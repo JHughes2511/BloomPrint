@@ -1,7 +1,8 @@
 """BloomPrint Video Vision MCP Server.
 
 Exposes tools for extracting and analyzing video frames via Claude's vision API,
-and transcribing audio via OpenAI Whisper.
+transcribing audio via OpenAI Whisper, and basketball-specific analysis via the
+Basketball Intelligence Model (BIM).
 """
 
 import base64
@@ -18,6 +19,8 @@ import mcp.types as types
 import numpy as np
 from mcp.server import Server
 from PIL import Image
+
+from .bim import build_prompt, OUTPUT_TYPES, COACH_WEIGHTS, COMPETITION_LEVELS
 
 app = Server("video-vision")
 
@@ -248,6 +251,83 @@ async def list_tools() -> list[types.Tool]:
                 "required": ["video_path"],
             },
         ),
+        types.Tool(
+            name="analyze_basketball_video",
+            description=(
+                "Analyze a basketball video using the Basketball Intelligence Model (BIM). "
+                "Produces one of 8 structured output types: film_breakdown, player_eval, "
+                "scouting_report, coaching_report, training_program, recruitment_profile, "
+                "position_analysis, or game_analysis. Frames are sampled and optionally "
+                "transcribed with Whisper before being sent to Claude with the BIM prompt."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "video_path": {
+                        "type": "string",
+                        "description": "Absolute path to the video file.",
+                    },
+                    "output_type": {
+                        "type": "string",
+                        "enum": OUTPUT_TYPES,
+                        "description": (
+                            "Report type to generate. One of: "
+                            + ", ".join(OUTPUT_TYPES)
+                        ),
+                    },
+                    "program_name": {
+                        "type": "string",
+                        "description": "Name of the program using the model (e.g. 'SEED Academy').",
+                        "default": "SEED Academy",
+                    },
+                    "competition_level": {
+                        "type": "string",
+                        "description": (
+                            "Level of play in the footage. One of: "
+                            + ", ".join(COMPETITION_LEVELS)
+                        ),
+                        "default": "16U AAU",
+                    },
+                    "coach_weight": {
+                        "type": "integer",
+                        "description": (
+                            "Authority weight of the requesting coach (1–100). "
+                            "Approximate values — NBA: 98, D1 head: 75, HS/elite AAU: 45, youth: 25."
+                        ),
+                        "default": 45,
+                    },
+                    "player_name": {
+                        "type": "string",
+                        "description": "Player name to focus on (optional — omit for team/full-game analysis).",
+                    },
+                    "focus_prompt": {
+                        "type": "string",
+                        "description": "Optional additional question or coaching focus to append to the BIM prompt.",
+                    },
+                    "interval_seconds": {
+                        "type": "number",
+                        "description": "Seconds between sampled frames (default 2.0).",
+                        "default": 2.0,
+                    },
+                    "max_frames": {
+                        "type": "integer",
+                        "description": "Maximum frames to sample (default 10, max 20).",
+                        "default": 10,
+                    },
+                    "include_audio": {
+                        "type": "boolean",
+                        "description": "Transcribe audio with Whisper and include as context (default true).",
+                        "default": True,
+                    },
+                    "whisper_model": {
+                        "type": "string",
+                        "description": "Whisper model size: tiny, base, small, medium, large (default base).",
+                        "default": "base",
+                    },
+                },
+                "required": ["video_path", "output_type"],
+            },
+        ),
     ]
 
 
@@ -261,6 +341,8 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
         return await _handle_analyze_video(arguments)
     if name == "transcribe_audio":
         return await _handle_transcribe_audio(arguments)
+    if name == "analyze_basketball_video":
+        return await _handle_analyze_basketball_video(arguments)
     raise ValueError(f"Unknown tool: {name}")
 
 
@@ -415,6 +497,79 @@ async def _handle_analyze_video(args: dict[str, Any]) -> list[types.TextContent]
 
     audio_note = " + audio transcript" if transcript_text else ""
     header = f"Video analysis ({len(frames)} frames{audio_note}): {video_path}\n{'─' * 60}\n"
+    return [types.TextContent(type="text", text=header + answer)]
+
+
+async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.TextContent]:
+    video_path = args["video_path"]
+    output_type = args["output_type"]
+    program = args.get("program_name", "SEED Academy")
+    level = args.get("competition_level", "16U AAU")
+    coach_weight = int(args.get("coach_weight", 45))
+    player_name = args.get("player_name", "")
+    focus_prompt = args.get("focus_prompt", "")
+    interval = float(args.get("interval_seconds", 2.0))
+    max_frames = min(int(args.get("max_frames", 10)), 20)
+    include_audio = bool(args.get("include_audio", True))
+    whisper_model = args.get("whisper_model", "base")
+
+    if not Path(video_path).exists():
+        return [types.TextContent(type="text", text=f"Error: file not found: {video_path}")]
+
+    try:
+        bim_prompt = build_prompt(output_type, program, level, coach_weight, player_name)
+    except ValueError as e:
+        return [types.TextContent(type="text", text=f"Error: {e}")]
+
+    if focus_prompt:
+        bim_prompt += f"\n\nADDITIONAL COACHING FOCUS:\n{focus_prompt}"
+
+    frames = _extract_frames(video_path, interval, max_frames)
+    if not frames:
+        return [types.TextContent(type="text", text="Error: no frames could be extracted.")]
+
+    transcript_text = ""
+    if include_audio:
+        try:
+            result = _transcribe(video_path, whisper_model)
+            transcript_text = result.get("text", "").strip()
+        except Exception:
+            transcript_text = ""
+
+    content: list[dict] = [{"type": "text", "text": bim_prompt}]
+
+    if transcript_text:
+        content.append({
+            "type": "text",
+            "text": f"\nAUDIO TRANSCRIPT FROM VIDEO:\n{transcript_text}\n",
+        })
+
+    content.append({"type": "text", "text": "\nVIDEO FRAMES:"})
+    for ts, frame in frames:
+        content.append({"type": "text", "text": f"[Frame at {ts:.2f}s]"})
+        content.append({
+            "type": "image",
+            "source": {
+                "type": "base64",
+                "media_type": "image/jpeg",
+                "data": _frame_to_base64(frame),
+            },
+        })
+
+    response = _client().messages.create(
+        model="claude-opus-4-7",
+        max_tokens=4096,
+        messages=[{"role": "user", "content": content}],
+    )
+    answer = response.content[0].text
+
+    audio_note = " + audio" if transcript_text else ""
+    header = (
+        f"BIM {output_type.upper().replace('_', ' ')} — {program} | {level} | "
+        f"coach weight {coach_weight}\n"
+        f"{len(frames)} frames{audio_note} analyzed\n"
+        f"{'═' * 60}\n"
+    )
     return [types.TextContent(type="text", text=header + answer)]
 
 
