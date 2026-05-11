@@ -1,10 +1,12 @@
 """BloomPrint Video Vision MCP Server.
 
-Exposes tools for extracting and analyzing video frames via Claude's vision API.
+Exposes tools for extracting and analyzing video frames via Claude's vision API,
+and transcribing audio via OpenAI Whisper.
 """
 
 import base64
 import os
+import subprocess
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -20,6 +22,7 @@ from PIL import Image
 app = Server("video-vision")
 
 _anthropic_client: anthropic.Anthropic | None = None
+_whisper_model: Any = None
 
 
 def _client() -> anthropic.Anthropic:
@@ -27,6 +30,16 @@ def _client() -> anthropic.Anthropic:
     if _anthropic_client is None:
         _anthropic_client = anthropic.Anthropic()
     return _anthropic_client
+
+
+def _whisper(model_name: str = "base") -> Any:
+    """Lazy-load Whisper to avoid slow startup when transcription isn't used."""
+    global _whisper_model
+    import whisper  # type: ignore[import]
+
+    if _whisper_model is None or _whisper_model.dims.n_mels != whisper.load_model(model_name).dims.n_mels:
+        _whisper_model = whisper.load_model(model_name)
+    return _whisper_model
 
 
 def _frame_to_base64(frame: np.ndarray) -> str:
@@ -56,7 +69,7 @@ def _extract_frames(
     duration = total_frames / fps
 
     step = max(interval_seconds, duration / max_frames) if duration > 0 else interval_seconds
-    timestamps = []
+    timestamps: list[float] = []
     t = 0.0
     while t <= duration and len(timestamps) < max_frames:
         timestamps.append(t)
@@ -71,6 +84,45 @@ def _extract_frames(
 
     cap.release()
     return results
+
+
+def _extract_audio(video_path: str, out_path: str) -> bool:
+    """Extract audio track from video to a WAV file using ffmpeg. Returns False if no audio."""
+    result = subprocess.run(
+        [
+            "ffmpeg", "-y", "-i", video_path,
+            "-vn", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1",
+            out_path,
+        ],
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode == 0 and Path(out_path).exists() and Path(out_path).stat().st_size > 0
+
+
+def _transcribe(video_path: str, model_name: str) -> dict[str, Any]:
+    """Extract audio from video then transcribe with Whisper. Returns Whisper result dict."""
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        audio_path = tmp.name
+    try:
+        if not _extract_audio(video_path, audio_path):
+            return {"text": "", "segments": []}
+        model = _whisper(model_name)
+        import whisper  # type: ignore[import]
+        return whisper.transcribe(model, audio_path, fp16=False)
+    finally:
+        if Path(audio_path).exists():
+            os.unlink(audio_path)
+
+
+def _format_segments(segments: list[dict]) -> str:
+    lines = []
+    for seg in segments:
+        start = seg.get("start", 0.0)
+        end = seg.get("end", 0.0)
+        text = seg.get("text", "").strip()
+        lines.append(f"  [{start:.1f}s → {end:.1f}s] {text}")
+    return "\n".join(lines)
 
 
 @app.list_tools()
@@ -131,8 +183,8 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="analyze_video",
             description=(
-                "Analyze an entire video by sampling frames at regular intervals and asking "
-                "Claude a question about the combined visual content."
+                "Analyze an entire video by sampling frames and optionally transcribing audio, "
+                "then asking Claude a question about the combined content."
             ),
             inputSchema={
                 "type": "object",
@@ -156,6 +208,42 @@ async def list_tools() -> list[types.Tool]:
                         "description": "Maximum frames to sample (default 8, max 20).",
                         "default": 8,
                     },
+                    "include_audio": {
+                        "type": "boolean",
+                        "description": "Transcribe audio with Whisper and include it as context (default true).",
+                        "default": True,
+                    },
+                    "whisper_model": {
+                        "type": "string",
+                        "description": "Whisper model size: tiny, base, small, medium, large (default base).",
+                        "default": "base",
+                    },
+                },
+                "required": ["video_path"],
+            },
+        ),
+        types.Tool(
+            name="transcribe_audio",
+            description=(
+                "Transcribe the audio track of a video file using OpenAI Whisper (runs locally). "
+                "Returns the full transcript with per-segment timestamps."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "video_path": {
+                        "type": "string",
+                        "description": "Absolute path to the video file.",
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Whisper model size: tiny, base, small, medium, large (default base).",
+                        "default": "base",
+                    },
+                    "language": {
+                        "type": "string",
+                        "description": "ISO language code hint (e.g. 'en', 'fr'). Omit for auto-detection.",
+                    },
                 },
                 "required": ["video_path"],
             },
@@ -171,6 +259,8 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
         return await _handle_analyze_frame(arguments)
     if name == "analyze_video":
         return await _handle_analyze_video(arguments)
+    if name == "transcribe_audio":
+        return await _handle_transcribe_audio(arguments)
     raise ValueError(f"Unknown tool: {name}")
 
 
@@ -219,11 +309,7 @@ async def _handle_analyze_frame(args: dict[str, Any]) -> list[types.TextContent]
                 "content": [
                     {
                         "type": "image",
-                        "source": {
-                            "type": "base64",
-                            "media_type": "image/jpeg",
-                            "data": img_b64,
-                        },
+                        "source": {"type": "base64", "media_type": "image/jpeg", "data": img_b64},
                     },
                     {"type": "text", "text": prompt},
                 ],
@@ -234,11 +320,55 @@ async def _handle_analyze_frame(args: dict[str, Any]) -> list[types.TextContent]
     return [types.TextContent(type="text", text=f"[Frame at {ts:.2f}s]\n{answer}")]
 
 
+async def _handle_transcribe_audio(args: dict[str, Any]) -> list[types.TextContent]:
+    video_path = args["video_path"]
+    model_name = args.get("model", "base")
+    language = args.get("language")
+
+    if not Path(video_path).exists():
+        return [types.TextContent(type="text", text=f"Error: file not found: {video_path}")]
+
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        audio_path = tmp.name
+    try:
+        if not _extract_audio(video_path, audio_path):
+            return [types.TextContent(type="text", text="Error: no audio track found or ffmpeg unavailable.")]
+
+        model = _whisper(model_name)
+        import whisper  # type: ignore[import]
+
+        kwargs: dict[str, Any] = {"fp16": False}
+        if language:
+            kwargs["language"] = language
+        result = whisper.transcribe(model, audio_path, **kwargs)
+    finally:
+        if Path(audio_path).exists():
+            os.unlink(audio_path)
+
+    transcript = result.get("text", "").strip()
+    segments = result.get("segments", [])
+    detected_lang = result.get("language", "unknown")
+
+    lines = [
+        f"Transcription of: {video_path}",
+        f"Detected language: {detected_lang}",
+        f"{'─' * 60}",
+        "",
+        transcript,
+        "",
+        "Segments:",
+        _format_segments(segments),
+    ]
+    return [types.TextContent(type="text", text="\n".join(lines))]
+
+
 async def _handle_analyze_video(args: dict[str, Any]) -> list[types.TextContent]:
     video_path = args["video_path"]
     prompt = args.get("prompt", "Describe what happens in this video.")
     interval = float(args.get("interval_seconds", 2.0))
     max_frames = min(int(args.get("max_frames", 8)), 20)
+    include_audio = bool(args.get("include_audio", True))
+    whisper_model = args.get("whisper_model", "base")
 
     if not Path(video_path).exists():
         return [types.TextContent(type="text", text=f"Error: file not found: {video_path}")]
@@ -247,19 +377,33 @@ async def _handle_analyze_video(args: dict[str, Any]) -> list[types.TextContent]
     if not frames:
         return [types.TextContent(type="text", text="Error: no frames could be extracted.")]
 
+    transcript_text = ""
+    if include_audio:
+        try:
+            result = _transcribe(video_path, whisper_model)
+            transcript_text = result.get("text", "").strip()
+        except Exception:
+            transcript_text = ""
+
     content: list[dict] = []
+
+    if transcript_text:
+        content.append({
+            "type": "text",
+            "text": f"Audio transcript:\n{transcript_text}\n\nVideo frames:",
+        })
+
     for ts, frame in frames:
         content.append({"type": "text", "text": f"[Frame at {ts:.2f}s]"})
-        content.append(
-            {
-                "type": "image",
-                "source": {
-                    "type": "base64",
-                    "media_type": "image/jpeg",
-                    "data": _frame_to_base64(frame),
-                },
-            }
-        )
+        content.append({
+            "type": "image",
+            "source": {
+                "type": "base64",
+                "media_type": "image/jpeg",
+                "data": _frame_to_base64(frame),
+            },
+        })
+
     content.append({"type": "text", "text": prompt})
 
     response = _client().messages.create(
@@ -268,7 +412,9 @@ async def _handle_analyze_video(args: dict[str, Any]) -> list[types.TextContent]
         messages=[{"role": "user", "content": content}],
     )
     answer = response.content[0].text
-    header = f"Video analysis ({len(frames)} frames sampled): {video_path}\n{'─' * 60}\n"
+
+    audio_note = " + audio transcript" if transcript_text else ""
+    header = f"Video analysis ({len(frames)} frames{audio_note}): {video_path}\n{'─' * 60}\n"
     return [types.TextContent(type="text", text=header + answer)]
 
 
