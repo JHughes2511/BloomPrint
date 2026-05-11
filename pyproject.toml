@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bloomprint-video-vision"
+version = "0.1.0"
+description = "MCP server providing video and vision analysis tools for Claude"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.0.0",
+    "anthropic>=0.40.0",
+    "opencv-python-headless>=4.8.0",
+    "Pillow>=10.0.0",
+    "numpy>=1.24.0",
+]
+
+[project.scripts]
+video-vision-mcp = "video_vision.server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["video_vision"]

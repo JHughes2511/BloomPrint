@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "video-vision": {
+      "command": "python",
+      "args": ["-m", "video_vision.server"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "ANTHROPIC_API_KEY": "${env:ANTHROPIC_API_KEY}"
+      }
+    }
+  }
+}
