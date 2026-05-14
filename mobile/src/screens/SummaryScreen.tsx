@@ -9,7 +9,14 @@ import * as Sharing from 'expo-sharing';
 export default function SummaryScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
-  const { title, reportText } = route.params as { title: string; reportText: string };
+  const { title, reportText, fileName: fileNameParam } = route.params as {
+    title: string; reportText: string; fileName?: string;
+  };
+
+  const buildFileName = () => {
+    if (fileNameParam) return fileNameParam.replace(/[^a-zA-Z0-9 \-]/g, '').trim();
+    return title.replace(/[^a-zA-Z0-9 \-]/g, '').trim() || 'BIM Report';
+  };
 
   const sanitize = (s: string) =>
     s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -31,7 +38,7 @@ export default function SummaryScreen() {
 
   const exportPdf = async () => {
     try {
-      const { uri } = await Print.printToFileAsync({ html: buildHtml() });
+      const { uri } = await Print.printToFileAsync({ html: buildHtml(), fileName: buildFileName() });
       await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Share Summary' });
     } catch (e: any) {
       Alert.alert('Export Error', e?.message ?? 'Could not export');

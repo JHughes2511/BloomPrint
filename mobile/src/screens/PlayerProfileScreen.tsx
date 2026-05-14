@@ -45,9 +45,18 @@ export default function PlayerProfileScreen() {
     try {
       const result = await playersAPI.summary(playerId, { output_type: summaryType });
       setShowSummary(false);
+      const typeLabel = summaryType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      const sanitize = (s: string) => (s ?? '').replace(/[^a-zA-Z0-9 \-]/g, '').trim();
       navigation.navigate('Summary', {
-        title: `${player.name} — ${summaryType.replace(/_/g, ' ').toUpperCase()} Summary`,
+        title: `${player.name} — ${typeLabel} Summary`,
         reportText: result.report_text,
+        fileName: [
+          'Player Summary',
+          sanitize(player.name),
+          sanitize(player.program_name),
+          sanitize(player.position ?? ''),
+          typeLabel,
+        ].filter(Boolean).join(' - '),
       });
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate summary');

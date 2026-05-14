@@ -8,8 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import Markdown from 'react-native-markdown-display';
-import { evalsAPI } from '../api/client';
-import { Evaluation, Correction } from '../types';
+import { evalsAPI, playersAPI } from '../api/client';
+import { Evaluation, Correction, Player } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
 
@@ -41,6 +41,7 @@ export default function EvalReportScreen() {
   const { evalId } = route.params;
 
   const [ev, setEv] = useState<Evaluation | null>(null);
+  const [player, setPlayer] = useState<Player | null>(null);
   const [corrections, setCorrections] = useState<Correction[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -59,9 +60,23 @@ export default function EvalReportScreen() {
 
   useEffect(() => {
     Promise.all([evalsAPI.get(evalId), evalsAPI.corrections(evalId)])
-      .then(([e, c]) => { setEv(e); setCorrections(c); })
+      .then(async ([e, c]) => {
+        setEv(e);
+        setCorrections(c);
+        try { setPlayer(await playersAPI.get(e.player_id)); } catch {}
+      })
       .finally(() => setLoading(false));
   }, [evalId]);
+
+  const buildFileName = () => {
+    if (!ev) return 'Evaluation Report';
+    const sanitize = (s: string) => s.replace(/[^a-zA-Z0-9 \-]/g, '').trim();
+    const type = ev.output_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const name = sanitize(player?.name ?? 'Player');
+    const team = sanitize(player?.program_name ?? '');
+    const pos  = sanitize(player?.position ?? '');
+    return ['Evaluation Report', name, team, pos, type].filter(Boolean).join(' - ');
+  };
 
   const submitCorrection = async () => {
     if (!correctionText.trim()) return;
@@ -154,7 +169,7 @@ export default function EvalReportScreen() {
     setExporting(true);
     try {
       const html = buildHtml();
-      const { uri } = await Print.printToFileAsync({ html });
+      const { uri } = await Print.printToFileAsync({ html, fileName: buildFileName() });
       await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Share BIM Report' });
     } catch (e: any) {
       Alert.alert('Export Error', e?.message ?? 'Could not generate report');
