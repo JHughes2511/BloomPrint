@@ -22,7 +22,8 @@
     "android": {
       "adaptiveIcon": { "backgroundColor": "#0a0a0a" },
       "package": "com.bloomprint.app",
-      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "RECORD_AUDIO"]
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "RECORD_AUDIO"],
+      "softwareKeyboardLayoutMode": "resize"
     },
     "plugins": [
       "expo-secure-store",

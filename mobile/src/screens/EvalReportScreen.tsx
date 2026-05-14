@@ -308,11 +308,9 @@ export default function EvalReportScreen() {
       {/* Correction modal */}
       <Modal visible={showCorrect} transparent animationType="slide">
         <KeyboardAvoidingView
-          style={{ flex: 1 }}
+          style={styles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-        <View style={styles.modalOverlay}>
-          <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>Add Correction</Text>
             <Text style={styles.modalSub}>This feeds back into the model to sharpen future evaluations.</Text>
@@ -350,8 +348,6 @@ export default function EvalReportScreen() {
               </TouchableOpacity>
             </View>
           </View>
-          </ScrollView>
-        </View>
         </KeyboardAvoidingView>
       </Modal>
     </ScrollView>

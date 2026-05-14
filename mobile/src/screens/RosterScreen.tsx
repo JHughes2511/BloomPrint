@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, TextInput, Modal, Alert, KeyboardAvoidingView, Platform, ScrollView,
+  ActivityIndicator, TextInput, Modal, Alert, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -82,29 +82,25 @@ export default function RosterScreen() {
 
       <Modal visible={showAdd} transparent animationType="slide">
         <KeyboardAvoidingView
-          style={{ flex: 1 }}
+          style={styles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View style={styles.modalOverlay}>
-            <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
-              <View style={styles.modal}>
-                <Text style={styles.modalTitle}>Add Player</Text>
-                <TextInput style={styles.input} placeholder="Full Name *" placeholderTextColor="#6b7280"
-                  value={newName} onChangeText={setNewName} />
-                <TextInput style={styles.input} placeholder="Position (e.g. PG, SG)" placeholderTextColor="#6b7280"
-                  value={newPos} onChangeText={setNewPos} />
-                <TextInput style={styles.input} placeholder="Competition Level" placeholderTextColor="#6b7280"
-                  value={newLevel} onChangeText={setNewLevel} />
-                <View style={styles.modalRow}>
-                  <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowAdd(false)}>
-                    <Text style={styles.cancelText}>Cancel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.saveBtn} onPress={addPlayer} disabled={saving}>
-                    {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Add</Text>}
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </ScrollView>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>Add Player</Text>
+            <TextInput style={styles.input} placeholder="Full Name *" placeholderTextColor="#6b7280"
+              value={newName} onChangeText={setNewName} />
+            <TextInput style={styles.input} placeholder="Position (e.g. PG, SG)" placeholderTextColor="#6b7280"
+              value={newPos} onChangeText={setNewPos} />
+            <TextInput style={styles.input} placeholder="Competition Level" placeholderTextColor="#6b7280"
+              value={newLevel} onChangeText={setNewLevel} />
+            <View style={styles.modalRow}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowAdd(false)}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveBtn} onPress={addPlayer} disabled={saving}>
+                {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Add</Text>}
+              </TouchableOpacity>
+            </View>
           </View>
         </KeyboardAvoidingView>
       </Modal>
