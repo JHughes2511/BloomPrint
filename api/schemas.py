@@ -139,3 +139,21 @@ class TrainingOut(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class EvalWithPlayerOut(EvalOut):
+    player_name: str = ""
+
+
+class SummaryRequest(BaseModel):
+    output_type: str = "player_eval"
+    focus_prompt: str | None = None
+
+
+class SummaryOut(BaseModel):
+    report_text: str
+
+
+class TeamReportRequest(BaseModel):
+    output_type: str = "coaching_report"
+    focus_prompt: str | None = None

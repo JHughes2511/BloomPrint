@@ -52,6 +52,50 @@ def player_evaluations(
     return player.evaluations
 
 
+@router.post("/{player_id}/summary", response_model=schemas.SummaryOut)
+async def player_summary(
+    player_id: int,
+    body: schemas.SummaryRequest,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    player = db.get(models.Player, player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found")
+
+    evals = player.evaluations
+    if not evals:
+        raise HTTPException(status_code=400, detail="No evaluations yet for this player")
+
+    eval_context = ""
+    for ev in evals:
+        grade_str = f"{ev.overall_grade:.1f}/10" if ev.overall_grade else "N/A"
+        date_str = ev.created_at.strftime("%Y-%m-%d")
+        eval_context += f"\n[{date_str} — {ev.output_type}] Overall: {grade_str}\n"
+        if ev.report_text:
+            eval_context += ev.report_text[:800] + "\n"
+
+    focus = body.focus_prompt or ""
+    prompt = (
+        f"You are the BloomPrint Basketball Intelligence Model. "
+        f"Generate a {body.output_type.replace('_', ' ')} that SUMMARIZES ALL EVALUATION HISTORY for {player.name}.\n\n"
+        f"EVALUATION HISTORY:\n{eval_context}\n\n"
+        f"{('COACH FOCUS: ' + focus) if focus else ''}\n\n"
+        "Synthesize trends, growth over time, consistent strengths, persistent concerns, "
+        "and the player's trajectory. Provide an overall composite grade and pillar grades. "
+        "Format with clear BIM sections including OVERALL GRADE, pillar grades, GREEN FLAGS, WATCH FLAGS, and KEY QUESTIONS."
+    )
+
+    import anthropic
+    client = anthropic.Anthropic()
+    response = client.messages.create(
+        model="claude-opus-4-7",
+        max_tokens=2048,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return schemas.SummaryOut(report_text=response.content[0].text)
+
+
 def _with_grade(player: models.Player) -> schemas.PlayerOut:
     out = schemas.PlayerOut.model_validate(player)
     if player.evaluations:

@@ -38,6 +38,10 @@ export interface Evaluation {
   created_at: string;
 }
 
+export interface EvalWithPlayer extends Evaluation {
+  player_name: string;
+}
+
 export interface Correction {
   id: number;
   evaluation_id: number;

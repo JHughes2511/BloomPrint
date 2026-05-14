@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
+  Modal, Alert, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +9,15 @@ import { playersAPI } from '../api/client';
 import { Player, Evaluation } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
+
+const OUTPUT_TYPES = [
+  { key: 'player_eval', label: 'Player Eval' },
+  { key: 'film_breakdown', label: 'Film Breakdown' },
+  { key: 'scouting_report', label: 'Scouting Report' },
+  { key: 'coaching_report', label: 'Coaching Report' },
+  { key: 'recruitment_profile', label: 'Recruitment' },
+  { key: 'position_analysis', label: 'Position Analysis' },
+];
 
 export default function PlayerProfileScreen() {
   const route = useRoute<any>();
@@ -18,11 +28,33 @@ export default function PlayerProfileScreen() {
   const [evals, setEvals] = useState<Evaluation[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Summary state
+  const [showSummary, setShowSummary] = useState(false);
+  const [summaryType, setSummaryType] = useState('player_eval');
+  const [summaryLoading, setSummaryLoading] = useState(false);
+
   useEffect(() => {
     Promise.all([playersAPI.get(playerId), playersAPI.evaluations(playerId)])
       .then(([p, e]) => { setPlayer(p); setEvals(e); })
       .finally(() => setLoading(false));
   }, [playerId]);
+
+  const generateSummary = async () => {
+    if (!player) return;
+    setSummaryLoading(true);
+    try {
+      const result = await playersAPI.summary(playerId, { output_type: summaryType });
+      setShowSummary(false);
+      navigation.navigate('Summary', {
+        title: `${player.name} — ${summaryType.replace(/_/g, ' ').toUpperCase()} Summary`,
+        reportText: result.report_text,
+      });
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate summary');
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
 
   if (loading) return <View style={styles.center}><ActivityIndicator color="#2563eb" size="large" /></View>;
   if (!player) return null;
@@ -100,6 +132,14 @@ export default function PlayerProfileScreen() {
         ))}
       </View>
 
+      {/* Summarize history */}
+      {evals.length > 0 && (
+        <TouchableOpacity style={styles.summaryBtn} onPress={() => setShowSummary(true)}>
+          <Ionicons name="bar-chart" size={18} color="#fff" />
+          <Text style={styles.summaryText}>Summarize Evaluation History</Text>
+        </TouchableOpacity>
+      )}
+
       {/* Training */}
       <TouchableOpacity
         style={styles.trainingBtn}
@@ -108,6 +148,37 @@ export default function PlayerProfileScreen() {
         <Ionicons name="barbell" size={18} color="#fff" />
         <Text style={styles.trainingText}>Generate Training Program</Text>
       </TouchableOpacity>
+
+      {/* Summary modal */}
+      <Modal visible={showSummary} transparent animationType="slide">
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>Summarize History</Text>
+            <Text style={styles.modalSub}>Choose a report type to generate a summary across all {evals.length} evaluations.</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+              {OUTPUT_TYPES.map(t => (
+                <TouchableOpacity
+                  key={t.key}
+                  style={[styles.chip, summaryType === t.key && styles.chipActive]}
+                  onPress={() => setSummaryType(t.key)}
+                >
+                  <Text style={[styles.chipText, summaryType === t.key && { color: '#fff' }]}>{t.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <View style={styles.modalRow}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowSummary(false)}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveBtn} onPress={generateSummary} disabled={summaryLoading}>
+                {summaryLoading
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={styles.saveText}>Generate</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </ScrollView>
   );
 }
@@ -138,9 +209,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563eb', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8,
   },
   newEvalText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  summaryBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: '#1d4ed8', margin: 20, marginBottom: 8, padding: 16, borderRadius: 12,
+  },
+  summaryText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   trainingBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#1f2937', margin: 20, padding: 16, borderRadius: 12,
+    backgroundColor: '#1f2937', marginHorizontal: 20, marginTop: 0, marginBottom: 0, padding: 16, borderRadius: 12,
   },
   trainingText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  // Modal styles
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' },
+  modal: { backgroundColor: '#111827', borderRadius: 20, padding: 24, margin: 12 },
+  modalTitle: { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 4 },
+  modalSub: { color: '#6b7280', fontSize: 12, marginBottom: 16 },
+  chip: { borderWidth: 1, borderColor: '#374151', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, marginRight: 8 },
+  chipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
+  chipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
+  modalRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  cancelBtn: { flex: 1, padding: 14, borderRadius: 10, borderWidth: 1, borderColor: '#374151', alignItems: 'center' },
+  cancelText: { color: '#9ca3af', fontWeight: '600' },
+  saveBtn: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: '#2563eb', alignItems: 'center' },
+  saveText: { color: '#fff', fontWeight: '700' },
 });

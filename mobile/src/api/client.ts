@@ -34,6 +34,9 @@ export const playersAPI = {
   }) => api.post('/players', data).then(r => r.data),
 
   evaluations: (id: number) => api.get(`/players/${id}/evaluations`).then(r => r.data),
+
+  summary: (id: number, data: { output_type: string; focus_prompt?: string }) =>
+    api.post(`/players/${id}/summary`, data).then(r => r.data),
 };
 
 // ── Evaluations ───────────────────────────────────────────────────────────────
@@ -44,6 +47,12 @@ export const evalsAPI = {
     }).then(r => r.data),
 
   get: (id: number) => api.get(`/evaluations/${id}`).then(r => r.data),
+
+  recent: (limit = 30) =>
+    api.get('/evaluations/recent', { params: { limit } }).then(r => r.data),
+
+  teamReport: (data: { output_type: string; focus_prompt?: string }) =>
+    api.post('/evaluations/team-report', data).then(r => r.data),
 
   addCorrection: (evalId: number, data: { pillar?: string; original_text?: string; correction: string }) =>
     api.post(`/evaluations/${evalId}/corrections`, data).then(r => r.data),

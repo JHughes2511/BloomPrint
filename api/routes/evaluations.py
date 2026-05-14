@@ -95,6 +95,73 @@ async def submit_evaluation(
     return eval_record
 
 
+@router.get("/recent", response_model=list[schemas.EvalWithPlayerOut])
+def recent_evaluations(
+    limit: int = 30,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    evals = (
+        db.query(models.Evaluation)
+        .order_by(models.Evaluation.id.desc())
+        .limit(limit)
+        .all()
+    )
+    results = []
+    for ev in evals:
+        player = db.get(models.Player, ev.player_id)
+        out = schemas.EvalWithPlayerOut.model_validate(ev)
+        out.player_name = player.name if player else "Unknown"
+        results.append(out)
+    return results
+
+
+@router.post("/team-report", response_model=schemas.SummaryOut)
+async def team_report(
+    body: schemas.TeamReportRequest,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    players = db.query(models.Player).all()
+    if not players:
+        raise HTTPException(status_code=400, detail="No players on roster yet")
+
+    roster_context = ""
+    for p in players:
+        evals = p.evaluations
+        if evals:
+            latest = evals[-1]
+            grade_str = f"{latest.overall_grade:.1f}/10" if latest.overall_grade else "N/A"
+            flags = ", ".join((latest.green_flags or [])[:3])
+            watch = ", ".join((latest.watch_flags or [])[:3])
+            roster_context += (
+                f"- {p.name} ({p.position or 'N/A'}, {p.competition_level}): "
+                f"Grade {grade_str}. Strengths: {flags or 'N/A'}. Watch: {watch or 'N/A'}.\n"
+            )
+        else:
+            roster_context += f"- {p.name} ({p.position or 'N/A'}): No evaluations yet.\n"
+
+    focus = body.focus_prompt or ""
+    prompt = (
+        f"You are the BloomPrint Basketball Intelligence Model. Generate a {body.output_type.replace('_', ' ')} "
+        f"for the entire {coach.program_name} roster.\n\n"
+        f"ROSTER SUMMARY:\n{roster_context}\n\n"
+        f"{('COACH FOCUS: ' + focus) if focus else ''}\n\n"
+        "Provide a comprehensive team analysis covering overall team grade, team strengths, "
+        "areas to develop, lineup recommendations, and strategic priorities. "
+        "Use the BIM framework with 6 pillars. Format with clear sections."
+    )
+
+    import anthropic
+    client = anthropic.Anthropic()
+    response = client.messages.create(
+        model="claude-opus-4-7",
+        max_tokens=2048,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return schemas.SummaryOut(report_text=response.content[0].text)
+
+
 @router.get("/{eval_id}", response_model=schemas.EvalOut)
 def get_evaluation(
     eval_id: int,
