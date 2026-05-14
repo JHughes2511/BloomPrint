@@ -11,3 +11,5 @@ venv/
 *.mov
 *.mkv
 *.tmp_frames/
+*.db
+uploads/
