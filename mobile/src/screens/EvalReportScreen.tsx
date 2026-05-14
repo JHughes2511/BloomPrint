@@ -83,82 +83,81 @@ export default function EvalReportScreen() {
   };
 
   const buildHtml = () => {
-    if (!ev) return '';
+    if (!ev) return '<html><body><p>No data</p></body></html>';
     const date = new Date(ev.created_at).toLocaleDateString();
     const type = ev.output_type.replace(/_/g, ' ').toUpperCase();
+    const sanitize = (s: string) =>
+      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-    let html = `
-      <html><head><style>
-        body { font-family: -apple-system, sans-serif; padding: 32px; color: #111; }
-        h1 { font-size: 22px; margin-bottom: 4px; }
-        h2 { font-size: 15px; color: #555; font-weight: normal; margin-top: 0; }
-        h3 { font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-top: 24px; color: #333; }
-        .grade { font-size: 48px; font-weight: 900; color: #2563eb; }
-        .pillar { display: flex; justify-content: space-between; margin: 6px 0; font-size: 13px; }
-        .bar-bg { background: #eee; border-radius: 4px; height: 8px; margin-top: 2px; }
-        .bar-fill { background: #2563eb; border-radius: 4px; height: 8px; }
-        .flag-green { color: #16a34a; font-size: 13px; margin: 3px 0; }
-        .flag-red { color: #dc2626; font-size: 13px; margin: 3px 0; }
-        .question { font-size: 13px; margin: 4px 0; }
-        .report { font-size: 12px; line-height: 1.7; white-space: pre-wrap; color: #444; }
-        .correction { background: #f9fafb; border-left: 3px solid #2563eb; padding: 8px 12px; margin: 6px 0; font-size: 12px; }
-        .footer { margin-top: 40px; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 12px; }
-      </style></head><body>
-      <h1>BloomPrint — ${type}</h1>
-      <h2>${ev.competition_level ?? ''} · ${date} · Coach weight ${ev.coach_weight}</h2>
-    `;
+    let body = `<h1>BloomPrint &mdash; ${type}</h1>
+      <p style="color:#555;margin-top:0">${ev.competition_level ?? ''} &bull; ${date} &bull; Coach weight ${ev.coach_weight}</p>`;
 
-    if (exportCats.grades && ev.overall_grade !== null) {
-      html += `<h3>Overall Grade</h3><div class="grade">${ev.overall_grade?.toFixed(1)} / 10</div>`;
+    if (exportCats.grades && ev.overall_grade != null) {
+      body += `<h3>Overall Grade</h3><div class="grade">${ev.overall_grade.toFixed(1)} / 10</div>`;
       if (ev.pillar_grades) {
-        html += `<h3>Pillar Grades</h3>`;
-        PILLARS.filter(k => ev.pillar_grades![k]).forEach(k => {
+        body += `<h3>Pillar Grades</h3>`;
+        PILLARS.filter(k => ev.pillar_grades![k] != null).forEach(k => {
           const g = ev.pillar_grades![k];
-          const pct = (g / 10) * 100;
-          html += `<div class="pillar"><span>${PILLAR_LABELS[k]}</span><strong>${g.toFixed(1)}</strong></div>
-            <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>`;
+          const pct = Math.round((g / 10) * 100);
+          body += `<table width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0">
+            <tr><td style="font-size:13px">${PILLAR_LABELS[k]}</td><td align="right" style="font-size:13px"><strong>${g.toFixed(1)}</strong></td></tr>
+            <tr><td colspan="2"><div style="background:#eee;border-radius:4px;height:8px;margin-top:3px">
+              <div style="background:#2563eb;border-radius:4px;height:8px;width:${pct}%"></div></div></td></tr>
+          </table>`;
         });
       }
     }
 
     if (exportCats.flags) {
       if (ev.green_flags?.length) {
-        html += `<h3>Green Flags</h3>`;
-        ev.green_flags.forEach(f => { html += `<div class="flag-green">✓ ${f}</div>`; });
+        body += `<h3>Green Flags</h3>`;
+        ev.green_flags.forEach(f => { body += `<p style="color:#16a34a;margin:3px 0">&#10003; ${sanitize(f)}</p>`; });
       }
       if (ev.watch_flags?.length) {
-        html += `<h3>Watch Flags</h3>`;
-        ev.watch_flags.forEach(f => { html += `<div class="flag-red">⚠ ${f}</div>`; });
+        body += `<h3>Watch Flags</h3>`;
+        ev.watch_flags.forEach(f => { body += `<p style="color:#dc2626;margin:3px 0">&#9888; ${sanitize(f)}</p>`; });
       }
     }
 
     if (exportCats.questions && ev.key_questions?.length) {
-      html += `<h3>Key Questions</h3>`;
-      ev.key_questions.forEach((q, i) => { html += `<div class="question">${i + 1}. ${q}</div>`; });
+      body += `<h3>Key Questions</h3><ol>`;
+      ev.key_questions.forEach(q => { body += `<li style="font-size:13px;margin:4px 0">${sanitize(q)}</li>`; });
+      body += `</ol>`;
     }
 
     if (exportCats.report && ev.report_text) {
-      html += `<h3>Full Report</h3><div class="report">${ev.report_text.replace(/</g, '&lt;')}</div>`;
+      body += `<h3>Full Report</h3><div style="font-size:12px;line-height:1.8;color:#444;white-space:pre-wrap">${sanitize(ev.report_text)}</div>`;
     }
 
     if (exportCats.corrections && corrections.length) {
-      html += `<h3>Coach Corrections</h3>`;
+      body += `<h3>Coach Corrections</h3>`;
       corrections.forEach(c => {
-        html += `<div class="correction">${c.pillar ? `<strong>${c.pillar.replace(/_/g, ' ').toUpperCase()}</strong><br/>` : ''}${c.correction}</div>`;
+        const pillarLabel = c.pillar ? `<strong>${c.pillar.replace(/_/g, ' ').toUpperCase()}</strong><br/>` : '';
+        body += `<div style="background:#f9fafb;border-left:3px solid #2563eb;padding:8px 12px;margin:6px 0;font-size:12px">${pillarLabel}${sanitize(c.correction)}</div>`;
       });
     }
 
-    html += `<div class="footer">Generated by BloomPrint Basketball Intelligence Model</div></body></html>`;
-    return html;
+    return `<html><head><meta charset="utf-8"/><style>
+      body { font-family: -apple-system, Helvetica, sans-serif; padding: 32px; color: #111; }
+      h1 { font-size: 22px; margin-bottom: 4px; }
+      h3 { font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-top: 24px; color: #333; }
+      .grade { font-size: 48px; font-weight: 900; color: #2563eb; }
+      p { margin: 6px 0; }
+    </style></head><body>${body}
+      <div style="margin-top:40px;font-size:11px;color:#999;border-top:1px solid #eee;padding-top:12px">
+        Generated by BloomPrint Basketball Intelligence Model
+      </div>
+    </body></html>`;
   };
 
   const exportReport = async () => {
     setExporting(true);
     try {
-      const { uri } = await Print.printToFileAsync({ html: buildHtml() });
+      const html = buildHtml();
+      const { uri } = await Print.printToFileAsync({ html });
       await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Share BIM Report' });
-    } catch {
-      Alert.alert('Error', 'Could not generate report');
+    } catch (e: any) {
+      Alert.alert('Export Error', e?.message ?? 'Could not generate report');
     } finally {
       setExporting(false);
       setShowExport(false);
@@ -168,8 +167,8 @@ export default function EvalReportScreen() {
   const printReport = async () => {
     try {
       await Print.printAsync({ html: buildHtml() });
-    } catch {
-      Alert.alert('Error', 'Could not print report');
+    } catch (e: any) {
+      Alert.alert('Print Error', e?.message ?? 'Could not print report');
     }
   };
 
