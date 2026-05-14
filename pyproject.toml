@@ -14,10 +14,18 @@ dependencies = [
     "Pillow>=10.0.0",
     "numpy>=1.24.0",
     "openai-whisper @ git+https://github.com/openai/whisper.git",
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.29.0",
+    "sqlalchemy>=2.0.0",
+    "python-multipart>=0.0.9",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "aiofiles>=23.0.0",
 ]
 
 [project.scripts]
 video-vision-mcp = "video_vision.server:main"
+bloomprint-api   = "api.main:start"
 
 [tool.hatch.build.targets.wheel]
-packages = ["video_vision"]
+packages = ["video_vision", "api"]

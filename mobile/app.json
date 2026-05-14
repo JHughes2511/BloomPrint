@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "BloomPrint",
+    "slug": "bloomprint",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "bloomprint",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0a0a0a"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bloomprint.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Record player film for BIM analysis",
+        "NSPhotoLibraryUsageDescription": "Select video clips for evaluation",
+        "NSMicrophoneUsageDescription": "Record audio for Whisper transcription"
+      }
+    },
+    "android": {
+      "adaptiveIcon": { "backgroundColor": "#0a0a0a" },
+      "package": "com.bloomprint.app",
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "RECORD_AUDIO"]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      ["expo-image-picker", { "photosPermission": "Select video clips for BIM analysis" }]
+    ]
+  }
+}
