@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  ActivityIndicator, TextInput, Alert, Modal, Switch,
+  ActivityIndicator, TextInput, Alert, Modal, Switch, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -307,7 +307,12 @@ export default function EvalReportScreen() {
 
       {/* Correction modal */}
       <Modal visible={showCorrect} transparent animationType="slide">
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
         <View style={styles.modalOverlay}>
+          <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>Add Correction</Text>
             <Text style={styles.modalSub}>This feeds back into the model to sharpen future evaluations.</Text>
@@ -345,7 +350,9 @@ export default function EvalReportScreen() {
               </TouchableOpacity>
             </View>
           </View>
+          </ScrollView>
         </View>
+        </KeyboardAvoidingView>
       </Modal>
     </ScrollView>
   );
