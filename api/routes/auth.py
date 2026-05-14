@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..database import get_db
 from .. import models, schemas
-from ..auth import hash_password, verify_password, create_token
+from ..auth import hash_password, verify_password, create_token, get_current_coach
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -34,5 +34,5 @@ def login(body: schemas.CoachLogin, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=schemas.CoachOut)
-def me(coach: models.Coach = Depends(__import__("..auth", fromlist=["get_current_coach"]).get_current_coach)):
+def me(coach: models.Coach = Depends(get_current_coach)):
     return coach

@@ -2,14 +2,14 @@
 
 from datetime import datetime
 from typing import Any
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 class CoachCreate(BaseModel):
     name: str
-    email: EmailStr
+    email: str
     password: str
     weight: int = 45
     level: str = "hs_elite_aau"
@@ -17,7 +17,7 @@ class CoachCreate(BaseModel):
 
 
 class CoachLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 
