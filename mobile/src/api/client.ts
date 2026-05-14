@@ -61,6 +61,14 @@ export const evalsAPI = {
     api.get(`/evaluations/${evalId}/corrections`).then(r => r.data),
 };
 
+// ── Uploads ───────────────────────────────────────────────────────────────────
+export const uploadsAPI = {
+  excel: (formData: FormData) =>
+    api.post('/uploads/excel', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then(r => r.data),
+};
+
 // ── Training ──────────────────────────────────────────────────────────────────
 export const trainingAPI = {
   generate: (data: { player_id: number; evaluation_id?: number; focus_prompt?: string }) =>

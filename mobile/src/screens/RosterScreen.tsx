@@ -51,10 +51,13 @@ export default function RosterScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.title}>Roster</Text>
           <Text style={styles.sub}>{coach?.program_name} · {players.length} players</Text>
         </View>
+        <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import')}>
+          <Ionicons name="cloud-upload-outline" size={18} color="#9ca3af" />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.addBtn} onPress={() => setShowAdd(true)}>
           <Ionicons name="add" size={22} color="#fff" />
         </TouchableOpacity>
@@ -114,6 +117,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 20 },
   title: { fontSize: 28, fontWeight: '900', color: '#fff' },
   sub: { fontSize: 12, color: '#6b7280', marginTop: 2 },
+  importBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#374151', marginRight: 8 },
   addBtn: { backgroundColor: '#2563eb', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   card: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

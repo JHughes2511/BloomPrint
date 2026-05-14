@@ -17,6 +17,7 @@ import TrainingScreen from './src/screens/TrainingScreen';
 import TeamReportScreen from './src/screens/TeamReportScreen';
 import RecentScreen from './src/screens/RecentScreen';
 import SummaryScreen from './src/screens/SummaryScreen';
+import ImportScreen from './src/screens/ImportScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -49,6 +50,7 @@ function RosterStack() {
       <Stack.Screen name="EvalReport" component={EvalReportScreen} />
       <Stack.Screen name="Training" component={TrainingScreen} />
       <Stack.Screen name="Summary" component={SummaryScreen} />
+      <Stack.Screen name="Import" component={ImportScreen} />
     </Stack.Navigator>
   );
 }
