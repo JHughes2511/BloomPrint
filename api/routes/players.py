@@ -69,8 +69,8 @@ async def player_summary(
 
     eval_context = ""
     for ev in evals:
-        grade_str = f"{ev.overall_grade:.1f}/10" if ev.overall_grade else "N/A"
-        date_str = ev.created_at.strftime("%Y-%m-%d")
+        grade_str = f"{ev.overall_grade:.1f}/10" if ev.overall_grade is not None else "N/A"
+        date_str = ev.created_at.strftime("%Y-%m-%d") if ev.created_at else "Unknown"
         eval_context += f"\n[{date_str} — {ev.output_type}] Overall: {grade_str}\n"
         if ev.report_text:
             eval_context += ev.report_text[:800] + "\n"
@@ -94,7 +94,12 @@ async def player_summary(
             max_tokens=2048,
             messages=[{"role": "user", "content": prompt}],
         )
-        return schemas.SummaryOut(report_text=response.content[0].text)
+        text_blocks = [b for b in response.content if hasattr(b, "text")]
+        if not text_blocks:
+            raise HTTPException(status_code=500, detail="AI returned no text content")
+        return schemas.SummaryOut(report_text=text_blocks[0].text)
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
 

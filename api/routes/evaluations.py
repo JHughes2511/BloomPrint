@@ -160,7 +160,12 @@ async def team_report(
             max_tokens=2048,
             messages=[{"role": "user", "content": prompt}],
         )
-        return schemas.SummaryOut(report_text=response.content[0].text)
+        text_blocks = [b for b in response.content if hasattr(b, "text")]
+        if not text_blocks:
+            raise HTTPException(status_code=500, detail="AI returned no text content")
+        return schemas.SummaryOut(report_text=text_blocks[0].text)
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
 

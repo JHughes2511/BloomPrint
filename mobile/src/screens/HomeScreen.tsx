@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 
@@ -24,14 +24,29 @@ const PILLARS = [
 ];
 
 export default function HomeScreen() {
-  const { coach } = useAuth();
+  const { coach, logout } = useAuth();
+
+  const handleSignOut = () => {
+    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Sign Out', style: 'destructive', onPress: logout },
+    ]);
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.logo}>BloomPrint</Text>
-        <Text style={styles.sub}>Basketball Intelligence Model</Text>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.logo}>BloomPrint</Text>
+            <Text style={styles.sub}>Basketball Intelligence Model</Text>
+          </View>
+          <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
+            <Ionicons name="log-out-outline" size={18} color="#6b7280" />
+            <Text style={styles.signOutText}>Sign Out</Text>
+          </TouchableOpacity>
+        </View>
         {coach && (
           <View style={styles.coachBadge}>
             <Ionicons name="person-circle-outline" size={16} color="#6b7280" />
@@ -74,9 +89,16 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0a0a' },
   header: { padding: 24, paddingTop: 60, marginBottom: 4 },
+  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   logo: { fontSize: 32, fontWeight: '900', color: '#fff', letterSpacing: 0.5 },
-  sub: { fontSize: 13, color: '#6b7280', marginTop: 2, marginBottom: 10 },
-  coachBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
+  sub: { fontSize: 13, color: '#6b7280', marginTop: 2 },
+  signOutBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    borderWidth: 1, borderColor: '#374151', borderRadius: 10,
+    paddingHorizontal: 12, paddingVertical: 8, marginTop: 6,
+  },
+  signOutText: { color: '#6b7280', fontSize: 12, fontWeight: '600' },
+  coachBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10 },
   coachText: { color: '#6b7280', fontSize: 12 },
   sectionLabel: {
     color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1,
