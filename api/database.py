@@ -24,3 +24,18 @@ def get_db():
 def init_db():
     from . import models  # noqa: F401 — registers all models
     Base.metadata.create_all(bind=engine)
+    _run_migrations()
+
+
+def _run_migrations():
+    """Apply any schema changes that create_all() can't handle (column additions)."""
+    with engine.connect() as conn:
+        # Add team_id to players if missing
+        cols = [row[1] for row in conn.execute(
+            __import__("sqlalchemy").text("PRAGMA table_info(players)")
+        )]
+        if "team_id" not in cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE players ADD COLUMN team_id INTEGER REFERENCES teams(id)"
+            ))
+            conn.commit()
