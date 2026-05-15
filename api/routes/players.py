@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
@@ -13,7 +14,15 @@ def create_player(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    player = models.Player(**body.model_dump())
+    data = body.model_dump()
+    # Derive program_name from team if team_id given
+    if data.get("team_id"):
+        team = db.get(models.Team, data["team_id"])
+        if team:
+            data["program_name"] = team.name
+    if "program_name" not in data or not data.get("program_name"):
+        data["program_name"] = coach.program_name
+    player = models.Player(**data)
     db.add(player)
     db.commit()
     db.refresh(player)
@@ -22,10 +31,14 @@ def create_player(
 
 @router.get("", response_model=list[schemas.PlayerOut])
 def list_players(
+    team_id: int | None = None,
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    return [_with_grade(p) for p in db.query(models.Player).all()]
+    q = db.query(models.Player)
+    if team_id is not None:
+        q = q.filter(models.Player.team_id == team_id)
+    return [_with_grade(p) for p in q.all()]
 
 
 @router.get("/{player_id}", response_model=schemas.PlayerOut)
@@ -59,6 +72,11 @@ async def player_summary(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(
+            status_code=500,
+            detail="ANTHROPIC_API_KEY is not set on the server. Ask the server admin to configure it."
+        )
     player = db.get(models.Player, player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
@@ -109,4 +127,7 @@ def _with_grade(player: models.Player) -> schemas.PlayerOut:
     if player.evaluations:
         grades = [e.overall_grade for e in player.evaluations if e.overall_grade is not None]
         out.latest_grade = grades[-1] if grades else None
+    if player.team:
+        out.team_id = player.team.id
+        out.team_name = player.team.name
     return out

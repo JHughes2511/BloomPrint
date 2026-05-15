@@ -148,6 +148,7 @@ async def import_excel(
     file: UploadFile = File(...),
     output_type: str = Form("player_eval"),
     competition_level: str = Form("HS Varsity"),
+    team_id: int | None = Form(None),
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
@@ -180,11 +181,17 @@ async def import_excel(
                 )
 
                 if player is None:
+                    program_name = coach.program_name
+                    if team_id:
+                        t = db.get(models.Team, team_id)
+                        if t:
+                            program_name = t.name
                     player = models.Player(
                         name=player_name,
                         position=row.get("position"),
                         competition_level=row.get("competition_level", competition_level),
-                        program_name=coach.program_name,
+                        program_name=program_name,
+                        team_id=team_id,
                     )
                     db.add(player)
                     db.flush()

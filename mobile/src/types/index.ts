@@ -1,3 +1,11 @@
+export interface Team {
+  id: number;
+  name: string;
+  coach_id: number;
+  competition_level: string;
+  created_at: string;
+}
+
 export interface Coach {
   id: number;
   name: string;
@@ -19,6 +27,8 @@ export interface Player {
   notes: string | null;
   created_at: string;
   latest_grade: number | null;
+  team_id: number | null;
+  team_name: string | null;
 }
 
 export interface Evaluation {

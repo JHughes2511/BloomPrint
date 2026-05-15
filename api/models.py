@@ -23,6 +23,20 @@ class Coach(Base):
 
     evaluations  = relationship("Evaluation", back_populates="coach")
     corrections  = relationship("Correction", back_populates="coach")
+    teams        = relationship("Team", back_populates="coach")
+
+
+class Team(Base):
+    __tablename__ = "teams"
+
+    id               = Column(Integer, primary_key=True, index=True)
+    name             = Column(String, nullable=False)
+    coach_id         = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    competition_level = Column(String, default="HS Varsity")
+    created_at       = Column(DateTime, default=datetime.utcnow)
+
+    coach   = relationship("Coach", back_populates="teams")
+    players = relationship("Player", back_populates="team")
 
 
 class Player(Base):
@@ -37,9 +51,11 @@ class Player(Base):
     competition_level = Column(String, default="HS Varsity")
     notes            = Column(Text)
     created_at       = Column(DateTime, default=datetime.utcnow)
+    team_id          = Column(Integer, ForeignKey("teams.id"), nullable=True)
 
     evaluations      = relationship("Evaluation", back_populates="player",
                                     order_by="Evaluation.created_at")
+    team             = relationship("Team", back_populates="players")
 
 
 class Evaluation(Base):

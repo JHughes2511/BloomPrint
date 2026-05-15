@@ -24,13 +24,14 @@ export const authAPI = {
 
 // ── Players ───────────────────────────────────────────────────────────────────
 export const playersAPI = {
-  list: () => api.get('/players').then(r => r.data),
+  list: (teamId?: number) =>
+    api.get('/players', { params: teamId != null ? { team_id: teamId } : {} }).then(r => r.data),
 
   get: (id: number) => api.get(`/players/${id}`).then(r => r.data),
 
   create: (data: {
     name: string; position?: string; age?: number;
-    height?: string; competition_level?: string; notes?: string;
+    height?: string; competition_level?: string; notes?: string; team_id?: number;
   }) => api.post('/players', data).then(r => r.data),
 
   evaluations: (id: number) => api.get(`/players/${id}/evaluations`).then(r => r.data),
@@ -61,12 +62,24 @@ export const evalsAPI = {
     api.get(`/evaluations/${evalId}/corrections`).then(r => r.data),
 };
 
+// ── Teams ─────────────────────────────────────────────────────────────────────
+export const teamsAPI = {
+  list: () => api.get('/teams').then(r => r.data),
+  create: (data: { name: string; competition_level?: string }) =>
+    api.post('/teams', data).then(r => r.data),
+  delete: (id: number) => api.delete(`/teams/${id}`).then(r => r.data),
+};
+
 // ── Uploads ───────────────────────────────────────────────────────────────────
 export const uploadsAPI = {
-  excel: (formData: FormData) =>
-    api.post('/uploads/excel', formData, {
+  excel: (formData: FormData, teamId?: number) => {
+    if (teamId != null) {
+      formData.append('team_id', String(teamId));
+    }
+    return api.post('/uploads/excel', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-    }).then(r => r.data),
+    }).then(r => r.data);
+  },
 };
 
 // ── Training ──────────────────────────────────────────────────────────────────

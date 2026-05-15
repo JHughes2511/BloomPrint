@@ -46,9 +46,10 @@ class PlayerCreate(BaseModel):
     position: str | None = None
     age: int | None = None
     height: str | None = None
-    program_name: str = "SEED Academy"
+    program_name: str | None = None
     competition_level: str = "HS Varsity"
     notes: str | None = None
+    team_id: int | None = None
 
 
 class PlayerOut(BaseModel):
@@ -62,6 +63,23 @@ class PlayerOut(BaseModel):
     notes: str | None
     created_at: datetime
     latest_grade: float | None = None
+    team_id: int | None = None
+    team_name: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class TeamCreate(BaseModel):
+    name: str
+    competition_level: str = "HS Varsity"
+
+
+class TeamOut(BaseModel):
+    id: int
+    name: str
+    coach_id: int
+    competition_level: str
+    created_at: datetime
 
     model_config = {"from_attributes": True}
 

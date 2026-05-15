@@ -122,6 +122,12 @@ async def team_report(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
+    import os
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(
+            status_code=500,
+            detail="ANTHROPIC_API_KEY is not set on the server. Ask the server admin to configure it."
+        )
     players = db.query(models.Player).all()
     if not players:
         raise HTTPException(status_code=400, detail="No players on roster yet")
