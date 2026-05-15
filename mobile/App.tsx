@@ -37,6 +37,7 @@ function TeamStack() {
     <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
       <Stack.Screen name="Team" component={TeamReportScreen} />
       <Stack.Screen name="Summary" component={SummaryScreen} />
+      <Stack.Screen name="Import" component={ImportScreen} />
     </Stack.Navigator>
   );
 }

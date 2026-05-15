@@ -7,11 +7,13 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system';
 import Markdown from 'react-native-markdown-display';
 import { evalsAPI, playersAPI } from '../api/client';
 import { Evaluation, Correction, Player } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
+import { mdToHtml, safeFileName } from '../utils/mdToHtml';
 
 const PILLARS = [
   'offensive_skills', 'defensive_capabilities', 'physical_attributes',
@@ -141,7 +143,7 @@ export default function EvalReportScreen() {
     }
 
     if (exportCats.report && ev.report_text) {
-      body += `<h3>Full Report</h3><div style="font-size:12px;line-height:1.8;color:#444;white-space:pre-wrap">${sanitize(ev.report_text)}</div>`;
+      body += `<h3>Full Report</h3><div style="margin-top:8px">${mdToHtml(ev.report_text)}</div>`;
     }
 
     if (exportCats.corrections && corrections.length) {
@@ -169,8 +171,10 @@ export default function EvalReportScreen() {
     setExporting(true);
     try {
       const html = buildHtml();
-      const { uri } = await Print.printToFileAsync({ html, fileName: buildFileName() });
-      await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Share BIM Report' });
+      const { uri } = await Print.printToFileAsync({ html });
+      const dest = FileSystem.cacheDirectory + safeFileName(buildFileName()) + '.pdf';
+      await FileSystem.copyAsync({ from: uri, to: dest });
+      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: 'Share BIM Report' });
     } catch (e: any) {
       Alert.alert('Export Error', e?.message ?? 'Could not generate report');
     } finally {

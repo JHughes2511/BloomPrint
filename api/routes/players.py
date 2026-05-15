@@ -86,14 +86,17 @@ async def player_summary(
         "Format with clear BIM sections including OVERALL GRADE, pillar grades, GREEN FLAGS, WATCH FLAGS, and KEY QUESTIONS."
     )
 
-    import anthropic
-    client = anthropic.Anthropic()
-    response = client.messages.create(
-        model="claude-opus-4-7",
-        max_tokens=2048,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return schemas.SummaryOut(report_text=response.content[0].text)
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        response = await client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=2048,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return schemas.SummaryOut(report_text=response.content[0].text)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
 
 
 def _with_grade(player: models.Player) -> schemas.PlayerOut:
