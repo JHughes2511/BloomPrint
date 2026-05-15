@@ -53,13 +53,14 @@ export default function PlayerProfileScreen() {
         fileName: [
           'Player Summary',
           sanitize(player.name),
-          sanitize(player.program_name),
+          sanitize(player.team_name ?? player.program_name),
           sanitize(player.position ?? ''),
           typeLabel,
         ].filter(Boolean).join(' - '),
       });
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate summary');
+      const msg = e?.response?.data?.detail ?? e?.message ?? 'Could not generate summary';
+      Alert.alert('Error', String(msg));
     } finally {
       setSummaryLoading(false);
     }

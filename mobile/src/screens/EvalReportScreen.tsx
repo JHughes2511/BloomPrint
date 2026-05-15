@@ -75,7 +75,7 @@ export default function EvalReportScreen() {
     const sanitize = (s: string) => s.replace(/[^a-zA-Z0-9 \-]/g, '').trim();
     const type = ev.output_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     const name = sanitize(player?.name ?? 'Player');
-    const team = sanitize(player?.program_name ?? '');
+    const team = sanitize(player?.team_name ?? player?.program_name ?? '');
     const pos  = sanitize(player?.position ?? '');
     return ['Evaluation Report', name, team, pos, type].filter(Boolean).join(' - ');
   };

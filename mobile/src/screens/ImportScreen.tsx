@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
@@ -6,7 +6,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { api } from '../api/client';
+import { api, teamsAPI } from '../api/client';
+import { Team } from '../types';
 
 const OUTPUT_TYPES = [
   { key: 'player_eval',        label: 'Player Eval' },
@@ -50,6 +51,12 @@ export default function ImportScreen() {
   const [level, setLevel] = useState('HS Varsity');
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+
+  useEffect(() => {
+    teamsAPI.list().then(setTeams).catch(() => {});
+  }, []);
 
   const pickFile = async () => {
     const res = await DocumentPicker.getDocumentAsync({
@@ -73,6 +80,7 @@ export default function ImportScreen() {
       form.append('file', { uri: file.uri, name: file.name, type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' } as any);
       form.append('output_type', outputType);
       form.append('competition_level', level);
+      if (selectedTeamId != null) form.append('team_id', String(selectedTeamId));
 
       const res = await api.post('/uploads/excel', form, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -148,6 +156,31 @@ export default function ImportScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
+
+        {/* Team assignment */}
+        {teams.length > 0 && (
+          <>
+            <Text style={styles.label}>Assign to Team (optional)</Text>
+            <Text style={styles.hint}>Imported players will be added to this team.</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24 }}>
+              <TouchableOpacity
+                style={[styles.chip, selectedTeamId == null && styles.chipActive]}
+                onPress={() => setSelectedTeamId(null)}
+              >
+                <Text style={[styles.chipText, selectedTeamId == null && styles.chipTextActive]}>No Team</Text>
+              </TouchableOpacity>
+              {teams.map(t => (
+                <TouchableOpacity
+                  key={t.id}
+                  style={[styles.chip, selectedTeamId === t.id && styles.chipActive]}
+                  onPress={() => setSelectedTeamId(t.id)}
+                >
+                  <Text style={[styles.chipText, selectedTeamId === t.id && styles.chipTextActive]}>{t.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </>
+        )}
 
         {/* Upload button */}
         <TouchableOpacity

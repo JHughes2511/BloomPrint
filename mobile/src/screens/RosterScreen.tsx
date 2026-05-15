@@ -1,29 +1,40 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, TextInput, Modal, Alert, KeyboardAvoidingView, Platform,
+  ActivityIndicator, TextInput, Modal, Alert, KeyboardAvoidingView, Platform, ScrollView,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { playersAPI } from '../api/client';
-import { Player } from '../types';
+import { playersAPI, teamsAPI } from '../api/client';
+import { Player, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
-import { useAuth } from '../context/AuthContext';
 
 export default function RosterScreen() {
   const navigation = useNavigation<any>();
-  const { coach } = useAuth();
+
+  const [teams, setTeams] = useState<Team[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Add player modal
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPos, setNewPos] = useState('');
   const [newLevel, setNewLevel] = useState('HS Varsity');
   const [saving, setSaving] = useState(false);
 
+  // Create team modal
+  const [showNewTeam, setShowNewTeam] = useState(false);
+  const [newTeamName, setNewTeamName] = useState('');
+  const [newTeamLevel, setNewTeamLevel] = useState('HS Varsity');
+  const [creatingTeam, setCreatingTeam] = useState(false);
+
   const load = async () => {
     try {
-      setPlayers(await playersAPI.list());
+      const [t, p] = await Promise.all([teamsAPI.list(), playersAPI.list()]);
+      setTeams(t);
+      setPlayers(p);
     } finally {
       setLoading(false);
     }
@@ -31,11 +42,20 @@ export default function RosterScreen() {
 
   useFocusEffect(useCallback(() => { load(); }, []));
 
+  const visiblePlayers = selectedTeamId == null
+    ? players
+    : players.filter(p => p.team_id === selectedTeamId);
+
   const addPlayer = async () => {
     if (!newName.trim()) return;
     setSaving(true);
     try {
-      await playersAPI.create({ name: newName, position: newPos, competition_level: newLevel });
+      await playersAPI.create({
+        name: newName,
+        position: newPos || undefined,
+        competition_level: newLevel,
+        team_id: selectedTeamId ?? undefined,
+      });
       setShowAdd(false);
       setNewName(''); setNewPos('');
       load();
@@ -46,14 +66,53 @@ export default function RosterScreen() {
     }
   };
 
+  const createTeam = async () => {
+    if (!newTeamName.trim()) return;
+    setCreatingTeam(true);
+    try {
+      const team = await teamsAPI.create({ name: newTeamName, competition_level: newTeamLevel });
+      setShowNewTeam(false);
+      setNewTeamName(''); setNewTeamLevel('HS Varsity');
+      setSelectedTeamId(team.id);
+      load();
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not create team');
+    } finally {
+      setCreatingTeam(false);
+    }
+  };
+
+  const deleteTeam = (team: Team) => {
+    Alert.alert('Delete Team', `Delete "${team.name}"? Players will remain but lose their team assignment.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete', style: 'destructive',
+        onPress: async () => {
+          try {
+            await teamsAPI.delete(team.id);
+            if (selectedTeamId === team.id) setSelectedTeamId(null);
+            load();
+          } catch (e: any) {
+            Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete team');
+          }
+        },
+      },
+    ]);
+  };
+
+  const currentTeamName = teams.find(t => t.id === selectedTeamId)?.name;
+
   if (loading) return <View style={styles.center}><ActivityIndicator color="#2563eb" size="large" /></View>;
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
           <Text style={styles.title}>Roster</Text>
-          <Text style={styles.sub}>{coach?.program_name} · {players.length} players</Text>
+          <Text style={styles.sub}>
+            {currentTeamName ?? 'All Teams'} · {visiblePlayers.length} players
+          </Text>
         </View>
         <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import')}>
           <Ionicons name="cloud-upload-outline" size={18} color="#9ca3af" />
@@ -63,36 +122,68 @@ export default function RosterScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Team filter chips */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.teamsRow} contentContainerStyle={{ paddingHorizontal: 16, gap: 8, alignItems: 'center' }}>
+        <TouchableOpacity
+          style={[styles.teamChip, selectedTeamId == null && styles.teamChipActive]}
+          onPress={() => setSelectedTeamId(null)}
+        >
+          <Text style={[styles.teamChipText, selectedTeamId == null && styles.teamChipTextActive]}>All</Text>
+        </TouchableOpacity>
+        {teams.map(t => (
+          <TouchableOpacity
+            key={t.id}
+            style={[styles.teamChip, selectedTeamId === t.id && styles.teamChipActive]}
+            onPress={() => setSelectedTeamId(t.id)}
+            onLongPress={() => deleteTeam(t)}
+          >
+            <Text style={[styles.teamChipText, selectedTeamId === t.id && styles.teamChipTextActive]}>{t.name}</Text>
+          </TouchableOpacity>
+        ))}
+        <TouchableOpacity style={styles.newTeamChip} onPress={() => setShowNewTeam(true)}>
+          <Ionicons name="add" size={14} color="#2563eb" />
+          <Text style={styles.newTeamText}>New Team</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* Player list */}
       <FlatList
-        data={players}
+        data={visiblePlayers}
         keyExtractor={p => String(p.id)}
         contentContainerStyle={{ paddingBottom: 24 }}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('PlayerProfile', { playerId: item.id })}>
             <View style={styles.cardLeft}>
               <Text style={styles.playerName}>{item.name}</Text>
-              <Text style={styles.playerMeta}>{[item.position, item.competition_level].filter(Boolean).join(' · ')}</Text>
+              <Text style={styles.playerMeta}>
+                {[item.position, item.team_name ?? item.competition_level].filter(Boolean).join(' · ')}
+              </Text>
             </View>
             <GradeBadge grade={item.latest_grade} size="md" />
           </TouchableOpacity>
         )}
         ListEmptyComponent={
-          <View style={styles.center}>
-            <Text style={styles.emptyText}>No players yet. Add your first player.</Text>
+          <View style={styles.emptyWrap}>
+            <Text style={styles.emptyText}>
+              {teams.length === 0
+                ? 'Create a team first, then add players.'
+                : 'No players in this team yet.'}
+            </Text>
           </View>
         }
       />
 
+      {/* Add Player Modal */}
       <Modal visible={showAdd} transparent animationType="slide">
-        <KeyboardAvoidingView
-          style={styles.modalOverlay}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>Add Player</Text>
+            {currentTeamName && (
+              <Text style={styles.modalSub}>Adding to {currentTeamName}</Text>
+            )}
             <TextInput style={styles.input} placeholder="Full Name *" placeholderTextColor="#6b7280"
               value={newName} onChangeText={setNewName} />
-            <TextInput style={styles.input} placeholder="Position (e.g. PG, SG)" placeholderTextColor="#6b7280"
+            <TextInput style={styles.input} placeholder="Position (e.g. PG, SG, SF)" placeholderTextColor="#6b7280"
               value={newPos} onChangeText={setNewPos} />
             <TextInput style={styles.input} placeholder="Competition Level" placeholderTextColor="#6b7280"
               value={newLevel} onChangeText={setNewLevel} />
@@ -107,6 +198,27 @@ export default function RosterScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Create Team Modal */}
+      <Modal visible={showNewTeam} transparent animationType="slide">
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>New Team</Text>
+            <TextInput style={styles.input} placeholder="Team Name *" placeholderTextColor="#6b7280"
+              value={newTeamName} onChangeText={setNewTeamName} />
+            <TextInput style={styles.input} placeholder="Competition Level" placeholderTextColor="#6b7280"
+              value={newTeamLevel} onChangeText={setNewTeamLevel} />
+            <View style={styles.modalRow}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowNewTeam(false)}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveBtn} onPress={createTeam} disabled={creatingTeam}>
+                {creatingTeam ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Create</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
@@ -114,11 +226,18 @@ export default function RosterScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0a0a', paddingTop: 56 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 20 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 12 },
   title: { fontSize: 28, fontWeight: '900', color: '#fff' },
   sub: { fontSize: 12, color: '#6b7280', marginTop: 2 },
   importBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#374151', marginRight: 8 },
   addBtn: { backgroundColor: '#2563eb', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  teamsRow: { marginBottom: 16, flexGrow: 0 },
+  teamChip: { borderWidth: 1, borderColor: '#374151', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7 },
+  teamChipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
+  teamChipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
+  teamChipTextActive: { color: '#fff' },
+  newTeamChip: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: '#2563eb', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 7, borderStyle: 'dashed' },
+  newTeamText: { color: '#2563eb', fontSize: 13, fontWeight: '600' },
   card: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     backgroundColor: '#111827', marginHorizontal: 16, marginBottom: 10,
@@ -127,14 +246,13 @@ const styles = StyleSheet.create({
   cardLeft: { flex: 1 },
   playerName: { color: '#fff', fontSize: 16, fontWeight: '700' },
   playerMeta: { color: '#6b7280', fontSize: 12, marginTop: 2 },
-  emptyText: { color: '#6b7280', marginTop: 60 },
+  emptyWrap: { alignItems: 'center', marginTop: 60 },
+  emptyText: { color: '#6b7280', textAlign: 'center', paddingHorizontal: 32 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
   modal: { backgroundColor: '#111827', borderRadius: 20, padding: 24, margin: 16 },
-  modalTitle: { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 16 },
-  input: {
-    backgroundColor: '#1f2937', borderRadius: 10, padding: 14,
-    color: '#fff', fontSize: 14, marginBottom: 10,
-  },
+  modalTitle: { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 4 },
+  modalSub: { color: '#6b7280', fontSize: 12, marginBottom: 12 },
+  input: { backgroundColor: '#1f2937', borderRadius: 10, padding: 14, color: '#fff', fontSize: 14, marginBottom: 10 },
   modalRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
   cancelBtn: { flex: 1, padding: 14, borderRadius: 10, borderWidth: 1, borderColor: '#374151', alignItems: 'center' },
   cancelText: { color: '#9ca3af', fontWeight: '600' },
