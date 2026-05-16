@@ -152,7 +152,23 @@ export default function RosterScreen() {
         keyExtractor={p => String(p.id)}
         contentContainerStyle={{ paddingBottom: 24 }}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('PlayerProfile', { playerId: item.id })}>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate('PlayerProfile', { playerId: item.id })}
+            onLongPress={() => {
+              Alert.alert('Delete Player', `Remove ${item.name} from the roster?`, [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Delete', style: 'destructive', onPress: async () => {
+                  try {
+                    await playersAPI.delete(item.id);
+                    load();
+                  } catch (e: any) {
+                    Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete player');
+                  }
+                }},
+              ]);
+            }}
+          >
             <View style={styles.cardLeft}>
               <Text style={styles.playerName}>{item.name}</Text>
               <Text style={styles.playerMeta}>

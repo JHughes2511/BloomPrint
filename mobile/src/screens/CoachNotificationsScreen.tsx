@@ -24,6 +24,12 @@ export default function CoachNotificationsScreen() {
     try {
       const data = await playerAPI.coachNotifications();
       setNotifications(data);
+      // Mark all unread as read
+      const unread = data.filter((n: any) => !n.read);
+      await Promise.all(unread.map((n: any) => playerAPI.coachMarkRead(n.id)));
+      if (unread.length > 0) {
+        setNotifications(data.map((n: any) => ({ ...n, read: true })));
+      }
     } catch {}
     setLoading(false);
     setRefreshing(false);

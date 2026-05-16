@@ -188,6 +188,20 @@ def get_evaluation(
     return ev
 
 
+@router.delete("/{eval_id}")
+def delete_evaluation(
+    eval_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    ev = db.get(models.Evaluation, eval_id)
+    if not ev:
+        raise HTTPException(status_code=404, detail="Evaluation not found")
+    db.delete(ev)
+    db.commit()
+    return {"ok": True}
+
+
 @router.post("/{eval_id}/corrections", response_model=schemas.CorrectionOut)
 def submit_correction(
     eval_id: int,

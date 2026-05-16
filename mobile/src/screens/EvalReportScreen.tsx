@@ -407,7 +407,7 @@ export default function EvalReportScreen() {
                     <Ionicons name="close-circle" size={20} color="#9ca3af" />
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.label}>Include in Share</Text>
+                <Text style={[styles.label, { marginTop: 12 }]}>Include in Share</Text>
                 {[
                   { key: 'share_report_text', label: 'Full Report' },
                   { key: 'share_grades', label: 'Grades' },

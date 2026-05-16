@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { playersAPI } from '../api/client';
+import { playersAPI, playerAPI } from '../api/client';
 import { Player, Evaluation } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
@@ -64,6 +64,21 @@ export default function PlayerProfileScreen() {
       Alert.alert('Error', String(msg));
     } finally {
       setSummaryLoading(false);
+    }
+  };
+
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [generatingInvite, setGeneratingInvite] = useState(false);
+
+  const generateInvite = async () => {
+    setGeneratingInvite(true);
+    try {
+      const result = await playerAPI.generateInvite(player!.id);
+      setInviteCode(result.code);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate invite code');
+    } finally {
+      setGeneratingInvite(false);
     }
   };
 
@@ -160,6 +175,22 @@ export default function PlayerProfileScreen() {
         <Text style={styles.trainingText}>Generate Training Program</Text>
       </TouchableOpacity>
 
+      {/* Invite Code */}
+      <TouchableOpacity style={styles.inviteBtn} onPress={generateInvite} disabled={generatingInvite}>
+        {generatingInvite
+          ? <ActivityIndicator color="#fff" size="small" />
+          : <Ionicons name="link" size={18} color="#fff" />}
+        <Text style={styles.inviteText}>Generate Player Invite Code</Text>
+      </TouchableOpacity>
+
+      {inviteCode && (
+        <View style={styles.inviteCodeBox}>
+          <Text style={styles.inviteCodeLabel}>INVITE CODE</Text>
+          <Text style={styles.inviteCode}>{inviteCode}</Text>
+          <Text style={styles.inviteCodeHint}>Share this code with the player so they can link their account</Text>
+        </View>
+      )}
+
       {/* Summary modal */}
       <Modal visible={showSummary} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -243,4 +274,16 @@ const styles = StyleSheet.create({
   cancelText: { color: '#9ca3af', fontWeight: '600' },
   saveBtn: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: '#2563eb', alignItems: 'center' },
   saveText: { color: '#fff', fontWeight: '700' },
+  inviteBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: '#374151', marginHorizontal: 20, marginTop: 10, padding: 14, borderRadius: 12,
+  },
+  inviteText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  inviteCodeBox: {
+    backgroundColor: '#111827', marginHorizontal: 20, marginTop: 10, padding: 16,
+    borderRadius: 12, borderWidth: 1, borderColor: '#2563eb', alignItems: 'center',
+  },
+  inviteCodeLabel: { color: '#6b7280', fontSize: 10, fontWeight: '700', letterSpacing: 2, marginBottom: 8 },
+  inviteCode: { color: '#2563eb', fontSize: 28, fontWeight: '900', letterSpacing: 4, marginBottom: 8 },
+  inviteCodeHint: { color: '#6b7280', fontSize: 11, textAlign: 'center' },
 });

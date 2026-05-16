@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator,
+  View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -58,6 +58,19 @@ export default function RecentScreen() {
               screen: 'EvalReport',
               params: { evalId: item.id },
             })}
+            onLongPress={() => {
+              Alert.alert('Delete Report', 'Permanently delete this report?', [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Delete', style: 'destructive', onPress: async () => {
+                  try {
+                    await evalsAPI.delete(item.id);
+                    load();
+                  } catch (e: any) {
+                    Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete');
+                  }
+                }},
+              ]);
+            }}
           >
             <View style={{ flex: 1 }}>
               <Text style={styles.playerName}>{item.player_name}</Text>

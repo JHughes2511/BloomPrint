@@ -567,6 +567,157 @@ def coach_mark_read(
     return {"ok": True}
 
 
+# ── Coach view + reply on shared reports ──────────────────────────────────────
+
+@router.get("/shared-reports/{shared_id}/coach-view")
+def coach_view_shared_report(
+    shared_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    report = db.get(models.SharedReport, shared_id)
+    if not report or report.shared_by_id != coach.id:
+        raise HTTPException(status_code=404, detail="Report not found")
+    comments = db.query(models.PlayerComment).filter_by(shared_report_id=shared_id).all()
+    result = []
+    for c in comments:
+        out = schemas.PlayerCommentOut.model_validate(c)
+        out.author_name = (
+            c.player_user.name if c.player_user else (c.coach.name if c.coach else "Unknown")
+        )
+        result.append(out)
+    return {"shared_report_id": shared_id, "comments": [c.model_dump() for c in result]}
+
+
+@router.post("/shared-reports/{shared_id}/coach-reply", response_model=schemas.PlayerCommentOut)
+def coach_reply_to_shared_report(
+    shared_id: int,
+    body: schemas.PlayerCommentCreate,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    shared = db.get(models.SharedReport, shared_id)
+    if not shared or shared.shared_by_id != coach.id:
+        raise HTTPException(status_code=404, detail="Report not found")
+    comment = models.PlayerComment(
+        coach_id=coach.id,
+        shared_report_id=shared_id,
+        text=body.text,
+    )
+    db.add(comment)
+    db.flush()
+    notif = models.PlayerNotification(
+        player_user_id=shared.player_user_id,
+        type="coach_replied",
+        title="Coach Replied",
+        body=f"{coach.name} replied to your report comment: \"{body.text[:80]}\"",
+        ref_id=shared_id,
+    )
+    db.add(notif)
+    db.commit()
+    db.refresh(comment)
+    out = schemas.PlayerCommentOut.model_validate(comment)
+    out.author_name = coach.name
+    return out
+
+
+# ── Mark all coach notifications read ─────────────────────────────────────────
+
+@router.post("/coach-notifications/read-all")
+def coach_mark_all_read(
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    db.query(models.PlayerNotification).filter_by(
+        coach_id=coach.id, read=False
+    ).update({"read": True})
+    db.commit()
+    return {"ok": True}
+
+
+# ── Share team report ─────────────────────────────────────────────────────────
+
+@router.post("/share-team-report")
+def share_team_report(
+    body: schemas.TeamShareRequest,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    targets: list[int] = []  # player_user_ids
+
+    if body.target_type == "player" and body.player_user_id:
+        targets = [body.player_user_id]
+
+    elif body.target_type == "team" and body.team_id:
+        # Find all players on this team who have a linked PlayerUser account
+        players = db.query(models.Player).filter_by(team_id=body.team_id).all()
+        for p in players:
+            if p.player_user:
+                targets.append(p.player_user.id)
+
+    elif body.target_type == "all_staff":
+        # Notify all coaches via notification (no player_user involved)
+        coaches = db.query(models.Coach).filter(models.Coach.id != coach.id).all()
+        preview = body.report_text[:200] if body.report_text else ""
+        for c in coaches:
+            notif = models.PlayerNotification(
+                coach_id=c.id,
+                type="team_report_shared",
+                title=f"Team Report: {body.output_type.replace('_', ' ').title()}",
+                body=f"{coach.name} shared a team report with you.\n\n{preview}...",
+            )
+            db.add(notif)
+        db.commit()
+        return {"ok": True, "shared_count": len(coaches)}
+
+    # Create TeamSharedReport for each target player user
+    count = 0
+    for pu_id in targets:
+        pu = db.get(models.PlayerUser, pu_id)
+        if not pu:
+            continue
+        tsr = models.TeamSharedReport(
+            player_user_id=pu_id,
+            shared_by_id=coach.id,
+            output_type=body.output_type,
+            report_text=body.report_text,
+            message=body.message,
+        )
+        db.add(tsr)
+        db.flush()
+        notif = models.PlayerNotification(
+            player_user_id=pu_id,
+            type="team_report_shared",
+            title=f"Team Report Shared",
+            body=f"{coach.name} shared a {body.output_type.replace('_', ' ')} team report with you.",
+            ref_id=tsr.id,
+        )
+        db.add(notif)
+        count += 1
+
+    db.commit()
+    return {"ok": True, "shared_count": count}
+
+
+@router.get("/team-shared-reports", response_model=list[schemas.TeamSharedReportOut])
+def player_team_shared_reports(
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    reports = (
+        db.query(models.TeamSharedReport)
+        .filter_by(player_user_id=pu.id)
+        .order_by(models.TeamSharedReport.id.desc())
+        .all()
+    )
+    result = []
+    for r in reports:
+        out = schemas.TeamSharedReportOut.model_validate(r)
+        out.shared_by_name = r.shared_by.name if r.shared_by else ""
+        result.append(out)
+    return result
+
+
 # ── Helper ────────────────────────────────────────────────────────────────────
 
 def _build_shared_report_out(shared: models.SharedReport) -> schemas.SharedReportOut:

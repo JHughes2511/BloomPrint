@@ -34,6 +34,8 @@ export const playersAPI = {
     height?: string; competition_level?: string; notes?: string; team_id?: number;
   }) => api.post('/players', data).then(r => r.data),
 
+  delete: (id: number) => api.delete(`/players/${id}`).then(r => r.data),
+
   evaluations: (id: number) => api.get(`/players/${id}/evaluations`).then(r => r.data),
 
   summary: (id: number, data: { output_type: string; focus_prompt?: string }) =>
@@ -46,6 +48,8 @@ export const evalsAPI = {
     api.post('/evaluations', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }).then(r => r.data),
+
+  delete: (id: number) => api.delete(`/evaluations/${id}`).then(r => r.data),
 
   get: (id: number) => api.get(`/evaluations/${id}`).then(r => r.data),
 
@@ -126,4 +130,12 @@ export const playerAPI = {
     api.patch(`/player/training/${id}`, data).then(r => r.data),
   addCoachComment: (trainingId: number, data: { text: string }) =>
     api.post(`/player/training/${trainingId}/coach-comment`, data).then(r => r.data),
+  coachMarkAllRead: () =>
+    api.post('/player/coach-notifications/read-all').then(r => r.data),
+  coachViewSharedReport: (sharedId: number) =>
+    api.get(`/player/shared-reports/${sharedId}/coach-view`).then(r => r.data),
+  coachReplyToReport: (sharedId: number, text: string) =>
+    api.post(`/player/shared-reports/${sharedId}/coach-reply`, { text }).then(r => r.data),
+  shareTeamReport: (data: { output_type: string; report_text: string; target_type: string; player_user_id?: number; team_id?: number; message?: string }) =>
+    api.post('/player/share-team-report', data).then(r => r.data),
 };

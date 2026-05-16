@@ -181,6 +181,21 @@ class SharedReport(Base):
     comments    = relationship("PlayerComment", back_populates="shared_report", cascade="all, delete-orphan")
 
 
+class TeamSharedReport(Base):
+    __tablename__ = "team_shared_reports"
+
+    id             = Column(Integer, primary_key=True, index=True)
+    player_user_id = Column(Integer, ForeignKey("player_users.id"), nullable=False)
+    shared_by_id   = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    output_type    = Column(String, nullable=False)
+    report_text    = Column(Text, nullable=True)
+    message        = Column(Text, nullable=True)
+    created_at     = Column(DateTime, default=datetime.utcnow)
+
+    player_user = relationship("PlayerUser")
+    shared_by   = relationship("Coach")
+
+
 class PlayerTraining(Base):
     __tablename__ = "player_training"
 

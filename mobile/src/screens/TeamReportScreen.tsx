@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
-  StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
+  StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal, Switch,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +9,7 @@ import Markdown from 'react-native-markdown-display';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import { evalsAPI } from '../api/client';
+import { evalsAPI, teamsAPI, playerAPI } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { mdToHtml, safeFileName } from '../utils/mdToHtml';
 
@@ -31,6 +31,16 @@ export default function TeamReportScreen() {
   const [reportText, setReportText] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const scrollRef = React.useRef<ScrollView>(null);
+
+  const [showShare, setShowShare] = useState(false);
+  const [shareTarget, setShareTarget] = useState<'player' | 'team' | 'all_staff'>('player');
+  const [shareSearch, setShareSearch] = useState('');
+  const [shareResults, setShareResults] = useState<any[]>([]);
+  const [selectedShareTarget, setSelectedShareTarget] = useState<any>(null);
+  const [teams, setTeams] = useState<any[]>([]);
+  const [shareMessage, setShareMessage] = useState('');
+  const [sharing, setSharing] = useState(false);
+  const [shareSearchLoading, setShareSearchLoading] = useState(false);
 
   const buildFileName = () => {
     const typeLabel = outputType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -75,6 +85,49 @@ export default function TeamReportScreen() {
       await Print.printAsync({ html: buildHtml() });
     } catch (e: any) {
       Alert.alert('Print Error', e?.message ?? 'Could not print');
+    }
+  };
+
+  useEffect(() => {
+    teamsAPI.list().then(setTeams).catch(() => {});
+  }, []);
+
+  const searchPlayers = async () => {
+    if (!shareSearch.trim()) return;
+    setShareSearchLoading(true);
+    try {
+      const results = await playerAPI.searchPlayerUsers(shareSearch.trim());
+      setShareResults(results);
+    } catch {}
+    setShareSearchLoading(false);
+  };
+
+  const submitShare = async () => {
+    if (!reportText) return;
+    setSharing(true);
+    try {
+      const data: any = {
+        output_type: outputType,
+        report_text: reportText,
+        target_type: shareTarget,
+        message: shareMessage.trim() || undefined,
+      };
+      if (shareTarget === 'player' && selectedShareTarget) {
+        data.player_user_id = selectedShareTarget.id;
+      } else if (shareTarget === 'team' && selectedShareTarget) {
+        data.team_id = selectedShareTarget.id;
+      }
+      const result = await playerAPI.shareTeamReport(data);
+      Alert.alert('Shared!', `Report shared with ${result.shared_count ?? 1} recipient(s).`);
+      setShowShare(false);
+      setSelectedShareTarget(null);
+      setShareSearch('');
+      setShareResults([]);
+      setShareMessage('');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share report');
+    } finally {
+      setSharing(false);
     }
   };
 
@@ -168,10 +221,114 @@ export default function TeamReportScreen() {
                 <Ionicons name="print-outline" size={18} color="#9ca3af" />
                 <Text style={styles.actionText}>Print</Text>
               </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionBtn, { borderColor: '#16a34a' }]} onPress={() => setShowShare(true)}>
+                <Ionicons name="person-add-outline" size={18} color="#16a34a" />
+                <Text style={[styles.actionText, { color: '#16a34a' }]}>Share</Text>
+              </TouchableOpacity>
             </View>
           </View>
         )}
       </ScrollView>
+
+      {/* Share Modal */}
+      <Modal visible={showShare} transparent animationType="slide">
+        <KeyboardAvoidingView style={shareStyles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={shareStyles.modal}>
+            <Text style={shareStyles.title}>Share Team Report</Text>
+
+            {/* Target type selector */}
+            <Text style={shareStyles.label}>Send To</Text>
+            <View style={shareStyles.targetRow}>
+              {([['player', 'Individual Player'], ['team', 'Whole Team'], ['all_staff', 'All Staff']] as const).map(([key, label]) => (
+                <TouchableOpacity
+                  key={key}
+                  style={[shareStyles.targetChip, shareTarget === key && shareStyles.targetChipActive]}
+                  onPress={() => { setShareTarget(key); setSelectedShareTarget(null); setShareResults([]); }}
+                >
+                  <Text style={[shareStyles.targetChipText, shareTarget === key && shareStyles.targetChipTextActive]}>{label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Player search */}
+            {shareTarget === 'player' && !selectedShareTarget && (
+              <View style={{ marginBottom: 12 }}>
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+                  <TextInput
+                    style={[shareStyles.input, { flex: 1 }]}
+                    placeholder="Search player name..."
+                    placeholderTextColor="#4b5563"
+                    value={shareSearch}
+                    onChangeText={setShareSearch}
+                  />
+                  <TouchableOpacity
+                    style={{ backgroundColor: '#2563eb', borderRadius: 10, padding: 12, justifyContent: 'center' }}
+                    onPress={searchPlayers}
+                  >
+                    {shareSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+                  </TouchableOpacity>
+                </View>
+                {shareResults.map((r: any) => (
+                  <TouchableOpacity key={r.id} style={shareStyles.resultRow} onPress={() => { setSelectedShareTarget(r); setShareResults([]); }}>
+                    <Text style={shareStyles.resultName}>{r.name}</Text>
+                    <Text style={shareStyles.resultMeta}>{r.email}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {/* Team selector */}
+            {shareTarget === 'team' && (
+              <View style={{ marginBottom: 12 }}>
+                {teams.map((t: any) => (
+                  <TouchableOpacity
+                    key={t.id}
+                    style={[shareStyles.resultRow, selectedShareTarget?.id === t.id && { borderColor: '#16a34a' }]}
+                    onPress={() => setSelectedShareTarget(t)}
+                  >
+                    <Text style={shareStyles.resultName}>{t.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {/* Selected target badge */}
+            {selectedShareTarget && (
+              <View style={shareStyles.selectedBadge}>
+                <Text style={shareStyles.selectedName}>{selectedShareTarget.name}</Text>
+                <TouchableOpacity onPress={() => setSelectedShareTarget(null)}>
+                  <Ionicons name="close-circle" size={18} color="#9ca3af" />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {shareTarget === 'all_staff' && (
+              <Text style={shareStyles.staffNote}>All coaches, scouts, and trainers will receive a notification with this report.</Text>
+            )}
+
+            <TextInput
+              style={[shareStyles.input, { marginTop: 8 }]}
+              placeholder="Add a message (optional)..."
+              placeholderTextColor="#4b5563"
+              value={shareMessage}
+              onChangeText={setShareMessage}
+            />
+
+            <View style={shareStyles.btnRow}>
+              <TouchableOpacity style={shareStyles.cancelBtn} onPress={() => { setShowShare(false); setSelectedShareTarget(null); }}>
+                <Text style={shareStyles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[shareStyles.shareBtn, { opacity: (shareTarget === 'all_staff' || selectedShareTarget) ? 1 : 0.4 }]}
+                onPress={submitShare}
+                disabled={sharing || (shareTarget !== 'all_staff' && !selectedShareTarget)}
+              >
+                {sharing ? <ActivityIndicator color="#fff" /> : <Text style={shareStyles.shareBtnText}>Send</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }

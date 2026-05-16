@@ -299,3 +299,25 @@ class NotificationOut(BaseModel):
     ref_id: int | None
     created_at: datetime
     model_config = {"from_attributes": True}
+
+
+# ── Team shared report ────────────────────────────────────────────────────────
+
+class TeamShareRequest(BaseModel):
+    output_type: str
+    report_text: str
+    target_type: str  # "player", "team", "all_staff"
+    player_user_id: int | None = None
+    team_id: int | None = None
+    message: str | None = None
+
+class TeamSharedReportOut(BaseModel):
+    id: int
+    player_user_id: int
+    shared_by_id: int
+    output_type: str
+    report_text: str | None
+    message: str | None
+    created_at: datetime
+    shared_by_name: str = ""
+    model_config = {"from_attributes": True}

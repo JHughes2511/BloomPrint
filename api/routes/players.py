@@ -53,6 +53,20 @@ def get_player(
     return _with_grade(player)
 
 
+@router.delete("/{player_id}")
+def delete_player(
+    player_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    player = db.get(models.Player, player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found")
+    db.delete(player)
+    db.commit()
+    return {"ok": True}
+
+
 @router.get("/{player_id}/evaluations", response_model=list[schemas.EvalOut])
 def player_evaluations(
     player_id: int,
