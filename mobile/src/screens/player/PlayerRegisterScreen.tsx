@@ -1,0 +1,266 @@
+import React, { useState } from 'react';
+import {
+  View, Text, TextInput, TouchableOpacity, ScrollView,
+  StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import { usePlayerAuth } from '../../context/PlayerAuthContext';
+import { playerLinkAPI } from '../../api/playerClient';
+
+export default function PlayerRegisterScreen() {
+  const { register, playerUser } = usePlayerAuth();
+  const navigation = useNavigation<any>();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [registered, setRegistered] = useState(false);
+
+  // Link profile state
+  const [inviteCode, setInviteCode] = useState('');
+  const [searchQ, setSearchQ] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [linkLoading, setLinkLoading] = useState(false);
+  const [inviteLoading, setInviteLoading] = useState(false);
+
+  const submit = async () => {
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+    setLoading(true);
+    try {
+      await register({ name: name.trim(), email: email.trim(), password });
+      setRegistered(true);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const useInvite = async () => {
+    if (!inviteCode.trim()) return;
+    setInviteLoading(true);
+    try {
+      const res = await playerLinkAPI.useInvite(inviteCode.trim());
+      Alert.alert('Linked!', `Your account is now linked to ${res.player_name}'s profile.`);
+      navigation.navigate('PlayerHome');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Invalid invite code');
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
+  const searchPlayers = async () => {
+    if (!searchQ.trim()) return;
+    setLinkLoading(true);
+    try {
+      const results = await playerLinkAPI.searchPlayers(searchQ.trim());
+      setSearchResults(results);
+    } catch {
+      Alert.alert('Error', 'Search failed');
+    } finally {
+      setLinkLoading(false);
+    }
+  };
+
+  const requestLink = async (playerId: number, playerName: string) => {
+    try {
+      await playerLinkAPI.requestLink(playerId);
+      Alert.alert('Request Sent', `A link request has been sent to coaches for ${playerName}'s profile.`);
+      setSearchResults([]);
+      setSearchQ('');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to send request');
+    }
+  };
+
+  if (registered) {
+    return (
+      <ScrollView style={styles.container} contentContainerStyle={{ padding: 24, paddingTop: 60 }}>
+        <Text style={styles.logo}>Welcome!</Text>
+        <Text style={styles.sub}>Link your player profile</Text>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Enter Invite Code</Text>
+          <Text style={styles.sectionDesc}>If a coach gave you an invite code, enter it here.</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Invite code (e.g. ABC12345)"
+            placeholderTextColor="#4b7a4b"
+            value={inviteCode}
+            onChangeText={setInviteCode}
+            autoCapitalize="characters"
+          />
+          <TouchableOpacity style={styles.btn} onPress={useInvite} disabled={inviteLoading}>
+            {inviteLoading
+              ? <ActivityIndicator color="#fff" />
+              : <Text style={styles.btnText}>Use Invite Code</Text>}
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Find My Profile</Text>
+          <Text style={styles.sectionDesc}>Search for your name in the roster and request to link.</Text>
+          <View style={styles.searchRow}>
+            <TextInput
+              style={[styles.input, { flex: 1 }]}
+              placeholder="Search your name..."
+              placeholderTextColor="#4b7a4b"
+              value={searchQ}
+              onChangeText={setSearchQ}
+            />
+            <TouchableOpacity style={styles.searchBtn} onPress={searchPlayers} disabled={linkLoading}>
+              {linkLoading
+                ? <ActivityIndicator color="#fff" size="small" />
+                : <Ionicons name="search" size={18} color="#fff" />}
+            </TouchableOpacity>
+          </View>
+          {searchResults.map((p: any) => (
+            <View key={p.id} style={styles.resultCard}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.resultName}>{p.name}</Text>
+                <Text style={styles.resultSub}>{p.position ?? '—'} · {p.team_name ?? '—'}</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.requestBtn}
+                onPress={() => requestLink(p.id, p.name)}
+              >
+                <Text style={styles.requestBtnText}>Request Link</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+
+        <TouchableOpacity style={styles.skipBtn} onPress={() => navigation.navigate('PlayerHome')}>
+          <Text style={styles.skipText}>Skip for now →</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1, backgroundColor: '#0f1a0f' }}
+    >
+      <ScrollView
+        contentContainerStyle={styles.formContainer}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.logo}>BloomPrint</Text>
+        <Text style={styles.sub}>Create Player Account</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Full Name"
+          placeholderTextColor="#4b7a4b"
+          value={name}
+          onChangeText={setName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#4b7a4b"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#4b7a4b"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+
+        <TouchableOpacity style={styles.btn} onPress={submit} disabled={loading}>
+          {loading
+            ? <ActivityIndicator color="#fff" />
+            : <Text style={styles.btnText}>Create Account</Text>}
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('PlayerLogin')}>
+          <Text style={styles.toggle}>Already have an account? Sign In</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#0f1a0f' },
+  formContainer: {
+    flexGrow: 1,
+    backgroundColor: '#0f1a0f',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  logo: { fontSize: 32, fontWeight: '900', color: '#fff', letterSpacing: 1, marginBottom: 4 },
+  sub: { fontSize: 13, color: '#16a34a', marginBottom: 32, fontWeight: '600' },
+  input: {
+    width: '100%',
+    backgroundColor: '#1a2e1a',
+    borderRadius: 10,
+    padding: 14,
+    color: '#fff',
+    fontSize: 15,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#2d4a2d',
+  },
+  btn: {
+    width: '100%',
+    backgroundColor: '#16a34a',
+    borderRadius: 10,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  btnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  toggle: { color: '#16a34a', marginTop: 20, fontSize: 13 },
+  section: { marginBottom: 24 },
+  sectionTitle: { color: '#fff', fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  sectionDesc: { color: '#4b7a4b', fontSize: 12, marginBottom: 12 },
+  divider: { height: 1, backgroundColor: '#1a2e1a', marginVertical: 24 },
+  searchRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
+  searchBtn: {
+    backgroundColor: '#16a34a',
+    borderRadius: 10,
+    padding: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resultCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1a2e1a',
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#2d4a2d',
+  },
+  resultName: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  resultSub: { color: '#4b7a4b', fontSize: 12, marginTop: 2 },
+  requestBtn: {
+    backgroundColor: '#16a34a22',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: '#16a34a',
+  },
+  requestBtnText: { color: '#16a34a', fontSize: 12, fontWeight: '600' },
+  skipBtn: { alignItems: 'center', marginTop: 8, marginBottom: 40 },
+  skipText: { color: '#4b7a4b', fontSize: 13 },
+});

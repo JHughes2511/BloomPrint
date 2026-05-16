@@ -9,7 +9,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import Markdown from 'react-native-markdown-display';
-import { evalsAPI, playersAPI } from '../api/client';
+import { evalsAPI, playersAPI, playerAPI } from '../api/client';
 import { Evaluation, Correction, Player } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
@@ -60,6 +60,19 @@ export default function EvalReportScreen() {
   });
   const [exporting, setExporting] = useState(false);
 
+  // Share with player modal
+  const [showShare, setShowShare] = useState(false);
+  const [shareSearch, setShareSearch] = useState('');
+  const [shareResults, setShareResults] = useState<any[]>([]);
+  const [selectedPlayerUser, setSelectedPlayerUser] = useState<any | null>(null);
+  const [shareMessage, setShareMessage] = useState('');
+  const [shareCats, setShareCats] = useState({
+    share_report_text: true, share_grades: false,
+    share_flags: false, share_questions: false,
+  });
+  const [sharing, setSharing] = useState(false);
+  const [shareSearchLoading, setShareSearchLoading] = useState(false);
+
   useEffect(() => {
     Promise.all([evalsAPI.get(evalId), evalsAPI.corrections(evalId)])
       .then(async ([e, c]) => {
@@ -69,6 +82,41 @@ export default function EvalReportScreen() {
       })
       .finally(() => setLoading(false));
   }, [evalId]);
+
+  const searchPlayerUsers = async () => {
+    if (!shareSearch.trim()) return;
+    setShareSearchLoading(true);
+    try {
+      const results = await playerAPI.searchPlayerUsers(shareSearch.trim());
+      setShareResults(results);
+    } catch {}
+    setShareSearchLoading(false);
+  };
+
+  const submitShare = async () => {
+    if (!selectedPlayerUser) return;
+    setSharing(true);
+    try {
+      await playerAPI.share(evalId, {
+        player_user_id: selectedPlayerUser.id,
+        share_report_text: shareCats.share_report_text,
+        share_grades: shareCats.share_grades,
+        share_flags: shareCats.share_flags,
+        share_questions: shareCats.share_questions,
+        message: shareMessage.trim() || null,
+      });
+      Alert.alert('Shared!', `Report shared with ${selectedPlayerUser.name}.`);
+      setShowShare(false);
+      setSelectedPlayerUser(null);
+      setShareSearch('');
+      setShareResults([]);
+      setShareMessage('');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share report');
+    } finally {
+      setSharing(false);
+    }
+  };
 
   const buildFileName = () => {
     if (!ev) return 'Evaluation Report';
@@ -99,7 +147,7 @@ export default function EvalReportScreen() {
     }
   };
 
-  const buildHtml = () => {
+  const buildHtml = (cats: Record<string, boolean>) => {
     if (!ev) return '<html><body><p>No data</p></body></html>';
     const date = new Date(ev.created_at).toLocaleDateString();
     const type = ev.output_type.replace(/_/g, ' ').toUpperCase();
@@ -107,9 +155,9 @@ export default function EvalReportScreen() {
       s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     let body = `<h1>BloomPrint &mdash; ${type}</h1>
-      <p style="color:#555;margin-top:0">${ev.competition_level ?? ''} &bull; ${date} &bull; Coach weight ${ev.coach_weight}</p>`;
+      <p style="color:#555;margin-top:0">${sanitize(ev.competition_level ?? '')} &bull; ${date} &bull; Coach weight ${ev.coach_weight ?? ''}</p>`;
 
-    if (exportCats.grades && ev.overall_grade != null) {
+    if (cats.grades && ev.overall_grade != null) {
       body += `<h3>Overall Grade</h3><div class="grade">${ev.overall_grade.toFixed(1)} / 10</div>`;
       if (ev.pillar_grades) {
         body += `<h3>Pillar Grades</h3>`;
@@ -125,7 +173,7 @@ export default function EvalReportScreen() {
       }
     }
 
-    if (exportCats.flags) {
+    if (cats.flags) {
       if (ev.green_flags?.length) {
         body += `<h3>Green Flags</h3>`;
         ev.green_flags.forEach(f => { body += `<p style="color:#16a34a;margin:3px 0">&#10003; ${sanitize(f)}</p>`; });
@@ -136,17 +184,17 @@ export default function EvalReportScreen() {
       }
     }
 
-    if (exportCats.questions && ev.key_questions?.length) {
+    if (cats.questions && ev.key_questions?.length) {
       body += `<h3>Key Questions</h3><ol>`;
       ev.key_questions.forEach(q => { body += `<li style="font-size:13px;margin:4px 0">${sanitize(q)}</li>`; });
       body += `</ol>`;
     }
 
-    if (exportCats.report && ev.report_text) {
+    if (cats.report && ev.report_text) {
       body += `<h3>Full Report</h3><div style="margin-top:8px">${mdToHtml(ev.report_text)}</div>`;
     }
 
-    if (exportCats.corrections && corrections.length) {
+    if (cats.corrections && corrections.length) {
       body += `<h3>Coach Corrections</h3>`;
       corrections.forEach(c => {
         const pillarLabel = c.pillar ? `<strong>${c.pillar.replace(/_/g, ' ').toUpperCase()}</strong><br/>` : '';
@@ -154,12 +202,18 @@ export default function EvalReportScreen() {
       });
     }
 
-    return `<html><head><meta charset="utf-8"/><style>
-      body { font-family: -apple-system, Helvetica, sans-serif; padding: 32px; color: #111; }
+    // Ensure body has content
+    if (!body.includes('<h3>') && !body.includes('<div class="grade">')) {
+      body += `<p style="color:#555">No sections selected for export.</p>`;
+    }
+
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"/><style>
+      body { font-family: -apple-system, Helvetica, Arial, sans-serif; padding: 32px; color: #111; }
       h1 { font-size: 22px; margin-bottom: 4px; }
       h3 { font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-top: 24px; color: #333; }
       .grade { font-size: 48px; font-weight: 900; color: #2563eb; }
       p { margin: 6px 0; }
+      ol { padding-left: 20px; }
     </style></head><body>${body}
       <div style="margin-top:40px;font-size:11px;color:#999;border-top:1px solid #eee;padding-top:12px">
         Generated by BloomPrint Basketball Intelligence Model
@@ -170,7 +224,7 @@ export default function EvalReportScreen() {
   const exportReport = async () => {
     setExporting(true);
     try {
-      const html = buildHtml();
+      const html = buildHtml(exportCats);
       const { uri } = await Print.printToFileAsync({ html });
       const dest = FileSystem.cacheDirectory + safeFileName(buildFileName()) + '.pdf';
       await FileSystem.copyAsync({ from: uri, to: dest });
@@ -183,11 +237,13 @@ export default function EvalReportScreen() {
     }
   };
 
-  const printReport = async () => {
+  const printPdf = async () => {
     try {
-      await Print.printAsync({ html: buildHtml() });
+      await Print.printAsync({ html: buildHtml(exportCats) });
     } catch (e: any) {
       Alert.alert('Print Error', e?.message ?? 'Could not print report');
+    } finally {
+      setShowExport(false);
     }
   };
 
@@ -286,9 +342,13 @@ export default function EvalReportScreen() {
           <Ionicons name="share-outline" size={18} color="#9ca3af" />
           <Text style={styles.actionText}>Export</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={printReport}>
+        <TouchableOpacity style={styles.actionBtn} onPress={() => setShowExport(true)}>
           <Ionicons name="print-outline" size={18} color="#9ca3af" />
           <Text style={styles.actionText}>Print</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.actionBtn, { borderColor: '#16a34a' }]} onPress={() => setShowShare(true)}>
+          <Ionicons name="person-add-outline" size={18} color="#16a34a" />
+          <Text style={[styles.actionText, { color: '#16a34a' }]}>Player</Text>
         </TouchableOpacity>
       </View>
 
@@ -313,6 +373,9 @@ export default function EvalReportScreen() {
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowExport(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
+              <TouchableOpacity style={[styles.saveBtn, { backgroundColor: '#374151' }]} onPress={printPdf} disabled={exporting}>
+                <Text style={styles.saveText}>Print</Text>
+              </TouchableOpacity>
               <TouchableOpacity style={styles.saveBtn} onPress={exportReport} disabled={exporting}>
                 {exporting
                   ? <ActivityIndicator color="#fff" />
@@ -321,6 +384,99 @@ export default function EvalReportScreen() {
             </View>
           </View>
         </View>
+      </Modal>
+
+      {/* Share with Player modal */}
+      <Modal visible={showShare} transparent animationType="slide">
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>Share with Player</Text>
+            <Text style={styles.modalSub}>Search for a player account and share this report.</Text>
+
+            {selectedPlayerUser ? (
+              <View style={{ marginBottom: 12 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#16a34a22', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: '#16a34a' }}>
+                  <View>
+                    <Text style={{ color: '#fff', fontWeight: '700' }}>{selectedPlayerUser.name}</Text>
+                    {selectedPlayerUser.linked_player && <Text style={{ color: '#16a34a', fontSize: 11 }}>→ {selectedPlayerUser.linked_player}</Text>}
+                  </View>
+                  <TouchableOpacity onPress={() => setSelectedPlayerUser(null)}>
+                    <Ionicons name="close-circle" size={20} color="#9ca3af" />
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.label}>Include in Share</Text>
+                {[
+                  { key: 'share_report_text', label: 'Full Report' },
+                  { key: 'share_grades', label: 'Grades' },
+                  { key: 'share_flags', label: 'Flags' },
+                  { key: 'share_questions', label: 'Key Questions' },
+                ].map(cat => (
+                  <View key={cat.key} style={styles.toggleRow}>
+                    <Text style={styles.toggleLabel}>{cat.label}</Text>
+                    <Switch
+                      value={shareCats[cat.key as keyof typeof shareCats]}
+                      onValueChange={v => setShareCats(prev => ({ ...prev, [cat.key]: v }))}
+                      trackColor={{ true: '#16a34a' }}
+                      thumbColor="#fff"
+                    />
+                  </View>
+                ))}
+                <Text style={styles.label}>Message (optional)</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Add a message to the player..."
+                  placeholderTextColor="#4b5563"
+                  value={shareMessage}
+                  onChangeText={setShareMessage}
+                  multiline
+                />
+              </View>
+            ) : (
+              <View style={{ marginBottom: 12 }}>
+                <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
+                  <TextInput
+                    style={[styles.input, { flex: 1, marginBottom: 0 }]}
+                    placeholder="Search player name..."
+                    placeholderTextColor="#4b5563"
+                    value={shareSearch}
+                    onChangeText={setShareSearch}
+                  />
+                  <TouchableOpacity
+                    style={{ backgroundColor: '#2563eb', borderRadius: 10, padding: 14, alignItems: 'center', justifyContent: 'center' }}
+                    onPress={searchPlayerUsers}
+                    disabled={shareSearchLoading}
+                  >
+                    {shareSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+                  </TouchableOpacity>
+                </View>
+                {shareResults.map((pu: any) => (
+                  <TouchableOpacity
+                    key={pu.id}
+                    style={{ backgroundColor: '#1f2937', borderRadius: 10, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: '#374151' }}
+                    onPress={() => { setSelectedPlayerUser(pu); setShareResults([]); }}
+                  >
+                    <Text style={{ color: '#fff', fontWeight: '600' }}>{pu.name}</Text>
+                    <Text style={{ color: '#6b7280', fontSize: 11 }}>{pu.email}{pu.linked_player ? ` · ${pu.linked_player}` : ''}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            <View style={styles.modalRow}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => { setShowShare(false); setSelectedPlayerUser(null); setShareResults([]); }}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+              {selectedPlayerUser && (
+                <TouchableOpacity style={[styles.saveBtn, { backgroundColor: '#16a34a' }]} onPress={submitShare} disabled={sharing}>
+                  {sharing ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Share</Text>}
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Correction modal */}

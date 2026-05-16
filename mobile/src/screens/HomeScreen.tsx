@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
+import { playerAPI } from '../api/client';
 
 const REPORT_TYPES = [
   { key: 'player_eval', label: 'Player Eval', icon: 'person', desc: 'Individual BIM evaluation scored across all 6 pillars' },
@@ -26,6 +28,14 @@ const PILLARS = [
 
 export default function HomeScreen() {
   const { coach, logout } = useAuth();
+  const navigation = useNavigation<any>();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useFocusEffect(useCallback(() => {
+    playerAPI.coachNotifications().then((notifs: any[]) => {
+      setUnreadCount(notifs.filter((n: any) => !n.read).length);
+    }).catch(() => {});
+  }, []));
 
   const handleSignOut = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
@@ -43,10 +53,23 @@ export default function HomeScreen() {
             <Text style={styles.logo}>BloomPrint</Text>
             <Text style={styles.sub}>Basketball Intelligence Model</Text>
           </View>
-          <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
-            <Ionicons name="log-out-outline" size={18} color="#6b7280" />
-            <Text style={styles.signOutText}>Sign Out</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <TouchableOpacity
+              style={[styles.signOutBtn, { position: 'relative' }]}
+              onPress={() => navigation.navigate('CoachNotifications')}
+            >
+              <Ionicons name="notifications-outline" size={18} color="#9ca3af" />
+              {unreadCount > 0 && (
+                <View style={styles.notifBadge}>
+                  <Text style={styles.notifBadgeText}>{unreadCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
+              <Ionicons name="log-out-outline" size={18} color="#6b7280" />
+              <Text style={styles.signOutText}>Sign Out</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         {coach && (
           <View style={styles.coachBadge}>
@@ -99,6 +122,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 8, marginTop: 6,
   },
   signOutText: { color: '#6b7280', fontSize: 12, fontWeight: '600' },
+  notifBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: '#dc2626',
+    borderRadius: 7,
+    minWidth: 14,
+    height: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 2,
+  },
+  notifBadgeText: { color: '#fff', fontSize: 8, fontWeight: '800' },
   coachBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10 },
   coachText: { color: '#6b7280', fontSize: 12 },
   sectionLabel: {

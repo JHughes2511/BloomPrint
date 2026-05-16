@@ -1,0 +1,53 @@
+import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
+
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000';
+export const playerApi = axios.create({ baseURL: BASE_URL });
+
+playerApi.interceptors.request.use(async (config) => {
+  const token = await SecureStore.getItemAsync('player_auth_token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+export const playerAuthAPI = {
+  register: (data: { name: string; email: string; password: string }) =>
+    playerApi.post('/player-auth/register', data).then(r => r.data),
+  login: (email: string, password: string) =>
+    playerApi.post('/player-auth/login', { email, password }).then(r => r.data),
+  me: () => playerApi.get('/player-auth/me').then(r => r.data),
+};
+
+export const playerReportsAPI = {
+  list: () => playerApi.get('/player/shared-reports').then(r => r.data),
+  get: (id: number) => playerApi.get(`/player/shared-reports/${id}`).then(r => r.data),
+  addComment: (id: number, text: string) =>
+    playerApi.post(`/player/shared-reports/${id}/comments`, { text }).then(r => r.data),
+  getComments: (id: number) =>
+    playerApi.get(`/player/shared-reports/${id}/comments`).then(r => r.data),
+};
+
+export const playerTrainingAPI = {
+  generate: (sharedReportId: number) =>
+    playerApi.post(`/player/training/generate/${sharedReportId}`).then(r => r.data),
+  list: () => playerApi.get('/player/training').then(r => r.data),
+  getComments: (id: number) =>
+    playerApi.get(`/player/training/${id}/comments`).then(r => r.data),
+  addComment: (id: number, text: string) =>
+    playerApi.post(`/player/training/${id}/comments`, { text }).then(r => r.data),
+};
+
+export const playerNotificationsAPI = {
+  list: () => playerApi.get('/player/notifications').then(r => r.data),
+  markRead: (id: number) =>
+    playerApi.post(`/player/notifications/${id}/read`).then(r => r.data),
+};
+
+export const playerLinkAPI = {
+  useInvite: (code: string) =>
+    playerApi.post('/player/use-invite', { code }).then(r => r.data),
+  searchPlayers: (q: string) =>
+    playerApi.get('/player/search-players', { params: { q } }).then(r => r.data),
+  requestLink: (playerId: number) =>
+    playerApi.post(`/player/link-request/${playerId}`).then(r => r.data),
+};

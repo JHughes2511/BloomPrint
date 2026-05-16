@@ -175,3 +175,125 @@ class SummaryOut(BaseModel):
 class TeamReportRequest(BaseModel):
     output_type: str = "coaching_report"
     focus_prompt: str | None = None
+
+
+# ── Player auth ───────────────────────────────────────────────────────────────
+
+class PlayerUserCreate(BaseModel):
+    name: str
+    email: str
+    password: str
+
+
+class PlayerUserOut(BaseModel):
+    id: int
+    name: str
+    email: str
+    player_id: int | None
+    created_at: datetime
+    model_config = {"from_attributes": True}
+
+
+class PlayerToken(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    player_user: PlayerUserOut
+
+
+# ── Invite ────────────────────────────────────────────────────────────────────
+
+class InviteCodeOut(BaseModel):
+    code: str
+    player_name: str
+
+
+# ── Link request ──────────────────────────────────────────────────────────────
+
+class LinkRequestOut(BaseModel):
+    id: int
+    player_user_id: int
+    player_id: int
+    status: str
+    player_user_name: str = ""
+    player_name: str = ""
+    created_at: datetime
+    model_config = {"from_attributes": True}
+
+
+# ── Shared report ─────────────────────────────────────────────────────────────
+
+class ShareReportRequest(BaseModel):
+    player_user_id: int
+    share_report_text: bool = True
+    share_grades: bool = False
+    share_flags: bool = False
+    share_questions: bool = False
+    message: str | None = None
+
+
+class SharedReportOut(BaseModel):
+    id: int
+    evaluation_id: int
+    player_user_id: int
+    shared_by_id: int
+    share_report_text: bool
+    share_grades: bool
+    share_flags: bool
+    share_questions: bool
+    message: str | None
+    created_at: datetime
+    output_type: str = ""
+    report_text: str | None = None
+    overall_grade: float | None = None
+    pillar_grades: dict | None = None
+    green_flags: list[str] | None = None
+    watch_flags: list[str] | None = None
+    key_questions: list[str] | None = None
+    shared_by_name: str = ""
+    model_config = {"from_attributes": True}
+
+
+# ── Player training ───────────────────────────────────────────────────────────
+
+class PlayerTrainingOut(BaseModel):
+    id: int
+    player_user_id: int
+    shared_report_id: int
+    program_text: str | None
+    coach_notes: str | None
+    created_at: datetime
+    updated_at: datetime
+    model_config = {"from_attributes": True}
+
+
+class PlayerTrainingUpdate(BaseModel):
+    coach_notes: str
+
+
+# ── Comments ──────────────────────────────────────────────────────────────────
+
+class PlayerCommentCreate(BaseModel):
+    text: str
+
+
+class PlayerCommentOut(BaseModel):
+    id: int
+    player_user_id: int | None
+    coach_id: int | None
+    text: str
+    created_at: datetime
+    author_name: str = ""
+    model_config = {"from_attributes": True}
+
+
+# ── Notifications ─────────────────────────────────────────────────────────────
+
+class NotificationOut(BaseModel):
+    id: int
+    type: str
+    title: str
+    body: str
+    read: bool
+    ref_id: int | None
+    created_at: datetime
+    model_config = {"from_attributes": True}

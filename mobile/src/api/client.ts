@@ -90,3 +90,40 @@ export const trainingAPI = {
   forPlayer: (playerId: number) =>
     api.get(`/training/player/${playerId}`).then(r => r.data),
 };
+
+// ── Player (coach-side) ────────────────────────────────────────────────────────
+export interface ShareReportRequest {
+  player_user_id: number;
+  share_report_text?: boolean;
+  share_grades?: boolean;
+  share_flags?: boolean;
+  share_questions?: boolean;
+  message?: string | null;
+}
+
+export const playerAPI = {
+  searchPlayerUsers: (q: string) =>
+    api.get('/player/search-player-users', { params: { q } }).then(r => r.data),
+  share: (evalId: number, data: ShareReportRequest) =>
+    api.post(`/player/share/${evalId}`, data).then(r => r.data),
+  sentReports: () =>
+    api.get('/player/shared-reports/sent').then(r => r.data),
+  generateInvite: (playerId: number) =>
+    api.post(`/player/invite/${playerId}`).then(r => r.data),
+  coachNotifications: () =>
+    api.get('/player/coach-notifications').then(r => r.data),
+  coachMarkRead: (id: number) =>
+    api.post(`/player/coach-notifications/${id}/read`).then(r => r.data),
+  linkRequests: () =>
+    api.get('/player/link-requests').then(r => r.data),
+  approveLink: (id: number) =>
+    api.post(`/player/link-request/${id}/approve`).then(r => r.data),
+  rejectLink: (id: number) =>
+    api.post(`/player/link-request/${id}/reject`).then(r => r.data),
+  coachTrainingView: () =>
+    api.get('/player/training/coach-view').then(r => r.data),
+  updateTraining: (id: number, data: { coach_notes: string }) =>
+    api.patch(`/player/training/${id}`, data).then(r => r.data),
+  addCoachComment: (trainingId: number, data: { text: string }) =>
+    api.post(`/player/training/${trainingId}/coach-comment`, data).then(r => r.data),
+};

@@ -7,6 +7,9 @@ import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, View } from 'react-native';
 
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { PlayerAuthProvider, usePlayerAuth } from './src/context/PlayerAuthContext';
+
+// Coach screens
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import RosterScreen from './src/screens/RosterScreen';
@@ -18,16 +21,33 @@ import TeamReportScreen from './src/screens/TeamReportScreen';
 import RecentScreen from './src/screens/RecentScreen';
 import SummaryScreen from './src/screens/SummaryScreen';
 import ImportScreen from './src/screens/ImportScreen';
+import CoachNotificationsScreen from './src/screens/CoachNotificationsScreen';
+
+// Role select
+import RoleSelectScreen from './src/screens/RoleSelectScreen';
+
+// Player screens
+import PlayerLoginScreen from './src/screens/player/PlayerLoginScreen';
+import PlayerRegisterScreen from './src/screens/player/PlayerRegisterScreen';
+import PlayerHomeScreen from './src/screens/player/PlayerHomeScreen';
+import PlayerInboxScreen from './src/screens/player/PlayerInboxScreen';
+import PlayerReportDetailScreen from './src/screens/player/PlayerReportDetailScreen';
+import PlayerTrainingScreen from './src/screens/player/PlayerTrainingScreen';
+import PlayerTrainingDetailScreen from './src/screens/player/PlayerTrainingDetailScreen';
+import PlayerNotificationsScreen from './src/screens/player/PlayerNotificationsScreen';
+import PlayerLinkScreen from './src/screens/player/PlayerLinkScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const SCREEN_OPTIONS = { headerShown: false, contentStyle: { backgroundColor: '#0a0a0a' } };
+const PLAYER_SCREEN_OPTIONS = { headerShown: false, contentStyle: { backgroundColor: '#0f1a0f' } };
 
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
       <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="CoachNotifications" component={CoachNotificationsScreen} />
     </Stack.Navigator>
   );
 }
@@ -93,10 +113,83 @@ function AppTabs() {
   );
 }
 
-function Root() {
-  const { coach, loading } = useAuth();
+// ── Player navigation ──────────────────────────────────────────────────────────
 
-  if (loading) {
+function PlayerHomeStack() {
+  return (
+    <Stack.Navigator screenOptions={PLAYER_SCREEN_OPTIONS}>
+      <Stack.Screen name="PlayerHome" component={PlayerHomeScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function PlayerInboxStack() {
+  return (
+    <Stack.Navigator screenOptions={PLAYER_SCREEN_OPTIONS}>
+      <Stack.Screen name="PlayerInbox" component={PlayerInboxScreen} />
+      <Stack.Screen name="PlayerReportDetail" component={PlayerReportDetailScreen} />
+      <Stack.Screen name="PlayerTraining" component={PlayerTrainingScreen} />
+      <Stack.Screen name="PlayerTrainingDetail" component={PlayerTrainingDetailScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function PlayerTrainingStack() {
+  return (
+    <Stack.Navigator screenOptions={PLAYER_SCREEN_OPTIONS}>
+      <Stack.Screen name="PlayerTraining" component={PlayerTrainingScreen} />
+      <Stack.Screen name="PlayerTrainingDetail" component={PlayerTrainingDetailScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function PlayerNotifStack() {
+  return (
+    <Stack.Navigator screenOptions={PLAYER_SCREEN_OPTIONS}>
+      <Stack.Screen name="PlayerNotifications" component={PlayerNotificationsScreen} />
+      <Stack.Screen name="PlayerReportDetail" component={PlayerReportDetailScreen} />
+      <Stack.Screen name="PlayerTrainingDetail" component={PlayerTrainingDetailScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function PlayerTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarStyle: { backgroundColor: '#1a2e1a', borderTopColor: '#2d4a2d' },
+        tabBarActiveTintColor: '#16a34a',
+        tabBarInactiveTintColor: '#4b7a4b',
+        tabBarIcon: ({ focused, color, size }) => {
+          const icons: Record<string, [string, string]> = {
+            PlayerHomeTab:    ['home',          'home-outline'],
+            InboxTab:         ['mail',          'mail-outline'],
+            TrainingTab:      ['barbell',       'barbell-outline'],
+            PlayerNotifsTab:  ['notifications', 'notifications-outline'],
+            ProfileTab:       ['person',        'person-outline'],
+          };
+          const [active, inactive] = icons[route.name] ?? ['grid', 'grid-outline'];
+          return <Ionicons name={(focused ? active : inactive) as any} size={size} color={color} />;
+        },
+      })}
+    >
+      <Tab.Screen name="PlayerHomeTab"   component={PlayerHomeStack}      options={{ title: 'Home' }} />
+      <Tab.Screen name="InboxTab"        component={PlayerInboxStack}     options={{ title: 'Reports' }} />
+      <Tab.Screen name="TrainingTab"     component={PlayerTrainingStack}  options={{ title: 'Training' }} />
+      <Tab.Screen name="PlayerNotifsTab" component={PlayerNotifStack}     options={{ title: 'Alerts' }} />
+      <Tab.Screen name="ProfileTab"      component={PlayerLinkScreen}     options={{ title: 'Profile' }} />
+    </Tab.Navigator>
+  );
+}
+
+// ── Root ───────────────────────────────────────────────────────────────────────
+
+function Root() {
+  const { coach, loading: coachLoading } = useAuth();
+  const { playerUser, loading: playerLoading } = usePlayerAuth();
+
+  if (coachLoading || playerLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: '#0a0a0a', alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator color="#2563eb" size="large" />
@@ -104,15 +197,33 @@ function Root() {
     );
   }
 
+  if (coach) {
+    return (
+      <NavigationContainer>
+        <StatusBar style="light" />
+        <AppTabs />
+      </NavigationContainer>
+    );
+  }
+
+  if (playerUser) {
+    return (
+      <NavigationContainer>
+        <StatusBar style="light" />
+        <PlayerTabs />
+      </NavigationContainer>
+    );
+  }
+
   return (
     <NavigationContainer>
       <StatusBar style="light" />
-      {coach
-        ? <AppTabs />
-        : <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Login" component={LoginScreen} />
-          </Stack.Navigator>
-      }
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="RoleSelect"      component={RoleSelectScreen} />
+        <Stack.Screen name="CoachLogin"      component={LoginScreen} />
+        <Stack.Screen name="PlayerLogin"     component={PlayerLoginScreen} />
+        <Stack.Screen name="PlayerRegister"  component={PlayerRegisterScreen} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
@@ -120,7 +231,9 @@ function Root() {
 export default function App() {
   return (
     <AuthProvider>
-      <Root />
+      <PlayerAuthProvider>
+        <Root />
+      </PlayerAuthProvider>
     </AuthProvider>
   );
 }
