@@ -10,6 +10,7 @@ interface PlayerAuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (data: { name: string; email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const PlayerAuthContext = createContext<PlayerAuthState | null>(null);
@@ -55,8 +56,15 @@ export function PlayerAuthProvider({ children }: { children: React.ReactNode }) 
     setPlayerUser(null);
   };
 
+  const refreshUser = async () => {
+    try {
+      const me = await playerAuthAPI.me();
+      setPlayerUser(me);
+    } catch {}
+  };
+
   return (
-    <PlayerAuthContext.Provider value={{ playerUser, playerToken, loading, login, register, logout }}>
+    <PlayerAuthContext.Provider value={{ playerUser, playerToken, loading, login, register, logout, refreshUser }}>
       {children}
     </PlayerAuthContext.Provider>
   );

@@ -81,4 +81,9 @@ def login(body: schemas.CoachLogin, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=schemas.PlayerUserOut)
 def me(pu: models.PlayerUser = Depends(get_current_player_user)):
-    return pu
+    out = schemas.PlayerUserOut.model_validate(pu)
+    if pu.player:
+        out.linked_player_name = pu.player.name
+        out.linked_team_name = pu.player.team.name if pu.player.team else None
+        out.linked_program_name = pu.player.program_name
+    return out

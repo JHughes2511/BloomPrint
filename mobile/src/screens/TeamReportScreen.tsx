@@ -96,8 +96,13 @@ export default function TeamReportScreen() {
     if (!shareSearch.trim()) return;
     setShareSearchLoading(true);
     try {
-      const results = await playerAPI.searchPlayerUsers(shareSearch.trim());
-      setShareResults(results);
+      if (shareTarget === 'all_staff') {
+        const results = await playerAPI.searchStaff(shareSearch.trim());
+        setShareResults(results);
+      } else {
+        const results = await playerAPI.searchPlayerUsers(shareSearch.trim());
+        setShareResults(results);
+      }
     } catch {}
     setShareSearchLoading(false);
   };
@@ -116,6 +121,8 @@ export default function TeamReportScreen() {
         data.player_user_id = selectedShareTarget.id;
       } else if (shareTarget === 'team' && selectedShareTarget) {
         data.team_id = selectedShareTarget.id;
+      } else if (shareTarget === 'all_staff' && selectedShareTarget) {
+        data.staff_coach_id = selectedShareTarget.id;
       }
       const result = await playerAPI.shareTeamReport(data);
       Alert.alert('Shared!', `Report shared with ${result.shared_count ?? 1} recipient(s).`);
@@ -225,6 +232,10 @@ export default function TeamReportScreen() {
                 <Ionicons name="person-add-outline" size={18} color="#16a34a" />
                 <Text style={[styles.actionText, { color: '#16a34a' }]}>Share</Text>
               </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionBtn, { borderColor: '#374151' }]} onPress={() => { setReportText(null); setFocusPrompt(''); }}>
+                <Ionicons name="add-circle-outline" size={18} color="#9ca3af" />
+                <Text style={styles.actionText}>New Report</Text>
+              </TouchableOpacity>
             </View>
           </View>
         )}
@@ -302,8 +313,31 @@ export default function TeamReportScreen() {
               </View>
             )}
 
-            {shareTarget === 'all_staff' && (
-              <Text style={shareStyles.staffNote}>All coaches, scouts, and trainers will receive a notification with this report.</Text>
+            {shareTarget === 'all_staff' && !selectedShareTarget && (
+              <View style={{ marginBottom: 12 }}>
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+                  <TextInput
+                    style={[shareStyles.input, { flex: 1 }]}
+                    placeholder="Search coach/program name..."
+                    placeholderTextColor="#4b5563"
+                    value={shareSearch}
+                    onChangeText={setShareSearch}
+                  />
+                  <TouchableOpacity
+                    style={{ backgroundColor: '#2563eb', borderRadius: 10, padding: 12, justifyContent: 'center' }}
+                    onPress={searchPlayers}
+                  >
+                    {shareSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+                  </TouchableOpacity>
+                </View>
+                {shareResults.map((r: any) => (
+                  <TouchableOpacity key={r.id} style={shareStyles.resultRow} onPress={() => { setSelectedShareTarget(r); setShareResults([]); }}>
+                    <Text style={shareStyles.resultName}>{r.name}</Text>
+                    <Text style={shareStyles.resultMeta}>{r.role} · {r.program_name}</Text>
+                  </TouchableOpacity>
+                ))}
+                <Text style={{ color: '#4b5563', fontSize: 11, marginTop: 4 }}>Search to find a specific staff member, or leave empty to notify all staff.</Text>
+              </View>
             )}
 
             <TextInput

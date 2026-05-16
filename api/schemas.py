@@ -192,6 +192,9 @@ class PlayerUserOut(BaseModel):
     name: str
     email: str
     player_id: int | None
+    linked_player_name: str | None = None
+    linked_team_name: str | None = None
+    linked_program_name: str | None = None
     created_at: datetime
     model_config = {"from_attributes": True}
 
@@ -310,6 +313,7 @@ class TeamShareRequest(BaseModel):
     player_user_id: int | None = None
     team_id: int | None = None
     message: str | None = None
+    staff_coach_id: int | None = None  # for targeting a specific staff member
 
 class TeamSharedReportOut(BaseModel):
     id: int
@@ -320,4 +324,16 @@ class TeamSharedReportOut(BaseModel):
     message: str | None
     created_at: datetime
     shared_by_name: str = ""
+    model_config = {"from_attributes": True}
+
+
+# ── Team report ────────────────────────────────────────────────────────────────
+
+class TeamReportOut(BaseModel):
+    id: int
+    coach_id: int
+    output_type: str
+    focus_prompt: str | None
+    report_text: str | None
+    created_at: datetime
     model_config = {"from_attributes": True}

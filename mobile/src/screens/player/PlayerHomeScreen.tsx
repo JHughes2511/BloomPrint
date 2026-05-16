@@ -51,13 +51,24 @@ export default function PlayerHomeScreen() {
           </View>
         </View>
         {playerUser && (
-          <View style={styles.playerBadge}>
-            <Ionicons name="person-circle-outline" size={16} color="#16a34a" />
-            <Text style={styles.playerText}>{playerUser.name}</Text>
-            {playerUser.player_id && (
-              <View style={styles.linkedBadge}>
-                <Ionicons name="checkmark-circle" size={12} color="#16a34a" />
-                <Text style={styles.linkedText}>Profile Linked</Text>
+          <View>
+            <View style={styles.playerBadge}>
+              <Ionicons name="person-circle-outline" size={16} color="#16a34a" />
+              <Text style={styles.playerText}>{playerUser.name}</Text>
+              {playerUser.player_id && (
+                <View style={styles.linkedBadge}>
+                  <Ionicons name="checkmark-circle" size={12} color="#16a34a" />
+                  <Text style={styles.linkedText}>Linked</Text>
+                </View>
+              )}
+            </View>
+            {playerUser.player_id && (playerUser as any).linked_program_name && (
+              <View style={styles.programBadge}>
+                <Ionicons name="shield-checkmark-outline" size={13} color="#4b7a4b" />
+                <Text style={styles.programText}>
+                  {(playerUser as any).linked_player_name} · {(playerUser as any).linked_program_name}
+                  {(playerUser as any).linked_team_name ? ` · ${(playerUser as any).linked_team_name}` : ''}
+                </Text>
               </View>
             )}
           </View>
@@ -146,6 +157,8 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   linkedText: { color: '#16a34a', fontSize: 11, fontWeight: '600' },
+  programBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
+  programText: { color: '#4b7a4b', fontSize: 12 },
   sectionLabel: {
     color: '#9ca3af',
     fontSize: 11,

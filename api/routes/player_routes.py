@@ -656,10 +656,15 @@ def share_team_report(
                 targets.append(p.player_user.id)
 
     elif body.target_type == "all_staff":
-        # Notify all coaches via notification (no player_user involved)
-        coaches = db.query(models.Coach).filter(models.Coach.id != coach.id).all()
-        preview = body.report_text[:200] if body.report_text else ""
-        for c in coaches:
+        if body.staff_coach_id:
+            # Send to specific staff member
+            target_coaches = [db.get(models.Coach, body.staff_coach_id)]
+            target_coaches = [c for c in target_coaches if c and c.id != coach.id]
+        else:
+            target_coaches = db.query(models.Coach).filter(models.Coach.id != coach.id).all()
+
+        preview = body.report_text[:300] if body.report_text else ""
+        for c in target_coaches:
             notif = models.PlayerNotification(
                 coach_id=c.id,
                 type="team_report_shared",
@@ -668,7 +673,7 @@ def share_team_report(
             )
             db.add(notif)
         db.commit()
-        return {"ok": True, "shared_count": len(coaches)}
+        return {"ok": True, "shared_count": len(target_coaches)}
 
     # Create TeamSharedReport for each target player user
     count = 0
@@ -716,6 +721,30 @@ def player_team_shared_reports(
         out.shared_by_name = r.shared_by.name if r.shared_by else ""
         result.append(out)
     return result
+
+
+# ── Staff search (coach-side) ────────────────────────────────────────────────
+
+@router.get("/staff/search")
+def search_staff(
+    q: str = "",
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    results = (
+        db.query(models.Coach)
+        .filter(
+            (models.Coach.name.ilike(f"%{q}%")) |
+            (models.Coach.program_name.ilike(f"%{q}%"))
+        )
+        .filter(models.Coach.id != coach.id)
+        .limit(10)
+        .all()
+    )
+    return [
+        {"id": c.id, "name": c.name, "role": c.role, "program_name": c.program_name}
+        for c in results
+    ]
 
 
 # ── Helper ────────────────────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  ActivityIndicator, RefreshControl, Alert,
+  ActivityIndicator, RefreshControl, Alert, TextInput,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,32 +19,20 @@ export default function CoachNotificationsScreen() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [replyTexts, setReplyTexts] = useState<Record<number, string>>({});
+  const [replying, setReplying] = useState<number | null>(null);
 
   const load = async () => {
     try {
       const data = await playerAPI.coachNotifications();
       setNotifications(data);
-      // Mark all unread as read
-      const unread = data.filter((n: any) => !n.read);
-      await Promise.all(unread.map((n: any) => playerAPI.coachMarkRead(n.id)));
-      if (unread.length > 0) {
-        setNotifications(data.map((n: any) => ({ ...n, read: true })));
-      }
     } catch {}
     setLoading(false);
     setRefreshing(false);
   };
 
   useFocusEffect(useCallback(() => { load(); }, []));
-
-  const markRead = async (notif: AppNotification) => {
-    if (!notif.read) {
-      await playerAPI.coachMarkRead(notif.id);
-      setNotifications(prev =>
-        prev.map(n => n.id === notif.id ? { ...n, read: true } : n)
-      );
-    }
-  };
 
   const approveLink = async (requestId: number, notifId: number) => {
     try {
@@ -53,6 +41,7 @@ export default function CoachNotificationsScreen() {
       setNotifications(prev =>
         prev.map(n => n.id === notifId ? { ...n, read: true } : n)
       );
+      setExpandedId(null);
       Alert.alert('Approved', 'Player profile has been linked.');
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to approve');
@@ -66,6 +55,7 @@ export default function CoachNotificationsScreen() {
       setNotifications(prev =>
         prev.map(n => n.id === notifId ? { ...n, read: true } : n)
       );
+      setExpandedId(null);
       Alert.alert('Rejected', 'Link request rejected.');
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to reject');
@@ -103,40 +93,91 @@ export default function CoachNotificationsScreen() {
           <TouchableOpacity
             key={n.id}
             style={[styles.card, !n.read && styles.cardUnread]}
-            onPress={() => markRead(n)}
+            onPress={() => setExpandedId(prev => prev === n.id ? null : n.id)}
+            activeOpacity={0.8}
           >
-            <View style={styles.iconBg}>
+            <View style={styles.cardMain}>
+              <View style={styles.iconBg}>
+                <Ionicons
+                  name={(NOTIF_ICONS[n.type] ?? 'notifications') as any}
+                  size={18}
+                  color={n.read ? '#6b7280' : '#2563eb'}
+                />
+              </View>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={[styles.notifTitle, !n.read && styles.notifTitleUnread]}>
+                  {n.title}
+                </Text>
+                <Text style={styles.notifBody}>{n.body}</Text>
+                <Text style={styles.notifDate}>{new Date(n.created_at).toLocaleDateString()}</Text>
+              </View>
+              {!n.read && <View style={styles.dot} />}
               <Ionicons
-                name={(NOTIF_ICONS[n.type] ?? 'notifications') as any}
-                size={18}
-                color={n.read ? '#6b7280' : '#2563eb'}
+                name={expandedId === n.id ? 'chevron-up' : 'chevron-down'}
+                size={14}
+                color="#4b5563"
+                style={{ marginLeft: 4 }}
               />
             </View>
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={[styles.notifTitle, !n.read && styles.notifTitleUnread]}>
-                {n.title}
-              </Text>
-              <Text style={styles.notifBody}>{n.body}</Text>
-              <Text style={styles.notifDate}>{new Date(n.created_at).toLocaleDateString()}</Text>
 
-              {n.type === 'link_requested' && n.ref_id && (
-                <View style={styles.actionRow}>
+            {expandedId === n.id && (
+              <View style={styles.expandedContent}>
+                {n.type === 'player_commented' && n.ref_id ? (
+                  <>
+                    <TextInput
+                      style={styles.replyInput}
+                      placeholder="Reply to player..."
+                      placeholderTextColor="#4b5563"
+                      value={replyTexts[n.id] ?? ''}
+                      onChangeText={t => setReplyTexts(prev => ({ ...prev, [n.id]: t }))}
+                      multiline
+                    />
+                    <TouchableOpacity
+                      style={styles.replyBtn}
+                      disabled={replying === n.id || !replyTexts[n.id]?.trim()}
+                      onPress={async () => {
+                        const text = replyTexts[n.id]?.trim();
+                        if (!text) return;
+                        setReplying(n.id);
+                        try {
+                          await playerAPI.coachReplyToReport(n.ref_id!, text);
+                          await playerAPI.coachMarkRead(n.id);
+                          setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
+                          setReplyTexts(prev => ({ ...prev, [n.id]: '' }));
+                          setExpandedId(null);
+                        } catch (e: any) {
+                          Alert.alert('Error', 'Could not send reply');
+                        } finally {
+                          setReplying(null);
+                        }
+                      }}
+                    >
+                      {replying === n.id ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.replyBtnText}>Send Reply</Text>}
+                    </TouchableOpacity>
+                  </>
+                ) : n.type === 'link_requested' && n.ref_id ? (
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity style={styles.approveBtn} onPress={() => approveLink(n.ref_id!, n.id)}>
+                      <Text style={styles.approveBtnText}>Approve</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.rejectBtn} onPress={() => rejectLink(n.ref_id!, n.id)}>
+                      <Text style={styles.rejectBtnText}>Reject</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : !n.read ? (
                   <TouchableOpacity
-                    style={styles.approveBtn}
-                    onPress={() => approveLink(n.ref_id!, n.id)}
+                    style={styles.markReadBtn}
+                    onPress={async () => {
+                      await playerAPI.coachMarkRead(n.id);
+                      setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
+                      setExpandedId(null);
+                    }}
                   >
-                    <Text style={styles.approveBtnText}>Approve</Text>
+                    <Text style={styles.markReadText}>Mark as Read</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.rejectBtn}
-                    onPress={() => rejectLink(n.ref_id!, n.id)}
-                  >
-                    <Text style={styles.rejectBtnText}>Reject</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-            {!n.read && <View style={styles.dot} />}
+                ) : null}
+              </View>
+            )}
           </TouchableOpacity>
         ))
       )}
@@ -152,8 +193,6 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', paddingTop: 80 },
   emptyTitle: { color: '#fff', fontSize: 16, fontWeight: '700', marginTop: 16 },
   card: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
     backgroundColor: '#111827',
     borderRadius: 12,
     padding: 14,
@@ -162,6 +201,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#1f2937',
   },
+  cardMain: { flexDirection: 'row', alignItems: 'flex-start' },
   cardUnread: { borderColor: '#2563eb' },
   iconBg: {
     width: 36,
@@ -175,7 +215,29 @@ const styles = StyleSheet.create({
   notifTitleUnread: { color: '#fff' },
   notifBody: { color: '#6b7280', fontSize: 12, lineHeight: 18 },
   notifDate: { color: '#374151', fontSize: 11, marginTop: 4 },
-  actionRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#2563eb',
+    marginTop: 4,
+    marginLeft: 8,
+  },
+  expandedContent: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#1f2937' },
+  replyInput: {
+    backgroundColor: '#0a0a0a',
+    borderRadius: 8,
+    padding: 10,
+    color: '#fff',
+    fontSize: 13,
+    borderWidth: 1,
+    borderColor: '#374151',
+    marginBottom: 8,
+    minHeight: 60,
+  },
+  replyBtn: { backgroundColor: '#2563eb', borderRadius: 8, padding: 10, alignItems: 'center' },
+  replyBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
+  actionRow: { flexDirection: 'row', gap: 8 },
   approveBtn: {
     backgroundColor: '#16a34a',
     borderRadius: 8,
@@ -192,12 +254,6 @@ const styles = StyleSheet.create({
     borderColor: '#dc2626',
   },
   rejectBtnText: { color: '#dc2626', fontWeight: '700', fontSize: 12 },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#2563eb',
-    marginTop: 4,
-    marginLeft: 8,
-  },
+  markReadBtn: { padding: 8, alignItems: 'center', borderWidth: 1, borderColor: '#374151', borderRadius: 8 },
+  markReadText: { color: '#6b7280', fontSize: 12, fontWeight: '600' },
 });

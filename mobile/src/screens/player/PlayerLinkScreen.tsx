@@ -8,7 +8,7 @@ import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { playerLinkAPI, playerAuthAPI } from '../../api/playerClient';
 
 export default function PlayerLinkScreen() {
-  const { playerUser, logout } = usePlayerAuth();
+  const { playerUser, logout, refreshUser } = usePlayerAuth();
   const [inviteCode, setInviteCode] = useState('');
   const [searchQ, setSearchQ] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -21,6 +21,7 @@ export default function PlayerLinkScreen() {
     try {
       const res = await playerLinkAPI.useInvite(inviteCode.trim());
       Alert.alert('Linked!', `Your account is now linked to ${res.player_name}'s profile.`);
+      await refreshUser();
       setInviteCode('');
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Invalid invite code');

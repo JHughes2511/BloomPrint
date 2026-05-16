@@ -116,6 +116,21 @@ def recent_evaluations(
     return results
 
 
+@router.get("/team-reports/recent", response_model=list[schemas.TeamReportOut])
+def recent_team_reports(
+    limit: int = 30,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    return (
+        db.query(models.TeamReport)
+        .filter_by(coach_id=coach.id)
+        .order_by(models.TeamReport.id.desc())
+        .limit(limit)
+        .all()
+    )
+
+
 @router.post("/team-report", response_model=schemas.SummaryOut)
 async def team_report(
     body: schemas.TeamReportRequest,
@@ -169,6 +184,14 @@ async def team_report(
         text_blocks = [b for b in response.content if hasattr(b, "text")]
         if not text_blocks:
             raise HTTPException(status_code=500, detail="AI returned no text content")
+        team_report_record = models.TeamReport(
+            coach_id=coach.id,
+            output_type=body.output_type,
+            focus_prompt=body.focus_prompt,
+            report_text=text_blocks[0].text,
+        )
+        db.add(team_report_record)
+        db.commit()
         return schemas.SummaryOut(report_text=text_blocks[0].text)
     except HTTPException:
         raise

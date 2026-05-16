@@ -102,6 +102,19 @@ class Correction(Base):
     coach         = relationship("Coach", back_populates="corrections")
 
 
+class TeamReport(Base):
+    __tablename__ = "team_reports"
+
+    id           = Column(Integer, primary_key=True, index=True)
+    coach_id     = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    output_type  = Column(String, nullable=False)
+    focus_prompt = Column(Text, nullable=True)
+    report_text  = Column(Text, nullable=True)
+    created_at   = Column(DateTime, default=datetime.utcnow)
+
+    coach = relationship("Coach")
+
+
 class TrainingSession(Base):
     __tablename__ = "training_sessions"
 

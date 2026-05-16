@@ -59,6 +59,11 @@ export const evalsAPI = {
   teamReport: (data: { output_type: string; focus_prompt?: string }) =>
     api.post('/evaluations/team-report', data).then(r => r.data),
 
+  teamReports: (limit = 30) =>
+    api.get('/evaluations/team-reports/recent', { params: { limit } }).then(r => r.data),
+  deleteTeamReport: (id: number) =>
+    api.delete(`/evaluations/team-reports/${id}`).then(r => r.data),
+
   addCorrection: (evalId: number, data: { pillar?: string; original_text?: string; correction: string }) =>
     api.post(`/evaluations/${evalId}/corrections`, data).then(r => r.data),
 
@@ -138,4 +143,6 @@ export const playerAPI = {
     api.post(`/player/shared-reports/${sharedId}/coach-reply`, { text }).then(r => r.data),
   shareTeamReport: (data: { output_type: string; report_text: string; target_type: string; player_user_id?: number; team_id?: number; message?: string }) =>
     api.post('/player/share-team-report', data).then(r => r.data),
+  searchStaff: (q: string) =>
+    api.get('/player/staff/search', { params: { q } }).then(r => r.data),
 };
