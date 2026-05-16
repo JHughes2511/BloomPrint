@@ -18,6 +18,7 @@ def register(body: schemas.CoachCreate, db: Session = Depends(get_db)):
         weight=body.weight,
         level=body.level,
         program_name=body.program_name,
+        role=body.role,
     )
     db.add(coach)
     db.commit()

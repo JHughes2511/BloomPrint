@@ -4,15 +4,22 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+import bcrypt
 from jose import jwt
-from passlib.context import CryptContext
 from ..database import get_db
 from .. import models, schemas
 
 SECRET_KEY = "bloomprint-player-secret-change-in-prod"
 ALGORITHM = "HS256"
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 player_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/player-auth/login")
+
+
+def _hash_pw(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
+def _verify_pw(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode(), hashed.encode())
 
 router = APIRouter(prefix="/player-auth", tags=["player-auth"])
 
@@ -50,7 +57,7 @@ def register(body: schemas.PlayerUserCreate, db: Session = Depends(get_db)):
     pu = models.PlayerUser(
         name=body.name,
         email=body.email,
-        password_hash=pwd_context.hash(body.password),
+        password_hash=_hash_pw(body.password),
     )
     db.add(pu)
     db.commit()
@@ -64,7 +71,7 @@ def register(body: schemas.PlayerUserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=schemas.PlayerToken)
 def login(body: schemas.CoachLogin, db: Session = Depends(get_db)):
     pu = db.query(models.PlayerUser).filter_by(email=body.email).first()
-    if not pu or not pwd_context.verify(body.password, pu.password_hash):
+    if not pu or not _verify_pw(body.password, pu.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     return schemas.PlayerToken(
         access_token=_make_token(pu.id),
