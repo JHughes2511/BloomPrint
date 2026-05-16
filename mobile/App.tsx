@@ -183,47 +183,41 @@ function PlayerTabs() {
   );
 }
 
+// ── Auth stack (unauthenticated) ───────────────────────────────────────────────
+
+function AuthStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="RoleSelect"     component={RoleSelectScreen} />
+      <Stack.Screen name="CoachLogin"     component={LoginScreen} />
+      <Stack.Screen name="PlayerLogin"    component={PlayerLoginScreen} />
+      <Stack.Screen name="PlayerRegister" component={PlayerRegisterScreen} />
+    </Stack.Navigator>
+  );
+}
+
 // ── Root ───────────────────────────────────────────────────────────────────────
 
 function Root() {
   const { coach, loading: coachLoading } = useAuth();
   const { playerUser, loading: playerLoading } = usePlayerAuth();
 
-  if (coachLoading || playerLoading) {
-    return (
-      <View style={{ flex: 1, backgroundColor: '#0a0a0a', alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color="#2563eb" size="large" />
-      </View>
-    );
-  }
-
-  if (coach) {
-    return (
-      <NavigationContainer>
-        <StatusBar style="light" />
-        <AppTabs />
-      </NavigationContainer>
-    );
-  }
-
-  if (playerUser) {
-    return (
-      <NavigationContainer>
-        <StatusBar style="light" />
-        <PlayerTabs />
-      </NavigationContainer>
-    );
-  }
+  const loading = coachLoading || playerLoading;
 
   return (
     <NavigationContainer>
       <StatusBar style="light" />
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="RoleSelect"      component={RoleSelectScreen} />
-        <Stack.Screen name="CoachLogin"      component={LoginScreen} />
-        <Stack.Screen name="PlayerLogin"     component={PlayerLoginScreen} />
-        <Stack.Screen name="PlayerRegister"  component={PlayerRegisterScreen} />
-      </Stack.Navigator>
+      {loading ? (
+        <View style={{ flex: 1, backgroundColor: '#0a0a0a', alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator color="#2563eb" size="large" />
+        </View>
+      ) : coach ? (
+        <AppTabs />
+      ) : playerUser ? (
+        <PlayerTabs />
+      ) : (
+        <AuthStack />
+      )}
     </NavigationContainer>
   );
 }

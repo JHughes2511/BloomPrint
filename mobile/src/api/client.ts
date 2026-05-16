@@ -13,7 +13,7 @@ api.interceptors.request.use(async (config) => {
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const authAPI = {
-  register: (data: { name: string; email: string; password: string; weight?: number; program_name?: string }) =>
+  register: (data: { name: string; email: string; password: string; weight?: number; program_name?: string; role?: string }) =>
     api.post('/auth/register', data).then(r => r.data),
 
   login: (email: string, password: string) =>

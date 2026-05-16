@@ -3,6 +3,8 @@ import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 
 const ROLES = [
@@ -13,6 +15,7 @@ const ROLES = [
 
 export default function LoginScreen() {
   const { login, register } = useAuth();
+  const navigation = useNavigation<any>();
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -46,8 +49,13 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('RoleSelect')}>
+          <Ionicons name="chevron-back" size={18} color="#6b7280" />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
+
         <Text style={styles.logo}>BloomPrint</Text>
-        <Text style={styles.sub}>Basketball Intelligence Model</Text>
+        <Text style={styles.sub}>Coach · Scout · Trainer</Text>
 
         {mode === 'register' && (
           <>
@@ -94,7 +102,9 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: '#0a0a0a', alignItems: 'center', justifyContent: 'center', padding: 24 },
+  container: { flexGrow: 1, backgroundColor: '#0a0a0a', alignItems: 'center', justifyContent: 'center', padding: 24, paddingTop: 60 },
+  backBtn: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', marginBottom: 24, gap: 4 },
+  backText: { color: '#6b7280', fontSize: 14 },
   logo: { fontSize: 36, fontWeight: '900', color: '#ffffff', letterSpacing: 1 },
   sub: { fontSize: 13, color: '#6b7280', marginBottom: 40, marginTop: 4 },
   sectionLabel: {
