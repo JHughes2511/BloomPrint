@@ -17,6 +17,7 @@ const TYPE_LABELS: Record<string, string> = {
   training_program: 'Training Program',
   recruitment_profile: 'Recruitment',
   position_analysis: 'Position Analysis',
+  box_score: 'Box Score',
 };
 
 export default function RecentScreen() {

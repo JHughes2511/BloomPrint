@@ -15,6 +15,7 @@ const OUTPUT_TYPES: { key: OutputType; label: string }[] = [
   { key: 'scouting_report',    label: 'Scouting Report' },
   { key: 'coaching_report',    label: 'Coaching Report' },
   { key: 'game_analysis',      label: 'Game Analysis' },
+  { key: 'box_score',          label: 'Box Score' },
   { key: 'training_program',   label: 'Training Program' },
   { key: 'recruitment_profile', label: 'Recruitment' },
   { key: 'position_analysis',  label: 'Position Analysis' },

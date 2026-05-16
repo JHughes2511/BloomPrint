@@ -39,6 +39,24 @@ HEADER_MAP: dict[str, str] = {
     "notes": "report_text", "report": "report_text", "comments": "report_text",
     "report text": "report_text", "scouting notes": "report_text",
     "evaluation": "report_text", "summary": "report_text",
+    # Box score stats
+    "pts": "stat:pts", "points": "stat:pts", "ppg": "stat:pts",
+    "reb": "stat:reb", "rebounds": "stat:reb", "rpg": "stat:reb", "total reb": "stat:reb",
+    "ast": "stat:ast", "assists": "stat:ast", "apg": "stat:ast",
+    "stl": "stat:stl", "steals": "stat:stl", "spg": "stat:stl",
+    "blk": "stat:blk", "blocks": "stat:blk", "bpg": "stat:blk",
+    "to": "stat:to", "turnovers": "stat:to", "tov": "stat:to",
+    "fgm": "stat:fgm", "fga": "stat:fga",
+    "fg%": "stat:fg_pct", "fg pct": "stat:fg_pct", "field goal pct": "stat:fg_pct",
+    "3pm": "stat:three_pm", "3pa": "stat:three_pa",
+    "3p%": "stat:three_pct", "3pt pct": "stat:three_pct", "three pct": "stat:three_pct",
+    "ftm": "stat:ftm", "fta": "stat:fta",
+    "ft%": "stat:ft_pct", "free throw pct": "stat:ft_pct",
+    "min": "stat:min", "minutes": "stat:min", "mpg": "stat:min",
+    "gp": "stat:gp", "games played": "stat:gp", "games": "stat:gp",
+    "+/-": "stat:plus_minus", "plus minus": "stat:plus_minus",
+    "oreb": "stat:oreb", "off reb": "stat:oreb",
+    "dreb": "stat:dreb", "def reb": "stat:dreb",
     # Pillars
     "offensive skills": "pillar:offensive_skills", "offensive": "pillar:offensive_skills",
     "offense": "pillar:offensive_skills", "off skills": "pillar:offensive_skills",
@@ -116,6 +134,7 @@ def _parse_sheet(ws) -> list[dict]:
 
         record: dict[str, Any] = {}
         pillars: dict[str, float] = {}
+        stats: dict[str, Any] = {}
 
         for idx, field in col_map.items():
             val = row[idx] if idx < len(row) else None
@@ -126,6 +145,8 @@ def _parse_sheet(ws) -> list[dict]:
                 f = _to_float(val)
                 if f is not None:
                     pillars[field[7:]] = f
+            elif field.startswith("stat:"):
+                stats[field[5:]] = str(val).strip()
             elif field == "overall_grade":
                 record[field] = _to_float(val)
             elif field in ("green_flags", "watch_flags", "key_questions"):
@@ -135,6 +156,22 @@ def _parse_sheet(ws) -> list[dict]:
 
         if pillars:
             record["pillar_grades"] = pillars
+        # Format box score stats into report_text if no text column provided
+        if stats and not record.get("report_text"):
+            stat_label = {
+                "pts": "PTS", "reb": "REB", "ast": "AST", "stl": "STL", "blk": "BLK",
+                "to": "TO", "fgm": "FGM", "fga": "FGA", "fg_pct": "FG%",
+                "three_pm": "3PM", "three_pa": "3PA", "three_pct": "3P%",
+                "ftm": "FTM", "fta": "FTA", "ft_pct": "FT%",
+                "min": "MIN", "gp": "GP", "plus_minus": "+/-",
+                "oreb": "OREB", "dreb": "DREB",
+            }
+            lines = "\n".join(
+                f"- {stat_label.get(k, k.upper())}: {v}" for k, v in stats.items()
+            )
+            record["report_text"] = f"BOX SCORE STATS\n{lines}"
+            if "output_type" not in record:
+                record["output_type"] = "box_score"
         if record.get("player_name"):
             records.append(record)
 

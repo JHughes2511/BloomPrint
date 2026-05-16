@@ -82,4 +82,5 @@ export type OutputType =
   | 'training_program'
   | 'recruitment_profile'
   | 'position_analysis'
-  | 'game_analysis';
+  | 'game_analysis'
+  | 'box_score';

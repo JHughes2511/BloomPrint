@@ -15,10 +15,11 @@ import { mdToHtml, safeFileName } from '../utils/mdToHtml';
 
 const OUTPUT_TYPES = [
   { key: 'coaching_report', label: 'Coaching Report' },
-  { key: 'game_analysis', label: 'Game Analysis' },
-  { key: 'film_breakdown', label: 'Film Breakdown' },
+  { key: 'game_analysis',   label: 'Game Analysis' },
+  { key: 'film_breakdown',  label: 'Film Breakdown' },
   { key: 'scouting_report', label: 'Scouting Report' },
   { key: 'training_program', label: 'Training Program' },
+  { key: 'box_score',       label: 'Box Score' },
 ];
 
 export default function TeamReportScreen() {

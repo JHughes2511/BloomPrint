@@ -10,12 +10,13 @@ import { api, teamsAPI } from '../api/client';
 import { Team } from '../types';
 
 const OUTPUT_TYPES = [
-  { key: 'player_eval',        label: 'Player Eval' },
-  { key: 'scouting_report',    label: 'Scouting Report' },
-  { key: 'film_breakdown',     label: 'Film Breakdown' },
-  { key: 'coaching_report',    label: 'Coaching Report' },
+  { key: 'player_eval',         label: 'Player Eval' },
+  { key: 'box_score',           label: 'Box Score' },
+  { key: 'scouting_report',     label: 'Scouting Report' },
+  { key: 'film_breakdown',      label: 'Film Breakdown' },
+  { key: 'coaching_report',     label: 'Coaching Report' },
   { key: 'recruitment_profile', label: 'Recruitment' },
-  { key: 'game_analysis',      label: 'Game Analysis' },
+  { key: 'game_analysis',       label: 'Game Analysis' },
 ];
 
 const LEVELS = ['Youth', 'MS', 'HS JV', 'HS Varsity', 'Prep School', 'JUCO', 'College', 'Pro'];

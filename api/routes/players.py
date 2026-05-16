@@ -115,7 +115,25 @@ async def player_summary(
         text_blocks = [b for b in response.content if hasattr(b, "text")]
         if not text_blocks:
             raise HTTPException(status_code=500, detail="AI returned no text content")
-        return schemas.SummaryOut(report_text=text_blocks[0].text)
+        report_text = text_blocks[0].text
+
+        # Save to DB so it appears in Recent Reports
+        from .evaluations import _parse_grade, _parse_pillar_grades, _parse_list_section
+        eval_record = models.Evaluation(
+            player_id=player_id,
+            coach_id=coach.id,
+            output_type=body.output_type,
+            report_text=report_text,
+            overall_grade=_parse_grade(report_text),
+            pillar_grades=_parse_pillar_grades(report_text),
+            green_flags=_parse_list_section(report_text, "GREEN FLAGS"),
+            watch_flags=_parse_list_section(report_text, "WATCH FLAGS"),
+            key_questions=_parse_list_section(report_text, "KEY QUESTIONS"),
+        )
+        db.add(eval_record)
+        db.commit()
+
+        return schemas.SummaryOut(report_text=report_text)
     except HTTPException:
         raise
     except Exception as exc:

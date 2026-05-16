@@ -12,6 +12,7 @@ const REPORT_TYPES = [
   { key: 'training_program', label: 'Training Program', icon: 'barbell', desc: 'Personalized skill development program from eval data' },
   { key: 'recruitment_profile', label: 'Recruitment', icon: 'school', desc: 'Next-level recruitment profile and college projection' },
   { key: 'position_analysis', label: 'Position Analysis', icon: 'location', desc: 'Position-specific role fit and skill translation analysis' },
+  { key: 'box_score', label: 'Box Score', icon: 'stats-chart', desc: 'Game and season box score stats imported and analyzed by BIM' },
 ];
 
 const PILLARS = [

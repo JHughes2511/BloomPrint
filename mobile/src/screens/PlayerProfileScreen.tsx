@@ -17,6 +17,7 @@ const OUTPUT_TYPES = [
   { key: 'coaching_report', label: 'Coaching Report' },
   { key: 'recruitment_profile', label: 'Recruitment' },
   { key: 'position_analysis', label: 'Position Analysis' },
+  { key: 'box_score', label: 'Box Score' },
 ];
 
 export default function PlayerProfileScreen() {
