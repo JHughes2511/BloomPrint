@@ -12,6 +12,7 @@ export interface Coach {
   email: string;
   weight: number;
   level: string;
+  role: string;
   program_name: string;
   created_at: string;
 }

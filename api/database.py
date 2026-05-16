@@ -39,3 +39,13 @@ def _run_migrations():
                 "ALTER TABLE players ADD COLUMN team_id INTEGER REFERENCES teams(id)"
             ))
             conn.commit()
+
+        # Add role to coaches if missing
+        coach_cols = [row[1] for row in conn.execute(
+            __import__("sqlalchemy").text("PRAGMA table_info(coaches)")
+        )]
+        if "role" not in coach_cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE coaches ADD COLUMN role TEXT NOT NULL DEFAULT 'coach'"
+            ))
+            conn.commit()

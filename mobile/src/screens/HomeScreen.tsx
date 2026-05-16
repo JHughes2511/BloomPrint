@@ -74,7 +74,9 @@ export default function HomeScreen() {
         {coach && (
           <View style={styles.coachBadge}>
             <Ionicons name="person-circle-outline" size={16} color="#6b7280" />
-            <Text style={styles.coachText}>{coach.name} · {coach.program_name}</Text>
+            <Text style={styles.coachText}>
+              {coach.name} · {coach.role ? coach.role.charAt(0).toUpperCase() + coach.role.slice(1) : 'Coach'} · {coach.program_name}
+            </Text>
           </View>
         )}
       </View>

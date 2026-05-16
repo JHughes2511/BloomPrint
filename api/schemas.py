@@ -13,6 +13,7 @@ class CoachCreate(BaseModel):
     password: str
     weight: int = 45
     level: str = "hs_elite_aau"
+    role: str = "coach"
     program_name: str = "SEED Academy"
 
 
@@ -27,6 +28,7 @@ class CoachOut(BaseModel):
     email: str
     weight: int
     level: str
+    role: str
     program_name: str
     created_at: datetime
 

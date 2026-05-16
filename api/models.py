@@ -18,6 +18,7 @@ class Coach(Base):
     password_hash = Column(String, nullable=False)
     weight       = Column(Integer, default=45)       # BIM authority weight
     level        = Column(String, default="hs_elite_aau")
+    role         = Column(String, default="coach")   # coach / scout / trainer
     program_name = Column(String, default="SEED Academy")
     created_at   = Column(DateTime, default=datetime.utcnow)
 
