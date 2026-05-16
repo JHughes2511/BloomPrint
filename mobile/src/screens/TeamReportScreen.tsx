@@ -385,3 +385,27 @@ const styles = StyleSheet.create({
   },
   actionText: { color: '#9ca3af', fontWeight: '600', fontSize: 13 },
 });
+
+const shareStyles = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' },
+  modal: { backgroundColor: '#111827', borderRadius: 20, padding: 24, margin: 12 },
+  title: { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 16 },
+  label: { color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 },
+  targetRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+  targetChip: { flex: 1, paddingVertical: 8, borderRadius: 10, borderWidth: 1, borderColor: '#374151', alignItems: 'center' },
+  targetChipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
+  targetChipText: { color: '#9ca3af', fontSize: 12, fontWeight: '600' },
+  targetChipTextActive: { color: '#fff' },
+  input: { backgroundColor: '#1f2937', borderRadius: 10, padding: 12, color: '#fff', fontSize: 14, marginBottom: 8 },
+  resultRow: { backgroundColor: '#1f2937', borderRadius: 10, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: '#374151' },
+  resultName: { color: '#fff', fontWeight: '600', fontSize: 14 },
+  resultMeta: { color: '#6b7280', fontSize: 11, marginTop: 2 },
+  selectedBadge: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#16a34a22', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: '#16a34a', marginBottom: 8 },
+  selectedName: { color: '#fff', fontWeight: '700' },
+  staffNote: { color: '#6b7280', fontSize: 12, marginBottom: 12, lineHeight: 18 },
+  btnRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  cancelBtn: { flex: 1, padding: 14, borderRadius: 10, borderWidth: 1, borderColor: '#374151', alignItems: 'center' },
+  cancelText: { color: '#9ca3af', fontWeight: '600' },
+  shareBtn: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: '#16a34a', alignItems: 'center' },
+  shareBtnText: { color: '#fff', fontWeight: '700' },
+});
