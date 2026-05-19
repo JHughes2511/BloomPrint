@@ -36,19 +36,14 @@ export default function TeamReportScreen() {
   const [videoAsset, setVideoAsset] = useState<{ uri: string; name: string; type: string } | null>(null);
 
   const pickVideo = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Allow access to your media library to upload footage.');
-      return;
-    }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['videos'],
+      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
       allowsEditing: false,
       quality: 1,
     });
     if (!result.canceled && result.assets[0]) {
       const asset = result.assets[0];
-      const name = asset.uri.split('/').pop() ?? 'team_video.mp4';
+      const name = asset.fileName ?? asset.uri.split('/').pop() ?? 'team_video.mp4';
       setVideoAsset({ uri: asset.uri, name, type: 'video/mp4' });
     }
   };

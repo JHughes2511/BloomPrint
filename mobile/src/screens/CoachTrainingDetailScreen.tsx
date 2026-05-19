@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform, Keyboard,
+  ActivityIndicator, TextInput, Alert, Keyboard,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,13 +17,14 @@ export default function CoachTrainingDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [feedbackText, setFeedbackText] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [noteText, setNoteText] = useState('');
-  const [savingNote, setSavingNote] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
-  useEffect(() => {
+  const loadDetail = () =>
     playerAPI.getTrainingDetail(trainingId).then(setTraining).finally(() => setLoading(false));
-  }, [trainingId]);
+
+  useEffect(() => { loadDetail(); }, [trainingId]);
 
   useEffect(() => {
     const sub = Keyboard.addListener('keyboardDidShow', () => {
@@ -31,6 +32,22 @@ export default function CoachTrainingDetailScreen() {
     });
     return () => sub.remove();
   }, []);
+
+  const addComment = async () => {
+    if (!commentText.trim()) return;
+    setSubmittingComment(true);
+    try {
+      await playerAPI.addCoachComment(trainingId, { text: commentText.trim() });
+      setCommentText('');
+      // Reload to get updated comments list
+      const updated = await playerAPI.getTrainingDetail(trainingId);
+      setTraining(updated);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to add comment');
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
 
   const refreshTraining = async () => {
     if (!feedbackText.trim()) return;
@@ -44,21 +61,6 @@ export default function CoachTrainingDetailScreen() {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to update training');
     } finally {
       setRefreshing(false);
-    }
-  };
-
-  const saveNote = async () => {
-    if (!noteText.trim()) return;
-    setSavingNote(true);
-    try {
-      await playerAPI.updateTraining(trainingId, { coach_notes: noteText.trim() });
-      setTraining((prev: any) => ({ ...prev, coach_notes: noteText.trim() }));
-      setNoteText('');
-      Alert.alert('Saved', 'Notes added to training.');
-    } catch (e: any) {
-      Alert.alert('Error', 'Failed to save notes');
-    } finally {
-      setSavingNote(false);
     }
   };
 
@@ -79,8 +81,14 @@ export default function CoachTrainingDetailScreen() {
   }
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#0a0a0a' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <ScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 200 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets={true}>
+    <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
+      <ScrollView
+        ref={scrollRef}
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: 200 }}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
+      >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={24} color="#fff" />
@@ -107,46 +115,43 @@ export default function CoachTrainingDetailScreen() {
           </View>
         </View>
 
-        {training.comments?.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Comments ({training.comments.length})</Text>
-            {training.comments.map((c: any) => (
-              <View key={c.id} style={styles.commentCard}>
-                <View style={styles.commentHeader}>
-                  <Text style={[styles.commentAuthor, c.coach_id ? { color: '#2563eb' } : { color: '#16a34a' }]}>
-                    {c.author_name}{c.coach_id ? ' (Coach)' : ''}
-                  </Text>
-                  <Text style={styles.commentDate}>{new Date(c.created_at).toLocaleDateString()}</Text>
-                </View>
-                <Text style={styles.commentText}>{c.text}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-
+        {/* Comments thread */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Add Coach Notes</Text>
-          <View style={styles.programBox}>
+          <Text style={styles.sectionLabel}>Comments ({training.comments?.length ?? 0})</Text>
+          {(training.comments ?? []).map((c: any) => (
+            <View key={c.id} style={styles.commentCard}>
+              <View style={styles.commentHeader}>
+                <Text style={[styles.commentAuthor, c.coach_id ? { color: '#2563eb' } : { color: '#16a34a' }]}>
+                  {c.author_name}{c.coach_id ? ' (Coach)' : ''}
+                </Text>
+                <Text style={styles.commentDate}>{new Date(c.created_at).toLocaleDateString()}</Text>
+              </View>
+              <Text style={styles.commentText}>{c.text}</Text>
+            </View>
+          ))}
+          <View style={styles.commentInput}>
             <TextInput
               style={styles.input}
-              placeholder="Add notes for the player..."
+              placeholder="Leave a comment for the player..."
               placeholderTextColor="#4b5563"
-              value={noteText}
-              onChangeText={setNoteText}
+              value={commentText}
+              onChangeText={setCommentText}
               multiline
-              textAlignVertical="top"
               onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150)}
             />
             <TouchableOpacity
-              style={[styles.btn, { marginTop: 8 }]}
-              onPress={saveNote}
-              disabled={savingNote || !noteText.trim()}
+              style={styles.sendBtn}
+              onPress={addComment}
+              disabled={submittingComment || !commentText.trim()}
             >
-              {savingNote ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.btnText}>Save Notes</Text>}
+              {submittingComment
+                ? <ActivityIndicator color="#fff" size="small" />
+                : <Ionicons name="send" size={18} color="#fff" />}
             </TouchableOpacity>
           </View>
         </View>
 
+        {/* Update Program with Feedback */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Update Program with Feedback</Text>
           <View style={styles.programBox}>
@@ -176,7 +181,7 @@ export default function CoachTrainingDetailScreen() {
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -209,10 +214,12 @@ const styles = StyleSheet.create({
   commentAuthor: { fontSize: 12, fontWeight: '700' },
   commentDate: { color: '#4b5563', fontSize: 11 },
   commentText: { color: '#d1d5db', fontSize: 13 },
+  commentInput: { flexDirection: 'row', gap: 10, marginTop: 12, alignItems: 'flex-end' },
   input: {
-    backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12, color: '#fff',
+    flex: 1, backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12, color: '#fff',
     fontSize: 14, borderWidth: 1, borderColor: '#374151', minHeight: 80,
   },
+  sendBtn: { backgroundColor: '#2563eb', borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' },
   btn: { backgroundColor: '#2563eb', borderRadius: 10, padding: 12, alignItems: 'center' },
   btnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
 });

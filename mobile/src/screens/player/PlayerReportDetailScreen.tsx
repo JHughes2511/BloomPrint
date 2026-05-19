@@ -93,10 +93,7 @@ export default function PlayerReportDetailScreen() {
   if (!report) return null;
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: '#0f1a0f' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <View style={{ flex: 1, backgroundColor: '#0f1a0f' }}>
       <ScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 200 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets={true}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -242,7 +239,7 @@ export default function PlayerReportDetailScreen() {
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
