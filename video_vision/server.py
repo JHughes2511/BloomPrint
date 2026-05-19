@@ -565,8 +565,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
 
     audio_note = " + audio" if transcript_text else ""
     header = (
-        f"BIM {output_type.upper().replace('_', ' ')} — {program} | {level} | "
-        f"coach weight {coach_weight}\n"
+        f"BIM {output_type.upper().replace('_', ' ')} — {program} | {level}\n"
         f"{len(frames)} frames{audio_note} analyzed\n"
         f"{'═' * 60}\n"
     )

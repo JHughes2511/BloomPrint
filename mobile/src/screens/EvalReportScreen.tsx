@@ -15,6 +15,14 @@ import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
 import { mdToHtml, safeFileName } from '../utils/mdToHtml';
 
+function cleanMarkdown(text: string): string {
+  return text
+    .replace(/\*\*\s*$/gm, '')
+    .replace(/^\s*\*\*\s*$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 const PILLARS = [
   'offensive_skills', 'defensive_capabilities', 'physical_attributes',
   'intangibles', 'advanced_analysis', 'strategic_fit',
@@ -139,7 +147,12 @@ export default function EvalReportScreen() {
       setCorrections(prev => [...prev, c]);
       setShowCorrect(false);
       setCorrectionText(''); setSelectedPillar('');
-      Alert.alert('Saved', 'Correction recorded — will sharpen future evaluations.');
+      // Apply all corrections to update the report text via AI
+      try {
+        const updated = await evalsAPI.applyCorrections(evalId);
+        setEv((prev: any) => prev ? { ...prev, report_text: updated.report_text } : prev);
+      } catch {}
+      Alert.alert('Updated', 'Evaluation sharpened based on your correction.');
     } catch {
       Alert.alert('Error', 'Could not save correction');
     } finally {
@@ -313,7 +326,7 @@ export default function EvalReportScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Full Report</Text>
           <View style={styles.reportBox}>
-            <Markdown style={markdownStyles}>{ev.report_text}</Markdown>
+            <Markdown style={markdownStyles}>{cleanMarkdown(ev.report_text)}</Markdown>
           </View>
         </View>
       )}
@@ -487,7 +500,7 @@ export default function EvalReportScreen() {
         >
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>Add Correction</Text>
-            <Text style={styles.modalSub}>This feeds back into the model to sharpen future evaluations.</Text>
+            <Text style={styles.modalSub}>Sharpen this evaluation by noting what needs to be corrected.</Text>
             <Text style={styles.label}>Pillar (optional)</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
               {['', ...PILLARS].map(p => (
@@ -505,7 +518,7 @@ export default function EvalReportScreen() {
             <Text style={styles.label}>Your Correction</Text>
             <TextInput
               style={[styles.input, { height: 100 }]}
-              placeholder="What did the model get wrong or miss?"
+              placeholder="What needs to be corrected in this report?"
               placeholderTextColor="#4b5563"
               value={correctionText}
               onChangeText={setCorrectionText}

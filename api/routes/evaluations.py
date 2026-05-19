@@ -309,6 +309,47 @@ def list_corrections(
     return db.query(models.Correction).filter_by(evaluation_id=eval_id).all()
 
 
+@router.post("/{eval_id}/apply-corrections", response_model=schemas.EvalOut)
+async def apply_corrections(
+    eval_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    ev = db.get(models.Evaluation, eval_id)
+    if not ev:
+        raise HTTPException(status_code=404, detail="Evaluation not found")
+    corrections = db.query(models.Correction).filter_by(evaluation_id=eval_id).all()
+    if not corrections or not ev.report_text:
+        return ev
+
+    corrections_text = "\n".join(
+        f"- [{c.pillar or 'General'}] {c.correction}" for c in corrections
+    )
+    prompt = (
+        f"You are a basketball evaluation expert. Below is an existing evaluation report "
+        f"followed by a list of corrections from the coach. Update the report to incorporate "
+        f"these corrections, adding or removing detail as needed. Return ONLY the updated report text, "
+        f"maintaining the same format and structure.\n\n"
+        f"ORIGINAL REPORT:\n{ev.report_text}\n\n"
+        f"CORRECTIONS:\n{corrections_text}\n\n"
+        f"UPDATED REPORT:"
+    )
+
+    import anthropic
+    client = anthropic.Anthropic()
+    response = client.messages.create(
+        model="claude-opus-4-7",
+        max_tokens=4096,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    updated_text = response.content[0].text.strip()
+
+    ev.report_text = updated_text
+    db.commit()
+    db.refresh(ev)
+    return ev
+
+
 # ── Parsing helpers ────────────────────────────────────────────────────────────
 
 def _parse_grade(text: str) -> float | None:

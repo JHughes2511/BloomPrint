@@ -21,13 +21,13 @@ export default function RosterScreen() {
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPos, setNewPos] = useState('');
-  const [newLevel, setNewLevel] = useState('HS Varsity');
+  const [newLevel, setNewLevel] = useState('Middle School');
   const [saving, setSaving] = useState(false);
 
   // Create team modal
   const [showNewTeam, setShowNewTeam] = useState(false);
   const [newTeamName, setNewTeamName] = useState('');
-  const [newTeamLevel, setNewTeamLevel] = useState('HS Varsity');
+  const [newTeamLevel, setNewTeamLevel] = useState('Middle School');
   const [creatingTeam, setCreatingTeam] = useState(false);
 
   const load = async () => {
@@ -72,7 +72,7 @@ export default function RosterScreen() {
     try {
       const team = await teamsAPI.create({ name: newTeamName, competition_level: newTeamLevel });
       setShowNewTeam(false);
-      setNewTeamName(''); setNewTeamLevel('HS Varsity');
+      setNewTeamName(''); setNewTeamLevel('Middle School');
       setSelectedTeamId(team.id);
       load();
     } catch (e: any) {
@@ -203,7 +203,7 @@ export default function RosterScreen() {
               value={newPos} onChangeText={setNewPos} />
             <Text style={[styles.input, { color: '#9ca3af', paddingTop: 10, height: 'auto' as any, marginBottom: 4, backgroundColor: 'transparent', borderWidth: 0 }]}>Competition Level</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
-              {['HS Varsity', 'HS JV', 'AAU Elite', 'AAU Grassroots', 'Middle School', 'College', 'Pro'].map(lvl => (
+              {['Middle School', 'HS JV', 'HS Varsity', 'AAU Grassroots', 'AAU Elite', 'College', 'Pro'].map(lvl => (
                 <TouchableOpacity
                   key={lvl}
                   style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, borderWidth: 1,
@@ -236,7 +236,7 @@ export default function RosterScreen() {
               value={newTeamName} onChangeText={setNewTeamName} />
             <Text style={[styles.input, { color: '#9ca3af', paddingTop: 10, height: 'auto' as any, marginBottom: 4, backgroundColor: 'transparent', borderWidth: 0 }]}>Competition Level</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
-              {['HS Varsity', 'HS JV', 'AAU Elite', 'AAU Grassroots', 'Middle School', 'College', 'Pro'].map(lvl => (
+              {['Middle School', 'HS JV', 'HS Varsity', 'AAU Grassroots', 'AAU Elite', 'College', 'Pro'].map(lvl => (
                 <TouchableOpacity
                   key={lvl}
                   style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, borderWidth: 1,

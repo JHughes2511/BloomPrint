@@ -1,12 +1,20 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  ActivityIndicator, TextInput, Alert, Keyboard,
+  ActivityIndicator, TextInput, Alert,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import { playerAPI } from '../api/client';
+
+function cleanMarkdown(text: string): string {
+  return text
+    .replace(/\*\*\s*$/gm, '')
+    .replace(/^\s*\*\*\s*$/gm, '')
+    .replace(/---/g, '')
+    .trim();
+}
 
 export default function CoachTrainingDetailScreen() {
   const route = useRoute<any>();
@@ -23,17 +31,21 @@ export default function CoachTrainingDetailScreen() {
   const [savingNote, setSavingNote] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
+  // Layout Y positions for each input section
+  const commentY = useRef(0);
+  const notesY = useRef(0);
+  const feedbackY = useRef(0);
+
   const loadDetail = () =>
     playerAPI.getTrainingDetail(trainingId).then(setTraining).finally(() => setLoading(false));
 
   useEffect(() => { loadDetail(); }, [trainingId]);
 
-  useEffect(() => {
-    const sub = Keyboard.addListener('keyboardDidShow', () => {
-      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
-    });
-    return () => sub.remove();
-  }, []);
+  const scrollToY = (y: number) => {
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({ y: Math.max(0, y - 100), animated: true });
+    }, 150);
+  };
 
   const addComment = async () => {
     if (!commentText.trim()) return;
@@ -41,7 +53,6 @@ export default function CoachTrainingDetailScreen() {
     try {
       await playerAPI.addCoachComment(trainingId, { text: commentText.trim() });
       setCommentText('');
-      // Reload to get updated comments list
       const updated = await playerAPI.getTrainingDetail(trainingId);
       setTraining(updated);
     } catch (e: any) {
@@ -101,7 +112,7 @@ export default function CoachTrainingDetailScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: 200 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets={true}
       >
@@ -126,13 +137,16 @@ export default function CoachTrainingDetailScreen() {
           <Text style={styles.sectionLabel}>Training Program</Text>
           <View style={styles.programBox}>
             {training.program_text
-              ? <Markdown style={markdownStyles}>{training.program_text}</Markdown>
+              ? <Markdown style={markdownStyles}>{cleanMarkdown(training.program_text)}</Markdown>
               : <Text style={{ color: '#6b7280' }}>No program text</Text>}
           </View>
         </View>
 
         {/* Comments thread */}
-        <View style={styles.section}>
+        <View
+          style={styles.section}
+          onLayout={e => { commentY.current = e.nativeEvent.layout.y; }}
+        >
           <Text style={styles.sectionLabel}>Comments ({training.comments?.length ?? 0})</Text>
           {(training.comments ?? []).map((c: any) => (
             <View key={c.id} style={styles.commentCard}>
@@ -153,7 +167,7 @@ export default function CoachTrainingDetailScreen() {
               value={commentText}
               onChangeText={setCommentText}
               multiline
-              onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150)}
+              onFocus={() => scrollToY(commentY.current)}
             />
             <TouchableOpacity
               style={styles.sendBtn}
@@ -167,8 +181,11 @@ export default function CoachTrainingDetailScreen() {
           </View>
         </View>
 
-        {/* Coach Notes (saved to training record) */}
-        <View style={styles.section}>
+        {/* Coach Notes */}
+        <View
+          style={styles.section}
+          onLayout={e => { notesY.current = e.nativeEvent.layout.y; }}
+        >
           <Text style={styles.sectionLabel}>Add Coach Notes</Text>
           <View style={styles.programBox}>
             <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
@@ -182,7 +199,7 @@ export default function CoachTrainingDetailScreen() {
               onChangeText={setNoteText}
               multiline
               textAlignVertical="top"
-              onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150)}
+              onFocus={() => scrollToY(notesY.current)}
             />
             <TouchableOpacity
               style={[styles.btn, { marginTop: 8 }]}
@@ -195,7 +212,10 @@ export default function CoachTrainingDetailScreen() {
         </View>
 
         {/* Update Program with Feedback */}
-        <View style={styles.section}>
+        <View
+          style={styles.section}
+          onLayout={e => { feedbackY.current = e.nativeEvent.layout.y; }}
+        >
           <Text style={styles.sectionLabel}>Update Program with Feedback</Text>
           <View style={styles.programBox}>
             <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
@@ -209,7 +229,7 @@ export default function CoachTrainingDetailScreen() {
               onChangeText={setFeedbackText}
               multiline
               textAlignVertical="top"
-              onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150)}
+              onFocus={() => scrollToY(feedbackY.current)}
             />
             <TouchableOpacity
               style={[styles.btn, { backgroundColor: '#16a34a', marginTop: 8, flexDirection: 'row', gap: 8, justifyContent: 'center' }]}
@@ -235,6 +255,7 @@ const markdownStyles = {
   strong: { color: '#ffffff', fontWeight: '700' as const },
   bullet_list: { marginLeft: 8 },
   list_item: { color: '#d1d5db', fontSize: 13 },
+  hr: { backgroundColor: '#1f2937', height: 1, marginVertical: 12 },
 };
 
 const styles = StyleSheet.create({

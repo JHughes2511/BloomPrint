@@ -1,13 +1,17 @@
 import React, { useCallback, useState } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, Alert, ScrollView, Modal,
+  ActivityIndicator, Alert, ScrollView, Modal, Share,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 import { evalsAPI } from '../api/client';
 import { GradeBadge } from '../components/GradeBadge';
+import { mdToHtml, safeFileName } from '../utils/mdToHtml';
 
 const TYPE_LABELS: Record<string, string> = {
   player_eval: 'Player Eval',
@@ -30,19 +34,39 @@ type ReportItem = {
   created_at: string;
 };
 
+type ModalReport = {
+  id: number;
+  kind: 'eval' | 'team';
+  text: string;
+  outputType: string;
+  playerName?: string;
+  evalId?: number;
+};
+
 const FILTER_CATS = [
   { key: 'all', label: 'All' },
   { key: 'eval', label: 'Player Evals' },
   { key: 'team', label: 'Team Reports' },
 ];
 
+function cleanMarkdown(text: string): string {
+  return text
+    .replace(/\*\*\s*$/gm, '')
+    .replace(/^\s*\*\*\s*$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 export default function RecentScreen() {
   const navigation = useNavigation<any>();
   const [items, setItems] = useState<ReportItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
-  const [teamReportModal, setTeamReportModal] = useState<{ text: string; outputType: string } | null>(null);
+  const [activeModal, setActiveModal] = useState<ModalReport | null>(null);
   const [teamReportTexts, setTeamReportTexts] = useState<Record<number, string>>({});
+  const [evalCache, setEvalCache] = useState<Record<number, any>>({});
+  const [loadingEval, setLoadingEval] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -70,6 +94,10 @@ export default function RecentScreen() {
       const texts: Record<number, string> = {};
       teamReports.forEach((t: any) => { if (t.report_text) texts[t.id] = t.report_text; });
       setTeamReportTexts(texts);
+      // Cache eval report_text for modal
+      const ec: Record<number, any> = {};
+      evals.forEach((e: any) => { ec[e.id] = e; });
+      setEvalCache(ec);
       const combined = [...evalItems, ...teamItems].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
@@ -88,12 +116,29 @@ export default function RecentScreen() {
     return true;
   });
 
-  const handlePress = (item: ReportItem) => {
-    if (item.kind === 'eval') {
-      navigation.navigate('EvalReport', { evalId: item.id });
-    } else {
+  const handlePress = async (item: ReportItem) => {
+    if (item.kind === 'team') {
       const text = teamReportTexts[item.id] ?? '';
-      setTeamReportModal({ text, outputType: item.output_type });
+      setActiveModal({ id: item.id, kind: 'team', text, outputType: item.output_type, playerName: item.player_name });
+    } else {
+      // Load eval detail if not cached with report_text
+      let evalData = evalCache[item.id];
+      if (!evalData?.report_text) {
+        setLoadingEval(true);
+        try {
+          evalData = await evalsAPI.get(item.id);
+          setEvalCache(prev => ({ ...prev, [item.id]: evalData }));
+        } catch {}
+        setLoadingEval(false);
+      }
+      setActiveModal({
+        id: item.id,
+        kind: 'eval',
+        text: evalData?.report_text ?? '',
+        outputType: item.output_type,
+        playerName: item.player_name,
+        evalId: item.id,
+      });
     }
   };
 
@@ -113,6 +158,61 @@ export default function RecentScreen() {
         }
       }},
     ]);
+  };
+
+  const exportModalReport = async () => {
+    if (!activeModal?.text) return;
+    setExporting(true);
+    try {
+      const title = TYPE_LABELS[activeModal.outputType] ?? activeModal.outputType;
+      const html = `<html><head><style>
+        body{font-family:Georgia,serif;padding:40px;color:#111;max-width:800px;margin:auto}
+        h1{font-size:22px;border-bottom:2px solid #2563eb;padding-bottom:8px}
+        h2{font-size:17px;color:#1e40af;margin-top:24px}
+        h3{font-size:14px;color:#374151;margin-top:16px}
+        p{line-height:1.7;font-size:13px}
+        li{line-height:1.7;font-size:13px}
+      </style></head><body>
+        <h1>BloomPrint — ${title}</h1>
+        ${activeModal.playerName ? `<p>${activeModal.playerName}</p>` : ''}
+        ${mdToHtml(activeModal.text)}
+      </body></html>`;
+      const { uri } = await Print.printToFileAsync({ html });
+      const fileName = `${safeFileName(title)}.pdf`;
+      const dest = FileSystem.cacheDirectory + fileName;
+      await FileSystem.copyAsync({ from: uri, to: dest });
+      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: 'Share Report' });
+    } catch (e: any) {
+      Alert.alert('Export Error', e?.message ?? 'Could not export');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const printModalReport = async () => {
+    if (!activeModal?.text) return;
+    try {
+      const title = TYPE_LABELS[activeModal.outputType] ?? activeModal.outputType;
+      const html = `<html><head><style>
+        body{font-family:Georgia,serif;padding:40px;color:#111}
+        h1{font-size:22px}h2{font-size:17px;color:#1e40af}
+        p,li{line-height:1.7;font-size:13px}
+      </style></head><body>
+        <h1>BloomPrint — ${title}</h1>
+        ${mdToHtml(activeModal.text)}
+      </body></html>`;
+      await Print.printAsync({ html });
+    } catch (e: any) {
+      Alert.alert('Print Error', e?.message ?? 'Could not print');
+    }
+  };
+
+  const shareModalReport = async () => {
+    if (!activeModal?.text) return;
+    try {
+      const title = TYPE_LABELS[activeModal.outputType] ?? activeModal.outputType;
+      await Share.share({ message: `${title}\n\n${activeModal.text}`, title });
+    } catch {}
   };
 
   if (loading) return <View style={styles.center}><ActivityIndicator color="#2563eb" size="large" /></View>;
@@ -182,21 +282,68 @@ export default function RecentScreen() {
         }}
       />
 
-      {/* Team Report Detail Modal */}
-      <Modal visible={!!teamReportModal} animationType="slide" transparent>
+      {/* Loading overlay while fetching eval detail */}
+      {loadingEval && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator color="#2563eb" size="large" />
+        </View>
+      )}
+
+      {/* Report Detail Modal (both eval and team) */}
+      <Modal visible={!!activeModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                {TYPE_LABELS[teamReportModal?.outputType ?? ''] ?? teamReportModal?.outputType ?? 'Team Report'}
-              </Text>
-              <TouchableOpacity onPress={() => setTeamReportModal(null)}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>
+                  {TYPE_LABELS[activeModal?.outputType ?? ''] ?? activeModal?.outputType ?? 'Report'}
+                </Text>
+                {activeModal?.playerName && (
+                  <Text style={styles.modalSub}>{activeModal.playerName}</Text>
+                )}
+              </View>
+              <TouchableOpacity onPress={() => setActiveModal(null)}>
                 <Ionicons name="close" size={24} color="#9ca3af" />
               </TouchableOpacity>
             </View>
-            <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-              <Markdown style={mdStyles}>{teamReportModal?.text ?? ''}</Markdown>
+
+            <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+              {activeModal?.text
+                ? <Markdown style={mdStyles}>{cleanMarkdown(activeModal.text)}</Markdown>
+                : <Text style={{ color: '#6b7280' }}>No report content</Text>
+              }
             </ScrollView>
+
+            {/* Action buttons */}
+            <View style={styles.actionRow}>
+              {activeModal?.kind === 'eval' && activeModal.evalId != null && (
+                <TouchableOpacity
+                  style={styles.actionBtn}
+                  onPress={() => {
+                    setActiveModal(null);
+                    navigation.navigate('EvalReport', { evalId: activeModal.evalId });
+                  }}
+                >
+                  <Ionicons name="create-outline" size={18} color="#fff" />
+                  <Text style={styles.actionText}>Correct</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity style={styles.actionBtn} onPress={exportModalReport} disabled={exporting}>
+                {exporting
+                  ? <ActivityIndicator color="#fff" size="small" />
+                  : <Ionicons name="download-outline" size={18} color="#fff" />
+                }
+                <Text style={styles.actionText}>Export</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionBtn} onPress={printModalReport}>
+                <Ionicons name="print-outline" size={18} color="#fff" />
+                <Text style={styles.actionText}>Print</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionBtn} onPress={shareModalReport}>
+                <Ionicons name="share-outline" size={18} color="#fff" />
+                <Text style={styles.actionText}>Share</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -212,6 +359,7 @@ const mdStyles = {
   strong: { color: '#fff', fontWeight: '700' as const },
   bullet_list: { marginLeft: 8 },
   list_item: { color: '#d1d5db', fontSize: 13 },
+  hr: { backgroundColor: '#1f2937', height: 1, marginVertical: 12 },
 };
 
 const styles = StyleSheet.create({
@@ -237,8 +385,23 @@ const styles = StyleSheet.create({
   },
   playerName: { color: '#fff', fontSize: 15, fontWeight: '700' },
   typeName: { color: '#2563eb', fontSize: 12, fontWeight: '600', marginTop: 2 },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.6)',
+    alignItems: 'center', justifyContent: 'center',
+  },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
-  modalBox: { backgroundColor: '#111827', borderRadius: 20, padding: 20, maxHeight: '85%', margin: 8 },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  modalTitle: { color: '#fff', fontSize: 18, fontWeight: '800', flex: 1 },
+  modalBox: { backgroundColor: '#111827', borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
+  modalTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
+  modalSub: { color: '#6b7280', fontSize: 12, marginTop: 2 },
+  actionRow: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: 8,
+    marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#1f2937',
+  },
+  actionBtn: {
+    flex: 1, minWidth: '45%', flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'center', gap: 6, backgroundColor: '#1f2937',
+    borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12,
+  },
+  actionText: { color: '#fff', fontSize: 13, fontWeight: '600' },
 });

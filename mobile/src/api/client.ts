@@ -75,6 +75,9 @@ export const evalsAPI = {
 
   corrections: (evalId: number) =>
     api.get(`/evaluations/${evalId}/corrections`).then(r => r.data),
+
+  applyCorrections: (evalId: number) =>
+    api.post(`/evaluations/${evalId}/apply-corrections`).then(r => r.data),
 };
 
 // ── Teams ─────────────────────────────────────────────────────────────────────
