@@ -378,6 +378,139 @@ def update_player_training(
     return pt
 
 
+@router.get("/training/{training_id}/detail")
+def get_training_detail(
+    training_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    pt = db.get(models.PlayerTraining, training_id)
+    if not pt:
+        raise HTTPException(status_code=404, detail="Training not found")
+    comments = db.query(models.PlayerComment).filter_by(player_training_id=training_id).all()
+    comment_list = []
+    for c in comments:
+        out = schemas.PlayerCommentOut.model_validate(c)
+        out.author_name = c.player_user.name if c.player_user else (c.coach.name if c.coach else "Unknown")
+        comment_list.append(out.model_dump())
+    player_name = pt.player_user.name if pt.player_user else "Unknown"
+    return {
+        "id": pt.id,
+        "player_name": player_name,
+        "program_text": pt.program_text,
+        "coach_notes": pt.coach_notes,
+        "created_at": pt.created_at,
+        "updated_at": pt.updated_at,
+        "comments": comment_list,
+    }
+
+
+@router.post("/training/{training_id}/refresh", response_model=schemas.PlayerTrainingOut)
+async def refresh_player_training(
+    training_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
+    pt = db.get(models.PlayerTraining, training_id)
+    if not pt or pt.player_user_id != pu.id:
+        raise HTTPException(status_code=404, detail="Training not found")
+    feedback = (body.get("feedback") or "").strip()
+    if not feedback:
+        raise HTTPException(status_code=400, detail="Feedback required")
+    prompt = (
+        f"You are the BloomPrint Basketball Intelligence Model.\n"
+        f"Here is an existing training program for {pu.name}:\n\n"
+        f"{pt.program_text or 'No previous program'}\n\n"
+        f"The player has provided the following feedback:\n{feedback}\n\n"
+        "Update the training program to incorporate this feedback. Keep the same structure but adjust drills, "
+        "intensity, focus areas, and weekly plan based on the feedback. Format with clear sections."
+    )
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        response = await client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=2048,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text_blocks = [b for b in response.content if hasattr(b, "text")]
+        if not text_blocks:
+            raise HTTPException(status_code=500, detail="AI returned no content")
+        pt.program_text = text_blocks[0].text
+        coaches = db.query(models.Coach).all()
+        for coach in coaches:
+            notif = models.PlayerNotification(
+                coach_id=coach.id,
+                type="training_refreshed",
+                title="Player Updated Training",
+                body=f"{pu.name} updated their training program with new feedback.",
+                ref_id=pt.id,
+            )
+            db.add(notif)
+        db.commit()
+        db.refresh(pt)
+        return pt
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
+
+
+@router.post("/training/{training_id}/coach-refresh", response_model=schemas.PlayerTrainingOut)
+async def coach_refresh_training(
+    training_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
+    pt = db.get(models.PlayerTraining, training_id)
+    if not pt:
+        raise HTTPException(status_code=404, detail="Training not found")
+    feedback = (body.get("feedback") or "").strip()
+    if not feedback:
+        raise HTTPException(status_code=400, detail="Feedback required")
+    player_name = pt.player_user.name if pt.player_user else "the player"
+    prompt = (
+        f"You are the BloomPrint Basketball Intelligence Model.\n"
+        f"Here is an existing training program for {player_name}:\n\n"
+        f"{pt.program_text or 'No previous program'}\n\n"
+        f"Coach feedback:\n{feedback}\n\n"
+        "Update the training program to incorporate the coach's feedback. Format with clear sections."
+    )
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        response = await client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=2048,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text_blocks = [b for b in response.content if hasattr(b, "text")]
+        if not text_blocks:
+            raise HTTPException(status_code=500, detail="AI returned no content")
+        pt.program_text = text_blocks[0].text
+        notif = models.PlayerNotification(
+            player_user_id=pt.player_user_id,
+            type="training_updated",
+            title="Training Updated by Coach",
+            body=f"{coach.name} has updated your training program.",
+            ref_id=pt.id,
+        )
+        db.add(notif)
+        db.commit()
+        db.refresh(pt)
+        return pt
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
+
+
 # ── Comments ──────────────────────────────────────────────────────────────────
 
 @router.post("/shared-reports/{shared_id}/comments", response_model=schemas.PlayerCommentOut)
