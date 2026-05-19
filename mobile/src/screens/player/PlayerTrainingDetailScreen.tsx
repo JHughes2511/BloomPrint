@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform, Keyboard,
+  ActivityIndicator, TextInput, Alert,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -34,13 +34,6 @@ export default function PlayerTrainingDetailScreen() {
       setComments(c);
     }).finally(() => setLoading(false));
   }, [trainingId]);
-
-  useEffect(() => {
-    const sub = Keyboard.addListener('keyboardDidShow', () => {
-      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
-    });
-    return () => sub.remove();
-  }, []);
 
   const refreshTraining = async () => {
     if (!feedbackText.trim()) return;
@@ -89,7 +82,7 @@ export default function PlayerTrainingDetailScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#0f1a0f' }}>
-      <ScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 200 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets={true}>
+      <ScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 60 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets={true}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={24} color="#fff" />

@@ -201,8 +201,20 @@ export default function RosterScreen() {
               value={newName} onChangeText={setNewName} />
             <TextInput style={styles.input} placeholder="Position (e.g. PG, SG, SF)" placeholderTextColor="#6b7280"
               value={newPos} onChangeText={setNewPos} />
-            <TextInput style={styles.input} placeholder="Competition Level" placeholderTextColor="#6b7280"
-              value={newLevel} onChangeText={setNewLevel} />
+            <Text style={[styles.input, { color: '#9ca3af', paddingTop: 10, height: 'auto' as any, marginBottom: 4, backgroundColor: 'transparent', borderWidth: 0 }]}>Competition Level</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
+              {['HS Varsity', 'HS JV', 'AAU Elite', 'AAU Grassroots', 'Middle School', 'College', 'Pro'].map(lvl => (
+                <TouchableOpacity
+                  key={lvl}
+                  style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, borderWidth: 1,
+                    borderColor: newLevel === lvl ? '#2563eb' : '#374151',
+                    backgroundColor: newLevel === lvl ? '#2563eb' : 'transparent' }}
+                  onPress={() => setNewLevel(lvl)}
+                >
+                  <Text style={{ color: newLevel === lvl ? '#fff' : '#9ca3af', fontSize: 12, fontWeight: '600' }}>{lvl}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowAdd(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>
@@ -222,8 +234,20 @@ export default function RosterScreen() {
             <Text style={styles.modalTitle}>New Team</Text>
             <TextInput style={styles.input} placeholder="Team Name *" placeholderTextColor="#6b7280"
               value={newTeamName} onChangeText={setNewTeamName} />
-            <TextInput style={styles.input} placeholder="Competition Level" placeholderTextColor="#6b7280"
-              value={newTeamLevel} onChangeText={setNewTeamLevel} />
+            <Text style={[styles.input, { color: '#9ca3af', paddingTop: 10, height: 'auto' as any, marginBottom: 4, backgroundColor: 'transparent', borderWidth: 0 }]}>Competition Level</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
+              {['HS Varsity', 'HS JV', 'AAU Elite', 'AAU Grassroots', 'Middle School', 'College', 'Pro'].map(lvl => (
+                <TouchableOpacity
+                  key={lvl}
+                  style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, borderWidth: 1,
+                    borderColor: newTeamLevel === lvl ? '#2563eb' : '#374151',
+                    backgroundColor: newTeamLevel === lvl ? '#2563eb' : 'transparent' }}
+                  onPress={() => setNewTeamLevel(lvl)}
+                >
+                  <Text style={{ color: newTeamLevel === lvl ? '#fff' : '#9ca3af', fontSize: 12, fontWeight: '600' }}>{lvl}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowNewTeam(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>

@@ -43,6 +43,8 @@ export const playerNotificationsAPI = {
   list: () => playerApi.get('/player/notifications').then(r => r.data),
   markRead: (id: number) =>
     playerApi.post(`/player/notifications/${id}/read`).then(r => r.data),
+  markAllRead: () =>
+    playerApi.post('/player/notifications/read-all').then(r => r.data),
 };
 
 export const playerLinkAPI = {

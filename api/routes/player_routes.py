@@ -660,6 +660,18 @@ def player_notifications(
     )
 
 
+@router.post("/notifications/read-all")
+def player_mark_all_read(
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    db.query(models.PlayerNotification).filter_by(
+        player_user_id=pu.id, read=False
+    ).update({"read": True})
+    db.commit()
+    return {"ok": True}
+
+
 @router.post("/notifications/{notif_id}/read")
 def mark_read(
     notif_id: int,

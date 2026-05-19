@@ -26,6 +26,12 @@ export default function PlayerNotificationsScreen() {
     try {
       const data = await playerNotificationsAPI.list();
       setNotifications(data);
+      // Mark all unread as read so the badge clears on home
+      const hasUnread = data.some((n: any) => !n.read);
+      if (hasUnread) {
+        playerNotificationsAPI.markAllRead().catch(() => {});
+        setNotifications(data.map((n: any) => ({ ...n, read: true })));
+      }
     } catch {}
     setLoading(false);
     setRefreshing(false);

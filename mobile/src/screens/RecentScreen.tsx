@@ -1,10 +1,11 @@
 import React, { useCallback, useState } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, Alert, ScrollView,
+  ActivityIndicator, Alert, ScrollView, Modal,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import Markdown from 'react-native-markdown-display';
 import { evalsAPI } from '../api/client';
 import { GradeBadge } from '../components/GradeBadge';
 
@@ -40,6 +41,8 @@ export default function RecentScreen() {
   const [items, setItems] = useState<ReportItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [teamReportModal, setTeamReportModal] = useState<{ text: string; outputType: string } | null>(null);
+  const [teamReportTexts, setTeamReportTexts] = useState<Record<number, string>>({});
 
   const load = async () => {
     setLoading(true);
@@ -64,6 +67,9 @@ export default function RecentScreen() {
         overall_grade: null,
         created_at: t.created_at,
       }));
+      const texts: Record<number, string> = {};
+      teamReports.forEach((t: any) => { if (t.report_text) texts[t.id] = t.report_text; });
+      setTeamReportTexts(texts);
       const combined = [...evalItems, ...teamItems].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
@@ -84,9 +90,11 @@ export default function RecentScreen() {
 
   const handlePress = (item: ReportItem) => {
     if (item.kind === 'eval') {
-      navigation.navigate('RosterTab', { screen: 'EvalReport', params: { evalId: item.id } });
+      navigation.navigate('EvalReport', { evalId: item.id });
+    } else {
+      const text = teamReportTexts[item.id] ?? '';
+      setTeamReportModal({ text, outputType: item.output_type });
     }
-    // Team reports: view inline for now (no detail screen yet)
   };
 
   const handleDelete = (item: ReportItem) => {
@@ -173,9 +181,38 @@ export default function RecentScreen() {
           );
         }}
       />
+
+      {/* Team Report Detail Modal */}
+      <Modal visible={!!teamReportModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {TYPE_LABELS[teamReportModal?.outputType ?? ''] ?? teamReportModal?.outputType ?? 'Team Report'}
+              </Text>
+              <TouchableOpacity onPress={() => setTeamReportModal(null)}>
+                <Ionicons name="close" size={24} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+              <Markdown style={mdStyles}>{teamReportModal?.text ?? ''}</Markdown>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
+
+const mdStyles = {
+  body: { color: '#d1d5db', fontSize: 13, lineHeight: 22 },
+  heading1: { color: '#fff', fontSize: 16, fontWeight: '800' as const, marginTop: 16, marginBottom: 4 },
+  heading2: { color: '#e5e7eb', fontSize: 14, fontWeight: '700' as const, marginTop: 12, marginBottom: 4 },
+  heading3: { color: '#9ca3af', fontSize: 13, fontWeight: '700' as const, marginTop: 10, marginBottom: 2 },
+  strong: { color: '#fff', fontWeight: '700' as const },
+  bullet_list: { marginLeft: 8 },
+  list_item: { color: '#d1d5db', fontSize: 13 },
+};
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0a0a', paddingTop: 56 },
@@ -200,4 +237,8 @@ const styles = StyleSheet.create({
   },
   playerName: { color: '#fff', fontSize: 15, fontWeight: '700' },
   typeName: { color: '#2563eb', fontSize: 12, fontWeight: '600', marginTop: 2 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
+  modalBox: { backgroundColor: '#111827', borderRadius: 20, padding: 20, maxHeight: '85%', margin: 8 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  modalTitle: { color: '#fff', fontSize: 18, fontWeight: '800', flex: 1 },
 });

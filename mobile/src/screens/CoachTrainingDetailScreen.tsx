@@ -19,6 +19,8 @@ export default function CoachTrainingDetailScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [noteText, setNoteText] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
   const loadDetail = () =>
@@ -46,6 +48,20 @@ export default function CoachTrainingDetailScreen() {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to add comment');
     } finally {
       setSubmittingComment(false);
+    }
+  };
+
+  const saveNote = async () => {
+    if (!noteText.trim()) return;
+    setSavingNote(true);
+    try {
+      await playerAPI.updateTraining(trainingId, { coach_notes: noteText.trim() });
+      setTraining((prev: any) => ({ ...prev, coach_notes: noteText.trim() }));
+      setNoteText('');
+    } catch {
+      Alert.alert('Error', 'Failed to save notes');
+    } finally {
+      setSavingNote(false);
     }
   };
 
@@ -151,6 +167,33 @@ export default function CoachTrainingDetailScreen() {
           </View>
         </View>
 
+        {/* Coach Notes (saved to training record) */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Add Coach Notes</Text>
+          <View style={styles.programBox}>
+            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
+              Notes are saved to the training record and visible to the player.
+            </Text>
+            <TextInput
+              style={styles.noteInput}
+              placeholder="Add notes for the player..."
+              placeholderTextColor="#4b5563"
+              value={noteText}
+              onChangeText={setNoteText}
+              multiline
+              textAlignVertical="top"
+              onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150)}
+            />
+            <TouchableOpacity
+              style={[styles.btn, { marginTop: 8 }]}
+              onPress={saveNote}
+              disabled={savingNote || !noteText.trim()}
+            >
+              {savingNote ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.btnText}>Save Notes</Text>}
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Update Program with Feedback */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Update Program with Feedback</Text>
@@ -159,7 +202,7 @@ export default function CoachTrainingDetailScreen() {
               Provide coaching feedback to regenerate the player's training program with AI.
             </Text>
             <TextInput
-              style={styles.input}
+              style={styles.noteInput}
               placeholder="e.g. Focus more on defensive footwork, increase conditioning..."
               placeholderTextColor="#4b5563"
               value={feedbackText}
@@ -217,6 +260,10 @@ const styles = StyleSheet.create({
   commentInput: { flexDirection: 'row', gap: 10, marginTop: 12, alignItems: 'flex-end' },
   input: {
     flex: 1, backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12, color: '#fff',
+    fontSize: 14, borderWidth: 1, borderColor: '#374151', minHeight: 60,
+  },
+  noteInput: {
+    backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12, color: '#fff',
     fontSize: 14, borderWidth: 1, borderColor: '#374151', minHeight: 80,
   },
   sendBtn: { backgroundColor: '#2563eb', borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' },
