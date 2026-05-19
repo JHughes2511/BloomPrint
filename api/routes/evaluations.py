@@ -133,7 +133,9 @@ def recent_team_reports(
 
 @router.post("/team-report", response_model=schemas.SummaryOut)
 async def team_report(
-    body: schemas.TeamReportRequest,
+    output_type: str = Form("coaching_report"),
+    focus_prompt: str | None = Form(None),
+    video: UploadFile | None = File(None),
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
@@ -162,12 +164,38 @@ async def team_report(
         else:
             roster_context += f"- {p.name} ({p.position or 'N/A'}): No evaluations yet.\n"
 
-    focus = body.focus_prompt or ""
+    # Optional video analysis for additional context
+    video_context = ""
+    if video and video.filename:
+        suffix = Path(video.filename).suffix
+        vid_dest = UPLOAD_DIR / f"team_report_{coach.id}{suffix}"
+        with vid_dest.open("wb") as f:
+            shutil.copyfileobj(video.file, f)
+        try:
+            from video_vision.server import _handle_analyze_basketball_video
+            vid_result = await _handle_analyze_basketball_video({
+                "video_path": str(vid_dest),
+                "output_type": output_type,
+                "program_name": coach.program_name,
+                "competition_level": "Team",
+                "coach_weight": coach.weight,
+                "player_name": "Team",
+                "focus_prompt": focus_prompt or "",
+                "interval_seconds": 5.0,
+                "max_frames": 8,
+                "include_audio": False,
+            })
+            video_context = f"\n\nVIDEO ANALYSIS:\n{vid_result[0].text}\n"
+        except Exception:
+            pass  # Video analysis optional — proceed without it
+
+    focus = focus_prompt or ""
     prompt = (
-        f"You are the BloomPrint Basketball Intelligence Model. Generate a {body.output_type.replace('_', ' ')} "
+        f"You are the BloomPrint Basketball Intelligence Model. Generate a {output_type.replace('_', ' ')} "
         f"for the entire {coach.program_name} roster.\n\n"
         f"ROSTER SUMMARY:\n{roster_context}\n\n"
-        f"{('COACH FOCUS: ' + focus) if focus else ''}\n\n"
+        f"{('COACH FOCUS: ' + focus) if focus else ''}"
+        f"{video_context}\n\n"
         "Provide a comprehensive team analysis covering overall team grade, team strengths, "
         "areas to develop, lineup recommendations, and strategic priorities. "
         "Use the BIM framework with 6 pillars. Format with clear sections."
@@ -186,8 +214,8 @@ async def team_report(
             raise HTTPException(status_code=500, detail="AI returned no text content")
         team_report_record = models.TeamReport(
             coach_id=coach.id,
-            output_type=body.output_type,
-            focus_prompt=body.focus_prompt,
+            output_type=output_type,
+            focus_prompt=focus_prompt,
             report_text=text_blocks[0].text,
         )
         db.add(team_report_record)
@@ -221,6 +249,20 @@ def delete_evaluation(
     if not ev:
         raise HTTPException(status_code=404, detail="Evaluation not found")
     db.delete(ev)
+    db.commit()
+    return {"ok": True}
+
+
+@router.delete("/team-reports/{report_id}")
+def delete_team_report(
+    report_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    tr = db.get(models.TeamReport, report_id)
+    if not tr:
+        raise HTTPException(status_code=404, detail="Team report not found")
+    db.delete(tr)
     db.commit()
     return {"ok": True}
 

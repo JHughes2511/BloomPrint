@@ -35,6 +35,8 @@ export const playerTrainingAPI = {
     playerApi.get(`/player/training/${id}/comments`).then(r => r.data),
   addComment: (id: number, text: string) =>
     playerApi.post(`/player/training/${id}/comments`, { text }).then(r => r.data),
+  refresh: (id: number, feedback: string) =>
+    playerApi.post(`/player/training/${id}/refresh`, { feedback }).then(r => r.data),
 };
 
 export const playerNotificationsAPI = {

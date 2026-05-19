@@ -77,7 +77,7 @@ export default function PlayerTrainingScreen() {
             </View>
             {pt.program_text && (
               <Text style={styles.preview} numberOfLines={2}>
-                {pt.program_text}
+                {pt.program_text.replace(/#{1,6}\s?/g, '').replace(/\*\*/g, '').replace(/\*/g, '').replace(/__/g, '').replace(/_([^_]+)_/g, '$1').replace(/^\s*[-•]\s/gm, '').trim()}
               </Text>
             )}
           </TouchableOpacity>

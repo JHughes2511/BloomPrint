@@ -56,8 +56,13 @@ export const evalsAPI = {
   recent: (limit = 30) =>
     api.get('/evaluations/recent', { params: { limit } }).then(r => r.data),
 
-  teamReport: (data: { output_type: string; focus_prompt?: string }) =>
-    api.post('/evaluations/team-report', data).then(r => r.data),
+  teamReport: (data: { output_type: string; focus_prompt?: string; video?: { uri: string; name: string; type: string } }) => {
+    const form = new FormData();
+    form.append('output_type', data.output_type);
+    if (data.focus_prompt) form.append('focus_prompt', data.focus_prompt);
+    if (data.video) form.append('video', { uri: data.video.uri, name: data.video.name, type: data.video.type } as any);
+    return api.post('/evaluations/team-report', form, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data);
+  },
 
   teamReports: (limit = 30) =>
     api.get('/evaluations/team-reports/recent', { params: { limit } }).then(r => r.data),
@@ -145,4 +150,8 @@ export const playerAPI = {
     api.post('/player/share-team-report', data).then(r => r.data),
   searchStaff: (q: string) =>
     api.get('/player/staff/search', { params: { q } }).then(r => r.data),
+  getTrainingDetail: (trainingId: number) =>
+    api.get(`/player/training/${trainingId}/detail`).then(r => r.data),
+  coachRefreshTraining: (trainingId: number, feedback: string) =>
+    api.post(`/player/training/${trainingId}/coach-refresh`, { feedback }).then(r => r.data),
 };

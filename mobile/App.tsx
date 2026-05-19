@@ -4,7 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, PanResponder } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { PlayerAuthProvider, usePlayerAuth } from './src/context/PlayerAuthContext';
@@ -22,6 +23,7 @@ import RecentScreen from './src/screens/RecentScreen';
 import SummaryScreen from './src/screens/SummaryScreen';
 import ImportScreen from './src/screens/ImportScreen';
 import CoachNotificationsScreen from './src/screens/CoachNotificationsScreen';
+import CoachTrainingDetailScreen from './src/screens/CoachTrainingDetailScreen';
 
 // Role select
 import RoleSelectScreen from './src/screens/RoleSelectScreen';
@@ -48,6 +50,7 @@ function HomeStack() {
     <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="CoachNotifications" component={CoachNotificationsScreen} />
+      <Stack.Screen name="CoachTrainingDetail" component={CoachTrainingDetailScreen} />
     </Stack.Navigator>
   );
 }
@@ -153,6 +156,44 @@ function PlayerNotifStack() {
   );
 }
 
+const PLAYER_TABS = ['PlayerHomeTab', 'InboxTab', 'TrainingTab', 'PlayerNotifsTab', 'ProfileTab'];
+
+function withTabSwipe<T extends object>(WrappedComponent: React.ComponentType<T>) {
+  return function SwipeWrapper(props: T) {
+    const navigation = useNavigation<any>();
+
+    const panResponder = React.useMemo(() => PanResponder.create({
+      onMoveShouldSetPanResponder: (_, { dx, dy }) =>
+        Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.8,
+      onPanResponderRelease: (_, { dx }) => {
+        if (Math.abs(dx) < 60) return;
+        const parent = navigation.getParent();
+        if (!parent) return;
+        const state = parent.getState();
+        if (!state) return;
+        const idx = state.index as number;
+        if (dx < 0 && idx < PLAYER_TABS.length - 1) {
+          parent.navigate(PLAYER_TABS[idx + 1]);
+        } else if (dx > 0 && idx > 0) {
+          parent.navigate(PLAYER_TABS[idx - 1]);
+        }
+      },
+    }), [navigation]);
+
+    return (
+      <View style={{ flex: 1 }} {...panResponder.panHandlers}>
+        <WrappedComponent {...props} />
+      </View>
+    );
+  };
+}
+
+const SwipedPlayerHomeStack = withTabSwipe(PlayerHomeStack);
+const SwipedPlayerInboxStack = withTabSwipe(PlayerInboxStack);
+const SwipedPlayerTrainingStack = withTabSwipe(PlayerTrainingStack);
+const SwipedPlayerNotifStack = withTabSwipe(PlayerNotifStack);
+const SwipedPlayerLinkScreen = withTabSwipe(PlayerLinkScreen);
+
 function PlayerTabs() {
   return (
     <Tab.Navigator
@@ -174,11 +215,11 @@ function PlayerTabs() {
         },
       })}
     >
-      <Tab.Screen name="PlayerHomeTab"   component={PlayerHomeStack}      options={{ title: 'Home' }} />
-      <Tab.Screen name="InboxTab"        component={PlayerInboxStack}     options={{ title: 'Reports' }} />
-      <Tab.Screen name="TrainingTab"     component={PlayerTrainingStack}  options={{ title: 'Training' }} />
-      <Tab.Screen name="PlayerNotifsTab" component={PlayerNotifStack}     options={{ title: 'Alerts' }} />
-      <Tab.Screen name="ProfileTab"      component={PlayerLinkScreen}     options={{ title: 'Profile' }} />
+      <Tab.Screen name="PlayerHomeTab"   component={SwipedPlayerHomeStack}     options={{ title: 'Home' }} />
+      <Tab.Screen name="InboxTab"        component={SwipedPlayerInboxStack}    options={{ title: 'Reports' }} />
+      <Tab.Screen name="TrainingTab"     component={SwipedPlayerTrainingStack} options={{ title: 'Training' }} />
+      <Tab.Screen name="PlayerNotifsTab" component={SwipedPlayerNotifStack}    options={{ title: 'Alerts' }} />
+      <Tab.Screen name="ProfileTab"      component={SwipedPlayerLinkScreen}    options={{ title: 'Profile' }} />
     </Tab.Navigator>
   );
 }

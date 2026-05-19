@@ -155,6 +155,25 @@ export default function CoachNotificationsScreen() {
                       {replying === n.id ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.replyBtnText}>Send Reply</Text>}
                     </TouchableOpacity>
                   </>
+                ) : (n.type === 'training_generated' || n.type === 'training_refreshed') && n.ref_id ? (
+                  <View>
+                    <Text style={{ color: '#9ca3af', fontSize: 12, marginBottom: 8 }}>
+                      {n.type === 'training_refreshed' ? 'Player updated their training with feedback.' : 'Player generated a new training program.'}
+                    </Text>
+                    <View style={styles.actionRow}>
+                      <TouchableOpacity
+                        style={[styles.approveBtn, { backgroundColor: '#2563eb', flex: 1, alignItems: 'center' }]}
+                        onPress={async () => {
+                          await playerAPI.coachMarkRead(n.id);
+                          setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
+                          setExpandedId(null);
+                          navigation.navigate('CoachTrainingDetail', { trainingId: n.ref_id });
+                        }}
+                      >
+                        <Text style={styles.approveBtnText}>View Training</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
                 ) : n.type === 'link_requested' && n.ref_id ? (
                   <View style={styles.actionRow}>
                     <TouchableOpacity style={styles.approveBtn} onPress={() => approveLink(n.ref_id!, n.id)}>

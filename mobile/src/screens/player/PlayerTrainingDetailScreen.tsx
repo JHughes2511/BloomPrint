@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform,
+  ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform, Keyboard,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,6 +19,8 @@ export default function PlayerTrainingDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -32,6 +34,28 @@ export default function PlayerTrainingDetailScreen() {
       setComments(c);
     }).finally(() => setLoading(false));
   }, [trainingId]);
+
+  useEffect(() => {
+    const sub = Keyboard.addListener('keyboardDidShow', () => {
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
+    });
+    return () => sub.remove();
+  }, []);
+
+  const refreshTraining = async () => {
+    if (!feedbackText.trim()) return;
+    setRefreshing(true);
+    try {
+      const updated = await playerTrainingAPI.refresh(trainingId, feedbackText.trim());
+      setTraining(updated);
+      setFeedbackText('');
+      Alert.alert('Updated!', 'Your training program has been updated based on your feedback.');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to update training');
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const addComment = async () => {
     if (!commentText.trim()) return;
@@ -68,7 +92,7 @@ export default function PlayerTrainingDetailScreen() {
       style={{ flex: 1, backgroundColor: '#0f1a0f' }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 120 }} keyboardShouldPersistTaps="handled">
+      <ScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 200 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets={true}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={24} color="#fff" />
@@ -142,6 +166,35 @@ export default function PlayerTrainingDetailScreen() {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Update Report with Feedback */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Update Training with Feedback</Text>
+          <View style={styles.programBox}>
+            <Text style={{ color: '#9ca3af', fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
+              Share what's working, what's not, or any changes to your schedule and the AI will update your program.
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. I want more shooting drills, reduce weight sessions, focus on ball-handling..."
+              placeholderTextColor="#4b7a4b"
+              value={feedbackText}
+              onChangeText={setFeedbackText}
+              multiline
+              textAlignVertical="top"
+            />
+            <TouchableOpacity
+              style={[styles.sendBtn, { width: '100%', borderRadius: 12, paddingVertical: 14, marginTop: 8, flexDirection: 'row', gap: 8, justifyContent: 'center' }]}
+              onPress={refreshTraining}
+              disabled={refreshing || !feedbackText.trim()}
+            >
+              {refreshing
+                ? <><ActivityIndicator color="#fff" size="small" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Updating...</Text></>
+                : <><Ionicons name="refresh" size={16} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Update Report</Text></>
+              }
+            </TouchableOpacity>
+          </View>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -206,6 +259,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#2d4a2d',
     maxHeight: 100,
+    minHeight: 80,
   },
   sendBtn: {
     backgroundColor: '#16a34a',

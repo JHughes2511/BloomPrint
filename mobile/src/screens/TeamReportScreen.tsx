@@ -6,6 +6,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
+import * as ImagePicker from 'expo-image-picker';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -31,6 +32,26 @@ export default function TeamReportScreen() {
   const [reportText, setReportText] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const scrollRef = React.useRef<ScrollView>(null);
+
+  const [videoAsset, setVideoAsset] = useState<{ uri: string; name: string; type: string } | null>(null);
+
+  const pickVideo = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Allow access to your media library to upload footage.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['videos'],
+      allowsEditing: false,
+      quality: 1,
+    });
+    if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      const name = asset.uri.split('/').pop() ?? 'team_video.mp4';
+      setVideoAsset({ uri: asset.uri, name, type: 'video/mp4' });
+    }
+  };
 
   const [showShare, setShowShare] = useState(false);
   const [shareTarget, setShareTarget] = useState<'player' | 'team' | 'all_staff'>('player');
@@ -142,7 +163,7 @@ export default function TeamReportScreen() {
     setGenerating(true);
     setReportText(null);
     try {
-      const result = await evalsAPI.teamReport({ output_type: outputType, focus_prompt: focusPrompt });
+      const result = await evalsAPI.teamReport({ output_type: outputType, focus_prompt: focusPrompt, video: videoAsset ?? undefined });
       setReportText(result.report_text);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300);
     } catch (e: any) {
@@ -199,6 +220,19 @@ export default function TeamReportScreen() {
           textAlignVertical="top"
           onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100)}
         />
+
+        <Text style={styles.label}>Upload Footage (optional)</Text>
+        <TouchableOpacity style={styles.videoPickerBtn} onPress={pickVideo}>
+          <Ionicons name={videoAsset ? 'videocam' : 'videocam-outline'} size={18} color={videoAsset ? '#16a34a' : '#9ca3af'} />
+          <Text style={[styles.videoPickerText, videoAsset && { color: '#16a34a' }]}>
+            {videoAsset ? videoAsset.name.slice(-30) : 'Pick a video for visual context...'}
+          </Text>
+          {videoAsset && (
+            <TouchableOpacity onPress={() => setVideoAsset(null)}>
+              <Ionicons name="close-circle" size={18} color="#6b7280" />
+            </TouchableOpacity>
+          )}
+        </TouchableOpacity>
 
         <TouchableOpacity style={styles.generateBtn} onPress={generate} disabled={generating}>
           {generating
@@ -404,6 +438,12 @@ const styles = StyleSheet.create({
     color: '#fff', fontSize: 14, marginBottom: 16,
     borderWidth: 1, borderColor: '#1f2937', minHeight: 80,
   },
+  videoPickerBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: '#111827', borderRadius: 10, padding: 14,
+    borderWidth: 1, borderColor: '#1f2937', marginBottom: 16,
+  },
+  videoPickerText: { color: '#9ca3af', fontSize: 13, flex: 1 },
   generateBtn: {
     backgroundColor: '#2563eb', borderRadius: 12, padding: 16,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',

@@ -1,0 +1,218 @@
+import React, { useEffect, useState, useRef } from 'react';
+import {
+  View, Text, ScrollView, TouchableOpacity, StyleSheet,
+  ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform, Keyboard,
+} from 'react-native';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import Markdown from 'react-native-markdown-display';
+import { playerAPI } from '../api/client';
+
+export default function CoachTrainingDetailScreen() {
+  const route = useRoute<any>();
+  const navigation = useNavigation<any>();
+  const { trainingId } = route.params;
+
+  const [training, setTraining] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [noteText, setNoteText] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    playerAPI.getTrainingDetail(trainingId).then(setTraining).finally(() => setLoading(false));
+  }, [trainingId]);
+
+  useEffect(() => {
+    const sub = Keyboard.addListener('keyboardDidShow', () => {
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
+    });
+    return () => sub.remove();
+  }, []);
+
+  const refreshTraining = async () => {
+    if (!feedbackText.trim()) return;
+    setRefreshing(true);
+    try {
+      const updated = await playerAPI.coachRefreshTraining(trainingId, feedbackText.trim());
+      setTraining((prev: any) => ({ ...prev, program_text: updated.program_text }));
+      setFeedbackText('');
+      Alert.alert('Updated!', 'Training program has been updated.');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to update training');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const saveNote = async () => {
+    if (!noteText.trim()) return;
+    setSavingNote(true);
+    try {
+      await playerAPI.updateTraining(trainingId, { coach_notes: noteText.trim() });
+      setTraining((prev: any) => ({ ...prev, coach_notes: noteText.trim() }));
+      setNoteText('');
+      Alert.alert('Saved', 'Notes added to training.');
+    } catch (e: any) {
+      Alert.alert('Error', 'Failed to save notes');
+    } finally {
+      setSavingNote(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color="#2563eb" size="large" />
+      </View>
+    );
+  }
+
+  if (!training) {
+    return (
+      <View style={styles.center}>
+        <Text style={{ color: '#fff' }}>Training not found</Text>
+      </View>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#0a0a0a' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 200 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets={true}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={styles.title}>{training.player_name}'s Training</Text>
+            <Text style={styles.sub}>{new Date(training.created_at).toLocaleDateString()}</Text>
+          </View>
+        </View>
+
+        {training.coach_notes ? (
+          <View style={styles.notesBox}>
+            <Text style={styles.notesLabel}>Coach Notes</Text>
+            <Text style={styles.notesText}>{training.coach_notes}</Text>
+          </View>
+        ) : null}
+
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Training Program</Text>
+          <View style={styles.programBox}>
+            {training.program_text
+              ? <Markdown style={markdownStyles}>{training.program_text}</Markdown>
+              : <Text style={{ color: '#6b7280' }}>No program text</Text>}
+          </View>
+        </View>
+
+        {training.comments?.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>Comments ({training.comments.length})</Text>
+            {training.comments.map((c: any) => (
+              <View key={c.id} style={styles.commentCard}>
+                <View style={styles.commentHeader}>
+                  <Text style={[styles.commentAuthor, c.coach_id ? { color: '#2563eb' } : { color: '#16a34a' }]}>
+                    {c.author_name}{c.coach_id ? ' (Coach)' : ''}
+                  </Text>
+                  <Text style={styles.commentDate}>{new Date(c.created_at).toLocaleDateString()}</Text>
+                </View>
+                <Text style={styles.commentText}>{c.text}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Add Coach Notes</Text>
+          <View style={styles.programBox}>
+            <TextInput
+              style={styles.input}
+              placeholder="Add notes for the player..."
+              placeholderTextColor="#4b5563"
+              value={noteText}
+              onChangeText={setNoteText}
+              multiline
+              textAlignVertical="top"
+              onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150)}
+            />
+            <TouchableOpacity
+              style={[styles.btn, { marginTop: 8 }]}
+              onPress={saveNote}
+              disabled={savingNote || !noteText.trim()}
+            >
+              {savingNote ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.btnText}>Save Notes</Text>}
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Update Program with Feedback</Text>
+          <View style={styles.programBox}>
+            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
+              Provide coaching feedback to regenerate the player's training program with AI.
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. Focus more on defensive footwork, increase conditioning..."
+              placeholderTextColor="#4b5563"
+              value={feedbackText}
+              onChangeText={setFeedbackText}
+              multiline
+              textAlignVertical="top"
+              onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150)}
+            />
+            <TouchableOpacity
+              style={[styles.btn, { backgroundColor: '#16a34a', marginTop: 8, flexDirection: 'row', gap: 8, justifyContent: 'center' }]}
+              onPress={refreshTraining}
+              disabled={refreshing || !feedbackText.trim()}
+            >
+              {refreshing
+                ? <><ActivityIndicator color="#fff" size="small" /><Text style={styles.btnText}>Updating...</Text></>
+                : <><Ionicons name="refresh" size={16} color="#fff" /><Text style={styles.btnText}>Update Report</Text></>
+              }
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+const markdownStyles = {
+  body: { color: '#d1d5db', fontSize: 13, lineHeight: 22 },
+  heading1: { color: '#ffffff', fontSize: 16, fontWeight: '800' as const, marginTop: 16, marginBottom: 4 },
+  heading2: { color: '#e5e7eb', fontSize: 14, fontWeight: '700' as const, marginTop: 14, marginBottom: 4 },
+  strong: { color: '#ffffff', fontWeight: '700' as const },
+  bullet_list: { marginLeft: 8 },
+  list_item: { color: '#d1d5db', fontSize: 13 },
+};
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#0a0a0a' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a0a0a' },
+  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56 },
+  title: { color: '#fff', fontSize: 16, fontWeight: '900' },
+  sub: { color: '#4b5563', fontSize: 11, marginTop: 2 },
+  notesBox: {
+    backgroundColor: '#16a34a22', borderLeftWidth: 3, borderLeftColor: '#16a34a',
+    marginHorizontal: 20, marginBottom: 8, padding: 14, borderRadius: 10,
+  },
+  notesLabel: { color: '#16a34a', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', marginBottom: 4 },
+  notesText: { color: '#d1d5db', fontSize: 13, lineHeight: 20 },
+  section: { paddingHorizontal: 20, marginTop: 24 },
+  sectionLabel: { color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 },
+  programBox: { backgroundColor: '#111827', borderRadius: 12, padding: 16 },
+  commentCard: { backgroundColor: '#111827', borderRadius: 10, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: '#1f2937' },
+  commentHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
+  commentAuthor: { fontSize: 12, fontWeight: '700' },
+  commentDate: { color: '#4b5563', fontSize: 11 },
+  commentText: { color: '#d1d5db', fontSize: 13 },
+  input: {
+    backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12, color: '#fff',
+    fontSize: 14, borderWidth: 1, borderColor: '#374151', minHeight: 80,
+  },
+  btn: { backgroundColor: '#2563eb', borderRadius: 10, padding: 12, alignItems: 'center' },
+  btnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+});
