@@ -33,6 +33,7 @@ export default function TeamReportScreen() {
   const [exporting, setExporting] = useState(false);
   const scrollRef = React.useRef<ScrollView>(null);
 
+  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [videoAsset, setVideoAsset] = useState<{ uri: string; name: string; type: string } | null>(null);
 
   const pickVideo = async () => {
@@ -158,7 +159,7 @@ export default function TeamReportScreen() {
     setGenerating(true);
     setReportText(null);
     try {
-      const result = await evalsAPI.teamReport({ output_type: outputType, focus_prompt: focusPrompt, video: videoAsset ?? undefined });
+      const result = await evalsAPI.teamReport({ output_type: outputType, focus_prompt: focusPrompt, team_id: selectedTeamId ?? undefined, video: videoAsset ?? undefined });
       setReportText(result.report_text);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300);
     } catch (e: any) {
@@ -190,6 +191,25 @@ export default function TeamReportScreen() {
             <Text style={styles.importText}>Import Excel</Text>
           </TouchableOpacity>
         </View>
+
+        <Text style={styles.label}>Select Team</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+          <TouchableOpacity
+            style={[styles.chip, selectedTeamId === null && styles.chipActive]}
+            onPress={() => setSelectedTeamId(null)}
+          >
+            <Text style={[styles.chipText, selectedTeamId === null && styles.chipTextActive]}>All Players</Text>
+          </TouchableOpacity>
+          {teams.map(t => (
+            <TouchableOpacity
+              key={t.id}
+              style={[styles.chip, selectedTeamId === t.id && styles.chipActive]}
+              onPress={() => setSelectedTeamId(t.id)}
+            >
+              <Text style={[styles.chipText, selectedTeamId === t.id && styles.chipTextActive]}>{t.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
         <Text style={styles.label}>Report Type</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
@@ -246,23 +266,23 @@ export default function TeamReportScreen() {
             <View style={styles.reportBox}>
               <Markdown style={markdownStyles}>{reportText}</Markdown>
             </View>
-            <View style={styles.actionRow}>
+            <View style={styles.actionGrid}>
               <TouchableOpacity style={styles.actionBtn} onPress={exportPdf} disabled={exporting}>
                 {exporting
                   ? <ActivityIndicator color="#9ca3af" size="small" />
-                  : <Ionicons name="share-outline" size={18} color="#9ca3af" />}
+                  : <Ionicons name="share-outline" size={20} color="#9ca3af" />}
                 <Text style={styles.actionText}>Export PDF</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn} onPress={printPdf}>
-                <Ionicons name="print-outline" size={18} color="#9ca3af" />
+                <Ionicons name="print-outline" size={20} color="#9ca3af" />
                 <Text style={styles.actionText}>Print</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.actionBtn, { borderColor: '#16a34a' }]} onPress={() => setShowShare(true)}>
-                <Ionicons name="person-add-outline" size={18} color="#16a34a" />
+                <Ionicons name="person-add-outline" size={20} color="#16a34a" />
                 <Text style={[styles.actionText, { color: '#16a34a' }]}>Share</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionBtn, { borderColor: '#374151' }]} onPress={() => { setReportText(null); setFocusPrompt(''); }}>
-                <Ionicons name="add-circle-outline" size={18} color="#9ca3af" />
+              <TouchableOpacity style={styles.actionBtn} onPress={() => { setReportText(null); setFocusPrompt(''); setSelectedTeamId(null); setVideoAsset(null); }}>
+                <Ionicons name="add-circle-outline" size={20} color="#9ca3af" />
                 <Text style={styles.actionText}>New Report</Text>
               </TouchableOpacity>
             </View>
@@ -447,12 +467,13 @@ const styles = StyleSheet.create({
   hint: { color: '#4b5563', fontSize: 12, textAlign: 'center', marginTop: 12 },
   reportSection: { marginTop: 28 },
   reportBox: { backgroundColor: '#111827', borderRadius: 12, padding: 16, marginBottom: 12 },
-  actionRow: { flexDirection: 'row', gap: 10 },
+  actionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   actionBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 6, padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#374151',
+    width: '47%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 8, paddingVertical: 16, paddingHorizontal: 12,
+    borderRadius: 12, borderWidth: 1, borderColor: '#374151',
   },
-  actionText: { color: '#9ca3af', fontWeight: '600', fontSize: 13 },
+  actionText: { color: '#9ca3af', fontWeight: '600', fontSize: 14 },
 });
 
 const shareStyles = StyleSheet.create({

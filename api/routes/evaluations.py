@@ -135,6 +135,7 @@ def recent_team_reports(
 async def team_report(
     output_type: str = Form("coaching_report"),
     focus_prompt: str | None = Form(None),
+    team_id: int | None = Form(None),
     video: UploadFile | None = File(None),
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
@@ -145,7 +146,10 @@ async def team_report(
             status_code=500,
             detail="ANTHROPIC_API_KEY is not set on the server. Ask the server admin to configure it."
         )
-    players = db.query(models.Player).all()
+    query = db.query(models.Player)
+    if team_id is not None:
+        query = query.filter_by(team_id=team_id)
+    players = query.all()
     if not players:
         raise HTTPException(status_code=400, detail="No players on roster yet")
 
@@ -190,9 +194,14 @@ async def team_report(
             pass  # Video analysis optional — proceed without it
 
     focus = focus_prompt or ""
+    team_label = coach.program_name
+    if team_id is not None:
+        team_obj = db.get(models.Team, team_id)
+        if team_obj:
+            team_label = f"{team_obj.name} ({coach.program_name})"
     prompt = (
         f"You are the BloomPrint Basketball Intelligence Model. Generate a {output_type.replace('_', ' ')} "
-        f"for the entire {coach.program_name} roster.\n\n"
+        f"for the {team_label} roster.\n\n"
         f"ROSTER SUMMARY:\n{roster_context}\n\n"
         f"{('COACH FOCUS: ' + focus) if focus else ''}"
         f"{video_context}\n\n"
