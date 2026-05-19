@@ -155,7 +155,7 @@ export default function EvalReportScreen() {
       s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     let body = `<h1>BloomPrint &mdash; ${type}</h1>
-      <p style="color:#555;margin-top:0">${sanitize(ev.competition_level ?? '')} &bull; ${date} &bull; Coach weight ${ev.coach_weight ?? ''}</p>`;
+      <p style="color:#555;margin-top:0">${sanitize(ev.competition_level ?? '')} &bull; ${date}</p>`;
 
     if (cats.grades && ev.overall_grade != null) {
       body += `<h3>Overall Grade</h3><div class="grade">${ev.overall_grade.toFixed(1)} / 10</div>`;
@@ -262,7 +262,7 @@ export default function EvalReportScreen() {
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 12 }}>
           <Text style={styles.title}>{ev.output_type.replace(/_/g, ' ').toUpperCase()}</Text>
-          <Text style={styles.sub}>{new Date(ev.created_at).toLocaleDateString()} · Weight {ev.coach_weight}</Text>
+          <Text style={styles.sub}>{new Date(ev.created_at).toLocaleDateString()}</Text>
         </View>
         <GradeBadge grade={ev.overall_grade} size="lg" />
       </View>
@@ -326,7 +326,7 @@ export default function EvalReportScreen() {
             <View key={c.id} style={styles.correctionCard}>
               {c.pillar && <Text style={styles.correctionPillar}>{c.pillar.replace(/_/g, ' ').toUpperCase()}</Text>}
               <Text style={styles.correctionText}>{c.correction}</Text>
-              <Text style={styles.correctionMeta}>Weight {c.coach_weight} · {new Date(c.created_at).toLocaleDateString()}</Text>
+              <Text style={styles.correctionMeta}>{new Date(c.created_at).toLocaleDateString()}</Text>
             </View>
           ))}
         </View>
