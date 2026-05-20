@@ -24,6 +24,7 @@ import SummaryScreen from './src/screens/SummaryScreen';
 import ImportScreen from './src/screens/ImportScreen';
 import CoachNotificationsScreen from './src/screens/CoachNotificationsScreen';
 import CoachTrainingDetailScreen from './src/screens/CoachTrainingDetailScreen';
+import GameReportBuilderScreen from './src/screens/GameReportBuilderScreen';
 
 // Role select
 import RoleSelectScreen from './src/screens/RoleSelectScreen';
@@ -60,6 +61,7 @@ function TeamStack() {
   return (
     <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
       <Stack.Screen name="Team" component={TeamReportScreen} />
+      <Stack.Screen name="GameReportBuilder" component={GameReportBuilderScreen} />
       <Stack.Screen name="Summary" component={SummaryScreen} />
       <Stack.Screen name="Import" component={ImportScreen} />
     </Stack.Navigator>

@@ -165,3 +165,17 @@ export const playerAPI = {
   coachRefreshTraining: (trainingId: number, feedback: string) =>
     api.post(`/player/training/${trainingId}/coach-refresh`, { feedback }).then(r => r.data),
 };
+
+export const gameReportsAPI = {
+  list: () => api.get('/game-reports').then(r => r.data),
+  get: (id: number) => api.get(`/game-reports/${id}`).then(r => r.data),
+  create: (data: any) => api.post('/game-reports', data).then(r => r.data),
+  update: (id: number, data: any) => api.patch(`/game-reports/${id}`, data).then(r => r.data),
+  delete: (id: number) => api.delete(`/game-reports/${id}`).then(r => r.data),
+  addClip: (id: number, formData: FormData) =>
+    api.post(`/game-reports/${id}/clips`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
+  deleteClip: (id: number, clipId: number) => api.delete(`/game-reports/${id}/clips/${clipId}`).then(r => r.data),
+  uploadDoc: (id: number, formData: FormData) =>
+    api.post(`/game-reports/${id}/upload-doc`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
+  generate: (id: number) => api.post(`/game-reports/${id}/generate`).then(r => r.data),
+};

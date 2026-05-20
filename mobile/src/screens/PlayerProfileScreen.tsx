@@ -36,6 +36,8 @@ export default function PlayerProfileScreen() {
   const [showEdit, setShowEdit] = useState(false);
   const [editName, setEditName] = useState('');
   const [editPos, setEditPos] = useState('');
+  const [editHeight, setEditHeight] = useState('');
+  const [editWingspan, setEditWingspan] = useState('');
   const [editLevel, setEditLevel] = useState('');
   const [editTeamId, setEditTeamId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
@@ -60,6 +62,8 @@ export default function PlayerProfileScreen() {
     if (!player) return;
     setEditName(player.name);
     setEditPos(player.position ?? '');
+    setEditHeight((player as any).height ?? '');
+    setEditWingspan((player as any).wingspan ?? '');
     setEditLevel(player.competition_level ?? 'HS Varsity');
     setEditTeamId(player.team_id ?? null);
     setShowEdit(true);
@@ -72,6 +76,8 @@ export default function PlayerProfileScreen() {
       const updated = await playersAPI.update(playerId, {
         name: editName.trim(),
         position: editPos.trim() || undefined,
+        height: editHeight.trim() || undefined,
+        wingspan: editWingspan.trim() || undefined,
         competition_level: editLevel,
         team_id: editTeamId ?? 0,
       });
@@ -274,6 +280,22 @@ export default function PlayerProfileScreen() {
               value={editPos}
               onChangeText={setEditPos}
             />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TextInput
+                style={[styles.input, { flex: 1 }]}
+                placeholder='Height (e.g. 6\'2")'
+                placeholderTextColor="#6b7280"
+                value={editHeight}
+                onChangeText={setEditHeight}
+              />
+              <TextInput
+                style={[styles.input, { flex: 1 }]}
+                placeholder='Wingspan (e.g. 6\'5")'
+                placeholderTextColor="#6b7280"
+                value={editWingspan}
+                onChangeText={setEditWingspan}
+              />
+            </View>
 
             {/* Inline level picker */}
             <Text style={styles.inputLabel}>Competition Level</Text>

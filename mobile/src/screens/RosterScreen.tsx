@@ -72,6 +72,8 @@ export default function RosterScreen() {
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPos, setNewPos] = useState('');
+  const [newHeight, setNewHeight] = useState('');
+  const [newWingspan, setNewWingspan] = useState('');
   const [newLevel, setNewLevel] = useState('Middle School');
   const [saving, setSaving] = useState(false);
 
@@ -104,11 +106,13 @@ export default function RosterScreen() {
       await playersAPI.create({
         name: newName,
         position: newPos || undefined,
+        height: newHeight || undefined,
+        wingspan: newWingspan || undefined,
         competition_level: newLevel,
         team_id: selectedTeamId ?? undefined,
       });
       setShowAdd(false);
-      setNewName(''); setNewPos('');
+      setNewName(''); setNewPos(''); setNewHeight(''); setNewWingspan('');
       load();
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not add player');
@@ -252,6 +256,12 @@ export default function RosterScreen() {
               value={newName} onChangeText={setNewName} />
             <TextInput style={styles.input} placeholder="Position (e.g. PG, SG, SF)" placeholderTextColor="#6b7280"
               value={newPos} onChangeText={setNewPos} />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TextInput style={[styles.input, { flex: 1 }]} placeholder='Height (e.g. 6\'2")' placeholderTextColor="#6b7280"
+                value={newHeight} onChangeText={setNewHeight} />
+              <TextInput style={[styles.input, { flex: 1 }]} placeholder='Wingspan (e.g. 6\'5")' placeholderTextColor="#6b7280"
+                value={newWingspan} onChangeText={setNewWingspan} />
+            </View>
             <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Competition Level</Text>
             <LevelDropdown value={newLevel} onChange={setNewLevel} />
             <View style={styles.modalRow}>

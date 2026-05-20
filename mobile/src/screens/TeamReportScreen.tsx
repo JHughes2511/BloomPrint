@@ -10,9 +10,22 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import { evalsAPI, teamsAPI, playerAPI } from '../api/client';
+import { evalsAPI, teamsAPI, playerAPI, gameReportsAPI } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { mdToHtml, safeFileName } from '../utils/mdToHtml';
+import { useFocusEffect } from '@react-navigation/native';
+
+function cleanMarkdown(text: string): string {
+  return text
+    .split('\n')
+    .map(line => {
+      if (/^\s*\*{1,2}\s*$/.test(line)) return '';
+      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '');
+    })
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
 
 const OUTPUT_TYPES = [
   { key: 'coaching_report', label: 'Coaching Report' },
@@ -48,6 +61,16 @@ export default function TeamReportScreen() {
       setVideoAsset({ uri: asset.uri, name, type: 'video/mp4' });
     }
   };
+
+  const [showQuickReport, setShowQuickReport] = useState(false);
+  const [gameReports, setGameReports] = useState<any[]>([]);
+  const [loadingGameReports, setLoadingGameReports] = useState(true);
+
+  const loadGameReports = () => {
+    gameReportsAPI.list().then(setGameReports).catch(() => {}).finally(() => setLoadingGameReports(false));
+  };
+
+  useFocusEffect(React.useCallback(() => { loadGameReports(); }, []));
 
   const [showShare, setShowShare] = useState(false);
   const [shareTarget, setShareTarget] = useState<'player' | 'team' | 'all_staff'>('player');
@@ -183,14 +206,87 @@ export default function TeamReportScreen() {
       >
         <View style={styles.titleRow}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.title}>Team Report</Text>
-            <Text style={styles.sub}>Generate a BIM analysis across your entire roster</Text>
+            <Text style={styles.title}>Team Reports</Text>
           </View>
           <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import')}>
             <Ionicons name="cloud-upload-outline" size={18} color="#9ca3af" />
             <Text style={styles.importText}>Import Excel</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Game Reports (packet builder) */}
+        <View style={{ marginBottom: 24 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <Text style={styles.label}>Game Reports</Text>
+            <TouchableOpacity
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#2563eb', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 }}
+              onPress={() => navigation.navigate('GameReportBuilder')}
+            >
+              <Ionicons name="add" size={14} color="#fff" />
+              <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700' }}>New</Text>
+            </TouchableOpacity>
+          </View>
+          {loadingGameReports ? (
+            <ActivityIndicator color="#2563eb" size="small" />
+          ) : gameReports.length === 0 ? (
+            <TouchableOpacity
+              style={{ borderWidth: 1, borderColor: '#374151', borderStyle: 'dashed', borderRadius: 12, padding: 20, alignItems: 'center', gap: 6 }}
+              onPress={() => navigation.navigate('GameReportBuilder')}
+            >
+              <Ionicons name="albums-outline" size={28} color="#374151" />
+              <Text style={{ color: '#6b7280', fontSize: 13 }}>Build your first game report packet</Text>
+            </TouchableOpacity>
+          ) : (
+            gameReports.map((gr: any) => {
+              const myName = gr.my_team_name;
+              const oppName = gr.opponent_team_name ?? gr.opponent_name;
+              let matchup = gr.title;
+              if (!matchup) {
+                if (gr.mode === 'vs_opponent' && oppName) matchup = `${myName ?? 'My Team'} vs ${oppName}`;
+                else if (gr.mode === 'my_program') matchup = myName ?? 'My Team';
+                else matchup = oppName ?? 'Opponent';
+              }
+              return (
+                <TouchableOpacity
+                  key={gr.id}
+                  style={{ backgroundColor: '#111827', borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: gr.report_text ? '#2563eb33' : '#1f2937', flexDirection: 'row', alignItems: 'center', gap: 12 }}
+                  onPress={() => navigation.navigate('GameReportBuilder', { reportId: gr.id })}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: '#fff', fontSize: 14, fontWeight: '700' }} numberOfLines={1}>{matchup}</Text>
+                    <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 2 }}>
+                      {gr.output_type.replace(/_/g, ' ')} · {new Date(gr.updated_at).toLocaleDateString()}
+                    </Text>
+                  </View>
+                  <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                    {gr.report_text ? (
+                      <View style={{ backgroundColor: '#1e3a5f', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
+                        <Text style={{ color: '#60a5fa', fontSize: 10, fontWeight: '700' }}>REPORT READY</Text>
+                      </View>
+                    ) : (
+                      <View style={{ backgroundColor: '#1f2937', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
+                        <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700' }}>IN PROGRESS</Text>
+                      </View>
+                    )}
+                    <Text style={{ color: '#4b5563', fontSize: 10 }}>{(gr.clips?.length ?? 0)} clip{gr.clips?.length !== 1 ? 's' : ''}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color="#374151" />
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </View>
+
+        {/* Quick Report (one-shot) */}
+        <TouchableOpacity
+          style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: showQuickReport ? 16 : 0 }}
+          onPress={() => setShowQuickReport(v => !v)}
+        >
+          <Text style={styles.label}>Quick Report</Text>
+          <Ionicons name={showQuickReport ? 'chevron-up' : 'chevron-down'} size={16} color="#6b7280" />
+        </TouchableOpacity>
+
+        {showQuickReport && (<>
 
         <Text style={styles.label}>Select Team</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
@@ -264,7 +360,7 @@ export default function TeamReportScreen() {
           <View style={styles.reportSection}>
             <Text style={styles.label}>Team Report</Text>
             <View style={styles.reportBox}>
-              <Markdown style={markdownStyles}>{reportText}</Markdown>
+              <Markdown style={markdownStyles}>{cleanMarkdown(reportText)}</Markdown>
             </View>
             <View style={styles.actionGrid}>
               <TouchableOpacity style={styles.actionBtn} onPress={exportPdf} disabled={exporting}>
@@ -288,6 +384,7 @@ export default function TeamReportScreen() {
             </View>
           </View>
         )}
+        </>)}
       </ScrollView>
 
       {/* Share Modal */}
