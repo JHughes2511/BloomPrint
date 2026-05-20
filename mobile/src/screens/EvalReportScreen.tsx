@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  ActivityIndicator, TextInput, Alert, Modal, Switch, KeyboardAvoidingView, Platform,
+  ActivityIndicator, TextInput, Alert, Modal, Switch, KeyboardAvoidingView, Platform, SafeAreaView,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -64,6 +64,9 @@ export default function EvalReportScreen() {
   const [selectedPillar, setSelectedPillar] = useState('');
   const [correctionText, setCorrectionText] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Player detail popup
+  const [showPlayerDetail, setShowPlayerDetail] = useState(false);
 
   // Export modal
   const [showExport, setShowExport] = useState(false);
@@ -284,11 +287,11 @@ export default function EvalReportScreen() {
         <GradeBadge grade={ev.overall_grade} size="lg" />
       </View>
 
-      {/* Player name link */}
+      {/* Player name — tap to see profile popup */}
       {player && (
         <TouchableOpacity
           style={styles.playerNameRow}
-          onPress={() => navigation.navigate('PlayerProfile', { playerId: ev.player_id })}
+          onPress={() => setShowPlayerDetail(true)}
         >
           <Ionicons name="person-circle-outline" size={18} color="#2563eb" />
           <Text style={styles.playerNameLink}>{player.name}</Text>
@@ -296,6 +299,58 @@ export default function EvalReportScreen() {
           <Ionicons name="chevron-forward" size={13} color="#2563eb" />
         </TouchableOpacity>
       )}
+
+      {/* Player detail modal */}
+      <Modal visible={showPlayerDetail} animationType="slide" transparent>
+        <View style={styles.pdOverlay}>
+          <View style={styles.pdBox}>
+            <View style={styles.pdHeader}>
+              <Text style={styles.pdName}>{player?.name}</Text>
+              <TouchableOpacity onPress={() => setShowPlayerDetail(false)}>
+                <Ionicons name="close" size={22} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.pdRow}>
+              {player?.position ? (
+                <View style={styles.pdChip}><Text style={styles.pdChipText}>{player.position}</Text></View>
+              ) : null}
+              {player?.competition_level ? (
+                <View style={styles.pdChip}><Text style={styles.pdChipText}>{player.competition_level}</Text></View>
+              ) : null}
+            </View>
+
+            {(player?.height || player?.wingspan) ? (
+              <View style={styles.pdMeasurements}>
+                {player.height ? (
+                  <View style={styles.pdStat}>
+                    <Text style={styles.pdStatVal}>{player.height}</Text>
+                    <Text style={styles.pdStatLabel}>Height</Text>
+                  </View>
+                ) : null}
+                {player.wingspan ? (
+                  <View style={styles.pdStat}>
+                    <Text style={styles.pdStatVal}>{player.wingspan}</Text>
+                    <Text style={styles.pdStatLabel}>Wingspan</Text>
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
+
+            {(player?.program_name) ? (
+              <Text style={styles.pdProgram}>{player.program_name}</Text>
+            ) : null}
+
+            <TouchableOpacity
+              style={styles.pdProfileBtn}
+              onPress={() => { setShowPlayerDetail(false); navigation.navigate('PlayerProfile', { playerId: ev!.player_id }); }}
+            >
+              <Ionicons name="person" size={15} color="#fff" />
+              <Text style={styles.pdProfileBtnText}>View Full Profile</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* Pillar grades */}
       {hasPillars && (
@@ -583,6 +638,24 @@ const styles = StyleSheet.create({
   },
   playerNameLink: { color: '#60a5fa', fontWeight: '700', fontSize: 15, flex: 1 },
   playerPos: { color: '#6b7280', fontSize: 12 },
+  // Player detail modal
+  pdOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
+  pdBox: { backgroundColor: '#111827', borderRadius: 20, padding: 24, margin: 8, paddingBottom: 36 },
+  pdHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  pdName: { color: '#fff', fontSize: 22, fontWeight: '900', flex: 1 },
+  pdRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
+  pdChip: { backgroundColor: '#1f2937', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6 },
+  pdChipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
+  pdMeasurements: { flexDirection: 'row', gap: 16, marginBottom: 16 },
+  pdStat: { alignItems: 'center', backgroundColor: '#1f2937', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20 },
+  pdStatVal: { color: '#fff', fontSize: 20, fontWeight: '800' },
+  pdStatLabel: { color: '#6b7280', fontSize: 11, marginTop: 2, textTransform: 'uppercase', letterSpacing: 0.5 },
+  pdProgram: { color: '#4b5563', fontSize: 13, marginBottom: 16 },
+  pdProfileBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: '#2563eb', borderRadius: 12, padding: 14, marginTop: 4,
+  },
+  pdProfileBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   title: { color: '#fff', fontSize: 16, fontWeight: '900' },
   sub: { color: '#6b7280', fontSize: 11, marginTop: 2 },
   section: { paddingHorizontal: 20, marginTop: 24 },
