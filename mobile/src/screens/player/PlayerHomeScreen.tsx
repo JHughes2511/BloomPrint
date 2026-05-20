@@ -244,7 +244,7 @@ export default function PlayerHomeScreen() {
                 style={styles.input}
                 value={editHeight}
                 onChangeText={setEditHeight}
-                placeholder='e.g. 6\'2"'
+                placeholder={`e.g. 6'2"`}
                 placeholderTextColor="#4b5563"
               />
               <Text style={styles.fieldLabel}>Wingspan</Text>
@@ -252,7 +252,7 @@ export default function PlayerHomeScreen() {
                 style={styles.input}
                 value={editWingspan}
                 onChangeText={setEditWingspan}
-                placeholder='e.g. 6\'5"'
+                placeholder={`e.g. 6'5"`}
                 placeholderTextColor="#4b5563"
               />
               <Text style={styles.fieldLabel}>School</Text>
