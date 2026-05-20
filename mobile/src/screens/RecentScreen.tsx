@@ -227,7 +227,7 @@ export default function RecentScreen() {
 
   const searchDebounce = useRef<any>(null);
   useEffect(() => {
-    if (!showSend) return;
+    if (modalView !== 'send') return;
     clearTimeout(searchDebounce.current);
     if (!sendSearch.trim()) { setSendResults([]); return; }
     setSendSearchLoading(true);
@@ -238,7 +238,7 @@ export default function RecentScreen() {
       } catch {}
       setSendSearchLoading(false);
     }, 400);
-  }, [sendSearch, showSend]);
+  }, [sendSearch, modalView]);
 
   const sendReport = async (target: any) => {
     if (!activeModal) return;
