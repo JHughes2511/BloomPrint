@@ -63,20 +63,20 @@ export default function RecentScreen() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [activeModal, setActiveModal] = useState<ModalReport | null>(null);
+  // 'report' = main view, 'send' = send flow, 'correct' = correction input
+  const [modalView, setModalView] = useState<'report' | 'send' | 'correct'>('report');
   const [teamReportTexts, setTeamReportTexts] = useState<Record<number, string>>({});
   const [evalCache, setEvalCache] = useState<Record<number, any>>({});
   const [loadingEval, setLoadingEval] = useState(false);
   const [exporting, setExporting] = useState(false);
 
-  // Send modal
-  const [showSend, setShowSend] = useState(false);
+  // Send state (inline in modal)
   const [sendSearch, setSendSearch] = useState('');
   const [sendResults, setSendResults] = useState<any[]>([]);
   const [sendSearchLoading, setSendSearchLoading] = useState(false);
   const [sending, setSending] = useState(false);
 
-  // Team report correct modal
-  const [showTeamCorrect, setShowTeamCorrect] = useState(false);
+  // Correct state (inline in modal)
   const [teamCorrectText, setTeamCorrectText] = useState('');
   const [applyingCorrect, setApplyingCorrect] = useState(false);
 
@@ -128,12 +128,19 @@ export default function RecentScreen() {
     return true;
   });
 
+  const openModal = (report: ModalReport) => {
+    setActiveModal(report);
+    setModalView('report');
+    setSendSearch('');
+    setSendResults([]);
+    setTeamCorrectText('');
+  };
+
   const handlePress = async (item: ReportItem) => {
     if (item.kind === 'team') {
       const text = teamReportTexts[item.id] ?? '';
-      setActiveModal({ id: item.id, kind: 'team', text, outputType: item.output_type, playerName: item.player_name });
+      openModal({ id: item.id, kind: 'team', text, outputType: item.output_type, playerName: item.player_name });
     } else {
-      // Load eval detail if not cached with report_text
       let evalData = evalCache[item.id];
       if (!evalData?.report_text) {
         setLoadingEval(true);
@@ -143,9 +150,8 @@ export default function RecentScreen() {
         } catch {}
         setLoadingEval(false);
       }
-      setActiveModal({
-        id: item.id,
-        kind: 'eval',
+      openModal({
+        id: item.id, kind: 'eval',
         text: evalData?.report_text ?? '',
         outputType: item.output_type,
         playerName: item.player_name,
@@ -349,93 +355,6 @@ export default function RecentScreen() {
         }}
       />
 
-      {/* Send modal */}
-      <Modal visible={showSend} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Send Report</Text>
-              <TouchableOpacity onPress={() => setShowSend(false)}>
-                <Ionicons name="close" size={24} color="#9ca3af" />
-              </TouchableOpacity>
-            </View>
-            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 12 }}>Search for a player to send this report to their inbox.</Text>
-            <View style={{ marginBottom: 12, position: 'relative' }}>
-              <TextInput
-                style={[sendStyles.searchInput, { paddingRight: 40 }]}
-                placeholder="Type a name to search..."
-                placeholderTextColor="#4b5563"
-                value={sendSearch}
-                onChangeText={setSendSearch}
-                autoFocus
-              />
-              {sendSearchLoading && (
-                <ActivityIndicator color="#6b7280" size="small" style={{ position: 'absolute', right: 12, top: 14 }} />
-              )}
-            </View>
-            <ScrollView style={{ maxHeight: 240 }}>
-              {sendResults.map(r => (
-                <TouchableOpacity
-                  key={r.id}
-                  style={sendStyles.resultRow}
-                  onPress={() => sendReport(r)}
-                  disabled={sending}
-                >
-                  <View style={sendStyles.avatar}>
-                    <Text style={{ color: '#fff', fontWeight: '700' }}>{r.name?.[0] ?? '?'}</Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ color: '#fff', fontWeight: '600' }}>{r.name}</Text>
-                    <Text style={{ color: '#6b7280', fontSize: 12 }}>{r.email}</Text>
-                  </View>
-                  {sending ? <ActivityIndicator color="#2563eb" size="small" /> : <Ionicons name="paper-plane-outline" size={18} color="#2563eb" />}
-                </TouchableOpacity>
-              ))}
-              {sendResults.length === 0 && sendSearch.trim().length > 0 && !sendSearchLoading && (
-                <Text style={{ color: '#4b5563', textAlign: 'center', paddingVertical: 20 }}>No players found</Text>
-              )}
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Team report correct modal */}
-      <Modal visible={showTeamCorrect} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Correct Report</Text>
-              <TouchableOpacity onPress={() => setShowTeamCorrect(false)}>
-                <Ionicons name="close" size={24} color="#9ca3af" />
-              </TouchableOpacity>
-            </View>
-            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 12 }}>Describe what needs to be corrected and AI will update the report.</Text>
-            <TextInput
-              style={sendStyles.correctInput}
-              placeholder="What needs to be corrected in this report?"
-              placeholderTextColor="#4b5563"
-              value={teamCorrectText}
-              onChangeText={setTeamCorrectText}
-              multiline
-              textAlignVertical="top"
-              autoFocus
-            />
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
-              <TouchableOpacity style={sendStyles.cancelBtn} onPress={() => setShowTeamCorrect(false)}>
-                <Text style={{ color: '#9ca3af', fontWeight: '600' }}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={sendStyles.applyBtn}
-                onPress={applyTeamCorrection}
-                disabled={applyingCorrect || !teamCorrectText.trim()}
-              >
-                {applyingCorrect ? <ActivityIndicator color="#fff" size="small" /> : <Text style={{ color: '#fff', fontWeight: '700' }}>Apply</Text>}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
       {/* Loading overlay while fetching eval detail */}
       {loadingEval && (
         <View style={styles.loadingOverlay}>
@@ -443,16 +362,25 @@ export default function RecentScreen() {
         </View>
       )}
 
-      {/* Report Detail Modal (both eval and team) */}
+      {/* Single modal — swaps between report / send / correct views */}
       <Modal visible={!!activeModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
+
+            {/* Header — back arrow when in sub-view */}
             <View style={styles.modalHeader}>
+              {modalView !== 'report' ? (
+                <TouchableOpacity onPress={() => setModalView('report')} style={{ marginRight: 10 }}>
+                  <Ionicons name="arrow-back" size={22} color="#9ca3af" />
+                </TouchableOpacity>
+              ) : null}
               <View style={{ flex: 1 }}>
                 <Text style={styles.modalTitle}>
-                  {TYPE_LABELS[activeModal?.outputType ?? ''] ?? activeModal?.outputType ?? 'Report'}
+                  {modalView === 'send' ? 'Send Report' :
+                   modalView === 'correct' ? 'Correct Report' :
+                   (TYPE_LABELS[activeModal?.outputType ?? ''] ?? activeModal?.outputType ?? 'Report')}
                 </Text>
-                {activeModal?.playerName && (
+                {modalView === 'report' && activeModal?.playerName && (
                   <Text style={styles.modalSub}>{activeModal.playerName}</Text>
                 )}
               </View>
@@ -461,42 +389,105 @@ export default function RecentScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
-              {activeModal?.text
-                ? <Markdown style={mdStyles}>{cleanMarkdown(activeModal.text)}</Markdown>
-                : <Text style={{ color: '#6b7280' }}>No report content</Text>
-              }
-            </ScrollView>
+            {/* REPORT VIEW */}
+            {modalView === 'report' && (
+              <>
+                <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+                  {activeModal?.text
+                    ? <Markdown style={mdStyles}>{cleanMarkdown(activeModal.text)}</Markdown>
+                    : <Text style={{ color: '#6b7280' }}>No report content</Text>
+                  }
+                </ScrollView>
+                <View style={styles.actionRow}>
+                  {activeModal?.kind === 'eval' && activeModal.evalId != null ? (
+                    <TouchableOpacity style={styles.actionBtn} onPress={() => { setActiveModal(null); navigation.navigate('EvalReport', { evalId: activeModal!.evalId }); }}>
+                      <Ionicons name="create-outline" size={18} color="#fff" />
+                      <Text style={styles.actionText}>Correct</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity style={styles.actionBtn} onPress={() => setModalView('correct')}>
+                      <Ionicons name="create-outline" size={18} color="#fff" />
+                      <Text style={styles.actionText}>Correct</Text>
+                    </TouchableOpacity>
+                  )}
+                  <TouchableOpacity style={styles.actionBtn} onPress={exportModalReport} disabled={exporting}>
+                    {exporting ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="download-outline" size={18} color="#fff" />}
+                    <Text style={styles.actionText}>Export</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.actionBtn} onPress={printModalReport}>
+                    <Ionicons name="print-outline" size={18} color="#fff" />
+                    <Text style={styles.actionText}>Print</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.actionBtn} onPress={() => { setSendSearch(''); setSendResults([]); setModalView('send'); }}>
+                    <Ionicons name="paper-plane-outline" size={18} color="#fff" />
+                    <Text style={styles.actionText}>Send</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
 
-            {/* Action buttons */}
-            <View style={styles.actionRow}>
-              {activeModal?.kind === 'eval' && activeModal.evalId != null ? (
-                <TouchableOpacity
-                  style={styles.actionBtn}
-                  onPress={() => { setActiveModal(null); navigation.navigate('EvalReport', { evalId: activeModal!.evalId }); }}
-                >
-                  <Ionicons name="create-outline" size={18} color="#fff" />
-                  <Text style={styles.actionText}>Correct</Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity style={styles.actionBtn} onPress={() => setShowTeamCorrect(true)}>
-                  <Ionicons name="create-outline" size={18} color="#fff" />
-                  <Text style={styles.actionText}>Correct</Text>
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity style={styles.actionBtn} onPress={exportModalReport} disabled={exporting}>
-                {exporting ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="download-outline" size={18} color="#fff" />}
-                <Text style={styles.actionText}>Export</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn} onPress={printModalReport}>
-                <Ionicons name="print-outline" size={18} color="#fff" />
-                <Text style={styles.actionText}>Print</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn} onPress={() => { setSendSearch(''); setSendResults([]); setShowSend(true); }}>
-                <Ionicons name="paper-plane-outline" size={18} color="#fff" />
-                <Text style={styles.actionText}>Send</Text>
-              </TouchableOpacity>
-            </View>
+            {/* SEND VIEW */}
+            {modalView === 'send' && (
+              <>
+                <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 12 }}>Search for a player to send this report to their inbox.</Text>
+                <View style={{ marginBottom: 12, position: 'relative' }}>
+                  <TextInput
+                    style={[sendStyles.searchInput, { paddingRight: 40 }]}
+                    placeholder="Type a name to search..."
+                    placeholderTextColor="#4b5563"
+                    value={sendSearch}
+                    onChangeText={setSendSearch}
+                    autoFocus
+                  />
+                  {sendSearchLoading && (
+                    <ActivityIndicator color="#6b7280" size="small" style={{ position: 'absolute', right: 12, top: 14 }} />
+                  )}
+                </View>
+                <ScrollView style={{ maxHeight: 260 }} keyboardShouldPersistTaps="handled">
+                  {sendResults.map(r => (
+                    <TouchableOpacity key={r.id} style={sendStyles.resultRow} onPress={() => sendReport(r)} disabled={sending}>
+                      <View style={sendStyles.avatar}>
+                        <Text style={{ color: '#fff', fontWeight: '700' }}>{r.name?.[0] ?? '?'}</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: '#fff', fontWeight: '600' }}>{r.name}</Text>
+                        <Text style={{ color: '#6b7280', fontSize: 12 }}>{r.email}</Text>
+                      </View>
+                      {sending ? <ActivityIndicator color="#2563eb" size="small" /> : <Ionicons name="paper-plane-outline" size={18} color="#2563eb" />}
+                    </TouchableOpacity>
+                  ))}
+                  {sendResults.length === 0 && sendSearch.trim().length > 0 && !sendSearchLoading && (
+                    <Text style={{ color: '#4b5563', textAlign: 'center', paddingVertical: 20 }}>No players found. Make sure they've registered on the player portal.</Text>
+                  )}
+                </ScrollView>
+              </>
+            )}
+
+            {/* CORRECT VIEW */}
+            {modalView === 'correct' && (
+              <>
+                <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 12 }}>Describe what needs to be corrected and AI will update the report.</Text>
+                <TextInput
+                  style={sendStyles.correctInput}
+                  placeholder="What needs to be corrected in this report?"
+                  placeholderTextColor="#4b5563"
+                  value={teamCorrectText}
+                  onChangeText={setTeamCorrectText}
+                  multiline
+                  textAlignVertical="top"
+                  autoFocus
+                />
+                <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+                  <TouchableOpacity style={sendStyles.cancelBtn} onPress={() => setModalView('report')}>
+                    <Text style={{ color: '#9ca3af', fontWeight: '600' }}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={sendStyles.applyBtn} onPress={applyTeamCorrection} disabled={applyingCorrect || !teamCorrectText.trim()}>
+                    {applyingCorrect ? <ActivityIndicator color="#fff" size="small" /> : <Text style={{ color: '#fff', fontWeight: '700' }}>Apply</Text>}
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+
           </View>
         </View>
       </Modal>

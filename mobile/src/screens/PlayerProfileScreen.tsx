@@ -255,10 +255,10 @@ export default function PlayerProfileScreen() {
         </View>
       )}
 
-      {/* Edit Player Modal */}
+      {/* Edit Player Modal — single modal, inline expand lists (no nested modals) */}
       <Modal visible={showEdit} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={styles.modal}>
+          <ScrollView style={styles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
             <Text style={styles.modalTitle}>Edit Player</Text>
             <TextInput
               style={styles.input}
@@ -274,104 +274,100 @@ export default function PlayerProfileScreen() {
               value={editPos}
               onChangeText={setEditPos}
             />
+
+            {/* Inline level picker */}
             <Text style={styles.inputLabel}>Competition Level</Text>
-            <TouchableOpacity style={styles.dropdownTrigger} onPress={() => setShowLevelPicker(true)}>
+            <TouchableOpacity
+              style={styles.dropdownTrigger}
+              onPress={() => { setShowLevelPicker(v => !v); setShowTeamPicker(false); setShowCreateTeam(false); }}
+            >
               <Text style={styles.dropdownText}>{editLevel}</Text>
-              <Text style={{ color: '#9ca3af' }}>▾</Text>
+              <Text style={{ color: '#9ca3af' }}>{showLevelPicker ? '▴' : '▾'}</Text>
             </TouchableOpacity>
-            <Text style={styles.inputLabel}>Team</Text>
-            <TouchableOpacity style={styles.dropdownTrigger} onPress={() => setShowTeamPicker(true)}>
+            {showLevelPicker && (
+              <View style={styles.inlineList}>
+                {COMPETITION_LEVELS.map(lvl => (
+                  <TouchableOpacity
+                    key={lvl}
+                    style={[styles.inlineOption, editLevel === lvl && styles.inlineOptionActive]}
+                    onPress={() => { setEditLevel(lvl); setShowLevelPicker(false); }}
+                  >
+                    <Text style={[styles.inlineOptionText, editLevel === lvl && { color: '#fff', fontWeight: '700' }]}>{lvl}</Text>
+                    {editLevel === lvl && <Ionicons name="checkmark" size={16} color="#2563eb" />}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {/* Inline team picker */}
+            <Text style={[styles.inputLabel, { marginTop: 8 }]}>Team</Text>
+            <TouchableOpacity
+              style={styles.dropdownTrigger}
+              onPress={() => { setShowTeamPicker(v => !v); setShowLevelPicker(false); setShowCreateTeam(false); }}
+            >
               <Text style={styles.dropdownText}>
                 {editTeamId ? (teams.find(t => t.id === editTeamId)?.name ?? 'Unknown') : 'No Team'}
               </Text>
-              <Text style={{ color: '#9ca3af' }}>▾</Text>
+              <Text style={{ color: '#9ca3af' }}>{showTeamPicker ? '▴' : '▾'}</Text>
             </TouchableOpacity>
-            <View style={styles.modalRow}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowEdit(false)}>
+            {showTeamPicker && (
+              <View style={styles.inlineList}>
+                <TouchableOpacity
+                  style={[styles.inlineOption, !editTeamId && styles.inlineOptionActive]}
+                  onPress={() => { setEditTeamId(null); setShowTeamPicker(false); }}
+                >
+                  <Text style={[styles.inlineOptionText, !editTeamId && { color: '#fff', fontWeight: '700' }]}>No Team</Text>
+                  {!editTeamId && <Ionicons name="checkmark" size={16} color="#2563eb" />}
+                </TouchableOpacity>
+                {teams.map(t => (
+                  <TouchableOpacity
+                    key={t.id}
+                    style={[styles.inlineOption, editTeamId === t.id && styles.inlineOptionActive]}
+                    onPress={() => { setEditTeamId(t.id); setShowTeamPicker(false); }}
+                  >
+                    <Text style={[styles.inlineOptionText, editTeamId === t.id && { color: '#fff', fontWeight: '700' }]}>{t.name}</Text>
+                    {editTeamId === t.id && <Ionicons name="checkmark" size={16} color="#2563eb" />}
+                  </TouchableOpacity>
+                ))}
+                {/* Create new team inline */}
+                <TouchableOpacity
+                  style={[styles.inlineOption, { borderTopColor: '#2563eb33' }]}
+                  onPress={() => { setShowCreateTeam(v => !v); }}
+                >
+                  <Ionicons name="add-circle-outline" size={16} color="#2563eb" />
+                  <Text style={[styles.inlineOptionText, { color: '#2563eb', marginLeft: 8 }]}>Create New Team</Text>
+                </TouchableOpacity>
+                {showCreateTeam && (
+                  <View style={{ padding: 8, gap: 8 }}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Team name..."
+                      placeholderTextColor="#6b7280"
+                      value={newTeamName}
+                      onChangeText={setNewTeamName}
+                      autoFocus
+                    />
+                    <TouchableOpacity
+                      style={[styles.saveBtn, { marginTop: 0 }]}
+                      onPress={createTeamFromEdit}
+                      disabled={creatingTeam || !newTeamName.trim()}
+                    >
+                      {creatingTeam ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Create & Assign</Text>}
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            )}
+
+            <View style={[styles.modalRow, { marginTop: 16 }]}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => { setShowEdit(false); setShowLevelPicker(false); setShowTeamPicker(false); setShowCreateTeam(false); }}>
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveBtn} onPress={saveEdit} disabled={saving}>
                 {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Save</Text>}
               </TouchableOpacity>
             </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-
-      {/* Level Picker */}
-      <Modal visible={showLevelPicker} transparent animationType="fade">
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowLevelPicker(false)}>
-          <View style={[styles.modal, { paddingBottom: 8 }]}>
-            <Text style={styles.modalTitle}>Competition Level</Text>
-            {COMPETITION_LEVELS.map(lvl => (
-              <TouchableOpacity
-                key={lvl}
-                style={[styles.pickerOption, editLevel === lvl && styles.pickerOptionActive]}
-                onPress={() => { setEditLevel(lvl); setShowLevelPicker(false); }}
-              >
-                <Text style={[styles.pickerOptionText, editLevel === lvl && { color: '#fff', fontWeight: '700' }]}>{lvl}</Text>
-                {editLevel === lvl && <Ionicons name="checkmark" size={16} color="#2563eb" />}
-              </TouchableOpacity>
-            ))}
-          </View>
-        </TouchableOpacity>
-      </Modal>
-
-      {/* Team Picker */}
-      <Modal visible={showTeamPicker} transparent animationType="fade">
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowTeamPicker(false)}>
-          <View style={[styles.modal, { paddingBottom: 8 }]}>
-            <Text style={styles.modalTitle}>Assign Team</Text>
-            <TouchableOpacity
-              style={[styles.pickerOption, !editTeamId && styles.pickerOptionActive]}
-              onPress={() => { setEditTeamId(null); setShowTeamPicker(false); }}
-            >
-              <Text style={[styles.pickerOptionText, !editTeamId && { color: '#fff', fontWeight: '700' }]}>No Team</Text>
-              {!editTeamId && <Ionicons name="checkmark" size={16} color="#2563eb" />}
-            </TouchableOpacity>
-            {teams.map(t => (
-              <TouchableOpacity
-                key={t.id}
-                style={[styles.pickerOption, editTeamId === t.id && styles.pickerOptionActive]}
-                onPress={() => { setEditTeamId(t.id); setShowTeamPicker(false); }}
-              >
-                <Text style={[styles.pickerOptionText, editTeamId === t.id && { color: '#fff', fontWeight: '700' }]}>{t.name}</Text>
-                {editTeamId === t.id && <Ionicons name="checkmark" size={16} color="#2563eb" />}
-              </TouchableOpacity>
-            ))}
-            <TouchableOpacity
-              style={[styles.pickerOption, { borderTopColor: '#2563eb33' }]}
-              onPress={() => { setShowCreateTeam(true); }}
-            >
-              <Ionicons name="add-circle-outline" size={16} color="#2563eb" />
-              <Text style={[styles.pickerOptionText, { color: '#2563eb', marginLeft: 8 }]}>Create New Team</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
-
-      {/* Create Team inline modal */}
-      <Modal visible={showCreateTeam} transparent animationType="fade">
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={styles.modal}>
-            <Text style={styles.modalTitle}>New Team</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Team Name *"
-              placeholderTextColor="#6b7280"
-              value={newTeamName}
-              onChangeText={setNewTeamName}
-              autoFocus
-            />
-            <View style={styles.modalRow}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => { setShowCreateTeam(false); setNewTeamName(''); }}>
-                <Text style={styles.cancelText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.saveBtn} onPress={createTeamFromEdit} disabled={creatingTeam || !newTeamName.trim()}>
-                {creatingTeam ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Create</Text>}
-              </TouchableOpacity>
-            </View>
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
 
@@ -487,5 +483,9 @@ const styles = StyleSheet.create({
   },
   pickerOptionActive: { backgroundColor: '#1e3a5f', marginHorizontal: -4, paddingHorizontal: 4, borderRadius: 8 },
   pickerOptionText: { color: '#d1d5db', fontSize: 14 },
+  inlineList: { backgroundColor: '#0a0a0a', borderRadius: 10, marginBottom: 8, overflow: 'hidden', borderWidth: 1, borderColor: '#374151' },
+  inlineOption: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12, borderTopWidth: 1, borderTopColor: '#1f2937' },
+  inlineOptionActive: { backgroundColor: '#1e3a5f' },
+  inlineOptionText: { color: '#d1d5db', fontSize: 14 },
   inviteCodeHint: { color: '#6b7280', fontSize: 11, textAlign: 'center' },
 });
