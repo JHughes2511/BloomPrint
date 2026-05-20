@@ -48,6 +48,7 @@ class PlayerCreate(BaseModel):
     position: str | None = None
     age: int | None = None
     height: str | None = None
+    wingspan: str | None = None
     program_name: str | None = None
     competition_level: str = "HS Varsity"
     notes: str | None = None
@@ -60,6 +61,7 @@ class PlayerOut(BaseModel):
     position: str | None
     age: int | None
     height: str | None
+    wingspan: str | None = None
     program_name: str
     competition_level: str
     notes: str | None
@@ -324,6 +326,60 @@ class TeamSharedReportOut(BaseModel):
     message: str | None
     created_at: datetime
     shared_by_name: str = ""
+    model_config = {"from_attributes": True}
+
+
+# ── Game Reports ──────────────────────────────────────────────────────────────
+
+class GameReportCreate(BaseModel):
+    title: str | None = None
+    mode: str = "vs_opponent"
+    my_team_id: int | None = None
+    opponent_team_id: int | None = None
+    opponent_name: str | None = None
+    output_type: str = "coaching_report"
+    focus_prompt: str | None = None
+
+
+class GameReportUpdate(BaseModel):
+    title: str | None = None
+    mode: str | None = None
+    my_team_id: int | None = None
+    opponent_team_id: int | None = None
+    opponent_name: str | None = None
+    output_type: str | None = None
+    focus_prompt: str | None = None
+    box_score: str | None = None
+    scouting_notes: str | None = None
+
+
+class GameReportClipOut(BaseModel):
+    id: int
+    game_report_id: int
+    label: str
+    analysis_text: str | None
+    created_at: datetime
+    model_config = {"from_attributes": True}
+
+
+class GameReportOut(BaseModel):
+    id: int
+    coach_id: int
+    title: str | None
+    mode: str
+    my_team_id: int | None
+    opponent_team_id: int | None
+    opponent_name: str | None
+    output_type: str
+    focus_prompt: str | None
+    box_score: str | None
+    scouting_notes: str | None
+    report_text: str | None
+    created_at: datetime
+    updated_at: datetime
+    clips: list[GameReportClipOut] = []
+    my_team_name: str | None = None
+    opponent_team_name: str | None = None
     model_config = {"from_attributes": True}
 
 

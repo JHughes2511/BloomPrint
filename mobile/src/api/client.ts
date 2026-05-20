@@ -31,10 +31,10 @@ export const playersAPI = {
 
   create: (data: {
     name: string; position?: string; age?: number;
-    height?: string; competition_level?: string; notes?: string; team_id?: number;
+    height?: string; wingspan?: string; competition_level?: string; notes?: string; team_id?: number;
   }) => api.post('/players', data).then(r => r.data),
 
-  update: (id: number, data: { name?: string; position?: string; competition_level?: string; team_id?: number }) =>
+  update: (id: number, data: { name?: string; position?: string; competition_level?: string; team_id?: number; height?: string; wingspan?: string }) =>
     api.patch(`/players/${id}`, data).then(r => r.data),
 
   delete: (id: number) => api.delete(`/players/${id}`).then(r => r.data),

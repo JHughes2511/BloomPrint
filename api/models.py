@@ -49,6 +49,7 @@ class Player(Base):
     position         = Column(String)
     age              = Column(Integer)
     height           = Column(String)
+    wingspan         = Column(String)
     program_name     = Column(String, default="SEED Academy")
     competition_level = Column(String, default="HS Varsity")
     notes            = Column(Text)
@@ -257,3 +258,40 @@ class PlayerNotification(Base):
 
     player_user = relationship("PlayerUser", back_populates="notifications")
     coach       = relationship("Coach", back_populates="notifications")
+
+
+class GameReport(Base):
+    __tablename__ = "game_reports"
+
+    id                = Column(Integer, primary_key=True, index=True)
+    coach_id          = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    title             = Column(String, nullable=True)
+    mode              = Column(String, default="vs_opponent")  # vs_opponent / my_program / opponent_only
+    my_team_id        = Column(Integer, ForeignKey("teams.id"), nullable=True)
+    opponent_team_id  = Column(Integer, ForeignKey("teams.id"), nullable=True)
+    opponent_name     = Column(String, nullable=True)
+    output_type       = Column(String, default="coaching_report")
+    focus_prompt      = Column(Text, nullable=True)
+    box_score         = Column(Text, nullable=True)
+    scouting_notes    = Column(Text, nullable=True)
+    report_text       = Column(Text, nullable=True)
+    created_at        = Column(DateTime, default=datetime.utcnow)
+    updated_at        = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    coach         = relationship("Coach")
+    my_team       = relationship("Team", foreign_keys=[my_team_id])
+    opponent_team = relationship("Team", foreign_keys=[opponent_team_id])
+    clips         = relationship("GameReportClip", back_populates="game_report", cascade="all, delete-orphan")
+
+
+class GameReportClip(Base):
+    __tablename__ = "game_report_clips"
+
+    id             = Column(Integer, primary_key=True, index=True)
+    game_report_id = Column(Integer, ForeignKey("game_reports.id"), nullable=False)
+    video_path     = Column(String, nullable=False)
+    label          = Column(String, nullable=False)  # 'my_team' or 'opponent'
+    analysis_text  = Column(Text, nullable=True)
+    created_at     = Column(DateTime, default=datetime.utcnow)
+
+    game_report = relationship("GameReport", back_populates="clips")
