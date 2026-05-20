@@ -178,4 +178,6 @@ export const gameReportsAPI = {
   uploadDoc: (id: number, formData: FormData) =>
     api.post(`/game-reports/${id}/upload-doc`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
   generate: (id: number) => api.post(`/game-reports/${id}/generate`).then(r => r.data),
+  correct: (id: number, correction: string) =>
+    api.post(`/game-reports/${id}/correct`, { correction }).then(r => r.data),
 };

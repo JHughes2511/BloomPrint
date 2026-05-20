@@ -186,6 +186,7 @@ async def import_excel(
     output_type: str = Form("player_eval"),
     competition_level: str = Form("HS Varsity"),
     team_id: int | None = Form(None),
+    roster_only: bool = Form(False),
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
@@ -239,6 +240,13 @@ async def import_excel(
                         player.position = row["position"]
                     if row.get("competition_level"):
                         player.competition_level = row["competition_level"]
+                    # In roster mode, always update team assignment
+                    if roster_only and team_id:
+                        player.team_id = team_id
+
+                # Roster-only mode: just import players, no evaluation
+                if roster_only:
+                    continue
 
                 # Auto-build minimal report_text from flags if no notes column
                 report_text = row.get("report_text")

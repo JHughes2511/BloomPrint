@@ -171,7 +171,7 @@ export default function RosterScreen() {
             {currentTeamName ?? 'All Teams'} · {visiblePlayers.length} players
           </Text>
         </View>
-        <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import')}>
+        <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import', { mode: 'roster' })}>
           <Ionicons name="cloud-upload-outline" size={16} color="#9ca3af" />
           <Text style={styles.importBtnText}>Import Roster</Text>
         </TouchableOpacity>
@@ -244,7 +244,7 @@ export default function RosterScreen() {
               <>
                 <Ionicons name="people-outline" size={40} color="#374151" />
                 <Text style={styles.emptyText}>No players in this team yet.</Text>
-                <TouchableOpacity style={styles.importRosterBtn} onPress={() => navigation.navigate('Import')}>
+                <TouchableOpacity style={styles.importRosterBtn} onPress={() => navigation.navigate('Import', { mode: 'roster' })}>
                   <Ionicons name="cloud-upload-outline" size={16} color="#fff" />
                   <Text style={styles.importRosterBtnText}>Import Roster from Excel</Text>
                 </TouchableOpacity>

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
+  ActivityIndicator, Alert, KeyboardAvoidingView, Platform, TextInput,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { api, teamsAPI } from '../api/client';
@@ -37,6 +37,12 @@ const TEMPLATE_COLUMNS = [
   { name: 'Notes', desc: 'Free-text scouting notes or report' },
 ];
 
+const ROSTER_COLUMNS = [
+  { name: 'Player Name *', desc: 'Full name — required' },
+  { name: 'Position', desc: 'PG, SG, SF, PF, C' },
+  { name: 'Competition Level', desc: 'HS Varsity, College, Pro, etc.' },
+];
+
 interface ImportResult {
   players_created: number;
   players_found: number;
@@ -47,6 +53,9 @@ interface ImportResult {
 
 export default function ImportScreen() {
   const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const isRosterMode = route.params?.mode === 'roster';
+
   const [file, setFile] = useState<{ uri: string; name: string } | null>(null);
   const [outputType, setOutputType] = useState('player_eval');
   const [level, setLevel] = useState('HS Varsity');
@@ -54,6 +63,11 @@ export default function ImportScreen() {
   const [result, setResult] = useState<ImportResult | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+
+  // Roster mode: create new team or pick existing
+  const [newTeamName, setNewTeamName] = useState('');
+  const [creatingTeam, setCreatingTeam] = useState(false);
+  const [showTeamPicker, setShowTeamPicker] = useState(false);
 
   useEffect(() => {
     teamsAPI.list().then(setTeams).catch(() => {});
@@ -73,8 +87,27 @@ export default function ImportScreen() {
     }
   };
 
+  const createAndSelectTeam = async () => {
+    if (!newTeamName.trim()) return;
+    setCreatingTeam(true);
+    try {
+      const team = await teamsAPI.create({ name: newTeamName.trim(), competition_level: level });
+      setTeams(prev => [...prev, team]);
+      setSelectedTeamId(team.id);
+      setNewTeamName('');
+    } catch {
+      Alert.alert('Error', 'Could not create team');
+    } finally {
+      setCreatingTeam(false);
+    }
+  };
+
   const upload = async () => {
     if (!file) return;
+    if (isRosterMode && !selectedTeamId) {
+      Alert.alert('Team Required', 'Please select or create a team before importing the roster.');
+      return;
+    }
     setUploading(true);
     try {
       const form = new FormData();
@@ -82,6 +115,7 @@ export default function ImportScreen() {
       form.append('output_type', outputType);
       form.append('competition_level', level);
       if (selectedTeamId != null) form.append('team_id', String(selectedTeamId));
+      if (isRosterMode) form.append('roster_only', 'true');
 
       const res = await api.post('/uploads/excel', form, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -93,6 +127,8 @@ export default function ImportScreen() {
       setUploading(false);
     }
   };
+
+  const selectedTeam = teams.find(t => t.id === selectedTeamId);
 
   return (
     <KeyboardAvoidingView
@@ -110,10 +146,79 @@ export default function ImportScreen() {
             <Ionicons name="chevron-back" size={24} color="#fff" />
           </TouchableOpacity>
           <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.title}>Import Excel</Text>
-            <Text style={styles.sub}>Upload a player or team evaluation spreadsheet</Text>
+            <Text style={styles.title}>{isRosterMode ? 'Import Roster' : 'Import Excel'}</Text>
+            <Text style={styles.sub}>
+              {isRosterMode
+                ? 'Add players to a team from a spreadsheet'
+                : 'Upload a player or team evaluation spreadsheet'}
+            </Text>
           </View>
         </View>
+
+        {/* ── ROSTER MODE: Team selector ── */}
+        {isRosterMode && (
+          <View style={styles.teamSection}>
+            <Text style={styles.label}>Team *</Text>
+            <Text style={styles.hint}>Select a team or create a new one. Players will be added to this team.</Text>
+
+            {/* Selected team badge */}
+            {selectedTeam && (
+              <View style={styles.selectedTeamBadge}>
+                <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
+                <Text style={styles.selectedTeamText}>{selectedTeam.name}</Text>
+                <TouchableOpacity onPress={() => setSelectedTeamId(null)}>
+                  <Ionicons name="close-circle" size={16} color="#6b7280" />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Create new team */}
+            <View style={styles.createTeamRow}>
+              <TextInput
+                style={styles.createTeamInput}
+                placeholder="Create new team name..."
+                placeholderTextColor="#4b5563"
+                value={newTeamName}
+                onChangeText={setNewTeamName}
+                returnKeyType="done"
+              />
+              <TouchableOpacity
+                style={[styles.createTeamBtn, !newTeamName.trim() && { opacity: 0.4 }]}
+                onPress={createAndSelectTeam}
+                disabled={!newTeamName.trim() || creatingTeam}
+              >
+                {creatingTeam
+                  ? <ActivityIndicator color="#fff" size="small" />
+                  : <Text style={styles.createTeamBtnText}>Create</Text>
+                }
+              </TouchableOpacity>
+            </View>
+
+            {/* Existing team picker */}
+            {teams.length > 0 && (
+              <>
+                <TouchableOpacity style={styles.teamPickerToggle} onPress={() => setShowTeamPicker(v => !v)}>
+                  <Text style={styles.teamPickerToggleText}>Or select existing team</Text>
+                  <Ionicons name={showTeamPicker ? 'chevron-up' : 'chevron-down'} size={14} color="#9ca3af" />
+                </TouchableOpacity>
+                {showTeamPicker && (
+                  <View style={styles.teamPickerList}>
+                    {teams.map(t => (
+                      <TouchableOpacity
+                        key={t.id}
+                        style={[styles.teamPickerItem, selectedTeamId === t.id && styles.teamPickerItemActive]}
+                        onPress={() => { setSelectedTeamId(t.id); setShowTeamPicker(false); }}
+                      >
+                        <Text style={[styles.teamPickerItemText, selectedTeamId === t.id && { color: '#fff' }]}>{t.name}</Text>
+                        {selectedTeamId === t.id && <Ionicons name="checkmark" size={14} color="#22c55e" />}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </>
+            )}
+          </View>
+        )}
 
         {/* File picker */}
         <Text style={styles.label}>Excel File</Text>
@@ -128,22 +233,7 @@ export default function ImportScreen() {
           </Text>
         </TouchableOpacity>
 
-        {/* Default output type */}
-        <Text style={styles.label}>Default Report Type</Text>
-        <Text style={styles.hint}>Used for rows that don't have an "Output Type" column.</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
-          {OUTPUT_TYPES.map(t => (
-            <TouchableOpacity
-              key={t.key}
-              style={[styles.chip, outputType === t.key && styles.chipActive]}
-              onPress={() => setOutputType(t.key)}
-            >
-              <Text style={[styles.chipText, outputType === t.key && styles.chipTextActive]}>{t.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        {/* Default competition level */}
+        {/* Default competition level — shown for both modes */}
         <Text style={styles.label}>Default Competition Level</Text>
         <Text style={styles.hint}>Used for rows that don't have a "Competition Level" column.</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24 }}>
@@ -158,40 +248,58 @@ export default function ImportScreen() {
           ))}
         </ScrollView>
 
-        {/* Team assignment */}
-        {teams.length > 0 && (
+        {/* Eval mode only: report type + team assignment */}
+        {!isRosterMode && (
           <>
-            <Text style={styles.label}>Assign to Team (optional)</Text>
-            <Text style={styles.hint}>Imported players will be added to this team.</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24 }}>
-              <TouchableOpacity
-                style={[styles.chip, selectedTeamId == null && styles.chipActive]}
-                onPress={() => setSelectedTeamId(null)}
-              >
-                <Text style={[styles.chipText, selectedTeamId == null && styles.chipTextActive]}>No Team</Text>
-              </TouchableOpacity>
-              {teams.map(t => (
+            <Text style={styles.label}>Default Report Type</Text>
+            <Text style={styles.hint}>Used for rows that don't have an "Output Type" column.</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+              {OUTPUT_TYPES.map(t => (
                 <TouchableOpacity
-                  key={t.id}
-                  style={[styles.chip, selectedTeamId === t.id && styles.chipActive]}
-                  onPress={() => setSelectedTeamId(t.id)}
+                  key={t.key}
+                  style={[styles.chip, outputType === t.key && styles.chipActive]}
+                  onPress={() => setOutputType(t.key)}
                 >
-                  <Text style={[styles.chipText, selectedTeamId === t.id && styles.chipTextActive]}>{t.name}</Text>
+                  <Text style={[styles.chipText, outputType === t.key && styles.chipTextActive]}>{t.label}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
+
+            {teams.length > 0 && (
+              <>
+                <Text style={styles.label}>Assign to Team (optional)</Text>
+                <Text style={styles.hint}>Imported players will be added to this team.</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24 }}>
+                  <TouchableOpacity
+                    style={[styles.chip, selectedTeamId == null && styles.chipActive]}
+                    onPress={() => setSelectedTeamId(null)}
+                  >
+                    <Text style={[styles.chipText, selectedTeamId == null && styles.chipTextActive]}>No Team</Text>
+                  </TouchableOpacity>
+                  {teams.map(t => (
+                    <TouchableOpacity
+                      key={t.id}
+                      style={[styles.chip, selectedTeamId === t.id && styles.chipActive]}
+                      onPress={() => setSelectedTeamId(t.id)}
+                    >
+                      <Text style={[styles.chipText, selectedTeamId === t.id && styles.chipTextActive]}>{t.name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </>
+            )}
           </>
         )}
 
         {/* Upload button */}
         <TouchableOpacity
-          style={[styles.uploadBtn, !file && styles.uploadBtnDisabled]}
+          style={[styles.uploadBtn, (!file || (isRosterMode && !selectedTeamId)) && styles.uploadBtnDisabled]}
           onPress={upload}
-          disabled={!file || uploading}
+          disabled={!file || uploading || (isRosterMode && !selectedTeamId)}
         >
           {uploading
             ? <><ActivityIndicator color="#fff" /><Text style={styles.uploadText}>  Importing...</Text></>
-            : <><Ionicons name="cloud-upload" size={18} color="#fff" /><Text style={styles.uploadText}>  Import File</Text></>
+            : <><Ionicons name="cloud-upload" size={18} color="#fff" /><Text style={styles.uploadText}>  {isRosterMode ? 'Import Roster' : 'Import File'}</Text></>
           }
         </TouchableOpacity>
 
@@ -212,10 +320,12 @@ export default function ImportScreen() {
                 <Text style={[styles.statNum, { color: '#60a5fa' }]}>{result.players_found}</Text>
                 <Text style={styles.statLabel}>Players Matched</Text>
               </View>
-              <View style={styles.stat}>
-                <Text style={[styles.statNum, { color: '#a78bfa' }]}>{result.evaluations_created}</Text>
-                <Text style={styles.statLabel}>Evals Created</Text>
-              </View>
+              {!isRosterMode && (
+                <View style={styles.stat}>
+                  <Text style={[styles.statNum, { color: '#a78bfa' }]}>{result.evaluations_created}</Text>
+                  <Text style={styles.statLabel}>Evals Created</Text>
+                </View>
+              )}
             </View>
             {result.errors.length > 0 && (
               <View style={styles.errorBox}>
@@ -226,7 +336,7 @@ export default function ImportScreen() {
               </View>
             )}
             <TouchableOpacity style={styles.doneBtn} onPress={() => navigation.goBack()}>
-              <Text style={styles.doneBtnText}>Go to Roster</Text>
+              <Text style={styles.doneBtnText}>{isRosterMode ? 'Back to Roster' : 'Go to Roster'}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -238,7 +348,7 @@ export default function ImportScreen() {
           Only "Player Name" is required.
         </Text>
         <View style={styles.columnGuide}>
-          {TEMPLATE_COLUMNS.map((col, i) => (
+          {(isRosterMode ? ROSTER_COLUMNS : TEMPLATE_COLUMNS).map((col, i) => (
             <View key={i} style={styles.colRow}>
               <Text style={styles.colName}>{col.name}</Text>
               <Text style={styles.colDesc}>{col.desc}</Text>
@@ -246,13 +356,15 @@ export default function ImportScreen() {
           ))}
         </View>
 
-        <View style={styles.exampleBox}>
-          <Text style={styles.exampleTitle}>Example row</Text>
-          <Text style={styles.exampleText}>
-            John Doe | PG | HS Varsity | 8.5 | 9.0 | 7.5 | 8.0 | 8.5 | 7.0 | 9.0 |
-            Elite shooter, High IQ | Needs off-dribble work | Great court vision and leadership
-          </Text>
-        </View>
+        {!isRosterMode && (
+          <View style={styles.exampleBox}>
+            <Text style={styles.exampleTitle}>Example row</Text>
+            <Text style={styles.exampleText}>
+              John Doe | PG | HS Varsity | 8.5 | 9.0 | 7.5 | 8.0 | 8.5 | 7.0 | 9.0 |
+              Elite shooter, High IQ | Needs off-dribble work | Great court vision and leadership
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -268,6 +380,37 @@ const styles = StyleSheet.create({
     letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6,
   },
   hint: { color: '#4b5563', fontSize: 12, marginBottom: 10, lineHeight: 17 },
+  teamSection: {
+    backgroundColor: '#111827', borderRadius: 14, padding: 16,
+    marginBottom: 24, borderWidth: 1, borderColor: '#1f2937',
+  },
+  selectedTeamBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: '#052e16', borderRadius: 8, padding: 10, marginBottom: 12,
+  },
+  selectedTeamText: { color: '#22c55e', fontWeight: '700', flex: 1, fontSize: 14 },
+  createTeamRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
+  createTeamInput: {
+    flex: 1, backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12,
+    color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151',
+  },
+  createTeamBtn: {
+    backgroundColor: '#2563eb', borderRadius: 10, paddingHorizontal: 16,
+    justifyContent: 'center', alignItems: 'center',
+  },
+  createTeamBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  teamPickerToggle: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingVertical: 10, borderTopWidth: 1, borderTopColor: '#1f2937',
+  },
+  teamPickerToggleText: { color: '#6b7280', fontSize: 13 },
+  teamPickerList: { marginTop: 6 },
+  teamPickerItem: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingVertical: 10, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: '#1f2937',
+  },
+  teamPickerItemActive: { backgroundColor: '#052e16' },
+  teamPickerItemText: { color: '#9ca3af', fontSize: 14 },
   filePicker: {
     borderWidth: 2, borderColor: '#374151', borderStyle: 'dashed',
     borderRadius: 12, padding: 24, alignItems: 'center', marginBottom: 24, gap: 8,

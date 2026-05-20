@@ -5,6 +5,7 @@ import tempfile
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -297,18 +298,66 @@ async def generate_game_report(
 
     prompt = "\n".join(sections)
 
-    import anthropic
-    client = anthropic.AsyncAnthropic()
-    response = await client.messages.create(
-        model="claude-opus-4-7",
-        max_tokens=8192,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    text_blocks = [b for b in response.content if hasattr(b, "text")]
-    if not text_blocks:
-        raise HTTPException(status_code=500, detail="AI returned no content")
+    import os
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY is not configured on the server.")
+
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        response = await client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=8192,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text_blocks = [b for b in response.content if hasattr(b, "text")]
+        if not text_blocks:
+            raise HTTPException(status_code=500, detail="AI returned no content")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
 
     gr.report_text = text_blocks[0].text
+    db.commit()
+    db.refresh(gr)
+    return _build_out(gr)
+
+
+class GameReportCorrectBody(BaseModel):
+    correction: str
+
+
+@router.post("/{report_id}/correct", response_model=schemas.GameReportOut)
+async def correct_game_report(
+    report_id: int,
+    body: GameReportCorrectBody,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    gr = db.get(models.GameReport, report_id)
+    if not gr or gr.coach_id != coach.id or not gr.report_text:
+        raise HTTPException(status_code=404, detail="Game report not found")
+
+    prompt = (
+        f"You are a basketball analysis expert. Below is a game report followed by a correction "
+        f"from the coach. Update the report to incorporate this correction. "
+        f"Return ONLY the updated report text in the same format.\n\n"
+        f"ORIGINAL REPORT:\n{gr.report_text}\n\n"
+        f"CORRECTION:\n{body.correction}\n\nUPDATED REPORT:"
+    )
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        response = await client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=8192,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        gr.report_text = response.content[0].text.strip()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Correction failed: {exc}")
+
     db.commit()
     db.refresh(gr)
     return _build_out(gr)

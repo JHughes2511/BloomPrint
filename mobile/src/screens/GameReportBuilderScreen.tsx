@@ -69,8 +69,14 @@ export default function GameReportBuilderScreen() {
 
   const [showMyTeamPicker, setShowMyTeamPicker] = useState(false);
   const [showOppTeamPicker, setShowOppTeamPicker] = useState(false);
+  const [correctionText, setCorrectionText] = useState('');
+  const [correcting, setCorrecting] = useState(false);
 
   const scrollRef = useRef<ScrollView>(null);
+  const boxScoreY = useRef(0);
+  const scoutingY = useRef(0);
+  const focusPromptY = useRef(0);
+  const correctionY = useRef(0);
 
   // Load or create on mount
   useEffect(() => {
@@ -201,6 +207,20 @@ export default function GameReportBuilderScreen() {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate report');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const applyCorrection = async () => {
+    if (!reportId || !correctionText.trim()) return;
+    setCorrecting(true);
+    try {
+      const updated = await gameReportsAPI.correct(reportId, correctionText.trim());
+      setReport(updated);
+      setCorrectionText('');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not apply correction');
+    } finally {
+      setCorrecting(false);
     }
   };
 
@@ -377,59 +397,72 @@ export default function GameReportBuilderScreen() {
         )}
 
         {/* Box Score */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.label}>Box Score / Stats</Text>
-          <TouchableOpacity style={styles.importBtn} onPress={() => pickDoc('box_score')} disabled={uploadingDoc === 'box_score'}>
-            {uploadingDoc === 'box_score'
-              ? <ActivityIndicator color="#9ca3af" size="small" />
-              : <><Ionicons name="document-outline" size={14} color="#9ca3af" /><Text style={styles.importBtnText}>Import</Text></>
-            }
-          </TouchableOpacity>
+        <View
+          onLayout={e => { boxScoreY.current = e.nativeEvent.layout.y; }}
+        >
+          <View style={styles.sectionHeader}>
+            <Text style={styles.label}>Box Score / Stats</Text>
+            <TouchableOpacity style={styles.importBtn} onPress={() => pickDoc('box_score')} disabled={uploadingDoc === 'box_score'}>
+              {uploadingDoc === 'box_score'
+                ? <ActivityIndicator color="#9ca3af" size="small" />
+                : <><Ionicons name="document-outline" size={14} color="#9ca3af" /><Text style={styles.importBtnText}>Import</Text></>
+              }
+            </TouchableOpacity>
+          </View>
+          <TextInput
+            style={styles.textArea}
+            placeholder="Paste box score, stats, or game data..."
+            placeholderTextColor="#4b5563"
+            value={boxScore}
+            onChangeText={setBoxScore}
+            onFocus={() => scrollRef.current?.scrollTo({ y: boxScoreY.current - 80, animated: true })}
+            onBlur={() => save({ box_score: boxScore.trim() || null })}
+            multiline
+            textAlignVertical="top"
+          />
         </View>
-        <TextInput
-          style={styles.textArea}
-          placeholder="Paste box score, stats, or game data..."
-          placeholderTextColor="#4b5563"
-          value={boxScore}
-          onChangeText={setBoxScore}
-          onBlur={() => save({ box_score: boxScore.trim() || null })}
-          multiline
-          textAlignVertical="top"
-        />
 
         {/* Scouting Notes */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.label}>Scouting Notes</Text>
-          <TouchableOpacity style={styles.importBtn} onPress={() => pickDoc('scouting_notes')} disabled={uploadingDoc === 'scouting_notes'}>
-            {uploadingDoc === 'scouting_notes'
-              ? <ActivityIndicator color="#9ca3af" size="small" />
-              : <><Ionicons name="document-outline" size={14} color="#9ca3af" /><Text style={styles.importBtnText}>Import</Text></>
-            }
-          </TouchableOpacity>
+        <View
+          onLayout={e => { scoutingY.current = e.nativeEvent.layout.y; }}
+        >
+          <View style={styles.sectionHeader}>
+            <Text style={styles.label}>Scouting Notes</Text>
+            <TouchableOpacity style={styles.importBtn} onPress={() => pickDoc('scouting_notes')} disabled={uploadingDoc === 'scouting_notes'}>
+              {uploadingDoc === 'scouting_notes'
+                ? <ActivityIndicator color="#9ca3af" size="small" />
+                : <><Ionicons name="document-outline" size={14} color="#9ca3af" /><Text style={styles.importBtnText}>Import</Text></>
+              }
+            </TouchableOpacity>
+          </View>
+          <TextInput
+            style={styles.textArea}
+            placeholder="Add scouting notes, observations, tendencies..."
+            placeholderTextColor="#4b5563"
+            value={scoutingNotes}
+            onChangeText={setScoutingNotes}
+            onFocus={() => scrollRef.current?.scrollTo({ y: scoutingY.current - 80, animated: true })}
+            onBlur={() => save({ scouting_notes: scoutingNotes.trim() || null })}
+            multiline
+            textAlignVertical="top"
+          />
         </View>
-        <TextInput
-          style={styles.textArea}
-          placeholder="Add scouting notes, observations, tendencies..."
-          placeholderTextColor="#4b5563"
-          value={scoutingNotes}
-          onChangeText={setScoutingNotes}
-          onBlur={() => save({ scouting_notes: scoutingNotes.trim() || null })}
-          multiline
-          textAlignVertical="top"
-        />
 
         {/* Focus */}
-        <Text style={styles.label}>Coach Focus (optional)</Text>
-        <TextInput
-          style={[styles.textArea, { minHeight: 60 }]}
-          placeholder="e.g. Upcoming tournament, press defense scheme..."
-          placeholderTextColor="#4b5563"
-          value={focusPrompt}
-          onChangeText={setFocusPrompt}
-          onBlur={() => save({ focus_prompt: focusPrompt.trim() || null })}
-          multiline
-          textAlignVertical="top"
-        />
+        <View onLayout={e => { focusPromptY.current = e.nativeEvent.layout.y; }}>
+          <Text style={styles.label}>Coach Focus (optional)</Text>
+          <TextInput
+            style={[styles.textArea, { minHeight: 60 }]}
+            placeholder="e.g. Upcoming tournament, press defense scheme..."
+            placeholderTextColor="#4b5563"
+            value={focusPrompt}
+            onChangeText={setFocusPrompt}
+            onFocus={() => scrollRef.current?.scrollTo({ y: focusPromptY.current - 80, animated: true })}
+            onBlur={() => save({ focus_prompt: focusPrompt.trim() || null })}
+            multiline
+            textAlignVertical="top"
+          />
+        </View>
 
         {/* Generate */}
         <TouchableOpacity style={styles.generateBtn} onPress={generate} disabled={generating}>
@@ -457,6 +490,34 @@ export default function GameReportBuilderScreen() {
               <TouchableOpacity style={styles.actionBtn} onPress={() => Print.printAsync({ html: `<html><body>${mdToHtml(report.report_text)}</body></html>` })}>
                 <Ionicons name="print-outline" size={18} color="#9ca3af" />
                 <Text style={styles.actionText}>Print</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Correction section */}
+            <View
+              style={styles.correctionSection}
+              onLayout={e => { correctionY.current = e.nativeEvent.layout.y; }}
+            >
+              <Text style={styles.correctionLabel}>Make a Correction</Text>
+              <TextInput
+                style={styles.correctionInput}
+                placeholder="e.g. The point guard is actually a better defender than scorer..."
+                placeholderTextColor="#4b5563"
+                value={correctionText}
+                onChangeText={setCorrectionText}
+                onFocus={() => scrollRef.current?.scrollTo({ y: correctionY.current - 80, animated: true })}
+                multiline
+                textAlignVertical="top"
+              />
+              <TouchableOpacity
+                style={[styles.correctionBtn, (!correctionText.trim() || correcting) && { opacity: 0.5 }]}
+                onPress={applyCorrection}
+                disabled={!correctionText.trim() || correcting}
+              >
+                {correcting
+                  ? <><ActivityIndicator color="#fff" size="small" /><Text style={styles.correctionBtnText}>  Updating...</Text></>
+                  : <><Ionicons name="checkmark-circle" size={16} color="#fff" /><Text style={styles.correctionBtnText}>  Apply Correction</Text></>
+                }
               </TouchableOpacity>
             </View>
           </View>
@@ -521,4 +582,22 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: 'row', gap: 10 },
   actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: '#374151' },
   actionText: { color: '#9ca3af', fontWeight: '600', fontSize: 14 },
+  correctionSection: {
+    marginTop: 20, backgroundColor: '#111827', borderRadius: 12,
+    padding: 16, borderWidth: 1, borderColor: '#374151',
+  },
+  correctionLabel: {
+    color: '#9ca3af', fontSize: 11, fontWeight: '700',
+    letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10,
+  },
+  correctionInput: {
+    backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12,
+    color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151',
+    minHeight: 80, marginBottom: 12, textAlignVertical: 'top',
+  },
+  correctionBtn: {
+    backgroundColor: '#16a34a', borderRadius: 10, padding: 14,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+  },
+  correctionBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
 });

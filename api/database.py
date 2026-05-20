@@ -49,3 +49,23 @@ def _run_migrations():
                 "ALTER TABLE coaches ADD COLUMN role TEXT NOT NULL DEFAULT 'coach'"
             ))
             conn.commit()
+
+        # Add wingspan to players if missing
+        if "wingspan" not in cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE players ADD COLUMN wingspan TEXT"
+            ))
+            conn.commit()
+
+        # Add game_reports table columns (handled by create_all, but ensure updated_at exists)
+        try:
+            gr_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(game_reports)")
+            )]
+            if gr_cols and "updated_at" not in gr_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE game_reports ADD COLUMN updated_at DATETIME"
+                ))
+                conn.commit()
+        except Exception:
+            pass
