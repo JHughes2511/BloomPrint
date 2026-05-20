@@ -276,8 +276,8 @@ export default function PlayerProfileScreen() {
       {/* Edit Player Modal — compact floating card */}
       <Modal visible={showEdit} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={[styles.modal, { maxHeight: '85%' }]}>
-          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true}>
+          <View style={[styles.modal, { maxHeight: '90%', flex: 0 }]}>
+          <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 16 }}>
             <Text style={styles.modalTitle}>Edit Player</Text>
             <TextInput
               style={styles.input}
