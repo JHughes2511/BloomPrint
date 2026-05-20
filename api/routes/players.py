@@ -15,6 +15,10 @@ class PlayerUpdate(BaseModel):
     team_id: Optional[int] = None
     height: Optional[str] = None
     wingspan: Optional[str] = None
+    country: Optional[str] = None
+    state: Optional[str] = None
+    city: Optional[str] = None
+    school_name: Optional[str] = None
 
 router = APIRouter(prefix="/players", tags=["players"])
 
@@ -91,6 +95,10 @@ def update_player(
         player.height = body.height
     if body.wingspan is not None:
         player.wingspan = body.wingspan
+    for field in ("country", "state", "city", "school_name"):
+        val = getattr(body, field)
+        if val is not None:
+            setattr(player, field, val)
     db.commit()
     db.refresh(player)
     return _with_grade(player)

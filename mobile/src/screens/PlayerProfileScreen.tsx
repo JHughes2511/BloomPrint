@@ -38,6 +38,10 @@ export default function PlayerProfileScreen() {
   const [editPos, setEditPos] = useState('');
   const [editHeight, setEditHeight] = useState('');
   const [editWingspan, setEditWingspan] = useState('');
+  const [editCountry, setEditCountry] = useState('');
+  const [editState, setEditState] = useState('');
+  const [editCity, setEditCity] = useState('');
+  const [editSchool, setEditSchool] = useState('');
   const [editLevel, setEditLevel] = useState('');
   const [editTeamId, setEditTeamId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
@@ -64,6 +68,10 @@ export default function PlayerProfileScreen() {
     setEditPos(player.position ?? '');
     setEditHeight((player as any).height ?? '');
     setEditWingspan((player as any).wingspan ?? '');
+    setEditCountry((player as any).country ?? '');
+    setEditState((player as any).state ?? '');
+    setEditCity((player as any).city ?? '');
+    setEditSchool((player as any).school_name ?? '');
     setEditLevel(player.competition_level ?? 'HS Varsity');
     setEditTeamId(player.team_id ?? null);
     setShowEdit(true);
@@ -78,6 +86,10 @@ export default function PlayerProfileScreen() {
         position: editPos.trim() || undefined,
         height: editHeight.trim() || undefined,
         wingspan: editWingspan.trim() || undefined,
+        country: editCountry.trim() || undefined,
+        state: editState.trim() || undefined,
+        city: editCity.trim() || undefined,
+        school_name: editSchool.trim() || undefined,
         competition_level: editLevel,
         team_id: editTeamId ?? 0,
       });
@@ -296,6 +308,36 @@ export default function PlayerProfileScreen() {
                 onChangeText={setEditWingspan}
               />
             </View>
+            <TextInput
+              style={styles.input}
+              placeholder="School name"
+              placeholderTextColor="#6b7280"
+              value={editSchool}
+              onChangeText={setEditSchool}
+            />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TextInput
+                style={[styles.input, { flex: 1 }]}
+                placeholder="City"
+                placeholderTextColor="#6b7280"
+                value={editCity}
+                onChangeText={setEditCity}
+              />
+              <TextInput
+                style={[styles.input, { flex: 1 }]}
+                placeholder="State"
+                placeholderTextColor="#6b7280"
+                value={editState}
+                onChangeText={setEditState}
+              />
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="Country"
+              placeholderTextColor="#6b7280"
+              value={editCountry}
+              onChangeText={setEditCountry}
+            />
 
             {/* Inline level picker */}
             <Text style={styles.inputLabel}>Competition Level</Text>
