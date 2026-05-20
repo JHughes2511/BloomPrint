@@ -12,11 +12,18 @@ export default function PlayerHomeScreen() {
   const { playerUser, logout } = usePlayerAuth();
   const navigation = useNavigation<any>();
   const [unreadCount, setUnreadCount] = useState(0);
-  const [profile, setProfile] = useState<{ position?: string; height?: string; wingspan?: string } | null>(null);
+  const [profile, setProfile] = useState<{
+    position?: string; height?: string; wingspan?: string;
+    country?: string; state?: string; city?: string; school_name?: string;
+  } | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editPosition, setEditPosition] = useState('');
   const [editHeight, setEditHeight] = useState('');
   const [editWingspan, setEditWingspan] = useState('');
+  const [editCountry, setEditCountry] = useState('');
+  const [editState, setEditState] = useState('');
+  const [editCity, setEditCity] = useState('');
+  const [editSchool, setEditSchool] = useState('');
   const [saving, setSaving] = useState(false);
 
   useFocusEffect(useCallback(() => {
@@ -32,6 +39,10 @@ export default function PlayerHomeScreen() {
     setEditPosition(profile?.position ?? '');
     setEditHeight(profile?.height ?? '');
     setEditWingspan(profile?.wingspan ?? '');
+    setEditCountry(profile?.country ?? '');
+    setEditState(profile?.state ?? '');
+    setEditCity(profile?.city ?? '');
+    setEditSchool(profile?.school_name ?? '');
     setShowEditModal(true);
   };
 
@@ -42,6 +53,10 @@ export default function PlayerHomeScreen() {
         position: editPosition.trim() || undefined,
         height: editHeight.trim() || undefined,
         wingspan: editWingspan.trim() || undefined,
+        country: editCountry.trim() || undefined,
+        state: editState.trim() || undefined,
+        city: editCity.trim() || undefined,
+        school_name: editSchool.trim() || undefined,
       });
       setProfile(updated);
       setShowEditModal(false);
@@ -163,6 +178,24 @@ export default function PlayerHomeScreen() {
                 <Text style={styles.profileStatLabel}>Wingspan</Text>
               </View>
             </View>
+            {(profile.school_name || profile.city || profile.state || profile.country) && (
+              <View style={styles.profileLocation}>
+                {profile.school_name && (
+                  <View style={styles.profileLocationRow}>
+                    <Ionicons name="school-outline" size={13} color="#4b7a4b" />
+                    <Text style={styles.profileLocationText}>{profile.school_name}</Text>
+                  </View>
+                )}
+                {(profile.city || profile.state || profile.country) && (
+                  <View style={styles.profileLocationRow}>
+                    <Ionicons name="location-outline" size={13} color="#4b7a4b" />
+                    <Text style={styles.profileLocationText}>
+                      {[profile.city, profile.state, profile.country].filter(Boolean).join(', ')}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
           </View>
         </>
       )}
@@ -220,6 +253,38 @@ export default function PlayerHomeScreen() {
                 value={editWingspan}
                 onChangeText={setEditWingspan}
                 placeholder='e.g. 6\'5"'
+                placeholderTextColor="#4b5563"
+              />
+              <Text style={styles.fieldLabel}>School</Text>
+              <TextInput
+                style={styles.input}
+                value={editSchool}
+                onChangeText={setEditSchool}
+                placeholder="e.g. Lincoln High School"
+                placeholderTextColor="#4b5563"
+              />
+              <Text style={styles.fieldLabel}>City</Text>
+              <TextInput
+                style={styles.input}
+                value={editCity}
+                onChangeText={setEditCity}
+                placeholder="e.g. Atlanta"
+                placeholderTextColor="#4b5563"
+              />
+              <Text style={styles.fieldLabel}>State</Text>
+              <TextInput
+                style={styles.input}
+                value={editState}
+                onChangeText={setEditState}
+                placeholder="e.g. Georgia"
+                placeholderTextColor="#4b5563"
+              />
+              <Text style={styles.fieldLabel}>Country</Text>
+              <TextInput
+                style={styles.input}
+                value={editCountry}
+                onChangeText={setEditCountry}
+                placeholder="e.g. USA"
                 placeholderTextColor="#4b5563"
               />
               <TouchableOpacity
@@ -334,11 +399,14 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   editBtnText: { color: '#16a34a', fontSize: 12, fontWeight: '600' },
-  profileStats: { flexDirection: 'row', alignItems: 'center' },
+  profileStats: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
   profileStat: { flex: 1, alignItems: 'center' },
   profileStatVal: { color: '#fff', fontSize: 18, fontWeight: '800' },
   profileStatLabel: { color: '#4b7a4b', fontSize: 11, marginTop: 2 },
   profileStatDivider: { width: 1, height: 36, backgroundColor: '#2d4a2d' },
+  profileLocation: { marginTop: 12, gap: 5, borderTopWidth: 1, borderTopColor: '#2d4a2d', paddingTop: 12 },
+  profileLocationRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  profileLocationText: { color: '#4b7a4b', fontSize: 12 },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.7)',

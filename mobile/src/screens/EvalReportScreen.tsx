@@ -337,6 +337,21 @@ export default function EvalReportScreen() {
               </View>
             ) : null}
 
+            {(player as any)?.school_name ? (
+              <View style={styles.pdLocationRow}>
+                <Ionicons name="school-outline" size={13} color="#6b7280" />
+                <Text style={styles.pdLocationText}>{(player as any).school_name}</Text>
+              </View>
+            ) : null}
+            {((player as any)?.city || (player as any)?.state || (player as any)?.country) ? (
+              <View style={styles.pdLocationRow}>
+                <Ionicons name="location-outline" size={13} color="#6b7280" />
+                <Text style={styles.pdLocationText}>
+                  {[(player as any).city, (player as any).state, (player as any).country].filter(Boolean).join(', ')}
+                </Text>
+              </View>
+            ) : null}
+
             {(player?.program_name) ? (
               <Text style={styles.pdProgram}>{player.program_name}</Text>
             ) : null}
@@ -650,6 +665,8 @@ const styles = StyleSheet.create({
   pdStat: { alignItems: 'center', backgroundColor: '#1f2937', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20 },
   pdStatVal: { color: '#fff', fontSize: 20, fontWeight: '800' },
   pdStatLabel: { color: '#6b7280', fontSize: 11, marginTop: 2, textTransform: 'uppercase', letterSpacing: 0.5 },
+  pdLocationRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
+  pdLocationText: { color: '#6b7280', fontSize: 13 },
   pdProgram: { color: '#4b5563', fontSize: 13, marginBottom: 16 },
   pdProfileBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,

@@ -107,6 +107,10 @@ class PlayerSelfUpdate(BaseModel):
     position: str | None = None
     height: str | None = None
     wingspan: str | None = None
+    country: str | None = None
+    state: str | None = None
+    city: str | None = None
+    school_name: str | None = None
 
 
 @router.patch("/linked-player", response_model=schemas.PlayerOut)
@@ -120,12 +124,10 @@ def update_linked_player(
     player = db.get(models.Player, pu.player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
-    if body.position is not None:
-        player.position = body.position
-    if body.height is not None:
-        player.height = body.height
-    if body.wingspan is not None:
-        player.wingspan = body.wingspan
+    for field in ("position", "height", "wingspan", "country", "state", "city", "school_name"):
+        val = getattr(body, field)
+        if val is not None:
+            setattr(player, field, val)
     db.commit()
     db.refresh(player)
     return schemas.PlayerOut.model_validate(player)

@@ -59,6 +59,13 @@ export const playerLinkAPI = {
 
 export const playerProfileAPI = {
   get: () => playerApi.get('/player-auth/linked-player').then(r => r.data),
-  update: (data: { position?: string; height?: string; wingspan?: string }) =>
-    playerApi.patch('/player-auth/linked-player', data).then(r => r.data),
+  update: (data: {
+    position?: string;
+    height?: string;
+    wingspan?: string;
+    country?: string;
+    state?: string;
+    city?: string;
+    school_name?: string;
+  }) => playerApi.patch('/player-auth/linked-player', data).then(r => r.data),
 };

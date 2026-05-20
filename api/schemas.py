@@ -49,6 +49,10 @@ class PlayerCreate(BaseModel):
     age: int | None = None
     height: str | None = None
     wingspan: str | None = None
+    country: str | None = None
+    state: str | None = None
+    city: str | None = None
+    school_name: str | None = None
     program_name: str | None = None
     competition_level: str = "HS Varsity"
     notes: str | None = None
@@ -62,6 +66,10 @@ class PlayerOut(BaseModel):
     age: int | None
     height: str | None
     wingspan: str | None = None
+    country: str | None = None
+    state: str | None = None
+    city: str | None = None
+    school_name: str | None = None
     program_name: str
     competition_level: str
     notes: str | None

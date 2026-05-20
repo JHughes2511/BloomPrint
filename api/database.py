@@ -57,6 +57,14 @@ def _run_migrations():
             ))
             conn.commit()
 
+        # Add location + school fields to players if missing
+        for col in ("country", "state", "city", "school_name"):
+            if col not in cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    f"ALTER TABLE players ADD COLUMN {col} TEXT"
+                ))
+                conn.commit()
+
         # Add game_reports table columns (handled by create_all, but ensure updated_at exists)
         try:
             gr_cols = [row[1] for row in conn.execute(
