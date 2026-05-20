@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, Alert, ScrollView, Modal, TextInput,
+  ActivityIndicator, Alert, ScrollView, Modal, TextInput, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -364,7 +364,7 @@ export default function RecentScreen() {
 
       {/* Single modal — swaps between report / send / correct views */}
       <Modal visible={!!activeModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
 
             {/* Header — back arrow when in sub-view */}
@@ -489,7 +489,7 @@ export default function RecentScreen() {
             )}
 
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
