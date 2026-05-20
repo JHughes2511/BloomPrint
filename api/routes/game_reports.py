@@ -293,7 +293,9 @@ async def generate_game_report(
     sections.append(
         "\nProvide a comprehensive analysis using the BIM framework. "
         "Include strengths, weaknesses, key players, strategic recommendations. "
-        "Format with clear sections and headers."
+        "Format with clear sections using ## for headers. "
+        "Use **bold** only within sentences for player names or key terms — never on a line by itself. "
+        "Never output orphaned ** markers."
     )
 
     prompt = "\n".join(sections)
@@ -326,6 +328,44 @@ async def generate_game_report(
 
 class GameReportCorrectBody(BaseModel):
     correction: str
+
+
+@router.post("/{report_id}/clips/{clip_id}/correct", response_model=schemas.GameReportClipOut)
+async def correct_clip(
+    report_id: int,
+    clip_id: int,
+    body: GameReportCorrectBody,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    clip = db.get(models.GameReportClip, clip_id)
+    if not clip or clip.game_report_id != report_id:
+        raise HTTPException(status_code=404, detail="Clip not found")
+    gr = db.get(models.GameReport, report_id)
+    if not gr or gr.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Game report not found")
+    if not clip.analysis_text:
+        raise HTTPException(status_code=400, detail="No analysis to correct")
+    prompt = (
+        f"Below is a basketball film analysis followed by a coach correction. "
+        f"Update the analysis to incorporate the correction. Return ONLY the updated analysis.\n\n"
+        f"ANALYSIS:\n{clip.analysis_text}\n\n"
+        f"CORRECTION:\n{body.correction}\n\nUPDATED ANALYSIS:"
+    )
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        response = await client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=2048,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        clip.analysis_text = response.content[0].text.strip()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Correction failed: {exc}")
+    db.commit()
+    db.refresh(clip)
+    return clip
 
 
 @router.post("/{report_id}/correct", response_model=schemas.GameReportOut)

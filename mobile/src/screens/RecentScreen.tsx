@@ -9,7 +9,7 @@ import Markdown from 'react-native-markdown-display';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import { evalsAPI, playerAPI } from '../api/client';
+import { evalsAPI, playerAPI, gameReportsAPI } from '../api/client';
 import { GradeBadge } from '../components/GradeBadge';
 import { mdToHtml, safeFileName } from '../utils/mdToHtml';
 
@@ -27,7 +27,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 type ReportItem = {
   id: number;
-  kind: 'eval' | 'team';
+  kind: 'eval' | 'team' | 'game';
   player_name?: string;
   output_type: string;
   overall_grade?: number | null;
@@ -47,6 +47,7 @@ const FILTER_CATS = [
   { key: 'all', label: 'All' },
   { key: 'eval', label: 'Player Evals' },
   { key: 'team', label: 'Team Reports' },
+  { key: 'game', label: 'Game Reports' },
 ];
 
 function cleanMarkdown(text: string): string {
@@ -89,9 +90,10 @@ export default function RecentScreen() {
   const load = async () => {
     setLoading(true);
     try {
-      const [evals, teamReports] = await Promise.all([
+      const [evals, teamReports, gameReports] = await Promise.all([
         evalsAPI.recent(),
         evalsAPI.teamReports(),
+        gameReportsAPI.list().catch(() => []),
       ]);
       const evalItems: ReportItem[] = evals.map((e: any) => ({
         id: e.id,
@@ -109,14 +111,21 @@ export default function RecentScreen() {
         overall_grade: null,
         created_at: t.created_at,
       }));
+      const gameItems: ReportItem[] = gameReports.map((g: any) => ({
+        id: g.id,
+        kind: 'game',
+        player_name: g.title || (g.my_team_name ? `${g.my_team_name}${g.opponent_team_name ? ` vs ${g.opponent_team_name}` : ''}` : 'Game Report'),
+        output_type: g.output_type,
+        overall_grade: null,
+        created_at: g.updated_at || g.created_at,
+      }));
       const texts: Record<number, string> = {};
       teamReports.forEach((t: any) => { if (t.report_text) texts[t.id] = t.report_text; });
       setTeamReportTexts(texts);
-      // Cache eval report_text for modal
       const ec: Record<number, any> = {};
       evals.forEach((e: any) => { ec[e.id] = e; });
       setEvalCache(ec);
-      const combined = [...evalItems, ...teamItems].sort(
+      const combined = [...evalItems, ...teamItems, ...gameItems].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       setItems(combined);
@@ -129,9 +138,7 @@ export default function RecentScreen() {
 
   const filtered = items.filter(item => {
     if (filter === 'all') return true;
-    if (filter === 'eval') return item.kind === 'eval';
-    if (filter === 'team') return item.kind === 'team';
-    return true;
+    return item.kind === filter;
   });
 
   const openModal = (report: ModalReport) => {
@@ -143,6 +150,10 @@ export default function RecentScreen() {
   };
 
   const handlePress = async (item: ReportItem) => {
+    if (item.kind === 'game') {
+      navigation.navigate('GameReportBuilder', { reportId: item.id });
+      return;
+    }
     if (item.kind === 'team') {
       const text = teamReportTexts[item.id] ?? '';
       openModal({ id: item.id, kind: 'team', text, outputType: item.output_type, playerName: item.player_name });
@@ -173,8 +184,10 @@ export default function RecentScreen() {
         try {
           if (item.kind === 'eval') {
             await evalsAPI.delete(item.id);
-          } else {
+          } else if (item.kind === 'team') {
             await evalsAPI.deleteTeamReport(item.id);
+          } else {
+            await gameReportsAPI.delete(item.id);
           }
           load();
         } catch (e: any) {
@@ -346,24 +359,33 @@ export default function RecentScreen() {
                 <Text style={styles.dateHeader}>{dateStr}</Text>
               )}
               <TouchableOpacity
-                style={[styles.card, item.kind === 'team' && styles.cardTeam]}
+                style={[
+                  styles.card,
+                  item.kind === 'team' && styles.cardTeam,
+                  item.kind === 'game' && styles.cardGame,
+                ]}
                 onPress={() => handlePress(item)}
                 onLongPress={() => handleDelete(item)}
               >
                 <View style={styles.kindBadge}>
                   <Ionicons
-                    name={item.kind === 'team' ? 'people' : 'person'}
+                    name={item.kind === 'game' ? 'clipboard' : item.kind === 'team' ? 'people' : 'person'}
                     size={12}
-                    color={item.kind === 'team' ? '#f59e0b' : '#2563eb'}
+                    color={item.kind === 'game' ? '#a78bfa' : item.kind === 'team' ? '#f59e0b' : '#2563eb'}
                   />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.playerName}>{item.player_name}</Text>
-                  <Text style={[styles.typeName, item.kind === 'team' && { color: '#f59e0b' }]}>
-                    {TYPE_LABELS[item.output_type] ?? item.output_type}
+                  <Text style={[
+                    styles.typeName,
+                    item.kind === 'team' && { color: '#f59e0b' },
+                    item.kind === 'game' && { color: '#a78bfa' },
+                  ]}>
+                    {item.kind === 'game' ? 'Game Report Packet' : (TYPE_LABELS[item.output_type] ?? item.output_type)}
                   </Text>
                 </View>
                 {item.overall_grade != null && <GradeBadge grade={item.overall_grade} size="md" />}
+                {item.kind === 'game' && <Ionicons name="chevron-forward" size={14} color="#4b5563" />}
               </TouchableOpacity>
             </>
           );
@@ -569,6 +591,7 @@ const styles = StyleSheet.create({
     borderRadius: 12, padding: 14, gap: 10,
   },
   cardTeam: { borderWidth: 1, borderColor: '#f59e0b22' },
+  cardGame: { borderWidth: 1, borderColor: '#a78bfa22' },
   kindBadge: {
     width: 28, height: 28, borderRadius: 8,
     backgroundColor: '#1f2937', alignItems: 'center', justifyContent: 'center',

@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform,
+  ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform, Modal,
+  findNodeHandle,
 } from 'react-native';
-import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import * as ImagePicker from 'expo-image-picker';
@@ -56,7 +57,6 @@ export default function GameReportBuilderScreen() {
   const [uploadingClip, setUploadingClip] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState<'box_score' | 'scouting_notes' | null>(null);
 
-  // Local editable fields (auto-save on blur)
   const [title, setTitle] = useState('');
   const [mode, setMode] = useState('vs_opponent');
   const [myTeamId, setMyTeamId] = useState<number | null>(null);
@@ -69,16 +69,33 @@ export default function GameReportBuilderScreen() {
 
   const [showMyTeamPicker, setShowMyTeamPicker] = useState(false);
   const [showOppTeamPicker, setShowOppTeamPicker] = useState(false);
+
+  // Correction for main report
   const [correctionText, setCorrectionText] = useState('');
   const [correcting, setCorrecting] = useState(false);
 
+  // Clip modal
+  const [clipModal, setClipModal] = useState<any | null>(null);
+  const [clipCorrectionText, setClipCorrectionText] = useState('');
+  const [clipCorrecting, setClipCorrecting] = useState(false);
+
+  // Share modal
+  const [showShare, setShowShare] = useState(false);
+  const [shareSearch, setShareSearch] = useState('');
+  const [shareResults, setShareResults] = useState<any[]>([]);
+  const [shareSearchLoading, setShareSearchLoading] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const shareDebounce = useRef<any>(null);
+
   const scrollRef = useRef<ScrollView>(null);
+  // Y positions captured via onLayout (direct ScrollView children only)
   const boxScoreY = useRef(0);
   const scoutingY = useRef(0);
   const focusPromptY = useRef(0);
-  const correctionY = useRef(0);
 
-  // Load or create on mount
+  const scrollTo = (y: number) =>
+    setTimeout(() => scrollRef.current?.scrollTo({ y: y - 80, animated: true }), 200);
+
   useEffect(() => {
     teamsAPI.list().then(setTeams).catch(() => {});
     if (existingId) {
@@ -88,7 +105,6 @@ export default function GameReportBuilderScreen() {
         setLoading(false);
       }).catch(() => setLoading(false));
     } else {
-      // Create new
       gameReportsAPI.create({ mode: 'vs_opponent', output_type: 'coaching_report' }).then(r => {
         setReport(r);
         setReportId(r.id);
@@ -97,6 +113,21 @@ export default function GameReportBuilderScreen() {
       }).catch(() => setLoading(false));
     }
   }, []);
+
+  // Share search debounce
+  useEffect(() => {
+    if (!showShare) return;
+    clearTimeout(shareDebounce.current);
+    if (!shareSearch.trim()) { setShareResults([]); return; }
+    setShareSearchLoading(true);
+    shareDebounce.current = setTimeout(async () => {
+      try {
+        const results = await playerAPI.searchPlayerUsers(shareSearch.trim());
+        setShareResults(results);
+      } catch {}
+      setShareSearchLoading(false);
+    }, 400);
+  }, [shareSearch, showShare]);
 
   const populateFromReport = (r: any) => {
     setTitle(r.title ?? '');
@@ -126,16 +157,9 @@ export default function GameReportBuilderScreen() {
     });
     if (result.canceled || !result.assets[0]) return;
     const asset = result.assets[0];
-
     Alert.alert('Whose film is this?', '', [
-      {
-        text: 'My Team',
-        onPress: () => uploadClip(asset, 'my_team'),
-      },
-      {
-        text: 'Opponent',
-        onPress: () => uploadClip(asset, 'opponent'),
-      },
+      { text: 'My Team', onPress: () => uploadClip(asset, 'my_team') },
+      { text: 'Opponent', onPress: () => uploadClip(asset, 'opponent') },
       { text: 'Cancel', style: 'cancel' },
     ]);
   };
@@ -148,8 +172,7 @@ export default function GameReportBuilderScreen() {
       const form = new FormData();
       form.append('video', { uri: asset.uri, name, type: 'video/mp4' } as any);
       form.append('label', label);
-      const updated = await gameReportsAPI.addClip(reportId, form);
-      // Refresh full report to get clips
+      await gameReportsAPI.addClip(reportId, form);
       const refreshed = await gameReportsAPI.get(reportId);
       setReport(refreshed);
     } catch (e: any) {
@@ -166,6 +189,23 @@ export default function GameReportBuilderScreen() {
       const refreshed = await gameReportsAPI.get(reportId);
       setReport(refreshed);
     } catch {}
+  };
+
+  const applyClipCorrection = async () => {
+    if (!reportId || !clipModal || !clipCorrectionText.trim()) return;
+    setClipCorrecting(true);
+    try {
+      const updated = await gameReportsAPI.correctClip(reportId, clipModal.id, clipCorrectionText.trim());
+      setClipModal(updated);
+      setClipCorrectionText('');
+      // Refresh full report so clips list updates
+      const refreshed = await gameReportsAPI.get(reportId);
+      setReport(refreshed);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not apply correction');
+    } finally {
+      setClipCorrecting(false);
+    }
   };
 
   const pickDoc = async (docType: 'box_score' | 'scouting_notes') => {
@@ -224,6 +264,27 @@ export default function GameReportBuilderScreen() {
     }
   };
 
+  const sendReport = async (target: any) => {
+    if (!report?.report_text) return;
+    setSharing(true);
+    try {
+      await playerAPI.shareTeamReport({
+        output_type: report.output_type ?? 'coaching_report',
+        report_text: report.report_text,
+        target_type: 'player',
+        player_user_id: target.id,
+      });
+      setShowShare(false);
+      setShareSearch('');
+      setShareResults([]);
+      Alert.alert('Sent!', `Report sent to ${target.name}.`);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not send report');
+    } finally {
+      setSharing(false);
+    }
+  };
+
   const exportPdf = async () => {
     if (!report?.report_text) return;
     try {
@@ -264,13 +325,17 @@ export default function GameReportBuilderScreen() {
   const clips: any[] = report?.clips ?? [];
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#0a0a0a' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: '#0a0a0a' }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
       <ScrollView
         ref={scrollRef}
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: 60 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
         keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
+        keyboardDismissMode="interactive"
       >
         {/* Header */}
         <View style={styles.header}>
@@ -382,24 +447,28 @@ export default function GameReportBuilderScreen() {
           <Text style={styles.emptyHint}>No film added yet. Tap "Add Film" to upload a clip.</Text>
         ) : (
           clips.map((clip: any) => (
-            <View key={clip.id} style={styles.clipCard}>
+            <TouchableOpacity
+              key={clip.id}
+              style={styles.clipCard}
+              onPress={() => { setClipModal(clip); setClipCorrectionText(''); }}
+              onLongPress={() => Alert.alert('Delete clip?', '', [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Delete', style: 'destructive', onPress: () => deleteClip(clip.id) },
+              ])}
+            >
               <View style={[styles.clipLabel, clip.label === 'my_team' ? styles.clipLabelMy : styles.clipLabelOpp]}>
                 <Text style={styles.clipLabelText}>{clip.label === 'my_team' ? 'My Team' : 'Opponent'}</Text>
               </View>
-              <Text style={styles.clipAnalysis} numberOfLines={3}>
-                {clip.analysis_text ? clip.analysis_text.slice(0, 160) + '...' : 'Analyzing...'}
+              <Text style={styles.clipAnalysis} numberOfLines={2}>
+                {clip.analysis_text ? cleanMarkdown(clip.analysis_text).slice(0, 120) + '...' : 'Analyzing...'}
               </Text>
-              <TouchableOpacity onPress={() => deleteClip(clip.id)} style={styles.clipDelete}>
-                <Ionicons name="trash-outline" size={14} color="#6b7280" />
-              </TouchableOpacity>
-            </View>
+              <Ionicons name="chevron-forward" size={14} color="#4b5563" />
+            </TouchableOpacity>
           ))
         )}
 
         {/* Box Score */}
-        <View
-          onLayout={e => { boxScoreY.current = e.nativeEvent.layout.y; }}
-        >
+        <View onLayout={e => { boxScoreY.current = e.nativeEvent.layout.y; }}>
           <View style={styles.sectionHeader}>
             <Text style={styles.label}>Box Score / Stats</Text>
             <TouchableOpacity style={styles.importBtn} onPress={() => pickDoc('box_score')} disabled={uploadingDoc === 'box_score'}>
@@ -415,7 +484,7 @@ export default function GameReportBuilderScreen() {
             placeholderTextColor="#4b5563"
             value={boxScore}
             onChangeText={setBoxScore}
-            onFocus={() => scrollRef.current?.scrollTo({ y: boxScoreY.current - 80, animated: true })}
+            onFocus={() => scrollTo(boxScoreY.current)}
             onBlur={() => save({ box_score: boxScore.trim() || null })}
             multiline
             textAlignVertical="top"
@@ -423,9 +492,7 @@ export default function GameReportBuilderScreen() {
         </View>
 
         {/* Scouting Notes */}
-        <View
-          onLayout={e => { scoutingY.current = e.nativeEvent.layout.y; }}
-        >
+        <View onLayout={e => { scoutingY.current = e.nativeEvent.layout.y; }}>
           <View style={styles.sectionHeader}>
             <Text style={styles.label}>Scouting Notes</Text>
             <TouchableOpacity style={styles.importBtn} onPress={() => pickDoc('scouting_notes')} disabled={uploadingDoc === 'scouting_notes'}>
@@ -441,7 +508,7 @@ export default function GameReportBuilderScreen() {
             placeholderTextColor="#4b5563"
             value={scoutingNotes}
             onChangeText={setScoutingNotes}
-            onFocus={() => scrollRef.current?.scrollTo({ y: scoutingY.current - 80, animated: true })}
+            onFocus={() => scrollTo(scoutingY.current)}
             onBlur={() => save({ scouting_notes: scoutingNotes.trim() || null })}
             multiline
             textAlignVertical="top"
@@ -457,7 +524,7 @@ export default function GameReportBuilderScreen() {
             placeholderTextColor="#4b5563"
             value={focusPrompt}
             onChangeText={setFocusPrompt}
-            onFocus={() => scrollRef.current?.scrollTo({ y: focusPromptY.current - 80, animated: true })}
+            onFocus={() => scrollTo(focusPromptY.current)}
             onBlur={() => save({ focus_prompt: focusPrompt.trim() || null })}
             multiline
             textAlignVertical="top"
@@ -484,20 +551,21 @@ export default function GameReportBuilderScreen() {
             </View>
             <View style={styles.actionRow}>
               <TouchableOpacity style={styles.actionBtn} onPress={exportPdf}>
-                <Ionicons name="share-outline" size={18} color="#9ca3af" />
+                <Ionicons name="share-outline" size={16} color="#9ca3af" />
                 <Text style={styles.actionText}>Export PDF</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn} onPress={() => Print.printAsync({ html: `<html><body>${mdToHtml(report.report_text)}</body></html>` })}>
-                <Ionicons name="print-outline" size={18} color="#9ca3af" />
+                <Ionicons name="print-outline" size={16} color="#9ca3af" />
                 <Text style={styles.actionText}>Print</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionBtn} onPress={() => { setShowShare(true); setShareSearch(''); setShareResults([]); }}>
+                <Ionicons name="paper-plane-outline" size={16} color="#9ca3af" />
+                <Text style={styles.actionText}>Send</Text>
               </TouchableOpacity>
             </View>
 
             {/* Correction section */}
-            <View
-              style={styles.correctionSection}
-              onLayout={e => { correctionY.current = e.nativeEvent.layout.y; }}
-            >
+            <View style={styles.correctionSection}>
               <Text style={styles.correctionLabel}>Make a Correction</Text>
               <TextInput
                 style={styles.correctionInput}
@@ -505,7 +573,7 @@ export default function GameReportBuilderScreen() {
                 placeholderTextColor="#4b5563"
                 value={correctionText}
                 onChangeText={setCorrectionText}
-                onFocus={() => scrollRef.current?.scrollTo({ y: correctionY.current - 80, animated: true })}
+                onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 200)}
                 multiline
                 textAlignVertical="top"
               />
@@ -523,6 +591,91 @@ export default function GameReportBuilderScreen() {
           </View>
         ) : null}
       </ScrollView>
+
+      {/* Clip analysis modal */}
+      <Modal visible={!!clipModal} animationType="slide" transparent>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={styles.modalBox}>
+            <View style={styles.modalHeader}>
+              <View style={[styles.clipLabel, clipModal?.label === 'my_team' ? styles.clipLabelMy : styles.clipLabelOpp]}>
+                <Text style={styles.clipLabelText}>{clipModal?.label === 'my_team' ? 'My Team Film' : 'Opponent Film'}</Text>
+              </View>
+              <TouchableOpacity onPress={() => setClipModal(null)} style={{ marginLeft: 'auto' }}>
+                <Ionicons name="close" size={22} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={{ maxHeight: 280 }} contentContainerStyle={{ paddingBottom: 8 }}>
+              {clipModal?.analysis_text
+                ? <Markdown style={markdownStyles}>{cleanMarkdown(clipModal.analysis_text)}</Markdown>
+                : <Text style={{ color: '#6b7280' }}>No analysis yet.</Text>
+              }
+            </ScrollView>
+            <Text style={[styles.correctionLabel, { marginTop: 16 }]}>Correct This Analysis</Text>
+            <TextInput
+              style={styles.correctionInput}
+              placeholder="What needs to be updated in this film analysis?"
+              placeholderTextColor="#4b5563"
+              value={clipCorrectionText}
+              onChangeText={setClipCorrectionText}
+              multiline
+              textAlignVertical="top"
+            />
+            <TouchableOpacity
+              style={[styles.correctionBtn, (!clipCorrectionText.trim() || clipCorrecting) && { opacity: 0.5 }]}
+              onPress={applyClipCorrection}
+              disabled={!clipCorrectionText.trim() || clipCorrecting}
+            >
+              {clipCorrecting
+                ? <><ActivityIndicator color="#fff" size="small" /><Text style={styles.correctionBtnText}>  Updating...</Text></>
+                : <><Ionicons name="checkmark-circle" size={16} color="#fff" /><Text style={styles.correctionBtnText}>  Apply Correction</Text></>
+              }
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Share modal */}
+      <Modal visible={showShare} animationType="slide" transparent>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={styles.modalBox}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Send Report</Text>
+              <TouchableOpacity onPress={() => setShowShare(false)}>
+                <Ionicons name="close" size={22} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>
+              Search for a player to send this report to their inbox.
+            </Text>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Type a name to search..."
+              placeholderTextColor="#6b7280"
+              value={shareSearch}
+              onChangeText={setShareSearch}
+              autoFocus
+            />
+            {shareSearchLoading && <ActivityIndicator color="#6b7280" size="small" style={{ marginTop: 8 }} />}
+            <ScrollView style={{ maxHeight: 260, marginTop: 8 }} keyboardShouldPersistTaps="handled">
+              {shareResults.map(r => (
+                <TouchableOpacity key={r.id} style={styles.searchResult} onPress={() => sendReport(r)} disabled={sharing}>
+                  <View style={styles.searchAvatar}>
+                    <Text style={{ color: '#fff', fontWeight: '700' }}>{r.name?.[0] ?? '?'}</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: '#fff', fontWeight: '600' }}>{r.name}</Text>
+                    <Text style={{ color: '#6b7280', fontSize: 12 }}>{r.email}</Text>
+                  </View>
+                  {sharing ? <ActivityIndicator color="#2563eb" size="small" /> : <Ionicons name="paper-plane-outline" size={18} color="#2563eb" />}
+                </TouchableOpacity>
+              ))}
+              {shareResults.length === 0 && shareSearch.trim().length > 0 && !shareSearchLoading && (
+                <Text style={{ color: '#4b5563', textAlign: 'center', paddingVertical: 20 }}>No players found.</Text>
+              )}
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -567,37 +720,31 @@ const styles = StyleSheet.create({
   importBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: '#374151', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
   importBtnText: { color: '#9ca3af', fontSize: 12, fontWeight: '600' },
   emptyHint: { color: '#4b5563', fontSize: 12, marginBottom: 14, fontStyle: 'italic' },
-  clipCard: { backgroundColor: '#111827', borderRadius: 10, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: '#1f2937', flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  clipCard: { backgroundColor: '#111827', borderRadius: 10, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: '#1f2937', flexDirection: 'row', alignItems: 'center', gap: 10 },
   clipLabel: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, alignSelf: 'flex-start' },
   clipLabelMy: { backgroundColor: '#1e3a5f' },
   clipLabelOpp: { backgroundColor: '#3b1515' },
   clipLabelText: { color: '#fff', fontSize: 10, fontWeight: '700' },
   clipAnalysis: { flex: 1, color: '#6b7280', fontSize: 11, lineHeight: 16 },
-  clipDelete: { padding: 4 },
   textArea: { backgroundColor: '#111827', borderRadius: 10, padding: 14, color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#1f2937', minHeight: 100, marginBottom: 16 },
   generateBtn: { backgroundColor: '#2563eb', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8 },
   generateText: { color: '#fff', fontWeight: '700', fontSize: 16, marginLeft: 8 },
   hint: { color: '#4b5563', fontSize: 12, textAlign: 'center', marginTop: 10 },
   reportBox: { backgroundColor: '#111827', borderRadius: 12, padding: 16, marginBottom: 12 },
-  actionRow: { flexDirection: 'row', gap: 10 },
-  actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: '#374151' },
-  actionText: { color: '#9ca3af', fontWeight: '600', fontSize: 14 },
-  correctionSection: {
-    marginTop: 20, backgroundColor: '#111827', borderRadius: 12,
-    padding: 16, borderWidth: 1, borderColor: '#374151',
-  },
-  correctionLabel: {
-    color: '#9ca3af', fontSize: 11, fontWeight: '700',
-    letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10,
-  },
-  correctionInput: {
-    backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12,
-    color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151',
-    minHeight: 80, marginBottom: 12, textAlignVertical: 'top',
-  },
-  correctionBtn: {
-    backgroundColor: '#16a34a', borderRadius: 10, padding: 14,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-  },
+  actionRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+  actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: '#374151' },
+  actionText: { color: '#9ca3af', fontWeight: '600', fontSize: 12 },
+  correctionSection: { backgroundColor: '#111827', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#374151' },
+  correctionLabel: { color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 },
+  correctionInput: { backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12, color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151', minHeight: 80, marginBottom: 12, textAlignVertical: 'top' },
+  correctionBtn: { backgroundColor: '#16a34a', borderRadius: 10, padding: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   correctionBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  // Modals
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
+  modalBox: { backgroundColor: '#111827', borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8 },
+  modalHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },
+  modalTitle: { color: '#fff', fontSize: 18, fontWeight: '800', flex: 1 },
+  searchInput: { backgroundColor: '#1f2937', borderRadius: 10, padding: 14, color: '#fff', fontSize: 15, borderWidth: 1, borderColor: '#374151' },
+  searchResult: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 10, backgroundColor: '#1f2937', marginBottom: 8 },
+  searchAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#2563eb', alignItems: 'center', justifyContent: 'center' },
 });

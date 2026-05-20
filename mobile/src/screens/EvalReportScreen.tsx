@@ -284,6 +284,19 @@ export default function EvalReportScreen() {
         <GradeBadge grade={ev.overall_grade} size="lg" />
       </View>
 
+      {/* Player name link */}
+      {player && (
+        <TouchableOpacity
+          style={styles.playerNameRow}
+          onPress={() => navigation.navigate('PlayerProfile', { playerId: ev.player_id })}
+        >
+          <Ionicons name="person-circle-outline" size={18} color="#2563eb" />
+          <Text style={styles.playerNameLink}>{player.name}</Text>
+          {player.position ? <Text style={styles.playerPos}>{player.position}</Text> : null}
+          <Ionicons name="chevron-forward" size={13} color="#2563eb" style={{ marginLeft: 'auto' }} />
+        </TouchableOpacity>
+      )}
+
       {/* Pillar grades */}
       {hasPillars && (
         <View style={styles.section}>
@@ -563,6 +576,13 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0a0a' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56 },
+  playerNameRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    marginHorizontal: 20, marginBottom: 12, backgroundColor: '#111827',
+    borderRadius: 10, padding: 12, borderWidth: 1, borderColor: '#1f2937',
+  },
+  playerNameLink: { color: '#60a5fa', fontWeight: '700', fontSize: 15, flex: 1 },
+  playerPos: { color: '#6b7280', fontSize: 12 },
   title: { color: '#fff', fontSize: 16, fontWeight: '900' },
   sub: { color: '#6b7280', fontSize: 11, marginTop: 2 },
   section: { paddingHorizontal: 20, marginTop: 24 },

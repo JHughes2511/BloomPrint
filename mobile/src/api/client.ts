@@ -180,4 +180,6 @@ export const gameReportsAPI = {
   generate: (id: number) => api.post(`/game-reports/${id}/generate`).then(r => r.data),
   correct: (id: number, correction: string) =>
     api.post(`/game-reports/${id}/correct`, { correction }).then(r => r.data),
+  correctClip: (id: number, clipId: number, correction: string) =>
+    api.post(`/game-reports/${id}/clips/${clipId}/correct`, { correction }).then(r => r.data),
 };

@@ -40,6 +40,8 @@ const TEMPLATE_COLUMNS = [
 const ROSTER_COLUMNS = [
   { name: 'Player Name *', desc: 'Full name — required' },
   { name: 'Position', desc: 'PG, SG, SF, PF, C' },
+  { name: 'Height', desc: "e.g. 6'2\"" },
+  { name: 'Wingspan', desc: "e.g. 6'5\" (also accepted: WS)" },
   { name: 'Competition Level', desc: 'HS Varsity, College, Pro, etc.' },
 ];
 

@@ -26,6 +26,9 @@ HEADER_MAP: dict[str, str] = {
     "competition level": "competition_level", "level": "competition_level",
     "class": "competition_level",
     "output type": "output_type", "report type": "output_type", "type": "output_type",
+    # Physical measurements
+    "height": "height", "ht": "height",
+    "wingspan": "wingspan", "ws": "wingspan", "wing span": "wingspan", "wing": "wingspan",
     # Grades
     "overall grade": "overall_grade", "overall": "overall_grade",
     "grade": "overall_grade", "score": "overall_grade",
@@ -230,6 +233,8 @@ async def import_excel(
                         competition_level=row.get("competition_level", competition_level),
                         program_name=program_name,
                         team_id=team_id,
+                        height=row.get("height"),
+                        wingspan=row.get("wingspan"),
                     )
                     db.add(player)
                     db.flush()
@@ -240,6 +245,10 @@ async def import_excel(
                         player.position = row["position"]
                     if row.get("competition_level"):
                         player.competition_level = row["competition_level"]
+                    if row.get("height"):
+                        player.height = row["height"]
+                    if row.get("wingspan"):
+                        player.wingspan = row["wingspan"]
                     # In roster mode, always update team assignment
                     if roster_only and team_id:
                         player.team_id = team_id
