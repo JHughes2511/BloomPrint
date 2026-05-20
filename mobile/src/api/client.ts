@@ -31,7 +31,9 @@ export const playersAPI = {
 
   create: (data: {
     name: string; position?: string; age?: number;
-    height?: string; wingspan?: string; competition_level?: string; notes?: string; team_id?: number;
+    height?: string; wingspan?: string; school_name?: string;
+    city?: string; state?: string; country?: string;
+    competition_level?: string; notes?: string; team_id?: number;
   }) => api.post('/players', data).then(r => r.data),
 
   update: (id: number, data: {

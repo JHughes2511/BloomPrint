@@ -74,6 +74,10 @@ export default function RosterScreen() {
   const [newPos, setNewPos] = useState('');
   const [newHeight, setNewHeight] = useState('');
   const [newWingspan, setNewWingspan] = useState('');
+  const [newSchool, setNewSchool] = useState('');
+  const [newCity, setNewCity] = useState('');
+  const [newState, setNewState] = useState('');
+  const [newCountry, setNewCountry] = useState('');
   const [newLevel, setNewLevel] = useState('Middle School');
   const [saving, setSaving] = useState(false);
 
@@ -108,11 +112,16 @@ export default function RosterScreen() {
         position: newPos || undefined,
         height: newHeight || undefined,
         wingspan: newWingspan || undefined,
+        school_name: newSchool || undefined,
+        city: newCity || undefined,
+        state: newState || undefined,
+        country: newCountry || undefined,
         competition_level: newLevel,
         team_id: selectedTeamId ?? undefined,
       });
       setShowAdd(false);
       setNewName(''); setNewPos(''); setNewHeight(''); setNewWingspan('');
+      setNewSchool(''); setNewCity(''); setNewState(''); setNewCountry('');
       load();
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not add player');
@@ -260,7 +269,7 @@ export default function RosterScreen() {
       {/* Add Player Modal */}
       <Modal visible={showAdd} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={styles.modal}>
+          <ScrollView style={[styles.modal, { maxHeight: '85%' }]} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
             <Text style={styles.modalTitle}>Add Player</Text>
             {currentTeamName && (
               <Text style={styles.modalSub}>Adding to {currentTeamName}</Text>
@@ -275,7 +284,17 @@ export default function RosterScreen() {
               <TextInput style={[styles.input, { flex: 1 }]} placeholder={`Wingspan (e.g. 6'5")`} placeholderTextColor="#6b7280"
                 value={newWingspan} onChangeText={setNewWingspan} />
             </View>
-            <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Competition Level</Text>
+            <TextInput style={styles.input} placeholder="School name" placeholderTextColor="#6b7280"
+              value={newSchool} onChangeText={setNewSchool} />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TextInput style={[styles.input, { flex: 1 }]} placeholder="City" placeholderTextColor="#6b7280"
+                value={newCity} onChangeText={setNewCity} />
+              <TextInput style={[styles.input, { flex: 1 }]} placeholder="State" placeholderTextColor="#6b7280"
+                value={newState} onChangeText={setNewState} />
+            </View>
+            <TextInput style={styles.input} placeholder="Country" placeholderTextColor="#6b7280"
+              value={newCountry} onChangeText={setNewCountry} />
+            <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6, marginTop: 4 }}>Competition Level</Text>
             <LevelDropdown value={newLevel} onChange={setNewLevel} />
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowAdd(false)}>
@@ -285,7 +304,7 @@ export default function RosterScreen() {
                 {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Add</Text>}
               </TouchableOpacity>
             </View>
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
 
