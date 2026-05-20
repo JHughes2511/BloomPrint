@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, Alert, ScrollView, Modal, TextInput,
@@ -219,15 +219,20 @@ export default function RecentScreen() {
     }
   };
 
-  const searchSendTargets = async () => {
-    if (!sendSearch.trim()) return;
+  const searchDebounce = useRef<any>(null);
+  useEffect(() => {
+    if (!showSend) return;
+    clearTimeout(searchDebounce.current);
+    if (!sendSearch.trim()) { setSendResults([]); return; }
     setSendSearchLoading(true);
-    try {
-      const results = await playerAPI.searchPlayerUsers(sendSearch.trim());
-      setSendResults(results);
-    } catch {}
-    setSendSearchLoading(false);
-  };
+    searchDebounce.current = setTimeout(async () => {
+      try {
+        const results = await playerAPI.searchPlayerUsers(sendSearch.trim());
+        setSendResults(results);
+      } catch {}
+      setSendSearchLoading(false);
+    }, 400);
+  }, [sendSearch, showSend]);
 
   const sendReport = async (target: any) => {
     if (!activeModal) return;
@@ -354,20 +359,19 @@ export default function RecentScreen() {
                 <Ionicons name="close" size={24} color="#9ca3af" />
               </TouchableOpacity>
             </View>
-            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 12 }}>Search for a player to send this report to.</Text>
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 12 }}>Search for a player to send this report to their inbox.</Text>
+            <View style={{ marginBottom: 12, position: 'relative' }}>
               <TextInput
-                style={sendStyles.searchInput}
-                placeholder="Search by name..."
+                style={[sendStyles.searchInput, { paddingRight: 40 }]}
+                placeholder="Type a name to search..."
                 placeholderTextColor="#4b5563"
                 value={sendSearch}
                 onChangeText={setSendSearch}
-                onSubmitEditing={searchSendTargets}
-                returnKeyType="search"
+                autoFocus
               />
-              <TouchableOpacity style={sendStyles.searchBtn} onPress={searchSendTargets}>
-                {sendSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
-              </TouchableOpacity>
+              {sendSearchLoading && (
+                <ActivityIndicator color="#6b7280" size="small" style={{ position: 'absolute', right: 12, top: 14 }} />
+              )}
             </View>
             <ScrollView style={{ maxHeight: 240 }}>
               {sendResults.map(r => (

@@ -41,6 +41,9 @@ export default function PlayerProfileScreen() {
   const [saving, setSaving] = useState(false);
   const [showLevelPicker, setShowLevelPicker] = useState(false);
   const [showTeamPicker, setShowTeamPicker] = useState(false);
+  const [showCreateTeam, setShowCreateTeam] = useState(false);
+  const [newTeamName, setNewTeamName] = useState('');
+  const [creatingTeam, setCreatingTeam] = useState(false);
 
   // Summary state
   const [showSummary, setShowSummary] = useState(false);
@@ -110,6 +113,23 @@ export default function PlayerProfileScreen() {
 
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [generatingInvite, setGeneratingInvite] = useState(false);
+
+  const createTeamFromEdit = async () => {
+    if (!newTeamName.trim()) return;
+    setCreatingTeam(true);
+    try {
+      const team = await teamsAPI.create({ name: newTeamName.trim(), competition_level: editLevel });
+      setTeams(prev => [...prev, team]);
+      setEditTeamId(team.id);
+      setNewTeamName('');
+      setShowCreateTeam(false);
+      setShowTeamPicker(false);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not create team');
+    } finally {
+      setCreatingTeam(false);
+    }
+  };
 
   const generateInvite = async () => {
     setGeneratingInvite(true);
@@ -319,8 +339,40 @@ export default function PlayerProfileScreen() {
                 {editTeamId === t.id && <Ionicons name="checkmark" size={16} color="#2563eb" />}
               </TouchableOpacity>
             ))}
+            <TouchableOpacity
+              style={[styles.pickerOption, { borderTopColor: '#2563eb33' }]}
+              onPress={() => { setShowCreateTeam(true); }}
+            >
+              <Ionicons name="add-circle-outline" size={16} color="#2563eb" />
+              <Text style={[styles.pickerOptionText, { color: '#2563eb', marginLeft: 8 }]}>Create New Team</Text>
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
+      </Modal>
+
+      {/* Create Team inline modal */}
+      <Modal visible={showCreateTeam} transparent animationType="fade">
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>New Team</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Team Name *"
+              placeholderTextColor="#6b7280"
+              value={newTeamName}
+              onChangeText={setNewTeamName}
+              autoFocus
+            />
+            <View style={styles.modalRow}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => { setShowCreateTeam(false); setNewTeamName(''); }}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveBtn} onPress={createTeamFromEdit} disabled={creatingTeam || !newTeamName.trim()}>
+                {creatingTeam ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Create</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Summary modal */}
