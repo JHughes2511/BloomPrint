@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 import bcrypt
 from jose import jwt
@@ -87,3 +88,44 @@ def me(pu: models.PlayerUser = Depends(get_current_player_user)):
         out.linked_team_name = pu.player.team.name if pu.player.team else None
         out.linked_program_name = pu.player.program_name
     return out
+
+
+@router.get("/linked-player", response_model=schemas.PlayerOut)
+def get_linked_player(
+    pu: models.PlayerUser = Depends(get_current_player_user),
+    db: Session = Depends(get_db),
+):
+    if not pu.player_id:
+        raise HTTPException(status_code=404, detail="No linked player profile")
+    player = db.get(models.Player, pu.player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found")
+    return schemas.PlayerOut.model_validate(player)
+
+
+class PlayerSelfUpdate(BaseModel):
+    position: str | None = None
+    height: str | None = None
+    wingspan: str | None = None
+
+
+@router.patch("/linked-player", response_model=schemas.PlayerOut)
+def update_linked_player(
+    body: PlayerSelfUpdate,
+    pu: models.PlayerUser = Depends(get_current_player_user),
+    db: Session = Depends(get_db),
+):
+    if not pu.player_id:
+        raise HTTPException(status_code=404, detail="No linked player profile")
+    player = db.get(models.Player, pu.player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found")
+    if body.position is not None:
+        player.position = body.position
+    if body.height is not None:
+        player.height = body.height
+    if body.wingspan is not None:
+        player.wingspan = body.wingspan
+    db.commit()
+    db.refresh(player)
+    return schemas.PlayerOut.model_validate(player)

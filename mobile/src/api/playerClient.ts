@@ -56,3 +56,9 @@ export const playerLinkAPI = {
   requestLink: (playerId: number) =>
     playerApi.post(`/player/link-request/${playerId}`).then(r => r.data),
 };
+
+export const playerProfileAPI = {
+  get: () => playerApi.get('/player-auth/linked-player').then(r => r.data),
+  update: (data: { position?: string; height?: string; wingspan?: string }) =>
+    playerApi.patch('/player-auth/linked-player', data).then(r => r.data),
+};

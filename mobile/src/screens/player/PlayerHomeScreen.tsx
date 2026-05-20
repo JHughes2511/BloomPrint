@@ -1,22 +1,56 @@
 import React, { useCallback, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
+  Modal, TextInput, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
-import { playerNotificationsAPI } from '../../api/playerClient';
+import { playerNotificationsAPI, playerProfileAPI } from '../../api/playerClient';
 
 export default function PlayerHomeScreen() {
   const { playerUser, logout } = usePlayerAuth();
   const navigation = useNavigation<any>();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [profile, setProfile] = useState<{ position?: string; height?: string; wingspan?: string } | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editPosition, setEditPosition] = useState('');
+  const [editHeight, setEditHeight] = useState('');
+  const [editWingspan, setEditWingspan] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useFocusEffect(useCallback(() => {
     playerNotificationsAPI.list().then((notifs: any[]) => {
       setUnreadCount(notifs.filter(n => !n.read).length);
     }).catch(() => {});
-  }, []));
+    if (playerUser?.player_id) {
+      playerProfileAPI.get().then((p: any) => setProfile(p)).catch(() => {});
+    }
+  }, [playerUser?.player_id]));
+
+  const openEdit = () => {
+    setEditPosition(profile?.position ?? '');
+    setEditHeight(profile?.height ?? '');
+    setEditWingspan(profile?.wingspan ?? '');
+    setShowEditModal(true);
+  };
+
+  const saveProfile = async () => {
+    setSaving(true);
+    try {
+      const updated = await playerProfileAPI.update({
+        position: editPosition.trim() || undefined,
+        height: editHeight.trim() || undefined,
+        wingspan: editWingspan.trim() || undefined,
+      });
+      setProfile(updated);
+      setShowEditModal(false);
+    } catch {
+      Alert.alert('Error', 'Failed to save profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleSignOut = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
@@ -101,6 +135,38 @@ export default function PlayerHomeScreen() {
         </TouchableOpacity>
       </View>
 
+      {playerUser?.player_id && profile && (
+        <>
+          <Text style={styles.sectionLabel}>My Profile</Text>
+          <View style={styles.profileCard}>
+            <View style={styles.profileCardHeader}>
+              <Ionicons name="person-circle-outline" size={20} color="#16a34a" />
+              <Text style={styles.profileCardTitle}>Athletic Profile</Text>
+              <TouchableOpacity style={styles.editBtn} onPress={openEdit}>
+                <Ionicons name="pencil-outline" size={15} color="#16a34a" />
+                <Text style={styles.editBtnText}>Edit</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.profileStats}>
+              <View style={styles.profileStat}>
+                <Text style={styles.profileStatVal}>{profile.position || '—'}</Text>
+                <Text style={styles.profileStatLabel}>Position</Text>
+              </View>
+              <View style={styles.profileStatDivider} />
+              <View style={styles.profileStat}>
+                <Text style={styles.profileStatVal}>{profile.height || '—'}</Text>
+                <Text style={styles.profileStatLabel}>Height</Text>
+              </View>
+              <View style={styles.profileStatDivider} />
+              <View style={styles.profileStat}>
+                <Text style={styles.profileStatVal}>{profile.wingspan || '—'}</Text>
+                <Text style={styles.profileStatLabel}>Wingspan</Text>
+              </View>
+            </View>
+          </View>
+        </>
+      )}
+
       <Text style={styles.sectionLabel}>Account</Text>
 
       <TouchableOpacity
@@ -118,6 +184,55 @@ export default function PlayerHomeScreen() {
         </View>
         <Ionicons name="chevron-forward" size={16} color="#4b5563" />
       </TouchableOpacity>
+
+      <Modal visible={showEditModal} transparent animationType="slide">
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalBox}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Edit My Profile</Text>
+                <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                  <Ionicons name="close" size={22} color="#9ca3af" />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.fieldLabel}>Position</Text>
+              <TextInput
+                style={styles.input}
+                value={editPosition}
+                onChangeText={setEditPosition}
+                placeholder="e.g. PG, SG, SF, PF, C"
+                placeholderTextColor="#4b5563"
+              />
+              <Text style={styles.fieldLabel}>Height</Text>
+              <TextInput
+                style={styles.input}
+                value={editHeight}
+                onChangeText={setEditHeight}
+                placeholder='e.g. 6\'2"'
+                placeholderTextColor="#4b5563"
+              />
+              <Text style={styles.fieldLabel}>Wingspan</Text>
+              <TextInput
+                style={styles.input}
+                value={editWingspan}
+                onChangeText={setEditWingspan}
+                placeholder='e.g. 6\'5"'
+                placeholderTextColor="#4b5563"
+              />
+              <TouchableOpacity
+                style={[styles.saveBtn, saving && { opacity: 0.6 }]}
+                onPress={saveProfile}
+                disabled={saving}
+              >
+                <Text style={styles.saveBtnText}>{saving ? 'Saving…' : 'Save Changes'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </ScrollView>
   );
 }
@@ -199,4 +314,61 @@ const styles = StyleSheet.create({
   },
   linkTitle: { color: '#fff', fontSize: 14, fontWeight: '600' },
   linkDesc: { color: '#4b7a4b', fontSize: 12, marginTop: 2 },
+  profileCard: {
+    backgroundColor: '#1a2e1a',
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 20,
+    borderWidth: 1,
+    borderColor: '#2d4a2d',
+  },
+  profileCardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
+  profileCardTitle: { color: '#fff', fontSize: 14, fontWeight: '700', flex: 1 },
+  editBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#16a34a22',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  editBtnText: { color: '#16a34a', fontSize: 12, fontWeight: '600' },
+  profileStats: { flexDirection: 'row', alignItems: 'center' },
+  profileStat: { flex: 1, alignItems: 'center' },
+  profileStatVal: { color: '#fff', fontSize: 18, fontWeight: '800' },
+  profileStatLabel: { color: '#4b7a4b', fontSize: 11, marginTop: 2 },
+  profileStatDivider: { width: 1, height: 36, backgroundColor: '#2d4a2d' },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
+  },
+  modalBox: {
+    backgroundColor: '#1a2e1a',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 24,
+    paddingBottom: 40,
+  },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  modalTitle: { color: '#fff', fontSize: 17, fontWeight: '800' },
+  fieldLabel: { color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6, marginTop: 14 },
+  input: {
+    backgroundColor: '#0f1a0f',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#2d4a2d',
+    color: '#fff',
+    fontSize: 15,
+    padding: 12,
+  },
+  saveBtn: {
+    backgroundColor: '#16a34a',
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  saveBtnText: { color: '#fff', fontSize: 15, fontWeight: '800' },
 });
