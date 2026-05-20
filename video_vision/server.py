@@ -384,7 +384,7 @@ async def _handle_analyze_frame(args: dict[str, Any]) -> list[types.TextContent]
     img_b64 = _frame_to_base64(frame)
     response = _client().messages.create(
         model="claude-opus-4-7",
-        max_tokens=1024,
+        max_tokens=4096,
         messages=[
             {
                 "role": "user",
@@ -490,7 +490,7 @@ async def _handle_analyze_video(args: dict[str, Any]) -> list[types.TextContent]
 
     response = _client().messages.create(
         model="claude-opus-4-7",
-        max_tokens=2048,
+        max_tokens=8192,
         messages=[{"role": "user", "content": content}],
     )
     answer = response.content[0].text

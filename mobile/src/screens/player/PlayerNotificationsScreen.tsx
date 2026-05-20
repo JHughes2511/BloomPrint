@@ -26,11 +26,10 @@ export default function PlayerNotificationsScreen() {
     try {
       const data = await playerNotificationsAPI.list();
       setNotifications(data);
-      // Mark all unread as read so the badge clears on home
+      // Mark all read in background so home badge clears — but keep visual unread state in list
       const hasUnread = data.some((n: any) => !n.read);
       if (hasUnread) {
         playerNotificationsAPI.markAllRead().catch(() => {});
-        setNotifications(data.map((n: any) => ({ ...n, read: true })));
       }
     } catch {}
     setLoading(false);
@@ -39,14 +38,14 @@ export default function PlayerNotificationsScreen() {
 
   useFocusEffect(useCallback(() => { load(); }, []));
 
-  const handleTap = async (notif: AppNotification) => {
-    if (!notif.read) {
-      await playerNotificationsAPI.markRead(notif.id);
-      setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
-    }
+  const handleTap = (notif: AppNotification) => {
+    // Mark as read visually
+    setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
     if (notif.type === 'report_shared' && notif.ref_id) {
       navigation.navigate('PlayerReportDetail', { reportId: notif.ref_id });
     } else if (notif.type === 'training_updated' && notif.ref_id) {
+      navigation.navigate('PlayerTrainingDetail', { trainingId: notif.ref_id });
+    } else if (notif.type === 'training_generated' && notif.ref_id) {
       navigation.navigate('PlayerTrainingDetail', { trainingId: notif.ref_id });
     }
   };

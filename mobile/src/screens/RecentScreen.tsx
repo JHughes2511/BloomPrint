@@ -51,8 +51,14 @@ const FILTER_CATS = [
 
 function cleanMarkdown(text: string): string {
   return text
-    .replace(/\*\*\s*$/gm, '')
-    .replace(/^\s*\*\*\s*$/gm, '')
+    .split('\n')
+    .map(line => {
+      // Remove lines that are only ** or whitespace/**
+      if (/^\s*\*{1,2}\s*$/.test(line)) return '';
+      // Remove trailing orphaned ** at end of line (not part of a **word** pair)
+      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '');
+    })
+    .join('\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
@@ -260,10 +266,10 @@ export default function RecentScreen() {
           player_user_id: target.id,
         });
       }
-      Alert.alert('Sent!', `Report sent to ${target.name}.`);
-      setShowSend(false);
       setSendSearch('');
       setSendResults([]);
+      setModalView('report');
+      Alert.alert('Sent!', `Report sent to ${target.name}.`);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not send report');
     } finally {

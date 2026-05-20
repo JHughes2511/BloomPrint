@@ -17,8 +17,12 @@ import { mdToHtml, safeFileName } from '../utils/mdToHtml';
 
 function cleanMarkdown(text: string): string {
   return text
-    .replace(/\*\*\s*$/gm, '')
-    .replace(/^\s*\*\*\s*$/gm, '')
+    .split('\n')
+    .map(line => {
+      if (/^\s*\*{1,2}\s*$/.test(line)) return '';
+      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '');
+    })
+    .join('\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }

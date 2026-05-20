@@ -216,7 +216,7 @@ async def team_report(
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
             model="claude-opus-4-7",
-            max_tokens=2048,
+            max_tokens=8192,
             messages=[{"role": "user", "content": prompt}],
         )
         text_blocks = [b for b in response.content if hasattr(b, "text")]

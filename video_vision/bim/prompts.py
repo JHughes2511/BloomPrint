@@ -31,9 +31,7 @@ def _six_pillars_block() -> str:
 def _program_header(program: str, level: str, coach_weight: int) -> str:
     return (
         f"PROGRAM: {program}\n"
-        f"COMPETITION LEVEL: {level}\n"
-        f"COACH AUTHORITY WEIGHT: {coach_weight}/100\n"
-        f"(Higher weight = your input updates model interpretation more significantly.)"
+        f"COMPETITION LEVEL: {level}"
     )
 
 
