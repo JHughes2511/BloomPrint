@@ -283,14 +283,14 @@ export default function PlayerProfileScreen() {
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <TextInput
                 style={[styles.input, { flex: 1 }]}
-                placeholder="Height (e.g. 6'2\")"
+                placeholder={`Height (e.g. 6'2")`}
                 placeholderTextColor="#6b7280"
                 value={editHeight}
                 onChangeText={setEditHeight}
               />
               <TextInput
                 style={[styles.input, { flex: 1 }]}
-                placeholder="Wingspan (e.g. 6'5\")"
+                placeholder={`Wingspan (e.g. 6'5")`}
                 placeholderTextColor="#6b7280"
                 value={editWingspan}
                 onChangeText={setEditWingspan}
