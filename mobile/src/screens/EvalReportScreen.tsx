@@ -293,7 +293,7 @@ export default function EvalReportScreen() {
           <Ionicons name="person-circle-outline" size={18} color="#2563eb" />
           <Text style={styles.playerNameLink}>{player.name}</Text>
           {player.position ? <Text style={styles.playerPos}>{player.position}</Text> : null}
-          <Ionicons name="chevron-forward" size={13} color="#2563eb" style={{ marginLeft: 'auto' }} />
+          <Ionicons name="chevron-forward" size={13} color="#2563eb" />
         </TouchableOpacity>
       )}
 

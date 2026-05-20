@@ -87,6 +87,8 @@ function RecentStack() {
     <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
       <Stack.Screen name="Recent" component={RecentScreen} />
       <Stack.Screen name="EvalReport" component={EvalReportScreen} />
+      <Stack.Screen name="PlayerProfile" component={PlayerProfileScreen} />
+      <Stack.Screen name="GameReportBuilder" component={GameReportBuilderScreen} />
     </Stack.Navigator>
   );
 }
