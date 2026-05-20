@@ -155,12 +155,12 @@ const styles = StyleSheet.create({
   cardTitle: { color: '#fff', fontSize: 13, fontWeight: '700', marginBottom: 4 },
   cardDesc: { color: '#6b7280', fontSize: 11, lineHeight: 16 },
   pillarRow: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: 14,
+    flexDirection: 'row', alignItems: 'center', gap: 14,
     marginHorizontal: 20, marginBottom: 14,
   },
   pillarIcon: {
     width: 36, height: 36, borderRadius: 10,
-    alignItems: 'center', justifyContent: 'center', marginTop: 2,
+    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
   pillarLabel: { color: '#fff', fontSize: 14, fontWeight: '700' },
   pillarDesc: { color: '#6b7280', fontSize: 12, marginTop: 2, lineHeight: 17 },

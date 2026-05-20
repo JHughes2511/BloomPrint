@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
-  Modal, TextInput, KeyboardAvoidingView, Platform,
+  Modal, TextInput, KeyboardAvoidingView, Platform, PanResponder, Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -44,6 +44,29 @@ export default function PlayerHomeScreen() {
     setEditCity(profile?.city ?? '');
     setEditSchool(profile?.school_name ?? '');
     setShowEditModal(true);
+  };
+
+  const slideY = useRef(new Animated.Value(0)).current;
+  const swipePan = useRef(PanResponder.create({
+    onMoveShouldSetPanResponder: (_, { dy, dx }) => dy > 10 && Math.abs(dy) > Math.abs(dx),
+    onPanResponderMove: (_, { dy }) => { if (dy > 0) slideY.setValue(dy); },
+    onPanResponderRelease: (_, { dy }) => {
+      if (dy > 80) {
+        Animated.timing(slideY, { toValue: 600, duration: 200, useNativeDriver: true }).start(() => {
+          setShowEditModal(false);
+          slideY.setValue(0);
+        });
+      } else {
+        Animated.spring(slideY, { toValue: 0, useNativeDriver: true }).start();
+      }
+    },
+  })).current;
+
+  const closeModal = () => {
+    Animated.timing(slideY, { toValue: 600, duration: 200, useNativeDriver: true }).start(() => {
+      setShowEditModal(false);
+      slideY.setValue(0);
+    });
   };
 
   const saveProfile = async () => {
@@ -222,80 +245,100 @@ export default function PlayerHomeScreen() {
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={0}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalBox}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Edit My Profile</Text>
-                <TouchableOpacity onPress={() => setShowEditModal(false)}>
-                  <Ionicons name="close" size={22} color="#9ca3af" />
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.fieldLabel}>Position</Text>
-              <TextInput
-                style={styles.input}
-                value={editPosition}
-                onChangeText={setEditPosition}
-                placeholder="e.g. PG, SG, SF, PF, C"
-                placeholderTextColor="#4b5563"
-              />
-              <Text style={styles.fieldLabel}>Height</Text>
-              <TextInput
-                style={styles.input}
-                value={editHeight}
-                onChangeText={setEditHeight}
-                placeholder={`e.g. 6'2"`}
-                placeholderTextColor="#4b5563"
-              />
-              <Text style={styles.fieldLabel}>Wingspan</Text>
-              <TextInput
-                style={styles.input}
-                value={editWingspan}
-                onChangeText={setEditWingspan}
-                placeholder={`e.g. 6'5"`}
-                placeholderTextColor="#4b5563"
-              />
-              <Text style={styles.fieldLabel}>School</Text>
-              <TextInput
-                style={styles.input}
-                value={editSchool}
-                onChangeText={setEditSchool}
-                placeholder="e.g. Lincoln High School"
-                placeholderTextColor="#4b5563"
-              />
-              <Text style={styles.fieldLabel}>City</Text>
-              <TextInput
-                style={styles.input}
-                value={editCity}
-                onChangeText={setEditCity}
-                placeholder="e.g. Atlanta"
-                placeholderTextColor="#4b5563"
-              />
-              <Text style={styles.fieldLabel}>State</Text>
-              <TextInput
-                style={styles.input}
-                value={editState}
-                onChangeText={setEditState}
-                placeholder="e.g. Georgia"
-                placeholderTextColor="#4b5563"
-              />
-              <Text style={styles.fieldLabel}>Country</Text>
-              <TextInput
-                style={styles.input}
-                value={editCountry}
-                onChangeText={setEditCountry}
-                placeholder="e.g. USA"
-                placeholderTextColor="#4b5563"
-              />
-              <TouchableOpacity
-                style={[styles.saveBtn, saving && { opacity: 0.6 }]}
-                onPress={saveProfile}
-                disabled={saving}
-              >
-                <Text style={styles.saveBtnText}>{saving ? 'Saving…' : 'Save Changes'}</Text>
+          <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={closeModal}>
+            <Animated.View
+              style={[styles.modalBox, { transform: [{ translateY: slideY }] }]}
+              {...swipePan.panHandlers}
+            >
+              <TouchableOpacity activeOpacity={1}>
+                <View style={styles.dragHandle} />
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Edit My Profile</Text>
+                  <TouchableOpacity onPress={closeModal}>
+                    <Ionicons name="close" size={22} color="#9ca3af" />
+                  </TouchableOpacity>
+                </View>
+                <ScrollView
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{ paddingBottom: 16 }}
+                >
+                  <Text style={styles.fieldLabel}>Position</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editPosition}
+                    onChangeText={setEditPosition}
+                    placeholder="e.g. PG, SG, SF, PF, C"
+                    placeholderTextColor="#4b5563"
+                    returnKeyType="next"
+                  />
+                  <Text style={styles.fieldLabel}>Height</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editHeight}
+                    onChangeText={setEditHeight}
+                    placeholder={`e.g. 6'2"`}
+                    placeholderTextColor="#4b5563"
+                    returnKeyType="next"
+                  />
+                  <Text style={styles.fieldLabel}>Wingspan</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editWingspan}
+                    onChangeText={setEditWingspan}
+                    placeholder={`e.g. 6'5"`}
+                    placeholderTextColor="#4b5563"
+                    returnKeyType="next"
+                  />
+                  <Text style={styles.fieldLabel}>School</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editSchool}
+                    onChangeText={setEditSchool}
+                    placeholder="e.g. Lincoln High School"
+                    placeholderTextColor="#4b5563"
+                    returnKeyType="next"
+                  />
+                  <Text style={styles.fieldLabel}>City</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editCity}
+                    onChangeText={setEditCity}
+                    placeholder="e.g. Atlanta"
+                    placeholderTextColor="#4b5563"
+                    returnKeyType="next"
+                  />
+                  <Text style={styles.fieldLabel}>State</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editState}
+                    onChangeText={setEditState}
+                    placeholder="e.g. Georgia"
+                    placeholderTextColor="#4b5563"
+                    returnKeyType="next"
+                  />
+                  <Text style={styles.fieldLabel}>Country</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editCountry}
+                    onChangeText={setEditCountry}
+                    placeholder="e.g. USA"
+                    placeholderTextColor="#4b5563"
+                    returnKeyType="done"
+                  />
+                  <TouchableOpacity
+                    style={[styles.saveBtn, saving && { opacity: 0.6 }]}
+                    onPress={saveProfile}
+                    disabled={saving}
+                  >
+                    <Text style={styles.saveBtnText}>{saving ? 'Saving…' : 'Save Changes'}</Text>
+                  </TouchableOpacity>
+                </ScrollView>
               </TouchableOpacity>
-            </View>
-          </View>
+            </Animated.View>
+          </TouchableOpacity>
         </KeyboardAvoidingView>
       </Modal>
     </ScrollView>
@@ -418,6 +461,11 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 24,
     paddingBottom: 40,
+    maxHeight: '85%',
+  },
+  dragHandle: {
+    width: 40, height: 4, borderRadius: 2,
+    backgroundColor: '#2d4a2d', alignSelf: 'center', marginBottom: 16,
   },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   modalTitle: { color: '#fff', fontSize: 17, fontWeight: '800' },
