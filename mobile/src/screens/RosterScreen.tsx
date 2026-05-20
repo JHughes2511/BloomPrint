@@ -128,6 +128,8 @@ export default function RosterScreen() {
       const team = await teamsAPI.create({ name: newTeamName, competition_level: newTeamLevel });
       setShowNewTeam(false);
       setNewTeamName(''); setNewTeamLevel('Middle School');
+      // Optimistically add team to list immediately, then refresh
+      setTeams(prev => [...prev, team]);
       setSelectedTeamId(team.id);
       load();
     } catch (e: any) {
@@ -170,7 +172,8 @@ export default function RosterScreen() {
           </Text>
         </View>
         <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import')}>
-          <Ionicons name="cloud-upload-outline" size={18} color="#9ca3af" />
+          <Ionicons name="cloud-upload-outline" size={16} color="#9ca3af" />
+          <Text style={styles.importBtnText}>Import Roster</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.addBtn} onPress={() => setShowAdd(true)}>
           <Ionicons name="add" size={22} color="#fff" />
@@ -235,11 +238,21 @@ export default function RosterScreen() {
         )}
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
-            <Text style={styles.emptyText}>
-              {teams.length === 0
-                ? 'Create a team first, then add players.'
-                : 'No players in this team yet.'}
-            </Text>
+            {teams.length === 0 ? (
+              <Text style={styles.emptyText}>Create a team first, then add players.</Text>
+            ) : selectedTeamId != null ? (
+              <>
+                <Ionicons name="people-outline" size={40} color="#374151" />
+                <Text style={styles.emptyText}>No players in this team yet.</Text>
+                <TouchableOpacity style={styles.importRosterBtn} onPress={() => navigation.navigate('Import')}>
+                  <Ionicons name="cloud-upload-outline" size={16} color="#fff" />
+                  <Text style={styles.importRosterBtnText}>Import Roster from Excel</Text>
+                </TouchableOpacity>
+                <Text style={styles.importRosterHint}>or tap + to add players one by one</Text>
+              </>
+            ) : (
+              <Text style={styles.emptyText}>No players yet. Create a team and add players.</Text>
+            )}
           </View>
         }
       />
@@ -306,8 +319,12 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 12 },
   title: { fontSize: 28, fontWeight: '900', color: '#fff' },
   sub: { fontSize: 12, color: '#6b7280', marginTop: 2 },
-  importBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#374151', marginRight: 8 },
+  importBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: '#374151', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 7, marginRight: 8 },
+  importBtnText: { color: '#9ca3af', fontSize: 12, fontWeight: '600' },
   addBtn: { backgroundColor: '#2563eb', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  importRosterBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#2563eb', borderRadius: 12, paddingHorizontal: 20, paddingVertical: 12, marginTop: 16 },
+  importRosterBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  importRosterHint: { color: '#4b5563', fontSize: 12, marginTop: 10 },
   teamsRow: { marginBottom: 16, flexGrow: 0 },
   teamChip: { borderWidth: 1, borderColor: '#374151', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7 },
   teamChipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },

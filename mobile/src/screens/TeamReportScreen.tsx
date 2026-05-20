@@ -246,6 +246,19 @@ export default function TeamReportScreen() {
                 else if (gr.mode === 'my_program') matchup = myName ?? 'My Team';
                 else matchup = oppName ?? 'Opponent';
               }
+              const deleteGameReport = () => {
+                Alert.alert('Delete Game Report', `Delete "${matchup}"?`, [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Delete', style: 'destructive', onPress: async () => {
+                    try {
+                      await gameReportsAPI.delete(gr.id);
+                      setGameReports(prev => prev.filter(r => r.id !== gr.id));
+                    } catch {
+                      Alert.alert('Error', 'Could not delete report');
+                    }
+                  }},
+                ]);
+              };
               return (
                 <TouchableOpacity
                   key={gr.id}
@@ -270,6 +283,9 @@ export default function TeamReportScreen() {
                     )}
                     <Text style={{ color: '#4b5563', fontSize: 10 }}>{(gr.clips?.length ?? 0)} clip{gr.clips?.length !== 1 ? 's' : ''}</Text>
                   </View>
+                  <TouchableOpacity onPress={deleteGameReport} style={{ padding: 4, marginLeft: 4 }}>
+                    <Ionicons name="trash-outline" size={16} color="#4b5563" />
+                  </TouchableOpacity>
                   <Ionicons name="chevron-forward" size={16} color="#374151" />
                 </TouchableOpacity>
               );
