@@ -227,7 +227,7 @@ export default function GameReportBuilderScreen() {
 
   const matchupLabel = () => {
     const myName = teams.find(t => t.id === myTeamId)?.name ?? coach?.program_name ?? 'My Program';
-    const oppLabel = teams.find(t => t.id === oppTeamId)?.name ?? oppName || 'Opponent';
+    const oppLabel = (teams.find(t => t.id === oppTeamId)?.name ?? oppName) || 'Opponent';
     if (mode === 'vs_opponent') return `${myName} vs ${oppLabel}`;
     if (mode === 'my_program') return myName;
     return oppLabel;
