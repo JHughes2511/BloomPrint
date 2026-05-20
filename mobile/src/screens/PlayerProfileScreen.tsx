@@ -255,10 +255,10 @@ export default function PlayerProfileScreen() {
         </View>
       )}
 
-      {/* Edit Player Modal — single modal, inline expand lists (no nested modals) */}
+      {/* Edit Player Modal — compact floating card */}
       <Modal visible={showEdit} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <ScrollView style={styles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
+          <ScrollView style={[styles.modal, { maxHeight: '75%' }]} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
             <Text style={styles.modalTitle}>Edit Player</Text>
             <TextInput
               style={styles.input}

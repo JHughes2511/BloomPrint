@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { playerNotificationsAPI } from '../../api/playerClient';
 
@@ -12,11 +12,11 @@ export default function PlayerHomeScreen() {
   const navigation = useNavigation<any>();
   const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     playerNotificationsAPI.list().then((notifs: any[]) => {
       setUnreadCount(notifs.filter(n => !n.read).length);
     }).catch(() => {});
-  }, []);
+  }, []));
 
   const handleSignOut = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [

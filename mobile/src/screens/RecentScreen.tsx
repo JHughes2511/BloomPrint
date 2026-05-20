@@ -271,16 +271,25 @@ export default function RecentScreen() {
     }
   };
 
-  const applyTeamCorrection = async () => {
+  const applyCorrection = async () => {
     if (!teamCorrectText.trim() || !activeModal) return;
     setApplyingCorrect(true);
     try {
-      const updated = await evalsAPI.correctTeamReport(activeModal.id, teamCorrectText.trim());
-      setActiveModal(prev => prev ? { ...prev, text: updated.report_text } : prev);
-      setTeamReportTexts(prev => ({ ...prev, [activeModal.id]: updated.report_text }));
+      let updatedText = '';
+      if (activeModal.kind === 'eval' && activeModal.evalId) {
+        await evalsAPI.addCorrection(activeModal.evalId, { correction: teamCorrectText.trim() });
+        const updated = await evalsAPI.applyCorrections(activeModal.evalId);
+        updatedText = updated.report_text;
+        setEvalCache(prev => ({ ...prev, [activeModal.evalId!]: updated }));
+      } else {
+        const updated = await evalsAPI.correctTeamReport(activeModal.id, teamCorrectText.trim());
+        updatedText = updated.report_text;
+        setTeamReportTexts(prev => ({ ...prev, [activeModal.id]: updatedText }));
+      }
+      setActiveModal(prev => prev ? { ...prev, text: updatedText } : prev);
       setTeamCorrectText('');
-      setShowTeamCorrect(false);
-      Alert.alert('Updated', 'Team report updated based on your correction.');
+      setModalView('report');
+      Alert.alert('Updated', 'Report updated based on your correction.');
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not apply correction');
     } finally {
@@ -399,17 +408,10 @@ export default function RecentScreen() {
                   }
                 </ScrollView>
                 <View style={styles.actionRow}>
-                  {activeModal?.kind === 'eval' && activeModal.evalId != null ? (
-                    <TouchableOpacity style={styles.actionBtn} onPress={() => { setActiveModal(null); navigation.navigate('EvalReport', { evalId: activeModal!.evalId }); }}>
-                      <Ionicons name="create-outline" size={18} color="#fff" />
-                      <Text style={styles.actionText}>Correct</Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity style={styles.actionBtn} onPress={() => setModalView('correct')}>
-                      <Ionicons name="create-outline" size={18} color="#fff" />
-                      <Text style={styles.actionText}>Correct</Text>
-                    </TouchableOpacity>
-                  )}
+                  <TouchableOpacity style={styles.actionBtn} onPress={() => { setTeamCorrectText(''); setModalView('correct'); }}>
+                    <Ionicons name="create-outline" size={18} color="#fff" />
+                    <Text style={styles.actionText}>Correct</Text>
+                  </TouchableOpacity>
                   <TouchableOpacity style={styles.actionBtn} onPress={exportModalReport} disabled={exporting}>
                     {exporting ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="download-outline" size={18} color="#fff" />}
                     <Text style={styles.actionText}>Export</Text>
@@ -429,18 +431,23 @@ export default function RecentScreen() {
             {/* SEND VIEW */}
             {modalView === 'send' && (
               <>
-                <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 12 }}>Search for a player to send this report to their inbox.</Text>
-                <View style={{ marginBottom: 12, position: 'relative' }}>
+                {/* Report preview */}
+                <View style={sendStyles.reportPreview}>
+                  <Text style={sendStyles.reportPreviewTitle}>{TYPE_LABELS[activeModal?.outputType ?? ''] ?? activeModal?.outputType}</Text>
+                  <Text style={sendStyles.reportPreviewText} numberOfLines={2}>{activeModal?.text?.replace(/[#*_]/g, '').trim().slice(0, 120)}...</Text>
+                </View>
+                <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>Search for a player to send this report to their inbox.</Text>
+                <View style={{ marginBottom: 12 }}>
                   <TextInput
-                    style={[sendStyles.searchInput, { paddingRight: 40 }]}
+                    style={sendStyles.searchInput}
                     placeholder="Type a name to search..."
-                    placeholderTextColor="#4b5563"
+                    placeholderTextColor="#6b7280"
                     value={sendSearch}
                     onChangeText={setSendSearch}
                     autoFocus
                   />
                   {sendSearchLoading && (
-                    <ActivityIndicator color="#6b7280" size="small" style={{ position: 'absolute', right: 12, top: 14 }} />
+                    <ActivityIndicator color="#6b7280" size="small" style={{ marginTop: 8, alignSelf: 'center' }} />
                   )}
                 </View>
                 <ScrollView style={{ maxHeight: 260 }} keyboardShouldPersistTaps="handled">
@@ -466,7 +473,11 @@ export default function RecentScreen() {
             {/* CORRECT VIEW */}
             {modalView === 'correct' && (
               <>
-                <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 12 }}>Describe what needs to be corrected and AI will update the report.</Text>
+                <View style={sendStyles.reportPreview}>
+                  <Text style={sendStyles.reportPreviewTitle}>{TYPE_LABELS[activeModal?.outputType ?? ''] ?? activeModal?.outputType}</Text>
+                  <Text style={sendStyles.reportPreviewText} numberOfLines={2}>{activeModal?.text?.replace(/[#*_]/g, '').trim().slice(0, 120)}...</Text>
+                </View>
+                <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>Describe what needs to be corrected and AI will update the report.</Text>
                 <TextInput
                   style={sendStyles.correctInput}
                   placeholder="What needs to be corrected in this report?"
@@ -481,7 +492,7 @@ export default function RecentScreen() {
                   <TouchableOpacity style={sendStyles.cancelBtn} onPress={() => setModalView('report')}>
                     <Text style={{ color: '#9ca3af', fontWeight: '600' }}>Cancel</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={sendStyles.applyBtn} onPress={applyTeamCorrection} disabled={applyingCorrect || !teamCorrectText.trim()}>
+                  <TouchableOpacity style={sendStyles.applyBtn} onPress={applyCorrection} disabled={applyingCorrect || !teamCorrectText.trim()}>
                     {applyingCorrect ? <ActivityIndicator color="#fff" size="small" /> : <Text style={{ color: '#fff', fontWeight: '700' }}>Apply</Text>}
                   </TouchableOpacity>
                 </View>
@@ -497,8 +508,9 @@ export default function RecentScreen() {
 
 const sendStyles = StyleSheet.create({
   searchInput: {
-    flex: 1, backgroundColor: '#1f2937', borderRadius: 10, padding: 12,
-    color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151',
+    backgroundColor: '#1f2937', borderRadius: 10, padding: 14,
+    color: '#fff', fontSize: 15, borderWidth: 1, borderColor: '#374151',
+    minHeight: 48,
   },
   searchBtn: { backgroundColor: '#2563eb', borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' },
   resultRow: {
@@ -510,9 +522,15 @@ const sendStyles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   correctInput: {
-    backgroundColor: '#1f2937', borderRadius: 10, padding: 12, color: '#fff',
-    fontSize: 14, borderWidth: 1, borderColor: '#374151', minHeight: 100,
+    backgroundColor: '#1f2937', borderRadius: 10, padding: 14, color: '#fff',
+    fontSize: 15, borderWidth: 1, borderColor: '#374151', minHeight: 120,
   },
+  reportPreview: {
+    backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12, marginBottom: 14,
+    borderWidth: 1, borderColor: '#1f2937',
+  },
+  reportPreviewTitle: { color: '#9ca3af', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 },
+  reportPreviewText: { color: '#6b7280', fontSize: 12, lineHeight: 18 },
   cancelBtn: { flex: 1, padding: 14, borderRadius: 10, borderWidth: 1, borderColor: '#374151', alignItems: 'center' },
   applyBtn: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: '#2563eb', alignItems: 'center' },
 });
