@@ -270,7 +270,7 @@ export default function RosterScreen() {
       <Modal visible={showAdd} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={[styles.modal, { maxHeight: '85%' }]}>
-          <ScrollView contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true}>
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true}>
             <Text style={styles.modalTitle}>Add Player</Text>
             {currentTeamName && (
               <Text style={styles.modalSub}>Adding to {currentTeamName}</Text>
