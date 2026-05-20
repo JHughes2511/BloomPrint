@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   cardDesc: { color: '#6b7280', fontSize: 11, lineHeight: 16 },
   pillarRow: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
-    marginHorizontal: 20, marginBottom: 14,
+    marginHorizontal: 20, minHeight: 52,
   },
   pillarIcon: {
     width: 36, height: 36, borderRadius: 10,

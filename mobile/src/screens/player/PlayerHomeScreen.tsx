@@ -43,31 +43,33 @@ export default function PlayerHomeScreen() {
     setEditState(profile?.state ?? '');
     setEditCity(profile?.city ?? '');
     setEditSchool(profile?.school_name ?? '');
-    setShowEditModal(true);
+    openModal();
   };
 
-  const slideY = useRef(new Animated.Value(0)).current;
+  const slideY = useRef(new Animated.Value(600)).current;
+
+  const openModal = () => {
+    setShowEditModal(true);
+    Animated.spring(slideY, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start();
+  };
+
+  const closeModal = () => {
+    Animated.timing(slideY, { toValue: 600, duration: 220, useNativeDriver: true }).start(() => {
+      setShowEditModal(false);
+    });
+  };
+
   const swipePan = useRef(PanResponder.create({
     onMoveShouldSetPanResponder: (_, { dy, dx }) => dy > 10 && Math.abs(dy) > Math.abs(dx),
     onPanResponderMove: (_, { dy }) => { if (dy > 0) slideY.setValue(dy); },
     onPanResponderRelease: (_, { dy }) => {
       if (dy > 80) {
-        Animated.timing(slideY, { toValue: 600, duration: 200, useNativeDriver: true }).start(() => {
-          setShowEditModal(false);
-          slideY.setValue(0);
-        });
+        closeModal();
       } else {
         Animated.spring(slideY, { toValue: 0, useNativeDriver: true }).start();
       }
     },
   })).current;
-
-  const closeModal = () => {
-    Animated.timing(slideY, { toValue: 600, duration: 200, useNativeDriver: true }).start(() => {
-      setShowEditModal(false);
-      slideY.setValue(0);
-    });
-  };
 
   const saveProfile = async () => {
     setSaving(true);
@@ -241,7 +243,7 @@ export default function PlayerHomeScreen() {
         <Ionicons name="chevron-forward" size={16} color="#4b5563" />
       </TouchableOpacity>
 
-      <Modal visible={showEditModal} transparent animationType="slide">
+      <Modal visible={showEditModal} transparent animationType="none">
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -263,7 +265,7 @@ export default function PlayerHomeScreen() {
                 <ScrollView
                   keyboardShouldPersistTaps="handled"
                   showsVerticalScrollIndicator={false}
-                  contentContainerStyle={{ paddingBottom: 16 }}
+                  contentContainerStyle={{ paddingBottom: 180 }}
                 >
                   <Text style={styles.fieldLabel}>Position</Text>
                   <TextInput
