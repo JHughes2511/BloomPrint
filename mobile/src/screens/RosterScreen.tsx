@@ -3,6 +3,57 @@ import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Modal, Alert, KeyboardAvoidingView, Platform, ScrollView,
 } from 'react-native';
+
+const COMPETITION_LEVELS = ['Middle School', 'HS JV', 'HS Varsity', 'AAU Grassroots', 'AAU Elite', 'College', 'Pro'];
+
+function LevelDropdown({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <TouchableOpacity
+        style={ddStyles.trigger}
+        onPress={() => setOpen(true)}
+      >
+        <Text style={ddStyles.triggerText}>{value}</Text>
+        <Text style={ddStyles.chevron}>▾</Text>
+      </TouchableOpacity>
+      <Modal visible={open} transparent animationType="fade">
+        <TouchableOpacity style={ddStyles.overlay} activeOpacity={1} onPress={() => setOpen(false)}>
+          <View style={ddStyles.menu}>
+            <Text style={ddStyles.menuTitle}>Competition Level</Text>
+            {COMPETITION_LEVELS.map(lvl => (
+              <TouchableOpacity
+                key={lvl}
+                style={[ddStyles.option, value === lvl && ddStyles.optionActive]}
+                onPress={() => { onChange(lvl); setOpen(false); }}
+              >
+                <Text style={[ddStyles.optionText, value === lvl && ddStyles.optionTextActive]}>{lvl}</Text>
+                {value === lvl && <Text style={{ color: '#2563eb' }}>✓</Text>}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </>
+  );
+}
+
+const ddStyles = StyleSheet.create({
+  trigger: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    backgroundColor: '#1f2937', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12,
+    marginBottom: 14, borderWidth: 1, borderColor: '#374151',
+  },
+  triggerText: { color: '#fff', fontSize: 14 },
+  chevron: { color: '#9ca3af', fontSize: 14 },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', paddingHorizontal: 32 },
+  menu: { backgroundColor: '#1f2937', borderRadius: 14, overflow: 'hidden', borderWidth: 1, borderColor: '#374151' },
+  menuTitle: { color: '#6b7280', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, padding: 14, paddingBottom: 8 },
+  option: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 13, borderTopWidth: 1, borderTopColor: '#374151' },
+  optionActive: { backgroundColor: '#1e3a5f' },
+  optionText: { color: '#d1d5db', fontSize: 14 },
+  optionTextActive: { color: '#fff', fontWeight: '700' },
+});
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { playersAPI, teamsAPI } from '../api/client';
@@ -201,20 +252,8 @@ export default function RosterScreen() {
               value={newName} onChangeText={setNewName} />
             <TextInput style={styles.input} placeholder="Position (e.g. PG, SG, SF)" placeholderTextColor="#6b7280"
               value={newPos} onChangeText={setNewPos} />
-            <Text style={[styles.input, { color: '#9ca3af', paddingTop: 10, height: 'auto' as any, marginBottom: 4, backgroundColor: 'transparent', borderWidth: 0 }]}>Competition Level</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
-              {['Middle School', 'HS JV', 'HS Varsity', 'AAU Grassroots', 'AAU Elite', 'College', 'Pro'].map(lvl => (
-                <TouchableOpacity
-                  key={lvl}
-                  style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, borderWidth: 1,
-                    borderColor: newLevel === lvl ? '#2563eb' : '#374151',
-                    backgroundColor: newLevel === lvl ? '#2563eb' : 'transparent' }}
-                  onPress={() => setNewLevel(lvl)}
-                >
-                  <Text style={{ color: newLevel === lvl ? '#fff' : '#9ca3af', fontSize: 12, fontWeight: '600' }}>{lvl}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Competition Level</Text>
+            <LevelDropdown value={newLevel} onChange={setNewLevel} />
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowAdd(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>
@@ -234,20 +273,8 @@ export default function RosterScreen() {
             <Text style={styles.modalTitle}>New Team</Text>
             <TextInput style={styles.input} placeholder="Team Name *" placeholderTextColor="#6b7280"
               value={newTeamName} onChangeText={setNewTeamName} />
-            <Text style={[styles.input, { color: '#9ca3af', paddingTop: 10, height: 'auto' as any, marginBottom: 4, backgroundColor: 'transparent', borderWidth: 0 }]}>Competition Level</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
-              {['Middle School', 'HS JV', 'HS Varsity', 'AAU Grassroots', 'AAU Elite', 'College', 'Pro'].map(lvl => (
-                <TouchableOpacity
-                  key={lvl}
-                  style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, borderWidth: 1,
-                    borderColor: newTeamLevel === lvl ? '#2563eb' : '#374151',
-                    backgroundColor: newTeamLevel === lvl ? '#2563eb' : 'transparent' }}
-                  onPress={() => setNewTeamLevel(lvl)}
-                >
-                  <Text style={{ color: newTeamLevel === lvl ? '#fff' : '#9ca3af', fontSize: 12, fontWeight: '600' }}>{lvl}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Competition Level</Text>
+            <LevelDropdown value={newTeamLevel} onChange={setNewTeamLevel} />
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowNewTeam(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>
