@@ -34,6 +34,9 @@ export const playersAPI = {
     height?: string; competition_level?: string; notes?: string; team_id?: number;
   }) => api.post('/players', data).then(r => r.data),
 
+  update: (id: number, data: { name?: string; position?: string; competition_level?: string; team_id?: number }) =>
+    api.patch(`/players/${id}`, data).then(r => r.data),
+
   delete: (id: number) => api.delete(`/players/${id}`).then(r => r.data),
 
   evaluations: (id: number) => api.get(`/players/${id}/evaluations`).then(r => r.data),
@@ -78,6 +81,9 @@ export const evalsAPI = {
 
   applyCorrections: (evalId: number) =>
     api.post(`/evaluations/${evalId}/apply-corrections`).then(r => r.data),
+
+  correctTeamReport: (reportId: number, correction: string) =>
+    api.post(`/evaluations/team-reports/${reportId}/correct`, { correction }).then(r => r.data),
 };
 
 // ── Teams ─────────────────────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, Alert, ScrollView, Modal, Share,
+  ActivityIndicator, Alert, ScrollView, Modal, TextInput,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +9,7 @@ import Markdown from 'react-native-markdown-display';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import { evalsAPI } from '../api/client';
+import { evalsAPI, playerAPI } from '../api/client';
 import { GradeBadge } from '../components/GradeBadge';
 import { mdToHtml, safeFileName } from '../utils/mdToHtml';
 
@@ -67,6 +67,18 @@ export default function RecentScreen() {
   const [evalCache, setEvalCache] = useState<Record<number, any>>({});
   const [loadingEval, setLoadingEval] = useState(false);
   const [exporting, setExporting] = useState(false);
+
+  // Send modal
+  const [showSend, setShowSend] = useState(false);
+  const [sendSearch, setSendSearch] = useState('');
+  const [sendResults, setSendResults] = useState<any[]>([]);
+  const [sendSearchLoading, setSendSearchLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  // Team report correct modal
+  const [showTeamCorrect, setShowTeamCorrect] = useState(false);
+  const [teamCorrectText, setTeamCorrectText] = useState('');
+  const [applyingCorrect, setApplyingCorrect] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -207,12 +219,62 @@ export default function RecentScreen() {
     }
   };
 
-  const shareModalReport = async () => {
-    if (!activeModal?.text) return;
+  const searchSendTargets = async () => {
+    if (!sendSearch.trim()) return;
+    setSendSearchLoading(true);
     try {
-      const title = TYPE_LABELS[activeModal.outputType] ?? activeModal.outputType;
-      await Share.share({ message: `${title}\n\n${activeModal.text}`, title });
+      const results = await playerAPI.searchPlayerUsers(sendSearch.trim());
+      setSendResults(results);
     } catch {}
+    setSendSearchLoading(false);
+  };
+
+  const sendReport = async (target: any) => {
+    if (!activeModal) return;
+    setSending(true);
+    try {
+      if (activeModal.kind === 'eval' && activeModal.evalId) {
+        await playerAPI.share(activeModal.evalId, {
+          player_user_id: target.id,
+          share_report_text: true,
+          share_grades: true,
+          share_flags: true,
+          share_questions: true,
+        });
+      } else {
+        await playerAPI.shareTeamReport({
+          output_type: activeModal.outputType,
+          report_text: activeModal.text,
+          target_type: 'individual',
+          player_user_id: target.id,
+        });
+      }
+      Alert.alert('Sent!', `Report sent to ${target.name}.`);
+      setShowSend(false);
+      setSendSearch('');
+      setSendResults([]);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not send report');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const applyTeamCorrection = async () => {
+    if (!teamCorrectText.trim() || !activeModal) return;
+    setApplyingCorrect(true);
+    try {
+      const updated = await evalsAPI.correctTeamReport(activeModal.id, teamCorrectText.trim());
+      setActiveModal(prev => prev ? { ...prev, text: updated.report_text } : prev);
+      setTeamReportTexts(prev => ({ ...prev, [activeModal.id]: updated.report_text }));
+      setTeamCorrectText('');
+      setShowTeamCorrect(false);
+      Alert.alert('Updated', 'Team report updated based on your correction.');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not apply correction');
+    } finally {
+      setApplyingCorrect(false);
+    }
   };
 
   if (loading) return <View style={styles.center}><ActivityIndicator color="#2563eb" size="large" /></View>;
@@ -282,6 +344,94 @@ export default function RecentScreen() {
         }}
       />
 
+      {/* Send modal */}
+      <Modal visible={showSend} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Send Report</Text>
+              <TouchableOpacity onPress={() => setShowSend(false)}>
+                <Ionicons name="close" size={24} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 12 }}>Search for a player to send this report to.</Text>
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+              <TextInput
+                style={sendStyles.searchInput}
+                placeholder="Search by name..."
+                placeholderTextColor="#4b5563"
+                value={sendSearch}
+                onChangeText={setSendSearch}
+                onSubmitEditing={searchSendTargets}
+                returnKeyType="search"
+              />
+              <TouchableOpacity style={sendStyles.searchBtn} onPress={searchSendTargets}>
+                {sendSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={{ maxHeight: 240 }}>
+              {sendResults.map(r => (
+                <TouchableOpacity
+                  key={r.id}
+                  style={sendStyles.resultRow}
+                  onPress={() => sendReport(r)}
+                  disabled={sending}
+                >
+                  <View style={sendStyles.avatar}>
+                    <Text style={{ color: '#fff', fontWeight: '700' }}>{r.name?.[0] ?? '?'}</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: '#fff', fontWeight: '600' }}>{r.name}</Text>
+                    <Text style={{ color: '#6b7280', fontSize: 12 }}>{r.email}</Text>
+                  </View>
+                  {sending ? <ActivityIndicator color="#2563eb" size="small" /> : <Ionicons name="paper-plane-outline" size={18} color="#2563eb" />}
+                </TouchableOpacity>
+              ))}
+              {sendResults.length === 0 && sendSearch.trim().length > 0 && !sendSearchLoading && (
+                <Text style={{ color: '#4b5563', textAlign: 'center', paddingVertical: 20 }}>No players found</Text>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Team report correct modal */}
+      <Modal visible={showTeamCorrect} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Correct Report</Text>
+              <TouchableOpacity onPress={() => setShowTeamCorrect(false)}>
+                <Ionicons name="close" size={24} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 12 }}>Describe what needs to be corrected and AI will update the report.</Text>
+            <TextInput
+              style={sendStyles.correctInput}
+              placeholder="What needs to be corrected in this report?"
+              placeholderTextColor="#4b5563"
+              value={teamCorrectText}
+              onChangeText={setTeamCorrectText}
+              multiline
+              textAlignVertical="top"
+              autoFocus
+            />
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+              <TouchableOpacity style={sendStyles.cancelBtn} onPress={() => setShowTeamCorrect(false)}>
+                <Text style={{ color: '#9ca3af', fontWeight: '600' }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={sendStyles.applyBtn}
+                onPress={applyTeamCorrection}
+                disabled={applyingCorrect || !teamCorrectText.trim()}
+              >
+                {applyingCorrect ? <ActivityIndicator color="#fff" size="small" /> : <Text style={{ color: '#fff', fontWeight: '700' }}>Apply</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Loading overlay while fetching eval detail */}
       {loadingEval && (
         <View style={styles.loadingOverlay}>
@@ -316,32 +466,31 @@ export default function RecentScreen() {
 
             {/* Action buttons */}
             <View style={styles.actionRow}>
-              {activeModal?.kind === 'eval' && activeModal.evalId != null && (
+              {activeModal?.kind === 'eval' && activeModal.evalId != null ? (
                 <TouchableOpacity
                   style={styles.actionBtn}
-                  onPress={() => {
-                    setActiveModal(null);
-                    navigation.navigate('EvalReport', { evalId: activeModal.evalId });
-                  }}
+                  onPress={() => { setActiveModal(null); navigation.navigate('EvalReport', { evalId: activeModal!.evalId }); }}
                 >
+                  <Ionicons name="create-outline" size={18} color="#fff" />
+                  <Text style={styles.actionText}>Correct</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={styles.actionBtn} onPress={() => setShowTeamCorrect(true)}>
                   <Ionicons name="create-outline" size={18} color="#fff" />
                   <Text style={styles.actionText}>Correct</Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity style={styles.actionBtn} onPress={exportModalReport} disabled={exporting}>
-                {exporting
-                  ? <ActivityIndicator color="#fff" size="small" />
-                  : <Ionicons name="download-outline" size={18} color="#fff" />
-                }
+                {exporting ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="download-outline" size={18} color="#fff" />}
                 <Text style={styles.actionText}>Export</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn} onPress={printModalReport}>
                 <Ionicons name="print-outline" size={18} color="#fff" />
                 <Text style={styles.actionText}>Print</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn} onPress={shareModalReport}>
-                <Ionicons name="share-outline" size={18} color="#fff" />
-                <Text style={styles.actionText}>Share</Text>
+              <TouchableOpacity style={styles.actionBtn} onPress={() => { setSendSearch(''); setSendResults([]); setShowSend(true); }}>
+                <Ionicons name="paper-plane-outline" size={18} color="#fff" />
+                <Text style={styles.actionText}>Send</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -350,6 +499,28 @@ export default function RecentScreen() {
     </View>
   );
 }
+
+const sendStyles = StyleSheet.create({
+  searchInput: {
+    flex: 1, backgroundColor: '#1f2937', borderRadius: 10, padding: 12,
+    color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151',
+  },
+  searchBtn: { backgroundColor: '#2563eb', borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' },
+  resultRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12,
+    borderRadius: 10, backgroundColor: '#1f2937', marginBottom: 8,
+  },
+  avatar: {
+    width: 36, height: 36, borderRadius: 18, backgroundColor: '#2563eb',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  correctInput: {
+    backgroundColor: '#1f2937', borderRadius: 10, padding: 12, color: '#fff',
+    fontSize: 14, borderWidth: 1, borderColor: '#374151', minHeight: 100,
+  },
+  cancelBtn: { flex: 1, padding: 14, borderRadius: 10, borderWidth: 1, borderColor: '#374151', alignItems: 'center' },
+  applyBtn: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: '#2563eb', alignItems: 'center' },
+});
 
 const mdStyles = {
   body: { color: '#d1d5db', fontSize: 13, lineHeight: 22 },

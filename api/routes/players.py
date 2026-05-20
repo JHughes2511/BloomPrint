@@ -1,9 +1,18 @@
 import os
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
 from .. import models, schemas
+
+
+class PlayerUpdate(BaseModel):
+    name: Optional[str] = None
+    position: Optional[str] = None
+    competition_level: Optional[str] = None
+    team_id: Optional[int] = None
 
 router = APIRouter(prefix="/players", tags=["players"])
 
@@ -50,6 +59,34 @@ def get_player(
     player = db.get(models.Player, player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
+    return _with_grade(player)
+
+
+@router.patch("/{player_id}", response_model=schemas.PlayerOut)
+def update_player(
+    player_id: int,
+    body: PlayerUpdate,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    player = db.get(models.Player, player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found")
+    if body.name is not None:
+        player.name = body.name
+    if body.position is not None:
+        player.position = body.position
+    if body.competition_level is not None:
+        player.competition_level = body.competition_level
+    if body.team_id is not None:
+        team = db.get(models.Team, body.team_id)
+        player.team_id = body.team_id
+        if team:
+            player.program_name = team.name
+    elif body.team_id == 0:
+        player.team_id = None
+    db.commit()
+    db.refresh(player)
     return _with_grade(player)
 
 

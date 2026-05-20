@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
-  Modal, Alert, KeyboardAvoidingView, Platform,
+  Modal, Alert, KeyboardAvoidingView, Platform, TextInput,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { playersAPI, playerAPI } from '../api/client';
-import { Player, Evaluation } from '../types';
+import { playersAPI, teamsAPI, playerAPI } from '../api/client';
+import { Player, Evaluation, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
+
+const COMPETITION_LEVELS = ['Middle School', 'HS JV', 'HS Varsity', 'AAU Grassroots', 'AAU Elite', 'College', 'Pro'];
 
 const OUTPUT_TYPES = [
   { key: 'player_eval', label: 'Player Eval' },
@@ -27,7 +29,18 @@ export default function PlayerProfileScreen() {
 
   const [player, setPlayer] = useState<Player | null>(null);
   const [evals, setEvals] = useState<Evaluation[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Edit state
+  const [showEdit, setShowEdit] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editPos, setEditPos] = useState('');
+  const [editLevel, setEditLevel] = useState('');
+  const [editTeamId, setEditTeamId] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [showLevelPicker, setShowLevelPicker] = useState(false);
+  const [showTeamPicker, setShowTeamPicker] = useState(false);
 
   // Summary state
   const [showSummary, setShowSummary] = useState(false);
@@ -35,10 +48,38 @@ export default function PlayerProfileScreen() {
   const [summaryLoading, setSummaryLoading] = useState(false);
 
   useEffect(() => {
-    Promise.all([playersAPI.get(playerId), playersAPI.evaluations(playerId)])
-      .then(([p, e]) => { setPlayer(p); setEvals(e); })
+    Promise.all([playersAPI.get(playerId), playersAPI.evaluations(playerId), teamsAPI.list()])
+      .then(([p, e, t]) => { setPlayer(p); setEvals(e); setTeams(t); })
       .finally(() => setLoading(false));
   }, [playerId]);
+
+  const openEdit = () => {
+    if (!player) return;
+    setEditName(player.name);
+    setEditPos(player.position ?? '');
+    setEditLevel(player.competition_level ?? 'HS Varsity');
+    setEditTeamId(player.team_id ?? null);
+    setShowEdit(true);
+  };
+
+  const saveEdit = async () => {
+    if (!editName.trim()) return;
+    setSaving(true);
+    try {
+      const updated = await playersAPI.update(playerId, {
+        name: editName.trim(),
+        position: editPos.trim() || undefined,
+        competition_level: editLevel,
+        team_id: editTeamId ?? 0,
+      });
+      setPlayer(updated);
+      setShowEdit(false);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save changes');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const generateSummary = async () => {
     if (!player) return;
@@ -96,8 +137,11 @@ export default function PlayerProfileScreen() {
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.name}>{player.name}</Text>
-          <Text style={styles.meta}>{[player.position, player.competition_level].filter(Boolean).join(' · ')}</Text>
+          <Text style={styles.meta}>{[player.position, player.team_name ?? player.competition_level].filter(Boolean).join(' · ')}</Text>
         </View>
+        <TouchableOpacity onPress={openEdit} style={styles.editBtn}>
+          <Ionicons name="create-outline" size={20} color="#9ca3af" />
+        </TouchableOpacity>
         <GradeBadge grade={player.latest_grade} size="lg" />
       </View>
 
@@ -190,6 +234,94 @@ export default function PlayerProfileScreen() {
           <Text style={styles.inviteCodeHint}>Share this code with the player so they can link their account</Text>
         </View>
       )}
+
+      {/* Edit Player Modal */}
+      <Modal visible={showEdit} transparent animationType="slide">
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>Edit Player</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Full Name *"
+              placeholderTextColor="#6b7280"
+              value={editName}
+              onChangeText={setEditName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Position (e.g. PG, SG, SF)"
+              placeholderTextColor="#6b7280"
+              value={editPos}
+              onChangeText={setEditPos}
+            />
+            <Text style={styles.inputLabel}>Competition Level</Text>
+            <TouchableOpacity style={styles.dropdownTrigger} onPress={() => setShowLevelPicker(true)}>
+              <Text style={styles.dropdownText}>{editLevel}</Text>
+              <Text style={{ color: '#9ca3af' }}>▾</Text>
+            </TouchableOpacity>
+            <Text style={styles.inputLabel}>Team</Text>
+            <TouchableOpacity style={styles.dropdownTrigger} onPress={() => setShowTeamPicker(true)}>
+              <Text style={styles.dropdownText}>
+                {editTeamId ? (teams.find(t => t.id === editTeamId)?.name ?? 'Unknown') : 'No Team'}
+              </Text>
+              <Text style={{ color: '#9ca3af' }}>▾</Text>
+            </TouchableOpacity>
+            <View style={styles.modalRow}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowEdit(false)}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveBtn} onPress={saveEdit} disabled={saving}>
+                {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Save</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Level Picker */}
+      <Modal visible={showLevelPicker} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowLevelPicker(false)}>
+          <View style={[styles.modal, { paddingBottom: 8 }]}>
+            <Text style={styles.modalTitle}>Competition Level</Text>
+            {COMPETITION_LEVELS.map(lvl => (
+              <TouchableOpacity
+                key={lvl}
+                style={[styles.pickerOption, editLevel === lvl && styles.pickerOptionActive]}
+                onPress={() => { setEditLevel(lvl); setShowLevelPicker(false); }}
+              >
+                <Text style={[styles.pickerOptionText, editLevel === lvl && { color: '#fff', fontWeight: '700' }]}>{lvl}</Text>
+                {editLevel === lvl && <Ionicons name="checkmark" size={16} color="#2563eb" />}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Team Picker */}
+      <Modal visible={showTeamPicker} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowTeamPicker(false)}>
+          <View style={[styles.modal, { paddingBottom: 8 }]}>
+            <Text style={styles.modalTitle}>Assign Team</Text>
+            <TouchableOpacity
+              style={[styles.pickerOption, !editTeamId && styles.pickerOptionActive]}
+              onPress={() => { setEditTeamId(null); setShowTeamPicker(false); }}
+            >
+              <Text style={[styles.pickerOptionText, !editTeamId && { color: '#fff', fontWeight: '700' }]}>No Team</Text>
+              {!editTeamId && <Ionicons name="checkmark" size={16} color="#2563eb" />}
+            </TouchableOpacity>
+            {teams.map(t => (
+              <TouchableOpacity
+                key={t.id}
+                style={[styles.pickerOption, editTeamId === t.id && styles.pickerOptionActive]}
+                onPress={() => { setEditTeamId(t.id); setShowTeamPicker(false); }}
+              >
+                <Text style={[styles.pickerOptionText, editTeamId === t.id && { color: '#fff', fontWeight: '700' }]}>{t.name}</Text>
+                {editTeamId === t.id && <Ionicons name="checkmark" size={16} color="#2563eb" />}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Summary modal */}
       <Modal visible={showSummary} transparent animationType="slide">
@@ -285,5 +417,23 @@ const styles = StyleSheet.create({
   },
   inviteCodeLabel: { color: '#6b7280', fontSize: 10, fontWeight: '700', letterSpacing: 2, marginBottom: 8 },
   inviteCode: { color: '#2563eb', fontSize: 28, fontWeight: '900', letterSpacing: 4, marginBottom: 8 },
+  editBtn: { padding: 4 },
+  input: {
+    backgroundColor: '#1f2937', borderRadius: 10, padding: 12, color: '#fff',
+    fontSize: 14, borderWidth: 1, borderColor: '#374151', marginBottom: 12,
+  },
+  inputLabel: { color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6 },
+  dropdownTrigger: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    backgroundColor: '#1f2937', borderRadius: 10, padding: 12, marginBottom: 12,
+    borderWidth: 1, borderColor: '#374151',
+  },
+  dropdownText: { color: '#fff', fontSize: 14 },
+  pickerOption: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingVertical: 13, paddingHorizontal: 4, borderTopWidth: 1, borderTopColor: '#1f2937',
+  },
+  pickerOptionActive: { backgroundColor: '#1e3a5f', marginHorizontal: -4, paddingHorizontal: 4, borderRadius: 8 },
+  pickerOptionText: { color: '#d1d5db', fontSize: 14 },
   inviteCodeHint: { color: '#6b7280', fontSize: 11, textAlign: 'center' },
 });

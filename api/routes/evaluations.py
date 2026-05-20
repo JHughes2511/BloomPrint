@@ -4,6 +4,7 @@ import tempfile
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -274,6 +275,42 @@ def delete_team_report(
     db.delete(tr)
     db.commit()
     return {"ok": True}
+
+
+class TeamReportCorrectBody(BaseModel):
+    correction: str
+
+
+@router.post("/team-reports/{report_id}/correct", response_model=schemas.TeamReportOut)
+async def correct_team_report(
+    report_id: int,
+    body: TeamReportCorrectBody,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    tr = db.get(models.TeamReport, report_id)
+    if not tr or not tr.report_text:
+        raise HTTPException(status_code=404, detail="Team report not found")
+
+    prompt = (
+        f"You are a basketball analysis expert. Below is a team report followed by a correction from the coach. "
+        f"Update the report to incorporate this correction, adding or removing detail as needed. "
+        f"Return ONLY the updated report text in the same format.\n\n"
+        f"ORIGINAL REPORT:\n{tr.report_text}\n\n"
+        f"CORRECTION:\n{body.correction}\n\n"
+        f"UPDATED REPORT:"
+    )
+    import anthropic
+    client = anthropic.Anthropic()
+    response = client.messages.create(
+        model="claude-opus-4-7",
+        max_tokens=4096,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    tr.report_text = response.content[0].text.strip()
+    db.commit()
+    db.refresh(tr)
+    return tr
 
 
 @router.post("/{eval_id}/corrections", response_model=schemas.CorrectionOut)
