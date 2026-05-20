@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
-  Modal, TextInput, KeyboardAvoidingView, Platform, PanResponder, Animated,
+  Modal, TextInput, Platform, PanResponder, Animated, Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -44,6 +44,15 @@ export default function PlayerHomeScreen() {
     setEditCity(profile?.city ?? '');
     setEditSchool(profile?.school_name ?? '');
     openModal();
+  };
+
+  const modalScrollRef = useRef<ScrollView>(null);
+  const fieldY = useRef<Record<string, number>>({});
+  const KEYBOARD_HEIGHT = Platform.OS === 'ios' ? 336 : 280;
+
+  const scrollToField = (key: string) => {
+    const y = fieldY.current[key] ?? 0;
+    setTimeout(() => modalScrollRef.current?.scrollTo({ y: Math.max(0, y - 20), animated: true }), 60);
   };
 
   const slideY = useRef(new Animated.Value(600)).current;
@@ -244,104 +253,78 @@ export default function PlayerHomeScreen() {
       </TouchableOpacity>
 
       <Modal visible={showEditModal} transparent animationType="none">
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={0}
-        >
-          <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={closeModal}>
-            <Animated.View
-              style={[styles.modalBox, { transform: [{ translateY: slideY }] }]}
-              {...swipePan.panHandlers}
-            >
-              <TouchableOpacity activeOpacity={1}>
-                <View style={styles.dragHandle} />
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Edit My Profile</Text>
-                  <TouchableOpacity onPress={closeModal}>
-                    <Ionicons name="close" size={22} color="#9ca3af" />
-                  </TouchableOpacity>
-                </View>
-                <ScrollView
-                  keyboardShouldPersistTaps="handled"
-                  showsVerticalScrollIndicator={false}
-                  contentContainerStyle={{ paddingBottom: 180 }}
-                >
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => { Keyboard.dismiss(); closeModal(); }}>
+          <Animated.View
+            style={[styles.modalBox, { transform: [{ translateY: slideY }] }]}
+            {...swipePan.panHandlers}
+          >
+            <TouchableOpacity activeOpacity={1}>
+              <View style={styles.dragHandle} />
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Edit My Profile</Text>
+                <TouchableOpacity onPress={() => { Keyboard.dismiss(); closeModal(); }}>
+                  <Ionicons name="close" size={22} color="#9ca3af" />
+                </TouchableOpacity>
+              </View>
+              <ScrollView
+                ref={modalScrollRef}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: KEYBOARD_HEIGHT + 40 }}
+              >
+                <View onLayout={e => { fieldY.current['position'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>Position</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={editPosition}
-                    onChangeText={setEditPosition}
-                    placeholder="e.g. PG, SG, SF, PF, C"
-                    placeholderTextColor="#4b5563"
-                    returnKeyType="next"
-                  />
+                  <TextInput style={styles.input} value={editPosition} onChangeText={setEditPosition}
+                    placeholder="e.g. PG, SG, SF, PF, C" placeholderTextColor="#4b5563"
+                    returnKeyType="next" onFocus={() => scrollToField('position')} />
+                </View>
+                <View onLayout={e => { fieldY.current['height'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>Height</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={editHeight}
-                    onChangeText={setEditHeight}
-                    placeholder={`e.g. 6'2"`}
-                    placeholderTextColor="#4b5563"
-                    returnKeyType="next"
-                  />
+                  <TextInput style={styles.input} value={editHeight} onChangeText={setEditHeight}
+                    placeholder={`e.g. 6'2"`} placeholderTextColor="#4b5563"
+                    returnKeyType="next" onFocus={() => scrollToField('height')} />
+                </View>
+                <View onLayout={e => { fieldY.current['wingspan'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>Wingspan</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={editWingspan}
-                    onChangeText={setEditWingspan}
-                    placeholder={`e.g. 6'5"`}
-                    placeholderTextColor="#4b5563"
-                    returnKeyType="next"
-                  />
+                  <TextInput style={styles.input} value={editWingspan} onChangeText={setEditWingspan}
+                    placeholder={`e.g. 6'5"`} placeholderTextColor="#4b5563"
+                    returnKeyType="next" onFocus={() => scrollToField('wingspan')} />
+                </View>
+                <View onLayout={e => { fieldY.current['school'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>School</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={editSchool}
-                    onChangeText={setEditSchool}
-                    placeholder="e.g. Lincoln High School"
-                    placeholderTextColor="#4b5563"
-                    returnKeyType="next"
-                  />
+                  <TextInput style={styles.input} value={editSchool} onChangeText={setEditSchool}
+                    placeholder="e.g. Lincoln High School" placeholderTextColor="#4b5563"
+                    returnKeyType="next" onFocus={() => scrollToField('school')} />
+                </View>
+                <View onLayout={e => { fieldY.current['city'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>City</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={editCity}
-                    onChangeText={setEditCity}
-                    placeholder="e.g. Atlanta"
-                    placeholderTextColor="#4b5563"
-                    returnKeyType="next"
-                  />
+                  <TextInput style={styles.input} value={editCity} onChangeText={setEditCity}
+                    placeholder="e.g. Atlanta" placeholderTextColor="#4b5563"
+                    returnKeyType="next" onFocus={() => scrollToField('city')} />
+                </View>
+                <View onLayout={e => { fieldY.current['state'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>State</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={editState}
-                    onChangeText={setEditState}
-                    placeholder="e.g. Georgia"
-                    placeholderTextColor="#4b5563"
-                    returnKeyType="next"
-                  />
+                  <TextInput style={styles.input} value={editState} onChangeText={setEditState}
+                    placeholder="e.g. Georgia" placeholderTextColor="#4b5563"
+                    returnKeyType="next" onFocus={() => scrollToField('state')} />
+                </View>
+                <View onLayout={e => { fieldY.current['country'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>Country</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={editCountry}
-                    onChangeText={setEditCountry}
-                    placeholder="e.g. USA"
-                    placeholderTextColor="#4b5563"
-                    returnKeyType="done"
-                  />
-                  <TouchableOpacity
-                    style={[styles.saveBtn, saving && { opacity: 0.6 }]}
-                    onPress={saveProfile}
-                    disabled={saving}
-                  >
-                    <Text style={styles.saveBtnText}>{saving ? 'Saving…' : 'Save Changes'}</Text>
-                  </TouchableOpacity>
-                </ScrollView>
-              </TouchableOpacity>
-            </Animated.View>
-          </TouchableOpacity>
-        </KeyboardAvoidingView>
+                  <TextInput style={styles.input} value={editCountry} onChangeText={setEditCountry}
+                    placeholder="e.g. USA" placeholderTextColor="#4b5563"
+                    returnKeyType="done" onFocus={() => scrollToField('country')} />
+                </View>
+                <TouchableOpacity
+                  style={[styles.saveBtn, saving && { opacity: 0.6 }]}
+                  onPress={saveProfile}
+                  disabled={saving}
+                >
+                  <Text style={styles.saveBtnText}>{saving ? 'Saving…' : 'Save Changes'}</Text>
+                </TouchableOpacity>
+              </ScrollView>
+            </TouchableOpacity>
+          </Animated.View>
+        </TouchableOpacity>
       </Modal>
     </ScrollView>
   );
