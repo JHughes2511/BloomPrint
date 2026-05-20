@@ -257,9 +257,9 @@ export default function RosterScreen() {
             <TextInput style={styles.input} placeholder="Position (e.g. PG, SG, SF)" placeholderTextColor="#6b7280"
               value={newPos} onChangeText={setNewPos} />
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <TextInput style={[styles.input, { flex: 1 }]} placeholder='Height (e.g. 6\'2")' placeholderTextColor="#6b7280"
+              <TextInput style={[styles.input, { flex: 1 }]} placeholder="Height (e.g. 6'2\")" placeholderTextColor="#6b7280"
                 value={newHeight} onChangeText={setNewHeight} />
-              <TextInput style={[styles.input, { flex: 1 }]} placeholder='Wingspan (e.g. 6\'5")' placeholderTextColor="#6b7280"
+              <TextInput style={[styles.input, { flex: 1 }]} placeholder="Wingspan (e.g. 6'5\")" placeholderTextColor="#6b7280"
                 value={newWingspan} onChangeText={setNewWingspan} />
             </View>
             <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Competition Level</Text>
