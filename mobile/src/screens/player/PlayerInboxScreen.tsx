@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, RefreshControl,
@@ -6,24 +6,51 @@ import {
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { playerReportsAPI } from '../../api/playerClient';
-import { SharedReport } from '../../types';
+
+type InboxItem = {
+  id: number;
+  kind: 'eval' | 'team';
+  output_type: string;
+  created_at: string;
+  shared_by_name: string;
+  message?: string | null;
+  share_grades?: boolean;
+  share_report_text?: boolean;
+  share_flags?: boolean;
+  share_questions?: boolean;
+};
 
 export default function PlayerInboxScreen() {
   const navigation = useNavigation<any>();
-  const [reports, setReports] = useState<SharedReport[]>([]);
+  const [items, setItems] = useState<InboxItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = async () => {
     try {
-      const data = await playerReportsAPI.list();
-      setReports(data);
+      const [evalReports, teamReports] = await Promise.all([
+        playerReportsAPI.list(),
+        playerReportsAPI.listTeam(),
+      ]);
+      const combined: InboxItem[] = [
+        ...evalReports.map((r: any) => ({ ...r, kind: 'eval' as const })),
+        ...teamReports.map((r: any) => ({ ...r, kind: 'team' as const })),
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setItems(combined);
     } catch {}
     setLoading(false);
     setRefreshing(false);
   };
 
   useFocusEffect(useCallback(() => { load(); }, []));
+
+  const handleTap = (item: InboxItem) => {
+    if (item.kind === 'eval') {
+      navigation.navigate('PlayerReportDetail', { reportId: item.id });
+    } else {
+      navigation.navigate('PlayerTeamReportDetail', { reportId: item.id });
+    }
+  };
 
   if (loading) {
     return (
@@ -41,59 +68,54 @@ export default function PlayerInboxScreen() {
     >
       <View style={styles.header}>
         <Text style={styles.title}>My Reports</Text>
-        <Text style={styles.sub}>{reports.length} report{reports.length !== 1 ? 's' : ''} shared with you</Text>
+        <Text style={styles.sub}>{items.length} report{items.length !== 1 ? 's' : ''} shared with you</Text>
       </View>
 
-      {reports.length === 0 ? (
+      {items.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="mail-outline" size={48} color="#2d4a2d" />
           <Text style={styles.emptyTitle}>No reports yet</Text>
           <Text style={styles.emptyDesc}>When a coach shares a report with you, it will appear here.</Text>
         </View>
       ) : (
-        reports.map(report => (
+        items.map(item => (
           <TouchableOpacity
-            key={report.id}
+            key={`${item.kind}-${item.id}`}
             style={styles.card}
-            onPress={() => navigation.navigate('PlayerReportDetail', { reportId: report.id })}
+            onPress={() => handleTap(item)}
           >
             <View style={styles.cardTop}>
               <View style={styles.typeBadge}>
                 <Text style={styles.typeText}>
-                  {report.output_type.replace(/_/g, ' ').toUpperCase()}
+                  {item.kind === 'team' ? 'TEAM · ' : ''}{item.output_type.replace(/_/g, ' ').toUpperCase()}
                 </Text>
               </View>
               <Text style={styles.date}>
-                {new Date(report.created_at).toLocaleDateString()}
+                {new Date(item.created_at).toLocaleDateString()}
               </Text>
             </View>
             <Text style={styles.cardTitle}>
-              Report from {report.shared_by_name || 'Coach'}
+              Report from {item.shared_by_name || 'Coach'}
             </Text>
-            {report.message && (
-              <Text style={styles.message} numberOfLines={2}>{report.message}</Text>
-            )}
+            {item.message ? (
+              <Text style={styles.message} numberOfLines={2}>{item.message}</Text>
+            ) : null}
             <View style={styles.cardFooter}>
               <View style={styles.sharedItems}>
-                {report.share_grades && (
-                  <View style={styles.chip}>
-                    <Text style={styles.chipText}>Grades</Text>
-                  </View>
+                {item.kind === 'eval' && item.share_grades && (
+                  <View style={styles.chip}><Text style={styles.chipText}>Grades</Text></View>
                 )}
-                {report.share_report_text && (
-                  <View style={styles.chip}>
-                    <Text style={styles.chipText}>Report</Text>
-                  </View>
+                {item.kind === 'eval' && item.share_report_text && (
+                  <View style={styles.chip}><Text style={styles.chipText}>Report</Text></View>
                 )}
-                {report.share_flags && (
-                  <View style={styles.chip}>
-                    <Text style={styles.chipText}>Flags</Text>
-                  </View>
+                {item.kind === 'eval' && item.share_flags && (
+                  <View style={styles.chip}><Text style={styles.chipText}>Flags</Text></View>
                 )}
-                {report.share_questions && (
-                  <View style={styles.chip}>
-                    <Text style={styles.chipText}>Questions</Text>
-                  </View>
+                {item.kind === 'eval' && item.share_questions && (
+                  <View style={styles.chip}><Text style={styles.chipText}>Questions</Text></View>
+                )}
+                {item.kind === 'team' && (
+                  <View style={styles.chip}><Text style={styles.chipText}>Full Report</Text></View>
                 )}
               </View>
               <Ionicons name="chevron-forward" size={16} color="#4b5563" />

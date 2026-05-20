@@ -93,7 +93,13 @@ export default function CoachNotificationsScreen() {
           <TouchableOpacity
             key={n.id}
             style={[styles.card, !n.read && styles.cardUnread]}
-            onPress={() => setExpandedId(prev => prev === n.id ? null : n.id)}
+            onPress={async () => {
+              setExpandedId(prev => prev === n.id ? null : n.id);
+              if (!n.read) {
+                try { await playerAPI.coachMarkRead(n.id); } catch {}
+                setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
+              }
+            }}
             activeOpacity={0.8}
           >
             <View style={styles.cardMain}>

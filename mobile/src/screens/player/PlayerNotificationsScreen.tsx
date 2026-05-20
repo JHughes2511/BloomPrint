@@ -47,6 +47,8 @@ export default function PlayerNotificationsScreen() {
       navigation.navigate('PlayerTrainingDetail', { trainingId: notif.ref_id });
     } else if (notif.type === 'training_generated' && notif.ref_id) {
       navigation.navigate('PlayerTrainingDetail', { trainingId: notif.ref_id });
+    } else if (notif.type === 'team_report_shared' && notif.ref_id) {
+      navigation.navigate('PlayerTeamReportDetail', { reportId: notif.ref_id });
     }
   };
 

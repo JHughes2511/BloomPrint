@@ -20,6 +20,7 @@ export const playerAuthAPI = {
 
 export const playerReportsAPI = {
   list: () => playerApi.get('/player/shared-reports').then(r => r.data),
+  listTeam: () => playerApi.get('/player/team-shared-reports').then(r => r.data),
   get: (id: number) => playerApi.get(`/player/shared-reports/${id}`).then(r => r.data),
   addComment: (id: number, text: string) =>
     playerApi.post(`/player/shared-reports/${id}/comments`, { text }).then(r => r.data),

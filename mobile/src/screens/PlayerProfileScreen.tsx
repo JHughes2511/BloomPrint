@@ -10,7 +10,7 @@ import { Player, Evaluation, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
 
-const COMPETITION_LEVELS = ['Middle School', 'HS JV', 'HS Varsity', 'AAU Grassroots', 'AAU Elite', 'College', 'Pro'];
+const COMPETITION_LEVELS = ['Middle School', 'HS JV', 'HS Varsity', 'AAU', 'College', 'Pro'];
 
 const OUTPUT_TYPES = [
   { key: 'player_eval', label: 'Player Eval' },

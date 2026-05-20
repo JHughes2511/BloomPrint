@@ -262,7 +262,7 @@ export default function RecentScreen() {
         await playerAPI.shareTeamReport({
           output_type: activeModal.outputType,
           report_text: activeModal.text,
-          target_type: 'individual',
+          target_type: 'player',
           player_user_id: target.id,
         });
       }

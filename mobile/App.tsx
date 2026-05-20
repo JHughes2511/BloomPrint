@@ -37,6 +37,7 @@ import PlayerReportDetailScreen from './src/screens/player/PlayerReportDetailScr
 import PlayerTrainingScreen from './src/screens/player/PlayerTrainingScreen';
 import PlayerTrainingDetailScreen from './src/screens/player/PlayerTrainingDetailScreen';
 import PlayerNotificationsScreen from './src/screens/player/PlayerNotificationsScreen';
+import PlayerTeamReportDetailScreen from './src/screens/player/PlayerTeamReportDetailScreen';
 import PlayerLinkScreen from './src/screens/player/PlayerLinkScreen';
 
 const Stack = createNativeStackNavigator();
@@ -131,6 +132,7 @@ function PlayerInboxStack() {
     <Stack.Navigator screenOptions={PLAYER_SCREEN_OPTIONS}>
       <Stack.Screen name="PlayerInbox" component={PlayerInboxScreen} />
       <Stack.Screen name="PlayerReportDetail" component={PlayerReportDetailScreen} />
+      <Stack.Screen name="PlayerTeamReportDetail" component={PlayerTeamReportDetailScreen} />
       <Stack.Screen name="PlayerTraining" component={PlayerTrainingScreen} />
       <Stack.Screen name="PlayerTrainingDetail" component={PlayerTrainingDetailScreen} />
     </Stack.Navigator>
@@ -151,6 +153,7 @@ function PlayerNotifStack() {
     <Stack.Navigator screenOptions={PLAYER_SCREEN_OPTIONS}>
       <Stack.Screen name="PlayerNotifications" component={PlayerNotificationsScreen} />
       <Stack.Screen name="PlayerReportDetail" component={PlayerReportDetailScreen} />
+      <Stack.Screen name="PlayerTeamReportDetail" component={PlayerTeamReportDetailScreen} />
       <Stack.Screen name="PlayerTrainingDetail" component={PlayerTrainingDetailScreen} />
     </Stack.Navigator>
   );
