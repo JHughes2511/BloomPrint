@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert,
+  Modal, FlatList, SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,15 +14,143 @@ const ROLES = [
   { key: 'trainer', label: 'Trainer' },
 ];
 
-const COMPETITION_LEVELS = ['Pro', 'College', 'AAU', 'HS Varsity', 'HS JV', 'Middle School', 'Other'];
+const COMPETITION_LEVELS = [
+  'Youth',
+  'Middle School',
+  'HS JV',
+  'HS Varsity',
+  'AAU',
+  'College',
+  'Pro',
+  'Other',
+];
 
 const CONFERENCES = [
-  'ACC', 'Big East', 'Big Ten', 'Big 12', 'SEC',
-  'American', 'Atlantic 10', 'Mountain West', 'Missouri Valley', 'WCC',
-  'MAC', 'Sun Belt', 'CUSA', 'Southland', 'Patriot', 'Ivy League',
-  'MAAC', 'Big South', 'NEC', 'OVC', 'Big Sky', 'WAC', 'Horizon',
-  'Summit', 'CAA', 'SoCon', 'SWAC', 'MEAC', 'Independent',
+  // NCAA Division I — Power Conferences
+  'ACC',
+  'Big East',
+  'Big Ten',
+  'Big 12',
+  'SEC',
+  'Pac-12',
+  // NCAA Division I — Mid-Major
+  'American Athletic (AAC)',
+  'Atlantic 10 (A-10)',
+  'Mountain West (MWC)',
+  'West Coast (WCC)',
+  'Missouri Valley (MVC)',
+  'Colonial Athletic (CAA)',
+  'Mid-American (MAC)',
+  'Sun Belt',
+  'Conference USA (CUSA)',
+  'Horizon League',
+  'Big West',
+  'Big Sky',
+  'Big South',
+  'Southern (SoCon)',
+  'Southland',
+  'Patriot League',
+  'Ivy League',
+  'MAAC',
+  'Metro Atlantic (MAAC)',
+  'Northeast (NEC)',
+  'Ohio Valley (OVC)',
+  'Summit League',
+  'WAC',
+  'America East',
+  'ASUN',
+  'Atlantic Sun (ASUN)',
+  'Southwestern Athletic (SWAC)',
+  'Mid-Eastern Athletic (MEAC)',
+  'Independent',
+  // Professional — USA
+  'NBA',
+  'G League',
+  'NBA G League',
+  // Professional — International
+  'EuroLeague',
+  'EuroCup',
+  'Liga ACB (Spain)',
+  'Lega Basket (Italy)',
+  'Bundesliga (Germany)',
+  'Pro A (France)',
+  'Turkish BSL',
+  'VTB United League',
+  'LNB Pro A',
+  'NBL (Australia)',
+  'CBA (China)',
+  'KBL (South Korea)',
+  'Super League (Greece)',
+  'Adriatic League (ABA)',
+  'FIBA Champions League',
+  'FIBA Europe Cup',
+  // Other / Club
+  'AAU',
+  'JUCO',
+  'NAIA',
+  'D2',
+  'D3',
+  'Other',
 ];
+
+function PickerModal({
+  visible,
+  title,
+  options,
+  selected,
+  onSelect,
+  onClose,
+}: {
+  visible: boolean;
+  title: string;
+  options: string[];
+  selected: string;
+  onSelect: (val: string) => void;
+  onClose: () => void;
+}) {
+  const [search, setSearch] = useState('');
+  const filtered = search.trim()
+    ? options.filter(o => o.toLowerCase().includes(search.toLowerCase()))
+    : options;
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <View style={pickerModalStyles.overlay}>
+        <SafeAreaView style={pickerModalStyles.sheet}>
+          <View style={pickerModalStyles.header}>
+            <Text style={pickerModalStyles.title}>{title}</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close" size={22} color="#9ca3af" />
+            </TouchableOpacity>
+          </View>
+          <TextInput
+            style={pickerModalStyles.search}
+            placeholder="Search..."
+            placeholderTextColor="#6b7280"
+            value={search}
+            onChangeText={setSearch}
+          />
+          <FlatList
+            data={filtered}
+            keyExtractor={item => item}
+            keyboardShouldPersistTaps="handled"
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[pickerModalStyles.option, selected === item && pickerModalStyles.optionActive]}
+                onPress={() => { onSelect(item); onClose(); setSearch(''); }}
+              >
+                <Text style={[pickerModalStyles.optionText, selected === item && { color: '#fff', fontWeight: '700' }]}>
+                  {item}
+                </Text>
+                {selected === item && <Ionicons name="checkmark" size={16} color="#2563eb" />}
+              </TouchableOpacity>
+            )}
+          />
+        </SafeAreaView>
+      </View>
+    </Modal>
+  );
+}
 
 export default function LoginScreen() {
   const { login, register } = useAuth();
@@ -108,27 +237,13 @@ export default function LoginScreen() {
             <Text style={styles.sectionLabel}>Competition Level</Text>
             <TouchableOpacity
               style={styles.pickerBtn}
-              onPress={() => { setShowLevelPicker(v => !v); setShowConferencePicker(false); }}
+              onPress={() => setShowLevelPicker(true)}
             >
               <Text style={[styles.pickerBtnText, !competitionLevel && { color: '#6b7280' }]}>
                 {competitionLevel || 'Select level...'}
               </Text>
-              <Ionicons name={showLevelPicker ? 'chevron-up' : 'chevron-down'} size={14} color="#6b7280" />
+              <Ionicons name="chevron-down" size={14} color="#6b7280" />
             </TouchableOpacity>
-            {showLevelPicker && (
-              <View style={styles.pickerDropdown}>
-                {COMPETITION_LEVELS.map(lvl => (
-                  <TouchableOpacity
-                    key={lvl}
-                    style={[styles.pickerOption, competitionLevel === lvl && styles.pickerOptionActive]}
-                    onPress={() => { setCompetitionLevel(lvl); setShowLevelPicker(false); if (lvl !== 'College') setConference(''); }}
-                  >
-                    <Text style={[styles.pickerOptionText, competitionLevel === lvl && { color: '#fff', fontWeight: '700' }]}>{lvl}</Text>
-                    {competitionLevel === lvl && <Ionicons name="checkmark" size={14} color="#2563eb" />}
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
 
             {/* Conference picker — shown only when College is selected */}
             {competitionLevel === 'College' && (
@@ -138,34 +253,27 @@ export default function LoginScreen() {
                 </Text>
                 <TouchableOpacity
                   style={[styles.pickerBtn, !conference && { borderColor: '#ef4444' }]}
-                  onPress={() => { setShowConferencePicker(v => !v); setShowLevelPicker(false); }}
+                  onPress={() => setShowConferencePicker(true)}
                 >
                   <Text style={[styles.pickerBtnText, !conference && { color: '#6b7280' }]}>
                     {conference || 'Select conference (required)...'}
                   </Text>
-                  <Ionicons name={showConferencePicker ? 'chevron-up' : 'chevron-down'} size={14} color="#6b7280" />
+                  <Ionicons name="chevron-down" size={14} color="#6b7280" />
                 </TouchableOpacity>
-                {showConferencePicker && (
-                  <View style={styles.pickerDropdown}>
-                    {CONFERENCES.map(conf => (
-                      <TouchableOpacity
-                        key={conf}
-                        style={[styles.pickerOption, conference === conf && styles.pickerOptionActive]}
-                        onPress={() => { setConference(conf); setShowConferencePicker(false); }}
-                      >
-                        <Text style={[styles.pickerOptionText, conference === conf && { color: '#fff', fontWeight: '700' }]}>{conf}</Text>
-                        {conference === conf && <Ionicons name="checkmark" size={14} color="#2563eb" />}
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
               </>
             )}
           </>
         )}
 
-        <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#6b7280"
-          value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
+        <TextInput
+          style={[styles.input, mode === 'register' && { marginTop: 16 }]}
+          placeholder="Email"
+          placeholderTextColor="#6b7280"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
         <TextInput style={styles.input} placeholder="Password" placeholderTextColor="#6b7280"
           value={password} onChangeText={setPassword} secureTextEntry />
 
@@ -181,9 +289,51 @@ export default function LoginScreen() {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <PickerModal
+        visible={showLevelPicker}
+        title="Competition Level"
+        options={COMPETITION_LEVELS}
+        selected={competitionLevel}
+        onSelect={(val) => { setCompetitionLevel(val); if (val !== 'College') setConference(''); }}
+        onClose={() => setShowLevelPicker(false)}
+      />
+
+      <PickerModal
+        visible={showConferencePicker}
+        title="Conference"
+        options={CONFERENCES}
+        selected={conference}
+        onSelect={setConference}
+        onClose={() => setShowConferencePicker(false)}
+      />
     </KeyboardAvoidingView>
   );
 }
+
+const pickerModalStyles = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
+  sheet: {
+    backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    maxHeight: '80%', paddingBottom: 20,
+  },
+  header: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    padding: 20, borderBottomWidth: 1, borderBottomColor: '#1f2937',
+  },
+  title: { color: '#fff', fontSize: 18, fontWeight: '800' },
+  search: {
+    backgroundColor: '#1f2937', borderRadius: 10, margin: 16, padding: 12,
+    color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151',
+  },
+  option: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingHorizontal: 20, paddingVertical: 14,
+    borderTopWidth: 1, borderTopColor: '#1f2937',
+  },
+  optionActive: { backgroundColor: '#1e3a5f' },
+  optionText: { color: '#d1d5db', fontSize: 15 },
+});
 
 const styles = StyleSheet.create({
   container: { flexGrow: 1, backgroundColor: '#0a0a0a', alignItems: 'center', justifyContent: 'center', padding: 24, paddingTop: 60 },
@@ -219,16 +369,4 @@ const styles = StyleSheet.create({
     marginBottom: 4, borderWidth: 1, borderColor: '#1f2937',
   },
   pickerBtnText: { color: '#fff', fontSize: 15 },
-  pickerDropdown: {
-    width: '100%', backgroundColor: '#0a0a0a', borderRadius: 10,
-    borderWidth: 1, borderColor: '#374151', marginBottom: 12, overflow: 'hidden',
-    maxHeight: 220,
-  },
-  pickerOption: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: 14, paddingVertical: 12,
-    borderTopWidth: 1, borderTopColor: '#1f2937',
-  },
-  pickerOptionActive: { backgroundColor: '#1e3a5f' },
-  pickerOptionText: { color: '#d1d5db', fontSize: 14 },
 });

@@ -171,6 +171,7 @@ class TrainingOut(BaseModel):
     program_text: str | None
     priorities: list[str] | None
     created_at: datetime
+    player_name: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -415,6 +416,20 @@ class StaffSharedReportOut(BaseModel):
     sender_name: str = ""
     recipient_name: str = ""
     report_text: str | None = None  # resolved from actual report
+    regenerated_text: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class CoachNotificationOut(BaseModel):
+    id: int
+    coach_id: int
+    title: str
+    body: str
+    read: bool
+    ref_id: int | None
+    type: str
+    created_at: datetime
 
     model_config = {"from_attributes": True}
 

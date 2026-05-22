@@ -13,8 +13,10 @@ function cleanMarkdown(text: string): string {
   return text
     .split('\n')
     .map(line => {
+      if (/^\s*[-=—]{3,}\s*$/.test(line)) return '';
       if (/^\s*\*{1,2}\s*$/.test(line)) return '';
-      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '');
+      line = line.replace(/^#+\s*/, '');
+      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
     })
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -38,7 +40,7 @@ export default function StaffInboxScreen() {
   const [submittingComment, setSubmittingComment] = useState(false);
   const [regenerateFeedback, setRegenerateFeedback] = useState('');
   const [regenerating, setRegenerating] = useState(false);
-  const [view, setView] = useState<'report' | 'comments' | 'regenerate'>('report');
+  const [view, setView] = useState<'report' | 'regenerated' | 'comments' | 'regenerate'>('report');
 
   const load = async () => {
     setLoading(true);
@@ -82,9 +84,9 @@ export default function StaffInboxScreen() {
     setRegenerating(true);
     try {
       const updated = await staffSharingAPI.regenerate(activeItem.id, regenerateFeedback.trim());
-      setActiveItem({ ...activeItem, report_text: updated.report_text });
+      setActiveItem({ ...activeItem, regenerated_text: updated.regenerated_text });
       setRegenerateFeedback('');
-      setView('report');
+      setView('regenerated');
       Alert.alert('Updated', 'Report regenerated with your feedback.');
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate');
@@ -107,7 +109,7 @@ export default function StaffInboxScreen() {
       <FlatList
         data={items}
         keyExtractor={i => String(i.id)}
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={{ paddingTop: 16, paddingBottom: 24 }}
         ListEmptyComponent={
           <View style={styles.center}>
             <Ionicons name="mail-outline" size={48} color="#374151" />
@@ -152,34 +154,58 @@ export default function StaffInboxScreen() {
             </View>
 
             {/* View switcher */}
-            <View style={styles.tabRow}>
-              {(['report', 'comments'] as const).map(t => (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 14 }}>
+              <View style={styles.tabRow}>
                 <TouchableOpacity
-                  key={t}
-                  style={[styles.tab, view === t && styles.tabActive]}
-                  onPress={() => setView(t)}
+                  style={[styles.tab, view === 'report' && styles.tabActive]}
+                  onPress={() => setView('report')}
                 >
-                  <Text style={[styles.tabText, view === t && styles.tabTextActive]}>
-                    {t === 'report' ? 'Report' : `Comments (${comments.length})`}
-                  </Text>
+                  <Text style={[styles.tabText, view === 'report' && styles.tabTextActive]}>Original</Text>
                 </TouchableOpacity>
-              ))}
-              {activeItem?.allow_regenerate && (
+                {activeItem?.regenerated_text ? (
+                  <TouchableOpacity
+                    style={[styles.tab, view === 'regenerated' && styles.tabActive]}
+                    onPress={() => setView('regenerated')}
+                  >
+                    <Text style={[styles.tabText, view === 'regenerated' && styles.tabTextActive]}>Regenerated</Text>
+                  </TouchableOpacity>
+                ) : null}
                 <TouchableOpacity
-                  style={[styles.tab, view === 'regenerate' && styles.tabActive]}
-                  onPress={() => setView('regenerate')}
+                  style={[styles.tab, view === 'comments' && styles.tabActive]}
+                  onPress={() => setView('comments')}
                 >
-                  <Text style={[styles.tabText, view === 'regenerate' && styles.tabTextActive]}>Regenerate</Text>
+                  <Text style={[styles.tabText, view === 'comments' && styles.tabTextActive]}>{`Comments (${comments.length})`}</Text>
                 </TouchableOpacity>
-              )}
-            </View>
+                {activeItem?.allow_regenerate && (
+                  <TouchableOpacity
+                    style={[styles.tab, view === 'regenerate' && styles.tabActive]}
+                    onPress={() => setView('regenerate')}
+                  >
+                    <Text style={[styles.tabText, view === 'regenerate' && styles.tabTextActive]}>Regenerate</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </ScrollView>
 
-            {/* Report view */}
+            {/* Report view — original */}
             {view === 'report' && (
               <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
                 {activeItem?.report_text
                   ? <Markdown style={mdStyles}>{cleanMarkdown(activeItem.report_text)}</Markdown>
                   : <Text style={{ color: '#6b7280' }}>No report content available.</Text>
+                }
+              </ScrollView>
+            )}
+
+            {/* Regenerated view */}
+            {view === 'regenerated' && (
+              <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+                <View style={{ backgroundColor: '#1e1b2e', borderRadius: 8, padding: 10, marginBottom: 10 }}>
+                  <Text style={{ color: '#a78bfa', fontSize: 11, fontWeight: '700', letterSpacing: 1 }}>REGENERATED VERSION</Text>
+                </View>
+                {activeItem?.regenerated_text
+                  ? <Markdown style={mdStyles}>{cleanMarkdown(activeItem.regenerated_text)}</Markdown>
+                  : <Text style={{ color: '#6b7280' }}>No regenerated version yet.</Text>
                 }
               </ScrollView>
             )}
@@ -267,7 +293,7 @@ const mdStyles = {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0a0a', paddingTop: 56 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, marginBottom: 16, gap: 12 },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 8, marginBottom: 8, gap: 12 },
   title: { fontSize: 22, fontWeight: '900', color: '#fff' },
   emptyText: { color: '#4b5563', marginTop: 12, fontSize: 14 },
   card: {
@@ -286,7 +312,7 @@ const styles = StyleSheet.create({
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
   modalTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
   modalSub: { color: '#6b7280', fontSize: 12, marginTop: 2 },
-  tabRow: { flexDirection: 'row', gap: 8, marginBottom: 14 },
+  tabRow: { flexDirection: 'row', gap: 8 },
   tab: { borderWidth: 1, borderColor: '#374151', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6 },
   tabActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
   tabText: { color: '#9ca3af', fontSize: 12, fontWeight: '600' },

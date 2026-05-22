@@ -734,18 +734,52 @@ def mark_read(
     return {"ok": True}
 
 
-@router.get("/coach-notifications", response_model=list[schemas.NotificationOut])
+@router.get("/coach-notifications")
 def coach_notifications(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    return (
+    """Return notifications from both PlayerNotification (coach_id) and CoachNotification."""
+    player_notifs = (
         db.query(models.PlayerNotification)
         .filter_by(coach_id=coach.id)
         .order_by(models.PlayerNotification.id.desc())
         .limit(50)
         .all()
     )
+    coach_notifs = (
+        db.query(models.CoachNotification)
+        .filter_by(coach_id=coach.id)
+        .order_by(models.CoachNotification.id.desc())
+        .limit(50)
+        .all()
+    )
+    result = []
+    for n in player_notifs:
+        result.append({
+            "id": n.id,
+            "type": n.type,
+            "title": n.title,
+            "body": n.body,
+            "read": n.read,
+            "ref_id": n.ref_id,
+            "created_at": n.created_at,
+            "source": "player_notif",
+        })
+    for n in coach_notifs:
+        result.append({
+            "id": n.id + 100000,  # offset to avoid ID collision with player notifs
+            "type": n.type,
+            "title": n.title,
+            "body": n.body,
+            "read": n.read,
+            "ref_id": n.ref_id,
+            "created_at": n.created_at,
+            "source": "coach_notif",
+            "coach_notif_id": n.id,
+        })
+    result.sort(key=lambda x: x["created_at"] or "", reverse=True)
+    return result[:60]
 
 
 @router.post("/coach-notifications/{notif_id}/read")
@@ -754,10 +788,17 @@ def coach_mark_read(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    n = db.get(models.PlayerNotification, notif_id)
-    if n and n.coach_id == coach.id:
-        n.read = True
-        db.commit()
+    if notif_id >= 100000:
+        real_id = notif_id - 100000
+        n = db.get(models.CoachNotification, real_id)
+        if n and n.coach_id == coach.id:
+            n.read = True
+            db.commit()
+    else:
+        n = db.get(models.PlayerNotification, notif_id)
+        if n and n.coach_id == coach.id:
+            n.read = True
+            db.commit()
     return {"ok": True}
 
 
@@ -823,6 +864,9 @@ def coach_mark_all_read(
     coach: models.Coach = Depends(get_current_coach),
 ):
     db.query(models.PlayerNotification).filter_by(
+        coach_id=coach.id, read=False
+    ).update({"read": True})
+    db.query(models.CoachNotification).filter_by(
         coach_id=coach.id, read=False
     ).update({"read": True})
     db.commit()

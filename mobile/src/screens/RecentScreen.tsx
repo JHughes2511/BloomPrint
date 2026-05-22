@@ -35,6 +35,7 @@ type ReportItem = {
   overall_grade?: number | null;
   created_at: string;
   program_text?: string;
+  report_text?: string;
 };
 
 type ModalReport = {
@@ -58,10 +59,10 @@ function cleanMarkdown(text: string): string {
   return text
     .split('\n')
     .map(line => {
-      // Remove lines that are only ** or whitespace/**
+      if (/^\s*[-=—]{3,}\s*$/.test(line)) return '';
       if (/^\s*\*{1,2}\s*$/.test(line)) return '';
-      // Remove trailing orphaned ** at end of line (not part of a **word** pair)
-      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '');
+      line = line.replace(/^#+\s*/, '');
+      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
     })
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -86,6 +87,9 @@ export default function RecentScreen() {
   const [sendResults, setSendResults] = useState<any[]>([]);
   const [sendSearchLoading, setSendSearchLoading] = useState(false);
   const [sending, setSending] = useState(false);
+
+  // Game report view modal
+  const [gameReportModal, setGameReportModal] = useState<{ title: string; text: string } | null>(null);
 
   // Correct state (inline in modal)
   const [teamCorrectText, setTeamCorrectText] = useState('');
@@ -123,11 +127,12 @@ export default function RecentScreen() {
         output_type: g.output_type,
         overall_grade: null,
         created_at: g.updated_at || g.created_at,
+        report_text: g.report_text,
       }));
       const trainingItems: ReportItem[] = trainingSessions.map((ts: any) => ({
         id: ts.id,
         kind: 'training' as const,
-        player_name: `Player #${ts.player_id}`,
+        player_name: ts.player_name || `Player #${ts.player_id}`,
         output_type: 'training_program',
         overall_grade: null,
         created_at: ts.created_at,
@@ -382,49 +387,74 @@ export default function RecentScreen() {
               {showDate && (
                 <Text style={styles.dateHeader}>{dateStr}</Text>
               )}
-              <TouchableOpacity
+              <View
                 style={[
                   styles.card,
                   item.kind === 'team' && styles.cardTeam,
                   item.kind === 'game' && styles.cardGame,
                   item.kind === 'training' && styles.cardTraining,
+                  { flexDirection: 'column', alignItems: 'flex-start' },
                 ]}
-                onPress={() => handlePress(item)}
-                onLongPress={() => handleDelete(item)}
               >
-                <View style={styles.kindBadge}>
-                  <Ionicons
-                    name={
-                      item.kind === 'game' ? 'clipboard' :
-                      item.kind === 'team' ? 'people' :
-                      item.kind === 'training' ? 'barbell' :
-                      'person'
-                    }
-                    size={12}
-                    color={
-                      item.kind === 'game' ? '#a78bfa' :
-                      item.kind === 'team' ? '#f59e0b' :
-                      item.kind === 'training' ? '#22c55e' :
-                      '#2563eb'
-                    }
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.playerName}>{item.player_name}</Text>
-                  <Text style={[
-                    styles.typeName,
-                    item.kind === 'team' && { color: '#f59e0b' },
-                    item.kind === 'game' && { color: '#a78bfa' },
-                    item.kind === 'training' && { color: '#22c55e' },
-                  ]}>
-                    {item.kind === 'game' ? 'Game Report Packet' :
-                     item.kind === 'training' ? 'Training Program' :
-                     (TYPE_LABELS[item.output_type] ?? item.output_type)}
-                  </Text>
-                </View>
-                {item.overall_grade != null && <GradeBadge grade={item.overall_grade} size="md" />}
-                {item.kind === 'game' && <Ionicons name="chevron-forward" size={14} color="#4b5563" />}
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 10, width: '100%' }}
+                  onPress={() => handlePress(item)}
+                  onLongPress={() => handleDelete(item)}
+                >
+                  <View style={styles.kindBadge}>
+                    <Ionicons
+                      name={
+                        item.kind === 'game' ? 'clipboard' :
+                        item.kind === 'team' ? 'people' :
+                        item.kind === 'training' ? 'barbell' :
+                        'person'
+                      }
+                      size={12}
+                      color={
+                        item.kind === 'game' ? '#a78bfa' :
+                        item.kind === 'team' ? '#f59e0b' :
+                        item.kind === 'training' ? '#22c55e' :
+                        '#2563eb'
+                      }
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.playerName}>{item.player_name}</Text>
+                    <Text style={[
+                      styles.typeName,
+                      item.kind === 'team' && { color: '#f59e0b' },
+                      item.kind === 'game' && { color: '#a78bfa' },
+                      item.kind === 'training' && { color: '#22c55e' },
+                    ]}>
+                      {item.kind === 'game' ? 'Game Report Packet' :
+                       item.kind === 'training' ? 'Training Program' :
+                       (TYPE_LABELS[item.output_type] ?? item.output_type)}
+                    </Text>
+                  </View>
+                  {item.overall_grade != null && <GradeBadge grade={item.overall_grade} size="md" />}
+                  {item.kind === 'game' && <Ionicons name="chevron-forward" size={14} color="#4b5563" />}
+                </TouchableOpacity>
+                {item.kind === 'game' && (
+                  <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, width: '100%' }}>
+                    {item.report_text ? (
+                      <TouchableOpacity
+                        style={styles.gameActionBtn}
+                        onPress={() => setGameReportModal({ title: item.player_name ?? 'Game Report', text: item.report_text! })}
+                      >
+                        <Ionicons name="document-text-outline" size={13} color="#a78bfa" />
+                        <Text style={[styles.gameActionText, { color: '#a78bfa' }]}>View Report</Text>
+                      </TouchableOpacity>
+                    ) : null}
+                    <TouchableOpacity
+                      style={styles.gameActionBtn}
+                      onPress={() => navigation.navigate('GameReportBuilder', { reportId: item.id })}
+                    >
+                      <Ionicons name="create-outline" size={13} color="#9ca3af" />
+                      <Text style={styles.gameActionText}>Edit Packet</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
             </>
           );
         }}
@@ -436,6 +466,29 @@ export default function RecentScreen() {
           <ActivityIndicator color="#2563eb" size="large" />
         </View>
       )}
+
+      {/* Game Report View Modal */}
+      <Modal visible={!!gameReportModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <View style={styles.modalHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>Game Report</Text>
+                <Text style={styles.modalSub}>{gameReportModal?.title}</Text>
+              </View>
+              <TouchableOpacity onPress={() => setGameReportModal(null)}>
+                <Ionicons name="close" size={24} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+              {gameReportModal?.text
+                ? <Markdown style={mdStyles}>{cleanMarkdown(gameReportModal.text)}</Markdown>
+                : <Text style={{ color: '#6b7280' }}>No report content available.</Text>
+              }
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
       {/* Single modal — swaps between report / send / correct views */}
       <Modal visible={!!activeModal} animationType="slide" transparent>
@@ -656,4 +709,10 @@ const styles = StyleSheet.create({
     borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12,
   },
   actionText: { color: '#fff', fontSize: 13, fontWeight: '600' },
+  gameActionBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: '#1f2937', borderRadius: 8, paddingVertical: 6, paddingHorizontal: 10,
+    borderWidth: 1, borderColor: '#374151',
+  },
+  gameActionText: { color: '#9ca3af', fontSize: 12, fontWeight: '600' },
 });

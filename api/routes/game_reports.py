@@ -297,13 +297,15 @@ async def generate_game_report(
             "offensive actions and counters, opponent tendencies and how to exploit or defend them, "
             "situational responses (end of clock, press breaks, late-game, transition defense), "
             "and key adjustments to make. "
-            "IMPORTANT: Do NOT use ## headers or ** bold markers. Use plain text section labels only."
+            "IMPORTANT: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
+            "Use plain section titles in ALL CAPS followed by a colon and newline."
         )
     else:
         sections.append(
             "\nProvide a comprehensive analysis using the BIM framework. "
             "Include strengths, weaknesses, key players, strategic recommendations. "
-            "Do NOT use ## headers or ** bold markers. Use plain text section labels only."
+            "IMPORTANT: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
+            "Use plain section titles in ALL CAPS followed by a colon and newline."
         )
 
     prompt = "\n".join(sections)
@@ -400,7 +402,8 @@ async def generate_team_training(
         "\nGenerate a comprehensive team training program based on the film analysis and player eval data. "
         "Include: team strengths to build on, collective weaknesses to address, specific drills by position group, "
         "weekly practice structure, situational training scenarios, and individual focus areas for key players. "
-        "IMPORTANT: Do NOT use ## headers or ** bold markers. Use plain text section labels only."
+        "IMPORTANT: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
+        "Use plain section titles in ALL CAPS followed by a colon and newline."
     )
 
     prompt = "\n".join(sections)

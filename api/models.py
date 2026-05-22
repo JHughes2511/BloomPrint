@@ -24,10 +24,11 @@ class Coach(Base):
     competition_level = Column(String, nullable=True)     # signup competition level
     created_at        = Column(DateTime, default=datetime.utcnow)
 
-    evaluations  = relationship("Evaluation", back_populates="coach")
-    corrections  = relationship("Correction", back_populates="coach")
-    teams        = relationship("Team", back_populates="coach")
-    notifications = relationship("PlayerNotification", back_populates="coach", cascade="all, delete-orphan")
+    evaluations         = relationship("Evaluation", back_populates="coach")
+    corrections         = relationship("Correction", back_populates="coach")
+    teams               = relationship("Team", back_populates="coach")
+    notifications       = relationship("PlayerNotification", back_populates="coach", cascade="all, delete-orphan")
+    coach_notifications = relationship("CoachNotification", foreign_keys="CoachNotification.coach_id", cascade="all, delete-orphan")
 
 
 class Team(Base):
@@ -266,16 +267,32 @@ class PlayerNotification(Base):
     coach       = relationship("Coach", back_populates="notifications")
 
 
+class CoachNotification(Base):
+    __tablename__ = "coach_notifications"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    coach_id   = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    title      = Column(String, nullable=False)
+    body       = Column(Text, nullable=False)
+    read       = Column(Boolean, default=False)
+    ref_id     = Column(Integer, nullable=True)
+    type       = Column(String, nullable=False, default="info")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    coach = relationship("Coach", foreign_keys=[coach_id])
+
+
 class StaffSharedReport(Base):
     __tablename__ = "staff_shared_reports"
 
-    id             = Column(Integer, primary_key=True, index=True)
-    report_type    = Column(String, nullable=False)   # eval / game / team_training
-    report_id      = Column(Integer, nullable=False)
-    sender_id      = Column(Integer, ForeignKey("coaches.id"), nullable=False)
-    recipient_id   = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    id               = Column(Integer, primary_key=True, index=True)
+    report_type      = Column(String, nullable=False)   # eval / game / team_training / team_report / training
+    report_id        = Column(Integer, nullable=False)
+    sender_id        = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    recipient_id     = Column(Integer, ForeignKey("coaches.id"), nullable=False)
     allow_regenerate = Column(Boolean, default=False)
-    created_at     = Column(DateTime, default=datetime.utcnow)
+    regenerated_text = Column(Text, nullable=True)
+    created_at       = Column(DateTime, default=datetime.utcnow)
 
     sender    = relationship("Coach", foreign_keys=[sender_id])
     recipient = relationship("Coach", foreign_keys=[recipient_id])

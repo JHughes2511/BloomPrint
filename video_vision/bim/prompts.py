@@ -97,7 +97,9 @@ SYSTEM FIT: [which system / program type this player thrives in]
 BEST FIT PAIRING: [what player type complements them best]
 KEY QUESTIONS: [unresolved flags — things film cannot answer]
 GREEN FLAGS: [standout positives]
-WATCH FLAGS: [concerns that need monitoring]"""
+WATCH FLAGS: [concerns that need monitoring]
+
+IMPORTANT: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. Use plain section titles in ALL CAPS followed by a colon and newline. Example: OFFENSIVE SKILLS: followed by content."""
 
 
 def scouting_report(program: str, level: str, coach_weight: int, player_name: str) -> str:

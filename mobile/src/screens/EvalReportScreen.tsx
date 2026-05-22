@@ -9,7 +9,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import Markdown from 'react-native-markdown-display';
-import { evalsAPI, playersAPI, playerAPI } from '../api/client';
+import { evalsAPI, playersAPI, playerAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import { Evaluation, Correction, Player } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
@@ -19,8 +19,14 @@ function cleanMarkdown(text: string): string {
   return text
     .split('\n')
     .map(line => {
+      // Remove lines that are only dashes/equals/em-dashes
+      if (/^\s*[-=—]{3,}\s*$/.test(line)) return '';
+      // Remove lines that are only ** or whitespace/**
       if (/^\s*\*{1,2}\s*$/.test(line)) return '';
-      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '');
+      // Remove ## prefix
+      line = line.replace(/^#+\s*/, '');
+      // Remove trailing orphaned **
+      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
     })
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -75,6 +81,14 @@ export default function EvalReportScreen() {
   });
   const [exporting, setExporting] = useState(false);
 
+  // Share with staff modal
+  const [showStaffShare, setShowStaffShare] = useState(false);
+  const [staffSearch, setStaffSearch] = useState('');
+  const [staffResults, setStaffResults] = useState<any[]>([]);
+  const [staffSearchLoading, setStaffSearchLoading] = useState(false);
+  const [allowRegen, setAllowRegen] = useState(false);
+  const [sendingStaff, setSendingStaff] = useState(false);
+
   // Share with player modal
   const [showShare, setShowShare] = useState(false);
   const [shareSearch, setShareSearch] = useState('');
@@ -97,6 +111,36 @@ export default function EvalReportScreen() {
       })
       .finally(() => setLoading(false));
   }, [evalId]);
+
+  const searchStaff = async () => {
+    if (!staffSearch.trim()) return;
+    setStaffSearchLoading(true);
+    try {
+      const results = await coachesAPI.search(staffSearch.trim());
+      setStaffResults(results);
+    } catch {}
+    setStaffSearchLoading(false);
+  };
+
+  const sendToStaff = async (target: any) => {
+    setSendingStaff(true);
+    try {
+      await staffSharingAPI.share({
+        report_type: 'eval',
+        report_id: evalId,
+        recipient_id: target.id,
+        allow_regenerate: allowRegen,
+      });
+      Alert.alert('Shared!', `Report shared with ${target.name}.`);
+      setShowStaffShare(false);
+      setStaffSearch('');
+      setStaffResults([]);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share report');
+    } finally {
+      setSendingStaff(false);
+    }
+  };
 
   const searchPlayerUsers = async () => {
     if (!shareSearch.trim()) return;
@@ -377,19 +421,29 @@ export default function EvalReportScreen() {
         </View>
       )}
 
-      {/* Flags */}
+      {/* Flags — vertical list layout */}
       {(ev.green_flags?.length || ev.watch_flags?.length) ? (
-        <View style={styles.flagRow}>
+        <View style={styles.flagSection}>
           {ev.green_flags && ev.green_flags.length > 0 && (
-            <View style={[styles.flagBox, { borderColor: '#16a34a' }]}>
+            <View style={{ marginBottom: 12 }}>
               <Text style={[styles.flagTitle, { color: '#22c55e' }]}>Green Flags</Text>
-              {ev.green_flags.map((f, i) => <Text key={i} style={styles.flagItem}>· {f}</Text>)}
+              {ev.green_flags.map((f, i) => (
+                <View key={i} style={styles.flagListItem}>
+                  <View style={styles.flagDotGreen} />
+                  <Text style={styles.flagListText}>{f.replace(/\*\*/g, '').trim()}</Text>
+                </View>
+              ))}
             </View>
           )}
           {ev.watch_flags && ev.watch_flags.length > 0 && (
-            <View style={[styles.flagBox, { borderColor: '#dc2626' }]}>
-              <Text style={[styles.flagTitle, { color: '#ef4444' }]}>Watch Flags</Text>
-              {ev.watch_flags.map((f, i) => <Text key={i} style={styles.flagItem}>· {f}</Text>)}
+            <View>
+              <Text style={[styles.flagTitle, { color: '#f59e0b' }]}>Watch Flags</Text>
+              {ev.watch_flags.map((f, i) => (
+                <View key={i} style={styles.flagListItem}>
+                  <View style={styles.flagDotWatch} />
+                  <Text style={styles.flagListText}>{f.replace(/\*\*/g, '').trim()}</Text>
+                </View>
+              ))}
             </View>
           )}
         </View>
@@ -442,15 +496,61 @@ export default function EvalReportScreen() {
           <Ionicons name="share-outline" size={18} color="#9ca3af" />
           <Text style={styles.actionText}>Export</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => setShowExport(true)}>
-          <Ionicons name="print-outline" size={18} color="#9ca3af" />
-          <Text style={styles.actionText}>Print</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={[styles.actionBtn, { borderColor: '#16a34a' }]} onPress={() => setShowShare(true)}>
           <Ionicons name="person-add-outline" size={18} color="#16a34a" />
           <Text style={[styles.actionText, { color: '#16a34a' }]}>Player</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={[styles.actionBtn, { borderColor: '#7c3aed' }]} onPress={() => { setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }}>
+          <Ionicons name="people-outline" size={18} color="#7c3aed" />
+          <Text style={[styles.actionText, { color: '#7c3aed' }]}>Staff</Text>
+        </TouchableOpacity>
       </View>
+
+      {/* Share with Staff modal */}
+      <Modal visible={showStaffShare} transparent animationType="slide">
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>Share with Staff</Text>
+            <Text style={styles.modalSub}>Search for a coach, scout, or trainer to share this eval report.</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
+              <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
+              <Switch value={allowRegen} onValueChange={setAllowRegen} trackColor={{ true: '#7c3aed' }} thumbColor="#fff" />
+            </View>
+            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
+              <TextInput
+                style={[styles.input, { flex: 1, marginBottom: 0 }]}
+                placeholder="Search coach/program name..."
+                placeholderTextColor="#4b5563"
+                value={staffSearch}
+                onChangeText={setStaffSearch}
+              />
+              <TouchableOpacity
+                style={{ backgroundColor: '#7c3aed', borderRadius: 10, padding: 14, alignItems: 'center', justifyContent: 'center' }}
+                onPress={searchStaff}
+                disabled={staffSearchLoading}
+              >
+                {staffSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+              </TouchableOpacity>
+            </View>
+            {staffResults.map((r: any) => (
+              <TouchableOpacity
+                key={r.id}
+                style={{ backgroundColor: '#1f2937', borderRadius: 10, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: '#374151' }}
+                onPress={() => sendToStaff(r)}
+                disabled={sendingStaff}
+              >
+                <Text style={{ color: '#fff', fontWeight: '600' }}>{r.name}</Text>
+                <Text style={{ color: '#6b7280', fontSize: 11 }}>{r.role} · {r.program_name}</Text>
+              </TouchableOpacity>
+            ))}
+            <View style={styles.modalRow}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowStaffShare(false)}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       {/* Export modal */}
       <Modal visible={showExport} transparent animationType="slide">
@@ -677,10 +777,12 @@ const styles = StyleSheet.create({
   sub: { color: '#6b7280', fontSize: 11, marginTop: 2 },
   section: { paddingHorizontal: 20, marginTop: 24 },
   sectionLabel: { color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 },
-  flagRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 20, marginTop: 20 },
-  flagBox: { flex: 1, borderWidth: 1, borderRadius: 10, padding: 12 },
-  flagTitle: { fontSize: 11, fontWeight: '700', marginBottom: 6, textTransform: 'uppercase' },
-  flagItem: { color: '#d1d5db', fontSize: 12, marginBottom: 3 },
+  flagSection: { paddingHorizontal: 20, marginTop: 20 },
+  flagTitle: { fontSize: 11, fontWeight: '700', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 },
+  flagListItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 8, paddingRight: 8 },
+  flagDotGreen: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#16a34a', marginTop: 4, flexShrink: 0 },
+  flagDotWatch: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#f59e0b', marginTop: 4, flexShrink: 0 },
+  flagListText: { color: '#d1d5db', fontSize: 13, flex: 1, lineHeight: 20 },
   questionRow: { flexDirection: 'row', marginBottom: 10, gap: 10 },
   questionNum: { color: '#2563eb', fontWeight: '800', fontSize: 14, width: 20 },
   questionText: { color: '#d1d5db', fontSize: 13, flex: 1, lineHeight: 20 },

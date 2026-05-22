@@ -140,7 +140,7 @@ def recent_team_reports(
     )
 
 
-@router.post("/team-report", response_model=schemas.SummaryOut)
+@router.post("/team-report", response_model=schemas.TeamReportOut)
 async def team_report(
     output_type: str = Form("coaching_report"),
     focus_prompt: str | None = Form(None),
@@ -208,15 +208,32 @@ async def team_report(
         team_obj = db.get(models.Team, team_id)
         if team_obj:
             team_label = f"{team_obj.name} ({coach.program_name})"
+
+    if output_type == "game_situational":
+        type_instruction = (
+            "Generate a GAME SITUATIONAL REPORT. Analyze the roster and provide a detailed report on: "
+            "how the coach and team should read specific on-court actions, defensive sets and how to attack them, "
+            "offensive actions and counters, player tendency exploitation, "
+            "situational responses (end of clock, press breaks, late-game, transition defense), "
+            "and key lineup adjustments for game situations."
+        )
+    else:
+        type_instruction = (
+            f"Generate a {output_type.replace('_', ' ')} for the {team_label} roster. "
+            "Provide a comprehensive team analysis covering overall team grade, team strengths, "
+            "areas to develop, lineup recommendations, and strategic priorities. "
+            "Use the BIM framework with 6 pillars."
+        )
+
     prompt = (
-        f"You are the BloomPrint Basketball Intelligence Model. Generate a {output_type.replace('_', ' ')} "
-        f"for the {team_label} roster.\n\n"
+        f"You are the BloomPrint Basketball Intelligence Model. {type_instruction}\n\n"
+        f"PROGRAM: {team_label}\n\n"
         f"ROSTER SUMMARY:\n{roster_context}\n\n"
-        f"{('COACH FOCUS: ' + focus) if focus else ''}"
+        f"{('COACH FOCUS: ' + focus + chr(10)) if focus else ''}"
         f"{video_context}\n\n"
-        "Provide a comprehensive team analysis covering overall team grade, team strengths, "
-        "areas to develop, lineup recommendations, and strategic priorities. "
-        "Use the BIM framework with 6 pillars. Format with clear sections."
+        "IMPORTANT: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
+        "Use plain section titles in ALL CAPS followed by a colon and newline. "
+        "Example: OFFENSIVE TENDENCIES: followed by content."
     )
 
     try:
@@ -238,7 +255,8 @@ async def team_report(
         )
         db.add(team_report_record)
         db.commit()
-        return schemas.SummaryOut(report_text=text_blocks[0].text)
+        db.refresh(team_report_record)
+        return schemas.TeamReportOut.model_validate(team_report_record)
     except HTTPException:
         raise
     except Exception as exc:

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
   Modal, Alert, KeyboardAvoidingView, Platform, TextInput,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { playersAPI, teamsAPI, playerAPI, trainingAPI } from '../api/client';
+import { playersAPI, teamsAPI, playerAPI, trainingAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import { Player, Evaluation, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
@@ -27,10 +27,15 @@ export default function PlayerProfileScreen() {
   const navigation = useNavigation<any>();
   const { playerId } = route.params;
 
+  const scrollRef = useRef<ScrollView>(null);
+  const trainingFeedbackY = useRef(0);
+
   const [player, setPlayer] = useState<Player | null>(null);
   const [evals, setEvals] = useState<Evaluation[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [latestTraining, setLatestTraining] = useState<any | null>(null);
+  const [allTraining, setAllTraining] = useState<any[]>([]);
+  const [trainingModalItem, setTrainingModalItem] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [sendingTraining, setSendingTraining] = useState(false);
 
@@ -71,6 +76,7 @@ export default function PlayerProfileScreen() {
         setTeams(t);
         if (Array.isArray(tr) && tr.length > 0) {
           setLatestTraining(tr[tr.length - 1]);
+          setAllTraining(tr);
         }
       })
       .finally(() => setLoading(false));
@@ -150,6 +156,16 @@ export default function PlayerProfileScreen() {
   const [trainingFeedback, setTrainingFeedback] = useState('');
   const [regeneratingTraining, setRegeneratingTraining] = useState(false);
 
+  // Share with staff
+  const [showStaffShare, setShowStaffShare] = useState(false);
+  const [staffShareType, setStaffShareType] = useState<'training' | null>(null);
+  const [staffShareId, setStaffShareId] = useState<number | null>(null);
+  const [staffSearch, setStaffSearch] = useState('');
+  const [staffResults, setStaffResults] = useState<any[]>([]);
+  const [staffSearchLoading, setStaffSearchLoading] = useState(false);
+  const [allowRegen, setAllowRegen] = useState(false);
+  const [sendingStaff, setSendingStaff] = useState(false);
+
   const createTeamFromEdit = async () => {
     if (!newTeamName.trim()) return;
     setCreatingTeam(true);
@@ -202,6 +218,37 @@ export default function PlayerProfileScreen() {
     }
   };
 
+  const searchStaff = async () => {
+    if (!staffSearch.trim()) return;
+    setStaffSearchLoading(true);
+    try {
+      const results = await coachesAPI.search(staffSearch.trim());
+      setStaffResults(results);
+    } catch {}
+    setStaffSearchLoading(false);
+  };
+
+  const sendToStaff = async (target: any) => {
+    if (!staffShareId) return;
+    setSendingStaff(true);
+    try {
+      await staffSharingAPI.share({
+        report_type: 'training',
+        report_id: staffShareId,
+        recipient_id: target.id,
+        allow_regenerate: allowRegen,
+      });
+      Alert.alert('Shared!', `Training program shared with ${target.name}.`);
+      setShowStaffShare(false);
+      setStaffSearch('');
+      setStaffResults([]);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share');
+    } finally {
+      setSendingStaff(false);
+    }
+  };
+
   const generateInvite = async () => {
     setGeneratingInvite(true);
     try {
@@ -220,7 +267,7 @@ export default function PlayerProfileScreen() {
   const latest = evals[evals.length - 1] ?? null;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 300 }}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -293,6 +340,31 @@ export default function PlayerProfileScreen() {
         ))}
       </View>
 
+      {/* Training Programs History */}
+      {allTraining.length > 0 && (
+        <View style={[styles.section, { marginTop: 20 }]}>
+          <Text style={styles.sectionTitle}>Training Programs</Text>
+          {[...allTraining].reverse().map((ts: any) => (
+            <TouchableOpacity
+              key={ts.id}
+              style={styles.evalCard}
+              onPress={() => setTrainingModalItem(ts)}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={styles.evalType}>Training Program</Text>
+                <Text style={styles.evalDate}>{new Date(ts.created_at).toLocaleDateString()}</Text>
+                {ts.program_text ? (
+                  <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 4 }} numberOfLines={2}>
+                    {ts.program_text.replace(/\*\*/g, '').trim().slice(0, 120)}
+                  </Text>
+                ) : null}
+              </View>
+              <Ionicons name="chevron-forward" size={16} color="#374151" />
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
       {/* Summarize history */}
       {evals.length > 0 && (
         <TouchableOpacity style={styles.summaryBtn} onPress={() => setShowSummary(true)}>
@@ -321,8 +393,22 @@ export default function PlayerProfileScreen() {
           : <><Ionicons name="paper-plane" size={18} color="#fff" /><Text style={styles.trainingText}>Send Training to Player</Text></>}
       </TouchableOpacity>
 
+      {/* Share training with staff */}
+      {latestTraining && (
+        <TouchableOpacity
+          style={[styles.trainingBtn, { backgroundColor: '#7c3aed', marginTop: 8 }]}
+          onPress={() => { setStaffShareId(latestTraining.id); setStaffShareType('training'); setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }}
+        >
+          <Ionicons name="people-outline" size={18} color="#fff" />
+          <Text style={styles.trainingText}>Share Training with Staff</Text>
+        </TouchableOpacity>
+      )}
+
       {/* Training feedback / regenerate */}
-      <View style={styles.trainingFeedbackBox}>
+      <View
+        style={styles.trainingFeedbackBox}
+        onLayout={e => { trainingFeedbackY.current = e.nativeEvent.layout.y; }}
+      >
         <Text style={styles.trainingFeedbackLabel}>Regenerate Training with Feedback</Text>
         <TextInput
           style={styles.trainingFeedbackInput}
@@ -332,6 +418,7 @@ export default function PlayerProfileScreen() {
           onChangeText={setTrainingFeedback}
           multiline
           textAlignVertical="top"
+          onFocus={() => setTimeout(() => scrollRef.current?.scrollTo({ y: trainingFeedbackY.current - 20, animated: true }), 60)}
         />
         <TouchableOpacity
           style={[styles.regenBtn, (!trainingFeedback.trim() || regeneratingTraining) && { opacity: 0.5 }]}
@@ -359,6 +446,33 @@ export default function PlayerProfileScreen() {
           <Text style={styles.inviteCodeHint}>Share this code with the player so they can link their account</Text>
         </View>
       )}
+
+      {/* Training detail modal */}
+      <Modal visible={!!trainingModalItem} transparent animationType="slide">
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={[styles.modal, { maxHeight: '90%' }]}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <Text style={styles.modalTitle}>Training Program</Text>
+              <TouchableOpacity onPress={() => setTrainingModalItem(null)}>
+                <Ionicons name="close" size={22} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+            {trainingModalItem && (
+              <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 12 }}>
+                {new Date(trainingModalItem.created_at).toLocaleDateString()}
+              </Text>
+            )}
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 16 }}>
+              <Text style={{ color: '#d1d5db', fontSize: 13, lineHeight: 22 }}>
+                {trainingModalItem?.program_text?.replace(/\*\*/g, '').trim() ?? ''}
+              </Text>
+            </ScrollView>
+            <TouchableOpacity style={styles.cancelBtn} onPress={() => setTrainingModalItem(null)}>
+              <Text style={styles.cancelText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       {/* Edit Player Modal — compact floating card */}
       <Modal visible={showEdit} transparent animationType="slide">
@@ -524,6 +638,59 @@ export default function PlayerProfileScreen() {
         </KeyboardAvoidingView>
       </Modal>
 
+      {/* Share with Staff modal */}
+      <Modal visible={showStaffShare} transparent animationType="slide">
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>Share with Staff</Text>
+            <Text style={styles.modalSub}>Search for a coach, scout, or trainer to share this training program.</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
+              <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
+              <TouchableOpacity
+                onPress={() => setAllowRegen(v => !v)}
+                style={{ width: 40, height: 22, borderRadius: 11, backgroundColor: allowRegen ? '#7c3aed' : '#374151', justifyContent: 'center', paddingHorizontal: 2 }}
+              >
+                <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: '#fff', alignSelf: allowRegen ? 'flex-end' : 'flex-start' }} />
+              </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
+              <TextInput
+                style={[styles.input, { flex: 1 }]}
+                placeholder="Search coach/program name..."
+                placeholderTextColor="#6b7280"
+                value={staffSearch}
+                onChangeText={setStaffSearch}
+              />
+              <TouchableOpacity
+                style={{ backgroundColor: '#7c3aed', borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' }}
+                onPress={searchStaff}
+                disabled={staffSearchLoading}
+              >
+                {staffSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+              </TouchableOpacity>
+            </View>
+            {staffResults.map((r: any) => (
+              <TouchableOpacity
+                key={r.id}
+                style={{ backgroundColor: '#1f2937', borderRadius: 10, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: '#374151' }}
+                onPress={() => sendToStaff(r)}
+                disabled={sendingStaff}
+              >
+                {sendingStaff ? <ActivityIndicator color="#7c3aed" /> : <>
+                  <Text style={{ color: '#fff', fontWeight: '600' }}>{r.name}</Text>
+                  <Text style={{ color: '#6b7280', fontSize: 11 }}>{r.role} · {r.program_name}</Text>
+                </>}
+              </TouchableOpacity>
+            ))}
+            <View style={styles.modalRow}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowStaffShare(false)}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
       {/* Summary modal */}
       <Modal visible={showSummary} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -598,7 +765,7 @@ const styles = StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' },
   modal: { backgroundColor: '#111827', borderRadius: 20, padding: 24, margin: 12 },
   modalTitle: { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 4 },
-  modalSub: { color: '#6b7280', fontSize: 12, marginBottom: 16 },
+  modalSub: { color: '#6b7280', fontSize: 12, marginBottom: 16, lineHeight: 18 },
   chip: { borderWidth: 1, borderColor: '#374151', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, marginRight: 8 },
   chipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
   chipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },

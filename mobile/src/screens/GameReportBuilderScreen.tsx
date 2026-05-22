@@ -36,8 +36,10 @@ function cleanMarkdown(text: string): string {
   return text
     .split('\n')
     .map(line => {
+      if (/^\s*[-=—]{3,}\s*$/.test(line)) return '';
       if (/^\s*\*{1,2}\s*$/.test(line)) return '';
-      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '');
+      line = line.replace(/^#+\s*/, '');
+      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
     })
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')

@@ -91,4 +91,33 @@ def _run_migrations():
             pass
 
         # Staff sharing tables are handled by create_all() on first startup.
-        # Nothing further needed — SQLAlchemy creates them on init_db().
+        # Add regenerated_text to staff_shared_reports if missing
+        try:
+            ssr_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(staff_shared_reports)")
+            )]
+            if ssr_cols and "regenerated_text" not in ssr_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE staff_shared_reports ADD COLUMN regenerated_text TEXT"
+                ))
+                conn.commit()
+        except Exception:
+            pass
+
+        # Create coach_notifications table if missing
+        try:
+            conn.execute(__import__("sqlalchemy").text(
+                "CREATE TABLE IF NOT EXISTS coach_notifications ("
+                "id INTEGER PRIMARY KEY, "
+                "coach_id INTEGER NOT NULL REFERENCES coaches(id), "
+                "title TEXT NOT NULL, "
+                "body TEXT NOT NULL, "
+                "read INTEGER NOT NULL DEFAULT 0, "
+                "ref_id INTEGER, "
+                "type TEXT NOT NULL DEFAULT 'info', "
+                "created_at DATETIME"
+                ")"
+            ))
+            conn.commit()
+        except Exception:
+            pass

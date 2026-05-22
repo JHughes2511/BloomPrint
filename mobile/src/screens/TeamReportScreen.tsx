@@ -10,7 +10,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import { evalsAPI, teamsAPI, playerAPI, gameReportsAPI } from '../api/client';
+import { evalsAPI, teamsAPI, playerAPI, gameReportsAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { mdToHtml, safeFileName } from '../utils/mdToHtml';
 import { useFocusEffect } from '@react-navigation/native';
@@ -19,8 +19,10 @@ function cleanMarkdown(text: string): string {
   return text
     .split('\n')
     .map(line => {
+      if (/^\s*[-=—]{3,}\s*$/.test(line)) return '';
       if (/^\s*\*{1,2}\s*$/.test(line)) return '';
-      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '');
+      line = line.replace(/^#+\s*/, '');
+      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
     })
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -28,12 +30,13 @@ function cleanMarkdown(text: string): string {
 }
 
 const OUTPUT_TYPES = [
-  { key: 'coaching_report', label: 'Coaching Report' },
-  { key: 'game_analysis',   label: 'Game Analysis' },
-  { key: 'film_breakdown',  label: 'Film Breakdown' },
-  { key: 'scouting_report', label: 'Scouting Report' },
+  { key: 'coaching_report',  label: 'Coaching Report' },
+  { key: 'game_analysis',    label: 'Game Analysis' },
+  { key: 'game_situational', label: 'Game Situational' },
+  { key: 'film_breakdown',   label: 'Film Breakdown' },
+  { key: 'scouting_report',  label: 'Scouting Report' },
   { key: 'training_program', label: 'Training Program' },
-  { key: 'box_score',       label: 'Box Score' },
+  { key: 'box_score',        label: 'Box Score' },
 ];
 
 export default function TeamReportScreen() {
@@ -72,6 +75,13 @@ export default function TeamReportScreen() {
 
   useFocusEffect(React.useCallback(() => { loadGameReports(); }, []));
 
+  const [savedTeamReportId, setSavedTeamReportId] = useState<number | null>(null);
+  const [showStaffShare, setShowStaffShare] = useState(false);
+  const [staffSearch, setStaffSearch] = useState('');
+  const [staffResults, setStaffResults] = useState<any[]>([]);
+  const [staffSearchLoading, setStaffSearchLoading] = useState(false);
+  const [allowRegen, setAllowRegen] = useState(false);
+  const [sendingStaff, setSendingStaff] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [shareTarget, setShareTarget] = useState<'player' | 'team' | 'all_staff'>('player');
   const [shareSearch, setShareSearch] = useState('');
@@ -178,12 +188,45 @@ export default function TeamReportScreen() {
     }
   };
 
+  const searchStaff = async () => {
+    if (!staffSearch.trim()) return;
+    setStaffSearchLoading(true);
+    try {
+      const results = await coachesAPI.search(staffSearch.trim());
+      setStaffResults(results);
+    } catch {}
+    setStaffSearchLoading(false);
+  };
+
+  const sendToStaff = async (target: any) => {
+    if (!savedTeamReportId) return;
+    setSendingStaff(true);
+    try {
+      await staffSharingAPI.share({
+        report_type: 'team_report',
+        report_id: savedTeamReportId,
+        recipient_id: target.id,
+        allow_regenerate: allowRegen,
+      });
+      Alert.alert('Shared!', `Report shared with ${target.name}.`);
+      setShowStaffShare(false);
+      setStaffSearch('');
+      setStaffResults([]);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share report');
+    } finally {
+      setSendingStaff(false);
+    }
+  };
+
   const generate = async () => {
     setGenerating(true);
     setReportText(null);
+    setSavedTeamReportId(null);
     try {
       const result = await evalsAPI.teamReport({ output_type: outputType, focus_prompt: focusPrompt, team_id: selectedTeamId ?? undefined, video: videoAsset ?? undefined });
       setReportText(result.report_text);
+      if (result.id) setSavedTeamReportId(result.id);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate team report');
@@ -393,7 +436,13 @@ export default function TeamReportScreen() {
                 <Ionicons name="person-add-outline" size={20} color="#16a34a" />
                 <Text style={[styles.actionText, { color: '#16a34a' }]}>Share</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn} onPress={() => { setReportText(null); setFocusPrompt(''); setSelectedTeamId(null); setVideoAsset(null); }}>
+              {savedTeamReportId && (
+                <TouchableOpacity style={[styles.actionBtn, { borderColor: '#7c3aed' }]} onPress={() => { setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }}>
+                  <Ionicons name="people-outline" size={20} color="#7c3aed" />
+                  <Text style={[styles.actionText, { color: '#7c3aed' }]}>Staff</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity style={styles.actionBtn} onPress={() => { setReportText(null); setFocusPrompt(''); setSelectedTeamId(null); setVideoAsset(null); setSavedTeamReportId(null); }}>
                 <Ionicons name="add-circle-outline" size={20} color="#9ca3af" />
                 <Text style={styles.actionText}>New Report</Text>
               </TouchableOpacity>
@@ -402,6 +451,51 @@ export default function TeamReportScreen() {
         )}
         </>)}
       </ScrollView>
+
+      {/* Share with Staff Modal */}
+      <Modal visible={showStaffShare} transparent animationType="slide">
+        <KeyboardAvoidingView style={shareStyles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={shareStyles.modal}>
+            <Text style={shareStyles.title}>Share with Staff</Text>
+            <Text style={shareStyles.label}>Allow Regenerate</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
+              <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
+              <TouchableOpacity
+                onPress={() => setAllowRegen(v => !v)}
+                style={{ width: 40, height: 22, borderRadius: 11, backgroundColor: allowRegen ? '#7c3aed' : '#374151', justifyContent: 'center', paddingHorizontal: 2 }}
+              >
+                <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: '#fff', alignSelf: allowRegen ? 'flex-end' : 'flex-start' }} />
+              </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+              <TextInput
+                style={[shareStyles.input, { flex: 1 }]}
+                placeholder="Search coach/program name..."
+                placeholderTextColor="#4b5563"
+                value={staffSearch}
+                onChangeText={setStaffSearch}
+              />
+              <TouchableOpacity
+                style={{ backgroundColor: '#7c3aed', borderRadius: 10, padding: 12, justifyContent: 'center' }}
+                onPress={searchStaff}
+              >
+                {staffSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+              </TouchableOpacity>
+            </View>
+            {staffResults.map((r: any) => (
+              <TouchableOpacity key={r.id} style={shareStyles.resultRow} onPress={() => sendToStaff(r)} disabled={sendingStaff}>
+                <Text style={shareStyles.resultName}>{r.name}</Text>
+                <Text style={shareStyles.resultMeta}>{r.role} · {r.program_name}</Text>
+              </TouchableOpacity>
+            ))}
+            <View style={shareStyles.btnRow}>
+              <TouchableOpacity style={shareStyles.cancelBtn} onPress={() => setShowStaffShare(false)}>
+                <Text style={shareStyles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       {/* Share Modal */}
       <Modal visible={showShare} transparent animationType="slide">
