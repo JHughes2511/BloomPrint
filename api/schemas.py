@@ -15,6 +15,8 @@ class CoachCreate(BaseModel):
     level: str = "hs_elite_aau"
     role: str = "coach"
     program_name: str = "SEED Academy"
+    conference: str | None = None
+    competition_level: str | None = None
 
 
 class CoachLogin(BaseModel):
@@ -30,6 +32,8 @@ class CoachOut(BaseModel):
     level: str
     role: str
     program_name: str
+    conference: str | None = None
+    competition_level: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -388,6 +392,45 @@ class GameReportOut(BaseModel):
     clips: list[GameReportClipOut] = []
     my_team_name: str | None = None
     opponent_team_name: str | None = None
+    model_config = {"from_attributes": True}
+
+
+# ── Staff sharing ─────────────────────────────────────────────────────────────
+
+class StaffShareRequest(BaseModel):
+    report_type: str          # eval / game / team_training
+    report_id: int
+    recipient_id: int
+    allow_regenerate: bool = False
+
+
+class StaffSharedReportOut(BaseModel):
+    id: int
+    report_type: str
+    report_id: int
+    sender_id: int
+    recipient_id: int
+    allow_regenerate: bool
+    created_at: datetime
+    sender_name: str = ""
+    recipient_name: str = ""
+    report_text: str | None = None  # resolved from actual report
+
+    model_config = {"from_attributes": True}
+
+
+class StaffReportCommentCreate(BaseModel):
+    text: str
+
+
+class StaffReportCommentOut(BaseModel):
+    id: int
+    shared_report_id: int
+    author_id: int
+    text: str
+    created_at: datetime
+    author_name: str = ""
+
     model_config = {"from_attributes": True}
 
 

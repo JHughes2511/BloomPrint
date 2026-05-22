@@ -13,6 +13,16 @@ const ROLES = [
   { key: 'trainer', label: 'Trainer' },
 ];
 
+const COMPETITION_LEVELS = ['Pro', 'College', 'AAU', 'HS Varsity', 'HS JV', 'Middle School', 'Other'];
+
+const CONFERENCES = [
+  'ACC', 'Big East', 'Big Ten', 'Big 12', 'SEC',
+  'American', 'Atlantic 10', 'Mountain West', 'Missouri Valley', 'WCC',
+  'MAC', 'Sun Belt', 'CUSA', 'Southland', 'Patriot', 'Ivy League',
+  'MAAC', 'Big South', 'NEC', 'OVC', 'Big Sky', 'WAC', 'Horizon',
+  'Summit', 'CAA', 'SoCon', 'SWAC', 'MEAC', 'Independent',
+];
+
 export default function LoginScreen() {
   const { login, register } = useAuth();
   const navigation = useNavigation<any>();
@@ -22,15 +32,31 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [program, setProgram] = useState('');
   const [role, setRole] = useState('coach');
+  const [competitionLevel, setCompetitionLevel] = useState('');
+  const [conference, setConference] = useState('');
+  const [showLevelPicker, setShowLevelPicker] = useState(false);
+  const [showConferencePicker, setShowConferencePicker] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
+    if (mode === 'register') {
+      if (competitionLevel === 'College' && !conference) {
+        Alert.alert('Conference Required', 'Please select your conference to continue.');
+        return;
+      }
+    }
     setLoading(true);
     try {
       if (mode === 'login') {
         await login(email, password);
       } else {
-        await register({ name, email, password, program_name: program || name, role });
+        await register({
+          name, email, password,
+          program_name: program || name,
+          role,
+          competition_level: competitionLevel || undefined,
+          conference: competitionLevel === 'College' ? conference : undefined,
+        } as any);
       }
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Something went wrong');
@@ -77,6 +103,64 @@ export default function LoginScreen() {
               value={name} onChangeText={setName} />
             <TextInput style={styles.input} placeholder="Program / Organization Name" placeholderTextColor="#6b7280"
               value={program} onChangeText={setProgram} />
+
+            {/* Competition Level picker */}
+            <Text style={styles.sectionLabel}>Competition Level</Text>
+            <TouchableOpacity
+              style={styles.pickerBtn}
+              onPress={() => { setShowLevelPicker(v => !v); setShowConferencePicker(false); }}
+            >
+              <Text style={[styles.pickerBtnText, !competitionLevel && { color: '#6b7280' }]}>
+                {competitionLevel || 'Select level...'}
+              </Text>
+              <Ionicons name={showLevelPicker ? 'chevron-up' : 'chevron-down'} size={14} color="#6b7280" />
+            </TouchableOpacity>
+            {showLevelPicker && (
+              <View style={styles.pickerDropdown}>
+                {COMPETITION_LEVELS.map(lvl => (
+                  <TouchableOpacity
+                    key={lvl}
+                    style={[styles.pickerOption, competitionLevel === lvl && styles.pickerOptionActive]}
+                    onPress={() => { setCompetitionLevel(lvl); setShowLevelPicker(false); if (lvl !== 'College') setConference(''); }}
+                  >
+                    <Text style={[styles.pickerOptionText, competitionLevel === lvl && { color: '#fff', fontWeight: '700' }]}>{lvl}</Text>
+                    {competitionLevel === lvl && <Ionicons name="checkmark" size={14} color="#2563eb" />}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {/* Conference picker — shown only when College is selected */}
+            {competitionLevel === 'College' && (
+              <>
+                <Text style={[styles.sectionLabel, { marginTop: 8 }]}>
+                  Conference <Text style={{ color: '#ef4444' }}>*</Text>
+                </Text>
+                <TouchableOpacity
+                  style={[styles.pickerBtn, !conference && { borderColor: '#ef4444' }]}
+                  onPress={() => { setShowConferencePicker(v => !v); setShowLevelPicker(false); }}
+                >
+                  <Text style={[styles.pickerBtnText, !conference && { color: '#6b7280' }]}>
+                    {conference || 'Select conference (required)...'}
+                  </Text>
+                  <Ionicons name={showConferencePicker ? 'chevron-up' : 'chevron-down'} size={14} color="#6b7280" />
+                </TouchableOpacity>
+                {showConferencePicker && (
+                  <View style={styles.pickerDropdown}>
+                    {CONFERENCES.map(conf => (
+                      <TouchableOpacity
+                        key={conf}
+                        style={[styles.pickerOption, conference === conf && styles.pickerOptionActive]}
+                        onPress={() => { setConference(conf); setShowConferencePicker(false); }}
+                      >
+                        <Text style={[styles.pickerOptionText, conference === conf && { color: '#fff', fontWeight: '700' }]}>{conf}</Text>
+                        {conference === conf && <Ionicons name="checkmark" size={14} color="#2563eb" />}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </>
+            )}
           </>
         )}
 
@@ -129,4 +213,22 @@ const styles = StyleSheet.create({
   },
   btnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   toggle: { color: '#6b7280', marginTop: 20, fontSize: 13 },
+  pickerBtn: {
+    width: '100%', backgroundColor: '#111827', borderRadius: 10, padding: 14,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    marginBottom: 4, borderWidth: 1, borderColor: '#1f2937',
+  },
+  pickerBtnText: { color: '#fff', fontSize: 15 },
+  pickerDropdown: {
+    width: '100%', backgroundColor: '#0a0a0a', borderRadius: 10,
+    borderWidth: 1, borderColor: '#374151', marginBottom: 12, overflow: 'hidden',
+    maxHeight: 220,
+  },
+  pickerOption: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingHorizontal: 14, paddingVertical: 12,
+    borderTopWidth: 1, borderTopColor: '#1f2937',
+  },
+  pickerOptionActive: { backgroundColor: '#1e3a5f' },
+  pickerOptionText: { color: '#d1d5db', fontSize: 14 },
 });

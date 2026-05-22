@@ -5,7 +5,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
-import { playerLinkAPI, playerAuthAPI } from '../../api/playerClient';
+import { playerLinkAPI, playerApi } from '../../api/playerClient';
+
+const ROLE_LABELS: Record<string, string> = {
+  coach: 'Coach',
+  scout: 'Scout',
+  trainer: 'Trainer',
+};
 
 export default function PlayerLinkScreen() {
   const { playerUser, logout, refreshUser } = usePlayerAuth();
@@ -14,6 +20,7 @@ export default function PlayerLinkScreen() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [inviteLoading, setInviteLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [requestingId, setRequestingId] = useState<number | null>(null);
 
   const useInvite = async () => {
     if (!inviteCode.trim()) return;
@@ -30,34 +37,37 @@ export default function PlayerLinkScreen() {
     }
   };
 
-  const searchPlayers = async () => {
+  const searchStaff = async () => {
     if (!searchQ.trim()) return;
     setSearchLoading(true);
     try {
-      const results = await playerLinkAPI.searchPlayers(searchQ.trim());
+      const results = await playerApi.get('/player/search-staff', { params: { q: searchQ.trim() } }).then(r => r.data);
       setSearchResults(results);
     } catch {
-      Alert.alert('Error', 'Search failed');
+      Alert.alert('Error', 'Search failed. Please try again.');
     } finally {
       setSearchLoading(false);
     }
   };
 
-  const requestLink = async (playerId: number, playerName: string) => {
+  const requestLink = async (coachId: number, coachName: string) => {
+    setRequestingId(coachId);
     try {
-      await playerLinkAPI.requestLink(playerId);
-      Alert.alert('Request Sent', `A link request was sent to coaches for ${playerName}'s profile.`);
+      await playerApi.post(`/player/link-request/coach/${coachId}`).then(r => r.data);
+      Alert.alert('Request Sent', `A link request was sent to ${coachName}.`);
       setSearchResults([]);
       setSearchQ('');
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to send request');
+    } finally {
+      setRequestingId(null);
     }
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60, padding: 24 }}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Link Profile</Text>
+        <Text style={styles.title}>Link to Staff</Text>
         <TouchableOpacity onPress={logout}>
           <Ionicons name="log-out-outline" size={20} color="#4b7a4b" />
         </TouchableOpacity>
@@ -74,7 +84,7 @@ export default function PlayerLinkScreen() {
       ) : (
         <View style={styles.notLinkedCard}>
           <Ionicons name="warning-outline" size={20} color="#f59e0b" />
-          <Text style={styles.notLinkedText}>Account not yet linked to a player profile</Text>
+          <Text style={styles.notLinkedText}>Account not yet linked to a staff member</Text>
         </View>
       )}
 
@@ -99,19 +109,19 @@ export default function PlayerLinkScreen() {
       <View style={styles.divider} />
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Find My Profile</Text>
-        <Text style={styles.sectionDesc}>Search the roster and request to link to your profile.</Text>
+        <Text style={styles.sectionTitle}>Find a Coach or Trainer</Text>
+        <Text style={styles.sectionDesc}>Search for a coach, trainer, or scout by name or program and send a link request.</Text>
         <View style={styles.searchRow}>
           <TextInput
             style={[styles.input, { flex: 1 }]}
-            placeholder="Search your name..."
+            placeholder="Search by name or program..."
             placeholderTextColor="#4b7a4b"
             value={searchQ}
             onChangeText={setSearchQ}
           />
           <TouchableOpacity
             style={styles.searchBtn}
-            onPress={searchPlayers}
+            onPress={searchStaff}
             disabled={searchLoading}
           >
             {searchLoading
@@ -119,20 +129,28 @@ export default function PlayerLinkScreen() {
               : <Ionicons name="search" size={18} color="#fff" />}
           </TouchableOpacity>
         </View>
-        {searchResults.map((p: any) => (
-          <View key={p.id} style={styles.resultCard}>
+        {searchResults.map((c: any) => (
+          <View key={c.id} style={styles.resultCard}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.resultName}>{p.name}</Text>
-              <Text style={styles.resultSub}>{p.position ?? '—'} · {p.team_name ?? '—'}</Text>
+              <Text style={styles.resultName}>{c.name}</Text>
+              <Text style={styles.resultSub}>
+                {ROLE_LABELS[c.role] ?? c.role} · {c.program_name}
+              </Text>
             </View>
             <TouchableOpacity
               style={styles.requestBtn}
-              onPress={() => requestLink(p.id, p.name)}
+              onPress={() => requestLink(c.id, c.name)}
+              disabled={requestingId === c.id}
             >
-              <Text style={styles.requestBtnText}>Request Link</Text>
+              {requestingId === c.id
+                ? <ActivityIndicator color="#16a34a" size="small" />
+                : <Text style={styles.requestBtnText}>Request Link</Text>}
             </TouchableOpacity>
           </View>
         ))}
+        {searchResults.length === 0 && searchQ.trim().length > 0 && !searchLoading && (
+          <Text style={{ color: '#4b7a4b', fontSize: 12, marginTop: 8 }}>No staff found. Try a different search.</Text>
+        )}
       </View>
     </ScrollView>
   );

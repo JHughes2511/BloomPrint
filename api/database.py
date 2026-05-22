@@ -50,6 +50,18 @@ def _run_migrations():
             ))
             conn.commit()
 
+        # Add conference and competition_level to coaches if missing
+        if "conference" not in coach_cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE coaches ADD COLUMN conference TEXT"
+            ))
+            conn.commit()
+        if "competition_level" not in coach_cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE coaches ADD COLUMN competition_level TEXT"
+            ))
+            conn.commit()
+
         # Add wingspan to players if missing
         if "wingspan" not in cols:
             conn.execute(__import__("sqlalchemy").text(
@@ -77,3 +89,6 @@ def _run_migrations():
                 conn.commit()
         except Exception:
             pass
+
+        # Staff sharing tables are handled by create_all() on first startup.
+        # Nothing further needed — SQLAlchemy creates them on init_db().

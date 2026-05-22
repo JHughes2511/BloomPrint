@@ -9,7 +9,7 @@ import Markdown from 'react-native-markdown-display';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import { evalsAPI, playerAPI, gameReportsAPI } from '../api/client';
+import { evalsAPI, playerAPI, gameReportsAPI, trainingAPI } from '../api/client';
 import { GradeBadge } from '../components/GradeBadge';
 import { mdToHtml, safeFileName } from '../utils/mdToHtml';
 
@@ -23,20 +23,23 @@ const TYPE_LABELS: Record<string, string> = {
   recruitment_profile: 'Recruitment',
   position_analysis: 'Position Analysis',
   box_score: 'Box Score',
+  team_training: 'Team Training',
+  game_situational: 'Game Situational',
 };
 
 type ReportItem = {
   id: number;
-  kind: 'eval' | 'team' | 'game';
+  kind: 'eval' | 'team' | 'game' | 'training';
   player_name?: string;
   output_type: string;
   overall_grade?: number | null;
   created_at: string;
+  program_text?: string;
 };
 
 type ModalReport = {
   id: number;
-  kind: 'eval' | 'team';
+  kind: 'eval' | 'team' | 'training';
   text: string;
   outputType: string;
   playerName?: string;
@@ -48,6 +51,7 @@ const FILTER_CATS = [
   { key: 'eval', label: 'Player Evals' },
   { key: 'team', label: 'Team Reports' },
   { key: 'game', label: 'Game Reports' },
+  { key: 'training', label: 'Training' },
 ];
 
 function cleanMarkdown(text: string): string {
@@ -90,10 +94,11 @@ export default function RecentScreen() {
   const load = async () => {
     setLoading(true);
     try {
-      const [evals, teamReports, gameReports] = await Promise.all([
+      const [evals, teamReports, gameReports, trainingSessions] = await Promise.all([
         evalsAPI.recent(),
         evalsAPI.teamReports(),
         gameReportsAPI.list().catch(() => []),
+        trainingAPI.recent().catch(() => []),
       ]);
       const evalItems: ReportItem[] = evals.map((e: any) => ({
         id: e.id,
@@ -119,13 +124,22 @@ export default function RecentScreen() {
         overall_grade: null,
         created_at: g.updated_at || g.created_at,
       }));
+      const trainingItems: ReportItem[] = trainingSessions.map((ts: any) => ({
+        id: ts.id,
+        kind: 'training' as const,
+        player_name: `Player #${ts.player_id}`,
+        output_type: 'training_program',
+        overall_grade: null,
+        created_at: ts.created_at,
+        program_text: ts.program_text,
+      }));
       const texts: Record<number, string> = {};
       teamReports.forEach((t: any) => { if (t.report_text) texts[t.id] = t.report_text; });
       setTeamReportTexts(texts);
       const ec: Record<number, any> = {};
       evals.forEach((e: any) => { ec[e.id] = e; });
       setEvalCache(ec);
-      const combined = [...evalItems, ...teamItems, ...gameItems].sort(
+      const combined = [...evalItems, ...teamItems, ...gameItems, ...trainingItems].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       setItems(combined);
@@ -154,6 +168,10 @@ export default function RecentScreen() {
       navigation.navigate('GameReportBuilder', { reportId: item.id });
       return;
     }
+    if (item.kind === 'training') {
+      openModal({ id: item.id, kind: 'training', text: item.program_text ?? '', outputType: 'training_program', playerName: item.player_name });
+      return;
+    }
     if (item.kind === 'team') {
       const text = teamReportTexts[item.id] ?? '';
       openModal({ id: item.id, kind: 'team', text, outputType: item.output_type, playerName: item.player_name });
@@ -178,6 +196,7 @@ export default function RecentScreen() {
   };
 
   const handleDelete = (item: ReportItem) => {
+    if (item.kind === 'training') return; // training deletion not exposed in recents
     Alert.alert('Delete Report', 'Permanently delete this report?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: async () => {
@@ -300,6 +319,11 @@ export default function RecentScreen() {
         const updated = await evalsAPI.applyCorrections(activeModal.evalId);
         updatedText = updated.report_text;
         setEvalCache(prev => ({ ...prev, [activeModal.evalId!]: updated }));
+      } else if (activeModal.kind === 'training') {
+        // Training corrections not supported in recents modal
+        Alert.alert('Info', 'To regenerate training with feedback, use the Player Profile screen.');
+        setApplyingCorrect(false);
+        return;
       } else {
         const updated = await evalsAPI.correctTeamReport(activeModal.id, teamCorrectText.trim());
         updatedText = updated.report_text;
@@ -363,15 +387,26 @@ export default function RecentScreen() {
                   styles.card,
                   item.kind === 'team' && styles.cardTeam,
                   item.kind === 'game' && styles.cardGame,
+                  item.kind === 'training' && styles.cardTraining,
                 ]}
                 onPress={() => handlePress(item)}
                 onLongPress={() => handleDelete(item)}
               >
                 <View style={styles.kindBadge}>
                   <Ionicons
-                    name={item.kind === 'game' ? 'clipboard' : item.kind === 'team' ? 'people' : 'person'}
+                    name={
+                      item.kind === 'game' ? 'clipboard' :
+                      item.kind === 'team' ? 'people' :
+                      item.kind === 'training' ? 'barbell' :
+                      'person'
+                    }
                     size={12}
-                    color={item.kind === 'game' ? '#a78bfa' : item.kind === 'team' ? '#f59e0b' : '#2563eb'}
+                    color={
+                      item.kind === 'game' ? '#a78bfa' :
+                      item.kind === 'team' ? '#f59e0b' :
+                      item.kind === 'training' ? '#22c55e' :
+                      '#2563eb'
+                    }
                   />
                 </View>
                 <View style={{ flex: 1 }}>
@@ -380,8 +415,11 @@ export default function RecentScreen() {
                     styles.typeName,
                     item.kind === 'team' && { color: '#f59e0b' },
                     item.kind === 'game' && { color: '#a78bfa' },
+                    item.kind === 'training' && { color: '#22c55e' },
                   ]}>
-                    {item.kind === 'game' ? 'Game Report Packet' : (TYPE_LABELS[item.output_type] ?? item.output_type)}
+                    {item.kind === 'game' ? 'Game Report Packet' :
+                     item.kind === 'training' ? 'Training Program' :
+                     (TYPE_LABELS[item.output_type] ?? item.output_type)}
                   </Text>
                 </View>
                 {item.overall_grade != null && <GradeBadge grade={item.overall_grade} size="md" />}
@@ -592,6 +630,7 @@ const styles = StyleSheet.create({
   },
   cardTeam: { borderWidth: 1, borderColor: '#f59e0b22' },
   cardGame: { borderWidth: 1, borderColor: '#a78bfa22' },
+  cardTraining: { borderWidth: 1, borderColor: '#22c55e22' },
   kindBadge: {
     width: 28, height: 28, borderRadius: 8,
     backgroundColor: '#1f2937', alignItems: 'center', justifyContent: 'center',

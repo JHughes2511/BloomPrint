@@ -132,6 +132,55 @@ def reject_link(
     return {"ok": True}
 
 
+# ── Link request to coach (player initiates) ─────────────────────────────────
+
+@router.post("/link-request/coach/{coach_id}")
+def request_link_to_coach(
+    coach_id: int,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    """Player requests to link to a specific coach account."""
+    coach = db.get(models.Coach, coach_id)
+    if not coach:
+        raise HTTPException(status_code=404, detail="Coach not found")
+    # Notify the coach
+    notif = models.PlayerNotification(
+        coach_id=coach_id,
+        type="link_requested",
+        title="Player Link Request",
+        body=f"{pu.name} is requesting to link to your account.",
+        ref_id=pu.id,
+    )
+    db.add(notif)
+    db.commit()
+    return {"ok": True}
+
+
+# ── Search coaches/staff (player side) ────────────────────────────────────────
+
+@router.get("/search-staff")
+def player_search_staff(
+    q: str = "",
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    """Search coach/trainer/scout accounts (player side)."""
+    results = (
+        db.query(models.Coach)
+        .filter(
+            (models.Coach.name.ilike(f"%{q}%")) |
+            (models.Coach.program_name.ilike(f"%{q}%"))
+        )
+        .limit(15)
+        .all()
+    )
+    return [
+        {"id": c.id, "name": c.name, "role": c.role, "program_name": c.program_name}
+        for c in results
+    ]
+
+
 # ── Search players for linking (player side) ──────────────────────────────────
 
 @router.get("/search-players")

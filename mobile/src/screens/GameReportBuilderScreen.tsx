@@ -12,7 +12,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import { gameReportsAPI, teamsAPI, playerAPI } from '../api/client';
+import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import { mdToHtml, safeFileName } from '../utils/mdToHtml';
 import { useAuth } from '../context/AuthContext';
 
@@ -22,6 +22,8 @@ const OUTPUT_TYPES = [
   { key: 'scouting_report', label: 'Scouting Report' },
   { key: 'film_breakdown', label: 'Film Breakdown' },
   { key: 'box_score', label: 'Box Score' },
+  { key: 'team_training', label: 'Team Training' },
+  { key: 'game_situational', label: 'Game Situational' },
 ];
 
 const MODES = [
@@ -81,10 +83,12 @@ export default function GameReportBuilderScreen() {
 
   // Share modal
   const [showShare, setShowShare] = useState(false);
+  const [shareMode, setShareMode] = useState<'player' | 'staff'>('player');
   const [shareSearch, setShareSearch] = useState('');
   const [shareResults, setShareResults] = useState<any[]>([]);
   const [shareSearchLoading, setShareSearchLoading] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [allowRegenerate, setAllowRegenerate] = useState(false);
   const shareDebounce = useRef<any>(null);
 
   const scrollRef = useRef<ScrollView>(null);
@@ -122,12 +126,14 @@ export default function GameReportBuilderScreen() {
     setShareSearchLoading(true);
     shareDebounce.current = setTimeout(async () => {
       try {
-        const results = await playerAPI.searchPlayerUsers(shareSearch.trim());
+        const results = shareMode === 'staff'
+          ? await coachesAPI.search(shareSearch.trim())
+          : await playerAPI.searchPlayerUsers(shareSearch.trim());
         setShareResults(results);
       } catch {}
       setShareSearchLoading(false);
     }, 400);
-  }, [shareSearch, showShare]);
+  }, [shareSearch, showShare, shareMode]);
 
   const populateFromReport = (r: any) => {
     setTitle(r.title ?? '');
@@ -240,7 +246,12 @@ export default function GameReportBuilderScreen() {
     if (!reportId) return;
     setGenerating(true);
     try {
-      const updated = await gameReportsAPI.generate(reportId);
+      let updated;
+      if (outputType === 'team_training') {
+        updated = await gameReportsAPI.teamTraining(reportId, focusPrompt || undefined);
+      } else {
+        updated = await gameReportsAPI.generate(reportId);
+      }
       setReport(updated);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300);
     } catch (e: any) {
@@ -268,12 +279,21 @@ export default function GameReportBuilderScreen() {
     if (!report?.report_text) return;
     setSharing(true);
     try {
-      await playerAPI.shareTeamReport({
-        output_type: report.output_type ?? 'coaching_report',
-        report_text: report.report_text,
-        target_type: 'player',
-        player_user_id: target.id,
-      });
+      if (shareMode === 'staff' && reportId) {
+        await staffSharingAPI.share({
+          report_type: 'game',
+          report_id: reportId,
+          recipient_id: target.id,
+          allow_regenerate: allowRegenerate,
+        });
+      } else {
+        await playerAPI.shareTeamReport({
+          output_type: report.output_type ?? 'coaching_report',
+          report_text: report.report_text,
+          target_type: 'player',
+          player_user_id: target.id,
+        });
+      }
       setShowShare(false);
       setShareSearch('');
       setShareResults([]);
@@ -644,8 +664,34 @@ export default function GameReportBuilderScreen() {
                 <Ionicons name="close" size={22} color="#9ca3af" />
               </TouchableOpacity>
             </View>
+            {/* Mode selector */}
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+              <TouchableOpacity
+                style={[styles.chip, shareMode === 'player' && styles.chipActive, { flex: 1 }]}
+                onPress={() => { setShareMode('player'); setShareSearch(''); setShareResults([]); }}
+              >
+                <Text style={[styles.chipText, shareMode === 'player' && styles.chipTextActive]}>Player</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.chip, shareMode === 'staff' && styles.chipActive, { flex: 1 }]}
+                onPress={() => { setShareMode('staff'); setShareSearch(''); setShareResults([]); }}
+              >
+                <Text style={[styles.chipText, shareMode === 'staff' && styles.chipTextActive]}>Staff</Text>
+              </TouchableOpacity>
+            </View>
+            {shareMode === 'staff' && (
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
+                <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
+                <TouchableOpacity
+                  onPress={() => setAllowRegenerate(v => !v)}
+                  style={{ width: 40, height: 22, borderRadius: 11, backgroundColor: allowRegenerate ? '#2563eb' : '#374151', justifyContent: 'center', paddingHorizontal: 2 }}
+                >
+                  <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: '#fff', alignSelf: allowRegenerate ? 'flex-end' : 'flex-start' }} />
+                </TouchableOpacity>
+              </View>
+            )}
             <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>
-              Search for a player to send this report to their inbox.
+              {shareMode === 'staff' ? 'Search for a coach, trainer, or scout to share this report.' : 'Search for a player to send this report to their inbox.'}
             </Text>
             <TextInput
               style={styles.searchInput}

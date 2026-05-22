@@ -6,19 +6,43 @@ from ..auth import hash_password, verify_password, create_token, get_current_coa
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+D1_HIGH_MAJOR_CONFERENCES = {"Big Ten", "Big 12", "ACC", "Big East", "SEC"}
+
+
+def _auto_weight(competition_level: str, conference: str | None) -> int:
+    """Assign a BIM authority weight based on competition level."""
+    lvl = (competition_level or "").strip()
+    if lvl == "Pro":
+        return 98
+    if lvl == "College":
+        if conference and conference.strip() in D1_HIGH_MAJOR_CONFERENCES:
+            return 82
+        return 75
+    if lvl == "AAU":
+        return 40
+    if lvl == "HS Varsity":
+        return 45
+    if lvl in ("HS JV", "Middle School"):
+        return 35
+    return 45
+
 
 @router.post("/register", response_model=schemas.Token)
 def register(body: schemas.CoachCreate, db: Session = Depends(get_db)):
     if db.query(models.Coach).filter_by(email=body.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
+    # Auto-assign weight from competition_level if not explicitly provided
+    weight = _auto_weight(body.competition_level, body.conference) if body.competition_level else body.weight
     coach = models.Coach(
         name=body.name,
         email=body.email,
         password_hash=hash_password(body.password),
-        weight=body.weight,
+        weight=weight,
         level=body.level,
         program_name=body.program_name,
         role=body.role,
+        conference=body.conference,
+        competition_level=body.competition_level,
     )
     db.add(coach)
     db.commit()
@@ -37,3 +61,26 @@ def login(body: schemas.CoachLogin, db: Session = Depends(get_db)):
 @router.get("/me", response_model=schemas.CoachOut)
 def me(coach: models.Coach = Depends(get_current_coach)):
     return coach
+
+
+@router.get("/coaches/search")
+def search_coaches(
+    q: str = "",
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Search coach/trainer/scout accounts by name."""
+    results = (
+        db.query(models.Coach)
+        .filter(
+            (models.Coach.name.ilike(f"%{q}%")) |
+            (models.Coach.program_name.ilike(f"%{q}%"))
+        )
+        .filter(models.Coach.id != coach.id)
+        .limit(15)
+        .all()
+    )
+    return [
+        {"id": c.id, "name": c.name, "role": c.role, "program_name": c.program_name}
+        for c in results
+    ]

@@ -41,8 +41,16 @@ async def submit_evaluation(
     with dest.open("wb") as f:
         shutil.copyfileobj(video.file, f)
 
+    # Get latest grade for this player (most recent non-null overall_grade)
+    latest_grade: float | None = None
+    for ev in sorted(player.evaluations, key=lambda e: e.created_at, reverse=True):
+        if ev.overall_grade is not None:
+            latest_grade = ev.overall_grade
+            break
+
     # Build focus prompt combining coach notes + any explicit focus
-    combined_focus = ""
+    combined_focus = f"HEIGHT: {player.height or 'Not recorded'}\n"
+    combined_focus += f"CURRENT RATING: {f'{latest_grade}/10' if latest_grade is not None else 'Not yet evaluated'}\n\n"
     if coach_notes:
         combined_focus += f"Coach notes:\n{coach_notes}\n\n"
     if focus_prompt:

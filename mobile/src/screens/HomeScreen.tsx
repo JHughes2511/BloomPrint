@@ -55,6 +55,12 @@ export default function HomeScreen() {
           </View>
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <TouchableOpacity
+              style={styles.signOutBtn}
+              onPress={() => navigation.navigate('StaffInbox')}
+            >
+              <Ionicons name="mail-outline" size={18} color="#9ca3af" />
+            </TouchableOpacity>
+            <TouchableOpacity
               style={[styles.signOutBtn, { position: 'relative' }]}
               onPress={() => navigation.navigate('CoachNotifications')}
             >

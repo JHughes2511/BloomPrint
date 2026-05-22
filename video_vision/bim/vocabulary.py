@@ -80,12 +80,16 @@ RATING_LADDER = [
 ]
 
 COACH_WEIGHTS = {
-    "nba": 98,
-    "g_league_high_europe": 85,
-    "d1_head": 75,
-    "d2_d3_juco": 60,
-    "hs_elite_aau": 45,
-    "youth_recreational": 25,
+    "nba":              98,
+    "euro":             90,
+    "d1_high_major":    82,
+    "g_league":         78,
+    "d1_mid_low":       75,
+    "d2_d3_juco":       60,
+    "hs_varsity":       45,
+    "aau":              40,
+    "hs_jv_ms":         35,
+    "youth":            25,
 }
 
 COMPETITION_LEVELS = [

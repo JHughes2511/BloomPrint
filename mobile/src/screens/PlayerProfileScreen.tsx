@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { playersAPI, teamsAPI, playerAPI } from '../api/client';
+import { playersAPI, teamsAPI, playerAPI, trainingAPI } from '../api/client';
 import { Player, Evaluation, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
@@ -30,7 +30,9 @@ export default function PlayerProfileScreen() {
   const [player, setPlayer] = useState<Player | null>(null);
   const [evals, setEvals] = useState<Evaluation[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [latestTraining, setLatestTraining] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sendingTraining, setSendingTraining] = useState(false);
 
   // Edit state
   const [showEdit, setShowEdit] = useState(false);
@@ -57,8 +59,20 @@ export default function PlayerProfileScreen() {
   const [summaryLoading, setSummaryLoading] = useState(false);
 
   useEffect(() => {
-    Promise.all([playersAPI.get(playerId), playersAPI.evaluations(playerId), teamsAPI.list()])
-      .then(([p, e, t]) => { setPlayer(p); setEvals(e); setTeams(t); })
+    Promise.all([
+      playersAPI.get(playerId),
+      playersAPI.evaluations(playerId),
+      teamsAPI.list(),
+      trainingAPI.forPlayer(playerId).catch(() => []),
+    ])
+      .then(([p, e, t, tr]) => {
+        setPlayer(p);
+        setEvals(e);
+        setTeams(t);
+        if (Array.isArray(tr) && tr.length > 0) {
+          setLatestTraining(tr[tr.length - 1]);
+        }
+      })
       .finally(() => setLoading(false));
   }, [playerId]);
 
@@ -132,6 +146,10 @@ export default function PlayerProfileScreen() {
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [generatingInvite, setGeneratingInvite] = useState(false);
 
+  // Training regenerate state
+  const [trainingFeedback, setTrainingFeedback] = useState('');
+  const [regeneratingTraining, setRegeneratingTraining] = useState(false);
+
   const createTeamFromEdit = async () => {
     if (!newTeamName.trim()) return;
     setCreatingTeam(true);
@@ -146,6 +164,41 @@ export default function PlayerProfileScreen() {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not create team');
     } finally {
       setCreatingTeam(false);
+    }
+  };
+
+  const sendTrainingToPlayer = async () => {
+    if (!latestTraining) {
+      Alert.alert('No Training', 'Generate a training program first.');
+      return;
+    }
+    setSendingTraining(true);
+    try {
+      const result = await trainingAPI.sendToPlayer(latestTraining.id);
+      Alert.alert('Sent!', `Training program sent to ${result.player_name ?? 'the player'}.`);
+    } catch (e: any) {
+      const msg = e?.response?.data?.detail ?? 'Could not send training';
+      if (msg.includes('not linked')) {
+        Alert.alert('Not Linked', 'This player has not linked a player account yet. Generate an invite code for them first.');
+      } else {
+        Alert.alert('Error', msg);
+      }
+    } finally {
+      setSendingTraining(false);
+    }
+  };
+
+  const regenerateTraining = async () => {
+    if (!trainingFeedback.trim()) return;
+    setRegeneratingTraining(true);
+    try {
+      await trainingAPI.regenerate(player!.id, trainingFeedback.trim());
+      setTrainingFeedback('');
+      Alert.alert('Training Updated', 'Training program has been regenerated with your feedback.');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate training');
+    } finally {
+      setRegeneratingTraining(false);
     }
   };
 
@@ -256,6 +309,40 @@ export default function PlayerProfileScreen() {
         <Ionicons name="barbell" size={18} color="#fff" />
         <Text style={styles.trainingText}>Generate Training Program</Text>
       </TouchableOpacity>
+
+      {/* Send training to player */}
+      <TouchableOpacity
+        style={[styles.trainingBtn, { backgroundColor: '#16a34a', marginTop: 8 }]}
+        onPress={sendTrainingToPlayer}
+        disabled={sendingTraining}
+      >
+        {sendingTraining
+          ? <ActivityIndicator color="#fff" size="small" />
+          : <><Ionicons name="paper-plane" size={18} color="#fff" /><Text style={styles.trainingText}>Send Training to Player</Text></>}
+      </TouchableOpacity>
+
+      {/* Training feedback / regenerate */}
+      <View style={styles.trainingFeedbackBox}>
+        <Text style={styles.trainingFeedbackLabel}>Regenerate Training with Feedback</Text>
+        <TextInput
+          style={styles.trainingFeedbackInput}
+          placeholder="e.g. Focus more on 3-point shooting and off-ball movement..."
+          placeholderTextColor="#4b5563"
+          value={trainingFeedback}
+          onChangeText={setTrainingFeedback}
+          multiline
+          textAlignVertical="top"
+        />
+        <TouchableOpacity
+          style={[styles.regenBtn, (!trainingFeedback.trim() || regeneratingTraining) && { opacity: 0.5 }]}
+          onPress={regenerateTraining}
+          disabled={!trainingFeedback.trim() || regeneratingTraining}
+        >
+          {regeneratingTraining
+            ? <ActivityIndicator color="#fff" size="small" />
+            : <><Ionicons name="refresh" size={16} color="#fff" /><Text style={styles.regenBtnText}> Regenerate</Text></>}
+        </TouchableOpacity>
+      </View>
 
       {/* Invite Code */}
       <TouchableOpacity style={styles.inviteBtn} onPress={generateInvite} disabled={generatingInvite}>
@@ -554,4 +641,18 @@ const styles = StyleSheet.create({
   inlineOptionActive: { backgroundColor: '#1e3a5f' },
   inlineOptionText: { color: '#d1d5db', fontSize: 14 },
   inviteCodeHint: { color: '#6b7280', fontSize: 11, textAlign: 'center' },
+  trainingFeedbackBox: {
+    backgroundColor: '#111827', marginHorizontal: 20, marginTop: 10,
+    padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#374151',
+  },
+  trainingFeedbackLabel: { color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 },
+  trainingFeedbackInput: {
+    backgroundColor: '#1f2937', borderRadius: 8, padding: 10, color: '#fff',
+    fontSize: 13, borderWidth: 1, borderColor: '#374151', minHeight: 70, marginBottom: 10,
+  },
+  regenBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#7c3aed', borderRadius: 8, padding: 12,
+  },
+  regenBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
 });

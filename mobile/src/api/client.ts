@@ -117,6 +117,15 @@ export const trainingAPI = {
 
   forPlayer: (playerId: number) =>
     api.get(`/training/player/${playerId}`).then(r => r.data),
+
+  regenerate: (playerId: number, feedback: string) =>
+    api.post(`/training/players/${playerId}/regenerate`, { feedback }).then(r => r.data),
+
+  sendToPlayer: (trainingId: number) =>
+    api.post(`/training/${trainingId}/send-to-player`).then(r => r.data),
+
+  recent: (limit = 30) =>
+    api.get('/training/recent', { params: { limit } }).then(r => r.data),
 };
 
 // ── Player (coach-side) ────────────────────────────────────────────────────────
@@ -170,6 +179,24 @@ export const playerAPI = {
     api.post(`/player/training/${trainingId}/coach-refresh`, { feedback }).then(r => r.data),
 };
 
+// ── Staff sharing ──────────────────────────────────────────────────────────────
+export const staffSharingAPI = {
+  share: (data: { report_type: string; report_id: number; recipient_id: number; allow_regenerate?: boolean }) =>
+    api.post('/staff-sharing/share', data).then(r => r.data),
+  inbox: () => api.get('/staff-sharing/inbox').then(r => r.data),
+  sent: () => api.get('/staff-sharing/sent').then(r => r.data),
+  getComments: (sharedId: number) => api.get(`/staff-sharing/${sharedId}/comments`).then(r => r.data),
+  addComment: (sharedId: number, text: string) =>
+    api.post(`/staff-sharing/${sharedId}/comments`, { text }).then(r => r.data),
+  regenerate: (sharedId: number, feedback: string) =>
+    api.post(`/staff-sharing/${sharedId}/regenerate`, { feedback }).then(r => r.data),
+};
+
+// ── Coaches search ─────────────────────────────────────────────────────────────
+export const coachesAPI = {
+  search: (q: string) => api.get('/auth/coaches/search', { params: { q } }).then(r => r.data),
+};
+
 export const gameReportsAPI = {
   list: () => api.get('/game-reports').then(r => r.data),
   get: (id: number) => api.get(`/game-reports/${id}`).then(r => r.data),
@@ -182,6 +209,8 @@ export const gameReportsAPI = {
   uploadDoc: (id: number, formData: FormData) =>
     api.post(`/game-reports/${id}/upload-doc`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
   generate: (id: number) => api.post(`/game-reports/${id}/generate`).then(r => r.data),
+  teamTraining: (id: number, focusPrompt?: string) =>
+    api.post(`/game-reports/${id}/team-training`, { focus_prompt: focusPrompt ?? null }).then(r => r.data),
   correct: (id: number, correction: string) =>
     api.post(`/game-reports/${id}/correct`, { correction }).then(r => r.data),
   correctClip: (id: number, clipId: number, correction: string) =>

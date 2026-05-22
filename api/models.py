@@ -12,15 +12,17 @@ from .database import Base
 class Coach(Base):
     __tablename__ = "coaches"
 
-    id           = Column(Integer, primary_key=True, index=True)
-    name         = Column(String, nullable=False)
-    email        = Column(String, unique=True, index=True, nullable=False)
-    password_hash = Column(String, nullable=False)
-    weight       = Column(Integer, default=45)       # BIM authority weight
-    level        = Column(String, default="hs_elite_aau")
-    role         = Column(String, default="coach")   # coach / scout / trainer
-    program_name = Column(String, default="SEED Academy")
-    created_at   = Column(DateTime, default=datetime.utcnow)
+    id                = Column(Integer, primary_key=True, index=True)
+    name              = Column(String, nullable=False)
+    email             = Column(String, unique=True, index=True, nullable=False)
+    password_hash     = Column(String, nullable=False)
+    weight            = Column(Integer, default=45)       # BIM authority weight
+    level             = Column(String, default="hs_elite_aau")
+    role              = Column(String, default="coach")   # coach / scout / trainer
+    program_name      = Column(String, default="SEED Academy")
+    conference        = Column(String, nullable=True)     # college conference
+    competition_level = Column(String, nullable=True)     # signup competition level
+    created_at        = Column(DateTime, default=datetime.utcnow)
 
     evaluations  = relationship("Evaluation", back_populates="coach")
     corrections  = relationship("Correction", back_populates="coach")
@@ -262,6 +264,35 @@ class PlayerNotification(Base):
 
     player_user = relationship("PlayerUser", back_populates="notifications")
     coach       = relationship("Coach", back_populates="notifications")
+
+
+class StaffSharedReport(Base):
+    __tablename__ = "staff_shared_reports"
+
+    id             = Column(Integer, primary_key=True, index=True)
+    report_type    = Column(String, nullable=False)   # eval / game / team_training
+    report_id      = Column(Integer, nullable=False)
+    sender_id      = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    recipient_id   = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    allow_regenerate = Column(Boolean, default=False)
+    created_at     = Column(DateTime, default=datetime.utcnow)
+
+    sender    = relationship("Coach", foreign_keys=[sender_id])
+    recipient = relationship("Coach", foreign_keys=[recipient_id])
+    comments  = relationship("StaffReportComment", back_populates="shared_report", cascade="all, delete-orphan")
+
+
+class StaffReportComment(Base):
+    __tablename__ = "staff_report_comments"
+
+    id               = Column(Integer, primary_key=True, index=True)
+    shared_report_id = Column(Integer, ForeignKey("staff_shared_reports.id"), nullable=False)
+    author_id        = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    text             = Column(Text, nullable=False)
+    created_at       = Column(DateTime, default=datetime.utcnow)
+
+    shared_report = relationship("StaffSharedReport", back_populates="comments")
+    author        = relationship("Coach")
 
 
 class GameReport(Base):
