@@ -22,7 +22,16 @@ function cleanMarkdown(text: string): string {
       if (/^\s*[-=—]{3,}\s*$/.test(line)) return '';
       if (/^\s*\*{1,2}\s*$/.test(line)) return '';
       line = line.replace(/^#+\s*/, '');
-      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
+      line = line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
+      const trimmed = line.trim();
+      if (
+        trimmed.length > 2 &&
+        trimmed.length < 60 &&
+        /^[A-Z][A-Z\s\/&\-()\d]{2,}:?$/.test(trimmed)
+      ) {
+        return `**${trimmed}**`;
+      }
+      return line;
     })
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -76,6 +85,91 @@ export default function TeamReportScreen() {
   useFocusEffect(React.useCallback(() => { loadGameReports(); }, []));
 
   const [savedTeamReportId, setSavedTeamReportId] = useState<number | null>(null);
+
+  // Previous reports list
+  const [showPrevReports, setShowPrevReports] = useState(false);
+  const [prevReports, setPrevReports] = useState<any[]>([]);
+  const [loadingPrevReports, setLoadingPrevReports] = useState(false);
+  const [selectedPrevReport, setSelectedPrevReport] = useState<any | null>(null);
+  const [prevReportFilter, setPrevReportFilter] = useState<string>('all');
+  const [prevReportCorrectionText, setPrevReportCorrectionText] = useState('');
+  const [prevReportCorrections, setPrevReportCorrections] = useState<any[]>([]);
+  const [addingPrevCorrection, setAddingPrevCorrection] = useState(false);
+  const [regeneratingPrevReport, setRegeneratingPrevReport] = useState(false);
+
+  const loadPrevReports = async () => {
+    setLoadingPrevReports(true);
+    try {
+      const reports = await evalsAPI.teamReports(50);
+      setPrevReports(reports);
+    } catch {}
+    setLoadingPrevReports(false);
+  };
+
+  const openPrevReport = async (report: any) => {
+    setSelectedPrevReport(report);
+    setPrevReportCorrectionText('');
+    try {
+      const corrs = await evalsAPI.teamReportCorrections(report.id);
+      setPrevReportCorrections(corrs);
+    } catch {
+      setPrevReportCorrections([]);
+    }
+  };
+
+  const addPrevReportCorrection = async (generateNew: boolean) => {
+    if (!prevReportCorrectionText.trim() || !selectedPrevReport) return;
+    setAddingPrevCorrection(true);
+    try {
+      const c = await evalsAPI.addTeamReportCorrection(selectedPrevReport.id, prevReportCorrectionText.trim());
+      setPrevReportCorrections(prev => [...prev, c]);
+      setPrevReportCorrectionText('');
+      if (generateNew) {
+        setRegeneratingPrevReport(true);
+        try {
+          const updated = await evalsAPI.regenerateTeamReport(selectedPrevReport.id);
+          setSelectedPrevReport(updated);
+          setPrevReports(prev => prev.map(r => r.id === updated.id ? updated : r));
+          const updatedCorrs = await evalsAPI.teamReportCorrections(selectedPrevReport.id);
+          setPrevReportCorrections(updatedCorrs);
+          Alert.alert('Regenerated', 'Team report updated with your corrections.');
+        } catch (e: any) {
+          Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate');
+        } finally {
+          setRegeneratingPrevReport(false);
+        }
+      } else {
+        Alert.alert('Saved', 'Correction saved for later.');
+      }
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save correction');
+    } finally {
+      setAddingPrevCorrection(false);
+    }
+  };
+
+  const regeneratePrevReport = async () => {
+    if (!selectedPrevReport) return;
+    const unapplied = prevReportCorrections.filter((c: any) => !c.applied);
+    if (unapplied.length === 0) {
+      Alert.alert('No Pending Corrections', 'Add at least one correction before regenerating.');
+      return;
+    }
+    setRegeneratingPrevReport(true);
+    try {
+      const updated = await evalsAPI.regenerateTeamReport(selectedPrevReport.id);
+      setSelectedPrevReport(updated);
+      setPrevReports(prev => prev.map(r => r.id === updated.id ? updated : r));
+      const updatedCorrs = await evalsAPI.teamReportCorrections(selectedPrevReport.id);
+      setPrevReportCorrections(updatedCorrs);
+      Alert.alert('Regenerated', 'Team report updated with your corrections.');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate');
+    } finally {
+      setRegeneratingPrevReport(false);
+    }
+  };
+
   const [showStaffShare, setShowStaffShare] = useState(false);
   const [staffSearch, setStaffSearch] = useState('');
   const [staffResults, setStaffResults] = useState<any[]>([]);
@@ -450,7 +544,156 @@ export default function TeamReportScreen() {
           </View>
         )}
         </>)}
+
+        {/* Previous Team Reports */}
+        <TouchableOpacity
+          style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, marginBottom: showPrevReports ? 12 : 0 }}
+          onPress={() => {
+            if (!showPrevReports) loadPrevReports();
+            setShowPrevReports(v => !v);
+          }}
+        >
+          <Text style={styles.label}>Previous Reports</Text>
+          <Ionicons name={showPrevReports ? 'chevron-up' : 'chevron-down'} size={16} color="#6b7280" />
+        </TouchableOpacity>
+
+        {showPrevReports && (
+          <>
+            {/* Filter by output_type */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+              {[{ key: 'all', label: 'All' }, ...OUTPUT_TYPES].map(t => (
+                <TouchableOpacity
+                  key={t.key}
+                  style={[styles.chip, prevReportFilter === t.key && styles.chipActive]}
+                  onPress={() => setPrevReportFilter(t.key)}
+                >
+                  <Text style={[styles.chipText, prevReportFilter === t.key && styles.chipTextActive]}>{t.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            {loadingPrevReports ? (
+              <ActivityIndicator color="#2563eb" size="small" />
+            ) : prevReports.filter(r => prevReportFilter === 'all' || r.output_type === prevReportFilter).length === 0 ? (
+              <Text style={{ color: '#4b5563', fontSize: 13, textAlign: 'center', paddingVertical: 16 }}>No team reports yet.</Text>
+            ) : (
+              prevReports
+                .filter(r => prevReportFilter === 'all' || r.output_type === prevReportFilter)
+                .map((r: any) => (
+                  <TouchableOpacity
+                    key={r.id}
+                    style={{ backgroundColor: '#111827', borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#1f2937' }}
+                    onPress={() => openPrevReport(r)}
+                  >
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View style={{ backgroundColor: '#1e3a5f', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
+                        <Text style={{ color: '#60a5fa', fontSize: 10, fontWeight: '700' }}>
+                          {OUTPUT_TYPES.find(t => t.key === r.output_type)?.label ?? r.output_type}
+                        </Text>
+                      </View>
+                      <Text style={{ color: '#4b5563', fontSize: 11 }}>{new Date(r.created_at).toLocaleDateString()}</Text>
+                    </View>
+                    {r.report_text ? (
+                      <Text style={{ color: '#6b7280', fontSize: 12, marginTop: 8, lineHeight: 18 }} numberOfLines={2}>
+                        {r.report_text.replace(/\*\*/g, '').replace(/^#+\s*/gm, '').trim().slice(0, 100)}...
+                      </Text>
+                    ) : null}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 }}>
+                      <Ionicons name="chevron-forward" size={12} color="#374151" />
+                      <Text style={{ color: '#374151', fontSize: 11 }}>Tap to view full report</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))
+            )}
+          </>
+        )}
       </ScrollView>
+
+      {/* Previous Report Detail Modal */}
+      <Modal visible={!!selectedPrevReport} animationType="slide" transparent>
+        <KeyboardAvoidingView style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={{ backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: '#fff', fontSize: 18, fontWeight: '800' }}>
+                  {OUTPUT_TYPES.find(t => t.key === selectedPrevReport?.output_type)?.label ?? selectedPrevReport?.output_type}
+                </Text>
+                <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 2 }}>
+                  {selectedPrevReport ? new Date(selectedPrevReport.created_at).toLocaleDateString() : ''}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setSelectedPrevReport(null)}>
+                <Ionicons name="close" size={22} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }}>
+              {selectedPrevReport?.report_text ? (
+                <Markdown style={markdownStyles}>{cleanMarkdown(selectedPrevReport.report_text)}</Markdown>
+              ) : (
+                <Text style={{ color: '#6b7280' }}>No report content.</Text>
+              )}
+
+              {/* Corrections section */}
+              {prevReportCorrections.length > 0 && (
+                <View style={{ marginTop: 20 }}>
+                  <Text style={styles.label}>Corrections ({prevReportCorrections.length})</Text>
+                  {prevReportCorrections.map((c: any) => (
+                    <View key={c.id} style={{ backgroundColor: '#1f2937', borderRadius: 8, padding: 12, marginBottom: 6, opacity: c.applied ? 0.55 : 1 }}>
+                      <Text style={{ color: '#d1d5db', fontSize: 13 }}>{c.correction}</Text>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
+                        <Text style={{ color: '#4b5563', fontSize: 11 }}>{new Date(c.created_at).toLocaleDateString()}</Text>
+                        {c.applied && <Text style={{ color: '#16a34a', fontSize: 10, fontWeight: '700' }}>APPLIED</Text>}
+                      </View>
+                    </View>
+                  ))}
+                  {prevReportCorrections.some((c: any) => !c.applied) && (
+                    <TouchableOpacity
+                      style={{ backgroundColor: '#2563eb', borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 8 }}
+                      onPress={regeneratePrevReport}
+                      disabled={regeneratingPrevReport}
+                    >
+                      {regeneratingPrevReport
+                        ? <ActivityIndicator color="#fff" />
+                        : <Text style={{ color: '#fff', fontWeight: '700' }}>Apply & Regenerate</Text>}
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
+
+              {/* Add correction */}
+              <View style={{ marginTop: 20 }}>
+                <Text style={styles.label}>Add Correction</Text>
+                <TextInput
+                  style={{ backgroundColor: '#1f2937', borderRadius: 10, padding: 12, color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151', minHeight: 80, marginBottom: 8 }}
+                  placeholder="What needs to be corrected in this report?"
+                  placeholderTextColor="#4b5563"
+                  value={prevReportCorrectionText}
+                  onChangeText={setPrevReportCorrectionText}
+                  multiline
+                  textAlignVertical="top"
+                />
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <TouchableOpacity
+                    style={{ flex: 1, backgroundColor: '#2563eb', borderRadius: 10, padding: 14, alignItems: 'center' }}
+                    onPress={() => addPrevReportCorrection(true)}
+                    disabled={addingPrevCorrection || regeneratingPrevReport || !prevReportCorrectionText.trim()}
+                  >
+                    {addingPrevCorrection || regeneratingPrevReport
+                      ? <ActivityIndicator color="#fff" />
+                      : <Text style={{ color: '#fff', fontWeight: '700' }}>Apply & Regenerate</Text>}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{ flex: 1, backgroundColor: '#374151', borderRadius: 10, padding: 14, alignItems: 'center' }}
+                    onPress={() => addPrevReportCorrection(false)}
+                    disabled={addingPrevCorrection || !prevReportCorrectionText.trim()}
+                  >
+                    <Text style={{ color: '#fff', fontWeight: '700' }}>Save for Later</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       {/* Share with Staff Modal */}
       <Modal visible={showStaffShare} transparent animationType="slide">

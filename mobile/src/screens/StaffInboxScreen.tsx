@@ -16,7 +16,16 @@ function cleanMarkdown(text: string): string {
       if (/^\s*[-=—]{3,}\s*$/.test(line)) return '';
       if (/^\s*\*{1,2}\s*$/.test(line)) return '';
       line = line.replace(/^#+\s*/, '');
-      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
+      line = line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
+      const trimmed = line.trim();
+      if (
+        trimmed.length > 2 &&
+        trimmed.length < 60 &&
+        /^[A-Z][A-Z\s\/&\-()\d]{2,}:?$/.test(trimmed)
+      ) {
+        return `**${trimmed}**`;
+      }
+      return line;
     })
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -28,6 +37,15 @@ const REPORT_TYPE_LABELS: Record<string, string> = {
   game: 'Game Report',
   team_training: 'Team Training',
   team_report: 'Team Report',
+  training: 'Training Program',
+};
+
+const REPORT_TYPE_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
+  eval: { bg: '#1e3a5f', text: '#60a5fa' },
+  game: { bg: '#2d1b69', text: '#a78bfa' },
+  team_training: { bg: '#1e3a5f', text: '#60a5fa' },
+  team_report: { bg: '#78350f', text: '#fbbf24' },
+  training: { bg: '#14532d', text: '#4ade80' },
 };
 
 export default function StaffInboxScreen() {
@@ -40,7 +58,9 @@ export default function StaffInboxScreen() {
   const [submittingComment, setSubmittingComment] = useState(false);
   const [regenerateFeedback, setRegenerateFeedback] = useState('');
   const [regenerating, setRegenerating] = useState(false);
-  const [view, setView] = useState<'report' | 'regenerated' | 'comments' | 'regenerate'>('report');
+  const [view, setView] = useState<'report' | 'regenerated' | 'comments' | 'regenerate' | 'notes'>('report');
+  const [coachNotes, setCoachNotes] = useState('');
+  const [savingNotes, setSavingNotes] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -59,6 +79,7 @@ export default function StaffInboxScreen() {
     setComments([]);
     setCommentText('');
     setRegenerateFeedback('');
+    setCoachNotes('');
     try {
       const c = await staffSharingAPI.getComments(item.id);
       setComments(c);
@@ -116,24 +137,37 @@ export default function StaffInboxScreen() {
             <Text style={styles.emptyText}>No reports shared with you yet.</Text>
           </View>
         }
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card} onPress={() => openItem(item)}>
-            <View style={styles.iconBox}>
-              <Ionicons name="document-text-outline" size={18} color="#2563eb" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>{REPORT_TYPE_LABELS[item.report_type] ?? item.report_type}</Text>
-              <Text style={styles.cardSub}>From: {item.sender_name}</Text>
-              <Text style={styles.cardDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
-            </View>
-            {item.allow_regenerate && (
-              <View style={styles.regenBadge}>
-                <Text style={styles.regenBadgeText}>Can Regen</Text>
+        renderItem={({ item }) => {
+          const badgeColor = REPORT_TYPE_BADGE_COLORS[item.report_type] ?? { bg: '#1f2937', text: '#9ca3af' };
+          const iconName = item.report_type === 'training' ? 'barbell-outline' :
+                           item.report_type === 'team_report' || item.report_type === 'team_training' ? 'people-outline' :
+                           item.report_type === 'game' ? 'clipboard-outline' : 'document-text-outline';
+          return (
+            <TouchableOpacity style={styles.card} onPress={() => openItem(item)}>
+              <View style={[styles.iconBox, { backgroundColor: badgeColor.bg }]}>
+                <Ionicons name={iconName as any} size={18} color={badgeColor.text} />
               </View>
-            )}
-            <Ionicons name="chevron-forward" size={14} color="#4b5563" />
-          </TouchableOpacity>
-        )}
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                  <Text style={styles.cardTitle}>{REPORT_TYPE_LABELS[item.report_type] ?? item.report_type}</Text>
+                  {item.report_type === 'training' && (
+                    <View style={{ backgroundColor: '#14532d', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
+                      <Text style={{ color: '#4ade80', fontSize: 9, fontWeight: '800', letterSpacing: 0.5 }}>TRAINING</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.cardSub}>From: {item.sender_name}</Text>
+                <Text style={styles.cardDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
+              </View>
+              {item.allow_regenerate && (
+                <View style={styles.regenBadge}>
+                  <Text style={styles.regenBadgeText}>Can Regen</Text>
+                </View>
+              )}
+              <Ionicons name="chevron-forward" size={14} color="#4b5563" />
+            </TouchableOpacity>
+          );
+        }}
       />
 
       {/* Detail modal */}
@@ -182,6 +216,14 @@ export default function StaffInboxScreen() {
                     onPress={() => setView('regenerate')}
                   >
                     <Text style={[styles.tabText, view === 'regenerate' && styles.tabTextActive]}>Regenerate</Text>
+                  </TouchableOpacity>
+                )}
+                {activeItem?.report_type === 'training' && (
+                  <TouchableOpacity
+                    style={[styles.tab, view === 'notes' && styles.tabActive]}
+                    onPress={() => setView('notes')}
+                  >
+                    <Text style={[styles.tabText, view === 'notes' && styles.tabTextActive]}>Notes</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -270,6 +312,47 @@ export default function StaffInboxScreen() {
                   {regenerating
                     ? <ActivityIndicator color="#fff" size="small" />
                     : <Text style={{ color: '#fff', fontWeight: '700' }}>Regenerate Report</Text>}
+                </TouchableOpacity>
+              </>
+            )}
+
+            {/* Notes view (for training programs) */}
+            {view === 'notes' && (
+              <>
+                <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>
+                  Add your notes about this training program. Notes are saved locally in this view.
+                </Text>
+                <TextInput
+                  style={[styles.input, { minHeight: 120 }]}
+                  placeholder="Add your coaching notes here..."
+                  placeholderTextColor="#4b5563"
+                  value={coachNotes}
+                  onChangeText={setCoachNotes}
+                  multiline
+                  textAlignVertical="top"
+                />
+                <TouchableOpacity
+                  style={[styles.regenBtn, { backgroundColor: '#16a34a' }, (!coachNotes.trim() || savingNotes) && { opacity: 0.5 }]}
+                  onPress={async () => {
+                    if (!coachNotes.trim() || !activeItem) return;
+                    setSavingNotes(true);
+                    try {
+                      await staffSharingAPI.addComment(activeItem.id, `[Coach Note] ${coachNotes.trim()}`);
+                      const c = await staffSharingAPI.getComments(activeItem.id);
+                      setComments(c);
+                      setCoachNotes('');
+                      Alert.alert('Saved', 'Note saved as a comment on this training program.');
+                    } catch (e: any) {
+                      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save note');
+                    } finally {
+                      setSavingNotes(false);
+                    }
+                  }}
+                  disabled={!coachNotes.trim() || savingNotes}
+                >
+                  {savingNotes
+                    ? <ActivityIndicator color="#fff" size="small" />
+                    : <Text style={{ color: '#fff', fontWeight: '700' }}>Save Note</Text>}
                 </TouchableOpacity>
               </>
             )}

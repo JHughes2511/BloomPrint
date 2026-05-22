@@ -86,8 +86,20 @@ export const evalsAPI = {
   applyCorrections: (evalId: number) =>
     api.post(`/evaluations/${evalId}/apply-corrections`).then(r => r.data),
 
+  regenerate: (evalId: number) =>
+    api.post(`/evaluations/${evalId}/regenerate`).then(r => r.data),
+
   correctTeamReport: (reportId: number, correction: string) =>
     api.post(`/evaluations/team-reports/${reportId}/correct`, { correction }).then(r => r.data),
+
+  addTeamReportCorrection: (reportId: number, correction: string) =>
+    api.post(`/evaluations/team-reports/${reportId}/corrections`, { correction }).then(r => r.data),
+
+  teamReportCorrections: (reportId: number) =>
+    api.get(`/evaluations/team-reports/${reportId}/corrections`).then(r => r.data),
+
+  regenerateTeamReport: (reportId: number) =>
+    api.post(`/evaluations/team-reports/${reportId}/regenerate`).then(r => r.data),
 };
 
 // ── Teams ─────────────────────────────────────────────────────────────────────
@@ -195,6 +207,7 @@ export const staffSharingAPI = {
 // ── Coaches search ─────────────────────────────────────────────────────────────
 export const coachesAPI = {
   search: (q: string) => api.get('/auth/coaches/search', { params: { q } }).then(r => r.data),
+  list: () => api.get('/auth/coaches').then(r => r.data),
 };
 
 export const gameReportsAPI = {

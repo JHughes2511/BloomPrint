@@ -447,31 +447,38 @@ export default function PlayerProfileScreen() {
         </View>
       )}
 
-      {/* Training detail modal */}
+      {/* Training detail modal — full-screen so all text is readable */}
       <Modal visible={!!trainingModalItem} transparent animationType="slide">
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={[styles.modal, { maxHeight: '90%' }]}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, flex: 1, marginTop: 60 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <Text style={styles.modalTitle}>Training Program</Text>
               <TouchableOpacity onPress={() => setTrainingModalItem(null)}>
                 <Ionicons name="close" size={22} color="#9ca3af" />
               </TouchableOpacity>
             </View>
             {trainingModalItem && (
-              <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 12 }}>
+              <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 16 }}>
                 {new Date(trainingModalItem.created_at).toLocaleDateString()}
               </Text>
             )}
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 16 }}>
-              <Text style={{ color: '#d1d5db', fontSize: 13, lineHeight: 22 }}>
+            <ScrollView
+              style={{ flex: 1 }}
+              contentContainerStyle={{ paddingBottom: 24 }}
+              showsVerticalScrollIndicator={true}
+            >
+              <Text style={{ color: '#d1d5db', fontSize: 14, lineHeight: 24 }}>
                 {trainingModalItem?.program_text?.replace(/\*\*/g, '').trim() ?? ''}
               </Text>
             </ScrollView>
-            <TouchableOpacity style={styles.cancelBtn} onPress={() => setTrainingModalItem(null)}>
+            <TouchableOpacity
+              style={[styles.cancelBtn, { marginTop: 12 }]}
+              onPress={() => setTrainingModalItem(null)}
+            >
               <Text style={styles.cancelText}>Close</Text>
             </TouchableOpacity>
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </Modal>
 
       {/* Edit Player Modal — compact floating card */}

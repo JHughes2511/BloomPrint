@@ -63,6 +63,25 @@ def me(coach: models.Coach = Depends(get_current_coach)):
     return coach
 
 
+@router.get("/coaches")
+def list_coaches(
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """List all coaches/scouts/trainers (excluding self)."""
+    results = (
+        db.query(models.Coach)
+        .filter(models.Coach.id != coach.id)
+        .order_by(models.Coach.name)
+        .limit(100)
+        .all()
+    )
+    return [
+        {"id": c.id, "name": c.name, "role": c.role, "program_name": c.program_name}
+        for c in results
+    ]
+
+
 @router.get("/coaches/search")
 def search_coaches(
     q: str = "",

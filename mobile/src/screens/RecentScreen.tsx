@@ -9,7 +9,7 @@ import Markdown from 'react-native-markdown-display';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import { evalsAPI, playerAPI, gameReportsAPI, trainingAPI } from '../api/client';
+import { evalsAPI, playerAPI, gameReportsAPI, trainingAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import { GradeBadge } from '../components/GradeBadge';
 import { mdToHtml, safeFileName } from '../utils/mdToHtml';
 
@@ -62,7 +62,16 @@ function cleanMarkdown(text: string): string {
       if (/^\s*[-=—]{3,}\s*$/.test(line)) return '';
       if (/^\s*\*{1,2}\s*$/.test(line)) return '';
       line = line.replace(/^#+\s*/, '');
-      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
+      line = line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
+      const trimmed = line.trim();
+      if (
+        trimmed.length > 2 &&
+        trimmed.length < 60 &&
+        /^[A-Z][A-Z\s\/&\-()\d]{2,}:?$/.test(trimmed)
+      ) {
+        return `**${trimmed}**`;
+      }
+      return line;
     })
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -94,6 +103,45 @@ export default function RecentScreen() {
   // Correct state (inline in modal)
   const [teamCorrectText, setTeamCorrectText] = useState('');
   const [applyingCorrect, setApplyingCorrect] = useState(false);
+
+  // Send Training to Staff modal
+  const [staffShareTrainingId, setStaffShareTrainingId] = useState<number | null>(null);
+  const [showStaffShareModal, setShowStaffShareModal] = useState(false);
+  const [staffSearch, setStaffSearch] = useState('');
+  const [staffResults, setStaffResults] = useState<any[]>([]);
+  const [staffSearchLoading, setStaffSearchLoading] = useState(false);
+  const [sendingToStaff, setSendingToStaff] = useState(false);
+
+  const searchStaff = async () => {
+    if (!staffSearch.trim()) return;
+    setStaffSearchLoading(true);
+    try {
+      const results = await coachesAPI.search(staffSearch.trim());
+      setStaffResults(results);
+    } catch {}
+    setStaffSearchLoading(false);
+  };
+
+  const sendTrainingToStaff = async (target: any) => {
+    if (!staffShareTrainingId) return;
+    setSendingToStaff(true);
+    try {
+      await staffSharingAPI.share({
+        report_type: 'training',
+        report_id: staffShareTrainingId,
+        recipient_id: target.id,
+        allow_regenerate: false,
+      });
+      Alert.alert('Shared!', `Training program shared with ${target.name}.`);
+      setShowStaffShareModal(false);
+      setStaffSearch('');
+      setStaffResults([]);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share');
+    } finally {
+      setSendingToStaff(false);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -454,6 +502,22 @@ export default function RecentScreen() {
                     </TouchableOpacity>
                   </View>
                 )}
+                {item.kind === 'training' && (
+                  <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, width: '100%' }}>
+                    <TouchableOpacity
+                      style={[styles.gameActionBtn, { borderColor: '#7c3aed22' }]}
+                      onPress={() => {
+                        setStaffShareTrainingId(item.id);
+                        setStaffSearch('');
+                        setStaffResults([]);
+                        setShowStaffShareModal(true);
+                      }}
+                    >
+                      <Ionicons name="people-outline" size={13} color="#7c3aed" />
+                      <Text style={[styles.gameActionText, { color: '#7c3aed' }]}>Send to Staff</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
             </>
           );
@@ -488,6 +552,64 @@ export default function RecentScreen() {
             </ScrollView>
           </View>
         </View>
+      </Modal>
+
+      {/* Send Training to Staff Modal */}
+      <Modal visible={showStaffShareModal} animationType="slide" transparent>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={styles.modalBox}>
+            <View style={styles.modalHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>Send to Staff</Text>
+                <Text style={styles.modalSub}>Share this training program with a coach, scout, or trainer.</Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowStaffShareModal(false)}>
+                <Ionicons name="close" size={24} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+              <TextInput
+                style={[sendStyles.searchInput, { flex: 1 }]}
+                placeholder="Search coach/program name..."
+                placeholderTextColor="#6b7280"
+                value={staffSearch}
+                onChangeText={setStaffSearch}
+              />
+              <TouchableOpacity
+                style={{ backgroundColor: '#7c3aed', borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' }}
+                onPress={searchStaff}
+                disabled={staffSearchLoading}
+              >
+                {staffSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={{ maxHeight: 280 }} keyboardShouldPersistTaps="handled">
+              {staffResults.map((r: any) => (
+                <TouchableOpacity
+                  key={r.id}
+                  style={sendStyles.resultRow}
+                  onPress={() => sendTrainingToStaff(r)}
+                  disabled={sendingToStaff}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: '#fff', fontWeight: '600' }}>{r.name}</Text>
+                    <Text style={{ color: '#6b7280', fontSize: 12 }}>{r.role} · {r.program_name}</Text>
+                  </View>
+                  {sendingToStaff ? <ActivityIndicator color="#7c3aed" size="small" /> : <Ionicons name="paper-plane-outline" size={18} color="#7c3aed" />}
+                </TouchableOpacity>
+              ))}
+              {staffResults.length === 0 && staffSearch.trim().length > 0 && !staffSearchLoading && (
+                <Text style={{ color: '#4b5563', textAlign: 'center', paddingVertical: 20 }}>No staff found.</Text>
+              )}
+            </ScrollView>
+            <TouchableOpacity
+              style={[sendStyles.cancelBtn, { marginTop: 12 }]}
+              onPress={() => setShowStaffShareModal(false)}
+            >
+              <Text style={{ color: '#9ca3af', fontWeight: '600' }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Single modal — swaps between report / send / correct views */}
@@ -698,7 +820,7 @@ const styles = StyleSheet.create({
   modalBox: { backgroundColor: '#111827', borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
   modalTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
-  modalSub: { color: '#6b7280', fontSize: 12, marginTop: 2 },
+  modalSub: { color: '#6b7280', fontSize: 12, marginTop: 4, lineHeight: 18 },
   actionRow: {
     flexDirection: 'row', flexWrap: 'wrap', gap: 8,
     marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#1f2937',

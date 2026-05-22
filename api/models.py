@@ -120,7 +120,22 @@ class TeamReport(Base):
     report_text  = Column(Text, nullable=True)
     created_at   = Column(DateTime, default=datetime.utcnow)
 
-    coach = relationship("Coach")
+    coach        = relationship("Coach")
+    corrections  = relationship("TeamReportCorrection", back_populates="team_report", cascade="all, delete-orphan")
+
+
+class TeamReportCorrection(Base):
+    __tablename__ = "team_report_corrections"
+
+    id             = Column(Integer, primary_key=True, index=True)
+    team_report_id = Column(Integer, ForeignKey("team_reports.id"), nullable=False)
+    coach_id       = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    correction     = Column(Text, nullable=False)
+    applied        = Column(Boolean, default=False)
+    created_at     = Column(DateTime, default=datetime.utcnow)
+
+    team_report    = relationship("TeamReport", back_populates="corrections")
+    coach          = relationship("Coach")
 
 
 class TrainingSession(Base):

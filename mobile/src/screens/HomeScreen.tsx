@@ -53,9 +53,9 @@ export default function HomeScreen() {
             <Text style={styles.logo}>BloomPrint</Text>
             <Text style={styles.sub}>Basketball Intelligence Model</Text>
           </View>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             <TouchableOpacity
-              style={styles.signOutBtn}
+              style={[styles.signOutBtn, { marginLeft: 16 }]}
               onPress={() => navigation.navigate('StaffInbox')}
             >
               <Ionicons name="mail-outline" size={18} color="#9ca3af" />

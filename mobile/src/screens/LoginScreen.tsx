@@ -22,76 +22,90 @@ const COMPETITION_LEVELS = [
   'AAU',
   'College',
   'Pro',
-  'Other',
 ];
 
-const CONFERENCES = [
-  // NCAA Division I — Power Conferences
-  'ACC',
-  'Big East',
-  'Big Ten',
-  'Big 12',
-  'SEC',
-  'Pac-12',
-  // NCAA Division I — Mid-Major
-  'American Athletic (AAC)',
-  'Atlantic 10 (A-10)',
-  'Mountain West (MWC)',
-  'West Coast (WCC)',
-  'Missouri Valley (MVC)',
-  'Colonial Athletic (CAA)',
-  'Mid-American (MAC)',
-  'Sun Belt',
-  'Conference USA (CUSA)',
-  'Horizon League',
-  'Big West',
-  'Big Sky',
-  'Big South',
-  'Southern (SoCon)',
-  'Southland',
-  'Patriot League',
-  'Ivy League',
-  'MAAC',
-  'Metro Atlantic (MAAC)',
-  'Northeast (NEC)',
-  'Ohio Valley (OVC)',
-  'Summit League',
-  'WAC',
-  'America East',
-  'ASUN',
-  'Atlantic Sun (ASUN)',
-  'Southwestern Athletic (SWAC)',
-  'Mid-Eastern Athletic (MEAC)',
-  'Independent',
-  // Professional — USA
-  'NBA',
-  'G League',
-  'NBA G League',
-  // Professional — International
-  'EuroLeague',
-  'EuroCup',
-  'Liga ACB (Spain)',
-  'Lega Basket (Italy)',
-  'Bundesliga (Germany)',
-  'Pro A (France)',
-  'Turkish BSL',
-  'VTB United League',
-  'LNB Pro A',
-  'NBL (Australia)',
-  'CBA (China)',
-  'KBL (South Korea)',
-  'Super League (Greece)',
-  'Adriatic League (ABA)',
-  'FIBA Champions League',
-  'FIBA Europe Cup',
-  // Other / Club
-  'AAU',
-  'JUCO',
-  'NAIA',
-  'D2',
-  'D3',
-  'Other',
-];
+// Conferences shown for each competition level
+const CONFERENCES_BY_LEVEL: Record<string, string[]> = {
+  College: [
+    // NCAA Division I — Power Conferences
+    'ACC',
+    'Big East',
+    'Big Ten',
+    'Big 12',
+    'SEC',
+    'Pac-12',
+    // NCAA Division I — Mid-Major
+    'American Athletic (AAC)',
+    'Atlantic 10 (A-10)',
+    'Mountain West (MWC)',
+    'West Coast (WCC)',
+    'Missouri Valley (MVC)',
+    'Colonial Athletic (CAA)',
+    'Mid-American (MAC)',
+    'Sun Belt',
+    'Conference USA (CUSA)',
+    'Horizon League',
+    'Big West',
+    'Big Sky',
+    'Big South',
+    'Southern (SoCon)',
+    'Southland',
+    'Patriot League',
+    'Ivy League',
+    'MAAC',
+    'Northeast (NEC)',
+    'Ohio Valley (OVC)',
+    'Summit League',
+    'WAC',
+    'America East',
+    'ASUN',
+    'Southwestern Athletic (SWAC)',
+    'Mid-Eastern Athletic (MEAC)',
+    'JUCO',
+    'NAIA',
+    'D2',
+    'D3',
+    'Independent',
+  ],
+  Pro: [
+    'NBA',
+    'G League',
+    'NBA G League',
+    'EuroLeague',
+    'EuroCup',
+    'Liga ACB (Spain)',
+    'Lega Basket (Italy)',
+    'Bundesliga (Germany)',
+    'Pro A (France)',
+    'Turkish BSL',
+    'VTB United League',
+    'LNB Pro A',
+    'NBL (Australia)',
+    'CBA (China)',
+    'KBL (South Korea)',
+    'Super League (Greece)',
+    'Adriatic League (ABA)',
+    'FIBA Champions League',
+    'FIBA Europe Cup',
+  ],
+  AAU: [
+    'Nike EYBL',
+    'Adidas 3SSB',
+    'Under Armour Association',
+    'Overtime Elite',
+    'Independent AAU',
+  ],
+  'HS Varsity': [
+    'State Association',
+    'Independent',
+  ],
+  'HS JV': [
+    'State Association',
+    'Independent',
+  ],
+  'Middle School': [],
+  'Youth': [],
+};
 
 function PickerModal({
   visible,
@@ -245,18 +259,19 @@ export default function LoginScreen() {
               <Ionicons name="chevron-down" size={14} color="#6b7280" />
             </TouchableOpacity>
 
-            {/* Conference picker — shown only when College is selected */}
-            {competitionLevel === 'College' && (
+            {/* Conference / League picker — shown when the selected level has options */}
+            {competitionLevel && (CONFERENCES_BY_LEVEL[competitionLevel]?.length ?? 0) > 0 && (
               <>
                 <Text style={[styles.sectionLabel, { marginTop: 8 }]}>
-                  Conference <Text style={{ color: '#ef4444' }}>*</Text>
+                  {competitionLevel === 'College' ? 'Conference' : 'League / Association'}
+                  {competitionLevel === 'College' && <Text style={{ color: '#ef4444' }}> *</Text>}
                 </Text>
                 <TouchableOpacity
-                  style={[styles.pickerBtn, !conference && { borderColor: '#ef4444' }]}
+                  style={[styles.pickerBtn, competitionLevel === 'College' && !conference && { borderColor: '#ef4444' }]}
                   onPress={() => setShowConferencePicker(true)}
                 >
                   <Text style={[styles.pickerBtnText, !conference && { color: '#6b7280' }]}>
-                    {conference || 'Select conference (required)...'}
+                    {conference || (competitionLevel === 'College' ? 'Select conference (required)...' : 'Select league (optional)...')}
                   </Text>
                   <Ionicons name="chevron-down" size={14} color="#6b7280" />
                 </TouchableOpacity>
@@ -301,8 +316,8 @@ export default function LoginScreen() {
 
       <PickerModal
         visible={showConferencePicker}
-        title="Conference"
-        options={CONFERENCES}
+        title={competitionLevel === 'College' ? 'Conference' : 'League / Association'}
+        options={CONFERENCES_BY_LEVEL[competitionLevel] ?? []}
         selected={conference}
         onSelect={setConference}
         onClose={() => setShowConferencePicker(false)}

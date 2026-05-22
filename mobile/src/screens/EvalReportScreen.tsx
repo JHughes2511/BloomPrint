@@ -26,7 +26,17 @@ function cleanMarkdown(text: string): string {
       // Remove ## prefix
       line = line.replace(/^#+\s*/, '');
       // Remove trailing orphaned **
-      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
+      line = line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
+      // Bold section headers: ALL-CAPS lines or short lines ending with ':'
+      const trimmed = line.trim();
+      if (
+        trimmed.length > 2 &&
+        trimmed.length < 60 &&
+        /^[A-Z][A-Z\s\/&\-()\d]{2,}:?$/.test(trimmed)
+      ) {
+        return `**${trimmed}**`;
+      }
+      return line;
     })
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -70,6 +80,7 @@ export default function EvalReportScreen() {
   const [selectedPillar, setSelectedPillar] = useState('');
   const [correctionText, setCorrectionText] = useState('');
   const [saving, setSaving] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
 
   // Player detail popup
   const [showPlayerDetail, setShowPlayerDetail] = useState(false);
@@ -187,7 +198,7 @@ export default function EvalReportScreen() {
     return ['Evaluation Report', name, team, pos, type].filter(Boolean).join(' - ');
   };
 
-  const submitCorrection = async () => {
+  const submitCorrection = async (generateNew: boolean) => {
     if (!correctionText.trim()) return;
     setSaving(true);
     try {
@@ -198,16 +209,48 @@ export default function EvalReportScreen() {
       setCorrections(prev => [...prev, c]);
       setShowCorrect(false);
       setCorrectionText(''); setSelectedPillar('');
-      // Apply all corrections to update the report text via AI
-      try {
-        const updated = await evalsAPI.applyCorrections(evalId);
-        setEv((prev: any) => prev ? { ...prev, report_text: updated.report_text } : prev);
-      } catch {}
-      Alert.alert('Updated', 'Evaluation sharpened based on your correction.');
+
+      if (generateNew) {
+        // Regenerate the full eval via AI using all unapplied corrections
+        setRegenerating(true);
+        try {
+          const updated = await evalsAPI.regenerate(evalId);
+          setEv(updated);
+          // Reload corrections to reflect applied=true
+          const updatedCorrs = await evalsAPI.corrections(evalId);
+          setCorrections(updatedCorrs);
+          Alert.alert('Evaluation Regenerated', 'The evaluation has been updated with your corrections.');
+        } catch (e: any) {
+          Alert.alert('Regeneration Failed', e?.response?.data?.detail ?? 'Could not regenerate evaluation');
+        } finally {
+          setRegenerating(false);
+        }
+      } else {
+        Alert.alert('Saved', 'Correction saved. You can generate a new evaluation when ready.');
+      }
     } catch {
       Alert.alert('Error', 'Could not save correction');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const generateNewEval = async () => {
+    if (corrections.filter((c: any) => !c.applied).length === 0) {
+      Alert.alert('No Pending Corrections', 'Add at least one correction before regenerating.');
+      return;
+    }
+    setRegenerating(true);
+    try {
+      const updated = await evalsAPI.regenerate(evalId);
+      setEv(updated);
+      const updatedCorrs = await evalsAPI.corrections(evalId);
+      setCorrections(updatedCorrs);
+      Alert.alert('Evaluation Regenerated', 'The evaluation has been updated with your corrections.');
+    } catch (e: any) {
+      Alert.alert('Regeneration Failed', e?.response?.data?.detail ?? 'Could not regenerate evaluation');
+    } finally {
+      setRegenerating(false);
     }
   };
 
@@ -476,13 +519,34 @@ export default function EvalReportScreen() {
       {corrections.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Coach Corrections ({corrections.length})</Text>
-          {corrections.map(c => (
-            <View key={c.id} style={styles.correctionCard}>
+          {corrections.map((c: any) => (
+            <View key={c.id} style={[styles.correctionCard, c.applied && { opacity: 0.55 }]}>
               {c.pillar && <Text style={styles.correctionPillar}>{c.pillar.replace(/_/g, ' ').toUpperCase()}</Text>}
               <Text style={styles.correctionText}>{c.correction}</Text>
-              <Text style={styles.correctionMeta}>{new Date(c.created_at).toLocaleDateString()}</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+                <Text style={styles.correctionMeta}>{new Date(c.created_at).toLocaleDateString()}</Text>
+                {c.applied && (
+                  <View style={{ backgroundColor: '#16a34a22', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, borderWidth: 1, borderColor: '#16a34a' }}>
+                    <Text style={{ color: '#16a34a', fontSize: 10, fontWeight: '700' }}>APPLIED</Text>
+                  </View>
+                )}
+              </View>
             </View>
           ))}
+          {/* Generate New Evaluation button — shown when there are unapplied corrections */}
+          {corrections.some((c: any) => !c.applied) && (
+            <View style={{ gap: 8, marginTop: 12 }}>
+              <TouchableOpacity
+                style={[styles.saveBtn, { backgroundColor: '#2563eb' }]}
+                onPress={generateNewEval}
+                disabled={regenerating}
+              >
+                {regenerating
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={styles.saveText}>Generate New Evaluation</Text>}
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       )}
 
@@ -713,13 +777,28 @@ export default function EvalReportScreen() {
               textAlignVertical="top"
               autoFocus
             />
-            <View style={styles.modalRow}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowCorrect(false)}>
-                <Text style={styles.cancelText}>Cancel</Text>
+            <View style={{ gap: 8, marginTop: 8 }}>
+              <TouchableOpacity
+                style={[styles.saveBtn, { backgroundColor: '#2563eb' }]}
+                onPress={() => submitCorrection(true)}
+                disabled={saving || regenerating}
+              >
+                {saving || regenerating
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={styles.saveText}>Generate New Evaluation</Text>}
               </TouchableOpacity>
-              <TouchableOpacity style={styles.saveBtn} onPress={submitCorrection} disabled={saving}>
-                {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Save</Text>}
-              </TouchableOpacity>
+              <View style={styles.modalRow}>
+                <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowCorrect(false)}>
+                  <Text style={styles.cancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.saveBtn, { backgroundColor: '#374151' }]}
+                  onPress={() => submitCorrection(false)}
+                  disabled={saving}
+                >
+                  {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Save for Later</Text>}
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </KeyboardAvoidingView>

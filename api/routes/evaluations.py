@@ -303,6 +303,86 @@ def delete_team_report(
     return {"ok": True}
 
 
+class TeamReportCorrectionCreate(BaseModel):
+    correction: str
+
+
+@router.post("/team-reports/{report_id}/corrections", response_model=schemas.TeamReportCorrectionOut)
+def add_team_report_correction(
+    report_id: int,
+    body: TeamReportCorrectionCreate,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    tr = db.get(models.TeamReport, report_id)
+    if not tr:
+        raise HTTPException(status_code=404, detail="Team report not found")
+    c = models.TeamReportCorrection(
+        team_report_id=report_id,
+        coach_id=coach.id,
+        correction=body.correction,
+    )
+    db.add(c)
+    db.commit()
+    db.refresh(c)
+    return c
+
+
+@router.get("/team-reports/{report_id}/corrections", response_model=list[schemas.TeamReportCorrectionOut])
+def list_team_report_corrections(
+    report_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    return db.query(models.TeamReportCorrection).filter_by(team_report_id=report_id).all()
+
+
+@router.post("/team-reports/{report_id}/regenerate", response_model=schemas.TeamReportOut)
+async def regenerate_team_report(
+    report_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    tr = db.get(models.TeamReport, report_id)
+    if not tr or not tr.report_text:
+        raise HTTPException(status_code=404, detail="Team report not found")
+    corrections = db.query(models.TeamReportCorrection).filter_by(team_report_id=report_id, applied=False).all()
+    if not corrections:
+        return tr
+
+    corrections_text = "\n".join(f"- {c.correction}" for c in corrections)
+    prompt = (
+        f"You are a basketball analysis expert. Below is a team report followed by corrections from the coach. "
+        f"Update the report to incorporate these corrections. Return ONLY the updated report text in the same format.\n\n"
+        f"Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
+        f"Use plain section titles in ALL CAPS followed by a colon and newline.\n\n"
+        f"ORIGINAL REPORT:\n{tr.report_text}\n\n"
+        f"CORRECTIONS:\n{corrections_text}\n\nUPDATED REPORT:"
+    )
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        response = await client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=8192,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text_blocks = [b for b in response.content if hasattr(b, "text")]
+        if not text_blocks:
+            raise HTTPException(status_code=500, detail="AI returned no content")
+        tr.report_text = text_blocks[0].text.strip()
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
+
+    for c in corrections:
+        c.applied = True
+    db.commit()
+    db.refresh(tr)
+    return tr
+
+
 class TeamReportCorrectBody(BaseModel):
     correction: str
 
@@ -372,6 +452,76 @@ def list_corrections(
     return db.query(models.Correction).filter_by(evaluation_id=eval_id).all()
 
 
+@router.post("/{eval_id}/regenerate", response_model=schemas.EvalOut)
+async def regenerate_evaluation(
+    eval_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Re-run AI with all unapplied corrections, update the eval in-place, mark corrections applied."""
+    ev = db.get(models.Evaluation, eval_id)
+    if not ev:
+        raise HTTPException(status_code=404, detail="Evaluation not found")
+    corrections = db.query(models.Correction).filter_by(evaluation_id=eval_id, applied=False).all()
+    if not corrections or not ev.report_text:
+        return ev
+
+    corrections_text = "\n".join(
+        f"- [{c.pillar or 'General'}] {c.correction}" for c in corrections
+    )
+    prompt = (
+        f"You are a basketball evaluation expert. Below is an existing evaluation report "
+        f"followed by a list of corrections from the coach. Update the report to incorporate "
+        f"these corrections, adding or removing detail as needed. Return ONLY the updated report text, "
+        f"maintaining the same format and structure.\n\n"
+        f"Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
+        f"Use plain section titles in ALL CAPS followed by a colon and newline.\n\n"
+        f"ORIGINAL REPORT:\n{ev.report_text}\n\n"
+        f"CORRECTIONS:\n{corrections_text}\n\n"
+        f"UPDATED REPORT:"
+    )
+
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        response = await client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=8192,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text_blocks = [b for b in response.content if hasattr(b, "text")]
+        if not text_blocks:
+            raise HTTPException(status_code=500, detail="AI returned no content")
+        updated_text = text_blocks[0].text.strip()
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
+
+    ev.report_text = updated_text
+    # Re-parse grades/flags from new text
+    new_grade = _parse_grade(updated_text)
+    new_pillars = _parse_pillar_grades(updated_text)
+    new_green = _parse_list_section(updated_text, "GREEN FLAGS")
+    new_watch = _parse_list_section(updated_text, "WATCH FLAGS")
+    if new_grade is not None:
+        ev.overall_grade = new_grade
+    if new_pillars:
+        ev.pillar_grades = new_pillars
+    if new_green:
+        ev.green_flags = new_green
+    if new_watch:
+        ev.watch_flags = new_watch
+
+    # Mark all unapplied corrections as applied
+    for c in corrections:
+        c.applied = True
+
+    db.commit()
+    db.refresh(ev)
+    return ev
+
+
 @router.post("/{eval_id}/apply-corrections", response_model=schemas.EvalOut)
 async def apply_corrections(
     eval_id: int,
@@ -432,13 +582,16 @@ def _parse_pillar_grades(text: str) -> dict:
 
 
 def _parse_list_section(text: str, section: str) -> list[str]:
-    pattern = rf"{re.escape(section)}[:\s]*\n((?:[-·*\d\.\s].+\n?)+)"
-    m = re.search(pattern, text, re.IGNORECASE)
+    # Match the section header, then capture lines that look like list items.
+    # Stop when we hit a blank line followed by an ALL-CAPS header (next section).
+    pattern = rf"{re.escape(section)}[:\s]*\n(.*?)(?=\n[A-Z][A-Z\s]{{3,}}[:\n]|\Z)"
+    m = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
     if not m:
         return []
+    block = m.group(1)
     lines = [
         re.sub(r"^[-·*\d\.\s]+", "", l).strip()
-        for l in m.group(1).splitlines()
-        if l.strip()
+        for l in block.splitlines()
+        if l.strip() and re.match(r"^[-·*\d\.\s]", l.strip())
     ]
     return [l for l in lines if l]

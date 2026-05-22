@@ -459,3 +459,13 @@ class TeamReportOut(BaseModel):
     report_text: str | None
     created_at: datetime
     model_config = {"from_attributes": True}
+
+
+class TeamReportCorrectionOut(BaseModel):
+    id: int
+    team_report_id: int
+    coach_id: int
+    correction: str
+    applied: bool
+    created_at: datetime
+    model_config = {"from_attributes": True}

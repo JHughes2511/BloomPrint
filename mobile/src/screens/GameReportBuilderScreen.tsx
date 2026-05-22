@@ -39,7 +39,16 @@ function cleanMarkdown(text: string): string {
       if (/^\s*[-=—]{3,}\s*$/.test(line)) return '';
       if (/^\s*\*{1,2}\s*$/.test(line)) return '';
       line = line.replace(/^#+\s*/, '');
-      return line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
+      line = line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
+      const trimmed = line.trim();
+      if (
+        trimmed.length > 2 &&
+        trimmed.length < 60 &&
+        /^[A-Z][A-Z\s\/&\-()\d]{2,}:?$/.test(trimmed)
+      ) {
+        return `**${trimmed}**`;
+      }
+      return line;
     })
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
