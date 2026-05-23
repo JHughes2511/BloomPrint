@@ -216,9 +216,18 @@ export default function PlayerProfileScreen() {
     if (!trainingFeedback.trim()) return;
     setRegeneratingTraining(true);
     try {
-      await trainingAPI.regenerate(player!.id, trainingFeedback.trim());
+      const newSession = await trainingAPI.regenerate(player!.id, trainingFeedback.trim());
       setTrainingFeedback('');
-      Alert.alert('Training Updated', 'Training program has been regenerated with your feedback.');
+      // Refresh the full training list so the new entry appears in the Training Programs section
+      const updated = await trainingAPI.forPlayer(player!.id).catch(() => null);
+      if (updated && Array.isArray(updated) && updated.length > 0) {
+        setAllTraining(updated);
+        setLatestTraining(updated[updated.length - 1]);
+      } else if (newSession) {
+        setAllTraining(prev => [...prev, newSession]);
+        setLatestTraining(newSession);
+      }
+      Alert.alert('Training Updated', 'A new training program has been generated with your feedback.');
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate training');
     } finally {

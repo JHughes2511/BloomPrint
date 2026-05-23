@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { playerAPI } from '../api/client';
@@ -54,16 +55,25 @@ export default function HomeScreen() {
             <Text style={styles.logo}>BloomPrint</Text>
             <Text style={styles.sub}>Basketball Intelligence Model</Text>
           </View>
-          <View style={{ flexDirection: 'row', gap: 8, flexShrink: 0 }}>
+          <View style={{ flexDirection: 'row', gap: 8, flexShrink: 0, alignItems: 'center' }}>
             <TouchableOpacity
-              style={styles.signOutBtn}
+              style={styles.iconBtn}
+              onPress={handleSignOut}
+              accessibilityLabel="Sign Out"
+            >
+              <MaterialCommunityIcons name="logout" size={18} color="#6b7280" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.iconBtn}
               onPress={() => navigation.navigate('StaffInbox')}
+              accessibilityLabel="Staff Inbox"
             >
               <Ionicons name="mail-outline" size={18} color="#9ca3af" />
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.signOutBtn, { position: 'relative' }]}
+              style={[styles.iconBtn, { position: 'relative' }]}
               onPress={() => navigation.navigate('CoachNotifications')}
+              accessibilityLabel="Notifications"
             >
               <Ionicons name="notifications-outline" size={18} color="#9ca3af" />
               {unreadCount > 0 && (
@@ -82,11 +92,6 @@ export default function HomeScreen() {
             </Text>
           </View>
         )}
-        {/* Sign out — always visible below coach info */}
-        <TouchableOpacity style={[styles.signOutBtn, { alignSelf: 'flex-start', marginTop: 10 }]} onPress={handleSignOut}>
-          <Ionicons name="log-out-outline" size={16} color="#6b7280" />
-          <Text style={styles.signOutText}>Sign Out</Text>
-        </TouchableOpacity>
       </View>
 
       {/* Report Types */}
@@ -126,12 +131,10 @@ const styles = StyleSheet.create({
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   logo: { fontSize: 32, fontWeight: '900', color: '#fff', letterSpacing: 0.5 },
   sub: { fontSize: 13, color: '#6b7280', marginTop: 2 },
-  signOutBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
+  iconBtn: {
     borderWidth: 1, borderColor: '#374151', borderRadius: 10,
-    paddingHorizontal: 12, paddingVertical: 8, marginTop: 6,
+    paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center', justifyContent: 'center',
   },
-  signOutText: { color: '#6b7280', fontSize: 12, fontWeight: '600' },
   notifBadge: {
     position: 'absolute',
     top: -2,
