@@ -152,6 +152,8 @@ export default function PlayerProfileScreen() {
     }
   };
 
+  const [showProfileDetail, setShowProfileDetail] = useState(false);
+
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [generatingInvite, setGeneratingInvite] = useState(false);
 
@@ -349,10 +351,11 @@ export default function PlayerProfileScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <View style={styles.headerCenter}>
+        <TouchableOpacity style={styles.headerCenter} onPress={() => setShowProfileDetail(true)} activeOpacity={0.75}>
           <Text style={styles.name}>{player.name}</Text>
           <Text style={styles.meta}>{[player.position, player.team_name ?? player.competition_level].filter(Boolean).join(' · ')}</Text>
-        </View>
+          <Text style={{ color: '#6b7280', fontSize: 10, marginTop: 1 }}>tap to view profile</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={openEdit} style={styles.editBtn}>
           <Ionicons name="create-outline" size={20} color="#9ca3af" />
         </TouchableOpacity>
@@ -522,6 +525,84 @@ export default function PlayerProfileScreen() {
           <Text style={styles.inviteCodeHint}>Share this code with the player so they can link their account</Text>
         </View>
       )}
+
+      {/* Player profile detail modal */}
+      <Modal visible={showProfileDetail} transparent animationType="slide">
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%' }}>
+            {/* Header */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+              <Text style={{ color: '#fff', fontSize: 16, fontWeight: '800' }}>Player Profile</Text>
+              <TouchableOpacity onPress={() => setShowProfileDetail(false)} style={{ padding: 4 }}>
+                <Ionicons name="close" size={22} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 32 }}>
+              {/* Name + grade */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900' }}>{player.name}</Text>
+                  {player.position ? <Text style={{ color: '#9ca3af', fontSize: 14, marginTop: 2 }}>{player.position}</Text> : null}
+                </View>
+                <GradeBadge grade={player.latest_grade} size="lg" />
+              </View>
+
+              {/* Info rows */}
+              {[
+                { label: 'Age', value: player.age ? `${player.age} yrs` : null },
+                { label: 'Height', value: (player as any).height },
+                { label: 'Wingspan', value: (player as any).wingspan },
+                { label: 'School', value: (player as any).school_name },
+                { label: 'Program', value: (player as any).program_name },
+                { label: 'Team', value: player.team_name },
+                { label: 'Level', value: player.competition_level },
+                { label: 'City', value: (player as any).city },
+                { label: 'State', value: (player as any).state },
+                { label: 'Country', value: (player as any).country },
+              ].filter(r => r.value).map(r => (
+                <View key={r.label} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                  <Text style={{ color: '#6b7280', fontSize: 14, fontWeight: '600' }}>{r.label}</Text>
+                  <Text style={{ color: '#f9fafb', fontSize: 14, fontWeight: '500', flexShrink: 1, textAlign: 'right', marginLeft: 12 }}>{r.value}</Text>
+                </View>
+              ))}
+
+              {/* Notes */}
+              {player.notes ? (
+                <View style={{ marginTop: 16 }}>
+                  <Text style={{ color: '#6b7280', fontSize: 12, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>NOTES</Text>
+                  <Text style={{ color: '#d1d5db', fontSize: 14, lineHeight: 20 }}>{player.notes}</Text>
+                </View>
+              ) : null}
+
+              {/* Stats summary */}
+              <View style={{ marginTop: 20, backgroundColor: '#1f2937', borderRadius: 12, padding: 14 }}>
+                <Text style={{ color: '#6b7280', fontSize: 12, fontWeight: '700', letterSpacing: 1, marginBottom: 10 }}>EVALUATION SUMMARY</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                  <View style={{ alignItems: 'center' }}>
+                    <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900' }}>{evals.length}</Text>
+                    <Text style={{ color: '#6b7280', fontSize: 11 }}>Evaluations</Text>
+                  </View>
+                  <View style={{ alignItems: 'center' }}>
+                    <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900' }}>{allTraining.length}</Text>
+                    <Text style={{ color: '#6b7280', fontSize: 11 }}>Training Plans</Text>
+                  </View>
+                  {player.latest_grade != null && (
+                    <View style={{ alignItems: 'center' }}>
+                      <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900' }}>{player.latest_grade.toFixed(1)}</Text>
+                      <Text style={{ color: '#6b7280', fontSize: 11 }}>Latest Grade</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+
+              {/* Member since */}
+              <Text style={{ color: '#4b5563', fontSize: 12, textAlign: 'center', marginTop: 16 }}>
+                Member since {new Date(player.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </Text>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
       {/* Training detail modal — full-screen so all text is readable */}
       <Modal visible={!!trainingModalItem} transparent animationType="slide">
