@@ -602,12 +602,41 @@ export default function TeamReportScreen() {
                 <Ionicons name="close" size={22} color="#9ca3af" />
               </TouchableOpacity>
             </View>
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }}>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
               {selectedPrevReport?.report_text ? (
                 renderReport(selectedPrevReport.report_text)
               ) : (
                 <Text style={{ color: '#6b7280' }}>No report content.</Text>
               )}
+
+              {/* Share buttons */}
+              <View style={{ flexDirection: 'row', gap: 8, marginTop: 20 }}>
+                <TouchableOpacity
+                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#16a34a', borderRadius: 10, paddingVertical: 12 }}
+                  onPress={() => {
+                    if (!selectedPrevReport?.report_text) return;
+                    setReportText(selectedPrevReport.report_text);
+                    setSavedTeamReportId(selectedPrevReport.id);
+                    setSelectedPrevReport(null);
+                    setTimeout(() => setShowShare(true), 200);
+                  }}
+                >
+                  <Ionicons name="person-outline" size={15} color="#fff" />
+                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Send to Player</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#7c3aed', borderRadius: 10, paddingVertical: 12 }}
+                  onPress={() => {
+                    if (!selectedPrevReport) return;
+                    setSavedTeamReportId(selectedPrevReport.id);
+                    setSelectedPrevReport(null);
+                    setTimeout(() => { setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }, 200);
+                  }}
+                >
+                  <Ionicons name="people-outline" size={15} color="#fff" />
+                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Send to Staff</Text>
+                </TouchableOpacity>
+              </View>
 
               {/* Corrections section */}
               {prevReportCorrections.length > 0 && (

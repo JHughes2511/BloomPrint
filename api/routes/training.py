@@ -224,20 +224,16 @@ async def regenerate_training(
             if line:
                 priorities.append(line)
 
-    if latest:
-        latest.program_text = program_text
-        latest.priorities = priorities[:6]
-        db.commit()
-        db.refresh(latest)
-        return latest
-    else:
-        session = models.TrainingSession(
-            player_id=player_id,
-            coach_id=coach.id,
-            program_text=program_text,
-            priorities=priorities[:6],
-        )
-        db.add(session)
-        db.commit()
-        db.refresh(session)
-        return session
+    # Always insert a new row so the new training appears as a separate entry
+    # in the Training Programs list rather than overwriting the existing one.
+    session = models.TrainingSession(
+        player_id=player_id,
+        coach_id=coach.id,
+        evaluation_id=latest.evaluation_id if latest else None,
+        program_text=program_text,
+        priorities=priorities[:6],
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
+    return session

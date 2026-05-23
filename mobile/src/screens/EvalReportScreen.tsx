@@ -507,17 +507,15 @@ export default function EvalReportScreen() {
           ))}
           {/* Generate New Evaluation button — shown when there are unapplied corrections */}
           {corrections.some((c: any) => !c.applied) && (
-            <View style={{ gap: 8, marginTop: 12 }}>
-              <TouchableOpacity
-                style={[styles.saveBtn, { backgroundColor: '#2563eb' }]}
-                onPress={generateNewEval}
-                disabled={regenerating}
-              >
-                {regenerating
-                  ? <ActivityIndicator color="#fff" />
-                  : <Text style={styles.saveText}>Generate New Evaluation</Text>}
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={[styles.saveBtn, { backgroundColor: '#2563eb', marginTop: 12 }]}
+              onPress={generateNewEval}
+              disabled={regenerating}
+            >
+              {regenerating
+                ? <ActivityIndicator color="#fff" />
+                : <Text style={styles.saveText}>Generate New Evaluation</Text>}
+            </TouchableOpacity>
           )}
         </View>
       )}

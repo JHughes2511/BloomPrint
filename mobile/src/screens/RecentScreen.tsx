@@ -96,13 +96,28 @@ export default function RecentScreen() {
   const [sendingToStaff, setSendingToStaff] = useState(false);
   const [staffAllowRegen, setStaffAllowRegen] = useState(false);
   const [staffMessage, setStaffMessage] = useState('');
+  // Staff share content toggles
+  const [staffShareToggles, setStaffShareToggles] = useState({
+    share_report_text: true, share_grades: false, share_flags: false,
+    share_questions: false, share_overall_grade: false, share_pillar_grades: false,
+  });
+  // Staff share preview text (first 150 chars of report)
+  const [staffSharePreview, setStaffSharePreview] = useState<string | null>(null);
 
-  const openStaffShareModal = (ctx: StaffShareContext) => {
+  // Send-to-player content toggles (for modal send view)
+  const [playerShareToggles, setPlayerShareToggles] = useState({
+    share_report_text: true, share_overall_grade: false, share_pillar_grades: false,
+    share_green_flags: false, share_watch_flags: false, share_key_questions: false,
+  });
+
+  const openStaffShareModal = (ctx: StaffShareContext, previewText?: string) => {
     setStaffShareCtx(ctx);
     setStaffSearch('');
     setStaffResults([]);
     setStaffAllowRegen(false);
     setStaffMessage('');
+    setStaffShareToggles({ share_report_text: true, share_grades: false, share_flags: false, share_questions: false, share_overall_grade: false, share_pillar_grades: false });
+    setStaffSharePreview(previewText ?? null);
     setShowStaffShareModal(true);
   };
 
@@ -213,6 +228,7 @@ export default function RecentScreen() {
     setSendSearch('');
     setSendResults([]);
     setTeamCorrectText('');
+    setPlayerShareToggles({ share_report_text: true, share_overall_grade: false, share_pillar_grades: false, share_green_flags: false, share_watch_flags: false, share_key_questions: false });
   };
 
   const handlePress = async (item: ReportItem) => {
@@ -337,15 +353,22 @@ export default function RecentScreen() {
       if (activeModal.kind === 'eval' && activeModal.evalId) {
         await playerAPI.share(activeModal.evalId, {
           player_user_id: target.id,
-          share_report_text: true,
-          share_grades: true,
-          share_flags: true,
-          share_questions: true,
+          share_report_text: playerShareToggles.share_report_text,
+          share_grades: playerShareToggles.share_overall_grade || playerShareToggles.share_pillar_grades,
+          share_flags: playerShareToggles.share_green_flags || playerShareToggles.share_watch_flags,
+          share_questions: playerShareToggles.share_key_questions,
+        });
+      } else if (activeModal.kind === 'training') {
+        await playerAPI.shareTeamReport({
+          output_type: activeModal.outputType,
+          report_text: playerShareToggles.share_report_text ? activeModal.text : '',
+          target_type: 'player',
+          player_user_id: target.id,
         });
       } else {
         await playerAPI.shareTeamReport({
           output_type: activeModal.outputType,
-          report_text: activeModal.text,
+          report_text: playerShareToggles.share_report_text ? activeModal.text : '',
           target_type: 'player',
           player_user_id: target.id,
         });
@@ -535,7 +558,11 @@ export default function RecentScreen() {
                       const label = item.kind === 'training' ? 'Training Program' :
                                     item.kind === 'game' ? 'Game Report' :
                                     item.kind === 'team' ? 'Team Report' : 'Player Eval';
-                      openStaffShareModal({ report_type: reportType, report_id: item.id, label });
+                      const previewRaw = item.program_text ?? item.report_text ?? (teamReportTexts[item.id] ?? '');
+                      const previewName = item.player_name ?? label;
+                      const previewType = item.kind === 'training' ? 'Training Program' : (TYPE_LABELS[item.output_type] ?? item.output_type);
+                      const preview = previewName + ' — ' + previewType + ': ' + previewRaw.replace(/[#*_]/g, '').trim().slice(0, 150);
+                      openStaffShareModal({ report_type: reportType, report_id: item.id, label }, preview);
                     }}
                   >
                     <Ionicons name="people-outline" size={13} color="#7c3aed" />
@@ -594,34 +621,72 @@ export default function RecentScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Allow regenerate toggle */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
-              <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
-              <Switch
-                value={staffAllowRegen}
-                onValueChange={setStaffAllowRegen}
-                trackColor={{ false: '#374151', true: '#7c3aed' }}
-                thumbColor="#fff"
-              />
-            </View>
+            <ScrollView style={{ maxHeight: '80%' }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+              {/* Report preview */}
+              {staffSharePreview && (
+                <View style={[sendStyles.reportPreview, { marginBottom: 12 }]}>
+                  <Text style={sendStyles.reportPreviewTitle}>Report Preview</Text>
+                  <Text style={sendStyles.reportPreviewText} numberOfLines={3}>{staffSharePreview}</Text>
+                </View>
+              )}
 
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
-              <TextInput
-                style={[sendStyles.searchInput, { flex: 1 }]}
-                placeholder="Search coach/program name..."
-                placeholderTextColor="#6b7280"
-                value={staffSearch}
-                onChangeText={setStaffSearch}
-              />
-              <TouchableOpacity
-                style={{ backgroundColor: '#7c3aed', borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' }}
-                onPress={searchStaff}
-                disabled={staffSearchLoading}
-              >
-                {staffSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
-              </TouchableOpacity>
-            </View>
-            <ScrollView style={{ maxHeight: 220 }} keyboardShouldPersistTaps="handled">
+              {/* Content toggles */}
+              {staffShareCtx?.report_type === 'training' ? (
+                <>
+                  {[
+                    { key: 'share_report_text', label: 'Share Program Text' },
+                  ].map(tog => (
+                    <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                      <Text style={{ color: '#d1d5db', fontSize: 13 }}>{tog.label}</Text>
+                      <Switch value={staffShareToggles[tog.key as keyof typeof staffShareToggles]} onValueChange={v => setStaffShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: '#374151', true: '#7c3aed' }} thumbColor="#fff" />
+                    </View>
+                  ))}
+                </>
+              ) : (
+                <>
+                  {[
+                    { key: 'share_report_text', label: 'Share Report Text' },
+                    { key: 'share_overall_grade', label: 'Share Overall Grade' },
+                    { key: 'share_pillar_grades', label: 'Share Pillar Grades' },
+                    { key: 'share_grades', label: 'Share Green Flags' },
+                    { key: 'share_flags', label: 'Share Watch Flags' },
+                    { key: 'share_questions', label: 'Share Key Questions' },
+                  ].map(tog => (
+                    <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                      <Text style={{ color: '#d1d5db', fontSize: 13 }}>{tog.label}</Text>
+                      <Switch value={staffShareToggles[tog.key as keyof typeof staffShareToggles]} onValueChange={v => setStaffShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: '#374151', true: '#7c3aed' }} thumbColor="#fff" />
+                    </View>
+                  ))}
+                </>
+              )}
+
+              {/* Allow regenerate toggle */}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, marginBottom: 12, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
+                <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
+                <Switch
+                  value={staffAllowRegen}
+                  onValueChange={setStaffAllowRegen}
+                  trackColor={{ false: '#374151', true: '#7c3aed' }}
+                  thumbColor="#fff"
+                />
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+                <TextInput
+                  style={[sendStyles.searchInput, { flex: 1 }]}
+                  placeholder="Search coach/program name..."
+                  placeholderTextColor="#6b7280"
+                  value={staffSearch}
+                  onChangeText={setStaffSearch}
+                />
+                <TouchableOpacity
+                  style={{ backgroundColor: '#7c3aed', borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' }}
+                  onPress={searchStaff}
+                  disabled={staffSearchLoading}
+                >
+                  {staffSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+                </TouchableOpacity>
+              </View>
               {staffResults.map((r: any) => (
                 <TouchableOpacity
                   key={r.id}
@@ -713,8 +778,11 @@ export default function RecentScreen() {
                                           activeModal.kind === 'team' ? 'team_report' : 'training';
                       const label = activeModal.kind === 'training' ? 'Training Program' :
                                     activeModal.kind === 'team' ? 'Team Report' : 'Player Eval';
+                      const previewName = activeModal.playerName ?? label;
+                      const previewType = TYPE_LABELS[activeModal.outputType] ?? activeModal.outputType;
+                      const preview = previewName + ' — ' + previewType + ': ' + activeModal.text.replace(/[#*_]/g, '').trim().slice(0, 150);
                       setActiveModal(null);
-                      openStaffShareModal({ report_type: reportType, report_id: activeModal.id, label });
+                      openStaffShareModal({ report_type: reportType, report_id: activeModal.id, label }, preview);
                     }}
                   >
                     <Ionicons name="people-outline" size={18} color="#7c3aed" />
@@ -732,6 +800,37 @@ export default function RecentScreen() {
                   <Text style={sendStyles.reportPreviewTitle}>{TYPE_LABELS[activeModal?.outputType ?? ''] ?? activeModal?.outputType}</Text>
                   <Text style={sendStyles.reportPreviewText} numberOfLines={2}>{activeModal?.text?.replace(/[#*_]/g, '').trim().slice(0, 120)}...</Text>
                 </View>
+
+                {/* Content toggles */}
+                {activeModal?.kind === 'training' ? (
+                  <View style={{ marginBottom: 10 }}>
+                    {[
+                      { key: 'share_report_text', label: 'Share Program Text' },
+                    ].map(tog => (
+                      <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                        <Text style={{ color: '#d1d5db', fontSize: 13 }}>{tog.label}</Text>
+                        <Switch value={playerShareToggles[tog.key as keyof typeof playerShareToggles]} onValueChange={v => setPlayerShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: '#374151', true: '#16a34a' }} thumbColor="#fff" />
+                      </View>
+                    ))}
+                  </View>
+                ) : (
+                  <View style={{ marginBottom: 10 }}>
+                    {[
+                      { key: 'share_report_text', label: 'Share Report Text' },
+                      { key: 'share_overall_grade', label: 'Share Overall Grade' },
+                      { key: 'share_pillar_grades', label: 'Share Pillar Grades' },
+                      { key: 'share_green_flags', label: 'Share Green Flags' },
+                      { key: 'share_watch_flags', label: 'Share Watch Flags' },
+                      { key: 'share_key_questions', label: 'Share Key Questions' },
+                    ].map(tog => (
+                      <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                        <Text style={{ color: '#d1d5db', fontSize: 13 }}>{tog.label}</Text>
+                        <Switch value={playerShareToggles[tog.key as keyof typeof playerShareToggles]} onValueChange={v => setPlayerShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: '#374151', true: '#16a34a' }} thumbColor="#fff" />
+                      </View>
+                    ))}
+                  </View>
+                )}
+
                 <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>Search for a player to send this report to their inbox.</Text>
                 <View style={{ marginBottom: 12 }}>
                   <TextInput
@@ -746,7 +845,7 @@ export default function RecentScreen() {
                     <ActivityIndicator color="#6b7280" size="small" style={{ marginTop: 8, alignSelf: 'center' }} />
                   )}
                 </View>
-                <ScrollView style={{ maxHeight: 260 }} keyboardShouldPersistTaps="handled">
+                <ScrollView style={{ maxHeight: 200 }} keyboardShouldPersistTaps="handled">
                   {sendResults.map(r => (
                     <TouchableOpacity key={r.id} style={sendStyles.resultRow} onPress={() => sendReport(r)} disabled={sending}>
                       <View style={sendStyles.avatar}>
