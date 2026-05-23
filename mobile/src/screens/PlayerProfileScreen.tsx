@@ -12,6 +12,7 @@ import { Player, Evaluation, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
 import { renderReport } from '../utils/renderReport';
+import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 
 const COMPETITION_LEVELS = ['Middle School', 'HS JV', 'HS Varsity', 'AAU', 'College', 'Pro'];
 
@@ -32,6 +33,8 @@ export default function PlayerProfileScreen() {
 
   const scrollRef = useRef<ScrollView>(null);
   const trainingFeedbackY = useRef(0);
+  const modalScrollRef = useRef<ScrollView>(null);
+  const correctionInputY = useRef(0);
 
   const [player, setPlayer] = useState<Player | null>(null);
   const [evals, setEvals] = useState<Evaluation[]>([]);
@@ -273,36 +276,32 @@ export default function PlayerProfileScreen() {
 
   const printTraining = async () => {
     if (!trainingModalItem?.program_text) return;
-    const lines = trainingModalItem.program_text.split('\n');
-    const htmlLines = lines.map((line: string) => {
-      const clean = line.replace(/#{1,6}\s*/g, '').replace(/\*\*/g, '').replace(/^-{3,}$|^={3,}$|^—{3,}$/, '').trim();
-      if (!clean) return '<br/>';
-      const isHeader = /^[A-Z][A-Z\s\/&()\d-]{2,}:?$/.test(clean) && clean.length < 60;
-      return isHeader ? `<h3 style="margin:16px 0 4px">${clean}</h3>` : `<p style="margin:2px 0;font-size:14px">${clean}</p>`;
+    const html = buildReportHtml({
+      title: 'Training Program',
+      subject: player?.name ?? '',
+      date: new Date(trainingModalItem.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      body: trainingModalItem.program_text,
     });
-    const html = `<html><body style="font-family:sans-serif;padding:24px;color:#111"><h2>${player?.name ?? ''} — Training Program</h2>${htmlLines.join('')}</body></html>`;
-    try {
-      await Print.printAsync({ html });
-    } catch {}
+    try { await Print.printAsync({ html }); } catch {}
   };
 
   const exportTraining = async () => {
     if (!trainingModalItem?.program_text) return;
     setExportingTraining(true);
     try {
-      const lines = trainingModalItem.program_text.split('\n');
-      const htmlLines = lines.map((line: string) => {
-        const clean = line.replace(/#{1,6}\s*/g, '').replace(/\*\*/g, '').replace(/^-{3,}$|^={3,}$|^—{3,}$/, '').trim();
-        if (!clean) return '<br/>';
-        const isHeader = /^[A-Z][A-Z\s\/&()\d-]{2,}:?$/.test(clean) && clean.length < 60;
-        return isHeader ? `<h3 style="margin:16px 0 4px">${clean}</h3>` : `<p style="margin:2px 0;font-size:14px">${clean}</p>`;
+      const reportDate = new Date(trainingModalItem.created_at);
+      const html = buildReportHtml({
+        title: 'Training Program',
+        subject: player?.name ?? '',
+        date: reportDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+        body: trainingModalItem.program_text,
       });
-      const html = `<html><body style="font-family:sans-serif;padding:24px;color:#111"><h2>${player?.name ?? ''} — Training Program</h2>${htmlLines.join('')}</body></html>`;
+      const fileName = buildPdfFileName('Training Program', player?.name ?? 'Player', reportDate);
       const { uri } = await Print.printToFileAsync({ html });
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Export Training Program' });
+        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: fileName });
       }
-    } catch (e: any) {
+    } catch {
       Alert.alert('Error', 'Could not export training program');
     } finally {
       setExportingTraining(false);
@@ -711,8 +710,9 @@ export default function PlayerProfileScreen() {
 
             <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
               <ScrollView
+                ref={modalScrollRef}
                 style={{ flex: 1 }}
-                contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+                contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
                 showsVerticalScrollIndicator={true}
                 keyboardShouldPersistTaps="handled"
               >
@@ -722,7 +722,10 @@ export default function PlayerProfileScreen() {
                 }
 
                 {/* Corrections section */}
-                <View style={{ marginTop: 24, borderTopWidth: 1, borderTopColor: '#1f2937', paddingTop: 16 }}>
+                <View
+                  style={{ marginTop: 24, borderTopWidth: 1, borderTopColor: '#1f2937', paddingTop: 16 }}
+                  onLayout={e => { correctionInputY.current = e.nativeEvent.layout.y; }}
+                >
                   <Text style={{ color: '#d1d5db', fontWeight: '700', fontSize: 13, marginBottom: 8 }}>CORRECTIONS</Text>
                   <TextInput
                     style={{
@@ -735,6 +738,7 @@ export default function PlayerProfileScreen() {
                     value={modalCorrection}
                     onChangeText={setModalCorrection}
                     multiline
+                    onFocus={() => setTimeout(() => modalScrollRef.current?.scrollTo({ y: correctionInputY.current, animated: true }), 100)}
                   />
                   <TouchableOpacity
                     style={{
