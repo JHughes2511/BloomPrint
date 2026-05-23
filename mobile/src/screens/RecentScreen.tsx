@@ -706,7 +706,7 @@ export default function RecentScreen() {
               )}
             </ScrollView>
             <TouchableOpacity
-              style={[sendStyles.cancelBtn, { marginTop: 12 }]}
+              style={[sendStyles.cancelBtn, { marginTop: 12, flex: 0 }]}
               onPress={closeStaffShareModal}
             >
               <Text style={{ color: '#9ca3af', fontWeight: '600' }}>Cancel</Text>

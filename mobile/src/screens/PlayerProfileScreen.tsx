@@ -43,7 +43,7 @@ export default function PlayerProfileScreen() {
   const [sendingTraining, setSendingTraining] = useState(false);
   // Training picker for send flows
   const [showTrainingPicker, setShowTrainingPicker] = useState(false);
-  const [trainingPickerAction, setTrainingPickerAction] = useState<'player' | 'staff' | null>(null);
+  const [trainingPickerAction, setTrainingPickerAction] = useState<'player' | 'staff' | 'regen' | null>(null);
 
   // Edit state
   const [showEdit, setShowEdit] = useState(false);
@@ -196,7 +196,7 @@ export default function PlayerProfileScreen() {
     }
   };
 
-  const openTrainingPicker = (action: 'player' | 'staff') => {
+  const openTrainingPicker = (action: 'player' | 'staff' | 'regen') => {
     if (allTraining.length === 0) {
       Alert.alert('No Training', 'Generate a training program first.');
       return;
@@ -514,7 +514,14 @@ export default function PlayerProfileScreen() {
         />
         <TouchableOpacity
           style={[styles.regenBtn, (!trainingFeedback.trim() || regeneratingTraining) && { opacity: 0.5 }]}
-          onPress={regenerateTraining}
+          onPress={() => {
+            if (!trainingFeedback.trim()) return;
+            if (allTraining.length > 1) {
+              openTrainingPicker('regen');
+            } else {
+              regenerateTraining();
+            }
+          }}
           disabled={!trainingFeedback.trim() || regeneratingTraining}
         >
           {regeneratingTraining
@@ -545,13 +552,19 @@ export default function PlayerProfileScreen() {
           <View style={{ backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
               <Text style={{ color: '#fff', fontSize: 15, fontWeight: '800' }}>
-                {trainingPickerAction === 'player' ? 'Send Training to Player' : 'Share Training with Staff'}
+                {trainingPickerAction === 'player' ? 'Send Training to Player' :
+                 trainingPickerAction === 'regen' ? 'Choose Training to Regenerate' :
+                 'Share Training with Staff'}
               </Text>
               <TouchableOpacity onPress={() => setShowTrainingPicker(false)} style={{ padding: 4 }}>
                 <Ionicons name="close" size={22} color="#9ca3af" />
               </TouchableOpacity>
             </View>
-            <Text style={{ color: '#6b7280', fontSize: 12, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 4 }}>Select which training program to send:</Text>
+            <Text style={{ color: '#6b7280', fontSize: 12, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 4 }}>
+              {trainingPickerAction === 'regen'
+                ? 'Select which training program to regenerate with your feedback:'
+                : 'Select which training program to send:'}
+            </Text>
             <ScrollView contentContainerStyle={{ padding: 12 }} keyboardShouldPersistTaps="handled">
               {[...allTraining].reverse().map((ts: any, idx: number) => (
                 <TouchableOpacity
@@ -561,6 +574,8 @@ export default function PlayerProfileScreen() {
                     setShowTrainingPicker(false);
                     if (trainingPickerAction === 'player') {
                       sendTrainingToPlayer(ts.id);
+                    } else if (trainingPickerAction === 'regen') {
+                      regenerateTraining(ts.id);
                     } else {
                       setStaffShareId(ts.id);
                       setStaffShareType('training');
