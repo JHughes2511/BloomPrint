@@ -5,6 +5,8 @@ import {
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import { playersAPI, teamsAPI, playerAPI, trainingAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import { Player, Evaluation, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
@@ -153,9 +155,14 @@ export default function PlayerProfileScreen() {
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [generatingInvite, setGeneratingInvite] = useState(false);
 
-  // Training regenerate state
+  // Training regenerate state (main profile section)
   const [trainingFeedback, setTrainingFeedback] = useState('');
   const [regeneratingTraining, setRegeneratingTraining] = useState(false);
+
+  // Training modal corrections + print/export
+  const [modalCorrection, setModalCorrection] = useState('');
+  const [regeneratingModal, setRegeneratingModal] = useState(false);
+  const [exportingTraining, setExportingTraining] = useState(false);
 
   // Share with staff
   const [showStaffShare, setShowStaffShare] = useState(false);
@@ -216,6 +223,65 @@ export default function PlayerProfileScreen() {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate training');
     } finally {
       setRegeneratingTraining(false);
+    }
+  };
+
+  const regenerateTrainingFromModal = async () => {
+    if (!modalCorrection.trim() || !player) return;
+    setRegeneratingModal(true);
+    try {
+      const updated = await trainingAPI.regenerate(player.id, modalCorrection.trim());
+      setModalCorrection('');
+      // refresh the full training list and update the open modal
+      const refreshed = await trainingAPI.forPlayer(player.id).catch(() => [] as any[]);
+      if (Array.isArray(refreshed) && refreshed.length > 0) {
+        setLatestTraining(refreshed[refreshed.length - 1]);
+        setAllTraining(refreshed);
+        setTrainingModalItem(refreshed[refreshed.length - 1]);
+      }
+      Alert.alert('Regenerated', 'Training program updated with your corrections.');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate training');
+    } finally {
+      setRegeneratingModal(false);
+    }
+  };
+
+  const printTraining = async () => {
+    if (!trainingModalItem?.program_text) return;
+    const lines = trainingModalItem.program_text.split('\n');
+    const htmlLines = lines.map((line: string) => {
+      const clean = line.replace(/#{1,6}\s*/g, '').replace(/\*\*/g, '').replace(/^-{3,}$|^={3,}$|^—{3,}$/, '').trim();
+      if (!clean) return '<br/>';
+      const isHeader = /^[A-Z][A-Z\s\/&()\d-]{2,}:?$/.test(clean) && clean.length < 60;
+      return isHeader ? `<h3 style="margin:16px 0 4px">${clean}</h3>` : `<p style="margin:2px 0;font-size:14px">${clean}</p>`;
+    });
+    const html = `<html><body style="font-family:sans-serif;padding:24px;color:#111"><h2>${player?.name ?? ''} — Training Program</h2>${htmlLines.join('')}</body></html>`;
+    try {
+      await Print.printAsync({ html });
+    } catch {}
+  };
+
+  const exportTraining = async () => {
+    if (!trainingModalItem?.program_text) return;
+    setExportingTraining(true);
+    try {
+      const lines = trainingModalItem.program_text.split('\n');
+      const htmlLines = lines.map((line: string) => {
+        const clean = line.replace(/#{1,6}\s*/g, '').replace(/\*\*/g, '').replace(/^-{3,}$|^={3,}$|^—{3,}$/, '').trim();
+        if (!clean) return '<br/>';
+        const isHeader = /^[A-Z][A-Z\s\/&()\d-]{2,}:?$/.test(clean) && clean.length < 60;
+        return isHeader ? `<h3 style="margin:16px 0 4px">${clean}</h3>` : `<p style="margin:2px 0;font-size:14px">${clean}</p>`;
+      });
+      const html = `<html><body style="font-family:sans-serif;padding:24px;color:#111"><h2>${player?.name ?? ''} — Training Program</h2>${htmlLines.join('')}</body></html>`;
+      const { uri } = await Print.printToFileAsync({ html });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Export Training Program' });
+      }
+    } catch (e: any) {
+      Alert.alert('Error', 'Could not export training program');
+    } finally {
+      setExportingTraining(false);
     }
   };
 
@@ -472,52 +538,96 @@ export default function PlayerProfileScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView
-              style={{ flex: 1 }}
-              contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
-              showsVerticalScrollIndicator={true}
-            >
-              {trainingModalItem?.program_text
-                ? renderReport(trainingModalItem.program_text)
-                : <Text style={{ color: '#6b7280' }}>No training content.</Text>
-              }
-            </ScrollView>
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+              <ScrollView
+                style={{ flex: 1 }}
+                contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+                showsVerticalScrollIndicator={true}
+                keyboardShouldPersistTaps="handled"
+              >
+                {trainingModalItem?.program_text
+                  ? renderReport(trainingModalItem.program_text)
+                  : <Text style={{ color: '#6b7280' }}>No training content.</Text>
+                }
 
-            {/* Action row: Send to Player + Send to Staff + Close */}
-            <View style={{ flexDirection: 'row', gap: 8, padding: 12, borderTopWidth: 1, borderTopColor: '#1f2937' }}>
-              <TouchableOpacity
-                style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#16a34a', borderRadius: 10, paddingVertical: 12 }}
-                onPress={() => {
-                  setTrainingModalItem(null);
-                  sendTrainingToPlayer();
-                }}
-                disabled={sendingTraining}
-              >
-                {sendingTraining
-                  ? <ActivityIndicator color="#fff" size="small" />
-                  : <><Ionicons name="person-outline" size={15} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Send to Player</Text></>}
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#7c3aed', borderRadius: 10, paddingVertical: 12 }}
-                onPress={() => {
-                  if (!trainingModalItem) return;
-                  setStaffShareId(trainingModalItem.id);
-                  setStaffShareType('training');
-                  setShowStaffShare(true);
-                  setStaffSearch('');
-                  setStaffResults([]);
-                  setTrainingModalItem(null);
-                }}
-              >
-                <Ionicons name="people-outline" size={15} color="#fff" />
-                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Send to Staff</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={{ paddingHorizontal: 14, paddingVertical: 12, borderRadius: 10, borderWidth: 1, borderColor: '#374151', alignItems: 'center', justifyContent: 'center' }}
-                onPress={() => setTrainingModalItem(null)}
-              >
-                <Text style={{ color: '#9ca3af', fontWeight: '600', fontSize: 13 }}>Close</Text>
-              </TouchableOpacity>
+                {/* Corrections section */}
+                <View style={{ marginTop: 24, borderTopWidth: 1, borderTopColor: '#1f2937', paddingTop: 16 }}>
+                  <Text style={{ color: '#d1d5db', fontWeight: '700', fontSize: 13, marginBottom: 8 }}>CORRECTIONS</Text>
+                  <TextInput
+                    style={{
+                      backgroundColor: '#1f2937', color: '#f9fafb', borderRadius: 10,
+                      padding: 12, fontSize: 14, minHeight: 80, textAlignVertical: 'top',
+                      borderWidth: 1, borderColor: '#374151',
+                    }}
+                    placeholder="Enter corrections or feedback for a new training program..."
+                    placeholderTextColor="#4b5563"
+                    value={modalCorrection}
+                    onChangeText={setModalCorrection}
+                    multiline
+                  />
+                  <TouchableOpacity
+                    style={{
+                      marginTop: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                      gap: 6, backgroundColor: '#7c3aed', borderRadius: 10, paddingVertical: 12,
+                      opacity: (!modalCorrection.trim() || regeneratingModal) ? 0.5 : 1,
+                    }}
+                    onPress={regenerateTrainingFromModal}
+                    disabled={!modalCorrection.trim() || regeneratingModal}
+                  >
+                    {regeneratingModal
+                      ? <ActivityIndicator color="#fff" size="small" />
+                      : <><Ionicons name="refresh" size={15} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Apply & Regenerate</Text></>}
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </KeyboardAvoidingView>
+
+            {/* Action row: Send to Player, Send to Staff, Print, Export */}
+            <View style={{ padding: 12, borderTopWidth: 1, borderTopColor: '#1f2937', gap: 8 }}>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity
+                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#16a34a', borderRadius: 10, paddingVertical: 12 }}
+                  onPress={() => { setTrainingModalItem(null); sendTrainingToPlayer(); }}
+                  disabled={sendingTraining}
+                >
+                  {sendingTraining
+                    ? <ActivityIndicator color="#fff" size="small" />
+                    : <><Ionicons name="person-outline" size={15} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Send to Player</Text></>}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#7c3aed', borderRadius: 10, paddingVertical: 12 }}
+                  onPress={() => {
+                    if (!trainingModalItem) return;
+                    setStaffShareId(trainingModalItem.id);
+                    setStaffShareType('training');
+                    setShowStaffShare(true);
+                    setStaffSearch('');
+                    setStaffResults([]);
+                    setTrainingModalItem(null);
+                  }}
+                >
+                  <Ionicons name="people-outline" size={15} color="#fff" />
+                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Send to Staff</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity
+                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#1f2937', borderRadius: 10, paddingVertical: 12, borderWidth: 1, borderColor: '#374151' }}
+                  onPress={printTraining}
+                >
+                  <Ionicons name="print-outline" size={15} color="#d1d5db" />
+                  <Text style={{ color: '#d1d5db', fontWeight: '700', fontSize: 13 }}>Print</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#1f2937', borderRadius: 10, paddingVertical: 12, borderWidth: 1, borderColor: '#374151' }}
+                  onPress={exportTraining}
+                  disabled={exportingTraining}
+                >
+                  {exportingTraining
+                    ? <ActivityIndicator color="#d1d5db" size="small" />
+                    : <><Ionicons name="share-outline" size={15} color="#d1d5db" /><Text style={{ color: '#d1d5db', fontWeight: '700', fontSize: 13 }}>Export PDF</Text></>}
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
