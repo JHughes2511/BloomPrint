@@ -839,7 +839,6 @@ export default function RecentScreen() {
                     placeholderTextColor="#6b7280"
                     value={sendSearch}
                     onChangeText={setSendSearch}
-                    autoFocus
                   />
                   {sendSearchLoading && (
                     <ActivityIndicator color="#6b7280" size="small" style={{ marginTop: 8, alignSelf: 'center' }} />
@@ -881,7 +880,6 @@ export default function RecentScreen() {
                   onChangeText={setTeamCorrectText}
                   multiline
                   textAlignVertical="top"
-                  autoFocus
                 />
                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                   <TouchableOpacity style={sendStyles.cancelBtn} onPress={() => setModalView('report')}>

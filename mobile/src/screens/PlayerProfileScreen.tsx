@@ -41,6 +41,9 @@ export default function PlayerProfileScreen() {
   const [trainingModalItem, setTrainingModalItem] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [sendingTraining, setSendingTraining] = useState(false);
+  // Training picker for send flows
+  const [showTrainingPicker, setShowTrainingPicker] = useState(false);
+  const [trainingPickerAction, setTrainingPickerAction] = useState<'player' | 'staff' | null>(null);
 
   // Edit state
   const [showEdit, setShowEdit] = useState(false);
@@ -193,14 +196,24 @@ export default function PlayerProfileScreen() {
     }
   };
 
-  const sendTrainingToPlayer = async () => {
-    if (!latestTraining) {
+  const openTrainingPicker = (action: 'player' | 'staff') => {
+    if (allTraining.length === 0) {
+      Alert.alert('No Training', 'Generate a training program first.');
+      return;
+    }
+    setTrainingPickerAction(action);
+    setShowTrainingPicker(true);
+  };
+
+  const sendTrainingToPlayer = async (trainingId?: number) => {
+    const id = trainingId ?? latestTraining?.id;
+    if (!id) {
       Alert.alert('No Training', 'Generate a training program first.');
       return;
     }
     setSendingTraining(true);
     try {
-      const result = await trainingAPI.sendToPlayer(latestTraining.id);
+      const result = await trainingAPI.sendToPlayer(id);
       Alert.alert('Sent!', `Training program sent to ${result.player_name ?? 'the player'}.`);
     } catch (e: any) {
       const msg = e?.response?.data?.detail ?? 'Could not send training';
@@ -464,7 +477,7 @@ export default function PlayerProfileScreen() {
       {/* Send training to player */}
       <TouchableOpacity
         style={[styles.trainingBtn, { backgroundColor: '#16a34a', marginTop: 8 }]}
-        onPress={sendTrainingToPlayer}
+        onPress={() => openTrainingPicker('player')}
         disabled={sendingTraining}
       >
         {sendingTraining
@@ -473,10 +486,10 @@ export default function PlayerProfileScreen() {
       </TouchableOpacity>
 
       {/* Share training with staff */}
-      {latestTraining && (
+      {allTraining.length > 0 && (
         <TouchableOpacity
           style={[styles.trainingBtn, { backgroundColor: '#7c3aed', marginTop: 8 }]}
-          onPress={() => { setStaffShareId(latestTraining.id); setStaffShareType('training'); setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }}
+          onPress={() => openTrainingPicker('staff')}
         >
           <Ionicons name="people-outline" size={18} color="#fff" />
           <Text style={styles.trainingText}>Share Training with Staff</Text>
@@ -525,6 +538,59 @@ export default function PlayerProfileScreen() {
           <Text style={styles.inviteCodeHint}>Share this code with the player so they can link their account</Text>
         </View>
       )}
+
+      {/* Training picker modal — choose which training to send */}
+      <Modal visible={showTrainingPicker} transparent animationType="slide">
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+              <Text style={{ color: '#fff', fontSize: 15, fontWeight: '800' }}>
+                {trainingPickerAction === 'player' ? 'Send Training to Player' : 'Share Training with Staff'}
+              </Text>
+              <TouchableOpacity onPress={() => setShowTrainingPicker(false)} style={{ padding: 4 }}>
+                <Ionicons name="close" size={22} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+            <Text style={{ color: '#6b7280', fontSize: 12, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 4 }}>Select which training program to send:</Text>
+            <ScrollView contentContainerStyle={{ padding: 12 }} keyboardShouldPersistTaps="handled">
+              {[...allTraining].reverse().map((ts: any, idx: number) => (
+                <TouchableOpacity
+                  key={ts.id}
+                  style={{ backgroundColor: '#1f2937', borderRadius: 10, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#374151' }}
+                  onPress={() => {
+                    setShowTrainingPicker(false);
+                    if (trainingPickerAction === 'player') {
+                      sendTrainingToPlayer(ts.id);
+                    } else {
+                      setStaffShareId(ts.id);
+                      setStaffShareType('training');
+                      setShowStaffShare(true);
+                      setStaffSearch('');
+                      setStaffResults([]);
+                    }
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>
+                      {idx === allTraining.length - 1 ? 'Latest — ' : ''}{new Date(ts.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </Text>
+                    {idx === allTraining.length - 1 && (
+                      <View style={{ backgroundColor: '#7c3aed', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
+                        <Text style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>LATEST</Text>
+                      </View>
+                    )}
+                  </View>
+                  {ts.program_text ? (
+                    <Text style={{ color: '#6b7280', fontSize: 12, marginTop: 4 }} numberOfLines={2}>
+                      {ts.program_text.replace(/[#*_\-=]/g, '').trim().slice(0, 100)}...
+                    </Text>
+                  ) : null}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
       {/* Player profile detail modal */}
       <Modal visible={showProfileDetail} transparent animationType="slide">

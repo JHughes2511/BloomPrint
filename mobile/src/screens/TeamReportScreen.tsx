@@ -162,6 +162,12 @@ export default function TeamReportScreen() {
   const [shareMessage, setShareMessage] = useState('');
   const [sharing, setSharing] = useState(false);
   const [shareSearchLoading, setShareSearchLoading] = useState(false);
+  // Content toggles for share modals
+  const [shareToggles, setShareToggles] = useState({ report_text: true, overall_grade: false, pillar_grades: false, green_flags: false, watch_flags: false, key_questions: false });
+  // Context for which report is being shared (prev report modal)
+  const [shareSourceReport, setShareSourceReport] = useState<any>(null);
+  // Export state for prev report modal
+  const [exportingPrevReport, setExportingPrevReport] = useState(false);
 
   const buildFileName = () => {
     const typeLabel = outputType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -257,6 +263,34 @@ export default function TeamReportScreen() {
     } finally {
       setSharing(false);
     }
+  };
+
+  const buildPrevReportHtml = (report: any) => {
+    if (!report?.report_text) return '';
+    const typeLabel = (report.output_type ?? '').replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
+    const lines = report.report_text.split('\n');
+    const htmlLines = lines.map((line: string) => {
+      const clean = line.replace(/#{1,6}\s*/g, '').replace(/\*\*/g, '').replace(/^-{3,}$|^={3,}$|^—{3,}$/, '').trim();
+      if (!clean) return '<br/>';
+      const isHeader = /^[A-Z][A-Z\s\/&()\d-]{2,}:?$/.test(clean) && clean.length < 60;
+      return isHeader ? `<h3 style="margin:16px 0 4px">${clean}</h3>` : `<p style="margin:2px 0;font-size:14px">${clean}</p>`;
+    });
+    return `<html><body style="font-family:sans-serif;padding:24px;color:#111"><h2>${typeLabel}</h2>${htmlLines.join('')}</body></html>`;
+  };
+
+  const printPrevReport = async (report: any) => {
+    try { await Print.printAsync({ html: buildPrevReportHtml(report) }); } catch {}
+  };
+
+  const exportPrevReport = async (report: any) => {
+    setExportingPrevReport(true);
+    try {
+      const { uri } = await Print.printToFileAsync({ html: buildPrevReportHtml(report) });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Export Report' });
+      }
+    } catch { Alert.alert('Error', 'Could not export report'); }
+    setExportingPrevReport(false);
   };
 
   const searchStaff = async () => {
@@ -609,33 +643,57 @@ export default function TeamReportScreen() {
                 <Text style={{ color: '#6b7280' }}>No report content.</Text>
               )}
 
-              {/* Share buttons */}
-              <View style={{ flexDirection: 'row', gap: 8, marginTop: 20 }}>
-                <TouchableOpacity
-                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#16a34a', borderRadius: 10, paddingVertical: 12 }}
-                  onPress={() => {
-                    if (!selectedPrevReport?.report_text) return;
-                    setReportText(selectedPrevReport.report_text);
-                    setSavedTeamReportId(selectedPrevReport.id);
-                    setSelectedPrevReport(null);
-                    setTimeout(() => setShowShare(true), 200);
-                  }}
-                >
-                  <Ionicons name="person-outline" size={15} color="#fff" />
-                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Send to Player</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#7c3aed', borderRadius: 10, paddingVertical: 12 }}
-                  onPress={() => {
-                    if (!selectedPrevReport) return;
-                    setSavedTeamReportId(selectedPrevReport.id);
-                    setSelectedPrevReport(null);
-                    setTimeout(() => { setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }, 200);
-                  }}
-                >
-                  <Ionicons name="people-outline" size={15} color="#fff" />
-                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Send to Staff</Text>
-                </TouchableOpacity>
+              {/* Share + Print/Export buttons */}
+              <View style={{ gap: 8, marginTop: 20 }}>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <TouchableOpacity
+                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#16a34a', borderRadius: 10, paddingVertical: 12 }}
+                    onPress={() => {
+                      if (!selectedPrevReport?.report_text) return;
+                      setShareSourceReport(selectedPrevReport);
+                      setReportText(selectedPrevReport.report_text);
+                      setSavedTeamReportId(selectedPrevReport.id);
+                      setShareToggles({ report_text: true, overall_grade: false, pillar_grades: false, green_flags: false, watch_flags: false, key_questions: false });
+                      setSelectedPrevReport(null);
+                      setTimeout(() => setShowShare(true), 200);
+                    }}
+                  >
+                    <Ionicons name="person-outline" size={15} color="#fff" />
+                    <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Send to Player</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#7c3aed', borderRadius: 10, paddingVertical: 12 }}
+                    onPress={() => {
+                      if (!selectedPrevReport) return;
+                      setShareSourceReport(selectedPrevReport);
+                      setSavedTeamReportId(selectedPrevReport.id);
+                      setShareToggles({ report_text: true, overall_grade: false, pillar_grades: false, green_flags: false, watch_flags: false, key_questions: false });
+                      setSelectedPrevReport(null);
+                      setTimeout(() => { setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }, 200);
+                    }}
+                  >
+                    <Ionicons name="people-outline" size={15} color="#fff" />
+                    <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Send to Staff</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <TouchableOpacity
+                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#1f2937', borderRadius: 10, paddingVertical: 12, borderWidth: 1, borderColor: '#374151' }}
+                    onPress={() => printPrevReport(selectedPrevReport)}
+                  >
+                    <Ionicons name="print-outline" size={15} color="#d1d5db" />
+                    <Text style={{ color: '#d1d5db', fontWeight: '700', fontSize: 13 }}>Print</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#1f2937', borderRadius: 10, paddingVertical: 12, borderWidth: 1, borderColor: '#374151' }}
+                    onPress={() => exportPrevReport(selectedPrevReport)}
+                    disabled={exportingPrevReport}
+                  >
+                    {exportingPrevReport
+                      ? <ActivityIndicator color="#d1d5db" size="small" />
+                      : <><Ionicons name="share-outline" size={15} color="#d1d5db" /><Text style={{ color: '#d1d5db', fontWeight: '700', fontSize: 13 }}>Export PDF</Text></>}
+                  </TouchableOpacity>
+                </View>
               </View>
 
               {/* Corrections section */}
@@ -704,17 +762,32 @@ export default function TeamReportScreen() {
       {/* Share with Staff Modal */}
       <Modal visible={showStaffShare} transparent animationType="slide">
         <KeyboardAvoidingView style={shareStyles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={shareStyles.modal}>
+          <ScrollView style={shareStyles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
             <Text style={shareStyles.title}>Share with Staff</Text>
-            <Text style={shareStyles.label}>Allow Regenerate</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
+            {/* Report preview */}
+            {shareSourceReport && (
+              <View style={{ backgroundColor: '#1f2937', borderRadius: 8, padding: 12, marginBottom: 12 }}>
+                <Text style={{ color: '#6b7280', fontSize: 11, fontWeight: '700', marginBottom: 2 }}>SENDING REPORT</Text>
+                <Text style={{ color: '#fff', fontSize: 13, fontWeight: '700' }}>
+                  {(shareSourceReport.output_type ?? outputType).replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                </Text>
+                <Text style={{ color: '#9ca3af', fontSize: 12, marginTop: 2 }}>
+                  {new Date(shareSourceReport.created_at ?? Date.now()).toLocaleDateString()}
+                </Text>
+              </View>
+            )}
+            {/* Content toggles */}
+            <Text style={[shareStyles.label, { marginBottom: 6 }]}>Include in Share</Text>
+            {([['report_text', 'Report Text'], ['overall_grade', 'Overall Grade'], ['pillar_grades', 'Pillar Grades'], ['green_flags', 'Green Flags'], ['watch_flags', 'Watch Flags'], ['key_questions', 'Key Questions']] as const).map(([key, label]) => (
+              <View key={key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 }}>
+                <Text style={{ color: '#d1d5db', fontSize: 13 }}>{label}</Text>
+                <Switch value={shareToggles[key]} onValueChange={v => setShareToggles(p => ({ ...p, [key]: v }))} trackColor={{ true: '#7c3aed', false: '#374151' }} thumbColor="#fff" />
+              </View>
+            ))}
+            {/* Allow regenerate */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 }}>
               <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
-              <TouchableOpacity
-                onPress={() => setAllowRegen(v => !v)}
-                style={{ width: 40, height: 22, borderRadius: 11, backgroundColor: allowRegen ? '#7c3aed' : '#374151', justifyContent: 'center', paddingHorizontal: 2 }}
-              >
-                <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: '#fff', alignSelf: allowRegen ? 'flex-end' : 'flex-start' }} />
-              </TouchableOpacity>
+              <Switch value={allowRegen} onValueChange={setAllowRegen} trackColor={{ true: '#7c3aed', false: '#374151' }} thumbColor="#fff" />
             </View>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
               <TextInput
@@ -738,19 +811,39 @@ export default function TeamReportScreen() {
               </TouchableOpacity>
             ))}
             <View style={shareStyles.btnRow}>
-              <TouchableOpacity style={shareStyles.cancelBtn} onPress={() => setShowStaffShare(false)}>
+              <TouchableOpacity style={shareStyles.cancelBtn} onPress={() => { setShowStaffShare(false); setShareSourceReport(null); }}>
                 <Text style={shareStyles.cancelText}>Cancel</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
 
       {/* Share Modal */}
       <Modal visible={showShare} transparent animationType="slide">
         <KeyboardAvoidingView style={shareStyles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={shareStyles.modal}>
+          <ScrollView style={shareStyles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
             <Text style={shareStyles.title}>Share Team Report</Text>
+            {/* Report preview */}
+            {shareSourceReport && (
+              <View style={{ backgroundColor: '#1f2937', borderRadius: 8, padding: 12, marginBottom: 12 }}>
+                <Text style={{ color: '#6b7280', fontSize: 11, fontWeight: '700', marginBottom: 2 }}>SENDING REPORT</Text>
+                <Text style={{ color: '#fff', fontSize: 13, fontWeight: '700' }}>
+                  {(shareSourceReport.output_type ?? outputType).replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                </Text>
+                <Text style={{ color: '#9ca3af', fontSize: 12, marginTop: 2 }}>
+                  {new Date(shareSourceReport.created_at ?? Date.now()).toLocaleDateString()}
+                </Text>
+              </View>
+            )}
+            {/* Content toggles */}
+            <Text style={[shareStyles.label, { marginBottom: 6 }]}>Include in Share</Text>
+            {([['report_text', 'Report Text'], ['overall_grade', 'Overall Grade'], ['pillar_grades', 'Pillar Grades'], ['green_flags', 'Green Flags'], ['watch_flags', 'Watch Flags'], ['key_questions', 'Key Questions']] as const).map(([key, label]) => (
+              <View key={key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 }}>
+                <Text style={{ color: '#d1d5db', fontSize: 13 }}>{label}</Text>
+                <Switch value={shareToggles[key]} onValueChange={v => setShareToggles(p => ({ ...p, [key]: v }))} trackColor={{ true: '#16a34a', false: '#374151' }} thumbColor="#fff" />
+              </View>
+            ))}
 
             {/* Target type selector */}
             <Text style={shareStyles.label}>Send To</Text>
@@ -865,7 +958,7 @@ export default function TeamReportScreen() {
                 {sharing ? <ActivityIndicator color="#fff" /> : <Text style={shareStyles.shareBtnText}>Send</Text>}
               </TouchableOpacity>
             </View>
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
     </KeyboardAvoidingView>
