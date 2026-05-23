@@ -48,14 +48,15 @@ export default function HomeScreen() {
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       {/* Header */}
       <View style={styles.header}>
+        {/* Top row: logo on left, icon buttons on right */}
         <View style={styles.headerTop}>
-          <View>
+          <View style={{ flex: 1, marginRight: 8 }}>
             <Text style={styles.logo}>BloomPrint</Text>
             <Text style={styles.sub}>Basketball Intelligence Model</Text>
           </View>
-          <View style={{ flexDirection: 'row', gap: 12 }}>
+          <View style={{ flexDirection: 'row', gap: 8, flexShrink: 0 }}>
             <TouchableOpacity
-              style={[styles.signOutBtn, { marginLeft: 16 }]}
+              style={styles.signOutBtn}
               onPress={() => navigation.navigate('StaffInbox')}
             >
               <Ionicons name="mail-outline" size={18} color="#9ca3af" />
@@ -71,10 +72,6 @@ export default function HomeScreen() {
                 </View>
               )}
             </TouchableOpacity>
-            <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
-              <Ionicons name="log-out-outline" size={18} color="#6b7280" />
-              <Text style={styles.signOutText}>Sign Out</Text>
-            </TouchableOpacity>
           </View>
         </View>
         {coach && (
@@ -85,6 +82,11 @@ export default function HomeScreen() {
             </Text>
           </View>
         )}
+        {/* Sign out — always visible below coach info */}
+        <TouchableOpacity style={[styles.signOutBtn, { alignSelf: 'flex-start', marginTop: 10 }]} onPress={handleSignOut}>
+          <Ionicons name="log-out-outline" size={16} color="#6b7280" />
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Report Types */}

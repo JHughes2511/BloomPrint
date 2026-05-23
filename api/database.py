@@ -137,3 +137,16 @@ def _run_migrations():
             conn.commit()
         except Exception:
             pass
+
+        # Add allow_regenerate to staff_shared_reports if missing
+        try:
+            ssr_cols2 = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(staff_shared_reports)")
+            )]
+            if ssr_cols2 and "allow_regenerate" not in ssr_cols2:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE staff_shared_reports ADD COLUMN allow_regenerate INTEGER NOT NULL DEFAULT 0"
+                ))
+                conn.commit()
+        except Exception:
+            pass

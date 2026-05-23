@@ -8,40 +8,12 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import Markdown from 'react-native-markdown-display';
 import { evalsAPI, playersAPI, playerAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import { Evaluation, Correction, Player } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
 import { mdToHtml, safeFileName } from '../utils/mdToHtml';
-
-function cleanMarkdown(text: string): string {
-  return text
-    .split('\n')
-    .map(line => {
-      // Remove lines that are only dashes/equals/em-dashes
-      if (/^\s*[-=—]{3,}\s*$/.test(line)) return '';
-      // Remove lines that are only ** or whitespace/**
-      if (/^\s*\*{1,2}\s*$/.test(line)) return '';
-      // Remove ## prefix
-      line = line.replace(/^#+\s*/, '');
-      // Remove trailing orphaned **
-      line = line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
-      // Bold section headers: ALL-CAPS lines or short lines ending with ':'
-      const trimmed = line.trim();
-      if (
-        trimmed.length > 2 &&
-        trimmed.length < 60 &&
-        /^[A-Z][A-Z\s\/&\-()\d]{2,}:?$/.test(trimmed)
-      ) {
-        return `**${trimmed}**`;
-      }
-      return line;
-    })
-    .join('\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-}
+import { renderReport } from '../utils/renderReport';
 
 const PILLARS = [
   'offensive_skills', 'defensive_capabilities', 'physical_attributes',
@@ -505,12 +477,12 @@ export default function EvalReportScreen() {
         </View>
       )}
 
-      {/* Full report — rendered markdown */}
+      {/* Full report — plain text rendering */}
       {ev.report_text && (
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Full Report</Text>
           <View style={styles.reportBox}>
-            <Markdown style={markdownStyles}>{cleanMarkdown(ev.report_text)}</Markdown>
+            {renderReport(ev.report_text)}
           </View>
         </View>
       )}
@@ -807,19 +779,6 @@ export default function EvalReportScreen() {
   );
 }
 
-const markdownStyles = {
-  body: { color: '#d1d5db', fontSize: 13, lineHeight: 22 },
-  heading1: { color: '#ffffff', fontSize: 16, fontWeight: '800' as const, marginTop: 16, marginBottom: 4 },
-  heading2: { color: '#e5e7eb', fontSize: 14, fontWeight: '700' as const, marginTop: 14, marginBottom: 4 },
-  heading3: { color: '#9ca3af', fontSize: 13, fontWeight: '700' as const, marginTop: 12, marginBottom: 2 },
-  strong: { color: '#ffffff', fontWeight: '700' as const },
-  em: { color: '#93c5fd' },
-  bullet_list: { marginLeft: 8 },
-  list_item: { color: '#d1d5db', fontSize: 13 },
-  hr: { backgroundColor: '#1f2937', height: 1, marginVertical: 12 },
-  blockquote: { backgroundColor: '#1f2937', borderLeftColor: '#2563eb', paddingLeft: 12 },
-  code_inline: { backgroundColor: '#1f2937', color: '#93c5fd', borderRadius: 4, paddingHorizontal: 4 },
-};
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0a0a' },

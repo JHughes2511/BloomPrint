@@ -1,17 +1,17 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, Alert, ScrollView, Modal, TextInput, KeyboardAvoidingView, Platform,
+  ActivityIndicator, Alert, ScrollView, Modal, TextInput, KeyboardAvoidingView, Platform, Switch,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import Markdown from 'react-native-markdown-display';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { evalsAPI, playerAPI, gameReportsAPI, trainingAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import { GradeBadge } from '../components/GradeBadge';
 import { mdToHtml, safeFileName } from '../utils/mdToHtml';
+import { renderReport } from '../utils/renderReport';
 
 const TYPE_LABELS: Record<string, string> = {
   player_eval: 'Player Eval',
@@ -55,28 +55,11 @@ const FILTER_CATS = [
   { key: 'training', label: 'Training' },
 ];
 
-function cleanMarkdown(text: string): string {
-  return text
-    .split('\n')
-    .map(line => {
-      if (/^\s*[-=—]{3,}\s*$/.test(line)) return '';
-      if (/^\s*\*{1,2}\s*$/.test(line)) return '';
-      line = line.replace(/^#+\s*/, '');
-      line = line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
-      const trimmed = line.trim();
-      if (
-        trimmed.length > 2 &&
-        trimmed.length < 60 &&
-        /^[A-Z][A-Z\s\/&\-()\d]{2,}:?$/.test(trimmed)
-      ) {
-        return `**${trimmed}**`;
-      }
-      return line;
-    })
-    .join('\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-}
+type StaffShareContext = {
+  report_type: string;
+  report_id: number;
+  label: string;
+};
 
 export default function RecentScreen() {
   const navigation = useNavigation<any>();
@@ -104,13 +87,31 @@ export default function RecentScreen() {
   const [teamCorrectText, setTeamCorrectText] = useState('');
   const [applyingCorrect, setApplyingCorrect] = useState(false);
 
-  // Send Training to Staff modal
-  const [staffShareTrainingId, setStaffShareTrainingId] = useState<number | null>(null);
+  // Generic Send to Staff modal
+  const [staffShareCtx, setStaffShareCtx] = useState<StaffShareContext | null>(null);
   const [showStaffShareModal, setShowStaffShareModal] = useState(false);
   const [staffSearch, setStaffSearch] = useState('');
   const [staffResults, setStaffResults] = useState<any[]>([]);
   const [staffSearchLoading, setStaffSearchLoading] = useState(false);
   const [sendingToStaff, setSendingToStaff] = useState(false);
+  const [staffAllowRegen, setStaffAllowRegen] = useState(false);
+  const [staffMessage, setStaffMessage] = useState('');
+
+  const openStaffShareModal = (ctx: StaffShareContext) => {
+    setStaffShareCtx(ctx);
+    setStaffSearch('');
+    setStaffResults([]);
+    setStaffAllowRegen(false);
+    setStaffMessage('');
+    setShowStaffShareModal(true);
+  };
+
+  const closeStaffShareModal = () => {
+    setShowStaffShareModal(false);
+    setStaffShareCtx(null);
+    setStaffSearch('');
+    setStaffResults([]);
+  };
 
   const searchStaff = async () => {
     if (!staffSearch.trim()) return;
@@ -122,20 +123,18 @@ export default function RecentScreen() {
     setStaffSearchLoading(false);
   };
 
-  const sendTrainingToStaff = async (target: any) => {
-    if (!staffShareTrainingId) return;
+  const sendToStaff = async (target: any) => {
+    if (!staffShareCtx) return;
     setSendingToStaff(true);
     try {
       await staffSharingAPI.share({
-        report_type: 'training',
-        report_id: staffShareTrainingId,
+        report_type: staffShareCtx.report_type,
+        report_id: staffShareCtx.report_id,
         recipient_id: target.id,
-        allow_regenerate: false,
+        allow_regenerate: staffAllowRegen,
       });
-      Alert.alert('Shared!', `Training program shared with ${target.name}.`);
-      setShowStaffShareModal(false);
-      setStaffSearch('');
-      setStaffResults([]);
+      Alert.alert('Shared!', `${staffShareCtx.label} shared with ${target.name}.`);
+      closeStaffShareModal();
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share');
     } finally {
@@ -482,17 +481,19 @@ export default function RecentScreen() {
                   {item.overall_grade != null && <GradeBadge grade={item.overall_grade} size="md" />}
                   {item.kind === 'game' && <Ionicons name="chevron-forward" size={14} color="#4b5563" />}
                 </TouchableOpacity>
-                {item.kind === 'game' && (
-                  <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, width: '100%' }}>
-                    {item.report_text ? (
-                      <TouchableOpacity
-                        style={styles.gameActionBtn}
-                        onPress={() => setGameReportModal({ title: item.player_name ?? 'Game Report', text: item.report_text! })}
-                      >
-                        <Ionicons name="document-text-outline" size={13} color="#a78bfa" />
-                        <Text style={[styles.gameActionText, { color: '#a78bfa' }]}>View Report</Text>
-                      </TouchableOpacity>
-                    ) : null}
+                {/* Action buttons row — shown for all card types */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10, width: '100%' }}>
+                  {/* Game-specific buttons */}
+                  {item.kind === 'game' && item.report_text ? (
+                    <TouchableOpacity
+                      style={styles.gameActionBtn}
+                      onPress={() => setGameReportModal({ title: item.player_name ?? 'Game Report', text: item.report_text! })}
+                    >
+                      <Ionicons name="document-text-outline" size={13} color="#a78bfa" />
+                      <Text style={[styles.gameActionText, { color: '#a78bfa' }]}>View Report</Text>
+                    </TouchableOpacity>
+                  ) : null}
+                  {item.kind === 'game' && (
                     <TouchableOpacity
                       style={styles.gameActionBtn}
                       onPress={() => navigation.navigate('GameReportBuilder', { reportId: item.id })}
@@ -500,24 +501,47 @@ export default function RecentScreen() {
                       <Ionicons name="create-outline" size={13} color="#9ca3af" />
                       <Text style={styles.gameActionText}>Edit Packet</Text>
                     </TouchableOpacity>
-                  </View>
-                )}
-                {item.kind === 'training' && (
-                  <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, width: '100%' }}>
+                  )}
+
+                  {/* Send to Player — available for eval, team, training; hidden for game */}
+                  {item.kind !== 'game' && (
                     <TouchableOpacity
-                      style={[styles.gameActionBtn, { borderColor: '#7c3aed22' }]}
+                      style={[styles.gameActionBtn, { borderColor: '#16a34a22' }]}
                       onPress={() => {
-                        setStaffShareTrainingId(item.id);
-                        setStaffSearch('');
-                        setStaffResults([]);
-                        setShowStaffShareModal(true);
+                        openModal({
+                          id: item.id,
+                          kind: item.kind as any,
+                          text: item.program_text ?? (teamReportTexts[item.id] ?? (evalCache[item.id]?.report_text ?? '')),
+                          outputType: item.output_type,
+                          playerName: item.player_name,
+                          evalId: item.kind === 'eval' ? item.id : undefined,
+                        });
+                        setTimeout(() => setModalView('send'), 50);
                       }}
                     >
-                      <Ionicons name="people-outline" size={13} color="#7c3aed" />
-                      <Text style={[styles.gameActionText, { color: '#7c3aed' }]}>Send to Staff</Text>
+                      <Ionicons name="person-outline" size={13} color="#16a34a" />
+                      <Text style={[styles.gameActionText, { color: '#16a34a' }]}>Send to Player</Text>
                     </TouchableOpacity>
-                  </View>
-                )}
+                  )}
+
+                  {/* Send to Staff — available for all types */}
+                  <TouchableOpacity
+                    style={[styles.gameActionBtn, { borderColor: '#7c3aed22' }]}
+                    onPress={() => {
+                      const reportType = item.kind === 'eval' ? 'eval' :
+                                         item.kind === 'team' ? 'team_report' :
+                                         item.kind === 'game' ? 'game' :
+                                         'training';
+                      const label = item.kind === 'training' ? 'Training Program' :
+                                    item.kind === 'game' ? 'Game Report' :
+                                    item.kind === 'team' ? 'Team Report' : 'Player Eval';
+                      openStaffShareModal({ report_type: reportType, report_id: item.id, label });
+                    }}
+                  >
+                    <Ionicons name="people-outline" size={13} color="#7c3aed" />
+                    <Text style={[styles.gameActionText, { color: '#7c3aed' }]}>Send to Staff</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </>
           );
@@ -546,7 +570,7 @@ export default function RecentScreen() {
             </View>
             <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
               {gameReportModal?.text
-                ? <Markdown style={mdStyles}>{cleanMarkdown(gameReportModal.text)}</Markdown>
+                ? renderReport(gameReportModal.text)
                 : <Text style={{ color: '#6b7280' }}>No report content available.</Text>
               }
             </ScrollView>
@@ -554,19 +578,33 @@ export default function RecentScreen() {
         </View>
       </Modal>
 
-      {/* Send Training to Staff Modal */}
+      {/* Generic Send to Staff Modal */}
       <Modal visible={showStaffShareModal} animationType="slide" transparent>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.modalTitle}>Send to Staff</Text>
-                <Text style={styles.modalSub}>Share this training program with a coach, scout, or trainer.</Text>
+                <Text style={styles.modalSub}>
+                  Share {staffShareCtx?.label ?? 'this report'} with a coach, scout, or trainer.
+                </Text>
               </View>
-              <TouchableOpacity onPress={() => setShowStaffShareModal(false)}>
+              <TouchableOpacity onPress={closeStaffShareModal}>
                 <Ionicons name="close" size={24} color="#9ca3af" />
               </TouchableOpacity>
             </View>
+
+            {/* Allow regenerate toggle */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
+              <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
+              <Switch
+                value={staffAllowRegen}
+                onValueChange={setStaffAllowRegen}
+                trackColor={{ false: '#374151', true: '#7c3aed' }}
+                thumbColor="#fff"
+              />
+            </View>
+
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
               <TextInput
                 style={[sendStyles.searchInput, { flex: 1 }]}
@@ -583,12 +621,12 @@ export default function RecentScreen() {
                 {staffSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
               </TouchableOpacity>
             </View>
-            <ScrollView style={{ maxHeight: 280 }} keyboardShouldPersistTaps="handled">
+            <ScrollView style={{ maxHeight: 220 }} keyboardShouldPersistTaps="handled">
               {staffResults.map((r: any) => (
                 <TouchableOpacity
                   key={r.id}
                   style={sendStyles.resultRow}
-                  onPress={() => sendTrainingToStaff(r)}
+                  onPress={() => sendToStaff(r)}
                   disabled={sendingToStaff}
                 >
                   <View style={{ flex: 1 }}>
@@ -604,7 +642,7 @@ export default function RecentScreen() {
             </ScrollView>
             <TouchableOpacity
               style={[sendStyles.cancelBtn, { marginTop: 12 }]}
-              onPress={() => setShowStaffShareModal(false)}
+              onPress={closeStaffShareModal}
             >
               <Text style={{ color: '#9ca3af', fontWeight: '600' }}>Cancel</Text>
             </TouchableOpacity>
@@ -644,7 +682,7 @@ export default function RecentScreen() {
               <>
                 <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
                   {activeModal?.text
-                    ? <Markdown style={mdStyles}>{cleanMarkdown(activeModal.text)}</Markdown>
+                    ? renderReport(activeModal.text)
                     : <Text style={{ color: '#6b7280' }}>No report content</Text>
                   }
                 </ScrollView>
@@ -661,9 +699,26 @@ export default function RecentScreen() {
                     <Ionicons name="print-outline" size={18} color="#fff" />
                     <Text style={styles.actionText}>Print</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.actionBtn} onPress={() => { setSendSearch(''); setSendResults([]); setModalView('send'); }}>
-                    <Ionicons name="paper-plane-outline" size={18} color="#fff" />
-                    <Text style={styles.actionText}>Send</Text>
+                  {/* Send to Player */}
+                  <TouchableOpacity style={[styles.actionBtn, { borderColor: '#16a34a44' }]} onPress={() => { setSendSearch(''); setSendResults([]); setModalView('send'); }}>
+                    <Ionicons name="person-outline" size={18} color="#16a34a" />
+                    <Text style={[styles.actionText, { color: '#16a34a' }]}>Player</Text>
+                  </TouchableOpacity>
+                  {/* Send to Staff */}
+                  <TouchableOpacity
+                    style={[styles.actionBtn, { borderColor: '#7c3aed44' }]}
+                    onPress={() => {
+                      if (!activeModal) return;
+                      const reportType = activeModal.kind === 'eval' ? 'eval' :
+                                          activeModal.kind === 'team' ? 'team_report' : 'training';
+                      const label = activeModal.kind === 'training' ? 'Training Program' :
+                                    activeModal.kind === 'team' ? 'Team Report' : 'Player Eval';
+                      setActiveModal(null);
+                      openStaffShareModal({ report_type: reportType, report_id: activeModal.id, label });
+                    }}
+                  >
+                    <Ionicons name="people-outline" size={18} color="#7c3aed" />
+                    <Text style={[styles.actionText, { color: '#7c3aed' }]}>Staff</Text>
                   </TouchableOpacity>
                 </View>
               </>
@@ -776,16 +831,6 @@ const sendStyles = StyleSheet.create({
   applyBtn: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: '#2563eb', alignItems: 'center' },
 });
 
-const mdStyles = {
-  body: { color: '#d1d5db', fontSize: 13, lineHeight: 22 },
-  heading1: { color: '#fff', fontSize: 16, fontWeight: '800' as const, marginTop: 16, marginBottom: 4 },
-  heading2: { color: '#e5e7eb', fontSize: 14, fontWeight: '700' as const, marginTop: 12, marginBottom: 4 },
-  heading3: { color: '#9ca3af', fontSize: 13, fontWeight: '700' as const, marginTop: 10, marginBottom: 2 },
-  strong: { color: '#fff', fontWeight: '700' as const },
-  bullet_list: { marginLeft: 8 },
-  list_item: { color: '#d1d5db', fontSize: 13 },
-  hr: { backgroundColor: '#1f2937', height: 1, marginVertical: 12 },
-};
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0a0a', paddingTop: 56 },

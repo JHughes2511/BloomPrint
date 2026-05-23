@@ -543,6 +543,8 @@ async def apply_corrections(
         f"followed by a list of corrections from the coach. Update the report to incorporate "
         f"these corrections, adding or removing detail as needed. Return ONLY the updated report text, "
         f"maintaining the same format and structure.\n\n"
+        f"FORMATTING RULES: Do NOT use any markdown. No ##, no **, no ---, no ===, no ——— dividers. "
+        f"Use plain text only. Section headers in ALL CAPS followed by a colon and blank line.\n\n"
         f"ORIGINAL REPORT:\n{ev.report_text}\n\n"
         f"CORRECTIONS:\n{corrections_text}\n\n"
         f"UPDATED REPORT:"

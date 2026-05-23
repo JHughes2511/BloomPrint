@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import Markdown from 'react-native-markdown-display';
+import { renderReport } from '../utils/renderReport';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Print from 'expo-print';
@@ -32,25 +32,12 @@ const MODES = [
   { key: 'opponent_only', label: 'Opponent Only' },
 ];
 
-function cleanMarkdown(text: string): string {
+/** Strip markdown for plain-text clip preview snippets */
+function stripMarkdownForPreview(text: string): string {
   return text
-    .split('\n')
-    .map(line => {
-      if (/^\s*[-=—]{3,}\s*$/.test(line)) return '';
-      if (/^\s*\*{1,2}\s*$/.test(line)) return '';
-      line = line.replace(/^#+\s*/, '');
-      line = line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
-      const trimmed = line.trim();
-      if (
-        trimmed.length > 2 &&
-        trimmed.length < 60 &&
-        /^[A-Z][A-Z\s\/&\-()\d]{2,}:?$/.test(trimmed)
-      ) {
-        return `**${trimmed}**`;
-      }
-      return line;
-    })
-    .join('\n')
+    .replace(/^#{1,6}\s*/gm, '')
+    .replace(/\*\*/g, '')
+    .replace(/^\s*[-=—─]{3,}\s*$/gm, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
@@ -491,7 +478,7 @@ export default function GameReportBuilderScreen() {
                 <Text style={styles.clipLabelText}>{clip.label === 'my_team' ? 'My Team' : 'Opponent'}</Text>
               </View>
               <Text style={styles.clipAnalysis} numberOfLines={2}>
-                {clip.analysis_text ? cleanMarkdown(clip.analysis_text).slice(0, 120) + '...' : 'Analyzing...'}
+                {clip.analysis_text ? stripMarkdownForPreview(clip.analysis_text).slice(0, 120) + '...' : 'Analyzing...'}
               </Text>
               <Ionicons name="chevron-forward" size={14} color="#4b5563" />
             </TouchableOpacity>
@@ -578,7 +565,7 @@ export default function GameReportBuilderScreen() {
           <View style={{ marginTop: 28 }}>
             <Text style={styles.label}>Generated Report</Text>
             <View style={styles.reportBox}>
-              <Markdown style={markdownStyles}>{cleanMarkdown(report.report_text)}</Markdown>
+              {renderReport(report.report_text)}
             </View>
             <View style={styles.actionRow}>
               <TouchableOpacity style={styles.actionBtn} onPress={exportPdf}>
@@ -637,7 +624,7 @@ export default function GameReportBuilderScreen() {
             </View>
             <ScrollView style={{ maxHeight: 280 }} contentContainerStyle={{ paddingBottom: 8 }}>
               {clipModal?.analysis_text
-                ? <Markdown style={markdownStyles}>{cleanMarkdown(clipModal.analysis_text)}</Markdown>
+                ? renderReport(clipModal.analysis_text)
                 : <Text style={{ color: '#6b7280' }}>No analysis yet.</Text>
               }
             </ScrollView>
@@ -737,15 +724,6 @@ export default function GameReportBuilderScreen() {
   );
 }
 
-const markdownStyles = {
-  body: { color: '#d1d5db', fontSize: 13, lineHeight: 22 },
-  heading1: { color: '#ffffff', fontSize: 16, fontWeight: '800' as const, marginTop: 16, marginBottom: 4 },
-  heading2: { color: '#e5e7eb', fontSize: 14, fontWeight: '700' as const, marginTop: 14, marginBottom: 4 },
-  heading3: { color: '#9ca3af', fontSize: 13, fontWeight: '700' as const, marginTop: 12, marginBottom: 2 },
-  strong: { color: '#ffffff', fontWeight: '700' as const },
-  bullet_list: { marginLeft: 8 },
-  list_item: { color: '#d1d5db', fontSize: 13 },
-};
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0a0a', padding: 20 },

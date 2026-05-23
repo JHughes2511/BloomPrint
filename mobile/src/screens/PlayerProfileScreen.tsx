@@ -9,6 +9,7 @@ import { playersAPI, teamsAPI, playerAPI, trainingAPI, staffSharingAPI, coachesA
 import { Player, Evaluation, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
+import { renderReport } from '../utils/renderReport';
 
 const COMPETITION_LEVELS = ['Middle School', 'HS JV', 'HS Varsity', 'AAU', 'College', 'Pro'];
 
@@ -450,33 +451,74 @@ export default function PlayerProfileScreen() {
       {/* Training detail modal — full-screen so all text is readable */}
       <Modal visible={!!trainingModalItem} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, flex: 1, marginTop: 60 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <Text style={styles.modalTitle}>Training Program</Text>
-              <TouchableOpacity onPress={() => setTrainingModalItem(null)}>
+          <View style={{ backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 60 }}>
+            {/* Compact header — max ~50px tall */}
+            <View style={{
+              flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+              paddingHorizontal: 16, paddingVertical: 10,
+              borderBottomWidth: 1, borderBottomColor: '#1f2937',
+              minHeight: 50, maxHeight: 50,
+            }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: '#fff', fontSize: 15, fontWeight: '800' }}>Training Program</Text>
+                {trainingModalItem && (
+                  <Text style={{ color: '#6b7280', fontSize: 10 }}>
+                    {new Date(trainingModalItem.created_at).toLocaleDateString()}
+                  </Text>
+                )}
+              </View>
+              <TouchableOpacity onPress={() => setTrainingModalItem(null)} style={{ padding: 4 }}>
                 <Ionicons name="close" size={22} color="#9ca3af" />
               </TouchableOpacity>
             </View>
-            {trainingModalItem && (
-              <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 16 }}>
-                {new Date(trainingModalItem.created_at).toLocaleDateString()}
-              </Text>
-            )}
+
             <ScrollView
               style={{ flex: 1 }}
-              contentContainerStyle={{ paddingBottom: 24 }}
+              contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
               showsVerticalScrollIndicator={true}
             >
-              <Text style={{ color: '#d1d5db', fontSize: 14, lineHeight: 24 }}>
-                {trainingModalItem?.program_text?.replace(/\*\*/g, '').trim() ?? ''}
-              </Text>
+              {trainingModalItem?.program_text
+                ? renderReport(trainingModalItem.program_text)
+                : <Text style={{ color: '#6b7280' }}>No training content.</Text>
+              }
             </ScrollView>
-            <TouchableOpacity
-              style={[styles.cancelBtn, { marginTop: 12 }]}
-              onPress={() => setTrainingModalItem(null)}
-            >
-              <Text style={styles.cancelText}>Close</Text>
-            </TouchableOpacity>
+
+            {/* Action row: Send to Player + Send to Staff + Close */}
+            <View style={{ flexDirection: 'row', gap: 8, padding: 12, borderTopWidth: 1, borderTopColor: '#1f2937' }}>
+              <TouchableOpacity
+                style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#16a34a', borderRadius: 10, paddingVertical: 12 }}
+                onPress={() => {
+                  setTrainingModalItem(null);
+                  sendTrainingToPlayer();
+                }}
+                disabled={sendingTraining}
+              >
+                {sendingTraining
+                  ? <ActivityIndicator color="#fff" size="small" />
+                  : <><Ionicons name="person-outline" size={15} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Send to Player</Text></>}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#7c3aed', borderRadius: 10, paddingVertical: 12 }}
+                onPress={() => {
+                  if (!trainingModalItem) return;
+                  setStaffShareId(trainingModalItem.id);
+                  setStaffShareType('training');
+                  setShowStaffShare(true);
+                  setStaffSearch('');
+                  setStaffResults([]);
+                  setTrainingModalItem(null);
+                }}
+              >
+                <Ionicons name="people-outline" size={15} color="#fff" />
+                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Send to Staff</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ paddingHorizontal: 14, paddingVertical: 12, borderRadius: 10, borderWidth: 1, borderColor: '#374151', alignItems: 'center', justifyContent: 'center' }}
+                onPress={() => setTrainingModalItem(null)}
+              >
+                <Text style={{ color: '#9ca3af', fontWeight: '600', fontSize: 13 }}>Close</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>

@@ -6,31 +6,8 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import Markdown from 'react-native-markdown-display';
 import { staffSharingAPI } from '../api/client';
-
-function cleanMarkdown(text: string): string {
-  return text
-    .split('\n')
-    .map(line => {
-      if (/^\s*[-=—]{3,}\s*$/.test(line)) return '';
-      if (/^\s*\*{1,2}\s*$/.test(line)) return '';
-      line = line.replace(/^#+\s*/, '');
-      line = line.replace(/\*\*\s*$/, '').replace(/^\s*\*\*\s*/, '').replace(/\*\*/g, '');
-      const trimmed = line.trim();
-      if (
-        trimmed.length > 2 &&
-        trimmed.length < 60 &&
-        /^[A-Z][A-Z\s\/&\-()\d]{2,}:?$/.test(trimmed)
-      ) {
-        return `**${trimmed}**`;
-      }
-      return line;
-    })
-    .join('\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-}
+import { renderReport } from '../utils/renderReport';
 
 const REPORT_TYPE_LABELS: Record<string, string> = {
   eval: 'Player Eval',
@@ -233,7 +210,7 @@ export default function StaffInboxScreen() {
             {view === 'report' && (
               <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
                 {activeItem?.report_text
-                  ? <Markdown style={mdStyles}>{cleanMarkdown(activeItem.report_text)}</Markdown>
+                  ? renderReport(activeItem.report_text)
                   : <Text style={{ color: '#6b7280' }}>No report content available.</Text>
                 }
               </ScrollView>
@@ -246,7 +223,7 @@ export default function StaffInboxScreen() {
                   <Text style={{ color: '#a78bfa', fontSize: 11, fontWeight: '700', letterSpacing: 1 }}>REGENERATED VERSION</Text>
                 </View>
                 {activeItem?.regenerated_text
-                  ? <Markdown style={mdStyles}>{cleanMarkdown(activeItem.regenerated_text)}</Markdown>
+                  ? renderReport(activeItem.regenerated_text)
                   : <Text style={{ color: '#6b7280' }}>No regenerated version yet.</Text>
                 }
               </ScrollView>
@@ -363,15 +340,6 @@ export default function StaffInboxScreen() {
   );
 }
 
-const mdStyles = {
-  body: { color: '#d1d5db', fontSize: 13, lineHeight: 22 },
-  heading1: { color: '#fff', fontSize: 16, fontWeight: '800' as const, marginTop: 16, marginBottom: 4 },
-  heading2: { color: '#e5e7eb', fontSize: 14, fontWeight: '700' as const, marginTop: 12, marginBottom: 4 },
-  heading3: { color: '#9ca3af', fontSize: 13, fontWeight: '700' as const, marginTop: 10, marginBottom: 2 },
-  strong: { color: '#fff', fontWeight: '700' as const },
-  bullet_list: { marginLeft: 8 },
-  list_item: { color: '#d1d5db', fontSize: 13 },
-};
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0a0a', paddingTop: 56 },

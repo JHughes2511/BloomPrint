@@ -1,5 +1,14 @@
 """Output-type-specific system prompts for the Basketball Intelligence Model."""
 
+# Appended to every prompt — enforces plain-text output for clean mobile rendering
+_NO_MARKDOWN = (
+    "\n\nFORMATTING RULES: Do NOT use any markdown formatting. "
+    "No ## headers, no ** bold, no -- or === or ——— dividers, no backticks. "
+    "Use plain text only. For section headers write the header in ALL CAPS on its own line "
+    "followed by a colon, then a blank line before the content. "
+    "Example:\n\nOFFENSIVE SKILLS:\n\nContent here..."
+)
+
 from .vocabulary import (
     FILM_VOCABULARY, KPIS, SIX_PILLARS, NBA_INTANGIBLES,
     RATING_LADDER, GAME_WINDOW, AGE_TIERS,
@@ -369,4 +378,4 @@ def build_prompt(
     if fn is None:
         valid = ", ".join(PROMPT_MAP.keys())
         raise ValueError(f"Unknown output_type '{output_type}'. Valid: {valid}")
-    return fn(program, level, coach_weight, player_name)
+    return fn(program, level, coach_weight, player_name) + _NO_MARKDOWN
