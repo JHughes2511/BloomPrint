@@ -127,8 +127,8 @@ function AppTabs() {
       })}
     >
       <Tab.Screen name="HomeTab"     component={HomeStack}     options={{ title: 'Home' }} />
-      <Tab.Screen name="TeamTab"     component={TeamStack}     options={{ title: 'Team' }} />
-      <Tab.Screen name="TeamEvalTab" component={TeamEvalStack} options={{ title: 'Team Eval' }} />
+      <Tab.Screen name="TeamTab"     component={TeamStack}     options={{ title: 'Team Eval' }} />
+      <Tab.Screen name="TeamEvalTab" component={TeamEvalStack} options={{ title: 'Team Grade' }} />
       <Tab.Screen name="RosterTab"   component={RosterStack}   options={{ title: 'Roster' }} />
       <Tab.Screen name="RecentTab"   component={RecentStack}   options={{ title: 'Recent' }} />
     </Tab.Navigator>
