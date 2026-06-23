@@ -14,6 +14,7 @@ import { gameEvalAPI, teamsAPI, playersAPI } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
+import WhiteboardModal from '../components/WhiteboardModal';
 
 // ── Stat definitions ──────────────────────────────────────────────────────────
 
@@ -77,6 +78,7 @@ export default function TeamEvalScreen() {
   const { coach } = useAuth();
   const scoutScrollRef = useRef<any>(null);
   const noteInputY = useRef(0);
+  const [whiteboardGameId, setWhiteboardGameId] = useState<number | null>(null);
   const [activeView, setActiveView] = useState<View>('dashboard');
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -834,6 +836,20 @@ export default function TeamEvalScreen() {
         </ScrollView>
       )}
 
+      {/* Floating whiteboard button on Games tab */}
+      {activeView === 'games' && (
+        <TouchableOpacity
+          style={{ position: 'absolute', bottom: 24, right: 20, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 6 }}
+          onPress={() => {
+            const firstGame = sessions[0];
+            if (firstGame) setWhiteboardGameId(firstGame.id);
+            else Alert.alert('No Games', 'Log a game first to use the whiteboard.');
+          }}
+        >
+          <Ionicons name="easel-outline" size={24} color="#fff" />
+        </TouchableOpacity>
+      )}
+
       {/* Live Entry */}
       {activeView === 'live' && activeGame && (
         <View style={{ flex: 1 }}>
@@ -1170,6 +1186,13 @@ export default function TeamEvalScreen() {
                 ? <ActivityIndicator size="small" color="#7c3aed" />
                 : <><Ionicons name="sparkles-outline" size={14} color="#7c3aed" />
                   <Text numberOfLines={1} style={{ color: '#7c3aed', fontSize: 11, fontWeight: '600' }}>Generate Report</Text></>}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[s.detailAction, { flex: 1, minWidth: '45%', borderColor: '#a78bfa' }]}
+              onPress={() => detailGame && setWhiteboardGameId(detailGame.id)}
+            >
+              <Ionicons name="easel-outline" size={14} color="#a78bfa" />
+              <Text numberOfLines={1} style={{ color: '#a78bfa', fontSize: 11, fontWeight: '600' }}>Whiteboard</Text>
             </TouchableOpacity>
           </View>
 
@@ -1858,6 +1881,13 @@ export default function TeamEvalScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Whiteboard */}
+      <WhiteboardModal
+        visible={whiteboardGameId !== null}
+        gameId={whiteboardGameId ?? 0}
+        onClose={() => setWhiteboardGameId(null)}
+      />
     </View>
   );
 }

@@ -452,3 +452,17 @@ class OpponentPlayer(Base):
     position = Column(String, nullable=True)
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class GameWhiteboard(Base):
+    __tablename__ = "game_whiteboards"
+    id = Column(Integer, primary_key=True, index=True)
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    name = Column(String, default="Untitled Board")
+    court_type = Column(String, default="full")  # full, half, three_quarter
+    data = Column(Text, default="[]")  # JSON array of strokes/shapes
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
+
+    coach = relationship("Coach")

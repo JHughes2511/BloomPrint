@@ -841,3 +841,72 @@ def compare_games(
         "game1": _summarize(game1),
         "game2": _summarize(game2),
     }
+
+
+# ── Whiteboards ───────────────────────────────────────────────────────────────
+
+@router.get("/sessions/{game_id}/whiteboards")
+def list_whiteboards(
+    game_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    _get_game(db, game_id, coach.id)
+    boards = db.query(models.GameWhiteboard).filter_by(game_id=game_id, coach_id=coach.id).order_by(models.GameWhiteboard.created_at).all()
+    return [{"id": b.id, "name": b.name, "court_type": b.court_type, "data": b.data, "created_at": b.created_at.isoformat()} for b in boards]
+
+
+@router.post("/sessions/{game_id}/whiteboards")
+def create_whiteboard(
+    game_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    _get_game(db, game_id, coach.id)
+    board = models.GameWhiteboard(
+        game_id=game_id,
+        coach_id=coach.id,
+        name=body.get("name", "Untitled Board"),
+        court_type=body.get("court_type", "full"),
+        data=body.get("data", "[]"),
+    )
+    db.add(board)
+    db.commit()
+    db.refresh(board)
+    return {"id": board.id, "name": board.name, "court_type": board.court_type, "data": board.data, "created_at": board.created_at.isoformat()}
+
+
+@router.patch("/whiteboards/{board_id}")
+def update_whiteboard(
+    board_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    board = db.get(models.GameWhiteboard, board_id)
+    if not board or board.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Whiteboard not found")
+    if "name" in body:
+        board.name = body["name"]
+    if "court_type" in body:
+        board.court_type = body["court_type"]
+    if "data" in body:
+        board.data = body["data"]
+    board.updated_at = datetime.utcnow()
+    db.commit()
+    return {"id": board.id, "name": board.name, "court_type": board.court_type, "data": board.data}
+
+
+@router.delete("/whiteboards/{board_id}")
+def delete_whiteboard(
+    board_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    board = db.get(models.GameWhiteboard, board_id)
+    if not board or board.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Whiteboard not found")
+    db.delete(board)
+    db.commit()
+    return {"ok": True}

@@ -234,6 +234,15 @@ export const gameEvalAPI = {
   deleteOpponentNote: (noteId: number) => api.delete(`/game-eval/opponent-notes/${noteId}`).then(r => r.data),
 };
 
+export const whiteboardAPI = {
+  list: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/whiteboards`).then(r => r.data),
+  create: (gameId: number, data: { name: string; court_type: string; data: string }) =>
+    api.post(`/game-eval/sessions/${gameId}/whiteboards`, data).then(r => r.data),
+  update: (boardId: number, data: { name?: string; court_type?: string; data?: string }) =>
+    api.patch(`/game-eval/whiteboards/${boardId}`, data).then(r => r.data),
+  delete: (boardId: number) => api.delete(`/game-eval/whiteboards/${boardId}`).then(r => r.data),
+};
+
 export const gameReportsAPI = {
   list: () => api.get('/game-reports').then(r => r.data),
   get: (id: number) => api.get(`/game-reports/${id}`).then(r => r.data),
