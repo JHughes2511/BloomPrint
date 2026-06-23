@@ -5,12 +5,12 @@ import {
   Dimensions, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Svg, { Path, Circle, Line, Defs, Marker, G, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Path, Circle, Line, Defs, G, Rect, Text as SvgText } from 'react-native-svg';
 import { whiteboardAPI } from '../api/client';
 
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+const { width: SCREEN_W } = Dimensions.get('window');
 const COURT_W = SCREEN_W - 32;
-const COURT_H = COURT_W * (94 / 50); // full court ratio
+const COURT_H = COURT_W * (94 / 50);
 const HALF_H = COURT_H / 2;
 const THREE_Q_H = COURT_H * 0.75;
 
@@ -20,10 +20,10 @@ type Tool = 'pen' | 'circle' | 'arrow' | 'text' | 'eraser';
 interface Stroke {
   id: string;
   type: 'path' | 'circle' | 'arrow' | 'text';
-  d?: string;           // SVG path string
-  cx?: number; cy?: number; r?: number;  // circle
-  x1?: number; y1?: number; x2?: number; y2?: number; // arrow
-  x?: number; y?: number; label?: string;              // text
+  d?: string;
+  cx?: number; cy?: number; r?: number;
+  x1?: number; y1?: number; x2?: number; y2?: number;
+  x?: number; y?: number; label?: string;
   color: string;
   strokeWidth: number;
 }
@@ -44,76 +44,171 @@ const TOOLS: { key: Tool; icon: string }[] = [
   { key: 'eraser', icon: 'trash-outline' },
 ];
 
+const WOOD_BASE = '#C8874A';
+const LINE_COLOR = '#ffffff';
+const PAINT_COLOR = 'rgba(180,100,40,0.35)';
+const LW = 1.5;
+
+function HoopBottom({ w, courtH, s }: { w: number; courtH: number; s: number }) {
+  const baseY = courtH - 2;
+  const rimY = baseY - 5.25 * s;
+  const rimR = Math.max(1.5 * s, 8);
+  const boardHalfW = 3 * s;
+  const boxHalfW = 1 * s;
+  const boxH = 1.5 * s;
+  return (
+    <G>
+      {/* Backboard */}
+      <Line x1={w / 2 - boardHalfW} y1={baseY} x2={w / 2 + boardHalfW} y2={baseY} stroke={LINE_COLOR} strokeWidth={3} />
+      {/* Box on backboard */}
+      <Rect x={w / 2 - boxHalfW} y={baseY - boxH} width={boxHalfW * 2} height={boxH} fill="none" stroke={LINE_COLOR} strokeWidth={1} />
+      {/* Rim */}
+      <Circle cx={w / 2} cy={rimY} r={rimR} stroke="#f59e0b" strokeWidth={2} fill="none" />
+    </G>
+  );
+}
+
+function HoopTop({ w, s }: { w: number; s: number }) {
+  const baseY = 2;
+  const rimY = baseY + 5.25 * s;
+  const rimR = Math.max(1.5 * s, 8);
+  const boardHalfW = 3 * s;
+  const boxHalfW = 1 * s;
+  const boxH = 1.5 * s;
+  return (
+    <G>
+      <Line x1={w / 2 - boardHalfW} y1={baseY} x2={w / 2 + boardHalfW} y2={baseY} stroke={LINE_COLOR} strokeWidth={3} />
+      <Rect x={w / 2 - boxHalfW} y={baseY + 0} width={boxHalfW * 2} height={boxH} fill="none" stroke={LINE_COLOR} strokeWidth={1} />
+      <Circle cx={w / 2} cy={rimY} r={rimR} stroke="#f59e0b" strokeWidth={2} fill="none" />
+    </G>
+  );
+}
+
+function CourtMarkingsBottom({ w, courtH, s }: { w: number; courtH: number; s: number }) {
+  const paintW = 16 * s;
+  const paintH = 19 * s;
+  const threeR = 23.75 * s;
+  const laneX = (w - paintW) / 2;
+  const baseY = courtH - 2;
+  const cornerEndY = baseY - 14 * s;
+  const ftCircleY = baseY - paintH;
+
+  return (
+    <G>
+      {/* Paint */}
+      <Rect x={laneX} y={baseY - paintH} width={paintW} height={paintH} fill={PAINT_COLOR} stroke={LINE_COLOR} strokeWidth={LW} />
+      {/* Free throw circle top half (dashed) */}
+      <Path
+        d={`M ${w / 2 - 6 * s} ${ftCircleY} A ${6 * s} ${6 * s} 0 0 0 ${w / 2 + 6 * s} ${ftCircleY}`}
+        fill="none" stroke={LINE_COLOR} strokeWidth={LW}
+      />
+      <Path
+        d={`M ${w / 2 - 6 * s} ${ftCircleY} A ${6 * s} ${6 * s} 0 0 1 ${w / 2 + 6 * s} ${ftCircleY}`}
+        fill="none" stroke={LINE_COLOR} strokeWidth={LW} strokeDasharray="6,4"
+      />
+      {/* 3pt corner lines */}
+      <Line x1={3 * s} y1={baseY} x2={3 * s} y2={cornerEndY} stroke={LINE_COLOR} strokeWidth={LW} />
+      <Line x1={w - 3 * s} y1={baseY} x2={w - 3 * s} y2={cornerEndY} stroke={LINE_COLOR} strokeWidth={LW} />
+      {/* 3pt arc */}
+      <Path
+        d={`M ${3 * s} ${cornerEndY} A ${threeR} ${threeR} 0 1 0 ${w - 3 * s} ${cornerEndY}`}
+        fill="none" stroke={LINE_COLOR} strokeWidth={LW}
+      />
+    </G>
+  );
+}
+
+function CourtMarkingsTop({ w, s }: { w: number; s: number }) {
+  const paintW = 16 * s;
+  const paintH = 19 * s;
+  const threeR = 23.75 * s;
+  const laneX = (w - paintW) / 2;
+  const baseY = 2;
+  const cornerEndY = baseY + 14 * s;
+  const ftCircleY = baseY + paintH;
+
+  return (
+    <G>
+      <Rect x={laneX} y={baseY} width={paintW} height={paintH} fill={PAINT_COLOR} stroke={LINE_COLOR} strokeWidth={LW} />
+      <Path
+        d={`M ${w / 2 - 6 * s} ${ftCircleY} A ${6 * s} ${6 * s} 0 0 1 ${w / 2 + 6 * s} ${ftCircleY}`}
+        fill="none" stroke={LINE_COLOR} strokeWidth={LW}
+      />
+      <Path
+        d={`M ${w / 2 - 6 * s} ${ftCircleY} A ${6 * s} ${6 * s} 0 0 0 ${w / 2 + 6 * s} ${ftCircleY}`}
+        fill="none" stroke={LINE_COLOR} strokeWidth={LW} strokeDasharray="6,4"
+      />
+      <Line x1={3 * s} y1={baseY} x2={3 * s} y2={cornerEndY} stroke={LINE_COLOR} strokeWidth={LW} />
+      <Line x1={w - 3 * s} y1={baseY} x2={w - 3 * s} y2={cornerEndY} stroke={LINE_COLOR} strokeWidth={LW} />
+      <Path
+        d={`M ${3 * s} ${cornerEndY} A ${threeR} ${threeR} 0 1 0 ${w - 3 * s} ${cornerEndY}`}
+        fill="none" stroke={LINE_COLOR} strokeWidth={LW}
+      />
+    </G>
+  );
+}
+
+function WoodGrain({ w, h }: { w: number; h: number }) {
+  const numPlanks = 14;
+  const plankW = w / numPlanks;
+  const colors = ['#C8874A', '#C07840', '#C8874A', '#BF7B3E', '#C08245', '#C8874A', '#BB7840'];
+  return (
+    <G>
+      {Array.from({ length: numPlanks }).map((_, i) => (
+        <Rect key={i} x={i * plankW} y={0} width={plankW} height={h} fill={colors[i % colors.length]} />
+      ))}
+      {Array.from({ length: numPlanks - 1 }).map((_, i) => (
+        <Line key={`d-${i}`} x1={(i + 1) * plankW} y1={0} x2={(i + 1) * plankW} y2={h} stroke="rgba(0,0,0,0.18)" strokeWidth={1.5} />
+      ))}
+      {Array.from({ length: numPlanks }).map((_, i) => (
+        <Line key={`g-${i}`} x1={i * plankW + plankW * 0.4} y1={0} x2={i * plankW + plankW * 0.4} y2={h} stroke="rgba(0,0,0,0.06)" strokeWidth={0.8} />
+      ))}
+    </G>
+  );
+}
+
 function CourtSvg({ courtType }: { courtType: CourtType }) {
   const h = courtType === 'full' ? COURT_H : courtType === 'half' ? HALF_H : THREE_Q_H;
   const w = COURT_W;
-  const s = w / 50; // scale: 1 foot = s px  (court is 50ft wide)
-
-  // Key court measurements in feet → pixels
-  const midY = h / 2;
-  const paint_w = 16 * s;
-  const paint_h = 19 * s;
-  const three_r = 23.75 * s;
-  const ft_line = 15 * s;
-  const lane_x = (w - paint_w) / 2;
-
-  const courtColor = '#1a3a1a';
-  const lineColor = '#ffffff';
-  const lw = 1.5;
+  const s = w / 50;
+  const midY = COURT_H / 2;
 
   if (courtType === 'full') {
     return (
       <Svg width={w} height={h}>
-        <Rect x={0} y={0} width={w} height={h} fill={courtColor} />
+        <WoodGrain w={w} h={h} />
         {/* Boundary */}
-        <Rect x={2} y={2} width={w - 4} height={h - 4} fill="none" stroke={lineColor} strokeWidth={lw} />
+        <Rect x={2} y={2} width={w - 4} height={h - 4} fill="none" stroke={LINE_COLOR} strokeWidth={LW} />
         {/* Half court line */}
-        <Line x1={0} y1={midY} x2={w} y2={midY} stroke={lineColor} strokeWidth={lw} />
+        <Line x1={2} y1={h / 2} x2={w - 2} y2={h / 2} stroke={LINE_COLOR} strokeWidth={LW} />
         {/* Center circle */}
-        <Circle cx={w / 2} cy={midY} r={6 * s} fill="none" stroke={lineColor} strokeWidth={lw} />
-        {/* Top paint */}
-        <Rect x={lane_x} y={2} width={paint_w} height={paint_h} fill="none" stroke={lineColor} strokeWidth={lw} />
-        {/* Bottom paint */}
-        <Rect x={lane_x} y={h - 2 - paint_h} width={paint_w} height={paint_h} fill="none" stroke={lineColor} strokeWidth={lw} />
-        {/* Top free throw circle */}
-        <Circle cx={w / 2} cy={2 + paint_h} r={6 * s} fill="none" stroke={lineColor} strokeWidth={lw} strokeDasharray="6,4" />
-        {/* Bottom free throw circle */}
-        <Circle cx={w / 2} cy={h - 2 - paint_h} r={6 * s} fill="none" stroke={lineColor} strokeWidth={lw} strokeDasharray="6,4" />
-        {/* Top 3pt arc */}
-        <Path d={`M ${lane_x - (three_r - paint_w / 2)} 2 A ${three_r} ${three_r} 0 0 1 ${lane_x + paint_w + (three_r - paint_w / 2)} 2`} fill="none" stroke={lineColor} strokeWidth={lw} />
-        {/* Bottom 3pt arc */}
-        <Path d={`M ${lane_x - (three_r - paint_w / 2)} ${h - 2} A ${three_r} ${three_r} 0 0 0 ${lane_x + paint_w + (three_r - paint_w / 2)} ${h - 2}`} fill="none" stroke={lineColor} strokeWidth={lw} />
-        {/* Top basket */}
-        <Circle cx={w / 2} cy={2 + ft_line * 0.4} r={9} fill="none" stroke="#f59e0b" strokeWidth={1.5} />
-        {/* Bottom basket */}
-        <Circle cx={w / 2} cy={h - 2 - ft_line * 0.4} r={9} fill="none" stroke="#f59e0b" strokeWidth={1.5} />
+        <Circle cx={w / 2} cy={h / 2} r={6 * s} fill="none" stroke={LINE_COLOR} strokeWidth={LW} />
+        {/* Top end markings */}
+        <CourtMarkingsTop w={w} s={s} />
+        <HoopTop w={w} s={s} />
+        {/* Bottom end markings */}
+        <CourtMarkingsBottom w={w} courtH={h} s={s} />
+        <HoopBottom w={w} courtH={h} s={s} />
       </Svg>
     );
   }
 
-  // Half / three_quarter — show bottom half of full court
-  const offsetY = courtType === 'half' ? -midY : -(h - THREE_Q_H);
+  // Half / three_quarter — show bottom portion of the full court
+  const offsetY = courtType === 'half' ? -midY : -(COURT_H - THREE_Q_H);
+
   return (
     <Svg width={w} height={h}>
-      <Rect x={0} y={0} width={w} height={h} fill={courtColor} />
+      <WoodGrain w={w} h={h} />
       <G transform={`translate(0, ${offsetY})`}>
-        {/* Boundary */}
-        <Rect x={2} y={2} width={w - 4} height={COURT_H - 4} fill="none" stroke={lineColor} strokeWidth={lw} />
+        {/* Full boundary drawn, clipped by SVG viewport */}
+        <Rect x={2} y={2} width={w - 4} height={COURT_H - 4} fill="none" stroke={LINE_COLOR} strokeWidth={LW} />
         {/* Half court line */}
-        <Line x1={0} y1={midY} x2={w} y2={midY} stroke={lineColor} strokeWidth={lw} />
-        {/* Center circle */}
-        <Circle cx={w / 2} cy={midY} r={6 * s} fill="none" stroke={lineColor} strokeWidth={lw} />
-        {/* Bottom paint */}
-        <Rect x={lane_x} y={COURT_H - 2 - paint_h} width={paint_w} height={paint_h} fill="none" stroke={lineColor} strokeWidth={lw} />
-        {/* Bottom free throw circle */}
-        <Circle cx={w / 2} cy={COURT_H - 2 - paint_h} r={6 * s} fill="none" stroke={lineColor} strokeWidth={lw} strokeDasharray="6,4" />
-        {/* Bottom 3pt arc */}
-        <Path d={`M ${lane_x - (three_r - paint_w / 2)} ${COURT_H - 2} A ${three_r} ${three_r} 0 0 0 ${lane_x + paint_w + (three_r - paint_w / 2)} ${COURT_H - 2}`} fill="none" stroke={lineColor} strokeWidth={lw} />
-        {/* Bottom basket */}
-        <Circle cx={w / 2} cy={COURT_H - 2 - ft_line * 0.4} r={9} fill="none" stroke="#f59e0b" strokeWidth={1.5} />
+        <Line x1={2} y1={midY} x2={w - 2} y2={midY} stroke={LINE_COLOR} strokeWidth={LW} />
+        <Circle cx={w / 2} cy={midY} r={6 * s} fill="none" stroke={LINE_COLOR} strokeWidth={LW} />
+        {/* Bottom end markings and basket */}
+        <CourtMarkingsBottom w={w} courtH={COURT_H} s={s} />
+        <HoopBottom w={w} courtH={COURT_H} s={s} />
       </G>
-      {/* Clip overlay to hide content outside bounds */}
-      <Rect x={0} y={0} width={w} height={2} fill="#111827" />
     </Svg>
   );
 }
@@ -136,9 +231,12 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const [textInput, setTextInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [livePath, setLivePath] = useState('');
 
   const currentPath = useRef('');
   const startPoint = useRef({ x: 0, y: 0 });
+  const activeBoardIdxRef = useRef(activeBoardIdx);
+  useEffect(() => { activeBoardIdxRef.current = activeBoardIdx; }, [activeBoardIdx]);
 
   const board = boards[activeBoardIdx];
   const courtH = board?.court_type === 'full' ? COURT_H : board?.court_type === 'half' ? HALF_H : THREE_Q_H;
@@ -214,9 +312,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
 
   const undo = () => {
     if (!board) return;
-    const strokes = [...board.strokes];
-    strokes.pop();
-    updateStrokes(activeBoardIdx, strokes);
+    updateStrokes(activeBoardIdx, board.strokes.slice(0, -1));
   };
 
   const clearAll = () => {
@@ -232,7 +328,6 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
-
       onPanResponderGrant: (evt) => {
         const { locationX: x, locationY: y } = evt.nativeEvent;
         startPoint.current = { x, y };
@@ -243,33 +338,29 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           setShowAddText(true);
         }
       },
-
       onPanResponderMove: (evt) => {
         const { locationX: x, locationY: y } = evt.nativeEvent;
         if (tool === 'pen' || tool === 'eraser') {
           currentPath.current += ` L${x.toFixed(1)},${y.toFixed(1)}`;
-          // Force re-render by updating a live path state
           setLivePath(currentPath.current);
         }
       },
-
       onPanResponderRelease: (evt) => {
         const { locationX: x2, locationY: y2 } = evt.nativeEvent;
         const { x: x1, y: y1 } = startPoint.current;
+        const idx = activeBoardIdxRef.current;
 
         if ((tool === 'pen' || tool === 'eraser') && currentPath.current) {
           const stroke: Stroke = {
-            id: uid(),
-            type: 'path',
-            d: currentPath.current,
-            color: tool === 'eraser' ? '#1a3a1a' : color,
-            strokeWidth: tool === 'eraser' ? 18 : strokeWidth,
+            id: uid(), type: 'path', d: currentPath.current,
+            color: tool === 'eraser' ? WOOD_BASE : color,
+            strokeWidth: tool === 'eraser' ? 20 : strokeWidth,
           };
           setBoards(prev => {
             const next = [...prev];
-            const updated = { ...next[activeBoardIdxRef.current], strokes: [...next[activeBoardIdxRef.current].strokes, stroke] };
-            next[activeBoardIdxRef.current] = updated;
-            saveBoard(activeBoardIdxRef.current, updated);
+            const updated = { ...next[idx], strokes: [...next[idx].strokes, stroke] };
+            next[idx] = updated;
+            saveBoard(idx, updated);
             return next;
           });
           currentPath.current = '';
@@ -279,29 +370,24 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           const stroke: Stroke = { id: uid(), type: 'circle', cx: (x1 + x2) / 2, cy: (y1 + y2) / 2, r: Math.max(r, 10), color, strokeWidth };
           setBoards(prev => {
             const next = [...prev];
-            const updated = { ...next[activeBoardIdxRef.current], strokes: [...next[activeBoardIdxRef.current].strokes, stroke] };
-            next[activeBoardIdxRef.current] = updated;
-            saveBoard(activeBoardIdxRef.current, updated);
+            const updated = { ...next[idx], strokes: [...next[idx].strokes, stroke] };
+            next[idx] = updated;
+            saveBoard(idx, updated);
             return next;
           });
         } else if (tool === 'arrow') {
           const stroke: Stroke = { id: uid(), type: 'arrow', x1, y1, x2, y2, color, strokeWidth };
           setBoards(prev => {
             const next = [...prev];
-            const updated = { ...next[activeBoardIdxRef.current], strokes: [...next[activeBoardIdxRef.current].strokes, stroke] };
-            next[activeBoardIdxRef.current] = updated;
-            saveBoard(activeBoardIdxRef.current, updated);
+            const updated = { ...next[idx], strokes: [...next[idx].strokes, stroke] };
+            next[idx] = updated;
+            saveBoard(idx, updated);
             return next;
           });
         }
       },
     })
   ).current;
-
-  const activeBoardIdxRef = useRef(activeBoardIdx);
-  useEffect(() => { activeBoardIdxRef.current = activeBoardIdx; }, [activeBoardIdx]);
-
-  const [livePath, setLivePath] = useState('');
 
   const addText = () => {
     if (!textInput.trim()) { setShowAddText(false); return; }
@@ -327,15 +413,15 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     const len = Math.sqrt(dx * dx + dy * dy);
     if (len < 5) return null;
     const ux = dx / len; const uy = dy / len;
-    const arrowSize = 12;
+    const as = 12;
     const px = -uy; const py = ux;
     const tip = { x: s.x2, y: s.y2 };
-    const base1 = { x: s.x2 - ux * arrowSize + px * arrowSize * 0.5, y: s.y2 - uy * arrowSize + py * arrowSize * 0.5 };
-    const base2 = { x: s.x2 - ux * arrowSize - px * arrowSize * 0.5, y: s.y2 - uy * arrowSize - py * arrowSize * 0.5 };
+    const b1 = { x: s.x2 - ux * as + px * as * 0.5, y: s.y2 - uy * as + py * as * 0.5 };
+    const b2 = { x: s.x2 - ux * as - px * as * 0.5, y: s.y2 - uy * as - py * as * 0.5 };
     return (
       <G key={s.id}>
         <Line x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke={s.color} strokeWidth={s.strokeWidth} />
-        <Path d={`M${tip.x},${tip.y} L${base1.x},${base1.y} L${base2.x},${base2.y} Z`} fill={s.color} />
+        <Path d={`M${tip.x},${tip.y} L${b1.x},${b1.y} L${b2.x},${b2.y} Z`} fill={s.color} />
       </G>
     );
   };
@@ -374,31 +460,8 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           ))}
         </View>
 
-        {/* Drawing canvas */}
-        {loading ? (
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <ActivityIndicator color="#7c3aed" size="large" />
-          </View>
-        ) : (
-          <View style={[styles.canvasWrapper, { height: courtH }]} {...panResponder.panHandlers}>
-            <CourtSvg courtType={board?.court_type ?? 'full'} />
-            <Svg style={StyleSheet.absoluteFill} width={COURT_W} height={courtH}>
-              {board?.strokes.map(s => {
-                if (s.type === 'path') return <Path key={s.id} d={s.d} stroke={s.color} strokeWidth={s.strokeWidth} fill="none" strokeLinecap="round" strokeLinejoin="round" />;
-                if (s.type === 'circle') return <Circle key={s.id} cx={s.cx} cy={s.cy} r={s.r} stroke={s.color} strokeWidth={s.strokeWidth} fill="none" />;
-                if (s.type === 'arrow') return renderArrow(s);
-                if (s.type === 'text') return <SvgText key={s.id} x={s.x} y={s.y} fill={s.color} fontSize={16} fontWeight="bold">{s.label}</SvgText>;
-                return null;
-              })}
-              {/* Live stroke preview */}
-              {livePath ? <Path d={livePath} stroke={tool === 'eraser' ? '#1a3a1a' : color} strokeWidth={tool === 'eraser' ? 18 : strokeWidth} fill="none" strokeLinecap="round" strokeLinejoin="round" /> : null}
-            </Svg>
-          </View>
-        )}
-
-        {/* Bottom toolbar */}
+        {/* Toolbar — floats above the canvas */}
         <View style={styles.toolbar}>
-          {/* Tools */}
           <View style={styles.toolRow}>
             {TOOLS.map(t => (
               <TouchableOpacity
@@ -417,7 +480,6 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               <Ionicons name="refresh" size={18} color="#9ca3af" />
             </TouchableOpacity>
           </View>
-          {/* Colors */}
           <View style={styles.colorRow}>
             {COLORS.map(c => (
               <TouchableOpacity
@@ -426,7 +488,6 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                 onPress={() => setColor(c)}
               />
             ))}
-            {/* Stroke width */}
             <View style={{ marginLeft: 8, flexDirection: 'row', gap: 6 }}>
               {[2, 4, 7].map(w => (
                 <TouchableOpacity
@@ -438,6 +499,33 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
             </View>
           </View>
         </View>
+
+        {/* Drawing canvas — scrollable so full court is reachable */}
+        {loading ? (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <ActivityIndicator color="#7c3aed" size="large" />
+          </View>
+        ) : (
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ alignItems: 'center', paddingBottom: 20 }}
+            scrollEnabled={tool !== 'pen' && tool !== 'eraser' && tool !== 'circle' && tool !== 'arrow'}
+          >
+            <View style={[styles.canvasWrapper, { height: courtH }]} {...panResponder.panHandlers}>
+              <CourtSvg courtType={board?.court_type ?? 'full'} />
+              <Svg style={StyleSheet.absoluteFill} width={COURT_W} height={courtH}>
+                {board?.strokes.map(s => {
+                  if (s.type === 'path') return <Path key={s.id} d={s.d} stroke={s.color} strokeWidth={s.strokeWidth} fill="none" strokeLinecap="round" strokeLinejoin="round" />;
+                  if (s.type === 'circle') return <Circle key={s.id} cx={s.cx} cy={s.cy} r={s.r} stroke={s.color} strokeWidth={s.strokeWidth} fill="none" />;
+                  if (s.type === 'arrow') return renderArrow(s);
+                  if (s.type === 'text') return <SvgText key={s.id} x={s.x} y={s.y} fill={s.color} fontSize={16} fontWeight="bold">{s.label}</SvgText>;
+                  return null;
+                })}
+                {livePath ? <Path d={livePath} stroke={tool === 'eraser' ? WOOD_BASE : color} strokeWidth={tool === 'eraser' ? 20 : strokeWidth} fill="none" strokeLinecap="round" strokeLinejoin="round" /> : null}
+              </Svg>
+            </View>
+          </ScrollView>
+        )}
 
         {/* Board list modal */}
         <Modal visible={showBoardList} transparent animationType="slide" onRequestClose={() => setShowBoardList(false)}>
@@ -507,8 +595,7 @@ const styles = StyleSheet.create({
   courtChip: { borderRadius: 16, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: '#374151' },
   courtChipActive: { backgroundColor: '#7c3aed', borderColor: '#7c3aed' },
   courtChipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
-  canvasWrapper: { width: COURT_W, marginHorizontal: 16, marginTop: 12, borderRadius: 8, overflow: 'hidden', alignSelf: 'center' },
-  toolbar: { backgroundColor: '#111827', paddingVertical: 10, paddingHorizontal: 12, borderTopWidth: 1, borderTopColor: '#1f2937', gap: 10, marginTop: 'auto' },
+  toolbar: { backgroundColor: '#111827', paddingVertical: 10, paddingHorizontal: 12, borderTopWidth: 1, borderTopColor: '#1f2937', borderBottomWidth: 1, borderBottomColor: '#1f2937', gap: 10 },
   toolRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   toolBtn: { width: 36, height: 36, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: '#1f2937' },
   toolBtnActive: { backgroundColor: '#7c3aed' },
@@ -516,6 +603,7 @@ const styles = StyleSheet.create({
   colorDot: { width: 22, height: 22, borderRadius: 11 },
   colorDotActive: { borderWidth: 2, borderColor: '#fff' },
   widthDot: { backgroundColor: '#fff' },
+  canvasWrapper: { width: COURT_W, marginTop: 12, borderRadius: 8, overflow: 'hidden', alignSelf: 'center' },
   listOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
   listBox: { backgroundColor: '#1f2937', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, maxHeight: '60%' },
   listTitle: { color: '#fff', fontSize: 17, fontWeight: '800', marginBottom: 14 },
