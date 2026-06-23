@@ -1018,7 +1018,7 @@ export default function TeamEvalScreen() {
               {teams.length > 0 && (
                 <>
                   <Text style={s.fieldLabel}>TEAM (optional)</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }} keyboardShouldPersistTaps="handled">
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
                     <TouchableOpacity
                       style={[s.chip, newGameTeamId === null && s.chipActive]}
                       onPress={() => setNewGameTeamId(null)}
@@ -1034,7 +1034,7 @@ export default function TeamEvalScreen() {
                         <Text style={[s.chipText, newGameTeamId === t.id && s.chipTextActive]}>{t.name}</Text>
                       </TouchableOpacity>
                     ))}
-                  </ScrollView>
+                  </View>
                 </>
               )}
               <Text style={s.fieldLabel}>OPPONENT NAME</Text>
