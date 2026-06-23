@@ -105,6 +105,8 @@ export default function TeamEvalScreen() {
   const [newOppPlayer, setNewOppPlayer] = useState('');
   const [showLineupModal, setShowLineupModal] = useState(false);
   const [flashStat, setFlashStat] = useState<string | null>(null);
+  const [statToast, setStatToast] = useState<string | null>(null);
+  const [subOutPlayer, setSubOutPlayer] = useState<string | null>(null);
   const [ourScore, setOurScore] = useState(0);
   const [oppScore, setOppScore] = useState(0);
 
@@ -211,6 +213,10 @@ export default function TeamEvalScreen() {
     }
   };
 
+  const SCORE_DELTA: Record<string, number> = {
+    '2 FG Made': 2, '3 FG Made': 3, 'FT Made': 1,
+  };
+
   const logStat = async (statName: string) => {
     if (!activeGame || !selectedPlayer) {
       Alert.alert('Select Player', 'Tap a player first, then select a stat.');
@@ -229,8 +235,16 @@ export default function TeamEvalScreen() {
         raw_points: rawPoints,
         count,
       });
+      // Auto-update scoreboard for scoring plays
+      const scoreDelta = SCORE_DELTA[statName];
+      if (scoreDelta) {
+        if (entryMode === 'our') updateScore('our', scoreDelta);
+        else updateScore('opp', scoreDelta);
+      }
+      // Flash the button and show toast
       setFlashStat(statName);
-      setTimeout(() => setFlashStat(null), 600);
+      setStatToast(`✓  ${selectedPlayer} — ${statName}`);
+      setTimeout(() => { setFlashStat(null); setStatToast(null); }, 1200);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not log stat');
     }
@@ -609,6 +623,13 @@ export default function TeamEvalScreen() {
               </View>
             </View>
           </View>
+
+          {/* Stat recorded toast */}
+          {statToast && (
+            <View style={{ backgroundColor: '#16a34a', paddingVertical: 6, paddingHorizontal: 16 }}>
+              <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700', textAlign: 'center' }}>{statToast}</Text>
+            </View>
+          )}
 
           {/* Quarter selector */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.quarterRow} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8, gap: 8 }}>
@@ -1173,51 +1194,91 @@ export default function TeamEvalScreen() {
       {/* Lineup Modal */}
       <Modal visible={showLineupModal} transparent animationType="slide">
         <View style={s.modalOverlay}>
-          <View style={s.modalBox}>
-            <Text style={s.modalTitle}>Manage Lineup</Text>
-            <Text style={{ color: '#6b7280', fontSize: 13, marginBottom: 16, lineHeight: 18 }}>
-              Tap a player to log a sub-in or sub-out event. This is used for plus/minus tracking.
-            </Text>
-            {(entryMode === 'our' ? roster.map((p: any) => p.name) : opponentPlayers).map(name => (
-              <View key={name} style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
-                <TouchableOpacity
-                  style={[s.modalBtn, { flex: 1, backgroundColor: '#16a34a22', borderWidth: 1, borderColor: '#16a34a' }]}
-                  onPress={async () => {
-                    if (activeGame) {
-                      await gameEvalAPI.logLineup(activeGame.id, {
-                        player_name: name,
-                        is_opponent: entryMode === 'opponent',
-                        event_type: 'in',
-                        quarter: activeQuarter,
-                      });
-                    }
-                  }}
-                >
-                  <Text style={{ color: '#16a34a', fontWeight: '600' }}>IN</Text>
-                </TouchableOpacity>
-                <Text style={{ color: '#fff', fontSize: 13, flex: 2, alignSelf: 'center', textAlign: 'center' }}>
-                  {name}
+          <View style={[s.modalBox, { maxHeight: '80%' }]}>
+            <Text style={s.modalTitle}>{subOutPlayer ? 'Who came in?' : 'Manage Lineup'}</Text>
+            {subOutPlayer ? (
+              <>
+                <Text style={{ color: '#6b7280', fontSize: 13, marginBottom: 16 }}>
+                  Select the player who substituted in for <Text style={{ color: '#fff', fontWeight: '700' }}>{subOutPlayer}</Text>:
                 </Text>
+                <ScrollView style={{ maxHeight: 280 }} showsVerticalScrollIndicator={false}>
+                  {(entryMode === 'our' ? roster.map((p: any) => p.name) : opponentPlayers)
+                    .filter(n => n !== subOutPlayer)
+                    .map(name => (
+                      <TouchableOpacity
+                        key={name}
+                        style={{ padding: 13, borderRadius: 10, backgroundColor: '#1f2937', marginBottom: 8, borderWidth: 1, borderColor: '#374151' }}
+                        onPress={async () => {
+                          if (activeGame) {
+                            await gameEvalAPI.logLineup(activeGame.id, {
+                              player_name: subOutPlayer,
+                              is_opponent: entryMode === 'opponent',
+                              event_type: 'out',
+                              quarter: activeQuarter,
+                            });
+                            await gameEvalAPI.logLineup(activeGame.id, {
+                              player_name: name,
+                              is_opponent: entryMode === 'opponent',
+                              event_type: 'in',
+                              quarter: activeQuarter,
+                            });
+                          }
+                          setSubOutPlayer(null);
+                        }}
+                      >
+                        <Text style={{ color: '#d1d5db', fontSize: 14, fontWeight: '600' }}>{name}</Text>
+                      </TouchableOpacity>
+                    ))
+                  }
+                </ScrollView>
                 <TouchableOpacity
-                  style={[s.modalBtn, { flex: 1, backgroundColor: '#dc262622', borderWidth: 1, borderColor: '#dc2626' }]}
-                  onPress={async () => {
-                    if (activeGame) {
-                      await gameEvalAPI.logLineup(activeGame.id, {
-                        player_name: name,
-                        is_opponent: entryMode === 'opponent',
-                        event_type: 'out',
-                        quarter: activeQuarter,
-                      });
-                    }
-                  }}
+                  style={[s.modalBtn, { backgroundColor: '#1f2937', marginTop: 8 }]}
+                  onPress={() => setSubOutPlayer(null)}
                 >
-                  <Text style={{ color: '#dc2626', fontWeight: '600' }}>OUT</Text>
+                  <Text style={{ color: '#9ca3af', fontWeight: '700' }}>Cancel</Text>
                 </TouchableOpacity>
-              </View>
-            ))}
-            <TouchableOpacity style={[s.modalBtn, { backgroundColor: '#374151', marginTop: 8 }]} onPress={() => setShowLineupModal(false)}>
-              <Text style={{ color: '#fff', fontWeight: '700' }}>Done</Text>
-            </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <Text style={{ color: '#6b7280', fontSize: 13, marginBottom: 16, lineHeight: 18 }}>
+                  Tap OUT to sub a player out (you'll pick who came in). Tap IN to log a standalone sub-in.
+                </Text>
+                <ScrollView style={{ maxHeight: 320 }} showsVerticalScrollIndicator={false}>
+                  {(entryMode === 'our' ? roster.map((p: any) => p.name) : opponentPlayers).map(name => (
+                    <View key={name} style={{ flexDirection: 'row', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+                      <TouchableOpacity
+                        style={[s.modalBtn, { flex: 1, backgroundColor: '#16a34a22', borderWidth: 1, borderColor: '#16a34a' }]}
+                        onPress={async () => {
+                          if (activeGame) {
+                            await gameEvalAPI.logLineup(activeGame.id, {
+                              player_name: name,
+                              is_opponent: entryMode === 'opponent',
+                              event_type: 'in',
+                              quarter: activeQuarter,
+                            });
+                          }
+                        }}
+                      >
+                        <Text style={{ color: '#16a34a', fontWeight: '600' }}>IN</Text>
+                      </TouchableOpacity>
+                      <Text style={{ color: '#fff', fontSize: 13, flex: 2, textAlign: 'center' }}>{name}</Text>
+                      <TouchableOpacity
+                        style={[s.modalBtn, { flex: 1, backgroundColor: '#dc262622', borderWidth: 1, borderColor: '#dc2626' }]}
+                        onPress={() => setSubOutPlayer(name)}
+                      >
+                        <Text style={{ color: '#dc2626', fontWeight: '600' }}>OUT</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+                <TouchableOpacity
+                  style={[s.modalBtn, { backgroundColor: '#374151', marginTop: 8 }]}
+                  onPress={() => { setShowLineupModal(false); setSubOutPlayer(null); }}
+                >
+                  <Text style={{ color: '#fff', fontWeight: '700' }}>Done</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </View>
       </Modal>
