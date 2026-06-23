@@ -229,6 +229,9 @@ export const gameEvalAPI = {
   getOpponentProfile: (name: string) => api.get(`/game-eval/opponents/${encodeURIComponent(name)}`).then(r => r.data),
   compareGames: (game1Id: number, game2Id: number) => api.get('/game-eval/compare', { params: { game1_id: game1Id, game2_id: game2Id } }).then(r => r.data),
   logMinutes: (gameId: number, data: any) => api.post(`/game-eval/sessions/${gameId}/minutes`, data).then(r => r.data),
+  getOpponentNotes: (name: string) => api.get(`/game-eval/opponents/${encodeURIComponent(name)}/notes`).then(r => r.data),
+  addOpponentNote: (name: string, noteText: string) => api.post(`/game-eval/opponents/${encodeURIComponent(name)}/notes`, { note_text: noteText }).then(r => r.data),
+  deleteOpponentNote: (noteId: number) => api.delete(`/game-eval/opponent-notes/${noteId}`).then(r => r.data),
 };
 
 export const gameReportsAPI = {

@@ -80,6 +80,7 @@ export default function TeamEvalScreen() {
   const [phaseFilter, setPhaseFilter] = useState<string>('all');
   const [dashboard, setDashboard] = useState<any>(null);
   const [loadingDash, setLoadingDash] = useState(true);
+  const [dashPhases, setDashPhases] = useState<string[]>([]);  // empty = all phases
 
   // Games list + new game modal
   const [showNewGame, setShowNewGame] = useState(false);
@@ -151,6 +152,16 @@ export default function TeamEvalScreen() {
       setTeams(t);
     } catch {}
     setLoading(false);
+    setLoadingDash(false);
+  }, []);
+
+  const loadDashboard = useCallback(async (phases: string[]) => {
+    setLoadingDash(true);
+    try {
+      const params = phases.length > 0 ? { phases: phases.join(',') } : {};
+      const d = await gameEvalAPI.getSeasonDashboard(params);
+      setDashboard(d);
+    } catch {}
     setLoadingDash(false);
   }, []);
 
