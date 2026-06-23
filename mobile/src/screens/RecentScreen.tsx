@@ -488,7 +488,7 @@ export default function RecentScreen() {
                       }
                     />
                   </View>
-                  <View style={{ flex: 1, overflow: 'hidden' }}>
+                  <View style={{ flex: 1, minWidth: 0 }}>
                     <Text numberOfLines={1} style={styles.playerName}>{item.player_name}</Text>
                     <Text
                       numberOfLines={1}
