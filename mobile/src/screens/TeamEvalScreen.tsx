@@ -137,6 +137,10 @@ export default function TeamEvalScreen() {
   const [scoutData, setScoutData] = useState<any | null>(null);
   const [loadingScout, setLoadingScout] = useState(false);
   const [regeneratingScout, setRegeneratingScout] = useState(false);
+  const [scoutNotes, setScoutNotes] = useState<any[]>([]);
+  const [newNoteText, setNewNoteText] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
+  const [loadingNotes, setLoadingNotes] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -477,12 +481,44 @@ export default function TeamEvalScreen() {
     setScoutOpponent(opponentName);
     setActiveView('scout');
     setScoutData(null);
+    setScoutNotes([]);
+    setNewNoteText('');
     setLoadingScout(true);
+    setLoadingNotes(true);
     try {
-      const data = await gameEvalAPI.getOpponentProfile(opponentName);
+      const [data, notes] = await Promise.all([
+        gameEvalAPI.getOpponentProfile(opponentName),
+        gameEvalAPI.getOpponentNotes(opponentName),
+      ]);
       setScoutData(data);
-    } catch {}
+      setScoutNotes(notes);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not load scout data');
+    }
     setLoadingScout(false);
+    setLoadingNotes(false);
+  };
+
+  const saveOpponentNote = async () => {
+    if (!scoutOpponent || !newNoteText.trim()) return;
+    setSavingNote(true);
+    try {
+      const note = await gameEvalAPI.addOpponentNote(scoutOpponent, newNoteText.trim());
+      setScoutNotes(prev => [...prev, note]);
+      setNewNoteText('');
+    } catch {
+      Alert.alert('Error', 'Could not save note');
+    }
+    setSavingNote(false);
+  };
+
+  const deleteOpponentNote = async (noteId: number) => {
+    try {
+      await gameEvalAPI.deleteOpponentNote(noteId);
+      setScoutNotes(prev => prev.filter(n => n.id !== noteId));
+    } catch {
+      Alert.alert('Error', 'Could not delete note');
+    }
   };
 
   const regenerateScoutingReport = async () => {
@@ -530,6 +566,47 @@ export default function TeamEvalScreen() {
       {/* Dashboard */}
       {activeView === 'dashboard' && (
         <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 60 }}>
+          {/* Phase filter */}
+          <View style={{ marginBottom: 16 }}>
+            <Text style={[s.cardLabel, { marginBottom: 8 }]}>GRADE VIEW</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                {['preseason', 'regular', 'playoff', 'tournament'].map(phase => {
+                  const selected = dashPhases.includes(phase);
+                  return (
+                    <TouchableOpacity
+                      key={phase}
+                      style={[s.chip, selected && s.chipActive]}
+                      onPress={() => {
+                        const next = selected
+                          ? dashPhases.filter(p => p !== phase)
+                          : [...dashPhases, phase];
+                        setDashPhases(next);
+                        loadDashboard(next);
+                      }}
+                    >
+                      <Text style={[s.chipText, selected && s.chipTextActive]}>
+                        {phase.charAt(0).toUpperCase() + phase.slice(1)}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+                {dashPhases.length > 0 && (
+                  <TouchableOpacity
+                    style={[s.chip, { borderColor: '#dc2626' }]}
+                    onPress={() => { setDashPhases([]); loadDashboard([]); }}
+                  >
+                    <Text style={[s.chipText, { color: '#dc2626' }]}>Clear</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </ScrollView>
+            {dashPhases.length > 0 && (
+              <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 6 }}>
+                Showing: {dashPhases.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' + ')}
+              </Text>
+            )}
+          </View>
           {loadingDash ? (
             <ActivityIndicator color="#7c3aed" style={{ marginTop: 40 }} />
           ) : dashboard ? (
@@ -1170,6 +1247,61 @@ export default function TeamEvalScreen() {
                         • {t.stat} (grade: {t.score.toFixed(1)})
                       </Text>
                     ))}
+                  </View>
+
+                  {/* Coach Notes */}
+                  <View style={s.card}>
+                    <Text style={s.cardLabel}>COACH NOTES</Text>
+                    <Text style={{ color: '#4b5563', fontSize: 11, marginBottom: 12, marginTop: 4 }}>
+                      Notes are included in the AI scouting report.
+                    </Text>
+
+                    {/* Existing notes */}
+                    {scoutNotes.map(note => (
+                      <View key={note.id} style={{ flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 8,
+                                                     borderBottomWidth: 1, borderBottomColor: '#1f2937', gap: 10 }}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ color: '#d1d5db', fontSize: 13, lineHeight: 18 }}>{note.note_text}</Text>
+                          <Text style={{ color: '#4b5563', fontSize: 10, marginTop: 3 }}>
+                            {new Date(note.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </Text>
+                        </View>
+                        <TouchableOpacity
+                          style={{ padding: 4 }}
+                          onPress={() => Alert.alert('Delete Note', 'Remove this note?', [
+                            { text: 'Cancel', style: 'cancel' },
+                            { text: 'Delete', style: 'destructive', onPress: () => deleteOpponentNote(note.id) },
+                          ])}
+                        >
+                          <Ionicons name="trash-outline" size={16} color="#4b5563" />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+
+                    {scoutNotes.length === 0 && !loadingNotes && (
+                      <Text style={{ color: '#4b5563', fontSize: 13, marginBottom: 8 }}>No notes yet. Add your first observation below.</Text>
+                    )}
+
+                    {/* Add note */}
+                    <TextInput
+                      style={[s.input, { marginTop: 10, marginBottom: 8, minHeight: 72, textAlignVertical: 'top' }]}
+                      placeholder="Add a scouting note or observation..."
+                      placeholderTextColor="#4b5563"
+                      value={newNoteText}
+                      onChangeText={setNewNoteText}
+                      multiline
+                      numberOfLines={3}
+                    />
+                    <TouchableOpacity
+                      style={{ backgroundColor: newNoteText.trim() ? '#7c3aed' : '#374151', borderRadius: 10,
+                               paddingVertical: 10, alignItems: 'center', opacity: savingNote ? 0.6 : 1 }}
+                      onPress={saveOpponentNote}
+                      disabled={!newNoteText.trim() || savingNote}
+                    >
+                      {savingNote
+                        ? <ActivityIndicator color="#fff" size="small" />
+                        : <Text style={{ color: '#fff', fontWeight: '700' }}>Save Note</Text>}
+                    </TouchableOpacity>
                   </View>
 
                   {/* AI report */}
