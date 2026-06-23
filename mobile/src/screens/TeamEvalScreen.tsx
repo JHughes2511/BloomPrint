@@ -8,6 +8,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 
 import { gameEvalAPI, teamsAPI, playersAPI } from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -461,16 +462,50 @@ export default function TeamEvalScreen() {
       });
 
       const fileName = buildPdfFileName(
-        `Game Report - ${programName} vs ${detailGame.opponent_name}`,
-        result,
+        `Game Report`,
+        `${programName} vs ${detailGame.opponent_name}${phase}`,
         gameDate,
       );
+      const dest = (FileSystem.cacheDirectory ?? '') + fileName + '.pdf';
       const { uri } = await Print.printToFileAsync({ html });
+      await FileSystem.copyAsync({ from: uri, to: dest });
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: fileName });
+        await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: fileName });
       }
     } catch (e: any) {
       Alert.alert('Export Error', e?.message ?? 'Could not export');
+    }
+    setExporting(false);
+  };
+
+  const exportDetailCsv = async () => {
+    if (!summary || !detailGame) return;
+    setExporting(true);
+    try {
+      const gameDate = new Date(detailGame.date);
+      const dateStr = `${gameDate.getFullYear()}-${String(gameDate.getMonth() + 1).padStart(2, '0')}-${String(gameDate.getDate()).padStart(2, '0')}`;
+      const programName = coach?.program_name ?? 'Team';
+      const phase = detailGame.season_phase ?? '';
+      const result = detailGame.our_score != null
+        ? `${detailGame.our_score > detailGame.opponent_score ? 'WIN' : 'LOSS'} ${detailGame.our_score}-${detailGame.opponent_score}`
+        : '';
+
+      const grades = detailTab === 'our' ? summary.player_grades : summary.opponent_grades;
+      const header = 'Player,Offensive Grade,Defensive Grade,Minutes,Game Grade\n';
+      const rows = grades.map((g: any) =>
+        `"${g.player_name}",${g.offensive_grade.toFixed(2)},${g.defensive_grade.toFixed(2)},${g.minutes_played.toFixed(0)},${g.game_grade.toFixed(2)}`
+      ).join('\n');
+      const meta = `"Game","${programName} vs ${detailGame.opponent_name}"\n"Date","${dateStr}"\n"Phase","${phase}"\n"Result","${result}"\n"Team Grade","${summary.team_grade.toFixed(2)}"\n\n`;
+      const csv = meta + header + rows;
+
+      const fileName = `Game Report - ${programName} vs ${detailGame.opponent_name} - ${dateStr}.csv`.replace(/[^a-zA-Z0-9 \-_.]/g, '');
+      const dest = (FileSystem.cacheDirectory ?? '') + fileName;
+      await FileSystem.writeAsStringAsync(dest, csv, { encoding: FileSystem.EncodingType.UTF8 });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(dest, { mimeType: 'text/csv', dialogTitle: fileName });
+      }
+    } catch (e: any) {
+      Alert.alert('Export Error', e?.message ?? 'Could not export CSV');
     }
     setExporting(false);
   };
@@ -1096,38 +1131,43 @@ export default function TeamEvalScreen() {
           ) : null}
 
           {/* Action buttons */}
-          <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginBottom: 16 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, marginBottom: 16 }}>
             <TouchableOpacity
-              style={[s.detailAction, { flex: 1 }]}
+              style={[s.detailAction, { flex: 1, minWidth: '45%' }]}
               onPress={() => openScout(detailGame.opponent_name)}
             >
-              <Ionicons name="search-outline" size={15} color="#9ca3af" />
-              <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600' }}>Scout</Text>
+              <Ionicons name="search-outline" size={14} color="#9ca3af" />
+              <Text numberOfLines={1} style={{ color: '#9ca3af', fontSize: 11, fontWeight: '600' }}>Scout</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[s.detailAction, { flex: 1 }]}
+              style={[s.detailAction, { flex: 1, minWidth: '45%' }]}
               onPress={exportDetailPdf}
               disabled={exporting}
             >
               {exporting
                 ? <ActivityIndicator size="small" color="#9ca3af" />
-                : <><Ionicons name="share-outline" size={15} color="#9ca3af" />
-                  <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600' }}>Export PDF</Text></>}
+                : <><Ionicons name="document-outline" size={14} color="#9ca3af" />
+                  <Text numberOfLines={1} style={{ color: '#9ca3af', fontSize: 11, fontWeight: '600' }}>Export PDF</Text></>}
             </TouchableOpacity>
             <TouchableOpacity
-              style={[s.detailAction, { flex: 1, borderColor: '#7c3aed', overflow: 'hidden' }]}
+              style={[s.detailAction, { flex: 1, minWidth: '45%' }]}
+              onPress={exportDetailCsv}
+              disabled={exporting}
+            >
+              {exporting
+                ? <ActivityIndicator size="small" color="#9ca3af" />
+                : <><Ionicons name="grid-outline" size={14} color="#9ca3af" />
+                  <Text numberOfLines={1} style={{ color: '#9ca3af', fontSize: 11, fontWeight: '600' }}>Export CSV</Text></>}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[s.detailAction, { flex: 1, minWidth: '45%', borderColor: '#7c3aed' }]}
               onPress={generateScoutingReport}
               disabled={generatingReport}
             >
               {generatingReport
                 ? <ActivityIndicator size="small" color="#7c3aed" />
-                : <><Ionicons name="sparkles-outline" size={15} color="#7c3aed" />
-                  <Text
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.7}
-                    style={{ color: '#7c3aed', fontSize: 12, fontWeight: '600', flexShrink: 1 }}
-                  >Generate Report</Text></>}
+                : <><Ionicons name="sparkles-outline" size={14} color="#7c3aed" />
+                  <Text numberOfLines={1} style={{ color: '#7c3aed', fontSize: 11, fontWeight: '600' }}>Generate Report</Text></>}
             </TouchableOpacity>
           </View>
 

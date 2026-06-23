@@ -113,6 +113,7 @@ function AppTabs() {
         tabBarStyle: { backgroundColor: '#111827', borderTopColor: '#1f2937' },
         tabBarActiveTintColor: '#2563eb',
         tabBarInactiveTintColor: '#6b7280',
+        tabBarLabelStyle: { fontSize: 10, marginBottom: 2 },
         tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, [string, string]> = {
             HomeTab:     ['home',        'home-outline'],
