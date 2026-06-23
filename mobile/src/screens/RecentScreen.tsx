@@ -956,8 +956,8 @@ const styles = StyleSheet.create({
     width: 28, height: 28, borderRadius: 8,
     backgroundColor: '#1f2937', alignItems: 'center', justifyContent: 'center',
   },
-  typeName: { color: '#2563eb', fontSize: 12, fontWeight: '600', marginTop: 2, lineHeight: 17 },
-  playerName: { color: '#fff', fontSize: 15, fontWeight: '700', lineHeight: 20 },
+  typeName: { color: '#2563eb', fontSize: 12, fontWeight: '600', marginTop: 2, lineHeight: 20, paddingBottom: 2 },
+  playerName: { color: '#fff', fontSize: 15, fontWeight: '700', lineHeight: 22 },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.6)',
     alignItems: 'center', justifyContent: 'center',

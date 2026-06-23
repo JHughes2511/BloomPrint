@@ -1197,8 +1197,7 @@ export default function TeamEvalScreen() {
 
       {/* Opponent Scout */}
       {activeView === 'scout' && (
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
-        <ScrollView ref={scoutScrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 120, paddingTop: 8 }} keyboardShouldPersistTaps="handled">
+        <ScrollView ref={scoutScrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 120, paddingTop: 8 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets={true}>
           {/* Opponent selector */}
           {!scoutOpponent ? (
             <>
@@ -1338,7 +1337,6 @@ export default function TeamEvalScreen() {
                       onChangeText={setNewNoteText}
                       multiline
                       numberOfLines={3}
-                      onFocus={() => setTimeout(() => scoutScrollRef.current?.scrollToEnd({ animated: true }), 300)}
                     />
                     <TouchableOpacity
                       style={{ backgroundColor: newNoteText.trim() ? '#7c3aed' : '#374151', borderRadius: 10,
@@ -1379,7 +1377,6 @@ export default function TeamEvalScreen() {
             </>
           )}
         </ScrollView>
-        </KeyboardAvoidingView>
       )}
 
       {/* New Game Modal */}
