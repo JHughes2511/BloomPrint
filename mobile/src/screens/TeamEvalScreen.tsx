@@ -84,6 +84,9 @@ export default function TeamEvalScreen() {
   // Games list + new game modal
   const [showNewGame, setShowNewGame] = useState(false);
   const [showTeamDropdown, setShowTeamDropdown] = useState(false);
+  const [showCreateTeam, setShowCreateTeam] = useState(false);
+  const [newTeamName, setNewTeamName] = useState('');
+  const [creatingTeam, setCreatingTeam] = useState(false);
   const [newGameOpponent, setNewGameOpponent] = useState('');
   const [newGameLocation, setNewGameLocation] = useState('');
   const [newGamePhase, setNewGamePhase] = useState('regular');
@@ -143,6 +146,22 @@ export default function TeamEvalScreen() {
   const filteredSessions = sessions.filter(
     s => phaseFilter === 'all' || s.season_phase === phaseFilter,
   );
+
+  // ── Create team ──────────────────────────────────────────────────────────────
+
+  const createTeam = async () => {
+    if (!newTeamName.trim()) return;
+    setCreatingTeam(true);
+    try {
+      const t = await teamsAPI.create({ name: newTeamName.trim() });
+      setTeams(prev => [...prev, t]);
+      setNewGameTeamId(t.id);
+      setNewTeamName('');
+      setShowCreateTeam(false);
+      setShowTeamDropdown(false);
+    } catch {}
+    setCreatingTeam(false);
+  };
 
   // ── Create game ──────────────────────────────────────────────────────────────
 
@@ -1016,42 +1035,77 @@ export default function TeamEvalScreen() {
           <View style={[s.modalBox, { maxHeight: '85%' }]}>
             <Text style={s.modalTitle}>New Game</Text>
             <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-              {teams.length > 0 && (
-                <>
-                  <Text style={s.fieldLabel}>TEAM (optional)</Text>
-                  <TouchableOpacity
-                    style={[s.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: showTeamDropdown ? 0 : 16 }]}
-                    onPress={() => setShowTeamDropdown(v => !v)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={{ color: newGameTeamId === null ? '#4b5563' : '#fff', fontSize: 15 }}>
-                      {newGameTeamId === null ? 'None (no team)' : teams.find((t: any) => t.id === newGameTeamId)?.name ?? 'Select team'}
-                    </Text>
-                    <Text style={{ color: '#6b7280', fontSize: 12 }}>{showTeamDropdown ? '▲' : '▼'}</Text>
-                  </TouchableOpacity>
-                  {showTeamDropdown && (
-                    <View style={{ borderWidth: 1, borderColor: '#374151', borderRadius: 10, marginBottom: 16, maxHeight: 180, overflow: 'hidden' }}>
-                      <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled>
+              <>
+                <Text style={s.fieldLabel}>TEAM (optional)</Text>
+                <TouchableOpacity
+                  style={[s.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: showTeamDropdown ? 0 : 16 }]}
+                  onPress={() => { setShowTeamDropdown(v => !v); setShowCreateTeam(false); }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={{ color: newGameTeamId === null ? '#4b5563' : '#fff', fontSize: 15 }}>
+                    {newGameTeamId === null ? 'None (no team)' : teams.find((t: any) => t.id === newGameTeamId)?.name ?? 'Select team'}
+                  </Text>
+                  <Text style={{ color: '#6b7280', fontSize: 12 }}>{showTeamDropdown ? '▲' : '▼'}</Text>
+                </TouchableOpacity>
+                {showTeamDropdown && (
+                  <View style={{ borderWidth: 1, borderColor: '#374151', borderRadius: 10, marginBottom: 16, overflow: 'hidden' }}>
+                    <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled style={{ maxHeight: 200 }}>
+                      <TouchableOpacity
+                        style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: '#374151', backgroundColor: newGameTeamId === null ? '#1e1b4b' : 'transparent' }}
+                        onPress={() => { setNewGameTeamId(null); setShowTeamDropdown(false); }}
+                      >
+                        <Text style={{ color: newGameTeamId === null ? '#a78bfa' : '#d1d5db', fontSize: 14 }}>None</Text>
+                      </TouchableOpacity>
+                      {teams.map((t: any) => (
                         <TouchableOpacity
-                          style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: '#374151', backgroundColor: newGameTeamId === null ? '#1e1b4b' : 'transparent' }}
-                          onPress={() => { setNewGameTeamId(null); setShowTeamDropdown(false); }}
+                          key={t.id}
+                          style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: '#374151', backgroundColor: newGameTeamId === t.id ? '#1e1b4b' : 'transparent' }}
+                          onPress={() => { setNewGameTeamId(t.id); setShowTeamDropdown(false); }}
                         >
-                          <Text style={{ color: newGameTeamId === null ? '#a78bfa' : '#d1d5db', fontSize: 14 }}>None</Text>
+                          <Text style={{ color: newGameTeamId === t.id ? '#a78bfa' : '#d1d5db', fontSize: 14 }}>{t.name}</Text>
                         </TouchableOpacity>
-                        {teams.map((t: any, i: number) => (
-                          <TouchableOpacity
-                            key={t.id}
-                            style={{ padding: 12, borderBottomWidth: i < teams.length - 1 ? 1 : 0, borderBottomColor: '#374151', backgroundColor: newGameTeamId === t.id ? '#1e1b4b' : 'transparent' }}
-                            onPress={() => { setNewGameTeamId(t.id); setShowTeamDropdown(false); }}
-                          >
-                            <Text style={{ color: newGameTeamId === t.id ? '#a78bfa' : '#d1d5db', fontSize: 14 }}>{t.name}</Text>
-                          </TouchableOpacity>
-                        ))}
-                      </ScrollView>
-                    </View>
-                  )}
-                </>
-              )}
+                      ))}
+                      {/* Create new team row */}
+                      {!showCreateTeam ? (
+                        <TouchableOpacity
+                          style={{ padding: 12, flexDirection: 'row', alignItems: 'center', gap: 6 }}
+                          onPress={() => setShowCreateTeam(true)}
+                        >
+                          <Text style={{ color: '#7c3aed', fontSize: 14, fontWeight: '700' }}>+ Create New Team</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <View style={{ padding: 12, gap: 8 }}>
+                          <TextInput
+                            style={[s.input, { marginBottom: 0 }]}
+                            placeholder="Team name"
+                            placeholderTextColor="#4b5563"
+                            value={newTeamName}
+                            onChangeText={setNewTeamName}
+                            autoFocus
+                          />
+                          <View style={{ flexDirection: 'row', gap: 8 }}>
+                            <TouchableOpacity
+                              style={[s.modalBtn, { flex: 1, backgroundColor: '#1f2937', paddingVertical: 8 }]}
+                              onPress={() => { setShowCreateTeam(false); setNewTeamName(''); }}
+                            >
+                              <Text style={{ color: '#9ca3af', fontWeight: '700', fontSize: 13 }}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={[s.modalBtn, { flex: 1, backgroundColor: '#7c3aed', paddingVertical: 8, opacity: newTeamName.trim() ? 1 : 0.4 }]}
+                              onPress={createTeam}
+                              disabled={creatingTeam || !newTeamName.trim()}
+                            >
+                              {creatingTeam
+                                ? <ActivityIndicator color="#fff" size="small" />
+                                : <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Create</Text>}
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      )}
+                    </ScrollView>
+                  </View>
+                )}
+              </>
               <Text style={s.fieldLabel}>OPPONENT NAME</Text>
               <TextInput
                 style={s.input}
@@ -1098,7 +1152,7 @@ export default function TeamEvalScreen() {
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity
                 style={[s.modalBtn, { flex: 1, backgroundColor: '#1f2937' }]}
-                onPress={() => { setShowNewGame(false); setShowTeamDropdown(false); }}
+                onPress={() => { setShowNewGame(false); setShowTeamDropdown(false); setShowCreateTeam(false); setNewTeamName(''); }}
               >
                 <Text style={{ color: '#9ca3af', fontWeight: '700' }}>Cancel</Text>
               </TouchableOpacity>
