@@ -1012,70 +1012,71 @@ export default function TeamEvalScreen() {
       {/* New Game Modal */}
       <Modal visible={showNewGame} transparent animationType="slide">
         <KeyboardAvoidingView style={s.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={s.modalBox}>
+          <View style={[s.modalBox, { maxHeight: '85%' }]}>
             <Text style={s.modalTitle}>New Game</Text>
-            <Text style={s.fieldLabel}>OPPONENT NAME</Text>
-            <TextInput
-              style={s.input}
-              placeholder="e.g. City High School"
-              placeholderTextColor="#4b5563"
-              value={newGameOpponent}
-              onChangeText={setNewGameOpponent}
-              autoFocus
-            />
-            <Text style={s.fieldLabel}>LOCATION (optional)</Text>
-            <TextInput
-              style={s.input}
-              placeholder="e.g. Home / Away / Neutral"
-              placeholderTextColor="#4b5563"
-              value={newGameLocation}
-              onChangeText={setNewGameLocation}
-            />
-            <Text style={s.fieldLabel}>SEASON YEAR (optional)</Text>
-            <TextInput
-              style={s.input}
-              placeholder="e.g. 2025-2026"
-              placeholderTextColor="#4b5563"
-              value={newGameYear}
-              onChangeText={setNewGameYear}
-            />
-            <Text style={s.fieldLabel}>SEASON PHASE</Text>
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
-              {['preseason', 'regular', 'playoff'].map(p => (
-                <TouchableOpacity
-                  key={p}
-                  style={[s.chip, newGamePhase === p && s.chipActive, { flex: 1 }]}
-                  onPress={() => setNewGamePhase(p)}
-                >
-                  <Text style={[s.chipText, newGamePhase === p && s.chipTextActive, { textAlign: 'center' }]}>
-                    {p.charAt(0).toUpperCase() + p.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            {teams.length > 0 && (
-              <>
-                <Text style={s.fieldLabel}>TEAM (optional)</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+              <Text style={s.fieldLabel}>OPPONENT NAME</Text>
+              <TextInput
+                style={s.input}
+                placeholder="e.g. City High School"
+                placeholderTextColor="#4b5563"
+                value={newGameOpponent}
+                onChangeText={setNewGameOpponent}
+              />
+              <Text style={s.fieldLabel}>LOCATION (optional)</Text>
+              <TextInput
+                style={s.input}
+                placeholder="e.g. Home / Away / Neutral"
+                placeholderTextColor="#4b5563"
+                value={newGameLocation}
+                onChangeText={setNewGameLocation}
+              />
+              <Text style={s.fieldLabel}>SEASON YEAR (optional)</Text>
+              <TextInput
+                style={s.input}
+                placeholder="e.g. 2025-2026"
+                placeholderTextColor="#4b5563"
+                value={newGameYear}
+                onChangeText={setNewGameYear}
+              />
+              <Text style={s.fieldLabel}>SEASON PHASE</Text>
+              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+                {['preseason', 'regular', 'playoff'].map(p => (
                   <TouchableOpacity
-                    style={[s.chip, newGameTeamId === null && s.chipActive]}
-                    onPress={() => setNewGameTeamId(null)}
+                    key={p}
+                    style={[s.chip, newGamePhase === p && s.chipActive, { flex: 1 }]}
+                    onPress={() => setNewGamePhase(p)}
                   >
-                    <Text style={[s.chipText, newGameTeamId === null && s.chipTextActive]}>None</Text>
+                    <Text style={[s.chipText, newGamePhase === p && s.chipTextActive, { textAlign: 'center' }]}>
+                      {p.charAt(0).toUpperCase() + p.slice(1)}
+                    </Text>
                   </TouchableOpacity>
-                  {teams.map((t: any) => (
+                ))}
+              </View>
+              {teams.length > 0 && (
+                <>
+                  <Text style={s.fieldLabel}>TEAM (optional)</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }} keyboardShouldPersistTaps="handled">
                     <TouchableOpacity
-                      key={t.id}
-                      style={[s.chip, newGameTeamId === t.id && s.chipActive]}
-                      onPress={() => setNewGameTeamId(t.id)}
+                      style={[s.chip, newGameTeamId === null && s.chipActive]}
+                      onPress={() => setNewGameTeamId(null)}
                     >
-                      <Text style={[s.chipText, newGameTeamId === t.id && s.chipTextActive]}>{t.name}</Text>
+                      <Text style={[s.chipText, newGameTeamId === null && s.chipTextActive]}>None</Text>
                     </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </>
-            )}
-            <View style={{ flexDirection: 'row', gap: 10 }}>
+                    {teams.map((t: any) => (
+                      <TouchableOpacity
+                        key={t.id}
+                        style={[s.chip, newGameTeamId === t.id && s.chipActive]}
+                        onPress={() => setNewGameTeamId(t.id)}
+                      >
+                        <Text style={[s.chipText, newGameTeamId === t.id && s.chipTextActive]}>{t.name}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </>
+              )}
+            </ScrollView>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity
                 style={[s.modalBtn, { flex: 1, backgroundColor: '#1f2937' }]}
                 onPress={() => setShowNewGame(false)}
