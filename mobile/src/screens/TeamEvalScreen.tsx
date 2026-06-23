@@ -883,11 +883,11 @@ export default function TeamEvalScreen() {
 
       {/* Opponent Scout */}
       {activeView === 'scout' && (
-        <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 80 }}>
+        <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 80, paddingTop: 8 }}>
           {/* Opponent selector */}
           {!scoutOpponent ? (
             <>
-              <Text style={s.cardLabel}>SELECT OPPONENT</Text>
+              <Text style={[s.cardLabel, { marginBottom: 10 }]}>SELECT OPPONENT</Text>
               {uniqueOpponents.length === 0 ? (
                 <View style={[s.card, { alignItems: 'center', paddingVertical: 32 }]}>
                   <Text style={{ color: '#6b7280', fontSize: 13 }}>No opponents yet. Log games first.</Text>
