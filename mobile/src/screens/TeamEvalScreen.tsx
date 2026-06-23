@@ -83,6 +83,7 @@ export default function TeamEvalScreen() {
 
   // Games list + new game modal
   const [showNewGame, setShowNewGame] = useState(false);
+  const [showTeamDropdown, setShowTeamDropdown] = useState(false);
   const [newGameOpponent, setNewGameOpponent] = useState('');
   const [newGameLocation, setNewGameLocation] = useState('');
   const [newGamePhase, setNewGamePhase] = useState('regular');
@@ -1018,23 +1019,37 @@ export default function TeamEvalScreen() {
               {teams.length > 0 && (
                 <>
                   <Text style={s.fieldLabel}>TEAM (optional)</Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-                    <TouchableOpacity
-                      style={[s.chip, newGameTeamId === null && s.chipActive]}
-                      onPress={() => setNewGameTeamId(null)}
-                    >
-                      <Text style={[s.chipText, newGameTeamId === null && s.chipTextActive]}>None</Text>
-                    </TouchableOpacity>
-                    {teams.map((t: any) => (
-                      <TouchableOpacity
-                        key={t.id}
-                        style={[s.chip, newGameTeamId === t.id && s.chipActive]}
-                        onPress={() => setNewGameTeamId(t.id)}
-                      >
-                        <Text style={[s.chipText, newGameTeamId === t.id && s.chipTextActive]}>{t.name}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+                  <TouchableOpacity
+                    style={[s.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: showTeamDropdown ? 0 : 16 }]}
+                    onPress={() => setShowTeamDropdown(v => !v)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={{ color: newGameTeamId === null ? '#4b5563' : '#fff', fontSize: 15 }}>
+                      {newGameTeamId === null ? 'None (no team)' : teams.find((t: any) => t.id === newGameTeamId)?.name ?? 'Select team'}
+                    </Text>
+                    <Text style={{ color: '#6b7280', fontSize: 12 }}>{showTeamDropdown ? '▲' : '▼'}</Text>
+                  </TouchableOpacity>
+                  {showTeamDropdown && (
+                    <View style={{ borderWidth: 1, borderColor: '#374151', borderRadius: 10, marginBottom: 16, maxHeight: 180, overflow: 'hidden' }}>
+                      <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled>
+                        <TouchableOpacity
+                          style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: '#374151', backgroundColor: newGameTeamId === null ? '#1e1b4b' : 'transparent' }}
+                          onPress={() => { setNewGameTeamId(null); setShowTeamDropdown(false); }}
+                        >
+                          <Text style={{ color: newGameTeamId === null ? '#a78bfa' : '#d1d5db', fontSize: 14 }}>None</Text>
+                        </TouchableOpacity>
+                        {teams.map((t: any, i: number) => (
+                          <TouchableOpacity
+                            key={t.id}
+                            style={{ padding: 12, borderBottomWidth: i < teams.length - 1 ? 1 : 0, borderBottomColor: '#374151', backgroundColor: newGameTeamId === t.id ? '#1e1b4b' : 'transparent' }}
+                            onPress={() => { setNewGameTeamId(t.id); setShowTeamDropdown(false); }}
+                          >
+                            <Text style={{ color: newGameTeamId === t.id ? '#a78bfa' : '#d1d5db', fontSize: 14 }}>{t.name}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  )}
                 </>
               )}
               <Text style={s.fieldLabel}>OPPONENT NAME</Text>
@@ -1062,14 +1077,18 @@ export default function TeamEvalScreen() {
                 onChangeText={setNewGameYear}
               />
               <Text style={s.fieldLabel}>SEASON PHASE</Text>
-              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+              <View style={{ flexDirection: 'row', gap: 6, marginBottom: 16 }}>
                 {['preseason', 'regular', 'playoff', 'tournament'].map(p => (
                   <TouchableOpacity
                     key={p}
-                    style={[s.chip, newGamePhase === p && s.chipActive, { flex: 1 }]}
+                    style={[s.chip, newGamePhase === p && s.chipActive, { flex: 1, paddingHorizontal: 6 }]}
                     onPress={() => setNewGamePhase(p)}
                   >
-                    <Text style={[s.chipText, newGamePhase === p && s.chipTextActive, { textAlign: 'center' }]}>
+                    <Text
+                      style={[s.chipText, newGamePhase === p && s.chipTextActive, { textAlign: 'center', fontSize: 11 }]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                    >
                       {p.charAt(0).toUpperCase() + p.slice(1)}
                     </Text>
                   </TouchableOpacity>
@@ -1079,7 +1098,7 @@ export default function TeamEvalScreen() {
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity
                 style={[s.modalBtn, { flex: 1, backgroundColor: '#1f2937' }]}
-                onPress={() => setShowNewGame(false)}
+                onPress={() => { setShowNewGame(false); setShowTeamDropdown(false); }}
               >
                 <Text style={{ color: '#9ca3af', fontWeight: '700' }}>Cancel</Text>
               </TouchableOpacity>
