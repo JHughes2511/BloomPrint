@@ -122,6 +122,14 @@ export default function TeamEvalScreen() {
   const [gameStats, setGameStats] = useState<any[]>([]);
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [statsModalPlayer, setStatsModalPlayer] = useState<string | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailModalPlayer, setDetailModalPlayer] = useState<string | null>(null);
+  const [gameLineup, setGameLineup] = useState<any[]>([]);
+  // for edit modal — add stat
+  const [addStatQuarter, setAddStatQuarter] = useState(1);
+  const [addStatName, setAddStatName] = useState('');
+  const [addingStatDropdownOpen, setAddingStatDropdownOpen] = useState(false);
+  const [addingStat, setAddingStat] = useState(false);
 
   // Opponent scout
   const [scoutOpponent, setScoutOpponent] = useState<string | null>(null);
@@ -297,14 +305,17 @@ export default function TeamEvalScreen() {
     setShowScoutingReport(false);
     setSummary(null);
     setGameStats([]);
+    setGameLineup([]);
     setLoadingSummary(true);
     try {
-      const [s, stats] = await Promise.all([
+      const [s, stats, lineup] = await Promise.all([
         gameEvalAPI.getGameSummary(game.id),
         gameEvalAPI.listStats(game.id),
+        gameEvalAPI.getLineup(game.id),
       ]);
       setSummary(s);
       setGameStats(stats);
+      setGameLineup(lineup);
     } catch {}
     setLoadingSummary(false);
   };
@@ -325,6 +336,65 @@ export default function TeamEvalScreen() {
     } catch (e: any) {
       Alert.alert('Error', 'Could not delete stat');
     }
+  };
+
+  const addStatEntry = async (statName: string, quarter: number) => {
+    if (!detailGame || !statsModalPlayer) return;
+    setAddingStat(true);
+    try {
+      const isOff = OFFENSE_STATS.includes(statName);
+      const category = isOff ? 'offense' : 'defense';
+      // compute raw points using same logic as STAT_POINTS in the file
+      const STAT_POINTS_LOCAL: Record<string, { base_low: number; base_high: number; threshold: number }> = {
+        '2 FG Made':          { base_low: 2,  base_high: 3,  threshold: 4 },
+        '2 FG Missed':        { base_low: -1, base_high: -2, threshold: 4 },
+        '3 FG Made':          { base_low: 3,  base_high: 4,  threshold: 4 },
+        '3 FG Missed':        { base_low: -1, base_high: -2, threshold: 4 },
+        'Off. Reb':           { base_low: 3,  base_high: 4,  threshold: 4 },
+        'Draw PF':            { base_low: 1,  base_high: 1,  threshold: 4 },
+        'Assists':            { base_low: 3,  base_high: 4,  threshold: 4 },
+        'Turnover':           { base_low: -2, base_high: -2, threshold: 4 },
+        'Hockey Assist':      { base_low: 2,  base_high: 2,  threshold: 4 },
+        'FT Made':            { base_low: 2,  base_high: 3,  threshold: 4 },
+        'FT Missed':          { base_low: -1, base_high: -2, threshold: 4 },
+        'Def. Reb':           { base_low: 3,  base_high: 4,  threshold: 4 },
+        'Steal':              { base_low: 3,  base_high: 4,  threshold: 4 },
+        'Deflection':         { base_low: 3,  base_high: 4,  threshold: 4 },
+        'Def. Stop':          { base_low: 3,  base_high: 3,  threshold: 4 },
+        'Charge':             { base_low: 5,  base_high: 7,  threshold: 4 },
+        'Bluff':              { base_low: 1,  base_high: 1,  threshold: 4 },
+        'Blocked Shot':       { base_low: 2,  base_high: 2,  threshold: 4 },
+        'Jog Back':           { base_low: -3, base_high: -3, threshold: 4 },
+        'No Ball Pressure':   { base_low: -1, base_high: -1, threshold: 4 },
+        'Defensive Mistake':  { base_low: -1, base_high: -1, threshold: 4 },
+        'No Contest':         { base_low: -1, base_high: -1, threshold: 4 },
+        'No Block Out':       { base_low: -1, base_high: -1, threshold: 4 },
+        'Foul Against':       { base_low: -1, base_high: -1, threshold: 4 },
+      };
+      const cfg = STAT_POINTS_LOCAL[statName];
+      const rawPoints = cfg ? cfg.base_low : 0;
+      const result = await gameEvalAPI.logStat(detailGame.id, {
+        player_name: statsModalPlayer,
+        is_opponent: detailTab === 'opponent',
+        quarter,
+        stat_name: statName,
+        stat_category: category,
+        raw_points: rawPoints,
+        count: 1,
+      });
+      // refresh stats and summary
+      const [newStats, newSummary] = await Promise.all([
+        gameEvalAPI.listStats(detailGame.id),
+        gameEvalAPI.getGameSummary(detailGame.id),
+      ]);
+      setGameStats(newStats);
+      setSummary(newSummary);
+      setAddStatName('');
+      setAddingStatDropdownOpen(false);
+    } catch (e: any) {
+      Alert.alert('Error', 'Could not add stat');
+    }
+    setAddingStat(false);
   };
 
   const generateScoutingReport = async () => {
@@ -909,13 +979,24 @@ export default function TeamEvalScreen() {
                           </Text>
                         </View>
                       ))}
-                      <TouchableOpacity
-                        style={{ marginTop: 8, flexDirection: 'row', alignItems: 'center', gap: 4 }}
-                        onPress={() => openPlayerStats(g.player_name)}
-                      >
-                        <Ionicons name="create-outline" size={13} color="#7c3aed" />
-                        <Text style={{ color: '#7c3aed', fontSize: 12, fontWeight: '600' }}>Edit / Delete Stats</Text>
-                      </TouchableOpacity>
+                      <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
+                        <TouchableOpacity
+                          style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4,
+                                   backgroundColor: '#1e1b4b', borderRadius: 8, paddingVertical: 8, borderWidth: 1, borderColor: '#4c1d95' }}
+                          onPress={() => { setDetailModalPlayer(g.player_name); setShowDetailModal(true); }}
+                        >
+                          <Ionicons name="eye-outline" size={13} color="#a78bfa" />
+                          <Text style={{ color: '#a78bfa', fontSize: 12, fontWeight: '700' }}>View Details</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4,
+                                   backgroundColor: '#1f2937', borderRadius: 8, paddingVertical: 8, borderWidth: 1, borderColor: '#374151' }}
+                          onPress={() => { setStatsModalPlayer(g.player_name); setShowStatsModal(true); setAddStatName(''); setAddingStatDropdownOpen(false); }}
+                        >
+                          <Ionicons name="create-outline" size={13} color="#9ca3af" />
+                          <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '700' }}>Edit Stats</Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   )}
                 </View>
@@ -1342,30 +1423,223 @@ export default function TeamEvalScreen() {
         </View>
       </Modal>
 
+      {/* Player Detail Modal */}
+      <Modal visible={showDetailModal} transparent animationType="slide">
+        <View style={s.modalOverlay}>
+          <View style={[s.modalBox, { maxHeight: '90%' }]}>
+            {/* Header */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: '#fff', fontSize: 18, fontWeight: '900' }}>{detailModalPlayer}</Text>
+                {summary && (() => {
+                  const grades = detailTab === 'our' ? summary.player_grades : summary.opponent_grades;
+                  const pg = grades.find((g: any) => g.player_name === detailModalPlayer);
+                  if (!pg) return null;
+                  return (
+                    <View style={{ flexDirection: 'row', gap: 12, marginTop: 4 }}>
+                      <Text style={{ color: '#6b7280', fontSize: 12 }}>OFF <Text style={{ color: '#a78bfa', fontWeight: '700' }}>{pg.offensive_grade.toFixed(2)}</Text></Text>
+                      <Text style={{ color: '#6b7280', fontSize: 12 }}>DEF <Text style={{ color: '#a78bfa', fontWeight: '700' }}>{pg.defensive_grade.toFixed(2)}</Text></Text>
+                      <Text style={{ color: '#6b7280', fontSize: 12 }}>{pg.minutes_played.toFixed(0)} min</Text>
+                    </View>
+                  );
+                })()}
+              </View>
+              {summary && (() => {
+                const grades = detailTab === 'our' ? summary.player_grades : summary.opponent_grades;
+                const pg = grades.find((g: any) => g.player_name === detailModalPlayer);
+                if (!pg) return null;
+                return (
+                  <View style={{ backgroundColor: '#7c3aed', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8 }}>
+                    <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900' }}>{pg.game_grade.toFixed(2)}</Text>
+                    <Text style={{ color: '#c4b5fd', fontSize: 9, textAlign: 'center' }}>GRADE</Text>
+                  </View>
+                );
+              })()}
+            </View>
+
+            <View style={{ height: 1, backgroundColor: '#1f2937', marginBottom: 14 }} />
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {/* Substitution events */}
+              {gameLineup.filter(e => e.player_name === detailModalPlayer && e.is_opponent === (detailTab === 'opponent')).length > 0 && (
+                <View style={{ marginBottom: 16 }}>
+                  <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>SUBSTITUTIONS</Text>
+                  {gameLineup
+                    .filter(e => e.player_name === detailModalPlayer && e.is_opponent === (detailTab === 'opponent'))
+                    .map((e, i) => (
+                      <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 7,
+                                             borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                        <View style={{ width: 28, height: 28, borderRadius: 14,
+                                        backgroundColor: e.event_type === 'in' ? '#16a34a22' : '#dc262622',
+                                        alignItems: 'center', justifyContent: 'center' }}>
+                          <Ionicons name={e.event_type === 'in' ? 'log-in-outline' : 'log-out-outline'}
+                                    size={14} color={e.event_type === 'in' ? '#16a34a' : '#dc2626'} />
+                        </View>
+                        <Text style={{ color: e.event_type === 'in' ? '#16a34a' : '#dc2626', fontWeight: '700', fontSize: 12, width: 28 }}>
+                          {e.event_type === 'in' ? 'IN' : 'OUT'}
+                        </Text>
+                        <Text style={{ color: '#9ca3af', fontSize: 12 }}>{e.quarter === 5 ? 'OT' : `Q${e.quarter}`}</Text>
+                        {e.timestamp_seconds != null && (
+                          <Text style={{ color: '#4b5563', fontSize: 11 }}>
+                            {Math.floor(e.timestamp_seconds / 60)}:{String(e.timestamp_seconds % 60).padStart(2, '0')}
+                          </Text>
+                        )}
+                      </View>
+                    ))
+                  }
+                </View>
+              )}
+
+              {/* Stats by quarter */}
+              {[1, 2, 3, 4, 5].map(q => {
+                const qStats = gameStats.filter(st =>
+                  st.player_name === detailModalPlayer &&
+                  st.is_opponent === (detailTab === 'opponent') &&
+                  st.quarter === q
+                );
+                if (qStats.length === 0) return null;
+                const offTotal = qStats.filter(s => s.stat_category === 'offense').reduce((a, s) => a + s.weighted_points, 0);
+                const defTotal = qStats.filter(s => s.stat_category === 'defense').reduce((a, s) => a + s.weighted_points, 0);
+                return (
+                  <View key={q} style={{ marginBottom: 14 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <Text style={{ color: '#fff', fontSize: 13, fontWeight: '800' }}>
+                        {q === 5 ? 'OVERTIME' : `QUARTER ${q}`}
+                      </Text>
+                      <Text style={{ color: '#6b7280', fontSize: 11 }}>
+                        OFF {offTotal > 0 ? '+' : ''}{offTotal.toFixed(1)}  ·  DEF {defTotal > 0 ? '+' : ''}{defTotal.toFixed(1)}
+                      </Text>
+                    </View>
+                    {qStats.map(st => (
+                      <View key={st.id} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 6,
+                                                  borderBottomWidth: 1, borderBottomColor: '#1f293780' }}>
+                        <View style={{ width: 6, height: 6, borderRadius: 3,
+                                        backgroundColor: st.stat_category === 'offense' ? '#7c3aed' : '#0ea5e9',
+                                        marginRight: 10 }} />
+                        <Text style={{ flex: 1, color: '#d1d5db', fontSize: 13 }}>{st.stat_name}</Text>
+                        <Text style={{ color: '#6b7280', fontSize: 11, marginRight: 8 }}>
+                          {st.stat_category === 'offense' ? 'OFF' : 'DEF'}
+                        </Text>
+                        <Text style={{ color: st.weighted_points >= 0 ? '#a78bfa' : '#f87171',
+                                        fontSize: 13, fontWeight: '700', width: 44, textAlign: 'right' }}>
+                          {st.weighted_points >= 0 ? '+' : ''}{st.weighted_points.toFixed(1)}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                );
+              })}
+
+              {gameStats.filter(st => st.player_name === detailModalPlayer && st.is_opponent === (detailTab === 'opponent')).length === 0 && (
+                <Text style={{ color: '#4b5563', fontSize: 13, textAlign: 'center', paddingVertical: 24 }}>No stats logged yet.</Text>
+              )}
+            </ScrollView>
+
+            <TouchableOpacity
+              style={[s.modalBtn, { backgroundColor: '#1f2937', marginTop: 14 }]}
+              onPress={() => setShowDetailModal(false)}
+            >
+              <Text style={{ color: '#9ca3af', fontWeight: '700' }}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       {/* Player Stats Edit Modal */}
       <Modal visible={showStatsModal} transparent animationType="slide">
         <View style={s.modalOverlay}>
-          <View style={[s.modalBox, { maxHeight: '85%' }]}>
-            <Text style={s.modalTitle}>{statsModalPlayer} — Stats</Text>
-            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 12 }}>
-              Tap the trash icon to remove a stat entry. Grades recalculate instantly.
-            </Text>
-            <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={[s.modalBox, { maxHeight: '90%' }]}>
+            <Text style={s.modalTitle}>Edit Stats — {statsModalPlayer}</Text>
+
+            {/* ADD STAT SECTION */}
+            <View style={{ backgroundColor: '#1a1a2e', borderRadius: 10, padding: 12, marginBottom: 14, borderWidth: 1, borderColor: '#2d2d5e' }}>
+              <Text style={{ color: '#a78bfa', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 10 }}>ADD MISSING STAT</Text>
+
+              {/* Quarter selector */}
+              <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 6 }}>QUARTER</Text>
+              <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
+                {[1, 2, 3, 4, 5].map(q => (
+                  <TouchableOpacity
+                    key={q}
+                    style={{ flex: 1, paddingVertical: 7, borderRadius: 8, alignItems: 'center',
+                              backgroundColor: addStatQuarter === q ? '#7c3aed' : '#1f2937',
+                              borderWidth: 1, borderColor: addStatQuarter === q ? '#7c3aed' : '#374151' }}
+                    onPress={() => setAddStatQuarter(q)}
+                  >
+                    <Text style={{ color: addStatQuarter === q ? '#fff' : '#6b7280', fontSize: 12, fontWeight: '700' }}>
+                      {q === 5 ? 'OT' : `Q${q}`}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Stat picker */}
+              <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 6 }}>STAT</Text>
+              <TouchableOpacity
+                style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+                         backgroundColor: '#1f2937', borderRadius: 8, padding: 12, borderWidth: 1, borderColor: '#374151',
+                         marginBottom: addingStatDropdownOpen ? 0 : 10 }}
+                onPress={() => setAddingStatDropdownOpen(v => !v)}
+              >
+                <Text style={{ color: addStatName ? '#fff' : '#4b5563', fontSize: 14 }}>
+                  {addStatName || 'Select a stat...'}
+                </Text>
+                <Ionicons name={addingStatDropdownOpen ? 'chevron-up' : 'chevron-down'} size={14} color="#6b7280" />
+              </TouchableOpacity>
+              {addingStatDropdownOpen && (
+                <View style={{ borderWidth: 1, borderColor: '#374151', borderRadius: 8, marginBottom: 10, maxHeight: 160, overflow: 'hidden' }}>
+                  <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="handled">
+                    <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700', padding: 8, letterSpacing: 1 }}>OFFENSE</Text>
+                    {OFFENSE_STATS.map(stat => (
+                      <TouchableOpacity key={stat} style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#1f2937',
+                                                             backgroundColor: addStatName === stat ? '#1e1b4b' : 'transparent' }}
+                        onPress={() => { setAddStatName(stat); setAddingStatDropdownOpen(false); }}>
+                        <Text style={{ color: addStatName === stat ? '#a78bfa' : '#d1d5db', fontSize: 13 }}>{stat}</Text>
+                      </TouchableOpacity>
+                    ))}
+                    <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700', padding: 8, letterSpacing: 1 }}>DEFENSE</Text>
+                    {DEFENSE_STATS.map(stat => (
+                      <TouchableOpacity key={stat} style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#1f2937',
+                                                             backgroundColor: addStatName === stat ? '#1e1b4b' : 'transparent' }}
+                        onPress={() => { setAddStatName(stat); setAddingStatDropdownOpen(false); }}>
+                        <Text style={{ color: addStatName === stat ? '#a78bfa' : '#d1d5db', fontSize: 13 }}>{stat}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={{ backgroundColor: addStatName ? '#7c3aed' : '#374151', borderRadius: 8, paddingVertical: 10,
+                         alignItems: 'center', opacity: addingStat ? 0.6 : 1 }}
+                onPress={() => addStatName && addStatEntry(addStatName, addStatQuarter)}
+                disabled={!addStatName || addingStat}
+              >
+                {addingStat
+                  ? <ActivityIndicator color="#fff" size="small" />
+                  : <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>+ Add Stat</Text>}
+              </TouchableOpacity>
+            </View>
+
+            {/* EXISTING STATS */}
+            <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 8 }}>LOGGED STATS — TAP TRASH TO REMOVE</Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 260 }}>
               {gameStats
                 .filter(st => st.player_name === statsModalPlayer && st.is_opponent === (detailTab === 'opponent'))
                 .length === 0 ? (
-                <Text style={{ color: '#4b5563', fontSize: 13, textAlign: 'center', paddingVertical: 20 }}>
-                  No individual stat entries found.
-                </Text>
+                <Text style={{ color: '#4b5563', fontSize: 13, textAlign: 'center', paddingVertical: 20 }}>No stats logged yet.</Text>
               ) : (
                 gameStats
                   .filter(st => st.player_name === statsModalPlayer && st.is_opponent === (detailTab === 'opponent'))
                   .map(st => (
-                    <View key={st.id} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                    <View key={st.id} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10,
+                                                borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                      <View style={{ width: 6, height: 6, borderRadius: 3,
+                                      backgroundColor: st.stat_category === 'offense' ? '#7c3aed' : '#0ea5e9', marginRight: 8 }} />
                       <View style={{ flex: 1 }}>
                         <Text style={{ color: '#fff', fontSize: 13, fontWeight: '600' }}>{st.stat_name}</Text>
-                        <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 2 }}>
-                          {st.quarter === 5 ? 'OT' : `Q${st.quarter}`}  ·  {st.raw_points > 0 ? '+' : ''}{st.raw_points} pts raw  ·  {st.weighted_points > 0 ? '+' : ''}{st.weighted_points.toFixed(1)} weighted
+                        <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 1 }}>
+                          {st.quarter === 5 ? 'OT' : `Q${st.quarter}`}  ·  {st.weighted_points >= 0 ? '+' : ''}{st.weighted_points.toFixed(1)} pts
                         </Text>
                       </View>
                       <TouchableOpacity
@@ -1383,6 +1657,7 @@ export default function TeamEvalScreen() {
                   ))
               )}
             </ScrollView>
+
             <TouchableOpacity
               style={[s.modalBtn, { backgroundColor: '#374151', marginTop: 12 }]}
               onPress={() => setShowStatsModal(false)}
