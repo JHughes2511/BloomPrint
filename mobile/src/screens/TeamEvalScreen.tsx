@@ -1115,14 +1115,19 @@ export default function TeamEvalScreen() {
                   <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600' }}>Export PDF</Text></>}
             </TouchableOpacity>
             <TouchableOpacity
-              style={[s.detailAction, { flex: 1, borderColor: '#7c3aed' }]}
+              style={[s.detailAction, { flex: 1, borderColor: '#7c3aed', overflow: 'hidden' }]}
               onPress={generateScoutingReport}
               disabled={generatingReport}
             >
               {generatingReport
                 ? <ActivityIndicator size="small" color="#7c3aed" />
                 : <><Ionicons name="sparkles-outline" size={15} color="#7c3aed" />
-                  <Text style={{ color: '#7c3aed', fontSize: 12, fontWeight: '600' }}>Generate Report</Text></>}
+                  <Text
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.7}
+                    style={{ color: '#7c3aed', fontSize: 12, fontWeight: '600', flexShrink: 1 }}
+                  >Generate Report</Text></>}
             </TouchableOpacity>
           </View>
 
@@ -1151,8 +1156,8 @@ export default function TeamEvalScreen() {
 
       {/* Opponent Scout */}
       {activeView === 'scout' && (
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 80, paddingTop: 8 }} keyboardShouldPersistTaps="handled">
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+        <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 120, paddingTop: 8 }} keyboardShouldPersistTaps="handled">
           {/* Opponent selector */}
           {!scoutOpponent ? (
             <>
