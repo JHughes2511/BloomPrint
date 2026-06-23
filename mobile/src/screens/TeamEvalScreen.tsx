@@ -1015,6 +1015,28 @@ export default function TeamEvalScreen() {
           <View style={[s.modalBox, { maxHeight: '85%' }]}>
             <Text style={s.modalTitle}>New Game</Text>
             <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+              {teams.length > 0 && (
+                <>
+                  <Text style={s.fieldLabel}>TEAM (optional)</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }} keyboardShouldPersistTaps="handled">
+                    <TouchableOpacity
+                      style={[s.chip, newGameTeamId === null && s.chipActive]}
+                      onPress={() => setNewGameTeamId(null)}
+                    >
+                      <Text style={[s.chipText, newGameTeamId === null && s.chipTextActive]}>None</Text>
+                    </TouchableOpacity>
+                    {teams.map((t: any) => (
+                      <TouchableOpacity
+                        key={t.id}
+                        style={[s.chip, newGameTeamId === t.id && s.chipActive]}
+                        onPress={() => setNewGameTeamId(t.id)}
+                      >
+                        <Text style={[s.chipText, newGameTeamId === t.id && s.chipTextActive]}>{t.name}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </>
+              )}
               <Text style={s.fieldLabel}>OPPONENT NAME</Text>
               <TextInput
                 style={s.input}
@@ -1053,28 +1075,6 @@ export default function TeamEvalScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              {teams.length > 0 && (
-                <>
-                  <Text style={s.fieldLabel}>TEAM (optional)</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }} keyboardShouldPersistTaps="handled">
-                    <TouchableOpacity
-                      style={[s.chip, newGameTeamId === null && s.chipActive]}
-                      onPress={() => setNewGameTeamId(null)}
-                    >
-                      <Text style={[s.chipText, newGameTeamId === null && s.chipTextActive]}>None</Text>
-                    </TouchableOpacity>
-                    {teams.map((t: any) => (
-                      <TouchableOpacity
-                        key={t.id}
-                        style={[s.chip, newGameTeamId === t.id && s.chipActive]}
-                        onPress={() => setNewGameTeamId(t.id)}
-                      >
-                        <Text style={[s.chipText, newGameTeamId === t.id && s.chipTextActive]}>{t.name}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </>
-              )}
             </ScrollView>
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity
