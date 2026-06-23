@@ -488,12 +488,11 @@ export default function RecentScreen() {
                       }
                     />
                   </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.playerName}>{item.player_name}</Text>
+                  <View style={{ flex: 1, overflow: 'hidden' }}>
+                    <Text numberOfLines={1} style={styles.playerName}>{item.player_name}</Text>
                     <Text
                       numberOfLines={1}
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.75}
+                      ellipsizeMode="tail"
                       style={[
                         styles.typeName,
                         item.kind === 'team' && { color: '#f59e0b' },
@@ -957,8 +956,8 @@ const styles = StyleSheet.create({
     width: 28, height: 28, borderRadius: 8,
     backgroundColor: '#1f2937', alignItems: 'center', justifyContent: 'center',
   },
-  playerName: { color: '#fff', fontSize: 15, fontWeight: '700' },
-  typeName: { color: '#2563eb', fontSize: 12, fontWeight: '600', marginTop: 2, lineHeight: 18, flexShrink: 1 },
+  typeName: { color: '#2563eb', fontSize: 12, fontWeight: '600', marginTop: 2, lineHeight: 17 },
+  playerName: { color: '#fff', fontSize: 15, fontWeight: '700', lineHeight: 20 },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.6)',
     alignItems: 'center', justifyContent: 'center',
