@@ -1297,7 +1297,7 @@ export default function TeamEvalScreen() {
                   </View>
 
                   {/* Coach Notes */}
-                  <View style={s.card}>
+                  <View style={s.card} onLayout={e => { noteInputY.current = e.nativeEvent.layout.y; }}>
                     <Text style={s.cardLabel}>COACH NOTES</Text>
                     <Text style={{ color: '#4b5563', fontSize: 11, marginBottom: 12, marginTop: 4 }}>
                       Notes are included in the scouting report.
@@ -1338,8 +1338,7 @@ export default function TeamEvalScreen() {
                       onChangeText={setNewNoteText}
                       multiline
                       numberOfLines={3}
-                      onLayout={e => { noteInputY.current = e.nativeEvent.layout.y; }}
-                      onFocus={() => setTimeout(() => scoutScrollRef.current?.scrollTo({ y: noteInputY.current - 80, animated: true }), 350)}
+                      onFocus={() => setTimeout(() => scoutScrollRef.current?.scrollTo({ y: noteInputY.current, animated: true }), 350)}
                     />
                     <TouchableOpacity
                       style={{ backgroundColor: newNoteText.trim() ? '#7c3aed' : '#374151', borderRadius: 10,
