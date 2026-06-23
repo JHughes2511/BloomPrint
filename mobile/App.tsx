@@ -113,8 +113,9 @@ function AppTabs() {
         tabBarStyle: { backgroundColor: '#111827', borderTopColor: '#1f2937' },
         tabBarActiveTintColor: '#2563eb',
         tabBarInactiveTintColor: '#6b7280',
-        tabBarLabelStyle: { fontSize: 10, marginBottom: 2 },
-        tabBarItemStyle: { width: '20%', paddingHorizontal: 0 },
+        tabBarLabelStyle: { fontSize: 9, marginBottom: 2, textAlign: 'center', includeFontPadding: false },
+        tabBarItemStyle: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2 },
+        tabBarIconStyle: { marginBottom: 0 },
         tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, [string, string]> = {
             HomeTab:     ['home',        'home-outline'],
