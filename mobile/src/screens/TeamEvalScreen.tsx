@@ -469,7 +469,7 @@ export default function TeamEvalScreen() {
         <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 60 }}>
           {/* Phase filter */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
-            {['all', 'preseason', 'regular', 'playoff'].map(p => (
+            {['all', 'preseason', 'regular', 'playoff', 'tournament'].map(p => (
               <TouchableOpacity
                 key={p}
                 style={[s.chip, phaseFilter === p && s.chipActive]}
@@ -1063,7 +1063,7 @@ export default function TeamEvalScreen() {
               />
               <Text style={s.fieldLabel}>SEASON PHASE</Text>
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
-                {['preseason', 'regular', 'playoff'].map(p => (
+                {['preseason', 'regular', 'playoff', 'tournament'].map(p => (
                   <TouchableOpacity
                     key={p}
                     style={[s.chip, newGamePhase === p && s.chipActive, { flex: 1 }]}
