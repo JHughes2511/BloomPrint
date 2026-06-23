@@ -76,6 +76,7 @@ type View = 'dashboard' | 'games' | 'live' | 'detail' | 'scout';
 export default function TeamEvalScreen() {
   const { coach } = useAuth();
   const scoutScrollRef = useRef<any>(null);
+  const noteInputY = useRef(0);
   const [activeView, setActiveView] = useState<View>('dashboard');
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1337,6 +1338,8 @@ export default function TeamEvalScreen() {
                       onChangeText={setNewNoteText}
                       multiline
                       numberOfLines={3}
+                      onLayout={e => { noteInputY.current = e.nativeEvent.layout.y; }}
+                      onFocus={() => setTimeout(() => scoutScrollRef.current?.scrollTo({ y: noteInputY.current - 80, animated: true }), 350)}
                     />
                     <TouchableOpacity
                       style={{ backgroundColor: newNoteText.trim() ? '#7c3aed' : '#374151', borderRadius: 10,
