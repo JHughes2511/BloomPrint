@@ -210,6 +210,26 @@ export const coachesAPI = {
   list: () => api.get('/auth/coaches').then(r => r.data),
 };
 
+// ── Game Evaluation ────────────────────────────────────────────────────────────
+export const gameEvalAPI = {
+  createSession: (data: any) => api.post('/game-eval/sessions', data).then(r => r.data),
+  listSessions: (params?: any) => api.get('/game-eval/sessions', { params }).then(r => r.data),
+  getSession: (id: number) => api.get(`/game-eval/sessions/${id}`).then(r => r.data),
+  updateSession: (id: number, data: any) => api.patch(`/game-eval/sessions/${id}`, data).then(r => r.data),
+  deleteSession: (id: number) => api.delete(`/game-eval/sessions/${id}`).then(r => r.data),
+  logStat: (gameId: number, data: any) => api.post(`/game-eval/sessions/${gameId}/stats`, data).then(r => r.data),
+  deleteStat: (statId: number) => api.delete(`/game-eval/stats/${statId}`).then(r => r.data),
+  logLineup: (gameId: number, data: any) => api.post(`/game-eval/sessions/${gameId}/lineup`, data).then(r => r.data),
+  getLineup: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/lineup`).then(r => r.data),
+  getGameSummary: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/summary`).then(r => r.data),
+  uploadFile: (gameId: number, formData: FormData) => api.post(`/game-eval/sessions/${gameId}/upload`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
+  getScoutingReport: (gameId: number) => api.post(`/game-eval/sessions/${gameId}/ai-scouting`).then(r => r.data),
+  getSeasonDashboard: (params?: any) => api.get('/game-eval/season-dashboard', { params }).then(r => r.data),
+  getOpponentProfile: (name: string) => api.get(`/game-eval/opponents/${encodeURIComponent(name)}`).then(r => r.data),
+  compareGames: (game1Id: number, game2Id: number) => api.get('/game-eval/compare', { params: { game1_id: game1Id, game2_id: game2Id } }).then(r => r.data),
+  logMinutes: (gameId: number, data: any) => api.post(`/game-eval/sessions/${gameId}/minutes`, data).then(r => r.data),
+};
+
 export const gameReportsAPI = {
   list: () => api.get('/game-reports').then(r => r.data),
   get: (id: number) => api.get(`/game-reports/${id}`).then(r => r.data),

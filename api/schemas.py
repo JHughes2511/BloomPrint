@@ -469,3 +469,76 @@ class TeamReportCorrectionOut(BaseModel):
     applied: bool
     created_at: datetime
     model_config = {"from_attributes": True}
+
+
+# ── Game Evaluation ───────────────────────────────────────────────────────────
+
+class GameSessionCreate(BaseModel):
+    opponent_name: str
+    team_id: int | None = None
+    date: str | None = None
+    location: str | None = None
+    season_phase: str = "regular"
+    season_year: str | None = None
+
+
+class GameSessionUpdate(BaseModel):
+    opponent_name: str | None = None
+    location: str | None = None
+    our_score: int | None = None
+    opponent_score: int | None = None
+    season_phase: str | None = None
+    season_year: str | None = None
+    status: str | None = None
+
+
+class GameSessionOut(BaseModel):
+    id: int
+    coach_id: int
+    team_id: int | None
+    opponent_name: str
+    date: datetime
+    location: str | None
+    our_score: int | None
+    opponent_score: int | None
+    season_phase: str
+    season_year: str | None
+    status: str
+    ai_scouting_report: str | None
+    created_at: datetime
+    model_config = {"from_attributes": True}
+
+
+class GameStatEntry(BaseModel):
+    player_id: int | None = None
+    player_name: str
+    is_opponent: bool = False
+    quarter: int
+    stat_name: str
+    stat_category: str
+    raw_points: float
+    count: int = 1
+
+
+class LineupEventCreate(BaseModel):
+    player_id: int | None = None
+    player_name: str
+    is_opponent: bool = False
+    event_type: str
+    quarter: int
+    timestamp_seconds: int | None = None
+
+
+class GameMinutesEntry(BaseModel):
+    player_id: int | None = None
+    player_name: str
+    is_opponent: bool = False
+    minutes_played: float
+
+
+class GameSummaryOut(BaseModel):
+    game: GameSessionOut
+    player_grades: list[dict]
+    team_grade: float
+    opponent_grades: list[dict]
+    model_config = {"from_attributes": True}

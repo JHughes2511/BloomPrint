@@ -26,6 +26,7 @@ import CoachNotificationsScreen from './src/screens/CoachNotificationsScreen';
 import CoachTrainingDetailScreen from './src/screens/CoachTrainingDetailScreen';
 import GameReportBuilderScreen from './src/screens/GameReportBuilderScreen';
 import StaffInboxScreen from './src/screens/StaffInboxScreen';
+import TeamEvalScreen from './src/screens/TeamEvalScreen';
 
 // Role select
 import RoleSelectScreen from './src/screens/RoleSelectScreen';
@@ -70,6 +71,14 @@ function TeamStack() {
   );
 }
 
+function TeamEvalStack() {
+  return (
+    <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
+      <Stack.Screen name="TeamEval" component={TeamEvalScreen} />
+    </Stack.Navigator>
+  );
+}
+
 function RosterStack() {
   return (
     <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
@@ -106,20 +115,22 @@ function AppTabs() {
         tabBarInactiveTintColor: '#6b7280',
         tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, [string, string]> = {
-            HomeTab:   ['home',   'home-outline'],
-            TeamTab:   ['people', 'people-outline'],
-            RosterTab: ['list',   'list-outline'],
-            RecentTab: ['time',   'time-outline'],
+            HomeTab:     ['home',        'home-outline'],
+            TeamTab:     ['people',      'people-outline'],
+            TeamEvalTab: ['stats-chart', 'stats-chart-outline'],
+            RosterTab:   ['list',        'list-outline'],
+            RecentTab:   ['time',        'time-outline'],
           };
           const [active, inactive] = icons[route.name] ?? ['grid', 'grid-outline'];
           return <Ionicons name={(focused ? active : inactive) as any} size={size} color={color} />;
         },
       })}
     >
-      <Tab.Screen name="HomeTab"   component={HomeStack}   options={{ title: 'Home' }} />
-      <Tab.Screen name="TeamTab"   component={TeamStack}   options={{ title: 'Team' }} />
-      <Tab.Screen name="RosterTab" component={RosterStack} options={{ title: 'Roster' }} />
-      <Tab.Screen name="RecentTab" component={RecentStack} options={{ title: 'Recent' }} />
+      <Tab.Screen name="HomeTab"     component={HomeStack}     options={{ title: 'Home' }} />
+      <Tab.Screen name="TeamTab"     component={TeamStack}     options={{ title: 'Team' }} />
+      <Tab.Screen name="TeamEvalTab" component={TeamEvalStack} options={{ title: 'Team Eval' }} />
+      <Tab.Screen name="RosterTab"   component={RosterStack}   options={{ title: 'Roster' }} />
+      <Tab.Screen name="RecentTab"   component={RecentStack}   options={{ title: 'Recent' }} />
     </Tab.Navigator>
   );
 }

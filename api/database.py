@@ -150,3 +150,102 @@ def _run_migrations():
                 conn.commit()
         except Exception:
             pass
+
+        # Create game_sessions table if missing
+        try:
+            conn.execute(__import__("sqlalchemy").text(
+                "CREATE TABLE IF NOT EXISTS game_sessions ("
+                "id INTEGER PRIMARY KEY, "
+                "coach_id INTEGER NOT NULL REFERENCES coaches(id), "
+                "team_id INTEGER REFERENCES teams(id), "
+                "opponent_name TEXT NOT NULL, "
+                "date DATETIME, "
+                "location TEXT, "
+                "our_score INTEGER, "
+                "opponent_score INTEGER, "
+                "season_phase TEXT NOT NULL DEFAULT 'regular', "
+                "season_year TEXT, "
+                "status TEXT NOT NULL DEFAULT 'in_progress', "
+                "ai_scouting_report TEXT, "
+                "created_at DATETIME"
+                ")"
+            ))
+            conn.commit()
+        except Exception:
+            pass
+
+        # Create game_player_stats table if missing
+        try:
+            conn.execute(__import__("sqlalchemy").text(
+                "CREATE TABLE IF NOT EXISTS game_player_stats ("
+                "id INTEGER PRIMARY KEY, "
+                "game_id INTEGER NOT NULL REFERENCES game_sessions(id), "
+                "player_id INTEGER REFERENCES players(id), "
+                "player_name TEXT NOT NULL, "
+                "is_opponent INTEGER NOT NULL DEFAULT 0, "
+                "quarter INTEGER NOT NULL, "
+                "stat_name TEXT NOT NULL, "
+                "stat_category TEXT NOT NULL, "
+                "raw_points REAL NOT NULL, "
+                "quarter_multiplier REAL NOT NULL DEFAULT 1.0, "
+                "weighted_points REAL NOT NULL, "
+                "count INTEGER NOT NULL DEFAULT 1, "
+                "created_at DATETIME"
+                ")"
+            ))
+            conn.commit()
+        except Exception:
+            pass
+
+        # Create lineup_events table if missing
+        try:
+            conn.execute(__import__("sqlalchemy").text(
+                "CREATE TABLE IF NOT EXISTS lineup_events ("
+                "id INTEGER PRIMARY KEY, "
+                "game_id INTEGER NOT NULL REFERENCES game_sessions(id), "
+                "player_id INTEGER REFERENCES players(id), "
+                "player_name TEXT NOT NULL, "
+                "is_opponent INTEGER NOT NULL DEFAULT 0, "
+                "event_type TEXT NOT NULL, "
+                "quarter INTEGER NOT NULL, "
+                "timestamp_seconds INTEGER, "
+                "created_at DATETIME"
+                ")"
+            ))
+            conn.commit()
+        except Exception:
+            pass
+
+        # Create game_minutes_played table if missing
+        try:
+            conn.execute(__import__("sqlalchemy").text(
+                "CREATE TABLE IF NOT EXISTS game_minutes_played ("
+                "id INTEGER PRIMARY KEY, "
+                "game_id INTEGER NOT NULL REFERENCES game_sessions(id), "
+                "player_id INTEGER REFERENCES players(id), "
+                "player_name TEXT NOT NULL, "
+                "is_opponent INTEGER NOT NULL DEFAULT 0, "
+                "minutes_played REAL NOT NULL DEFAULT 0.0, "
+                "created_at DATETIME"
+                ")"
+            ))
+            conn.commit()
+        except Exception:
+            pass
+
+        # Create opponent_players table if missing
+        try:
+            conn.execute(__import__("sqlalchemy").text(
+                "CREATE TABLE IF NOT EXISTS opponent_players ("
+                "id INTEGER PRIMARY KEY, "
+                "coach_id INTEGER NOT NULL REFERENCES coaches(id), "
+                "opponent_name TEXT NOT NULL, "
+                "player_name TEXT NOT NULL, "
+                "position TEXT, "
+                "notes TEXT, "
+                "created_at DATETIME"
+                ")"
+            ))
+            conn.commit()
+        except Exception:
+            pass

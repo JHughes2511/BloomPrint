@@ -362,3 +362,81 @@ class GameReportClip(Base):
     created_at     = Column(DateTime, default=datetime.utcnow)
 
     game_report = relationship("GameReport", back_populates="clips")
+
+
+class GameSession(Base):
+    __tablename__ = "game_sessions"
+    id = Column(Integer, primary_key=True, index=True)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
+    opponent_name = Column(String, nullable=False)
+    date = Column(DateTime, default=datetime.utcnow)
+    location = Column(String, nullable=True)
+    our_score = Column(Integer, nullable=True)
+    opponent_score = Column(Integer, nullable=True)
+    season_phase = Column(String, default="regular")
+    season_year = Column(String, nullable=True)
+    status = Column(String, default="in_progress")
+    ai_scouting_report = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    coach = relationship("Coach")
+    player_stats = relationship("GamePlayerStat", back_populates="game", cascade="all, delete-orphan")
+    lineup_events = relationship("LineupEvent", back_populates="game", cascade="all, delete-orphan")
+
+
+class GamePlayerStat(Base):
+    __tablename__ = "game_player_stats"
+    id = Column(Integer, primary_key=True, index=True)
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False)
+    player_id = Column(Integer, ForeignKey("players.id"), nullable=True)
+    player_name = Column(String, nullable=False)
+    is_opponent = Column(Boolean, default=False)
+    quarter = Column(Integer, nullable=False)
+    stat_name = Column(String, nullable=False)
+    stat_category = Column(String, nullable=False)
+    raw_points = Column(Float, nullable=False)
+    quarter_multiplier = Column(Float, default=1.0)
+    weighted_points = Column(Float, nullable=False)
+    count = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    game = relationship("GameSession", back_populates="player_stats")
+    player = relationship("Player")
+
+
+class LineupEvent(Base):
+    __tablename__ = "lineup_events"
+    id = Column(Integer, primary_key=True, index=True)
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False)
+    player_id = Column(Integer, ForeignKey("players.id"), nullable=True)
+    player_name = Column(String, nullable=False)
+    is_opponent = Column(Boolean, default=False)
+    event_type = Column(String, nullable=False)
+    quarter = Column(Integer, nullable=False)
+    timestamp_seconds = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    game = relationship("GameSession", back_populates="lineup_events")
+
+
+class GameMinutesPlayed(Base):
+    __tablename__ = "game_minutes_played"
+    id = Column(Integer, primary_key=True, index=True)
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False)
+    player_id = Column(Integer, ForeignKey("players.id"), nullable=True)
+    player_name = Column(String, nullable=False)
+    is_opponent = Column(Boolean, default=False)
+    minutes_played = Column(Float, default=0.0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class OpponentPlayer(Base):
+    __tablename__ = "opponent_players"
+    id = Column(Integer, primary_key=True, index=True)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    opponent_name = Column(String, nullable=False)
+    player_name = Column(String, nullable=False)
+    position = Column(String, nullable=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
