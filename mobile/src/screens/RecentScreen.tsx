@@ -490,12 +490,17 @@ export default function RecentScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.playerName}>{item.player_name}</Text>
-                    <Text style={[
-                      styles.typeName,
-                      item.kind === 'team' && { color: '#f59e0b' },
-                      item.kind === 'game' && { color: '#a78bfa' },
-                      item.kind === 'training' && { color: '#22c55e' },
-                    ]}>
+                    <Text
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.75}
+                      style={[
+                        styles.typeName,
+                        item.kind === 'team' && { color: '#f59e0b' },
+                        item.kind === 'game' && { color: '#a78bfa' },
+                        item.kind === 'training' && { color: '#22c55e' },
+                      ]}
+                    >
                       {item.kind === 'game' ? 'Game Report Packet' :
                        item.kind === 'training' ? 'Training Program' :
                        (TYPE_LABELS[item.output_type] ?? item.output_type)}
@@ -953,7 +958,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1f2937', alignItems: 'center', justifyContent: 'center',
   },
   playerName: { color: '#fff', fontSize: 15, fontWeight: '700' },
-  typeName: { color: '#2563eb', fontSize: 12, fontWeight: '600', marginTop: 2 },
+  typeName: { color: '#2563eb', fontSize: 12, fontWeight: '600', marginTop: 2, flexShrink: 1 },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.6)',
     alignItems: 'center', justifyContent: 'center',
