@@ -119,6 +119,9 @@ export default function TeamEvalScreen() {
   const [generatingReport, setGeneratingReport] = useState(false);
   const [showScoutingReport, setShowScoutingReport] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [gameStats, setGameStats] = useState<any[]>([]);
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [statsModalPlayer, setStatsModalPlayer] = useState<string | null>(null);
 
   // Opponent scout
   const [scoutOpponent, setScoutOpponent] = useState<string | null>(null);
@@ -274,6 +277,8 @@ export default function TeamEvalScreen() {
           try {
             const updated = await gameEvalAPI.updateSession(activeGame.id, { status: 'completed' });
             setSessions(prev => prev.map(s => s.id === updated.id ? updated : s));
+            // Refresh dashboard so new game shows immediately
+            gameEvalAPI.getSeasonDashboard().then(setDashboard).catch(() => {});
             openDetail(updated);
           } catch (e: any) {
             Alert.alert('Error', e?.response?.data?.detail ?? 'Could not end game');
@@ -291,12 +296,35 @@ export default function TeamEvalScreen() {
     setExpandedPlayer(null);
     setShowScoutingReport(false);
     setSummary(null);
+    setGameStats([]);
     setLoadingSummary(true);
     try {
-      const s = await gameEvalAPI.getGameSummary(game.id);
+      const [s, stats] = await Promise.all([
+        gameEvalAPI.getGameSummary(game.id),
+        gameEvalAPI.listStats(game.id),
+      ]);
       setSummary(s);
+      setGameStats(stats);
     } catch {}
     setLoadingSummary(false);
+  };
+
+  const openPlayerStats = (playerName: string) => {
+    setStatsModalPlayer(playerName);
+    setShowStatsModal(true);
+  };
+
+  const deleteStatEntry = async (statId: number) => {
+    if (!detailGame) return;
+    try {
+      await gameEvalAPI.deleteStat(statId);
+      setGameStats(prev => prev.filter(s => s.id !== statId));
+      // Refresh summary grades
+      const s = await gameEvalAPI.getGameSummary(detailGame.id);
+      setSummary(s);
+    } catch (e: any) {
+      Alert.alert('Error', 'Could not delete stat');
+    }
   };
 
   const generateScoutingReport = async () => {
@@ -316,18 +344,42 @@ export default function TeamEvalScreen() {
     if (!summary || !detailGame) return;
     setExporting(true);
     try {
+      const gameDate = new Date(detailGame.date);
+      const dateStr = gameDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      const programName = coach?.program_name ?? 'Team';
+      const result = detailGame.our_score != null
+        ? `${detailGame.our_score > detailGame.opponent_score ? 'WIN' : 'LOSS'} ${detailGame.our_score}-${detailGame.opponent_score}`
+        : 'Score N/A';
+      const phase = detailGame.season_phase ? ` · ${detailGame.season_phase.charAt(0).toUpperCase() + detailGame.season_phase.slice(1)}` : '';
+      const year = detailGame.season_year ? ` ${detailGame.season_year}` : '';
+
       const grades = detailTab === 'our' ? summary.player_grades : summary.opponent_grades;
       const gradeText = grades.map((g: any) =>
-        `${g.player_name}: OFF=${g.offensive_grade} DEF=${g.defensive_grade} GRADE=${g.game_grade} MINS=${g.minutes_played}`
-      ).join('\n');
-      const body = `GAME: ${detailGame.opponent_name}\nDATE: ${new Date(detailGame.date).toLocaleDateString()}\nSCORE: ${detailGame.our_score ?? '-'} - ${detailGame.opponent_score ?? '-'}\nTEAM GRADE: ${summary.team_grade}\n\nPLAYER GRADES:\n${gradeText}`;
+        `${g.player_name}\nOFF ${g.offensive_grade.toFixed(2)}  ·  DEF ${g.defensive_grade.toFixed(2)}  ·  ${g.minutes_played.toFixed(0)} min  ·  Grade ${g.game_grade.toFixed(2)}`
+      ).join('\n\n');
+
+      const body = [
+        `GAME SUMMARY`,
+        `${programName} vs ${detailGame.opponent_name}`,
+        `${dateStr}${phase}${year}  ·  ${result}`,
+        `Team Grade: ${summary.team_grade.toFixed(2)}`,
+        ``,
+        `PLAYER GRADES`,
+        gradeText,
+      ].join('\n');
+
       const html = buildReportHtml({
-        title: `Game vs ${detailGame.opponent_name}`,
-        subject: coach?.program_name ?? 'Team',
-        date: new Date(detailGame.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+        title: `Game Report — ${programName} vs ${detailGame.opponent_name}`,
+        subject: `${result}${phase}${year}`,
+        date: dateStr,
         body,
       });
-      const fileName = buildPdfFileName(`Game vs ${detailGame.opponent_name}`, coach?.program_name ?? 'Team');
+
+      const fileName = buildPdfFileName(
+        `Game Report - ${programName} vs ${detailGame.opponent_name}`,
+        result,
+        gameDate,
+      );
       const { uri } = await Print.printToFileAsync({ html });
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: fileName });
@@ -857,6 +909,13 @@ export default function TeamEvalScreen() {
                           </Text>
                         </View>
                       ))}
+                      <TouchableOpacity
+                        style={{ marginTop: 8, flexDirection: 'row', alignItems: 'center', gap: 4 }}
+                        onPress={() => openPlayerStats(g.player_name)}
+                      >
+                        <Ionicons name="create-outline" size={13} color="#7c3aed" />
+                        <Text style={{ color: '#7c3aed', fontSize: 12, fontWeight: '600' }}>Edit / Delete Stats</Text>
+                      </TouchableOpacity>
                     </View>
                   )}
                 </View>
@@ -1279,6 +1338,57 @@ export default function TeamEvalScreen() {
                 </TouchableOpacity>
               </>
             )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Player Stats Edit Modal */}
+      <Modal visible={showStatsModal} transparent animationType="slide">
+        <View style={s.modalOverlay}>
+          <View style={[s.modalBox, { maxHeight: '85%' }]}>
+            <Text style={s.modalTitle}>{statsModalPlayer} — Stats</Text>
+            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 12 }}>
+              Tap the trash icon to remove a stat entry. Grades recalculate instantly.
+            </Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {gameStats
+                .filter(st => st.player_name === statsModalPlayer && st.is_opponent === (detailTab === 'opponent'))
+                .length === 0 ? (
+                <Text style={{ color: '#4b5563', fontSize: 13, textAlign: 'center', paddingVertical: 20 }}>
+                  No individual stat entries found.
+                </Text>
+              ) : (
+                gameStats
+                  .filter(st => st.player_name === statsModalPlayer && st.is_opponent === (detailTab === 'opponent'))
+                  .map(st => (
+                    <View key={st.id} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: '#fff', fontSize: 13, fontWeight: '600' }}>{st.stat_name}</Text>
+                        <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 2 }}>
+                          {st.quarter === 5 ? 'OT' : `Q${st.quarter}`}  ·  {st.raw_points > 0 ? '+' : ''}{st.raw_points} pts raw  ·  {st.weighted_points > 0 ? '+' : ''}{st.weighted_points.toFixed(1)} weighted
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        style={{ padding: 8 }}
+                        onPress={() =>
+                          Alert.alert('Delete Stat', `Remove "${st.stat_name}" entry?`, [
+                            { text: 'Cancel', style: 'cancel' },
+                            { text: 'Delete', style: 'destructive', onPress: () => deleteStatEntry(st.id) },
+                          ])
+                        }
+                      >
+                        <Ionicons name="trash-outline" size={18} color="#dc2626" />
+                      </TouchableOpacity>
+                    </View>
+                  ))
+              )}
+            </ScrollView>
+            <TouchableOpacity
+              style={[s.modalBtn, { backgroundColor: '#374151', marginTop: 12 }]}
+              onPress={() => setShowStatsModal(false)}
+            >
+              <Text style={{ color: '#fff', fontWeight: '700' }}>Done</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>

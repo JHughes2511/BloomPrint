@@ -217,6 +217,7 @@ export const gameEvalAPI = {
   getSession: (id: number) => api.get(`/game-eval/sessions/${id}`).then(r => r.data),
   updateSession: (id: number, data: any) => api.patch(`/game-eval/sessions/${id}`, data).then(r => r.data),
   deleteSession: (id: number) => api.delete(`/game-eval/sessions/${id}`).then(r => r.data),
+  listStats: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/stats`).then(r => r.data),
   logStat: (gameId: number, data: any) => api.post(`/game-eval/sessions/${gameId}/stats`, data).then(r => r.data),
   deleteStat: (statId: number) => api.delete(`/game-eval/stats/${statId}`).then(r => r.data),
   logLineup: (gameId: number, data: any) => api.post(`/game-eval/sessions/${gameId}/lineup`, data).then(r => r.data),

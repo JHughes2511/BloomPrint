@@ -160,6 +160,35 @@ def delete_session(
 
 # ── Stats ─────────────────────────────────────────────────────────────────────
 
+@router.get("/sessions/{game_id}/stats")
+def list_stats(
+    game_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    game = _get_game(db, game_id, coach.id)
+    stats = (
+        db.query(models.GamePlayerStat)
+        .filter_by(game_id=game.id)
+        .order_by(models.GamePlayerStat.id)
+        .all()
+    )
+    return [
+        {
+            "id": s.id,
+            "player_name": s.player_name,
+            "is_opponent": s.is_opponent,
+            "quarter": s.quarter,
+            "stat_name": s.stat_name,
+            "stat_category": s.stat_category,
+            "raw_points": s.raw_points,
+            "weighted_points": s.weighted_points,
+            "count": s.count,
+        }
+        for s in stats
+    ]
+
+
 @router.post("/sessions/{game_id}/stats")
 def log_stat(
     game_id: int,
