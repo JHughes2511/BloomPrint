@@ -431,6 +431,18 @@ class GameMinutesPlayed(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class OpponentNote(Base):
+    __tablename__ = "opponent_notes"
+
+    id            = Column(Integer, primary_key=True, index=True)
+    coach_id      = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    opponent_name = Column(String, nullable=False)
+    note_text     = Column(Text, nullable=False)
+    created_at    = Column(DateTime, default=datetime.utcnow)
+
+    coach = relationship("Coach")
+
+
 class OpponentPlayer(Base):
     __tablename__ = "opponent_players"
     id = Column(Integer, primary_key=True, index=True)

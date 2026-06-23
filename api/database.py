@@ -249,3 +249,18 @@ def _run_migrations():
             conn.commit()
         except Exception:
             pass
+
+        # Create opponent_notes table if missing
+        try:
+            conn.execute(__import__("sqlalchemy").text(
+                "CREATE TABLE IF NOT EXISTS opponent_notes ("
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                "coach_id INTEGER NOT NULL REFERENCES coaches(id), "
+                "opponent_name TEXT NOT NULL, "
+                "note_text TEXT NOT NULL, "
+                "created_at DATETIME DEFAULT CURRENT_TIMESTAMP"
+                ")"
+            ))
+            conn.commit()
+        except Exception:
+            pass

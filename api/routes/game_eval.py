@@ -531,12 +531,24 @@ async def generate_ai_scouting(
         result = "WIN" if game.our_score > game.opponent_score else "LOSS"
         score_info = f"Final score: {game.our_score}-{game.opponent_score} ({result})"
 
+    # Load coach notes for this opponent
+    notes = (
+        db.query(models.OpponentNote)
+        .filter_by(coach_id=coach.id, opponent_name=game.opponent_name)
+        .order_by(models.OpponentNote.created_at)
+        .all()
+    )
+    notes_text = ""
+    if notes:
+        notes_text = "\n\nCOACH NOTES (observed by coaching staff):\n" + "\n".join(f"- {n.note_text}" for n in notes)
+
     prompt = (
         f"You are the BloomPrint Basketball Intelligence Model. "
         f"Generate a pre-game scouting report for the opponent: {game.opponent_name}\n\n"
         f"Game date: {game.date}\n"
         f"{score_info}\n\n"
-        f"OPPONENT PLAYER GRADES:\n{opp_context}\n\n"
+        f"OPPONENT PLAYER GRADES:\n{opp_context}"
+        f"{notes_text}\n\n"
         f"Analyze the opponent's strengths, weaknesses, top players to watch, offensive tendencies, "
         f"defensive tendencies, and strategic recommendations for the next game against them. "
         f"IMPORTANT: Do NOT use ## headers, ** bold markers, or dividers. "
@@ -569,14 +581,16 @@ async def generate_ai_scouting(
 
 @router.get("/season-dashboard")
 def season_dashboard(
-    season_phase: str | None = None,
+    phases: str | None = None,   # comma-separated, e.g. "playoff,tournament"
     season_year: str | None = None,
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
     q = db.query(models.GameSession).filter_by(coach_id=coach.id, status="completed")
-    if season_phase:
-        q = q.filter(models.GameSession.season_phase == season_phase)
+    if phases:
+        phase_list = [p.strip() for p in phases.split(",") if p.strip()]
+        if phase_list:
+            q = q.filter(models.GameSession.season_phase.in_(phase_list))
     if season_year:
         q = q.filter(models.GameSession.season_year == season_year)
     games = q.order_by(models.GameSession.date).all()
@@ -735,6 +749,59 @@ def opponent_profile(
         "weak_spots": [{"stat": s, "score": round(sc, 2)} for s, sc in weak_spots],
         "ai_scouting_report": latest_report,
     }
+
+
+# ── Opponent Notes ────────────────────────────────────────────────────────────
+
+@router.get("/opponents/{opponent_name}/notes")
+def get_opponent_notes(
+    opponent_name: str,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    notes = (
+        db.query(models.OpponentNote)
+        .filter_by(coach_id=coach.id, opponent_name=opponent_name)
+        .order_by(models.OpponentNote.created_at)
+        .all()
+    )
+    return [{"id": n.id, "note_text": n.note_text, "created_at": n.created_at.isoformat()} for n in notes]
+
+
+@router.post("/opponents/{opponent_name}/notes")
+def add_opponent_note(
+    opponent_name: str,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    note = models.OpponentNote(
+        coach_id=coach.id,
+        opponent_name=opponent_name,
+        note_text=body.get("note_text", "").strip(),
+    )
+    if not note.note_text:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="note_text required")
+    db.add(note)
+    db.commit()
+    db.refresh(note)
+    return {"id": note.id, "note_text": note.note_text, "created_at": note.created_at.isoformat()}
+
+
+@router.delete("/opponent-notes/{note_id}")
+def delete_opponent_note(
+    note_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    note = db.get(models.OpponentNote, note_id)
+    if not note or note.coach_id != coach.id:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Note not found")
+    db.delete(note)
+    db.commit()
+    return {"ok": True}
 
 
 # ── Compare Games ─────────────────────────────────────────────────────────────
