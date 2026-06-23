@@ -1122,7 +1122,7 @@ export default function TeamEvalScreen() {
               {generatingReport
                 ? <ActivityIndicator size="small" color="#7c3aed" />
                 : <><Ionicons name="sparkles-outline" size={15} color="#7c3aed" />
-                  <Text style={{ color: '#7c3aed', fontSize: 12, fontWeight: '600' }}>AI Report</Text></>}
+                  <Text style={{ color: '#7c3aed', fontSize: 12, fontWeight: '600' }}>Generate Report</Text></>}
             </TouchableOpacity>
           </View>
 
@@ -1140,7 +1140,7 @@ export default function TeamEvalScreen() {
           {/* AI scouting report */}
           {(showScoutingReport || detailGame.ai_scouting_report) && (
             <View style={s.card}>
-              <Text style={s.cardLabel}>AI SCOUTING REPORT</Text>
+              <Text style={s.cardLabel}>SCOUTING REPORT</Text>
               <View style={{ marginTop: 8 }}>
                 {renderReport(detailGame.ai_scouting_report ?? '')}
               </View>
@@ -1151,7 +1151,8 @@ export default function TeamEvalScreen() {
 
       {/* Opponent Scout */}
       {activeView === 'scout' && (
-        <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 80, paddingTop: 8 }}>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 80, paddingTop: 8 }} keyboardShouldPersistTaps="handled">
           {/* Opponent selector */}
           {!scoutOpponent ? (
             <>
@@ -1253,7 +1254,7 @@ export default function TeamEvalScreen() {
                   <View style={s.card}>
                     <Text style={s.cardLabel}>COACH NOTES</Text>
                     <Text style={{ color: '#4b5563', fontSize: 11, marginBottom: 12, marginTop: 4 }}>
-                      Notes are included in the AI scouting report.
+                      Notes are included in the scouting report.
                     </Text>
 
                     {/* Existing notes */}
@@ -1314,13 +1315,13 @@ export default function TeamEvalScreen() {
                       ? <ActivityIndicator color="#fff" />
                       : <><Ionicons name="sparkles-outline" size={16} color="#fff" />
                         <Text style={s.newGameBtnText}>
-                          {scoutData.ai_scouting_report ? 'Regenerate AI Report' : 'Generate AI Report'}
+                          {scoutData.ai_scouting_report ? 'Regenerate Report' : 'Generate Report'}
                         </Text></>}
                   </TouchableOpacity>
 
                   {scoutData.ai_scouting_report && (
                     <View style={s.card}>
-                      <Text style={s.cardLabel}>AI SCOUTING REPORT</Text>
+                      <Text style={s.cardLabel}>SCOUTING REPORT</Text>
                       <View style={{ marginTop: 8 }}>
                         {renderReport(scoutData.ai_scouting_report)}
                       </View>
@@ -1331,6 +1332,7 @@ export default function TeamEvalScreen() {
             </>
           )}
         </ScrollView>
+        </KeyboardAvoidingView>
       )}
 
       {/* New Game Modal */}
