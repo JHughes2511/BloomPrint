@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
   StyleSheet, ActivityIndicator, Alert, Modal, KeyboardAvoidingView, Platform,
@@ -75,6 +75,7 @@ type View = 'dashboard' | 'games' | 'live' | 'detail' | 'scout';
 
 export default function TeamEvalScreen() {
   const { coach } = useAuth();
+  const scoutScrollRef = useRef<any>(null);
   const [activeView, setActiveView] = useState<View>('dashboard');
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1197,7 +1198,7 @@ export default function TeamEvalScreen() {
       {/* Opponent Scout */}
       {activeView === 'scout' && (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
-        <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 120, paddingTop: 8 }} keyboardShouldPersistTaps="handled">
+        <ScrollView ref={scoutScrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 120, paddingTop: 8 }} keyboardShouldPersistTaps="handled">
           {/* Opponent selector */}
           {!scoutOpponent ? (
             <>
@@ -1337,6 +1338,7 @@ export default function TeamEvalScreen() {
                       onChangeText={setNewNoteText}
                       multiline
                       numberOfLines={3}
+                      onFocus={() => setTimeout(() => scoutScrollRef.current?.scrollToEnd({ animated: true }), 300)}
                     />
                     <TouchableOpacity
                       style={{ backgroundColor: newNoteText.trim() ? '#7c3aed' : '#374151', borderRadius: 10,
