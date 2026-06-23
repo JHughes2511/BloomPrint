@@ -839,7 +839,7 @@ export default function TeamEvalScreen() {
       {/* Floating whiteboard button on Games tab */}
       {activeView === 'games' && (
         <TouchableOpacity
-          style={{ position: 'absolute', bottom: 24, right: 20, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 6 }}
+          style={{ position: 'absolute', bottom: 24, right: 20, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 10, zIndex: 100 }}
           onPress={() => {
             const firstGame = sessions[0];
             if (firstGame) setWhiteboardGameId(firstGame.id);
