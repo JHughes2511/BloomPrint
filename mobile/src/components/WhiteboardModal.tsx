@@ -10,13 +10,14 @@ import { whiteboardAPI } from '../api/client';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
-const UI_CHROME  = 310;
-const MAX_W      = SCREEN_W - 16;
-const MAX_H      = SCREEN_H - UI_CHROME;
-const COURT_W    = Math.min(MAX_W, MAX_H * (50 / 94));
-const COURT_H    = COURT_W * (94 / 50);
-const HALF_H     = COURT_H / 2;
-const THREE_Q_H  = COURT_H * 0.75;
+// ── Court sizing ──────────────────────────────────────────────────────────
+// Modal chrome: status bar ~50, header ~90, court selector ~55, toolbar ~100,
+// iOS home indicator ~34, breathing room ~20  → ~350px total
+const UI_CHROME = 360;
+const COURT_W   = SCREEN_W - 24;                     // nearly full width
+const COURT_H   = Math.min(COURT_W * (94 / 50), SCREEN_H - UI_CHROME);
+const HALF_H    = COURT_H / 2;
+const THREE_Q_H = COURT_H * 0.75;
 
 type CourtType = 'full' | 'half' | 'three_quarter';
 type Tool = 'pen' | 'circle' | 'xmark' | 'arrow' | 'text';
@@ -28,8 +29,7 @@ interface Stroke {
   cx?: number; cy?: number; r?: number; size?: number;
   x1?: number; y1?: number; x2?: number; y2?: number;
   x?: number; y?: number; label?: string;
-  color: string;
-  strokeWidth: number;
+  color: string; strokeWidth: number;
 }
 
 interface Board {
@@ -40,7 +40,6 @@ interface Board {
 }
 
 const COLORS = ['#ffffff', '#ef4444', '#22c55e', '#3b82f6', '#a855f7', '#000000'];
-
 const TOOLS: { key: Tool; icon: string }[] = [
   { key: 'pen',    icon: 'pencil' },
   { key: 'circle', icon: 'ellipse-outline' },
@@ -50,149 +49,178 @@ const TOOLS: { key: Tool; icon: string }[] = [
 ];
 
 // ── Court colours ─────────────────────────────────────────────────────────
-// Warm tan/cream wood tones matching reference
-const PLANK_COLORS = [
-  '#D4A55A','#CBAA68','#D9AD62','#C8A250','#D6A85A',
-  '#CCА55E','#D1A860','#C9A354','#D3A65C','#CEA45A',
-  '#D7A95E','#C9A252','#D4A658','#D0A55C','#D8A85E','#CAA356',
-];
-const PAINT_FILL = '#7B4A2E';   // reddish-brown matching reference
-const LINE_C     = '#FFFFFF';
-const RIM_C      = '#F97316';   // orange rim
-const LW         = 2;           // court line weight
+const FLOOR_A  = '#D4A84A';   // main floor tan
+const FLOOR_B  = '#C89840';   // darker plank
+const FLOOR_C  = '#DDB055';   // lighter plank
+const PAINT    = '#7B4228';   // reddish-brown paint
+const WHITE    = '#FFFFFF';
+const RIM      = '#F97316';   // orange rim
+const LW       = 2;           // standard line weight
 
-// ── Wood floor — HORIZONTAL planks (matching reference orientation) ───────
+// ── Wood floor — horizontal planks (each plank is a horizontal band) ──────
 function WoodFloor({ w, h }: { w: number; h: number }) {
-  const numPlanks = 16;
-  const pH = h / numPlanks;
+  const n  = 18;
+  const pH = h / n;
+  // Alternate between three shades for a real hardwood look
+  const shade = (i: number) => {
+    const cycle = i % 3;
+    if (cycle === 0) return FLOOR_A;
+    if (cycle === 1) return FLOOR_B;
+    return FLOOR_C;
+  };
   return (
     <G>
-      {Array.from({ length: numPlanks }).map((_, i) => (
-        <Rect key={`p${i}`} x={0} y={i * pH} width={w} height={pH}
-              fill={PLANK_COLORS[i % PLANK_COLORS.length]} />
+      {Array.from({ length: n }).map((_, i) => (
+        <Rect key={i} x={0} y={i * pH} width={w} height={pH} fill={shade(i)} />
       ))}
-      {/* Divider lines between planks */}
-      {Array.from({ length: numPlanks - 1 }).map((_, i) => (
-        <Line key={`d${i}`} x1={0} y1={(i + 1) * pH} x2={w} y2={(i + 1) * pH}
-              stroke="rgba(0,0,0,0.18)" strokeWidth={1.2} />
+      {/* Subtle horizontal divider lines between planks */}
+      {Array.from({ length: n - 1 }).map((_, i) => (
+        <Line key={`d${i}`}
+              x1={0} y1={(i + 1) * pH} x2={w} y2={(i + 1) * pH}
+              stroke="rgba(0,0,0,0.15)" strokeWidth={1} />
       ))}
     </G>
   );
 }
 
-// ── One end of the court ──────────────────────────────────────────────────
-// up=true  → top end (baseline at y≈2, markings go DOWN toward center)
-// up=false → bottom end (baseline at y≈courtH-2, markings go UP toward center)
-function CourtEnd({
-  w, courtH, s, up,
-}: {
-  w: number; courtH: number; s: number; up: boolean;
-}) {
-  // ── Measurements (NBA standard, in feet → pixels) ────────────────────
-  const paintW    = 16 * s;   // lane width
-  const paintH    = 19 * s;   // lane depth (baseline → FT line)
-  const threeR    = 23.75 * s; // 3-point arc radius
-  const ftR       = 6 * s;    // free throw circle radius
-  const restrictR = 4 * s;    // restricted area arc radius
-  const laneX     = (w - paintW) / 2;
-
-  // Baseline y-coordinate for this end
-  const baseY = up ? 2 : courtH - 2;
-  // Direction toward center court (+1 = downward for top, -1 = upward for bottom)
-  const d = up ? 1 : -1;
-
-  // Derived y positions (all "toward center" from baseline)
-  const paintTopY   = up ? baseY         : baseY - paintH; // top of paint rect in SVG
-  const ftY         = baseY + d * paintH; // free throw line
-  const crnY        = baseY + d * 14 * s; // where 3pt corner line ends
-  const basketY     = baseY + d * 5.25 * s; // basket center
-
-  // Hash marks — 7 ticks on each side of the lane
-  const hashCount = 7;
-  const hashStep  = paintH / (hashCount + 1);
-  const tickLen   = 5;
-
-  // ── SVG Arc flags derivation ────────────────────────────────────────
-  // Both 3-point arcs use: large=1, sweep=0
-  //   Proof: for BOTH ends, the correct arc (curving toward center court)
-  //   is the LONG (>180°, ~223°) CCW arc in SVG space (sweep=0).
-  //   This was verified geometrically using the angle between the arc
-  //   center (at basket) and the two corner endpoints.
-  //
-  // Free throw circle:
-  //   Half facing center court → solid.  Half inside paint → dashed.
-  //   bottom end: solid=sweep0, dashed=sweep1
-  //   top end:    solid=sweep1, dashed=sweep0
-  const ftSolidSweep  = up ? 1 : 0;
-  const ftDashedSweep = up ? 0 : 1;
-
-  // Restricted area arc sweep: same logic as FT circle
-  const restrictSweep = up ? 1 : 0;
+// ── TOP END (basket near y = 0) ───────────────────────────────────────────
+// All markings extend DOWNWARD from the top baseline.
+function TopEnd({ w, s }: { w: number; s: number }) {
+  const BASE  = 2;                      // top baseline y
+  const BKT   = BASE + 5.25 * s;       // basket center y (5.25 ft from baseline)
+  const FTY   = BASE + 19 * s;         // free throw line y (19 ft from baseline)
+  const CRNR  = BASE + 14 * s;         // 3pt corner end y
+  const THREE = 23.75 * s;             // 3pt arc radius
+  const FTR   = 6 * s;                 // FT circle radius
+  const PW    = 16 * s;                // paint width
+  const LX    = (w - PW) / 2;         // left edge of paint
+  const TICKS = 7;
+  const TICKH = (19 * s) / (TICKS + 1);
+  const TICK  = 5;
 
   return (
     <G>
-      {/* ── Paint fill ── */}
-      <Rect x={laneX} y={paintTopY} width={paintW} height={paintH} fill={PAINT_FILL} />
+      {/* Paint fill */}
+      <Rect x={LX} y={BASE} width={PW} height={19 * s} fill={PAINT} />
+      {/* Paint border */}
+      <Rect x={LX} y={BASE} width={PW} height={19 * s} fill="none" stroke={WHITE} strokeWidth={LW} />
 
-      {/* ── Lane border ── */}
-      <Rect x={laneX} y={paintTopY} width={paintW} height={paintH}
-            fill="none" stroke={LINE_C} strokeWidth={LW} />
+      {/* Hash marks left side of lane */}
+      {Array.from({ length: TICKS }).map((_, i) => (
+        <Line key={`hl${i}`}
+              x1={LX - TICK} y1={BASE + TICKH * (i + 1)}
+              x2={LX}        y2={BASE + TICKH * (i + 1)}
+              stroke={WHITE} strokeWidth={LW} />
+      ))}
+      {/* Hash marks right side of lane */}
+      {Array.from({ length: TICKS }).map((_, i) => (
+        <Line key={`hr${i}`}
+              x1={LX + PW}        y1={BASE + TICKH * (i + 1)}
+              x2={LX + PW + TICK} y2={BASE + TICKH * (i + 1)}
+              stroke={WHITE} strokeWidth={LW} />
+      ))}
 
-      {/* ── Hash marks on left side of lane ── */}
-      {Array.from({ length: hashCount }).map((_, i) => {
-        const hy = paintTopY + hashStep * (i + 1);
-        return (
-          <Line key={`hl${i}`}
-                x1={laneX - tickLen} y1={hy} x2={laneX} y2={hy}
-                stroke={LINE_C} strokeWidth={LW} />
-        );
-      })}
+      {/* Free throw circle
+          Top end: center-facing half = BELOW FT line (larger Y) = sweep=1 (CW) → solid
+                   basket-facing half = ABOVE FT line (smaller Y) = sweep=0 (CCW) → dashed */}
+      {/* Solid half (toward center court = downward) */}
+      <Path d={`M ${w/2 - FTR} ${FTY} A ${FTR} ${FTR} 0 0 1 ${w/2 + FTR} ${FTY}`}
+            fill="none" stroke={WHITE} strokeWidth={LW} />
+      {/* Dashed half (toward basket = upward) */}
+      <Path d={`M ${w/2 - FTR} ${FTY} A ${FTR} ${FTR} 0 0 0 ${w/2 + FTR} ${FTY}`}
+            fill="none" stroke={WHITE} strokeWidth={LW} strokeDasharray="5,4" />
 
-      {/* ── Hash marks on right side of lane ── */}
-      {Array.from({ length: hashCount }).map((_, i) => {
-        const hy = paintTopY + hashStep * (i + 1);
-        return (
-          <Line key={`hr${i}`}
-                x1={laneX + paintW} y1={hy} x2={laneX + paintW + tickLen} y2={hy}
-                stroke={LINE_C} strokeWidth={LW} />
-        );
-      })}
+      {/* Restricted area arc — 4ft radius, curves toward center (downward), sweep=1 */}
+      <Path d={`M ${w/2 - 4*s} ${BKT} A ${4*s} ${4*s} 0 0 1 ${w/2 + 4*s} ${BKT}`}
+            fill="none" stroke={WHITE} strokeWidth={LW} />
 
-      {/* ── Free throw circle — solid half (toward center), dashed half (in paint) ── */}
-      <Path
-        d={`M ${w / 2 - ftR} ${ftY} A ${ftR} ${ftR} 0 0 ${ftSolidSweep} ${w / 2 + ftR} ${ftY}`}
-        fill="none" stroke={LINE_C} strokeWidth={LW}
-      />
-      <Path
-        d={`M ${w / 2 - ftR} ${ftY} A ${ftR} ${ftR} 0 0 ${ftDashedSweep} ${w / 2 + ftR} ${ftY}`}
-        fill="none" stroke={LINE_C} strokeWidth={LW} strokeDasharray="5,4"
-      />
+      {/* 3-point corner lines (run downward from baseline) */}
+      <Line x1={3*s} y1={BASE} x2={3*s} y2={CRNR} stroke={WHITE} strokeWidth={LW} />
+      <Line x1={w - 3*s} y1={BASE} x2={w - 3*s} y2={CRNR} stroke={WHITE} strokeWidth={LW} />
 
-      {/* ── Restricted area arc (4ft radius, inside paint at basket) ── */}
-      <Path
-        d={`M ${w / 2 - restrictR} ${basketY} A ${restrictR} ${restrictR} 0 0 ${restrictSweep} ${w / 2 + restrictR} ${basketY}`}
-        fill="none" stroke={LINE_C} strokeWidth={LW}
-      />
+      {/* 3-point arc
+          Top end: arc must curve DOWNWARD (toward center court = larger Y).
+          Center of arc = basket at (w/2, BKT). BKT < CRNR so center is ABOVE corners.
+          Arc through bottom of circle (toward larger Y) = long CW arc = large=1, sweep=1 */}
+      <Path d={`M ${3*s} ${CRNR} A ${THREE} ${THREE} 0 1 1 ${w - 3*s} ${CRNR}`}
+            fill="none" stroke={WHITE} strokeWidth={LW} />
 
-      {/* ── 3-point corner lines ── */}
-      <Line x1={3 * s} y1={baseY} x2={3 * s} y2={crnY}
-            stroke={LINE_C} strokeWidth={LW} />
-      <Line x1={w - 3 * s} y1={baseY} x2={w - 3 * s} y2={crnY}
-            stroke={LINE_C} strokeWidth={LW} />
+      {/* Backboard */}
+      <Line x1={w/2 - 3*s} y1={BASE} x2={w/2 + 3*s} y2={BASE}
+            stroke={WHITE} strokeWidth={4} strokeLinecap="round" />
+      {/* Rim */}
+      <Circle cx={w/2} cy={BKT} r={Math.max(1.5*s, 9)} stroke={RIM} strokeWidth={2.5} fill="none" />
+    </G>
+  );
+}
 
-      {/* ── 3-point arc — large=1, sweep=0 curves toward center on both ends ── */}
-      <Path
-        d={`M ${3 * s} ${crnY} A ${threeR} ${threeR} 0 1 0 ${w - 3 * s} ${crnY}`}
-        fill="none" stroke={LINE_C} strokeWidth={LW}
-      />
+// ── BOTTOM END (basket near y = courtH) ───────────────────────────────────
+// All markings extend UPWARD from the bottom baseline.
+function BottomEnd({ w, courtH, s }: { w: number; courtH: number; s: number }) {
+  const BASE  = courtH - 2;            // bottom baseline y
+  const BKT   = BASE - 5.25 * s;      // basket center y
+  const FTY   = BASE - 19 * s;        // free throw line y
+  const CRNR  = BASE - 14 * s;        // 3pt corner end y
+  const THREE = 23.75 * s;
+  const FTR   = 6 * s;
+  const PW    = 16 * s;
+  const LX    = (w - PW) / 2;
+  const TICKS = 7;
+  const TICKH = (19 * s) / (TICKS + 1);
+  const TICK  = 5;
 
-      {/* ── Backboard (thick white line at baseline) ── */}
-      <Line x1={w / 2 - 3 * s} y1={baseY} x2={w / 2 + 3 * s} y2={baseY}
-            stroke={LINE_C} strokeWidth={4} strokeLinecap="round" />
+  return (
+    <G>
+      {/* Paint fill */}
+      <Rect x={LX} y={FTY} width={PW} height={19 * s} fill={PAINT} />
+      {/* Paint border */}
+      <Rect x={LX} y={FTY} width={PW} height={19 * s} fill="none" stroke={WHITE} strokeWidth={LW} />
 
-      {/* ── Basket rim (orange circle) ── */}
-      <Circle cx={w / 2} cy={basketY} r={Math.max(1.5 * s, 9)}
-              stroke={RIM_C} strokeWidth={2.5} fill="none" />
+      {/* Hash marks left */}
+      {Array.from({ length: TICKS }).map((_, i) => (
+        <Line key={`hl${i}`}
+              x1={LX - TICK} y1={FTY + TICKH * (i + 1)}
+              x2={LX}        y2={FTY + TICKH * (i + 1)}
+              stroke={WHITE} strokeWidth={LW} />
+      ))}
+      {/* Hash marks right */}
+      {Array.from({ length: TICKS }).map((_, i) => (
+        <Line key={`hr${i}`}
+              x1={LX + PW}        y1={FTY + TICKH * (i + 1)}
+              x2={LX + PW + TICK} y2={FTY + TICKH * (i + 1)}
+              stroke={WHITE} strokeWidth={LW} />
+      ))}
+
+      {/* Free throw circle
+          Bottom end: center-facing half = ABOVE FT line (smaller Y) = sweep=0 (CCW) → solid
+                      basket-facing half = BELOW FT line (larger Y) = sweep=1 (CW) → dashed */}
+      {/* Solid half (toward center court = upward) */}
+      <Path d={`M ${w/2 - FTR} ${FTY} A ${FTR} ${FTR} 0 0 0 ${w/2 + FTR} ${FTY}`}
+            fill="none" stroke={WHITE} strokeWidth={LW} />
+      {/* Dashed half (toward basket = downward) */}
+      <Path d={`M ${w/2 - FTR} ${FTY} A ${FTR} ${FTR} 0 0 1 ${w/2 + FTR} ${FTY}`}
+            fill="none" stroke={WHITE} strokeWidth={LW} strokeDasharray="5,4" />
+
+      {/* Restricted area arc — curves toward center (upward), sweep=0 */}
+      <Path d={`M ${w/2 - 4*s} ${BKT} A ${4*s} ${4*s} 0 0 0 ${w/2 + 4*s} ${BKT}`}
+            fill="none" stroke={WHITE} strokeWidth={LW} />
+
+      {/* 3-point corner lines (run upward from baseline) */}
+      <Line x1={3*s} y1={BASE} x2={3*s} y2={CRNR} stroke={WHITE} strokeWidth={LW} />
+      <Line x1={w - 3*s} y1={BASE} x2={w - 3*s} y2={CRNR} stroke={WHITE} strokeWidth={LW} />
+
+      {/* 3-point arc
+          Bottom end: arc must curve UPWARD (toward center court = smaller Y).
+          Center of arc = basket at (w/2, BKT). BKT > CRNR so center is BELOW corners.
+          Arc through top of circle (toward smaller Y) = long CCW arc = large=1, sweep=0 */}
+      <Path d={`M ${3*s} ${CRNR} A ${THREE} ${THREE} 0 1 0 ${w - 3*s} ${CRNR}`}
+            fill="none" stroke={WHITE} strokeWidth={LW} />
+
+      {/* Backboard */}
+      <Line x1={w/2 - 3*s} y1={BASE} x2={w/2 + 3*s} y2={BASE}
+            stroke={WHITE} strokeWidth={4} strokeLinecap="round" />
+      {/* Rim */}
+      <Circle cx={w/2} cy={BKT} r={Math.max(1.5*s, 9)} stroke={RIM} strokeWidth={2.5} fill="none" />
     </G>
   );
 }
@@ -201,46 +229,46 @@ function CourtEnd({
 function CourtSvg({ courtType }: { courtType: CourtType }) {
   const h    = courtType === 'full' ? COURT_H : courtType === 'half' ? HALF_H : THREE_Q_H;
   const w    = COURT_W;
-  const s    = w / 50;
+  const s    = w / 50;           // 1 foot in pixels
   const midY = COURT_H / 2;
-  const ftR  = 6 * s;
+  const FTR  = 6 * s;
 
   if (courtType === 'full') {
     return (
       <Svg width={w} height={h}>
         <WoodFloor w={w} h={h} />
-        {/* Outer boundary */}
+        {/* Court boundary */}
         <Rect x={2} y={2} width={w - 4} height={h - 4}
-              fill="none" stroke={LINE_C} strokeWidth={LW} />
+              fill="none" stroke={WHITE} strokeWidth={LW} />
         {/* Half-court line */}
-        <Line x1={2} y1={h / 2} x2={w - 2} y2={h / 2} stroke={LINE_C} strokeWidth={LW} />
-        {/* Center — large restraining circle + small tip-off circle */}
-        <Circle cx={w / 2} cy={h / 2} r={ftR}
-                fill="none" stroke={LINE_C} strokeWidth={LW} />
-        <Circle cx={w / 2} cy={h / 2} r={ftR * 0.3}
-                fill="none" stroke={LINE_C} strokeWidth={LW} />
-        {/* Top end */}
-        <CourtEnd w={w} courtH={h} s={s} up={true} />
-        {/* Bottom end */}
-        <CourtEnd w={w} courtH={h} s={s} up={false} />
+        <Line x1={2} y1={h / 2} x2={w - 2} y2={h / 2} stroke={WHITE} strokeWidth={LW} />
+        {/* Center circle (restraining) */}
+        <Circle cx={w / 2} cy={h / 2} r={FTR}
+                fill="none" stroke={WHITE} strokeWidth={LW} />
+        {/* Center tip-off circle (small) */}
+        <Circle cx={w / 2} cy={h / 2} r={FTR * 0.28}
+                fill="none" stroke={WHITE} strokeWidth={LW} />
+        {/* Ends */}
+        <TopEnd w={w} s={s} />
+        <BottomEnd w={w} courtH={h} s={s} />
       </Svg>
     );
   }
 
-  // Half / three_quarter — translate so bottom end is visible in viewport
+  // Half / three_quarter: show the bottom end (with basket) by translating
   const offsetY = courtType === 'half' ? -midY : -(COURT_H - THREE_Q_H);
   return (
     <Svg width={w} height={h}>
       <WoodFloor w={w} h={h} />
       <G transform={`translate(0, ${offsetY})`}>
         <Rect x={2} y={2} width={w - 4} height={COURT_H - 4}
-              fill="none" stroke={LINE_C} strokeWidth={LW} />
-        <Line x1={2} y1={midY} x2={w - 2} y2={midY} stroke={LINE_C} strokeWidth={LW} />
-        <Circle cx={w / 2} cy={midY} r={ftR}
-                fill="none" stroke={LINE_C} strokeWidth={LW} />
-        <Circle cx={w / 2} cy={midY} r={ftR * 0.3}
-                fill="none" stroke={LINE_C} strokeWidth={LW} />
-        <CourtEnd w={w} courtH={COURT_H} s={s} up={false} />
+              fill="none" stroke={WHITE} strokeWidth={LW} />
+        <Line x1={2} y1={midY} x2={w - 2} y2={midY} stroke={WHITE} strokeWidth={LW} />
+        <Circle cx={w / 2} cy={midY} r={FTR}
+                fill="none" stroke={WHITE} strokeWidth={LW} />
+        <Circle cx={w / 2} cy={midY} r={FTR * 0.28}
+                fill="none" stroke={WHITE} strokeWidth={LW} />
+        <BottomEnd w={w} courtH={COURT_H} s={s} />
       </G>
     </Svg>
   );
@@ -305,8 +333,8 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       if (b.id) {
         await whiteboardAPI.update(b.id, { name: b.name, court_type: b.court_type, data: ds });
       } else {
-        const c = await whiteboardAPI.create(gameId, { name: b.name, court_type: b.court_type, data: ds });
-        setBoards(prev => { const n = [...prev]; n[idx] = { ...b, id: c.id }; return n; });
+        const created = await whiteboardAPI.create(gameId, { name: b.name, court_type: b.court_type, data: ds });
+        setBoards(prev => { const n = [...prev]; n[idx] = { ...b, id: created.id }; return n; });
       }
     } catch {}
     setSaving(false);
@@ -315,17 +343,16 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
 
   const commitStrokes = (idx: number, strokes: Stroke[]) => {
     setBoards(prev => {
-      const next = [...prev];
+      const next    = [...prev];
       const updated = { ...next[idx], strokes };
-      next[idx] = updated;
+      next[idx]     = updated;
       saveBoard(idx, updated);
       return next;
     });
   };
 
   const addNewBoard = () => {
-    const nb: Board = { name: `Board ${boards.length + 1}`, court_type: 'full', strokes: [] };
-    setBoards(prev => [...prev, nb]);
+    setBoards(prev => [...prev, { name: `Board ${prev.length + 1}`, court_type: 'full', strokes: [] }]);
     setActiveBoardIdx(boards.length);
     setShowBoardList(false);
   };
@@ -411,7 +438,8 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const addText = () => {
     if (!textInput.trim()) { setShowAddText(false); return; }
     commitStrokes(activeBoardIdx, [...(board?.strokes ?? []), {
-      id: uid(), type: 'text', x: pendingTextPos.x, y: pendingTextPos.y,
+      id: uid(), type: 'text',
+      x: pendingTextPos.x, y: pendingTextPos.y,
       label: textInput.trim(), color: colorRef.current, strokeWidth: strokeWidthRef.current,
     }]);
     setTextInput('');
@@ -448,11 +476,10 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       );
     }
     if (s.type === 'arrow' && s.x1 != null && s.y1 != null && s.x2 != null && s.y2 != null) {
-      const dx = s.x2-s.x1; const dy = s.y2-s.y1;
+      const dx = s.x2-s.x1, dy = s.y2-s.y1;
       const len = Math.sqrt(dx*dx + dy*dy);
       if (len < 5) return null;
-      const ux = dx/len; const uy = dy/len; const as = 12;
-      const px = -uy; const py = ux;
+      const ux = dx/len, uy = dy/len, as = 12, px = -uy, py = ux;
       const tip = { x: s.x2, y: s.y2 };
       const b1  = { x: s.x2 - ux*as + px*as*0.5, y: s.y2 - uy*as + py*as*0.5 };
       const b2  = { x: s.x2 - ux*as - px*as*0.5, y: s.y2 - uy*as - py*as*0.5 };
@@ -489,7 +516,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           </View>
         </View>
 
-        {/* Court type selector */}
+        {/* Court type */}
         <View style={styles.courtSelector}>
           {(['full', 'half', 'three_quarter'] as CourtType[]).map(ct => (
             <TouchableOpacity key={ct}
@@ -529,20 +556,25 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
             <View style={{ marginLeft: 8, flexDirection: 'row', gap: 6 }}>
               {[2, 4, 7].map(w => (
                 <TouchableOpacity key={w}
-                  style={[styles.widthDot, { width: w*3, height: w*3, borderRadius: w*3 }, strokeWidth === w && { borderColor: '#fff', borderWidth: 2 }]}
+                  style={[styles.widthDot, { width: w*3, height: w*3, borderRadius: w*3 },
+                          strokeWidth === w && { borderColor: '#fff', borderWidth: 2 }]}
                   onPress={() => setStrokeWidth(w)} />
               ))}
             </View>
           </View>
         </View>
 
-        {/* Canvas */}
+        {/* Canvas — ScrollView so court never gets clipped */}
         {loading ? (
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <ActivityIndicator color="#7c3aed" size="large" />
           </View>
         ) : (
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ alignItems: 'center', paddingVertical: 8 }}
+            scrollEnabled={tool === 'text'}
+          >
             <View style={[styles.canvasWrapper, { height: courtH }]} {...panResponder.panHandlers}>
               <CourtSvg courtType={board?.court_type ?? 'full'} />
               <Svg style={StyleSheet.absoluteFill} width={COURT_W} height={courtH}>
@@ -553,7 +585,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                 ) : null}
               </Svg>
             </View>
-          </View>
+          </ScrollView>
         )}
 
         {/* Board list modal */}
@@ -564,7 +596,8 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               <ScrollView>
                 {boards.map((b, i) => (
                   <View key={i} style={styles.listRow}>
-                    <TouchableOpacity style={{ flex: 1 }} onPress={() => { setActiveBoardIdx(i); setShowBoardList(false); }}>
+                    <TouchableOpacity style={{ flex: 1 }}
+                      onPress={() => { setActiveBoardIdx(i); setShowBoardList(false); }}>
                       <Text style={[styles.listItemText, i === activeBoardIdx && { color: '#7c3aed' }]}>{b.name}</Text>
                       <Text style={styles.listItemSub}>
                         {b.court_type === 'full' ? 'Full Court' : b.court_type === 'half' ? 'Half Court' : '3/4 Court'} · {b.strokes.length} marks
@@ -595,7 +628,8 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               <TextInput style={styles.textField} placeholder="Enter text..."
                 placeholderTextColor="#4b5563" value={textInput} onChangeText={setTextInput} autoFocus />
               <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
-                <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: '#374151' }]} onPress={() => setShowAddText(false)}>
+                <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: '#374151' }]}
+                  onPress={() => setShowAddText(false)}>
                   <Text style={{ color: '#fff', fontWeight: '700' }}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.addBoardBtn, { flex: 1 }]} onPress={addText}>
@@ -612,7 +646,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container:       { flex: 1, backgroundColor: '#0a0a0a' },
+  container:       { flex: 1, backgroundColor: '#111' },
   header:          { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: Platform.OS === 'ios' ? 56 : 16, paddingBottom: 10, backgroundColor: '#111827' },
   headerBtn:       { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
   boardName:       { color: '#fff', fontSize: 16, fontWeight: '700', flex: 1 },
@@ -631,7 +665,7 @@ const styles = StyleSheet.create({
   colorDot:        { width: 22, height: 22, borderRadius: 11 },
   colorDotActive:  { borderWidth: 2, borderColor: '#fff' },
   widthDot:        { backgroundColor: '#fff' },
-  canvasWrapper:   { width: COURT_W, borderRadius: 8, overflow: 'hidden' },
+  canvasWrapper:   { width: COURT_W, borderRadius: 6, overflow: 'hidden' },
   listOverlay:     { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
   listBox:         { backgroundColor: '#1f2937', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, maxHeight: '60%' },
   listTitle:       { color: '#fff', fontSize: 17, fontWeight: '800', marginBottom: 14 },
