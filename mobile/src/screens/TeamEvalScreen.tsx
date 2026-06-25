@@ -507,30 +507,181 @@ export default function TeamEvalScreen() {
       const phase = detailGame.season_phase ? ` · ${detailGame.season_phase.charAt(0).toUpperCase() + detailGame.season_phase.slice(1)}` : '';
       const year = detailGame.season_year ? ` ${detailGame.season_year}` : '';
 
-      const grades = detailTab === 'our' ? summary.player_grades : summary.opponent_grades;
-      const gradeText = grades.map((g: any) =>
-        `${g.player_name}\nOFF ${g.offensive_grade.toFixed(2)}  ·  DEF ${g.defensive_grade.toFixed(2)}  ·  ${g.minutes_played.toFixed(0)} min  ·  Grade ${g.game_grade.toFixed(2)}`
-      ).join('\n\n');
+      let html: string;
 
-      const body = [
-        `GAME SUMMARY`,
-        `${programName} vs ${detailGame.opponent_name}`,
-        `${dateStr}${phase}${year}  ·  ${result}`,
-        `Team Grade: ${summary.team_grade.toFixed(2)}`,
-        ``,
-        `PLAYER GRADES`,
-        gradeText,
-      ].join('\n');
+      if (detailTab === 'byquarter') {
+        // Build quarter comparison HTML with table + per-player breakdown
+        const ourStats = gameStats.filter((st: any) => !st.is_opponent);
+        const qSet = new Set<number>();
+        type QData = { weighted: number; counts: Record<string, number>; breakdown: Record<string, { count: number; wp: number }> };
+        const players: Record<string, { total: number; quarters: Record<number, QData> }> = {};
+        for (const st of ourStats) {
+          qSet.add(st.quarter);
+          if (!players[st.player_name]) players[st.player_name] = { total: 0, quarters: {} };
+          const P = players[st.player_name];
+          if (!P.quarters[st.quarter]) P.quarters[st.quarter] = { weighted: 0, counts: {}, breakdown: {} };
+          const Q = P.quarters[st.quarter];
+          Q.weighted += st.weighted_points;
+          Q.counts[st.stat_name] = (Q.counts[st.stat_name] || 0) + (st.count || 1);
+          if (!Q.breakdown[st.stat_name]) Q.breakdown[st.stat_name] = { count: 0, wp: 0 };
+          Q.breakdown[st.stat_name].count += st.count || 1;
+          Q.breakdown[st.stat_name].wp += st.weighted_points;
+          P.total += st.weighted_points;
+        }
+        const qNums = Array.from(qSet).sort((a, b) => a - b);
+        const qLabel = (q: number) => (q === 5 ? 'OT' : `Q${q}`);
+        const playerNames = Object.keys(players).sort((a, b) => players[b].total - players[a].total);
+        const teamQ: Record<number, number> = {};
+        for (const q of qNums) teamQ[q] = playerNames.reduce((s, n) => s + (players[n].quarters[q]?.weighted || 0), 0);
+        const teamTotal = playerNames.reduce((s, n) => s + players[n].total, 0);
+        const fmt = (v: number) => (v > 0 ? '+' : '') + v.toFixed(1);
+        const fmtColor = (v: number) => v > 0 ? '#166534' : v < 0 ? '#991b1b' : '#6b7280';
+        const trad = (c: Record<string, number>) => {
+          const fgm = (c['2 FG Made'] || 0) + (c['3 FG Made'] || 0);
+          const fga = fgm + (c['2 FG Missed'] || 0) + (c['3 FG Missed'] || 0);
+          return {
+            pts: (c['2 FG Made'] || 0) * 2 + (c['3 FG Made'] || 0) * 3 + (c['FT Made'] || 0),
+            reb: (c['Off. Reb'] || 0) + (c['Def. Reb'] || 0),
+            ast: c['Assists'] || 0,
+            stl: c['Steal'] || 0,
+            blk: c['Blocked Shot'] || 0,
+            to: c['Turnover'] || 0,
+            fg: fga > 0 ? `${fgm}/${fga}` : '—',
+          };
+        };
 
-      const html = buildReportHtml({
-        title: `Game Report — ${programName} vs ${detailGame.opponent_name}`,
-        subject: `${result}${phase}${year}`,
-        date: dateStr,
-        body,
-      });
+        const thStyle = `padding:6px 8px;background:#1e1b4b;color:#fff;font-size:10px;font-weight:800;text-align:center;`;
+        const tdStyle = `padding:5px 8px;font-size:10px;text-align:center;border-bottom:1px solid #e5e7eb;`;
+        const nameTd = `padding:5px 8px;font-size:10px;font-weight:700;border-bottom:1px solid #e5e7eb;`;
+
+        // Matrix table
+        let matrixRows = '';
+        for (const name of playerNames) {
+          const P = players[name];
+          const cells = qNums.map(q => {
+            const w = P.quarters[q]?.weighted;
+            const col = w == null ? '#9ca3af' : fmtColor(w);
+            return `<td style="${tdStyle}color:${col};font-weight:700">${w == null ? '–' : fmt(w)}</td>`;
+          }).join('');
+          matrixRows += `<tr>
+            <td style="${nameTd}">${name}</td>
+            ${cells}
+            <td style="${tdStyle}color:#6d28d9;font-weight:800">${fmt(P.total)}</td>
+          </tr>`;
+        }
+        const teamCells = qNums.map(q => {
+          const col = fmtColor(teamQ[q] || 0);
+          return `<td style="${tdStyle}color:${col};font-weight:800">${fmt(teamQ[q] || 0)}</td>`;
+        }).join('');
+
+        // Per-player detail sections
+        let playerSections = '';
+        for (const name of playerNames) {
+          const P = players[name];
+          let qRows = '';
+          for (const q of qNums.filter(q => P.quarters[q])) {
+            const Q = P.quarters[q];
+            const t = trad(Q.counts);
+            const breakdownRows = Object.entries(Q.breakdown).map(([sn, d]) =>
+              `<tr>
+                <td style="padding:3px 6px;font-size:9px;color:#374151">${sn}${d.count > 1 ? ` ×${d.count}` : ''}</td>
+                <td style="padding:3px 6px;font-size:9px;font-weight:700;text-align:right;color:${d.wp >= 0 ? '#166534' : '#991b1b'}">${d.wp >= 0 ? '+' : ''}${d.wp.toFixed(1)}</td>
+              </tr>`
+            ).join('');
+            qRows += `
+              <tr style="background:#f9fafb">
+                <td colspan="9" style="padding:8px 10px 2px;font-size:10px;font-weight:800;color:#6d28d9">${qLabel(q)}
+                  <span style="color:#6b7280;font-weight:400;margin-left:10px">${fmt(Q.weighted)} grade pts</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:3px 10px 8px" colspan="9">
+                  <table style="width:100%;border-collapse:collapse">
+                    <tr style="background:#f3f4f6">
+                      ${['PTS','REB','AST','STL','BLK','TO','FG'].map(l => `<th style="padding:4px 6px;font-size:9px;color:#6b7280;text-align:center">${l}</th>`).join('')}
+                    </tr>
+                    <tr>
+                      ${[t.pts, t.reb, t.ast, t.stl, t.blk, t.to, t.fg].map(v => `<td style="padding:4px 6px;font-size:11px;font-weight:800;text-align:center">${v}</td>`).join('')}
+                    </tr>
+                    <tr><td colspan="7" style="padding-top:6px">
+                      <table style="width:100%;border-collapse:collapse">${breakdownRows}</table>
+                    </td></tr>
+                  </table>
+                </td>
+              </tr>`;
+          }
+          playerSections += `
+            <div style="page-break-inside:avoid;margin-top:20px">
+              <h3 style="font-size:12px;font-weight:800;color:#111;text-transform:uppercase;
+                         border-bottom:1.5px solid #ddd;padding-bottom:4px;margin:0 0 6px">${name}
+                <span style="color:#6d28d9;margin-left:10px">${fmt(P.total)} total</span>
+              </h3>
+              <table style="width:100%;border-collapse:collapse">${qRows}</table>
+            </div>`;
+        }
+
+        html = `<!DOCTYPE html><html><head><meta charset="utf-8"/>
+          <style>
+            @page { margin: 18mm 16mm; }
+            body { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size:11px; color:#111; }
+            .cover { margin-bottom:16px; border-bottom:2px solid #111; padding-bottom:10px; }
+            .cover h1 { font-size:18px; font-weight:900; margin:0 0 4px; }
+            .cover .meta { font-size:11px; color:#555; }
+            table { border-collapse:collapse; width:100%; }
+            .footer { position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:9px;color:#aaa;padding:6px 0;border-top:1px solid #eee; }
+          </style></head><body>
+          <div class="cover">
+            <h1>Quarter Comparison — ${programName} vs ${detailGame.opponent_name}</h1>
+            <div class="meta">${result} &nbsp;·&nbsp; ${dateStr}${phase}${year} &nbsp;·&nbsp; Team Grade: ${summary.team_grade.toFixed(2)}</div>
+          </div>
+          <div style="page-break-inside:avoid;margin-bottom:24px">
+            <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;border-bottom:1.5px solid #ddd;padding-bottom:4px;margin:0 0 8px">Quarter Comparison Matrix</h3>
+            <table>
+              <thead><tr>
+                <th style="${thStyle}text-align:left">PLAYER</th>
+                ${qNums.map(q => `<th style="${thStyle}">${qLabel(q)}</th>`).join('')}
+                <th style="${thStyle}color:#c4b5fd">TOTAL</th>
+              </tr></thead>
+              <tbody>
+                <tr style="background:#f3f4f6;font-weight:800">
+                  <td style="${nameTd}color:#6d28d9">TEAM</td>
+                  ${teamCells}
+                  <td style="${tdStyle}color:#6d28d9;font-weight:800">${fmt(teamTotal)}</td>
+                </tr>
+                ${matrixRows}
+              </tbody>
+            </table>
+          </div>
+          <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;border-bottom:1.5px solid #ddd;padding-bottom:4px;margin:0 0 4px">Player Detail By Quarter</h3>
+          ${playerSections}
+          <div class="footer">Generated by BloomPrint · ${dateStr}</div>
+        </body></html>`;
+      } else {
+        const grades = detailTab === 'our' ? summary.player_grades : summary.opponent_grades;
+        const gradeText = grades.map((g: any) =>
+          `${g.player_name}\nOFF ${g.offensive_grade.toFixed(2)}  ·  DEF ${g.defensive_grade.toFixed(2)}  ·  ${g.minutes_played.toFixed(0)} min  ·  Grade ${g.game_grade.toFixed(2)}`
+        ).join('\n\n');
+
+        const body = [
+          `GAME SUMMARY`,
+          `${programName} vs ${detailGame.opponent_name}`,
+          `${dateStr}${phase}${year}  ·  ${result}`,
+          `Team Grade: ${summary.team_grade.toFixed(2)}`,
+          ``,
+          `PLAYER GRADES`,
+          gradeText,
+        ].join('\n');
+
+        html = buildReportHtml({
+          title: `Game Report — ${programName} vs ${detailGame.opponent_name}`,
+          subject: `${result}${phase}${year}`,
+          date: dateStr,
+          body,
+        });
+      }
 
       const fileName = buildPdfFileName(
-        `Game Report`,
+        detailTab === 'byquarter' ? 'Quarter Report' : 'Game Report',
         `${programName} vs ${detailGame.opponent_name}${phase}`,
         gameDate,
       );
