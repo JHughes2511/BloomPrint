@@ -425,7 +425,7 @@ export default function RecentScreen() {
       <Text style={styles.title}>Recent Reports</Text>
 
       {/* Category filter */}
-      <View style={styles.filterRow}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={{ paddingHorizontal: 16, paddingRight: 24, gap: 8, alignItems: 'center' }}>
         {FILTER_CATS.map(cat => (
           <TouchableOpacity
             key={cat.key}
@@ -437,7 +437,7 @@ export default function RecentScreen() {
             </Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </ScrollView>
 
       <FlatList
         data={filtered}
@@ -938,7 +938,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0a0a', paddingTop: 56 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80 },
   title: { fontSize: 28, fontWeight: '900', color: '#fff', marginHorizontal: 20, marginBottom: 12 },
-  filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, marginBottom: 12 },
+  filterRow: { marginBottom: 12, flexGrow: 0 },
   filterChip: { borderWidth: 1, borderColor: '#374151', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8 },
   filterChipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
   filterChipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
