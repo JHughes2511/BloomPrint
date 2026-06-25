@@ -985,10 +985,10 @@ const styles = StyleSheet.create({
   },
   chip: {
     borderWidth: 1, borderColor: '#374151', borderRadius: 20,
-    paddingHorizontal: 14, paddingVertical: 8, marginRight: 8,
+    paddingHorizontal: 14, paddingVertical: 10, marginRight: 8,
   },
   chipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  chipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600', lineHeight: 18 },
+  chipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600', lineHeight: 20, paddingVertical: 1 },
   chipTextActive: { color: '#fff' },
   input: {
     backgroundColor: '#111827', borderRadius: 10, padding: 14,
