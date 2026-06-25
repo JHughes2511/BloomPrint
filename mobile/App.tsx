@@ -128,14 +128,14 @@ function AppTabs() {
         },
         tabBarStyle: {
           position: 'absolute',
-          left: 24, right: 24, bottom: 24,
-          height: 60,
-          borderRadius: 30,
+          left: 30, right: 30, bottom: 22,
+          height: 52,
+          borderRadius: 26,
           backgroundColor: '#111827',
           borderTopWidth: 0,
           paddingHorizontal: 4,
-          paddingTop: 6,
-          paddingBottom: 6,
+          paddingTop: 5,
+          paddingBottom: 5,
           shadowColor: '#000',
           shadowOpacity: 0.4,
           shadowRadius: 14,
@@ -156,13 +156,13 @@ function AppTabs() {
           const [active, inactive] = icons[route.name] ?? ['grid', 'grid-outline'];
           return (
             <View style={{
-              width: 50, height: 30, borderRadius: 15,
+              width: 42, height: 26, borderRadius: 13,
               alignItems: 'center', justifyContent: 'center',
               backgroundColor: focused ? 'rgba(59,130,246,0.18)' : 'transparent',
             }}>
               <Ionicons
                 name={(focused ? active : inactive) as any}
-                size={22}
+                size={19}
                 color={focused ? '#3b82f6' : '#6b7280'}
               />
             </View>
