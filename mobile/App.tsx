@@ -110,23 +110,28 @@ function AppTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: '#3b82f6',
+        tabBarInactiveTintColor: '#6b7280',
         tabBarStyle: {
           marginHorizontal: 14,
-          marginBottom: 28,
-          height: 66,
-          borderRadius: 33,
-          backgroundColor: '#d6d6d6',
+          marginBottom: 24,
+          height: 70,
+          borderRadius: 26,
+          backgroundColor: '#111827',
           borderTopWidth: 0,
           paddingHorizontal: 6,
+          paddingTop: 8,
+          paddingBottom: 8,
           shadowColor: '#000',
-          shadowOpacity: 0.35,
+          shadowOpacity: 0.4,
           shadowRadius: 14,
           shadowOffset: { width: 0, height: 6 },
           elevation: 10,
         },
-        tabBarItemStyle: { flex: 1, height: 66, paddingVertical: 0 },
-        tabBarIconStyle: { flex: 1, width: '100%' },
+        tabBarItemStyle: { flex: 1, paddingVertical: 0 },
+        tabBarLabelStyle: { fontSize: 10, fontWeight: '600', marginTop: 3, includeFontPadding: false },
+        tabBarIconStyle: { marginBottom: 0 },
         tabBarIcon: ({ focused }) => {
           const icons: Record<string, [string, string]> = {
             HomeTab:     ['home',        'home-outline'],
@@ -138,14 +143,14 @@ function AppTabs() {
           const [active, inactive] = icons[route.name] ?? ['grid', 'grid-outline'];
           return (
             <View style={{
-              width: 56, height: 44, borderRadius: 22,
+              width: 50, height: 30, borderRadius: 15,
               alignItems: 'center', justifyContent: 'center',
-              backgroundColor: focused ? '#f4f4f5' : 'transparent',
+              backgroundColor: focused ? 'rgba(59,130,246,0.18)' : 'transparent',
             }}>
               <Ionicons
                 name={(focused ? active : inactive) as any}
-                size={25}
-                color={focused ? '#111827' : '#4b5563'}
+                size={22}
+                color={focused ? '#3b82f6' : '#6b7280'}
               />
             </View>
           );
