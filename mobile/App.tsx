@@ -128,7 +128,7 @@ function AppTabs() {
         },
         tabBarStyle: {
           position: 'absolute',
-          left: 30, right: 30, bottom: 22,
+          left: 48, right: 48, bottom: 36,
           height: 52,
           borderRadius: 26,
           backgroundColor: '#111827',
