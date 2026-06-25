@@ -19,7 +19,8 @@ def _get_model():
                 _device = "mps"
             else:
                 _device = "cpu"
-            _whisper_model = whisper.load_model("small", device=_device)
+            model_size = os.environ.get("WHISPER_MODEL", "small")
+            _whisper_model = whisper.load_model(model_size, device=_device)
         except Exception as e:
             raise RuntimeError(f"Failed to load Whisper model: {e}")
     return _whisper_model
@@ -49,6 +50,13 @@ async def transcribe_audio(
             beam_size=1,
             best_of=1,
             condition_on_previous_text=True,
+            # Temperature fallback: if a decode looks low-confidence,
+            # Whisper retries at a higher temperature instead of dropping words.
+            temperature=(0.0, 0.2, 0.4, 0.6),
+            # Hallucination / dropped-word guards tuned for short chunks.
+            no_speech_threshold=0.5,
+            logprob_threshold=-1.0,
+            compression_ratio_threshold=2.4,
         )
         if context:
             options["initial_prompt"] = context

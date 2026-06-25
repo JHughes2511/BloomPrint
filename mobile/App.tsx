@@ -110,13 +110,13 @@ function AppTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarStyle: { backgroundColor: '#111827', borderTopColor: '#1f2937' },
+        tabBarStyle: { backgroundColor: '#111827', borderTopColor: '#1f2937', paddingTop: 6 },
         tabBarActiveTintColor: '#2563eb',
         tabBarInactiveTintColor: '#6b7280',
-        tabBarLabelStyle: { fontSize: 9, marginBottom: 2, textAlign: 'center', includeFontPadding: false },
-        tabBarItemStyle: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2 },
+        tabBarLabelStyle: { fontSize: 10, fontWeight: '600', marginTop: 4, textAlign: 'center', includeFontPadding: false },
+        tabBarItemStyle: { flex: 1, paddingHorizontal: 2, paddingVertical: 4 },
         tabBarIconStyle: { marginBottom: 0 },
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ focused, color }) => {
           const icons: Record<string, [string, string]> = {
             HomeTab:     ['home',        'home-outline'],
             TeamTab:     ['people',      'people-outline'],
@@ -125,7 +125,7 @@ function AppTabs() {
             RecentTab:   ['time',        'time-outline'],
           };
           const [active, inactive] = icons[route.name] ?? ['grid', 'grid-outline'];
-          return <Ionicons name={(focused ? active : inactive) as any} size={size} color={color} />;
+          return <Ionicons name={(focused ? active : inactive) as any} size={24} color={color} />;
         },
       })}
     >

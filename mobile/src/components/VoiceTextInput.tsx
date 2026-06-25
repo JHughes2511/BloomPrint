@@ -9,7 +9,7 @@ type Props = TextInputProps & {
   onChangeText?: (text: string) => void;
 };
 
-const CHUNK_MS = 5000; // 5-second recording chunks
+const CHUNK_MS = 2500; // recording chunk length — shorter = words appear sooner
 
 export default function VoiceTextInput({
   value = '',
@@ -28,6 +28,7 @@ export default function VoiceTextInput({
   const chunkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const valueRef = useRef(value);
   const activeTranscriptions = useRef(0);
+  const transcribeChainRef = useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => {
     valueRef.current = value;
@@ -82,29 +83,36 @@ export default function VoiceTextInput({
       chunkTimerRef.current = null;
     }
 
-    const context = getContext();
-
+    let uri: string | null = null;
     try {
       await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
-      if (uri) {
-        activeTranscriptions.current += 1;
-        setTranscribing(true);
-        try {
-          const text = await transcribeAPI.transcribe(uri, context);
-          if (text) appendText(text);
-        } catch {
-          // silently skip bad chunks
-        } finally {
-          activeTranscriptions.current -= 1;
-          if (activeTranscriptions.current === 0) setTranscribing(false);
-        }
-      }
+      uri = recording.getURI();
     } catch {
       // ignore stop errors
     }
 
+    // Resume recording IMMEDIATELY so no speech is lost while the
+    // previous clip uploads and transcribes in the background.
     if (listeningRef.current) startChunk();
+
+    if (!uri) return;
+    const clipUri = uri;
+    activeTranscriptions.current += 1;
+    setTranscribing(true);
+    // Chain transcriptions so chunks append in order and the server
+    // handles one request at a time. Context is read at run time so it
+    // includes everything appended from earlier chunks.
+    transcribeChainRef.current = transcribeChainRef.current.then(async () => {
+      try {
+        const text = await transcribeAPI.transcribe(clipUri, getContext());
+        if (text) appendText(text);
+      } catch {
+        // silently skip bad chunks
+      } finally {
+        activeTranscriptions.current -= 1;
+        if (activeTranscriptions.current === 0) setTranscribing(false);
+      }
+    });
   };
 
   const startRecording = async () => {
