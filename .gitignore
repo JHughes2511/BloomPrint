@@ -13,3 +13,7 @@ venv/
 *.tmp_frames/
 *.db
 uploads/
+
+# Mobile
+mobile/node_modules/
+mobile/package-lock.json
