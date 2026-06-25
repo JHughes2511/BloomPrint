@@ -16,6 +16,7 @@ import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import WhiteboardModal from '../components/WhiteboardModal';
+import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
 
 // ── Stat definitions ──────────────────────────────────────────────────────────
 
@@ -900,34 +901,28 @@ export default function TeamEvalScreen() {
         </ScrollView>
       )}
 
-      {/* Floating whiteboard button on Games tab */}
+      {/* Draggable floating whiteboard button on Games tab */}
       {activeView === 'games' && (
-        <TouchableOpacity
-          style={{ position: 'absolute', bottom: 24, right: 20, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 10, zIndex: 100 }}
+        <DraggableWhiteboardButton
           onPress={() => {
             const firstGame = sessions[0];
             if (firstGame) setWhiteboardGameId(firstGame.id);
             else Alert.alert('No Games', 'Log a game first to use the whiteboard.');
           }}
-        >
-          <Ionicons name="clipboard-outline" size={24} color="#fff" />
-        </TouchableOpacity>
+        />
       )}
 
-      {/* Floating whiteboard button on Game Detail tab */}
+      {/* Draggable floating whiteboard button on Game Detail tab */}
       {activeView === 'detail' && detailGame && (
-        <TouchableOpacity
-          style={{ position: 'absolute', bottom: 24, right: 20, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 10, zIndex: 100 }}
-          onPress={() => setWhiteboardGameId(detailGame.id)}
-        >
-          <Ionicons name="clipboard-outline" size={24} color="#fff" />
-        </TouchableOpacity>
+        <DraggableWhiteboardButton onPress={() => setWhiteboardGameId(detailGame.id)} />
       )}
 
 
       {/* Live Entry */}
       {activeView === 'live' && activeGame && (
         <View style={{ flex: 1 }}>
+          {/* Draggable floating whiteboard button */}
+          <DraggableWhiteboardButton onPress={() => setWhiteboardGameId(activeGame.id)} />
           {/* Score bar */}
           <View style={s.scoreBar}>
             <View style={{ alignItems: 'center' }}>
@@ -948,25 +943,17 @@ export default function TeamEvalScreen() {
               </Text>
               <Text style={{ color: '#6b7280', fontSize: 11 }}>Q{activeQuarter}</Text>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <View style={{ alignItems: 'center' }}>
-                <Text style={{ color: '#9ca3af', fontSize: 10, fontWeight: '700' }}>THEM</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <TouchableOpacity onPress={() => updateScore('opp', -1)}>
-                    <Ionicons name="remove-circle-outline" size={20} color="#6b7280" />
-                  </TouchableOpacity>
-                  <Text style={s.scoreNum}>{oppScore}</Text>
-                  <TouchableOpacity onPress={() => updateScore('opp', 1)}>
-                    <Ionicons name="add-circle-outline" size={20} color="#7c3aed" />
-                  </TouchableOpacity>
-                </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ color: '#9ca3af', fontSize: 10, fontWeight: '700' }}>THEM</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <TouchableOpacity onPress={() => updateScore('opp', -1)}>
+                  <Ionicons name="remove-circle-outline" size={20} color="#6b7280" />
+                </TouchableOpacity>
+                <Text style={s.scoreNum}>{oppScore}</Text>
+                <TouchableOpacity onPress={() => updateScore('opp', 1)}>
+                  <Ionicons name="add-circle-outline" size={20} color="#7c3aed" />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                onPress={() => setWhiteboardGameId(activeGame.id)}
-                style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: '#7c3aed22', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#7c3aed55' }}
-              >
-                <Ionicons name="clipboard-outline" size={18} color="#a78bfa" />
-              </TouchableOpacity>
             </View>
           </View>
 
