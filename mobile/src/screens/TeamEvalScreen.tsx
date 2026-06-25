@@ -849,7 +849,7 @@ export default function TeamEvalScreen() {
       {/* Floating whiteboard button on Games tab */}
       {activeView === 'games' && (
         <TouchableOpacity
-          style={{ position: 'absolute', bottom: 24, right: 20, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 10, zIndex: 100 }}
+          style={{ position: 'absolute', bottom: 104, right: 20, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 10, zIndex: 100 }}
           onPress={() => {
             const firstGame = sessions[0];
             if (firstGame) setWhiteboardGameId(firstGame.id);
@@ -863,7 +863,7 @@ export default function TeamEvalScreen() {
       {/* Floating whiteboard button on Game Detail tab */}
       {activeView === 'detail' && detailGame && (
         <TouchableOpacity
-          style={{ position: 'absolute', bottom: 24, right: 20, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 10, zIndex: 100 }}
+          style={{ position: 'absolute', bottom: 104, right: 20, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 10, zIndex: 100 }}
           onPress={() => setWhiteboardGameId(detailGame.id)}
         >
           <Ionicons name="clipboard-outline" size={24} color="#fff" />
@@ -1343,13 +1343,6 @@ export default function TeamEvalScreen() {
                 ? <ActivityIndicator size="small" color="#7c3aed" />
                 : <><Ionicons name="sparkles-outline" size={14} color="#7c3aed" />
                   <Text numberOfLines={1} style={{ color: '#7c3aed', fontSize: 11, fontWeight: '600' }}>Generate Report</Text></>}
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[s.detailAction, { flex: 1, minWidth: '45%', borderColor: '#a78bfa' }]}
-              onPress={() => detailGame && setWhiteboardGameId(detailGame.id)}
-            >
-              <Ionicons name="clipboard-outline" size={14} color="#a78bfa" />
-              <Text numberOfLines={1} style={{ color: '#a78bfa', fontSize: 11, fontWeight: '600' }}>Whiteboard</Text>
             </TouchableOpacity>
           </View>
 
