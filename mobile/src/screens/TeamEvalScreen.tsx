@@ -1328,38 +1328,90 @@ export default function TeamEvalScreen() {
                       size={14} color="#4b5563"
                     />
                   </TouchableOpacity>
-                  {expandedPlayer === g.player_name && (
-                    <View style={s.expandedBox}>
-                      {Object.entries(g.per_quarter).map(([q, data]: [string, any]) => (
-                        <View key={q} style={{ flexDirection: 'row', gap: 12, marginBottom: 4 }}>
-                          <Text style={{ color: '#6b7280', fontSize: 12, width: 30 }}>
-                            {parseInt(q) === 5 ? 'OT' : `Q${q}`}
-                          </Text>
-                          <Text style={{ color: '#9ca3af', fontSize: 12 }}>
-                            OFF: {(data.offense ?? 0).toFixed(1)} · DEF: {(data.defense ?? 0).toFixed(1)}
-                          </Text>
+                  {expandedPlayer === g.player_name && (() => {
+                    // Derive traditional stats from raw gameStats for this player
+                    const pStats = gameStats.filter((st: any) => !st.is_opponent && st.player_name === g.player_name);
+                    const counts: Record<string, number> = {};
+                    const breakdown: Record<string, { count: number; weighted_points: number }> = {};
+                    for (const st of pStats) {
+                      counts[st.stat_name] = (counts[st.stat_name] || 0) + (st.count || 1);
+                      if (!breakdown[st.stat_name]) breakdown[st.stat_name] = { count: 0, weighted_points: 0 };
+                      breakdown[st.stat_name].count += st.count || 1;
+                      breakdown[st.stat_name].weighted_points += st.weighted_points;
+                    }
+                    const pts = (counts['2 FG Made'] || 0) * 2 + (counts['3 FG Made'] || 0) * 3 + (counts['FT Made'] || 0);
+                    const reb = (counts['Off. Reb'] || 0) + (counts['Def. Reb'] || 0);
+                    const ast = counts['Assists'] || 0;
+                    const stl = counts['Steal'] || 0;
+                    const blk = counts['Blocked Shot'] || 0;
+                    const to = counts['Turnover'] || 0;
+                    const fgm = (counts['2 FG Made'] || 0) + (counts['3 FG Made'] || 0);
+                    const fga = fgm + (counts['2 FG Missed'] || 0) + (counts['3 FG Missed'] || 0);
+                    return (
+                      <View style={s.expandedBox}>
+                        {/* Traditional stats row */}
+                        <View style={{ flexDirection: 'row', gap: 14, marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                          {([['PTS', pts], ['REB', reb], ['AST', ast], ['STL', stl], ['BLK', blk], ['TO', to], ['FG', fga > 0 ? `${fgm}/${fga}` : '—']] as [string, string | number][]).map(([label, val]) => (
+                            <View key={label} style={{ alignItems: 'center' }}>
+                              <Text style={{ color: '#9ca3af', fontSize: 10, fontWeight: '700' }}>{label}</Text>
+                              <Text style={{ color: '#fff', fontSize: 15, fontWeight: '900' }}>{val}</Text>
+                            </View>
+                          ))}
                         </View>
-                      ))}
-                      <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
-                        <TouchableOpacity
-                          style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4,
-                                   backgroundColor: '#1e1b4b', borderRadius: 8, paddingVertical: 8, borderWidth: 1, borderColor: '#4c1d95' }}
-                          onPress={() => { setDetailModalPlayer(g.player_name); setShowDetailModal(true); }}
-                        >
-                          <Ionicons name="eye-outline" size={13} color="#a78bfa" />
-                          <Text style={{ color: '#a78bfa', fontSize: 12, fontWeight: '700' }}>View Details</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4,
-                                   backgroundColor: '#1f2937', borderRadius: 8, paddingVertical: 8, borderWidth: 1, borderColor: '#374151' }}
-                          onPress={() => { setStatsModalPlayer(g.player_name); setShowStatsModal(true); setAddStatName(''); setAddingStatDropdownOpen(false); }}
-                        >
-                          <Ionicons name="create-outline" size={13} color="#9ca3af" />
-                          <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '700' }}>Edit Stats</Text>
-                        </TouchableOpacity>
+
+                        {/* OFF / DEF / minutes */}
+                        <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 10 }}>
+                          OFF {g.offensive_grade.toFixed(1)} · DEF {g.defensive_grade.toFixed(1)} · {g.minutes_played.toFixed(0)}min
+                        </Text>
+
+                        {/* Grading stats */}
+                        <Text style={{ color: '#4b5563', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>GRADING STATS</Text>
+                        <View style={{ gap: 3, marginBottom: 12 }}>
+                          {Object.entries(breakdown).map(([statName, data]) => (
+                            <View key={statName} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                              <Text style={{ color: '#9ca3af', fontSize: 12 }}>{statName}{data.count > 1 ? ` ×${data.count}` : ''}</Text>
+                              <Text style={{ color: data.weighted_points >= 0 ? '#4ade80' : '#f87171', fontSize: 12, fontWeight: '600' }}>
+                                {data.weighted_points >= 0 ? '+' : ''}{data.weighted_points.toFixed(1)}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+
+                        {/* Per quarter */}
+                        {Object.keys(g.per_quarter).length > 0 && (
+                          <>
+                            <Text style={{ color: '#4b5563', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>PER QUARTER</Text>
+                            {Object.entries(g.per_quarter as Record<string, any>).sort(([a], [b]) => Number(a) - Number(b)).map(([q, data]: [string, any]) => (
+                              <View key={q} style={{ flexDirection: 'row', gap: 12, marginBottom: 3 }}>
+                                <Text style={{ color: '#6b7280', fontSize: 11, width: 28 }}>{Number(q) === 5 ? 'OT' : `Q${q}`}</Text>
+                                <Text style={{ color: '#9ca3af', fontSize: 11 }}>OFF {(data.offense ?? 0).toFixed(1)} · DEF {(data.defense ?? 0).toFixed(1)}</Text>
+                              </View>
+                            ))}
+                          </>
+                        )}
+
+                        {/* Action buttons */}
+                        <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+                          <TouchableOpacity
+                            style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4,
+                                     backgroundColor: '#1e1b4b', borderRadius: 8, paddingVertical: 8, borderWidth: 1, borderColor: '#4c1d95' }}
+                            onPress={() => { setDetailModalPlayer(g.player_name); setShowDetailModal(true); }}
+                          >
+                            <Ionicons name="eye-outline" size={13} color="#a78bfa" />
+                            <Text style={{ color: '#a78bfa', fontSize: 12, fontWeight: '700' }}>View Details</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4,
+                                     backgroundColor: '#1f2937', borderRadius: 8, paddingVertical: 8, borderWidth: 1, borderColor: '#374151' }}
+                            onPress={() => { setStatsModalPlayer(g.player_name); setShowStatsModal(true); setAddStatName(''); setAddingStatDropdownOpen(false); }}
+                          >
+                            <Ionicons name="create-outline" size={13} color="#9ca3af" />
+                            <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '700' }}>Edit Stats</Text>
+                          </TouchableOpacity>
+                        </View>
                       </View>
-                    </View>
-                  )}
+                    );
+                  })()}
                 </View>
               ))}
               {(detailTab === 'our' ? summary.player_grades : summary.opponent_grades).length === 0 && (
