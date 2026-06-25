@@ -2,22 +2,27 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, Modal, StyleSheet,
   PanResponder, Alert, TextInput, ScrollView, ActivityIndicator,
-  Dimensions, Platform,
+  Dimensions, Platform, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Svg, { Path, Circle, Line, G, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Path, Circle, Line, G, Text as SvgText } from 'react-native-svg';
 import { whiteboardAPI } from '../api/client';
 
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+const { width: SCREEN_W } = Dimensions.get('window');
+
+// ── Court image ─────────────────────────────────────────────────────────────
+// The court is the actual wooden-board photo. Drop your cropped court image at
+// mobile/assets/court.png (portrait, cropped to just the board — no white border).
+const COURT_SRC = require('../../assets/court.png');
+const _meta = Image.resolveAssetSource(COURT_SRC);
+// Full-court height derived from the image's own aspect ratio so it never distorts.
+const IMG_RATIO = _meta && _meta.width ? _meta.height / _meta.width : (94 / 50);
 
 // ── Court sizing ──────────────────────────────────────────────────────────
-// Modal chrome: status bar ~50, header ~90, court selector ~55, toolbar ~100,
-// iOS home indicator ~34, breathing room ~20  → ~350px total
-const UI_CHROME = 360;
-const COURT_W   = SCREEN_W - 24;                     // nearly full width
-const COURT_H   = Math.min(COURT_W * (94 / 50), SCREEN_H - UI_CHROME);
-const HALF_H    = COURT_H / 2;
-const THREE_Q_H = COURT_H * 0.75;
+const COURT_W   = SCREEN_W - 24;            // nearly full width
+const COURT_H   = COURT_W * IMG_RATIO;      // full court = full image
+const HALF_H    = COURT_H / 2;              // half court = bottom half of image
+const THREE_Q_H = COURT_H * 0.75;          // 3/4 court = bottom 75% of image
 
 type CourtType = 'full' | 'half' | 'three_quarter';
 type Tool = 'pen' | 'circle' | 'xmark' | 'arrow' | 'text';
@@ -48,230 +53,21 @@ const TOOLS: { key: Tool; icon: string }[] = [
   { key: 'text',   icon: 'text' },
 ];
 
-// ── Court colours ─────────────────────────────────────────────────────────
-const FLOOR_A = '#D4A84A';   // main floor tan
-const FLOOR_B = '#C89840';   // darker plank
-const FLOOR_C = '#DDB055';   // lighter plank
-const LINE    = '#2d1505';   // dark brown engraved lines
-const LW      = 2;           // standard line weight
-
-// ── Wood floor — vertical planks ──────────────────────────────────────────
-function WoodFloor({ w, h }: { w: number; h: number }) {
-  const n  = 22;
-  const pW = w / n;
-  const shade = (i: number) => {
-    const cycle = i % 3;
-    if (cycle === 0) return FLOOR_A;
-    if (cycle === 1) return FLOOR_B;
-    return FLOOR_C;
-  };
+// ── Court image — the actual wooden board, cropped to the chosen size ───────
+// Full court  = whole image.
+// Half court  = bottom half of the image (one basket near the viewer).
+// 3/4 court   = bottom 75% of the image.
+function CourtImage({ height }: { height: number }) {
   return (
-    <G>
-      {Array.from({ length: n }).map((_, i) => (
-        <Rect key={i} x={i * pW} y={0} width={pW} height={h} fill={shade(i)} />
-      ))}
-      {Array.from({ length: n - 1 }).map((_, i) => (
-        <Line key={`d${i}`}
-              x1={(i + 1) * pW} y1={0} x2={(i + 1) * pW} y2={h}
-              stroke="rgba(0,0,0,0.08)" strokeWidth={0.5} />
-      ))}
-    </G>
-  );
-}
-
-// ── Basketball graphic ────────────────────────────────────────────────────
-function Basketball({ cx, cy, r }: { cx: number; cy: number; r: number }) {
-  return (
-    <G>
-      <Circle cx={cx} cy={cy} r={r} fill={FLOOR_B} stroke={LINE} strokeWidth={1.5} />
-      {/* Horizontal seam — two opposing arcs */}
-      <Path d={`M ${cx - r} ${cy} A ${r} ${r * 0.38} 0 0 1 ${cx + r} ${cy}`}
-            fill="none" stroke={LINE} strokeWidth={1.3} />
-      <Path d={`M ${cx - r} ${cy} A ${r} ${r * 0.38} 0 0 0 ${cx + r} ${cy}`}
-            fill="none" stroke={LINE} strokeWidth={1.3} />
-      {/* Vertical seam */}
-      <Path d={`M ${cx} ${cy - r} A ${r * 0.38} ${r} 0 0 1 ${cx} ${cy + r}`}
-            fill="none" stroke={LINE} strokeWidth={1.3} />
-      <Path d={`M ${cx} ${cy - r} A ${r * 0.38} ${r} 0 0 0 ${cx} ${cy + r}`}
-            fill="none" stroke={LINE} strokeWidth={1.3} />
-    </G>
-  );
-}
-
-// ── TOP END (basket near y = 0) ───────────────────────────────────────────
-function TopEnd({ w, s }: { w: number; s: number }) {
-  const BASE  = 2;
-  const BKT   = BASE + 5.25 * s;
-  const FTY   = BASE + 19 * s;
-  const CRNR  = BASE + 14 * s;
-  const THREE = 23.75 * s;
-  const FTR   = 6 * s;
-  const PW    = 16 * s;
-  const LX    = (w - PW) / 2;
-  const TICKS = 4;
-  const TICK  = 5;
-  const rimR  = Math.max(1.5 * s, 9);
-  const bbW   = 6 * s;
-
-  return (
-    <G>
-      {/* Paint — outline only, no fill */}
-      <Rect x={LX} y={BASE} width={PW} height={19 * s} fill="none" stroke={LINE} strokeWidth={LW} />
-
-      {/* Lane hash marks */}
-      {Array.from({ length: TICKS }).map((_, i) => {
-        const step = (19 * s) / (TICKS + 1);
-        return (
-          <G key={`t${i}`}>
-            <Line x1={LX - TICK} y1={BASE + step * (i + 1)} x2={LX} y2={BASE + step * (i + 1)} stroke={LINE} strokeWidth={1.5} />
-            <Line x1={LX + PW} y1={BASE + step * (i + 1)} x2={LX + PW + TICK} y2={BASE + step * (i + 1)} stroke={LINE} strokeWidth={1.5} />
-          </G>
-        );
-      })}
-
-      {/* Free throw circle — solid half toward center */}
-      <Path d={`M ${w/2 - FTR} ${FTY} A ${FTR} ${FTR} 0 0 1 ${w/2 + FTR} ${FTY}`}
-            fill="none" stroke={LINE} strokeWidth={LW} />
-      {/* Dashed half toward basket */}
-      <Path d={`M ${w/2 - FTR} ${FTY} A ${FTR} ${FTR} 0 0 0 ${w/2 + FTR} ${FTY}`}
-            fill="none" stroke={LINE} strokeWidth={LW} strokeDasharray="5,4" />
-
-      {/* Restricted area arc */}
-      <Path d={`M ${w/2 - 4*s} ${BKT} A ${4*s} ${4*s} 0 0 1 ${w/2 + 4*s} ${BKT}`}
-            fill="none" stroke={LINE} strokeWidth={LW} />
-
-      {/* 3-point corner lines */}
-      <Line x1={3*s} y1={BASE} x2={3*s} y2={CRNR} stroke={LINE} strokeWidth={LW} />
-      <Line x1={w - 3*s} y1={BASE} x2={w - 3*s} y2={CRNR} stroke={LINE} strokeWidth={LW} />
-
-      {/* 3-point arc */}
-      <Path d={`M ${3*s} ${CRNR} A ${THREE} ${THREE} 0 1 1 ${w - 3*s} ${CRNR}`}
-            fill="none" stroke={LINE} strokeWidth={LW} />
-
-      {/* Backboard */}
-      <Line x1={w/2 - bbW/2} y1={BASE + 1} x2={w/2 + bbW/2} y2={BASE + 1}
-            stroke={LINE} strokeWidth={3.5} strokeLinecap="round" />
-      {/* Shooter's box outline */}
-      <Rect x={w/2 - 2*s} y={BASE + 1} width={4*s} height={1.8*s}
-            fill="none" stroke={LINE} strokeWidth={1.5} />
-      {/* Post from box to rim */}
-      <Line x1={w/2} y1={BASE + 1.8*s} x2={w/2} y2={BKT - rimR}
-            stroke={LINE} strokeWidth={1.5} />
-      {/* Rim */}
-      <Circle cx={w/2} cy={BKT} r={rimR} stroke={LINE} strokeWidth={2} fill="none" />
-    </G>
-  );
-}
-
-// ── BOTTOM END (basket near y = courtH) ───────────────────────────────────
-function BottomEnd({ w, courtH, s }: { w: number; courtH: number; s: number }) {
-  const BASE  = courtH - 2;
-  const BKT   = BASE - 5.25 * s;
-  const FTY   = BASE - 19 * s;
-  const CRNR  = BASE - 14 * s;
-  const THREE = 23.75 * s;
-  const FTR   = 6 * s;
-  const PW    = 16 * s;
-  const LX    = (w - PW) / 2;
-  const TICKS = 4;
-  const TICK  = 5;
-  const rimR  = Math.max(1.5 * s, 9);
-  const bbW   = 6 * s;
-
-  return (
-    <G>
-      {/* Paint — outline only, no fill */}
-      <Rect x={LX} y={FTY} width={PW} height={19 * s} fill="none" stroke={LINE} strokeWidth={LW} />
-
-      {/* Lane hash marks */}
-      {Array.from({ length: TICKS }).map((_, i) => {
-        const step = (19 * s) / (TICKS + 1);
-        return (
-          <G key={`t${i}`}>
-            <Line x1={LX - TICK} y1={FTY + step * (i + 1)} x2={LX} y2={FTY + step * (i + 1)} stroke={LINE} strokeWidth={1.5} />
-            <Line x1={LX + PW} y1={FTY + step * (i + 1)} x2={LX + PW + TICK} y2={FTY + step * (i + 1)} stroke={LINE} strokeWidth={1.5} />
-          </G>
-        );
-      })}
-
-      {/* Free throw circle — solid half toward center */}
-      <Path d={`M ${w/2 - FTR} ${FTY} A ${FTR} ${FTR} 0 0 0 ${w/2 + FTR} ${FTY}`}
-            fill="none" stroke={LINE} strokeWidth={LW} />
-      {/* Dashed half toward basket */}
-      <Path d={`M ${w/2 - FTR} ${FTY} A ${FTR} ${FTR} 0 0 1 ${w/2 + FTR} ${FTY}`}
-            fill="none" stroke={LINE} strokeWidth={LW} strokeDasharray="5,4" />
-
-      {/* Restricted area arc */}
-      <Path d={`M ${w/2 - 4*s} ${BKT} A ${4*s} ${4*s} 0 0 0 ${w/2 + 4*s} ${BKT}`}
-            fill="none" stroke={LINE} strokeWidth={LW} />
-
-      {/* 3-point corner lines */}
-      <Line x1={3*s} y1={BASE} x2={3*s} y2={CRNR} stroke={LINE} strokeWidth={LW} />
-      <Line x1={w - 3*s} y1={BASE} x2={w - 3*s} y2={CRNR} stroke={LINE} strokeWidth={LW} />
-
-      {/* 3-point arc */}
-      <Path d={`M ${3*s} ${CRNR} A ${THREE} ${THREE} 0 1 0 ${w - 3*s} ${CRNR}`}
-            fill="none" stroke={LINE} strokeWidth={LW} />
-
-      {/* Backboard */}
-      <Line x1={w/2 - bbW/2} y1={BASE - 1} x2={w/2 + bbW/2} y2={BASE - 1}
-            stroke={LINE} strokeWidth={3.5} strokeLinecap="round" />
-      {/* Shooter's box outline */}
-      <Rect x={w/2 - 2*s} y={BASE - 1 - 1.8*s} width={4*s} height={1.8*s}
-            fill="none" stroke={LINE} strokeWidth={1.5} />
-      {/* Post from box to rim */}
-      <Line x1={w/2} y1={BASE - 1 - 1.8*s} x2={w/2} y2={BKT + rimR}
-            stroke={LINE} strokeWidth={1.5} />
-      {/* Rim */}
-      <Circle cx={w/2} cy={BKT} r={rimR} stroke={LINE} strokeWidth={2} fill="none" />
-    </G>
-  );
-}
-
-// ── Full court SVG ────────────────────────────────────────────────────────
-function CourtSvg({ courtType }: { courtType: CourtType }) {
-  const h    = courtType === 'full' ? COURT_H : courtType === 'half' ? HALF_H : THREE_Q_H;
-  const w    = COURT_W;
-  const s    = w / 50;           // 1 foot in pixels
-  const midY = COURT_H / 2;
-  const FTR  = 6 * s;
-
-  if (courtType === 'full') {
-    return (
-      <Svg width={w} height={h}>
-        <WoodFloor w={w} h={h} />
-        {/* Court boundary */}
-        <Rect x={2} y={2} width={w - 4} height={h - 4}
-              fill="none" stroke={LINE} strokeWidth={LW} />
-        {/* Half-court line */}
-        <Line x1={2} y1={h / 2} x2={w - 2} y2={h / 2} stroke={LINE} strokeWidth={LW} />
-        {/* Center restraining circle */}
-        <Circle cx={w / 2} cy={h / 2} r={FTR}
-                fill="none" stroke={LINE} strokeWidth={LW} />
-        {/* Basketball at center */}
-        <Basketball cx={w / 2} cy={h / 2} r={FTR * 0.55} />
-        {/* Ends */}
-        <TopEnd w={w} s={s} />
-        <BottomEnd w={w} courtH={h} s={s} />
-      </Svg>
-    );
-  }
-
-  // Half / three_quarter
-  const offsetY = courtType === 'half' ? -midY : -(COURT_H - THREE_Q_H);
-  return (
-    <Svg width={w} height={h}>
-      <WoodFloor w={w} h={h} />
-      <G transform={`translate(0, ${offsetY})`}>
-        <Rect x={2} y={2} width={w - 4} height={COURT_H - 4}
-              fill="none" stroke={LINE} strokeWidth={LW} />
-        <Line x1={2} y1={midY} x2={w - 2} y2={midY} stroke={LINE} strokeWidth={LW} />
-        <Circle cx={w / 2} cy={midY} r={FTR}
-                fill="none" stroke={LINE} strokeWidth={LW} />
-        <Basketball cx={w / 2} cy={midY} r={FTR * 0.55} />
-        <BottomEnd w={w} courtH={COURT_H} s={s} />
-      </G>
-    </Svg>
+    <View style={{ width: COURT_W, height, overflow: 'hidden', borderRadius: 6 }}>
+      {/* Render the full-size image anchored to the BOTTOM, then clip the top
+          away via the container's height. This keeps the near basket in view. */}
+      <Image
+        source={COURT_SRC}
+        style={{ position: 'absolute', left: 0, bottom: 0, width: COURT_W, height: COURT_H }}
+        resizeMode="stretch"
+      />
+    </View>
   );
 }
 
@@ -577,7 +373,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
             scrollEnabled={tool === 'text'}
           >
             <View style={[styles.canvasWrapper, { height: courtH }]} {...panResponder.panHandlers}>
-              <CourtSvg courtType={board?.court_type ?? 'full'} />
+              <CourtImage height={courtH} />
               <Svg style={StyleSheet.absoluteFill} width={COURT_W} height={courtH}>
                 {board?.strokes.map(renderStroke)}
                 {livePath ? (
