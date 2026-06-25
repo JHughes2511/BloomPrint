@@ -110,13 +110,24 @@ function AppTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarStyle: { backgroundColor: '#111827', borderTopColor: '#1f2937', paddingTop: 6 },
-        tabBarActiveTintColor: '#2563eb',
-        tabBarInactiveTintColor: '#6b7280',
-        tabBarLabelStyle: { fontSize: 10, fontWeight: '600', marginTop: 4, textAlign: 'center', includeFontPadding: false },
-        tabBarItemStyle: { flex: 1, paddingHorizontal: 2, paddingVertical: 4 },
-        tabBarIconStyle: { marginBottom: 0 },
-        tabBarIcon: ({ focused, color }) => {
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          marginHorizontal: 14,
+          marginBottom: 28,
+          height: 66,
+          borderRadius: 33,
+          backgroundColor: '#d6d6d6',
+          borderTopWidth: 0,
+          paddingHorizontal: 6,
+          shadowColor: '#000',
+          shadowOpacity: 0.35,
+          shadowRadius: 14,
+          shadowOffset: { width: 0, height: 6 },
+          elevation: 10,
+        },
+        tabBarItemStyle: { flex: 1, height: 66, paddingVertical: 0 },
+        tabBarIconStyle: { flex: 1, width: '100%' },
+        tabBarIcon: ({ focused }) => {
           const icons: Record<string, [string, string]> = {
             HomeTab:     ['home',        'home-outline'],
             TeamTab:     ['people',      'people-outline'],
@@ -125,7 +136,19 @@ function AppTabs() {
             RecentTab:   ['time',        'time-outline'],
           };
           const [active, inactive] = icons[route.name] ?? ['grid', 'grid-outline'];
-          return <Ionicons name={(focused ? active : inactive) as any} size={24} color={color} />;
+          return (
+            <View style={{
+              width: 56, height: 44, borderRadius: 22,
+              alignItems: 'center', justifyContent: 'center',
+              backgroundColor: focused ? '#f4f4f5' : 'transparent',
+            }}>
+              <Ionicons
+                name={(focused ? active : inactive) as any}
+                size={25}
+                color={focused ? '#111827' : '#4b5563'}
+              />
+            </View>
+          );
         },
       })}
     >
