@@ -984,11 +984,11 @@ const styles = StyleSheet.create({
     letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10,
   },
   chip: {
-    borderWidth: 1, borderColor: '#374151', borderRadius: 20,
-    paddingHorizontal: 14, paddingVertical: 10, marginRight: 8,
+    borderWidth: 1, borderColor: '#374151', borderRadius: 16,
+    paddingHorizontal: 13, paddingVertical: 7, marginRight: 8,
   },
   chipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  chipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600', lineHeight: 20, paddingVertical: 1 },
+  chipText: { color: '#9ca3af', fontSize: 12, fontWeight: '600', lineHeight: 16 },
   chipTextActive: { color: '#fff' },
   input: {
     backgroundColor: '#111827', borderRadius: 10, padding: 14,
