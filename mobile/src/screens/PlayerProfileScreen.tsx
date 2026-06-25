@@ -623,11 +623,11 @@ export default function PlayerProfileScreen() {
               </View>
               {isExpanded && (
                 <View style={{ marginTop: 12 }}>
-                  <View style={{ flexDirection: 'row', gap: 14, marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
                     {[['PTS', pts], ['REB', reb], ['AST', ast], ['STL', stl], ['BLK', blk], ['TO', to], ['FG', fga > 0 ? `${fgm}/${fga}` : '—']].map(([label, val]) => (
-                      <View key={label as string} style={{ alignItems: 'center' }}>
+                      <View key={label as string} style={{ alignItems: 'center', flex: 1 }}>
                         <Text style={{ color: '#9ca3af', fontSize: 10, fontWeight: '700' }}>{label}</Text>
-                        <Text style={{ color: '#fff', fontSize: 15, fontWeight: '900' }}>{val}</Text>
+                        <Text style={{ color: '#fff', fontSize: 14, fontWeight: '900' }}>{val}</Text>
                       </View>
                     ))}
                   </View>
