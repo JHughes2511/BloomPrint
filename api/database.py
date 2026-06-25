@@ -69,6 +69,18 @@ def _run_migrations():
             ))
             conn.commit()
 
+        # Add weight and standing_reach to players if missing
+        if "weight" not in cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE players ADD COLUMN weight TEXT"
+            ))
+            conn.commit()
+        if "standing_reach" not in cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE players ADD COLUMN standing_reach TEXT"
+            ))
+            conn.commit()
+
         # Add location + school fields to players if missing
         for col in ("country", "state", "city", "school_name"):
             if col not in cols:
