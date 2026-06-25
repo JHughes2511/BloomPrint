@@ -11,6 +11,7 @@ from .. import models, schemas
 class PlayerUpdate(BaseModel):
     name: Optional[str] = None
     position: Optional[str] = None
+    jersey_number: Optional[str] = None
     competition_level: Optional[str] = None
     team_id: Optional[int] = None
     height: Optional[str] = None
@@ -84,6 +85,8 @@ def update_player(
         player.name = body.name
     if body.position is not None:
         player.position = body.position
+    if body.jersey_number is not None:
+        player.jersey_number = body.jersey_number
     if body.competition_level is not None:
         player.competition_level = body.competition_level
     if body.team_id is not None:

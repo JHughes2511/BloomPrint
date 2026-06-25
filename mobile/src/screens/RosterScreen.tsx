@@ -73,6 +73,7 @@ export default function RosterScreen() {
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPos, setNewPos] = useState('');
+  const [newJersey, setNewJersey] = useState('');
   const [newHeight, setNewHeight] = useState('');
   const [newWingspan, setNewWingspan] = useState('');
   const [newWeight, setNewWeight] = useState('');
@@ -113,6 +114,7 @@ export default function RosterScreen() {
       await playersAPI.create({
         name: newName,
         position: newPos || undefined,
+        jersey_number: newJersey || undefined,
         height: newHeight || undefined,
         wingspan: newWingspan || undefined,
         weight: newWeight || undefined,
@@ -125,7 +127,7 @@ export default function RosterScreen() {
         team_id: selectedTeamId ?? undefined,
       });
       setShowAdd(false);
-      setNewName(''); setNewPos(''); setNewHeight(''); setNewWingspan('');
+      setNewName(''); setNewPos(''); setNewJersey(''); setNewHeight(''); setNewWingspan('');
       setNewWeight(''); setNewStandingReach('');
       setNewSchool(''); setNewCity(''); setNewState(''); setNewCountry('');
       load();
@@ -283,8 +285,12 @@ export default function RosterScreen() {
             )}
             <VoiceTextInput style={styles.input} placeholder="Full Name *" placeholderTextColor="#6b7280"
               value={newName} onChangeText={setNewName} />
-            <VoiceTextInput style={styles.input} placeholder="Position (e.g. PG, SG, SF)" placeholderTextColor="#6b7280"
-              value={newPos} onChangeText={setNewPos} />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder="Position (e.g. PG, SG, SF)" placeholderTextColor="#6b7280"
+                value={newPos} onChangeText={setNewPos} />
+              <TextInput style={[styles.input, { flex: 1 }]} placeholder="Jersey # (e.g. 23)" placeholderTextColor="#6b7280"
+                keyboardType="number-pad" value={newJersey} onChangeText={setNewJersey} />
+            </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder={`Height (e.g. 6'2")`} placeholderTextColor="#6b7280"
                 value={newHeight} onChangeText={setNewHeight} />

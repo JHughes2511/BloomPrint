@@ -50,6 +50,7 @@ class Token(BaseModel):
 class PlayerCreate(BaseModel):
     name: str
     position: str | None = None
+    jersey_number: str | None = None
     age: int | None = None
     height: str | None = None
     wingspan: str | None = None
@@ -69,6 +70,7 @@ class PlayerOut(BaseModel):
     id: int
     name: str
     position: str | None
+    jersey_number: str | None = None
     age: int | None
     height: str | None
     wingspan: str | None = None

@@ -880,6 +880,82 @@ def delete_opponent_note(
     return {"ok": True}
 
 
+# ── Opponent Roster (saved opponent players, persisted by opponent name) ──────
+
+def _opp_player_out(p: models.OpponentPlayer) -> dict:
+    return {
+        "id": p.id,
+        "opponent_name": p.opponent_name,
+        "player_name": p.player_name,
+        "jersey_number": p.jersey_number,
+        "position": p.position,
+    }
+
+
+@router.get("/opponents/{opponent_name}/players")
+def list_opponent_players(
+    opponent_name: str,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    players = (
+        db.query(models.OpponentPlayer)
+        .filter_by(coach_id=coach.id, opponent_name=opponent_name)
+        .order_by(models.OpponentPlayer.id)
+        .all()
+    )
+    return [_opp_player_out(p) for p in players]
+
+
+@router.post("/opponents/{opponent_name}/players")
+def add_opponent_player(
+    opponent_name: str,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    name = (body.get("player_name") or "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="player_name required")
+    # Avoid duplicates for the same opponent
+    existing = (
+        db.query(models.OpponentPlayer)
+        .filter_by(coach_id=coach.id, opponent_name=opponent_name, player_name=name)
+        .first()
+    )
+    if existing:
+        existing.jersey_number = (body.get("jersey_number") or "").strip() or existing.jersey_number
+        existing.position = (body.get("position") or "").strip() or existing.position
+        db.commit()
+        db.refresh(existing)
+        return _opp_player_out(existing)
+    player = models.OpponentPlayer(
+        coach_id=coach.id,
+        opponent_name=opponent_name,
+        player_name=name,
+        jersey_number=(body.get("jersey_number") or "").strip() or None,
+        position=(body.get("position") or "").strip() or None,
+    )
+    db.add(player)
+    db.commit()
+    db.refresh(player)
+    return _opp_player_out(player)
+
+
+@router.delete("/opponent-players/{player_id}")
+def delete_opponent_player(
+    player_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    p = db.get(models.OpponentPlayer, player_id)
+    if not p or p.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Opponent player not found")
+    db.delete(p)
+    db.commit()
+    return {"ok": True}
+
+
 # ── Compare Games ─────────────────────────────────────────────────────────────
 
 @router.get("/compare")

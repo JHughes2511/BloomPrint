@@ -89,6 +89,26 @@ def _run_migrations():
                 ))
                 conn.commit()
 
+        # Add jersey_number to players if missing
+        if "jersey_number" not in cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE players ADD COLUMN jersey_number TEXT"
+            ))
+            conn.commit()
+
+        # Add jersey_number to opponent_players if missing
+        try:
+            op_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(opponent_players)")
+            )]
+            if op_cols and "jersey_number" not in op_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE opponent_players ADD COLUMN jersey_number TEXT"
+                ))
+                conn.commit()
+        except Exception:
+            pass
+
         # Add game_reports table columns (handled by create_all, but ensure updated_at exists)
         try:
             gr_cols = [row[1] for row in conn.execute(

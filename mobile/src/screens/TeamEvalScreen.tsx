@@ -109,7 +109,10 @@ export default function TeamEvalScreen() {
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [roster, setRoster] = useState<any[]>([]);
   const [opponentPlayers, setOpponentPlayers] = useState<string[]>([]);
+  const [opponentRoster, setOpponentRoster] = useState<any[]>([]);
   const [newOppPlayer, setNewOppPlayer] = useState('');
+  const [newOppJersey, setNewOppJersey] = useState('');
+  const [newOppPosition, setNewOppPosition] = useState('');
   const [showLineupModal, setShowLineupModal] = useState(false);
   const [flashStat, setFlashStat] = useState<string | null>(null);
   const [statToast, setStatToast] = useState<string | null>(null);
@@ -252,6 +255,39 @@ export default function TeamEvalScreen() {
     } else {
       setRoster([]);
     }
+    // Load this opponent's saved roster (persisted by opponent name)
+    try {
+      const saved = await gameEvalAPI.listOpponentPlayers(game.opponent_name);
+      setOpponentRoster(saved);
+      setOpponentPlayers(saved.map((p: any) => p.player_name));
+    } catch {
+      setOpponentRoster([]);
+      setOpponentPlayers([]);
+    }
+  };
+
+  const addOpponentPlayer = async () => {
+    const name = newOppPlayer.trim();
+    if (!name || !activeGame) return;
+    try {
+      const saved = await gameEvalAPI.addOpponentPlayer(activeGame.opponent_name, {
+        player_name: name,
+        jersey_number: newOppJersey.trim() || undefined,
+        position: newOppPosition.trim() || undefined,
+      });
+      setOpponentRoster(prev => prev.some(p => p.player_name === saved.player_name)
+        ? prev.map(p => (p.player_name === saved.player_name ? saved : p))
+        : [...prev, saved]);
+      setOpponentPlayers(prev => prev.includes(saved.player_name) ? prev : [...prev, saved.player_name]);
+      setSelectedPlayer(saved.player_name);
+    } catch {
+      // Don't block stat entry if the save fails — keep the name locally.
+      setOpponentPlayers(prev => prev.includes(name) ? prev : [...prev, name]);
+      setSelectedPlayer(name);
+    }
+    setNewOppPlayer('');
+    setNewOppJersey('');
+    setNewOppPosition('');
   };
 
   const SCORE_DELTA: Record<string, number> = {
@@ -975,34 +1011,44 @@ export default function TeamEvalScreen() {
                 )
               ) : (
                 <>
-                  {opponentPlayers.map(name => (
+                  {opponentRoster.map((p: any) => (
                     <TouchableOpacity
-                      key={name}
-                      style={[s.playerBtn, selectedPlayer === name && s.playerBtnActive]}
-                      onPress={() => setSelectedPlayer(name)}
+                      key={p.id ?? p.player_name}
+                      style={[s.playerBtn, selectedPlayer === p.player_name && s.playerBtnActive]}
+                      onPress={() => setSelectedPlayer(p.player_name)}
                     >
-                      <Text style={[s.playerBtnText, selectedPlayer === name && s.playerBtnTextActive]} numberOfLines={1}>
-                        {name}
+                      <Text style={[s.playerBtnText, selectedPlayer === p.player_name && s.playerBtnTextActive]} numberOfLines={1}>
+                        {p.jersey_number ? `#${p.jersey_number} ` : ''}{p.player_name}{p.position ? ` · ${p.position}` : ''}
                       </Text>
                     </TouchableOpacity>
                   ))}
-                  <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
+                  <View style={{ width: '100%', flexDirection: 'row', gap: 6, marginTop: 4 }}>
                     <VoiceTextInput
                       style={[s.smallInput, { flex: 1 }]}
-                      placeholder="Add opponent player..."
+                      placeholder="Opponent player name..."
                       placeholderTextColor="#4b5563"
                       value={newOppPlayer}
                       onChangeText={setNewOppPlayer}
                     />
+                    <TextInput
+                      style={[s.smallInput, { width: 48, textAlign: 'center' }]}
+                      placeholder="#"
+                      placeholderTextColor="#4b5563"
+                      value={newOppJersey}
+                      onChangeText={setNewOppJersey}
+                      keyboardType="number-pad"
+                    />
+                    <TextInput
+                      style={[s.smallInput, { width: 56, textAlign: 'center' }]}
+                      placeholder="Pos"
+                      placeholderTextColor="#4b5563"
+                      value={newOppPosition}
+                      onChangeText={setNewOppPosition}
+                      autoCapitalize="characters"
+                    />
                     <TouchableOpacity
-                      style={{ backgroundColor: '#374151', borderRadius: 8, padding: 8, justifyContent: 'center' }}
-                      onPress={() => {
-                        if (newOppPlayer.trim()) {
-                          setOpponentPlayers(prev => [...prev, newOppPlayer.trim()]);
-                          setSelectedPlayer(newOppPlayer.trim());
-                          setNewOppPlayer('');
-                        }
-                      }}
+                      style={{ backgroundColor: '#374151', borderRadius: 8, paddingHorizontal: 10, justifyContent: 'center' }}
+                      onPress={addOpponentPlayer}
                     >
                       <Ionicons name="add" size={16} color="#9ca3af" />
                     </TouchableOpacity>

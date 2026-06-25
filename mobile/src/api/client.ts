@@ -30,14 +30,14 @@ export const playersAPI = {
   get: (id: number) => api.get(`/players/${id}`).then(r => r.data),
 
   create: (data: {
-    name: string; position?: string; age?: number;
+    name: string; position?: string; jersey_number?: string; age?: number;
     height?: string; wingspan?: string; weight?: string; standing_reach?: string;
     school_name?: string; city?: string; state?: string; country?: string;
     competition_level?: string; notes?: string; team_id?: number;
   }) => api.post('/players', data).then(r => r.data),
 
   update: (id: number, data: {
-    name?: string; position?: string; competition_level?: string; team_id?: number;
+    name?: string; position?: string; jersey_number?: string; competition_level?: string; team_id?: number;
     height?: string; wingspan?: string; weight?: string; standing_reach?: string;
     country?: string; state?: string; city?: string; school_name?: string;
   }) => api.patch(`/players/${id}`, data).then(r => r.data),
@@ -233,6 +233,10 @@ export const gameEvalAPI = {
   getOpponentNotes: (name: string) => api.get(`/game-eval/opponents/${encodeURIComponent(name)}/notes`).then(r => r.data),
   addOpponentNote: (name: string, noteText: string) => api.post(`/game-eval/opponents/${encodeURIComponent(name)}/notes`, { note_text: noteText }).then(r => r.data),
   deleteOpponentNote: (noteId: number) => api.delete(`/game-eval/opponent-notes/${noteId}`).then(r => r.data),
+  listOpponentPlayers: (name: string) => api.get(`/game-eval/opponents/${encodeURIComponent(name)}/players`).then(r => r.data),
+  addOpponentPlayer: (name: string, data: { player_name: string; jersey_number?: string; position?: string }) =>
+    api.post(`/game-eval/opponents/${encodeURIComponent(name)}/players`, data).then(r => r.data),
+  deleteOpponentPlayer: (playerId: number) => api.delete(`/game-eval/opponent-players/${playerId}`).then(r => r.data),
   playerGameHistory: (playerName: string) =>
     api.get('/game-eval/player-game-history', { params: { player_name: playerName } }).then(r => r.data),
 };

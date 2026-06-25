@@ -53,6 +53,7 @@ export default function PlayerProfileScreen() {
   const [showEdit, setShowEdit] = useState(false);
   const [editName, setEditName] = useState('');
   const [editPos, setEditPos] = useState('');
+  const [editJersey, setEditJersey] = useState('');
   const [editHeight, setEditHeight] = useState('');
   const [editWingspan, setEditWingspan] = useState('');
   const [editWeight, setEditWeight] = useState('');
@@ -111,6 +112,7 @@ export default function PlayerProfileScreen() {
     if (!player) return;
     setEditName(player.name);
     setEditPos(player.position ?? '');
+    setEditJersey((player as any).jersey_number ?? '');
     setEditHeight((player as any).height ?? '');
     setEditWingspan((player as any).wingspan ?? '');
     setEditWeight((player as any).weight ?? '');
@@ -131,6 +133,7 @@ export default function PlayerProfileScreen() {
       const updated = await playersAPI.update(playerId, {
         name: editName.trim(),
         position: editPos.trim() || undefined,
+        jersey_number: editJersey.trim() || undefined,
         height: editHeight.trim() || undefined,
         wingspan: editWingspan.trim() || undefined,
         weight: editWeight.trim() || undefined,
@@ -384,7 +387,7 @@ export default function PlayerProfileScreen() {
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.headerCenter} onPress={() => setShowProfileDetail(true)} activeOpacity={0.75}>
-          <Text style={styles.name}>{player.name}</Text>
+          <Text style={styles.name}>{(player as any).jersey_number ? `#${(player as any).jersey_number} ` : ''}{player.name}</Text>
           <Text style={styles.meta}>{[player.position, player.team_name ?? player.competition_level].filter(Boolean).join(' · ')}</Text>
           <Text style={{ color: '#6b7280', fontSize: 10, marginTop: 1 }}>tap to view profile</Text>
         </TouchableOpacity>
@@ -745,6 +748,7 @@ export default function PlayerProfileScreen() {
               {/* Info rows */}
               {[
                 { label: 'Age', value: player.age ? `${player.age} yrs` : null },
+                { label: 'Jersey', value: (player as any).jersey_number ? `#${(player as any).jersey_number}` : null },
                 { label: 'Height', value: (player as any).height },
                 { label: 'Wingspan', value: (player as any).wingspan },
                 { label: 'Weight', value: (player as any).weight },
@@ -938,13 +942,23 @@ export default function PlayerProfileScreen() {
               value={editName}
               onChangeText={setEditName}
             />
-            <VoiceTextInput
-              style={styles.input}
-              placeholder="Position (e.g. PG, SG, SF)"
-              placeholderTextColor="#6b7280"
-              value={editPos}
-              onChangeText={setEditPos}
-            />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <VoiceTextInput
+                style={[styles.input, { flex: 1 }]}
+                placeholder="Position (e.g. PG, SG, SF)"
+                placeholderTextColor="#6b7280"
+                value={editPos}
+                onChangeText={setEditPos}
+              />
+              <TextInput
+                style={[styles.input, { flex: 1 }]}
+                placeholder="Jersey # (e.g. 23)"
+                placeholderTextColor="#6b7280"
+                keyboardType="number-pad"
+                value={editJersey}
+                onChangeText={setEditJersey}
+              />
+            </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
