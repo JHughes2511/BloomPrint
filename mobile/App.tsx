@@ -114,8 +114,8 @@ function AppTabs() {
         tabBarActiveTintColor: '#3b82f6',
         tabBarInactiveTintColor: '#6b7280',
         tabBarStyle: {
-          marginHorizontal: 14,
-          marginBottom: 24,
+          position: 'absolute',
+          left: 14, right: 14, bottom: 24,
           height: 70,
           borderRadius: 26,
           backgroundColor: '#111827',
