@@ -468,3 +468,15 @@ class GameWhiteboard(Base):
     updated_at = Column(DateTime, default=datetime.utcnow)
 
     coach = relationship("Coach")
+
+
+class TeamStaff(Base):
+    __tablename__ = "team_staff"
+
+    id        = Column(Integer, primary_key=True, index=True)
+    coach_id  = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    team_id   = Column(Integer, ForeignKey("teams.id"), nullable=False)
+    joined_at = Column(DateTime, default=datetime.utcnow)
+
+    coach = relationship("Coach")
+    team  = relationship("Team")

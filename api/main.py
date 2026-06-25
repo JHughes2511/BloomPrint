@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import init_db
-from .routes import auth, players, evaluations, training, uploads, teams, player_auth, player_routes, game_reports, staff_sharing, game_eval, transcribe
+from .routes import auth, players, evaluations, training, uploads, teams, player_auth, player_routes, game_reports, staff_sharing, game_eval, transcribe, team_staff
 
 app = FastAPI(title="BloomPrint API", version="1.0.0")
 
@@ -29,6 +29,7 @@ app.include_router(game_reports.router)
 app.include_router(staff_sharing.router)
 app.include_router(game_eval.router)
 app.include_router(transcribe.router)
+app.include_router(team_staff.router)
 
 
 @app.on_event("startup")

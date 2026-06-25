@@ -24,6 +24,23 @@ def _resolve_report_text(report_type: str, report_id: int, db: Session) -> str |
     if report_type == "training":
         ts = db.get(models.TrainingSession, report_id)
         return ts.program_text if ts else None
+    if report_type == "game_session":
+        session = db.get(models.GameSession, report_id)
+        if not session:
+            return None
+        lines = [f"GAME: vs {session.opponent_name}"]
+        if session.date:
+            lines.append(f"Date: {session.date.strftime('%B %d, %Y')}")
+        if session.our_score is not None and session.opponent_score is not None:
+            result_word = "W" if session.our_score > session.opponent_score else ("L" if session.our_score < session.opponent_score else "T")
+            lines.append(f"Score: {result_word} {session.our_score}-{session.opponent_score}")
+        if session.location:
+            lines.append(f"Location: {session.location}")
+        if session.ai_scouting_report:
+            lines.append("")
+            lines.append("AI SCOUTING REPORT:")
+            lines.append(session.ai_scouting_report)
+        return "\n".join(lines)
     return None
 
 

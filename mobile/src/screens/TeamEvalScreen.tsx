@@ -11,7 +11,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 
-import { gameEvalAPI, teamsAPI, playersAPI } from '../api/client';
+import { gameEvalAPI, teamsAPI, playersAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
@@ -147,6 +147,14 @@ export default function TeamEvalScreen() {
   const [newNoteText, setNewNoteText] = useState('');
   const [savingNote, setSavingNote] = useState(false);
   const [loadingNotes, setLoadingNotes] = useState(false);
+
+  // Share with staff
+  const [shareGameModalVisible, setShareGameModalVisible] = useState(false);
+  const [shareGameId, setShareGameId] = useState<number | null>(null);
+  const [staffSearch, setStaffSearch] = useState('');
+  const [staffResults, setStaffResults] = useState<any[]>([]);
+  const [sharingStaff, setSharingStaff] = useState(false);
+  const [staffSearching, setStaffSearching] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -1049,6 +1057,13 @@ export default function TeamEvalScreen() {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900' }}>vs {detailGame.opponent_name}</Text>
+                <TouchableOpacity
+                  style={{ backgroundColor: '#1f2937', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 }}
+                  onPress={() => { setShareGameId(detailGame?.id); setShareGameModalVisible(true); setStaffSearch(''); setStaffResults([]); }}
+                >
+                  <Ionicons name="share-outline" size={14} color="#9ca3af" />
+                  <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600' }}>Share with Staff</Text>
+                </TouchableOpacity>
                 <Text style={{ color: '#6b7280', fontSize: 12, marginTop: 2 }}>
                   {new Date(detailGame.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   {detailGame.location ? ` · ${detailGame.location}` : ''}
@@ -1899,6 +1914,87 @@ export default function TeamEvalScreen() {
         gameId={whiteboardGameId ?? 0}
         onClose={() => setWhiteboardGameId(null)}
       />
+
+      {/* Share game with staff modal */}
+      <Modal visible={shareGameModalVisible} animationType="slide" transparent>
+        <KeyboardAvoidingView style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={{ backgroundColor: '#111827', borderRadius: 20, padding: 20, maxHeight: '80%', margin: 8 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <Text style={{ color: '#fff', fontSize: 18, fontWeight: '800' }}>Share with Staff</Text>
+              <TouchableOpacity onPress={() => setShareGameModalVisible(false)}>
+                <Ionicons name="close" size={22} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>Search for a staff member by name to share this game session.</Text>
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+              <TextInput
+                style={{ flex: 1, backgroundColor: '#1f2937', borderRadius: 10, padding: 12, color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151' }}
+                placeholder="Search staff by name..."
+                placeholderTextColor="#4b5563"
+                value={staffSearch}
+                onChangeText={setStaffSearch}
+                onSubmitEditing={async () => {
+                  if (!staffSearch.trim()) return;
+                  setStaffSearching(true);
+                  try {
+                    const r = await coachesAPI.search(staffSearch.trim());
+                    setStaffResults(r);
+                  } catch {}
+                  setStaffSearching(false);
+                }}
+                returnKeyType="search"
+              />
+              <TouchableOpacity
+                style={{ backgroundColor: '#2563eb', borderRadius: 10, width: 44, alignItems: 'center', justifyContent: 'center' }}
+                onPress={async () => {
+                  if (!staffSearch.trim()) return;
+                  setStaffSearching(true);
+                  try {
+                    const r = await coachesAPI.search(staffSearch.trim());
+                    setStaffResults(r);
+                  } catch {}
+                  setStaffSearching(false);
+                }}
+                disabled={staffSearching}
+              >
+                {staffSearching ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={{ maxHeight: 300 }}>
+              {staffResults.map((staff: any) => (
+                <View key={staff.id} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#1f2937', borderRadius: 10, padding: 12, marginBottom: 8 }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: '#fff', fontSize: 14, fontWeight: '700' }}>{staff.name}</Text>
+                    <Text style={{ color: '#6b7280', fontSize: 12 }}>{staff.role} · {staff.program_name}</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={{ backgroundColor: '#7c3aed', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7 }}
+                    onPress={async () => {
+                      if (!shareGameId) return;
+                      setSharingStaff(true);
+                      try {
+                        await staffSharingAPI.share({ report_type: 'game_session', report_id: shareGameId, recipient_id: staff.id, allow_regenerate: false });
+                        setShareGameModalVisible(false);
+                        Alert.alert('Shared', `Game session shared with ${staff.name}.`);
+                      } catch (e: any) {
+                        Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share');
+                      } finally {
+                        setSharingStaff(false);
+                      }
+                    }}
+                    disabled={sharingStaff}
+                  >
+                    {sharingStaff ? <ActivityIndicator color="#fff" size="small" /> : <Text style={{ color: '#fff', fontSize: 13, fontWeight: '700' }}>Share</Text>}
+                  </TouchableOpacity>
+                </View>
+              ))}
+              {staffResults.length === 0 && staffSearch.length > 0 && !staffSearching && (
+                <Text style={{ color: '#4b5563', textAlign: 'center', paddingVertical: 20 }}>No staff found.</Text>
+              )}
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }

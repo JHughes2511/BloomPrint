@@ -276,3 +276,18 @@ def _run_migrations():
             conn.commit()
         except Exception:
             pass
+
+        # Create team_staff table if missing
+        try:
+            conn.execute(__import__("sqlalchemy").text(
+                "CREATE TABLE IF NOT EXISTS team_staff ("
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                "coach_id INTEGER NOT NULL REFERENCES coaches(id), "
+                "team_id INTEGER NOT NULL REFERENCES teams(id), "
+                "joined_at DATETIME DEFAULT CURRENT_TIMESTAMP, "
+                "UNIQUE(coach_id, team_id)"
+                ")"
+            ))
+            conn.commit()
+        except Exception:
+            pass

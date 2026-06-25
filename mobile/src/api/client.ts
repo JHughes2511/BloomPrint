@@ -276,3 +276,16 @@ export const transcribeAPI = {
     }).then(r => r.data.text as string);
   },
 };
+
+export const teamStaffAPI = {
+  search: (q: string) =>
+    api.get('/team-staff/search', { params: { q } }).then(r => r.data),
+  join: (teamId: number) =>
+    api.post(`/team-staff/${teamId}/join`).then(r => r.data),
+  leave: (teamId: number) =>
+    api.delete(`/team-staff/${teamId}/leave`).then(r => r.data),
+  myTeams: () =>
+    api.get('/team-staff/my-teams').then(r => r.data),
+  teamGames: (teamId: number) =>
+    api.get('/team-staff/team-games', { params: { team_id: teamId } }).then(r => r.data),
+};
