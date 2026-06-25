@@ -917,12 +917,15 @@ export default function TeamEvalScreen() {
         <DraggableWhiteboardButton onPress={() => setWhiteboardGameId(detailGame.id)} />
       )}
 
+      {/* Draggable floating whiteboard button while taking stats in a live/in-progress game */}
+      {activeView === 'live' && activeGame && (
+        <DraggableWhiteboardButton onPress={() => setWhiteboardGameId(activeGame.id)} />
+      )}
+
 
       {/* Live Entry */}
       {activeView === 'live' && activeGame && (
         <View style={{ flex: 1 }}>
-          {/* Draggable floating whiteboard button */}
-          <DraggableWhiteboardButton onPress={() => setWhiteboardGameId(activeGame.id)} />
           {/* Score bar */}
           <View style={s.scoreBar}>
             <View style={{ alignItems: 'center' }}>
