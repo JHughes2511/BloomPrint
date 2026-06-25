@@ -113,19 +113,6 @@ function AppTabs() {
         tabBarShowLabel: true,
         tabBarActiveTintColor: '#3b82f6',
         tabBarInactiveTintColor: '#6b7280',
-        // Only the active tab shows its name; inactive tabs are icon-only.
-        tabBarLabel: ({ focused }) => {
-          if (!focused) return null;
-          const labels: Record<string, string> = {
-            HomeTab: 'Home', TeamTab: 'Team Eval', TeamEvalTab: 'Team Grade',
-            RosterTab: 'Roster', RecentTab: 'Recent',
-          };
-          return (
-            <Text style={{ fontSize: 10, fontWeight: '600', color: '#3b82f6', marginTop: 2, includeFontPadding: false }}>
-              {labels[route.name] ?? ''}
-            </Text>
-          );
-        },
         tabBarStyle: {
           position: 'absolute',
           left: 28, right: 28, bottom: 32,
