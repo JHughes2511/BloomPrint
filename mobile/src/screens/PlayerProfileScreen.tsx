@@ -566,8 +566,8 @@ export default function PlayerProfileScreen() {
       )}
 
       {/* Game History */}
-      <View style={[ps.section, { marginTop: 8 }]}>
-        <Text style={ps.sectionTitle}>GAME HISTORY</Text>
+      <View style={[styles.section, { marginTop: 8 }]}>
+        <Text style={styles.sectionTitle}>GAME HISTORY</Text>
         {gameHistoryLoading && <ActivityIndicator color="#7c3aed" style={{ marginVertical: 12 }} />}
         {!gameHistoryLoading && gameHistory.length === 0 && (
           <Text style={{ color: '#4b5563', fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>
