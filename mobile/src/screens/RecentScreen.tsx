@@ -941,7 +941,7 @@ const styles = StyleSheet.create({
   filterRow: { marginBottom: 12, flexGrow: 0 },
   filterChip: { borderWidth: 1, borderColor: '#374151', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8 },
   filterChipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  filterChipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
+  filterChipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600', lineHeight: 18 },
   filterChipTextActive: { color: '#fff' },
   dateHeader: { color: '#4b5563', fontSize: 11, fontWeight: '700', marginHorizontal: 20, marginTop: 16, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 },
   emptyText: { color: '#4b5563', marginTop: 12, fontSize: 14 },
