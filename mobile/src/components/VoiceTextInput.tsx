@@ -9,7 +9,7 @@ type Props = TextInputProps & {
   onChangeText?: (text: string) => void;
 };
 
-const CHUNK_MS = 4000; // send a chunk to Whisper every 4 seconds
+const CHUNK_MS = 5000; // 5-second recording chunks
 
 export default function VoiceTextInput({
   value = '',
@@ -27,13 +27,12 @@ export default function VoiceTextInput({
   const listeningRef = useRef(false);
   const chunkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const valueRef = useRef(value);
-  const transcribingCountRef = useRef(0);
+  const activeTranscriptions = useRef(0);
 
   useEffect(() => {
     valueRef.current = value;
   }, [value]);
 
-  // Don't show mic for passwords, read-only fields, or email fields
   const keyboardType = (rest as any).keyboardType;
   const showMic =
     !secureTextEntry &&
@@ -54,6 +53,12 @@ export default function VoiceTextInput({
     onChangeText(next);
   };
 
+  // Last ~50 words of current text as context for Whisper continuity
+  const getContext = () => {
+    const words = (valueRef.current ?? '').trim().split(/\s+/).filter(Boolean);
+    return words.slice(-50).join(' ') || undefined;
+  };
+
   const startChunk = async () => {
     if (!listeningRef.current) return;
     try {
@@ -61,12 +66,8 @@ export default function VoiceTextInput({
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
       recordingRef.current = recording;
-
-      chunkTimerRef.current = setTimeout(() => {
-        processChunk();
-      }, CHUNK_MS);
+      chunkTimerRef.current = setTimeout(processChunk, CHUNK_MS);
     } catch {
-      // recording failed, stop listening
       listeningRef.current = false;
       setListening(false);
     }
@@ -81,30 +82,29 @@ export default function VoiceTextInput({
       chunkTimerRef.current = null;
     }
 
+    const context = getContext();
+
     try {
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
       if (uri) {
-        transcribingCountRef.current += 1;
+        activeTranscriptions.current += 1;
         setTranscribing(true);
         try {
-          const text = await transcribeAPI.transcribe(uri);
+          const text = await transcribeAPI.transcribe(uri, context);
           if (text) appendText(text);
         } catch {
-          // silently ignore chunk errors
+          // silently skip bad chunks
         } finally {
-          transcribingCountRef.current -= 1;
-          if (transcribingCountRef.current === 0) setTranscribing(false);
+          activeTranscriptions.current -= 1;
+          if (activeTranscriptions.current === 0) setTranscribing(false);
         }
       }
     } catch {
       // ignore stop errors
     }
 
-    // Start the next chunk if still listening
-    if (listeningRef.current) {
-      startChunk();
-    }
+    if (listeningRef.current) startChunk();
   };
 
   const startRecording = async () => {
@@ -130,7 +130,6 @@ export default function VoiceTextInput({
       clearTimeout(chunkTimerRef.current);
       chunkTimerRef.current = null;
     }
-    // Transcribe whatever is in the current chunk
     await processChunk();
     await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
   };

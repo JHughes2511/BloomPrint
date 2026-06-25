@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   label: { color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 },
   typeChip: {
     borderWidth: 1, borderColor: '#374151', borderRadius: 20,
-    paddingHorizontal: 14, paddingVertical: 8, marginRight: 8,
+    paddingHorizontal: 14, paddingVertical: 7, marginRight: 8,
   },
   typeChipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
   typeLabel: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },

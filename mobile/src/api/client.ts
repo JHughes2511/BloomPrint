@@ -266,12 +266,13 @@ export const gameReportsAPI = {
 
 
 export const transcribeAPI = {
-  transcribe: (uri: string) => {
+  transcribe: (uri: string, context?: string) => {
     const formData = new FormData();
     formData.append('audio', { uri, name: 'audio.m4a', type: 'audio/m4a' } as any);
+    if (context) formData.append('context', context);
     return api.post('/transcribe', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 30000,
+      timeout: 45000,
     }).then(r => r.data.text as string);
   },
 };

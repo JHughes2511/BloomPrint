@@ -1,25 +1,35 @@
 import os
 import tempfile
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from typing import Optional
 
 router = APIRouter(prefix="/transcribe", tags=["transcribe"])
 
 _whisper_model = None
+_device = None
 
 
 def _get_model():
-    global _whisper_model
+    global _whisper_model, _device
     if _whisper_model is None:
         try:
+            import torch
             import whisper
-            _whisper_model = whisper.load_model("base")
+            if torch.backends.mps.is_available():
+                _device = "mps"
+            else:
+                _device = "cpu"
+            _whisper_model = whisper.load_model("small", device=_device)
         except Exception as e:
             raise RuntimeError(f"Failed to load Whisper model: {e}")
     return _whisper_model
 
 
 @router.post("")
-async def transcribe_audio(audio: UploadFile = File(...)):
+async def transcribe_audio(
+    audio: UploadFile = File(...),
+    context: Optional[str] = Form(None),
+):
     suffix = ".m4a"
     if audio.filename:
         ext = os.path.splitext(audio.filename)[1]
@@ -33,7 +43,16 @@ async def transcribe_audio(audio: UploadFile = File(...)):
 
     try:
         model = _get_model()
-        result = model.transcribe(tmp_path)
+        options = dict(
+            language="en",
+            fp16=(_device == "mps"),
+            beam_size=1,
+            best_of=1,
+            condition_on_previous_text=True,
+        )
+        if context:
+            options["initial_prompt"] = context
+        result = model.transcribe(tmp_path, **options)
         text = (result.get("text") or "").strip()
         return {"text": text}
     except RuntimeError as e:
