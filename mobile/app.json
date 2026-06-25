@@ -28,10 +28,7 @@
     "plugins": [
       "expo-secure-store",
       ["expo-image-picker", { "photosPermission": "Select video clips for BIM analysis" }],
-      ["expo-speech-recognition", {
-        "microphonePermission": "Allow BloomPrint to use the microphone for voice input.",
-        "speechRecognitionPermission": "Allow BloomPrint to recognize your speech for voice input."
-      }]
+      "expo-av"
     ]
   }
 }

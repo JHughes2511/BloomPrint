@@ -263,3 +263,15 @@ export const gameReportsAPI = {
   correctClip: (id: number, clipId: number, correction: string) =>
     api.post(`/game-reports/${id}/clips/${clipId}/correct`, { correction }).then(r => r.data),
 };
+
+
+export const transcribeAPI = {
+  transcribe: (uri: string) => {
+    const formData = new FormData();
+    formData.append('audio', { uri, name: 'audio.m4a', type: 'audio/m4a' } as any);
+    return api.post('/transcribe', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 30000,
+    }).then(r => r.data.text as string);
+  },
+};
