@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, View, PanResponder } from 'react-native';
+import { ActivityIndicator, View, Text, PanResponder } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { AuthProvider, useAuth } from './src/context/AuthContext';
@@ -113,6 +113,19 @@ function AppTabs() {
         tabBarShowLabel: true,
         tabBarActiveTintColor: '#3b82f6',
         tabBarInactiveTintColor: '#6b7280',
+        // Only the active tab shows its name; inactive tabs are icon-only.
+        tabBarLabel: ({ focused }) => {
+          if (!focused) return null;
+          const labels: Record<string, string> = {
+            HomeTab: 'Home', TeamTab: 'Team Eval', TeamEvalTab: 'Team Grade',
+            RosterTab: 'Roster', RecentTab: 'Recent',
+          };
+          return (
+            <Text style={{ fontSize: 10, fontWeight: '600', color: '#3b82f6', marginTop: 3, includeFontPadding: false }}>
+              {labels[route.name] ?? ''}
+            </Text>
+          );
+        },
         tabBarStyle: {
           position: 'absolute',
           left: 14, right: 14, bottom: 24,
