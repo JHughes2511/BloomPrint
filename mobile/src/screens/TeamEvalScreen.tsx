@@ -709,15 +709,72 @@ export default function TeamEvalScreen() {
         ? `${detailGame.our_score > detailGame.opponent_score ? 'WIN' : 'LOSS'} ${detailGame.our_score}-${detailGame.opponent_score}`
         : '';
 
-      const grades = detailTab === 'our' ? summary.player_grades : summary.opponent_grades;
-      const header = 'Player,Offensive Grade,Defensive Grade,Minutes,Game Grade\n';
-      const rows = grades.map((g: any) =>
-        `"${g.player_name}",${g.offensive_grade.toFixed(2)},${g.defensive_grade.toFixed(2)},${g.minutes_played.toFixed(0)},${g.game_grade.toFixed(2)}`
-      ).join('\n');
       const meta = `"Game","${programName} vs ${detailGame.opponent_name}"\n"Date","${dateStr}"\n"Phase","${phase}"\n"Result","${result}"\n"Team Grade","${summary.team_grade.toFixed(2)}"\n\n`;
-      const csv = meta + header + rows;
 
-      const fileName = `Game Report - ${programName} vs ${detailGame.opponent_name} - ${dateStr}.csv`.replace(/[^a-zA-Z0-9 \-_.]/g, '');
+      let csv: string;
+
+      if (detailTab === 'byquarter') {
+        // One row per player per quarter, with traditional stats + grade points
+        const ourStats = gameStats.filter((st: any) => !st.is_opponent);
+        const qSet = new Set<number>();
+        const players: Record<string, Record<number, { weighted: number; counts: Record<string, number> }>> = {};
+        for (const st of ourStats) {
+          qSet.add(st.quarter);
+          if (!players[st.player_name]) players[st.player_name] = {};
+          if (!players[st.player_name][st.quarter]) players[st.player_name][st.quarter] = { weighted: 0, counts: {} };
+          const Q = players[st.player_name][st.quarter];
+          Q.weighted += st.weighted_points;
+          Q.counts[st.stat_name] = (Q.counts[st.stat_name] || 0) + (st.count || 1);
+        }
+        const qNums = Array.from(qSet).sort((a, b) => a - b);
+        const qLabel = (q: number) => (q === 5 ? 'OT' : `Q${q}`);
+        const playerNames = Object.keys(players).sort();
+        const trad = (c: Record<string, number>) => {
+          const fgm = (c['2 FG Made'] || 0) + (c['3 FG Made'] || 0);
+          const fga = fgm + (c['2 FG Missed'] || 0) + (c['3 FG Missed'] || 0);
+          return {
+            pts: (c['2 FG Made'] || 0) * 2 + (c['3 FG Made'] || 0) * 3 + (c['FT Made'] || 0),
+            reb: (c['Off. Reb'] || 0) + (c['Def. Reb'] || 0),
+            ast: c['Assists'] || 0,
+            stl: c['Steal'] || 0,
+            blk: c['Blocked Shot'] || 0,
+            to: c['Turnover'] || 0,
+            fgm, fga,
+          };
+        };
+        const header = 'Player,Quarter,PTS,REB,AST,STL,BLK,TO,FGM,FGA,Grade Points\n';
+        const lines: string[] = [];
+        for (const name of playerNames) {
+          let pTotal = 0;
+          for (const q of qNums) {
+            const Q = players[name][q];
+            if (!Q) continue;
+            const t = trad(Q.counts);
+            pTotal += Q.weighted;
+            lines.push(`"${name}",${qLabel(q)},${t.pts},${t.reb},${t.ast},${t.stl},${t.blk},${t.to},${t.fgm},${t.fga},${Q.weighted.toFixed(1)}`);
+          }
+          // Player total row
+          const allCounts: Record<string, number> = {};
+          for (const q of qNums) {
+            const Q = players[name][q];
+            if (!Q) continue;
+            for (const [k, v] of Object.entries(Q.counts)) allCounts[k] = (allCounts[k] || 0) + v;
+          }
+          const tt = trad(allCounts);
+          lines.push(`"${name}",TOTAL,${tt.pts},${tt.reb},${tt.ast},${tt.stl},${tt.blk},${tt.to},${tt.fgm},${tt.fga},${pTotal.toFixed(1)}`);
+        }
+        csv = meta + header + lines.join('\n');
+      } else {
+        const grades = detailTab === 'our' ? summary.player_grades : summary.opponent_grades;
+        const header = 'Player,Offensive Grade,Defensive Grade,Minutes,Game Grade\n';
+        const rows = grades.map((g: any) =>
+          `"${g.player_name}",${g.offensive_grade.toFixed(2)},${g.defensive_grade.toFixed(2)},${g.minutes_played.toFixed(0)},${g.game_grade.toFixed(2)}`
+        ).join('\n');
+        csv = meta + header + rows;
+      }
+
+      const reportLabel = detailTab === 'byquarter' ? 'Quarter Report' : 'Game Report';
+      const fileName = `${reportLabel} - ${programName} vs ${detailGame.opponent_name} - ${dateStr}.csv`.replace(/[^a-zA-Z0-9 \-_.]/g, '');
       const dest = (FileSystem.cacheDirectory ?? '') + fileName;
       await FileSystem.writeAsStringAsync(dest, csv, { encoding: FileSystem.EncodingType.UTF8 });
       if (await Sharing.isAvailableAsync()) {
