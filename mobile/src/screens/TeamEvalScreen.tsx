@@ -121,7 +121,7 @@ export default function TeamEvalScreen() {
   const [detailGame, setDetailGame] = useState<any | null>(null);
   const [summary, setSummary] = useState<any | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
-  const [detailTab, setDetailTab] = useState<'our' | 'opponent'>('our');
+  const [detailTab, setDetailTab] = useState<'our' | 'opponent' | 'byquarter'>('our');
   const [expandedPlayer, setExpandedPlayer] = useState<string | null>(null);
   const [generatingReport, setGeneratingReport] = useState(false);
   const [showScoutingReport, setShowScoutingReport] = useState(false);
@@ -1109,11 +1109,82 @@ export default function TeamEvalScreen() {
             >
               <Text style={[s.teamToggleText, detailTab === 'opponent' && s.teamToggleTextActive]}>Opponent</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[s.teamToggleBtn, detailTab === 'byquarter' && s.teamToggleBtnActive]}
+              onPress={() => setDetailTab('byquarter')}
+            >
+              <Text style={[s.teamToggleText, detailTab === 'byquarter' && s.teamToggleTextActive]}>By Quarter</Text>
+            </TouchableOpacity>
           </View>
 
-          {loadingSummary ? (
+          {detailTab === 'byquarter' && (() => {
+            const ourStats = gameStats.filter((st: any) => !st.is_opponent);
+            const quarters: Record<number, Record<string, any[]>> = {};
+            for (const st of ourStats) {
+              if (!quarters[st.quarter]) quarters[st.quarter] = {};
+              if (!quarters[st.quarter][st.player_name]) quarters[st.quarter][st.player_name] = [];
+              quarters[st.quarter][st.player_name].push(st);
+            }
+            const qNums = Object.keys(quarters).map(Number).sort();
+            if (qNums.length === 0) return (
+              <View style={s.card}>
+                <Text style={{ color: '#6b7280', textAlign: 'center', fontSize: 13 }}>No stats logged yet.</Text>
+              </View>
+            );
+            return qNums.map(q => {
+              const playerMap = quarters[q];
+              return (
+                <View key={q} style={s.card}>
+                  <Text style={s.cardLabel}>{q === 5 ? 'OVERTIME' : `QUARTER ${q}`}</Text>
+                  {Object.entries(playerMap).map(([playerName, pStats]: [string, any[]]) => {
+                    const counts: Record<string, number> = {};
+                    let totalW = 0;
+                    for (const st of pStats) {
+                      counts[st.stat_name] = (counts[st.stat_name] || 0) + (st.count || 1);
+                      totalW += st.weighted_points;
+                    }
+                    const pts = (counts['2 FG Made'] || 0) * 2 + (counts['3 FG Made'] || 0) * 3 + (counts['FT Made'] || 0);
+                    const reb = (counts['Off. Reb'] || 0) + (counts['Def. Reb'] || 0);
+                    const ast = counts['Assists'] || 0;
+                    const stl = counts['Steal'] || 0;
+                    const blk = counts['Blocked Shot'] || 0;
+                    const to = counts['Turnover'] || 0;
+                    return (
+                      <View key={playerName} style={{ marginBottom: 14, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>{playerName}</Text>
+                          <View style={s.gradeBadge}>
+                            <Text style={s.gradeBadgeText}>{totalW.toFixed(1)} pts</Text>
+                          </View>
+                        </View>
+                        <View style={{ flexDirection: 'row', gap: 14, marginBottom: 8 }}>
+                          {[['PTS', pts], ['REB', reb], ['AST', ast], ['STL', stl], ['BLK', blk], ['TO', to]].map(([label, val]) => (
+                            <View key={label as string} style={{ alignItems: 'center' }}>
+                              <Text style={{ color: '#9ca3af', fontSize: 10, fontWeight: '700' }}>{label}</Text>
+                              <Text style={{ color: '#fff', fontSize: 15, fontWeight: '900' }}>{val}</Text>
+                            </View>
+                          ))}
+                        </View>
+                        <View style={{ gap: 2 }}>
+                          {pStats.map((st: any, i: number) => (
+                            <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                              <Text style={{ color: '#6b7280', fontSize: 11 }}>{st.stat_name}{st.count > 1 ? ` ×${st.count}` : ''}</Text>
+                              <Text style={{ color: st.weighted_points >= 0 ? '#4ade80' : '#f87171', fontSize: 11, fontWeight: '600' }}>
+                                {st.weighted_points >= 0 ? '+' : ''}{st.weighted_points.toFixed(1)}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              );
+            });
+          })()}
+          {detailTab !== 'byquarter' && loadingSummary ? (
             <ActivityIndicator color="#7c3aed" style={{ marginTop: 24 }} />
-          ) : summary ? (
+          ) : detailTab !== 'byquarter' && summary ? (
             <View style={s.card}>
               <Text style={s.cardLabel}>PLAYER GRADES</Text>
               {(detailTab === 'our' ? summary.player_grades : summary.opponent_grades).map((g: any) => (

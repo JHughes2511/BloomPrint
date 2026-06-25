@@ -233,6 +233,8 @@ export const gameEvalAPI = {
   getOpponentNotes: (name: string) => api.get(`/game-eval/opponents/${encodeURIComponent(name)}/notes`).then(r => r.data),
   addOpponentNote: (name: string, noteText: string) => api.post(`/game-eval/opponents/${encodeURIComponent(name)}/notes`, { note_text: noteText }).then(r => r.data),
   deleteOpponentNote: (noteId: number) => api.delete(`/game-eval/opponent-notes/${noteId}`).then(r => r.data),
+  playerGameHistory: (playerName: string) =>
+    api.get('/game-eval/player-game-history', { params: { player_name: playerName } }).then(r => r.data),
 };
 
 export const whiteboardAPI = {

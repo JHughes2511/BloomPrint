@@ -8,7 +8,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { playersAPI, teamsAPI, playerAPI, trainingAPI, staffSharingAPI, coachesAPI } from '../api/client';
+import { playersAPI, teamsAPI, playerAPI, trainingAPI, staffSharingAPI, coachesAPI, gameEvalAPI } from '../api/client';
 import { Player, Evaluation, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
@@ -70,6 +70,11 @@ export default function PlayerProfileScreen() {
   const [newTeamName, setNewTeamName] = useState('');
   const [creatingTeam, setCreatingTeam] = useState(false);
 
+  // Game history state
+  const [gameHistory, setGameHistory] = useState<any[]>([]);
+  const [gameHistoryLoading, setGameHistoryLoading] = useState(false);
+  const [expandedGame, setExpandedGame] = useState<number | null>(null);
+
   // Summary state
   const [showSummary, setShowSummary] = useState(false);
   const [summaryType, setSummaryType] = useState('player_eval');
@@ -89,6 +94,14 @@ export default function PlayerProfileScreen() {
         if (Array.isArray(tr) && tr.length > 0) {
           setLatestTraining(tr[tr.length - 1]);
           setAllTraining(tr);
+        }
+        // Load game history by player name once we have the player
+        if (p?.name) {
+          setGameHistoryLoading(true);
+          gameEvalAPI.playerGameHistory(p.name)
+            .then(setGameHistory)
+            .catch(() => {})
+            .finally(() => setGameHistoryLoading(false));
         }
       })
       .finally(() => setLoading(false));
@@ -551,6 +564,101 @@ export default function PlayerProfileScreen() {
           <Text style={styles.inviteCodeHint}>Share this code with the player so they can link their account</Text>
         </View>
       )}
+
+      {/* Game History */}
+      <View style={[ps.section, { marginTop: 8 }]}>
+        <Text style={ps.sectionTitle}>GAME HISTORY</Text>
+        {gameHistoryLoading && <ActivityIndicator color="#7c3aed" style={{ marginVertical: 12 }} />}
+        {!gameHistoryLoading && gameHistory.length === 0 && (
+          <Text style={{ color: '#4b5563', fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>
+            No game stats recorded for this player yet.
+          </Text>
+        )}
+        {gameHistory.map((game: any) => {
+          const isExpanded = expandedGame === game.game_id;
+          const won = game.our_score != null && game.our_score > game.opponent_score;
+          const lost = game.our_score != null && game.our_score < game.opponent_score;
+          const counts: Record<string, number> = {};
+          for (const [statName, data] of Object.entries(game.stat_breakdown as Record<string, any>)) {
+            counts[statName] = data.count;
+          }
+          const pts = (counts['2 FG Made'] || 0) * 2 + (counts['3 FG Made'] || 0) * 3 + (counts['FT Made'] || 0);
+          const reb = (counts['Off. Reb'] || 0) + (counts['Def. Reb'] || 0);
+          const ast = counts['Assists'] || 0;
+          const stl = counts['Steal'] || 0;
+          const blk = counts['Blocked Shot'] || 0;
+          const to = counts['Turnover'] || 0;
+          const fgm = (counts['2 FG Made'] || 0) + (counts['3 FG Made'] || 0);
+          const fga = fgm + (counts['2 FG Missed'] || 0) + (counts['3 FG Missed'] || 0);
+          return (
+            <TouchableOpacity
+              key={game.game_id}
+              style={{ backgroundColor: '#111827', borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#1f2937' }}
+              onPress={() => setExpandedGame(isExpanded ? null : game.game_id)}
+              activeOpacity={0.8}
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>vs {game.opponent_name}</Text>
+                  <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 2 }}>
+                    {game.date}{game.season_phase ? ` · ${game.season_phase}` : ''}
+                  </Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  {game.our_score != null && (
+                    <View style={{ backgroundColor: won ? '#16a34a22' : lost ? '#dc262622' : '#1f2937', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+                      <Text style={{ color: won ? '#4ade80' : lost ? '#f87171' : '#9ca3af', fontSize: 11, fontWeight: '700' }}>
+                        {won ? 'W' : lost ? 'L' : 'T'} {game.our_score}-{game.opponent_score}
+                      </Text>
+                    </View>
+                  )}
+                  <View style={{ backgroundColor: '#1e1b4b', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: '#4c1d95' }}>
+                    <Text style={{ color: '#a78bfa', fontSize: 12, fontWeight: '800' }}>{game.game_grade.toFixed(2)}</Text>
+                  </View>
+                  <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={14} color="#4b5563" />
+                </View>
+              </View>
+              {isExpanded && (
+                <View style={{ marginTop: 12 }}>
+                  <View style={{ flexDirection: 'row', gap: 14, marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                    {[['PTS', pts], ['REB', reb], ['AST', ast], ['STL', stl], ['BLK', blk], ['TO', to], ['FG', fga > 0 ? `${fgm}/${fga}` : '—']].map(([label, val]) => (
+                      <View key={label as string} style={{ alignItems: 'center' }}>
+                        <Text style={{ color: '#9ca3af', fontSize: 10, fontWeight: '700' }}>{label}</Text>
+                        <Text style={{ color: '#fff', fontSize: 15, fontWeight: '900' }}>{val}</Text>
+                      </View>
+                    ))}
+                  </View>
+                  <Text style={{ color: '#4b5563', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>GRADING STATS</Text>
+                  <View style={{ gap: 3 }}>
+                    {Object.entries(game.stat_breakdown as Record<string, any>).map(([statName, data]: [string, any]) => (
+                      <View key={statName} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={{ color: '#9ca3af', fontSize: 12 }}>{statName}{data.count > 1 ? ` ×${data.count}` : ''}</Text>
+                        <Text style={{ color: data.weighted_points >= 0 ? '#4ade80' : '#f87171', fontSize: 12, fontWeight: '600' }}>
+                          {data.weighted_points >= 0 ? '+' : ''}{data.weighted_points.toFixed(1)}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                  <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#1f2937', flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={{ color: '#6b7280', fontSize: 12 }}>OFF {game.offensive_weighted.toFixed(1)} · DEF {game.defensive_weighted.toFixed(1)} · {game.minutes.toFixed(0)}min</Text>
+                  </View>
+                  {Object.keys(game.per_quarter).length > 0 && (
+                    <View style={{ marginTop: 10 }}>
+                      <Text style={{ color: '#4b5563', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>PER QUARTER</Text>
+                      {Object.entries(game.per_quarter as Record<string, any>).sort(([a], [b]) => Number(a) - Number(b)).map(([q, data]: [string, any]) => (
+                        <View key={q} style={{ flexDirection: 'row', gap: 12, marginBottom: 3 }}>
+                          <Text style={{ color: '#6b7280', fontSize: 11, width: 28 }}>{Number(q) === 5 ? 'OT' : `Q${q}`}</Text>
+                          <Text style={{ color: '#9ca3af', fontSize: 11 }}>OFF {data.offense.toFixed(1)} · DEF {data.defense.toFixed(1)}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </View>
+              )}
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
       {/* Training picker modal — choose which training to send */}
       <Modal visible={showTrainingPicker} transparent animationType="slide">

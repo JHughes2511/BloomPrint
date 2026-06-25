@@ -399,6 +399,82 @@ def get_summary(
     }
 
 
+@router.get("/player-game-history")
+def player_game_history(
+    player_name: str,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """All games this player appeared in, with per-game stats and grade."""
+    stats = (
+        db.query(models.GamePlayerStat)
+        .join(models.GameSession, models.GameSession.id == models.GamePlayerStat.game_id)
+        .filter(
+            models.GameSession.coach_id == coach.id,
+            models.GamePlayerStat.player_name == player_name,
+            models.GamePlayerStat.is_opponent == False,
+        )
+        .all()
+    )
+
+    game_ids = sorted({s.game_id for s in stats}, reverse=True)
+    result = []
+    for game_id in game_ids:
+        game = db.get(models.GameSession, game_id)
+        if not game:
+            continue
+        gs = [s for s in stats if s.game_id == game_id]
+
+        off_w = sum(s.weighted_points for s in gs if s.stat_category == "offense")
+        def_w = sum(s.weighted_points for s in gs if s.stat_category == "defense")
+        total_w = off_w + def_w
+
+        mp_rec = (
+            db.query(models.GameMinutesPlayed)
+            .filter_by(game_id=game_id, player_name=player_name, is_opponent=False)
+            .first()
+        )
+        minutes = mp_rec.minutes_played if mp_rec else 20.0
+        game_grade = round(total_w / max(minutes, 1.0), 2)
+
+        stat_breakdown: dict = {}
+        for s in gs:
+            if s.stat_name not in stat_breakdown:
+                stat_breakdown[s.stat_name] = {"count": 0, "weighted_points": 0.0, "category": s.stat_category}
+            stat_breakdown[s.stat_name]["count"] += s.count
+            stat_breakdown[s.stat_name]["weighted_points"] += round(s.weighted_points, 2)
+
+        quarters: dict = {}
+        for s in gs:
+            q = str(s.quarter)
+            if q not in quarters:
+                quarters[q] = {"offense": 0.0, "defense": 0.0, "stats": []}
+            quarters[q][s.stat_category] = round(quarters[q][s.stat_category] + s.weighted_points, 2)
+            quarters[q]["stats"].append({
+                "name": s.stat_name,
+                "count": s.count,
+                "weighted_points": round(s.weighted_points, 2),
+                "category": s.stat_category,
+            })
+
+        result.append({
+            "game_id": game.id,
+            "opponent_name": game.opponent_name,
+            "date": game.date.strftime("%B %d, %Y") if game.date else None,
+            "our_score": game.our_score,
+            "opponent_score": game.opponent_score,
+            "season_phase": game.season_phase,
+            "game_grade": game_grade,
+            "offensive_weighted": round(off_w, 2),
+            "defensive_weighted": round(def_w, 2),
+            "minutes": round(minutes, 1),
+            "stat_breakdown": stat_breakdown,
+            "per_quarter": quarters,
+        })
+
+    return result
+
+
 # ── Upload Excel ──────────────────────────────────────────────────────────────
 
 @router.post("/sessions/{game_id}/upload")
