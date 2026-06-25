@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Alert,
@@ -164,7 +165,7 @@ export default function CoachTrainingDetailScreen() {
             </View>
           ))}
           <View style={styles.commentInput}>
-            <TextInput
+            <VoiceTextInput
               style={styles.input}
               placeholder="Leave a comment for the player..."
               placeholderTextColor="#4b5563"
@@ -195,7 +196,7 @@ export default function CoachTrainingDetailScreen() {
             <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
               Notes are saved to the training record and visible to the player.
             </Text>
-            <TextInput
+            <VoiceTextInput
               style={styles.noteInput}
               placeholder="Add notes for the player..."
               placeholderTextColor="#4b5563"
@@ -225,7 +226,7 @@ export default function CoachTrainingDetailScreen() {
             <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
               Provide coaching feedback to regenerate the player's training program with AI.
             </Text>
-            <TextInput
+            <VoiceTextInput
               style={styles.noteInput}
               placeholder="e.g. Focus more on defensive footwork, increase conditioning..."
               placeholderTextColor="#4b5563"

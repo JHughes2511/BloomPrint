@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import VoiceTextInput from '../../components/VoiceTextInput';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert,
@@ -41,7 +42,7 @@ export default function PlayerLoginScreen() {
         <Text style={styles.logo}>BloomPrint</Text>
         <Text style={styles.sub}>Player Portal</Text>
 
-        <TextInput
+        <VoiceTextInput
           style={styles.input}
           placeholder="Email"
           placeholderTextColor="#4b7a4b"
@@ -50,7 +51,7 @@ export default function PlayerLoginScreen() {
           autoCapitalize="none"
           keyboardType="email-address"
         />
-        <TextInput
+        <VoiceTextInput
           style={styles.input}
           placeholder="Password"
           placeholderTextColor="#4b7a4b"

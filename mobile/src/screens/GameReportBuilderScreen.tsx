@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform, Modal,
@@ -360,7 +361,7 @@ export default function GameReportBuilderScreen() {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <TextInput
+          <VoiceTextInput
             style={styles.titleInput}
             value={title}
             onChangeText={setTitle}
@@ -419,7 +420,7 @@ export default function GameReportBuilderScreen() {
             </TouchableOpacity>
             {showOppTeamPicker && (
               <View style={styles.pickerList}>
-                <TextInput
+                <VoiceTextInput
                   style={styles.oppNameInput}
                   placeholder="Or type opponent name..."
                   placeholderTextColor="#4b5563"
@@ -496,7 +497,7 @@ export default function GameReportBuilderScreen() {
               }
             </TouchableOpacity>
           </View>
-          <TextInput
+          <VoiceTextInput
             style={styles.textArea}
             placeholder="Paste box score, stats, or game data..."
             placeholderTextColor="#4b5563"
@@ -520,7 +521,7 @@ export default function GameReportBuilderScreen() {
               }
             </TouchableOpacity>
           </View>
-          <TextInput
+          <VoiceTextInput
             style={styles.textArea}
             placeholder="Add scouting notes, observations, tendencies..."
             placeholderTextColor="#4b5563"
@@ -536,7 +537,7 @@ export default function GameReportBuilderScreen() {
         {/* Focus */}
         <View onLayout={e => { focusPromptY.current = e.nativeEvent.layout.y; }}>
           <Text style={styles.label}>Coach Focus (optional)</Text>
-          <TextInput
+          <VoiceTextInput
             style={[styles.textArea, { minHeight: 60 }]}
             placeholder="e.g. Upcoming tournament, press defense scheme..."
             placeholderTextColor="#4b5563"
@@ -585,7 +586,7 @@ export default function GameReportBuilderScreen() {
             {/* Correction section */}
             <View style={styles.correctionSection}>
               <Text style={styles.correctionLabel}>Make a Correction</Text>
-              <TextInput
+              <VoiceTextInput
                 style={styles.correctionInput}
                 placeholder="e.g. The point guard is actually a better defender than scorer..."
                 placeholderTextColor="#4b5563"
@@ -629,7 +630,7 @@ export default function GameReportBuilderScreen() {
               }
             </ScrollView>
             <Text style={[styles.correctionLabel, { marginTop: 16 }]}>Correct This Analysis</Text>
-            <TextInput
+            <VoiceTextInput
               style={styles.correctionInput}
               placeholder="What needs to be updated in this film analysis?"
               placeholderTextColor="#4b5563"
@@ -691,7 +692,7 @@ export default function GameReportBuilderScreen() {
             <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>
               {shareMode === 'staff' ? 'Search for a coach, trainer, or scout to share this report.' : 'Search for a player to send this report to their inbox.'}
             </Text>
-            <TextInput
+            <VoiceTextInput
               style={styles.searchInput}
               placeholder="Type a name to search..."
               placeholderTextColor="#6b7280"

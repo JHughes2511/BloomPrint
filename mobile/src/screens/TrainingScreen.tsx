@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform,
@@ -57,7 +58,7 @@ export default function TrainingScreen() {
       {/* Focus input */}
       <View style={styles.section}>
         <Text style={styles.label}>Additional Focus (optional)</Text>
-        <TextInput
+        <VoiceTextInput
           style={styles.input}
           placeholder="e.g. Focus on P&R pace variation this week..."
           placeholderTextColor="#4b5563"

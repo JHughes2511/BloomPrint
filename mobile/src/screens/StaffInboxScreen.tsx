@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, Modal, TextInput, KeyboardAvoidingView,
@@ -245,7 +246,7 @@ export default function StaffInboxScreen() {
                   ))}
                 </ScrollView>
                 <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-                  <TextInput
+                  <VoiceTextInput
                     style={[styles.input, { flex: 1 }]}
                     placeholder="Add a comment..."
                     placeholderTextColor="#4b5563"
@@ -272,7 +273,7 @@ export default function StaffInboxScreen() {
                 <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>
                   Provide feedback to regenerate this report with AI.
                 </Text>
-                <TextInput
+                <VoiceTextInput
                   style={[styles.input, { minHeight: 100 }]}
                   placeholder="What needs to be updated or corrected?"
                   placeholderTextColor="#4b5563"
@@ -299,7 +300,7 @@ export default function StaffInboxScreen() {
                 <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>
                   Add your notes about this training program. Notes are saved locally in this view.
                 </Text>
-                <TextInput
+                <VoiceTextInput
                   style={[styles.input, { minHeight: 120 }]}
                   placeholder="Add your coaching notes here..."
                   placeholderTextColor="#4b5563"

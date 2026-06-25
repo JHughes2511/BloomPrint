@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
@@ -113,7 +114,7 @@ export default function NewEvalScreen() {
 
       {/* Coach notes */}
       <Text style={styles.label}>Coach Notes</Text>
-      <TextInput
+      <VoiceTextInput
         style={[styles.input, { height: 100 }]}
         placeholder="e.g. Elite catch and shoot, plays at one pace, need to see more P&R midrange..."
         placeholderTextColor="#4b5563"
@@ -125,7 +126,7 @@ export default function NewEvalScreen() {
 
       {/* Focus prompt */}
       <Text style={styles.label}>Evaluation Focus (optional)</Text>
-      <TextInput
+      <VoiceTextInput
         style={[styles.input, { height: 80 }]}
         placeholder="e.g. Focus on college-level translation, P&R reads, defensive film"
         placeholderTextColor="#4b5563"

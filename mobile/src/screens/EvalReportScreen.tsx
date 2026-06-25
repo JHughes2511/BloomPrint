@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Alert, Modal, Switch, KeyboardAvoidingView, Platform, SafeAreaView,
@@ -551,7 +552,7 @@ export default function EvalReportScreen() {
               <Switch value={allowRegen} onValueChange={setAllowRegen} trackColor={{ true: '#7c3aed' }} thumbColor="#fff" />
             </View>
             <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
-              <TextInput
+              <VoiceTextInput
                 style={[styles.input, { flex: 1, marginBottom: 0 }]}
                 placeholder="Search coach/program name..."
                 placeholderTextColor="#4b5563"
@@ -659,7 +660,7 @@ export default function EvalReportScreen() {
                   </View>
                 ))}
                 <Text style={styles.label}>Message (optional)</Text>
-                <TextInput
+                <VoiceTextInput
                   style={styles.input}
                   placeholder="Add a message to the player..."
                   placeholderTextColor="#4b5563"
@@ -671,7 +672,7 @@ export default function EvalReportScreen() {
             ) : (
               <View style={{ marginBottom: 12 }}>
                 <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
-                  <TextInput
+                  <VoiceTextInput
                     style={[styles.input, { flex: 1, marginBottom: 0 }]}
                     placeholder="Search player name..."
                     placeholderTextColor="#4b5563"
@@ -737,7 +738,7 @@ export default function EvalReportScreen() {
               ))}
             </ScrollView>
             <Text style={styles.label}>Your Correction</Text>
-            <TextInput
+            <VoiceTextInput
               style={[styles.input, { height: 100 }]}
               placeholder="What needs to be corrected in this report?"
               placeholderTextColor="#4b5563"

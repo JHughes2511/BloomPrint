@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
   StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal, Switch,
@@ -486,7 +487,7 @@ export default function TeamReportScreen() {
         </ScrollView>
 
         <Text style={styles.label}>Coach Focus (optional)</Text>
-        <TextInput
+        <VoiceTextInput
           style={styles.input}
           placeholder="e.g. Upcoming tournament, defensive scheme, recruiting eval..."
           placeholderTextColor="#4b5563"
@@ -727,7 +728,7 @@ export default function TeamReportScreen() {
               {/* Add correction */}
               <View style={{ marginTop: 20 }}>
                 <Text style={styles.label}>Add Correction</Text>
-                <TextInput
+                <VoiceTextInput
                   style={{ backgroundColor: '#1f2937', borderRadius: 10, padding: 12, color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151', minHeight: 80, marginBottom: 8 }}
                   placeholder="What needs to be corrected in this report?"
                   placeholderTextColor="#4b5563"
@@ -791,7 +792,7 @@ export default function TeamReportScreen() {
               <Switch value={allowRegen} onValueChange={setAllowRegen} trackColor={{ true: '#7c3aed', false: '#374151' }} thumbColor="#fff" />
             </View>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
-              <TextInput
+              <VoiceTextInput
                 style={[shareStyles.input, { flex: 1 }]}
                 placeholder="Search coach/program name..."
                 placeholderTextColor="#4b5563"
@@ -864,7 +865,7 @@ export default function TeamReportScreen() {
             {shareTarget === 'player' && !selectedShareTarget && (
               <View style={{ marginBottom: 12 }}>
                 <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
-                  <TextInput
+                  <VoiceTextInput
                     style={[shareStyles.input, { flex: 1 }]}
                     placeholder="Search player name..."
                     placeholderTextColor="#4b5563"
@@ -915,7 +916,7 @@ export default function TeamReportScreen() {
             {shareTarget === 'all_staff' && !selectedShareTarget && (
               <View style={{ marginBottom: 12 }}>
                 <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
-                  <TextInput
+                  <VoiceTextInput
                     style={[shareStyles.input, { flex: 1 }]}
                     placeholder="Search coach/program name..."
                     placeholderTextColor="#4b5563"
@@ -939,7 +940,7 @@ export default function TeamReportScreen() {
               </View>
             )}
 
-            <TextInput
+            <VoiceTextInput
               style={[shareStyles.input, { marginTop: 8 }]}
               placeholder="Add a message (optional)..."
               placeholderTextColor="#4b5563"

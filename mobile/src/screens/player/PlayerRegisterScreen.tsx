@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import VoiceTextInput from '../../components/VoiceTextInput';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert,
@@ -87,7 +88,7 @@ export default function PlayerRegisterScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Enter Invite Code</Text>
           <Text style={styles.sectionDesc}>If a coach gave you an invite code, enter it here.</Text>
-          <TextInput
+          <VoiceTextInput
             style={styles.input}
             placeholder="Invite code (e.g. ABC12345)"
             placeholderTextColor="#4b7a4b"
@@ -108,7 +109,7 @@ export default function PlayerRegisterScreen() {
           <Text style={styles.sectionTitle}>Find My Profile</Text>
           <Text style={styles.sectionDesc}>Search for your name in the roster and request to link.</Text>
           <View style={styles.searchRow}>
-            <TextInput
+            <VoiceTextInput
               style={[styles.input, { flex: 1 }]}
               placeholder="Search your name..."
               placeholderTextColor="#4b7a4b"
@@ -157,14 +158,14 @@ export default function PlayerRegisterScreen() {
         <Text style={styles.logo}>BloomPrint</Text>
         <Text style={styles.sub}>Create Player Account</Text>
 
-        <TextInput
+        <VoiceTextInput
           style={styles.input}
           placeholder="Full Name"
           placeholderTextColor="#4b7a4b"
           value={name}
           onChangeText={setName}
         />
-        <TextInput
+        <VoiceTextInput
           style={styles.input}
           placeholder="Email"
           placeholderTextColor="#4b7a4b"
@@ -173,7 +174,7 @@ export default function PlayerRegisterScreen() {
           autoCapitalize="none"
           keyboardType="email-address"
         />
-        <TextInput
+        <VoiceTextInput
           style={styles.input}
           placeholder="Password"
           placeholderTextColor="#4b7a4b"

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
   StyleSheet, ActivityIndicator, Alert, Modal, KeyboardAvoidingView, Platform,
@@ -967,7 +968,7 @@ export default function TeamEvalScreen() {
                     </TouchableOpacity>
                   ))}
                   <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
-                    <TextInput
+                    <VoiceTextInput
                       style={[s.smallInput, { flex: 1 }]}
                       placeholder="Add opponent player..."
                       placeholderTextColor="#4b5563"
@@ -1363,7 +1364,7 @@ export default function TeamEvalScreen() {
                     )}
 
                     {/* Add note */}
-                    <TextInput
+                    <VoiceTextInput
                       style={[s.input, { marginTop: 10, marginBottom: 8, minHeight: 72, textAlignVertical: 'top' }]}
                       placeholder="Add a scouting note or observation..."
                       placeholderTextColor="#4b5563"
@@ -1460,7 +1461,7 @@ export default function TeamEvalScreen() {
                         </TouchableOpacity>
                       ) : (
                         <View style={{ padding: 12, gap: 8 }}>
-                          <TextInput
+                          <VoiceTextInput
                             style={[s.input, { marginBottom: 0 }]}
                             placeholder="Team name"
                             placeholderTextColor="#4b5563"
@@ -1492,7 +1493,7 @@ export default function TeamEvalScreen() {
                 )}
               </>
               <Text style={s.fieldLabel}>OPPONENT NAME</Text>
-              <TextInput
+              <VoiceTextInput
                 style={s.input}
                 placeholder="e.g. City High School"
                 placeholderTextColor="#4b5563"
@@ -1500,7 +1501,7 @@ export default function TeamEvalScreen() {
                 onChangeText={setNewGameOpponent}
               />
               <Text style={s.fieldLabel}>LOCATION (optional)</Text>
-              <TextInput
+              <VoiceTextInput
                 style={s.input}
                 placeholder="e.g. Home / Away / Neutral"
                 placeholderTextColor="#4b5563"
@@ -1508,7 +1509,7 @@ export default function TeamEvalScreen() {
                 onChangeText={setNewGameLocation}
               />
               <Text style={s.fieldLabel}>SEASON YEAR (optional)</Text>
-              <TextInput
+              <VoiceTextInput
                 style={s.input}
                 placeholder="e.g. 2025-2026"
                 placeholderTextColor="#4b5563"

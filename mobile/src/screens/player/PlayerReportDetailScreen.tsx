@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import VoiceTextInput from '../../components/VoiceTextInput';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Alert,
@@ -211,7 +212,7 @@ export default function PlayerReportDetailScreen() {
             </View>
           ))}
           <View style={styles.commentInput}>
-            <TextInput
+            <VoiceTextInput
               style={styles.input}
               placeholder="Add a comment..."
               placeholderTextColor="#4b7a4b"

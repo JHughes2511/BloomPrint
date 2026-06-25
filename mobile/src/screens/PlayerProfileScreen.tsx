@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
   Modal, Alert, KeyboardAvoidingView, Platform, TextInput,
@@ -507,7 +508,7 @@ export default function PlayerProfileScreen() {
         onLayout={e => { trainingFeedbackY.current = e.nativeEvent.layout.y; }}
       >
         <Text style={styles.trainingFeedbackLabel}>Regenerate Training with Feedback</Text>
-        <TextInput
+        <VoiceTextInput
           style={styles.trainingFeedbackInput}
           placeholder="e.g. Focus more on 3-point shooting and off-ball movement..."
           placeholderTextColor="#4b5563"
@@ -735,7 +736,7 @@ export default function PlayerProfileScreen() {
                   onLayout={e => { correctionInputY.current = e.nativeEvent.layout.y; }}
                 >
                   <Text style={{ color: '#d1d5db', fontWeight: '700', fontSize: 13, marginBottom: 8 }}>CORRECTIONS</Text>
-                  <TextInput
+                  <VoiceTextInput
                     style={{
                       backgroundColor: '#1f2937', color: '#f9fafb', borderRadius: 10,
                       padding: 12, fontSize: 14, minHeight: 80, textAlignVertical: 'top',
@@ -822,14 +823,14 @@ export default function PlayerProfileScreen() {
           <View style={[styles.modal, { maxHeight: '90%', flex: 0 }]}>
           <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 16 }}>
             <Text style={styles.modalTitle}>Edit Player</Text>
-            <TextInput
+            <VoiceTextInput
               style={styles.input}
               placeholder="Full Name *"
               placeholderTextColor="#6b7280"
               value={editName}
               onChangeText={setEditName}
             />
-            <TextInput
+            <VoiceTextInput
               style={styles.input}
               placeholder="Position (e.g. PG, SG, SF)"
               placeholderTextColor="#6b7280"
@@ -837,14 +838,14 @@ export default function PlayerProfileScreen() {
               onChangeText={setEditPos}
             />
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <TextInput
+              <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder={`Height (e.g. 6'2")`}
                 placeholderTextColor="#6b7280"
                 value={editHeight}
                 onChangeText={setEditHeight}
               />
-              <TextInput
+              <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder={`Wingspan (e.g. 6'5")`}
                 placeholderTextColor="#6b7280"
@@ -853,14 +854,14 @@ export default function PlayerProfileScreen() {
               />
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <TextInput
+              <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="Weight (e.g. 185 lbs)"
                 placeholderTextColor="#6b7280"
                 value={editWeight}
                 onChangeText={setEditWeight}
               />
-              <TextInput
+              <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder={`Standing Reach (e.g. 8'2")`}
                 placeholderTextColor="#6b7280"
@@ -868,7 +869,7 @@ export default function PlayerProfileScreen() {
                 onChangeText={setEditStandingReach}
               />
             </View>
-            <TextInput
+            <VoiceTextInput
               style={styles.input}
               placeholder="School name"
               placeholderTextColor="#6b7280"
@@ -876,14 +877,14 @@ export default function PlayerProfileScreen() {
               onChangeText={setEditSchool}
             />
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <TextInput
+              <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="City"
                 placeholderTextColor="#6b7280"
                 value={editCity}
                 onChangeText={setEditCity}
               />
-              <TextInput
+              <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="State"
                 placeholderTextColor="#6b7280"
@@ -891,7 +892,7 @@ export default function PlayerProfileScreen() {
                 onChangeText={setEditState}
               />
             </View>
-            <TextInput
+            <VoiceTextInput
               style={styles.input}
               placeholder="Country"
               placeholderTextColor="#6b7280"
@@ -963,7 +964,7 @@ export default function PlayerProfileScreen() {
                 </TouchableOpacity>
                 {showCreateTeam && (
                   <View style={{ padding: 8, gap: 8 }}>
-                    <TextInput
+                    <VoiceTextInput
                       style={styles.input}
                       placeholder="Team name..."
                       placeholderTextColor="#6b7280"
@@ -1012,7 +1013,7 @@ export default function PlayerProfileScreen() {
               </TouchableOpacity>
             </View>
             <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
-              <TextInput
+              <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="Search coach/program name..."
                 placeholderTextColor="#6b7280"

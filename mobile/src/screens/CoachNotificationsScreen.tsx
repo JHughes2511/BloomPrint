@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, RefreshControl, Alert, TextInput,
@@ -130,7 +131,7 @@ export default function CoachNotificationsScreen() {
               <View style={styles.expandedContent}>
                 {n.type === 'player_commented' && n.ref_id ? (
                   <>
-                    <TextInput
+                    <VoiceTextInput
                       style={styles.replyInput}
                       placeholder="Reply to player..."
                       placeholderTextColor="#4b5563"

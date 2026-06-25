@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, Alert, KeyboardAvoidingView, Platform, TextInput,
@@ -176,7 +177,7 @@ export default function ImportScreen() {
 
             {/* Create new team */}
             <View style={styles.createTeamRow}>
-              <TextInput
+              <VoiceTextInput
                 style={styles.createTeamInput}
                 placeholder="Create new team name..."
                 placeholderTextColor="#4b5563"

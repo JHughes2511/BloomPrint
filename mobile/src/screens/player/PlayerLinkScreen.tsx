@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import VoiceTextInput from '../../components/VoiceTextInput';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   TextInput, Alert, ActivityIndicator,
@@ -91,7 +92,7 @@ export default function PlayerLinkScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Enter Invite Code</Text>
         <Text style={styles.sectionDesc}>Enter a code provided by your coach to instantly link.</Text>
-        <TextInput
+        <VoiceTextInput
           style={styles.input}
           placeholder="Invite code (e.g. ABC12345)"
           placeholderTextColor="#4b7a4b"
@@ -112,7 +113,7 @@ export default function PlayerLinkScreen() {
         <Text style={styles.sectionTitle}>Find a Coach or Trainer</Text>
         <Text style={styles.sectionDesc}>Search for a coach, trainer, or scout by name or program and send a link request.</Text>
         <View style={styles.searchRow}>
-          <TextInput
+          <VoiceTextInput
             style={[styles.input, { flex: 1 }]}
             placeholder="Search by name or program..."
             placeholderTextColor="#4b7a4b"

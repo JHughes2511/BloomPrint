@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
+import VoiceTextInput from '../../components/VoiceTextInput';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
   Modal, TextInput, Platform, PanResponder, Animated, Keyboard,
@@ -274,43 +275,43 @@ export default function PlayerHomeScreen() {
               >
                 <View onLayout={e => { fieldY.current['position'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>Position</Text>
-                  <TextInput style={styles.input} value={editPosition} onChangeText={setEditPosition}
+                  <VoiceTextInput style={styles.input} value={editPosition} onChangeText={setEditPosition}
                     placeholder="e.g. PG, SG, SF, PF, C" placeholderTextColor="#4b5563"
                     returnKeyType="next" onFocus={() => scrollToField('position')} />
                 </View>
                 <View onLayout={e => { fieldY.current['height'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>Height</Text>
-                  <TextInput style={styles.input} value={editHeight} onChangeText={setEditHeight}
+                  <VoiceTextInput style={styles.input} value={editHeight} onChangeText={setEditHeight}
                     placeholder={`e.g. 6'2"`} placeholderTextColor="#4b5563"
                     returnKeyType="next" onFocus={() => scrollToField('height')} />
                 </View>
                 <View onLayout={e => { fieldY.current['wingspan'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>Wingspan</Text>
-                  <TextInput style={styles.input} value={editWingspan} onChangeText={setEditWingspan}
+                  <VoiceTextInput style={styles.input} value={editWingspan} onChangeText={setEditWingspan}
                     placeholder={`e.g. 6'5"`} placeholderTextColor="#4b5563"
                     returnKeyType="next" onFocus={() => scrollToField('wingspan')} />
                 </View>
                 <View onLayout={e => { fieldY.current['school'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>School</Text>
-                  <TextInput style={styles.input} value={editSchool} onChangeText={setEditSchool}
+                  <VoiceTextInput style={styles.input} value={editSchool} onChangeText={setEditSchool}
                     placeholder="e.g. Lincoln High School" placeholderTextColor="#4b5563"
                     returnKeyType="next" onFocus={() => scrollToField('school')} />
                 </View>
                 <View onLayout={e => { fieldY.current['city'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>City</Text>
-                  <TextInput style={styles.input} value={editCity} onChangeText={setEditCity}
+                  <VoiceTextInput style={styles.input} value={editCity} onChangeText={setEditCity}
                     placeholder="e.g. Atlanta" placeholderTextColor="#4b5563"
                     returnKeyType="next" onFocus={() => scrollToField('city')} />
                 </View>
                 <View onLayout={e => { fieldY.current['state'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>State</Text>
-                  <TextInput style={styles.input} value={editState} onChangeText={setEditState}
+                  <VoiceTextInput style={styles.input} value={editState} onChangeText={setEditState}
                     placeholder="e.g. Georgia" placeholderTextColor="#4b5563"
                     returnKeyType="next" onFocus={() => scrollToField('state')} />
                 </View>
                 <View onLayout={e => { fieldY.current['country'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>Country</Text>
-                  <TextInput style={styles.input} value={editCountry} onChangeText={setEditCountry}
+                  <VoiceTextInput style={styles.input} value={editCountry} onChangeText={setEditCountry}
                     placeholder="e.g. USA" placeholderTextColor="#4b5563"
                     returnKeyType="done" onFocus={() => scrollToField('country')} />
                 </View>

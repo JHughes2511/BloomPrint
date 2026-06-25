@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
+import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, Alert, ScrollView, Modal, TextInput, KeyboardAvoidingView, Platform, Switch,
@@ -676,7 +677,7 @@ export default function RecentScreen() {
               </View>
 
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
-                <TextInput
+                <VoiceTextInput
                   style={[sendStyles.searchInput, { flex: 1 }]}
                   placeholder="Search coach/program name..."
                   placeholderTextColor="#6b7280"
@@ -837,7 +838,7 @@ export default function RecentScreen() {
 
                 <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>Search for a player to send this report to their inbox.</Text>
                 <View style={{ marginBottom: 12 }}>
-                  <TextInput
+                  <VoiceTextInput
                     style={sendStyles.searchInput}
                     placeholder="Type a name to search..."
                     placeholderTextColor="#6b7280"
@@ -876,7 +877,7 @@ export default function RecentScreen() {
                   <Text style={sendStyles.reportPreviewText} numberOfLines={2}>{activeModal?.text?.replace(/[#*_]/g, '').trim().slice(0, 120)}...</Text>
                 </View>
                 <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>Describe what needs to be corrected and AI will update the report.</Text>
-                <TextInput
+                <VoiceTextInput
                   style={sendStyles.correctInput}
                   placeholder="What needs to be corrected in this report?"
                   placeholderTextColor="#4b5563"

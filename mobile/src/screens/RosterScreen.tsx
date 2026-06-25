@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Modal, Alert, KeyboardAvoidingView, Platform, ScrollView,
@@ -280,31 +281,31 @@ export default function RosterScreen() {
             {currentTeamName && (
               <Text style={styles.modalSub}>Adding to {currentTeamName}</Text>
             )}
-            <TextInput style={styles.input} placeholder="Full Name *" placeholderTextColor="#6b7280"
+            <VoiceTextInput style={styles.input} placeholder="Full Name *" placeholderTextColor="#6b7280"
               value={newName} onChangeText={setNewName} />
-            <TextInput style={styles.input} placeholder="Position (e.g. PG, SG, SF)" placeholderTextColor="#6b7280"
+            <VoiceTextInput style={styles.input} placeholder="Position (e.g. PG, SG, SF)" placeholderTextColor="#6b7280"
               value={newPos} onChangeText={setNewPos} />
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <TextInput style={[styles.input, { flex: 1 }]} placeholder={`Height (e.g. 6'2")`} placeholderTextColor="#6b7280"
+              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder={`Height (e.g. 6'2")`} placeholderTextColor="#6b7280"
                 value={newHeight} onChangeText={setNewHeight} />
-              <TextInput style={[styles.input, { flex: 1 }]} placeholder={`Wingspan (e.g. 6'5")`} placeholderTextColor="#6b7280"
+              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder={`Wingspan (e.g. 6'5")`} placeholderTextColor="#6b7280"
                 value={newWingspan} onChangeText={setNewWingspan} />
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <TextInput style={[styles.input, { flex: 1 }]} placeholder="Weight (e.g. 185 lbs)" placeholderTextColor="#6b7280"
+              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder="Weight (e.g. 185 lbs)" placeholderTextColor="#6b7280"
                 value={newWeight} onChangeText={setNewWeight} />
-              <TextInput style={[styles.input, { flex: 1 }]} placeholder={`Standing Reach (e.g. 8'2")`} placeholderTextColor="#6b7280"
+              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder={`Standing Reach (e.g. 8'2")`} placeholderTextColor="#6b7280"
                 value={newStandingReach} onChangeText={setNewStandingReach} />
             </View>
-            <TextInput style={styles.input} placeholder="School name" placeholderTextColor="#6b7280"
+            <VoiceTextInput style={styles.input} placeholder="School name" placeholderTextColor="#6b7280"
               value={newSchool} onChangeText={setNewSchool} />
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <TextInput style={[styles.input, { flex: 1 }]} placeholder="City" placeholderTextColor="#6b7280"
+              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder="City" placeholderTextColor="#6b7280"
                 value={newCity} onChangeText={setNewCity} />
-              <TextInput style={[styles.input, { flex: 1 }]} placeholder="State" placeholderTextColor="#6b7280"
+              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder="State" placeholderTextColor="#6b7280"
                 value={newState} onChangeText={setNewState} />
             </View>
-            <TextInput style={styles.input} placeholder="Country" placeholderTextColor="#6b7280"
+            <VoiceTextInput style={styles.input} placeholder="Country" placeholderTextColor="#6b7280"
               value={newCountry} onChangeText={setNewCountry} />
             <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6, marginTop: 4 }}>Competition Level</Text>
             <LevelDropdown value={newLevel} onChange={setNewLevel} />
@@ -326,7 +327,7 @@ export default function RosterScreen() {
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>New Team</Text>
-            <TextInput style={styles.input} placeholder="Team Name *" placeholderTextColor="#6b7280"
+            <VoiceTextInput style={styles.input} placeholder="Team Name *" placeholderTextColor="#6b7280"
               value={newTeamName} onChangeText={setNewTeamName} />
             <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Competition Level</Text>
             <LevelDropdown value={newTeamLevel} onChange={setNewTeamLevel} />

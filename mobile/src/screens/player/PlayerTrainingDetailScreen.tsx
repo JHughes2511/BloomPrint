@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import VoiceTextInput from '../../components/VoiceTextInput';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Alert,
@@ -136,7 +137,7 @@ export default function PlayerTrainingDetailScreen() {
             </View>
           ))}
           <View style={styles.commentInput}>
-            <TextInput
+            <VoiceTextInput
               style={styles.input}
               placeholder="Add a comment..."
               placeholderTextColor="#4b7a4b"
@@ -164,7 +165,7 @@ export default function PlayerTrainingDetailScreen() {
             <Text style={{ color: '#9ca3af', fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
               Share what's working, what's not, or any changes to your schedule and the AI will update your program.
             </Text>
-            <TextInput
+            <VoiceTextInput
               style={styles.input}
               placeholder="e.g. I want more shooting drills, reduce weight sessions, focus on ball-handling..."
               placeholderTextColor="#4b7a4b"

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import VoiceTextInput from '../components/VoiceTextInput';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert,
@@ -137,7 +138,7 @@ function PickerModal({
               <Ionicons name="close" size={22} color="#9ca3af" />
             </TouchableOpacity>
           </View>
-          <TextInput
+          <VoiceTextInput
             style={pickerModalStyles.search}
             placeholder="Search..."
             placeholderTextColor="#6b7280"
@@ -242,9 +243,9 @@ export default function LoginScreen() {
                 </TouchableOpacity>
               ))}
             </View>
-            <TextInput style={styles.input} placeholder="Full Name" placeholderTextColor="#6b7280"
+            <VoiceTextInput style={styles.input} placeholder="Full Name" placeholderTextColor="#6b7280"
               value={name} onChangeText={setName} />
-            <TextInput style={styles.input} placeholder="Program / Organization Name" placeholderTextColor="#6b7280"
+            <VoiceTextInput style={styles.input} placeholder="Program / Organization Name" placeholderTextColor="#6b7280"
               value={program} onChangeText={setProgram} />
 
             {/* Competition Level picker */}
@@ -280,7 +281,7 @@ export default function LoginScreen() {
           </>
         )}
 
-        <TextInput
+        <VoiceTextInput
           style={[styles.input, mode === 'register' && { marginTop: 16 }]}
           placeholder="Email"
           placeholderTextColor="#6b7280"
@@ -289,7 +290,7 @@ export default function LoginScreen() {
           autoCapitalize="none"
           keyboardType="email-address"
         />
-        <TextInput style={styles.input} placeholder="Password" placeholderTextColor="#6b7280"
+        <VoiceTextInput style={styles.input} placeholder="Password" placeholderTextColor="#6b7280"
           value={password} onChangeText={setPassword} secureTextEntry />
 
         <TouchableOpacity style={styles.btn} onPress={submit} disabled={loading}>
