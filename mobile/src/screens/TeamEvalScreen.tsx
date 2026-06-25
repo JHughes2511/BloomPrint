@@ -2186,6 +2186,8 @@ export default function TeamEvalScreen() {
                   const pts = (c['2 FG Made'] || 0) * 2 + (c['3 FG Made'] || 0) * 3 + (c['FT Made'] || 0);
                   const reb = (c['Off. Reb'] || 0) + (c['Def. Reb'] || 0);
                   const ast = c['Assists'] || 0, stl = c['Steal'] || 0, blk = c['Blocked Shot'] || 0, to = c['Turnover'] || 0;
+                  const fgm = (c['2 FG Made'] || 0) + (c['3 FG Made'] || 0);
+                  const fga = fgm + (c['2 FG Missed'] || 0) + (c['3 FG Missed'] || 0);
                   const entries = Object.entries(g.stat_breakdown as Record<string, any>);
                   return (
                     <View key={g.game_id} style={{ backgroundColor: '#1f2937', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#374151' }}>
@@ -2200,11 +2202,11 @@ export default function TeamEvalScreen() {
                       </View>
 
                       {/* Traditional stat line */}
-                      <View style={{ flexDirection: 'row', gap: 14, marginBottom: 10 }}>
-                        {[['PTS', pts], ['REB', reb], ['AST', ast], ['STL', stl], ['BLK', blk], ['TO', to]].map(([label, val]) => (
-                          <View key={label as string} style={{ alignItems: 'center' }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+                        {[['PTS', pts], ['REB', reb], ['AST', ast], ['STL', stl], ['BLK', blk], ['TO', to], ['FG', fga > 0 ? `${fgm}/${fga}` : '—']].map(([label, val]) => (
+                          <View key={label as string} style={{ alignItems: 'center', flex: 1 }}>
                             <Text style={{ color: '#6b7280', fontSize: 9, fontWeight: '700' }}>{label}</Text>
-                            <Text style={{ color: '#fff', fontSize: 14, fontWeight: '800' }}>{val}</Text>
+                            <Text style={{ color: '#fff', fontSize: 13, fontWeight: '800' }}>{val}</Text>
                           </View>
                         ))}
                       </View>
