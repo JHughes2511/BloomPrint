@@ -870,6 +870,16 @@ export default function TeamEvalScreen() {
         </TouchableOpacity>
       )}
 
+      {/* Floating whiteboard button while taking stats in a live game */}
+      {activeView === 'live' && activeGame && (
+        <TouchableOpacity
+          style={{ position: 'absolute', bottom: 116, right: 24, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 10, zIndex: 100 }}
+          onPress={() => setWhiteboardGameId(activeGame.id)}
+        >
+          <Ionicons name="clipboard-outline" size={24} color="#fff" />
+        </TouchableOpacity>
+      )}
+
       {/* Live Entry */}
       {activeView === 'live' && activeGame && (
         <View style={{ flex: 1 }}>

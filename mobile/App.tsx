@@ -116,8 +116,8 @@ function AppTabs() {
         tabBarStyle: {
           position: 'absolute',
           left: 28, right: 28, bottom: 32,
-          height: 60,
-          borderRadius: 30,
+          height: 56,
+          borderRadius: 28,
           backgroundColor: '#111827',
           borderTopWidth: 0,
           paddingHorizontal: 6,
@@ -129,7 +129,7 @@ function AppTabs() {
           shadowOffset: { width: 0, height: 6 },
           elevation: 10,
         },
-        tabBarItemStyle: { flex: 1, paddingVertical: 9, alignItems: 'center', justifyContent: 'center' },
+        tabBarItemStyle: { flex: 1, paddingVertical: 5, alignItems: 'center', justifyContent: 'center' },
         tabBarLabelStyle: { fontSize: 10, fontWeight: '600', marginTop: 3, includeFontPadding: false },
         tabBarIconStyle: { marginBottom: 0 },
         tabBarIcon: ({ focused }) => {
@@ -143,7 +143,7 @@ function AppTabs() {
           const [active, inactive] = icons[route.name] ?? ['grid', 'grid-outline'];
           return (
             <View style={{
-              width: 42, height: 26, borderRadius: 13,
+              width: 24, height: 26, borderRadius: 12,
               alignItems: 'center', justifyContent: 'center',
               backgroundColor: focused ? 'rgba(59,130,246,0.18)' : 'transparent',
             }}>
