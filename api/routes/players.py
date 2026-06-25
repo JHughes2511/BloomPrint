@@ -15,6 +15,8 @@ class PlayerUpdate(BaseModel):
     team_id: Optional[int] = None
     height: Optional[str] = None
     wingspan: Optional[str] = None
+    weight: Optional[str] = None
+    standing_reach: Optional[str] = None
     country: Optional[str] = None
     state: Optional[str] = None
     city: Optional[str] = None
@@ -95,7 +97,7 @@ def update_player(
         player.height = body.height
     if body.wingspan is not None:
         player.wingspan = body.wingspan
-    for field in ("country", "state", "city", "school_name"):
+    for field in ("weight", "standing_reach", "country", "state", "city", "school_name"):
         val = getattr(body, field)
         if val is not None:
             setattr(player, field, val)

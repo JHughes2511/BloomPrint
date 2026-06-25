@@ -23,6 +23,9 @@ export interface Player {
   position: string | null;
   age: number | null;
   height: string | null;
+  wingspan: string | null;
+  weight: string | null;
+  standing_reach: string | null;
   program_name: string;
   competition_level: string;
   notes: string | null;

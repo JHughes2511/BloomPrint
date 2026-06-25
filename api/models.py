@@ -53,6 +53,8 @@ class Player(Base):
     age              = Column(Integer)
     height           = Column(String)
     wingspan         = Column(String)
+    weight           = Column(String)
+    standing_reach   = Column(String)
     country          = Column(String)
     state            = Column(String)
     city             = Column(String)

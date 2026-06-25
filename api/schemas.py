@@ -53,6 +53,8 @@ class PlayerCreate(BaseModel):
     age: int | None = None
     height: str | None = None
     wingspan: str | None = None
+    weight: str | None = None
+    standing_reach: str | None = None
     country: str | None = None
     state: str | None = None
     city: str | None = None
@@ -70,6 +72,8 @@ class PlayerOut(BaseModel):
     age: int | None
     height: str | None
     wingspan: str | None = None
+    weight: str | None = None
+    standing_reach: str | None = None
     country: str | None = None
     state: str | None = None
     city: str | None = None

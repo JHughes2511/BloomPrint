@@ -54,6 +54,8 @@ export default function PlayerProfileScreen() {
   const [editPos, setEditPos] = useState('');
   const [editHeight, setEditHeight] = useState('');
   const [editWingspan, setEditWingspan] = useState('');
+  const [editWeight, setEditWeight] = useState('');
+  const [editStandingReach, setEditStandingReach] = useState('');
   const [editCountry, setEditCountry] = useState('');
   const [editState, setEditState] = useState('');
   const [editCity, setEditCity] = useState('');
@@ -97,6 +99,8 @@ export default function PlayerProfileScreen() {
     setEditPos(player.position ?? '');
     setEditHeight((player as any).height ?? '');
     setEditWingspan((player as any).wingspan ?? '');
+    setEditWeight((player as any).weight ?? '');
+    setEditStandingReach((player as any).standing_reach ?? '');
     setEditCountry((player as any).country ?? '');
     setEditState((player as any).state ?? '');
     setEditCity((player as any).city ?? '');
@@ -115,6 +119,8 @@ export default function PlayerProfileScreen() {
         position: editPos.trim() || undefined,
         height: editHeight.trim() || undefined,
         wingspan: editWingspan.trim() || undefined,
+        weight: editWeight.trim() || undefined,
+        standing_reach: editStandingReach.trim() || undefined,
         country: editCountry.trim() || undefined,
         state: editState.trim() || undefined,
         city: editCity.trim() || undefined,
@@ -632,6 +638,8 @@ export default function PlayerProfileScreen() {
                 { label: 'Age', value: player.age ? `${player.age} yrs` : null },
                 { label: 'Height', value: (player as any).height },
                 { label: 'Wingspan', value: (player as any).wingspan },
+                { label: 'Weight', value: (player as any).weight },
+                { label: 'Standing Reach', value: (player as any).standing_reach },
                 { label: 'School', value: (player as any).school_name },
                 { label: 'Program', value: (player as any).program_name },
                 { label: 'Team', value: player.team_name },
@@ -842,6 +850,22 @@ export default function PlayerProfileScreen() {
                 placeholderTextColor="#6b7280"
                 value={editWingspan}
                 onChangeText={setEditWingspan}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TextInput
+                style={[styles.input, { flex: 1 }]}
+                placeholder="Weight (e.g. 185 lbs)"
+                placeholderTextColor="#6b7280"
+                value={editWeight}
+                onChangeText={setEditWeight}
+              />
+              <TextInput
+                style={[styles.input, { flex: 1 }]}
+                placeholder={`Standing Reach (e.g. 8'2")`}
+                placeholderTextColor="#6b7280"
+                value={editStandingReach}
+                onChangeText={setEditStandingReach}
               />
             </View>
             <TextInput

@@ -74,6 +74,8 @@ export default function RosterScreen() {
   const [newPos, setNewPos] = useState('');
   const [newHeight, setNewHeight] = useState('');
   const [newWingspan, setNewWingspan] = useState('');
+  const [newWeight, setNewWeight] = useState('');
+  const [newStandingReach, setNewStandingReach] = useState('');
   const [newSchool, setNewSchool] = useState('');
   const [newCity, setNewCity] = useState('');
   const [newState, setNewState] = useState('');
@@ -112,6 +114,8 @@ export default function RosterScreen() {
         position: newPos || undefined,
         height: newHeight || undefined,
         wingspan: newWingspan || undefined,
+        weight: newWeight || undefined,
+        standing_reach: newStandingReach || undefined,
         school_name: newSchool || undefined,
         city: newCity || undefined,
         state: newState || undefined,
@@ -121,6 +125,7 @@ export default function RosterScreen() {
       });
       setShowAdd(false);
       setNewName(''); setNewPos(''); setNewHeight(''); setNewWingspan('');
+      setNewWeight(''); setNewStandingReach('');
       setNewSchool(''); setNewCity(''); setNewState(''); setNewCountry('');
       load();
     } catch (e: any) {
@@ -284,6 +289,12 @@ export default function RosterScreen() {
                 value={newHeight} onChangeText={setNewHeight} />
               <TextInput style={[styles.input, { flex: 1 }]} placeholder={`Wingspan (e.g. 6'5")`} placeholderTextColor="#6b7280"
                 value={newWingspan} onChangeText={setNewWingspan} />
+            </View>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TextInput style={[styles.input, { flex: 1 }]} placeholder="Weight (e.g. 185 lbs)" placeholderTextColor="#6b7280"
+                value={newWeight} onChangeText={setNewWeight} />
+              <TextInput style={[styles.input, { flex: 1 }]} placeholder={`Standing Reach (e.g. 8'2")`} placeholderTextColor="#6b7280"
+                value={newStandingReach} onChangeText={setNewStandingReach} />
             </View>
             <TextInput style={styles.input} placeholder="School name" placeholderTextColor="#6b7280"
               value={newSchool} onChangeText={setNewSchool} />

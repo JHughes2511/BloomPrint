@@ -31,14 +31,15 @@ export const playersAPI = {
 
   create: (data: {
     name: string; position?: string; age?: number;
-    height?: string; wingspan?: string; school_name?: string;
-    city?: string; state?: string; country?: string;
+    height?: string; wingspan?: string; weight?: string; standing_reach?: string;
+    school_name?: string; city?: string; state?: string; country?: string;
     competition_level?: string; notes?: string; team_id?: number;
   }) => api.post('/players', data).then(r => r.data),
 
   update: (id: number, data: {
     name?: string; position?: string; competition_level?: string; team_id?: number;
-    height?: string; wingspan?: string; country?: string; state?: string; city?: string; school_name?: string;
+    height?: string; wingspan?: string; weight?: string; standing_reach?: string;
+    country?: string; state?: string; city?: string; school_name?: string;
   }) => api.patch(`/players/${id}`, data).then(r => r.data),
 
   delete: (id: number) => api.delete(`/players/${id}`).then(r => r.data),
