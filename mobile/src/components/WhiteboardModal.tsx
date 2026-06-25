@@ -49,19 +49,16 @@ const TOOLS: { key: Tool; icon: string }[] = [
 ];
 
 // ── Court colours ─────────────────────────────────────────────────────────
-const FLOOR_A  = '#D4A84A';   // main floor tan
-const FLOOR_B  = '#C89840';   // darker plank
-const FLOOR_C  = '#DDB055';   // lighter plank
-const PAINT    = '#7B4228';   // reddish-brown paint
-const WHITE    = '#FFFFFF';
-const RIM      = '#F97316';   // orange rim
-const LW       = 2;           // standard line weight
+const FLOOR_A = '#D4A84A';   // main floor tan
+const FLOOR_B = '#C89840';   // darker plank
+const FLOOR_C = '#DDB055';   // lighter plank
+const LINE    = '#2d1505';   // dark brown engraved lines
+const LW      = 2;           // standard line weight
 
-// ── Wood floor — horizontal planks (each plank is a horizontal band) ──────
+// ── Wood floor — vertical planks ──────────────────────────────────────────
 function WoodFloor({ w, h }: { w: number; h: number }) {
-  const n  = 18;
-  const pH = h / n;
-  // Alternate between three shades for a real hardwood look
+  const n  = 22;
+  const pW = w / n;
   const shade = (i: number) => {
     const cycle = i % 3;
     if (cycle === 0) return FLOOR_A;
@@ -71,156 +68,162 @@ function WoodFloor({ w, h }: { w: number; h: number }) {
   return (
     <G>
       {Array.from({ length: n }).map((_, i) => (
-        <Rect key={i} x={0} y={i * pH} width={w} height={pH} fill={shade(i)} />
+        <Rect key={i} x={i * pW} y={0} width={pW} height={h} fill={shade(i)} />
       ))}
-      {/* Subtle horizontal divider lines between planks */}
       {Array.from({ length: n - 1 }).map((_, i) => (
         <Line key={`d${i}`}
-              x1={0} y1={(i + 1) * pH} x2={w} y2={(i + 1) * pH}
-              stroke="rgba(0,0,0,0.15)" strokeWidth={1} />
+              x1={(i + 1) * pW} y1={0} x2={(i + 1) * pW} y2={h}
+              stroke="rgba(0,0,0,0.08)" strokeWidth={0.5} />
       ))}
+    </G>
+  );
+}
+
+// ── Basketball graphic ────────────────────────────────────────────────────
+function Basketball({ cx, cy, r }: { cx: number; cy: number; r: number }) {
+  return (
+    <G>
+      <Circle cx={cx} cy={cy} r={r} fill={FLOOR_B} stroke={LINE} strokeWidth={1.5} />
+      {/* Horizontal seam — two opposing arcs */}
+      <Path d={`M ${cx - r} ${cy} A ${r} ${r * 0.38} 0 0 1 ${cx + r} ${cy}`}
+            fill="none" stroke={LINE} strokeWidth={1.3} />
+      <Path d={`M ${cx - r} ${cy} A ${r} ${r * 0.38} 0 0 0 ${cx + r} ${cy}`}
+            fill="none" stroke={LINE} strokeWidth={1.3} />
+      {/* Vertical seam */}
+      <Path d={`M ${cx} ${cy - r} A ${r * 0.38} ${r} 0 0 1 ${cx} ${cy + r}`}
+            fill="none" stroke={LINE} strokeWidth={1.3} />
+      <Path d={`M ${cx} ${cy - r} A ${r * 0.38} ${r} 0 0 0 ${cx} ${cy + r}`}
+            fill="none" stroke={LINE} strokeWidth={1.3} />
     </G>
   );
 }
 
 // ── TOP END (basket near y = 0) ───────────────────────────────────────────
-// All markings extend DOWNWARD from the top baseline.
 function TopEnd({ w, s }: { w: number; s: number }) {
-  const BASE  = 2;                      // top baseline y
-  const BKT   = BASE + 5.25 * s;       // basket center y (5.25 ft from baseline)
-  const FTY   = BASE + 19 * s;         // free throw line y (19 ft from baseline)
-  const CRNR  = BASE + 14 * s;         // 3pt corner end y
-  const THREE = 23.75 * s;             // 3pt arc radius
-  const FTR   = 6 * s;                 // FT circle radius
-  const PW    = 16 * s;                // paint width
-  const LX    = (w - PW) / 2;         // left edge of paint
-  const TICKS = 7;
-  const TICKH = (19 * s) / (TICKS + 1);
+  const BASE  = 2;
+  const BKT   = BASE + 5.25 * s;
+  const FTY   = BASE + 19 * s;
+  const CRNR  = BASE + 14 * s;
+  const THREE = 23.75 * s;
+  const FTR   = 6 * s;
+  const PW    = 16 * s;
+  const LX    = (w - PW) / 2;
+  const TICKS = 4;
   const TICK  = 5;
+  const rimR  = Math.max(1.5 * s, 9);
+  const bbW   = 6 * s;
 
   return (
     <G>
-      {/* Paint fill */}
-      <Rect x={LX} y={BASE} width={PW} height={19 * s} fill={PAINT} />
-      {/* Paint border */}
-      <Rect x={LX} y={BASE} width={PW} height={19 * s} fill="none" stroke={WHITE} strokeWidth={LW} />
+      {/* Paint — outline only, no fill */}
+      <Rect x={LX} y={BASE} width={PW} height={19 * s} fill="none" stroke={LINE} strokeWidth={LW} />
 
-      {/* Hash marks left side of lane */}
-      {Array.from({ length: TICKS }).map((_, i) => (
-        <Line key={`hl${i}`}
-              x1={LX - TICK} y1={BASE + TICKH * (i + 1)}
-              x2={LX}        y2={BASE + TICKH * (i + 1)}
-              stroke={WHITE} strokeWidth={LW} />
-      ))}
-      {/* Hash marks right side of lane */}
-      {Array.from({ length: TICKS }).map((_, i) => (
-        <Line key={`hr${i}`}
-              x1={LX + PW}        y1={BASE + TICKH * (i + 1)}
-              x2={LX + PW + TICK} y2={BASE + TICKH * (i + 1)}
-              stroke={WHITE} strokeWidth={LW} />
-      ))}
+      {/* Lane hash marks */}
+      {Array.from({ length: TICKS }).map((_, i) => {
+        const step = (19 * s) / (TICKS + 1);
+        return (
+          <G key={`t${i}`}>
+            <Line x1={LX - TICK} y1={BASE + step * (i + 1)} x2={LX} y2={BASE + step * (i + 1)} stroke={LINE} strokeWidth={1.5} />
+            <Line x1={LX + PW} y1={BASE + step * (i + 1)} x2={LX + PW + TICK} y2={BASE + step * (i + 1)} stroke={LINE} strokeWidth={1.5} />
+          </G>
+        );
+      })}
 
-      {/* Free throw circle
-          Top end: center-facing half = BELOW FT line (larger Y) = sweep=1 (CW) → solid
-                   basket-facing half = ABOVE FT line (smaller Y) = sweep=0 (CCW) → dashed */}
-      {/* Solid half (toward center court = downward) */}
+      {/* Free throw circle — solid half toward center */}
       <Path d={`M ${w/2 - FTR} ${FTY} A ${FTR} ${FTR} 0 0 1 ${w/2 + FTR} ${FTY}`}
-            fill="none" stroke={WHITE} strokeWidth={LW} />
-      {/* Dashed half (toward basket = upward) */}
+            fill="none" stroke={LINE} strokeWidth={LW} />
+      {/* Dashed half toward basket */}
       <Path d={`M ${w/2 - FTR} ${FTY} A ${FTR} ${FTR} 0 0 0 ${w/2 + FTR} ${FTY}`}
-            fill="none" stroke={WHITE} strokeWidth={LW} strokeDasharray="5,4" />
+            fill="none" stroke={LINE} strokeWidth={LW} strokeDasharray="5,4" />
 
-      {/* Restricted area arc — 4ft radius, curves toward center (downward), sweep=1 */}
+      {/* Restricted area arc */}
       <Path d={`M ${w/2 - 4*s} ${BKT} A ${4*s} ${4*s} 0 0 1 ${w/2 + 4*s} ${BKT}`}
-            fill="none" stroke={WHITE} strokeWidth={LW} />
+            fill="none" stroke={LINE} strokeWidth={LW} />
 
-      {/* 3-point corner lines (run downward from baseline) */}
-      <Line x1={3*s} y1={BASE} x2={3*s} y2={CRNR} stroke={WHITE} strokeWidth={LW} />
-      <Line x1={w - 3*s} y1={BASE} x2={w - 3*s} y2={CRNR} stroke={WHITE} strokeWidth={LW} />
+      {/* 3-point corner lines */}
+      <Line x1={3*s} y1={BASE} x2={3*s} y2={CRNR} stroke={LINE} strokeWidth={LW} />
+      <Line x1={w - 3*s} y1={BASE} x2={w - 3*s} y2={CRNR} stroke={LINE} strokeWidth={LW} />
 
-      {/* 3-point arc
-          Top end: arc must curve DOWNWARD (toward center court = larger Y).
-          Center of arc = basket at (w/2, BKT). BKT < CRNR so center is ABOVE corners.
-          Arc through bottom of circle (toward larger Y) = long CW arc = large=1, sweep=1 */}
+      {/* 3-point arc */}
       <Path d={`M ${3*s} ${CRNR} A ${THREE} ${THREE} 0 1 1 ${w - 3*s} ${CRNR}`}
-            fill="none" stroke={WHITE} strokeWidth={LW} />
+            fill="none" stroke={LINE} strokeWidth={LW} />
 
       {/* Backboard */}
-      <Line x1={w/2 - 3*s} y1={BASE} x2={w/2 + 3*s} y2={BASE}
-            stroke={WHITE} strokeWidth={4} strokeLinecap="round" />
+      <Line x1={w/2 - bbW/2} y1={BASE + 1} x2={w/2 + bbW/2} y2={BASE + 1}
+            stroke={LINE} strokeWidth={3.5} strokeLinecap="round" />
+      {/* Shooter's box outline */}
+      <Rect x={w/2 - 2*s} y={BASE + 1} width={4*s} height={1.8*s}
+            fill="none" stroke={LINE} strokeWidth={1.5} />
+      {/* Post from box to rim */}
+      <Line x1={w/2} y1={BASE + 1.8*s} x2={w/2} y2={BKT - rimR}
+            stroke={LINE} strokeWidth={1.5} />
       {/* Rim */}
-      <Circle cx={w/2} cy={BKT} r={Math.max(1.5*s, 9)} stroke={RIM} strokeWidth={2.5} fill="none" />
+      <Circle cx={w/2} cy={BKT} r={rimR} stroke={LINE} strokeWidth={2} fill="none" />
     </G>
   );
 }
 
 // ── BOTTOM END (basket near y = courtH) ───────────────────────────────────
-// All markings extend UPWARD from the bottom baseline.
 function BottomEnd({ w, courtH, s }: { w: number; courtH: number; s: number }) {
-  const BASE  = courtH - 2;            // bottom baseline y
-  const BKT   = BASE - 5.25 * s;      // basket center y
-  const FTY   = BASE - 19 * s;        // free throw line y
-  const CRNR  = BASE - 14 * s;        // 3pt corner end y
+  const BASE  = courtH - 2;
+  const BKT   = BASE - 5.25 * s;
+  const FTY   = BASE - 19 * s;
+  const CRNR  = BASE - 14 * s;
   const THREE = 23.75 * s;
   const FTR   = 6 * s;
   const PW    = 16 * s;
   const LX    = (w - PW) / 2;
-  const TICKS = 7;
-  const TICKH = (19 * s) / (TICKS + 1);
+  const TICKS = 4;
   const TICK  = 5;
+  const rimR  = Math.max(1.5 * s, 9);
+  const bbW   = 6 * s;
 
   return (
     <G>
-      {/* Paint fill */}
-      <Rect x={LX} y={FTY} width={PW} height={19 * s} fill={PAINT} />
-      {/* Paint border */}
-      <Rect x={LX} y={FTY} width={PW} height={19 * s} fill="none" stroke={WHITE} strokeWidth={LW} />
+      {/* Paint — outline only, no fill */}
+      <Rect x={LX} y={FTY} width={PW} height={19 * s} fill="none" stroke={LINE} strokeWidth={LW} />
 
-      {/* Hash marks left */}
-      {Array.from({ length: TICKS }).map((_, i) => (
-        <Line key={`hl${i}`}
-              x1={LX - TICK} y1={FTY + TICKH * (i + 1)}
-              x2={LX}        y2={FTY + TICKH * (i + 1)}
-              stroke={WHITE} strokeWidth={LW} />
-      ))}
-      {/* Hash marks right */}
-      {Array.from({ length: TICKS }).map((_, i) => (
-        <Line key={`hr${i}`}
-              x1={LX + PW}        y1={FTY + TICKH * (i + 1)}
-              x2={LX + PW + TICK} y2={FTY + TICKH * (i + 1)}
-              stroke={WHITE} strokeWidth={LW} />
-      ))}
+      {/* Lane hash marks */}
+      {Array.from({ length: TICKS }).map((_, i) => {
+        const step = (19 * s) / (TICKS + 1);
+        return (
+          <G key={`t${i}`}>
+            <Line x1={LX - TICK} y1={FTY + step * (i + 1)} x2={LX} y2={FTY + step * (i + 1)} stroke={LINE} strokeWidth={1.5} />
+            <Line x1={LX + PW} y1={FTY + step * (i + 1)} x2={LX + PW + TICK} y2={FTY + step * (i + 1)} stroke={LINE} strokeWidth={1.5} />
+          </G>
+        );
+      })}
 
-      {/* Free throw circle
-          Bottom end: center-facing half = ABOVE FT line (smaller Y) = sweep=0 (CCW) → solid
-                      basket-facing half = BELOW FT line (larger Y) = sweep=1 (CW) → dashed */}
-      {/* Solid half (toward center court = upward) */}
+      {/* Free throw circle — solid half toward center */}
       <Path d={`M ${w/2 - FTR} ${FTY} A ${FTR} ${FTR} 0 0 0 ${w/2 + FTR} ${FTY}`}
-            fill="none" stroke={WHITE} strokeWidth={LW} />
-      {/* Dashed half (toward basket = downward) */}
+            fill="none" stroke={LINE} strokeWidth={LW} />
+      {/* Dashed half toward basket */}
       <Path d={`M ${w/2 - FTR} ${FTY} A ${FTR} ${FTR} 0 0 1 ${w/2 + FTR} ${FTY}`}
-            fill="none" stroke={WHITE} strokeWidth={LW} strokeDasharray="5,4" />
+            fill="none" stroke={LINE} strokeWidth={LW} strokeDasharray="5,4" />
 
-      {/* Restricted area arc — curves toward center (upward), sweep=0 */}
+      {/* Restricted area arc */}
       <Path d={`M ${w/2 - 4*s} ${BKT} A ${4*s} ${4*s} 0 0 0 ${w/2 + 4*s} ${BKT}`}
-            fill="none" stroke={WHITE} strokeWidth={LW} />
+            fill="none" stroke={LINE} strokeWidth={LW} />
 
-      {/* 3-point corner lines (run upward from baseline) */}
-      <Line x1={3*s} y1={BASE} x2={3*s} y2={CRNR} stroke={WHITE} strokeWidth={LW} />
-      <Line x1={w - 3*s} y1={BASE} x2={w - 3*s} y2={CRNR} stroke={WHITE} strokeWidth={LW} />
+      {/* 3-point corner lines */}
+      <Line x1={3*s} y1={BASE} x2={3*s} y2={CRNR} stroke={LINE} strokeWidth={LW} />
+      <Line x1={w - 3*s} y1={BASE} x2={w - 3*s} y2={CRNR} stroke={LINE} strokeWidth={LW} />
 
-      {/* 3-point arc
-          Bottom end: arc must curve UPWARD (toward center court = smaller Y).
-          Center of arc = basket at (w/2, BKT). BKT > CRNR so center is BELOW corners.
-          Arc through top of circle (toward smaller Y) = long CCW arc = large=1, sweep=0 */}
+      {/* 3-point arc */}
       <Path d={`M ${3*s} ${CRNR} A ${THREE} ${THREE} 0 1 0 ${w - 3*s} ${CRNR}`}
-            fill="none" stroke={WHITE} strokeWidth={LW} />
+            fill="none" stroke={LINE} strokeWidth={LW} />
 
       {/* Backboard */}
-      <Line x1={w/2 - 3*s} y1={BASE} x2={w/2 + 3*s} y2={BASE}
-            stroke={WHITE} strokeWidth={4} strokeLinecap="round" />
+      <Line x1={w/2 - bbW/2} y1={BASE - 1} x2={w/2 + bbW/2} y2={BASE - 1}
+            stroke={LINE} strokeWidth={3.5} strokeLinecap="round" />
+      {/* Shooter's box outline */}
+      <Rect x={w/2 - 2*s} y={BASE - 1 - 1.8*s} width={4*s} height={1.8*s}
+            fill="none" stroke={LINE} strokeWidth={1.5} />
+      {/* Post from box to rim */}
+      <Line x1={w/2} y1={BASE - 1 - 1.8*s} x2={w/2} y2={BKT + rimR}
+            stroke={LINE} strokeWidth={1.5} />
       {/* Rim */}
-      <Circle cx={w/2} cy={BKT} r={Math.max(1.5*s, 9)} stroke={RIM} strokeWidth={2.5} fill="none" />
+      <Circle cx={w/2} cy={BKT} r={rimR} stroke={LINE} strokeWidth={2} fill="none" />
     </G>
   );
 }
@@ -239,15 +242,14 @@ function CourtSvg({ courtType }: { courtType: CourtType }) {
         <WoodFloor w={w} h={h} />
         {/* Court boundary */}
         <Rect x={2} y={2} width={w - 4} height={h - 4}
-              fill="none" stroke={WHITE} strokeWidth={LW} />
+              fill="none" stroke={LINE} strokeWidth={LW} />
         {/* Half-court line */}
-        <Line x1={2} y1={h / 2} x2={w - 2} y2={h / 2} stroke={WHITE} strokeWidth={LW} />
-        {/* Center circle (restraining) */}
+        <Line x1={2} y1={h / 2} x2={w - 2} y2={h / 2} stroke={LINE} strokeWidth={LW} />
+        {/* Center restraining circle */}
         <Circle cx={w / 2} cy={h / 2} r={FTR}
-                fill="none" stroke={WHITE} strokeWidth={LW} />
-        {/* Center tip-off circle (small) */}
-        <Circle cx={w / 2} cy={h / 2} r={FTR * 0.28}
-                fill="none" stroke={WHITE} strokeWidth={LW} />
+                fill="none" stroke={LINE} strokeWidth={LW} />
+        {/* Basketball at center */}
+        <Basketball cx={w / 2} cy={h / 2} r={FTR * 0.55} />
         {/* Ends */}
         <TopEnd w={w} s={s} />
         <BottomEnd w={w} courtH={h} s={s} />
@@ -255,19 +257,18 @@ function CourtSvg({ courtType }: { courtType: CourtType }) {
     );
   }
 
-  // Half / three_quarter: show the bottom end (with basket) by translating
+  // Half / three_quarter
   const offsetY = courtType === 'half' ? -midY : -(COURT_H - THREE_Q_H);
   return (
     <Svg width={w} height={h}>
       <WoodFloor w={w} h={h} />
       <G transform={`translate(0, ${offsetY})`}>
         <Rect x={2} y={2} width={w - 4} height={COURT_H - 4}
-              fill="none" stroke={WHITE} strokeWidth={LW} />
-        <Line x1={2} y1={midY} x2={w - 2} y2={midY} stroke={WHITE} strokeWidth={LW} />
+              fill="none" stroke={LINE} strokeWidth={LW} />
+        <Line x1={2} y1={midY} x2={w - 2} y2={midY} stroke={LINE} strokeWidth={LW} />
         <Circle cx={w / 2} cy={midY} r={FTR}
-                fill="none" stroke={WHITE} strokeWidth={LW} />
-        <Circle cx={w / 2} cy={midY} r={FTR * 0.28}
-                fill="none" stroke={WHITE} strokeWidth={LW} />
+                fill="none" stroke={LINE} strokeWidth={LW} />
+        <Basketball cx={w / 2} cy={midY} r={FTR * 0.55} />
         <BottomEnd w={w} courtH={COURT_H} s={s} />
       </G>
     </Svg>
