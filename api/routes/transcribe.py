@@ -1,17 +1,12 @@
 import os
 import tempfile
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
-from ..auth import get_current_coach
-from .. import models
+from fastapi import APIRouter, UploadFile, File, HTTPException
 
 router = APIRouter(prefix="/transcribe", tags=["transcribe"])
 
 
 @router.post("")
-async def transcribe_audio(
-    audio: UploadFile = File(...),
-    coach: models.Coach = Depends(get_current_coach),
-):
+async def transcribe_audio(audio: UploadFile = File(...)):
     suffix = ".m4a"
     if audio.filename:
         ext = os.path.splitext(audio.filename)[1]

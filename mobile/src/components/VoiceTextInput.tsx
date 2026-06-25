@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, TextInput, TouchableOpacity, TextInputProps, Alert } from 'react-native';
+import { View, TextInput, TouchableOpacity, TextInputProps, Alert, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { transcribeAPI } from '../api/client';
@@ -9,12 +9,30 @@ type Props = TextInputProps & {
   onChangeText?: (text: string) => void;
 };
 
-export default function VoiceTextInput({ value = '', onChangeText, style, secureTextEntry, editable, ...rest }: Props) {
+export default function VoiceTextInput({
+  value = '',
+  onChangeText,
+  style,
+  secureTextEntry,
+  editable,
+  multiline,
+  ...rest
+}: Props) {
   const [listening, setListening] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const recordingRef = useRef<Audio.Recording | null>(null);
 
-  const showMic = !secureTextEntry && editable !== false;
+  // Don't show mic for passwords, read-only fields, or email fields
+  const keyboardType = (rest as any).keyboardType;
+  const showMic =
+    !secureTextEntry &&
+    editable !== false &&
+    keyboardType !== 'email-address';
+
+  const flatStyle = StyleSheet.flatten(style) as any || {};
+  const textColor = flatStyle.color ?? '#f9fafb';
+  const fontSize = flatStyle.fontSize;
+  const fontWeight = flatStyle.fontWeight;
 
   const startRecording = async () => {
     try {
@@ -51,47 +69,53 @@ export default function VoiceTextInput({ value = '', onChangeText, style, secure
         onChangeText(current + sep + text);
       }
     } catch {
-      Alert.alert('Error', 'Could not transcribe audio. Make sure the server is running.');
+      Alert.alert('Error', 'Could not transcribe. Make sure the server is running.');
     } finally {
       setTranscribing(false);
     }
   };
 
-  const toggleVoice = () => {
-    if (listening) {
-      stopRecording();
-    } else {
-      startRecording();
-    }
-  };
+  const toggleVoice = () => (listening ? stopRecording() : startRecording());
 
   const micColor = transcribing ? '#f59e0b' : listening ? '#7c3aed' : '#6b7280';
-  const micIcon = transcribing ? 'hourglass-outline' : listening ? 'mic' : 'mic-outline';
+  const micIcon: any = transcribing ? 'hourglass-outline' : listening ? 'mic' : 'mic-outline';
 
   return (
-    <View style={{ position: 'relative' }}>
+    <View
+      style={[
+        style,
+        {
+          flexDirection: 'row',
+          alignItems: multiline ? 'flex-start' : 'center',
+        },
+      ]}
+    >
       <TextInput
         {...rest}
         value={value}
         onChangeText={onChangeText}
-        style={[style, showMic ? { paddingRight: 36 } : undefined]}
+        multiline={multiline}
         secureTextEntry={secureTextEntry}
         editable={editable}
+        style={{
+          flex: 1,
+          backgroundColor: 'transparent',
+          borderWidth: 0,
+          padding: 0,
+          margin: 0,
+          color: textColor,
+          fontSize,
+          fontWeight,
+        }}
       />
       {showMic && (
         <TouchableOpacity
           onPress={toggleVoice}
           disabled={transcribing}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          style={{
-            position: 'absolute',
-            right: 10,
-            top: 0,
-            bottom: 0,
-            justifyContent: 'center',
-          }}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 4 }}
+          style={{ paddingLeft: 8, paddingTop: multiline ? 2 : 0 }}
         >
-          <Ionicons name={micIcon as any} size={17} color={micColor} />
+          <Ionicons name={micIcon} size={17} color={micColor} />
         </TouchableOpacity>
       )}
     </View>
