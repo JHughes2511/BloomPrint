@@ -117,7 +117,7 @@ export default function CoachTrainingDetailScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets={true}
       >

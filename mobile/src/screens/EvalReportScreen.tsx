@@ -333,7 +333,7 @@ export default function EvalReportScreen() {
   const hasPillars = ev.pillar_grades && Object.keys(ev.pillar_grades).length > 0;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
 
       {/* Header */}
       <View style={styles.header}>

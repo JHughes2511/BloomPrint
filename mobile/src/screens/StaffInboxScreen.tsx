@@ -196,7 +196,7 @@ export default function StaffInboxScreen() {
       <FlatList
         data={items}
         keyExtractor={i => String(i.id)}
-        contentContainerStyle={{ paddingTop: 12, paddingBottom: 24 }}
+        contentContainerStyle={{ paddingTop: 12, paddingBottom: 100 }}
         ListEmptyComponent={
           <View style={s.center}>
             <Ionicons name="mail-outline" size={48} color="#374151" />
@@ -241,7 +241,7 @@ export default function StaffInboxScreen() {
       );
     }
     return (
-      <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Team switcher */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12, gap: 8 }}>
           {myTeams.map(team => (
@@ -298,7 +298,7 @@ export default function StaffInboxScreen() {
   const renderMyTeamsTab = () => {
     const myTeamIds = new Set(myTeams.map((t: any) => t.id));
     return (
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}>
         {/* Search to join */}
         <Text style={s.sectionLabel}>FIND A TEAM TO JOIN</Text>
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>

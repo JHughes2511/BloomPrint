@@ -46,7 +46,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
       {/* Header */}
       <View style={styles.header}>
         {/* Top row: logo on left, icon buttons on right */}

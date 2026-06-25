@@ -223,7 +223,7 @@ export default function RosterScreen() {
       <FlatList
         data={visiblePlayers}
         keyExtractor={p => String(p.id)}
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.card}

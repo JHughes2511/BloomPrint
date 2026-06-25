@@ -350,7 +350,7 @@ export default function TeamReportScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: 60 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >

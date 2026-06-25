@@ -129,7 +129,7 @@ function AppTabs() {
           shadowOffset: { width: 0, height: 6 },
           elevation: 10,
         },
-        tabBarItemStyle: { flex: 1, paddingVertical: 0 },
+        tabBarItemStyle: { flex: 1, paddingVertical: 0, alignItems: 'center', justifyContent: 'center' },
         tabBarLabelStyle: { fontSize: 10, fontWeight: '600', marginTop: 3, includeFontPadding: false },
         tabBarIconStyle: { marginBottom: 0 },
         tabBarIcon: ({ focused }) => {

@@ -352,7 +352,7 @@ export default function GameReportBuilderScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
       >

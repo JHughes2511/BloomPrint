@@ -47,7 +47,7 @@ export default function TrainingScreen() {
       style={{ flex: 1, backgroundColor: '#0a0a0a' }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#fff" />

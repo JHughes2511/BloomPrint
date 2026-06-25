@@ -377,7 +377,7 @@ export default function PlayerProfileScreen() {
   const latest = evals[evals.length - 1] ?? null;
 
   return (
-    <ScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 300 }}>
+    <ScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>

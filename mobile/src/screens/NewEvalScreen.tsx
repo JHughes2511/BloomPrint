@@ -75,7 +75,7 @@ export default function NewEvalScreen() {
     <ScrollView
       ref={scrollRef}
       style={styles.container}
-      contentContainerStyle={{ paddingBottom: 120 }}
+      contentContainerStyle={{ paddingBottom: 100 }}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
     >

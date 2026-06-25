@@ -614,7 +614,7 @@ export default function TeamEvalScreen() {
 
       {/* Dashboard */}
       {activeView === 'dashboard' && (
-        <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 60 }}>
+        <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
           {/* Phase filter */}
           <View style={{ marginBottom: 16 }}>
             <Text style={[s.cardLabel, { marginBottom: 8 }]}>GRADE VIEW</Text>
@@ -759,7 +759,7 @@ export default function TeamEvalScreen() {
 
       {/* Games list */}
       {activeView === 'games' && (
-        <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 60 }}>
+        <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
           {/* Phase filter */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
             {['all', 'preseason', 'regular', 'playoff', 'tournament'].map(p => (
@@ -1052,7 +1052,7 @@ export default function TeamEvalScreen() {
 
       {/* Game Detail */}
       {activeView === 'detail' && detailGame && (
-        <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 80 }}>
+        <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
           {/* Header */}
           <View style={s.card}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -1378,7 +1378,7 @@ export default function TeamEvalScreen() {
 
       {/* Opponent Scout */}
       {activeView === 'scout' && (
-        <ScrollView ref={scoutScrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 120, paddingTop: 8 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets={true}>
+        <ScrollView ref={scoutScrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets={true}>
           {/* Opponent selector */}
           {!scoutOpponent ? (
             <>

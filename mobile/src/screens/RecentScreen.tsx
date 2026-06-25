@@ -442,7 +442,7 @@ export default function RecentScreen() {
       <FlatList
         data={filtered}
         keyExtractor={e => `${e.kind}-${e.id}`}
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         ListEmptyComponent={
           <View style={styles.center}>
             <Ionicons name="document-text-outline" size={48} color="#374151" />

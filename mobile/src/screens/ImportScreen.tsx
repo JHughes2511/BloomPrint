@@ -140,7 +140,7 @@ export default function ImportScreen() {
     >
       <ScrollView
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: 60 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
