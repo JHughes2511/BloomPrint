@@ -17,3 +17,8 @@ uploads/
 # Mobile
 mobile/node_modules/
 mobile/package-lock.json
+
+# Root-level (accidental installs)
+node_modules/
+package-lock.json
+package.json
