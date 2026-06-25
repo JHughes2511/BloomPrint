@@ -988,7 +988,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 13, paddingVertical: 7, marginRight: 8,
   },
   chipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  chipText: { color: '#9ca3af', fontSize: 12, fontWeight: '600', lineHeight: 16 },
+  chipText: { color: '#9ca3af', fontSize: 12, fontWeight: '600' },
   chipTextActive: { color: '#fff' },
   input: {
     backgroundColor: '#111827', borderRadius: 10, padding: 14,
