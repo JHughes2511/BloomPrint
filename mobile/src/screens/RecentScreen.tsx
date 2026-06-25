@@ -425,7 +425,7 @@ export default function RecentScreen() {
       <Text style={styles.title}>Recent Reports</Text>
 
       {/* Category filter */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={{ paddingHorizontal: 16, paddingRight: 24, paddingVertical: 6, gap: 8, alignItems: 'center' }}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={{ paddingHorizontal: 16, paddingRight: 24, gap: 8, alignItems: 'center' }}>
         {FILTER_CATS.map(cat => (
           <TouchableOpacity
             key={cat.key}
@@ -938,10 +938,10 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0a0a', paddingTop: 56 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80 },
   title: { fontSize: 28, fontWeight: '900', color: '#fff', marginHorizontal: 20, marginBottom: 12 },
-  filterRow: { marginBottom: 12, flexGrow: 0 },
-  filterChip: { borderWidth: 1, borderColor: '#374151', borderRadius: 16, paddingHorizontal: 13, paddingVertical: 7 },
+  filterRow: { marginBottom: 12, flexGrow: 0, height: 52 },
+  filterChip: { borderWidth: 1, borderColor: '#374151', borderRadius: 18, paddingHorizontal: 14, justifyContent: 'center', alignItems: 'center', height: 34 },
   filterChipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  filterChipText: { color: '#9ca3af', fontSize: 12, fontWeight: '600' },
+  filterChipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
   filterChipTextActive: { color: '#fff' },
   dateHeader: { color: '#4b5563', fontSize: 11, fontWeight: '700', marginHorizontal: 20, marginTop: 16, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 },
   emptyText: { color: '#4b5563', marginTop: 12, fontSize: 14 },
