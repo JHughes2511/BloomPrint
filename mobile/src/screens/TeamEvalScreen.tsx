@@ -136,6 +136,10 @@ export default function TeamEvalScreen() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [detailModalPlayer, setDetailModalPlayer] = useState<string | null>(null);
   const [gameLineup, setGameLineup] = useState<any[]>([]);
+  // Player grade-detail modal (from leaderboard)
+  const [gradeDetailPlayer, setGradeDetailPlayer] = useState<string | null>(null);
+  const [gradeDetailData, setGradeDetailData] = useState<any[]>([]);
+  const [gradeDetailLoading, setGradeDetailLoading] = useState(false);
   // for edit modal — add stat
   const [addStatQuarter, setAddStatQuarter] = useState(1);
   const [addStatName, setAddStatName] = useState('');
@@ -288,6 +292,19 @@ export default function TeamEvalScreen() {
     setNewOppPlayer('');
     setNewOppJersey('');
     setNewOppPosition('');
+  };
+
+  const openGradeDetail = async (playerName: string) => {
+    setGradeDetailPlayer(playerName);
+    setGradeDetailData([]);
+    setGradeDetailLoading(true);
+    try {
+      const data = await gameEvalAPI.playerGameHistory(playerName);
+      setGradeDetailData(data);
+    } catch {
+      setGradeDetailData([]);
+    }
+    setGradeDetailLoading(false);
   };
 
   const SCORE_DELTA: Record<string, number> = {
@@ -764,7 +781,7 @@ export default function TeamEvalScreen() {
                 <View style={s.card}>
                   <Text style={s.cardLabel}>PLAYER LEADERBOARD</Text>
                   {dashboard.player_leaderboard.slice(0, 8).map((p: any, i: number) => (
-                    <View key={p.player_name} style={s.leaderRow}>
+                    <TouchableOpacity key={p.player_name} style={s.leaderRow} onPress={() => openGradeDetail(p.player_name)}>
                       <Text style={s.leaderRank}>{i + 1}</Text>
                       <View style={{ flex: 1 }}>
                         <Text style={s.leaderName}>{p.player_name}</Text>
@@ -775,7 +792,8 @@ export default function TeamEvalScreen() {
                       <View style={s.gradeBadge}>
                         <Text style={s.gradeBadgeText}>{p.avg_game_grade.toFixed(2)}</Text>
                       </View>
-                    </View>
+                      <Ionicons name="chevron-forward" size={14} color="#4b5563" style={{ marginLeft: 4 }} />
+                    </TouchableOpacity>
                   ))}
                 </View>
               )}
@@ -2084,6 +2102,105 @@ export default function TeamEvalScreen() {
             >
               <Text style={{ color: '#fff', fontWeight: '700' }}>Done</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Player grade detail (from leaderboard) */}
+      <Modal visible={gradeDetailPlayer !== null} transparent animationType="slide" onRequestClose={() => setGradeDetailPlayer(null)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', paddingBottom: 24 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+              <View>
+                <Text style={{ color: '#fff', fontSize: 18, fontWeight: '800' }}>{gradeDetailPlayer}</Text>
+                <Text style={{ color: '#6b7280', fontSize: 12, marginTop: 2 }}>How the grade was earned, game by game</Text>
+              </View>
+              <TouchableOpacity onPress={() => setGradeDetailPlayer(null)} style={{ padding: 4 }}>
+                <Ionicons name="close" size={24} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+
+            {gradeDetailLoading ? (
+              <ActivityIndicator color="#7c3aed" style={{ marginVertical: 32 }} />
+            ) : gradeDetailData.length === 0 ? (
+              <Text style={{ color: '#6b7280', textAlign: 'center', paddingVertical: 32, fontSize: 13 }}>No game stats recorded for this player yet.</Text>
+            ) : (
+              <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 12 }}>
+                {/* Season average */}
+                {(() => {
+                  const avg = gradeDetailData.reduce((sum: number, g: any) => sum + (g.game_grade || 0), 0) / gradeDetailData.length;
+                  return (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#1f2937', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#374151' }}>
+                      <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '700' }}>SEASON AVG GRADE · {gradeDetailData.length} GAMES</Text>
+                      <View style={s.gradeBadge}><Text style={s.gradeBadgeText}>{avg.toFixed(2)}</Text></View>
+                    </View>
+                  );
+                })()}
+
+                {gradeDetailData.map((g: any) => {
+                  const won = g.our_score != null && g.our_score > g.opponent_score;
+                  const lost = g.our_score != null && g.our_score < g.opponent_score;
+                  const c: Record<string, number> = {};
+                  for (const [name, d] of Object.entries(g.stat_breakdown as Record<string, any>)) c[name] = d.count;
+                  const pts = (c['2 FG Made'] || 0) * 2 + (c['3 FG Made'] || 0) * 3 + (c['FT Made'] || 0);
+                  const reb = (c['Off. Reb'] || 0) + (c['Def. Reb'] || 0);
+                  const ast = c['Assists'] || 0, stl = c['Steal'] || 0, blk = c['Blocked Shot'] || 0, to = c['Turnover'] || 0;
+                  const entries = Object.entries(g.stat_breakdown as Record<string, any>);
+                  return (
+                    <View key={g.game_id} style={{ backgroundColor: '#1f2937', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#374151' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ color: '#fff', fontSize: 15, fontWeight: '700' }}>vs {g.opponent_name}</Text>
+                          <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 1 }}>
+                            {g.date ?? ''}{g.our_score != null ? `  ·  ${won ? 'W' : lost ? 'L' : 'T'} ${g.our_score}-${g.opponent_score}` : ''}  ·  {g.minutes}m
+                          </Text>
+                        </View>
+                        <View style={s.gradeBadge}><Text style={s.gradeBadgeText}>{g.game_grade.toFixed(2)}</Text></View>
+                      </View>
+
+                      {/* Traditional stat line */}
+                      <View style={{ flexDirection: 'row', gap: 14, marginBottom: 10 }}>
+                        {[['PTS', pts], ['REB', reb], ['AST', ast], ['STL', stl], ['BLK', blk], ['TO', to]].map(([label, val]) => (
+                          <View key={label as string} style={{ alignItems: 'center' }}>
+                            <Text style={{ color: '#6b7280', fontSize: 9, fontWeight: '700' }}>{label}</Text>
+                            <Text style={{ color: '#fff', fontSize: 14, fontWeight: '800' }}>{val}</Text>
+                          </View>
+                        ))}
+                      </View>
+
+                      {/* Offense / Defense weighted contribution */}
+                      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
+                        <View style={{ flex: 1, backgroundColor: '#0f172a', borderRadius: 8, padding: 8 }}>
+                          <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700' }}>OFFENSE PTS</Text>
+                          <Text style={{ color: g.offensive_weighted >= 0 ? '#4ade80' : '#f87171', fontSize: 15, fontWeight: '800' }}>
+                            {g.offensive_weighted >= 0 ? '+' : ''}{g.offensive_weighted.toFixed(1)}
+                          </Text>
+                        </View>
+                        <View style={{ flex: 1, backgroundColor: '#0f172a', borderRadius: 8, padding: 8 }}>
+                          <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700' }}>DEFENSE PTS</Text>
+                          <Text style={{ color: g.defensive_weighted >= 0 ? '#4ade80' : '#f87171', fontSize: 15, fontWeight: '800' }}>
+                            {g.defensive_weighted >= 0 ? '+' : ''}{g.defensive_weighted.toFixed(1)}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Full stat breakdown — how the grade was built */}
+                      <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700', marginBottom: 4, letterSpacing: 0.5 }}>STAT BREAKDOWN</Text>
+                      <View style={{ gap: 3 }}>
+                        {entries.map(([name, d]: [string, any]) => (
+                          <View key={name} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Text style={{ color: '#9ca3af', fontSize: 12 }}>{name}{d.count > 1 ? ` ×${d.count}` : ''}</Text>
+                            <Text style={{ color: d.weighted_points >= 0 ? '#4ade80' : '#f87171', fontSize: 12, fontWeight: '600' }}>
+                              {d.weighted_points >= 0 ? '+' : ''}{d.weighted_points.toFixed(1)}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            )}
           </View>
         </View>
       </Modal>
