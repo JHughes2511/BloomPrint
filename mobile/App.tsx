@@ -110,29 +110,13 @@ function AppTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarShowLabel: true,
-        tabBarActiveTintColor: '#3b82f6',
+        tabBarStyle: { backgroundColor: '#111827', borderTopColor: '#1f2937' },
+        tabBarActiveTintColor: '#2563eb',
         tabBarInactiveTintColor: '#6b7280',
-        tabBarStyle: {
-          position: 'absolute',
-          left: 28, right: 28, bottom: 32,
-          height: 56,
-          borderRadius: 28,
-          backgroundColor: '#111827',
-          borderTopWidth: 0,
-          paddingHorizontal: 6,
-          paddingTop: 0,
-          paddingBottom: 0,
-          shadowColor: '#000',
-          shadowOpacity: 0.4,
-          shadowRadius: 14,
-          shadowOffset: { width: 0, height: 6 },
-          elevation: 10,
-        },
-        tabBarItemStyle: { flex: 1, paddingVertical: 5, alignItems: 'center', justifyContent: 'center' },
-        tabBarLabelStyle: { fontSize: 10, fontWeight: '600', marginTop: 3, includeFontPadding: false },
+        tabBarLabelStyle: { fontSize: 9, marginBottom: 2, textAlign: 'center', includeFontPadding: false },
+        tabBarItemStyle: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2 },
         tabBarIconStyle: { marginBottom: 0 },
-        tabBarIcon: ({ focused }) => {
+        tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, [string, string]> = {
             HomeTab:     ['home',        'home-outline'],
             TeamTab:     ['people',      'people-outline'],
@@ -141,19 +125,7 @@ function AppTabs() {
             RecentTab:   ['time',        'time-outline'],
           };
           const [active, inactive] = icons[route.name] ?? ['grid', 'grid-outline'];
-          return (
-            <View style={{
-              width: 24, height: 26, borderRadius: 12,
-              alignItems: 'center', justifyContent: 'center',
-              backgroundColor: focused ? 'rgba(59,130,246,0.18)' : 'transparent',
-            }}>
-              <Ionicons
-                name={(focused ? active : inactive) as any}
-                size={19}
-                color={focused ? '#3b82f6' : '#6b7280'}
-              />
-            </View>
-          );
+          return <Ionicons name={(focused ? active : inactive) as any} size={size} color={color} />;
         },
       })}
     >

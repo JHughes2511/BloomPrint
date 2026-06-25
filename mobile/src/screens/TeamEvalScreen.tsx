@@ -903,7 +903,7 @@ export default function TeamEvalScreen() {
       {/* Floating whiteboard button on Games tab */}
       {activeView === 'games' && (
         <TouchableOpacity
-          style={{ position: 'absolute', bottom: 116, right: 24, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 10, zIndex: 100 }}
+          style={{ position: 'absolute', bottom: 24, right: 20, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 10, zIndex: 100 }}
           onPress={() => {
             const firstGame = sessions[0];
             if (firstGame) setWhiteboardGameId(firstGame.id);
@@ -917,7 +917,7 @@ export default function TeamEvalScreen() {
       {/* Floating whiteboard button on Game Detail tab */}
       {activeView === 'detail' && detailGame && (
         <TouchableOpacity
-          style={{ position: 'absolute', bottom: 116, right: 24, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 10, zIndex: 100 }}
+          style={{ position: 'absolute', bottom: 24, right: 20, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 10, zIndex: 100 }}
           onPress={() => setWhiteboardGameId(detailGame.id)}
         >
           <Ionicons name="clipboard-outline" size={24} color="#fff" />
@@ -927,7 +927,7 @@ export default function TeamEvalScreen() {
       {/* Floating whiteboard button while taking stats in a live game */}
       {activeView === 'live' && activeGame && (
         <TouchableOpacity
-          style={{ position: 'absolute', bottom: 116, right: 24, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 10, zIndex: 100 }}
+          style={{ position: 'absolute', bottom: 24, right: 20, width: 52, height: 52, borderRadius: 26, backgroundColor: '#7c3aed', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 10, zIndex: 100 }}
           onPress={() => setWhiteboardGameId(activeGame.id)}
         >
           <Ionicons name="clipboard-outline" size={24} color="#fff" />
@@ -1009,7 +1009,7 @@ export default function TeamEvalScreen() {
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 80 }}>
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
             {/* Player grid */}
             <Text style={s.sectionLabel}>SELECT PLAYER</Text>
             <View style={s.playerGrid}>
