@@ -133,6 +133,11 @@ def _run_migrations():
                     "ALTER TABLE staff_shared_reports ADD COLUMN regenerated_text TEXT"
                 ))
                 conn.commit()
+            if ssr_cols and "frozen_text" not in ssr_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE staff_shared_reports ADD COLUMN frozen_text TEXT"
+                ))
+                conn.commit()
         except Exception:
             pass
 

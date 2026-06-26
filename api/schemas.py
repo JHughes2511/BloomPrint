@@ -409,6 +409,10 @@ class StaffShareRequest(BaseModel):
     report_id: int
     recipient_id: int
     allow_regenerate: bool = False
+    # Optional frozen, section-filtered snapshot. When provided (and
+    # allow_regenerate is False) the recipient sees this exact text instead of
+    # the live report.
+    frozen_text: str | None = None
 
 
 class StaffSharedReportOut(BaseModel):

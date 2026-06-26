@@ -322,11 +322,17 @@ export default function TeamReportScreen() {
     if (!savedTeamReportId) return;
     setSendingStaff(true);
     try {
+      // When regeneration is NOT allowed, send a frozen, section-filtered copy
+      // so the recipient sees exactly the sections the sender chose to include.
+      const frozenText = !allowRegen
+        ? (joinReportSections(reportSections, sectionToggles) || reportText || undefined)
+        : undefined;
       await staffSharingAPI.share({
         report_type: 'team_report',
         report_id: savedTeamReportId,
         recipient_id: target.id,
         allow_regenerate: allowRegen,
+        frozen_text: frozenText ?? undefined,
       });
       Alert.alert('Shared!', `Report shared with ${target.name}.`);
       setShowStaffShare(false);
@@ -557,7 +563,7 @@ export default function TeamReportScreen() {
                 <Text style={[styles.actionText, { color: '#16a34a' }]}>Share</Text>
               </TouchableOpacity>
               {savedTeamReportId && (
-                <TouchableOpacity style={[styles.actionBtn, { borderColor: '#7c3aed' }]} onPress={() => { setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }}>
+                <TouchableOpacity style={[styles.actionBtn, { borderColor: '#7c3aed' }]} onPress={() => { setShareSourceReport(null); initSectionToggles(); setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }}>
                   <Ionicons name="people-outline" size={20} color="#7c3aed" />
                   <Text style={[styles.actionText, { color: '#7c3aed' }]}>Staff</Text>
                 </TouchableOpacity>
@@ -683,7 +689,11 @@ export default function TeamReportScreen() {
                     onPress={() => {
                       if (!selectedPrevReport) return;
                       setShareSourceReport(selectedPrevReport);
+                      setReportText(selectedPrevReport.report_text);
                       setSavedTeamReportId(selectedPrevReport.id);
+                      const initial: Record<string, boolean> = {};
+                      for (const s of splitReportSections(selectedPrevReport.report_text ?? '')) initial[s.heading] = true;
+                      setSectionToggles(initial);
                       setSelectedPrevReport(null);
                       setTimeout(() => { setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }, 200);
                     }}
@@ -792,11 +802,36 @@ export default function TeamReportScreen() {
                 </Text>
               </View>
             )}
-            {/* Allow regenerate */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 }}>
+            {/* Allow regenerate — this is the mode switch:
+                ON  = live, regenerable copy (recipient can regenerate; no filtering)
+                OFF = frozen snapshot (you control which sections are included) */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 }}>
               <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
               <Switch value={allowRegen} onValueChange={setAllowRegen} trackColor={{ true: '#7c3aed', false: '#374151' }} thumbColor="#fff" />
             </View>
+            <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 12, marginLeft: 2 }}>
+              {allowRegen
+                ? 'Sends a live, regenerable copy — recipient sees the full report.'
+                : 'Sends a frozen snapshot — choose which sections to include below.'}
+            </Text>
+
+            {/* Section toggles — only in frozen mode (regenerate OFF) */}
+            {!allowRegen && reportSections.length > 1 && (
+              <>
+                <Text style={[shareStyles.label, { marginBottom: 6 }]}>Include Sections</Text>
+                {reportSections.map(sec => (
+                  <View key={sec.heading} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 }}>
+                    <Text style={{ color: '#d1d5db', fontSize: 13, flex: 1, marginRight: 8 }} numberOfLines={1}>{sec.heading}</Text>
+                    <Switch
+                      value={sectionToggles[sec.heading] !== false}
+                      onValueChange={v => setSectionToggles(p => ({ ...p, [sec.heading]: v }))}
+                      trackColor={{ true: '#7c3aed', false: '#374151' }}
+                      thumbColor="#fff"
+                    />
+                  </View>
+                ))}
+              </>
+            )}
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
               <VoiceTextInput
                 style={[shareStyles.input, { flex: 1 }]}

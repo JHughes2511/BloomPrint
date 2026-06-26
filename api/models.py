@@ -310,6 +310,10 @@ class StaffSharedReport(Base):
     recipient_id     = Column(Integer, ForeignKey("coaches.id"), nullable=False)
     allow_regenerate = Column(Boolean, default=False)
     regenerated_text = Column(Text, nullable=True)
+    # When set, this is a frozen, section-filtered snapshot of the report at
+    # share time. Used when the sender does NOT allow regeneration so the
+    # recipient sees exactly the controlled copy instead of the live report.
+    frozen_text      = Column(Text, nullable=True)
     created_at       = Column(DateTime, default=datetime.utcnow)
 
     sender    = relationship("Coach", foreign_keys=[sender_id])

@@ -48,7 +48,9 @@ def _build_out(sr: models.StaffSharedReport, db: Session) -> schemas.StaffShared
     out = schemas.StaffSharedReportOut.model_validate(sr)
     out.sender_name = sr.sender.name if sr.sender else ""
     out.recipient_name = sr.recipient.name if sr.recipient else ""
-    out.report_text = _resolve_report_text(sr.report_type, sr.report_id, db)
+    # A frozen snapshot (section-filtered, non-regenerable) takes precedence over
+    # the live report text so the recipient sees exactly the controlled copy.
+    out.report_text = sr.frozen_text if sr.frozen_text else _resolve_report_text(sr.report_type, sr.report_id, db)
     out.regenerated_text = sr.regenerated_text
     return out
 
@@ -76,12 +78,16 @@ def share_with_staff(
     if recipient.id == coach.id:
         raise HTTPException(status_code=400, detail="Cannot share with yourself")
 
+    # A frozen snapshot is only meaningful when regeneration is NOT allowed.
+    frozen = body.frozen_text if (body.frozen_text and not body.allow_regenerate) else None
+
     sr = models.StaffSharedReport(
         report_type=body.report_type,
         report_id=body.report_id,
         sender_id=coach.id,
         recipient_id=body.recipient_id,
         allow_regenerate=body.allow_regenerate,
+        frozen_text=frozen,
     )
     db.add(sr)
     db.flush()
@@ -257,12 +263,16 @@ def forward_shared(
     if recipient.id == coach.id:
         raise HTTPException(status_code=400, detail="Cannot forward to yourself")
 
+    # Preserve the frozen snapshot when forwarding a non-regenerable copy.
+    fwd_frozen = sr.frozen_text if (sr.frozen_text and not body.allow_regenerate) else None
+
     new_sr = models.StaffSharedReport(
         report_type=sr.report_type,
         report_id=sr.report_id,
         sender_id=coach.id,
         recipient_id=body.recipient_id,
         allow_regenerate=body.allow_regenerate,
+        frozen_text=fwd_frozen,
     )
     db.add(new_sr)
     db.flush()

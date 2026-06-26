@@ -194,7 +194,7 @@ export const playerAPI = {
 
 // ── Staff sharing ──────────────────────────────────────────────────────────────
 export const staffSharingAPI = {
-  share: (data: { report_type: string; report_id: number; recipient_id: number; allow_regenerate?: boolean }) =>
+  share: (data: { report_type: string; report_id: number; recipient_id: number; allow_regenerate?: boolean; frozen_text?: string }) =>
     api.post('/staff-sharing/share', data).then(r => r.data),
   inbox: () => api.get('/staff-sharing/inbox').then(r => r.data),
   sent: () => api.get('/staff-sharing/sent').then(r => r.data),
