@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, Modal, KeyboardAvoidingView,
@@ -298,7 +299,7 @@ export default function StaffInboxScreen() {
   const renderMyTeamsTab = () => {
     const myTeamIds = new Set(myTeams.map((t: any) => t.id));
     return (
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}>
+      <KeyboardAwareScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}>
         {/* Search to join */}
         <Text style={s.sectionLabel}>FIND A TEAM TO JOIN</Text>
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
@@ -381,7 +382,7 @@ export default function StaffInboxScreen() {
             <Text style={s.emptyText}>Search for a team above to get started.</Text>
           </View>
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
     );
   };
 
@@ -460,19 +461,19 @@ export default function StaffInboxScreen() {
             </ScrollView>
 
             {view === 'report' && (
-              <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+              <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
                 {activeItem?.report_text
                   ? renderReport(activeItem.report_text)
                   : <Text style={{ color: '#6b7280' }}>No report content available.</Text>}
-              </ScrollView>
+              </KeyboardAwareScrollView>
             )}
             {view === 'regenerated' && (
-              <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+              <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
                 <View style={{ backgroundColor: '#1e1b2e', borderRadius: 8, padding: 10, marginBottom: 10 }}>
                   <Text style={{ color: '#a78bfa', fontSize: 11, fontWeight: '700', letterSpacing: 1 }}>REGENERATED VERSION</Text>
                 </View>
                 {activeItem?.regenerated_text ? renderReport(activeItem.regenerated_text) : <Text style={{ color: '#6b7280' }}>No regenerated version yet.</Text>}
-              </ScrollView>
+              </KeyboardAwareScrollView>
             )}
             {view === 'comments' && (
               <>
@@ -575,7 +576,7 @@ export default function StaffInboxScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+            <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
               {activeGame?.kind === 'report' && (
                 activeGame.report_text
                   ? renderReport(activeGame.report_text)
@@ -586,7 +587,7 @@ export default function StaffInboxScreen() {
                   ? renderReport(activeGame.ai_scouting_report)
                   : <Text style={{ color: '#6b7280' }}>No AI scouting report generated yet for this game.</Text>
               )}
-            </ScrollView>
+            </KeyboardAwareScrollView>
 
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
               <VoiceTextInput

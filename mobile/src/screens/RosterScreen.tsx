@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Modal, Alert, KeyboardAvoidingView, Platform, ScrollView,
@@ -278,7 +279,7 @@ export default function RosterScreen() {
       <Modal visible={showAdd} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={[styles.modal, { maxHeight: '90%', flex: 0 }]}>
-          <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 16 }}>
+          <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 16 }}>
             <Text style={styles.modalTitle}>Add Player</Text>
             {currentTeamName && (
               <Text style={styles.modalSub}>Adding to {currentTeamName}</Text>
@@ -323,7 +324,7 @@ export default function RosterScreen() {
                 {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Add</Text>}
               </TouchableOpacity>
             </View>
-          </ScrollView>
+          </KeyboardAwareScrollView>
           </View>
         </KeyboardAvoidingView>
       </Modal>

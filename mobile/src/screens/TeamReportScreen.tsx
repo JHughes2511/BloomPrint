@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
   StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal, Switch,
@@ -369,7 +370,7 @@ export default function TeamReportScreen() {
       style={{ flex: 1, backgroundColor: '#0a0a0a' }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView
+      <KeyboardAwareScrollView
         ref={scrollRef}
         style={styles.container}
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -641,7 +642,7 @@ export default function TeamReportScreen() {
             )}
           </>
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* Previous Report Detail Modal */}
       <Modal visible={!!selectedPrevReport} animationType="slide" transparent>
@@ -660,7 +661,7 @@ export default function TeamReportScreen() {
                 <Ionicons name="close" size={22} color="#9ca3af" />
               </TouchableOpacity>
             </View>
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
+            <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
               {selectedPrevReport?.report_text ? (
                 renderReport(selectedPrevReport.report_text)
               ) : (
@@ -783,7 +784,7 @@ export default function TeamReportScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
-            </ScrollView>
+            </KeyboardAwareScrollView>
           </View>
         </KeyboardAvoidingView>
       </Modal>
@@ -791,7 +792,7 @@ export default function TeamReportScreen() {
       {/* Share with Staff Modal */}
       <Modal visible={showStaffShare} transparent animationType="slide">
         <KeyboardAvoidingView style={shareStyles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <ScrollView style={shareStyles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
+          <KeyboardAwareScrollView style={shareStyles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
             <Text style={shareStyles.title}>Share with Staff</Text>
             {/* Report preview */}
             {shareSourceReport && (
@@ -867,14 +868,14 @@ export default function TeamReportScreen() {
                 <Text style={shareStyles.cancelText}>Cancel</Text>
               </TouchableOpacity>
             </View>
-          </ScrollView>
+          </KeyboardAwareScrollView>
         </KeyboardAvoidingView>
       </Modal>
 
       {/* Share Modal */}
       <Modal visible={showShare} transparent animationType="slide">
         <KeyboardAvoidingView style={shareStyles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <ScrollView style={shareStyles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
+          <KeyboardAwareScrollView style={shareStyles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
             <Text style={shareStyles.title}>Share Team Report</Text>
             {/* Report preview */}
             {shareSourceReport && (
@@ -1019,7 +1020,7 @@ export default function TeamReportScreen() {
                 {sharing ? <ActivityIndicator color="#fff" /> : <Text style={shareStyles.shareBtnText}>Send</Text>}
               </TouchableOpacity>
             </View>
-          </ScrollView>
+          </KeyboardAwareScrollView>
         </KeyboardAvoidingView>
       </Modal>
     </KeyboardAvoidingView>

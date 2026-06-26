@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
   Modal, Alert, KeyboardAvoidingView, Platform, TextInput,
@@ -392,7 +393,7 @@ export default function PlayerProfileScreen() {
   const latest = evals[evals.length - 1] ?? null;
 
   return (
-    <ScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
+    <KeyboardAwareScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -844,7 +845,7 @@ export default function PlayerProfileScreen() {
             </View>
 
             <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-              <ScrollView
+              <KeyboardAwareScrollView
                 ref={modalScrollRef}
                 style={{ flex: 1 }}
                 contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
@@ -889,7 +890,7 @@ export default function PlayerProfileScreen() {
                       : <><Ionicons name="refresh" size={15} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Apply & Regenerate</Text></>}
                   </TouchableOpacity>
                 </View>
-              </ScrollView>
+              </KeyboardAwareScrollView>
             </KeyboardAvoidingView>
 
             {/* Action row: Send to Player, Send to Staff, Print, Export */}
@@ -949,7 +950,7 @@ export default function PlayerProfileScreen() {
       <Modal visible={showEdit} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={[styles.modal, { maxHeight: '90%', flex: 0 }]}>
-          <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 16 }}>
+          <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 16 }}>
             <Text style={styles.modalTitle}>Edit Player</Text>
             <VoiceTextInput
               style={styles.input}
@@ -1130,7 +1131,7 @@ export default function PlayerProfileScreen() {
                 {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Save</Text>}
               </TouchableOpacity>
             </View>
-          </ScrollView>
+          </KeyboardAwareScrollView>
           </View>
         </KeyboardAvoidingView>
       </Modal>
@@ -1255,7 +1256,7 @@ export default function PlayerProfileScreen() {
           title={shareCtx.title}
         />
       )}
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 

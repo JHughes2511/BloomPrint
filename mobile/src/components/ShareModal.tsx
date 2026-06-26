@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import VoiceTextInput from './VoiceTextInput';
 import { playerAPI, teamsAPI, staffSharingAPI } from '../api/client';
 import { splitReportSections, joinReportSections } from '../utils/mdToHtml';
+import KeyboardAwareScrollView from './KeyboardAwareScrollView';
 
 type Target = 'player' | 'team' | 'all_staff';
 
@@ -127,8 +128,7 @@ export default function ShareModal({
     <Modal visible={visible} transparent animationType="slide">
       <KeyboardAvoidingView
         style={styles.overlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
+        behavior={Platform.OS === 'android' ? 'height' : undefined}
       >
         <View style={styles.box}>
           <View style={styles.header}>
@@ -154,7 +154,7 @@ export default function ShareModal({
             ))}
           </View>
 
-          <ScrollView style={{ maxHeight: 420 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          <KeyboardAwareScrollView style={{ maxHeight: 420 }}>
             {/* Whole Team — pick from your teams */}
             {target === 'team' ? (
               <>
@@ -256,7 +256,7 @@ export default function ShareModal({
                 ))}
               </>
             )}
-          </ScrollView>
+          </KeyboardAwareScrollView>
 
           <View style={styles.footer}>
             <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>

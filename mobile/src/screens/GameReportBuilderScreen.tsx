@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform, Modal,
@@ -357,7 +358,7 @@ export default function GameReportBuilderScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
-      <ScrollView
+      <KeyboardAwareScrollView
         ref={scrollRef}
         style={styles.container}
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -617,7 +618,7 @@ export default function GameReportBuilderScreen() {
             </View>
           </View>
         ) : null}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* Clip analysis modal */}
       <Modal visible={!!clipModal} animationType="slide" transparent>
@@ -631,12 +632,12 @@ export default function GameReportBuilderScreen() {
                 <Ionicons name="close" size={22} color="#9ca3af" />
               </TouchableOpacity>
             </View>
-            <ScrollView style={{ maxHeight: 280 }} contentContainerStyle={{ paddingBottom: 8 }}>
+            <KeyboardAwareScrollView style={{ maxHeight: 280 }} contentContainerStyle={{ paddingBottom: 8 }}>
               {clipModal?.analysis_text
                 ? renderReport(clipModal.analysis_text)
                 : <Text style={{ color: '#6b7280' }}>No analysis yet.</Text>
               }
-            </ScrollView>
+            </KeyboardAwareScrollView>
             <Text style={[styles.correctionLabel, { marginTop: 16 }]}>Correct This Analysis</Text>
             <VoiceTextInput
               style={styles.correctionInput}

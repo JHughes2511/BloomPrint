@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Alert, Modal, Switch, KeyboardAvoidingView, Platform, SafeAreaView,
@@ -341,7 +342,7 @@ export default function EvalReportScreen() {
   const hasPillars = ev.pillar_grades && Object.keys(ev.pillar_grades).length > 0;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
+    <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
 
       {/* Header */}
       <View style={styles.header}>
@@ -803,7 +804,7 @@ export default function EvalReportScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 

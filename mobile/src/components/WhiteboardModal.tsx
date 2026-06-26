@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, Modal, StyleSheet,
   PanResponder, Alert, TextInput, ScrollView, ActivityIndicator,
-  Dimensions, Platform, Image,
+  Dimensions, Platform, Image, KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path, Circle, Line, G, Text as SvgText } from 'react-native-svg';
@@ -419,7 +419,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
 
         {/* Text input modal */}
         <Modal visible={showAddText} transparent animationType="fade" onRequestClose={() => setShowAddText(false)}>
-          <View style={styles.listOverlay}>
+          <KeyboardAvoidingView style={styles.listOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View style={[styles.listBox, { padding: 20 }]}>
               <Text style={styles.listTitle}>Add Label</Text>
               <TextInput style={styles.textField} placeholder="Enter text..."
@@ -434,7 +434,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         </Modal>
 
       </View>

@@ -1,5 +1,6 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, Alert, ScrollView, Modal, TextInput, KeyboardAvoidingView, Platform, Switch,
@@ -618,12 +619,12 @@ export default function RecentScreen() {
                 <Ionicons name="close" size={24} color="#9ca3af" />
               </TouchableOpacity>
             </View>
-            <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+            <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
               {gameReportModal?.text
                 ? renderReport(gameReportModal.text)
                 : <Text style={{ color: '#6b7280' }}>No report content available.</Text>
               }
-            </ScrollView>
+            </KeyboardAwareScrollView>
           </View>
         </View>
       </Modal>
@@ -644,7 +645,7 @@ export default function RecentScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={{ maxHeight: '80%' }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <KeyboardAwareScrollView style={{ maxHeight: '80%' }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
               {/* Report preview */}
               {staffSharePreview && (
                 <View style={[sendStyles.reportPreview, { marginBottom: 12 }]}>
@@ -753,7 +754,7 @@ export default function RecentScreen() {
               {staffResults.length === 0 && staffSearch.trim().length > 0 && !staffSearchLoading && (
                 <Text style={{ color: '#4b5563', textAlign: 'center', paddingVertical: 20 }}>No staff found.</Text>
               )}
-            </ScrollView>
+            </KeyboardAwareScrollView>
             <TouchableOpacity
               style={[sendStyles.cancelBtn, { marginTop: 12, flex: 0 }]}
               onPress={closeStaffShareModal}
@@ -794,12 +795,12 @@ export default function RecentScreen() {
             {/* REPORT VIEW */}
             {modalView === 'report' && (
               <>
-                <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+                <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
                   {activeModal?.text
                     ? renderReport(activeModal.text)
                     : <Text style={{ color: '#6b7280' }}>No report content</Text>
                   }
-                </ScrollView>
+                </KeyboardAwareScrollView>
                 <View style={styles.actionRow}>
                   <TouchableOpacity style={styles.actionBtn} onPress={() => { setTeamCorrectText(''); setModalView('correct'); }}>
                     <Ionicons name="create-outline" size={18} color="#fff" />
@@ -893,7 +894,7 @@ export default function RecentScreen() {
                     <ActivityIndicator color="#6b7280" size="small" style={{ marginTop: 8, alignSelf: 'center' }} />
                   )}
                 </View>
-                <ScrollView style={{ maxHeight: 200 }} keyboardShouldPersistTaps="handled">
+                <KeyboardAwareScrollView style={{ maxHeight: 200 }} keyboardShouldPersistTaps="handled">
                   {sendResults.map(r => (
                     <TouchableOpacity key={r.id} style={sendStyles.resultRow} onPress={() => sendReport(r)} disabled={sending}>
                       <View style={sendStyles.avatar}>
@@ -909,7 +910,7 @@ export default function RecentScreen() {
                   {sendResults.length === 0 && sendSearch.trim().length > 0 && !sendSearchLoading && (
                     <Text style={{ color: '#4b5563', textAlign: 'center', paddingVertical: 20 }}>No players found. Make sure they've registered on the player portal.</Text>
                   )}
-                </ScrollView>
+                </KeyboardAwareScrollView>
               </>
             )}
 
