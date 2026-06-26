@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Alert,
@@ -114,12 +115,12 @@ export default function CoachTrainingDetailScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
-      <ScrollView
+      <KeyboardAwareScrollView
         ref={scrollRef}
         style={styles.container}
         contentContainerStyle={{ paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
-        automaticallyAdjustKeyboardInsets={true}
+       
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -248,7 +249,7 @@ export default function CoachTrainingDetailScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }

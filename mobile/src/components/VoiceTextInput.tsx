@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, TextInputProps, Alert, StyleSheet } from 'react-native';
+import { View, TextInput, TouchableOpacity, Pressable, TextInputProps, Alert, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { transcribeAPI } from '../api/client';
@@ -23,6 +23,7 @@ export default function VoiceTextInput({
   const [listening, setListening] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
 
+  const inputRef = useRef<TextInput>(null);
   const recordingRef = useRef<Audio.Recording | null>(null);
   const listeningRef = useRef(false);
   const chunkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -147,8 +148,15 @@ export default function VoiceTextInput({
   const micColor = listening ? '#7c3aed' : transcribing ? '#f59e0b' : '#6b7280';
   const micIcon: any = listening ? 'mic' : transcribing ? 'hourglass-outline' : 'mic-outline';
 
+  // Tapping anywhere in the box (padding, or the empty area of a multiline
+  // field) focuses the input — not just the exact text glyphs.
+  const focusInput = () => {
+    if (editable !== false) inputRef.current?.focus();
+  };
+
   return (
-    <View
+    <Pressable
+      onPress={focusInput}
       style={[
         style,
         {
@@ -158,6 +166,7 @@ export default function VoiceTextInput({
       ]}
     >
       <TextInput
+        ref={inputRef}
         {...rest}
         value={value}
         onChangeText={onChangeText}
@@ -166,6 +175,7 @@ export default function VoiceTextInput({
         editable={editable}
         style={{
           flex: 1,
+          alignSelf: 'stretch',
           backgroundColor: 'transparent',
           borderWidth: 0,
           padding: 0,
@@ -173,6 +183,7 @@ export default function VoiceTextInput({
           color: textColor,
           fontSize,
           fontWeight,
+          ...(multiline ? { textAlignVertical: 'top' as const } : null),
         }}
       />
       {showMic && (
@@ -184,6 +195,6 @@ export default function VoiceTextInput({
           <Ionicons name={micIcon} size={17} color={micColor} />
         </TouchableOpacity>
       )}
-    </View>
+    </Pressable>
   );
 }
