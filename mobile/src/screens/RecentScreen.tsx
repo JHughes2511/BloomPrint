@@ -11,7 +11,7 @@ import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { evalsAPI, playerAPI, gameReportsAPI, trainingAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import { GradeBadge } from '../components/GradeBadge';
-import { mdToHtml, safeFileName } from '../utils/mdToHtml';
+import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import { renderReport } from '../utils/renderReport';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -104,6 +104,9 @@ export default function RecentScreen() {
   });
   // Staff share preview text (first 150 chars of report)
   const [staffSharePreview, setStaffSharePreview] = useState<string | null>(null);
+  // Full report text + per-section toggles for frozen (non-regenerable) shares
+  const [staffShareFullText, setStaffShareFullText] = useState<string>('');
+  const [staffSectionToggles, setStaffSectionToggles] = useState<Record<string, boolean>>({});
 
   // Send-to-player content toggles (for modal send view)
   const [playerShareToggles, setPlayerShareToggles] = useState({
@@ -111,7 +114,7 @@ export default function RecentScreen() {
     share_green_flags: false, share_watch_flags: false, share_key_questions: false,
   });
 
-  const openStaffShareModal = (ctx: StaffShareContext, previewText?: string) => {
+  const openStaffShareModal = (ctx: StaffShareContext, previewText?: string, fullText?: string) => {
     setStaffShareCtx(ctx);
     setStaffSearch('');
     setStaffResults([]);
@@ -119,6 +122,9 @@ export default function RecentScreen() {
     setStaffMessage('');
     setStaffShareToggles({ share_report_text: true, share_grades: false, share_flags: false, share_questions: false, share_overall_grade: false, share_pillar_grades: false });
     setStaffSharePreview(previewText ?? null);
+    const txt = fullText ?? '';
+    setStaffShareFullText(txt);
+    setStaffSectionToggles(Object.fromEntries(splitReportSections(txt).map(s => [s.heading, true])));
     setShowStaffShareModal(true);
   };
 
@@ -143,11 +149,16 @@ export default function RecentScreen() {
     if (!staffShareCtx) return;
     setSendingToStaff(true);
     try {
+      const secs = splitReportSections(staffShareFullText);
+      const frozenText = !staffAllowRegen && secs.length > 1
+        ? (joinReportSections(secs, staffSectionToggles) || staffShareFullText || undefined)
+        : undefined;
       await staffSharingAPI.share({
         report_type: staffShareCtx.report_type,
         report_id: staffShareCtx.report_id,
         recipient_id: target.id,
         allow_regenerate: staffAllowRegen,
+        frozen_text: frozenText,
       });
       Alert.alert('Shared!', `${staffShareCtx.label} shared with ${target.name}.`);
       closeStaffShareModal();
@@ -567,7 +578,7 @@ export default function RecentScreen() {
                       const previewName = item.player_name ?? label;
                       const previewType = item.kind === 'training' ? 'Training Program' : (TYPE_LABELS[item.output_type] ?? item.output_type);
                       const preview = previewName + ' — ' + previewType + ': ' + previewRaw.replace(/[#*_]/g, '').trim().slice(0, 150);
-                      openStaffShareModal({ report_type: reportType, report_id: item.id, label }, preview);
+                      openStaffShareModal({ report_type: reportType, report_id: item.id, label }, preview, previewRaw);
                     }}
                   >
                     <Ionicons name="people-outline" size={13} color="#7c3aed" />
@@ -612,7 +623,7 @@ export default function RecentScreen() {
 
       {/* Generic Send to Staff Modal */}
       <Modal visible={showStaffShareModal} animationType="slide" transparent>
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
               <View style={{ flex: 1 }}>
@@ -666,7 +677,7 @@ export default function RecentScreen() {
               )}
 
               {/* Allow regenerate toggle */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, marginBottom: 12, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, marginBottom: 4, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
                 <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
                 <Switch
                   value={staffAllowRegen}
@@ -675,6 +686,32 @@ export default function RecentScreen() {
                   thumbColor="#fff"
                 />
               </View>
+              <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 12, marginLeft: 2 }}>
+                {staffAllowRegen
+                  ? 'Sends a live, regenerable copy — recipient sees the full report.'
+                  : 'Sends a frozen snapshot — choose which sections to include below.'}
+              </Text>
+
+              {/* Section toggles — only in frozen mode (regenerate OFF) */}
+              {(() => {
+                const secs = splitReportSections(staffShareFullText);
+                return !staffAllowRegen && secs.length > 1 ? (
+                  <>
+                    <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Include Sections</Text>
+                    {secs.map(sec => (
+                      <View key={sec.heading} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 }}>
+                        <Text style={{ color: '#d1d5db', fontSize: 13, flex: 1, marginRight: 8 }} numberOfLines={1}>{sec.heading}</Text>
+                        <Switch
+                          value={staffSectionToggles[sec.heading] !== false}
+                          onValueChange={v => setStaffSectionToggles(prev => ({ ...prev, [sec.heading]: v }))}
+                          trackColor={{ false: '#374151', true: '#7c3aed' }}
+                          thumbColor="#fff"
+                        />
+                      </View>
+                    ))}
+                  </>
+                ) : null;
+              })()}
 
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
                 <VoiceTextInput
@@ -785,9 +822,11 @@ export default function RecentScreen() {
                                     activeModal.kind === 'team' ? 'Team Report' : 'Player Eval';
                       const previewName = activeModal.playerName ?? label;
                       const previewType = TYPE_LABELS[activeModal.outputType] ?? activeModal.outputType;
-                      const preview = previewName + ' — ' + previewType + ': ' + activeModal.text.replace(/[#*_]/g, '').trim().slice(0, 150);
+                      const fullText = activeModal.text ?? '';
+                      const preview = previewName + ' — ' + previewType + ': ' + fullText.replace(/[#*_]/g, '').trim().slice(0, 150);
+                      const reportId = activeModal.id;
                       setActiveModal(null);
-                      openStaffShareModal({ report_type: reportType, report_id: activeModal.id, label }, preview);
+                      openStaffShareModal({ report_type: reportType, report_id: reportId, label }, preview, fullText);
                     }}
                   >
                     <Ionicons name="people-outline" size={18} color="#7c3aed" />

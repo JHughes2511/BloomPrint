@@ -1139,7 +1139,7 @@ export default function PlayerProfileScreen() {
 
       {/* Share with Staff modal */}
       <Modal visible={showStaffShare} transparent animationType="slide">
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>Share with Staff</Text>
             <Text style={styles.modalSub}>Search for a coach, scout, or trainer to share this training program.</Text>
