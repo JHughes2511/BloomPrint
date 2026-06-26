@@ -14,6 +14,7 @@ import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
 import { renderReport } from '../utils/renderReport';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
+import { splitReportSections, joinReportSections } from '../utils/mdToHtml';
 
 const COMPETITION_LEVELS = ['Middle School', 'HS JV', 'HS Varsity', 'AAU', 'College', 'Pro'];
 
@@ -199,6 +200,8 @@ export default function PlayerProfileScreen() {
   const [showStaffShare, setShowStaffShare] = useState(false);
   const [staffShareType, setStaffShareType] = useState<'training' | null>(null);
   const [staffShareId, setStaffShareId] = useState<number | null>(null);
+  const [staffShareText, setStaffShareText] = useState<string>('');
+  const [staffSectionToggles, setStaffSectionToggles] = useState<Record<string, boolean>>({});
   const [staffSearch, setStaffSearch] = useState('');
   const [staffResults, setStaffResults] = useState<any[]>([]);
   const [staffSearchLoading, setStaffSearchLoading] = useState(false);
@@ -345,11 +348,16 @@ export default function PlayerProfileScreen() {
     if (!staffShareId) return;
     setSendingStaff(true);
     try {
+      const staffSections = splitReportSections(staffShareText);
+      const frozenText = !allowRegen && staffSections.length > 1
+        ? (joinReportSections(staffSections, staffSectionToggles) || staffShareText || undefined)
+        : undefined;
       await staffSharingAPI.share({
         report_type: 'training',
         report_id: staffShareId,
         recipient_id: target.id,
         allow_regenerate: allowRegen,
+        frozen_text: frozenText,
       });
       Alert.alert('Shared!', `Training program shared with ${target.name}.`);
       setShowStaffShare(false);
@@ -694,7 +702,12 @@ export default function PlayerProfileScreen() {
                     } else if (trainingPickerAction === 'regen') {
                       regenerateTraining(ts.id);
                     } else {
+                      const txt = ts.program_text ?? '';
+                      const secs = splitReportSections(txt);
                       setStaffShareId(ts.id);
+                      setStaffShareText(txt);
+                      setStaffSectionToggles(Object.fromEntries(secs.map(s => [s.heading, true])));
+                      setAllowRegen(false);
                       setStaffShareType('training');
                       setShowStaffShare(true);
                       setStaffSearch('');
@@ -894,7 +907,12 @@ export default function PlayerProfileScreen() {
                   style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#7c3aed', borderRadius: 10, paddingVertical: 12 }}
                   onPress={() => {
                     if (!trainingModalItem) return;
+                    const txt = trainingModalItem.program_text ?? '';
+                    const secs = splitReportSections(txt);
                     setStaffShareId(trainingModalItem.id);
+                    setStaffShareText(txt);
+                    setStaffSectionToggles(Object.fromEntries(secs.map(s => [s.heading, true])));
+                    setAllowRegen(false);
                     setStaffShareType('training');
                     setShowStaffShare(true);
                     setStaffSearch('');
@@ -1125,7 +1143,7 @@ export default function PlayerProfileScreen() {
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>Share with Staff</Text>
             <Text style={styles.modalSub}>Search for a coach, scout, or trainer to share this training program.</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
               <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
               <TouchableOpacity
                 onPress={() => setAllowRegen(v => !v)}
@@ -1134,6 +1152,30 @@ export default function PlayerProfileScreen() {
                 <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: '#fff', alignSelf: allowRegen ? 'flex-end' : 'flex-start' }} />
               </TouchableOpacity>
             </View>
+            <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 12, marginLeft: 2 }}>
+              {allowRegen
+                ? 'Sends a live, regenerable copy — recipient sees the full report.'
+                : 'Sends a frozen snapshot — choose which sections to include below.'}
+            </Text>
+            {(() => {
+              const secs = splitReportSections(staffShareText);
+              return !allowRegen && secs.length > 1 ? (
+                <>
+                  <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Include Sections</Text>
+                  {secs.map(sec => (
+                    <View key={sec.heading} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 }}>
+                      <Text style={{ color: '#d1d5db', fontSize: 13, flex: 1, marginRight: 8 }} numberOfLines={1}>{sec.heading}</Text>
+                      <TouchableOpacity
+                        onPress={() => setStaffSectionToggles(p => ({ ...p, [sec.heading]: !(p[sec.heading] !== false) }))}
+                        style={{ width: 40, height: 22, borderRadius: 11, backgroundColor: staffSectionToggles[sec.heading] !== false ? '#7c3aed' : '#374151', justifyContent: 'center', paddingHorizontal: 2 }}
+                      >
+                        <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: '#fff', alignSelf: staffSectionToggles[sec.heading] !== false ? 'flex-end' : 'flex-start' }} />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </>
+              ) : null;
+            })()}
             <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
               <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
