@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform,
@@ -47,7 +48,7 @@ export default function TrainingScreen() {
       style={{ flex: 1, backgroundColor: '#0a0a0a' }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
+    <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#fff" />
@@ -115,7 +116,7 @@ export default function TrainingScreen() {
           <Text style={styles.emptyText}>No training program yet. Generate one based on the latest evaluation.</Text>
         </View>
       )}
-    </ScrollView>
+    </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
   );
 }

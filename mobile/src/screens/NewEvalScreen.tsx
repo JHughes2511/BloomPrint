@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
@@ -72,7 +73,7 @@ export default function NewEvalScreen() {
       style={{ flex: 1, backgroundColor: '#0a0a0a' }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-    <ScrollView
+    <KeyboardAwareScrollView
       ref={scrollRef}
       style={styles.container}
       contentContainerStyle={{ paddingBottom: 100 }}
@@ -147,7 +148,7 @@ export default function NewEvalScreen() {
       {submitting && (
         <Text style={styles.hint}>Extracting frames and analyzing with Claude. This may take 30–60 seconds.</Text>
       )}
-    </ScrollView>
+    </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
   );
 }

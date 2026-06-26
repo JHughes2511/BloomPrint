@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import VoiceTextInput from '../../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../../components/KeyboardAwareScrollView';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert,
@@ -34,7 +35,7 @@ export default function PlayerLoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1, backgroundColor: '#0f1a0f' }}
     >
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -76,7 +77,7 @@ export default function PlayerLoginScreen() {
         >
           <Text style={styles.backText}>← Back to Role Select</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import VoiceTextInput from '../../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   TextInput, Alert, ActivityIndicator,
@@ -66,7 +67,7 @@ export default function PlayerLinkScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60, padding: 24 }}>
+    <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60, padding: 24 }}>
       <View style={styles.headerRow}>
         <Text style={styles.title}>Link to Staff</Text>
         <TouchableOpacity onPress={logout}>
@@ -153,7 +154,7 @@ export default function PlayerLinkScreen() {
           <Text style={{ color: '#4b7a4b', fontSize: 12, marginTop: 8 }}>No staff found. Try a different search.</Text>
         )}
       </View>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 

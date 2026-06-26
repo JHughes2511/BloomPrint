@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 import VoiceTextInput from '../../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
   Modal, TextInput, Platform, PanResponder, Animated, Keyboard,
@@ -267,7 +268,7 @@ export default function PlayerHomeScreen() {
                   <Ionicons name="close" size={22} color="#9ca3af" />
                 </TouchableOpacity>
               </View>
-              <ScrollView
+              <KeyboardAwareScrollView
                 ref={modalScrollRef}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
@@ -322,7 +323,7 @@ export default function PlayerHomeScreen() {
                 >
                   <Text style={styles.saveBtnText}>{saving ? 'Saving…' : 'Save Changes'}</Text>
                 </TouchableOpacity>
-              </ScrollView>
+              </KeyboardAwareScrollView>
             </TouchableOpacity>
           </Animated.View>
         </TouchableOpacity>

@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, RefreshControl, Alert, TextInput,
@@ -72,7 +73,7 @@ export default function CoachNotificationsScreen() {
   }
 
   return (
-    <ScrollView
+    <KeyboardAwareScrollView
       style={styles.container}
       contentContainerStyle={{ paddingBottom: 100 }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#2563eb" />}
@@ -207,7 +208,7 @@ export default function CoachNotificationsScreen() {
           </TouchableOpacity>
         ))
       )}
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 

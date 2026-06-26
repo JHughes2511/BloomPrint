@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import VoiceTextInput from '../../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../../components/KeyboardAwareScrollView';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert,
@@ -81,7 +82,7 @@ export default function PlayerRegisterScreen() {
 
   if (registered) {
     return (
-      <ScrollView style={styles.container} contentContainerStyle={{ padding: 24, paddingTop: 60 }}>
+      <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ padding: 24, paddingTop: 60 }}>
         <Text style={styles.logo}>Welcome!</Text>
         <Text style={styles.sub}>Link your player profile</Text>
 
@@ -141,7 +142,7 @@ export default function PlayerRegisterScreen() {
         <TouchableOpacity style={styles.skipBtn} onPress={() => navigation.navigate('PlayerHome')}>
           <Text style={styles.skipText}>Skip for now →</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     );
   }
 
@@ -150,7 +151,7 @@ export default function PlayerRegisterScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1, backgroundColor: '#0f1a0f' }}
     >
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.formContainer}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -192,7 +193,7 @@ export default function PlayerRegisterScreen() {
         <TouchableOpacity onPress={() => navigation.navigate('PlayerLogin')}>
           <Text style={styles.toggle}>Already have an account? Sign In</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
   );
 }
