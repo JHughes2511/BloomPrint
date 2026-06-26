@@ -646,7 +646,7 @@ export default function TeamReportScreen() {
 
       {/* Previous Report Detail Modal */}
       <Modal visible={!!selectedPrevReport} animationType="slide" transparent>
-        <KeyboardAvoidingView style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <View style={{ flex: 1 }}>
@@ -786,7 +786,7 @@ export default function TeamReportScreen() {
               </View>
             </KeyboardAwareScrollView>
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </Modal>
 
       {/* Share with Staff Modal */}
