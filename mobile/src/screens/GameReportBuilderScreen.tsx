@@ -14,6 +14,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI } from '../api/client';
+import ShareModal from '../components/ShareModal';
 import { mdToHtml, safeFileName, wrapPrintDocument } from '../utils/mdToHtml';
 import { useAuth } from '../context/AuthContext';
 
@@ -79,6 +80,9 @@ export default function GameReportBuilderScreen() {
   const [clipModal, setClipModal] = useState<any | null>(null);
   const [clipCorrectionText, setClipCorrectionText] = useState('');
   const [clipCorrecting, setClipCorrecting] = useState(false);
+
+  // Unified share modal (player / team / staff)
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Share modal
   const [showShare, setShowShare] = useState(false);
@@ -581,9 +585,9 @@ export default function GameReportBuilderScreen() {
                 <Ionicons name="print-outline" size={16} color="#9ca3af" />
                 <Text style={styles.actionText}>Print</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn} onPress={() => { setShowShare(true); setShareSearch(''); setShareResults([]); }}>
-                <Ionicons name="paper-plane-outline" size={16} color="#9ca3af" />
-                <Text style={styles.actionText}>Send</Text>
+              <TouchableOpacity style={styles.actionBtn} onPress={() => setShowShareModal(true)}>
+                <Ionicons name="share-social-outline" size={16} color="#9ca3af" />
+                <Text style={styles.actionText}>Share</Text>
               </TouchableOpacity>
             </View>
 
@@ -656,6 +660,19 @@ export default function GameReportBuilderScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Unified Share modal — player / team / staff */}
+      {report && showShareModal && (
+        <ShareModal
+          visible={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          reportType="game"
+          reportId={reportId ?? 0}
+          outputType={report.output_type ?? 'coaching_report'}
+          reportText={report.report_text ?? ''}
+          title={report.title || matchupLabel()}
+        />
+      )}
 
       {/* Share modal */}
       <Modal visible={showShare} animationType="slide" transparent>

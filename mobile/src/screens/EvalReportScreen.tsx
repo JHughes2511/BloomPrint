@@ -10,6 +10,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { evalsAPI, playersAPI, playerAPI, staffSharingAPI, coachesAPI } from '../api/client';
+import ShareModal from '../components/ShareModal';
 import { Evaluation, Correction, Player } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
@@ -64,6 +65,9 @@ export default function EvalReportScreen() {
     grades: true, flags: true, questions: true, report: true, corrections: false,
   });
   const [exporting, setExporting] = useState(false);
+
+  // Unified share modal (player / team / staff)
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Share with staff modal
   const [showStaffShare, setShowStaffShare] = useState(false);
@@ -539,11 +543,24 @@ export default function EvalReportScreen() {
           <Ionicons name="person-add-outline" size={18} color="#16a34a" />
           <Text style={[styles.actionText, { color: '#16a34a' }]}>Player</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtn, { borderColor: '#7c3aed' }]} onPress={() => { setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }}>
-          <Ionicons name="people-outline" size={18} color="#7c3aed" />
-          <Text style={[styles.actionText, { color: '#7c3aed' }]}>Staff</Text>
+        <TouchableOpacity style={[styles.actionBtn, { borderColor: '#7c3aed' }]} onPress={() => setShowShareModal(true)}>
+          <Ionicons name="share-social-outline" size={18} color="#7c3aed" />
+          <Text style={[styles.actionText, { color: '#7c3aed' }]}>Share</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Unified Share modal — player / team / staff */}
+      {ev && showShareModal && (
+        <ShareModal
+          visible={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          reportType="eval"
+          reportId={evalId}
+          outputType={ev.output_type ?? 'player_eval'}
+          reportText={ev.report_text ?? ''}
+          title={ev.output_type ? ev.output_type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) : 'Player Eval'}
+        />
+      )}
 
       {/* Share with Staff modal */}
       <Modal visible={showStaffShare} transparent animationType="slide">

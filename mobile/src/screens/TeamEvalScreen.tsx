@@ -2473,7 +2473,7 @@ export default function TeamEvalScreen() {
                 <Ionicons name="close" size={22} color="#9ca3af" />
               </TouchableOpacity>
             </View>
-            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>Search for a staff member by name to share this game session.</Text>
+            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>Search a staff member, team, or program to share this game session. Searching a team or program reaches every connected staff member.</Text>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
               <TextInput
                 style={{ flex: 1, backgroundColor: '#1f2937', borderRadius: 10, padding: 12, color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151' }}
@@ -2485,7 +2485,7 @@ export default function TeamEvalScreen() {
                   if (!staffSearch.trim()) return;
                   setStaffSearching(true);
                   try {
-                    const r = await coachesAPI.search(staffSearch.trim());
+                    const r = await staffSharingAPI.searchTargets(staffSearch.trim());
                     setStaffResults(r);
                   } catch {}
                   setStaffSearching(false);
@@ -2498,7 +2498,7 @@ export default function TeamEvalScreen() {
                   if (!staffSearch.trim()) return;
                   setStaffSearching(true);
                   try {
-                    const r = await coachesAPI.search(staffSearch.trim());
+                    const r = await staffSharingAPI.searchTargets(staffSearch.trim());
                     setStaffResults(r);
                   } catch {}
                   setStaffSearching(false);
@@ -2509,21 +2509,32 @@ export default function TeamEvalScreen() {
               </TouchableOpacity>
             </View>
             <ScrollView style={{ maxHeight: 300 }}>
-              {staffResults.map((staff: any) => (
-                <View key={staff.id} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#1f2937', borderRadius: 10, padding: 12, marginBottom: 8 }}>
+              {staffResults.map((staff: any, idx: number) => (
+                <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#1f2937', borderRadius: 10, padding: 12, marginBottom: 8 }}>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: '#fff', fontSize: 14, fontWeight: '700' }}>{staff.name}</Text>
-                    <Text style={{ color: '#6b7280', fontSize: 12 }}>{staff.role} · {staff.program_name}</Text>
+                    <Text style={{ color: '#fff', fontSize: 14, fontWeight: '700' }}>{staff.label ?? staff.name}</Text>
+                    <Text style={{ color: '#6b7280', fontSize: 12 }}>{staff.sublabel ?? `${staff.role} · ${staff.program_name}`}</Text>
                   </View>
+                  {staff.kind && staff.kind !== 'coach' && (
+                    <Ionicons name="people" size={16} color="#7c3aed" style={{ marginRight: 8 }} />
+                  )}
                   <TouchableOpacity
                     style={{ backgroundColor: '#7c3aed', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7 }}
                     onPress={async () => {
                       if (!shareGameId) return;
                       setSharingStaff(true);
                       try {
-                        await staffSharingAPI.share({ report_type: 'game_session', report_id: shareGameId, recipient_id: staff.id, allow_regenerate: false });
+                        const res = await staffSharingAPI.shareGroup({
+                          report_type: 'game_session',
+                          report_id: shareGameId,
+                          kind: staff.kind ?? 'coach',
+                          coach_id: staff.coach_id ?? undefined,
+                          team_id: staff.team_id ?? undefined,
+                          program_name: staff.program_name ?? undefined,
+                          allow_regenerate: false,
+                        });
                         setShareGameModalVisible(false);
-                        Alert.alert('Shared', `Game session shared with ${staff.name}.`);
+                        Alert.alert('Shared', `Game session shared with ${res.shared_count ?? 1} staff member(s).`);
                       } catch (e: any) {
                         Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share');
                       } finally {

@@ -312,7 +312,7 @@ export default function TeamReportScreen() {
     if (!staffSearch.trim()) return;
     setStaffSearchLoading(true);
     try {
-      const results = await coachesAPI.search(staffSearch.trim());
+      const results = await staffSharingAPI.searchTargets(staffSearch.trim());
       setStaffResults(results);
     } catch {}
     setStaffSearchLoading(false);
@@ -327,14 +327,17 @@ export default function TeamReportScreen() {
       const frozenText = !allowRegen
         ? (joinReportSections(reportSections, sectionToggles) || reportText || undefined)
         : undefined;
-      await staffSharingAPI.share({
+      const res = await staffSharingAPI.shareGroup({
         report_type: 'team_report',
         report_id: savedTeamReportId,
-        recipient_id: target.id,
+        kind: target.kind ?? 'coach',
+        coach_id: target.coach_id ?? undefined,
+        team_id: target.team_id ?? undefined,
+        program_name: target.program_name ?? undefined,
         allow_regenerate: allowRegen,
         frozen_text: frozenText ?? undefined,
       });
-      Alert.alert('Shared!', `Report shared with ${target.name}.`);
+      Alert.alert('Shared!', `Report shared with ${res.shared_count ?? 1} staff member(s).`);
       setShowStaffShare(false);
       setStaffSearch('');
       setStaffResults([]);
@@ -835,7 +838,7 @@ export default function TeamReportScreen() {
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
               <VoiceTextInput
                 style={[shareStyles.input, { flex: 1 }]}
-                placeholder="Search coach/program name..."
+                placeholder="Search coach, team, or program name..."
                 placeholderTextColor="#4b5563"
                 value={staffSearch}
                 onChangeText={setStaffSearch}
@@ -847,10 +850,16 @@ export default function TeamReportScreen() {
                 {staffSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
               </TouchableOpacity>
             </View>
-            {staffResults.map((r: any) => (
-              <TouchableOpacity key={r.id} style={shareStyles.resultRow} onPress={() => sendToStaff(r)} disabled={sendingStaff}>
-                <Text style={shareStyles.resultName}>{r.name}</Text>
-                <Text style={shareStyles.resultMeta}>{r.role} · {r.program_name}</Text>
+            <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
+              Search a team or program to reach every connected staff member at once.
+            </Text>
+            {staffResults.map((r: any, idx: number) => (
+              <TouchableOpacity key={idx} style={[shareStyles.resultRow, { flexDirection: 'row', alignItems: 'center' }]} onPress={() => sendToStaff(r)} disabled={sendingStaff}>
+                <View style={{ flex: 1 }}>
+                  <Text style={shareStyles.resultName}>{r.label ?? r.name}</Text>
+                  <Text style={shareStyles.resultMeta}>{r.sublabel ?? `${r.role} · ${r.program_name}`}</Text>
+                </View>
+                {r.kind && r.kind !== 'coach' && <Ionicons name="people" size={16} color="#7c3aed" />}
               </TouchableOpacity>
             ))}
             <View style={shareStyles.btnRow}>
@@ -900,7 +909,7 @@ export default function TeamReportScreen() {
             {/* Target type selector */}
             <Text style={shareStyles.label}>Send To</Text>
             <View style={shareStyles.targetRow}>
-              {([['player', 'Individual Player'], ['team', 'Whole Team'], ['all_staff', 'All Staff']] as const).map(([key, label]) => (
+              {([['player', 'Individual Player'], ['team', 'Whole Team']] as const).map(([key, label]) => (
                 <TouchableOpacity
                   key={key}
                   style={[shareStyles.targetChip, shareTarget === key && shareStyles.targetChipActive]}
