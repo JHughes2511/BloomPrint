@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert,
@@ -214,7 +215,7 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1, backgroundColor: '#0a0a0a' }}
     >
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -304,7 +305,7 @@ export default function LoginScreen() {
             {mode === 'login' ? "Don't have an account? Register" : 'Already have an account? Sign In'}
           </Text>
         </TouchableOpacity>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <PickerModal
         visible={showLevelPicker}

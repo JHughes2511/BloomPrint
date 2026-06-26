@@ -16,6 +16,7 @@ import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import WhiteboardModal from '../components/WhiteboardModal';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
 
 // ── Stat definitions ──────────────────────────────────────────────────────────
@@ -1206,7 +1207,7 @@ export default function TeamEvalScreen() {
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
+          <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
             {/* Player grid */}
             <Text style={s.sectionLabel}>SELECT PLAYER</Text>
             <View style={s.playerGrid}>
@@ -1317,7 +1318,7 @@ export default function TeamEvalScreen() {
                 <Text style={{ color: '#dc2626', fontWeight: '600', fontSize: 13 }}>End Game</Text>
               </TouchableOpacity>
             </View>
-          </ScrollView>
+          </KeyboardAwareScrollView>
         </View>
       )}
 
@@ -1694,7 +1695,7 @@ export default function TeamEvalScreen() {
 
       {/* Opponent Scout */}
       {activeView === 'scout' && (
-        <ScrollView ref={scoutScrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets={true}>
+        <KeyboardAwareScrollView ref={scoutScrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }}>
           {/* Opponent selector */}
           {!scoutOpponent ? (
             <>
@@ -1834,7 +1835,6 @@ export default function TeamEvalScreen() {
                       onChangeText={setNewNoteText}
                       multiline
                       numberOfLines={3}
-                      onFocus={() => setTimeout(() => scoutScrollRef.current?.scrollTo({ y: noteInputY.current, animated: true }), 350)}
                     />
                     <TouchableOpacity
                       style={{ backgroundColor: newNoteText.trim() ? '#7c3aed' : '#374151', borderRadius: 10,
@@ -1874,7 +1874,7 @@ export default function TeamEvalScreen() {
               ) : null}
             </>
           )}
-        </ScrollView>
+        </KeyboardAwareScrollView>
       )}
 
       {/* New Game Modal */}
@@ -1882,7 +1882,7 @@ export default function TeamEvalScreen() {
         <KeyboardAvoidingView style={s.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={[s.modalBox, { maxHeight: '85%' }]}>
             <Text style={s.modalTitle}>New Game</Text>
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <KeyboardAwareScrollView>
               <>
                 <Text style={s.fieldLabel}>TEAM (optional)</Text>
                 <TouchableOpacity
@@ -1996,7 +1996,7 @@ export default function TeamEvalScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-            </ScrollView>
+            </KeyboardAwareScrollView>
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity
                 style={[s.modalBtn, { flex: 1, backgroundColor: '#1f2937' }]}
