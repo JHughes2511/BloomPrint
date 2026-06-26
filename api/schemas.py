@@ -431,6 +431,28 @@ class StaffSharedReportOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class StaffShareTargetOut(BaseModel):
+    # kind: "coach" | "team" | "program"
+    kind: str
+    label: str                       # display name
+    sublabel: str = ""               # role / member count / etc.
+    coach_id: int | None = None      # when kind == "coach"
+    team_id: int | None = None       # when kind == "team"
+    program_name: str | None = None  # when kind == "program"
+    member_count: int = 1            # how many coaches will receive it
+
+
+class StaffGroupShareRequest(BaseModel):
+    report_type: str
+    report_id: int
+    kind: str                        # "coach" | "team" | "program"
+    coach_id: int | None = None
+    team_id: int | None = None
+    program_name: str | None = None
+    allow_regenerate: bool = False
+    frozen_text: str | None = None
+
+
 class CoachNotificationOut(BaseModel):
     id: int
     coach_id: int

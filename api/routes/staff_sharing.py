@@ -105,6 +105,153 @@ def share_with_staff(
     return _build_out(sr, db)
 
 
+def _resolve_group_recipients(
+    kind: str,
+    coach_id: int | None,
+    team_id: int | None,
+    program_name: str | None,
+    sender_id: int,
+    db: Session,
+) -> list[int]:
+    """Resolve a share target (coach/team/program) into a deduped list of
+    recipient coach ids, excluding the sender."""
+    ids: set[int] = set()
+    if kind == "coach" and coach_id:
+        ids.add(coach_id)
+    elif kind == "team" and team_id:
+        team = db.get(models.Team, team_id)
+        if team:
+            ids.add(team.coach_id)  # team owner
+            for link in db.query(models.TeamStaff).filter_by(team_id=team_id).all():
+                ids.add(link.coach_id)
+    elif kind == "program" and program_name:
+        for c in db.query(models.Coach).filter(models.Coach.program_name.ilike(program_name)).all():
+            ids.add(c.id)
+    ids.discard(sender_id)
+    return list(ids)
+
+
+@router.get("/search-targets", response_model=list[schemas.StaffShareTargetOut])
+def search_share_targets(
+    q: str = "",
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Search staff share targets by coach name, team name, or program name.
+
+    Returns a mixed list of individual coaches plus team/program groups so the
+    sender can reach an entire connected staff in one action.
+    """
+    q = (q or "").strip()
+    results: list[schemas.StaffShareTargetOut] = []
+    if not q:
+        return results
+
+    like = f"%{q}%"
+
+    # ── Team groups (everyone connected to a matching team) ──────────────────
+    teams = db.query(models.Team).filter(models.Team.name.ilike(like)).limit(10).all()
+    for t in teams:
+        recipients = _resolve_group_recipients("team", None, t.id, None, coach.id, db)
+        if not recipients:
+            continue
+        owner = db.get(models.Coach, t.coach_id)
+        results.append(schemas.StaffShareTargetOut(
+            kind="team",
+            label=f"{t.name} — Whole Staff",
+            sublabel=f"{len(recipients)} staff" + (f" · {owner.program_name}" if owner else ""),
+            team_id=t.id,
+            member_count=len(recipients),
+        ))
+
+    # ── Program groups (everyone sharing a matching program_name) ────────────
+    programs = (
+        db.query(models.Coach.program_name)
+        .filter(models.Coach.program_name.ilike(like))
+        .distinct()
+        .limit(10)
+        .all()
+    )
+    for (prog,) in programs:
+        if not prog:
+            continue
+        recipients = _resolve_group_recipients("program", None, None, prog, coach.id, db)
+        if not recipients:
+            continue
+        results.append(schemas.StaffShareTargetOut(
+            kind="program",
+            label=f"{prog} — Whole Program",
+            sublabel=f"{len(recipients)} staff",
+            program_name=prog,
+            member_count=len(recipients),
+        ))
+
+    # ── Individual coaches ───────────────────────────────────────────────────
+    coaches = (
+        db.query(models.Coach)
+        .filter(
+            (models.Coach.name.ilike(like)) | (models.Coach.program_name.ilike(like))
+        )
+        .filter(models.Coach.id != coach.id)
+        .limit(15)
+        .all()
+    )
+    for c in coaches:
+        results.append(schemas.StaffShareTargetOut(
+            kind="coach",
+            label=c.name,
+            sublabel=f"{c.role or 'staff'} · {c.program_name or ''}".strip(" ·"),
+            coach_id=c.id,
+            member_count=1,
+        ))
+
+    return results
+
+
+@router.post("/share-group")
+def share_with_staff_group(
+    body: schemas.StaffGroupShareRequest,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Share a report with a staff target (single coach, whole team, or whole
+    program), fanning out to every connected coach with duplicates removed."""
+    recipients = _resolve_group_recipients(
+        body.kind, body.coach_id, body.team_id, body.program_name, coach.id, db
+    )
+    if not recipients:
+        raise HTTPException(status_code=400, detail="No connected staff to share with")
+
+    frozen = body.frozen_text if (body.frozen_text and not body.allow_regenerate) else None
+
+    count = 0
+    for rid in recipients:
+        recipient = db.get(models.Coach, rid)
+        if not recipient:
+            continue
+        sr = models.StaffSharedReport(
+            report_type=body.report_type,
+            report_id=body.report_id,
+            sender_id=coach.id,
+            recipient_id=rid,
+            allow_regenerate=body.allow_regenerate,
+            frozen_text=frozen,
+        )
+        db.add(sr)
+        db.flush()
+        _coach_notify(
+            db, rid,
+            f"Report Shared by {coach.name}",
+            f"{coach.name} shared a {body.report_type.replace('_', ' ')} report with you.",
+            ref_id=sr.id,
+            ntype="staff_report_shared",
+        )
+        count += 1
+
+    db.commit()
+    return {"ok": True, "shared_count": count}
+
+
 @router.get("/inbox", response_model=list[schemas.StaffSharedReportOut])
 def staff_inbox(
     db: Session = Depends(get_db),

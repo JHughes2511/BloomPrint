@@ -12,6 +12,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { evalsAPI, playerAPI, gameReportsAPI, trainingAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import { GradeBadge } from '../components/GradeBadge';
 import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
+import ShareModal from '../components/ShareModal';
 import { renderReport } from '../utils/renderReport';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -87,6 +88,9 @@ export default function RecentScreen() {
   // Correct state (inline in modal)
   const [teamCorrectText, setTeamCorrectText] = useState('');
   const [applyingCorrect, setApplyingCorrect] = useState(false);
+
+  // Unified share modal (player / team / staff)
+  const [shareCtx, setShareCtx] = useState<{ reportType: string; reportId: number; outputType: string; reportText: string; title: string } | null>(null);
 
   // Generic Send to Staff modal
   const [staffShareCtx, setStaffShareCtx] = useState<StaffShareContext | null>(null);
@@ -563,7 +567,7 @@ export default function RecentScreen() {
                     </TouchableOpacity>
                   )}
 
-                  {/* Send to Staff — available for all types */}
+                  {/* Share — player / team / staff, available for all types */}
                   <TouchableOpacity
                     style={[styles.gameActionBtn, { borderColor: '#7c3aed22' }]}
                     onPress={() => {
@@ -574,15 +578,18 @@ export default function RecentScreen() {
                       const label = item.kind === 'training' ? 'Training Program' :
                                     item.kind === 'game' ? 'Game Report' :
                                     item.kind === 'team' ? 'Team Report' : 'Player Eval';
-                      const previewRaw = item.program_text ?? item.report_text ?? (teamReportTexts[item.id] ?? '');
-                      const previewName = item.player_name ?? label;
-                      const previewType = item.kind === 'training' ? 'Training Program' : (TYPE_LABELS[item.output_type] ?? item.output_type);
-                      const preview = previewName + ' — ' + previewType + ': ' + previewRaw.replace(/[#*_]/g, '').trim().slice(0, 150);
-                      openStaffShareModal({ report_type: reportType, report_id: item.id, label }, preview, previewRaw);
+                      const fullText = item.program_text ?? item.report_text ?? (teamReportTexts[item.id] ?? '');
+                      setShareCtx({
+                        reportType,
+                        reportId: item.id,
+                        outputType: item.output_type ?? (item.kind === 'training' ? 'training_program' : 'coaching_report'),
+                        reportText: fullText,
+                        title: label,
+                      });
                     }}
                   >
-                    <Ionicons name="people-outline" size={13} color="#7c3aed" />
-                    <Text style={[styles.gameActionText, { color: '#7c3aed' }]}>Send to Staff</Text>
+                    <Ionicons name="share-social-outline" size={13} color="#7c3aed" />
+                    <Text style={[styles.gameActionText, { color: '#7c3aed' }]}>Share</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -811,7 +818,7 @@ export default function RecentScreen() {
                     <Ionicons name="person-outline" size={18} color="#16a34a" />
                     <Text style={[styles.actionText, { color: '#16a34a' }]}>Player</Text>
                   </TouchableOpacity>
-                  {/* Send to Staff */}
+                  {/* Share — player / team / staff */}
                   <TouchableOpacity
                     style={[styles.actionBtn, { borderColor: '#7c3aed44' }]}
                     onPress={() => {
@@ -820,17 +827,15 @@ export default function RecentScreen() {
                                           activeModal.kind === 'team' ? 'team_report' : 'training';
                       const label = activeModal.kind === 'training' ? 'Training Program' :
                                     activeModal.kind === 'team' ? 'Team Report' : 'Player Eval';
-                      const previewName = activeModal.playerName ?? label;
-                      const previewType = TYPE_LABELS[activeModal.outputType] ?? activeModal.outputType;
                       const fullText = activeModal.text ?? '';
-                      const preview = previewName + ' — ' + previewType + ': ' + fullText.replace(/[#*_]/g, '').trim().slice(0, 150);
                       const reportId = activeModal.id;
+                      const outputType = activeModal.outputType ?? (activeModal.kind === 'training' ? 'training_program' : 'coaching_report');
                       setActiveModal(null);
-                      openStaffShareModal({ report_type: reportType, report_id: reportId, label }, preview, fullText);
+                      setShareCtx({ reportType, reportId, outputType, reportText: fullText, title: label });
                     }}
                   >
-                    <Ionicons name="people-outline" size={18} color="#7c3aed" />
-                    <Text style={[styles.actionText, { color: '#7c3aed' }]}>Staff</Text>
+                    <Ionicons name="share-social-outline" size={18} color="#7c3aed" />
+                    <Text style={[styles.actionText, { color: '#7c3aed' }]}>Share</Text>
                   </TouchableOpacity>
                 </View>
               </>
@@ -939,6 +944,19 @@ export default function RecentScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Unified Share modal — player / team / staff */}
+      {shareCtx && (
+        <ShareModal
+          visible={!!shareCtx}
+          onClose={() => setShareCtx(null)}
+          reportType={shareCtx.reportType}
+          reportId={shareCtx.reportId}
+          outputType={shareCtx.outputType}
+          reportText={shareCtx.reportText}
+          title={shareCtx.title}
+        />
+      )}
     </View>
   );
 }

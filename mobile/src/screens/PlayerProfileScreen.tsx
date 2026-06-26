@@ -15,6 +15,7 @@ import { PillarCard } from '../components/PillarCard';
 import { renderReport } from '../utils/renderReport';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { splitReportSections, joinReportSections } from '../utils/mdToHtml';
+import ShareModal from '../components/ShareModal';
 
 const COMPETITION_LEVELS = ['Middle School', 'HS JV', 'HS Varsity', 'AAU', 'College', 'Pro'];
 
@@ -195,6 +196,9 @@ export default function PlayerProfileScreen() {
   const [modalCorrection, setModalCorrection] = useState('');
   const [regeneratingModal, setRegeneratingModal] = useState(false);
   const [exportingTraining, setExportingTraining] = useState(false);
+
+  // Unified share modal (player / team / staff)
+  const [shareCtx, setShareCtx] = useState<{ reportType: string; reportId: number; outputType: string; reportText: string; title: string } | null>(null);
 
   // Share with staff
   const [showStaffShare, setShowStaffShare] = useState(false);
@@ -702,16 +706,13 @@ export default function PlayerProfileScreen() {
                     } else if (trainingPickerAction === 'regen') {
                       regenerateTraining(ts.id);
                     } else {
-                      const txt = ts.program_text ?? '';
-                      const secs = splitReportSections(txt);
-                      setStaffShareId(ts.id);
-                      setStaffShareText(txt);
-                      setStaffSectionToggles(Object.fromEntries(secs.map(s => [s.heading, true])));
-                      setAllowRegen(false);
-                      setStaffShareType('training');
-                      setShowStaffShare(true);
-                      setStaffSearch('');
-                      setStaffResults([]);
+                      setShareCtx({
+                        reportType: 'training',
+                        reportId: ts.id,
+                        outputType: 'training_program',
+                        reportText: ts.program_text ?? '',
+                        title: 'Training Program',
+                      });
                     }
                   }}
                 >
@@ -907,21 +908,18 @@ export default function PlayerProfileScreen() {
                   style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#7c3aed', borderRadius: 10, paddingVertical: 12 }}
                   onPress={() => {
                     if (!trainingModalItem) return;
-                    const txt = trainingModalItem.program_text ?? '';
-                    const secs = splitReportSections(txt);
-                    setStaffShareId(trainingModalItem.id);
-                    setStaffShareText(txt);
-                    setStaffSectionToggles(Object.fromEntries(secs.map(s => [s.heading, true])));
-                    setAllowRegen(false);
-                    setStaffShareType('training');
-                    setShowStaffShare(true);
-                    setStaffSearch('');
-                    setStaffResults([]);
+                    setShareCtx({
+                      reportType: 'training',
+                      reportId: trainingModalItem.id,
+                      outputType: 'training_program',
+                      reportText: trainingModalItem.program_text ?? '',
+                      title: 'Training Program',
+                    });
                     setTrainingModalItem(null);
                   }}
                 >
-                  <Ionicons name="people-outline" size={15} color="#fff" />
-                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Send to Staff</Text>
+                  <Ionicons name="share-social-outline" size={15} color="#fff" />
+                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Share</Text>
                 </TouchableOpacity>
               </View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -1244,6 +1242,19 @@ export default function PlayerProfileScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Unified Share modal — player / team / staff */}
+      {shareCtx && (
+        <ShareModal
+          visible={!!shareCtx}
+          onClose={() => setShareCtx(null)}
+          reportType={shareCtx.reportType}
+          reportId={shareCtx.reportId}
+          outputType={shareCtx.outputType}
+          reportText={shareCtx.reportText}
+          title={shareCtx.title}
+        />
+      )}
     </ScrollView>
   );
 }
