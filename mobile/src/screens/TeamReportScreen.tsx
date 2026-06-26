@@ -12,7 +12,7 @@ import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { evalsAPI, teamsAPI, playerAPI, gameReportsAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import { useAuth } from '../context/AuthContext';
-import { mdToHtml, safeFileName } from '../utils/mdToHtml';
+import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { useFocusEffect } from '@react-navigation/native';
 import { renderReport } from '../utils/renderReport';
@@ -164,8 +164,9 @@ export default function TeamReportScreen() {
   const [shareMessage, setShareMessage] = useState('');
   const [sharing, setSharing] = useState(false);
   const [shareSearchLoading, setShareSearchLoading] = useState(false);
-  // Content toggles for share modals
-  const [shareToggles, setShareToggles] = useState({ report_text: true, overall_grade: false, pillar_grades: false, green_flags: false, watch_flags: false, key_questions: false });
+  // Section include/exclude toggles for share modals — derived from the report's
+  // actual headings so labels always match what's in this report.
+  const [sectionToggles, setSectionToggles] = useState<Record<string, boolean>>({});
   // Context for which report is being shared (prev report modal)
   const [shareSourceReport, setShareSourceReport] = useState<any>(null);
   // Export state for prev report modal
@@ -231,13 +232,25 @@ export default function TeamReportScreen() {
     setShareSearchLoading(false);
   };
 
+  // Sections of the report currently being shared (derived from its headings)
+  const reportSections = splitReportSections(reportText ?? '');
+
+  // Initialise toggles (all-on) for the sections of the report about to be shared
+  const initSectionToggles = () => {
+    const next: Record<string, boolean> = {};
+    for (const s of splitReportSections(reportText ?? '')) next[s.heading] = true;
+    setSectionToggles(next);
+  };
+
   const submitShare = async () => {
     if (!reportText) return;
     setSharing(true);
     try {
+      // Only include the sections the user left enabled
+      const filteredText = joinReportSections(reportSections, sectionToggles) || reportText;
       const data: any = {
         output_type: outputType,
-        report_text: reportText,
+        report_text: filteredText,
         target_type: shareTarget,
         message: shareMessage.trim() || undefined,
       };
@@ -539,7 +552,7 @@ export default function TeamReportScreen() {
                 <Ionicons name="print-outline" size={20} color="#9ca3af" />
                 <Text style={styles.actionText}>Print</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionBtn, { borderColor: '#16a34a' }]} onPress={() => setShowShare(true)}>
+              <TouchableOpacity style={[styles.actionBtn, { borderColor: '#16a34a' }]} onPress={() => { setShareSourceReport(null); initSectionToggles(); setShowShare(true); }}>
                 <Ionicons name="person-add-outline" size={20} color="#16a34a" />
                 <Text style={[styles.actionText, { color: '#16a34a' }]}>Share</Text>
               </TouchableOpacity>
@@ -655,7 +668,9 @@ export default function TeamReportScreen() {
                       setShareSourceReport(selectedPrevReport);
                       setReportText(selectedPrevReport.report_text);
                       setSavedTeamReportId(selectedPrevReport.id);
-                      setShareToggles({ report_text: true, overall_grade: false, pillar_grades: false, green_flags: false, watch_flags: false, key_questions: false });
+                      const initial: Record<string, boolean> = {};
+                      for (const s of splitReportSections(selectedPrevReport.report_text)) initial[s.heading] = true;
+                      setSectionToggles(initial);
                       setSelectedPrevReport(null);
                       setTimeout(() => setShowShare(true), 200);
                     }}
@@ -669,7 +684,6 @@ export default function TeamReportScreen() {
                       if (!selectedPrevReport) return;
                       setShareSourceReport(selectedPrevReport);
                       setSavedTeamReportId(selectedPrevReport.id);
-                      setShareToggles({ report_text: true, overall_grade: false, pillar_grades: false, green_flags: false, watch_flags: false, key_questions: false });
                       setSelectedPrevReport(null);
                       setTimeout(() => { setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }, 200);
                     }}
@@ -778,14 +792,6 @@ export default function TeamReportScreen() {
                 </Text>
               </View>
             )}
-            {/* Content toggles */}
-            <Text style={[shareStyles.label, { marginBottom: 6 }]}>Include in Share</Text>
-            {([['report_text', 'Report Text'], ['overall_grade', 'Overall Grade'], ['pillar_grades', 'Pillar Grades'], ['green_flags', 'Green Flags'], ['watch_flags', 'Watch Flags'], ['key_questions', 'Key Questions']] as const).map(([key, label]) => (
-              <View key={key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 }}>
-                <Text style={{ color: '#d1d5db', fontSize: 13 }}>{label}</Text>
-                <Switch value={shareToggles[key]} onValueChange={v => setShareToggles(p => ({ ...p, [key]: v }))} trackColor={{ true: '#7c3aed', false: '#374151' }} thumbColor="#fff" />
-              </View>
-            ))}
             {/* Allow regenerate */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 }}>
               <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
@@ -838,14 +844,23 @@ export default function TeamReportScreen() {
                 </Text>
               </View>
             )}
-            {/* Content toggles */}
-            <Text style={[shareStyles.label, { marginBottom: 6 }]}>Include in Share</Text>
-            {([['report_text', 'Report Text'], ['overall_grade', 'Overall Grade'], ['pillar_grades', 'Pillar Grades'], ['green_flags', 'Green Flags'], ['watch_flags', 'Watch Flags'], ['key_questions', 'Key Questions']] as const).map(([key, label]) => (
-              <View key={key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 }}>
-                <Text style={{ color: '#d1d5db', fontSize: 13 }}>{label}</Text>
-                <Switch value={shareToggles[key]} onValueChange={v => setShareToggles(p => ({ ...p, [key]: v }))} trackColor={{ true: '#16a34a', false: '#374151' }} thumbColor="#fff" />
-              </View>
-            ))}
+            {/* Section toggles — derived from this report's actual headings */}
+            {reportSections.length > 1 && (
+              <>
+                <Text style={[shareStyles.label, { marginBottom: 6 }]}>Include Sections</Text>
+                {reportSections.map(sec => (
+                  <View key={sec.heading} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 }}>
+                    <Text style={{ color: '#d1d5db', fontSize: 13, flex: 1, marginRight: 8 }} numberOfLines={1}>{sec.heading}</Text>
+                    <Switch
+                      value={sectionToggles[sec.heading] !== false}
+                      onValueChange={v => setSectionToggles(p => ({ ...p, [sec.heading]: v }))}
+                      trackColor={{ true: '#16a34a', false: '#374151' }}
+                      thumbColor="#fff"
+                    />
+                  </View>
+                ))}
+              </>
+            )}
 
             {/* Target type selector */}
             <Text style={shareStyles.label}>Send To</Text>

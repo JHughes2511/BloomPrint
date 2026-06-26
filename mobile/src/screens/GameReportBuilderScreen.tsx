@@ -14,7 +14,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI } from '../api/client';
-import { mdToHtml, safeFileName } from '../utils/mdToHtml';
+import { mdToHtml, safeFileName, wrapPrintDocument } from '../utils/mdToHtml';
 import { useAuth } from '../context/AuthContext';
 
 const OUTPUT_TYPES = [
@@ -304,22 +304,26 @@ export default function GameReportBuilderScreen() {
     }
   };
 
+  const reportTypeLabel = () =>
+    (report?.output_type ?? 'Game Report').replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
+
   const exportPdf = async () => {
     if (!report?.report_text) return;
     try {
+      const now = new Date();
       const title_label = report.title || matchupLabel();
-      const html = `<html><head><meta charset="utf-8"/><style>
-        body{font-family:-apple-system,Helvetica,sans-serif;padding:32px;color:#111}
-        h1{font-size:20px}p.meta{font-size:13px;color:#555}
-      </style></head><body>
-        <h1>${title_label}</h1>
-        <p class="meta">${coach?.program_name ?? ''} · ${new Date().toLocaleDateString()}</p>
-        ${mdToHtml(report.report_text)}
-      </body></html>`;
+      const html = wrapPrintDocument({
+        title: title_label,
+        subtitle: coach?.program_name ?? '',
+        date: now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+        bodyHtml: mdToHtml(report.report_text),
+      });
       const { uri } = await Print.printToFileAsync({ html });
-      const dest = FileSystem.cacheDirectory + safeFileName(title_label) + '.pdf';
+      const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const fileName = `${safeFileName(reportTypeLabel())} - ${safeFileName(title_label)} - ${stamp}`;
+      const dest = FileSystem.cacheDirectory + fileName + '.pdf';
       await FileSystem.copyAsync({ from: uri, to: dest });
-      await Sharing.shareAsync(dest, { mimeType: 'application/pdf' });
+      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: fileName });
     } catch (e: any) {
       Alert.alert('Export Error', e?.message ?? 'Could not export');
     }
@@ -573,7 +577,7 @@ export default function GameReportBuilderScreen() {
                 <Ionicons name="share-outline" size={16} color="#9ca3af" />
                 <Text style={styles.actionText}>Export PDF</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn} onPress={() => Print.printAsync({ html: `<html><body>${mdToHtml(report.report_text)}</body></html>` })}>
+              <TouchableOpacity style={styles.actionBtn} onPress={() => Print.printAsync({ html: wrapPrintDocument({ title: report.title || matchupLabel(), subtitle: coach?.program_name ?? '', date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), bodyHtml: mdToHtml(report.report_text) }) })}>
                 <Ionicons name="print-outline" size={16} color="#9ca3af" />
                 <Text style={styles.actionText}>Print</Text>
               </TouchableOpacity>

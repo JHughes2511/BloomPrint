@@ -18,11 +18,13 @@ export function renderReport(text: string): React.ReactElement[] {
 
   const lines = text
     .split('\n')
-    // Strip all markdown syntax characters from each line
+    // Strip all markdown syntax characters from each line; remember which lines
+    // were explicit markdown headings (## ...) so they still render as headings.
     .map(line => {
       // Drop pure divider lines
-      if (/^\s*[-=—─]{3,}\s*$/.test(line)) return '';
-      if (/^\s*={3,}\s*$/.test(line)) return '';
+      if (/^\s*[-=—─]{3,}\s*$/.test(line)) return { text: '', mdHeading: false };
+      if (/^\s*={3,}\s*$/.test(line)) return { text: '', mdHeading: false };
+      const mdHeading = /^#{1,6}\s/.test(line);
       // Strip leading ##+ headings
       line = line.replace(/^#{1,6}\s*/, '');
       // Strip ** bold markers
@@ -37,13 +39,14 @@ export function renderReport(text: string): React.ReactElement[] {
       line = line.replace(/^[-=—─]+\s*/, '').replace(/\s*[-=—─]+$/, '');
       // Convert leading "- " bullets to "• "
       line = line.replace(/^\s*[-*]\s+/, '• ');
-      return line;
+      return { text: line, mdHeading };
     });
 
   const elements: React.ReactElement[] = [];
   let consecutiveBlanks = 0;
 
-  lines.forEach((line, index) => {
+  lines.forEach((entry, index) => {
+    const line = entry.text;
     const trimmed = line.trim();
 
     if (trimmed === '') {
@@ -58,16 +61,17 @@ export function renderReport(text: string): React.ReactElement[] {
     consecutiveBlanks = 0;
 
     // Detect header lines:
-    //   1. ALL CAPS line (may end with ':')
-    //   2. Short line (<60 chars) that ends with ':'
+    //   1. Explicit markdown heading (## ...)
+    //   2. ALL CAPS line (may end with ':')
+    //   3. Short line (<60 chars) that ends with ':'
     const isAllCaps = /^[A-Z][A-Z0-9\s/&\-().,':]+$/.test(trimmed);
     const isShortHeader = trimmed.length < 60 && trimmed.endsWith(':');
 
-    if (isAllCaps || isShortHeader) {
+    if (entry.mdHeading || isAllCaps || isShortHeader) {
       elements.push(
         <Text
           key={`line-${index}`}
-          style={{ fontWeight: 'bold', fontSize: 15, color: '#e5e7eb', marginTop: 12, marginBottom: 2 }}
+          style={{ fontWeight: '800', fontSize: 16, color: '#f3f4f6', marginTop: 14, marginBottom: 3 }}
         >
           {trimmed}
         </Text>
