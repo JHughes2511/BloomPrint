@@ -63,6 +63,7 @@ class PlayerCreate(BaseModel):
     program_name: str | None = None
     competition_level: str = "HS Varsity"
     notes: str | None = None
+    parent_permission: bool | None = None
     team_id: int | None = None
 
 
@@ -83,6 +84,7 @@ class PlayerOut(BaseModel):
     program_name: str
     competition_level: str
     notes: str | None
+    parent_permission: bool | None = None
     created_at: datetime
     latest_grade: float | None = None
     team_id: int | None = None

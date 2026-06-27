@@ -96,6 +96,13 @@ def _run_migrations():
             ))
             conn.commit()
 
+        # Add parent_permission to players if missing
+        if "parent_permission" not in cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE players ADD COLUMN parent_permission BOOLEAN"
+            ))
+            conn.commit()
+
         # Add jersey_number to opponent_players if missing
         try:
             op_cols = [row[1] for row in conn.execute(

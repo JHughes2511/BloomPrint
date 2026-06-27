@@ -63,6 +63,8 @@ class Player(Base):
     program_name     = Column(String, default="SEED Academy")
     competition_level = Column(String, default="HS Varsity")
     notes            = Column(Text)
+    # Parent/guardian consent for minors (under 18). None = not specified.
+    parent_permission = Column(Boolean, nullable=True)
     created_at       = Column(DateTime, default=datetime.utcnow)
     team_id          = Column(Integer, ForeignKey("teams.id"), nullable=True)
 

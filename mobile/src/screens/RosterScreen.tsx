@@ -84,6 +84,8 @@ export default function RosterScreen() {
   const [newState, setNewState] = useState('');
   const [newCountry, setNewCountry] = useState('');
   const [newLevel, setNewLevel] = useState('Middle School');
+  const [parentPermission, setParentPermission] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // Create team modal
@@ -125,12 +127,14 @@ export default function RosterScreen() {
         state: newState || undefined,
         country: newCountry || undefined,
         competition_level: newLevel,
+        parent_permission: parentPermission,
         team_id: selectedTeamId ?? undefined,
       });
       setShowAdd(false);
       setNewName(''); setNewPos(''); setNewJersey(''); setNewHeight(''); setNewWingspan('');
       setNewWeight(''); setNewStandingReach('');
       setNewSchool(''); setNewCity(''); setNewState(''); setNewCountry('');
+      setParentPermission(false);
       load();
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not add player');
@@ -316,6 +320,34 @@ export default function RosterScreen() {
               value={newCountry} onChangeText={setNewCountry} />
             <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6, marginTop: 4 }}>Competition Level</Text>
             <LevelDropdown value={newLevel} onChange={setNewLevel} />
+
+            {/* Parent/Guardian permission — required for minors */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 16, marginBottom: 4 }}>
+              <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600' }}>Parent/Guardian Permission</Text>
+              <TouchableOpacity onPress={() => setShowDisclaimer(true)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} style={{ marginLeft: 6 }}>
+                <Ionicons name="information-circle-outline" size={16} color="#7c3aed" />
+              </TouchableOpacity>
+            </View>
+            <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 8 }}>
+              Required for any player under 18. Tap the ⓘ for the full consent disclaimer.
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 4 }}>
+              <TouchableOpacity
+                onPress={() => setParentPermission(true)}
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center', borderWidth: 1,
+                         backgroundColor: parentPermission ? '#16a34a' : '#1f2937',
+                         borderColor: parentPermission ? '#16a34a' : '#374151' }}>
+                <Text style={{ color: parentPermission ? '#fff' : '#9ca3af', fontWeight: '700' }}>Yes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setParentPermission(false)}
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center', borderWidth: 1,
+                         backgroundColor: !parentPermission ? '#374151' : '#1f2937',
+                         borderColor: !parentPermission ? '#6b7280' : '#374151' }}>
+                <Text style={{ color: !parentPermission ? '#fff' : '#9ca3af', fontWeight: '700' }}>No</Text>
+              </TouchableOpacity>
+            </View>
+
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowAdd(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>
@@ -327,6 +359,38 @@ export default function RosterScreen() {
           </KeyboardAwareScrollView>
           </View>
         </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Parent/Guardian consent disclaimer */}
+      <Modal visible={showDisclaimer} transparent animationType="fade" onRequestClose={() => setShowDisclaimer(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', padding: 20 }}>
+          <View style={{ backgroundColor: '#111827', borderRadius: 16, padding: 20, maxHeight: '80%' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+              <Ionicons name="shield-checkmark-outline" size={20} color="#7c3aed" />
+              <Text style={{ color: '#fff', fontSize: 17, fontWeight: '800', marginLeft: 8, flex: 1 }}>Parent/Guardian Consent</Text>
+              <TouchableOpacity onPress={() => setShowDisclaimer(false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Ionicons name="close" size={22} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+              <Text style={{ color: '#d1d5db', fontSize: 13, lineHeight: 20 }}>
+                For any athlete under the age of 18, a parent or legal guardian must grant permission before their
+                information, evaluations, and film are collected, analyzed, or shared within BloomPrint.{'\n\n'}
+                By selecting “Yes,” you confirm that you have obtained verifiable consent from the player’s parent or
+                legal guardian to create and maintain this profile — including the storage of biometric and performance
+                data and the generation of AI scouting and development reports.{'\n\n'}
+                If the player is 18 or older, parental permission is not required and you may select “No.”{'\n\n'}
+                You are responsible for ensuring this consent complies with all applicable privacy laws, including
+                COPPA and any local regulations governing minors’ data.
+              </Text>
+            </ScrollView>
+            <TouchableOpacity
+              style={{ marginTop: 16, backgroundColor: '#7c3aed', borderRadius: 10, paddingVertical: 12, alignItems: 'center' }}
+              onPress={() => setShowDisclaimer(false)}>
+              <Text style={{ color: '#fff', fontWeight: '700' }}>Got it</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
 
       {/* Create Team Modal */}

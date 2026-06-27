@@ -34,6 +34,7 @@ export const playersAPI = {
     height?: string; wingspan?: string; weight?: string; standing_reach?: string;
     school_name?: string; city?: string; state?: string; country?: string;
     competition_level?: string; notes?: string; team_id?: number;
+    parent_permission?: boolean | null;
   }) => api.post('/players', data).then(r => r.data),
 
   update: (id: number, data: {
