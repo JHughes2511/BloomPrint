@@ -1,39 +1,84 @@
-import React, { forwardRef } from 'react';
-import { ScrollView, ScrollViewProps, Platform, StyleSheet } from 'react-native';
-import { KeyboardAwareScrollView as KASV } from 'react-native-keyboard-aware-scroll-view';
+import React, { forwardRef, useRef, useEffect, useState, useImperativeHandle } from 'react';
+import {
+  ScrollView, ScrollViewProps, Keyboard, TextInput, Platform, StyleSheet,
+  KeyboardEvent, NativeSyntheticEvent, NativeScrollEvent,
+} from 'react-native';
 
 /**
- * A ScrollView that reliably scrolls a focused TextInput clear of the on-screen
+ * A ScrollView that scrolls the focused TextInput clear of the on-screen
  * keyboard on iOS, Android, and web.
  *
- * Backed by react-native-keyboard-aware-scroll-view (pure JS, Expo Go safe),
- * which measures the focused input and scrolls it into view — handling the
- * cases the built-in `automaticallyAdjustKeyboardInsets` misses (multiline
- * inputs at the bottom of a form, inputs inside modals, etc.).
+ * Implemented directly against current React Native APIs (no third-party
+ * library — the popular one is unmaintained and silently no-ops on RN 0.81):
+ *   1. On keyboard show we grab the focused input via
+ *      `TextInput.State.currentlyFocusedInput()`, measure it in window
+ *      coordinates, and if it overlaps the keyboard we scroll the difference.
+ *   2. While the keyboard is open we add bottom padding equal to its height so
+ *      there is always room to scroll the field up.
  *
  * The forwarded ref points at the underlying ScrollView, so existing
  * `ref.current.scrollTo()` / `scrollToEnd()` calls keep working.
  */
+const EXTRA = 24; // breathing room above the keyboard
+
 const KeyboardAwareScrollView = forwardRef<ScrollView, ScrollViewProps>(
-  ({ contentContainerStyle, ...props }, ref) => {
+  ({ contentContainerStyle, onScroll, ...props }, ref) => {
+    const scrollRef = useRef<ScrollView>(null);
+    const scrollY = useRef(0);
+    const [kbHeight, setKbHeight] = useState(0);
+
+    useImperativeHandle(ref, () => scrollRef.current as ScrollView, []);
+
+    useEffect(() => {
+      const showEvt = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+      const hideEvt = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+      const scrollToFocused = (kbScreenY: number) => {
+        const input: any = (TextInput.State as any).currentlyFocusedInput?.()
+          ?? (TextInput.State as any).currentlyFocusedField?.();
+        if (!input || !scrollRef.current) return;
+        const measure = input.measureInWindow?.bind(input);
+        if (!measure) return;
+        measure((_x: number, y: number, _w: number, h: number) => {
+          const inputBottom = y + h;
+          const limit = kbScreenY - EXTRA;
+          if (inputBottom > limit) {
+            scrollRef.current?.scrollTo({ y: scrollY.current + (inputBottom - limit), animated: true });
+          }
+        });
+      };
+
+      const showSub = Keyboard.addListener(showEvt, (e: KeyboardEvent) => {
+        setKbHeight(e.endCoordinates.height);
+        // Let the bottom padding apply first so there is room to scroll.
+        setTimeout(() => scrollToFocused(e.endCoordinates.screenY), Platform.OS === 'ios' ? 10 : 60);
+      });
+      const hideSub = Keyboard.addListener(hideEvt, () => setKbHeight(0));
+      return () => { showSub.remove(); hideSub.remove(); };
+    }, []);
+
+    const handleScroll = (ev: NativeSyntheticEvent<NativeScrollEvent>) => {
+      scrollY.current = ev.nativeEvent.contentOffset.y;
+      onScroll?.(ev);
+    };
+
     return (
-      <KASV
-        // forward the real ScrollView node to the caller's ref
-        innerRef={(node: any) => {
-          if (typeof ref === 'function') ref(node);
-          else if (ref) (ref as React.MutableRefObject<any>).current = node;
-        }}
+      <ScrollView
+        ref={scrollRef}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
-        enableOnAndroid
-        enableResetScrollToCoords={false}
-        extraScrollHeight={Platform.OS === 'ios' ? 24 : 100}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.content, contentContainerStyle]}
-        {...(props as any)}
+        contentContainerStyle={[
+          styles.content,
+          contentContainerStyle,
+          kbHeight ? { paddingBottom: kbHeight + EXTRA } : null,
+        ]}
+        {...props}
       >
         {props.children}
-      </KASV>
+      </ScrollView>
     );
   },
 );
