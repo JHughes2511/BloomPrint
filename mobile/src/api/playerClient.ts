@@ -63,6 +63,8 @@ export const playerProfileAPI = {
     position?: string;
     height?: string;
     wingspan?: string;
+    weight?: string;
+    standing_reach?: string;
     country?: string;
     state?: string;
     city?: string;

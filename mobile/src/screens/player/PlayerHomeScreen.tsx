@@ -16,12 +16,15 @@ export default function PlayerHomeScreen() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [profile, setProfile] = useState<{
     position?: string; height?: string; wingspan?: string;
+    weight?: string; standing_reach?: string;
     country?: string; state?: string; city?: string; school_name?: string;
   } | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editPosition, setEditPosition] = useState('');
   const [editHeight, setEditHeight] = useState('');
   const [editWingspan, setEditWingspan] = useState('');
+  const [editWeight, setEditWeight] = useState('');
+  const [editStandingReach, setEditStandingReach] = useState('');
   const [editCountry, setEditCountry] = useState('');
   const [editState, setEditState] = useState('');
   const [editCity, setEditCity] = useState('');
@@ -41,6 +44,8 @@ export default function PlayerHomeScreen() {
     setEditPosition(profile?.position ?? '');
     setEditHeight(profile?.height ?? '');
     setEditWingspan(profile?.wingspan ?? '');
+    setEditWeight(profile?.weight ?? '');
+    setEditStandingReach(profile?.standing_reach ?? '');
     setEditCountry(profile?.country ?? '');
     setEditState(profile?.state ?? '');
     setEditCity(profile?.city ?? '');
@@ -89,6 +94,8 @@ export default function PlayerHomeScreen() {
         position: editPosition.trim() || undefined,
         height: editHeight.trim() || undefined,
         wingspan: editWingspan.trim() || undefined,
+        weight: editWeight.trim() || undefined,
+        standing_reach: editStandingReach.trim() || undefined,
         country: editCountry.trim() || undefined,
         state: editState.trim() || undefined,
         city: editCity.trim() || undefined,
@@ -214,6 +221,17 @@ export default function PlayerHomeScreen() {
                 <Text style={styles.profileStatLabel}>Wingspan</Text>
               </View>
             </View>
+            <View style={[styles.profileStats, { marginTop: 10 }]}>
+              <View style={styles.profileStat}>
+                <Text style={styles.profileStatVal}>{profile.weight || '—'}</Text>
+                <Text style={styles.profileStatLabel}>Weight</Text>
+              </View>
+              <View style={styles.profileStatDivider} />
+              <View style={styles.profileStat}>
+                <Text style={styles.profileStatVal}>{profile.standing_reach || '—'}</Text>
+                <Text style={styles.profileStatLabel}>Standing Reach</Text>
+              </View>
+            </View>
             {(profile.school_name || profile.city || profile.state || profile.country) && (
               <View style={styles.profileLocation}>
                 {profile.school_name && (
@@ -291,6 +309,18 @@ export default function PlayerHomeScreen() {
                   <VoiceTextInput style={styles.input} value={editWingspan} onChangeText={setEditWingspan}
                     placeholder={`e.g. 6'5"`} placeholderTextColor="#4b5563"
                     returnKeyType="next" onFocus={() => scrollToField('wingspan')} />
+                </View>
+                <View onLayout={e => { fieldY.current['weight'] = e.nativeEvent.layout.y; }}>
+                  <Text style={styles.fieldLabel}>Weight</Text>
+                  <VoiceTextInput style={styles.input} value={editWeight} onChangeText={setEditWeight}
+                    placeholder={`e.g. 185 lbs`} placeholderTextColor="#4b5563"
+                    returnKeyType="next" onFocus={() => scrollToField('weight')} />
+                </View>
+                <View onLayout={e => { fieldY.current['standing_reach'] = e.nativeEvent.layout.y; }}>
+                  <Text style={styles.fieldLabel}>Standing Reach</Text>
+                  <VoiceTextInput style={styles.input} value={editStandingReach} onChangeText={setEditStandingReach}
+                    placeholder={`e.g. 8'2"`} placeholderTextColor="#4b5563"
+                    returnKeyType="next" onFocus={() => scrollToField('standing_reach')} />
                 </View>
                 <View onLayout={e => { fieldY.current['school'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>School</Text>

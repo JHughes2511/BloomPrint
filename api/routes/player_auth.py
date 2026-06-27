@@ -107,6 +107,8 @@ class PlayerSelfUpdate(BaseModel):
     position: str | None = None
     height: str | None = None
     wingspan: str | None = None
+    weight: str | None = None
+    standing_reach: str | None = None
     country: str | None = None
     state: str | None = None
     city: str | None = None
@@ -124,7 +126,7 @@ def update_linked_player(
     player = db.get(models.Player, pu.player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
-    for field in ("position", "height", "wingspan", "country", "state", "city", "school_name"):
+    for field in ("position", "height", "wingspan", "weight", "standing_reach", "country", "state", "city", "school_name"):
         val = getattr(body, field)
         if val is not None:
             setattr(player, field, val)
