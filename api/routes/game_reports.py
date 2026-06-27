@@ -272,9 +272,10 @@ async def generate_game_report(
             film_context += f"\n{label_str.upper()}:\n{clip.analysis_text}\n"
 
     # Assemble prompt
+    from video_vision.bim import describe_output_type, comprehensive_directive
     sections = [
         f"You are the BloomPrint Basketball Intelligence Model.",
-        f"Generate a {gr.output_type.replace('_', ' ')} for: {matchup}",
+        f"Generate a {describe_output_type(gr.output_type)} for: {matchup}",
         f"PROGRAM: {my_team_name}",
     ]
     if my_roster_context:
@@ -307,6 +308,10 @@ async def generate_game_report(
             "IMPORTANT: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
             "Use plain section titles in ALL CAPS followed by a colon and newline."
         )
+
+    directive = comprehensive_directive(gr.output_type)
+    if directive:
+        sections.append(directive)
 
     prompt = "\n".join(sections)
 

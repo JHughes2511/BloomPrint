@@ -218,11 +218,13 @@ async def team_report(
             "and key lineup adjustments for game situations."
         )
     else:
+        from video_vision.bim import describe_output_type, comprehensive_directive
         type_instruction = (
-            f"Generate a {output_type.replace('_', ' ')} for the {team_label} roster. "
+            f"Generate a {describe_output_type(output_type)} for the {team_label} roster. "
             "Provide a comprehensive team analysis covering overall team grade, team strengths, "
             "areas to develop, lineup recommendations, and strategic priorities. "
             "Use the BIM framework with 6 pillars."
+            f"{comprehensive_directive(output_type)}"
         )
 
     prompt = (

@@ -367,6 +367,38 @@ PROMPT_MAP = {
 }
 
 
+def parse_output_types(output_type: str) -> list[str]:
+    """A report's output_type may be a single key or a comma-separated combo."""
+    return [t.strip() for t in (output_type or "").split(",") if t.strip()]
+
+
+def describe_output_type(output_type: str) -> str:
+    """Human phrase for one or more comma-separated output types, used inside the
+    inline-prompt generation routes (team report / game report / summary)."""
+    types = parse_output_types(output_type)
+    if len(types) <= 1:
+        return (output_type or "report").replace("_", " ")
+    return "comprehensive report combining " + ", ".join(t.replace("_", " ") for t in types)
+
+
+def comprehensive_directive(output_type: str) -> str:
+    """Extra instruction appended to an inline prompt when several types are
+    combined; empty string for a single type."""
+    types = parse_output_types(output_type)
+    if len(types) <= 1:
+        return ""
+    lenses = "\n".join(f"  {i}. {t.replace('_', ' ').upper()}" for i, t in enumerate(types, 1))
+    return (
+        "\n\nThis is a COMPREHENSIVE REPORT. Produce ONE cohesive document containing a clearly "
+        "labeled major section for EACH of the following lenses, in this order:\n"
+        f"{lenses}\n"
+        "Begin with a COMPREHENSIVE REPORT title and a one-paragraph executive summary tying the "
+        "lenses together. Each lens must be its own substantive section following that lens's "
+        "standard structure. Finish with an INTEGRATED PRIORITIES section synthesizing all lenses. "
+        "Do not omit any lens."
+    )
+
+
 def build_prompt(
     output_type: str,
     program: str,
@@ -374,6 +406,34 @@ def build_prompt(
     coach_weight: int,
     player_name: str,
 ) -> str:
+    types = parse_output_types(output_type)
+
+    # Combined / comprehensive report — merge multiple lenses into one document.
+    if len(types) > 1:
+        header = (
+            "You are the Basketball Intelligence Model producing a COMPREHENSIVE REPORT that "
+            "combines multiple analysis lenses into ONE cohesive document.\n\n"
+            f"{_program_header(program, level, coach_weight)}\n"
+            f"{'PLAYER FOCUS: ' + player_name if player_name else 'TEAM / MULTI-PLAYER'}\n\n"
+            "Produce a single report with a clearly labeled major section for each lens below, in "
+            "order. Each section must follow that lens's own output format. Begin with a "
+            "COMPREHENSIVE REPORT title and a one-paragraph executive summary, and end with an "
+            "INTEGRATED PRIORITIES section that synthesizes every lens. Do not omit any lens.\n"
+        )
+        blocks = []
+        for i, t in enumerate(types, 1):
+            fn = PROMPT_MAP.get(t)
+            if fn is None:
+                continue
+            blocks.append(
+                f"\n===== LENS {i}: {t.replace('_', ' ').upper()} =====\n"
+                f"{fn(program, level, coach_weight, player_name)}"
+            )
+        if not blocks:
+            valid = ", ".join(PROMPT_MAP.keys())
+            raise ValueError(f"Unknown output_type '{output_type}'. Valid: {valid}")
+        return header + "\n".join(blocks) + _NO_MARKDOWN
+
     fn = PROMPT_MAP.get(output_type)
     if fn is None:
         valid = ", ".join(PROMPT_MAP.keys())

@@ -16,6 +16,7 @@ import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import ShareModal from '../components/ShareModal';
+import { outputTypeLabel } from '../utils/reportType';
 import { mdToHtml, safeFileName, wrapPrintDocument } from '../utils/mdToHtml';
 import { useAuth } from '../context/AuthContext';
 
@@ -310,7 +311,7 @@ export default function GameReportBuilderScreen() {
   };
 
   const reportTypeLabel = () =>
-    (report?.output_type ?? 'Game Report').replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
+    report?.output_type ? outputTypeLabel(report.output_type) : 'Game Report';
 
   const exportPdf = async () => {
     if (!report?.report_text) return;
@@ -449,16 +450,27 @@ export default function GameReportBuilderScreen() {
           </View>
         )}
 
-        {/* Output type */}
+        {/* Output type — select one or more to combine into a comprehensive report */}
         <Text style={styles.label}>Report Type</Text>
+        <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
+          Tap multiple to combine them into one comprehensive report.
+        </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
-          {OUTPUT_TYPES.map(t => (
-            <TouchableOpacity key={t.key}
-              style={[styles.chip, outputType === t.key && styles.chipActive]}
-              onPress={() => { setOutputType(t.key); save({ output_type: t.key }); }}>
-              <Text style={[styles.chipText, outputType === t.key && styles.chipTextActive]}>{t.label}</Text>
-            </TouchableOpacity>
-          ))}
+          {OUTPUT_TYPES.map(t => {
+            const selected = outputType.split(',').filter(Boolean);
+            const isOn = selected.includes(t.key);
+            return (
+              <TouchableOpacity key={t.key}
+                style={[styles.chip, isOn && styles.chipActive]}
+                onPress={() => {
+                  const next = isOn ? selected.filter(k => k !== t.key) : [...selected, t.key];
+                  const joined = (next.length ? next : [t.key]).join(',');
+                  setOutputType(joined); save({ output_type: joined });
+                }}>
+                <Text style={[styles.chipText, isOn && styles.chipTextActive]}>{t.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
 
         {/* Film clips */}

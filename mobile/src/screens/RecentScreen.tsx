@@ -14,6 +14,7 @@ import { evalsAPI, playerAPI, gameReportsAPI, trainingAPI, staffSharingAPI, coac
 import { GradeBadge } from '../components/GradeBadge';
 import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import ShareModal from '../components/ShareModal';
+import { outputTypeLabel } from '../utils/reportType';
 import { renderReport } from '../utils/renderReport';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -305,7 +306,7 @@ export default function RecentScreen() {
     if (!activeModal?.text) return;
     setExporting(true);
     try {
-      const title = TYPE_LABELS[activeModal.outputType] ?? activeModal.outputType;
+      const title = TYPE_LABELS[activeModal.outputType] ?? outputTypeLabel(activeModal.outputType);
       const html = `<html><head><style>
         body{font-family:Georgia,serif;padding:40px;color:#111;max-width:800px;margin:auto}
         h1{font-size:22px;border-bottom:2px solid #2563eb;padding-bottom:8px}
@@ -333,7 +334,7 @@ export default function RecentScreen() {
   const printModalReport = async () => {
     if (!activeModal?.text) return;
     try {
-      const title = TYPE_LABELS[activeModal.outputType] ?? activeModal.outputType;
+      const title = TYPE_LABELS[activeModal.outputType] ?? outputTypeLabel(activeModal.outputType);
       const html = `<html><head><style>
         body{font-family:Georgia,serif;padding:40px;color:#111}
         h1{font-size:22px}h2{font-size:17px;color:#1e40af}
@@ -519,7 +520,7 @@ export default function RecentScreen() {
                     >
                       {item.kind === 'game' ? 'Game Report Packet' :
                        item.kind === 'training' ? 'Training Program' :
-                       (TYPE_LABELS[item.output_type] ?? item.output_type)}
+                       (TYPE_LABELS[item.output_type] ?? outputTypeLabel(item.output_type))}
                     </Text>
                   </View>
                   {item.overall_grade != null && <GradeBadge grade={item.overall_grade} size="md" />}
@@ -781,7 +782,7 @@ export default function RecentScreen() {
                 <Text style={styles.modalTitle}>
                   {modalView === 'send' ? 'Send Report' :
                    modalView === 'correct' ? 'Correct Report' :
-                   (TYPE_LABELS[activeModal?.outputType ?? ''] ?? activeModal?.outputType ?? 'Report')}
+                   (TYPE_LABELS[activeModal?.outputType ?? ''] ?? outputTypeLabel(activeModal?.outputType) ?? 'Report')}
                 </Text>
                 {modalView === 'report' && activeModal?.playerName && (
                   <Text style={styles.modalSub}>{activeModal.playerName}</Text>
@@ -847,7 +848,7 @@ export default function RecentScreen() {
               <>
                 {/* Report preview */}
                 <View style={sendStyles.reportPreview}>
-                  <Text style={sendStyles.reportPreviewTitle}>{TYPE_LABELS[activeModal?.outputType ?? ''] ?? activeModal?.outputType}</Text>
+                  <Text style={sendStyles.reportPreviewTitle}>{TYPE_LABELS[activeModal?.outputType ?? ''] ?? outputTypeLabel(activeModal?.outputType)}</Text>
                   <Text style={sendStyles.reportPreviewText} numberOfLines={2}>{activeModal?.text?.replace(/[#*_]/g, '').trim().slice(0, 120)}...</Text>
                 </View>
 
@@ -918,7 +919,7 @@ export default function RecentScreen() {
             {modalView === 'correct' && (
               <>
                 <View style={sendStyles.reportPreview}>
-                  <Text style={sendStyles.reportPreviewTitle}>{TYPE_LABELS[activeModal?.outputType ?? ''] ?? activeModal?.outputType}</Text>
+                  <Text style={sendStyles.reportPreviewTitle}>{TYPE_LABELS[activeModal?.outputType ?? ''] ?? outputTypeLabel(activeModal?.outputType)}</Text>
                   <Text style={sendStyles.reportPreviewText} numberOfLines={2}>{activeModal?.text?.replace(/[#*_]/g, '').trim().slice(0, 120)}...</Text>
                 </View>
                 <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>Describe what needs to be corrected and AI will update the report.</Text>

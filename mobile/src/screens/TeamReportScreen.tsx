@@ -17,6 +17,7 @@ import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from 
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { useFocusEffect } from '@react-navigation/native';
 import { renderReport } from '../utils/renderReport';
+import { outputTypeLabel } from '../utils/reportType';
 
 const OUTPUT_TYPES = [
   { key: 'coaching_report',  label: 'Coaching Report' },
@@ -173,7 +174,7 @@ export default function TeamReportScreen() {
   // Export state for prev report modal
   const [exportingPrevReport, setExportingPrevReport] = useState(false);
 
-  const typeLabel = () => outputType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  const typeLabel = () => outputTypeLabel(outputType);
 
   const exportPdf = async () => {
     if (!reportText) return;
@@ -497,16 +498,26 @@ export default function TeamReportScreen() {
         </ScrollView>
 
         <Text style={styles.label}>Report Type</Text>
+        <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
+          Tap multiple to combine them into one comprehensive report.
+        </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
-          {OUTPUT_TYPES.map(t => (
-            <TouchableOpacity
-              key={t.key}
-              style={[styles.chip, outputType === t.key && styles.chipActive]}
-              onPress={() => setOutputType(t.key)}
-            >
-              <Text style={[styles.chipText, outputType === t.key && styles.chipTextActive]}>{t.label}</Text>
-            </TouchableOpacity>
-          ))}
+          {OUTPUT_TYPES.map(t => {
+            const selected = outputType.split(',').filter(Boolean);
+            const isOn = selected.includes(t.key);
+            return (
+              <TouchableOpacity
+                key={t.key}
+                style={[styles.chip, isOn && styles.chipActive]}
+                onPress={() => {
+                  const next = isOn ? selected.filter(k => k !== t.key) : [...selected, t.key];
+                  setOutputType((next.length ? next : [t.key]).join(','));
+                }}
+              >
+                <Text style={[styles.chipText, isOn && styles.chipTextActive]}>{t.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
 
         <Text style={styles.label}>Coach Focus (optional)</Text>

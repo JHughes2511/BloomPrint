@@ -17,6 +17,7 @@ import { renderReport } from '../utils/renderReport';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import ShareModal from '../components/ShareModal';
+import { outputTypeLabel } from '../utils/reportType';
 
 const COMPETITION_LEVELS = ['Middle School', 'HS JV', 'HS Varsity', 'AAU', 'College', 'Pro'];
 
@@ -163,7 +164,7 @@ export default function PlayerProfileScreen() {
     try {
       const result = await playersAPI.summary(playerId, { output_type: summaryType });
       setShowSummary(false);
-      const typeLabel = summaryType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      const typeLabel = outputTypeLabel(summaryType);
       const sanitize = (s: string) => (s ?? '').replace(/[^a-zA-Z0-9 \-]/g, '').trim();
       navigation.navigate('Summary', {
         title: `${player.name} — ${typeLabel} Summary`,
@@ -1218,17 +1219,24 @@ export default function PlayerProfileScreen() {
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>Summarize History</Text>
-            <Text style={styles.modalSub}>Choose a report type to generate a summary across all {evals.length} evaluations.</Text>
+            <Text style={styles.modalSub}>Choose one or more report types — combine them for a comprehensive summary across all {evals.length} evaluations.</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
-              {OUTPUT_TYPES.map(t => (
+              {OUTPUT_TYPES.map(t => {
+                const selected = summaryType.split(',').filter(Boolean);
+                const isOn = selected.includes(t.key);
+                return (
                 <TouchableOpacity
                   key={t.key}
-                  style={[styles.chip, summaryType === t.key && styles.chipActive]}
-                  onPress={() => setSummaryType(t.key)}
+                  style={[styles.chip, isOn && styles.chipActive]}
+                  onPress={() => {
+                    const next = isOn ? selected.filter(k => k !== t.key) : [...selected, t.key];
+                    setSummaryType((next.length ? next : [t.key]).join(','));
+                  }}
                 >
-                  <Text style={[styles.chipText, summaryType === t.key && { color: '#fff' }]}>{t.label}</Text>
+                  <Text style={[styles.chipText, isOn && { color: '#fff' }]}>{t.label}</Text>
                 </TouchableOpacity>
-              ))}
+                );
+              })}
             </ScrollView>
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowSummary(false)}>

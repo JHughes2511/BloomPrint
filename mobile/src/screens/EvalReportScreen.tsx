@@ -12,6 +12,7 @@ import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { evalsAPI, playersAPI, playerAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import ShareModal from '../components/ShareModal';
+import { outputTypeLabel } from '../utils/reportType';
 import { Evaluation, Correction, Player } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
@@ -169,7 +170,7 @@ export default function EvalReportScreen() {
   const buildFileName = () => {
     if (!ev) return 'Evaluation Report';
     const sanitize = (s: string) => s.replace(/[^a-zA-Z0-9 \-]/g, '').trim();
-    const type = ev.output_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const type = outputTypeLabel(ev.output_type);
     const name = sanitize(player?.name ?? 'Player');
     const team = sanitize(player?.team_name ?? player?.program_name ?? '');
     const pos  = sanitize(player?.position ?? '');
@@ -235,7 +236,7 @@ export default function EvalReportScreen() {
   const buildHtml = (cats: Record<string, boolean>) => {
     if (!ev) return '<html><body><p>No data</p></body></html>';
     const date = new Date(ev.created_at).toLocaleDateString();
-    const type = ev.output_type.replace(/_/g, ' ').toUpperCase();
+    const type = outputTypeLabel(ev.output_type).toUpperCase();
     const sanitize = (s: string) =>
       s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -350,7 +351,7 @@ export default function EvalReportScreen() {
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={styles.title}>{ev.output_type.replace(/_/g, ' ').toUpperCase()}</Text>
+          <Text style={styles.title}>{outputTypeLabel(ev.output_type).toUpperCase()}</Text>
           <Text style={styles.sub}>{new Date(ev.created_at).toLocaleDateString()}</Text>
         </View>
         <GradeBadge grade={ev.overall_grade} size="lg" />
@@ -559,7 +560,7 @@ export default function EvalReportScreen() {
           reportId={evalId}
           outputType={ev.output_type ?? 'player_eval'}
           reportText={ev.report_text ?? ''}
-          title={ev.output_type ? ev.output_type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) : 'Player Eval'}
+          title={ev.output_type ? outputTypeLabel(ev.output_type) : 'Player Eval'}
         />
       )}
 

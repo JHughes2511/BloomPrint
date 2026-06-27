@@ -164,22 +164,26 @@ async def player_summary(
             eval_context += ev.report_text[:800] + "\n"
 
     focus = body.focus_prompt or ""
+    from video_vision.bim import describe_output_type, comprehensive_directive
     prompt = (
         f"You are the BloomPrint Basketball Intelligence Model. "
-        f"Generate a {body.output_type.replace('_', ' ')} that SUMMARIZES ALL EVALUATION HISTORY for {player.name}.\n\n"
+        f"Generate a {describe_output_type(body.output_type)} that SUMMARIZES ALL EVALUATION HISTORY for {player.name}.\n\n"
         f"EVALUATION HISTORY:\n{eval_context}\n\n"
         f"{('COACH FOCUS: ' + focus) if focus else ''}\n\n"
         "Synthesize trends, growth over time, consistent strengths, persistent concerns, "
         "and the player's trajectory. Provide an overall composite grade and pillar grades. "
         "Format with clear BIM sections including OVERALL GRADE, pillar grades, GREEN FLAGS, WATCH FLAGS, and KEY QUESTIONS."
+        f"{comprehensive_directive(body.output_type)}"
     )
 
+    from video_vision.bim import parse_output_types
+    summary_max_tokens = 8192 if len(parse_output_types(body.output_type)) > 1 else 2048
     try:
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
             model="claude-opus-4-7",
-            max_tokens=2048,
+            max_tokens=summary_max_tokens,
             messages=[{"role": "user", "content": prompt}],
         )
         text_blocks = [b for b in response.content if hasattr(b, "text")]

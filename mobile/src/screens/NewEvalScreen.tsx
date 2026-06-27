@@ -28,7 +28,8 @@ export default function NewEvalScreen() {
   const navigation = useNavigation<any>();
   const { playerId, playerName } = route.params;
 
-  const [outputType, setOutputType] = useState<OutputType>('player_eval');
+  // comma-separated when multiple types are combined into one comprehensive eval
+  const [outputType, setOutputType] = useState<string>('player_eval');
   const [coachNotes, setCoachNotes] = useState('');
   const [focusPrompt, setFocusPrompt] = useState('');
   const [videoUri, setVideoUri] = useState<string | null>(null);
@@ -90,18 +91,28 @@ export default function NewEvalScreen() {
         </View>
       </View>
 
-      {/* Output type selector */}
+      {/* Output type selector — combine multiple for a comprehensive eval */}
       <Text style={styles.label}>Report Type</Text>
+      <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
+        Tap multiple to combine them into one comprehensive report.
+      </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
-        {OUTPUT_TYPES.map(t => (
+        {OUTPUT_TYPES.map(t => {
+          const selected = outputType.split(',').filter(Boolean);
+          const isOn = selected.includes(t.key);
+          return (
           <TouchableOpacity
             key={t.key}
-            style={[styles.typeChip, outputType === t.key && styles.typeChipActive]}
-            onPress={() => setOutputType(t.key)}
+            style={[styles.typeChip, isOn && styles.typeChipActive]}
+            onPress={() => {
+              const next = isOn ? selected.filter(k => k !== t.key) : [...selected, t.key];
+              setOutputType((next.length ? next : [t.key]).join(','));
+            }}
           >
-            <Text style={[styles.typeLabel, outputType === t.key && styles.typeLabelActive]}>{t.label}</Text>
+            <Text style={[styles.typeLabel, isOn && styles.typeLabelActive]}>{t.label}</Text>
           </TouchableOpacity>
-        ))}
+          );
+        })}
       </ScrollView>
 
       {/* Video picker */}
