@@ -32,6 +32,9 @@ export type ThemeTokens = {
   // Surfaces
   card: string;
   cardBorder: string;
+  // Near-opaque surface for full-screen sheets / modals (keeps a faint premium
+  // translucency in dark but does not let the background bleed through).
+  sheet: string;
   cardBlurIntensity: number; // 0 = no blur (light); dark uses ~14
   divider: string;
   line: string;
@@ -87,6 +90,7 @@ export const light: ThemeTokens = {
 
   card: '#FFFFFF',
   cardBorder: '#E7DFD0',
+  sheet: '#FFFFFF',
   cardBlurIntensity: 0,
   divider: '#EAE2D5',
   line: '#E1D9CA',
@@ -138,6 +142,7 @@ export const dark: ThemeTokens = {
 
   card: 'rgba(255,255,255,0.07)',
   cardBorder: 'rgba(255,255,255,0.13)',
+  sheet: 'rgba(15,32,43,0.95)',
   cardBlurIntensity: 14,
   divider: 'rgba(255,255,255,0.12)',
   line: 'rgba(255,255,255,0.16)',

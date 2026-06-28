@@ -566,7 +566,7 @@ export default function TeamReportScreen() {
           <View style={styles.reportSection}>
             <Text style={styles.label}>Team Report</Text>
             <View style={styles.reportBox}>
-              {renderReport(reportText)}
+              {renderReport(reportText, { heading: t.ink, body: t.inkSoft })}
             </View>
             <View style={styles.actionGrid}>
               <TouchableOpacity style={styles.actionBtn} onPress={exportPdf} disabled={exporting}>
@@ -664,7 +664,7 @@ export default function TeamReportScreen() {
       {/* Previous Report Detail Modal */}
       <Modal visible={!!selectedPrevReport} animationType="slide" transparent>
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60 }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: t.ink, fontSize: 18, fontWeight: '800' }}>
@@ -680,7 +680,7 @@ export default function TeamReportScreen() {
             </View>
             <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
               {selectedPrevReport?.report_text ? (
-                renderReport(selectedPrevReport.report_text)
+                renderReport(selectedPrevReport.report_text, { heading: t.ink, body: t.inkSoft })
               ) : (
                 <Text style={{ color: t.muted }}>No report content.</Text>
               )}
@@ -1098,7 +1098,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
 
 const makeShareStyles = (t: ThemeTokens) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modal: { backgroundColor: t.isDark ? '#13242F' : '#FFFFFF', borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder },
+  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder },
   title: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 16 },
   label: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
   targetRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },

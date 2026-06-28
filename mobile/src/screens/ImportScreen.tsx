@@ -10,6 +10,10 @@ import * as DocumentPicker from 'expo-document-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { api, teamsAPI } from '../api/client';
 import { Team } from '../types';
+import { useTheme } from '../theme/ThemeProvider';
+import { ThemeTokens } from '../theme/tokens';
+import { fonts } from '../theme/typography';
+import { ScreenBackground } from '../theme/components';
 
 const OUTPUT_TYPES = [
   { key: 'player_eval',         label: 'Player Eval' },
@@ -58,6 +62,8 @@ interface ImportResult {
 export default function ImportScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
+  const { t } = useTheme();
+  const styles = makeStyles(t);
   const isRosterMode = route.params?.mode === 'roster';
 
   const [file, setFile] = useState<{ uri: string; name: string } | null>(null);
@@ -135,8 +141,9 @@ export default function ImportScreen() {
   const selectedTeam = teams.find(t => t.id === selectedTeamId);
 
   return (
+    <ScreenBackground>
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: '#0a0a0a' }}
+      style={{ flex: 1 }}
       behavior={undefined}
     >
       <KeyboardAwareScrollView
@@ -147,7 +154,7 @@ export default function ImportScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={24} color="#fff" />
+            <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
           <View style={{ flex: 1, marginLeft: 12 }}>
             <Text style={styles.title}>{isRosterMode ? 'Import Roster' : 'Import Excel'}</Text>
@@ -168,10 +175,10 @@ export default function ImportScreen() {
             {/* Selected team badge */}
             {selectedTeam && (
               <View style={styles.selectedTeamBadge}>
-                <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
+                <Ionicons name="checkmark-circle" size={16} color={t.positive} />
                 <Text style={styles.selectedTeamText}>{selectedTeam.name}</Text>
                 <TouchableOpacity onPress={() => setSelectedTeamId(null)}>
-                  <Ionicons name="close-circle" size={16} color="#6b7280" />
+                  <Ionicons name="close-circle" size={16} color={t.muted} />
                 </TouchableOpacity>
               </View>
             )}
@@ -181,7 +188,7 @@ export default function ImportScreen() {
               <VoiceTextInput
                 style={styles.createTeamInput}
                 placeholder="Create new team name..."
-                placeholderTextColor="#4b5563"
+                placeholderTextColor={t.muted2}
                 value={newTeamName}
                 onChangeText={setNewTeamName}
                 returnKeyType="done"
@@ -192,7 +199,7 @@ export default function ImportScreen() {
                 disabled={!newTeamName.trim() || creatingTeam}
               >
                 {creatingTeam
-                  ? <ActivityIndicator color="#fff" size="small" />
+                  ? <ActivityIndicator color={t.ctaText} size="small" />
                   : <Text style={styles.createTeamBtnText}>Create</Text>
                 }
               </TouchableOpacity>
@@ -203,18 +210,18 @@ export default function ImportScreen() {
               <>
                 <TouchableOpacity style={styles.teamPickerToggle} onPress={() => setShowTeamPicker(v => !v)}>
                   <Text style={styles.teamPickerToggleText}>Or select existing team</Text>
-                  <Ionicons name={showTeamPicker ? 'chevron-up' : 'chevron-down'} size={14} color="#9ca3af" />
+                  <Ionicons name={showTeamPicker ? 'chevron-up' : 'chevron-down'} size={14} color={t.muted} />
                 </TouchableOpacity>
                 {showTeamPicker && (
                   <View style={styles.teamPickerList}>
-                    {teams.map(t => (
+                    {teams.map(tm => (
                       <TouchableOpacity
-                        key={t.id}
-                        style={[styles.teamPickerItem, selectedTeamId === t.id && styles.teamPickerItemActive]}
-                        onPress={() => { setSelectedTeamId(t.id); setShowTeamPicker(false); }}
+                        key={tm.id}
+                        style={[styles.teamPickerItem, selectedTeamId === tm.id && styles.teamPickerItemActive]}
+                        onPress={() => { setSelectedTeamId(tm.id); setShowTeamPicker(false); }}
                       >
-                        <Text style={[styles.teamPickerItemText, selectedTeamId === t.id && { color: '#fff' }]}>{t.name}</Text>
-                        {selectedTeamId === t.id && <Ionicons name="checkmark" size={14} color="#22c55e" />}
+                        <Text style={[styles.teamPickerItemText, selectedTeamId === tm.id && { color: t.ink }]}>{tm.name}</Text>
+                        {selectedTeamId === tm.id && <Ionicons name="checkmark" size={14} color={t.positive} />}
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -230,9 +237,9 @@ export default function ImportScreen() {
           <Ionicons
             name={file ? 'document-text' : 'cloud-upload-outline'}
             size={28}
-            color={file ? '#22c55e' : '#6b7280'}
+            color={file ? t.positive : t.muted}
           />
-          <Text style={[styles.filePickerText, file && { color: '#22c55e' }]}>
+          <Text style={[styles.filePickerText, file && { color: t.positive }]}>
             {file ? file.name : 'Tap to select .xlsx file'}
           </Text>
         </TouchableOpacity>
@@ -302,8 +309,8 @@ export default function ImportScreen() {
           disabled={!file || uploading || (isRosterMode && !selectedTeamId)}
         >
           {uploading
-            ? <><ActivityIndicator color="#fff" /><Text style={styles.uploadText}>  Importing...</Text></>
-            : <><Ionicons name="cloud-upload" size={18} color="#fff" /><Text style={styles.uploadText}>  {isRosterMode ? 'Import Roster' : 'Import File'}</Text></>
+            ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.uploadText}>  Importing...</Text></>
+            : <><Ionicons name="cloud-upload" size={18} color={t.ctaText} /><Text style={styles.uploadText}>  {isRosterMode ? 'Import Roster' : 'Import File'}</Text></>
           }
         </TouchableOpacity>
 
@@ -317,16 +324,16 @@ export default function ImportScreen() {
                 <Text style={styles.statLabel}>Rows Read</Text>
               </View>
               <View style={styles.stat}>
-                <Text style={[styles.statNum, { color: '#22c55e' }]}>{result.players_created}</Text>
+                <Text style={[styles.statNum, { color: t.positive }]}>{result.players_created}</Text>
                 <Text style={styles.statLabel}>Players Added</Text>
               </View>
               <View style={styles.stat}>
-                <Text style={[styles.statNum, { color: '#60a5fa' }]}>{result.players_found}</Text>
+                <Text style={[styles.statNum, { color: t.accent }]}>{result.players_found}</Text>
                 <Text style={styles.statLabel}>Players Matched</Text>
               </View>
               {!isRosterMode && (
                 <View style={styles.stat}>
-                  <Text style={[styles.statNum, { color: '#a78bfa' }]}>{result.evaluations_created}</Text>
+                  <Text style={[styles.statNum, { color: t.accent }]}>{result.evaluations_created}</Text>
                   <Text style={styles.statLabel}>Evals Created</Text>
                 </View>
               )}
@@ -371,91 +378,92 @@ export default function ImportScreen() {
         )}
       </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
+    </ScreenBackground>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0a0a', padding: 20, paddingTop: 56 },
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  container: { flex: 1, padding: 20, paddingTop: 56 },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 28 },
-  title: { color: '#fff', fontSize: 22, fontWeight: '900' },
-  sub: { color: '#6b7280', fontSize: 12, marginTop: 2 },
+  title: { color: t.ink, fontSize: 22, fontFamily: fonts[800] },
+  sub: { color: t.muted, fontSize: 12, marginTop: 2 },
   label: {
-    color: '#9ca3af', fontSize: 11, fontWeight: '700',
-    letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6,
+    color: t.label, fontSize: 11.5, fontFamily: fonts[700],
+    letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6,
   },
-  hint: { color: '#4b5563', fontSize: 12, marginBottom: 10, lineHeight: 17 },
+  hint: { color: t.muted2, fontSize: 12, marginBottom: 10, lineHeight: 17 },
   teamSection: {
-    backgroundColor: '#111827', borderRadius: 14, padding: 16,
-    marginBottom: 24, borderWidth: 1, borderColor: '#1f2937',
+    backgroundColor: t.card, borderRadius: 18, padding: 16,
+    marginBottom: 24, borderWidth: 1, borderColor: t.cardBorder,
   },
   selectedTeamBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#052e16', borderRadius: 8, padding: 10, marginBottom: 12,
+    backgroundColor: t.positiveSoft, borderRadius: 10, padding: 10, marginBottom: 12,
   },
-  selectedTeamText: { color: '#22c55e', fontWeight: '700', flex: 1, fontSize: 14 },
+  selectedTeamText: { color: t.positive, fontFamily: fonts[700], flex: 1, fontSize: 14 },
   createTeamRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
   createTeamInput: {
-    flex: 1, backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12,
-    color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151',
+    flex: 1, backgroundColor: t.chip, borderRadius: 12, padding: 12,
+    color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line,
   },
   createTeamBtn: {
-    backgroundColor: '#2563eb', borderRadius: 10, paddingHorizontal: 16,
+    backgroundColor: t.ctaBg, borderRadius: 999, paddingHorizontal: 16,
     justifyContent: 'center', alignItems: 'center',
   },
-  createTeamBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  createTeamBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
   teamPickerToggle: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingVertical: 10, borderTopWidth: 1, borderTopColor: '#1f2937',
+    paddingVertical: 10, borderTopWidth: 1, borderTopColor: t.divider,
   },
-  teamPickerToggleText: { color: '#6b7280', fontSize: 13 },
+  teamPickerToggleText: { color: t.muted, fontSize: 13 },
   teamPickerList: { marginTop: 6 },
   teamPickerItem: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingVertical: 10, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: '#1f2937',
+    paddingVertical: 10, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: t.divider,
   },
-  teamPickerItemActive: { backgroundColor: '#052e16' },
-  teamPickerItemText: { color: '#9ca3af', fontSize: 14 },
+  teamPickerItemActive: { backgroundColor: t.accentSoft, borderRadius: 8 },
+  teamPickerItemText: { color: t.inkSoft, fontSize: 14 },
   filePicker: {
-    borderWidth: 2, borderColor: '#374151', borderStyle: 'dashed',
-    borderRadius: 12, padding: 24, alignItems: 'center', marginBottom: 24, gap: 8,
+    borderWidth: 2, borderColor: t.line, borderStyle: 'dashed',
+    borderRadius: 14, padding: 24, alignItems: 'center', marginBottom: 24, gap: 8,
   },
-  filePickerDone: { borderColor: '#16a34a', borderStyle: 'solid' },
-  filePickerText: { color: '#6b7280', fontSize: 14 },
+  filePickerDone: { borderColor: t.positive, borderStyle: 'solid' },
+  filePickerText: { color: t.muted, fontSize: 14 },
   chip: {
-    borderWidth: 1, borderColor: '#374151', borderRadius: 20,
-    paddingHorizontal: 14, paddingVertical: 8, marginRight: 8,
+    borderWidth: 1, borderColor: t.line, borderRadius: 999,
+    paddingHorizontal: 16, paddingVertical: 9, marginRight: 8,
   },
-  chipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  chipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
-  chipTextActive: { color: '#fff' },
+  chipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  chipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
+  chipTextActive: { color: t.ctaText },
   uploadBtn: {
-    backgroundColor: '#2563eb', borderRadius: 12, padding: 16,
+    backgroundColor: t.ctaBg, borderRadius: 999, padding: 15,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
   },
-  uploadBtnDisabled: { backgroundColor: '#1e3a8a' },
-  uploadText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  uploadBtnDisabled: { opacity: 0.5 },
+  uploadText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15 },
   resultBox: {
-    backgroundColor: '#111827', borderRadius: 14, padding: 20, marginTop: 24,
+    backgroundColor: t.card, borderRadius: 18, padding: 20, marginTop: 24, borderWidth: 1, borderColor: t.cardBorder,
   },
-  resultTitle: { color: '#fff', fontSize: 18, fontWeight: '800', marginBottom: 16 },
+  resultTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800], marginBottom: 16 },
   statRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
   stat: { alignItems: 'center', flex: 1 },
-  statNum: { color: '#fff', fontSize: 28, fontWeight: '900' },
-  statLabel: { color: '#6b7280', fontSize: 10, marginTop: 2, textAlign: 'center' },
-  errorBox: { backgroundColor: '#1f0000', borderRadius: 8, padding: 12, marginBottom: 14 },
-  errorTitle: { color: '#ef4444', fontWeight: '700', fontSize: 12, marginBottom: 6 },
-  errorText: { color: '#fca5a5', fontSize: 12, marginBottom: 2 },
+  statNum: { color: t.ink, fontSize: 28, fontFamily: fonts[900] },
+  statLabel: { color: t.muted, fontSize: 10, marginTop: 2, textAlign: 'center' },
+  errorBox: { backgroundColor: t.negativeSoft, borderRadius: 10, padding: 12, marginBottom: 14 },
+  errorTitle: { color: t.negative, fontFamily: fonts[700], fontSize: 12, marginBottom: 6 },
+  errorText: { color: t.negative, fontSize: 12, marginBottom: 2 },
   doneBtn: {
-    backgroundColor: '#166534', borderRadius: 10, padding: 14, alignItems: 'center',
+    backgroundColor: t.ctaBg, borderRadius: 999, padding: 14, alignItems: 'center',
   },
-  doneBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  columnGuide: { backgroundColor: '#111827', borderRadius: 12, overflow: 'hidden', marginBottom: 16 },
+  doneBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
+  columnGuide: { backgroundColor: t.card, borderRadius: 14, overflow: 'hidden', marginBottom: 16, borderWidth: 1, borderColor: t.cardBorder },
   colRow: {
-    padding: 12, borderBottomWidth: 1, borderBottomColor: '#1f2937',
+    padding: 12, borderBottomWidth: 1, borderBottomColor: t.divider,
   },
-  colName: { color: '#fff', fontSize: 13, fontWeight: '700', marginBottom: 2 },
-  colDesc: { color: '#6b7280', fontSize: 12 },
-  exampleBox: { backgroundColor: '#1e3a8a22', borderRadius: 10, padding: 14, borderWidth: 1, borderColor: '#1d4ed8' },
-  exampleTitle: { color: '#60a5fa', fontSize: 11, fontWeight: '700', marginBottom: 6 },
-  exampleText: { color: '#93c5fd', fontSize: 11, lineHeight: 18 },
+  colName: { color: t.ink, fontSize: 13, fontFamily: fonts[700], marginBottom: 2 },
+  colDesc: { color: t.muted, fontSize: 12 },
+  exampleBox: { backgroundColor: t.accentSoft, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: t.accent },
+  exampleTitle: { color: t.accent, fontSize: 11, fontFamily: fonts[700], marginBottom: 6 },
+  exampleText: { color: t.inkSoft, fontSize: 11, lineHeight: 18 },
 });

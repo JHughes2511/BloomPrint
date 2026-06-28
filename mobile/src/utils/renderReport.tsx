@@ -13,7 +13,10 @@ import { Text, View } from 'react-native';
  *  - Blank lines become a small spacer View
  *  - All other lines render as normal body text (fontSize:14, lineHeight:22)
  */
-export function renderReport(text: string): React.ReactElement[] {
+export function renderReport(
+  text: string,
+  colors: { heading: string; body: string } = { heading: '#f3f4f6', body: '#d1d5db' },
+): React.ReactElement[] {
   if (!text) return [];
 
   const lines = text
@@ -71,7 +74,7 @@ export function renderReport(text: string): React.ReactElement[] {
       elements.push(
         <Text
           key={`line-${index}`}
-          style={{ fontWeight: '800', fontSize: 16, color: '#f3f4f6', marginTop: 14, marginBottom: 3 }}
+          style={{ fontWeight: '800', fontSize: 16, color: colors.heading, marginTop: 14, marginBottom: 3 }}
         >
           {trimmed}
         </Text>
@@ -80,7 +83,7 @@ export function renderReport(text: string): React.ReactElement[] {
       elements.push(
         <Text
           key={`line-${index}`}
-          style={{ fontSize: 14, lineHeight: 22, color: '#d1d5db' }}
+          style={{ fontSize: 14, lineHeight: 22, color: colors.body }}
         >
           {line}
         </Text>
