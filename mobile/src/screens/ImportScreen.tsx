@@ -113,7 +113,10 @@ export default function ImportScreen() {
   };
 
   const upload = async () => {
-    if (!file) return;
+    if (!file) {
+      Alert.alert('Select a file', 'Tap the dashed "Tap to select .xlsx file" box above to choose your spreadsheet first.');
+      return;
+    }
     if (isRosterMode && !selectedTeamId) {
       Alert.alert('Team Required', 'Please select or create a team before importing the roster.');
       return;
@@ -306,7 +309,8 @@ export default function ImportScreen() {
         <TouchableOpacity
           style={[styles.uploadBtn, (!file || (isRosterMode && !selectedTeamId)) && styles.uploadBtnDisabled]}
           onPress={upload}
-          disabled={!file || uploading || (isRosterMode && !selectedTeamId)}
+          disabled={uploading}
+          activeOpacity={0.85}
         >
           {uploading
             ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.uploadText}>  Importing...</Text></>
