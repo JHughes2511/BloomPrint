@@ -43,6 +43,13 @@ import PlayerNotificationsScreen from './src/screens/player/PlayerNotificationsS
 import PlayerTeamReportDetailScreen from './src/screens/player/PlayerTeamReportDetailScreen';
 import PlayerLinkScreen from './src/screens/player/PlayerLinkScreen';
 
+import {
+  useFonts,
+  HankenGrotesk_400Regular, HankenGrotesk_500Medium, HankenGrotesk_600SemiBold,
+  HankenGrotesk_700Bold, HankenGrotesk_800ExtraBold, HankenGrotesk_900Black,
+} from '@expo-google-fonts/hanken-grotesk';
+import { ThemeProvider } from './src/theme/ThemeProvider';
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -288,11 +295,22 @@ function Root() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    HankenGrotesk_400Regular, HankenGrotesk_500Medium, HankenGrotesk_600SemiBold,
+    HankenGrotesk_700Bold, HankenGrotesk_800ExtraBold, HankenGrotesk_900Black,
+  });
+
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, backgroundColor: '#0C2331', alignItems: 'center', justifyContent: 'center' }} />;
+  }
+
   return (
-    <AuthProvider>
-      <PlayerAuthProvider>
-        <Root />
-      </PlayerAuthProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <PlayerAuthProvider>
+          <Root />
+        </PlayerAuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
