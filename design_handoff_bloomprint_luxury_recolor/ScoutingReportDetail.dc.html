@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</helmet>
+<div data-screen-label="Scouting Report Detail" style="width:390px;height:852px;border-radius:46px;overflow:hidden;background:var(--canvas,#F5F0E8);display:flex;flex-direction:column;font-family:'Hanken Grotesk',sans-serif;color:var(--ink,#15252F);">
+
+  <div style="flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 26px 2px;">
+    <span style="font-weight:700;font-size:16px;color:var(--ink,#15252F);">11:29</span>
+    <div style="display:flex;align-items:center;gap:8px;color:var(--ink,#15252F);">
+      <div style="display:flex;align-items:flex-end;gap:2px;height:11px;"><span style="width:3px;height:5px;background:currentColor;border-radius:1px;opacity:.5;"></span><span style="width:3px;height:7px;background:currentColor;border-radius:1px;opacity:.7;"></span><span style="width:3px;height:9px;background:currentColor;border-radius:1px;opacity:.85;"></span><span style="width:3px;height:11px;background:currentColor;border-radius:1px;"></span></div>
+      <i data-lucide="wifi" width="16" height="16"></i>
+      <div style="width:24px;height:12px;border:1.5px solid currentColor;border-radius:3px;padding:1.5px;opacity:.9;"><div style="width:55%;height:100%;background:currentColor;border-radius:1px;"></div></div>
+    </div>
+  </div>
+
+  <div style="flex:1 1 auto;overflow:hidden;padding:8px 24px 0;display:flex;flex-direction:column;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div style="display:flex;align-items:flex-start;gap:12px;"><i data-lucide="chevron-left" width="24" height="24" style="color:var(--ink,#15252F);margin-top:2px;"></i><div><div style="font-weight:800;font-size:23px;letter-spacing:-.01em;color:var(--ink,#15252F);">Scouting Report</div><div style="color:var(--muted,#857C6E);font-size:13.5px;margin-top:3px;">Test player · 5/14/2026</div></div></div>
+      <div style="display:flex;gap:8px;"><div style="width:36px;height:36px;border-radius:50%;background:var(--chip,#EFE8DC);display:flex;align-items:center;justify-content:center;color:var(--muted,#857C6E);"><i data-lucide="printer" width="17" height="17"></i></div><div style="width:36px;height:36px;border-radius:50%;background:var(--chip,#EFE8DC);display:flex;align-items:center;justify-content:center;color:var(--muted,#857C6E);"><i data-lucide="share-2" width="17" height="17"></i></div></div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:18px;">
+      <span style="padding:7px 14px;border-radius:999px;background:var(--badge-bg,#171513);color:var(--badge-text,#F5F0E8);font-size:11.5px;font-weight:800;letter-spacing:.04em;">BIM Score 6.1</span>
+      <span style="padding:7px 14px;border-radius:999px;background:var(--accent-soft,rgba(31,111,155,.1));color:var(--accent,#1F6F9B);font-size:11.5px;font-weight:800;">Recruit Grade</span>
+    </div>
+
+    <div style="overflow:hidden;flex:1;margin-top:18px;">
+      <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--label,#1F6F9B);margin-bottom:9px;"><i data-lucide="circle-dot" width="15" height="15"></i> Offensive Skills</div>
+      <div style="font-size:14px;color:var(--ink-soft,#34424B);line-height:1.6;">Advanced shot creation off the dribble with a reliable mid-range pull-up. Reads ball-screen coverage well and punishes drop coverage. Needs to improve weak-hand finishing in traffic.</div>
+
+      <div style="height:1px;background:var(--divider,#EAE2D5);margin:18px 0;"></div>
+
+      <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--label,#1F6F9B);margin-bottom:9px;"><i data-lucide="shield" width="15" height="15"></i> Defense</div>
+      <div style="font-size:14px;color:var(--ink-soft,#34424B);line-height:1.6;">High motor on-ball defender with active hands. Rotations are a half-step late on help-side; closeouts can be over-aggressive against shooters.</div>
+
+      <div style="height:1px;background:var(--divider,#EAE2D5);margin:18px 0;"></div>
+
+      <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--brown,#8A624A);margin-bottom:9px;"><i data-lucide="flag" width="15" height="15"></i> Projection</div>
+      <div style="font-size:14px;color:var(--ink-soft,#34424B);line-height:1.6;">Rotation-ready wing with two-way upside. Ceiling depends on consistent perimeter shooting and defensive discipline.</div>
+    </div>
+
+    <div style="flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:14px 0 18px;">
+      <div style="background:var(--pistachio,#B8C98A);color:#16201A;font-weight:800;font-size:14.5px;padding:15px;border-radius:14px;display:flex;gap:8px;align-items:center;justify-content:center;"><i data-lucide="send" width="17" height="17"></i> Send to Player</div>
+      <div style="background:var(--brown,#8A624A);color:var(--brown-ink,#fff);font-weight:800;font-size:14.5px;padding:15px;border-radius:14px;display:flex;gap:8px;align-items:center;justify-content:center;"><i data-lucide="users" width="17" height="17"></i> Share w/ Staff</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:852}}">
+class Component extends DCLogic {
+  componentDidMount(){ this._draw(); }
+  componentDidUpdate(){ this._draw(); }
+  _draw(){ const go=(n)=>{ if(window.lucide&&window.lucide.createIcons){try{window.lucide.createIcons();}catch(e){}} else if(n<40){setTimeout(()=>go(n+1),120);} }; go(0); }
+  renderVals(){ return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>*{box-sizing:border-box;} html,body{margin:0;}</style>
+</helmet>
+<div style="min-height:100vh;display:flex;align-items:flex-start;justify-content:center;gap:50px;padding:48px 40px;background:#d7d4cc;font-family:'Hanken Grotesk',sans-serif;">
+
+  <div style="width:270px;flex:0 0 auto;position:sticky;top:48px;">
+    <div style="font-weight:800;font-size:23px;color:#1d2832;letter-spacing:-.02em;">BloomPrint</div>
+    <div style="font-size:13px;color:#6b7178;margin-top:2px;margin-bottom:26px;">Interactive prototype · tap to navigate</div>
+
+    <div style="font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8a8f95;margin-bottom:10px;">Appearance</div>
+    <div style="display:flex;gap:6px;background:#cbc8c0;padding:5px;border-radius:14px;">
+      <div onClick="{{ setLight }}" style="{{ lightStyle }}"><i data-lucide="sun" width="16" height="16"></i> Light</div>
+      <div onClick="{{ setDark }}" style="{{ darkStyle }}"><i data-lucide="moon" width="16" height="16"></i> Dark</div>
+    </div>
+    <div style="font-size:12px;color:#7b8087;margin-top:9px;line-height:1.5;">{{ themeNote }}</div>
+
+    <div style="font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8a8f95;margin:26px 0 10px;">Screens</div>
+    <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="20">
+      <div onClick="{{ item.onClick }}" style="{{ item.style }}">{{ item.label }}</div>
+    </sc-for>
+  </div>
+
+  <div style="width:390px;height:852px;border-radius:48px;overflow:hidden;box-shadow:0 44px 100px rgba(0,0,0,.42);background:var(--canvas);flex:0 0 auto;border:9px solid #1c1c1e;{{ themeVars }}">
+    <div style="{{ dHome }}"><dc-import name="HomeScreen" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dReports }}"><dc-import name="ReportsScreen" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dDetail }}"><dc-import name="ReportDetail" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dGenerate }}"><dc-import name="GenerateForm" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dGrade }}"><dc-import name="TeamGrade" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dRoster }}"><dc-import name="Roster" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dRecent }}"><dc-import name="RecentReports" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dProfile }}"><dc-import name="PlayerProfileCoach" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dLive }}"><dc-import name="TeamEvalLive" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dNewgame }}"><dc-import name="NewGame" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dAddplayer }}"><dc-import name="AddPlayer" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dScouting }}"><dc-import name="ScoutingReportDetail" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dShare }}"><dc-import name="ShareReport" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dNotif }}"><dc-import name="Notifications" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dStaff }}"><dc-import name="StaffHub" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dRole }}"><dc-import name="RoleSelect" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dPhome }}"><dc-import name="PlayerHome" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dMyreports }}"><dc-import name="MyReports" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dMytraining }}"><dc-import name="MyTraining" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dPlayereval }}"><dc-import name="PlayerEvalDetail" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dEditprofile }}"><dc-import name="EditMyProfile" hint-size="390px,852px"></dc-import></div>
+    <div style="{{ dLink }}"><dc-import name="LinkToStaff" hint-size="390px,852px"></dc-import></div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { theme: 'dark', screen: 'home' };
+
+  componentDidMount(){ this._draw(); }
+  componentDidUpdate(){ this._draw(); }
+  _draw(){ const go=(n)=>{ if(window.lucide&&window.lucide.createIcons){try{window.lucide.createIcons();}catch(e){}} else if(n<40){setTimeout(()=>go(n+1),120);} }; go(0); }
+
+  _vars(theme){
+    const LIGHT = "--canvas:linear-gradient(180deg,#F7F2EA 0%,#EFE7DA 100%);--ink:#16242E;--ink-soft:#34424B;--muted:#8A8174;--muted-2:#ABA192;--label:#1F6F9B;--accent:#1F6F9B;--accent-soft:rgba(31,111,155,.1);--card:#FFFFFF;--card-border:#E7DFD0;--card-blur:none;--divider:#EAE2D5;--line:#E1D9CA;--chip:#EFE8DC;--badge-bg:#171513;--badge-text:#F5F0E8;--cta-bg:#1F6F9B;--cta-text:#FFFFFF;--cta2-bg:transparent;--cta2-text:#16242E;--cta2-border:#D9D2C7;--pistachio:#B8C98A;--positive:#6F8B45;--positive-soft:rgba(111,139,69,.16);--negative:#B0654C;--negative-soft:rgba(176,101,76,.14);--brown:#8A624A;--brown-ink:#FFFFFF;--brown-soft:rgba(138,98,74,.12);--tile:rgba(31,111,155,.1);--tile-icon:#1F6F9B;--navbar:rgba(245,240,232,.72);";
+    const DARK = "--canvas:linear-gradient(168deg,#0C2331 0%,#1A4258 48%,#0D2636 100%);--ink:#FFFFFF;--ink-soft:rgba(255,255,255,.82);--muted:rgba(255,255,255,.62);--muted-2:rgba(255,255,255,.45);--label:#41B8E8;--accent:#41B8E8;--accent-soft:rgba(65,184,232,.16);--card:rgba(255,255,255,.07);--card-border:rgba(255,255,255,.13);--card-blur:blur(14px);--divider:rgba(255,255,255,.12);--line:rgba(255,255,255,.16);--chip:rgba(255,255,255,.1);--badge-bg:#0C1318;--badge-text:#FFFFFF;--cta-bg:#FFFFFF;--cta-text:#0E2230;--cta2-bg:transparent;--cta2-text:#FFFFFF;--cta2-border:rgba(255,255,255,.32);--pistachio:#C6D89E;--positive:#C6D89E;--positive-soft:rgba(184,201,138,.2);--negative:#E6A98F;--negative-soft:rgba(230,169,143,.18);--brown:#CDA079;--brown-ink:#241608;--brown-soft:rgba(205,160,121,.2);--tile:rgba(65,184,232,.16);--tile-icon:#5CC4EE;--navbar:rgba(11,30,42,.55);";
+    return theme === 'dark' ? DARK : LIGHT;
+  }
+
+  renderVals(){
+    const t = this.state.theme, s = this.state.screen;
+    const ON_L = "flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;background:#fff;color:#1d2832;box-shadow:0 1px 4px rgba(0,0,0,.14);";
+    const ON_D = "flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;background:#10283A;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2);";
+    const OFF = "flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;background:transparent;color:#6b7178;";
+    const ACT = "padding:12px 15px;border-radius:11px;background:#fff;color:#16242E;font-weight:700;font-size:14px;cursor:pointer;margin-bottom:5px;box-shadow:0 1px 4px rgba(0,0,0,.1);";
+    const INA = "padding:12px 15px;border-radius:11px;background:transparent;color:#5d646b;font-weight:600;font-size:14px;cursor:pointer;margin-bottom:5px;";
+    const HDR = "padding:16px 4px 7px;font-weight:700;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#9aa0a6;";
+    const groups = [
+      ['Coach · App', [['home','Home'],['reports','Team Reports'],['detail','Report Detail'],['scouting','Scouting Report'],['generate','Generate Report'],['share','Share Report'],['grade','Team Grade'],['roster','Roster'],['addplayer','Add Player'],['profile','Player Profile'],['recent','Recent Reports'],['live','Live Game Tracker'],['newgame','New Game'],['notif','Notifications'],['staff','Staff Hub']]],
+      ['Onboarding', [['role','Who Are You?']]],
+      ['Player · Portal', [['phome','Player Home'],['myreports','My Reports'],['mytraining','My Training'],['playereval','My Evaluation'],['editprofile','Edit Profile'],['link','Link to Staff']]]
+    ];
+    const allScreens = groups.flatMap(([,arr]) => arr);
+    const navItems = [];
+    groups.forEach(([title, arr], gi) => {
+      navItems.push({ key:'h'+gi, label:title, onClick:undefined, style:HDR });
+      arr.forEach(([k,label]) => navItems.push({ key:k, label, onClick: () => this.setState({screen:k}), style: s===k ? ACT : INA }));
+    });
+    const d = {}; allScreens.forEach(([k]) => d[k] = s===k ? 'display:block' : 'display:none');
+    return {
+      themeVars: this._vars(t),
+      themeNote: t==='dark' ? 'Blue Luxury — deep gradient, cyan accents, frosted cards.' : 'Beige Luxury — warm canvas, Sane Blue accents, white cards.',
+      navItems,
+      dHome:d.home, dReports:d.reports, dDetail:d.detail, dGenerate:d.generate, dGrade:d.grade, dRoster:d.roster, dRecent:d.recent, dProfile:d.profile, dLive:d.live, dNotif:d.notif, dStaff:d.staff,
+      dNewgame:d.newgame, dAddplayer:d.addplayer, dScouting:d.scouting, dShare:d.share, dRole:d.role, dPhome:d.phome, dMyreports:d.myreports, dMytraining:d.mytraining, dPlayereval:d.playereval, dEditprofile:d.editprofile, dLink:d.link,
+      setLight: () => this.setState({theme:'light'}),
+      setDark: () => this.setState({theme:'dark'}),
+      lightStyle: t==='light' ? ON_L : OFF,
+      darkStyle: t==='dark' ? ON_D : OFF
+    };
+  }
+}
+</script>
+</body>
+</html>

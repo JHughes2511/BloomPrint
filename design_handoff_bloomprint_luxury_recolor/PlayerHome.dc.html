@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</helmet>
+<div data-screen-label="Player Home" style="width:390px;height:852px;border-radius:46px;overflow:hidden;background:var(--canvas,#F5F0E8);display:flex;flex-direction:column;font-family:'Hanken Grotesk',sans-serif;color:var(--ink,#15252F);">
+
+  <div style="flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 26px 2px;">
+    <span style="font-weight:700;font-size:16px;color:var(--ink,#15252F);">9:41</span>
+    <div style="display:flex;align-items:center;gap:8px;color:var(--ink,#15252F);">
+      <div style="display:flex;align-items:flex-end;gap:2px;height:11px;"><span style="width:3px;height:5px;background:currentColor;border-radius:1px;opacity:.5;"></span><span style="width:3px;height:7px;background:currentColor;border-radius:1px;opacity:.7;"></span><span style="width:3px;height:9px;background:currentColor;border-radius:1px;opacity:.85;"></span><span style="width:3px;height:11px;background:currentColor;border-radius:1px;"></span></div>
+      <i data-lucide="wifi" width="16" height="16"></i>
+      <div style="width:24px;height:12px;border:1.5px solid currentColor;border-radius:3px;padding:1.5px;opacity:.9;"><div style="width:55%;height:100%;background:currentColor;border-radius:1px;"></div></div>
+    </div>
+  </div>
+
+  <div style="flex:1 1 auto;overflow:hidden;padding:10px 22px 0;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div><div style="font-weight:600;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--label,#1F6F9B);margin-bottom:8px;">Player Portal</div><div style="font-weight:800;font-size:30px;letter-spacing:-.02em;line-height:1;color:var(--ink,#15252F);">Hey, Marcus</div><div style="font-size:14px;color:var(--muted,#857C6E);margin-top:8px;">SF · Creator Academy</div></div>
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--accent-soft,rgba(31,111,155,.1));color:var(--accent,#1F6F9B);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex:0 0 auto;">MJ</div>
+    </div>
+
+    <div style="background:var(--card,#fff);border:1px solid var(--card-border,#E7DFD0);backdrop-filter:var(--card-blur,none);-webkit-backdrop-filter:var(--card-blur,none);border-radius:22px;padding:20px;margin-top:24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-weight:700;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2,#ABA192);">Current BIM Score</div><span style="padding:5px 11px;border-radius:999px;background:var(--positive-soft,rgba(111,139,69,.16));color:var(--positive,#6F8B45);font-size:11px;font-weight:800;">▲ +0.4</span></div>
+      <div style="display:flex;align-items:baseline;gap:12px;margin-top:8px;"><div style="font-weight:900;font-size:46px;letter-spacing:-.02em;line-height:1;color:var(--ink,#15252F);">6.1</div><div style="color:var(--muted,#857C6E);font-size:15px;font-weight:600;">of 10 · trending up</div></div>
+      <div style="display:flex;gap:5px;margin-top:18px;height:7px;"><div style="flex:2.4;background:var(--accent,#1F6F9B);border-radius:4px;"></div><div style="flex:2.1;background:var(--pistachio,#B8C98A);border-radius:4px;"></div><div style="flex:1.6;background:var(--brown,#8A624A);border-radius:4px;"></div><div style="flex:1.2;background:var(--chip,#EFE8DC);border-radius:4px;"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:9px;font-size:11px;color:var(--muted,#857C6E);font-weight:600;"><span>Offense</span><span>Defense</span><span>Physical</span><span>IQ</span></div>
+    </div>
+
+    <div style="font-weight:700;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--label,#1F6F9B);margin:26px 0 13px;">From Your Coach</div>
+    <div style="background:var(--card,#fff);border:1px solid var(--card-border,#E7DFD0);backdrop-filter:var(--card-blur,none);-webkit-backdrop-filter:var(--card-blur,none);border-radius:18px;padding:16px;display:flex;align-items:center;gap:13px;margin-bottom:11px;">
+      <div style="width:46px;height:46px;border-radius:13px;background:var(--accent-soft,rgba(31,111,155,.1));color:var(--tile-icon,#1F6F9B);display:flex;align-items:center;justify-content:center;flex:0 0 auto;"><i data-lucide="file-text" width="22" height="22"></i></div>
+      <div style="flex:1;"><div style="font-weight:800;font-size:16.5px;color:var(--ink,#15252F);">New Scouting Report</div><div style="font-size:13px;color:var(--muted,#857C6E);margin-top:2px;">Shared 2 days ago · tap to read</div></div>
+      <i data-lucide="chevron-right" width="18" height="18" style="color:var(--muted-2,#ABA192);"></i>
+    </div>
+    <div style="background:var(--card,#fff);border:1px solid var(--card-border,#E7DFD0);backdrop-filter:var(--card-blur,none);-webkit-backdrop-filter:var(--card-blur,none);border-radius:18px;padding:16px;display:flex;align-items:center;gap:13px;">
+      <div style="width:46px;height:46px;border-radius:13px;background:var(--brown-soft,rgba(138,98,74,.12));color:var(--brown,#8A624A);display:flex;align-items:center;justify-content:center;flex:0 0 auto;"><i data-lucide="dumbbell" width="22" height="22"></i></div>
+      <div style="flex:1;"><div style="font-weight:800;font-size:16.5px;color:var(--ink,#15252F);">Training Plan Updated</div><div style="font-size:13px;color:var(--muted,#857C6E);margin-top:2px;">3 new drills this week</div></div>
+      <i data-lucide="chevron-right" width="18" height="18" style="color:var(--muted-2,#ABA192);"></i>
+    </div>
+  </div>
+
+  <div style="flex:0 0 auto;display:flex;justify-content:space-around;align-items:center;padding:12px 14px 22px;border-top:1px solid var(--divider,#EAE2D5);background:var(--navbar,transparent);">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--accent,#1F6F9B);"><i data-lucide="home" width="22" height="22"></i><span style="font-size:11px;font-weight:700;">Home</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--muted-2,#ABA192);"><i data-lucide="file-text" width="22" height="22"></i><span style="font-size:11px;font-weight:600;">Reports</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--muted-2,#ABA192);"><i data-lucide="dumbbell" width="22" height="22"></i><span style="font-size:11px;font-weight:600;">Training</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--muted-2,#ABA192);"><i data-lucide="bell" width="22" height="22"></i><span style="font-size:11px;font-weight:600;">Alerts</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--muted-2,#ABA192);"><i data-lucide="user" width="22" height="22"></i><span style="font-size:11px;font-weight:600;">Profile</span></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:852}}">
+class Component extends DCLogic {
+  componentDidMount(){ this._draw(); }
+  componentDidUpdate(){ this._draw(); }
+  _draw(){ const go=(n)=>{ if(window.lucide&&window.lucide.createIcons){try{window.lucide.createIcons();}catch(e){}} else if(n<40){setTimeout(()=>go(n+1),120);} }; go(0); }
+  renderVals(){ return {}; }
+}
+</script>
+</body>
+</html>

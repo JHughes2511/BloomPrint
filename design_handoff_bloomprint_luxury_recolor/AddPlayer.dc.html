@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</helmet>
+<div data-screen-label="Add Player" style="width:390px;height:852px;border-radius:46px;overflow:hidden;background:var(--canvas,#F5F0E8);display:flex;flex-direction:column;font-family:'Hanken Grotesk',sans-serif;color:var(--ink,#15252F);">
+
+  <div style="flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 26px 2px;">
+    <span style="font-weight:700;font-size:16px;color:var(--ink,#15252F);">11:31</span>
+    <div style="display:flex;align-items:center;gap:8px;color:var(--ink,#15252F);">
+      <div style="display:flex;align-items:flex-end;gap:2px;height:11px;"><span style="width:3px;height:5px;background:currentColor;border-radius:1px;opacity:.5;"></span><span style="width:3px;height:7px;background:currentColor;border-radius:1px;opacity:.7;"></span><span style="width:3px;height:9px;background:currentColor;border-radius:1px;opacity:.85;"></span><span style="width:3px;height:11px;background:currentColor;border-radius:1px;"></span></div>
+      <i data-lucide="wifi" width="16" height="16"></i>
+      <div style="width:24px;height:12px;border:1.5px solid currentColor;border-radius:3px;padding:1.5px;opacity:.9;"><div style="width:55%;height:100%;background:currentColor;border-radius:1px;"></div></div>
+    </div>
+  </div>
+
+  <div style="flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:6px 24px 14px;">
+    <div style="display:flex;align-items:center;gap:13px;"><i data-lucide="x" width="24" height="24" style="color:var(--ink,#15252F);"></i><div style="font-weight:800;font-size:23px;letter-spacing:-.01em;color:var(--ink,#15252F);">Add Player</div></div>
+    <div style="padding:9px 18px;border-radius:999px;background:var(--cta-bg,#1F6F9B);color:var(--cta-text,#fff);font-weight:800;font-size:13.5px;">Save</div>
+  </div>
+
+  <div style="flex:1 1 auto;overflow:hidden;padding:6px 24px 0;">
+    <div style="display:flex;flex-direction:column;align-items:center;margin:6px 0 22px;">
+      <div style="width:92px;height:92px;border-radius:50%;background:var(--chip,#EFE8DC);border:2px dashed var(--line,#E1D9CA);display:flex;align-items:center;justify-content:center;color:var(--muted-2,#ABA192);"><i data-lucide="camera" width="30" height="30"></i></div>
+      <div style="font-size:13px;color:var(--label,#1F6F9B);font-weight:700;margin-top:10px;">Add Photo</div>
+    </div>
+
+    <div style="font-weight:700;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2,#ABA192);margin-bottom:8px;">Full Name</div>
+    <div style="background:var(--card,#fff);border:1px solid var(--card-border,#E7DFD0);border-radius:13px;padding:15px 17px;color:var(--muted-2,#ABA192);font-size:15.5px;margin-bottom:16px;">Player name…</div>
+
+    <div style="display:flex;gap:13px;margin-bottom:16px;">
+      <div style="flex:1;"><div style="font-weight:700;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2,#ABA192);margin-bottom:8px;">Position</div><div style="background:var(--card,#fff);border:1px solid var(--card-border,#E7DFD0);border-radius:13px;padding:15px 17px;color:var(--ink,#15252F);font-size:15.5px;font-weight:600;display:flex;justify-content:space-between;align-items:center;">SF <i data-lucide="chevron-down" width="18" height="18" style="color:var(--muted,#857C6E);"></i></div></div>
+      <div style="flex:1;"><div style="font-weight:700;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2,#ABA192);margin-bottom:8px;">Jersey</div><div style="background:var(--card,#fff);border:1px solid var(--card-border,#E7DFD0);border-radius:13px;padding:15px 17px;color:var(--muted-2,#ABA192);font-size:15.5px;">#</div></div>
+    </div>
+
+    <div style="font-weight:700;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2,#ABA192);margin-bottom:8px;">Team</div>
+    <div style="background:var(--card,#fff);border:1px solid var(--card-border,#E7DFD0);border-radius:13px;padding:15px 17px;color:var(--ink,#15252F);font-size:15.5px;font-weight:600;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">Team Monaco <i data-lucide="chevron-down" width="18" height="18" style="color:var(--muted,#857C6E);"></i></div>
+
+    <div style="font-weight:700;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2,#ABA192);margin-bottom:8px;">School / Org</div>
+    <div style="background:var(--card,#fff);border:1px solid var(--card-border,#E7DFD0);border-radius:13px;padding:15px 17px;color:var(--muted-2,#ABA192);font-size:15.5px;margin-bottom:22px;">e.g. Black Hills State University</div>
+
+    <div style="display:flex;align-items:center;gap:12px;padding:15px 17px;border-radius:13px;background:var(--accent-soft,rgba(31,111,155,.1));border:1px solid var(--accent,#1F6F9B);">
+      <i data-lucide="link" width="19" height="19" style="color:var(--accent,#1F6F9B);"></i>
+      <div style="flex:1;font-size:14px;color:var(--ink,#15252F);font-weight:600;">Invite player to link their portal</div>
+      <div style="width:42px;height:24px;border-radius:999px;background:var(--accent,#1F6F9B);position:relative;"><div style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:#fff;"></div></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:852}}">
+class Component extends DCLogic {
+  componentDidMount(){ this._draw(); }
+  componentDidUpdate(){ this._draw(); }
+  _draw(){ const go=(n)=>{ if(window.lucide&&window.lucide.createIcons){try{window.lucide.createIcons();}catch(e){}} else if(n<40){setTimeout(()=>go(n+1),120);} }; go(0); }
+  renderVals(){ return {}; }
+}
+</script>
+</body>
+</html>

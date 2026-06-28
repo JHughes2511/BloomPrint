@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</helmet>
+<div data-screen-label="Share Report" style="width:390px;height:852px;border-radius:46px;overflow:hidden;background:var(--canvas,#F5F0E8);display:flex;flex-direction:column;font-family:'Hanken Grotesk',sans-serif;color:var(--ink,#15252F);position:relative;">
+
+  <div style="flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 26px 2px;opacity:.5;">
+    <span style="font-weight:700;font-size:16px;color:var(--ink,#15252F);">11:30</span>
+    <div style="display:flex;align-items:center;gap:8px;color:var(--ink,#15252F);">
+      <div style="display:flex;align-items:flex-end;gap:2px;height:11px;"><span style="width:3px;height:5px;background:currentColor;border-radius:1px;opacity:.5;"></span><span style="width:3px;height:7px;background:currentColor;border-radius:1px;opacity:.7;"></span><span style="width:3px;height:9px;background:currentColor;border-radius:1px;opacity:.85;"></span><span style="width:3px;height:11px;background:currentColor;border-radius:1px;"></span></div>
+      <i data-lucide="wifi" width="16" height="16"></i>
+      <div style="width:24px;height:12px;border:1.5px solid currentColor;border-radius:3px;padding:1.5px;opacity:.9;"><div style="width:55%;height:100%;background:currentColor;border-radius:1px;"></div></div>
+    </div>
+  </div>
+
+  <div style="flex:1 1 auto;"></div>
+  <div style="position:absolute;inset:0;background:var(--scrim,rgba(16,40,58,.45));"></div>
+
+  <div style="position:relative;background:var(--sheet,#FBF7F0);border-top-left-radius:30px;border-top-right-radius:30px;padding:10px 24px 30px;box-shadow:0 -20px 50px rgba(0,0,0,.25);border:1px solid var(--card-border,#E7DFD0);border-bottom:none;">
+    <div style="width:44px;height:5px;border-radius:3px;background:var(--line,#E1D9CA);margin:0 auto 20px;"></div>
+
+    <div style="display:flex;align-items:center;gap:11px;margin-bottom:6px;"><div style="width:46px;height:46px;border-radius:13px;background:var(--brown-soft,rgba(138,98,74,.12));color:var(--brown,#8A624A);display:flex;align-items:center;justify-content:center;"><i data-lucide="share-2" width="22" height="22"></i></div><div><div style="font-weight:800;font-size:21px;color:var(--ink,#15252F);">Share Report</div><div style="font-size:13px;color:var(--muted,#857C6E);">Scouting Report · Test player</div></div></div>
+
+    <div style="font-weight:700;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--label,#1F6F9B);margin:22px 0 11px;">Share With</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;gap:13px;padding:15px;border-radius:15px;background:var(--card,#fff);border:1.5px solid var(--accent,#1F6F9B);"><div style="width:40px;height:40px;border-radius:50%;background:var(--accent-soft,rgba(31,111,155,.1));color:var(--accent,#1F6F9B);display:flex;align-items:center;justify-content:center;font-weight:800;">TP</div><div style="flex:1;"><div style="font-weight:800;font-size:16px;color:var(--ink,#15252F);">Test Player Pro</div><div style="font-size:12.5px;color:var(--muted,#857C6E);">Player · linked</div></div><div style="width:24px;height:24px;border-radius:50%;background:var(--accent,#1F6F9B);color:#fff;display:flex;align-items:center;justify-content:center;"><i data-lucide="check" width="15" height="15"></i></div></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:15px;border-radius:15px;background:var(--card,#fff);border:1px solid var(--card-border,#E7DFD0);"><div style="width:40px;height:40px;border-radius:50%;background:var(--brown-soft,rgba(138,98,74,.12));color:var(--brown,#8A624A);display:flex;align-items:center;justify-content:center;font-weight:800;">AS</div><div style="flex:1;"><div style="font-weight:800;font-size:16px;color:var(--ink,#15252F);">Assistant Staff</div><div style="font-size:12.5px;color:var(--muted,#857C6E);">Coaching staff</div></div><div style="width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line,#E1D9CA);"></div></div>
+    </div>
+
+    <div style="font-weight:700;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--label,#1F6F9B);margin:20px 0 10px;">Permissions</div>
+    <div style="display:flex;gap:9px;"><div style="flex:1;padding:13px;border-radius:12px;background:var(--accent-soft,rgba(31,111,155,.1));border:1.5px solid var(--accent,#1F6F9B);color:var(--accent,#1F6F9B);font-weight:800;font-size:13.5px;text-align:center;">View &amp; Comment</div><div style="flex:1;padding:13px;border-radius:12px;border:1px solid var(--line,#E1D9CA);color:var(--muted,#857C6E);font-weight:700;font-size:13.5px;text-align:center;">View Only</div></div>
+
+    <div style="margin-top:22px;background:var(--cta-bg,#1F6F9B);color:var(--cta-text,#fff);border-radius:15px;padding:17px;text-align:center;font-weight:800;font-size:16.5px;display:flex;gap:9px;align-items:center;justify-content:center;"><i data-lucide="send" width="19" height="19"></i> Send Report</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:852}}">
+class Component extends DCLogic {
+  componentDidMount(){ this._draw(); }
+  componentDidUpdate(){ this._draw(); }
+  _draw(){ const go=(n)=>{ if(window.lucide&&window.lucide.createIcons){try{window.lucide.createIcons();}catch(e){}} else if(n<40){setTimeout(()=>go(n+1),120);} }; go(0); }
+  renderVals(){ return {}; }
+}
+</script>
+</body>
+</html>

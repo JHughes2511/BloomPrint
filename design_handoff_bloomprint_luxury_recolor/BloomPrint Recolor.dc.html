@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box;}</style>
+</helmet>
+
+<div style="position:absolute;left:60px;top:30px;width:862px;font-family:'Hanken Grotesk',sans-serif;">
+  <div data-drags-parent="1" style="font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Luxury Palette</div>
+  <div style="background:#fff;border-radius:18px;padding:20px 24px;box-shadow:0 12px 34px rgba(0,0,0,.13);display:flex;gap:24px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:11px;"><div style="width:36px;height:36px;border-radius:10px;background:#B8C98A;border:1px solid rgba(0,0,0,.08);"></div><div><div style="font-size:13px;font-weight:700;color:#1c1c1c;">Pistachio</div><div style="font-size:11px;color:#999;font-family:monospace;">#B8C98A</div></div></div>
+    <div style="display:flex;align-items:center;gap:11px;"><div style="width:36px;height:36px;border-radius:10px;background:#F5F0E8;border:1px solid rgba(0,0,0,.1);"></div><div><div style="font-size:13px;font-weight:700;color:#1c1c1c;">Beige White</div><div style="font-size:11px;color:#999;font-family:monospace;">#F5F0E8</div></div></div>
+    <div style="display:flex;align-items:center;gap:11px;"><div style="width:36px;height:36px;border-radius:10px;background:#8A624A;border:1px solid rgba(0,0,0,.08);"></div><div><div style="font-size:13px;font-weight:700;color:#1c1c1c;">Toast Brown</div><div style="font-size:11px;color:#999;font-family:monospace;">#8A624A</div></div></div>
+    <div style="display:flex;align-items:center;gap:11px;"><div style="width:36px;height:36px;border-radius:10px;background:#1F6F9B;border:1px solid rgba(0,0,0,.08);"></div><div><div style="font-size:13px;font-weight:700;color:#1c1c1c;">Sane Blue</div><div style="font-size:11px;color:#999;font-family:monospace;">#1F6F9B</div></div></div>
+    <div style="display:flex;align-items:center;gap:11px;"><div style="width:36px;height:36px;border-radius:10px;background:#10283A;border:1px solid rgba(0,0,0,.08);"></div><div><div style="font-size:13px;font-weight:700;color:#1c1c1c;">Deep Navy</div><div style="font-size:11px;color:#999;font-family:monospace;">#10283A</div></div></div>
+    <div style="display:flex;align-items:center;gap:11px;"><div style="width:36px;height:36px;border-radius:10px;background:#D9D2C7;border:1px solid rgba(0,0,0,.08);"></div><div><div style="font-size:13px;font-weight:700;color:#1c1c1c;">Soft Divider</div><div style="font-size:11px;color:#999;font-family:monospace;">#D9D2C7</div></div></div>
+    <div style="display:flex;align-items:center;gap:11px;"><div style="width:36px;height:36px;border-radius:10px;background:#111111;border:1px solid rgba(0,0,0,.08);"></div><div><div style="font-size:13px;font-weight:700;color:#1c1c1c;">Ink Black</div><div style="font-size:11px;color:#999;font-family:monospace;">#111111</div></div></div>
+  </div>
+</div>
+
+<div data-drags-parent="1" style="position:absolute;left:60px;top:200px;width:390px;font-family:'Hanken Grotesk',sans-serif;">
+  <div style="font-weight:800;font-size:21px;color:#26323a;letter-spacing:-.01em;">Beige Luxury</div>
+  <div style="font-size:13px;color:#67727a;margin-top:3px;">Beige canvas · Sane Blue accent · Pistachio positive</div>
+</div>
+<div data-drags-parent="1" style="position:absolute;left:532px;top:200px;width:430px;font-family:'Hanken Grotesk',sans-serif;">
+  <div style="font-weight:800;font-size:21px;color:#26323a;letter-spacing:-.01em;">Blue Luxury <span style="font-weight:600;font-size:12px;color:#8a949b;">· from your reference</span></div>
+  <div style="font-size:13px;color:#67727a;margin-top:3px;">Deep blue gradient · cyan labels · frosted cards · white CTAs</div>
+</div>
+
+<div style="position:absolute;left:60px;top:280px;width:390px;--canvas:linear-gradient(180deg,#F7F2EA 0%,#EFE7DA 100%);--ink:#16242E;--ink-soft:#34424B;--muted:#8A8174;--muted-2:#ABA192;--label:#1F6F9B;--accent:#1F6F9B;--accent-soft:rgba(31,111,155,.1);--card:#FFFFFF;--card-border:#E7DFD0;--card-blur:none;--divider:#EAE2D5;--line:#E1D9CA;--chip:#EFE8DC;--badge-bg:#171513;--badge-text:#F5F0E8;--cta-bg:#1F6F9B;--cta-text:#FFFFFF;--cta2-bg:transparent;--cta2-text:#16242E;--cta2-border:#D9D2C7;--pistachio:#B8C98A;--positive:#6F8B45;--positive-soft:rgba(111,139,69,.16);--negative:#B0654C;--negative-soft:rgba(176,101,76,.14);--brown:#8A624A;--brown-ink:#FFFFFF;--brown-soft:rgba(138,98,74,.12);--tile:rgba(31,111,155,.1);--tile-icon:#1F6F9B;--navbar:rgba(245,240,232,.72);">
+  <div data-drags-parent="1" style="font-family:'Hanken Grotesk';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Home · Beige</div>
+  <dc-import name="HomeScreen" hint-size="390px,852px" style="display:block;width:390px;height:852px;border-radius:46px;box-shadow:0 30px 70px rgba(0,0,0,.3);"></dc-import>
+</div>
+<div style="position:absolute;left:532px;top:280px;width:390px;--canvas:linear-gradient(168deg,#0C2331 0%,#1A4258 48%,#0D2636 100%);--ink:#FFFFFF;--ink-soft:rgba(255,255,255,.82);--muted:rgba(255,255,255,.62);--muted-2:rgba(255,255,255,.45);--label:#41B8E8;--accent:#41B8E8;--accent-soft:rgba(65,184,232,.16);--card:rgba(255,255,255,.07);--card-border:rgba(255,255,255,.13);--card-blur:blur(14px);--divider:rgba(255,255,255,.12);--line:rgba(255,255,255,.16);--chip:rgba(255,255,255,.1);--badge-bg:#0C1318;--badge-text:#FFFFFF;--cta-bg:#FFFFFF;--cta-text:#0E2230;--cta2-bg:transparent;--cta2-text:#FFFFFF;--cta2-border:rgba(255,255,255,.32);--pistachio:#C6D89E;--positive:#C6D89E;--positive-soft:rgba(184,201,138,.2);--negative:#E6A98F;--negative-soft:rgba(230,169,143,.18);--brown:#CDA079;--brown-ink:#241608;--brown-soft:rgba(205,160,121,.2);--tile:rgba(65,184,232,.16);--tile-icon:#5CC4EE;--navbar:rgba(11,30,42,.55);">
+  <div data-drags-parent="1" style="font-family:'Hanken Grotesk';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Home · Blue</div>
+  <dc-import name="HomeScreen" hint-size="390px,852px" style="display:block;width:390px;height:852px;border-radius:46px;box-shadow:0 30px 70px rgba(0,0,0,.45);"></dc-import>
+</div>
+
+<div style="position:absolute;left:60px;top:1250px;width:390px;--canvas:linear-gradient(180deg,#F7F2EA 0%,#EFE7DA 100%);--ink:#16242E;--ink-soft:#34424B;--muted:#8A8174;--muted-2:#ABA192;--label:#1F6F9B;--accent:#1F6F9B;--accent-soft:rgba(31,111,155,.1);--card:#FFFFFF;--card-border:#E7DFD0;--card-blur:none;--divider:#EAE2D5;--line:#E1D9CA;--chip:#EFE8DC;--badge-bg:#171513;--badge-text:#F5F0E8;--cta-bg:#1F6F9B;--cta-text:#FFFFFF;--cta2-bg:transparent;--cta2-text:#16242E;--cta2-border:#D9D2C7;--pistachio:#B8C98A;--positive:#6F8B45;--positive-soft:rgba(111,139,69,.16);--negative:#B0654C;--negative-soft:rgba(176,101,76,.14);--brown:#8A624A;--brown-ink:#FFFFFF;--brown-soft:rgba(138,98,74,.12);--tile:rgba(31,111,155,.1);--tile-icon:#1F6F9B;--navbar:rgba(245,240,232,.72);">
+  <div data-drags-parent="1" style="font-family:'Hanken Grotesk';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Team Reports · Beige</div>
+  <dc-import name="ReportsScreen" hint-size="390px,852px" style="display:block;width:390px;height:852px;border-radius:46px;box-shadow:0 30px 70px rgba(0,0,0,.3);"></dc-import>
+</div>
+<div style="position:absolute;left:532px;top:1250px;width:390px;--canvas:linear-gradient(168deg,#0C2331 0%,#1A4258 48%,#0D2636 100%);--ink:#FFFFFF;--ink-soft:rgba(255,255,255,.82);--muted:rgba(255,255,255,.62);--muted-2:rgba(255,255,255,.45);--label:#41B8E8;--accent:#41B8E8;--accent-soft:rgba(65,184,232,.16);--card:rgba(255,255,255,.07);--card-border:rgba(255,255,255,.13);--card-blur:blur(14px);--divider:rgba(255,255,255,.12);--line:rgba(255,255,255,.16);--chip:rgba(255,255,255,.1);--badge-bg:#0C1318;--badge-text:#FFFFFF;--cta-bg:#FFFFFF;--cta-text:#0E2230;--cta2-bg:transparent;--cta2-text:#FFFFFF;--cta2-border:rgba(255,255,255,.32);--pistachio:#C6D89E;--positive:#C6D89E;--positive-soft:rgba(184,201,138,.2);--negative:#E6A98F;--negative-soft:rgba(230,169,143,.18);--brown:#CDA079;--brown-ink:#241608;--brown-soft:rgba(205,160,121,.2);--tile:rgba(65,184,232,.16);--tile-icon:#5CC4EE;--navbar:rgba(11,30,42,.55);">
+  <div data-drags-parent="1" style="font-family:'Hanken Grotesk';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Team Reports · Blue</div>
+  <dc-import name="ReportsScreen" hint-size="390px,852px" style="display:block;width:390px;height:852px;border-radius:46px;box-shadow:0 30px 70px rgba(0,0,0,.45);"></dc-import>
+</div>
+
+<div style="position:absolute;left:60px;top:2220px;width:390px;--canvas:linear-gradient(180deg,#F7F2EA 0%,#EFE7DA 100%);--ink:#16242E;--ink-soft:#34424B;--muted:#8A8174;--muted-2:#ABA192;--label:#1F6F9B;--accent:#1F6F9B;--accent-soft:rgba(31,111,155,.1);--card:#FFFFFF;--card-border:#E7DFD0;--card-blur:none;--divider:#EAE2D5;--line:#E1D9CA;--chip:#EFE8DC;--badge-bg:#171513;--badge-text:#F5F0E8;--cta-bg:#1F6F9B;--cta-text:#FFFFFF;--cta2-bg:transparent;--cta2-text:#16242E;--cta2-border:#D9D2C7;--pistachio:#B8C98A;--positive:#6F8B45;--positive-soft:rgba(111,139,69,.16);--negative:#B0654C;--negative-soft:rgba(176,101,76,.14);--brown:#8A624A;--brown-ink:#FFFFFF;--brown-soft:rgba(138,98,74,.12);--tile:rgba(31,111,155,.1);--tile-icon:#1F6F9B;--navbar:rgba(245,240,232,.72);">
+  <div data-drags-parent="1" style="font-family:'Hanken Grotesk';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Report Detail · Beige</div>
+  <dc-import name="ReportDetail" hint-size="390px,852px" style="display:block;width:390px;height:852px;border-radius:46px;box-shadow:0 30px 70px rgba(0,0,0,.3);"></dc-import>
+</div>
+<div style="position:absolute;left:532px;top:2220px;width:390px;--canvas:linear-gradient(168deg,#0C2331 0%,#1A4258 48%,#0D2636 100%);--ink:#FFFFFF;--ink-soft:rgba(255,255,255,.82);--muted:rgba(255,255,255,.62);--muted-2:rgba(255,255,255,.45);--label:#41B8E8;--accent:#41B8E8;--accent-soft:rgba(65,184,232,.16);--card:rgba(255,255,255,.07);--card-border:rgba(255,255,255,.13);--card-blur:blur(14px);--divider:rgba(255,255,255,.12);--line:rgba(255,255,255,.16);--chip:rgba(255,255,255,.1);--badge-bg:#0C1318;--badge-text:#FFFFFF;--cta-bg:#FFFFFF;--cta-text:#0E2230;--cta2-bg:transparent;--cta2-text:#FFFFFF;--cta2-border:rgba(255,255,255,.32);--pistachio:#C6D89E;--positive:#C6D89E;--positive-soft:rgba(184,201,138,.2);--negative:#E6A98F;--negative-soft:rgba(230,169,143,.18);--brown:#CDA079;--brown-ink:#241608;--brown-soft:rgba(205,160,121,.2);--tile:rgba(65,184,232,.16);--tile-icon:#5CC4EE;--navbar:rgba(11,30,42,.55);">
+  <div data-drags-parent="1" style="font-family:'Hanken Grotesk';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Report Detail · Blue</div>
+  <dc-import name="ReportDetail" hint-size="390px,852px" style="display:block;width:390px;height:852px;border-radius:46px;box-shadow:0 30px 70px rgba(0,0,0,.45);"></dc-import>
+</div>
+
+<div style="position:absolute;left:60px;top:3190px;width:390px;--canvas:linear-gradient(180deg,#F7F2EA 0%,#EFE7DA 100%);--ink:#16242E;--ink-soft:#34424B;--muted:#8A8174;--muted-2:#ABA192;--label:#1F6F9B;--accent:#1F6F9B;--accent-soft:rgba(31,111,155,.1);--card:#FFFFFF;--card-border:#E7DFD0;--card-blur:none;--divider:#EAE2D5;--line:#E1D9CA;--chip:#EFE8DC;--badge-bg:#171513;--badge-text:#F5F0E8;--cta-bg:#1F6F9B;--cta-text:#FFFFFF;--cta2-bg:transparent;--cta2-text:#16242E;--cta2-border:#D9D2C7;--pistachio:#B8C98A;--positive:#6F8B45;--positive-soft:rgba(111,139,69,.16);--negative:#B0654C;--negative-soft:rgba(176,101,76,.14);--brown:#8A624A;--brown-ink:#FFFFFF;--brown-soft:rgba(138,98,74,.12);--tile:rgba(31,111,155,.1);--tile-icon:#1F6F9B;--navbar:rgba(245,240,232,.72);">
+  <div data-drags-parent="1" style="font-family:'Hanken Grotesk';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Generate Report · Beige</div>
+  <dc-import name="GenerateForm" hint-size="390px,852px" style="display:block;width:390px;height:852px;border-radius:46px;box-shadow:0 30px 70px rgba(0,0,0,.3);"></dc-import>
+</div>
+<div style="position:absolute;left:532px;top:3190px;width:390px;--canvas:linear-gradient(168deg,#0C2331 0%,#1A4258 48%,#0D2636 100%);--ink:#FFFFFF;--ink-soft:rgba(255,255,255,.82);--muted:rgba(255,255,255,.62);--muted-2:rgba(255,255,255,.45);--label:#41B8E8;--accent:#41B8E8;--accent-soft:rgba(65,184,232,.16);--card:rgba(255,255,255,.07);--card-border:rgba(255,255,255,.13);--card-blur:blur(14px);--divider:rgba(255,255,255,.12);--line:rgba(255,255,255,.16);--chip:rgba(255,255,255,.1);--badge-bg:#0C1318;--badge-text:#FFFFFF;--cta-bg:#FFFFFF;--cta-text:#0E2230;--cta2-bg:transparent;--cta2-text:#FFFFFF;--cta2-border:rgba(255,255,255,.32);--pistachio:#C6D89E;--positive:#C6D89E;--positive-soft:rgba(184,201,138,.2);--negative:#E6A98F;--negative-soft:rgba(230,169,143,.18);--brown:#CDA079;--brown-ink:#241608;--brown-soft:rgba(205,160,121,.2);--tile:rgba(65,184,232,.16);--tile-icon:#5CC4EE;--navbar:rgba(11,30,42,.55);">
+  <div data-drags-parent="1" style="font-family:'Hanken Grotesk';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Generate Report · Blue</div>
+  <dc-import name="GenerateForm" hint-size="390px,852px" style="display:block;width:390px;height:852px;border-radius:46px;box-shadow:0 30px 70px rgba(0,0,0,.45);"></dc-import>
+</div>
+
+<div style="position:absolute;left:60px;top:4160px;width:390px;--canvas:linear-gradient(180deg,#F7F2EA 0%,#EFE7DA 100%);--ink:#16242E;--ink-soft:#34424B;--muted:#8A8174;--muted-2:#ABA192;--label:#1F6F9B;--accent:#1F6F9B;--accent-soft:rgba(31,111,155,.1);--card:#FFFFFF;--card-border:#E7DFD0;--card-blur:none;--divider:#EAE2D5;--line:#E1D9CA;--chip:#EFE8DC;--badge-bg:#171513;--badge-text:#F5F0E8;--cta-bg:#1F6F9B;--cta-text:#FFFFFF;--cta2-bg:transparent;--cta2-text:#16242E;--cta2-border:#D9D2C7;--pistachio:#B8C98A;--positive:#6F8B45;--positive-soft:rgba(111,139,69,.16);--negative:#B0654C;--negative-soft:rgba(176,101,76,.14);--brown:#8A624A;--brown-ink:#FFFFFF;--brown-soft:rgba(138,98,74,.12);--tile:rgba(31,111,155,.1);--tile-icon:#1F6F9B;--navbar:rgba(245,240,232,.72);">
+  <div data-drags-parent="1" style="font-family:'Hanken Grotesk';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Team Grade · Beige</div>
+  <dc-import name="TeamGrade" hint-size="390px,852px" style="display:block;width:390px;height:852px;border-radius:46px;box-shadow:0 30px 70px rgba(0,0,0,.3);"></dc-import>
+</div>
+<div style="position:absolute;left:532px;top:4160px;width:390px;--canvas:linear-gradient(168deg,#0C2331 0%,#1A4258 48%,#0D2636 100%);--ink:#FFFFFF;--ink-soft:rgba(255,255,255,.82);--muted:rgba(255,255,255,.62);--muted-2:rgba(255,255,255,.45);--label:#41B8E8;--accent:#41B8E8;--accent-soft:rgba(65,184,232,.16);--card:rgba(255,255,255,.07);--card-border:rgba(255,255,255,.13);--card-blur:blur(14px);--divider:rgba(255,255,255,.12);--line:rgba(255,255,255,.16);--chip:rgba(255,255,255,.1);--badge-bg:#0C1318;--badge-text:#FFFFFF;--cta-bg:#FFFFFF;--cta-text:#0E2230;--cta2-bg:transparent;--cta2-text:#FFFFFF;--cta2-border:rgba(255,255,255,.32);--pistachio:#C6D89E;--positive:#C6D89E;--positive-soft:rgba(184,201,138,.2);--negative:#E6A98F;--negative-soft:rgba(230,169,143,.18);--brown:#CDA079;--brown-ink:#241608;--brown-soft:rgba(205,160,121,.2);--tile:rgba(65,184,232,.16);--tile-icon:#5CC4EE;--navbar:rgba(11,30,42,.55);">
+  <div data-drags-parent="1" style="font-family:'Hanken Grotesk';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Team Grade · Blue</div>
+  <dc-import name="TeamGrade" hint-size="390px,852px" style="display:block;width:390px;height:852px;border-radius:46px;box-shadow:0 30px 70px rgba(0,0,0,.45);"></dc-import>
+</div>
+
+<div style="position:absolute;left:60px;top:5130px;width:390px;--canvas:linear-gradient(180deg,#F7F2EA 0%,#EFE7DA 100%);--ink:#16242E;--ink-soft:#34424B;--muted:#8A8174;--muted-2:#ABA192;--label:#1F6F9B;--accent:#1F6F9B;--accent-soft:rgba(31,111,155,.1);--card:#FFFFFF;--card-border:#E7DFD0;--card-blur:none;--divider:#EAE2D5;--line:#E1D9CA;--chip:#EFE8DC;--badge-bg:#171513;--badge-text:#F5F0E8;--cta-bg:#1F6F9B;--cta-text:#FFFFFF;--cta2-bg:transparent;--cta2-text:#16242E;--cta2-border:#D9D2C7;--pistachio:#B8C98A;--positive:#6F8B45;--positive-soft:rgba(111,139,69,.16);--negative:#B0654C;--negative-soft:rgba(176,101,76,.14);--brown:#8A624A;--brown-ink:#FFFFFF;--brown-soft:rgba(138,98,74,.12);--tile:rgba(31,111,155,.1);--tile-icon:#1F6F9B;--navbar:rgba(245,240,232,.72);">
+  <div data-drags-parent="1" style="font-family:'Hanken Grotesk';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Notifications · Beige</div>
+  <dc-import name="Notifications" hint-size="390px,852px" style="display:block;width:390px;height:852px;border-radius:46px;box-shadow:0 30px 70px rgba(0,0,0,.3);"></dc-import>
+</div>
+<div style="position:absolute;left:532px;top:5130px;width:390px;--canvas:linear-gradient(168deg,#0C2331 0%,#1A4258 48%,#0D2636 100%);--ink:#FFFFFF;--ink-soft:rgba(255,255,255,.82);--muted:rgba(255,255,255,.62);--muted-2:rgba(255,255,255,.45);--label:#41B8E8;--accent:#41B8E8;--accent-soft:rgba(65,184,232,.16);--card:rgba(255,255,255,.07);--card-border:rgba(255,255,255,.13);--card-blur:blur(14px);--divider:rgba(255,255,255,.12);--line:rgba(255,255,255,.16);--chip:rgba(255,255,255,.1);--badge-bg:#0C1318;--badge-text:#FFFFFF;--cta-bg:#FFFFFF;--cta-text:#0E2230;--cta2-bg:transparent;--cta2-text:#FFFFFF;--cta2-border:rgba(255,255,255,.32);--pistachio:#C6D89E;--positive:#C6D89E;--positive-soft:rgba(184,201,138,.2);--negative:#E6A98F;--negative-soft:rgba(230,169,143,.18);--brown:#CDA079;--brown-ink:#241608;--brown-soft:rgba(205,160,121,.2);--tile:rgba(65,184,232,.16);--tile-icon:#5CC4EE;--navbar:rgba(11,30,42,.55);">
+  <div data-drags-parent="1" style="font-family:'Hanken Grotesk';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Notifications · Blue</div>
+  <dc-import name="Notifications" hint-size="390px,852px" style="display:block;width:390px;height:852px;border-radius:46px;box-shadow:0 30px 70px rgba(0,0,0,.45);"></dc-import>
+</div>
+
+<div style="position:absolute;left:60px;top:6100px;width:390px;--canvas:linear-gradient(180deg,#F7F2EA 0%,#EFE7DA 100%);--ink:#16242E;--ink-soft:#34424B;--muted:#8A8174;--muted-2:#ABA192;--label:#1F6F9B;--accent:#1F6F9B;--accent-soft:rgba(31,111,155,.1);--card:#FFFFFF;--card-border:#E7DFD0;--card-blur:none;--divider:#EAE2D5;--line:#E1D9CA;--chip:#EFE8DC;--badge-bg:#171513;--badge-text:#F5F0E8;--cta-bg:#1F6F9B;--cta-text:#FFFFFF;--cta2-bg:transparent;--cta2-text:#16242E;--cta2-border:#D9D2C7;--pistachio:#B8C98A;--positive:#6F8B45;--positive-soft:rgba(111,139,69,.16);--negative:#B0654C;--negative-soft:rgba(176,101,76,.14);--brown:#8A624A;--brown-ink:#FFFFFF;--brown-soft:rgba(138,98,74,.12);--tile:rgba(31,111,155,.1);--tile-icon:#1F6F9B;--navbar:rgba(245,240,232,.72);">
+  <div data-drags-parent="1" style="font-family:'Hanken Grotesk';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Staff Hub · Beige</div>
+  <dc-import name="StaffHub" hint-size="390px,852px" style="display:block;width:390px;height:852px;border-radius:46px;box-shadow:0 30px 70px rgba(0,0,0,.3);"></dc-import>
+</div>
+<div style="position:absolute;left:532px;top:6100px;width:390px;--canvas:linear-gradient(168deg,#0C2331 0%,#1A4258 48%,#0D2636 100%);--ink:#FFFFFF;--ink-soft:rgba(255,255,255,.82);--muted:rgba(255,255,255,.62);--muted-2:rgba(255,255,255,.45);--label:#41B8E8;--accent:#41B8E8;--accent-soft:rgba(65,184,232,.16);--card:rgba(255,255,255,.07);--card-border:rgba(255,255,255,.13);--card-blur:blur(14px);--divider:rgba(255,255,255,.12);--line:rgba(255,255,255,.16);--chip:rgba(255,255,255,.1);--badge-bg:#0C1318;--badge-text:#FFFFFF;--cta-bg:#FFFFFF;--cta-text:#0E2230;--cta2-bg:transparent;--cta2-text:#FFFFFF;--cta2-border:rgba(255,255,255,.32);--pistachio:#C6D89E;--positive:#C6D89E;--positive-soft:rgba(184,201,138,.2);--negative:#E6A98F;--negative-soft:rgba(230,169,143,.18);--brown:#CDA079;--brown-ink:#241608;--brown-soft:rgba(205,160,121,.2);--tile:rgba(65,184,232,.16);--tile-icon:#5CC4EE;--navbar:rgba(11,30,42,.55);">
+  <div data-drags-parent="1" style="font-family:'Hanken Grotesk';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b72;margin:0 0 10px 6px;">Staff Hub · Blue</div>
+  <dc-import name="StaffHub" hint-size="390px,852px" style="display:block;width:390px;height:852px;border-radius:46px;box-shadow:0 30px 70px rgba(0,0,0,.45);"></dc-import>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic { renderVals(){ return {}; } }
+</script>
+</body>
+</html>
