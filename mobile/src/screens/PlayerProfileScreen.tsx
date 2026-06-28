@@ -546,7 +546,7 @@ export default function PlayerProfileScreen() {
           onChangeText={setTrainingFeedback}
           multiline
           textAlignVertical="top"
-          onFocus={() => setTimeout(() => scrollRef.current?.scrollTo({ y: trainingFeedbackY.current - 20, animated: true }), 60)}
+
         />
         <TouchableOpacity
           style={[styles.regenBtn, (!trainingFeedback.trim() || regeneratingTraining) && { opacity: 0.5 }]}
@@ -875,7 +875,7 @@ export default function PlayerProfileScreen() {
                     value={modalCorrection}
                     onChangeText={setModalCorrection}
                     multiline
-                    onFocus={() => setTimeout(() => modalScrollRef.current?.scrollTo({ y: correctionInputY.current, animated: true }), 100)}
+
                   />
                   <TouchableOpacity
                     style={{

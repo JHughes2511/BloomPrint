@@ -524,7 +524,7 @@ export default function GameReportBuilderScreen() {
             placeholderTextColor="#4b5563"
             value={boxScore}
             onChangeText={setBoxScore}
-            onFocus={() => scrollTo(boxScoreY.current)}
+
             onBlur={() => save({ box_score: boxScore.trim() || null })}
             multiline
             textAlignVertical="top"
@@ -548,7 +548,7 @@ export default function GameReportBuilderScreen() {
             placeholderTextColor="#4b5563"
             value={scoutingNotes}
             onChangeText={setScoutingNotes}
-            onFocus={() => scrollTo(scoutingY.current)}
+
             onBlur={() => save({ scouting_notes: scoutingNotes.trim() || null })}
             multiline
             textAlignVertical="top"
@@ -564,7 +564,7 @@ export default function GameReportBuilderScreen() {
             placeholderTextColor="#4b5563"
             value={focusPrompt}
             onChangeText={setFocusPrompt}
-            onFocus={() => scrollTo(focusPromptY.current)}
+
             onBlur={() => save({ focus_prompt: focusPrompt.trim() || null })}
             multiline
             textAlignVertical="top"
@@ -613,7 +613,7 @@ export default function GameReportBuilderScreen() {
                 placeholderTextColor="#4b5563"
                 value={correctionText}
                 onChangeText={setCorrectionText}
-                onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 200)}
+
                 multiline
                 textAlignVertical="top"
               />

@@ -212,7 +212,7 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={undefined}
       style={{ flex: 1, backgroundColor: '#0a0a0a' }}
     >
       <KeyboardAwareScrollView

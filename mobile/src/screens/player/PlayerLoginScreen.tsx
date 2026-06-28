@@ -32,7 +32,7 @@ export default function PlayerLoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={undefined}
       style={{ flex: 1, backgroundColor: '#0f1a0f' }}
     >
       <KeyboardAwareScrollView

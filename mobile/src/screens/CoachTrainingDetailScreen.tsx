@@ -173,7 +173,7 @@ export default function CoachTrainingDetailScreen() {
               value={commentText}
               onChangeText={setCommentText}
               multiline
-              onFocus={() => scrollToY(commentY.current)}
+
             />
             <TouchableOpacity
               style={styles.sendBtn}
@@ -205,7 +205,7 @@ export default function CoachTrainingDetailScreen() {
               onChangeText={setNoteText}
               multiline
               textAlignVertical="top"
-              onFocus={() => scrollToY(notesY.current)}
+
             />
             <TouchableOpacity
               style={[styles.btn, { marginTop: 8 }]}
@@ -235,7 +235,7 @@ export default function CoachTrainingDetailScreen() {
               onChangeText={setFeedbackText}
               multiline
               textAlignVertical="top"
-              onFocus={() => scrollToY(feedbackY.current)}
+
             />
             <TouchableOpacity
               style={[styles.btn, { backgroundColor: '#16a34a', marginTop: 8, flexDirection: 'row', gap: 8, justifyContent: 'center' }]}

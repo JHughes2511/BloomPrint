@@ -145,7 +145,7 @@ export default function PlayerTrainingDetailScreen() {
               value={commentText}
               onChangeText={setCommentText}
               multiline
-              onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150)}
+
             />
             <TouchableOpacity
               style={styles.sendBtn}

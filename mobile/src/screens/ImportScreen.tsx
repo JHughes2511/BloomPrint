@@ -137,7 +137,7 @@ export default function ImportScreen() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: '#0a0a0a' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={undefined}
     >
       <KeyboardAwareScrollView
         style={styles.container}

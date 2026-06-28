@@ -72,7 +72,7 @@ export default function NewEvalScreen() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: '#0a0a0a' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={undefined}
     >
     <KeyboardAwareScrollView
       ref={scrollRef}
@@ -146,7 +146,7 @@ export default function NewEvalScreen() {
         onChangeText={setFocusPrompt}
         multiline
         textAlignVertical="top"
-        onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100)}
+
       />
 
       <TouchableOpacity style={styles.submitBtn} onPress={submit} disabled={submitting}>

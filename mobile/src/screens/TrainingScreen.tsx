@@ -46,7 +46,7 @@ export default function TrainingScreen() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: '#0a0a0a' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={undefined}
     >
     <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
       <View style={styles.header}>
