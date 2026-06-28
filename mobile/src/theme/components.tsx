@@ -65,7 +65,9 @@ export function Card({ children, selected, style, padding = 18 }: CardProps) {
         tint="dark"
         style={[{ borderRadius: radius, overflow: 'hidden', borderWidth, borderColor }, style]}
       >
-        <View style={{ backgroundColor: t.card, padding }}>{children}</View>
+        {/* flex:1 so the translucent fill covers the full card height even when a
+            grid row stretches this card to match a taller neighbor. */}
+        <View style={{ flex: 1, backgroundColor: t.card, padding }}>{children}</View>
       </BlurView>
     );
   }
