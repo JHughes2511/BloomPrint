@@ -34,8 +34,13 @@ const KeyboardAwareScrollView = forwardRef<ScrollView, ScrollViewProps>(
       const hideEvt = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
 
       const scrollToFocused = (kbScreenY: number) => {
-        const input: any = (TextInput.State as any).currentlyFocusedInput?.()
-          ?? (TextInput.State as any).currentlyFocusedField?.();
+        const State = TextInput.State as any;
+        // Use the modern API when present; only fall back to the deprecated
+        // currentlyFocusedField when currentlyFocusedInput doesn't exist (calling
+        // the deprecated one logs a console warning every time).
+        const input: any = typeof State.currentlyFocusedInput === 'function'
+          ? State.currentlyFocusedInput()
+          : State.currentlyFocusedField?.();
         if (!input || !scrollRef.current) return;
         const measure = input.measureInWindow?.bind(input);
         if (!measure) return;

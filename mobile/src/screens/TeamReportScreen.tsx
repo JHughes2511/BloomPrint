@@ -301,7 +301,7 @@ export default function TeamReportScreen() {
     setExportingPrevReport(true);
     try {
       const rDate = new Date(report.created_at);
-      const rType = (report.output_type ?? '').replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
+      const rType = outputTypeLabel(report.output_type);
       const html = buildReportHtml({
         title: rType,
         subject: coach?.program_name ?? 'Team',
@@ -310,8 +310,12 @@ export default function TeamReportScreen() {
       });
       const fileName = buildPdfFileName(rType, coach?.program_name ?? 'Team', rDate);
       const { uri } = await Print.printToFileAsync({ html });
+      // Copy to a properly-named file so the export keeps the standard convention
+      // (Type - Subject - YYYY-MM-DD) instead of the random Print temp name.
+      const dest = FileSystem.cacheDirectory + fileName + '.pdf';
+      await FileSystem.copyAsync({ from: uri, to: dest });
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: fileName });
+        await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: fileName });
       }
     } catch { Alert.alert('Error', 'Could not export report'); }
     setExportingPrevReport(false);

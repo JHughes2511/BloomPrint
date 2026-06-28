@@ -9,6 +9,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 import { playersAPI, teamsAPI, playerAPI, trainingAPI, staffSharingAPI, coachesAPI, gameEvalAPI } from '../api/client';
 import { Player, Evaluation, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
@@ -330,8 +331,11 @@ export default function PlayerProfileScreen() {
       });
       const fileName = buildPdfFileName('Training Program', player?.name ?? 'Player', reportDate);
       const { uri } = await Print.printToFileAsync({ html });
+      // Copy to a properly-named file so the export keeps the standard convention.
+      const dest = FileSystem.cacheDirectory + fileName + '.pdf';
+      await FileSystem.copyAsync({ from: uri, to: dest });
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: fileName });
+        await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: fileName });
       }
     } catch {
       Alert.alert('Error', 'Could not export training program');
