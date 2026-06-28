@@ -788,24 +788,24 @@ export default function EvalReportScreen() {
             />
             <View style={{ gap: 8, marginTop: 8 }}>
               <TouchableOpacity
-                style={[styles.saveBtn, { backgroundColor: t.accent }]}
+                style={[styles.saveBtn, { backgroundColor: t.ctaBg }]}
                 onPress={() => submitCorrection(true)}
                 disabled={saving || regenerating}
               >
                 {saving || regenerating
                   ? <ActivityIndicator color={t.ctaText} />
-                  : <Text style={styles.saveText}>Generate New Evaluation</Text>}
+                  : <Text style={[styles.saveText, { color: t.ctaText }]}>Apply & Regenerate</Text>}
               </TouchableOpacity>
               <View style={styles.modalRow}>
                 <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowCorrect(false)}>
                   <Text style={styles.cancelText}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.saveBtn, { backgroundColor: t.line }]}
+                  style={[styles.saveBtn, { backgroundColor: t.chip }]}
                   onPress={() => submitCorrection(false)}
                   disabled={saving}
                 >
-                  {saving ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>Save for Later</Text>}
+                  {saving ? <ActivityIndicator color={t.ink} /> : <Text style={[styles.saveText, { color: t.ink }]}>Save for Later</Text>}
                 </TouchableOpacity>
               </View>
             </View>

@@ -8,6 +8,9 @@ import VoiceTextInput from './VoiceTextInput';
 import { playerAPI, teamsAPI, staffSharingAPI } from '../api/client';
 import { splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import KeyboardAwareScrollView from './KeyboardAwareScrollView';
+import { useTheme } from '../theme/ThemeProvider';
+import { ThemeTokens } from '../theme/tokens';
+import { fonts } from '../theme/typography';
 
 type Target = 'player' | 'team' | 'all_staff';
 
@@ -24,6 +27,8 @@ export type ShareModalProps = {
 export default function ShareModal({
   visible, onClose, reportType, reportId, outputType, reportText, title,
 }: ShareModalProps) {
+  const { t } = useTheme();
+  const styles = makeStyles(t);
   const [target, setTarget] = useState<Target>('player');
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<any[]>([]);
@@ -137,7 +142,7 @@ export default function ShareModal({
               {!!title && <Text style={styles.headerSub} numberOfLines={1}>{title}</Text>}
             </View>
             <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={24} color="#9ca3af" />
+              <Ionicons name="close" size={24} color={t.muted} />
             </TouchableOpacity>
           </View>
 
@@ -160,14 +165,14 @@ export default function ShareModal({
               <>
                 <Text style={styles.label}>Select a Team</Text>
                 {teams.length === 0 && <Text style={styles.empty}>No teams found.</Text>}
-                {teams.map(t => (
+                {teams.map(tm => (
                   <TouchableOpacity
-                    key={t.id}
-                    style={[styles.row, selected?.id === t.id && styles.rowActive]}
-                    onPress={() => setSelected(t)}
+                    key={tm.id}
+                    style={[styles.row, selected?.id === tm.id && styles.rowActive]}
+                    onPress={() => setSelected(tm)}
                   >
-                    <Text style={styles.rowTitle}>{t.name}</Text>
-                    {selected?.id === t.id && <Ionicons name="checkmark-circle" size={18} color="#7c3aed" />}
+                    <Text style={styles.rowTitle}>{tm.name}</Text>
+                    {selected?.id === tm.id && <Ionicons name="checkmark-circle" size={18} color={t.accent} />}
                   </TouchableOpacity>
                 ))}
               </>
@@ -180,12 +185,12 @@ export default function ShareModal({
                     placeholder={target === 'all_staff'
                       ? 'Search coach, team, or program name...'
                       : 'Search player name...'}
-                    placeholderTextColor="#6b7280"
+                    placeholderTextColor={t.muted2}
                     value={search}
                     onChangeText={setSearch}
                   />
                   <TouchableOpacity style={styles.searchBtn} onPress={runSearch} disabled={searchLoading}>
-                    {searchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+                    {searchLoading ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="search" size={18} color={t.ctaText} />}
                   </TouchableOpacity>
                 </View>
                 {target === 'all_staff' && (
@@ -210,9 +215,9 @@ export default function ShareModal({
                           : !!(r.linked_player || r.email) && <Text style={styles.rowSub}>{r.linked_player ?? r.email}</Text>}
                       </View>
                       {target === 'all_staff' && r.kind !== 'coach' && (
-                        <Ionicons name="people" size={15} color="#7c3aed" style={{ marginRight: 6 }} />
+                        <Ionicons name="people" size={15} color={t.accent} style={{ marginRight: 6 }} />
                       )}
-                      {isSel && <Ionicons name="checkmark-circle" size={18} color="#7c3aed" />}
+                      {isSel && <Ionicons name="checkmark-circle" size={18} color={t.accent} />}
                     </TouchableOpacity>
                   );
                 })}
@@ -227,7 +232,7 @@ export default function ShareModal({
                   <Switch
                     value={allowRegen}
                     onValueChange={setAllowRegen}
-                    trackColor={{ false: '#374151', true: '#7c3aed' }}
+                    trackColor={{ false: t.line, true: t.accent }}
                     thumbColor="#fff"
                   />
                 </View>
@@ -249,7 +254,7 @@ export default function ShareModal({
                     <Switch
                       value={sectionToggles[sec.heading] !== false}
                       onValueChange={v => setSectionToggles(p => ({ ...p, [sec.heading]: v }))}
-                      trackColor={{ false: '#374151', true: '#7c3aed' }}
+                      trackColor={{ false: t.line, true: t.accent }}
                       thumbColor="#fff"
                     />
                   </View>
@@ -267,7 +272,7 @@ export default function ShareModal({
               onPress={doSend}
               disabled={sending || !canSend()}
             >
-              {sending ? <ActivityIndicator color="#fff" /> : <Text style={styles.sendText}>Share</Text>}
+              {sending ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.sendText}>Share</Text>}
             </TouchableOpacity>
           </View>
         </View>
@@ -276,31 +281,31 @@ export default function ShareModal({
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
-  box: { backgroundColor: '#111827', borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8 },
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
+  box: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, borderWidth: 1, borderColor: t.cardBorder },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
-  headerTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
-  headerSub: { color: '#6b7280', fontSize: 12, marginTop: 4 },
+  headerTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
+  headerSub: { color: t.muted, fontSize: 12, marginTop: 4 },
   targetRow: { flexDirection: 'row', gap: 6, marginBottom: 14 },
-  targetChip: { flex: 1, paddingVertical: 9, borderRadius: 10, backgroundColor: '#1f2937', alignItems: 'center', borderWidth: 1, borderColor: '#374151' },
-  targetChipActive: { backgroundColor: '#7c3aed22', borderColor: '#7c3aed' },
-  targetChipText: { color: '#9ca3af', fontSize: 12, fontWeight: '600' },
-  targetChipTextActive: { color: '#fff' },
-  label: { color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6 },
-  empty: { color: '#6b7280', fontSize: 13, marginBottom: 8 },
-  hint: { color: '#6b7280', fontSize: 11, marginBottom: 12, marginLeft: 2 },
-  input: { backgroundColor: '#1f2937', borderRadius: 10, padding: 14, color: '#fff', fontSize: 15, borderWidth: 1, borderColor: '#374151', minHeight: 48 },
-  searchBtn: { backgroundColor: '#7c3aed', borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' },
-  row: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1f2937', borderRadius: 10, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: '#374151' },
-  rowActive: { borderColor: '#7c3aed' },
-  rowTitle: { color: '#fff', fontWeight: '600', fontSize: 14 },
-  rowSub: { color: '#6b7280', fontSize: 11, marginTop: 2 },
-  toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 },
-  toggleLabel: { color: '#d1d5db', fontSize: 13 },
+  targetChip: { flex: 1, paddingVertical: 10, borderRadius: 999, backgroundColor: t.chip, alignItems: 'center', borderWidth: 1, borderColor: t.line },
+  targetChipActive: { backgroundColor: t.accentSoft, borderColor: t.accent },
+  targetChipText: { color: t.muted, fontSize: 12, fontFamily: fonts[700] },
+  targetChipTextActive: { color: t.accent },
+  label: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 },
+  empty: { color: t.muted, fontSize: 13, marginBottom: 8 },
+  hint: { color: t.muted, fontSize: 11, marginBottom: 12, marginLeft: 2 },
+  input: { backgroundColor: t.chip, borderRadius: 14, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line, minHeight: 48 },
+  searchBtn: { backgroundColor: t.ctaBg, borderRadius: 14, padding: 12, alignItems: 'center', justifyContent: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center', backgroundColor: t.chip, borderRadius: 14, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: t.cardBorder },
+  rowActive: { borderColor: t.accent },
+  rowTitle: { color: t.ink, fontFamily: fonts[600], fontSize: 14 },
+  rowSub: { color: t.muted, fontSize: 11, marginTop: 2 },
+  toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: t.chip, borderRadius: 10, padding: 10 },
+  toggleLabel: { color: t.inkSoft, fontSize: 13 },
   footer: { flexDirection: 'row', gap: 10, marginTop: 14 },
-  cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 10, backgroundColor: '#1f2937', alignItems: 'center' },
-  cancelText: { color: '#9ca3af', fontWeight: '600' },
-  sendBtn: { flex: 2, paddingVertical: 14, borderRadius: 10, backgroundColor: '#7c3aed', alignItems: 'center' },
-  sendText: { color: '#fff', fontWeight: '700' },
+  cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 999, backgroundColor: t.chip, alignItems: 'center' },
+  cancelText: { color: t.cta2Text, fontFamily: fonts[700] },
+  sendBtn: { flex: 2, paddingVertical: 14, borderRadius: 999, backgroundColor: t.ctaBg, alignItems: 'center' },
+  sendText: { color: t.ctaText, fontFamily: fonts[700] },
 });

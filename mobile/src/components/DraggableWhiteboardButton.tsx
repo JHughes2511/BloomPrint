@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { Animated, PanResponder, Dimensions, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../theme/ThemeProvider';
 
 const SIZE = 52;
 
@@ -15,6 +16,7 @@ type Props = {
  */
 export default function DraggableWhiteboardButton({ onPress }: Props) {
   const { width, height } = Dimensions.get('window');
+  const { t } = useTheme();
 
   // Start near the bottom-right corner.
   const pan = useRef(
@@ -61,11 +63,11 @@ export default function DraggableWhiteboardButton({ onPress }: Props) {
     <Animated.View
       style={[
         styles.button,
-        { transform: pan.getTranslateTransform() },
+        { backgroundColor: t.ctaBg, transform: pan.getTranslateTransform() },
       ]}
       {...panResponder.panHandlers}
     >
-      <Ionicons name="clipboard-outline" size={24} color="#fff" />
+      <Ionicons name="clipboard-outline" size={24} color={t.ctaText} />
     </Animated.View>
   );
 }
