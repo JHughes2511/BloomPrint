@@ -17,6 +17,10 @@ import { renderReport } from '../utils/renderReport';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import WhiteboardModal from '../components/WhiteboardModal';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
+import { useTheme } from '../theme/ThemeProvider';
+import { ThemeTokens } from '../theme/tokens';
+import { fonts } from '../theme/typography';
+import { ScreenBackground } from '../theme/components';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
 
 // ── Stat definitions ──────────────────────────────────────────────────────────
@@ -79,6 +83,8 @@ type View = 'dashboard' | 'games' | 'live' | 'detail' | 'scout';
 
 export default function TeamEvalScreen() {
   const { coach } = useAuth();
+  const { t } = useTheme();
+  const s = makeS(t);
   const scoutScrollRef = useRef<any>(null);
   const noteInputY = useRef(0);
   const [whiteboardGameId, setWhiteboardGameId] = useState<number | null>(null);
@@ -536,7 +542,7 @@ export default function TeamEvalScreen() {
         for (const q of qNums) teamQ[q] = playerNames.reduce((s, n) => s + (players[n].quarters[q]?.weighted || 0), 0);
         const teamTotal = playerNames.reduce((s, n) => s + players[n].total, 0);
         const fmt = (v: number) => (v > 0 ? '+' : '') + v.toFixed(1);
-        const fmtColor = (v: number) => v > 0 ? '#166534' : v < 0 ? '#991b1b' : '#6b7280';
+        const fmtColor = (v: number) => v > 0 ? t.positive : v < 0 ? t.negative : t.muted;
         const trad = (c: Record<string, number>) => {
           const fgm = (c['2 FG Made'] || 0) + (c['3 FG Made'] || 0);
           const fga = fgm + (c['2 FG Missed'] || 0) + (c['3 FG Missed'] || 0);
@@ -561,7 +567,7 @@ export default function TeamEvalScreen() {
           const P = players[name];
           const cells = qNums.map(q => {
             const w = P.quarters[q]?.weighted;
-            const col = w == null ? '#9ca3af' : fmtColor(w);
+            const col = w == null ? t.muted : fmtColor(w);
             return `<td style="${tdStyle}color:${col};font-weight:700">${w == null ? '–' : fmt(w)}</td>`;
           }).join('');
           matrixRows += `<tr>
@@ -582,11 +588,11 @@ export default function TeamEvalScreen() {
           let qRows = '';
           for (const q of qNums.filter(q => P.quarters[q])) {
             const Q = P.quarters[q];
-            const t = trad(Q.counts);
+            const tr = trad(Q.counts);
             const breakdownRows = Object.entries(Q.breakdown).map(([sn, d]) =>
               `<tr>
                 <td style="padding:3px 6px;font-size:9px;color:#374151">${sn}${d.count > 1 ? ` ×${d.count}` : ''}</td>
-                <td style="padding:3px 6px;font-size:9px;font-weight:700;text-align:right;color:${d.wp >= 0 ? '#166534' : '#991b1b'}">${d.wp >= 0 ? '+' : ''}${d.wp.toFixed(1)}</td>
+                <td style="padding:3px 6px;font-size:9px;font-weight:700;text-align:right;color:${d.wp >= 0 ? '#6F8B45' : '#B0654C'}">${d.wp >= 0 ? '+' : ''}${d.wp.toFixed(1)}</td>
               </tr>`
             ).join('');
             qRows += `
@@ -602,7 +608,7 @@ export default function TeamEvalScreen() {
                       ${['PTS','REB','AST','STL','BLK','TO','FG'].map(l => `<th style="padding:4px 6px;font-size:9px;color:#6b7280;text-align:center">${l}</th>`).join('')}
                     </tr>
                     <tr>
-                      ${[t.pts, t.reb, t.ast, t.stl, t.blk, t.to, t.fg].map(v => `<td style="padding:4px 6px;font-size:11px;font-weight:800;text-align:center">${v}</td>`).join('')}
+                      ${[tr.pts, tr.reb, tr.ast, tr.stl, tr.blk, tr.to, tr.fg].map(v => `<td style="padding:4px 6px;font-size:11px;font-weight:800;text-align:center">${v}</td>`).join('')}
                     </tr>
                     <tr><td colspan="7" style="padding-top:6px">
                       <table style="width:100%;border-collapse:collapse">${breakdownRows}</table>
@@ -750,9 +756,9 @@ export default function TeamEvalScreen() {
           for (const q of qNums) {
             const Q = players[name][q];
             if (!Q) continue;
-            const t = trad(Q.counts);
+            const tr = trad(Q.counts);
             pTotal += Q.weighted;
-            lines.push(`"${name}",${qLabel(q)},${t.pts},${t.reb},${t.ast},${t.stl},${t.blk},${t.to},${t.fgm},${t.fga},${Q.weighted.toFixed(1)}`);
+            lines.push(`"${name}",${qLabel(q)},${tr.pts},${tr.reb},${tr.ast},${tr.stl},${tr.blk},${tr.to},${tr.fgm},${tr.fga},${Q.weighted.toFixed(1)}`);
           }
           // Player total row
           const allCounts: Record<string, number> = {};
@@ -856,6 +862,7 @@ export default function TeamEvalScreen() {
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
+    <ScreenBackground>
     <View style={s.root}>
       {/* Top nav */}
       <View style={s.topNav}>
@@ -905,22 +912,22 @@ export default function TeamEvalScreen() {
                 })}
                 {dashPhases.length > 0 && (
                   <TouchableOpacity
-                    style={[s.chip, { borderColor: '#dc2626' }]}
+                    style={[s.chip, { borderColor: t.negative }]}
                     onPress={() => { setDashPhases([]); loadDashboard([]); }}
                   >
-                    <Text style={[s.chipText, { color: '#dc2626' }]}>Clear</Text>
+                    <Text style={[s.chipText, { color: t.negative }]}>Clear</Text>
                   </TouchableOpacity>
                 )}
               </View>
             </ScrollView>
             {dashPhases.length > 0 && (
-              <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 6 }}>
+              <Text style={{ color: t.muted, fontSize: 11, marginTop: 6 }}>
                 Showing: {dashPhases.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' + ')}
               </Text>
             )}
           </View>
           {loadingDash ? (
-            <ActivityIndicator color="#7c3aed" style={{ marginTop: 40 }} />
+            <ActivityIndicator color={t.accent} style={{ marginTop: 40 }} />
           ) : dashboard ? (
             <>
               {/* Record card */}
@@ -928,13 +935,13 @@ export default function TeamEvalScreen() {
                 <Text style={s.cardLabel}>SEASON RECORD</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 12, marginTop: 8 }}>
                   <Text style={s.bigStat}>{dashboard.record.wins}W - {dashboard.record.losses}L</Text>
-                  <Text style={{ color: '#9ca3af', fontSize: 14 }}>
+                  <Text style={{ color: t.muted, fontSize: 14 }}>
                     {(dashboard.record.win_pct * 100).toFixed(1)}%
                   </Text>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
                   <Text style={s.cardLabel}>SEASON AVG GRADE</Text>
-                  <Text style={[s.bigStat, { fontSize: 28, color: '#7c3aed' }]}>
+                  <Text style={[s.bigStat, { fontSize: 28, color: t.accent }]}>
                     {dashboard.season_avg_team_grade.toFixed(2)}
                   </Text>
                 </View>
@@ -958,24 +965,24 @@ export default function TeamEvalScreen() {
                             if (game) openDetail(game);
                           }}
                         >
-                          <Text style={{ color: '#9ca3af', fontSize: 9, marginBottom: 4 }}>
+                          <Text style={{ color: t.muted, fontSize: 9, marginBottom: 4 }}>
                             {t.team_grade.toFixed(1)}
                           </Text>
                           <View
                             style={{
                               width: 32, height: Math.round(pct * 80) + 10,
-                              backgroundColor: won ? '#7c3aed' : '#374151',
+                              backgroundColor: won ? t.accent : t.line,
                               borderRadius: 4, marginBottom: 6,
                             }}
                           />
-                          <Text style={{ color: '#6b7280', fontSize: 9, textAlign: 'center' }} numberOfLines={2}>
+                          <Text style={{ color: t.muted, fontSize: 9, textAlign: 'center' }} numberOfLines={2}>
                             {t.opponent.slice(0, 8)}
                           </Text>
                           <View style={{
-                            backgroundColor: won ? '#16a34a22' : '#dc262622',
+                            backgroundColor: won ? t.positiveSoft : t.negativeSoft,
                             borderRadius: 4, paddingHorizontal: 4, paddingVertical: 1, marginTop: 2,
                           }}>
-                            <Text style={{ color: won ? '#16a34a' : '#dc2626', fontSize: 8, fontWeight: '700' }}>
+                            <Text style={{ color: won ? t.positive : t.negative, fontSize: 8, fontWeight: '700' }}>
                               {won ? 'W' : 'L'}
                             </Text>
                           </View>
@@ -995,14 +1002,14 @@ export default function TeamEvalScreen() {
                       <Text style={s.leaderRank}>{i + 1}</Text>
                       <View style={{ flex: 1 }}>
                         <Text style={s.leaderName}>{p.player_name}</Text>
-                        <Text style={{ color: '#6b7280', fontSize: 11 }}>
+                        <Text style={{ color: t.muted, fontSize: 11 }}>
                           {p.games_played}G · OFF {p.avg_offensive.toFixed(1)} · DEF {p.avg_defensive.toFixed(1)}
                         </Text>
                       </View>
                       <View style={s.gradeBadge}>
                         <Text style={s.gradeBadgeText}>{p.avg_game_grade.toFixed(2)}</Text>
                       </View>
-                      <Ionicons name="chevron-forward" size={14} color="#4b5563" style={{ marginLeft: 4 }} />
+                      <Ionicons name="chevron-forward" size={14} color={t.muted2} style={{ marginLeft: 4 }} />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -1010,8 +1017,8 @@ export default function TeamEvalScreen() {
 
               {dashboard.team_grade_trend.length === 0 && (
                 <View style={[s.card, { alignItems: 'center', paddingVertical: 32 }]}>
-                  <Ionicons name="stats-chart-outline" size={36} color="#374151" />
-                  <Text style={{ color: '#6b7280', fontSize: 13, marginTop: 10 }}>
+                  <Ionicons name="stats-chart-outline" size={36} color={t.line} />
+                  <Text style={{ color: t.muted, fontSize: 13, marginTop: 10 }}>
                     No completed games yet. Log a game to see your season stats.
                   </Text>
                 </View>
@@ -1041,16 +1048,16 @@ export default function TeamEvalScreen() {
 
           {/* New game button */}
           <TouchableOpacity style={s.newGameBtn} onPress={() => setShowNewGame(true)}>
-            <Ionicons name="add-circle-outline" size={18} color="#fff" />
+            <Ionicons name="add-circle-outline" size={18} color={t.ctaText} />
             <Text style={s.newGameBtnText}>New Game</Text>
           </TouchableOpacity>
 
           {loading ? (
-            <ActivityIndicator color="#7c3aed" style={{ marginTop: 24 }} />
+            <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />
           ) : filteredSessions.length === 0 ? (
             <View style={[s.card, { alignItems: 'center', paddingVertical: 32 }]}>
-              <Ionicons name="basketball-outline" size={36} color="#374151" />
-              <Text style={{ color: '#6b7280', fontSize: 13, marginTop: 10 }}>No games found. Create your first game.</Text>
+              <Ionicons name="basketball-outline" size={36} color={t.line} />
+              <Text style={{ color: t.muted, fontSize: 13, marginTop: 10 }}>No games found. Create your first game.</Text>
             </View>
           ) : (
             filteredSessions.map((game: any) => {
@@ -1064,7 +1071,7 @@ export default function TeamEvalScreen() {
                 >
                   <View style={{ flex: 1 }}>
                     <Text style={s.gameCardOpponent}>{game.opponent_name}</Text>
-                    <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 2 }}>
+                    <Text style={{ color: t.muted, fontSize: 11, marginTop: 2 }}>
                       {new Date(game.date).toLocaleDateString()} · {game.season_phase}
                       {game.location ? ` · ${game.location}` : ''}
                     </Text>
@@ -1072,15 +1079,15 @@ export default function TeamEvalScreen() {
                   <View style={{ alignItems: 'flex-end', gap: 4 }}>
                     {hasScore ? (
                       <>
-                        <View style={[s.wlBadge, { backgroundColor: won ? '#16a34a22' : '#dc262622' }]}>
-                          <Text style={[s.wlText, { color: won ? '#16a34a' : '#dc2626' }]}>
+                        <View style={[s.wlBadge, { backgroundColor: won ? t.positiveSoft : t.negativeSoft }]}>
+                          <Text style={[s.wlText, { color: won ? t.positive : t.negative }]}>
                             {won ? 'W' : 'L'} {game.our_score}-{game.opponent_score}
                           </Text>
                         </View>
                       </>
                     ) : null}
-                    <View style={[s.statusBadge, game.status === 'in_progress' && { backgroundColor: '#1e3a5f' }]}>
-                      <Text style={[s.statusText, game.status === 'in_progress' && { color: '#60a5fa' }]}>
+                    <View style={[s.statusBadge, game.status === 'in_progress' && { backgroundColor: t.accentSoft }]}>
+                      <Text style={[s.statusText, game.status === 'in_progress' && { color: t.accent }]}>
                         {game.status === 'in_progress' ? 'IN PROGRESS' : 'DONE'}
                       </Text>
                     </View>
@@ -1101,7 +1108,7 @@ export default function TeamEvalScreen() {
                       ]);
                     }}
                   >
-                    <Ionicons name="trash-outline" size={15} color="#4b5563" />
+                    <Ionicons name="trash-outline" size={15} color={t.muted2} />
                   </TouchableOpacity>
                 </TouchableOpacity>
               );
@@ -1138,32 +1145,32 @@ export default function TeamEvalScreen() {
           {/* Score bar */}
           <View style={s.scoreBar}>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: '#9ca3af', fontSize: 10, fontWeight: '700' }}>US</Text>
+              <Text style={{ color: t.muted, fontSize: 10, fontWeight: '700' }}>US</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <TouchableOpacity onPress={() => updateScore('our', -1)}>
-                  <Ionicons name="remove-circle-outline" size={20} color="#6b7280" />
+                  <Ionicons name="remove-circle-outline" size={20} color={t.muted} />
                 </TouchableOpacity>
                 <Text style={s.scoreNum}>{ourScore}</Text>
                 <TouchableOpacity onPress={() => updateScore('our', 1)}>
-                  <Ionicons name="add-circle-outline" size={20} color="#7c3aed" />
+                  <Ionicons name="add-circle-outline" size={20} color={t.accent} />
                 </TouchableOpacity>
               </View>
             </View>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: '#fff', fontSize: 13, fontWeight: '700' }} numberOfLines={1}>
+              <Text style={{ color: t.ink, fontSize: 13, fontWeight: '700' }} numberOfLines={1}>
                 vs {activeGame.opponent_name}
               </Text>
-              <Text style={{ color: '#6b7280', fontSize: 11 }}>Q{activeQuarter}</Text>
+              <Text style={{ color: t.muted, fontSize: 11 }}>Q{activeQuarter}</Text>
             </View>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: '#9ca3af', fontSize: 10, fontWeight: '700' }}>THEM</Text>
+              <Text style={{ color: t.muted, fontSize: 10, fontWeight: '700' }}>THEM</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <TouchableOpacity onPress={() => updateScore('opp', -1)}>
-                  <Ionicons name="remove-circle-outline" size={20} color="#6b7280" />
+                  <Ionicons name="remove-circle-outline" size={20} color={t.muted} />
                 </TouchableOpacity>
                 <Text style={s.scoreNum}>{oppScore}</Text>
                 <TouchableOpacity onPress={() => updateScore('opp', 1)}>
-                  <Ionicons name="add-circle-outline" size={20} color="#7c3aed" />
+                  <Ionicons name="add-circle-outline" size={20} color={t.accent} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -1171,8 +1178,8 @@ export default function TeamEvalScreen() {
 
           {/* Stat recorded toast */}
           {statToast && (
-            <View style={{ backgroundColor: '#16a34a', paddingVertical: 6, paddingHorizontal: 16 }}>
-              <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700', textAlign: 'center' }}>{statToast}</Text>
+            <View style={{ backgroundColor: t.positive, paddingVertical: 6, paddingHorizontal: 16 }}>
+              <Text style={{ color: t.ink, fontSize: 12, fontWeight: '700', textAlign: 'center' }}>{statToast}</Text>
             </View>
           )}
 
@@ -1223,7 +1230,7 @@ export default function TeamEvalScreen() {
                     </Text>
                   </TouchableOpacity>
                 )) : (
-                  <Text style={{ color: '#6b7280', fontSize: 12, padding: 8 }}>No roster loaded. Add players to the team first.</Text>
+                  <Text style={{ color: t.muted, fontSize: 12, padding: 8 }}>No roster loaded. Add players to the team first.</Text>
                 )
               ) : (
                 <>
@@ -1242,14 +1249,14 @@ export default function TeamEvalScreen() {
                     <VoiceTextInput
                       style={[s.smallInput, { flex: 1 }]}
                       placeholder="Opponent player name..."
-                      placeholderTextColor="#4b5563"
+                      placeholderTextColor={t.muted2}
                       value={newOppPlayer}
                       onChangeText={setNewOppPlayer}
                     />
                     <TextInput
                       style={[s.smallInput, { width: 48, textAlign: 'center' }]}
                       placeholder="#"
-                      placeholderTextColor="#4b5563"
+                      placeholderTextColor={t.muted2}
                       value={newOppJersey}
                       onChangeText={setNewOppJersey}
                       keyboardType="number-pad"
@@ -1257,16 +1264,16 @@ export default function TeamEvalScreen() {
                     <TextInput
                       style={[s.smallInput, { width: 56, textAlign: 'center' }]}
                       placeholder="Pos"
-                      placeholderTextColor="#4b5563"
+                      placeholderTextColor={t.muted2}
                       value={newOppPosition}
                       onChangeText={setNewOppPosition}
                       autoCapitalize="characters"
                     />
                     <TouchableOpacity
-                      style={{ backgroundColor: '#374151', borderRadius: 8, paddingHorizontal: 10, justifyContent: 'center' }}
+                      style={{ backgroundColor: t.line, borderRadius: 8, paddingHorizontal: 10, justifyContent: 'center' }}
                       onPress={addOpponentPlayer}
                     >
-                      <Ionicons name="add" size={16} color="#9ca3af" />
+                      <Ionicons name="add" size={16} color={t.muted} />
                     </TouchableOpacity>
                   </View>
                 </>
@@ -1304,18 +1311,18 @@ export default function TeamEvalScreen() {
 
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 24 }}>
               <TouchableOpacity
-                style={[s.actionBtnLive, { flex: 1, borderColor: '#374151' }]}
+                style={[s.actionBtnLive, { flex: 1, borderColor: t.line }]}
                 onPress={() => setShowLineupModal(true)}
               >
-                <Ionicons name="people-outline" size={16} color="#9ca3af" />
-                <Text style={{ color: '#9ca3af', fontWeight: '600', fontSize: 13 }}>Lineup</Text>
+                <Ionicons name="people-outline" size={16} color={t.muted} />
+                <Text style={{ color: t.muted, fontWeight: '600', fontSize: 13 }}>Lineup</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[s.actionBtnLive, { flex: 1, borderColor: '#dc2626' }]}
+                style={[s.actionBtnLive, { flex: 1, borderColor: t.negative }]}
                 onPress={endGame}
               >
-                <Ionicons name="stop-circle-outline" size={16} color="#dc2626" />
-                <Text style={{ color: '#dc2626', fontWeight: '600', fontSize: 13 }}>End Game</Text>
+                <Ionicons name="stop-circle-outline" size={16} color={t.negative} />
+                <Text style={{ color: t.negative, fontWeight: '600', fontSize: 13 }}>End Game</Text>
               </TouchableOpacity>
             </View>
           </KeyboardAwareScrollView>
@@ -1329,15 +1336,15 @@ export default function TeamEvalScreen() {
           <View style={s.card}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900' }}>vs {detailGame.opponent_name}</Text>
+                <Text style={{ color: t.ink, fontSize: 22, fontWeight: '900' }}>vs {detailGame.opponent_name}</Text>
                 <TouchableOpacity
-                  style={{ backgroundColor: '#1f2937', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 }}
+                  style={{ backgroundColor: t.chip, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 }}
                   onPress={() => { setShareGameId(detailGame?.id); setShareGameModalVisible(true); setStaffSearch(''); setStaffResults([]); }}
                 >
-                  <Ionicons name="share-outline" size={14} color="#9ca3af" />
-                  <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600' }}>Share with Staff</Text>
+                  <Ionicons name="share-outline" size={14} color={t.muted} />
+                  <Text style={{ color: t.muted, fontSize: 12, fontWeight: '600' }}>Share with Staff</Text>
                 </TouchableOpacity>
-                <Text style={{ color: '#6b7280', fontSize: 12, marginTop: 2 }}>
+                <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>
                   {new Date(detailGame.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   {detailGame.location ? ` · ${detailGame.location}` : ''}
                   {' · '}{detailGame.season_phase}
@@ -1345,13 +1352,13 @@ export default function TeamEvalScreen() {
               </View>
               {detailGame.our_score != null && (
                 <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={{ color: '#fff', fontSize: 28, fontWeight: '900' }}>
+                  <Text style={{ color: t.ink, fontSize: 28, fontWeight: '900' }}>
                     {detailGame.our_score} - {detailGame.opponent_score}
                   </Text>
                   <View style={[s.wlBadge, {
-                    backgroundColor: detailGame.our_score > detailGame.opponent_score ? '#16a34a22' : '#dc262622'
+                    backgroundColor: detailGame.our_score > detailGame.opponent_score ? t.positiveSoft : t.negativeSoft
                   }]}>
-                    <Text style={[s.wlText, { color: detailGame.our_score > detailGame.opponent_score ? '#16a34a' : '#dc2626' }]}>
+                    <Text style={[s.wlText, { color: detailGame.our_score > detailGame.opponent_score ? t.positive : t.negative }]}>
                       {detailGame.our_score > detailGame.opponent_score ? 'WIN' : 'LOSS'}
                     </Text>
                   </View>
@@ -1361,7 +1368,7 @@ export default function TeamEvalScreen() {
             {summary && (
               <View style={{ marginTop: 16, alignItems: 'center' }}>
                 <Text style={s.cardLabel}>TEAM GRADE</Text>
-                <Text style={{ color: '#7c3aed', fontSize: 40, fontWeight: '900', marginTop: 4 }}>
+                <Text style={{ color: t.accent, fontSize: 40, fontWeight: '900', marginTop: 4 }}>
                   {summary.team_grade.toFixed(2)}
                 </Text>
               </View>
@@ -1394,7 +1401,7 @@ export default function TeamEvalScreen() {
             const ourStats = gameStats.filter((st: any) => !st.is_opponent);
             if (ourStats.length === 0) return (
               <View style={s.card}>
-                <Text style={{ color: '#6b7280', textAlign: 'center', fontSize: 13 }}>No stats logged yet.</Text>
+                <Text style={{ color: t.muted, textAlign: 'center', fontSize: 13 }}>No stats logged yet.</Text>
               </View>
             );
             // Build player -> quarter -> { weighted, counts, list }
@@ -1417,13 +1424,13 @@ export default function TeamEvalScreen() {
             const teamQ: Record<number, number> = {};
             for (const q of qNums) teamQ[q] = playerNames.reduce((sum, n) => sum + (players[n].quarters[q]?.weighted || 0), 0);
             const teamTotal = playerNames.reduce((sum, n) => sum + players[n].total, 0);
-            const cellColor = (v: number) => (v > 0 ? '#4ade80' : v < 0 ? '#f87171' : '#6b7280');
+            const cellColor = (v: number) => (v > 0 ? t.positive : v < 0 ? t.negative : t.muted);
             const fmt = (v: number) => (v > 0 ? '+' : '') + v.toFixed(1);
 
             return (
               <View style={s.card}>
                 <Text style={s.cardLabel}>QUARTER COMPARISON</Text>
-                <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 2, marginBottom: 12 }}>
+                <Text style={{ color: t.muted, fontSize: 11, marginTop: 2, marginBottom: 12 }}>
                   Grade points per quarter — tap a player for the full breakdown
                 </Text>
 
@@ -1431,16 +1438,16 @@ export default function TeamEvalScreen() {
                 <View style={s.qHeaderRow}>
                   <Text style={s.qPlayerHead}>PLAYER</Text>
                   {qNums.map(q => <Text key={q} style={s.qColHead}>{qLabel(q)}</Text>)}
-                  <Text style={[s.qColHead, { color: '#a78bfa' }]}>TOT</Text>
+                  <Text style={[s.qColHead, { color: t.accent }]}>TOT</Text>
                 </View>
 
                 {/* Team totals */}
-                <View style={[s.qRow, { backgroundColor: '#11182755', borderRadius: 8 }]}>
-                  <Text style={[s.qPlayerName, { color: '#a78bfa', fontWeight: '800' }]}>TEAM</Text>
+                <View style={[s.qRow, { backgroundColor: t.chip, borderRadius: 8 }]}>
+                  <Text style={[s.qPlayerName, { color: t.accent, fontWeight: '800' }]}>TEAM</Text>
                   {qNums.map(q => (
                     <Text key={q} style={[s.qCell, { color: cellColor(teamQ[q]), fontWeight: '800' }]}>{fmt(teamQ[q])}</Text>
                   ))}
-                  <Text style={[s.qCell, { color: '#c4b5fd', fontWeight: '800' }]}>{fmt(teamTotal)}</Text>
+                  <Text style={[s.qCell, { color: t.accent, fontWeight: '800' }]}>{fmt(teamTotal)}</Text>
                 </View>
 
                 {/* Player rows */}
@@ -1450,22 +1457,22 @@ export default function TeamEvalScreen() {
                   return (
                     <View key={name}>
                       <TouchableOpacity
-                        style={[s.qRow, isOpen && { backgroundColor: '#11182755', borderRadius: 8 }]}
+                        style={[s.qRow, isOpen && { backgroundColor: t.chip, borderRadius: 8 }]}
                         onPress={() => setExpandedQuarterPlayer(isOpen ? null : name)}
                       >
                         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 4 }}>
-                          <Ionicons name={isOpen ? 'chevron-down' : 'chevron-forward'} size={12} color="#4b5563" />
+                          <Ionicons name={isOpen ? 'chevron-down' : 'chevron-forward'} size={12} color={t.muted2} />
                           <Text style={s.qPlayerName} numberOfLines={1}>{name}</Text>
                         </View>
                         {qNums.map(q => {
                           const w = P.quarters[q]?.weighted;
                           return (
-                            <Text key={q} style={[s.qCell, { color: w == null ? '#374151' : cellColor(w) }]}>
+                            <Text key={q} style={[s.qCell, { color: w == null ? t.line : cellColor(w) }]}>
                               {w == null ? '–' : fmt(w)}
                             </Text>
                           );
                         })}
-                        <Text style={[s.qCell, { color: '#c4b5fd', fontWeight: '800' }]}>{fmt(P.total)}</Text>
+                        <Text style={[s.qCell, { color: t.accent, fontWeight: '800' }]}>{fmt(P.total)}</Text>
                       </TouchableOpacity>
 
                       {isOpen && (
@@ -1482,22 +1489,22 @@ export default function TeamEvalScreen() {
                             return (
                               <View key={q} style={{ marginBottom: 10 }}>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-                                  <Text style={{ color: '#a78bfa', fontSize: 11, fontWeight: '800', letterSpacing: 0.5 }}>{qLabel(q)}</Text>
+                                  <Text style={{ color: t.accent, fontSize: 11, fontWeight: '800', letterSpacing: 0.5 }}>{qLabel(q)}</Text>
                                   <Text style={{ color: cellColor(Q.weighted), fontSize: 11, fontWeight: '700' }}>{fmt(Q.weighted)} pts</Text>
                                 </View>
                                 <View style={{ flexDirection: 'row', gap: 12, marginBottom: 6 }}>
                                   {[['PTS', pts], ['REB', reb], ['AST', ast], ['STL', stl], ['BLK', blk], ['TO', to]].map(([label, val]) => (
                                     <View key={label as string} style={{ alignItems: 'center' }}>
-                                      <Text style={{ color: '#6b7280', fontSize: 9, fontWeight: '700' }}>{label}</Text>
-                                      <Text style={{ color: '#fff', fontSize: 13, fontWeight: '800' }}>{val}</Text>
+                                      <Text style={{ color: t.muted, fontSize: 9, fontWeight: '700' }}>{label}</Text>
+                                      <Text style={{ color: t.ink, fontSize: 13, fontWeight: '800' }}>{val}</Text>
                                     </View>
                                   ))}
                                 </View>
                                 <View style={{ gap: 2 }}>
                                   {Q.list.map((st: any, i: number) => (
                                     <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                      <Text style={{ color: '#6b7280', fontSize: 11 }}>{st.stat_name}{st.count > 1 ? ` ×${st.count}` : ''}</Text>
-                                      <Text style={{ color: st.weighted_points >= 0 ? '#4ade80' : '#f87171', fontSize: 11, fontWeight: '600' }}>
+                                      <Text style={{ color: t.muted, fontSize: 11 }}>{st.stat_name}{st.count > 1 ? ` ×${st.count}` : ''}</Text>
+                                      <Text style={{ color: st.weighted_points >= 0 ? t.positive : t.negative, fontSize: 11, fontWeight: '600' }}>
                                         {st.weighted_points >= 0 ? '+' : ''}{st.weighted_points.toFixed(1)}
                                       </Text>
                                     </View>
@@ -1515,7 +1522,7 @@ export default function TeamEvalScreen() {
             );
           })()}
           {detailTab !== 'byquarter' && loadingSummary ? (
-            <ActivityIndicator color="#7c3aed" style={{ marginTop: 24 }} />
+            <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />
           ) : detailTab !== 'byquarter' && summary ? (
             <View style={s.card}>
               <Text style={s.cardLabel}>PLAYER GRADES</Text>
@@ -1526,15 +1533,15 @@ export default function TeamEvalScreen() {
                     onPress={() => setExpandedPlayer(expandedPlayer === g.player_name ? null : g.player_name)}
                   >
                     <Text style={s.playerGradeName} numberOfLines={1}>{g.player_name}</Text>
-                    <Text style={{ color: '#9ca3af', fontSize: 11 }}>OFF {g.offensive_grade.toFixed(1)}</Text>
-                    <Text style={{ color: '#9ca3af', fontSize: 11 }}>DEF {g.defensive_grade.toFixed(1)}</Text>
-                    <Text style={{ color: '#9ca3af', fontSize: 11 }}>{g.minutes_played.toFixed(0)}m</Text>
+                    <Text style={{ color: t.muted, fontSize: 11 }}>OFF {g.offensive_grade.toFixed(1)}</Text>
+                    <Text style={{ color: t.muted, fontSize: 11 }}>DEF {g.defensive_grade.toFixed(1)}</Text>
+                    <Text style={{ color: t.muted, fontSize: 11 }}>{g.minutes_played.toFixed(0)}m</Text>
                     <View style={s.gradeBadge}>
                       <Text style={s.gradeBadgeText}>{g.game_grade.toFixed(2)}</Text>
                     </View>
                     <Ionicons
                       name={expandedPlayer === g.player_name ? 'chevron-up' : 'chevron-down'}
-                      size={14} color="#4b5563"
+                      size={14} color={t.muted2}
                     />
                   </TouchableOpacity>
                   {expandedPlayer === g.player_name && (() => {
@@ -1559,27 +1566,27 @@ export default function TeamEvalScreen() {
                     return (
                       <View style={s.expandedBox}>
                         {/* Traditional stats row */}
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: t.chip }}>
                           {([['PTS', pts], ['REB', reb], ['AST', ast], ['STL', stl], ['BLK', blk], ['TO', to], ['FG', fga > 0 ? `${fgm}/${fga}` : '—']] as [string, string | number][]).map(([label, val]) => (
                             <View key={label} style={{ alignItems: 'center', flex: 1 }}>
-                              <Text style={{ color: '#9ca3af', fontSize: 10, fontWeight: '700' }}>{label}</Text>
-                              <Text style={{ color: '#fff', fontSize: 14, fontWeight: '900' }}>{val}</Text>
+                              <Text style={{ color: t.muted, fontSize: 10, fontWeight: '700' }}>{label}</Text>
+                              <Text style={{ color: t.ink, fontSize: 14, fontWeight: '900' }}>{val}</Text>
                             </View>
                           ))}
                         </View>
 
                         {/* OFF / DEF / minutes */}
-                        <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 10 }}>
+                        <Text style={{ color: t.muted, fontSize: 11, marginBottom: 10 }}>
                           OFF {g.offensive_grade.toFixed(1)} · DEF {g.defensive_grade.toFixed(1)} · {g.minutes_played.toFixed(0)}min
                         </Text>
 
                         {/* Grading stats */}
-                        <Text style={{ color: '#4b5563', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>GRADING STATS</Text>
+                        <Text style={{ color: t.muted2, fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>GRADING STATS</Text>
                         <View style={{ gap: 3, marginBottom: 12 }}>
                           {Object.entries(breakdown).map(([statName, data]) => (
                             <View key={statName} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                              <Text style={{ color: '#9ca3af', fontSize: 12 }}>{statName}{data.count > 1 ? ` ×${data.count}` : ''}</Text>
-                              <Text style={{ color: data.weighted_points >= 0 ? '#4ade80' : '#f87171', fontSize: 12, fontWeight: '600' }}>
+                              <Text style={{ color: t.muted, fontSize: 12 }}>{statName}{data.count > 1 ? ` ×${data.count}` : ''}</Text>
+                              <Text style={{ color: data.weighted_points >= 0 ? t.positive : t.negative, fontSize: 12, fontWeight: '600' }}>
                                 {data.weighted_points >= 0 ? '+' : ''}{data.weighted_points.toFixed(1)}
                               </Text>
                             </View>
@@ -1589,11 +1596,11 @@ export default function TeamEvalScreen() {
                         {/* Per quarter */}
                         {Object.keys(g.per_quarter).length > 0 && (
                           <>
-                            <Text style={{ color: '#4b5563', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>PER QUARTER</Text>
+                            <Text style={{ color: t.muted2, fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>PER QUARTER</Text>
                             {Object.entries(g.per_quarter as Record<string, any>).sort(([a], [b]) => Number(a) - Number(b)).map(([q, data]: [string, any]) => (
                               <View key={q} style={{ flexDirection: 'row', gap: 12, marginBottom: 3 }}>
-                                <Text style={{ color: '#6b7280', fontSize: 11, width: 28 }}>{Number(q) === 5 ? 'OT' : `Q${q}`}</Text>
-                                <Text style={{ color: '#9ca3af', fontSize: 11 }}>OFF {(data.offense ?? 0).toFixed(1)} · DEF {(data.defense ?? 0).toFixed(1)}</Text>
+                                <Text style={{ color: t.muted, fontSize: 11, width: 28 }}>{Number(q) === 5 ? 'OT' : `Q${q}`}</Text>
+                                <Text style={{ color: t.muted, fontSize: 11 }}>OFF {(data.offense ?? 0).toFixed(1)} · DEF {(data.defense ?? 0).toFixed(1)}</Text>
                               </View>
                             ))}
                           </>
@@ -1603,19 +1610,19 @@ export default function TeamEvalScreen() {
                         <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
                           <TouchableOpacity
                             style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4,
-                                     backgroundColor: '#1e1b4b', borderRadius: 8, paddingVertical: 8, borderWidth: 1, borderColor: '#4c1d95' }}
+                                     backgroundColor: t.accentSoft, borderRadius: 8, paddingVertical: 8, borderWidth: 1, borderColor: t.accent }}
                             onPress={() => { setDetailModalPlayer(g.player_name); setShowDetailModal(true); }}
                           >
-                            <Ionicons name="eye-outline" size={13} color="#a78bfa" />
-                            <Text style={{ color: '#a78bfa', fontSize: 12, fontWeight: '700' }}>View Details</Text>
+                            <Ionicons name="eye-outline" size={13} color={t.accent} />
+                            <Text style={{ color: t.accent, fontSize: 12, fontWeight: '700' }}>View Details</Text>
                           </TouchableOpacity>
                           <TouchableOpacity
                             style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4,
-                                     backgroundColor: '#1f2937', borderRadius: 8, paddingVertical: 8, borderWidth: 1, borderColor: '#374151' }}
+                                     backgroundColor: t.chip, borderRadius: 8, paddingVertical: 8, borderWidth: 1, borderColor: t.line }}
                             onPress={() => { setStatsModalPlayer(g.player_name); setShowStatsModal(true); setAddStatName(''); setAddingStatDropdownOpen(false); }}
                           >
-                            <Ionicons name="create-outline" size={13} color="#9ca3af" />
-                            <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '700' }}>Edit Stats</Text>
+                            <Ionicons name="create-outline" size={13} color={t.muted} />
+                            <Text style={{ color: t.muted, fontSize: 12, fontWeight: '700' }}>Edit Stats</Text>
                           </TouchableOpacity>
                         </View>
                       </View>
@@ -1624,7 +1631,7 @@ export default function TeamEvalScreen() {
                 </View>
               ))}
               {(detailTab === 'our' ? summary.player_grades : summary.opponent_grades).length === 0 && (
-                <Text style={{ color: '#4b5563', fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>No stats logged yet.</Text>
+                <Text style={{ color: t.muted2, fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>No stats logged yet.</Text>
               )}
             </View>
           ) : null}
@@ -1635,8 +1642,8 @@ export default function TeamEvalScreen() {
               style={[s.detailAction, { flex: 1, minWidth: '45%' }]}
               onPress={() => openScout(detailGame.opponent_name)}
             >
-              <Ionicons name="search-outline" size={14} color="#9ca3af" />
-              <Text numberOfLines={1} style={{ color: '#9ca3af', fontSize: 11, fontWeight: '600' }}>Scout</Text>
+              <Ionicons name="search-outline" size={14} color={t.muted} />
+              <Text numberOfLines={1} style={{ color: t.muted, fontSize: 11, fontWeight: '600' }}>Scout</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[s.detailAction, { flex: 1, minWidth: '45%' }]}
@@ -1644,9 +1651,9 @@ export default function TeamEvalScreen() {
               disabled={exporting}
             >
               {exporting
-                ? <ActivityIndicator size="small" color="#9ca3af" />
-                : <><Ionicons name="document-outline" size={14} color="#9ca3af" />
-                  <Text numberOfLines={1} style={{ color: '#9ca3af', fontSize: 11, fontWeight: '600' }}>Export PDF</Text></>}
+                ? <ActivityIndicator size="small" color={t.muted} />
+                : <><Ionicons name="document-outline" size={14} color={t.muted} />
+                  <Text numberOfLines={1} style={{ color: t.muted, fontSize: 11, fontWeight: '600' }}>Export PDF</Text></>}
             </TouchableOpacity>
             <TouchableOpacity
               style={[s.detailAction, { flex: 1, minWidth: '45%' }]}
@@ -1654,19 +1661,19 @@ export default function TeamEvalScreen() {
               disabled={exporting}
             >
               {exporting
-                ? <ActivityIndicator size="small" color="#9ca3af" />
-                : <><Ionicons name="grid-outline" size={14} color="#9ca3af" />
-                  <Text numberOfLines={1} style={{ color: '#9ca3af', fontSize: 11, fontWeight: '600' }}>Export CSV</Text></>}
+                ? <ActivityIndicator size="small" color={t.muted} />
+                : <><Ionicons name="grid-outline" size={14} color={t.muted} />
+                  <Text numberOfLines={1} style={{ color: t.muted, fontSize: 11, fontWeight: '600' }}>Export CSV</Text></>}
             </TouchableOpacity>
             <TouchableOpacity
-              style={[s.detailAction, { flex: 1, minWidth: '45%', borderColor: '#7c3aed' }]}
+              style={[s.detailAction, { flex: 1, minWidth: '45%', borderColor: t.accent }]}
               onPress={generateScoutingReport}
               disabled={generatingReport}
             >
               {generatingReport
-                ? <ActivityIndicator size="small" color="#7c3aed" />
-                : <><Ionicons name="sparkles-outline" size={14} color="#7c3aed" />
-                  <Text numberOfLines={1} style={{ color: '#7c3aed', fontSize: 11, fontWeight: '600' }}>Generate Report</Text></>}
+                ? <ActivityIndicator size="small" color={t.accent} />
+                : <><Ionicons name="sparkles-outline" size={14} color={t.accent} />
+                  <Text numberOfLines={1} style={{ color: t.accent, fontSize: 11, fontWeight: '600' }}>Generate Report</Text></>}
             </TouchableOpacity>
           </View>
 
@@ -1676,7 +1683,7 @@ export default function TeamEvalScreen() {
               style={[s.newGameBtn, { marginHorizontal: 16, marginBottom: 16 }]}
               onPress={() => openLiveEntry(detailGame)}
             >
-              <Ionicons name="radio-button-on-outline" size={16} color="#fff" />
+              <Ionicons name="radio-button-on-outline" size={16} color={t.ctaText} />
               <Text style={s.newGameBtnText}>Continue Live Entry</Text>
             </TouchableOpacity>
           )}
@@ -1686,7 +1693,7 @@ export default function TeamEvalScreen() {
             <View style={s.card}>
               <Text style={s.cardLabel}>SCOUTING REPORT</Text>
               <View style={{ marginTop: 8 }}>
-                {renderReport(detailGame.ai_scouting_report ?? '')}
+                {renderReport(detailGame.ai_scouting_report ?? '', { heading: t.ink, body: t.inkSoft })}
               </View>
             </View>
           )}
@@ -1702,16 +1709,16 @@ export default function TeamEvalScreen() {
               <Text style={[s.cardLabel, { marginBottom: 10 }]}>SELECT OPPONENT</Text>
               {uniqueOpponents.length === 0 ? (
                 <View style={[s.card, { alignItems: 'center', paddingVertical: 32 }]}>
-                  <Text style={{ color: '#6b7280', fontSize: 13 }}>No opponents yet. Log games first.</Text>
+                  <Text style={{ color: t.muted, fontSize: 13 }}>No opponents yet. Log games first.</Text>
                 </View>
               ) : (
                 uniqueOpponents.map(opp => (
                   <TouchableOpacity key={opp} style={s.gameCard} onPress={() => openScout(opp)}>
                     <Text style={s.gameCardOpponent}>{opp}</Text>
-                    <Text style={{ color: '#6b7280', fontSize: 12 }}>
+                    <Text style={{ color: t.muted, fontSize: 12 }}>
                       {sessions.filter((x: any) => x.opponent_name === opp).length} game(s)
                     </Text>
-                    <Ionicons name="chevron-forward" size={16} color="#374151" />
+                    <Ionicons name="chevron-forward" size={16} color={t.line} />
                   </TouchableOpacity>
                 ))
               )}
@@ -1722,14 +1729,14 @@ export default function TeamEvalScreen() {
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 }}
                 onPress={() => { setScoutOpponent(null); setScoutData(null); }}
               >
-                <Ionicons name="arrow-back" size={18} color="#9ca3af" />
-                <Text style={{ color: '#9ca3af', fontSize: 14 }}>All Opponents</Text>
+                <Ionicons name="arrow-back" size={18} color={t.muted} />
+                <Text style={{ color: t.muted, fontSize: 14 }}>All Opponents</Text>
               </TouchableOpacity>
 
-              <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900', marginBottom: 4 }}>{scoutOpponent}</Text>
+              <Text style={{ color: t.ink, fontSize: 22, fontWeight: '900', marginBottom: 4 }}>{scoutOpponent}</Text>
 
               {loadingScout ? (
-                <ActivityIndicator color="#7c3aed" style={{ marginTop: 24 }} />
+                <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />
               ) : scoutData ? (
                 <>
                   {/* Record vs this opponent */}
@@ -1739,15 +1746,15 @@ export default function TeamEvalScreen() {
                       const won = g.our_score != null && g.opponent_score != null && g.our_score > g.opponent_score;
                       return (
                         <View key={g.id} style={s.leaderRow}>
-                          <Text style={{ color: '#6b7280', fontSize: 12, width: 80 }}>
+                          <Text style={{ color: t.muted, fontSize: 12, width: 80 }}>
                             {g.date ? new Date(g.date).toLocaleDateString() : 'N/A'}
                           </Text>
-                          <Text style={{ flex: 1, color: '#d1d5db', fontSize: 13 }}>
+                          <Text style={{ flex: 1, color: t.inkSoft, fontSize: 13 }}>
                             {g.our_score != null ? `${g.our_score} - ${g.opponent_score}` : 'No score'}
                           </Text>
                           {g.our_score != null && (
-                            <View style={[s.wlBadge, { backgroundColor: won ? '#16a34a22' : '#dc262622' }]}>
-                              <Text style={[s.wlText, { color: won ? '#16a34a' : '#dc2626' }]}>{won ? 'W' : 'L'}</Text>
+                            <View style={[s.wlBadge, { backgroundColor: won ? t.positiveSoft : t.negativeSoft }]}>
+                              <Text style={[s.wlText, { color: won ? t.positive : t.negative }]}>{won ? 'W' : 'L'}</Text>
                             </View>
                           )}
                         </View>
@@ -1761,8 +1768,8 @@ export default function TeamEvalScreen() {
                       <Text style={s.cardLabel}>THEIR TOP PLAYERS</Text>
                       {scoutData.best_players.map((p: any) => (
                         <View key={p.player_name} style={s.leaderRow}>
-                          <Text style={{ flex: 1, color: '#d1d5db', fontSize: 13 }}>{p.player_name}</Text>
-                          <Text style={{ color: '#6b7280', fontSize: 11 }}>{p.games}G</Text>
+                          <Text style={{ flex: 1, color: t.inkSoft, fontSize: 13 }}>{p.player_name}</Text>
+                          <Text style={{ color: t.muted, fontSize: 11 }}>{p.games}G</Text>
                           <View style={s.gradeBadge}>
                             <Text style={s.gradeBadgeText}>{p.avg_grade.toFixed(2)}</Text>
                           </View>
@@ -1775,19 +1782,19 @@ export default function TeamEvalScreen() {
                   <View style={s.card}>
                     <Text style={s.cardLabel}>OFFENSIVE TENDENCIES</Text>
                     {scoutData.offensive_tendencies.map((t: any) => (
-                      <Text key={t.stat} style={{ color: '#d1d5db', fontSize: 13, marginBottom: 4 }}>
+                      <Text key={t.stat} style={{ color: t.inkSoft, fontSize: 13, marginBottom: 4 }}>
                         • {t.stat} ({t.count}x)
                       </Text>
                     ))}
                     <Text style={[s.cardLabel, { marginTop: 12 }]}>DEFENSIVE TENDENCIES</Text>
                     {scoutData.defensive_tendencies.map((t: any) => (
-                      <Text key={t.stat} style={{ color: '#d1d5db', fontSize: 13, marginBottom: 4 }}>
+                      <Text key={t.stat} style={{ color: t.inkSoft, fontSize: 13, marginBottom: 4 }}>
                         • {t.stat} ({t.count}x)
                       </Text>
                     ))}
                     <Text style={[s.cardLabel, { marginTop: 12 }]}>WEAK SPOTS</Text>
                     {scoutData.weak_spots.map((t: any) => (
-                      <Text key={t.stat} style={{ color: '#d1d5db', fontSize: 13, marginBottom: 4 }}>
+                      <Text key={t.stat} style={{ color: t.inkSoft, fontSize: 13, marginBottom: 4 }}>
                         • {t.stat} (grade: {t.score.toFixed(1)})
                       </Text>
                     ))}
@@ -1796,17 +1803,17 @@ export default function TeamEvalScreen() {
                   {/* Coach Notes */}
                   <View style={s.card} onLayout={e => { noteInputY.current = e.nativeEvent.layout.y; }}>
                     <Text style={s.cardLabel}>COACH NOTES</Text>
-                    <Text style={{ color: '#4b5563', fontSize: 11, marginBottom: 12, marginTop: 4 }}>
+                    <Text style={{ color: t.muted2, fontSize: 11, marginBottom: 12, marginTop: 4 }}>
                       Notes are included in the scouting report.
                     </Text>
 
                     {/* Existing notes */}
                     {scoutNotes.map(note => (
                       <View key={note.id} style={{ flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 8,
-                                                     borderBottomWidth: 1, borderBottomColor: '#1f2937', gap: 10 }}>
+                                                     borderBottomWidth: 1, borderBottomColor: t.chip, gap: 10 }}>
                         <View style={{ flex: 1 }}>
-                          <Text style={{ color: '#d1d5db', fontSize: 13, lineHeight: 18 }}>{note.note_text}</Text>
-                          <Text style={{ color: '#4b5563', fontSize: 10, marginTop: 3 }}>
+                          <Text style={{ color: t.inkSoft, fontSize: 13, lineHeight: 18 }}>{note.note_text}</Text>
+                          <Text style={{ color: t.muted2, fontSize: 10, marginTop: 3 }}>
                             {new Date(note.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </Text>
                         </View>
@@ -1817,34 +1824,34 @@ export default function TeamEvalScreen() {
                             { text: 'Delete', style: 'destructive', onPress: () => deleteOpponentNote(note.id) },
                           ])}
                         >
-                          <Ionicons name="trash-outline" size={16} color="#4b5563" />
+                          <Ionicons name="trash-outline" size={16} color={t.muted2} />
                         </TouchableOpacity>
                       </View>
                     ))}
 
                     {scoutNotes.length === 0 && !loadingNotes && (
-                      <Text style={{ color: '#4b5563', fontSize: 13, marginBottom: 8 }}>No notes yet. Add your first observation below.</Text>
+                      <Text style={{ color: t.muted2, fontSize: 13, marginBottom: 8 }}>No notes yet. Add your first observation below.</Text>
                     )}
 
                     {/* Add note */}
                     <VoiceTextInput
                       style={[s.input, { marginTop: 10, marginBottom: 8, minHeight: 72, textAlignVertical: 'top' }]}
                       placeholder="Add a scouting note or observation..."
-                      placeholderTextColor="#4b5563"
+                      placeholderTextColor={t.muted2}
                       value={newNoteText}
                       onChangeText={setNewNoteText}
                       multiline
                       numberOfLines={3}
                     />
                     <TouchableOpacity
-                      style={{ backgroundColor: newNoteText.trim() ? '#7c3aed' : '#374151', borderRadius: 10,
+                      style={{ backgroundColor: newNoteText.trim() ? t.accent : t.line, borderRadius: 10,
                                paddingVertical: 10, alignItems: 'center', opacity: savingNote ? 0.6 : 1 }}
                       onPress={saveOpponentNote}
                       disabled={!newNoteText.trim() || savingNote}
                     >
                       {savingNote
-                        ? <ActivityIndicator color="#fff" size="small" />
-                        : <Text style={{ color: '#fff', fontWeight: '700' }}>Save Note</Text>}
+                        ? <ActivityIndicator color={t.ctaText} size="small" />
+                        : <Text style={{ color: t.ink, fontWeight: '700' }}>Save Note</Text>}
                     </TouchableOpacity>
                   </View>
 
@@ -1855,8 +1862,8 @@ export default function TeamEvalScreen() {
                     disabled={regeneratingScout}
                   >
                     {regeneratingScout
-                      ? <ActivityIndicator color="#fff" />
-                      : <><Ionicons name="sparkles-outline" size={16} color="#fff" />
+                      ? <ActivityIndicator color={t.ctaText} />
+                      : <><Ionicons name="sparkles-outline" size={16} color={t.ctaText} />
                         <Text style={s.newGameBtnText}>
                           {scoutData.ai_scouting_report ? 'Regenerate Report' : 'Generate Report'}
                         </Text></>}
@@ -1866,7 +1873,7 @@ export default function TeamEvalScreen() {
                     <View style={s.card}>
                       <Text style={s.cardLabel}>SCOUTING REPORT</Text>
                       <View style={{ marginTop: 8 }}>
-                        {renderReport(scoutData.ai_scouting_report)}
+                        {renderReport(scoutData.ai_scouting_report, { heading: t.ink, body: t.inkSoft })}
                       </View>
                     </View>
                   )}
@@ -1890,27 +1897,27 @@ export default function TeamEvalScreen() {
                   onPress={() => { setShowTeamDropdown(v => !v); setShowCreateTeam(false); }}
                   activeOpacity={0.7}
                 >
-                  <Text style={{ color: newGameTeamId === null ? '#4b5563' : '#fff', fontSize: 15 }}>
+                  <Text style={{ color: newGameTeamId === null ? t.muted2 : t.ink, fontSize: 15 }}>
                     {newGameTeamId === null ? 'None (no team)' : teams.find((t: any) => t.id === newGameTeamId)?.name ?? 'Select team'}
                   </Text>
-                  <Text style={{ color: '#6b7280', fontSize: 12 }}>{showTeamDropdown ? '▲' : '▼'}</Text>
+                  <Text style={{ color: t.muted, fontSize: 12 }}>{showTeamDropdown ? '▲' : '▼'}</Text>
                 </TouchableOpacity>
                 {showTeamDropdown && (
-                  <View style={{ borderWidth: 1, borderColor: '#374151', borderRadius: 10, marginBottom: 16, overflow: 'hidden' }}>
+                  <View style={{ borderWidth: 1, borderColor: t.line, borderRadius: 10, marginBottom: 16, overflow: 'hidden' }}>
                     <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled style={{ maxHeight: 200 }}>
                       <TouchableOpacity
-                        style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: '#374151', backgroundColor: newGameTeamId === null ? '#1e1b4b' : 'transparent' }}
+                        style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: t.line, backgroundColor: newGameTeamId === null ? t.accentSoft : 'transparent' }}
                         onPress={() => { setNewGameTeamId(null); setShowTeamDropdown(false); }}
                       >
-                        <Text style={{ color: newGameTeamId === null ? '#a78bfa' : '#d1d5db', fontSize: 14 }}>None</Text>
+                        <Text style={{ color: newGameTeamId === null ? t.accent : t.inkSoft, fontSize: 14 }}>None</Text>
                       </TouchableOpacity>
                       {teams.map((t: any) => (
                         <TouchableOpacity
                           key={t.id}
-                          style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: '#374151', backgroundColor: newGameTeamId === t.id ? '#1e1b4b' : 'transparent' }}
+                          style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: t.line, backgroundColor: newGameTeamId === t.id ? t.accentSoft : 'transparent' }}
                           onPress={() => { setNewGameTeamId(t.id); setShowTeamDropdown(false); }}
                         >
-                          <Text style={{ color: newGameTeamId === t.id ? '#a78bfa' : '#d1d5db', fontSize: 14 }}>{t.name}</Text>
+                          <Text style={{ color: newGameTeamId === t.id ? t.accent : t.inkSoft, fontSize: 14 }}>{t.name}</Text>
                         </TouchableOpacity>
                       ))}
                       {/* Create new team row */}
@@ -1919,33 +1926,33 @@ export default function TeamEvalScreen() {
                           style={{ padding: 12, flexDirection: 'row', alignItems: 'center', gap: 6 }}
                           onPress={() => setShowCreateTeam(true)}
                         >
-                          <Text style={{ color: '#7c3aed', fontSize: 14, fontWeight: '700' }}>+ Create New Team</Text>
+                          <Text style={{ color: t.accent, fontSize: 14, fontWeight: '700' }}>+ Create New Team</Text>
                         </TouchableOpacity>
                       ) : (
                         <View style={{ padding: 12, gap: 8 }}>
                           <VoiceTextInput
                             style={[s.input, { marginBottom: 0 }]}
                             placeholder="Team name"
-                            placeholderTextColor="#4b5563"
+                            placeholderTextColor={t.muted2}
                             value={newTeamName}
                             onChangeText={setNewTeamName}
                             autoFocus
                           />
                           <View style={{ flexDirection: 'row', gap: 8 }}>
                             <TouchableOpacity
-                              style={[s.modalBtn, { flex: 1, backgroundColor: '#1f2937', paddingVertical: 8 }]}
+                              style={[s.modalBtn, { flex: 1, backgroundColor: t.chip, paddingVertical: 8 }]}
                               onPress={() => { setShowCreateTeam(false); setNewTeamName(''); }}
                             >
-                              <Text style={{ color: '#9ca3af', fontWeight: '700', fontSize: 13 }}>Cancel</Text>
+                              <Text style={{ color: t.muted, fontWeight: '700', fontSize: 13 }}>Cancel</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                              style={[s.modalBtn, { flex: 1, backgroundColor: '#7c3aed', paddingVertical: 8, opacity: newTeamName.trim() ? 1 : 0.4 }]}
+                              style={[s.modalBtn, { flex: 1, backgroundColor: t.accent, paddingVertical: 8, opacity: newTeamName.trim() ? 1 : 0.4 }]}
                               onPress={createTeam}
                               disabled={creatingTeam || !newTeamName.trim()}
                             >
                               {creatingTeam
-                                ? <ActivityIndicator color="#fff" size="small" />
-                                : <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Create</Text>}
+                                ? <ActivityIndicator color={t.ctaText} size="small" />
+                                : <Text style={{ color: t.ink, fontWeight: '700', fontSize: 13 }}>Create</Text>}
                             </TouchableOpacity>
                           </View>
                         </View>
@@ -1958,7 +1965,7 @@ export default function TeamEvalScreen() {
               <VoiceTextInput
                 style={s.input}
                 placeholder="e.g. City High School"
-                placeholderTextColor="#4b5563"
+                placeholderTextColor={t.muted2}
                 value={newGameOpponent}
                 onChangeText={setNewGameOpponent}
               />
@@ -1966,7 +1973,7 @@ export default function TeamEvalScreen() {
               <VoiceTextInput
                 style={s.input}
                 placeholder="e.g. Home / Away / Neutral"
-                placeholderTextColor="#4b5563"
+                placeholderTextColor={t.muted2}
                 value={newGameLocation}
                 onChangeText={setNewGameLocation}
               />
@@ -1974,7 +1981,7 @@ export default function TeamEvalScreen() {
               <VoiceTextInput
                 style={s.input}
                 placeholder="e.g. 2025-2026"
-                placeholderTextColor="#4b5563"
+                placeholderTextColor={t.muted2}
                 value={newGameYear}
                 onChangeText={setNewGameYear}
               />
@@ -1999,19 +2006,19 @@ export default function TeamEvalScreen() {
             </KeyboardAwareScrollView>
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity
-                style={[s.modalBtn, { flex: 1, backgroundColor: '#1f2937' }]}
+                style={[s.modalBtn, { flex: 1, backgroundColor: t.chip }]}
                 onPress={() => { setShowNewGame(false); setShowTeamDropdown(false); setShowCreateTeam(false); setNewTeamName(''); }}
               >
-                <Text style={{ color: '#9ca3af', fontWeight: '700' }}>Cancel</Text>
+                <Text style={{ color: t.muted, fontWeight: '700' }}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[s.modalBtn, { flex: 1, backgroundColor: '#7c3aed', opacity: newGameOpponent.trim() ? 1 : 0.4 }]}
+                style={[s.modalBtn, { flex: 1, backgroundColor: t.accent, opacity: newGameOpponent.trim() ? 1 : 0.4 }]}
                 onPress={createGame}
                 disabled={creating || !newGameOpponent.trim()}
               >
                 {creating
-                  ? <ActivityIndicator color="#fff" />
-                  : <Text style={{ color: '#fff', fontWeight: '700' }}>Start Game</Text>}
+                  ? <ActivityIndicator color={t.ctaText} />
+                  : <Text style={{ color: t.ink, fontWeight: '700' }}>Start Game</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -2025,8 +2032,8 @@ export default function TeamEvalScreen() {
             <Text style={s.modalTitle}>{subOutPlayer ? 'Who came in?' : 'Manage Lineup'}</Text>
             {subOutPlayer ? (
               <>
-                <Text style={{ color: '#6b7280', fontSize: 13, marginBottom: 16 }}>
-                  Select the player who substituted in for <Text style={{ color: '#fff', fontWeight: '700' }}>{subOutPlayer}</Text>:
+                <Text style={{ color: t.muted, fontSize: 13, marginBottom: 16 }}>
+                  Select the player who substituted in for <Text style={{ color: t.ink, fontWeight: '700' }}>{subOutPlayer}</Text>:
                 </Text>
                 <ScrollView style={{ maxHeight: 280 }} showsVerticalScrollIndicator={false}>
                   {(entryMode === 'our' ? roster.map((p: any) => p.name) : opponentPlayers)
@@ -2034,7 +2041,7 @@ export default function TeamEvalScreen() {
                     .map(name => (
                       <TouchableOpacity
                         key={name}
-                        style={{ padding: 13, borderRadius: 10, backgroundColor: '#1f2937', marginBottom: 8, borderWidth: 1, borderColor: '#374151' }}
+                        style={{ padding: 13, borderRadius: 10, backgroundColor: t.chip, marginBottom: 8, borderWidth: 1, borderColor: t.line }}
                         onPress={async () => {
                           if (activeGame) {
                             await gameEvalAPI.logLineup(activeGame.id, {
@@ -2053,28 +2060,28 @@ export default function TeamEvalScreen() {
                           setSubOutPlayer(null);
                         }}
                       >
-                        <Text style={{ color: '#d1d5db', fontSize: 14, fontWeight: '600' }}>{name}</Text>
+                        <Text style={{ color: t.inkSoft, fontSize: 14, fontWeight: '600' }}>{name}</Text>
                       </TouchableOpacity>
                     ))
                   }
                 </ScrollView>
                 <TouchableOpacity
-                  style={[s.modalBtn, { backgroundColor: '#1f2937', marginTop: 8 }]}
+                  style={[s.modalBtn, { backgroundColor: t.chip, marginTop: 8 }]}
                   onPress={() => setSubOutPlayer(null)}
                 >
-                  <Text style={{ color: '#9ca3af', fontWeight: '700' }}>Cancel</Text>
+                  <Text style={{ color: t.muted, fontWeight: '700' }}>Cancel</Text>
                 </TouchableOpacity>
               </>
             ) : (
               <>
-                <Text style={{ color: '#6b7280', fontSize: 13, marginBottom: 16, lineHeight: 18 }}>
+                <Text style={{ color: t.muted, fontSize: 13, marginBottom: 16, lineHeight: 18 }}>
                   Tap OUT to sub a player out (you'll pick who came in). Tap IN to log a standalone sub-in.
                 </Text>
                 <ScrollView style={{ maxHeight: 320 }} showsVerticalScrollIndicator={false}>
                   {(entryMode === 'our' ? roster.map((p: any) => p.name) : opponentPlayers).map(name => (
                     <View key={name} style={{ flexDirection: 'row', gap: 8, marginBottom: 8, alignItems: 'center' }}>
                       <TouchableOpacity
-                        style={[s.modalBtn, { flex: 1, backgroundColor: '#16a34a22', borderWidth: 1, borderColor: '#16a34a' }]}
+                        style={[s.modalBtn, { flex: 1, backgroundColor: t.positiveSoft, borderWidth: 1, borderColor: t.positive }]}
                         onPress={async () => {
                           if (activeGame) {
                             await gameEvalAPI.logLineup(activeGame.id, {
@@ -2086,23 +2093,23 @@ export default function TeamEvalScreen() {
                           }
                         }}
                       >
-                        <Text style={{ color: '#16a34a', fontWeight: '600' }}>IN</Text>
+                        <Text style={{ color: t.positive, fontWeight: '600' }}>IN</Text>
                       </TouchableOpacity>
-                      <Text style={{ color: '#fff', fontSize: 13, flex: 2, textAlign: 'center' }}>{name}</Text>
+                      <Text style={{ color: t.ink, fontSize: 13, flex: 2, textAlign: 'center' }}>{name}</Text>
                       <TouchableOpacity
-                        style={[s.modalBtn, { flex: 1, backgroundColor: '#dc262622', borderWidth: 1, borderColor: '#dc2626' }]}
+                        style={[s.modalBtn, { flex: 1, backgroundColor: t.negativeSoft, borderWidth: 1, borderColor: t.negative }]}
                         onPress={() => setSubOutPlayer(name)}
                       >
-                        <Text style={{ color: '#dc2626', fontWeight: '600' }}>OUT</Text>
+                        <Text style={{ color: t.negative, fontWeight: '600' }}>OUT</Text>
                       </TouchableOpacity>
                     </View>
                   ))}
                 </ScrollView>
                 <TouchableOpacity
-                  style={[s.modalBtn, { backgroundColor: '#374151', marginTop: 8 }]}
+                  style={[s.modalBtn, { backgroundColor: t.line, marginTop: 8 }]}
                   onPress={() => { setShowLineupModal(false); setSubOutPlayer(null); }}
                 >
-                  <Text style={{ color: '#fff', fontWeight: '700' }}>Done</Text>
+                  <Text style={{ color: t.ink, fontWeight: '700' }}>Done</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -2117,16 +2124,16 @@ export default function TeamEvalScreen() {
             {/* Header */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: '#fff', fontSize: 18, fontWeight: '900' }}>{detailModalPlayer}</Text>
+                <Text style={{ color: t.ink, fontSize: 18, fontWeight: '900' }}>{detailModalPlayer}</Text>
                 {summary && (() => {
                   const grades = detailTab === 'our' ? summary.player_grades : summary.opponent_grades;
                   const pg = grades.find((g: any) => g.player_name === detailModalPlayer);
                   if (!pg) return null;
                   return (
                     <View style={{ flexDirection: 'row', gap: 12, marginTop: 4 }}>
-                      <Text style={{ color: '#6b7280', fontSize: 12 }}>OFF <Text style={{ color: '#a78bfa', fontWeight: '700' }}>{pg.offensive_grade.toFixed(2)}</Text></Text>
-                      <Text style={{ color: '#6b7280', fontSize: 12 }}>DEF <Text style={{ color: '#a78bfa', fontWeight: '700' }}>{pg.defensive_grade.toFixed(2)}</Text></Text>
-                      <Text style={{ color: '#6b7280', fontSize: 12 }}>{pg.minutes_played.toFixed(0)} min</Text>
+                      <Text style={{ color: t.muted, fontSize: 12 }}>OFF <Text style={{ color: t.accent, fontWeight: '700' }}>{pg.offensive_grade.toFixed(2)}</Text></Text>
+                      <Text style={{ color: t.muted, fontSize: 12 }}>DEF <Text style={{ color: t.accent, fontWeight: '700' }}>{pg.defensive_grade.toFixed(2)}</Text></Text>
+                      <Text style={{ color: t.muted, fontSize: 12 }}>{pg.minutes_played.toFixed(0)} min</Text>
                     </View>
                   );
                 })()}
@@ -2136,38 +2143,38 @@ export default function TeamEvalScreen() {
                 const pg = grades.find((g: any) => g.player_name === detailModalPlayer);
                 if (!pg) return null;
                 return (
-                  <View style={{ backgroundColor: '#7c3aed', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8 }}>
-                    <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900' }}>{pg.game_grade.toFixed(2)}</Text>
-                    <Text style={{ color: '#c4b5fd', fontSize: 9, textAlign: 'center' }}>GRADE</Text>
+                  <View style={{ backgroundColor: t.accent, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8 }}>
+                    <Text style={{ color: t.ink, fontSize: 22, fontWeight: '900' }}>{pg.game_grade.toFixed(2)}</Text>
+                    <Text style={{ color: t.accent, fontSize: 9, textAlign: 'center' }}>GRADE</Text>
                   </View>
                 );
               })()}
             </View>
 
-            <View style={{ height: 1, backgroundColor: '#1f2937', marginBottom: 14 }} />
+            <View style={{ height: 1, backgroundColor: t.chip, marginBottom: 14 }} />
 
             <ScrollView showsVerticalScrollIndicator={false}>
               {/* Substitution events */}
               {gameLineup.filter(e => e.player_name === detailModalPlayer && e.is_opponent === (detailTab === 'opponent')).length > 0 && (
                 <View style={{ marginBottom: 16 }}>
-                  <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>SUBSTITUTIONS</Text>
+                  <Text style={{ color: t.muted, fontSize: 10, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>SUBSTITUTIONS</Text>
                   {gameLineup
                     .filter(e => e.player_name === detailModalPlayer && e.is_opponent === (detailTab === 'opponent'))
                     .map((e, i) => (
                       <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 7,
-                                             borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                                             borderBottomWidth: 1, borderBottomColor: t.chip }}>
                         <View style={{ width: 28, height: 28, borderRadius: 14,
-                                        backgroundColor: e.event_type === 'in' ? '#16a34a22' : '#dc262622',
+                                        backgroundColor: e.event_type === 'in' ? t.positiveSoft : t.negativeSoft,
                                         alignItems: 'center', justifyContent: 'center' }}>
                           <Ionicons name={e.event_type === 'in' ? 'log-in-outline' : 'log-out-outline'}
-                                    size={14} color={e.event_type === 'in' ? '#16a34a' : '#dc2626'} />
+                                    size={14} color={e.event_type === 'in' ? t.positive : t.negative} />
                         </View>
-                        <Text style={{ color: e.event_type === 'in' ? '#16a34a' : '#dc2626', fontWeight: '700', fontSize: 12, width: 28 }}>
+                        <Text style={{ color: e.event_type === 'in' ? t.positive : t.negative, fontWeight: '700', fontSize: 12, width: 28 }}>
                           {e.event_type === 'in' ? 'IN' : 'OUT'}
                         </Text>
-                        <Text style={{ color: '#9ca3af', fontSize: 12 }}>{e.quarter === 5 ? 'OT' : `Q${e.quarter}`}</Text>
+                        <Text style={{ color: t.muted, fontSize: 12 }}>{e.quarter === 5 ? 'OT' : `Q${e.quarter}`}</Text>
                         {e.timestamp_seconds != null && (
-                          <Text style={{ color: '#4b5563', fontSize: 11 }}>
+                          <Text style={{ color: t.muted2, fontSize: 11 }}>
                             {Math.floor(e.timestamp_seconds / 60)}:{String(e.timestamp_seconds % 60).padStart(2, '0')}
                           </Text>
                         )}
@@ -2190,24 +2197,24 @@ export default function TeamEvalScreen() {
                 return (
                   <View key={q} style={{ marginBottom: 14 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <Text style={{ color: '#fff', fontSize: 13, fontWeight: '800' }}>
+                      <Text style={{ color: t.ink, fontSize: 13, fontWeight: '800' }}>
                         {q === 5 ? 'OVERTIME' : `QUARTER ${q}`}
                       </Text>
-                      <Text style={{ color: '#6b7280', fontSize: 11 }}>
+                      <Text style={{ color: t.muted, fontSize: 11 }}>
                         OFF {offTotal > 0 ? '+' : ''}{offTotal.toFixed(1)}  ·  DEF {defTotal > 0 ? '+' : ''}{defTotal.toFixed(1)}
                       </Text>
                     </View>
                     {qStats.map(st => (
                       <View key={st.id} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 6,
-                                                  borderBottomWidth: 1, borderBottomColor: '#1f293780' }}>
+                                                  borderBottomWidth: 1, borderBottomColor: t.chip }}>
                         <View style={{ width: 6, height: 6, borderRadius: 3,
-                                        backgroundColor: st.stat_category === 'offense' ? '#7c3aed' : '#0ea5e9',
+                                        backgroundColor: st.stat_category === 'offense' ? t.accent : t.accent,
                                         marginRight: 10 }} />
-                        <Text style={{ flex: 1, color: '#d1d5db', fontSize: 13 }}>{st.stat_name}</Text>
-                        <Text style={{ color: '#6b7280', fontSize: 11, marginRight: 8 }}>
+                        <Text style={{ flex: 1, color: t.inkSoft, fontSize: 13 }}>{st.stat_name}</Text>
+                        <Text style={{ color: t.muted, fontSize: 11, marginRight: 8 }}>
                           {st.stat_category === 'offense' ? 'OFF' : 'DEF'}
                         </Text>
-                        <Text style={{ color: st.weighted_points >= 0 ? '#a78bfa' : '#f87171',
+                        <Text style={{ color: st.weighted_points >= 0 ? t.accent : t.negative,
                                         fontSize: 13, fontWeight: '700', width: 44, textAlign: 'right' }}>
                           {st.weighted_points >= 0 ? '+' : ''}{st.weighted_points.toFixed(1)}
                         </Text>
@@ -2218,15 +2225,15 @@ export default function TeamEvalScreen() {
               })}
 
               {gameStats.filter(st => st.player_name === detailModalPlayer && st.is_opponent === (detailTab === 'opponent')).length === 0 && (
-                <Text style={{ color: '#4b5563', fontSize: 13, textAlign: 'center', paddingVertical: 24 }}>No stats logged yet.</Text>
+                <Text style={{ color: t.muted2, fontSize: 13, textAlign: 'center', paddingVertical: 24 }}>No stats logged yet.</Text>
               )}
             </ScrollView>
 
             <TouchableOpacity
-              style={[s.modalBtn, { backgroundColor: '#1f2937', marginTop: 14 }]}
+              style={[s.modalBtn, { backgroundColor: t.chip, marginTop: 14 }]}
               onPress={() => setShowDetailModal(false)}
             >
-              <Text style={{ color: '#9ca3af', fontWeight: '700' }}>Close</Text>
+              <Text style={{ color: t.muted, fontWeight: '700' }}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -2239,21 +2246,21 @@ export default function TeamEvalScreen() {
             <Text style={s.modalTitle}>Edit Stats — {statsModalPlayer}</Text>
 
             {/* ADD STAT SECTION */}
-            <View style={{ backgroundColor: '#1a1a2e', borderRadius: 10, padding: 12, marginBottom: 14, borderWidth: 1, borderColor: '#2d2d5e' }}>
-              <Text style={{ color: '#a78bfa', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 10 }}>ADD MISSING STAT</Text>
+            <View style={{ backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 14, borderWidth: 1, borderColor: t.chip }}>
+              <Text style={{ color: t.accent, fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 10 }}>ADD MISSING STAT</Text>
 
               {/* Quarter selector */}
-              <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 6 }}>QUARTER</Text>
+              <Text style={{ color: t.muted, fontSize: 11, marginBottom: 6 }}>QUARTER</Text>
               <View style={{ flexDirection: 'row', gap: 6, marginBottom: 12 }}>
                 {[1, 2, 3, 4, 5].map(q => (
                   <TouchableOpacity
                     key={q}
                     style={{ flex: 1, paddingVertical: 7, borderRadius: 8, alignItems: 'center',
-                              backgroundColor: addStatQuarter === q ? '#7c3aed' : '#1f2937',
-                              borderWidth: 1, borderColor: addStatQuarter === q ? '#7c3aed' : '#374151' }}
+                              backgroundColor: addStatQuarter === q ? t.accent : t.chip,
+                              borderWidth: 1, borderColor: addStatQuarter === q ? t.accent : t.line }}
                     onPress={() => setAddStatQuarter(q)}
                   >
-                    <Text style={{ color: addStatQuarter === q ? '#fff' : '#6b7280', fontSize: 12, fontWeight: '700' }}>
+                    <Text style={{ color: addStatQuarter === q ? t.ink : t.muted, fontSize: 12, fontWeight: '700' }}>
                       {q === 5 ? 'OT' : `Q${q}`}
                     </Text>
                   </TouchableOpacity>
@@ -2261,35 +2268,35 @@ export default function TeamEvalScreen() {
               </View>
 
               {/* Stat picker */}
-              <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 6 }}>STAT</Text>
+              <Text style={{ color: t.muted, fontSize: 11, marginBottom: 6 }}>STAT</Text>
               <TouchableOpacity
                 style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-                         backgroundColor: '#1f2937', borderRadius: 8, padding: 12, borderWidth: 1, borderColor: '#374151',
+                         backgroundColor: t.chip, borderRadius: 8, padding: 12, borderWidth: 1, borderColor: t.line,
                          marginBottom: addingStatDropdownOpen ? 0 : 10 }}
                 onPress={() => setAddingStatDropdownOpen(v => !v)}
               >
-                <Text style={{ color: addStatName ? '#fff' : '#4b5563', fontSize: 14 }}>
+                <Text style={{ color: addStatName ? t.ink : t.muted2, fontSize: 14 }}>
                   {addStatName || 'Select a stat...'}
                 </Text>
-                <Ionicons name={addingStatDropdownOpen ? 'chevron-up' : 'chevron-down'} size={14} color="#6b7280" />
+                <Ionicons name={addingStatDropdownOpen ? 'chevron-up' : 'chevron-down'} size={14} color={t.muted} />
               </TouchableOpacity>
               {addingStatDropdownOpen && (
-                <View style={{ borderWidth: 1, borderColor: '#374151', borderRadius: 8, marginBottom: 10, maxHeight: 160, overflow: 'hidden' }}>
+                <View style={{ borderWidth: 1, borderColor: t.line, borderRadius: 8, marginBottom: 10, maxHeight: 160, overflow: 'hidden' }}>
                   <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="handled">
-                    <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700', padding: 8, letterSpacing: 1 }}>OFFENSE</Text>
+                    <Text style={{ color: t.muted, fontSize: 10, fontWeight: '700', padding: 8, letterSpacing: 1 }}>OFFENSE</Text>
                     {OFFENSE_STATS.map(stat => (
-                      <TouchableOpacity key={stat} style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#1f2937',
-                                                             backgroundColor: addStatName === stat ? '#1e1b4b' : 'transparent' }}
+                      <TouchableOpacity key={stat} style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: t.chip,
+                                                             backgroundColor: addStatName === stat ? t.accentSoft : 'transparent' }}
                         onPress={() => { setAddStatName(stat); setAddingStatDropdownOpen(false); }}>
-                        <Text style={{ color: addStatName === stat ? '#a78bfa' : '#d1d5db', fontSize: 13 }}>{stat}</Text>
+                        <Text style={{ color: addStatName === stat ? t.accent : t.inkSoft, fontSize: 13 }}>{stat}</Text>
                       </TouchableOpacity>
                     ))}
-                    <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700', padding: 8, letterSpacing: 1 }}>DEFENSE</Text>
+                    <Text style={{ color: t.muted, fontSize: 10, fontWeight: '700', padding: 8, letterSpacing: 1 }}>DEFENSE</Text>
                     {DEFENSE_STATS.map(stat => (
-                      <TouchableOpacity key={stat} style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#1f2937',
-                                                             backgroundColor: addStatName === stat ? '#1e1b4b' : 'transparent' }}
+                      <TouchableOpacity key={stat} style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: t.chip,
+                                                             backgroundColor: addStatName === stat ? t.accentSoft : 'transparent' }}
                         onPress={() => { setAddStatName(stat); setAddingStatDropdownOpen(false); }}>
-                        <Text style={{ color: addStatName === stat ? '#a78bfa' : '#d1d5db', fontSize: 13 }}>{stat}</Text>
+                        <Text style={{ color: addStatName === stat ? t.accent : t.inkSoft, fontSize: 13 }}>{stat}</Text>
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
@@ -2297,35 +2304,35 @@ export default function TeamEvalScreen() {
               )}
 
               <TouchableOpacity
-                style={{ backgroundColor: addStatName ? '#7c3aed' : '#374151', borderRadius: 8, paddingVertical: 10,
+                style={{ backgroundColor: addStatName ? t.accent : t.line, borderRadius: 8, paddingVertical: 10,
                          alignItems: 'center', opacity: addingStat ? 0.6 : 1 }}
                 onPress={() => addStatName && addStatEntry(addStatName, addStatQuarter)}
                 disabled={!addStatName || addingStat}
               >
                 {addingStat
-                  ? <ActivityIndicator color="#fff" size="small" />
-                  : <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>+ Add Stat</Text>}
+                  ? <ActivityIndicator color={t.ctaText} size="small" />
+                  : <Text style={{ color: t.ink, fontWeight: '700', fontSize: 14 }}>+ Add Stat</Text>}
               </TouchableOpacity>
             </View>
 
             {/* EXISTING STATS */}
-            <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 8 }}>LOGGED STATS — TAP TRASH TO REMOVE</Text>
+            <Text style={{ color: t.muted, fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 8 }}>LOGGED STATS — TAP TRASH TO REMOVE</Text>
             <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 260 }}>
               {gameStats
                 .filter(st => st.player_name === statsModalPlayer && st.is_opponent === (detailTab === 'opponent'))
                 .length === 0 ? (
-                <Text style={{ color: '#4b5563', fontSize: 13, textAlign: 'center', paddingVertical: 20 }}>No stats logged yet.</Text>
+                <Text style={{ color: t.muted2, fontSize: 13, textAlign: 'center', paddingVertical: 20 }}>No stats logged yet.</Text>
               ) : (
                 gameStats
                   .filter(st => st.player_name === statsModalPlayer && st.is_opponent === (detailTab === 'opponent'))
                   .map(st => (
                     <View key={st.id} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10,
-                                                borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                                                borderBottomWidth: 1, borderBottomColor: t.chip }}>
                       <View style={{ width: 6, height: 6, borderRadius: 3,
-                                      backgroundColor: st.stat_category === 'offense' ? '#7c3aed' : '#0ea5e9', marginRight: 8 }} />
+                                      backgroundColor: st.stat_category === 'offense' ? t.accent : t.accent, marginRight: 8 }} />
                       <View style={{ flex: 1 }}>
-                        <Text style={{ color: '#fff', fontSize: 13, fontWeight: '600' }}>{st.stat_name}</Text>
-                        <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 1 }}>
+                        <Text style={{ color: t.ink, fontSize: 13, fontWeight: '600' }}>{st.stat_name}</Text>
+                        <Text style={{ color: t.muted, fontSize: 11, marginTop: 1 }}>
                           {st.quarter === 5 ? 'OT' : `Q${st.quarter}`}  ·  {st.weighted_points >= 0 ? '+' : ''}{st.weighted_points.toFixed(1)} pts
                         </Text>
                       </View>
@@ -2338,7 +2345,7 @@ export default function TeamEvalScreen() {
                           ])
                         }
                       >
-                        <Ionicons name="trash-outline" size={18} color="#dc2626" />
+                        <Ionicons name="trash-outline" size={18} color={t.negative} />
                       </TouchableOpacity>
                     </View>
                   ))
@@ -2346,10 +2353,10 @@ export default function TeamEvalScreen() {
             </ScrollView>
 
             <TouchableOpacity
-              style={[s.modalBtn, { backgroundColor: '#374151', marginTop: 12 }]}
+              style={[s.modalBtn, { backgroundColor: t.line, marginTop: 12 }]}
               onPress={() => setShowStatsModal(false)}
             >
-              <Text style={{ color: '#fff', fontWeight: '700' }}>Done</Text>
+              <Text style={{ color: t.ink, fontWeight: '700' }}>Done</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -2358,29 +2365,29 @@ export default function TeamEvalScreen() {
       {/* Player grade detail (from leaderboard) */}
       <Modal visible={gradeDetailPlayer !== null} transparent animationType="slide" onRequestClose={() => setGradeDetailPlayer(null)}>
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', paddingBottom: 24 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+          <View style={{ backgroundColor: t.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', paddingBottom: 24 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip }}>
               <View>
-                <Text style={{ color: '#fff', fontSize: 18, fontWeight: '800' }}>{gradeDetailPlayer}</Text>
-                <Text style={{ color: '#6b7280', fontSize: 12, marginTop: 2 }}>How the grade was earned, game by game</Text>
+                <Text style={{ color: t.ink, fontSize: 18, fontWeight: '800' }}>{gradeDetailPlayer}</Text>
+                <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>How the grade was earned, game by game</Text>
               </View>
               <TouchableOpacity onPress={() => setGradeDetailPlayer(null)} style={{ padding: 4 }}>
-                <Ionicons name="close" size={24} color="#9ca3af" />
+                <Ionicons name="close" size={24} color={t.muted} />
               </TouchableOpacity>
             </View>
 
             {gradeDetailLoading ? (
-              <ActivityIndicator color="#7c3aed" style={{ marginVertical: 32 }} />
+              <ActivityIndicator color={t.accent} style={{ marginVertical: 32 }} />
             ) : gradeDetailData.length === 0 ? (
-              <Text style={{ color: '#6b7280', textAlign: 'center', paddingVertical: 32, fontSize: 13 }}>No game stats recorded for this player yet.</Text>
+              <Text style={{ color: t.muted, textAlign: 'center', paddingVertical: 32, fontSize: 13 }}>No game stats recorded for this player yet.</Text>
             ) : (
               <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 12 }}>
                 {/* Season average */}
                 {(() => {
                   const avg = gradeDetailData.reduce((sum: number, g: any) => sum + (g.game_grade || 0), 0) / gradeDetailData.length;
                   return (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#1f2937', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#374151' }}>
-                      <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '700' }}>SEASON AVG GRADE · {gradeDetailData.length} GAMES</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.chip, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: t.line }}>
+                      <Text style={{ color: t.muted, fontSize: 12, fontWeight: '700' }}>SEASON AVG GRADE · {gradeDetailData.length} GAMES</Text>
                       <View style={s.gradeBadge}><Text style={s.gradeBadgeText}>{avg.toFixed(2)}</Text></View>
                     </View>
                   );
@@ -2398,11 +2405,11 @@ export default function TeamEvalScreen() {
                   const fga = fgm + (c['2 FG Missed'] || 0) + (c['3 FG Missed'] || 0);
                   const entries = Object.entries(g.stat_breakdown as Record<string, any>);
                   return (
-                    <View key={g.game_id} style={{ backgroundColor: '#1f2937', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#374151' }}>
+                    <View key={g.game_id} style={{ backgroundColor: t.chip, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: t.line }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                         <View style={{ flex: 1 }}>
-                          <Text style={{ color: '#fff', fontSize: 15, fontWeight: '700' }}>vs {g.opponent_name}</Text>
-                          <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 1 }}>
+                          <Text style={{ color: t.ink, fontSize: 15, fontWeight: '700' }}>vs {g.opponent_name}</Text>
+                          <Text style={{ color: t.muted, fontSize: 11, marginTop: 1 }}>
                             {g.date ?? ''}{g.our_score != null ? `  ·  ${won ? 'W' : lost ? 'L' : 'T'} ${g.our_score}-${g.opponent_score}` : ''}  ·  {g.minutes}m
                           </Text>
                         </View>
@@ -2413,35 +2420,35 @@ export default function TeamEvalScreen() {
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
                         {[['PTS', pts], ['REB', reb], ['AST', ast], ['STL', stl], ['BLK', blk], ['TO', to], ['FG', fga > 0 ? `${fgm}/${fga}` : '—']].map(([label, val]) => (
                           <View key={label as string} style={{ alignItems: 'center', flex: 1 }}>
-                            <Text style={{ color: '#6b7280', fontSize: 9, fontWeight: '700' }}>{label}</Text>
-                            <Text style={{ color: '#fff', fontSize: 13, fontWeight: '800' }}>{val}</Text>
+                            <Text style={{ color: t.muted, fontSize: 9, fontWeight: '700' }}>{label}</Text>
+                            <Text style={{ color: t.ink, fontSize: 13, fontWeight: '800' }}>{val}</Text>
                           </View>
                         ))}
                       </View>
 
                       {/* Offense / Defense weighted contribution */}
                       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
-                        <View style={{ flex: 1, backgroundColor: '#0f172a', borderRadius: 8, padding: 8 }}>
-                          <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700' }}>OFFENSE PTS</Text>
-                          <Text style={{ color: g.offensive_weighted >= 0 ? '#4ade80' : '#f87171', fontSize: 15, fontWeight: '800' }}>
+                        <View style={{ flex: 1, backgroundColor: t.chip, borderRadius: 8, padding: 8 }}>
+                          <Text style={{ color: t.muted, fontSize: 10, fontWeight: '700' }}>OFFENSE PTS</Text>
+                          <Text style={{ color: g.offensive_weighted >= 0 ? t.positive : t.negative, fontSize: 15, fontWeight: '800' }}>
                             {g.offensive_weighted >= 0 ? '+' : ''}{g.offensive_weighted.toFixed(1)}
                           </Text>
                         </View>
-                        <View style={{ flex: 1, backgroundColor: '#0f172a', borderRadius: 8, padding: 8 }}>
-                          <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700' }}>DEFENSE PTS</Text>
-                          <Text style={{ color: g.defensive_weighted >= 0 ? '#4ade80' : '#f87171', fontSize: 15, fontWeight: '800' }}>
+                        <View style={{ flex: 1, backgroundColor: t.chip, borderRadius: 8, padding: 8 }}>
+                          <Text style={{ color: t.muted, fontSize: 10, fontWeight: '700' }}>DEFENSE PTS</Text>
+                          <Text style={{ color: g.defensive_weighted >= 0 ? t.positive : t.negative, fontSize: 15, fontWeight: '800' }}>
                             {g.defensive_weighted >= 0 ? '+' : ''}{g.defensive_weighted.toFixed(1)}
                           </Text>
                         </View>
                       </View>
 
                       {/* Full stat breakdown — how the grade was built */}
-                      <Text style={{ color: '#6b7280', fontSize: 10, fontWeight: '700', marginBottom: 4, letterSpacing: 0.5 }}>STAT BREAKDOWN</Text>
+                      <Text style={{ color: t.muted, fontSize: 10, fontWeight: '700', marginBottom: 4, letterSpacing: 0.5 }}>STAT BREAKDOWN</Text>
                       <View style={{ gap: 3 }}>
                         {entries.map(([name, d]: [string, any]) => (
                           <View key={name} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text style={{ color: '#9ca3af', fontSize: 12 }}>{name}{d.count > 1 ? ` ×${d.count}` : ''}</Text>
-                            <Text style={{ color: d.weighted_points >= 0 ? '#4ade80' : '#f87171', fontSize: 12, fontWeight: '600' }}>
+                            <Text style={{ color: t.muted, fontSize: 12 }}>{name}{d.count > 1 ? ` ×${d.count}` : ''}</Text>
+                            <Text style={{ color: d.weighted_points >= 0 ? t.positive : t.negative, fontSize: 12, fontWeight: '600' }}>
                               {d.weighted_points >= 0 ? '+' : ''}{d.weighted_points.toFixed(1)}
                             </Text>
                           </View>
@@ -2466,19 +2473,19 @@ export default function TeamEvalScreen() {
       {/* Share game with staff modal */}
       <Modal visible={shareGameModalVisible} animationType="slide" transparent>
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={{ backgroundColor: '#111827', borderRadius: 20, padding: 20, maxHeight: '80%', margin: 8 }}>
+          <View style={{ backgroundColor: t.card, borderRadius: 20, padding: 20, maxHeight: '80%', margin: 8 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <Text style={{ color: '#fff', fontSize: 18, fontWeight: '800' }}>Share with Staff</Text>
+              <Text style={{ color: t.ink, fontSize: 18, fontWeight: '800' }}>Share with Staff</Text>
               <TouchableOpacity onPress={() => setShareGameModalVisible(false)}>
-                <Ionicons name="close" size={22} color="#9ca3af" />
+                <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
-            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>Search a staff member, team, or program to share this game session. Searching a team or program reaches every connected staff member.</Text>
+            <Text style={{ color: t.muted, fontSize: 12, marginBottom: 10 }}>Search a staff member, team, or program to share this game session. Searching a team or program reaches every connected staff member.</Text>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
               <TextInput
-                style={{ flex: 1, backgroundColor: '#1f2937', borderRadius: 10, padding: 12, color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151' }}
+                style={{ flex: 1, backgroundColor: t.chip, borderRadius: 10, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line }}
                 placeholder="Search staff by name..."
-                placeholderTextColor="#4b5563"
+                placeholderTextColor={t.muted2}
                 value={staffSearch}
                 onChangeText={setStaffSearch}
                 onSubmitEditing={async () => {
@@ -2493,7 +2500,7 @@ export default function TeamEvalScreen() {
                 returnKeyType="search"
               />
               <TouchableOpacity
-                style={{ backgroundColor: '#2563eb', borderRadius: 10, width: 44, alignItems: 'center', justifyContent: 'center' }}
+                style={{ backgroundColor: t.accent, borderRadius: 10, width: 44, alignItems: 'center', justifyContent: 'center' }}
                 onPress={async () => {
                   if (!staffSearch.trim()) return;
                   setStaffSearching(true);
@@ -2505,21 +2512,21 @@ export default function TeamEvalScreen() {
                 }}
                 disabled={staffSearching}
               >
-                {staffSearching ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+                {staffSearching ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="search" size={18} color={t.ctaText} />}
               </TouchableOpacity>
             </View>
             <ScrollView style={{ maxHeight: 300 }}>
               {staffResults.map((staff: any, idx: number) => (
-                <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#1f2937', borderRadius: 10, padding: 12, marginBottom: 8 }}>
+                <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 8 }}>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: '#fff', fontSize: 14, fontWeight: '700' }}>{staff.label ?? staff.name}</Text>
-                    <Text style={{ color: '#6b7280', fontSize: 12 }}>{staff.sublabel ?? `${staff.role} · ${staff.program_name}`}</Text>
+                    <Text style={{ color: t.ink, fontSize: 14, fontWeight: '700' }}>{staff.label ?? staff.name}</Text>
+                    <Text style={{ color: t.muted, fontSize: 12 }}>{staff.sublabel ?? `${staff.role} · ${staff.program_name}`}</Text>
                   </View>
                   {staff.kind && staff.kind !== 'coach' && (
-                    <Ionicons name="people" size={16} color="#7c3aed" style={{ marginRight: 8 }} />
+                    <Ionicons name="people" size={16} color={t.accent} style={{ marginRight: 8 }} />
                   )}
                   <TouchableOpacity
-                    style={{ backgroundColor: '#7c3aed', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7 }}
+                    style={{ backgroundColor: t.accent, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7 }}
                     onPress={async () => {
                       if (!shareGameId) return;
                       setSharingStaff(true);
@@ -2543,173 +2550,174 @@ export default function TeamEvalScreen() {
                     }}
                     disabled={sharingStaff}
                   >
-                    {sharingStaff ? <ActivityIndicator color="#fff" size="small" /> : <Text style={{ color: '#fff', fontSize: 13, fontWeight: '700' }}>Share</Text>}
+                    {sharingStaff ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ink, fontSize: 13, fontWeight: '700' }}>Share</Text>}
                   </TouchableOpacity>
                 </View>
               ))}
               {staffResults.length === 0 && staffSearch.length > 0 && !staffSearching && (
-                <Text style={{ color: '#4b5563', textAlign: 'center', paddingVertical: 20 }}>No staff found.</Text>
+                <Text style={{ color: t.muted2, textAlign: 'center', paddingVertical: 20 }}>No staff found.</Text>
               )}
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
       </Modal>
     </View>
+    </ScreenBackground>
   );
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
-const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#111827' },
+const makeS = (t: ThemeTokens) => StyleSheet.create({
+  root: { flex: 1 },
   scroll: { flex: 1, padding: 16 },
   topNav: {
     paddingTop: 56, paddingHorizontal: 16, paddingBottom: 12,
-    backgroundColor: '#111827', borderBottomWidth: 1, borderBottomColor: '#1f2937',
+    borderBottomWidth: 1, borderBottomColor: t.divider,
   },
-  screenTitle: { color: '#fff', fontSize: 26, fontWeight: '900', marginBottom: 12 },
+  screenTitle: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6, marginBottom: 12 },
   navBtn: {
-    paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20,
-    borderWidth: 1, borderColor: '#374151', marginRight: 8,
+    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999,
+    borderWidth: 1, borderColor: t.line, marginRight: 8,
   },
-  navBtnActive: { backgroundColor: '#7c3aed', borderColor: '#7c3aed' },
-  navBtnText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
-  navBtnTextActive: { color: '#fff' },
+  navBtnActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  navBtnText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
+  navBtnTextActive: { color: t.ctaText },
   card: {
-    backgroundColor: '#1f2937', borderRadius: 14, padding: 16,
-    marginBottom: 14, borderWidth: 1, borderColor: '#374151',
+    backgroundColor: t.card, borderRadius: 18, padding: 16,
+    marginBottom: 14, borderWidth: 1, borderColor: t.cardBorder,
   },
   cardLabel: {
-    color: '#9ca3af', fontSize: 10, fontWeight: '700',
-    letterSpacing: 1, textTransform: 'uppercase',
+    color: t.label, fontSize: 11, fontFamily: fonts[700],
+    letterSpacing: 2, textTransform: 'uppercase',
   },
-  bigStat: { color: '#fff', fontSize: 36, fontWeight: '900' },
+  bigStat: { color: t.ink, fontSize: 42, fontFamily: fonts[900], letterSpacing: -0.9 },
   leaderRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#374151',
+    paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider,
   },
-  leaderRank: { color: '#6b7280', fontSize: 13, width: 20, textAlign: 'center' },
-  leaderName: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  leaderRank: { color: t.muted, fontSize: 13, width: 20, textAlign: 'center' },
+  leaderName: { color: t.ink, fontSize: 14, fontFamily: fonts[600] },
   gradeBadge: {
-    backgroundColor: '#7c3aed22', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3,
-    borderWidth: 1, borderColor: '#7c3aed66',
+    backgroundColor: t.accentSoft, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3,
+    borderWidth: 1, borderColor: t.accent,
   },
-  gradeBadgeText: { color: '#a78bfa', fontSize: 12, fontWeight: '700' },
+  gradeBadgeText: { color: t.accent, fontSize: 12, fontFamily: fonts[700] },
   qHeaderRow: {
     flexDirection: 'row', alignItems: 'center',
-    paddingBottom: 8, marginBottom: 2, borderBottomWidth: 1, borderBottomColor: '#374151',
+    paddingBottom: 8, marginBottom: 2, borderBottomWidth: 1, borderBottomColor: t.divider,
   },
-  qPlayerHead: { flex: 1, color: '#6b7280', fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
-  qColHead: { width: 42, textAlign: 'center', color: '#6b7280', fontSize: 10, fontWeight: '700' },
+  qPlayerHead: { flex: 1, color: t.muted, fontSize: 10, fontFamily: fonts[700], letterSpacing: 0.5 },
+  qColHead: { width: 42, textAlign: 'center', color: t.muted, fontSize: 10, fontFamily: fonts[700] },
   qRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 4 },
-  qPlayerName: { flex: 1, color: '#fff', fontSize: 13, fontWeight: '600' },
+  qPlayerName: { flex: 1, color: t.ink, fontSize: 13, fontFamily: fonts[600] },
   qCell: { width: 42, textAlign: 'center', fontSize: 12, fontWeight: '700' },
-  qExpand: { backgroundColor: '#111827', borderRadius: 10, padding: 12, marginTop: 2, marginBottom: 6 },
+  qExpand: { backgroundColor: t.chip, borderRadius: 10, padding: 12, marginTop: 2, marginBottom: 6 },
   chip: {
-    borderWidth: 1, borderColor: '#374151', borderRadius: 20,
-    paddingHorizontal: 14, paddingVertical: 7, marginRight: 8,
+    borderWidth: 1, borderColor: t.line, borderRadius: 999,
+    paddingHorizontal: 16, paddingVertical: 8, marginRight: 8,
   },
-  chipActive: { backgroundColor: '#7c3aed', borderColor: '#7c3aed' },
-  chipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
-  chipTextActive: { color: '#fff' },
+  chipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  chipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
+  chipTextActive: { color: t.ctaText },
   newGameBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#7c3aed', borderRadius: 12, paddingVertical: 14, marginBottom: 16,
+    backgroundColor: t.ctaBg, borderRadius: 999, paddingVertical: 14, marginBottom: 16,
   },
-  newGameBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  newGameBtnText: { color: t.ctaText, fontSize: 15, fontFamily: fonts[700] },
   gameCard: {
-    backgroundColor: '#1f2937', borderRadius: 12, padding: 14, marginBottom: 8,
-    borderWidth: 1, borderColor: '#374151',
+    backgroundColor: t.card, borderRadius: 18, padding: 14, marginBottom: 8,
+    borderWidth: 1, borderColor: t.cardBorder,
     flexDirection: 'row', alignItems: 'center', gap: 10,
   },
-  gameCardOpponent: { color: '#fff', fontSize: 15, fontWeight: '700' },
-  wlBadge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
+  gameCardOpponent: { color: t.ink, fontSize: 15, fontFamily: fonts[700] },
+  wlBadge: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },
   wlText: { fontSize: 11, fontWeight: '700' },
-  statusBadge: { backgroundColor: '#1f2937', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
-  statusText: { color: '#6b7280', fontSize: 9, fontWeight: '700' },
+  statusBadge: { backgroundColor: t.chip, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },
+  statusText: { color: t.muted, fontSize: 9, fontFamily: fonts[700] },
   scoreBar: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    backgroundColor: '#1f2937', paddingHorizontal: 20, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: '#374151',
+    backgroundColor: t.card, paddingHorizontal: 20, paddingVertical: 12,
+    borderBottomWidth: 1, borderBottomColor: t.divider,
   },
-  scoreNum: { color: '#fff', fontSize: 28, fontWeight: '900', minWidth: 40, textAlign: 'center' },
-  quarterRow: { backgroundColor: '#111827', flexGrow: 0 },
+  scoreNum: { color: t.ink, fontSize: 28, fontFamily: fonts[900], minWidth: 40, textAlign: 'center' },
+  quarterRow: { flexGrow: 0 },
   quarterBtn: {
-    paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20,
-    borderWidth: 1, borderColor: '#374151',
+    paddingHorizontal: 16, paddingVertical: 7, borderRadius: 999,
+    borderWidth: 1, borderColor: t.line,
   },
-  quarterBtnActive: { backgroundColor: '#7c3aed', borderColor: '#7c3aed' },
-  quarterBtnText: { color: '#9ca3af', fontSize: 13, fontWeight: '700' },
-  quarterBtnTextActive: { color: '#fff' },
+  quarterBtnActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  quarterBtnText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
+  quarterBtnTextActive: { color: t.ctaText },
   teamToggle: {
     flexDirection: 'row', padding: 12, gap: 8,
-    borderBottomWidth: 1, borderBottomColor: '#1f2937',
+    borderBottomWidth: 1, borderBottomColor: t.divider,
   },
   teamToggleBtn: {
-    flex: 1, paddingVertical: 8, borderRadius: 10,
-    borderWidth: 1, borderColor: '#374151', alignItems: 'center',
+    flex: 1, paddingVertical: 9, borderRadius: 999,
+    borderWidth: 1, borderColor: t.line, alignItems: 'center',
   },
-  teamToggleBtnActive: { backgroundColor: '#7c3aed22', borderColor: '#7c3aed' },
-  teamToggleText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
-  teamToggleTextActive: { color: '#7c3aed', fontWeight: '700' },
+  teamToggleBtnActive: { backgroundColor: t.accentSoft, borderColor: t.accent },
+  teamToggleText: { color: t.muted, fontSize: 13, fontFamily: fonts[600] },
+  teamToggleTextActive: { color: t.accent, fontFamily: fonts[700] },
   sectionLabel: {
-    color: '#9ca3af', fontSize: 10, fontWeight: '700',
-    letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8,
+    color: t.label, fontSize: 11, fontFamily: fonts[700],
+    letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8,
   },
   playerGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
   playerBtn: {
-    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10,
-    borderWidth: 1, borderColor: '#374151', backgroundColor: '#1f2937',
+    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999,
+    borderWidth: 1, borderColor: t.line, backgroundColor: t.chip,
   },
-  playerBtnActive: { backgroundColor: '#7c3aed', borderColor: '#7c3aed' },
-  playerBtnText: { color: '#9ca3af', fontSize: 12, fontWeight: '600' },
-  playerBtnTextActive: { color: '#fff' },
+  playerBtnActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  playerBtnText: { color: t.muted, fontSize: 12, fontFamily: fonts[600] },
+  playerBtnTextActive: { color: t.ctaText },
   statGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   statBtn: {
-    paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10,
-    borderWidth: 1, borderColor: '#374151', backgroundColor: '#1f2937',
+    paddingHorizontal: 10, paddingVertical: 8, borderRadius: 999,
+    borderWidth: 1, borderColor: t.line, backgroundColor: t.chip,
   },
-  statBtnFlash: { backgroundColor: '#7c3aed', borderColor: '#7c3aed' },
-  statBtnText: { color: '#d1d5db', fontSize: 12, fontWeight: '600' },
+  statBtnFlash: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  statBtnText: { color: t.inkSoft, fontSize: 12, fontFamily: fonts[600] },
   smallInput: {
-    backgroundColor: '#1f2937', borderRadius: 8, padding: 8,
-    color: '#fff', fontSize: 13, borderWidth: 1, borderColor: '#374151',
+    backgroundColor: t.chip, borderRadius: 12, padding: 8,
+    color: t.ink, fontSize: 13, borderWidth: 1, borderColor: t.line,
   },
   actionBtnLive: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    paddingVertical: 12, borderRadius: 10, borderWidth: 1,
+    paddingVertical: 12, borderRadius: 999, borderWidth: 1,
   },
   playerGradeRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#374151',
+    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: t.divider,
   },
-  playerGradeName: { color: '#fff', fontSize: 13, fontWeight: '600', flex: 1 },
+  playerGradeName: { color: t.ink, fontSize: 13, fontFamily: fonts[600], flex: 1 },
   expandedBox: {
-    backgroundColor: '#111827', borderRadius: 8, padding: 12, marginBottom: 4,
+    backgroundColor: t.chip, borderRadius: 12, padding: 12, marginBottom: 4,
   },
   detailAction: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: '#374151',
-    backgroundColor: '#1f2937',
+    paddingVertical: 10, borderRadius: 999, borderWidth: 1, borderColor: t.line,
+    backgroundColor: t.chip,
   },
   modalOverlay: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'flex-end',
+    flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end',
   },
   modalBox: {
-    backgroundColor: '#1f2937', borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    padding: 24, maxHeight: '85%',
+    backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    padding: 24, maxHeight: '85%', borderWidth: 1, borderColor: t.cardBorder,
   },
-  modalTitle: { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 20 },
+  modalTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 20 },
   fieldLabel: {
-    color: '#9ca3af', fontSize: 10, fontWeight: '700',
-    letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6,
+    color: t.label, fontSize: 11, fontFamily: fonts[700],
+    letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6,
   },
   input: {
-    backgroundColor: '#111827', borderRadius: 10, padding: 12,
-    color: '#fff', fontSize: 14, marginBottom: 16,
-    borderWidth: 1, borderColor: '#374151',
+    backgroundColor: t.chip, borderRadius: 14, padding: 12,
+    color: t.ink, fontSize: 14, marginBottom: 16,
+    borderWidth: 1, borderColor: t.line,
   },
   modalBtn: {
-    paddingVertical: 13, borderRadius: 10, alignItems: 'center',
+    paddingVertical: 13, borderRadius: 999, alignItems: 'center',
   },
 });
