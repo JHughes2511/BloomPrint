@@ -19,6 +19,10 @@ import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
+import { useTheme } from '../theme/ThemeProvider';
+import { ThemeTokens } from '../theme/tokens';
+import { fonts } from '../theme/typography';
+import { ScreenBackground } from '../theme/components';
 
 const COMPETITION_LEVELS = ['Middle School', 'HS JV', 'HS Varsity', 'AAU', 'College', 'Pro'];
 
@@ -36,6 +40,8 @@ export default function PlayerProfileScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { playerId } = route.params;
+  const { t } = useTheme();
+  const styles = makeStyles(t);
 
   const scrollRef = useRef<ScrollView>(null);
   const trainingFeedbackY = useRef(0);
@@ -392,25 +398,26 @@ export default function PlayerProfileScreen() {
     }
   };
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#2563eb" size="large" /></View>;
+  if (loading) return <ScreenBackground><View style={styles.center}><ActivityIndicator color={t.accent} size="large" /></View></ScreenBackground>;
   if (!player) return null;
 
   const latest = evals[evals.length - 1] ?? null;
 
   return (
+    <ScreenBackground>
     <KeyboardAwareScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color="#fff" />
+          <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.headerCenter} onPress={() => setShowProfileDetail(true)} activeOpacity={0.75}>
           <Text style={styles.name}>{(player as any).jersey_number ? `#${(player as any).jersey_number} ` : ''}{player.name}</Text>
           <Text style={styles.meta}>{[player.position, player.team_name ?? player.competition_level].filter(Boolean).join(' · ')}</Text>
-          <Text style={{ color: '#6b7280', fontSize: 10, marginTop: 1 }}>tap to view profile</Text>
+          <Text style={{ color: t.muted, fontSize: 10, marginTop: 1 }}>tap to view profile</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={openEdit} style={styles.editBtn}>
-          <Ionicons name="create-outline" size={20} color="#9ca3af" />
+          <Ionicons name="create-outline" size={20} color={t.muted} />
         </TouchableOpacity>
         <GradeBadge grade={player.latest_grade} size="lg" />
       </View>
@@ -429,14 +436,14 @@ export default function PlayerProfileScreen() {
       {latest && (
         <View style={styles.row}>
           {latest.green_flags && latest.green_flags.length > 0 && (
-            <View style={[styles.flagBox, { borderColor: '#16a34a' }]}>
-              <Text style={[styles.flagTitle, { color: '#22c55e' }]}>Green Flags</Text>
+            <View style={[styles.flagBox, { borderColor: t.positive }]}>
+              <Text style={[styles.flagTitle, { color: t.positive }]}>Green Flags</Text>
               {latest.green_flags.map((f, i) => <Text key={i} style={styles.flagItem}>· {f}</Text>)}
             </View>
           )}
           {latest.watch_flags && latest.watch_flags.length > 0 && (
-            <View style={[styles.flagBox, { borderColor: '#dc2626' }]}>
-              <Text style={[styles.flagTitle, { color: '#ef4444' }]}>Watch Flags</Text>
+            <View style={[styles.flagBox, { borderColor: t.negative }]}>
+              <Text style={[styles.flagTitle, { color: t.negative }]}>Watch Flags</Text>
               {latest.watch_flags.map((f, i) => <Text key={i} style={styles.flagItem}>· {f}</Text>)}
             </View>
           )}
@@ -451,7 +458,7 @@ export default function PlayerProfileScreen() {
             style={styles.newEvalBtn}
             onPress={() => navigation.navigate('NewEval', { playerId: player.id, playerName: player.name })}
           >
-            <Ionicons name="videocam" size={14} color="#fff" />
+            <Ionicons name="videocam" size={14} color={t.ctaText} />
             <Text style={styles.newEvalText}>New Eval</Text>
           </TouchableOpacity>
         </View>
@@ -486,12 +493,12 @@ export default function PlayerProfileScreen() {
                 <Text style={styles.evalType}>Training Program</Text>
                 <Text style={styles.evalDate}>{new Date(ts.created_at).toLocaleDateString()}</Text>
                 {ts.program_text ? (
-                  <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 4 }} numberOfLines={2}>
+                  <Text style={{ color: t.muted, fontSize: 11, marginTop: 4 }} numberOfLines={2}>
                     {ts.program_text.replace(/\*\*/g, '').trim().slice(0, 120)}
                   </Text>
                 ) : null}
               </View>
-              <Ionicons name="chevron-forward" size={16} color="#374151" />
+              <Ionicons name="chevron-forward" size={16} color={t.line} />
             </TouchableOpacity>
           ))}
         </View>
@@ -500,7 +507,7 @@ export default function PlayerProfileScreen() {
       {/* Summarize history */}
       {evals.length > 0 && (
         <TouchableOpacity style={styles.summaryBtn} onPress={() => setShowSummary(true)}>
-          <Ionicons name="bar-chart" size={18} color="#fff" />
+          <Ionicons name="bar-chart" size={18} color={t.ctaText} />
           <Text style={styles.summaryText}>Summarize Evaluation History</Text>
         </TouchableOpacity>
       )}
@@ -510,28 +517,28 @@ export default function PlayerProfileScreen() {
         style={styles.trainingBtn}
         onPress={() => navigation.navigate('Training', { playerId: player.id, evalId: latest?.id })}
       >
-        <Ionicons name="barbell" size={18} color="#fff" />
+        <Ionicons name="barbell" size={18} color={t.ink} />
         <Text style={styles.trainingText}>Generate Training Program</Text>
       </TouchableOpacity>
 
       {/* Send training to player */}
       <TouchableOpacity
-        style={[styles.trainingBtn, { backgroundColor: '#16a34a', marginTop: 8 }]}
+        style={[styles.trainingBtn, { backgroundColor: t.positive, marginTop: 8 }]}
         onPress={() => openTrainingPicker('player')}
         disabled={sendingTraining}
       >
         {sendingTraining
-          ? <ActivityIndicator color="#fff" size="small" />
-          : <><Ionicons name="paper-plane" size={18} color="#fff" /><Text style={styles.trainingText}>Send Training to Player</Text></>}
+          ? <ActivityIndicator color={t.ctaText} size="small" />
+          : <><Ionicons name="paper-plane" size={18} color={t.ink} /><Text style={styles.trainingText}>Send Training to Player</Text></>}
       </TouchableOpacity>
 
       {/* Share training with staff */}
       {allTraining.length > 0 && (
         <TouchableOpacity
-          style={[styles.trainingBtn, { backgroundColor: '#7c3aed', marginTop: 8 }]}
+          style={[styles.trainingBtn, { backgroundColor: t.accent, marginTop: 8 }]}
           onPress={() => openTrainingPicker('staff')}
         >
-          <Ionicons name="people-outline" size={18} color="#fff" />
+          <Ionicons name="people-outline" size={18} color={t.ink} />
           <Text style={styles.trainingText}>Share Training with Staff</Text>
         </TouchableOpacity>
       )}
@@ -545,7 +552,7 @@ export default function PlayerProfileScreen() {
         <VoiceTextInput
           style={styles.trainingFeedbackInput}
           placeholder="e.g. Focus more on 3-point shooting and off-ball movement..."
-          placeholderTextColor="#4b5563"
+          placeholderTextColor={t.muted2}
           value={trainingFeedback}
           onChangeText={setTrainingFeedback}
           multiline
@@ -565,16 +572,16 @@ export default function PlayerProfileScreen() {
           disabled={!trainingFeedback.trim() || regeneratingTraining}
         >
           {regeneratingTraining
-            ? <ActivityIndicator color="#fff" size="small" />
-            : <><Ionicons name="refresh" size={16} color="#fff" /><Text style={styles.regenBtnText}> Regenerate</Text></>}
+            ? <ActivityIndicator color={t.ctaText} size="small" />
+            : <><Ionicons name="refresh" size={16} color={t.ctaText} /><Text style={styles.regenBtnText}> Regenerate</Text></>}
         </TouchableOpacity>
       </View>
 
       {/* Invite Code */}
       <TouchableOpacity style={styles.inviteBtn} onPress={generateInvite} disabled={generatingInvite}>
         {generatingInvite
-          ? <ActivityIndicator color="#fff" size="small" />
-          : <Ionicons name="link" size={18} color="#fff" />}
+          ? <ActivityIndicator color={t.ctaText} size="small" />
+          : <Ionicons name="link" size={18} color={t.ink} />}
         <Text style={styles.inviteText}>Generate Player Invite Code</Text>
       </TouchableOpacity>
 
@@ -589,9 +596,9 @@ export default function PlayerProfileScreen() {
       {/* Game History */}
       <View style={[styles.section, { marginTop: 8 }]}>
         <Text style={styles.sectionTitle}>GAME HISTORY</Text>
-        {gameHistoryLoading && <ActivityIndicator color="#7c3aed" style={{ marginVertical: 12 }} />}
+        {gameHistoryLoading && <ActivityIndicator color={t.accent} style={{ marginVertical: 12 }} />}
         {!gameHistoryLoading && gameHistory.length === 0 && (
-          <Text style={{ color: '#4b5563', fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>
+          <Text style={{ color: t.muted2, fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>
             No game stats recorded for this player yet.
           </Text>
         )}
@@ -614,62 +621,62 @@ export default function PlayerProfileScreen() {
           return (
             <TouchableOpacity
               key={game.game_id}
-              style={{ backgroundColor: '#111827', borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#1f2937' }}
+              style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: t.chip }}
               onPress={() => setExpandedGame(isExpanded ? null : game.game_id)}
               activeOpacity={0.8}
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>vs {game.opponent_name}</Text>
-                  <Text style={{ color: '#6b7280', fontSize: 11, marginTop: 2 }}>
+                  <Text style={{ color: t.ink, fontWeight: '700', fontSize: 14 }}>vs {game.opponent_name}</Text>
+                  <Text style={{ color: t.muted, fontSize: 11, marginTop: 2 }}>
                     {game.date}{game.season_phase ? ` · ${game.season_phase}` : ''}
                   </Text>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                   {game.our_score != null && (
-                    <View style={{ backgroundColor: won ? '#16a34a22' : lost ? '#dc262622' : '#1f2937', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
-                      <Text style={{ color: won ? '#4ade80' : lost ? '#f87171' : '#9ca3af', fontSize: 11, fontWeight: '700' }}>
+                    <View style={{ backgroundColor: won ? t.positiveSoft : lost ? t.negativeSoft : t.chip, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+                      <Text style={{ color: won ? t.positive : lost ? t.negative : t.muted, fontSize: 11, fontWeight: '700' }}>
                         {won ? 'W' : lost ? 'L' : 'T'} {game.our_score}-{game.opponent_score}
                       </Text>
                     </View>
                   )}
-                  <View style={{ backgroundColor: '#1e1b4b', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: '#4c1d95' }}>
-                    <Text style={{ color: '#a78bfa', fontSize: 12, fontWeight: '800' }}>{game.game_grade.toFixed(2)}</Text>
+                  <View style={{ backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: t.accent }}>
+                    <Text style={{ color: t.accent, fontSize: 12, fontWeight: '800' }}>{game.game_grade.toFixed(2)}</Text>
                   </View>
-                  <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={14} color="#4b5563" />
+                  <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={14} color={t.muted2} />
                 </View>
               </View>
               {isExpanded && (
                 <View style={{ marginTop: 12 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: t.chip }}>
                     {[['PTS', pts], ['REB', reb], ['AST', ast], ['STL', stl], ['BLK', blk], ['TO', to], ['FG', fga > 0 ? `${fgm}/${fga}` : '—']].map(([label, val]) => (
                       <View key={label as string} style={{ alignItems: 'center', flex: 1 }}>
-                        <Text style={{ color: '#9ca3af', fontSize: 10, fontWeight: '700' }}>{label}</Text>
-                        <Text style={{ color: '#fff', fontSize: 14, fontWeight: '900' }}>{val}</Text>
+                        <Text style={{ color: t.muted, fontSize: 10, fontWeight: '700' }}>{label}</Text>
+                        <Text style={{ color: t.ink, fontSize: 14, fontWeight: '900' }}>{val}</Text>
                       </View>
                     ))}
                   </View>
-                  <Text style={{ color: '#4b5563', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>GRADING STATS</Text>
+                  <Text style={{ color: t.muted2, fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>GRADING STATS</Text>
                   <View style={{ gap: 3 }}>
                     {Object.entries(game.stat_breakdown as Record<string, any>).map(([statName, data]: [string, any]) => (
                       <View key={statName} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <Text style={{ color: '#9ca3af', fontSize: 12 }}>{statName}{data.count > 1 ? ` ×${data.count}` : ''}</Text>
-                        <Text style={{ color: data.weighted_points >= 0 ? '#4ade80' : '#f87171', fontSize: 12, fontWeight: '600' }}>
+                        <Text style={{ color: t.muted, fontSize: 12 }}>{statName}{data.count > 1 ? ` ×${data.count}` : ''}</Text>
+                        <Text style={{ color: data.weighted_points >= 0 ? t.positive : t.negative, fontSize: 12, fontWeight: '600' }}>
                           {data.weighted_points >= 0 ? '+' : ''}{data.weighted_points.toFixed(1)}
                         </Text>
                       </View>
                     ))}
                   </View>
-                  <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#1f2937', flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={{ color: '#6b7280', fontSize: 12 }}>OFF {game.offensive_weighted.toFixed(1)} · DEF {game.defensive_weighted.toFixed(1)} · {game.minutes.toFixed(0)}min</Text>
+                  <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: t.chip, flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={{ color: t.muted, fontSize: 12 }}>OFF {game.offensive_weighted.toFixed(1)} · DEF {game.defensive_weighted.toFixed(1)} · {game.minutes.toFixed(0)}min</Text>
                   </View>
                   {Object.keys(game.per_quarter).length > 0 && (
                     <View style={{ marginTop: 10 }}>
-                      <Text style={{ color: '#4b5563', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>PER QUARTER</Text>
+                      <Text style={{ color: t.muted2, fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>PER QUARTER</Text>
                       {Object.entries(game.per_quarter as Record<string, any>).sort(([a], [b]) => Number(a) - Number(b)).map(([q, data]: [string, any]) => (
                         <View key={q} style={{ flexDirection: 'row', gap: 12, marginBottom: 3 }}>
-                          <Text style={{ color: '#6b7280', fontSize: 11, width: 28 }}>{Number(q) === 5 ? 'OT' : `Q${q}`}</Text>
-                          <Text style={{ color: '#9ca3af', fontSize: 11 }}>OFF {data.offense.toFixed(1)} · DEF {data.defense.toFixed(1)}</Text>
+                          <Text style={{ color: t.muted, fontSize: 11, width: 28 }}>{Number(q) === 5 ? 'OT' : `Q${q}`}</Text>
+                          <Text style={{ color: t.muted, fontSize: 11 }}>OFF {data.offense.toFixed(1)} · DEF {data.defense.toFixed(1)}</Text>
                         </View>
                       ))}
                     </View>
@@ -684,18 +691,18 @@ export default function PlayerProfileScreen() {
       {/* Training picker modal — choose which training to send */}
       <Modal visible={showTrainingPicker} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
-              <Text style={{ color: '#fff', fontSize: 15, fontWeight: '800' }}>
+          <View style={{ backgroundColor: t.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip }}>
+              <Text style={{ color: t.ink, fontSize: 15, fontWeight: '800' }}>
                 {trainingPickerAction === 'player' ? 'Send Training to Player' :
                  trainingPickerAction === 'regen' ? 'Choose Training to Regenerate' :
                  'Share Training with Staff'}
               </Text>
               <TouchableOpacity onPress={() => setShowTrainingPicker(false)} style={{ padding: 4 }}>
-                <Ionicons name="close" size={22} color="#9ca3af" />
+                <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
-            <Text style={{ color: '#6b7280', fontSize: 12, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 4 }}>
+            <Text style={{ color: t.muted, fontSize: 12, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 4 }}>
               {trainingPickerAction === 'regen'
                 ? 'Select which training program to regenerate with your feedback:'
                 : 'Select which training program to send:'}
@@ -704,7 +711,7 @@ export default function PlayerProfileScreen() {
               {[...allTraining].reverse().map((ts: any, idx: number) => (
                 <TouchableOpacity
                   key={ts.id}
-                  style={{ backgroundColor: '#1f2937', borderRadius: 10, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#374151' }}
+                  style={{ backgroundColor: t.chip, borderRadius: 10, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: t.line }}
                   onPress={() => {
                     setShowTrainingPicker(false);
                     if (trainingPickerAction === 'player') {
@@ -723,17 +730,17 @@ export default function PlayerProfileScreen() {
                   }}
                 >
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>
+                    <Text style={{ color: t.ink, fontWeight: '700', fontSize: 13 }}>
                       {idx === allTraining.length - 1 ? 'Latest — ' : ''}{new Date(ts.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </Text>
                     {idx === allTraining.length - 1 && (
-                      <View style={{ backgroundColor: '#7c3aed', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
-                        <Text style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>LATEST</Text>
+                      <View style={{ backgroundColor: t.accent, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
+                        <Text style={{ color: t.ink, fontSize: 10, fontWeight: '700' }}>LATEST</Text>
                       </View>
                     )}
                   </View>
                   {ts.program_text ? (
-                    <Text style={{ color: '#6b7280', fontSize: 12, marginTop: 4 }} numberOfLines={2}>
+                    <Text style={{ color: t.muted, fontSize: 12, marginTop: 4 }} numberOfLines={2}>
                       {ts.program_text.replace(/[#*_\-=]/g, '').trim().slice(0, 100)}...
                     </Text>
                   ) : null}
@@ -747,20 +754,20 @@ export default function PlayerProfileScreen() {
       {/* Player profile detail modal */}
       <Modal visible={showProfileDetail} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%' }}>
+          <View style={{ backgroundColor: t.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%' }}>
             {/* Header */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
-              <Text style={{ color: '#fff', fontSize: 16, fontWeight: '800' }}>Player Profile</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: t.chip }}>
+              <Text style={{ color: t.ink, fontSize: 16, fontWeight: '800' }}>Player Profile</Text>
               <TouchableOpacity onPress={() => setShowProfileDetail(false)} style={{ padding: 4 }}>
-                <Ionicons name="close" size={22} color="#9ca3af" />
+                <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
             <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 32 }}>
               {/* Name + grade */}
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900' }}>{player.name}</Text>
-                  {player.position ? <Text style={{ color: '#9ca3af', fontSize: 14, marginTop: 2 }}>{player.position}</Text> : null}
+                  <Text style={{ color: t.ink, fontSize: 22, fontWeight: '900' }}>{player.name}</Text>
+                  {player.position ? <Text style={{ color: t.muted, fontSize: 14, marginTop: 2 }}>{player.position}</Text> : null}
                 </View>
                 <GradeBadge grade={player.latest_grade} size="lg" />
               </View>
@@ -781,43 +788,43 @@ export default function PlayerProfileScreen() {
                 { label: 'State', value: (player as any).state },
                 { label: 'Country', value: (player as any).country },
               ].filter(r => r.value).map(r => (
-                <View key={r.label} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
-                  <Text style={{ color: '#6b7280', fontSize: 14, fontWeight: '600' }}>{r.label}</Text>
-                  <Text style={{ color: '#f9fafb', fontSize: 14, fontWeight: '500', flexShrink: 1, textAlign: 'right', marginLeft: 12 }}>{r.value}</Text>
+                <View key={r.label} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: t.chip }}>
+                  <Text style={{ color: t.muted, fontSize: 14, fontWeight: '600' }}>{r.label}</Text>
+                  <Text style={{ color: t.ink, fontSize: 14, fontWeight: '500', flexShrink: 1, textAlign: 'right', marginLeft: 12 }}>{r.value}</Text>
                 </View>
               ))}
 
               {/* Notes */}
               {player.notes ? (
                 <View style={{ marginTop: 16 }}>
-                  <Text style={{ color: '#6b7280', fontSize: 12, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>NOTES</Text>
-                  <Text style={{ color: '#d1d5db', fontSize: 14, lineHeight: 20 }}>{player.notes}</Text>
+                  <Text style={{ color: t.muted, fontSize: 12, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>NOTES</Text>
+                  <Text style={{ color: t.inkSoft, fontSize: 14, lineHeight: 20 }}>{player.notes}</Text>
                 </View>
               ) : null}
 
               {/* Stats summary */}
-              <View style={{ marginTop: 20, backgroundColor: '#1f2937', borderRadius: 12, padding: 14 }}>
-                <Text style={{ color: '#6b7280', fontSize: 12, fontWeight: '700', letterSpacing: 1, marginBottom: 10 }}>EVALUATION SUMMARY</Text>
+              <View style={{ marginTop: 20, backgroundColor: t.chip, borderRadius: 12, padding: 14 }}>
+                <Text style={{ color: t.muted, fontSize: 12, fontWeight: '700', letterSpacing: 1, marginBottom: 10 }}>EVALUATION SUMMARY</Text>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
                   <View style={{ alignItems: 'center' }}>
-                    <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900' }}>{evals.length}</Text>
-                    <Text style={{ color: '#6b7280', fontSize: 11 }}>Evaluations</Text>
+                    <Text style={{ color: t.ink, fontSize: 22, fontWeight: '900' }}>{evals.length}</Text>
+                    <Text style={{ color: t.muted, fontSize: 11 }}>Evaluations</Text>
                   </View>
                   <View style={{ alignItems: 'center' }}>
-                    <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900' }}>{allTraining.length}</Text>
-                    <Text style={{ color: '#6b7280', fontSize: 11 }}>Training Plans</Text>
+                    <Text style={{ color: t.ink, fontSize: 22, fontWeight: '900' }}>{allTraining.length}</Text>
+                    <Text style={{ color: t.muted, fontSize: 11 }}>Training Plans</Text>
                   </View>
                   {player.latest_grade != null && (
                     <View style={{ alignItems: 'center' }}>
-                      <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900' }}>{player.latest_grade.toFixed(1)}</Text>
-                      <Text style={{ color: '#6b7280', fontSize: 11 }}>Latest Grade</Text>
+                      <Text style={{ color: t.ink, fontSize: 22, fontWeight: '900' }}>{player.latest_grade.toFixed(1)}</Text>
+                      <Text style={{ color: t.muted, fontSize: 11 }}>Latest Grade</Text>
                     </View>
                   )}
                 </View>
               </View>
 
               {/* Member since */}
-              <Text style={{ color: '#4b5563', fontSize: 12, textAlign: 'center', marginTop: 16 }}>
+              <Text style={{ color: t.muted2, fontSize: 12, textAlign: 'center', marginTop: 16 }}>
                 Member since {new Date(player.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
               </Text>
             </ScrollView>
@@ -828,24 +835,24 @@ export default function PlayerProfileScreen() {
       {/* Training detail modal — full-screen so all text is readable */}
       <Modal visible={!!trainingModalItem} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 60 }}>
+          <View style={{ backgroundColor: t.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 60 }}>
             {/* Compact header — max ~50px tall */}
             <View style={{
               flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
               paddingHorizontal: 16, paddingVertical: 10,
-              borderBottomWidth: 1, borderBottomColor: '#1f2937',
+              borderBottomWidth: 1, borderBottomColor: t.chip,
               minHeight: 50, maxHeight: 50,
             }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: '#fff', fontSize: 15, fontWeight: '800' }}>Training Program</Text>
+                <Text style={{ color: t.ink, fontSize: 15, fontWeight: '800' }}>Training Program</Text>
                 {trainingModalItem && (
-                  <Text style={{ color: '#6b7280', fontSize: 10 }}>
+                  <Text style={{ color: t.muted, fontSize: 10 }}>
                     {new Date(trainingModalItem.created_at).toLocaleDateString()}
                   </Text>
                 )}
               </View>
               <TouchableOpacity onPress={() => setTrainingModalItem(null)} style={{ padding: 4 }}>
-                <Ionicons name="close" size={22} color="#9ca3af" />
+                <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
 
@@ -858,24 +865,24 @@ export default function PlayerProfileScreen() {
                 keyboardShouldPersistTaps="handled"
               >
                 {trainingModalItem?.program_text
-                  ? renderReport(trainingModalItem.program_text)
-                  : <Text style={{ color: '#6b7280' }}>No training content.</Text>
+                  ? renderReport(trainingModalItem.program_text, { heading: t.ink, body: t.inkSoft })
+                  : <Text style={{ color: t.muted }}>No training content.</Text>
                 }
 
                 {/* Corrections section */}
                 <View
-                  style={{ marginTop: 24, borderTopWidth: 1, borderTopColor: '#1f2937', paddingTop: 16 }}
+                  style={{ marginTop: 24, borderTopWidth: 1, borderTopColor: t.chip, paddingTop: 16 }}
                   onLayout={e => { correctionInputY.current = e.nativeEvent.layout.y; }}
                 >
-                  <Text style={{ color: '#d1d5db', fontWeight: '700', fontSize: 13, marginBottom: 8 }}>CORRECTIONS</Text>
+                  <Text style={{ color: t.inkSoft, fontWeight: '700', fontSize: 13, marginBottom: 8 }}>CORRECTIONS</Text>
                   <VoiceTextInput
                     style={{
-                      backgroundColor: '#1f2937', color: '#f9fafb', borderRadius: 10,
+                      backgroundColor: t.chip, color: t.ink, borderRadius: 10,
                       padding: 12, fontSize: 14, minHeight: 80, textAlignVertical: 'top',
-                      borderWidth: 1, borderColor: '#374151',
+                      borderWidth: 1, borderColor: t.line,
                     }}
                     placeholder="Enter corrections or feedback for a new training program..."
-                    placeholderTextColor="#4b5563"
+                    placeholderTextColor={t.muted2}
                     value={modalCorrection}
                     onChangeText={setModalCorrection}
                     multiline
@@ -884,34 +891,34 @@ export default function PlayerProfileScreen() {
                   <TouchableOpacity
                     style={{
                       marginTop: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-                      gap: 6, backgroundColor: '#7c3aed', borderRadius: 10, paddingVertical: 12,
+                      gap: 6, backgroundColor: t.accent, borderRadius: 10, paddingVertical: 12,
                       opacity: (!modalCorrection.trim() || regeneratingModal) ? 0.5 : 1,
                     }}
                     onPress={regenerateTrainingFromModal}
                     disabled={!modalCorrection.trim() || regeneratingModal}
                   >
                     {regeneratingModal
-                      ? <ActivityIndicator color="#fff" size="small" />
-                      : <><Ionicons name="refresh" size={15} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Apply & Regenerate</Text></>}
+                      ? <ActivityIndicator color={t.ctaText} size="small" />
+                      : <><Ionicons name="refresh" size={15} color={t.ink} /><Text style={{ color: t.ink, fontWeight: '700', fontSize: 13 }}>Apply & Regenerate</Text></>}
                   </TouchableOpacity>
                 </View>
               </KeyboardAwareScrollView>
             </KeyboardAvoidingView>
 
             {/* Action row: Send to Player, Send to Staff, Print, Export */}
-            <View style={{ padding: 12, borderTopWidth: 1, borderTopColor: '#1f2937', gap: 8 }}>
+            <View style={{ padding: 12, borderTopWidth: 1, borderTopColor: t.chip, gap: 8 }}>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <TouchableOpacity
-                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#16a34a', borderRadius: 10, paddingVertical: 12 }}
+                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.positive, borderRadius: 10, paddingVertical: 12 }}
                   onPress={() => { setTrainingModalItem(null); sendTrainingToPlayer(); }}
                   disabled={sendingTraining}
                 >
                   {sendingTraining
-                    ? <ActivityIndicator color="#fff" size="small" />
-                    : <><Ionicons name="person-outline" size={15} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Send to Player</Text></>}
+                    ? <ActivityIndicator color={t.ctaText} size="small" />
+                    : <><Ionicons name="person-outline" size={15} color={t.ink} /><Text style={{ color: t.ink, fontWeight: '700', fontSize: 13 }}>Send to Player</Text></>}
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#7c3aed', borderRadius: 10, paddingVertical: 12 }}
+                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.accent, borderRadius: 10, paddingVertical: 12 }}
                   onPress={() => {
                     if (!trainingModalItem) return;
                     setShareCtx({
@@ -924,26 +931,26 @@ export default function PlayerProfileScreen() {
                     setTrainingModalItem(null);
                   }}
                 >
-                  <Ionicons name="share-social-outline" size={15} color="#fff" />
-                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Share</Text>
+                  <Ionicons name="share-social-outline" size={15} color={t.ink} />
+                  <Text style={{ color: t.ink, fontWeight: '700', fontSize: 13 }}>Share</Text>
                 </TouchableOpacity>
               </View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <TouchableOpacity
-                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#1f2937', borderRadius: 10, paddingVertical: 12, borderWidth: 1, borderColor: '#374151' }}
+                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.chip, borderRadius: 10, paddingVertical: 12, borderWidth: 1, borderColor: t.line }}
                   onPress={printTraining}
                 >
-                  <Ionicons name="print-outline" size={15} color="#d1d5db" />
-                  <Text style={{ color: '#d1d5db', fontWeight: '700', fontSize: 13 }}>Print</Text>
+                  <Ionicons name="print-outline" size={15} color={t.inkSoft} />
+                  <Text style={{ color: t.inkSoft, fontWeight: '700', fontSize: 13 }}>Print</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#1f2937', borderRadius: 10, paddingVertical: 12, borderWidth: 1, borderColor: '#374151' }}
+                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.chip, borderRadius: 10, paddingVertical: 12, borderWidth: 1, borderColor: t.line }}
                   onPress={exportTraining}
                   disabled={exportingTraining}
                 >
                   {exportingTraining
-                    ? <ActivityIndicator color="#d1d5db" size="small" />
-                    : <><Ionicons name="share-outline" size={15} color="#d1d5db" /><Text style={{ color: '#d1d5db', fontWeight: '700', fontSize: 13 }}>Export PDF</Text></>}
+                    ? <ActivityIndicator color={t.inkSoft} size="small" />
+                    : <><Ionicons name="share-outline" size={15} color={t.inkSoft} /><Text style={{ color: t.inkSoft, fontWeight: '700', fontSize: 13 }}>Export PDF</Text></>}
                 </TouchableOpacity>
               </View>
             </View>
@@ -960,7 +967,7 @@ export default function PlayerProfileScreen() {
             <VoiceTextInput
               style={styles.input}
               placeholder="Full Name *"
-              placeholderTextColor="#6b7280"
+              placeholderTextColor={t.muted}
               value={editName}
               onChangeText={setEditName}
             />
@@ -968,14 +975,14 @@ export default function PlayerProfileScreen() {
               <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="Position (e.g. PG, SG, SF)"
-                placeholderTextColor="#6b7280"
+                placeholderTextColor={t.muted}
                 value={editPos}
                 onChangeText={setEditPos}
               />
               <TextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="Jersey # (e.g. 23)"
-                placeholderTextColor="#6b7280"
+                placeholderTextColor={t.muted}
                 keyboardType="number-pad"
                 value={editJersey}
                 onChangeText={setEditJersey}
@@ -985,14 +992,14 @@ export default function PlayerProfileScreen() {
               <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder={`Height (e.g. 6'2")`}
-                placeholderTextColor="#6b7280"
+                placeholderTextColor={t.muted}
                 value={editHeight}
                 onChangeText={setEditHeight}
               />
               <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder={`Wingspan (e.g. 6'5")`}
-                placeholderTextColor="#6b7280"
+                placeholderTextColor={t.muted}
                 value={editWingspan}
                 onChangeText={setEditWingspan}
               />
@@ -1001,14 +1008,14 @@ export default function PlayerProfileScreen() {
               <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="Weight (e.g. 185 lbs)"
-                placeholderTextColor="#6b7280"
+                placeholderTextColor={t.muted}
                 value={editWeight}
                 onChangeText={setEditWeight}
               />
               <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder={`Standing Reach (e.g. 8'2")`}
-                placeholderTextColor="#6b7280"
+                placeholderTextColor={t.muted}
                 value={editStandingReach}
                 onChangeText={setEditStandingReach}
               />
@@ -1016,7 +1023,7 @@ export default function PlayerProfileScreen() {
             <VoiceTextInput
               style={styles.input}
               placeholder="School name"
-              placeholderTextColor="#6b7280"
+              placeholderTextColor={t.muted}
               value={editSchool}
               onChangeText={setEditSchool}
             />
@@ -1024,14 +1031,14 @@ export default function PlayerProfileScreen() {
               <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="City"
-                placeholderTextColor="#6b7280"
+                placeholderTextColor={t.muted}
                 value={editCity}
                 onChangeText={setEditCity}
               />
               <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="State"
-                placeholderTextColor="#6b7280"
+                placeholderTextColor={t.muted}
                 value={editState}
                 onChangeText={setEditState}
               />
@@ -1039,7 +1046,7 @@ export default function PlayerProfileScreen() {
             <VoiceTextInput
               style={styles.input}
               placeholder="Country"
-              placeholderTextColor="#6b7280"
+              placeholderTextColor={t.muted}
               value={editCountry}
               onChangeText={setEditCountry}
             />
@@ -1051,7 +1058,7 @@ export default function PlayerProfileScreen() {
               onPress={() => { setShowLevelPicker(v => !v); setShowTeamPicker(false); setShowCreateTeam(false); }}
             >
               <Text style={styles.dropdownText}>{editLevel}</Text>
-              <Text style={{ color: '#9ca3af' }}>{showLevelPicker ? '▴' : '▾'}</Text>
+              <Text style={{ color: t.muted }}>{showLevelPicker ? '▴' : '▾'}</Text>
             </TouchableOpacity>
             {showLevelPicker && (
               <View style={styles.inlineList}>
@@ -1061,8 +1068,8 @@ export default function PlayerProfileScreen() {
                     style={[styles.inlineOption, editLevel === lvl && styles.inlineOptionActive]}
                     onPress={() => { setEditLevel(lvl); setShowLevelPicker(false); }}
                   >
-                    <Text style={[styles.inlineOptionText, editLevel === lvl && { color: '#fff', fontWeight: '700' }]}>{lvl}</Text>
-                    {editLevel === lvl && <Ionicons name="checkmark" size={16} color="#2563eb" />}
+                    <Text style={[styles.inlineOptionText, editLevel === lvl && { color: t.ink, fontWeight: '700' }]}>{lvl}</Text>
+                    {editLevel === lvl && <Ionicons name="checkmark" size={16} color={t.accent} />}
                   </TouchableOpacity>
                 ))}
               </View>
@@ -1077,7 +1084,7 @@ export default function PlayerProfileScreen() {
               <Text style={styles.dropdownText}>
                 {editTeamId ? (teams.find(t => t.id === editTeamId)?.name ?? 'Unknown') : 'No Team'}
               </Text>
-              <Text style={{ color: '#9ca3af' }}>{showTeamPicker ? '▴' : '▾'}</Text>
+              <Text style={{ color: t.muted }}>{showTeamPicker ? '▴' : '▾'}</Text>
             </TouchableOpacity>
             {showTeamPicker && (
               <View style={styles.inlineList}>
@@ -1085,33 +1092,33 @@ export default function PlayerProfileScreen() {
                   style={[styles.inlineOption, !editTeamId && styles.inlineOptionActive]}
                   onPress={() => { setEditTeamId(null); setShowTeamPicker(false); }}
                 >
-                  <Text style={[styles.inlineOptionText, !editTeamId && { color: '#fff', fontWeight: '700' }]}>No Team</Text>
-                  {!editTeamId && <Ionicons name="checkmark" size={16} color="#2563eb" />}
+                  <Text style={[styles.inlineOptionText, !editTeamId && { color: t.ink, fontWeight: '700' }]}>No Team</Text>
+                  {!editTeamId && <Ionicons name="checkmark" size={16} color={t.accent} />}
                 </TouchableOpacity>
-                {teams.map(t => (
+                {teams.map(tm => (
                   <TouchableOpacity
-                    key={t.id}
-                    style={[styles.inlineOption, editTeamId === t.id && styles.inlineOptionActive]}
-                    onPress={() => { setEditTeamId(t.id); setShowTeamPicker(false); }}
+                    key={tm.id}
+                    style={[styles.inlineOption, editTeamId === tm.id && styles.inlineOptionActive]}
+                    onPress={() => { setEditTeamId(tm.id); setShowTeamPicker(false); }}
                   >
-                    <Text style={[styles.inlineOptionText, editTeamId === t.id && { color: '#fff', fontWeight: '700' }]}>{t.name}</Text>
-                    {editTeamId === t.id && <Ionicons name="checkmark" size={16} color="#2563eb" />}
+                    <Text style={[styles.inlineOptionText, editTeamId === tm.id && { color: t.ink, fontWeight: '700' }]}>{tm.name}</Text>
+                    {editTeamId === tm.id && <Ionicons name="checkmark" size={16} color={t.accent} />}
                   </TouchableOpacity>
                 ))}
                 {/* Create new team inline */}
                 <TouchableOpacity
-                  style={[styles.inlineOption, { borderTopColor: '#2563eb33' }]}
+                  style={[styles.inlineOption, { borderTopColor: t.accent }]}
                   onPress={() => { setShowCreateTeam(v => !v); }}
                 >
-                  <Ionicons name="add-circle-outline" size={16} color="#2563eb" />
-                  <Text style={[styles.inlineOptionText, { color: '#2563eb', marginLeft: 8 }]}>Create New Team</Text>
+                  <Ionicons name="add-circle-outline" size={16} color={t.accent} />
+                  <Text style={[styles.inlineOptionText, { color: t.accent, marginLeft: 8 }]}>Create New Team</Text>
                 </TouchableOpacity>
                 {showCreateTeam && (
                   <View style={{ padding: 8, gap: 8 }}>
                     <VoiceTextInput
                       style={styles.input}
                       placeholder="Team name..."
-                      placeholderTextColor="#6b7280"
+                      placeholderTextColor={t.muted}
                       value={newTeamName}
                       onChangeText={setNewTeamName}
                       autoFocus
@@ -1121,7 +1128,7 @@ export default function PlayerProfileScreen() {
                       onPress={createTeamFromEdit}
                       disabled={creatingTeam || !newTeamName.trim()}
                     >
-                      {creatingTeam ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Create & Assign</Text>}
+                      {creatingTeam ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>Create & Assign</Text>}
                     </TouchableOpacity>
                   </View>
                 )}
@@ -1133,7 +1140,7 @@ export default function PlayerProfileScreen() {
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveBtn} onPress={saveEdit} disabled={saving}>
-                {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Save</Text>}
+                {saving ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>Save</Text>}
               </TouchableOpacity>
             </View>
           </KeyboardAwareScrollView>
@@ -1147,16 +1154,16 @@ export default function PlayerProfileScreen() {
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>Share with Staff</Text>
             <Text style={styles.modalSub}>Search for a coach, scout, or trainer to share this training program.</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
-              <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, backgroundColor: t.chip, borderRadius: 8, padding: 12 }}>
+              <Text style={{ color: t.inkSoft, fontSize: 13 }}>Allow recipient to regenerate</Text>
               <TouchableOpacity
                 onPress={() => setAllowRegen(v => !v)}
-                style={{ width: 40, height: 22, borderRadius: 11, backgroundColor: allowRegen ? '#7c3aed' : '#374151', justifyContent: 'center', paddingHorizontal: 2 }}
+                style={{ width: 40, height: 22, borderRadius: 11, backgroundColor: allowRegen ? t.accent : t.line, justifyContent: 'center', paddingHorizontal: 2 }}
               >
-                <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: '#fff', alignSelf: allowRegen ? 'flex-end' : 'flex-start' }} />
+                <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: t.ink, alignSelf: allowRegen ? 'flex-end' : 'flex-start' }} />
               </TouchableOpacity>
             </View>
-            <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 12, marginLeft: 2 }}>
+            <Text style={{ color: t.muted, fontSize: 11, marginBottom: 12, marginLeft: 2 }}>
               {allowRegen
                 ? 'Sends a live, regenerable copy — recipient sees the full report.'
                 : 'Sends a frozen snapshot — choose which sections to include below.'}
@@ -1165,15 +1172,15 @@ export default function PlayerProfileScreen() {
               const secs = splitReportSections(staffShareText);
               return !allowRegen && secs.length > 1 ? (
                 <>
-                  <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Include Sections</Text>
+                  <Text style={{ color: t.muted, fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Include Sections</Text>
                   {secs.map(sec => (
-                    <View key={sec.heading} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 }}>
-                      <Text style={{ color: '#d1d5db', fontSize: 13, flex: 1, marginRight: 8 }} numberOfLines={1}>{sec.heading}</Text>
+                    <View key={sec.heading} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: t.chip, borderRadius: 8, padding: 10 }}>
+                      <Text style={{ color: t.inkSoft, fontSize: 13, flex: 1, marginRight: 8 }} numberOfLines={1}>{sec.heading}</Text>
                       <TouchableOpacity
                         onPress={() => setStaffSectionToggles(p => ({ ...p, [sec.heading]: !(p[sec.heading] !== false) }))}
-                        style={{ width: 40, height: 22, borderRadius: 11, backgroundColor: staffSectionToggles[sec.heading] !== false ? '#7c3aed' : '#374151', justifyContent: 'center', paddingHorizontal: 2 }}
+                        style={{ width: 40, height: 22, borderRadius: 11, backgroundColor: staffSectionToggles[sec.heading] !== false ? t.accent : t.line, justifyContent: 'center', paddingHorizontal: 2 }}
                       >
-                        <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: '#fff', alignSelf: staffSectionToggles[sec.heading] !== false ? 'flex-end' : 'flex-start' }} />
+                        <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: t.ink, alignSelf: staffSectionToggles[sec.heading] !== false ? 'flex-end' : 'flex-start' }} />
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -1184,28 +1191,28 @@ export default function PlayerProfileScreen() {
               <VoiceTextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="Search coach/program name..."
-                placeholderTextColor="#6b7280"
+                placeholderTextColor={t.muted}
                 value={staffSearch}
                 onChangeText={setStaffSearch}
               />
               <TouchableOpacity
-                style={{ backgroundColor: '#7c3aed', borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' }}
+                style={{ backgroundColor: t.accent, borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' }}
                 onPress={searchStaff}
                 disabled={staffSearchLoading}
               >
-                {staffSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+                {staffSearchLoading ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="search" size={18} color={t.ctaText} />}
               </TouchableOpacity>
             </View>
             {staffResults.map((r: any) => (
               <TouchableOpacity
                 key={r.id}
-                style={{ backgroundColor: '#1f2937', borderRadius: 10, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: '#374151' }}
+                style={{ backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: t.line }}
                 onPress={() => sendToStaff(r)}
                 disabled={sendingStaff}
               >
-                {sendingStaff ? <ActivityIndicator color="#7c3aed" /> : <>
-                  <Text style={{ color: '#fff', fontWeight: '600' }}>{r.name}</Text>
-                  <Text style={{ color: '#6b7280', fontSize: 11 }}>{r.role} · {r.program_name}</Text>
+                {sendingStaff ? <ActivityIndicator color={t.accent} /> : <>
+                  <Text style={{ color: t.ink, fontWeight: '600' }}>{r.name}</Text>
+                  <Text style={{ color: t.muted, fontSize: 11 }}>{r.role} · {r.program_name}</Text>
                 </>}
               </TouchableOpacity>
             ))}
@@ -1225,19 +1232,19 @@ export default function PlayerProfileScreen() {
             <Text style={styles.modalTitle}>Summarize History</Text>
             <Text style={styles.modalSub}>Choose one or more report types — combine them for a comprehensive summary across all {evals.length} evaluations.</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
-              {OUTPUT_TYPES.map(t => {
+              {OUTPUT_TYPES.map(ot => {
                 const selected = summaryType.split(',').filter(Boolean);
-                const isOn = selected.includes(t.key);
+                const isOn = selected.includes(ot.key);
                 return (
                 <TouchableOpacity
-                  key={t.key}
+                  key={ot.key}
                   style={[styles.chip, isOn && styles.chipActive]}
                   onPress={() => {
-                    const next = isOn ? selected.filter(k => k !== t.key) : [...selected, t.key];
-                    setSummaryType((next.length ? next : [t.key]).join(','));
+                    const next = isOn ? selected.filter(k => k !== ot.key) : [...selected, ot.key];
+                    setSummaryType((next.length ? next : [ot.key]).join(','));
                   }}
                 >
-                  <Text style={[styles.chipText, isOn && { color: '#fff' }]}>{t.label}</Text>
+                  <Text style={[styles.chipText, isOn && { color: t.ctaText }]}>{ot.label}</Text>
                 </TouchableOpacity>
                 );
               })}
@@ -1248,7 +1255,7 @@ export default function PlayerProfileScreen() {
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveBtn} onPress={generateSummary} disabled={summaryLoading}>
                 {summaryLoading
-                  ? <ActivityIndicator color="#fff" />
+                  ? <ActivityIndicator color={t.ctaText} />
                   : <Text style={styles.saveText}>Generate</Text>}
               </TouchableOpacity>
             </View>
@@ -1269,104 +1276,105 @@ export default function PlayerProfileScreen() {
         />
       )}
     </KeyboardAwareScrollView>
+    </ScreenBackground>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0a0a' },
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56, gap: 12 },
   headerCenter: { flex: 1 },
-  name: { color: '#fff', fontSize: 22, fontWeight: '900' },
-  meta: { color: '#6b7280', fontSize: 12, marginTop: 2 },
+  name: { color: t.ink, fontSize: 22, fontFamily: fonts[900] },
+  meta: { color: t.muted, fontSize: 12, marginTop: 2 },
   section: { paddingHorizontal: 20, marginTop: 24 },
   sectionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sectionTitle: { color: '#9ca3af', fontSize: 12, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 },
+  sectionTitle: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 },
   row: { flexDirection: 'row', gap: 10, paddingHorizontal: 20, marginTop: 20 },
-  flagBox: { flex: 1, borderWidth: 1, borderRadius: 10, padding: 12 },
-  flagTitle: { fontSize: 11, fontWeight: '700', marginBottom: 6, textTransform: 'uppercase' },
-  flagItem: { color: '#d1d5db', fontSize: 12, marginBottom: 3 },
+  flagBox: { flex: 1, borderWidth: 1, borderRadius: 14, padding: 12 },
+  flagTitle: { fontSize: 11, fontFamily: fonts[700], marginBottom: 6, textTransform: 'uppercase' },
+  flagItem: { color: t.inkSoft, fontSize: 12, marginBottom: 3 },
   evalCard: {
-    backgroundColor: '#111827', borderRadius: 10, padding: 14,
-    flexDirection: 'row', alignItems: 'center', marginBottom: 8,
+    backgroundColor: t.card, borderRadius: 14, padding: 14,
+    flexDirection: 'row', alignItems: 'center', marginBottom: 8, borderWidth: 1, borderColor: t.cardBorder,
   },
-  evalType: { color: '#fff', fontSize: 13, fontWeight: '700' },
-  evalDate: { color: '#6b7280', fontSize: 11, marginTop: 2 },
-  emptyText: { color: '#4b5563', fontSize: 13 },
+  evalType: { color: t.ink, fontSize: 13, fontFamily: fonts[700] },
+  evalDate: { color: t.muted, fontSize: 11, marginTop: 2 },
+  emptyText: { color: t.muted2, fontSize: 13 },
   newEvalBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: '#2563eb', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8,
+    backgroundColor: t.ctaBg, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999,
   },
-  newEvalText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  newEvalText: { color: t.ctaText, fontSize: 12, fontFamily: fonts[700] },
   summaryBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#1d4ed8', margin: 20, marginBottom: 8, padding: 16, borderRadius: 12,
+    backgroundColor: t.ctaBg, margin: 20, marginBottom: 8, padding: 15, borderRadius: 999,
   },
-  summaryText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  summaryText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15 },
   trainingBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#1f2937', marginHorizontal: 20, marginTop: 0, marginBottom: 0, padding: 16, borderRadius: 12,
+    backgroundColor: t.chip, marginHorizontal: 20, marginTop: 0, marginBottom: 0, padding: 15, borderRadius: 999,
   },
-  trainingText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  trainingText: { color: t.ink, fontFamily: fonts[700], fontSize: 15 },
   // Modal styles
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' },
-  modal: { backgroundColor: '#111827', borderRadius: 20, padding: 24, margin: 12 },
-  modalTitle: { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 4 },
-  modalSub: { color: '#6b7280', fontSize: 12, marginBottom: 16, lineHeight: 18 },
-  chip: { borderWidth: 1, borderColor: '#374151', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, marginRight: 8 },
-  chipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  chipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
+  modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
+  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder },
+  modalTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 4 },
+  modalSub: { color: t.muted, fontSize: 12, marginBottom: 16, lineHeight: 18 },
+  chip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 9, marginRight: 8 },
+  chipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  chipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
   modalRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
-  cancelBtn: { flex: 1, padding: 14, borderRadius: 10, borderWidth: 1, borderColor: '#374151', alignItems: 'center' },
-  cancelText: { color: '#9ca3af', fontWeight: '600' },
-  saveBtn: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: '#2563eb', alignItems: 'center' },
-  saveText: { color: '#fff', fontWeight: '700' },
+  cancelBtn: { flex: 1, padding: 14, borderRadius: 999, borderWidth: 1, borderColor: t.cta2Border, alignItems: 'center' },
+  cancelText: { color: t.cta2Text, fontFamily: fonts[700] },
+  saveBtn: { flex: 1, padding: 14, borderRadius: 999, backgroundColor: t.ctaBg, alignItems: 'center' },
+  saveText: { color: t.ctaText, fontFamily: fonts[700] },
   inviteBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#374151', marginHorizontal: 20, marginTop: 10, padding: 14, borderRadius: 12,
+    backgroundColor: t.chip, marginHorizontal: 20, marginTop: 10, padding: 14, borderRadius: 999,
   },
-  inviteText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  inviteText: { color: t.ink, fontFamily: fonts[700], fontSize: 14 },
   inviteCodeBox: {
-    backgroundColor: '#111827', marginHorizontal: 20, marginTop: 10, padding: 16,
-    borderRadius: 12, borderWidth: 1, borderColor: '#2563eb', alignItems: 'center',
+    backgroundColor: t.card, marginHorizontal: 20, marginTop: 10, padding: 16,
+    borderRadius: 18, borderWidth: 1, borderColor: t.accent, alignItems: 'center',
   },
-  inviteCodeLabel: { color: '#6b7280', fontSize: 10, fontWeight: '700', letterSpacing: 2, marginBottom: 8 },
-  inviteCode: { color: '#2563eb', fontSize: 28, fontWeight: '900', letterSpacing: 4, marginBottom: 8 },
+  inviteCodeLabel: { color: t.muted, fontSize: 10, fontFamily: fonts[700], letterSpacing: 2, marginBottom: 8 },
+  inviteCode: { color: t.accent, fontSize: 28, fontFamily: fonts[900], letterSpacing: 4, marginBottom: 8 },
   editBtn: { padding: 4 },
   input: {
-    backgroundColor: '#1f2937', borderRadius: 10, padding: 12, color: '#fff',
-    fontSize: 14, borderWidth: 1, borderColor: '#374151', marginBottom: 12,
+    backgroundColor: t.chip, borderRadius: 14, padding: 12, color: t.ink,
+    fontSize: 14, borderWidth: 1, borderColor: t.line, marginBottom: 12,
   },
-  inputLabel: { color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6 },
+  inputLabel: { color: t.muted, fontSize: 12, fontFamily: fonts[600], marginBottom: 6 },
   dropdownTrigger: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    backgroundColor: '#1f2937', borderRadius: 10, padding: 12, marginBottom: 12,
-    borderWidth: 1, borderColor: '#374151',
+    backgroundColor: t.chip, borderRadius: 14, padding: 12, marginBottom: 12,
+    borderWidth: 1, borderColor: t.line,
   },
-  dropdownText: { color: '#fff', fontSize: 14 },
+  dropdownText: { color: t.ink, fontSize: 14 },
   pickerOption: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingVertical: 13, paddingHorizontal: 4, borderTopWidth: 1, borderTopColor: '#1f2937',
+    paddingVertical: 13, paddingHorizontal: 4, borderTopWidth: 1, borderTopColor: t.divider,
   },
-  pickerOptionActive: { backgroundColor: '#1e3a5f', marginHorizontal: -4, paddingHorizontal: 4, borderRadius: 8 },
-  pickerOptionText: { color: '#d1d5db', fontSize: 14 },
-  inlineList: { backgroundColor: '#0a0a0a', borderRadius: 10, marginBottom: 8, overflow: 'hidden', borderWidth: 1, borderColor: '#374151' },
-  inlineOption: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12, borderTopWidth: 1, borderTopColor: '#1f2937' },
-  inlineOptionActive: { backgroundColor: '#1e3a5f' },
-  inlineOptionText: { color: '#d1d5db', fontSize: 14 },
-  inviteCodeHint: { color: '#6b7280', fontSize: 11, textAlign: 'center' },
+  pickerOptionActive: { backgroundColor: t.accentSoft, marginHorizontal: -4, paddingHorizontal: 4, borderRadius: 8 },
+  pickerOptionText: { color: t.inkSoft, fontSize: 14 },
+  inlineList: { backgroundColor: t.chip, borderRadius: 14, marginBottom: 8, overflow: 'hidden', borderWidth: 1, borderColor: t.line },
+  inlineOption: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12, borderTopWidth: 1, borderTopColor: t.divider },
+  inlineOptionActive: { backgroundColor: t.accentSoft },
+  inlineOptionText: { color: t.inkSoft, fontSize: 14 },
+  inviteCodeHint: { color: t.muted, fontSize: 11, textAlign: 'center' },
   trainingFeedbackBox: {
-    backgroundColor: '#111827', marginHorizontal: 20, marginTop: 10,
-    padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#374151',
+    backgroundColor: t.card, marginHorizontal: 20, marginTop: 10,
+    padding: 14, borderRadius: 18, borderWidth: 1, borderColor: t.cardBorder,
   },
-  trainingFeedbackLabel: { color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 },
+  trainingFeedbackLabel: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
   trainingFeedbackInput: {
-    backgroundColor: '#1f2937', borderRadius: 8, padding: 10, color: '#fff',
-    fontSize: 13, borderWidth: 1, borderColor: '#374151', minHeight: 70, marginBottom: 10,
+    backgroundColor: t.chip, borderRadius: 12, padding: 10, color: t.ink,
+    fontSize: 13, borderWidth: 1, borderColor: t.line, minHeight: 70, marginBottom: 10,
   },
   regenBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#7c3aed', borderRadius: 8, padding: 12,
+    backgroundColor: t.ctaBg, borderRadius: 999, padding: 12,
   },
-  regenBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  regenBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
 });
