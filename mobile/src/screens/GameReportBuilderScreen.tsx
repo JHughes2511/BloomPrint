@@ -17,6 +17,10 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
+import { useTheme } from '../theme/ThemeProvider';
+import { ThemeTokens } from '../theme/tokens';
+import { fonts } from '../theme/typography';
+import { ScreenBackground } from '../theme/components';
 import { mdToHtml, safeFileName, wrapPrintDocument } from '../utils/mdToHtml';
 import { useAuth } from '../context/AuthContext';
 
@@ -50,6 +54,8 @@ export default function GameReportBuilderScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { coach } = useAuth();
+  const { t } = useTheme();
+  const styles = makeStyles(t);
 
   const existingId: number | undefined = route.params?.reportId;
 
@@ -345,17 +351,20 @@ export default function GameReportBuilderScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator color="#2563eb" size="large" />
-      </View>
+      <ScreenBackground>
+        <View style={styles.center}>
+          <ActivityIndicator color={t.accent} size="large" />
+        </View>
+      </ScreenBackground>
     );
   }
 
   const clips: any[] = report?.clips ?? [];
 
   return (
+    <ScreenBackground>
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: '#0a0a0a' }}
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
@@ -369,7 +378,7 @@ export default function GameReportBuilderScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={24} color="#fff" />
+            <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
           <VoiceTextInput
             style={styles.titleInput}
@@ -377,7 +386,7 @@ export default function GameReportBuilderScreen() {
             onChangeText={setTitle}
             onBlur={() => save({ title: title.trim() || null })}
             placeholder="Game Report Title..."
-            placeholderTextColor="#4b5563"
+            placeholderTextColor={t.muted2}
           />
         </View>
 
@@ -403,15 +412,15 @@ export default function GameReportBuilderScreen() {
               <Text style={styles.teamPickerText}>
                 {teams.find(t => t.id === myTeamId)?.name ?? 'Select a team...'}
               </Text>
-              <Ionicons name={showMyTeamPicker ? 'chevron-up' : 'chevron-down'} size={14} color="#9ca3af" />
+              <Ionicons name={showMyTeamPicker ? 'chevron-up' : 'chevron-down'} size={14} color={t.muted} />
             </TouchableOpacity>
             {showMyTeamPicker && (
               <View style={styles.pickerList}>
                 {teams.map(t => (
                   <TouchableOpacity key={t.id} style={[styles.pickerItem, myTeamId === t.id && styles.pickerItemActive]}
                     onPress={() => { setMyTeamId(t.id); setShowMyTeamPicker(false); save({ my_team_id: t.id }); }}>
-                    <Text style={[styles.pickerItemText, myTeamId === t.id && { color: '#fff' }]}>{t.name}</Text>
-                    {myTeamId === t.id && <Ionicons name="checkmark" size={14} color="#2563eb" />}
+                    <Text style={[styles.pickerItemText, myTeamId === t.id && { color: t.ink }]}>{t.name}</Text>
+                    {myTeamId === t.id && <Ionicons name="checkmark" size={14} color={t.accent} />}
                   </TouchableOpacity>
                 ))}
               </View>
@@ -426,14 +435,14 @@ export default function GameReportBuilderScreen() {
               <Text style={styles.teamPickerText}>
                 {teams.find(t => t.id === oppTeamId)?.name ?? (oppName || 'Select or type opponent...')}
               </Text>
-              <Ionicons name={showOppTeamPicker ? 'chevron-up' : 'chevron-down'} size={14} color="#9ca3af" />
+              <Ionicons name={showOppTeamPicker ? 'chevron-up' : 'chevron-down'} size={14} color={t.muted} />
             </TouchableOpacity>
             {showOppTeamPicker && (
               <View style={styles.pickerList}>
                 <VoiceTextInput
                   style={styles.oppNameInput}
                   placeholder="Or type opponent name..."
-                  placeholderTextColor="#4b5563"
+                  placeholderTextColor={t.muted2}
                   value={oppName}
                   onChangeText={t => { setOppName(t); setOppTeamId(null); }}
                   onBlur={() => save({ opponent_name: oppName.trim() || null, opponent_team_id: null })}
@@ -441,8 +450,8 @@ export default function GameReportBuilderScreen() {
                 {teams.map(t => (
                   <TouchableOpacity key={t.id} style={[styles.pickerItem, oppTeamId === t.id && styles.pickerItemActive]}
                     onPress={() => { setOppTeamId(t.id); setOppName(''); setShowOppTeamPicker(false); save({ opponent_team_id: t.id, opponent_name: null }); }}>
-                    <Text style={[styles.pickerItemText, oppTeamId === t.id && { color: '#fff' }]}>{t.name}</Text>
-                    {oppTeamId === t.id && <Ionicons name="checkmark" size={14} color="#2563eb" />}
+                    <Text style={[styles.pickerItemText, oppTeamId === t.id && { color: t.ink }]}>{t.name}</Text>
+                    {oppTeamId === t.id && <Ionicons name="checkmark" size={14} color={t.accent} />}
                   </TouchableOpacity>
                 ))}
               </View>
@@ -452,7 +461,7 @@ export default function GameReportBuilderScreen() {
 
         {/* Output type — select one or more to combine into a comprehensive report */}
         <Text style={styles.label}>Report Type</Text>
-        <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
+        <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
           Tap multiple to combine them into one comprehensive report.
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
@@ -478,8 +487,8 @@ export default function GameReportBuilderScreen() {
           <Text style={styles.label}>Film</Text>
           <TouchableOpacity style={styles.addBtn} onPress={pickClip} disabled={uploadingClip}>
             {uploadingClip
-              ? <ActivityIndicator color="#fff" size="small" />
-              : <><Ionicons name="add" size={14} color="#fff" /><Text style={styles.addBtnText}>Add Film</Text></>
+              ? <ActivityIndicator color={t.ctaText} size="small" />
+              : <><Ionicons name="add" size={14} color={t.ctaText} /><Text style={styles.addBtnText}>Add Film</Text></>
             }
           </TouchableOpacity>
         </View>
@@ -502,7 +511,7 @@ export default function GameReportBuilderScreen() {
               <Text style={styles.clipAnalysis} numberOfLines={2}>
                 {clip.analysis_text ? stripMarkdownForPreview(clip.analysis_text).slice(0, 120) + '...' : 'Analyzing...'}
               </Text>
-              <Ionicons name="chevron-forward" size={14} color="#4b5563" />
+              <Ionicons name="chevron-forward" size={14} color={t.muted2} />
             </TouchableOpacity>
           ))
         )}
@@ -513,15 +522,15 @@ export default function GameReportBuilderScreen() {
             <Text style={styles.label}>Box Score / Stats</Text>
             <TouchableOpacity style={styles.importBtn} onPress={() => pickDoc('box_score')} disabled={uploadingDoc === 'box_score'}>
               {uploadingDoc === 'box_score'
-                ? <ActivityIndicator color="#9ca3af" size="small" />
-                : <><Ionicons name="document-outline" size={14} color="#9ca3af" /><Text style={styles.importBtnText}>Import</Text></>
+                ? <ActivityIndicator color={t.muted} size="small" />
+                : <><Ionicons name="document-outline" size={14} color={t.muted} /><Text style={styles.importBtnText}>Import</Text></>
               }
             </TouchableOpacity>
           </View>
           <VoiceTextInput
             style={styles.textArea}
             placeholder="Paste box score, stats, or game data..."
-            placeholderTextColor="#4b5563"
+            placeholderTextColor={t.muted2}
             value={boxScore}
             onChangeText={setBoxScore}
 
@@ -537,15 +546,15 @@ export default function GameReportBuilderScreen() {
             <Text style={styles.label}>Scouting Notes</Text>
             <TouchableOpacity style={styles.importBtn} onPress={() => pickDoc('scouting_notes')} disabled={uploadingDoc === 'scouting_notes'}>
               {uploadingDoc === 'scouting_notes'
-                ? <ActivityIndicator color="#9ca3af" size="small" />
-                : <><Ionicons name="document-outline" size={14} color="#9ca3af" /><Text style={styles.importBtnText}>Import</Text></>
+                ? <ActivityIndicator color={t.muted} size="small" />
+                : <><Ionicons name="document-outline" size={14} color={t.muted} /><Text style={styles.importBtnText}>Import</Text></>
               }
             </TouchableOpacity>
           </View>
           <VoiceTextInput
             style={styles.textArea}
             placeholder="Add scouting notes, observations, tendencies..."
-            placeholderTextColor="#4b5563"
+            placeholderTextColor={t.muted2}
             value={scoutingNotes}
             onChangeText={setScoutingNotes}
 
@@ -561,7 +570,7 @@ export default function GameReportBuilderScreen() {
           <VoiceTextInput
             style={[styles.textArea, { minHeight: 60 }]}
             placeholder="e.g. Upcoming tournament, press defense scheme..."
-            placeholderTextColor="#4b5563"
+            placeholderTextColor={t.muted2}
             value={focusPrompt}
             onChangeText={setFocusPrompt}
 
@@ -574,8 +583,8 @@ export default function GameReportBuilderScreen() {
         {/* Generate */}
         <TouchableOpacity style={styles.generateBtn} onPress={generate} disabled={generating}>
           {generating
-            ? <><ActivityIndicator color="#fff" /><Text style={styles.generateText}>  Generating...</Text></>
-            : <><Ionicons name="sparkles" size={18} color="#fff" /><Text style={styles.generateText}>  Generate Report</Text></>
+            ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.generateText}>  Generating...</Text></>
+            : <><Ionicons name="sparkles" size={18} color={t.ctaText} /><Text style={styles.generateText}>  Generate Report</Text></>
           }
         </TouchableOpacity>
         {generating && (
@@ -587,19 +596,19 @@ export default function GameReportBuilderScreen() {
           <View style={{ marginTop: 28 }}>
             <Text style={styles.label}>Generated Report</Text>
             <View style={styles.reportBox}>
-              {renderReport(report.report_text)}
+              {renderReport(report.report_text, { heading: t.ink, body: t.inkSoft })}
             </View>
             <View style={styles.actionRow}>
               <TouchableOpacity style={styles.actionBtn} onPress={exportPdf}>
-                <Ionicons name="share-outline" size={16} color="#9ca3af" />
+                <Ionicons name="share-outline" size={16} color={t.muted} />
                 <Text style={styles.actionText}>Export PDF</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn} onPress={() => Print.printAsync({ html: wrapPrintDocument({ title: report.title || matchupLabel(), subtitle: coach?.program_name ?? '', date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), bodyHtml: mdToHtml(report.report_text) }) })}>
-                <Ionicons name="print-outline" size={16} color="#9ca3af" />
+                <Ionicons name="print-outline" size={16} color={t.muted} />
                 <Text style={styles.actionText}>Print</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn} onPress={() => setShowShareModal(true)}>
-                <Ionicons name="share-social-outline" size={16} color="#9ca3af" />
+                <Ionicons name="share-social-outline" size={16} color={t.muted} />
                 <Text style={styles.actionText}>Share</Text>
               </TouchableOpacity>
             </View>
@@ -610,7 +619,7 @@ export default function GameReportBuilderScreen() {
               <VoiceTextInput
                 style={styles.correctionInput}
                 placeholder="e.g. The point guard is actually a better defender than scorer..."
-                placeholderTextColor="#4b5563"
+                placeholderTextColor={t.muted2}
                 value={correctionText}
                 onChangeText={setCorrectionText}
 
@@ -623,8 +632,8 @@ export default function GameReportBuilderScreen() {
                 disabled={!correctionText.trim() || correcting}
               >
                 {correcting
-                  ? <><ActivityIndicator color="#fff" size="small" /><Text style={styles.correctionBtnText}>  Updating...</Text></>
-                  : <><Ionicons name="checkmark-circle" size={16} color="#fff" /><Text style={styles.correctionBtnText}>  Apply Correction</Text></>
+                  ? <><ActivityIndicator color={t.ctaText} size="small" /><Text style={styles.correctionBtnText}>  Updating...</Text></>
+                  : <><Ionicons name="checkmark-circle" size={16} color={t.ctaText} /><Text style={styles.correctionBtnText}>  Apply Correction</Text></>
                 }
               </TouchableOpacity>
             </View>
@@ -641,20 +650,20 @@ export default function GameReportBuilderScreen() {
                 <Text style={styles.clipLabelText}>{clipModal?.label === 'my_team' ? 'My Team Film' : 'Opponent Film'}</Text>
               </View>
               <TouchableOpacity onPress={() => setClipModal(null)} style={{ marginLeft: 'auto' }}>
-                <Ionicons name="close" size={22} color="#9ca3af" />
+                <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
             <KeyboardAwareScrollView style={{ maxHeight: 280 }} contentContainerStyle={{ paddingBottom: 8 }}>
               {clipModal?.analysis_text
                 ? renderReport(clipModal.analysis_text)
-                : <Text style={{ color: '#6b7280' }}>No analysis yet.</Text>
+                : <Text style={{ color: t.muted }}>No analysis yet.</Text>
               }
             </KeyboardAwareScrollView>
             <Text style={[styles.correctionLabel, { marginTop: 16 }]}>Correct This Analysis</Text>
             <VoiceTextInput
               style={styles.correctionInput}
               placeholder="What needs to be updated in this film analysis?"
-              placeholderTextColor="#4b5563"
+              placeholderTextColor={t.muted2}
               value={clipCorrectionText}
               onChangeText={setClipCorrectionText}
               multiline
@@ -666,8 +675,8 @@ export default function GameReportBuilderScreen() {
               disabled={!clipCorrectionText.trim() || clipCorrecting}
             >
               {clipCorrecting
-                ? <><ActivityIndicator color="#fff" size="small" /><Text style={styles.correctionBtnText}>  Updating...</Text></>
-                : <><Ionicons name="checkmark-circle" size={16} color="#fff" /><Text style={styles.correctionBtnText}>  Apply Correction</Text></>
+                ? <><ActivityIndicator color={t.ctaText} size="small" /><Text style={styles.correctionBtnText}>  Updating...</Text></>
+                : <><Ionicons name="checkmark-circle" size={16} color={t.ctaText} /><Text style={styles.correctionBtnText}>  Apply Correction</Text></>
               }
             </TouchableOpacity>
           </View>
@@ -694,7 +703,7 @@ export default function GameReportBuilderScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Send Report</Text>
               <TouchableOpacity onPress={() => setShowShare(false)}>
-                <Ionicons name="close" size={22} color="#9ca3af" />
+                <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
             {/* Mode selector */}
@@ -713,108 +722,109 @@ export default function GameReportBuilderScreen() {
               </TouchableOpacity>
             </View>
             {shareMode === 'staff' && (
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
-                <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, backgroundColor: t.chip, borderRadius: 8, padding: 12 }}>
+                <Text style={{ color: t.inkSoft, fontSize: 13 }}>Allow recipient to regenerate</Text>
                 <TouchableOpacity
                   onPress={() => setAllowRegenerate(v => !v)}
-                  style={{ width: 40, height: 22, borderRadius: 11, backgroundColor: allowRegenerate ? '#2563eb' : '#374151', justifyContent: 'center', paddingHorizontal: 2 }}
+                  style={{ width: 40, height: 22, borderRadius: 11, backgroundColor: allowRegenerate ? t.accent : t.line, justifyContent: 'center', paddingHorizontal: 2 }}
                 >
-                  <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: '#fff', alignSelf: allowRegenerate ? 'flex-end' : 'flex-start' }} />
+                  <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: t.ink, alignSelf: allowRegenerate ? 'flex-end' : 'flex-start' }} />
                 </TouchableOpacity>
               </View>
             )}
-            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>
+            <Text style={{ color: t.muted, fontSize: 12, marginBottom: 10 }}>
               {shareMode === 'staff' ? 'Search for a coach, trainer, or scout to share this report.' : 'Search for a player to send this report to their inbox.'}
             </Text>
             <VoiceTextInput
               style={styles.searchInput}
               placeholder="Type a name to search..."
-              placeholderTextColor="#6b7280"
+              placeholderTextColor={t.muted}
               value={shareSearch}
               onChangeText={setShareSearch}
               autoFocus
             />
-            {shareSearchLoading && <ActivityIndicator color="#6b7280" size="small" style={{ marginTop: 8 }} />}
+            {shareSearchLoading && <ActivityIndicator color={t.muted} size="small" style={{ marginTop: 8 }} />}
             <ScrollView style={{ maxHeight: 260, marginTop: 8 }} keyboardShouldPersistTaps="handled">
               {shareResults.map(r => (
                 <TouchableOpacity key={r.id} style={styles.searchResult} onPress={() => sendReport(r)} disabled={sharing}>
                   <View style={styles.searchAvatar}>
-                    <Text style={{ color: '#fff', fontWeight: '700' }}>{r.name?.[0] ?? '?'}</Text>
+                    <Text style={{ color: t.ink, fontWeight: '700' }}>{r.name?.[0] ?? '?'}</Text>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: '#fff', fontWeight: '600' }}>{r.name}</Text>
-                    <Text style={{ color: '#6b7280', fontSize: 12 }}>{r.email}</Text>
+                    <Text style={{ color: t.ink, fontWeight: '600' }}>{r.name}</Text>
+                    <Text style={{ color: t.muted, fontSize: 12 }}>{r.email}</Text>
                   </View>
-                  {sharing ? <ActivityIndicator color="#2563eb" size="small" /> : <Ionicons name="paper-plane-outline" size={18} color="#2563eb" />}
+                  {sharing ? <ActivityIndicator color={t.accent} size="small" /> : <Ionicons name="paper-plane-outline" size={18} color={t.accent} />}
                 </TouchableOpacity>
               ))}
               {shareResults.length === 0 && shareSearch.trim().length > 0 && !shareSearchLoading && (
-                <Text style={{ color: '#4b5563', textAlign: 'center', paddingVertical: 20 }}>No players found.</Text>
+                <Text style={{ color: t.muted2, textAlign: 'center', paddingVertical: 20 }}>No players found.</Text>
               )}
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
       </Modal>
     </KeyboardAvoidingView>
+    </ScreenBackground>
   );
 }
 
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0a0a', padding: 20 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a0a0a' },
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  container: { flex: 1, padding: 20 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', paddingTop: 48, marginBottom: 24, gap: 12 },
-  titleInput: { flex: 1, color: '#fff', fontSize: 18, fontWeight: '800', borderBottomWidth: 1, borderBottomColor: '#374151', paddingBottom: 4 },
-  label: { color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 },
+  titleInput: { flex: 1, color: t.ink, fontSize: 18, fontFamily: fonts[800], borderBottomWidth: 1, borderBottomColor: t.line, paddingBottom: 4 },
+  label: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 },
   modeRow: { gap: 8, marginBottom: 20 },
-  modeChip: { borderWidth: 1, borderColor: '#374151', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10 },
-  modeChipActive: { backgroundColor: '#1e3a5f', borderColor: '#2563eb' },
-  modeChipText: { color: '#6b7280', fontSize: 13, fontWeight: '600' },
-  modeChipTextActive: { color: '#fff' },
-  card: { backgroundColor: '#111827', borderRadius: 12, padding: 14, marginBottom: 14, borderWidth: 1, borderColor: '#1f2937' },
-  cardLabel: { color: '#6b7280', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', marginBottom: 8 },
+  modeChip: { borderWidth: 1, borderColor: t.line, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10 },
+  modeChipActive: { backgroundColor: t.accentSoft, borderColor: t.accent },
+  modeChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600] },
+  modeChipTextActive: { color: t.accent },
+  card: { backgroundColor: t.card, borderRadius: 18, padding: 14, marginBottom: 14, borderWidth: 1, borderColor: t.cardBorder },
+  cardLabel: { color: t.muted, fontSize: 11, fontFamily: fonts[700], textTransform: 'uppercase', marginBottom: 8 },
   teamPicker: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  teamPickerText: { color: '#fff', fontSize: 14 },
-  pickerList: { marginTop: 12, borderTopWidth: 1, borderTopColor: '#1f2937', paddingTop: 10 },
-  oppNameInput: { backgroundColor: '#0a0a0a', borderRadius: 8, padding: 10, color: '#fff', fontSize: 13, borderWidth: 1, borderColor: '#374151', marginBottom: 8 },
-  pickerItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: '#1f2937' },
-  pickerItemActive: { backgroundColor: '#1e3a5f22' },
-  pickerItemText: { color: '#9ca3af', fontSize: 14 },
-  chip: { borderWidth: 1, borderColor: '#374151', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, marginRight: 8 },
-  chipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  chipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
-  chipTextActive: { color: '#fff' },
+  teamPickerText: { color: t.ink, fontSize: 14 },
+  pickerList: { marginTop: 12, borderTopWidth: 1, borderTopColor: t.divider, paddingTop: 10 },
+  oppNameInput: { backgroundColor: t.chip, borderRadius: 10, padding: 10, color: t.ink, fontSize: 13, borderWidth: 1, borderColor: t.line, marginBottom: 8 },
+  pickerItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: t.divider },
+  pickerItemActive: { backgroundColor: t.accentSoft, borderRadius: 8 },
+  pickerItemText: { color: t.inkSoft, fontSize: 14 },
+  chip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 9, marginRight: 8 },
+  chipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  chipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
+  chipTextActive: { color: t.ctaText },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, marginTop: 4 },
-  addBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#2563eb', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
-  addBtnText: { color: '#fff', fontSize: 12, fontWeight: '600' },
-  importBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: '#374151', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
-  importBtnText: { color: '#9ca3af', fontSize: 12, fontWeight: '600' },
-  emptyHint: { color: '#4b5563', fontSize: 12, marginBottom: 14, fontStyle: 'italic' },
-  clipCard: { backgroundColor: '#111827', borderRadius: 10, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: '#1f2937', flexDirection: 'row', alignItems: 'center', gap: 10 },
-  clipLabel: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, alignSelf: 'flex-start' },
-  clipLabelMy: { backgroundColor: '#1e3a5f' },
-  clipLabelOpp: { backgroundColor: '#3b1515' },
-  clipLabelText: { color: '#fff', fontSize: 10, fontWeight: '700' },
-  clipAnalysis: { flex: 1, color: '#6b7280', fontSize: 11, lineHeight: 16 },
-  textArea: { backgroundColor: '#111827', borderRadius: 10, padding: 14, color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#1f2937', minHeight: 100, marginBottom: 16 },
-  generateBtn: { backgroundColor: '#2563eb', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8 },
-  generateText: { color: '#fff', fontWeight: '700', fontSize: 16, marginLeft: 8 },
-  hint: { color: '#4b5563', fontSize: 12, textAlign: 'center', marginTop: 10 },
-  reportBox: { backgroundColor: '#111827', borderRadius: 12, padding: 16, marginBottom: 12 },
+  addBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.ctaBg, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 7 },
+  addBtnText: { color: t.ctaText, fontSize: 12, fontFamily: fonts[700] },
+  importBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: t.cta2Border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
+  importBtnText: { color: t.cta2Text, fontSize: 12, fontFamily: fonts[700] },
+  emptyHint: { color: t.muted2, fontSize: 12, marginBottom: 14, fontStyle: 'italic' },
+  clipCard: { backgroundColor: t.card, borderRadius: 14, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: t.cardBorder, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  clipLabel: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3, alignSelf: 'flex-start' },
+  clipLabelMy: { backgroundColor: t.accentSoft },
+  clipLabelOpp: { backgroundColor: t.negativeSoft },
+  clipLabelText: { color: t.inkSoft, fontSize: 10, fontFamily: fonts[700] },
+  clipAnalysis: { flex: 1, color: t.muted, fontSize: 11, lineHeight: 16 },
+  textArea: { backgroundColor: t.card, borderRadius: 14, padding: 14, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 100, marginBottom: 16 },
+  generateBtn: { backgroundColor: t.ctaBg, borderRadius: 999, padding: 15, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8 },
+  generateText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15, marginLeft: 8 },
+  hint: { color: t.muted2, fontSize: 12, textAlign: 'center', marginTop: 10 },
+  reportBox: { backgroundColor: t.card, borderRadius: 18, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: t.cardBorder },
   actionRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: '#374151' },
-  actionText: { color: '#9ca3af', fontWeight: '600', fontSize: 12 },
-  correctionSection: { backgroundColor: '#111827', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#374151' },
-  correctionLabel: { color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 },
-  correctionInput: { backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12, color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151', minHeight: 80, marginBottom: 12, textAlignVertical: 'top' },
-  correctionBtn: { backgroundColor: '#16a34a', borderRadius: 10, padding: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
-  correctionBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 999, borderWidth: 1, borderColor: t.cta2Border },
+  actionText: { color: t.cta2Text, fontFamily: fonts[700], fontSize: 12 },
+  correctionSection: { backgroundColor: t.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: t.cardBorder },
+  correctionLabel: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 },
+  correctionInput: { backgroundColor: t.chip, borderRadius: 14, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 80, marginBottom: 12, textAlignVertical: 'top' },
+  correctionBtn: { backgroundColor: t.ctaBg, borderRadius: 999, padding: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  correctionBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
   // Modals
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
-  modalBox: { backgroundColor: '#111827', borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8 },
+  modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
+  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8, borderWidth: 1, borderColor: t.cardBorder },
   modalHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },
-  modalTitle: { color: '#fff', fontSize: 18, fontWeight: '800', flex: 1 },
-  searchInput: { backgroundColor: '#1f2937', borderRadius: 10, padding: 14, color: '#fff', fontSize: 15, borderWidth: 1, borderColor: '#374151' },
-  searchResult: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 10, backgroundColor: '#1f2937', marginBottom: 8 },
-  searchAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#2563eb', alignItems: 'center', justifyContent: 'center' },
+  modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800], flex: 1 },
+  searchInput: { backgroundColor: t.chip, borderRadius: 14, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line },
+  searchResult: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 14, backgroundColor: t.chip, marginBottom: 8 },
+  searchAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: t.accent, alignItems: 'center', justifyContent: 'center' },
 });
