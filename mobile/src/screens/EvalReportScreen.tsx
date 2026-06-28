@@ -13,6 +13,10 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { evalsAPI, playersAPI, playerAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
+import { useTheme } from '../theme/ThemeProvider';
+import { ThemeTokens } from '../theme/tokens';
+import { fonts } from '../theme/typography';
+import { ScreenBackground } from '../theme/components';
 import { Evaluation, Correction, Player } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
@@ -45,6 +49,8 @@ export default function EvalReportScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { evalId } = route.params;
+  const { t } = useTheme();
+  const styles = makeStyles(t);
 
   const [ev, setEv] = useState<Evaluation | null>(null);
   const [player, setPlayer] = useState<Player | null>(null);
@@ -337,18 +343,19 @@ export default function EvalReportScreen() {
     }
   };
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#2563eb" size="large" /></View>;
+  if (loading) return <ScreenBackground><View style={styles.center}><ActivityIndicator color={t.accent} size="large" /></View></ScreenBackground>;
   if (!ev) return null;
 
   const hasPillars = ev.pillar_grades && Object.keys(ev.pillar_grades).length > 0;
 
   return (
+    <ScreenBackground>
     <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
 
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color="#fff" />
+          <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 12 }}>
           <Text style={styles.title}>{outputTypeLabel(ev.output_type).toUpperCase()}</Text>
@@ -363,10 +370,10 @@ export default function EvalReportScreen() {
           style={styles.playerNameRow}
           onPress={() => setShowPlayerDetail(true)}
         >
-          <Ionicons name="person-circle-outline" size={18} color="#2563eb" />
+          <Ionicons name="person-circle-outline" size={18} color={t.accent} />
           <Text style={styles.playerNameLink}>{player.name}</Text>
           {player.position ? <Text style={styles.playerPos}>{player.position}</Text> : null}
-          <Ionicons name="chevron-forward" size={13} color="#2563eb" />
+          <Ionicons name="chevron-forward" size={13} color={t.accent} />
         </TouchableOpacity>
       )}
 
@@ -377,7 +384,7 @@ export default function EvalReportScreen() {
             <View style={styles.pdHeader}>
               <Text style={styles.pdName}>{player?.name}</Text>
               <TouchableOpacity onPress={() => setShowPlayerDetail(false)}>
-                <Ionicons name="close" size={22} color="#9ca3af" />
+                <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
 
@@ -409,13 +416,13 @@ export default function EvalReportScreen() {
 
             {(player as any)?.school_name ? (
               <View style={styles.pdLocationRow}>
-                <Ionicons name="school-outline" size={13} color="#6b7280" />
+                <Ionicons name="school-outline" size={13} color={t.muted} />
                 <Text style={styles.pdLocationText}>{(player as any).school_name}</Text>
               </View>
             ) : null}
             {((player as any)?.city || (player as any)?.state || (player as any)?.country) ? (
               <View style={styles.pdLocationRow}>
-                <Ionicons name="location-outline" size={13} color="#6b7280" />
+                <Ionicons name="location-outline" size={13} color={t.muted} />
                 <Text style={styles.pdLocationText}>
                   {[(player as any).city, (player as any).state, (player as any).country].filter(Boolean).join(', ')}
                 </Text>
@@ -430,7 +437,7 @@ export default function EvalReportScreen() {
               style={styles.pdProfileBtn}
               onPress={() => { setShowPlayerDetail(false); navigation.navigate('PlayerProfile', { playerId: ev!.player_id }); }}
             >
-              <Ionicons name="person" size={15} color="#fff" />
+              <Ionicons name="person" size={15} color={t.ctaText} />
               <Text style={styles.pdProfileBtnText}>View Full Profile</Text>
             </TouchableOpacity>
           </View>
@@ -452,7 +459,7 @@ export default function EvalReportScreen() {
         <View style={styles.flagSection}>
           {ev.green_flags && ev.green_flags.length > 0 && (
             <View style={{ marginBottom: 12 }}>
-              <Text style={[styles.flagTitle, { color: '#22c55e' }]}>Green Flags</Text>
+              <Text style={[styles.flagTitle, { color: t.positive }]}>Green Flags</Text>
               {ev.green_flags.map((f, i) => (
                 <View key={i} style={styles.flagListItem}>
                   <View style={styles.flagDotGreen} />
@@ -463,7 +470,7 @@ export default function EvalReportScreen() {
           )}
           {ev.watch_flags && ev.watch_flags.length > 0 && (
             <View>
-              <Text style={[styles.flagTitle, { color: '#f59e0b' }]}>Watch Flags</Text>
+              <Text style={[styles.flagTitle, { color: t.brown }]}>Watch Flags</Text>
               {ev.watch_flags.map((f, i) => (
                 <View key={i} style={styles.flagListItem}>
                   <View style={styles.flagDotWatch} />
@@ -493,7 +500,7 @@ export default function EvalReportScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Full Report</Text>
           <View style={styles.reportBox}>
-            {renderReport(ev.report_text)}
+            {renderReport(ev.report_text, { heading: t.ink, body: t.inkSoft })}
           </View>
         </View>
       )}
@@ -509,8 +516,8 @@ export default function EvalReportScreen() {
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
                 <Text style={styles.correctionMeta}>{new Date(c.created_at).toLocaleDateString()}</Text>
                 {c.applied && (
-                  <View style={{ backgroundColor: '#16a34a22', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, borderWidth: 1, borderColor: '#16a34a' }}>
-                    <Text style={{ color: '#16a34a', fontSize: 10, fontWeight: '700' }}>APPLIED</Text>
+                  <View style={{ backgroundColor: '#16a34a22', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, borderWidth: 1, borderColor: t.positive }}>
+                    <Text style={{ color: t.positive, fontSize: 10, fontWeight: '700' }}>APPLIED</Text>
                   </View>
                 )}
               </View>
@@ -519,12 +526,12 @@ export default function EvalReportScreen() {
           {/* Generate New Evaluation button — shown when there are unapplied corrections */}
           {corrections.some((c: any) => !c.applied) && (
             <TouchableOpacity
-              style={[styles.saveBtn, { backgroundColor: '#2563eb', marginTop: 12 }]}
+              style={[styles.saveBtn, { backgroundColor: t.accent, marginTop: 12 }]}
               onPress={generateNewEval}
               disabled={regenerating}
             >
               {regenerating
-                ? <ActivityIndicator color="#fff" />
+                ? <ActivityIndicator color={t.ctaText} />
                 : <Text style={styles.saveText}>Generate New Evaluation</Text>}
             </TouchableOpacity>
           )}
@@ -534,20 +541,20 @@ export default function EvalReportScreen() {
       {/* Action buttons */}
       <View style={styles.actionRow}>
         <TouchableOpacity style={styles.actionBtn} onPress={() => setShowCorrect(true)}>
-          <Ionicons name="create-outline" size={18} color="#9ca3af" />
+          <Ionicons name="create-outline" size={18} color={t.muted} />
           <Text style={styles.actionText}>Correct</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionBtn} onPress={() => setShowExport(true)}>
-          <Ionicons name="share-outline" size={18} color="#9ca3af" />
+          <Ionicons name="share-outline" size={18} color={t.muted} />
           <Text style={styles.actionText}>Export</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtn, { borderColor: '#16a34a' }]} onPress={() => setShowShare(true)}>
-          <Ionicons name="person-add-outline" size={18} color="#16a34a" />
-          <Text style={[styles.actionText, { color: '#16a34a' }]}>Player</Text>
+        <TouchableOpacity style={[styles.actionBtn, { borderColor: t.positive }]} onPress={() => setShowShare(true)}>
+          <Ionicons name="person-add-outline" size={18} color={t.positive} />
+          <Text style={[styles.actionText, { color: t.positive }]}>Player</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtn, { borderColor: '#7c3aed' }]} onPress={() => setShowShareModal(true)}>
-          <Ionicons name="share-social-outline" size={18} color="#7c3aed" />
-          <Text style={[styles.actionText, { color: '#7c3aed' }]}>Share</Text>
+        <TouchableOpacity style={[styles.actionBtn, { borderColor: t.accent }]} onPress={() => setShowShareModal(true)}>
+          <Ionicons name="share-social-outline" size={18} color={t.accent} />
+          <Text style={[styles.actionText, { color: t.accent }]}>Share</Text>
         </TouchableOpacity>
       </View>
 
@@ -570,20 +577,20 @@ export default function EvalReportScreen() {
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>Share with Staff</Text>
             <Text style={styles.modalSub}>Search for a coach, scout, or trainer to share this eval report.</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
-              <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
-              <Switch value={allowRegen} onValueChange={setAllowRegen} trackColor={{ true: '#7c3aed' }} thumbColor="#fff" />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, backgroundColor: t.chip, borderRadius: 8, padding: 12 }}>
+              <Text style={{ color: t.inkSoft, fontSize: 13 }}>Allow recipient to regenerate</Text>
+              <Switch value={allowRegen} onValueChange={setAllowRegen} trackColor={{ true: t.accent }} thumbColor="#fff" />
             </View>
             <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
               <VoiceTextInput
                 style={[styles.input, { flex: 1, marginBottom: 0 }]}
                 placeholder="Search coach/program name..."
-                placeholderTextColor="#4b5563"
+                placeholderTextColor={t.muted2}
                 value={staffSearch}
                 onChangeText={setStaffSearch}
               />
               <TouchableOpacity
-                style={{ backgroundColor: '#7c3aed', borderRadius: 10, padding: 14, alignItems: 'center', justifyContent: 'center' }}
+                style={{ backgroundColor: t.accent, borderRadius: 10, padding: 14, alignItems: 'center', justifyContent: 'center' }}
                 onPress={searchStaff}
                 disabled={staffSearchLoading}
               >
@@ -593,12 +600,12 @@ export default function EvalReportScreen() {
             {staffResults.map((r: any) => (
               <TouchableOpacity
                 key={r.id}
-                style={{ backgroundColor: '#1f2937', borderRadius: 10, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: '#374151' }}
+                style={{ backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: t.line }}
                 onPress={() => sendToStaff(r)}
                 disabled={sendingStaff}
               >
-                <Text style={{ color: '#fff', fontWeight: '600' }}>{r.name}</Text>
-                <Text style={{ color: '#6b7280', fontSize: 11 }}>{r.role} · {r.program_name}</Text>
+                <Text style={{ color: t.ink, fontWeight: '600' }}>{r.name}</Text>
+                <Text style={{ color: t.muted, fontSize: 11 }}>{r.role} · {r.program_name}</Text>
               </TouchableOpacity>
             ))}
             <View style={styles.modalRow}>
@@ -630,7 +637,7 @@ export default function EvalReportScreen() {
                 <Switch
                   value={exportCats[cat.key]}
                   onValueChange={v => setExportCats(prev => ({ ...prev, [cat.key]: v }))}
-                  trackColor={{ true: '#2563eb' }}
+                  trackColor={{ true: t.accent }}
                   thumbColor="#fff"
                 />
               </View>
@@ -639,12 +646,12 @@ export default function EvalReportScreen() {
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowExport(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.saveBtn, { backgroundColor: '#374151' }]} onPress={printPdf} disabled={exporting}>
+              <TouchableOpacity style={[styles.saveBtn, { backgroundColor: t.line }]} onPress={printPdf} disabled={exporting}>
                 <Text style={styles.saveText}>Print</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveBtn} onPress={exportReport} disabled={exporting}>
                 {exporting
-                  ? <ActivityIndicator color="#fff" />
+                  ? <ActivityIndicator color={t.ctaText} />
                   : <Text style={styles.saveText}>Share PDF</Text>}
               </TouchableOpacity>
             </View>
@@ -664,13 +671,13 @@ export default function EvalReportScreen() {
 
             {selectedPlayerUser ? (
               <View style={{ marginBottom: 12 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#16a34a22', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: '#16a34a' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#16a34a22', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: t.positive }}>
                   <View>
-                    <Text style={{ color: '#fff', fontWeight: '700' }}>{selectedPlayerUser.name}</Text>
-                    {selectedPlayerUser.linked_player && <Text style={{ color: '#16a34a', fontSize: 11 }}>→ {selectedPlayerUser.linked_player}</Text>}
+                    <Text style={{ color: t.ink, fontWeight: '700' }}>{selectedPlayerUser.name}</Text>
+                    {selectedPlayerUser.linked_player && <Text style={{ color: t.positive, fontSize: 11 }}>→ {selectedPlayerUser.linked_player}</Text>}
                   </View>
                   <TouchableOpacity onPress={() => setSelectedPlayerUser(null)}>
-                    <Ionicons name="close-circle" size={20} color="#9ca3af" />
+                    <Ionicons name="close-circle" size={20} color={t.muted} />
                   </TouchableOpacity>
                 </View>
                 <Text style={[styles.label, { marginTop: 12 }]}>Include in Share</Text>
@@ -685,7 +692,7 @@ export default function EvalReportScreen() {
                     <Switch
                       value={shareCats[cat.key as keyof typeof shareCats]}
                       onValueChange={v => setShareCats(prev => ({ ...prev, [cat.key]: v }))}
-                      trackColor={{ true: '#16a34a' }}
+                      trackColor={{ true: t.positive }}
                       thumbColor="#fff"
                     />
                   </View>
@@ -694,7 +701,7 @@ export default function EvalReportScreen() {
                 <VoiceTextInput
                   style={styles.input}
                   placeholder="Add a message to the player..."
-                  placeholderTextColor="#4b5563"
+                  placeholderTextColor={t.muted2}
                   value={shareMessage}
                   onChangeText={setShareMessage}
                   multiline
@@ -706,12 +713,12 @@ export default function EvalReportScreen() {
                   <VoiceTextInput
                     style={[styles.input, { flex: 1, marginBottom: 0 }]}
                     placeholder="Search player name..."
-                    placeholderTextColor="#4b5563"
+                    placeholderTextColor={t.muted2}
                     value={shareSearch}
                     onChangeText={setShareSearch}
                   />
                   <TouchableOpacity
-                    style={{ backgroundColor: '#2563eb', borderRadius: 10, padding: 14, alignItems: 'center', justifyContent: 'center' }}
+                    style={{ backgroundColor: t.accent, borderRadius: 10, padding: 14, alignItems: 'center', justifyContent: 'center' }}
                     onPress={searchPlayerUsers}
                     disabled={shareSearchLoading}
                   >
@@ -721,11 +728,11 @@ export default function EvalReportScreen() {
                 {shareResults.map((pu: any) => (
                   <TouchableOpacity
                     key={pu.id}
-                    style={{ backgroundColor: '#1f2937', borderRadius: 10, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: '#374151' }}
+                    style={{ backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: t.line }}
                     onPress={() => { setSelectedPlayerUser(pu); setShareResults([]); }}
                   >
-                    <Text style={{ color: '#fff', fontWeight: '600' }}>{pu.name}</Text>
-                    <Text style={{ color: '#6b7280', fontSize: 11 }}>{pu.email}{pu.linked_player ? ` · ${pu.linked_player}` : ''}</Text>
+                    <Text style={{ color: t.ink, fontWeight: '600' }}>{pu.name}</Text>
+                    <Text style={{ color: t.muted, fontSize: 11 }}>{pu.email}{pu.linked_player ? ` · ${pu.linked_player}` : ''}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -736,8 +743,8 @@ export default function EvalReportScreen() {
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
               {selectedPlayerUser && (
-                <TouchableOpacity style={[styles.saveBtn, { backgroundColor: '#16a34a' }]} onPress={submitShare} disabled={sharing}>
-                  {sharing ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Share</Text>}
+                <TouchableOpacity style={[styles.saveBtn, { backgroundColor: t.positive }]} onPress={submitShare} disabled={sharing}>
+                  {sharing ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>Share</Text>}
                 </TouchableOpacity>
               )}
             </View>
@@ -762,7 +769,7 @@ export default function EvalReportScreen() {
                   style={[styles.pillarChip, selectedPillar === p && styles.pillarChipActive]}
                   onPress={() => setSelectedPillar(p)}
                 >
-                  <Text style={[styles.pillarChipText, selectedPillar === p && { color: '#fff' }]}>
+                  <Text style={[styles.pillarChipText, selectedPillar === p && { color: t.ink }]}>
                     {p ? PILLAR_LABELS[p] : 'General'}
                   </Text>
                 </TouchableOpacity>
@@ -772,7 +779,7 @@ export default function EvalReportScreen() {
             <VoiceTextInput
               style={[styles.input, { height: 100 }]}
               placeholder="What needs to be corrected in this report?"
-              placeholderTextColor="#4b5563"
+              placeholderTextColor={t.muted2}
               value={correctionText}
               onChangeText={setCorrectionText}
               multiline
@@ -781,12 +788,12 @@ export default function EvalReportScreen() {
             />
             <View style={{ gap: 8, marginTop: 8 }}>
               <TouchableOpacity
-                style={[styles.saveBtn, { backgroundColor: '#2563eb' }]}
+                style={[styles.saveBtn, { backgroundColor: t.accent }]}
                 onPress={() => submitCorrection(true)}
                 disabled={saving || regenerating}
               >
                 {saving || regenerating
-                  ? <ActivityIndicator color="#fff" />
+                  ? <ActivityIndicator color={t.ctaText} />
                   : <Text style={styles.saveText}>Generate New Evaluation</Text>}
               </TouchableOpacity>
               <View style={styles.modalRow}>
@@ -794,11 +801,11 @@ export default function EvalReportScreen() {
                   <Text style={styles.cancelText}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.saveBtn, { backgroundColor: '#374151' }]}
+                  style={[styles.saveBtn, { backgroundColor: t.line }]}
                   onPress={() => submitCorrection(false)}
                   disabled={saving}
                 >
-                  {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Save for Later</Text>}
+                  {saving ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>Save for Later</Text>}
                 </TouchableOpacity>
               </View>
             </View>
@@ -806,79 +813,80 @@ export default function EvalReportScreen() {
         </KeyboardAvoidingView>
       </Modal>
     </KeyboardAwareScrollView>
+    </ScreenBackground>
   );
 }
 
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0a0a' },
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56 },
   playerNameRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    marginHorizontal: 20, marginBottom: 12, backgroundColor: '#111827',
-    borderRadius: 10, padding: 12, borderWidth: 1, borderColor: '#1f2937',
+    marginHorizontal: 20, marginBottom: 12, backgroundColor: t.card,
+    borderRadius: 14, padding: 12, borderWidth: 1, borderColor: t.cardBorder,
   },
-  playerNameLink: { color: '#60a5fa', fontWeight: '700', fontSize: 15, flex: 1 },
-  playerPos: { color: '#6b7280', fontSize: 12 },
+  playerNameLink: { color: t.accent, fontFamily: fonts[700], fontSize: 15, flex: 1 },
+  playerPos: { color: t.muted, fontSize: 12 },
   // Player detail modal
-  pdOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
-  pdBox: { backgroundColor: '#111827', borderRadius: 20, padding: 24, margin: 8, paddingBottom: 36 },
+  pdOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
+  pdBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 8, paddingBottom: 36, borderWidth: 1, borderColor: t.cardBorder },
   pdHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  pdName: { color: '#fff', fontSize: 22, fontWeight: '900', flex: 1 },
+  pdName: { color: t.ink, fontSize: 22, fontFamily: fonts[900], flex: 1 },
   pdRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
-  pdChip: { backgroundColor: '#1f2937', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6 },
-  pdChipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
+  pdChip: { backgroundColor: t.chip, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 6 },
+  pdChipText: { color: t.inkSoft, fontSize: 13, fontFamily: fonts[600] },
   pdMeasurements: { flexDirection: 'row', gap: 16, marginBottom: 16 },
-  pdStat: { alignItems: 'center', backgroundColor: '#1f2937', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20 },
-  pdStatVal: { color: '#fff', fontSize: 20, fontWeight: '800' },
-  pdStatLabel: { color: '#6b7280', fontSize: 11, marginTop: 2, textTransform: 'uppercase', letterSpacing: 0.5 },
+  pdStat: { alignItems: 'center', backgroundColor: t.chip, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20 },
+  pdStatVal: { color: t.ink, fontSize: 20, fontFamily: fonts[800] },
+  pdStatLabel: { color: t.muted, fontSize: 11, marginTop: 2, textTransform: 'uppercase', letterSpacing: 0.5 },
   pdLocationRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  pdLocationText: { color: '#6b7280', fontSize: 13 },
-  pdProgram: { color: '#4b5563', fontSize: 13, marginBottom: 16 },
+  pdLocationText: { color: t.muted, fontSize: 13 },
+  pdProgram: { color: t.muted2, fontSize: 13, marginBottom: 16 },
   pdProfileBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#2563eb', borderRadius: 12, padding: 14, marginTop: 4,
+    backgroundColor: t.ctaBg, borderRadius: 999, padding: 14, marginTop: 4,
   },
-  pdProfileBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  title: { color: '#fff', fontSize: 16, fontWeight: '900' },
-  sub: { color: '#6b7280', fontSize: 11, marginTop: 2 },
+  pdProfileBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 15 },
+  title: { color: t.ink, fontSize: 16, fontFamily: fonts[900] },
+  sub: { color: t.muted, fontSize: 11, marginTop: 2 },
   section: { paddingHorizontal: 20, marginTop: 24 },
-  sectionLabel: { color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 },
+  sectionLabel: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 },
   flagSection: { paddingHorizontal: 20, marginTop: 20 },
-  flagTitle: { fontSize: 11, fontWeight: '700', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 },
+  flagTitle: { fontSize: 11.5, fontFamily: fonts[700], marginBottom: 8, textTransform: 'uppercase', letterSpacing: 2 },
   flagListItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 8, paddingRight: 8 },
-  flagDotGreen: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#16a34a', marginTop: 4, flexShrink: 0 },
-  flagDotWatch: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#f59e0b', marginTop: 4, flexShrink: 0 },
-  flagListText: { color: '#d1d5db', fontSize: 13, flex: 1, lineHeight: 20 },
+  flagDotGreen: { width: 10, height: 10, borderRadius: 5, backgroundColor: t.positive, marginTop: 4, flexShrink: 0 },
+  flagDotWatch: { width: 10, height: 10, borderRadius: 5, backgroundColor: t.brown, marginTop: 4, flexShrink: 0 },
+  flagListText: { color: t.inkSoft, fontSize: 13, flex: 1, lineHeight: 20 },
   questionRow: { flexDirection: 'row', marginBottom: 10, gap: 10 },
-  questionNum: { color: '#2563eb', fontWeight: '800', fontSize: 14, width: 20 },
-  questionText: { color: '#d1d5db', fontSize: 13, flex: 1, lineHeight: 20 },
-  reportBox: { backgroundColor: '#111827', borderRadius: 12, padding: 16 },
-  correctionCard: { backgroundColor: '#111827', borderRadius: 10, padding: 14, marginBottom: 8 },
-  correctionPillar: { color: '#2563eb', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 4 },
-  correctionText: { color: '#fff', fontSize: 13 },
-  correctionMeta: { color: '#4b5563', fontSize: 11, marginTop: 6 },
+  questionNum: { color: t.accent, fontFamily: fonts[800], fontSize: 14, width: 20 },
+  questionText: { color: t.inkSoft, fontSize: 13, flex: 1, lineHeight: 20 },
+  reportBox: { backgroundColor: t.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: t.cardBorder },
+  correctionCard: { backgroundColor: t.card, borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: t.cardBorder },
+  correctionPillar: { color: t.accent, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 4 },
+  correctionText: { color: t.ink, fontSize: 13 },
+  correctionMeta: { color: t.muted2, fontSize: 11, marginTop: 6 },
   actionRow: { flexDirection: 'row', margin: 20, gap: 10 },
   actionBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 6, padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#374151',
+    gap: 6, padding: 13, borderRadius: 999, borderWidth: 1, borderColor: t.cta2Border,
   },
-  actionText: { color: '#9ca3af', fontWeight: '600', fontSize: 13 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' },
-  modal: { backgroundColor: '#111827', borderRadius: 20, padding: 24, margin: 12 },
-  modalTitle: { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 4 },
-  modalSub: { color: '#6b7280', fontSize: 12, marginBottom: 16 },
-  toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1f2937' },
-  toggleLabel: { color: '#d1d5db', fontSize: 14 },
-  label: { color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 },
-  pillarChip: { borderWidth: 1, borderColor: '#374151', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6, marginRight: 6 },
-  pillarChipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  pillarChipText: { color: '#9ca3af', fontSize: 12 },
-  input: { backgroundColor: '#1f2937', borderRadius: 10, padding: 14, color: '#fff', fontSize: 14, marginBottom: 12 },
+  actionText: { color: t.cta2Text, fontFamily: fonts[700], fontSize: 13 },
+  modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
+  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder },
+  modalTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 4 },
+  modalSub: { color: t.muted, fontSize: 12, marginBottom: 16 },
+  toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: t.divider },
+  toggleLabel: { color: t.inkSoft, fontSize: 14 },
+  label: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
+  pillarChip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 7, marginRight: 6 },
+  pillarChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  pillarChipText: { color: t.muted, fontSize: 12 },
+  input: { backgroundColor: t.chip, borderRadius: 14, padding: 14, color: t.ink, fontSize: 14, marginBottom: 12, borderWidth: 1, borderColor: t.line },
   modalRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
-  cancelBtn: { flex: 1, padding: 14, borderRadius: 10, borderWidth: 1, borderColor: '#374151', alignItems: 'center' },
-  cancelText: { color: '#9ca3af', fontWeight: '600' },
-  saveBtn: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: '#2563eb', alignItems: 'center' },
-  saveText: { color: '#fff', fontWeight: '700' },
+  cancelBtn: { flex: 1, padding: 14, borderRadius: 999, borderWidth: 1, borderColor: t.cta2Border, alignItems: 'center' },
+  cancelText: { color: t.cta2Text, fontFamily: fonts[700] },
+  saveBtn: { flex: 1, padding: 14, borderRadius: 999, backgroundColor: t.ctaBg, alignItems: 'center' },
+  saveText: { color: t.ctaText, fontFamily: fonts[700] },
 });

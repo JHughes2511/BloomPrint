@@ -1,10 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTheme } from '../theme/ThemeProvider';
 
 export function GradeBadge({ grade, size = 'md' }: { grade: number | null; size?: 'sm' | 'md' | 'lg' }) {
+  const { t } = useTheme();
   if (grade === null) return null;
 
-  const color = grade >= 8 ? '#22c55e' : grade >= 6.5 ? '#eab308' : grade >= 5 ? '#f97316' : '#ef4444';
+  // Grade scale folded into the brand palette (no bright red/green/yellow).
+  const color = grade >= 8 ? t.positive : grade >= 6.5 ? t.accent : grade >= 5 ? t.brown : t.negative;
   const sz = size === 'lg' ? 56 : size === 'md' ? 44 : 32;
   const fs = size === 'lg' ? 20 : size === 'md' ? 15 : 12;
 
