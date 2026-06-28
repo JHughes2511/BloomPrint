@@ -1,35 +1,38 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { playerAPI } from '../api/client';
+import { useTheme } from '../theme/ThemeProvider';
+import { ScreenBackground, SectionLabel, Card, IconTile, Txt } from '../theme/components';
+import { Icon, IconName } from '../theme/icons';
+import { fonts, type as typeScale } from '../theme/typography';
 
-const REPORT_TYPES = [
-  { key: 'player_eval', label: 'Player Eval', icon: 'person', desc: 'Individual BIM evaluation scored across all 6 pillars' },
+const REPORT_TYPES: { key: string; label: string; icon: IconName; desc: string }[] = [
+  { key: 'player_eval', label: 'Player Eval', icon: 'user', desc: 'Individual BIM evaluation scored across all 6 pillars' },
   { key: 'film_breakdown', label: 'Film Breakdown', icon: 'film', desc: 'Frame-by-frame film analysis of technique and decisions' },
   { key: 'scouting_report', label: 'Scouting Report', icon: 'search', desc: 'Recruitment-grade scouting report for a target player' },
   { key: 'coaching_report', label: 'Coaching Report', icon: 'clipboard', desc: 'Coach-facing breakdown with practice and scheme focus' },
-  { key: 'game_analysis', label: 'Game Analysis', icon: 'stats-chart', desc: 'Full game film analysis covering both sides of the ball' },
-  { key: 'training_program', label: 'Training Program', icon: 'barbell', desc: 'Personalized skill development program from eval data' },
-  { key: 'recruitment_profile', label: 'Recruitment', icon: 'school', desc: 'Next-level recruitment profile and college projection' },
-  { key: 'position_analysis', label: 'Position Analysis', icon: 'location', desc: 'Position-specific role fit and skill translation analysis' },
-  { key: 'box_score', label: 'Box Score', icon: 'stats-chart', desc: 'Game and season box score stats imported and analyzed by BIM' },
+  { key: 'game_analysis', label: 'Game Analysis', icon: 'bar-chart-3', desc: 'Full game film analysis covering both sides of the ball' },
+  { key: 'training_program', label: 'Training Program', icon: 'dumbbell', desc: 'Personalized skill development program from eval data' },
+  { key: 'recruitment_profile', label: 'Recruitment', icon: 'award', desc: 'Next-level recruitment profile and college projection' },
+  { key: 'position_analysis', label: 'Position Analysis', icon: 'map-pin', desc: 'Position-specific role fit and skill translation analysis' },
+  { key: 'box_score', label: 'Box Score', icon: 'list', desc: 'Game and season box score stats imported and analyzed by BIM' },
 ];
 
-const PILLARS = [
-  { key: 'offensive_skills', label: 'Offensive Skills', icon: 'basketball', color: '#f59e0b', desc: 'Scoring, creation, shooting mechanics, footwork, P&R' },
-  { key: 'defensive_capabilities', label: 'Defense', icon: 'shield', color: '#3b82f6', desc: 'On-ball defense, help-side, IQ, communication, rotations' },
-  { key: 'physical_attributes', label: 'Physical', icon: 'body', color: '#22c55e', desc: 'Athleticism, size, length, speed, strength, explosiveness' },
-  { key: 'intangibles', label: 'Intangibles', icon: 'heart', color: '#ec4899', desc: 'IQ, coachability, leadership, motor, competitive drive' },
-  { key: 'advanced_analysis', label: 'Advanced', icon: 'analytics', color: '#a78bfa', desc: 'Shot selection, efficiency metrics, tendencies, adjustments' },
-  { key: 'strategic_fit', label: 'Strategic Fit', icon: 'git-network', color: '#fb923c', desc: 'System fit, positional versatility, lineup compatibility' },
+const PILLARS: { key: string; label: string; icon: IconName; desc: string }[] = [
+  { key: 'offensive_skills', label: 'Offensive Skills', icon: 'target', desc: 'Scoring, creation, shooting mechanics, footwork, P&R' },
+  { key: 'defensive_capabilities', label: 'Defense', icon: 'shield', desc: 'On-ball defense, help-side, IQ, communication, rotations' },
+  { key: 'physical_attributes', label: 'Physical', icon: 'dumbbell', desc: 'Athleticism, size, length, speed, strength, explosiveness' },
+  { key: 'intangibles', label: 'Intangibles', icon: 'brain', desc: 'IQ, coachability, leadership, motor, competitive drive' },
+  { key: 'advanced_analysis', label: 'Advanced', icon: 'activity', desc: 'Shot selection, efficiency metrics, tendencies, adjustments' },
+  { key: 'strategic_fit', label: 'Strategic Fit', icon: 'crosshair', desc: 'System fit, positional versatility, lineup compatibility' },
 ];
 
 export default function HomeScreen() {
   const { coach, logout } = useAuth();
   const navigation = useNavigation<any>();
+  const { t, mode, toggle } = useTheme();
   const [unreadCount, setUnreadCount] = useState(0);
 
   useFocusEffect(useCallback(() => {
@@ -45,134 +48,93 @@ export default function HomeScreen() {
     ]);
   };
 
-  return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
-      {/* Header */}
-      <View style={styles.header}>
-        {/* Top row: logo on left, icon buttons on right */}
-        <View style={styles.headerTop}>
-          <View style={{ flex: 1, marginRight: 8 }}>
-            <Text style={styles.logo}>BloomPrint</Text>
-            <Text style={styles.sub}>Basketball Intelligence Model</Text>
-          </View>
-          <View style={{ flexDirection: 'row', gap: 8, flexShrink: 0, alignItems: 'center' }}>
-            <TouchableOpacity
-              style={styles.iconBtn}
-              onPress={handleSignOut}
-              accessibilityLabel="Sign Out"
-            >
-              <MaterialCommunityIcons name="logout" size={18} color="#6b7280" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.iconBtn}
-              onPress={() => navigation.navigate('StaffInbox')}
-              accessibilityLabel="Staff Inbox"
-            >
-              <Ionicons name="mail-outline" size={18} color="#9ca3af" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.iconBtn, { position: 'relative' }]}
-              onPress={() => navigation.navigate('CoachNotifications')}
-              accessibilityLabel="Notifications"
-            >
-              <Ionicons name="notifications-outline" size={18} color="#9ca3af" />
-              {unreadCount > 0 && (
-                <View style={styles.notifBadge}>
-                  <Text style={styles.notifBadgeText}>{unreadCount}</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
+  const CircleBtn = ({ icon, onPress, badge, label }: { icon: IconName; onPress: () => void; badge?: number; label: string }) => (
+    <TouchableOpacity
+      onPress={onPress}
+      accessibilityLabel={label}
+      style={{
+        width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center',
+        backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder,
+      }}
+    >
+      <Icon name={icon} size={18} color={t.inkSoft} strokeWidth={2} />
+      {badge ? (
+        <View style={[styles.notifBadge, { backgroundColor: t.negative }]}>
+          <Text style={styles.notifBadgeText}>{badge}</Text>
         </View>
-        {coach && (
-          <View style={styles.coachBadge}>
-            <Ionicons name="person-circle-outline" size={16} color="#6b7280" />
-            <Text style={styles.coachText}>
+      ) : null}
+    </TouchableOpacity>
+  );
+
+  return (
+    <ScreenBackground>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <View style={{ flex: 1, marginRight: 8 }}>
+              <Text style={[typeScale.label, { color: t.label, marginBottom: 4 }]}>Intelligence Model</Text>
+              <Text style={[typeScale.h1, { color: t.ink }]}>BloomPrint</Text>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+              <CircleBtn icon={mode === 'dark' ? 'sun' : 'moon'} onPress={toggle} label="Toggle theme" />
+              <CircleBtn icon="log-out" onPress={handleSignOut} label="Sign out" />
+              <CircleBtn icon="mail" onPress={() => navigation.navigate('StaffInbox')} label="Staff inbox" />
+              <CircleBtn icon="bell" onPress={() => navigation.navigate('CoachNotifications')} badge={unreadCount} label="Notifications" />
+            </View>
+          </View>
+          {coach && (
+            <Text style={[typeScale.bodySoft, { color: t.muted, marginTop: 8 }]}>
               {coach.name} · {coach.role ? coach.role.charAt(0).toUpperCase() + coach.role.slice(1) : 'Coach'} · {coach.program_name}
             </Text>
-          </View>
-        )}
-      </View>
+          )}
+        </View>
 
-      {/* Report Types */}
-      <Text style={styles.sectionLabel}>Report Types</Text>
-      <View style={styles.grid}>
-        {REPORT_TYPES.map(rt => (
-          <View key={rt.key} style={styles.card}>
-            <View style={styles.cardIcon}>
-              <Ionicons name={rt.icon as any} size={20} color="#2563eb" />
-            </View>
-            <Text style={styles.cardTitle}>{rt.label}</Text>
-            <Text style={styles.cardDesc}>{rt.desc}</Text>
-          </View>
-        ))}
-      </View>
-
-      {/* 6 Pillars */}
-      <Text style={styles.sectionLabel}>The 6 Pillars</Text>
-      {PILLARS.map(p => (
-        <View key={p.key} style={styles.pillarRow}>
-          <View style={[styles.pillarIcon, { backgroundColor: p.color + '22' }]}>
-            <Ionicons name={p.icon as any} size={18} color={p.color} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.pillarLabel}>{p.label}</Text>
-            <Text style={styles.pillarDesc}>{p.desc}</Text>
+        {/* Report Types */}
+        <View style={{ paddingHorizontal: 22, marginTop: 22 }}>
+          <SectionLabel>Report Types</SectionLabel>
+          <View style={styles.grid}>
+            {REPORT_TYPES.map(rt => (
+              <Card key={rt.key} style={{ width: '48%' }} padding={16}>
+                <IconTile name={rt.icon} variant="accent" size={44} />
+                <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 15.5, marginTop: 12 }]}>{rt.label}</Text>
+                <Text style={[typeScale.bodySoft, { color: t.muted, fontSize: 12, lineHeight: 17, marginTop: 4 }]}>{rt.desc}</Text>
+              </Card>
+            ))}
           </View>
         </View>
-      ))}
-    </ScrollView>
+
+        {/* 6 Pillars */}
+        <View style={{ paddingHorizontal: 22, marginTop: 26 }}>
+          <SectionLabel>The 6 Pillars</SectionLabel>
+          <Card padding={6}>
+            {PILLARS.map((p, i) => (
+              <View key={p.key}>
+                <View style={styles.pillarRow}>
+                  <IconTile name={p.icon} variant="accent" size={44} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: fonts[700], fontSize: 14.5, color: t.ink }}>{p.label}</Text>
+                    <Text style={[typeScale.bodySoft, { color: t.muted, fontSize: 12, lineHeight: 17, marginTop: 2 }]}>{p.desc}</Text>
+                  </View>
+                </View>
+                {i < PILLARS.length - 1 && <View style={{ height: 1, backgroundColor: t.divider, marginLeft: 12 }} />}
+              </View>
+            ))}
+          </Card>
+        </View>
+      </ScrollView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0a0a' },
-  header: { padding: 24, paddingTop: 60, marginBottom: 4 },
+  header: { paddingHorizontal: 22, paddingTop: 64 },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  logo: { fontSize: 32, fontWeight: '900', color: '#fff', letterSpacing: 0.5 },
-  sub: { fontSize: 13, color: '#6b7280', marginTop: 2 },
-  iconBtn: {
-    borderWidth: 1, borderColor: '#374151', borderRadius: 10,
-    paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center', justifyContent: 'center',
-  },
   notifBadge: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    backgroundColor: '#dc2626',
-    borderRadius: 7,
-    minWidth: 14,
-    height: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 2,
+    position: 'absolute', top: 2, right: 2, borderRadius: 7, minWidth: 14, height: 14,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2,
   },
   notifBadgeText: { color: '#fff', fontSize: 8, fontWeight: '800' },
-  coachBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10 },
-  coachText: { color: '#6b7280', fontSize: 12 },
-  sectionLabel: {
-    color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1,
-    textTransform: 'uppercase', marginHorizontal: 20, marginTop: 24, marginBottom: 12,
-  },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, gap: 10 },
-  card: {
-    width: '47%', backgroundColor: '#111827', borderRadius: 12,
-    padding: 14, borderWidth: 1, borderColor: '#1f2937',
-  },
-  cardIcon: {
-    width: 36, height: 36, borderRadius: 10, backgroundColor: '#1e3a8a22',
-    alignItems: 'center', justifyContent: 'center', marginBottom: 8,
-  },
-  cardTitle: { color: '#fff', fontSize: 13, fontWeight: '700', marginBottom: 4 },
-  cardDesc: { color: '#6b7280', fontSize: 11, lineHeight: 16 },
-  pillarRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 14,
-    marginHorizontal: 20, minHeight: 52,
-  },
-  pillarIcon: {
-    width: 36, height: 36, borderRadius: 10,
-    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-  },
-  pillarLabel: { color: '#fff', fontSize: 14, fontWeight: '700' },
-  pillarDesc: { color: '#6b7280', fontSize: 12, marginTop: 2, lineHeight: 17 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12 },
+  pillarRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12, paddingHorizontal: 12 },
 });

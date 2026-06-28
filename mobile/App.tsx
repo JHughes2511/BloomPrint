@@ -48,7 +48,7 @@ import {
   HankenGrotesk_400Regular, HankenGrotesk_500Medium, HankenGrotesk_600SemiBold,
   HankenGrotesk_700Bold, HankenGrotesk_800ExtraBold, HankenGrotesk_900Black,
 } from '@expo-google-fonts/hanken-grotesk';
-import { ThemeProvider } from './src/theme/ThemeProvider';
+import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -113,13 +113,14 @@ function RecentStack() {
 }
 
 function AppTabs() {
+  const { t } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarStyle: { backgroundColor: '#111827', borderTopColor: '#1f2937' },
-        tabBarActiveTintColor: '#2563eb',
-        tabBarInactiveTintColor: '#6b7280',
+        tabBarStyle: { backgroundColor: t.isDark ? '#0C2331' : '#EFE7DA', borderTopColor: t.divider },
+        tabBarActiveTintColor: t.accent,
+        tabBarInactiveTintColor: t.muted2,
         tabBarLabelStyle: { fontSize: 9, marginBottom: 2, textAlign: 'center', includeFontPadding: false },
         tabBarItemStyle: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2 },
         tabBarIconStyle: { marginBottom: 0 },
