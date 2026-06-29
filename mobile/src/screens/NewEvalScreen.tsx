@@ -10,6 +10,10 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { evalsAPI } from '../api/client';
 import { OutputType } from '../types';
+import { useTheme } from '../theme/ThemeProvider';
+import { ThemeTokens } from '../theme/tokens';
+import { fonts } from '../theme/typography';
+import { ScreenBackground } from '../theme/components';
 
 const OUTPUT_TYPES: { key: OutputType; label: string }[] = [
   { key: 'player_eval',        label: 'Player Eval' },
@@ -27,6 +31,8 @@ export default function NewEvalScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { playerId, playerName } = route.params;
+  const { t } = useTheme();
+  const styles = makeStyles(t);
 
   // comma-separated when multiple types are combined into one comprehensive eval
   const [outputType, setOutputType] = useState<string>('player_eval');
@@ -70,8 +76,9 @@ export default function NewEvalScreen() {
   };
 
   return (
+    <ScreenBackground>
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: '#0a0a0a' }}
+      style={{ flex: 1 }}
       behavior={undefined}
     >
     <KeyboardAwareScrollView
@@ -83,7 +90,7 @@ export default function NewEvalScreen() {
     >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color="#fff" />
+          <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 12 }}>
           <Text style={styles.title}>New Evaluation</Text>
@@ -93,7 +100,7 @@ export default function NewEvalScreen() {
 
       {/* Output type selector — combine multiple for a comprehensive eval */}
       <Text style={styles.label}>Report Type</Text>
-      <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
+      <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
         Tap multiple to combine them into one comprehensive report.
       </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
@@ -118,8 +125,8 @@ export default function NewEvalScreen() {
       {/* Video picker */}
       <Text style={styles.label}>Video Clip</Text>
       <TouchableOpacity style={[styles.videoPicker, videoUri && styles.videoPickerDone]} onPress={pickVideo}>
-        <Ionicons name={videoUri ? 'checkmark-circle' : 'cloud-upload-outline'} size={28} color={videoUri ? '#22c55e' : '#6b7280'} />
-        <Text style={[styles.videoPickerText, videoUri && { color: '#22c55e' }]}>
+        <Ionicons name={videoUri ? 'checkmark-circle' : 'cloud-upload-outline'} size={28} color={videoUri ? t.positive : t.muted} />
+        <Text style={[styles.videoPickerText, videoUri && { color: t.positive }]}>
           {videoUri ? videoName : 'Tap to select video'}
         </Text>
       </TouchableOpacity>
@@ -129,7 +136,7 @@ export default function NewEvalScreen() {
       <VoiceTextInput
         style={[styles.input, { height: 100 }]}
         placeholder="e.g. Elite catch and shoot, plays at one pace, need to see more P&R midrange..."
-        placeholderTextColor="#4b5563"
+        placeholderTextColor={t.muted2}
         value={coachNotes}
         onChangeText={setCoachNotes}
         multiline
@@ -141,7 +148,7 @@ export default function NewEvalScreen() {
       <VoiceTextInput
         style={[styles.input, { height: 80 }]}
         placeholder="e.g. Focus on college-level translation, P&R reads, defensive film"
-        placeholderTextColor="#4b5563"
+        placeholderTextColor={t.muted2}
         value={focusPrompt}
         onChangeText={setFocusPrompt}
         multiline
@@ -151,8 +158,8 @@ export default function NewEvalScreen() {
 
       <TouchableOpacity style={styles.submitBtn} onPress={submit} disabled={submitting}>
         {submitting
-          ? <><ActivityIndicator color="#fff" /><Text style={styles.submitText}>  Analyzing...</Text></>
-          : <><Ionicons name="analytics" size={18} color="#fff" /><Text style={styles.submitText}>  Run BIM Analysis</Text></>
+          ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.submitText}>  Analyzing...</Text></>
+          : <><Ionicons name="analytics" size={18} color={t.ctaText} /><Text style={styles.submitText}>  Run BIM Analysis</Text></>
         }
       </TouchableOpacity>
 
@@ -161,36 +168,37 @@ export default function NewEvalScreen() {
       )}
     </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
+    </ScreenBackground>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0a0a', padding: 20, paddingTop: 56 },
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  container: { flex: 1, padding: 20, paddingTop: 56 },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 28 },
-  title: { color: '#fff', fontSize: 22, fontWeight: '900' },
-  sub: { color: '#6b7280', fontSize: 12, marginTop: 2 },
-  label: { color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 },
+  title: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6 },
+  sub: { color: t.muted, fontSize: 12, marginTop: 2 },
+  label: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
   typeChip: {
-    borderWidth: 1, borderColor: '#374151', borderRadius: 20,
-    paddingHorizontal: 14, paddingVertical: 7, marginRight: 8,
+    borderWidth: 1, borderColor: t.line, borderRadius: 999,
+    paddingHorizontal: 16, paddingVertical: 9, marginRight: 8,
   },
-  typeChipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  typeLabel: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
-  typeLabelActive: { color: '#fff' },
+  typeChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  typeLabel: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
+  typeLabelActive: { color: t.ctaText },
   videoPicker: {
-    borderWidth: 2, borderColor: '#374151', borderStyle: 'dashed', borderRadius: 12,
+    borderWidth: 2, borderColor: t.line, borderStyle: 'dashed', borderRadius: 16,
     padding: 24, alignItems: 'center', marginBottom: 20, gap: 8,
   },
-  videoPickerDone: { borderColor: '#16a34a', borderStyle: 'solid' },
-  videoPickerText: { color: '#6b7280', fontSize: 14 },
+  videoPickerDone: { borderColor: t.positive, borderStyle: 'solid' },
+  videoPickerText: { color: t.muted, fontSize: 14 },
   input: {
-    backgroundColor: '#111827', borderRadius: 10, padding: 14,
-    color: '#fff', fontSize: 14, marginBottom: 16, borderWidth: 1, borderColor: '#1f2937',
+    backgroundColor: t.card, borderRadius: 14, padding: 14,
+    color: t.ink, fontSize: 14, marginBottom: 16, borderWidth: 1, borderColor: t.line,
   },
   submitBtn: {
-    backgroundColor: '#2563eb', borderRadius: 12, padding: 16,
+    backgroundColor: t.ctaBg, borderRadius: 999, padding: 16,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8,
   },
-  submitText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  hint: { color: '#4b5563', fontSize: 12, textAlign: 'center', marginTop: 12 },
+  submitText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 16 },
+  hint: { color: t.muted2, fontSize: 12, textAlign: 'center', marginTop: 12 },
 });

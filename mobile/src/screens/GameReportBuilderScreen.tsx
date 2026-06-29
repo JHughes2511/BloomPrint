@@ -655,7 +655,7 @@ export default function GameReportBuilderScreen() {
             </View>
             <KeyboardAwareScrollView style={{ maxHeight: 280 }} contentContainerStyle={{ paddingBottom: 8 }}>
               {clipModal?.analysis_text
-                ? renderReport(clipModal.analysis_text)
+                ? renderReport(clipModal.analysis_text, { heading: t.ink, body: t.inkSoft })
                 : <Text style={{ color: t.muted }}>No analysis yet.</Text>
               }
             </KeyboardAwareScrollView>
