@@ -8,22 +8,25 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
-import { playerNotificationsAPI, playerProfileAPI } from '../../api/playerClient';
+import { playerNotificationsAPI, playerProfileAPI, playerReportsAPI } from '../../api/playerClient';
 import { useTheme } from '../../theme/ThemeProvider';
+import { outputTypeLabel } from '../../utils/reportType';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 
 export default function PlayerHomeScreen() {
-  const { t } = useTheme();
+  const { t, mode, toggle } = useTheme();
   const styles = makeStyles(t);
   const { playerUser, logout } = usePlayerAuth();
   const navigation = useNavigation<any>();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [reports, setReports] = useState<any[]>([]);
   const [profile, setProfile] = useState<{
     position?: string; height?: string; wingspan?: string;
     weight?: string; standing_reach?: string;
     country?: string; state?: string; city?: string; school_name?: string;
+    latest_grade?: number | null; program_name?: string;
   } | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editPosition, setEditPosition] = useState('');
@@ -41,10 +44,43 @@ export default function PlayerHomeScreen() {
     playerNotificationsAPI.list().then((notifs: any[]) => {
       setUnreadCount(notifs.filter(n => !n.read).length);
     }).catch(() => {});
+    playerReportsAPI.list().then((r: any[]) => setReports(Array.isArray(r) ? r : [])).catch(() => {});
     if (playerUser?.player_id) {
       playerProfileAPI.get().then((p: any) => setProfile(p)).catch(() => {});
     }
   }, [playerUser?.player_id]));
+
+  // ── Derived data for the reference-style header + BIM score card ──
+  const firstName = (playerUser?.name ?? '').trim().split(/\s+/)[0] || 'Player';
+  const initials = (playerUser?.name ?? '')
+    .trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('') || 'P';
+  const programName = (playerUser as any)?.linked_program_name ?? profile?.program_name ?? '';
+  const subtitleBits = [profile?.position, programName].filter(Boolean);
+
+  const gradedReports = reports
+    .filter(r => r.overall_grade != null)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const bimScore = profile?.latest_grade ?? gradedReports[0]?.overall_grade ?? null;
+  const trend = gradedReports.length >= 2
+    ? (gradedReports[0].overall_grade - gradedReports[1].overall_grade)
+    : null;
+  const pillarSource = reports.find(r => r.pillar_grades && Object.keys(r.pillar_grades).length)?.pillar_grades ?? null;
+  const PILLAR_BAR = [
+    { key: 'offensive_skills', label: 'Offense', color: t.accent },
+    { key: 'defensive_capabilities', label: 'Defense', color: t.pistachio },
+    { key: 'physical_attributes', label: 'Physical', color: t.brown },
+    { key: 'intangibles', label: 'IQ', color: t.chip },
+  ];
+
+  const timeAgo = (iso: string) => {
+    const d = (Date.now() - new Date(iso).getTime()) / 86400000;
+    if (d < 1) return 'today';
+    if (d < 2) return 'yesterday';
+    return `${Math.floor(d)} days ago`;
+  };
+  const coachFeed = [...reports]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 3);
 
   const openEdit = () => {
     setEditPosition(profile?.position ?? '');
@@ -128,51 +164,98 @@ export default function PlayerHomeScreen() {
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <View>
-            <Text style={styles.logo}>BloomPrint</Text>
-            <Text style={styles.sub}>Player Portal</Text>
+          <View style={{ flex: 1, marginRight: 10 }}>
+            <Text style={styles.eyebrow}>Player Portal</Text>
+            <Text style={styles.greeting}>Hey, {firstName}</Text>
+            {subtitleBits.length > 0 && (
+              <Text style={styles.greetingSub}>{subtitleBits.join(' · ')}</Text>
+            )}
           </View>
           <View style={styles.headerActions}>
-            <TouchableOpacity
-              style={styles.notifBtn}
-              onPress={() => navigation.navigate('PlayerNotifsTab' as any)}
-            >
-              <Ionicons name="notifications-outline" size={22} color={t.positive} />
+            <TouchableOpacity style={styles.circleBtn} onPress={toggle} accessibilityLabel="Toggle theme">
+              <Ionicons name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'} size={18} color={t.inkSoft} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.circleBtn} onPress={() => navigation.navigate('PlayerNotifsTab' as any)} accessibilityLabel="Notifications">
+              <Ionicons name="notifications-outline" size={18} color={t.inkSoft} />
               {unreadCount > 0 && (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{unreadCount}</Text>
                 </View>
               )}
             </TouchableOpacity>
-            <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
+            <TouchableOpacity style={styles.circleBtn} onPress={handleSignOut} accessibilityLabel="Sign out">
               <Ionicons name="log-out-outline" size={18} color={t.muted2} />
             </TouchableOpacity>
           </View>
         </View>
-        {playerUser && (
-          <View>
-            <View style={styles.playerBadge}>
-              <Ionicons name="person-circle-outline" size={16} color={t.positive} />
-              <Text style={styles.playerText}>{playerUser.name}</Text>
-              {playerUser.player_id && (
-                <View style={styles.linkedBadge}>
-                  <Ionicons name="checkmark-circle" size={12} color={t.positive} />
-                  <Text style={styles.linkedText}>Linked</Text>
-                </View>
-              )}
+        {playerUser?.player_id && (playerUser as any).linked_program_name && (
+          <View style={styles.programBadge}>
+            <Ionicons name="shield-checkmark-outline" size={13} color={t.muted} />
+            <Text style={styles.programText}>
+              {(playerUser as any).linked_player_name}
+              {(playerUser as any).linked_team_name ? ` · ${(playerUser as any).linked_team_name}` : ''}
+            </Text>
+            <View style={styles.linkedBadge}>
+              <Ionicons name="checkmark-circle" size={11} color={t.positive} />
+              <Text style={styles.linkedText}>Linked</Text>
             </View>
-            {playerUser.player_id && (playerUser as any).linked_program_name && (
-              <View style={styles.programBadge}>
-                <Ionicons name="shield-checkmark-outline" size={13} color={t.muted} />
-                <Text style={styles.programText}>
-                  {(playerUser as any).linked_player_name} · {(playerUser as any).linked_program_name}
-                  {(playerUser as any).linked_team_name ? ` · ${(playerUser as any).linked_team_name}` : ''}
+          </View>
+        )}
+      </View>
+
+      {/* Current BIM Score */}
+      {bimScore != null && (
+        <View style={styles.bimCard}>
+          <View style={styles.bimTop}>
+            <Text style={styles.bimCardLabel}>Current BIM Score</Text>
+            {trend != null && Math.abs(trend) >= 0.05 && (
+              <View style={[styles.trendPill, { backgroundColor: trend >= 0 ? t.positiveSoft : t.negativeSoft }]}>
+                <Text style={[styles.trendText, { color: trend >= 0 ? t.positive : t.negative }]}>
+                  {trend >= 0 ? '▲ +' : '▼ '}{Math.abs(trend).toFixed(1)}
                 </Text>
               </View>
             )}
           </View>
-        )}
-      </View>
+          <View style={styles.bimScoreRow}>
+            <Text style={styles.bimScore}>{bimScore.toFixed(1)}</Text>
+            <Text style={styles.bimOf}>
+              of 10{trend != null && Math.abs(trend) >= 0.05 ? (trend >= 0 ? ' · trending up' : ' · trending down') : ''}
+            </Text>
+          </View>
+          {pillarSource && (
+            <>
+              <View style={styles.pillarBar}>
+                {PILLAR_BAR.map(p => {
+                  const g = Number(pillarSource[p.key]) || 1;
+                  return <View key={p.key} style={{ flex: Math.max(0.6, g), backgroundColor: p.color, borderRadius: 4 }} />;
+                })}
+              </View>
+              <View style={styles.pillarLabels}>
+                {PILLAR_BAR.map(p => <Text key={p.key} style={styles.pillarLabelText}>{p.label}</Text>)}
+              </View>
+            </>
+          )}
+        </View>
+      )}
+
+      {/* From Your Coach */}
+      {coachFeed.length > 0 && (
+        <>
+          <Text style={styles.sectionLabel}>From Your Coach</Text>
+          {coachFeed.map(r => (
+            <TouchableOpacity key={r.id} style={styles.feedCard} onPress={() => navigation.navigate('InboxTab' as any)}>
+              <View style={[styles.feedIcon, { backgroundColor: t.accentSoft }]}>
+                <Ionicons name="document-text-outline" size={22} color={t.accent} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.feedTitle}>{outputTypeLabel(r.output_type) || 'New Report'}</Text>
+                <Text style={styles.feedSub}>Shared {timeAgo(r.created_at)} · tap to read</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={t.muted2} />
+            </TouchableOpacity>
+          ))}
+        </>
+      )}
 
       <Text style={styles.sectionLabel}>Your Dashboard</Text>
 
@@ -407,6 +490,35 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   linkedText: { color: t.positive, fontSize: 11, fontFamily: fonts[600] },
   programBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
   programText: { color: t.muted, fontSize: 12 },
+  eyebrow: { color: t.label, fontSize: 12, fontFamily: fonts[600], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
+  greeting: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6, lineHeight: 32 },
+  greetingSub: { color: t.muted, fontSize: 14, marginTop: 8 },
+  circleBtn: {
+    width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder, position: 'relative',
+  },
+  bimCard: {
+    backgroundColor: t.card, borderRadius: 22, padding: 20, marginHorizontal: 20, marginTop: 22,
+    borderWidth: 1, borderColor: t.cardBorder,
+  },
+  bimTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  bimCardLabel: { color: t.muted2, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 1.6, textTransform: 'uppercase' },
+  trendPill: { paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999 },
+  trendText: { fontSize: 11, fontFamily: fonts[800] },
+  bimScoreRow: { flexDirection: 'row', alignItems: 'baseline', gap: 12, marginTop: 8 },
+  bimScore: { color: t.ink, fontSize: 46, fontFamily: fonts[900], letterSpacing: -1, lineHeight: 48 },
+  bimOf: { color: t.muted, fontSize: 15, fontFamily: fonts[600] },
+  pillarBar: { flexDirection: 'row', gap: 5, marginTop: 18, height: 7 },
+  pillarLabels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 9 },
+  pillarLabelText: { color: t.muted, fontSize: 11, fontFamily: fonts[600] },
+  feedCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 13,
+    backgroundColor: t.card, borderRadius: 18, padding: 16, marginHorizontal: 20, marginBottom: 11,
+    borderWidth: 1, borderColor: t.cardBorder,
+  },
+  feedIcon: { width: 46, height: 46, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
+  feedTitle: { color: t.ink, fontSize: 16.5, fontFamily: fonts[800] },
+  feedSub: { color: t.muted, fontSize: 13, marginTop: 2 },
   sectionLabel: {
     color: t.label,
     fontSize: 11,
