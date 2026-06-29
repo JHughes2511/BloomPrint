@@ -20,11 +20,13 @@ const firstSentence = (s: string) => {
   const m = clean.match(/^(.{0,90}?[.!?])(\s|$)/);
   return (m ? m[1] : clean.slice(0, 90)).trim();
 };
-const headlineFor = (item: { report_text?: string | null; message?: string | null; output_type: string }) => {
+// The report's descriptive sub-name. Never falls back to the type label (that
+// already shows on the pill — no duplication).
+const headlineFor = (item: { report_text?: string | null; message?: string | null }) => {
   const brief = extractBrief(item.report_text ?? undefined);
   if (brief) return firstSentence(brief);
   if (item.message?.trim()) return item.message.trim();
-  return outputTypeLabel(item.output_type) || 'Report';
+  return null;
 };
 
 type InboxItem = {
@@ -169,12 +171,11 @@ export default function PlayerInboxScreen() {
                 <Text style={styles.date}>{timeAgo(item.created_at)}</Text>
               </View>
 
-              <Text style={styles.cardTitle} numberOfLines={2}>
-                {headlineFor(item)}
-              </Text>
-              <Text style={styles.cardMeta}>
-                {item.shared_by_name || 'Coach'}{grade != null ? ` · BIM ${grade.toFixed(1)}` : ''}
-              </Text>
+              {(() => {
+                const headline = headlineFor(item);
+                return headline ? <Text style={styles.cardTitle} numberOfLines={2}>{headline}</Text> : null;
+              })()}
+              {grade != null ? <Text style={styles.cardMeta}>BIM {grade.toFixed(1)}</Text> : null}
 
               <View style={styles.cardFooter}>
                 <View style={styles.sharedItems}>
