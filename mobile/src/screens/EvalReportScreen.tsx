@@ -377,12 +377,13 @@ export default function EvalReportScreen() {
 
   const hasPillars = ev.pillar_grades && Object.keys(ev.pillar_grades).length > 0;
 
-  // Redesigned report layout (first applied to single scouting reports).
-  const isScouting =
-    parseOutputTypes(ev.output_type).length === 1 &&
-    parseOutputTypes(ev.output_type)[0] === 'scouting_report';
+  // Redesigned report layout — applied to any single (non-combo) player report.
+  const singleType = parseOutputTypes(ev.output_type)[0] ?? '';
+  const isSingle = parseOutputTypes(ev.output_type).length === 1;
+  // Recruit grade only makes sense for player-evaluation report types.
+  const showsRecruit = ['scouting_report', 'player_eval', 'recruitment_profile'].includes(singleType);
   const brief = extractBrief(ev.report_text);
-  const fixedSections = isScouting ? getFixedSections(ev.output_type, ev.report_text) : null;
+  const fixedSections = isSingle ? getFixedSections(ev.output_type, ev.report_text) : null;
   const recruit = recruitGrade(ev.overall_grade);
   const gradeTrend = history
     .filter(h => h.overall_grade != null)
@@ -391,7 +392,7 @@ export default function EvalReportScreen() {
 
   return (
     <ScreenBackground>
-    <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: isScouting ? 24 : 100 }}>
+    <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: isSingle ? 24 : 100 }}>
 
       {/* Header */}
       <View style={styles.header}>
@@ -402,7 +403,7 @@ export default function EvalReportScreen() {
           <Text style={styles.title}>{outputTypeLabel(ev.output_type).toUpperCase()}</Text>
           <Text style={styles.sub}>{new Date(ev.created_at).toLocaleDateString()}</Text>
         </View>
-        {isScouting ? (
+        {isSingle ? (
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.circleBtn} onPress={printPdf}>
               <Ionicons name="print-outline" size={17} color={t.muted} />
@@ -430,13 +431,13 @@ export default function EvalReportScreen() {
       )}
 
       {/* BIM Score + Recruit Grade pills — tap to see how each is derived */}
-      {isScouting && ev.overall_grade != null && (
+      {isSingle && ev.overall_grade != null && (
         <View style={styles.pillRow}>
           <TouchableOpacity style={styles.bimPill} onPress={() => setShowBim(true)}>
             <Text style={styles.bimPillText}>BIM Score {ev.overall_grade.toFixed(1)}</Text>
             <Ionicons name="chevron-forward" size={12} color={t.badgeText} />
           </TouchableOpacity>
-          {recruit && (
+          {showsRecruit && recruit && (
             <TouchableOpacity style={styles.recruitPill} onPress={() => setShowRecruit(true)}>
               <Text style={styles.recruitPillText}>Recruit Grade {recruit.letter}</Text>
               <Ionicons name="chevron-forward" size={12} color={t.accent} />
@@ -446,7 +447,7 @@ export default function EvalReportScreen() {
       )}
 
       {/* Brief (AI TL;DR) */}
-      {isScouting && brief && (
+      {isSingle && brief && (
         <View style={styles.briefBox}>
           <Text style={styles.briefLabel}>Brief</Text>
           <Text style={styles.briefText}>{brief}</Text>
@@ -454,7 +455,7 @@ export default function EvalReportScreen() {
       )}
 
       {/* Broken-out fixed sections + full-report dropdown */}
-      {isScouting && fixedSections && (
+      {isSingle && fixedSections && (
         <View style={styles.section}>
           {fixedSections.filter(s => s.body.trim()).map((s, i, arr) => (
             <View key={s.key}>
@@ -662,8 +663,9 @@ export default function EvalReportScreen() {
         </View>
       )}
 
-      {/* Full report — plain text rendering (scouting uses the dropdown above) */}
-      {!isScouting && ev.report_text && (
+      {/* Full report — shown inline for combos and for single reports that have
+          no broken-out section map (those use the dropdown above instead). */}
+      {(!isSingle || !fixedSections) && ev.report_text && (
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Full Report</Text>
           <View style={styles.reportBox}>
@@ -706,7 +708,7 @@ export default function EvalReportScreen() {
       )}
 
       {/* Action buttons — scouting reports use the sticky bottom bar instead */}
-      {!isScouting && (
+      {!isSingle && (
       <View style={styles.actionRow}>
         <TouchableOpacity style={styles.actionBtn} onPress={() => setShowCorrect(true)}>
           <Ionicons name="create-outline" size={18} color={t.muted} />
@@ -987,7 +989,7 @@ export default function EvalReportScreen() {
     </KeyboardAwareScrollView>
 
     {/* Sticky bottom action bar — Correct · Export · Send to Player · Share w/ Staff */}
-    {isScouting && (
+    {isSingle && (
       <View style={[styles.bottomBar, { backgroundColor: barBg }]}>
         <View style={styles.bottomRow}>
           <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.ctaBg }]} onPress={() => setShowCorrect(true)}>

@@ -1,15 +1,35 @@
 """Output-type-specific system prompts for the Basketball Intelligence Model."""
 
-# Appended to every prompt — a short executive brief the mobile app surfaces
-# at the top of the report (the "TL;DR" the coach reads first).
-_BRIEF_DIRECTIVE = (
-    "\n\nBEFORE everything else, open the report with a section titled exactly "
-    "\"BRIEF:\" on its own line, followed by a blank line, then a 2–3 sentence "
-    "plain-language executive summary a busy coach can absorb in ten seconds — "
-    "the single most important takeaways (who this player is, the headline "
-    "strength, the headline concern). Do not use bullet points in the brief. "
-    "After the brief, continue with the full structured report below."
-)
+# The mobile app surfaces a short "BRIEF:" TL;DR at the very top of every
+# report. The summary's framing is tailored to the report type so a scouting
+# brief reads differently from a game-analysis or training brief.
+_BRIEF_FOCUS = {
+    "player_eval":         "who this player is, the headline strength, and the headline concern",
+    "scouting_report":     "who this player is, their projected level/role, the standout skill, and the biggest question",
+    "recruitment_profile": "the recruitment verdict (pursue/monitor/pass), the key reason, and the 3-year outlook",
+    "film_breakdown":      "the concepts seen most often and the overall decision-quality read",
+    "coaching_report":     "the biggest execution issue and the single highest-priority coaching focus",
+    "game_analysis":       "the defining offensive and defensive tendencies and the most important adjustment",
+    "training_program":    "the focus of this program and the top one or two development priorities",
+    "box_score":           "the headline statistical story of the performance",
+    "position_analysis":   "the standout player(s) and the key positional takeaway",
+}
+_BRIEF_DEFAULT_FOCUS = "the single most important takeaways a coach needs first"
+
+
+def _brief_directive(output_type: str) -> str:
+    types = parse_output_types(output_type)
+    if len(types) > 1:
+        focus = "the most important cross-cutting takeaways tying every lens together"
+    else:
+        focus = _BRIEF_FOCUS.get(types[0] if types else "", _BRIEF_DEFAULT_FOCUS)
+    return (
+        "\n\nBEFORE everything else, open the report with a section titled exactly "
+        "\"BRIEF:\" on its own line, followed by a blank line, then a 2–3 sentence "
+        "plain-language executive summary a busy coach can absorb in ten seconds — "
+        f"focus the summary on {focus}. Do not use bullet points in the brief. "
+        "After the brief, continue with the full structured report below."
+    )
 
 # Appended to every prompt — enforces plain-text output for clean mobile rendering
 _NO_MARKDOWN = (
@@ -443,10 +463,10 @@ def build_prompt(
         if not blocks:
             valid = ", ".join(PROMPT_MAP.keys())
             raise ValueError(f"Unknown output_type '{output_type}'. Valid: {valid}")
-        return header + "\n".join(blocks) + _BRIEF_DIRECTIVE + _NO_MARKDOWN
+        return header + "\n".join(blocks) + _brief_directive(output_type) + _NO_MARKDOWN
 
     fn = PROMPT_MAP.get(output_type)
     if fn is None:
         valid = ", ".join(PROMPT_MAP.keys())
         raise ValueError(f"Unknown output_type '{output_type}'. Valid: {valid}")
-    return fn(program, level, coach_weight, player_name) + _BRIEF_DIRECTIVE + _NO_MARKDOWN
+    return fn(program, level, coach_weight, player_name) + _brief_directive(output_type) + _NO_MARKDOWN

@@ -139,6 +139,29 @@ const FIXED_DEFS: Record<string, FixedSectionDef[]> = {
     { key: 'defense', label: 'Defense',          icon: 'shield-outline',     tone: 'label', match: /defens/i },
     { key: 'projection', label: 'Projection',    icon: 'flag-outline',       tone: 'brown', match: /projection|rating|status|comp|recruit|outlook|mental|intel|physical|medical|key question|3-year|development/i },
   ],
+  recruitment_profile: [
+    { key: 'fit', label: 'System Fit', icon: 'git-compare-outline', tone: 'label', match: /system fit|recommendation|alignment|snapshot|position-less/i },
+    { key: 'dev', label: 'Development', icon: 'trending-up-outline', tone: 'label', match: /correctable|structural|3-year|development|projection/i },
+    { key: 'outlook', label: 'Outlook', icon: 'flag-outline', tone: 'brown', match: /comparable|key question|partnership|unique|best-case|realistic/i },
+  ],
+  game_analysis: [
+    { key: 'offense', label: 'Offense', icon: 'basketball-outline', tone: 'label', match: /offens|hot zone|cold zone|ball-screen package/i },
+    { key: 'defense', label: 'Defense', icon: 'shield-outline', tone: 'label', match: /defens|coverage|rebound/i },
+    { key: 'adjust', label: 'Adjustments', icon: 'construct-outline', tone: 'brown', match: /adjust|scheme tendenc|scout against|kpi|overview|pace/i },
+  ],
+  coaching_report: [
+    { key: 'analysis', label: 'Analysis', icon: 'film-outline', tone: 'label', match: /overview|possession|player-specific|player specific/i },
+    { key: 'adjust', label: 'Adjustments', icon: 'construct-outline', tone: 'brown', match: /scheme adjust|priorit|next session/i },
+    { key: 'working', label: "What's Working", icon: 'checkmark-circle-outline', tone: 'label', match: /what is working|do not change|reinforce/i },
+  ],
+  position_analysis: [
+    { key: 'players', label: 'Players', icon: 'people-outline', tone: 'label', match: /player\s*\d|position|pillar|standout|weakness|role|system fit/i },
+    { key: 'lineups', label: 'Lineups & Depth', icon: 'grid-outline', tone: 'brown', match: /comparison|lineup|combination|depth/i },
+  ],
+  film_breakdown: [
+    { key: 'clips', label: 'Clips', icon: 'film-outline', tone: 'label', match: /timestamp|concept|clip|decision|kpi/i },
+    { key: 'summary', label: 'Summary', icon: 'flag-outline', tone: 'brown', match: /summary/i },
+  ],
 };
 
 const singleType = (outputType?: string | null): string =>
