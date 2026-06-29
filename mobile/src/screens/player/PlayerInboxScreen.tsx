@@ -11,6 +11,21 @@ import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 import { outputTypeLabel } from '../../utils/reportType';
+import { extractBrief } from '../../utils/reportSections';
+
+// Headline describing what the report is about — derived from the report's
+// brief/summary, falling back to the coach's note, then the report type.
+const firstSentence = (s: string) => {
+  const clean = s.replace(/\s+/g, ' ').trim();
+  const m = clean.match(/^(.{0,90}?[.!?])(\s|$)/);
+  return (m ? m[1] : clean.slice(0, 90)).trim();
+};
+const headlineFor = (item: { report_text?: string | null; message?: string | null; output_type: string }) => {
+  const brief = extractBrief(item.report_text ?? undefined);
+  if (brief) return firstSentence(brief);
+  if (item.message?.trim()) return item.message.trim();
+  return outputTypeLabel(item.output_type) || 'Report';
+};
 
 type InboxItem = {
   id: number;
@@ -19,6 +34,7 @@ type InboxItem = {
   created_at: string;
   shared_by_name: string;
   message?: string | null;
+  report_text?: string | null;
   overall_grade?: number | null;
   share_grades?: boolean;
   share_report_text?: boolean;
@@ -146,15 +162,15 @@ export default function PlayerInboxScreen() {
             >
               <View style={styles.cardTop}>
                 <View style={[styles.typeBadge, isFilm ? styles.typeBadgeFilm : styles.typeBadgeEval]}>
-                  <Text style={[styles.typeText, { color: isFilm ? t.badgeText : t.accent }]}>
+                  <Text style={[styles.typeText, { color: isFilm ? t.brown : t.accent }]}>
                     {item.kind === 'team' ? 'TEAM · ' : ''}{(outputTypeLabel(item.output_type) || 'Report').toUpperCase()}
                   </Text>
                 </View>
                 <Text style={styles.date}>{timeAgo(item.created_at)}</Text>
               </View>
 
-              <Text style={styles.cardTitle} numberOfLines={1}>
-                {item.message?.trim() ? item.message.trim() : `Report from ${item.shared_by_name || 'Coach'}`}
+              <Text style={styles.cardTitle} numberOfLines={2}>
+                {headlineFor(item)}
               </Text>
               <Text style={styles.cardMeta}>
                 {item.shared_by_name || 'Coach'}{grade != null ? ` · BIM ${grade.toFixed(1)}` : ''}
@@ -214,10 +230,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderColor: t.cardBorder,
   },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  typeBadge: { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+  typeBadge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   typeBadgeEval: { backgroundColor: t.accentSoft },
-  typeBadgeFilm: { backgroundColor: t.badgeBg },
-  typeText: { fontSize: 11, fontFamily: fonts[800], letterSpacing: 0.4 },
+  typeBadgeFilm: { backgroundColor: t.brownSoft },
+  typeText: { fontSize: 10, fontFamily: fonts[800], letterSpacing: 0.4 },
   date: { color: t.muted2, fontSize: 12.5 },
   cardTitle: { color: t.ink, fontSize: 17.5, fontFamily: fonts[800], marginTop: 12 },
   cardMeta: { color: t.muted, fontSize: 13.5, marginTop: 3 },

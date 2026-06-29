@@ -31,15 +31,25 @@ const isHeading = (line: string): boolean => {
   return allCaps || shortColon;
 };
 
+// Sections that describe analysis/targets/commentary rather than things the
+// player physically does — their bullets are NOT checkable drills.
+const SKIP_SECTION = /kpi|target|checkpoint|progress check|profile|overview|summary|weakness|strength(?!s? (drill|work))|correctable|structural|comparable|projection|do not change|what is working|note|recommendation|analysis/i;
+
+// Individual lines that are commentary/metrics rather than a drill.
+const SKIP_LINE = /[↑↓]|^\s*\d+\s*[-–]?\s*week\b|measurably|^link\b|should be|^\s*by (week|day)\b/i;
+
 export function parseDrills(text?: string | null): { sections: DrillSection[]; total: number } {
   if (!text) return { sections: [], total: 0 };
   const sections: DrillSection[] = [];
   let cur: DrillSection | null = null;
+  let skipCurrent = false;
   const seen = new Set<string>();
   let total = 0;
 
   for (const raw of text.split('\n')) {
     if (isDrillLine(raw)) {
+      if (skipCurrent) continue;
+      if (SKIP_LINE.test(raw)) continue;
       const label = raw
         .replace(/^\s*([-*•·▪]|\d+[.)])\s+/, '')
         .replace(/\*\*/g, '').replace(/`/g, '').trim();
@@ -62,8 +72,9 @@ export function parseDrills(text?: string | null): { sections: DrillSection[]; t
       total++;
     } else if (isHeading(raw)) {
       const title = raw.trim().replace(/^#{1,6}\s*/, '').replace(/\*\*/g, '').replace(/:$/, '').trim();
+      skipCurrent = SKIP_SECTION.test(title);
       cur = { title, drills: [] };
-      sections.push(cur);
+      if (!skipCurrent) sections.push(cur);
     }
   }
 
