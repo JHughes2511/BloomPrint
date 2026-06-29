@@ -37,6 +37,24 @@ const DEFENSE_STATS = [
   'Defensive Mistake', 'No Contest', 'No Block Out', 'Foul Against',
 ];
 
+// Live-tracker event semantics: bad plays = red, made baskets + positive plays =
+// green, everything else = blue (accent).
+const NEGATIVE_STATS = new Set([
+  '2 FG Missed', '3 FG Missed', 'FT Missed', 'Turnover', 'Foul Against',
+  'Defensive Mistake', 'No Contest', 'No Block Out', 'No Ball Pressure',
+  'Jog Back', 'Bluff',
+]);
+const POSITIVE_STATS = new Set([
+  '2 FG Made', '3 FG Made', 'FT Made', 'Off. Reb', 'Def. Reb', 'Assists',
+  'Hockey Assist', 'Steal', 'Blocked Shot', 'Deflection', 'Def. Stop',
+  'Charge', 'Draw PF',
+]);
+function statKind(stat: string): 'positive' | 'negative' | 'neutral' {
+  if (NEGATIVE_STATS.has(stat)) return 'negative';
+  if (POSITIVE_STATS.has(stat)) return 'positive';
+  return 'neutral';
+}
+
 const STAT_POINTS: Record<string, { base_low: number; base_high: number; threshold: number }> = {
   '2 FG Made':          { base_low: 2,  base_high: 3,  threshold: 4 },
   '2 FG Missed':        { base_low: -1, base_high: -2, threshold: 4 },
@@ -352,18 +370,24 @@ export default function TeamEvalScreen() {
     }
   };
 
-  const updateScore = async (team: 'our' | 'opp', delta: number) => {
-    const newOur = team === 'our' ? ourScore + delta : ourScore;
-    const newOpp = team === 'opp' ? oppScore + delta : oppScore;
-    setOurScore(newOur);
-    setOppScore(newOpp);
+  const updateScore = (team: 'our' | 'opp', delta: number) => {
+    // Functional updates so rapid taps (and the auto-score from logStat) always
+    // accumulate off the latest value, never a stale closure.
+    let nextOur = ourScore;
+    let nextOpp = oppScore;
+    if (team === 'our') {
+      setOurScore(prev => (nextOur = Math.max(0, prev + delta)));
+    } else {
+      setOppScore(prev => (nextOpp = Math.max(0, prev + delta)));
+    }
     if (activeGame) {
-      try {
-        await gameEvalAPI.updateSession(activeGame.id, {
-          our_score: newOur,
-          opponent_score: newOpp,
-        });
-      } catch {}
+      // Persist after the state settles.
+      setTimeout(() => {
+        gameEvalAPI.updateSession(activeGame.id, {
+          our_score: team === 'our' ? nextOur : ourScore,
+          opponent_score: team === 'opp' ? nextOpp : oppScore,
+        }).catch(() => {});
+      }, 0);
     }
   };
 
@@ -1283,30 +1307,40 @@ export default function TeamEvalScreen() {
             {/* Stat buttons */}
             <Text style={[s.sectionLabel, { marginTop: 20 }]}>OFFENSE</Text>
             <View style={s.statGrid}>
-              {OFFENSE_STATS.map(stat => (
+              {OFFENSE_STATS.map(stat => {
+                const kind = statKind(stat);
+                const c = kind === 'positive' ? t.positive : kind === 'negative' ? t.negative : t.accent;
+                const soft = kind === 'positive' ? t.positiveSoft : kind === 'negative' ? t.negativeSoft : t.accentSoft;
+                return (
                 <TouchableOpacity
                   key={stat}
-                  style={[s.statBtn, flashStat === stat && s.statBtnFlash]}
+                  style={[s.statBtn, { borderColor: c, backgroundColor: soft }, flashStat === stat && { backgroundColor: c }]}
                   onPress={() => logStat(stat)}
                   disabled={!selectedPlayer}
                 >
-                  <Text style={s.statBtnText}>{stat}</Text>
+                  <Text style={[s.statBtnText, { color: flashStat === stat ? t.ctaText : c }]}>{stat}</Text>
                 </TouchableOpacity>
-              ))}
+                );
+              })}
             </View>
 
             <Text style={[s.sectionLabel, { marginTop: 16 }]}>DEFENSE</Text>
             <View style={s.statGrid}>
-              {DEFENSE_STATS.map(stat => (
+              {DEFENSE_STATS.map(stat => {
+                const kind = statKind(stat);
+                const c = kind === 'positive' ? t.positive : kind === 'negative' ? t.negative : t.accent;
+                const soft = kind === 'positive' ? t.positiveSoft : kind === 'negative' ? t.negativeSoft : t.accentSoft;
+                return (
                 <TouchableOpacity
                   key={stat}
-                  style={[s.statBtn, flashStat === stat && s.statBtnFlash]}
+                  style={[s.statBtn, { borderColor: c, backgroundColor: soft }, flashStat === stat && { backgroundColor: c }]}
                   onPress={() => logStat(stat)}
                   disabled={!selectedPlayer}
                 >
-                  <Text style={s.statBtnText}>{stat}</Text>
+                  <Text style={[s.statBtnText, { color: flashStat === stat ? t.ctaText : c }]}>{stat}</Text>
                 </TouchableOpacity>
-              ))}
+                );
+              })}
             </View>
 
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 24 }}>
