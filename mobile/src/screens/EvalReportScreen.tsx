@@ -341,6 +341,24 @@ export default function EvalReportScreen() {
     }
   };
 
+  // Top-bar quick share — generate the full PDF and open the share sheet
+  // directly, no section-picker modal.
+  const quickSharePdf = async () => {
+    setExporting(true);
+    try {
+      const allCats = { grades: true, flags: true, questions: true, report: true, corrections: corrections.length > 0 };
+      const html = buildHtml(allCats);
+      const { uri } = await Print.printToFileAsync({ html });
+      const dest = FileSystem.cacheDirectory + safeFileName(buildFileName()) + '.pdf';
+      await FileSystem.copyAsync({ from: uri, to: dest });
+      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: 'Share BIM Report' });
+    } catch (e: any) {
+      Alert.alert('Share Error', e?.message ?? 'Could not generate report');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const printPdf = async () => {
     try {
       await Print.printAsync({ html: buildHtml(exportCats) });
@@ -370,7 +388,7 @@ export default function EvalReportScreen() {
 
   return (
     <ScreenBackground>
-    <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: isScouting ? 120 : 100 }}>
+    <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: isScouting ? 190 : 100 }}>
 
       {/* Header */}
       <View style={styles.header}>
@@ -386,7 +404,7 @@ export default function EvalReportScreen() {
             <TouchableOpacity style={styles.circleBtn} onPress={printPdf}>
               <Ionicons name="print-outline" size={17} color={t.muted} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.circleBtn} onPress={() => setShowExport(true)}>
+            <TouchableOpacity style={styles.circleBtn} onPress={quickSharePdf} disabled={exporting}>
               <Ionicons name="share-social-outline" size={17} color={t.muted} />
             </TouchableOpacity>
           </View>
@@ -394,6 +412,19 @@ export default function EvalReportScreen() {
           <GradeBadge grade={ev.overall_grade} size="lg" />
         )}
       </View>
+
+      {/* Player name — tap to see profile popup (kept at the top) */}
+      {player && (
+        <TouchableOpacity
+          style={styles.playerNameRow}
+          onPress={() => setShowPlayerDetail(true)}
+        >
+          <Ionicons name="person-circle-outline" size={18} color={t.accent} />
+          <Text style={styles.playerNameLink}>{player.name}</Text>
+          {player.position ? <Text style={styles.playerPos}>{player.position}</Text> : null}
+          <Ionicons name="chevron-forward" size={13} color={t.accent} />
+        </TouchableOpacity>
+      )}
 
       {/* BIM Score + Recruit Grade pills — tap to see how each is derived */}
       {isScouting && ev.overall_grade != null && (
@@ -509,19 +540,6 @@ export default function EvalReportScreen() {
           </View>
         </View>
       </Modal>
-
-      {/* Player name — tap to see profile popup */}
-      {player && (
-        <TouchableOpacity
-          style={styles.playerNameRow}
-          onPress={() => setShowPlayerDetail(true)}
-        >
-          <Ionicons name="person-circle-outline" size={18} color={t.accent} />
-          <Text style={styles.playerNameLink}>{player.name}</Text>
-          {player.position ? <Text style={styles.playerPos}>{player.position}</Text> : null}
-          <Ionicons name="chevron-forward" size={13} color={t.accent} />
-        </TouchableOpacity>
-      )}
 
       {/* Player detail modal */}
       <Modal visible={showPlayerDetail} animationType="slide" transparent>
@@ -684,7 +702,8 @@ export default function EvalReportScreen() {
         </View>
       )}
 
-      {/* Action buttons */}
+      {/* Action buttons — scouting reports use the sticky bottom bar instead */}
+      {!isScouting && (
       <View style={styles.actionRow}>
         <TouchableOpacity style={styles.actionBtn} onPress={() => setShowCorrect(true)}>
           <Ionicons name="create-outline" size={18} color={t.muted} />
@@ -703,6 +722,7 @@ export default function EvalReportScreen() {
           <Text style={[styles.actionText, { color: t.accent }]}>Share</Text>
         </TouchableOpacity>
       </View>
+      )}
 
       {/* Unified Share modal — player / team / staff */}
       {ev && showShareModal && (
@@ -934,16 +954,16 @@ export default function EvalReportScreen() {
             />
             <View style={{ gap: 8, marginTop: 8 }}>
               <TouchableOpacity
-                style={[styles.saveBtn, { backgroundColor: t.ctaBg }]}
+                style={[styles.saveBtn, { flexDirection: 'row', backgroundColor: t.ctaBg }]}
                 onPress={() => submitCorrection(true)}
                 disabled={saving || regenerating}
               >
                 {saving || regenerating
                   ? <ActivityIndicator color={t.ctaText} />
-                  : <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  : <>
                       <Ionicons name="refresh" size={16} color={t.ctaText} />
-                      <Text style={[styles.saveText, { color: t.ctaText }]}>Apply & Regenerate</Text>
-                    </View>}
+                      <Text style={[styles.saveText, { color: t.ctaText, marginLeft: 8 }]}>Apply & Regenerate</Text>
+                    </>}
               </TouchableOpacity>
               <View style={styles.modalRow}>
                 <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowCorrect(false)}>
@@ -963,17 +983,29 @@ export default function EvalReportScreen() {
       </Modal>
     </KeyboardAwareScrollView>
 
-    {/* Sticky bottom action bar — Send to Player / Share w/ Staff */}
+    {/* Sticky bottom action bar — Correct · Export · Send to Player · Share w/ Staff */}
     {isScouting && (
       <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.sendPlayerBtn} onPress={() => setShowShare(true)}>
-          <Ionicons name="send" size={16} color="#16201A" />
-          <Text style={styles.sendPlayerText}>Send to Player</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.shareStaffBtn} onPress={() => setShowShareModal(true)}>
-          <Ionicons name="people" size={16} color={t.brownInk} />
-          <Text style={styles.shareStaffText}>Share w/ Staff</Text>
-        </TouchableOpacity>
+        <View style={styles.bottomRow}>
+          <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.ctaBg }]} onPress={() => setShowCorrect(true)}>
+            <Ionicons name="create-outline" size={16} color={t.ctaText} />
+            <Text style={[styles.bbText, { color: t.ctaText }]}>Correct</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.chip }]} onPress={() => setShowExport(true)} disabled={exporting}>
+            <Ionicons name="document-text-outline" size={16} color={t.ink} />
+            <Text style={[styles.bbText, { color: t.ink }]}>Export</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.bottomRow}>
+          <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.pistachio }]} onPress={() => setShowShare(true)}>
+            <Ionicons name="send" size={15} color="#16201A" />
+            <Text style={[styles.bbText, { color: '#16201A' }]}>Send to Player</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.brown }]} onPress={() => setShowShareModal(true)}>
+            <Ionicons name="people" size={15} color={t.brownInk} />
+            <Text style={[styles.bbText, { color: t.brownInk }]}>Share w/ Staff</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     )}
     </ScreenBackground>
@@ -1053,11 +1085,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   ladderLetter: { color: t.ink, fontSize: 13, fontFamily: fonts[800], width: 32 },
   ladderTier: { color: t.inkSoft, fontSize: 12.5, flex: 1 },
   ladderRange: { color: t.muted, fontSize: 11.5 },
-  bottomBar: { position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', gap: 11, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 28, backgroundColor: t.sheet, borderTopWidth: 1, borderTopColor: t.divider },
-  sendPlayerBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.pistachio, borderRadius: 14, paddingVertical: 15 },
-  sendPlayerText: { color: '#16201A', fontFamily: fonts[800], fontSize: 14.5 },
-  shareStaffBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.brown, borderRadius: 14, paddingVertical: 15 },
-  shareStaffText: { color: t.brownInk, fontFamily: fonts[800], fontSize: 14.5 },
+  bottomBar: { position: 'absolute', left: 0, right: 0, bottom: 0, gap: 10, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 28, backgroundColor: t.sheet, borderTopWidth: 1, borderTopColor: t.divider },
+  bottomRow: { flexDirection: 'row', gap: 10 },
+  bbBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 14, paddingVertical: 14 },
+  bbText: { fontFamily: fonts[800], fontSize: 14 },
 
   correctionCard: { backgroundColor: t.card, borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: t.cardBorder },
   correctionPillar: { color: t.accent, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 4 },

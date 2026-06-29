@@ -21,6 +21,31 @@ const isHeadingLine = (raw: string): boolean => {
   return isAllCaps || isShortColon;
 };
 
+/**
+ * Strip markdown noise (**bold**, *italic*, `code`, ## headings, --- / ===
+ * dividers, leading "- " bullets) from plain report text so it renders cleanly
+ * in the brief and broken-out sections.
+ */
+export function cleanText(text: string): string {
+  return text
+    .split('\n')
+    .map(line => {
+      // Drop pure divider lines entirely.
+      if (/^\s*[-=—─*]{3,}\s*$/.test(line)) return '';
+      return line
+        .replace(/^#{1,6}\s*/, '')
+        .replace(/\*\*/g, '')
+        .replace(/\*([^*]+)\*/g, '$1')
+        .replace(/`([^`]*)`/g, '$1')
+        .replace(/^[-=—─]+\s*/, '')
+        .replace(/\s*[-=—─]+$/, '')
+        .replace(/^\s*[-*]\s+/, '• ');
+    })
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 const normalizeHeading = (raw: string): string =>
   raw
     .trim()
@@ -52,10 +77,10 @@ export function splitSections(text?: string | null): ReportSegment[] {
 export function extractBrief(text?: string | null): string | null {
   if (!text) return null;
   const seg = splitSections(text).find(s => /^brief\b/i.test(s.heading));
-  if (seg && seg.body.trim()) return seg.body.trim();
+  if (seg && seg.body.trim()) return cleanText(seg.body);
   // Fallbacks for reports generated before the brief directive existed.
   const m = text.match(/one[-\s]?line summary\s*:?\s*(.+)/i);
-  if (m && m[1].trim()) return m[1].trim();
+  if (m && m[1].trim()) return cleanText(m[1]);
   return null;
 }
 
@@ -146,7 +171,7 @@ export function getFixedSections(outputType: string | null | undefined, text?: s
     label: b.def.label,
     icon: b.def.icon,
     tone: b.def.tone,
-    body: b.parts.join('\n\n'),
+    body: cleanText(b.parts.join('\n\n')),
   }));
 
   return result.some(s => s.body.trim()) ? result : null;
