@@ -8,9 +8,19 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
-import { playerNotificationsAPI, playerProfileAPI, playerReportsAPI } from '../../api/playerClient';
+import { playerNotificationsAPI, playerProfileAPI, playerReportsAPI, playerLinkAPI } from '../../api/playerClient';
 import { useTheme } from '../../theme/ThemeProvider';
 import { outputTypeLabel } from '../../utils/reportType';
+
+const PILLAR_LABELS: Record<string, string> = {
+  offensive_skills: 'Offensive Skills',
+  defensive_capabilities: 'Defense',
+  physical_attributes: 'Physical',
+  intangibles: 'Intangibles',
+  advanced_analysis: 'Advanced',
+  strategic_fit: 'Strategic Fit',
+};
+const PILLAR_ORDER = ['offensive_skills', 'defensive_capabilities', 'physical_attributes', 'intangibles', 'advanced_analysis', 'strategic_fit'];
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
@@ -18,10 +28,14 @@ import { ScreenBackground } from '../../theme/components';
 export default function PlayerHomeScreen() {
   const { t, mode, toggle } = useTheme();
   const styles = makeStyles(t);
-  const { playerUser, logout } = usePlayerAuth();
+  const { playerUser, logout, refreshUser } = usePlayerAuth();
   const navigation = useNavigation<any>();
+  const isLinked = !!playerUser?.player_id;
   const [unreadCount, setUnreadCount] = useState(0);
   const [reports, setReports] = useState<any[]>([]);
+  const [showBim, setShowBim] = useState(false);
+  const [inviteCode, setInviteCode] = useState('');
+  const [linking, setLinking] = useState(false);
   const [profile, setProfile] = useState<{
     position?: string; height?: string; wingspan?: string;
     weight?: string; standing_reach?: string;
@@ -81,6 +95,25 @@ export default function PlayerHomeScreen() {
   const coachFeed = [...reports]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 3);
+  const flagSource = reports.find(r => (r.green_flags?.length || r.watch_flags?.length)) ?? null;
+
+  const openReport = (r: any) =>
+    navigation.navigate('InboxTab' as any, { screen: 'PlayerReportDetail', params: { reportId: r.id } });
+
+  const linkWithInvite = async () => {
+    if (!inviteCode.trim()) return;
+    setLinking(true);
+    try {
+      const res = await playerLinkAPI.useInvite(inviteCode.trim());
+      await refreshUser();
+      setInviteCode('');
+      Alert.alert('Linked!', `Your account is now linked to ${res?.player_name ?? 'your player profile'}.`);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Invalid invite code');
+    } finally {
+      setLinking(false);
+    }
+  };
 
   const openEdit = () => {
     setEditPosition(profile?.position ?? '');
@@ -188,24 +221,26 @@ export default function PlayerHomeScreen() {
             </TouchableOpacity>
           </View>
         </View>
-        {playerUser?.player_id && (playerUser as any).linked_program_name && (
-          <View style={styles.programBadge}>
-            <Ionicons name="shield-checkmark-outline" size={13} color={t.muted} />
-            <Text style={styles.programText}>
-              {(playerUser as any).linked_player_name}
-              {(playerUser as any).linked_team_name ? ` · ${(playerUser as any).linked_team_name}` : ''}
-            </Text>
+        <View style={styles.statusRow}>
+          {isLinked ? (
             <View style={styles.linkedBadge}>
-              <Ionicons name="checkmark-circle" size={11} color={t.positive} />
-              <Text style={styles.linkedText}>Linked</Text>
+              <Ionicons name="checkmark-circle" size={12} color={t.positive} />
+              <Text style={styles.linkedText}>
+                Linked{(playerUser as any).linked_program_name ? ` · ${(playerUser as any).linked_program_name}` : ''}
+              </Text>
             </View>
-          </View>
-        )}
+          ) : (
+            <TouchableOpacity style={styles.notLinkedBadge} onPress={openEdit}>
+              <Ionicons name="link-outline" size={12} color={t.muted} />
+              <Text style={styles.notLinkedText}>Not linked · tap to link</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* Current BIM Score */}
       {bimScore != null && (
-        <View style={styles.bimCard}>
+        <TouchableOpacity style={styles.bimCard} activeOpacity={0.85} onPress={() => setShowBim(true)}>
           <View style={styles.bimTop}>
             <Text style={styles.bimCardLabel}>Current BIM Score</Text>
             {trend != null && Math.abs(trend) >= 0.05 && (
@@ -235,7 +270,11 @@ export default function PlayerHomeScreen() {
               </View>
             </>
           )}
-        </View>
+          <View style={styles.bimHint}>
+            <Text style={styles.bimHintText}>Tap for full breakdown</Text>
+            <Ionicons name="chevron-forward" size={13} color={t.muted2} />
+          </View>
+        </TouchableOpacity>
       )}
 
       {/* From Your Coach */}
@@ -243,7 +282,7 @@ export default function PlayerHomeScreen() {
         <>
           <Text style={styles.sectionLabel}>From Your Coach</Text>
           {coachFeed.map(r => (
-            <TouchableOpacity key={r.id} style={styles.feedCard} onPress={() => navigation.navigate('InboxTab' as any)}>
+            <TouchableOpacity key={r.id} style={styles.feedCard} onPress={() => openReport(r)}>
               <View style={[styles.feedIcon, { backgroundColor: t.accentSoft }]}>
                 <Ionicons name="document-text-outline" size={22} color={t.accent} />
               </View>
@@ -344,23 +383,64 @@ export default function PlayerHomeScreen() {
         </>
       )}
 
-      <Text style={styles.sectionLabel}>Account</Text>
+      {/* BIM Score breakdown modal */}
+      <Modal visible={showBim} transparent animationType="slide" onRequestClose={() => setShowBim(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalBox, { maxHeight: '85%' }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>BIM Score {bimScore != null ? bimScore.toFixed(1) : ''}</Text>
+              <TouchableOpacity onPress={() => setShowBim(false)}>
+                <Ionicons name="close" size={22} color={t.muted} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.bimModalSub}>How your score breaks down across the evaluation pillars, with the strengths and watch areas your coach flagged.</Text>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+              {pillarSource ? (
+                PILLAR_ORDER.filter(k => pillarSource[k] != null).map(k => {
+                  const g = Number(pillarSource[k]) || 0;
+                  return (
+                    <View key={k} style={styles.pbRow}>
+                      <View style={styles.pbHead}>
+                        <Text style={styles.pbLabel}>{PILLAR_LABELS[k] ?? k}</Text>
+                        <Text style={styles.pbVal}>{g.toFixed(1)}</Text>
+                      </View>
+                      <View style={styles.pbTrack}>
+                        <View style={[styles.pbFill, { width: `${Math.min(100, (g / 10) * 100)}%` }]} />
+                      </View>
+                    </View>
+                  );
+                })
+              ) : (
+                <Text style={styles.bimModalSub}>No pillar breakdown was shared on your reports yet.</Text>
+              )}
 
-      <TouchableOpacity
-        style={styles.linkRow}
-        onPress={() => navigation.navigate('ProfileTab' as any)}
-      >
-        <Ionicons name="link-outline" size={20} color={t.positive} />
-        <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={styles.linkTitle}>Link Profile</Text>
-          <Text style={styles.linkDesc}>
-            {playerUser?.player_id
-              ? 'Your account is linked to a player profile'
-              : 'Connect your account to your player profile'}
-          </Text>
+              {flagSource?.green_flags?.length ? (
+                <View style={{ marginTop: 18 }}>
+                  <Text style={[styles.bimGroupLabel, { color: t.positive }]}>Strengths</Text>
+                  {flagSource.green_flags.map((f: string, i: number) => (
+                    <View key={i} style={styles.flagItem}>
+                      <View style={[styles.flagDot, { backgroundColor: t.positive }]} />
+                      <Text style={styles.flagText}>{f.replace(/\*\*/g, '').trim()}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+
+              {flagSource?.watch_flags?.length ? (
+                <View style={{ marginTop: 16 }}>
+                  <Text style={[styles.bimGroupLabel, { color: t.brown }]}>Watch Areas</Text>
+                  {flagSource.watch_flags.map((f: string, i: number) => (
+                    <View key={i} style={styles.flagItem}>
+                      <View style={[styles.flagDot, { backgroundColor: t.brown }]} />
+                      <Text style={styles.flagText}>{f.replace(/\*\*/g, '').trim()}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+            </ScrollView>
+          </View>
         </View>
-        <Ionicons name="chevron-forward" size={16} color={t.muted2} />
-      </TouchableOpacity>
+      </Modal>
 
       <Modal visible={showEditModal} transparent animationType="none">
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => { Keyboard.dismiss(); closeModal(); }}>
@@ -382,6 +462,42 @@ export default function PlayerHomeScreen() {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: KEYBOARD_HEIGHT + 40 }}
               >
+                {/* Link to Coach */}
+                <Text style={styles.linkSectionLabel}>Link to Coach</Text>
+                {isLinked ? (
+                  <View style={styles.linkedRow}>
+                    <Ionicons name="checkmark-circle" size={18} color={t.positive} />
+                    <Text style={styles.linkedRowText}>
+                      Linked{(playerUser as any)?.linked_program_name ? ` to ${(playerUser as any).linked_program_name}` : ''}
+                    </Text>
+                  </View>
+                ) : (
+                  <>
+                    <Text style={styles.linkHint}>Enter the invite code your coach gave you to connect your account.</Text>
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      <VoiceTextInput
+                        style={[styles.input, { flex: 1 }]}
+                        value={inviteCode}
+                        onChangeText={setInviteCode}
+                        placeholder="Invite code (e.g. ABC12345)"
+                        placeholderTextColor={t.muted2}
+                        autoCapitalize="characters"
+                      />
+                      <TouchableOpacity
+                        style={[styles.linkBtn, (!inviteCode.trim() || linking) && { opacity: 0.5 }]}
+                        onPress={linkWithInvite}
+                        disabled={!inviteCode.trim() || linking}
+                      >
+                        <Text style={styles.linkBtnText}>{linking ? '…' : 'Link'}</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <TouchableOpacity onPress={() => { closeModal(); navigation.navigate('ProfileTab' as any); }}>
+                      <Text style={styles.findCoachText}>Find your coach instead →</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+                <View style={styles.linkDivider} />
+
                 <View onLayout={e => { fieldY.current['position'] = e.nativeEvent.layout.y; }}>
                   <Text style={styles.fieldLabel}>Position</Text>
                   <VoiceTextInput style={styles.input} value={editPosition} onChangeText={setEditPosition}
@@ -624,4 +740,34 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     marginTop: 24,
   },
   saveBtnText: { color: '#fff', fontSize: 15, fontFamily: fonts[800] },
+
+  statusRow: { flexDirection: 'row', marginTop: 12 },
+  notLinkedBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    backgroundColor: t.chip, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 5,
+  },
+  notLinkedText: { color: t.muted, fontSize: 11.5, fontFamily: fonts[600] },
+  bimHint: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 3, marginTop: 16 },
+  bimHintText: { color: t.muted2, fontSize: 12, fontFamily: fonts[600] },
+
+  bimModalSub: { color: t.muted, fontSize: 13, lineHeight: 19, marginBottom: 16 },
+  pbRow: { marginBottom: 14 },
+  pbHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  pbLabel: { color: t.ink, fontSize: 14, fontFamily: fonts[700] },
+  pbVal: { color: t.inkSoft, fontSize: 14, fontFamily: fonts[800] },
+  pbTrack: { height: 8, borderRadius: 4, backgroundColor: t.chip, overflow: 'hidden' },
+  pbFill: { height: 8, borderRadius: 4, backgroundColor: t.accent },
+  bimGroupLabel: { fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 1.4, textTransform: 'uppercase', marginBottom: 8 },
+  flagItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 8 },
+  flagDot: { width: 9, height: 9, borderRadius: 5, marginTop: 5, flexShrink: 0 },
+  flagText: { color: t.inkSoft, fontSize: 13.5, lineHeight: 20, flex: 1 },
+
+  linkSectionLabel: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 1.4, textTransform: 'uppercase', marginBottom: 8 },
+  linkHint: { color: t.muted, fontSize: 12.5, lineHeight: 18, marginBottom: 10 },
+  linkedRow: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.positiveSoft, borderRadius: 10, padding: 12 },
+  linkedRowText: { color: t.positive, fontSize: 14, fontFamily: fonts[700] },
+  linkBtn: { backgroundColor: t.positive, borderRadius: 10, paddingHorizontal: 18, alignItems: 'center', justifyContent: 'center' },
+  linkBtnText: { color: '#fff', fontSize: 14, fontFamily: fonts[800] },
+  findCoachText: { color: t.label, fontSize: 13, fontFamily: fonts[700], marginTop: 12 },
+  linkDivider: { height: 1, backgroundColor: t.divider, marginVertical: 18 },
 });
