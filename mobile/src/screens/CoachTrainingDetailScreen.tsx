@@ -9,6 +9,10 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import { playerAPI } from '../api/client';
+import { useTheme } from '../theme/ThemeProvider';
+import { ThemeTokens } from '../theme/tokens';
+import { fonts } from '../theme/typography';
+import { ScreenBackground } from '../theme/components';
 
 function cleanMarkdown(text: string): string {
   return text
@@ -26,6 +30,9 @@ export default function CoachTrainingDetailScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { trainingId } = route.params;
+  const { t } = useTheme();
+  const styles = makeStyles(t);
+  const markdownStyles = makeMarkdownStyles(t);
 
   const [training, setTraining] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -99,22 +106,26 @@ export default function CoachTrainingDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator color="#2563eb" size="large" />
-      </View>
+      <ScreenBackground>
+        <View style={styles.center}>
+          <ActivityIndicator color={t.accent} size="large" />
+        </View>
+      </ScreenBackground>
     );
   }
 
   if (!training) {
     return (
-      <View style={styles.center}>
-        <Text style={{ color: '#fff' }}>Training not found</Text>
-      </View>
+      <ScreenBackground>
+        <View style={styles.center}>
+          <Text style={{ color: t.ink }}>Training not found</Text>
+        </View>
+      </ScreenBackground>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
+    <ScreenBackground>
       <KeyboardAwareScrollView
         ref={scrollRef}
         style={styles.container}
@@ -124,7 +135,7 @@ export default function CoachTrainingDetailScreen() {
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={24} color="#fff" />
+            <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
           <View style={{ flex: 1, marginLeft: 12 }}>
             <Text style={styles.title}>{training.player_name}'s Training</Text>
@@ -144,7 +155,7 @@ export default function CoachTrainingDetailScreen() {
           <View style={styles.programBox}>
             {training.program_text
               ? <Markdown style={markdownStyles}>{cleanMarkdown(training.program_text)}</Markdown>
-              : <Text style={{ color: '#6b7280' }}>No program text</Text>}
+              : <Text style={{ color: t.muted2 }}>No program text</Text>}
           </View>
         </View>
 
@@ -157,7 +168,7 @@ export default function CoachTrainingDetailScreen() {
           {(training.comments ?? []).map((c: any) => (
             <View key={c.id} style={styles.commentCard}>
               <View style={styles.commentHeader}>
-                <Text style={[styles.commentAuthor, c.coach_id ? { color: '#2563eb' } : { color: '#16a34a' }]}>
+                <Text style={[styles.commentAuthor, c.coach_id ? { color: t.accent } : { color: t.positive }]}>
                   {c.author_name}{c.coach_id ? ' (Coach)' : ''}
                 </Text>
                 <Text style={styles.commentDate}>{new Date(c.created_at).toLocaleDateString()}</Text>
@@ -169,7 +180,7 @@ export default function CoachTrainingDetailScreen() {
             <VoiceTextInput
               style={styles.input}
               placeholder="Leave a comment for the player..."
-              placeholderTextColor="#4b5563"
+              placeholderTextColor={t.muted2}
               value={commentText}
               onChangeText={setCommentText}
               multiline
@@ -181,8 +192,8 @@ export default function CoachTrainingDetailScreen() {
               disabled={submittingComment || !commentText.trim()}
             >
               {submittingComment
-                ? <ActivityIndicator color="#fff" size="small" />
-                : <Ionicons name="send" size={18} color="#fff" />}
+                ? <ActivityIndicator color={t.ctaText} size="small" />
+                : <Ionicons name="send" size={18} color={t.ctaText} />}
             </TouchableOpacity>
           </View>
         </View>
@@ -194,13 +205,13 @@ export default function CoachTrainingDetailScreen() {
         >
           <Text style={styles.sectionLabel}>Add Coach Notes</Text>
           <View style={styles.programBox}>
-            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
+            <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
               Notes are saved to the training record and visible to the player.
             </Text>
             <VoiceTextInput
               style={styles.noteInput}
               placeholder="Add notes for the player..."
-              placeholderTextColor="#4b5563"
+              placeholderTextColor={t.muted2}
               value={noteText}
               onChangeText={setNoteText}
               multiline
@@ -212,7 +223,7 @@ export default function CoachTrainingDetailScreen() {
               onPress={saveNote}
               disabled={savingNote || !noteText.trim()}
             >
-              {savingNote ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.btnText}>Save Notes</Text>}
+              {savingNote ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.btnText}>Save Notes</Text>}
             </TouchableOpacity>
           </View>
         </View>
@@ -224,13 +235,13 @@ export default function CoachTrainingDetailScreen() {
         >
           <Text style={styles.sectionLabel}>Update Program with Feedback</Text>
           <View style={styles.programBox}>
-            <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
+            <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
               Provide coaching feedback to regenerate the player's training program with AI.
             </Text>
             <VoiceTextInput
               style={styles.noteInput}
               placeholder="e.g. Focus more on defensive footwork, increase conditioning..."
-              placeholderTextColor="#4b5563"
+              placeholderTextColor={t.muted2}
               value={feedbackText}
               onChangeText={setFeedbackText}
               multiline
@@ -238,62 +249,62 @@ export default function CoachTrainingDetailScreen() {
 
             />
             <TouchableOpacity
-              style={[styles.btn, { backgroundColor: '#16a34a', marginTop: 8, flexDirection: 'row', gap: 8, justifyContent: 'center' }]}
+              style={[styles.btn, { backgroundColor: t.positive, marginTop: 8, flexDirection: 'row', gap: 8, justifyContent: 'center' }]}
               onPress={refreshTraining}
               disabled={refreshing || !feedbackText.trim()}
             >
               {refreshing
-                ? <><ActivityIndicator color="#fff" size="small" /><Text style={styles.btnText}>Updating...</Text></>
-                : <><Ionicons name="refresh" size={16} color="#fff" /><Text style={styles.btnText}>Update Report</Text></>
+                ? <><ActivityIndicator color={t.ctaText} size="small" /><Text style={styles.btnText}>Updating...</Text></>
+                : <><Ionicons name="refresh" size={16} color={t.ctaText} /><Text style={styles.btnText}>Update Report</Text></>
               }
             </TouchableOpacity>
           </View>
         </View>
       </KeyboardAwareScrollView>
-    </View>
+    </ScreenBackground>
   );
 }
 
-const markdownStyles = {
-  body: { color: '#d1d5db', fontSize: 13, lineHeight: 22 },
-  heading1: { color: '#ffffff', fontSize: 16, fontWeight: '800' as const, marginTop: 16, marginBottom: 4 },
-  heading2: { color: '#e5e7eb', fontSize: 14, fontWeight: '700' as const, marginTop: 14, marginBottom: 4 },
-  strong: { color: '#ffffff', fontWeight: '700' as const },
+const makeMarkdownStyles = (t: ThemeTokens) => ({
+  body: { color: t.inkSoft, fontSize: 13, lineHeight: 22 },
+  heading1: { color: t.ink, fontSize: 16, fontWeight: '800' as const, marginTop: 16, marginBottom: 4 },
+  heading2: { color: t.ink, fontSize: 14, fontWeight: '700' as const, marginTop: 14, marginBottom: 4 },
+  strong: { color: t.ink, fontWeight: '700' as const },
   bullet_list: { marginLeft: 8 },
-  list_item: { color: '#d1d5db', fontSize: 13 },
-  hr: { backgroundColor: '#1f2937', height: 1, marginVertical: 12 },
-};
+  list_item: { color: t.inkSoft, fontSize: 13 },
+  hr: { backgroundColor: t.divider, height: 1, marginVertical: 12 },
+});
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0a0a' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a0a0a' },
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: 'transparent' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56 },
-  title: { color: '#fff', fontSize: 16, fontWeight: '900' },
-  sub: { color: '#4b5563', fontSize: 11, marginTop: 2 },
+  title: { color: t.ink, fontSize: 16, fontWeight: '900' },
+  sub: { color: t.muted2, fontSize: 11, marginTop: 2 },
   notesBox: {
-    backgroundColor: '#16a34a22', borderLeftWidth: 3, borderLeftColor: '#16a34a',
+    backgroundColor: t.positiveSoft, borderLeftWidth: 3, borderLeftColor: t.positive,
     marginHorizontal: 20, marginBottom: 8, padding: 14, borderRadius: 10,
   },
-  notesLabel: { color: '#16a34a', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', marginBottom: 4 },
-  notesText: { color: '#d1d5db', fontSize: 13, lineHeight: 20 },
+  notesLabel: { color: t.positive, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', marginBottom: 4 },
+  notesText: { color: t.inkSoft, fontSize: 13, lineHeight: 20 },
   section: { paddingHorizontal: 20, marginTop: 24 },
-  sectionLabel: { color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 },
-  programBox: { backgroundColor: '#111827', borderRadius: 12, padding: 16 },
-  commentCard: { backgroundColor: '#111827', borderRadius: 10, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: '#1f2937' },
+  sectionLabel: { color: t.label, fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 },
+  programBox: { backgroundColor: t.card, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: t.cardBorder },
+  commentCard: { backgroundColor: t.card, borderRadius: 10, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: t.cardBorder },
   commentHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
   commentAuthor: { fontSize: 12, fontWeight: '700' },
-  commentDate: { color: '#4b5563', fontSize: 11 },
-  commentText: { color: '#d1d5db', fontSize: 13 },
+  commentDate: { color: t.muted2, fontSize: 11 },
+  commentText: { color: t.inkSoft, fontSize: 13 },
   commentInput: { flexDirection: 'row', gap: 10, marginTop: 12, alignItems: 'flex-end' },
   input: {
-    flex: 1, backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12, color: '#fff',
-    fontSize: 14, borderWidth: 1, borderColor: '#374151', minHeight: 60,
+    flex: 1, backgroundColor: t.chip, borderRadius: 10, padding: 12, color: t.ink,
+    fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 60,
   },
   noteInput: {
-    backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12, color: '#fff',
-    fontSize: 14, borderWidth: 1, borderColor: '#374151', minHeight: 80,
+    backgroundColor: t.chip, borderRadius: 10, padding: 12, color: t.ink,
+    fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 80,
   },
-  sendBtn: { backgroundColor: '#2563eb', borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' },
-  btn: { backgroundColor: '#2563eb', borderRadius: 10, padding: 12, alignItems: 'center' },
-  btnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  sendBtn: { backgroundColor: t.ctaBg, borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' },
+  btn: { backgroundColor: t.ctaBg, borderRadius: 10, padding: 12, alignItems: 'center' },
+  btnText: { color: t.ctaText, fontWeight: '700', fontSize: 14 },
 });

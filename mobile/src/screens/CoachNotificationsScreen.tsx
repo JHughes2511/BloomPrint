@@ -9,6 +9,10 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { playerAPI } from '../api/client';
 import { AppNotification } from '../types';
+import { useTheme } from '../theme/ThemeProvider';
+import { ThemeTokens } from '../theme/tokens';
+import { fonts } from '../theme/typography';
+import { ScreenBackground } from '../theme/components';
 
 const NOTIF_ICONS: Record<string, string> = {
   link_requested: 'link',
@@ -18,6 +22,8 @@ const NOTIF_ICONS: Record<string, string> = {
 
 export default function CoachNotificationsScreen() {
   const navigation = useNavigation<any>();
+  const { t } = useTheme();
+  const styles = makeStyles(t);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -66,28 +72,31 @@ export default function CoachNotificationsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator color="#2563eb" size="large" />
-      </View>
+      <ScreenBackground>
+        <View style={styles.center}>
+          <ActivityIndicator color={t.accent} size="large" />
+        </View>
+      </ScreenBackground>
     );
   }
 
   return (
+    <ScreenBackground>
     <KeyboardAwareScrollView
       style={styles.container}
       contentContainerStyle={{ paddingBottom: 100 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#2563eb" />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={t.accent} />}
     >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color="#fff" />
+          <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
         <Text style={styles.title}>Notifications</Text>
       </View>
 
       {notifications.length === 0 ? (
         <View style={styles.empty}>
-          <Ionicons name="notifications-outline" size={48} color="#374151" />
+          <Ionicons name="notifications-outline" size={48} color={t.muted2} />
           <Text style={styles.emptyTitle}>No notifications</Text>
         </View>
       ) : (
@@ -109,7 +118,7 @@ export default function CoachNotificationsScreen() {
                 <Ionicons
                   name={(NOTIF_ICONS[n.type] ?? 'notifications') as any}
                   size={18}
-                  color={n.read ? '#6b7280' : '#2563eb'}
+                  color={n.read ? t.muted2 : t.accent}
                 />
               </View>
               <View style={{ flex: 1, marginLeft: 12 }}>
@@ -123,7 +132,7 @@ export default function CoachNotificationsScreen() {
               <Ionicons
                 name={expandedId === n.id ? 'chevron-up' : 'chevron-down'}
                 size={14}
-                color="#4b5563"
+                color={t.muted2}
                 style={{ marginLeft: 4 }}
               />
             </View>
@@ -135,9 +144,9 @@ export default function CoachNotificationsScreen() {
                     <VoiceTextInput
                       style={styles.replyInput}
                       placeholder="Reply to player..."
-                      placeholderTextColor="#4b5563"
+                      placeholderTextColor={t.muted2}
                       value={replyTexts[n.id] ?? ''}
-                      onChangeText={t => setReplyTexts(prev => ({ ...prev, [n.id]: t }))}
+                      onChangeText={text => setReplyTexts(prev => ({ ...prev, [n.id]: text }))}
                       multiline
                     />
                     <TouchableOpacity
@@ -160,17 +169,17 @@ export default function CoachNotificationsScreen() {
                         }
                       }}
                     >
-                      {replying === n.id ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.replyBtnText}>Send Reply</Text>}
+                      {replying === n.id ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.replyBtnText}>Send Reply</Text>}
                     </TouchableOpacity>
                   </>
                 ) : (n.type === 'training_generated' || n.type === 'training_refreshed') && n.ref_id ? (
                   <View>
-                    <Text style={{ color: '#9ca3af', fontSize: 12, marginBottom: 8 }}>
+                    <Text style={{ color: t.muted, fontSize: 12, marginBottom: 8 }}>
                       {n.type === 'training_refreshed' ? 'Player updated their training with feedback.' : 'Player generated a new training program.'}
                     </Text>
                     <View style={styles.actionRow}>
                       <TouchableOpacity
-                        style={[styles.approveBtn, { backgroundColor: '#2563eb', flex: 1, alignItems: 'center' }]}
+                        style={[styles.approveBtn, { backgroundColor: t.ctaBg, flex: 1, alignItems: 'center' }]}
                         onPress={async () => {
                           await playerAPI.coachMarkRead(n.id);
                           setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
@@ -178,7 +187,7 @@ export default function CoachNotificationsScreen() {
                           navigation.navigate('CoachTrainingDetail', { trainingId: n.ref_id });
                         }}
                       >
-                        <Text style={styles.approveBtnText}>View Training</Text>
+                        <Text style={[styles.approveBtnText, { color: t.ctaText }]}>View Training</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -209,78 +218,79 @@ export default function CoachNotificationsScreen() {
         ))
       )}
     </KeyboardAwareScrollView>
+    </ScreenBackground>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0a0a' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a0a0a' },
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: 'transparent' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, paddingTop: 56 },
-  title: { color: '#fff', fontSize: 20, fontWeight: '800' },
+  title: { color: t.ink, fontSize: 20, fontWeight: '800' },
   empty: { alignItems: 'center', paddingTop: 80 },
-  emptyTitle: { color: '#fff', fontSize: 16, fontWeight: '700', marginTop: 16 },
+  emptyTitle: { color: t.ink, fontSize: 16, fontWeight: '700', marginTop: 16 },
   card: {
-    backgroundColor: '#111827',
+    backgroundColor: t.card,
     borderRadius: 12,
     padding: 14,
     marginHorizontal: 20,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#1f2937',
+    borderColor: t.cardBorder,
   },
   cardMain: { flexDirection: 'row', alignItems: 'flex-start' },
-  cardUnread: { borderColor: '#2563eb' },
+  cardUnread: { borderColor: t.accent },
   iconBg: {
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: '#1f2937',
+    backgroundColor: t.chip,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  notifTitle: { color: '#9ca3af', fontSize: 13, fontWeight: '600', marginBottom: 2 },
-  notifTitleUnread: { color: '#fff' },
-  notifBody: { color: '#6b7280', fontSize: 12, lineHeight: 18 },
-  notifDate: { color: '#374151', fontSize: 11, marginTop: 4 },
+  notifTitle: { color: t.muted, fontSize: 13, fontWeight: '600', marginBottom: 2 },
+  notifTitleUnread: { color: t.ink },
+  notifBody: { color: t.muted2, fontSize: 12, lineHeight: 18 },
+  notifDate: { color: t.muted2, fontSize: 11, marginTop: 4 },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#2563eb',
+    backgroundColor: t.accent,
     marginTop: 4,
     marginLeft: 8,
   },
-  expandedContent: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#1f2937' },
+  expandedContent: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: t.line },
   replyInput: {
-    backgroundColor: '#0a0a0a',
+    backgroundColor: t.chip,
     borderRadius: 8,
     padding: 10,
-    color: '#fff',
+    color: t.ink,
     fontSize: 13,
     borderWidth: 1,
-    borderColor: '#374151',
+    borderColor: t.line,
     marginBottom: 8,
     minHeight: 60,
   },
-  replyBtn: { backgroundColor: '#2563eb', borderRadius: 8, padding: 10, alignItems: 'center' },
-  replyBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
+  replyBtn: { backgroundColor: t.ctaBg, borderRadius: 8, padding: 10, alignItems: 'center' },
+  replyBtnText: { color: t.ctaText, fontWeight: '700', fontSize: 13 },
   actionRow: { flexDirection: 'row', gap: 8 },
   approveBtn: {
-    backgroundColor: '#16a34a',
+    backgroundColor: t.positive,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
-  approveBtnText: { color: '#fff', fontWeight: '700', fontSize: 12 },
+  approveBtnText: { color: t.brownInk, fontWeight: '700', fontSize: 12 },
   rejectBtn: {
-    backgroundColor: '#dc262622',
+    backgroundColor: t.negativeSoft,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: '#dc2626',
+    borderColor: t.negative,
   },
-  rejectBtnText: { color: '#dc2626', fontWeight: '700', fontSize: 12 },
-  markReadBtn: { padding: 8, alignItems: 'center', borderWidth: 1, borderColor: '#374151', borderRadius: 8 },
-  markReadText: { color: '#6b7280', fontSize: 12, fontWeight: '600' },
+  rejectBtnText: { color: t.negative, fontWeight: '700', fontSize: 12 },
+  markReadBtn: { padding: 8, alignItems: 'center', borderWidth: 1, borderColor: t.line, borderRadius: 8 },
+  markReadText: { color: t.muted, fontSize: 12, fontWeight: '600' },
 });

@@ -227,13 +227,14 @@ const SwipedPlayerNotifStack = withTabSwipe(PlayerNotifStack);
 const SwipedPlayerLinkScreen = withTabSwipe(PlayerLinkScreen);
 
 function PlayerTabs() {
+  const { t } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarStyle: { backgroundColor: '#1a2e1a', borderTopColor: '#2d4a2d' },
-        tabBarActiveTintColor: '#16a34a',
-        tabBarInactiveTintColor: '#4b7a4b',
+        tabBarStyle: { backgroundColor: t.isDark ? '#0C2331' : '#EFE7DA', borderTopColor: t.divider },
+        tabBarActiveTintColor: t.positive,
+        tabBarInactiveTintColor: t.muted2,
         tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, [string, string]> = {
             PlayerHomeTab:    ['home',          'home-outline'],

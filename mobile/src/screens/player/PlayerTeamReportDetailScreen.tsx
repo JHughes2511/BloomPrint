@@ -6,6 +6,10 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import { playerReportsAPI } from '../../api/playerClient';
+import { useTheme } from '../../theme/ThemeProvider';
+import { ThemeTokens } from '../../theme/tokens';
+import { fonts } from '../../theme/typography';
+import { ScreenBackground } from '../../theme/components';
 
 function cleanMarkdown(text: string): string {
   return text
@@ -20,6 +24,9 @@ function cleanMarkdown(text: string): string {
 }
 
 export default function PlayerTeamReportDetailScreen() {
+  const { t } = useTheme();
+  const styles = makeStyles(t);
+  const markdownStyles = makeMarkdownStyles(t);
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { reportId } = route.params;
@@ -37,26 +44,30 @@ export default function PlayerTeamReportDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator color="#16a34a" size="large" />
-      </View>
+      <ScreenBackground>
+        <View style={styles.center}>
+          <ActivityIndicator color={t.positive} size="large" />
+        </View>
+      </ScreenBackground>
     );
   }
 
   if (!report) {
     return (
-      <View style={styles.center}>
-        <Text style={{ color: '#fff' }}>Report not found</Text>
-      </View>
+      <ScreenBackground>
+        <View style={styles.center}>
+          <Text style={{ color: t.ink }}>Report not found</Text>
+        </View>
+      </ScreenBackground>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0f1a0f' }}>
+    <ScreenBackground>
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={24} color="#fff" />
+            <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
           <View style={{ flex: 1, marginLeft: 12 }}>
             <Text style={styles.title}>
@@ -84,37 +95,37 @@ export default function PlayerTeamReportDetailScreen() {
           </View>
         ) : null}
       </ScrollView>
-    </View>
+    </ScreenBackground>
   );
 }
 
-const markdownStyles = {
-  body: { color: '#d1d5db', fontSize: 13, lineHeight: 22 },
-  heading1: { color: '#ffffff', fontSize: 16, fontWeight: '800' as const, marginTop: 16, marginBottom: 4 },
-  heading2: { color: '#e5e7eb', fontSize: 14, fontWeight: '700' as const, marginTop: 14, marginBottom: 4 },
-  strong: { color: '#ffffff', fontWeight: '700' as const },
+const makeMarkdownStyles = (t: ThemeTokens) => ({
+  body: { color: t.inkSoft, fontSize: 13, lineHeight: 22 },
+  heading1: { color: t.ink, fontSize: 16, fontWeight: '800' as const, marginTop: 16, marginBottom: 4 },
+  heading2: { color: t.ink, fontSize: 14, fontWeight: '700' as const, marginTop: 14, marginBottom: 4 },
+  strong: { color: t.ink, fontWeight: '700' as const },
   bullet_list: { marginLeft: 8 },
-  list_item: { color: '#d1d5db', fontSize: 13 },
-};
+  list_item: { color: t.inkSoft, fontSize: 13 },
+});
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f1a0f' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f1a0f' },
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: 'transparent' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56 },
-  title: { color: '#fff', fontSize: 16, fontWeight: '900' },
-  sub: { color: '#4b7a4b', fontSize: 11, marginTop: 2 },
+  title: { color: t.ink, fontSize: 16, fontWeight: '900' },
+  sub: { color: t.muted, fontSize: 11, marginTop: 2 },
   messageBox: {
-    backgroundColor: '#16a34a22',
+    backgroundColor: t.positiveSoft,
     borderLeftWidth: 3,
-    borderLeftColor: '#16a34a',
+    borderLeftColor: t.positive,
     marginHorizontal: 20,
     marginBottom: 16,
     padding: 12,
     borderRadius: 8,
   },
-  messageLabel: { color: '#16a34a', fontSize: 10, fontWeight: '700', marginBottom: 4, textTransform: 'uppercase' },
-  messageText: { color: '#d1d5db', fontSize: 13 },
+  messageLabel: { color: t.positive, fontSize: 10, fontWeight: '700', marginBottom: 4, textTransform: 'uppercase' },
+  messageText: { color: t.inkSoft, fontSize: 13 },
   section: { paddingHorizontal: 20, marginTop: 20 },
-  sectionLabel: { color: '#9ca3af', fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 },
-  reportBox: { backgroundColor: '#1a2e1a', borderRadius: 12, padding: 16 },
+  sectionLabel: { color: t.label, fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 },
+  reportBox: { backgroundColor: t.card, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: t.cardBorder },
 });

@@ -6,6 +6,10 @@ import {
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { playerReportsAPI } from '../../api/playerClient';
+import { useTheme } from '../../theme/ThemeProvider';
+import { ThemeTokens } from '../../theme/tokens';
+import { fonts } from '../../theme/typography';
+import { ScreenBackground } from '../../theme/components';
 
 type InboxItem = {
   id: number;
@@ -21,6 +25,8 @@ type InboxItem = {
 };
 
 export default function PlayerInboxScreen() {
+  const { t } = useTheme();
+  const styles = makeStyles(t);
   const navigation = useNavigation<any>();
   const [items, setItems] = useState<InboxItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,17 +60,20 @@ export default function PlayerInboxScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator color="#16a34a" size="large" />
-      </View>
+      <ScreenBackground>
+        <View style={styles.center}>
+          <ActivityIndicator color={t.positive} size="large" />
+        </View>
+      </ScreenBackground>
     );
   }
 
   return (
+    <ScreenBackground>
     <ScrollView
       style={styles.container}
       contentContainerStyle={{ paddingBottom: 40 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#16a34a" />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={t.positive} />}
     >
       <View style={styles.header}>
         <Text style={styles.title}>My Reports</Text>
@@ -73,7 +82,7 @@ export default function PlayerInboxScreen() {
 
       {items.length === 0 ? (
         <View style={styles.empty}>
-          <Ionicons name="mail-outline" size={48} color="#2d4a2d" />
+          <Ionicons name="mail-outline" size={48} color={t.muted2} />
           <Text style={styles.emptyTitle}>No reports yet</Text>
           <Text style={styles.emptyDesc}>When a coach shares a report with you, it will appear here.</Text>
         </View>
@@ -118,53 +127,54 @@ export default function PlayerInboxScreen() {
                   <View style={styles.chip}><Text style={styles.chipText}>Full Report</Text></View>
                 )}
               </View>
-              <Ionicons name="chevron-forward" size={16} color="#4b5563" />
+              <Ionicons name="chevron-forward" size={16} color={t.muted} />
             </View>
           </TouchableOpacity>
         ))
       )}
     </ScrollView>
+    </ScreenBackground>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f1a0f' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f1a0f' },
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: 'transparent' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' },
   header: { padding: 24, paddingTop: 60 },
-  title: { color: '#fff', fontSize: 26, fontWeight: '900' },
-  sub: { color: '#4b7a4b', fontSize: 12, marginTop: 4 },
+  title: { color: t.ink, fontSize: 26, fontWeight: '900' },
+  sub: { color: t.muted, fontSize: 12, marginTop: 4 },
   empty: { alignItems: 'center', paddingTop: 80, paddingHorizontal: 40 },
-  emptyTitle: { color: '#fff', fontSize: 16, fontWeight: '700', marginTop: 16 },
-  emptyDesc: { color: '#4b7a4b', fontSize: 13, textAlign: 'center', marginTop: 8, lineHeight: 20 },
+  emptyTitle: { color: t.ink, fontSize: 16, fontWeight: '700', marginTop: 16 },
+  emptyDesc: { color: t.muted, fontSize: 13, textAlign: 'center', marginTop: 8, lineHeight: 20 },
   card: {
-    backgroundColor: '#1a2e1a',
+    backgroundColor: t.card,
     borderRadius: 14,
     padding: 16,
     marginHorizontal: 20,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#2d4a2d',
+    borderColor: t.cardBorder,
   },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   typeBadge: {
-    backgroundColor: '#16a34a22',
+    backgroundColor: t.positiveSoft,
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderWidth: 1,
-    borderColor: '#16a34a',
+    borderColor: t.positive,
   },
-  typeText: { color: '#16a34a', fontSize: 10, fontWeight: '700' },
-  date: { color: '#4b7a4b', fontSize: 11 },
-  cardTitle: { color: '#fff', fontSize: 15, fontWeight: '700', marginBottom: 4 },
-  message: { color: '#9ca3af', fontSize: 12, marginBottom: 8, lineHeight: 18 },
+  typeText: { color: t.positive, fontSize: 10, fontWeight: '700' },
+  date: { color: t.muted, fontSize: 11 },
+  cardTitle: { color: t.ink, fontSize: 15, fontWeight: '700', marginBottom: 4 },
+  message: { color: t.muted, fontSize: 12, marginBottom: 8, lineHeight: 18 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 },
   sharedItems: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
   chip: {
-    backgroundColor: '#2d4a2d',
+    backgroundColor: t.chip,
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  chipText: { color: '#9ca3af', fontSize: 10 },
+  chipText: { color: t.muted, fontSize: 10 },
 });
