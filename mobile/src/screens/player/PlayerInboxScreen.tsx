@@ -18,28 +18,49 @@ const SKIP_TITLE = /^(bim\b|player\b|program\b|framework\b|overall\b|grade\b|eva
 const cleanLine = (l: string) =>
   l.replace(/\*\*/g, '').replace(/^#{1,6}\s*/, '').replace(/[—–_=]{2,}/g, '').trim();
 
-// The report's descriptive sub-name, derived from the report header:
-//   "{Type} - {player name | level}"  or  "{Type} - {team matchup / title}".
-// Returns null when there's no report body to derive from (so the type pill is
-// never just repeated).
-const reportSubName = (item: { report_text?: string | null; output_type: string }): string | null => {
-  const typeLabel = outputTypeLabel(item.output_type) || 'Report';
-  if (!item.report_text) return null;
-  const head = item.report_text.split('\n').map(cleanLine).filter(Boolean).slice(0, 12);
+// A short, clean subject from the report body: the player's name (+ level) for
+// player reports, or the team matchup for team reports — trailing descriptors
+// like "— Comprehensive Game Plan" / "— Creator Academy" are dropped.
+const cleanSubject = (reportText: string): string | null => {
+  const head = reportText.split('\n').map(cleanLine).filter(Boolean).slice(0, 12);
 
   const playerLine = head.find(l => /^player\s*:/i.test(l));
   if (playerLine) {
     const name = playerLine.replace(/^player\s*:/i, '').split('/')[0].trim();
-    const lm = head.join(' ').match(LEVEL_RE);
-    const level = lm ? lm[1] : '';
     if (name) {
-      return `${typeLabel} - ${name}${level && !name.toLowerCase().includes(level.toLowerCase()) ? ` | ${level}` : ''}`;
+      const lm = head.join(' ').match(LEVEL_RE);
+      const level = lm ? lm[1] : '';
+      return level && !name.toLowerCase().includes(level.toLowerCase()) ? `${name} · ${level}` : name;
     }
   }
 
   const titleLine = head.find((l, i) => i > 0 && l.length > 8 && /[a-z]/.test(l) && /[A-Z]/.test(l) && !SKIP_TITLE.test(l));
-  if (titleLine) return `${typeLabel} - ${titleLine}`;
+  if (titleLine) {
+    const subject = titleLine.split(/\s+[—–-]\s+/)[0].replace(/\s*\|.*$/, '').trim();
+    if (subject.length > 3) return subject;
+  }
   return null;
+};
+
+// What the player actually received, used as a clean fallback name when the
+// report body was excluded from the share.
+const sharedContentLabel = (item: InboxItem): string => {
+  if (item.kind === 'team') return 'Full Report';
+  if (item.share_report_text) return 'Full Report';
+  if (item.share_grades) return 'Pillar Grades';
+  if (item.share_flags) return 'Flags & Notes';
+  if (item.share_questions) return 'Key Questions';
+  return 'Shared Report';
+};
+
+// Every report gets a clean sub-name: the body's subject when available, else a
+// description of what was shared.
+const reportSubName = (item: InboxItem): string => {
+  if (item.report_text) {
+    const subject = cleanSubject(item.report_text);
+    if (subject) return subject;
+  }
+  return sharedContentLabel(item);
 };
 
 type InboxItem = {
