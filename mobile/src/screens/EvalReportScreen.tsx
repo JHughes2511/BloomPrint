@@ -994,7 +994,7 @@ export default function EvalReportScreen() {
             <Ionicons name="create-outline" size={16} color={t.ctaText} />
             <Text style={[styles.bbText, { color: t.ctaText }]}>Correct</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.chip }]} onPress={() => setShowExport(true)} disabled={exporting}>
+          <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.chip, borderColor: t.cta2Border }]} onPress={() => setShowExport(true)} disabled={exporting}>
             <Ionicons name="document-text-outline" size={16} color={t.ink} />
             <Text style={[styles.bbText, { color: t.ink }]}>Export</Text>
           </TouchableOpacity>
@@ -1090,7 +1090,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   ladderRange: { color: t.muted, fontSize: 11.5 },
   bottomBar: { gap: 10, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, backgroundColor: t.sheet, borderTopWidth: 1, borderTopColor: t.divider },
   bottomRow: { flexDirection: 'row', gap: 10 },
-  bbBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 14, paddingVertical: 14 },
+  bbBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 14, paddingVertical: 14, borderWidth: 1, borderColor: 'transparent' },
   bbText: { fontFamily: fonts[800], fontSize: 14 },
 
   correctionCard: { backgroundColor: t.card, borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: t.cardBorder },
