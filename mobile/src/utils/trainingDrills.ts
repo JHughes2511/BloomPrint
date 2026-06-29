@@ -31,9 +31,10 @@ const isHeading = (line: string): boolean => {
   return allCaps || shortColon;
 };
 
-// Sections that describe analysis/targets/commentary rather than things the
-// player physically does — their bullets are NOT checkable drills.
-const SKIP_SECTION = /kpi|target|checkpoint|progress check|profile|overview|summary|weakness|strength(?!s? (drill|work))|correctable|structural|comparable|projection|do not change|what is working|note|recommendation|analysis/i;
+// Checkable drills come ONLY from the program's weekly structure — the weekly
+// session plan and its per-day blocks. Everything else (KPI targets, progress
+// checkpoints, profile, weakness analysis, prose) is ignored.
+const WEEKLY_SECTION = /^day\s*\d|^week\s*\d|weekly|session plan|daily|routine|workout|schedule/i;
 
 // Individual lines that are commentary/metrics rather than a drill.
 const SKIP_LINE = /[↑↓]|^\s*\d+\s*[-–]?\s*week\b|measurably|^link\b|should be|^\s*by (week|day)\b/i;
@@ -42,13 +43,13 @@ export function parseDrills(text?: string | null): { sections: DrillSection[]; t
   if (!text) return { sections: [], total: 0 };
   const sections: DrillSection[] = [];
   let cur: DrillSection | null = null;
-  let skipCurrent = false;
+  let collecting = false;
   const seen = new Set<string>();
   let total = 0;
 
   for (const raw of text.split('\n')) {
     if (isDrillLine(raw)) {
-      if (skipCurrent) continue;
+      if (!collecting || !cur) continue;
       if (SKIP_LINE.test(raw)) continue;
       const label = raw
         .replace(/^\s*([-*•·▪]|\d+[.)])\s+/, '')
@@ -67,14 +68,13 @@ export function parseDrills(text?: string | null): { sections: DrillSection[]; t
       if (seen.has(key)) key = `${key}-${total}`;
       seen.add(key);
 
-      if (!cur) { cur = { title: 'Drills', drills: [] }; sections.push(cur); }
       cur.drills.push({ key, label, meta: meta || undefined });
       total++;
     } else if (isHeading(raw)) {
       const title = raw.trim().replace(/^#{1,6}\s*/, '').replace(/\*\*/g, '').replace(/:$/, '').trim();
-      skipCurrent = SKIP_SECTION.test(title);
+      collecting = WEEKLY_SECTION.test(title);
       cur = { title, drills: [] };
-      if (!skipCurrent) sections.push(cur);
+      if (collecting) sections.push(cur);
     }
   }
 
