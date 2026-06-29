@@ -36,7 +36,7 @@ const isHeading = (line: string): boolean => {
 // per-day blocks; it ENDS at the next unrelated section. Standalone day/workout/
 // routine sections elsewhere, KPI targets, checkpoints, profile, and prose are
 // all excluded.
-const WEEKLY_START = /weekly|week\s*\d|session\s*plan/i;
+const WEEKLY_START = /weekly|week\s*\d|session\s*plan|training week|^day\s*\d|^week\s*\d/i;
 const WEEKLY_CONTINUE = /^day\s*\d|^week\s*\d/i;
 
 // Individual lines that are commentary/metrics rather than a drill.
