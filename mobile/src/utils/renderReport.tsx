@@ -71,19 +71,23 @@ export function renderReport(
     const isShortHeader = trimmed.length < 60 && trimmed.endsWith(':');
 
     if (entry.mdHeading || isAllCaps || isShortHeader) {
+      // Underlined, larger, well-spaced headings so sections read as distinct
+      // blocks instead of one continuous wall of text.
       elements.push(
-        <Text
+        <View
           key={`line-${index}`}
-          style={{ fontWeight: '800', fontSize: 16, color: colors.heading, marginTop: 14, marginBottom: 3 }}
+          style={{ marginTop: 18, marginBottom: 7, borderBottomWidth: 1, borderBottomColor: colors.heading, paddingBottom: 4, alignSelf: 'flex-start' }}
         >
-          {trimmed}
-        </Text>
+          <Text style={{ fontWeight: '800', fontSize: 16.5, letterSpacing: 0.2, color: colors.heading }}>
+            {trimmed}
+          </Text>
+        </View>
       );
     } else {
       elements.push(
         <Text
           key={`line-${index}`}
-          style={{ fontSize: 14, lineHeight: 22, color: colors.body }}
+          style={{ fontSize: 14.5, lineHeight: 23, color: colors.body, marginBottom: 2 }}
         >
           {line}
         </Text>

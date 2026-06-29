@@ -18,40 +18,44 @@ export default function RoleSelectScreen() {
     <ScreenBackground>
     <SafeAreaView style={styles.container}>
       <View style={styles.inner}>
-        <Text style={styles.logo}>BloomPrint</Text>
-        <Text style={styles.sub}>Basketball Intelligence Model</Text>
-        <Text style={styles.prompt}>Who are you?</Text>
+        <Text style={styles.brand}>BloomPrint</Text>
+        <Text style={styles.title}>Who are you?</Text>
+        <Text style={styles.sub}>Choose how you'll use BloomPrint. You can switch later in settings.</Text>
 
-        <TouchableOpacity
-          style={[styles.card, styles.coachCard]}
-          onPress={() => navigation.navigate('CoachLogin')}
-        >
-          <View style={[styles.iconBg, { backgroundColor: t.accentSoft }]}>
-            <Ionicons name="clipboard" size={32} color={t.accent} />
-          </View>
-          <Text style={styles.cardTitle}>Coach / Scout / Trainer</Text>
-          <Text style={styles.cardDesc}>
-            Evaluate players, generate reports, and manage your roster
-          </Text>
-          <View style={[styles.arrow, { backgroundColor: t.accent }]}>
-            <Ionicons name="arrow-forward" size={16} color={t.ctaText} />
-          </View>
-        </TouchableOpacity>
+        <View style={styles.cards}>
+          <TouchableOpacity
+            style={[styles.card, { borderWidth: 1.5, borderColor: t.accent }]}
+            onPress={() => navigation.navigate('CoachLogin')}
+          >
+            <View style={[styles.tile, { backgroundColor: t.accentSoft }]}>
+              <Ionicons name="clipboard-outline" size={28} color={t.accent} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cardTitle}>Coach</Text>
+              <Text style={styles.cardDesc}>Build reports, track games, evaluate your roster</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={22} color={t.accent} />
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.card, styles.playerCard]}
-          onPress={() => navigation.navigate('PlayerLogin')}
-        >
-          <View style={[styles.iconBg, { backgroundColor: t.positiveSoft }]}>
-            <Ionicons name="basketball" size={32} color={t.positive} />
-          </View>
-          <Text style={styles.cardTitle}>Player</Text>
-          <Text style={styles.cardDesc}>
-            View your evaluations, training programs, and coach feedback
+          <TouchableOpacity
+            style={[styles.card, { borderWidth: 1, borderColor: t.cardBorder }]}
+            onPress={() => navigation.navigate('PlayerLogin')}
+          >
+            <View style={[styles.tile, { backgroundColor: t.brownSoft }]}>
+              <Ionicons name="person-outline" size={28} color={t.brown} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cardTitle}>Player</Text>
+              <Text style={styles.cardDesc}>Receive reports, follow training, track your growth</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={22} color={t.muted2} />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity onPress={() => navigation.navigate('CoachLogin')}>
+          <Text style={styles.signin}>
+            Already have an account? <Text style={styles.signinLink}>Sign in</Text>
           </Text>
-          <View style={[styles.arrow, { backgroundColor: t.positive }]}>
-            <Ionicons name="arrow-forward" size={16} color="#fff" />
-          </View>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -61,44 +65,27 @@ export default function RoleSelectScreen() {
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1 },
-  inner: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+  inner: { flex: 1, justifyContent: 'center', paddingHorizontal: 30 },
+  brand: {
+    fontFamily: fonts[800], fontSize: 14, letterSpacing: 2.8,
+    textTransform: 'uppercase', color: t.label, textAlign: 'center',
   },
-  logo: { fontSize: 38, fontFamily: fonts[900], color: t.ink, letterSpacing: 1 },
-  sub: { fontSize: 13, color: t.muted, marginBottom: 8, marginTop: 4 },
-  prompt: { fontSize: 18, color: t.inkSoft, fontFamily: fonts[700], marginBottom: 32, marginTop: 16 },
+  title: {
+    fontFamily: fonts[800], fontSize: 34, letterSpacing: -0.7,
+    color: t.ink, textAlign: 'center', marginTop: 14, lineHeight: 38,
+  },
+  sub: { fontSize: 15, color: t.muted, textAlign: 'center', marginTop: 10, lineHeight: 22 },
+  cards: { marginTop: 40, gap: 15 },
   card: {
-    width: '100%',
-    borderRadius: 20,
-    padding: 24,
-    marginBottom: 16,
-    borderWidth: 1,
-    position: 'relative',
-    backgroundColor: t.card,
+    backgroundColor: t.card, borderRadius: 22, padding: 22,
+    flexDirection: 'row', alignItems: 'center', gap: 16,
   },
-  coachCard: { borderColor: t.accent },
-  playerCard: { borderColor: t.positive },
-  iconBg: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
+  tile: {
+    width: 58, height: 58, borderRadius: 17,
+    alignItems: 'center', justifyContent: 'center',
   },
-  cardTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800], marginBottom: 6 },
-  cardDesc: { color: t.muted, fontSize: 13, lineHeight: 19, paddingRight: 32 },
-  arrow: {
-    position: 'absolute',
-    bottom: 24,
-    right: 24,
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  cardTitle: { fontFamily: fonts[800], fontSize: 20, color: t.ink },
+  cardDesc: { fontSize: 13.5, color: t.muted, marginTop: 3, lineHeight: 19 },
+  signin: { textAlign: 'center', marginTop: 34, fontSize: 14, color: t.muted },
+  signinLink: { color: t.label, fontFamily: fonts[800] },
 });

@@ -460,10 +460,10 @@ export default function EvalReportScreen() {
           {fixedSections.filter(s => s.body.trim()).map((s, i, arr) => (
             <View key={s.key}>
               <View style={styles.fixedHead}>
-                <Ionicons name={s.icon as any} size={15} color={s.tone === 'brown' ? t.brown : t.label} />
+                <Ionicons name={s.icon as any} size={17} color={s.tone === 'brown' ? t.brown : t.label} />
                 <Text style={[styles.fixedHeadLabel, { color: s.tone === 'brown' ? t.brown : t.label }]}>{s.label}</Text>
               </View>
-              <Text style={styles.fixedBody}>{s.body}</Text>
+              <View>{renderReport(s.body, { heading: t.ink, body: t.inkSoft })}</View>
               {i < arr.length - 1 && <View style={styles.fixedDivider} />}
             </View>
           ))}
@@ -1074,10 +1074,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   recruitPillText: { color: t.accent, fontSize: 11.5, fontFamily: fonts[800] },
   briefBox: { marginHorizontal: 20, marginTop: 16, backgroundColor: t.card, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: t.cardBorder },
   briefLabel: { color: t.label, fontSize: 10.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 },
-  briefText: { color: t.inkSoft, fontSize: 14, lineHeight: 21 },
-  fixedHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  fixedHeadLabel: { fontSize: 12, fontFamily: fonts[700], letterSpacing: 1.6, textTransform: 'uppercase' },
-  fixedBody: { color: t.inkSoft, fontSize: 14, lineHeight: 22 },
+  briefText: { color: t.inkSoft, fontSize: 15, lineHeight: 23 },
+  fixedHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8, marginTop: 4 },
+  fixedHeadLabel: { fontSize: 13.5, fontFamily: fonts[800], letterSpacing: 1.4, textTransform: 'uppercase' },
+  fixedBody: { color: t.inkSoft, fontSize: 14.5, lineHeight: 23 },
   fixedDivider: { height: 1, backgroundColor: t.divider, marginVertical: 18 },
   fullToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 20, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: t.line },
   fullToggleText: { color: t.accent, fontSize: 13, fontFamily: fonts[700] },
