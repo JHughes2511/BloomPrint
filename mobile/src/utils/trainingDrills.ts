@@ -31,10 +31,13 @@ const isHeading = (line: string): boolean => {
   return allCaps || shortColon;
 };
 
-// Checkable drills come ONLY from the program's weekly structure — the weekly
-// session plan and its per-day blocks. Everything else (KPI targets, progress
-// checkpoints, profile, weakness analysis, prose) is ignored.
-const WEEKLY_SECTION = /^day\s*\d|^week\s*\d|weekly|session plan|daily|routine|workout|schedule/i;
+// Checkable drills come ONLY from the program's weekly structure overview. That
+// region STARTS at a "Weekly … / Session Plan" heading and CONTINUES through its
+// per-day blocks; it ENDS at the next unrelated section. Standalone day/workout/
+// routine sections elsewhere, KPI targets, checkpoints, profile, and prose are
+// all excluded.
+const WEEKLY_START = /weekly|week\s*\d|session\s*plan/i;
+const WEEKLY_CONTINUE = /^day\s*\d|^week\s*\d/i;
 
 // Individual lines that are commentary/metrics rather than a drill.
 const SKIP_LINE = /[↑↓]|^\s*\d+\s*[-–]?\s*week\b|measurably|^link\b|should be|^\s*by (week|day)\b/i;
@@ -72,9 +75,17 @@ export function parseDrills(text?: string | null): { sections: DrillSection[]; t
       total++;
     } else if (isHeading(raw)) {
       const title = raw.trim().replace(/^#{1,6}\s*/, '').replace(/\*\*/g, '').replace(/:$/, '').trim();
-      collecting = WEEKLY_SECTION.test(title);
-      cur = { title, drills: [] };
-      if (collecting) sections.push(cur);
+      if (WEEKLY_START.test(title)) {
+        collecting = true;                        // entering the weekly structure
+        cur = { title, drills: [] };
+        sections.push(cur);
+      } else if (collecting && WEEKLY_CONTINUE.test(title)) {
+        cur = { title, drills: [] };              // a day block within the week
+        sections.push(cur);
+      } else {
+        collecting = false;                       // left the weekly structure
+        cur = null;
+      }
     }
   }
 
