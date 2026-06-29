@@ -49,7 +49,6 @@ export default function PlayerTrainingScreen() {
   const sorted = [...programs].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
-  const mostRecent = sorted[0];
 
   if (loading) {
     return (
@@ -85,21 +84,7 @@ export default function PlayerTrainingScreen() {
         </View>
       ) : (
         <>
-          {/* Tracking summary */}
-          <View style={styles.summaryCard}>
-            <View style={styles.summaryTop}>
-              <Text style={styles.summaryLabel}>Your Training</Text>
-              <View style={styles.countPill}><Text style={styles.countPillText}>{programs.length}</Text></View>
-            </View>
-            <View style={styles.summaryRow}>
-              <Ionicons name="time-outline" size={15} color={t.muted} />
-              <Text style={styles.summaryMeta}>
-                {mostRecent ? `Most recent ${timeAgo(mostRecent.created_at)}` : 'No programs yet'}
-              </Text>
-            </View>
-          </View>
-
-          <Text style={styles.sectionLabel}>Sent to You</Text>
+          <Text style={[styles.sectionLabel, { marginTop: 22 }]}>Sent to You</Text>
 
           {sorted.map((pt, idx) => (
             <TouchableOpacity
