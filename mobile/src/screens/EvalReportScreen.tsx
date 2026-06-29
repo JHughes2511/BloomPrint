@@ -794,7 +794,10 @@ export default function EvalReportScreen() {
               >
                 {saving || regenerating
                   ? <ActivityIndicator color={t.ctaText} />
-                  : <Text style={[styles.saveText, { color: t.ctaText }]}>Apply & Regenerate</Text>}
+                  : <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <Ionicons name="refresh" size={16} color={t.ctaText} />
+                      <Text style={[styles.saveText, { color: t.ctaText }]}>Apply & Regenerate</Text>
+                    </View>}
               </TouchableOpacity>
               <View style={styles.modalRow}>
                 <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowCorrect(false)}>
