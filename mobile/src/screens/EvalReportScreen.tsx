@@ -1004,9 +1004,9 @@ export default function EvalReportScreen() {
             <Ionicons name="send" size={15} color="#16201A" />
             <Text style={[styles.bbText, { color: '#16201A' }]}>Send to Player</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.brown }]} onPress={() => setShowShareModal(true)}>
-            <Ionicons name="people" size={15} color={t.brownInk} />
-            <Text style={[styles.bbText, { color: t.brownInk }]}>Share w/ Staff</Text>
+          <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.ctaBg }]} onPress={() => setShowShareModal(true)}>
+            <Ionicons name="people" size={15} color={t.ctaText} />
+            <Text style={[styles.bbText, { color: t.ctaText }]}>Share w/ Staff</Text>
           </TouchableOpacity>
         </View>
       </View>
