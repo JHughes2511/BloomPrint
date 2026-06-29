@@ -11,21 +11,34 @@ import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 import { outputTypeLabel } from '../../utils/reportType';
-import { extractBrief } from '../../utils/reportSections';
 
-// Headline describing what the report is about — derived from the report's
-// brief/summary, falling back to the coach's note, then the report type.
-const firstSentence = (s: string) => {
-  const clean = s.replace(/\s+/g, ' ').trim();
-  const m = clean.match(/^(.{0,90}?[.!?])(\s|$)/);
-  return (m ? m[1] : clean.slice(0, 90)).trim();
-};
-// The report's descriptive sub-name. Never falls back to the type label (that
-// already shows on the pill — no duplication).
-const headlineFor = (item: { report_text?: string | null; message?: string | null }) => {
-  const brief = extractBrief(item.report_text ?? undefined);
-  if (brief) return firstSentence(brief);
-  if (item.message?.trim()) return item.message.trim();
+const LEVEL_RE = /\b(HS Varsity|HS JV|Varsity|JUCO|NAIA|D1|D2|D3|College|Pro|AAU|Middle School|Youth|EYBL|Prep)\b/i;
+const SKIP_TITLE = /^(bim\b|player\b|program\b|framework\b|overall\b|grade\b|evaluation\b|status\b|rating\b|section\b|output\b|\d+\s+frames|rating scale|status options|comparable|floor comp|ceiling comp)/i;
+
+const cleanLine = (l: string) =>
+  l.replace(/\*\*/g, '').replace(/^#{1,6}\s*/, '').replace(/[—–_=]{2,}/g, '').trim();
+
+// The report's descriptive sub-name, derived from the report header:
+//   "{Type} - {player name | level}"  or  "{Type} - {team matchup / title}".
+// Returns null when there's no report body to derive from (so the type pill is
+// never just repeated).
+const reportSubName = (item: { report_text?: string | null; output_type: string }): string | null => {
+  const typeLabel = outputTypeLabel(item.output_type) || 'Report';
+  if (!item.report_text) return null;
+  const head = item.report_text.split('\n').map(cleanLine).filter(Boolean).slice(0, 12);
+
+  const playerLine = head.find(l => /^player\s*:/i.test(l));
+  if (playerLine) {
+    const name = playerLine.replace(/^player\s*:/i, '').split('/')[0].trim();
+    const lm = head.join(' ').match(LEVEL_RE);
+    const level = lm ? lm[1] : '';
+    if (name) {
+      return `${typeLabel} - ${name}${level && !name.toLowerCase().includes(level.toLowerCase()) ? ` | ${level}` : ''}`;
+    }
+  }
+
+  const titleLine = head.find((l, i) => i > 0 && l.length > 8 && /[a-z]/.test(l) && /[A-Z]/.test(l) && !SKIP_TITLE.test(l));
+  if (titleLine) return `${typeLabel} - ${titleLine}`;
   return null;
 };
 
@@ -172,8 +185,8 @@ export default function PlayerInboxScreen() {
               </View>
 
               {(() => {
-                const headline = headlineFor(item);
-                return headline ? <Text style={styles.cardTitle} numberOfLines={2}>{headline}</Text> : null;
+                const sub = reportSubName(item);
+                return sub ? <Text style={styles.cardTitle} numberOfLines={2}>{sub}</Text> : null;
               })()}
               {grade != null ? <Text style={styles.cardMeta}>BIM {grade.toFixed(1)}</Text> : null}
 
@@ -231,10 +244,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderColor: t.cardBorder,
   },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  typeBadge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  typeBadge: { borderRadius: 999, paddingHorizontal: 11, paddingVertical: 5 },
   typeBadgeEval: { backgroundColor: t.accentSoft },
   typeBadgeFilm: { backgroundColor: t.brownSoft },
-  typeText: { fontSize: 10, fontFamily: fonts[800], letterSpacing: 0.4 },
+  typeText: { fontSize: 10.5, fontFamily: fonts[800], letterSpacing: 0.4 },
   date: { color: t.muted2, fontSize: 12.5 },
   cardTitle: { color: t.ink, fontSize: 17.5, fontFamily: fonts[800], marginTop: 12 },
   cardMeta: { color: t.muted, fontSize: 13.5, marginTop: 3 },
@@ -243,8 +256,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   chip: {
     backgroundColor: t.chip,
     borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
   },
   chipText: { color: t.muted, fontSize: 10.5, fontFamily: fonts[600] },
 });
