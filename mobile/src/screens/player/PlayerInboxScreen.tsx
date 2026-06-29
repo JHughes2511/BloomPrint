@@ -18,11 +18,15 @@ const SKIP_TITLE = /^(bim\b|player\b|program\b|framework\b|overall\b|grade\b|eva
 const cleanLine = (l: string) =>
   l.replace(/\*\*/g, '').replace(/^#{1,6}\s*/, '').replace(/[—–_=]{2,}/g, '').trim();
 
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
 // A short, clean subject from the report body: the player's name (+ level) for
-// player reports, or the team matchup for team reports — trailing descriptors
-// like "— Comprehensive Game Plan" / "— Creator Academy" are dropped.
-const cleanSubject = (reportText: string): string | null => {
-  const head = reportText.split('\n').map(cleanLine).filter(Boolean).slice(0, 12);
+// player reports, or the best descriptive title (team matchup / scheme) for team
+// reports. Trailing descriptors are dropped, and any line that just repeats the
+// report type (e.g. "FILM BREAKDOWN") is rejected.
+const cleanSubject = (reportText: string, outputType: string): string | null => {
+  const typeNorm = norm(outputTypeLabel(outputType) || '');
+  const head = reportText.split('\n').map(cleanLine).filter(Boolean).slice(0, 18);
 
   const playerLine = head.find(l => /^player\s*:/i.test(l));
   if (playerLine) {
@@ -34,12 +38,22 @@ const cleanSubject = (reportText: string): string | null => {
     }
   }
 
-  const titleLine = head.find((l, i) => i > 0 && l.length > 8 && /[a-z]/.test(l) && /[A-Z]/.test(l) && !SKIP_TITLE.test(l));
-  if (titleLine) {
-    const subject = titleLine.split(/\s+[—–-]\s+/)[0].replace(/\s*\|.*$/, '').trim();
-    if (subject.length > 3) return subject;
-  }
-  return null;
+  // Build candidate descriptive titles, rejecting headers, metadata lines, and
+  // anything that just echoes the report type.
+  const candidates = head
+    .filter((l, i) =>
+      i > 0 &&
+      l.length >= 6 && l.length <= 80 &&
+      /[a-z]/.test(l) &&                       // must have lowercase (not an ALL-CAPS header)
+      !SKIP_TITLE.test(l) &&
+      !/:/.test(l.slice(0, 26)) &&             // skip "Program:", "Coach Focus:", etc.
+      norm(l) !== typeNorm && !norm(l).includes(typeNorm),
+    )
+    .map(l => l.split(/\s+[—–-]\s+/)[0].replace(/\s*\|.*$/, '').trim())
+    .filter(s => s.length >= 4 && norm(s) !== typeNorm && !norm(s).includes(typeNorm));
+
+  // Prefer a matchup ("X vs Y"); otherwise the first solid descriptive line.
+  return candidates.find(s => /\bvs?\.?\b/i.test(s)) || candidates[0] || null;
 };
 
 // What the player actually received, used as a clean fallback name when the
@@ -57,7 +71,7 @@ const sharedContentLabel = (item: InboxItem): string => {
 // description of what was shared.
 const reportSubName = (item: InboxItem): string => {
   if (item.report_text) {
-    const subject = cleanSubject(item.report_text);
+    const subject = cleanSubject(item.report_text, item.output_type);
     if (subject) return subject;
   }
   return sharedContentLabel(item);
@@ -188,8 +202,6 @@ export default function PlayerInboxScreen() {
       ) : (
         filtered.map(item => {
           const isFilm = (item.output_type || '').includes('film');
-          const grade = item.kind === 'eval' && item.share_grades && item.overall_grade != null
-            ? item.overall_grade : null;
           return (
             <TouchableOpacity
               key={`${item.kind}-${item.id}`}
@@ -205,11 +217,7 @@ export default function PlayerInboxScreen() {
                 <Text style={styles.date}>{timeAgo(item.created_at)}</Text>
               </View>
 
-              {(() => {
-                const sub = reportSubName(item);
-                return sub ? <Text style={styles.cardTitle} numberOfLines={2}>{sub}</Text> : null;
-              })()}
-              {grade != null ? <Text style={styles.cardMeta}>BIM {grade.toFixed(1)}</Text> : null}
+              <Text style={styles.cardTitle} numberOfLines={2}>{reportSubName(item)}</Text>
 
               <View style={styles.cardFooter}>
                 <View style={styles.sharedItems}>
