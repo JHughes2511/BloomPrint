@@ -16,6 +16,10 @@ import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from 
 import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
 import { renderReport } from '../utils/renderReport';
+import { useTheme } from '../theme/ThemeProvider';
+import { ThemeTokens } from '../theme/tokens';
+import { fonts } from '../theme/typography';
+import { ScreenBackground } from '../theme/components';
 
 const TYPE_LABELS: Record<string, string> = {
   player_eval: 'Player Eval',
@@ -66,6 +70,9 @@ type StaffShareContext = {
 };
 
 export default function RecentScreen() {
+  const { t } = useTheme();
+  const styles = makeStyles(t);
+  const sendStyles = makeSendStyles(t);
   const navigation = useNavigation<any>();
   const [items, setItems] = useState<ReportItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -192,13 +199,13 @@ export default function RecentScreen() {
         overall_grade: e.overall_grade,
         created_at: e.created_at,
       }));
-      const teamItems: ReportItem[] = teamReports.map((t: any) => ({
-        id: t.id,
+      const teamItems: ReportItem[] = teamReports.map((tr: any) => ({
+        id: tr.id,
         kind: 'team',
         player_name: 'Team Report',
-        output_type: t.output_type,
+        output_type: tr.output_type,
         overall_grade: null,
-        created_at: t.created_at,
+        created_at: tr.created_at,
       }));
       const gameItems: ReportItem[] = gameReports.map((g: any) => ({
         id: g.id,
@@ -219,7 +226,7 @@ export default function RecentScreen() {
         program_text: ts.program_text,
       }));
       const texts: Record<number, string> = {};
-      teamReports.forEach((t: any) => { if (t.report_text) texts[t.id] = t.report_text; });
+      teamReports.forEach((tr: any) => { if (tr.report_text) texts[tr.id] = tr.report_text; });
       setTeamReportTexts(texts);
       const ec: Record<number, any> = {};
       evals.forEach((e: any) => { ec[e.id] = e; });
@@ -433,11 +440,12 @@ export default function RecentScreen() {
     }
   };
 
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#2563eb" size="large" /></View>;
+  if (loading) return <ScreenBackground><View style={styles.center}><ActivityIndicator color={t.accent} size="large" /></View></ScreenBackground>;
 
   let lastDate = '';
 
   return (
+    <ScreenBackground>
     <View style={styles.container}>
       <Text style={styles.title}>Recent Reports</Text>
 
@@ -462,7 +470,7 @@ export default function RecentScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
         ListEmptyComponent={
           <View style={styles.center}>
-            <Ionicons name="document-text-outline" size={48} color="#374151" />
+            <Ionicons name="document-text-outline" size={48} color={t.muted2} />
             <Text style={styles.emptyText}>No reports yet.</Text>
           </View>
         }
@@ -499,10 +507,10 @@ export default function RecentScreen() {
                       }
                       size={12}
                       color={
-                        item.kind === 'game' ? '#a78bfa' :
-                        item.kind === 'team' ? '#f59e0b' :
-                        item.kind === 'training' ? '#22c55e' :
-                        '#2563eb'
+                        item.kind === 'game' ? t.accent :
+                        item.kind === 'team' ? t.brown :
+                        item.kind === 'training' ? t.positive :
+                        t.accent
                       }
                     />
                   </View>
@@ -513,9 +521,9 @@ export default function RecentScreen() {
                       ellipsizeMode="tail"
                       style={[
                         styles.typeName,
-                        item.kind === 'team' && { color: '#f59e0b' },
-                        item.kind === 'game' && { color: '#a78bfa' },
-                        item.kind === 'training' && { color: '#22c55e' },
+                        item.kind === 'team' && { color: t.brown },
+                        item.kind === 'game' && { color: t.accent },
+                        item.kind === 'training' && { color: t.positive },
                       ]}
                     >
                       {item.kind === 'game' ? 'Game Report Packet' :
@@ -524,7 +532,7 @@ export default function RecentScreen() {
                     </Text>
                   </View>
                   {item.overall_grade != null && <GradeBadge grade={item.overall_grade} size="md" />}
-                  {item.kind === 'game' && <Ionicons name="chevron-forward" size={14} color="#4b5563" />}
+                  {item.kind === 'game' && <Ionicons name="chevron-forward" size={14} color={t.muted2} />}
                 </TouchableOpacity>
                 {/* Action buttons row — shown for all card types */}
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10, width: '100%' }}>
@@ -534,8 +542,8 @@ export default function RecentScreen() {
                       style={styles.gameActionBtn}
                       onPress={() => setGameReportModal({ title: item.player_name ?? 'Game Report', text: item.report_text! })}
                     >
-                      <Ionicons name="document-text-outline" size={13} color="#a78bfa" />
-                      <Text style={[styles.gameActionText, { color: '#a78bfa' }]}>View Report</Text>
+                      <Ionicons name="document-text-outline" size={13} color={t.accent} />
+                      <Text style={[styles.gameActionText, { color: t.accent }]}>View Report</Text>
                     </TouchableOpacity>
                   ) : null}
                   {item.kind === 'game' && (
@@ -543,7 +551,7 @@ export default function RecentScreen() {
                       style={styles.gameActionBtn}
                       onPress={() => navigation.navigate('GameReportBuilder', { reportId: item.id })}
                     >
-                      <Ionicons name="create-outline" size={13} color="#9ca3af" />
+                      <Ionicons name="create-outline" size={13} color={t.muted} />
                       <Text style={styles.gameActionText}>Edit Packet</Text>
                     </TouchableOpacity>
                   )}
@@ -551,7 +559,7 @@ export default function RecentScreen() {
                   {/* Send to Player — available for eval, team, training; hidden for game */}
                   {item.kind !== 'game' && (
                     <TouchableOpacity
-                      style={[styles.gameActionBtn, { borderColor: '#16a34a22' }]}
+                      style={[styles.gameActionBtn, { borderColor: t.positiveSoft }]}
                       onPress={() => {
                         openModal({
                           id: item.id,
@@ -564,14 +572,14 @@ export default function RecentScreen() {
                         setTimeout(() => setModalView('send'), 50);
                       }}
                     >
-                      <Ionicons name="person-outline" size={13} color="#16a34a" />
-                      <Text style={[styles.gameActionText, { color: '#16a34a' }]}>Send to Player</Text>
+                      <Ionicons name="person-outline" size={13} color={t.positive} />
+                      <Text style={[styles.gameActionText, { color: t.positive }]}>Send to Player</Text>
                     </TouchableOpacity>
                   )}
 
                   {/* Share — player / team / staff, available for all types */}
                   <TouchableOpacity
-                    style={[styles.gameActionBtn, { borderColor: '#7c3aed22' }]}
+                    style={[styles.gameActionBtn, { borderColor: t.brownSoft }]}
                     onPress={() => {
                       const reportType = item.kind === 'eval' ? 'eval' :
                                          item.kind === 'team' ? 'team_report' :
@@ -590,8 +598,8 @@ export default function RecentScreen() {
                       });
                     }}
                   >
-                    <Ionicons name="share-social-outline" size={13} color="#7c3aed" />
-                    <Text style={[styles.gameActionText, { color: '#7c3aed' }]}>Share</Text>
+                    <Ionicons name="share-social-outline" size={13} color={t.brown} />
+                    <Text style={[styles.gameActionText, { color: t.brown }]}>Share</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -603,7 +611,7 @@ export default function RecentScreen() {
       {/* Loading overlay while fetching eval detail */}
       {loadingEval && (
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator color="#2563eb" size="large" />
+          <ActivityIndicator color={t.accent} size="large" />
         </View>
       )}
 
@@ -617,13 +625,13 @@ export default function RecentScreen() {
                 <Text style={styles.modalSub}>{gameReportModal?.title}</Text>
               </View>
               <TouchableOpacity onPress={() => setGameReportModal(null)}>
-                <Ionicons name="close" size={24} color="#9ca3af" />
+                <Ionicons name="close" size={24} color={t.muted} />
               </TouchableOpacity>
             </View>
             <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
               {gameReportModal?.text
-                ? renderReport(gameReportModal.text)
-                : <Text style={{ color: '#6b7280' }}>No report content available.</Text>
+                ? renderReport(gameReportModal.text, { heading: t.ink, body: t.inkSoft })
+                : <Text style={{ color: t.muted2 }}>No report content available.</Text>
               }
             </KeyboardAwareScrollView>
           </View>
@@ -642,7 +650,7 @@ export default function RecentScreen() {
                 </Text>
               </View>
               <TouchableOpacity onPress={closeStaffShareModal}>
-                <Ionicons name="close" size={24} color="#9ca3af" />
+                <Ionicons name="close" size={24} color={t.muted} />
               </TouchableOpacity>
             </View>
 
@@ -661,9 +669,9 @@ export default function RecentScreen() {
                   {[
                     { key: 'share_report_text', label: 'Share Program Text' },
                   ].map(tog => (
-                    <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
-                      <Text style={{ color: '#d1d5db', fontSize: 13 }}>{tog.label}</Text>
-                      <Switch value={staffShareToggles[tog.key as keyof typeof staffShareToggles]} onValueChange={v => setStaffShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: '#374151', true: '#7c3aed' }} thumbColor="#fff" />
+                    <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider }}>
+                      <Text style={{ color: t.inkSoft, fontSize: 13 }}>{tog.label}</Text>
+                      <Switch value={staffShareToggles[tog.key as keyof typeof staffShareToggles]} onValueChange={v => setStaffShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: t.line, true: t.brown }} thumbColor="#fff" />
                     </View>
                   ))}
                 </>
@@ -677,25 +685,25 @@ export default function RecentScreen() {
                     { key: 'share_flags', label: 'Share Watch Flags' },
                     { key: 'share_questions', label: 'Share Key Questions' },
                   ].map(tog => (
-                    <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
-                      <Text style={{ color: '#d1d5db', fontSize: 13 }}>{tog.label}</Text>
-                      <Switch value={staffShareToggles[tog.key as keyof typeof staffShareToggles]} onValueChange={v => setStaffShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: '#374151', true: '#7c3aed' }} thumbColor="#fff" />
+                    <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider }}>
+                      <Text style={{ color: t.inkSoft, fontSize: 13 }}>{tog.label}</Text>
+                      <Switch value={staffShareToggles[tog.key as keyof typeof staffShareToggles]} onValueChange={v => setStaffShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: t.line, true: t.brown }} thumbColor="#fff" />
                     </View>
                   ))}
                 </>
               )}
 
               {/* Allow regenerate toggle */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, marginBottom: 4, backgroundColor: '#1f2937', borderRadius: 8, padding: 12 }}>
-                <Text style={{ color: '#d1d5db', fontSize: 13 }}>Allow recipient to regenerate</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, marginBottom: 4, backgroundColor: t.chip, borderRadius: 8, padding: 12 }}>
+                <Text style={{ color: t.inkSoft, fontSize: 13 }}>Allow recipient to regenerate</Text>
                 <Switch
                   value={staffAllowRegen}
                   onValueChange={setStaffAllowRegen}
-                  trackColor={{ false: '#374151', true: '#7c3aed' }}
+                  trackColor={{ false: t.line, true: t.brown }}
                   thumbColor="#fff"
                 />
               </View>
-              <Text style={{ color: '#6b7280', fontSize: 11, marginBottom: 12, marginLeft: 2 }}>
+              <Text style={{ color: t.muted2, fontSize: 11, marginBottom: 12, marginLeft: 2 }}>
                 {staffAllowRegen
                   ? 'Sends a live, regenerable copy — recipient sees the full report.'
                   : 'Sends a frozen snapshot — choose which sections to include below.'}
@@ -706,14 +714,14 @@ export default function RecentScreen() {
                 const secs = splitReportSections(staffShareFullText);
                 return !staffAllowRegen && secs.length > 1 ? (
                   <>
-                    <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Include Sections</Text>
+                    <Text style={{ color: t.muted, fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Include Sections</Text>
                     {secs.map(sec => (
-                      <View key={sec.heading} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: '#1f2937', borderRadius: 8, padding: 10 }}>
-                        <Text style={{ color: '#d1d5db', fontSize: 13, flex: 1, marginRight: 8 }} numberOfLines={1}>{sec.heading}</Text>
+                      <View key={sec.heading} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: t.chip, borderRadius: 8, padding: 10 }}>
+                        <Text style={{ color: t.inkSoft, fontSize: 13, flex: 1, marginRight: 8 }} numberOfLines={1}>{sec.heading}</Text>
                         <Switch
                           value={staffSectionToggles[sec.heading] !== false}
                           onValueChange={v => setStaffSectionToggles(prev => ({ ...prev, [sec.heading]: v }))}
-                          trackColor={{ false: '#374151', true: '#7c3aed' }}
+                          trackColor={{ false: t.line, true: t.brown }}
                           thumbColor="#fff"
                         />
                       </View>
@@ -726,12 +734,12 @@ export default function RecentScreen() {
                 <VoiceTextInput
                   style={[sendStyles.searchInput, { flex: 1 }]}
                   placeholder="Search coach/program name..."
-                  placeholderTextColor="#6b7280"
+                  placeholderTextColor={t.muted2}
                   value={staffSearch}
                   onChangeText={setStaffSearch}
                 />
                 <TouchableOpacity
-                  style={{ backgroundColor: '#7c3aed', borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' }}
+                  style={{ backgroundColor: t.brown, borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' }}
                   onPress={searchStaff}
                   disabled={staffSearchLoading}
                 >
@@ -746,21 +754,21 @@ export default function RecentScreen() {
                   disabled={sendingToStaff}
                 >
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: '#fff', fontWeight: '600' }}>{r.name}</Text>
-                    <Text style={{ color: '#6b7280', fontSize: 12 }}>{r.role} · {r.program_name}</Text>
+                    <Text style={{ color: t.ink, fontWeight: '600' }}>{r.name}</Text>
+                    <Text style={{ color: t.muted2, fontSize: 12 }}>{r.role} · {r.program_name}</Text>
                   </View>
-                  {sendingToStaff ? <ActivityIndicator color="#7c3aed" size="small" /> : <Ionicons name="paper-plane-outline" size={18} color="#7c3aed" />}
+                  {sendingToStaff ? <ActivityIndicator color={t.brown} size="small" /> : <Ionicons name="paper-plane-outline" size={18} color={t.brown} />}
                 </TouchableOpacity>
               ))}
               {staffResults.length === 0 && staffSearch.trim().length > 0 && !staffSearchLoading && (
-                <Text style={{ color: '#4b5563', textAlign: 'center', paddingVertical: 20 }}>No staff found.</Text>
+                <Text style={{ color: t.muted2, textAlign: 'center', paddingVertical: 20 }}>No staff found.</Text>
               )}
             </KeyboardAwareScrollView>
             <TouchableOpacity
               style={[sendStyles.cancelBtn, { marginTop: 12, flex: 0 }]}
               onPress={closeStaffShareModal}
             >
-              <Text style={{ color: '#9ca3af', fontWeight: '600' }}>Cancel</Text>
+              <Text style={{ color: t.muted, fontWeight: '600' }}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -775,7 +783,7 @@ export default function RecentScreen() {
             <View style={styles.modalHeader}>
               {modalView !== 'report' ? (
                 <TouchableOpacity onPress={() => setModalView('report')} style={{ marginRight: 10 }}>
-                  <Ionicons name="arrow-back" size={22} color="#9ca3af" />
+                  <Ionicons name="arrow-back" size={22} color={t.muted} />
                 </TouchableOpacity>
               ) : null}
               <View style={{ flex: 1 }}>
@@ -789,7 +797,7 @@ export default function RecentScreen() {
                 )}
               </View>
               <TouchableOpacity onPress={() => setActiveModal(null)}>
-                <Ionicons name="close" size={24} color="#9ca3af" />
+                <Ionicons name="close" size={24} color={t.muted} />
               </TouchableOpacity>
             </View>
 
@@ -798,31 +806,31 @@ export default function RecentScreen() {
               <>
                 <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
                   {activeModal?.text
-                    ? renderReport(activeModal.text)
-                    : <Text style={{ color: '#6b7280' }}>No report content</Text>
+                    ? renderReport(activeModal.text, { heading: t.ink, body: t.inkSoft })
+                    : <Text style={{ color: t.muted2 }}>No report content</Text>
                   }
                 </KeyboardAwareScrollView>
                 <View style={styles.actionRow}>
                   <TouchableOpacity style={styles.actionBtn} onPress={() => { setTeamCorrectText(''); setModalView('correct'); }}>
-                    <Ionicons name="create-outline" size={18} color="#fff" />
+                    <Ionicons name="create-outline" size={18} color={t.ink} />
                     <Text style={styles.actionText}>Correct</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.actionBtn} onPress={exportModalReport} disabled={exporting}>
-                    {exporting ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="download-outline" size={18} color="#fff" />}
+                    {exporting ? <ActivityIndicator color={t.ink} size="small" /> : <Ionicons name="download-outline" size={18} color={t.ink} />}
                     <Text style={styles.actionText}>Export</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.actionBtn} onPress={printModalReport}>
-                    <Ionicons name="print-outline" size={18} color="#fff" />
+                    <Ionicons name="print-outline" size={18} color={t.ink} />
                     <Text style={styles.actionText}>Print</Text>
                   </TouchableOpacity>
                   {/* Send to Player */}
-                  <TouchableOpacity style={[styles.actionBtn, { borderColor: '#16a34a44' }]} onPress={() => { setSendSearch(''); setSendResults([]); setModalView('send'); }}>
-                    <Ionicons name="person-outline" size={18} color="#16a34a" />
-                    <Text style={[styles.actionText, { color: '#16a34a' }]}>Player</Text>
+                  <TouchableOpacity style={[styles.actionBtn, { borderColor: t.positiveSoft }]} onPress={() => { setSendSearch(''); setSendResults([]); setModalView('send'); }}>
+                    <Ionicons name="person-outline" size={18} color={t.positive} />
+                    <Text style={[styles.actionText, { color: t.positive }]}>Player</Text>
                   </TouchableOpacity>
                   {/* Share — player / team / staff */}
                   <TouchableOpacity
-                    style={[styles.actionBtn, { borderColor: '#7c3aed44' }]}
+                    style={[styles.actionBtn, { borderColor: t.brownSoft }]}
                     onPress={() => {
                       if (!activeModal) return;
                       const reportType = activeModal.kind === 'eval' ? 'eval' :
@@ -836,8 +844,8 @@ export default function RecentScreen() {
                       setShareCtx({ reportType, reportId, outputType, reportText: fullText, title: label });
                     }}
                   >
-                    <Ionicons name="share-social-outline" size={18} color="#7c3aed" />
-                    <Text style={[styles.actionText, { color: '#7c3aed' }]}>Share</Text>
+                    <Ionicons name="share-social-outline" size={18} color={t.brown} />
+                    <Text style={[styles.actionText, { color: t.brown }]}>Share</Text>
                   </TouchableOpacity>
                 </View>
               </>
@@ -858,9 +866,9 @@ export default function RecentScreen() {
                     {[
                       { key: 'share_report_text', label: 'Share Program Text' },
                     ].map(tog => (
-                      <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
-                        <Text style={{ color: '#d1d5db', fontSize: 13 }}>{tog.label}</Text>
-                        <Switch value={playerShareToggles[tog.key as keyof typeof playerShareToggles]} onValueChange={v => setPlayerShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: '#374151', true: '#16a34a' }} thumbColor="#fff" />
+                      <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: t.divider }}>
+                        <Text style={{ color: t.inkSoft, fontSize: 13 }}>{tog.label}</Text>
+                        <Switch value={playerShareToggles[tog.key as keyof typeof playerShareToggles]} onValueChange={v => setPlayerShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: t.line, true: t.positive }} thumbColor="#fff" />
                       </View>
                     ))}
                   </View>
@@ -874,42 +882,42 @@ export default function RecentScreen() {
                       { key: 'share_watch_flags', label: 'Share Watch Flags' },
                       { key: 'share_key_questions', label: 'Share Key Questions' },
                     ].map(tog => (
-                      <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: '#1f2937' }}>
-                        <Text style={{ color: '#d1d5db', fontSize: 13 }}>{tog.label}</Text>
-                        <Switch value={playerShareToggles[tog.key as keyof typeof playerShareToggles]} onValueChange={v => setPlayerShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: '#374151', true: '#16a34a' }} thumbColor="#fff" />
+                      <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: t.divider }}>
+                        <Text style={{ color: t.inkSoft, fontSize: 13 }}>{tog.label}</Text>
+                        <Switch value={playerShareToggles[tog.key as keyof typeof playerShareToggles]} onValueChange={v => setPlayerShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: t.line, true: t.positive }} thumbColor="#fff" />
                       </View>
                     ))}
                   </View>
                 )}
 
-                <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>Search for a player to send this report to their inbox.</Text>
+                <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>Search for a player to send this report to their inbox.</Text>
                 <View style={{ marginBottom: 12 }}>
                   <VoiceTextInput
                     style={sendStyles.searchInput}
                     placeholder="Type a name to search..."
-                    placeholderTextColor="#6b7280"
+                    placeholderTextColor={t.muted2}
                     value={sendSearch}
                     onChangeText={setSendSearch}
                   />
                   {sendSearchLoading && (
-                    <ActivityIndicator color="#6b7280" size="small" style={{ marginTop: 8, alignSelf: 'center' }} />
+                    <ActivityIndicator color={t.muted2} size="small" style={{ marginTop: 8, alignSelf: 'center' }} />
                   )}
                 </View>
                 <KeyboardAwareScrollView style={{ maxHeight: 200 }} keyboardShouldPersistTaps="handled">
                   {sendResults.map(r => (
                     <TouchableOpacity key={r.id} style={sendStyles.resultRow} onPress={() => sendReport(r)} disabled={sending}>
                       <View style={sendStyles.avatar}>
-                        <Text style={{ color: '#fff', fontWeight: '700' }}>{r.name?.[0] ?? '?'}</Text>
+                        <Text style={{ color: t.ctaText, fontWeight: '700' }}>{r.name?.[0] ?? '?'}</Text>
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Text style={{ color: '#fff', fontWeight: '600' }}>{r.name}</Text>
-                        <Text style={{ color: '#6b7280', fontSize: 12 }}>{r.email}</Text>
+                        <Text style={{ color: t.ink, fontWeight: '600' }}>{r.name}</Text>
+                        <Text style={{ color: t.muted2, fontSize: 12 }}>{r.email}</Text>
                       </View>
-                      {sending ? <ActivityIndicator color="#2563eb" size="small" /> : <Ionicons name="paper-plane-outline" size={18} color="#2563eb" />}
+                      {sending ? <ActivityIndicator color={t.accent} size="small" /> : <Ionicons name="paper-plane-outline" size={18} color={t.accent} />}
                     </TouchableOpacity>
                   ))}
                   {sendResults.length === 0 && sendSearch.trim().length > 0 && !sendSearchLoading && (
-                    <Text style={{ color: '#4b5563', textAlign: 'center', paddingVertical: 20 }}>No players found. Make sure they've registered on the player portal.</Text>
+                    <Text style={{ color: t.muted2, textAlign: 'center', paddingVertical: 20 }}>No players found. Make sure they've registered on the player portal.</Text>
                   )}
                 </KeyboardAwareScrollView>
               </>
@@ -922,11 +930,11 @@ export default function RecentScreen() {
                   <Text style={sendStyles.reportPreviewTitle}>{TYPE_LABELS[activeModal?.outputType ?? ''] ?? outputTypeLabel(activeModal?.outputType)}</Text>
                   <Text style={sendStyles.reportPreviewText} numberOfLines={2}>{activeModal?.text?.replace(/[#*_]/g, '').trim().slice(0, 120)}...</Text>
                 </View>
-                <Text style={{ color: '#6b7280', fontSize: 12, marginBottom: 10 }}>Describe what needs to be corrected and AI will update the report.</Text>
+                <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>Describe what needs to be corrected and AI will update the report.</Text>
                 <VoiceTextInput
                   style={sendStyles.correctInput}
                   placeholder="What needs to be corrected in this report?"
-                  placeholderTextColor="#4b5563"
+                  placeholderTextColor={t.muted2}
                   value={teamCorrectText}
                   onChangeText={setTeamCorrectText}
                   multiline
@@ -934,10 +942,10 @@ export default function RecentScreen() {
                 />
                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                   <TouchableOpacity style={sendStyles.cancelBtn} onPress={() => setModalView('report')}>
-                    <Text style={{ color: '#9ca3af', fontWeight: '600' }}>Cancel</Text>
+                    <Text style={{ color: t.muted, fontWeight: '600' }}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={sendStyles.applyBtn} onPress={applyCorrection} disabled={applyingCorrect || !teamCorrectText.trim()}>
-                    {applyingCorrect ? <ActivityIndicator color="#fff" size="small" /> : <Text style={{ color: '#fff', fontWeight: '700' }}>Apply</Text>}
+                    {applyingCorrect ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontWeight: '700' }}>Apply</Text>}
                   </TouchableOpacity>
                 </View>
               </>
@@ -960,87 +968,89 @@ export default function RecentScreen() {
         />
       )}
     </View>
+    </ScreenBackground>
   );
 }
 
-const sendStyles = StyleSheet.create({
+const makeSendStyles = (t: ThemeTokens) => StyleSheet.create({
   searchInput: {
-    backgroundColor: '#1f2937', borderRadius: 10, padding: 14,
-    color: '#fff', fontSize: 15, borderWidth: 1, borderColor: '#374151',
+    backgroundColor: t.card, borderRadius: 10, padding: 14,
+    color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line,
     minHeight: 48,
   },
-  searchBtn: { backgroundColor: '#2563eb', borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' },
+  searchBtn: { backgroundColor: t.ctaBg, borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' },
   resultRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12,
-    borderRadius: 10, backgroundColor: '#1f2937', marginBottom: 8,
+    borderRadius: 10, backgroundColor: t.chip, marginBottom: 8,
   },
   avatar: {
-    width: 36, height: 36, borderRadius: 18, backgroundColor: '#2563eb',
+    width: 36, height: 36, borderRadius: 18, backgroundColor: t.accent,
     alignItems: 'center', justifyContent: 'center',
   },
   correctInput: {
-    backgroundColor: '#1f2937', borderRadius: 10, padding: 14, color: '#fff',
-    fontSize: 15, borderWidth: 1, borderColor: '#374151', minHeight: 120,
+    backgroundColor: t.card, borderRadius: 10, padding: 14, color: t.ink,
+    fontSize: 15, borderWidth: 1, borderColor: t.line, minHeight: 120,
   },
   reportPreview: {
-    backgroundColor: '#0a0a0a', borderRadius: 10, padding: 12, marginBottom: 14,
-    borderWidth: 1, borderColor: '#1f2937',
+    backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 14,
+    borderWidth: 1, borderColor: t.line,
   },
-  reportPreviewTitle: { color: '#9ca3af', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 },
-  reportPreviewText: { color: '#6b7280', fontSize: 12, lineHeight: 18 },
-  cancelBtn: { flex: 1, padding: 14, borderRadius: 10, borderWidth: 1, borderColor: '#374151', alignItems: 'center' },
-  applyBtn: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: '#2563eb', alignItems: 'center' },
+  reportPreviewTitle: { color: t.label, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 },
+  reportPreviewText: { color: t.muted2, fontSize: 12, lineHeight: 18 },
+  cancelBtn: { flex: 1, padding: 14, borderRadius: 10, borderWidth: 1, borderColor: t.line, alignItems: 'center' },
+  applyBtn: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: t.ctaBg, alignItems: 'center' },
 });
 
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0a0a', paddingTop: 56 },
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: 'transparent', paddingTop: 56 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80 },
-  title: { fontSize: 28, fontWeight: '900', color: '#fff', marginHorizontal: 20, marginBottom: 12 },
+  title: { fontSize: 28, fontFamily: fonts[900], color: t.ink, marginHorizontal: 20, marginBottom: 12 },
   filterRow: { marginBottom: 12, flexGrow: 0, height: 52 },
-  filterChip: { borderWidth: 1, borderColor: '#374151', borderRadius: 18, paddingHorizontal: 14, justifyContent: 'center', alignItems: 'center', height: 34 },
-  filterChipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  filterChipText: { color: '#9ca3af', fontSize: 13, fontWeight: '600' },
-  filterChipTextActive: { color: '#fff' },
-  dateHeader: { color: '#4b5563', fontSize: 11, fontWeight: '700', marginHorizontal: 20, marginTop: 16, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 },
-  emptyText: { color: '#4b5563', marginTop: 12, fontSize: 14 },
+  filterChip: { borderWidth: 1, borderColor: t.line, borderRadius: 18, paddingHorizontal: 14, justifyContent: 'center', alignItems: 'center', height: 34 },
+  filterChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  filterChipText: { color: t.muted, fontSize: 13, fontWeight: '600' },
+  filterChipTextActive: { color: t.ctaText },
+  dateHeader: { color: t.label, fontSize: 11, fontWeight: '700', marginHorizontal: 20, marginTop: 16, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 },
+  emptyText: { color: t.muted2, marginTop: 12, fontSize: 14 },
   card: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#111827', marginHorizontal: 16, marginBottom: 8,
+    backgroundColor: t.card, marginHorizontal: 16, marginBottom: 8,
     borderRadius: 12, padding: 14, gap: 10,
+    borderWidth: 1, borderColor: t.cardBorder,
   },
-  cardTeam: { borderWidth: 1, borderColor: '#f59e0b22' },
-  cardGame: { borderWidth: 1, borderColor: '#a78bfa22' },
-  cardTraining: { borderWidth: 1, borderColor: '#22c55e22' },
+  cardTeam: { borderWidth: 1, borderColor: t.brownSoft },
+  cardGame: { borderWidth: 1, borderColor: t.accentSoft },
+  cardTraining: { borderWidth: 1, borderColor: t.positiveSoft },
   kindBadge: {
     width: 28, height: 28, borderRadius: 8,
-    backgroundColor: '#1f2937', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: t.chip, alignItems: 'center', justifyContent: 'center',
   },
-  typeName: { color: '#2563eb', fontSize: 12, fontWeight: '600', marginTop: 2, lineHeight: 20, paddingBottom: 2 },
-  playerName: { color: '#fff', fontSize: 15, fontWeight: '700', lineHeight: 22 },
+  typeName: { color: t.accent, fontSize: 12, fontWeight: '600', marginTop: 2, lineHeight: 20, paddingBottom: 2 },
+  playerName: { color: t.ink, fontSize: 15, fontWeight: '700', lineHeight: 22 },
   loadingOverlay: {
-    ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.6)',
+    ...StyleSheet.absoluteFillObject, backgroundColor: t.scrim,
     alignItems: 'center', justifyContent: 'center',
   },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
-  modalBox: { backgroundColor: '#111827', borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8 },
+  modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
+  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
-  modalTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
-  modalSub: { color: '#6b7280', fontSize: 12, marginTop: 4, lineHeight: 18 },
+  modalTitle: { color: t.ink, fontSize: 18, fontWeight: '800' },
+  modalSub: { color: t.muted2, fontSize: 12, marginTop: 4, lineHeight: 18 },
   actionRow: {
     flexDirection: 'row', flexWrap: 'wrap', gap: 8,
-    marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#1f2937',
+    marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: t.divider,
   },
   actionBtn: {
     flex: 1, minWidth: '45%', flexDirection: 'row', alignItems: 'center',
-    justifyContent: 'center', gap: 6, backgroundColor: '#1f2937',
+    justifyContent: 'center', gap: 6, backgroundColor: t.chip,
     borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12,
   },
-  actionText: { color: '#fff', fontSize: 13, fontWeight: '600' },
+  actionText: { color: t.ink, fontSize: 13, fontWeight: '600' },
   gameActionBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: '#1f2937', borderRadius: 8, paddingVertical: 6, paddingHorizontal: 10,
-    borderWidth: 1, borderColor: '#374151',
+    backgroundColor: t.chip, borderRadius: 8, paddingVertical: 6, paddingHorizontal: 10,
+    borderWidth: 1, borderColor: t.line,
   },
-  gameActionText: { color: '#9ca3af', fontSize: 12, fontWeight: '600' },
+  gameActionText: { color: t.muted, fontSize: 12, fontWeight: '600' },
 });
