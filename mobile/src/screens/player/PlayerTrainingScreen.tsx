@@ -12,6 +12,20 @@ import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 
+const timeAgo = (iso: string) => {
+  const d = (Date.now() - new Date(iso).getTime()) / 86400000;
+  if (d < 1) return 'today';
+  if (d < 2) return 'yesterday';
+  if (d < 7) return `${Math.floor(d)} days ago`;
+  if (d < 14) return '1 week ago';
+  if (d < 30) return `${Math.floor(d / 7)} weeks ago`;
+  return new Date(iso).toLocaleDateString();
+};
+
+const cleanPreview = (s: string) =>
+  s.replace(/#{1,6}\s?/g, '').replace(/\*\*/g, '').replace(/\*/g, '')
+   .replace(/__/g, '').replace(/_([^_]+)_/g, '$1').replace(/^\s*[-•]\s/gm, '').trim();
+
 export default function PlayerTrainingScreen() {
   const navigation = useNavigation<any>();
   const { t } = useTheme();
@@ -30,6 +44,11 @@ export default function PlayerTrainingScreen() {
   };
 
   useFocusEffect(useCallback(() => { load(); }, []));
+
+  const sorted = [...programs].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+  const mostRecent = sorted[0];
 
   if (loading) {
     return (
@@ -50,47 +69,65 @@ export default function PlayerTrainingScreen() {
     >
       <View style={styles.header}>
         <Text style={styles.title}>My Training</Text>
-        <Text style={styles.sub}>{programs.length} program{programs.length !== 1 ? 's' : ''}</Text>
+        <Text style={styles.sub}>
+          {programs.length > 0 ? 'Programs your coach built for you' : 'Training from your coach'}
+        </Text>
       </View>
 
       {programs.length === 0 ? (
         <View style={styles.empty}>
-          <Ionicons name="barbell-outline" size={48} color={t.positiveSoft} />
+          <Ionicons name="barbell-outline" size={48} color={t.muted2} />
           <Text style={styles.emptyTitle}>No training programs yet</Text>
           <Text style={styles.emptyDesc}>
             Open a shared report and tap "Generate Training Program" to create one.
           </Text>
         </View>
       ) : (
-        programs.map(pt => (
-          <TouchableOpacity
-            key={pt.id}
-            style={styles.card}
-            onPress={() => navigation.navigate('PlayerTrainingDetail', { trainingId: pt.id })}
-          >
-            <View style={styles.cardTop}>
-              <View style={styles.iconBg}>
-                <Ionicons name="barbell" size={18} color={t.positive} />
-              </View>
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.cardTitle}>Training Program</Text>
-                <Text style={styles.cardDate}>{new Date(pt.created_at).toLocaleDateString()}</Text>
-              </View>
-              {pt.coach_notes && (
-                <View style={styles.notesBadge}>
-                  <Ionicons name="chatbubble" size={12} color={t.positive} />
-                  <Text style={styles.notesBadgeText}>Coach Notes</Text>
-                </View>
-              )}
-              <Ionicons name="chevron-forward" size={16} color={t.muted2} style={{ marginLeft: 8 }} />
+        <>
+          {/* Tracking summary */}
+          <View style={styles.summaryCard}>
+            <View style={styles.summaryTop}>
+              <Text style={styles.summaryLabel}>Your Training</Text>
+              <View style={styles.countPill}><Text style={styles.countPillText}>{programs.length}</Text></View>
             </View>
-            {pt.program_text && (
-              <Text style={styles.preview} numberOfLines={2}>
-                {pt.program_text.replace(/#{1,6}\s?/g, '').replace(/\*\*/g, '').replace(/\*/g, '').replace(/__/g, '').replace(/_([^_]+)_/g, '$1').replace(/^\s*[-•]\s/gm, '').trim()}
+            <View style={styles.summaryRow}>
+              <Ionicons name="time-outline" size={15} color={t.muted} />
+              <Text style={styles.summaryMeta}>
+                {mostRecent ? `Most recent ${timeAgo(mostRecent.created_at)}` : 'No programs yet'}
               </Text>
-            )}
-          </TouchableOpacity>
-        ))
+            </View>
+          </View>
+
+          <Text style={styles.sectionLabel}>Sent to You</Text>
+
+          {sorted.map((pt, idx) => (
+            <TouchableOpacity
+              key={pt.id}
+              style={styles.card}
+              onPress={() => navigation.navigate('PlayerTrainingDetail', { trainingId: pt.id })}
+            >
+              <View style={styles.cardTop}>
+                <View style={styles.iconBg}>
+                  <Ionicons name="barbell" size={20} color="#16201A" />
+                </View>
+                <View style={{ flex: 1, marginLeft: 13 }}>
+                  <Text style={styles.cardTitle}>{idx === 0 ? 'Latest Program' : 'Training Program'}</Text>
+                  <Text style={styles.cardDate}>Sent {timeAgo(pt.created_at)}</Text>
+                </View>
+                {pt.coach_notes ? (
+                  <View style={styles.notesBadge}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={12} color={t.positive} />
+                    <Text style={styles.notesBadgeText}>Coach Notes</Text>
+                  </View>
+                ) : null}
+                <Ionicons name="chevron-forward" size={16} color={t.muted2} style={{ marginLeft: 8 }} />
+              </View>
+              {pt.program_text ? (
+                <Text style={styles.preview} numberOfLines={2}>{cleanPreview(pt.program_text)}</Text>
+              ) : null}
+            </TouchableOpacity>
+          ))}
+        </>
       )}
     </ScrollView>
     </ScreenBackground>
@@ -100,43 +137,44 @@ export default function PlayerTrainingScreen() {
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { padding: 24, paddingTop: 60 },
-  title: { color: t.ink, fontSize: 26, fontWeight: '900' },
-  sub: { color: t.positive, fontSize: 12, marginTop: 4 },
-  empty: { alignItems: 'center', paddingTop: 80, paddingHorizontal: 40 },
-  emptyTitle: { color: t.ink, fontSize: 16, fontWeight: '700', marginTop: 16 },
-  emptyDesc: { color: t.positive, fontSize: 13, textAlign: 'center', marginTop: 8, lineHeight: 20 },
+  header: { paddingHorizontal: 22, paddingTop: 60 },
+  title: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6 },
+  sub: { color: t.muted, fontSize: 13.5, marginTop: 5 },
+  empty: { alignItems: 'center', paddingTop: 70, paddingHorizontal: 40 },
+  emptyTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[700], marginTop: 16 },
+  emptyDesc: { color: t.muted, fontSize: 13, textAlign: 'center', marginTop: 8, lineHeight: 20 },
+
+  summaryCard: {
+    backgroundColor: t.card, borderRadius: 20, padding: 18,
+    marginHorizontal: 20, marginTop: 20, borderWidth: 1, borderColor: t.cardBorder,
+  },
+  summaryTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  summaryLabel: { color: t.muted2, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 1.6, textTransform: 'uppercase' },
+  countPill: { backgroundColor: t.accentSoft, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 4 },
+  countPillText: { color: t.accent, fontSize: 15, fontFamily: fonts[800] },
+  summaryRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12 },
+  summaryMeta: { color: t.muted, fontSize: 13, fontFamily: fonts[600] },
+
+  sectionLabel: {
+    color: t.label, fontSize: 12, fontFamily: fonts[700], letterSpacing: 1.6,
+    textTransform: 'uppercase', marginHorizontal: 22, marginTop: 24, marginBottom: 13,
+  },
   card: {
-    backgroundColor: t.card,
-    borderRadius: 14,
-    padding: 16,
-    marginHorizontal: 20,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: t.cardBorder,
+    backgroundColor: t.card, borderRadius: 16, padding: 15,
+    marginHorizontal: 20, marginBottom: 11, borderWidth: 1, borderColor: t.cardBorder,
   },
   cardTop: { flexDirection: 'row', alignItems: 'center' },
   iconBg: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: t.positiveSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 40, height: 40, borderRadius: 12, backgroundColor: t.pistachio,
+    alignItems: 'center', justifyContent: 'center',
   },
-  cardTitle: { color: t.ink, fontSize: 14, fontWeight: '700' },
-  cardDate: { color: t.positive, fontSize: 11, marginTop: 2 },
+  cardTitle: { color: t.ink, fontSize: 15.5, fontFamily: fonts[800] },
+  cardDate: { color: t.muted, fontSize: 12.5, marginTop: 1 },
   notesBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: t.positiveSoft,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderWidth: 1,
-    borderColor: t.positive,
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: t.positiveSoft, borderRadius: 999,
+    paddingHorizontal: 10, paddingVertical: 4,
   },
-  notesBadgeText: { color: t.positive, fontSize: 10, fontWeight: '600' },
-  preview: { color: t.muted, fontSize: 12, marginTop: 10, lineHeight: 18 },
+  notesBadgeText: { color: t.positive, fontSize: 10.5, fontFamily: fonts[700] },
+  preview: { color: t.muted, fontSize: 12.5, marginTop: 11, lineHeight: 18 },
 });
