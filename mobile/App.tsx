@@ -152,6 +152,8 @@ function PlayerHomeStack() {
   return (
     <Stack.Navigator screenOptions={PLAYER_SCREEN_OPTIONS}>
       <Stack.Screen name="PlayerHome" component={PlayerHomeScreen} />
+      <Stack.Screen name="PlayerReportDetail" component={PlayerReportDetailScreen} />
+      <Stack.Screen name="PlayerTeamReportDetail" component={PlayerTeamReportDetailScreen} />
     </Stack.Navigator>
   );
 }

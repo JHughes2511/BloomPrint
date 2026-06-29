@@ -98,7 +98,7 @@ export default function PlayerHomeScreen() {
   const flagSource = reports.find(r => (r.green_flags?.length || r.watch_flags?.length)) ?? null;
 
   const openReport = (r: any) =>
-    navigation.navigate('InboxTab' as any, { screen: 'PlayerReportDetail', params: { reportId: r.id } });
+    navigation.navigate('PlayerReportDetail' as any, { reportId: r.id });
 
   const linkWithInvite = async () => {
     if (!inviteCode.trim()) return;
