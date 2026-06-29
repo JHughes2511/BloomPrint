@@ -17,6 +17,7 @@ import { renderReport } from '../utils/renderReport';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import WhiteboardModal from '../components/WhiteboardModal';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
+import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -972,50 +973,38 @@ export default function TeamEvalScreen() {
               </View>
 
               {/* Team grade trend */}
-              {dashboard.team_grade_trend.length > 0 && (
-                <View style={s.card}>
-                  <Text style={s.cardLabel}>GRADE TREND</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 12 }}>
-                    {dashboard.team_grade_trend.map((t: any, i: number) => {
-                      const maxGrade = Math.max(...dashboard.team_grade_trend.map((x: any) => x.team_grade), 1);
-                      const pct = Math.max(t.team_grade / maxGrade, 0.05);
-                      const won = t.our_score != null && t.opponent_score != null && t.our_score > t.opponent_score;
-                      return (
-                        <TouchableOpacity
-                          key={t.game_id}
-                          style={{ alignItems: 'center', marginRight: 12, width: 56 }}
-                          onPress={() => {
-                            const game = sessions.find(x => x.id === t.game_id);
-                            if (game) openDetail(game);
-                          }}
-                        >
-                          <Text style={{ color: t.muted, fontSize: 9, marginBottom: 4 }}>
-                            {t.team_grade.toFixed(1)}
-                          </Text>
-                          <View
-                            style={{
-                              width: 32, height: Math.round(pct * 80) + 10,
-                              backgroundColor: won ? t.accent : t.line,
-                              borderRadius: 4, marginBottom: 6,
-                            }}
-                          />
-                          <Text style={{ color: t.muted, fontSize: 9, textAlign: 'center' }} numberOfLines={2}>
-                            {t.opponent.slice(0, 8)}
-                          </Text>
-                          <View style={{
-                            backgroundColor: won ? t.positiveSoft : t.negativeSoft,
-                            borderRadius: 4, paddingHorizontal: 4, paddingVertical: 1, marginTop: 2,
-                          }}>
-                            <Text style={{ color: won ? t.positive : t.negative, fontSize: 8, fontWeight: '700' }}>
-                              {won ? 'W' : 'L'}
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </ScrollView>
-                </View>
-              )}
+              {dashboard.team_grade_trend.length > 0 && (() => {
+                const data = dashboard.team_grade_trend;
+                const maxGrade = Math.max(...data.map((x: any) => x.team_grade), 1);
+                const barW = 30, gap = 24, chartH = 130, topPad = 18;
+                const chartW = gap + data.length * (barW + gap);
+                return (
+                  <View style={s.card}>
+                    <Text style={s.cardLabel}>GRADE TREND</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14 }}>
+                      <Svg width={chartW} height={chartH + 48}>
+                        <Line x1={0} y1={chartH} x2={chartW} y2={chartH} stroke={t.divider} strokeWidth={1} />
+                        {data.map((pt: any, i: number) => {
+                          const x = gap + i * (barW + gap);
+                          const h = Math.max((pt.team_grade / maxGrade) * (chartH - topPad), 6);
+                          const y = chartH - h;
+                          const won = pt.our_score != null && pt.opponent_score != null && pt.our_score > pt.opponent_score;
+                          const barColor = won ? t.pistachio : t.chip;
+                          const onTap = () => { const game = sessions.find(x => x.id === pt.game_id); if (game) openDetail(game); };
+                          return (
+                            <React.Fragment key={pt.game_id}>
+                              <SvgText x={x + barW / 2} y={y - 6} fill={t.inkSoft} fontSize={10} fontWeight="800" textAnchor="middle">{pt.team_grade.toFixed(1)}</SvgText>
+                              <Rect x={x} y={y} width={barW} height={h} rx={6} fill={barColor} onPressIn={onTap} />
+                              <SvgText x={x + barW / 2} y={chartH + 16} fill={t.muted} fontSize={9} textAnchor="middle">{(pt.opponent ?? '').slice(0, 7)}</SvgText>
+                              <SvgText x={x + barW / 2} y={chartH + 32} fill={won ? t.positive : t.negative} fontSize={10} fontWeight="800" textAnchor="middle">{won ? 'W' : 'L'}</SvgText>
+                            </React.Fragment>
+                          );
+                        })}
+                      </Svg>
+                    </ScrollView>
+                  </View>
+                );
+              })()}
 
               {/* Player leaderboard */}
               {dashboard.player_leaderboard.length > 0 && (
@@ -2177,9 +2166,9 @@ export default function TeamEvalScreen() {
                 const pg = grades.find((g: any) => g.player_name === detailModalPlayer);
                 if (!pg) return null;
                 return (
-                  <View style={{ backgroundColor: t.accent, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8 }}>
-                    <Text style={{ color: t.ink, fontSize: 22, fontWeight: '900' }}>{pg.game_grade.toFixed(2)}</Text>
-                    <Text style={{ color: t.accent, fontSize: 9, textAlign: 'center' }}>GRADE</Text>
+                  <View style={{ backgroundColor: t.accent, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 6, alignItems: 'center', minWidth: 58 }}>
+                    <Text style={{ color: t.ctaText, fontSize: 18, fontFamily: fonts[900], letterSpacing: -0.5 }}>{pg.game_grade.toFixed(2)}</Text>
+                    <Text style={{ color: t.ctaText, fontSize: 8, letterSpacing: 1.5, fontFamily: fonts[700], opacity: 0.75 }}>GRADE</Text>
                   </View>
                 );
               })()}
