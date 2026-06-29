@@ -148,6 +148,19 @@ def _run_migrations():
         except Exception:
             pass
 
+        # Add completed_drills to player_training if missing
+        try:
+            ptr_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(player_training)")
+            )]
+            if ptr_cols and "completed_drills" not in ptr_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE player_training ADD COLUMN completed_drills JSON"
+                ))
+                conn.commit()
+        except Exception:
+            pass
+
         # Create coach_notifications table if missing
         try:
             conn.execute(__import__("sqlalchemy").text(

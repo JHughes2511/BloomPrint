@@ -126,6 +126,7 @@ export interface PlayerTraining {
   shared_report_id: number;
   program_text: string | null;
   coach_notes: string | null;
+  completed_drills?: string[] | null;
   created_at: string;
   updated_at: string;
 }

@@ -386,6 +386,24 @@ def list_player_training(
     )
 
 
+@router.patch("/training/{training_id}/progress", response_model=schemas.PlayerTrainingOut)
+def update_training_progress(
+    training_id: int,
+    body: schemas.PlayerTrainingProgress,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    pt = db.get(models.PlayerTraining, training_id)
+    if not pt or pt.player_user_id != pu.id:
+        raise HTTPException(status_code=404, detail="Training not found")
+    # De-duplicate while preserving order.
+    seen: set[str] = set()
+    pt.completed_drills = [d for d in body.completed_drills if not (d in seen or seen.add(d))]
+    db.commit()
+    db.refresh(pt)
+    return pt
+
+
 @router.get("/training/coach-view", response_model=list[schemas.PlayerTrainingOut])
 def coach_view_training(
     db: Session = Depends(get_db),

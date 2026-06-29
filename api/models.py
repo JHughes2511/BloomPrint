@@ -245,6 +245,7 @@ class PlayerTraining(Base):
     shared_report_id = Column(Integer, ForeignKey("shared_reports.id"), nullable=False)
     program_text     = Column(Text, nullable=True)
     coach_notes      = Column(Text, nullable=True)
+    completed_drills = Column(JSON, default=list)   # list of completed drill keys
     created_at       = Column(DateTime, default=datetime.utcnow)
     updated_at       = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

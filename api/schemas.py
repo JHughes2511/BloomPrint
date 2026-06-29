@@ -297,9 +297,14 @@ class PlayerTrainingOut(BaseModel):
     shared_report_id: int
     program_text: str | None
     coach_notes: str | None
+    completed_drills: list[str] | None = None
     created_at: datetime
     updated_at: datetime
     model_config = {"from_attributes": True}
+
+
+class PlayerTrainingProgress(BaseModel):
+    completed_drills: list[str]
 
 
 class PlayerTrainingUpdate(BaseModel):

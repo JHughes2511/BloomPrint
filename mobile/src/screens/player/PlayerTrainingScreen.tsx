@@ -11,6 +11,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
+import { parseDrills } from '../../utils/trainingDrills';
 
 const timeAgo = (iso: string) => {
   const d = (Date.now() - new Date(iso).getTime()) / 86400000;
@@ -125,6 +126,19 @@ export default function PlayerTrainingScreen() {
               {pt.program_text ? (
                 <Text style={styles.preview} numberOfLines={2}>{cleanPreview(pt.program_text)}</Text>
               ) : null}
+              {(() => {
+                const total = parseDrills(pt.program_text).total;
+                if (!total) return null;
+                const done = (pt.completed_drills ?? []).length;
+                return (
+                  <View style={styles.progressWrap}>
+                    <View style={styles.progressTrack}>
+                      <View style={[styles.progressFill, { width: `${Math.min(100, (done / total) * 100)}%` }]} />
+                    </View>
+                    <Text style={styles.progressLabel}>{done}/{total}</Text>
+                  </View>
+                );
+              })()}
             </TouchableOpacity>
           ))}
         </>
@@ -177,4 +191,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   notesBadgeText: { color: t.positive, fontSize: 10.5, fontFamily: fonts[700] },
   preview: { color: t.muted, fontSize: 12.5, marginTop: 11, lineHeight: 18 },
+  progressWrap: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 },
+  progressTrack: { flex: 1, height: 7, borderRadius: 4, backgroundColor: t.chip, overflow: 'hidden' },
+  progressFill: { height: 7, borderRadius: 4, backgroundColor: t.accent },
+  progressLabel: { color: t.muted, fontSize: 11.5, fontFamily: fonts[700] },
 });
