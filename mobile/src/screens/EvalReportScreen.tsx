@@ -391,7 +391,7 @@ export default function EvalReportScreen() {
 
   return (
     <ScreenBackground>
-    <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: isScouting ? 190 : 100 }}>
+    <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: isScouting ? 24 : 100 }}>
 
       {/* Header */}
       <View style={styles.header}>
@@ -1088,7 +1088,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   ladderLetter: { color: t.ink, fontSize: 13, fontFamily: fonts[800], width: 32 },
   ladderTier: { color: t.inkSoft, fontSize: 12.5, flex: 1 },
   ladderRange: { color: t.muted, fontSize: 11.5 },
-  bottomBar: { position: 'absolute', left: 0, right: 0, bottom: 0, gap: 10, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, backgroundColor: t.sheet, borderTopWidth: 1, borderTopColor: t.divider },
+  bottomBar: { gap: 10, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, backgroundColor: t.sheet, borderTopWidth: 1, borderTopColor: t.divider },
   bottomRow: { flexDirection: 'row', gap: 10 },
   bbBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 14, paddingVertical: 14 },
   bbText: { fontFamily: fonts[800], fontSize: 14 },
