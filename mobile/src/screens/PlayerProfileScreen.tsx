@@ -10,6 +10,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
+import * as Clipboard from 'expo-clipboard';
+import QRCode from 'react-native-qrcode-svg';
 import { playersAPI, teamsAPI, playerAPI, trainingAPI, staffSharingAPI, coachesAPI, gameEvalAPI } from '../api/client';
 import { Player, Evaluation, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
@@ -195,6 +197,8 @@ export default function PlayerProfileScreen() {
   const [showProfileDetail, setShowProfileDetail] = useState(false);
 
   const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [inviteCopied, setInviteCopied] = useState(false);
+  const [showInviteQR, setShowInviteQR] = useState(false);
   const [generatingInvite, setGeneratingInvite] = useState(false);
 
   // Training regenerate state (main profile section)
@@ -386,8 +390,17 @@ export default function PlayerProfileScreen() {
     }
   };
 
+  const copyInviteCode = async () => {
+    if (!inviteCode) return;
+    await Clipboard.setStringAsync(inviteCode);
+    setInviteCopied(true);
+    setTimeout(() => setInviteCopied(false), 1800);
+  };
+
   const generateInvite = async () => {
     setGeneratingInvite(true);
+    setShowInviteQR(false);
+    setInviteCopied(false);
     try {
       const result = await playerAPI.generateInvite(player!.id);
       setInviteCode(result.code);
@@ -588,8 +601,26 @@ export default function PlayerProfileScreen() {
       {inviteCode && (
         <View style={styles.inviteCodeBox}>
           <Text style={styles.inviteCodeLabel}>INVITE CODE</Text>
-          <Text style={styles.inviteCode}>{inviteCode}</Text>
-          <Text style={styles.inviteCodeHint}>Share this code with the player so they can link their account</Text>
+          <TouchableOpacity onPress={copyInviteCode} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Text style={styles.inviteCode}>{inviteCode}</Text>
+            <Ionicons name={inviteCopied ? 'checkmark-circle' : 'copy-outline'} size={22} color={inviteCopied ? t.positive : t.accent} />
+          </TouchableOpacity>
+          <Text style={styles.inviteCodeHint}>{inviteCopied ? 'Copied to clipboard!' : 'Tap the code to copy it'}</Text>
+
+          <TouchableOpacity
+            onPress={() => setShowInviteQR(v => !v)}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 14, borderWidth: 1, borderColor: t.cta2Border, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 9 }}
+          >
+            <Ionicons name="qr-code-outline" size={16} color={t.cta2Text} />
+            <Text style={{ color: t.cta2Text, fontFamily: fonts[700], fontSize: 13 }}>{showInviteQR ? 'Hide QR Code' : 'Show QR Code'}</Text>
+          </TouchableOpacity>
+
+          {showInviteQR && (
+            <View style={{ marginTop: 14, padding: 16, backgroundColor: '#FFFFFF', borderRadius: 16 }}>
+              {/* Fixed white background so the QR scans in either theme */}
+              <QRCode value={inviteCode} size={180} backgroundColor="#FFFFFF" color="#111111" />
+            </View>
+          )}
         </View>
       )}
 
