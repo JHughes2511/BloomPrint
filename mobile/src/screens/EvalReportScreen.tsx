@@ -957,7 +957,7 @@ export default function EvalReportScreen() {
             />
             <View style={{ gap: 8, marginTop: 8 }}>
               <TouchableOpacity
-                style={[styles.saveBtn, { flexDirection: 'row', backgroundColor: t.ctaBg }]}
+                style={[styles.saveBtn, { flex: undefined, alignSelf: 'stretch', flexDirection: 'row', justifyContent: 'center', backgroundColor: t.ctaBg }]}
                 onPress={() => submitCorrection(true)}
                 disabled={saving || regenerating}
               >

@@ -1155,7 +1155,7 @@ export default function PlayerProfileScreen() {
                       autoFocus
                     />
                     <TouchableOpacity
-                      style={[styles.saveBtn, { marginTop: 0 }]}
+                      style={[styles.saveBtn, { flex: undefined, alignSelf: 'stretch', marginTop: 0 }]}
                       onPress={createTeamFromEdit}
                       disabled={creatingTeam || !newTeamName.trim()}
                     >
