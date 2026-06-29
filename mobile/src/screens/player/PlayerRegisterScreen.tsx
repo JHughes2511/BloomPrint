@@ -9,8 +9,14 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { playerLinkAPI } from '../../api/playerClient';
+import { useTheme } from '../../theme/ThemeProvider';
+import { ThemeTokens } from '../../theme/tokens';
+import { fonts } from '../../theme/typography';
+import { ScreenBackground } from '../../theme/components';
 
 export default function PlayerRegisterScreen() {
+  const { t } = useTheme();
+  const styles = makeStyles(t);
   const { register, playerUser } = usePlayerAuth();
   const navigation = useNavigation<any>();
   const [name, setName] = useState('');
@@ -82,6 +88,7 @@ export default function PlayerRegisterScreen() {
 
   if (registered) {
     return (
+      <ScreenBackground>
       <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ padding: 24, paddingTop: 60 }}>
         <Text style={styles.logo}>Welcome!</Text>
         <Text style={styles.sub}>Link your player profile</Text>
@@ -92,7 +99,7 @@ export default function PlayerRegisterScreen() {
           <VoiceTextInput
             style={styles.input}
             placeholder="Invite code (e.g. ABC12345)"
-            placeholderTextColor="#4b7a4b"
+            placeholderTextColor={t.muted2}
             value={inviteCode}
             onChangeText={setInviteCode}
             autoCapitalize="characters"
@@ -113,7 +120,7 @@ export default function PlayerRegisterScreen() {
             <VoiceTextInput
               style={[styles.input, { flex: 1 }]}
               placeholder="Search your name..."
-              placeholderTextColor="#4b7a4b"
+              placeholderTextColor={t.muted2}
               value={searchQ}
               onChangeText={setSearchQ}
             />
@@ -143,13 +150,15 @@ export default function PlayerRegisterScreen() {
           <Text style={styles.skipText}>Skip for now →</Text>
         </TouchableOpacity>
       </KeyboardAwareScrollView>
+      </ScreenBackground>
     );
   }
 
   return (
+    <ScreenBackground>
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1, backgroundColor: '#0f1a0f' }}
+      style={{ flex: 1, backgroundColor: 'transparent' }}
     >
       <KeyboardAwareScrollView
         contentContainerStyle={styles.formContainer}
@@ -162,14 +171,14 @@ export default function PlayerRegisterScreen() {
         <VoiceTextInput
           style={styles.input}
           placeholder="Full Name"
-          placeholderTextColor="#4b7a4b"
+          placeholderTextColor={t.muted2}
           value={name}
           onChangeText={setName}
         />
         <VoiceTextInput
           style={styles.input}
           placeholder="Email"
-          placeholderTextColor="#4b7a4b"
+          placeholderTextColor={t.muted2}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -178,7 +187,7 @@ export default function PlayerRegisterScreen() {
         <VoiceTextInput
           style={styles.input}
           placeholder="Password"
-          placeholderTextColor="#4b7a4b"
+          placeholderTextColor={t.muted2}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -195,48 +204,49 @@ export default function PlayerRegisterScreen() {
         </TouchableOpacity>
       </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
+    </ScreenBackground>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f1a0f' },
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: 'transparent' },
   formContainer: {
     flexGrow: 1,
-    backgroundColor: '#0f1a0f',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
   },
-  logo: { fontSize: 32, fontWeight: '900', color: '#fff', letterSpacing: 1, marginBottom: 4 },
-  sub: { fontSize: 13, color: '#16a34a', marginBottom: 32, fontWeight: '600' },
+  logo: { fontSize: 32, fontFamily: fonts[900], fontWeight: '900', color: t.ink, letterSpacing: 1, marginBottom: 4 },
+  sub: { fontSize: 13, color: t.positive, marginBottom: 32, fontWeight: '600' },
   input: {
     width: '100%',
-    backgroundColor: '#1a2e1a',
+    backgroundColor: t.card,
     borderRadius: 10,
     padding: 14,
-    color: '#fff',
+    color: t.ink,
     fontSize: 15,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#2d4a2d',
+    borderColor: t.cardBorder,
   },
   btn: {
     width: '100%',
-    backgroundColor: '#16a34a',
+    backgroundColor: t.positive,
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
     marginTop: 8,
   },
   btnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  toggle: { color: '#16a34a', marginTop: 20, fontSize: 13 },
+  toggle: { color: t.positive, marginTop: 20, fontSize: 13 },
   section: { marginBottom: 24 },
-  sectionTitle: { color: '#fff', fontSize: 16, fontWeight: '700', marginBottom: 4 },
-  sectionDesc: { color: '#4b7a4b', fontSize: 12, marginBottom: 12 },
-  divider: { height: 1, backgroundColor: '#1a2e1a', marginVertical: 24 },
+  sectionTitle: { color: t.ink, fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  sectionDesc: { color: t.muted, fontSize: 12, marginBottom: 12 },
+  divider: { height: 1, backgroundColor: t.divider, marginVertical: 24 },
   searchRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   searchBtn: {
-    backgroundColor: '#16a34a',
+    backgroundColor: t.positive,
     borderRadius: 10,
     padding: 14,
     alignItems: 'center',
@@ -245,24 +255,24 @@ const styles = StyleSheet.create({
   resultCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1a2e1a',
+    backgroundColor: t.card,
     borderRadius: 10,
     padding: 12,
     marginTop: 8,
     borderWidth: 1,
-    borderColor: '#2d4a2d',
+    borderColor: t.cardBorder,
   },
-  resultName: { color: '#fff', fontSize: 14, fontWeight: '600' },
-  resultSub: { color: '#4b7a4b', fontSize: 12, marginTop: 2 },
+  resultName: { color: t.ink, fontSize: 14, fontWeight: '600' },
+  resultSub: { color: t.muted, fontSize: 12, marginTop: 2 },
   requestBtn: {
-    backgroundColor: '#16a34a22',
+    backgroundColor: t.positiveSoft,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderWidth: 1,
-    borderColor: '#16a34a',
+    borderColor: t.positive,
   },
-  requestBtnText: { color: '#16a34a', fontSize: 12, fontWeight: '600' },
+  requestBtnText: { color: t.positive, fontSize: 12, fontWeight: '600' },
   skipBtn: { alignItems: 'center', marginTop: 8, marginBottom: 40 },
-  skipText: { color: '#4b7a4b', fontSize: 13 },
+  skipText: { color: t.muted, fontSize: 13 },
 });

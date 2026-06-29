@@ -7,10 +7,16 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
+import { useTheme } from '../../theme/ThemeProvider';
+import { ThemeTokens } from '../../theme/tokens';
+import { fonts } from '../../theme/typography';
+import { ScreenBackground } from '../../theme/components';
 
 export default function PlayerLoginScreen() {
   const { login } = usePlayerAuth();
   const navigation = useNavigation<any>();
+  const { t } = useTheme();
+  const styles = makeStyles(t);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,88 +37,89 @@ export default function PlayerLoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={undefined}
-      style={{ flex: 1, backgroundColor: '#0f1a0f' }}
-    >
-      <KeyboardAwareScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+    <ScreenBackground>
+      <KeyboardAvoidingView
+        behavior={undefined}
+        style={{ flex: 1, backgroundColor: 'transparent' }}
       >
-        <Text style={styles.logo}>BloomPrint</Text>
-        <Text style={styles.sub}>Player Portal</Text>
-
-        <VoiceTextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#4b7a4b"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        <VoiceTextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#4b7a4b"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-
-        <TouchableOpacity style={styles.btn} onPress={submit} disabled={loading}>
-          {loading
-            ? <ActivityIndicator color="#fff" />
-            : <Text style={styles.btnText}>Sign In</Text>}
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('PlayerRegister')}>
-          <Text style={styles.toggle}>Don't have an account? Register</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => navigation.navigate('RoleSelect')}
+        <KeyboardAwareScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.backText}>← Back to Role Select</Text>
-        </TouchableOpacity>
-      </KeyboardAwareScrollView>
-    </KeyboardAvoidingView>
+          <Text style={styles.logo}>BloomPrint</Text>
+          <Text style={styles.sub}>Player Portal</Text>
+
+          <VoiceTextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor={t.muted2}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <VoiceTextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor={t.muted2}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+
+          <TouchableOpacity style={styles.btn} onPress={submit} disabled={loading}>
+            {loading
+              ? <ActivityIndicator color="#fff" />
+              : <Text style={styles.btnText}>Sign In</Text>}
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate('PlayerRegister')}>
+            <Text style={styles.toggle}>Don't have an account? Register</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => navigation.navigate('RoleSelect')}
+          >
+            <Text style={styles.backText}>← Back to Role Select</Text>
+          </TouchableOpacity>
+        </KeyboardAwareScrollView>
+      </KeyboardAvoidingView>
+    </ScreenBackground>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#0f1a0f',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
   },
-  logo: { fontSize: 36, fontWeight: '900', color: '#ffffff', letterSpacing: 1 },
-  sub: { fontSize: 13, color: '#16a34a', marginBottom: 40, marginTop: 4, fontWeight: '600' },
+  logo: { fontSize: 36, fontFamily: fonts[900], color: t.ink, letterSpacing: 1 },
+  sub: { fontSize: 13, color: t.positive, marginBottom: 40, marginTop: 4, fontWeight: '600' },
   input: {
     width: '100%',
-    backgroundColor: '#1a2e1a',
+    backgroundColor: t.card,
     borderRadius: 10,
     padding: 14,
-    color: '#fff',
+    color: t.ink,
     fontSize: 15,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#2d4a2d',
+    borderColor: t.cardBorder,
   },
   btn: {
     width: '100%',
-    backgroundColor: '#16a34a',
+    backgroundColor: t.positive,
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
     marginTop: 8,
   },
   btnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  toggle: { color: '#16a34a', marginTop: 20, fontSize: 13 },
+  toggle: { color: t.positive, marginTop: 20, fontSize: 13 },
   backBtn: { marginTop: 32 },
-  backText: { color: '#4b7a4b', fontSize: 12 },
+  backText: { color: t.muted2, fontSize: 12 },
 });

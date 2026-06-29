@@ -8,6 +8,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { playerLinkAPI, playerApi } from '../../api/playerClient';
+import { useTheme } from '../../theme/ThemeProvider';
+import { ThemeTokens } from '../../theme/tokens';
+import { fonts } from '../../theme/typography';
+import { ScreenBackground } from '../../theme/components';
 
 const ROLE_LABELS: Record<string, string> = {
   coach: 'Coach',
@@ -17,6 +21,8 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function PlayerLinkScreen() {
   const { playerUser, logout, refreshUser } = usePlayerAuth();
+  const { t } = useTheme();
+  const styles = makeStyles(t);
   const [inviteCode, setInviteCode] = useState('');
   const [searchQ, setSearchQ] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -67,17 +73,18 @@ export default function PlayerLinkScreen() {
   };
 
   return (
+    <ScreenBackground>
     <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60, padding: 24 }}>
       <View style={styles.headerRow}>
         <Text style={styles.title}>Link to Staff</Text>
         <TouchableOpacity onPress={logout}>
-          <Ionicons name="log-out-outline" size={20} color="#4b7a4b" />
+          <Ionicons name="log-out-outline" size={20} color={t.muted} />
         </TouchableOpacity>
       </View>
 
       {playerUser?.player_id ? (
         <View style={styles.linkedCard}>
-          <Ionicons name="checkmark-circle" size={24} color="#16a34a" />
+          <Ionicons name="checkmark-circle" size={24} color={t.positive} />
           <View style={{ marginLeft: 12 }}>
             <Text style={styles.linkedTitle}>Profile Linked</Text>
             <Text style={styles.linkedDesc}>Your account is connected to a player profile.</Text>
@@ -96,7 +103,7 @@ export default function PlayerLinkScreen() {
         <VoiceTextInput
           style={styles.input}
           placeholder="Invite code (e.g. ABC12345)"
-          placeholderTextColor="#4b7a4b"
+          placeholderTextColor={t.muted2}
           value={inviteCode}
           onChangeText={setInviteCode}
           autoCapitalize="characters"
@@ -117,7 +124,7 @@ export default function PlayerLinkScreen() {
           <VoiceTextInput
             style={[styles.input, { flex: 1 }]}
             placeholder="Search by name or program..."
-            placeholderTextColor="#4b7a4b"
+            placeholderTextColor={t.muted2}
             value={searchQ}
             onChangeText={setSearchQ}
           />
@@ -145,21 +152,22 @@ export default function PlayerLinkScreen() {
               disabled={requestingId === c.id}
             >
               {requestingId === c.id
-                ? <ActivityIndicator color="#16a34a" size="small" />
+                ? <ActivityIndicator color={t.positive} size="small" />
                 : <Text style={styles.requestBtnText}>Request Link</Text>}
             </TouchableOpacity>
           </View>
         ))}
         {searchResults.length === 0 && searchQ.trim().length > 0 && !searchLoading && (
-          <Text style={{ color: '#4b7a4b', fontSize: 12, marginTop: 8 }}>No staff found. Try a different search.</Text>
+          <Text style={{ color: t.muted, fontSize: 12, marginTop: 8 }}>No staff found. Try a different search.</Text>
         )}
       </View>
     </KeyboardAwareScrollView>
+    </ScreenBackground>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f1a0f' },
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: 'transparent' },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -167,19 +175,19 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     marginBottom: 20,
   },
-  title: { color: '#fff', fontSize: 26, fontWeight: '900' },
+  title: { color: t.ink, fontSize: 26, fontWeight: '900' },
   linkedCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#16a34a22',
+    backgroundColor: t.positiveSoft,
     borderRadius: 12,
     padding: 16,
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: '#16a34a',
+    borderColor: t.positive,
   },
-  linkedTitle: { color: '#16a34a', fontSize: 14, fontWeight: '700' },
-  linkedDesc: { color: '#4b7a4b', fontSize: 12, marginTop: 2 },
+  linkedTitle: { color: t.positive, fontSize: 14, fontWeight: '700' },
+  linkedDesc: { color: t.muted, fontSize: 12, marginTop: 2 },
   notLinkedCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -193,29 +201,29 @@ const styles = StyleSheet.create({
   },
   notLinkedText: { color: '#f59e0b', fontSize: 13 },
   section: { marginBottom: 8 },
-  sectionTitle: { color: '#fff', fontSize: 16, fontWeight: '700', marginBottom: 4 },
-  sectionDesc: { color: '#4b7a4b', fontSize: 12, marginBottom: 12 },
+  sectionTitle: { color: t.ink, fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  sectionDesc: { color: t.muted, fontSize: 12, marginBottom: 12 },
   input: {
-    backgroundColor: '#1a2e1a',
+    backgroundColor: t.card,
     borderRadius: 10,
     padding: 14,
-    color: '#fff',
+    color: t.ink,
     fontSize: 15,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#2d4a2d',
+    borderColor: t.cardBorder,
   },
   btn: {
-    backgroundColor: '#16a34a',
+    backgroundColor: t.positive,
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
   },
   btnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  divider: { height: 1, backgroundColor: '#1a2e1a', marginVertical: 24 },
+  divider: { height: 1, backgroundColor: t.divider, marginVertical: 24 },
   searchRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   searchBtn: {
-    backgroundColor: '#16a34a',
+    backgroundColor: t.positive,
     borderRadius: 10,
     padding: 14,
     alignItems: 'center',
@@ -224,22 +232,22 @@ const styles = StyleSheet.create({
   resultCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1a2e1a',
+    backgroundColor: t.card,
     borderRadius: 10,
     padding: 12,
     marginTop: 8,
     borderWidth: 1,
-    borderColor: '#2d4a2d',
+    borderColor: t.cardBorder,
   },
-  resultName: { color: '#fff', fontSize: 14, fontWeight: '600' },
-  resultSub: { color: '#4b7a4b', fontSize: 12, marginTop: 2 },
+  resultName: { color: t.ink, fontSize: 14, fontWeight: '600' },
+  resultSub: { color: t.muted, fontSize: 12, marginTop: 2 },
   requestBtn: {
-    backgroundColor: '#16a34a22',
+    backgroundColor: t.positiveSoft,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderWidth: 1,
-    borderColor: '#16a34a',
+    borderColor: t.positive,
   },
-  requestBtnText: { color: '#16a34a', fontSize: 12, fontWeight: '600' },
+  requestBtnText: { color: t.positive, fontSize: 12, fontWeight: '600' },
 });

@@ -9,6 +9,10 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../theme/ThemeProvider';
+import { ThemeTokens } from '../theme/tokens';
+import { fonts } from '../theme/typography';
+import { ScreenBackground } from '../theme/components';
 
 const ROLES = [
   { key: 'coach',   label: 'Coach' },
@@ -124,6 +128,8 @@ function PickerModal({
   onSelect: (val: string) => void;
   onClose: () => void;
 }) {
+  const { t } = useTheme();
+  const pickerModalStyles = makePickerStyles(t);
   const [search, setSearch] = useState('');
   const filtered = search.trim()
     ? options.filter(o => o.toLowerCase().includes(search.toLowerCase()))
@@ -136,13 +142,13 @@ function PickerModal({
           <View style={pickerModalStyles.header}>
             <Text style={pickerModalStyles.title}>{title}</Text>
             <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={22} color="#9ca3af" />
+              <Ionicons name="close" size={22} color={t.muted} />
             </TouchableOpacity>
           </View>
           <VoiceTextInput
             style={pickerModalStyles.search}
             placeholder="Search..."
-            placeholderTextColor="#6b7280"
+            placeholderTextColor={t.muted2}
             value={search}
             onChangeText={setSearch}
           />
@@ -155,10 +161,10 @@ function PickerModal({
                 style={[pickerModalStyles.option, selected === item && pickerModalStyles.optionActive]}
                 onPress={() => { onSelect(item); onClose(); setSearch(''); }}
               >
-                <Text style={[pickerModalStyles.optionText, selected === item && { color: '#fff', fontWeight: '700' }]}>
+                <Text style={[pickerModalStyles.optionText, selected === item && { color: t.ink, fontFamily: fonts[700] }]}>
                   {item}
                 </Text>
-                {selected === item && <Ionicons name="checkmark" size={16} color="#2563eb" />}
+                {selected === item && <Ionicons name="checkmark" size={16} color={t.accent} />}
               </TouchableOpacity>
             )}
           />
@@ -171,6 +177,8 @@ function PickerModal({
 export default function LoginScreen() {
   const { login, register } = useAuth();
   const navigation = useNavigation<any>();
+  const { t } = useTheme();
+  const styles = makeStyles(t);
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -211,9 +219,10 @@ export default function LoginScreen() {
   };
 
   return (
+    <ScreenBackground>
     <KeyboardAvoidingView
       behavior={undefined}
-      style={{ flex: 1, backgroundColor: '#0a0a0a' }}
+      style={{ flex: 1 }}
     >
       <KeyboardAwareScrollView
         contentContainerStyle={styles.container}
@@ -221,7 +230,7 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
       >
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('RoleSelect')}>
-          <Ionicons name="chevron-back" size={18} color="#6b7280" />
+          <Ionicons name="chevron-back" size={18} color={t.muted} />
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
 
@@ -244,9 +253,9 @@ export default function LoginScreen() {
                 </TouchableOpacity>
               ))}
             </View>
-            <VoiceTextInput style={styles.input} placeholder="Full Name" placeholderTextColor="#6b7280"
+            <VoiceTextInput style={styles.input} placeholder="Full Name" placeholderTextColor={t.muted2}
               value={name} onChangeText={setName} />
-            <VoiceTextInput style={styles.input} placeholder="Program / Organization Name" placeholderTextColor="#6b7280"
+            <VoiceTextInput style={styles.input} placeholder="Program / Organization Name" placeholderTextColor={t.muted2}
               value={program} onChangeText={setProgram} />
 
             {/* Competition Level picker */}
@@ -255,10 +264,10 @@ export default function LoginScreen() {
               style={styles.pickerBtn}
               onPress={() => setShowLevelPicker(true)}
             >
-              <Text style={[styles.pickerBtnText, !competitionLevel && { color: '#6b7280' }]}>
+              <Text style={[styles.pickerBtnText, !competitionLevel && { color: t.muted2 }]}>
                 {competitionLevel || 'Select level...'}
               </Text>
-              <Ionicons name="chevron-down" size={14} color="#6b7280" />
+              <Ionicons name="chevron-down" size={14} color={t.muted} />
             </TouchableOpacity>
 
             {/* Conference / League picker — shown when the selected level has options */}
@@ -266,16 +275,16 @@ export default function LoginScreen() {
               <>
                 <Text style={[styles.sectionLabel, { marginTop: 8 }]}>
                   {competitionLevel === 'College' ? 'Conference' : 'League / Association'}
-                  {competitionLevel === 'College' && <Text style={{ color: '#ef4444' }}> *</Text>}
+                  {competitionLevel === 'College' && <Text style={{ color: t.negative }}> *</Text>}
                 </Text>
                 <TouchableOpacity
-                  style={[styles.pickerBtn, competitionLevel === 'College' && !conference && { borderColor: '#ef4444' }]}
+                  style={[styles.pickerBtn, competitionLevel === 'College' && !conference && { borderColor: t.negative }]}
                   onPress={() => setShowConferencePicker(true)}
                 >
-                  <Text style={[styles.pickerBtnText, !conference && { color: '#6b7280' }]}>
+                  <Text style={[styles.pickerBtnText, !conference && { color: t.muted2 }]}>
                     {conference || (competitionLevel === 'College' ? 'Select conference (required)...' : 'Select league (optional)...')}
                   </Text>
-                  <Ionicons name="chevron-down" size={14} color="#6b7280" />
+                  <Ionicons name="chevron-down" size={14} color={t.muted} />
                 </TouchableOpacity>
               </>
             )}
@@ -285,18 +294,18 @@ export default function LoginScreen() {
         <VoiceTextInput
           style={[styles.input, mode === 'register' && { marginTop: 16 }]}
           placeholder="Email"
-          placeholderTextColor="#6b7280"
+          placeholderTextColor={t.muted2}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
           keyboardType="email-address"
         />
-        <VoiceTextInput style={styles.input} placeholder="Password" placeholderTextColor="#6b7280"
+        <VoiceTextInput style={styles.input} placeholder="Password" placeholderTextColor={t.muted2}
           value={password} onChangeText={setPassword} secureTextEntry />
 
         <TouchableOpacity style={styles.btn} onPress={submit} disabled={loading}>
           {loading
-            ? <ActivityIndicator color="#fff" />
+            ? <ActivityIndicator color={t.ctaText} />
             : <Text style={styles.btnText}>{mode === 'login' ? 'Sign In' : 'Create Account'}</Text>}
         </TouchableOpacity>
 
@@ -325,65 +334,66 @@ export default function LoginScreen() {
         onClose={() => setShowConferencePicker(false)}
       />
     </KeyboardAvoidingView>
+    </ScreenBackground>
   );
 }
 
-const pickerModalStyles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
+const makePickerStyles = (t: ThemeTokens) => StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   sheet: {
-    backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20,
     maxHeight: '80%', paddingBottom: 20,
   },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    padding: 20, borderBottomWidth: 1, borderBottomColor: '#1f2937',
+    padding: 20, borderBottomWidth: 1, borderBottomColor: t.divider,
   },
-  title: { color: '#fff', fontSize: 18, fontWeight: '800' },
+  title: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   search: {
-    backgroundColor: '#1f2937', borderRadius: 10, margin: 16, padding: 12,
-    color: '#fff', fontSize: 14, borderWidth: 1, borderColor: '#374151',
+    backgroundColor: t.chip, borderRadius: 10, margin: 16, padding: 12,
+    color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line,
   },
   option: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 20, paddingVertical: 14,
-    borderTopWidth: 1, borderTopColor: '#1f2937',
+    borderTopWidth: 1, borderTopColor: t.divider,
   },
-  optionActive: { backgroundColor: '#1e3a5f' },
-  optionText: { color: '#d1d5db', fontSize: 15 },
+  optionActive: { backgroundColor: t.accentSoft },
+  optionText: { color: t.inkSoft, fontSize: 15 },
 });
 
-const styles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: '#0a0a0a', alignItems: 'center', justifyContent: 'center', padding: 24, paddingTop: 60 },
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  container: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: 24, paddingTop: 60 },
   backBtn: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', marginBottom: 24, gap: 4 },
-  backText: { color: '#6b7280', fontSize: 14 },
-  logo: { fontSize: 36, fontWeight: '900', color: '#ffffff', letterSpacing: 1 },
-  sub: { fontSize: 13, color: '#6b7280', marginBottom: 40, marginTop: 4 },
+  backText: { color: t.muted, fontSize: 14 },
+  logo: { fontSize: 36, fontFamily: fonts[900], color: t.ink, letterSpacing: 1 },
+  sub: { fontSize: 13, color: t.muted, marginBottom: 40, marginTop: 4 },
   sectionLabel: {
-    alignSelf: 'flex-start', color: '#9ca3af', fontSize: 11,
-    fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8,
+    alignSelf: 'flex-start', color: t.label, fontSize: 11,
+    fontFamily: fonts[700], letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8,
   },
   roleRow: { flexDirection: 'row', gap: 8, width: '100%', marginBottom: 16 },
   roleChip: {
     flex: 1, paddingVertical: 10, borderRadius: 10,
-    borderWidth: 1, borderColor: '#374151', alignItems: 'center',
+    borderWidth: 1, borderColor: t.line, alignItems: 'center',
   },
-  roleChipActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  roleText: { color: '#9ca3af', fontWeight: '600', fontSize: 14 },
-  roleTextActive: { color: '#fff' },
+  roleChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  roleText: { color: t.muted, fontFamily: fonts[600], fontSize: 14 },
+  roleTextActive: { color: t.ctaText },
   input: {
-    width: '100%', backgroundColor: '#111827', borderRadius: 10, padding: 14,
-    color: '#fff', fontSize: 15, marginBottom: 12, borderWidth: 1, borderColor: '#1f2937',
+    width: '100%', backgroundColor: t.card, borderRadius: 10, padding: 14,
+    color: t.ink, fontSize: 15, marginBottom: 12, borderWidth: 1, borderColor: t.line,
   },
   btn: {
-    width: '100%', backgroundColor: '#2563eb', borderRadius: 10,
+    width: '100%', backgroundColor: t.ctaBg, borderRadius: 10,
     padding: 16, alignItems: 'center', marginTop: 8,
   },
-  btnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  toggle: { color: '#6b7280', marginTop: 20, fontSize: 13 },
+  btnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 16 },
+  toggle: { color: t.muted, marginTop: 20, fontSize: 13 },
   pickerBtn: {
-    width: '100%', backgroundColor: '#111827', borderRadius: 10, padding: 14,
+    width: '100%', backgroundColor: t.card, borderRadius: 10, padding: 14,
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    marginBottom: 4, borderWidth: 1, borderColor: '#1f2937',
+    marginBottom: 4, borderWidth: 1, borderColor: t.line,
   },
-  pickerBtnText: { color: '#fff', fontSize: 15 },
+  pickerBtnText: { color: t.ink, fontSize: 15 },
 });
