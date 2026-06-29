@@ -20,6 +20,11 @@ export const authAPI = {
     api.post('/auth/login', { email, password }).then(r => r.data),
 
   me: () => api.get('/auth/me').then(r => r.data),
+
+  updateProfile: (data: {
+    name?: string; role?: string; program_name?: string;
+    competition_level?: string; conference?: string;
+  }) => api.patch('/auth/me', data).then(r => r.data),
 };
 
 // ── Players ───────────────────────────────────────────────────────────────────

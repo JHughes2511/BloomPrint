@@ -63,6 +63,24 @@ def me(coach: models.Coach = Depends(get_current_coach)):
     return coach
 
 
+@router.patch("/me", response_model=schemas.CoachOut)
+def update_me(
+    body: schemas.CoachUpdate,
+    coach: models.Coach = Depends(get_current_coach),
+    db: Session = Depends(get_db),
+):
+    data = body.model_dump(exclude_unset=True)
+    for field in ("name", "role", "program_name", "competition_level", "conference"):
+        if field in data and data[field] is not None:
+            setattr(coach, field, data[field])
+    # Recompute BIM authority weight if the competition level/conference changed.
+    if "competition_level" in data and coach.competition_level:
+        coach.weight = _auto_weight(coach.competition_level, coach.conference)
+    db.commit()
+    db.refresh(coach)
+    return coach
+
+
 @router.get("/coaches")
 def list_coaches(
     db: Session = Depends(get_db),

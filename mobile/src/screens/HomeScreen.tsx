@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { playerAPI } from '../api/client';
@@ -29,11 +29,40 @@ const PILLARS: { key: string; label: string; icon: IconName; desc: string }[] = 
   { key: 'strategic_fit', label: 'Strategic Fit', icon: 'crosshair', desc: 'System fit, positional versatility, lineup compatibility' },
 ];
 
+const ROLES = ['coach', 'scout', 'trainer'];
+
 export default function HomeScreen() {
-  const { coach, logout } = useAuth();
+  const { coach, logout, updateProfile } = useAuth();
   const navigation = useNavigation<any>();
   const { t, mode, toggle } = useTheme();
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Profile edit modal
+  const [showProfile, setShowProfile] = useState(false);
+  const [pName, setPName] = useState('');
+  const [pProgram, setPProgram] = useState('');
+  const [pRole, setPRole] = useState('coach');
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  const openProfile = () => {
+    setPName(coach?.name ?? '');
+    setPProgram(coach?.program_name ?? '');
+    setPRole(coach?.role ?? 'coach');
+    setShowProfile(true);
+  };
+
+  const saveProfile = async () => {
+    if (!pName.trim()) { Alert.alert('Name required', 'Please enter your name.'); return; }
+    setSavingProfile(true);
+    try {
+      await updateProfile({ name: pName.trim(), program_name: pProgram.trim(), role: pRole });
+      setShowProfile(false);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update profile');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   useFocusEffect(useCallback(() => {
     playerAPI.coachNotifications().then((notifs: any[]) => {
@@ -84,9 +113,12 @@ export default function HomeScreen() {
             </View>
           </View>
           {coach && (
-            <Text style={[typeScale.bodySoft, { color: t.muted, marginTop: 8 }]}>
-              {coach.name} · {coach.role ? coach.role.charAt(0).toUpperCase() + coach.role.slice(1) : 'Coach'} · {coach.program_name}
-            </Text>
+            <TouchableOpacity onPress={openProfile} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 }}>
+              <Text style={[typeScale.bodySoft, { color: t.muted }]}>
+                {coach.name} · {coach.role ? coach.role.charAt(0).toUpperCase() + coach.role.slice(1) : 'Coach'} · {coach.program_name}
+              </Text>
+              <Icon name="pencil" size={13} color={t.muted2} strokeWidth={2} />
+            </TouchableOpacity>
           )}
         </View>
 
@@ -123,6 +155,58 @@ export default function HomeScreen() {
           </Card>
         </View>
       </ScrollView>
+
+      {/* Profile edit modal */}
+      <Modal visible={showProfile} transparent animationType="slide" onRequestClose={() => setShowProfile(false)}>
+        <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 36, borderWidth: 1, borderColor: t.cardBorder }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20 }]}>Edit Profile</Text>
+              <TouchableOpacity onPress={() => setShowProfile(false)}>
+                <Icon name="x" size={22} color={t.muted} strokeWidth={2} />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8 }]}>Name</Text>
+            <TextInput
+              style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line }}
+              value={pName} onChangeText={setPName}
+              placeholder="Your name" placeholderTextColor={t.muted2}
+            />
+
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>Role</Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {ROLES.map(r => (
+                <TouchableOpacity
+                  key={r}
+                  style={{ flex: 1, paddingVertical: 11, borderRadius: 10, borderWidth: 1, alignItems: 'center', borderColor: pRole === r ? t.ctaBg : t.line, backgroundColor: pRole === r ? t.ctaBg : 'transparent' }}
+                  onPress={() => setPRole(r)}
+                >
+                  <Text style={{ color: pRole === r ? t.ctaText : t.muted, fontFamily: fonts[700], fontSize: 14 }}>
+                    {r.charAt(0).toUpperCase() + r.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>Program / Organization</Text>
+            <TextInput
+              style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line }}
+              value={pProgram} onChangeText={setPProgram}
+              placeholder="Program name" placeholderTextColor={t.muted2}
+            />
+
+            <TouchableOpacity
+              style={{ backgroundColor: t.ctaBg, borderRadius: 12, padding: 15, alignItems: 'center', marginTop: 24 }}
+              onPress={saveProfile} disabled={savingProfile}
+            >
+              {savingProfile
+                ? <ActivityIndicator color={t.ctaText} />
+                : <Text style={{ color: t.ctaText, fontFamily: fonts[800], fontSize: 15 }}>Save Changes</Text>}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScreenBackground>
   );
 }

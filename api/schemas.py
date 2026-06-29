@@ -24,6 +24,14 @@ class CoachLogin(BaseModel):
     password: str
 
 
+class CoachUpdate(BaseModel):
+    name: str | None = None
+    role: str | None = None
+    program_name: str | None = None
+    competition_level: str | None = None
+    conference: str | None = None
+
+
 class CoachOut(BaseModel):
     id: int
     name: str

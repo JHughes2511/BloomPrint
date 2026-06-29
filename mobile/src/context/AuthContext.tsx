@@ -9,6 +9,7 @@ interface AuthState {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: { name: string; email: string; password: string; weight?: number; program_name?: string; role?: string }) => Promise<void>;
+  updateProfile: (data: { name?: string; role?: string; program_name?: string; competition_level?: string; conference?: string }) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -49,6 +50,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setCoach(res.coach);
   };
 
+  const updateProfile = async (data: Parameters<typeof authAPI.updateProfile>[0]) => {
+    const updated = await authAPI.updateProfile(data);
+    setCoach(updated);
+  };
+
   const logout = async () => {
     await SecureStore.deleteItemAsync('auth_token');
     setToken(null);
@@ -56,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ coach, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ coach, token, loading, login, register, updateProfile, logout }}>
       {children}
     </AuthContext.Provider>
   );
