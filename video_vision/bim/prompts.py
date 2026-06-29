@@ -1,5 +1,16 @@
 """Output-type-specific system prompts for the Basketball Intelligence Model."""
 
+# Appended to every prompt — a short executive brief the mobile app surfaces
+# at the top of the report (the "TL;DR" the coach reads first).
+_BRIEF_DIRECTIVE = (
+    "\n\nBEFORE everything else, open the report with a section titled exactly "
+    "\"BRIEF:\" on its own line, followed by a blank line, then a 2–3 sentence "
+    "plain-language executive summary a busy coach can absorb in ten seconds — "
+    "the single most important takeaways (who this player is, the headline "
+    "strength, the headline concern). Do not use bullet points in the brief. "
+    "After the brief, continue with the full structured report below."
+)
+
 # Appended to every prompt — enforces plain-text output for clean mobile rendering
 _NO_MARKDOWN = (
     "\n\nFORMATTING RULES: Do NOT use any markdown formatting. "
@@ -432,10 +443,10 @@ def build_prompt(
         if not blocks:
             valid = ", ".join(PROMPT_MAP.keys())
             raise ValueError(f"Unknown output_type '{output_type}'. Valid: {valid}")
-        return header + "\n".join(blocks) + _NO_MARKDOWN
+        return header + "\n".join(blocks) + _BRIEF_DIRECTIVE + _NO_MARKDOWN
 
     fn = PROMPT_MAP.get(output_type)
     if fn is None:
         valid = ", ".join(PROMPT_MAP.keys())
         raise ValueError(f"Unknown output_type '{output_type}'. Valid: {valid}")
-    return fn(program, level, coach_weight, player_name) + _NO_MARKDOWN
+    return fn(program, level, coach_weight, player_name) + _BRIEF_DIRECTIVE + _NO_MARKDOWN

@@ -922,7 +922,7 @@ export default function PlayerProfileScreen() {
                   <TouchableOpacity
                     style={{
                       marginTop: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-                      gap: 6, backgroundColor: t.accent, borderRadius: 10, paddingVertical: 12,
+                      gap: 6, backgroundColor: t.ctaBg, borderRadius: 10, paddingVertical: 12,
                       opacity: (!modalCorrection.trim() || regeneratingModal) ? 0.5 : 1,
                     }}
                     onPress={regenerateTrainingFromModal}
@@ -930,7 +930,7 @@ export default function PlayerProfileScreen() {
                   >
                     {regeneratingModal
                       ? <ActivityIndicator color={t.ctaText} size="small" />
-                      : <><Ionicons name="refresh" size={15} color={t.ink} /><Text style={{ color: t.ink, fontWeight: '700', fontSize: 13 }}>Apply & Regenerate</Text></>}
+                      : <><Ionicons name="refresh" size={15} color={t.ctaText} /><Text style={{ color: t.ctaText, fontWeight: '700', fontSize: 13 }}>Apply & Regenerate</Text></>}
                   </TouchableOpacity>
                 </View>
               </KeyboardAwareScrollView>

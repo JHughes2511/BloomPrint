@@ -12,7 +12,8 @@ import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { evalsAPI, playersAPI, playerAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import ShareModal from '../components/ShareModal';
-import { outputTypeLabel } from '../utils/reportType';
+import { outputTypeLabel, parseOutputTypes } from '../utils/reportType';
+import { extractBrief, getFixedSections, recruitGrade, recruitGradeScale } from '../utils/reportSections';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -67,6 +68,12 @@ export default function EvalReportScreen() {
   // Player detail popup
   const [showPlayerDetail, setShowPlayerDetail] = useState(false);
 
+  // Redesigned scouting layout: score/recruit detail popups, full-report dropdown
+  const [history, setHistory] = useState<Evaluation[]>([]);
+  const [showBim, setShowBim] = useState(false);
+  const [showRecruit, setShowRecruit] = useState(false);
+  const [showFull, setShowFull] = useState(false);
+
   // Export modal
   const [showExport, setShowExport] = useState(false);
   const [exportCats, setExportCats] = useState<Record<string, boolean>>({
@@ -104,6 +111,7 @@ export default function EvalReportScreen() {
         setEv(e);
         setCorrections(c);
         try { setPlayer(await playersAPI.get(e.player_id)); } catch {}
+        try { setHistory(await playersAPI.evaluations(e.player_id)); } catch {}
       })
       .finally(() => setLoading(false));
   }, [evalId]);
@@ -348,9 +356,21 @@ export default function EvalReportScreen() {
 
   const hasPillars = ev.pillar_grades && Object.keys(ev.pillar_grades).length > 0;
 
+  // Redesigned report layout (first applied to single scouting reports).
+  const isScouting =
+    parseOutputTypes(ev.output_type).length === 1 &&
+    parseOutputTypes(ev.output_type)[0] === 'scouting_report';
+  const brief = extractBrief(ev.report_text);
+  const fixedSections = isScouting ? getFixedSections(ev.output_type, ev.report_text) : null;
+  const recruit = recruitGrade(ev.overall_grade);
+  const gradeTrend = history
+    .filter(h => h.overall_grade != null)
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+    .slice(-8);
+
   return (
     <ScreenBackground>
-    <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
+    <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: isScouting ? 120 : 100 }}>
 
       {/* Header */}
       <View style={styles.header}>
@@ -361,8 +381,134 @@ export default function EvalReportScreen() {
           <Text style={styles.title}>{outputTypeLabel(ev.output_type).toUpperCase()}</Text>
           <Text style={styles.sub}>{new Date(ev.created_at).toLocaleDateString()}</Text>
         </View>
-        <GradeBadge grade={ev.overall_grade} size="lg" />
+        {isScouting ? (
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.circleBtn} onPress={printPdf}>
+              <Ionicons name="print-outline" size={17} color={t.muted} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.circleBtn} onPress={() => setShowExport(true)}>
+              <Ionicons name="share-social-outline" size={17} color={t.muted} />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <GradeBadge grade={ev.overall_grade} size="lg" />
+        )}
       </View>
+
+      {/* BIM Score + Recruit Grade pills — tap to see how each is derived */}
+      {isScouting && ev.overall_grade != null && (
+        <View style={styles.pillRow}>
+          <TouchableOpacity style={styles.bimPill} onPress={() => setShowBim(true)}>
+            <Text style={styles.bimPillText}>BIM Score {ev.overall_grade.toFixed(1)}</Text>
+            <Ionicons name="chevron-forward" size={12} color={t.badgeText} />
+          </TouchableOpacity>
+          {recruit && (
+            <TouchableOpacity style={styles.recruitPill} onPress={() => setShowRecruit(true)}>
+              <Text style={styles.recruitPillText}>Recruit Grade {recruit.letter}</Text>
+              <Ionicons name="chevron-forward" size={12} color={t.accent} />
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+
+      {/* Brief (AI TL;DR) */}
+      {isScouting && brief && (
+        <View style={styles.briefBox}>
+          <Text style={styles.briefLabel}>Brief</Text>
+          <Text style={styles.briefText}>{brief}</Text>
+        </View>
+      )}
+
+      {/* Broken-out fixed sections + full-report dropdown */}
+      {isScouting && fixedSections && (
+        <View style={styles.section}>
+          {fixedSections.filter(s => s.body.trim()).map((s, i, arr) => (
+            <View key={s.key}>
+              <View style={styles.fixedHead}>
+                <Ionicons name={s.icon as any} size={15} color={s.tone === 'brown' ? t.brown : t.label} />
+                <Text style={[styles.fixedHeadLabel, { color: s.tone === 'brown' ? t.brown : t.label }]}>{s.label}</Text>
+              </View>
+              <Text style={styles.fixedBody}>{s.body}</Text>
+              {i < arr.length - 1 && <View style={styles.fixedDivider} />}
+            </View>
+          ))}
+
+          <TouchableOpacity style={styles.fullToggle} onPress={() => setShowFull(v => !v)}>
+            <Text style={styles.fullToggleText}>{showFull ? 'Hide full report' : 'See full report'}</Text>
+            <Ionicons name={showFull ? 'chevron-up' : 'chevron-down'} size={16} color={t.accent} />
+          </TouchableOpacity>
+          {showFull && ev.report_text && (
+            <View style={styles.reportBox}>
+              {renderReport(ev.report_text, { heading: t.ink, body: t.inkSoft })}
+            </View>
+          )}
+        </View>
+      )}
+
+      {/* BIM Score detail — pillar breakdown + grade trend */}
+      <Modal visible={showBim} animationType="slide" transparent onRequestClose={() => setShowBim(false)}>
+        <View style={styles.pdOverlay}>
+          <View style={styles.pdBox}>
+            <View style={styles.pdHeader}>
+              <Text style={styles.pdName}>BIM Score {ev.overall_grade?.toFixed(1)}</Text>
+              <TouchableOpacity onPress={() => setShowBim(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
+            </View>
+            <Text style={styles.modalSub}>The Basketball Intelligence Model grade, out of 10, across the six evaluation pillars.</Text>
+            <ScrollView style={{ maxHeight: 460 }} showsVerticalScrollIndicator={false}>
+            {hasPillars && (
+              <View style={{ marginTop: 4 }}>
+                <Text style={styles.sectionLabel}>Pillar Breakdown</Text>
+                {PILLARS.filter(k => ev.pillar_grades![k] !== undefined).map(k => (
+                  <PillarCard key={k} pillarKey={k} grade={ev.pillar_grades![k]} />
+                ))}
+              </View>
+            )}
+            {gradeTrend.length > 1 && (
+              <View style={{ marginTop: 16 }}>
+                <Text style={styles.sectionLabel}>Grade Trend</Text>
+                <View style={styles.trendRow}>
+                  {gradeTrend.map((h, i) => {
+                    const g = h.overall_grade ?? 0;
+                    const tone = g >= 7 ? t.positive : g >= 5 ? t.accent : t.brown;
+                    return (
+                      <View key={h.id ?? i} style={styles.trendCol}>
+                        <Text style={[styles.trendVal, { color: tone }]}>{g.toFixed(1)}</Text>
+                        <View style={[styles.trendBar, { height: Math.max(6, (g / 10) * 70), backgroundColor: tone }]} />
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+            )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Recruit Grade detail — how the letter maps from the BIM score */}
+      <Modal visible={showRecruit} animationType="slide" transparent onRequestClose={() => setShowRecruit(false)}>
+        <View style={styles.pdOverlay}>
+          <View style={styles.pdBox}>
+            <View style={styles.pdHeader}>
+              <Text style={styles.pdName}>Recruit Grade {recruit?.letter}</Text>
+              <TouchableOpacity onPress={() => setShowRecruit(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
+            </View>
+            {recruit && <Text style={styles.recruitTier}>{recruit.tier}</Text>}
+            {recruit && <Text style={styles.modalSub}>{recruit.blurb}</Text>}
+            <Text style={[styles.sectionLabel, { marginTop: 16 }]}>How it maps</Text>
+            {recruitGradeScale.map(r => {
+              const active = recruit?.letter === r.letter;
+              return (
+                <View key={r.letter} style={[styles.ladderRow, active && { backgroundColor: t.accentSoft, borderRadius: 8 }]}>
+                  <Text style={[styles.ladderLetter, active && { color: t.accent }]}>{r.letter}</Text>
+                  <Text style={styles.ladderTier}>{r.tier}</Text>
+                  <Text style={styles.ladderRange}>{r.range}</Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      </Modal>
 
       {/* Player name — tap to see profile popup */}
       {player && (
@@ -495,8 +641,8 @@ export default function EvalReportScreen() {
         </View>
       )}
 
-      {/* Full report — plain text rendering */}
-      {ev.report_text && (
+      {/* Full report — plain text rendering (scouting uses the dropdown above) */}
+      {!isScouting && ev.report_text && (
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Full Report</Text>
           <View style={styles.reportBox}>
@@ -816,6 +962,20 @@ export default function EvalReportScreen() {
         </KeyboardAvoidingView>
       </Modal>
     </KeyboardAwareScrollView>
+
+    {/* Sticky bottom action bar — Send to Player / Share w/ Staff */}
+    {isScouting && (
+      <View style={styles.bottomBar}>
+        <TouchableOpacity style={styles.sendPlayerBtn} onPress={() => setShowShare(true)}>
+          <Ionicons name="send" size={16} color="#16201A" />
+          <Text style={styles.sendPlayerText}>Send to Player</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.shareStaffBtn} onPress={() => setShowShareModal(true)}>
+          <Ionicons name="people" size={16} color={t.brownInk} />
+          <Text style={styles.shareStaffText}>Share w/ Staff</Text>
+        </TouchableOpacity>
+      </View>
+    )}
     </ScreenBackground>
   );
 }
@@ -866,6 +1026,39 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   questionNum: { color: t.accent, fontFamily: fonts[800], fontSize: 14, width: 20 },
   questionText: { color: t.inkSoft, fontSize: 13, flex: 1, lineHeight: 20 },
   reportBox: { backgroundColor: t.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: t.cardBorder },
+
+  // ── Redesigned scouting layout ──
+  headerActions: { flexDirection: 'row', gap: 8 },
+  circleBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: t.chip, alignItems: 'center', justifyContent: 'center' },
+  pillRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 20, marginTop: 4 },
+  bimPill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: t.badgeBg },
+  bimPillText: { color: t.badgeText, fontSize: 11.5, fontFamily: fonts[800], letterSpacing: 0.4 },
+  recruitPill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: t.accentSoft },
+  recruitPillText: { color: t.accent, fontSize: 11.5, fontFamily: fonts[800] },
+  briefBox: { marginHorizontal: 20, marginTop: 16, backgroundColor: t.card, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: t.cardBorder },
+  briefLabel: { color: t.label, fontSize: 10.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 },
+  briefText: { color: t.inkSoft, fontSize: 14, lineHeight: 21 },
+  fixedHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
+  fixedHeadLabel: { fontSize: 12, fontFamily: fonts[700], letterSpacing: 1.6, textTransform: 'uppercase' },
+  fixedBody: { color: t.inkSoft, fontSize: 14, lineHeight: 22 },
+  fixedDivider: { height: 1, backgroundColor: t.divider, marginVertical: 18 },
+  fullToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 20, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: t.line },
+  fullToggleText: { color: t.accent, fontSize: 13, fontFamily: fonts[700] },
+  trendRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, height: 96, paddingTop: 6 },
+  trendCol: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', gap: 5 },
+  trendVal: { fontSize: 10, fontFamily: fonts[700] },
+  trendBar: { width: '70%', borderRadius: 4 },
+  recruitTier: { color: t.ink, fontSize: 14, fontFamily: fonts[800], marginBottom: 8 },
+  ladderRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 8, gap: 10 },
+  ladderLetter: { color: t.ink, fontSize: 13, fontFamily: fonts[800], width: 32 },
+  ladderTier: { color: t.inkSoft, fontSize: 12.5, flex: 1 },
+  ladderRange: { color: t.muted, fontSize: 11.5 },
+  bottomBar: { position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', gap: 11, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 28, backgroundColor: t.sheet, borderTopWidth: 1, borderTopColor: t.divider },
+  sendPlayerBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.pistachio, borderRadius: 14, paddingVertical: 15 },
+  sendPlayerText: { color: '#16201A', fontFamily: fonts[800], fontSize: 14.5 },
+  shareStaffBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.brown, borderRadius: 14, paddingVertical: 15 },
+  shareStaffText: { color: t.brownInk, fontFamily: fonts[800], fontSize: 14.5 },
+
   correctionCard: { backgroundColor: t.card, borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: t.cardBorder },
   correctionPillar: { color: t.accent, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 4 },
   correctionText: { color: t.ink, fontSize: 13 },

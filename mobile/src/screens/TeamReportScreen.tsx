@@ -762,13 +762,13 @@ export default function TeamReportScreen() {
                   ))}
                   {prevReportCorrections.some((c: any) => !c.applied) && (
                     <TouchableOpacity
-                      style={{ backgroundColor: t.accent, borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 8 }}
+                      style={{ backgroundColor: t.ctaBg, borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 8 }}
                       onPress={regeneratePrevReport}
                       disabled={regeneratingPrevReport}
                     >
                       {regeneratingPrevReport
-                        ? <ActivityIndicator color="#fff" />
-                        : <Text style={{ color: t.ink, fontWeight: '700' }}>Apply & Regenerate</Text>}
+                        ? <ActivityIndicator color={t.ctaText} />
+                        : <Text style={{ color: t.ctaText, fontWeight: '700' }}>Apply & Regenerate</Text>}
                     </TouchableOpacity>
                   )}
                 </View>
@@ -788,13 +788,13 @@ export default function TeamReportScreen() {
                 />
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   <TouchableOpacity
-                    style={{ flex: 1, backgroundColor: t.accent, borderRadius: 10, padding: 14, alignItems: 'center' }}
+                    style={{ flex: 1, backgroundColor: t.ctaBg, borderRadius: 10, padding: 14, alignItems: 'center' }}
                     onPress={() => addPrevReportCorrection(true)}
                     disabled={addingPrevCorrection || regeneratingPrevReport || !prevReportCorrectionText.trim()}
                   >
                     {addingPrevCorrection || regeneratingPrevReport
-                      ? <ActivityIndicator color="#fff" />
-                      : <Text style={{ color: t.ink, fontWeight: '700' }}>Apply & Regenerate</Text>}
+                      ? <ActivityIndicator color={t.ctaText} />
+                      : <Text style={{ color: t.ctaText, fontWeight: '700' }}>Apply & Regenerate</Text>}
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={{ flex: 1, backgroundColor: t.line, borderRadius: 10, padding: 14, alignItems: 'center' }}
