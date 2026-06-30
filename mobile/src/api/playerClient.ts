@@ -57,6 +57,9 @@ export const playerLinkAPI = {
     playerApi.get('/player/search-players', { params: { q } }).then(r => r.data),
   requestLink: (playerId: number) =>
     playerApi.post(`/player/link-request/${playerId}`).then(r => r.data),
+  listLinks: () => playerApi.get('/player/links').then(r => r.data),
+  unlink: (playerId: number) =>
+    playerApi.delete(`/player/links/${playerId}`).then(r => r.data),
 };
 
 export const playerProfileAPI = {

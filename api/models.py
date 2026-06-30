@@ -173,6 +173,23 @@ class PlayerUser(Base):
     player        = relationship("Player", back_populates="player_user")
     notifications = relationship("PlayerNotification", back_populates="player_user", cascade="all, delete-orphan")
     comments      = relationship("PlayerComment", back_populates="player_user", cascade="all, delete-orphan")
+    links         = relationship("PlayerUserLink", back_populates="player_user", cascade="all, delete-orphan")
+
+
+class PlayerUserLink(Base):
+    """A player account can be linked to multiple player profiles (one per
+    coach / program / team). PlayerUser.player_id is the primary/active one."""
+    __tablename__ = "player_user_links"
+
+    id             = Column(Integer, primary_key=True, index=True)
+    player_user_id = Column(Integer, ForeignKey("player_users.id"), nullable=False)
+    player_id      = Column(Integer, ForeignKey("players.id"), nullable=False)
+    coach_id       = Column(Integer, ForeignKey("coaches.id"), nullable=True)
+    created_at     = Column(DateTime, default=datetime.utcnow)
+
+    player_user    = relationship("PlayerUser", back_populates="links")
+    player         = relationship("Player")
+    coach          = relationship("Coach")
 
 
 class InviteCode(Base):

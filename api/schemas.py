@@ -307,6 +307,15 @@ class PlayerTrainingProgress(BaseModel):
     completed_drills: list[str]
 
 
+class PlayerLinkOut(BaseModel):
+    player_id: int
+    player_name: str
+    program_name: str | None = None
+    team_name: str | None = None
+    coach_name: str | None = None
+    is_primary: bool = False
+
+
 class PlayerTrainingUpdate(BaseModel):
     coach_notes: str
 

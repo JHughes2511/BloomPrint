@@ -28,6 +28,7 @@
     "plugins": [
       "expo-secure-store",
       ["expo-image-picker", { "photosPermission": "Select video clips for BIM analysis" }],
+      ["expo-camera", { "cameraPermission": "Scan a coach's QR code to link your account." }],
       "expo-av"
     ]
   }

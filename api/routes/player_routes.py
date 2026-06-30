@@ -40,10 +40,74 @@ def use_invite(
     invite = db.query(models.InviteCode).filter_by(code=code, used=False).first()
     if not invite:
         raise HTTPException(status_code=404, detail="Invalid or already used invite code")
-    pu.player_id = invite.player_id
+    _add_player_link(db, pu, invite.player_id, invite.coach_id)
     invite.used = True
     db.commit()
     return {"ok": True, "player_name": invite.player.name}
+
+
+def _add_player_link(db: Session, pu: models.PlayerUser, player_id: int, coach_id: int | None):
+    """Link an account to a player profile (supports multiple). Keeps the first
+    link as the primary (PlayerUser.player_id) used for profile editing."""
+    if not pu.player_id:
+        pu.player_id = player_id
+    exists = db.query(models.PlayerUserLink).filter_by(
+        player_user_id=pu.id, player_id=player_id
+    ).first()
+    if not exists:
+        db.add(models.PlayerUserLink(player_user_id=pu.id, player_id=player_id, coach_id=coach_id))
+
+
+@router.get("/links", response_model=list[schemas.PlayerLinkOut])
+def list_player_links(
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    # Backfill: if the account has a primary player_id but no link rows yet
+    # (legacy single-link accounts), surface it so it shows up and is unlinkable.
+    links = db.query(models.PlayerUserLink).filter_by(player_user_id=pu.id).all()
+    linked_ids = {l.player_id for l in links}
+    if pu.player_id and pu.player_id not in linked_ids:
+        db.add(models.PlayerUserLink(player_user_id=pu.id, player_id=pu.player_id))
+        db.commit()
+        links = db.query(models.PlayerUserLink).filter_by(player_user_id=pu.id).all()
+
+    out = []
+    for l in links:
+        p = l.player
+        if not p:
+            continue
+        out.append(schemas.PlayerLinkOut(
+            player_id=p.id,
+            player_name=p.name,
+            program_name=p.program_name,
+            team_name=p.team.name if p.team else None,
+            coach_name=l.coach.name if l.coach else None,
+            is_primary=(p.id == pu.player_id),
+        ))
+    return out
+
+
+@router.delete("/links/{player_id}")
+def unlink_player_link(
+    player_id: int,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    link = db.query(models.PlayerUserLink).filter_by(
+        player_user_id=pu.id, player_id=player_id
+    ).first()
+    if link:
+        db.delete(link)
+    # If we removed the primary, reassign it to another remaining link (or clear).
+    if pu.player_id == player_id:
+        remaining = db.query(models.PlayerUserLink).filter(
+            models.PlayerUserLink.player_user_id == pu.id,
+            models.PlayerUserLink.player_id != player_id,
+        ).first()
+        pu.player_id = remaining.player_id if remaining else None
+    db.commit()
+    return {"ok": True}
 
 
 # ── Link requests (player initiates) ─────────────────────────────────────────
@@ -105,7 +169,7 @@ def approve_link(
     if not lr:
         raise HTTPException(status_code=404, detail="Request not found")
     lr.status = "approved"
-    lr.player_user.player_id = lr.player_id
+    _add_player_link(db, lr.player_user, lr.player_id, coach.id)
     notif = models.PlayerNotification(
         player_user_id=lr.player_user_id,
         type="link_approved",
