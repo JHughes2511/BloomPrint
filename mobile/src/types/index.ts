@@ -96,6 +96,10 @@ export interface PlayerUser {
   name: string;
   email: string;
   player_id: number | null;
+  avatar?: string | null;
+  linked_player_name?: string | null;
+  linked_team_name?: string | null;
+  linked_program_name?: string | null;
   created_at: string;
 }
 

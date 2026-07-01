@@ -3,13 +3,14 @@ import VoiceTextInput from '../../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  Alert, ActivityIndicator, Modal,
+  Alert, ActivityIndicator, Modal, Image,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
-import { playerLinkAPI, playerProfileAPI, playerApi } from '../../api/playerClient';
+import { playerLinkAPI, playerProfileAPI, playerApi, playerAuthAPI } from '../../api/playerClient';
 import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
@@ -21,7 +22,7 @@ type Link = { player_id: number; player_name: string; program_name?: string | nu
 
 export default function PlayerLinkScreen() {
   const { playerUser, logout, refreshUser } = usePlayerAuth();
-  const { t } = useTheme();
+  const { t, mode, toggle } = useTheme();
   const styles = makeStyles(t);
 
   const [profile, setProfile] = useState<any | null>(null);
@@ -38,6 +39,8 @@ export default function PlayerLinkScreen() {
 
   // Edit profile modal
   const [showEdit, setShowEdit] = useState(false);
+  const [eName, setEName] = useState('');
+  const [eAvatar, setEAvatar] = useState<string | null>(null);
   const [eP, setEP] = useState('');     // position
   const [eH, setEH] = useState('');     // height
   const [eW, setEW] = useState('');     // wingspan
@@ -121,20 +124,41 @@ export default function PlayerLinkScreen() {
   };
 
   const openEdit = () => {
+    setEName(playerUser?.name ?? '');
+    setEAvatar((playerUser as any)?.avatar ?? null);
     setEP(profile?.position ?? ''); setEH(profile?.height ?? ''); setEW(profile?.wingspan ?? '');
     setEWt(profile?.weight ?? ''); setESr(profile?.standing_reach ?? ''); setESchool(profile?.school_name ?? '');
     setShowEdit(true);
   };
 
+  const pickAvatar = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) { Alert.alert('Permission needed', 'Allow photo access to set a profile picture.'); return; }
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true, aspect: [1, 1], quality: 0.4, base64: true,
+    });
+    if (!res.canceled && res.assets[0]?.base64) {
+      setEAvatar(`data:image/jpeg;base64,${res.assets[0].base64}`);
+    }
+  };
+
   const saveProfile = async () => {
     setSaving(true);
     try {
-      const updated = await playerProfileAPI.update({
-        position: eP.trim() || undefined, height: eH.trim() || undefined,
-        wingspan: eW.trim() || undefined, weight: eWt.trim() || undefined,
-        standing_reach: eSr.trim() || undefined, school_name: eSchool.trim() || undefined,
-      });
-      setProfile(updated); setShowEdit(false);
+      // Account-level: name + avatar
+      await playerAuthAPI.updateMe({ name: eName.trim() || undefined, avatar: eAvatar });
+      // Profile-level: athletic fields (only when linked)
+      if (playerUser?.player_id) {
+        const updated = await playerProfileAPI.update({
+          position: eP.trim() || undefined, height: eH.trim() || undefined,
+          wingspan: eW.trim() || undefined, weight: eWt.trim() || undefined,
+          standing_reach: eSr.trim() || undefined, school_name: eSchool.trim() || undefined,
+        });
+        setProfile(updated);
+      }
+      await refreshUser();
+      setShowEdit(false);
     } catch { Alert.alert('Error', 'Failed to save profile.'); }
     finally { setSaving(false); }
   };
@@ -160,19 +184,33 @@ export default function PlayerLinkScreen() {
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }}>
       <View style={styles.headerRow}>
         <Text style={styles.title}>Profile</Text>
-        <TouchableOpacity onPress={logout}><Ionicons name="log-out-outline" size={20} color={t.muted} /></TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.circleBtn} onPress={toggle} accessibilityLabel="Toggle theme">
+            <Ionicons name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'} size={18} color={t.inkSoft} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.circleBtn} onPress={logout} accessibilityLabel="Sign out">
+            <Ionicons name="log-out-outline" size={18} color={t.muted2} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Avatar + name */}
-      <View style={styles.avatarWrap}>
-        <View style={styles.avatar}><Text style={styles.avatarText}>{initials}</Text></View>
+      <TouchableOpacity style={styles.avatarWrap} onPress={openEdit} activeOpacity={0.85}>
+        <View>
+          <View style={styles.avatar}>
+            {(playerUser as any)?.avatar
+              ? <Image source={{ uri: (playerUser as any).avatar }} style={styles.avatarImg} />
+              : <Text style={styles.avatarText}>{initials}</Text>}
+          </View>
+          <View style={styles.avatarCam}><Ionicons name="camera" size={15} color={t.ctaText} /></View>
+        </View>
         <Text style={styles.name}>{playerUser?.name}</Text>
         {(profile?.position || profile?.school_name) ? (
           <Text style={styles.nameSub}>
             {[profile?.position, profile?.school_name].filter(Boolean).join(' · ')}
           </Text>
         ) : null}
-      </View>
+      </TouchableOpacity>
 
       {/* Athletic profile */}
       {profile && (
@@ -230,10 +268,33 @@ export default function PlayerLinkScreen() {
             <TouchableOpacity onPress={() => setShowEdit(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
           </View>
           <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 40 }}>
-            {([['Position', eP, setEP, 'e.g. SF'], ['Height', eH, setEH, `e.g. 6'6"`], ['Wingspan', eW, setEW, `e.g. 6'9"`], ['Weight', eWt, setEWt, 'e.g. 200 lbs'], ['Standing Reach', eSr, setESr, `e.g. 8'6"`], ['School / Org', eSchool, setESchool, 'e.g. Creator Academy']] as const).map(([label, val, setter, ph]) => (
+            {/* Avatar picker */}
+            <TouchableOpacity style={styles.editAvatarWrap} onPress={pickAvatar}>
+              <View style={styles.avatar}>
+                {eAvatar
+                  ? <Image source={{ uri: eAvatar }} style={styles.avatarImg} />
+                  : <Text style={styles.avatarText}>{initials}</Text>}
+              </View>
+              <View style={styles.avatarCam}><Ionicons name="camera" size={15} color={t.ctaText} /></View>
+            </TouchableOpacity>
+
+            <Text style={styles.fieldLabel}>Full Name</Text>
+            <VoiceTextInput style={styles.input} value={eName} onChangeText={setEName} placeholder="Your name" placeholderTextColor={t.muted2} />
+
+            {(playerUser?.player_id
+              ? ([
+                  ['Position', eP, setEP, 'e.g. SF'],
+                  ['Height', eH, setEH, `e.g. 6'6"`],
+                  ['Wingspan', eW, setEW, `e.g. 6'9"`],
+                  ['Weight', eWt, setEWt, 'e.g. 200 lbs'],
+                  ['Standing Reach', eSr, setESr, `e.g. 8'6"`],
+                  ['School / Org', eSchool, setESchool, 'e.g. Creator Academy'],
+                ] as [string, string, (v: string) => void, string][])
+              : []
+            ).map(([label, val, setter, ph]) => (
               <View key={label}>
                 <Text style={styles.fieldLabel}>{label}</Text>
-                <VoiceTextInput style={styles.input} value={val} onChangeText={setter as any} placeholder={ph} placeholderTextColor={t.muted2} />
+                <VoiceTextInput style={styles.input} value={val} onChangeText={setter} placeholder={ph} placeholderTextColor={t.muted2} />
               </View>
             ))}
             <TouchableOpacity style={[styles.btn, saving && { opacity: 0.6 }]} onPress={saveProfile} disabled={saving}>
@@ -330,9 +391,14 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingTop: 56 },
   title: { color: t.ink, fontSize: 28, fontFamily: fonts[800], letterSpacing: -0.6 },
+  headerActions: { flexDirection: 'row', gap: 8 },
+  circleBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder },
 
   avatarWrap: { alignItems: 'center', marginTop: 12, marginBottom: 8 },
-  avatar: { width: 92, height: 92, borderRadius: 46, backgroundColor: t.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  editAvatarWrap: { alignSelf: 'center', marginBottom: 8 },
+  avatar: { width: 92, height: 92, borderRadius: 46, backgroundColor: t.accentSoft, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  avatarImg: { width: 92, height: 92, borderRadius: 46 },
+  avatarCam: { position: 'absolute', bottom: 0, right: 0, width: 30, height: 30, borderRadius: 15, backgroundColor: t.ctaBg, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: t.sheet },
   avatarText: { color: t.accent, fontSize: 30, fontFamily: fonts[800] },
   name: { color: t.ink, fontSize: 22, fontFamily: fonts[800], marginTop: 12 },
   nameSub: { color: t.muted, fontSize: 13.5, marginTop: 3 },

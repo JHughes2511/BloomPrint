@@ -223,11 +223,17 @@ class PlayerUserOut(BaseModel):
     name: str
     email: str
     player_id: int | None
+    avatar: str | None = None
     linked_player_name: str | None = None
     linked_team_name: str | None = None
     linked_program_name: str | None = None
     created_at: datetime
     model_config = {"from_attributes": True}
+
+
+class PlayerUserUpdate(BaseModel):
+    name: str | None = None
+    avatar: str | None = None
 
 
 class PlayerToken(BaseModel):

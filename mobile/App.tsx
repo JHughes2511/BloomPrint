@@ -240,7 +240,7 @@ function PlayerTabs() {
         tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, [string, string]> = {
             PlayerHomeTab:    ['home',          'home-outline'],
-            InboxTab:         ['mail',          'mail-outline'],
+            InboxTab:         ['document-text', 'document-text-outline'],
             TrainingTab:      ['barbell',       'barbell-outline'],
             PlayerNotifsTab:  ['notifications', 'notifications-outline'],
             ProfileTab:       ['person',        'person-outline'],

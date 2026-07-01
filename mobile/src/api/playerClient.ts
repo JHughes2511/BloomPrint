@@ -16,6 +16,8 @@ export const playerAuthAPI = {
   login: (email: string, password: string) =>
     playerApi.post('/player-auth/login', { email, password }).then(r => r.data),
   me: () => playerApi.get('/player-auth/me').then(r => r.data),
+  updateMe: (data: { name?: string; avatar?: string | null }) =>
+    playerApi.patch('/player-auth/me', data).then(r => r.data),
 };
 
 export const playerReportsAPI = {

@@ -80,14 +80,34 @@ def login(body: schemas.CoachLogin, db: Session = Depends(get_db)):
     )
 
 
-@router.get("/me", response_model=schemas.PlayerUserOut)
-def me(pu: models.PlayerUser = Depends(get_current_player_user)):
+def _player_user_out(pu: models.PlayerUser) -> schemas.PlayerUserOut:
     out = schemas.PlayerUserOut.model_validate(pu)
     if pu.player:
         out.linked_player_name = pu.player.name
         out.linked_team_name = pu.player.team.name if pu.player.team else None
         out.linked_program_name = pu.player.program_name
     return out
+
+
+@router.get("/me", response_model=schemas.PlayerUserOut)
+def me(pu: models.PlayerUser = Depends(get_current_player_user)):
+    return _player_user_out(pu)
+
+
+@router.patch("/me", response_model=schemas.PlayerUserOut)
+def update_me(
+    body: schemas.PlayerUserUpdate,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    data = body.model_dump(exclude_unset=True)
+    if "name" in data and data["name"] and data["name"].strip():
+        pu.name = data["name"].strip()
+    if "avatar" in data:
+        pu.avatar = data["avatar"] or None
+    db.commit()
+    db.refresh(pu)
+    return _player_user_out(pu)
 
 
 @router.get("/linked-player", response_model=schemas.PlayerOut)

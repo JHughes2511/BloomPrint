@@ -168,6 +168,7 @@ class PlayerUser(Base):
     email         = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
     player_id     = Column(Integer, ForeignKey("players.id"), nullable=True)
+    avatar        = Column(Text, nullable=True)   # base64 data URI
     created_at    = Column(DateTime, default=datetime.utcnow)
 
     player        = relationship("Player", back_populates="player_user")

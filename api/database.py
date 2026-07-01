@@ -161,6 +161,19 @@ def _run_migrations():
         except Exception:
             pass
 
+        # Add avatar to player_users if missing
+        try:
+            puu_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(player_users)")
+            )]
+            if puu_cols and "avatar" not in puu_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE player_users ADD COLUMN avatar TEXT"
+                ))
+                conn.commit()
+        except Exception:
+            pass
+
         # Create coach_notifications table if missing
         try:
             conn.execute(__import__("sqlalchemy").text(
