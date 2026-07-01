@@ -39,6 +39,13 @@ export default function StaffInboxScreen() {
   const { t } = useTheme();
   const styles = makeStyles(t);
   const navigation = useNavigation<any>();
+
+  // Themed report-type badge colors (adapt to light/dark instead of fixed hex).
+  const badgeFor = (type: string): { bg: string; text: string } => {
+    if (type === 'training' || type === 'game_session') return { bg: t.positiveSoft, text: t.positive };
+    if (type === 'team_report') return { bg: t.brownSoft, text: t.brown };
+    return { bg: t.accentSoft, text: t.accent }; // eval / game / team_training / default
+  };
   const [tab, setTab] = useState<TabKey>('inbox');
 
   // Inbox state
@@ -211,7 +218,7 @@ export default function StaffInboxScreen() {
           </View>
         }
         renderItem={({ item }) => {
-          const badgeColor = REPORT_TYPE_BADGE_COLORS[item.report_type] ?? { bg: '#1f2937', text: '#9ca3af' };
+          const badgeColor = badgeFor(item.report_type);
           const iconName = item.report_type === 'training' ? 'barbell-outline' :
                            item.report_type === 'team_report' || item.report_type === 'team_training' ? 'people-outline' :
                            item.report_type === 'game' || item.report_type === 'game_session' ? 'clipboard-outline' : 'document-text-outline';
@@ -287,8 +294,8 @@ export default function StaffInboxScreen() {
             setGameCommentText('');
             setGameComments([]);
           }}>
-            <View style={[styles.iconBox, { backgroundColor: game.kind === 'session' ? '#14532d' : '#2d1b69' }]}>
-              <Ionicons name={game.kind === 'session' ? 'stats-chart-outline' : 'clipboard-outline'} size={18} color={game.kind === 'session' ? '#4ade80' : '#a78bfa'} />
+            <View style={[styles.iconBox, { backgroundColor: game.kind === 'session' ? t.positiveSoft : t.accentSoft }]}>
+              <Ionicons name={game.kind === 'session' ? 'stats-chart-outline' : 'clipboard-outline'} size={18} color={game.kind === 'session' ? t.positive : t.accent} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.cardTitle}>{game.title}</Text>

@@ -192,6 +192,11 @@ def reject_link(
     if not lr:
         raise HTTPException(status_code=404, detail="Request not found")
     lr.status = "rejected"
+    # Clean up the auto-created placeholder roster profile if it was never used.
+    if lr.coach_id and lr.player and not lr.player.evaluations:
+        player = lr.player
+        db.delete(lr)
+        db.delete(player)
     db.commit()
     return {"ok": True}
 
@@ -204,17 +209,31 @@ def request_link_to_coach(
     db: Session = Depends(get_db),
     pu: models.PlayerUser = Depends(get_current_player_user),
 ):
-    """Player requests to link to a specific coach account."""
+    """Player requests to link to a specific coach account. Creates a pending
+    LinkRequest (with a roster profile in the coach's program) so the coach can
+    approve/reject it from their notifications."""
     coach = db.get(models.Coach, coach_id)
     if not coach:
         raise HTTPException(status_code=404, detail="Coach not found")
-    # Notify the coach
+    # Avoid duplicate pending requests to the same coach.
+    dup = db.query(models.LinkRequest).filter_by(
+        player_user_id=pu.id, coach_id=coach_id, status="pending"
+    ).first()
+    if dup:
+        raise HTTPException(status_code=400, detail="Link request already sent")
+    # Create a roster profile for this player in the coach's program.
+    player = models.Player(name=pu.name, program_name=coach.program_name)
+    db.add(player)
+    db.flush()
+    lr = models.LinkRequest(player_user_id=pu.id, player_id=player.id, coach_id=coach_id)
+    db.add(lr)
+    db.flush()
     notif = models.PlayerNotification(
         coach_id=coach_id,
         type="link_requested",
         title="Player Link Request",
         body=f"{pu.name} is requesting to link to your account.",
-        ref_id=pu.id,
+        ref_id=lr.id,
     )
     db.add(notif)
     db.commit()

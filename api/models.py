@@ -213,6 +213,7 @@ class LinkRequest(Base):
     id             = Column(Integer, primary_key=True, index=True)
     player_user_id = Column(Integer, ForeignKey("player_users.id"), nullable=False)
     player_id      = Column(Integer, ForeignKey("players.id"), nullable=False)
+    coach_id       = Column(Integer, ForeignKey("coaches.id"), nullable=True)  # set when player requested a coach directly
     status         = Column(String, default="pending")  # pending / approved / rejected
     created_at     = Column(DateTime, default=datetime.utcnow)
 

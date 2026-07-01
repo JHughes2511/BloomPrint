@@ -174,6 +174,19 @@ def _run_migrations():
         except Exception:
             pass
 
+        # Add coach_id to link_requests if missing
+        try:
+            lr_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(link_requests)")
+            )]
+            if lr_cols and "coach_id" not in lr_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE link_requests ADD COLUMN coach_id INTEGER"
+                ))
+                conn.commit()
+        except Exception:
+            pass
+
         # Create coach_notifications table if missing
         try:
             conn.execute(__import__("sqlalchemy").text(
