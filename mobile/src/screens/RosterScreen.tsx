@@ -411,39 +411,40 @@ export default function RosterScreen() {
             </View>
           </KeyboardAwareScrollView>
           </View>
-        </KeyboardAvoidingView>
-      </Modal>
 
-      {/* Parent/Guardian consent disclaimer */}
-      <Modal visible={showDisclaimer} transparent animationType="fade" onRequestClose={() => setShowDisclaimer(false)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', padding: 20 }}>
-          <View style={{ backgroundColor: t.card, borderRadius: 16, padding: 20, maxHeight: '80%' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-              <Ionicons name="shield-checkmark-outline" size={20} color={t.accent} />
-              <Text style={{ color: t.ink, fontSize: 17, fontWeight: '800', marginLeft: 8, flex: 1 }}>Parent/Guardian Consent</Text>
-              <TouchableOpacity onPress={() => setShowDisclaimer(false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                <Ionicons name="close" size={22} color={t.muted} />
-              </TouchableOpacity>
+          {/* Parent/Guardian consent disclaimer — an in-modal overlay, because a
+              nested <Modal> won't present over an already-open Modal on iOS. */}
+          {showDisclaimer && (
+            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', padding: 20 }}>
+              <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, maxHeight: '80%', borderWidth: 1, borderColor: t.cardBorder }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                  <Ionicons name="shield-checkmark-outline" size={20} color={t.accent} />
+                  <Text style={{ color: t.ink, fontSize: 17, fontWeight: '800', marginLeft: 8, flex: 1 }}>Parent/Guardian Consent</Text>
+                  <TouchableOpacity onPress={() => setShowDisclaimer(false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                    <Ionicons name="close" size={22} color={t.muted} />
+                  </TouchableOpacity>
+                </View>
+                <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                  <Text style={{ color: t.inkSoft, fontSize: 13, lineHeight: 20 }}>
+                    For any athlete under the age of 18, a parent or legal guardian must grant permission before their
+                    information, evaluations, and film are collected, analyzed, or shared within BloomPrint.{'\n\n'}
+                    By selecting “Yes,” you confirm that you have obtained verifiable consent from the player’s parent or
+                    legal guardian to create and maintain this profile — including the storage of biometric and performance
+                    data and the generation of AI scouting and development reports.{'\n\n'}
+                    If the player is 18 or older, parental permission is not required and you may select “No.”{'\n\n'}
+                    You are responsible for ensuring this consent complies with all applicable privacy laws, including
+                    COPPA and any local regulations governing minors’ data.
+                  </Text>
+                </ScrollView>
+                <TouchableOpacity
+                  style={{ marginTop: 16, backgroundColor: t.ctaBg, borderRadius: 10, paddingVertical: 12, alignItems: 'center' }}
+                  onPress={() => setShowDisclaimer(false)}>
+                  <Text style={{ color: t.ctaText, fontWeight: '700' }}>Got it</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
-              <Text style={{ color: t.inkSoft, fontSize: 13, lineHeight: 20 }}>
-                For any athlete under the age of 18, a parent or legal guardian must grant permission before their
-                information, evaluations, and film are collected, analyzed, or shared within BloomPrint.{'\n\n'}
-                By selecting “Yes,” you confirm that you have obtained verifiable consent from the player’s parent or
-                legal guardian to create and maintain this profile — including the storage of biometric and performance
-                data and the generation of AI scouting and development reports.{'\n\n'}
-                If the player is 18 or older, parental permission is not required and you may select “No.”{'\n\n'}
-                You are responsible for ensuring this consent complies with all applicable privacy laws, including
-                COPPA and any local regulations governing minors’ data.
-              </Text>
-            </ScrollView>
-            <TouchableOpacity
-              style={{ marginTop: 16, backgroundColor: t.accent, borderRadius: 10, paddingVertical: 12, alignItems: 'center' }}
-              onPress={() => setShowDisclaimer(false)}>
-              <Text style={{ color: t.ink, fontWeight: '700' }}>Got it</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+          )}
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Create Team Modal */}

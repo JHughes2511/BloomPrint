@@ -167,7 +167,20 @@ def approve_link(
 ):
     lr = db.get(models.LinkRequest, request_id)
     if not lr:
-        raise HTTPException(status_code=404, detail="Request not found")
+        # Legacy notifications carried ref_id = player_user id (no LinkRequest).
+        pu = db.get(models.PlayerUser, request_id)
+        if not pu:
+            raise HTTPException(status_code=404, detail="Request not found")
+        player = models.Player(name=pu.name, program_name=coach.program_name)
+        db.add(player)
+        db.flush()
+        _add_player_link(db, pu, player.id, coach.id)
+        db.add(models.PlayerNotification(
+            player_user_id=pu.id, type="link_approved", title="Profile Linked",
+            body=f"Your account has been linked to {coach.program_name}.", ref_id=player.id,
+        ))
+        db.commit()
+        return {"ok": True}
     lr.status = "approved"
     _add_player_link(db, lr.player_user, lr.player_id, coach.id)
     notif = models.PlayerNotification(
@@ -190,7 +203,8 @@ def reject_link(
 ):
     lr = db.get(models.LinkRequest, request_id)
     if not lr:
-        raise HTTPException(status_code=404, detail="Request not found")
+        # Legacy notification (no LinkRequest) — nothing to reject; just succeed.
+        return {"ok": True}
     lr.status = "rejected"
     # Clean up the auto-created placeholder roster profile if it was never used.
     if lr.coach_id and lr.player and not lr.player.evaluations:

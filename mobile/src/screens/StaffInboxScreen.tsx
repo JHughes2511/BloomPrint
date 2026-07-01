@@ -421,7 +421,7 @@ export default function StaffInboxScreen() {
             style={[styles.tabBtn, tab === tm.key && styles.tabBtnActive]}
             onPress={() => setTab(tm.key)}
           >
-            <Ionicons name={tm.icon as any} size={16} color={tab === tm.key ? t.ink : t.muted2} />
+            <Ionicons name={tm.icon as any} size={16} color={tab === tm.key ? t.ctaText : t.muted2} />
             <Text style={[styles.tabBtnText, tab === tm.key && styles.tabBtnTextActive]}>{tm.label}</Text>
           </TouchableOpacity>
         ))}
