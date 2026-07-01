@@ -78,6 +78,10 @@ export default function RosterScreen() {
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Search
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
+
   // Add player modal
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState('');
@@ -114,9 +118,17 @@ export default function RosterScreen() {
 
   useFocusEffect(useCallback(() => { load(); }, []));
 
-  const visiblePlayers = selectedTeamId == null
+  const teamFilteredPlayers = selectedTeamId == null
     ? players
     : players.filter(p => p.team_id === selectedTeamId);
+
+  const q = query.trim().toLowerCase();
+  const visiblePlayers = q === ''
+    ? teamFilteredPlayers
+    : teamFilteredPlayers.filter(p =>
+        [p.name, p.position, p.team_name, p.competition_level]
+          .some(field => (field ?? '').toLowerCase().includes(q))
+      );
 
   const addPlayer = async () => {
     if (!newName.trim()) return;
@@ -202,6 +214,16 @@ export default function RosterScreen() {
             {currentTeamName ?? 'All Teams'} · {visiblePlayers.length} players
           </Text>
         </View>
+        <TouchableOpacity
+          style={styles.searchBtn}
+          onPress={() => setSearchOpen(o => {
+            const next = !o;
+            if (!next) setQuery('');
+            return next;
+          })}
+        >
+          <Ionicons name={searchOpen ? 'search' : 'search-outline'} size={18} color={searchOpen ? t.accent : t.muted} />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import', { mode: 'roster' })}>
           <Ionicons name="cloud-upload-outline" size={16} color={t.muted} />
           <Text style={styles.importBtnText}>Import Roster</Text>
@@ -210,6 +232,28 @@ export default function RosterScreen() {
           <Ionicons name="add" size={22} color={t.ctaText} />
         </TouchableOpacity>
       </View>
+
+      {/* Search bar */}
+      {searchOpen && (
+        <View style={styles.searchRow}>
+          <Ionicons name="search" size={16} color={t.muted} style={{ marginRight: 8 }} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search players by name, position, team…"
+            placeholderTextColor={t.muted2}
+            value={query}
+            onChangeText={setQuery}
+            autoFocus
+            autoCorrect={false}
+            returnKeyType="search"
+          />
+          {query.length > 0 && (
+            <TouchableOpacity onPress={() => setQuery('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Ionicons name="close" size={18} color={t.muted} />
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
 
       {/* Team filter chips */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.teamsRow} contentContainerStyle={{ paddingHorizontal: 16, gap: 8, alignItems: 'center' }}>
@@ -435,6 +479,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   sub: { fontSize: 12, color: t.muted, marginTop: 2 },
   importBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: t.cta2Border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, marginRight: 8 },
   importBtnText: { color: t.cta2Text, fontSize: 12, fontFamily: fonts[700] },
+  searchBtn: { width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: t.line, alignItems: 'center', justifyContent: 'center', marginRight: 8 },
+  searchRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: t.chip, borderRadius: 14, borderWidth: 1, borderColor: t.line, paddingHorizontal: 14, paddingVertical: 10, marginHorizontal: 20, marginBottom: 12 },
+  searchInput: { flex: 1, color: t.ink, fontSize: 14, padding: 0 },
   addBtn: { backgroundColor: t.ctaBg, width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   importRosterBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.ctaBg, borderRadius: 999, paddingHorizontal: 20, paddingVertical: 13, marginTop: 16 },
   importRosterBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },

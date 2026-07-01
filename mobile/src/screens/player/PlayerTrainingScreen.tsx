@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  ActivityIndicator, RefreshControl,
+  ActivityIndicator, RefreshControl, TextInput,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -34,6 +34,8 @@ export default function PlayerTrainingScreen() {
   const [programs, setPrograms] = useState<PlayerTraining[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
 
   const load = async () => {
     try {
@@ -49,6 +51,16 @@ export default function PlayerTrainingScreen() {
   const sorted = [...programs].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
+
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? sorted.filter((pt, idx) => {
+        const title = idx === 0 ? 'Latest Program' : 'Training Program';
+        const preview = pt.program_text ? cleanPreview(pt.program_text) : '';
+        const date = `Sent ${timeAgo(pt.created_at)}`;
+        return [title, preview, date].some((s) => s.toLowerCase().includes(q));
+      })
+    : sorted;
 
   if (loading) {
     return (
@@ -68,10 +80,39 @@ export default function PlayerTrainingScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={t.positive} />}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>My Training</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>My Training</Text>
+          <TouchableOpacity
+            style={styles.searchBtn}
+            onPress={() => {
+              setSearchOpen((o) => {
+                if (o) setQuery('');
+                return !o;
+              });
+            }}
+          >
+            <Ionicons name={searchOpen ? 'close' : 'search'} size={20} color={t.ink} />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.sub}>
           {programs.length > 0 ? 'Programs your coach built for you' : 'Training from your coach'}
         </Text>
+        {searchOpen ? (
+          <View style={styles.searchBox}>
+            <Ionicons name="search" size={16} color={t.muted2} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search programs"
+              placeholderTextColor={t.muted2}
+              value={query}
+              onChangeText={setQuery}
+              autoFocus
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+            />
+          </View>
+        ) : null}
       </View>
 
       {programs.length === 0 ? (
@@ -86,7 +127,11 @@ export default function PlayerTrainingScreen() {
         <>
           <Text style={[styles.sectionLabel, { marginTop: 22 }]}>Sent to You</Text>
 
-          {sorted.map((pt, idx) => (
+          {filtered.length === 0 ? (
+            <Text style={styles.noResults}>No programs match "{query.trim()}"</Text>
+          ) : null}
+
+          {filtered.map((pt, idx) => (
             <TouchableOpacity
               key={pt.id}
               style={styles.card}
@@ -137,7 +182,19 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { paddingHorizontal: 22, paddingTop: 60 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6 },
+  searchBtn: {
+    width: 40, height: 40, borderRadius: 12, backgroundColor: t.card,
+    borderWidth: 1, borderColor: t.cardBorder, alignItems: 'center', justifyContent: 'center',
+  },
+  searchBox: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: t.card, borderRadius: 12, borderWidth: 1, borderColor: t.cardBorder,
+    paddingHorizontal: 12, paddingVertical: 10, marginTop: 14,
+  },
+  searchInput: { flex: 1, color: t.ink, fontSize: 14, fontFamily: fonts[600], padding: 0 },
+  noResults: { color: t.muted, fontSize: 13, marginHorizontal: 22, marginTop: 4, marginBottom: 8 },
   sub: { color: t.muted, fontSize: 13.5, marginTop: 5 },
   empty: { alignItems: 'center', paddingTop: 70, paddingHorizontal: 40 },
   emptyTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[700], marginTop: 16 },

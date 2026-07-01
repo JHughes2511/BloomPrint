@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  ActivityIndicator, RefreshControl,
+  ActivityIndicator, RefreshControl, TextInput,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -117,6 +117,8 @@ export default function PlayerInboxScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<typeof FILTERS[number]['key']>('all');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [search, setSearch] = useState('');
 
   const load = async () => {
     try {
@@ -142,6 +144,19 @@ export default function PlayerInboxScreen() {
     // Evaluations: eval-kind reports that aren't pure film breakdowns
     return items.filter(i => i.kind === 'eval' && !(i.output_type || '').includes('film'));
   }, [items, filter]);
+
+  const searched = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return filtered;
+    return filtered.filter(item => {
+      const haystack = [
+        reportSubName(item),
+        item.shared_by_name,
+        outputTypeLabel(item.output_type),
+      ].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [filtered, search]);
 
   const handleTap = (item: InboxItem) => {
     if (item.kind === 'eval') {
@@ -169,7 +184,20 @@ export default function PlayerInboxScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={t.positive} />}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>My Reports</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>My Reports</Text>
+          <TouchableOpacity
+            style={styles.searchButton}
+            onPress={() => {
+              setSearchOpen(open => {
+                if (open) setSearch('');
+                return !open;
+              });
+            }}
+          >
+            <Ionicons name={searchOpen ? 'close' : 'search'} size={20} color={t.ink} />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.sub}>Shared with you by your coaching staff</Text>
       </View>
 
@@ -189,18 +217,36 @@ export default function PlayerInboxScreen() {
         })}
       </View>
 
-      {filtered.length === 0 ? (
+      {searchOpen && (
+        <View style={styles.searchWrap}>
+          <Ionicons name="search" size={17} color={t.muted2} style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            value={search}
+            onChangeText={setSearch}
+            placeholder="Search reports"
+            placeholderTextColor={t.muted2}
+            autoFocus
+            autoCorrect={false}
+            returnKeyType="search"
+          />
+        </View>
+      )}
+
+      {searched.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="mail-outline" size={48} color={t.muted2} />
-          <Text style={styles.emptyTitle}>No reports yet</Text>
+          <Text style={styles.emptyTitle}>{search.trim() ? 'No matches' : 'No reports yet'}</Text>
           <Text style={styles.emptyDesc}>
-            {filter === 'all'
-              ? 'When a coach shares a report with you, it will appear here.'
-              : 'No reports in this category yet.'}
+            {search.trim()
+              ? 'No reports match your search.'
+              : filter === 'all'
+                ? 'When a coach shares a report with you, it will appear here.'
+                : 'No reports in this category yet.'}
           </Text>
         </View>
       ) : (
-        filtered.map(item => {
+        searched.map(item => {
           const isFilm = (item.output_type || '').includes('film');
           return (
             <TouchableOpacity
@@ -252,7 +298,37 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' },
   header: { paddingHorizontal: 22, paddingTop: 60 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6 },
+  searchButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: t.line,
+  },
+  searchWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 22,
+    marginTop: 4,
+    marginBottom: 4,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: t.line,
+    backgroundColor: t.card,
+  },
+  searchIcon: { marginRight: 8 },
+  searchInput: {
+    flex: 1,
+    color: t.ink,
+    fontSize: 15,
+    fontFamily: fonts[600],
+    paddingVertical: 12,
+  },
   sub: { color: t.muted, fontSize: 13.5, marginTop: 5 },
   filterRow: { flexDirection: 'row', gap: 9, paddingHorizontal: 22, marginTop: 20, marginBottom: 8 },
   filterPill: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 999 },

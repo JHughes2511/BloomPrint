@@ -154,6 +154,9 @@ export default function TeamEvalScreen() {
   const [detailTab, setDetailTab] = useState<'our' | 'opponent' | 'byquarter'>('our');
   const [expandedPlayer, setExpandedPlayer] = useState<string | null>(null);
   const [expandedQuarterPlayer, setExpandedQuarterPlayer] = useState<string | null>(null);
+  // Team Grade player-grades list search
+  const [showGradeSearch, setShowGradeSearch] = useState(false);
+  const [gradeSearch, setGradeSearch] = useState('');
   const [generatingReport, setGeneratingReport] = useState(false);
   const [showScoutingReport, setShowScoutingReport] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -1548,8 +1551,40 @@ export default function TeamEvalScreen() {
             <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />
           ) : detailTab !== 'byquarter' && summary ? (
             <View style={s.card}>
-              <Text style={s.cardLabel}>PLAYER GRADES</Text>
-              {(detailTab === 'our' ? summary.player_grades : summary.opponent_grades).map((g: any) => (
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={s.cardLabel}>PLAYER GRADES</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowGradeSearch(prev => {
+                      if (prev) setGradeSearch('');
+                      return !prev;
+                    });
+                  }}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons name="search-outline" size={16} color={showGradeSearch ? t.accent : t.muted2} />
+                </TouchableOpacity>
+              </View>
+              {showGradeSearch && (
+                <TextInput
+                  style={[s.smallInput, { marginTop: 8, marginBottom: 4 }]}
+                  placeholder="Search players…"
+                  placeholderTextColor={t.muted2}
+                  value={gradeSearch}
+                  onChangeText={setGradeSearch}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              )}
+              {(detailTab === 'our' ? summary.player_grades : summary.opponent_grades)
+                .filter((g: any) => {
+                  const q = gradeSearch.trim().toLowerCase();
+                  if (!q) return true;
+                  const name = String(g.player_name ?? '').toLowerCase();
+                  const pos = String(g.position ?? '').toLowerCase();
+                  return name.includes(q) || pos.includes(q);
+                })
+                .map((g: any) => (
                 <View key={g.player_name}>
                   <TouchableOpacity
                     style={s.playerGradeRow}
@@ -1656,6 +1691,17 @@ export default function TeamEvalScreen() {
               {(detailTab === 'our' ? summary.player_grades : summary.opponent_grades).length === 0 && (
                 <Text style={{ color: t.muted2, fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>No stats logged yet.</Text>
               )}
+              {(detailTab === 'our' ? summary.player_grades : summary.opponent_grades).length > 0 &&
+                gradeSearch.trim() !== '' &&
+                (detailTab === 'our' ? summary.player_grades : summary.opponent_grades)
+                  .filter((g: any) => {
+                    const q = gradeSearch.trim().toLowerCase();
+                    const name = String(g.player_name ?? '').toLowerCase();
+                    const pos = String(g.position ?? '').toLowerCase();
+                    return name.includes(q) || pos.includes(q);
+                  }).length === 0 && (
+                  <Text style={{ color: t.muted2, fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>No players match “{gradeSearch.trim()}”.</Text>
+                )}
             </View>
           ) : null}
 

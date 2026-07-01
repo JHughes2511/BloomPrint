@@ -77,6 +77,8 @@ export default function RecentScreen() {
   const [items, setItems] = useState<ReportItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeModal, setActiveModal] = useState<ModalReport | null>(null);
   // 'report' = main view, 'send' = send flow, 'correct' = correction input
   const [modalView, setModalView] = useState<'report' | 'send' | 'correct'>('report');
@@ -242,9 +244,20 @@ export default function RecentScreen() {
 
   useFocusEffect(useCallback(() => { load(); }, []));
 
+  const searchTerm = searchQuery.trim().toLowerCase();
   const filtered = items.filter(item => {
-    if (filter === 'all') return true;
-    return item.kind === filter;
+    if (filter !== 'all' && item.kind !== filter) return false;
+    if (!searchTerm) return true;
+    const kindLabel =
+      item.kind === 'game' ? 'Game Report Packet' :
+      item.kind === 'training' ? 'Training Program' :
+      (TYPE_LABELS[item.output_type] ?? outputTypeLabel(item.output_type));
+    const haystack = [
+      item.player_name ?? '',
+      kindLabel,
+      item.output_type ?? '',
+    ].join(' ').toLowerCase();
+    return haystack.includes(searchTerm);
   });
 
   const openModal = (report: ModalReport) => {
@@ -447,7 +460,40 @@ export default function RecentScreen() {
   return (
     <ScreenBackground>
     <View style={styles.container}>
-      <Text style={styles.title}>Recent Reports</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Recent Reports</Text>
+        <TouchableOpacity
+          style={styles.searchIconBtn}
+          onPress={() => {
+            setSearchVisible(v => {
+              if (v) setSearchQuery('');
+              return !v;
+            });
+          }}
+        >
+          <Ionicons name={searchVisible ? 'close' : 'search'} size={22} color={t.ink} />
+        </TouchableOpacity>
+      </View>
+
+      {searchVisible && (
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={18} color={t.muted2} />
+          <TextInput
+            style={styles.searchBarInput}
+            placeholder="Search reports..."
+            placeholderTextColor={t.muted2}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoFocus
+            returnKeyType="search"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close" size={18} color={t.muted2} />
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
 
       {/* Category filter */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={{ paddingHorizontal: 16, paddingRight: 24, gap: 8, alignItems: 'center' }}>
@@ -1006,6 +1052,17 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent', paddingTop: 56 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80 },
   title: { fontSize: 28, fontFamily: fonts[900], color: t.ink, marginHorizontal: 20, marginBottom: 12 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 16 },
+  searchIconBtn: {
+    width: 40, height: 40, borderRadius: 20, marginBottom: 12,
+    alignItems: 'center', justifyContent: 'center', backgroundColor: t.chip,
+  },
+  searchBar: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: t.card, borderRadius: 10, borderWidth: 1, borderColor: t.line,
+    marginHorizontal: 16, marginBottom: 12, paddingHorizontal: 12, height: 44,
+  },
+  searchBarInput: { flex: 1, color: t.ink, fontSize: 15, paddingVertical: 0 },
   filterRow: { marginBottom: 12, flexGrow: 0, height: 52 },
   filterChip: { borderWidth: 1, borderColor: t.line, borderRadius: 18, paddingHorizontal: 14, justifyContent: 'center', alignItems: 'center', height: 34 },
   filterChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },

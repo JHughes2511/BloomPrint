@@ -80,6 +80,8 @@ export default function TeamReportScreen() {
   const [loadingPrevReports, setLoadingPrevReports] = useState(false);
   const [selectedPrevReport, setSelectedPrevReport] = useState<any | null>(null);
   const [prevReportFilter, setPrevReportFilter] = useState<string>('all');
+  const [showPrevSearch, setShowPrevSearch] = useState(false);
+  const [prevSearchText, setPrevSearchText] = useState('');
   const [prevReportCorrectionText, setPrevReportCorrectionText] = useState('');
   const [prevReportCorrections, setPrevReportCorrections] = useState<any[]>([]);
   const [addingPrevCorrection, setAddingPrevCorrection] = useState(false);
@@ -377,6 +379,33 @@ export default function TeamReportScreen() {
     }
   };
 
+  // Client-side filtering of the visible previous-reports list: output_type chip
+  // filter (existing) plus a case-insensitive substring search over team/program
+  // name, opponent, output type, and any title/date text on the item.
+  const prevSearchQuery = prevSearchText.trim().toLowerCase();
+  const filteredPrevReports = prevReports
+    .filter(r => prevReportFilter === 'all' || r.output_type === prevReportFilter)
+    .filter((r: any) => {
+      if (!prevSearchQuery) return true;
+      const typeLabelText = OUTPUT_TYPES.find(ot => ot.key === r.output_type)?.label ?? r.output_type ?? '';
+      const dateText = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
+      const haystack = [
+        r.program_name,
+        r.team_name,
+        r.my_team_name,
+        r.opponent_name,
+        r.opponent_team_name,
+        r.output_type,
+        typeLabelText,
+        r.title,
+        dateText,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(prevSearchQuery);
+    });
+
   return (
     <ScreenBackground>
     <KeyboardAvoidingView
@@ -603,16 +632,40 @@ export default function TeamReportScreen() {
         </>)}
 
         {/* Previous Team Reports */}
-        <TouchableOpacity
-          style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, marginBottom: showPrevReports ? 12 : 0 }}
-          onPress={() => {
-            if (!showPrevReports) loadPrevReports();
-            setShowPrevReports(v => !v);
-          }}
-        >
-          <Text style={styles.label}>Previous Reports</Text>
-          <Ionicons name={showPrevReports ? 'chevron-up' : 'chevron-down'} size={16} color={t.muted} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, marginBottom: showPrevReports ? 12 : 0 }}>
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={() => {
+              if (!showPrevReports) loadPrevReports();
+              setShowPrevReports(v => !v);
+            }}
+          >
+            <Text style={styles.label}>Previous Reports</Text>
+          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+            {showPrevReports && (
+              <TouchableOpacity
+                onPress={() => {
+                  setShowPrevSearch(v => {
+                    const next = !v;
+                    if (!next) setPrevSearchText('');
+                    return next;
+                  });
+                }}
+              >
+                <Ionicons name={showPrevSearch ? 'close' : 'search'} size={16} color={t.muted} />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              onPress={() => {
+                if (!showPrevReports) loadPrevReports();
+                setShowPrevReports(v => !v);
+              }}
+            >
+              <Ionicons name={showPrevReports ? 'chevron-up' : 'chevron-down'} size={16} color={t.muted} />
+            </TouchableOpacity>
+          </View>
+        </View>
 
         {showPrevReports && (
           <>
@@ -628,13 +681,26 @@ export default function TeamReportScreen() {
                 </TouchableOpacity>
               ))}
             </ScrollView>
+            {showPrevSearch && (
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search team, opponent, type, or title..."
+                placeholderTextColor={t.muted2}
+                value={prevSearchText}
+                onChangeText={setPrevSearchText}
+                autoFocus
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            )}
             {loadingPrevReports ? (
               <ActivityIndicator color={t.accent} size="small" />
-            ) : prevReports.filter(r => prevReportFilter === 'all' || r.output_type === prevReportFilter).length === 0 ? (
-              <Text style={{ color: t.muted2, fontSize: 13, textAlign: 'center', paddingVertical: 16 }}>No team reports yet.</Text>
+            ) : filteredPrevReports.length === 0 ? (
+              <Text style={{ color: t.muted2, fontSize: 13, textAlign: 'center', paddingVertical: 16 }}>
+                {prevSearchText.trim() ? 'No matching reports.' : 'No team reports yet.'}
+              </Text>
             ) : (
-              prevReports
-                .filter(r => prevReportFilter === 'all' || r.output_type === prevReportFilter)
+              filteredPrevReports
                 .map((r: any) => (
                   <TouchableOpacity
                     key={r.id}
@@ -1083,6 +1149,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderWidth: 1, borderColor: t.line, marginBottom: 16,
   },
   videoPickerText: { color: t.muted, fontSize: 13, flex: 1 },
+  searchInput: {
+    backgroundColor: t.card, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10,
+    color: t.ink, fontSize: 14, marginBottom: 12,
+    borderWidth: 1, borderColor: t.line,
+  },
   generateBtn: {
     backgroundColor: t.ctaBg, borderRadius: 999, padding: 15,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
