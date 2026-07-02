@@ -99,7 +99,7 @@ function quarterMultiplier(q: number): number {
 
 // ── Main Screen ───────────────────────────────────────────────────────────────
 
-type View = 'dashboard' | 'games' | 'live' | 'detail' | 'scout';
+type ViewKey = 'dashboard' | 'games' | 'live' | 'detail' | 'scout';
 
 export default function TeamEvalScreen() {
   const { coach } = useAuth();
@@ -108,7 +108,7 @@ export default function TeamEvalScreen() {
   const scoutScrollRef = useRef<any>(null);
   const noteInputY = useRef(0);
   const [whiteboardGameId, setWhiteboardGameId] = useState<number | null>(null);
-  const [activeView, setActiveView] = useState<View>('dashboard');
+  const [activeView, setActiveView] = useState<ViewKey>('dashboard');
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [phaseFilter, setPhaseFilter] = useState<string>('all');
@@ -1896,21 +1896,21 @@ export default function TeamEvalScreen() {
                   {/* Tendencies */}
                   <View style={s.card}>
                     <Text style={s.cardLabel}>OFFENSIVE TENDENCIES</Text>
-                    {scoutData.offensive_tendencies.map((t: any) => (
-                      <Text key={t.stat} style={{ color: t.inkSoft, fontSize: 13, marginBottom: 4 }}>
-                        • {t.stat} ({t.count}x)
+                    {scoutData.offensive_tendencies.map((td: any) => (
+                      <Text key={td.stat} style={{ color: t.inkSoft, fontSize: 13, marginBottom: 4 }}>
+                        • {td.stat} ({td.count}x)
                       </Text>
                     ))}
                     <Text style={[s.cardLabel, { marginTop: 12 }]}>DEFENSIVE TENDENCIES</Text>
-                    {scoutData.defensive_tendencies.map((t: any) => (
-                      <Text key={t.stat} style={{ color: t.inkSoft, fontSize: 13, marginBottom: 4 }}>
-                        • {t.stat} ({t.count}x)
+                    {scoutData.defensive_tendencies.map((td: any) => (
+                      <Text key={td.stat} style={{ color: t.inkSoft, fontSize: 13, marginBottom: 4 }}>
+                        • {td.stat} ({td.count}x)
                       </Text>
                     ))}
                     <Text style={[s.cardLabel, { marginTop: 12 }]}>WEAK SPOTS</Text>
-                    {scoutData.weak_spots.map((t: any) => (
-                      <Text key={t.stat} style={{ color: t.inkSoft, fontSize: 13, marginBottom: 4 }}>
-                        • {t.stat} (grade: {t.score.toFixed(1)})
+                    {scoutData.weak_spots.map((td: any) => (
+                      <Text key={td.stat} style={{ color: t.inkSoft, fontSize: 13, marginBottom: 4 }}>
+                        • {td.stat} (grade: {td.score.toFixed(1)})
                       </Text>
                     ))}
                   </View>
@@ -2013,7 +2013,7 @@ export default function TeamEvalScreen() {
                   activeOpacity={0.7}
                 >
                   <Text style={{ color: newGameTeamId === null ? t.muted2 : t.ink, fontSize: 15 }}>
-                    {newGameTeamId === null ? 'None (no team)' : teams.find((t: any) => t.id === newGameTeamId)?.name ?? 'Select team'}
+                    {newGameTeamId === null ? 'None (no team)' : teams.find((tm: any) => tm.id === newGameTeamId)?.name ?? 'Select team'}
                   </Text>
                   <Text style={{ color: t.muted, fontSize: 12 }}>{showTeamDropdown ? '▲' : '▼'}</Text>
                 </TouchableOpacity>
@@ -2026,13 +2026,13 @@ export default function TeamEvalScreen() {
                       >
                         <Text style={{ color: newGameTeamId === null ? t.accent : t.inkSoft, fontSize: 14 }}>None</Text>
                       </TouchableOpacity>
-                      {teams.map((t: any) => (
+                      {teams.map((tm: any) => (
                         <TouchableOpacity
-                          key={t.id}
-                          style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: t.line, backgroundColor: newGameTeamId === t.id ? t.accentSoft : 'transparent' }}
-                          onPress={() => { setNewGameTeamId(t.id); setShowTeamDropdown(false); }}
+                          key={tm.id}
+                          style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: t.line, backgroundColor: newGameTeamId === tm.id ? t.accentSoft : 'transparent' }}
+                          onPress={() => { setNewGameTeamId(tm.id); setShowTeamDropdown(false); }}
                         >
-                          <Text style={{ color: newGameTeamId === t.id ? t.accent : t.inkSoft, fontSize: 14 }}>{t.name}</Text>
+                          <Text style={{ color: newGameTeamId === tm.id ? t.accent : t.inkSoft, fontSize: 14 }}>{tm.name}</Text>
                         </TouchableOpacity>
                       ))}
                       {/* Create new team row */}

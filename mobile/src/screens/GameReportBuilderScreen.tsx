@@ -444,14 +444,14 @@ export default function GameReportBuilderScreen() {
                   placeholder="Or type opponent name..."
                   placeholderTextColor={t.muted2}
                   value={oppName}
-                  onChangeText={t => { setOppName(t); setOppTeamId(null); }}
+                  onChangeText={txt => { setOppName(txt); setOppTeamId(null); }}
                   onBlur={() => save({ opponent_name: oppName.trim() || null, opponent_team_id: null })}
                 />
-                {teams.map(t => (
-                  <TouchableOpacity key={t.id} style={[styles.pickerItem, oppTeamId === t.id && styles.pickerItemActive]}
-                    onPress={() => { setOppTeamId(t.id); setOppName(''); setShowOppTeamPicker(false); save({ opponent_team_id: t.id, opponent_name: null }); }}>
-                    <Text style={[styles.pickerItemText, oppTeamId === t.id && { color: t.ink }]}>{t.name}</Text>
-                    {oppTeamId === t.id && <Ionicons name="checkmark" size={14} color={t.accent} />}
+                {teams.map(tm => (
+                  <TouchableOpacity key={tm.id} style={[styles.pickerItem, oppTeamId === tm.id && styles.pickerItemActive]}
+                    onPress={() => { setOppTeamId(tm.id); setOppName(''); setShowOppTeamPicker(false); save({ opponent_team_id: tm.id, opponent_name: null }); }}>
+                    <Text style={[styles.pickerItemText, oppTeamId === tm.id && { color: t.ink }]}>{tm.name}</Text>
+                    {oppTeamId === tm.id && <Ionicons name="checkmark" size={14} color={t.accent} />}
                   </TouchableOpacity>
                 ))}
               </View>

@@ -1038,13 +1038,13 @@ export default function TeamReportScreen() {
             {/* Team selector */}
             {shareTarget === 'team' && (
               <View style={{ marginBottom: 12 }}>
-                {teams.map((t: any) => (
+                {teams.map((tm: any) => (
                   <TouchableOpacity
-                    key={t.id}
-                    style={[shareStyles.resultRow, selectedShareTarget?.id === t.id && { borderColor: t.positive }]}
-                    onPress={() => setSelectedShareTarget(t)}
+                    key={tm.id}
+                    style={[shareStyles.resultRow, selectedShareTarget?.id === tm.id && { borderColor: t.positive }]}
+                    onPress={() => setSelectedShareTarget(tm)}
                   >
-                    <Text style={shareStyles.resultName}>{t.name}</Text>
+                    <Text style={shareStyles.resultName}>{tm.name}</Text>
                   </TouchableOpacity>
                 ))}
               </View>

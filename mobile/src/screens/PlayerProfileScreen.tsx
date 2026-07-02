@@ -273,7 +273,9 @@ export default function PlayerProfileScreen() {
     }
   };
 
-  const regenerateTraining = async () => {
+  // NOTE: the backend regenerates from the player's latest program + feedback;
+  // the picker's selected training id is accepted but not used by the API yet.
+  const regenerateTraining = async (_trainingId?: number) => {
     if (!trainingFeedback.trim()) return;
     setRegeneratingTraining(true);
     try {

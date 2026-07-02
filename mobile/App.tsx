@@ -106,6 +106,10 @@ function RecentStack() {
       <Stack.Screen name="Recent" component={RecentScreen} />
       <Stack.Screen name="EvalReport" component={EvalReportScreen} />
       <Stack.Screen name="PlayerProfile" component={PlayerProfileScreen} />
+      {/* Reachable from PlayerProfile, which lives in this stack too */}
+      <Stack.Screen name="NewEval" component={NewEvalScreen} />
+      <Stack.Screen name="Training" component={TrainingScreen} />
+      <Stack.Screen name="Summary" component={SummaryScreen} />
       <Stack.Screen name="GameReportBuilder" component={GameReportBuilderScreen} />
       <Stack.Screen name="StaffInbox" component={StaffInboxScreen} />
     </Stack.Navigator>
