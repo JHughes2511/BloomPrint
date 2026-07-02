@@ -8,17 +8,6 @@ router = APIRouter(prefix="/transcribe", tags=["transcribe"])
 _whisper_model = None
 _device = None
 
-# Primes Whisper toward basketball vocabulary so domain jargon (P&R, closeout,
-# box out, and-one, etc.) transcribes correctly — used to seed the first chunk
-# before there's any prior-speech context to lean on.
-_DOMAIN_PROMPT = (
-    "Basketball film and game notes. Common terms: pick and roll, P&R, ball screen, "
-    "closeout, box out, and-one, pull-up, floater, transition, help defense, rotation, "
-    "deflection, offensive rebound, defensive rebound, assist, turnover, steal, block, "
-    "drop coverage, hedge, switch, isolation, post up, catch and shoot, mid-range, "
-    "three-pointer, free throw, layup, dunk, wing, corner, elbow, paint."
-)
-
 
 def _get_model():
     global _whisper_model, _device
@@ -26,10 +15,10 @@ def _get_model():
         import torch
         import whisper
         _device = "mps" if torch.backends.mps.is_available() else "cpu"
-        # Prefer a more accurate model; fall back to lighter ones if it can't
-        # load (limited RAM/VRAM). Override with WHISPER_MODEL; on a GPU use
-        # "large-v3-turbo" (near-large accuracy, much faster) for best results.
-        configured = os.environ.get("WHISPER_MODEL", "medium")
+        # Default to the fast, known-good "small". For better accuracy set
+        # WHISPER_MODEL=medium (needs RAM) or large-v3-turbo (on a GPU) — but
+        # PRE-DOWNLOAD it first so the first request doesn't hang on a big fetch.
+        configured = os.environ.get("WHISPER_MODEL", "small")
         candidates = [configured, "small", "base"]
         seen = set()
         last_err = None
@@ -79,10 +68,13 @@ async def transcribe_audio(
             logprob_threshold=-1.0,
             compression_ratio_threshold=2.4,
         )
-        # Bias toward basketball vocabulary. Use the running speech context when
-        # we have it (it already carries the domain words the user just said),
-        # otherwise seed with the domain prompt so the very first chunk is primed.
-        options["initial_prompt"] = context if context else _DOMAIN_PROMPT
+        # Use the running speech context as the prompt (it already carries the
+        # domain words the user just said). We intentionally do NOT prime with a
+        # static comma-list vocabulary prompt: on short chunks its high
+        # compression ratio can trip Whisper's hallucination guard and return an
+        # empty result, which then starves the context and breaks every chunk.
+        if context:
+            options["initial_prompt"] = context
         result = model.transcribe(tmp_path, **options)
         text = (result.get("text") or "").strip()
         return {"text": text}
