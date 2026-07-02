@@ -230,6 +230,14 @@ export const gameEvalAPI = {
   deleteSession: (id: number) => api.delete(`/game-eval/sessions/${id}`).then(r => r.data),
   listStats: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/stats`).then(r => r.data),
   logStat: (gameId: number, data: any) => api.post(`/game-eval/sessions/${gameId}/stats`, data).then(r => r.data),
+  importStats: (gameId: number, file: { uri: string; name: string; type: string }, isOpponent = false) => {
+    const form = new FormData();
+    form.append('file', file as any);
+    return api.post(`/game-eval/sessions/${gameId}/import`, form, {
+      params: { is_opponent: isOpponent },
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then(r => r.data);
+  },
   deleteStat: (statId: number) => api.delete(`/game-eval/stats/${statId}`).then(r => r.data),
   logLineup: (gameId: number, data: any) => api.post(`/game-eval/sessions/${gameId}/lineup`, data).then(r => r.data),
   getLineup: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/lineup`).then(r => r.data),

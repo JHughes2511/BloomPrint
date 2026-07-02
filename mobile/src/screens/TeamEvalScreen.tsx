@@ -130,6 +130,7 @@ export default function TeamEvalScreen() {
   const [newGameDate, setNewGameDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [trackMode, setTrackMode] = useState<'live' | 'post'>('live');
+  const [importing, setImporting] = useState(false);
   const [teams, setTeams] = useState<any[]>([]);
   const [creating, setCreating] = useState(false);
 
@@ -276,6 +277,30 @@ export default function TeamEvalScreen() {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not create game');
     }
     setCreating(false);
+  };
+
+  // ── Post-game import ─────────────────────────────────────────────────────────
+
+  const importGameStats = async () => {
+    if (!activeGame) return;
+    try {
+      const res = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
+      if (res.canceled || !res.assets?.[0]) return;
+      const f = res.assets[0];
+      setImporting(true);
+      const result = await gameEvalAPI.importStats(
+        activeGame.id,
+        { uri: f.uri, name: f.name ?? 'boxscore.xlsx', type: f.mimeType ?? 'application/octet-stream' },
+        entryMode === 'opponent',
+      );
+      const stats = await gameEvalAPI.listStats(activeGame.id);
+      setGameStats(stats);
+      Alert.alert('Imported', `${result?.imported ?? 0} stat${result?.imported === 1 ? '' : 's'} imported${entryMode === 'opponent' ? ' for the opponent' : ''}.`);
+    } catch (e: any) {
+      Alert.alert('Import Error', e?.response?.data?.detail ?? 'Could not import that file. Use an .xlsx box score.');
+    } finally {
+      setImporting(false);
+    }
   };
 
   // ── Live entry ───────────────────────────────────────────────────────────────
@@ -1239,6 +1264,19 @@ export default function TeamEvalScreen() {
           </View>
 
           <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
+            {/* Post-game import */}
+            {activeGame.tracking_mode === 'post' && (
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.accentSoft, borderWidth: 1, borderColor: t.accent, borderRadius: 12, paddingVertical: 13, marginBottom: 16 }}
+                onPress={importGameStats}
+                disabled={importing}
+              >
+                {importing
+                  ? <ActivityIndicator color={t.accent} />
+                  : <><Ionicons name="cloud-upload-outline" size={18} color={t.accent} /><Text style={{ color: t.accent, fontFamily: fonts[800], fontSize: 14 }}>Import {entryMode === 'opponent' ? 'Opponent ' : ''}Box Score (.xlsx)</Text></>}
+              </TouchableOpacity>
+            )}
+
             {/* Player grid */}
             <Text style={s.sectionLabel}>SELECT PLAYER</Text>
             <View style={s.playerGrid}>

@@ -59,6 +59,98 @@ def _quarter_multiplier(quarter: int) -> float:
         return 1.5
 
 
+# ── Post-game box-score import ─────────────────────────────────────────────────
+# Mirror of the app's STAT_POINTS: stat_name -> (base_low, base_high, threshold).
+_IMPORT_STAT_POINTS: dict[str, tuple[int, int, int]] = {
+    "2 FG Made": (2, 3, 4), "3 FG Made": (3, 4, 4), "FT Made": (2, 3, 4),
+    "Off. Reb": (3, 4, 4), "Def. Reb": (3, 4, 4), "Assists": (3, 4, 4),
+    "Steal": (3, 4, 4), "Blocked Shot": (2, 2, 4), "Turnover": (-2, -2, 4),
+    "Foul Against": (-1, -1, 4),
+}
+# Header keyword -> stat_name (checked in order; first match wins).
+_IMPORT_COL_MAP: list[tuple[str, str]] = [
+    (r"^(3pm|3 ?fg ?made|3 ?pt ?made|3s ?made|threes ?made)", "3 FG Made"),
+    (r"^(ftm|ft ?made|free ?throws? ?made)", "FT Made"),
+    (r"^(2pm|2 ?fg ?made|fgm|fg ?made)", "2 FG Made"),
+    (r"^(oreb|o\.? ?reb|off\.? ?reb|offensive ?reb)", "Off. Reb"),
+    (r"^(dreb|d\.? ?reb|def\.? ?reb|defensive ?reb)", "Def. Reb"),
+    (r"^(reb|rebounds?|trb)", "Def. Reb"),
+    (r"^(ast|assists?)", "Assists"),
+    (r"^(stl|steals?)", "Steal"),
+    (r"^(blk|blocks?)", "Blocked Shot"),
+    (r"^(to|tov|turnovers?)", "Turnover"),
+    (r"^(pf|fouls?)", "Foul Against"),
+]
+
+
+def _import_raw(stat: str, count: int) -> float:
+    cfg = _IMPORT_STAT_POINTS.get(stat)
+    if not cfg:
+        return 0.0
+    low, high, thr = cfg
+    return float((high if count >= thr else low) * count)
+
+
+@router.post("/sessions/{game_id}/import")
+async def import_game_stats(
+    game_id: int,
+    file: UploadFile = File(...),
+    is_opponent: bool = False,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Import a post-game box score (Excel/CSV): one row per player, stat columns
+    mapped to the BIM stat vocabulary and recorded as full-game (Q4) entries."""
+    import re
+    import openpyxl
+
+    game = _get_game(db, game_id, coach.id)
+    content = await file.read()
+    try:
+        wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
+        rows = [list(r) for r in wb.active.iter_rows(values_only=True)]
+    except Exception:
+        raise HTTPException(status_code=400, detail="Could not read spreadsheet. Use .xlsx.")
+    if not rows:
+        raise HTTPException(status_code=400, detail="The file is empty.")
+
+    header = [str(c).strip().lower() if c is not None else "" for c in rows[0]]
+    name_idx = next((i for i, h in enumerate(header) if h in ("name", "player", "player name", "athlete", "#")), 0)
+    col_stats: dict[int, str] = {}
+    for i, h in enumerate(header):
+        for pat, stat in _IMPORT_COL_MAP:
+            if re.match(pat, h):
+                col_stats[i] = stat
+                break
+    if not col_stats:
+        raise HTTPException(status_code=400, detail="No recognizable stat columns (PTS/REB/AST/…) found.")
+
+    q, mult = 4, _quarter_multiplier(4)
+    imported = 0
+    for row in rows[1:]:
+        if name_idx >= len(row) or not row[name_idx] or not str(row[name_idx]).strip():
+            continue
+        pname = str(row[name_idx]).strip()
+        for i, stat in col_stats.items():
+            if i >= len(row):
+                continue
+            try:
+                count = int(float(row[i]))
+            except (TypeError, ValueError):
+                continue
+            if count <= 0:
+                continue
+            raw = _import_raw(stat, count)
+            db.add(models.GamePlayerStat(
+                game_id=game.id, player_name=pname, is_opponent=is_opponent,
+                quarter=q, stat_name=stat, stat_category=("negative" if raw < 0 else "positive"),
+                raw_points=raw, quarter_multiplier=mult, weighted_points=raw * mult, count=count,
+            ))
+            imported += 1
+    db.commit()
+    return {"imported": imported}
+
+
 def _compute_raw_points(stat_name: str, count: int) -> tuple[float, str]:
     """Returns (raw_points, category)."""
     if stat_name in OFFENSE_STATS:
