@@ -3,7 +3,7 @@ import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, Alert, ScrollView, Modal, TextInput, KeyboardAvoidingView, Platform, Switch,
+  ActivityIndicator, Alert, ScrollView, Modal, TextInput, KeyboardAvoidingView, Platform, Switch, RefreshControl,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -184,6 +184,7 @@ export default function RecentScreen() {
     }
   };
 
+  const [refreshing, setRefreshing] = useState(false);
   const load = async () => {
     setLoading(true);
     try {
@@ -511,6 +512,7 @@ export default function RecentScreen() {
       </ScrollView>
 
       <FlatList
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} tintColor={t.accent} />}
         data={filtered}
         keyExtractor={e => `${e.kind}-${e.id}`}
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -760,7 +762,7 @@ export default function RecentScreen() {
                 const secs = splitReportSections(staffShareFullText);
                 return !staffAllowRegen && secs.length > 1 ? (
                   <>
-                    <Text style={{ color: t.muted, fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Include Sections</Text>
+                    <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600], marginBottom: 6 }}>Include Sections</Text>
                     {secs.map(sec => (
                       <View key={sec.heading} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: t.chip, borderRadius: 8, padding: 10 }}>
                         <Text style={{ color: t.inkSoft, fontSize: 13, flex: 1, marginRight: 8 }} numberOfLines={1}>{sec.heading}</Text>
@@ -789,7 +791,7 @@ export default function RecentScreen() {
                   onPress={searchStaff}
                   disabled={staffSearchLoading}
                 >
-                  {staffSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+                  {staffSearchLoading ? <ActivityIndicator color={t.brownInk} size="small" /> : <Ionicons name="search" size={18} color={t.brownInk} />}
                 </TouchableOpacity>
               </View>
               {staffResults.map((r: any) => (
@@ -800,7 +802,7 @@ export default function RecentScreen() {
                   disabled={sendingToStaff}
                 >
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: t.ink, fontWeight: '600' }}>{r.name}</Text>
+                    <Text style={{ color: t.ink, fontFamily: fonts[600] }}>{r.name}</Text>
                     <Text style={{ color: t.muted2, fontSize: 12 }}>{r.role} · {r.program_name}</Text>
                   </View>
                   {sendingToStaff ? <ActivityIndicator color={t.brown} size="small" /> : <Ionicons name="paper-plane-outline" size={18} color={t.brown} />}
@@ -814,7 +816,7 @@ export default function RecentScreen() {
               style={[sendStyles.cancelBtn, { marginTop: 12, flex: 0 }]}
               onPress={closeStaffShareModal}
             >
-              <Text style={{ color: t.muted, fontWeight: '600' }}>Cancel</Text>
+              <Text style={{ color: t.muted, fontFamily: fonts[600] }}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -953,10 +955,10 @@ export default function RecentScreen() {
                   {sendResults.map(r => (
                     <TouchableOpacity key={r.id} style={sendStyles.resultRow} onPress={() => sendReport(r)} disabled={sending}>
                       <View style={sendStyles.avatar}>
-                        <Text style={{ color: t.ctaText, fontWeight: '700' }}>{r.name?.[0] ?? '?'}</Text>
+                        <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{r.name?.[0] ?? '?'}</Text>
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Text style={{ color: t.ink, fontWeight: '600' }}>{r.name}</Text>
+                        <Text style={{ color: t.ink, fontFamily: fonts[600] }}>{r.name}</Text>
                         <Text style={{ color: t.muted2, fontSize: 12 }}>{r.email}</Text>
                       </View>
                       {sending ? <ActivityIndicator color={t.accent} size="small" /> : <Ionicons name="paper-plane-outline" size={18} color={t.accent} />}
@@ -988,10 +990,10 @@ export default function RecentScreen() {
                 />
                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                   <TouchableOpacity style={sendStyles.cancelBtn} onPress={() => setModalView('report')}>
-                    <Text style={{ color: t.muted, fontWeight: '600' }}>Cancel</Text>
+                    <Text style={{ color: t.muted, fontFamily: fonts[600] }}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={sendStyles.applyBtn} onPress={applyCorrection} disabled={applyingCorrect || !teamCorrectText.trim()}>
-                    {applyingCorrect ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontWeight: '700' }}>Apply</Text>}
+                    {applyingCorrect ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply</Text>}
                   </TouchableOpacity>
                 </View>
               </>
@@ -1041,7 +1043,7 @@ const makeSendStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 14,
     borderWidth: 1, borderColor: t.line,
   },
-  reportPreviewTitle: { color: t.label, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 },
+  reportPreviewTitle: { color: t.label, fontSize: 11, fontFamily: fonts[700], textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 },
   reportPreviewText: { color: t.muted2, fontSize: 12, lineHeight: 18 },
   cancelBtn: { flex: 1, padding: 14, borderRadius: 10, borderWidth: 1, borderColor: t.line, alignItems: 'center' },
   applyBtn: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: t.ctaBg, alignItems: 'center' },
@@ -1066,9 +1068,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   filterRow: { marginBottom: 12, flexGrow: 0, height: 52 },
   filterChip: { borderWidth: 1, borderColor: t.line, borderRadius: 18, paddingHorizontal: 14, justifyContent: 'center', alignItems: 'center', height: 34 },
   filterChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
-  filterChipText: { color: t.muted, fontSize: 13, fontWeight: '600' },
+  filterChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600] },
   filterChipTextActive: { color: t.ctaText },
-  dateHeader: { color: t.label, fontSize: 11, fontWeight: '700', marginHorizontal: 20, marginTop: 16, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 },
+  dateHeader: { color: t.label, fontSize: 11, fontFamily: fonts[700], marginHorizontal: 20, marginTop: 16, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 },
   emptyText: { color: t.muted2, marginTop: 12, fontSize: 14 },
   card: {
     flexDirection: 'row', alignItems: 'center',
@@ -1083,8 +1085,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     width: 28, height: 28, borderRadius: 8,
     backgroundColor: t.chip, alignItems: 'center', justifyContent: 'center',
   },
-  typeName: { color: t.accent, fontSize: 12, fontWeight: '600', marginTop: 2, lineHeight: 20, paddingBottom: 2 },
-  playerName: { color: t.ink, fontSize: 15, fontWeight: '700', lineHeight: 22 },
+  typeName: { color: t.accent, fontSize: 12, fontFamily: fonts[600], marginTop: 2, lineHeight: 20, paddingBottom: 2 },
+  playerName: { color: t.ink, fontSize: 15, fontFamily: fonts[700], lineHeight: 22 },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject, backgroundColor: t.scrim,
     alignItems: 'center', justifyContent: 'center',
@@ -1092,7 +1094,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
-  modalTitle: { color: t.ink, fontSize: 18, fontWeight: '800' },
+  modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   modalSub: { color: t.muted2, fontSize: 12, marginTop: 4, lineHeight: 18 },
   actionRow: {
     flexDirection: 'row', flexWrap: 'wrap', gap: 8,
@@ -1103,11 +1105,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     justifyContent: 'center', gap: 6, backgroundColor: t.chip,
     borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12,
   },
-  actionText: { color: t.ink, fontSize: 13, fontWeight: '600' },
+  actionText: { color: t.ink, fontSize: 13, fontFamily: fonts[600] },
   gameActionBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: t.chip, borderRadius: 8, paddingVertical: 6, paddingHorizontal: 10,
     borderWidth: 1, borderColor: t.line,
   },
-  gameActionText: { color: t.muted, fontSize: 12, fontWeight: '600' },
+  gameActionText: { color: t.muted, fontSize: 12, fontFamily: fonts[600] },
 });

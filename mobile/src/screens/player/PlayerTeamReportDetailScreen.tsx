@@ -101,9 +101,9 @@ export default function PlayerTeamReportDetailScreen() {
 
 const makeMarkdownStyles = (t: ThemeTokens) => ({
   body: { color: t.inkSoft, fontSize: 13, lineHeight: 22 },
-  heading1: { color: t.ink, fontSize: 16, fontWeight: '800' as const, marginTop: 16, marginBottom: 4 },
-  heading2: { color: t.ink, fontSize: 14, fontWeight: '700' as const, marginTop: 14, marginBottom: 4 },
-  strong: { color: t.ink, fontWeight: '700' as const },
+  heading1: { color: t.ink, fontSize: 16, fontFamily: fonts[800], marginTop: 16, marginBottom: 4 },
+  heading2: { color: t.ink, fontSize: 14, fontFamily: fonts[700], marginTop: 14, marginBottom: 4 },
+  strong: { color: t.ink, fontFamily: fonts[700] },
   bullet_list: { marginLeft: 8 },
   list_item: { color: t.inkSoft, fontSize: 13 },
 });
@@ -112,7 +112,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56 },
-  title: { color: t.ink, fontSize: 16, fontWeight: '900' },
+  title: { color: t.ink, fontSize: 16, fontFamily: fonts[900] },
   sub: { color: t.muted, fontSize: 11, marginTop: 2 },
   messageBox: {
     backgroundColor: t.positiveSoft,
@@ -123,9 +123,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     padding: 12,
     borderRadius: 8,
   },
-  messageLabel: { color: t.positive, fontSize: 10, fontWeight: '700', marginBottom: 4, textTransform: 'uppercase' },
+  messageLabel: { color: t.positive, fontSize: 10, fontFamily: fonts[700], marginBottom: 4, textTransform: 'uppercase' },
   messageText: { color: t.inkSoft, fontSize: 13 },
   section: { paddingHorizontal: 20, marginTop: 20 },
-  sectionLabel: { color: t.label, fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 },
+  sectionLabel: { color: t.label, fontSize: 11, fontFamily: fonts[700], letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 },
   reportBox: { backgroundColor: t.card, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: t.cardBorder },
 });

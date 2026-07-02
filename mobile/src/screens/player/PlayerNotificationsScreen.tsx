@@ -120,7 +120,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   title: { color: t.ink, fontSize: 26, fontFamily: fonts[900] },
   sub: { color: t.positive, fontSize: 12, marginTop: 4 },
   empty: { alignItems: 'center', paddingTop: 80 },
-  emptyTitle: { color: t.ink, fontSize: 16, fontWeight: '700', marginTop: 16 },
+  emptyTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[700], marginTop: 16 },
   card: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -142,7 +142,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     justifyContent: 'center',
   },
   iconBgUnread: { backgroundColor: t.positiveSoft },
-  notifTitle: { color: t.muted, fontSize: 13, fontWeight: '600', marginBottom: 2 },
+  notifTitle: { color: t.muted, fontSize: 13, fontFamily: fonts[600], marginBottom: 2 },
   notifTitleUnread: { color: t.ink },
   notifBody: { color: t.muted2, fontSize: 12, lineHeight: 18 },
   notifDate: { color: t.muted, fontSize: 11, marginTop: 4 },

@@ -85,10 +85,10 @@ export default function SummaryScreen() {
 
 const makeMarkdownStyles = (t: ThemeTokens) => ({
   body: { color: t.inkSoft, fontSize: 13, lineHeight: 22 },
-  heading1: { color: t.ink, fontSize: 16, fontWeight: '800' as const, marginTop: 16, marginBottom: 4 },
-  heading2: { color: t.ink, fontSize: 14, fontWeight: '700' as const, marginTop: 14, marginBottom: 4 },
-  heading3: { color: t.muted, fontSize: 13, fontWeight: '700' as const, marginTop: 12, marginBottom: 2 },
-  strong: { color: t.ink, fontWeight: '700' as const },
+  heading1: { color: t.ink, fontSize: 16, fontFamily: fonts[800], marginTop: 16, marginBottom: 4 },
+  heading2: { color: t.ink, fontSize: 14, fontFamily: fonts[700], marginTop: 14, marginBottom: 4 },
+  heading3: { color: t.muted, fontSize: 13, fontFamily: fonts[700], marginTop: 12, marginBottom: 2 },
+  strong: { color: t.ink, fontFamily: fonts[700] },
   bullet_list: { marginLeft: 8 },
   list_item: { color: t.inkSoft, fontSize: 13 },
 });
@@ -96,12 +96,12 @@ const makeMarkdownStyles = (t: ThemeTokens) => ({
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   header: { flexDirection: 'row', alignItems: 'flex-start', padding: 20, paddingTop: 56, gap: 12 },
-  title: { color: t.ink, fontSize: 18, fontWeight: '900', flex: 1 },
+  title: { color: t.ink, fontSize: 18, fontFamily: fonts[900], flex: 1 },
   reportBox: { backgroundColor: t.card, margin: 16, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: t.cardBorder },
   actionRow: { flexDirection: 'row', margin: 16, gap: 10 },
   actionBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 6, padding: 14, borderRadius: 12, borderWidth: 1, borderColor: t.line,
   },
-  actionText: { color: t.muted, fontWeight: '600', fontSize: 13 },
+  actionText: { color: t.muted, fontFamily: fonts[600], fontSize: 13 },
 });

@@ -24,6 +24,7 @@ const PILLAR_ORDER = ['offensive_skills', 'defensive_capabilities', 'physical_at
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
+import { timeAgo } from '../../utils/timeAgo';
 
 export default function PlayerHomeScreen() {
   const { t, mode, toggle } = useTheme();
@@ -86,12 +87,6 @@ export default function PlayerHomeScreen() {
     { key: 'intangibles', label: 'IQ', color: t.chip },
   ];
 
-  const timeAgo = (iso: string) => {
-    const d = (Date.now() - new Date(iso).getTime()) / 86400000;
-    if (d < 1) return 'today';
-    if (d < 2) return 'yesterday';
-    return `${Math.floor(d)} days ago`;
-  };
   const coachFeed = [...reports]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 3);

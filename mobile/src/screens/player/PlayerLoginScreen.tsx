@@ -98,7 +98,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     padding: 24,
   },
   logo: { fontSize: 36, fontFamily: fonts[900], color: t.ink, letterSpacing: 1 },
-  sub: { fontSize: 13, color: t.positive, marginBottom: 40, marginTop: 4, fontWeight: '600' },
+  sub: { fontSize: 13, color: t.positive, marginBottom: 40, marginTop: 4, fontFamily: fonts[600] },
   input: {
     width: '100%',
     backgroundColor: t.card,
@@ -118,7 +118,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
   },
-  btnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  btnText: { color: '#fff', fontFamily: fonts[700], fontSize: 16 },
   toggle: { color: t.positive, marginTop: 20, fontSize: 13 },
   backBtn: { marginTop: 32 },
   backText: { color: t.muted2, fontSize: 12 },

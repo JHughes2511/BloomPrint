@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
+import { fonts } from '../theme/typography';
 
 /**
  * renderReport — strips ALL markdown syntax from AI-generated report text
@@ -78,7 +79,7 @@ export function renderReport(
           key={`line-${index}`}
           style={{ marginTop: 18, marginBottom: 7, borderBottomWidth: 1, borderBottomColor: colors.heading, paddingBottom: 4, alignSelf: 'flex-start' }}
         >
-          <Text style={{ fontWeight: '800', fontSize: 16.5, letterSpacing: 0.2, color: colors.heading }}>
+          <Text style={{ fontFamily: fonts[800], fontSize: 16.5, letterSpacing: 0.2, color: colors.heading }}>
             {trimmed}
           </Text>
         </View>

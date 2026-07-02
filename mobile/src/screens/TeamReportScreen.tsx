@@ -436,7 +436,7 @@ export default function TeamReportScreen() {
               onPress={() => navigation.navigate('GameReportBuilder')}
             >
               <Ionicons name="add" size={14} color={t.ctaText} />
-              <Text style={{ color: t.ink, fontSize: 12, fontWeight: '700' }}>New</Text>
+              <Text style={{ color: t.ink, fontSize: 12, fontFamily: fonts[700] }}>New</Text>
             </TouchableOpacity>
           </View>
           {loadingGameReports ? (
@@ -479,7 +479,7 @@ export default function TeamReportScreen() {
                   onPress={() => navigation.navigate('GameReportBuilder', { reportId: gr.id })}
                 >
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: t.ink, fontSize: 14, fontWeight: '700' }} numberOfLines={1}>{matchup}</Text>
+                    <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700] }} numberOfLines={1}>{matchup}</Text>
                     <Text style={{ color: t.muted, fontSize: 11, marginTop: 2 }}>
                       {gr.output_type.replace(/_/g, ' ')} · {new Date(gr.updated_at).toLocaleDateString()}
                     </Text>
@@ -487,11 +487,11 @@ export default function TeamReportScreen() {
                   <View style={{ alignItems: 'flex-end', gap: 4 }}>
                     {gr.report_text ? (
                       <View style={{ backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
-                        <Text style={{ color: t.accent, fontSize: 10, fontWeight: '700' }}>REPORT READY</Text>
+                        <Text style={{ color: t.accent, fontSize: 10, fontFamily: fonts[700] }}>REPORT READY</Text>
                       </View>
                     ) : (
                       <View style={{ backgroundColor: t.chip, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
-                        <Text style={{ color: t.muted, fontSize: 10, fontWeight: '700' }}>IN PROGRESS</Text>
+                        <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }}>IN PROGRESS</Text>
                       </View>
                     )}
                     <Text style={{ color: t.muted2, fontSize: 10 }}>{(gr.clips?.length ?? 0)} clip{gr.clips?.length !== 1 ? 's' : ''}</Text>
@@ -709,7 +709,7 @@ export default function TeamReportScreen() {
                   >
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                       <View style={{ backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
-                        <Text style={{ color: t.accent, fontSize: 10, fontWeight: '700' }}>
+                        <Text style={{ color: t.accent, fontSize: 10, fontFamily: fonts[700] }}>
                           {OUTPUT_TYPES.find(t => t.key === r.output_type)?.label ?? r.output_type}
                         </Text>
                       </View>
@@ -737,7 +737,7 @@ export default function TeamReportScreen() {
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontSize: 18, fontWeight: '800' }}>
+                <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }}>
                   {OUTPUT_TYPES.find(t => t.key === selectedPrevReport?.output_type)?.label ?? selectedPrevReport?.output_type}
                 </Text>
                 <Text style={{ color: t.muted, fontSize: 11, marginTop: 2 }}>
@@ -772,11 +772,11 @@ export default function TeamReportScreen() {
                       setTimeout(() => setShowShare(true), 200);
                     }}
                   >
-                    <Ionicons name="person-outline" size={15} color="#fff" />
-                    <Text style={{ color: t.ink, fontWeight: '700', fontSize: 13 }}>Send to Player</Text>
+                    <Ionicons name="person-outline" size={15} color="#16201A" />
+                    <Text style={{ color: '#16201A', fontFamily: fonts[700], fontSize: 13 }}>Send to Player</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.accent, borderRadius: 10, paddingVertical: 12 }}
+                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.ctaBg, borderRadius: 10, paddingVertical: 12 }}
                     onPress={() => {
                       if (!selectedPrevReport) return;
                       setShareSourceReport(selectedPrevReport);
@@ -789,8 +789,8 @@ export default function TeamReportScreen() {
                       setTimeout(() => { setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }, 200);
                     }}
                   >
-                    <Ionicons name="people-outline" size={15} color="#fff" />
-                    <Text style={{ color: t.ink, fontWeight: '700', fontSize: 13 }}>Send to Staff</Text>
+                    <Ionicons name="people-outline" size={15} color={t.ctaText} />
+                    <Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>Send to Staff</Text>
                   </TouchableOpacity>
                 </View>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -799,7 +799,7 @@ export default function TeamReportScreen() {
                     onPress={() => printPrevReport(selectedPrevReport)}
                   >
                     <Ionicons name="print-outline" size={15} color={t.inkSoft} />
-                    <Text style={{ color: t.inkSoft, fontWeight: '700', fontSize: 13 }}>Print</Text>
+                    <Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13 }}>Print</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.chip, borderRadius: 10, paddingVertical: 12, borderWidth: 1, borderColor: t.line }}
@@ -808,7 +808,7 @@ export default function TeamReportScreen() {
                   >
                     {exportingPrevReport
                       ? <ActivityIndicator color={t.inkSoft} size="small" />
-                      : <><Ionicons name="share-outline" size={15} color={t.inkSoft} /><Text style={{ color: t.inkSoft, fontWeight: '700', fontSize: 13 }}>Export PDF</Text></>}
+                      : <><Ionicons name="share-outline" size={15} color={t.inkSoft} /><Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13 }}>Export PDF</Text></>}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -822,7 +822,7 @@ export default function TeamReportScreen() {
                       <Text style={{ color: t.inkSoft, fontSize: 13 }}>{c.correction}</Text>
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
                         <Text style={{ color: t.muted2, fontSize: 11 }}>{new Date(c.created_at).toLocaleDateString()}</Text>
-                        {c.applied && <Text style={{ color: t.positive, fontSize: 10, fontWeight: '700' }}>APPLIED</Text>}
+                        {c.applied && <Text style={{ color: t.positive, fontSize: 10, fontFamily: fonts[700] }}>APPLIED</Text>}
                       </View>
                     </View>
                   ))}
@@ -834,7 +834,7 @@ export default function TeamReportScreen() {
                     >
                       {regeneratingPrevReport
                         ? <ActivityIndicator color={t.ctaText} />
-                        : <Text style={{ color: t.ctaText, fontWeight: '700' }}>Apply & Regenerate</Text>}
+                        : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply & Regenerate</Text>}
                     </TouchableOpacity>
                   )}
                 </View>
@@ -860,14 +860,14 @@ export default function TeamReportScreen() {
                   >
                     {addingPrevCorrection || regeneratingPrevReport
                       ? <ActivityIndicator color={t.ctaText} />
-                      : <Text style={{ color: t.ctaText, fontWeight: '700' }}>Apply & Regenerate</Text>}
+                      : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply & Regenerate</Text>}
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={{ flex: 1, backgroundColor: t.line, borderRadius: 10, padding: 14, alignItems: 'center' }}
                     onPress={() => addPrevReportCorrection(false)}
                     disabled={addingPrevCorrection || !prevReportCorrectionText.trim()}
                   >
-                    <Text style={{ color: t.ink, fontWeight: '700' }}>Save for Later</Text>
+                    <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Save for Later</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -884,8 +884,8 @@ export default function TeamReportScreen() {
             {/* Report preview */}
             {shareSourceReport && (
               <View style={{ backgroundColor: t.chip, borderRadius: 8, padding: 12, marginBottom: 12 }}>
-                <Text style={{ color: t.muted, fontSize: 11, fontWeight: '700', marginBottom: 2 }}>SENDING REPORT</Text>
-                <Text style={{ color: t.ink, fontSize: 13, fontWeight: '700' }}>
+                <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[700], marginBottom: 2 }}>SENDING REPORT</Text>
+                <Text style={{ color: t.ink, fontSize: 13, fontFamily: fonts[700] }}>
                   {(shareSourceReport.output_type ?? outputType).replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
                 </Text>
                 <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>
@@ -932,10 +932,10 @@ export default function TeamReportScreen() {
                 onChangeText={setStaffSearch}
               />
               <TouchableOpacity
-                style={{ backgroundColor: t.accent, borderRadius: 10, padding: 12, justifyContent: 'center' }}
+                style={{ backgroundColor: t.ctaBg, borderRadius: 10, padding: 12, justifyContent: 'center' }}
                 onPress={searchStaff}
               >
-                {staffSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+                {staffSearchLoading ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="search" size={18} color={t.ctaText} />}
               </TouchableOpacity>
             </View>
             <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
@@ -967,8 +967,8 @@ export default function TeamReportScreen() {
             {/* Report preview */}
             {shareSourceReport && (
               <View style={{ backgroundColor: t.chip, borderRadius: 8, padding: 12, marginBottom: 12 }}>
-                <Text style={{ color: t.muted, fontSize: 11, fontWeight: '700', marginBottom: 2 }}>SENDING REPORT</Text>
-                <Text style={{ color: t.ink, fontSize: 13, fontWeight: '700' }}>
+                <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[700], marginBottom: 2 }}>SENDING REPORT</Text>
+                <Text style={{ color: t.ink, fontSize: 13, fontFamily: fonts[700] }}>
                   {(shareSourceReport.output_type ?? outputType).replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
                 </Text>
                 <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>
@@ -1020,10 +1020,10 @@ export default function TeamReportScreen() {
                     onChangeText={setShareSearch}
                   />
                   <TouchableOpacity
-                    style={{ backgroundColor: t.accent, borderRadius: 10, padding: 12, justifyContent: 'center' }}
+                    style={{ backgroundColor: t.ctaBg, borderRadius: 10, padding: 12, justifyContent: 'center' }}
                     onPress={searchPlayers}
                   >
-                    {shareSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+                    {shareSearchLoading ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="search" size={18} color={t.ctaText} />}
                   </TouchableOpacity>
                 </View>
                 {shareResults.map((r: any) => (
@@ -1071,10 +1071,10 @@ export default function TeamReportScreen() {
                     onChangeText={setShareSearch}
                   />
                   <TouchableOpacity
-                    style={{ backgroundColor: t.accent, borderRadius: 10, padding: 12, justifyContent: 'center' }}
+                    style={{ backgroundColor: t.ctaBg, borderRadius: 10, padding: 12, justifyContent: 'center' }}
                     onPress={searchPlayers}
                   >
-                    {shareSearchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
+                    {shareSearchLoading ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="search" size={18} color={t.ctaText} />}
                   </TouchableOpacity>
                 </View>
                 {shareResults.map((r: any) => (

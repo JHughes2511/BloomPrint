@@ -3,7 +3,7 @@ import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, TextInput, Modal, Alert, KeyboardAvoidingView, Platform, ScrollView,
+  ActivityIndicator, TextInput, Modal, Alert, KeyboardAvoidingView, Platform, ScrollView, RefreshControl,
 } from 'react-native';
 
 const COMPETITION_LEVELS = ['Middle School', 'HS JV', 'HS Varsity', 'AAU', 'College', 'Pro'];
@@ -106,6 +106,7 @@ export default function RosterScreen() {
   const [newTeamLevel, setNewTeamLevel] = useState('Middle School');
   const [creatingTeam, setCreatingTeam] = useState(false);
 
+  const [refreshing, setRefreshing] = useState(false);
   const load = async () => {
     try {
       const [t, p] = await Promise.all([teamsAPI.list(), playersAPI.list()]);
@@ -281,6 +282,7 @@ export default function RosterScreen() {
 
       {/* Player list */}
       <FlatList
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} tintColor={t.accent} />}
         data={visiblePlayers}
         keyExtractor={p => String(p.id)}
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -371,12 +373,12 @@ export default function RosterScreen() {
             </View>
             <VoiceTextInput style={styles.input} placeholder="Country" placeholderTextColor={t.muted}
               value={newCountry} onChangeText={setNewCountry} />
-            <Text style={{ color: t.muted, fontSize: 12, fontWeight: '600', marginBottom: 6, marginTop: 4 }}>Competition Level</Text>
+            <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600], marginBottom: 6, marginTop: 4 }}>Competition Level</Text>
             <LevelDropdown value={newLevel} onChange={setNewLevel} />
 
             {/* Parent/Guardian permission — required for minors */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 16, marginBottom: 4 }}>
-              <Text style={{ color: t.muted, fontSize: 12, fontWeight: '600' }}>Parent/Guardian Permission</Text>
+              <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600] }}>Parent/Guardian Permission</Text>
               <TouchableOpacity onPress={() => setShowDisclaimer(true)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} style={{ marginLeft: 6 }}>
                 <Ionicons name="information-circle-outline" size={16} color={t.accent} />
               </TouchableOpacity>
@@ -390,14 +392,14 @@ export default function RosterScreen() {
                 style={{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center', borderWidth: 1,
                          backgroundColor: parentPermission ? t.positive : t.chip,
                          borderColor: parentPermission ? t.positive : t.line }}>
-                <Text style={{ color: parentPermission ? '#16201A' : t.muted, fontWeight: '700' }}>Yes</Text>
+                <Text style={{ color: parentPermission ? '#16201A' : t.muted, fontFamily: fonts[700] }}>Yes</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setParentPermission(false)}
                 style={{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center', borderWidth: 1,
                          backgroundColor: !parentPermission ? t.line : t.chip,
                          borderColor: !parentPermission ? t.muted : t.line }}>
-                <Text style={{ color: !parentPermission ? t.ink : t.muted, fontWeight: '700' }}>No</Text>
+                <Text style={{ color: !parentPermission ? t.ink : t.muted, fontFamily: fonts[700] }}>No</Text>
               </TouchableOpacity>
             </View>
 
@@ -419,7 +421,7 @@ export default function RosterScreen() {
               <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, maxHeight: '80%', borderWidth: 1, borderColor: t.cardBorder }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                   <Ionicons name="shield-checkmark-outline" size={20} color={t.accent} />
-                  <Text style={{ color: t.ink, fontSize: 17, fontWeight: '800', marginLeft: 8, flex: 1 }}>Parent/Guardian Consent</Text>
+                  <Text style={{ color: t.ink, fontSize: 17, fontFamily: fonts[800], marginLeft: 8, flex: 1 }}>Parent/Guardian Consent</Text>
                   <TouchableOpacity onPress={() => setShowDisclaimer(false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                     <Ionicons name="close" size={22} color={t.muted} />
                   </TouchableOpacity>
@@ -439,7 +441,7 @@ export default function RosterScreen() {
                 <TouchableOpacity
                   style={{ marginTop: 16, backgroundColor: t.ctaBg, borderRadius: 10, paddingVertical: 12, alignItems: 'center' }}
                   onPress={() => setShowDisclaimer(false)}>
-                  <Text style={{ color: t.ctaText, fontWeight: '700' }}>Got it</Text>
+                  <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Got it</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -454,7 +456,7 @@ export default function RosterScreen() {
             <Text style={styles.modalTitle}>New Team</Text>
             <VoiceTextInput style={styles.input} placeholder="Team Name *" placeholderTextColor={t.muted}
               value={newTeamName} onChangeText={setNewTeamName} />
-            <Text style={{ color: t.muted, fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Competition Level</Text>
+            <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600], marginBottom: 6 }}>Competition Level</Text>
             <LevelDropdown value={newTeamLevel} onChange={setNewTeamLevel} />
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowNewTeam(false)}>

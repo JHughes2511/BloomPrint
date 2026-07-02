@@ -748,10 +748,10 @@ export default function GameReportBuilderScreen() {
               {shareResults.map(r => (
                 <TouchableOpacity key={r.id} style={styles.searchResult} onPress={() => sendReport(r)} disabled={sharing}>
                   <View style={styles.searchAvatar}>
-                    <Text style={{ color: t.ink, fontWeight: '700' }}>{r.name?.[0] ?? '?'}</Text>
+                    <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{r.name?.[0] ?? '?'}</Text>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: t.ink, fontWeight: '600' }}>{r.name}</Text>
+                    <Text style={{ color: t.ink, fontFamily: fonts[600] }}>{r.name}</Text>
                     <Text style={{ color: t.muted, fontSize: 12 }}>{r.email}</Text>
                   </View>
                   {sharing ? <ActivityIndicator color={t.accent} size="small" /> : <Ionicons name="paper-plane-outline" size={18} color={t.accent} />}

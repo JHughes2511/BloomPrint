@@ -686,7 +686,7 @@ export default function EvalReportScreen() {
                 <Text style={styles.correctionMeta}>{new Date(c.created_at).toLocaleDateString()}</Text>
                 {c.applied && (
                   <View style={{ backgroundColor: t.positiveSoft, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, borderWidth: 1, borderColor: t.positive }}>
-                    <Text style={{ color: t.positive, fontSize: 10, fontWeight: '700' }}>APPLIED</Text>
+                    <Text style={{ color: t.positive, fontSize: 10, fontFamily: fonts[700] }}>APPLIED</Text>
                   </View>
                 )}
               </View>
@@ -775,7 +775,7 @@ export default function EvalReportScreen() {
                 onPress={() => sendToStaff(r)}
                 disabled={sendingStaff}
               >
-                <Text style={{ color: t.ink, fontWeight: '600' }}>{r.name}</Text>
+                <Text style={{ color: t.ink, fontFamily: fonts[600] }}>{r.name}</Text>
                 <Text style={{ color: t.muted, fontSize: 11 }}>{r.role} · {r.program_name}</Text>
               </TouchableOpacity>
             ))}
@@ -844,7 +844,7 @@ export default function EvalReportScreen() {
               <View style={{ marginBottom: 12 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#16a34a22', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: t.positive }}>
                   <View>
-                    <Text style={{ color: t.ink, fontWeight: '700' }}>{selectedPlayerUser.name}</Text>
+                    <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{selectedPlayerUser.name}</Text>
                     {selectedPlayerUser.linked_player && <Text style={{ color: t.positive, fontSize: 11 }}>→ {selectedPlayerUser.linked_player}</Text>}
                   </View>
                   <TouchableOpacity onPress={() => setSelectedPlayerUser(null)}>
@@ -902,7 +902,7 @@ export default function EvalReportScreen() {
                     style={{ backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: t.line }}
                     onPress={() => { setSelectedPlayerUser(pu); setShareResults([]); }}
                   >
-                    <Text style={{ color: t.ink, fontWeight: '600' }}>{pu.name}</Text>
+                    <Text style={{ color: t.ink, fontFamily: fonts[600] }}>{pu.name}</Text>
                     <Text style={{ color: t.muted, fontSize: 11 }}>{pu.email}{pu.linked_player ? ` · ${pu.linked_player}` : ''}</Text>
                   </TouchableOpacity>
                 ))}

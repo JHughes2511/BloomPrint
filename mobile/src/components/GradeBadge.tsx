@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
+import { fonts } from '../theme/typography';
 
 export function GradeBadge({ grade, size = 'md' }: { grade: number | null; size?: 'sm' | 'md' | 'lg' }) {
   const { t } = useTheme();
@@ -20,5 +21,5 @@ export function GradeBadge({ grade, size = 'md' }: { grade: number | null; size?
 
 const styles = StyleSheet.create({
   badge: { borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
-  text: { fontWeight: '800' },
+  text: { fontFamily: fonts[800] },
 });

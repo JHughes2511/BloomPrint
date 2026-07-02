@@ -226,9 +226,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, paddingTop: 56 },
-  title: { color: t.ink, fontSize: 20, fontWeight: '800' },
+  title: { color: t.ink, fontSize: 20, fontFamily: fonts[800] },
   empty: { alignItems: 'center', paddingTop: 80 },
-  emptyTitle: { color: t.ink, fontSize: 16, fontWeight: '700', marginTop: 16 },
+  emptyTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[700], marginTop: 16 },
   card: {
     backgroundColor: t.card,
     borderRadius: 12,
@@ -248,7 +248,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  notifTitle: { color: t.muted, fontSize: 13, fontWeight: '600', marginBottom: 2 },
+  notifTitle: { color: t.muted, fontSize: 13, fontFamily: fonts[600], marginBottom: 2 },
   notifTitleUnread: { color: t.ink },
   notifBody: { color: t.muted2, fontSize: 12, lineHeight: 18 },
   notifDate: { color: t.muted2, fontSize: 11, marginTop: 4 },
@@ -273,7 +273,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     minHeight: 60,
   },
   replyBtn: { backgroundColor: t.ctaBg, borderRadius: 8, padding: 10, alignItems: 'center' },
-  replyBtnText: { color: t.ctaText, fontWeight: '700', fontSize: 13 },
+  replyBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 13 },
   actionRow: { flexDirection: 'row', gap: 8 },
   approveBtn: {
     backgroundColor: t.positive,
@@ -281,7 +281,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
-  approveBtnText: { color: t.brownInk, fontWeight: '700', fontSize: 12 },
+  approveBtnText: { color: t.brownInk, fontFamily: fonts[700], fontSize: 12 },
   rejectBtn: {
     backgroundColor: t.negativeSoft,
     borderRadius: 8,
@@ -290,7 +290,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderWidth: 1,
     borderColor: t.negative,
   },
-  rejectBtnText: { color: t.negative, fontWeight: '700', fontSize: 12 },
+  rejectBtnText: { color: t.negative, fontFamily: fonts[700], fontSize: 12 },
   markReadBtn: { padding: 8, alignItems: 'center', borderWidth: 1, borderColor: t.line, borderRadius: 8 },
-  markReadText: { color: t.muted, fontSize: 12, fontWeight: '600' },
+  markReadText: { color: t.muted, fontSize: 12, fontFamily: fonts[600] },
 });

@@ -11,6 +11,7 @@ import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 import { outputTypeLabel } from '../../utils/reportType';
+import { timeAgo } from '../../utils/timeAgo';
 
 const LEVEL_RE = /\b(HS Varsity|HS JV|Varsity|JUCO|NAIA|D1|D2|D3|College|Pro|AAU|Middle School|Youth|EYBL|Prep)\b/i;
 const SKIP_TITLE = /^(bim\b|player\b|program\b|framework\b|overall\b|grade\b|evaluation\b|status\b|rating\b|section\b|output\b|\d+\s+frames|rating scale|status options|comparable|floor comp|ceiling comp)/i;
@@ -98,16 +99,6 @@ const FILTERS = [
   { key: 'film', label: 'Film' },
 ] as const;
 
-const timeAgo = (iso: string) => {
-  const ms = Date.now() - new Date(iso).getTime();
-  const d = ms / 86400000;
-  if (d < 1) return 'today';
-  if (d < 2) return 'yesterday';
-  if (d < 7) return `${Math.floor(d)} days ago`;
-  if (d < 14) return '1 week ago';
-  if (d < 30) return `${Math.floor(d / 7)} weeks ago`;
-  return new Date(iso).toLocaleDateString();
-};
 
 export default function PlayerInboxScreen() {
   const { t } = useTheme();

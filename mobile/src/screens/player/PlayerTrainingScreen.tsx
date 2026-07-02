@@ -12,16 +12,8 @@ import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 import { parseDrills } from '../../utils/trainingDrills';
+import { timeAgo } from '../../utils/timeAgo';
 
-const timeAgo = (iso: string) => {
-  const d = (Date.now() - new Date(iso).getTime()) / 86400000;
-  if (d < 1) return 'today';
-  if (d < 2) return 'yesterday';
-  if (d < 7) return `${Math.floor(d)} days ago`;
-  if (d < 14) return '1 week ago';
-  if (d < 30) return `${Math.floor(d / 7)} weeks ago`;
-  return new Date(iso).toLocaleDateString();
-};
 
 const cleanPreview = (s: string) =>
   s.replace(/#{1,6}\s?/g, '').replace(/\*\*/g, '').replace(/\*/g, '')

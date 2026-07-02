@@ -660,7 +660,7 @@ export default function PlayerProfileScreen() {
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontWeight: '700', fontSize: 14 }}>vs {game.opponent_name}</Text>
+                  <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 14 }}>vs {game.opponent_name}</Text>
                   <Text style={{ color: t.muted, fontSize: 11, marginTop: 2 }}>
                     {game.date}{game.season_phase ? ` · ${game.season_phase}` : ''}
                   </Text>
@@ -668,13 +668,13 @@ export default function PlayerProfileScreen() {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                   {game.our_score != null && (
                     <View style={{ backgroundColor: won ? t.positiveSoft : lost ? t.negativeSoft : t.chip, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
-                      <Text style={{ color: won ? t.positive : lost ? t.negative : t.muted, fontSize: 11, fontWeight: '700' }}>
+                      <Text style={{ color: won ? t.positive : lost ? t.negative : t.muted, fontSize: 11, fontFamily: fonts[700] }}>
                         {won ? 'W' : lost ? 'L' : 'T'} {game.our_score}-{game.opponent_score}
                       </Text>
                     </View>
                   )}
                   <View style={{ backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: t.accent }}>
-                    <Text style={{ color: t.accent, fontSize: 12, fontWeight: '800' }}>{game.game_grade.toFixed(2)}</Text>
+                    <Text style={{ color: t.accent, fontSize: 12, fontFamily: fonts[800] }}>{game.game_grade.toFixed(2)}</Text>
                   </View>
                   <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={14} color={t.muted2} />
                 </View>
@@ -684,17 +684,17 @@ export default function PlayerProfileScreen() {
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: t.chip }}>
                     {[['PTS', pts], ['REB', reb], ['AST', ast], ['STL', stl], ['BLK', blk], ['TO', to], ['FG', fga > 0 ? `${fgm}/${fga}` : '—']].map(([label, val]) => (
                       <View key={label as string} style={{ alignItems: 'center', flex: 1 }}>
-                        <Text style={{ color: t.muted, fontSize: 10, fontWeight: '700' }}>{label}</Text>
-                        <Text style={{ color: t.ink, fontSize: 14, fontWeight: '900' }}>{val}</Text>
+                        <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }}>{label}</Text>
+                        <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[900] }}>{val}</Text>
                       </View>
                     ))}
                   </View>
-                  <Text style={{ color: t.muted2, fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>GRADING STATS</Text>
+                  <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 6 }}>GRADING STATS</Text>
                   <View style={{ gap: 3 }}>
                     {Object.entries(game.stat_breakdown as Record<string, any>).map(([statName, data]: [string, any]) => (
                       <View key={statName} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <Text style={{ color: t.muted, fontSize: 12 }}>{statName}{data.count > 1 ? ` ×${data.count}` : ''}</Text>
-                        <Text style={{ color: data.weighted_points >= 0 ? t.positive : t.negative, fontSize: 12, fontWeight: '600' }}>
+                        <Text style={{ color: data.weighted_points >= 0 ? t.positive : t.negative, fontSize: 12, fontFamily: fonts[600] }}>
                           {data.weighted_points >= 0 ? '+' : ''}{data.weighted_points.toFixed(1)}
                         </Text>
                       </View>
@@ -705,7 +705,7 @@ export default function PlayerProfileScreen() {
                   </View>
                   {Object.keys(game.per_quarter).length > 0 && (
                     <View style={{ marginTop: 10 }}>
-                      <Text style={{ color: t.muted2, fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>PER QUARTER</Text>
+                      <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 6 }}>PER QUARTER</Text>
                       {Object.entries(game.per_quarter as Record<string, any>).sort(([a], [b]) => Number(a) - Number(b)).map(([q, data]: [string, any]) => (
                         <View key={q} style={{ flexDirection: 'row', gap: 12, marginBottom: 3 }}>
                           <Text style={{ color: t.muted, fontSize: 11, width: 28 }}>{Number(q) === 5 ? 'OT' : `Q${q}`}</Text>
@@ -726,7 +726,7 @@ export default function PlayerProfileScreen() {
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip }}>
-              <Text style={{ color: t.ink, fontSize: 15, fontWeight: '800' }}>
+              <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[800] }}>
                 {trainingPickerAction === 'player' ? 'Send Training to Player' :
                  trainingPickerAction === 'regen' ? 'Choose Training to Regenerate' :
                  'Share Training with Staff'}
@@ -763,12 +763,12 @@ export default function PlayerProfileScreen() {
                   }}
                 >
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={{ color: t.ink, fontWeight: '700', fontSize: 13 }}>
+                    <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 13 }}>
                       {idx === allTraining.length - 1 ? 'Latest — ' : ''}{new Date(ts.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </Text>
                     {idx === allTraining.length - 1 && (
                       <View style={{ backgroundColor: t.accent, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
-                        <Text style={{ color: t.ink, fontSize: 10, fontWeight: '700' }}>LATEST</Text>
+                        <Text style={{ color: t.ink, fontSize: 10, fontFamily: fonts[700] }}>LATEST</Text>
                       </View>
                     )}
                   </View>
@@ -790,7 +790,7 @@ export default function PlayerProfileScreen() {
           <View style={{ backgroundColor: t.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%' }}>
             {/* Header */}
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: t.chip }}>
-              <Text style={{ color: t.ink, fontSize: 16, fontWeight: '800' }}>Player Profile</Text>
+              <Text style={{ color: t.ink, fontSize: 16, fontFamily: fonts[800] }}>Player Profile</Text>
               <TouchableOpacity onPress={() => setShowProfileDetail(false)} style={{ padding: 4 }}>
                 <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
@@ -799,7 +799,7 @@ export default function PlayerProfileScreen() {
               {/* Name + grade */}
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 22, fontWeight: '900' }}>{player.name}</Text>
+                  <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900] }}>{player.name}</Text>
                   {player.position ? <Text style={{ color: t.muted, fontSize: 14, marginTop: 2 }}>{player.position}</Text> : null}
                 </View>
                 <GradeBadge grade={player.latest_grade} size="lg" />
@@ -822,34 +822,34 @@ export default function PlayerProfileScreen() {
                 { label: 'Country', value: (player as any).country },
               ].filter(r => r.value).map(r => (
                 <View key={r.label} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: t.chip }}>
-                  <Text style={{ color: t.muted, fontSize: 14, fontWeight: '600' }}>{r.label}</Text>
-                  <Text style={{ color: t.ink, fontSize: 14, fontWeight: '500', flexShrink: 1, textAlign: 'right', marginLeft: 12 }}>{r.value}</Text>
+                  <Text style={{ color: t.muted, fontSize: 14, fontFamily: fonts[600] }}>{r.label}</Text>
+                  <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[500], flexShrink: 1, textAlign: 'right', marginLeft: 12 }}>{r.value}</Text>
                 </View>
               ))}
 
               {/* Notes */}
               {player.notes ? (
                 <View style={{ marginTop: 16 }}>
-                  <Text style={{ color: t.muted, fontSize: 12, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>NOTES</Text>
+                  <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 6 }}>NOTES</Text>
                   <Text style={{ color: t.inkSoft, fontSize: 14, lineHeight: 20 }}>{player.notes}</Text>
                 </View>
               ) : null}
 
               {/* Stats summary */}
               <View style={{ marginTop: 20, backgroundColor: t.chip, borderRadius: 12, padding: 14 }}>
-                <Text style={{ color: t.muted, fontSize: 12, fontWeight: '700', letterSpacing: 1, marginBottom: 10 }}>EVALUATION SUMMARY</Text>
+                <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 10 }}>EVALUATION SUMMARY</Text>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
                   <View style={{ alignItems: 'center' }}>
-                    <Text style={{ color: t.ink, fontSize: 22, fontWeight: '900' }}>{evals.length}</Text>
+                    <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900] }}>{evals.length}</Text>
                     <Text style={{ color: t.muted, fontSize: 11 }}>Evaluations</Text>
                   </View>
                   <View style={{ alignItems: 'center' }}>
-                    <Text style={{ color: t.ink, fontSize: 22, fontWeight: '900' }}>{allTraining.length}</Text>
+                    <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900] }}>{allTraining.length}</Text>
                     <Text style={{ color: t.muted, fontSize: 11 }}>Training Plans</Text>
                   </View>
                   {player.latest_grade != null && (
                     <View style={{ alignItems: 'center' }}>
-                      <Text style={{ color: t.ink, fontSize: 22, fontWeight: '900' }}>{player.latest_grade.toFixed(1)}</Text>
+                      <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900] }}>{player.latest_grade.toFixed(1)}</Text>
                       <Text style={{ color: t.muted, fontSize: 11 }}>Latest Grade</Text>
                     </View>
                   )}
@@ -877,7 +877,7 @@ export default function PlayerProfileScreen() {
               minHeight: 50, maxHeight: 50,
             }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontSize: 15, fontWeight: '800' }}>Training Program</Text>
+                <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[800] }}>Training Program</Text>
                 {trainingModalItem && (
                   <Text style={{ color: t.muted, fontSize: 10 }}>
                     {new Date(trainingModalItem.created_at).toLocaleDateString()}
@@ -907,7 +907,7 @@ export default function PlayerProfileScreen() {
                   style={{ marginTop: 24, borderTopWidth: 1, borderTopColor: t.chip, paddingTop: 16 }}
                   onLayout={e => { correctionInputY.current = e.nativeEvent.layout.y; }}
                 >
-                  <Text style={{ color: t.inkSoft, fontWeight: '700', fontSize: 13, marginBottom: 8 }}>CORRECTIONS</Text>
+                  <Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13, marginBottom: 8 }}>CORRECTIONS</Text>
                   <VoiceTextInput
                     style={{
                       backgroundColor: t.chip, color: t.ink, borderRadius: 10,
@@ -932,7 +932,7 @@ export default function PlayerProfileScreen() {
                   >
                     {regeneratingModal
                       ? <ActivityIndicator color={t.ctaText} size="small" />
-                      : <><Ionicons name="refresh" size={15} color={t.ctaText} /><Text style={{ color: t.ctaText, fontWeight: '700', fontSize: 13 }}>Apply & Regenerate</Text></>}
+                      : <><Ionicons name="refresh" size={15} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>Apply & Regenerate</Text></>}
                   </TouchableOpacity>
                 </View>
               </KeyboardAwareScrollView>
@@ -948,7 +948,7 @@ export default function PlayerProfileScreen() {
                 >
                   {sendingTraining
                     ? <ActivityIndicator color={t.ctaText} size="small" />
-                    : <><Ionicons name="person-outline" size={15} color={t.ink} /><Text style={{ color: t.ink, fontWeight: '700', fontSize: 13 }}>Send to Player</Text></>}
+                    : <><Ionicons name="person-outline" size={15} color={t.ink} /><Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 13 }}>Send to Player</Text></>}
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.accent, borderRadius: 10, paddingVertical: 12 }}
@@ -965,7 +965,7 @@ export default function PlayerProfileScreen() {
                   }}
                 >
                   <Ionicons name="share-social-outline" size={15} color={t.ink} />
-                  <Text style={{ color: t.ink, fontWeight: '700', fontSize: 13 }}>Share</Text>
+                  <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 13 }}>Share</Text>
                 </TouchableOpacity>
               </View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -974,7 +974,7 @@ export default function PlayerProfileScreen() {
                   onPress={printTraining}
                 >
                   <Ionicons name="print-outline" size={15} color={t.inkSoft} />
-                  <Text style={{ color: t.inkSoft, fontWeight: '700', fontSize: 13 }}>Print</Text>
+                  <Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13 }}>Print</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.chip, borderRadius: 10, paddingVertical: 12, borderWidth: 1, borderColor: t.line }}
@@ -983,7 +983,7 @@ export default function PlayerProfileScreen() {
                 >
                   {exportingTraining
                     ? <ActivityIndicator color={t.inkSoft} size="small" />
-                    : <><Ionicons name="share-outline" size={15} color={t.inkSoft} /><Text style={{ color: t.inkSoft, fontWeight: '700', fontSize: 13 }}>Export PDF</Text></>}
+                    : <><Ionicons name="share-outline" size={15} color={t.inkSoft} /><Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13 }}>Export PDF</Text></>}
                 </TouchableOpacity>
               </View>
             </View>
@@ -1101,7 +1101,7 @@ export default function PlayerProfileScreen() {
                     style={[styles.inlineOption, editLevel === lvl && styles.inlineOptionActive]}
                     onPress={() => { setEditLevel(lvl); setShowLevelPicker(false); }}
                   >
-                    <Text style={[styles.inlineOptionText, editLevel === lvl && { color: t.ink, fontWeight: '700' }]}>{lvl}</Text>
+                    <Text style={[styles.inlineOptionText, editLevel === lvl && { color: t.ink, fontFamily: fonts[700] }]}>{lvl}</Text>
                     {editLevel === lvl && <Ionicons name="checkmark" size={16} color={t.accent} />}
                   </TouchableOpacity>
                 ))}
@@ -1125,7 +1125,7 @@ export default function PlayerProfileScreen() {
                   style={[styles.inlineOption, !editTeamId && styles.inlineOptionActive]}
                   onPress={() => { setEditTeamId(null); setShowTeamPicker(false); }}
                 >
-                  <Text style={[styles.inlineOptionText, !editTeamId && { color: t.ink, fontWeight: '700' }]}>No Team</Text>
+                  <Text style={[styles.inlineOptionText, !editTeamId && { color: t.ink, fontFamily: fonts[700] }]}>No Team</Text>
                   {!editTeamId && <Ionicons name="checkmark" size={16} color={t.accent} />}
                 </TouchableOpacity>
                 {teams.map(tm => (
@@ -1134,7 +1134,7 @@ export default function PlayerProfileScreen() {
                     style={[styles.inlineOption, editTeamId === tm.id && styles.inlineOptionActive]}
                     onPress={() => { setEditTeamId(tm.id); setShowTeamPicker(false); }}
                   >
-                    <Text style={[styles.inlineOptionText, editTeamId === tm.id && { color: t.ink, fontWeight: '700' }]}>{tm.name}</Text>
+                    <Text style={[styles.inlineOptionText, editTeamId === tm.id && { color: t.ink, fontFamily: fonts[700] }]}>{tm.name}</Text>
                     {editTeamId === tm.id && <Ionicons name="checkmark" size={16} color={t.accent} />}
                   </TouchableOpacity>
                 ))}
@@ -1205,7 +1205,7 @@ export default function PlayerProfileScreen() {
               const secs = splitReportSections(staffShareText);
               return !allowRegen && secs.length > 1 ? (
                 <>
-                  <Text style={{ color: t.muted, fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Include Sections</Text>
+                  <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600], marginBottom: 6 }}>Include Sections</Text>
                   {secs.map(sec => (
                     <View key={sec.heading} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: t.chip, borderRadius: 8, padding: 10 }}>
                       <Text style={{ color: t.inkSoft, fontSize: 13, flex: 1, marginRight: 8 }} numberOfLines={1}>{sec.heading}</Text>
@@ -1244,7 +1244,7 @@ export default function PlayerProfileScreen() {
                 disabled={sendingStaff}
               >
                 {sendingStaff ? <ActivityIndicator color={t.accent} /> : <>
-                  <Text style={{ color: t.ink, fontWeight: '600' }}>{r.name}</Text>
+                  <Text style={{ color: t.ink, fontFamily: fonts[600] }}>{r.name}</Text>
                   <Text style={{ color: t.muted, fontSize: 11 }}>{r.role} · {r.program_name}</Text>
                 </>}
               </TouchableOpacity>

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
+import { fonts } from '../theme/typography';
 
 const PILLAR_LABELS: Record<string, string> = {
   offensive_skills: 'Offensive Skills',
@@ -42,7 +43,7 @@ const styles = StyleSheet.create({
   card: { marginBottom: 10 },
   row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
   label: { fontSize: 13 },
-  grade: { fontSize: 13, fontWeight: '700' },
+  grade: { fontSize: 13, fontFamily: fonts[700] },
   barBg: { height: 6, borderRadius: 3 },
   barFill: { height: 6, borderRadius: 3 },
 });

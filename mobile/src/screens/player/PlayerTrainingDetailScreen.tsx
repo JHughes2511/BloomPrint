@@ -300,8 +300,8 @@ export default function PlayerTrainingDetailScreen() {
               disabled={refreshing || !feedbackText.trim()}
             >
               {refreshing
-                ? <><ActivityIndicator color="#fff" size="small" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Updating...</Text></>
-                : <><Ionicons name="refresh" size={16} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Update Report</Text></>
+                ? <><ActivityIndicator color="#fff" size="small" /><Text style={{ color: '#fff', fontFamily: fonts[700], fontSize: 14 }}>Updating...</Text></>
+                : <><Ionicons name="refresh" size={16} color="#fff" /><Text style={{ color: '#fff', fontFamily: fonts[700], fontSize: 14 }}>Update Report</Text></>
               }
             </TouchableOpacity>
           </View>
@@ -324,10 +324,10 @@ export default function PlayerTrainingDetailScreen() {
 
 const makeMarkdownStyles = (t: ThemeTokens) => ({
   body: { color: t.inkSoft, fontSize: 13, lineHeight: 22 },
-  heading1: { color: t.ink, fontSize: 16, fontWeight: '800' as const, marginTop: 16, marginBottom: 4 },
-  heading2: { color: t.ink, fontSize: 14, fontWeight: '700' as const, marginTop: 14, marginBottom: 4 },
-  heading3: { color: t.muted, fontSize: 13, fontWeight: '700' as const, marginTop: 12, marginBottom: 2 },
-  strong: { color: t.ink, fontWeight: '700' as const },
+  heading1: { color: t.ink, fontSize: 16, fontFamily: fonts[800], marginTop: 16, marginBottom: 4 },
+  heading2: { color: t.ink, fontSize: 14, fontFamily: fonts[700], marginTop: 14, marginBottom: 4 },
+  heading3: { color: t.muted, fontSize: 13, fontFamily: fonts[700], marginTop: 12, marginBottom: 2 },
+  strong: { color: t.ink, fontFamily: fonts[700] },
   bullet_list: { marginLeft: 8 },
   list_item: { color: t.inkSoft, fontSize: 13 },
 });
@@ -336,7 +336,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56 },
-  title: { color: t.ink, fontSize: 16, fontWeight: '900' },
+  title: { color: t.ink, fontSize: 16, fontFamily: fonts[900] },
   sub: { color: t.muted2, fontSize: 11, marginTop: 2 },
   coachNotesBox: {
     backgroundColor: t.positiveSoft,
@@ -348,11 +348,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderRadius: 10,
   },
   coachNotesHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  coachNotesLabel: { color: t.positive, fontSize: 11, fontWeight: '700', textTransform: 'uppercase' },
+  coachNotesLabel: { color: t.positive, fontSize: 11, fontFamily: fonts[700], textTransform: 'uppercase' },
   coachNotesText: { color: t.inkSoft, fontSize: 13, lineHeight: 20 },
   section: { paddingHorizontal: 20, marginTop: 24 },
   sectionLabel: {
-    color: t.label, fontSize: 11, fontWeight: '700', letterSpacing: 1,
+    color: t.label, fontSize: 11, fontFamily: fonts[700], letterSpacing: 1,
     textTransform: 'uppercase', marginBottom: 12,
   },
   programBox: { backgroundColor: t.card, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: t.cardBorder },
@@ -397,7 +397,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderColor: t.cardBorder,
   },
   commentHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  commentAuthor: { fontSize: 12, fontWeight: '700' },
+  commentAuthor: { fontSize: 12, fontFamily: fonts[700] },
   commentDate: { color: t.muted2, fontSize: 11 },
   commentText: { color: t.inkSoft, fontSize: 13 },
   commentInput: { flexDirection: 'row', gap: 10, marginTop: 12, alignItems: 'flex-end' },

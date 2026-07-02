@@ -4,7 +4,7 @@ import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, Modal, KeyboardAvoidingView,
-  Platform, ScrollView, Alert, TextInput,
+  Platform, ScrollView, Alert, TextInput, RefreshControl,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -70,6 +70,7 @@ export default function StaffInboxScreen() {
   const [gameComments, setGameComments] = useState<any[]>([]);
   const [submittingGameComment, setSubmittingGameComment] = useState(false);
 
+  const [refreshing, setRefreshing] = useState(false);
   const loadInbox = async () => {
     setLoading(true);
     try {
@@ -199,6 +200,7 @@ export default function StaffInboxScreen() {
     if (loading) return <View style={styles.center}><ActivityIndicator color={t.accent} size="large" /></View>;
     return (
       <FlatList
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await loadInbox(); setRefreshing(false); }} tintColor={t.accent} />}
         data={items}
         keyExtractor={i => String(i.id)}
         contentContainerStyle={{ paddingTop: 12, paddingBottom: 100 }}
@@ -332,7 +334,7 @@ export default function StaffInboxScreen() {
               </View>
               {isMember ? (
                 <View style={{ backgroundColor: t.positiveSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 }}>
-                  <Text style={{ color: t.positive, fontSize: 12, fontWeight: '700' }}>Joined</Text>
+                  <Text style={{ color: t.positive, fontSize: 12, fontFamily: fonts[700] }}>Joined</Text>
                 </View>
               ) : (
                 <TouchableOpacity
@@ -342,7 +344,7 @@ export default function StaffInboxScreen() {
                 >
                   {joining === team.id
                     ? <ActivityIndicator color={t.ctaText} size="small" />
-                    : <Text style={{ color: t.ctaText, fontSize: 13, fontWeight: '700' }}>Join</Text>}
+                    : <Text style={{ color: t.ctaText, fontSize: 13, fontFamily: fonts[700] }}>Join</Text>}
                 </TouchableOpacity>
               )}
             </View>
@@ -372,7 +374,7 @@ export default function StaffInboxScreen() {
                   >
                     {leaving === team.id
                       ? <ActivityIndicator color={t.negative} size="small" />
-                      : <Text style={{ color: t.negative, fontSize: 12, fontWeight: '700' }}>Leave</Text>}
+                      : <Text style={{ color: t.negative, fontSize: 12, fontFamily: fonts[700] }}>Leave</Text>}
                   </TouchableOpacity>
                 </View>
               ))
@@ -475,7 +477,7 @@ export default function StaffInboxScreen() {
             {view === 'regenerated' && (
               <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
                 <View style={{ backgroundColor: t.accentSoft, borderRadius: 8, padding: 10, marginBottom: 10 }}>
-                  <Text style={{ color: t.accent, fontSize: 11, fontWeight: '700', letterSpacing: 1 }}>REGENERATED VERSION</Text>
+                  <Text style={{ color: t.accent, fontSize: 11, fontFamily: fonts[700], letterSpacing: 1 }}>REGENERATED VERSION</Text>
                 </View>
                 {activeItem?.regenerated_text ? renderReport(activeItem.regenerated_text, { heading: t.ink, body: t.inkSoft }) : <Text style={{ color: t.muted2 }}>No regenerated version yet.</Text>}
               </KeyboardAwareScrollView>
@@ -524,7 +526,7 @@ export default function StaffInboxScreen() {
                   onPress={regenerate}
                   disabled={!regenerateFeedback.trim() || regenerating}
                 >
-                  {regenerating ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontWeight: '700' }}>Regenerate Report</Text>}
+                  {regenerating ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Regenerate Report</Text>}
                 </TouchableOpacity>
               </>
             )}
@@ -559,7 +561,7 @@ export default function StaffInboxScreen() {
                   }}
                   disabled={!coachNotes.trim() || savingNotes}
                 >
-                  {savingNotes ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontWeight: '700' }}>Save Note</Text>}
+                  {savingNotes ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Save Note</Text>}
                 </TouchableOpacity>
               </>
             )}
@@ -639,41 +641,41 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent', paddingTop: 56 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 60, paddingHorizontal: 20 },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 8, marginBottom: 12, gap: 12 },
-  title: { fontSize: 22, fontWeight: '900', color: t.ink },
+  title: { fontSize: 22, fontFamily: fonts[900], color: t.ink },
   emptyText: { color: t.muted2, marginTop: 12, fontSize: 14, textAlign: 'center' },
   tabBar: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 12, backgroundColor: t.card, borderRadius: 12, padding: 4 },
   tabBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 8, borderRadius: 10 },
   tabBtnActive: { backgroundColor: t.ctaBg },
-  tabBtnText: { color: t.muted2, fontSize: 11, fontWeight: '700' },
+  tabBtnText: { color: t.muted2, fontSize: 11, fontFamily: fonts[700] },
   tabBtnTextActive: { color: t.ctaText },
-  sectionLabel: { color: t.label, fontSize: 10, fontWeight: '800', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10, marginTop: 4 },
+  sectionLabel: { color: t.label, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10, marginTop: 4 },
   card: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     backgroundColor: t.card, marginHorizontal: 16, marginBottom: 8,
     borderRadius: 12, padding: 14, borderWidth: 1, borderColor: t.cardBorder,
   },
   iconBox: { width: 32, height: 32, borderRadius: 8, backgroundColor: t.accentSoft, alignItems: 'center', justifyContent: 'center' },
-  cardTitle: { color: t.ink, fontSize: 15, fontWeight: '700' },
+  cardTitle: { color: t.ink, fontSize: 15, fontFamily: fonts[700] },
   cardSub: { color: t.muted, fontSize: 12, marginTop: 2 },
   cardDate: { color: t.muted2, fontSize: 11, marginTop: 2 },
   regenBadge: { backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: t.accent },
-  regenBadgeText: { color: t.accent, fontSize: 10, fontWeight: '700' },
+  regenBadgeText: { color: t.accent, fontSize: 10, fontFamily: fonts[700] },
   teamChip: { borderWidth: 1, borderColor: t.line, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7 },
   teamChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
-  teamChipText: { color: t.muted, fontSize: 13, fontWeight: '600' },
+  teamChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600] },
   teamChipTextActive: { color: t.ctaText },
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
-  modalTitle: { color: t.ink, fontSize: 18, fontWeight: '800' },
+  modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   modalSub: { color: t.muted, fontSize: 12, marginTop: 2 },
   tabRow: { flexDirection: 'row', gap: 8 },
   tab: { borderWidth: 1, borderColor: t.line, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6 },
   tabActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
-  tabText: { color: t.muted, fontSize: 12, fontWeight: '600' },
+  tabText: { color: t.muted, fontSize: 12, fontFamily: fonts[600] },
   tabTextActive: { color: t.ctaText },
   commentCard: { backgroundColor: t.chip, borderRadius: 8, padding: 12, marginBottom: 8 },
-  commentAuthor: { color: t.accent, fontSize: 11, fontWeight: '700', marginBottom: 4 },
+  commentAuthor: { color: t.accent, fontSize: 11, fontFamily: fonts[700], marginBottom: 4 },
   commentText: { color: t.inkSoft, fontSize: 13 },
   commentDate: { color: t.muted2, fontSize: 11, marginTop: 6 },
   input: {

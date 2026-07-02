@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     position: 'absolute', top: 2, right: 2, borderRadius: 7, minWidth: 14, height: 14,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2,
   },
-  notifBadgeText: { color: '#fff', fontSize: 8, fontWeight: '800' },
+  notifBadgeText: { color: '#fff', fontSize: 8, fontFamily: fonts[800] },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12 },
   pillarRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12, paddingHorizontal: 12 },
 });
