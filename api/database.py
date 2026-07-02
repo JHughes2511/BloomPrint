@@ -187,6 +187,19 @@ def _run_migrations():
         except Exception:
             pass
 
+        # Add tracking_mode to game_sessions if missing
+        try:
+            gs_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(game_sessions)")
+            )]
+            if gs_cols and "tracking_mode" not in gs_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE game_sessions ADD COLUMN tracking_mode TEXT DEFAULT 'live'"
+                ))
+                conn.commit()
+        except Exception:
+            pass
+
         # Create coach_notifications table if missing
         try:
             conn.execute(__import__("sqlalchemy").text(

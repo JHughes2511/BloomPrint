@@ -7,6 +7,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -102,7 +103,7 @@ type View = 'dashboard' | 'games' | 'live' | 'detail' | 'scout';
 
 export default function TeamEvalScreen() {
   const { coach } = useAuth();
-  const { t } = useTheme();
+  const { t, mode } = useTheme();
   const s = makeS(t);
   const scoutScrollRef = useRef<any>(null);
   const noteInputY = useRef(0);
@@ -126,6 +127,9 @@ export default function TeamEvalScreen() {
   const [newGamePhase, setNewGamePhase] = useState('regular');
   const [newGameYear, setNewGameYear] = useState('');
   const [newGameTeamId, setNewGameTeamId] = useState<number | null>(null);
+  const [newGameDate, setNewGameDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [trackMode, setTrackMode] = useState<'live' | 'post'>('live');
   const [teams, setTeams] = useState<any[]>([]);
   const [creating, setCreating] = useState(false);
 
@@ -255,6 +259,8 @@ export default function TeamEvalScreen() {
         season_phase: newGamePhase,
         season_year: newGameYear.trim() || undefined,
         team_id: newGameTeamId ?? undefined,
+        date: newGameDate.toISOString(),
+        tracking_mode: trackMode,
       });
       setSessions(prev => [g, ...prev]);
       setShowNewGame(false);
@@ -262,7 +268,9 @@ export default function TeamEvalScreen() {
       setNewGameLocation('');
       setNewGameYear('');
       setNewGameTeamId(null);
-      // Open live entry
+      setNewGameDate(new Date());
+      setTrackMode('live');
+      // Both modes open the same entry screen; post-game just also offers import.
       openLiveEntry(g);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not create game');
@@ -2054,23 +2062,66 @@ export default function TeamEvalScreen() {
                 value={newGameYear}
                 onChangeText={setNewGameYear}
               />
-              <Text style={s.fieldLabel}>SEASON PHASE</Text>
-              <View style={{ flexDirection: 'row', gap: 6, marginBottom: 16 }}>
-                {['preseason', 'regular', 'playoff', 'tournament'].map(p => (
+
+              <Text style={s.fieldLabel}>DATE</Text>
+              <TouchableOpacity
+                style={[s.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }]}
+                onPress={() => setShowDatePicker(v => !v)}
+                activeOpacity={0.7}
+              >
+                <Text style={{ color: t.ink, fontSize: 15 }}>
+                  {newGameDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                </Text>
+                <Ionicons name="calendar-outline" size={17} color={t.muted} />
+              </TouchableOpacity>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={newGameDate}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                  themeVariant={mode === 'dark' ? 'dark' : 'light'}
+                  onChange={(_, d) => {
+                    if (Platform.OS === 'android') setShowDatePicker(false);
+                    if (d) setNewGameDate(d);
+                  }}
+                />
+              )}
+
+              <Text style={s.fieldLabel}>TYPE</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
+                {['preseason', 'regular', 'playoff', 'scrimmage', 'tournament', 'exhibition'].map(p => (
                   <TouchableOpacity
                     key={p}
-                    style={[s.chip, newGamePhase === p && s.chipActive, { flex: 1, paddingHorizontal: 6 }]}
+                    style={[s.chip, newGamePhase === p && s.chipActive]}
                     onPress={() => setNewGamePhase(p)}
                   >
-                    <Text
-                      style={[s.chipText, newGamePhase === p && s.chipTextActive, { textAlign: 'center', fontSize: 11 }]}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                    >
+                    <Text style={[s.chipText, newGamePhase === p && s.chipTextActive, { fontSize: 12.5 }]}>
                       {p.charAt(0).toUpperCase() + p.slice(1)}
                     </Text>
                   </TouchableOpacity>
                 ))}
+              </View>
+
+              <Text style={s.fieldLabel}>TRACKING MODE</Text>
+              <View style={{ flexDirection: 'row', gap: 10, marginBottom: 4 }}>
+                {([
+                  { key: 'live', icon: 'pulse-outline', title: 'Live Track', desc: 'Tap events in real time' },
+                  { key: 'post', icon: 'create-outline', title: 'Post-Game', desc: 'Enter or import stats after' },
+                ] as const).map(m => {
+                  const on = trackMode === m.key;
+                  return (
+                    <TouchableOpacity
+                      key={m.key}
+                      style={{ flex: 1, padding: 14, borderRadius: 14, alignItems: 'center', borderWidth: on ? 1.5 : 1,
+                               backgroundColor: on ? t.accentSoft : 'transparent', borderColor: on ? t.accent : t.line }}
+                      onPress={() => setTrackMode(m.key)}
+                    >
+                      <Ionicons name={m.icon as any} size={22} color={on ? t.accent : t.muted} />
+                      <Text style={{ color: t.ink, fontSize: 14, fontWeight: on ? '800' : '700', marginTop: 7 }}>{m.title}</Text>
+                      <Text style={{ color: t.muted, fontSize: 11, marginTop: 2, textAlign: 'center' }}>{m.desc}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </KeyboardAwareScrollView>
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>

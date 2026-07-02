@@ -405,6 +405,7 @@ class GameSession(Base):
     opponent_score = Column(Integer, nullable=True)
     season_phase = Column(String, default="regular")
     season_year = Column(String, nullable=True)
+    tracking_mode = Column(String, default="live")  # live / post
     status = Column(String, default="in_progress")
     ai_scouting_report = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

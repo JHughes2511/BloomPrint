@@ -542,6 +542,7 @@ class GameSessionCreate(BaseModel):
     location: str | None = None
     season_phase: str = "regular"
     season_year: str | None = None
+    tracking_mode: str = "live"
 
 
 class GameSessionUpdate(BaseModel):
@@ -565,6 +566,7 @@ class GameSessionOut(BaseModel):
     opponent_score: int | None
     season_phase: str
     season_year: str | None
+    tracking_mode: str | None = None
     status: str
     ai_scouting_report: str | None
     created_at: datetime

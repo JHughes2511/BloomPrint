@@ -95,6 +95,7 @@ def create_session(
         location=body.location,
         season_phase=body.season_phase,
         season_year=body.season_year,
+        tracking_mode=body.tracking_mode,
     )
     if body.date:
         try:
