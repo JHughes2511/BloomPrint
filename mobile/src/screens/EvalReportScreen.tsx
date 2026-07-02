@@ -685,7 +685,7 @@ export default function EvalReportScreen() {
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
                 <Text style={styles.correctionMeta}>{new Date(c.created_at).toLocaleDateString()}</Text>
                 {c.applied && (
-                  <View style={{ backgroundColor: '#16a34a22', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, borderWidth: 1, borderColor: t.positive }}>
+                  <View style={{ backgroundColor: t.positiveSoft, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, borderWidth: 1, borderColor: t.positive }}>
                     <Text style={{ color: t.positive, fontSize: 10, fontWeight: '700' }}>APPLIED</Text>
                   </View>
                 )}
@@ -750,7 +750,7 @@ export default function EvalReportScreen() {
             <Text style={styles.modalSub}>Search for a coach, scout, or trainer to share this eval report.</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, backgroundColor: t.chip, borderRadius: 8, padding: 12 }}>
               <Text style={{ color: t.inkSoft, fontSize: 13 }}>Allow recipient to regenerate</Text>
-              <Switch value={allowRegen} onValueChange={setAllowRegen} trackColor={{ true: t.accent }} thumbColor="#fff" />
+              <Switch value={allowRegen} onValueChange={setAllowRegen} trackColor={{ true: t.accent, false: t.line }} thumbColor="#fff" />
             </View>
             <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
               <VoiceTextInput

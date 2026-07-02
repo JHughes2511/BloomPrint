@@ -24,15 +24,6 @@ const REPORT_TYPE_LABELS: Record<string, string> = {
   training: 'Training Program',
 };
 
-const REPORT_TYPE_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
-  eval: { bg: '#1e3a5f', text: '#60a5fa' },
-  game: { bg: '#2d1b69', text: '#a78bfa' },
-  game_session: { bg: '#14532d', text: '#4ade80' },
-  team_training: { bg: '#1e3a5f', text: '#60a5fa' },
-  team_report: { bg: '#78350f', text: '#fbbf24' },
-  training: { bg: '#14532d', text: '#4ade80' },
-};
-
 type TabKey = 'inbox' | 'team_games' | 'my_teams';
 
 export default function StaffInboxScreen() {
