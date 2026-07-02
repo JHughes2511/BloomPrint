@@ -52,11 +52,6 @@ export default function RoleSelectScreen() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={() => navigation.navigate('CoachLogin')}>
-          <Text style={styles.signin}>
-            Already have an account? <Text style={styles.signinLink}>Sign in</Text>
-          </Text>
-        </TouchableOpacity>
       </View>
     </SafeAreaView>
     </ScreenBackground>

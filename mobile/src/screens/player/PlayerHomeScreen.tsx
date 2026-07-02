@@ -460,7 +460,7 @@ export default function PlayerHomeScreen() {
                 ref={modalScrollRef}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 24 }}
+                contentContainerStyle={{ paddingBottom: 48 }}
               >
                 {/* Link to Coach */}
                 <Text style={styles.linkSectionLabel}>Link to Coach</Text>
