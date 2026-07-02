@@ -3,6 +3,7 @@ import { View, TextInput, TouchableOpacity, Pressable, TextInputProps, Alert, St
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { transcribeAPI } from '../api/client';
+import { useTheme } from '../theme/ThemeProvider';
 
 type Props = TextInputProps & {
   value?: string;
@@ -20,6 +21,7 @@ export default function VoiceTextInput({
   multiline,
   ...rest
 }: Props) {
+  const { t } = useTheme();
   const [listening, setListening] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
 
@@ -42,7 +44,7 @@ export default function VoiceTextInput({
     keyboardType !== 'email-address';
 
   const flatStyle = StyleSheet.flatten(style) as any || {};
-  const textColor = flatStyle.color ?? '#f9fafb';
+  const textColor = flatStyle.color ?? t.ink;
   const fontSize = flatStyle.fontSize;
   const fontWeight = flatStyle.fontWeight;
 
@@ -145,7 +147,7 @@ export default function VoiceTextInput({
 
   const toggleVoice = () => (listening ? stopRecording() : startRecording());
 
-  const micColor = listening ? '#7c3aed' : transcribing ? '#f59e0b' : '#6b7280';
+  const micColor = listening ? t.accent : transcribing ? t.brown : t.muted2;
   const micIcon: any = listening ? 'mic' : transcribing ? 'hourglass-outline' : 'mic-outline';
 
   // Tapping anywhere in the box (padding, or the empty area of a multiline
