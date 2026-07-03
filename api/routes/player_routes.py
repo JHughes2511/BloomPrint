@@ -1102,6 +1102,44 @@ def coach_reply_to_shared_report(
 ):
     shared = db.get(models.SharedReport, shared_id)
     if not shared or shared.shared_by_id != coach.id:
+        # Fallback: older/ambiguous "player_commented" notifications carried a
+        # training id here, not a shared-report id. Route those to the matching
+        # training comment thread so the reply still lands instead of 404-ing.
+        pt = db.get(models.PlayerTraining, shared_id)
+        if pt:
+            comment = models.PlayerComment(coach_id=coach.id, player_training_id=shared_id, text=body.text)
+            db.add(comment)
+            db.flush()
+            db.add(models.PlayerNotification(
+                player_user_id=pt.player_user_id,
+                type="training_updated",
+                title="Coach Added Notes",
+                body=f"A coach commented on your training: \"{body.text[:80]}\"",
+                ref_id=shared_id,
+            ))
+            db.commit()
+            db.refresh(comment)
+            out = schemas.PlayerCommentOut.model_validate(comment)
+            out.author_name = coach.name
+            return out
+        ts = db.get(models.TrainingSession, shared_id)
+        if ts and ts.coach_id == coach.id:
+            comment = models.PlayerComment(coach_id=coach.id, training_session_id=shared_id, text=body.text)
+            db.add(comment)
+            db.flush()
+            if ts.player and ts.player.player_user:
+                db.add(models.PlayerNotification(
+                    player_user_id=ts.player.player_user.id,
+                    type="training_shared",
+                    title="Coach Replied",
+                    body=f"{coach.name} commented on your training: \"{body.text[:80]}\"",
+                    ref_id=shared_id,
+                ))
+            db.commit()
+            db.refresh(comment)
+            out = schemas.PlayerCommentOut.model_validate(comment)
+            out.author_name = coach.name
+            return out
         raise HTTPException(status_code=404, detail="Report not found")
     comment = models.PlayerComment(
         coach_id=coach.id,
