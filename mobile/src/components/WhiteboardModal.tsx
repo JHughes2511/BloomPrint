@@ -181,46 +181,52 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const [aiGenerating, setAiGenerating] = useState(false);
   const [activeScheme, setActiveScheme] = useState<SchemeKey>('offense');
   const [showKey, setShowKey]           = useState(true);
-  // Report input: pull the scene from a team report or an opponent scouting report.
-  const [seedMode, setSeedMode]       = useState<'none' | 'pick'>('none');
-  const [seedItems, setSeedItems]     = useState<{ id: string; title: string; sub: string; text: string }[]>([]);
+  // Draw up from a report: pick a source type (Scout / Team), then a report.
+  // The chosen report ATTACHES to the request (shown as a chip) so the text box
+  // stays free for the coach's own additional details.
+  type SeedItem = { id: string; title: string; sub: string; text: string };
+  const [seedMode, setSeedMode]       = useState<'none' | 'type' | 'list'>('none');
+  const [seedType, setSeedType]       = useState<'scout' | 'team' | null>(null);
+  const [seedItems, setSeedItems]     = useState<SeedItem[]>([]);
   const [seedLoading, setSeedLoading] = useState(false);
+  const [attachedReport, setAttachedReport] = useState<SeedItem | null>(null);
 
-  const openSeedPicker = async () => {
-    setSeedMode('pick');
+  const openSeedList = async (kind: 'scout' | 'team') => {
+    setSeedType(kind);
+    setSeedMode('list');
     setSeedLoading(true);
     try {
-      const [teamReports, sessions] = await Promise.all([
-        evalsAPI.teamReports(30).catch(() => []),
-        gameEvalAPI.listSessions().catch(() => []),
-      ]);
-      const items: { id: string; title: string; sub: string; text: string }[] = [];
-      (teamReports ?? []).forEach((r: any) => {
-        if (!r.report_text) return;
-        items.push({
-          id: `team-${r.id}`,
-          title: `Team Report — ${(r.output_type ?? 'report').replace(/_/g, ' ')}`,
-          sub: new Date(r.created_at).toLocaleDateString(),
-          text: r.report_text,
+      const items: SeedItem[] = [];
+      if (kind === 'team') {
+        const teamReports = await evalsAPI.teamReports(30).catch(() => []);
+        (teamReports ?? []).forEach((r: any) => {
+          if (!r.report_text) return;
+          items.push({
+            id: `team-${r.id}`,
+            title: (r.output_type ?? 'report').replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
+            sub: new Date(r.created_at).toLocaleDateString(),
+            text: r.report_text,
+          });
         });
-      });
-      (sessions ?? []).forEach((g: any) => {
-        if (!g.ai_scouting_report) return;
-        items.push({
-          id: `scout-${g.id}`,
-          title: `Opponent Scouting — vs ${g.opponent_name}`,
-          sub: new Date(g.date).toLocaleDateString(),
-          text: g.ai_scouting_report,
+      } else {
+        const sessions = await gameEvalAPI.listSessions().catch(() => []);
+        (sessions ?? []).forEach((g: any) => {
+          if (!g.ai_scouting_report) return;
+          items.push({
+            id: `scout-${g.id}`,
+            title: `vs ${g.opponent_name}`,
+            sub: new Date(g.date).toLocaleDateString(),
+            text: g.ai_scouting_report,
+          });
         });
-      });
+      }
       setSeedItems(items);
     } catch { setSeedItems([]); }
     setSeedLoading(false);
   };
 
-  const seedFromReport = (item: { text: string }) => {
-    const text = (item.text || '').trim().slice(0, 4000);
-    if (text) setAiDescription(prev => (prev.trim() ? prev.trim() + '\n\n' : '') + text);
+  const attachReport = (item: SeedItem) => {
+    setAttachedReport(item);
     setSeedMode('none');
   };
 
@@ -256,10 +262,14 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   };
 
   const generatePlay = async () => {
-    if (!aiDescription.trim()) return;
+    if (!aiDescription.trim() && !attachedReport) return;
     setAiGenerating(true);
     try {
-      const res = await whiteboardAPI.aiPlay(aiDescription.trim());
+      const composed = [
+        aiDescription.trim(),
+        attachedReport ? `REPORT (${attachedReport.title}):\n${attachedReport.text.trim().slice(0, 4000)}` : '',
+      ].filter(Boolean).join('\n\n');
+      const res = await whiteboardAPI.aiPlay(composed);
       const idx = boards.length;
       const newBoard: Board = {
         name: res.play_name || `AI Play ${idx + 1}`,
@@ -274,6 +284,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       saveBoard(idx, newBoard);
       setShowAI(false);
       setAiDescription('');
+      setAttachedReport(null);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate the play');
     } finally {
@@ -750,6 +761,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
 
         {/* AI play modal */}
         <Modal visible={showAI} transparent animationType="slide" onRequestClose={() => { setShowAI(false); setSeedMode('none'); }}>
+          {/* seedMode handled inside */}
           <KeyboardAvoidingView style={styles.listOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View style={[styles.listBox, { padding: 20 }]}>
               {seedMode === 'none' ? (
@@ -768,18 +780,30 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                     multiline
                     textAlignVertical="top"
                   />
-                  <TouchableOpacity style={styles.seedBtn} onPress={openSeedPicker}>
-                    <Ionicons name="document-text-outline" size={16} color={t.accent} />
-                    <Text style={styles.seedBtnText}>Input from a report</Text>
-                  </TouchableOpacity>
+                  {attachedReport ? (
+                    <View style={styles.attachChip}>
+                      <Ionicons name="document-attach-outline" size={15} color={t.accent} />
+                      <Text style={styles.attachChipText} numberOfLines={1}>
+                        {attachedReport.title} · {attachedReport.sub}
+                      </Text>
+                      <TouchableOpacity onPress={() => setAttachedReport(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                        <Ionicons name="close-circle" size={17} color={t.muted} />
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <TouchableOpacity style={styles.seedBtn} onPress={() => setSeedMode('type')}>
+                      <Ionicons name="document-text-outline" size={16} color={t.accent} />
+                      <Text style={styles.seedBtnText}>Draw up from a report</Text>
+                    </TouchableOpacity>
+                  )}
                   <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                     <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]}
                       onPress={() => setShowAI(false)}>
                       <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.addBoardBtn, { flex: 1, opacity: aiDescription.trim() && !aiGenerating ? 1 : 0.5 }]}
-                      onPress={generatePlay} disabled={!aiDescription.trim() || aiGenerating}>
+                      style={[styles.addBoardBtn, { flex: 1, opacity: (aiDescription.trim() || attachedReport) && !aiGenerating ? 1 : 0.5 }]}
+                      onPress={generatePlay} disabled={(!aiDescription.trim() && !attachedReport) || aiGenerating}>
                       {aiGenerating
                         ? <ActivityIndicator color={t.ctaText} size="small" />
                         : <><Ionicons name="sparkles" size={16} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Draw It Up</Text></>}
@@ -789,19 +813,48 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               ) : (
                 <>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                    <TouchableOpacity onPress={() => setSeedMode('none')}>
+                    <TouchableOpacity onPress={() => setSeedMode(seedMode === 'list' ? 'type' : 'none')}>
                       <Ionicons name="chevron-back" size={22} color={t.ink} />
                     </TouchableOpacity>
-                    <Text style={[styles.listTitle, { marginBottom: 0 }]}>Pick a Report</Text>
+                    <Text style={[styles.listTitle, { marginBottom: 0 }]}>
+                      {seedMode === 'type' ? 'Report Source' : seedType === 'scout' ? 'Scout Reports' : 'Team Reports'}
+                    </Text>
                   </View>
-                  {seedLoading ? (
+                  {seedMode === 'type' ? (
+                    <>
+                      <TouchableOpacity style={styles.sourceCard} onPress={() => openSeedList('scout')}>
+                        <View style={[styles.sourceIcon, { backgroundColor: t.accentSoft }]}>
+                          <Ionicons name="telescope-outline" size={22} color={t.accent} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.listItemText}>Scout Report</Text>
+                          <Text style={styles.listItemSub}>Opponent scouting from the Team Grade scout section</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={16} color={t.muted2} />
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.sourceCard} onPress={() => openSeedList('team')}>
+                        <View style={[styles.sourceIcon, { backgroundColor: t.positiveSoft }]}>
+                          <Ionicons name="people-outline" size={22} color={t.positive} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.listItemText}>Team Report</Text>
+                          <Text style={styles.listItemSub}>Reports you created in the Team Reports section</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={16} color={t.muted2} />
+                      </TouchableOpacity>
+                    </>
+                  ) : seedLoading ? (
                     <ActivityIndicator color={t.accent} style={{ marginVertical: 24 }} />
                   ) : (
                     <ScrollView style={{ maxHeight: 340 }}>
                       {seedItems.length === 0
-                        ? <Text style={styles.aiHint}>No team reports or opponent scouting reports yet.</Text>
+                        ? <Text style={styles.aiHint}>
+                            {seedType === 'scout'
+                              ? 'No opponent scouting reports yet — generate one from the Team Grade scout section.'
+                              : 'No team reports yet — create one in the Team Reports section.'}
+                          </Text>
                         : seedItems.map(item => (
-                          <TouchableOpacity key={item.id} style={styles.listRow} onPress={() => seedFromReport(item)}>
+                          <TouchableOpacity key={item.id} style={styles.listRow} onPress={() => attachReport(item)}>
                             <View style={{ flex: 1 }}>
                               <Text style={styles.listItemText} numberOfLines={1}>{item.title}</Text>
                               <Text style={styles.listItemSub}>{item.sub}</Text>
@@ -919,4 +972,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   aiHint:          { color: t.muted, fontSize: 12.5, lineHeight: 18, marginBottom: 12 },
   seedBtn:         { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: t.line, alignSelf: 'flex-start' },
   seedBtnText:     { color: t.accent, fontSize: 13, fontFamily: fonts[700] },
+  attachChip:      { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10, backgroundColor: t.accentSoft, borderWidth: 1, borderColor: t.accent },
+  attachChipText:  { color: t.accent, fontSize: 13, fontFamily: fonts[700], flex: 1 },
+  sourceCard:      { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 14, backgroundColor: t.chip, borderWidth: 1, borderColor: t.line, marginBottom: 10 },
+  sourceIcon:      { width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
 });
