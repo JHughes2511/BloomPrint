@@ -8,6 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path, Circle, Line, Rect, G, Text as SvgText } from 'react-native-svg';
 import { whiteboardAPI, evalsAPI, gameEvalAPI } from '../api/client';
 import VoiceTextInput from './VoiceTextInput';
+import { reportSubject } from '../utils/reportSubject';
+import { outputTypeLabel } from '../utils/reportType';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -201,10 +203,12 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         const teamReports = await evalsAPI.teamReports(30).catch(() => []);
         (teamReports ?? []).forEach((r: any) => {
           if (!r.report_text) return;
+          const typeLabel = outputTypeLabel(r.output_type) || 'Team Report';
+          const subject = reportSubject(r.report_text, r.output_type ?? '');
           items.push({
             id: `team-${r.id}`,
-            title: (r.output_type ?? 'report').replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
-            sub: new Date(r.created_at).toLocaleDateString(),
+            title: subject ?? typeLabel,
+            sub: `${typeLabel} · ${new Date(r.created_at).toLocaleDateString()}`,
             text: r.report_text,
           });
         });
@@ -212,10 +216,11 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         const sessions = await gameEvalAPI.listSessions().catch(() => []);
         (sessions ?? []).forEach((g: any) => {
           if (!g.ai_scouting_report) return;
+          const subject = reportSubject(g.ai_scouting_report, 'scouting_report');
           items.push({
             id: `scout-${g.id}`,
-            title: `vs ${g.opponent_name}`,
-            sub: new Date(g.date).toLocaleDateString(),
+            title: subject ? `vs ${g.opponent_name} — ${subject}` : `vs ${g.opponent_name}`,
+            sub: `Scout Report · ${new Date(g.date).toLocaleDateString()}`,
             text: g.ai_scouting_report,
           });
         });
@@ -856,7 +861,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                         : seedItems.map(item => (
                           <TouchableOpacity key={item.id} style={styles.listRow} onPress={() => attachReport(item)}>
                             <View style={{ flex: 1 }}>
-                              <Text style={styles.listItemText} numberOfLines={1}>{item.title}</Text>
+                              <Text style={styles.listItemText} numberOfLines={2}>{item.title}</Text>
                               <Text style={styles.listItemSub}>{item.sub}</Text>
                             </View>
                             <Ionicons name="add-circle-outline" size={18} color={t.accent} />
