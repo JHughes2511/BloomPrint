@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, Modal, StyleSheet,
   PanResponder, Alert, TextInput, ScrollView, ActivityIndicator,
-  Dimensions, Platform, KeyboardAvoidingView,
+  Platform, KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path, Circle, Line, Rect, G, Text as SvgText } from 'react-native-svg';
@@ -12,14 +12,15 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 
-const { width: SCREEN_W } = Dimensions.get('window');
-
 // ── Court sizing ──────────────────────────────────────────────────────────
-// Classic hardwood court drawn in SVG at a regulation 50ft x 94ft ratio.
-const COURT_W   = SCREEN_W - 24;            // nearly full width
-const COURT_H   = COURT_W * (94 / 50);      // full court
-const HALF_H    = COURT_H / 2;              // half court = bottom half
-const THREE_Q_H = COURT_H * 0.75;           // 3/4 court = bottom 75%
+// Classic hardwood court drawn in SVG at regulation 50ft x 94ft proportions.
+// Each view scales to FIT the available screen area:
+//   full  = whole court (both hoops visible),
+//   half  = bottom 47ft (fills the screen much larger),
+//   3/4   = bottom 78ft (includes the far free-throw line at 75ft).
+const COURT_FT_W = 50;
+const COURT_FT_L = 94;
+const VISIBLE_FT: Record<string, number> = { full: 94, three_quarter: 78, half: 47 };
 
 type CourtType = 'full' | 'half' | 'three_quarter';
 type Tool = 'pen' | 'circle' | 'xmark' | 'arrow' | 'text';
@@ -61,15 +62,15 @@ const WOOD_B = '#DDBA84';   // alternating plank tone
 const LINE = '#7A4326';     // painted line — walnut brown, classic look
 const LINE_W = 2;
 
-function HardwoodCourt({ height }: { height: number }) {
-  const s = COURT_W / 50;             // feet -> px
-  const L = COURT_H;                  // full length in px
+function HardwoodCourt({ width, height }: { width: number; height: number }) {
+  const s = width / COURT_FT_W;       // feet -> px
+  const L = COURT_FT_L * s;           // full length in px
   const ft = (n: number) => n * s;
 
   // Plank stripes (vertical, ~3.5ft wide)
   const planks = [];
   const plankW = ft(3.55);
-  for (let i = 0; i * plankW < COURT_W; i++) {
+  for (let i = 0; i * plankW < width; i++) {
     planks.push(
       <Rect key={i} x={i * plankW} y={0} width={plankW} height={L}
             fill={i % 2 === 0 ? WOOD_A : WOOD_B} />
@@ -80,7 +81,7 @@ function HardwoodCourt({ height }: { height: number }) {
   const End = ({ flip }: { flip?: boolean }) => {
     // Drawn relative to the NEAR baseline (y = L); flip rotates 180° about center.
     const base = L;
-    const cx = COURT_W / 2;
+    const cx = width / 2;
     const rimY = base - ft(5.25);
     const keyW = ft(16), keyH = ft(19);
     const ftY = base - keyH;
@@ -100,26 +101,26 @@ function HardwoodCourt({ height }: { height: number }) {
         <Circle cx={cx} cy={rimY} r={ft(0.75)} stroke={LINE} strokeWidth={LINE_W} fill="none" />
         {/* three-point line: two corner segments + arc */}
         <Line x1={cornerX} y1={base} x2={cornerX} y2={yCorner} stroke={LINE} strokeWidth={LINE_W} />
-        <Line x1={COURT_W - cornerX} y1={base} x2={COURT_W - cornerX} y2={yCorner} stroke={LINE} strokeWidth={LINE_W} />
-        <Path d={`M ${cornerX} ${yCorner} A ${r3} ${r3} 0 0 1 ${COURT_W - cornerX} ${yCorner}`}
+        <Line x1={width - cornerX} y1={base} x2={width - cornerX} y2={yCorner} stroke={LINE} strokeWidth={LINE_W} />
+        <Path d={`M ${cornerX} ${yCorner} A ${r3} ${r3} 0 0 1 ${width - cornerX} ${yCorner}`}
               stroke={LINE} strokeWidth={LINE_W} fill="none" />
       </G>
     );
   };
 
   return (
-    <View style={{ width: COURT_W, height, overflow: 'hidden', borderRadius: 8 }}>
+    <View style={{ width, height, overflow: 'hidden', borderRadius: 8 }}>
       {/* Full court anchored to the bottom; half / 3/4 clip the top away. */}
-      <View style={{ position: 'absolute', left: 0, bottom: 0, width: COURT_W, height: L }}>
-        <Svg width={COURT_W} height={L}>
+      <View style={{ position: 'absolute', left: 0, bottom: 0, width, height: L }}>
+        <Svg width={width} height={L}>
           {planks}
           {/* boundary */}
-          <Rect x={LINE_W / 2} y={LINE_W / 2} width={COURT_W - LINE_W} height={L - LINE_W}
+          <Rect x={LINE_W / 2} y={LINE_W / 2} width={width - LINE_W} height={L - LINE_W}
                 stroke={LINE} strokeWidth={LINE_W} fill="none" />
           {/* center line + circle */}
-          <Line x1={0} y1={L / 2} x2={COURT_W} y2={L / 2} stroke={LINE} strokeWidth={LINE_W} />
-          <Circle cx={COURT_W / 2} cy={L / 2} r={ft(6)} stroke={LINE} strokeWidth={LINE_W} fill="none" />
-          <Circle cx={COURT_W / 2} cy={L / 2} r={ft(2)} stroke={LINE} strokeWidth={LINE_W} fill="rgba(122,67,38,0.10)" />
+          <Line x1={0} y1={L / 2} x2={width} y2={L / 2} stroke={LINE} strokeWidth={LINE_W} />
+          <Circle cx={width / 2} cy={L / 2} r={ft(6)} stroke={LINE} strokeWidth={LINE_W} fill="none" />
+          <Circle cx={width / 2} cy={L / 2} r={ft(2)} stroke={LINE} strokeWidth={LINE_W} fill="rgba(122,67,38,0.10)" />
           <End />
           <End flip />
         </Svg>
@@ -156,9 +157,15 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const currentPath = useRef('');
   const startPoint  = useRef({ x: 0, y: 0 });
 
+  // Fit the court to the measured canvas area for the chosen view.
+  const [avail, setAvail] = useState({ w: 0, h: 0 });
   const board  = boards[activeBoardIdx];
-  const courtH = board?.court_type === 'full' ? COURT_H
-               : board?.court_type === 'half'  ? HALF_H : THREE_Q_H;
+  const visFt  = VISIBLE_FT[board?.court_type ?? 'full'];
+  const scale  = avail.w > 0 && avail.h > 0
+    ? Math.min((avail.w - 8) / COURT_FT_W, (avail.h - 8) / visFt)
+    : 0;
+  const courtW = COURT_FT_W * scale;
+  const courtH = visFt * scale;
 
   useEffect(() => { if (visible && gameId) loadBoards(); }, [visible, gameId]);
 
@@ -335,9 +342,11 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       const tip = { x: s.x2, y: s.y2 };
       const b1  = { x: s.x2 - ux*as + px*as*0.5, y: s.y2 - uy*as + py*as*0.5 };
       const b2  = { x: s.x2 - ux*as - px*as*0.5, y: s.y2 - uy*as - py*as*0.5 };
+      // Shaft stops at the arrowhead's base so the line never pokes past the tip.
+      const shaftEnd = { x: s.x2 - ux*as*0.85, y: s.y2 - uy*as*0.85 };
       return (
         <G key={s.id}>
-          <Line x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke={s.color} strokeWidth={s.strokeWidth} />
+          <Line x1={s.x1} y1={s.y1} x2={shaftEnd.x} y2={shaftEnd.y} stroke={s.color} strokeWidth={s.strokeWidth} strokeLinecap="round" />
           <Path d={`M${tip.x},${tip.y} L${b1.x},${b1.y} L${b2.x},${b2.y} Z`} fill={s.color} />
         </G>
       );
@@ -410,28 +419,29 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           </View>
         </View>
 
-        {/* Canvas — ScrollView so court never gets clipped */}
+        {/* Canvas — court scales to fit the available area for the chosen view */}
         {loading ? (
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <ActivityIndicator color={t.accent} size="large" />
           </View>
         ) : (
-          <ScrollView
-            style={{ flex: 1 }}
-            contentContainerStyle={{ alignItems: 'center', paddingVertical: 8 }}
-            scrollEnabled={tool === 'text'}
+          <View
+            style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+            onLayout={e => setAvail({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
           >
-            <View style={[styles.canvasWrapper, { height: courtH }]} {...panResponder.panHandlers}>
-              <HardwoodCourt height={courtH} />
-              <Svg style={StyleSheet.absoluteFill} width={COURT_W} height={courtH}>
-                {board?.strokes.map(renderStroke)}
-                {livePath ? (
-                  <Path d={livePath} stroke={color} strokeWidth={STROKE_WIDTH}
-                        fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                ) : null}
-              </Svg>
-            </View>
-          </ScrollView>
+            {scale > 0 && (
+              <View style={[styles.canvasWrapper, { width: courtW, height: courtH }]} {...panResponder.panHandlers}>
+                <HardwoodCourt width={courtW} height={courtH} />
+                <Svg style={StyleSheet.absoluteFill} width={courtW} height={courtH}>
+                  {board?.strokes.map(renderStroke)}
+                  {livePath ? (
+                    <Path d={livePath} stroke={color} strokeWidth={STROKE_WIDTH}
+                          fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                  ) : null}
+                </Svg>
+              </View>
+            )}
+          </View>
         )}
 
         {/* Board list modal */}
@@ -512,7 +522,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   colorRow:        { flexDirection: 'row', alignItems: 'center', gap: 8, marginLeft: 'auto' },
   colorDot:        { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: 'transparent' },
   colorDotActive:  { borderColor: t.accent },
-  canvasWrapper:   { width: COURT_W, borderRadius: 8, overflow: 'hidden', borderWidth: 1, borderColor: t.cardBorder },
+  canvasWrapper:   { borderRadius: 8, overflow: 'hidden', borderWidth: 1, borderColor: t.cardBorder },
   listOverlay:     { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   listBox:         { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, maxHeight: '60%', borderWidth: 1, borderColor: t.cardBorder },
   listTitle:       { color: t.ink, fontSize: 17, fontFamily: fonts[800], marginBottom: 14 },
