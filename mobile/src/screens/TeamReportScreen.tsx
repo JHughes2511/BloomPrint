@@ -46,6 +46,8 @@ export default function TeamReportScreen() {
   const [reportText, setReportText] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const scrollRef = React.useRef<ScrollView>(null);
+  const reportSectionY = React.useRef(0);
+  const pendingScrollToReport = React.useRef(false);
 
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [videoAsset, setVideoAsset] = useState<{ uri: string; name: string; type: string } | null>(null);
@@ -373,7 +375,14 @@ export default function TeamReportScreen() {
       const result = await evalsAPI.teamReport({ output_type: outputType, focus_prompt: focusPrompt, team_id: selectedTeamId ?? undefined, video: videoAsset ?? undefined });
       setReportText(result.report_text);
       if (result.id) setSavedTeamReportId(result.id);
-      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300);
+      loadPrevReports();
+      pendingScrollToReport.current = true;
+      setTimeout(() => {
+        if (pendingScrollToReport.current) {
+          scrollRef.current?.scrollTo({ y: reportSectionY.current, animated: true });
+          pendingScrollToReport.current = false;
+        }
+      }, 300);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate team report');
     } finally {
@@ -386,10 +395,10 @@ export default function TeamReportScreen() {
   // name, opponent, output type, and any title/date text on the item.
   const prevSearchQuery = prevSearchText.trim().toLowerCase();
   const filteredPrevReports = prevReports
-    .filter(r => prevReportFilter === 'all' || r.output_type === prevReportFilter)
+    .filter(r => prevReportFilter === 'all' || (r.output_type ?? '').split(',').includes(prevReportFilter))
     .filter((r: any) => {
       if (!prevSearchQuery) return true;
-      const typeLabelText = OUTPUT_TYPES.find(ot => ot.key === r.output_type)?.label ?? r.output_type ?? '';
+      const typeLabelText = outputTypeLabel(r.output_type) ?? r.output_type ?? '';
       const dateText = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
       const haystack = [
         r.program_name,
@@ -598,7 +607,16 @@ export default function TeamReportScreen() {
         )}
 
         {reportText && (
-          <View style={styles.reportSection}>
+          <View
+            style={styles.reportSection}
+            onLayout={(e) => {
+              reportSectionY.current = e.nativeEvent.layout.y;
+              if (pendingScrollToReport.current) {
+                scrollRef.current?.scrollTo({ y: reportSectionY.current, animated: true });
+                pendingScrollToReport.current = false;
+              }
+            }}
+          >
             <Text style={styles.label}>Team Report</Text>
             <View style={styles.reportBox}>
               {renderReport(reportText, { heading: t.ink, body: t.inkSoft })}
@@ -712,7 +730,7 @@ export default function TeamReportScreen() {
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                       <View style={{ backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
                         <Text style={{ color: t.accent, fontSize: 10, fontFamily: fonts[700] }}>
-                          {OUTPUT_TYPES.find(t => t.key === r.output_type)?.label ?? r.output_type}
+                          {outputTypeLabel(r.output_type) ?? r.output_type}
                         </Text>
                       </View>
                       <Text style={{ color: t.muted2, fontSize: 11 }}>{new Date(r.created_at).toLocaleDateString()}</Text>
@@ -740,7 +758,7 @@ export default function TeamReportScreen() {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }}>
-                  {OUTPUT_TYPES.find(t => t.key === selectedPrevReport?.output_type)?.label ?? selectedPrevReport?.output_type}
+                  {outputTypeLabel(selectedPrevReport?.output_type) ?? selectedPrevReport?.output_type}
                 </Text>
                 <Text style={{ color: t.muted, fontSize: 11, marginTop: 2 }}>
                   {selectedPrevReport ? new Date(selectedPrevReport.created_at).toLocaleDateString() : ''}

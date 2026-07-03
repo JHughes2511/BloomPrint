@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, Modal, StyleSheet,
   PanResponder, Alert, TextInput, ScrollView, ActivityIndicator,
-  Platform, KeyboardAvoidingView, Dimensions,
+  Platform, KeyboardAvoidingView, Dimensions, Keyboard, TouchableWithoutFeedback,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path, Circle, Line, Rect, G, Text as SvgText } from 'react-native-svg';
@@ -767,10 +767,15 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         {/* AI play modal */}
         <Modal visible={showAI} transparent animationType="slide" onRequestClose={() => { setShowAI(false); setSeedMode('none'); }}>
           {/* seedMode handled inside */}
-          <KeyboardAvoidingView style={styles.listOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            <View style={[styles.listBox, { padding: 20 }]}>
+          <KeyboardAvoidingView
+            style={styles.listOverlay}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
+          >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View style={[styles.listBox, { padding: 20, maxHeight: '85%' }]}>
               {seedMode === 'none' ? (
-                <>
+                <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                   <Text style={styles.listTitle}>AI Play Draw-Up</Text>
                   <Text style={styles.aiHint}>
                     Describe the scene or play — what was run, what the defense did, what went wrong.
@@ -796,7 +801,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                       </TouchableOpacity>
                     </View>
                   ) : (
-                    <TouchableOpacity style={styles.seedBtn} onPress={() => setSeedMode('type')}>
+                    <TouchableOpacity style={styles.seedBtn} onPress={() => { Keyboard.dismiss(); setSeedMode('type'); }}>
                       <Ionicons name="document-text-outline" size={16} color={t.accent} />
                       <Text style={styles.seedBtnText}>Draw up from a report</Text>
                     </TouchableOpacity>
@@ -814,7 +819,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                         : <><Ionicons name="sparkles" size={16} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Draw It Up</Text></>}
                     </TouchableOpacity>
                   </View>
-                </>
+                </ScrollView>
               ) : (
                 <>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -871,7 +876,8 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                   )}
                 </>
               )}
-            </View>
+              </View>
+            </TouchableWithoutFeedback>
           </KeyboardAvoidingView>
         </Modal>
 
