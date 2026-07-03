@@ -1120,7 +1120,11 @@ export default function TeamEvalScreen() {
               return (
                 <TouchableOpacity
                   key={game.id}
-                  style={s.gameCard}
+                  style={[
+                    s.gameCard,
+                    // Lost games tint light clay red (same red family as live-game events)
+                    hasScore && !won && { backgroundColor: t.negativeSoft, borderColor: t.negative },
+                  ]}
                   onPress={() => game.status === 'in_progress' ? openLiveEntry(game) : openDetail(game)}
                 >
                   <View style={{ flex: 1 }}>
