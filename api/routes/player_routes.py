@@ -749,7 +749,7 @@ def add_training_comment_player(
     shared = pt.shared_report
     notif = models.PlayerNotification(
         coach_id=shared.shared_by_id,
-        type="player_commented",
+        type="player_commented_training",
         title="Player Responded",
         body=f"{pu.name} commented on their training: \"{body.text[:80]}\"",
         ref_id=training_id,

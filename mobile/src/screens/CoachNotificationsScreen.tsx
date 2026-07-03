@@ -17,6 +17,7 @@ import { ScreenBackground } from '../theme/components';
 const NOTIF_ICONS: Record<string, string> = {
   link_requested: 'link',
   player_commented: 'chatbubble',
+  player_commented_training: 'chatbubble',
   training_generated: 'barbell',
 };
 
@@ -139,7 +140,7 @@ export default function CoachNotificationsScreen() {
 
             {expandedId === n.id && (
               <View style={styles.expandedContent}>
-                {n.type === 'player_commented' && n.ref_id ? (
+                {(n.type === 'player_commented' || n.type === 'player_commented_training') && n.ref_id ? (
                   <>
                     <VoiceTextInput
                       style={styles.replyInput}
@@ -157,13 +158,17 @@ export default function CoachNotificationsScreen() {
                         if (!text) return;
                         setReplying(n.id);
                         try {
-                          await playerAPI.coachReplyToReport(n.ref_id!, text);
+                          if (n.type === 'player_commented_training') {
+                            await playerAPI.addCoachComment(n.ref_id!, { text });
+                          } else {
+                            await playerAPI.coachReplyToReport(n.ref_id!, text);
+                          }
                           await playerAPI.coachMarkRead(n.id);
                           setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
                           setReplyTexts(prev => ({ ...prev, [n.id]: '' }));
                           setExpandedId(null);
                         } catch (e: any) {
-                          Alert.alert('Error', 'Could not send reply');
+                          Alert.alert('Error', e?.response?.data?.detail ?? 'Could not send reply');
                         } finally {
                           setReplying(null);
                         }
