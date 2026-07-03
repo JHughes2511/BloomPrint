@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import Markdown from 'react-native-markdown-display';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -38,6 +39,7 @@ export default function PlayerCoachTrainingDetailScreen() {
   const { playerUser } = usePlayerAuth();
   const { t } = useTheme();
   const styles = makeStyles(t);
+  const markdownStyles = makeMarkdownStyles(t);
 
   const [training, setTraining] = useState<CoachTraining | null>(null);
   const [comments, setComments] = useState<PlayerComment[]>([]);
@@ -270,7 +272,7 @@ export default function PlayerCoachTrainingDetailScreen() {
               <Text style={styles.sectionLabel}>Your Program</Text>
               <View style={styles.programBox}>
                 {training.player_program_text
-                  ? renderReport(training.player_program_text, { heading: t.ink, body: t.inkSoft })
+                  ? <Markdown style={markdownStyles}>{training.player_program_text}</Markdown>
                   : <Text style={{ color: t.muted, fontSize: 13 }}>Not ready yet — pull to refresh.</Text>}
               </View>
             </View>
@@ -359,6 +361,16 @@ export default function PlayerCoachTrainingDetailScreen() {
     </ScreenBackground>
   );
 }
+
+const makeMarkdownStyles = (t: ThemeTokens) => ({
+  body: { color: t.inkSoft, fontSize: 13, lineHeight: 22 },
+  heading1: { color: t.ink, fontSize: 16, fontFamily: fonts[800], marginTop: 16, marginBottom: 4 },
+  heading2: { color: t.ink, fontSize: 14, fontFamily: fonts[700], marginTop: 14, marginBottom: 4 },
+  heading3: { color: t.muted, fontSize: 13, fontFamily: fonts[700], marginTop: 12, marginBottom: 2 },
+  strong: { color: t.ink, fontFamily: fonts[700] },
+  bullet_list: { marginLeft: 8 },
+  list_item: { color: t.inkSoft, fontSize: 13 },
+});
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },

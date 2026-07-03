@@ -15,33 +15,20 @@ class RegenerateRequest(BaseModel):
 
 
 def build_player_training_prompt(player_name: str, original_text: str, feedback: str | None = None) -> str:
-    """Restructure a coach's training program into the checklist format the
-    player's training screens parse into a checkable weekly plan."""
+    """Recreate a coach's training program in the same rich, markdown-formatted
+    style the player's own self-generated training programs use."""
     prompt = (
-        f"You are the BloomPrint Basketball Intelligence Model. A coach wrote the following training "
-        f"program for {player_name}. Restructure it (do not lose any of the coach's intent, drills, or "
-        f"priorities) into the exact format below so it can be tracked as a weekly checklist.\n\n"
-        f"COACH'S ORIGINAL PROGRAM:\n{original_text[:4000]}\n\n"
+        f"You are the BloomPrint Basketball Intelligence Model. Generate a personalized, detailed training "
+        f"program for {player_name} based on the following training program written by their coach.\n\n"
+        f"COACH'S PROGRAM:\n{original_text[:4000]}\n\n"
     )
     if feedback:
         prompt += f"PLAYER FEEDBACK TO INCORPORATE:\n{feedback}\n\n"
     prompt += (
-        "OUTPUT FORMAT (follow exactly):\n\n"
-        "WEEKLY STRUCTURE OVERVIEW\n"
-        "MONDAY — [focus title] ([duration], e.g. 60 min)\n"
-        "  · [drill or task]\n"
-        "  · [drill or task]\n"
-        "TUESDAY — [focus title] ([duration])\n"
-        "  · [drill or task]\n"
-        "(continue for each day the program uses — skip rest days, use real day-of-week names "
-        "MONDAY through SUNDAY as the heading for each active day)\n\n"
-        "KPI TARGETS\n"
-        "  [3-5 KPIs this program is designed to move]\n\n"
-        "PROGRESS CHECKPOINTS\n"
-        "  2-week: [milestone]\n"
-        "  4-week: [milestone]\n\n"
-        "IMPORTANT: Do NOT use ## headers or ** bold markers. Use plain text section labels exactly as "
-        "shown above, with each day of the week as its own heading line."
+        "Create a detailed, actionable training program with specific drills, focus areas, and a weekly "
+        "structure, preserving the coach's priorities and intent. Format with clear sections, headers, and "
+        "tables where useful. Include a weekly plan broken out by day of the week (e.g. MONDAY, TUESDAY, "
+        "WEDNESDAY, ...) so each day's focus and drills can be tracked as a checklist."
     )
     return prompt
 
