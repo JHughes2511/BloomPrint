@@ -1143,6 +1143,96 @@ def update_whiteboard(
     return {"id": board.id, "name": board.name, "court_type": board.court_type, "data": board.data}
 
 
+# ── AI play draw-up ───────────────────────────────────────────────────────────
+# Turns a coach's description of a scene/play into a structured X's-and-O's
+# diagram: offense / defense / counter schemes plus a numbered improvement key.
+_AI_PLAY_PROMPT = """You are an elite basketball tactician. From the scene description below, produce a schematic play diagram as STRICT JSON (no markdown, no prose).
+
+COORDINATES: feet on a regulation court, x from 0 (left sideline) to 50 (right sideline), y from 0 (far baseline) to 94 (near baseline). Draw the primary action in the NEAR half (y between 50 and 92) unless the scene requires full court. Keep every coordinate inside 2..48 for x and 4..92 for y.
+
+Return exactly this shape:
+{
+  "play_name": "short name",
+  "schemes": {
+    "offense": {"players": [{"id": "O1", "x": 25, "y": 80}], "defenders": [{"id": "X1", "x": 25, "y": 76}], "actions": [{"kind": "cut|screen|pass|dribble", "from": [25, 80], "to": [30, 70]}]},
+    "defense": { same shape },
+    "counter": { same shape }
+  },
+  "key": [{"n": 1, "text": "concise coaching suggestion", "from": [x, y], "to": [x, y]}]
+}
+
+RULES: 5 offensive players (O1-O5) and up to 5 defenders (X1-X5) per scheme; at most 10 actions per scheme; 3-5 key items. offense = what the offense ran / should run; defense = the defensive scheme and rotations; counter = the counter/adjustment. The key holds the suggested movements or positioning that would have made the play succeed (get a basket, find the open man, correct the rotation) — each key arrow shows the improved movement. Keep key text under 90 characters."""
+
+
+@router.post("/ai-play")
+async def ai_play(
+    body: dict,
+    coach: models.Coach = Depends(get_current_coach),
+):
+    import os
+    import re as _re
+    import json as _json
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(status_code=503, detail="ANTHROPIC_API_KEY not configured")
+    description = (body.get("description") or "").strip()
+    if not description:
+        raise HTTPException(status_code=400, detail="Describe the scene or play first")
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        resp = await client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=3000,
+            messages=[{"role": "user", "content": f"{_AI_PLAY_PROMPT}\n\nSCENE:\n{description}"}],
+        )
+        blocks = [b for b in resp.content if hasattr(b, "text")]
+        raw = (blocks[0].text if blocks else "{}").strip()
+        raw = _re.sub(r"^```(?:json)?|```$", "", raw, flags=_re.MULTILINE).strip()
+        m = _re.search(r"\{.*\}", raw, _re.DOTALL)
+        data = _json.loads(m.group(0) if m else raw)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"AI play generation failed: {exc}")
+
+    # Validate + clamp everything the client will render.
+    def _pt(v, lo, hi, d):
+        try:
+            return max(lo, min(hi, float(v)))
+        except (TypeError, ValueError):
+            return d
+
+    def _clean_scheme(sc):
+        sc = sc if isinstance(sc, dict) else {}
+        out = {"players": [], "defenders": [], "actions": []}
+        for i, pl in enumerate((sc.get("players") or [])[:5]):
+            out["players"].append({"id": str(pl.get("id") or f"O{i+1}")[:3],
+                                   "x": _pt(pl.get("x"), 2, 48, 25), "y": _pt(pl.get("y"), 4, 92, 80)})
+        for i, df in enumerate((sc.get("defenders") or [])[:5]):
+            out["defenders"].append({"id": str(df.get("id") or f"X{i+1}")[:3],
+                                     "x": _pt(df.get("x"), 2, 48, 25), "y": _pt(df.get("y"), 4, 92, 74)})
+        for a in (sc.get("actions") or [])[:10]:
+            fr, to = a.get("from") or [25, 80], a.get("to") or [25, 70]
+            out["actions"].append({"kind": str(a.get("kind") or "cut"),
+                                   "from": [_pt(fr[0], 2, 48, 25), _pt(fr[1], 4, 92, 80)],
+                                   "to":   [_pt(to[0], 2, 48, 25), _pt(to[1], 4, 92, 70)]})
+        return out
+
+    schemes = data.get("schemes") if isinstance(data.get("schemes"), dict) else {}
+    key_items = []
+    for i, k in enumerate((data.get("key") or [])[:5]):
+        fr, to = (k.get("from") or [25, 80]), (k.get("to") or [25, 70])
+        key_items.append({"n": int(k.get("n") or i + 1),
+                          "text": str(k.get("text") or "")[:120],
+                          "from": [_pt(fr[0], 2, 48, 25), _pt(fr[1], 4, 92, 80)],
+                          "to":   [_pt(to[0], 2, 48, 25), _pt(to[1], 4, 92, 70)]})
+    return {
+        "play_name": str(data.get("play_name") or "AI Play")[:40],
+        "schemes": {name: _clean_scheme(schemes.get(name)) for name in ("offense", "defense", "counter")},
+        "key": key_items,
+    }
+
+
 @router.delete("/whiteboards/{board_id}")
 def delete_whiteboard(
     board_id: int,

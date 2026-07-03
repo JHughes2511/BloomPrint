@@ -6,7 +6,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path, Circle, Line, Rect, G, Text as SvgText } from 'react-native-svg';
-import { whiteboardAPI } from '../api/client';
+import { whiteboardAPI, gameReportsAPI } from '../api/client';
+import VoiceTextInput from './VoiceTextInput';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -33,13 +34,18 @@ interface Stroke {
   x1?: number; y1?: number; x2?: number; y2?: number;
   x?: number; y?: number; label?: string;
   color: string; strokeWidth: number;
+  dash?: boolean;                 // dashed rendering (passes, suggested movement)
+  layer?: 'offense' | 'defense' | 'counter' | 'key';  // AI scheme layer
 }
+
+type SchemeKey = 'offense' | 'defense' | 'counter';
 
 interface Board {
   id?: number;
   name: string;
   court_type: CourtType;
   strokes: Stroke[];
+  ai?: { play_name: string; key: { n: number; text: string }[] };
 }
 
 // Three marker colors with strong contrast on maple hardwood, one thickness.
@@ -169,6 +175,98 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   useEffect(() => { boardsRef.current = boards; }, [boards]);
   const dragRef = useRef<{ id: string; dx: number; dy: number; wasSelected?: boolean; label?: string } | null>(null);
 
+  // ── AI play draw-up ──────────────────────────────────────────────────────
+  const [showAI, setShowAI]             = useState(false);
+  const [aiDescription, setAiDescription] = useState('');
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [activeScheme, setActiveScheme] = useState<SchemeKey>('offense');
+  const [showKey, setShowKey]           = useState(true);
+  // Clip seeding
+  const [seedMode, setSeedMode]         = useState<'none' | 'reports' | 'clips'>('none');
+  const [seedReports, setSeedReports]   = useState<any[]>([]);
+  const [seedClips, setSeedClips]       = useState<any[]>([]);
+  const [seedLoading, setSeedLoading]   = useState(false);
+
+  const openSeedReports = async () => {
+    setSeedMode('reports');
+    setSeedLoading(true);
+    try { setSeedReports(await gameReportsAPI.list()); } catch { setSeedReports([]); }
+    setSeedLoading(false);
+  };
+
+  const openSeedClips = async (reportId: number) => {
+    setSeedMode('clips');
+    setSeedLoading(true);
+    try {
+      const rep = await gameReportsAPI.get(reportId);
+      setSeedClips(rep?.clips ?? []);
+    } catch { setSeedClips([]); }
+    setSeedLoading(false);
+  };
+
+  const seedFromClip = (clip: any) => {
+    const text = (clip?.analysis_text || '').trim();
+    if (text) setAiDescription(prev => (prev.trim() ? prev.trim() + '\n\n' : '') + text);
+    setSeedMode('none');
+  };
+
+  // Convert the AI scheme JSON (court feet) into layered strokes (canvas px),
+  // mapped for the FULL court view this board defaults to.
+  const buildPlayStrokes = (res: any): Stroke[] => {
+    const fs = Math.min((avail.w - 8) / COURT_FT_W, (avail.h - 8) / VISIBLE_FT.full);
+    const X = (ftv: number) => ftv * fs;
+    const mk = () => Math.random().toString(36).slice(2);
+    const out: Stroke[] = [];
+    (['offense', 'defense', 'counter'] as SchemeKey[]).forEach(layer => {
+      const sc = res?.schemes?.[layer];
+      if (!sc) return;
+      (sc.players ?? []).forEach((pl: any) => {
+        out.push({ id: mk(), type: 'circle', cx: X(pl.x), cy: X(pl.y), r: 11, color: '#141414', strokeWidth: 2.5, layer });
+        out.push({ id: mk(), type: 'text', x: X(pl.x) - 7, y: X(pl.y) + 4, label: pl.id, size: 11, color: '#141414', strokeWidth: 1, layer });
+      });
+      (sc.defenders ?? []).forEach((df: any) => {
+        out.push({ id: mk(), type: 'xmark', cx: X(df.x), cy: X(df.y), size: 8, color: '#C0392B', strokeWidth: 2.5, layer });
+        out.push({ id: mk(), type: 'text', x: X(df.x) + 10, y: X(df.y) + 4, label: df.id, size: 10, color: '#C0392B', strokeWidth: 1, layer });
+      });
+      (sc.actions ?? []).forEach((a: any) => {
+        out.push({ id: mk(), type: 'arrow', x1: X(a.from[0]), y1: X(a.from[1]), x2: X(a.to[0]), y2: X(a.to[1]),
+                   color: '#141414', strokeWidth: 2.5, dash: a.kind === 'pass', layer });
+      });
+    });
+    (res?.key ?? []).forEach((k: any) => {
+      out.push({ id: mk(), type: 'arrow', x1: X(k.from[0]), y1: X(k.from[1]), x2: X(k.to[0]), y2: X(k.to[1]),
+                 color: '#1F6F9B', strokeWidth: 3, dash: true, layer: 'key' });
+      out.push({ id: mk(), type: 'text', x: X(k.to[0]) + 5, y: X(k.to[1]) - 5, label: String(k.n), size: 13, color: '#1F6F9B', strokeWidth: 1, layer: 'key' });
+    });
+    return out;
+  };
+
+  const generatePlay = async () => {
+    if (!aiDescription.trim()) return;
+    setAiGenerating(true);
+    try {
+      const res = await whiteboardAPI.aiPlay(aiDescription.trim());
+      const idx = boards.length;
+      const newBoard: Board = {
+        name: res.play_name || `AI Play ${idx + 1}`,
+        court_type: 'full',
+        strokes: buildPlayStrokes(res),
+        ai: { play_name: res.play_name ?? 'AI Play', key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })) },
+      };
+      setBoards(prev => [...prev, newBoard]);
+      setActiveBoardIdx(idx);
+      setActiveScheme('offense');
+      setShowKey(true);
+      saveBoard(idx, newBoard);
+      setShowAI(false);
+      setAiDescription('');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate the play');
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
   const textAt = (x: number, y: number): Stroke | null => {
     const strokes = boardsRef.current[activeBoardIdxRef.current]?.strokes ?? [];
     for (let i = strokes.length - 1; i >= 0; i--) {
@@ -240,7 +338,12 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), 5000)),
       ]);
       if (data.length > 0) {
-        setBoards(data.map((b: any) => ({ ...b, strokes: JSON.parse(b.data || '[]') })));
+        setBoards(data.map((b: any) => {
+          const parsed = JSON.parse(b.data || '[]');
+          return Array.isArray(parsed)
+            ? { ...b, strokes: parsed }
+            : { ...b, strokes: parsed.strokes ?? [], ai: parsed.ai };
+        }));
       } else {
         setBoards([{ name: 'Board 1', court_type: 'full', strokes: [] }]);
       }
@@ -255,7 +358,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const saveBoard = useCallback(async (idx: number, b: Board) => {
     setSaving(true);
     try {
-      const ds = JSON.stringify(b.strokes);
+      const ds = JSON.stringify(b.ai ? { strokes: b.strokes, ai: b.ai } : b.strokes);
       if (b.id) {
         await whiteboardAPI.update(b.id, { name: b.name, court_type: b.court_type, data: ds });
       } else {
@@ -420,10 +523,12 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const renderStroke = (s: Stroke) => {
     if (s.type === 'path') {
       return <Path key={s.id} d={s.d} stroke={s.color} strokeWidth={s.strokeWidth}
+                   strokeDasharray={s.dash ? '7,6' : undefined}
                    fill="none" strokeLinecap="round" strokeLinejoin="round" />;
     }
     if (s.type === 'circle') {
       return <Circle key={s.id} cx={s.cx} cy={s.cy} r={s.r}
+                     strokeDasharray={s.dash ? '7,6' : undefined}
                      stroke={s.color} strokeWidth={s.strokeWidth} fill="none" />;
     }
     if (s.type === 'xmark' && s.cx != null && s.cy != null && s.size != null) {
@@ -448,7 +553,8 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       const shaftEnd = { x: s.x2 - ux*as*0.85, y: s.y2 - uy*as*0.85 };
       return (
         <G key={s.id}>
-          <Line x1={s.x1} y1={s.y1} x2={shaftEnd.x} y2={shaftEnd.y} stroke={s.color} strokeWidth={s.strokeWidth} strokeLinecap="round" />
+          <Line x1={s.x1} y1={s.y1} x2={shaftEnd.x} y2={shaftEnd.y} stroke={s.color} strokeWidth={s.strokeWidth} strokeLinecap="round"
+                strokeDasharray={s.dash ? '8,6' : undefined} />
           <Path d={`M${tip.x},${tip.y} L${b1.x},${b1.y} L${b2.x},${b2.y} Z`} fill={s.color} />
         </G>
       );
@@ -504,6 +610,26 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           ))}
         </View>
 
+        {/* AI scheme switcher — only on AI-generated boards */}
+        {board?.ai && (
+          <View style={styles.schemeRow}>
+            {(['offense', 'defense', 'counter'] as SchemeKey[]).map(sc => (
+              <TouchableOpacity key={sc}
+                style={[styles.schemeChip, activeScheme === sc && styles.schemeChipActive]}
+                onPress={() => setActiveScheme(sc)}>
+                <Text style={[styles.schemeChipText, activeScheme === sc && { color: t.ctaText }]}>
+                  {sc === 'offense' ? 'Offense' : sc === 'defense' ? 'Defense' : 'Counter'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity
+              style={[styles.schemeChip, showKey && { backgroundColor: '#1F6F9B22', borderColor: '#1F6F9B' }]}
+              onPress={() => setShowKey(v => !v)}>
+              <Text style={[styles.schemeChipText, showKey && { color: '#1F6F9B' }]}>Key</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Toolbar */}
         <View style={styles.toolbar}>
           <View style={styles.toolRow}>
@@ -515,6 +641,9 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               </TouchableOpacity>
             ))}
             <View style={styles.toolDivider} />
+            <TouchableOpacity style={[styles.toolBtn, { backgroundColor: t.accentSoft }]} onPress={() => setShowAI(true)}>
+              <Ionicons name="sparkles" size={17} color={t.accent} />
+            </TouchableOpacity>
             <TouchableOpacity style={styles.toolBtn} onPress={undo}>
               <Ionicons name="arrow-undo" size={18} color={t.muted} />
             </TouchableOpacity>
@@ -577,7 +706,9 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               <View style={[styles.canvasWrapper, { width: courtW, height: courtH }]} {...panResponder.panHandlers}>
                 <HardwoodCourt width={courtW} height={courtH} />
                 <Svg style={StyleSheet.absoluteFill} width={courtW} height={courtH}>
-                  {board?.strokes.map(renderStroke)}
+                  {board?.strokes
+                    .filter(st => !st.layer || st.layer === activeScheme || (showKey && st.layer === 'key'))
+                    .map(renderStroke)}
                   {livePath ? (
                     <Path d={livePath} stroke={color} strokeWidth={STROKE_WIDTH}
                           fill="none" strokeLinecap="round" strokeLinejoin="round" />
@@ -587,6 +718,103 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
             )}
           </View>
         )}
+
+        {/* AI Key — the suggested improvements, numbered to match the dashed arrows */}
+        {board?.ai && showKey && board.ai.key.length > 0 && (
+          <View style={styles.keyPanel}>
+            <Text style={styles.keyTitle}>KEY — SUGGESTED IMPROVEMENTS</Text>
+            <ScrollView style={{ maxHeight: 96 }} showsVerticalScrollIndicator={false}>
+              {board.ai.key.map(k => (
+                <Text key={k.n} style={styles.keyItem}>
+                  <Text style={{ color: '#1F6F9B', fontFamily: fonts[800] }}>{k.n}. </Text>
+                  {k.text}
+                </Text>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
+        {/* AI play modal */}
+        <Modal visible={showAI} transparent animationType="slide" onRequestClose={() => { setShowAI(false); setSeedMode('none'); }}>
+          <KeyboardAvoidingView style={styles.listOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+            <View style={[styles.listBox, { padding: 20 }]}>
+              {seedMode === 'none' ? (
+                <>
+                  <Text style={styles.listTitle}>AI Play Draw-Up</Text>
+                  <Text style={styles.aiHint}>
+                    Describe the scene or play — what was run, what the defense did, what went wrong.
+                    The AI draws the offense, defense, and counter, plus a key of what would have made it work.
+                  </Text>
+                  <VoiceTextInput
+                    style={[styles.textField, { minHeight: 110 }]}
+                    placeholder="e.g. High P&R left, their big hedged hard, roller was open but the pass came late, weak-side corner never lifted..."
+                    placeholderTextColor={t.muted2}
+                    value={aiDescription}
+                    onChangeText={setAiDescription}
+                    multiline
+                    textAlignVertical="top"
+                  />
+                  <TouchableOpacity style={styles.seedBtn} onPress={openSeedReports}>
+                    <Ionicons name="film-outline" size={16} color={t.accent} />
+                    <Text style={styles.seedBtnText}>Seed from a game-report clip</Text>
+                  </TouchableOpacity>
+                  <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+                    <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]}
+                      onPress={() => setShowAI(false)}>
+                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.addBoardBtn, { flex: 1, opacity: aiDescription.trim() && !aiGenerating ? 1 : 0.5 }]}
+                      onPress={generatePlay} disabled={!aiDescription.trim() || aiGenerating}>
+                      {aiGenerating
+                        ? <ActivityIndicator color={t.ctaText} size="small" />
+                        : <><Ionicons name="sparkles" size={16} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Draw It Up</Text></>}
+                    </TouchableOpacity>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                    <TouchableOpacity onPress={() => setSeedMode(seedMode === 'clips' ? 'reports' : 'none')}>
+                      <Ionicons name="chevron-back" size={22} color={t.ink} />
+                    </TouchableOpacity>
+                    <Text style={[styles.listTitle, { marginBottom: 0 }]}>
+                      {seedMode === 'reports' ? 'Pick a Game Report' : 'Pick a Clip'}
+                    </Text>
+                  </View>
+                  {seedLoading ? (
+                    <ActivityIndicator color={t.accent} style={{ marginVertical: 24 }} />
+                  ) : (
+                    <ScrollView style={{ maxHeight: 340 }}>
+                      {seedMode === 'reports' && (seedReports.length === 0
+                        ? <Text style={styles.aiHint}>No game reports yet.</Text>
+                        : seedReports.map((r: any) => (
+                          <TouchableOpacity key={r.id} style={styles.listRow} onPress={() => openSeedClips(r.id)}>
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.listItemText}>{r.opponent_name ?? r.opponent_team_name ?? r.title ?? `Report ${r.id}`}</Text>
+                              <Text style={styles.listItemSub}>{new Date(r.created_at).toLocaleDateString()}</Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={16} color={t.muted2} />
+                          </TouchableOpacity>
+                        )))}
+                      {seedMode === 'clips' && (seedClips.length === 0
+                        ? <Text style={styles.aiHint}>No analyzed clips in this report.</Text>
+                        : seedClips.map((c: any) => (
+                          <TouchableOpacity key={c.id} style={styles.listRow} onPress={() => seedFromClip(c)}>
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.listItemText} numberOfLines={1}>{c.title ?? `Clip ${c.id}`}</Text>
+                              <Text style={styles.listItemSub} numberOfLines={2}>{(c.analysis_text ?? '').slice(0, 90) || 'No analysis text'}</Text>
+                            </View>
+                            <Ionicons name="add-circle-outline" size={18} color={t.accent} />
+                          </TouchableOpacity>
+                        )))}
+                    </ScrollView>
+                  )}
+                </>
+              )}
+            </View>
+          </KeyboardAvoidingView>
+        </Modal>
 
         {/* Board list modal */}
         <Modal visible={showBoardList} transparent animationType="slide" onRequestClose={() => setShowBoardList(false)}>
@@ -680,4 +908,14 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   textCtrlLabel:   { color: t.muted, fontSize: 12, fontFamily: fonts[600], flex: 1 },
   textCtrlBtn:     { minWidth: 36, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: t.chip, paddingHorizontal: 8 },
   textCtrlBtnLabel:{ color: t.ink, fontSize: 13, fontFamily: fonts[800] },
+  schemeRow:       { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider },
+  schemeChip:      { borderRadius: 16, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: t.line },
+  schemeChipActive:{ backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  schemeChipText:  { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
+  keyPanel:        { paddingHorizontal: 16, paddingVertical: 10, borderTopWidth: 1, borderTopColor: t.divider },
+  keyTitle:        { color: t.label, fontSize: 10.5, fontFamily: fonts[700], letterSpacing: 1.4, marginBottom: 6 },
+  keyItem:         { color: t.inkSoft, fontSize: 12.5, lineHeight: 18, marginBottom: 4 },
+  aiHint:          { color: t.muted, fontSize: 12.5, lineHeight: 18, marginBottom: 12 },
+  seedBtn:         { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: t.line, alignSelf: 'flex-start' },
+  seedBtnText:     { color: t.accent, fontSize: 13, fontFamily: fonts[700] },
 });

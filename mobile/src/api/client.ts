@@ -266,6 +266,8 @@ export const whiteboardAPI = {
   update: (boardId: number, data: { name?: string; court_type?: string; data?: string }) =>
     api.patch(`/game-eval/whiteboards/${boardId}`, data).then(r => r.data),
   delete: (boardId: number) => api.delete(`/game-eval/whiteboards/${boardId}`).then(r => r.data),
+  aiPlay: (description: string) =>
+    api.post('/game-eval/ai-play', { description }).then(r => r.data),
 };
 
 export const gameReportsAPI = {
