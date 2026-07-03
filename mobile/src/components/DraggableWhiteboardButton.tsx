@@ -1,41 +1,52 @@
 import React, { useRef } from 'react';
 import { Animated, PanResponder, Dimensions, StyleSheet } from 'react-native';
-import Svg, { Rect, Circle, Path, Line } from 'react-native-svg';
-import { useTheme } from '../theme/ThemeProvider';
+import Svg, { Rect, Circle, Path, Line, Defs, ClipPath } from 'react-native-svg';
 
-const W = 54;
-const H = 54;
+const W = 52;
+const H = 62;
 
 // Same palette as the whiteboard's hardwood court.
 const WOOD_A = '#E5C593';
 const WOOD_B = '#DDBA84';
-const LINE = '#7A4326';
+const LINE = '#7A4326';   // walnut painted lines
+const CLIP = '#5C3A22';   // dark walnut clip
 
-/** The button IS a miniature hardwood half-court — no surrounding bubble. */
-function MiniCourt() {
+/** A clipboard whose board face is a classic hardwood court. */
+function CourtClipboard() {
   const lw = 1.6;
+  const bTop = 8;                 // board starts under the clip
+  const bx = 2, bw = W - 4, bh = H - bTop - 2;
+  const cx = W / 2;
   return (
     <Svg width={W} height={H}>
-      {/* wood planks */}
+      <Defs>
+        <ClipPath id="boardClip">
+          <Rect x={bx} y={bTop} width={bw} height={bh} rx={8} />
+        </ClipPath>
+      </Defs>
+
+      {/* board face: wood planks clipped to the rounded board */}
       {[0, 1, 2, 3, 4, 5].map(i => (
-        <Rect key={i} x={i * (W / 6)} y={0} width={W / 6} height={H}
-              fill={i % 2 === 0 ? WOOD_A : WOOD_B} />
+        <Rect key={i} x={bx + i * (bw / 6)} y={bTop} width={bw / 6} height={bh}
+              fill={i % 2 === 0 ? WOOD_A : WOOD_B} clipPath="url(#boardClip)" />
       ))}
-      {/* boundary */}
-      <Rect x={lw} y={lw} width={W - lw * 2} height={H - lw * 2}
-            rx={9} stroke={LINE} strokeWidth={lw} fill="none" />
-      {/* key */}
-      <Rect x={W / 2 - 9} y={H - 22} width={18} height={20}
-            stroke={LINE} strokeWidth={lw} fill="rgba(122,67,38,0.10)" />
-      {/* free-throw circle */}
-      <Circle cx={W / 2} cy={H - 22} r={7} stroke={LINE} strokeWidth={lw} fill="none" />
-      {/* rim */}
-      <Circle cx={W / 2} cy={H - 7} r={2.4} stroke={LINE} strokeWidth={lw} fill="none" />
-      {/* backboard */}
-      <Line x1={W / 2 - 5} y1={H - 4} x2={W / 2 + 5} y2={H - 4} stroke={LINE} strokeWidth={lw + 0.6} />
-      {/* three-point arc */}
-      <Path d={`M 7 ${H - 2} Q 7 14 ${W / 2} 14 Q ${W - 7} 14 ${W - 7} ${H - 2}`}
-            stroke={LINE} strokeWidth={lw} fill="none" />
+
+      {/* court markings on the board */}
+      <Rect x={cx - 8} y={H - 20} width={16} height={18}
+            stroke={LINE} strokeWidth={lw} fill="rgba(122,67,38,0.10)" clipPath="url(#boardClip)" />
+      <Circle cx={cx} cy={H - 20} r={6} stroke={LINE} strokeWidth={lw} fill="none" clipPath="url(#boardClip)" />
+      <Circle cx={cx} cy={H - 7} r={2.2} stroke={LINE} strokeWidth={lw} fill="none" clipPath="url(#boardClip)" />
+      <Line x1={cx - 4.5} y1={H - 4} x2={cx + 4.5} y2={H - 4} stroke={LINE} strokeWidth={lw + 0.5} clipPath="url(#boardClip)" />
+      <Path d={`M ${bx + 4} ${H - 2} Q ${bx + 4} 18 ${cx} 18 Q ${bx + bw - 4} 18 ${bx + bw - 4} ${H - 2}`}
+            stroke={LINE} strokeWidth={lw} fill="none" clipPath="url(#boardClip)" />
+
+      {/* board border */}
+      <Rect x={bx + lw / 2} y={bTop + lw / 2} width={bw - lw} height={bh - lw}
+            rx={8} stroke={LINE} strokeWidth={lw} fill="none" />
+
+      {/* clipboard clip — dark walnut, classic metal-clip silhouette */}
+      <Rect x={cx - 11} y={3} width={22} height={10} rx={4} fill={CLIP} />
+      <Rect x={cx - 5} y={0} width={10} height={7} rx={3.5} stroke={CLIP} strokeWidth={2.4} fill="none" />
     </Svg>
   );
 }
@@ -51,7 +62,6 @@ type Props = {
  */
 export default function DraggableWhiteboardButton({ onPress }: Props) {
   const { width, height } = Dimensions.get('window');
-  const { t } = useTheme();
 
   // Start near the bottom-right corner.
   const pan = useRef(
@@ -96,13 +106,10 @@ export default function DraggableWhiteboardButton({ onPress }: Props) {
 
   return (
     <Animated.View
-      style={[
-        styles.button,
-        { borderColor: t.cardBorder, transform: pan.getTranslateTransform() },
-      ]}
+      style={[styles.button, { transform: pan.getTranslateTransform() }]}
       {...panResponder.panHandlers}
     >
-      <MiniCourt />
+      <CourtClipboard />
     </Animated.View>
   );
 }
@@ -114,14 +121,13 @@ const styles = StyleSheet.create({
     left: 0,
     width: W,
     height: H,
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#000',
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
-    elevation: 10,
+    elevation: 8,
     zIndex: 100,
   },
 });
