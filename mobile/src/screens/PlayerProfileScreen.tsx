@@ -723,8 +723,8 @@ export default function PlayerProfileScreen() {
 
       {/* Training picker modal — choose which training to send */}
       <Modal visible={showTrainingPicker} transparent animationType="slide">
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%' }}>
+        <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%', borderWidth: 1, borderColor: t.cardBorder }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip }}>
               <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[800] }}>
                 {trainingPickerAction === 'player' ? 'Send Training to Player' :
@@ -786,8 +786,8 @@ export default function PlayerProfileScreen() {
 
       {/* Player profile detail modal */}
       <Modal visible={showProfileDetail} transparent animationType="slide">
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%' }}>
+        <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', borderWidth: 1, borderColor: t.cardBorder }}>
             {/* Header */}
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: t.chip }}>
               <Text style={{ color: t.ink, fontSize: 16, fontFamily: fonts[800] }}>Player Profile</Text>
@@ -867,7 +867,7 @@ export default function PlayerProfileScreen() {
 
       {/* Training detail modal — full-screen so all text is readable */}
       <Modal visible={!!trainingModalItem} transparent animationType="slide">
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }}>
+        <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 60 }}>
             {/* Compact header — max ~50px tall */}
             <View style={{

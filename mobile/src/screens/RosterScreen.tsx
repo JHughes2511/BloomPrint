@@ -417,7 +417,7 @@ export default function RosterScreen() {
           {/* Parent/Guardian consent disclaimer — an in-modal overlay, because a
               nested <Modal> won't present over an already-open Modal on iOS. */}
           {showDisclaimer && (
-            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', padding: 20 }}>
+            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: t.scrim, justifyContent: 'center', padding: 20 }}>
               <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, maxHeight: '80%', borderWidth: 1, borderColor: t.cardBorder }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                   <Ionicons name="shield-checkmark-outline" size={20} color={t.accent} />

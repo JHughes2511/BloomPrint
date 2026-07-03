@@ -12,6 +12,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { evalsAPI, teamsAPI, playerAPI, gameReportsAPI, staffSharingAPI, coachesAPI } from '../api/client';
+import ShareModal from '../components/ShareModal';
 import { useAuth } from '../context/AuthContext';
 import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
@@ -160,6 +161,7 @@ export default function TeamReportScreen() {
     }
   };
 
+  const [prevShareReport, setPrevShareReport] = useState<any | null>(null);
   const [showStaffShare, setShowStaffShare] = useState(false);
   const [staffSearch, setStaffSearch] = useState('');
   const [staffResults, setStaffResults] = useState<any[]>([]);
@@ -733,7 +735,7 @@ export default function TeamReportScreen() {
 
       {/* Previous Report Detail Modal */}
       <Modal visible={!!selectedPrevReport} animationType="slide" transparent>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }}>
+        <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <View style={{ flex: 1 }}>
@@ -757,42 +759,19 @@ export default function TeamReportScreen() {
 
               {/* Share + Print/Export buttons */}
               <View style={{ gap: 8, marginTop: 20 }}>
-                <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <TouchableOpacity
-                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.positive, borderRadius: 10, paddingVertical: 12 }}
-                    onPress={() => {
-                      if (!selectedPrevReport?.report_text) return;
-                      setShareSourceReport(selectedPrevReport);
-                      setReportText(selectedPrevReport.report_text);
-                      setSavedTeamReportId(selectedPrevReport.id);
-                      const initial: Record<string, boolean> = {};
-                      for (const s of splitReportSections(selectedPrevReport.report_text)) initial[s.heading] = true;
-                      setSectionToggles(initial);
-                      setSelectedPrevReport(null);
-                      setTimeout(() => setShowShare(true), 200);
-                    }}
-                  >
-                    <Ionicons name="person-outline" size={15} color="#16201A" />
-                    <Text style={{ color: '#16201A', fontFamily: fonts[700], fontSize: 13 }}>Send to Player</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.ctaBg, borderRadius: 10, paddingVertical: 12 }}
-                    onPress={() => {
-                      if (!selectedPrevReport) return;
-                      setShareSourceReport(selectedPrevReport);
-                      setReportText(selectedPrevReport.report_text);
-                      setSavedTeamReportId(selectedPrevReport.id);
-                      const initial: Record<string, boolean> = {};
-                      for (const s of splitReportSections(selectedPrevReport.report_text ?? '')) initial[s.heading] = true;
-                      setSectionToggles(initial);
-                      setSelectedPrevReport(null);
-                      setTimeout(() => { setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }, 200);
-                    }}
-                  >
-                    <Ionicons name="people-outline" size={15} color={t.ctaText} />
-                    <Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>Send to Staff</Text>
-                  </TouchableOpacity>
-                </View>
+                {/* Unified share — player / whole team / all staff */}
+                <TouchableOpacity
+                  style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.ctaBg, borderRadius: 10, paddingVertical: 12 }}
+                  onPress={() => {
+                    if (!selectedPrevReport) return;
+                    const rep = selectedPrevReport;
+                    setSelectedPrevReport(null);
+                    setTimeout(() => setPrevShareReport(rep), 200);
+                  }}
+                >
+                  <Ionicons name="share-social-outline" size={15} color={t.ctaText} />
+                  <Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>Share — Player, Team, or Staff</Text>
+                </TouchableOpacity>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   <TouchableOpacity
                     style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.chip, borderRadius: 10, paddingVertical: 12, borderWidth: 1, borderColor: t.line }}
@@ -1111,6 +1090,19 @@ export default function TeamReportScreen() {
         </KeyboardAvoidingView>
       </Modal>
     </KeyboardAvoidingView>
+
+    {/* Unified share for previous reports — player / whole team / all staff */}
+    {prevShareReport && (
+      <ShareModal
+        visible={!!prevShareReport}
+        onClose={() => setPrevShareReport(null)}
+        reportType="team_report"
+        reportId={prevShareReport.id}
+        outputType={prevShareReport.output_type ?? 'coaching_report'}
+        reportText={prevShareReport.report_text ?? ''}
+        title={outputTypeLabel(prevShareReport.output_type)}
+      />
+    )}
     </ScreenBackground>
   );
 }

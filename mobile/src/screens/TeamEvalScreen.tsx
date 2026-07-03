@@ -2527,8 +2527,8 @@ export default function TeamEvalScreen() {
 
       {/* Player grade detail (from leaderboard) */}
       <Modal visible={gradeDetailPlayer !== null} transparent animationType="slide" onRequestClose={() => setGradeDetailPlayer(null)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', paddingBottom: 24 }}>
+        <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', paddingBottom: 24, borderWidth: 1, borderColor: t.cardBorder }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip }}>
               <View>
                 <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }}>{gradeDetailPlayer}</Text>
@@ -2635,8 +2635,8 @@ export default function TeamEvalScreen() {
 
       {/* Share game with staff modal */}
       <Modal visible={shareGameModalVisible} animationType="slide" transparent>
-        <KeyboardAvoidingView style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={{ backgroundColor: t.card, borderRadius: 20, padding: 20, maxHeight: '80%', margin: 8 }}>
+        <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={{ backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '80%', margin: 8, borderWidth: 1, borderColor: t.cardBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }}>Share with Staff</Text>
               <TouchableOpacity onPress={() => setShareGameModalVisible(false)}>

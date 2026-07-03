@@ -940,7 +940,7 @@ export default function EvalReportScreen() {
                   style={[styles.pillarChip, selectedPillar === p && styles.pillarChipActive]}
                   onPress={() => setSelectedPillar(p)}
                 >
-                  <Text style={[styles.pillarChipText, selectedPillar === p && { color: t.ink }]}>
+                  <Text style={[styles.pillarChipText, selectedPillar === p && { color: t.ctaText, fontFamily: fonts[700] }]}>
                     {p ? PILLAR_LABELS[p] : 'General'}
                   </Text>
                 </TouchableOpacity>
@@ -1114,7 +1114,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   label: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
   pillarChip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 7, marginRight: 6 },
   pillarChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
-  pillarChipText: { color: t.muted, fontSize: 12 },
+  pillarChipText: { color: t.inkSoft, fontSize: 12 },
   input: { backgroundColor: t.chip, borderRadius: 14, padding: 14, color: t.ink, fontSize: 14, marginBottom: 12, borderWidth: 1, borderColor: t.line },
   modalRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
   cancelBtn: { flex: 1, padding: 14, borderRadius: 999, borderWidth: 1, borderColor: t.cta2Border, alignItems: 'center' },
