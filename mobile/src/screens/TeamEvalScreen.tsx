@@ -928,7 +928,7 @@ export default function TeamEvalScreen() {
     <View style={s.root}>
       {/* Top nav */}
       <View style={s.topNav}>
-        <Text style={s.screenTitle}>Team Eval</Text>
+        <Text style={s.screenTitle}>Team Grade</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {(['dashboard', 'games', 'scout'] as const).map(v => (
             <TouchableOpacity
