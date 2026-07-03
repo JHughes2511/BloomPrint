@@ -66,6 +66,7 @@ function HardwoodCourt({ width, height }: { width: number; height: number }) {
   const s = width / COURT_FT_W;       // feet -> px
   const L = COURT_FT_L * s;           // full length in px
   const ft = (n: number) => n * s;
+  const M = 6;                        // uniform wood margin around the painted boundary
 
   // Plank stripes (vertical, ~3.5ft wide)
   const planks = [];
@@ -79,14 +80,14 @@ function HardwoodCourt({ width, height }: { width: number; height: number }) {
 
   // One end's markings; mirrored for the far end via rotation.
   const End = ({ flip }: { flip?: boolean }) => {
-    // Drawn relative to the NEAR baseline (y = L); flip rotates 180° about center.
-    const base = L;
+    // Drawn relative to the NEAR baseline (y = L - M); flip rotates 180° about center.
+    const base = L - M;
     const cx = width / 2;
     const rimY = base - ft(5.25);
     const keyW = ft(16), keyH = ft(19);
     const ftY = base - keyH;
     const r3 = ft(22.15);
-    const cornerX = ft(4);
+    const cornerX = M + ft(4);
     const yCorner = rimY - Math.sqrt(Math.max(r3 * r3 - (cx - cornerX) ** 2, 0));
     return (
       <G transform={flip ? `rotate(180 ${cx} ${L / 2})` : undefined}>
@@ -102,6 +103,7 @@ function HardwoodCourt({ width, height }: { width: number; height: number }) {
         {/* three-point line: two corner segments + arc */}
         <Line x1={cornerX} y1={base} x2={cornerX} y2={yCorner} stroke={LINE} strokeWidth={LINE_W} />
         <Line x1={width - cornerX} y1={base} x2={width - cornerX} y2={yCorner} stroke={LINE} strokeWidth={LINE_W} />
+        {/* baseline-to-arc geometry uses the inset base, so edges stay uniform */}
         <Path d={`M ${cornerX} ${yCorner} A ${r3} ${r3} 0 0 1 ${width - cornerX} ${yCorner}`}
               stroke={LINE} strokeWidth={LINE_W} fill="none" />
       </G>
@@ -114,11 +116,11 @@ function HardwoodCourt({ width, height }: { width: number; height: number }) {
       <View style={{ position: 'absolute', left: 0, bottom: 0, width, height: L }}>
         <Svg width={width} height={L}>
           {planks}
-          {/* boundary */}
-          <Rect x={LINE_W / 2} y={LINE_W / 2} width={width - LINE_W} height={L - LINE_W}
+          {/* boundary — inset by the same margin on all four sides */}
+          <Rect x={M} y={M} width={width - M * 2} height={L - M * 2}
                 stroke={LINE} strokeWidth={LINE_W} fill="none" />
           {/* center line + circle */}
-          <Line x1={0} y1={L / 2} x2={width} y2={L / 2} stroke={LINE} strokeWidth={LINE_W} />
+          <Line x1={M} y1={L / 2} x2={width - M} y2={L / 2} stroke={LINE} strokeWidth={LINE_W} />
           <Circle cx={width / 2} cy={L / 2} r={ft(6)} stroke={LINE} strokeWidth={LINE_W} fill="none" />
           <Circle cx={width / 2} cy={L / 2} r={ft(2)} stroke={LINE} strokeWidth={LINE_W} fill="rgba(122,67,38,0.10)" />
           <End />
@@ -160,11 +162,12 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   // Text selection: with the Text tool, tap a label to select it, drag to move,
   // resize with the A-/A+ controls. Tap empty court to place a new label.
   const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
+  const [editingTextId, setEditingTextId] = useState<string | null>(null);
   const selectedTextIdRef = useRef<string | null>(null);
   useEffect(() => { selectedTextIdRef.current = selectedTextId; }, [selectedTextId]);
   const boardsRef = useRef<Board[]>([]);
   useEffect(() => { boardsRef.current = boards; }, [boards]);
-  const dragRef = useRef<{ id: string; dx: number; dy: number } | null>(null);
+  const dragRef = useRef<{ id: string; dx: number; dy: number; wasSelected?: boolean; label?: string } | null>(null);
 
   const textAt = (x: number, y: number): Stroke | null => {
     const strokes = boardsRef.current[activeBoardIdxRef.current]?.strokes ?? [];
@@ -312,7 +315,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       } else if (toolRef.current === 'text') {
         const hit = textAt(x, y);
         if (hit && hit.x != null && hit.y != null) {
-          dragRef.current = { id: hit.id, dx: x - hit.x, dy: y - hit.y };
+          dragRef.current = { id: hit.id, dx: x - hit.x, dy: y - hit.y, wasSelected: hit.id === selectedTextIdRef.current, label: hit.label ?? '' };
           setSelectedTextId(hit.id);
         } else if (selectedTextIdRef.current) {
           setSelectedTextId(null);              // tap empty court: deselect first
@@ -352,9 +355,18 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       };
 
       if (tl === 'text' && dragRef.current) {
-        const idx2 = activeBoardIdxRef.current;
-        const b = boardsRef.current[idx2];
-        if (b) saveBoardRef.current(idx2, b);
+        const d = dragRef.current;
+        const moved = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) > 6;
+        if (!moved && d.wasSelected) {
+          // Second tap on the selected label: edit its text in place.
+          setEditingTextId(d.id);
+          setTextInput(d.label ?? '');
+          setShowAddText(true);
+        } else {
+          const idx2 = activeBoardIdxRef.current;
+          const b = boardsRef.current[idx2];
+          if (b) saveBoardRef.current(idx2, b);
+        }
         dragRef.current = null;
         return;
       }
@@ -376,7 +388,14 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   })).current;
 
   const addText = () => {
-    if (!textInput.trim()) { setShowAddText(false); return; }
+    if (!textInput.trim()) { setShowAddText(false); setEditingTextId(null); return; }
+    if (editingTextId) {
+      updateTextStroke(editingTextId, { label: textInput.trim() }, true);
+      setTextInput('');
+      setShowAddText(false);
+      setEditingTextId(null);
+      return;
+    }
     const id = uid();
     commitStrokes(activeBoardIdx, [...(board?.strokes ?? []), {
       id, type: 'text',
@@ -518,6 +537,13 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           <View style={styles.textCtrlBar}>
             <Text style={styles.textCtrlLabel}>Text selected — drag to move</Text>
             <View style={{ flexDirection: 'row', gap: 6 }}>
+              <TouchableOpacity style={styles.textCtrlBtn} onPress={() => {
+                const b = boardsRef.current[activeBoardIdxRef.current];
+                const st = b?.strokes.find(x => x.id === selectedTextIdRef.current);
+                if (st) { setEditingTextId(st.id); setTextInput(st.label ?? ''); setShowAddText(true); }
+              }}>
+                <Ionicons name="pencil" size={15} color={t.ink} />
+              </TouchableOpacity>
               <TouchableOpacity style={styles.textCtrlBtn} onPress={() => resizeSelectedText(-2)}>
                 <Text style={styles.textCtrlBtnLabel}>A−</Text>
               </TouchableOpacity>
@@ -598,12 +624,12 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         <Modal visible={showAddText} transparent animationType="fade" onRequestClose={() => setShowAddText(false)}>
           <KeyboardAvoidingView style={styles.listOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View style={[styles.listBox, { padding: 20 }]}>
-              <Text style={styles.listTitle}>Add Label</Text>
+              <Text style={styles.listTitle}>{editingTextId ? 'Edit Label' : 'Add Label'}</Text>
               <TextInput style={styles.textField} placeholder="Enter text..."
                 placeholderTextColor={t.muted2} value={textInput} onChangeText={setTextInput} autoFocus />
               <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                 <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]}
-                  onPress={() => setShowAddText(false)}>
+                  onPress={() => { setShowAddText(false); setEditingTextId(null); }}>
                   <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.addBoardBtn, { flex: 1 }]} onPress={addText}>

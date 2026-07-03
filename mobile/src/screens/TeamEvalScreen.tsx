@@ -1026,7 +1026,9 @@ export default function TeamEvalScreen() {
                           const h = Math.max((pt.team_grade / maxGrade) * (chartH - topPad), 6);
                           const y = chartH - h;
                           const won = pt.our_score != null && pt.opponent_score != null && pt.our_score > pt.opponent_score;
-                          const barColor = won ? t.pistachio : t.negativeSoft;
+                          // Loss bars: fixed soft clay red (identical in light + dark),
+                          // clearly visible but a notch less intense than the win green.
+                          const barColor = won ? t.pistachio : '#D9987F';
                           const onTap = () => { const game = sessions.find(x => x.id === pt.game_id); if (game) openDetail(game); };
                           return (
                             <React.Fragment key={pt.game_id}>
