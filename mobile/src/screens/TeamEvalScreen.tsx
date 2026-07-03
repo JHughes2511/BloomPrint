@@ -1657,7 +1657,8 @@ export default function TeamEvalScreen() {
                   </TouchableOpacity>
                   {expandedPlayer === g.player_name && (() => {
                     // Derive traditional stats from raw gameStats for this player
-                    const pStats = gameStats.filter((st: any) => !st.is_opponent && st.player_name === g.player_name);
+                    // (respect the active tab so opponent rows resolve to opponent stats)
+                    const pStats = gameStats.filter((st: any) => st.is_opponent === (detailTab === 'opponent') && st.player_name === g.player_name);
                     const counts: Record<string, number> = {};
                     const breakdown: Record<string, { count: number; weighted_points: number }> = {};
                     for (const st of pStats) {
