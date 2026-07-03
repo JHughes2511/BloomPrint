@@ -111,7 +111,7 @@ function HardwoodCourt({ width, height }: { width: number; height: number }) {
   };
 
   return (
-    <View style={{ width, height, overflow: 'hidden', borderRadius: 8 }}>
+    <View style={{ width, height, overflow: 'hidden' }}>
       {/* Full court anchored to the bottom; half / 3/4 clip the top away. */}
       <View style={{ position: 'absolute', left: 0, bottom: 0, width, height: L }}>
         <Svg width={width} height={L}>
@@ -666,7 +666,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   colorRow:        { flexDirection: 'row', alignItems: 'center', gap: 8, marginLeft: 'auto' },
   colorDot:        { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: 'transparent' },
   colorDotActive:  { borderColor: t.accent },
-  canvasWrapper:   { borderRadius: 8, overflow: 'hidden', borderWidth: 1, borderColor: t.cardBorder },
+  canvasWrapper:   { overflow: 'hidden', borderWidth: 1, borderColor: t.cardBorder },
   listOverlay:     { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   listBox:         { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, maxHeight: '60%', borderWidth: 1, borderColor: t.cardBorder },
   listTitle:       { color: t.ink, fontSize: 17, fontFamily: fonts[800], marginBottom: 14 },
