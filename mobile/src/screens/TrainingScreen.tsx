@@ -13,6 +13,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import { renderReport } from '../utils/renderReport';
 
 export default function TrainingScreen() {
   const route = useRoute<any>();
@@ -101,7 +102,7 @@ export default function TrainingScreen() {
       {current?.program_text && (
         <View style={styles.section}>
           <Text style={styles.label}>Full Program</Text>
-          <Text style={styles.programText}>{current.program_text}</Text>
+          {renderReport(current.program_text, { heading: t.ink, body: t.inkSoft })}
         </View>
       )}
 

@@ -27,19 +27,13 @@ async def submit_evaluation(
     interval_seconds: float = Form(5.0),
     max_frames: int = Form(10),
     include_audio: bool = Form(False),
-    video: UploadFile = File(...),
+    video: UploadFile | None = File(None),
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
     player = db.get(models.Player, player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
-
-    # Save uploaded video to disk
-    suffix = Path(video.filename or "video.mp4").suffix
-    dest = UPLOAD_DIR / f"eval_{player_id}_{coach.id}{suffix}"
-    with dest.open("wb") as f:
-        shutil.copyfileobj(video.file, f)
 
     # Get latest grade for this player (most recent non-null overall_grade)
     latest_grade: float | None = None
@@ -56,25 +50,52 @@ async def submit_evaluation(
     if focus_prompt:
         combined_focus += focus_prompt
 
-    # Run BIM analysis
-    import sys
-    sys.path.insert(0, ".")
-    from video_vision.server import _handle_analyze_basketball_video
+    dest: Path | None = None
+    if video and video.filename:
+        # Save uploaded video to disk
+        suffix = Path(video.filename or "video.mp4").suffix
+        dest = UPLOAD_DIR / f"eval_{player_id}_{coach.id}{suffix}"
+        with dest.open("wb") as f:
+            shutil.copyfileobj(video.file, f)
 
-    result = await _handle_analyze_basketball_video({
-        "video_path": str(dest),
-        "output_type": output_type,
-        "program_name": coach.program_name,
-        "competition_level": competition_level,
-        "coach_weight": coach.weight,
-        "player_name": player.name,
-        "focus_prompt": combined_focus,
-        "interval_seconds": interval_seconds,
-        "max_frames": max_frames,
-        "include_audio": include_audio,
-    })
+        # Run BIM analysis on the video
+        import sys
+        sys.path.insert(0, ".")
+        from video_vision.server import _handle_analyze_basketball_video
 
-    report_text = result[0].text
+        result = await _handle_analyze_basketball_video({
+            "video_path": str(dest),
+            "output_type": output_type,
+            "program_name": coach.program_name,
+            "competition_level": competition_level,
+            "coach_weight": coach.weight,
+            "player_name": player.name,
+            "focus_prompt": combined_focus,
+            "interval_seconds": interval_seconds,
+            "max_frames": max_frames,
+            "include_audio": include_audio,
+        })
+        report_text = result[0].text
+    else:
+        # No video provided — generate a text-only evaluation from coach notes.
+        import os
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            raise HTTPException(
+                status_code=500,
+                detail="ANTHROPIC_API_KEY is not set on the server. Ask the server admin to configure it."
+            )
+        from video_vision.bim import build_prompt
+        bim_prompt = build_prompt(output_type, coach.program_name, competition_level, coach.weight, player.name)
+        bim_prompt += f"\n\nADDITIONAL COACHING FOCUS:\n{combined_focus}"
+
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        response = await client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=8192,
+            messages=[{"role": "user", "content": bim_prompt}],
+        )
+        report_text = response.content[0].text
 
     # Parse overall grade from report
     overall_grade = _parse_grade(report_text)
@@ -90,7 +111,7 @@ async def submit_evaluation(
         competition_level=competition_level,
         coach_weight=coach.weight,
         coach_notes=coach_notes,
-        video_path=str(dest),
+        video_path=str(dest) if dest else None,
         report_text=report_text,
         overall_grade=overall_grade,
         pillar_grades=pillar_grades,

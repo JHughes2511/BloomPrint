@@ -55,7 +55,6 @@ export default function NewEvalScreen() {
   };
 
   const submit = async () => {
-    if (!videoUri) { Alert.alert('No video', 'Please select a video clip first.'); return; }
     setSubmitting(true);
     try {
       const form = new FormData();
@@ -64,7 +63,7 @@ export default function NewEvalScreen() {
       form.append('coach_notes', coachNotes);
       form.append('focus_prompt', focusPrompt);
       form.append('include_audio', 'false');
-      form.append('video', { uri: videoUri, name: videoName, type: 'video/mp4' } as any);
+      if (videoUri) form.append('video', { uri: videoUri, name: videoName, type: 'video/mp4' } as any);
 
       const ev = await evalsAPI.submit(form);
       navigation.replace('EvalReport', { evalId: ev.id });
@@ -123,11 +122,11 @@ export default function NewEvalScreen() {
       </ScrollView>
 
       {/* Video picker */}
-      <Text style={styles.label}>Video Clip</Text>
+      <Text style={styles.label}>Video Clip (optional)</Text>
       <TouchableOpacity style={[styles.videoPicker, videoUri && styles.videoPickerDone]} onPress={pickVideo}>
         <Ionicons name={videoUri ? 'checkmark-circle' : 'cloud-upload-outline'} size={28} color={videoUri ? t.positive : t.muted} />
         <Text style={[styles.videoPickerText, videoUri && { color: t.positive }]}>
-          {videoUri ? videoName : 'Tap to select video'}
+          {videoUri ? videoName : 'Tap to select video (optional)'}
         </Text>
       </TouchableOpacity>
 
