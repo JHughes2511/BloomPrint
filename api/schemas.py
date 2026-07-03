@@ -188,6 +188,9 @@ class TrainingOut(BaseModel):
     priorities: list[str] | None
     created_at: datetime
     player_name: str | None = None
+    sent_to_player: bool = False
+    reformatting: bool = False
+    player_program_text: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -311,6 +314,10 @@ class PlayerTrainingOut(BaseModel):
 
 class PlayerTrainingProgress(BaseModel):
     completed_drills: list[str]
+
+
+class CoachTrainingRefresh(BaseModel):
+    feedback: str
 
 
 class PlayerLinkOut(BaseModel):

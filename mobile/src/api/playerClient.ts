@@ -42,8 +42,18 @@ export const playerTrainingAPI = {
     playerApi.post(`/player/training/${id}/refresh`, { feedback }).then(r => r.data),
   setProgress: (id: number, completed_drills: string[]) =>
     playerApi.patch(`/player/training/${id}/progress`, { completed_drills }).then(r => r.data),
+  listCoachSent: () =>
+    playerApi.get('/player/coach-training').then(r => r.data),
   getCoachSent: (id: number) =>
     playerApi.get(`/player/coach-training/${id}`).then(r => r.data),
+  getCoachSentComments: (id: number) =>
+    playerApi.get(`/player/coach-training/${id}/comments`).then(r => r.data),
+  addCoachSentComment: (id: number, text: string) =>
+    playerApi.post(`/player/coach-training/${id}/comments`, { text }).then(r => r.data),
+  setCoachSentProgress: (id: number, completed_drills: string[]) =>
+    playerApi.patch(`/player/coach-training/${id}/progress`, { completed_drills }).then(r => r.data),
+  refreshCoachSent: (id: number, feedback: string) =>
+    playerApi.post(`/player/coach-training/${id}/refresh`, { feedback }).then(r => r.data),
 };
 
 export const playerNotificationsAPI = {

@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { playerAPI } from '../api/client';
+import { playerAPI, trainingAPI } from '../api/client';
 import { AppNotification } from '../types';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -18,7 +18,9 @@ const NOTIF_ICONS: Record<string, string> = {
   link_requested: 'link',
   player_commented: 'chatbubble',
   player_commented_training: 'chatbubble',
+  player_commented_coach_training: 'chatbubble',
   training_generated: 'barbell',
+  training_feedback: 'barbell',
 };
 
 export default function CoachNotificationsScreen() {
@@ -140,7 +142,8 @@ export default function CoachNotificationsScreen() {
 
             {expandedId === n.id && (
               <View style={styles.expandedContent}>
-                {(n.type === 'player_commented' || n.type === 'player_commented_training') && n.ref_id ? (
+                {(n.type === 'player_commented' || n.type === 'player_commented_training'
+                  || n.type === 'player_commented_coach_training' || n.type === 'training_feedback') && n.ref_id ? (
                   <>
                     <VoiceTextInput
                       style={styles.replyInput}
@@ -160,6 +163,8 @@ export default function CoachNotificationsScreen() {
                         try {
                           if (n.type === 'player_commented_training') {
                             await playerAPI.addCoachComment(n.ref_id!, { text });
+                          } else if (n.type === 'player_commented_coach_training' || n.type === 'training_feedback') {
+                            await trainingAPI.addComment(n.ref_id!, text);
                           } else {
                             await playerAPI.coachReplyToReport(n.ref_id!, text);
                           }

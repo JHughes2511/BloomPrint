@@ -145,6 +145,13 @@ export const trainingAPI = {
 
   recent: (limit = 30) =>
     api.get('/training/recent', { params: { limit } }).then(r => r.data),
+
+  comments: (trainingId: number) =>
+    api.get(`/training/${trainingId}/comments`).then(r => r.data),
+  addComment: (trainingId: number, text: string) =>
+    api.post(`/training/${trainingId}/comments`, { text }).then(r => r.data),
+  refreshPlayerProgram: (trainingId: number, feedback: string) =>
+    api.post(`/training/${trainingId}/refresh-player-program`, { feedback }).then(r => r.data),
 };
 
 // ── Player (coach-side) ────────────────────────────────────────────────────────

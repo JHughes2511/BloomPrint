@@ -19,11 +19,22 @@ const cleanPreview = (s: string) =>
   s.replace(/#{1,6}\s?/g, '').replace(/\*\*/g, '').replace(/\*/g, '')
    .replace(/__/g, '').replace(/_([^_]+)_/g, '$1').replace(/^\s*[-•]\s/gm, '').trim();
 
+interface UnifiedProgram {
+  id: number;
+  created_at: string;
+  origin: 'self' | 'coach';
+  program_text: string | null;
+  completed_drills: string[];
+  coach_notes?: string | null;
+  reformatting?: boolean;
+}
+
 export default function PlayerTrainingScreen() {
   const navigation = useNavigation<any>();
   const { t } = useTheme();
   const styles = makeStyles(t);
   const [programs, setPrograms] = useState<PlayerTraining[]>([]);
+  const [coachSent, setCoachSent] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -31,8 +42,12 @@ export default function PlayerTrainingScreen() {
 
   const load = async () => {
     try {
-      const data = await playerTrainingAPI.list();
+      const [data, coach] = await Promise.all([
+        playerTrainingAPI.list(),
+        playerTrainingAPI.listCoachSent().catch(() => []),
+      ]);
       setPrograms(data);
+      setCoachSent(Array.isArray(coach) ? coach : []);
     } catch {}
     setLoading(false);
     setRefreshing(false);
@@ -40,7 +55,18 @@ export default function PlayerTrainingScreen() {
 
   useFocusEffect(useCallback(() => { load(); }, []));
 
-  const sorted = [...programs].sort(
+  const unified: UnifiedProgram[] = [
+    ...programs.map(pt => ({
+      id: pt.id, created_at: pt.created_at, origin: 'self' as const,
+      program_text: pt.program_text, completed_drills: pt.completed_drills ?? [], coach_notes: pt.coach_notes,
+    })),
+    ...coachSent.map(cs => ({
+      id: cs.id, created_at: cs.created_at, origin: 'coach' as const,
+      program_text: cs.player_program_text, completed_drills: cs.completed_drills ?? [], reformatting: cs.reformatting,
+    })),
+  ];
+
+  const sorted = unified.sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
 
@@ -87,7 +113,7 @@ export default function PlayerTrainingScreen() {
           </TouchableOpacity>
         </View>
         <Text style={styles.sub}>
-          {programs.length > 0 ? 'Programs your coach built for you' : 'Training from your coach'}
+          {unified.length > 0 ? 'Programs your coach built for you' : 'Training from your coach'}
         </Text>
         {searchOpen ? (
           <View style={styles.searchBox}>
@@ -107,7 +133,7 @@ export default function PlayerTrainingScreen() {
         ) : null}
       </View>
 
-      {programs.length === 0 ? (
+      {unified.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="barbell-outline" size={48} color={t.muted2} />
           <Text style={styles.emptyTitle}>No training programs yet</Text>
@@ -125,9 +151,12 @@ export default function PlayerTrainingScreen() {
 
           {filtered.map((pt, idx) => (
             <TouchableOpacity
-              key={pt.id}
+              key={`${pt.origin}-${pt.id}`}
               style={styles.card}
-              onPress={() => navigation.navigate('PlayerTrainingDetail', { trainingId: pt.id })}
+              onPress={() => navigation.navigate(
+                pt.origin === 'coach' ? 'PlayerCoachTrainingDetail' : 'PlayerTrainingDetail',
+                { trainingId: pt.id },
+              )}
             >
               <View style={styles.cardTop}>
                 <View style={styles.iconBg}>
@@ -137,7 +166,11 @@ export default function PlayerTrainingScreen() {
                   <Text style={styles.cardTitle}>{idx === 0 ? 'Latest Program' : 'Training Program'}</Text>
                   <Text style={styles.cardDate}>Sent {timeAgo(pt.created_at)}</Text>
                 </View>
-                {pt.coach_notes ? (
+                {pt.origin === 'coach' ? (
+                  <View style={styles.coachBadge}>
+                    <Text style={styles.coachBadgeText}>From Coach</Text>
+                  </View>
+                ) : pt.coach_notes ? (
                   <View style={styles.notesBadge}>
                     <Ionicons name="chatbubble-ellipses-outline" size={12} color={t.positive} />
                     <Text style={styles.notesBadgeText}>Coach Notes</Text>
@@ -145,7 +178,9 @@ export default function PlayerTrainingScreen() {
                 ) : null}
                 <Ionicons name="chevron-forward" size={16} color={t.muted2} style={{ marginLeft: 8 }} />
               </View>
-              {pt.program_text ? (
+              {pt.reformatting ? (
+                <Text style={styles.preview}>AI is preparing this program...</Text>
+              ) : pt.program_text ? (
                 <Text style={styles.preview} numberOfLines={2}>{cleanPreview(pt.program_text)}</Text>
               ) : null}
               {(() => {
@@ -224,6 +259,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     paddingHorizontal: 10, paddingVertical: 4,
   },
   notesBadgeText: { color: t.positive, fontSize: 10.5, fontFamily: fonts[700] },
+  coachBadge: { backgroundColor: t.accentSoft, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  coachBadgeText: { color: t.accent, fontSize: 10.5, fontFamily: fonts[700] },
   preview: { color: t.muted, fontSize: 12.5, marginTop: 11, lineHeight: 18 },
   progressWrap: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 },
   progressTrack: { flex: 1, height: 7, borderRadius: 4, backgroundColor: t.chip, overflow: 'hidden' },

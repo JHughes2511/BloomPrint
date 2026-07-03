@@ -154,6 +154,14 @@ class TrainingSession(Base):
     priorities    = Column(JSON)   # ordered list of focus areas
     created_at    = Column(DateTime, default=datetime.utcnow)
 
+    # Player-facing version: once sent, the AI reformats program_text into the
+    # same checklist/weekly-structure format the player's own training screens
+    # parse. program_text above stays the untouched coach original.
+    sent_to_player       = Column(Boolean, default=False)
+    reformatting         = Column(Boolean, default=False)
+    player_program_text  = Column(Text, nullable=True)
+    completed_drills     = Column(JSON, default=list)
+
     player        = relationship("Player")
     coach         = relationship("Coach")
 
@@ -276,18 +284,20 @@ class PlayerTraining(Base):
 class PlayerComment(Base):
     __tablename__ = "player_comments"
 
-    id                 = Column(Integer, primary_key=True, index=True)
-    player_user_id     = Column(Integer, ForeignKey("player_users.id"), nullable=True)
-    coach_id           = Column(Integer, ForeignKey("coaches.id"), nullable=True)
-    shared_report_id   = Column(Integer, ForeignKey("shared_reports.id"), nullable=True)
-    player_training_id = Column(Integer, ForeignKey("player_training.id"), nullable=True)
-    text               = Column(Text, nullable=False)
-    created_at         = Column(DateTime, default=datetime.utcnow)
+    id                  = Column(Integer, primary_key=True, index=True)
+    player_user_id      = Column(Integer, ForeignKey("player_users.id"), nullable=True)
+    coach_id            = Column(Integer, ForeignKey("coaches.id"), nullable=True)
+    shared_report_id    = Column(Integer, ForeignKey("shared_reports.id"), nullable=True)
+    player_training_id  = Column(Integer, ForeignKey("player_training.id"), nullable=True)
+    training_session_id = Column(Integer, ForeignKey("training_sessions.id"), nullable=True)
+    text                = Column(Text, nullable=False)
+    created_at          = Column(DateTime, default=datetime.utcnow)
 
-    player_user     = relationship("PlayerUser", back_populates="comments")
-    coach           = relationship("Coach")
-    shared_report   = relationship("SharedReport", back_populates="comments")
-    player_training = relationship("PlayerTraining", back_populates="comments")
+    player_user      = relationship("PlayerUser", back_populates="comments")
+    coach            = relationship("Coach")
+    shared_report    = relationship("SharedReport", back_populates="comments")
+    player_training  = relationship("PlayerTraining", back_populates="comments")
+    training_session = relationship("TrainingSession")
 
 
 class PlayerNotification(Base):

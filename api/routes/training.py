@@ -1,9 +1,9 @@
 import os
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ..database import get_db
+from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
 from .. import models, schemas
 
@@ -12,6 +12,66 @@ router = APIRouter(prefix="/training", tags=["training"])
 
 class RegenerateRequest(BaseModel):
     feedback: str
+
+
+def build_player_training_prompt(player_name: str, original_text: str, feedback: str | None = None) -> str:
+    """Restructure a coach's training program into the checklist format the
+    player's training screens parse into a checkable weekly plan."""
+    prompt = (
+        f"You are the BloomPrint Basketball Intelligence Model. A coach wrote the following training "
+        f"program for {player_name}. Restructure it (do not lose any of the coach's intent, drills, or "
+        f"priorities) into the exact format below so it can be tracked as a weekly checklist.\n\n"
+        f"COACH'S ORIGINAL PROGRAM:\n{original_text[:4000]}\n\n"
+    )
+    if feedback:
+        prompt += f"PLAYER FEEDBACK TO INCORPORATE:\n{feedback}\n\n"
+    prompt += (
+        "OUTPUT FORMAT (follow exactly):\n\n"
+        "WEEKLY STRUCTURE OVERVIEW\n"
+        "MONDAY — [focus title] ([duration], e.g. 60 min)\n"
+        "  · [drill or task]\n"
+        "  · [drill or task]\n"
+        "TUESDAY — [focus title] ([duration])\n"
+        "  · [drill or task]\n"
+        "(continue for each day the program uses — skip rest days, use real day-of-week names "
+        "MONDAY through SUNDAY as the heading for each active day)\n\n"
+        "KPI TARGETS\n"
+        "  [3-5 KPIs this program is designed to move]\n\n"
+        "PROGRESS CHECKPOINTS\n"
+        "  2-week: [milestone]\n"
+        "  4-week: [milestone]\n\n"
+        "IMPORTANT: Do NOT use ## headers or ** bold markers. Use plain text section labels exactly as "
+        "shown above, with each day of the week as its own heading line."
+    )
+    return prompt
+
+
+def reformat_training_for_player(training_id: int) -> None:
+    """Background task: AI-restructure a coach's training into the player's
+    checklist format. Runs after the send-to-player response is returned."""
+    db = SessionLocal()
+    try:
+        session = db.get(models.TrainingSession, training_id)
+        if not session:
+            return
+        try:
+            player_name = session.player.name if session.player else "the player"
+            prompt = build_player_training_prompt(player_name, session.program_text or "")
+            import anthropic
+            client = anthropic.Anthropic()
+            response = client.messages.create(
+                model="claude-opus-4-7",
+                max_tokens=3000,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            session.player_program_text = response.content[0].text
+            session.completed_drills = []
+        except Exception:
+            pass
+        session.reformatting = False
+        db.commit()
+    finally:
+        db.close()
 
 
 @router.post("", response_model=schemas.TrainingOut)
@@ -104,10 +164,13 @@ async def generate_training(
 @router.post("/{training_id}/send-to-player")
 def send_training_to_player(
     training_id: int,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    """Send a training session notification to the linked player user."""
+    """Send a training session notification to the linked player user. The
+    AI reformats it into the player's checklist format in the background —
+    the coach's own program_text is never touched."""
     session = db.get(models.TrainingSession, training_id)
     if not session:
         raise HTTPException(status_code=404, detail="Training session not found")
@@ -124,8 +187,107 @@ def send_training_to_player(
         ref_id=training_id,
     )
     db.add(notif)
+    session.sent_to_player = True
+    session.reformatting = True
     db.commit()
+    background_tasks.add_task(reformat_training_for_player, training_id)
     return {"ok": True, "player_name": player.name}
+
+
+@router.get("/{training_id}/comments", response_model=list[schemas.PlayerCommentOut])
+def coach_training_comments(
+    training_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    session = db.get(models.TrainingSession, training_id)
+    if not session or session.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Training session not found")
+    comments = (
+        db.query(models.PlayerComment)
+        .filter_by(training_session_id=training_id)
+        .order_by(models.PlayerComment.id)
+        .all()
+    )
+    result = []
+    for c in comments:
+        out = schemas.PlayerCommentOut.model_validate(c)
+        out.author_name = c.player_user.name if c.player_user else (c.coach.name if c.coach else "Unknown")
+        result.append(out)
+    return result
+
+
+@router.post("/{training_id}/comments", response_model=schemas.PlayerCommentOut)
+def add_coach_training_comment(
+    training_id: int,
+    body: schemas.PlayerCommentCreate,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    session = db.get(models.TrainingSession, training_id)
+    if not session or session.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Training session not found")
+    comment = models.PlayerComment(
+        coach_id=coach.id,
+        training_session_id=training_id,
+        text=body.text,
+    )
+    db.add(comment)
+    db.flush()
+    if session.player and session.player.player_user:
+        notif = models.PlayerNotification(
+            player_user_id=session.player.player_user.id,
+            type="training_shared",
+            title="Coach Replied",
+            body=f"{coach.name} commented on your training: \"{body.text[:80]}\"",
+            ref_id=training_id,
+        )
+        db.add(notif)
+    db.commit()
+    db.refresh(comment)
+    out = schemas.PlayerCommentOut.model_validate(comment)
+    out.author_name = coach.name
+    return out
+
+
+@router.post("/{training_id}/refresh-player-program")
+def refresh_player_program(
+    training_id: int,
+    body: RegenerateRequest,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Coach-triggered update to the player's checklist version, incorporating
+    feedback. The coach's own program_text is left untouched."""
+    session = db.get(models.TrainingSession, training_id)
+    if not session or session.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Training session not found")
+    player_name = session.player.name if session.player else "the player"
+    prompt = build_player_training_prompt(player_name, session.program_text or "", body.feedback)
+    try:
+        import anthropic
+        client = anthropic.Anthropic()
+        response = client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=3000,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        session.player_program_text = response.content[0].text
+        session.completed_drills = []
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"AI update failed: {exc}")
+    if session.player and session.player.player_user:
+        notif = models.PlayerNotification(
+            player_user_id=session.player.player_user.id,
+            type="training_shared",
+            title="Training Program Updated",
+            body=f"{coach.name} updated your training program.",
+            ref_id=training_id,
+        )
+        db.add(notif)
+    db.commit()
+    db.refresh(session)
+    return session
 
 
 @router.get("/player/{player_id}")

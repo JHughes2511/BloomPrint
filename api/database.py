@@ -412,3 +412,45 @@ def _run_migrations():
                 conn.commit()
         except Exception:
             pass
+
+        # Training sessions: coach-sent-to-player fields (AI-reformatted
+        # checklist version, kept separate from the coach's original text).
+        try:
+            ts_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(training_sessions)")
+            )]
+            if ts_cols and "sent_to_player" not in ts_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE training_sessions ADD COLUMN sent_to_player INTEGER NOT NULL DEFAULT 0"
+                ))
+                conn.commit()
+            if ts_cols and "reformatting" not in ts_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE training_sessions ADD COLUMN reformatting INTEGER NOT NULL DEFAULT 0"
+                ))
+                conn.commit()
+            if ts_cols and "player_program_text" not in ts_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE training_sessions ADD COLUMN player_program_text TEXT"
+                ))
+                conn.commit()
+            if ts_cols and "completed_drills" not in ts_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE training_sessions ADD COLUMN completed_drills TEXT"
+                ))
+                conn.commit()
+        except Exception:
+            pass
+
+        # Player comments: allow attaching to a coach-sent training_session too.
+        try:
+            pc_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(player_comments)")
+            )]
+            if pc_cols and "training_session_id" not in pc_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE player_comments ADD COLUMN training_session_id INTEGER REFERENCES training_sessions(id)"
+                ))
+                conn.commit()
+        except Exception:
+            pass

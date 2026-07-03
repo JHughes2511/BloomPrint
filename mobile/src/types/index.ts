@@ -76,6 +76,9 @@ export interface TrainingSession {
   program_text: string | null;
   priorities: string[] | null;
   created_at: string;
+  sent_to_player?: boolean;
+  reformatting?: boolean;
+  player_program_text?: string | null;
 }
 
 export type OutputType =

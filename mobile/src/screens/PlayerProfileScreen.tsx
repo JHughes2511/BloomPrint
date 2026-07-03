@@ -210,6 +210,50 @@ export default function PlayerProfileScreen() {
   const [regeneratingModal, setRegeneratingModal] = useState(false);
   const [exportingTraining, setExportingTraining] = useState(false);
 
+  // Player-facing version (once sent) — comments thread + feedback update
+  const [playerComments, setPlayerComments] = useState<any[]>([]);
+  const [playerCommentText, setPlayerCommentText] = useState('');
+  const [sendingPlayerComment, setSendingPlayerComment] = useState(false);
+  const [playerFeedbackText, setPlayerFeedbackText] = useState('');
+  const [updatingPlayerProgram, setUpdatingPlayerProgram] = useState(false);
+
+  useEffect(() => {
+    if (trainingModalItem?.sent_to_player) {
+      trainingAPI.comments(trainingModalItem.id).then(setPlayerComments).catch(() => setPlayerComments([]));
+    } else {
+      setPlayerComments([]);
+    }
+  }, [trainingModalItem?.id, trainingModalItem?.sent_to_player]);
+
+  const sendPlayerComment = async () => {
+    if (!playerCommentText.trim() || !trainingModalItem) return;
+    setSendingPlayerComment(true);
+    try {
+      const c = await trainingAPI.addComment(trainingModalItem.id, playerCommentText.trim());
+      setPlayerComments(prev => [...prev, c]);
+      setPlayerCommentText('');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not send comment');
+    } finally {
+      setSendingPlayerComment(false);
+    }
+  };
+
+  const updatePlayerProgram = async () => {
+    if (!playerFeedbackText.trim() || !trainingModalItem) return;
+    setUpdatingPlayerProgram(true);
+    try {
+      const updated = await trainingAPI.refreshPlayerProgram(trainingModalItem.id, playerFeedbackText.trim());
+      setTrainingModalItem((prev: any) => prev ? { ...prev, ...updated } : prev);
+      setPlayerFeedbackText('');
+      Alert.alert('Updated', "The player's training program has been updated.");
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? "Could not update player's program");
+    } finally {
+      setUpdatingPlayerProgram(false);
+    }
+  };
+
   // Unified share modal (player / team / staff)
   const [shareCtx, setShareCtx] = useState<{ reportType: string; reportId: number; outputType: string; reportText: string; title: string } | null>(null);
 
@@ -260,6 +304,7 @@ export default function PlayerProfileScreen() {
     setSendingTraining(true);
     try {
       const result = await trainingAPI.sendToPlayer(id);
+      setAllTraining(prev => prev.map(s => s.id === id ? { ...s, sent_to_player: true, reformatting: true } : s));
       Alert.alert('Sent!', `Training program sent to ${result.player_name ?? 'the player'}.`);
     } catch (e: any) {
       const msg = e?.response?.data?.detail ?? 'Could not send training';
@@ -935,6 +980,76 @@ export default function PlayerProfileScreen() {
                       : <><Ionicons name="refresh" size={15} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>Apply & Regenerate</Text></>}
                   </TouchableOpacity>
                 </View>
+
+                {/* Player-facing version — only once this program has been sent */}
+                {trainingModalItem?.sent_to_player && (
+                  <View style={{ marginTop: 24, borderTopWidth: 1, borderTopColor: t.chip, paddingTop: 16 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                      <Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13 }}>PLAYER'S VERSION</Text>
+                      <View style={{ backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 2 }}>
+                        <Text style={{ color: t.accent, fontSize: 9.5, fontFamily: fonts[700] }}>SENT</Text>
+                      </View>
+                    </View>
+
+                    {trainingModalItem.reformatting ? (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8 }}>
+                        <ActivityIndicator color={t.accent} size="small" />
+                        <Text style={{ color: t.muted, fontSize: 12.5 }}>AI is preparing the player's checklist version...</Text>
+                      </View>
+                    ) : (
+                      <>
+                        <Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 12, marginBottom: 8 }}>Comments ({playerComments.length})</Text>
+                        {playerComments.map(c => (
+                          <View key={c.id} style={{ backgroundColor: t.card, borderRadius: 10, padding: 10, marginBottom: 6, borderWidth: 1, borderColor: t.cardBorder }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
+                              <Text style={{ fontSize: 11.5, fontFamily: fonts[700], color: c.coach_id ? t.accent : t.positive }}>
+                                {c.author_name || 'Unknown'}{c.coach_id ? ' (You)' : ''}
+                              </Text>
+                              <Text style={{ color: t.muted2, fontSize: 10.5 }}>{new Date(c.created_at).toLocaleDateString()}</Text>
+                            </View>
+                            <Text style={{ color: t.inkSoft, fontSize: 12.5 }}>{c.text}</Text>
+                          </View>
+                        ))}
+                        <View style={{ flexDirection: 'row', gap: 8, marginTop: 4, alignItems: 'flex-end' }}>
+                          <VoiceTextInput
+                            style={{ flex: 1, backgroundColor: t.chip, color: t.ink, borderRadius: 10, padding: 10, fontSize: 13, minHeight: 40, borderWidth: 1, borderColor: t.line }}
+                            placeholder="Reply to player..."
+                            placeholderTextColor={t.muted2}
+                            value={playerCommentText}
+                            onChangeText={setPlayerCommentText}
+                            multiline
+                          />
+                          <TouchableOpacity
+                            style={{ backgroundColor: t.positive, borderRadius: 10, padding: 10, opacity: (!playerCommentText.trim() || sendingPlayerComment) ? 0.5 : 1 }}
+                            onPress={sendPlayerComment}
+                            disabled={!playerCommentText.trim() || sendingPlayerComment}
+                          >
+                            {sendingPlayerComment ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="send" size={16} color="#fff" />}
+                          </TouchableOpacity>
+                        </View>
+
+                        <Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 12, marginTop: 18, marginBottom: 8 }}>Update Player's Program</Text>
+                        <VoiceTextInput
+                          style={{ backgroundColor: t.chip, color: t.ink, borderRadius: 10, padding: 12, fontSize: 13, minHeight: 60, borderWidth: 1, borderColor: t.line }}
+                          placeholder="Feedback to adjust the player's checklist version..."
+                          placeholderTextColor={t.muted2}
+                          value={playerFeedbackText}
+                          onChangeText={setPlayerFeedbackText}
+                          multiline
+                        />
+                        <TouchableOpacity
+                          style={{ marginTop: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.accentSoft, borderRadius: 10, paddingVertical: 11, opacity: (!playerFeedbackText.trim() || updatingPlayerProgram) ? 0.5 : 1 }}
+                          onPress={updatePlayerProgram}
+                          disabled={!playerFeedbackText.trim() || updatingPlayerProgram}
+                        >
+                          {updatingPlayerProgram
+                            ? <ActivityIndicator color={t.accent} size="small" />
+                            : <><Ionicons name="refresh" size={14} color={t.accent} /><Text style={{ color: t.accent, fontFamily: fonts[700], fontSize: 12.5 }}>Update Player's Program</Text></>}
+                        </TouchableOpacity>
+                      </>
+                    )}
+                  </View>
+                )}
               </KeyboardAwareScrollView>
             </KeyboardAvoidingView>
 

@@ -483,6 +483,37 @@ def list_player_training(
     )
 
 
+def _coach_training_out(session: "models.TrainingSession") -> dict:
+    return {
+        "id": session.id,
+        "program_text": session.program_text,
+        "player_program_text": session.player_program_text,
+        "reformatting": session.reformatting,
+        "completed_drills": session.completed_drills or [],
+        "priorities": session.priorities,
+        "coach_name": session.coach.name if session.coach else None,
+        "created_at": session.created_at,
+    }
+
+
+@router.get("/coach-training")
+def list_coach_training(
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    """All training programs a coach generated and sent directly, for merging
+    into the player's My Training list alongside self-generated ones."""
+    if not pu.player_id:
+        return []
+    sessions = (
+        db.query(models.TrainingSession)
+        .filter_by(player_id=pu.player_id, sent_to_player=True)
+        .order_by(models.TrainingSession.id.desc())
+        .all()
+    )
+    return [_coach_training_out(s) for s in sessions]
+
+
 @router.get("/coach-training/{training_id}")
 def get_coach_training(
     training_id: int,
@@ -494,13 +525,116 @@ def get_coach_training(
     session = db.get(models.TrainingSession, training_id)
     if not session or not pu.player_id or session.player_id != pu.player_id:
         raise HTTPException(status_code=404, detail="Training program not found")
-    return {
-        "id": session.id,
-        "program_text": session.program_text,
-        "priorities": session.priorities,
-        "coach_name": session.coach.name if session.coach else None,
-        "created_at": session.created_at,
-    }
+    return _coach_training_out(session)
+
+
+@router.patch("/coach-training/{training_id}/progress")
+def update_coach_training_progress(
+    training_id: int,
+    body: schemas.PlayerTrainingProgress,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    session = db.get(models.TrainingSession, training_id)
+    if not session or not pu.player_id or session.player_id != pu.player_id:
+        raise HTTPException(status_code=404, detail="Training program not found")
+    session.completed_drills = body.completed_drills
+    db.commit()
+    return {"ok": True}
+
+
+@router.get("/coach-training/{training_id}/comments", response_model=list[schemas.PlayerCommentOut])
+def list_coach_training_comments(
+    training_id: int,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    session = db.get(models.TrainingSession, training_id)
+    if not session or not pu.player_id or session.player_id != pu.player_id:
+        raise HTTPException(status_code=404, detail="Training program not found")
+    comments = (
+        db.query(models.PlayerComment)
+        .filter_by(training_session_id=training_id)
+        .order_by(models.PlayerComment.id)
+        .all()
+    )
+    result = []
+    for c in comments:
+        out = schemas.PlayerCommentOut.model_validate(c)
+        out.author_name = c.player_user.name if c.player_user else (c.coach.name if c.coach else "Unknown")
+        result.append(out)
+    return result
+
+
+@router.post("/coach-training/{training_id}/comments", response_model=schemas.PlayerCommentOut)
+def add_coach_training_comment_player(
+    training_id: int,
+    body: schemas.PlayerCommentCreate,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    session = db.get(models.TrainingSession, training_id)
+    if not session or not pu.player_id or session.player_id != pu.player_id:
+        raise HTTPException(status_code=404, detail="Training program not found")
+    comment = models.PlayerComment(
+        player_user_id=pu.id,
+        training_session_id=training_id,
+        text=body.text,
+    )
+    db.add(comment)
+    db.flush()
+    notif = models.CoachNotification(
+        coach_id=session.coach_id,
+        type="player_commented_coach_training",
+        title="Player Responded",
+        body=f"{pu.name} commented on their training: \"{body.text[:80]}\"",
+        ref_id=training_id,
+    )
+    db.add(notif)
+    db.commit()
+    db.refresh(comment)
+    out = schemas.PlayerCommentOut.model_validate(comment)
+    out.author_name = pu.name
+    return out
+
+
+@router.post("/coach-training/{training_id}/refresh")
+def refresh_coach_training(
+    training_id: int,
+    body: schemas.CoachTrainingRefresh,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    """Player-triggered update to their checklist version, incorporating
+    feedback. The coach's own program_text is left untouched."""
+    session = db.get(models.TrainingSession, training_id)
+    if not session or not pu.player_id or session.player_id != pu.player_id:
+        raise HTTPException(status_code=404, detail="Training program not found")
+    from .training import build_player_training_prompt
+    prompt = build_player_training_prompt(pu.name, session.program_text or "", body.feedback)
+    try:
+        import anthropic
+        client = anthropic.Anthropic()
+        response = client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=3000,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        session.player_program_text = response.content[0].text
+        session.completed_drills = []
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"AI update failed: {exc}")
+    notif = models.CoachNotification(
+        coach_id=session.coach_id,
+        type="training_feedback",
+        title="Training Feedback",
+        body=f"{pu.name} requested an update to their training: \"{body.feedback[:80]}\"",
+        ref_id=training_id,
+    )
+    db.add(notif)
+    db.commit()
+    db.refresh(session)
+    return _coach_training_out(session)
 
 
 @router.patch("/training/{training_id}/progress", response_model=schemas.PlayerTrainingOut)
