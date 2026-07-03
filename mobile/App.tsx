@@ -39,6 +39,7 @@ import PlayerInboxScreen from './src/screens/player/PlayerInboxScreen';
 import PlayerReportDetailScreen from './src/screens/player/PlayerReportDetailScreen';
 import PlayerTrainingScreen from './src/screens/player/PlayerTrainingScreen';
 import PlayerTrainingDetailScreen from './src/screens/player/PlayerTrainingDetailScreen';
+import PlayerCoachTrainingDetailScreen from './src/screens/player/PlayerCoachTrainingDetailScreen';
 import PlayerNotificationsScreen from './src/screens/player/PlayerNotificationsScreen';
 import PlayerTeamReportDetailScreen from './src/screens/player/PlayerTeamReportDetailScreen';
 import PlayerLinkScreen from './src/screens/player/PlayerLinkScreen';
@@ -170,6 +171,7 @@ function PlayerInboxStack() {
       <Stack.Screen name="PlayerTeamReportDetail" component={PlayerTeamReportDetailScreen} />
       <Stack.Screen name="PlayerTraining" component={PlayerTrainingScreen} />
       <Stack.Screen name="PlayerTrainingDetail" component={PlayerTrainingDetailScreen} />
+      <Stack.Screen name="PlayerCoachTrainingDetail" component={PlayerCoachTrainingDetailScreen} />
     </Stack.Navigator>
   );
 }
@@ -179,6 +181,7 @@ function PlayerTrainingStack() {
     <Stack.Navigator screenOptions={PLAYER_SCREEN_OPTIONS}>
       <Stack.Screen name="PlayerTraining" component={PlayerTrainingScreen} />
       <Stack.Screen name="PlayerTrainingDetail" component={PlayerTrainingDetailScreen} />
+      <Stack.Screen name="PlayerCoachTrainingDetail" component={PlayerCoachTrainingDetailScreen} />
     </Stack.Navigator>
   );
 }
@@ -190,6 +193,7 @@ function PlayerNotifStack() {
       <Stack.Screen name="PlayerReportDetail" component={PlayerReportDetailScreen} />
       <Stack.Screen name="PlayerTeamReportDetail" component={PlayerTeamReportDetailScreen} />
       <Stack.Screen name="PlayerTrainingDetail" component={PlayerTrainingDetailScreen} />
+      <Stack.Screen name="PlayerCoachTrainingDetail" component={PlayerCoachTrainingDetailScreen} />
     </Stack.Navigator>
   );
 }

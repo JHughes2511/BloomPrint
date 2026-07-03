@@ -18,6 +18,7 @@ const NOTIF_ICONS: Record<string, string> = {
   training_updated: 'barbell',
   player_commented: 'chatbubble',
   training_generated: 'barbell',
+  training_shared: 'barbell',
 };
 
 export default function PlayerNotificationsScreen() {
@@ -53,6 +54,8 @@ export default function PlayerNotificationsScreen() {
       navigation.navigate('PlayerTrainingDetail', { trainingId: notif.ref_id });
     } else if (notif.type === 'training_generated' && notif.ref_id) {
       navigation.navigate('PlayerTrainingDetail', { trainingId: notif.ref_id });
+    } else if (notif.type === 'training_shared' && notif.ref_id) {
+      navigation.navigate('PlayerCoachTrainingDetail', { trainingId: notif.ref_id });
     } else if (notif.type === 'team_report_shared' && notif.ref_id) {
       navigation.navigate('PlayerTeamReportDetail', { reportId: notif.ref_id });
     }

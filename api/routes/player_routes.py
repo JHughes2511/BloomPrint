@@ -483,6 +483,26 @@ def list_player_training(
     )
 
 
+@router.get("/coach-training/{training_id}")
+def get_coach_training(
+    training_id: int,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    """A training program a coach generated and sent directly (TrainingSession),
+    as opposed to a player-generated one (PlayerTraining)."""
+    session = db.get(models.TrainingSession, training_id)
+    if not session or not pu.player_id or session.player_id != pu.player_id:
+        raise HTTPException(status_code=404, detail="Training program not found")
+    return {
+        "id": session.id,
+        "program_text": session.program_text,
+        "priorities": session.priorities,
+        "coach_name": session.coach.name if session.coach else None,
+        "created_at": session.created_at,
+    }
+
+
 @router.patch("/training/{training_id}/progress", response_model=schemas.PlayerTrainingOut)
 def update_training_progress(
     training_id: int,

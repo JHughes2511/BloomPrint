@@ -3,7 +3,7 @@ import VoiceTextInput from '../../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
-  Modal, TextInput, Platform, PanResponder, Animated, Keyboard,
+  Modal, TextInput, Platform, PanResponder, Animated, Keyboard, RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -54,8 +54,9 @@ export default function PlayerHomeScreen() {
   const [editCity, setEditCity] = useState('');
   const [editSchool, setEditSchool] = useState('');
   const [saving, setSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useFocusEffect(useCallback(() => {
+  const loadHome = useCallback(() => {
     playerNotificationsAPI.list().then((notifs: any[]) => {
       setUnreadCount(notifs.filter(n => !n.read).length);
     }).catch(() => {});
@@ -63,7 +64,16 @@ export default function PlayerHomeScreen() {
     if (playerUser?.player_id) {
       playerProfileAPI.get().then((p: any) => setProfile(p)).catch(() => {});
     }
-  }, [playerUser?.player_id]));
+  }, [playerUser?.player_id]);
+
+  useFocusEffect(useCallback(() => { loadHome(); }, [loadHome]));
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refreshUser().catch(() => {});
+    loadHome();
+    setRefreshing(false);
+  }, [loadHome, refreshUser]);
 
   // ── Derived data for the reference-style header + BIM score card ──
   const firstName = (playerUser?.name ?? '').trim().split(/\s+/)[0] || 'Player';
@@ -189,7 +199,11 @@ export default function PlayerHomeScreen() {
 
   return (
     <ScreenBackground>
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={t.positive} />}
+    >
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View style={{ flex: 1, marginRight: 10 }}>

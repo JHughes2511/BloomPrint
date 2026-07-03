@@ -42,6 +42,8 @@ export const playerTrainingAPI = {
     playerApi.post(`/player/training/${id}/refresh`, { feedback }).then(r => r.data),
   setProgress: (id: number, completed_drills: string[]) =>
     playerApi.patch(`/player/training/${id}/progress`, { completed_drills }).then(r => r.data),
+  getCoachSent: (id: number) =>
+    playerApi.get(`/player/coach-training/${id}`).then(r => r.data),
 };
 
 export const playerNotificationsAPI = {
