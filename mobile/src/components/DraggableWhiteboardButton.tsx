@@ -1,9 +1,44 @@
 import React, { useRef } from 'react';
 import { Animated, PanResponder, Dimensions, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Svg, { Rect, Circle, Path, Line } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeProvider';
 
-const SIZE = 52;
+const W = 54;
+const H = 54;
+
+// Same palette as the whiteboard's hardwood court.
+const WOOD_A = '#E5C593';
+const WOOD_B = '#DDBA84';
+const LINE = '#7A4326';
+
+/** The button IS a miniature hardwood half-court — no surrounding bubble. */
+function MiniCourt() {
+  const lw = 1.6;
+  return (
+    <Svg width={W} height={H}>
+      {/* wood planks */}
+      {[0, 1, 2, 3, 4, 5].map(i => (
+        <Rect key={i} x={i * (W / 6)} y={0} width={W / 6} height={H}
+              fill={i % 2 === 0 ? WOOD_A : WOOD_B} />
+      ))}
+      {/* boundary */}
+      <Rect x={lw} y={lw} width={W - lw * 2} height={H - lw * 2}
+            rx={9} stroke={LINE} strokeWidth={lw} fill="none" />
+      {/* key */}
+      <Rect x={W / 2 - 9} y={H - 22} width={18} height={20}
+            stroke={LINE} strokeWidth={lw} fill="rgba(122,67,38,0.10)" />
+      {/* free-throw circle */}
+      <Circle cx={W / 2} cy={H - 22} r={7} stroke={LINE} strokeWidth={lw} fill="none" />
+      {/* rim */}
+      <Circle cx={W / 2} cy={H - 7} r={2.4} stroke={LINE} strokeWidth={lw} fill="none" />
+      {/* backboard */}
+      <Line x1={W / 2 - 5} y1={H - 4} x2={W / 2 + 5} y2={H - 4} stroke={LINE} strokeWidth={lw + 0.6} />
+      {/* three-point arc */}
+      <Path d={`M 7 ${H - 2} Q 7 14 ${W / 2} 14 Q ${W - 7} 14 ${W - 7} ${H - 2}`}
+            stroke={LINE} strokeWidth={lw} fill="none" />
+    </Svg>
+  );
+}
 
 type Props = {
   onPress: () => void;
@@ -20,9 +55,9 @@ export default function DraggableWhiteboardButton({ onPress }: Props) {
 
   // Start near the bottom-right corner.
   const pan = useRef(
-    new Animated.ValueXY({ x: width - SIZE - 20, y: height - SIZE - 160 })
+    new Animated.ValueXY({ x: width - W - 20, y: height - H - 160 })
   ).current;
-  const offset = useRef({ x: width - SIZE - 20, y: height - SIZE - 160 });
+  const offset = useRef({ x: width - W - 20, y: height - H - 160 });
   const dragged = useRef(false);
 
   const panResponder = useRef(
@@ -46,8 +81,8 @@ export default function DraggableWhiteboardButton({ onPress }: Props) {
         // Clamp inside the screen.
         let nx = offset.current.x + g.dx;
         let ny = offset.current.y + g.dy;
-        nx = Math.max(8, Math.min(nx, width - SIZE - 8));
-        ny = Math.max(40, Math.min(ny, height - SIZE - 40));
+        nx = Math.max(8, Math.min(nx, width - W - 8));
+        ny = Math.max(40, Math.min(ny, height - H - 40));
         offset.current = { x: nx, y: ny };
         Animated.spring(pan, {
           toValue: { x: nx, y: ny },
@@ -63,11 +98,11 @@ export default function DraggableWhiteboardButton({ onPress }: Props) {
     <Animated.View
       style={[
         styles.button,
-        { backgroundColor: t.ctaBg, transform: pan.getTranslateTransform() },
+        { borderColor: t.cardBorder, transform: pan.getTranslateTransform() },
       ]}
       {...panResponder.panHandlers}
     >
-      <Ionicons name="clipboard-outline" size={24} color={t.ctaText} />
+      <MiniCourt />
     </Animated.View>
   );
 }
@@ -77,15 +112,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    width: SIZE,
-    height: SIZE,
-    borderRadius: SIZE / 2,
-    backgroundColor: '#7c3aed',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: W,
+    height: H,
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
     shadowColor: '#000',
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.35,
     shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
     elevation: 10,
     zIndex: 100,
   },
