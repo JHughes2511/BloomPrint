@@ -150,12 +150,66 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const toolRef           = useRef<Tool>('pen');
   const colorRef          = useRef(COLORS[0]);
   const activeBoardIdxRef = useRef(0);
-  useEffect(() => { toolRef.current = tool; },   [tool]);
+  useEffect(() => { toolRef.current = tool; if (tool !== 'text') setSelectedTextId(null); }, [tool]);
   useEffect(() => { colorRef.current = color; }, [color]);
   useEffect(() => { activeBoardIdxRef.current = activeBoardIdx; }, [activeBoardIdx]);
 
   const currentPath = useRef('');
   const startPoint  = useRef({ x: 0, y: 0 });
+
+  // Text selection: with the Text tool, tap a label to select it, drag to move,
+  // resize with the A-/A+ controls. Tap empty court to place a new label.
+  const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
+  const selectedTextIdRef = useRef<string | null>(null);
+  useEffect(() => { selectedTextIdRef.current = selectedTextId; }, [selectedTextId]);
+  const boardsRef = useRef<Board[]>([]);
+  useEffect(() => { boardsRef.current = boards; }, [boards]);
+  const dragRef = useRef<{ id: string; dx: number; dy: number } | null>(null);
+
+  const textAt = (x: number, y: number): Stroke | null => {
+    const strokes = boardsRef.current[activeBoardIdxRef.current]?.strokes ?? [];
+    for (let i = strokes.length - 1; i >= 0; i--) {
+      const st = strokes[i];
+      if (st.type !== 'text' || st.x == null || st.y == null) continue;
+      const fs = st.size ?? 16;
+      const w = (st.label?.length ?? 1) * fs * 0.62;
+      if (x >= st.x - 10 && x <= st.x + w + 10 && y >= st.y - fs - 10 && y <= st.y + 12) return st;
+    }
+    return null;
+  };
+
+  const updateTextStroke = (id: string, patch: Partial<Stroke>, save: boolean) => {
+    setBoards(prev => {
+      const idx = activeBoardIdxRef.current;
+      const next = [...prev];
+      const updated = {
+        ...next[idx],
+        strokes: next[idx].strokes.map(st => st.id === id ? { ...st, ...patch } : st),
+      };
+      next[idx] = updated;
+      if (save) saveBoardRef.current(idx, updated);
+      return next;
+    });
+  };
+
+  const deleteSelectedText = () => {
+    const id = selectedTextIdRef.current;
+    if (!id) return;
+    const idx = activeBoardIdxRef.current;
+    const b = boardsRef.current[idx];
+    if (b) commitStrokes(idx, b.strokes.filter(st => st.id !== id));
+    setSelectedTextId(null);
+  };
+
+  const resizeSelectedText = (delta: number) => {
+    const id = selectedTextIdRef.current;
+    if (!id) return;
+    const b = boardsRef.current[activeBoardIdxRef.current];
+    const st = b?.strokes.find(x => x.id === id);
+    if (!st) return;
+    const next = Math.min(48, Math.max(10, (st.size ?? 16) + delta));
+    updateTextStroke(id, { size: next }, true);
+  };
 
   // Fit the court to the measured canvas area for the chosen view.
   const [avail, setAvail] = useState({ w: 0, h: 0 });
@@ -247,8 +301,16 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       if (toolRef.current === 'pen') {
         currentPath.current = `M${x.toFixed(1)},${y.toFixed(1)}`;
       } else if (toolRef.current === 'text') {
-        setPendingTextPos({ x, y });
-        setShowAddText(true);
+        const hit = textAt(x, y);
+        if (hit && hit.x != null && hit.y != null) {
+          dragRef.current = { id: hit.id, dx: x - hit.x, dy: y - hit.y };
+          setSelectedTextId(hit.id);
+        } else if (selectedTextIdRef.current) {
+          setSelectedTextId(null);              // tap empty court: deselect first
+        } else {
+          setPendingTextPos({ x, y });
+          setShowAddText(true);
+        }
       }
     },
 
@@ -257,6 +319,9 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       if (toolRef.current === 'pen') {
         currentPath.current += ` L${x.toFixed(1)},${y.toFixed(1)}`;
         setLivePath(currentPath.current);
+      } else if (toolRef.current === 'text' && dragRef.current) {
+        const d = dragRef.current;
+        updateTextStroke(d.id, { x: x - d.dx, y: y - d.dy }, false);
       }
     },
 
@@ -277,6 +342,13 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         });
       };
 
+      if (tl === 'text' && dragRef.current) {
+        const idx2 = activeBoardIdxRef.current;
+        const b = boardsRef.current[idx2];
+        if (b) saveBoardRef.current(idx2, b);
+        dragRef.current = null;
+        return;
+      }
       if (tl === 'pen' && currentPath.current) {
         push({ id: uid(), type: 'path', d: currentPath.current, color: c, strokeWidth: STROKE_WIDTH });
         currentPath.current = '';
@@ -296,13 +368,15 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
 
   const addText = () => {
     if (!textInput.trim()) { setShowAddText(false); return; }
+    const id = uid();
     commitStrokes(activeBoardIdx, [...(board?.strokes ?? []), {
-      id: uid(), type: 'text',
-      x: pendingTextPos.x, y: pendingTextPos.y,
+      id, type: 'text',
+      x: pendingTextPos.x, y: pendingTextPos.y, size: 16,
       label: textInput.trim(), color: colorRef.current, strokeWidth: STROKE_WIDTH,
     }]);
     setTextInput('');
     setShowAddText(false);
+    setSelectedTextId(id);
   };
 
   const setCourtType = (ct: CourtType) => {
@@ -352,7 +426,18 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       );
     }
     if (s.type === 'text') {
-      return <SvgText key={s.id} x={s.x} y={s.y} fill={s.color} fontSize={16} fontWeight="bold">{s.label}</SvgText>;
+      const fs = s.size ?? 16;
+      const selected = s.id === selectedTextId;
+      const w = (s.label?.length ?? 1) * fs * 0.62;
+      return (
+        <G key={s.id}>
+          {selected && s.x != null && s.y != null && (
+            <Rect x={s.x - 6} y={s.y - fs - 4} width={w + 12} height={fs + 12}
+                  stroke={s.color} strokeWidth={1} strokeDasharray="4,3" fill="none" rx={4} />
+          )}
+          <SvgText x={s.x} y={s.y} fill={s.color} fontSize={fs} fontWeight="bold">{s.label}</SvgText>
+        </G>
+      );
     }
     return null;
   };
@@ -418,6 +503,27 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
             </View>
           </View>
         </View>
+
+        {/* Selected-text controls: resize / delete / done */}
+        {selectedTextId && (
+          <View style={styles.textCtrlBar}>
+            <Text style={styles.textCtrlLabel}>Text selected — drag to move</Text>
+            <View style={{ flexDirection: 'row', gap: 6 }}>
+              <TouchableOpacity style={styles.textCtrlBtn} onPress={() => resizeSelectedText(-2)}>
+                <Text style={styles.textCtrlBtnLabel}>A−</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.textCtrlBtn} onPress={() => resizeSelectedText(2)}>
+                <Text style={styles.textCtrlBtnLabel}>A+</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.textCtrlBtn} onPress={deleteSelectedText}>
+                <Ionicons name="trash-outline" size={16} color={t.negative} />
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.textCtrlBtn, { backgroundColor: t.ctaBg }]} onPress={() => setSelectedTextId(null)}>
+                <Ionicons name="checkmark" size={16} color={t.ctaText} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         {/* Canvas — court scales to fit the available area for the chosen view */}
         {loading ? (
@@ -532,4 +638,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   addBoardBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.ctaBg, borderRadius: 10, paddingVertical: 12, marginTop: 12 },
   listClose:       { alignItems: 'center', marginTop: 10 },
   textField:       { backgroundColor: t.chip, borderRadius: 10, padding: 12, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line },
+  textCtrlBar:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider },
+  textCtrlLabel:   { color: t.muted, fontSize: 12, fontFamily: fonts[600], flex: 1 },
+  textCtrlBtn:     { minWidth: 36, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: t.chip, paddingHorizontal: 8 },
+  textCtrlBtnLabel:{ color: t.ink, fontSize: 13, fontFamily: fonts[800] },
 });
