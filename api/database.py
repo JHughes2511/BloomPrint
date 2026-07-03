@@ -375,3 +375,40 @@ def _run_migrations():
             conn.commit()
         except Exception:
             pass
+
+        # Create corrections table if missing (player-eval "save correction for
+        # later" feature), and backfill any columns missing on an older table.
+        try:
+            conn.execute(__import__("sqlalchemy").text(
+                "CREATE TABLE IF NOT EXISTS corrections ("
+                "id INTEGER PRIMARY KEY, "
+                "evaluation_id INTEGER NOT NULL REFERENCES evaluations(id), "
+                "coach_id INTEGER NOT NULL REFERENCES coaches(id), "
+                "pillar TEXT, "
+                "original_text TEXT, "
+                "correction TEXT NOT NULL, "
+                "coach_weight INTEGER, "
+                "applied INTEGER NOT NULL DEFAULT 0, "
+                "created_at DATETIME"
+                ")"
+            ))
+            conn.commit()
+            corr_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(corrections)")
+            )]
+            if "pillar" not in corr_cols:
+                conn.execute(__import__("sqlalchemy").text("ALTER TABLE corrections ADD COLUMN pillar TEXT"))
+                conn.commit()
+            if "original_text" not in corr_cols:
+                conn.execute(__import__("sqlalchemy").text("ALTER TABLE corrections ADD COLUMN original_text TEXT"))
+                conn.commit()
+            if "coach_weight" not in corr_cols:
+                conn.execute(__import__("sqlalchemy").text("ALTER TABLE corrections ADD COLUMN coach_weight INTEGER"))
+                conn.commit()
+            if "applied" not in corr_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE corrections ADD COLUMN applied INTEGER NOT NULL DEFAULT 0"
+                ))
+                conn.commit()
+        except Exception:
+            pass

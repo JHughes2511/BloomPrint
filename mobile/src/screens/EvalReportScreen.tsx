@@ -224,8 +224,8 @@ export default function EvalReportScreen() {
       } else {
         Alert.alert('Saved', 'Correction saved. You can generate a new evaluation when ready.');
       }
-    } catch {
-      Alert.alert('Error', 'Could not save correction');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save correction');
     } finally {
       setSaving(false);
     }
