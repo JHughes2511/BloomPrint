@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, Modal, StyleSheet,
   PanResponder, Alert, TextInput, ScrollView, ActivityIndicator,
-  Platform, KeyboardAvoidingView,
+  Platform, KeyboardAvoidingView, Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path, Circle, Line, Rect, G, Text as SvgText } from 'react-native-svg';
@@ -211,9 +211,12 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     updateTextStroke(id, { size: next }, true);
   };
 
-  // Fit the court to the measured canvas area for the chosen view. Unknown or
-  // legacy court_type values fall back to full court (never NaN -> blank).
-  const [avail, setAvail] = useState({ w: 0, h: 0 });
+  // Fit the court to the canvas area for the chosen view. Start from the window
+  // size (minus header/toolbar estimate) so the court ALWAYS renders instantly;
+  // onLayout then refines to the exact measured area. Unknown or legacy
+  // court_type values fall back to full court (never NaN -> blank).
+  const win = Dimensions.get('window');
+  const [avail, setAvail] = useState({ w: win.width, h: Math.max(win.height - 230, 300) });
   const board  = boards[activeBoardIdx];
   const visFt  = VISIBLE_FT[board?.court_type ?? 'full'] ?? VISIBLE_FT.full;
   const rawScale = avail.w > 8 && avail.h > 8
@@ -539,7 +542,10 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         ) : (
           <View
             style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
-            onLayout={e => setAvail({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
+            onLayout={e => {
+              const { width: lw, height: lh } = e.nativeEvent.layout;
+              if (lw > 50 && lh > 50) setAvail({ w: lw, h: lh });
+            }}
           >
             {scale > 0 && (
               <View style={[styles.canvasWrapper, { width: courtW, height: courtH }]} {...panResponder.panHandlers}>

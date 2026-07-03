@@ -1026,7 +1026,7 @@ export default function TeamEvalScreen() {
                           const h = Math.max((pt.team_grade / maxGrade) * (chartH - topPad), 6);
                           const y = chartH - h;
                           const won = pt.our_score != null && pt.opponent_score != null && pt.our_score > pt.opponent_score;
-                          const barColor = won ? t.pistachio : t.chip;
+                          const barColor = won ? t.pistachio : t.negativeSoft;
                           const onTap = () => { const game = sessions.find(x => x.id === pt.game_id); if (game) openDetail(game); };
                           return (
                             <React.Fragment key={pt.game_id}>
@@ -1120,11 +1120,7 @@ export default function TeamEvalScreen() {
               return (
                 <TouchableOpacity
                   key={game.id}
-                  style={[
-                    s.gameCard,
-                    // Lost games tint light clay red (same red family as live-game events)
-                    hasScore && !won && { backgroundColor: t.negativeSoft, borderColor: t.negative },
-                  ]}
+                  style={s.gameCard}
                   onPress={() => game.status === 'in_progress' ? openLiveEntry(game) : openDetail(game)}
                 >
                   <View style={{ flex: 1 }}>
