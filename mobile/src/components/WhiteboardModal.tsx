@@ -211,13 +211,15 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     updateTextStroke(id, { size: next }, true);
   };
 
-  // Fit the court to the measured canvas area for the chosen view.
+  // Fit the court to the measured canvas area for the chosen view. Unknown or
+  // legacy court_type values fall back to full court (never NaN -> blank).
   const [avail, setAvail] = useState({ w: 0, h: 0 });
   const board  = boards[activeBoardIdx];
-  const visFt  = VISIBLE_FT[board?.court_type ?? 'full'];
-  const scale  = avail.w > 0 && avail.h > 0
+  const visFt  = VISIBLE_FT[board?.court_type ?? 'full'] ?? VISIBLE_FT.full;
+  const rawScale = avail.w > 8 && avail.h > 8
     ? Math.min((avail.w - 8) / COURT_FT_W, (avail.h - 8) / visFt)
     : 0;
+  const scale  = Number.isFinite(rawScale) && rawScale > 0 ? rawScale : 0;
   const courtW = COURT_FT_W * scale;
   const courtH = visFt * scale;
 
@@ -226,7 +228,11 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const loadBoards = async () => {
     setLoading(true);
     try {
-      const data = await whiteboardAPI.list(gameId);
+      // Never hang on a slow/unreachable API — fall back to a fresh board.
+      const data = await Promise.race([
+        whiteboardAPI.list(gameId),
+        new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), 5000)),
+      ]);
       if (data.length > 0) {
         setBoards(data.map((b: any) => ({ ...b, strokes: JSON.parse(b.data || '[]') })));
       } else {
