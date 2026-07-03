@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path, Circle, Line, Rect, G, Text as SvgText } from 'react-native-svg';
-import { whiteboardAPI, gameReportsAPI } from '../api/client';
+import { whiteboardAPI, evalsAPI, gameEvalAPI } from '../api/client';
 import VoiceTextInput from './VoiceTextInput';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -181,31 +181,45 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const [aiGenerating, setAiGenerating] = useState(false);
   const [activeScheme, setActiveScheme] = useState<SchemeKey>('offense');
   const [showKey, setShowKey]           = useState(true);
-  // Clip seeding
-  const [seedMode, setSeedMode]         = useState<'none' | 'reports' | 'clips'>('none');
-  const [seedReports, setSeedReports]   = useState<any[]>([]);
-  const [seedClips, setSeedClips]       = useState<any[]>([]);
-  const [seedLoading, setSeedLoading]   = useState(false);
+  // Report input: pull the scene from a team report or an opponent scouting report.
+  const [seedMode, setSeedMode]       = useState<'none' | 'pick'>('none');
+  const [seedItems, setSeedItems]     = useState<{ id: string; title: string; sub: string; text: string }[]>([]);
+  const [seedLoading, setSeedLoading] = useState(false);
 
-  const openSeedReports = async () => {
-    setSeedMode('reports');
-    setSeedLoading(true);
-    try { setSeedReports(await gameReportsAPI.list()); } catch { setSeedReports([]); }
-    setSeedLoading(false);
-  };
-
-  const openSeedClips = async (reportId: number) => {
-    setSeedMode('clips');
+  const openSeedPicker = async () => {
+    setSeedMode('pick');
     setSeedLoading(true);
     try {
-      const rep = await gameReportsAPI.get(reportId);
-      setSeedClips(rep?.clips ?? []);
-    } catch { setSeedClips([]); }
+      const [teamReports, sessions] = await Promise.all([
+        evalsAPI.teamReports(30).catch(() => []),
+        gameEvalAPI.listSessions().catch(() => []),
+      ]);
+      const items: { id: string; title: string; sub: string; text: string }[] = [];
+      (teamReports ?? []).forEach((r: any) => {
+        if (!r.report_text) return;
+        items.push({
+          id: `team-${r.id}`,
+          title: `Team Report — ${(r.output_type ?? 'report').replace(/_/g, ' ')}`,
+          sub: new Date(r.created_at).toLocaleDateString(),
+          text: r.report_text,
+        });
+      });
+      (sessions ?? []).forEach((g: any) => {
+        if (!g.ai_scouting_report) return;
+        items.push({
+          id: `scout-${g.id}`,
+          title: `Opponent Scouting — vs ${g.opponent_name}`,
+          sub: new Date(g.date).toLocaleDateString(),
+          text: g.ai_scouting_report,
+        });
+      });
+      setSeedItems(items);
+    } catch { setSeedItems([]); }
     setSeedLoading(false);
   };
 
-  const seedFromClip = (clip: any) => {
-    const text = (clip?.analysis_text || '').trim();
+  const seedFromReport = (item: { text: string }) => {
+    const text = (item.text || '').trim().slice(0, 4000);
     if (text) setAiDescription(prev => (prev.trim() ? prev.trim() + '\n\n' : '') + text);
     setSeedMode('none');
   };
@@ -317,11 +331,11 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   // onLayout then refines to the exact measured area. Unknown or legacy
   // court_type values fall back to full court (never NaN -> blank).
   const win = Dimensions.get('window');
-  const [avail, setAvail] = useState({ w: win.width, h: Math.max(win.height - 230, 300) });
+  const [avail, setAvail] = useState({ w: win.width, h: Math.max(win.height - 240, 300) });
   const board  = boards[activeBoardIdx];
   const visFt  = VISIBLE_FT[board?.court_type ?? 'full'] ?? VISIBLE_FT.full;
-  const rawScale = avail.w > 8 && avail.h > 8
-    ? Math.min((avail.w - 8) / COURT_FT_W, (avail.h - 8) / visFt)
+  const rawScale = avail.w > 20 && avail.h > 20
+    ? Math.min((avail.w - 20) / COURT_FT_W, (avail.h - 20) / visFt)
     : 0;
   const scale  = Number.isFinite(rawScale) && rawScale > 0 ? rawScale : 0;
   const courtW = COURT_FT_W * scale;
@@ -637,18 +651,18 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               <TouchableOpacity key={tl.key}
                 style={[styles.toolBtn, tool === tl.key && styles.toolBtnActive]}
                 onPress={() => setTool(tl.key)}>
-                <Ionicons name={tl.icon as any} size={18} color={tool === tl.key ? t.ctaText : t.muted} />
+                <Ionicons name={tl.icon as any} size={16} color={tool === tl.key ? t.ctaText : t.muted} />
               </TouchableOpacity>
             ))}
             <View style={styles.toolDivider} />
             <TouchableOpacity style={[styles.toolBtn, { backgroundColor: t.accentSoft }]} onPress={() => setShowAI(true)}>
-              <Ionicons name="sparkles" size={17} color={t.accent} />
+              <Ionicons name="sparkles" size={15} color={t.accent} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.toolBtn} onPress={undo}>
-              <Ionicons name="arrow-undo" size={18} color={t.muted} />
+              <Ionicons name="arrow-undo" size={16} color={t.muted} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.clearBtn} onPress={clearAll}>
-              <Text style={styles.clearBtnText}>Clear</Text>
+              <Ionicons name="trash-outline" size={16} color={t.negative} />
             </TouchableOpacity>
             {/* Marker colors — single thickness */}
             <View style={styles.colorRow}>
@@ -754,9 +768,9 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                     multiline
                     textAlignVertical="top"
                   />
-                  <TouchableOpacity style={styles.seedBtn} onPress={openSeedReports}>
-                    <Ionicons name="film-outline" size={16} color={t.accent} />
-                    <Text style={styles.seedBtnText}>Seed from a game-report clip</Text>
+                  <TouchableOpacity style={styles.seedBtn} onPress={openSeedPicker}>
+                    <Ionicons name="document-text-outline" size={16} color={t.accent} />
+                    <Text style={styles.seedBtnText}>Input from a report</Text>
                   </TouchableOpacity>
                   <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                     <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]}
@@ -775,39 +789,26 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               ) : (
                 <>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                    <TouchableOpacity onPress={() => setSeedMode(seedMode === 'clips' ? 'reports' : 'none')}>
+                    <TouchableOpacity onPress={() => setSeedMode('none')}>
                       <Ionicons name="chevron-back" size={22} color={t.ink} />
                     </TouchableOpacity>
-                    <Text style={[styles.listTitle, { marginBottom: 0 }]}>
-                      {seedMode === 'reports' ? 'Pick a Game Report' : 'Pick a Clip'}
-                    </Text>
+                    <Text style={[styles.listTitle, { marginBottom: 0 }]}>Pick a Report</Text>
                   </View>
                   {seedLoading ? (
                     <ActivityIndicator color={t.accent} style={{ marginVertical: 24 }} />
                   ) : (
                     <ScrollView style={{ maxHeight: 340 }}>
-                      {seedMode === 'reports' && (seedReports.length === 0
-                        ? <Text style={styles.aiHint}>No game reports yet.</Text>
-                        : seedReports.map((r: any) => (
-                          <TouchableOpacity key={r.id} style={styles.listRow} onPress={() => openSeedClips(r.id)}>
+                      {seedItems.length === 0
+                        ? <Text style={styles.aiHint}>No team reports or opponent scouting reports yet.</Text>
+                        : seedItems.map(item => (
+                          <TouchableOpacity key={item.id} style={styles.listRow} onPress={() => seedFromReport(item)}>
                             <View style={{ flex: 1 }}>
-                              <Text style={styles.listItemText}>{r.opponent_name ?? r.opponent_team_name ?? r.title ?? `Report ${r.id}`}</Text>
-                              <Text style={styles.listItemSub}>{new Date(r.created_at).toLocaleDateString()}</Text>
-                            </View>
-                            <Ionicons name="chevron-forward" size={16} color={t.muted2} />
-                          </TouchableOpacity>
-                        )))}
-                      {seedMode === 'clips' && (seedClips.length === 0
-                        ? <Text style={styles.aiHint}>No analyzed clips in this report.</Text>
-                        : seedClips.map((c: any) => (
-                          <TouchableOpacity key={c.id} style={styles.listRow} onPress={() => seedFromClip(c)}>
-                            <View style={{ flex: 1 }}>
-                              <Text style={styles.listItemText} numberOfLines={1}>{c.title ?? `Clip ${c.id}`}</Text>
-                              <Text style={styles.listItemSub} numberOfLines={2}>{(c.analysis_text ?? '').slice(0, 90) || 'No analysis text'}</Text>
+                              <Text style={styles.listItemText} numberOfLines={1}>{item.title}</Text>
+                              <Text style={styles.listItemSub}>{item.sub}</Text>
                             </View>
                             <Ionicons name="add-circle-outline" size={18} color={t.accent} />
                           </TouchableOpacity>
-                        )))}
+                        ))}
                     </ScrollView>
                   )}
                 </>
@@ -885,14 +886,14 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   courtChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   courtChipText:   { color: t.muted, fontSize: 13, fontFamily: fonts[600] },
   toolbar:         { paddingVertical: 10, paddingHorizontal: 12, borderBottomWidth: 1, borderBottomColor: t.divider },
-  toolRow:         { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  toolBtn:         { width: 36, height: 36, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: t.chip },
+  toolRow:         { flexDirection: 'row', alignItems: 'center', gap: 3, flexWrap: 'wrap', rowGap: 6 },
+  toolBtn:         { width: 31, height: 31, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: t.chip },
   toolBtnActive:   { backgroundColor: t.ctaBg },
-  toolDivider:     { width: 1, height: 24, backgroundColor: t.line, marginHorizontal: 4 },
-  clearBtn:        { height: 36, paddingHorizontal: 12, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: t.chip },
+  toolDivider:     { width: 1, height: 20, backgroundColor: t.line, marginHorizontal: 2 },
+  clearBtn:        { width: 31, height: 31, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: t.chip },
   clearBtnText:    { color: t.negative, fontSize: 13, fontFamily: fonts[700] },
-  colorRow:        { flexDirection: 'row', alignItems: 'center', gap: 8, marginLeft: 'auto' },
-  colorDot:        { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: 'transparent' },
+  colorRow:        { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 'auto' },
+  colorDot:        { width: 21, height: 21, borderRadius: 11, borderWidth: 2, borderColor: 'transparent' },
   colorDotActive:  { borderColor: t.accent },
   canvasWrapper:   { overflow: 'hidden', borderWidth: 1, borderColor: t.cardBorder },
   listOverlay:     { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
