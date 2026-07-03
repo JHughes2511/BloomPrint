@@ -30,3 +30,6 @@ bloomprint-api   = "api.main:start"
 
 [tool.hatch.build.targets.wheel]
 packages = ["video_vision", "api"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
