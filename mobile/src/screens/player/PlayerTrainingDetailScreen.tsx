@@ -37,9 +37,14 @@ export default function PlayerTrainingDetailScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [savingCorrection, setSavingCorrection] = useState(false);
+  const [trainingCorrections, setTrainingCorrections] = useState<any[]>([]);
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [exporting, setExporting] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
+
+  const loadCorrections = () =>
+    playerTrainingAPI.corrections(trainingId).then(setTrainingCorrections).catch(() => setTrainingCorrections([]));
 
   useEffect(() => {
     Promise.all([
@@ -52,6 +57,7 @@ export default function PlayerTrainingDetailScreen() {
       setComments(c);
       setCompleted(new Set(tr?.completed_drills ?? []));
     }).finally(() => setLoading(false));
+    loadCorrections();
   }, [trainingId]);
 
   const { sections: drillSections, total: drillTotal } = parseDrills(training?.program_text);
@@ -112,14 +118,35 @@ export default function PlayerTrainingDetailScreen() {
     }
   };
 
-  const refreshTraining = async () => {
+  const saveCorrectionForLater = async () => {
     if (!feedbackText.trim()) return;
+    setSavingCorrection(true);
+    try {
+      await playerTrainingAPI.addCorrection(trainingId, feedbackText.trim());
+      setFeedbackText('');
+      await loadCorrections();
+      Alert.alert('Saved', 'Correction saved. Apply & Regenerate when ready.');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to save correction');
+    } finally {
+      setSavingCorrection(false);
+    }
+  };
+
+  const refreshTraining = async () => {
+    const pending = feedbackText.trim();
+    if (!pending && trainingCorrections.filter(c => !c.applied).length === 0) {
+      Alert.alert('Nothing to apply', 'Add a correction first.');
+      return;
+    }
     setRefreshing(true);
     try {
-      const updated = await playerTrainingAPI.refresh(trainingId, feedbackText.trim());
+      if (pending) await playerTrainingAPI.addCorrection(trainingId, pending);
+      const updated = await playerTrainingAPI.applyCorrections(trainingId);
       setTraining(updated);
       setFeedbackText('');
-      Alert.alert('Updated!', 'Your training program has been updated based on your feedback.');
+      await loadCorrections();
+      Alert.alert('Updated!', 'Your training program has been updated based on your corrections.');
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to update training');
     } finally {
@@ -294,16 +321,43 @@ export default function PlayerTrainingDetailScreen() {
               multiline
               textAlignVertical="top"
             />
-            <TouchableOpacity
-              style={[styles.sendBtn, { width: '100%', borderRadius: 12, paddingVertical: 14, marginTop: 8, flexDirection: 'row', gap: 8, justifyContent: 'center' }]}
-              onPress={refreshTraining}
-              disabled={refreshing || !feedbackText.trim()}
-            >
-              {refreshing
-                ? <><ActivityIndicator color="#fff" size="small" /><Text style={{ color: '#fff', fontFamily: fonts[700], fontSize: 14 }}>Updating...</Text></>
-                : <><Ionicons name="refresh" size={16} color="#fff" /><Text style={{ color: '#fff', fontFamily: fonts[700], fontSize: 14 }}>Update Report</Text></>
-              }
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
+              <TouchableOpacity
+                style={[styles.sendBtn, { flex: 1, backgroundColor: t.chip, borderRadius: 12, paddingVertical: 14 }, (savingCorrection || !feedbackText.trim()) && { opacity: 0.5 }]}
+                onPress={saveCorrectionForLater}
+                disabled={savingCorrection || !feedbackText.trim()}
+              >
+                {savingCorrection
+                  ? <ActivityIndicator color={t.ink} size="small" />
+                  : <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 14 }}>Save for Later</Text>}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.sendBtn, { flex: 1, borderRadius: 12, paddingVertical: 14, flexDirection: 'row', gap: 6, justifyContent: 'center' }, refreshing && { opacity: 0.5 }]}
+                onPress={refreshTraining}
+                disabled={refreshing}
+              >
+                {refreshing
+                  ? <><ActivityIndicator color="#fff" size="small" /><Text style={{ color: '#fff', fontFamily: fonts[700], fontSize: 13 }}>Updating...</Text></>
+                  : <><Ionicons name="refresh" size={15} color="#fff" /><Text style={{ color: '#fff', fontFamily: fonts[700], fontSize: 13 }}>Apply & Regenerate</Text></>
+                }
+              </TouchableOpacity>
+            </View>
+
+            {trainingCorrections.length > 0 && (
+              <View style={{ marginTop: 14 }}>
+                {trainingCorrections.map((c: any) => (
+                  <View key={c.id} style={{ backgroundColor: t.chip, borderRadius: 10, padding: 10, marginBottom: 6, opacity: c.applied ? 0.55 : 1 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                      {c.applied
+                        ? <View style={{ backgroundColor: t.positiveSoft, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}><Text style={{ color: t.positive, fontSize: 9, fontFamily: fonts[700] }}>APPLIED</Text></View>
+                        : <View style={{ backgroundColor: t.card, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}><Text style={{ color: t.muted, fontSize: 9, fontFamily: fonts[700] }}>PENDING</Text></View>}
+                      <Text style={{ color: t.muted2, fontSize: 10 }}>{c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}</Text>
+                    </View>
+                    <Text style={{ color: t.inkSoft, fontSize: 12.5 }}>{c.correction}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
         </View>
 

@@ -471,3 +471,20 @@ def _run_migrations():
             conn.commit()
         except Exception:
             pass
+
+        # Create training_corrections table if missing (save-for-later
+        # corrections on training programs — player-owned or coach-sent).
+        try:
+            conn.execute(__import__("sqlalchemy").text(
+                "CREATE TABLE IF NOT EXISTS training_corrections ("
+                "id INTEGER PRIMARY KEY, "
+                "player_training_id INTEGER REFERENCES player_training(id), "
+                "training_session_id INTEGER REFERENCES training_sessions(id), "
+                "correction TEXT NOT NULL, "
+                "applied INTEGER NOT NULL DEFAULT 0, "
+                "created_at DATETIME"
+                ")"
+            ))
+            conn.commit()
+        except Exception:
+            pass

@@ -281,6 +281,19 @@ class PlayerTraining(Base):
     comments      = relationship("PlayerComment", back_populates="player_training", cascade="all, delete-orphan")
 
 
+class TrainingCorrection(Base):
+    """Save-for-later corrections on a training program — either a player's own
+    (player_training_id) or a coach-sent one (training_session_id)."""
+    __tablename__ = "training_corrections"
+
+    id                  = Column(Integer, primary_key=True, index=True)
+    player_training_id  = Column(Integer, ForeignKey("player_training.id"), nullable=True)
+    training_session_id = Column(Integer, ForeignKey("training_sessions.id"), nullable=True)
+    correction          = Column(Text, nullable=False)
+    applied             = Column(Boolean, default=False)
+    created_at          = Column(DateTime, default=datetime.utcnow)
+
+
 class PlayerComment(Base):
     __tablename__ = "player_comments"
 

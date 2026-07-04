@@ -777,6 +777,178 @@ async def refresh_player_training(
         raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
 
 
+def _training_corr_out(c: "models.TrainingCorrection") -> dict:
+    return {"id": c.id, "correction": c.correction, "applied": c.applied, "created_at": c.created_at}
+
+
+@router.get("/training/{training_id}/corrections")
+def list_player_training_corrections(
+    training_id: int,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    pt = db.get(models.PlayerTraining, training_id)
+    if not pt or pt.player_user_id != pu.id:
+        raise HTTPException(status_code=404, detail="Training not found")
+    rows = (
+        db.query(models.TrainingCorrection)
+        .filter_by(player_training_id=training_id)
+        .order_by(models.TrainingCorrection.id)
+        .all()
+    )
+    return [_training_corr_out(c) for c in rows]
+
+
+@router.post("/training/{training_id}/corrections")
+def add_player_training_correction(
+    training_id: int,
+    body: schemas.PlayerCommentCreate,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    """Save a training correction for later without regenerating."""
+    pt = db.get(models.PlayerTraining, training_id)
+    if not pt or pt.player_user_id != pu.id:
+        raise HTTPException(status_code=404, detail="Training not found")
+    c = models.TrainingCorrection(player_training_id=training_id, correction=body.text)
+    db.add(c)
+    db.commit()
+    db.refresh(c)
+    return _training_corr_out(c)
+
+
+@router.post("/training/{training_id}/apply-corrections", response_model=schemas.PlayerTrainingOut)
+async def apply_player_training_corrections(
+    training_id: int,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    """Regenerate the program from all un-applied corrections, then mark them applied."""
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
+    pt = db.get(models.PlayerTraining, training_id)
+    if not pt or pt.player_user_id != pu.id:
+        raise HTTPException(status_code=404, detail="Training not found")
+    pending = (
+        db.query(models.TrainingCorrection)
+        .filter_by(player_training_id=training_id, applied=False)
+        .order_by(models.TrainingCorrection.id)
+        .all()
+    )
+    if not pending:
+        raise HTTPException(status_code=400, detail="No un-applied corrections to apply")
+    feedback = "\n".join(f"- {c.correction}" for c in pending)
+    prompt = (
+        f"You are the BloomPrint Basketball Intelligence Model.\n"
+        f"Here is an existing training program for {pu.name}:\n\n{pt.program_text or 'No previous program'}\n\n"
+        f"The player has provided the following corrections/feedback:\n{feedback}\n\n"
+        "Update the training program to incorporate ALL of this feedback. Keep the same structure but adjust "
+        "drills, intensity, focus areas, and weekly plan. Format with clear sections."
+    )
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        response = await client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=8192,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text_blocks = [b for b in response.content if hasattr(b, "text")]
+        if not text_blocks:
+            raise HTTPException(status_code=500, detail="AI returned no content")
+        pt.program_text = text_blocks[0].text
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
+    for c in pending:
+        c.applied = True
+    db.commit()
+    db.refresh(pt)
+    return pt
+
+
+@router.get("/coach-training/{training_id}/corrections-list")
+def list_coach_training_corrections(
+    training_id: int,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    session = db.get(models.TrainingSession, training_id)
+    if not session or not pu.player_id or session.player_id != pu.player_id:
+        raise HTTPException(status_code=404, detail="Training program not found")
+    rows = (
+        db.query(models.TrainingCorrection)
+        .filter_by(training_session_id=training_id)
+        .order_by(models.TrainingCorrection.id)
+        .all()
+    )
+    return [_training_corr_out(c) for c in rows]
+
+
+@router.post("/coach-training/{training_id}/corrections")
+def add_coach_training_correction(
+    training_id: int,
+    body: schemas.PlayerCommentCreate,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    session = db.get(models.TrainingSession, training_id)
+    if not session or not pu.player_id or session.player_id != pu.player_id:
+        raise HTTPException(status_code=404, detail="Training program not found")
+    c = models.TrainingCorrection(training_session_id=training_id, correction=body.text)
+    db.add(c)
+    db.commit()
+    db.refresh(c)
+    return _training_corr_out(c)
+
+
+@router.post("/coach-training/{training_id}/apply-corrections")
+def apply_coach_training_corrections(
+    training_id: int,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    session = db.get(models.TrainingSession, training_id)
+    if not session or not pu.player_id or session.player_id != pu.player_id:
+        raise HTTPException(status_code=404, detail="Training program not found")
+    pending = (
+        db.query(models.TrainingCorrection)
+        .filter_by(training_session_id=training_id, applied=False)
+        .order_by(models.TrainingCorrection.id)
+        .all()
+    )
+    if not pending:
+        raise HTTPException(status_code=400, detail="No un-applied corrections to apply")
+    feedback = "\n".join(f"- {c.correction}" for c in pending)
+    from .training import build_player_training_prompt
+    prompt = build_player_training_prompt(pu.name, session.program_text or "", feedback)
+    try:
+        import anthropic
+        client = anthropic.Anthropic()
+        response = client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=3000,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        session.player_program_text = response.content[0].text
+        session.completed_drills = []
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"AI update failed: {exc}")
+    for c in pending:
+        c.applied = True
+    db.add(models.CoachNotification(
+        coach_id=session.coach_id,
+        type="training_feedback",
+        title="Training Feedback",
+        body=f"{pu.name} applied corrections to their training.",
+        ref_id=training_id,
+    ))
+    db.commit()
+    db.refresh(session)
+    return _coach_training_out(session)
+
+
 @router.post("/training/{training_id}/coach-refresh", response_model=schemas.PlayerTrainingOut)
 async def coach_refresh_training(
     training_id: int,

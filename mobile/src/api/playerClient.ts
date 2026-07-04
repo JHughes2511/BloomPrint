@@ -40,6 +40,12 @@ export const playerTrainingAPI = {
     playerApi.post(`/player/training/${id}/comments`, { text }).then(r => r.data),
   refresh: (id: number, feedback: string) =>
     playerApi.post(`/player/training/${id}/refresh`, { feedback }).then(r => r.data),
+  corrections: (id: number) =>
+    playerApi.get(`/player/training/${id}/corrections`).then(r => r.data),
+  addCorrection: (id: number, text: string) =>
+    playerApi.post(`/player/training/${id}/corrections`, { text }).then(r => r.data),
+  applyCorrections: (id: number) =>
+    playerApi.post(`/player/training/${id}/apply-corrections`).then(r => r.data),
   setProgress: (id: number, completed_drills: string[]) =>
     playerApi.patch(`/player/training/${id}/progress`, { completed_drills }).then(r => r.data),
   listCoachSent: () =>
@@ -54,6 +60,12 @@ export const playerTrainingAPI = {
     playerApi.patch(`/player/coach-training/${id}/progress`, { completed_drills }).then(r => r.data),
   refreshCoachSent: (id: number, feedback: string) =>
     playerApi.post(`/player/coach-training/${id}/refresh`, { feedback }).then(r => r.data),
+  coachSentCorrections: (id: number) =>
+    playerApi.get(`/player/coach-training/${id}/corrections-list`).then(r => r.data),
+  addCoachSentCorrection: (id: number, text: string) =>
+    playerApi.post(`/player/coach-training/${id}/corrections`, { text }).then(r => r.data),
+  applyCoachSentCorrections: (id: number) =>
+    playerApi.post(`/player/coach-training/${id}/apply-corrections`).then(r => r.data),
 };
 
 export const playerNotificationsAPI = {
