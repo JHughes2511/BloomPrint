@@ -1322,9 +1322,8 @@ export default function TeamEvalScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Weight bucket — auto-follows the clock; tap to override */}
+          {/* Period bucket — auto-follows the clock; tap to override */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.quarterRow} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 6, gap: 8, alignItems: 'center' }}>
-            <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[700], marginRight: 2 }}>WEIGHT</Text>
             {[1, 2, 3, 4, 5].map(q => (
               <TouchableOpacity
                 key={q}
