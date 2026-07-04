@@ -488,3 +488,21 @@ def _run_migrations():
             conn.commit()
         except Exception:
             pass
+
+        # Create generation_jobs table if missing (background video generation).
+        try:
+            conn.execute(__import__("sqlalchemy").text(
+                "CREATE TABLE IF NOT EXISTS generation_jobs ("
+                "id INTEGER PRIMARY KEY, "
+                "coach_id INTEGER NOT NULL REFERENCES coaches(id), "
+                "kind TEXT NOT NULL, "
+                "status TEXT NOT NULL DEFAULT 'processing', "
+                "result_id INTEGER, "
+                "error TEXT, "
+                "created_at DATETIME, "
+                "updated_at DATETIME"
+                ")"
+            ))
+            conn.commit()
+        except Exception:
+            pass

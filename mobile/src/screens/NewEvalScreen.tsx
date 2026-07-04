@@ -65,10 +65,13 @@ export default function NewEvalScreen() {
       form.append('include_audio', 'false');
       if (videoUri) form.append('video', { uri: videoUri, name: videoName, type: 'video/mp4' } as any);
 
-      const ev = await evalsAPI.submit(form);
+      const res = await evalsAPI.submit(form);
+      // Video uploads process in the background and return a job id; poll for it.
+      const ev = res?.job_id ? await evalsAPI.awaitJob(res.job_id) : res;
+      if (!ev?.id) throw new Error('No evaluation returned');
       navigation.replace('EvalReport', { evalId: ev.id });
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Evaluation failed. Check API connection.');
+      Alert.alert('Error', e?.response?.data?.detail ?? e?.message ?? 'Evaluation failed. Check API connection.');
     } finally {
       setSubmitting(false);
     }
@@ -163,7 +166,7 @@ export default function NewEvalScreen() {
       </TouchableOpacity>
 
       {submitting && (
-        <Text style={styles.hint}>Extracting frames and analyzing with Claude. This may take 30–60 seconds.</Text>
+        <Text style={styles.hint}>Uploading and analyzing with Claude. Long films are processed in the background — keep this screen open; it may take several minutes.</Text>
       )}
     </KeyboardAwareScrollView>
     </KeyboardAvoidingView>

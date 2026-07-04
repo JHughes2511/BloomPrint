@@ -115,6 +115,21 @@ class Correction(Base):
     coach         = relationship("Coach", back_populates="corrections")
 
 
+class GenerationJob(Base):
+    """Background job for long-running video-based generation (so 60+ minute
+    films don't block/time out the request). The client polls for completion."""
+    __tablename__ = "generation_jobs"
+
+    id          = Column(Integer, primary_key=True, index=True)
+    coach_id    = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    kind        = Column(String, nullable=False)          # 'eval' | 'team_report'
+    status      = Column(String, default="processing")    # processing | done | error
+    result_id   = Column(Integer, nullable=True)          # created eval/team_report id
+    error       = Column(Text, nullable=True)
+    created_at  = Column(DateTime, default=datetime.utcnow)
+    updated_at  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class TeamReport(Base):
     __tablename__ = "team_reports"
 

@@ -3,11 +3,11 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ..database import get_db
+from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
 from .. import models, schemas
 
@@ -17,8 +17,79 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 router = APIRouter(prefix="/evaluations", tags=["evaluations"])
 
 
-@router.post("", response_model=schemas.EvalOut)
+def _finalize_eval(db, *, player_id, coach, output_type, competition_level,
+                   coach_notes, video_path, report_text):
+    """Parse a report and persist the Evaluation row."""
+    eval_record = models.Evaluation(
+        player_id=player_id,
+        coach_id=coach.id,
+        output_type=output_type,
+        competition_level=competition_level,
+        coach_weight=coach.weight,
+        coach_notes=coach_notes,
+        video_path=video_path,
+        report_text=report_text,
+        overall_grade=_parse_grade(report_text),
+        pillar_grades=_parse_pillar_grades(report_text),
+        key_questions=_parse_list_section(report_text, "KEY QUESTIONS"),
+        green_flags=_parse_list_section(report_text, "GREEN FLAGS"),
+        watch_flags=_parse_list_section(report_text, "WATCH FLAGS"),
+    )
+    db.add(eval_record)
+    db.commit()
+    db.refresh(eval_record)
+    return eval_record
+
+
+def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_type: str,
+                        competition_level: str, coach_notes: str | None, combined_focus: str,
+                        interval_seconds: float, max_frames: int, include_audio: bool,
+                        video_path: str, player_name: str, coach_program: str, coach_weight: int):
+    """Background task: analyze a (potentially very long) film and create the
+    evaluation. The client polls the job for completion, so nothing times out."""
+    import asyncio
+    db = SessionLocal()
+    try:
+        import sys
+        sys.path.insert(0, ".")
+        from video_vision.server import _handle_analyze_basketball_video
+        result = asyncio.run(_handle_analyze_basketball_video({
+            "video_path": video_path,
+            "output_type": output_type,
+            "program_name": coach_program,
+            "competition_level": competition_level,
+            "coach_weight": coach_weight,
+            "player_name": player_name,
+            "focus_prompt": combined_focus,
+            "interval_seconds": interval_seconds,
+            "max_frames": max_frames,
+            "include_audio": include_audio,
+        }))
+        report_text = result[0].text
+        coach = db.get(models.Coach, coach_id)
+        eval_record = _finalize_eval(
+            db, player_id=player_id, coach=coach, output_type=output_type,
+            competition_level=competition_level, coach_notes=coach_notes,
+            video_path=video_path, report_text=report_text,
+        )
+        job = db.get(models.GenerationJob, job_id)
+        if job:
+            job.status = "done"
+            job.result_id = eval_record.id
+            db.commit()
+    except Exception as exc:
+        job = db.get(models.GenerationJob, job_id)
+        if job:
+            job.status = "error"
+            job.error = str(exc)[:500]
+            db.commit()
+    finally:
+        db.close()
+
+
+@router.post("")
 async def submit_evaluation(
+    background_tasks: BackgroundTasks,
     player_id: int = Form(...),
     output_type: str = Form(...),
     competition_level: str = Form("HS Varsity"),
@@ -50,79 +121,77 @@ async def submit_evaluation(
     if focus_prompt:
         combined_focus += focus_prompt
 
-    dest: Path | None = None
     if video and video.filename:
-        # Save uploaded video to disk
+        # Save uploaded video to disk, then process in the BACKGROUND so a long
+        # film doesn't block/time out the request. The client polls the job.
         suffix = Path(video.filename or "video.mp4").suffix
         dest = UPLOAD_DIR / f"eval_{player_id}_{coach.id}{suffix}"
         with dest.open("wb") as f:
             shutil.copyfileobj(video.file, f)
 
-        # Run BIM analysis on the video
-        import sys
-        sys.path.insert(0, ".")
-        from video_vision.server import _handle_analyze_basketball_video
-
-        result = await _handle_analyze_basketball_video({
-            "video_path": str(dest),
-            "output_type": output_type,
-            "program_name": coach.program_name,
-            "competition_level": competition_level,
-            "coach_weight": coach.weight,
-            "player_name": player.name,
-            "focus_prompt": combined_focus,
-            "interval_seconds": interval_seconds,
-            "max_frames": max_frames,
-            "include_audio": include_audio,
-        })
-        report_text = result[0].text
-    else:
-        # No video provided — generate a text-only evaluation from coach notes.
-        import os
-        if not os.environ.get("ANTHROPIC_API_KEY"):
-            raise HTTPException(
-                status_code=500,
-                detail="ANTHROPIC_API_KEY is not set on the server. Ask the server admin to configure it."
-            )
-        from video_vision.bim import build_prompt
-        bim_prompt = build_prompt(output_type, coach.program_name, competition_level, coach.weight, player.name)
-        bim_prompt += f"\n\nADDITIONAL COACHING FOCUS:\n{combined_focus}"
-
-        import anthropic
-        client = anthropic.AsyncAnthropic()
-        response = await client.messages.create(
-            model="claude-opus-4-7",
-            max_tokens=8192,
-            messages=[{"role": "user", "content": bim_prompt}],
+        job = models.GenerationJob(coach_id=coach.id, kind="eval", status="processing")
+        db.add(job)
+        db.commit()
+        db.refresh(job)
+        background_tasks.add_task(
+            _run_eval_video_job, job.id,
+            player_id=player_id, coach_id=coach.id, output_type=output_type,
+            competition_level=competition_level, coach_notes=coach_notes,
+            combined_focus=combined_focus, interval_seconds=interval_seconds,
+            max_frames=max_frames, include_audio=include_audio, video_path=str(dest),
+            player_name=player.name, coach_program=coach.program_name, coach_weight=coach.weight,
         )
-        report_text = response.content[0].text
+        return {"job_id": job.id, "status": "processing"}
 
-    # Parse overall grade from report
-    overall_grade = _parse_grade(report_text)
-    pillar_grades = _parse_pillar_grades(report_text)
-    key_questions = _parse_list_section(report_text, "KEY QUESTIONS")
-    green_flags   = _parse_list_section(report_text, "GREEN FLAGS")
-    watch_flags   = _parse_list_section(report_text, "WATCH FLAGS")
+    # No video provided — generate a text-only evaluation from coach notes (fast, synchronous).
+    import os
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(
+            status_code=500,
+            detail="ANTHROPIC_API_KEY is not set on the server. Ask the server admin to configure it."
+        )
+    from video_vision.bim import build_prompt
+    bim_prompt = build_prompt(output_type, coach.program_name, competition_level, coach.weight, player.name)
+    bim_prompt += f"\n\nADDITIONAL COACHING FOCUS:\n{combined_focus}"
 
-    eval_record = models.Evaluation(
-        player_id=player_id,
-        coach_id=coach.id,
-        output_type=output_type,
-        competition_level=competition_level,
-        coach_weight=coach.weight,
-        coach_notes=coach_notes,
-        video_path=str(dest) if dest else None,
-        report_text=report_text,
-        overall_grade=overall_grade,
-        pillar_grades=pillar_grades,
-        key_questions=key_questions,
-        green_flags=green_flags,
-        watch_flags=watch_flags,
+    import anthropic
+    client = anthropic.AsyncAnthropic()
+    response = await client.messages.create(
+        model="claude-opus-4-7",
+        max_tokens=8192,
+        messages=[{"role": "user", "content": bim_prompt}],
     )
-    db.add(eval_record)
-    db.commit()
-    db.refresh(eval_record)
-    return eval_record
+    report_text = response.content[0].text
+    eval_record = _finalize_eval(
+        db, player_id=player_id, coach=coach, output_type=output_type,
+        competition_level=competition_level, coach_notes=coach_notes,
+        video_path=None, report_text=report_text,
+    )
+    return schemas.EvalOut.model_validate(eval_record)
+
+
+@router.get("/jobs/{job_id}")
+def get_generation_job(
+    job_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Poll a background generation job. When done, returns result_id."""
+    job = db.get(models.GenerationJob, job_id)
+    if not job or job.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Job not found")
+    out = {"id": job.id, "kind": job.kind, "status": job.status,
+           "result_id": job.result_id, "error": job.error, "result": None}
+    if job.status == "done" and job.result_id:
+        if job.kind == "eval":
+            ev = db.get(models.Evaluation, job.result_id)
+            if ev:
+                out["result"] = schemas.EvalOut.model_validate(ev).model_dump(mode="json")
+        elif job.kind == "team_report":
+            tr = db.get(models.TeamReport, job.result_id)
+            if tr:
+                out["result"] = schemas.TeamReportOut.model_validate(tr).model_dump(mode="json")
+    return out
 
 
 @router.get("/recent", response_model=list[schemas.EvalWithPlayerOut])
@@ -161,8 +230,99 @@ def recent_team_reports(
     )
 
 
-@router.post("/team-report", response_model=schemas.TeamReportOut)
+def _build_team_report_prompt(output_type, team_label, roster_context, focus, video_context):
+    if output_type == "game_situational":
+        type_instruction = (
+            "Generate a GAME SITUATIONAL REPORT. Analyze the roster and provide a detailed report on: "
+            "how the coach and team should read specific on-court actions, defensive sets and how to attack them, "
+            "offensive actions and counters, player tendency exploitation, "
+            "situational responses (end of clock, press breaks, late-game, transition defense), "
+            "and key lineup adjustments for game situations."
+        )
+    else:
+        from video_vision.bim import describe_output_type, comprehensive_directive
+        type_instruction = (
+            f"Generate a {describe_output_type(output_type)} for the {team_label} roster. "
+            "Provide a comprehensive team analysis covering overall team grade, team strengths, "
+            "areas to develop, lineup recommendations, and strategic priorities. "
+            "Use the BIM framework with 6 pillars."
+            f"{comprehensive_directive(output_type)}"
+        )
+    return (
+        f"You are the BloomPrint Basketball Intelligence Model. {type_instruction}\n\n"
+        f"PROGRAM: {team_label}\n\n"
+        f"ROSTER SUMMARY:\n{roster_context}\n\n"
+        f"{('COACH FOCUS: ' + focus + chr(10)) if focus else ''}"
+        f"{video_context}\n\n"
+        "IMPORTANT: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
+        "Use plain section titles in ALL CAPS followed by a colon and newline. "
+        "Example: OFFENSIVE TENDENCIES: followed by content."
+    )
+
+
+def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_prompt: str | None,
+                         team_label: str, roster_context: str, video_path: str,
+                         coach_program: str, coach_weight: int):
+    """Background task: analyze a (potentially long) film for a team report and
+    generate the report. The client polls the job."""
+    import asyncio
+    db = SessionLocal()
+    try:
+        video_context = ""
+        try:
+            import sys
+            sys.path.insert(0, ".")
+            from video_vision.server import _handle_analyze_basketball_video
+            vid_result = asyncio.run(_handle_analyze_basketball_video({
+                "video_path": video_path,
+                "output_type": output_type,
+                "program_name": coach_program,
+                "competition_level": "Team",
+                "coach_weight": coach_weight,
+                "player_name": "Team",
+                "focus_prompt": focus_prompt or "",
+                "interval_seconds": 5.0,
+                "max_frames": 8,
+                "include_audio": False,
+            }))
+            video_context = f"\n\nVIDEO ANALYSIS:\n{vid_result[0].text}\n"
+        except Exception as exc:
+            import logging
+            logging.getLogger("bloomprint").warning("team_report video analysis skipped: %s", exc)
+
+        prompt = _build_team_report_prompt(output_type, team_label, roster_context, focus_prompt or "", video_context)
+        import anthropic
+        client = anthropic.Anthropic()
+        response = client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=8192,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text_blocks = [b for b in response.content if hasattr(b, "text")]
+        report_text = text_blocks[0].text if text_blocks else ""
+        rec = models.TeamReport(coach_id=coach_id, output_type=output_type,
+                                focus_prompt=focus_prompt, report_text=report_text)
+        db.add(rec)
+        db.commit()
+        db.refresh(rec)
+        job = db.get(models.GenerationJob, job_id)
+        if job:
+            job.status = "done"
+            job.result_id = rec.id
+            db.commit()
+    except Exception as exc:
+        job = db.get(models.GenerationJob, job_id)
+        if job:
+            job.status = "error"
+            job.error = str(exc)[:500]
+            db.commit()
+    finally:
+        db.close()
+
+
+@router.post("/team-report")
 async def team_report(
+    background_tasks: BackgroundTasks,
     output_type: str = Form("coaching_report"),
     focus_prompt: str | None = Form(None),
     team_id: int | None = Form(None),
@@ -198,72 +358,32 @@ async def team_report(
         else:
             roster_context += f"- {p.name} ({p.position or 'N/A'}): No evaluations yet.\n"
 
-    # Optional video analysis for additional context
-    video_context = ""
-    if video and video.filename:
-        suffix = Path(video.filename).suffix
-        vid_dest = UPLOAD_DIR / f"team_report_{coach.id}{suffix}"
-        with vid_dest.open("wb") as f:
-            shutil.copyfileobj(video.file, f)
-        try:
-            from video_vision.server import _handle_analyze_basketball_video
-            # Full multi-lens film analysis — the video is analyzed through every
-            # selected report type, same as the final report.
-            vid_result = await _handle_analyze_basketball_video({
-                "video_path": str(vid_dest),
-                "output_type": output_type,
-                "program_name": coach.program_name,
-                "competition_level": "Team",
-                "coach_weight": coach.weight,
-                "player_name": "Team",
-                "focus_prompt": focus_prompt or "",
-                "interval_seconds": 5.0,
-                "max_frames": 8,
-                "include_audio": False,
-            })
-            video_context = f"\n\nVIDEO ANALYSIS:\n{vid_result[0].text}\n"
-        except Exception as exc:
-            # Video analysis is optional — proceed without it, but log so a
-            # silently-dropped film is observable rather than invisible.
-            import logging
-            logging.getLogger("bloomprint").warning("team_report video analysis skipped: %s", exc)
-
-    focus = focus_prompt or ""
     team_label = coach.program_name
     if team_id is not None:
         team_obj = db.get(models.Team, team_id)
         if team_obj:
             team_label = f"{team_obj.name} ({coach.program_name})"
 
-    if output_type == "game_situational":
-        type_instruction = (
-            "Generate a GAME SITUATIONAL REPORT. Analyze the roster and provide a detailed report on: "
-            "how the coach and team should read specific on-court actions, defensive sets and how to attack them, "
-            "offensive actions and counters, player tendency exploitation, "
-            "situational responses (end of clock, press breaks, late-game, transition defense), "
-            "and key lineup adjustments for game situations."
+    if video and video.filename:
+        # Long film → save and process in the background; the client polls.
+        suffix = Path(video.filename).suffix
+        vid_dest = UPLOAD_DIR / f"team_report_{coach.id}{suffix}"
+        with vid_dest.open("wb") as f:
+            shutil.copyfileobj(video.file, f)
+        job = models.GenerationJob(coach_id=coach.id, kind="team_report", status="processing")
+        db.add(job)
+        db.commit()
+        db.refresh(job)
+        background_tasks.add_task(
+            _run_team_report_job, job.id,
+            coach_id=coach.id, output_type=output_type, focus_prompt=focus_prompt,
+            team_label=team_label, roster_context=roster_context, video_path=str(vid_dest),
+            coach_program=coach.program_name, coach_weight=coach.weight,
         )
-    else:
-        from video_vision.bim import describe_output_type, comprehensive_directive
-        type_instruction = (
-            f"Generate a {describe_output_type(output_type)} for the {team_label} roster. "
-            "Provide a comprehensive team analysis covering overall team grade, team strengths, "
-            "areas to develop, lineup recommendations, and strategic priorities. "
-            "Use the BIM framework with 6 pillars."
-            f"{comprehensive_directive(output_type)}"
-        )
+        return {"job_id": job.id, "status": "processing"}
 
-    prompt = (
-        f"You are the BloomPrint Basketball Intelligence Model. {type_instruction}\n\n"
-        f"PROGRAM: {team_label}\n\n"
-        f"ROSTER SUMMARY:\n{roster_context}\n\n"
-        f"{('COACH FOCUS: ' + focus + chr(10)) if focus else ''}"
-        f"{video_context}\n\n"
-        "IMPORTANT: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
-        "Use plain section titles in ALL CAPS followed by a colon and newline. "
-        "Example: OFFENSIVE TENDENCIES: followed by content."
-    )
-
+    # No video — generate synchronously (fast).
+    prompt = _build_team_report_prompt(output_type, team_label, roster_context, focus_prompt or "", "")
     try:
         import anthropic
         client = anthropic.AsyncAnthropic()

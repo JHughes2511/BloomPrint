@@ -57,11 +57,21 @@ export const playersAPI = {
 };
 
 // ── Evaluations ───────────────────────────────────────────────────────────────
+// Large/long film uploads: allow up to 30 min for the upload itself (the
+// server returns a job id as soon as the file lands, then processes in the
+// background — the app polls evalsAPI.job for the result).
+const UPLOAD_TIMEOUT = 1800000;
+
 export const evalsAPI = {
   submit: (formData: FormData) =>
     api.post('/evaluations', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: UPLOAD_TIMEOUT,
     }).then(r => r.data),
+
+  // Poll a background generation job (video evals / team reports).
+  job: (jobId: number) =>
+    api.get(`/evaluations/jobs/${jobId}`).then(r => r.data),
 
   delete: (id: number) => api.delete(`/evaluations/${id}`).then(r => r.data),
 
@@ -76,11 +86,22 @@ export const evalsAPI = {
     if (data.focus_prompt) form.append('focus_prompt', data.focus_prompt);
     if (data.team_id != null) form.append('team_id', String(data.team_id));
     if (data.video) form.append('video', { uri: data.video.uri, name: data.video.name, type: data.video.type } as any);
-    return api.post('/evaluations/team-report', form, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data);
+    return api.post('/evaluations/team-report', form, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: UPLOAD_TIMEOUT }).then(r => r.data);
   },
 
   teamReports: (limit = 30) =>
     api.get('/evaluations/team-reports/recent', { params: { limit } }).then(r => r.data),
+  // Poll a job until it finishes, returning the result object. Throws on error.
+  awaitJob: async (jobId: number, onTick?: (status: string) => void) => {
+    for (let i = 0; i < 450; i++) {           // ~30 min cap at 4s intervals
+      const j = await api.get(`/evaluations/jobs/${jobId}`).then(r => r.data);
+      if (j.status === 'done') return j.result;
+      if (j.status === 'error') throw new Error(j.error || 'Generation failed');
+      onTick?.(j.status);
+      await new Promise(res => setTimeout(res, 4000));
+    }
+    throw new Error('Generation timed out');
+  },
   deleteTeamReport: (id: number) =>
     api.delete(`/evaluations/team-reports/${id}`).then(r => r.data),
 

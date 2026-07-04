@@ -372,7 +372,9 @@ export default function TeamReportScreen() {
     setReportText(null);
     setSavedTeamReportId(null);
     try {
-      const result = await evalsAPI.teamReport({ output_type: outputType, focus_prompt: focusPrompt, team_id: selectedTeamId ?? undefined, video: videoAsset ?? undefined });
+      const res = await evalsAPI.teamReport({ output_type: outputType, focus_prompt: focusPrompt, team_id: selectedTeamId ?? undefined, video: videoAsset ?? undefined });
+      // Film uploads process in the background and return a job id; poll for it.
+      const result = res?.job_id ? await evalsAPI.awaitJob(res.job_id) : res;
       setReportText(result.report_text);
       if (result.id) setSavedTeamReportId(result.id);
       loadPrevReports();
