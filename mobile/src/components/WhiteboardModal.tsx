@@ -465,6 +465,24 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     setShowBoardList(false);
   };
 
+  // Duplicate a board (fresh id so it saves as a new board, deep-copied strokes).
+  const duplicateBoard = (idx: number) => {
+    const src = boards[idx];
+    if (!src) return;
+    const copy: Board = {
+      name: `${src.name} copy`,
+      court_type: src.court_type,
+      strokes: src.strokes.map(s => ({ ...s, id: Math.random().toString(36).slice(2) })),
+      ai: src.ai ? { ...src.ai, key: src.ai.key.map(k => ({ ...k })) } : undefined,
+    };
+    const newIdx = boards.length;
+    const next = [...boards, copy];
+    setBoards(next);
+    setActiveBoardIdx(newIdx);
+    setShowBoardList(false);
+    saveBoard(newIdx, copy);
+  };
+
   const deleteBoard = (idx: number) => {
     const b = boards[idx];
     Alert.alert('Delete Board', `Delete "${b.name}"?`, [
@@ -1093,7 +1111,10 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                         {b.court_type === 'full' ? 'Full Court' : b.court_type === 'half' ? 'Half Court' : '3/4 Court'} · {b.strokes.length} marks
                       </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => deleteBoard(i)}>
+                    <TouchableOpacity onPress={() => duplicateBoard(i)} style={{ padding: 4 }}>
+                      <Ionicons name="copy-outline" size={16} color={t.muted2} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => deleteBoard(i)} style={{ padding: 4, marginLeft: 6 }}>
                       <Ionicons name="trash-outline" size={16} color={t.muted2} />
                     </TouchableOpacity>
                   </View>
