@@ -51,7 +51,7 @@ interface Board {
   name: string;
   court_type: CourtType;
   strokes: Stroke[];
-  ai?: { play_name: string; key: { n: number; text: string }[] };
+  ai?: { play_name: string; key: { n: number; text: string }[]; source?: string };
 }
 
 // Three marker colors with strong contrast on maple hardwood, one thickness.
@@ -185,6 +185,9 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const [showAI, setShowAI]             = useState(false);
   const [aiDescription, setAiDescription] = useState('');
   const [aiGenerating, setAiGenerating] = useState(false);
+  const [showRefine, setShowRefine]     = useState(false);
+  const [refineText, setRefineText]     = useState('');
+  const [refining, setRefining]         = useState(false);
   const [activeScheme, setActiveScheme] = useState<SchemeKey>('offense');
   const [showKey, setShowKey]           = useState(true);
   // ── Scheme play-through animation ──
@@ -294,7 +297,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         name: res.play_name || `AI Play ${idx + 1}`,
         court_type: 'half',
         strokes: buildPlayStrokes(res),
-        ai: { play_name: res.play_name ?? 'AI Play', key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })) },
+        ai: { play_name: res.play_name ?? 'AI Play', key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })), source: composed },
       };
       setBoards(prev => [...prev, newBoard]);
       setActiveBoardIdx(idx);
@@ -308,6 +311,38 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate the play');
     } finally {
       setAiGenerating(false);
+    }
+  };
+
+  // Refine an existing AI play with extra text: regenerate all schemes from the
+  // original description + the refinement, replace the AI strokes in place, and
+  // keep any hand-drawn marks (strokes with no scheme layer).
+  const refinePlay = async () => {
+    const b = boards[activeBoardIdx];
+    if (!b?.ai || !refineText.trim()) return;
+    setRefining(true);
+    try {
+      const composed = [b.ai.source || b.ai.play_name || '', `REFINEMENT (update the play): ${refineText.trim()}`]
+        .filter(Boolean).join('\n\n');
+      const res = await whiteboardAPI.aiPlay(composed);
+      // Build AI strokes on the half court, then map to this board's current view.
+      const aiStrokes = remapStrokes(buildPlayStrokes(res), 'half', b.court_type);
+      const kept = b.strokes.filter(st => !st.layer);   // hand-drawn marks only
+      const updated: Board = {
+        ...b,
+        name: res.play_name || b.name,
+        strokes: [...kept, ...aiStrokes],
+        ai: { play_name: res.play_name ?? b.ai.play_name, key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })), source: composed },
+      };
+      setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
+      setActiveScheme('offense');
+      saveBoard(activeBoardIdx, updated);
+      setShowRefine(false);
+      setRefineText('');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update the play');
+    } finally {
+      setRefining(false);
     }
   };
 
@@ -774,6 +809,12 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               <Ionicons name={animating ? 'stop' : 'play'} size={13} color={t.ctaText} />
               <Text style={[styles.schemeChipText, { color: t.ctaText }]}>{animating ? 'Stop' : 'Play'}</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.accentSoft, borderColor: t.accent }]}
+              onPress={() => { setRefineText(''); setShowRefine(true); }}>
+              <Ionicons name="create-outline" size={13} color={t.accent} />
+              <Text style={[styles.schemeChipText, { color: t.accent }]}>Refine</Text>
+            </TouchableOpacity>
           </View>
         )}
 
@@ -883,6 +924,42 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
             </ScrollView>
           </View>
         )}
+
+        {/* Refine play modal */}
+        <Modal visible={showRefine} transparent animationType="slide" onRequestClose={() => setShowRefine(false)}>
+          <KeyboardAvoidingView style={styles.listOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={0}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View style={[styles.listBox, { padding: 20 }]}>
+                <Text style={styles.listTitle}>Refine Play</Text>
+                <Text style={styles.aiHint}>
+                  Describe the change and the AI will redraw the play (offense, defense, counter, and key).
+                  Your hand-drawn marks are kept.
+                </Text>
+                <VoiceTextInput
+                  style={[styles.textField, { minHeight: 90 }]}
+                  placeholder="e.g. add a weak-side flare, roller should short-roll, bring the 5 to the top..."
+                  placeholderTextColor={t.muted2}
+                  value={refineText}
+                  onChangeText={setRefineText}
+                  multiline
+                  textAlignVertical="top"
+                />
+                <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+                  <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setShowRefine(false)}>
+                    <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.addBoardBtn, { flex: 1, opacity: (refineText.trim() && !refining) ? 1 : 0.5 }]}
+                    onPress={refinePlay} disabled={!refineText.trim() || refining}>
+                    {refining
+                      ? <ActivityIndicator color={t.ctaText} size="small" />
+                      : <><Ionicons name="sparkles" size={16} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Update Play</Text></>}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </KeyboardAvoidingView>
+        </Modal>
 
         {/* AI play modal */}
         <Modal visible={showAI} transparent animationType="slide" onRequestClose={() => { setShowAI(false); setSeedMode('none'); }}>
@@ -1093,7 +1170,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   textCtrlLabel:   { color: t.muted, fontSize: 12, fontFamily: fonts[600], flex: 1 },
   textCtrlBtn:     { minWidth: 36, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: t.chip, paddingHorizontal: 8 },
   textCtrlBtnLabel:{ color: t.ink, fontSize: 13, fontFamily: fonts[800] },
-  schemeRow:       { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider },
+  schemeRow:       { flexDirection: 'row', flexWrap: 'wrap', rowGap: 6, gap: 8, paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider },
   schemeChip:      { borderRadius: 16, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: t.line },
   schemeChipActive:{ backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   schemeChipText:  { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
