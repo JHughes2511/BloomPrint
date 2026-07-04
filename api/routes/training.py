@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -12,6 +12,64 @@ router = APIRouter(prefix="/training", tags=["training"])
 
 class RegenerateRequest(BaseModel):
     feedback: str
+
+
+def _extract_reference(upload: "UploadFile") -> tuple[str, list[dict]]:
+    """Turn an uploaded training-reference file into (text, media_blocks) that
+    can be fed to the AI. Text-extractable formats (txt/csv/xlsx/docx) become
+    text; images and PDFs become native content blocks for Claude. Best-effort:
+    any failure yields empty results so generation still proceeds."""
+    import base64
+    name = (upload.filename or "").lower()
+    try:
+        data = upload.file.read()
+    except Exception:
+        return "", []
+    if not data:
+        return "", []
+
+    ctype = (upload.content_type or "").lower()
+    # Images → vision block
+    if ctype.startswith("image/") or name.endswith((".png", ".jpg", ".jpeg", ".webp", ".gif")):
+        media = "image/png" if name.endswith(".png") else "image/webp" if name.endswith(".webp") else "image/gif" if name.endswith(".gif") else "image/jpeg"
+        return "", [{"type": "image", "source": {"type": "base64", "media_type": media, "data": base64.b64encode(data).decode()}}]
+    # PDF → native document block
+    if ctype == "application/pdf" or name.endswith(".pdf"):
+        return "", [{"type": "document", "source": {"type": "base64", "media_type": "application/pdf", "data": base64.b64encode(data).decode()}}]
+    # Plain text / CSV
+    if name.endswith((".txt", ".csv", ".md")) or ctype.startswith("text/"):
+        try:
+            return data.decode("utf-8", errors="ignore")[:6000], []
+        except Exception:
+            return "", []
+    # Excel
+    if name.endswith((".xlsx", ".xls")) or "spreadsheet" in ctype:
+        try:
+            import io, openpyxl
+            wb = openpyxl.load_workbook(io.BytesIO(data), read_only=True, data_only=True)
+            lines = []
+            for ws in wb.worksheets:
+                lines.append(f"# Sheet: {ws.title}")
+                for row in ws.iter_rows(values_only=True):
+                    cells = [str(c) for c in row if c is not None]
+                    if cells:
+                        lines.append(" | ".join(cells))
+            return "\n".join(lines)[:6000], []
+        except Exception:
+            return "", []
+    # Word
+    if name.endswith(".docx") or "word" in ctype:
+        try:
+            import io, docx
+            d = docx.Document(io.BytesIO(data))
+            return "\n".join(p.text for p in d.paragraphs if p.text.strip())[:6000], []
+        except Exception:
+            return "", []
+    # Unknown — try utf-8 as a last resort
+    try:
+        return data.decode("utf-8", errors="ignore")[:6000], []
+    except Exception:
+        return "", []
 
 
 def build_player_training_prompt(player_name: str, original_text: str, feedback: str | None = None) -> str:
@@ -63,19 +121,27 @@ def reformat_training_for_player(training_id: int) -> None:
 
 @router.post("", response_model=schemas.TrainingOut)
 async def generate_training(
-    body: schemas.TrainingRequest,
+    player_id: int = Form(...),
+    evaluation_id: int | None = Form(None),
+    focus_prompt: str | None = Form(None),
+    reference: UploadFile | None = File(None),
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    player = db.get(models.Player, body.player_id)
+    player = db.get(models.Player, player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
 
     eval_record = None
-    if body.evaluation_id:
-        eval_record = db.get(models.Evaluation, body.evaluation_id)
-        if not eval_record or eval_record.player_id != body.player_id:
+    if evaluation_id:
+        eval_record = db.get(models.Evaluation, evaluation_id)
+        if not eval_record or eval_record.player_id != player_id:
             raise HTTPException(status_code=404, detail="Evaluation not found for this player")
+
+    # Optional coach-uploaded reference material (PDF/Word/txt/xlsx/csv/image).
+    ref_text, ref_media = ("", [])
+    if reference is not None and reference.filename:
+        ref_text, ref_media = _extract_reference(reference)
 
     # Find latest overall_grade from player's evaluations
     evals_desc = sorted(player.evaluations, key=lambda e: e.created_at, reverse=True)
@@ -89,7 +155,7 @@ async def generate_training(
     # reflects the full evaluation picture — not just one report. The explicitly
     # selected evaluation (if any) is featured first and in full; the rest are
     # summarized (grade, strengths/watch flags, and a report excerpt).
-    focus = body.focus_prompt or ""
+    focus = focus_prompt or ""
     report_ctx_parts: list[str] = []
     if eval_record and eval_record.report_text:
         report_ctx_parts.append(
@@ -134,17 +200,31 @@ async def generate_training(
     )
     if focus:
         prompt += f"\n\nCOACH CONTEXT:\n{focus}"
+    if ref_text:
+        prompt += (
+            "\n\nCOACH-PROVIDED REFERENCE MATERIAL (incorporate its drills/structure "
+            f"where relevant):\n{ref_text}"
+        )
+    if ref_media:
+        prompt += (
+            "\n\nThe coach also attached reference material as file(s) below — "
+            "incorporate their drills/structure where relevant."
+        )
     prompt += (
         "\n\nIMPORTANT FORMATTING: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
         f"Always refer to the player by their name ({player.name}), not as 'the player' or a jersey number. "
         "Use plain section titles in ALL CAPS followed by a colon and newline."
     )
 
+    # If the coach attached an image/PDF, send it as content blocks alongside text.
+    content: list[dict] = [{"type": "text", "text": prompt}]
+    content.extend(ref_media)
+
     client = anthropic.Anthropic()
     response = client.messages.create(
         model="claude-opus-4-7",
         max_tokens=3000,
-        messages=[{"role": "user", "content": prompt}],
+        messages=[{"role": "user", "content": content}],
     )
     program_text = response.content[0].text
 
@@ -159,9 +239,9 @@ async def generate_training(
                 priorities.append(line)
 
     session = models.TrainingSession(
-        player_id=body.player_id,
+        player_id=player_id,
         coach_id=coach.id,
-        evaluation_id=body.evaluation_id,
+        evaluation_id=evaluation_id,
         program_text=program_text,
         priorities=priorities[:6],
     )

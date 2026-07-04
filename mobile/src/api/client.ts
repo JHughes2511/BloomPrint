@@ -131,8 +131,17 @@ export const uploadsAPI = {
 
 // ── Training ──────────────────────────────────────────────────────────────────
 export const trainingAPI = {
-  generate: (data: { player_id: number; evaluation_id?: number; focus_prompt?: string }) =>
-    api.post('/training', data).then(r => r.data),
+  generate: (data: {
+    player_id: number; evaluation_id?: number; focus_prompt?: string;
+    reference?: { uri: string; name: string; type: string };
+  }) => {
+    const form = new FormData();
+    form.append('player_id', String(data.player_id));
+    if (data.evaluation_id != null) form.append('evaluation_id', String(data.evaluation_id));
+    if (data.focus_prompt) form.append('focus_prompt', data.focus_prompt);
+    if (data.reference) form.append('reference', { uri: data.reference.uri, name: data.reference.name, type: data.reference.type } as any);
+    return api.post('/training', form, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data);
+  },
 
   forPlayer: (playerId: number) =>
     api.get(`/training/player/${playerId}`).then(r => r.data),

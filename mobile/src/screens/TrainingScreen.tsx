@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as DocumentPicker from 'expo-document-picker';
 import { trainingAPI } from '../api/client';
 import { TrainingSession } from '../types';
 import { useTheme } from '../theme/ThemeProvider';
@@ -27,6 +28,7 @@ export default function TrainingScreen() {
   const [focusPrompt, setFocusPrompt] = useState('');
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [reference, setReference] = useState<{ uri: string; name: string; type: string } | null>(null);
 
   useEffect(() => {
     trainingAPI.forPlayer(playerId)
@@ -34,13 +36,32 @@ export default function TrainingScreen() {
       .finally(() => setLoading(false));
   }, [playerId]);
 
+  const pickReference = async () => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf', 'image/*',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'text/*', 'text/csv'],
+        copyToCacheDirectory: true,
+      });
+      if (!res.canceled && res.assets?.[0]) {
+        const a = res.assets[0];
+        setReference({ uri: a.uri, name: a.name ?? 'reference', type: a.mimeType ?? 'application/octet-stream' });
+      }
+    } catch {
+      Alert.alert('Error', 'Could not open file picker.');
+    }
+  };
+
   const generate = async () => {
     setGenerating(true);
     try {
-      const s = await trainingAPI.generate({ player_id: playerId, evaluation_id: evalId, focus_prompt: focusPrompt });
+      const s = await trainingAPI.generate({ player_id: playerId, evaluation_id: evalId, focus_prompt: focusPrompt, reference: reference ?? undefined });
       setSessions(prev => [...prev, s]);
       setCurrent(s);
       setFocusPrompt('');
+      setReference(null);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate program');
     } finally {
@@ -75,6 +96,23 @@ export default function TrainingScreen() {
           onChangeText={setFocusPrompt}
           multiline
         />
+
+        {/* Import reference content */}
+        {reference ? (
+          <View style={styles.refChip}>
+            <Ionicons name="document-attach" size={16} color={t.accent} />
+            <Text style={styles.refChipText} numberOfLines={1}>{reference.name}</Text>
+            <TouchableOpacity onPress={() => setReference(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Ionicons name="close-circle" size={18} color={t.muted} />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity style={styles.importBtn} onPress={pickReference}>
+            <Ionicons name="cloud-upload-outline" size={16} color={t.accent} />
+            <Text style={styles.importBtnText}>Import reference content (PDF, Word, Excel, image)</Text>
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity style={styles.generateBtn} onPress={generate} disabled={generating}>
           {generating
             ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.generateText}>  Generating...</Text></>
@@ -146,6 +184,16 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
   },
   generateText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15 },
+  importBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12,
+    backgroundColor: t.accentSoft, borderRadius: 12, padding: 13,
+  },
+  importBtnText: { color: t.accent, fontFamily: fonts[600], fontSize: 12.5, flex: 1 },
+  refChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12,
+    backgroundColor: t.card, borderRadius: 12, padding: 13, borderWidth: 1, borderColor: t.cardBorder,
+  },
+  refChipText: { color: t.ink, fontFamily: fonts[600], fontSize: 13, flex: 1 },
   priorityRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12, gap: 12 },
   priorityNum: {
     width: 28, height: 28, borderRadius: 14, backgroundColor: t.accent,
