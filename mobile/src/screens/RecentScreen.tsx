@@ -99,6 +99,44 @@ export default function RecentScreen() {
   // Correct state (inline in modal)
   const [teamCorrectText, setTeamCorrectText] = useState('');
   const [applyingCorrect, setApplyingCorrect] = useState(false);
+  const [savingCorrect, setSavingCorrect] = useState(false);
+  const [corrections, setCorrections] = useState<any[]>([]);
+
+  const supportsCorrections = (m: ModalReport | null) =>
+    !!m && (m.kind === 'eval' ? !!m.evalId : m.kind === 'team');
+
+  const loadCorrections = async (m: ModalReport | null) => {
+    if (!m) { setCorrections([]); return; }
+    try {
+      if (m.kind === 'eval' && m.evalId) {
+        setCorrections(await evalsAPI.corrections(m.evalId));
+      } else if (m.kind === 'team') {
+        setCorrections(await evalsAPI.teamReportCorrections(m.id));
+      } else {
+        setCorrections([]);
+      }
+    } catch { setCorrections([]); }
+  };
+
+  // Save a correction without regenerating (save for later).
+  const saveCorrectionForLater = async () => {
+    if (!teamCorrectText.trim() || !activeModal) return;
+    setSavingCorrect(true);
+    try {
+      if (activeModal.kind === 'eval' && activeModal.evalId) {
+        await evalsAPI.addCorrection(activeModal.evalId, { correction: teamCorrectText.trim() });
+      } else if (activeModal.kind === 'team') {
+        await evalsAPI.addTeamReportCorrection(activeModal.id, teamCorrectText.trim());
+      }
+      setTeamCorrectText('');
+      await loadCorrections(activeModal);
+      Alert.alert('Saved', 'Correction saved. Apply & Regenerate when ready.');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save correction');
+    } finally {
+      setSavingCorrect(false);
+    }
+  };
 
   // Unified share modal (player / team / staff)
   const [shareCtx, setShareCtx] = useState<{ reportType: string; reportId: number; outputType: string; reportText: string; title: string } | null>(null);
@@ -423,30 +461,38 @@ export default function RecentScreen() {
     }
   };
 
+  // Apply & regenerate: persist any pending text, then regenerate from all
+  // un-applied corrections (the backend marks those applied afterward).
   const applyCorrection = async () => {
-    if (!teamCorrectText.trim() || !activeModal) return;
+    if (!activeModal) return;
+    if (activeModal.kind === 'training') {
+      Alert.alert('Info', 'To regenerate training with feedback, use the Player Profile screen.');
+      return;
+    }
+    const pending = teamCorrectText.trim();
+    if (!pending && corrections.filter(c => !c.applied).length === 0) {
+      Alert.alert('Nothing to apply', 'Add a correction first.');
+      return;
+    }
     setApplyingCorrect(true);
     try {
       let updatedText = '';
       if (activeModal.kind === 'eval' && activeModal.evalId) {
-        await evalsAPI.addCorrection(activeModal.evalId, { correction: teamCorrectText.trim() });
-        const updated = await evalsAPI.applyCorrections(activeModal.evalId);
+        if (pending) await evalsAPI.addCorrection(activeModal.evalId, { correction: pending });
+        const updated = await evalsAPI.regenerate(activeModal.evalId);
         updatedText = updated.report_text;
         setEvalCache(prev => ({ ...prev, [activeModal.evalId!]: updated }));
-      } else if (activeModal.kind === 'training') {
-        // Training corrections not supported in recents modal
-        Alert.alert('Info', 'To regenerate training with feedback, use the Player Profile screen.');
-        setApplyingCorrect(false);
-        return;
       } else {
-        const updated = await evalsAPI.correctTeamReport(activeModal.id, teamCorrectText.trim());
+        if (pending) await evalsAPI.addTeamReportCorrection(activeModal.id, pending);
+        const updated = await evalsAPI.regenerateTeamReport(activeModal.id);
         updatedText = updated.report_text;
         setTeamReportTexts(prev => ({ ...prev, [activeModal.id]: updatedText }));
       }
       setActiveModal(prev => prev ? { ...prev, text: updatedText } : prev);
       setTeamCorrectText('');
+      await loadCorrections(activeModal);
       setModalView('report');
-      Alert.alert('Updated', 'Report updated based on your correction.');
+      Alert.alert('Updated', 'Report regenerated with your corrections.');
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not apply correction');
     } finally {
@@ -859,10 +905,12 @@ export default function RecentScreen() {
                   }
                 </KeyboardAwareScrollView>
                 <View style={styles.actionRow}>
-                  <TouchableOpacity style={styles.actionBtn} onPress={() => { setTeamCorrectText(''); setModalView('correct'); }}>
-                    <Ionicons name="create-outline" size={18} color={t.ink} />
-                    <Text style={styles.actionText}>Correct</Text>
-                  </TouchableOpacity>
+                  {supportsCorrections(activeModal) && (
+                    <TouchableOpacity style={styles.actionBtn} onPress={() => { setTeamCorrectText(''); loadCorrections(activeModal); setModalView('correct'); }}>
+                      <Ionicons name="create-outline" size={18} color={t.ink} />
+                      <Text style={styles.actionText}>Correct</Text>
+                    </TouchableOpacity>
+                  )}
                   <TouchableOpacity style={styles.actionBtn} onPress={exportModalReport} disabled={exporting}>
                     {exporting ? <ActivityIndicator color={t.ink} size="small" /> : <Ionicons name="download-outline" size={18} color={t.ink} />}
                     <Text style={styles.actionText}>Export</Text>
@@ -978,7 +1026,7 @@ export default function RecentScreen() {
                   <Text style={sendStyles.reportPreviewTitle}>{TYPE_LABELS[activeModal?.outputType ?? ''] ?? outputTypeLabel(activeModal?.outputType)}</Text>
                   <Text style={sendStyles.reportPreviewText} numberOfLines={2}>{activeModal?.text?.replace(/[#*_]/g, '').trim().slice(0, 120)}...</Text>
                 </View>
-                <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>Describe what needs to be corrected and AI will update the report.</Text>
+                <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>Save corrections for later, then Apply & Regenerate to update the report using all un-applied corrections.</Text>
                 <VoiceTextInput
                   style={sendStyles.correctInput}
                   placeholder="What needs to be corrected in this report?"
@@ -989,13 +1037,36 @@ export default function RecentScreen() {
                   textAlignVertical="top"
                 />
                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
-                  <TouchableOpacity style={sendStyles.cancelBtn} onPress={() => setModalView('report')}>
-                    <Text style={{ color: t.muted, fontFamily: fonts[600] }}>Cancel</Text>
+                  <TouchableOpacity style={sendStyles.cancelBtn} onPress={saveCorrectionForLater} disabled={savingCorrect || !teamCorrectText.trim()}>
+                    {savingCorrect ? <ActivityIndicator color={t.muted} size="small" /> : <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Save for Later</Text>}
                   </TouchableOpacity>
-                  <TouchableOpacity style={sendStyles.applyBtn} onPress={applyCorrection} disabled={applyingCorrect || !teamCorrectText.trim()}>
-                    {applyingCorrect ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply</Text>}
+                  <TouchableOpacity style={sendStyles.applyBtn} onPress={applyCorrection} disabled={applyingCorrect}>
+                    {applyingCorrect ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply & Regenerate</Text>}
                   </TouchableOpacity>
                 </View>
+
+                {corrections.length > 0 && (
+                  <View style={{ marginTop: 18 }}>
+                    <Text style={{ color: t.label, fontSize: 11, fontFamily: fonts[700], letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>
+                      Corrections ({corrections.length})
+                    </Text>
+                    {corrections.map((c: any) => (
+                      <View key={c.id} style={{ backgroundColor: t.card, borderRadius: 10, padding: 11, marginBottom: 6, borderWidth: 1, borderColor: t.cardBorder, opacity: c.applied ? 0.55 : 1 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                          {c.applied
+                            ? <View style={{ backgroundColor: t.positiveSoft, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}>
+                                <Text style={{ color: t.positive, fontSize: 9, fontFamily: fonts[700] }}>APPLIED</Text>
+                              </View>
+                            : <View style={{ backgroundColor: t.chip, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}>
+                                <Text style={{ color: t.muted, fontSize: 9, fontFamily: fonts[700] }}>PENDING</Text>
+                              </View>}
+                          <Text style={{ color: t.muted2, fontSize: 10 }}>{c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}</Text>
+                        </View>
+                        <Text style={{ color: t.inkSoft, fontSize: 12.5 }}>{c.correction}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
               </>
             )}
 
