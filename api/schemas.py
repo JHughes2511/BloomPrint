@@ -550,6 +550,10 @@ class GameSessionCreate(BaseModel):
     season_phase: str = "regular"
     season_year: str | None = None
     tracking_mode: str = "live"
+    competition_level: str | None = None
+    period_format: str = "quarters"
+    num_periods: int = 4
+    period_seconds: int = 480
 
 
 class GameSessionUpdate(BaseModel):
@@ -574,6 +578,10 @@ class GameSessionOut(BaseModel):
     season_phase: str
     season_year: str | None
     tracking_mode: str | None = None
+    competition_level: str | None = None
+    period_format: str | None = None
+    num_periods: int | None = None
+    period_seconds: int | None = None
     status: str
     ai_scouting_report: str | None
     created_at: datetime

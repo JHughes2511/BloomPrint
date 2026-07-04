@@ -16,6 +16,7 @@ import { gameEvalAPI, teamsAPI, playersAPI, staffSharingAPI, coachesAPI } from '
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
+import { formatForLevel, periodLabel, weightBucket, formatClock, type GameFormat } from '../utils/gameClock';
 import WhiteboardModal from '../components/WhiteboardModal';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
@@ -24,6 +25,13 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
+
+const COMPETITION_LEVELS = [
+  'NBA', 'G-League', 'High Europe', 'Low Europe',
+  'D1', 'D2', 'D3', 'JUCO',
+  'HS Varsity', '17U AAU', '16U AAU', '14U/15U AAU',
+  'Youth (5-13)', 'European Pro', 'International Academy',
+];
 
 // ── Stat definitions ──────────────────────────────────────────────────────────
 
@@ -130,6 +138,7 @@ export default function TeamEvalScreen() {
   const [newGameDate, setNewGameDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [trackMode, setTrackMode] = useState<'live' | 'post'>('live');
+  const [newGameLevel, setNewGameLevel] = useState<string>('HS Varsity');
   const [importing, setImporting] = useState(false);
   const [teams, setTeams] = useState<any[]>([]);
   const [creating, setCreating] = useState(false);
@@ -137,6 +146,16 @@ export default function TeamEvalScreen() {
   // Live entry state
   const [activeGame, setActiveGame] = useState<any | null>(null);
   const [activeQuarter, setActiveQuarter] = useState(1);
+  // ── Live game clock ──
+  const [periodIndex, setPeriodIndex] = useState(1);        // 1-based; > numPeriods = OT
+  const [clockRemaining, setClockRemaining] = useState(480);
+  const [clockRunning, setClockRunning] = useState(false);
+  const [showClockEdit, setShowClockEdit] = useState(false);
+  const [editMin, setEditMin] = useState('0');
+  const [editSec, setEditSec] = useState('0');
+  const gameFmt: GameFormat = activeGame
+    ? { format: activeGame.period_format ?? 'quarters', numPeriods: activeGame.num_periods ?? 4, periodSeconds: activeGame.period_seconds ?? 480 }
+    : { format: 'quarters', numPeriods: 4, periodSeconds: 480 };
   const [entryMode, setEntryMode] = useState<'our' | 'opponent'>('our');
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [roster, setRoster] = useState<any[]>([]);
@@ -255,6 +274,7 @@ export default function TeamEvalScreen() {
     if (!newGameOpponent.trim()) return;
     setCreating(true);
     try {
+      const fmt = formatForLevel(newGameLevel);
       const g = await gameEvalAPI.createSession({
         opponent_name: newGameOpponent.trim(),
         location: newGameLocation.trim() || undefined,
@@ -263,6 +283,10 @@ export default function TeamEvalScreen() {
         team_id: newGameTeamId ?? undefined,
         date: newGameDate.toISOString(),
         tracking_mode: trackMode,
+        competition_level: newGameLevel,
+        period_format: fmt.format,
+        num_periods: fmt.numPeriods,
+        period_seconds: fmt.periodSeconds,
       });
       setSessions(prev => [g, ...prev]);
       setShowNewGame(false);
@@ -311,6 +335,9 @@ export default function TeamEvalScreen() {
     setOurScore(game.our_score ?? 0);
     setOppScore(game.opponent_score ?? 0);
     setActiveQuarter(1);
+    setPeriodIndex(1);
+    setClockRemaining(game.period_seconds ?? 480);
+    setClockRunning(false);
     setSelectedPlayer(null);
     setActiveView('live');
     if (game.team_id) {
@@ -332,6 +359,42 @@ export default function TeamEvalScreen() {
       setOpponentRoster([]);
       setOpponentPlayers([]);
     }
+  };
+
+  // Game clock tick — decrement once per second while running.
+  useEffect(() => {
+    if (!clockRunning) return;
+    const iv = setInterval(() => {
+      setClockRemaining(prev => {
+        if (prev <= 1) {
+          // Period ended: auto-stop and auto-advance to the next period.
+          setClockRunning(false);
+          setPeriodIndex(pi => pi + 1);
+          return gameFmt.periodSeconds;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [clockRunning, gameFmt.periodSeconds]);
+
+  // The clock drives the weight bucket: whenever the derived bucket changes,
+  // update activeQuarter (still tappable as a manual override between crossings).
+  const derivedBucket = weightBucket(gameFmt, periodIndex, clockRemaining);
+  useEffect(() => {
+    if (activeView === 'live') setActiveQuarter(derivedBucket);
+  }, [derivedBucket, activeView]);
+
+  const advancePeriod = () => {
+    setPeriodIndex(pi => pi + 1);
+    setClockRemaining(gameFmt.periodSeconds);
+    setClockRunning(false);
+  };
+  const applyClockEdit = () => {
+    const m = Math.max(0, parseInt(editMin, 10) || 0);
+    const sc = Math.min(59, Math.max(0, parseInt(editSec, 10) || 0));
+    setClockRemaining(m * 60 + sc);
+    setShowClockEdit(false);
   };
 
   const addOpponentPlayer = async () => {
@@ -1216,7 +1279,7 @@ export default function TeamEvalScreen() {
               <Text style={{ color: t.ink, fontSize: 13, fontFamily: fonts[700] }} numberOfLines={1}>
                 vs {activeGame.opponent_name}
               </Text>
-              <Text style={{ color: t.muted, fontSize: 11 }}>Q{activeQuarter}</Text>
+              <Text style={{ color: t.muted, fontSize: 11 }}>{periodLabel(gameFmt, periodIndex)}</Text>
             </View>
             <View style={{ alignItems: 'center' }}>
               <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }}>THEM</Text>
@@ -1239,8 +1302,29 @@ export default function TeamEvalScreen() {
             </View>
           )}
 
-          {/* Quarter selector */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.quarterRow} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8, gap: 8 }}>
+          {/* Game clock + period controls */}
+          <View style={s.clockBar}>
+            <TouchableOpacity style={s.clockPeriodBtn} onPress={advancePeriod}>
+              <Text style={s.clockPeriodLabel}>{periodLabel(gameFmt, periodIndex)}</Text>
+              <Ionicons name="play-skip-forward" size={13} color={t.muted} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => { setEditMin(String(Math.floor(clockRemaining / 60))); setEditSec(String(clockRemaining % 60)); setShowClockEdit(true); }}>
+              <Text style={s.clockDisplay}>{formatClock(clockRemaining)}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[s.clockRunBtn, { backgroundColor: clockRunning ? t.negativeSoft : t.positiveSoft }]}
+              onPress={() => setClockRunning(r => !r)}
+            >
+              <Ionicons name={clockRunning ? 'pause' : 'play'} size={16} color={clockRunning ? t.negative : t.positive} />
+              <Text style={{ color: clockRunning ? t.negative : t.positive, fontFamily: fonts[700], fontSize: 12 }}>
+                {clockRunning ? 'Stop' : 'Start'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Weight bucket — auto-follows the clock; tap to override */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.quarterRow} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 6, gap: 8, alignItems: 'center' }}>
+            <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[700], marginRight: 2 }}>WEIGHT</Text>
             {[1, 2, 3, 4, 5].map(q => (
               <TouchableOpacity
                 key={q}
@@ -1253,6 +1337,34 @@ export default function TeamEvalScreen() {
               </TouchableOpacity>
             ))}
           </ScrollView>
+
+          {/* Clock edit modal */}
+          <Modal visible={showClockEdit} transparent animationType="fade" onRequestClose={() => setShowClockEdit(false)}>
+            <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'center', padding: 32 }}>
+              <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: t.cardBorder }}>
+                <Text style={{ color: t.ink, fontSize: 16, fontFamily: fonts[800], marginBottom: 14 }}>Set Clock</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                  <TextInput
+                    style={{ backgroundColor: t.chip, color: t.ink, borderRadius: 10, padding: 12, fontSize: 22, fontFamily: fonts[800], textAlign: 'center', width: 74, borderWidth: 1, borderColor: t.line }}
+                    keyboardType="number-pad" value={editMin} onChangeText={setEditMin} maxLength={2} placeholder="0" placeholderTextColor={t.muted2}
+                  />
+                  <Text style={{ color: t.ink, fontSize: 24, fontFamily: fonts[800] }}>:</Text>
+                  <TextInput
+                    style={{ backgroundColor: t.chip, color: t.ink, borderRadius: 10, padding: 12, fontSize: 22, fontFamily: fonts[800], textAlign: 'center', width: 74, borderWidth: 1, borderColor: t.line }}
+                    keyboardType="number-pad" value={editSec} onChangeText={setEditSec} maxLength={2} placeholder="00" placeholderTextColor={t.muted2}
+                  />
+                </View>
+                <View style={{ flexDirection: 'row', gap: 10, marginTop: 18 }}>
+                  <TouchableOpacity style={{ flex: 1, padding: 13, borderRadius: 10, borderWidth: 1, borderColor: t.line, alignItems: 'center' }} onPress={() => setShowClockEdit(false)}>
+                    <Text style={{ color: t.muted, fontFamily: fonts[700] }}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={{ flex: 1, padding: 13, borderRadius: 10, backgroundColor: t.ctaBg, alignItems: 'center' }} onPress={applyClockEdit}>
+                    <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Set</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
 
           {/* Team toggle */}
           <View style={s.teamToggle}>
@@ -2038,7 +2150,7 @@ export default function TeamEvalScreen() {
                         <TouchableOpacity
                           key={tm.id}
                           style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: t.line, backgroundColor: newGameTeamId === tm.id ? t.accentSoft : 'transparent' }}
-                          onPress={() => { setNewGameTeamId(tm.id); setShowTeamDropdown(false); }}
+                          onPress={() => { setNewGameTeamId(tm.id); if (tm.competition_level) setNewGameLevel(tm.competition_level); setShowTeamDropdown(false); }}
                         >
                           <Text style={{ color: newGameTeamId === tm.id ? t.accent : t.inkSoft, fontSize: 14 }}>{tm.name}</Text>
                         </TouchableOpacity>
@@ -2132,6 +2244,27 @@ export default function TeamEvalScreen() {
                   }}
                 />
               )}
+
+              <Text style={s.fieldLabel}>COMPETITION LEVEL</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
+                {COMPETITION_LEVELS.map(lv => (
+                  <TouchableOpacity
+                    key={lv}
+                    style={[s.chip, newGameLevel === lv && s.chipActive]}
+                    onPress={() => setNewGameLevel(lv)}
+                  >
+                    <Text style={[s.chipText, newGameLevel === lv && s.chipTextActive, { fontSize: 12.5 }]}>{lv}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {(() => {
+                const f = formatForLevel(newGameLevel);
+                return (
+                  <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 16 }}>
+                    {f.numPeriods} {f.format === 'halves' ? 'halves' : 'quarters'} × {formatClock(f.periodSeconds)} — game clock counts down each period.
+                  </Text>
+                );
+              })()}
 
               <Text style={s.fieldLabel}>TYPE</Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
@@ -2808,6 +2941,21 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   },
   scoreNum: { color: t.ink, fontSize: 28, fontFamily: fonts[900], minWidth: 40, textAlign: 'center' },
   quarterRow: { flexGrow: 0 },
+  clockBar: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 8, gap: 10,
+    borderBottomWidth: 1, borderBottomColor: t.divider,
+  },
+  clockPeriodBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    backgroundColor: t.chip, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7,
+  },
+  clockPeriodLabel: { color: t.ink, fontSize: 14, fontFamily: fonts[800] },
+  clockDisplay: { color: t.ink, fontSize: 30, fontFamily: fonts[900], letterSpacing: 1, fontVariant: ['tabular-nums'] },
+  clockRunBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8,
+  },
   quarterBtn: {
     paddingHorizontal: 16, paddingVertical: 7, borderRadius: 999,
     borderWidth: 1, borderColor: t.line,

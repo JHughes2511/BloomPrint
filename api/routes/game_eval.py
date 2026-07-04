@@ -188,6 +188,10 @@ def create_session(
         season_phase=body.season_phase,
         season_year=body.season_year,
         tracking_mode=body.tracking_mode,
+        competition_level=body.competition_level,
+        period_format=body.period_format or "quarters",
+        num_periods=body.num_periods or 4,
+        period_seconds=body.period_seconds or 480,
     )
     if body.date:
         try:

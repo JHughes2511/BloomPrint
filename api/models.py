@@ -462,6 +462,11 @@ class GameSession(Base):
     season_phase = Column(String, default="regular")
     season_year = Column(String, nullable=True)
     tracking_mode = Column(String, default="live")  # live / post
+    # Game clock / period structure, set from competition level at creation.
+    competition_level = Column(String, nullable=True)
+    period_format = Column(String, default="quarters")   # quarters / halves
+    num_periods = Column(Integer, default=4)             # 4 quarters, or 2 halves
+    period_seconds = Column(Integer, default=480)        # length of each period
     status = Column(String, default="in_progress")
     ai_scouting_report = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

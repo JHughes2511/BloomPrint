@@ -497,6 +497,31 @@ def _run_migrations():
         except Exception:
             pass
 
+        # Game session clock/period-structure columns.
+        try:
+            gs_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(game_sessions)")
+            )]
+            if gs_cols:
+                if "competition_level" not in gs_cols:
+                    conn.execute(__import__("sqlalchemy").text(
+                        "ALTER TABLE game_sessions ADD COLUMN competition_level TEXT"))
+                    conn.commit()
+                if "period_format" not in gs_cols:
+                    conn.execute(__import__("sqlalchemy").text(
+                        "ALTER TABLE game_sessions ADD COLUMN period_format TEXT NOT NULL DEFAULT 'quarters'"))
+                    conn.commit()
+                if "num_periods" not in gs_cols:
+                    conn.execute(__import__("sqlalchemy").text(
+                        "ALTER TABLE game_sessions ADD COLUMN num_periods INTEGER NOT NULL DEFAULT 4"))
+                    conn.commit()
+                if "period_seconds" not in gs_cols:
+                    conn.execute(__import__("sqlalchemy").text(
+                        "ALTER TABLE game_sessions ADD COLUMN period_seconds INTEGER NOT NULL DEFAULT 480"))
+                    conn.commit()
+        except Exception:
+            pass
+
         # Create generation_jobs table if missing (background video generation).
         try:
             conn.execute(__import__("sqlalchemy").text(
