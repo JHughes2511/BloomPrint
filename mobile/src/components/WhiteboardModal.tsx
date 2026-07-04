@@ -2,10 +2,13 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, Modal, StyleSheet,
   PanResponder, Alert, TextInput, ScrollView, ActivityIndicator,
-  Platform, KeyboardAvoidingView, Dimensions, Keyboard, TouchableWithoutFeedback,
+  Platform, KeyboardAvoidingView, Dimensions, Keyboard, TouchableWithoutFeedback, Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path, Circle, Line, Rect, G, Text as SvgText } from 'react-native-svg';
+
+const AnimatedLine = Animated.createAnimatedComponent(Line);
+const AnimatedG = Animated.createAnimatedComponent(G);
 import { whiteboardAPI, evalsAPI, gameEvalAPI } from '../api/client';
 import VoiceTextInput from './VoiceTextInput';
 import { reportSubject } from '../utils/reportSubject';
@@ -38,6 +41,7 @@ interface Stroke {
   color: string; strokeWidth: number;
   dash?: boolean;                 // dashed rendering (passes, suggested movement)
   layer?: 'offense' | 'defense' | 'counter' | 'key';  // AI scheme layer
+  step?: number;                  // animation order within a scheme (1-based)
 }
 
 type SchemeKey = 'offense' | 'defense' | 'counter';
@@ -183,6 +187,11 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const [aiGenerating, setAiGenerating] = useState(false);
   const [activeScheme, setActiveScheme] = useState<SchemeKey>('offense');
   const [showKey, setShowKey]           = useState(true);
+  // ── Scheme play-through animation ──
+  const [animating, setAnimating]       = useState(false);
+  const [animStep, setAnimStep]         = useState(0);   // step value currently drawing
+  const drawProgress                    = useRef(new Animated.Value(0)).current;
+  const animCancel                      = useRef(false);
   // Draw up from a report: pick a source type (Scout / Team), then a report.
   // The chosen report ATTACHES to the request (shown as a chip) so the text box
   // stays free for the coach's own additional details.
@@ -258,9 +267,9 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         out.push({ id: mk(), type: 'xmark', cx: X(df.x), cy: Y(df.y), size: 10, color: '#C0392B', strokeWidth: 3, layer });
         out.push({ id: mk(), type: 'text', x: X(df.x) + 12, y: Y(df.y) + 5, label: df.id, size: 12, color: '#C0392B', strokeWidth: 1, layer });
       });
-      (sc.actions ?? []).forEach((a: any) => {
+      (sc.actions ?? []).forEach((a: any, i: number) => {
         out.push({ id: mk(), type: 'arrow', x1: X(a.from[0]), y1: Y(a.from[1]), x2: X(a.to[0]), y2: Y(a.to[1]),
-                   color: '#141414', strokeWidth: 3, dash: a.kind === 'pass', layer });
+                   color: '#141414', strokeWidth: 3, dash: a.kind === 'pass', layer, step: a.step ?? (i + 1) });
       });
     });
     (res?.key ?? []).forEach((k: any) => {
@@ -586,6 +595,32 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     });
   };
 
+  // Animate the current scheme's actions step by step (same step = together).
+  const playScheme = () => {
+    const b = boards[activeBoardIdx];
+    if (!b) return;
+    const arrows = b.strokes.filter(st => st.layer === activeScheme && st.type === 'arrow');
+    const steps = [...new Set(arrows.map(a => a.step ?? 1))].sort((x, y) => x - y);
+    if (steps.length === 0) return;
+    animCancel.current = false;
+    setAnimating(true);
+    let i = 0;
+    const runStep = () => {
+      if (animCancel.current) { setAnimating(false); return; }
+      setAnimStep(steps[i]);
+      drawProgress.setValue(0);
+      Animated.timing(drawProgress, { toValue: 1, duration: 650, useNativeDriver: false }).start(({ finished }) => {
+        if (!finished || animCancel.current) { setAnimating(false); return; }
+        i += 1;
+        if (i < steps.length) setTimeout(runStep, 220);
+        else setAnimating(false);   // done — everything drawn, revert to static
+      });
+    };
+    runStep();
+  };
+  // Stop any running animation when leaving/ switching schemes.
+  useEffect(() => { animCancel.current = true; setAnimating(false); }, [activeScheme, activeBoardIdx]);
+
   const renderStroke = (s: Stroke) => {
     if (s.type === 'path') {
       return <Path key={s.id} d={s.d} stroke={s.color} strokeWidth={s.strokeWidth}
@@ -642,6 +677,46 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     return null;
   };
 
+  // An arrow that visibly "draws itself" from start to arrowhead (playback).
+  const renderAnimatedArrow = (s: Stroke) => {
+    if (s.x1 == null || s.y1 == null || s.x2 == null || s.y2 == null) return null;
+    const dx = s.x2 - s.x1, dy = s.y2 - s.y1;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    if (len < 5) return null;
+    const ux = dx / len, uy = dy / len, as = 12, px = -uy, py = ux;
+    const tip = { x: s.x2, y: s.y2 };
+    const b1 = { x: s.x2 - ux * as + px * as * 0.5, y: s.y2 - uy * as + py * as * 0.5 };
+    const b2 = { x: s.x2 - ux * as - px * as * 0.5, y: s.y2 - uy * as - py * as * 0.5 };
+    const shaftEnd = { x: s.x2 - ux * as * 0.85, y: s.y2 - uy * as * 0.85 };
+    const shaftLen = Math.max(len - as * 0.85, 0.1);
+    const dashoffset = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [shaftLen, 0] });
+    const headOpacity = drawProgress.interpolate({ inputRange: [0.75, 1], outputRange: [0, 1], extrapolate: 'clamp' });
+    return (
+      <G key={s.id}>
+        <AnimatedLine x1={s.x1} y1={s.y1} x2={shaftEnd.x} y2={shaftEnd.y} stroke={s.color} strokeWidth={s.strokeWidth}
+          strokeLinecap="round" strokeDasharray={`${shaftLen},${shaftLen}`} strokeDashoffset={dashoffset as any} />
+        <AnimatedG opacity={headOpacity as any}>
+          <Path d={`M${tip.x},${tip.y} L${b1.x},${b1.y} L${b2.x},${b2.y} Z`} fill={s.color} />
+        </AnimatedG>
+      </G>
+    );
+  };
+
+  // Court strokes with playback awareness: during animation, the active
+  // scheme's arrows reveal step by step; players/labels/key stay static.
+  const renderCourtStrokes = () => {
+    const strokes = boards[activeBoardIdx]?.strokes ?? [];
+    const visibleFilter = (st: Stroke) => !st.layer || st.layer === activeScheme || (showKey && st.layer === 'key');
+    if (!animating) return strokes.filter(visibleFilter).map(renderStroke);
+    return strokes.filter(visibleFilter).map(st => {
+      if (st.layer === 'key' || !st.layer || st.type !== 'arrow') return renderStroke(st);
+      const step = st.step ?? 1;
+      if (step < animStep) return renderStroke(st);
+      if (step > animStep) return null;
+      return renderAnimatedArrow(st);
+    });
+  };
+
   if (!visible) return null;
 
   return (
@@ -692,6 +767,12 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               style={[styles.schemeChip, showKey && { backgroundColor: '#1F6F9B22', borderColor: '#1F6F9B' }]}
               onPress={() => setShowKey(v => !v)}>
               <Text style={[styles.schemeChipText, showKey && { color: '#1F6F9B' }]}>Key</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
+              onPress={() => { if (animating) { animCancel.current = true; setAnimating(false); } else playScheme(); }}>
+              <Ionicons name={animating ? 'stop' : 'play'} size={13} color={t.ctaText} />
+              <Text style={[styles.schemeChipText, { color: t.ctaText }]}>{animating ? 'Stop' : 'Play'}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -772,9 +853,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               <View style={[styles.canvasWrapper, { width: courtW, height: courtH }]} {...panResponder.panHandlers}>
                 <HardwoodCourt width={courtW} height={courtH} />
                 <Svg style={StyleSheet.absoluteFill} width={courtW} height={courtH}>
-                  {board?.strokes
-                    .filter(st => !st.layer || st.layer === activeScheme || (showKey && st.layer === 'key'))
-                    .map(renderStroke)}
+                  {renderCourtStrokes()}
                   {livePath ? (
                     <Path d={livePath} stroke={color} strokeWidth={STROKE_WIDTH}
                           fill="none" strokeLinecap="round" strokeLinejoin="round" />

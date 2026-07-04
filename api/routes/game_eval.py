@@ -1158,12 +1158,14 @@ Return exactly this shape:
 {
   "play_name": "short name",
   "schemes": {
-    "offense": {"players": [{"id": "O1", "x": 25, "y": 80}], "defenders": [{"id": "X1", "x": 25, "y": 76}], "actions": [{"kind": "cut|screen|pass|dribble", "from": [25, 80], "to": [30, 70]}]},
+    "offense": {"players": [{"id": "O1", "x": 25, "y": 80}], "defenders": [{"id": "X1", "x": 25, "y": 76}], "actions": [{"kind": "cut|screen|pass|dribble", "from": [25, 80], "to": [30, 70], "step": 1}]},
     "defense": { same shape },
     "counter": { same shape }
   },
   "key": [{"n": 1, "text": "concise coaching suggestion", "from": [x, y], "to": [x, y]}]
 }
+
+STEPS: every action has a "step" integer (1,2,3,...) marking WHEN it happens as the play develops. Actions that happen at the SAME time share the same step number; actions that happen later get higher step numbers. Order the play realistically (e.g. screen on step 1, cut on step 2, pass on step 3).
 
 RULES: 5 offensive players (O1-O5) and up to 5 defenders (X1-X5) per scheme; at most 10 actions per scheme; 3-5 key items. offense = what the offense ran / should run; defense = the defensive scheme and rotations; counter = the counter/adjustment. The key holds the suggested movements or positioning that would have made the play succeed (get a basket, find the open man, correct the rotation) — each key arrow shows the improved movement. Keep key text under 90 characters.
 
@@ -1244,9 +1246,13 @@ async def ai_play(
         for i, df in enumerate((sc.get("defenders") or [])[:5]):
             out["defenders"].append({"id": str(df.get("id") or f"X{i+1}")[:3],
                                      "x": _pt(df.get("x"), 2, 48, 25), "y": _pt(df.get("y"), 48, 92, 74)})
-        for a in (sc.get("actions") or [])[:10]:
+        for idx, a in enumerate((sc.get("actions") or [])[:10]):
             fr, to = a.get("from") or [25, 80], a.get("to") or [25, 70]
-            out["actions"].append({"kind": str(a.get("kind") or "cut"),
+            try:
+                step = max(1, int(a.get("step") or (idx + 1)))
+            except (TypeError, ValueError):
+                step = idx + 1
+            out["actions"].append({"kind": str(a.get("kind") or "cut"), "step": step,
                                    "from": [_pt(fr[0], 2, 48, 25), _pt(fr[1], 48, 92, 80)],
                                    "to":   [_pt(to[0], 2, 48, 25), _pt(to[1], 48, 92, 70)]})
         return out
