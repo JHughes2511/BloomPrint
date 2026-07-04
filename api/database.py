@@ -454,3 +454,20 @@ def _run_migrations():
                 conn.commit()
         except Exception:
             pass
+
+        # Create game_report_corrections table if missing (save-for-later
+        # corrections on game reports, mirroring team_report_corrections).
+        try:
+            conn.execute(__import__("sqlalchemy").text(
+                "CREATE TABLE IF NOT EXISTS game_report_corrections ("
+                "id INTEGER PRIMARY KEY, "
+                "game_report_id INTEGER NOT NULL REFERENCES game_reports(id), "
+                "coach_id INTEGER NOT NULL REFERENCES coaches(id), "
+                "correction TEXT NOT NULL, "
+                "applied INTEGER NOT NULL DEFAULT 0, "
+                "created_at DATETIME"
+                ")"
+            ))
+            conn.commit()
+        except Exception:
+            pass

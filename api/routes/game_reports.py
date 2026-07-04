@@ -511,3 +511,87 @@ async def correct_game_report(
     db.commit()
     db.refresh(gr)
     return _build_out(gr)
+
+
+@router.get("/{report_id}/corrections")
+def list_game_report_corrections(
+    report_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    gr = db.get(models.GameReport, report_id)
+    if not gr or gr.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Game report not found")
+    rows = (
+        db.query(models.GameReportCorrection)
+        .filter_by(game_report_id=report_id)
+        .order_by(models.GameReportCorrection.id)
+        .all()
+    )
+    return [
+        {"id": c.id, "correction": c.correction, "applied": c.applied, "created_at": c.created_at}
+        for c in rows
+    ]
+
+
+@router.post("/{report_id}/corrections")
+def add_game_report_correction(
+    report_id: int,
+    body: GameReportCorrectBody,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Save a correction for later without regenerating."""
+    gr = db.get(models.GameReport, report_id)
+    if not gr or gr.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Game report not found")
+    c = models.GameReportCorrection(game_report_id=report_id, coach_id=coach.id, correction=body.correction)
+    db.add(c)
+    db.commit()
+    db.refresh(c)
+    return {"id": c.id, "correction": c.correction, "applied": c.applied, "created_at": c.created_at}
+
+
+@router.post("/{report_id}/regenerate", response_model=schemas.GameReportOut)
+async def regenerate_game_report(
+    report_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Regenerate the game report from all un-applied corrections, then mark
+    those corrections applied."""
+    gr = db.get(models.GameReport, report_id)
+    if not gr or gr.coach_id != coach.id or not gr.report_text:
+        raise HTTPException(status_code=404, detail="Game report not found")
+    pending = (
+        db.query(models.GameReportCorrection)
+        .filter_by(game_report_id=report_id, applied=False)
+        .order_by(models.GameReportCorrection.id)
+        .all()
+    )
+    if not pending:
+        raise HTTPException(status_code=400, detail="No un-applied corrections to apply")
+    corrections_text = "\n".join(f"- {c.correction}" for c in pending)
+    prompt = (
+        f"You are a basketball analysis expert. Below is a game report followed by corrections "
+        f"from the coach. Update the report to incorporate ALL of them. "
+        f"Return ONLY the updated report text in the same format.\n\n"
+        f"ORIGINAL REPORT:\n{gr.report_text}\n\n"
+        f"CORRECTIONS:\n{corrections_text}\n\nUPDATED REPORT:"
+    )
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        response = await client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=8192,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        gr.report_text = response.content[0].text.strip()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Correction failed: {exc}")
+    for c in pending:
+        c.applied = True
+    db.commit()
+    db.refresh(gr)
+    return _build_out(gr)

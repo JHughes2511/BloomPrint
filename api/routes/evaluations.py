@@ -207,16 +207,11 @@ async def team_report(
             shutil.copyfileobj(video.file, f)
         try:
             from video_vision.server import _handle_analyze_basketball_video
-            from video_vision.bim import parse_output_types
-            # The video sub-analysis only needs to describe what's on film — feed
-            # it ONE lightweight lens, not the full multi-lens prompt, so a
-            # multi-type + film request doesn't run two huge generations back to
-            # back and time out. The final report below still uses all types.
-            vid_types = parse_output_types(output_type)
-            vid_type = vid_types[0] if vid_types else "film_breakdown"
+            # Full multi-lens film analysis — the video is analyzed through every
+            # selected report type, same as the final report.
             vid_result = await _handle_analyze_basketball_video({
                 "video_path": str(vid_dest),
-                "output_type": vid_type,
+                "output_type": output_type,
                 "program_name": coach.program_name,
                 "competition_level": "Team",
                 "coach_weight": coach.weight,

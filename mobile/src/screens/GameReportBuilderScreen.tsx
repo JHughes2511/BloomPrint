@@ -83,6 +83,30 @@ export default function GameReportBuilderScreen() {
   // Correction for main report
   const [correctionText, setCorrectionText] = useState('');
   const [correcting, setCorrecting] = useState(false);
+  const [savingCorrection, setSavingCorrection] = useState(false);
+  const [gameCorrections, setGameCorrections] = useState<any[]>([]);
+
+  const loadGameCorrections = async (id: number | null) => {
+    if (!id) { setGameCorrections([]); return; }
+    try { setGameCorrections(await gameReportsAPI.corrections(id)); } catch { setGameCorrections([]); }
+  };
+
+  useEffect(() => { loadGameCorrections(reportId); }, [reportId, report?.report_text]);
+
+  const saveCorrectionForLater = async () => {
+    if (!reportId || !correctionText.trim()) return;
+    setSavingCorrection(true);
+    try {
+      await gameReportsAPI.addCorrection(reportId, correctionText.trim());
+      setCorrectionText('');
+      await loadGameCorrections(reportId);
+      Alert.alert('Saved', 'Correction saved. Apply & Regenerate when ready.');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save correction');
+    } finally {
+      setSavingCorrection(false);
+    }
+  };
 
   // Clip modal
   const [clipModal, setClipModal] = useState<any | null>(null);
@@ -273,12 +297,19 @@ export default function GameReportBuilderScreen() {
   };
 
   const applyCorrection = async () => {
-    if (!reportId || !correctionText.trim()) return;
+    if (!reportId) return;
+    const pending = correctionText.trim();
+    if (!pending && gameCorrections.filter(c => !c.applied).length === 0) {
+      Alert.alert('Nothing to apply', 'Add a correction first.');
+      return;
+    }
     setCorrecting(true);
     try {
-      const updated = await gameReportsAPI.correct(reportId, correctionText.trim());
+      if (pending) await gameReportsAPI.addCorrection(reportId, pending);
+      const updated = await gameReportsAPI.regenerate(reportId);
       setReport(updated);
       setCorrectionText('');
+      await loadGameCorrections(reportId);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not apply correction');
     } finally {
@@ -626,16 +657,47 @@ export default function GameReportBuilderScreen() {
                 multiline
                 textAlignVertical="top"
               />
-              <TouchableOpacity
-                style={[styles.correctionBtn, (!correctionText.trim() || correcting) && { opacity: 0.5 }]}
-                onPress={applyCorrection}
-                disabled={!correctionText.trim() || correcting}
-              >
-                {correcting
-                  ? <><ActivityIndicator color={t.ctaText} size="small" /><Text style={styles.correctionBtnText}>  Updating...</Text></>
-                  : <><Ionicons name="checkmark-circle" size={16} color={t.ctaText} /><Text style={styles.correctionBtnText}>  Apply Correction</Text></>
-                }
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <TouchableOpacity
+                  style={[styles.correctionBtn, { flex: 1, backgroundColor: t.chip }, (!correctionText.trim() || savingCorrection) && { opacity: 0.5 }]}
+                  onPress={saveCorrectionForLater}
+                  disabled={!correctionText.trim() || savingCorrection}
+                >
+                  {savingCorrection
+                    ? <ActivityIndicator color={t.ink} size="small" />
+                    : <Text style={[styles.correctionBtnText, { color: t.ink }]}>Save for Later</Text>}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.correctionBtn, { flex: 1 }, correcting && { opacity: 0.5 }]}
+                  onPress={applyCorrection}
+                  disabled={correcting}
+                >
+                  {correcting
+                    ? <><ActivityIndicator color={t.ctaText} size="small" /><Text style={styles.correctionBtnText}>  Updating...</Text></>
+                    : <><Ionicons name="refresh" size={15} color={t.ctaText} /><Text style={styles.correctionBtnText}>  Apply & Regenerate</Text></>
+                  }
+                </TouchableOpacity>
+              </View>
+
+              {gameCorrections.length > 0 && (
+                <View style={{ marginTop: 14 }}>
+                  {gameCorrections.map((c: any) => (
+                    <View key={c.id} style={{ backgroundColor: t.card, borderRadius: 10, padding: 11, marginBottom: 6, borderWidth: 1, borderColor: t.cardBorder, opacity: c.applied ? 0.55 : 1 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                        {c.applied
+                          ? <View style={{ backgroundColor: t.positiveSoft, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}>
+                              <Text style={{ color: t.positive, fontSize: 9, fontFamily: fonts[700] }}>APPLIED</Text>
+                            </View>
+                          : <View style={{ backgroundColor: t.chip, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}>
+                              <Text style={{ color: t.muted, fontSize: 9, fontFamily: fonts[700] }}>PENDING</Text>
+                            </View>}
+                        <Text style={{ color: t.muted2, fontSize: 10 }}>{c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}</Text>
+                      </View>
+                      <Text style={{ color: t.inkSoft, fontSize: 12.5 }}>{c.correction}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
           </View>
         ) : null}

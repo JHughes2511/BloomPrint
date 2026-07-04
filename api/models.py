@@ -388,6 +388,21 @@ class GameReport(Base):
     my_team       = relationship("Team", foreign_keys=[my_team_id])
     opponent_team = relationship("Team", foreign_keys=[opponent_team_id])
     clips         = relationship("GameReportClip", back_populates="game_report", cascade="all, delete-orphan")
+    corrections   = relationship("GameReportCorrection", back_populates="game_report", cascade="all, delete-orphan")
+
+
+class GameReportCorrection(Base):
+    __tablename__ = "game_report_corrections"
+
+    id             = Column(Integer, primary_key=True, index=True)
+    game_report_id = Column(Integer, ForeignKey("game_reports.id"), nullable=False)
+    coach_id       = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    correction     = Column(Text, nullable=False)
+    applied        = Column(Boolean, default=False)
+    created_at     = Column(DateTime, default=datetime.utcnow)
+
+    game_report    = relationship("GameReport", back_populates="corrections")
+    coach          = relationship("Coach")
 
 
 class GameReportClip(Base):

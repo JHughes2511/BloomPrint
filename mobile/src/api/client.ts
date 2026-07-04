@@ -304,6 +304,12 @@ export const gameReportsAPI = {
     api.post(`/game-reports/${id}/correct`, { correction }).then(r => r.data),
   correctClip: (id: number, clipId: number, correction: string) =>
     api.post(`/game-reports/${id}/clips/${clipId}/correct`, { correction }).then(r => r.data),
+  corrections: (id: number) =>
+    api.get(`/game-reports/${id}/corrections`).then(r => r.data),
+  addCorrection: (id: number, correction: string) =>
+    api.post(`/game-reports/${id}/corrections`, { correction }).then(r => r.data),
+  regenerate: (id: number) =>
+    api.post(`/game-reports/${id}/regenerate`).then(r => r.data),
 };
 
 
