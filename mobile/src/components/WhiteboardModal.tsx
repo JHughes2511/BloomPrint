@@ -1027,32 +1027,32 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         <Modal visible={showRefine} transparent animationType="slide" onRequestClose={() => setShowRefine(false)}>
           <KeyboardAvoidingView style={styles.listOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={0}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View style={[styles.listBox, { padding: 20 }]}>
-                <Text style={styles.listTitle}>Refine Play</Text>
-                {!!boards[activeBoardIdx]?.ai?.prompt && (
-                  <View style={{ backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 10, borderWidth: 1, borderColor: t.line }}>
-                    <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 4 }}>WHAT YOU WROTE</Text>
-                    <ScrollView style={{ maxHeight: 90 }}>
+              <View style={[styles.listBox, { padding: 20, maxHeight: '88%' }]}>
+                <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+                  <Text style={styles.listTitle}>Refine Play</Text>
+                  {!!boards[activeBoardIdx]?.ai?.prompt && (
+                    <View style={{ backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 10, borderWidth: 1, borderColor: t.line }}>
+                      <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 4 }}>WHAT YOU WROTE</Text>
                       <Text style={{ color: t.inkSoft, fontSize: 13, lineHeight: 18 }}>{boards[activeBoardIdx]!.ai!.prompt}</Text>
                       {!!boards[activeBoardIdx]?.ai?.attachedTitle && (
                         <Text style={{ color: t.muted, fontSize: 11, marginTop: 4 }}>📎 {boards[activeBoardIdx]!.ai!.attachedTitle}</Text>
                       )}
-                    </ScrollView>
-                  </View>
-                )}
-                <Text style={styles.aiHint}>
-                  Describe the change and the AI will redraw the play (offense, defense, counter, and key).
-                  Your hand-drawn marks are kept.
-                </Text>
-                <VoiceTextInput
-                  style={[styles.textField, { minHeight: 90 }]}
-                  placeholder="e.g. add a weak-side flare, roller should short-roll, bring the 5 to the top..."
-                  placeholderTextColor={t.muted2}
-                  value={refineText}
-                  onChangeText={setRefineText}
-                  multiline
-                  textAlignVertical="top"
-                />
+                    </View>
+                  )}
+                  <Text style={styles.aiHint}>
+                    Describe the change and the AI will redraw the play (offense, defense, counter, and key).
+                    Your hand-drawn marks are kept.
+                  </Text>
+                  <VoiceTextInput
+                    style={[styles.textField, { minHeight: 90 }]}
+                    placeholder="e.g. add a weak-side flare, roller should short-roll, bring the 5 to the top..."
+                    placeholderTextColor={t.muted2}
+                    value={refineText}
+                    onChangeText={setRefineText}
+                    multiline
+                    textAlignVertical="top"
+                  />
+                </ScrollView>
                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                   <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setShowRefine(false)}>
                     <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>

@@ -733,7 +733,7 @@ async def generate_ai_scouting(
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
             model="claude-opus-4-7",
-            max_tokens=4096,
+            max_tokens=8000,
             messages=[{"role": "user", "content": prompt}],
         )
         text_blocks = [b for b in response.content if hasattr(b, "text")]
@@ -1154,7 +1154,7 @@ _AI_PLAY_PROMPT = """You are an elite basketball tactician. From the scene descr
 
 POSITIONS: the player numbers are basketball positions — 1 = Point Guard (O1), 2 = Shooting Guard (O2), 3 = Small Forward (O3), 4 = Power Forward (O4), 5 = Center (O5). Place and move each player consistent with their position (e.g. O1 initiates up top, O5 plays around the rim/high post), and each defender X1-X5 guards the matching position (X5 guards O5, etc.).
 
-COORDINATES: feet on a regulation HALF court, x from 0 (left sideline) to 50 (right sideline), y from 47 (half-court line) to 94 (near baseline, hoop end). Draw EVERYTHING in this near half. Keep every coordinate inside 2..48 for x and 48..92 for y.
+COORDINATES: feet on a regulation HALF court. x: 0 = left sideline, 25 = middle, 50 = right sideline. y grows toward the hoop — LOW y is farther from the basket (up top), HIGH y is at the rim. Landmarks: half-court line y=47, top of the 3-point arc / where the point guard initiates y≈62, free-throw line y=75, elbows y≈75 (x≈17 and x≈33), rim/basket y≈89, blocks/low post y≈84 (x≈19 and x≈31), wings y≈66 (x≈8 and x≈42), corners y≈90 (x≈4 and x≈46). The ball-handler up top belongs around y=60-64, NOT at the free-throw line. Keep every coordinate inside 2..48 for x and 48..92 for y.
 
 Return exactly this shape:
 {
@@ -1210,7 +1210,7 @@ async def ai_play(
         client = anthropic.AsyncAnthropic()
         resp = await client.messages.create(
             model="claude-opus-4-7",
-            max_tokens=4096,
+            max_tokens=8000,
             messages=[{"role": "user", "content": f"{_AI_PLAY_PROMPT}\n\nSCENE:\n{description}"}],
         )
         blocks = [b for b in resp.content if hasattr(b, "text")]
@@ -1221,7 +1221,7 @@ async def ai_play(
             # One retry: ask the model to return corrected, strictly-valid JSON.
             fix = await client.messages.create(
                 model="claude-opus-4-7",
-                max_tokens=4096,
+                max_tokens=8000,
                 messages=[{"role": "user", "content":
                     "The following was supposed to be strict JSON but is invalid. "
                     "Return ONLY the corrected, strictly-valid JSON — same data, no prose, "
