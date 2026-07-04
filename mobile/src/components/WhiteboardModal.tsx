@@ -785,11 +785,16 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           </View>
         )}
 
-        {/* AI Key — the suggested improvements, numbered to match the dashed arrows */}
+        {/* AI Key — bottom overlay that pops up over the court when Key is on */}
         {board?.ai && showKey && board.ai.key.length > 0 && (
           <View style={styles.keyPanel}>
-            <Text style={styles.keyTitle}>KEY — SUGGESTED IMPROVEMENTS</Text>
-            <ScrollView style={{ maxHeight: 96 }} showsVerticalScrollIndicator={false}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <Text style={styles.keyTitle}>KEY — SUGGESTED IMPROVEMENTS</Text>
+              <TouchableOpacity onPress={() => setShowKey(false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Ionicons name="chevron-down" size={18} color={t.muted} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={true}>
               {board.ai.key.map(k => (
                 <Text key={k.n} style={styles.keyItem}>
                   <Text style={{ color: '#1F6F9B', fontFamily: fonts[800] }}>{k.n}. </Text>
@@ -1013,8 +1018,14 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   schemeChip:      { borderRadius: 16, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: t.line },
   schemeChipActive:{ backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   schemeChipText:  { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
-  keyPanel:        { paddingHorizontal: 16, paddingVertical: 10, borderTopWidth: 1, borderTopColor: t.divider },
-  keyTitle:        { color: t.label, fontSize: 10.5, fontFamily: fonts[700], letterSpacing: 1.4, marginBottom: 6 },
+  keyPanel:        {
+    position: 'absolute', left: 0, right: 0, bottom: 0,
+    paddingHorizontal: 16, paddingTop: 10, paddingBottom: 20,
+    backgroundColor: t.sheet, borderTopWidth: 1, borderTopColor: t.cardBorder,
+    borderTopLeftRadius: 16, borderTopRightRadius: 16,
+    shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, shadowOffset: { width: 0, height: -3 }, elevation: 12,
+  },
+  keyTitle:        { color: t.label, fontSize: 10.5, fontFamily: fonts[700], letterSpacing: 1.4 },
   keyItem:         { color: t.inkSoft, fontSize: 12.5, lineHeight: 18, marginBottom: 4 },
   aiHint:          { color: t.muted, fontSize: 12.5, lineHeight: 18, marginBottom: 12 },
   seedBtn:         { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: t.line, alignSelf: 'flex-start' },
