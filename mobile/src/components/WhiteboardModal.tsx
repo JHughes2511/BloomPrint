@@ -51,7 +51,18 @@ interface Board {
   name: string;
   court_type: CourtType;
   strokes: Stroke[];
-  ai?: { play_name: string; key: { n: number; text: string }[]; source?: string };
+  ai?: {
+    play_name: string;
+    key: { n: number; text: string }[];
+    source?: string;
+    prompt?: string;   // what the coach wrote to generate/refine the play
+    attachedTitle?: string; // report attached at generation, if any
+    schemes?: Record<string, {
+      players?: { id: string; x: number; y: number }[];
+      defenders?: { id: string; x: number; y: number }[];
+      actions?: { actor?: string; kind?: string; from: number[]; to: number[]; step?: number }[];
+    }>;
+  };
 }
 
 // Three marker colors with strong contrast on maple hardwood, one thickness.
@@ -192,6 +203,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const [showKey, setShowKey]           = useState(true);
   // ── Scheme play-through animation ──
   const [animating, setAnimating]       = useState(false);
+  const [animDone, setAnimDone]         = useState(false); // finished — markers at final spots
   const [animStep, setAnimStep]         = useState(0);   // step value currently drawing
   const drawProgress                    = useRef(new Animated.Value(0)).current;
   const animCancel                      = useRef(false);
@@ -297,7 +309,8 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         name: res.play_name || `AI Play ${idx + 1}`,
         court_type: 'half',
         strokes: buildPlayStrokes(res),
-        ai: { play_name: res.play_name ?? 'AI Play', key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })), source: composed },
+        ai: { play_name: res.play_name ?? 'AI Play', key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })), source: composed, schemes: res.schemes,
+              prompt: aiDescription.trim(), attachedTitle: attachedReport?.title },
       };
       setBoards(prev => [...prev, newBoard]);
       setActiveBoardIdx(idx);
@@ -332,7 +345,8 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         ...b,
         name: res.play_name || b.name,
         strokes: [...kept, ...aiStrokes],
-        ai: { play_name: res.play_name ?? b.ai.play_name, key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })), source: composed },
+        ai: { play_name: res.play_name ?? b.ai.play_name, key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })), source: composed, schemes: res.schemes,
+              prompt: [b.ai.prompt, `+ ${refineText.trim()}`].filter(Boolean).join('\n'), attachedTitle: b.ai.attachedTitle },
       };
       setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
       setActiveScheme('offense');
@@ -648,31 +662,33 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     });
   };
 
-  // Animate the current scheme's actions step by step (same step = together).
+  // Animate the current scheme step by step (same step = together): each actor
+  // marker travels its path while its arrow draws; passes send a ball.
   const playScheme = () => {
     const b = boards[activeBoardIdx];
-    if (!b) return;
-    const arrows = b.strokes.filter(st => st.layer === activeScheme && st.type === 'arrow');
-    const steps = [...new Set(arrows.map(a => a.step ?? 1))].sort((x, y) => x - y);
+    const scheme = b?.ai?.schemes?.[activeScheme];
+    const actions = scheme?.actions ?? [];
+    const steps = [...new Set(actions.map(a => a.step ?? 1))].sort((x, y) => x - y);
     if (steps.length === 0) return;
     animCancel.current = false;
+    setAnimDone(false);
     setAnimating(true);
     let i = 0;
     const runStep = () => {
       if (animCancel.current) { setAnimating(false); return; }
       setAnimStep(steps[i]);
       drawProgress.setValue(0);
-      Animated.timing(drawProgress, { toValue: 1, duration: 650, useNativeDriver: false }).start(({ finished }) => {
+      Animated.timing(drawProgress, { toValue: 1, duration: 750, useNativeDriver: false }).start(({ finished }) => {
         if (!finished || animCancel.current) { setAnimating(false); return; }
         i += 1;
-        if (i < steps.length) setTimeout(runStep, 220);
-        else setAnimating(false);   // done — everything drawn, revert to static
+        if (i < steps.length) setTimeout(runStep, 250);
+        else { setAnimating(false); setAnimDone(true); }   // hold final positions
       });
     };
     runStep();
   };
-  // Stop any running animation when leaving/ switching schemes.
-  useEffect(() => { animCancel.current = true; setAnimating(false); }, [activeScheme, activeBoardIdx]);
+  // Reset animation when switching schemes/boards.
+  useEffect(() => { animCancel.current = true; setAnimating(false); setAnimDone(false); }, [activeScheme, activeBoardIdx]);
 
   const renderStroke = (s: Stroke) => {
     if (s.type === 'path') {
@@ -755,19 +771,83 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     );
   };
 
-  // Court strokes with playback awareness: during animation, the active
-  // scheme's arrows reveal step by step; players/labels/key stay static.
-  const renderCourtStrokes = () => {
-    const strokes = boards[activeBoardIdx]?.strokes ?? [];
-    const visibleFilter = (st: Stroke) => !st.layer || st.layer === activeScheme || (showKey && st.layer === 'key');
-    if (!animating) return strokes.filter(visibleFilter).map(renderStroke);
-    return strokes.filter(visibleFilter).map(st => {
-      if (st.layer === 'key' || !st.layer || st.type !== 'arrow') return renderStroke(st);
-      const step = st.step ?? 1;
-      if (step < animStep) return renderStroke(st);
-      if (step > animStep) return null;
-      return renderAnimatedArrow(st);
+  // The full play as a diagram, animated: each actor marker travels its path,
+  // arrows draw in, and passes send a ball — driven from the structured scheme
+  // data (feet coords) so it also survives court-type toggles.
+  const renderAnimatedScheme = () => {
+    const b = boards[activeBoardIdx];
+    const scheme = b?.ai?.schemes?.[activeScheme];
+    if (!scheme) return [];
+    const sc = scaleForType(b!.court_type);
+    const offFt = offsetFtForType(b!.court_type);
+    const px = (fx: number, fy: number) => ({ x: fx * sc, y: (fy - offFt) * sc });
+    const actions = (scheme.actions ?? []).slice().sort((a, c) => (a.step ?? 1) - (c.step ?? 1));
+    const steps = [...new Set(actions.map(a => a.step ?? 1))].sort((x, y) => x - y);
+    const maxStep = steps.length ? steps[steps.length - 1] : 0;
+    const curStep = animDone ? maxStep + 1 : animStep;
+    const OINK = '#141414', XRED = '#C0392B', BALL = '#E67E22';
+    const els: any[] = [];
+
+    // Markers — offense (circles) and defense (xmarks), with their labels.
+    const markers = [
+      ...(scheme.players ?? []).map(p => ({ ...p, kind: 'O' as const })),
+      ...(scheme.defenders ?? []).map(p => ({ ...p, kind: 'X' as const })),
+    ];
+    markers.forEach(m => {
+      const moves = actions.filter(a => a.actor === m.id && a.kind !== 'pass');
+      let baseFt = { x: m.x, y: m.y };
+      for (const mv of moves) if ((mv.step ?? 1) < curStep) baseFt = { x: mv.to[0], y: mv.to[1] };
+      const curMove = moves.find(mv => (mv.step ?? 1) === curStep);
+      const at = px(baseFt.x, baseFt.y);
+      const shape = m.kind === 'O'
+        ? (<><Circle cx={at.x} cy={at.y} r={13} stroke={OINK} strokeWidth={3} fill="none" />
+             <SvgText x={at.x - 8} y={at.y + 5} fill={OINK} fontSize={13} fontWeight="bold">{m.id}</SvgText></>)
+        : (<><Line x1={at.x - 10} y1={at.y - 10} x2={at.x + 10} y2={at.y + 10} stroke={XRED} strokeWidth={3} strokeLinecap="round" />
+             <Line x1={at.x + 10} y1={at.y - 10} x2={at.x - 10} y2={at.y + 10} stroke={XRED} strokeWidth={3} strokeLinecap="round" />
+             <SvgText x={at.x + 12} y={at.y + 5} fill={XRED} fontSize={12} fontWeight="bold">{m.id}</SvgText></>);
+      if (curMove) {
+        const to = px(curMove.to[0], curMove.to[1]);
+        const tx = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, to.x - at.x] });
+        const ty = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, to.y - at.y] });
+        els.push(<AnimatedG key={`m${m.id}`} translateX={tx as any} translateY={ty as any}>{shape}</AnimatedG>);
+      } else {
+        els.push(<G key={`m${m.id}`}>{shape}</G>);
+      }
     });
+
+    // Actions — arrows draw in; balls fly on passes.
+    actions.forEach((a, i) => {
+      const st = a.step ?? 1;
+      if (st > curStep) return;
+      const f = px(a.from[0], a.from[1]), tt = px(a.to[0], a.to[1]);
+      const pseudo: Stroke = { id: `act${i}`, type: 'arrow', x1: f.x, y1: f.y, x2: tt.x, y2: tt.y,
+        color: a.kind === 'pass' ? '#1F6F9B' : OINK, strokeWidth: 3, dash: a.kind === 'pass' };
+      els.push(st < curStep ? renderStroke(pseudo) : renderAnimatedArrow(pseudo));
+      if (a.kind === 'pass' && st === curStep) {
+        const tx = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, tt.x - f.x] });
+        const ty = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, tt.y - f.y] });
+        els.push(<AnimatedG key={`ball${i}`} translateX={tx as any} translateY={ty as any}>
+          <Circle cx={f.x} cy={f.y} r={6} fill={BALL} /></AnimatedG>);
+      }
+    });
+    return els;
+  };
+
+  // Court strokes with playback awareness. Idle = static strokes. Playing/Done =
+  // hand-drawn + key stay static, the active scheme animates from its data.
+  const renderCourtStrokes = () => {
+    const b = boards[activeBoardIdx];
+    const strokes = b?.strokes ?? [];
+    const animMode = (animating || animDone) && !!b?.ai?.schemes?.[activeScheme];
+    if (!animMode) {
+      return strokes
+        .filter(st => !st.layer || st.layer === activeScheme || (showKey && st.layer === 'key'))
+        .map(renderStroke);
+    }
+    const statics = strokes
+      .filter(st => !st.layer || (showKey && st.layer === 'key'))
+      .map(renderStroke);
+    return [...statics, ...renderAnimatedScheme()];
   };
 
   if (!visible) return null;
@@ -823,9 +903,9 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
-              onPress={() => { if (animating) { animCancel.current = true; setAnimating(false); } else playScheme(); }}>
-              <Ionicons name={animating ? 'stop' : 'play'} size={13} color={t.ctaText} />
-              <Text style={[styles.schemeChipText, { color: t.ctaText }]}>{animating ? 'Stop' : 'Play'}</Text>
+              onPress={() => { if (animating) { animCancel.current = true; setAnimating(false); setAnimDone(true); } else playScheme(); }}>
+              <Ionicons name={animating ? 'stop' : animDone ? 'refresh' : 'play'} size={13} color={t.ctaText} />
+              <Text style={[styles.schemeChipText, { color: t.ctaText }]}>{animating ? 'Stop' : animDone ? 'Replay' : 'Play'}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.accentSoft, borderColor: t.accent }]}
@@ -949,6 +1029,17 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={[styles.listBox, { padding: 20 }]}>
                 <Text style={styles.listTitle}>Refine Play</Text>
+                {!!boards[activeBoardIdx]?.ai?.prompt && (
+                  <View style={{ backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 10, borderWidth: 1, borderColor: t.line }}>
+                    <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 4 }}>WHAT YOU WROTE</Text>
+                    <ScrollView style={{ maxHeight: 90 }}>
+                      <Text style={{ color: t.inkSoft, fontSize: 13, lineHeight: 18 }}>{boards[activeBoardIdx]!.ai!.prompt}</Text>
+                      {!!boards[activeBoardIdx]?.ai?.attachedTitle && (
+                        <Text style={{ color: t.muted, fontSize: 11, marginTop: 4 }}>📎 {boards[activeBoardIdx]!.ai!.attachedTitle}</Text>
+                      )}
+                    </ScrollView>
+                  </View>
+                )}
                 <Text style={styles.aiHint}>
                   Describe the change and the AI will redraw the play (offense, defense, counter, and key).
                   Your hand-drawn marks are kept.

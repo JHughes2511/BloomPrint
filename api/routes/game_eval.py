@@ -1158,12 +1158,14 @@ Return exactly this shape:
 {
   "play_name": "short name",
   "schemes": {
-    "offense": {"players": [{"id": "O1", "x": 25, "y": 80}], "defenders": [{"id": "X1", "x": 25, "y": 76}], "actions": [{"kind": "cut|screen|pass|dribble", "from": [25, 80], "to": [30, 70], "step": 1}]},
+    "offense": {"players": [{"id": "O1", "x": 25, "y": 80}], "defenders": [{"id": "X1", "x": 25, "y": 76}], "actions": [{"actor": "O2", "kind": "cut|screen|pass|dribble", "from": [25, 80], "to": [30, 70], "step": 1}]},
     "defense": { same shape },
     "counter": { same shape }
   },
   "key": [{"n": 1, "text": "concise coaching suggestion", "from": [x, y], "to": [x, y]}]
 }
+
+ACTOR: every action has an "actor" = the id of the player or defender who makes that movement (must match one of the players/defenders ids, e.g. "O2" or "X1"). The action's "from" should be that actor's current position and "to" is where they move. For a "pass", the actor is the passer and "from"/"to" are the ball's path (no one relocates on a pass).
 
 STEPS: every action has a "step" integer (1,2,3,...) marking WHEN it happens as the play develops. Actions that happen at the SAME time share the same step number; actions that happen later get higher step numbers. Order the play realistically (e.g. screen on step 1, cut on step 2, pass on step 3).
 
@@ -1253,6 +1255,7 @@ async def ai_play(
             except (TypeError, ValueError):
                 step = idx + 1
             out["actions"].append({"kind": str(a.get("kind") or "cut"), "step": step,
+                                   "actor": str(a.get("actor") or "")[:3],
                                    "from": [_pt(fr[0], 2, 48, 25), _pt(fr[1], 48, 92, 80)],
                                    "to":   [_pt(to[0], 2, 48, 25), _pt(to[1], 48, 92, 70)]})
         return out
