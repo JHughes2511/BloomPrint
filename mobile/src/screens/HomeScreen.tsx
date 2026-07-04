@@ -8,6 +8,20 @@ import { ScreenBackground, SectionLabel, Card, IconTile, Txt } from '../theme/co
 import { Icon, IconName } from '../theme/icons';
 import { fonts, type as typeScale } from '../theme/typography';
 
+// Which bottom tab each report type routes to when tapped on the Home page.
+//   RosterTab   = Roster      TeamTab = Team Eval      TeamEvalTab = Team Grade
+const REPORT_TYPE_TAB: Record<string, string> = {
+  player_eval: 'RosterTab',
+  training_program: 'RosterTab',
+  position_analysis: 'RosterTab',
+  scouting_report: 'RosterTab',
+  recruitment_profile: 'RosterTab',
+  film_breakdown: 'TeamTab',
+  coaching_report: 'TeamTab',
+  game_analysis: 'TeamTab',
+  box_score: 'TeamEvalTab',
+};
+
 const REPORT_TYPES: { key: string; label: string; icon: IconName; desc: string }[] = [
   { key: 'player_eval', label: 'Player Eval', icon: 'user', desc: 'Individual BIM evaluation scored across all 6 pillars' },
   { key: 'film_breakdown', label: 'Film Breakdown', icon: 'film', desc: 'Frame-by-frame film analysis of technique and decisions' },
@@ -127,11 +141,21 @@ export default function HomeScreen() {
           <SectionLabel>Report Types</SectionLabel>
           <View style={styles.grid}>
             {REPORT_TYPES.map(rt => (
-              <Card key={rt.key} style={{ width: '48%' }} padding={16}>
-                <IconTile name={rt.icon} variant="accent" size={44} />
-                <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 15.5, marginTop: 12 }]}>{rt.label}</Text>
-                <Text style={[typeScale.bodySoft, { color: t.muted, fontSize: 12, lineHeight: 17, marginTop: 4 }]}>{rt.desc}</Text>
-              </Card>
+              <TouchableOpacity
+                key={rt.key}
+                style={{ width: '48%' }}
+                activeOpacity={0.7}
+                onPress={() => {
+                  const tab = REPORT_TYPE_TAB[rt.key];
+                  if (tab) navigation.navigate(tab as never);
+                }}
+              >
+                <Card padding={16} style={{ flex: 1 }}>
+                  <IconTile name={rt.icon} variant="accent" size={44} />
+                  <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 15.5, marginTop: 12 }]}>{rt.label}</Text>
+                  <Text style={[typeScale.bodySoft, { color: t.muted, fontSize: 12, lineHeight: 17, marginTop: 4 }]}>{rt.desc}</Text>
+                </Card>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
