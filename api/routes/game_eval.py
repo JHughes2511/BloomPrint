@@ -1152,6 +1152,8 @@ def update_whiteboard(
 # diagram: offense / defense / counter schemes plus a numbered improvement key.
 _AI_PLAY_PROMPT = """You are an elite basketball tactician. From the scene description below, produce a schematic play diagram as STRICT JSON (no markdown, no prose).
 
+POSITIONS: the player numbers are basketball positions — 1 = Point Guard (O1), 2 = Shooting Guard (O2), 3 = Small Forward (O3), 4 = Power Forward (O4), 5 = Center (O5). Place and move each player consistent with their position (e.g. O1 initiates up top, O5 plays around the rim/high post), and each defender X1-X5 guards the matching position (X5 guards O5, etc.).
+
 COORDINATES: feet on a regulation HALF court, x from 0 (left sideline) to 50 (right sideline), y from 47 (half-court line) to 94 (near baseline, hoop end). Draw EVERYTHING in this near half. Keep every coordinate inside 2..48 for x and 48..92 for y.
 
 Return exactly this shape:
