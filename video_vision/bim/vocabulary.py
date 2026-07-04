@@ -121,4 +121,6 @@ OUTPUT_TYPES = [
     "recruitment_profile",
     "position_analysis",
     "game_analysis",
+    "box_score",
+    "game_situational",
 ]

@@ -384,6 +384,60 @@ ADJUSTMENTS FOR NEXT GAME
   Defensive: [1–3 changes]"""
 
 
+def box_score(program: str, level: str, coach_weight: int, player_name: str) -> str:
+    return f"""You are the Basketball Intelligence Model producing a BOX SCORE ANALYSIS.
+
+{_program_header(program, level, coach_weight)}
+{"PLAYER FOCUS: " + player_name if player_name else "FULL TEAM / MULTI-PLAYER"}
+
+Extract and interpret statistical production from the footage/context provided.
+
+OUTPUT FORMAT:
+
+STAT LINE
+  Points / Rebounds (off+def) / Assists / Steals / Blocks / Turnovers / Fouls
+  Shooting: FG (made/att), 3PT (made/att), FT (made/att)
+
+EFFICIENCY READ
+  True shooting impression | Usage vs. efficiency | Shot-diet quality (rim / mid / three mix)
+
+PRODUCTION IN CONTEXT
+  What the numbers say vs. what the film shows (empty stats vs. winning plays)
+  Hidden value (screens, rotations, deterrence) not captured in the box
+
+KEY TAKEAWAYS
+  [2-4 statistical priorities to move next]"""
+
+
+def game_situational(program: str, level: str, coach_weight: int, player_name: str) -> str:
+    return f"""You are the Basketball Intelligence Model producing a GAME SITUATIONAL REPORT.
+
+{_program_header(program, level, coach_weight)}
+{"PLAYER FOCUS: " + player_name if player_name else "FULL TEAM"}
+
+Provide situational reads a coach and team can act on in-game.
+
+OUTPUT FORMAT:
+
+READING ON-COURT ACTIONS
+  How to recognize and respond to the key actions on film
+
+DEFENSIVE SETS & HOW TO ATTACK THEM
+  [coverage → counter]
+
+OFFENSIVE ACTIONS & COUNTERS
+  [action → defensive counter]
+
+PLAYER TENDENCY EXPLOITATION
+  [specific tendencies to attack or protect]
+
+SITUATIONAL RESPONSES
+  End of clock | Press breaks | Late-game | Transition defense
+
+KEY LINEUP ADJUSTMENTS
+  [matchup / personnel changes for game situations]"""
+
+
 # ── DISPATCHER ────────────────────────────────────────────────────────────────
 
 PROMPT_MAP = {
@@ -395,6 +449,8 @@ PROMPT_MAP = {
     "recruitment_profile": recruitment_profile,
     "position_analysis":  position_analysis,
     "game_analysis":      game_analysis,
+    "box_score":          box_score,
+    "game_situational":   game_situational,
 }
 
 
@@ -465,8 +521,7 @@ def build_prompt(
             raise ValueError(f"Unknown output_type '{output_type}'. Valid: {valid}")
         return header + "\n".join(blocks) + _brief_directive(output_type) + _NO_MARKDOWN
 
-    fn = PROMPT_MAP.get(output_type)
-    if fn is None:
-        valid = ", ".join(PROMPT_MAP.keys())
-        raise ValueError(f"Unknown output_type '{output_type}'. Valid: {valid}")
+    # Single type — fall back to a general coaching report for any unrecognized
+    # key rather than raising (unguarded callers would otherwise 500).
+    fn = PROMPT_MAP.get(output_type) or PROMPT_MAP.get("coaching_report")
     return fn(program, level, coach_weight, player_name) + _brief_directive(output_type) + _NO_MARKDOWN

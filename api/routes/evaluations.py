@@ -207,9 +207,16 @@ async def team_report(
             shutil.copyfileobj(video.file, f)
         try:
             from video_vision.server import _handle_analyze_basketball_video
+            from video_vision.bim import parse_output_types
+            # The video sub-analysis only needs to describe what's on film — feed
+            # it ONE lightweight lens, not the full multi-lens prompt, so a
+            # multi-type + film request doesn't run two huge generations back to
+            # back and time out. The final report below still uses all types.
+            vid_types = parse_output_types(output_type)
+            vid_type = vid_types[0] if vid_types else "film_breakdown"
             vid_result = await _handle_analyze_basketball_video({
                 "video_path": str(vid_dest),
-                "output_type": output_type,
+                "output_type": vid_type,
                 "program_name": coach.program_name,
                 "competition_level": "Team",
                 "coach_weight": coach.weight,
@@ -220,8 +227,11 @@ async def team_report(
                 "include_audio": False,
             })
             video_context = f"\n\nVIDEO ANALYSIS:\n{vid_result[0].text}\n"
-        except Exception:
-            pass  # Video analysis optional — proceed without it
+        except Exception as exc:
+            # Video analysis is optional — proceed without it, but log so a
+            # silently-dropped film is observable rather than invisible.
+            import logging
+            logging.getLogger("bloomprint").warning("team_report video analysis skipped: %s", exc)
 
     focus = focus_prompt or ""
     team_label = coach.program_name
