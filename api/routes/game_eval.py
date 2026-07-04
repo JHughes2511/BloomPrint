@@ -1152,7 +1152,7 @@ def update_whiteboard(
 # diagram: offense / defense / counter schemes plus a numbered improvement key.
 _AI_PLAY_PROMPT = """You are an elite basketball tactician. From the scene description below, produce a schematic play diagram as STRICT JSON (no markdown, no prose).
 
-COORDINATES: feet on a regulation court, x from 0 (left sideline) to 50 (right sideline), y from 0 (far baseline) to 94 (near baseline). Draw the primary action in the NEAR half (y between 50 and 92) unless the scene requires full court. Keep every coordinate inside 2..48 for x and 4..92 for y.
+COORDINATES: feet on a regulation HALF court, x from 0 (left sideline) to 50 (right sideline), y from 47 (half-court line) to 94 (near baseline, hoop end). Draw EVERYTHING in this near half. Keep every coordinate inside 2..48 for x and 48..92 for y.
 
 Return exactly this shape:
 {
@@ -1165,7 +1165,27 @@ Return exactly this shape:
   "key": [{"n": 1, "text": "concise coaching suggestion", "from": [x, y], "to": [x, y]}]
 }
 
-RULES: 5 offensive players (O1-O5) and up to 5 defenders (X1-X5) per scheme; at most 10 actions per scheme; 3-5 key items. offense = what the offense ran / should run; defense = the defensive scheme and rotations; counter = the counter/adjustment. The key holds the suggested movements or positioning that would have made the play succeed (get a basket, find the open man, correct the rotation) — each key arrow shows the improved movement. Keep key text under 90 characters."""
+RULES: 5 offensive players (O1-O5) and up to 5 defenders (X1-X5) per scheme; at most 10 actions per scheme; 3-5 key items. offense = what the offense ran / should run; defense = the defensive scheme and rotations; counter = the counter/adjustment. The key holds the suggested movements or positioning that would have made the play succeed (get a basket, find the open man, correct the rotation) — each key arrow shows the improved movement. Keep key text under 90 characters.
+
+OUTPUT ONLY the JSON object. It MUST be strictly valid: every array element and object property separated by a comma, no trailing commas, no comments, no prose before or after."""
+
+
+def _parse_ai_play_json(raw: str):
+    """Best-effort parse of the model's JSON, repairing common LLM mistakes."""
+    import re as _re
+    import json as _json
+    raw = _re.sub(r"^```(?:json)?|```$", "", raw, flags=_re.MULTILINE).strip()
+    m = _re.search(r"\{.*\}", raw, _re.DOTALL)
+    candidate = m.group(0) if m else raw
+    try:
+        return _json.loads(candidate)
+    except Exception:
+        pass
+    # Repair: strip trailing commas before } or ]
+    repaired = _re.sub(r",\s*([}\]])", r"\1", candidate)
+    # Repair: insert missing commas between adjacent } { , ] [ , } " etc.
+    repaired = _re.sub(r"([}\]0-9\"])\s*\n\s*([{\[\"])", r"\1,\n\2", repaired)
+    return _json.loads(repaired)
 
 
 @router.post("/ai-play")
@@ -1174,8 +1194,6 @@ async def ai_play(
     coach: models.Coach = Depends(get_current_coach),
 ):
     import os
-    import re as _re
-    import json as _json
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise HTTPException(status_code=503, detail="ANTHROPIC_API_KEY not configured")
     description = (body.get("description") or "").strip()
@@ -1186,14 +1204,25 @@ async def ai_play(
         client = anthropic.AsyncAnthropic()
         resp = await client.messages.create(
             model="claude-opus-4-7",
-            max_tokens=3000,
+            max_tokens=4096,
             messages=[{"role": "user", "content": f"{_AI_PLAY_PROMPT}\n\nSCENE:\n{description}"}],
         )
         blocks = [b for b in resp.content if hasattr(b, "text")]
         raw = (blocks[0].text if blocks else "{}").strip()
-        raw = _re.sub(r"^```(?:json)?|```$", "", raw, flags=_re.MULTILINE).strip()
-        m = _re.search(r"\{.*\}", raw, _re.DOTALL)
-        data = _json.loads(m.group(0) if m else raw)
+        try:
+            data = _parse_ai_play_json(raw)
+        except Exception:
+            # One retry: ask the model to return corrected, strictly-valid JSON.
+            fix = await client.messages.create(
+                model="claude-opus-4-7",
+                max_tokens=4096,
+                messages=[{"role": "user", "content":
+                    "The following was supposed to be strict JSON but is invalid. "
+                    "Return ONLY the corrected, strictly-valid JSON — same data, no prose, "
+                    f"no trailing commas, no comments:\n\n{raw}"}],
+            )
+            fblocks = [b for b in fix.content if hasattr(b, "text")]
+            data = _parse_ai_play_json(fblocks[0].text if fblocks else "{}")
     except HTTPException:
         raise
     except Exception as exc:
@@ -1211,15 +1240,15 @@ async def ai_play(
         out = {"players": [], "defenders": [], "actions": []}
         for i, pl in enumerate((sc.get("players") or [])[:5]):
             out["players"].append({"id": str(pl.get("id") or f"O{i+1}")[:3],
-                                   "x": _pt(pl.get("x"), 2, 48, 25), "y": _pt(pl.get("y"), 4, 92, 80)})
+                                   "x": _pt(pl.get("x"), 2, 48, 25), "y": _pt(pl.get("y"), 48, 92, 80)})
         for i, df in enumerate((sc.get("defenders") or [])[:5]):
             out["defenders"].append({"id": str(df.get("id") or f"X{i+1}")[:3],
-                                     "x": _pt(df.get("x"), 2, 48, 25), "y": _pt(df.get("y"), 4, 92, 74)})
+                                     "x": _pt(df.get("x"), 2, 48, 25), "y": _pt(df.get("y"), 48, 92, 74)})
         for a in (sc.get("actions") or [])[:10]:
             fr, to = a.get("from") or [25, 80], a.get("to") or [25, 70]
             out["actions"].append({"kind": str(a.get("kind") or "cut"),
-                                   "from": [_pt(fr[0], 2, 48, 25), _pt(fr[1], 4, 92, 80)],
-                                   "to":   [_pt(to[0], 2, 48, 25), _pt(to[1], 4, 92, 70)]})
+                                   "from": [_pt(fr[0], 2, 48, 25), _pt(fr[1], 48, 92, 80)],
+                                   "to":   [_pt(to[0], 2, 48, 25), _pt(to[1], 48, 92, 70)]})
         return out
 
     schemes = data.get("schemes") if isinstance(data.get("schemes"), dict) else {}
@@ -1228,8 +1257,8 @@ async def ai_play(
         fr, to = (k.get("from") or [25, 80]), (k.get("to") or [25, 70])
         key_items.append({"n": int(k.get("n") or i + 1),
                           "text": str(k.get("text") or "")[:120],
-                          "from": [_pt(fr[0], 2, 48, 25), _pt(fr[1], 4, 92, 80)],
-                          "to":   [_pt(to[0], 2, 48, 25), _pt(to[1], 4, 92, 70)]})
+                          "from": [_pt(fr[0], 2, 48, 25), _pt(fr[1], 48, 92, 80)],
+                          "to":   [_pt(to[0], 2, 48, 25), _pt(to[1], 48, 92, 70)]})
     return {
         "play_name": str(data.get("play_name") or "AI Play")[:40],
         "schemes": {name: _clean_scheme(schemes.get(name)) for name in ("offense", "defense", "counter")},

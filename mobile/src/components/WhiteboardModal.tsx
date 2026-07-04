@@ -238,30 +238,35 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   // Convert the AI scheme JSON (court feet) into layered strokes (canvas px),
   // mapped for the FULL court view this board defaults to.
   const buildPlayStrokes = (res: any): Stroke[] => {
-    const fs = Math.min((avail.w - 8) / COURT_FT_W, (avail.h - 8) / VISIBLE_FT.full);
-    const X = (ftv: number) => ftv * fs;
+    // AI plays are drawn on a HALF court (bigger, easier to read). The half
+    // court shows the near half (court-feet y 47..94) with the hoop at the
+    // bottom, so we scale to that view and offset y by the half-court line.
+    const fs = Math.min((avail.w - 20) / COURT_FT_W, (avail.h - 20) / VISIBLE_FT.half);
+    const HALF_OFFSET = COURT_FT_L - VISIBLE_FT.half; // 94 - 47 = 47
+    const X = (xft: number) => xft * fs;
+    const Y = (yft: number) => (yft - HALF_OFFSET) * fs;
     const mk = () => Math.random().toString(36).slice(2);
     const out: Stroke[] = [];
     (['offense', 'defense', 'counter'] as SchemeKey[]).forEach(layer => {
       const sc = res?.schemes?.[layer];
       if (!sc) return;
       (sc.players ?? []).forEach((pl: any) => {
-        out.push({ id: mk(), type: 'circle', cx: X(pl.x), cy: X(pl.y), r: 11, color: '#141414', strokeWidth: 2.5, layer });
-        out.push({ id: mk(), type: 'text', x: X(pl.x) - 7, y: X(pl.y) + 4, label: pl.id, size: 11, color: '#141414', strokeWidth: 1, layer });
+        out.push({ id: mk(), type: 'circle', cx: X(pl.x), cy: Y(pl.y), r: 13, color: '#141414', strokeWidth: 3, layer });
+        out.push({ id: mk(), type: 'text', x: X(pl.x) - 8, y: Y(pl.y) + 5, label: pl.id, size: 13, color: '#141414', strokeWidth: 1, layer });
       });
       (sc.defenders ?? []).forEach((df: any) => {
-        out.push({ id: mk(), type: 'xmark', cx: X(df.x), cy: X(df.y), size: 8, color: '#C0392B', strokeWidth: 2.5, layer });
-        out.push({ id: mk(), type: 'text', x: X(df.x) + 10, y: X(df.y) + 4, label: df.id, size: 10, color: '#C0392B', strokeWidth: 1, layer });
+        out.push({ id: mk(), type: 'xmark', cx: X(df.x), cy: Y(df.y), size: 10, color: '#C0392B', strokeWidth: 3, layer });
+        out.push({ id: mk(), type: 'text', x: X(df.x) + 12, y: Y(df.y) + 5, label: df.id, size: 12, color: '#C0392B', strokeWidth: 1, layer });
       });
       (sc.actions ?? []).forEach((a: any) => {
-        out.push({ id: mk(), type: 'arrow', x1: X(a.from[0]), y1: X(a.from[1]), x2: X(a.to[0]), y2: X(a.to[1]),
-                   color: '#141414', strokeWidth: 2.5, dash: a.kind === 'pass', layer });
+        out.push({ id: mk(), type: 'arrow', x1: X(a.from[0]), y1: Y(a.from[1]), x2: X(a.to[0]), y2: Y(a.to[1]),
+                   color: '#141414', strokeWidth: 3, dash: a.kind === 'pass', layer });
       });
     });
     (res?.key ?? []).forEach((k: any) => {
-      out.push({ id: mk(), type: 'arrow', x1: X(k.from[0]), y1: X(k.from[1]), x2: X(k.to[0]), y2: X(k.to[1]),
-                 color: '#1F6F9B', strokeWidth: 3, dash: true, layer: 'key' });
-      out.push({ id: mk(), type: 'text', x: X(k.to[0]) + 5, y: X(k.to[1]) - 5, label: String(k.n), size: 13, color: '#1F6F9B', strokeWidth: 1, layer: 'key' });
+      out.push({ id: mk(), type: 'arrow', x1: X(k.from[0]), y1: Y(k.from[1]), x2: X(k.to[0]), y2: Y(k.to[1]),
+                 color: '#1F6F9B', strokeWidth: 3.5, dash: true, layer: 'key' });
+      out.push({ id: mk(), type: 'text', x: X(k.to[0]) + 6, y: Y(k.to[1]) - 6, label: String(k.n), size: 15, color: '#1F6F9B', strokeWidth: 1, layer: 'key' });
     });
     return out;
   };
@@ -278,7 +283,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       const idx = boards.length;
       const newBoard: Board = {
         name: res.play_name || `AI Play ${idx + 1}`,
-        court_type: 'full',
+        court_type: 'half',
         strokes: buildPlayStrokes(res),
         ai: { play_name: res.play_name ?? 'AI Play', key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })) },
       };
@@ -540,10 +545,41 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     setSelectedTextId(id);
   };
 
+  // Scale + court-feet offset for a given court view (court is bottom-anchored,
+  // so the top of the canvas corresponds to court-feet = COURT_FT_L - visibleFt).
+  const scaleForType = (type: CourtType) => {
+    const visFt = VISIBLE_FT[type] ?? VISIBLE_FT.full;
+    const raw = Math.min((avail.w - 20) / COURT_FT_W, (avail.h - 20) / visFt);
+    return Number.isFinite(raw) && raw > 0 ? raw : 1;
+  };
+  const offsetFtForType = (type: CourtType) => COURT_FT_L - (VISIBLE_FT[type] ?? VISIBLE_FT.full);
+
+  // Re-map all strokes from one court view's pixel space into another so a play
+  // drawn on (say) half court stays in the same real court location on full/¾.
+  const remapStrokes = (strokes: Stroke[], from: CourtType, to: CourtType): Stroke[] => {
+    if (from === to) return strokes;
+    const sA = scaleForType(from), sB = scaleForType(to);
+    const offA = offsetFtForType(from), offB = offsetFtForType(to);
+    const mapX = (px?: number) => px == null ? px : (px / sA) * sB;
+    const mapY = (px?: number) => px == null ? px : ((px / sA + offA) - offB) * sB;
+    const mapSize = (v?: number) => v == null ? v : v * (sB / sA);
+    const mapPath = (d?: string) => !d ? d : d.replace(/([-\d.]+)\s+([-\d.]+)/g,
+      (_m, a, b) => `${mapX(parseFloat(a))!.toFixed(2)} ${mapY(parseFloat(b))!.toFixed(2)}`);
+    return strokes.map(s => ({
+      ...s,
+      d: mapPath(s.d),
+      cx: mapX(s.cx), cy: mapY(s.cy), r: mapSize(s.r), size: mapSize(s.size),
+      x1: mapX(s.x1), y1: mapY(s.y1), x2: mapX(s.x2), y2: mapY(s.y2),
+      x: mapX(s.x), y: mapY(s.y),
+    }));
+  };
+
   const setCourtType = (ct: CourtType) => {
     setBoards(prev => {
       const next    = [...prev];
-      const updated = { ...next[activeBoardIdx], court_type: ct };
+      const cur     = next[activeBoardIdx];
+      const remapped = remapStrokes(cur.strokes, cur.court_type, ct);
+      const updated = { ...cur, court_type: ct, strokes: remapped };
       next[activeBoardIdx] = updated;
       saveBoard(activeBoardIdx, updated);
       return next;
@@ -770,10 +806,10 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           <KeyboardAvoidingView
             style={styles.listOverlay}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
+            keyboardVerticalOffset={0}
           >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View style={[styles.listBox, { padding: 20, maxHeight: '85%' }]}>
+              <View style={[styles.listBox, { padding: 20, maxHeight: '80%' }]}>
               {seedMode === 'none' ? (
                 <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                   <Text style={styles.listTitle}>AI Play Draw-Up</Text>
