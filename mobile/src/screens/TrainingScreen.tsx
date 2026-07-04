@@ -125,7 +125,9 @@ export default function TrainingScreen() {
       {current?.priorities && current.priorities.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.label}>Priority Stack</Text>
-          {current.priorities.map((p, i) => (
+          {current.priorities
+            .filter(p => p && p.replace(/[^A-Za-z0-9]/g, '').length >= 3)
+            .map((p, i) => (
             <View key={i} style={styles.priorityRow}>
               <View style={styles.priorityNum}>
                 <Text style={styles.priorityNumText}>{i + 1}</Text>
@@ -148,12 +150,17 @@ export default function TrainingScreen() {
       {sessions.length > 1 && (
         <View style={styles.section}>
           <Text style={styles.label}>Previous Programs</Text>
-          {[...sessions].reverse().slice(1).map(s => (
-            <TouchableOpacity key={s.id} style={styles.historyCard} onPress={() => setCurrent(s)}>
-              <Text style={styles.historyDate}>{new Date(s.created_at).toLocaleDateString()}</Text>
-              <Text style={styles.historyPriority}>{s.priorities?.[0] ?? 'Program'}</Text>
-            </TouchableOpacity>
-          ))}
+          {[...sessions].reverse().slice(1).map((s, i, arr) => {
+            const focus = (s.priorities ?? []).find(p => p && p.replace(/[^A-Za-z0-9]/g, '').length >= 3);
+            return (
+              <TouchableOpacity key={s.id} style={styles.historyCard} onPress={() => setCurrent(s)}>
+                <Text style={styles.historyPriority}>Training Program #{arr.length - i}</Text>
+                <Text style={styles.historyDate}>
+                  {new Date(s.created_at).toLocaleDateString()}{focus ? ` · ${focus}` : ''}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       )}
 

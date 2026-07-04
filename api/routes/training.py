@@ -14,6 +14,24 @@ class RegenerateRequest(BaseModel):
     feedback: str
 
 
+def _extract_priorities(program_text: str) -> list[str]:
+    """Pull the ordered priority/KPI list out of a program, skipping headers and
+    stray punctuation (e.g. a leftover ':' from the 'KPI TARGETS:' line)."""
+    import re
+    priorities: list[str] = []
+    m = re.search(r"KPI TARGETS(.*?)(?:CORRECTABLE|PROGRESS|WEEKLY|$)", program_text, re.DOTALL | re.IGNORECASE)
+    if not m:
+        return priorities
+    for raw in m.group(1).splitlines():
+        # strip leading bullets/numbers/arrows AND leading colons/whitespace
+        line = re.sub(r"^[\s\-·•*\d\.\):↑↓]+", "", raw).strip()
+        line = line.rstrip(":").strip()
+        if len(line) < 3 or not re.search(r"[A-Za-z]", line):
+            continue
+        priorities.append(line)
+    return priorities[:6]
+
+
 def _extract_reference(upload: "UploadFile") -> tuple[str, list[dict]]:
     """Turn an uploaded training-reference file into (text, media_blocks) that
     can be fed to the AI. Text-extractable formats (txt/csv/xlsx/docx) become
@@ -227,16 +245,7 @@ async def generate_training(
         messages=[{"role": "user", "content": content}],
     )
     program_text = response.content[0].text
-
-    # Extract ordered priorities from the program text
-    import re
-    priorities: list[str] = []
-    m = re.search(r"KPI TARGETS(.*?)(?:CORRECTABLE|PROGRESS|$)", program_text, re.DOTALL | re.IGNORECASE)
-    if m:
-        for line in m.group(1).splitlines():
-            line = re.sub(r"^[-·*\d\.\s↑↓]+", "", line).strip()
-            if line:
-                priorities.append(line)
+    priorities = _extract_priorities(program_text)
 
     session = models.TrainingSession(
         player_id=player_id,
@@ -282,6 +291,94 @@ def send_training_to_player(
     db.commit()
     background_tasks.add_task(reformat_training_for_player, training_id)
     return {"ok": True, "player_name": player.name}
+
+
+def _tc_out(c: "models.TrainingCorrection") -> dict:
+    return {"id": c.id, "correction": c.correction, "applied": c.applied, "created_at": c.created_at}
+
+
+@router.get("/{training_id}/corrections")
+def coach_training_corrections(
+    training_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    session = db.get(models.TrainingSession, training_id)
+    if not session or session.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Training session not found")
+    rows = (
+        db.query(models.TrainingCorrection)
+        .filter_by(training_session_id=training_id, coach_side=True)
+        .order_by(models.TrainingCorrection.id)
+        .all()
+    )
+    return [_tc_out(c) for c in rows]
+
+
+@router.post("/{training_id}/corrections")
+def add_coach_training_correction_row(
+    training_id: int,
+    body: schemas.PlayerCommentCreate,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Save a coach correction for later without regenerating."""
+    session = db.get(models.TrainingSession, training_id)
+    if not session or session.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Training session not found")
+    c = models.TrainingCorrection(training_session_id=training_id, correction=body.text, coach_side=True)
+    db.add(c)
+    db.commit()
+    db.refresh(c)
+    return _tc_out(c)
+
+
+@router.post("/{training_id}/apply-corrections", response_model=schemas.TrainingOut)
+def apply_coach_training_corrections(
+    training_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Regenerate the coach's program_text from all un-applied coach corrections."""
+    session = db.get(models.TrainingSession, training_id)
+    if not session or session.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Training session not found")
+    pending = (
+        db.query(models.TrainingCorrection)
+        .filter_by(training_session_id=training_id, applied=False, coach_side=True)
+        .order_by(models.TrainingCorrection.id)
+        .all()
+    )
+    if not pending:
+        raise HTTPException(status_code=400, detail="No un-applied corrections to apply")
+    feedback = "\n".join(f"- {c.correction}" for c in pending)
+    player_name = session.player.name if session.player else "the player"
+    prompt = (
+        f"You are the BloomPrint Basketball Intelligence Model.\n"
+        f"Here is the current training program for {player_name}:\n\n{session.program_text or ''}\n\n"
+        f"COACH CORRECTIONS:\n{feedback}\n\n"
+        "Update the training program incorporating ALL corrections. Keep the same structure but adjust "
+        "focus areas, drills, and weekly plan. IMPORTANT: Do NOT use ## headers or ** bold markers."
+    )
+    try:
+        import anthropic
+        client = anthropic.Anthropic()
+        response = client.messages.create(
+            model="claude-opus-4-7",
+            max_tokens=3000,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        session.program_text = response.content[0].text
+        session.priorities = _extract_priorities(session.program_text)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"AI update failed: {exc}")
+    for c in pending:
+        c.applied = True
+    db.commit()
+    db.refresh(session)
+    out = schemas.TrainingOut.model_validate(session)
+    out.player_name = session.player.name if session.player else None
+    return out
 
 
 @router.get("/{training_id}/comments", response_model=list[schemas.PlayerCommentOut])
@@ -466,15 +563,7 @@ async def regenerate_training(
         messages=[{"role": "user", "content": prompt}],
     )
     program_text = response.content[0].text
-
-    import re
-    priorities: list[str] = []
-    m = re.search(r"KPI TARGETS(.*?)(?:CORRECTABLE|PROGRESS|$)", program_text, re.DOTALL | re.IGNORECASE)
-    if m:
-        for line in m.group(1).splitlines():
-            line = re.sub(r"^[-·*\d\.\s↑↓]+", "", line).strip()
-            if line:
-                priorities.append(line)
+    priorities = _extract_priorities(program_text)
 
     # Always insert a new row so the new training appears as a separate entry
     # in the Training Programs list rather than overwriting the existing one.

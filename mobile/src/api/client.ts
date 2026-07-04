@@ -182,6 +182,12 @@ export const trainingAPI = {
     api.post(`/training/${trainingId}/comments`, { text }).then(r => r.data),
   refreshPlayerProgram: (trainingId: number, feedback: string) =>
     api.post(`/training/${trainingId}/refresh-player-program`, { feedback }).then(r => r.data),
+  corrections: (trainingId: number) =>
+    api.get(`/training/${trainingId}/corrections`).then(r => r.data),
+  addCorrection: (trainingId: number, text: string) =>
+    api.post(`/training/${trainingId}/corrections`, { text }).then(r => r.data),
+  applyCorrections: (trainingId: number) =>
+    api.post(`/training/${trainingId}/apply-corrections`).then(r => r.data),
 };
 
 // ── Player (coach-side) ────────────────────────────────────────────────────────

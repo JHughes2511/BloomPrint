@@ -486,6 +486,14 @@ def _run_migrations():
                 ")"
             ))
             conn.commit()
+            tc_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(training_corrections)")
+            )]
+            if tc_cols and "coach_side" not in tc_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE training_corrections ADD COLUMN coach_side INTEGER NOT NULL DEFAULT 0"
+                ))
+                conn.commit()
         except Exception:
             pass
 

@@ -3,7 +3,7 @@ import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
-  Modal, Alert, KeyboardAvoidingView, Platform, TextInput,
+  Modal, Alert, KeyboardAvoidingView, Platform, TextInput, RefreshControl,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -94,7 +94,7 @@ export default function PlayerProfileScreen() {
   const [summaryType, setSummaryType] = useState('player_eval');
   const [summaryLoading, setSummaryLoading] = useState(false);
 
-  useEffect(() => {
+  const loadAll = React.useCallback(() =>
     Promise.all([
       playersAPI.get(playerId),
       playersAPI.evaluations(playerId),
@@ -117,9 +117,15 @@ export default function PlayerProfileScreen() {
             .catch(() => {})
             .finally(() => setGameHistoryLoading(false));
         }
-      })
-      .finally(() => setLoading(false));
-  }, [playerId]);
+      }), [playerId]);
+
+  useEffect(() => { loadAll().finally(() => setLoading(false)); }, [loadAll]);
+
+  const [refreshingProfile, setRefreshingProfile] = useState(false);
+  const onRefreshProfile = React.useCallback(() => {
+    setRefreshingProfile(true);
+    loadAll().finally(() => setRefreshingProfile(false));
+  }, [loadAll]);
 
   const openEdit = () => {
     if (!player) return;
@@ -208,7 +214,30 @@ export default function PlayerProfileScreen() {
   // Training modal corrections + print/export
   const [modalCorrection, setModalCorrection] = useState('');
   const [regeneratingModal, setRegeneratingModal] = useState(false);
+  const [savingModalCorrection, setSavingModalCorrection] = useState(false);
+  const [modalCorrections, setModalCorrections] = useState<any[]>([]);
   const [exportingTraining, setExportingTraining] = useState(false);
+
+  const loadModalCorrections = (id?: number) => {
+    if (!id) { setModalCorrections([]); return; }
+    trainingAPI.corrections(id).then(setModalCorrections).catch(() => setModalCorrections([]));
+  };
+  useEffect(() => { loadModalCorrections(trainingModalItem?.id); }, [trainingModalItem?.id]);
+
+  const saveModalCorrectionForLater = async () => {
+    if (!modalCorrection.trim() || !trainingModalItem) return;
+    setSavingModalCorrection(true);
+    try {
+      await trainingAPI.addCorrection(trainingModalItem.id, modalCorrection.trim());
+      setModalCorrection('');
+      loadModalCorrections(trainingModalItem.id);
+      Alert.alert('Saved', 'Correction saved. Apply & Regenerate when ready.');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save correction');
+    } finally {
+      setSavingModalCorrection(false);
+    }
+  };
 
   // Player-facing version (once sent) — comments thread + feedback update
   const [playerComments, setPlayerComments] = useState<any[]>([]);
@@ -344,17 +373,25 @@ export default function PlayerProfileScreen() {
   };
 
   const regenerateTrainingFromModal = async () => {
-    if (!modalCorrection.trim() || !player) return;
+    if (!trainingModalItem) return;
+    const pending = modalCorrection.trim();
+    if (!pending && modalCorrections.filter(c => !c.applied).length === 0) {
+      Alert.alert('Nothing to apply', 'Add a correction first.');
+      return;
+    }
     setRegeneratingModal(true);
     try {
-      const updated = await trainingAPI.regenerate(player.id, modalCorrection.trim());
+      if (pending) await trainingAPI.addCorrection(trainingModalItem.id, pending);
+      // Regenerate this program in place from all un-applied corrections.
+      const updated = await trainingAPI.applyCorrections(trainingModalItem.id);
       setModalCorrection('');
-      // refresh the full training list and update the open modal
-      const refreshed = await trainingAPI.forPlayer(player.id).catch(() => [] as any[]);
+      setTrainingModalItem((prev: any) => prev ? { ...prev, ...updated } : prev);
+      loadModalCorrections(trainingModalItem.id);
+      // reflect the update in the training lists
+      const refreshed = await trainingAPI.forPlayer(playerId).catch(() => [] as any[]);
       if (Array.isArray(refreshed) && refreshed.length > 0) {
-        setLatestTraining(refreshed[refreshed.length - 1]);
         setAllTraining(refreshed);
-        setTrainingModalItem(refreshed[refreshed.length - 1]);
+        setLatestTraining(refreshed[refreshed.length - 1]);
       }
       Alert.alert('Regenerated', 'Training program updated with your corrections.');
     } catch (e: any) {
@@ -465,7 +502,8 @@ export default function PlayerProfileScreen() {
 
   return (
     <ScreenBackground>
-    <KeyboardAwareScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
+    <KeyboardAwareScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}
+      refreshControl={<RefreshControl refreshing={refreshingProfile} onRefresh={onRefreshProfile} tintColor={t.accent} />}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -966,19 +1004,50 @@ export default function PlayerProfileScreen() {
                     multiline
 
                   />
-                  <TouchableOpacity
-                    style={{
-                      marginTop: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-                      gap: 6, backgroundColor: t.ctaBg, borderRadius: 10, paddingVertical: 12,
-                      opacity: (!modalCorrection.trim() || regeneratingModal) ? 0.5 : 1,
-                    }}
-                    onPress={regenerateTrainingFromModal}
-                    disabled={!modalCorrection.trim() || regeneratingModal}
-                  >
-                    {regeneratingModal
-                      ? <ActivityIndicator color={t.ctaText} size="small" />
-                      : <><Ionicons name="refresh" size={15} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>Apply & Regenerate</Text></>}
-                  </TouchableOpacity>
+                  <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
+                    <TouchableOpacity
+                      style={{
+                        flex: 1, alignItems: 'center', justifyContent: 'center',
+                        backgroundColor: t.chip, borderRadius: 10, paddingVertical: 12,
+                        opacity: (!modalCorrection.trim() || savingModalCorrection) ? 0.5 : 1,
+                      }}
+                      onPress={saveModalCorrectionForLater}
+                      disabled={!modalCorrection.trim() || savingModalCorrection}
+                    >
+                      {savingModalCorrection
+                        ? <ActivityIndicator color={t.ink} size="small" />
+                        : <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 13 }}>Save for Later</Text>}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{
+                        flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                        gap: 6, backgroundColor: t.ctaBg, borderRadius: 10, paddingVertical: 12,
+                        opacity: regeneratingModal ? 0.5 : 1,
+                      }}
+                      onPress={regenerateTrainingFromModal}
+                      disabled={regeneratingModal}
+                    >
+                      {regeneratingModal
+                        ? <ActivityIndicator color={t.ctaText} size="small" />
+                        : <><Ionicons name="refresh" size={15} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>Apply & Regenerate</Text></>}
+                    </TouchableOpacity>
+                  </View>
+
+                  {modalCorrections.length > 0 && (
+                    <View style={{ marginTop: 12 }}>
+                      {modalCorrections.map((c: any) => (
+                        <View key={c.id} style={{ backgroundColor: t.chip, borderRadius: 10, padding: 10, marginBottom: 6, opacity: c.applied ? 0.55 : 1 }}>
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                            {c.applied
+                              ? <View style={{ backgroundColor: t.positiveSoft, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}><Text style={{ color: t.positive, fontSize: 9, fontFamily: fonts[700] }}>APPLIED</Text></View>
+                              : <View style={{ backgroundColor: t.card, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}><Text style={{ color: t.muted, fontSize: 9, fontFamily: fonts[700] }}>PENDING</Text></View>}
+                            <Text style={{ color: t.muted2, fontSize: 10 }}>{c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}</Text>
+                          </View>
+                          <Text style={{ color: t.inkSoft, fontSize: 12.5 }}>{c.correction}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
                 </View>
 
                 {/* Player-facing version — only once this program has been sent */}

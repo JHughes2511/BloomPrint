@@ -879,7 +879,7 @@ def list_coach_training_corrections(
         raise HTTPException(status_code=404, detail="Training program not found")
     rows = (
         db.query(models.TrainingCorrection)
-        .filter_by(training_session_id=training_id)
+        .filter_by(training_session_id=training_id, coach_side=False)
         .order_by(models.TrainingCorrection.id)
         .all()
     )
@@ -896,7 +896,7 @@ def add_coach_training_correction(
     session = db.get(models.TrainingSession, training_id)
     if not session or not pu.player_id or session.player_id != pu.player_id:
         raise HTTPException(status_code=404, detail="Training program not found")
-    c = models.TrainingCorrection(training_session_id=training_id, correction=body.text)
+    c = models.TrainingCorrection(training_session_id=training_id, correction=body.text, coach_side=False)
     db.add(c)
     db.commit()
     db.refresh(c)
@@ -914,7 +914,7 @@ def apply_coach_training_corrections(
         raise HTTPException(status_code=404, detail="Training program not found")
     pending = (
         db.query(models.TrainingCorrection)
-        .filter_by(training_session_id=training_id, applied=False)
+        .filter_by(training_session_id=training_id, applied=False, coach_side=False)
         .order_by(models.TrainingCorrection.id)
         .all()
     )

@@ -306,6 +306,9 @@ class TrainingCorrection(Base):
     training_session_id = Column(Integer, ForeignKey("training_sessions.id"), nullable=True)
     correction          = Column(Text, nullable=False)
     applied             = Column(Boolean, default=False)
+    # On a coach-sent TrainingSession, distinguishes coach corrections (edit the
+    # coach's program_text) from player corrections (edit player_program_text).
+    coach_side          = Column(Boolean, default=False)
     created_at          = Column(DateTime, default=datetime.utcnow)
 
 
