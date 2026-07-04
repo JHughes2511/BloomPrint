@@ -78,16 +78,39 @@ async def generate_training(
             raise HTTPException(status_code=404, detail="Evaluation not found for this player")
 
     # Find latest overall_grade from player's evaluations
+    evals_desc = sorted(player.evaluations, key=lambda e: e.created_at, reverse=True)
     latest_grade: float | None = None
-    for ev in sorted(player.evaluations, key=lambda e: e.created_at, reverse=True):
+    for ev in evals_desc:
         if ev.overall_grade is not None:
             latest_grade = ev.overall_grade
             break
 
-    # Build context from the most recent eval if available
+    # Build context from ALL reports currently under the player, so the program
+    # reflects the full evaluation picture — not just one report. The explicitly
+    # selected evaluation (if any) is featured first and in full; the rest are
+    # summarized (grade, strengths/watch flags, and a report excerpt).
     focus = body.focus_prompt or ""
+    report_ctx_parts: list[str] = []
     if eval_record and eval_record.report_text:
-        focus = f"Base this training program on the following player evaluation:\n\n{eval_record.report_text[:3000]}\n\n{focus}"
+        report_ctx_parts.append(
+            f"PRIMARY EVALUATION (most recent / selected):\n{eval_record.report_text[:3000]}"
+        )
+    other_evals = [e for e in evals_desc if not (eval_record and e.id == eval_record.id)]
+    for e in other_evals[:4]:
+        if not (e.report_text or e.green_flags or e.watch_flags):
+            continue
+        grade_str = f"{e.overall_grade:.1f}/10" if e.overall_grade is not None else "N/A"
+        strengths = ", ".join((e.green_flags or [])[:4]) or "N/A"
+        watch = ", ".join((e.watch_flags or [])[:4]) or "N/A"
+        date_str = e.created_at.strftime("%Y-%m-%d") if e.created_at else ""
+        excerpt = (e.report_text or "")[:900]
+        report_ctx_parts.append(
+            f"ADDITIONAL EVALUATION ({e.output_type}, {date_str}) — Grade {grade_str}; "
+            f"Strengths: {strengths}; Watch: {watch}.\n{excerpt}"
+        )
+    if report_ctx_parts:
+        joined = "\n\n".join(report_ctx_parts)
+        focus = f"Base this training program on ALL of the following reports for this player:\n\n{joined}\n\n{focus}"
     elif player.notes:
         focus = f"Player notes: {player.notes}\n\n{focus}"
 
