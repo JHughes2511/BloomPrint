@@ -1156,15 +1156,15 @@ POSITIONS: the player numbers are basketball positions — 1 = Point Guard (O1),
 
 COORDINATES: feet on a regulation HALF court. x: 0 = left sideline, 25 = middle, 50 = right sideline. y grows toward the hoop — LOW y is farther from the basket (up top), HIGH y is at the rim. Landmarks: half-court line y=47, top of the 3-point arc / where the point guard initiates y≈62, free-throw line y=75, elbows y≈75 (x≈17 and x≈33), rim/basket y≈89, blocks/low post y≈84 (x≈19 and x≈31), wings y≈66 (x≈8 and x≈42), corners y≈90 (x≈4 and x≈46). The ball-handler up top belongs around y=60-64, NOT at the free-throw line. Keep every coordinate inside 2..48 for x and 48..92 for y.
 
-Return exactly this shape:
+Return exactly this shape. Output play_name and the FULL key array FIRST, then the schemes last — the key must never be omitted:
 {
   "play_name": "short name",
+  "key": [{"n": 1, "text": "concise coaching suggestion", "from": [x, y], "to": [x, y]}],
   "schemes": {
     "offense": {"players": [{"id": "O1", "x": 25, "y": 80}], "defenders": [{"id": "X1", "x": 25, "y": 76}], "actions": [{"actor": "O2", "kind": "cut|screen|pass|dribble", "from": [25, 80], "to": [30, 70], "step": 1}]},
     "defense": { same shape },
     "counter": { same shape }
-  },
-  "key": [{"n": 1, "text": "concise coaching suggestion", "from": [x, y], "to": [x, y]}]
+  }
 }
 
 ACTOR: every action has an "actor" = the id of the player or defender who makes that movement (must match one of the players/defenders ids, e.g. "O2" or "X1"). The action's "from" should be that actor's current position and "to" is where they move. For a "pass", the actor is the passer and "from"/"to" are the ball's path (no one relocates on a pass).
@@ -1263,13 +1263,40 @@ async def ai_play(
         return out
 
     schemes = data.get("schemes") if isinstance(data.get("schemes"), dict) else {}
-    key_items = []
-    for i, k in enumerate((data.get("key") or [])[:5]):
-        fr, to = (k.get("from") or [25, 80]), (k.get("to") or [25, 70])
-        key_items.append({"n": int(k.get("n") or i + 1),
-                          "text": str(k.get("text") or "")[:120],
-                          "from": [_pt(fr[0], 2, 48, 25), _pt(fr[1], 48, 92, 80)],
-                          "to":   [_pt(to[0], 2, 48, 25), _pt(to[1], 48, 92, 70)]})
+
+    def _clean_key(raw_key):
+        out = []
+        for i, k in enumerate((raw_key or [])[:5]):
+            fr, to = (k.get("from") or [25, 80]), (k.get("to") or [25, 70])
+            out.append({"n": int(k.get("n") or i + 1),
+                        "text": str(k.get("text") or "")[:120],
+                        "from": [_pt(fr[0], 2, 48, 25), _pt(fr[1], 48, 92, 80)],
+                        "to":   [_pt(to[0], 2, 48, 25), _pt(to[1], 48, 92, 70)]})
+        return out
+
+    key_items = _clean_key(data.get("key"))
+
+    # Guarantee the key: if it came back empty, generate it in a separate,
+    # small call so a long play can never leave the suggestions blank.
+    if not key_items:
+        try:
+            import json as _json2
+            kresp = await client.messages.create(
+                model="claude-opus-4-7",
+                max_tokens=1200,
+                messages=[{"role": "user", "content":
+                    "For the basketball play below, list 3-5 KEY suggested improvements — the movements or "
+                    "positioning that would have made it succeed (get a basket, find the open man, correct the "
+                    "rotation). Return ONLY strict JSON: {\"key\": [{\"n\":1, \"text\":\"...\", \"from\":[x,y], "
+                    "\"to\":[x,y]}]}. Coordinates are half-court feet (x 2..48, y 48..92, high y = rim). Key text "
+                    f"under 90 chars.\n\nPLAY:\n{description}"}],
+            )
+            kb = [b for b in kresp.content if hasattr(b, "text")]
+            kdata = _parse_ai_play_json(kb[0].text if kb else "{}")
+            key_items = _clean_key(kdata.get("key"))
+        except Exception:
+            pass
+
     return {
         "play_name": str(data.get("play_name") or "AI Play")[:40],
         "schemes": {name: _clean_scheme(schemes.get(name)) for name in ("offense", "defense", "counter")},
