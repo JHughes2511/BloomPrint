@@ -98,6 +98,7 @@ async def submit_evaluation(
     interval_seconds: float = Form(5.0),
     max_frames: int = Form(10),
     include_audio: bool = Form(False),
+    game_ids: str | None = Form(None),   # comma-separated tracked game ids (box score)
     video: UploadFile | None = File(None),
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
@@ -121,6 +122,15 @@ async def submit_evaluation(
     from ..coach_context import system_profile_block, focus_directive
     if focus_prompt:
         combined_focus += focus_directive(focus_prompt)
+    # Attach real tracked box-score stats from selected games, if any.
+    if game_ids:
+        try:
+            gid_list = [int(x) for x in game_ids.split(",") if x.strip()]
+        except ValueError:
+            gid_list = []
+        if gid_list:
+            from .game_eval import player_tracked_stats_block
+            combined_focus += player_tracked_stats_block(db, coach.id, player.name, gid_list)
     combined_focus += system_profile_block(coach)
 
     if video and video.filename:

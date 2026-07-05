@@ -165,6 +165,51 @@ def _compute_raw_points(stat_name: str, count: int) -> tuple[float, str]:
     return (float(pv * count), cat)
 
 
+def player_tracked_stats_block(db, coach_id: int, player_name: str, game_ids) -> str:
+    """Format a player's real tracked box-score stats for the given games into a
+    prompt block. Shared by player summaries and new evals."""
+    if not game_ids:
+        return ""
+    gstats = (
+        db.query(models.GamePlayerStat)
+        .join(models.GameSession, models.GameSession.id == models.GamePlayerStat.game_id)
+        .filter(
+            models.GameSession.coach_id == coach_id,
+            models.GameSession.id.in_(list(game_ids)),
+            models.GamePlayerStat.player_name == player_name,
+            models.GamePlayerStat.is_opponent == False,
+        )
+        .all()
+    )
+    by_game: dict = {}
+    for s in gstats:
+        by_game.setdefault(s.game_id, []).append(s)
+    lines = []
+    for gid in game_ids:
+        gs = by_game.get(gid)
+        if not gs:
+            continue
+        game = db.get(models.GameSession, gid)
+        counts: dict = {}
+        for s in gs:
+            counts[s.stat_name] = counts.get(s.stat_name, 0) + (s.count or 0)
+        pts = counts.get("2 FG Made", 0) * 2 + counts.get("3 FG Made", 0) * 3 + counts.get("FT Made", 0)
+        reb = counts.get("Off. Reb", 0) + counts.get("Def. Reb", 0)
+        statline = ", ".join(f"{k}: {v}" for k, v in counts.items())
+        when = game.date.strftime("%Y-%m-%d") if game and game.date else ""
+        opp = game.opponent_name if game else "opponent"
+        lines.append(
+            f"vs {opp} ({when}) — PTS {pts}, REB {reb}, AST {counts.get('Assists', 0)}, "
+            f"STL {counts.get('Steal', 0)}, BLK {counts.get('Blocked Shot', 0)}, TO {counts.get('Turnover', 0)}\n   {statline}"
+        )
+    if not lines:
+        return ""
+    return (
+        "\n\nTRACKED GAME STATS (real box-score data from tracked games — build the box "
+        "score from THESE numbers and reference them):\n" + "\n".join(lines)
+    )
+
+
 def _get_game(db: Session, game_id: int, coach_id: int) -> models.GameSession:
     game = db.get(models.GameSession, game_id)
     if not game or game.coach_id != coach_id:

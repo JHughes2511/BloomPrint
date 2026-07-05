@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -8,7 +8,7 @@ import {
 import { useRoute, useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { evalsAPI } from '../api/client';
+import { evalsAPI, gameEvalAPI } from '../api/client';
 import { OutputType } from '../types';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -43,6 +43,31 @@ export default function NewEvalScreen() {
   const [submitting, setSubmitting] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
+  // Box-score tracked games (loaded when Box Score is selected)
+  const wantsBoxScore = outputType.split(',').includes('box_score');
+  const [games, setGames] = useState<any[]>([]);
+  const [gamesLoaded, setGamesLoaded] = useState(false);
+  const [seasonYear, setSeasonYear] = useState<string>('all');
+  const [seasonPhase, setSeasonPhase] = useState<string>('all');
+  const [selectedGameIds, setSelectedGameIds] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (wantsBoxScore && !gamesLoaded && playerName) {
+      gameEvalAPI.playerGameHistory(playerName)
+        .then((g: any[]) => setGames(Array.isArray(g) ? g : []))
+        .catch(() => setGames([]))
+        .finally(() => setGamesLoaded(true));
+    }
+  }, [wantsBoxScore, gamesLoaded, playerName]);
+
+  const seasonYears = ['all', ...Array.from(new Set(games.map(g => (g.date ? String(new Date(g.date).getFullYear()) : '')).filter(Boolean)))];
+  const seasonPhases = ['all', ...Array.from(new Set(games.map(g => g.season_phase).filter(Boolean)))];
+  const filteredGames = games.filter(g =>
+    (seasonYear === 'all' || (g.date && String(new Date(g.date).getFullYear()) === seasonYear)) &&
+    (seasonPhase === 'all' || g.season_phase === seasonPhase),
+  );
+  const allFilteredSelected = filteredGames.length > 0 && filteredGames.every(g => selectedGameIds.includes(g.game_id));
+
   const pickVideo = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Videos,
@@ -63,6 +88,7 @@ export default function NewEvalScreen() {
       form.append('coach_notes', coachNotes);
       form.append('focus_prompt', focusPrompt);
       form.append('include_audio', 'false');
+      if (wantsBoxScore && selectedGameIds.length) form.append('game_ids', selectedGameIds.join(','));
       if (videoUri) form.append('video', { uri: videoUri, name: videoName, type: 'video/mp4' } as any);
 
       const res = await evalsAPI.submit(form);
@@ -123,6 +149,77 @@ export default function NewEvalScreen() {
           );
         })}
       </ScrollView>
+
+      {/* Box Score — tracked game selection */}
+      {wantsBoxScore && (
+        <View style={{ marginBottom: 20 }}>
+          <Text style={styles.label}>Tracked Games (Box Score)</Text>
+          <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
+            Pick a season/type and select one or more tracked games — their real stats are attached to the report.
+          </Text>
+          {!gamesLoaded ? (
+            <ActivityIndicator color={t.accent} style={{ marginVertical: 12 }} />
+          ) : games.length === 0 ? (
+            <Text style={{ color: t.muted2, fontSize: 12, paddingVertical: 8 }}>
+              No tracked games for {playerName} yet. Track games in Team Grade first.
+            </Text>
+          ) : (
+            <>
+              {/* Season filter */}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>
+                {seasonYears.map(y => (
+                  <TouchableOpacity key={y} style={[styles.typeChip, seasonYear === y && styles.typeChipActive]} onPress={() => setSeasonYear(y)}>
+                    <Text style={[styles.typeLabel, seasonYear === y && styles.typeLabelActive]}>{y === 'all' ? 'All Seasons' : y}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+              {/* Season type filter */}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }}>
+                {seasonPhases.map(p => (
+                  <TouchableOpacity key={p} style={[styles.typeChip, seasonPhase === p && styles.typeChipActive]} onPress={() => setSeasonPhase(p)}>
+                    <Text style={[styles.typeLabel, seasonPhase === p && styles.typeLabelActive]}>{p === 'all' ? 'All Types' : p.charAt(0).toUpperCase() + p.slice(1)}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+              {/* Select all in filter */}
+              {filteredGames.length > 0 && (
+                <TouchableOpacity
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8 }}
+                  onPress={() => {
+                    const ids = filteredGames.map(g => g.game_id);
+                    setSelectedGameIds(prev => allFilteredSelected
+                      ? prev.filter(id => !ids.includes(id))
+                      : Array.from(new Set([...prev, ...ids])));
+                  }}
+                >
+                  <Ionicons name={allFilteredSelected ? 'checkbox' : 'square-outline'} size={20} color={allFilteredSelected ? t.accent : t.muted2} />
+                  <Text style={{ color: t.inkSoft, fontSize: 13, fontFamily: fonts[700] }}>Select all shown ({filteredGames.length})</Text>
+                </TouchableOpacity>
+              )}
+              {filteredGames.map(g => {
+                const on = selectedGameIds.includes(g.game_id);
+                return (
+                  <TouchableOpacity key={g.game_id}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: t.divider }}
+                    onPress={() => setSelectedGameIds(prev => on ? prev.filter(id => id !== g.game_id) : [...prev, g.game_id])}
+                  >
+                    <Ionicons name={on ? 'checkbox' : 'square-outline'} size={20} color={on ? t.accent : t.muted2} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[600] }}>vs {g.opponent_name}</Text>
+                      <Text style={{ color: t.muted2, fontSize: 11 }}>
+                        {g.date ?? ''}{g.season_phase ? ` · ${g.season_phase}` : ''}{g.game_grade != null ? ` · Grade ${g.game_grade}` : ''}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+              {selectedGameIds.length > 0 && (
+                <Text style={{ color: t.accent, fontSize: 12, marginTop: 8, fontFamily: fonts[700] }}>{selectedGameIds.length} game{selectedGameIds.length > 1 ? 's' : ''} selected</Text>
+              )}
+            </>
+          )}
+        </View>
+      )}
 
       {/* Video picker */}
       <Text style={styles.label}>Video Clip (optional)</Text>
