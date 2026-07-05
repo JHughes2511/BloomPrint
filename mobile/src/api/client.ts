@@ -98,7 +98,7 @@ export const evalsAPI = {
       const j = await api.get(`/evaluations/jobs/${jobId}`).then(r => r.data);
       if (j.status === 'done') return j.result;
       if (j.status === 'error') throw new Error(j.error || 'Generation failed');
-      onTick?.(j.status);
+      onTick?.(j.progress || j.status);
       await new Promise(res => setTimeout(res, 4000));
     }
     throw new Error('Generation timed out');

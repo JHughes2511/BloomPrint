@@ -542,5 +542,12 @@ def _run_migrations():
                 ")"
             ))
             conn.commit()
+            gj_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(generation_jobs)")
+            )]
+            if gj_cols and "progress" not in gj_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE generation_jobs ADD COLUMN progress TEXT"))
+                conn.commit()
         except Exception:
             pass

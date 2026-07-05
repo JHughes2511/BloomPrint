@@ -53,6 +53,17 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
         import sys
         sys.path.insert(0, ".")
         from video_vision.server import _handle_analyze_basketball_video
+
+        def _prog(done, total, label):
+            pdb = SessionLocal()
+            try:
+                j = pdb.get(models.GenerationJob, job_id)
+                if j:
+                    j.progress = label
+                    pdb.commit()
+            finally:
+                pdb.close()
+
         result = asyncio.run(_handle_analyze_basketball_video({
             "video_path": video_path,
             "output_type": output_type,
@@ -61,9 +72,10 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
             "coach_weight": coach_weight,
             "player_name": player_name,
             "focus_prompt": combined_focus,
-            "interval_seconds": interval_seconds,
+            "interval_seconds": 12.0,   # one frame ~every 12s; chunked for long film
             "max_frames": max_frames,
             "include_audio": include_audio,
+            "_progress": _prog,
         }))
         report_text = result[0].text
         coach = db.get(models.Coach, coach_id)
@@ -193,7 +205,7 @@ def get_generation_job(
     if not job or job.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Job not found")
     out = {"id": job.id, "kind": job.kind, "status": job.status,
-           "result_id": job.result_id, "error": job.error, "result": None}
+           "result_id": job.result_id, "error": job.error, "progress": job.progress, "result": None}
     if job.status == "done" and job.result_id:
         if job.kind == "eval":
             ev = db.get(models.Evaluation, job.result_id)
@@ -287,6 +299,17 @@ def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_
             import sys
             sys.path.insert(0, ".")
             from video_vision.server import _handle_analyze_basketball_video
+
+            def _prog(done, total, label):
+                pdb = SessionLocal()
+                try:
+                    j = pdb.get(models.GenerationJob, job_id)
+                    if j:
+                        j.progress = label
+                        pdb.commit()
+                finally:
+                    pdb.close()
+
             vid_result = asyncio.run(_handle_analyze_basketball_video({
                 "video_path": video_path,
                 "output_type": output_type,
@@ -295,9 +318,10 @@ def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_
                 "coach_weight": coach_weight,
                 "player_name": "Team",
                 "focus_prompt": focus_prompt or "",
-                "interval_seconds": 5.0,
+                "interval_seconds": 12.0,
                 "max_frames": 8,
                 "include_audio": False,
+                "_progress": _prog,
             }))
             video_context = f"\n\nVIDEO ANALYSIS:\n{vid_result[0].text}\n"
         except Exception as exc:

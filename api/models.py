@@ -129,6 +129,7 @@ class GenerationJob(Base):
     status      = Column(String, default="processing")    # processing | done | error
     result_id   = Column(Integer, nullable=True)          # created eval/team_report id
     error       = Column(Text, nullable=True)
+    progress    = Column(String, nullable=True)           # human-readable progress
     created_at  = Column(DateTime, default=datetime.utcnow)
     updated_at  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

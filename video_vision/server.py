@@ -89,6 +89,39 @@ def _extract_frames(
     return results
 
 
+def _extract_frames_interval(
+    video_path: str,
+    interval_seconds: float,
+    total_cap: int,
+) -> list[tuple[float, np.ndarray]]:
+    """Sample one frame every `interval_seconds` across the WHOLE video (so
+    coverage is proportional to length), capped at `total_cap` frames."""
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        raise ValueError(f"Cannot open video: {video_path}")
+    fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    duration = total_frames / fps if fps else 0.0
+    if duration <= 0:
+        cap.release()
+        return _extract_frames(video_path, interval_seconds, min(total_cap, 20))
+
+    n = int(duration / max(interval_seconds, 0.5)) + 1
+    if n > total_cap:                       # too many — widen the interval to fit
+        interval_seconds = duration / total_cap
+        n = total_cap
+    results: list[tuple[float, np.ndarray]] = []
+    t = 0.0
+    while t <= duration and len(results) < total_cap:
+        cap.set(cv2.CAP_PROP_POS_MSEC, t * 1000)
+        ret, frame = cap.read()
+        if ret:
+            results.append((t, frame))
+        t += interval_seconds
+    cap.release()
+    return results
+
+
 def _extract_audio(video_path: str, out_path: str) -> bool:
     """Extract audio track from video to a WAV file using ffmpeg. Returns False if no audio."""
     result = subprocess.run(
@@ -524,7 +557,13 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     if focus_prompt:
         bim_prompt += f"\n\nADDITIONAL COACHING FOCUS:\n{focus_prompt}"
 
-    frames = _extract_frames(video_path, interval, max_frames)
+    # Interval sampling: one frame every `interval` seconds across the WHOLE film
+    # so a 6-min and a 60-min clip get the same per-minute coverage. For long
+    # films we analyze in chunks (map) and synthesize one report (reduce).
+    CHUNK = 40
+    TOTAL_CAP = 400
+    progress = args.get("_progress")   # optional callable(done, total, label)
+    frames = _extract_frames_interval(video_path, interval, TOTAL_CAP)
     if not frames:
         return [types.TextContent(type="text", text="Error: no frames could be extracted.")]
 
@@ -536,37 +575,66 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
         except Exception:
             transcript_text = ""
 
-    content: list[dict] = [{"type": "text", "text": bim_prompt}]
+    def _frames_content(fr):
+        c = [{"type": "text", "text": "\nVIDEO FRAMES:"}]
+        for ts, frame in fr:
+            c.append({"type": "text", "text": f"[Frame at {ts:.1f}s]"})
+            c.append({"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": _frame_to_base64(frame)}})
+        return c
 
-    if transcript_text:
-        content.append({
-            "type": "text",
-            "text": f"\nAUDIO TRANSCRIPT FROM VIDEO:\n{transcript_text}\n",
-        })
-
-    content.append({"type": "text", "text": "\nVIDEO FRAMES:"})
-    for ts, frame in frames:
-        content.append({"type": "text", "text": f"[Frame at {ts:.2f}s]"})
-        content.append({
-            "type": "image",
-            "source": {
-                "type": "base64",
-                "media_type": "image/jpeg",
-                "data": _frame_to_base64(frame),
-            },
-        })
-
-    response = _client().messages.create(
-        model="claude-opus-4-7",
-        max_tokens=4096,
-        messages=[{"role": "user", "content": content}],
-    )
-    answer = response.content[0].text
+    # ── Single pass (short clips) ──
+    if len(frames) <= CHUNK:
+        content: list[dict] = [{"type": "text", "text": bim_prompt}]
+        if transcript_text:
+            content.append({"type": "text", "text": f"\nAUDIO TRANSCRIPT FROM VIDEO:\n{transcript_text}\n"})
+        content += _frames_content(frames)
+        response = _client().messages.create(
+            model="claude-opus-4-7", max_tokens=4096,
+            messages=[{"role": "user", "content": content}],
+        )
+        answer = response.content[0].text
+    else:
+        # ── Multi-pass: map each chunk to observations, then synthesize ──
+        chunks = [frames[i:i + CHUNK] for i in range(0, len(frames), CHUNK)]
+        seg_notes = []
+        for i, ch in enumerate(chunks, 1):
+            if progress:
+                try:
+                    progress(i, len(chunks), f"Analyzing segment {i} of {len(chunks)}")
+                except Exception:
+                    pass
+            t0, t1 = ch[0][0], ch[-1][0]
+            seg_prompt = (
+                f"You are analyzing SEGMENT {i} of {len(chunks)} of game film (≈{t0:.0f}s–{t1:.0f}s) for a "
+                f"{output_type.replace('_', ' ')}. From the frames, note the key basketball observations: what "
+                f"actions/sets are run, tendencies, notable plays, and visible strengths/weaknesses for {player_name or 'the team'}. "
+                "Be concise and specific — these notes will be synthesized into one full report. Do NOT grade yet."
+            )
+            seg_content = [{"type": "text", "text": seg_prompt}] + _frames_content(ch)
+            try:
+                r = _client().messages.create(model="claude-opus-4-7", max_tokens=1200,
+                                              messages=[{"role": "user", "content": seg_content}])
+                seg_notes.append(f"SEGMENT {i} ({t0:.0f}s–{t1:.0f}s):\n{r.content[0].text}")
+            except Exception as exc:
+                seg_notes.append(f"SEGMENT {i}: (analysis unavailable: {exc})")
+        if progress:
+            try:
+                progress(len(chunks), len(chunks), "Synthesizing report")
+            except Exception:
+                pass
+        synth = bim_prompt + "\n\nOBSERVATIONS FROM ACROSS THE FULL FILM (synthesize these into the complete report):\n\n"
+        if transcript_text:
+            synth += f"AUDIO TRANSCRIPT:\n{transcript_text[:2000]}\n\n"
+        synth += "\n\n".join(seg_notes)
+        response = _client().messages.create(model="claude-opus-4-7", max_tokens=4096,
+                                             messages=[{"role": "user", "content": synth}])
+        answer = response.content[0].text
 
     audio_note = " + audio" if transcript_text else ""
+    passes = "single pass" if len(frames) <= CHUNK else f"{(len(frames) + CHUNK - 1) // CHUNK} segments"
     header = (
         f"BIM {output_type.upper().replace('_', ' ')} — {program} | {level}\n"
-        f"{len(frames)} frames{audio_note} analyzed\n"
+        f"{len(frames)} frames{audio_note} analyzed ({passes})\n"
         f"{'═' * 60}\n"
     )
     return [types.TextContent(type="text", text=header + answer)]

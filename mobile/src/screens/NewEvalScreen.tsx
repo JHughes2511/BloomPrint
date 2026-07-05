@@ -41,6 +41,7 @@ export default function NewEvalScreen() {
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [videoName, setVideoName] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
+  const [progress, setProgress] = useState('');
   const scrollRef = useRef<ScrollView>(null);
 
   // Box-score tracked games (loaded when Box Score is selected)
@@ -95,13 +96,14 @@ export default function NewEvalScreen() {
 
       const res = await evalsAPI.submit(form);
       // Video uploads process in the background and return a job id; poll for it.
-      const ev = res?.job_id ? await evalsAPI.awaitJob(res.job_id) : res;
+      const ev = res?.job_id ? await evalsAPI.awaitJob(res.job_id, setProgress) : res;
       if (!ev?.id) throw new Error('No evaluation returned');
       navigation.replace('EvalReport', { evalId: ev.id });
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? e?.message ?? 'Evaluation failed. Check API connection.');
     } finally {
       setSubmitting(false);
+      setProgress('');
     }
   };
 
@@ -268,7 +270,7 @@ export default function NewEvalScreen() {
       </TouchableOpacity>
 
       {submitting && (
-        <Text style={styles.hint}>Uploading and analyzing with Claude. Long films are processed in the background — keep this screen open; it may take several minutes.</Text>
+        <Text style={styles.hint}>{progress || 'Uploading and analyzing with Claude'} — long films are processed in the background; keep this screen open.</Text>
       )}
     </KeyboardAwareScrollView>
     </KeyboardAvoidingView>

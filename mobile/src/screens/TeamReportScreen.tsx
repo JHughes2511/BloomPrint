@@ -43,6 +43,7 @@ export default function TeamReportScreen() {
   const [outputType, setOutputType] = useState('coaching_report');
   const [focusPrompt, setFocusPrompt] = useState('');
   const [generating, setGenerating] = useState(false);
+  const [genProgress, setGenProgress] = useState('');
   const [reportText, setReportText] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const scrollRef = React.useRef<ScrollView>(null);
@@ -374,7 +375,7 @@ export default function TeamReportScreen() {
     try {
       const res = await evalsAPI.teamReport({ output_type: outputType, focus_prompt: focusPrompt, team_id: selectedTeamId ?? undefined, video: videoAsset ?? undefined });
       // Film uploads process in the background and return a job id; poll for it.
-      const result = res?.job_id ? await evalsAPI.awaitJob(res.job_id) : res;
+      const result = res?.job_id ? await evalsAPI.awaitJob(res.job_id, setGenProgress) : res;
       setReportText(result.report_text);
       if (result.id) setSavedTeamReportId(result.id);
       loadPrevReports();
@@ -389,6 +390,7 @@ export default function TeamReportScreen() {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate team report');
     } finally {
       setGenerating(false);
+      setGenProgress('');
     }
   };
 
@@ -608,7 +610,7 @@ export default function TeamReportScreen() {
         </TouchableOpacity>
 
         {generating && (
-          <Text style={styles.hint}>Analyzing roster and generating report. This may take 20–40 seconds.</Text>
+          <Text style={styles.hint}>{genProgress || 'Analyzing roster and generating report.'} Long films are processed in the background — keep this screen open.</Text>
         )}
 
         {reportText && (
