@@ -120,7 +120,10 @@ def get_linked_player(
     player = db.get(models.Player, pu.player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
-    return schemas.PlayerOut.model_validate(player)
+    # The player sees their TRUE composite score (from all evals). The actual
+    # report content stays gated — they only open what the coach has shared.
+    from .players import _with_grade
+    return _with_grade(player)
 
 
 class PlayerSelfUpdate(BaseModel):

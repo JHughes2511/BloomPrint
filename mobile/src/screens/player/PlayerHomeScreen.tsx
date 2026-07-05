@@ -85,11 +85,15 @@ export default function PlayerHomeScreen() {
   const gradedReports = reports
     .filter(r => r.overall_grade != null)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-  const bimScore = profile?.latest_grade ?? gradedReports[0]?.overall_grade ?? null;
+  // The player's true BIM score = the same recency-weighted composite the coach
+  // sees (from all evals). Report content stays gated to what the coach shared.
+  const bimScore = (profile as any)?.bim_grade ?? profile?.latest_grade ?? gradedReports[0]?.overall_grade ?? null;
   const trend = gradedReports.length >= 2
     ? (gradedReports[0].overall_grade - gradedReports[1].overall_grade)
     : null;
-  const pillarSource = reports.find(r => r.pillar_grades && Object.keys(r.pillar_grades).length)?.pillar_grades ?? null;
+  const pillarSource = ((profile as any)?.bim_pillars && Object.keys((profile as any).bim_pillars).length)
+    ? (profile as any).bim_pillars
+    : (reports.find(r => r.pillar_grades && Object.keys(r.pillar_grades).length)?.pillar_grades ?? null);
   const PILLAR_BAR = [
     { key: 'offensive_skills', label: 'Offense', color: t.accent },
     { key: 'defensive_capabilities', label: 'Defense', color: t.pistachio },
