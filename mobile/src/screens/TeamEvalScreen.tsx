@@ -33,6 +33,13 @@ const COMPETITION_LEVELS = [
   'Youth (5-13)', 'European Pro', 'International Academy',
 ];
 
+// A basketball season spans Aug–Jul, so a game's season year is derived from
+// its calendar date: Aug–Dec → "YYYY-YY+1", Jan–Jul → "YYYY-1-YY".
+const seasonForDate = (d: Date): string => {
+  const start = d.getMonth() >= 7 ? d.getFullYear() : d.getFullYear() - 1;
+  return `${start}-${String((start + 1) % 100).padStart(2, '0')}`;
+};
+
 // ── Stat definitions ──────────────────────────────────────────────────────────
 
 const OFFENSE_STATS = [
@@ -137,6 +144,11 @@ export default function TeamEvalScreen() {
   const [newGameTeamId, setNewGameTeamId] = useState<number | null>(null);
   const [newGameDate, setNewGameDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  // Default the Season Year from the game date when the New Game modal opens.
+  useEffect(() => {
+    if (showNewGame && !newGameYear.trim()) setNewGameYear(seasonForDate(newGameDate));
+  }, [showNewGame]);
   const [trackMode, setTrackMode] = useState<'live' | 'post'>('live');
   const [newGameLevel, setNewGameLevel] = useState<string>('HS Varsity');
   const [importing, setImporting] = useState(false);
@@ -2239,7 +2251,13 @@ export default function TeamEvalScreen() {
                   themeVariant={mode === 'dark' ? 'dark' : 'light'}
                   onChange={(_, d) => {
                     if (Platform.OS === 'android') setShowDatePicker(false);
-                    if (d) setNewGameDate(d);
+                    if (d) {
+                      // Keep the season year in sync unless the coach typed their own.
+                      if (!newGameYear.trim() || newGameYear === seasonForDate(newGameDate)) {
+                        setNewGameYear(seasonForDate(d));
+                      }
+                      setNewGameDate(d);
+                    }
                   }}
                 />
               )}
