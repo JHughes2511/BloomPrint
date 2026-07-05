@@ -179,6 +179,8 @@ async def player_summary(
         "and the player's trajectory. Provide an overall composite grade and pillar grades. "
         "Format with clear BIM sections including OVERALL GRADE, pillar grades, GREEN FLAGS, WATCH FLAGS, and KEY QUESTIONS."
         f"{comprehensive_directive(body.output_type)}"
+        "\n\nIMPORTANT: Do NOT use ## headers or ** bold markers anywhere (including KEY QUESTIONS). "
+        "Use plain section titles in ALL CAPS followed by a colon."
     )
 
     from video_vision.bim import parse_output_types

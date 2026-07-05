@@ -60,10 +60,12 @@ export default function NewEvalScreen() {
     }
   }, [wantsBoxScore, gamesLoaded, playerName]);
 
-  const seasonYears = ['all', ...Array.from(new Set(games.map(g => (g.date ? String(new Date(g.date).getFullYear()) : '')).filter(Boolean)))];
+  // Season = coach's Season Year field, falling back to the game-date year.
+  const gameSeason = (g: any) => (g.season_year || (g.year != null ? String(g.year) : '')) || '';
+  const seasonYears = ['all', ...Array.from(new Set(games.map(gameSeason).filter(Boolean)))];
   const seasonPhases = ['all', ...Array.from(new Set(games.map(g => g.season_phase).filter(Boolean)))];
   const filteredGames = games.filter(g =>
-    (seasonYear === 'all' || (g.date && String(new Date(g.date).getFullYear()) === seasonYear)) &&
+    (seasonYear === 'all' || gameSeason(g) === seasonYear) &&
     (seasonPhase === 'all' || g.season_phase === seasonPhase),
   );
   const allFilteredSelected = filteredGames.length > 0 && filteredGames.every(g => selectedGameIds.includes(g.game_id));

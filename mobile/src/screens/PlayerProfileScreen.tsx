@@ -94,6 +94,8 @@ export default function PlayerProfileScreen() {
   const [summaryType, setSummaryType] = useState('player_eval');
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [selectedGameIds, setSelectedGameIds] = useState<number[]>([]);
+  const [sumSeasonYear, setSumSeasonYear] = useState<string>('all');
+  const [sumSeasonPhase, setSumSeasonPhase] = useState<string>('all');
 
   const loadAll = React.useCallback(() =>
     Promise.all([
@@ -1488,15 +1490,51 @@ export default function PlayerProfileScreen() {
             </ScrollView>
 
             {/* Tracked game selector — only for Box Score */}
-            {summaryType.split(',').includes('box_score') && (
+            {summaryType.split(',').includes('box_score') && (() => {
+              const seasonOf = (g: any) => (g.season_year || (g.year != null ? String(g.year) : '')) || '';
+              const years = ['all', ...Array.from(new Set(gameHistory.map(seasonOf).filter(Boolean)))];
+              const phases = ['all', ...Array.from(new Set(gameHistory.map((g: any) => g.season_phase).filter(Boolean)))];
+              const filtered = gameHistory.filter((g: any) =>
+                (sumSeasonYear === 'all' || seasonOf(g) === sumSeasonYear) &&
+                (sumSeasonPhase === 'all' || g.season_phase === sumSeasonPhase));
+              const allSel = filtered.length > 0 && filtered.every((g: any) => selectedGameIds.includes(g.game_id));
+              return (
               <View style={{ marginBottom: 18 }}>
                 <Text style={[styles.modalSub, { marginBottom: 8 }]}>
                   {gameHistory.length
-                    ? 'Select tracked games to build the box score from real stats:'
+                    ? 'Pick a season/type, then select games — their real stats build the box score:'
                     : 'No tracked games for this player yet (track games in Team Grade).'}
                 </Text>
+                {gameHistory.length > 0 && (
+                  <>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 6 }}>
+                      {years.map(y => (
+                        <TouchableOpacity key={y} style={[styles.chip, sumSeasonYear === y && styles.chipActive]} onPress={() => setSumSeasonYear(y)}>
+                          <Text style={[styles.chipText, sumSeasonYear === y && { color: t.ctaText }]}>{y === 'all' ? 'All Seasons' : y}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>
+                      {phases.map(p => (
+                        <TouchableOpacity key={p} style={[styles.chip, sumSeasonPhase === p && styles.chipActive]} onPress={() => setSumSeasonPhase(p)}>
+                          <Text style={[styles.chipText, sumSeasonPhase === p && { color: t.ctaText }]}>{p === 'all' ? 'All Types' : p.charAt(0).toUpperCase() + p.slice(1)}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                    {filtered.length > 0 && (
+                      <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6 }}
+                        onPress={() => {
+                          const ids = filtered.map((g: any) => g.game_id);
+                          setSelectedGameIds(prev => allSel ? prev.filter(id => !ids.includes(id)) : Array.from(new Set([...prev, ...ids])));
+                        }}>
+                        <Ionicons name={allSel ? 'checkbox' : 'square-outline'} size={20} color={allSel ? t.accent : t.muted2} />
+                        <Text style={{ color: t.inkSoft, fontSize: 13, fontFamily: fonts[700] }}>Select all shown ({filtered.length})</Text>
+                      </TouchableOpacity>
+                    )}
+                  </>
+                )}
                 <ScrollView style={{ maxHeight: 180 }}>
-                  {gameHistory.map((g: any) => {
+                  {filtered.map((g: any) => {
                     const on = selectedGameIds.includes(g.game_id);
                     return (
                       <TouchableOpacity key={g.game_id}
@@ -1506,14 +1544,15 @@ export default function PlayerProfileScreen() {
                         <Ionicons name={on ? 'checkbox' : 'square-outline'} size={20} color={on ? t.accent : t.muted2} />
                         <View style={{ flex: 1 }}>
                           <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[600] }}>vs {g.opponent_name}</Text>
-                          <Text style={{ color: t.muted2, fontSize: 11 }}>{g.date ?? ''}{g.game_grade != null ? ` · Grade ${g.game_grade}` : ''}</Text>
+                          <Text style={{ color: t.muted2, fontSize: 11 }}>{g.date ?? ''}{g.season_phase ? ` · ${g.season_phase}` : ''}{g.game_grade != null ? ` · Grade ${g.game_grade}` : ''}</Text>
                         </View>
                       </TouchableOpacity>
                     );
                   })}
                 </ScrollView>
               </View>
-            )}
+              );
+            })()}
 
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowSummary(false)}>

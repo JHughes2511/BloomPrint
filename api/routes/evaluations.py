@@ -757,8 +757,18 @@ def _parse_list_section(text: str, section: str) -> list[str]:
         return []
     block = m.group(1)
     lines = [
-        re.sub(r"^[-·*\d\.\s]+", "", l).strip()
+        _strip_md(re.sub(r"^[-·*\d\.\s]+", "", l)).strip()
         for l in block.splitlines()
         if l.strip() and re.match(r"^[-·*\d\.\s]", l.strip())
     ]
     return [l for l in lines if l]
+
+
+def _strip_md(s: str) -> str:
+    """Remove stray markdown (** bold, ## headers, __) from plain-text reports."""
+    if not s:
+        return s
+    s = re.sub(r"\*\*|__", "", s)          # bold markers
+    s = re.sub(r"^\s*#{1,6}\s*", "", s)    # leading heading hashes
+    s = s.replace("##", "")                 # any stray hashes
+    return s

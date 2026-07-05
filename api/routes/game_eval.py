@@ -603,6 +603,8 @@ def player_game_history(
             "game_id": game.id,
             "opponent_name": game.opponent_name,
             "date": game.date.strftime("%B %d, %Y") if game.date else None,
+            "year": game.date.year if game.date else None,
+            "season_year": game.season_year,
             "our_score": game.our_score,
             "opponent_score": game.opponent_score,
             "season_phase": game.season_phase,
