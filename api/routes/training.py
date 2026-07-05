@@ -218,7 +218,8 @@ async def generate_training(
     )
     if focus:
         prompt += f"\n\nCOACH CONTEXT:\n{focus}"
-    from ..coach_context import system_profile_block
+    from ..coach_context import system_profile_block, focus_directive
+    prompt += focus_directive(focus_prompt)
     prompt += system_profile_block(coach)
     if ref_text:
         prompt += (

@@ -572,10 +572,13 @@ export default function TeamReportScreen() {
           })}
         </ScrollView>
 
-        <Text style={styles.label}>Coach Focus (optional)</Text>
+        <Text style={styles.label}>Focus (optional)</Text>
+        <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
+          Center the report on specific players, a unit, an action, or a situation.
+        </Text>
         <VoiceTextInput
           style={styles.input}
-          placeholder="e.g. Upcoming tournament, defensive scheme, recruiting eval..."
+          placeholder="e.g. Focus on our guards' P&R defense; the bigs' rim protection; the press break..."
           placeholderTextColor={t.muted2}
           value={focusPrompt}
           onChangeText={setFocusPrompt}

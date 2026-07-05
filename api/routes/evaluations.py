@@ -118,9 +118,9 @@ async def submit_evaluation(
     combined_focus += f"CURRENT RATING: {f'{latest_grade}/10' if latest_grade is not None else 'Not yet evaluated'}\n\n"
     if coach_notes:
         combined_focus += f"Coach notes:\n{coach_notes}\n\n"
+    from ..coach_context import system_profile_block, focus_directive
     if focus_prompt:
-        combined_focus += focus_prompt
-    from ..coach_context import system_profile_block
+        combined_focus += focus_directive(focus_prompt)
     combined_focus += system_profile_block(coach)
 
     if video and video.filename:
@@ -250,11 +250,12 @@ def _build_team_report_prompt(output_type, team_label, roster_context, focus, vi
             "Use the BIM framework with 6 pillars."
             f"{comprehensive_directive(output_type)}"
         )
+    from ..coach_context import focus_directive
     return (
         f"You are the BloomPrint Basketball Intelligence Model. {type_instruction}\n\n"
         f"PROGRAM: {team_label}\n\n"
         f"ROSTER SUMMARY:\n{roster_context}\n\n"
-        f"{('COACH FOCUS: ' + focus + chr(10)) if focus else ''}"
+        f"{focus_directive(focus)}"
         f"{video_context}"
         f"{system_block}\n\n"
         "IMPORTANT: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
