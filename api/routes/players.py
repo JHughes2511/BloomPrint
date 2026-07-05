@@ -163,12 +163,52 @@ async def player_summary(
         if ev.report_text:
             eval_context += ev.report_text[:800] + "\n"
 
+    # Tracked game stats from selected games (real box-score data from Team Grade).
+    tracked_block = ""
+    if body.game_ids:
+        gstats = (
+            db.query(models.GamePlayerStat)
+            .join(models.GameSession, models.GameSession.id == models.GamePlayerStat.game_id)
+            .filter(
+                models.GameSession.coach_id == coach.id,
+                models.GameSession.id.in_(body.game_ids),
+                models.GamePlayerStat.player_name == player.name,
+                models.GamePlayerStat.is_opponent == False,
+            )
+            .all()
+        )
+        by_game: dict = {}
+        for s in gstats:
+            by_game.setdefault(s.game_id, []).append(s)
+        lines = []
+        for gid in body.game_ids:
+            gs = by_game.get(gid)
+            if not gs:
+                continue
+            game = db.get(models.GameSession, gid)
+            counts: dict = {}
+            for s in gs:
+                counts[s.stat_name] = counts.get(s.stat_name, 0) + (s.count or 0)
+            pts = counts.get("2 FG Made", 0) * 2 + counts.get("3 FG Made", 0) * 3 + counts.get("FT Made", 0)
+            reb = counts.get("Off. Reb", 0) + counts.get("Def. Reb", 0)
+            statline = ", ".join(f"{k}: {v}" for k, v in counts.items())
+            when = game.date.strftime("%Y-%m-%d") if game and game.date else ""
+            opp = game.opponent_name if game else "opponent"
+            lines.append(f"vs {opp} ({when}) — PTS {pts}, REB {reb}, AST {counts.get('Assists', 0)}, "
+                         f"STL {counts.get('Steal', 0)}, BLK {counts.get('Blocked Shot', 0)}, TO {counts.get('Turnover', 0)}\n   {statline}")
+        if lines:
+            tracked_block = (
+                "\n\nTRACKED GAME STATS (real box-score data from tracked games — build the box "
+                "score from THESE numbers and reference them):\n" + "\n".join(lines)
+            )
+
     focus = body.focus_prompt or ""
     from video_vision.bim import describe_output_type, comprehensive_directive
     prompt = (
         f"You are the BloomPrint Basketball Intelligence Model. "
         f"Generate a {describe_output_type(body.output_type)} that SUMMARIZES ALL EVALUATION HISTORY for {player.name}.\n\n"
-        f"EVALUATION HISTORY:\n{eval_context}\n\n"
+        f"EVALUATION HISTORY:\n{eval_context}\n"
+        f"{tracked_block}\n\n"
         f"{('COACH FOCUS: ' + focus) if focus else ''}\n\n"
         "Synthesize trends, growth over time, consistent strengths, persistent concerns, "
         "and the player's trajectory. Provide an overall composite grade and pillar grades. "

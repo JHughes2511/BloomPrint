@@ -93,6 +93,7 @@ export default function PlayerProfileScreen() {
   const [showSummary, setShowSummary] = useState(false);
   const [summaryType, setSummaryType] = useState('player_eval');
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [selectedGameIds, setSelectedGameIds] = useState<number[]>([]);
 
   const loadAll = React.useCallback(() =>
     Promise.all([
@@ -177,7 +178,11 @@ export default function PlayerProfileScreen() {
     if (!player) return;
     setSummaryLoading(true);
     try {
-      const result = await playersAPI.summary(playerId, { output_type: summaryType });
+      const wantsBox = summaryType.split(',').includes('box_score');
+      const result = await playersAPI.summary(playerId, {
+        output_type: summaryType,
+        game_ids: wantsBox && selectedGameIds.length ? selectedGameIds : undefined,
+      });
       setShowSummary(false);
       const typeLabel = outputTypeLabel(summaryType);
       const sanitize = (s: string) => (s ?? '').replace(/[^a-zA-Z0-9 \-]/g, '').trim();
@@ -1481,6 +1486,35 @@ export default function PlayerProfileScreen() {
                 );
               })}
             </ScrollView>
+
+            {/* Tracked game selector — only for Box Score */}
+            {summaryType.split(',').includes('box_score') && (
+              <View style={{ marginBottom: 18 }}>
+                <Text style={[styles.modalSub, { marginBottom: 8 }]}>
+                  {gameHistory.length
+                    ? 'Select tracked games to build the box score from real stats:'
+                    : 'No tracked games for this player yet (track games in Team Grade).'}
+                </Text>
+                <ScrollView style={{ maxHeight: 180 }}>
+                  {gameHistory.map((g: any) => {
+                    const on = selectedGameIds.includes(g.game_id);
+                    return (
+                      <TouchableOpacity key={g.game_id}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: t.divider }}
+                        onPress={() => setSelectedGameIds(prev => on ? prev.filter(id => id !== g.game_id) : [...prev, g.game_id])}
+                      >
+                        <Ionicons name={on ? 'checkbox' : 'square-outline'} size={20} color={on ? t.accent : t.muted2} />
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[600] }}>vs {g.opponent_name}</Text>
+                          <Text style={{ color: t.muted2, fontSize: 11 }}>{g.date ?? ''}{g.game_grade != null ? ` · Grade ${g.game_grade}` : ''}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            )}
+
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowSummary(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>

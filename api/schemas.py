@@ -207,6 +207,7 @@ class EvalWithPlayerOut(EvalOut):
 class SummaryRequest(BaseModel):
     output_type: str = "player_eval"
     focus_prompt: str | None = None
+    game_ids: list[int] | None = None   # tracked games to pull box-score stats from
 
 
 class SummaryOut(BaseModel):

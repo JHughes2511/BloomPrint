@@ -53,7 +53,7 @@ export const playersAPI = {
 
   evaluations: (id: number) => api.get(`/players/${id}/evaluations`).then(r => r.data),
 
-  summary: (id: number, data: { output_type: string; focus_prompt?: string }) =>
+  summary: (id: number, data: { output_type: string; focus_prompt?: string; game_ids?: number[] }) =>
     api.post(`/players/${id}/summary`, data).then(r => r.data),
 };
 
