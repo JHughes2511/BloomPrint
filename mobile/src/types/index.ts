@@ -14,6 +14,9 @@ export interface Coach {
   level: string;
   role: string;
   program_name: string;
+  competition_level?: string | null;
+  conference?: string | null;
+  system_profile?: Record<string, string> | null;
   created_at: string;
 }
 

@@ -70,7 +70,7 @@ def update_me(
     db: Session = Depends(get_db),
 ):
     data = body.model_dump(exclude_unset=True)
-    for field in ("name", "role", "program_name", "competition_level", "conference"):
+    for field in ("name", "role", "program_name", "competition_level", "conference", "system_profile"):
         if field in data and data[field] is not None:
             setattr(coach, field, data[field])
     # Recompute BIM authority weight if the competition level/conference changed.

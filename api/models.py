@@ -22,6 +22,9 @@ class Coach(Base):
     program_name      = Column(String, default="SEED Academy")
     conference        = Column(String, nullable=True)     # college conference
     competition_level = Column(String, nullable=True)     # signup competition level
+    # Program system & philosophy — free-text per category. Injected into every
+    # report so evaluations are framed as fit-for-this-program.
+    system_profile    = Column(JSON, nullable=True)
     created_at        = Column(DateTime, default=datetime.utcnow)
 
     evaluations         = relationship("Evaluation", back_populates="coach")

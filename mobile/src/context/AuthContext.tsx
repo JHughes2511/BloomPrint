@@ -9,7 +9,7 @@ interface AuthState {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: { name: string; email: string; password: string; weight?: number; program_name?: string; role?: string }) => Promise<void>;
-  updateProfile: (data: { name?: string; role?: string; program_name?: string; competition_level?: string; conference?: string }) => Promise<void>;
+  updateProfile: (data: { name?: string; role?: string; program_name?: string; competition_level?: string; conference?: string; system_profile?: Record<string, string> }) => Promise<void>;
   logout: () => Promise<void>;
 }
 

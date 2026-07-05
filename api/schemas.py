@@ -30,6 +30,7 @@ class CoachUpdate(BaseModel):
     program_name: str | None = None
     competition_level: str | None = None
     conference: str | None = None
+    system_profile: dict | None = None
 
 
 class CoachOut(BaseModel):
@@ -42,6 +43,7 @@ class CoachOut(BaseModel):
     program_name: str
     conference: str | None = None
     competition_level: str | None = None
+    system_profile: dict | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

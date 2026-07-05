@@ -24,6 +24,7 @@ export const authAPI = {
   updateProfile: (data: {
     name?: string; role?: string; program_name?: string;
     competition_level?: string; conference?: string;
+    system_profile?: Record<string, string>;
   }) => api.patch('/auth/me', data).then(r => r.data),
 };
 

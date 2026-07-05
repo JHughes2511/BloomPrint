@@ -120,6 +120,8 @@ async def submit_evaluation(
         combined_focus += f"Coach notes:\n{coach_notes}\n\n"
     if focus_prompt:
         combined_focus += focus_prompt
+    from ..coach_context import system_profile_block
+    combined_focus += system_profile_block(coach)
 
     if video and video.filename:
         # Save uploaded video to disk, then process in the BACKGROUND so a long
@@ -230,7 +232,7 @@ def recent_team_reports(
     )
 
 
-def _build_team_report_prompt(output_type, team_label, roster_context, focus, video_context):
+def _build_team_report_prompt(output_type, team_label, roster_context, focus, video_context, system_block=""):
     if output_type == "game_situational":
         type_instruction = (
             "Generate a GAME SITUATIONAL REPORT. Analyze the roster and provide a detailed report on: "
@@ -253,7 +255,8 @@ def _build_team_report_prompt(output_type, team_label, roster_context, focus, vi
         f"PROGRAM: {team_label}\n\n"
         f"ROSTER SUMMARY:\n{roster_context}\n\n"
         f"{('COACH FOCUS: ' + focus + chr(10)) if focus else ''}"
-        f"{video_context}\n\n"
+        f"{video_context}"
+        f"{system_block}\n\n"
         "IMPORTANT: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
         "Use plain section titles in ALL CAPS followed by a colon and newline. "
         "Example: OFFENSIVE TENDENCIES: followed by content."
@@ -262,7 +265,7 @@ def _build_team_report_prompt(output_type, team_label, roster_context, focus, vi
 
 def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_prompt: str | None,
                          team_label: str, roster_context: str, video_path: str,
-                         coach_program: str, coach_weight: int):
+                         coach_program: str, coach_weight: int, system_block: str = ""):
     """Background task: analyze a (potentially long) film for a team report and
     generate the report. The client polls the job."""
     import asyncio
@@ -290,7 +293,7 @@ def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_
             import logging
             logging.getLogger("bloomprint").warning("team_report video analysis skipped: %s", exc)
 
-        prompt = _build_team_report_prompt(output_type, team_label, roster_context, focus_prompt or "", video_context)
+        prompt = _build_team_report_prompt(output_type, team_label, roster_context, focus_prompt or "", video_context, system_block)
         import anthropic
         client = anthropic.Anthropic()
         response = client.messages.create(
@@ -364,6 +367,9 @@ async def team_report(
         if team_obj:
             team_label = f"{team_obj.name} ({coach.program_name})"
 
+    from ..coach_context import system_profile_block
+    system_block = system_profile_block(coach)
+
     if video and video.filename:
         # Long film → save and process in the background; the client polls.
         suffix = Path(video.filename).suffix
@@ -378,12 +384,12 @@ async def team_report(
             _run_team_report_job, job.id,
             coach_id=coach.id, output_type=output_type, focus_prompt=focus_prompt,
             team_label=team_label, roster_context=roster_context, video_path=str(vid_dest),
-            coach_program=coach.program_name, coach_weight=coach.weight,
+            coach_program=coach.program_name, coach_weight=coach.weight, system_block=system_block,
         )
         return {"job_id": job.id, "status": "processing"}
 
     # No video — generate synchronously (fast).
-    prompt = _build_team_report_prompt(output_type, team_label, roster_context, focus_prompt or "", "")
+    prompt = _build_team_report_prompt(output_type, team_label, roster_context, focus_prompt or "", "", system_block)
     try:
         import anthropic
         client = anthropic.AsyncAnthropic()

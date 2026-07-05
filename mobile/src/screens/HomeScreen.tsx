@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator } from 'react-native';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { playerAPI } from '../api/client';
@@ -21,6 +22,16 @@ const REPORT_TYPE_TAB: Record<string, string> = {
   game_analysis: 'TeamTab',
   box_score: 'TeamEvalTab',
 };
+
+// Program system & philosophy — matches the backend coach_context field keys.
+const SYSTEM_FIELDS: { key: string; label: string; placeholder: string }[] = [
+  { key: 'offensive_system', label: 'Offensive System', placeholder: 'Pace, spacing, primary actions (motion, ball-screen heavy, Princeton…), who initiates.' },
+  { key: 'defensive_system', label: 'Defensive System', placeholder: 'Man / zone / switch-everything / drop / press, physicality, rotations.' },
+  { key: 'archetypes', label: 'Player Archetypes You Value', placeholder: 'What you recruit/develop for — 3&D wings, positionless bigs, rim protection, secondary creators…' },
+  { key: 'development', label: 'Development / Training Philosophy', placeholder: 'Skill priorities, how you build players, load approach.' },
+  { key: 'recruiting', label: 'Recruiting Lens', placeholder: 'Level, timeline, the swing skills that change your evaluation.' },
+  { key: 'culture', label: 'Culture / Non-Negotiables', placeholder: 'The intangibles and standards you weight heavily.' },
+];
 
 const REPORT_TYPES: { key: string; label: string; icon: IconName; desc: string }[] = [
   { key: 'player_eval', label: 'Player Eval', icon: 'user', desc: 'Individual BIM evaluation scored across all 6 pillars' },
@@ -58,11 +69,34 @@ export default function HomeScreen() {
   const [pRole, setPRole] = useState('coach');
   const [savingProfile, setSavingProfile] = useState(false);
 
+  // System & philosophy profile
+  const [showSystem, setShowSystem] = useState(false);
+  const [sys, setSys] = useState<Record<string, string>>({});
+  const [savingSystem, setSavingSystem] = useState(false);
+
   const openProfile = () => {
     setPName(coach?.name ?? '');
     setPProgram(coach?.program_name ?? '');
     setPRole(coach?.role ?? 'coach');
     setShowProfile(true);
+  };
+
+  const openSystem = () => {
+    setSys({ ...(coach?.system_profile ?? {}) });
+    setShowProfile(false);
+    setShowSystem(true);
+  };
+
+  const saveSystem = async () => {
+    setSavingSystem(true);
+    try {
+      await updateProfile({ system_profile: sys });
+      setShowSystem(false);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save system profile');
+    } finally {
+      setSavingSystem(false);
+    }
   };
 
   const saveProfile = async () => {
@@ -221,13 +255,64 @@ export default function HomeScreen() {
             />
 
             <TouchableOpacity
-              style={{ backgroundColor: t.ctaBg, borderRadius: 12, padding: 15, alignItems: 'center', marginTop: 24 }}
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.card, borderRadius: 12, padding: 14, marginTop: 16, borderWidth: 1, borderColor: t.line }}
+              onPress={openSystem}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 14 }}>Program System & Philosophy</Text>
+                <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>How the AI should read the game for you</Text>
+              </View>
+              <Icon name="chevron-right" size={18} color={t.muted} strokeWidth={2} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{ backgroundColor: t.ctaBg, borderRadius: 12, padding: 15, alignItems: 'center', marginTop: 20 }}
               onPress={saveProfile} disabled={savingProfile}
             >
               {savingProfile
                 ? <ActivityIndicator color={t.ctaText} />
                 : <Text style={{ color: t.ctaText, fontFamily: fonts[800], fontSize: 15 }}>Save Changes</Text>}
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Program System & Philosophy modal */}
+      <Modal visible={showSystem} transparent animationType="slide" onRequestClose={() => setShowSystem(false)}>
+        <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 50, borderWidth: 1, borderColor: t.cardBorder }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingBottom: 8 }}>
+              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 19 }]}>System & Philosophy</Text>
+              <TouchableOpacity onPress={() => setShowSystem(false)}>
+                <Icon name="x" size={22} color={t.muted} strokeWidth={2} />
+              </TouchableOpacity>
+            </View>
+            <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingTop: 4, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+              <Text style={{ color: t.muted, fontSize: 13, lineHeight: 19, marginBottom: 16 }}>
+                Describe your program's system and what you value. The AI keeps this in mind on every report,
+                framing players as fit for the way YOU play. Fill in what's relevant — leave the rest blank.
+              </Text>
+              {SYSTEM_FIELDS.map(f => (
+                <View key={f.key} style={{ marginBottom: 16 }}>
+                  <Text style={[typeScale.label, { color: t.label, marginBottom: 6 }]}>{f.label}</Text>
+                  <TextInput
+                    style={{ backgroundColor: t.card, borderRadius: 12, padding: 13, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 76, textAlignVertical: 'top' }}
+                    value={sys[f.key] ?? ''}
+                    onChangeText={txt => setSys(prev => ({ ...prev, [f.key]: txt }))}
+                    placeholder={f.placeholder} placeholderTextColor={t.muted2}
+                    multiline
+                  />
+                </View>
+              ))}
+              <TouchableOpacity
+                style={{ backgroundColor: t.ctaBg, borderRadius: 12, padding: 15, alignItems: 'center', marginTop: 4 }}
+                onPress={saveSystem} disabled={savingSystem}
+              >
+                {savingSystem
+                  ? <ActivityIndicator color={t.ctaText} />
+                  : <Text style={{ color: t.ctaText, fontFamily: fonts[800], fontSize: 15 }}>Save Philosophy</Text>}
+              </TouchableOpacity>
+            </KeyboardAwareScrollView>
           </View>
         </View>
       </Modal>
