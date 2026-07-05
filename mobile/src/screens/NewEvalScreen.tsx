@@ -150,15 +150,6 @@ export default function NewEvalScreen() {
       <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
         Center the report on a person, matchup, action, or situation.
       </Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-        {['Pick-and-roll defense', 'Off-ball movement', 'Transition', 'Late-clock', 'College translation'].map(ex => (
-          <TouchableOpacity key={ex}
-            style={{ backgroundColor: t.card, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 6, borderWidth: 1, borderColor: t.line }}
-            onPress={() => setFocusPrompt(f => f.trim() ? `${f.trim()}, ${ex}` : ex)}>
-            <Text style={{ color: t.muted, fontSize: 12 }}>{ex}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
       <VoiceTextInput
         style={[styles.input, { height: 80 }]}
         placeholder="e.g. Focus on the two guards' P&R defense; grade the 4's spacing on the weak side"
