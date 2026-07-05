@@ -97,6 +97,9 @@ class PlayerOut(BaseModel):
     parent_permission: bool | None = None
     created_at: datetime
     latest_grade: float | None = None
+    bim_grade: float | None = None            # recency-weighted composite overall
+    bim_pillars: dict | None = None           # recency-weighted composite per pillar
+    bim_report_count: int = 0                 # how many evals feed the composite
     team_id: int | None = None
     team_name: str | None = None
 

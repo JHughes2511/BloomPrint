@@ -214,11 +214,51 @@ async def player_summary(
         raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
 
 
+# The player's BIM score is a living, recency-weighted composite of ALL their
+# evaluations (every report is part of the story), not just the latest one.
+_BIM_HALF_LIFE_DAYS = 120.0   # ~4 months: recent film counts most, history still counts
+
+
+def _composite_bim(player: models.Player):
+    """Returns (composite_overall, composite_pillars, report_count)."""
+    from datetime import datetime
+    evals = [e for e in player.evaluations if e.overall_grade is not None]
+    if not evals:
+        return None, {}, 0
+    now = datetime.utcnow()
+
+    def weight(e):
+        age = max((now - e.created_at).days, 0) if e.created_at else 0
+        return 0.5 ** (age / _BIM_HALF_LIFE_DAYS)
+
+    wsum = sum(weight(e) for e in evals)
+    overall = round(sum(e.overall_grade * weight(e) for e in evals) / wsum, 1) if wsum else None
+
+    # Aggregate every pillar key found across evals, each recency-weighted.
+    pil_num: dict[str, float] = {}
+    pil_den: dict[str, float] = {}
+    for e in evals:
+        w = weight(e)
+        for k, v in (e.pillar_grades or {}).items():
+            try:
+                fv = float(v)
+            except (TypeError, ValueError):
+                continue
+            pil_num[k] = pil_num.get(k, 0.0) + fv * w
+            pil_den[k] = pil_den.get(k, 0.0) + w
+    pillars = {k: round(pil_num[k] / pil_den[k], 1) for k in pil_num if pil_den.get(k, 0) > 0}
+    return overall, pillars, len(evals)
+
+
 def _with_grade(player: models.Player) -> schemas.PlayerOut:
     out = schemas.PlayerOut.model_validate(player)
     if player.evaluations:
         grades = [e.overall_grade for e in player.evaluations if e.overall_grade is not None]
         out.latest_grade = grades[-1] if grades else None
+        overall, pillars, count = _composite_bim(player)
+        out.bim_grade = overall
+        out.bim_pillars = pillars or None
+        out.bim_report_count = count
     if player.team:
         out.team_id = player.team.id
         out.team_name = player.team.name

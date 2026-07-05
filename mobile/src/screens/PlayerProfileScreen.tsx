@@ -517,18 +517,33 @@ export default function PlayerProfileScreen() {
         <TouchableOpacity onPress={openEdit} style={styles.editBtn}>
           <Ionicons name="create-outline" size={20} color={t.muted} />
         </TouchableOpacity>
-        <GradeBadge grade={player.latest_grade} size="lg" />
+        <GradeBadge grade={(player as any).bim_grade ?? player.latest_grade} size="lg" />
       </View>
 
-      {/* Latest pillar grades */}
-      {latest?.pillar_grades && Object.keys(latest.pillar_grades).length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Latest Evaluation</Text>
-          {Object.entries(latest.pillar_grades).map(([key, grade]) => (
-            <PillarCard key={key} pillarKey={key} grade={grade} />
-          ))}
-        </View>
-      )}
+      {/* BIM composite pillar grades — recency-weighted across all reports */}
+      {(() => {
+        const composite = (player as any).bim_pillars as Record<string, number> | null | undefined;
+        const count = (player as any).bim_report_count ?? 0;
+        const pillars = composite && Object.keys(composite).length > 0
+          ? composite
+          : (latest?.pillar_grades ?? null);
+        if (!pillars || Object.keys(pillars).length === 0) return null;
+        return (
+          <View style={styles.section}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text style={styles.sectionTitle}>BIM Score</Text>
+              {count > 0 && (
+                <Text style={{ color: t.muted2, fontSize: 11 }}>
+                  {count === 1 ? 'from 1 report' : `composite of ${count} reports`}
+                </Text>
+              )}
+            </View>
+            {Object.entries(pillars).map(([key, grade]) => (
+              <PillarCard key={key} pillarKey={key} grade={grade as number} />
+            ))}
+          </View>
+        );
+      })()}
 
       {/* Flags */}
       {latest && (
@@ -885,7 +900,7 @@ export default function PlayerProfileScreen() {
                   <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900] }}>{player.name}</Text>
                   {player.position ? <Text style={{ color: t.muted, fontSize: 14, marginTop: 2 }}>{player.position}</Text> : null}
                 </View>
-                <GradeBadge grade={player.latest_grade} size="lg" />
+                <GradeBadge grade={(player as any).bim_grade ?? player.latest_grade} size="lg" />
               </View>
 
               {/* Info rows */}
@@ -930,10 +945,10 @@ export default function PlayerProfileScreen() {
                     <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900] }}>{allTraining.length}</Text>
                     <Text style={{ color: t.muted, fontSize: 11 }}>Training Plans</Text>
                   </View>
-                  {player.latest_grade != null && (
+                  {((player as any).bim_grade ?? player.latest_grade) != null && (
                     <View style={{ alignItems: 'center' }}>
-                      <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900] }}>{player.latest_grade.toFixed(1)}</Text>
-                      <Text style={{ color: t.muted, fontSize: 11 }}>Latest Grade</Text>
+                      <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900] }}>{(((player as any).bim_grade ?? player.latest_grade) as number).toFixed(1)}</Text>
+                      <Text style={{ color: t.muted, fontSize: 11 }}>BIM Score</Text>
                     </View>
                   )}
                 </View>

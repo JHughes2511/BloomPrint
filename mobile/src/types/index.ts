@@ -34,6 +34,9 @@ export interface Player {
   notes: string | null;
   created_at: string;
   latest_grade: number | null;
+  bim_grade?: number | null;
+  bim_pillars?: Record<string, number> | null;
+  bim_report_count?: number;
   team_id: number | null;
   team_name: string | null;
 }

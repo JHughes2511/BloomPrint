@@ -310,7 +310,7 @@ export default function RosterScreen() {
                 {[item.position, item.team_name ?? item.competition_level].filter(Boolean).join(' · ')}
               </Text>
             </View>
-            <GradeBadge grade={item.latest_grade} size="md" />
+            <GradeBadge grade={item.bim_grade ?? item.latest_grade} size="md" />
           </TouchableOpacity>
         )}
         ListEmptyComponent={
