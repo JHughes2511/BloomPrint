@@ -17,6 +17,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import GeneratingBasketball from './GeneratingBasketball';
 
 // ── Court sizing ──────────────────────────────────────────────────────────
 // Classic hardwood court drawn in SVG at regulation 50ft x 94ft proportions.
@@ -1111,6 +1112,11 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                       <Ionicons name="document-text-outline" size={16} color={t.accent} />
                       <Text style={styles.seedBtnText}>Draw up from a report</Text>
                     </TouchableOpacity>
+                  )}
+                  {aiGenerating && (
+                    <View style={{ alignItems: 'center', marginTop: 14 }}>
+                      <GeneratingBasketball size={72} label="Drawing up the play…" />
+                    </View>
                   )}
                   <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                     <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]}

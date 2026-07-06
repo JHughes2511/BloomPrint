@@ -23,6 +23,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import GeneratingBasketball, { parseGenProgress } from '../components/GeneratingBasketball';
 
 const OUTPUT_TYPES = [
   { key: 'coaching_report',  label: 'Coaching Report' },
@@ -610,7 +611,9 @@ export default function TeamReportScreen() {
         </TouchableOpacity>
 
         {generating && (
-          <Text style={styles.hint}>{genProgress || 'Analyzing roster and generating report.'} Long films are processed in the background — keep this screen open.</Text>
+          <View style={{ alignItems: 'center', marginTop: 18 }}>
+            <GeneratingBasketball realProgress={parseGenProgress(genProgress)} label={genProgress || 'Analyzing roster and generating report — keep this screen open.'} />
+          </View>
         )}
 
         {reportText && (

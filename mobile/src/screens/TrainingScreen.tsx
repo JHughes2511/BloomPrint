@@ -14,6 +14,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import GeneratingBasketball from '../components/GeneratingBasketball';
 import { renderReport } from '../utils/renderReport';
 
 export default function TrainingScreen() {
@@ -119,6 +120,11 @@ export default function TrainingScreen() {
             : <><Ionicons name="barbell" size={16} color={t.ctaText} /><Text style={styles.generateText}>  Generate Program</Text></>
           }
         </TouchableOpacity>
+        {generating && (
+          <View style={{ alignItems: 'center', marginTop: 18 }}>
+            <GeneratingBasketball label="Building the training program…" />
+          </View>
+        )}
       </View>
 
       {/* Priority stack */}
