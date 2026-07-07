@@ -23,7 +23,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
-import GeneratingBasketball, { parseGenProgress } from '../components/GeneratingBasketball';
+import { GeneratingOverlay, parseGenProgress } from '../components/GeneratingBasketball';
 
 const OUTPUT_TYPES = [
   { key: 'coaching_report',  label: 'Coaching Report' },
@@ -610,11 +610,7 @@ export default function TeamReportScreen() {
           }
         </TouchableOpacity>
 
-        {generating && (
-          <View style={{ alignItems: 'center', marginTop: 18 }}>
-            <GeneratingBasketball realProgress={parseGenProgress(genProgress)} label={genProgress || 'Analyzing roster and generating report — keep this screen open.'} />
-          </View>
-        )}
+        <GeneratingOverlay visible={generating} realProgress={parseGenProgress(genProgress)} label={genProgress || 'Analyzing roster and generating report — keep this screen open.'} />
 
         {reportText && (
           <View
@@ -844,11 +840,7 @@ export default function TeamReportScreen() {
                         : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply & Regenerate</Text>}
                     </TouchableOpacity>
                   )}
-                  {regeneratingPrevReport && (
-                    <View style={{ alignItems: 'center', marginTop: 16 }}>
-                      <GeneratingBasketball size={64} label="Regenerating the report…" />
-                    </View>
-                  )}
+                  <GeneratingOverlay visible={regeneratingPrevReport} label="Regenerating the report…" />
                 </View>
               )}
 

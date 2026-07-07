@@ -14,7 +14,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
-import GeneratingBasketball, { parseGenProgress } from '../components/GeneratingBasketball';
+import { GeneratingOverlay, parseGenProgress } from '../components/GeneratingBasketball';
 
 const OUTPUT_TYPES: { key: OutputType; label: string }[] = [
   { key: 'player_eval',        label: 'Player Eval' },
@@ -270,14 +270,11 @@ export default function NewEvalScreen() {
         }
       </TouchableOpacity>
 
-      {submitting && (
-        <View style={{ alignItems: 'center', marginTop: 20 }}>
-          <GeneratingBasketball
-            realProgress={parseGenProgress(progress)}
-            label={progress || 'Uploading and analyzing with Claude — keep this screen open.'}
-          />
-        </View>
-      )}
+      <GeneratingOverlay
+        visible={submitting}
+        realProgress={parseGenProgress(progress)}
+        label={progress || 'Uploading and analyzing with Claude — keep this screen open.'}
+      />
     </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
     </ScreenBackground>

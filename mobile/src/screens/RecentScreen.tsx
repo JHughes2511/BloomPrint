@@ -16,7 +16,7 @@ import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from 
 import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
 import { renderReport } from '../utils/renderReport';
-import GeneratingBasketball from '../components/GeneratingBasketball';
+import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -1045,11 +1045,7 @@ export default function RecentScreen() {
                     {applyingCorrect ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply & Regenerate</Text>}
                   </TouchableOpacity>
                 </View>
-                {applyingCorrect && (
-                  <View style={{ alignItems: 'center', marginTop: 16 }}>
-                    <GeneratingBasketball size={64} label="Regenerating the report…" />
-                  </View>
-                )}
+                <GeneratingOverlay visible={applyingCorrect} label="Regenerating the report…" />
 
                 {corrections.length > 0 && (
                   <View style={{ marginTop: 18 }}>

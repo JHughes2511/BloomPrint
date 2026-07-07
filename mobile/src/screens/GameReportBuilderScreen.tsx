@@ -9,7 +9,7 @@ import {
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { renderReport } from '../utils/renderReport';
-import GeneratingBasketball from '../components/GeneratingBasketball';
+import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Print from 'expo-print';
@@ -622,6 +622,7 @@ export default function GameReportBuilderScreen() {
         {generating && (
           <Text style={styles.hint}>Analyzing all sources. This may take 30–60 seconds.</Text>
         )}
+        <GeneratingOverlay visible={generating} label="Analyzing all sources and building the report…" />
 
         {/* Report output */}
         {report?.report_text ? (
@@ -679,11 +680,7 @@ export default function GameReportBuilderScreen() {
                   }
                 </TouchableOpacity>
               </View>
-              {correcting && (
-                <View style={{ alignItems: 'center', marginTop: 16 }}>
-                  <GeneratingBasketball size={64} label="Regenerating the report…" />
-                </View>
-              )}
+              <GeneratingOverlay visible={correcting} label="Regenerating the report…" />
 
               {gameCorrections.length > 0 && (
                 <View style={{ marginTop: 14 }}>
@@ -747,11 +744,7 @@ export default function GameReportBuilderScreen() {
                 : <><Ionicons name="checkmark-circle" size={16} color={t.ctaText} /><Text style={styles.correctionBtnText}>  Apply Correction</Text></>
               }
             </TouchableOpacity>
-            {clipCorrecting && (
-              <View style={{ alignItems: 'center', marginTop: 16 }}>
-                <GeneratingBasketball size={56} label="Updating the film analysis…" />
-              </View>
-            )}
+            <GeneratingOverlay visible={clipCorrecting} label="Updating the film analysis…" />
           </View>
         </KeyboardAvoidingView>
       </Modal>

@@ -15,7 +15,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { gameEvalAPI, teamsAPI, playersAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
-import GeneratingBasketball from '../components/GeneratingBasketball';
+import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { formatForLevel, periodLabel, weightBucket, formatClock, type GameFormat } from '../utils/gameClock';
 import WhiteboardModal from '../components/WhiteboardModal';
@@ -1923,6 +1923,7 @@ export default function TeamEvalScreen() {
                   <Text numberOfLines={1} style={{ color: t.accent, fontSize: 11, fontFamily: fonts[600] }}>Generate Report</Text></>}
             </TouchableOpacity>
           </View>
+          <GeneratingOverlay visible={generatingReport} label="Building the scouting report…" />
 
           {/* Live entry shortcut if in_progress */}
           {detailGame.status === 'in_progress' && (
@@ -2115,12 +2116,7 @@ export default function TeamEvalScreen() {
                           {scoutData.ai_scouting_report ? 'Regenerate Report' : 'Generate Report'}
                         </Text></>}
                   </TouchableOpacity>
-
-                  {regeneratingScout && (
-                    <View style={{ alignItems: 'center', marginBottom: 12 }}>
-                      <GeneratingBasketball size={64} label="Building the scouting report…" />
-                    </View>
-                  )}
+                  <GeneratingOverlay visible={regeneratingScout} label="Building the scouting report…" />
 
                   {scoutData.ai_scouting_report && (
                     <View style={s.card}>

@@ -13,7 +13,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
-import GeneratingBasketball from '../components/GeneratingBasketball';
+import { GeneratingOverlay } from '../components/GeneratingBasketball';
 
 function cleanMarkdown(text: string): string {
   return text
@@ -259,11 +259,7 @@ export default function CoachTrainingDetailScreen() {
                 : <><Ionicons name="refresh" size={16} color={t.ctaText} /><Text style={styles.btnText}>Update Report</Text></>
               }
             </TouchableOpacity>
-            {refreshing && (
-              <View style={{ alignItems: 'center', marginTop: 16 }}>
-                <GeneratingBasketball size={56} label="Updating the program…" />
-              </View>
-            )}
+            <GeneratingOverlay visible={refreshing} label="Updating the program…" />
           </View>
         </View>
       </KeyboardAwareScrollView>

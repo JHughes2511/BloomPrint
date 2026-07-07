@@ -18,7 +18,7 @@ import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 import { parseDrills } from '../../utils/trainingDrills';
-import GeneratingBasketball from '../../components/GeneratingBasketball';
+import { GeneratingOverlay } from '../../components/GeneratingBasketball';
 import { buildPdfFileName } from '../../utils/buildReportPdf';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 
@@ -343,11 +343,7 @@ export default function PlayerTrainingDetailScreen() {
                 }
               </TouchableOpacity>
             </View>
-            {refreshing && (
-              <View style={{ alignItems: 'center', marginTop: 16 }}>
-                <GeneratingBasketball size={56} label="Updating your program…" />
-              </View>
-            )}
+            <GeneratingOverlay visible={refreshing} label="Updating your program…" />
 
             {trainingCorrections.length > 0 && (
               <View style={{ marginTop: 14 }}>
