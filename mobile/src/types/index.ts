@@ -16,6 +16,8 @@ export interface Coach {
   program_name: string;
   competition_level?: string | null;
   conference?: string | null;
+  country?: string | null;
+  city?: string | null;
   system_profile?: Record<string, string> | null;
   philosophy_reference?: string | null;
   created_at: string;
@@ -107,6 +109,8 @@ export interface PlayerUser {
   email: string;
   player_id: number | null;
   avatar?: string | null;
+  country?: string | null;
+  city?: string | null;
   linked_player_name?: string | null;
   linked_team_name?: string | null;
   linked_program_name?: string | null;

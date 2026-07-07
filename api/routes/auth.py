@@ -48,6 +48,8 @@ def register(body: schemas.CoachCreate, db: Session = Depends(get_db)):
         role=body.role,
         conference=body.conference,
         competition_level=body.competition_level,
+        country=body.country,
+        city=body.city,
     )
     db.add(coach)
     db.commit()
@@ -75,7 +77,7 @@ def update_me(
     db: Session = Depends(get_db),
 ):
     data = body.model_dump(exclude_unset=True)
-    for field in ("name", "role", "program_name", "competition_level", "conference", "system_profile"):
+    for field in ("name", "role", "program_name", "competition_level", "conference", "system_profile", "country", "city"):
         if field in data and data[field] is not None:
             setattr(coach, field, data[field])
     # Recompute BIM authority weight if the competition level/conference changed.

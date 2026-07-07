@@ -10,6 +10,7 @@ import { ScreenBackground, SectionLabel, Card, IconTile, Txt } from '../theme/co
 import { Icon, IconName } from '../theme/icons';
 import { fonts, type as typeScale } from '../theme/typography';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
+import CountryField from '../components/CountryField';
 
 // Which bottom tab each report type routes to when tapped on the Home page.
 //   RosterTab   = Roster      TeamTab = Team Eval      TeamEvalTab = Team Grade
@@ -69,6 +70,8 @@ export default function HomeScreen() {
   const [pName, setPName] = useState('');
   const [pProgram, setPProgram] = useState('');
   const [pRole, setPRole] = useState('coach');
+  const [pCountry, setPCountry] = useState('');
+  const [pCity, setPCity] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
 
   // System & philosophy profile
@@ -109,6 +112,8 @@ export default function HomeScreen() {
     setPName(coach?.name ?? '');
     setPProgram(coach?.program_name ?? '');
     setPRole(coach?.role ?? 'coach');
+    setPCountry(coach?.country ?? '');
+    setPCity(coach?.city ?? '');
     setShowProfile(true);
   };
 
@@ -134,7 +139,7 @@ export default function HomeScreen() {
     if (!pName.trim()) { Alert.alert('Name required', 'Please enter your name.'); return; }
     setSavingProfile(true);
     try {
-      await updateProfile({ name: pName.trim(), program_name: pProgram.trim(), role: pRole });
+      await updateProfile({ name: pName.trim(), program_name: pProgram.trim(), role: pRole, country: pCountry || undefined, city: pCity.trim() || undefined });
       setShowProfile(false);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update profile');
@@ -283,6 +288,14 @@ export default function HomeScreen() {
               style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line }}
               value={pProgram} onChangeText={setPProgram}
               placeholder="Program name" placeholderTextColor={t.muted2}
+            />
+
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>Location</Text>
+            <CountryField value={pCountry} onChange={setPCountry} />
+            <TextInput
+              style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line }}
+              value={pCity} onChangeText={setPCity}
+              placeholder="City / Region (optional)" placeholderTextColor={t.muted2}
             />
 
             <TouchableOpacity

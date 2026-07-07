@@ -15,6 +15,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
+import CountryField from '../../components/CountryField';
 
 const ROLE_LABELS: Record<string, string> = { coach: 'Coach', scout: 'Scout', trainer: 'Trainer' };
 
@@ -47,6 +48,8 @@ export default function PlayerLinkScreen() {
   const [eWt, setEWt] = useState('');   // weight
   const [eSr, setESr] = useState('');   // standing reach
   const [eSchool, setESchool] = useState('');
+  const [eCountry, setECountry] = useState('');
+  const [eCity, setECity] = useState('');
   const [saving, setSaving] = useState(false);
 
   // QR scanner
@@ -126,6 +129,8 @@ export default function PlayerLinkScreen() {
   const openEdit = () => {
     setEName(playerUser?.name ?? '');
     setEAvatar((playerUser as any)?.avatar ?? null);
+    setECountry((playerUser as any)?.country ?? '');
+    setECity((playerUser as any)?.city ?? '');
     setEP(profile?.position ?? ''); setEH(profile?.height ?? ''); setEW(profile?.wingspan ?? '');
     setEWt(profile?.weight ?? ''); setESr(profile?.standing_reach ?? ''); setESchool(profile?.school_name ?? '');
     setShowEdit(true);
@@ -147,7 +152,7 @@ export default function PlayerLinkScreen() {
     setSaving(true);
     try {
       // Account-level: name + avatar
-      await playerAuthAPI.updateMe({ name: eName.trim() || undefined, avatar: eAvatar });
+      await playerAuthAPI.updateMe({ name: eName.trim() || undefined, avatar: eAvatar, country: eCountry || undefined, city: eCity.trim() || undefined });
       // Profile-level: athletic fields (only when linked)
       if (playerUser?.player_id) {
         const updated = await playerProfileAPI.update({
@@ -280,6 +285,11 @@ export default function PlayerLinkScreen() {
 
             <Text style={styles.fieldLabel}>Full Name</Text>
             <VoiceTextInput style={styles.input} value={eName} onChangeText={setEName} placeholder="Your name" placeholderTextColor={t.muted2} />
+
+            <Text style={styles.fieldLabel}>Country</Text>
+            <CountryField value={eCountry} onChange={setECountry} placeholder="Select country..." />
+            <Text style={styles.fieldLabel}>City / Region</Text>
+            <VoiceTextInput style={styles.input} value={eCity} onChangeText={setECity} placeholder="City / Region (optional)" placeholderTextColor={t.muted2} />
 
             {(playerUser?.player_id
               ? ([

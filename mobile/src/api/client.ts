@@ -13,7 +13,7 @@ api.interceptors.request.use(async (config) => {
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const authAPI = {
-  register: (data: { name: string; email: string; password: string; weight?: number; program_name?: string; role?: string }) =>
+  register: (data: { name: string; email: string; password: string; weight?: number; program_name?: string; role?: string; competition_level?: string; conference?: string; country?: string; city?: string }) =>
     api.post('/auth/register', data).then(r => r.data),
 
   login: (email: string, password: string) =>
@@ -25,6 +25,7 @@ export const authAPI = {
     name?: string; role?: string; program_name?: string;
     competition_level?: string; conference?: string;
     system_profile?: Record<string, string>;
+    country?: string; city?: string;
   }) => api.patch('/auth/me', data).then(r => r.data),
 
   importPhilosophy: (formData: FormData) =>

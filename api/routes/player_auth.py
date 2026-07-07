@@ -59,6 +59,8 @@ def register(body: schemas.PlayerUserCreate, db: Session = Depends(get_db)):
         name=body.name,
         email=body.email,
         password_hash=_hash_pw(body.password),
+        country=body.country,
+        city=body.city,
     )
     db.add(pu)
     db.commit()
@@ -105,6 +107,10 @@ def update_me(
         pu.name = data["name"].strip()
     if "avatar" in data:
         pu.avatar = data["avatar"] or None
+    if "country" in data:
+        pu.country = data["country"] or None
+    if "city" in data:
+        pu.city = data["city"] or None
     db.commit()
     db.refresh(pu)
     return _player_user_out(pu)

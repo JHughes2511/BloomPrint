@@ -13,6 +13,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import CountryField from '../components/CountryField';
 
 const ROLES = [
   { key: 'coach',   label: 'Coach' },
@@ -187,6 +188,8 @@ export default function LoginScreen() {
   const [role, setRole] = useState('coach');
   const [competitionLevel, setCompetitionLevel] = useState('');
   const [conference, setConference] = useState('');
+  const [country, setCountry] = useState('');
+  const [city, setCity] = useState('');
   const [showLevelPicker, setShowLevelPicker] = useState(false);
   const [showConferencePicker, setShowConferencePicker] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -209,6 +212,8 @@ export default function LoginScreen() {
           role,
           competition_level: competitionLevel || undefined,
           conference: competitionLevel === 'College' ? conference : undefined,
+          country: country || undefined,
+          city: city.trim() || undefined,
         } as any);
       }
     } catch (e: any) {
@@ -288,6 +293,17 @@ export default function LoginScreen() {
                 </TouchableOpacity>
               </>
             )}
+
+            {/* Location */}
+            <Text style={[styles.sectionLabel, { marginTop: 8 }]}>Location</Text>
+            <CountryField value={country} onChange={setCountry} />
+            <VoiceTextInput
+              style={styles.input}
+              placeholder="City / Region (optional)"
+              placeholderTextColor={t.muted2}
+              value={city}
+              onChangeText={setCity}
+            />
           </>
         )}
 

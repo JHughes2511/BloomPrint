@@ -71,6 +71,16 @@ def _run_migrations():
                 "ALTER TABLE coaches ADD COLUMN competition_level TEXT"
             ))
             conn.commit()
+        if "country" not in coach_cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE coaches ADD COLUMN country TEXT"
+            ))
+            conn.commit()
+        if "city" not in coach_cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE coaches ADD COLUMN city TEXT"
+            ))
+            conn.commit()
 
         # Add wingspan to players if missing
         if "wingspan" not in cols:
@@ -179,6 +189,16 @@ def _run_migrations():
             if puu_cols and "avatar" not in puu_cols:
                 conn.execute(__import__("sqlalchemy").text(
                     "ALTER TABLE player_users ADD COLUMN avatar TEXT"
+                ))
+                conn.commit()
+            if puu_cols and "country" not in puu_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE player_users ADD COLUMN country TEXT"
+                ))
+                conn.commit()
+            if puu_cols and "city" not in puu_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE player_users ADD COLUMN city TEXT"
                 ))
                 conn.commit()
         except Exception:

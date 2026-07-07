@@ -11,12 +11,12 @@ playerApi.interceptors.request.use(async (config) => {
 });
 
 export const playerAuthAPI = {
-  register: (data: { name: string; email: string; password: string }) =>
+  register: (data: { name: string; email: string; password: string; country?: string; city?: string }) =>
     playerApi.post('/player-auth/register', data).then(r => r.data),
   login: (email: string, password: string) =>
     playerApi.post('/player-auth/login', { email, password }).then(r => r.data),
   me: () => playerApi.get('/player-auth/me').then(r => r.data),
-  updateMe: (data: { name?: string; avatar?: string | null }) =>
+  updateMe: (data: { name?: string; avatar?: string | null; country?: string; city?: string }) =>
     playerApi.patch('/player-auth/me', data).then(r => r.data),
 };
 

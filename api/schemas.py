@@ -17,6 +17,8 @@ class CoachCreate(BaseModel):
     program_name: str = "SEED Academy"
     conference: str | None = None
     competition_level: str | None = None
+    country: str | None = None
+    city: str | None = None
 
 
 class CoachLogin(BaseModel):
@@ -31,6 +33,8 @@ class CoachUpdate(BaseModel):
     competition_level: str | None = None
     conference: str | None = None
     system_profile: dict | None = None
+    country: str | None = None
+    city: str | None = None
 
 
 class CoachOut(BaseModel):
@@ -43,6 +47,8 @@ class CoachOut(BaseModel):
     program_name: str
     conference: str | None = None
     competition_level: str | None = None
+    country: str | None = None
+    city: str | None = None
     system_profile: dict | None = None
     philosophy_reference: str | None = None
     created_at: datetime
@@ -226,6 +232,8 @@ class PlayerUserCreate(BaseModel):
     name: str
     email: str
     password: str
+    country: str | None = None
+    city: str | None = None
 
 
 class PlayerUserOut(BaseModel):
@@ -234,6 +242,8 @@ class PlayerUserOut(BaseModel):
     email: str
     player_id: int | None
     avatar: str | None = None
+    country: str | None = None
+    city: str | None = None
     linked_player_name: str | None = None
     linked_team_name: str | None = None
     linked_program_name: str | None = None
@@ -244,6 +254,8 @@ class PlayerUserOut(BaseModel):
 class PlayerUserUpdate(BaseModel):
     name: str | None = None
     avatar: str | None = None
+    country: str | None = None
+    city: str | None = None
 
 
 class PlayerToken(BaseModel):

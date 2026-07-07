@@ -13,6 +13,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
+import CountryField from '../../components/CountryField';
 
 export default function PlayerRegisterScreen() {
   const { t } = useTheme();
@@ -22,6 +23,8 @@ export default function PlayerRegisterScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [country, setCountry] = useState('');
+  const [city, setCity] = useState('');
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
 
@@ -39,7 +42,7 @@ export default function PlayerRegisterScreen() {
     }
     setLoading(true);
     try {
-      await register({ name: name.trim(), email: email.trim(), password });
+      await register({ name: name.trim(), email: email.trim(), password, country: country || undefined, city: city.trim() || undefined });
       setRegistered(true);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Registration failed');
@@ -191,6 +194,14 @@ export default function PlayerRegisterScreen() {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+        />
+        <CountryField value={country} onChange={setCountry} placeholder="Country (optional)" />
+        <VoiceTextInput
+          style={styles.input}
+          placeholder="City / Region (optional)"
+          placeholderTextColor={t.muted2}
+          value={city}
+          onChangeText={setCity}
         />
 
         <TouchableOpacity style={styles.btn} onPress={submit} disabled={loading}>

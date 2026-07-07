@@ -8,7 +8,7 @@ interface PlayerAuthState {
   playerToken: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (data: { name: string; email: string; password: string }) => Promise<void>;
+  register: (data: { name: string; email: string; password: string; country?: string; city?: string }) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -43,7 +43,7 @@ export function PlayerAuthProvider({ children }: { children: React.ReactNode }) 
     setPlayerUser(res.player_user);
   };
 
-  const register = async (data: { name: string; email: string; password: string }) => {
+  const register = async (data: { name: string; email: string; password: string; country?: string; city?: string }) => {
     const res = await playerAuthAPI.register(data);
     await SecureStore.setItemAsync('player_auth_token', res.access_token);
     setPlayerToken(res.access_token);
