@@ -15,6 +15,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { gameEvalAPI, teamsAPI, playersAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
+import GeneratingBasketball from '../components/GeneratingBasketball';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { formatForLevel, periodLabel, weightBucket, formatClock, type GameFormat } from '../utils/gameClock';
 import WhiteboardModal from '../components/WhiteboardModal';
@@ -2114,6 +2115,12 @@ export default function TeamEvalScreen() {
                           {scoutData.ai_scouting_report ? 'Regenerate Report' : 'Generate Report'}
                         </Text></>}
                   </TouchableOpacity>
+
+                  {regeneratingScout && (
+                    <View style={{ alignItems: 'center', marginBottom: 12 }}>
+                      <GeneratingBasketball size={64} label="Building the scouting report…" />
+                    </View>
+                  )}
 
                   {scoutData.ai_scouting_report && (
                     <View style={s.card}>

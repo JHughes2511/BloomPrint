@@ -23,6 +23,7 @@ import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
 import { mdToHtml, safeFileName } from '../utils/mdToHtml';
 import { renderReport } from '../utils/renderReport';
+import GeneratingBasketball from '../components/GeneratingBasketball';
 
 const PILLARS = [
   'offensive_skills', 'defensive_capabilities', 'physical_attributes',
@@ -703,6 +704,11 @@ export default function EvalReportScreen() {
                 ? <ActivityIndicator color={t.ctaText} />
                 : <Text style={styles.saveText}>Generate New Evaluation</Text>}
             </TouchableOpacity>
+          )}
+          {regenerating && (
+            <View style={{ alignItems: 'center', marginTop: 18 }}>
+              <GeneratingBasketball size={72} label="Regenerating the evaluation…" />
+            </View>
           )}
         </View>
       )}

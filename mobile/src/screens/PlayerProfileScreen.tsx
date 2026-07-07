@@ -25,6 +25,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import GeneratingBasketball from '../components/GeneratingBasketball';
 
 const COMPETITION_LEVELS = ['Middle School', 'HS JV', 'HS Varsity', 'AAU', 'College', 'Pro'];
 
@@ -1055,6 +1056,12 @@ export default function PlayerProfileScreen() {
                     </TouchableOpacity>
                   </View>
 
+                  {regeneratingModal && (
+                    <View style={{ alignItems: 'center', marginTop: 12 }}>
+                      <GeneratingBasketball size={64} label="Regenerating training…" />
+                    </View>
+                  )}
+
                   {modalCorrections.length > 0 && (
                     <View style={{ marginTop: 12 }}>
                       {modalCorrections.map((c: any) => (
@@ -1137,6 +1144,11 @@ export default function PlayerProfileScreen() {
                             ? <ActivityIndicator color={t.accent} size="small" />
                             : <><Ionicons name="refresh" size={14} color={t.accent} /><Text style={{ color: t.accent, fontFamily: fonts[700], fontSize: 12.5 }}>Update Player's Program</Text></>}
                         </TouchableOpacity>
+                        {updatingPlayerProgram && (
+                          <View style={{ alignItems: 'center', marginTop: 10 }}>
+                            <GeneratingBasketball size={56} label="Updating the player's program…" />
+                          </View>
+                        )}
                       </>
                     )}
                   </View>
@@ -1554,6 +1566,11 @@ export default function PlayerProfileScreen() {
               );
             })()}
 
+            {summaryLoading && (
+              <View style={{ alignItems: 'center', marginBottom: 14 }}>
+                <GeneratingBasketball size={72} label="Synthesizing the summary…" />
+              </View>
+            )}
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowSummary(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>

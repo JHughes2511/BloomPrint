@@ -844,6 +844,11 @@ export default function TeamReportScreen() {
                         : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply & Regenerate</Text>}
                     </TouchableOpacity>
                   )}
+                  {regeneratingPrevReport && (
+                    <View style={{ alignItems: 'center', marginTop: 16 }}>
+                      <GeneratingBasketball size={64} label="Regenerating the report…" />
+                    </View>
+                  )}
                 </View>
               )}
 
