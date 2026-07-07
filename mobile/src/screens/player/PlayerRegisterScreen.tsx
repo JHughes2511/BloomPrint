@@ -213,6 +213,10 @@ export default function PlayerRegisterScreen() {
         <TouchableOpacity onPress={() => navigation.navigate('PlayerLogin')}>
           <Text style={styles.toggle}>Already have an account? Sign In</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('RoleSelect')}>
+          <Text style={styles.backText}>← Back to Role Select</Text>
+        </TouchableOpacity>
       </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
     </ScreenBackground>
@@ -251,6 +255,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   btnText: { color: '#fff', fontFamily: fonts[700], fontSize: 16 },
   toggle: { color: t.positive, marginTop: 20, fontSize: 13 },
+  backBtn: { marginTop: 32 },
+  backText: { color: t.muted2, fontSize: 12 },
   section: { marginBottom: 24 },
   sectionTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[700], marginBottom: 4 },
   sectionDesc: { color: t.muted, fontSize: 12, marginBottom: 12 },

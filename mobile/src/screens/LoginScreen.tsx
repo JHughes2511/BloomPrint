@@ -234,10 +234,12 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('RoleSelect')}>
-          <Ionicons name="chevron-back" size={18} color={t.muted} />
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
+        {mode === 'register' && (
+          <TouchableOpacity style={styles.backBtn} onPress={() => setMode('login')}>
+            <Ionicons name="chevron-back" size={18} color={t.muted} />
+            <Text style={styles.backText}>Back</Text>
+          </TouchableOpacity>
+        )}
 
         <Text style={styles.logo}>BloomPrint</Text>
         <Text style={styles.sub}>Coach · Scout · Trainer</Text>
@@ -330,6 +332,12 @@ export default function LoginScreen() {
             {mode === 'login' ? "Don't have an account? Register" : 'Already have an account? Sign In'}
           </Text>
         </TouchableOpacity>
+
+        {mode === 'login' && (
+          <TouchableOpacity style={styles.roleSelectBtn} onPress={() => navigation.navigate('RoleSelect')}>
+            <Text style={styles.roleSelectText}>← Back to Role Select</Text>
+          </TouchableOpacity>
+        )}
       </KeyboardAwareScrollView>
 
       <PickerModal
@@ -406,6 +414,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   btnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 16 },
   toggle: { color: t.muted, marginTop: 20, fontSize: 13 },
+  roleSelectBtn: { marginTop: 32 },
+  roleSelectText: { color: t.muted2, fontSize: 12 },
   pickerBtn: {
     width: '100%', backgroundColor: t.card, borderRadius: 10, padding: 14,
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
