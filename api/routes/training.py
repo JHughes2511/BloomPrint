@@ -102,9 +102,11 @@ def build_player_training_prompt(player_name: str, original_text: str, feedback:
         prompt += f"PLAYER FEEDBACK TO INCORPORATE:\n{feedback}\n\n"
     prompt += (
         "Create a detailed, actionable training program with specific drills, focus areas, and a weekly "
-        "structure, preserving the coach's priorities and intent. Format with clear sections, headers, and "
-        "tables where useful. Include a weekly plan broken out by day of the week (e.g. MONDAY, TUESDAY, "
-        "WEDNESDAY, ...) so each day's focus and drills can be tracked as a checklist."
+        "structure, preserving the coach's priorities and intent. Do NOT use ## headers or ** bold markers; "
+        "use plain ALL-CAPS section titles. Include a weekly plan broken out by day of the week (e.g. MONDAY, "
+        "TUESDAY, WEDNESDAY, ...); put each day's title on its own line and list every drill/focus item under "
+        "it as its own bullet starting with '- '. In any checkpoint or weakness list, put a blank line between "
+        "each entry so items read as separate points and never run together."
     )
     return prompt
 
@@ -234,7 +236,11 @@ async def generate_training(
     prompt += (
         "\n\nIMPORTANT FORMATTING: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
         f"Always refer to the player by their name ({player.name}), not as 'the player' or a jersey number. "
-        "Use plain section titles in ALL CAPS followed by a colon and newline."
+        "Use plain section titles in ALL CAPS followed by a colon and newline. "
+        "Under each day of the WEEKLY SESSION PLAN, list every session item as its own "
+        "bullet line starting with '- '. In CORRECTABLE WEAKNESSES BEING ADDRESSED and "
+        "PROGRESS CHECKPOINTS, put a blank line between each entry so items read as "
+        "separate points and never run together."
     )
 
     # If the coach attached an image/PDF, send it as content blocks alongside text.

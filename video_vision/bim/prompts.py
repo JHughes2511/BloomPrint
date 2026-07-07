@@ -249,21 +249,33 @@ PLAYER / GROUP PROFILE FROM FILM
   Age tier | Level | Strengths to build on | Weaknesses to develop
 
 WEEKLY SESSION PLAN
-  Day 1–5: [session title]
-    · Ball handling block (25–30 min): [specific drills mapped to what film revealed]
-    · Shooting clinic: [form, footwork, or game-shot focus based on film]
-    · 5v5 / Live reads: [concept or scheme to reinforce]
+(For each day, put the day title on its own line, then list every session item
+as its own bullet starting with "- ".)
+
+Day 1–5: [session title]
+- Ball handling block (25–30 min): [specific drills mapped to what film revealed]
+- Shooting clinic: [form, footwork, or game-shot focus based on film]
+- 5v5 / Live reads: [concept or scheme to reinforce]
 
 KPI TARGETS
-  [List 3–5 KPIs this program is designed to move, with target direction: ↑ or ↓]
+- [KPI with target direction: ↑ or ↓]
+- [KPI with target direction: ↑ or ↓]
 
 CORRECTABLE WEAKNESSES BEING ADDRESSED
-  [Link each drill block to a specific correctable weakness from film]
+(One bullet per weakness, with a BLANK LINE between each so they don't run together.)
+
+- [Weakness from film → the drill block that addresses it]
+
+- [Weakness from film → the drill block that addresses it]
 
 PROGRESS CHECKPOINTS
-  2-week: [what should be measurably different]
-  4-week: [next milestone]
-  8-week: [program completion standard]"""
+(Put a BLANK LINE between each checkpoint so they read as separate milestones.)
+
+2-week: [what should be measurably different]
+
+4-week: [next milestone]
+
+8-week: [program completion standard]"""
 
 
 def recruitment_profile(program: str, level: str, coach_weight: int, player_name: str) -> str:

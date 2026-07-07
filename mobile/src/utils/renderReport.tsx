@@ -8,11 +8,13 @@ import { fonts } from '../theme/typography';
  *
  * Rules:
  *  - Lines that are ALL CAPS, or short (<60 chars) lines ending with ':'
- *    are rendered as bold header text (fontWeight:'bold', fontSize:15)
- *  - Leading "- " becomes "• "
+ *    are rendered as bold header text
+ *  - "Day N" lines render as sub-headers so day blocks stand apart
+ *  - Leading "- ", "*", "·", "•", "▪", "◦", "–" become proper bullets with a
+ *    hanging indent
  *  - All markdown syntax (##, **, ---, ===, ———, etc.) is stripped
  *  - Blank lines become a small spacer View
- *  - All other lines render as normal body text (fontSize:14, lineHeight:22)
+ *  - Body/bullet lines get breathing room so items don't run together
  */
 export function renderReport(
   text: string,
@@ -22,12 +24,10 @@ export function renderReport(
 
   const lines = text
     .split('\n')
-    // Strip all markdown syntax characters from each line; remember which lines
-    // were explicit markdown headings (## ...) so they still render as headings.
     .map(line => {
       // Drop pure divider lines
-      if (/^\s*[-=—─]{3,}\s*$/.test(line)) return { text: '', mdHeading: false };
-      if (/^\s*={3,}\s*$/.test(line)) return { text: '', mdHeading: false };
+      if (/^\s*[-=—─]{3,}\s*$/.test(line)) return { text: '', bullet: false, mdHeading: false };
+      if (/^\s*={3,}\s*$/.test(line)) return { text: '', bullet: false, mdHeading: false };
       const mdHeading = /^#{1,6}\s/.test(line);
       // Strip leading ##+ headings
       line = line.replace(/^#{1,6}\s*/, '');
@@ -39,11 +39,15 @@ export function renderReport(
       line = line.replace(/_([^_]+)_/g, '$1');
       // Strip `code` markers
       line = line.replace(/`([^`]*)`/g, '$1');
-      // Strip trailing/leading === or --- dividers embedded in text
-      line = line.replace(/^[-=—─]+\s*/, '').replace(/\s*[-=—─]+$/, '');
-      // Convert leading "- " bullets to "• "
-      line = line.replace(/^\s*[-*]\s+/, '• ');
-      return { text: line, mdHeading };
+      // Detect a leading bullet marker (dash, asterisk, middot, bullet, etc.)
+      const bullet = /^\s*[-*·•▪◦–]\s+/.test(line);
+      if (bullet) {
+        line = line.replace(/^\s*[-*·•▪◦–]\s+/, '');
+      } else {
+        // Strip trailing/leading === or --- dividers embedded in text
+        line = line.replace(/^[-=—─]+\s*/, '').replace(/\s*[-=—─]+$/, '');
+      }
+      return { text: line, bullet, mdHeading };
     });
 
   const elements: React.ReactElement[] = [];
@@ -55,40 +59,53 @@ export function renderReport(
 
     if (trimmed === '') {
       consecutiveBlanks++;
-      // Only render one spacer per blank-line group
       if (consecutiveBlanks === 1) {
-        elements.push(<View key={`spacer-${index}`} style={{ height: 8 }} />);
+        elements.push(<View key={`spacer-${index}`} style={{ height: 9 }} />);
       }
       return;
     }
 
     consecutiveBlanks = 0;
 
-    // Detect header lines:
-    //   1. Explicit markdown heading (## ...)
-    //   2. ALL CAPS line (may end with ':')
-    //   3. Short line (<60 chars) that ends with ':'
     const isAllCaps = /^[A-Z][A-Z0-9\s/&\-().,':]+$/.test(trimmed);
     const isShortHeader = trimmed.length < 60 && trimmed.endsWith(':');
+    const isDay = /^day\s|^days\s|^week\s\d/i.test(trimmed);
 
-    if (entry.mdHeading || isAllCaps || isShortHeader) {
-      // Underlined, larger, well-spaced headings so sections read as distinct
-      // blocks instead of one continuous wall of text.
+    if (!entry.bullet && (entry.mdHeading || isAllCaps || isShortHeader)) {
+      // Section headings — underlined, larger, well-spaced.
       elements.push(
         <View
           key={`line-${index}`}
-          style={{ marginTop: 18, marginBottom: 7, borderBottomWidth: 1, borderBottomColor: colors.heading, paddingBottom: 4, alignSelf: 'flex-start' }}
+          style={{ marginTop: 18, marginBottom: 8, borderBottomWidth: 1, borderBottomColor: colors.heading, paddingBottom: 4, alignSelf: 'flex-start' }}
         >
           <Text style={{ fontFamily: fonts[800], fontSize: 16.5, letterSpacing: 0.2, color: colors.heading }}>
             {trimmed}
           </Text>
         </View>
       );
+    } else if (!entry.bullet && isDay) {
+      // Day / week sub-headers so each day block reads as its own group.
+      elements.push(
+        <Text
+          key={`line-${index}`}
+          style={{ fontFamily: fonts[700], fontSize: 14.5, color: colors.heading, marginTop: 12, marginBottom: 5 }}
+        >
+          {trimmed}
+        </Text>
+      );
+    } else if (entry.bullet) {
+      // Bulleted item with a hanging indent.
+      elements.push(
+        <View key={`line-${index}`} style={{ flexDirection: 'row', marginBottom: 7, paddingLeft: 6 }}>
+          <Text style={{ fontSize: 14.5, lineHeight: 23, color: colors.body, marginRight: 8 }}>•</Text>
+          <Text style={{ fontSize: 14.5, lineHeight: 23, color: colors.body, flex: 1 }}>{trimmed}</Text>
+        </View>
+      );
     } else {
       elements.push(
         <Text
           key={`line-${index}`}
-          style={{ fontSize: 14.5, lineHeight: 23, color: colors.body, marginBottom: 2 }}
+          style={{ fontSize: 14.5, lineHeight: 23, color: colors.body, marginBottom: 7 }}
         >
           {line}
         </Text>

@@ -120,8 +120,8 @@ export default function TrainingScreen() {
             : <><Ionicons name="barbell" size={16} color={t.ctaText} /><Text style={styles.generateText}>  Generate Program</Text></>
           }
         </TouchableOpacity>
+        <GeneratingOverlay visible={generating} label="Building the training program…" />
       </View>
-      <GeneratingOverlay visible={generating} label="Building the training program…" />
 
       {/* Priority stack */}
       {current?.priorities && current.priorities.length > 0 && (
