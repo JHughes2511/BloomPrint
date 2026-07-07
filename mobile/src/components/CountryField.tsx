@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Modal, FlatList, TextInput, SafeAreaView,
+  KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeProvider';
@@ -43,7 +44,10 @@ export default function CountryField({
       </TouchableOpacity>
 
       <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
-        <View style={s.overlay}>
+        <KeyboardAvoidingView
+          style={s.overlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
           <SafeAreaView style={s.sheet}>
             <View style={s.header}>
               <Text style={s.title}>Select Country</Text>
@@ -58,11 +62,14 @@ export default function CountryField({
               value={search}
               onChangeText={setSearch}
               autoCorrect={false}
+              autoFocus
             />
             <FlatList
+              style={{ flex: 1 }}
               data={filtered}
               keyExtractor={item => item}
               keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="none"
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={[s.option, value === item && s.optionActive]}
@@ -76,7 +83,7 @@ export default function CountryField({
               )}
             />
           </SafeAreaView>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </>
   );
@@ -96,7 +103,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   sheet: {
     backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    maxHeight: '80%', paddingBottom: 20,
+    height: '75%', paddingBottom: 12,
   },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
