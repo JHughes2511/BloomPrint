@@ -29,19 +29,31 @@ def focus_directive(text: str | None) -> str:
 
 def system_profile_block(coach) -> str:
     """Return a PROGRAM SYSTEM & PHILOSOPHY block for the prompt, or "" if the
-    coach hasn't filled anything in."""
+    coach hasn't filled anything in. Includes any imported philosophy reference
+    material so the model keeps it in mind on every generation."""
     profile = getattr(coach, "system_profile", None)
-    if not isinstance(profile, dict):
-        return ""
     lines = []
-    for key, label in SYSTEM_PROFILE_FIELDS:
-        val = (profile.get(key) or "").strip()
-        if val:
-            lines.append(f"- {label}: {val[:600]}")
-    if not lines:
-        return ""
-    return (
-        "\n\nPROGRAM SYSTEM & PHILOSOPHY (evaluate through this lens — frame "
-        "strengths, weaknesses, and especially FIT for THIS program's system):\n"
-        + "\n".join(lines)
-    )
+    if isinstance(profile, dict):
+        for key, label in SYSTEM_PROFILE_FIELDS:
+            val = (profile.get(key) or "").strip()
+            if val:
+                lines.append(f"- {label}: {val[:600]}")
+
+    block = ""
+    if lines:
+        block += (
+            "\n\nPROGRAM SYSTEM & PHILOSOPHY (evaluate through this lens — frame "
+            "strengths, weaknesses, and especially FIT for THIS program's system):\n"
+            + "\n".join(lines)
+        )
+
+    reference = (getattr(coach, "philosophy_reference", None) or "").strip()
+    if reference:
+        block += (
+            "\n\nCOACH-PROVIDED PHILOSOPHY REFERENCE (imported material — treat as "
+            "authoritative context for how THIS program plays, develops, and "
+            "recruits):\n"
+            + reference[:4000]
+        )
+
+    return block

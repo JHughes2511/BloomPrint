@@ -54,6 +54,11 @@ def _run_migrations():
                 "ALTER TABLE coaches ADD COLUMN system_profile TEXT"
             ))
             conn.commit()
+        if "philosophy_reference" not in coach_cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE coaches ADD COLUMN philosophy_reference TEXT"
+            ))
+            conn.commit()
 
         # Add conference and competition_level to coaches if missing
         if "conference" not in coach_cols:

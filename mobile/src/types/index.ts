@@ -17,6 +17,7 @@ export interface Coach {
   competition_level?: string | null;
   conference?: string | null;
   system_profile?: Record<string, string> | null;
+  philosophy_reference?: string | null;
   created_at: string;
 }
 

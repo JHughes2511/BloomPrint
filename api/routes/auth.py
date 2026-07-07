@@ -1,8 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import json
+import os
+import re
+
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from ..database import get_db
 from .. import models, schemas
 from ..auth import hash_password, verify_password, create_token, get_current_coach
+from ..coach_context import SYSTEM_PROFILE_FIELDS
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -76,6 +81,97 @@ def update_me(
     # Recompute BIM authority weight if the competition level/conference changed.
     if "competition_level" in data and coach.competition_level:
         coach.weight = _auto_weight(coach.competition_level, coach.conference)
+    db.commit()
+    db.refresh(coach)
+    return coach
+
+
+def _extract_json_object(text: str) -> dict:
+    """Best-effort: pull the first {...} JSON object out of a model response."""
+    text = (text or "").strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```[a-zA-Z]*\n?", "", text).rstrip("`").strip()
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+    m = re.search(r"\{.*\}", text, re.DOTALL)
+    if m:
+        try:
+            return json.loads(m.group(0))
+        except Exception:
+            return {}
+    return {}
+
+
+@router.post("/philosophy/import", response_model=schemas.CoachOut)
+def import_philosophy(
+    file: UploadFile = File(...),
+    coach: models.Coach = Depends(get_current_coach),
+    db: Session = Depends(get_db),
+):
+    """Parse an uploaded coaching-philosophy document: extract details into the
+    six philosophy fields (APPENDED to whatever is already there) and keep the
+    document, distilled to text, as a standing reference fed to the model on
+    every future generation."""
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(status_code=400, detail="AI is not configured on this server (missing ANTHROPIC_API_KEY).")
+
+    # Reuse the training reference extractor (text for docs, media blocks for PDF/images).
+    from .training import _extract_reference
+    ref_text, ref_media = _extract_reference(file)
+    if not ref_text and not ref_media:
+        raise HTTPException(status_code=400, detail="Could not read any content from that file.")
+
+    field_keys = [k for k, _ in SYSTEM_PROFILE_FIELDS]
+    labels = "\n".join(f"  - {k}: {label}" for k, label in SYSTEM_PROFILE_FIELDS)
+    instruction = (
+        "You are extracting a basketball coach's PROGRAM PHILOSOPHY from the attached document. "
+        "Return ONLY a strict JSON object (no prose, no markdown) with these keys:\n"
+        f"{labels}\n"
+        "  - reference_summary: string\n\n"
+        "For each of the six category keys, pull the details from the document that belong in THAT "
+        "category, written as clear notes (empty string if the document says nothing about it). "
+        "reference_summary = a thorough plain-text digest of this program's systems, terminology, "
+        "development approach, and priorities that should remain available to the model as ongoing "
+        "reference. Output ONLY the JSON object."
+    )
+
+    content: list[dict] = [{"type": "text", "text": instruction}]
+    if ref_text:
+        content.append({"type": "text", "text": f"DOCUMENT CONTENT:\n{ref_text}"})
+    content.extend(ref_media)
+
+    import anthropic
+    client = anthropic.Anthropic()
+    resp = client.messages.create(
+        model="claude-opus-4-7",
+        max_tokens=2000,
+        messages=[{"role": "user", "content": content}],
+    )
+    raw = "".join(getattr(b, "text", "") for b in resp.content)
+    parsed = _extract_json_object(raw)
+    if not parsed:
+        raise HTTPException(status_code=502, detail="Could not parse the philosophy from that document. Try a clearer file.")
+
+    # APPEND extracted category details to the existing profile.
+    profile = dict(coach.system_profile) if isinstance(coach.system_profile, dict) else {}
+    for key in field_keys:
+        val = (parsed.get(key) or "").strip()
+        if not val:
+            continue
+        existing = (profile.get(key) or "").strip()
+        profile[key] = f"{existing}\n{val}".strip() if existing else val
+    coach.system_profile = profile
+
+    # APPEND the distilled document to the standing philosophy reference.
+    summary = (parsed.get("reference_summary") or ref_text or "").strip()
+    if summary:
+        fname = file.filename or "imported document"
+        block = f"[Imported from {fname}]\n{summary}"
+        existing_ref = (coach.philosophy_reference or "").strip()
+        coach.philosophy_reference = f"{existing_ref}\n\n{block}".strip() if existing_ref else block
+
     db.commit()
     db.refresh(coach)
     return coach

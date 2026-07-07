@@ -44,6 +44,7 @@ class CoachOut(BaseModel):
     conference: str | None = None
     competition_level: str | None = None
     system_profile: dict | None = None
+    philosophy_reference: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

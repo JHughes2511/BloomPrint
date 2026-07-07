@@ -26,6 +26,12 @@ export const authAPI = {
     competition_level?: string; conference?: string;
     system_profile?: Record<string, string>;
   }) => api.patch('/auth/me', data).then(r => r.data),
+
+  importPhilosophy: (formData: FormData) =>
+    api.post('/auth/philosophy/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000,
+    }).then(r => r.data),
 };
 
 // ── Players ───────────────────────────────────────────────────────────────────

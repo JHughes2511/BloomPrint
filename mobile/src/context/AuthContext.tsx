@@ -10,6 +10,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (data: { name: string; email: string; password: string; weight?: number; program_name?: string; role?: string }) => Promise<void>;
   updateProfile: (data: { name?: string; role?: string; program_name?: string; competition_level?: string; conference?: string; system_profile?: Record<string, string> }) => Promise<void>;
+  importPhilosophy: (formData: FormData) => Promise<Coach>;
   logout: () => Promise<void>;
 }
 
@@ -55,6 +56,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setCoach(updated);
   };
 
+  const importPhilosophy = async (formData: FormData) => {
+    const updated = await authAPI.importPhilosophy(formData);
+    setCoach(updated);
+    return updated;
+  };
+
   const logout = async () => {
     await SecureStore.deleteItemAsync('auth_token');
     setToken(null);
@@ -62,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ coach, token, loading, login, register, updateProfile, logout }}>
+    <AuthContext.Provider value={{ coach, token, loading, login, register, updateProfile, importPhilosophy, logout }}>
       {children}
     </AuthContext.Provider>
   );

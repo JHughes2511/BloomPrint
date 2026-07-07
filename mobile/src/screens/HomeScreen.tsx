@@ -2,12 +2,14 @@ import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator } from 'react-native';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import * as DocumentPicker from 'expo-document-picker';
 import { useAuth } from '../context/AuthContext';
 import { playerAPI } from '../api/client';
 import { useTheme } from '../theme/ThemeProvider';
 import { ScreenBackground, SectionLabel, Card, IconTile, Txt } from '../theme/components';
 import { Icon, IconName } from '../theme/icons';
 import { fonts, type as typeScale } from '../theme/typography';
+import { GeneratingOverlay } from '../components/GeneratingBasketball';
 
 // Which bottom tab each report type routes to when tapped on the Home page.
 //   RosterTab   = Roster      TeamTab = Team Eval      TeamEvalTab = Team Grade
@@ -57,7 +59,7 @@ const PILLARS: { key: string; label: string; icon: IconName; desc: string }[] = 
 const ROLES = ['coach', 'scout', 'trainer'];
 
 export default function HomeScreen() {
-  const { coach, logout, updateProfile } = useAuth();
+  const { coach, logout, updateProfile, importPhilosophy } = useAuth();
   const navigation = useNavigation<any>();
   const { t, mode, toggle } = useTheme();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -73,6 +75,35 @@ export default function HomeScreen() {
   const [showSystem, setShowSystem] = useState(false);
   const [sys, setSys] = useState<Record<string, string>>({});
   const [savingSystem, setSavingSystem] = useState(false);
+  const [importingPhilosophy, setImportingPhilosophy] = useState(false);
+
+  const importPhilosophyDoc = async () => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf', 'image/*',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'text/*', 'text/csv'],
+        copyToCacheDirectory: true,
+      });
+      if (res.canceled || !res.assets?.[0]) return;
+      const a = res.assets[0];
+      const form = new FormData();
+      form.append('file', {
+        uri: a.uri,
+        name: a.name ?? 'philosophy',
+        type: a.mimeType ?? 'application/octet-stream',
+      } as any);
+      setImportingPhilosophy(true);
+      const updated = await importPhilosophy(form);
+      setSys({ ...(updated.system_profile ?? {}) });
+      Alert.alert('Imported', 'Your philosophy fields were updated and the document is now kept as a standing reference for the AI. Review below, then Save.');
+    } catch (e: any) {
+      Alert.alert('Import failed', e?.response?.data?.detail ?? 'Could not import that document.');
+    } finally {
+      setImportingPhilosophy(false);
+    }
+  };
 
   const openProfile = () => {
     setPName(coach?.name ?? '');
@@ -288,10 +319,36 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
             <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingTop: 4, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
-              <Text style={{ color: t.muted, fontSize: 13, lineHeight: 19, marginBottom: 16 }}>
+              <Text style={{ color: t.muted, fontSize: 13, lineHeight: 19, marginBottom: 14 }}>
                 Describe your program's system and what you value. The AI keeps this in mind on every report,
                 framing players as fit for the way YOU play. Fill in what's relevant — leave the rest blank.
               </Text>
+
+              {/* Import philosophy document */}
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.accentSoft, borderRadius: 12, padding: 13, marginBottom: 8 }}
+                onPress={importPhilosophyDoc}
+                disabled={importingPhilosophy}
+              >
+                <Icon name="upload" size={16} color={t.accent} strokeWidth={2} />
+                <Text style={{ color: t.accent, fontFamily: fonts[700], fontSize: 12.5, flex: 1 }}>
+                  Import philosophy document (PDF, Word, image, text)
+                </Text>
+              </TouchableOpacity>
+              <Text style={{ color: t.muted2, fontSize: 11.5, lineHeight: 16, marginBottom: 10 }}>
+                The AI reads it, adds the details to the fields below, and keeps the document as a standing
+                reference on every future report.
+              </Text>
+              {!!coach?.philosophy_reference && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 14 }}>
+                  <Icon name="check-circle" size={14} color={t.positive} strokeWidth={2} />
+                  <Text style={{ color: t.positive, fontSize: 12, fontFamily: fonts[600] }}>
+                    Reference document on file for the AI
+                  </Text>
+                </View>
+              )}
+              <GeneratingOverlay visible={importingPhilosophy} label="Reading your philosophy document…" />
+
               {SYSTEM_FIELDS.map(f => (
                 <View key={f.key} style={{ marginBottom: 16 }}>
                   <Text style={[typeScale.label, { color: t.label, marginBottom: 6 }]}>{f.label}</Text>

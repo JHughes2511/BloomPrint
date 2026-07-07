@@ -25,6 +25,9 @@ class Coach(Base):
     # Program system & philosophy — free-text per category. Injected into every
     # report so evaluations are framed as fit-for-this-program.
     system_profile    = Column(JSON, nullable=True)
+    # Imported philosophy documents, distilled to text and kept as a standing
+    # reference that is fed to the model on every generation.
+    philosophy_reference = Column(String, nullable=True)
     created_at        = Column(DateTime, default=datetime.utcnow)
 
     evaluations         = relationship("Evaluation", back_populates="coach")
