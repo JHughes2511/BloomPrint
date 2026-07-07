@@ -19,19 +19,19 @@ export function parseGenProgress(label?: string): number | undefined {
 }
 
 // Real-basketball palette (theme-independent — a basketball is orange everywhere).
-const RIM_DARK   = '#8A3B12';  // outer edge / deepest tone
-const BALL_DARK  = '#C25311';  // liquid bottom
-const BALL_MID   = '#E2721E';  // liquid mid
-const BALL_LIGHT = '#F6A24A';  // liquid top / highlight
-const EMPTY_TOP  = '#F0D9C6';  // unfilled upper tint
-const EMPTY_BOT  = '#E4C1A6';  // unfilled lower tint
-const SEAM       = '#5E3016';  // seam brown
+const SEAM      = '#1C1109';  // near-black seam
+const LIQ_TOP   = '#F0A050';  // filled: highlight
+const LIQ_MID   = '#D66E1D';  // filled: mid
+const LIQ_BOT   = '#A94A11';  // filled: deep
+const EMPTY_TOP = '#B07C52';  // unfilled: muted upper
+const EMPTY_BOT = '#8A5C38';  // unfilled: muted lower
 
 /**
  * A realistic basketball that fills with liquid as an AI action runs. Pass
  * `realProgress` (0-100) when you have a genuine signal (e.g. film "segment 3
- * of 8"); otherwise it eases up a time curve toward ~92% and holds until the
- * action completes. When `done` is true it fills to 100%.
+ * of 8"); otherwise it eases up a time curve and keeps creeping toward 99%
+ * (never stalling) until the action completes. When `done` is true it fills
+ * to 100%.
  */
 export default function GeneratingBasketball({
   size = 96,
@@ -53,10 +53,14 @@ export default function GeneratingBasketball({
     return () => fill.removeListener(id);
   }, [fill]);
 
-  // Slow ease toward 92% while running (only when there's no real signal).
+  // Estimated curve when there's no real signal: quick to ~55%, then a slow
+  // continuous crawl toward 99% so it never appears frozen at one number.
   useEffect(() => {
     if (realProgress == null && !done) {
-      Animated.timing(fill, { toValue: 0.92, duration: 22000, easing: Easing.out(Easing.cubic), useNativeDriver: false }).start();
+      Animated.sequence([
+        Animated.timing(fill, { toValue: 0.55, duration: 5000, easing: Easing.out(Easing.quad), useNativeDriver: false }),
+        Animated.timing(fill, { toValue: 0.99, duration: 90000, easing: Easing.linear, useNativeDriver: false }),
+      ]).start();
     }
   }, []);
 
@@ -73,14 +77,13 @@ export default function GeneratingBasketball({
 
   const S = size;
   const cx = S / 2, cy = S / 2, R = S / 2 - 3;
-  const sw = Math.max(1.4, S / 60); // seam stroke scales with size
+  const sw = Math.max(2, S / 26); // seam stroke scales with size
   const pct = Math.round(level * 100);
 
   // Liquid surface Y: bottom (cy+R) at 0, top (cy-R) at 1.
   const surfaceY = (cy + R) - 2 * R * level;
   const amp = Math.max(2, S / 34); // wave amplitude
   const w = S;
-  // Wavy meniscus + body down to the bottom of the ball.
   const liquidPath =
     `M ${-w * 0.1} ${surfaceY} ` +
     `Q ${w * 0.2} ${surfaceY - amp} ${w * 0.45} ${surfaceY} ` +
@@ -88,28 +91,42 @@ export default function GeneratingBasketball({
     `T ${w * 1.1} ${surfaceY} ` +
     `L ${w * 1.1} ${S + 2} L ${-w * 0.1} ${S + 2} Z`;
 
+  // Classic basketball seams: vertical meridian, horizontal meridian, and two
+  // curved side seams — drawn thick and dark like a real ball.
+  const vSeam = `M ${cx} ${cy - R} L ${cx} ${cy + R}`;
+  const hSeam = `M ${cx - R} ${cy} L ${cx + R} ${cy}`;
+  const leftSeam  = `M ${cx} ${cy - R} Q ${cx - R * 1.05} ${cy} ${cx} ${cy + R}`;
+  const rightSeam = `M ${cx} ${cy - R} Q ${cx + R * 1.05} ${cy} ${cx} ${cy + R}`;
+
   return (
     <View style={{ alignItems: 'center', gap: 10 }}>
       <Svg width={S} height={S * 1.06}>
         <Defs>
           <ClipPath id="ballClip"><Circle cx={cx} cy={cy} r={R} /></ClipPath>
-          <RadialGradient id="emptyGrad" cx="38%" cy="32%" r="80%">
+          <RadialGradient id="emptyGrad" cx="42%" cy="36%" r="75%">
             <Stop offset="0" stopColor={EMPTY_TOP} />
             <Stop offset="1" stopColor={EMPTY_BOT} />
           </RadialGradient>
           <LinearGradient id="liquidGrad" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor={BALL_LIGHT} />
-            <Stop offset="0.55" stopColor={BALL_MID} />
-            <Stop offset="1" stopColor={BALL_DARK} />
+            <Stop offset="0" stopColor={LIQ_TOP} />
+            <Stop offset="0.5" stopColor={LIQ_MID} />
+            <Stop offset="1" stopColor={LIQ_BOT} />
           </LinearGradient>
-          <RadialGradient id="sheen" cx="35%" cy="28%" r="55%">
-            <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0.55} />
+          {/* edge vignette gives the round, spherical look of a real ball */}
+          <RadialGradient id="vign" cx="42%" cy="36%" r="65%">
+            <Stop offset="0" stopColor="#000000" stopOpacity={0} />
+            <Stop offset="0.72" stopColor="#000000" stopOpacity={0} />
+            <Stop offset="1" stopColor="#3A1704" stopOpacity={0.55} />
+          </RadialGradient>
+          {/* subtle matte highlight, top-left */}
+          <RadialGradient id="sheen" cx="36%" cy="26%" r="42%">
+            <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0.22} />
             <Stop offset="1" stopColor="#FFFFFF" stopOpacity={0} />
           </RadialGradient>
         </Defs>
 
         {/* soft contact shadow */}
-        <Ellipse cx={cx} cy={S + 1} rx={R * 0.72} ry={Math.max(2, S / 26)} fill="#000000" opacity={0.14} />
+        <Ellipse cx={cx} cy={S + 1} rx={R * 0.72} ry={Math.max(2, S / 26)} fill="#000000" opacity={0.16} />
 
         {/* empty ball body */}
         <Circle cx={cx} cy={cy} r={R} fill="url(#emptyGrad)" />
@@ -117,29 +134,28 @@ export default function GeneratingBasketball({
         {/* rising liquid, clipped to the ball */}
         <G clipPath="url(#ballClip)">
           <Path d={liquidPath} fill="url(#liquidGrad)" />
-          {/* bright meniscus line on the liquid surface */}
           {level > 0.02 && level < 0.99 && (
             <Path
               d={`M ${-w * 0.1} ${surfaceY} Q ${w * 0.2} ${surfaceY - amp} ${w * 0.45} ${surfaceY} T ${w * 0.95} ${surfaceY} T ${w * 1.1} ${surfaceY}`}
-              fill="none" stroke={BALL_LIGHT} strokeWidth={sw} opacity={0.9}
+              fill="none" stroke={LIQ_TOP} strokeWidth={sw * 0.8} opacity={0.85}
             />
           )}
         </G>
 
-        {/* specular sheen over the whole ball */}
+        {/* spherical shading + subtle highlight */}
+        <Circle cx={cx} cy={cy} r={R} fill="url(#vign)" />
         <Circle cx={cx} cy={cy} r={R} fill="url(#sheen)" />
 
         {/* seams on top */}
-        <G>
-          <Circle cx={cx} cy={cy} r={R} fill="none" stroke={SEAM} strokeWidth={sw} />
-          <Line x1={cx} y1={cy - R} x2={cx} y2={cy + R} stroke={SEAM} strokeWidth={sw} />
-          <Line x1={cx - R} y1={cy} x2={cx + R} y2={cy} stroke={SEAM} strokeWidth={sw} />
-          <Path d={`M ${cx} ${cy - R} Q ${cx - R * 0.95} ${cy} ${cx} ${cy + R}`} fill="none" stroke={SEAM} strokeWidth={sw} />
-          <Path d={`M ${cx} ${cy - R} Q ${cx + R * 0.95} ${cy} ${cx} ${cy + R}`} fill="none" stroke={SEAM} strokeWidth={sw} />
+        <G clipPath="url(#ballClip)">
+          <Path d={vSeam} fill="none" stroke={SEAM} strokeWidth={sw} strokeLinecap="round" />
+          <Path d={hSeam} fill="none" stroke={SEAM} strokeWidth={sw} strokeLinecap="round" />
+          <Path d={leftSeam} fill="none" stroke={SEAM} strokeWidth={sw} strokeLinecap="round" />
+          <Path d={rightSeam} fill="none" stroke={SEAM} strokeWidth={sw} strokeLinecap="round" />
         </G>
 
-        {/* thin dark rim for depth */}
-        <Circle cx={cx} cy={cy} r={R} fill="none" stroke={RIM_DARK} strokeWidth={sw * 0.7} opacity={0.5} />
+        {/* crisp outline */}
+        <Circle cx={cx} cy={cy} r={R} fill="none" stroke={SEAM} strokeWidth={sw * 0.9} />
       </Svg>
       <Text style={{ color: t.ink, fontSize: Math.max(16, S * 0.19), fontFamily: fonts[900] }}>{pct}%</Text>
       {!!label && <Text style={{ color: t.muted, fontSize: 12.5, textAlign: 'center', paddingHorizontal: 20 }}>{label}</Text>}
