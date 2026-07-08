@@ -1208,7 +1208,7 @@ Return exactly this shape. Output play_name and the FULL key array FIRST, then t
   "play_name": "short name",
   "key": [{"n": 1, "text": "concise coaching suggestion", "from": [x, y], "to": [x, y]}],
   "schemes": {
-    "offense": {"players": [{"id": "O1", "x": 25, "y": 80}], "defenders": [{"id": "X1", "x": 25, "y": 76}], "actions": [{"actor": "O2", "kind": "cut|screen|pass|dribble", "from": [25, 80], "to": [30, 70], "step": 1}]},
+    "offense": {"players": [{"id": "O1", "x": 25, "y": 80, "role": "what O1 does in this scheme"}], "defenders": [{"id": "X1", "x": 25, "y": 76, "role": "what X1 does in this scheme"}], "actions": [{"actor": "O2", "kind": "cut|screen|pass|dribble", "from": [25, 80], "to": [30, 70], "step": 1}]},
     "defense": { same shape },
     "counter": { same shape }
   }
@@ -1217,6 +1217,10 @@ Return exactly this shape. Output play_name and the FULL key array FIRST, then t
 ACTOR: every action has an "actor" = the id of the player or defender who makes that movement (must match one of the players/defenders ids, e.g. "O2" or "X1"). The action's "from" should be that actor's current position and "to" is where they move. For a "pass", the actor is the passer and "from"/"to" are the ball's path (no one relocates on a pass).
 
 STEPS: every action has a "step" integer (1,2,3,...) marking WHEN it happens as the play develops. Actions that happen at the SAME time share the same step number; actions that happen later get higher step numbers. Order the play realistically (e.g. screen on step 1, cut on step 2, pass on step 3).
+
+ROLE: for EVERY player (O1-O5) AND defender (X1-X5) in EVERY scheme, include a short "role" string (under 120 characters) describing what that player does in that scheme — their action, assignment, or spot. Reflect the scene description and any BY-PLAYER INSTRUCTIONS so the coach can see how you read their words for each player.
+
+BY-PLAYER INSTRUCTIONS: the scene may list per-player intent as O1-O5 (offense) and D1-D5 (defense). D1-D5 are the defenders X1-X5 (D1 = X1 guards O1, D2 = X2 guards O2, and so on). Assign each player/defender to do exactly what its note says, and reflect it in that player's role and movements.
 
 CONSTRAINTS: if the scene lists LOCKED PLAYERS or PER-PLAYER GUIDANCE / PLAYER ADJUSTMENTS, honor them precisely — keep any locked player at the exact coordinates given and reposition (cascade) only the other players to make the play work, and follow each per-player note.
 
@@ -1295,10 +1299,12 @@ async def ai_play(
         out = {"players": [], "defenders": [], "actions": []}
         for i, pl in enumerate((sc.get("players") or [])[:5]):
             out["players"].append({"id": str(pl.get("id") or f"O{i+1}")[:3],
-                                   "x": _pt(pl.get("x"), 2, 48, 25), "y": _pt(pl.get("y"), 48, 92, 80)})
+                                   "x": _pt(pl.get("x"), 2, 48, 25), "y": _pt(pl.get("y"), 48, 92, 80),
+                                   "role": str(pl.get("role") or "")[:200]})
         for i, df in enumerate((sc.get("defenders") or [])[:5]):
             out["defenders"].append({"id": str(df.get("id") or f"X{i+1}")[:3],
-                                     "x": _pt(df.get("x"), 2, 48, 25), "y": _pt(df.get("y"), 48, 92, 74)})
+                                     "x": _pt(df.get("x"), 2, 48, 25), "y": _pt(df.get("y"), 48, 92, 74),
+                                     "role": str(df.get("role") or "")[:200]})
         for idx, a in enumerate((sc.get("actions") or [])[:10]):
             fr, to = a.get("from") or [25, 80], a.get("to") or [25, 70]
             try:

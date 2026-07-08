@@ -47,6 +47,10 @@ interface Stroke {
 
 type SchemeKey = 'offense' | 'defense' | 'counter';
 
+// Defenders are stored as X1..X5 (X1 guards O1) but shown to the coach as
+// D1..D5 so it's clear they're defensive players.
+const dispId = (id: string) => (id && id[0] === 'X' ? 'D' + id.slice(1) : id);
+
 interface Board {
   id?: number;
   name: string;
@@ -59,8 +63,8 @@ interface Board {
     prompt?: string;   // what the coach wrote to generate/refine the play
     attachedTitle?: string; // report attached at generation, if any
     schemes?: Record<string, {
-      players?: { id: string; x: number; y: number }[];
-      defenders?: { id: string; x: number; y: number }[];
+      players?: { id: string; x: number; y: number; role?: string }[];
+      defenders?: { id: string; x: number; y: number; role?: string }[];
       actions?: { actor?: string; kind?: string; from: number[]; to: number[]; step?: number }[];
     }>;
   };
@@ -200,6 +204,11 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const [showRefine, setShowRefine]     = useState(false);
   const [refineText, setRefineText]     = useState('');
   const [refining, setRefining]         = useState(false);
+  // Draw-up "By Player": optional per-position intent (O1-O5 offense, D1-D5
+  // defense) captured BEFORE generating and folded into the prompt.
+  const [aiByPlayer, setAiByPlayer]     = useState(false);
+  const [byPlayerNotes, setByPlayerNotes] = useState<Record<string, string>>({});
+  const byPlayerCount = Object.values(byPlayerNotes).filter(v => v.trim()).length;
   const [activeScheme, setActiveScheme] = useState<SchemeKey>('offense');
   const [showKey, setShowKey]           = useState(true);
   // Court orientation — portrait (default) or landscape for tablets / wide screens.
@@ -292,7 +301,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       });
       (sc.defenders ?? []).forEach((df: any) => {
         out.push({ id: mk(), type: 'xmark', cx: X(df.x), cy: Y(df.y), size: 10, color: '#C0392B', strokeWidth: 3, layer });
-        out.push({ id: mk(), type: 'text', x: X(df.x) + 12, y: Y(df.y) + 5, label: df.id, size: 12, color: '#C0392B', strokeWidth: 1, layer });
+        out.push({ id: mk(), type: 'text', x: X(df.x) + 12, y: Y(df.y) + 5, label: dispId(df.id), size: 12, color: '#C0392B', strokeWidth: 1, layer });
       });
       (sc.actions ?? []).forEach((a: any, i: number) => {
         out.push({ id: mk(), type: 'arrow', x1: X(a.from[0]), y1: Y(a.from[1]), x2: X(a.to[0]), y2: Y(a.to[1]),
@@ -307,12 +316,25 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     return out;
   };
 
+  const buildByPlayerBlock = () => {
+    const off = ['O1', 'O2', 'O3', 'O4', 'O5'].filter(id => (byPlayerNotes[id] || '').trim())
+      .map(id => `- ${id}: ${byPlayerNotes[id].trim()}`);
+    const def = ['D1', 'D2', 'D3', 'D4', 'D5'].filter(id => (byPlayerNotes[id] || '').trim())
+      .map(id => `- ${id}: ${byPlayerNotes[id].trim()}`);
+    const block = [
+      off.length ? `OFFENSE:\n${off.join('\n')}` : '',
+      def.length ? `DEFENSE:\n${def.join('\n')}` : '',
+    ].filter(Boolean).join('\n');
+    return block ? `BY-PLAYER INSTRUCTIONS (assign each player exactly this):\n${block}` : '';
+  };
+
   const generatePlay = async () => {
-    if (!aiDescription.trim() && !attachedReport) return;
+    if (!aiDescription.trim() && !attachedReport && byPlayerCount === 0) return;
     setAiGenerating(true);
     try {
       const composed = [
         aiDescription.trim(),
+        buildByPlayerBlock(),
         attachedReport ? `REPORT (${attachedReport.title}):\n${attachedReport.text.trim().slice(0, 4000)}` : '',
       ].filter(Boolean).join('\n\n');
       const res = await whiteboardAPI.aiPlay(composed);
@@ -332,6 +354,8 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       setShowAI(false);
       setAiDescription('');
       setAttachedReport(null);
+      setByPlayerNotes({});
+      setAiByPlayer(false);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate the play');
     } finally {
@@ -360,6 +384,8 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     };
     setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
     setActiveScheme('offense');
+    // Show the fresh AI per-player detail (drop the coach's local edits, now baked in).
+    setPlayerGuidance({});
     saveBoard(activeBoardIdx, updated);
   };
 
@@ -380,20 +406,28 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
 
   // Apply per-player lock/cascade + guidance, then regenerate. Locked players
   // keep their exact court-feet positions; the AI moves the rest around them.
+  // Units the Players panel controls for the active scheme: offense/counter
+  // control the offensive players; defense controls the defenders (shown D1-D5).
+  const guidanceUnits = () => {
+    const scheme = boards[activeBoardIdx]?.ai?.schemes?.[activeScheme];
+    return (activeScheme === 'defense' ? scheme?.defenders : scheme?.players) ?? [];
+  };
+
   const applyPlayerGuidance = async () => {
     const b = boards[activeBoardIdx];
     const scheme = b?.ai?.schemes?.[activeScheme];
     if (!b?.ai || !scheme) return;
-    const players = scheme.players ?? [];
-    const lockLines = players
+    const units = activeScheme === 'defense' ? (scheme.defenders ?? []) : (scheme.players ?? []);
+    const lockLines = units
       .filter(p => lockedPlayers[p.id])
-      .map(p => `- ${p.id}: LOCKED at court position x=${Math.round(p.x)}, y=${Math.round(p.y)} — keep exactly here, do not move.`);
-    const guideLines = players
-      .filter(p => (playerGuidance[p.id] || '').trim())
-      .map(p => `- ${p.id}: ${playerGuidance[p.id].trim()}`);
-    const openIds = players.filter(p => !lockedPlayers[p.id]).map(p => p.id);
+      .map(p => `- ${dispId(p.id)}: LOCKED at court position x=${Math.round(p.x)}, y=${Math.round(p.y)} — keep exactly here, do not move.`);
+    // Only send fields the coach actually edited (the rest already hold the AI's role).
+    const guideLines = units
+      .filter(p => playerGuidance[p.id] != null && playerGuidance[p.id].trim())
+      .map(p => `- ${dispId(p.id)}: ${playerGuidance[p.id].trim()}`);
+    const openIds = units.filter(p => !lockedPlayers[p.id]).map(p => dispId(p.id));
     if (!lockLines.length && !guideLines.length) {
-      Alert.alert('Nothing to apply', 'Lock a player or add guidance first.');
+      Alert.alert('Nothing to apply', 'Lock a player or edit their detail first.');
       return;
     }
     const constraints = [
@@ -403,7 +437,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     ].filter(Boolean).join('\n\n');
     setApplyingGuidance(true);
     try {
-      await regenerateWith(`PLAYER ADJUSTMENTS:\n${constraints}`, '+ player lock / guidance');
+      await regenerateWith(`PLAYER ADJUSTMENTS (${activeScheme}):\n${constraints}`, '+ player lock / guidance');
       setShowPlayers(false);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update the play');
@@ -863,7 +897,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
              <SvgText x={at.x - 8} y={at.y + 5} fill={OINK} fontSize={13} fontWeight="bold">{m.id}</SvgText></>)
         : (<><Line x1={at.x - 10} y1={at.y - 10} x2={at.x + 10} y2={at.y + 10} stroke={XRED} strokeWidth={3} strokeLinecap="round" />
              <Line x1={at.x + 10} y1={at.y - 10} x2={at.x - 10} y2={at.y + 10} stroke={XRED} strokeWidth={3} strokeLinecap="round" />
-             <SvgText x={at.x + 12} y={at.y + 5} fill={XRED} fontSize={12} fontWeight="bold">{m.id}</SvgText></>);
+             <SvgText x={at.x + 12} y={at.y + 5} fill={XRED} fontSize={12} fontWeight="bold">{dispId(m.id)}</SvgText></>);
       if (curMove) {
         const to = px(curMove.to[0], curMove.to[1]);
         const tx = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, to.x - at.x] });
@@ -1171,18 +1205,22 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           <KeyboardAvoidingView style={styles.listOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={0}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={[styles.listBox, { padding: 20, maxHeight: '88%' }]}>
-                <Text style={styles.listTitle}>Player Guidance — {activeScheme === 'offense' ? 'Offense' : activeScheme === 'defense' ? 'Defense' : 'Counter'}</Text>
-                <Text style={styles.aiHint}>
-                  Lock a player to keep them exactly where they are — the AI cascades the rest of the
-                  play around them. Add a note to steer a specific player. Then Apply & Regenerate.
+                <Text style={styles.listTitle}>
+                  {activeScheme === 'offense' ? 'Offense' : activeScheme === 'defense' ? 'Defense' : 'Counter'} — By Player
                 </Text>
-                <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
-                  {(boards[activeBoardIdx]?.ai?.schemes?.[activeScheme]?.players ?? []).map(pl => {
+                <Text style={styles.aiHint}>
+                  Each player's detail is how the AI read your play for them. Edit any of them and/or
+                  lock a player in place (the AI cascades the others around a lock), then Apply & Regenerate.
+                </Text>
+                <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
+                  {guidanceUnits().map(pl => {
                     const locked = !!lockedPlayers[pl.id];
                     return (
                       <View key={pl.id} style={styles.guideRow}>
                         <View style={styles.guideHead}>
-                          <View style={styles.guideBadge}><Text style={styles.guideBadgeText}>{pl.id}</Text></View>
+                          <View style={[styles.guideBadge, activeScheme === 'defense' && { borderColor: '#C0392B' }]}>
+                            <Text style={[styles.guideBadgeText, activeScheme === 'defense' && { color: '#C0392B' }]}>{dispId(pl.id)}</Text>
+                          </View>
                           <TouchableOpacity
                             style={[styles.lockBtn, locked && { backgroundColor: t.accentSoft, borderColor: t.accent }]}
                             onPress={() => setLockedPlayers(prev => ({ ...prev, [pl.id]: !locked }))}>
@@ -1191,17 +1229,18 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                           </TouchableOpacity>
                         </View>
                         <TextInput
-                          style={styles.guideInput}
-                          placeholder={`Guidance for ${pl.id} (optional)…`}
+                          style={[styles.guideInput, { minHeight: 44 }]}
+                          placeholder={`What ${dispId(pl.id)} does…`}
                           placeholderTextColor={t.muted2}
-                          value={playerGuidance[pl.id] ?? ''}
+                          value={playerGuidance[pl.id] ?? pl.role ?? ''}
                           onChangeText={txt => setPlayerGuidance(prev => ({ ...prev, [pl.id]: txt }))}
+                          multiline
                         />
                       </View>
                     );
                   })}
-                  {(boards[activeBoardIdx]?.ai?.schemes?.[activeScheme]?.players ?? []).length === 0 && (
-                    <Text style={styles.aiHint}>No players in this scheme yet.</Text>
+                  {guidanceUnits().length === 0 && (
+                    <Text style={styles.aiHint}>No {activeScheme === 'defense' ? 'defenders' : 'players'} in this scheme yet.</Text>
                   )}
                 </ScrollView>
                 <GeneratingOverlay visible={applyingGuidance} label="Cascading the play around your locks…" />
@@ -1223,7 +1262,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         </Modal>
 
         {/* AI play modal */}
-        <Modal visible={showAI} transparent animationType="slide" onRequestClose={() => { setShowAI(false); setSeedMode('none'); }}>
+        <Modal visible={showAI} transparent animationType="slide" onRequestClose={() => { setShowAI(false); setSeedMode('none'); setAiByPlayer(false); }}>
           {/* seedMode handled inside */}
           <KeyboardAvoidingView
             style={styles.listOverlay}
@@ -1232,7 +1271,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={[styles.listBox, { padding: 20, maxHeight: '80%' }]}>
-              {seedMode === 'none' ? (
+              {(!aiByPlayer && seedMode === 'none') ? (
                 <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                   <Text style={styles.listTitle}>AI Play Draw-Up</Text>
                   <Text style={styles.aiHint}>
@@ -1264,6 +1303,13 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                       <Text style={styles.seedBtnText}>Draw up from a report</Text>
                     </TouchableOpacity>
                   )}
+                  {/* By Player — set what each player does before drawing it up */}
+                  <TouchableOpacity style={styles.seedBtn} onPress={() => { Keyboard.dismiss(); setAiByPlayer(true); }}>
+                    <Ionicons name="people-outline" size={16} color={t.accent} />
+                    <Text style={styles.seedBtnText}>
+                      {byPlayerCount ? `By Player · ${byPlayerCount} set` : 'By Player — set roles for O1–O5 / D1–D5'}
+                    </Text>
+                  </TouchableOpacity>
                   <GeneratingOverlay visible={aiGenerating} label="Drawing up the play…" />
                   <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                     <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]}
@@ -1271,14 +1317,47 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                       <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.addBoardBtn, { flex: 1, opacity: (aiDescription.trim() || attachedReport) && !aiGenerating ? 1 : 0.5 }]}
-                      onPress={generatePlay} disabled={(!aiDescription.trim() && !attachedReport) || aiGenerating}>
+                      style={[styles.addBoardBtn, { flex: 1, opacity: (aiDescription.trim() || attachedReport || byPlayerCount > 0) && !aiGenerating ? 1 : 0.5 }]}
+                      onPress={generatePlay} disabled={(!aiDescription.trim() && !attachedReport && byPlayerCount === 0) || aiGenerating}>
                       {aiGenerating
                         ? <ActivityIndicator color={t.ctaText} size="small" />
                         : <><Ionicons name="sparkles" size={16} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Draw It Up</Text></>}
                     </TouchableOpacity>
                   </View>
                 </ScrollView>
+              ) : aiByPlayer ? (
+                <>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                    <TouchableOpacity onPress={() => setAiByPlayer(false)}>
+                      <Ionicons name="chevron-back" size={22} color={t.ink} />
+                    </TouchableOpacity>
+                    <Text style={[styles.listTitle, { marginBottom: 0 }]}>By Player</Text>
+                  </View>
+                  <Text style={styles.aiHint}>
+                    Set what any player should do — offense (O1–O5) or defense (D1–D5). Leave the rest blank.
+                    The AI builds the play from these, and you can fine-tune per player afterward.
+                  </Text>
+                  <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                    {(['O1', 'O2', 'O3', 'O4', 'O5', 'D1', 'D2', 'D3', 'D4', 'D5']).map(id => (
+                      <View key={id} style={styles.byPlayerRow}>
+                        <View style={[styles.guideBadge, id[0] === 'D' && { borderColor: '#C0392B' }]}>
+                          <Text style={[styles.guideBadgeText, id[0] === 'D' && { color: '#C0392B' }]}>{id}</Text>
+                        </View>
+                        <TextInput
+                          style={[styles.guideInput, { flex: 1 }]}
+                          placeholder={id[0] === 'O' ? `What ${id} runs…` : `What ${id} does on defense…`}
+                          placeholderTextColor={t.muted2}
+                          value={byPlayerNotes[id] ?? ''}
+                          onChangeText={txt => setByPlayerNotes(prev => ({ ...prev, [id]: txt }))}
+                        />
+                      </View>
+                    ))}
+                  </ScrollView>
+                  <TouchableOpacity style={[styles.addBoardBtn, { marginTop: 12 }]} onPress={() => setAiByPlayer(false)}>
+                    <Ionicons name="checkmark" size={18} color={t.ctaText} />
+                    <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Done{byPlayerCount ? ` · ${byPlayerCount} set` : ''}</Text>
+                  </TouchableOpacity>
+                </>
               ) : (
                 <>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -1462,4 +1541,5 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   lockBtn:         { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: t.line, backgroundColor: t.card },
   lockBtnText:     { color: t.muted, fontSize: 12, fontFamily: fonts[700] },
   guideInput:      { backgroundColor: t.card, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, color: t.ink, fontSize: 13.5, borderWidth: 1, borderColor: t.line },
+  byPlayerRow:     { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
 });
