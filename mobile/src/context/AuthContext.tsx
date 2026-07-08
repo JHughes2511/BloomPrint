@@ -11,6 +11,7 @@ interface AuthState {
   register: (data: { name: string; email: string; password: string; weight?: number; program_name?: string; role?: string; competition_level?: string; conference?: string; country?: string; city?: string }) => Promise<void>;
   updateProfile: (data: { name?: string; role?: string; program_name?: string; competition_level?: string; conference?: string; system_profile?: Record<string, string>; country?: string; city?: string }) => Promise<void>;
   importPhilosophy: (formData: FormData) => Promise<Coach>;
+  applyAuth: (accessToken: string, coachData: Coach) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -62,6 +63,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return updated;
   };
 
+  const applyAuth = async (accessToken: string, coachData: Coach) => {
+    await SecureStore.setItemAsync('auth_token', accessToken);
+    setToken(accessToken);
+    setCoach(coachData);
+  };
+
   const logout = async () => {
     await SecureStore.deleteItemAsync('auth_token');
     setToken(null);
@@ -69,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ coach, token, loading, login, register, updateProfile, importPhilosophy, logout }}>
+    <AuthContext.Provider value={{ coach, token, loading, login, register, updateProfile, importPhilosophy, applyAuth, logout }}>
       {children}
     </AuthContext.Provider>
   );

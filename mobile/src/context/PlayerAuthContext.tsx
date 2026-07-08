@@ -9,6 +9,7 @@ interface PlayerAuthState {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: { name: string; email: string; password: string; country?: string; city?: string }) => Promise<void>;
+  applyAuth: (accessToken: string, user: PlayerUser) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -50,6 +51,12 @@ export function PlayerAuthProvider({ children }: { children: React.ReactNode }) 
     setPlayerUser(res.player_user);
   };
 
+  const applyAuth = async (accessToken: string, user: PlayerUser) => {
+    await SecureStore.setItemAsync('player_auth_token', accessToken);
+    setPlayerToken(accessToken);
+    setPlayerUser(user);
+  };
+
   const logout = async () => {
     await SecureStore.deleteItemAsync('player_auth_token');
     setPlayerToken(null);
@@ -64,7 +71,7 @@ export function PlayerAuthProvider({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <PlayerAuthContext.Provider value={{ playerUser, playerToken, loading, login, register, logout, refreshUser }}>
+    <PlayerAuthContext.Provider value={{ playerUser, playerToken, loading, login, register, applyAuth, logout, refreshUser }}>
       {children}
     </PlayerAuthContext.Provider>
   );

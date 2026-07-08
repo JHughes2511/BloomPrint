@@ -82,6 +82,50 @@ def login(body: schemas.CoachLogin, db: Session = Depends(get_db)):
     )
 
 
+@router.post("/google")
+def google_auth(body: schemas.PlayerGoogleAuth, db: Session = Depends(get_db)):
+    """Google Sign-In for players. Returns either:
+      {status:'ok', access_token, player_user}   — signed in / created
+      {status:'needs_signup', email, name}       — no account; app routes to
+                                                    the signup form (prefilled)
+    The player still completes the coach-link flow after a Google signup."""
+    from ..google_auth import verify_google_token, random_unusable_password_hash
+
+    identity = verify_google_token(body.id_token)
+    pu = db.query(models.PlayerUser).filter_by(email=identity.email).first()
+
+    if pu:
+        if not pu.google_sub and identity.sub:
+            pu.google_sub = identity.sub
+            db.commit()
+            db.refresh(pu)
+        return {
+            "status": "ok",
+            "access_token": _make_token(pu.id),
+            "player_user": schemas.PlayerUserOut.model_validate(pu),
+        }
+
+    if body.mode != "register":
+        return {"status": "needs_signup", "email": identity.email, "name": identity.name}
+
+    pu = models.PlayerUser(
+        name=identity.name,
+        email=identity.email,
+        password_hash=random_unusable_password_hash(_hash_pw),
+        country=body.country,
+        city=body.city,
+        google_sub=identity.sub or None,
+    )
+    db.add(pu)
+    db.commit()
+    db.refresh(pu)
+    return {
+        "status": "ok",
+        "access_token": _make_token(pu.id),
+        "player_user": schemas.PlayerUserOut.model_validate(pu),
+    }
+
+
 def _player_user_out(pu: models.PlayerUser) -> schemas.PlayerUserOut:
     out = schemas.PlayerUserOut.model_validate(pu)
     if pu.player:

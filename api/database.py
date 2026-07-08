@@ -81,6 +81,11 @@ def _run_migrations():
                 "ALTER TABLE coaches ADD COLUMN city TEXT"
             ))
             conn.commit()
+        if "google_sub" not in coach_cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE coaches ADD COLUMN google_sub TEXT"
+            ))
+            conn.commit()
 
         # Add wingspan to players if missing
         if "wingspan" not in cols:
@@ -199,6 +204,11 @@ def _run_migrations():
             if puu_cols and "city" not in puu_cols:
                 conn.execute(__import__("sqlalchemy").text(
                     "ALTER TABLE player_users ADD COLUMN city TEXT"
+                ))
+                conn.commit()
+            if puu_cols and "google_sub" not in puu_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE player_users ADD COLUMN google_sub TEXT"
                 ))
                 conn.commit()
         except Exception:

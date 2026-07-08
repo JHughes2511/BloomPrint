@@ -19,6 +19,12 @@ export const authAPI = {
   login: (email: string, password: string) =>
     api.post('/auth/login', { email, password }).then(r => r.data),
 
+  google: (data: {
+    id_token: string; mode: 'login' | 'register';
+    role?: string; program_name?: string; competition_level?: string;
+    conference?: string; country?: string; city?: string;
+  }) => api.post('/auth/google', data).then(r => r.data),
+
   me: () => api.get('/auth/me').then(r => r.data),
 
   updateProfile: (data: {

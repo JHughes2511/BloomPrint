@@ -5,28 +5,51 @@ import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
-import { playerLinkAPI } from '../../api/playerClient';
+import { playerLinkAPI, playerAuthAPI } from '../../api/playerClient';
 import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 import CountryField from '../../components/CountryField';
+import GoogleSignInButton from '../../components/GoogleSignInButton';
 
 export default function PlayerRegisterScreen() {
   const { t } = useTheme();
   const styles = makeStyles(t);
-  const { register, playerUser } = usePlayerAuth();
+  const { register, playerUser, applyAuth } = usePlayerAuth();
   const navigation = useNavigation<any>();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const route = useRoute<any>();
+  const gp = route.params ?? {};
+  const [name, setName] = useState(gp.name ?? '');
+  const [email, setEmail] = useState(gp.email ?? '');
   const [password, setPassword] = useState('');
   const [country, setCountry] = useState('');
   const [city, setCity] = useState('');
+  const [googleIdToken, setGoogleIdToken] = useState<string | null>(gp.googleIdToken ?? null);
+  const [googleBusy, setGoogleBusy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
+
+  const handleGoogleIdToken = async (idToken: string) => {
+    setGoogleBusy(true);
+    try {
+      const res = await playerAuthAPI.google({ id_token: idToken, mode: 'login' });
+      if (res.status === 'ok') {
+        await applyAuth(res.access_token, res.player_user);
+      } else {
+        setGoogleIdToken(idToken);
+        setName(res.name ?? '');
+        setEmail(res.email ?? '');
+      }
+    } catch (e: any) {
+      Alert.alert('Google sign-in', e?.response?.data?.detail ?? 'Could not sign in with Google.');
+    } finally {
+      setGoogleBusy(false);
+    }
+  };
 
   // Link profile state
   const [inviteCode, setInviteCode] = useState('');
@@ -36,6 +59,17 @@ export default function PlayerRegisterScreen() {
   const [inviteLoading, setInviteLoading] = useState(false);
 
   const submit = async () => {
+    if (googleIdToken) {
+      setLoading(true);
+      try {
+        const res = await playerAuthAPI.google({ id_token: googleIdToken, mode: 'register', country: country || undefined, city: city.trim() || undefined });
+        if (res.status === 'ok') { await applyAuth(res.access_token, res.player_user); setRegistered(true); }
+        else throw new Error('Could not create the account.');
+      } catch (e: any) {
+        Alert.alert('Error', e?.response?.data?.detail ?? 'Registration failed');
+      } finally { setLoading(false); }
+      return;
+    }
     if (!name.trim() || !email.trim() || !password.trim()) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -179,22 +213,30 @@ export default function PlayerRegisterScreen() {
           onChangeText={setName}
         />
         <VoiceTextInput
-          style={styles.input}
+          style={[styles.input, !!googleIdToken && { opacity: 0.6 }]}
           placeholder="Email"
           placeholderTextColor={t.muted2}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
           keyboardType="email-address"
+          editable={!googleIdToken}
         />
-        <VoiceTextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor={t.muted2}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        {!googleIdToken && (
+          <VoiceTextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor={t.muted2}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+        )}
+        {!!googleIdToken && (
+          <Text style={{ color: t.muted, fontSize: 12, marginBottom: 8 }}>
+            Signing up with Google — no password needed.
+          </Text>
+        )}
         <CountryField value={country} onChange={setCountry} placeholder="Country (optional)" />
         <VoiceTextInput
           style={styles.input}
@@ -209,6 +251,17 @@ export default function PlayerRegisterScreen() {
             ? <ActivityIndicator color="#fff" />
             : <Text style={styles.btnText}>Create Account</Text>}
         </TouchableOpacity>
+
+        {!googleIdToken && (
+          <>
+            <View style={styles.orRow}>
+              <View style={styles.orLine} />
+              <Text style={styles.orText}>or</Text>
+              <View style={styles.orLine} />
+            </View>
+            <GoogleSignInButton onIdToken={handleGoogleIdToken} busy={googleBusy} color={t.positive} />
+          </>
+        )}
 
         <TouchableOpacity onPress={() => navigation.navigate('PlayerLogin')}>
           <Text style={styles.toggle}>Already have an account? Sign In</Text>
@@ -257,6 +310,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   toggle: { color: t.positive, marginTop: 20, fontSize: 13 },
   backBtn: { marginTop: 32 },
   backText: { color: t.muted2, fontSize: 12 },
+  orRow: { flexDirection: 'row', alignItems: 'center', width: '100%', marginTop: 16, marginBottom: 4, gap: 10 },
+  orLine: { flex: 1, height: 1, backgroundColor: t.divider },
+  orText: { color: t.muted2, fontSize: 12 },
   section: { marginBottom: 24 },
   sectionTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[700], marginBottom: 4 },
   sectionDesc: { color: t.muted, fontSize: 12, marginBottom: 12 },

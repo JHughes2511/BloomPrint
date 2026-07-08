@@ -26,6 +26,18 @@ class CoachLogin(BaseModel):
     password: str
 
 
+class CoachGoogleAuth(BaseModel):
+    id_token: str
+    mode: str = "login"   # "login" (existing only) or "register" (create with fields)
+    # Required-profile fields collected during Google signup (ignored on login):
+    role: str = "coach"
+    program_name: str | None = None
+    competition_level: str | None = None
+    conference: str | None = None
+    country: str | None = None
+    city: str | None = None
+
+
 class CoachUpdate(BaseModel):
     name: str | None = None
     role: str | None = None
@@ -254,6 +266,13 @@ class PlayerUserOut(BaseModel):
 class PlayerUserUpdate(BaseModel):
     name: str | None = None
     avatar: str | None = None
+    country: str | None = None
+    city: str | None = None
+
+
+class PlayerGoogleAuth(BaseModel):
+    id_token: str
+    mode: str = "login"   # "login" (existing only) or "register" (create)
     country: str | None = None
     city: str | None = None
 

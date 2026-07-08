@@ -9,11 +9,13 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
+import { authAPI } from '../api/client';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import CountryField from '../components/CountryField';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 const ROLES = [
   { key: 'coach',   label: 'Coach' },
@@ -176,7 +178,7 @@ function PickerModal({
 }
 
 export default function LoginScreen() {
-  const { login, register } = useAuth();
+  const { login, register, applyAuth } = useAuth();
   const navigation = useNavigation<any>();
   const { t } = useTheme();
   const styles = makeStyles(t);
@@ -193,6 +195,31 @@ export default function LoginScreen() {
   const [showLevelPicker, setShowLevelPicker] = useState(false);
   const [showConferencePicker, setShowConferencePicker] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
+  const [googleIdToken, setGoogleIdToken] = useState<string | null>(null);
+
+  // Google returns identity only; a NEW user still completes the required
+  // fields (role, level, conference, location) before the account is created.
+  const handleGoogleIdToken = async (idToken: string) => {
+    setGoogleBusy(true);
+    try {
+      const res = await authAPI.google({ id_token: idToken, mode: 'login' });
+      if (res.status === 'ok') {
+        await applyAuth(res.access_token, res.coach);
+      } else {
+        // No account yet — switch to the signup form, prefilled, and finish there.
+        setGoogleIdToken(idToken);
+        setName(res.name ?? '');
+        setEmail(res.email ?? '');
+        setMode('register');
+        Alert.alert('Almost there', 'Finish setting up your account, then tap Create Account.');
+      }
+    } catch (e: any) {
+      Alert.alert('Google sign-in', e?.response?.data?.detail ?? 'Could not sign in with Google.');
+    } finally {
+      setGoogleBusy(false);
+    }
+  };
 
   const submit = async () => {
     if (mode === 'register') {
@@ -205,6 +232,19 @@ export default function LoginScreen() {
     try {
       if (mode === 'login') {
         await login(email, password);
+      } else if (googleIdToken) {
+        // Google-based signup: create the account with the required fields.
+        const res = await authAPI.google({
+          id_token: googleIdToken, mode: 'register',
+          role,
+          program_name: program || name,
+          competition_level: competitionLevel || undefined,
+          conference: competitionLevel === 'College' ? conference : undefined,
+          country: country || undefined,
+          city: city.trim() || undefined,
+        });
+        if (res.status === 'ok') await applyAuth(res.access_token, res.coach);
+        else throw new Error('Could not create the account.');
       } else {
         await register({
           name, email, password,
@@ -235,7 +275,7 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
       >
         {mode === 'register' && (
-          <TouchableOpacity style={styles.backBtn} onPress={() => setMode('login')}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => { setGoogleIdToken(null); setMode('login'); }}>
             <Ionicons name="chevron-back" size={18} color={t.muted} />
             <Text style={styles.backText}>Back</Text>
           </TouchableOpacity>
@@ -310,16 +350,24 @@ export default function LoginScreen() {
         )}
 
         <VoiceTextInput
-          style={[styles.input, mode === 'register' && { marginTop: 16 }]}
+          style={[styles.input, mode === 'register' && { marginTop: 16 }, !!googleIdToken && { opacity: 0.6 }]}
           placeholder="Email"
           placeholderTextColor={t.muted2}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
           keyboardType="email-address"
+          editable={!googleIdToken}
         />
-        <VoiceTextInput style={styles.input} placeholder="Password" placeholderTextColor={t.muted2}
-          value={password} onChangeText={setPassword} secureTextEntry />
+        {!googleIdToken && (
+          <VoiceTextInput style={styles.input} placeholder="Password" placeholderTextColor={t.muted2}
+            value={password} onChangeText={setPassword} secureTextEntry />
+        )}
+        {!!googleIdToken && (
+          <Text style={{ color: t.muted, fontSize: 12, alignSelf: 'flex-start', marginBottom: 8 }}>
+            Signing up with Google — no password needed.
+          </Text>
+        )}
 
         <TouchableOpacity style={styles.btn} onPress={submit} disabled={loading}>
           {loading
@@ -327,7 +375,18 @@ export default function LoginScreen() {
             : <Text style={styles.btnText}>{mode === 'login' ? 'Sign In' : 'Create Account'}</Text>}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => setMode(mode === 'login' ? 'register' : 'login')}>
+        {!googleIdToken && (
+          <>
+            <View style={styles.orRow}>
+              <View style={styles.orLine} />
+              <Text style={styles.orText}>or</Text>
+              <View style={styles.orLine} />
+            </View>
+            <GoogleSignInButton onIdToken={handleGoogleIdToken} busy={googleBusy} color={t.accent} />
+          </>
+        )}
+
+        <TouchableOpacity onPress={() => { if (mode === 'register') setGoogleIdToken(null); setMode(mode === 'login' ? 'register' : 'login'); }}>
           <Text style={styles.toggle}>
             {mode === 'login' ? "Don't have an account? Register" : 'Already have an account? Sign In'}
           </Text>
@@ -416,6 +475,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   toggle: { color: t.muted, marginTop: 20, fontSize: 13 },
   roleSelectBtn: { marginTop: 32 },
   roleSelectText: { color: t.muted2, fontSize: 12 },
+  orRow: { flexDirection: 'row', alignItems: 'center', width: '100%', marginTop: 16, marginBottom: 4, gap: 10 },
+  orLine: { flex: 1, height: 1, backgroundColor: t.divider },
+  orText: { color: t.muted2, fontSize: 12 },
   pickerBtn: {
     width: '100%', backgroundColor: t.card, borderRadius: 10, padding: 14,
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',

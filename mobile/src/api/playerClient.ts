@@ -15,6 +15,8 @@ export const playerAuthAPI = {
     playerApi.post('/player-auth/register', data).then(r => r.data),
   login: (email: string, password: string) =>
     playerApi.post('/player-auth/login', { email, password }).then(r => r.data),
+  google: (data: { id_token: string; mode: 'login' | 'register'; country?: string; city?: string }) =>
+    playerApi.post('/player-auth/google', data).then(r => r.data),
   me: () => playerApi.get('/player-auth/me').then(r => r.data),
   updateMe: (data: { name?: string; avatar?: string | null; country?: string; city?: string }) =>
     playerApi.patch('/player-auth/me', data).then(r => r.data),

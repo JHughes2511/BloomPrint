@@ -24,6 +24,7 @@ class Coach(Base):
     competition_level = Column(String, nullable=True)     # signup competition level
     country           = Column(String, nullable=True)     # account location
     city              = Column(String, nullable=True)
+    google_sub        = Column(String, nullable=True)      # Google account id (Sign-In)
     # Program system & philosophy — free-text per category. Injected into every
     # report so evaluations are framed as fit-for-this-program.
     system_profile    = Column(JSON, nullable=True)
@@ -203,6 +204,7 @@ class PlayerUser(Base):
     avatar        = Column(Text, nullable=True)   # base64 data URI
     country       = Column(String, nullable=True) # account location
     city          = Column(String, nullable=True)
+    google_sub    = Column(String, nullable=True)  # Google account id (Sign-In)
     created_at    = Column(DateTime, default=datetime.utcnow)
 
     player        = relationship("Player", back_populates="player_user")

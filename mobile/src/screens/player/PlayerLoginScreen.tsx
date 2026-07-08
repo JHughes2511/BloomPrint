@@ -7,19 +7,39 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
+import { playerAuthAPI } from '../../api/playerClient';
 import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
+import GoogleSignInButton from '../../components/GoogleSignInButton';
 
 export default function PlayerLoginScreen() {
-  const { login } = usePlayerAuth();
+  const { login, applyAuth } = usePlayerAuth();
   const navigation = useNavigation<any>();
   const { t } = useTheme();
   const styles = makeStyles(t);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
+
+  const handleGoogleIdToken = async (idToken: string) => {
+    setGoogleBusy(true);
+    try {
+      const res = await playerAuthAPI.google({ id_token: idToken, mode: 'login' });
+      if (res.status === 'ok') {
+        await applyAuth(res.access_token, res.player_user);
+      } else {
+        // No account — go finish signup (prefilled) then complete the link flow.
+        navigation.navigate('PlayerRegister', { googleIdToken: idToken, email: res.email, name: res.name });
+      }
+    } catch (e: any) {
+      Alert.alert('Google sign-in', e?.response?.data?.detail ?? 'Could not sign in with Google.');
+    } finally {
+      setGoogleBusy(false);
+    }
+  };
 
   const submit = async () => {
     if (!email.trim() || !password.trim()) {
@@ -74,6 +94,13 @@ export default function PlayerLoginScreen() {
               : <Text style={styles.btnText}>Sign In</Text>}
           </TouchableOpacity>
 
+          <View style={styles.orRow}>
+            <View style={styles.orLine} />
+            <Text style={styles.orText}>or</Text>
+            <View style={styles.orLine} />
+          </View>
+          <GoogleSignInButton onIdToken={handleGoogleIdToken} busy={googleBusy} color={t.positive} />
+
           <TouchableOpacity onPress={() => navigation.navigate('PlayerRegister')}>
             <Text style={styles.toggle}>Don't have an account? Register</Text>
           </TouchableOpacity>
@@ -122,4 +149,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   toggle: { color: t.positive, marginTop: 20, fontSize: 13 },
   backBtn: { marginTop: 32 },
   backText: { color: t.muted2, fontSize: 12 },
+  orRow: { flexDirection: 'row', alignItems: 'center', width: '100%', marginTop: 16, marginBottom: 4, gap: 10 },
+  orLine: { flex: 1, height: 1, backgroundColor: t.divider },
+  orText: { color: t.muted2, fontSize: 12 },
 });

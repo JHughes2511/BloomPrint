@@ -65,6 +65,57 @@ def login(body: schemas.CoachLogin, db: Session = Depends(get_db)):
     return {"access_token": create_token(coach.id), "coach": coach}
 
 
+@router.post("/google")
+def google_auth(body: schemas.CoachGoogleAuth, db: Session = Depends(get_db)):
+    """Google Sign-In for coaches. Returns either:
+      {status:'ok', access_token, coach}         — signed in / created
+      {status:'needs_signup', email, name}       — no account; app routes to
+                                                    the signup form (prefilled)
+    mode='login' never creates; mode='register' creates with the required
+    profile fields the user filled in on the signup form."""
+    from ..google_auth import verify_google_token, random_unusable_password_hash
+
+    identity = verify_google_token(body.id_token)
+    coach = db.query(models.Coach).filter_by(email=identity.email).first()
+
+    if coach:
+        if not coach.google_sub and identity.sub:
+            coach.google_sub = identity.sub
+            db.commit()
+            db.refresh(coach)
+        return {
+            "status": "ok",
+            "access_token": create_token(coach.id),
+            "coach": schemas.CoachOut.model_validate(coach),
+        }
+
+    if body.mode != "register":
+        return {"status": "needs_signup", "email": identity.email, "name": identity.name}
+
+    weight = _auto_weight(body.competition_level, body.conference) if body.competition_level else 45
+    coach = models.Coach(
+        name=identity.name,
+        email=identity.email,
+        password_hash=random_unusable_password_hash(hash_password),
+        weight=weight,
+        role=body.role or "coach",
+        program_name=body.program_name or identity.name,
+        conference=body.conference,
+        competition_level=body.competition_level,
+        country=body.country,
+        city=body.city,
+        google_sub=identity.sub or None,
+    )
+    db.add(coach)
+    db.commit()
+    db.refresh(coach)
+    return {
+        "status": "ok",
+        "access_token": create_token(coach.id),
+        "coach": schemas.CoachOut.model_validate(coach),
+    }
+
+
 @router.get("/me", response_model=schemas.CoachOut)
 def me(coach: models.Coach = Depends(get_current_coach)):
     return coach
