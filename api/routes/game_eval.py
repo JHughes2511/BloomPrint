@@ -1222,6 +1222,10 @@ ROLE: for EVERY player (O1-O5) AND defender (X1-X5) in EVERY scheme, include a s
 
 BY-PLAYER INSTRUCTIONS: the scene may list per-player intent as O1-O5 (offense) and D1-D5 (defense). D1-D5 are the defenders X1-X5 (D1 = X1 guards O1, D2 = X2 guards O2, and so on). Assign each player/defender to do exactly what its note says, and reflect it in that player's role and movements.
 
+STANDING PER-PLAYER INSTRUCTIONS: if the scene lists these, ALWAYS honor them — you may reword them for clarity but never drop the coach's intent, and reflect each one in that player's role and movements.
+
+LABELS: in the human-facing "text" of every key item, refer to defenders as D1-D5, never X1-X5 (the JSON ids stay X1-X5, but the key text the coach reads must say D1-D5).
+
 CONSTRAINTS: if the scene lists LOCKED PLAYERS or PER-PLAYER GUIDANCE / PLAYER ADJUSTMENTS, honor them precisely — keep any locked player at the exact coordinates given and reposition (cascade) only the other players to make the play work, and follow each per-player note.
 
 RULES: 5 offensive players (O1-O5) and up to 5 defenders (X1-X5) per scheme; at most 10 actions per scheme; 3-5 key items. offense = what the offense ran / should run; defense = the defensive scheme and rotations; counter = the counter/adjustment. The key holds the suggested movements or positioning that would have made the play succeed (get a basket, find the open man, correct the rotation) — each key arrow shows the improved movement. Keep key text under 90 characters.

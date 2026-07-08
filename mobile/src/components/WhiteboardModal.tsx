@@ -50,6 +50,11 @@ type SchemeKey = 'offense' | 'defense' | 'counter';
 // Defenders are stored as X1..X5 (X1 guards O1) but shown to the coach as
 // D1..D5 so it's clear they're defensive players.
 const dispId = (id: string) => (id && id[0] === 'X' ? 'D' + id.slice(1) : id);
+// Relabel defender references in free text (key items, roles) X#→D# for display.
+const dispText = (s?: string) => (s || '').replace(/\bX([1-5])\b/g, 'D$1');
+// Standing per-player edits are keyed by "scheme:id" so O1 on offense and
+// counter stay independent.
+const gKey = (scheme: string, id: string) => `${scheme}:${id}`;
 
 interface Board {
   id?: number;
@@ -67,6 +72,9 @@ interface Board {
       defenders?: { id: string; x: number; y: number; role?: string }[];
       actions?: { actor?: string; kind?: string; from: number[]; to: number[]; step?: number }[];
     }>;
+    // Coach's standing per-player edits, keyed "scheme:id". Always re-applied on
+    // regeneration and shown in the panel until the coach changes them.
+    guidance?: Record<string, string>;
   };
 }
 
@@ -339,12 +347,23 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       ].filter(Boolean).join('\n\n');
       const res = await whiteboardAPI.aiPlay(composed);
       const idx = boards.length;
+      // Seed standing per-player guidance from any By-Player draw-up notes so the
+      // coach's intent persists (offense O#, defense D#→X#).
+      const seedGuidance: Record<string, string> = {};
+      ['O1', 'O2', 'O3', 'O4', 'O5'].forEach(id => {
+        const v = (byPlayerNotes[id] || '').trim();
+        if (v) seedGuidance[gKey('offense', id)] = v;
+      });
+      ['D1', 'D2', 'D3', 'D4', 'D5'].forEach(id => {
+        const v = (byPlayerNotes[id] || '').trim();
+        if (v) seedGuidance[gKey('defense', 'X' + id.slice(1))] = v;
+      });
       const newBoard: Board = {
         name: res.play_name || `AI Play ${idx + 1}`,
         court_type: 'half',
         strokes: buildPlayStrokes(res),
         ai: { play_name: res.play_name ?? 'AI Play', key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })), source: composed, schemes: res.schemes,
-              prompt: aiDescription.trim(), attachedTitle: attachedReport?.title },
+              prompt: aiDescription.trim(), attachedTitle: attachedReport?.title, guidance: seedGuidance },
       };
       setBoards(prev => [...prev, newBoard]);
       setActiveBoardIdx(idx);
@@ -368,23 +387,54 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   // keep any hand-drawn marks (strokes with no scheme layer).
   // Shared regenerate: recompose from the play's original source + extra text,
   // replace the AI strokes in place, keep hand-drawn marks (no scheme layer).
-  const regenerateWith = async (extra: string, promptNote?: string) => {
+  // Turn the standing per-player edits into a prompt block that is re-applied on
+  // EVERY regeneration so the coach's edits are never lost (only reworded).
+  const buildStickyBlock = (gmap: Record<string, string>) => {
+    const bySch: Record<string, string[]> = {};
+    Object.entries(gmap || {}).forEach(([k, v]) => {
+      if (!v || !v.trim()) return;
+      const [sch, id] = k.split(':');
+      (bySch[sch] = bySch[sch] || []).push(`- ${dispId(id)}: ${v.trim()}`);
+    });
+    const parts = (['offense', 'defense', 'counter'] as SchemeKey[])
+      .filter(s => bySch[s]?.length)
+      .map(s => `${s.toUpperCase()}:\n${bySch[s].join('\n')}`);
+    return parts.length
+      ? `STANDING PER-PLAYER INSTRUCTIONS (ALWAYS honor these — you may reword them, but never drop the coach's intent):\n${parts.join('\n')}`
+      : '';
+  };
+
+  // Shared regenerate. `extra` = this-run instructions. persistExtra keeps it in
+  // the play's durable source (refinements); otherwise it's transient (formation
+  // snapshots). Standing guidance is always re-applied and carried forward.
+  const regenerateWith = async (
+    extra: string,
+    promptNote?: string,
+    opts?: { guidanceMap?: Record<string, string>; persistExtra?: boolean },
+  ) => {
     const b = boards[activeBoardIdx];
     if (!b?.ai) return;
-    const composed = [b.ai.source || b.ai.play_name || '', extra].filter(Boolean).join('\n\n');
-    const res = await whiteboardAPI.aiPlay(composed);
+    const gmap = opts?.guidanceMap ?? b.ai.guidance ?? {};
+    const baseSource = b.ai.source || b.ai.play_name || '';
+    const sticky = buildStickyBlock(gmap);
+    const promptToSend = [baseSource, sticky, extra].filter(Boolean).join('\n\n');
+    const res = await whiteboardAPI.aiPlay(promptToSend);
     const aiStrokes = remapStrokes(buildPlayStrokes(res), 'half', b.court_type);
     const kept = b.strokes.filter(st => !st.layer);   // hand-drawn marks only
+    const newSource = opts?.persistExtra && extra
+      ? [baseSource, extra].filter(Boolean).join('\n\n')
+      : baseSource;
     const updated: Board = {
       ...b,
       name: res.play_name || b.name,
       strokes: [...kept, ...aiStrokes],
-      ai: { play_name: res.play_name ?? b.ai.play_name, key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })), source: composed, schemes: res.schemes,
-            prompt: [b.ai.prompt, promptNote].filter(Boolean).join('\n'), attachedTitle: b.ai.attachedTitle },
+      ai: { play_name: res.play_name ?? b.ai.play_name, key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })), source: newSource, schemes: res.schemes,
+            prompt: [b.ai.prompt, promptNote].filter(Boolean).join('\n'), attachedTitle: b.ai.attachedTitle, guidance: gmap },
     };
     setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
     setActiveScheme('offense');
-    // Show the fresh AI per-player detail (drop the coach's local edits, now baked in).
+    // Clear only the TRANSIENT field edits — they're now saved in ai.guidance and
+    // will still show (and keep being applied) from there.
     setPlayerGuidance({});
     saveBoard(activeBoardIdx, updated);
   };
@@ -394,7 +444,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     if (!b?.ai || !refineText.trim()) return;
     setRefining(true);
     try {
-      await regenerateWith(`REFINEMENT (update the play): ${refineText.trim()}`, `+ ${refineText.trim()}`);
+      await regenerateWith(`REFINEMENT (update the play): ${refineText.trim()}`, `+ ${refineText.trim()}`, { persistExtra: true });
       setShowRefine(false);
       setRefineText('');
     } catch (e: any) {
@@ -418,26 +468,31 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     const scheme = b?.ai?.schemes?.[activeScheme];
     if (!b?.ai || !scheme) return;
     const units = activeScheme === 'defense' ? (scheme.defenders ?? []) : (scheme.players ?? []);
-    const lockLines = units
-      .filter(p => lockedPlayers[p.id])
-      .map(p => `- ${dispId(p.id)}: LOCKED at court position x=${Math.round(p.x)}, y=${Math.round(p.y)} — keep exactly here, do not move.`);
-    // Only send fields the coach actually edited (the rest already hold the AI's role).
-    const guideLines = units
-      .filter(p => playerGuidance[p.id] != null && playerGuidance[p.id].trim())
-      .map(p => `- ${dispId(p.id)}: ${playerGuidance[p.id].trim()}`);
-    const openIds = units.filter(p => !lockedPlayers[p.id]).map(p => dispId(p.id));
-    if (!lockLines.length && !guideLines.length) {
+    // Merge the coach's field edits into the standing guidance map (empty = clear).
+    const newGuidance = { ...(b.ai.guidance ?? {}) };
+    units.forEach(p => {
+      const k = gKey(activeScheme, p.id);
+      if (playerGuidance[k] != null) {
+        const v = playerGuidance[k].trim();
+        if (v) newGuidance[k] = v; else delete newGuidance[k];
+      }
+    });
+    const lockedIds = units.filter(p => lockedPlayers[p.id]).map(p => dispId(p.id));
+    if (!lockedIds.length && Object.keys(newGuidance).length === 0) {
       Alert.alert('Nothing to apply', 'Lock a player or edit their detail first.');
       return;
     }
-    const constraints = [
-      lockLines.length ? `LOCKED PLAYERS — keep these EXACTLY where they are and cascade the rest of the play around them:\n${lockLines.join('\n')}` : '',
-      (lockLines.length && openIds.length) ? `You MAY reposition these players to make the play work: ${openIds.join(', ')}.` : '',
-      guideLines.length ? `PER-PLAYER GUIDANCE (honor precisely):\n${guideLines.join('\n')}` : '',
-    ].filter(Boolean).join('\n\n');
+    // Full current formation (both sides) — start here, keep the same side.
+    const allUnits = [...(scheme.players ?? []), ...(scheme.defenders ?? [])];
+    const formationLines = allUnits.map(p => `- ${dispId(p.id)} at x=${Math.round(p.x)}, y=${Math.round(p.y)}`);
+    const extra = [
+      'EDIT the existing play — do NOT redraw a new one. KEEP THE PLAY ON THE SAME SIDE OF THE FLOOR; do NOT mirror or flip left/right. Start every player from their CURRENT position below and keep them there. Move a player ONLY if a standing per-player instruction applies to them; make minimal adjustments, only to non-locked players, and only if genuinely required to make an instruction work.',
+      `CURRENT POSITIONS (${activeScheme} — keep exactly, same side):\n${formationLines.join('\n')}`,
+      `LOCKED (must not move at all): ${lockedIds.length ? lockedIds.join(', ') : 'none'}`,
+    ].join('\n\n');
     setApplyingGuidance(true);
     try {
-      await regenerateWith(`PLAYER ADJUSTMENTS (${activeScheme}):\n${constraints}`, '+ player lock / guidance');
+      await regenerateWith(extra, '+ player lock / guidance', { guidanceMap: newGuidance, persistExtra: false });
       setShowPlayers(false);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update the play');
@@ -1146,7 +1201,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               {board.ai.key.map(k => (
                 <Text key={k.n} style={styles.keyItem}>
                   <Text style={{ color: '#1F6F9B', fontFamily: fonts[800] }}>{k.n}. </Text>
-                  {k.text}
+                  {dispText(k.text)}
                 </Text>
               ))}
             </ScrollView>
@@ -1215,6 +1270,8 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                 <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
                   {guidanceUnits().map(pl => {
                     const locked = !!lockedPlayers[pl.id];
+                    const gk = gKey(activeScheme, pl.id);
+                    const persisted = boards[activeBoardIdx]?.ai?.guidance?.[gk];
                     return (
                       <View key={pl.id} style={styles.guideRow}>
                         <View style={styles.guideHead}>
@@ -1229,11 +1286,11 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                           </TouchableOpacity>
                         </View>
                         <TextInput
-                          style={[styles.guideInput, { minHeight: 44 }]}
+                          style={[styles.guideInput, { minHeight: 44 }, persisted != null && { borderColor: t.accent }]}
                           placeholder={`What ${dispId(pl.id)} does…`}
                           placeholderTextColor={t.muted2}
-                          value={playerGuidance[pl.id] ?? pl.role ?? ''}
-                          onChangeText={txt => setPlayerGuidance(prev => ({ ...prev, [pl.id]: txt }))}
+                          value={playerGuidance[gk] ?? persisted ?? dispText(pl.role)}
+                          onChangeText={txt => setPlayerGuidance(prev => ({ ...prev, [gk]: txt }))}
                           multiline
                         />
                       </View>
