@@ -202,6 +202,17 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const [refining, setRefining]         = useState(false);
   const [activeScheme, setActiveScheme] = useState<SchemeKey>('offense');
   const [showKey, setShowKey]           = useState(true);
+  // Court orientation — portrait (default) or landscape for tablets / wide screens.
+  const [orientation, setOrientation]   = useState<'portrait' | 'landscape'>('portrait');
+  const didAutoOrient                   = useRef(false);
+  // Per-player guidance: lock a player in place (AI cascades the others around
+  // it) and/or attach a per-player note. Keyed by player id (O1..O5). Reset per
+  // board. Applied on regenerate.
+  const [showPlayers, setShowPlayers]       = useState(false);
+  const [lockedPlayers, setLockedPlayers]   = useState<Record<string, boolean>>({});
+  const [playerGuidance, setPlayerGuidance] = useState<Record<string, string>>({});
+  const [applyingGuidance, setApplyingGuidance] = useState(false);
+  useEffect(() => { setLockedPlayers({}); setPlayerGuidance({}); }, [activeBoardIdx]);
   // ── Scheme play-through animation ──
   const [animating, setAnimating]       = useState(false);
   const [animDone, setAnimDone]         = useState(false); // finished — markers at final spots
@@ -331,33 +342,73 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   // Refine an existing AI play with extra text: regenerate all schemes from the
   // original description + the refinement, replace the AI strokes in place, and
   // keep any hand-drawn marks (strokes with no scheme layer).
+  // Shared regenerate: recompose from the play's original source + extra text,
+  // replace the AI strokes in place, keep hand-drawn marks (no scheme layer).
+  const regenerateWith = async (extra: string, promptNote?: string) => {
+    const b = boards[activeBoardIdx];
+    if (!b?.ai) return;
+    const composed = [b.ai.source || b.ai.play_name || '', extra].filter(Boolean).join('\n\n');
+    const res = await whiteboardAPI.aiPlay(composed);
+    const aiStrokes = remapStrokes(buildPlayStrokes(res), 'half', b.court_type);
+    const kept = b.strokes.filter(st => !st.layer);   // hand-drawn marks only
+    const updated: Board = {
+      ...b,
+      name: res.play_name || b.name,
+      strokes: [...kept, ...aiStrokes],
+      ai: { play_name: res.play_name ?? b.ai.play_name, key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })), source: composed, schemes: res.schemes,
+            prompt: [b.ai.prompt, promptNote].filter(Boolean).join('\n'), attachedTitle: b.ai.attachedTitle },
+    };
+    setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
+    setActiveScheme('offense');
+    saveBoard(activeBoardIdx, updated);
+  };
+
   const refinePlay = async () => {
     const b = boards[activeBoardIdx];
     if (!b?.ai || !refineText.trim()) return;
     setRefining(true);
     try {
-      const composed = [b.ai.source || b.ai.play_name || '', `REFINEMENT (update the play): ${refineText.trim()}`]
-        .filter(Boolean).join('\n\n');
-      const res = await whiteboardAPI.aiPlay(composed);
-      // Build AI strokes on the half court, then map to this board's current view.
-      const aiStrokes = remapStrokes(buildPlayStrokes(res), 'half', b.court_type);
-      const kept = b.strokes.filter(st => !st.layer);   // hand-drawn marks only
-      const updated: Board = {
-        ...b,
-        name: res.play_name || b.name,
-        strokes: [...kept, ...aiStrokes],
-        ai: { play_name: res.play_name ?? b.ai.play_name, key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })), source: composed, schemes: res.schemes,
-              prompt: [b.ai.prompt, `+ ${refineText.trim()}`].filter(Boolean).join('\n'), attachedTitle: b.ai.attachedTitle },
-      };
-      setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
-      setActiveScheme('offense');
-      saveBoard(activeBoardIdx, updated);
+      await regenerateWith(`REFINEMENT (update the play): ${refineText.trim()}`, `+ ${refineText.trim()}`);
       setShowRefine(false);
       setRefineText('');
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update the play');
     } finally {
       setRefining(false);
+    }
+  };
+
+  // Apply per-player lock/cascade + guidance, then regenerate. Locked players
+  // keep their exact court-feet positions; the AI moves the rest around them.
+  const applyPlayerGuidance = async () => {
+    const b = boards[activeBoardIdx];
+    const scheme = b?.ai?.schemes?.[activeScheme];
+    if (!b?.ai || !scheme) return;
+    const players = scheme.players ?? [];
+    const lockLines = players
+      .filter(p => lockedPlayers[p.id])
+      .map(p => `- ${p.id}: LOCKED at court position x=${Math.round(p.x)}, y=${Math.round(p.y)} — keep exactly here, do not move.`);
+    const guideLines = players
+      .filter(p => (playerGuidance[p.id] || '').trim())
+      .map(p => `- ${p.id}: ${playerGuidance[p.id].trim()}`);
+    const openIds = players.filter(p => !lockedPlayers[p.id]).map(p => p.id);
+    if (!lockLines.length && !guideLines.length) {
+      Alert.alert('Nothing to apply', 'Lock a player or add guidance first.');
+      return;
+    }
+    const constraints = [
+      lockLines.length ? `LOCKED PLAYERS — keep these EXACTLY where they are and cascade the rest of the play around them:\n${lockLines.join('\n')}` : '',
+      (lockLines.length && openIds.length) ? `You MAY reposition these players to make the play work: ${openIds.join(', ')}.` : '',
+      guideLines.length ? `PER-PLAYER GUIDANCE (honor precisely):\n${guideLines.join('\n')}` : '',
+    ].filter(Boolean).join('\n\n');
+    setApplyingGuidance(true);
+    try {
+      await regenerateWith(`PLAYER ADJUSTMENTS:\n${constraints}`, '+ player lock / guidance');
+      setShowPlayers(false);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update the play');
+    } finally {
+      setApplyingGuidance(false);
     }
   };
 
@@ -420,6 +471,13 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const scale  = Number.isFinite(rawScale) && rawScale > 0 ? rawScale : 0;
   const courtW = COURT_FT_W * scale;
   const courtH = visFt * scale;
+  // Landscape: rotate the whole court 90° for display and uniformly scale it to
+  // fit the wide area. Strokes stay aligned (one transform on the whole wrapper).
+  // Drawing is a portrait activity, so hand-draw input is paused in landscape.
+  const isLandscape = orientation === 'landscape';
+  const landscapeFit = isLandscape && courtW > 0 && courtH > 0
+    ? Math.min((avail.w - 12) / courtH, (avail.h - 12) / courtW)
+    : 1;
 
   useEffect(() => { if (visible && gameId) loadBoards(); }, [visible, gameId]);
 
@@ -883,6 +941,15 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               </Text>
             </TouchableOpacity>
           ))}
+          {/* Orientation toggle — portrait / landscape */}
+          <TouchableOpacity
+            style={[styles.courtChip, { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 5 }, isLandscape && styles.courtChipActive]}
+            onPress={() => setOrientation(o => (o === 'portrait' ? 'landscape' : 'portrait'))}>
+            <Ionicons name={isLandscape ? 'tablet-landscape-outline' : 'tablet-portrait-outline'} size={14} color={isLandscape ? t.ctaText : t.muted} />
+            <Text style={[styles.courtChipText, isLandscape && { color: t.ctaText }]}>
+              {isLandscape ? 'Landscape' : 'Portrait'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* AI scheme switcher — only on AI-generated boards */}
@@ -914,10 +981,23 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               <Ionicons name="create-outline" size={13} color={t.accent} />
               <Text style={[styles.schemeChipText, { color: t.accent }]}>Refine</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5 }]}
+              onPress={() => setShowPlayers(true)}>
+              <Ionicons name="people-outline" size={13} color={t.muted} />
+              <Text style={styles.schemeChipText}>Players</Text>
+            </TouchableOpacity>
           </View>
         )}
 
-        {/* Toolbar */}
+        {/* Toolbar — hidden in landscape (drawing is a portrait activity) */}
+        {isLandscape ? (
+          <View style={styles.toolbar}>
+            <Text style={styles.aiHint}>
+              Landscape view — switch to Portrait to draw. Play, Refine, Players and Key still work here.
+            </Text>
+          </View>
+        ) : (
         <View style={styles.toolbar}>
           <View style={styles.toolRow}>
             {TOOLS.map(tl => (
@@ -947,6 +1027,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
             </View>
           </View>
         </View>
+        )}
 
         {/* Selected-text controls: resize / delete / done */}
         {selectedTextId && (
@@ -986,15 +1067,29 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
             style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
             onLayout={e => {
               const { width: lw, height: lh } = e.nativeEvent.layout;
-              if (lw > 50 && lh > 50) setAvail({ w: lw, h: lh });
+              if (lw > 50 && lh > 50) {
+                setAvail({ w: lw, h: lh });
+                // Auto-pick landscape once on wide screens (tablets / web).
+                if (!didAutoOrient.current) {
+                  didAutoOrient.current = true;
+                  if (lw > lh * 1.2) setOrientation('landscape');
+                }
+              }
             }}
           >
             {scale > 0 && (
-              <View style={[styles.canvasWrapper, { width: courtW, height: courtH }]} {...panResponder.panHandlers}>
+              <View
+                style={[
+                  styles.canvasWrapper,
+                  { width: courtW, height: courtH },
+                  isLandscape ? { transform: [{ rotate: '90deg' }, { scale: landscapeFit }] } : null,
+                ]}
+                {...(isLandscape ? {} : panResponder.panHandlers)}
+              >
                 <HardwoodCourt width={courtW} height={courtH} />
                 <Svg style={StyleSheet.absoluteFill} width={courtW} height={courtH}>
                   {renderCourtStrokes()}
-                  {livePath ? (
+                  {livePath && !isLandscape ? (
                     <Path d={livePath} stroke={color} strokeWidth={STROKE_WIDTH}
                           fill="none" strokeLinecap="round" strokeLinejoin="round" />
                   ) : null}
@@ -1064,6 +1159,62 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                     {refining
                       ? <ActivityIndicator color={t.ctaText} size="small" />
                       : <><Ionicons name="sparkles" size={16} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Update Play</Text></>}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </KeyboardAvoidingView>
+        </Modal>
+
+        {/* Player guidance modal — per-player lock/cascade + notes */}
+        <Modal visible={showPlayers} transparent animationType="slide" onRequestClose={() => setShowPlayers(false)}>
+          <KeyboardAvoidingView style={styles.listOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={0}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View style={[styles.listBox, { padding: 20, maxHeight: '88%' }]}>
+                <Text style={styles.listTitle}>Player Guidance — {activeScheme === 'offense' ? 'Offense' : activeScheme === 'defense' ? 'Defense' : 'Counter'}</Text>
+                <Text style={styles.aiHint}>
+                  Lock a player to keep them exactly where they are — the AI cascades the rest of the
+                  play around them. Add a note to steer a specific player. Then Apply & Regenerate.
+                </Text>
+                <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                  {(boards[activeBoardIdx]?.ai?.schemes?.[activeScheme]?.players ?? []).map(pl => {
+                    const locked = !!lockedPlayers[pl.id];
+                    return (
+                      <View key={pl.id} style={styles.guideRow}>
+                        <View style={styles.guideHead}>
+                          <View style={styles.guideBadge}><Text style={styles.guideBadgeText}>{pl.id}</Text></View>
+                          <TouchableOpacity
+                            style={[styles.lockBtn, locked && { backgroundColor: t.accentSoft, borderColor: t.accent }]}
+                            onPress={() => setLockedPlayers(prev => ({ ...prev, [pl.id]: !locked }))}>
+                            <Ionicons name={locked ? 'lock-closed' : 'lock-open-outline'} size={14} color={locked ? t.accent : t.muted} />
+                            <Text style={[styles.lockBtnText, locked && { color: t.accent }]}>{locked ? 'Locked' : 'Open'}</Text>
+                          </TouchableOpacity>
+                        </View>
+                        <TextInput
+                          style={styles.guideInput}
+                          placeholder={`Guidance for ${pl.id} (optional)…`}
+                          placeholderTextColor={t.muted2}
+                          value={playerGuidance[pl.id] ?? ''}
+                          onChangeText={txt => setPlayerGuidance(prev => ({ ...prev, [pl.id]: txt }))}
+                        />
+                      </View>
+                    );
+                  })}
+                  {(boards[activeBoardIdx]?.ai?.schemes?.[activeScheme]?.players ?? []).length === 0 && (
+                    <Text style={styles.aiHint}>No players in this scheme yet.</Text>
+                  )}
+                </ScrollView>
+                <GeneratingOverlay visible={applyingGuidance} label="Cascading the play around your locks…" />
+                <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+                  <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setShowPlayers(false)}>
+                    <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.addBoardBtn, { flex: 1, opacity: applyingGuidance ? 0.5 : 1 }]}
+                    onPress={applyPlayerGuidance} disabled={applyingGuidance}>
+                    {applyingGuidance
+                      ? <ActivityIndicator color={t.ctaText} size="small" />
+                      : <><Ionicons name="sparkles" size={16} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply & Regenerate</Text></>}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1304,4 +1455,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   attachChipText:  { color: t.accent, fontSize: 13, fontFamily: fonts[700], flex: 1 },
   sourceCard:      { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 14, backgroundColor: t.chip, borderWidth: 1, borderColor: t.line, marginBottom: 10 },
   sourceIcon:      { width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  guideRow:        { backgroundColor: t.chip, borderRadius: 12, padding: 12, marginBottom: 10, borderWidth: 1, borderColor: t.line },
+  guideHead:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  guideBadge:      { width: 34, height: 28, borderRadius: 8, backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder, alignItems: 'center', justifyContent: 'center' },
+  guideBadgeText:  { color: t.ink, fontSize: 13, fontFamily: fonts[800] },
+  lockBtn:         { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: t.line, backgroundColor: t.card },
+  lockBtnText:     { color: t.muted, fontSize: 12, fontFamily: fonts[700] },
+  guideInput:      { backgroundColor: t.card, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, color: t.ink, fontSize: 13.5, borderWidth: 1, borderColor: t.line },
 });

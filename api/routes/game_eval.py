@@ -1218,6 +1218,8 @@ ACTOR: every action has an "actor" = the id of the player or defender who makes 
 
 STEPS: every action has a "step" integer (1,2,3,...) marking WHEN it happens as the play develops. Actions that happen at the SAME time share the same step number; actions that happen later get higher step numbers. Order the play realistically (e.g. screen on step 1, cut on step 2, pass on step 3).
 
+CONSTRAINTS: if the scene lists LOCKED PLAYERS or PER-PLAYER GUIDANCE / PLAYER ADJUSTMENTS, honor them precisely — keep any locked player at the exact coordinates given and reposition (cascade) only the other players to make the play work, and follow each per-player note.
+
 RULES: 5 offensive players (O1-O5) and up to 5 defenders (X1-X5) per scheme; at most 10 actions per scheme; 3-5 key items. offense = what the offense ran / should run; defense = the defensive scheme and rotations; counter = the counter/adjustment. The key holds the suggested movements or positioning that would have made the play succeed (get a basket, find the open man, correct the rotation) — each key arrow shows the improved movement. Keep key text under 90 characters.
 
 OUTPUT ONLY the JSON object. It MUST be strictly valid: every array element and object property separated by a comma, no trailing commas, no comments, no prose before or after."""
