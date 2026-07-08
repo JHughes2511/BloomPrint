@@ -482,12 +482,21 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       Alert.alert('Nothing to apply', 'Lock a player or edit their detail first.');
       return;
     }
-    // Full current formation (both sides) — start here, keep the same side.
-    const allUnits = [...(scheme.players ?? []), ...(scheme.defenders ?? [])];
-    const formationLines = allUnits.map(p => `- ${dispId(p.id)} at x=${Math.round(p.x)}, y=${Math.round(p.y)}`);
+    // Full current formation for EVERY scheme — the AI must keep them all exactly
+    // where they are (same side, no mirror); only edited players move.
+    const schemesObj = b.ai.schemes ?? {};
+    const formationBlocks = (['offense', 'defense', 'counter'] as SchemeKey[])
+      .filter(s => schemesObj[s])
+      .map(s => {
+        const all = [...(schemesObj[s]?.players ?? []), ...(schemesObj[s]?.defenders ?? [])];
+        if (!all.length) return '';
+        return `${s.toUpperCase()}:\n${all.map(p => `- ${dispId(p.id)} at x=${Math.round(p.x)}, y=${Math.round(p.y)}`).join('\n')}`;
+      })
+      .filter(Boolean)
+      .join('\n\n');
     const extra = [
-      'EDIT the existing play — do NOT redraw a new one. KEEP THE PLAY ON THE SAME SIDE OF THE FLOOR; do NOT mirror or flip left/right. Start every player from their CURRENT position below and keep them there. Move a player ONLY if a standing per-player instruction applies to them; make minimal adjustments, only to non-locked players, and only if genuinely required to make an instruction work.',
-      `CURRENT POSITIONS (${activeScheme} — keep exactly, same side):\n${formationLines.join('\n')}`,
+      'EDIT the existing play — do NOT redraw a new one. Keep ALL THREE schemes (offense, defense, counter) exactly as they are: same side of the floor, NO mirroring or flipping. Start every player from their CURRENT position below and keep them there. Move a player ONLY if a standing per-player instruction applies to them; make minimal adjustments, only to non-locked players, and only if genuinely required to make an instruction work.',
+      `CURRENT POSITIONS — keep every player at these exact spots:\n${formationBlocks}`,
       `LOCKED (must not move at all): ${lockedIds.length ? lockedIds.join(', ') : 'none'}`,
     ].join('\n\n');
     setApplyingGuidance(true);
@@ -830,7 +839,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         if (!finished || animCancel.current) { setAnimating(false); return; }
         i += 1;
         if (i < steps.length) setTimeout(runStep, 250);
-        else { setAnimating(false); setAnimDone(true); }   // hold final positions
+        else { setAnimating(false); setAnimDone(false); }   // return to the START view
       });
     };
     runStep();

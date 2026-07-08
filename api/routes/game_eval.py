@@ -1201,7 +1201,9 @@ _AI_PLAY_PROMPT = """You are an elite basketball tactician. From the scene descr
 
 POSITIONS: the player numbers are basketball positions — 1 = Point Guard (O1), 2 = Shooting Guard (O2), 3 = Small Forward (O3), 4 = Power Forward (O4), 5 = Center (O5). Place and move each player consistent with their position (e.g. O1 initiates up top, O5 plays around the rim/high post), and each defender X1-X5 guards the matching position (X5 guards O5, etc.).
 
-COORDINATES: feet on a regulation HALF court. x: 0 = left sideline, 25 = middle, 50 = right sideline. y grows toward the hoop — LOW y is farther from the basket (up top), HIGH y is at the rim. Landmarks: half-court line y=47, top of the 3-point arc / where the point guard initiates y≈62, free-throw line y=75, elbows y≈75 (x≈17 and x≈33), rim/basket y≈89, blocks/low post y≈84 (x≈19 and x≈31), wings y≈66 (x≈8 and x≈42), corners y≈90 (x≈4 and x≈46). The ball-handler up top belongs around y=60-64, NOT at the free-throw line. Keep every coordinate inside 2..48 for x and 48..92 for y.
+COORDINATES: feet on a regulation HALF court. x: 0 = left sideline, 25 = middle, 50 = right sideline. y grows toward the hoop — LOW y is farther from the basket (up top), HIGH y is at the rim. The x,y for every player and defender is their STARTING position, before the play develops (movement is expressed only through actions).
+
+DEFENDER POSITIONING: by default place each defender on the BASKET side of the player they guard — between their man and the rim. Because the rim is at HIGH y, that means the defender sits at a slightly HIGHER y than their man (about 3-5 ft toward the basket), roughly on the line from their man to the rim. So the on-ball defender of a point guard up top (y≈62) belongs just below him toward the basket (y≈66-67), NOT above him. Only put a defender on the non-basket (ball/deny) side when the scene or scheme calls for fronting the post, denying a wing, or top-locking a shooter. Landmarks: half-court line y=47, top of the 3-point arc / where the point guard initiates y≈62, free-throw line y=75, elbows y≈75 (x≈17 and x≈33), rim/basket y≈89, blocks/low post y≈84 (x≈19 and x≈31), wings y≈66 (x≈8 and x≈42), corners y≈90 (x≈4 and x≈46). The ball-handler up top belongs around y=60-64, NOT at the free-throw line. Keep every coordinate inside 2..48 for x and 48..92 for y.
 
 Return exactly this shape. Output play_name and the FULL key array FIRST, then the schemes last — the key must never be omitted:
 {
@@ -1309,6 +1311,22 @@ async def ai_play(
             out["defenders"].append({"id": str(df.get("id") or f"X{i+1}")[:3],
                                      "x": _pt(df.get("x"), 2, 48, 25), "y": _pt(df.get("y"), 48, 92, 74),
                                      "role": str(df.get("role") or "")[:200]})
+
+        # Auto-correct obviously-wrong on-ball defenders: a PERIMETER defender
+        # (guarding a man up top, man.y < 76) that sits ON TOP of / above its man
+        # (farther from the basket) is almost never right — nudge it to the basket
+        # side (between man and rim). Post fronts / off-ball are left untouched.
+        by_num = {p["id"][1:]: p for p in out["players"] if len(p["id"]) > 1}
+        for df in out["defenders"]:
+            man = by_num.get(df["id"][1:]) if len(df["id"]) > 1 else None
+            if not man:
+                continue
+            perimeter = man["y"] < 76
+            guarding = abs(df["x"] - man["x"]) < 10
+            non_basket_side = df["y"] <= man["y"] + 1  # at/above man = away from rim
+            if perimeter and guarding and non_basket_side:
+                df["y"] = min(man["y"] + 5.0, 90.0)
+                df["x"] = man["x"] + (25.0 - man["x"]) * 0.12  # ease slightly toward the middle
         for idx, a in enumerate((sc.get("actions") or [])[:10]):
             fr, to = a.get("from") or [25, 80], a.get("to") or [25, 70]
             try:
