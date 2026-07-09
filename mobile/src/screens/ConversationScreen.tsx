@@ -18,6 +18,8 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import { renderReport } from '../utils/renderReport';
+import { reportSubject } from '../utils/reportSubject';
+import { outputTypeLabel } from '../utils/reportType';
 
 export default function ConversationScreen() {
   const route = useRoute<any>();
@@ -39,6 +41,7 @@ export default function ConversationScreen() {
   const [showReportPicker, setShowReportPicker] = useState(false);
   const [reportList, setReportList] = useState<any[]>([]);
   const [reportsLoading, setReportsLoading] = useState(false);
+  const [reportSearch, setReportSearch] = useState('');
   const [reportView, setReportView] = useState<{ title: string; text: string } | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const rec = useRef<Audio.Recording | null>(null);
@@ -119,16 +122,27 @@ export default function ConversationScreen() {
     } catch { setRecording(false); }
   };
 
-  const playAudio = async (uri: string) => {
+  const playAudio = async (dataUri: string) => {
     try {
-      const { sound } = await Audio.Sound.createAsync({ uri });
-      await sound.playAsync();
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsInSilentModeIOS: true });
+      let uri = dataUri;
+      // iOS can't play a data: URI directly — write it to a temp file first.
+      if (dataUri.startsWith('data:')) {
+        const b64 = dataUri.split(',')[1] ?? '';
+        const path = `${FileSystem.cacheDirectory}sm_${Date.now()}.m4a`;
+        await FileSystem.writeAsStringAsync(path, b64, { encoding: 'base64' as any });
+        uri = path;
+      }
+      const { sound } = await Audio.Sound.createAsync({ uri }, { shouldPlay: true });
+      sound.setOnPlaybackStatusUpdate((st: any) => { if (st?.isLoaded && st.didJustFinish) sound.unloadAsync().catch(() => {}); });
     } catch { Alert.alert('Error', 'Could not play audio.'); }
   };
 
   const openReportPicker = async () => {
     setShowReportPicker(true);
+    setReportSearch('');
     setReportsLoading(true);
+    const d = (v: any) => { try { return new Date(v).toLocaleDateString(); } catch { return ''; } };
     try {
       const [evals, team, games, scout, training] = await Promise.all([
         evalsAPI.recent().catch(() => []),
@@ -138,11 +152,38 @@ export default function ConversationScreen() {
         trainingAPI.recent().catch(() => []),
       ]);
       const items = [
-        ...(evals ?? []).map((e: any) => ({ report_type: 'eval', report_id: e.id, report_title: `${e.player_name ?? 'Player'} — ${(e.output_type ?? '').replace(/_/g, ' ')}` })),
-        ...(team ?? []).map((tr: any) => ({ report_type: 'team_report', report_id: tr.id, report_title: 'Team Report', report_text: tr.report_text })),
-        ...(games ?? []).map((g: any) => ({ report_type: 'game', report_id: g.id, report_title: g.title || 'Game Report', report_text: g.report_text })),
-        ...(scout ?? []).filter((g: any) => g.ai_scouting_report).map((g: any) => ({ report_type: 'scout', report_id: g.id, report_title: `Scout vs ${g.opponent_name ?? ''}`, report_text: String(g.ai_scouting_report).replace(/\s*END OF REPORT\.?\s*$/i, '') })),
-        ...(training ?? []).map((ts: any) => ({ report_type: 'training', report_id: ts.id, report_title: `Training — ${ts.player_name ?? ''}`, report_text: ts.program_text })),
+        ...(evals ?? []).map((e: any) => ({
+          category: 'Player Evals', report_type: 'eval', report_id: e.id,
+          report_title: `${e.player_name ?? 'Player'} · ${outputTypeLabel(e.output_type ?? '')}`,
+          sub: d(e.created_at),
+        })),
+        ...(team ?? []).map((tr: any) => {
+          const subject = reportSubject(tr.report_text ?? '', tr.output_type ?? '');
+          return {
+            category: 'Team Reports', report_type: 'team_report', report_id: tr.id,
+            report_title: subject || outputTypeLabel(tr.output_type ?? '') || 'Team Report',
+            sub: `${outputTypeLabel(tr.output_type ?? '') || 'Team Report'} · ${d(tr.created_at)}`,
+            report_text: tr.report_text,
+          };
+        }),
+        ...(games ?? []).map((g: any) => ({
+          category: 'Game Reports', report_type: 'game', report_id: g.id,
+          report_title: g.title || (g.my_team_name ? `${g.my_team_name}${g.opponent_team_name ? ` vs ${g.opponent_team_name}` : ''}` : 'Game Report'),
+          sub: `Game Report · ${d(g.updated_at || g.created_at)}`,
+          report_text: g.report_text,
+        })),
+        ...(scout ?? []).filter((g: any) => g.ai_scouting_report).map((g: any) => ({
+          category: 'Scout Reports', report_type: 'scout', report_id: g.id,
+          report_title: `vs ${g.opponent_name ?? 'Opponent'}`,
+          sub: `Scout Report · ${d(g.date || g.created_at)}`,
+          report_text: String(g.ai_scouting_report).replace(/\s*END OF REPORT\.?\s*$/i, ''),
+        })),
+        ...(training ?? []).map((ts: any) => ({
+          category: 'Training', report_type: 'training', report_id: ts.id,
+          report_title: `${ts.player_name ?? 'Player'} Training`,
+          sub: `Training Program · ${d(ts.created_at)}`,
+          report_text: ts.program_text,
+        })),
       ];
       setReportList(items);
     } catch { setReportList([]); }
@@ -255,17 +296,44 @@ export default function ConversationScreen() {
               <Text style={styles.sheetTitle}>Attach a report</Text>
               <TouchableOpacity onPress={() => setShowReportPicker(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
-            {reportsLoading ? <ActivityIndicator color={t.accent} style={{ marginVertical: 24 }} /> : (
-              <ScrollView style={{ maxHeight: 400 }}>
-                {reportList.length === 0 && <Text style={styles.empty}>No reports found.</Text>}
-                {reportList.map((r, i) => (
-                  <TouchableOpacity key={`${r.report_type}-${r.report_id}-${i}`} style={styles.reportRow} onPress={() => attachReport(r)}>
-                    <Ionicons name="document-text-outline" size={16} color={t.accent} />
-                    <Text style={styles.reportRowText} numberOfLines={1}>{r.report_title}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            )}
+            <View style={styles.pickerSearch}>
+              <Ionicons name="search" size={16} color={t.muted} />
+              <VoiceTextInput
+                style={styles.pickerSearchInput}
+                placeholder="Search reports..."
+                placeholderTextColor={t.muted2}
+                value={reportSearch}
+                onChangeText={setReportSearch}
+              />
+            </View>
+            {reportsLoading ? <ActivityIndicator color={t.accent} style={{ marginVertical: 24 }} /> : (() => {
+              const q = reportSearch.trim().toLowerCase();
+              const filtered = reportList.filter(r => !q || `${r.report_title} ${r.sub} ${r.category}`.toLowerCase().includes(q));
+              const cats = ['Player Evals', 'Team Reports', 'Game Reports', 'Scout Reports', 'Training'];
+              return (
+                <ScrollView style={{ maxHeight: 420 }} keyboardShouldPersistTaps="handled">
+                  {filtered.length === 0 && <Text style={styles.empty}>No reports found.</Text>}
+                  {cats.map(cat => {
+                    const rows = filtered.filter(r => r.category === cat);
+                    if (!rows.length) return null;
+                    return (
+                      <View key={cat}>
+                        <Text style={styles.catHeader}>{cat}</Text>
+                        {rows.map((r, i) => (
+                          <TouchableOpacity key={`${r.report_type}-${r.report_id}-${i}`} style={styles.reportRow} onPress={() => attachReport(r)}>
+                            <Ionicons name="document-text-outline" size={16} color={t.accent} />
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.reportRowText} numberOfLines={1}>{r.report_title}</Text>
+                              {!!r.sub && <Text style={styles.reportRowSub} numberOfLines={1}>{r.sub}</Text>}
+                            </View>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              );
+            })()}
           </View>
         </View>
       </Modal>
@@ -314,6 +382,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, maxHeight: '70%', borderWidth: 1, borderColor: t.cardBorder },
   sheetHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   sheetTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[800], flex: 1 },
-  reportRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: t.divider },
-  reportRowText: { color: t.inkSoft, fontSize: 14, flex: 1 },
+  reportRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: t.divider },
+  reportRowText: { color: t.inkSoft, fontSize: 14, fontFamily: fonts[600] },
+  reportRowSub: { color: t.muted2, fontSize: 11, marginTop: 1 },
+  catHeader: { color: t.label, fontSize: 10.5, fontFamily: fonts[800], letterSpacing: 1, textTransform: 'uppercase', marginTop: 14, marginBottom: 4 },
+  pickerSearch: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.chip, borderRadius: 10, paddingHorizontal: 12, borderWidth: 1, borderColor: t.line, marginBottom: 6 },
+  pickerSearchInput: { flex: 1, paddingVertical: 10, color: t.ink, fontSize: 14 },
 });

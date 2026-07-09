@@ -32,6 +32,7 @@ export default function CommentThread({
   const [replyTo, setReplyTo] = useState<number | null>(null);
   const [replyText, setReplyText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [collapsed, setCollapsed] = useState<Record<number, boolean>>({});
 
   const byParent = useMemo(() => {
     const map: Record<string, ThreadComment[]> = {};
@@ -56,37 +57,50 @@ export default function CommentThread({
 
   const renderLevel = (parentKey: string, depth: number): React.ReactNode[] => {
     const items = byParent[parentKey] ?? [];
-    return items.map(c => (
-      <View key={c.id} style={[depth > 0 && { marginLeft: 14, borderLeftWidth: 2, borderLeftColor: t.line, paddingLeft: 10 }]}>
-        <View style={s.card}>
-          <View style={s.head}>
-            <Text style={[s.author, { color: acc }]}>{c.author_name || 'Unknown'}</Text>
-            <Text style={s.date}>{new Date(c.created_at).toLocaleDateString()}</Text>
+    return items.map(c => {
+      const childCount = (byParent[String(c.id)] ?? []).length;
+      const isCollapsed = !!collapsed[c.id];
+      return (
+        <View key={c.id} style={[depth > 0 && { marginLeft: 14, borderLeftWidth: 2, borderLeftColor: t.line, paddingLeft: 10 }]}>
+          <View style={s.card}>
+            <View style={s.head}>
+              <Text style={[s.author, { color: acc }]}>{c.author_name || 'Unknown'}</Text>
+              <Text style={s.date}>{new Date(c.created_at).toLocaleDateString()}</Text>
+            </View>
+            <Text style={s.text}>{c.text}</Text>
+            <View style={s.actionsRow}>
+              <TouchableOpacity onPress={() => { setReplyTo(replyTo === c.id ? null : c.id); setReplyText(''); }} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+                <Text style={[s.replyLink, { color: acc }]}>{replyTo === c.id ? 'Cancel' : 'Reply'}</Text>
+              </TouchableOpacity>
+              {childCount > 0 && (
+                <TouchableOpacity onPress={() => setCollapsed(prev => ({ ...prev, [c.id]: !prev[c.id] }))} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+                  <Text style={[s.replyLink, { color: t.muted }]}>
+                    {isCollapsed ? `Show ${childCount} ${childCount === 1 ? 'reply' : 'replies'}` : 'Hide replies'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
-          <Text style={s.text}>{c.text}</Text>
-          <TouchableOpacity onPress={() => { setReplyTo(replyTo === c.id ? null : c.id); setReplyText(''); }} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
-            <Text style={[s.replyLink, { color: acc }]}>{replyTo === c.id ? 'Cancel' : 'Reply'}</Text>
-          </TouchableOpacity>
+          {replyTo === c.id && (
+            <View style={s.replyRow}>
+              <TextInput
+                style={s.input}
+                placeholder={`Reply to ${c.author_name || 'comment'}…`}
+                placeholderTextColor={t.muted2}
+                value={replyText}
+                onChangeText={setReplyText}
+                autoFocus
+                multiline
+              />
+              <TouchableOpacity style={[s.sendBtn, { backgroundColor: acc }]} onPress={() => submit(c.id)} disabled={submitting || !replyText.trim()}>
+                {submitting ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="send" size={16} color="#fff" />}
+              </TouchableOpacity>
+            </View>
+          )}
+          {!isCollapsed && renderLevel(String(c.id), depth + 1)}
         </View>
-        {replyTo === c.id && (
-          <View style={s.replyRow}>
-            <TextInput
-              style={s.input}
-              placeholder={`Reply to ${c.author_name || 'comment'}…`}
-              placeholderTextColor={t.muted2}
-              value={replyText}
-              onChangeText={setReplyText}
-              autoFocus
-              multiline
-            />
-            <TouchableOpacity style={[s.sendBtn, { backgroundColor: acc }]} onPress={() => submit(c.id)} disabled={submitting || !replyText.trim()}>
-              {submitting ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="send" size={16} color="#fff" />}
-            </TouchableOpacity>
-          </View>
-        )}
-        {renderLevel(String(c.id), depth + 1)}
-      </View>
-    ));
+      );
+    });
   };
 
   return <View>{renderLevel('root', 0)}</View>;
@@ -98,7 +112,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   author: { fontSize: 12, fontFamily: fonts[700] },
   date: { color: t.muted, fontSize: 11 },
   text: { color: t.inkSoft, fontSize: 13, lineHeight: 19 },
-  replyLink: { fontSize: 12, fontFamily: fonts[700], marginTop: 8 },
+  actionsRow: { flexDirection: 'row', gap: 16, marginTop: 8 },
+  replyLink: { fontSize: 12, fontFamily: fonts[700] },
   replyRow: { flexDirection: 'row', gap: 8, marginBottom: 10, alignItems: 'flex-end' },
   input: { flex: 1, backgroundColor: t.chip, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, color: t.ink, fontSize: 13.5, borderWidth: 1, borderColor: t.line, minHeight: 40 },
   sendBtn: { width: 42, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
