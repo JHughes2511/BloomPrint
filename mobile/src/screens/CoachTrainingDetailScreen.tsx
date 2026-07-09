@@ -14,6 +14,7 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
+import CommentThread from '../components/CommentThread';
 
 function cleanMarkdown(text: string): string {
   return text
@@ -166,17 +167,15 @@ export default function CoachTrainingDetailScreen() {
           onLayout={e => { commentY.current = e.nativeEvent.layout.y; }}
         >
           <Text style={styles.sectionLabel}>Comments ({training.comments?.length ?? 0})</Text>
-          {(training.comments ?? []).map((c: any) => (
-            <View key={c.id} style={styles.commentCard}>
-              <View style={styles.commentHeader}>
-                <Text style={[styles.commentAuthor, c.coach_id ? { color: t.accent } : { color: t.positive }]}>
-                  {c.author_name}{c.coach_id ? ' (Coach)' : ''}
-                </Text>
-                <Text style={styles.commentDate}>{new Date(c.created_at).toLocaleDateString()}</Text>
-              </View>
-              <Text style={styles.commentText}>{c.text}</Text>
-            </View>
-          ))}
+          <CommentThread
+            comments={(training.comments ?? []) as any}
+            accent={t.accent}
+            onReply={async (parentId, text) => {
+              await playerAPI.addCoachComment(trainingId, { text, parent_id: parentId });
+              const updated = await playerAPI.getTrainingDetail(trainingId);
+              setTraining(updated);
+            }}
+          />
           <View style={styles.commentInput}>
             <VoiceTextInput
               style={styles.input}
