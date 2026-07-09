@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import VoiceTextInput from './VoiceTextInput';
-import { playerAPI, teamsAPI, staffSharingAPI } from '../api/client';
+import { playerAPI, teamsAPI, staffSharingAPI, teamStaffAPI } from '../api/client';
 import { splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import KeyboardAwareScrollView from './KeyboardAwareScrollView';
 import { useTheme } from '../theme/ThemeProvider';
@@ -38,6 +38,7 @@ export default function ShareModal({
   const [searchLoading, setSearchLoading] = useState(false);
   const [teams, setTeams] = useState<any[]>([]);
   const [selected, setSelected] = useState<any>(null); // selected player user / team / staff target
+  const [myGroups, setMyGroups] = useState<any[]>([]); // staff teams + sub-teams I'm in
   const [allowRegen, setAllowRegen] = useState(false);
   const [sectionToggles, setSectionToggles] = useState<Record<string, boolean>>({});
   const [sending, setSending] = useState(false);
@@ -52,6 +53,7 @@ export default function ShareModal({
       setAllowRegen(false);
       setSectionToggles(Object.fromEntries(splitReportSections(reportText ?? '').map(s => [s.heading, true])));
       teamsAPI.list().then(setTeams).catch(() => {});
+      teamStaffAPI.myTeams().then(setMyGroups).catch(() => setMyGroups([]));
       // Surface the subject player first so they're the default recipient.
       if (subjectPlayerName) {
         setSearch(subjectPlayerName);
@@ -114,67 +116,61 @@ export default function ShareModal({
     try {
       if (target === 'all_staff') {
         const frozen = !allowRegen ? filteredText() : undefined;
-        const res = await staffSharingAPI.shareGroup({
-          report_type: reportType,
-          report_id: reportId,
-          kind: selected.kind,
-          coach_id: selected.coach_id ?? undefined,
-          team_id: selected.team_id ?? undefined,
-          program_name: selected.program_name ?? undefined,
-          allow_regenerate: allowRegen,
-          frozen_text: frozen,
+        if (selected?.__group) {
+          // A team / sub-team from My Groups — staff members only.
+          const res = await staffSharingAPI.shareTeam({
+            report_type: reportType, report_id: reportId, team_id: selected.id,
+            allow_regenerate: allowRegen, frozen_text: frozen,
+          });
+          Alert.alert('Shared!', `Report shared with ${res.shared_count ?? 0} staff member(s) in ${res.team_name ?? selected.name}.`);
+        } else {
+          const res = await staffSharingAPI.shareGroup({
+            report_type: reportType, report_id: reportId, kind: selected.kind,
+            coach_id: selected.coach_id ?? undefined, team_id: selected.team_id ?? undefined,
+            program_name: selected.program_name ?? undefined,
+            allow_regenerate: allowRegen, frozen_text: frozen,
+          });
+          Alert.alert('Shared!', `Report shared with ${res.shared_count ?? 1} staff member(s).`);
+        }
+      } else if (target === 'team') {
+        // Whole team: players AND the team's staff coaches.
+        const playersRes = await playerAPI.shareTeamReport({
+          output_type: outputType, report_text: filteredText(), target_type: 'team', team_id: selected.id,
         });
-        Alert.alert('Shared!', `Report shared with ${res.shared_count ?? 1} staff member(s).`);
-      } else if (target === 'team' && selected?.parent_team_id) {
-        // A staff sub-team — deliver to its coach members' staff inbox.
-        const res = await staffSharingAPI.shareTeam({
-          report_type: reportType,
-          report_id: reportId,
-          team_id: selected.id,
-          allow_regenerate: false,
-          frozen_text: filteredText(),
-        });
-        setSending(false);
-        Alert.alert('Shared!', `Report shared with ${res.shared_count ?? 0} staff member(s) in ${res.team_name ?? selected.name}.`);
-        onClose();
-        return;
+        let staffCount = 0;
+        try {
+          const staffRes = await staffSharingAPI.shareTeam({
+            report_type: reportType, report_id: reportId, team_id: selected.id,
+            allow_regenerate: false, frozen_text: filteredText(),
+          });
+          staffCount = staffRes.shared_count ?? 0;
+        } catch {}
+        const p = playersRes.shared_count ?? 0;
+        Alert.alert('Shared!', `Report shared with ${p} player(s) and ${staffCount} staff on ${selected.name}.`);
       } else {
+        // Individual player (consent flow).
         const res = await playerAPI.shareTeamReport({
-          output_type: outputType,
-          report_text: filteredText(),
-          target_type: target,
-          player_user_id: target === 'player' ? selected.id : undefined,
-          team_id: target === 'team' ? selected.id : undefined,
-          subject_player_id: target === 'player' ? subjectPlayerId : undefined,
-          require_consent: target === 'player' && !!subjectPlayerId,
+          output_type: outputType, report_text: filteredText(), target_type: 'player',
+          player_user_id: selected.id,
+          subject_player_id: subjectPlayerId,
+          require_consent: !!subjectPlayerId,
           consent_override: consentOverride,
         });
-        // Consent flow responses (individual player reports going to another player).
         if (res.status === 'pending_approval') {
           setSending(false);
-          Alert.alert(
-            'Pending approval',
-            `This report is about ${res.subject_name}. We sent ${res.subject_name} a request to approve sharing it with ${res.recipient_name}. It will send automatically once they approve.`,
-          );
+          Alert.alert('Pending approval',
+            `This report is about ${res.subject_name}. We sent ${res.subject_name} a request to approve sharing it with ${res.recipient_name}. It will send automatically once they approve.`);
           onClose();
           return;
         }
         if (res.status === 'needs_override') {
           setSending(false);
-          Alert.alert(
-            'No account to approve',
+          Alert.alert('No account to approve',
             `${res.subject_name} doesn't have an account to approve this yet. Their report is not about ${res.recipient_name}. Send it to ${res.recipient_name} anyway?`,
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Send anyway', style: 'destructive', onPress: () => doSend(true) },
-            ],
-          );
+            [{ text: 'Cancel', style: 'cancel' }, { text: 'Send anyway', style: 'destructive', onPress: () => doSend(true) }]);
           return;
         }
-        const n = res.shared_count ?? 1;
-        Alert.alert('Shared!', target === 'team'
-          ? `Report shared with ${n} player(s) on ${selected.name}.`
-          : `Report shared with ${selected.name ?? 'player'}.`);
+        Alert.alert('Shared!', `Report shared with ${selected.name ?? 'player'}.`);
       }
       onClose();
     } catch (e: any) {
@@ -209,7 +205,7 @@ export default function ShareModal({
 
           {/* Target selector */}
           <View style={styles.targetRow}>
-            {([['player', 'Individual Player'], ['team', 'Whole Team'], ['all_staff', 'All Staff']] as const).map(([key, label]) => (
+            {([['player', 'Player'], ['team', 'Team'], ['all_staff', 'Staff']] as const).map(([key, label]) => (
               <TouchableOpacity
                 key={key}
                 style={[styles.targetChip, target === key && styles.targetChipActive]}
@@ -225,27 +221,18 @@ export default function ShareModal({
             {target === 'team' ? (
               <>
                 <Text style={styles.label}>Select a Team</Text>
-                {teams.length === 0 && <Text style={styles.empty}>No teams found.</Text>}
-                {(() => {
-                  const nameById: Record<number, string> = {};
-                  teams.forEach((tm: any) => { nameById[tm.id] = tm.name; });
-                  return teams.map((tm: any) => {
-                    const parentName = tm.parent_team_id ? nameById[tm.parent_team_id] : null;
-                    return (
-                      <TouchableOpacity
-                        key={tm.id}
-                        style={[styles.row, selected?.id === tm.id && styles.rowActive, tm.parent_team_id && { marginLeft: 14, borderLeftWidth: 3, borderLeftColor: t.accent }]}
-                        onPress={() => setSelected(tm)}
-                      >
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.rowTitle}>{tm.name}</Text>
-                          {parentName && <Text style={styles.rowSub}>Sub-team of {parentName}</Text>}
-                        </View>
-                        {selected?.id === tm.id && <Ionicons name="checkmark-circle" size={18} color={t.accent} />}
-                      </TouchableOpacity>
-                    );
-                  });
-                })()}
+                <Text style={styles.hint}>Sends to the team's players and its staff coaches.</Text>
+                {teams.filter((tm: any) => !tm.parent_team_id).length === 0 && <Text style={styles.empty}>No teams found.</Text>}
+                {teams.filter((tm: any) => !tm.parent_team_id).map((tm: any) => (
+                  <TouchableOpacity
+                    key={tm.id}
+                    style={[styles.row, selected?.id === tm.id && !selected?.__group && styles.rowActive]}
+                    onPress={() => setSelected(tm)}
+                  >
+                    <Text style={styles.rowTitle}>{tm.name}</Text>
+                    {selected?.id === tm.id && !selected?.__group && <Ionicons name="checkmark-circle" size={18} color={t.accent} />}
+                  </TouchableOpacity>
+                ))}
               </>
             ) : (
               <>
@@ -299,6 +286,38 @@ export default function ShareModal({
                     </TouchableOpacity>
                   );
                 })}
+
+                {/* My groups — teams & sub-teams I'm in (staff only) */}
+                {target === 'all_staff' && myGroups.length > 0 && (() => {
+                  const ids = new Set(myGroups.map((g: any) => g.id));
+                  const byParent: Record<number, any[]> = {};
+                  myGroups.forEach((g: any) => { const p = g.parent_team_id ?? 0; (byParent[p] = byParent[p] || []).push(g); });
+                  const roots = myGroups.filter((g: any) => !g.parent_team_id || !ids.has(g.parent_team_id));
+                  const renderNode = (g: any, depth: number): any => {
+                    const sel = selected?.__group && selected.id === g.id;
+                    return (
+                      <View key={g.id}>
+                        <TouchableOpacity
+                          style={[styles.row, sel && styles.rowActive, depth ? { marginLeft: depth * 14, borderLeftWidth: 3, borderLeftColor: t.accent } : null]}
+                          onPress={() => setSelected({ ...g, __group: true })}
+                        >
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.rowTitle}>{g.name}</Text>
+                            <Text style={styles.rowSub}>{g.member_count ?? 1} staff{g.parent_team_id ? ' · sub-team' : ''}</Text>
+                          </View>
+                          {sel && <Ionicons name="checkmark-circle" size={18} color={t.accent} />}
+                        </TouchableOpacity>
+                        {(byParent[g.id] || []).map((c: any) => renderNode(c, depth + 1))}
+                      </View>
+                    );
+                  };
+                  return (
+                    <>
+                      <Text style={[styles.label, { marginTop: 14 }]}>My Groups — staff only</Text>
+                      {roots.map((r: any) => renderNode(r, 0))}
+                    </>
+                  );
+                })()}
               </>
             )}
 
