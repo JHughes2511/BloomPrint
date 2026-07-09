@@ -1583,6 +1583,8 @@ export default function PlayerProfileScreen() {
           outputType={shareCtx.outputType}
           reportText={shareCtx.reportText}
           title={shareCtx.title}
+          subjectPlayerId={player?.id}
+          subjectPlayerName={player?.name}
         />
       )}
     </KeyboardAwareScrollView>

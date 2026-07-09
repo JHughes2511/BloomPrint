@@ -361,6 +361,24 @@ class PlayerNotification(Base):
     coach       = relationship("Coach", back_populates="notifications")
 
 
+class ShareApproval(Base):
+    """Consent record: a coach wants to send a player's report to a DIFFERENT
+    player. The subject player (who the report is about) must approve before it
+    is sent to the recipient."""
+    __tablename__ = "share_approvals"
+
+    id                       = Column(Integer, primary_key=True, index=True)
+    coach_id                 = Column(Integer, ForeignKey("coaches.id"), nullable=False)   # sender
+    subject_player_id        = Column(Integer, ForeignKey("players.id"), nullable=False)    # report is about
+    subject_player_user_id   = Column(Integer, ForeignKey("player_users.id"), nullable=True) # approver
+    recipient_player_user_id = Column(Integer, ForeignKey("player_users.id"), nullable=False) # intended recipient
+    output_type              = Column(String, nullable=False)
+    report_text              = Column(Text, nullable=False)
+    message                  = Column(Text, nullable=True)
+    status                   = Column(String, default="pending")  # pending / approved / rejected
+    created_at               = Column(DateTime, default=datetime.utcnow)
+
+
 class CoachNotification(Base):
     __tablename__ = "coach_notifications"
 

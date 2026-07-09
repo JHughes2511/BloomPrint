@@ -741,6 +741,8 @@ export default function EvalReportScreen() {
           outputType={ev.output_type ?? 'player_eval'}
           reportText={ev.report_text ?? ''}
           title={ev.output_type ? outputTypeLabel(ev.output_type) : 'Player Eval'}
+          subjectPlayerId={player?.id}
+          subjectPlayerName={player?.name}
         />
       )}
 

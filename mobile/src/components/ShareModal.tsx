@@ -22,10 +22,13 @@ export type ShareModalProps = {
   outputType: string;   // label for player-facing copy, e.g. coaching_report
   reportText: string;   // full report text (section filtering + player payload)
   title?: string;       // optional heading label shown in the modal subtitle
+  subjectPlayerId?: number;    // the player this report is ABOUT (enables consent flow)
+  subjectPlayerName?: string;  // shown first + used in consent messaging
 };
 
 export default function ShareModal({
   visible, onClose, reportType, reportId, outputType, reportText, title,
+  subjectPlayerId, subjectPlayerName,
 }: ShareModalProps) {
   const { t } = useTheme();
   const styles = makeStyles(t);
@@ -45,20 +48,40 @@ export default function ShareModal({
   useEffect(() => {
     if (visible) {
       setTarget('player');
-      setSearch('');
-      setResults([]);
       setSelected(null);
       setAllowRegen(false);
       setSectionToggles(Object.fromEntries(splitReportSections(reportText ?? '').map(s => [s.heading, true])));
       teamsAPI.list().then(setTeams).catch(() => {});
+      // Surface the subject player first so they're the default recipient.
+      if (subjectPlayerName) {
+        setSearch(subjectPlayerName);
+        setSearchLoading(true);
+        playerAPI.searchPlayerUsers(subjectPlayerName)
+          .then((r: any[]) => setResults(r ?? []))
+          .catch(() => setResults([]))
+          .finally(() => setSearchLoading(false));
+      } else {
+        setSearch('');
+        setResults([]);
+      }
     }
   }, [visible, reportText]);
 
-  // Clear selection/results when switching target tab
+  // Clear selection/results when switching target tab; re-surface the subject
+  // player when returning to the Player tab.
   useEffect(() => {
     setSelected(null);
-    setResults([]);
-    setSearch('');
+    if (target === 'player' && subjectPlayerName) {
+      setSearch(subjectPlayerName);
+      setSearchLoading(true);
+      playerAPI.searchPlayerUsers(subjectPlayerName)
+        .then((r: any[]) => setResults(r ?? []))
+        .catch(() => setResults([]))
+        .finally(() => setSearchLoading(false));
+    } else {
+      setResults([]);
+      setSearch('');
+    }
   }, [target]);
 
   const runSearch = async () => {
@@ -85,7 +108,7 @@ export default function ShareModal({
     return !!selected;
   };
 
-  const doSend = async () => {
+  const doSend = async (consentOverride = false) => {
     if (!canSend()) return;
     setSending(true);
     try {
@@ -109,7 +132,32 @@ export default function ShareModal({
           target_type: target,
           player_user_id: target === 'player' ? selected.id : undefined,
           team_id: target === 'team' ? selected.id : undefined,
+          subject_player_id: target === 'player' ? subjectPlayerId : undefined,
+          require_consent: target === 'player' && !!subjectPlayerId,
+          consent_override: consentOverride,
         });
+        // Consent flow responses (individual player reports going to another player).
+        if (res.status === 'pending_approval') {
+          setSending(false);
+          Alert.alert(
+            'Pending approval',
+            `This report is about ${res.subject_name}. We sent ${res.subject_name} a request to approve sharing it with ${res.recipient_name}. It will send automatically once they approve.`,
+          );
+          onClose();
+          return;
+        }
+        if (res.status === 'needs_override') {
+          setSending(false);
+          Alert.alert(
+            'No account to approve',
+            `${res.subject_name} doesn't have an account to approve this yet. Their report is not about ${res.recipient_name}. Send it to ${res.recipient_name} anyway?`,
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Send anyway', style: 'destructive', onPress: () => doSend(true) },
+            ],
+          );
+          return;
+        }
         const n = res.shared_count ?? 1;
         Alert.alert('Shared!', target === 'team'
           ? `Report shared with ${n} player(s) on ${selected.name}.`
@@ -178,6 +226,13 @@ export default function ShareModal({
               </>
             ) : (
               <>
+                {/* Consent note for individual player reports */}
+                {target === 'player' && !!subjectPlayerName && (
+                  <Text style={styles.hint}>
+                    This report is about {subjectPlayerName}. Sending it to {subjectPlayerName} is instant;
+                    sending to a different player needs {subjectPlayerName}'s approval first.
+                  </Text>
+                )}
                 {/* Player or Staff — search */}
                 <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
                   <VoiceTextInput
@@ -269,7 +324,7 @@ export default function ShareModal({
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.sendBtn, { opacity: canSend() ? 1 : 0.4 }]}
-              onPress={doSend}
+              onPress={() => doSend()}
               disabled={sending || !canSend()}
             >
               {sending ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.sendText}>Share</Text>}

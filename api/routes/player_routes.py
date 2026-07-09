@@ -1363,6 +1363,46 @@ def share_team_report(
     targets: list[int] = []  # player_user_ids
 
     if body.target_type == "player" and body.player_user_id:
+        recipient = db.get(models.PlayerUser, body.player_user_id)
+        # Consent flow: sending an individual player's report to a DIFFERENT
+        # player requires the subject player's approval first.
+        if body.require_consent and body.subject_player_id and recipient:
+            recipient_player_id = recipient.player_id
+            if recipient_player_id != body.subject_player_id:
+                subject_player = db.get(models.Player, body.subject_player_id)
+                subject_pu = subject_player.player_user if subject_player else None
+                subject_name = subject_player.name if subject_player else "the player"
+                recipient_name = recipient.name or "the recipient"
+                if subject_pu and not body.consent_override:
+                    approval = models.ShareApproval(
+                        coach_id=coach.id,
+                        subject_player_id=body.subject_player_id,
+                        subject_player_user_id=subject_pu.id,
+                        recipient_player_user_id=recipient.id,
+                        output_type=body.output_type,
+                        report_text=body.report_text,
+                        message=body.message,
+                        status="pending",
+                    )
+                    db.add(approval)
+                    db.flush()
+                    db.add(models.PlayerNotification(
+                        player_user_id=subject_pu.id,
+                        type="share_approval",
+                        title="Approval needed",
+                        body=(f"{coach.name} wants to send your "
+                              f"{body.output_type.replace('_', ' ')} report to {recipient_name}. "
+                              f"Approve or reject sharing your report with a player it isn't about."),
+                        ref_id=approval.id,
+                    ))
+                    db.commit()
+                    return {"ok": True, "status": "pending_approval",
+                            "subject_name": subject_name, "recipient_name": recipient_name}
+                if not subject_pu and not body.consent_override:
+                    # No account to approve — let the coach confirm an override.
+                    return {"ok": False, "status": "needs_override",
+                            "subject_name": subject_name, "recipient_name": recipient_name}
+                # consent_override -> fall through to a direct share.
         targets = [body.player_user_id]
 
     elif body.target_type == "team" and body.team_id:
@@ -1419,6 +1459,95 @@ def share_team_report(
 
     db.commit()
     return {"ok": True, "shared_count": count}
+
+
+@router.get("/share-approvals")
+def list_share_approvals(
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    """Pending consent requests where THIS player is the report subject."""
+    rows = (
+        db.query(models.ShareApproval)
+        .filter_by(subject_player_user_id=pu.id, status="pending")
+        .order_by(models.ShareApproval.id.desc())
+        .all()
+    )
+    out = []
+    for a in rows:
+        coach = db.get(models.Coach, a.coach_id)
+        recip = db.get(models.PlayerUser, a.recipient_player_user_id)
+        subj = db.get(models.Player, a.subject_player_id)
+        out.append({
+            "id": a.id,
+            "coach_name": coach.name if coach else "Coach",
+            "subject_player_name": subj.name if subj else "",
+            "recipient_name": (recip.name if recip else "the recipient"),
+            "output_type": a.output_type,
+            "status": a.status,
+            "created_at": a.created_at,
+        })
+    return out
+
+
+@router.post("/share-approvals/{approval_id}/approve")
+def approve_share(
+    approval_id: int,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    a = db.get(models.ShareApproval, approval_id)
+    if not a or a.subject_player_user_id != pu.id:
+        raise HTTPException(status_code=404, detail="Approval not found")
+    if a.status != "pending":
+        return {"ok": True, "status": a.status}
+    coach = db.get(models.Coach, a.coach_id)
+    tsr = models.TeamSharedReport(
+        player_user_id=a.recipient_player_user_id,
+        shared_by_id=a.coach_id,
+        output_type=a.output_type,
+        report_text=a.report_text,
+        message=a.message,
+    )
+    db.add(tsr)
+    db.flush()
+    db.add(models.PlayerNotification(
+        player_user_id=a.recipient_player_user_id,
+        type="team_report_shared",
+        title="Report Shared",
+        body=f"{coach.name if coach else 'A coach'} shared a {a.output_type.replace('_', ' ')} report with you.",
+        ref_id=tsr.id,
+    ))
+    db.add(models.PlayerNotification(
+        coach_id=a.coach_id,
+        type="share_approved",
+        title="Share approved",
+        body=f"{pu.name} approved sharing their {a.output_type.replace('_', ' ')} report.",
+    ))
+    a.status = "approved"
+    db.commit()
+    return {"ok": True, "status": "approved"}
+
+
+@router.post("/share-approvals/{approval_id}/reject")
+def reject_share(
+    approval_id: int,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    a = db.get(models.ShareApproval, approval_id)
+    if not a or a.subject_player_user_id != pu.id:
+        raise HTTPException(status_code=404, detail="Approval not found")
+    if a.status == "pending":
+        a.status = "rejected"
+        db.add(models.PlayerNotification(
+            coach_id=a.coach_id,
+            type="share_rejected",
+            title="Share declined",
+            body=f"{pu.name} declined sharing their {a.output_type.replace('_', ' ')} report.",
+        ))
+        db.commit()
+    return {"ok": True, "status": a.status}
 
 
 @router.get("/team-shared-reports", response_model=list[schemas.TeamSharedReportOut])

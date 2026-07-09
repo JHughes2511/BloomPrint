@@ -70,6 +70,12 @@ export const playerTrainingAPI = {
     playerApi.post(`/player/coach-training/${id}/apply-corrections`).then(r => r.data),
 };
 
+export const shareApprovalsAPI = {
+  list: () => playerApi.get('/player/share-approvals').then(r => r.data),
+  approve: (id: number) => playerApi.post(`/player/share-approvals/${id}/approve`).then(r => r.data),
+  reject: (id: number) => playerApi.post(`/player/share-approvals/${id}/reject`).then(r => r.data),
+};
+
 export const playerNotificationsAPI = {
   list: () => playerApi.get('/player/notifications').then(r => r.data),
   markRead: (id: number) =>

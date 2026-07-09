@@ -410,6 +410,22 @@ class TeamShareRequest(BaseModel):
     team_id: int | None = None
     message: str | None = None
     staff_coach_id: int | None = None  # for targeting a specific staff member
+    # Consent flow: for an individual player's report, if the recipient is NOT
+    # the subject, the subject must approve first.
+    subject_player_id: int | None = None
+    require_consent: bool = False
+    consent_override: bool = False   # coach confirms sending when subject has no account
+
+
+class ShareApprovalOut(BaseModel):
+    id: int
+    coach_name: str
+    subject_player_name: str
+    recipient_name: str
+    output_type: str
+    status: str
+    created_at: datetime
+    model_config = {"from_attributes": True}
 
 class TeamSharedReportOut(BaseModel):
     id: int

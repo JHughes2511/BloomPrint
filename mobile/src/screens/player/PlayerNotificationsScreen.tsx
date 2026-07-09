@@ -5,8 +5,9 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { playerNotificationsAPI } from '../../api/playerClient';
+import { playerNotificationsAPI, shareApprovalsAPI } from '../../api/playerClient';
 import { AppNotification } from '../../types';
+import { Alert } from 'react-native';
 import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
@@ -26,13 +27,19 @@ export default function PlayerNotificationsScreen() {
   const { t } = useTheme();
   const styles = makeStyles(t);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [approvals, setApprovals] = useState<any[]>([]);
+  const [actioning, setActioning] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = async () => {
     try {
-      const data = await playerNotificationsAPI.list();
+      const [data, appr] = await Promise.all([
+        playerNotificationsAPI.list(),
+        shareApprovalsAPI.list().catch(() => []),
+      ]);
       setNotifications(data);
+      setApprovals(appr ?? []);
       // Mark all read in background so home badge clears — but keep visual unread state in list
       const hasUnread = data.some((n: any) => !n.read);
       if (hasUnread) {
@@ -41,6 +48,19 @@ export default function PlayerNotificationsScreen() {
     } catch {}
     setLoading(false);
     setRefreshing(false);
+  };
+
+  const resolveApproval = async (id: number, action: 'approve' | 'reject') => {
+    setActioning(id);
+    try {
+      if (action === 'approve') await shareApprovalsAPI.approve(id);
+      else await shareApprovalsAPI.reject(id);
+      setApprovals(prev => prev.filter(a => a.id !== id));
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update the request.');
+    } finally {
+      setActioning(null);
+    }
   };
 
   useFocusEffect(useCallback(() => { load(); }, []));
@@ -81,7 +101,34 @@ export default function PlayerNotificationsScreen() {
           <Text style={styles.sub}>{notifications.filter(n => !n.read).length} unread</Text>
         </View>
 
-        {notifications.length === 0 ? (
+        {/* Pending consent requests — someone wants to share YOUR report */}
+        {approvals.map(a => (
+          <View key={`appr-${a.id}`} style={styles.approvalCard}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <Ionicons name="shield-checkmark-outline" size={18} color={t.accent} />
+              <Text style={styles.approvalTitle}>Approval needed</Text>
+            </View>
+            <Text style={styles.approvalBody}>
+              <Text style={{ fontFamily: fonts[700], color: t.ink }}>{a.coach_name}</Text> wants to send your{' '}
+              {String(a.output_type || 'report').replace(/_/g, ' ')} report (about {a.subject_player_name || 'you'}) to{' '}
+              <Text style={{ fontFamily: fonts[700], color: t.ink }}>{a.recipient_name}</Text> — a player it isn't about.
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
+              <TouchableOpacity
+                style={[styles.rejectBtn, actioning === a.id && { opacity: 0.5 }]}
+                onPress={() => resolveApproval(a.id, 'reject')} disabled={actioning === a.id}>
+                <Text style={styles.rejectText}>Reject</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.approveBtn, actioning === a.id && { opacity: 0.5 }]}
+                onPress={() => resolveApproval(a.id, 'approve')} disabled={actioning === a.id}>
+                {actioning === a.id ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.approveText}>Approve</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+
+        {notifications.length === 0 && approvals.length === 0 ? (
           <View style={styles.empty}>
             <Ionicons name="notifications-outline" size={48} color={t.muted2} />
             <Text style={styles.emptyTitle}>No notifications</Text>
@@ -157,4 +204,14 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     marginTop: 4,
     marginLeft: 8,
   },
+  approvalCard: {
+    backgroundColor: t.card, borderRadius: 12, padding: 14,
+    marginHorizontal: 20, marginBottom: 10, borderWidth: 1, borderColor: t.accent,
+  },
+  approvalTitle: { color: t.ink, fontSize: 14, fontFamily: fonts[800] },
+  approvalBody: { color: t.inkSoft, fontSize: 13, lineHeight: 19 },
+  rejectBtn: { flex: 1, paddingVertical: 11, borderRadius: 10, alignItems: 'center', backgroundColor: t.chip, borderWidth: 1, borderColor: t.line },
+  rejectText: { color: t.ink, fontFamily: fonts[700], fontSize: 14 },
+  approveBtn: { flex: 1, paddingVertical: 11, borderRadius: 10, alignItems: 'center', backgroundColor: t.accent },
+  approveText: { color: '#fff', fontFamily: fonts[700], fontSize: 14 },
 });
