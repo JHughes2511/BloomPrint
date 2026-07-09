@@ -32,6 +32,7 @@ class Coach(Base):
     # reference that is fed to the model on every generation.
     philosophy_reference = Column(String, nullable=True)
     onboarded         = Column(Boolean, default=False)  # completed the philosophy onboarding
+    last_season_reminder = Column(String, nullable=True)  # season year last nudged/acknowledged
     created_at        = Column(DateTime, default=datetime.utcnow)
 
     evaluations         = relationship("Evaluation", back_populates="coach")

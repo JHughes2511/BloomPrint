@@ -129,11 +129,6 @@ export default function CoachNotificationsScreen() {
                 navigation.navigate('Conversation', { conversationId: n.ref_id });
                 return;
               }
-              if (n.type === 'philosophy_update') {
-                if (!n.read) { try { await playerAPI.coachMarkRead(n.id); } catch {} }
-                navigation.navigate('Onboarding');
-                return;
-              }
               const willExpand = expandedId !== n.id;
               setExpandedId(prev => prev === n.id ? null : n.id);
               if (willExpand && n.type === 'player_commented' && n.ref_id) {
@@ -224,6 +219,26 @@ export default function CoachNotificationsScreen() {
                       {replying === n.id ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.replyBtnText}>Send Reply</Text>}
                     </TouchableOpacity>
                   </>
+                ) : n.type === 'philosophy_update' ? (
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity
+                      style={[styles.approveBtn, { backgroundColor: t.chip, flex: 1, alignItems: 'center' }]}
+                      onPress={async () => {
+                        try { await playerAPI.coachMarkRead(n.id); } catch {}
+                        setNotifications(prev => prev.filter(x => x.id !== n.id));
+                      }}>
+                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>No update needed</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.approveBtn, { backgroundColor: t.ctaBg, flex: 1, alignItems: 'center' }]}
+                      onPress={async () => {
+                        try { await playerAPI.coachMarkRead(n.id); } catch {}
+                        setNotifications(prev => prev.filter(x => x.id !== n.id));
+                        navigation.navigate('Onboarding');
+                      }}>
+                      <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Review & update</Text>
+                    </TouchableOpacity>
+                  </View>
                 ) : n.type === 'team_invite' && n.ref_id ? (
                   <View style={styles.actionRow}>
                     <TouchableOpacity

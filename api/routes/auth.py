@@ -117,7 +117,16 @@ def google_auth(body: schemas.CoachGoogleAuth, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=schemas.CoachOut)
-def me(coach: models.Coach = Depends(get_current_coach)):
+def me(coach: models.Coach = Depends(get_current_coach), db: Session = Depends(get_db)):
+    # Calendar-based season nudge (fires even if the coach never tracks a game).
+    from ..season import maybe_season_reminder
+    try:
+        if maybe_season_reminder(db, coach):
+            db.commit()
+        elif db.is_modified(coach):
+            db.commit()
+    except Exception:
+        db.rollback()
     return coach
 
 
