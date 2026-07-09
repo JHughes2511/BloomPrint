@@ -26,6 +26,7 @@ const NOTIF_ICONS: Record<string, string> = {
   team_invite: 'people-circle-outline',
   team_invite_approved: 'checkmark-circle',
   team_invite_rejected: 'close-circle',
+  philosophy_update: 'sparkles-outline',
 };
 
 export default function CoachNotificationsScreen() {
@@ -126,6 +127,11 @@ export default function CoachNotificationsScreen() {
               if (n.type === 'staff_message' && n.ref_id) {
                 if (!n.read) { try { await playerAPI.coachMarkRead(n.id); } catch {} }
                 navigation.navigate('Conversation', { conversationId: n.ref_id });
+                return;
+              }
+              if (n.type === 'philosophy_update') {
+                if (!n.read) { try { await playerAPI.coachMarkRead(n.id); } catch {} }
+                navigation.navigate('Onboarding');
                 return;
               }
               const willExpand = expandedId !== n.id;

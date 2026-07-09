@@ -243,6 +243,29 @@ def create_session(
             game.date = datetime.fromisoformat(body.date)
         except ValueError:
             pass
+
+    # Season-change nudge: if this game is the first of a NEW season year for
+    # this coach, remind them to review/update their system & philosophy (once).
+    def _yr(g) -> str:
+        return (getattr(g, "season_year", None) or "").strip() or (str(g.date.year) if getattr(g, "date", None) else "")
+    new_year = _yr(game)
+    if new_year:
+        prior_years = {_yr(g) for g in db.query(models.GameSession).filter_by(coach_id=coach.id).all()}
+        prior_years.discard("")
+        if prior_years and new_year not in prior_years:
+            exists = (
+                db.query(models.PlayerNotification)
+                .filter_by(coach_id=coach.id, type="philosophy_update")
+                .filter(models.PlayerNotification.body.like(f"%{new_year}%"))
+                .first()
+            )
+            if not exists:
+                db.add(models.PlayerNotification(
+                    coach_id=coach.id, type="philosophy_update",
+                    title="New season detected",
+                    body=f"A new season ({new_year}) has started — a good time to review and update your system & philosophy.",
+                ))
+
     db.add(game)
     db.commit()
     db.refresh(game)
