@@ -910,12 +910,12 @@ export default function StaffInboxScreen() {
             <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
               {activeGame?.kind === 'report' && (
                 activeGame.report_text
-                  ? renderReport(activeGame.report_text, { heading: t.ink, body: t.inkSoft })
+                  ? renderReport(String(activeGame.report_text).replace(/\s*END OF REPORT\.?\s*$/i, ''), { heading: t.ink, body: t.inkSoft })
                   : <Text style={{ color: t.muted2 }}>No report generated yet.</Text>
               )}
               {activeGame?.kind === 'session' && (
                 activeGame.ai_scouting_report
-                  ? renderReport(activeGame.ai_scouting_report, { heading: t.ink, body: t.inkSoft })
+                  ? renderReport(String(activeGame.ai_scouting_report).replace(/\s*END OF REPORT\.?\s*$/i, ''), { heading: t.ink, body: t.inkSoft })
                   : <Text style={{ color: t.muted2 }}>No AI scouting report generated yet for this game.</Text>
               )}
             </KeyboardAwareScrollView>
