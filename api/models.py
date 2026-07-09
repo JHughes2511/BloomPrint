@@ -334,6 +334,7 @@ class PlayerComment(Base):
     shared_report_id    = Column(Integer, ForeignKey("shared_reports.id"), nullable=True)
     player_training_id  = Column(Integer, ForeignKey("player_training.id"), nullable=True)
     training_session_id = Column(Integer, ForeignKey("training_sessions.id"), nullable=True)
+    parent_id           = Column(Integer, ForeignKey("player_comments.id"), nullable=True)  # threaded reply
     text                = Column(Text, nullable=False)
     created_at          = Column(DateTime, default=datetime.utcnow)
 

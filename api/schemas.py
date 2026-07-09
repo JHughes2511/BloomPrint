@@ -375,12 +375,14 @@ class PlayerTrainingUpdate(BaseModel):
 
 class PlayerCommentCreate(BaseModel):
     text: str
+    parent_id: int | None = None
 
 
 class PlayerCommentOut(BaseModel):
     id: int
     player_user_id: int | None
     coach_id: int | None
+    parent_id: int | None = None
     text: str
     created_at: datetime
     author_name: str = ""

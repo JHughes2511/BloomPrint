@@ -580,6 +580,7 @@ def add_coach_training_comment_player(
         player_user_id=pu.id,
         training_session_id=training_id,
         text=body.text,
+        parent_id=body.parent_id,
     )
     db.add(comment)
     db.flush()
@@ -1017,6 +1018,7 @@ def add_player_comment(
         player_user_id=pu.id,
         shared_report_id=shared_id,
         text=body.text,
+        parent_id=body.parent_id,
     )
     db.add(comment)
     db.flush()
@@ -1049,6 +1051,7 @@ def add_training_comment_player(
         player_user_id=pu.id,
         player_training_id=training_id,
         text=body.text,
+        parent_id=body.parent_id,
     )
     db.add(comment)
     db.flush()
@@ -1082,6 +1085,7 @@ def add_training_comment_coach(
         coach_id=coach.id,
         player_training_id=training_id,
         text=body.text,
+        parent_id=body.parent_id,
     )
     db.add(comment)
     db.flush()
@@ -1279,7 +1283,7 @@ def coach_reply_to_shared_report(
         # training comment thread so the reply still lands instead of 404-ing.
         pt = db.get(models.PlayerTraining, shared_id)
         if pt:
-            comment = models.PlayerComment(coach_id=coach.id, player_training_id=shared_id, text=body.text)
+            comment = models.PlayerComment(coach_id=coach.id, player_training_id=shared_id, text=body.text, parent_id=body.parent_id)
             db.add(comment)
             db.flush()
             db.add(models.PlayerNotification(
@@ -1296,7 +1300,7 @@ def coach_reply_to_shared_report(
             return out
         ts = db.get(models.TrainingSession, shared_id)
         if ts and ts.coach_id == coach.id:
-            comment = models.PlayerComment(coach_id=coach.id, training_session_id=shared_id, text=body.text)
+            comment = models.PlayerComment(coach_id=coach.id, training_session_id=shared_id, text=body.text, parent_id=body.parent_id)
             db.add(comment)
             db.flush()
             if ts.player and ts.player.player_user:
@@ -1317,6 +1321,7 @@ def coach_reply_to_shared_report(
         coach_id=coach.id,
         shared_report_id=shared_id,
         text=body.text,
+        parent_id=body.parent_id,
     )
     db.add(comment)
     db.flush()

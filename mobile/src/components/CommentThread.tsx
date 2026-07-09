@@ -1,0 +1,105 @@
+import React, { useMemo, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../theme/ThemeProvider';
+import { ThemeTokens } from '../theme/tokens';
+import { fonts } from '../theme/typography';
+
+export type ThreadComment = {
+  id: number;
+  parent_id?: number | null;
+  author_name?: string;
+  text: string;
+  created_at: string;
+};
+
+/**
+ * Renders comments as nested threads (full depth). Each comment has a Reply
+ * action that opens an inline box; onReply(parentId, text) posts the reply.
+ */
+export default function CommentThread({
+  comments,
+  onReply,
+  accent,
+}: {
+  comments: ThreadComment[];
+  onReply: (parentId: number, text: string) => Promise<void>;
+  accent?: string;
+}) {
+  const { t } = useTheme();
+  const s = makeStyles(t);
+  const acc = accent ?? t.accent;
+  const [replyTo, setReplyTo] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const byParent = useMemo(() => {
+    const map: Record<string, ThreadComment[]> = {};
+    comments.forEach(c => {
+      const key = c.parent_id == null ? 'root' : String(c.parent_id);
+      (map[key] = map[key] || []).push(c);
+    });
+    return map;
+  }, [comments]);
+
+  const submit = async (parentId: number) => {
+    if (!replyText.trim()) return;
+    setSubmitting(true);
+    try {
+      await onReply(parentId, replyText.trim());
+      setReplyText('');
+      setReplyTo(null);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const renderLevel = (parentKey: string, depth: number): React.ReactNode[] => {
+    const items = byParent[parentKey] ?? [];
+    return items.map(c => (
+      <View key={c.id} style={[depth > 0 && { marginLeft: 14, borderLeftWidth: 2, borderLeftColor: t.line, paddingLeft: 10 }]}>
+        <View style={s.card}>
+          <View style={s.head}>
+            <Text style={[s.author, { color: acc }]}>{c.author_name || 'Unknown'}</Text>
+            <Text style={s.date}>{new Date(c.created_at).toLocaleDateString()}</Text>
+          </View>
+          <Text style={s.text}>{c.text}</Text>
+          <TouchableOpacity onPress={() => { setReplyTo(replyTo === c.id ? null : c.id); setReplyText(''); }} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+            <Text style={[s.replyLink, { color: acc }]}>{replyTo === c.id ? 'Cancel' : 'Reply'}</Text>
+          </TouchableOpacity>
+        </View>
+        {replyTo === c.id && (
+          <View style={s.replyRow}>
+            <TextInput
+              style={s.input}
+              placeholder={`Reply to ${c.author_name || 'comment'}…`}
+              placeholderTextColor={t.muted2}
+              value={replyText}
+              onChangeText={setReplyText}
+              autoFocus
+              multiline
+            />
+            <TouchableOpacity style={[s.sendBtn, { backgroundColor: acc }]} onPress={() => submit(c.id)} disabled={submitting || !replyText.trim()}>
+              {submitting ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="send" size={16} color="#fff" />}
+            </TouchableOpacity>
+          </View>
+        )}
+        {renderLevel(String(c.id), depth + 1)}
+      </View>
+    ));
+  };
+
+  return <View>{renderLevel('root', 0)}</View>;
+}
+
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  card: { backgroundColor: t.card, borderRadius: 12, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: t.cardBorder },
+  head: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
+  author: { fontSize: 12, fontFamily: fonts[700] },
+  date: { color: t.muted, fontSize: 11 },
+  text: { color: t.inkSoft, fontSize: 13, lineHeight: 19 },
+  replyLink: { fontSize: 12, fontFamily: fonts[700], marginTop: 8 },
+  replyRow: { flexDirection: 'row', gap: 8, marginBottom: 10, alignItems: 'flex-end' },
+  input: { flex: 1, backgroundColor: t.chip, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, color: t.ink, fontSize: 13.5, borderWidth: 1, borderColor: t.line, minHeight: 40 },
+  sendBtn: { width: 42, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+});

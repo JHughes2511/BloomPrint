@@ -153,6 +153,7 @@ export interface PlayerComment {
   id: number;
   player_user_id: number | null;
   coach_id: number | null;
+  parent_id?: number | null;
   text: string;
   created_at: string;
   author_name: string;

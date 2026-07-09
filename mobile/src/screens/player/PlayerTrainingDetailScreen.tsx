@@ -19,6 +19,7 @@ import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 import { parseDrills } from '../../utils/trainingDrills';
 import { GeneratingOverlay } from '../../components/GeneratingBasketball';
+import CommentThread from '../../components/CommentThread';
 import { buildPdfFileName } from '../../utils/buildReportPdf';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 
@@ -269,21 +270,14 @@ export default function PlayerTrainingDetailScreen() {
         {/* Comments */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Comments ({comments.length})</Text>
-          {comments.map(c => (
-            <View key={c.id} style={styles.commentCard}>
-              <View style={styles.commentHeader}>
-                <Text style={[
-                  styles.commentAuthor,
-                  c.coach_id ? { color: t.accent } : { color: t.positive },
-                ]}>
-                  {c.author_name || 'Unknown'}
-                  {c.coach_id ? ' (Coach)' : ''}
-                </Text>
-                <Text style={styles.commentDate}>{new Date(c.created_at).toLocaleDateString()}</Text>
-              </View>
-              <Text style={styles.commentText}>{c.text}</Text>
-            </View>
-          ))}
+          <CommentThread
+            comments={comments as any}
+            accent={t.positive}
+            onReply={async (parentId, text) => {
+              const c = await playerTrainingAPI.addComment(trainingId, text, parentId);
+              setComments(prev => [...prev, c]);
+            }}
+          />
           <View style={styles.commentInput}>
             <VoiceTextInput
               style={styles.input}

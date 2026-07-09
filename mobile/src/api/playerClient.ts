@@ -26,8 +26,8 @@ export const playerReportsAPI = {
   list: () => playerApi.get('/player/shared-reports').then(r => r.data),
   listTeam: () => playerApi.get('/player/team-shared-reports').then(r => r.data),
   get: (id: number) => playerApi.get(`/player/shared-reports/${id}`).then(r => r.data),
-  addComment: (id: number, text: string) =>
-    playerApi.post(`/player/shared-reports/${id}/comments`, { text }).then(r => r.data),
+  addComment: (id: number, text: string, parentId?: number) =>
+    playerApi.post(`/player/shared-reports/${id}/comments`, { text, parent_id: parentId }).then(r => r.data),
   getComments: (id: number) =>
     playerApi.get(`/player/shared-reports/${id}/comments`).then(r => r.data),
 };
@@ -38,8 +38,8 @@ export const playerTrainingAPI = {
   list: () => playerApi.get('/player/training').then(r => r.data),
   getComments: (id: number) =>
     playerApi.get(`/player/training/${id}/comments`).then(r => r.data),
-  addComment: (id: number, text: string) =>
-    playerApi.post(`/player/training/${id}/comments`, { text }).then(r => r.data),
+  addComment: (id: number, text: string, parentId?: number) =>
+    playerApi.post(`/player/training/${id}/comments`, { text, parent_id: parentId }).then(r => r.data),
   refresh: (id: number, feedback: string) =>
     playerApi.post(`/player/training/${id}/refresh`, { feedback }).then(r => r.data),
   corrections: (id: number) =>
@@ -56,8 +56,8 @@ export const playerTrainingAPI = {
     playerApi.get(`/player/coach-training/${id}`).then(r => r.data),
   getCoachSentComments: (id: number) =>
     playerApi.get(`/player/coach-training/${id}/comments`).then(r => r.data),
-  addCoachSentComment: (id: number, text: string) =>
-    playerApi.post(`/player/coach-training/${id}/comments`, { text }).then(r => r.data),
+  addCoachSentComment: (id: number, text: string, parentId?: number) =>
+    playerApi.post(`/player/coach-training/${id}/comments`, { text, parent_id: parentId }).then(r => r.data),
   setCoachSentProgress: (id: number, completed_drills: string[]) =>
     playerApi.patch(`/player/coach-training/${id}/progress`, { completed_drills }).then(r => r.data),
   refreshCoachSent: (id: number, feedback: string) =>

@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import { playerReportsAPI, playerTrainingAPI } from '../../api/playerClient';
 import { SharedReport, PlayerComment } from '../../types';
+import CommentThread from '../../components/CommentThread';
 import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
@@ -212,15 +213,14 @@ export default function PlayerReportDetailScreen() {
         {/* Comments */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Comments ({comments.length})</Text>
-          {comments.map(c => (
-            <View key={c.id} style={styles.commentCard}>
-              <View style={styles.commentHeader}>
-                <Text style={styles.commentAuthor}>{c.author_name || 'Unknown'}</Text>
-                <Text style={styles.commentDate}>{new Date(c.created_at).toLocaleDateString()}</Text>
-              </View>
-              <Text style={styles.commentText}>{c.text}</Text>
-            </View>
-          ))}
+          <CommentThread
+            comments={comments as any}
+            accent={t.positive}
+            onReply={async (parentId, text) => {
+              const c = await playerReportsAPI.addComment(reportId, text, parentId);
+              setComments(prev => [...prev, c]);
+            }}
+          />
           <View style={styles.commentInput}>
             <VoiceTextInput
               style={styles.input}

@@ -495,6 +495,19 @@ def _run_migrations():
         except Exception:
             pass
 
+        # Add parent_id to player_comments for threaded replies.
+        try:
+            pc_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(player_comments)")
+            )]
+            if pc_cols and "parent_id" not in pc_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE player_comments ADD COLUMN parent_id INTEGER"
+                ))
+                conn.commit()
+        except Exception:
+            pass
+
         # Create game_report_corrections table if missing (save-for-later
         # corrections on game reports, mirroring team_report_corrections).
         try:
