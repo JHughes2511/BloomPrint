@@ -146,6 +146,9 @@ export function splitReportSections(text: string): ReportSection[] {
   const headingOf = (line: string): string | null => {
     const t = line.trim();
     if (/^#{1,6}\s+/.test(t)) return t.replace(/^#{1,6}\s+/, '').replace(/\*\*/g, '').trim();
+    // A "LABEL: value" line whose value is a number/grade (e.g. "GRADE: 6.4 / 10")
+    // is a sub-field of the section above it, NOT its own toggleable section.
+    if (/:\s*-?\d/.test(t)) return null;
     // ALL CAPS heading line (no sentence punctuation)
     if (/^[A-Z][A-Z0-9\s/&()\-:'.]{2,}$/.test(t) && t.length < 70 && !/[.!?]$/.test(t)) {
       return t.replace(/:$/, '').trim();

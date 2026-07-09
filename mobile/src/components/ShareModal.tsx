@@ -236,6 +236,25 @@ export default function ShareModal({
               </>
             ) : (
               <>
+                {/* Allow regenerate — staff only, above the targets */}
+                {target === 'all_staff' && (
+                  <>
+                    <View style={styles.toggleRow}>
+                      <Text style={styles.toggleLabel}>Allow recipient to regenerate</Text>
+                      <Switch
+                        value={allowRegen}
+                        onValueChange={setAllowRegen}
+                        trackColor={{ false: t.line, true: t.accent }}
+                        thumbColor="#fff"
+                      />
+                    </View>
+                    <Text style={styles.hint}>
+                      {allowRegen
+                        ? 'Sends a live, regenerable copy — recipient sees the full report.'
+                        : 'Sends a frozen snapshot — choose which sections to include below.'}
+                    </Text>
+                  </>
+                )}
                 {/* Consent note for individual player reports */}
                 {target === 'player' && !!subjectPlayerName && (
                   <Text style={styles.hint}>
@@ -318,26 +337,6 @@ export default function ShareModal({
                     </>
                   );
                 })()}
-              </>
-            )}
-
-            {/* Allow regenerate — staff only */}
-            {target === 'all_staff' && (
-              <>
-                <View style={styles.toggleRow}>
-                  <Text style={styles.toggleLabel}>Allow recipient to regenerate</Text>
-                  <Switch
-                    value={allowRegen}
-                    onValueChange={setAllowRegen}
-                    trackColor={{ false: t.line, true: t.accent }}
-                    thumbColor="#fff"
-                  />
-                </View>
-                <Text style={styles.hint}>
-                  {allowRegen
-                    ? 'Sends a live, regenerable copy — recipient sees the full report.'
-                    : 'Sends a frozen snapshot — choose which sections to include below.'}
-                </Text>
               </>
             )}
 
