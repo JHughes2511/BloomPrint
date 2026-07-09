@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { staffSharingAPI, teamStaffAPI } from '../api/client';
+import { staffSharingAPI, teamStaffAPI, staffMessagesAPI, coachesAPI } from '../api/client';
 import { renderReport } from '../utils/renderReport';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -71,13 +71,51 @@ export default function StaffInboxScreen() {
   const [submittingGameComment, setSubmittingGameComment] = useState(false);
 
   const [refreshing, setRefreshing] = useState(false);
+
+  // Messaging state (merged into the inbox)
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [showCompose, setShowCompose] = useState(false);
+  const [staffSearch, setStaffSearch] = useState('');
+  const [staffResults, setStaffResults] = useState<any[]>([]);
+  const [staffSearching, setStaffSearching] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<any[]>([]);
+  const [creating, setCreating] = useState(false);
+
   const loadInbox = async () => {
     setLoading(true);
     try {
-      const inbox = await staffSharingAPI.inbox();
+      const [inbox, convos] = await Promise.all([
+        staffSharingAPI.inbox(),
+        staffMessagesAPI.list().catch(() => []),
+      ]);
       setItems(inbox);
+      setConversations(convos ?? []);
     } catch {}
     setLoading(false);
+  };
+
+  const searchStaff = async () => {
+    if (!staffSearch.trim()) return;
+    setStaffSearching(true);
+    try { setStaffResults(await coachesAPI.search(staffSearch.trim())); } catch {}
+    setStaffSearching(false);
+  };
+
+  const toggleStaff = (s: any) => {
+    setSelectedStaff(prev => prev.some(x => x.id === s.id) ? prev.filter(x => x.id !== s.id) : [...prev, s]);
+  };
+
+  const startConversation = async () => {
+    if (selectedStaff.length === 0) return;
+    setCreating(true);
+    try {
+      const conv = await staffMessagesAPI.create({ member_ids: selectedStaff.map(s => s.id), is_group: selectedStaff.length > 1 });
+      setShowCompose(false);
+      setSelectedStaff([]); setStaffSearch(''); setStaffResults([]);
+      navigation.navigate('Conversation', { conversationId: conv.id, title: conv.title });
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not start the conversation.');
+    } finally { setCreating(false); }
   };
 
   const loadMyTeams = async () => {
@@ -204,11 +242,41 @@ export default function StaffInboxScreen() {
         data={items}
         keyExtractor={i => String(i.id)}
         contentContainerStyle={{ paddingTop: 12, paddingBottom: 100 }}
-        ListEmptyComponent={
-          <View style={styles.center}>
-            <Ionicons name="mail-outline" size={48} color={t.muted2} />
-            <Text style={styles.emptyText}>No reports shared with you yet.</Text>
+        ListHeaderComponent={
+          <View>
+            <View style={styles.sectionRow}>
+              <Text style={styles.sectionLabel}>Messages</Text>
+              <TouchableOpacity style={styles.newMsgBtn} onPress={() => setShowCompose(true)}>
+                <Ionicons name="create-outline" size={15} color={t.ctaText} />
+                <Text style={styles.newMsgText}>New</Text>
+              </TouchableOpacity>
+            </View>
+            {conversations.length === 0 && (
+              <Text style={[styles.cardSub, { paddingHorizontal: 20, marginBottom: 6 }]}>No conversations yet — tap New to message a staff member.</Text>
+            )}
+            {conversations.map(c => (
+              <TouchableOpacity key={`conv-${c.id}`} style={styles.card} onPress={() => navigation.navigate('Conversation', { conversationId: c.id, title: c.title })}>
+                <View style={[styles.iconBox, { backgroundColor: t.accentSoft }]}>
+                  <Ionicons name={c.is_group ? 'people' : 'chatbubble-ellipses-outline'} size={18} color={t.accent} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.cardTitle} numberOfLines={1}>{c.title}</Text>
+                  <Text style={styles.cardSub} numberOfLines={1}>{c.last_text || 'No messages yet'}</Text>
+                </View>
+                {c.unread > 0 && <View style={styles.unreadDot}><Text style={styles.unreadDotText}>{c.unread}</Text></View>}
+                <Ionicons name="chevron-forward" size={14} color={t.muted2} />
+              </TouchableOpacity>
+            ))}
+            {items.length > 0 && <Text style={[styles.sectionLabel, { marginTop: 14 }]}>Shared Reports</Text>}
           </View>
+        }
+        ListEmptyComponent={
+          items.length === 0 ? null : (
+            <View style={styles.center}>
+              <Ionicons name="mail-outline" size={48} color={t.muted2} />
+              <Text style={styles.emptyText}>No reports shared with you yet.</Text>
+            </View>
+          )
         }
         renderItem={({ item }) => {
           const badgeColor = badgeFor(item.report_type);
@@ -423,6 +491,62 @@ export default function StaffInboxScreen() {
       {tab === 'inbox' && renderInboxTab()}
       {tab === 'team_games' && renderTeamGamesTab()}
       {tab === 'my_teams' && renderMyTeamsTab()}
+
+      {/* Compose / new message modal */}
+      <Modal visible={showCompose} transparent animationType="slide" onRequestClose={() => setShowCompose(false)}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={[styles.modalBox, { maxHeight: '80%' }]}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <Text style={styles.modalTitle}>New Message</Text>
+              <TouchableOpacity onPress={() => { setShowCompose(false); setSelectedStaff([]); }}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
+            </View>
+            <Text style={[styles.cardSub, { marginBottom: 8 }]}>Search staff by name. Add more than one for a group message.</Text>
+            {selectedStaff.length > 0 && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }} contentContainerStyle={{ gap: 6 }}>
+                {selectedStaff.map(s => (
+                  <TouchableOpacity key={s.id} style={styles.selChip} onPress={() => toggleStaff(s)}>
+                    <Text style={styles.selChipText}>{s.name}</Text>
+                    <Ionicons name="close-circle" size={14} color={t.accent} />
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+              <TextInput
+                style={[styles.searchInput, { flex: 1 }]}
+                placeholder="Search staff name..."
+                placeholderTextColor={t.muted2}
+                value={staffSearch}
+                onChangeText={setStaffSearch}
+                onSubmitEditing={searchStaff}
+                returnKeyType="search"
+              />
+              <TouchableOpacity style={styles.searchBtn} onPress={searchStaff} disabled={staffSearching}>
+                {staffSearching ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="search" size={18} color={t.ctaText} />}
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={{ maxHeight: 240 }}>
+              {staffResults.map((s: any) => {
+                const sel = selectedStaff.some(x => x.id === s.id);
+                return (
+                  <TouchableOpacity key={s.id} style={[styles.staffRow, sel && { borderColor: t.accent }]} onPress={() => toggleStaff(s)}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.cardTitle}>{s.name}</Text>
+                      <Text style={styles.cardSub}>{[s.role, s.program_name].filter(Boolean).join(' · ')}</Text>
+                    </View>
+                    {sel && <Ionicons name="checkmark-circle" size={18} color={t.accent} />}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+            <TouchableOpacity
+              style={[styles.startBtn, { opacity: selectedStaff.length && !creating ? 1 : 0.5 }]}
+              onPress={startConversation} disabled={!selectedStaff.length || creating}>
+              {creating ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.startBtnText}>{selectedStaff.length > 1 ? 'Start Group' : 'Start Message'}</Text>}
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       {/* Inbox detail modal */}
       <Modal visible={!!activeItem} animationType="slide" transparent>
@@ -685,4 +809,15 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   searchBtn: { backgroundColor: t.ctaBg, borderRadius: 10, width: 44, alignItems: 'center', justifyContent: 'center' },
   sendBtn: { backgroundColor: t.ctaBg, borderRadius: 10, width: 44, alignItems: 'center', justifyContent: 'center' },
   regenBtn: { backgroundColor: t.accent, borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 4 },
+  sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20 },
+  newMsgBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6, marginBottom: 8 },
+  newMsgText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 12.5 },
+  unreadDot: { minWidth: 20, height: 20, borderRadius: 10, backgroundColor: t.accent, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6, marginRight: 6 },
+  unreadDotText: { color: '#fff', fontSize: 11, fontFamily: fonts[800] },
+  searchInput: { backgroundColor: t.chip, borderRadius: 10, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line },
+  selChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: t.accentSoft, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, borderWidth: 1, borderColor: t.accent },
+  selChipText: { color: t.accent, fontSize: 13, fontFamily: fonts[600] },
+  staffRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: t.card, borderRadius: 12, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: t.cardBorder },
+  startBtn: { backgroundColor: t.ctaBg, borderRadius: 999, padding: 15, alignItems: 'center', marginTop: 10 },
+  startBtnText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15 },
 });

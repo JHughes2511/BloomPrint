@@ -26,6 +26,7 @@ import CoachNotificationsScreen from './src/screens/CoachNotificationsScreen';
 import CoachTrainingDetailScreen from './src/screens/CoachTrainingDetailScreen';
 import GameReportBuilderScreen from './src/screens/GameReportBuilderScreen';
 import StaffInboxScreen from './src/screens/StaffInboxScreen';
+import ConversationScreen from './src/screens/ConversationScreen';
 import TeamEvalScreen from './src/screens/TeamEvalScreen';
 
 // Role select
@@ -64,6 +65,7 @@ function HomeStack() {
       <Stack.Screen name="CoachNotifications" component={CoachNotificationsScreen} />
       <Stack.Screen name="CoachTrainingDetail" component={CoachTrainingDetailScreen} />
       <Stack.Screen name="StaffInbox" component={StaffInboxScreen} />
+      <Stack.Screen name="Conversation" component={ConversationScreen} />
     </Stack.Navigator>
   );
 }

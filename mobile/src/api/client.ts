@@ -274,6 +274,16 @@ export const staffSharingAPI = {
 };
 
 // ── Coaches search ─────────────────────────────────────────────────────────────
+export const staffMessagesAPI = {
+  list: () => api.get('/staff-messages').then(r => r.data),
+  create: (data: { member_ids: number[]; title?: string; is_group?: boolean }) =>
+    api.post('/staff-messages', data).then(r => r.data),
+  get: (cid: number) => api.get(`/staff-messages/${cid}`).then(r => r.data),
+  send: (cid: number, data: { text?: string; attachments?: any[] }) =>
+    api.post(`/staff-messages/${cid}/messages`, data).then(r => r.data),
+  read: (cid: number) => api.post(`/staff-messages/${cid}/read`).then(r => r.data),
+};
+
 export const coachesAPI = {
   search: (q: string) => api.get('/auth/coaches/search', { params: { q } }).then(r => r.data),
   list: () => api.get('/auth/coaches').then(r => r.data),

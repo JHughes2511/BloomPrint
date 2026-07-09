@@ -609,3 +609,51 @@ class TeamStaff(Base):
 
     coach = relationship("Coach")
     team  = relationship("Team")
+
+
+# ── Staff messaging ──────────────────────────────────────────────────────────
+
+class Conversation(Base):
+    __tablename__ = "conversations"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    is_group   = Column(Boolean, default=False)
+    title      = Column(String, nullable=True)      # group name
+    created_by = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    last_at    = Column(DateTime, default=datetime.utcnow)  # sort key
+
+
+class ConversationMember(Base):
+    __tablename__ = "conversation_members"
+
+    id                   = Column(Integer, primary_key=True, index=True)
+    conversation_id      = Column(Integer, ForeignKey("conversations.id"), nullable=False)
+    coach_id             = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    last_read_message_id = Column(Integer, nullable=True)
+
+
+class StaffMessage(Base):
+    __tablename__ = "staff_messages"
+
+    id              = Column(Integer, primary_key=True, index=True)
+    conversation_id = Column(Integer, ForeignKey("conversations.id"), nullable=False)
+    sender_id       = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    text            = Column(Text, nullable=True)
+    created_at      = Column(DateTime, default=datetime.utcnow)
+
+    attachments = relationship("StaffMessageAttachment", cascade="all, delete-orphan")
+
+
+class StaffMessageAttachment(Base):
+    __tablename__ = "staff_message_attachments"
+
+    id           = Column(Integer, primary_key=True, index=True)
+    message_id   = Column(Integer, ForeignKey("staff_messages.id"), nullable=False)
+    kind         = Column(String, nullable=False)   # report | image | audio
+    report_type  = Column(String, nullable=True)
+    report_id    = Column(Integer, nullable=True)
+    report_title = Column(String, nullable=True)
+    report_text  = Column(Text, nullable=True)       # snapshot for reports
+    data         = Column(Text, nullable=True)        # base64 data URI for image/audio
+    name         = Column(String, nullable=True)

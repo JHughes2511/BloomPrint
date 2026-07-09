@@ -22,6 +22,7 @@ const NOTIF_ICONS: Record<string, string> = {
   player_commented_coach_training: 'chatbubble',
   training_generated: 'barbell',
   training_feedback: 'barbell',
+  staff_message: 'chatbubble-ellipses',
 };
 
 export default function CoachNotificationsScreen() {
@@ -119,6 +120,11 @@ export default function CoachNotificationsScreen() {
             key={n.id}
             style={[styles.card, !n.read && styles.cardUnread]}
             onPress={async () => {
+              if (n.type === 'staff_message' && n.ref_id) {
+                if (!n.read) { try { await playerAPI.coachMarkRead(n.id); } catch {} }
+                navigation.navigate('Conversation', { conversationId: n.ref_id });
+                return;
+              }
               const willExpand = expandedId !== n.id;
               setExpandedId(prev => prev === n.id ? null : n.id);
               if (willExpand && n.type === 'player_commented' && n.ref_id) {
