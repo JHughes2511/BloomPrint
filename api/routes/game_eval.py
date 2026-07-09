@@ -244,11 +244,10 @@ def create_session(
         except ValueError:
             pass
 
-    # Season-change nudge (activity-based): the season year of this game.
-    from ..season import maybe_season_reminder
+    # Season-change nudge (activity-based) + activity stamp.
+    from ..season import touch_and_maybe_remind
     game_year = (body.season_year or "").strip() or (str(game.date.year) if getattr(game, "date", None) else "")
-    if game_year:
-        maybe_season_reminder(db, coach, game_year)
+    touch_and_maybe_remind(db, coach, game_year or None)
 
     db.add(game)
     db.commit()

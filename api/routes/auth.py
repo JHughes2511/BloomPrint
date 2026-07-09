@@ -62,6 +62,12 @@ def login(body: schemas.CoachLogin, db: Session = Depends(get_db)):
     coach = db.query(models.Coach).filter_by(email=body.email).first()
     if not coach or not verify_password(body.password, coach.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    from ..season import touch_and_maybe_remind
+    try:
+        touch_and_maybe_remind(db, coach)
+        db.commit()
+    except Exception:
+        db.rollback()
     return {"access_token": create_token(coach.id), "coach": coach}
 
 
@@ -118,13 +124,12 @@ def google_auth(body: schemas.CoachGoogleAuth, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=schemas.CoachOut)
 def me(coach: models.Coach = Depends(get_current_coach), db: Session = Depends(get_db)):
-    # Calendar-based season nudge (fires even if the coach never tracks a game).
-    from ..season import maybe_season_reminder
+    # Season nudge (calendar rollover per competition level, or dormant return)
+    # + stamp activity. Runs on every app-open so it works without game tracking.
+    from ..season import touch_and_maybe_remind
     try:
-        if maybe_season_reminder(db, coach):
-            db.commit()
-        elif db.is_modified(coach):
-            db.commit()
+        touch_and_maybe_remind(db, coach)
+        db.commit()
     except Exception:
         db.rollback()
     return coach

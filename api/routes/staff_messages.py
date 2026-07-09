@@ -178,6 +178,7 @@ def send_message(
             name=a.get("name"),
         ))
     conv.last_at = datetime.utcnow()
+    coach.last_active = datetime.utcnow()  # communication counts as activity
     # Notify the other members.
     preview = text or "[attachment]"
     for mid in _member_ids(db, cid):

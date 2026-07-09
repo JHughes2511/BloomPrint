@@ -33,6 +33,7 @@ class Coach(Base):
     philosophy_reference = Column(String, nullable=True)
     onboarded         = Column(Boolean, default=False)  # completed the philosophy onboarding
     last_season_reminder = Column(String, nullable=True)  # season year last nudged/acknowledged
+    last_active       = Column(DateTime, nullable=True)   # last app-open / login / activity
     created_at        = Column(DateTime, default=datetime.utcnow)
 
     evaluations         = relationship("Evaluation", back_populates="coach")

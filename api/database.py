@@ -70,6 +70,11 @@ def _run_migrations():
                 "ALTER TABLE coaches ADD COLUMN last_season_reminder TEXT"
             ))
             conn.commit()
+        if "last_active" not in coach_cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE coaches ADD COLUMN last_active DATETIME"
+            ))
+            conn.commit()
 
         # Add conference and competition_level to coaches if missing
         if "conference" not in coach_cols:
