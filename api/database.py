@@ -59,6 +59,12 @@ def _run_migrations():
                 "ALTER TABLE coaches ADD COLUMN philosophy_reference TEXT"
             ))
             conn.commit()
+        if "onboarded" not in coach_cols:
+            # Existing coaches default to onboarded=1 so they're never forced through it.
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE coaches ADD COLUMN onboarded INTEGER DEFAULT 1"
+            ))
+            conn.commit()
 
         # Add conference and competition_level to coaches if missing
         if "conference" not in coach_cols:

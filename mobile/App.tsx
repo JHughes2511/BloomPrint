@@ -27,6 +27,7 @@ import CoachTrainingDetailScreen from './src/screens/CoachTrainingDetailScreen';
 import GameReportBuilderScreen from './src/screens/GameReportBuilderScreen';
 import StaffInboxScreen from './src/screens/StaffInboxScreen';
 import ConversationScreen from './src/screens/ConversationScreen';
+import OnboardingScreen from './src/screens/OnboardingScreen';
 import TeamEvalScreen from './src/screens/TeamEvalScreen';
 
 // Role select
@@ -66,6 +67,15 @@ function HomeStack() {
       <Stack.Screen name="CoachTrainingDetail" component={CoachTrainingDetailScreen} />
       <Stack.Screen name="StaffInbox" component={StaffInboxScreen} />
       <Stack.Screen name="Conversation" component={ConversationScreen} />
+      <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function OnboardingStack() {
+  return (
+    <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
+      <Stack.Screen name="Onboarding" component={OnboardingScreen} />
     </Stack.Navigator>
   );
 }
@@ -298,7 +308,7 @@ function Root() {
           <ActivityIndicator color="#2563eb" size="large" />
         </View>
       ) : coach ? (
-        <AppTabs />
+        coach.onboarded === false ? <OnboardingStack /> : <AppTabs />
       ) : playerUser ? (
         <PlayerTabs />
       ) : (

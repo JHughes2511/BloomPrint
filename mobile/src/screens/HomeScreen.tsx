@@ -360,6 +360,16 @@ export default function HomeScreen() {
                   </Text>
                 </View>
               )}
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.chip, borderRadius: 12, padding: 13, marginBottom: 14, borderWidth: 1, borderColor: t.line }}
+                onPress={() => { setShowSystem(false); navigation.navigate('Onboarding'); }}
+              >
+                <Icon name="list" size={16} color={t.ink} strokeWidth={2} />
+                <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 12.5, flex: 1 }}>
+                  Re-run the guided setup (chips + questions)
+                </Text>
+                <Icon name="chevron-right" size={16} color={t.muted} strokeWidth={2} />
+              </TouchableOpacity>
               <GeneratingOverlay visible={importingPhilosophy} label="Reading your philosophy document…" />
 
               {SYSTEM_FIELDS.map(f => (

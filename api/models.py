@@ -31,6 +31,7 @@ class Coach(Base):
     # Imported philosophy documents, distilled to text and kept as a standing
     # reference that is fed to the model on every generation.
     philosophy_reference = Column(String, nullable=True)
+    onboarded         = Column(Boolean, default=False)  # completed the philosophy onboarding
     created_at        = Column(DateTime, default=datetime.utcnow)
 
     evaluations         = relationship("Evaluation", back_populates="coach")

@@ -47,6 +47,7 @@ class CoachUpdate(BaseModel):
     system_profile: dict | None = None
     country: str | None = None
     city: str | None = None
+    onboarded: bool | None = None
 
 
 class CoachOut(BaseModel):
@@ -63,6 +64,7 @@ class CoachOut(BaseModel):
     city: str | None = None
     system_profile: dict | None = None
     philosophy_reference: str | None = None
+    onboarded: bool | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

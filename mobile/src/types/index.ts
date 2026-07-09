@@ -20,6 +20,7 @@ export interface Coach {
   city?: string | null;
   system_profile?: Record<string, string> | null;
   philosophy_reference?: string | null;
+  onboarded?: boolean | null;
   created_at: string;
 }
 
