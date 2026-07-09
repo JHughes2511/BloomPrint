@@ -160,18 +160,46 @@ export default function EvalReportScreen() {
     setShareSearchLoading(false);
   };
 
-  const submitShare = async () => {
+  // Surface the report's subject player first when the share sheet opens.
+  useEffect(() => {
+    if (showShare && player?.name) {
+      setSelectedPlayerUser(null);
+      setShareSearch(player.name);
+      setShareSearchLoading(true);
+      playerAPI.searchPlayerUsers(player.name)
+        .then((r: any[]) => setShareResults(r ?? []))
+        .catch(() => setShareResults([]))
+        .finally(() => setShareSearchLoading(false));
+    }
+  }, [showShare]);
+
+  const submitShare = async (consentOverride = false) => {
     if (!selectedPlayerUser) return;
     setSharing(true);
     try {
-      await playerAPI.share(evalId, {
+      const res = await playerAPI.share(evalId, {
         player_user_id: selectedPlayerUser.id,
         share_report_text: shareCats.share_report_text,
         share_grades: shareCats.share_grades,
         share_flags: shareCats.share_flags,
         share_questions: shareCats.share_questions,
         message: shareMessage.trim() || null,
+        consent_override: consentOverride,
       });
+      if (res?.status === 'pending_approval') {
+        setSharing(false);
+        Alert.alert('Pending approval',
+          `This report is about ${res.subject_name}. We sent ${res.subject_name} a request to approve sharing it with ${res.recipient_name}. It will send automatically once they approve.`);
+        setShowShare(false); setSelectedPlayerUser(null); setShareSearch(''); setShareResults([]); setShareMessage('');
+        return;
+      }
+      if (res?.status === 'needs_override') {
+        setSharing(false);
+        Alert.alert('No account to approve',
+          `${res.subject_name} doesn't have an account to approve this yet. Their report isn't about ${res.recipient_name}. Send it anyway?`,
+          [{ text: 'Cancel', style: 'cancel' }, { text: 'Send anyway', style: 'destructive', onPress: () => submitShare(true) }]);
+        return;
+      }
       Alert.alert('Shared!', `Report shared with ${selectedPlayerUser.name}.`);
       setShowShare(false);
       setSelectedPlayerUser(null);
@@ -918,7 +946,7 @@ export default function EvalReportScreen() {
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
               {selectedPlayerUser && (
-                <TouchableOpacity style={[styles.saveBtn, { backgroundColor: t.positive }]} onPress={submitShare} disabled={sharing}>
+                <TouchableOpacity style={[styles.saveBtn, { backgroundColor: t.positive }]} onPress={() => submitShare()} disabled={sharing}>
                   {sharing ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>Share</Text>}
                 </TouchableOpacity>
               )}

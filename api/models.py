@@ -373,9 +373,16 @@ class ShareApproval(Base):
     subject_player_id        = Column(Integer, ForeignKey("players.id"), nullable=False)    # report is about
     subject_player_user_id   = Column(Integer, ForeignKey("player_users.id"), nullable=True) # approver
     recipient_player_user_id = Column(Integer, ForeignKey("player_users.id"), nullable=False) # intended recipient
+    kind                     = Column(String, default="team")     # "eval" | "team"
     output_type              = Column(String, nullable=False)
-    report_text              = Column(Text, nullable=False)
+    report_text              = Column(Text, nullable=True)        # team-share payload
     message                  = Column(Text, nullable=True)
+    # eval-share payload (kind == "eval")
+    evaluation_id            = Column(Integer, ForeignKey("evaluations.id"), nullable=True)
+    share_report_text        = Column(Boolean, default=True)
+    share_grades             = Column(Boolean, default=True)
+    share_flags              = Column(Boolean, default=True)
+    share_questions          = Column(Boolean, default=True)
     status                   = Column(String, default="pending")  # pending / approved / rejected
     created_at               = Column(DateTime, default=datetime.utcnow)
 

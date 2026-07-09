@@ -495,6 +495,26 @@ def _run_migrations():
         except Exception:
             pass
 
+        # Extend share_approvals for eval-kind consent (table may pre-exist).
+        try:
+            sa_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(share_approvals)")
+            )]
+            if sa_cols:
+                for col, ddl in [
+                    ("kind", "ALTER TABLE share_approvals ADD COLUMN kind TEXT DEFAULT 'team'"),
+                    ("evaluation_id", "ALTER TABLE share_approvals ADD COLUMN evaluation_id INTEGER"),
+                    ("share_report_text", "ALTER TABLE share_approvals ADD COLUMN share_report_text INTEGER DEFAULT 1"),
+                    ("share_grades", "ALTER TABLE share_approvals ADD COLUMN share_grades INTEGER DEFAULT 1"),
+                    ("share_flags", "ALTER TABLE share_approvals ADD COLUMN share_flags INTEGER DEFAULT 1"),
+                    ("share_questions", "ALTER TABLE share_approvals ADD COLUMN share_questions INTEGER DEFAULT 1"),
+                ]:
+                    if col not in sa_cols:
+                        conn.execute(__import__("sqlalchemy").text(ddl))
+                        conn.commit()
+        except Exception:
+            pass
+
         # Add parent_id to player_comments for threaded replies.
         try:
             pc_cols = [row[1] for row in conn.execute(

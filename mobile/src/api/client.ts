@@ -212,6 +212,7 @@ export interface ShareReportRequest {
   share_flags?: boolean;
   share_questions?: boolean;
   message?: string | null;
+  consent_override?: boolean;
 }
 
 export const playerAPI = {

@@ -312,6 +312,7 @@ class ShareReportRequest(BaseModel):
     share_flags: bool = False
     share_questions: bool = False
     message: str | None = None
+    consent_override: bool = False
 
 
 class SharedReportOut(BaseModel):

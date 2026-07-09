@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import { evalsAPI, playerAPI, gameReportsAPI, trainingAPI, staffSharingAPI, coachesAPI } from '../api/client';
+import { evalsAPI, playerAPI, gameReportsAPI, trainingAPI, staffSharingAPI, coachesAPI, gameEvalAPI } from '../api/client';
 import { GradeBadge } from '../components/GradeBadge';
 import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import ShareModal from '../components/ShareModal';
@@ -38,7 +38,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 type ReportItem = {
   id: number;
-  kind: 'eval' | 'team' | 'game' | 'training';
+  kind: 'eval' | 'team' | 'game' | 'training' | 'scout';
   player_name?: string;
   output_type: string;
   overall_grade?: number | null;
@@ -61,6 +61,7 @@ const FILTER_CATS = [
   { key: 'eval', label: 'Player Evals' },
   { key: 'team', label: 'Team Reports' },
   { key: 'game', label: 'Game Reports' },
+  { key: 'scout', label: 'Scout' },
   { key: 'training', label: 'Training' },
 ];
 
@@ -227,11 +228,12 @@ export default function RecentScreen() {
   const load = async () => {
     setLoading(true);
     try {
-      const [evals, teamReports, gameReports, trainingSessions] = await Promise.all([
+      const [evals, teamReports, gameReports, trainingSessions, gameSessions] = await Promise.all([
         evalsAPI.recent(),
         evalsAPI.teamReports(),
         gameReportsAPI.list().catch(() => []),
         trainingAPI.recent().catch(() => []),
+        gameEvalAPI.listSessions().catch(() => []),
       ]);
       const evalItems: ReportItem[] = evals.map((e: any) => ({
         id: e.id,
@@ -267,13 +269,25 @@ export default function RecentScreen() {
         created_at: ts.created_at,
         program_text: ts.program_text,
       }));
+      // Scout reports: game sessions that have an AI scouting report.
+      const scoutItems: ReportItem[] = (gameSessions ?? [])
+        .filter((g: any) => g.ai_scouting_report)
+        .map((g: any) => ({
+          id: g.id,
+          kind: 'scout' as const,
+          player_name: g.opponent_name ? `vs ${g.opponent_name}` : (g.title || 'Scout Report'),
+          output_type: 'scouting_report',
+          overall_grade: null,
+          created_at: g.date || g.created_at,
+          report_text: g.ai_scouting_report,
+        }));
       const texts: Record<number, string> = {};
       teamReports.forEach((tr: any) => { if (tr.report_text) texts[tr.id] = tr.report_text; });
       setTeamReportTexts(texts);
       const ec: Record<number, any> = {};
       evals.forEach((e: any) => { ec[e.id] = e; });
       setEvalCache(ec);
-      const combined = [...evalItems, ...teamItems, ...gameItems, ...trainingItems].sort(
+      const combined = [...evalItems, ...teamItems, ...gameItems, ...trainingItems, ...scoutItems].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       setItems(combined);
@@ -290,6 +304,7 @@ export default function RecentScreen() {
     if (!searchTerm) return true;
     const kindLabel =
       item.kind === 'game' ? 'Game Report Packet' :
+      item.kind === 'scout' ? 'Scout Report' :
       item.kind === 'training' ? 'Training Program' :
       (TYPE_LABELS[item.output_type] ?? outputTypeLabel(item.output_type));
     const haystack = [
@@ -312,6 +327,10 @@ export default function RecentScreen() {
   const handlePress = async (item: ReportItem) => {
     if (item.kind === 'game') {
       navigation.navigate('GameReportBuilder', { reportId: item.id });
+      return;
+    }
+    if (item.kind === 'scout') {
+      setGameReportModal({ title: item.player_name ?? 'Scout Report', text: item.report_text ?? '' });
       return;
     }
     if (item.kind === 'training') {
@@ -342,7 +361,7 @@ export default function RecentScreen() {
   };
 
   const handleDelete = (item: ReportItem) => {
-    if (item.kind === 'training') return; // training deletion not exposed in recents
+    if (item.kind === 'training' || item.kind === 'scout') return; // not deletable from recents
     Alert.alert('Delete Report', 'Permanently delete this report?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: async () => {
@@ -618,10 +637,12 @@ export default function RecentScreen() {
                         styles.typeName,
                         item.kind === 'team' && { color: t.brown },
                         item.kind === 'game' && { color: t.accent },
+                        item.kind === 'scout' && { color: t.accent },
                         item.kind === 'training' && { color: t.positive },
                       ]}
                     >
                       {item.kind === 'game' ? 'Game Report Packet' :
+                       item.kind === 'scout' ? 'Scout Report' :
                        item.kind === 'training' ? 'Training Program' :
                        (TYPE_LABELS[item.output_type] ?? outputTypeLabel(item.output_type))}
                     </Text>
@@ -632,10 +653,10 @@ export default function RecentScreen() {
                 {/* Action buttons row — shown for all card types */}
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10, width: '100%' }}>
                   {/* Game-specific buttons */}
-                  {item.kind === 'game' && item.report_text ? (
+                  {(item.kind === 'game' || item.kind === 'scout') && item.report_text ? (
                     <TouchableOpacity
                       style={styles.gameActionBtn}
-                      onPress={() => setGameReportModal({ title: item.player_name ?? 'Game Report', text: item.report_text! })}
+                      onPress={() => setGameReportModal({ title: item.player_name ?? (item.kind === 'scout' ? 'Scout Report' : 'Game Report'), text: item.report_text! })}
                     >
                       <Ionicons name="document-text-outline" size={13} color={t.accent} />
                       <Text style={[styles.gameActionText, { color: t.accent }]}>View Report</Text>
@@ -651,8 +672,8 @@ export default function RecentScreen() {
                     </TouchableOpacity>
                   )}
 
-                  {/* Send to Player — available for eval, team, training; hidden for game */}
-                  {item.kind !== 'game' && (
+                  {/* Send to Player — available for eval, team, training; hidden for game/scout */}
+                  {item.kind !== 'game' && item.kind !== 'scout' && (
                     <TouchableOpacity
                       style={[styles.gameActionBtn, { borderColor: t.positiveSoft }]}
                       onPress={() => {
@@ -678,9 +699,10 @@ export default function RecentScreen() {
                     onPress={() => {
                       const reportType = item.kind === 'eval' ? 'eval' :
                                          item.kind === 'team' ? 'team_report' :
-                                         item.kind === 'game' ? 'game' :
+                                         (item.kind === 'game' || item.kind === 'scout') ? 'game' :
                                          'training';
                       const label = item.kind === 'training' ? 'Training Program' :
+                                    item.kind === 'scout' ? 'Scout Report' :
                                     item.kind === 'game' ? 'Game Report' :
                                     item.kind === 'team' ? 'Team Report' : 'Player Eval';
                       const fullText = item.program_text ?? item.report_text ?? (teamReportTexts[item.id] ?? '');

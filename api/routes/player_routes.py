@@ -330,7 +330,7 @@ def search_player_users(
 
 # ── Share report (coach → player) ────────────────────────────────────────────
 
-@router.post("/share/{eval_id}", response_model=schemas.SharedReportOut)
+@router.post("/share/{eval_id}")
 def share_report(
     eval_id: int,
     body: schemas.ShareReportRequest,
@@ -343,6 +343,48 @@ def share_report(
     pu = db.get(models.PlayerUser, body.player_user_id)
     if not pu:
         raise HTTPException(status_code=404, detail="Player user not found")
+
+    # Consent flow: this eval is about ev.player_id. Sending it to a DIFFERENT
+    # player requires that subject player's approval first.
+    if pu.player_id != ev.player_id:
+        subject_player = db.get(models.Player, ev.player_id)
+        subject_pu = subject_player.player_user if subject_player else None
+        subject_name = subject_player.name if subject_player else "the player"
+        recipient_name = pu.name or "the recipient"
+        if subject_pu and not body.consent_override:
+            approval = models.ShareApproval(
+                coach_id=coach.id,
+                subject_player_id=ev.player_id,
+                subject_player_user_id=subject_pu.id,
+                recipient_player_user_id=pu.id,
+                kind="eval",
+                output_type=ev.output_type,
+                message=body.message,
+                evaluation_id=eval_id,
+                share_report_text=body.share_report_text,
+                share_grades=body.share_grades,
+                share_flags=body.share_flags,
+                share_questions=body.share_questions,
+                status="pending",
+            )
+            db.add(approval)
+            db.flush()
+            db.add(models.PlayerNotification(
+                player_user_id=subject_pu.id,
+                type="share_approval",
+                title="Approval needed",
+                body=(f"{coach.name} wants to send your {ev.output_type.replace('_', ' ')} report "
+                      f"to {recipient_name}. Approve or reject sharing your report with a player it isn't about."),
+                ref_id=approval.id,
+            ))
+            db.commit()
+            return {"ok": True, "status": "pending_approval",
+                    "subject_name": subject_name, "recipient_name": recipient_name}
+        if not subject_pu and not body.consent_override:
+            return {"ok": False, "status": "needs_override",
+                    "subject_name": subject_name, "recipient_name": recipient_name}
+        # consent_override -> fall through to a direct share.
+
     shared = models.SharedReport(
         evaluation_id=eval_id,
         player_user_id=body.player_user_id,
@@ -1507,22 +1549,43 @@ def approve_share(
     if a.status != "pending":
         return {"ok": True, "status": a.status}
     coach = db.get(models.Coach, a.coach_id)
-    tsr = models.TeamSharedReport(
-        player_user_id=a.recipient_player_user_id,
-        shared_by_id=a.coach_id,
-        output_type=a.output_type,
-        report_text=a.report_text,
-        message=a.message,
-    )
-    db.add(tsr)
-    db.flush()
-    db.add(models.PlayerNotification(
-        player_user_id=a.recipient_player_user_id,
-        type="team_report_shared",
-        title="Report Shared",
-        body=f"{coach.name if coach else 'A coach'} shared a {a.output_type.replace('_', ' ')} report with you.",
-        ref_id=tsr.id,
-    ))
+    if a.kind == "eval" and a.evaluation_id:
+        shared = models.SharedReport(
+            evaluation_id=a.evaluation_id,
+            player_user_id=a.recipient_player_user_id,
+            shared_by_id=a.coach_id,
+            share_report_text=bool(a.share_report_text),
+            share_grades=bool(a.share_grades),
+            share_flags=bool(a.share_flags),
+            share_questions=bool(a.share_questions),
+            message=a.message,
+        )
+        db.add(shared)
+        db.flush()
+        db.add(models.PlayerNotification(
+            player_user_id=a.recipient_player_user_id,
+            type="report_shared",
+            title="New Report Shared",
+            body=f"{coach.name if coach else 'A coach'} shared a {a.output_type.replace('_', ' ')} report with you.",
+            ref_id=shared.id,
+        ))
+    else:
+        tsr = models.TeamSharedReport(
+            player_user_id=a.recipient_player_user_id,
+            shared_by_id=a.coach_id,
+            output_type=a.output_type,
+            report_text=a.report_text or "",
+            message=a.message,
+        )
+        db.add(tsr)
+        db.flush()
+        db.add(models.PlayerNotification(
+            player_user_id=a.recipient_player_user_id,
+            type="team_report_shared",
+            title="Report Shared",
+            body=f"{coach.name if coach else 'A coach'} shared a {a.output_type.replace('_', ' ')} report with you.",
+            ref_id=tsr.id,
+        ))
     db.add(models.PlayerNotification(
         coach_id=a.coach_id,
         type="share_approved",
