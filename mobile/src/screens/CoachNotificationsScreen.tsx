@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { playerAPI, trainingAPI } from '../api/client';
+import { playerAPI, trainingAPI, teamStaffAPI } from '../api/client';
 import CommentThread from '../components/CommentThread';
 import { AppNotification } from '../types';
 import { useTheme } from '../theme/ThemeProvider';
@@ -23,6 +23,9 @@ const NOTIF_ICONS: Record<string, string> = {
   training_generated: 'barbell',
   training_feedback: 'barbell',
   staff_message: 'chatbubble-ellipses',
+  team_invite: 'people-circle-outline',
+  team_invite_approved: 'checkmark-circle',
+  team_invite_rejected: 'close-circle',
 };
 
 export default function CoachNotificationsScreen() {
@@ -215,6 +218,28 @@ export default function CoachNotificationsScreen() {
                       {replying === n.id ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.replyBtnText}>Send Reply</Text>}
                     </TouchableOpacity>
                   </>
+                ) : n.type === 'team_invite' && n.ref_id ? (
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity
+                      style={[styles.approveBtn, { backgroundColor: t.chip, flex: 1, alignItems: 'center' }]}
+                      onPress={async () => {
+                        try { await teamStaffAPI.rejectInvite(n.ref_id!); } catch {}
+                        await playerAPI.coachMarkRead(n.id);
+                        setNotifications(prev => prev.filter(x => x.id !== n.id));
+                      }}>
+                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Reject</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.approveBtn, { backgroundColor: t.ctaBg, flex: 1, alignItems: 'center' }]}
+                      onPress={async () => {
+                        try { await teamStaffAPI.approveInvite(n.ref_id!); } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not accept.'); return; }
+                        await playerAPI.coachMarkRead(n.id);
+                        setNotifications(prev => prev.filter(x => x.id !== n.id));
+                        Alert.alert('Joined', 'You joined the team.');
+                      }}>
+                      <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Accept</Text>
+                    </TouchableOpacity>
+                  </View>
                 ) : (n.type === 'training_generated' || n.type === 'training_refreshed') && n.ref_id ? (
                   <View>
                     <Text style={{ color: t.muted, fontSize: 12, marginBottom: 8 }}>

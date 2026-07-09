@@ -388,4 +388,15 @@ export const teamStaffAPI = {
     api.get('/team-staff/my-teams').then(r => r.data),
   teamGames: (teamId: number) =>
     api.get('/team-staff/team-games', { params: { team_id: teamId } }).then(r => r.data),
+  createSubteam: (teamId: number, name: string) =>
+    api.post(`/team-staff/${teamId}/subteam`, { name }).then(r => r.data),
+  subteams: (teamId: number) =>
+    api.get(`/team-staff/${teamId}/subteams`).then(r => r.data),
+  members: (teamId: number) =>
+    api.get(`/team-staff/${teamId}/members`).then(r => r.data),
+  invite: (teamId: number, data: { coach_id?: number; email?: string }) =>
+    api.post(`/team-staff/${teamId}/invite`, data).then(r => r.data),
+  invites: () => api.get('/team-staff/invites').then(r => r.data),
+  approveInvite: (id: number) => api.post(`/team-staff/invites/${id}/approve`).then(r => r.data),
+  rejectInvite: (id: number) => api.post(`/team-staff/invites/${id}/reject`).then(r => r.data),
 };

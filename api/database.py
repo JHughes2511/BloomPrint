@@ -515,6 +515,19 @@ def _run_migrations():
         except Exception:
             pass
 
+        # Add parent_team_id to teams for nested sub-teams.
+        try:
+            tcols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(teams)")
+            )]
+            if tcols and "parent_team_id" not in tcols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE teams ADD COLUMN parent_team_id INTEGER"
+                ))
+                conn.commit()
+        except Exception:
+            pass
+
         # Add parent_id to player_comments for threaded replies.
         try:
             pc_cols = [row[1] for row in conn.execute(

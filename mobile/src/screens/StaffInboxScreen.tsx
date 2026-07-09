@@ -81,6 +81,48 @@ export default function StaffInboxScreen() {
   const [selectedStaff, setSelectedStaff] = useState<any[]>([]);
   const [creating, setCreating] = useState(false);
 
+  // Sub-team + invite state
+  const [subFor, setSubFor] = useState<any | null>(null);
+  const [subName, setSubName] = useState('');
+  const [creatingSub, setCreatingSub] = useState(false);
+  const [inviteFor, setInviteFor] = useState<any | null>(null);
+  const [inviteSearch, setInviteSearch] = useState('');
+  const [inviteResults, setInviteResults] = useState<any[]>([]);
+  const [inviteSearching, setInviteSearching] = useState(false);
+  const [inviting, setInviting] = useState(false);
+
+  const createSubteam = async () => {
+    if (!subFor || !subName.trim()) return;
+    setCreatingSub(true);
+    try {
+      await teamStaffAPI.createSubteam(subFor.id, subName.trim());
+      setSubFor(null); setSubName('');
+      await loadMyTeams();
+    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not create the sub-team.'); }
+    finally { setCreatingSub(false); }
+  };
+
+  const searchInvite = async () => {
+    if (!inviteSearch.trim()) return;
+    setInviteSearching(true);
+    try { setInviteResults(await coachesAPI.search(inviteSearch.trim())); } catch {}
+    setInviteSearching(false);
+  };
+
+  const doInvite = async (data: { coach_id?: number; email?: string }) => {
+    if (!inviteFor) return;
+    setInviting(true);
+    try {
+      const res = await teamStaffAPI.invite(inviteFor.id, data);
+      if (res.status === 'invited') Alert.alert('Invite sent', `${res.name} was invited and will approve or reject it.`);
+      else Alert.alert('Email invite', res.email_sent
+        ? `We emailed ${res.email} an invite to sign up and join.`
+        : `No account for ${res.email} yet. Share this invite code so they can sign up: ${res.code}`);
+      setInviteFor(null); setInviteSearch(''); setInviteResults([]);
+    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not invite.'); }
+    finally { setInviting(false); }
+  };
+
   const loadInbox = async () => {
     setLoading(true);
     try {
@@ -419,34 +461,44 @@ export default function StaffInboxScreen() {
           );
         })}
 
-        {/* My current teams */}
+        {/* My current teams — nested sub-team breakout */}
         {myTeams.length > 0 && (
           <>
             <Text style={[styles.sectionLabel, { marginTop: 20 }]}>MY TEAMS</Text>
-            {teamsLoading
-              ? <ActivityIndicator color={t.accent} />
-              : myTeams.map((team: any) => (
-                <View key={team.id} style={[styles.card, { marginHorizontal: 0 }]}>
-                  <View style={[styles.iconBox, { backgroundColor: t.accentSoft }]}>
-                    <Ionicons name="people" size={18} color={t.accent} />
+            {teamsLoading ? <ActivityIndicator color={t.accent} /> : (() => {
+              const ids = new Set(myTeams.map((tm: any) => tm.id));
+              const byParent: Record<number, any[]> = {};
+              myTeams.forEach((tm: any) => { const p = tm.parent_team_id ?? 0; (byParent[p] = byParent[p] || []).push(tm); });
+              const roots = myTeams.filter((tm: any) => !tm.parent_team_id || !ids.has(tm.parent_team_id));
+              const renderNode = (tm: any, depth: number): any => (
+                <View key={tm.id}>
+                  <View style={[styles.card, { marginHorizontal: 0, marginLeft: depth * 16, borderLeftWidth: depth ? 3 : 1, borderLeftColor: depth ? t.accent : t.cardBorder }]}>
+                    <View style={[styles.iconBox, { backgroundColor: t.accentSoft }]}>
+                      <Ionicons name={depth ? 'git-branch-outline' : 'people'} size={17} color={t.accent} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.cardTitle}>{tm.name}</Text>
+                      <Text style={styles.cardSub}>{tm.member_count ?? 1} member{(tm.member_count ?? 1) === 1 ? '' : 's'}{tm.is_owner ? ' · You own this' : tm.coach_name ? ` · ${tm.coach_name}` : ''}</Text>
+                    </View>
                   </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.cardTitle}>{team.name}</Text>
-                    {team.coach_name && <Text style={styles.cardSub}>Head Coach: {team.coach_name}</Text>}
-                    {team.competition_level && <Text style={styles.cardDate}>{team.competition_level}</Text>}
+                  <View style={{ flexDirection: 'row', gap: 8, marginLeft: depth * 16, marginBottom: 8, flexWrap: 'wrap' }}>
+                    <TouchableOpacity style={styles.teamActBtn} onPress={() => { setSubFor(tm); setSubName(''); }}>
+                      <Ionicons name="add" size={14} color={t.accent} /><Text style={styles.teamActText}>Sub-team</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.teamActBtn} onPress={() => { setInviteFor(tm); setInviteSearch(''); setInviteResults([]); }}>
+                      <Ionicons name="person-add-outline" size={14} color={t.accent} /><Text style={styles.teamActText}>Invite</Text>
+                    </TouchableOpacity>
+                    {!tm.is_owner && (
+                      <TouchableOpacity style={[styles.teamActBtn, { borderColor: t.negative }]} onPress={() => leaveTeam(tm.id)} disabled={leaving === tm.id}>
+                        {leaving === tm.id ? <ActivityIndicator color={t.negative} size="small" /> : <Text style={[styles.teamActText, { color: t.negative }]}>Leave</Text>}
+                      </TouchableOpacity>
+                    )}
                   </View>
-                  <TouchableOpacity
-                    style={{ backgroundColor: t.negativeSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: t.negative }}
-                    onPress={() => leaveTeam(team.id)}
-                    disabled={leaving === team.id}
-                  >
-                    {leaving === team.id
-                      ? <ActivityIndicator color={t.negative} size="small" />
-                      : <Text style={{ color: t.negative, fontSize: 12, fontFamily: fonts[700] }}>Leave</Text>}
-                  </TouchableOpacity>
+                  {(byParent[tm.id] || []).map((child: any) => renderNode(child, depth + 1))}
                 </View>
-              ))
-            }
+              );
+              return roots.map((r: any) => renderNode(r, 0));
+            })()}
           </>
         )}
 
@@ -544,6 +596,77 @@ export default function StaffInboxScreen() {
               onPress={startConversation} disabled={!selectedStaff.length || creating}>
               {creating ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.startBtnText}>{selectedStaff.length > 1 ? 'Start Group' : 'Start Message'}</Text>}
             </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Create sub-team modal */}
+      <Modal visible={!!subFor} transparent animationType="fade" onRequestClose={() => setSubFor(null)}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View style={[styles.modalBox, { padding: 20 }]}>
+            <Text style={styles.modalTitle}>New Sub-team</Text>
+            <Text style={[styles.cardSub, { marginTop: 4, marginBottom: 12 }]}>Under {subFor?.name}</Text>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Sub-team name (e.g. Offense, Guards)..."
+              placeholderTextColor={t.muted2}
+              value={subName}
+              onChangeText={setSubName}
+              autoFocus
+            />
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+              <TouchableOpacity style={[styles.startBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setSubFor(null)}>
+                <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.startBtn, { flex: 1, opacity: subName.trim() && !creatingSub ? 1 : 0.5 }]} onPress={createSubteam} disabled={!subName.trim() || creatingSub}>
+                {creatingSub ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.startBtnText}>Create</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Invite modal */}
+      <Modal visible={!!inviteFor} transparent animationType="slide" onRequestClose={() => setInviteFor(null)}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={[styles.modalBox, { maxHeight: '80%' }]}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <Text style={styles.modalTitle}>Invite to {inviteFor?.name}</Text>
+              <TouchableOpacity onPress={() => setInviteFor(null)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
+            </View>
+            <Text style={[styles.cardSub, { marginBottom: 8 }]}>Search a coach by name, or enter an email to invite someone new. Coach accounts only.</Text>
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+              <TextInput
+                style={[styles.searchInput, { flex: 1 }]}
+                placeholder="Coach name or email..."
+                placeholderTextColor={t.muted2}
+                value={inviteSearch}
+                onChangeText={setInviteSearch}
+                onSubmitEditing={searchInvite}
+                autoCapitalize="none"
+                returnKeyType="search"
+              />
+              <TouchableOpacity style={styles.searchBtn} onPress={searchInvite} disabled={inviteSearching}>
+                {inviteSearching ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="search" size={18} color={t.ctaText} />}
+              </TouchableOpacity>
+            </View>
+            {inviteSearch.includes('@') && (
+              <TouchableOpacity style={[styles.staffRow, { justifyContent: 'space-between' }]} onPress={() => doInvite({ email: inviteSearch.trim() })} disabled={inviting}>
+                <Text style={styles.cardTitle}>Email invite: {inviteSearch.trim()}</Text>
+                <Ionicons name="mail-outline" size={18} color={t.accent} />
+              </TouchableOpacity>
+            )}
+            <ScrollView style={{ maxHeight: 260 }}>
+              {inviteResults.map((c: any) => (
+                <TouchableOpacity key={c.id} style={styles.staffRow} onPress={() => doInvite({ coach_id: c.id })} disabled={inviting}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.cardTitle}>{c.name}</Text>
+                    <Text style={styles.cardSub}>{[c.role, c.program_name].filter(Boolean).join(' · ')}</Text>
+                  </View>
+                  <Ionicons name="person-add-outline" size={18} color={t.accent} />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         </KeyboardAvoidingView>
       </Modal>
@@ -820,4 +943,6 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   staffRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: t.card, borderRadius: 12, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: t.cardBorder },
   startBtn: { backgroundColor: t.ctaBg, borderRadius: 999, padding: 15, alignItems: 'center', marginTop: 10 },
   startBtnText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15 },
+  teamActBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: t.accent },
+  teamActText: { color: t.accent, fontSize: 12, fontFamily: fonts[700] },
 });

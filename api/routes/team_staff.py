@@ -16,7 +16,25 @@ class TeamOut(BaseModel):
     name: str
     competition_level: str | None = None
     coach_name: str | None = None
+    parent_team_id: int | None = None
+    member_count: int | None = None
+    is_owner: bool | None = None
     model_config = {"from_attributes": True}
+
+
+def _can_manage(db: Session, team_id: int, coach_id: int) -> bool:
+    """Owner OR any staff member of the team can create sub-teams / invite."""
+    team = db.get(models.Team, team_id)
+    if not team:
+        return False
+    if team.coach_id == coach_id:
+        return True
+    return db.query(models.TeamStaff).filter_by(team_id=team_id, coach_id=coach_id).first() is not None
+
+
+def _member_count(db: Session, team_id: int) -> int:
+    staff = db.query(models.TeamStaff).filter_by(team_id=team_id).count()
+    return staff + 1  # + owner
 
 
 class TeamGameItem(BaseModel):
@@ -116,25 +134,199 @@ def my_teams(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    """Return all teams this staff member has joined (not owned)."""
-    links = (
-        db.query(models.TeamStaff)
-        .filter_by(coach_id=coach.id)
-        .all()
-    )
+    """Teams this coach owns OR joined, plus their ancestor teams so the nested
+    sub-team breakout can be rendered."""
+    teams: dict[int, models.Team] = {}
+    for t in db.query(models.Team).filter_by(coach_id=coach.id).all():
+        teams[t.id] = t
+    joined_ids = [l.team_id for l in db.query(models.TeamStaff).filter_by(coach_id=coach.id).all()]
+    if joined_ids:
+        for t in db.query(models.Team).filter(models.Team.id.in_(joined_ids)).all():
+            teams[t.id] = t
+    # Pull in ancestors so the tree has parents for context.
+    for t in list(teams.values()):
+        cur = t
+        while cur is not None and cur.parent_team_id and cur.parent_team_id not in teams:
+            parent = db.get(models.Team, cur.parent_team_id)
+            if not parent:
+                break
+            teams[parent.id] = parent
+            cur = parent
     result = []
-    for link in links:
-        team = db.get(models.Team, link.team_id)
-        if not team:
-            continue
-        owner = db.get(models.Coach, team.coach_id)
+    for t in teams.values():
+        owner = db.get(models.Coach, t.coach_id)
         result.append(TeamOut(
-            id=team.id,
-            name=team.name,
-            competition_level=team.competition_level,
+            id=t.id, name=t.name, competition_level=t.competition_level,
             coach_name=owner.name if owner else None,
+            parent_team_id=t.parent_team_id,
+            member_count=_member_count(db, t.id),
+            is_owner=(t.coach_id == coach.id),
         ))
     return result
+
+
+@router.post("/{team_id}/subteam", response_model=TeamOut)
+def create_subteam(
+    team_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    parent = db.get(models.Team, team_id)
+    if not parent:
+        raise HTTPException(status_code=404, detail="Team not found")
+    if not _can_manage(db, team_id, coach.id):
+        raise HTTPException(status_code=403, detail="Only the team owner or its staff can create a sub-team.")
+    name = (body.get("name") or "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Give the sub-team a name.")
+    sub = models.Team(name=name, coach_id=coach.id, competition_level=parent.competition_level, parent_team_id=team_id)
+    db.add(sub)
+    db.commit()
+    db.refresh(sub)
+    return TeamOut(id=sub.id, name=sub.name, competition_level=sub.competition_level,
+                   coach_name=coach.name, parent_team_id=team_id, member_count=1, is_owner=True)
+
+
+@router.get("/{team_id}/subteams", response_model=list[TeamOut])
+def list_subteams(
+    team_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    subs = db.query(models.Team).filter_by(parent_team_id=team_id).order_by(models.Team.name).all()
+    out = []
+    for s in subs:
+        owner = db.get(models.Coach, s.coach_id)
+        out.append(TeamOut(id=s.id, name=s.name, competition_level=s.competition_level,
+                           coach_name=owner.name if owner else None, parent_team_id=team_id,
+                           member_count=_member_count(db, s.id),
+                           is_owner=(s.coach_id == coach.id)))
+    return out
+
+
+@router.get("/{team_id}/members")
+def list_members(
+    team_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    team = db.get(models.Team, team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    ids = {team.coach_id, *[l.coach_id for l in db.query(models.TeamStaff).filter_by(team_id=team_id).all()]}
+    coaches = db.query(models.Coach).filter(models.Coach.id.in_(ids)).all() if ids else []
+    return [{"id": c.id, "name": c.name, "role": c.role, "is_owner": c.id == team.coach_id} for c in coaches]
+
+
+@router.post("/{team_id}/invite")
+def invite_to_team(
+    team_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    import secrets
+    team = db.get(models.Team, team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    if not _can_manage(db, team_id, coach.id):
+        raise HTTPException(status_code=403, detail="Only the team owner or its staff can invite.")
+    target_coach_id = body.get("coach_id")
+    email = (body.get("email") or "").strip().lower()
+    target = None
+    if target_coach_id:
+        target = db.get(models.Coach, int(target_coach_id))
+    elif email:
+        target = db.query(models.Coach).filter(models.Coach.email == email).first()
+
+    if target:
+        if target.id == team.coach_id or db.query(models.TeamStaff).filter_by(team_id=team_id, coach_id=target.id).first():
+            raise HTTPException(status_code=400, detail=f"{target.name} is already on this team.")
+        inv = models.TeamInvite(team_id=team_id, invited_by=coach.id, invited_coach_id=target.id, status="pending")
+        db.add(inv)
+        db.flush()
+        db.add(models.PlayerNotification(
+            coach_id=target.id,
+            type="team_invite",
+            title="Team invite",
+            body=f"{coach.name} invited you to join {team.name}.",
+            ref_id=inv.id,
+        ))
+        db.commit()
+        return {"status": "invited", "name": target.name}
+
+    if not email:
+        raise HTTPException(status_code=400, detail="Enter a coach name or email to invite.")
+    # Unknown email — create a coded invite. Actual email send is gated on SMTP.
+    code = secrets.token_urlsafe(8).upper()
+    inv = models.TeamInvite(team_id=team_id, invited_by=coach.id, invited_email=email, code=code, status="pending")
+    db.add(inv)
+    db.commit()
+    from ..email_invite import send_team_invite_email
+    sent = send_team_invite_email(email, coach.name, team.name, code)
+    return {"status": "email_invite", "email": email, "code": code, "email_sent": sent}
+
+
+@router.get("/invites")
+def my_invites(
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    rows = db.query(models.TeamInvite).filter_by(invited_coach_id=coach.id, status="pending").all()
+    out = []
+    for inv in rows:
+        team = db.get(models.Team, inv.team_id)
+        inviter = db.get(models.Coach, inv.invited_by)
+        out.append({
+            "id": inv.id,
+            "team_id": inv.team_id,
+            "team_name": team.name if team else "Team",
+            "inviter_name": inviter.name if inviter else "A coach",
+            "created_at": inv.created_at,
+        })
+    return out
+
+
+@router.post("/invites/{invite_id}/approve")
+def approve_invite(
+    invite_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    inv = db.get(models.TeamInvite, invite_id)
+    if not inv or inv.invited_coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Invite not found")
+    if inv.status == "pending":
+        if not db.query(models.TeamStaff).filter_by(team_id=inv.team_id, coach_id=coach.id).first():
+            db.add(models.TeamStaff(team_id=inv.team_id, coach_id=coach.id))
+        inv.status = "approved"
+        team = db.get(models.Team, inv.team_id)
+        db.add(models.PlayerNotification(
+            coach_id=inv.invited_by, type="team_invite_approved", title="Invite accepted",
+            body=f"{coach.name} joined {team.name if team else 'your team'}.",
+        ))
+        db.commit()
+    return {"ok": True, "status": inv.status}
+
+
+@router.post("/invites/{invite_id}/reject")
+def reject_invite(
+    invite_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    inv = db.get(models.TeamInvite, invite_id)
+    if not inv or inv.invited_coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Invite not found")
+    if inv.status == "pending":
+        inv.status = "rejected"
+        db.add(models.PlayerNotification(
+            coach_id=inv.invited_by, type="team_invite_rejected", title="Invite declined",
+            body=f"{coach.name} declined the team invite.",
+        ))
+        db.commit()
+    return {"ok": True, "status": inv.status}
 
 
 @router.get("/team-games")

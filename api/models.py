@@ -47,6 +47,7 @@ class Team(Base):
     name             = Column(String, nullable=False)
     coach_id         = Column(Integer, ForeignKey("coaches.id"), nullable=False)
     competition_level = Column(String, default="HS Varsity")
+    parent_team_id   = Column(Integer, ForeignKey("teams.id"), nullable=True)  # nested sub-team
     created_at       = Column(DateTime, default=datetime.utcnow)
 
     coach   = relationship("Coach", back_populates="teams")
@@ -657,3 +658,18 @@ class StaffMessageAttachment(Base):
     report_text  = Column(Text, nullable=True)       # snapshot for reports
     data         = Column(Text, nullable=True)        # base64 data URI for image/audio
     name         = Column(String, nullable=True)
+
+
+class TeamInvite(Base):
+    """Invite a coach (existing account or by email) into a team / sub-team.
+    Existing accounts approve/reject; unknown emails get a signup invite."""
+    __tablename__ = "team_invites"
+
+    id               = Column(Integer, primary_key=True, index=True)
+    team_id          = Column(Integer, ForeignKey("teams.id"), nullable=False)
+    invited_by       = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    invited_coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=True)
+    invited_email    = Column(String, nullable=True)
+    code             = Column(String, nullable=True)   # signup/join code for email invites
+    status           = Column(String, default="pending")  # pending / approved / rejected
+    created_at       = Column(DateTime, default=datetime.utcnow)
