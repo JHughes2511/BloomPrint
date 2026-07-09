@@ -212,10 +212,16 @@ export default function ConversationScreen() {
       );
     }
     // report
+    const typeLabel = ({ eval: 'Player Eval', team_report: 'Team Report', game: 'Game Report', scout: 'Scout Report', training: 'Training' } as Record<string, string>)[a.report_type] || 'Report';
+    const title = (a.report_title && String(a.report_title).trim()) || typeLabel;
     return (
-      <TouchableOpacity key={a.id ?? a.report_id} style={styles.attReport} onPress={() => setReportView({ title: a.report_title || 'Report', text: a.report_text || 'No content.' })}>
-        <Ionicons name="document-text-outline" size={16} color={t.accent} />
-        <Text style={styles.attReportText} numberOfLines={1}>{a.report_title || 'Report'}</Text>
+      <TouchableOpacity key={a.id ?? a.report_id} style={styles.attReport} onPress={() => setReportView({ title, text: a.report_text || 'No content.' })}>
+        <View style={styles.attReportIcon}><Ionicons name="document-text" size={18} color={t.accent} /></View>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text style={styles.attReportTitle} numberOfLines={2}>{title}</Text>
+          <Text style={styles.attReportSub} numberOfLines={1}>{typeLabel} · Tap to open</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={16} color={t.muted2} />
       </TouchableOpacity>
     );
   };
@@ -369,8 +375,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   attImage: { width: 200, height: 150, borderRadius: 10, marginBottom: 6 },
   attAudio: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.chip, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 6 },
   attAudioText: { color: t.inkSoft, fontSize: 13, fontFamily: fonts[600] },
-  attReport: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.card, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 6, borderWidth: 1, borderColor: t.cardBorder, maxWidth: 240 },
-  attReportText: { color: t.ink, fontSize: 13, fontFamily: fonts[600], flex: 1 },
+  attReport: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: t.card, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 11, marginBottom: 6, borderWidth: 1, borderColor: t.cardBorder, width: 240, maxWidth: '100%' },
+  attReportIcon: { width: 34, height: 34, borderRadius: 9, backgroundColor: t.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  attReportTitle: { color: t.ink, fontSize: 13.5, fontFamily: fonts[700] },
+  attReportSub: { color: t.muted, fontSize: 11, marginTop: 1 },
   pendingRow: { maxHeight: 44, paddingVertical: 6 },
   pendingChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: t.accentSoft, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: t.accent, maxWidth: 200 },
   pendingChipText: { color: t.accent, fontSize: 12, fontFamily: fonts[600], flexShrink: 1 },
