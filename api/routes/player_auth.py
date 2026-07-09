@@ -170,10 +170,17 @@ def get_linked_player(
     player = db.get(models.Player, pu.player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
-    # The player sees their TRUE composite score (from all evals). The actual
-    # report content stays gated — they only open what the coach has shared.
+    # The player's composite aggregates only the evals that coaches have SHARED
+    # with them (from any coach) — an accurate score across all sides. Unshared
+    # evals stay private to their creating coach.
     from .players import _with_grade
-    return _with_grade(player)
+    shared_eval_ids = {
+        sr.evaluation_id
+        for sr in db.query(models.SharedReport).filter_by(player_user_id=pu.id).all()
+        if sr.evaluation_id
+    }
+    shared_evals = [e for e in player.evaluations if e.id in shared_eval_ids]
+    return _with_grade(player, shared_evals)
 
 
 class PlayerSelfUpdate(BaseModel):

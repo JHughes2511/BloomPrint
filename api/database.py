@@ -103,6 +103,24 @@ def _run_migrations():
             ))
             conn.commit()
 
+        # Add roster-owner coach_id to players + backfill.
+        if "coach_id" not in cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE players ADD COLUMN coach_id INTEGER"
+            ))
+            conn.commit()
+            # Owner = the coach who owns the player's team, else the first coach
+            # who evaluated them (best-effort for legacy team-less players).
+            conn.execute(__import__("sqlalchemy").text(
+                "UPDATE players SET coach_id = (SELECT teams.coach_id FROM teams WHERE teams.id = players.team_id) "
+                "WHERE team_id IS NOT NULL AND coach_id IS NULL"
+            ))
+            conn.execute(__import__("sqlalchemy").text(
+                "UPDATE players SET coach_id = (SELECT e.coach_id FROM evaluations e WHERE e.player_id = players.id ORDER BY e.id LIMIT 1) "
+                "WHERE coach_id IS NULL"
+            ))
+            conn.commit()
+
         # Add wingspan to players if missing
         if "wingspan" not in cols:
             conn.execute(__import__("sqlalchemy").text(

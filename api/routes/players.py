@@ -33,18 +33,34 @@ def create_player(
     coach: models.Coach = Depends(get_current_coach),
 ):
     data = body.model_dump()
-    # Derive program_name from team if team_id given
+    # Roster owner: a team player belongs to the team's owner; a team-less
+    # personal player belongs to the coach who created it.
     if data.get("team_id"):
         team = db.get(models.Team, data["team_id"])
         if team:
             data["program_name"] = team.name
+            data["coach_id"] = team.coach_id
+    if not data.get("coach_id"):
+        data["coach_id"] = coach.id
     if "program_name" not in data or not data.get("program_name"):
         data["program_name"] = coach.program_name
     player = models.Player(**data)
     db.add(player)
     db.commit()
     db.refresh(player)
-    return _with_grade(player)
+    return _with_grade(player, [e for e in player.evaluations if e.coach_id == coach.id])
+
+
+def _accessible_team_ids(db: Session, coach: models.Coach) -> set[int]:
+    ids = {tm.id for tm in db.query(models.Team).filter_by(coach_id=coach.id).all()}
+    ids |= {l.team_id for l in db.query(models.TeamStaff).filter_by(coach_id=coach.id).all()}
+    return ids
+
+
+def _can_see_player(db: Session, coach: models.Coach, player: models.Player) -> bool:
+    if player.coach_id == coach.id:
+        return True
+    return player.team_id is not None and player.team_id in _accessible_team_ids(db, coach)
 
 
 @router.get("", response_model=list[schemas.PlayerOut])
@@ -53,10 +69,15 @@ def list_players(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    q = db.query(models.Player)
+    from sqlalchemy import or_
+    team_ids = _accessible_team_ids(db, coach)
+    conds = [models.Player.coach_id == coach.id]
+    if team_ids:
+        conds.append(models.Player.team_id.in_(team_ids))
+    q = db.query(models.Player).filter(or_(*conds))
     if team_id is not None:
         q = q.filter(models.Player.team_id == team_id)
-    return [_with_grade(p) for p in q.all()]
+    return [_with_grade(p, [e for e in p.evaluations if e.coach_id == coach.id]) for p in q.all()]
 
 
 @router.get("/{player_id}", response_model=schemas.PlayerOut)
@@ -68,7 +89,9 @@ def get_player(
     player = db.get(models.Player, player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
-    return _with_grade(player)
+    if not _can_see_player(db, coach, player):
+        raise HTTPException(status_code=403, detail="You don't have access to this player")
+    return _with_grade(player, [e for e in player.evaluations if e.coach_id == coach.id])
 
 
 @router.patch("/{player_id}", response_model=schemas.PlayerOut)
@@ -106,7 +129,7 @@ def update_player(
             setattr(player, field, val)
     db.commit()
     db.refresh(player)
-    return _with_grade(player)
+    return _with_grade(player, [e for e in player.evaluations if e.coach_id == coach.id])
 
 
 @router.delete("/{player_id}")
@@ -132,7 +155,10 @@ def player_evaluations(
     player = db.get(models.Player, player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
-    return player.evaluations
+    if not _can_see_player(db, coach, player):
+        raise HTTPException(status_code=403, detail="You don't have access to this player")
+    # A coach sees only their OWN evaluations of the player (their personal BIM).
+    return [e for e in player.evaluations if e.coach_id == coach.id]
 
 
 @router.post("/{player_id}/summary", response_model=schemas.SummaryOut)
@@ -226,10 +252,12 @@ async def player_summary(
 _BIM_HALF_LIFE_DAYS = 120.0   # ~4 months: recent film counts most, history still counts
 
 
-def _composite_bim(player: models.Player):
-    """Returns (composite_overall, composite_pillars, report_count)."""
+def _composite_bim(player: models.Player, evals=None):
+    """Returns (composite_overall, composite_pillars, report_count) over the
+    given eval list (defaults to all of the player's evals)."""
     from datetime import datetime
-    evals = [e for e in player.evaluations if e.overall_grade is not None]
+    source = player.evaluations if evals is None else evals
+    evals = [e for e in source if e.overall_grade is not None]
     if not evals:
         return None, {}, 0
     now = datetime.utcnow()
@@ -257,12 +285,15 @@ def _composite_bim(player: models.Player):
     return overall, pillars, len(evals)
 
 
-def _with_grade(player: models.Player) -> schemas.PlayerOut:
+def _with_grade(player: models.Player, evals=None) -> schemas.PlayerOut:
+    # `evals` scopes the BIM: a coach's own evals (their personal score) on the
+    # coach side, or the player's SHARED evals (aggregate) on the player side.
     out = schemas.PlayerOut.model_validate(player)
-    if player.evaluations:
-        grades = [e.overall_grade for e in player.evaluations if e.overall_grade is not None]
-        out.latest_grade = grades[-1] if grades else None
-        overall, pillars, count = _composite_bim(player)
+    source = player.evaluations if evals is None else evals
+    graded = [e for e in source if e.overall_grade is not None]
+    if graded:
+        out.latest_grade = graded[-1].overall_grade
+        overall, pillars, count = _composite_bim(player, source)
         out.bim_grade = overall
         out.bim_pillars = pillars or None
         out.bim_report_count = count

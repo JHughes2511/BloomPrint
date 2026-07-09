@@ -80,6 +80,7 @@ class Player(Base):
     parent_permission = Column(Boolean, nullable=True)
     created_at       = Column(DateTime, default=datetime.utcnow)
     team_id          = Column(Integer, ForeignKey("teams.id"), nullable=True)
+    coach_id         = Column(Integer, ForeignKey("coaches.id"), nullable=True)  # roster owner
 
     evaluations      = relationship("Evaluation", back_populates="player",
                                     order_by="Evaluation.created_at")
