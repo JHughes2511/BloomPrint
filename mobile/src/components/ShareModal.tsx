@@ -213,16 +213,26 @@ export default function ShareModal({
               <>
                 <Text style={styles.label}>Select a Team</Text>
                 {teams.length === 0 && <Text style={styles.empty}>No teams found.</Text>}
-                {teams.map(tm => (
-                  <TouchableOpacity
-                    key={tm.id}
-                    style={[styles.row, selected?.id === tm.id && styles.rowActive]}
-                    onPress={() => setSelected(tm)}
-                  >
-                    <Text style={styles.rowTitle}>{tm.name}</Text>
-                    {selected?.id === tm.id && <Ionicons name="checkmark-circle" size={18} color={t.accent} />}
-                  </TouchableOpacity>
-                ))}
+                {(() => {
+                  const nameById: Record<number, string> = {};
+                  teams.forEach((tm: any) => { nameById[tm.id] = tm.name; });
+                  return teams.map((tm: any) => {
+                    const parentName = tm.parent_team_id ? nameById[tm.parent_team_id] : null;
+                    return (
+                      <TouchableOpacity
+                        key={tm.id}
+                        style={[styles.row, selected?.id === tm.id && styles.rowActive, tm.parent_team_id && { marginLeft: 14, borderLeftWidth: 3, borderLeftColor: t.accent }]}
+                        onPress={() => setSelected(tm)}
+                      >
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.rowTitle}>{tm.name}</Text>
+                          {parentName && <Text style={styles.rowSub}>Sub-team of {parentName}</Text>}
+                        </View>
+                        {selected?.id === tm.id && <Ionicons name="checkmark-circle" size={18} color={t.accent} />}
+                      </TouchableOpacity>
+                    );
+                  });
+                })()}
               </>
             ) : (
               <>

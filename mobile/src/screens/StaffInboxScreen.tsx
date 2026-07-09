@@ -8,7 +8,8 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { staffSharingAPI, teamStaffAPI, staffMessagesAPI, coachesAPI } from '../api/client';
+import { staffSharingAPI, teamStaffAPI, staffMessagesAPI, coachesAPI, teamsAPI } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -28,6 +29,8 @@ type TabKey = 'inbox' | 'team_games' | 'my_teams';
 
 export default function StaffInboxScreen() {
   const { t } = useTheme();
+  const { coach: me } = useAuth();
+  const coachId = me?.id;
   const styles = makeStyles(t);
   const navigation = useNavigation<any>();
 
@@ -90,6 +93,34 @@ export default function StaffInboxScreen() {
   const [inviteResults, setInviteResults] = useState<any[]>([]);
   const [inviteSearching, setInviteSearching] = useState(false);
   const [inviting, setInviting] = useState(false);
+  const [showCreateTeam, setShowCreateTeam] = useState(false);
+  const [newTeamName, setNewTeamName] = useState('');
+  const [creatingTeam, setCreatingTeam] = useState(false);
+  const [collapsedTeams, setCollapsedTeams] = useState<Record<number, boolean>>({});
+  const [messagingTeam, setMessagingTeam] = useState<number | null>(null);
+
+  const createTeam = async () => {
+    if (!newTeamName.trim()) return;
+    setCreatingTeam(true);
+    try {
+      await teamsAPI.create({ name: newTeamName.trim() });
+      setShowCreateTeam(false); setNewTeamName('');
+      await loadMyTeams();
+    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not create the team.'); }
+    finally { setCreatingTeam(false); }
+  };
+
+  const messageGroup = async (team: any) => {
+    setMessagingTeam(team.id);
+    try {
+      const members = await teamStaffAPI.members(team.id);
+      const others = (members ?? []).filter((m: any) => m.id !== coachId);
+      if (others.length === 0) { Alert.alert('No other members', 'This group has no other staff to message yet — invite someone first.'); return; }
+      const conv = await staffMessagesAPI.create({ member_ids: others.map((m: any) => m.id), is_group: others.length > 1, title: team.name });
+      navigation.navigate('Conversation', { conversationId: conv.id, title: conv.title || team.name });
+    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not open the group message.'); }
+    finally { setMessagingTeam(null); }
+  };
 
   const createSubteam = async () => {
     if (!subFor || !subName.trim()) return;
@@ -433,6 +464,11 @@ export default function StaffInboxScreen() {
           </TouchableOpacity>
         </View>
 
+        <TouchableOpacity style={styles.createTeamBtn} onPress={() => { setNewTeamName(''); setShowCreateTeam(true); }}>
+          <Ionicons name="add-circle-outline" size={18} color={t.accent} />
+          <Text style={styles.createTeamText}>Create a new team</Text>
+        </TouchableOpacity>
+
         {searchResults.map((team: any) => {
           const isMember = myTeamIds.has(team.id);
           return (
@@ -470,7 +506,10 @@ export default function StaffInboxScreen() {
               const byParent: Record<number, any[]> = {};
               myTeams.forEach((tm: any) => { const p = tm.parent_team_id ?? 0; (byParent[p] = byParent[p] || []).push(tm); });
               const roots = myTeams.filter((tm: any) => !tm.parent_team_id || !ids.has(tm.parent_team_id));
-              const renderNode = (tm: any, depth: number): any => (
+              const renderNode = (tm: any, depth: number): any => {
+                const kids = byParent[tm.id] || [];
+                const isCollapsed = !!collapsedTeams[tm.id];
+                return (
                 <View key={tm.id}>
                   <View style={[styles.card, { marginHorizontal: 0, marginLeft: depth * 16, borderLeftWidth: depth ? 3 : 1, borderLeftColor: depth ? t.accent : t.cardBorder }]}>
                     <View style={[styles.iconBox, { backgroundColor: t.accentSoft }]}>
@@ -480,8 +519,19 @@ export default function StaffInboxScreen() {
                       <Text style={styles.cardTitle}>{tm.name}</Text>
                       <Text style={styles.cardSub}>{tm.member_count ?? 1} member{(tm.member_count ?? 1) === 1 ? '' : 's'}{tm.is_owner ? ' · You own this' : tm.coach_name ? ` · ${tm.coach_name}` : ''}</Text>
                     </View>
+                    {kids.length > 0 && (
+                      <TouchableOpacity onPress={() => setCollapsedTeams(prev => ({ ...prev, [tm.id]: !prev[tm.id] }))} style={{ padding: 4 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                          <Text style={{ color: t.accent, fontSize: 12, fontFamily: fonts[700] }}>{kids.length}</Text>
+                          <Ionicons name={isCollapsed ? 'chevron-down' : 'chevron-up'} size={16} color={t.accent} />
+                        </View>
+                      </TouchableOpacity>
+                    )}
                   </View>
                   <View style={{ flexDirection: 'row', gap: 8, marginLeft: depth * 16, marginBottom: 8, flexWrap: 'wrap' }}>
+                    <TouchableOpacity style={styles.teamActBtn} onPress={() => messageGroup(tm)} disabled={messagingTeam === tm.id}>
+                      {messagingTeam === tm.id ? <ActivityIndicator color={t.accent} size="small" /> : <><Ionicons name="chatbubble-ellipses-outline" size={14} color={t.accent} /><Text style={styles.teamActText}>Message</Text></>}
+                    </TouchableOpacity>
                     <TouchableOpacity style={styles.teamActBtn} onPress={() => { setSubFor(tm); setSubName(''); }}>
                       <Ionicons name="add" size={14} color={t.accent} /><Text style={styles.teamActText}>Sub-team</Text>
                     </TouchableOpacity>
@@ -494,9 +544,10 @@ export default function StaffInboxScreen() {
                       </TouchableOpacity>
                     )}
                   </View>
-                  {(byParent[tm.id] || []).map((child: any) => renderNode(child, depth + 1))}
+                  {!isCollapsed && kids.map((child: any) => renderNode(child, depth + 1))}
                 </View>
-              );
+                );
+              };
               return roots.map((r: any) => renderNode(r, 0));
             })()}
           </>
@@ -596,6 +647,32 @@ export default function StaffInboxScreen() {
               onPress={startConversation} disabled={!selectedStaff.length || creating}>
               {creating ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.startBtnText}>{selectedStaff.length > 1 ? 'Start Group' : 'Start Message'}</Text>}
             </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Create team modal */}
+      <Modal visible={showCreateTeam} transparent animationType="fade" onRequestClose={() => setShowCreateTeam(false)}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View style={[styles.modalBox, { padding: 20 }]}>
+            <Text style={styles.modalTitle}>New Team</Text>
+            <Text style={[styles.cardSub, { marginTop: 4, marginBottom: 12 }]}>Create a team, then add sub-teams and invite coaches.</Text>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Team name..."
+              placeholderTextColor={t.muted2}
+              value={newTeamName}
+              onChangeText={setNewTeamName}
+              autoFocus
+            />
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+              <TouchableOpacity style={[styles.startBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setShowCreateTeam(false)}>
+                <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.startBtn, { flex: 1, opacity: newTeamName.trim() && !creatingTeam ? 1 : 0.5 }]} onPress={createTeam} disabled={!newTeamName.trim() || creatingTeam}>
+                {creatingTeam ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.startBtnText}>Create</Text>}
+              </TouchableOpacity>
+            </View>
           </View>
         </KeyboardAvoidingView>
       </Modal>
@@ -945,4 +1022,6 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   startBtnText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15 },
   teamActBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: t.accent },
   teamActText: { color: t.accent, fontSize: 12, fontFamily: fonts[700] },
+  createTeamBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.accentSoft, borderRadius: 12, paddingVertical: 12, borderWidth: 1, borderColor: t.accent, marginBottom: 8 },
+  createTeamText: { color: t.accent, fontFamily: fonts[700], fontSize: 13.5 },
 });

@@ -135,6 +135,7 @@ class TeamOut(BaseModel):
     name: str
     coach_id: int
     competition_level: str
+    parent_team_id: int | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
