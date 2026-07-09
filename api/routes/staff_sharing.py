@@ -252,6 +252,47 @@ def share_with_staff_group(
     return {"ok": True, "shared_count": count}
 
 
+@router.post("/share-team")
+def share_with_team(
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Share a report with every STAFF member of a team / sub-team (the coaches
+    on it), delivered to their staff inbox."""
+    team_id = body.get("team_id")
+    team = db.get(models.Team, int(team_id)) if team_id else None
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    ids = {team.coach_id}
+    ids.update(l.coach_id for l in db.query(models.TeamStaff).filter_by(team_id=team.id).all())
+    ids.discard(coach.id)
+    if not ids:
+        raise HTTPException(status_code=400, detail="This group has no other staff members yet.")
+    report_type = str(body.get("report_type") or "team_report")
+    report_id = int(body.get("report_id") or 0)
+    allow_regenerate = bool(body.get("allow_regenerate"))
+    frozen = body.get("frozen_text") if (body.get("frozen_text") and not allow_regenerate) else None
+    count = 0
+    for rid in ids:
+        sr = models.StaffSharedReport(
+            report_type=report_type, report_id=report_id,
+            sender_id=coach.id, recipient_id=rid,
+            allow_regenerate=allow_regenerate, frozen_text=frozen,
+        )
+        db.add(sr)
+        db.flush()
+        _coach_notify(
+            db, rid,
+            f"Report shared by {coach.name}",
+            f"{coach.name} shared a {report_type.replace('_', ' ')} report with {team.name}.",
+            ref_id=sr.id, ntype="staff_report_shared",
+        )
+        count += 1
+    db.commit()
+    return {"ok": True, "shared_count": count, "team_name": team.name}
+
+
 @router.get("/inbox", response_model=list[schemas.StaffSharedReportOut])
 def staff_inbox(
     db: Session = Depends(get_db),

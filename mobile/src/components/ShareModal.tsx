@@ -125,6 +125,19 @@ export default function ShareModal({
           frozen_text: frozen,
         });
         Alert.alert('Shared!', `Report shared with ${res.shared_count ?? 1} staff member(s).`);
+      } else if (target === 'team' && selected?.parent_team_id) {
+        // A staff sub-team — deliver to its coach members' staff inbox.
+        const res = await staffSharingAPI.shareTeam({
+          report_type: reportType,
+          report_id: reportId,
+          team_id: selected.id,
+          allow_regenerate: false,
+          frozen_text: filteredText(),
+        });
+        setSending(false);
+        Alert.alert('Shared!', `Report shared with ${res.shared_count ?? 0} staff member(s) in ${res.team_name ?? selected.name}.`);
+        onClose();
+        return;
       } else {
         const res = await playerAPI.shareTeamReport({
           output_type: outputType,

@@ -264,6 +264,8 @@ export const staffSharingAPI = {
     api.get('/staff-sharing/search-targets', { params: { q } }).then(r => r.data),
   shareGroup: (data: { report_type: string; report_id: number; kind: string; coach_id?: number; team_id?: number; program_name?: string; allow_regenerate?: boolean; frozen_text?: string }) =>
     api.post('/staff-sharing/share-group', data).then(r => r.data),
+  shareTeam: (data: { report_type: string; report_id: number; team_id: number; allow_regenerate?: boolean; frozen_text?: string }) =>
+    api.post('/staff-sharing/share-team', data).then(r => r.data),
   inbox: () => api.get('/staff-sharing/inbox').then(r => r.data),
   sent: () => api.get('/staff-sharing/sent').then(r => r.data),
   getComments: (sharedId: number) => api.get(`/staff-sharing/${sharedId}/comments`).then(r => r.data),
