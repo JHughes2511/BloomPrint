@@ -772,7 +772,8 @@ async def generate_ai_scouting(
         f"Analyze the opponent's strengths, weaknesses, top players to watch, offensive tendencies, "
         f"defensive tendencies, and strategic recommendations for the next game against them. "
         f"IMPORTANT: Do NOT use ## headers, ** bold markers, or dividers. "
-        f"Use plain section titles in ALL CAPS followed by a colon and newline."
+        f"Use plain section titles in ALL CAPS followed by a colon and newline. "
+        f"Do NOT write 'END OF REPORT' or any closing marker at the end."
     )
 
     try:
@@ -792,6 +793,8 @@ async def generate_ai_scouting(
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
 
+    import re as _re
+    report_text = _re.sub(r"\s*END OF REPORT\.?\s*$", "", report_text, flags=_re.IGNORECASE).rstrip()
     game.ai_scouting_report = report_text
     db.commit()
     return {"ai_scouting_report": report_text}

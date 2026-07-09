@@ -359,6 +359,7 @@ def share_report(
                 recipient_player_user_id=pu.id,
                 kind="eval",
                 output_type=ev.output_type,
+                report_text="",   # eval payload lives in evaluation_id; keep non-null for legacy tables
                 message=body.message,
                 evaluation_id=eval_id,
                 share_report_text=body.share_report_text,

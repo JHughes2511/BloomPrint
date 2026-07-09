@@ -8,6 +8,7 @@ import {
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { playerAPI, trainingAPI } from '../api/client';
+import CommentThread from '../components/CommentThread';
 import { AppNotification } from '../types';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -33,6 +34,16 @@ export default function CoachNotificationsScreen() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [replyTexts, setReplyTexts] = useState<Record<number, string>>({});
   const [replying, setReplying] = useState<number | null>(null);
+  const [threads, setThreads] = useState<Record<number, any[]>>({});
+
+  const loadThread = async (notifId: number, sharedId: number) => {
+    try {
+      const res = await playerAPI.coachViewSharedReport(sharedId);
+      setThreads(prev => ({ ...prev, [notifId]: res?.comments ?? [] }));
+    } catch {
+      setThreads(prev => ({ ...prev, [notifId]: [] }));
+    }
+  };
 
   const load = async () => {
     try {
@@ -108,7 +119,11 @@ export default function CoachNotificationsScreen() {
             key={n.id}
             style={[styles.card, !n.read && styles.cardUnread]}
             onPress={async () => {
+              const willExpand = expandedId !== n.id;
               setExpandedId(prev => prev === n.id ? null : n.id);
+              if (willExpand && n.type === 'player_commented' && n.ref_id) {
+                loadThread(n.id, n.ref_id);
+              }
               if (!n.read) {
                 try { await playerAPI.coachMarkRead(n.id); } catch {}
                 setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
@@ -145,6 +160,18 @@ export default function CoachNotificationsScreen() {
                 {(n.type === 'player_commented' || n.type === 'player_commented_training'
                   || n.type === 'player_commented_coach_training' || n.type === 'training_feedback') && n.ref_id ? (
                   <>
+                    {n.type === 'player_commented' && (threads[n.id]?.length ?? 0) > 0 && (
+                      <View style={{ marginBottom: 10 }}>
+                        <CommentThread
+                          comments={threads[n.id] as any}
+                          accent={t.accent}
+                          onReply={async (parentId, text) => {
+                            await playerAPI.coachReplyToReport(n.ref_id!, text, parentId);
+                            await loadThread(n.id, n.ref_id!);
+                          }}
+                        />
+                      </View>
+                    )}
                     <VoiceTextInput
                       style={styles.replyInput}
                       placeholder="Reply to player..."

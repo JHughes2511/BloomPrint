@@ -303,8 +303,8 @@ export default function ShareModal({
             {showSectionToggles && (
               <>
                 <Text style={[styles.label, { marginTop: 8 }]}>Include Sections</Text>
-                {sections.map(sec => (
-                  <View key={sec.heading} style={styles.toggleRow}>
+                {sections.map((sec, i) => (
+                  <View key={`${sec.heading}-${i}`} style={styles.toggleRow}>
                     <Text style={[styles.toggleLabel, { flex: 1, marginRight: 8 }]} numberOfLines={1}>{sec.heading}</Text>
                     <Switch
                       value={sectionToggles[sec.heading] !== false}

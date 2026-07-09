@@ -279,7 +279,7 @@ export default function RecentScreen() {
           output_type: 'scouting_report',
           overall_grade: null,
           created_at: g.date || g.created_at,
-          report_text: g.ai_scouting_report,
+          report_text: String(g.ai_scouting_report).replace(/\s*END OF REPORT\.?\s*$/i, '').trimEnd(),
         }));
       const texts: Record<number, string> = {};
       teamReports.forEach((tr: any) => { if (tr.report_text) texts[tr.id] = tr.report_text; });
