@@ -205,6 +205,13 @@ export default function PlayerRegisterScreen() {
         <Text style={styles.logo}>BloomPrint</Text>
         <Text style={styles.sub}>Create Player Account</Text>
 
+        {!!googleIdToken && (
+          <View style={styles.googleBanner}>
+            <Ionicons name="logo-google" size={16} color={t.positive} />
+            <Text style={styles.googleBannerText}>Complete your account to finish signing up with Google</Text>
+          </View>
+        )}
+
         <VoiceTextInput
           style={styles.input}
           placeholder="Full Name"
@@ -313,6 +320,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   orRow: { flexDirection: 'row', alignItems: 'center', width: '100%', marginTop: 16, marginBottom: 4, gap: 10 },
   orLine: { flex: 1, height: 1, backgroundColor: t.divider },
   orText: { color: t.muted2, fontSize: 12 },
+  googleBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.positiveSoft, borderRadius: 10, padding: 12, marginBottom: 14, borderWidth: 1, borderColor: t.positive, width: '100%' },
+  googleBannerText: { color: t.positive, fontSize: 12.5, fontFamily: fonts[700], flex: 1 },
   section: { marginBottom: 24 },
   sectionTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[700], marginBottom: 4 },
   sectionDesc: { color: t.muted, fontSize: 12, marginBottom: 12 },

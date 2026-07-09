@@ -286,6 +286,12 @@ export default function LoginScreen() {
 
         {mode === 'register' && (
           <>
+            {!!googleIdToken && (
+              <View style={styles.googleBanner}>
+                <Ionicons name="logo-google" size={16} color={t.accent} />
+                <Text style={styles.googleBannerText}>Complete your account to finish signing up with Google</Text>
+              </View>
+            )}
             <Text style={styles.sectionLabel}>I am a</Text>
             <View style={styles.roleRow}>
               {ROLES.map(r => (
@@ -478,6 +484,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   orRow: { flexDirection: 'row', alignItems: 'center', width: '100%', marginTop: 16, marginBottom: 4, gap: 10 },
   orLine: { flex: 1, height: 1, backgroundColor: t.divider },
   orText: { color: t.muted2, fontSize: 12 },
+  googleBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.accentSoft, borderRadius: 10, padding: 12, marginBottom: 16, borderWidth: 1, borderColor: t.accent },
+  googleBannerText: { color: t.accent, fontSize: 12.5, fontFamily: fonts[700], flex: 1 },
   pickerBtn: {
     width: '100%', backgroundColor: t.card, borderRadius: 10, padding: 14,
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
