@@ -719,6 +719,67 @@ async def regenerate_mine(
     return _build_out(sr, db)
 
 
+@router.post("/{shared_id}/request-updated")
+def request_updated(
+    shared_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """The original sharer asks the recipient to share back their updated copy."""
+    sr = db.get(models.StaffSharedReport, shared_id)
+    if not sr or sr.sender_id != coach.id:
+        raise HTTPException(status_code=404, detail="Shared report not found")
+    _coach_notify(
+        db, sr.recipient_id,
+        f"{coach.name} requested your updated report",
+        f"{coach.name} asked to see your updated version of the {sr.report_type.replace('_', ' ')} report.",
+        ref_id=sr.id, ntype="staff_report_request",
+    )
+    db.commit()
+    return {"ok": True}
+
+
+@router.post("/{shared_id}/respond-request")
+def respond_request(
+    shared_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """The recipient approves or rejects a request to share back their updated
+    copy. On approve, their updated version is shared to the requester with
+    correct/regenerate enabled; on reject, the requester is just notified."""
+    sr = db.get(models.StaffSharedReport, shared_id)
+    if not sr or sr.recipient_id != coach.id:
+        raise HTTPException(status_code=404, detail="Shared report not found")
+    approve = bool(body.get("approve"))
+    if not approve:
+        _coach_notify(
+            db, sr.sender_id,
+            f"{coach.name} declined your request",
+            f"{coach.name} declined to share their updated {sr.report_type.replace('_', ' ')} report.",
+            ref_id=sr.id, ntype="staff_report_declined",
+        )
+        db.commit()
+        return {"ok": True, "approved": False}
+    # Share the recipient's updated copy (or their current version) back.
+    report_id = sr.updated_report_id or sr.report_id
+    new_share = models.StaffSharedReport(
+        report_type=sr.report_type, report_id=report_id,
+        sender_id=coach.id, recipient_id=sr.sender_id, allow_regenerate=True,
+    )
+    db.add(new_share)
+    db.flush()
+    _coach_notify(
+        db, sr.sender_id,
+        f"{coach.name} shared their updated report",
+        f"{coach.name} shared their updated {sr.report_type.replace('_', ' ')} report with you.",
+        ref_id=new_share.id, ntype="staff_report_shared",
+    )
+    db.commit()
+    return {"ok": True, "approved": True, "shared_id": new_share.id}
+
+
 @router.post("/{shared_id}/adopt", response_model=schemas.EvalOut)
 def adopt_shared_eval(
     shared_id: int,

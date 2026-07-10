@@ -285,6 +285,10 @@ export const staffSharingAPI = {
     api.delete(`/staff-sharing/corrections/${correctionId}`).then(r => r.data),
   regenerateMine: (sharedId: number, feedback?: string) =>
     api.post(`/staff-sharing/${sharedId}/regenerate-mine`, { feedback }).then(r => r.data),
+  requestUpdated: (sharedId: number) =>
+    api.post(`/staff-sharing/${sharedId}/request-updated`, {}).then(r => r.data),
+  respondRequest: (sharedId: number, approve: boolean) =>
+    api.post(`/staff-sharing/${sharedId}/respond-request`, { approve }).then(r => r.data),
 };
 
 // ── Coaches search ─────────────────────────────────────────────────────────────

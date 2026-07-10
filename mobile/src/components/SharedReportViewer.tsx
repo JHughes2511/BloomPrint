@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import VoiceTextInput from './VoiceTextInput';
 import KeyboardAwareScrollView from './KeyboardAwareScrollView';
 import { staffSharingAPI } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay } from './GeneratingBasketball';
 import { useTheme } from '../theme/ThemeProvider';
@@ -34,6 +35,7 @@ export type SharedReportViewerProps = {
 
 export default function SharedReportViewer({ shared, visible, onClose, onChanged }: SharedReportViewerProps) {
   const { t } = useTheme();
+  const { coach } = useAuth();
   const styles = makeStyles(t);
 
   const [item, setItem] = useState<any | null>(shared);
@@ -49,16 +51,20 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
   const [busy, setBusy] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
 
-  const canRegen = !!item?.allow_regenerate;
+  // The recipient can correct/regenerate; the original sharer (viewing their
+  // sent copy) gets view + comments/notes only.
+  const isRecipient = item?.recipient_id == null || item?.recipient_id === coach?.id;
+  const canRegen = isRecipient && !!item?.allow_regenerate;
 
   useEffect(() => {
     if (visible && shared) {
       setItem(shared);
       setBodyMode(shared.regenerated_text ? 'updated' : 'original');
-      setBottomTab(shared.allow_regenerate ? 'correct' : 'comments');
+      const amRecipient = shared.recipient_id == null || shared.recipient_id === coach?.id;
+      setBottomTab(amRecipient && shared.allow_regenerate ? 'correct' : 'comments');
       setCommentText(''); setNoteText(''); setCorrectText('');
       staffSharingAPI.getComments(shared.id).then(setComments).catch(() => setComments([]));
-      if (shared.allow_regenerate) {
+      if (amRecipient && shared.allow_regenerate) {
         staffSharingAPI.listCorrections(shared.id).then(setCorrections).catch(() => setCorrections([]));
       } else {
         setCorrections([]);

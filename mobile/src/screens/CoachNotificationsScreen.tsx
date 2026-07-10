@@ -42,15 +42,47 @@ export default function CoachNotificationsScreen() {
   const [replying, setReplying] = useState<number | null>(null);
   const [threads, setThreads] = useState<Record<number, any[]>>({});
   const [viewerShared, setViewerShared] = useState<any | null>(null);
+  // shared_id -> report_type, so notification buttons can say "…Training"/"…Report".
+  const [sharedMeta, setSharedMeta] = useState<Record<number, string>>({});
+
+  const TYPE_WORD: Record<string, string> = {
+    training: 'Training', eval: 'Eval', team_report: 'Team Report',
+    team_training: 'Team Report', game: 'Game Report', game_session: 'Scout Report',
+  };
+  const typeWord = (sharedId?: number | null) =>
+    TYPE_WORD[(sharedId != null ? sharedMeta[sharedId] : '') ?? ''] ?? 'Report';
 
   const openSharedReport = async (sharedId: number) => {
     try {
-      const inbox = await staffSharingAPI.inbox();
-      const found = (inbox ?? []).find((s: any) => s.id === sharedId);
+      const [inbox, sent] = await Promise.all([
+        staffSharingAPI.inbox().catch(() => []),
+        staffSharingAPI.sent().catch(() => []),
+      ]);
+      const found = [...(inbox ?? []), ...(sent ?? [])].find((s: any) => s.id === sharedId);
       if (found) setViewerShared(found);
       else Alert.alert('Unavailable', 'This shared report is no longer available.');
     } catch {
       Alert.alert('Error', 'Could not open the report.');
+    }
+  };
+
+  const requestUpdated = async (sharedId: number) => {
+    try {
+      await staffSharingAPI.requestUpdated(sharedId);
+      Alert.alert('Requested', 'We asked them to share their updated version. You\'ll be notified if they approve.');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not send the request.');
+    }
+  };
+
+  const respondRequest = async (n: any, approve: boolean) => {
+    try {
+      await staffSharingAPI.respondRequest(n.ref_id, approve);
+      await playerAPI.coachMarkRead(n.id);
+      setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
+      Alert.alert(approve ? 'Shared' : 'Declined', approve ? 'Your updated report was shared.' : 'Request declined.');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not respond.');
     }
   };
 
@@ -67,6 +99,14 @@ export default function CoachNotificationsScreen() {
     try {
       const data = await playerAPI.coachNotifications();
       setNotifications(data);
+      // Build shared_id -> report_type for type-aware button labels.
+      const [inbox, sent] = await Promise.all([
+        staffSharingAPI.inbox().catch(() => []),
+        staffSharingAPI.sent().catch(() => []),
+      ]);
+      const meta: Record<number, string> = {};
+      [...(inbox ?? []), ...(sent ?? [])].forEach((s: any) => { meta[s.id] = s.report_type; });
+      setSharedMeta(meta);
     } catch {}
     setLoading(false);
     setRefreshing(false);
@@ -302,23 +342,30 @@ export default function CoachNotificationsScreen() {
                       <Text style={styles.rejectBtnText}>Reject</Text>
                     </TouchableOpacity>
                   </View>
-                ) : (n.type === 'staff_report_shared' || n.type === 'staff_share' || n.type === 'staff_report_regenerated' || n.type === 'staff_report_comment') && n.ref_id ? (
+                ) : n.type === 'staff_report_regenerated' && n.ref_id ? (
+                  // I'm the original sharer: their updated copy is private — ask for it.
+                  <TouchableOpacity
+                    style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center' }]}
+                    onPress={() => requestUpdated(n.ref_id!)}
+                  >
+                    <Text style={[styles.approveBtnText, { color: t.ctaText }]}>Request {typeWord(n.ref_id)}</Text>
+                  </TouchableOpacity>
+                ) : n.type === 'staff_report_request' && n.ref_id ? (
                   <View style={styles.actionRow}>
-                    <TouchableOpacity style={styles.approveBtn} onPress={() => openSharedReport(n.ref_id!)}>
-                      <Text style={styles.approveBtnText}>View Report</Text>
+                    <TouchableOpacity style={styles.approveBtn} onPress={() => respondRequest(n, true)}>
+                      <Text style={styles.approveBtnText}>Approve</Text>
                     </TouchableOpacity>
-                    {!n.read && (
-                      <TouchableOpacity
-                        style={styles.rejectBtn}
-                        onPress={async () => {
-                          await playerAPI.coachMarkRead(n.id);
-                          setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
-                        }}
-                      >
-                        <Text style={styles.rejectBtnText}>Mark as Read</Text>
-                      </TouchableOpacity>
-                    )}
+                    <TouchableOpacity style={styles.rejectBtn} onPress={() => respondRequest(n, false)}>
+                      <Text style={styles.rejectBtnText}>Reject</Text>
+                    </TouchableOpacity>
                   </View>
+                ) : (n.type === 'staff_report_shared' || n.type === 'staff_share' || n.type === 'staff_report_comment') && n.ref_id ? (
+                  <TouchableOpacity
+                    style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center' }]}
+                    onPress={() => openSharedReport(n.ref_id!)}
+                  >
+                    <Text style={[styles.approveBtnText, { color: t.ctaText }]}>View {typeWord(n.ref_id)}</Text>
+                  </TouchableOpacity>
                 ) : !n.read ? (
                   <TouchableOpacity
                     style={styles.markReadBtn}
@@ -341,6 +388,7 @@ export default function CoachNotificationsScreen() {
       shared={viewerShared}
       visible={!!viewerShared}
       onClose={() => setViewerShared(null)}
+      onChanged={load}
     />
     </ScreenBackground>
   );
