@@ -17,6 +17,7 @@ import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
 import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
+import SharedReportViewer from '../components/SharedReportViewer';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -54,6 +55,8 @@ type ReportItem = {
   allow_regenerate?: boolean;
   sender_name?: string;
   share_report_type?: string; // underlying staff-share report_type
+  raw?: any;                  // full StaffSharedReportOut, for the viewer
+  updated_from?: string;      // set on MY copy that was regenerated from X's share
 };
 
 type ModalReport = {
@@ -153,12 +156,8 @@ export default function RecentScreen() {
   // Unified share modal (player / team / staff)
   const [shareCtx, setShareCtx] = useState<{ reportType: string; reportId: number; outputType: string; reportText: string; title: string } | null>(null);
 
-  // Edit-and-make-mine modal for a shared eval (only when the sender allowed it)
-  const [editShared, setEditShared] = useState<ReportItem | null>(null);
-  const [editText, setEditText] = useState('');
-  const [editFeedback, setEditFeedback] = useState('');
-  const [regeneratingEdit, setRegeneratingEdit] = useState(false);
-  const [savingEdit, setSavingEdit] = useState(false);
+  // Unified shared-report viewer (correct / regenerate / comment / notes)
+  const [viewerShared, setViewerShared] = useState<any | null>(null);
 
   // Generic Send to Staff modal
   const [staffShareCtx, setStaffShareCtx] = useState<StaffShareContext | null>(null);
@@ -318,7 +317,7 @@ export default function RecentScreen() {
       };
       const sharedItems: ReportItem[] = (sharedInbox ?? []).map((sr: any) => {
         const kind = SHARE_KIND[sr.report_type] ?? 'eval';
-        const text = sr.regenerated_text || sr.report_text || '';
+        const text = sr.report_text || '';
         return {
           id: sr.report_id,
           kind,
@@ -333,7 +332,22 @@ export default function RecentScreen() {
           allow_regenerate: !!sr.allow_regenerate,
           sender_name: sr.sender_name || 'A coach',
           share_report_type: sr.report_type,
+          raw: sr,
         } as ReportItem;
+      });
+
+      // Map of my OWN records that were regenerated from a shared report, so I
+      // can label them "Updated ___ · from X" in Recents.
+      const updatedFrom: Record<string, string> = {};
+      (sharedInbox ?? []).forEach((sr: any) => {
+        if (sr.updated_report_id) {
+          const k = SHARE_KIND[sr.report_type] ?? 'eval';
+          updatedFrom[`${k}:${sr.updated_report_id}`] = sr.sender_name || 'a coach';
+        }
+      });
+      [...evalItems, ...teamItems, ...gameItems, ...trainingItems, ...scoutItems].forEach((it: ReportItem) => {
+        const from = updatedFrom[`${it.kind}:${it.id}`];
+        if (from) it.updated_from = from;
       });
 
       const combined = [...evalItems, ...teamItems, ...gameItems, ...trainingItems, ...scoutItems, ...sharedItems].sort(
@@ -374,14 +388,10 @@ export default function RecentScreen() {
   };
 
   const handlePress = async (item: ReportItem) => {
-    // A shared report is opened read-only from the text the sender chose to
-    // share — the recipient can't fetch/edit the author's underlying record.
+    // A shared report opens in the unified viewer (correct / regenerate /
+    // comment / notes), always scrollable.
     if (item.shared) {
-      if (item.kind === 'training' || item.kind === 'team') {
-        openModal({ id: item.id, kind: item.kind as any, text: item.report_text ?? '', outputType: item.output_type, playerName: item.player_name });
-      } else {
-        setGameReportModal({ title: item.player_name ?? 'Shared Report', text: item.report_text ?? '' });
-      }
+      openViewer(item);
       return;
     }
     if (item.kind === 'game') {
@@ -419,37 +429,12 @@ export default function RecentScreen() {
     }
   };
 
-  const openEditShared = (item: ReportItem) => {
-    setEditShared(item);
-    setEditText(item.report_text ?? '');
-    setEditFeedback('');
-  };
-
-  const regenerateEdit = async () => {
-    if (!editShared?.shared_id || !editFeedback.trim()) return;
-    setRegeneratingEdit(true);
-    try {
-      const res = await staffSharingAPI.regenerate(editShared.shared_id, editFeedback.trim());
-      setEditText(res?.regenerated_text ?? res?.report_text ?? editText);
-      setEditFeedback('');
-    } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not refine with AI.');
-    }
-    setRegeneratingEdit(false);
-  };
-
-  const saveEditAsMine = async () => {
-    if (!editShared?.shared_id || !editText.trim()) return;
-    setSavingEdit(true);
-    try {
-      await staffSharingAPI.adopt(editShared.shared_id, editText.trim());
-      setEditShared(null);
-      Alert.alert('Saved', 'This is now your own eval. It counts as your input if you share it with the player.');
-      await load();
-    } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save your eval.');
-    }
-    setSavingEdit(false);
+  const openViewer = (item: ReportItem) => {
+    // Prefer the full shared payload; fall back to a minimal shape.
+    setViewerShared(item.raw ?? {
+      id: item.shared_id, report_type: item.share_report_type, report_text: item.report_text,
+      allow_regenerate: item.allow_regenerate, sender_name: item.sender_name, subject_name: item.player_name,
+    });
   };
 
   const handleDelete = (item: ReportItem) => {
@@ -744,6 +729,11 @@ export default function RecentScreen() {
                         Shared by {item.sender_name}
                       </Text>
                     )}
+                    {!item.shared && item.updated_from && (
+                      <Text numberOfLines={1} style={[styles.sharedByLabel, { color: t.accent }]}>
+                        Updated · from {item.updated_from}
+                      </Text>
+                    )}
                   </View>
                   {item.overall_grade != null && <GradeBadge grade={item.overall_grade} size="md" />}
                   {item.kind === 'game' && <Ionicons name="chevron-forward" size={14} color={t.muted2} />}
@@ -791,15 +781,15 @@ export default function RecentScreen() {
                     </TouchableOpacity>
                   )}
 
-                  {/* Edit & make mine — only for a shared eval the sender let
-                      me regenerate. Adopting it creates my own eval. */}
-                  {item.shared && item.kind === 'eval' && item.allow_regenerate && (
+                  {/* Correct / Regenerate — opens the shared-report viewer's
+                      edit flow. Only when the sender allowed regeneration. */}
+                  {item.shared && item.allow_regenerate && (
                     <TouchableOpacity
                       style={[styles.gameActionBtn, { borderColor: t.accentSoft }]}
-                      onPress={() => openEditShared(item)}
+                      onPress={() => openViewer(item)}
                     >
                       <Ionicons name="create-outline" size={13} color={t.accent} />
-                      <Text style={[styles.gameActionText, { color: t.accent }]}>Edit & make mine</Text>
+                      <Text style={[styles.gameActionText, { color: t.accent }]}>Correct / Regenerate</Text>
                     </TouchableOpacity>
                   )}
 
@@ -869,67 +859,13 @@ export default function RecentScreen() {
         </View>
       </Modal>
 
-      {/* Edit & Make Mine — adopt a shared eval as my own */}
-      <Modal visible={!!editShared} animationType="slide" transparent>
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <View style={styles.modalBox}>
-            <View style={styles.modalHeader}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.modalTitle}>Edit & Make It Mine</Text>
-                <Text style={styles.modalSub}>{editShared?.player_name} · from {editShared?.sender_name}</Text>
-              </View>
-              <TouchableOpacity onPress={() => setEditShared(null)}>
-                <Ionicons name="close" size={24} color={t.muted} />
-              </TouchableOpacity>
-            </View>
-            <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>
-              Editing saves this as your own eval. It re-scores the BIM from your text and,
-              if you share it with the player, counts as your input — the author's original stays separate.
-            </Text>
-            <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 12 }}>
-              <VoiceTextInput
-                style={[styles.editArea]}
-                value={editText}
-                onChangeText={setEditText}
-                multiline
-                placeholder="Report text..."
-                placeholderTextColor={t.muted2}
-              />
-              <Text style={{ color: t.label, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1, marginTop: 14, marginBottom: 6 }}>
-                REFINE WITH AI (OPTIONAL)
-              </Text>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                <VoiceTextInput
-                  style={[styles.input, { flex: 1, marginBottom: 0 }]}
-                  value={editFeedback}
-                  onChangeText={setEditFeedback}
-                  placeholder="e.g. emphasize his defense, add a shooting note..."
-                  placeholderTextColor={t.muted2}
-                  multiline
-                />
-                <TouchableOpacity
-                  style={[styles.gameActionBtn, { borderColor: t.accentSoft, alignSelf: 'flex-start' }]}
-                  onPress={regenerateEdit}
-                  disabled={regeneratingEdit || !editFeedback.trim()}
-                >
-                  {regeneratingEdit
-                    ? <ActivityIndicator size="small" color={t.accent} />
-                    : <><Ionicons name="sparkles-outline" size={13} color={t.accent} /><Text style={[styles.gameActionText, { color: t.accent }]}>Refine</Text></>}
-                </TouchableOpacity>
-              </View>
-            </KeyboardAwareScrollView>
-            <TouchableOpacity
-              style={[styles.primaryBtn, { marginTop: 10, opacity: (savingEdit || !editText.trim()) ? 0.6 : 1 }]}
-              onPress={saveEditAsMine}
-              disabled={savingEdit || !editText.trim()}
-            >
-              {savingEdit
-                ? <ActivityIndicator color={t.ctaText} size="small" />
-                : <Text style={styles.primaryBtnText}>Save as my eval</Text>}
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+      {/* Unified shared-report viewer (correct / regenerate / comment / notes) */}
+      <SharedReportViewer
+        shared={viewerShared}
+        visible={!!viewerShared}
+        onClose={() => setViewerShared(null)}
+        onChanged={load}
+      />
 
       {/* Generic Send to Staff Modal */}
       <Modal visible={showStaffShareModal} animationType="slide" transparent>

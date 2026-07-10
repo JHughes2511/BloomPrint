@@ -7,8 +7,9 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { playerAPI, trainingAPI, teamStaffAPI } from '../api/client';
+import { playerAPI, trainingAPI, teamStaffAPI, staffSharingAPI } from '../api/client';
 import CommentThread from '../components/CommentThread';
+import SharedReportViewer from '../components/SharedReportViewer';
 import { AppNotification } from '../types';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -40,6 +41,18 @@ export default function CoachNotificationsScreen() {
   const [replyTexts, setReplyTexts] = useState<Record<number, string>>({});
   const [replying, setReplying] = useState<number | null>(null);
   const [threads, setThreads] = useState<Record<number, any[]>>({});
+  const [viewerShared, setViewerShared] = useState<any | null>(null);
+
+  const openSharedReport = async (sharedId: number) => {
+    try {
+      const inbox = await staffSharingAPI.inbox();
+      const found = (inbox ?? []).find((s: any) => s.id === sharedId);
+      if (found) setViewerShared(found);
+      else Alert.alert('Unavailable', 'This shared report is no longer available.');
+    } catch {
+      Alert.alert('Error', 'Could not open the report.');
+    }
+  };
 
   const loadThread = async (notifId: number, sharedId: number) => {
     try {
@@ -289,6 +302,23 @@ export default function CoachNotificationsScreen() {
                       <Text style={styles.rejectBtnText}>Reject</Text>
                     </TouchableOpacity>
                   </View>
+                ) : (n.type === 'staff_report_shared' || n.type === 'staff_share' || n.type === 'staff_report_regenerated' || n.type === 'staff_report_comment') && n.ref_id ? (
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity style={styles.approveBtn} onPress={() => openSharedReport(n.ref_id!)}>
+                      <Text style={styles.approveBtnText}>View Report</Text>
+                    </TouchableOpacity>
+                    {!n.read && (
+                      <TouchableOpacity
+                        style={styles.rejectBtn}
+                        onPress={async () => {
+                          await playerAPI.coachMarkRead(n.id);
+                          setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
+                        }}
+                      >
+                        <Text style={styles.rejectBtnText}>Mark as Read</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 ) : !n.read ? (
                   <TouchableOpacity
                     style={styles.markReadBtn}
@@ -307,6 +337,11 @@ export default function CoachNotificationsScreen() {
         ))
       )}
     </KeyboardAwareScrollView>
+    <SharedReportViewer
+      shared={viewerShared}
+      visible={!!viewerShared}
+      onClose={() => setViewerShared(null)}
+    />
     </ScreenBackground>
   );
 }

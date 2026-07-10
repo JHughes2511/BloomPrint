@@ -423,9 +423,27 @@ class StaffSharedReport(Base):
     frozen_text      = Column(Text, nullable=True)
     created_at       = Column(DateTime, default=datetime.utcnow)
 
+    # id of the recipient's OWN "Updated ___" copy once they regenerate/correct
+    # it (points to the appropriate table for report_type). Lets the viewer and
+    # Recents surface the updated version distinctly from the original.
+    updated_report_id = Column(Integer, nullable=True)
+
     sender    = relationship("Coach", foreign_keys=[sender_id])
     recipient = relationship("Coach", foreign_keys=[recipient_id])
     comments  = relationship("StaffReportComment", back_populates="shared_report", cascade="all, delete-orphan")
+
+
+class SharedReportCorrection(Base):
+    """A recipient's running list of corrections for a report shared with them.
+    'Apply Corrections' saves one; 'Apply & Regenerate' runs the AI over all
+    un-applied corrections to produce the recipient's own Updated copy."""
+    __tablename__ = "shared_report_corrections"
+    id         = Column(Integer, primary_key=True, index=True)
+    shared_id  = Column(Integer, ForeignKey("staff_shared_reports.id"), nullable=False)
+    coach_id   = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    correction = Column(Text, nullable=False)
+    applied    = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 
 class StaffReportComment(Base):

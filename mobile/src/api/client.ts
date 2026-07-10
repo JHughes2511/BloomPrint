@@ -275,6 +275,12 @@ export const staffSharingAPI = {
     api.post(`/staff-sharing/${sharedId}/regenerate`, { feedback }).then(r => r.data),
   adopt: (sharedId: number, text: string) =>
     api.post(`/staff-sharing/${sharedId}/adopt`, { text }).then(r => r.data),
+  listCorrections: (sharedId: number) =>
+    api.get(`/staff-sharing/${sharedId}/corrections`).then(r => r.data),
+  addCorrection: (sharedId: number, correction: string) =>
+    api.post(`/staff-sharing/${sharedId}/corrections`, { correction }).then(r => r.data),
+  regenerateMine: (sharedId: number, feedback?: string) =>
+    api.post(`/staff-sharing/${sharedId}/regenerate-mine`, { feedback }).then(r => r.data),
 };
 
 // ── Coaches search ─────────────────────────────────────────────────────────────

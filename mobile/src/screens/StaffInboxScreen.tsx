@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { staffSharingAPI, teamStaffAPI, staffMessagesAPI, coachesAPI, teamsAPI } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
+import SharedReportViewer from '../components/SharedReportViewer';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -216,18 +217,7 @@ export default function StaffInboxScreen() {
     loadMyTeams();
   }, []));
 
-  const openItem = async (item: any) => {
-    setActiveItem(item);
-    setView('report');
-    setComments([]);
-    setCommentText('');
-    setRegenerateFeedback('');
-    setCoachNotes('');
-    try {
-      const c = await staffSharingAPI.getComments(item.id);
-      setComments(c);
-    } catch {}
-  };
+  const openItem = (item: any) => setActiveItem(item);
 
   const submitComment = async () => {
     if (!commentText.trim() || !activeItem) return;
@@ -748,150 +738,13 @@ export default function StaffInboxScreen() {
         </KeyboardAvoidingView>
       </Modal>
 
-      {/* Inbox detail modal */}
-      <Modal visible={!!activeItem} animationType="slide" transparent>
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={styles.modalBox}>
-            <View style={styles.modalHeader}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.modalTitle}>
-                  {REPORT_TYPE_LABELS[activeItem?.report_type ?? ''] ?? activeItem?.report_type ?? 'Report'}
-                </Text>
-                <Text style={styles.modalSub}>From {activeItem?.sender_name}</Text>
-              </View>
-              <TouchableOpacity onPress={() => setActiveItem(null)}>
-                <Ionicons name="close" size={22} color={t.muted} />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 14 }}>
-              <View style={styles.tabRow}>
-                {(['report', 'comments'] as const).map(v => (
-                  <TouchableOpacity key={v} style={[styles.tab, view === v && styles.tabActive]} onPress={() => setView(v)}>
-                    <Text style={[styles.tabText, view === v && styles.tabTextActive]}>
-                      {v === 'report' ? 'Original' : `Comments (${comments.length})`}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-                {activeItem?.regenerated_text && (
-                  <TouchableOpacity style={[styles.tab, view === 'regenerated' && styles.tabActive]} onPress={() => setView('regenerated')}>
-                    <Text style={[styles.tabText, view === 'regenerated' && styles.tabTextActive]}>Regenerated</Text>
-                  </TouchableOpacity>
-                )}
-                {activeItem?.allow_regenerate && (
-                  <TouchableOpacity style={[styles.tab, view === 'regenerate' && styles.tabActive]} onPress={() => setView('regenerate')}>
-                    <Text style={[styles.tabText, view === 'regenerate' && styles.tabTextActive]}>Regenerate</Text>
-                  </TouchableOpacity>
-                )}
-                {activeItem?.report_type === 'training' && (
-                  <TouchableOpacity style={[styles.tab, view === 'notes' && styles.tabActive]} onPress={() => setView('notes')}>
-                    <Text style={[styles.tabText, view === 'notes' && styles.tabTextActive]}>Notes</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </ScrollView>
-
-            {view === 'report' && (
-              <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
-                {activeItem?.report_text
-                  ? renderReport(activeItem.report_text, { heading: t.ink, body: t.inkSoft })
-                  : <Text style={{ color: t.muted2 }}>No report content available.</Text>}
-              </KeyboardAwareScrollView>
-            )}
-            {view === 'regenerated' && (
-              <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
-                <View style={{ backgroundColor: t.accentSoft, borderRadius: 8, padding: 10, marginBottom: 10 }}>
-                  <Text style={{ color: t.accent, fontSize: 11, fontFamily: fonts[700], letterSpacing: 1 }}>REGENERATED VERSION</Text>
-                </View>
-                {activeItem?.regenerated_text ? renderReport(activeItem.regenerated_text, { heading: t.ink, body: t.inkSoft }) : <Text style={{ color: t.muted2 }}>No regenerated version yet.</Text>}
-              </KeyboardAwareScrollView>
-            )}
-            {view === 'comments' && (
-              <>
-                <ScrollView style={{ maxHeight: 240 }} contentContainerStyle={{ paddingBottom: 8 }}>
-                  {comments.length === 0 && <Text style={{ color: t.muted2, textAlign: 'center', paddingVertical: 20 }}>No comments yet.</Text>}
-                  {comments.map((c: any) => (
-                    <View key={c.id} style={styles.commentCard}>
-                      <Text style={styles.commentAuthor}>{c.author_name}</Text>
-                      <Text style={styles.commentText}>{c.text}</Text>
-                      <Text style={styles.commentDate}>{new Date(c.created_at).toLocaleDateString()}</Text>
-                    </View>
-                  ))}
-                </ScrollView>
-                <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-                  <VoiceTextInput
-                    style={[styles.input, { flex: 1 }]}
-                    placeholder="Add a comment..."
-                    placeholderTextColor={t.muted2}
-                    value={commentText}
-                    onChangeText={setCommentText}
-                    multiline
-                  />
-                  <TouchableOpacity style={styles.sendBtn} onPress={submitComment} disabled={submittingComment || !commentText.trim()}>
-                    {submittingComment ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="send" size={18} color={t.ctaText} />}
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
-            {view === 'regenerate' && (
-              <>
-                <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>Provide feedback to regenerate this report with AI.</Text>
-                <VoiceTextInput
-                  style={[styles.input, { minHeight: 100 }]}
-                  placeholder="What needs to be updated or corrected?"
-                  placeholderTextColor={t.muted2}
-                  value={regenerateFeedback}
-                  onChangeText={setRegenerateFeedback}
-                  multiline
-                  textAlignVertical="top"
-                />
-                <TouchableOpacity
-                  style={[styles.regenBtn, (!regenerateFeedback.trim() || regenerating) && { opacity: 0.5 }]}
-                  onPress={regenerate}
-                  disabled={!regenerateFeedback.trim() || regenerating}
-                >
-                  {regenerating ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Regenerate Report</Text>}
-                </TouchableOpacity>
-              </>
-            )}
-            {view === 'notes' && (
-              <>
-                <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>Add your notes about this training program.</Text>
-                <VoiceTextInput
-                  style={[styles.input, { minHeight: 120 }]}
-                  placeholder="Add your coaching notes here..."
-                  placeholderTextColor={t.muted2}
-                  value={coachNotes}
-                  onChangeText={setCoachNotes}
-                  multiline
-                  textAlignVertical="top"
-                />
-                <TouchableOpacity
-                  style={[styles.regenBtn, { backgroundColor: t.positive }, (!coachNotes.trim() || savingNotes) && { opacity: 0.5 }]}
-                  onPress={async () => {
-                    if (!coachNotes.trim() || !activeItem) return;
-                    setSavingNotes(true);
-                    try {
-                      await staffSharingAPI.addComment(activeItem.id, `[Coach Note] ${coachNotes.trim()}`);
-                      const c = await staffSharingAPI.getComments(activeItem.id);
-                      setComments(c);
-                      setCoachNotes('');
-                      Alert.alert('Saved', 'Note saved.');
-                    } catch (e: any) {
-                      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save note');
-                    } finally {
-                      setSavingNotes(false);
-                    }
-                  }}
-                  disabled={!coachNotes.trim() || savingNotes}
-                >
-                  {savingNotes ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Save Note</Text>}
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+      {/* Inbox detail — unified shared-report viewer */}
+      <SharedReportViewer
+        shared={activeItem}
+        visible={!!activeItem}
+        onClose={() => setActiveItem(null)}
+        onChanged={loadInbox}
+      />
 
       {/* Team Game detail modal */}
       <Modal visible={!!activeGame} animationType="slide" transparent>

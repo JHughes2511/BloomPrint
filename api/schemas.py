@@ -527,6 +527,7 @@ class StaffSharedReportOut(BaseModel):
     subject_name: str | None = None  # player name / matchup / "Team Report"
     output_type: str | None = None
     overall_grade: float | None = None
+    updated_report_id: int | None = None  # recipient's own Updated copy, once made
 
     model_config = {"from_attributes": True}
 

@@ -476,6 +476,174 @@ async def regenerate_shared(
     return _build_out(sr, db)
 
 
+async def _ai_update_report(base_text: str, corrections: list[str]) -> str:
+    """Rewrite a report to incorporate all of the recipient's corrections."""
+    combined = "\n".join(f"- {c}" for c in corrections if c.strip())
+    prompt = (
+        "You are a basketball analysis expert. Below is a report followed by corrections "
+        "from a staff member. Rewrite the report to fully incorporate ALL the corrections. "
+        "Return ONLY the updated report text.\n\n"
+        "Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
+        "Use plain section titles in ALL CAPS followed by a colon and newline. "
+        "Do NOT write 'END OF REPORT' or any closing marker.\n\n"
+        f"ORIGINAL REPORT:\n{base_text}\n\nCORRECTIONS:\n{combined}\n\nUPDATED REPORT:"
+    )
+    import anthropic
+    client = anthropic.AsyncAnthropic()
+    response = await client.messages.create(
+        model="claude-opus-4-7", max_tokens=8192,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    blocks = [b for b in response.content if hasattr(b, "text")]
+    if not blocks:
+        raise HTTPException(status_code=500, detail="AI returned no content")
+    import re as _re
+    return _re.sub(r"\s*END OF REPORT\.?\s*$", "", blocks[0].text.strip(), flags=_re.IGNORECASE).rstrip()
+
+
+def _create_updated_report(db: Session, coach: models.Coach, sr: models.StaffSharedReport, new_text: str) -> int:
+    """Create the recipient's OWN 'Updated ___' record for a shared report, in
+    the right table for the report type. Returns the new record id (or the game
+    id for a scouting report)."""
+    from .evaluations import _parse_grade, _parse_pillar_grades, _parse_list_section
+    rt = sr.report_type
+    if rt == "eval":
+        orig = db.get(models.Evaluation, sr.report_id)
+        if not orig:
+            raise HTTPException(status_code=404, detail="Original evaluation not found")
+        rec = models.Evaluation(
+            player_id=orig.player_id, coach_id=coach.id, output_type=orig.output_type,
+            report_text=new_text, overall_grade=_parse_grade(new_text),
+            pillar_grades=_parse_pillar_grades(new_text),
+            green_flags=_parse_list_section(new_text, "GREEN FLAGS"),
+            watch_flags=_parse_list_section(new_text, "WATCH FLAGS"),
+            key_questions=_parse_list_section(new_text, "KEY QUESTIONS"),
+        )
+        db.add(rec); db.flush(); return rec.id
+    if rt == "training":
+        orig = db.get(models.TrainingSession, sr.report_id)
+        if not orig:
+            raise HTTPException(status_code=404, detail="Original training not found")
+        rec = models.TrainingSession(
+            player_id=orig.player_id, coach_id=coach.id, program_text=new_text, priorities=orig.priorities,
+        )
+        db.add(rec); db.flush(); return rec.id
+    if rt in ("team_report", "team_training"):
+        orig = db.get(models.TeamReport, sr.report_id)
+        if not orig:
+            raise HTTPException(status_code=404, detail="Original team report not found")
+        rec = models.TeamReport(
+            coach_id=coach.id, output_type=orig.output_type, focus_prompt=orig.focus_prompt, report_text=new_text,
+        )
+        db.add(rec); db.flush(); return rec.id
+    if rt == "game":
+        orig = db.get(models.GameReport, sr.report_id)
+        if not orig:
+            raise HTTPException(status_code=404, detail="Original game report not found")
+        rec = models.GameReport(
+            coach_id=coach.id, title=(("Updated: " + orig.title) if orig.title else "Updated Game Report"),
+            mode=orig.mode, opponent_name=orig.opponent_name, output_type=orig.output_type, report_text=new_text,
+        )
+        db.add(rec); db.flush(); return rec.id
+    if rt == "game_session":
+        game = db.get(models.GameSession, sr.report_id)
+        if not game:
+            raise HTTPException(status_code=404, detail="Original game not found")
+        row = db.query(models.GameScoutingReport).filter_by(game_id=game.id, coach_id=coach.id).first()
+        if row:
+            row.report_text = new_text
+        else:
+            db.add(models.GameScoutingReport(game_id=game.id, coach_id=coach.id, report_text=new_text))
+        db.flush(); return game.id
+    raise HTTPException(status_code=400, detail="This report type can't be updated")
+
+
+@router.get("/{shared_id}/corrections")
+def list_shared_corrections(
+    shared_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    sr = db.get(models.StaffSharedReport, shared_id)
+    if not sr or sr.recipient_id != coach.id:
+        raise HTTPException(status_code=404, detail="Shared report not found")
+    rows = (
+        db.query(models.SharedReportCorrection)
+        .filter_by(shared_id=shared_id, coach_id=coach.id)
+        .order_by(models.SharedReportCorrection.id)
+        .all()
+    )
+    return [{"id": r.id, "correction": r.correction, "applied": r.applied, "created_at": r.created_at} for r in rows]
+
+
+@router.post("/{shared_id}/corrections")
+def add_shared_correction(
+    shared_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    sr = db.get(models.StaffSharedReport, shared_id)
+    if not sr or sr.recipient_id != coach.id:
+        raise HTTPException(status_code=404, detail="Shared report not found")
+    if not sr.allow_regenerate:
+        raise HTTPException(status_code=403, detail="This share doesn't allow edits")
+    text = (body.get("correction") or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Correction text required")
+    row = models.SharedReportCorrection(shared_id=shared_id, coach_id=coach.id, correction=text)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return {"id": row.id, "correction": row.correction, "applied": row.applied}
+
+
+@router.post("/{shared_id}/regenerate-mine", response_model=schemas.StaffSharedReportOut)
+async def regenerate_mine(
+    shared_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Apply & Regenerate: rewrite the shared report with all of my un-applied
+    corrections and save the result as my OWN Updated copy (of the right type).
+    The sender's original is untouched."""
+    sr = db.get(models.StaffSharedReport, shared_id)
+    if not sr or sr.recipient_id != coach.id:
+        raise HTTPException(status_code=404, detail="Shared report not found")
+    if not sr.allow_regenerate:
+        raise HTTPException(status_code=403, detail="This share doesn't allow edits")
+
+    feedback = (body.get("feedback") or "").strip()
+    if feedback:
+        db.add(models.SharedReportCorrection(shared_id=shared_id, coach_id=coach.id, correction=feedback))
+        db.commit()
+    pending = (
+        db.query(models.SharedReportCorrection)
+        .filter_by(shared_id=shared_id, coach_id=coach.id, applied=False)
+        .order_by(models.SharedReportCorrection.id)
+        .all()
+    )
+    corrections = [p.correction for p in pending]
+    if not corrections:
+        raise HTTPException(status_code=400, detail="Add at least one correction first")
+
+    # Base off my latest updated copy if I have one, else the shared original.
+    base = sr.regenerated_text or _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id) or sr.frozen_text
+    if not base:
+        raise HTTPException(status_code=400, detail="No report content to update")
+
+    new_text = await _ai_update_report(base, corrections)
+    new_id = _create_updated_report(db, coach, sr, new_text)
+    sr.regenerated_text = new_text
+    sr.updated_report_id = new_id
+    for p in pending:
+        p.applied = True
+    db.commit()
+    db.refresh(sr)
+    return _build_out(sr, db)
+
+
 @router.post("/{shared_id}/adopt", response_model=schemas.EvalOut)
 def adopt_shared_eval(
     shared_id: int,
