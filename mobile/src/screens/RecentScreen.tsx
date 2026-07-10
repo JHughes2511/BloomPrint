@@ -336,18 +336,24 @@ export default function RecentScreen() {
         } as ReportItem;
       });
 
-      // Map of my OWN records that were regenerated from a shared report, so I
-      // can label them "Updated ___ · from X" in Recents.
-      const updatedFrom: Record<string, string> = {};
+      // Map my OWN records that were regenerated from a shared report back to
+      // that share, so I can label them "Updated · from X" AND let their
+      // "Correct" button reopen the same viewer.
+      const updatedFrom: Record<string, any> = {};
       (sharedInbox ?? []).forEach((sr: any) => {
         if (sr.updated_report_id) {
           const k = SHARE_KIND[sr.report_type] ?? 'eval';
-          updatedFrom[`${k}:${sr.updated_report_id}`] = sr.sender_name || 'a coach';
+          updatedFrom[`${k}:${sr.updated_report_id}`] = sr;
         }
       });
       [...evalItems, ...teamItems, ...gameItems, ...trainingItems, ...scoutItems].forEach((it: ReportItem) => {
-        const from = updatedFrom[`${it.kind}:${it.id}`];
-        if (from) it.updated_from = from;
+        const sr = updatedFrom[`${it.kind}:${it.id}`];
+        if (sr) {
+          it.updated_from = sr.sender_name || 'a coach';
+          it.raw = sr;
+          it.shared_id = sr.id;
+          it.allow_regenerate = !!sr.allow_regenerate;
+        }
       });
 
       const combined = [...evalItems, ...teamItems, ...gameItems, ...trainingItems, ...scoutItems, ...sharedItems].sort(
@@ -781,15 +787,15 @@ export default function RecentScreen() {
                     </TouchableOpacity>
                   )}
 
-                  {/* Correct / Regenerate — opens the shared-report viewer's
-                      edit flow. Only when the sender allowed regeneration. */}
-                  {item.shared && item.allow_regenerate && (
+                  {/* Correct — opens the shared-report viewer's edit flow.
+                      On the shared original AND on my Updated copy of it. */}
+                  {(item.shared || item.updated_from) && item.allow_regenerate && (
                     <TouchableOpacity
                       style={[styles.gameActionBtn, { borderColor: t.accentSoft }]}
                       onPress={() => openViewer(item)}
                     >
                       <Ionicons name="create-outline" size={13} color={t.accent} />
-                      <Text style={[styles.gameActionText, { color: t.accent }]}>Correct / Regenerate</Text>
+                      <Text style={[styles.gameActionText, { color: t.accent }]}>Correct</Text>
                     </TouchableOpacity>
                   )}
 

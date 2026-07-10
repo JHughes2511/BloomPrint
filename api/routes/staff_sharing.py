@@ -558,6 +558,81 @@ def _create_updated_report(db: Session, coach: models.Coach, sr: models.StaffSha
     raise HTTPException(status_code=400, detail="This report type can't be updated")
 
 
+def _apply_updated_report(db: Session, coach: models.Coach, sr: models.StaffSharedReport, new_text: str) -> int:
+    """Update the recipient's existing Updated copy in place if they have one,
+    else create it. It's their own file, so we keep a single evolving copy."""
+    if not sr.updated_report_id:
+        return _create_updated_report(db, coach, sr, new_text)
+    rt = sr.report_type
+    from .evaluations import _parse_grade, _parse_pillar_grades, _parse_list_section
+    if rt == "eval":
+        rec = db.get(models.Evaluation, sr.updated_report_id)
+        if rec:
+            rec.report_text = new_text
+            rec.overall_grade = _parse_grade(new_text)
+            rec.pillar_grades = _parse_pillar_grades(new_text)
+            rec.green_flags = _parse_list_section(new_text, "GREEN FLAGS")
+            rec.watch_flags = _parse_list_section(new_text, "WATCH FLAGS")
+            rec.key_questions = _parse_list_section(new_text, "KEY QUESTIONS")
+            return rec.id
+    elif rt == "training":
+        rec = db.get(models.TrainingSession, sr.updated_report_id)
+        if rec:
+            rec.program_text = new_text
+            return rec.id
+    elif rt in ("team_report", "team_training"):
+        rec = db.get(models.TeamReport, sr.updated_report_id)
+        if rec:
+            rec.report_text = new_text
+            return rec.id
+    elif rt == "game":
+        rec = db.get(models.GameReport, sr.updated_report_id)
+        if rec:
+            rec.report_text = new_text
+            return rec.id
+    elif rt == "game_session":
+        # Scouting is unique per (game, coach), so this upserts in place.
+        return _create_updated_report(db, coach, sr, new_text)
+    # Record was deleted out from under us — make a fresh one.
+    return _create_updated_report(db, coach, sr, new_text)
+
+
+@router.patch("/corrections/{correction_id}")
+def edit_shared_correction(
+    correction_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    row = db.get(models.SharedReportCorrection, correction_id)
+    if not row or row.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Correction not found")
+    if row.applied:
+        raise HTTPException(status_code=400, detail="This correction was already applied and can't be edited")
+    text = (body.get("correction") or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Correction text required")
+    row.correction = text
+    db.commit()
+    return {"id": row.id, "correction": row.correction, "applied": row.applied}
+
+
+@router.delete("/corrections/{correction_id}")
+def delete_shared_correction(
+    correction_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    row = db.get(models.SharedReportCorrection, correction_id)
+    if not row or row.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Correction not found")
+    if row.applied:
+        raise HTTPException(status_code=400, detail="This correction was already applied and can't be deleted")
+    db.delete(row)
+    db.commit()
+    return {"ok": True}
+
+
 @router.get("/{shared_id}/corrections")
 def list_shared_corrections(
     shared_id: int,
@@ -634,7 +709,7 @@ async def regenerate_mine(
         raise HTTPException(status_code=400, detail="No report content to update")
 
     new_text = await _ai_update_report(base, corrections)
-    new_id = _create_updated_report(db, coach, sr, new_text)
+    new_id = _apply_updated_report(db, coach, sr, new_text)
     sr.regenerated_text = new_text
     sr.updated_report_id = new_id
     for p in pending:

@@ -279,6 +279,10 @@ export const staffSharingAPI = {
     api.get(`/staff-sharing/${sharedId}/corrections`).then(r => r.data),
   addCorrection: (sharedId: number, correction: string) =>
     api.post(`/staff-sharing/${sharedId}/corrections`, { correction }).then(r => r.data),
+  editCorrection: (correctionId: number, correction: string) =>
+    api.patch(`/staff-sharing/corrections/${correctionId}`, { correction }).then(r => r.data),
+  deleteCorrection: (correctionId: number) =>
+    api.delete(`/staff-sharing/corrections/${correctionId}`).then(r => r.data),
   regenerateMine: (sharedId: number, feedback?: string) =>
     api.post(`/staff-sharing/${sharedId}/regenerate-mine`, { feedback }).then(r => r.data),
 };

@@ -358,9 +358,6 @@ export default function StaffInboxScreen() {
                 <Text style={styles.cardSub}>From: {item.sender_name}</Text>
                 <Text style={styles.cardDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
               </View>
-              {item.allow_regenerate && (
-                <View style={styles.regenBadge}><Text style={styles.regenBadgeText}>Can Regen</Text></View>
-              )}
               <Ionicons name="chevron-forward" size={14} color={t.muted2} />
             </TouchableOpacity>
           );

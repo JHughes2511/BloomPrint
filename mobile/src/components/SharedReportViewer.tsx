@@ -44,6 +44,8 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
   const [commentText, setCommentText] = useState('');
   const [noteText, setNoteText] = useState('');
   const [correctText, setCorrectText] = useState('');
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState('');
   const [busy, setBusy] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
 
@@ -112,6 +114,33 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
     setBusy(false);
   };
 
+  const saveEditedCorrection = async (id: number) => {
+    if (!editingText.trim()) return;
+    setBusy(true);
+    try {
+      await staffSharingAPI.editCorrection(id, editingText.trim());
+      setCorrections(await staffSharingAPI.listCorrections(item.id));
+      setEditingId(null); setEditingText('');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not edit correction');
+    }
+    setBusy(false);
+  };
+
+  const deleteCorrection = (id: number) => {
+    Alert.alert('Delete correction', 'Remove this correction?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: async () => {
+        try {
+          await staffSharingAPI.deleteCorrection(id);
+          setCorrections(await staffSharingAPI.listCorrections(item.id));
+        } catch (e: any) {
+          Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete');
+        }
+      } },
+    ]);
+  };
+
   const applyAndRegenerate = async () => {
     setRegenerating(true);
     try {
@@ -147,7 +176,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
           </View>
 
           {/* Body-version chips */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRowContent}>
+          <View style={styles.chipRow}>
             <TouchableOpacity style={[styles.chip, bodyMode === 'original' && styles.chipActive]} onPress={() => setBodyMode('original')}>
               <Text style={[styles.chipText, bodyMode === 'original' && styles.chipTextActive]}>Original</Text>
             </TouchableOpacity>
@@ -156,7 +185,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                 <Text style={[styles.chipText, bodyMode === 'updated' && styles.chipTextActive]}>{updatedLabel}</Text>
               </TouchableOpacity>
             )}
-          </ScrollView>
+          </View>
 
           {/* Report body — always visible + scrollable */}
           <View style={styles.bodyWrap}>
@@ -187,6 +216,48 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
 
             {bottomTab === 'correct' && canRegen && (
               <View>
+                {/* Saved corrections — edit / delete the un-applied ones */}
+                {corrections.length > 0 && (
+                  <ScrollView style={{ maxHeight: 130, marginBottom: 8 }}>
+                    {corrections.map((c: any) => (
+                      <View key={c.id} style={styles.corrRow}>
+                        {editingId === c.id ? (
+                          <>
+                            <VoiceTextInput
+                              style={[styles.input, { flex: 1, minHeight: 40 }]}
+                              value={editingText}
+                              onChangeText={setEditingText}
+                              multiline
+                            />
+                            <TouchableOpacity style={styles.corrIcon} onPress={() => saveEditedCorrection(c.id)} disabled={busy}>
+                              <Ionicons name="checkmark" size={18} color={t.positive} />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.corrIcon} onPress={() => { setEditingId(null); setEditingText(''); }}>
+                              <Ionicons name="close" size={18} color={t.muted} />
+                            </TouchableOpacity>
+                          </>
+                        ) : (
+                          <>
+                            <View style={{ flex: 1 }}>
+                              <Text style={[styles.corrText, c.applied && { color: t.muted2 }]}>{c.correction}</Text>
+                              {c.applied && <Text style={styles.corrApplied}>Applied</Text>}
+                            </View>
+                            {!c.applied && (
+                              <>
+                                <TouchableOpacity style={styles.corrIcon} onPress={() => { setEditingId(c.id); setEditingText(c.correction); }}>
+                                  <Ionicons name="create-outline" size={16} color={t.accent} />
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.corrIcon} onPress={() => deleteCorrection(c.id)}>
+                                  <Ionicons name="trash-outline" size={16} color={t.negative} />
+                                </TouchableOpacity>
+                              </>
+                            )}
+                          </>
+                        )}
+                      </View>
+                    ))}
+                  </ScrollView>
+                )}
                 <VoiceTextInput
                   style={styles.input}
                   placeholder="What should change? (saved to your correction list)"
@@ -201,7 +272,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                     onPress={applyCorrection}
                     disabled={!correctText.trim() || busy}
                   >
-                    <Text style={styles.secondaryBtnText}>Apply Corrections</Text>
+                    <Text style={styles.secondaryBtnText}>Save Corrections</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.primaryBtn, ((pendingCount === 0 && !correctText.trim()) || regenerating) && { opacity: 0.5 }]}
@@ -212,9 +283,6 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                     <Text style={styles.primaryBtnText}>Apply & Regenerate</Text>
                   </TouchableOpacity>
                 </View>
-                {pendingCount > 0 && (
-                  <Text style={styles.hint}>{pendingCount} correction{pendingCount === 1 ? '' : 's'} saved — Apply & Regenerate to build your Updated version.</Text>
-                )}
               </View>
             )}
 
@@ -286,13 +354,13 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
   title: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   sub: { color: t.muted2, fontSize: 12, marginTop: 4 },
-  chipRowContent: { gap: 8, paddingBottom: 4 },
-  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, borderWidth: 1, borderColor: t.line, backgroundColor: t.chip, justifyContent: 'center' },
+  chipRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
+  chip: { alignSelf: 'flex-start', height: 34, paddingHorizontal: 16, borderRadius: 999, borderWidth: 1, borderColor: t.line, backgroundColor: t.chip, alignItems: 'center', justifyContent: 'center' },
   chipActive: { backgroundColor: t.accentSoft, borderColor: t.accent },
-  chipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600], lineHeight: 18 },
+  chipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600] },
   chipTextActive: { color: t.accent, fontFamily: fonts[700] },
   bodyWrap: { flex: 1, marginTop: 10 },
-  bodyContent: { paddingHorizontal: 4, paddingBottom: 16 },
+  bodyContent: { paddingHorizontal: 16, paddingBottom: 16 },
   bottomPanel: { borderTopWidth: 1, borderTopColor: t.line, paddingTop: 10, marginTop: 6 },
   bottomTabs: { flexDirection: 'row', gap: 6, marginBottom: 10, flexWrap: 'wrap' },
   bottomTab: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999, borderWidth: 1, borderColor: t.line, backgroundColor: t.chip },
@@ -306,6 +374,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   primaryBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 13 },
   sendBtn: { width: 44, height: 44, borderRadius: 10, backgroundColor: t.ctaBg, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end' },
   hint: { color: t.muted2, fontSize: 11, marginTop: 8 },
+  corrRow: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: t.chip, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, marginBottom: 6 },
+  corrText: { color: t.inkSoft, fontSize: 13 },
+  corrApplied: { color: t.positive, fontSize: 10, fontFamily: fonts[700], marginTop: 2 },
+  corrIcon: { padding: 4 },
   empty: { color: t.muted2, textAlign: 'center', paddingVertical: 16, fontSize: 13 },
   commentCard: { backgroundColor: t.chip, borderRadius: 10, padding: 10, marginBottom: 6 },
   commentAuthor: { color: t.accent, fontSize: 11, fontFamily: fonts[700], marginBottom: 2 },
