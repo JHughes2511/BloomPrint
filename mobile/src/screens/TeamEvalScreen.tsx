@@ -117,7 +117,7 @@ function quarterMultiplier(q: number): number {
 
 type ViewKey = 'dashboard' | 'games' | 'live' | 'detail' | 'scout';
 
-export default function TeamEvalScreen() {
+export default function TeamEvalScreen({ route, navigation }: any) {
   const { coach } = useAuth();
   const { t, mode } = useTheme();
   const s = makeS(t);
@@ -548,6 +548,27 @@ export default function TeamEvalScreen() {
     } catch {}
     setLoadingSummary(false);
   };
+
+  // Deep link from the Staff Hub: open a team game straight into its detail view
+  // so staff can see the full game data (stats, grades, scouting).
+  const handledOpenGameId = useRef<number | null>(null);
+  useFocusEffect(useCallback(() => {
+    const gid = route?.params?.openGameId;
+    if (gid && handledOpenGameId.current !== gid) {
+      handledOpenGameId.current = gid;
+      (async () => {
+        try {
+          const game = await gameEvalAPI.getSession(gid);
+          await openDetail(game);
+        } catch {
+          Alert.alert('Unavailable', 'Could not open that game.');
+        }
+      })();
+      navigation?.setParams?.({ openGameId: undefined });
+    }
+  }, [route?.params?.openGameId]));
+
+  const isOwnedGame = (game: any) => !game || game.coach_id === coach?.id;
 
   const openPlayerStats = (playerName: string) => {
     setStatsModalPlayer(playerName);
@@ -1199,7 +1220,7 @@ export default function TeamEvalScreen() {
                 <TouchableOpacity
                   key={game.id}
                   style={s.gameCard}
-                  onPress={() => game.status === 'in_progress' ? openLiveEntry(game) : openDetail(game)}
+                  onPress={() => (game.status === 'in_progress' && isOwnedGame(game)) ? openLiveEntry(game) : openDetail(game)}
                 >
                   <View style={{ flex: 1 }}>
                     <Text style={s.gameCardOpponent}>{game.opponent_name}</Text>
@@ -1224,24 +1245,30 @@ export default function TeamEvalScreen() {
                       </Text>
                     </View>
                   </View>
-                  <TouchableOpacity
-                    style={{ padding: 4 }}
-                    onPress={() => {
-                      Alert.alert('Delete Game', `Delete game vs ${game.opponent_name}?`, [
-                        { text: 'Cancel', style: 'cancel' },
-                        {
-                          text: 'Delete', style: 'destructive', onPress: async () => {
-                            try {
-                              await gameEvalAPI.deleteSession(game.id);
-                              setSessions(prev => prev.filter(x => x.id !== game.id));
-                            } catch { Alert.alert('Error', 'Could not delete'); }
+                  {isOwnedGame(game) ? (
+                    <TouchableOpacity
+                      style={{ padding: 4 }}
+                      onPress={() => {
+                        Alert.alert('Delete Game', `Delete game vs ${game.opponent_name}?`, [
+                          { text: 'Cancel', style: 'cancel' },
+                          {
+                            text: 'Delete', style: 'destructive', onPress: async () => {
+                              try {
+                                await gameEvalAPI.deleteSession(game.id);
+                                setSessions(prev => prev.filter(x => x.id !== game.id));
+                              } catch { Alert.alert('Error', 'Could not delete'); }
+                            },
                           },
-                        },
-                      ]);
-                    }}
-                  >
-                    <Ionicons name="trash-outline" size={15} color={t.muted2} />
-                  </TouchableOpacity>
+                        ]);
+                      }}
+                    >
+                      <Ionicons name="trash-outline" size={15} color={t.muted2} />
+                    </TouchableOpacity>
+                  ) : (
+                    <View style={{ padding: 4 }}>
+                      <Ionicons name="people-outline" size={15} color={t.muted2} />
+                    </View>
+                  )}
                 </TouchableOpacity>
               );
             })
@@ -2562,9 +2589,10 @@ export default function TeamEvalScreen() {
       <Modal visible={showStatsModal} transparent animationType="slide">
         <View style={s.modalOverlay}>
           <View style={[s.modalBox, { maxHeight: '90%' }]}>
-            <Text style={s.modalTitle}>Edit Stats — {statsModalPlayer}</Text>
+            <Text style={s.modalTitle}>{isOwnedGame(detailGame) ? 'Edit Stats' : 'Stats'} — {statsModalPlayer}</Text>
 
-            {/* ADD STAT SECTION */}
+            {/* ADD STAT SECTION — owner only */}
+            {isOwnedGame(detailGame) && (
             <View style={{ backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 14, borderWidth: 1, borderColor: t.chip }}>
               <Text style={{ color: t.accent, fontSize: 11, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 10 }}>ADD MISSING STAT</Text>
 
@@ -2633,9 +2661,10 @@ export default function TeamEvalScreen() {
                   : <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 14 }}>+ Add Stat</Text>}
               </TouchableOpacity>
             </View>
+            )}
 
             {/* EXISTING STATS */}
-            <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 8 }}>LOGGED STATS — TAP TRASH TO REMOVE</Text>
+            <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 8 }}>{isOwnedGame(detailGame) ? 'LOGGED STATS — TAP TRASH TO REMOVE' : 'LOGGED STATS'}</Text>
             <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 260 }}>
               {gameStats
                 .filter(st => st.player_name === statsModalPlayer && st.is_opponent === (detailTab === 'opponent'))
@@ -2655,17 +2684,19 @@ export default function TeamEvalScreen() {
                           {st.quarter === 5 ? 'OT' : `Q${st.quarter}`}  ·  {st.weighted_points >= 0 ? '+' : ''}{st.weighted_points.toFixed(1)} pts
                         </Text>
                       </View>
-                      <TouchableOpacity
-                        style={{ padding: 8 }}
-                        onPress={() =>
-                          Alert.alert('Delete Stat', `Remove "${st.stat_name}" entry?`, [
-                            { text: 'Cancel', style: 'cancel' },
-                            { text: 'Delete', style: 'destructive', onPress: () => deleteStatEntry(st.id) },
-                          ])
-                        }
-                      >
-                        <Ionicons name="trash-outline" size={18} color={t.negative} />
-                      </TouchableOpacity>
+                      {isOwnedGame(detailGame) && (
+                        <TouchableOpacity
+                          style={{ padding: 8 }}
+                          onPress={() =>
+                            Alert.alert('Delete Stat', `Remove "${st.stat_name}" entry?`, [
+                              { text: 'Cancel', style: 'cancel' },
+                              { text: 'Delete', style: 'destructive', onPress: () => deleteStatEntry(st.id) },
+                            ])
+                          }
+                        >
+                          <Ionicons name="trash-outline" size={18} color={t.negative} />
+                        </TouchableOpacity>
+                      )}
                     </View>
                   ))
               )}

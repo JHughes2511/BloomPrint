@@ -907,6 +907,21 @@ export default function StaffInboxScreen() {
               </TouchableOpacity>
             </View>
 
+            {activeGame?.kind === 'session' && (
+              <TouchableOpacity
+                style={styles.fullDataBtn}
+                onPress={() => {
+                  const gid = activeGame.id;
+                  setActiveGame(null);
+                  navigation.navigate('TeamEvalTab', { screen: 'TeamEval', params: { openGameId: gid } });
+                }}
+              >
+                <Ionicons name="stats-chart-outline" size={16} color={t.accent} />
+                <Text style={styles.fullDataBtnText}>View full game data (stats & grades)</Text>
+                <Ionicons name="chevron-forward" size={16} color={t.accent} />
+              </TouchableOpacity>
+            )}
+
             <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
               {activeGame?.kind === 'report' && (
                 activeGame.report_text
@@ -983,6 +998,12 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   cardSub: { color: t.muted, fontSize: 12, marginTop: 2 },
   cardDate: { color: t.muted2, fontSize: 11, marginTop: 2 },
   regenBadge: { backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: t.accent },
+  fullDataBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: t.accentSoft, borderRadius: 10, padding: 12,
+    borderWidth: 1, borderColor: t.accent, marginBottom: 12,
+  },
+  fullDataBtnText: { flex: 1, color: t.accent, fontSize: 13, fontFamily: fonts[700] },
   regenBadgeText: { color: t.accent, fontSize: 10, fontFamily: fonts[700] },
   teamChip: { borderWidth: 1, borderColor: t.line, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7 },
   teamChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },

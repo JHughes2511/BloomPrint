@@ -217,6 +217,28 @@ def _get_game(db: Session, game_id: int, coach_id: int) -> models.GameSession:
     return game
 
 
+def _accessible_team_ids(db: Session, coach: models.Coach) -> set[int]:
+    """Teams a coach can see games for: teams they own + teams they've joined
+    as staff."""
+    ids = {tm.id for tm in db.query(models.Team).filter_by(coach_id=coach.id).all()}
+    ids |= {l.team_id for l in db.query(models.TeamStaff).filter_by(coach_id=coach.id).all()}
+    return ids
+
+
+def _get_game_readable(db: Session, game_id: int, coach: models.Coach) -> models.GameSession:
+    """Read access to a game: the owner, or any staff member linked to the
+    game's team. Staff can view full game data (stats, grades, scouting) but
+    editing stays owner-only via _get_game."""
+    game = db.get(models.GameSession, game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game session not found")
+    if game.coach_id == coach.id:
+        return game
+    if game.team_id is not None and game.team_id in _accessible_team_ids(db, coach):
+        return game
+    raise HTTPException(status_code=404, detail="Game session not found")
+
+
 # ── Sessions ─────────────────────────────────────────────────────────────────
 
 @router.post("/sessions", response_model=schemas.GameSessionOut)
@@ -262,7 +284,14 @@ def list_sessions(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    q = db.query(models.GameSession).filter_by(coach_id=coach.id)
+    # A coach sees their own games plus games on any team they're linked to as
+    # staff, so a team's schedule shows up in the Team Grade tab for all staff.
+    from sqlalchemy import or_
+    team_ids = _accessible_team_ids(db, coach)
+    conds = [models.GameSession.coach_id == coach.id]
+    if team_ids:
+        conds.append(models.GameSession.team_id.in_(team_ids))
+    q = db.query(models.GameSession).filter(or_(*conds))
     if season_phase:
         q = q.filter(models.GameSession.season_phase == season_phase)
     if season_year:
@@ -276,7 +305,7 @@ def get_session(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    return _get_game(db, game_id, coach.id)
+    return _get_game_readable(db, game_id, coach)
 
 
 @router.patch("/sessions/{game_id}", response_model=schemas.GameSessionOut)
@@ -314,7 +343,7 @@ def list_stats(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    game = _get_game(db, game_id, coach.id)
+    game = _get_game_readable(db, game_id, coach)
     stats = (
         db.query(models.GamePlayerStat)
         .filter_by(game_id=game.id)
@@ -415,7 +444,7 @@ def get_lineup(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    game = _get_game(db, game_id, coach.id)
+    game = _get_game_readable(db, game_id, coach)
     events = (
         db.query(models.LineupEvent)
         .filter_by(game_id=game.id)
@@ -508,7 +537,7 @@ def get_summary(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    game = _get_game(db, game_id, coach.id)
+    game = _get_game_readable(db, game_id, coach)
 
     # Minutes map
     mp_records = db.query(models.GameMinutesPlayed).filter_by(game_id=game.id).all()
@@ -733,7 +762,7 @@ async def generate_ai_scouting(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    game = _get_game(db, game_id, coach.id)
+    game = _get_game_readable(db, game_id, coach)
 
     import os
     if not os.environ.get("ANTHROPIC_API_KEY"):
@@ -815,7 +844,14 @@ def season_dashboard(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    q = db.query(models.GameSession).filter_by(coach_id=coach.id, status="completed")
+    # Include games on teams the coach is linked to as staff, so a team's season
+    # shows in the Team Grade dashboard for all its staff, not just the owner.
+    from sqlalchemy import or_
+    team_ids = _accessible_team_ids(db, coach)
+    conds = [models.GameSession.coach_id == coach.id]
+    if team_ids:
+        conds.append(models.GameSession.team_id.in_(team_ids))
+    q = db.query(models.GameSession).filter(or_(*conds)).filter(models.GameSession.status == "completed")
     if phases:
         phase_list = [p.strip() for p in phases.split(",") if p.strip()]
         if phase_list:
