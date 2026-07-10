@@ -222,17 +222,37 @@ export default function ShareModal({
               <>
                 <Text style={styles.label}>Select a Team</Text>
                 <Text style={styles.hint}>Sends to the team's players and its staff coaches.</Text>
-                {teams.filter((tm: any) => !tm.parent_team_id).length === 0 && <Text style={styles.empty}>No teams found.</Text>}
-                {teams.filter((tm: any) => !tm.parent_team_id).map((tm: any) => (
-                  <TouchableOpacity
-                    key={tm.id}
-                    style={[styles.row, selected?.id === tm.id && !selected?.__group && styles.rowActive]}
-                    onPress={() => setSelected(tm)}
-                  >
-                    <Text style={styles.rowTitle}>{tm.name}</Text>
-                    {selected?.id === tm.id && !selected?.__group && <Ionicons name="checkmark-circle" size={18} color={t.accent} />}
-                  </TouchableOpacity>
-                ))}
+                {/* Top-level teams I own OR am a staff member of (sub-teams live
+                    under the Staff tab). Searchable by name. */}
+                <VoiceTextInput
+                  style={[styles.input, { marginBottom: 8 }]}
+                  placeholder="Search a team you're on..."
+                  placeholderTextColor={t.muted2}
+                  value={search}
+                  onChangeText={setSearch}
+                />
+                {(() => {
+                  const q = search.trim().toLowerCase();
+                  const topTeams = myGroups
+                    .filter((tm: any) => !tm.parent_team_id)
+                    .filter((tm: any) => !q || (tm.name ?? '').toLowerCase().includes(q));
+                  if (topTeams.length === 0) {
+                    return <Text style={styles.empty}>{q ? 'No teams match.' : "You're not on any teams yet."}</Text>;
+                  }
+                  return topTeams.map((tm: any) => (
+                    <TouchableOpacity
+                      key={tm.id}
+                      style={[styles.row, selected?.id === tm.id && !selected?.__group && styles.rowActive]}
+                      onPress={() => setSelected(tm)}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.rowTitle}>{tm.name}</Text>
+                        {tm.is_owner === false && <Text style={styles.rowSub}>Staff member</Text>}
+                      </View>
+                      {selected?.id === tm.id && !selected?.__group && <Ionicons name="checkmark-circle" size={18} color={t.accent} />}
+                    </TouchableOpacity>
+                  ));
+                })()}
               </>
             ) : (
               <>

@@ -44,6 +44,34 @@ def _resolve_report_text(report_type: str, report_id: int, db: Session) -> str |
     return None
 
 
+def _report_meta(report_type: str, report_id: int, db: Session) -> tuple[str | None, str | None, float | None]:
+    """(subject_name, output_type, overall_grade) for a shared report so the
+    recipient's Recent list can render it like a normal report."""
+    if report_type == "eval":
+        ev = db.get(models.Evaluation, report_id)
+        if not ev:
+            return None, None, None
+        player = db.get(models.Player, ev.player_id)
+        return (player.name if player else "Player"), ev.output_type, ev.overall_grade
+    if report_type == "game":
+        gr = db.get(models.GameReport, report_id)
+        if not gr:
+            return None, None, None
+        subject = gr.title or (f"vs {gr.opponent_name}" if gr.opponent_name else "Game Report")
+        return subject, gr.output_type, None
+    if report_type in ("team_training", "team_report"):
+        tr = db.get(models.TeamReport, report_id)
+        return ("Team Report" if tr else None), (tr.output_type if tr else None), None
+    if report_type == "training":
+        ts = db.get(models.TrainingSession, report_id)
+        subject = (ts.player.name if ts and ts.player else "Training") if ts else None
+        return subject, "training_program", None
+    if report_type == "game_session":
+        gs = db.get(models.GameSession, report_id)
+        return ((f"vs {gs.opponent_name}" if gs else None), "scouting_report", None)
+    return None, None, None
+
+
 def _build_out(sr: models.StaffSharedReport, db: Session) -> schemas.StaffSharedReportOut:
     out = schemas.StaffSharedReportOut.model_validate(sr)
     out.sender_name = sr.sender.name if sr.sender else ""
@@ -52,6 +80,7 @@ def _build_out(sr: models.StaffSharedReport, db: Session) -> schemas.StaffShared
     # the live report text so the recipient sees exactly the controlled copy.
     out.report_text = sr.frozen_text if sr.frozen_text else _resolve_report_text(sr.report_type, sr.report_id, db)
     out.regenerated_text = sr.regenerated_text
+    out.subject_name, out.output_type, out.overall_grade = _report_meta(sr.report_type, sr.report_id, db)
     return out
 
 

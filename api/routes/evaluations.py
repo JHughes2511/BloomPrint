@@ -224,8 +224,11 @@ def recent_evaluations(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
+    # Only the coach's OWN evaluations. Reports shared with the coach surface
+    # separately via the staff-sharing inbox (merged into Recent client-side).
     evals = (
         db.query(models.Evaluation)
+        .filter_by(coach_id=coach.id)
         .order_by(models.Evaluation.id.desc())
         .limit(limit)
         .all()

@@ -17,6 +17,7 @@ import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
 import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
+import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -45,6 +46,14 @@ type ReportItem = {
   created_at: string;
   program_text?: string;
   report_text?: string;
+  // Set when this row is a report another coach SHARED with me (surfaced in
+  // Recent alongside my own). It keeps full share functions; regenerate shows
+  // only if the sharer allowed it.
+  shared?: boolean;
+  shared_id?: number;         // StaffSharedReport id (for regenerate)
+  allow_regenerate?: boolean;
+  sender_name?: string;
+  share_report_type?: string; // underlying staff-share report_type
 };
 
 type ModalReport = {
@@ -72,6 +81,7 @@ type StaffShareContext = {
 };
 
 export default function RecentScreen() {
+  const { coach } = useAuth();
   const { t } = useTheme();
   const styles = makeStyles(t);
   const sendStyles = makeSendStyles(t);
@@ -228,12 +238,13 @@ export default function RecentScreen() {
   const load = async () => {
     setLoading(true);
     try {
-      const [evals, teamReports, gameReports, trainingSessions, gameSessions] = await Promise.all([
+      const [evals, teamReports, gameReports, trainingSessions, gameSessions, sharedInbox] = await Promise.all([
         evalsAPI.recent(),
         evalsAPI.teamReports(),
         gameReportsAPI.list().catch(() => []),
         trainingAPI.recent().catch(() => []),
         gameEvalAPI.listSessions().catch(() => []),
+        staffSharingAPI.inbox().catch(() => []),
       ]);
       const evalItems: ReportItem[] = evals.map((e: any) => ({
         id: e.id,
@@ -269,9 +280,12 @@ export default function RecentScreen() {
         created_at: ts.created_at,
         program_text: ts.program_text,
       }));
-      // Scout reports: game sessions that have an AI scouting report.
+      // Scout reports: game sessions I OWN that have an AI scouting report.
+      // (Scout reports shared with me arrive via the staff inbox below, so
+      // filtering to my own games here avoids showing them twice.)
+      const myCoachId = coach?.id;
       const scoutItems: ReportItem[] = (gameSessions ?? [])
-        .filter((g: any) => g.ai_scouting_report)
+        .filter((g: any) => g.ai_scouting_report && (myCoachId == null || g.coach_id === myCoachId))
         .map((g: any) => ({
           id: g.id,
           kind: 'scout' as const,
@@ -287,7 +301,34 @@ export default function RecentScreen() {
       const ec: Record<number, any> = {};
       evals.forEach((e: any) => { ec[e.id] = e; });
       setEvalCache(ec);
-      const combined = [...evalItems, ...teamItems, ...gameItems, ...trainingItems, ...scoutItems].sort(
+
+      // Reports another coach SHARED with me — surfaced in Recent with full
+      // share functions. Regenerate shows only when the sharer allowed it.
+      const SHARE_KIND: Record<string, ReportItem['kind']> = {
+        eval: 'eval', team_report: 'team', team_training: 'team',
+        game: 'game', game_session: 'scout', training: 'training',
+      };
+      const sharedItems: ReportItem[] = (sharedInbox ?? []).map((sr: any) => {
+        const kind = SHARE_KIND[sr.report_type] ?? 'eval';
+        const text = sr.regenerated_text || sr.report_text || '';
+        return {
+          id: sr.report_id,
+          kind,
+          player_name: sr.subject_name || 'Shared report',
+          output_type: sr.output_type ?? 'coaching_report',
+          overall_grade: sr.overall_grade ?? null,
+          created_at: sr.created_at,
+          report_text: text,
+          program_text: kind === 'training' ? text : undefined,
+          shared: true,
+          shared_id: sr.id,
+          allow_regenerate: !!sr.allow_regenerate,
+          sender_name: sr.sender_name || 'A coach',
+          share_report_type: sr.report_type,
+        } as ReportItem;
+      });
+
+      const combined = [...evalItems, ...teamItems, ...gameItems, ...trainingItems, ...scoutItems, ...sharedItems].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       setItems(combined);
@@ -325,6 +366,16 @@ export default function RecentScreen() {
   };
 
   const handlePress = async (item: ReportItem) => {
+    // A shared report is opened read-only from the text the sender chose to
+    // share — the recipient can't fetch/edit the author's underlying record.
+    if (item.shared) {
+      if (item.kind === 'training' || item.kind === 'team') {
+        openModal({ id: item.id, kind: item.kind as any, text: item.report_text ?? '', outputType: item.output_type, playerName: item.player_name });
+      } else {
+        setGameReportModal({ title: item.player_name ?? 'Shared Report', text: item.report_text ?? '' });
+      }
+      return;
+    }
     if (item.kind === 'game') {
       navigation.navigate('GameReportBuilder', { reportId: item.id });
       return;
@@ -361,6 +412,7 @@ export default function RecentScreen() {
   };
 
   const handleDelete = (item: ReportItem) => {
+    if (item.shared) return; // a report shared with me isn't mine to delete
     if (item.kind === 'training' || item.kind === 'scout') return; // not deletable from recents
     Alert.alert('Delete Report', 'Permanently delete this report?', [
       { text: 'Cancel', style: 'cancel' },
@@ -646,6 +698,11 @@ export default function RecentScreen() {
                        item.kind === 'training' ? 'Training Program' :
                        (TYPE_LABELS[item.output_type] ?? outputTypeLabel(item.output_type))}
                     </Text>
+                    {item.shared && (
+                      <Text numberOfLines={1} style={styles.sharedByLabel}>
+                        Shared by {item.sender_name}
+                      </Text>
+                    )}
                   </View>
                   {item.overall_grade != null && <GradeBadge grade={item.overall_grade} size="md" />}
                   {item.kind === 'game' && <Ionicons name="chevron-forward" size={14} color={t.muted2} />}
@@ -662,7 +719,7 @@ export default function RecentScreen() {
                       <Text style={[styles.gameActionText, { color: t.accent }]}>View Report</Text>
                     </TouchableOpacity>
                   ) : null}
-                  {item.kind === 'game' && (
+                  {item.kind === 'game' && !item.shared && (
                     <TouchableOpacity
                       style={styles.gameActionBtn}
                       onPress={() => navigation.navigate('GameReportBuilder', { reportId: item.id })}
@@ -680,7 +737,7 @@ export default function RecentScreen() {
                         openModal({
                           id: item.id,
                           kind: item.kind as any,
-                          text: item.program_text ?? (teamReportTexts[item.id] ?? (evalCache[item.id]?.report_text ?? '')),
+                          text: item.program_text ?? item.report_text ?? (teamReportTexts[item.id] ?? (evalCache[item.id]?.report_text ?? '')),
                           outputType: item.output_type,
                           playerName: item.player_name,
                           evalId: item.kind === 'eval' ? item.id : undefined,
@@ -697,9 +754,13 @@ export default function RecentScreen() {
                   <TouchableOpacity
                     style={[styles.gameActionBtn, { borderColor: t.brownSoft }]}
                     onPress={() => {
-                      const reportType = item.kind === 'eval' ? 'eval' :
+                      // A shared report forwards under its ORIGINAL type/id so
+                      // the recipient (or player) gets the author's report.
+                      const reportType = item.shared ? (item.share_report_type ?? 'eval') :
+                                         item.kind === 'eval' ? 'eval' :
                                          item.kind === 'team' ? 'team_report' :
-                                         (item.kind === 'game' || item.kind === 'scout') ? 'game' :
+                                         item.kind === 'scout' ? 'game_session' :
+                                         item.kind === 'game' ? 'game' :
                                          'training';
                       const label = item.kind === 'training' ? 'Training Program' :
                                     item.kind === 'scout' ? 'Scout Report' :
@@ -1182,6 +1243,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   typeName: { color: t.accent, fontSize: 12, fontFamily: fonts[600], marginTop: 2, lineHeight: 20, paddingBottom: 2 },
   playerName: { color: t.ink, fontSize: 15, fontFamily: fonts[700], lineHeight: 22 },
+  sharedByLabel: { color: t.muted2, fontSize: 11, fontFamily: fonts[600], marginTop: 1, fontStyle: 'italic' },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject, backgroundColor: t.scrim,
     alignItems: 'center', justifyContent: 'center',

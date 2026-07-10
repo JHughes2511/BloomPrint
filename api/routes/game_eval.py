@@ -225,6 +225,27 @@ def _accessible_team_ids(db: Session, coach: models.Coach) -> set[int]:
     return ids
 
 
+def _scout_shared_to(db: Session, coach: models.Coach, game: models.GameSession) -> bool:
+    """True if this game's AI scouting report was shared to the coach (directly
+    or via a team share). Team shares fan out to one StaffSharedReport per staff
+    recipient, so checking recipient_id covers both."""
+    return (
+        db.query(models.StaffSharedReport)
+        .filter_by(report_type="game_session", report_id=game.id, recipient_id=coach.id)
+        .first()
+    ) is not None
+
+
+def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession) -> schemas.GameSessionOut:
+    """Serialize a game, hiding the written AI scouting report from non-owners
+    unless it was shared to them. Game stats/grades stay visible to team staff;
+    only the written report is gated."""
+    out = schemas.GameSessionOut.model_validate(game)
+    if game.coach_id != coach.id and out.ai_scouting_report and not _scout_shared_to(db, coach, game):
+        out.ai_scouting_report = None
+    return out
+
+
 def _get_game_readable(db: Session, game_id: int, coach: models.Coach) -> models.GameSession:
     """Read access to a game: the owner, or any staff member linked to the
     game's team. Staff can view full game data (stats, grades, scouting) but
@@ -296,7 +317,10 @@ def list_sessions(
         q = q.filter(models.GameSession.season_phase == season_phase)
     if season_year:
         q = q.filter(models.GameSession.season_year == season_year)
-    return q.order_by(models.GameSession.date.desc()).all()
+    games = q.order_by(models.GameSession.date.desc()).all()
+    # Gate each game's written scouting report: staff see the game's stats but
+    # only see the AI scouting write-up if it was shared to them.
+    return [_gate_scouting(db, coach, g) for g in games]
 
 
 @router.get("/sessions/{game_id}", response_model=schemas.GameSessionOut)
@@ -305,7 +329,7 @@ def get_session(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    return _get_game_readable(db, game_id, coach)
+    return _gate_scouting(db, coach, _get_game_readable(db, game_id, coach))
 
 
 @router.patch("/sessions/{game_id}", response_model=schemas.GameSessionOut)
@@ -567,7 +591,7 @@ def get_summary(
 
     team_grade = round((avg_player_grade * 0.6) + (win_loss_factor * 0.4), 2)
 
-    game_out = schemas.GameSessionOut.model_validate(game)
+    game_out = _gate_scouting(db, coach, game)
     return {
         "game": game_out.model_dump(),
         "player_grades": player_grades,
@@ -582,12 +606,19 @@ def player_game_history(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    """All games this player appeared in, with per-game stats and grade."""
+    """All games this player appeared in, with per-game stats and grade.
+    Covers the coach's own games plus games on teams they're staff on, so the
+    Team Grade leaderboard detail works for shared team schedules."""
+    from sqlalchemy import or_
+    team_ids = _accessible_team_ids(db, coach)
+    game_conds = [models.GameSession.coach_id == coach.id]
+    if team_ids:
+        game_conds.append(models.GameSession.team_id.in_(team_ids))
     stats = (
         db.query(models.GamePlayerStat)
         .join(models.GameSession, models.GameSession.id == models.GamePlayerStat.game_id)
         .filter(
-            models.GameSession.coach_id == coach.id,
+            or_(*game_conds),
             models.GamePlayerStat.player_name == player_name,
             models.GamePlayerStat.is_opponent == False,
         )
@@ -762,7 +793,9 @@ async def generate_ai_scouting(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    game = _get_game_readable(db, game_id, coach)
+    # Generating a scouting report is an owner-only action; staff can only view
+    # it once the owner shares it.
+    game = _get_game(db, game_id, coach.id)
 
     import os
     if not os.environ.get("ANTHROPIC_API_KEY"):
