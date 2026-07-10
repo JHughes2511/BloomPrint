@@ -273,6 +273,8 @@ export const staffSharingAPI = {
     api.post(`/staff-sharing/${sharedId}/comments`, { text }).then(r => r.data),
   regenerate: (sharedId: number, feedback: string) =>
     api.post(`/staff-sharing/${sharedId}/regenerate`, { feedback }).then(r => r.data),
+  adopt: (sharedId: number, text: string) =>
+    api.post(`/staff-sharing/${sharedId}/adopt`, { text }).then(r => r.data),
 };
 
 // ── Coaches search ─────────────────────────────────────────────────────────────

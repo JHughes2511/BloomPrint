@@ -153,6 +153,13 @@ export default function RecentScreen() {
   // Unified share modal (player / team / staff)
   const [shareCtx, setShareCtx] = useState<{ reportType: string; reportId: number; outputType: string; reportText: string; title: string } | null>(null);
 
+  // Edit-and-make-mine modal for a shared eval (only when the sender allowed it)
+  const [editShared, setEditShared] = useState<ReportItem | null>(null);
+  const [editText, setEditText] = useState('');
+  const [editFeedback, setEditFeedback] = useState('');
+  const [regeneratingEdit, setRegeneratingEdit] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+
   // Generic Send to Staff modal
   const [staffShareCtx, setStaffShareCtx] = useState<StaffShareContext | null>(null);
   const [showStaffShareModal, setShowStaffShareModal] = useState(false);
@@ -410,6 +417,39 @@ export default function RecentScreen() {
         evalId: item.id,
       });
     }
+  };
+
+  const openEditShared = (item: ReportItem) => {
+    setEditShared(item);
+    setEditText(item.report_text ?? '');
+    setEditFeedback('');
+  };
+
+  const regenerateEdit = async () => {
+    if (!editShared?.shared_id || !editFeedback.trim()) return;
+    setRegeneratingEdit(true);
+    try {
+      const res = await staffSharingAPI.regenerate(editShared.shared_id, editFeedback.trim());
+      setEditText(res?.regenerated_text ?? res?.report_text ?? editText);
+      setEditFeedback('');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not refine with AI.');
+    }
+    setRegeneratingEdit(false);
+  };
+
+  const saveEditAsMine = async () => {
+    if (!editShared?.shared_id || !editText.trim()) return;
+    setSavingEdit(true);
+    try {
+      await staffSharingAPI.adopt(editShared.shared_id, editText.trim());
+      setEditShared(null);
+      Alert.alert('Saved', 'This is now your own eval. It counts as your input if you share it with the player.');
+      await load();
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save your eval.');
+    }
+    setSavingEdit(false);
   };
 
   const handleDelete = (item: ReportItem) => {
@@ -751,6 +791,18 @@ export default function RecentScreen() {
                     </TouchableOpacity>
                   )}
 
+                  {/* Edit & make mine — only for a shared eval the sender let
+                      me regenerate. Adopting it creates my own eval. */}
+                  {item.shared && item.kind === 'eval' && item.allow_regenerate && (
+                    <TouchableOpacity
+                      style={[styles.gameActionBtn, { borderColor: t.accentSoft }]}
+                      onPress={() => openEditShared(item)}
+                    >
+                      <Ionicons name="create-outline" size={13} color={t.accent} />
+                      <Text style={[styles.gameActionText, { color: t.accent }]}>Edit & make mine</Text>
+                    </TouchableOpacity>
+                  )}
+
                   {/* Share — player / team / staff, available for all types */}
                   <TouchableOpacity
                     style={[styles.gameActionBtn, { borderColor: t.brownSoft }]}
@@ -815,6 +867,68 @@ export default function RecentScreen() {
             </KeyboardAwareScrollView>
           </View>
         </View>
+      </Modal>
+
+      {/* Edit & Make Mine — adopt a shared eval as my own */}
+      <Modal visible={!!editShared} animationType="slide" transparent>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View style={styles.modalBox}>
+            <View style={styles.modalHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>Edit & Make It Mine</Text>
+                <Text style={styles.modalSub}>{editShared?.player_name} · from {editShared?.sender_name}</Text>
+              </View>
+              <TouchableOpacity onPress={() => setEditShared(null)}>
+                <Ionicons name="close" size={24} color={t.muted} />
+              </TouchableOpacity>
+            </View>
+            <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>
+              Editing saves this as your own eval. It re-scores the BIM from your text and,
+              if you share it with the player, counts as your input — the author's original stays separate.
+            </Text>
+            <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 12 }}>
+              <VoiceTextInput
+                style={[styles.editArea]}
+                value={editText}
+                onChangeText={setEditText}
+                multiline
+                placeholder="Report text..."
+                placeholderTextColor={t.muted2}
+              />
+              <Text style={{ color: t.label, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1, marginTop: 14, marginBottom: 6 }}>
+                REFINE WITH AI (OPTIONAL)
+              </Text>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <VoiceTextInput
+                  style={[styles.input, { flex: 1, marginBottom: 0 }]}
+                  value={editFeedback}
+                  onChangeText={setEditFeedback}
+                  placeholder="e.g. emphasize his defense, add a shooting note..."
+                  placeholderTextColor={t.muted2}
+                  multiline
+                />
+                <TouchableOpacity
+                  style={[styles.gameActionBtn, { borderColor: t.accentSoft, alignSelf: 'flex-start' }]}
+                  onPress={regenerateEdit}
+                  disabled={regeneratingEdit || !editFeedback.trim()}
+                >
+                  {regeneratingEdit
+                    ? <ActivityIndicator size="small" color={t.accent} />
+                    : <><Ionicons name="sparkles-outline" size={13} color={t.accent} /><Text style={[styles.gameActionText, { color: t.accent }]}>Refine</Text></>}
+                </TouchableOpacity>
+              </View>
+            </KeyboardAwareScrollView>
+            <TouchableOpacity
+              style={[styles.primaryBtn, { marginTop: 10, opacity: (savingEdit || !editText.trim()) ? 0.6 : 1 }]}
+              onPress={saveEditAsMine}
+              disabled={savingEdit || !editText.trim()}
+            >
+              {savingEdit
+                ? <ActivityIndicator color={t.ctaText} size="small" />
+                : <Text style={styles.primaryBtnText}>Save as my eval</Text>}
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Generic Send to Staff Modal */}
@@ -1270,4 +1384,14 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderWidth: 1, borderColor: t.line,
   },
   gameActionText: { color: t.muted, fontSize: 12, fontFamily: fonts[600] },
+  input: {
+    backgroundColor: t.card, borderRadius: 10, padding: 12, color: t.ink,
+    fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 44, marginBottom: 8,
+  },
+  editArea: {
+    backgroundColor: t.card, borderRadius: 10, padding: 12, color: t.ink,
+    fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 220, textAlignVertical: 'top',
+  },
+  primaryBtn: { backgroundColor: t.ctaBg, borderRadius: 12, padding: 15, alignItems: 'center', justifyContent: 'center' },
+  primaryBtnText: { color: t.ctaText, fontSize: 15, fontFamily: fonts[800] },
 });

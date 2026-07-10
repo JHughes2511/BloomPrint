@@ -476,6 +476,52 @@ async def regenerate_shared(
     return _build_out(sr, db)
 
 
+@router.post("/{shared_id}/adopt", response_model=schemas.EvalOut)
+def adopt_shared_eval(
+    shared_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Make an edited/regenerated copy of a shared player eval MY OWN eval.
+
+    Only allowed when the sender permitted regeneration. Creates a brand-new
+    Evaluation owned by me from the given text (re-parsing the BIM grade/pillars
+    so the score reflects my edits). The author's original stays untouched. If I
+    later share this to the player, it counts as my own input in their
+    composite — a second coach's view — because it's a distinct evaluation."""
+    sr = db.get(models.StaffSharedReport, shared_id)
+    if not sr or sr.recipient_id != coach.id:
+        raise HTTPException(status_code=404, detail="Shared report not found")
+    if sr.report_type != "eval":
+        raise HTTPException(status_code=400, detail="Only player evaluations can be adopted")
+    if not sr.allow_regenerate:
+        raise HTTPException(status_code=403, detail="This share doesn't allow edits")
+    text = (body.get("text") or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Report text required")
+    orig = db.get(models.Evaluation, sr.report_id)
+    if not orig:
+        raise HTTPException(status_code=404, detail="Original evaluation not found")
+
+    from .evaluations import _parse_grade, _parse_pillar_grades, _parse_list_section
+    new_eval = models.Evaluation(
+        player_id=orig.player_id,
+        coach_id=coach.id,
+        output_type=orig.output_type,
+        report_text=text,
+        overall_grade=_parse_grade(text),
+        pillar_grades=_parse_pillar_grades(text),
+        green_flags=_parse_list_section(text, "GREEN FLAGS"),
+        watch_flags=_parse_list_section(text, "WATCH FLAGS"),
+        key_questions=_parse_list_section(text, "KEY QUESTIONS"),
+    )
+    db.add(new_eval)
+    db.commit()
+    db.refresh(new_eval)
+    return new_eval
+
+
 @router.post("/{shared_id}/forward", response_model=schemas.StaffSharedReportOut)
 def forward_shared(
     shared_id: int,
