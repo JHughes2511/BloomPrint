@@ -280,12 +280,13 @@ export default function RecentScreen() {
         created_at: ts.created_at,
         program_text: ts.program_text,
       }));
-      // Scout reports: game sessions I OWN that have an AI scouting report.
-      // (Scout reports shared with me arrive via the staff inbox below, so
-      // filtering to my own games here avoids showing them twice.)
-      const myCoachId = coach?.id;
+      // Scout reports: games where I have MY OWN scouting report. The backend
+      // scopes ai_scouting_report to the requesting coach's own report (per
+      // coach), so a non-null value here is always mine — including my scouting
+      // of a team game I don't own. Reports another coach shared with me arrive
+      // separately via the staff inbox below.
       const scoutItems: ReportItem[] = (gameSessions ?? [])
-        .filter((g: any) => g.ai_scouting_report && (myCoachId == null || g.coach_id === myCoachId))
+        .filter((g: any) => g.ai_scouting_report)
         .map((g: any) => ({
           id: g.id,
           kind: 'scout' as const,

@@ -1952,8 +1952,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           </View>
           <GeneratingOverlay visible={generatingReport} label="Building the scouting report…" />
 
-          {/* Live entry shortcut if in_progress */}
-          {detailGame.status === 'in_progress' && (
+          {/* Live entry shortcut if in_progress — owner only */}
+          {detailGame.status === 'in_progress' && isOwnedGame(detailGame) && (
             <TouchableOpacity
               style={[s.newGameBtn, { marginHorizontal: 16, marginBottom: 16 }]}
               onPress={() => openLiveEntry(detailGame)}

@@ -520,6 +520,19 @@ class GameSession(Base):
     lineup_events = relationship("LineupEvent", back_populates="game", cascade="all, delete-orphan")
 
 
+class GameScoutingReport(Base):
+    """A coach's OWN scouting report for a game. Each coach who can access a
+    game (owner or team staff) gets their own private report; they can then
+    share it with staff/teams/players if they choose. One per (game, coach)."""
+    __tablename__ = "game_scouting_reports"
+    id = Column(Integer, primary_key=True, index=True)
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    report_text = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class GamePlayerStat(Base):
     __tablename__ = "game_player_stats"
     id = Column(Integer, primary_key=True, index=True)

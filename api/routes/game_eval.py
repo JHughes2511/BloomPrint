@@ -225,24 +225,43 @@ def _accessible_team_ids(db: Session, coach: models.Coach) -> set[int]:
     return ids
 
 
-def _scout_shared_to(db: Session, coach: models.Coach, game: models.GameSession) -> bool:
-    """True if this game's AI scouting report was shared to the coach (directly
-    or via a team share). Team shares fan out to one StaffSharedReport per staff
-    recipient, so checking recipient_id covers both."""
-    return (
-        db.query(models.StaffSharedReport)
-        .filter_by(report_type="game_session", report_id=game.id, recipient_id=coach.id)
+def _coach_scouting(db: Session, coach: models.Coach, game: models.GameSession) -> str | None:
+    """The coach's OWN scouting report for a game. Each coach who can access a
+    game keeps their own private scouting; the owner's legacy report (stored on
+    the game row before per-coach reports existed) is their own report."""
+    row = (
+        db.query(models.GameScoutingReport)
+        .filter_by(game_id=game.id, coach_id=coach.id)
         .first()
-    ) is not None
+    )
+    if row and row.report_text:
+        return row.report_text
+    if game.coach_id == coach.id and game.ai_scouting_report:
+        return game.ai_scouting_report
+    return None
+
+
+def _upsert_scouting(db: Session, coach: models.Coach, game: models.GameSession, text: str) -> None:
+    row = (
+        db.query(models.GameScoutingReport)
+        .filter_by(game_id=game.id, coach_id=coach.id)
+        .first()
+    )
+    if row:
+        row.report_text = text
+    else:
+        db.add(models.GameScoutingReport(game_id=game.id, coach_id=coach.id, report_text=text))
+    # Keep the legacy field in sync for the owner so older consumers still work.
+    if game.coach_id == coach.id:
+        game.ai_scouting_report = text
 
 
 def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession) -> schemas.GameSessionOut:
-    """Serialize a game, hiding the written AI scouting report from non-owners
-    unless it was shared to them. Game stats/grades stay visible to team staff;
-    only the written report is gated."""
+    """Serialize a game with the CURRENT coach's own scouting report. Staff see
+    the game's stats/grades but only their own scouting write-up (empty until
+    they generate one); scouting shared to them surfaces via Recent/Staff Hub."""
     out = schemas.GameSessionOut.model_validate(game)
-    if game.coach_id != coach.id and out.ai_scouting_report and not _scout_shared_to(db, coach, game):
-        out.ai_scouting_report = None
+    out.ai_scouting_report = _coach_scouting(db, coach, game)
     return out
 
 
@@ -793,9 +812,9 @@ async def generate_ai_scouting(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    # Generating a scouting report is an owner-only action; staff can only view
-    # it once the owner shares it.
-    game = _get_game(db, game_id, coach.id)
+    # Any coach who can access the game (owner or team staff) can generate their
+    # OWN scouting report for it. Reports are per-coach and private until shared.
+    game = _get_game_readable(db, game_id, coach)
 
     import os
     if not os.environ.get("ANTHROPIC_API_KEY"):
@@ -863,7 +882,7 @@ async def generate_ai_scouting(
 
     import re as _re
     report_text = _re.sub(r"\s*END OF REPORT\.?\s*$", "", report_text, flags=_re.IGNORECASE).rstrip()
-    game.ai_scouting_report = report_text
+    _upsert_scouting(db, coach, game, report_text)
     db.commit()
     return {"ai_scouting_report": report_text}
 
@@ -981,9 +1000,16 @@ def opponent_profile(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
+    # Opponent intel is built from every game against them that the coach can
+    # see — their own games plus games on teams they're staff on.
+    from sqlalchemy import or_
+    team_ids = _accessible_team_ids(db, coach)
+    conds = [models.GameSession.coach_id == coach.id]
+    if team_ids:
+        conds.append(models.GameSession.team_id.in_(team_ids))
     games = (
         db.query(models.GameSession)
-        .filter_by(coach_id=coach.id, opponent_name=opponent_name)
+        .filter(or_(*conds), models.GameSession.opponent_name == opponent_name)
         .order_by(models.GameSession.date.desc())
         .all()
     )
@@ -996,8 +1022,10 @@ def opponent_profile(
     latest_report = None
 
     for game in games:
-        if game.ai_scouting_report:
-            latest_report = game.ai_scouting_report
+        # The coach's own scouting report for that game (not another coach's).
+        own_scout = _coach_scouting(db, coach, game)
+        if own_scout:
+            latest_report = own_scout
         opp_stats = [s for s in game.player_stats if s.is_opponent]
         for s in opp_stats:
             if s.player_name not in player_totals:

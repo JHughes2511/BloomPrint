@@ -10,7 +10,7 @@ from .. import models, schemas
 router = APIRouter(prefix="/staff-sharing", tags=["staff-sharing"])
 
 
-def _resolve_report_text(report_type: str, report_id: int, db: Session) -> str | None:
+def _resolve_report_text(report_type: str, report_id: int, db: Session, sender_id: int | None = None) -> str | None:
     """Fetch the report_text from the appropriate table."""
     if report_type == "eval":
         ev = db.get(models.Evaluation, report_id)
@@ -28,6 +28,19 @@ def _resolve_report_text(report_type: str, report_id: int, db: Session) -> str |
         session = db.get(models.GameSession, report_id)
         if not session:
             return None
+        # Prefer the SENDER's own scouting report for this game (per-coach); fall
+        # back to the game's legacy report.
+        scout_text = None
+        if sender_id is not None:
+            row = (
+                db.query(models.GameScoutingReport)
+                .filter_by(game_id=session.id, coach_id=sender_id)
+                .first()
+            )
+            if row and row.report_text:
+                scout_text = row.report_text
+        if scout_text is None:
+            scout_text = session.ai_scouting_report
         lines = [f"GAME: vs {session.opponent_name}"]
         if session.date:
             lines.append(f"Date: {session.date.strftime('%B %d, %Y')}")
@@ -36,10 +49,10 @@ def _resolve_report_text(report_type: str, report_id: int, db: Session) -> str |
             lines.append(f"Score: {result_word} {session.our_score}-{session.opponent_score}")
         if session.location:
             lines.append(f"Location: {session.location}")
-        if session.ai_scouting_report:
+        if scout_text:
             lines.append("")
             lines.append("AI SCOUTING REPORT:")
-            lines.append(session.ai_scouting_report)
+            lines.append(scout_text)
         return "\n".join(lines)
     return None
 
@@ -78,7 +91,7 @@ def _build_out(sr: models.StaffSharedReport, db: Session) -> schemas.StaffShared
     out.recipient_name = sr.recipient.name if sr.recipient else ""
     # A frozen snapshot (section-filtered, non-regenerable) takes precedence over
     # the live report text so the recipient sees exactly the controlled copy.
-    out.report_text = sr.frozen_text if sr.frozen_text else _resolve_report_text(sr.report_type, sr.report_id, db)
+    out.report_text = sr.frozen_text if sr.frozen_text else _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id)
     out.regenerated_text = sr.regenerated_text
     out.subject_name, out.output_type, out.overall_grade = _report_meta(sr.report_type, sr.report_id, db)
     return out
