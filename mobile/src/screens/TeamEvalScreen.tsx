@@ -1606,7 +1606,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           </View>
 
           {/* Detail tabs */}
-          <View style={s.teamToggle}>
+          <View style={[s.teamToggle, { borderBottomWidth: 0 }]}>
             <TouchableOpacity
               style={[s.teamToggleBtn, detailTab === 'our' && s.teamToggleBtnActive]}
               onPress={() => setDetailTab('our')}
