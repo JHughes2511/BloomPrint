@@ -1791,7 +1791,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 .map((g: any) => (
                 <View key={g.player_name}>
                   <TouchableOpacity
-                    style={s.playerGradeRow}
+                    style={[s.playerGradeRow, expandedPlayer === g.player_name && { borderBottomWidth: 0 }]}
                     onPress={() => setExpandedPlayer(expandedPlayer === g.player_name ? null : g.player_name)}
                   >
                     <Text style={s.playerGradeName} numberOfLines={1}>{g.player_name}</Text>

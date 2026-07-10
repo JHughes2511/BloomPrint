@@ -216,7 +216,7 @@ export default function ConversationScreen() {
     const title = (a.report_title && String(a.report_title).trim()) || typeLabel;
     return (
       <TouchableOpacity key={a.id ?? a.report_id} style={styles.attReport} onPress={() => setReportView({ title, text: a.report_text || 'No content.' })}>
-        <View style={styles.attReportIcon}><Ionicons name="document-text" size={18} color={t.accent} /></View>
+        <View style={styles.attReportIcon}><Ionicons name="document-text" size={18} color="#fff" /></View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={styles.attReportTitle} numberOfLines={2}>{title}</Text>
           <Text style={styles.attReportSub} numberOfLines={1}>{typeLabel} · Tap to open</Text>
@@ -376,7 +376,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   attAudio: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.chip, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 6 },
   attAudioText: { color: t.inkSoft, fontSize: 13, fontFamily: fonts[600] },
   attReport: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: t.card, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 11, marginBottom: 6, borderWidth: 1, borderColor: t.cardBorder, width: 240, maxWidth: '100%' },
-  attReportIcon: { width: 34, height: 34, borderRadius: 9, backgroundColor: t.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  attReportIcon: { width: 34, height: 34, borderRadius: 9, backgroundColor: t.accent, alignItems: 'center', justifyContent: 'center' },
   attReportTitle: { color: t.ink, fontSize: 13.5, fontFamily: fonts[700] },
   attReportSub: { color: t.muted, fontSize: 11, marginTop: 1 },
   pendingRow: { maxHeight: 44, paddingVertical: 6 },

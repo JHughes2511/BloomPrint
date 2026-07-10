@@ -673,7 +673,7 @@ export default function RecentScreen() {
       <FlatList
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} tintColor={t.accent} />}
         data={filtered}
-        keyExtractor={e => `${e.kind}-${e.id}`}
+        keyExtractor={e => e.shared ? `shared-${e.shared_id}` : `${e.kind}-${e.id}`}
         contentContainerStyle={{ paddingBottom: 100 }}
         ListEmptyComponent={
           <View style={styles.center}>
