@@ -330,7 +330,7 @@ export default function StaffInboxScreen() {
                 <Ionicons name="chevron-forward" size={14} color={t.muted2} />
               </TouchableOpacity>
             ))}
-            {items.length > 0 && <Text style={[styles.sectionLabel, { marginTop: 14 }]}>Shared Reports</Text>}
+            {items.length > 0 && <Text style={[styles.sectionLabel, { marginTop: 14, paddingHorizontal: 20 }]}>Shared Reports</Text>}
           </View>
         }
         ListEmptyComponent={
