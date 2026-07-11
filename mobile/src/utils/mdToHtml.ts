@@ -129,7 +129,7 @@ export function safeFileName(s: string): string {
   return s.replace(/[^a-zA-Z0-9 \-]/g, '').replace(/\s+/g, ' ').trim();
 }
 
-export type ReportSection = { heading: string; body: string };
+export type ReportSection = { heading: string; body: string; pinned?: boolean };
 
 /**
  * Splits a markdown/plain report into top-level sections.
@@ -174,7 +174,16 @@ export function splitReportSections(text: string): ReportSection[] {
     return body ? [{ heading: 'Report', body }] : [];
   }
   // Trim trailing blank lines from each body
-  return sections.map(s => ({ heading: s.heading, body: s.body.replace(/\n+$/, '') }));
+  const result = sections.map(s => ({ heading: s.heading, body: s.body.replace(/\n+$/, ''), pinned: false }));
+  // The document header (model banner, report type, opponent/metadata lines) is
+  // NOT toggleable content — it's the title block. Pin every leading section up
+  // to the first one that has a real prose body so it's always included and not
+  // shown as a section toggle.
+  const firstReal = result.findIndex(s => s.body.replace(/\s+/g, ' ').trim().length >= 60);
+  if (firstReal > 0) {
+    for (let i = 0; i < firstReal; i++) result[i].pinned = true;
+  }
+  return result;
 }
 
 /**
@@ -183,7 +192,8 @@ export function splitReportSections(text: string): ReportSection[] {
  */
 export function joinReportSections(sections: ReportSection[], enabled: Record<string, boolean>): string {
   return sections
-    .filter(s => enabled[s.heading] !== false)
+    // Pinned header sections are always included, regardless of toggles.
+    .filter(s => s.pinned || enabled[s.heading] !== false)
     .map(s => (s.heading === 'Overview' || s.heading === 'Report' ? s.body : `## ${s.heading}\n${s.body}`))
     .join('\n\n')
     .trim();

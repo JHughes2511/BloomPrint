@@ -104,7 +104,10 @@ export default function ShareModal({
 
   // Section toggles are available on every target; for staff they only apply in
   // frozen mode (regenerate OFF — a regenerable copy is always the full report).
-  const showSectionToggles = sections.length > 1 && !(target === 'all_staff' && allowRegen);
+  // The document header (title / model banner / opponent line) is pinned and
+  // always included — only real content sections get toggles.
+  const toggleSections = sections.filter(s => !s.pinned);
+  const showSectionToggles = toggleSections.length > 1 && !(target === 'all_staff' && allowRegen);
 
   const canSend = () => {
     if (target === 'team') return !!selected;
@@ -365,7 +368,7 @@ export default function ShareModal({
             {showSectionToggles && (
               <>
                 <Text style={[styles.label, { marginTop: 8 }]}>Include Sections</Text>
-                {sections.map((sec, i) => (
+                {toggleSections.map((sec, i) => (
                   <View key={`${sec.heading}-${i}`} style={styles.toggleRow}>
                     <Text style={[styles.toggleLabel, { flex: 1, marginRight: 8 }]} numberOfLines={1}>{sec.heading}</Text>
                     <Switch
