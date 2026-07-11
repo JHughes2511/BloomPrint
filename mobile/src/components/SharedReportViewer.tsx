@@ -213,7 +213,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
               {canRegen && (
                 <TouchableOpacity style={[styles.bottomTab, bottomTab === 'correct' && styles.bottomTabActive]} onPress={() => setBottomTab('correct')}>
                   <Text style={[styles.bottomTabText, bottomTab === 'correct' && styles.bottomTabTextActive]}>
-                    Corrections{pendingCount ? ` (${pendingCount})` : ''}
+                    Corrections ({corrections.length})
                   </Text>
                 </TouchableOpacity>
               )}
@@ -221,7 +221,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                 <Text style={[styles.bottomTabText, bottomTab === 'comments' && styles.bottomTabTextActive]}>Comments ({comments.filter(c => !isNote(c) && underCurrent(c)).length})</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.bottomTab, bottomTab === 'notes' && styles.bottomTabActive]} onPress={() => setBottomTab('notes')}>
-                <Text style={[styles.bottomTabText, bottomTab === 'notes' && styles.bottomTabTextActive]}>Notes</Text>
+                <Text style={[styles.bottomTabText, bottomTab === 'notes' && styles.bottomTabTextActive]}>Notes ({comments.filter(c => isNote(c) && underCurrent(c)).length})</Text>
               </TouchableOpacity>
             </View>
 

@@ -109,7 +109,7 @@ export default function RecentScreen() {
   const [sending, setSending] = useState(false);
 
   // Game report view modal
-  const [gameReportModal, setGameReportModal] = useState<{ title: string; text: string } | null>(null);
+  const [gameReportModal, setGameReportModal] = useState<{ title: string; text: string; reportType?: string; reportId?: number; outputType?: string; subject?: string } | null>(null);
 
   // Correct state (inline in modal)
   const [teamCorrectText, setTeamCorrectText] = useState('');
@@ -118,7 +118,7 @@ export default function RecentScreen() {
   const [corrections, setCorrections] = useState<any[]>([]);
 
   const supportsCorrections = (m: ModalReport | null) =>
-    !!m && (m.kind === 'eval' ? !!m.evalId : m.kind === 'team');
+    !!m && (m.kind === 'eval' ? !!m.evalId : (m.kind === 'team' || m.kind === 'training'));
 
   const loadCorrections = async (m: ModalReport | null) => {
     if (!m) { setCorrections([]); return; }
@@ -127,6 +127,8 @@ export default function RecentScreen() {
         setCorrections(await evalsAPI.corrections(m.evalId));
       } else if (m.kind === 'team') {
         setCorrections(await evalsAPI.teamReportCorrections(m.id));
+      } else if (m.kind === 'training') {
+        setCorrections(await trainingAPI.corrections(m.id));
       } else {
         setCorrections([]);
       }
@@ -142,6 +144,8 @@ export default function RecentScreen() {
         await evalsAPI.addCorrection(activeModal.evalId, { correction: teamCorrectText.trim() });
       } else if (activeModal.kind === 'team') {
         await evalsAPI.addTeamReportCorrection(activeModal.id, teamCorrectText.trim());
+      } else if (activeModal.kind === 'training') {
+        await trainingAPI.addCorrection(activeModal.id, teamCorrectText.trim());
       }
       setTeamCorrectText('');
       await loadCorrections(activeModal);
@@ -405,7 +409,10 @@ export default function RecentScreen() {
       return;
     }
     if (item.kind === 'scout') {
-      setGameReportModal({ title: item.player_name ?? 'Scout Report', text: item.report_text ?? '' });
+      setGameReportModal({
+        title: 'Scouting Report', subject: item.player_name, text: item.report_text ?? '',
+        reportType: 'game_session', reportId: item.id, outputType: 'scouting_report',
+      });
       return;
     }
     if (item.kind === 'training') {
@@ -512,6 +519,40 @@ export default function RecentScreen() {
     }
   };
 
+  // Generic export/print (used by the scout/game report modal).
+  const buildReportHtmlDoc = (title: string, text: string, subject?: string) => `<html><head><style>
+      body{font-family:Georgia,serif;padding:40px;color:#111;max-width:800px;margin:auto}
+      h1{font-size:22px;border-bottom:2px solid #2563eb;padding-bottom:8px}
+      h2{font-size:17px;color:#1e40af;margin-top:24px}
+      p,li{line-height:1.7;font-size:13px}
+    </style></head><body>
+      <h1>BloomPrint — ${title}</h1>
+      ${subject ? `<p>${subject}</p>` : ''}
+      ${mdToHtml(text)}
+    </body></html>`;
+
+  const exportText = async (title: string, text: string, subject?: string) => {
+    if (!text) return;
+    setExporting(true);
+    try {
+      const { uri } = await Print.printToFileAsync({ html: buildReportHtmlDoc(title, text, subject) });
+      const dest = FileSystem.cacheDirectory + `${safeFileName(title)}.pdf`;
+      await FileSystem.copyAsync({ from: uri, to: dest });
+      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: 'Share Report' });
+    } catch (e: any) {
+      Alert.alert('Export Error', e?.message ?? 'Could not export');
+    } finally { setExporting(false); }
+  };
+
+  const printText = async (title: string, text: string, subject?: string) => {
+    if (!text) return;
+    try {
+      await Print.printAsync({ html: buildReportHtmlDoc(title, text, subject) });
+    } catch (e: any) {
+      Alert.alert('Print Error', e?.message ?? 'Could not print');
+    }
+  };
+
   const searchDebounce = useRef<any>(null);
   useEffect(() => {
     if (modalView !== 'send') return;
@@ -586,6 +627,10 @@ export default function RecentScreen() {
         const updated = await evalsAPI.regenerate(activeModal.evalId);
         updatedText = updated.report_text;
         setEvalCache(prev => ({ ...prev, [activeModal.evalId!]: updated }));
+      } else if (activeModal.kind === 'training') {
+        if (pending) await trainingAPI.addCorrection(activeModal.id, pending);
+        const updated = await trainingAPI.applyCorrections(activeModal.id);
+        updatedText = updated.program_text ?? updated.report_text ?? '';
       } else {
         if (pending) await evalsAPI.addTeamReportCorrection(activeModal.id, pending);
         const updated = await evalsAPI.regenerateTeamReport(activeModal.id);
@@ -750,7 +795,12 @@ export default function RecentScreen() {
                   {(item.kind === 'game' || item.kind === 'scout') && item.report_text ? (
                     <TouchableOpacity
                       style={styles.gameActionBtn}
-                      onPress={() => setGameReportModal({ title: item.player_name ?? (item.kind === 'scout' ? 'Scout Report' : 'Game Report'), text: item.report_text! })}
+                      onPress={() => setGameReportModal({
+                        title: item.kind === 'scout' ? 'Scouting Report' : 'Game Report',
+                        subject: item.player_name, text: item.report_text!,
+                        reportType: item.kind === 'scout' ? 'game_session' : 'game',
+                        reportId: item.id, outputType: item.kind === 'scout' ? 'scouting_report' : (item.output_type ?? 'coaching_report'),
+                      })}
                     >
                       <Ionicons name="document-text-outline" size={13} color={t.accent} />
                       <Text style={[styles.gameActionText, { color: t.accent }]}>View Report</Text>
@@ -848,8 +898,8 @@ export default function RecentScreen() {
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.modalTitle}>Game Report</Text>
-                <Text style={styles.modalSub}>{gameReportModal?.title}</Text>
+                <Text style={styles.modalTitle}>{gameReportModal?.title ?? 'Report'}</Text>
+                {!!gameReportModal?.subject && <Text style={styles.modalSub}>{gameReportModal.subject}</Text>}
               </View>
               <TouchableOpacity onPress={() => setGameReportModal(null)}>
                 <Ionicons name="close" size={24} color={t.muted} />
@@ -861,6 +911,44 @@ export default function RecentScreen() {
                 : <Text style={{ color: t.muted2 }}>No report content available.</Text>
               }
             </KeyboardAwareScrollView>
+            {gameReportModal && (
+              <View style={styles.actionRow}>
+                <TouchableOpacity style={styles.actionBtn} onPress={() => exportText(gameReportModal.title, gameReportModal.text, gameReportModal.subject)} disabled={exporting}>
+                  {exporting ? <ActivityIndicator color={t.ink} size="small" /> : <Ionicons name="download-outline" size={18} color={t.ink} />}
+                  <Text style={styles.actionText}>Export</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionBtn} onPress={() => printText(gameReportModal.title, gameReportModal.text, gameReportModal.subject)}>
+                  <Ionicons name="print-outline" size={18} color={t.ink} />
+                  <Text style={styles.actionText}>Print</Text>
+                </TouchableOpacity>
+                {gameReportModal.reportType && gameReportModal.reportId != null && (
+                  <>
+                    <TouchableOpacity
+                      style={[styles.actionBtn, { borderColor: t.positiveSoft }]}
+                      onPress={() => {
+                        const g = gameReportModal;
+                        setGameReportModal(null);
+                        setShareCtx({ reportType: g.reportType!, reportId: g.reportId!, outputType: g.outputType ?? 'scouting_report', reportText: g.text, title: g.title });
+                      }}
+                    >
+                      <Ionicons name="person-outline" size={18} color={t.positive} />
+                      <Text style={[styles.actionText, { color: t.positive }]}>Player</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.actionBtn, { borderColor: t.brownSoft }]}
+                      onPress={() => {
+                        const g = gameReportModal;
+                        setGameReportModal(null);
+                        setShareCtx({ reportType: g.reportType!, reportId: g.reportId!, outputType: g.outputType ?? 'scouting_report', reportText: g.text, title: g.title });
+                      }}
+                    >
+                      <Ionicons name="share-social-outline" size={18} color={t.brown} />
+                      <Text style={[styles.actionText, { color: t.brown }]}>Share</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            )}
           </View>
         </View>
       </Modal>
