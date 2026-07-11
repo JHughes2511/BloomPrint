@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { playerAPI, trainingAPI, teamStaffAPI, staffSharingAPI } from '../api/client';
 import CommentThread from '../components/CommentThread';
 import SharedReportViewer from '../components/SharedReportViewer';
+import { useAuth } from '../context/AuthContext';
 import { AppNotification } from '../types';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -32,6 +33,7 @@ const NOTIF_ICONS: Record<string, string> = {
 
 export default function CoachNotificationsScreen() {
   const navigation = useNavigation<any>();
+  const { coach } = useAuth();
   const { t } = useTheme();
   const styles = makeStyles(t);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -44,6 +46,8 @@ export default function CoachNotificationsScreen() {
   const [viewerShared, setViewerShared] = useState<any | null>(null);
   // shared_id -> report_type, so notification buttons can say "…Training"/"…Report".
   const [sharedMeta, setSharedMeta] = useState<Record<number, string>>({});
+  // notif id -> how I responded to a report request (for the disabled label)
+  const [requestResponses, setRequestResponses] = useState<Record<number, 'approved' | 'denied'>>({});
 
   const TYPE_WORD: Record<string, string> = {
     training: 'Training', eval: 'Eval', team_report: 'Team Report',
@@ -59,8 +63,24 @@ export default function CoachNotificationsScreen() {
         staffSharingAPI.sent().catch(() => []),
       ]);
       const found = [...(inbox ?? []), ...(sent ?? [])].find((s: any) => s.id === sharedId);
-      if (found) setViewerShared(found);
-      else Alert.alert('Unavailable', 'This shared report is no longer available.');
+      if (!found) { Alert.alert('Unavailable', 'This shared report is no longer available.'); return; }
+      const amRecipient = found.recipient_id === coach?.id;
+      // As the sharer, I can view the original + comments/notes freely. But if
+      // the recipient made an updated version, that's private until they approve
+      // — offer to request it.
+      if (!amRecipient && found.has_update) {
+        Alert.alert(
+          'Updated version',
+          'This coach has their own updated version. It stays private until they approve your request. You can request it, or view the original report and its comments.',
+          [
+            { text: 'Request Approval', onPress: () => requestUpdated(sharedId) },
+            { text: 'View Original & Comments', onPress: () => setViewerShared(found) },
+            { text: 'Cancel', style: 'cancel' },
+          ],
+        );
+      } else {
+        setViewerShared(found);
+      }
     } catch {
       Alert.alert('Error', 'Could not open the report.');
     }
@@ -80,6 +100,7 @@ export default function CoachNotificationsScreen() {
       await staffSharingAPI.respondRequest(n.ref_id, approve);
       await playerAPI.coachMarkRead(n.id);
       setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
+      setRequestResponses(prev => ({ ...prev, [n.id]: approve ? 'approved' : 'denied' }));
       Alert.alert(approve ? 'Shared' : 'Declined', approve ? 'Your updated report was shared.' : 'Request declined.');
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not respond.');
@@ -351,14 +372,22 @@ export default function CoachNotificationsScreen() {
                     <Text style={[styles.approveBtnText, { color: t.ctaText }]}>Request {typeWord(n.ref_id)}</Text>
                   </TouchableOpacity>
                 ) : n.type === 'staff_report_request' && n.ref_id ? (
-                  <View style={styles.actionRow}>
-                    <TouchableOpacity style={styles.approveBtn} onPress={() => respondRequest(n, true)}>
-                      <Text style={styles.approveBtnText}>Approve</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.rejectBtn} onPress={() => respondRequest(n, false)}>
-                      <Text style={styles.rejectBtnText}>Reject</Text>
-                    </TouchableOpacity>
-                  </View>
+                  (requestResponses[n.id] || n.read) ? (
+                    <View style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center', opacity: 0.7 }]}>
+                      <Text style={[styles.approveBtnText, { color: t.ctaText }]}>
+                        {requestResponses[n.id] === 'denied' ? 'Denied' : requestResponses[n.id] === 'approved' ? 'Approved' : 'Responded'}
+                      </Text>
+                    </View>
+                  ) : (
+                    <View style={styles.actionRow}>
+                      <TouchableOpacity style={styles.approveBtn} onPress={() => respondRequest(n, true)}>
+                        <Text style={styles.approveBtnText}>Approve</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.rejectBtn} onPress={() => respondRequest(n, false)}>
+                        <Text style={styles.rejectBtnText}>Reject</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )
                 ) : (n.type === 'staff_report_shared' || n.type === 'staff_share' || n.type === 'staff_report_comment') && n.ref_id ? (
                   <TouchableOpacity
                     style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center' }]}

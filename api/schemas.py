@@ -528,6 +528,7 @@ class StaffSharedReportOut(BaseModel):
     output_type: str | None = None
     overall_grade: float | None = None
     updated_report_id: int | None = None  # recipient's own Updated copy, once made
+    has_update: bool = False  # the recipient made an updated version (content hidden from the sharer until approved)
 
     model_config = {"from_attributes": True}
 

@@ -59,8 +59,8 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
   useEffect(() => {
     if (visible && shared) {
       setItem(shared);
-      setBodyMode(shared.regenerated_text ? 'updated' : 'original');
       const amRecipient = shared.recipient_id == null || shared.recipient_id === coach?.id;
+      setBodyMode(amRecipient && shared.regenerated_text ? 'updated' : 'original');
       setBottomTab(amRecipient && shared.allow_regenerate ? 'correct' : 'comments');
       setCommentText(''); setNoteText(''); setCorrectText('');
       staffSharingAPI.getComments(shared.id).then(setComments).catch(() => setComments([]));
@@ -163,7 +163,9 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
     setRegenerating(false);
   };
 
-  const hasUpdated = !!item.regenerated_text;
+  // Only the recipient sees their own updated version; the sharer sees the
+  // original + comments/notes until the recipient approves a request.
+  const hasUpdated = isRecipient && !!item.regenerated_text;
   const updatedLabel = UPDATED_LABEL[item.report_type] ?? 'Updated Report';
 
   return (

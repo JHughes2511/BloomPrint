@@ -360,7 +360,17 @@ def staff_sent(
         .order_by(models.StaffSharedReport.id.desc())
         .all()
     )
-    return [_build_out(r, db) for r in reports]
+    out = []
+    for r in reports:
+        o = _build_out(r, db)
+        # The sharer sees the ORIGINAL + comments, but the recipient's updated
+        # version stays private until they approve a request — only signal that
+        # one exists.
+        o.has_update = r.updated_report_id is not None
+        o.regenerated_text = None
+        o.updated_report_id = None
+        out.append(o)
+    return out
 
 
 @router.get("/{shared_id}/comments", response_model=list[schemas.StaffReportCommentOut])
