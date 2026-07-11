@@ -19,6 +19,7 @@ import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { formatForLevel, periodLabel, weightBucket, formatClock, type GameFormat } from '../utils/gameClock';
 import WhiteboardModal from '../components/WhiteboardModal';
+import ScoutContextPanel from '../components/ScoutContextPanel';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeProvider';
@@ -2075,75 +2076,24 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     ))}
                   </View>
 
-                  {/* Coach Notes */}
+                  {/* Scouting context — add context + generate/regenerate */}
                   <View style={s.card} onLayout={e => { noteInputY.current = e.nativeEvent.layout.y; }}>
-                    <Text style={s.cardLabel}>COACH NOTES</Text>
-                    <Text style={{ color: t.muted2, fontSize: 11, marginBottom: 12, marginTop: 4 }}>
-                      Notes are included in the scouting report.
-                    </Text>
-
-                    {/* Existing notes */}
-                    {scoutNotes.map(note => (
-                      <View key={note.id} style={{ flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 8,
-                                                     borderBottomWidth: 1, borderBottomColor: t.chip, gap: 10 }}>
-                        <View style={{ flex: 1 }}>
-                          <Text style={{ color: t.inkSoft, fontSize: 13, lineHeight: 18 }}>{note.note_text}</Text>
-                          <Text style={{ color: t.muted2, fontSize: 10, marginTop: 3 }}>
-                            {new Date(note.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                          </Text>
-                        </View>
-                        <TouchableOpacity
-                          style={{ padding: 4 }}
-                          onPress={() => Alert.alert('Delete Note', 'Remove this note?', [
-                            { text: 'Cancel', style: 'cancel' },
-                            { text: 'Delete', style: 'destructive', onPress: () => deleteOpponentNote(note.id) },
-                          ])}
-                        >
-                          <Ionicons name="trash-outline" size={16} color={t.muted2} />
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-
-                    {scoutNotes.length === 0 && !loadingNotes && (
-                      <Text style={{ color: t.muted2, fontSize: 13, marginBottom: 8 }}>No notes yet. Add your first observation below.</Text>
-                    )}
-
-                    {/* Add note */}
-                    <VoiceTextInput
-                      style={[s.input, { marginTop: 10, marginBottom: 8, minHeight: 72, textAlignVertical: 'top' }]}
-                      placeholder="Add a scouting note or observation..."
-                      placeholderTextColor={t.muted2}
-                      value={newNoteText}
-                      onChangeText={setNewNoteText}
-                      multiline
-                      numberOfLines={3}
-                    />
-                    <TouchableOpacity
-                      style={{ backgroundColor: newNoteText.trim() ? t.accent : t.line, borderRadius: 10,
-                               paddingVertical: 10, alignItems: 'center', opacity: savingNote ? 0.6 : 1 }}
-                      onPress={saveOpponentNote}
-                      disabled={!newNoteText.trim() || savingNote}
-                    >
-                      {savingNote
-                        ? <ActivityIndicator color={t.ctaText} size="small" />
-                        : <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Save Note</Text>}
-                    </TouchableOpacity>
+                    <Text style={s.cardLabel}>SCOUTING CONTEXT</Text>
+                    {(() => {
+                      const scoutGameId = sessions.find((x: any) => x.opponent_name === scoutOpponent)?.id;
+                      return scoutGameId ? (
+                        <ScoutContextPanel
+                          gameId={scoutGameId}
+                          opponentName={scoutOpponent ?? undefined}
+                          onRegenerated={(text) => setScoutData((prev: any) => ({ ...prev, ai_scouting_report: text }))}
+                        />
+                      ) : (
+                        <Text style={{ color: t.muted2, fontSize: 13, marginTop: 6 }}>
+                          Track a game against this opponent to generate a scouting report.
+                        </Text>
+                      );
+                    })()}
                   </View>
-
-                  {/* AI report */}
-                  <TouchableOpacity
-                    style={[s.newGameBtn, { marginBottom: 12 }]}
-                    onPress={regenerateScoutingReport}
-                    disabled={regeneratingScout}
-                  >
-                    {regeneratingScout
-                      ? <ActivityIndicator color={t.ctaText} />
-                      : <><Ionicons name="sparkles-outline" size={16} color={t.ctaText} />
-                        <Text style={s.newGameBtnText}>
-                          {scoutData.ai_scouting_report ? 'Regenerate Report' : 'Generate Report'}
-                        </Text></>}
-                  </TouchableOpacity>
-                  <GeneratingOverlay visible={regeneratingScout} label="Building the scouting report…" />
 
                   {scoutData.ai_scouting_report && (
                     <View style={s.card}>

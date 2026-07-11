@@ -18,6 +18,7 @@ import { outputTypeLabel } from '../utils/reportType';
 import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import SharedReportViewer from '../components/SharedReportViewer';
+import ScoutContextPanel from '../components/ScoutContextPanel';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -110,49 +111,8 @@ export default function RecentScreen() {
 
   // Game report view modal
   const [gameReportModal, setGameReportModal] = useState<{ title: string; text: string; reportType?: string; reportId?: number; outputType?: string; subject?: string } | null>(null);
-  // Scout-report corrections (extra context layered on the stat-derived report)
+  // Scout-report context/corrections panel (opens over the report)
   const [scoutCorrectMode, setScoutCorrectMode] = useState(false);
-  const [scoutCorrections, setScoutCorrections] = useState<any[]>([]);
-  const [scoutCorrectText, setScoutCorrectText] = useState('');
-  const [savingScout, setSavingScout] = useState(false);
-  const [applyingScout, setApplyingScout] = useState(false);
-
-  const openScoutCorrect = async (gameId: number) => {
-    setScoutCorrectText('');
-    setScoutCorrectMode(true);
-    try { setScoutCorrections(await gameEvalAPI.scoutingCorrections(gameId)); } catch { setScoutCorrections([]); }
-  };
-  const saveScoutCorrection = async (gameId: number) => {
-    if (!scoutCorrectText.trim()) return;
-    setSavingScout(true);
-    try {
-      await gameEvalAPI.addScoutingCorrection(gameId, scoutCorrectText.trim());
-      setScoutCorrections(await gameEvalAPI.scoutingCorrections(gameId));
-      setScoutCorrectText('');
-      Alert.alert('Saved', 'Context saved. Apply & Regenerate when ready.');
-    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save'); }
-    setSavingScout(false);
-  };
-  const deleteScoutCorrection = async (gameId: number, id: number) => {
-    try {
-      await gameEvalAPI.deleteScoutingCorrection(id);
-      setScoutCorrections(await gameEvalAPI.scoutingCorrections(gameId));
-    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete'); }
-  };
-  const applyScoutCorrections = async (gameId: number) => {
-    setApplyingScout(true);
-    try {
-      if (scoutCorrectText.trim()) await gameEvalAPI.addScoutingCorrection(gameId, scoutCorrectText.trim());
-      const res = await gameEvalAPI.applyScoutingCorrections(gameId);
-      setGameReportModal(prev => prev ? { ...prev, text: res.ai_scouting_report ?? prev.text } : prev);
-      setScoutCorrections(await gameEvalAPI.scoutingCorrections(gameId));
-      setScoutCorrectText('');
-      setScoutCorrectMode(false);
-      Alert.alert('Updated', 'Scouting report regenerated with your added context.');
-      load();
-    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate'); }
-    setApplyingScout(false);
-  };
 
   // Correct state (inline in modal)
   const [teamCorrectText, setTeamCorrectText] = useState('');
@@ -949,44 +909,16 @@ export default function RecentScreen() {
               </TouchableOpacity>
             </View>
             {scoutCorrectMode && gameReportModal?.reportId != null ? (
-              // Add-context / correction panel for a scout report.
-              <>
-                <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>
-                  Add context the box score can't capture (e.g. "they trap the first ball screen", "their scorer was hurt"). Apply & Regenerate rebuilds the report from the stats + everything you add.
-                </Text>
-                <KeyboardAwareScrollView style={{ maxHeight: 220 }} contentContainerStyle={{ paddingBottom: 8 }}>
-                  {scoutCorrections.length === 0 && <Text style={{ color: t.muted2, textAlign: 'center', paddingVertical: 12 }}>No added context yet.</Text>}
-                  {scoutCorrections.map((c: any) => (
-                    <View key={c.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.chip, borderRadius: 8, padding: 10, marginBottom: 6 }}>
-                      <Text style={{ flex: 1, color: t.inkSoft, fontSize: 13 }}>{c.correction}{c.applied ? '' : ''}</Text>
-                      {!c.applied && (
-                        <TouchableOpacity onPress={() => deleteScoutCorrection(gameReportModal!.reportId!, c.id)}>
-                          <Ionicons name="trash-outline" size={16} color={t.negative} />
-                        </TouchableOpacity>
-                      )}
-                    </View>
-                  ))}
-                </KeyboardAwareScrollView>
-                <VoiceTextInput
-                  style={sendStyles.correctInput}
-                  placeholder="Add context or an adjustment..."
-                  placeholderTextColor={t.muted2}
-                  value={scoutCorrectText}
-                  onChangeText={setScoutCorrectText}
-                  multiline
-                />
-                <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
-                  <TouchableOpacity style={sendStyles.cancelBtn} onPress={() => setScoutCorrectMode(false)}>
-                    <Text style={{ color: t.muted, fontFamily: fonts[700] }}>Back</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[sendStyles.cancelBtn, { opacity: (!scoutCorrectText.trim() || savingScout) ? 0.5 : 1 }]} onPress={() => saveScoutCorrection(gameReportModal!.reportId!)} disabled={!scoutCorrectText.trim() || savingScout}>
-                    <Text style={{ color: t.accent, fontFamily: fonts[700] }}>Save Corrections</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[sendStyles.applyBtn, { opacity: applyingScout ? 0.6 : 1 }]} onPress={() => applyScoutCorrections(gameReportModal!.reportId!)} disabled={applyingScout}>
-                    {applyingScout ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply & Regenerate</Text>}
-                  </TouchableOpacity>
-                </View>
-              </>
+              <ScoutContextPanel
+                gameId={gameReportModal.reportId}
+                opponentName={(gameReportModal.subject ?? '').replace(/^vs\s+/i, '').trim() || undefined}
+                onBack={() => setScoutCorrectMode(false)}
+                onRegenerated={(newText) => {
+                  setGameReportModal(prev => prev ? { ...prev, text: newText || prev.text } : prev);
+                  setScoutCorrectMode(false);
+                  load();
+                }}
+              />
             ) : (
               <>
                 <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
@@ -998,7 +930,7 @@ export default function RecentScreen() {
                 {gameReportModal && (
                   <View style={styles.actionRow}>
                     {gameReportModal.reportType === 'game_session' && gameReportModal.reportId != null && (
-                      <TouchableOpacity style={styles.actionBtn} onPress={() => openScoutCorrect(gameReportModal!.reportId!)}>
+                      <TouchableOpacity style={styles.actionBtn} onPress={() => setScoutCorrectMode(true)}>
                         <Ionicons name="create-outline" size={18} color={t.ink} />
                         <Text style={styles.actionText}>Correct</Text>
                       </TouchableOpacity>
