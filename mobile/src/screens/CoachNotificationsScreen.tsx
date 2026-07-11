@@ -48,6 +48,8 @@ export default function CoachNotificationsScreen() {
   const [sharedMeta, setSharedMeta] = useState<Record<number, string>>({});
   // notif id -> how I responded to a report request (for the disabled label)
   const [requestResponses, setRequestResponses] = useState<Record<number, 'approved' | 'denied'>>({});
+  // notif ids where I've sent a request (button becomes disabled "Requested")
+  const [requestedIds, setRequestedIds] = useState<Record<number, boolean>>({});
 
   const TYPE_WORD: Record<string, string> = {
     training: 'Training', eval: 'Eval', team_report: 'Team Report',
@@ -86,9 +88,10 @@ export default function CoachNotificationsScreen() {
     }
   };
 
-  const requestUpdated = async (sharedId: number) => {
+  const requestUpdated = async (sharedId: number, notifId?: number) => {
     try {
       await staffSharingAPI.requestUpdated(sharedId);
+      if (notifId != null) setRequestedIds(prev => ({ ...prev, [notifId]: true }));
       Alert.alert('Requested', 'We asked them to share their updated version. You\'ll be notified if they approve.');
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not send the request.');
@@ -365,12 +368,18 @@ export default function CoachNotificationsScreen() {
                   </View>
                 ) : n.type === 'staff_report_regenerated' && n.ref_id ? (
                   // I'm the original sharer: their updated copy is private — ask for it.
-                  <TouchableOpacity
-                    style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center' }]}
-                    onPress={() => requestUpdated(n.ref_id!)}
-                  >
-                    <Text style={[styles.approveBtnText, { color: t.ctaText }]}>Request {typeWord(n.ref_id)}</Text>
-                  </TouchableOpacity>
+                  requestedIds[n.id] ? (
+                    <View style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center', opacity: 0.7 }]}>
+                      <Text style={[styles.approveBtnText, { color: t.ctaText }]}>Requested</Text>
+                    </View>
+                  ) : (
+                    <TouchableOpacity
+                      style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center' }]}
+                      onPress={() => requestUpdated(n.ref_id!, n.id)}
+                    >
+                      <Text style={[styles.approveBtnText, { color: t.ctaText }]}>Request {typeWord(n.ref_id)}</Text>
+                    </TouchableOpacity>
+                  )
                 ) : n.type === 'staff_report_request' && n.ref_id ? (
                   requestResponses[n.id] ? (
                     <View style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center', opacity: 0.7 }]}>
