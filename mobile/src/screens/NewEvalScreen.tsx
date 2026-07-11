@@ -8,7 +8,7 @@ import {
 import { useRoute, useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { evalsAPI, gameEvalAPI } from '../api/client';
+import { evalsAPI, gameEvalAPI, uploadFileStreamed } from '../api/client';
 import { OutputType } from '../types';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -86,16 +86,25 @@ export default function NewEvalScreen() {
   const submit = async () => {
     setSubmitting(true);
     try {
-      const form = new FormData();
-      form.append('player_id', String(playerId));
-      form.append('output_type', outputType);
-      form.append('coach_notes', coachNotes);
-      form.append('focus_prompt', focusPrompt);
-      form.append('include_audio', 'false');
-      if (wantsBoxScore && selectedGameIds.length) form.append('game_ids', selectedGameIds.join(','));
-      if (videoUri) form.append('video', { uri: videoUri, name: videoName, type: 'video/mp4' } as any);
+      const fields: Record<string, string> = {
+        player_id: String(playerId),
+        output_type: outputType,
+        coach_notes: coachNotes,
+        focus_prompt: focusPrompt,
+        include_audio: 'false',
+      };
+      if (wantsBoxScore && selectedGameIds.length) fields.game_ids = selectedGameIds.join(',');
 
-      const res = await evalsAPI.submit(form);
+      let res: any;
+      if (videoUri) {
+        // Stream the film from disk (native) so large/long film doesn't OOM the
+        // JS multipart buffer ("Failed to grow buffer").
+        res = await uploadFileStreamed('/evaluations', videoUri, fields);
+      } else {
+        const form = new FormData();
+        Object.entries(fields).forEach(([k, v]) => form.append(k, v));
+        res = await evalsAPI.submit(form);
+      }
       // Video uploads process in the background and return a job id; poll for it.
       const ev = res?.job_id ? await evalsAPI.awaitJob(res.job_id, setProgress) : res;
       if (!ev?.id) throw new Error('No evaluation returned');

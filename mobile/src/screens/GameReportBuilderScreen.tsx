@@ -15,7 +15,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI } from '../api/client';
+import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI, uploadFileStreamed } from '../api/client';
 import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
 import { useTheme } from '../theme/ThemeProvider';
@@ -214,14 +214,11 @@ export default function GameReportBuilderScreen() {
     if (!reportId) return;
     setUploadingClip(true);
     try {
-      const name = asset.fileName ?? asset.uri.split('/').pop() ?? 'clip.mp4';
-      const form = new FormData();
-      form.append('video', { uri: asset.uri, name, type: 'video/mp4' } as any);
-      form.append('label', label);
+      // Stream the file straight from disk (native), NOT via FormData in JS
+      // memory — that's what throws "Failed to grow buffer" on long film.
       // The upload returns fast; the AI breakdown runs in the background, so we
-      // poll the report until this clip's analysis lands (long film can take a
-      // few minutes). The card shows "Analyzing…" meanwhile.
-      const created = await gameReportsAPI.addClip(reportId, form);
+      // poll the report until this clip's analysis lands. Card shows "Analyzing…".
+      const created = await uploadFileStreamed(`/game-reports/${reportId}/clips`, asset.uri, { label });
       const refreshed = await gameReportsAPI.get(reportId);
       setReport(refreshed);
       setUploadingClip(false);

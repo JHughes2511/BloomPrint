@@ -1,9 +1,39 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import * as FileSystem from 'expo-file-system/legacy';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000';
 
 export const api = axios.create({ baseURL: BASE_URL, timeout: 120000 });
+
+/**
+ * Upload a video (or any file) STREAMED from disk via native code, instead of
+ * building the multipart body in JS memory. This avoids RN's "Failed to grow
+ * buffer" OOM on large files (long film), which axios/FormData hits.
+ */
+export async function uploadFileStreamed(
+  path: string,
+  fileUri: string,
+  parameters: Record<string, string> = {},
+  fieldName = 'video',
+  mimeType = 'video/mp4',
+): Promise<any> {
+  const token = await SecureStore.getItemAsync('auth_token');
+  const res = await FileSystem.uploadAsync(`${BASE_URL}${path}`, fileUri, {
+    httpMethod: 'POST',
+    uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+    fieldName,
+    mimeType,
+    parameters,
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (res.status >= 400) {
+    let detail = `Upload failed (${res.status})`;
+    try { detail = JSON.parse(res.body || '{}').detail || detail; } catch {}
+    throw new Error(detail);
+  }
+  try { return JSON.parse(res.body || '{}'); } catch { return {}; }
+}
 
 api.interceptors.request.use(async (config) => {
   const token = await SecureStore.getItemAsync('auth_token');
