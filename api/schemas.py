@@ -529,6 +529,9 @@ class StaffSharedReportOut(BaseModel):
     overall_grade: float | None = None
     updated_report_id: int | None = None  # recipient's own Updated copy, once made
     has_update: bool = False  # the recipient made an updated version (content hidden from the sharer until approved)
+    comment_count: int = 0
+    note_count: int = 0
+    correction_count: int = 0
 
     model_config = {"from_attributes": True}
 
@@ -570,6 +573,7 @@ class CoachNotificationOut(BaseModel):
 
 class StaffReportCommentCreate(BaseModel):
     text: str
+    target: str = "original"  # "original" | "updated" — which version it's under
 
 
 class StaffReportCommentOut(BaseModel):
@@ -579,6 +583,7 @@ class StaffReportCommentOut(BaseModel):
     text: str
     created_at: datetime
     author_name: str = ""
+    target: str = "original"
 
     model_config = {"from_attributes": True}
 

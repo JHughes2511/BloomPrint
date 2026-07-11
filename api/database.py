@@ -209,6 +209,14 @@ def _run_migrations():
                     "ALTER TABLE staff_shared_reports ADD COLUMN updated_report_id INTEGER"
                 ))
                 conn.commit()
+            src_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(staff_report_comments)")
+            )]
+            if src_cols and "target" not in src_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE staff_report_comments ADD COLUMN target VARCHAR DEFAULT 'original'"
+                ))
+                conn.commit()
         except Exception:
             pass
 

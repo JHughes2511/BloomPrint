@@ -75,6 +75,9 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
   if (!item) return null;
 
   const pendingCount = corrections.filter(c => !c.applied).length;
+  // Comments/notes are tied to the Original vs Updated version you're viewing.
+  const isNote = (c: any) => String(c.text).startsWith('[Coach Note]');
+  const underCurrent = (c: any) => (c.target ?? 'original') === bodyMode;
   const bodyText = bodyMode === 'updated'
     ? (item.regenerated_text ?? item.report_text ?? '')
     : (item.report_text ?? '');
@@ -83,7 +86,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
     if (!commentText.trim()) return;
     setBusy(true);
     try {
-      await staffSharingAPI.addComment(item.id, commentText.trim());
+      await staffSharingAPI.addComment(item.id, commentText.trim(), bodyMode);
       setComments(await staffSharingAPI.getComments(item.id));
       setCommentText('');
     } catch (e: any) {
@@ -96,7 +99,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
     if (!noteText.trim()) return;
     setBusy(true);
     try {
-      await staffSharingAPI.addComment(item.id, `[Coach Note] ${noteText.trim()}`);
+      await staffSharingAPI.addComment(item.id, `[Coach Note] ${noteText.trim()}`, bodyMode);
       setComments(await staffSharingAPI.getComments(item.id));
       setNoteText('');
       Alert.alert('Saved', 'Note saved.');
@@ -215,7 +218,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                 </TouchableOpacity>
               )}
               <TouchableOpacity style={[styles.bottomTab, bottomTab === 'comments' && styles.bottomTabActive]} onPress={() => setBottomTab('comments')}>
-                <Text style={[styles.bottomTabText, bottomTab === 'comments' && styles.bottomTabTextActive]}>Comments ({comments.filter(c => !String(c.text).startsWith('[Coach Note]')).length})</Text>
+                <Text style={[styles.bottomTabText, bottomTab === 'comments' && styles.bottomTabTextActive]}>Comments ({comments.filter(c => !isNote(c) && underCurrent(c)).length})</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.bottomTab, bottomTab === 'notes' && styles.bottomTabActive]} onPress={() => setBottomTab('notes')}>
                 <Text style={[styles.bottomTabText, bottomTab === 'notes' && styles.bottomTabTextActive]}>Notes</Text>
@@ -296,11 +299,12 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
 
             {bottomTab === 'comments' && (
               <View>
+                <Text style={styles.scopeHint}>Comments on the {bodyMode === 'updated' ? updatedLabel : 'Original'}</Text>
                 <ScrollView style={{ maxHeight: 120 }}>
-                  {comments.filter(c => !String(c.text).startsWith('[Coach Note]')).length === 0 && (
-                    <Text style={styles.empty}>No comments yet.</Text>
+                  {comments.filter(c => !isNote(c) && underCurrent(c)).length === 0 && (
+                    <Text style={styles.empty}>No comments on this version yet.</Text>
                   )}
-                  {comments.filter(c => !String(c.text).startsWith('[Coach Note]')).map((c: any) => (
+                  {comments.filter(c => !isNote(c) && underCurrent(c)).map((c: any) => (
                     <View key={c.id} style={styles.commentCard}>
                       <Text style={styles.commentAuthor}>{c.author_name}</Text>
                       <Text style={styles.commentText}>{c.text}</Text>
@@ -325,8 +329,12 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
 
             {bottomTab === 'notes' && (
               <View>
+                <Text style={styles.scopeHint}>Notes on the {bodyMode === 'updated' ? updatedLabel : 'Original'}</Text>
                 <ScrollView style={{ maxHeight: 100 }}>
-                  {comments.filter(c => String(c.text).startsWith('[Coach Note]')).map((c: any) => (
+                  {comments.filter(c => isNote(c) && underCurrent(c)).length === 0 && (
+                    <Text style={styles.empty}>No notes on this version yet.</Text>
+                  )}
+                  {comments.filter(c => isNote(c) && underCurrent(c)).map((c: any) => (
                     <View key={c.id} style={styles.commentCard}>
                       <Text style={styles.commentText}>{String(c.text).replace('[Coach Note] ', '')}</Text>
                     </View>
@@ -382,6 +390,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   primaryBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 13 },
   sendBtn: { width: 44, height: 44, borderRadius: 10, backgroundColor: t.ctaBg, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end' },
   hint: { color: t.muted2, fontSize: 11, marginTop: 8 },
+  scopeHint: { color: t.accent, fontSize: 10, fontFamily: fonts[700], letterSpacing: 0.5, marginBottom: 6 },
   corrRow: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: t.chip, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, marginBottom: 6 },
   corrText: { color: t.inkSoft, fontSize: 13 },
   corrApplied: { color: t.positive, fontSize: 10, fontFamily: fonts[700], marginTop: 2 },

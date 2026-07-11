@@ -269,8 +269,8 @@ export const staffSharingAPI = {
   inbox: () => api.get('/staff-sharing/inbox').then(r => r.data),
   sent: () => api.get('/staff-sharing/sent').then(r => r.data),
   getComments: (sharedId: number) => api.get(`/staff-sharing/${sharedId}/comments`).then(r => r.data),
-  addComment: (sharedId: number, text: string) =>
-    api.post(`/staff-sharing/${sharedId}/comments`, { text }).then(r => r.data),
+  addComment: (sharedId: number, text: string, target: 'original' | 'updated' = 'original') =>
+    api.post(`/staff-sharing/${sharedId}/comments`, { text, target }).then(r => r.data),
   regenerate: (sharedId: number, feedback: string) =>
     api.post(`/staff-sharing/${sharedId}/regenerate`, { feedback }).then(r => r.data),
   adopt: (sharedId: number, text: string) =>

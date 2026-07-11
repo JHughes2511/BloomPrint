@@ -46,9 +46,10 @@ export default function CoachNotificationsScreen() {
   const [viewerShared, setViewerShared] = useState<any | null>(null);
   // shared_id -> report_type, so notification buttons can say "…Training"/"…Report".
   const [sharedMeta, setSharedMeta] = useState<Record<number, string>>({});
-  // notif id -> how I responded to a report request (for the disabled label)
+  // shared_id -> how I responded to a request (keyed by share so ALL request
+  // notifications for the same report update, not just the one I tapped).
   const [requestResponses, setRequestResponses] = useState<Record<number, 'approved' | 'denied'>>({});
-  // notif ids where I've sent a request (button becomes disabled "Requested")
+  // shared_ids where I've sent a request (button becomes disabled "Requested")
   const [requestedIds, setRequestedIds] = useState<Record<number, boolean>>({});
 
   const TYPE_WORD: Record<string, string> = {
@@ -88,10 +89,10 @@ export default function CoachNotificationsScreen() {
     }
   };
 
-  const requestUpdated = async (sharedId: number, notifId?: number) => {
+  const requestUpdated = async (sharedId: number) => {
     try {
       await staffSharingAPI.requestUpdated(sharedId);
-      if (notifId != null) setRequestedIds(prev => ({ ...prev, [notifId]: true }));
+      setRequestedIds(prev => ({ ...prev, [sharedId]: true }));
       Alert.alert('Requested', 'We asked them to share their updated version. You\'ll be notified if they approve.');
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not send the request.');
@@ -101,9 +102,11 @@ export default function CoachNotificationsScreen() {
   const respondRequest = async (n: any, approve: boolean) => {
     try {
       await staffSharingAPI.respondRequest(n.ref_id, approve);
-      await playerAPI.coachMarkRead(n.id);
-      setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
-      setRequestResponses(prev => ({ ...prev, [n.id]: approve ? 'approved' : 'denied' }));
+      // Mark every request notification for this same share as read + resolved.
+      setRequestResponses(prev => ({ ...prev, [n.ref_id]: approve ? 'approved' : 'denied' }));
+      const sameShare = notifications.filter(x => x.type === 'staff_report_request' && x.ref_id === n.ref_id && !x.read);
+      await Promise.all(sameShare.map(x => playerAPI.coachMarkRead(x.id).catch(() => {})));
+      setNotifications(prev => prev.map(x => (x.type === 'staff_report_request' && x.ref_id === n.ref_id) ? { ...x, read: true } : x));
       Alert.alert(approve ? 'Shared' : 'Declined', approve ? 'Your updated report was shared.' : 'Request declined.');
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not respond.');
@@ -368,23 +371,23 @@ export default function CoachNotificationsScreen() {
                   </View>
                 ) : n.type === 'staff_report_regenerated' && n.ref_id ? (
                   // I'm the original sharer: their updated copy is private — ask for it.
-                  requestedIds[n.id] ? (
+                  requestedIds[n.ref_id] ? (
                     <View style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center', opacity: 0.7 }]}>
                       <Text style={[styles.approveBtnText, { color: t.ctaText }]}>Requested</Text>
                     </View>
                   ) : (
                     <TouchableOpacity
                       style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center' }]}
-                      onPress={() => requestUpdated(n.ref_id!, n.id)}
+                      onPress={() => requestUpdated(n.ref_id!)}
                     >
                       <Text style={[styles.approveBtnText, { color: t.ctaText }]}>Request {typeWord(n.ref_id)}</Text>
                     </TouchableOpacity>
                   )
                 ) : n.type === 'staff_report_request' && n.ref_id ? (
-                  requestResponses[n.id] ? (
+                  requestResponses[n.ref_id] ? (
                     <View style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center', opacity: 0.7 }]}>
                       <Text style={[styles.approveBtnText, { color: t.ctaText }]}>
-                        {requestResponses[n.id] === 'denied' ? 'Denied' : 'Approved'}
+                        {requestResponses[n.ref_id] === 'denied' ? 'Denied' : 'Approved'}
                       </Text>
                     </View>
                   ) : (

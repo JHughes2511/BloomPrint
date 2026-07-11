@@ -94,6 +94,9 @@ def _build_out(sr: models.StaffSharedReport, db: Session) -> schemas.StaffShared
     out.report_text = sr.frozen_text if sr.frozen_text else _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id)
     out.regenerated_text = sr.regenerated_text
     out.subject_name, out.output_type, out.overall_grade = _report_meta(sr.report_type, sr.report_id, db)
+    comments = db.query(models.StaffReportComment).filter_by(shared_report_id=sr.id).all()
+    out.note_count = sum(1 for c in comments if (c.text or "").startswith("[Coach Note]"))
+    out.comment_count = len(comments) - out.note_count
     return out
 
 
@@ -349,7 +352,16 @@ def staff_inbox(
         .order_by(models.StaffSharedReport.id.desc())
         .all()
     )
-    return [_build_out(r, db) for r in reports]
+    out = []
+    for r in reports:
+        o = _build_out(r, db)
+        o.correction_count = (
+            db.query(models.SharedReportCorrection)
+            .filter_by(shared_id=r.id, coach_id=coach.id, applied=False)
+            .count()
+        )
+        out.append(o)
+    return out
 
 
 @router.get("/sent", response_model=list[schemas.StaffSharedReportOut])
@@ -390,6 +402,7 @@ def get_comments(
     for c in comments:
         out = schemas.StaffReportCommentOut.model_validate(c)
         out.author_name = c.author.name if c.author else ""
+        out.target = c.target or "original"
         result.append(out)
     return result
 
@@ -408,6 +421,7 @@ def add_comment(
         shared_report_id=shared_id,
         author_id=coach.id,
         text=body.text,
+        target=(body.target if body.target in ("original", "updated") else "original"),
     )
     db.add(comment)
     db.flush()

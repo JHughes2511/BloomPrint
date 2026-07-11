@@ -453,6 +453,7 @@ class StaffReportComment(Base):
     shared_report_id = Column(Integer, ForeignKey("staff_shared_reports.id"), nullable=False)
     author_id        = Column(Integer, ForeignKey("coaches.id"), nullable=False)
     text             = Column(Text, nullable=False)
+    target           = Column(String, default="original")  # "original" | "updated"
     created_at       = Column(DateTime, default=datetime.utcnow)
 
     shared_report = relationship("StaffSharedReport", back_populates="comments")

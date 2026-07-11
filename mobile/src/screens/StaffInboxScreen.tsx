@@ -370,17 +370,30 @@ export default function StaffInboxScreen() {
           const iconName = item.report_type === 'training' ? 'barbell-outline' :
                            item.report_type === 'team_report' || item.report_type === 'team_training' ? 'people-outline' :
                            item.report_type === 'game' || item.report_type === 'game_session' ? 'clipboard-outline' : 'document-text-outline';
+          const typeLabel = REPORT_TYPE_LABELS[item.report_type] ?? item.report_type;
+          const title = (item.subject_name && String(item.subject_name).trim()) || typeLabel;
+          const chips: { icon: string; n: number; color: string }[] = [
+            { icon: 'create-outline', n: item.correction_count ?? 0, color: t.accent },
+            { icon: 'chatbubble-ellipses-outline', n: item.comment_count ?? 0, color: t.brown },
+            { icon: 'bookmark-outline', n: item.note_count ?? 0, color: t.positive },
+          ].filter(c => c.n > 0);
           return (
             <TouchableOpacity style={styles.card} onPress={() => openItem(item)}>
               <View style={[styles.iconBox, { backgroundColor: badgeColor.bg }]}>
                 <Ionicons name={iconName as any} size={18} color={badgeColor.text} />
               </View>
               <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                  <Text style={styles.cardTitle}>{REPORT_TYPE_LABELS[item.report_type] ?? item.report_type}</Text>
+                <Text style={styles.cardTitle} numberOfLines={1}>{title}</Text>
+                <Text style={styles.cardSub}>{typeLabel} · From {item.sender_name}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3, flexWrap: 'wrap' }}>
+                  <Text style={styles.cardDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
+                  {chips.map((c, i) => (
+                    <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 2, marginLeft: 6 }}>
+                      <Ionicons name={c.icon as any} size={11} color={c.color} />
+                      <Text style={{ color: c.color, fontSize: 11, fontFamily: fonts[700] }}>{c.n}</Text>
+                    </View>
+                  ))}
                 </View>
-                <Text style={styles.cardSub}>From: {item.sender_name}</Text>
-                <Text style={styles.cardDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
               </View>
               <Ionicons name="chevron-forward" size={14} color={t.muted2} />
             </TouchableOpacity>
