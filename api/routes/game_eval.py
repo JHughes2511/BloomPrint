@@ -806,16 +806,9 @@ async def upload_excel(
 
 # ── AI Scouting Report ────────────────────────────────────────────────────────
 
-@router.post("/sessions/{game_id}/ai-scouting")
-async def generate_ai_scouting(
-    game_id: int,
-    db: Session = Depends(get_db),
-    coach: models.Coach = Depends(get_current_coach),
-):
-    # Any coach who can access the game (owner or team staff) can generate their
-    # OWN scouting report for it. Reports are per-coach and private until shared.
-    game = _get_game_readable(db, game_id, coach)
-
+async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSession, corrections: list[str]) -> str:
+    """Build + run the scouting report from the box score plus any coach-added
+    context ('corrections'), upsert it for this coach, and return the text."""
     import os
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY is not configured.")
@@ -838,7 +831,6 @@ async def generate_ai_scouting(
         result = "WIN" if game.our_score > game.opponent_score else "LOSS"
         score_info = f"Final score: {game.our_score}-{game.opponent_score} ({result})"
 
-    # Load coach notes for this opponent
     notes = (
         db.query(models.OpponentNote)
         .filter_by(coach_id=coach.id, opponent_name=game.opponent_name)
@@ -849,13 +841,22 @@ async def generate_ai_scouting(
     if notes:
         notes_text = "\n\nCOACH NOTES (observed by coaching staff):\n" + "\n".join(f"- {n.note_text}" for n in notes)
 
+    corr_text = ""
+    if corrections:
+        corr_text = (
+            "\n\nCOACH CONTEXT & ADJUSTMENTS (qualitative detail the box score can't capture — "
+            "you MUST weave ALL of these into the analysis and recommendations):\n"
+            + "\n".join(f"- {c}" for c in corrections if c and c.strip())
+        )
+
     prompt = (
         f"You are the BloomPrint Basketball Intelligence Model. "
         f"Generate a pre-game scouting report for the opponent: {game.opponent_name}\n\n"
         f"Game date: {game.date}\n"
         f"{score_info}\n\n"
         f"OPPONENT PLAYER GRADES:\n{opp_context}"
-        f"{notes_text}\n\n"
+        f"{notes_text}"
+        f"{corr_text}\n\n"
         f"Analyze the opponent's strengths, weaknesses, top players to watch, offensive tendencies, "
         f"defensive tendencies, and strategic recommendations for the next game against them. "
         f"IMPORTANT: Do NOT use ## headers, ** bold markers, or dividers. "
@@ -884,7 +885,125 @@ async def generate_ai_scouting(
     report_text = _re.sub(r"\s*END OF REPORT\.?\s*$", "", report_text, flags=_re.IGNORECASE).rstrip()
     _upsert_scouting(db, coach, game, report_text)
     db.commit()
-    return {"ai_scouting_report": report_text}
+    return report_text
+
+
+@router.post("/sessions/{game_id}/ai-scouting")
+async def generate_ai_scouting(
+    game_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    # Any coach who can access the game (owner or team staff) can generate their
+    # OWN scouting report for it. Reports are per-coach and private until shared.
+    game = _get_game_readable(db, game_id, coach)
+    text = await _run_scouting(db, coach, game, [])
+    return {"ai_scouting_report": text}
+
+
+@router.get("/sessions/{game_id}/scouting-corrections")
+def list_scouting_corrections(
+    game_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    _get_game_readable(db, game_id, coach)
+    rows = (
+        db.query(models.GameScoutingCorrection)
+        .filter_by(game_id=game_id, coach_id=coach.id)
+        .order_by(models.GameScoutingCorrection.id)
+        .all()
+    )
+    return [{"id": r.id, "correction": r.correction, "applied": r.applied, "created_at": r.created_at} for r in rows]
+
+
+@router.post("/sessions/{game_id}/scouting-corrections")
+def add_scouting_correction(
+    game_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    _get_game_readable(db, game_id, coach)
+    text = (body.get("text") or body.get("correction") or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Correction text required")
+    row = models.GameScoutingCorrection(game_id=game_id, coach_id=coach.id, correction=text)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return {"id": row.id, "correction": row.correction, "applied": row.applied}
+
+
+@router.patch("/scouting-corrections/{correction_id}")
+def edit_scouting_correction(
+    correction_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    row = db.get(models.GameScoutingCorrection, correction_id)
+    if not row or row.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Correction not found")
+    if row.applied:
+        raise HTTPException(status_code=400, detail="Already applied — can't edit")
+    text = (body.get("text") or body.get("correction") or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Correction text required")
+    row.correction = text
+    db.commit()
+    return {"id": row.id, "correction": row.correction, "applied": row.applied}
+
+
+@router.delete("/scouting-corrections/{correction_id}")
+def delete_scouting_correction(
+    correction_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    row = db.get(models.GameScoutingCorrection, correction_id)
+    if not row or row.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Correction not found")
+    if row.applied:
+        raise HTTPException(status_code=400, detail="Already applied — can't delete")
+    db.delete(row)
+    db.commit()
+    return {"ok": True}
+
+
+@router.post("/sessions/{game_id}/apply-scouting-corrections")
+async def apply_scouting_corrections(
+    game_id: int,
+    body: dict = None,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Regenerate the scouting report from the box score PLUS all of the coach's
+    added context, then mark those corrections applied."""
+    game = _get_game_readable(db, game_id, coach)
+    if body:
+        feedback = (body.get("feedback") or body.get("text") or "").strip()
+        if feedback:
+            db.add(models.GameScoutingCorrection(game_id=game_id, coach_id=coach.id, correction=feedback))
+            db.commit()
+    pending = (
+        db.query(models.GameScoutingCorrection)
+        .filter_by(game_id=game_id, coach_id=coach.id, applied=False)
+        .order_by(models.GameScoutingCorrection.id)
+        .all()
+    )
+    # Include ALL of the coach's context so the report reflects everything they've added.
+    all_corr = (
+        db.query(models.GameScoutingCorrection)
+        .filter_by(game_id=game_id, coach_id=coach.id)
+        .order_by(models.GameScoutingCorrection.id)
+        .all()
+    )
+    text = await _run_scouting(db, coach, game, [c.correction for c in all_corr])
+    for p in pending:
+        p.applied = True
+    db.commit()
+    return {"ai_scouting_report": text}
 
 
 # ── Season Dashboard ──────────────────────────────────────────────────────────

@@ -552,6 +552,19 @@ class GameScoutingReport(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
+class GameScoutingCorrection(Base):
+    """Coach-added context/adjustments layered on top of the stat-derived
+    scouting report. Apply & Regenerate rebuilds the report from the box score
+    PLUS these corrections — the qualitative detail the stats can't capture."""
+    __tablename__ = "game_scouting_corrections"
+    id = Column(Integer, primary_key=True, index=True)
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    correction = Column(Text, nullable=False)
+    applied = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class GamePlayerStat(Base):
     __tablename__ = "game_player_stats"
     id = Column(Integer, primary_key=True, index=True)
