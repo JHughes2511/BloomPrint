@@ -101,18 +101,21 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
         </View>
       )}
 
-      <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
+      <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, alignItems: 'stretch' }}>
         {onBack && (
-          <TouchableOpacity style={s.secondaryBtn} onPress={onBack}>
-            <Text style={{ color: t.muted, fontFamily: fonts[700] }}>Back</Text>
+          <TouchableOpacity style={s.backBtn} onPress={onBack}>
+            <Text style={s.backText} numberOfLines={1}>Back</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity style={[s.secondaryBtn, (!text.trim() || busy) && { opacity: 0.5 }]} onPress={add} disabled={!text.trim() || busy}>
-          <Text style={{ color: t.accent, fontFamily: fonts[700] }}>Save Corrections</Text>
+          <Text style={s.secondaryText} numberOfLines={1}>Save</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[s.primaryBtn, applying && { opacity: 0.6 }]} onPress={applyRegen} disabled={applying}>
           {applying ? <ActivityIndicator color={t.ctaText} size="small" /> : (
-            <><Ionicons name="sparkles-outline" size={14} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>  Apply & Regenerate</Text></>
+            <>
+              <Ionicons name="sparkles-outline" size={14} color={t.ctaText} />
+              <Text style={s.primaryText} numberOfLines={1}>Apply & Regenerate</Text>
+            </>
           )}
         </TouchableOpacity>
       </View>
@@ -151,8 +154,12 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   rememberRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10, backgroundColor: t.chip, borderRadius: 10, padding: 12 },
   rememberLabel: { color: t.ink, fontSize: 13, fontFamily: fonts[700] },
   rememberSub: { color: t.muted2, fontSize: 11, marginTop: 2 },
-  secondaryBtn: { flex: 1, borderRadius: 10, paddingVertical: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.accent, backgroundColor: t.accentSoft },
-  primaryBtn: { flex: 1.4, flexDirection: 'row', borderRadius: 10, paddingVertical: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: t.ctaBg },
+  backBtn: { paddingHorizontal: 16, borderRadius: 10, paddingVertical: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.line, backgroundColor: t.chip },
+  backText: { color: t.muted, fontFamily: fonts[700], fontSize: 13 },
+  secondaryBtn: { paddingHorizontal: 18, borderRadius: 10, paddingVertical: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.accent, backgroundColor: t.accentSoft },
+  secondaryText: { color: t.accent, fontFamily: fonts[700], fontSize: 13 },
+  primaryBtn: { flex: 1, flexDirection: 'row', gap: 5, borderRadius: 10, paddingVertical: 12, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: t.ctaBg },
+  primaryText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 13 },
   section: { color: t.label, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1, marginBottom: 6 },
   empty: { color: t.muted2, fontSize: 12, marginBottom: 6 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.chip, borderRadius: 8, padding: 10, marginBottom: 6 },
