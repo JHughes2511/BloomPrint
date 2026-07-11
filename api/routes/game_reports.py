@@ -4,13 +4,51 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ..database import get_db
+from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
 from .. import models, schemas
+
+
+def _run_clip_analysis(clip_id: int, video_path: str, output_type: str,
+                       program_name: str, opp_name: str, label_text: str,
+                       coach_weight: int, focus_prompt: str):
+    """Background task: analyze a (possibly hour-long) film and fill in the
+    clip's analysis. The upload request returns immediately, so the phone never
+    holds a multi-minute connection — the client polls the report for the text."""
+    import asyncio
+    db = SessionLocal()
+    try:
+        import sys
+        sys.path.insert(0, ".")
+        from video_vision.server import _handle_analyze_basketball_video
+        result = asyncio.run(_handle_analyze_basketball_video({
+            "video_path": video_path,
+            "output_type": output_type,
+            "program_name": program_name,
+            "competition_level": "HS Varsity",
+            "coach_weight": coach_weight,
+            "player_name": label_text,
+            "focus_prompt": f"This film is of {label_text}. My team: {program_name}. Opponent: {opp_name}.\n{focus_prompt or ''}",
+            "interval_seconds": 12.0,   # one frame ~every 12s; chunked for long film
+            "max_frames": 10,
+            "include_audio": False,
+        }))
+        text = result[0].text
+        clip = db.get(models.GameReportClip, clip_id)
+        if clip:
+            clip.analysis_text = text
+            db.commit()
+    except Exception as exc:
+        clip = db.get(models.GameReportClip, clip_id)
+        if clip:
+            clip.analysis_text = f"Analysis failed — {str(exc)[:300]}"
+            db.commit()
+    finally:
+        db.close()
 
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -98,6 +136,7 @@ def delete_game_report(
 @router.post("/{report_id}/clips", response_model=schemas.GameReportClipOut)
 async def add_clip(
     report_id: int,
+    background_tasks: BackgroundTasks,
     label: str = Form(...),
     video: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -112,38 +151,28 @@ async def add_clip(
     with dest.open("wb") as f:
         shutil.copyfileobj(video.file, f)
 
-    # Determine context label for AI
     label_text = "my team" if label == "my_team" else "the opponent"
     my_team_name = gr.my_team.name if gr.my_team else coach.program_name
     opp_name = gr.opponent_team.name if gr.opponent_team else (gr.opponent_name or "Opponent")
 
-    import sys
-    sys.path.insert(0, ".")
-    from video_vision.server import _handle_analyze_basketball_video
-
-    result = await _handle_analyze_basketball_video({
-        "video_path": str(dest),
-        "output_type": gr.output_type,
-        "program_name": my_team_name,
-        "competition_level": "HS Varsity",
-        "coach_weight": coach.weight,
-        "player_name": label_text,
-        "focus_prompt": f"This film is of {label_text}. My team: {my_team_name}. Opponent: {opp_name}.\n{gr.focus_prompt or ''}",
-        "interval_seconds": 5.0,
-        "max_frames": 10,
-        "include_audio": False,
-    })
-    analysis_text = result[0].text
-
+    # Create the clip in an "analyzing" state (analysis_text=None) and run the
+    # AI breakdown in the BACKGROUND so the upload request returns immediately —
+    # long (up to hour-long) film no longer holds the connection open or hangs
+    # the app. The client polls the report until analysis_text appears.
     clip = models.GameReportClip(
         game_report_id=report_id,
         video_path=str(dest),
         label=label,
-        analysis_text=analysis_text,
+        analysis_text=None,
     )
     db.add(clip)
     db.commit()
     db.refresh(clip)
+
+    background_tasks.add_task(
+        _run_clip_analysis, clip.id, str(dest), gr.output_type,
+        my_team_name, opp_name, label_text, coach.weight, gr.focus_prompt or "",
+    )
     return clip
 
 

@@ -113,6 +113,10 @@ export default function GameReportBuilderScreen() {
   const [clipModal, setClipModal] = useState<any | null>(null);
   const [clipCorrectionText, setClipCorrectionText] = useState('');
   const [clipCorrecting, setClipCorrecting] = useState(false);
+  // Background poll for a clip's analysis to land (long film analyzes async).
+  const pollAliveRef = useRef(true);
+  const pollTimerRef = useRef<any>(null);
+  useEffect(() => () => { pollAliveRef.current = false; if (pollTimerRef.current) clearTimeout(pollTimerRef.current); }, []);
 
   // Unified share modal (player / team / staff)
   const [showShareModal, setShowShareModal] = useState(false);
@@ -214,14 +218,38 @@ export default function GameReportBuilderScreen() {
       const form = new FormData();
       form.append('video', { uri: asset.uri, name, type: 'video/mp4' } as any);
       form.append('label', label);
-      await gameReportsAPI.addClip(reportId, form);
+      // The upload returns fast; the AI breakdown runs in the background, so we
+      // poll the report until this clip's analysis lands (long film can take a
+      // few minutes). The card shows "Analyzing…" meanwhile.
+      const created = await gameReportsAPI.addClip(reportId, form);
       const refreshed = await gameReportsAPI.get(reportId);
       setReport(refreshed);
+      setUploadingClip(false);
+      pollClipAnalysis(created?.id);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not upload clip');
-    } finally {
       setUploadingClip(false);
     }
+  };
+
+  const pollClipAnalysis = (clipId?: number) => {
+    if (!reportId || clipId == null) return;
+    let tries = 0;
+    const tick = async () => {
+      if (!pollAliveRef.current) return;
+      tries++;
+      try {
+        const r = await gameReportsAPI.get(reportId);
+        if (!pollAliveRef.current) return;
+        setReport(r);
+        const c = (r?.clips ?? []).find((x: any) => x.id === clipId);
+        if (c?.analysis_text || tries >= 150) return;  // ~12.5 min max
+      } catch {
+        if (tries >= 150) return;
+      }
+      pollTimerRef.current = setTimeout(tick, 5000);
+    };
+    pollTimerRef.current = setTimeout(tick, 5000);
   };
 
   const deleteClip = async (clipId: number) => {
