@@ -372,10 +372,10 @@ export default function CoachNotificationsScreen() {
                     <Text style={[styles.approveBtnText, { color: t.ctaText }]}>Request {typeWord(n.ref_id)}</Text>
                   </TouchableOpacity>
                 ) : n.type === 'staff_report_request' && n.ref_id ? (
-                  (requestResponses[n.id] || n.read) ? (
+                  requestResponses[n.id] ? (
                     <View style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center', opacity: 0.7 }]}>
                       <Text style={[styles.approveBtnText, { color: t.ctaText }]}>
-                        {requestResponses[n.id] === 'denied' ? 'Denied' : requestResponses[n.id] === 'approved' ? 'Approved' : 'Responded'}
+                        {requestResponses[n.id] === 'denied' ? 'Denied' : 'Approved'}
                       </Text>
                     </View>
                   ) : (

@@ -25,9 +25,11 @@ export function renderReport(
   const lines = text
     .split('\n')
     .map(line => {
-      // Drop pure divider lines
-      if (/^\s*[-=—─]{3,}\s*$/.test(line)) return { text: '', bullet: false, mdHeading: false };
-      if (/^\s*={3,}\s*$/.test(line)) return { text: '', bullet: false, mdHeading: false };
+      // Drop pure divider lines — any line made only of separator characters
+      // (dashes, equals, underscores, box-drawing, dots, tildes, etc.).
+      if (/^[\s\-=—─━_~.·*•]*$/.test(line) && (line.match(/[-=—─━_~.·*•]/g)?.length ?? 0) >= 3) {
+        return { text: '', bullet: false, mdHeading: false };
+      }
       const mdHeading = /^#{1,6}\s/.test(line);
       // Strip leading ##+ headings
       line = line.replace(/^#{1,6}\s*/, '');
@@ -44,8 +46,8 @@ export function renderReport(
       if (bullet) {
         line = line.replace(/^\s*[-*·•▪◦–]\s+/, '');
       } else {
-        // Strip trailing/leading === or --- dividers embedded in text
-        line = line.replace(/^[-=—─]+\s*/, '').replace(/\s*[-=—─]+$/, '');
+        // Strip trailing/leading divider runs embedded in a line
+        line = line.replace(/^[-=—─━_~]{2,}\s*/, '').replace(/\s*[-=—─━_~]{2,}$/, '');
       }
       return { text: line, bullet, mdHeading };
     });
