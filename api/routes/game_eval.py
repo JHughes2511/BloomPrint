@@ -262,6 +262,13 @@ def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession) -
     they generate one); scouting shared to them surfaces via Recent/Staff Hub."""
     out = schemas.GameSessionOut.model_validate(game)
     out.ai_scouting_report = _coach_scouting(db, coach, game)
+    if out.ai_scouting_report:
+        row = (
+            db.query(models.GameScoutingReport)
+            .filter_by(game_id=game.id, coach_id=coach.id)
+            .first()
+        )
+        out.scouting_updated_at = (row.updated_at or row.created_at) if row else game.date
     return out
 
 

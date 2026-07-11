@@ -655,6 +655,7 @@ class GameSessionOut(BaseModel):
     status: str
     ai_scouting_report: str | None
     created_at: datetime
+    scouting_updated_at: datetime | None = None  # when THIS coach's scout was last generated
     model_config = {"from_attributes": True}
 
 

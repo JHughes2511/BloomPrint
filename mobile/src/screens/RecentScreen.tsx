@@ -306,7 +306,9 @@ export default function RecentScreen() {
           player_name: g.opponent_name ? `vs ${g.opponent_name}` : (g.title || 'Scout Report'),
           output_type: 'scouting_report',
           overall_grade: null,
-          created_at: g.date || g.created_at,
+          // Sort by when the scout was generated/updated so a freshly created
+          // one lands at the top, not buried under the (old) game date.
+          created_at: g.scouting_updated_at || g.date || g.created_at,
           report_text: String(g.ai_scouting_report).replace(/\s*END OF REPORT\.?\s*$/i, '').trimEnd(),
         }));
       const texts: Record<number, string> = {};
