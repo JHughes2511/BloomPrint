@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
-  Modal, Alert, KeyboardAvoidingView, Platform, Switch,
+  Modal, Alert, KeyboardAvoidingView, Platform, Switch, Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import VoiceTextInput from './VoiceTextInput';
@@ -88,6 +88,7 @@ export default function ShareModal({
 
   const runSearch = async () => {
     if (!search.trim()) return;
+    Keyboard.dismiss();  // so results aren't hidden behind the keyboard
     setSearchLoading(true);
     try {
       if (target === 'all_staff') {

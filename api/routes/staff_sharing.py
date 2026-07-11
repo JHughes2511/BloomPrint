@@ -108,6 +108,30 @@ def _coach_notify(db: Session, coach_id: int, title: str, body: str, ref_id: int
     db.add(notif)
 
 
+def _upsert_share(db: Session, report_type: str, report_id: int, sender_id: int,
+                  recipient_id: int, allow_regenerate: bool, frozen: str | None):
+    """Create a share, or update the existing one for the same
+    (report, sender, recipient) — never a duplicate row. Returns (share, is_new)."""
+    existing = (
+        db.query(models.StaffSharedReport)
+        .filter_by(report_type=report_type, report_id=report_id,
+                   sender_id=sender_id, recipient_id=recipient_id)
+        .first()
+    )
+    if existing:
+        existing.allow_regenerate = allow_regenerate
+        existing.frozen_text = frozen
+        db.flush()
+        return existing, False
+    sr = models.StaffSharedReport(
+        report_type=report_type, report_id=report_id, sender_id=sender_id,
+        recipient_id=recipient_id, allow_regenerate=allow_regenerate, frozen_text=frozen,
+    )
+    db.add(sr)
+    db.flush()
+    return sr, True
+
+
 @router.post("/share", response_model=schemas.StaffSharedReportOut)
 def share_with_staff(
     body: schemas.StaffShareRequest,
@@ -123,16 +147,8 @@ def share_with_staff(
     # A frozen snapshot is only meaningful when regeneration is NOT allowed.
     frozen = body.frozen_text if (body.frozen_text and not body.allow_regenerate) else None
 
-    sr = models.StaffSharedReport(
-        report_type=body.report_type,
-        report_id=body.report_id,
-        sender_id=coach.id,
-        recipient_id=body.recipient_id,
-        allow_regenerate=body.allow_regenerate,
-        frozen_text=frozen,
-    )
-    db.add(sr)
-    db.flush()
+    sr, _ = _upsert_share(db, body.report_type, body.report_id, coach.id,
+                          body.recipient_id, body.allow_regenerate, frozen)
 
     # Notify recipient via CoachNotification
     _coach_notify(
@@ -271,16 +287,8 @@ def share_with_staff_group(
         recipient = db.get(models.Coach, rid)
         if not recipient:
             continue
-        sr = models.StaffSharedReport(
-            report_type=body.report_type,
-            report_id=body.report_id,
-            sender_id=coach.id,
-            recipient_id=rid,
-            allow_regenerate=body.allow_regenerate,
-            frozen_text=frozen,
-        )
-        db.add(sr)
-        db.flush()
+        sr, _ = _upsert_share(db, body.report_type, body.report_id, coach.id,
+                              rid, body.allow_regenerate, frozen)
         _coach_notify(
             db, rid,
             f"Report Shared by {coach.name}",
@@ -317,13 +325,8 @@ def share_with_team(
     frozen = body.get("frozen_text") if (body.get("frozen_text") and not allow_regenerate) else None
     count = 0
     for rid in ids:
-        sr = models.StaffSharedReport(
-            report_type=report_type, report_id=report_id,
-            sender_id=coach.id, recipient_id=rid,
-            allow_regenerate=allow_regenerate, frozen_text=frozen,
-        )
-        db.add(sr)
-        db.flush()
+        sr, _ = _upsert_share(db, report_type, report_id, coach.id, rid,
+                              allow_regenerate, frozen)
         _coach_notify(
             db, rid,
             f"Report shared by {coach.name}",
@@ -781,14 +784,11 @@ def respond_request(
         )
         db.commit()
         return {"ok": True, "approved": False}
-    # Share the recipient's updated copy (or their current version) back.
+    # Share the recipient's updated copy (or their current version) back —
+    # reusing any existing share so a repeated request doesn't duplicate it.
     report_id = sr.updated_report_id or sr.report_id
-    new_share = models.StaffSharedReport(
-        report_type=sr.report_type, report_id=report_id,
-        sender_id=coach.id, recipient_id=sr.sender_id, allow_regenerate=True,
-    )
-    db.add(new_share)
-    db.flush()
+    new_share, _ = _upsert_share(db, sr.report_type, report_id, coach.id,
+                                 sr.sender_id, True, None)
     _coach_notify(
         db, sr.sender_id,
         f"{coach.name} shared their updated report",
