@@ -62,6 +62,8 @@ export default function StaffInboxScreen() {
   const [teamSearch, setTeamSearch] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+  const [inboxSearch, setInboxSearch] = useState('');
+  const [gamesSearch, setGamesSearch] = useState('');
   const [joining, setJoining] = useState<number | null>(null);
   const [leaving, setLeaving] = useState<number | null>(null);
 
@@ -299,14 +301,36 @@ export default function StaffInboxScreen() {
 
   const renderInboxTab = () => {
     if (loading) return <View style={styles.center}><ActivityIndicator color={t.accent} size="large" /></View>;
+    const q = inboxSearch.trim().toLowerCase();
+    const convFiltered = !q ? conversations : conversations.filter((c: any) =>
+      (c.title ?? '').toLowerCase().includes(q) || (c.last_text ?? '').toLowerCase().includes(q));
+    const itemsFiltered = !q ? items : items.filter((it: any) =>
+      (REPORT_TYPE_LABELS[it.report_type] ?? it.report_type ?? '').toLowerCase().includes(q) ||
+      (it.sender_name ?? '').toLowerCase().includes(q));
     return (
       <FlatList
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await loadInbox(); setRefreshing(false); }} tintColor={t.accent} />}
-        data={items}
+        data={itemsFiltered}
         keyExtractor={i => String(i.id)}
         contentContainerStyle={{ paddingTop: 12, paddingBottom: 100 }}
+        keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View>
+            <View style={styles.searchBar}>
+              <Ionicons name="search" size={16} color={t.muted} />
+              <TextInput
+                style={styles.searchBarInput}
+                placeholder="Search messages & reports..."
+                placeholderTextColor={t.muted2}
+                value={inboxSearch}
+                onChangeText={setInboxSearch}
+              />
+              {inboxSearch.length > 0 && (
+                <TouchableOpacity onPress={() => setInboxSearch('')}>
+                  <Ionicons name="close-circle" size={16} color={t.muted2} />
+                </TouchableOpacity>
+              )}
+            </View>
             <View style={styles.sectionRow}>
               <Text style={styles.sectionLabel}>Messages</Text>
               <TouchableOpacity style={styles.newMsgBtn} onPress={() => setShowCompose(true)}>
@@ -314,10 +338,10 @@ export default function StaffInboxScreen() {
                 <Text style={styles.newMsgText}>New</Text>
               </TouchableOpacity>
             </View>
-            {conversations.length === 0 && (
-              <Text style={[styles.cardSub, { paddingHorizontal: 20, marginBottom: 6 }]}>No conversations yet — tap New to message a staff member.</Text>
+            {convFiltered.length === 0 && (
+              <Text style={[styles.cardSub, { paddingHorizontal: 20, marginBottom: 6 }]}>{q ? 'No matching conversations.' : 'No conversations yet — tap New to message a staff member.'}</Text>
             )}
-            {conversations.map(c => (
+            {convFiltered.map(c => (
               <TouchableOpacity key={`conv-${c.id}`} style={styles.card} onPress={() => navigation.navigate('Conversation', { conversationId: c.id, title: c.title })}>
                 <View style={[styles.iconBox, { backgroundColor: t.accentSoft }]}>
                   <Ionicons name={c.is_group ? 'people' : 'chatbubble-ellipses-outline'} size={18} color={t.accent} />
@@ -330,14 +354,14 @@ export default function StaffInboxScreen() {
                 <Ionicons name="chevron-forward" size={14} color={t.muted2} />
               </TouchableOpacity>
             ))}
-            {items.length > 0 && <Text style={[styles.sectionLabel, { marginTop: 14, paddingHorizontal: 20 }]}>Shared Reports</Text>}
+            {itemsFiltered.length > 0 && <Text style={[styles.sectionLabel, { marginTop: 14, paddingHorizontal: 20 }]}>Shared Reports</Text>}
           </View>
         }
         ListEmptyComponent={
           items.length === 0 ? null : (
             <View style={styles.center}>
               <Ionicons name="mail-outline" size={48} color={t.muted2} />
-              <Text style={styles.emptyText}>No reports shared with you yet.</Text>
+              <Text style={styles.emptyText}>{inboxSearch.trim() ? 'No matching reports.' : 'No reports shared with you yet.'}</Text>
             </View>
           )
         }
@@ -402,6 +426,24 @@ export default function StaffInboxScreen() {
           <View style={styles.center}><ActivityIndicator color={t.accent} /></View>
         )}
 
+        {selectedTeam && !teamGamesLoading && teamGames.length > 0 && (
+          <View style={[styles.searchBar, { marginTop: 0 }]}>
+            <Ionicons name="search" size={16} color={t.muted} />
+            <TextInput
+              style={styles.searchBarInput}
+              placeholder="Search games..."
+              placeholderTextColor={t.muted2}
+              value={gamesSearch}
+              onChangeText={setGamesSearch}
+            />
+            {gamesSearch.length > 0 && (
+              <TouchableOpacity onPress={() => setGamesSearch('')}>
+                <Ionicons name="close-circle" size={16} color={t.muted2} />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
         {selectedTeam && !teamGamesLoading && teamGames.length === 0 && (
           <View style={styles.center}>
             <Ionicons name="basketball-outline" size={48} color={t.muted2} />
@@ -409,7 +451,12 @@ export default function StaffInboxScreen() {
           </View>
         )}
 
-        {selectedTeam && !teamGamesLoading && teamGames.map((game: any) => (
+        {selectedTeam && !teamGamesLoading && teamGames
+          .filter((game: any) => {
+            const q = gamesSearch.trim().toLowerCase();
+            return !q || (game.title ?? '').toLowerCase().includes(q) || (game.date ?? '').toLowerCase().includes(q);
+          })
+          .map((game: any) => (
           <TouchableOpacity key={game.kind + game.id} style={styles.card} onPress={() => {
             setActiveGame(game);
             setGameCommentText('');
@@ -886,6 +933,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   unreadDot: { minWidth: 20, height: 20, borderRadius: 10, backgroundColor: t.accent, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6, marginRight: 6 },
   unreadDotText: { color: '#fff', fontSize: 11, fontFamily: fonts[800] },
   searchInput: { backgroundColor: t.chip, borderRadius: 10, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line },
+  searchBar: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.chip, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, borderWidth: 1, borderColor: t.line, marginHorizontal: 16, marginBottom: 12 },
+  searchBarInput: { flex: 1, color: t.ink, fontSize: 14, paddingVertical: 0 },
   selChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: t.accentSoft, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, borderWidth: 1, borderColor: t.accent },
   selChipText: { color: t.accent, fontSize: 13, fontFamily: fonts[600] },
   staffRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: t.card, borderRadius: 12, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: t.cardBorder },
