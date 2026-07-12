@@ -13,18 +13,29 @@ from ..auth import get_current_coach
 from .. import models, schemas
 
 
-def _run_clip_analysis(clip_id: int, video_path: str, output_type: str,
+def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: str,
                        program_name: str, opp_name: str, label_text: str,
                        coach_weight: int, focus_prompt: str):
-    """Background task: analyze a (possibly hour-long) film and fill in the
-    clip's analysis. The upload request returns immediately, so the phone never
-    holds a multi-minute connection — the client polls the report for the text."""
+    """Background task: analyze a (possibly hour-long) film and fill in the clip.
+    Reports per-segment progress on the GenerationJob so the app shows the same
+    "Analyzing segment i of N" bar as the player-eval flow."""
     import asyncio
     db = SessionLocal()
     try:
         import sys
         sys.path.insert(0, ".")
         from video_vision.server import _handle_analyze_basketball_video
+
+        def _prog(done, total, label):
+            pdb = SessionLocal()
+            try:
+                j = pdb.get(models.GenerationJob, job_id)
+                if j:
+                    j.progress = label
+                    pdb.commit()
+            finally:
+                pdb.close()
+
         result = asyncio.run(_handle_analyze_basketball_video({
             "video_path": video_path,
             "output_type": output_type,
@@ -36,17 +47,26 @@ def _run_clip_analysis(clip_id: int, video_path: str, output_type: str,
             "interval_seconds": 12.0,   # one frame ~every 12s; chunked for long film
             "max_frames": 10,
             "include_audio": False,
+            "_progress": _prog,
         }))
         text = result[0].text
         clip = db.get(models.GameReportClip, clip_id)
         if clip:
             clip.analysis_text = text
-            db.commit()
+        job = db.get(models.GenerationJob, job_id)
+        if job:
+            job.status = "done"
+            job.result_id = clip_id
+        db.commit()
     except Exception as exc:
         clip = db.get(models.GameReportClip, clip_id)
         if clip:
             clip.analysis_text = f"Analysis failed — {str(exc)[:300]}"
-            db.commit()
+        job = db.get(models.GenerationJob, job_id)
+        if job:
+            job.status = "error"
+            job.error = str(exc)[:500]
+        db.commit()
     finally:
         db.close()
 
@@ -133,7 +153,7 @@ def delete_game_report(
     return {"ok": True}
 
 
-@router.post("/{report_id}/clips", response_model=schemas.GameReportClipOut)
+@router.post("/{report_id}/clips")
 async def add_clip(
     report_id: int,
     background_tasks: BackgroundTasks,
@@ -169,11 +189,18 @@ async def add_clip(
     db.commit()
     db.refresh(clip)
 
+    # A GenerationJob carries per-segment progress so the app shows the same
+    # progress bar as the player-eval flow.
+    job = models.GenerationJob(coach_id=coach.id, kind="clip", status="processing")
+    db.add(job)
+    db.commit()
+    db.refresh(job)
+
     background_tasks.add_task(
-        _run_clip_analysis, clip.id, str(dest), gr.output_type,
+        _run_clip_analysis, clip.id, job.id, str(dest), gr.output_type,
         my_team_name, opp_name, label_text, coach.weight, gr.focus_prompt or "",
     )
-    return clip
+    return {"job_id": job.id, "clip_id": clip.id}
 
 
 @router.delete("/{report_id}/clips/{clip_id}")

@@ -9,13 +9,13 @@ import {
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { renderReport } from '../utils/renderReport';
-import { GeneratingOverlay } from '../components/GeneratingBasketball';
+import { GeneratingOverlay, parseGenProgress } from '../components/GeneratingBasketball';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI, uploadFileStreamed } from '../api/client';
+import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI, uploadFileStreamed, evalsAPI } from '../api/client';
 import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
 import { useTheme } from '../theme/ThemeProvider';
@@ -113,10 +113,8 @@ export default function GameReportBuilderScreen() {
   const [clipModal, setClipModal] = useState<any | null>(null);
   const [clipCorrectionText, setClipCorrectionText] = useState('');
   const [clipCorrecting, setClipCorrecting] = useState(false);
-  // Background poll for a clip's analysis to land (long film analyzes async).
-  const pollAliveRef = useRef(true);
-  const pollTimerRef = useRef<any>(null);
-  useEffect(() => () => { pollAliveRef.current = false; if (pollTimerRef.current) clearTimeout(pollTimerRef.current); }, []);
+  // Progress label for the film breakdown ("Analyzing segment i of N").
+  const [clipProgress, setClipProgress] = useState('');
 
   // Unified share modal (player / team / staff)
   const [showShareModal, setShowShareModal] = useState(false);
@@ -213,40 +211,25 @@ export default function GameReportBuilderScreen() {
   const uploadClip = async (asset: any, label: string) => {
     if (!reportId) return;
     setUploadingClip(true);
+    setClipProgress('Uploading film…');
     try {
       // Stream the file straight from disk (native), NOT via FormData in JS
-      // memory — that's what throws "Failed to grow buffer" on long film.
-      // The upload returns fast; the AI breakdown runs in the background, so we
-      // poll the report until this clip's analysis lands. Card shows "Analyzing…".
+      // memory — that's what throws "Failed to grow buffer" on long film. The
+      // breakdown runs as a background job that reports per-segment progress,
+      // shown on the same overlay as the player-eval flow.
       const created = await uploadFileStreamed(`/game-reports/${reportId}/clips`, asset.uri, { label });
+      if (created?.job_id) {
+        setClipProgress('Analyzing film…');
+        await evalsAPI.awaitJob(created.job_id, setClipProgress);
+      }
       const refreshed = await gameReportsAPI.get(reportId);
       setReport(refreshed);
-      setUploadingClip(false);
-      pollClipAnalysis(created?.id);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not upload clip');
+      Alert.alert('Error', e?.response?.data?.detail ?? e?.message ?? 'Could not upload clip');
+    } finally {
       setUploadingClip(false);
+      setClipProgress('');
     }
-  };
-
-  const pollClipAnalysis = (clipId?: number) => {
-    if (!reportId || clipId == null) return;
-    let tries = 0;
-    const tick = async () => {
-      if (!pollAliveRef.current) return;
-      tries++;
-      try {
-        const r = await gameReportsAPI.get(reportId);
-        if (!pollAliveRef.current) return;
-        setReport(r);
-        const c = (r?.clips ?? []).find((x: any) => x.id === clipId);
-        if (c?.analysis_text || tries >= 150) return;  // ~12.5 min max
-      } catch {
-        if (tries >= 150) return;
-      }
-      pollTimerRef.current = setTimeout(tick, 5000);
-    };
-    pollTimerRef.current = setTimeout(tick, 5000);
   };
 
   const deleteClip = async (clipId: number) => {
@@ -648,6 +631,11 @@ export default function GameReportBuilderScreen() {
           <Text style={styles.hint}>Analyzing all sources. This may take 30–60 seconds.</Text>
         )}
         <GeneratingOverlay visible={generating} label="Analyzing all sources and building the report…" />
+        <GeneratingOverlay
+          visible={uploadingClip}
+          realProgress={parseGenProgress(clipProgress)}
+          label={clipProgress || 'Uploading and analyzing film — keep this screen open.'}
+        />
 
         {/* Report output */}
         {report?.report_text ? (
