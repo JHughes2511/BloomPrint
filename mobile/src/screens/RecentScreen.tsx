@@ -19,6 +19,7 @@ import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import SharedReportViewer from '../components/SharedReportViewer';
 import ScoutContextPanel from '../components/ScoutContextPanel';
+import ExportSectionsModal from '../components/ExportSectionsModal';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -113,6 +114,8 @@ export default function RecentScreen() {
   const [gameReportModal, setGameReportModal] = useState<{ title: string; text: string; reportType?: string; reportId?: number; outputType?: string; subject?: string } | null>(null);
   // Scout-report context/corrections panel (opens over the report)
   const [scoutCorrectMode, setScoutCorrectMode] = useState(false);
+  // Section-selectable export/print
+  const [exportCtx, setExportCtx] = useState<{ title: string; subject?: string; text: string } | null>(null);
 
   // Correct state (inline in modal)
   const [teamCorrectText, setTeamCorrectText] = useState('');
@@ -937,13 +940,9 @@ export default function RecentScreen() {
                         <Text style={styles.actionText}>Correct</Text>
                       </TouchableOpacity>
                     )}
-                    <TouchableOpacity style={styles.actionBtn} onPress={() => exportText(gameReportModal.title, gameReportModal.text, gameReportModal.subject)} disabled={exporting}>
-                      {exporting ? <ActivityIndicator color={t.ink} size="small" /> : <Ionicons name="download-outline" size={18} color={t.ink} />}
-                      <Text style={styles.actionText}>Export</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionBtn} onPress={() => printText(gameReportModal.title, gameReportModal.text, gameReportModal.subject)}>
-                      <Ionicons name="print-outline" size={18} color={t.ink} />
-                      <Text style={styles.actionText}>Print</Text>
+                    <TouchableOpacity style={styles.actionBtn} onPress={() => setExportCtx({ title: gameReportModal.title, subject: gameReportModal.subject, text: gameReportModal.text })}>
+                      <Ionicons name="download-outline" size={18} color={t.ink} />
+                      <Text style={styles.actionText}>Export / Print</Text>
                     </TouchableOpacity>
                     {gameReportModal.reportType && gameReportModal.reportId != null && (
                       <>
@@ -985,6 +984,15 @@ export default function RecentScreen() {
         visible={!!viewerShared}
         onClose={() => setViewerShared(null)}
         onChanged={load}
+      />
+
+      {/* Section-selectable export / print */}
+      <ExportSectionsModal
+        visible={!!exportCtx}
+        title={exportCtx?.title ?? 'Report'}
+        subject={exportCtx?.subject}
+        reportText={exportCtx?.text ?? ''}
+        onClose={() => setExportCtx(null)}
       />
 
       {/* Generic Send to Staff Modal */}
@@ -1166,13 +1174,12 @@ export default function RecentScreen() {
                       <Text style={styles.actionText}>Correct</Text>
                     </TouchableOpacity>
                   )}
-                  <TouchableOpacity style={styles.actionBtn} onPress={exportModalReport} disabled={exporting}>
-                    {exporting ? <ActivityIndicator color={t.ink} size="small" /> : <Ionicons name="download-outline" size={18} color={t.ink} />}
-                    <Text style={styles.actionText}>Export</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.actionBtn} onPress={printModalReport}>
-                    <Ionicons name="print-outline" size={18} color={t.ink} />
-                    <Text style={styles.actionText}>Print</Text>
+                  <TouchableOpacity
+                    style={styles.actionBtn}
+                    onPress={() => activeModal && setExportCtx({ title: TYPE_LABELS[activeModal.outputType] ?? outputTypeLabel(activeModal.outputType), subject: activeModal.playerName, text: activeModal.text })}
+                  >
+                    <Ionicons name="download-outline" size={18} color={t.ink} />
+                    <Text style={styles.actionText}>Export / Print</Text>
                   </TouchableOpacity>
                   {/* Send to Player */}
                   <TouchableOpacity style={[styles.actionBtn, { borderColor: t.positiveSoft }]} onPress={() => { setSendSearch(''); setSendResults([]); setModalView('send'); }}>

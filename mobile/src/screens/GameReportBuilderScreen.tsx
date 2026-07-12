@@ -17,6 +17,7 @@ import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI, uploadFileStreamed, evalsAPI } from '../api/client';
 import ShareModal from '../components/ShareModal';
+import ExportSectionsModal from '../components/ExportSectionsModal';
 import { outputTypeLabel } from '../utils/reportType';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -115,6 +116,7 @@ export default function GameReportBuilderScreen() {
   const [clipCorrecting, setClipCorrecting] = useState(false);
   // Progress label for the film breakdown ("Analyzing segment i of N").
   const [clipProgress, setClipProgress] = useState('');
+  const [showExport, setShowExport] = useState(false);
 
   // Unified share modal (player / team / staff)
   const [showShareModal, setShowShareModal] = useState(false);
@@ -652,13 +654,9 @@ export default function GameReportBuilderScreen() {
               {renderReport(report.report_text, { heading: t.ink, body: t.inkSoft })}
             </View>
             <View style={styles.actionRow}>
-              <TouchableOpacity style={styles.actionBtn} onPress={exportPdf}>
-                <Ionicons name="share-outline" size={16} color={t.muted} />
-                <Text style={styles.actionText}>Export PDF</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn} onPress={() => Print.printAsync({ html: wrapPrintDocument({ title: report.title || matchupLabel(), subtitle: coach?.program_name ?? '', date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), bodyHtml: mdToHtml(report.report_text) }) })}>
-                <Ionicons name="print-outline" size={16} color={t.muted} />
-                <Text style={styles.actionText}>Print</Text>
+              <TouchableOpacity style={styles.actionBtn} onPress={() => setShowExport(true)}>
+                <Ionicons name="download-outline" size={16} color={t.muted} />
+                <Text style={styles.actionText}>Export / Print</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn} onPress={() => setShowShareModal(true)}>
                 <Ionicons name="share-social-outline" size={16} color={t.muted} />
@@ -781,6 +779,14 @@ export default function GameReportBuilderScreen() {
           title={report.title || matchupLabel()}
         />
       )}
+
+      <ExportSectionsModal
+        visible={showExport && !!report}
+        title={report?.title || matchupLabel()}
+        subject={coach?.program_name ?? undefined}
+        reportText={report?.report_text ?? ''}
+        onClose={() => setShowExport(false)}
+      />
 
       {/* Share modal */}
       <Modal visible={showShare} animationType="slide" transparent>
