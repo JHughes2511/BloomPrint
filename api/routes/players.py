@@ -161,6 +161,62 @@ def player_evaluations(
     return [e for e in player.evaluations if e.coach_id == coach.id]
 
 
+@router.get("/{player_id}/videos")
+def player_videos(
+    player_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Video catalog: every film uploaded for this player (by this coach), with
+    what report it created so it can be opened, plus a stream url to watch it."""
+    player = db.get(models.Player, player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found")
+    if not _can_see_player(db, coach, player):
+        raise HTTPException(status_code=403, detail="You don't have access to this player")
+    rows = (
+        db.query(models.PlayerVideo)
+        .filter_by(player_id=player_id, coach_id=coach.id)
+        .order_by(models.PlayerVideo.id.desc())
+        .all()
+    )
+    out = []
+    for v in rows:
+        report_label = None
+        if v.source_kind == "eval" and v.source_id:
+            ev = db.get(models.Evaluation, v.source_id)
+            if ev:
+                report_label = (ev.output_type or "eval").replace("_", " ").title()
+        out.append({
+            "id": v.id,
+            "source_kind": v.source_kind,
+            "source_id": v.source_id,
+            "report_label": report_label,
+            "label": v.label,
+            "created_at": v.created_at,
+            "stream_url": f"/players/videos/{v.id}/stream",
+        })
+    return out
+
+
+@router.get("/videos/{video_id}/stream")
+def stream_player_video(
+    video_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    from fastapi.responses import FileResponse
+    v = db.get(models.PlayerVideo, video_id)
+    if not v:
+        raise HTTPException(status_code=404, detail="Video not found")
+    player = db.get(models.Player, v.player_id)
+    if not player or not _can_see_player(db, coach, player):
+        raise HTTPException(status_code=403, detail="No access to this video")
+    if not os.path.exists(v.video_path):
+        raise HTTPException(status_code=404, detail="Video file is no longer available")
+    return FileResponse(v.video_path, media_type="video/mp4")
+
+
 @router.post("/{player_id}/summary", response_model=schemas.SummaryOut)
 async def player_summary(
     player_id: int,

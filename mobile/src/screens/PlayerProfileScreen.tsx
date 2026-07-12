@@ -12,7 +12,8 @@ import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Clipboard from 'expo-clipboard';
 import QRCode from 'react-native-qrcode-svg';
-import { playersAPI, teamsAPI, playerAPI, trainingAPI, staffSharingAPI, coachesAPI, gameEvalAPI } from '../api/client';
+import { Video, ResizeMode } from 'expo-av';
+import { playersAPI, teamsAPI, playerAPI, trainingAPI, staffSharingAPI, coachesAPI, gameEvalAPI, authedVideoSource } from '../api/client';
 import { Player, Evaluation, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
@@ -53,6 +54,9 @@ export default function PlayerProfileScreen() {
 
   const [player, setPlayer] = useState<Player | null>(null);
   const [evals, setEvals] = useState<Evaluation[]>([]);
+  const [videos, setVideos] = useState<any[]>([]);
+  const [videoSource, setVideoSource] = useState<{ uri: string; headers?: any } | null>(null);
+  const [videoMeta, setVideoMeta] = useState<any | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [latestTraining, setLatestTraining] = useState<any | null>(null);
   const [allTraining, setAllTraining] = useState<any[]>([]);
@@ -104,11 +108,13 @@ export default function PlayerProfileScreen() {
       playersAPI.evaluations(playerId),
       teamsAPI.list(),
       trainingAPI.forPlayer(playerId).catch(() => []),
+      playersAPI.videos(playerId).catch(() => []),
     ])
-      .then(([p, e, t, tr]) => {
+      .then(([p, e, t, tr, vids]) => {
         setPlayer(p);
         setEvals(e);
         setTeams(t);
+        setVideos(Array.isArray(vids) ? vids : []);
         if (Array.isArray(tr) && tr.length > 0) {
           setLatestTraining(tr[tr.length - 1]);
           setAllTraining(tr);
@@ -231,6 +237,16 @@ export default function PlayerProfileScreen() {
     trainingAPI.corrections(id).then(setModalCorrections).catch(() => setModalCorrections([]));
   };
   useEffect(() => { loadModalCorrections(trainingModalItem?.id); }, [trainingModalItem?.id]);
+
+  const openVideo = async (v: any) => {
+    try {
+      const src = await authedVideoSource(v.stream_url);
+      setVideoMeta(v);
+      setVideoSource(src);
+    } catch {
+      Alert.alert('Error', 'Could not open this video.');
+    }
+  };
 
   const saveModalCorrectionForLater = async () => {
     if (!modalCorrection.trim() || !trainingModalItem) return;
@@ -826,6 +842,64 @@ export default function PlayerProfileScreen() {
           );
         })}
       </View>
+
+      {/* Film Catalog — every video used to build a report for this player */}
+      <View style={[styles.section, { marginTop: 8 }]}>
+        <Text style={styles.sectionTitle}>FILM CATALOG</Text>
+        {videos.length === 0 ? (
+          <Text style={{ color: t.muted2, fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>
+            No film uploaded for this player yet.
+          </Text>
+        ) : (
+          videos.map((v: any) => (
+            <View key={v.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: t.chip }}>
+              <TouchableOpacity onPress={() => openVideo(v)} style={{ width: 44, height: 44, borderRadius: 8, backgroundColor: t.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+                <Ionicons name="play" size={20} color={t.accent} />
+              </TouchableOpacity>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700] }} numberOfLines={1}>
+                  {v.report_label || v.label || 'Film'}
+                </Text>
+                <Text style={{ color: t.muted2, fontSize: 11, marginTop: 2 }}>
+                  {v.created_at ? new Date(v.created_at).toLocaleDateString() : ''}
+                </Text>
+              </View>
+              {v.source_kind === 'eval' && v.source_id && (
+                <TouchableOpacity
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: t.line }}
+                  onPress={() => navigation.navigate('EvalReport' as never, { evalId: v.source_id } as never)}
+                >
+                  <Ionicons name="document-text-outline" size={13} color={t.muted} />
+                  <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>Report</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          ))
+        )}
+      </View>
+
+      {/* Video player modal */}
+      <Modal visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
+        <View style={{ flex: 1, backgroundColor: '#000000EE', justifyContent: 'center' }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: 48 }}>
+            <Text style={{ color: '#fff', fontSize: 15, fontFamily: fonts[700], flex: 1 }} numberOfLines={1}>
+              {videoMeta?.report_label || 'Film'}
+            </Text>
+            <TouchableOpacity onPress={() => setVideoSource(null)}>
+              <Ionicons name="close" size={28} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          {videoSource && (
+            <Video
+              source={videoSource as any}
+              style={{ width: '100%', height: 260, backgroundColor: '#000' }}
+              useNativeControls
+              resizeMode={ResizeMode.CONTAIN}
+              shouldPlay
+            />
+          )}
+        </View>
+      </Modal>
 
       {/* Training picker modal — choose which training to send */}
       <Modal visible={showTrainingPicker} transparent animationType="slide">

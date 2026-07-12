@@ -35,6 +35,12 @@ export async function uploadFileStreamed(
   try { return JSON.parse(res.body || '{}'); } catch { return {}; }
 }
 
+/** Build an authenticated expo-av video source for a stream path. */
+export async function authedVideoSource(streamPath: string): Promise<{ uri: string; headers?: Record<string, string> }> {
+  const token = await SecureStore.getItemAsync('auth_token');
+  return { uri: `${BASE_URL}${streamPath}`, headers: token ? { Authorization: `Bearer ${token}` } : undefined };
+}
+
 api.interceptors.request.use(async (config) => {
   const token = await SecureStore.getItemAsync('auth_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -77,6 +83,8 @@ export const playersAPI = {
     api.get('/players', { params: teamId != null ? { team_id: teamId } : {} }).then(r => r.data),
 
   get: (id: number) => api.get(`/players/${id}`).then(r => r.data),
+
+  videos: (playerId: number) => api.get(`/players/${playerId}/videos`).then(r => r.data),
 
   create: (data: {
     name: string; position?: string; jersey_number?: string; age?: number;
