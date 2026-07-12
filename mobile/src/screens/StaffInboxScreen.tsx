@@ -416,7 +416,7 @@ export default function StaffInboxScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Team switcher */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12, gap: 8 }}>
-          {myTeams.map(team => (
+          {myTeams.filter((team: any) => !team.parent_team_id).map(team => (
             <TouchableOpacity
               key={team.id}
               style={[styles.teamChip, selectedTeam?.id === team.id && styles.teamChipActive]}

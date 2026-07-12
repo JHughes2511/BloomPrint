@@ -17,15 +17,15 @@ import { ScreenBackground } from '../theme/components';
 // Draft preset chips per field — refine later.
 const FIELDS = [
   { key: 'offensive_system', label: 'Offensive System', desc: 'How your team plays on offense — pace, spacing, primary actions.',
-    chips: ['Motion', 'Ball-screen heavy', 'Pace-and-space', 'Princeton', 'Dribble-drive', 'Triangle', 'Flex', 'Read-and-react', 'Transition / Run', 'Five-out', 'Horns', 'Post-centric'] },
+    chips: ['Motion', 'Ball-screen heavy', 'Pace-and-space', 'Princeton', 'Dribble-drive', 'Triangle', 'Flex', 'Read-and-react', 'Transition / Run', 'Five-out', 'Horns', 'Post-centric', 'Two-man game', 'Skilled/High IQ guard'] },
   { key: 'defensive_system', label: 'Defensive System', desc: 'Your defensive identity and coverages.',
-    chips: ['Man-to-man', 'Pack-line', 'Switch everything', 'Drop coverage', 'Hedge / Blitz', '2-3 zone', '3-2 zone', '1-3-1 zone', 'Full-court press', 'Half-court trap', 'No-middle', 'Force baseline'] },
+    chips: ['Man-to-man', 'Pack-line', 'Switch everything', 'Drop coverage', 'Hedge / Blitz', '2-3 zone', '3-2 zone', '1-3-1 zone', 'Merrimack zone', 'Full-court press', 'Half-court trap', 'No-middle / Force baseline'] },
   { key: 'archetypes', label: 'Player Archetypes You Value', desc: 'The kinds of players you recruit and develop for.',
-    chips: ['3&D wings', 'Positionless bigs', 'Rim protectors', 'Secondary creators', 'Two-way guards', 'Stretch bigs', 'Point-of-attack defenders', 'High-motor connectors', 'Shot creators', 'Floor generals'] },
+    chips: ['3&D wings', 'Positionless bigs', 'Rim protectors', 'Secondary creators', 'Two-way guards', 'Stretch bigs', 'Point-of-attack defenders', 'High-motor connectors', 'Shot creators', 'Floor generals', 'Crafty shot-maker / Scoring mindset'] },
   { key: 'development', label: 'Development / Training Philosophy', desc: 'How you build players.',
-    chips: ['Skill-first', 'Strength & conditioning', 'Film / IQ', 'Shooting mechanics', 'Individual workouts', 'Load management', 'Positionless development', 'Habits & fundamentals'] },
+    chips: ['Skill-first', 'Strength & conditioning', 'Film / IQ', 'Shooting mechanics / Ball handling', 'Individual workouts', 'Load management', 'Positionless development', 'Habits & fundamentals'] },
   { key: 'recruiting', label: 'Recruiting Lens', desc: 'Where and how you recruit, and what swings your evaluation.',
-    chips: ['High school', 'AAU / club', 'JUCO', 'Transfer portal', 'International', 'Prep school', 'Local / regional', 'National', 'Character-first', 'Upside / projection', 'Immediate impact'] },
+    chips: ['High school', 'AAU / club', 'JUCO', 'Transfer portal', 'International', 'Prep school', 'Local / regional', 'National', 'Character-first', 'Upside / projection', 'Immediate impact', 'Adaptability / positional versatility'] },
   { key: 'culture', label: 'Culture / Non-Negotiables', desc: 'The standards and intangibles you weight heavily.',
     chips: ['Accountability', 'Toughness', 'Selflessness', 'Competitiveness', 'Discipline', 'Coachability', 'Work ethic', 'Communication', 'Family / brotherhood', 'Detail-oriented'] },
 ];

@@ -244,8 +244,8 @@ export default function NewEvalScreen() {
         </Text>
       </TouchableOpacity>
 
-      {/* Coach notes */}
-      <Text style={styles.label}>Coach Notes</Text>
+      {/* Notes */}
+      <Text style={styles.label}>Notes</Text>
       <VoiceTextInput
         style={[styles.input, { height: 100 }]}
         placeholder="e.g. Elite catch and shoot, plays at one pace, need to see more P&R midrange..."

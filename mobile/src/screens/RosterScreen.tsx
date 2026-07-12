@@ -264,7 +264,7 @@ export default function RosterScreen() {
         >
           <Text style={[styles.teamChipText, selectedTeamId == null && styles.teamChipTextActive]}>All</Text>
         </TouchableOpacity>
-        {teams.map(tm => (
+        {teams.filter((tm: any) => !tm.parent_team_id).map(tm => (
           <TouchableOpacity
             key={tm.id}
             style={[styles.teamChip, selectedTeamId === tm.id && styles.teamChipActive]}

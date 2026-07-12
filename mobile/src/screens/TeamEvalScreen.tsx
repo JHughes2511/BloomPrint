@@ -2137,7 +2137,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                       >
                         <Text style={{ color: newGameTeamId === null ? t.accent : t.inkSoft, fontSize: 14 }}>None</Text>
                       </TouchableOpacity>
-                      {teams.map((tm: any) => (
+                      {teams.filter((tm: any) => !tm.parent_team_id).map((tm: any) => (
                         <TouchableOpacity
                           key={tm.id}
                           style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: t.line, backgroundColor: newGameTeamId === tm.id ? t.accentSoft : 'transparent' }}

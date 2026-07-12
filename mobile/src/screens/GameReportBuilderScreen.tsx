@@ -420,15 +420,22 @@ export default function GameReportBuilderScreen() {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
-          <VoiceTextInput
-            style={styles.titleInput}
-            value={title}
-            onChangeText={setTitle}
-            onBlur={() => save({ title: title.trim() || null })}
-            placeholder="Game Report Title..."
-            placeholderTextColor={t.muted2}
-          />
+          <Text style={styles.headerTitle}>Game Packet</Text>
         </View>
+
+        {/* Packet name — prominent so it isn't skipped */}
+        <Text style={styles.label}>Packet Name</Text>
+        <VoiceTextInput
+          style={[styles.nameInput, !title.trim() && { borderColor: t.accent }]}
+          value={title}
+          onChangeText={setTitle}
+          onBlur={() => save({ title: title.trim() || null })}
+          placeholder="Name this packet so you can find it later"
+          placeholderTextColor={t.muted2}
+        />
+        {!title.trim() && (
+          <Text style={styles.nameHint}>Give your packet a name before you generate it.</Text>
+        )}
 
         {/* Mode selector */}
         <Text style={styles.label}>Report Context</Text>
@@ -854,6 +861,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', paddingTop: 48, marginBottom: 24, gap: 12 },
   titleInput: { flex: 1, color: t.ink, fontSize: 18, fontFamily: fonts[800], borderBottomWidth: 1, borderBottomColor: t.line, paddingBottom: 4 },
+  headerTitle: { flex: 1, color: t.ink, fontSize: 18, fontFamily: fonts[800] },
+  nameInput: { backgroundColor: t.card, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, color: t.ink, fontSize: 16, fontFamily: fonts[700], borderWidth: 1.5, borderColor: t.line, marginBottom: 4 },
+  nameHint: { color: t.accent, fontSize: 11, fontFamily: fonts[600], marginBottom: 8 },
   label: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 },
   modeRow: { gap: 8, marginBottom: 20 },
   modeChip: { borderWidth: 1, borderColor: t.line, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10 },
