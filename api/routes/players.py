@@ -63,6 +63,19 @@ def _can_see_player(db: Session, coach: models.Coach, player: models.Player) -> 
     return player.team_id is not None and player.team_id in _accessible_team_ids(db, coach)
 
 
+def _bim_evals(coach: models.Coach, player: models.Player) -> list:
+    """The evals that back a coach's BIM view of a player: their OWN evals, so
+    each coach sees their personal score. But when a coach is viewing a player
+    through a shared team and has run none of their own, fall back to the
+    aggregate of ALL evals so the profile detail isn't blank."""
+    own = [e for e in player.evaluations if e.coach_id == coach.id]
+    if own:
+        return own
+    if player.coach_id != coach.id and player.evaluations:
+        return list(player.evaluations)
+    return own
+
+
 @router.get("", response_model=list[schemas.PlayerOut])
 def list_players(
     team_id: int | None = None,
@@ -77,7 +90,7 @@ def list_players(
     q = db.query(models.Player).filter(or_(*conds))
     if team_id is not None:
         q = q.filter(models.Player.team_id == team_id)
-    return [_with_grade(p, [e for e in p.evaluations if e.coach_id == coach.id]) for p in q.all()]
+    return [_with_grade(p, _bim_evals(coach, p)) for p in q.all()]
 
 
 @router.get("/{player_id}", response_model=schemas.PlayerOut)
@@ -91,7 +104,7 @@ def get_player(
         raise HTTPException(status_code=404, detail="Player not found")
     if not _can_see_player(db, coach, player):
         raise HTTPException(status_code=403, detail="You don't have access to this player")
-    return _with_grade(player, [e for e in player.evaluations if e.coach_id == coach.id])
+    return _with_grade(player, _bim_evals(coach, player))
 
 
 @router.patch("/{player_id}", response_model=schemas.PlayerOut)
