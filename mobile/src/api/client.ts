@@ -127,6 +127,15 @@ export const evalsAPI = {
   job: (jobId: number) =>
     api.get(`/evaluations/jobs/${jobId}`).then(r => r.data),
 
+  // Extract plain text from an uploaded doc (import into Notes/Focus fields).
+  extractDoc: (file: { uri: string; name: string; type: string }) => {
+    const form = new FormData();
+    form.append('file', file as any);
+    return api.post('/evaluations/extract-doc', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then(r => r.data);
+  },
+
   delete: (id: number) => api.delete(`/evaluations/${id}`).then(r => r.data),
 
   get: (id: number) => api.get(`/evaluations/${id}`).then(r => r.data),

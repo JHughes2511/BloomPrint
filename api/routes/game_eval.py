@@ -866,8 +866,11 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
         f"{corr_text}\n\n"
         f"Analyze the opponent's strengths, weaknesses, top players to watch, offensive tendencies, "
         f"defensive tendencies, and strategic recommendations for the next game against them. "
-        f"IMPORTANT: Do NOT use ## headers, ** bold markers, or dividers. "
-        f"Use plain section titles in ALL CAPS followed by a colon and newline. "
+        f"FORMATTING (so a coach can scan it fast): Do NOT use ## headers, ** bold markers, or dividers. "
+        f"Write each section title in ALL CAPS on its own line followed by a colon, then a blank line. "
+        f"Present the findings under each section as bullet points that each start with '- ' (a hyphen and a space), "
+        f"one idea per bullet, with a blank line between bullets so they don't run together. "
+        f"Keep prose to a minimum — favor tight, scannable bullets. "
         f"Do NOT write 'END OF REPORT' or any closing marker at the end."
     )
 
@@ -935,7 +938,8 @@ async def generate_game_report(
             lines += f"\n{pname}: OFF={d['off']:.1f} DEF={d['def']:.1f}  {', '.join(f'{s}={c}' for s, c in top)}"
         return lines or "\n(no tracked stats)"
 
-    my_team = game.team.name if game.team else coach.program_name
+    team_row = db.get(models.Team, game.team_id) if game.team_id else None
+    my_team = team_row.name if team_row else coach.program_name
     score_info = ""
     if game.our_score is not None and game.opponent_score is not None:
         res = "WIN" if game.our_score > game.opponent_score else ("LOSS" if game.our_score < game.opponent_score else "TIE")
@@ -958,7 +962,11 @@ async def generate_game_report(
         "Cover, in this order: 1) OUR TEAM PERFORMANCE — what worked, who stood out, where we broke down, "
         "and adjustments for next time; 2) OPPONENT BREAKDOWN — their tendencies, key players, how to attack "
         "and defend them going forward; 3) KEY TAKEAWAYS. "
-        "Do NOT use ## headers, ** bold, or dividers. Plain ALL-CAPS section titles followed by a colon. "
+        "FORMATTING (so a coach can scan it fast): Do NOT use ## headers, ** bold, or dividers. "
+        "Write each section title in ALL CAPS on its own line followed by a colon, then a blank line. "
+        "Present the findings under each section as bullet points that each start with '- ' (a hyphen and a space), "
+        "one idea per bullet, with a blank line between bullets so they don't run together. "
+        "Keep prose to a minimum — favor tight, scannable bullets. "
         "Do NOT write 'END OF REPORT'."
     )
     try:

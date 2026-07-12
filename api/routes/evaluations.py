@@ -121,6 +121,38 @@ async def upload_eval_video(
     return {"token": name}
 
 
+@router.post("/extract-doc")
+async def extract_doc_text(
+    file: UploadFile = File(...),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Extract plain text from an uploaded .txt/.pdf/.docx so a coach can import
+    scouting notes or a focus prompt into the eval form instead of retyping."""
+    import io
+    content = await file.read()
+    filename = (file.filename or "").lower()
+    text = ""
+    if filename.endswith(".txt") or filename.endswith(".md") or filename.endswith(".csv"):
+        text = content.decode("utf-8", errors="replace")
+    elif filename.endswith(".pdf"):
+        try:
+            import pypdf
+            reader = pypdf.PdfReader(io.BytesIO(content))
+            text = "\n".join(page.extract_text() or "" for page in reader.pages)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Could not read PDF: {e}")
+    elif filename.endswith(".docx"):
+        try:
+            import docx
+            doc = docx.Document(io.BytesIO(content))
+            text = "\n".join(p.text for p in doc.paragraphs)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Could not read Word doc: {e}")
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported file type. Use .txt, .pdf, or .docx")
+    return {"text": text.strip()}
+
+
 def _tokens_to_refs(tokens: str | None, coach_id: int) -> list[str]:
     """Validate upload tokens and resolve to storage refs. A token must be a bare
     filename owned by this coach (prefix guard), preventing traversal or reuse of

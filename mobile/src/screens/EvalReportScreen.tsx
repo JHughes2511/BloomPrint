@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -21,7 +21,7 @@ import { ScreenBackground } from '../theme/components';
 import { Evaluation, Correction, Player } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
-import { mdToHtml, safeFileName } from '../utils/mdToHtml';
+import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 
@@ -84,6 +84,15 @@ export default function EvalReportScreen() {
     grades: true, flags: true, questions: true, report: true, corrections: false,
   });
   const [exporting, setExporting] = useState(false);
+
+  // The Full Report broken into its real headings, so the export picker mirrors
+  // the report's actual sections (same as the sharing toggles).
+  const reportSections = useMemo(() => splitReportSections(ev?.report_text ?? ''), [ev?.report_text]);
+  const reportToggleSections = reportSections.filter(sec => !sec.pinned);
+  const [reportToggles, setReportToggles] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    setReportToggles(Object.fromEntries(reportSections.map(sec => [sec.heading, true])));
+  }, [ev?.report_text]);
 
   // Unified share modal (player / team / staff)
   const [showShareModal, setShowShareModal] = useState(false);
@@ -279,7 +288,7 @@ export default function EvalReportScreen() {
     }
   };
 
-  const buildHtml = (cats: Record<string, boolean>) => {
+  const buildHtml = (cats: Record<string, boolean>, rToggles: Record<string, boolean> = reportToggles) => {
     if (!ev) return '<html><body><p>No data</p></body></html>';
     const date = new Date(ev.created_at).toLocaleDateString();
     const type = outputTypeLabel(ev.output_type).toUpperCase();
@@ -323,7 +332,15 @@ export default function EvalReportScreen() {
     }
 
     if (cats.report && ev.report_text) {
-      body += `<h3>Full Report</h3><div style="margin-top:8px">${mdToHtml(ev.report_text)}</div>`;
+      // Only include the report sections the coach left enabled. If the report
+      // has no detectable sections, fall back to the whole thing.
+      const secs = splitReportSections(ev.report_text);
+      const toggleable = secs.filter(sec => !sec.pinned);
+      const anyEnabled = toggleable.length === 0 || toggleable.some(sec => rToggles[sec.heading] !== false);
+      if (anyEnabled) {
+        const joined = joinReportSections(secs, rToggles) || ev.report_text;
+        body += `<h3>Full Report</h3><div style="margin-top:8px">${mdToHtml(joined)}</div>`;
+      }
     }
 
     if (cats.corrections && corrections.length) {
@@ -379,7 +396,8 @@ export default function EvalReportScreen() {
     setExporting(true);
     try {
       const allCats = { grades: true, flags: true, questions: true, report: true, corrections: corrections.length > 0 };
-      const html = buildHtml(allCats);
+      const allReport = Object.fromEntries(reportSections.map(sec => [sec.heading, true]));
+      const html = buildHtml(allCats, allReport);
       const { uri } = await Print.printToFileAsync({ html });
       const dest = FileSystem.cacheDirectory + safeFileName(buildFileName()) + '.pdf';
       await FileSystem.copyAsync({ from: uri, to: dest });
@@ -826,12 +844,14 @@ export default function EvalReportScreen() {
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>Export Report</Text>
             <Text style={styles.modalSub}>Choose what to include:</Text>
+            <ScrollView style={{ maxHeight: 360 }}>
             {EXPORT_CATEGORIES.filter(cat => {
               // Only show toggles for sections that actually exist in THIS report
               if (cat.key === 'grades') return ev?.overall_grade != null || ev?.pillar_grades != null;
               if (cat.key === 'flags') return (ev?.green_flags?.length ?? 0) > 0 || (ev?.watch_flags?.length ?? 0) > 0;
               if (cat.key === 'questions') return (ev?.key_questions?.length ?? 0) > 0;
-              if (cat.key === 'report') return !!ev?.report_text;
+              // The report is broken into its own per-section toggles below.
+              if (cat.key === 'report') return !!ev?.report_text && reportToggleSections.length <= 1;
               if (cat.key === 'corrections') return corrections.length > 0;
               return true;
             }).map(cat => (
@@ -845,6 +865,24 @@ export default function EvalReportScreen() {
                 />
               </View>
             ))}
+            {/* Report broken into its real sections, mirroring the share toggles. */}
+            {!!ev?.report_text && reportToggleSections.length > 1 && (
+              <>
+                <Text style={[styles.modalSub, { marginTop: 12, marginBottom: 2 }]}>Report sections</Text>
+                {reportToggleSections.map((sec, i) => (
+                  <View key={`report-${sec.heading}-${i}`} style={styles.toggleRow}>
+                    <Text style={[styles.toggleLabel, { flex: 1, marginRight: 8 }]} numberOfLines={1}>{sec.heading}</Text>
+                    <Switch
+                      value={reportToggles[sec.heading] !== false}
+                      onValueChange={v => setReportToggles(prev => ({ ...prev, [sec.heading]: v }))}
+                      trackColor={{ true: t.accent }}
+                      thumbColor="#fff"
+                    />
+                  </View>
+                ))}
+              </>
+            )}
+            </ScrollView>
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowExport(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>

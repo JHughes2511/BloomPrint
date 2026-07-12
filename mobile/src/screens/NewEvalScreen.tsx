@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { evalsAPI, gameEvalAPI, uploadFileStreamed } from '../api/client';
 import { OutputType } from '../types';
@@ -42,6 +43,8 @@ export default function NewEvalScreen() {
   const [videos, setVideos] = useState<{ uri: string; name: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState('');
+  const [importingNotes, setImportingNotes] = useState(false);
+  const [importingFocus, setImportingFocus] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
   // Box-score tracked games (loaded when Box Score is selected)
@@ -80,6 +83,39 @@ export default function NewEvalScreen() {
     if (!res.canceled && res.assets?.length) {
       const picked = res.assets.map((a, i) => ({ uri: a.uri, name: a.fileName ?? `film_${Date.now()}_${i}.mp4` }));
       setVideos(prev => [...prev, ...picked]);
+    }
+  };
+
+  const importDoc = async (
+    target: 'notes' | 'focus',
+    setBusy: (v: boolean) => void,
+    setValue: (fn: (prev: string) => string) => void,
+  ) => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'text/*', 'text/csv', 'text/markdown'],
+        copyToCacheDirectory: true,
+      });
+      if (res.canceled || !res.assets?.[0]) return;
+      const a = res.assets[0];
+      setBusy(true);
+      const { text } = await evalsAPI.extractDoc({
+        uri: a.uri,
+        name: a.name ?? 'document',
+        type: a.mimeType ?? 'application/octet-stream',
+      });
+      const clean = (text ?? '').trim();
+      if (!clean) {
+        Alert.alert('Nothing to import', 'No readable text was found in that file.');
+        return;
+      }
+      setValue(prev => (prev.trim() ? `${prev.trim()}\n\n${clean}` : clean));
+    } catch (e: any) {
+      Alert.alert('Import failed', e?.response?.data?.detail ?? 'Could not read that file.');
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -260,7 +296,19 @@ export default function NewEvalScreen() {
       </TouchableOpacity>
 
       {/* Notes */}
-      <Text style={styles.label}>Notes</Text>
+      <View style={styles.labelRow}>
+        <Text style={styles.label}>Notes</Text>
+        <TouchableOpacity
+          style={styles.importBtn}
+          onPress={() => importDoc('notes', setImportingNotes, setCoachNotes)}
+          disabled={importingNotes}
+        >
+          {importingNotes
+            ? <ActivityIndicator size="small" color={t.accent} />
+            : <><Ionicons name="document-attach-outline" size={13} color={t.accent} />
+              <Text style={styles.importBtnText}>Import</Text></>}
+        </TouchableOpacity>
+      </View>
       <VoiceTextInput
         style={[styles.input, { height: 100 }]}
         placeholder="e.g. Elite catch and shoot, plays at one pace, need to see more P&R midrange..."
@@ -272,7 +320,19 @@ export default function NewEvalScreen() {
       />
 
       {/* Focus */}
-      <Text style={styles.label}>Focus (optional)</Text>
+      <View style={styles.labelRow}>
+        <Text style={styles.label}>Focus (optional)</Text>
+        <TouchableOpacity
+          style={styles.importBtn}
+          onPress={() => importDoc('focus', setImportingFocus, setFocusPrompt)}
+          disabled={importingFocus}
+        >
+          {importingFocus
+            ? <ActivityIndicator size="small" color={t.accent} />
+            : <><Ionicons name="document-attach-outline" size={13} color={t.accent} />
+              <Text style={styles.importBtnText}>Import</Text></>}
+        </TouchableOpacity>
+      </View>
       <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
         Center the report on a person, matchup, action, or situation.
       </Text>
@@ -311,6 +371,13 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   title: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6 },
   sub: { color: t.muted, fontSize: 12, marginTop: 2 },
   label: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
+  labelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  importBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    borderWidth: 1, borderColor: t.accent, borderRadius: 999,
+    paddingHorizontal: 12, paddingVertical: 5, marginBottom: 8, minHeight: 28,
+  },
+  importBtnText: { color: t.accent, fontSize: 12, fontFamily: fonts[600] },
   typeChip: {
     borderWidth: 1, borderColor: t.line, borderRadius: 999,
     paddingHorizontal: 16, paddingVertical: 9, marginRight: 8,

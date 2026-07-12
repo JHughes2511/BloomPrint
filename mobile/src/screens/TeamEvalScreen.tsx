@@ -199,7 +199,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [showScoutingReport, setShowScoutingReport] = useState(false);
   const [gameReportText, setGameReportText] = useState<string | null>(null);
   const [generatingGameReport, setGeneratingGameReport] = useState(false);
-  const [exporting, setExporting] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportingCsv, setExportingCsv] = useState(false);
   const [gameStats, setGameStats] = useState<any[]>([]);
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [statsModalPlayer, setStatsModalPlayer] = useState<string | null>(null);
@@ -678,7 +679,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
   const exportDetailPdf = async () => {
     if (!summary || !detailGame) return;
-    setExporting(true);
+    setExportingPdf(true);
     try {
       const gameDate = new Date(detailGame.date);
       const dateStr = gameDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
@@ -876,12 +877,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     } catch (e: any) {
       Alert.alert('Export Error', e?.message ?? 'Could not export');
     }
-    setExporting(false);
+    setExportingPdf(false);
   };
 
   const exportDetailCsv = async () => {
     if (!summary || !detailGame) return;
-    setExporting(true);
+    setExportingCsv(true);
     try {
       const gameDate = new Date(detailGame.date);
       const dateStr = `${gameDate.getFullYear()}-${String(gameDate.getMonth() + 1).padStart(2, '0')}-${String(gameDate.getDate()).padStart(2, '0')}`;
@@ -965,7 +966,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     } catch (e: any) {
       Alert.alert('Export Error', e?.message ?? 'Could not export CSV');
     }
-    setExporting(false);
+    setExportingCsv(false);
   };
 
   // ── Opponent scout ────────────────────────────────────────────────────────────
@@ -1938,9 +1939,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             <TouchableOpacity
               style={[s.detailAction, { flex: 1, minWidth: '45%' }]}
               onPress={exportDetailPdf}
-              disabled={exporting}
+              disabled={exportingPdf}
             >
-              {exporting
+              {exportingPdf
                 ? <ActivityIndicator size="small" color={t.muted} />
                 : <><Ionicons name="document-outline" size={14} color={t.muted} />
                   <Text numberOfLines={1} style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>Export PDF</Text></>}
@@ -1948,9 +1949,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             <TouchableOpacity
               style={[s.detailAction, { flex: 1, minWidth: '45%' }]}
               onPress={exportDetailCsv}
-              disabled={exporting}
+              disabled={exportingCsv}
             >
-              {exporting
+              {exportingCsv
                 ? <ActivityIndicator size="small" color={t.muted} />
                 : <><Ionicons name="grid-outline" size={14} color={t.muted} />
                   <Text numberOfLines={1} style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>Export CSV</Text></>}
@@ -1963,7 +1964,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               {generatingGameReport
                 ? <ActivityIndicator size="small" color={t.accent} />
                 : <><Ionicons name="sparkles-outline" size={14} color={t.accent} />
-                  <Text numberOfLines={1} style={{ color: t.accent, fontSize: 11, fontFamily: fonts[600] }}>Game Report</Text></>}
+                  <Text numberOfLines={1} style={{ color: t.accent, fontSize: 11, fontFamily: fonts[600] }}>Generate Game Report</Text></>}
             </TouchableOpacity>
           </View>
           <GeneratingOverlay visible={generatingGameReport} label="Building the full game report…" />
