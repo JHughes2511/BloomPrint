@@ -39,8 +39,7 @@ export default function NewEvalScreen() {
   const [outputType, setOutputType] = useState<string>('player_eval');
   const [coachNotes, setCoachNotes] = useState('');
   const [focusPrompt, setFocusPrompt] = useState('');
-  const [videoUri, setVideoUri] = useState<string | null>(null);
-  const [videoName, setVideoName] = useState<string>('');
+  const [videos, setVideos] = useState<{ uri: string; name: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState('');
   const scrollRef = useRef<ScrollView>(null);
@@ -75,11 +74,12 @@ export default function NewEvalScreen() {
   const pickVideo = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+      allowsMultipleSelection: true,
       quality: 1,
     });
-    if (!res.canceled && res.assets[0]) {
-      setVideoUri(res.assets[0].uri);
-      setVideoName(res.assets[0].fileName ?? 'video.mp4');
+    if (!res.canceled && res.assets?.length) {
+      const picked = res.assets.map((a, i) => ({ uri: a.uri, name: a.fileName ?? `film_${Date.now()}_${i}.mp4` }));
+      setVideos(prev => [...prev, ...picked]);
     }
   };
 
@@ -95,17 +95,21 @@ export default function NewEvalScreen() {
       };
       if (wantsBoxScore && selectedGameIds.length) fields.game_ids = selectedGameIds.join(',');
 
-      let res: any;
-      if (videoUri) {
-        // Stream the film from disk (native) so large/long film doesn't OOM the
-        // JS multipart buffer ("Failed to grow buffer").
-        res = await uploadFileStreamed('/evaluations', videoUri, fields);
-      } else {
-        const form = new FormData();
-        Object.entries(fields).forEach(([k, v]) => form.append(k, v));
-        res = await evalsAPI.submit(form);
+      // Stream each film from disk (native) so large/multiple film doesn't OOM
+      // the JS multipart buffer, collecting upload tokens.
+      const tokens: string[] = [];
+      for (let i = 0; i < videos.length; i++) {
+        setProgress(`Uploading film ${i + 1} of ${videos.length}…`);
+        const up = await uploadFileStreamed('/evaluations/upload-video', videos[i].uri, {});
+        if (up?.token) tokens.push(up.token);
       }
-      // Video uploads process in the background and return a job id; poll for it.
+      if (tokens.length) fields.video_tokens = tokens.join(',');
+      setProgress(videos.length ? 'Analyzing film…' : '');
+
+      const form = new FormData();
+      Object.entries(fields).forEach(([k, v]) => form.append(k, v));
+      const res: any = await evalsAPI.submit(form);
+      // Video jobs return a job id; poll for it.
       const ev = res?.job_id ? await evalsAPI.awaitJob(res.job_id, setProgress) : res;
       if (!ev?.id) throw new Error('No evaluation returned');
       navigation.replace('EvalReport', { evalId: ev.id });
@@ -235,12 +239,23 @@ export default function NewEvalScreen() {
         </View>
       )}
 
-      {/* Video picker */}
-      <Text style={styles.label}>Video Clip (optional)</Text>
-      <TouchableOpacity style={[styles.videoPicker, videoUri && styles.videoPickerDone]} onPress={pickVideo}>
-        <Ionicons name={videoUri ? 'checkmark-circle' : 'cloud-upload-outline'} size={28} color={videoUri ? t.positive : t.muted} />
-        <Text style={[styles.videoPickerText, videoUri && { color: t.positive }]}>
-          {videoUri ? videoName : 'Tap to select video (optional)'}
+      {/* Video picker — multiple films allowed */}
+      <Text style={styles.label}>Film (optional)</Text>
+      {videos.map((v, i) => (
+        <View key={`${v.uri}-${i}`} style={[styles.videoPicker, styles.videoPickerDone, { justifyContent: 'space-between', marginBottom: 8 }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+            <Ionicons name="checkmark-circle" size={22} color={t.positive} />
+            <Text style={[styles.videoPickerText, { color: t.positive, flex: 1 }]} numberOfLines={1}>{v.name}</Text>
+          </View>
+          <TouchableOpacity onPress={() => setVideos(prev => prev.filter((_, j) => j !== i))} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Ionicons name="close-circle" size={20} color={t.muted2} />
+          </TouchableOpacity>
+        </View>
+      ))}
+      <TouchableOpacity style={styles.videoPicker} onPress={pickVideo}>
+        <Ionicons name="cloud-upload-outline" size={28} color={t.muted} />
+        <Text style={styles.videoPickerText}>
+          {videos.length ? 'Add more film' : 'Tap to select film (you can pick several)'}
         </Text>
       </TouchableOpacity>
 

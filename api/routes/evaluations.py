@@ -44,9 +44,9 @@ def _finalize_eval(db, *, player_id, coach, output_type, competition_level,
 def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_type: str,
                         competition_level: str, coach_notes: str | None, combined_focus: str,
                         interval_seconds: float, max_frames: int, include_audio: bool,
-                        video_path: str, player_name: str, coach_program: str, coach_weight: int):
-    """Background task: analyze a (potentially very long) film and create the
-    evaluation. The client polls the job for completion, so nothing times out."""
+                        video_paths: list[str], player_name: str, coach_program: str, coach_weight: int):
+    """Background task: analyze one or more films and create ONE evaluation. The
+    client polls the job for completion, so nothing times out."""
     import asyncio
     db = SessionLocal()
     try:
@@ -65,7 +65,7 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
                 pdb.close()
 
         result = asyncio.run(_handle_analyze_basketball_video({
-            "video_path": video_path,
+            "video_paths": video_paths,
             "output_type": output_type,
             "program_name": coach_program,
             "competition_level": competition_level,
@@ -82,8 +82,12 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
         eval_record = _finalize_eval(
             db, player_id=player_id, coach=coach, output_type=output_type,
             competition_level=competition_level, coach_notes=coach_notes,
-            video_path=video_path, report_text=report_text,
+            video_path=video_paths[0] if video_paths else None, report_text=report_text,
         )
+        # Keep every film in the player's video catalog, linked to this eval.
+        for vp in video_paths:
+            db.add(models.PlayerVideo(player_id=player_id, coach_id=coach_id,
+                                      video_path=vp, source_kind="eval", source_id=eval_record.id))
         job = db.get(models.GenerationJob, job_id)
         if job:
             job.status = "done"
@@ -99,6 +103,36 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
         db.close()
 
 
+@router.post("/upload-video")
+async def upload_eval_video(
+    video: UploadFile = File(...),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Stream one film to disk (native upload) and return a token. The eval is
+    then submitted with a list of tokens so several films can build one eval."""
+    from uuid import uuid4
+    suffix = Path(video.filename or "video.mp4").suffix
+    name = f"evalvid_{coach.id}_{uuid4().hex}{suffix}"
+    dest = UPLOAD_DIR / name
+    with dest.open("wb") as f:
+        shutil.copyfileobj(video.file, f)
+    return {"token": name}
+
+
+def _tokens_to_paths(tokens: str | None) -> list[str]:
+    """Validate upload tokens (filenames) and resolve to on-disk paths, rejecting
+    anything with a path separator."""
+    paths: list[str] = []
+    for tok in (tokens or "").split(","):
+        tok = tok.strip()
+        if not tok or "/" in tok or "\\" in tok or ".." in tok:
+            continue
+        p = UPLOAD_DIR / tok
+        if p.exists():
+            paths.append(str(p))
+    return paths
+
+
 @router.post("")
 async def submit_evaluation(
     background_tasks: BackgroundTasks,
@@ -111,6 +145,7 @@ async def submit_evaluation(
     max_frames: int = Form(10),
     include_audio: bool = Form(False),
     game_ids: str | None = Form(None),   # comma-separated tracked game ids (box score)
+    video_tokens: str | None = Form(None),  # comma-separated tokens from /upload-video
     video: UploadFile | None = File(None),
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
@@ -145,14 +180,18 @@ async def submit_evaluation(
             combined_focus += player_tracked_stats_block(db, coach.id, player.name, gid_list)
     combined_focus += system_profile_block(coach)
 
+    # Collect film: pre-uploaded tokens (multiple) and/or one direct file (legacy).
+    video_paths = _tokens_to_paths(video_tokens)
     if video and video.filename:
-        # Save uploaded video to disk, then process in the BACKGROUND so a long
-        # film doesn't block/time out the request. The client polls the job.
         suffix = Path(video.filename or "video.mp4").suffix
         dest = UPLOAD_DIR / f"eval_{player_id}_{coach.id}{suffix}"
         with dest.open("wb") as f:
             shutil.copyfileobj(video.file, f)
+        video_paths.append(str(dest))
 
+    if video_paths:
+        # Process in the BACKGROUND so long/multiple film doesn't time out; the
+        # client polls the job.
         job = models.GenerationJob(coach_id=coach.id, kind="eval", status="processing")
         db.add(job)
         db.commit()
@@ -162,7 +201,7 @@ async def submit_evaluation(
             player_id=player_id, coach_id=coach.id, output_type=output_type,
             competition_level=competition_level, coach_notes=coach_notes,
             combined_focus=combined_focus, interval_seconds=interval_seconds,
-            max_frames=max_frames, include_audio=include_audio, video_path=str(dest),
+            max_frames=max_frames, include_audio=include_audio, video_paths=video_paths,
             player_name=player.name, coach_program=coach.program_name, coach_weight=coach.weight,
         )
         return {"job_id": job.id, "status": "processing"}

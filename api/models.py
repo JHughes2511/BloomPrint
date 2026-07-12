@@ -112,6 +112,21 @@ class Evaluation(Base):
     corrections      = relationship("Correction", back_populates="evaluation")
 
 
+class PlayerVideo(Base):
+    """A film uploaded for a player, kept for the player-profile video catalog.
+    Links back to the report/eval/training it helped create so a coach can
+    watch it and see what it produced."""
+    __tablename__ = "player_videos"
+    id          = Column(Integer, primary_key=True, index=True)
+    player_id   = Column(Integer, ForeignKey("players.id"), nullable=False)
+    coach_id    = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    video_path  = Column(String, nullable=False)
+    source_kind = Column(String, default="eval")   # eval / training / game_report
+    source_id   = Column(Integer, nullable=True)    # id of the eval/training/report
+    label       = Column(String, nullable=True)     # optional display label
+    created_at  = Column(DateTime, default=datetime.utcnow)
+
+
 class Correction(Base):
     __tablename__ = "corrections"
 

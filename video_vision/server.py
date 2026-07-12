@@ -534,7 +534,11 @@ async def _handle_analyze_video(args: dict[str, Any]) -> list[types.TextContent]
 
 
 async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.TextContent]:
-    video_path = args["video_path"]
+    # Accept one video ("video_path") OR several ("video_paths"); multiple films
+    # are combined into a single frame set so ONE report covers all of them.
+    video_paths = args.get("video_paths") or ([args.get("video_path")] if args.get("video_path") else [])
+    video_paths = [p for p in video_paths if p and Path(p).exists()]
+    video_path = video_paths[0] if video_paths else args.get("video_path")
     output_type = args["output_type"]
     program = args.get("program_name", "SEED Academy")
     level = args.get("competition_level", "16U AAU")
@@ -546,7 +550,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     include_audio = bool(args.get("include_audio", True))
     whisper_model = args.get("whisper_model", "base")
 
-    if not Path(video_path).exists():
+    if not video_paths:
         return [types.TextContent(type="text", text=f"Error: file not found: {video_path}")]
 
     try:
@@ -563,12 +567,18 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     CHUNK = 40
     TOTAL_CAP = 400
     progress = args.get("_progress")   # optional callable(done, total, label)
-    frames = _extract_frames_interval(video_path, interval, TOTAL_CAP)
+    # Sample frames from every film, sharing the total-frame budget across them.
+    per_cap = max(20, TOTAL_CAP // max(len(video_paths), 1))
+    frames = []
+    for p in video_paths:
+        frames += _extract_frames_interval(p, interval, per_cap)
+    frames = frames[:TOTAL_CAP]
     if not frames:
         return [types.TextContent(type="text", text="Error: no frames could be extracted.")]
 
     transcript_text = ""
-    if include_audio:
+    # Audio transcription only for a single film (keeps multi-film fast).
+    if include_audio and len(video_paths) == 1:
         try:
             result = _transcribe(video_path, whisper_model)
             transcript_text = result.get("text", "").strip()
