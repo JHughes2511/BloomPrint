@@ -327,6 +327,26 @@ async def generate_game_report(
             label_str = "My Team Film" if clip.label == "my_team" else "Opponent Film"
             film_context += f"\n{label_str.upper()}:\n{clip.analysis_text}\n"
 
+    # Auto-include what we've already "remembered" about this opponent — the
+    # coach's opponent notes and their most recent scouting report on them — so
+    # the packet builds on the full knowledge base, not just this game's inputs.
+    remembered = ""
+    if opp_name:
+        onotes = db.query(models.OpponentNote).filter_by(coach_id=coach.id, opponent_name=opp_name).all()
+        if onotes:
+            remembered += "\nREMEMBERED OPPONENT NOTES:\n" + "\n".join(f"- {n.note_text}" for n in onotes)
+        opp_games = (
+            db.query(models.GameSession)
+            .filter_by(opponent_name=opp_name)
+            .order_by(models.GameSession.id.desc())
+            .all()
+        )
+        for g in opp_games:
+            row = db.query(models.GameScoutingReport).filter_by(game_id=g.id, coach_id=coach.id).first()
+            if row and row.report_text:
+                remembered += f"\nPRIOR SCOUTING REPORT ON {opp_name}:\n{row.report_text}\n"
+                break
+
     # Assemble prompt
     from video_vision.bim import describe_output_type, comprehensive_directive
     sections = [
@@ -344,6 +364,8 @@ async def generate_game_report(
         sections.append(f"\nBOX SCORE / STATS:\n{gr.box_score}")
     if gr.scouting_notes:
         sections.append(f"\nSCOUTING NOTES:\n{gr.scouting_notes}")
+    if remembered:
+        sections.append(f"\nKNOWLEDGE BASE ON {opp_name} (use as reference):{remembered}")
     if gr.focus_prompt:
         sections.append(f"\nCOACH FOCUS:\n{gr.focus_prompt}")
 
