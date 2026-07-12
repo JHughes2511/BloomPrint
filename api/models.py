@@ -580,6 +580,32 @@ class GameScoutingCorrection(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class GameFullReport(Base):
+    """A coach's OWN full GAME REPORT for a game (our team + opponent combined),
+    distinct from the opponent-only scouting report. Per (game, coach); the coach
+    can layer context on it, regenerate, share, and it feeds game packets."""
+    __tablename__ = "game_full_reports"
+    id = Column(Integer, primary_key=True, index=True)
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    report_text = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class GameReportCorrection(Base):
+    """Coach-added context/adjustments layered on top of the stat-derived game
+    report. Apply & Regenerate rebuilds the report from the box score PLUS these
+    corrections — the qualitative detail the stats can't capture."""
+    __tablename__ = "game_report_corrections"
+    id = Column(Integer, primary_key=True, index=True)
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    correction = Column(Text, nullable=False)
+    applied = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class GamePlayerStat(Base):
     __tablename__ = "game_player_stats"
     id = Column(Integer, primary_key=True, index=True)

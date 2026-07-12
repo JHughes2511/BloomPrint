@@ -42,7 +42,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 type ReportItem = {
   id: number;
-  kind: 'eval' | 'team' | 'game' | 'training' | 'scout';
+  kind: 'eval' | 'team' | 'game' | 'training' | 'scout' | 'gamereport';
   player_name?: string;
   output_type: string;
   overall_grade?: number | null;
@@ -314,6 +314,19 @@ export default function RecentScreen() {
           created_at: g.scouting_updated_at || g.date || g.created_at,
           report_text: String(g.ai_scouting_report).replace(/\s*END OF REPORT\.?\s*$/i, '').trimEnd(),
         }));
+      // Full game reports: games where I have MY OWN persisted game report
+      // (our team + opponent). Per-coach scoped by the backend like scouting.
+      const gameReportItems: ReportItem[] = (gameSessions ?? [])
+        .filter((g: any) => g.ai_game_report)
+        .map((g: any) => ({
+          id: g.id,
+          kind: 'gamereport' as const,
+          player_name: g.opponent_name ? `vs ${g.opponent_name}` : (g.title || 'Game Report'),
+          output_type: 'game_report',
+          overall_grade: null,
+          created_at: g.game_report_updated_at || g.date || g.created_at,
+          report_text: String(g.ai_game_report).replace(/\s*END OF REPORT\.?\s*$/i, '').trimEnd(),
+        }));
       const texts: Record<number, string> = {};
       teamReports.forEach((tr: any) => { if (tr.report_text) texts[tr.id] = tr.report_text; });
       setTeamReportTexts(texts);
@@ -325,7 +338,7 @@ export default function RecentScreen() {
       // share functions. Regenerate shows only when the sharer allowed it.
       const SHARE_KIND: Record<string, ReportItem['kind']> = {
         eval: 'eval', team_report: 'team', team_training: 'team',
-        game: 'game', game_session: 'scout', training: 'training',
+        game: 'game', game_session: 'scout', game_report: 'gamereport', training: 'training',
       };
       const sharedItems: ReportItem[] = (sharedInbox ?? []).map((sr: any) => {
         const kind = SHARE_KIND[sr.report_type] ?? 'eval';
@@ -358,7 +371,7 @@ export default function RecentScreen() {
           updatedFrom[`${k}:${sr.updated_report_id}`] = sr;
         }
       });
-      [...evalItems, ...teamItems, ...gameItems, ...trainingItems, ...scoutItems].forEach((it: ReportItem) => {
+      [...evalItems, ...teamItems, ...gameItems, ...trainingItems, ...scoutItems, ...gameReportItems].forEach((it: ReportItem) => {
         const sr = updatedFrom[`${it.kind}:${it.id}`];
         if (sr) {
           it.updated_from = sr.sender_name || 'a coach';
@@ -368,7 +381,7 @@ export default function RecentScreen() {
         }
       });
 
-      const combined = [...evalItems, ...teamItems, ...gameItems, ...trainingItems, ...scoutItems, ...sharedItems].sort(
+      const combined = [...evalItems, ...teamItems, ...gameItems, ...trainingItems, ...scoutItems, ...gameReportItems, ...sharedItems].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       setItems(combined);
@@ -381,7 +394,9 @@ export default function RecentScreen() {
 
   const searchTerm = searchQuery.trim().toLowerCase();
   const filtered = items.filter(item => {
-    if (filter !== 'all' && item.kind !== filter) return false;
+    // The "Game Reports" tab groups packet game reports and per-game reports.
+    const matchesFilter = item.kind === filter || (filter === 'game' && item.kind === 'gamereport');
+    if (filter !== 'all' && !matchesFilter) return false;
     if (!searchTerm) return true;
     const kindLabel =
       item.kind === 'game' ? 'Game Report Packet' :
@@ -423,6 +438,13 @@ export default function RecentScreen() {
       });
       return;
     }
+    if (item.kind === 'gamereport') {
+      setGameReportModal({
+        title: 'Game Report', subject: item.player_name, text: item.report_text ?? '',
+        reportType: 'game_report', reportId: item.id, outputType: 'game_report',
+      });
+      return;
+    }
     if (item.kind === 'training') {
       openModal({ id: item.id, kind: 'training', text: item.program_text ?? '', outputType: 'training_program', playerName: item.player_name });
       return;
@@ -460,7 +482,7 @@ export default function RecentScreen() {
 
   const handleDelete = (item: ReportItem) => {
     if (item.shared) return; // a report shared with me isn't mine to delete
-    if (item.kind === 'training' || item.kind === 'scout') return; // not deletable from recents
+    if (item.kind === 'training' || item.kind === 'scout' || item.kind === 'gamereport') return; // not deletable from recents
     Alert.alert('Delete Report', 'Permanently delete this report?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: async () => {
@@ -752,6 +774,7 @@ export default function RecentScreen() {
                     <Ionicons
                       name={
                         item.kind === 'game' ? 'clipboard' :
+                        item.kind === 'gamereport' ? 'sparkles' :
                         item.kind === 'team' ? 'people' :
                         item.kind === 'training' ? 'barbell' :
                         'person'
@@ -775,11 +798,13 @@ export default function RecentScreen() {
                         item.kind === 'team' && { color: t.brown },
                         item.kind === 'game' && { color: t.accent },
                         item.kind === 'scout' && { color: t.accent },
+                        item.kind === 'gamereport' && { color: t.accent },
                         item.kind === 'training' && { color: t.positive },
                       ]}
                     >
                       {item.kind === 'game' ? 'Game Report Packet' :
                        item.kind === 'scout' ? 'Scout Report' :
+                       item.kind === 'gamereport' ? 'Game Report' :
                        item.kind === 'training' ? 'Training Program' :
                        (TYPE_LABELS[item.output_type] ?? outputTypeLabel(item.output_type))}
                     </Text>
@@ -800,14 +825,14 @@ export default function RecentScreen() {
                 {/* Action buttons row — shown for all card types */}
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10, width: '100%' }}>
                   {/* Game-specific buttons */}
-                  {(item.kind === 'game' || item.kind === 'scout') && item.report_text ? (
+                  {(item.kind === 'game' || item.kind === 'scout' || item.kind === 'gamereport') && item.report_text ? (
                     <TouchableOpacity
                       style={styles.gameActionBtn}
                       onPress={() => setGameReportModal({
                         title: item.kind === 'scout' ? 'Scouting Report' : 'Game Report',
                         subject: item.player_name, text: item.report_text!,
-                        reportType: item.kind === 'scout' ? 'game_session' : 'game',
-                        reportId: item.id, outputType: item.kind === 'scout' ? 'scouting_report' : (item.output_type ?? 'coaching_report'),
+                        reportType: item.kind === 'scout' ? 'game_session' : item.kind === 'gamereport' ? 'game_report' : 'game',
+                        reportId: item.id, outputType: item.kind === 'scout' ? 'scouting_report' : item.kind === 'gamereport' ? 'game_report' : (item.output_type ?? 'coaching_report'),
                       })}
                     >
                       <Ionicons name="document-text-outline" size={13} color={t.accent} />
@@ -824,8 +849,8 @@ export default function RecentScreen() {
                     </TouchableOpacity>
                   )}
 
-                  {/* Send to Player — available for eval, team, training; hidden for game/scout */}
-                  {item.kind !== 'game' && item.kind !== 'scout' && (
+                  {/* Send to Player — available for eval, team, training; hidden for game/scout/gamereport */}
+                  {item.kind !== 'game' && item.kind !== 'scout' && item.kind !== 'gamereport' && (
                     <TouchableOpacity
                       style={[styles.gameActionBtn, { borderColor: t.positiveSoft }]}
                       onPress={() => {
@@ -867,10 +892,12 @@ export default function RecentScreen() {
                                          item.kind === 'eval' ? 'eval' :
                                          item.kind === 'team' ? 'team_report' :
                                          item.kind === 'scout' ? 'game_session' :
+                                         item.kind === 'gamereport' ? 'game_report' :
                                          item.kind === 'game' ? 'game' :
                                          'training';
                       const label = item.kind === 'training' ? 'Training Program' :
                                     item.kind === 'scout' ? 'Scout Report' :
+                                    item.kind === 'gamereport' ? 'Game Report' :
                                     item.kind === 'game' ? 'Game Report' :
                                     item.kind === 'team' ? 'Team Report' : 'Player Eval';
                       const fullText = item.program_text ?? item.report_text ?? (teamReportTexts[item.id] ?? '');

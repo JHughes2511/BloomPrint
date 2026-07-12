@@ -20,6 +20,7 @@ import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { formatForLevel, periodLabel, weightBucket, formatClock, type GameFormat } from '../utils/gameClock';
 import WhiteboardModal from '../components/WhiteboardModal';
 import ScoutContextPanel from '../components/ScoutContextPanel';
+import GameReportPanel from '../components/GameReportPanel';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeProvider';
@@ -116,7 +117,7 @@ function quarterMultiplier(q: number): number {
 
 // ── Main Screen ───────────────────────────────────────────────────────────────
 
-type ViewKey = 'dashboard' | 'games' | 'live' | 'detail' | 'scout';
+type ViewKey = 'dashboard' | 'games' | 'live' | 'detail' | 'scout' | 'gamereport';
 
 export default function TeamEvalScreen({ route, navigation }: any) {
   const { coach } = useAuth();
@@ -197,8 +198,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [gradeSearch, setGradeSearch] = useState('');
   const [generatingReport, setGeneratingReport] = useState(false);
   const [showScoutingReport, setShowScoutingReport] = useState(false);
-  const [gameReportText, setGameReportText] = useState<string | null>(null);
-  const [generatingGameReport, setGeneratingGameReport] = useState(false);
+  const [gameReportGame, setGameReportGame] = useState<any>(null);
+  const [loadingGameReport, setLoadingGameReport] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportingCsv, setExportingCsv] = useState(false);
   const [gameStats, setGameStats] = useState<any[]>([]);
@@ -536,7 +537,6 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setActiveView('detail');
     setExpandedPlayer(null);
     setShowScoutingReport(false);
-    setGameReportText(null);
     setSummary(null);
     setGameStats([]);
     setGameLineup([]);
@@ -665,16 +665,19 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setGeneratingReport(false);
   };
 
-  const generateGameReport = async () => {
-    if (!detailGame) return;
-    setGeneratingGameReport(true);
+  const openGameReport = async (game: any) => {
+    if (!game) return;
+    setGameReportGame(game);
+    setActiveView('gamereport');
+    setLoadingGameReport(true);
     try {
-      const result = await gameEvalAPI.generateGameReport(detailGame.id);
-      setGameReportText(result.report_text);
-    } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate game report');
+      // Pull the freshest session so we have this coach's persisted game report.
+      const fresh = await gameEvalAPI.getSession(game.id);
+      setGameReportGame(fresh);
+    } catch {
+      // keep the game we already have
     }
-    setGeneratingGameReport(false);
+    setLoadingGameReport(false);
   };
 
   const exportDetailPdf = async () => {
@@ -1044,14 +1047,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       <View style={s.topNav}>
         <Text style={s.screenTitle}>Team Grade</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {(['dashboard', 'games', 'scout'] as const).map(v => (
+          {(['dashboard', 'games', 'scout', 'gamereport'] as const).map(v => (
             <TouchableOpacity
               key={v}
               style={[s.navBtn, activeView === v && s.navBtnActive]}
-              onPress={() => setActiveView(v)}
+              onPress={() => { if (v === 'gamereport') setGameReportGame(null); setActiveView(v); }}
             >
               <Text style={[s.navBtnText, activeView === v && s.navBtnTextActive]}>
-                {v === 'dashboard' ? 'Dashboard' : v === 'games' ? 'Games' : 'Scout'}
+                {v === 'dashboard' ? 'Dashboard' : v === 'games' ? 'Games' : v === 'scout' ? 'Scout' : 'Game Report'}
               </Text>
             </TouchableOpacity>
           ))}
@@ -1958,16 +1961,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </TouchableOpacity>
             <TouchableOpacity
               style={[s.detailAction, { flex: 1, minWidth: '45%', borderColor: t.accent }]}
-              onPress={generateGameReport}
-              disabled={generatingGameReport}
+              onPress={() => openGameReport(detailGame)}
             >
-              {generatingGameReport
-                ? <ActivityIndicator size="small" color={t.accent} />
-                : <><Ionicons name="sparkles-outline" size={14} color={t.accent} />
-                  <Text numberOfLines={1} style={{ color: t.accent, fontSize: 11, fontFamily: fonts[600] }}>Generate Game Report</Text></>}
+              <Ionicons name="sparkles-outline" size={14} color={t.accent} />
+              <Text numberOfLines={1} style={{ color: t.accent, fontSize: 11, fontFamily: fonts[600] }}>Generate Game Report</Text>
             </TouchableOpacity>
           </View>
-          <GeneratingOverlay visible={generatingGameReport} label="Building the full game report…" />
 
           {/* Live entry shortcut if in_progress — owner only */}
           {detailGame.status === 'in_progress' && isOwnedGame(detailGame) && (
@@ -1986,14 +1985,6 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               <Text style={s.cardLabel}>SCOUTING REPORT</Text>
               <View style={{ marginTop: 8 }}>
                 {renderReport(detailGame.ai_scouting_report ?? '', { heading: t.ink, body: t.inkSoft })}
-              </View>
-            </View>
-          )}
-          {gameReportText && (
-            <View style={s.card}>
-              <Text style={s.cardLabel}>GAME REPORT</Text>
-              <View style={{ marginTop: 8 }}>
-                {renderReport(gameReportText, { heading: t.ink, body: t.inkSoft })}
               </View>
             </View>
           )}
@@ -2129,6 +2120,94 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   )}
                 </>
               ) : null}
+            </>
+          )}
+        </KeyboardAwareScrollView>
+      )}
+
+      {/* Full Game Report — our team + opponent, with add-context (like Scout) */}
+      {activeView === 'gamereport' && (
+        <KeyboardAwareScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }}>
+          {!gameReportGame ? (
+            <>
+              <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900], marginHorizontal: 16, marginBottom: 4 }}>Game Report</Text>
+              <Text style={{ color: t.muted2, fontSize: 13, marginHorizontal: 16, marginBottom: 12 }}>
+                Pick a game to build its full report — your team's performance and the opponent, combined.
+              </Text>
+              {sessions.length === 0 && (
+                <Text style={{ color: t.muted2, fontSize: 13, marginHorizontal: 16 }}>No games yet.</Text>
+              )}
+              {sessions.map((g: any) => {
+                const won = g.our_score != null && g.opponent_score != null && g.our_score > g.opponent_score;
+                return (
+                  <TouchableOpacity key={g.id} style={s.gameCard} onPress={() => openGameReport(g)}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[700] }}>vs {g.opponent_name}</Text>
+                      <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>
+                        {g.date ? new Date(g.date).toLocaleDateString() : ''}
+                        {g.our_score != null ? `  ·  ${g.our_score}-${g.opponent_score}` : ''}
+                        {g.ai_game_report ? '  ·  Report ready' : ''}
+                      </Text>
+                    </View>
+                    {g.our_score != null && (
+                      <View style={[s.wlBadge, { backgroundColor: won ? t.positiveSoft : t.negativeSoft }]}>
+                        <Text style={[s.wlText, { color: won ? t.positive : t.negative }]}>{won ? 'W' : 'L'}</Text>
+                      </View>
+                    )}
+                    <Ionicons name="chevron-forward" size={18} color={t.muted} />
+                  </TouchableOpacity>
+                );
+              })}
+            </>
+          ) : (
+            <>
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginHorizontal: 16, marginBottom: 8 }}
+                onPress={() => setGameReportGame(null)}
+              >
+                <Ionicons name="arrow-back" size={18} color={t.muted} />
+                <Text style={{ color: t.muted, fontSize: 14 }}>All Games</Text>
+              </TouchableOpacity>
+
+              <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900], marginHorizontal: 16, marginBottom: 2 }}>
+                vs {gameReportGame.opponent_name}
+              </Text>
+              <Text style={{ color: t.muted2, fontSize: 13, marginHorizontal: 16, marginBottom: 12 }}>
+                {gameReportGame.date ? new Date(gameReportGame.date).toLocaleDateString() : ''}
+                {gameReportGame.our_score != null ? `  ·  ${gameReportGame.our_score}-${gameReportGame.opponent_score}` : ''}
+              </Text>
+
+              {loadingGameReport ? (
+                <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />
+              ) : (
+                <>
+                  {/* Add context + generate / regenerate */}
+                  <View style={s.card}>
+                    <Text style={s.cardLabel}>GAME REPORT CONTEXT</Text>
+                    <View style={{ marginTop: 8 }}>
+                      <GameReportPanel
+                        gameId={gameReportGame.id}
+                        opponentName={gameReportGame.opponent_name}
+                        hasReport={!!gameReportGame.ai_game_report}
+                        onRegenerated={(text) => setGameReportGame((prev: any) => ({ ...prev, ai_game_report: text }))}
+                      />
+                    </View>
+                  </View>
+
+                  {gameReportGame.ai_game_report ? (
+                    <View style={s.card}>
+                      <Text style={s.cardLabel}>GAME REPORT</Text>
+                      <View style={{ marginTop: 8 }}>
+                        {renderReport(gameReportGame.ai_game_report, { heading: t.ink, body: t.inkSoft })}
+                      </View>
+                    </View>
+                  ) : (
+                    <Text style={{ color: t.muted2, fontSize: 13, marginHorizontal: 16 }}>
+                      No report yet — add any context above and tap Generate Game Report.
+                    </Text>
+                  )}
+                </>
+              )}
             </>
           )}
         </KeyboardAwareScrollView>

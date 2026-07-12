@@ -257,6 +257,28 @@ def _upsert_scouting(db: Session, coach: models.Coach, game: models.GameSession,
         game.ai_scouting_report = text
 
 
+def _coach_game_report(db: Session, coach: models.Coach, game: models.GameSession) -> str | None:
+    """The coach's OWN full game report for a game (per-coach, private)."""
+    row = (
+        db.query(models.GameFullReport)
+        .filter_by(game_id=game.id, coach_id=coach.id)
+        .first()
+    )
+    return row.report_text if row and row.report_text else None
+
+
+def _upsert_game_report(db: Session, coach: models.Coach, game: models.GameSession, text: str) -> None:
+    row = (
+        db.query(models.GameFullReport)
+        .filter_by(game_id=game.id, coach_id=coach.id)
+        .first()
+    )
+    if row:
+        row.report_text = text
+    else:
+        db.add(models.GameFullReport(game_id=game.id, coach_id=coach.id, report_text=text))
+
+
 def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession) -> schemas.GameSessionOut:
     """Serialize a game with the CURRENT coach's own scouting report. Staff see
     the game's stats/grades but only their own scouting write-up (empty until
@@ -270,6 +292,14 @@ def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession) -
             .first()
         )
         out.scouting_updated_at = (row.updated_at or row.created_at) if row else game.date
+    out.ai_game_report = _coach_game_report(db, coach, game)
+    if out.ai_game_report:
+        grow = (
+            db.query(models.GameFullReport)
+            .filter_by(game_id=game.id, coach_id=coach.id)
+            .first()
+        )
+        out.game_report_updated_at = (grow.updated_at or grow.created_at) if grow else game.date
     return out
 
 
@@ -907,16 +937,11 @@ async def generate_ai_scouting(
     return {"ai_scouting_report": text}
 
 
-@router.post("/sessions/{game_id}/game-report")
-async def generate_game_report(
-    game_id: int,
-    db: Session = Depends(get_db),
-    coach: models.Coach = Depends(get_current_coach),
-):
-    """A full GAME REPORT — our team's performance AND the opponent, combined
-    (vs the Scout Opponent report which is opponent-only)."""
+async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSession, corrections: list[str]) -> str:
+    """Build + run the full GAME REPORT (our team + opponent) from the box score
+    plus opponent notes and any coach-added context, persist it for this coach,
+    and return the text. Mirrors _run_scouting but covers both sides."""
     import os
-    game = _get_game_readable(db, game_id, coach)
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY is not configured.")
 
@@ -942,12 +967,15 @@ async def generate_game_report(
         score_info = f"Final: {game.our_score}-{game.opponent_score} ({res})"
 
     notes = db.query(models.OpponentNote).filter_by(coach_id=coach.id, opponent_name=game.opponent_name).all()
-    corr = db.query(models.GameScoutingCorrection).filter_by(game_id=game.id, coach_id=coach.id).all()
     context = ""
     if notes:
         context += "\n\nCOACH NOTES ON THE OPPONENT:\n" + "\n".join(f"- {n.note_text}" for n in notes)
-    if corr:
-        context += "\n\nADDED CONTEXT (weave in):\n" + "\n".join(f"- {c.correction}" for c in corr)
+    if corrections:
+        context += (
+            "\n\nCOACH CONTEXT & ADJUSTMENTS (qualitative detail the box score can't capture — "
+            "you MUST weave ALL of these into the analysis):\n"
+            + "\n".join(f"- {c}" for c in corrections if c and c.strip())
+        )
 
     prompt = (
         f"You are the BloomPrint Basketball Intelligence Model. Generate a full GAME REPORT for "
@@ -974,7 +1002,113 @@ async def generate_game_report(
         raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
-    return {"report_text": text}
+    _upsert_game_report(db, coach, game, text)
+    db.commit()
+    return text
+
+
+@router.post("/sessions/{game_id}/game-report")
+async def generate_game_report(
+    game_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """A full GAME REPORT — our team's performance AND the opponent, combined
+    (vs the Scout Opponent report which is opponent-only). Persisted per-coach so
+    it appears in Recents and feeds game packets."""
+    game = _get_game_readable(db, game_id, coach)
+    all_corr = (
+        db.query(models.GameReportCorrection)
+        .filter_by(game_id=game.id, coach_id=coach.id)
+        .order_by(models.GameReportCorrection.id)
+        .all()
+    )
+    text = await _run_game_report(db, coach, game, [c.correction for c in all_corr])
+    return {"report_text": text, "ai_game_report": text}
+
+
+@router.get("/sessions/{game_id}/game-report-corrections")
+def list_game_report_corrections(
+    game_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    _get_game_readable(db, game_id, coach)
+    rows = (
+        db.query(models.GameReportCorrection)
+        .filter_by(game_id=game_id, coach_id=coach.id)
+        .order_by(models.GameReportCorrection.id)
+        .all()
+    )
+    return [{"id": r.id, "correction": r.correction, "applied": r.applied, "created_at": r.created_at} for r in rows]
+
+
+@router.post("/sessions/{game_id}/game-report-corrections")
+def add_game_report_correction(
+    game_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    _get_game_readable(db, game_id, coach)
+    text = (body.get("text") or body.get("correction") or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Correction text required")
+    row = models.GameReportCorrection(game_id=game_id, coach_id=coach.id, correction=text)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return {"id": row.id, "correction": row.correction, "applied": row.applied}
+
+
+@router.delete("/game-report-corrections/{correction_id}")
+def delete_game_report_correction(
+    correction_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    row = db.get(models.GameReportCorrection, correction_id)
+    if not row or row.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Correction not found")
+    if row.applied:
+        raise HTTPException(status_code=400, detail="Already applied — can't delete")
+    db.delete(row)
+    db.commit()
+    return {"ok": True}
+
+
+@router.post("/sessions/{game_id}/apply-game-report-corrections")
+async def apply_game_report_corrections(
+    game_id: int,
+    body: dict = None,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Regenerate the game report from the box score PLUS all of the coach's
+    added context, then mark those corrections applied."""
+    game = _get_game_readable(db, game_id, coach)
+    if body:
+        feedback = (body.get("feedback") or body.get("text") or "").strip()
+        if feedback:
+            db.add(models.GameReportCorrection(game_id=game_id, coach_id=coach.id, correction=feedback))
+            db.commit()
+    pending = (
+        db.query(models.GameReportCorrection)
+        .filter_by(game_id=game_id, coach_id=coach.id, applied=False)
+        .order_by(models.GameReportCorrection.id)
+        .all()
+    )
+    all_corr = (
+        db.query(models.GameReportCorrection)
+        .filter_by(game_id=game_id, coach_id=coach.id)
+        .order_by(models.GameReportCorrection.id)
+        .all()
+    )
+    text = await _run_game_report(db, coach, game, [c.correction for c in all_corr])
+    for p in pending:
+        p.applied = True
+    db.commit()
+    return {"ai_game_report": text}
 
 
 @router.get("/sessions/{game_id}/scouting-corrections")

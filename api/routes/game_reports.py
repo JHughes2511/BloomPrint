@@ -343,10 +343,19 @@ async def generate_game_report(
             .order_by(models.GameSession.id.desc())
             .all()
         )
+        scout_added = game_added = False
         for g in opp_games:
-            row = db.query(models.GameScoutingReport).filter_by(game_id=g.id, coach_id=coach.id).first()
-            if row and row.report_text:
-                remembered += f"\nPRIOR SCOUTING REPORT ON {opp_name}:\n{row.report_text}\n"
+            if not scout_added:
+                row = db.query(models.GameScoutingReport).filter_by(game_id=g.id, coach_id=coach.id).first()
+                if row and row.report_text:
+                    remembered += f"\nPRIOR SCOUTING REPORT ON {opp_name}:\n{row.report_text}\n"
+                    scout_added = True
+            if not game_added:
+                grow = db.query(models.GameFullReport).filter_by(game_id=g.id, coach_id=coach.id).first()
+                if grow and grow.report_text:
+                    remembered += f"\nPRIOR GAME REPORT vs {opp_name}:\n{grow.report_text}\n"
+                    game_added = True
+            if scout_added and game_added:
                 break
 
     # Assemble prompt

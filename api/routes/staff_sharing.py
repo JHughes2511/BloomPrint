@@ -54,6 +54,20 @@ def _resolve_report_text(report_type: str, report_id: int, db: Session, sender_i
             lines.append("AI SCOUTING REPORT:")
             lines.append(scout_text)
         return "\n".join(lines)
+    if report_type == "game_report":
+        session = db.get(models.GameSession, report_id)
+        if not session:
+            return None
+        text = None
+        if sender_id is not None:
+            row = (
+                db.query(models.GameFullReport)
+                .filter_by(game_id=session.id, coach_id=sender_id)
+                .first()
+            )
+            if row and row.report_text:
+                text = row.report_text
+        return text
     return None
 
 
@@ -82,6 +96,9 @@ def _report_meta(report_type: str, report_id: int, db: Session) -> tuple[str | N
     if report_type == "game_session":
         gs = db.get(models.GameSession, report_id)
         return ((f"vs {gs.opponent_name}" if gs else None), "scouting_report", None)
+    if report_type == "game_report":
+        gs = db.get(models.GameSession, report_id)
+        return ((f"vs {gs.opponent_name}" if gs else None), "game_report", None)
     return None, None, None
 
 
