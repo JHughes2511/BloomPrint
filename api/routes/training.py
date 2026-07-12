@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
+from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
 
 router = APIRouter(prefix="/training", tags=["training"])
@@ -102,11 +103,10 @@ def build_player_training_prompt(player_name: str, original_text: str, feedback:
         prompt += f"PLAYER FEEDBACK TO INCORPORATE:\n{feedback}\n\n"
     prompt += (
         "Create a detailed, actionable training program with specific drills, focus areas, and a weekly "
-        "structure, preserving the coach's priorities and intent. Do NOT use ## headers or ** bold markers; "
-        "use plain ALL-CAPS section titles. Include a weekly plan broken out by day of the week (e.g. MONDAY, "
-        "TUESDAY, WEDNESDAY, ...); put each day's title on its own line and list every drill/focus item under "
-        "it as its own bullet starting with '- '. In any checkpoint or weakness list, put a blank line between "
-        "each entry so items read as separate points and never run together."
+        "structure, preserving the coach's priorities and intent. Include a weekly plan broken out by day of "
+        "the week (e.g. MONDAY, TUESDAY, WEDNESDAY, ...); put each day's title on its own line and list every "
+        "drill/focus item under it as its own bullet starting with '- '."
+        f"{REPORT_FORMAT}"
     )
     return prompt
 
@@ -234,13 +234,9 @@ async def generate_training(
             "incorporate their drills/structure where relevant."
         )
     prompt += (
-        "\n\nIMPORTANT FORMATTING: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
-        f"Always refer to the player by their name ({player.name}), not as 'the player' or a jersey number. "
-        "Use plain section titles in ALL CAPS followed by a colon and newline. "
-        "Under each day of the WEEKLY SESSION PLAN, list every session item as its own "
-        "bullet line starting with '- '. In CORRECTABLE WEAKNESSES BEING ADDRESSED and "
-        "PROGRESS CHECKPOINTS, put a blank line between each entry so items read as "
-        "separate points and never run together."
+        f"\n\nAlways refer to the player by their name ({player.name}), not as 'the player' or a jersey number. "
+        "Under each day of the WEEKLY SESSION PLAN, list every session item as its own bullet line."
+        f"{REPORT_FORMAT}"
     )
 
     # If the coach attached an image/PDF, send it as content blocks alongside text.
@@ -367,7 +363,8 @@ def apply_coach_training_corrections(
         f"Here is the current training program for {player_name}:\n\n{session.program_text or ''}\n\n"
         f"COACH CORRECTIONS:\n{feedback}\n\n"
         "Update the training program incorporating ALL corrections. Keep the same structure but adjust "
-        "focus areas, drills, and weekly plan. IMPORTANT: Do NOT use ## headers or ** bold markers."
+        "focus areas, drills, and weekly plan."
+        f"{REPORT_FORMAT}"
     )
     try:
         import anthropic
@@ -560,8 +557,8 @@ async def regenerate_training(
         f"HEIGHT: {player.height or 'Not recorded'}\n"
         f"CURRENT RATING: {f'{latest_grade}/10' if latest_grade is not None else 'Not evaluated'}\n\n"
         f"COACH FEEDBACK:\n{body.feedback}\n\n"
-        "Update the training program incorporating the coach feedback. Keep the same structure but adjust focus areas, drills, and weekly plan based on the feedback.\n"
-        "IMPORTANT: Do NOT use ## headers or ** bold markers. Use plain text section labels."
+        "Update the training program incorporating the coach feedback. Keep the same structure but adjust focus areas, drills, and weekly plan based on the feedback."
+        f"{REPORT_FORMAT}"
     )
 
     import anthropic

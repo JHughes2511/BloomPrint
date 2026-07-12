@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..auth import get_current_coach
+from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
 
 router = APIRouter(prefix="/game-eval", tags=["game-eval"])
@@ -865,13 +866,8 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
         f"{notes_text}"
         f"{corr_text}\n\n"
         f"Analyze the opponent's strengths, weaknesses, top players to watch, offensive tendencies, "
-        f"defensive tendencies, and strategic recommendations for the next game against them. "
-        f"FORMATTING (so a coach can scan it fast): Do NOT use ## headers, ** bold markers, or dividers. "
-        f"Write each section title in ALL CAPS on its own line followed by a colon, then a blank line. "
-        f"Present the findings under each section as bullet points that each start with '- ' (a hyphen and a space), "
-        f"one idea per bullet, with a blank line between bullets so they don't run together. "
-        f"Keep prose to a minimum — favor tight, scannable bullets. "
-        f"Do NOT write 'END OF REPORT' or any closing marker at the end."
+        f"defensive tendencies, and strategic recommendations for the next game against them."
+        f"{REPORT_FORMAT}"
     )
 
     try:
@@ -961,13 +957,8 @@ async def generate_game_report(
         f"{context}\n\n"
         "Cover, in this order: 1) OUR TEAM PERFORMANCE — what worked, who stood out, where we broke down, "
         "and adjustments for next time; 2) OPPONENT BREAKDOWN — their tendencies, key players, how to attack "
-        "and defend them going forward; 3) KEY TAKEAWAYS. "
-        "FORMATTING (so a coach can scan it fast): Do NOT use ## headers, ** bold, or dividers. "
-        "Write each section title in ALL CAPS on its own line followed by a colon, then a blank line. "
-        "Present the findings under each section as bullet points that each start with '- ' (a hyphen and a space), "
-        "one idea per bullet, with a blank line between bullets so they don't run together. "
-        "Keep prose to a minimum — favor tight, scannable bullets. "
-        "Do NOT write 'END OF REPORT'."
+        "and defend them going forward; 3) KEY TAKEAWAYS."
+        f"{REPORT_FORMAT_WITH_TABLES}"
     )
     try:
         import anthropic

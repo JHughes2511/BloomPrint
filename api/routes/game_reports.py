@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
+from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
 
 
@@ -376,16 +377,14 @@ async def generate_game_report(
             "how the coach and team should read specific on-court actions, defensive sets and how to attack them, "
             "offensive actions and counters, opponent tendencies and how to exploit or defend them, "
             "situational responses (end of clock, press breaks, late-game, transition defense), "
-            "and key adjustments to make. "
-            "IMPORTANT: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
-            "Use plain section titles in ALL CAPS followed by a colon and newline."
+            "and key adjustments to make."
+            f"{REPORT_FORMAT_WITH_TABLES}"
         )
     else:
         sections.append(
             "\nProvide a comprehensive analysis using the BIM framework. "
-            "Include strengths, weaknesses, key players, strategic recommendations. "
-            "IMPORTANT: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
-            "Use plain section titles in ALL CAPS followed by a colon and newline."
+            "Include strengths, weaknesses, key players, strategic recommendations."
+            f"{REPORT_FORMAT_WITH_TABLES}"
         )
 
     directive = comprehensive_directive(gr.output_type)
@@ -485,9 +484,8 @@ async def generate_team_training(
     sections.append(
         "\nGenerate a comprehensive team training program based on the film analysis and player eval data. "
         "Include: team strengths to build on, collective weaknesses to address, specific drills by position group, "
-        "weekly practice structure, situational training scenarios, and individual focus areas for key players. "
-        "IMPORTANT: Do NOT use ## headers, ** bold markers, or ——— / === / --- dividers. "
-        "Use plain section titles in ALL CAPS followed by a colon and newline."
+        "weekly practice structure, situational training scenarios, and individual focus areas for key players."
+        f"{REPORT_FORMAT}"
     )
 
     prompt = "\n".join(sections)

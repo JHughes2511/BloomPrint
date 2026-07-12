@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
+from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
 
 
@@ -277,8 +278,7 @@ async def player_summary(
         "and the player's trajectory. Provide an overall composite grade and pillar grades. "
         "Format with clear BIM sections including OVERALL GRADE, pillar grades, GREEN FLAGS, WATCH FLAGS, and KEY QUESTIONS."
         f"{comprehensive_directive(body.output_type)}"
-        "\n\nIMPORTANT: Do NOT use ## headers or ** bold markers anywhere (including KEY QUESTIONS). "
-        "Use plain section titles in ALL CAPS followed by a colon."
+        f"{REPORT_FORMAT_WITH_TABLES}"
     )
 
     from video_vision.bim import parse_output_types
