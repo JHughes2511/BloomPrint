@@ -1018,9 +1018,9 @@ async def generate_game_report(
     it appears in Recents and feeds game packets."""
     game = _get_game_readable(db, game_id, coach)
     all_corr = (
-        db.query(models.GameReportCorrection)
+        db.query(models.GameSessionReportCorrection)
         .filter_by(game_id=game.id, coach_id=coach.id)
-        .order_by(models.GameReportCorrection.id)
+        .order_by(models.GameSessionReportCorrection.id)
         .all()
     )
     text = await _run_game_report(db, coach, game, [c.correction for c in all_corr])
@@ -1035,9 +1035,9 @@ def list_game_report_corrections(
 ):
     _get_game_readable(db, game_id, coach)
     rows = (
-        db.query(models.GameReportCorrection)
+        db.query(models.GameSessionReportCorrection)
         .filter_by(game_id=game_id, coach_id=coach.id)
-        .order_by(models.GameReportCorrection.id)
+        .order_by(models.GameSessionReportCorrection.id)
         .all()
     )
     return [{"id": r.id, "correction": r.correction, "applied": r.applied, "created_at": r.created_at} for r in rows]
@@ -1054,7 +1054,7 @@ def add_game_report_correction(
     text = (body.get("text") or body.get("correction") or "").strip()
     if not text:
         raise HTTPException(status_code=400, detail="Correction text required")
-    row = models.GameReportCorrection(game_id=game_id, coach_id=coach.id, correction=text)
+    row = models.GameSessionReportCorrection(game_id=game_id, coach_id=coach.id, correction=text)
     db.add(row)
     db.commit()
     db.refresh(row)
@@ -1067,7 +1067,7 @@ def delete_game_report_correction(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    row = db.get(models.GameReportCorrection, correction_id)
+    row = db.get(models.GameSessionReportCorrection, correction_id)
     if not row or row.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Correction not found")
     if row.applied:
@@ -1090,18 +1090,18 @@ async def apply_game_report_corrections(
     if body:
         feedback = (body.get("feedback") or body.get("text") or "").strip()
         if feedback:
-            db.add(models.GameReportCorrection(game_id=game_id, coach_id=coach.id, correction=feedback))
+            db.add(models.GameSessionReportCorrection(game_id=game_id, coach_id=coach.id, correction=feedback))
             db.commit()
     pending = (
-        db.query(models.GameReportCorrection)
+        db.query(models.GameSessionReportCorrection)
         .filter_by(game_id=game_id, coach_id=coach.id, applied=False)
-        .order_by(models.GameReportCorrection.id)
+        .order_by(models.GameSessionReportCorrection.id)
         .all()
     )
     all_corr = (
-        db.query(models.GameReportCorrection)
+        db.query(models.GameSessionReportCorrection)
         .filter_by(game_id=game_id, coach_id=coach.id)
-        .order_by(models.GameReportCorrection.id)
+        .order_by(models.GameSessionReportCorrection.id)
         .all()
     )
     text = await _run_game_report(db, coach, game, [c.correction for c in all_corr])

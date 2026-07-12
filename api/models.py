@@ -593,11 +593,12 @@ class GameFullReport(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
-class GameReportCorrection(Base):
-    """Coach-added context/adjustments layered on top of the stat-derived game
-    report. Apply & Regenerate rebuilds the report from the box score PLUS these
-    corrections — the qualitative detail the stats can't capture."""
-    __tablename__ = "game_report_corrections"
+class GameSessionReportCorrection(Base):
+    """Coach-added context/adjustments layered on top of the stat-derived full
+    game report for a GameSession (distinct from GameReportCorrection, which
+    belongs to the packet GameReport). Apply & Regenerate rebuilds the report
+    from the box score PLUS these corrections."""
+    __tablename__ = "game_session_report_corrections"
     id = Column(Integer, primary_key=True, index=True)
     game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False)
     coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
