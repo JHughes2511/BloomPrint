@@ -68,6 +68,7 @@ export default function HomeScreen() {
   // Profile edit modal
   const [showProfile, setShowProfile] = useState(false);
   const [pName, setPName] = useState('');
+  const [pEmail, setPEmail] = useState('');
   const [pProgram, setPProgram] = useState('');
   const [pRole, setPRole] = useState('coach');
   const [pCountry, setPCountry] = useState('');
@@ -110,6 +111,7 @@ export default function HomeScreen() {
 
   const openProfile = () => {
     setPName(coach?.name ?? '');
+    setPEmail(coach?.email ?? '');
     setPProgram(coach?.program_name ?? '');
     setPRole(coach?.role ?? 'coach');
     setPCountry(coach?.country ?? '');
@@ -137,9 +139,13 @@ export default function HomeScreen() {
 
   const saveProfile = async () => {
     if (!pName.trim()) { Alert.alert('Name required', 'Please enter your name.'); return; }
+    const email = pEmail.trim();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      Alert.alert('Invalid email', 'Please enter a valid email address.'); return;
+    }
     setSavingProfile(true);
     try {
-      await updateProfile({ name: pName.trim(), program_name: pProgram.trim(), role: pRole, country: pCountry || undefined, city: pCity.trim() || undefined });
+      await updateProfile({ name: pName.trim(), email: email || undefined, program_name: pProgram.trim(), role: pRole, country: pCountry || undefined, city: pCity.trim() || undefined });
       setShowProfile(false);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update profile');
@@ -191,18 +197,17 @@ export default function HomeScreen() {
             </View>
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
               <CircleBtn icon={mode === 'dark' ? 'sun' : 'moon'} onPress={toggle} label="Toggle theme" />
-              <CircleBtn icon="log-out" onPress={handleSignOut} label="Sign out" />
+              <CircleBtn icon="user" onPress={openProfile} label="Edit profile" />
               <CircleBtn icon="mail" onPress={() => navigation.navigate('StaffInbox')} label="Staff inbox" />
               <CircleBtn icon="bell" onPress={() => navigation.navigate('CoachNotifications')} badge={unreadCount} label="Notifications" />
             </View>
           </View>
           {coach && (
-            <TouchableOpacity onPress={openProfile} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 }}>
+            <View style={{ marginTop: 8 }}>
               <Text style={[typeScale.bodySoft, { color: t.muted }]}>
                 {coach.name} · {coach.role ? coach.role.charAt(0).toUpperCase() + coach.role.slice(1) : 'Coach'} · {coach.program_name}
               </Text>
-              <Icon name="pencil" size={13} color={t.muted2} strokeWidth={2} />
-            </TouchableOpacity>
+            </View>
           )}
         </View>
 
@@ -268,6 +273,15 @@ export default function HomeScreen() {
               placeholder="Your name" placeholderTextColor={t.muted2}
             />
 
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>Email</Text>
+            <TextInput
+              style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line }}
+              value={pEmail} onChangeText={setPEmail}
+              placeholder="you@email.com" placeholderTextColor={t.muted2}
+              autoCapitalize="none" keyboardType="email-address"
+            />
+            <Text style={{ color: t.muted2, fontSize: 11, marginTop: 4 }}>This is the email you sign in with.</Text>
+
             <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>Role</Text>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               {ROLES.map(r => (
@@ -316,6 +330,14 @@ export default function HomeScreen() {
               {savingProfile
                 ? <ActivityIndicator color={t.ctaText} />
                 : <Text style={{ color: t.ctaText, fontFamily: fonts[800], fontSize: 15 }}>Save Changes</Text>}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 12, padding: 14, marginTop: 12, borderWidth: 1, borderColor: t.negative }}
+              onPress={() => { setShowProfile(false); handleSignOut(); }}
+            >
+              <Icon name="log-out" size={16} color={t.negative} strokeWidth={2} />
+              <Text style={{ color: t.negative, fontFamily: fonts[700], fontSize: 14 }}>Sign Out</Text>
             </TouchableOpacity>
           </View>
         </View>

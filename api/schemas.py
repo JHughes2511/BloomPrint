@@ -40,6 +40,7 @@ class CoachGoogleAuth(BaseModel):
 
 class CoachUpdate(BaseModel):
     name: str | None = None
+    email: str | None = None
     role: str | None = None
     program_name: str | None = None
     competition_level: str | None = None

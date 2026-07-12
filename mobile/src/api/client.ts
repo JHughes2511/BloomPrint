@@ -58,7 +58,7 @@ export const authAPI = {
   me: () => api.get('/auth/me').then(r => r.data),
 
   updateProfile: (data: {
-    name?: string; role?: string; program_name?: string;
+    name?: string; email?: string; role?: string; program_name?: string;
     competition_level?: string; conference?: string;
     system_profile?: Record<string, string>;
     country?: string; city?: string; onboarded?: boolean;

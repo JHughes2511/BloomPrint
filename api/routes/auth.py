@@ -142,6 +142,14 @@ def update_me(
     db: Session = Depends(get_db),
 ):
     data = body.model_dump(exclude_unset=True)
+    # Email is the login identity — change it directly but reject a duplicate.
+    if "email" in data and data["email"]:
+        new_email = data["email"].strip().lower()
+        if new_email and new_email != (coach.email or "").lower():
+            taken = db.query(models.Coach).filter(models.Coach.email == new_email, models.Coach.id != coach.id).first()
+            if taken:
+                raise HTTPException(status_code=400, detail="That email is already used by another account.")
+            coach.email = new_email
     for field in ("name", "role", "program_name", "competition_level", "conference", "system_profile", "country", "city", "onboarded"):
         if field in data and data[field] is not None:
             setattr(coach, field, data[field])
