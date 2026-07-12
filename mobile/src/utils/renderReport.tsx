@@ -9,7 +9,7 @@ import { fonts } from '../theme/typography';
  */
 
 const isDividerLine = (line: string) =>
-  /^[\s\-=—─━_~.·*•]*$/.test(line) && (line.match(/[-=—─━_~.·*•]/g)?.length ?? 0) >= 3;
+  /^[\s\-=—─━═╍╌┄┅_~.·*•]*$/.test(line) && (line.match(/[-=—─━═╍╌┄┅_~.·*•]/g)?.length ?? 0) >= 3;
 
 // A markdown table row: has at least one interior pipe.
 const isTableRow = (line: string) => /\|/.test(line) && /^\s*\|?.*\|.*$/.test(line) && line.trim().includes('|');
@@ -74,7 +74,7 @@ function renderLine(raw: string, index: number, colors: { heading: string; body:
   if (bullet) {
     line = line.replace(/^\s*[-*·•▪◦–]\s+/, '');
   } else {
-    line = line.replace(/^[-=—─━_~]{2,}\s*/, '').replace(/\s*[-=—─━_~]{2,}$/, '');
+    line = line.replace(/^[-=—─━═_~]{2,}\s*/, '').replace(/\s*[-=—─━═_~]{2,}$/, '');
   }
   const trimmed = line.trim();
   if (trimmed === '') return null;

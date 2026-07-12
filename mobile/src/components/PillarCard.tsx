@@ -13,17 +13,37 @@ const PILLAR_LABELS: Record<string, string> = {
   strategic_fit: 'Strategic Fit',
 };
 
-function gradeColor(g: number, t: ThemeTokens) {
-  if (g >= 8) return t.positive;
-  if (g >= 6.5) return t.accent;
-  if (g >= 5) return t.brown;
-  return t.negative;
+// Each pillar keeps its own identity color (blues + browns), theme-aware —
+// alternating so the six bars read as distinct rather than one solid block.
+const PILLAR_TONE: Record<string, 'accent' | 'brown'> = {
+  offensive_skills: 'accent',
+  defensive_capabilities: 'brown',
+  physical_attributes: 'accent',
+  intangibles: 'brown',
+  advanced_analysis: 'accent',
+  strategic_fit: 'brown',
+};
+const PILLAR_ORDER = Object.keys(PILLAR_TONE);
+
+function pillarColor(pillarKey: string, t: ThemeTokens) {
+  let tone = PILLAR_TONE[pillarKey];
+  if (!tone) {
+    const idx = PILLAR_ORDER.indexOf(pillarKey);
+    tone = (idx >= 0 ? idx : Math.abs(hashKey(pillarKey))) % 2 === 0 ? 'accent' : 'brown';
+  }
+  return tone === 'accent' ? t.accent : t.brown;
+}
+
+function hashKey(s: string) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return h;
 }
 
 export function PillarCard({ pillarKey, grade }: { pillarKey: string; grade: number }) {
   const { t } = useTheme();
   const label = PILLAR_LABELS[pillarKey] ?? pillarKey;
-  const color = gradeColor(grade, t);
+  const color = pillarColor(pillarKey, t);
   const pct = (grade / 10) * 100;
 
   return (

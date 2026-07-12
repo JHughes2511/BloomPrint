@@ -5,7 +5,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
   Modal, Alert, KeyboardAvoidingView, Platform, TextInput, RefreshControl,
 } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -129,7 +129,11 @@ export default function PlayerProfileScreen() {
         }
       }), [playerId]);
 
-  useEffect(() => { loadAll().finally(() => setLoading(false)); }, [loadAll]);
+  // Reload whenever the screen regains focus so newly created evals (and their
+  // green/watch flags + BIM composite) show without a manual pull-to-refresh.
+  useFocusEffect(
+    React.useCallback(() => { loadAll().finally(() => setLoading(false)); }, [loadAll]),
+  );
 
   const [refreshingProfile, setRefreshingProfile] = useState(false);
   const onRefreshProfile = React.useCallback(() => {

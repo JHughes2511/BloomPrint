@@ -640,13 +640,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                                              messages=[{"role": "user", "content": synth}])
         answer = response.content[0].text
 
-    audio_note = " + audio" if transcript_text else ""
-    passes = "single pass" if len(frames) <= CHUNK else f"{(len(frames) + CHUNK - 1) // CHUNK} segments"
-    header = (
-        f"BIM {output_type.upper().replace('_', ' ')} — {program} | {level}\n"
-        f"{len(frames)} frames{audio_note} analyzed ({passes})\n"
-        f"{'═' * 60}\n"
-    )
+    header = f"BIM {output_type.upper().replace('_', ' ')} — {program} | {level}\n\n"
     return [types.TextContent(type="text", text=header + answer)]
 
 

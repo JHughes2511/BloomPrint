@@ -42,7 +42,7 @@ export function mdToHtml(md: string): string {
     const line = raw.trimEnd();
 
     // Pure divider line — skip entirely
-    if (/^\s*([-=_*•]\s*){3,}\s*$/.test(line) || /^\s*[-=—─]{3,}\s*$/.test(line)) {
+    if (/^\s*([-=_*•]\s*){3,}\s*$/.test(line) || /^\s*[-=—─━═╍╌┄┅]{3,}\s*$/.test(line)) {
       closeList();
       continue;
     }

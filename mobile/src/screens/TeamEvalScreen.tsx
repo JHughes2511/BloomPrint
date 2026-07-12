@@ -21,6 +21,7 @@ import { formatForLevel, periodLabel, weightBucket, formatClock, type GameFormat
 import WhiteboardModal from '../components/WhiteboardModal';
 import ScoutContextPanel from '../components/ScoutContextPanel';
 import GameReportPanel from '../components/GameReportPanel';
+import ReportCorrectionsPanel from '../components/ReportCorrectionsPanel';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeProvider';
@@ -2111,12 +2112,34 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   </View>
 
                   {scoutData.ai_scouting_report && (
-                    <View style={s.card}>
-                      <Text style={s.cardLabel}>SCOUTING REPORT</Text>
-                      <View style={{ marginTop: 8 }}>
-                        {renderReport(scoutData.ai_scouting_report, { heading: t.ink, body: t.inkSoft })}
+                    <>
+                      <View style={s.card}>
+                        <Text style={s.cardLabel}>SCOUTING REPORT</Text>
+                        <View style={{ marginTop: 8 }}>
+                          {renderReport(scoutData.ai_scouting_report, { heading: t.ink, body: t.inkSoft })}
+                        </View>
                       </View>
-                    </View>
+
+                      {/* Corrections — a separate pass to fix things in the finished report. */}
+                      {(() => {
+                        const scoutGameId = sessions.find((x: any) => x.opponent_name === scoutOpponent)?.id;
+                        return scoutGameId ? (
+                          <View style={s.card}>
+                            <Text style={s.cardLabel}>CORRECTIONS</Text>
+                            <View style={{ marginTop: 8 }}>
+                              <ReportCorrectionsPanel
+                                list={() => gameEvalAPI.scoutingCorrections(scoutGameId)}
+                                add={(text) => gameEvalAPI.addScoutingCorrection(scoutGameId, text)}
+                                remove={(id) => gameEvalAPI.deleteScoutingCorrection(id)}
+                                apply={() => gameEvalAPI.applyScoutingCorrections(scoutGameId)}
+                                resultKey="ai_scouting_report"
+                                onApplied={(text) => setScoutData((prev: any) => ({ ...prev, ai_scouting_report: text }))}
+                              />
+                            </View>
+                          </View>
+                        ) : null;
+                      })()}
+                    </>
                   )}
                 </>
               ) : null}
@@ -2195,12 +2218,29 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   </View>
 
                   {gameReportGame.ai_game_report ? (
-                    <View style={s.card}>
-                      <Text style={s.cardLabel}>GAME REPORT</Text>
-                      <View style={{ marginTop: 8 }}>
-                        {renderReport(gameReportGame.ai_game_report, { heading: t.ink, body: t.inkSoft })}
+                    <>
+                      <View style={s.card}>
+                        <Text style={s.cardLabel}>GAME REPORT</Text>
+                        <View style={{ marginTop: 8 }}>
+                          {renderReport(gameReportGame.ai_game_report, { heading: t.ink, body: t.inkSoft })}
+                        </View>
                       </View>
-                    </View>
+
+                      {/* Corrections — a separate pass to fix things in the finished report. */}
+                      <View style={s.card}>
+                        <Text style={s.cardLabel}>CORRECTIONS</Text>
+                        <View style={{ marginTop: 8 }}>
+                          <ReportCorrectionsPanel
+                            list={() => gameEvalAPI.gameReportCorrections(gameReportGame.id)}
+                            add={(text) => gameEvalAPI.addGameReportCorrection(gameReportGame.id, text)}
+                            remove={(id) => gameEvalAPI.deleteGameReportCorrection(id)}
+                            apply={() => gameEvalAPI.applyGameReportCorrections(gameReportGame.id)}
+                            resultKey="ai_game_report"
+                            onApplied={(text) => setGameReportGame((prev: any) => ({ ...prev, ai_game_report: text }))}
+                          />
+                        </View>
+                      </View>
+                    </>
                   ) : (
                     <Text style={{ color: t.muted2, fontSize: 13, marginHorizontal: 16 }}>
                       No report yet — add any context above and tap Generate Game Report.
