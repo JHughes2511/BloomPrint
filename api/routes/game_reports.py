@@ -36,8 +36,9 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             finally:
                 pdb.close()
 
+        from ..storage import ensure_local
         result = asyncio.run(_handle_analyze_basketball_video({
-            "video_path": video_path,
+            "video_path": ensure_local(video_path),
             "output_type": output_type,
             "program_name": program_name,
             "competition_level": "HS Varsity",
@@ -166,10 +167,10 @@ async def add_clip(
     if not gr or gr.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Game report not found")
 
+    from ..storage import save_fileobj
+    from uuid import uuid4
     suffix = Path(video.filename or "clip.mp4").suffix
-    dest = UPLOAD_DIR / f"gr_{report_id}_clip_{len(gr.clips)}{suffix}"
-    with dest.open("wb") as f:
-        shutil.copyfileobj(video.file, f)
+    dest = save_fileobj(video.file, f"gr_{report_id}_clip_{uuid4().hex}{suffix}")
 
     label_text = "my team" if label == "my_team" else "the opponent"
     my_team_name = gr.my_team.name if gr.my_team else coach.program_name

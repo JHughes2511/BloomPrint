@@ -64,8 +64,11 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
             finally:
                 pdb.close()
 
+        # Analysis needs real files — download any S3-backed refs to temp local.
+        from ..storage import ensure_local
+        local_paths = [ensure_local(r) for r in video_paths]
         result = asyncio.run(_handle_analyze_basketball_video({
-            "video_paths": video_paths,
+            "video_paths": local_paths,
             "output_type": output_type,
             "program_name": coach_program,
             "competition_level": competition_level,
@@ -108,29 +111,32 @@ async def upload_eval_video(
     video: UploadFile = File(...),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    """Stream one film to disk (native upload) and return a token. The eval is
-    then submitted with a list of tokens so several films can build one eval."""
+    """Stream one film to durable storage and return a token. The eval is then
+    submitted with a list of tokens so several films can build one eval."""
     from uuid import uuid4
+    from ..storage import save_fileobj
     suffix = Path(video.filename or "video.mp4").suffix
     name = f"evalvid_{coach.id}_{uuid4().hex}{suffix}"
-    dest = UPLOAD_DIR / name
-    with dest.open("wb") as f:
-        shutil.copyfileobj(video.file, f)
+    save_fileobj(video.file, name)
     return {"token": name}
 
 
-def _tokens_to_paths(tokens: str | None) -> list[str]:
-    """Validate upload tokens (filenames) and resolve to on-disk paths, rejecting
-    anything with a path separator."""
-    paths: list[str] = []
+def _tokens_to_refs(tokens: str | None, coach_id: int) -> list[str]:
+    """Validate upload tokens and resolve to storage refs. A token must be a bare
+    filename owned by this coach (prefix guard), preventing traversal or reuse of
+    another coach's upload."""
+    from ..storage import ref_for, exists
+    refs: list[str] = []
     for tok in (tokens or "").split(","):
         tok = tok.strip()
         if not tok or "/" in tok or "\\" in tok or ".." in tok:
             continue
-        p = UPLOAD_DIR / tok
-        if p.exists():
-            paths.append(str(p))
-    return paths
+        if not tok.startswith(f"evalvid_{coach_id}_"):
+            continue
+        ref = ref_for(tok)
+        if exists(ref):
+            refs.append(ref)
+    return refs
 
 
 @router.post("")
@@ -181,13 +187,13 @@ async def submit_evaluation(
     combined_focus += system_profile_block(coach)
 
     # Collect film: pre-uploaded tokens (multiple) and/or one direct file (legacy).
-    video_paths = _tokens_to_paths(video_tokens)
+    from ..storage import save_fileobj
+    from uuid import uuid4
+    video_paths = _tokens_to_refs(video_tokens, coach.id)
     if video and video.filename:
         suffix = Path(video.filename or "video.mp4").suffix
-        dest = UPLOAD_DIR / f"eval_{player_id}_{coach.id}{suffix}"
-        with dest.open("wb") as f:
-            shutil.copyfileobj(video.file, f)
-        video_paths.append(str(dest))
+        ref = save_fileobj(video.file, f"eval_{player_id}_{coach.id}_{uuid4().hex}{suffix}")
+        video_paths.append(ref)
 
     if video_paths:
         # Process in the BACKGROUND so long/multiple film doesn't time out; the
@@ -352,8 +358,9 @@ def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_
                 finally:
                     pdb.close()
 
+            from ..storage import ensure_local
             vid_result = asyncio.run(_handle_analyze_basketball_video({
-                "video_path": video_path,
+                "video_path": ensure_local(video_path),
                 "output_type": output_type,
                 "program_name": coach_program,
                 "competition_level": "Team",
@@ -448,11 +455,11 @@ async def team_report(
     system_block = system_profile_block(coach)
 
     if video and video.filename:
-        # Long film → save and process in the background; the client polls.
+        # Long film → save to durable storage and process in the background.
+        from ..storage import save_fileobj
+        from uuid import uuid4
         suffix = Path(video.filename).suffix
-        vid_dest = UPLOAD_DIR / f"team_report_{coach.id}{suffix}"
-        with vid_dest.open("wb") as f:
-            shutil.copyfileobj(video.file, f)
+        vid_ref = save_fileobj(video.file, f"team_report_{coach.id}_{uuid4().hex}{suffix}")
         job = models.GenerationJob(coach_id=coach.id, kind="team_report", status="processing")
         db.add(job)
         db.commit()
@@ -460,7 +467,7 @@ async def team_report(
         background_tasks.add_task(
             _run_team_report_job, job.id,
             coach_id=coach.id, output_type=output_type, focus_prompt=focus_prompt,
-            team_label=team_label, roster_context=roster_context, video_path=str(vid_dest),
+            team_label=team_label, roster_context=roster_context, video_path=vid_ref,
             coach_program=coach.program_name, coach_weight=coach.weight, system_block=system_block,
         )
         return {"job_id": job.id, "status": "processing"}

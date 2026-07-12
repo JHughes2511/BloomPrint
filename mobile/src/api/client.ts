@@ -35,8 +35,10 @@ export async function uploadFileStreamed(
   try { return JSON.parse(res.body || '{}'); } catch { return {}; }
 }
 
-/** Build an authenticated expo-av video source for a stream path. */
+/** Build a video source for a stream url. Absolute urls (e.g. presigned S3) are
+ * used as-is; relative backend paths get the bearer token attached. */
 export async function authedVideoSource(streamPath: string): Promise<{ uri: string; headers?: Record<string, string> }> {
+  if (/^https?:\/\//i.test(streamPath)) return { uri: streamPath };
   const token = await SecureStore.getItemAsync('auth_token');
   return { uri: `${BASE_URL}${streamPath}`, headers: token ? { Authorization: `Bearer ${token}` } : undefined };
 }

@@ -187,6 +187,7 @@ def player_videos(
             ev = db.get(models.Evaluation, v.source_id)
             if ev:
                 report_label = (ev.output_type or "eval").replace("_", " ").title()
+        from ..storage import playback_url
         out.append({
             "id": v.id,
             "source_kind": v.source_kind,
@@ -194,7 +195,8 @@ def player_videos(
             "report_label": report_label,
             "label": v.label,
             "created_at": v.created_at,
-            "stream_url": f"/players/videos/{v.id}/stream",
+            # Presigned URL when on S3, else the backend stream path.
+            "stream_url": playback_url(v.video_path, f"/players/videos/{v.id}/stream"),
         })
     return out
 
@@ -206,15 +208,16 @@ def stream_player_video(
     coach: models.Coach = Depends(get_current_coach),
 ):
     from fastapi.responses import FileResponse
+    from ..storage import exists, ensure_local
     v = db.get(models.PlayerVideo, video_id)
     if not v:
         raise HTTPException(status_code=404, detail="Video not found")
     player = db.get(models.Player, v.player_id)
     if not player or not _can_see_player(db, coach, player):
         raise HTTPException(status_code=403, detail="No access to this video")
-    if not os.path.exists(v.video_path):
+    if not exists(v.video_path):
         raise HTTPException(status_code=404, detail="Video file is no longer available")
-    return FileResponse(v.video_path, media_type="video/mp4")
+    return FileResponse(ensure_local(v.video_path), media_type="video/mp4")
 
 
 @router.post("/{player_id}/summary", response_model=schemas.SummaryOut)
