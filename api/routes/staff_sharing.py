@@ -458,7 +458,7 @@ async def regenerate_shared(
     if not feedback:
         raise HTTPException(status_code=400, detail="Feedback required")
 
-    report_text = _resolve_report_text(sr.report_type, sr.report_id, db)
+    report_text = sr.frozen_text or _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id)
     if not report_text:
         raise HTTPException(status_code=400, detail="No report content to regenerate")
 
@@ -731,7 +731,9 @@ async def regenerate_mine(
         raise HTTPException(status_code=400, detail="Add at least one correction first")
 
     # Base off my latest updated copy if I have one, else the shared original.
-    base = sr.regenerated_text or _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id) or sr.frozen_text
+    # Prefer the frozen (toggle-filtered) copy so regeneration never brings back
+    # sections the sharer deselected.
+    base = sr.regenerated_text or sr.frozen_text or _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id)
     if not base:
         raise HTTPException(status_code=400, detail="No report content to update")
 

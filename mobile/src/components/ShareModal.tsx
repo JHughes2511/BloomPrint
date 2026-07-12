@@ -107,7 +107,9 @@ export default function ShareModal({
   // The document header (title / model banner / opponent line) is pinned and
   // always included — only real content sections get toggles.
   const toggleSections = sections.filter(s => !s.pinned);
-  const showSectionToggles = toggleSections.length > 1 && !(target === 'all_staff' && allowRegen);
+  // Section toggles apply to every share (including regenerable staff copies) so
+  // deselected sections are always removed from what the recipient receives.
+  const showSectionToggles = toggleSections.length > 1;
 
   const canSend = () => {
     if (target === 'team') return !!selected;
@@ -119,7 +121,9 @@ export default function ShareModal({
     setSending(true);
     try {
       if (target === 'all_staff') {
-        const frozen = !allowRegen ? filteredText() : undefined;
+        // Always send the toggle-filtered text so deselected sections are
+        // removed even for a regenerable copy (recipient regenerates from it).
+        const frozen = filteredText();
         if (selected?.__group) {
           // A team / sub-team from My Groups — staff members only.
           const res = await staffSharingAPI.shareTeam({
@@ -274,8 +278,8 @@ export default function ShareModal({
                     </View>
                     <Text style={styles.hint}>
                       {allowRegen
-                        ? 'Sends a live, regenerable copy — recipient sees the full report.'
-                        : 'Sends a frozen snapshot — choose which sections to include below.'}
+                        ? 'Recipient can regenerate it — only the sections you include below are shared.'
+                        : 'Sends a snapshot — only the sections you include below are shared.'}
                     </Text>
                   </>
                 )}
