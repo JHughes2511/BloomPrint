@@ -908,6 +908,76 @@ async def generate_ai_scouting(
     return {"ai_scouting_report": text}
 
 
+@router.post("/sessions/{game_id}/game-report")
+async def generate_game_report(
+    game_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """A full GAME REPORT — our team's performance AND the opponent, combined
+    (vs the Scout Opponent report which is opponent-only)."""
+    import os
+    game = _get_game_readable(db, game_id, coach)
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY is not configured.")
+
+    def _side_context(is_opp: bool) -> str:
+        summary: dict[str, dict] = {}
+        for s in game.player_stats:
+            if s.is_opponent != is_opp:
+                continue
+            d = summary.setdefault(s.player_name, {"off": 0.0, "def": 0.0, "stats": defaultdict(int)})
+            d[("off" if s.stat_category == "offense" else "def")] += s.weighted_points
+            d["stats"][s.stat_name] += s.count
+        lines = ""
+        for pname, d in summary.items():
+            top = sorted(d["stats"].items(), key=lambda x: x[1], reverse=True)[:5]
+            lines += f"\n{pname}: OFF={d['off']:.1f} DEF={d['def']:.1f}  {', '.join(f'{s}={c}' for s, c in top)}"
+        return lines or "\n(no tracked stats)"
+
+    my_team = game.team.name if game.team else coach.program_name
+    score_info = ""
+    if game.our_score is not None and game.opponent_score is not None:
+        res = "WIN" if game.our_score > game.opponent_score else ("LOSS" if game.our_score < game.opponent_score else "TIE")
+        score_info = f"Final: {game.our_score}-{game.opponent_score} ({res})"
+
+    notes = db.query(models.OpponentNote).filter_by(coach_id=coach.id, opponent_name=game.opponent_name).all()
+    corr = db.query(models.GameScoutingCorrection).filter_by(game_id=game.id, coach_id=coach.id).all()
+    context = ""
+    if notes:
+        context += "\n\nCOACH NOTES ON THE OPPONENT:\n" + "\n".join(f"- {n.note_text}" for n in notes)
+    if corr:
+        context += "\n\nADDED CONTEXT (weave in):\n" + "\n".join(f"- {c.correction}" for c in corr)
+
+    prompt = (
+        f"You are the BloomPrint Basketball Intelligence Model. Generate a full GAME REPORT for "
+        f"{my_team} vs {game.opponent_name}.\n\nGame date: {game.date}\n{score_info}\n\n"
+        f"OUR TEAM PLAYER GRADES:{_side_context(False)}\n\n"
+        f"OPPONENT PLAYER GRADES:{_side_context(True)}"
+        f"{context}\n\n"
+        "Cover, in this order: 1) OUR TEAM PERFORMANCE — what worked, who stood out, where we broke down, "
+        "and adjustments for next time; 2) OPPONENT BREAKDOWN — their tendencies, key players, how to attack "
+        "and defend them going forward; 3) KEY TAKEAWAYS. "
+        "Do NOT use ## headers, ** bold, or dividers. Plain ALL-CAPS section titles followed by a colon. "
+        "Do NOT write 'END OF REPORT'."
+    )
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        response = await client.messages.create(model="claude-opus-4-7", max_tokens=6000,
+                                                 messages=[{"role": "user", "content": prompt}])
+        blocks = [b for b in response.content if hasattr(b, "text")]
+        if not blocks:
+            raise HTTPException(status_code=500, detail="AI returned no content")
+        import re as _re
+        text = _re.sub(r"\s*END OF REPORT\.?\s*$", "", blocks[0].text.strip(), flags=_re.IGNORECASE).rstrip()
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
+    return {"report_text": text}
+
+
 @router.get("/sessions/{game_id}/scouting-corrections")
 def list_scouting_corrections(
     game_id: int,

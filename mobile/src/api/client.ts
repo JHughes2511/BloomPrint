@@ -368,6 +368,7 @@ export const gameEvalAPI = {
   getGameSummary: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/summary`).then(r => r.data),
   uploadFile: (gameId: number, formData: FormData) => api.post(`/game-eval/sessions/${gameId}/upload`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
   getScoutingReport: (gameId: number) => api.post(`/game-eval/sessions/${gameId}/ai-scouting`).then(r => r.data),
+  generateGameReport: (gameId: number) => api.post(`/game-eval/sessions/${gameId}/game-report`).then(r => r.data),
   scoutingCorrections: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/scouting-corrections`).then(r => r.data),
   addScoutingCorrection: (gameId: number, text: string) => api.post(`/game-eval/sessions/${gameId}/scouting-corrections`, { text }).then(r => r.data),
   editScoutingCorrection: (id: number, text: string) => api.patch(`/game-eval/scouting-corrections/${id}`, { text }).then(r => r.data),

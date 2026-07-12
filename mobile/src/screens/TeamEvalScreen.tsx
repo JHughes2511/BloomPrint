@@ -197,6 +197,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [gradeSearch, setGradeSearch] = useState('');
   const [generatingReport, setGeneratingReport] = useState(false);
   const [showScoutingReport, setShowScoutingReport] = useState(false);
+  const [gameReportText, setGameReportText] = useState<string | null>(null);
+  const [generatingGameReport, setGeneratingGameReport] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [gameStats, setGameStats] = useState<any[]>([]);
   const [showStatsModal, setShowStatsModal] = useState(false);
@@ -533,6 +535,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setActiveView('detail');
     setExpandedPlayer(null);
     setShowScoutingReport(false);
+    setGameReportText(null);
     setSummary(null);
     setGameStats([]);
     setGameLineup([]);
@@ -659,6 +662,18 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate report');
     }
     setGeneratingReport(false);
+  };
+
+  const generateGameReport = async () => {
+    if (!detailGame) return;
+    setGeneratingGameReport(true);
+    try {
+      const result = await gameEvalAPI.generateGameReport(detailGame.id);
+      setGameReportText(result.report_text);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate game report');
+    }
+    setGeneratingGameReport(false);
   };
 
   const exportDetailPdf = async () => {
@@ -1918,7 +1933,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               onPress={() => openScout(detailGame.opponent_name)}
             >
               <Ionicons name="search-outline" size={14} color={t.muted} />
-              <Text numberOfLines={1} style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>Scout</Text>
+              <Text numberOfLines={1} style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>Scout Opponent</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[s.detailAction, { flex: 1, minWidth: '45%' }]}
@@ -1942,16 +1957,16 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </TouchableOpacity>
             <TouchableOpacity
               style={[s.detailAction, { flex: 1, minWidth: '45%', borderColor: t.accent }]}
-              onPress={generateScoutingReport}
-              disabled={generatingReport}
+              onPress={generateGameReport}
+              disabled={generatingGameReport}
             >
-              {generatingReport
+              {generatingGameReport
                 ? <ActivityIndicator size="small" color={t.accent} />
                 : <><Ionicons name="sparkles-outline" size={14} color={t.accent} />
-                  <Text numberOfLines={1} style={{ color: t.accent, fontSize: 11, fontFamily: fonts[600] }}>Generate Report</Text></>}
+                  <Text numberOfLines={1} style={{ color: t.accent, fontSize: 11, fontFamily: fonts[600] }}>Game Report</Text></>}
             </TouchableOpacity>
           </View>
-          <GeneratingOverlay visible={generatingReport} label="Building the scouting report…" />
+          <GeneratingOverlay visible={generatingGameReport} label="Building the full game report…" />
 
           {/* Live entry shortcut if in_progress — owner only */}
           {detailGame.status === 'in_progress' && isOwnedGame(detailGame) && (
@@ -1970,6 +1985,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               <Text style={s.cardLabel}>SCOUTING REPORT</Text>
               <View style={{ marginTop: 8 }}>
                 {renderReport(detailGame.ai_scouting_report ?? '', { heading: t.ink, body: t.inkSoft })}
+              </View>
+            </View>
+          )}
+          {gameReportText && (
+            <View style={s.card}>
+              <Text style={s.cardLabel}>GAME REPORT</Text>
+              <View style={{ marginTop: 8 }}>
+                {renderReport(gameReportText, { heading: t.ink, body: t.inkSoft })}
               </View>
             </View>
           )}
