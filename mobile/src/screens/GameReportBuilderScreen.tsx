@@ -247,17 +247,22 @@ export default function GameReportBuilderScreen() {
   const applyClipCorrection = async () => {
     if (!reportId || !clipModal || !clipCorrectionText.trim()) return;
     setClipCorrecting(true);
+    setClipProgress('Re-watching the film…');
     try {
-      const updated = await gameReportsAPI.correctClip(reportId, clipModal.id, clipCorrectionText.trim());
-      setClipModal(updated);
+      // Correcting a clip re-analyzes the actual film focused on the correction,
+      // so it runs as a background job the client polls.
+      const res = await gameReportsAPI.correctClip(reportId, clipModal.id, clipCorrectionText.trim());
+      if (res?.job_id) await evalsAPI.awaitJob(res.job_id, setClipProgress);
       setClipCorrectionText('');
-      // Refresh full report so clips list updates
       const refreshed = await gameReportsAPI.get(reportId);
       setReport(refreshed);
+      const updatedClip = (refreshed.clips ?? []).find((c: any) => c.id === clipModal.id);
+      if (updatedClip) setClipModal(updatedClip);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not apply correction');
     } finally {
       setClipCorrecting(false);
+      setClipProgress('');
     }
   };
 
@@ -774,7 +779,11 @@ export default function GameReportBuilderScreen() {
                 : <><Ionicons name="checkmark-circle" size={16} color={t.ctaText} /><Text style={styles.correctionBtnText}>  Apply Correction</Text></>
               }
             </TouchableOpacity>
-            <GeneratingOverlay visible={clipCorrecting} label="Updating the film analysis…" />
+            <GeneratingOverlay
+              visible={clipCorrecting}
+              label={clipProgress || 'Re-watching the film with your correction…'}
+              realProgress={parseGenProgress(clipProgress)}
+            />
           </View>
         </KeyboardAvoidingView>
       </Modal>

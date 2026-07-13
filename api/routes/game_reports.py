@@ -72,6 +72,75 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
     finally:
         db.close()
 
+
+def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_type: str,
+                           program_name: str, opp_name: str, label_text: str,
+                           coach_weight: int, prior_text: str, correction: str):
+    """Background task: RE-WATCH the film guided by a coach correction. Instead of
+    just rephrasing the old text, we re-run the vision analysis focused on the
+    action the coach described so the model can LOCATE and VERIFY it in the film
+    and fold the verified observation into a corrected analysis."""
+    import asyncio
+    db = SessionLocal()
+    try:
+        import sys
+        sys.path.insert(0, ".")
+        from video_vision.server import _handle_analyze_basketball_video
+
+        def _prog(done, total, label):
+            pdb = SessionLocal()
+            try:
+                j = pdb.get(models.GenerationJob, job_id)
+                if j:
+                    j.progress = label
+                    pdb.commit()
+            finally:
+                pdb.close()
+
+        focus = (
+            f"This film is of {label_text}. My team: {program_name}. Opponent: {opp_name}.\n\n"
+            "A coach reviewed your PRIOR analysis of this exact film and made a correction. "
+            "Re-watch the film and LOCATE the specific action, play, or moment the coach is "
+            "describing. VERIFY it visually in the frames — identify the concept/action they "
+            "mean (a screen, a rotation, a coverage, a read, whoever was involved), cite it by "
+            "film timestamp (MM:SS), and produce a CORRECTED analysis that integrates that "
+            "verified observation. Do NOT simply repeat the coach's words — find what they are "
+            "pointing at in the film and describe it accurately. If, after re-watching, you "
+            "still cannot see what they describe, say so plainly rather than inventing it.\n\n"
+            f"PRIOR ANALYSIS:\n{prior_text}\n\nCOACH CORRECTION:\n{correction}"
+        )
+
+        from ..storage import ensure_local
+        result = asyncio.run(_handle_analyze_basketball_video({
+            "video_path": ensure_local(video_path),
+            "output_type": output_type,
+            "program_name": program_name,
+            "competition_level": "HS Varsity",
+            "coach_weight": coach_weight,
+            "player_name": label_text,
+            "focus_prompt": focus,
+            "interval_seconds": 8.0,   # denser sampling for a targeted re-watch
+            "max_frames": 12,
+            "include_audio": False,
+            "_progress": _prog,
+        }))
+        clip = db.get(models.GameReportClip, clip_id)
+        if clip:
+            clip.analysis_text = result[0].text
+        job = db.get(models.GenerationJob, job_id)
+        if job:
+            job.status = "done"
+            job.result_id = clip_id
+        db.commit()
+    except Exception as exc:
+        job = db.get(models.GenerationJob, job_id)
+        if job:
+            job.status = "error"
+            job.error = str(exc)[:500]
+        db.commit()
+    finally:
+        db.close()
+
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
@@ -554,14 +623,18 @@ class GameReportCorrectBody(BaseModel):
     correction: str
 
 
-@router.post("/{report_id}/clips/{clip_id}/correct", response_model=schemas.GameReportClipOut)
+@router.post("/{report_id}/clips/{clip_id}/correct")
 async def correct_clip(
     report_id: int,
     clip_id: int,
     body: GameReportCorrectBody,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
+    """Re-watch the clip's film guided by the coach's correction (background job),
+    so the model locates/verifies the described action and folds it in — rather
+    than just rewording the old text. The client polls the returned job."""
     clip = db.get(models.GameReportClip, clip_id)
     if not clip or clip.game_report_id != report_id:
         raise HTTPException(status_code=404, detail="Clip not found")
@@ -570,26 +643,21 @@ async def correct_clip(
         raise HTTPException(status_code=404, detail="Game report not found")
     if not clip.analysis_text:
         raise HTTPException(status_code=400, detail="No analysis to correct")
-    prompt = (
-        f"Below is a basketball film analysis followed by a coach correction. "
-        f"Update the analysis to incorporate the correction. Return ONLY the updated analysis.\n\n"
-        f"ANALYSIS:\n{clip.analysis_text}\n\n"
-        f"CORRECTION:\n{body.correction}\n\nUPDATED ANALYSIS:"
-    )
-    try:
-        import anthropic
-        client = anthropic.AsyncAnthropic()
-        response = await client.messages.create(
-            model="claude-opus-4-7",
-            max_tokens=2048,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        clip.analysis_text = response.content[0].text.strip()
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Correction failed: {exc}")
+
+    label_text = "my team" if clip.label == "my_team" else "the opponent"
+    my_team_name = gr.my_team.name if gr.my_team else coach.program_name
+    opp_name = gr.opponent_team.name if gr.opponent_team else (gr.opponent_name or "Opponent")
+
+    job = models.GenerationJob(coach_id=coach.id, kind="clip", status="processing")
+    db.add(job)
     db.commit()
-    db.refresh(clip)
-    return clip
+    db.refresh(job)
+
+    background_tasks.add_task(
+        _run_clip_recorrection, clip.id, job.id, clip.video_path, gr.output_type,
+        my_team_name, opp_name, label_text, coach.weight, clip.analysis_text, body.correction,
+    )
+    return {"job_id": job.id, "clip_id": clip.id}
 
 
 @router.post("/{report_id}/correct", response_model=schemas.GameReportOut)
