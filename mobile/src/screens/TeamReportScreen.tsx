@@ -779,7 +779,7 @@ export default function TeamReportScreen() {
               filteredPrevReports
                 .map((r: any) => (
                   <TouchableOpacity
-                    key={r.id}
+                    key={`${r._kind ?? 'team'}-${r.id}`}
                     style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: t.chip }}
                     onPress={() => openPrevReport(r)}
                   >
@@ -817,9 +817,13 @@ export default function TeamReportScreen() {
         )}
 
         {/* Film Catalog — every clip attached to a game report packet */}
-        {reportVideos.length > 0 && (
-          <View style={{ marginTop: 24 }}>
-            <Text style={styles.label}>Film Catalog</Text>
+        <View style={{ marginTop: 24 }}>
+          <Text style={styles.label}>Film Catalog</Text>
+          {reportVideos.length === 0 ? (
+            <Text style={{ color: t.muted2, fontSize: 13, paddingVertical: 12 }}>
+              No film attached to a game report yet. Add film to a packet and it shows up here.
+            </Text>
+          ) : (
             <View style={{ marginTop: 12 }}>
               {reportVideos.map((v: any) => (
                 <View key={v.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: t.chip }}>
@@ -842,8 +846,8 @@ export default function TeamReportScreen() {
                 </View>
               ))}
             </View>
-          </View>
-        )}
+          )}
+        </View>
       </KeyboardAwareScrollView>
 
       {/* Report film player modal */}
@@ -897,10 +901,9 @@ export default function TeamReportScreen() {
                 <TouchableOpacity
                   style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.ctaBg, borderRadius: 10, paddingVertical: 12 }}
                   onPress={() => {
-                    if (!selectedPrevReport) return;
-                    const rep = selectedPrevReport;
-                    setSelectedPrevReport(null);
-                    setTimeout(() => setPrevShareReport(rep), 200);
+                    // Keep the report modal open behind the share sheet so it's
+                    // clear exactly which report is being shared.
+                    if (selectedPrevReport) setPrevShareReport(selectedPrevReport);
                   }}
                 >
                   <Ionicons name="share-social-outline" size={15} color={t.ctaText} />

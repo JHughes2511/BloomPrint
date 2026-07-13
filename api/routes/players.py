@@ -172,7 +172,11 @@ def player_evaluations(
     if not _can_see_player(db, coach, player):
         raise HTTPException(status_code=403, detail="You don't have access to this player")
     # A coach sees only their OWN evaluations of the player (their personal BIM).
-    return [e for e in player.evaluations if e.coach_id == coach.id]
+    from .evaluations import _backfill_parsed
+    own = [e for e in player.evaluations if e.coach_id == coach.id]
+    for e in own:
+        _backfill_parsed(db, e)
+    return own
 
 
 @router.get("/{player_id}/videos")

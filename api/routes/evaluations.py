@@ -253,7 +253,7 @@ async def submit_evaluation(
         )
     from video_vision.bim import build_prompt
     bim_prompt = build_prompt(output_type, coach.program_name, competition_level, coach.weight, player.name)
-    bim_prompt += f"\n\nADDITIONAL COACHING FOCUS:\n{combined_focus}"
+    bim_prompt += f"\n\nADDITIONAL FOCUS:\n{combined_focus}"
 
     import anthropic
     client = anthropic.AsyncAnthropic()
@@ -542,6 +542,7 @@ def get_evaluation(
     ev = db.get(models.Evaluation, eval_id)
     if not ev:
         raise HTTPException(status_code=404, detail="Evaluation not found")
+    _backfill_parsed(db, ev)
     return ev
 
 
@@ -854,19 +855,58 @@ def _parse_pillar_grades(text: str) -> dict:
 
 
 def _parse_list_section(text: str, section: str) -> list[str]:
-    # Match the section header, then capture lines that look like list items.
-    # Stop when we hit a blank line followed by an ALL-CAPS header (next section).
-    pattern = rf"{re.escape(section)}[:\s]*\n(.*?)(?=\n[A-Z][A-Z\s]{{3,}}[:\n]|\Z)"
+    """Extract a section (GREEN FLAGS, WATCH FLAGS, KEY QUESTIONS, …) as a list of
+    items. Handles BOTH shapes the model produces: bulleted lines under the header,
+    AND an inline paragraph on the same line ("GREEN FLAGS: point one. point two.")
+    — the latter is split into items by sentence."""
+    # Capture everything after the header (inline or on following lines) up to the
+    # next ALL-CAPS header (start of line) or end of text.
+    pattern = rf"{re.escape(section)}\s*:?\s*(.*?)(?=\n\s*[A-Z][A-Z0-9 /&'()\-]{{3,}}\s*:|\Z)"
     m = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
     if not m:
         return []
-    block = m.group(1)
-    lines = [
-        _strip_md(re.sub(r"^[-·*\d\.\s]+", "", l)).strip()
+    block = m.group(1).strip()
+    if not block:
+        return []
+    # Bulleted form: keep only real list lines.
+    bullets = [
+        _strip_md(re.sub(r"^[-·*•\d\.\)\s]+", "", l)).strip()
         for l in block.splitlines()
-        if l.strip() and re.match(r"^[-·*\d\.\s]", l.strip())
+        if re.match(r"^\s*(?:[-·*•]|\d+[.\)])\s+", l)
     ]
-    return [l for l in lines if l]
+    bullets = [b for b in bullets if b]
+    if bullets:
+        return bullets
+    # Inline paragraph form: collapse to one line and split into sentences.
+    para = _strip_md(" ".join(l.strip() for l in block.splitlines() if l.strip()))
+    parts = re.split(r"(?<=[.!?])\s+(?=[A-Z0-9\"'])", para)
+    return [p.strip() for p in parts if p.strip()]
+
+
+def _backfill_parsed(db, ev) -> None:
+    """Older evals were parsed with a stricter parser that missed inline flag
+    paragraphs, leaving green/watch/questions empty. Re-parse from report_text on
+    read and persist so they populate without regenerating the report."""
+    if not ev or not ev.report_text:
+        return
+    changed = False
+    if not ev.green_flags:
+        g = _parse_list_section(ev.report_text, "GREEN FLAGS")
+        if g:
+            ev.green_flags = g; changed = True
+    if not ev.watch_flags:
+        w = _parse_list_section(ev.report_text, "WATCH FLAGS")
+        if w:
+            ev.watch_flags = w; changed = True
+    if not ev.key_questions:
+        q = _parse_list_section(ev.report_text, "KEY QUESTIONS")
+        if q:
+            ev.key_questions = q; changed = True
+    if changed:
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
 
 
 def _strip_md(s: str) -> str:

@@ -559,7 +559,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
         return [types.TextContent(type="text", text=f"Error: {e}")]
 
     if focus_prompt:
-        bim_prompt += f"\n\nADDITIONAL COACHING FOCUS:\n{focus_prompt}"
+        bim_prompt += f"\n\nADDITIONAL FOCUS:\n{focus_prompt}"
 
     # Interval sampling: one frame every `interval` seconds across the WHOLE film
     # so a 6-min and a 60-min clip get the same per-minute coverage. For long
