@@ -291,7 +291,8 @@ async def generate_game_report(
     if gr.my_team_id and gr.mode in ("vs_opponent", "my_program"):
         players = db.query(models.Player).filter_by(team_id=gr.my_team_id).all()
         for p in players:
-            parts = [p.name]
+            name = f"#{p.jersey_number} {p.name}" if p.jersey_number else p.name
+            parts = [name]
             if p.position: parts.append(p.position)
             if p.height: parts.append(p.height)
             if p.wingspan: parts.append(f"ws:{p.wingspan}")
@@ -311,7 +312,8 @@ async def generate_game_report(
     if gr.opponent_team_id and gr.mode in ("vs_opponent", "opponent_only"):
         players = db.query(models.Player).filter_by(team_id=gr.opponent_team_id).all()
         for p in players:
-            parts = [p.name]
+            name = f"#{p.jersey_number} {p.name}" if p.jersey_number else p.name
+            parts = [name]
             if p.position: parts.append(p.position)
             if p.height: parts.append(p.height)
             if p.wingspan: parts.append(f"ws:{p.wingspan}")
@@ -365,6 +367,13 @@ async def generate_game_report(
         f"Generate a {describe_output_type(gr.output_type)} for: {matchup}",
         f"PROGRAM: {my_team_name}",
     ]
+    if my_roster_context or opp_roster_context:
+        sections.append(
+            "\nWhen the film shows a jersey number, MAP IT to the matching player in the "
+            "rosters below (each player is listed as '#<number> <name>') and refer to them by "
+            "name. Do NOT claim a player is absent or unknown if their number appears on a "
+            "roster below — use the roster as the source of truth for who is on the floor."
+        )
     if my_roster_context:
         sections.append(f"\nMY TEAM ROSTER ({my_team_name}):\n{my_roster_context}")
     if opp_roster_context:
@@ -378,7 +387,7 @@ async def generate_game_report(
     if remembered:
         sections.append(f"\nKNOWLEDGE BASE ON {opp_name} (use as reference):{remembered}")
     if gr.focus_prompt:
-        sections.append(f"\nCOACH FOCUS:\n{gr.focus_prompt}")
+        sections.append(f"\nFOCUS:\n{gr.focus_prompt}")
 
     if gr.output_type == "game_situational":
         sections.append(
@@ -488,7 +497,7 @@ async def generate_team_training(
     if film_context:
         sections.append(f"\nFILM ANALYSIS:{film_context}")
     if body.focus_prompt:
-        sections.append(f"\nCOACH FOCUS:\n{body.focus_prompt}")
+        sections.append(f"\nFOCUS:\n{body.focus_prompt}")
 
     sections.append(
         "\nGenerate a comprehensive team training program based on the film analysis and player eval data. "

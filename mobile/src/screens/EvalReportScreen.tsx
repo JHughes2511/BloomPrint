@@ -44,7 +44,7 @@ const EXPORT_CATEGORIES = [
   { key: 'flags',      label: 'Green Flags & Watch Flags' },
   { key: 'questions',  label: 'Key Questions' },
   { key: 'report',     label: 'Full Report' },
-  { key: 'corrections', label: 'Coach Corrections' },
+  { key: 'corrections', label: 'Corrections' },
 ];
 
 export default function EvalReportScreen() {
@@ -344,7 +344,7 @@ export default function EvalReportScreen() {
     }
 
     if (cats.corrections && corrections.length) {
-      body += `<h3>Coach Corrections</h3>`;
+      body += `<h3>Corrections</h3>`;
       corrections.forEach(c => {
         const pillarLabel = c.pillar ? `<strong>${c.pillar.replace(/_/g, ' ').toUpperCase()}</strong><br/>` : '';
         body += `<div style="background:#f9fafb;border-left:3px solid #2563eb;padding:8px 12px;margin:6px 0;font-size:12px">${pillarLabel}${sanitize(c.correction)}</div>`;
@@ -724,7 +724,7 @@ export default function EvalReportScreen() {
       {/* Corrections */}
       {corrections.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Coach Corrections ({corrections.length})</Text>
+          <Text style={styles.sectionLabel}>Corrections ({corrections.length})</Text>
           {corrections.map((c: any) => (
             <View key={c.id} style={[styles.correctionCard, c.applied && { opacity: 0.55 }]}>
               {c.pillar && <Text style={styles.correctionPillar}>{c.pillar.replace(/_/g, ' ').toUpperCase()}</Text>}

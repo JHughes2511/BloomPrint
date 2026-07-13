@@ -615,7 +615,7 @@ export default function GameReportBuilderScreen() {
 
         {/* Focus */}
         <View onLayout={e => { focusPromptY.current = e.nativeEvent.layout.y; }}>
-          <Text style={styles.label}>Coach Focus (optional)</Text>
+          <Text style={styles.label}>Focus (optional)</Text>
           <VoiceTextInput
             style={[styles.textArea, { minHeight: 60 }]}
             placeholder="e.g. Upcoming tournament, press defense scheme..."

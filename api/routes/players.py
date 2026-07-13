@@ -273,7 +273,7 @@ async def player_summary(
         f"Generate a {describe_output_type(body.output_type)} that SUMMARIZES ALL EVALUATION HISTORY for {player.name}.\n\n"
         f"EVALUATION HISTORY:\n{eval_context}\n"
         f"{tracked_block}\n\n"
-        f"{('COACH FOCUS: ' + focus) if focus else ''}\n\n"
+        f"{('FOCUS: ' + focus) if focus else ''}\n\n"
         "Synthesize trends, growth over time, consistent strengths, persistent concerns, "
         "and the player's trajectory. Provide an overall composite grade and pillar grades. "
         "Format with clear BIM sections including OVERALL GRADE, pillar grades, GREEN FLAGS, WATCH FLAGS, and KEY QUESTIONS."

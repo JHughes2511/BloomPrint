@@ -361,7 +361,7 @@ def apply_coach_training_corrections(
     prompt = (
         f"You are the BloomPrint Basketball Intelligence Model.\n"
         f"Here is the current training program for {player_name}:\n\n{session.program_text or ''}\n\n"
-        f"COACH CORRECTIONS:\n{feedback}\n\n"
+        f"CORRECTIONS:\n{feedback}\n\n"
         "Update the training program incorporating ALL corrections. Keep the same structure but adjust "
         "focus areas, drills, and weekly plan."
         f"{REPORT_FORMAT}"

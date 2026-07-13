@@ -585,10 +585,20 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
         except Exception:
             transcript_text = ""
 
+    def _fmt_ts(ts: float) -> str:
+        ts = max(int(round(ts)), 0)
+        return f"{ts // 60:02d}:{ts % 60:02d}"
+
     def _frames_content(fr):
-        c = [{"type": "text", "text": "\nVIDEO FRAMES:"}]
+        c = [{"type": "text", "text": (
+            "\nVIDEO FRAMES (each is labeled with its film timestamp [MM:SS]). "
+            "When you reference a specific moment, play, or action, cite the film "
+            "timestamp like (12:34) — never frame numbers or raw seconds. If a "
+            "scoreboard/game clock and score are visible in the frame, you may cite "
+            "those instead (e.g. 'Q3 4:12, 45-40')."
+        )}]
         for ts, frame in fr:
-            c.append({"type": "text", "text": f"[Frame at {ts:.1f}s]"})
+            c.append({"type": "text", "text": f"[{_fmt_ts(ts)}]"})
             c.append({"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": _frame_to_base64(frame)}})
         return c
 
@@ -615,9 +625,10 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                     pass
             t0, t1 = ch[0][0], ch[-1][0]
             seg_prompt = (
-                f"You are analyzing SEGMENT {i} of {len(chunks)} of game film (≈{t0:.0f}s–{t1:.0f}s) for a "
+                f"You are analyzing SEGMENT {i} of {len(chunks)} of game film ({_fmt_ts(t0)}–{_fmt_ts(t1)}) for a "
                 f"{output_type.replace('_', ' ')}. From the frames, note the key basketball observations: what "
                 f"actions/sets are run, tendencies, notable plays, and visible strengths/weaknesses for {player_name or 'the team'}. "
+                "Cite specific moments by their film timestamp [MM:SS] (e.g. (12:34)), never frame numbers or raw seconds. "
                 "Be concise and specific — these notes will be synthesized into one full report. Do NOT grade yet."
             )
             seg_content = [{"type": "text", "text": seg_prompt}] + _frames_content(ch)
