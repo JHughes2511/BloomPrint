@@ -64,6 +64,12 @@ export default function GameReportBuilderScreen() {
 
   const [report, setReport] = useState<any>(null);
   const [reportId, setReportId] = useState<number | null>(existingId ?? null);
+  const [versions, setVersions] = useState<any[]>([]);
+  const [versionView, setVersionView] = useState<any>(null);
+  const loadVersions = (id: number | null) => {
+    if (!id) return;
+    gameReportsAPI.versions(id).then(setVersions).catch(() => setVersions([]));
+  };
   const [teams, setTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -148,6 +154,7 @@ export default function GameReportBuilderScreen() {
       gameReportsAPI.get(existingId).then(r => {
         setReport(r);
         populateFromReport(r);
+        loadVersions(existingId);
         setLoading(false);
       }).catch(() => setLoading(false));
     } else {
@@ -307,6 +314,7 @@ export default function GameReportBuilderScreen() {
         updated = await gameReportsAPI.generate(reportId);
       }
       setReport(updated);
+      loadVersions(reportId);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate report');
@@ -327,6 +335,7 @@ export default function GameReportBuilderScreen() {
       if (pending) await gameReportsAPI.addCorrection(reportId, pending);
       const updated = await gameReportsAPI.regenerate(reportId);
       setReport(updated);
+      loadVersions(reportId);
       setCorrectionText('');
       await loadGameCorrections(reportId);
     } catch (e: any) {
@@ -676,6 +685,32 @@ export default function GameReportBuilderScreen() {
           label={clipProgress || 'Uploading and analyzing film — keep this screen open.'}
         />
 
+        {/* Saved reports — one per report-type selection, kept in the packet */}
+        {versions.length > 0 && (
+          <View style={{ marginTop: 28 }}>
+            <Text style={styles.label}>Saved Reports ({versions.length})</Text>
+            <View style={{ marginTop: 10, gap: 8 }}>
+              {versions.map((v: any) => (
+                <TouchableOpacity
+                  key={v.id}
+                  style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: t.chip, flexDirection: 'row', alignItems: 'center', gap: 10 }}
+                  onPress={() => setVersionView(v)}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: t.ink, fontSize: 13, fontFamily: fonts[700] }} numberOfLines={1}>
+                      {String(v.output_type || '').split(',').map((s: string) => s.replace(/_/g, ' ').trim()).filter(Boolean).map((s: string) => s.replace(/\b\w/g, c => c.toUpperCase())).join(' · ') || 'Report'}
+                    </Text>
+                    <Text style={{ color: t.muted2, fontSize: 11, marginTop: 2 }}>
+                      Updated {new Date(v.updated_at || v.created_at).toLocaleDateString()}
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={t.muted2} />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+
         {/* Report output */}
         {report?.report_text ? (
           <View style={{ marginTop: 28 }}>
@@ -755,6 +790,30 @@ export default function GameReportBuilderScreen() {
       </KeyboardAwareScrollView>
 
       {/* Clip analysis modal */}
+      {/* Saved report version viewer */}
+      <Modal visible={!!versionView} animationType="slide" transparent onRequestClose={() => setVersionView(null)}>
+        <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: t.ink, fontSize: 17, fontFamily: fonts[800] }} numberOfLines={2}>
+                  {String(versionView?.output_type || '').split(',').map((s: string) => s.replace(/_/g, ' ').trim()).filter(Boolean).map((s: string) => s.replace(/\b\w/g, (c: string) => c.toUpperCase())).join(' · ') || 'Report'}
+                </Text>
+                <Text style={{ color: t.muted, fontSize: 11, marginTop: 2 }}>
+                  {versionView ? `Updated ${new Date(versionView.updated_at || versionView.created_at).toLocaleDateString()}` : ''}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setVersionView(null)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
+            </View>
+            <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }}>
+              {versionView?.report_text
+                ? renderReport(versionView.report_text, { heading: t.ink, body: t.inkSoft })
+                : <Text style={{ color: t.muted }}>No content.</Text>}
+            </KeyboardAwareScrollView>
+          </View>
+        </View>
+      </Modal>
+
       <Modal visible={!!clipModal} animationType="slide" transparent>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>

@@ -154,6 +154,25 @@ def _build_out(gr: models.GameReport) -> schemas.GameReportOut:
     return out
 
 
+def _save_version(db: Session, gr: models.GameReport, text: str) -> None:
+    """Persist a generated report inside the packet, keyed by its output_type
+    selection. Same selection overwrites its version; a new selection adds one.
+    Also mirrors the text onto gr.report_text as the packet's 'latest'."""
+    sig = gr.output_type or "coaching_report"
+    row = (
+        db.query(models.GameReportVersion)
+        .filter_by(game_report_id=gr.id, output_type=sig)
+        .first()
+    )
+    if row:
+        row.report_text = text
+    else:
+        db.add(models.GameReportVersion(
+            game_report_id=gr.id, coach_id=gr.coach_id, output_type=sig, report_text=text,
+        ))
+    gr.report_text = text
+
+
 @router.get("", response_model=list[schemas.GameReportOut])
 def list_game_reports(
     db: Session = Depends(get_db),
@@ -179,6 +198,78 @@ def create_game_report(
     db.commit()
     db.refresh(gr)
     return _build_out(gr)
+
+
+def _packet_title(gr: models.GameReport) -> str:
+    my = gr.my_team.name if gr.my_team else None
+    opp = gr.opponent_team.name if gr.opponent_team else gr.opponent_name
+    if gr.title:
+        return gr.title
+    if gr.mode == "opp_vs_opp":
+        a = gr.my_team.name if gr.my_team else (gr.opponent_a_name or "Opponent A")
+        return f"{a} vs {opp or 'Opponent B'}"
+    if gr.mode == "vs_opponent" and opp:
+        return f"{my or 'My Team'} vs {opp}"
+    if gr.mode == "my_program":
+        return my or "My Team"
+    return opp or "Opponent"
+
+
+def _ensure_versions(db: Session, gr: models.GameReport) -> list[models.GameReportVersion]:
+    """Return a packet's saved versions, backfilling one from the legacy
+    report_text for packets generated before versioning existed."""
+    versions = list(gr.versions)
+    if not versions and gr.report_text:
+        v = models.GameReportVersion(
+            game_report_id=gr.id, coach_id=gr.coach_id,
+            output_type=gr.output_type or "coaching_report", report_text=gr.report_text,
+        )
+        db.add(v)
+        db.commit()
+        db.refresh(gr)
+        versions = list(gr.versions)
+    return versions
+
+
+def _version_out(v: models.GameReportVersion, gr: models.GameReport) -> dict:
+    return {
+        "id": v.id,
+        "report_id": gr.id,
+        "output_type": v.output_type,
+        "title": _packet_title(gr),
+        "report_text": v.report_text,
+        "created_at": v.created_at,
+        "updated_at": v.updated_at,
+    }
+
+
+@router.get("/versions")
+def all_report_versions(
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Every saved report version across the coach's packets (for Previous
+    Reports + Recent), newest first."""
+    reports = db.query(models.GameReport).filter_by(coach_id=coach.id).all()
+    out = []
+    for gr in reports:
+        for v in _ensure_versions(db, gr):
+            if v.report_text:
+                out.append(_version_out(v, gr))
+    out.sort(key=lambda x: str(x["updated_at"] or x["created_at"] or ""), reverse=True)
+    return out
+
+
+@router.get("/{report_id}/versions")
+def report_versions(
+    report_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    gr = db.get(models.GameReport, report_id)
+    if not gr or gr.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Game report not found")
+    return [_version_out(v, gr) for v in _ensure_versions(db, gr) if v.report_text]
 
 
 @router.get("/{report_id}", response_model=schemas.GameReportOut)
@@ -589,7 +680,7 @@ async def generate_game_report(
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
 
-    gr.report_text = text_blocks[0].text
+    _save_version(db, gr, text_blocks[0].text)
     db.commit()
     db.refresh(gr)
     return _build_out(gr)
@@ -682,8 +773,8 @@ async def generate_team_training(
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
 
-    gr.report_text = text_blocks[0].text
     gr.output_type = "team_training"
+    _save_version(db, gr, text_blocks[0].text)
     db.commit()
     db.refresh(gr)
     return _build_out(gr)
@@ -756,7 +847,7 @@ async def correct_game_report(
             max_tokens=16000,
             messages=[{"role": "user", "content": prompt}],
         )
-        gr.report_text = response.content[0].text.strip()
+        _save_version(db, gr, response.content[0].text.strip())
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Correction failed: {exc}")
 
@@ -839,7 +930,7 @@ async def regenerate_game_report(
             max_tokens=16000,
             messages=[{"role": "user", "content": prompt}],
         )
-        gr.report_text = response.content[0].text.strip()
+        _save_version(db, gr, response.content[0].text.strip())
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Correction failed: {exc}")
     for c in pending:

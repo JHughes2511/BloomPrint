@@ -128,33 +128,21 @@ export default function TeamReportScreen() {
   const loadPrevReports = async () => {
     setLoadingPrevReports(true);
     try {
-      const [reports, packets] = await Promise.all([
+      const [reports, versions] = await Promise.all([
         evalsAPI.teamReports(50),
-        gameReportsAPI.list().catch(() => []),
+        gameReportsAPI.allVersions().catch(() => []),
       ]);
-      // Fold in finished packet game reports so they show alongside team reports.
-      const packetItems = (packets ?? [])
-        .filter((gr: any) => gr.report_text)
-        .map((gr: any) => {
-          const myName = gr.my_team_name;
-          const oppName = gr.opponent_team_name ?? gr.opponent_name;
-          let title = gr.title;
-          if (!title) {
-            if (gr.mode === 'opp_vs_opp') title = `${myName ?? 'Opponent A'} vs ${oppName ?? 'Opponent B'}`;
-            else if (gr.mode === 'vs_opponent' && oppName) title = `${myName ?? 'My Team'} vs ${oppName}`;
-            else if (gr.mode === 'my_program') title = myName ?? 'My Team';
-            else title = oppName ?? 'Opponent';
-          }
-          return {
-            id: gr.id,
-            _kind: 'game',
-            _reportId: gr.id,
-            title,
-            output_type: gr.output_type,
-            report_text: gr.report_text,
-            created_at: gr.updated_at || gr.created_at,
-          };
-        });
+      // Fold in every saved packet report VERSION (one per report-type selection)
+      // so each generated report shows alongside team reports.
+      const packetItems = (versions ?? []).map((v: any) => ({
+        id: `gv-${v.id}`,
+        _kind: 'game',
+        _reportId: v.report_id,
+        title: v.title,
+        output_type: v.output_type,
+        report_text: v.report_text,
+        created_at: v.updated_at || v.created_at,
+      }));
       const merged = [...(reports ?? []), ...packetItems].sort(
         (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       );

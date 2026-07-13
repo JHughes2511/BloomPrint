@@ -41,7 +41,8 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 type ReportItem = {
-  id: number;
+  id: number | string;
+  report_id?: number;   // for packet report versions: the owning packet id
   kind: 'eval' | 'team' | 'game' | 'training' | 'scout' | 'gamereport';
   player_name?: string;
   output_type: string;
@@ -257,7 +258,7 @@ export default function RecentScreen() {
       const [evals, teamReports, gameReports, trainingSessions, gameSessions, sharedInbox] = await Promise.all([
         evalsAPI.recent(),
         evalsAPI.teamReports(),
-        gameReportsAPI.list().catch(() => []),
+        gameReportsAPI.allVersions().catch(() => []),
         trainingAPI.recent().catch(() => []),
         gameEvalAPI.listSessions().catch(() => []),
         staffSharingAPI.inbox().catch(() => []),
@@ -278,14 +279,16 @@ export default function RecentScreen() {
         overall_grade: null,
         created_at: tr.created_at,
       }));
-      const gameItems: ReportItem[] = gameReports.map((g: any) => ({
-        id: g.id,
+      // Each saved packet report VERSION (one per report-type selection).
+      const gameItems: ReportItem[] = (gameReports ?? []).map((v: any) => ({
+        id: `gv-${v.id}`,
+        report_id: v.report_id,
         kind: 'game',
-        player_name: g.title || (g.my_team_name ? `${g.my_team_name}${g.opponent_team_name ? ` vs ${g.opponent_team_name}` : ''}` : 'Game Report'),
-        output_type: g.output_type,
+        player_name: v.title || 'Game Report',
+        output_type: v.output_type,
         overall_grade: null,
-        created_at: g.updated_at || g.created_at,
-        report_text: g.report_text,
+        created_at: v.updated_at || v.created_at,
+        report_text: v.report_text,
       }));
       const trainingItems: ReportItem[] = trainingSessions.map((ts: any) => ({
         id: ts.id,
@@ -428,7 +431,7 @@ export default function RecentScreen() {
       return;
     }
     if (item.kind === 'game') {
-      navigation.navigate('GameReportBuilder', { reportId: item.id });
+      navigation.navigate('GameReportBuilder', { reportId: item.report_id ?? item.id });
       return;
     }
     if (item.kind === 'scout') {
@@ -482,17 +485,18 @@ export default function RecentScreen() {
 
   const handleDelete = (item: ReportItem) => {
     if (item.shared) return; // a report shared with me isn't mine to delete
-    if (item.kind === 'training' || item.kind === 'scout' || item.kind === 'gamereport') return; // not deletable from recents
+    // Packet reports (and versions) are managed from Team Eval, not deletable here.
+    if (item.kind === 'training' || item.kind === 'scout' || item.kind === 'gamereport' || item.kind === 'game') return;
     Alert.alert('Delete Report', 'Permanently delete this report?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: async () => {
         try {
           if (item.kind === 'eval') {
-            await evalsAPI.delete(item.id);
+            await evalsAPI.delete(item.id as number);
           } else if (item.kind === 'team') {
-            await evalsAPI.deleteTeamReport(item.id);
+            await evalsAPI.deleteTeamReport(item.id as number);
           } else {
-            await gameReportsAPI.delete(item.id);
+            await gameReportsAPI.delete(item.id as number);
           }
           load();
         } catch (e: any) {
@@ -832,7 +836,7 @@ export default function RecentScreen() {
                         title: item.kind === 'scout' ? 'Scouting Report' : 'Game Report',
                         subject: item.player_name, text: item.report_text!,
                         reportType: item.kind === 'scout' ? 'game_session' : item.kind === 'gamereport' ? 'game_report' : 'game',
-                        reportId: item.id, outputType: item.kind === 'scout' ? 'scouting_report' : item.kind === 'gamereport' ? 'game_report' : (item.output_type ?? 'coaching_report'),
+                        reportId: (item.kind === 'game' ? (item.report_id ?? item.id) : item.id) as number, outputType: item.kind === 'scout' ? 'scouting_report' : item.kind === 'gamereport' ? 'game_report' : (item.output_type ?? 'coaching_report'),
                       })}
                     >
                       <Ionicons name="document-text-outline" size={13} color={t.accent} />
@@ -842,7 +846,7 @@ export default function RecentScreen() {
                   {item.kind === 'game' && !item.shared && (
                     <TouchableOpacity
                       style={styles.gameActionBtn}
-                      onPress={() => navigation.navigate('GameReportBuilder', { reportId: item.id })}
+                      onPress={() => navigation.navigate('GameReportBuilder', { reportId: item.report_id ?? item.id })}
                     >
                       <Ionicons name="create-outline" size={13} color={t.muted} />
                       <Text style={styles.gameActionText}>Edit Packet</Text>
@@ -900,10 +904,10 @@ export default function RecentScreen() {
                                     item.kind === 'gamereport' ? 'Game Report' :
                                     item.kind === 'game' ? 'Game Report' :
                                     item.kind === 'team' ? 'Team Report' : 'Player Eval';
-                      const fullText = item.program_text ?? item.report_text ?? (teamReportTexts[item.id] ?? '');
+                      const fullText = item.program_text ?? item.report_text ?? (teamReportTexts[item.id as number] ?? '');
                       setShareCtx({
                         reportType,
-                        reportId: item.id,
+                        reportId: (item.kind === 'game' ? (item.report_id ?? item.id) : item.id) as number,
                         outputType: item.output_type ?? (item.kind === 'training' ? 'training_program' : 'coaching_report'),
                         reportText: fullText,
                         title: label,

@@ -501,6 +501,26 @@ class GameReport(Base):
     opponent_team = relationship("Team", foreign_keys=[opponent_team_id])
     clips         = relationship("GameReportClip", back_populates="game_report", cascade="all, delete-orphan")
     corrections   = relationship("GameReportCorrection", back_populates="game_report", cascade="all, delete-orphan")
+    versions      = relationship("GameReportVersion", back_populates="game_report",
+                                 cascade="all, delete-orphan", order_by="GameReportVersion.updated_at.desc()")
+
+
+class GameReportVersion(Base):
+    """A generated report saved inside a packet, keyed by the selection of report
+    types (output_type signature). Generating the same selection overwrites its
+    version; a new selection is saved as a separate version. So a packet keeps a
+    history — one entry per distinct report-type combination."""
+    __tablename__ = "game_report_versions"
+
+    id             = Column(Integer, primary_key=True, index=True)
+    game_report_id = Column(Integer, ForeignKey("game_reports.id"), nullable=False)
+    coach_id       = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    output_type    = Column(String, nullable=False)   # the selection signature
+    report_text    = Column(Text, nullable=True)
+    created_at     = Column(DateTime, default=datetime.utcnow)
+    updated_at     = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    game_report    = relationship("GameReport", back_populates="versions")
 
 
 class GameReportCorrection(Base):
