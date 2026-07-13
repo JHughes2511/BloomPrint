@@ -277,11 +277,7 @@ export default function GameReportBuilderScreen() {
 
   const pickDoc = async (docType: 'box_score' | 'scouting_notes') => {
     const res = await DocumentPicker.getDocumentAsync({
-      type: [
-        'text/plain',
-        'application/pdf',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      ],
+      type: '*/*',
       copyToCacheDirectory: true,
     });
     if (res.canceled || !res.assets[0]) return;

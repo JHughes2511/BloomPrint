@@ -194,6 +194,27 @@ export const evalsAPI = {
     api.post(`/evaluations/team-reports/${reportId}/regenerate`).then(r => r.data),
 };
 
+// ── Unified AI imports (any file → preview → commit) ──────────────────────────
+type PickedFile = { uri: string; name: string; type: string };
+const _importForm = (file: PickedFile, extra: Record<string, string> = {}) => {
+  const form = new FormData();
+  form.append('file', file as any);
+  Object.entries(extra).forEach(([k, v]) => form.append(k, v));
+  return form;
+};
+export const importsAPI = {
+  rosterPreview: (file: PickedFile) =>
+    api.post('/imports/roster/preview', _importForm(file), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),
+  rosterCommit: (data: { team_id?: number | null; competition_level?: string; players: any[] }) =>
+    api.post('/imports/roster/commit', data).then(r => r.data),
+  gameStatsPreview: (file: PickedFile) =>
+    api.post('/imports/game-stats/preview', _importForm(file), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),
+  gameStatsCommit: (data: { game_id: number; players: any[] }) =>
+    api.post('/imports/game-stats/commit', data).then(r => r.data),
+  text: (file: PickedFile, purpose = 'coaching notes') =>
+    api.post('/imports/text', _importForm(file, { purpose }), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),
+};
+
 // ── Teams ─────────────────────────────────────────────────────────────────────
 export const teamsAPI = {
   list: () => api.get('/teams').then(r => r.data),

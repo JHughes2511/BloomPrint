@@ -93,9 +93,7 @@ export default function NewEvalScreen() {
   ) => {
     try {
       const res = await DocumentPicker.getDocumentAsync({
-        type: ['application/pdf',
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          'text/*', 'text/csv', 'text/markdown'],
+        type: '*/*',
         copyToCacheDirectory: true,
       });
       if (res.canceled || !res.assets?.[0]) return;

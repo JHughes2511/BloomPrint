@@ -494,7 +494,7 @@ export default function TeamReportScreen() {
           </View>
           <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import')}>
             <Ionicons name="cloud-upload-outline" size={18} color={t.muted} />
-            <Text style={styles.importText}>Import Excel</Text>
+            <Text style={styles.importText}>Import Roster</Text>
           </TouchableOpacity>
         </View>
 

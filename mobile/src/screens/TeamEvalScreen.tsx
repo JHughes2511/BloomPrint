@@ -12,7 +12,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 
-import { gameEvalAPI, teamsAPI, playersAPI, staffSharingAPI, coachesAPI } from '../api/client';
+import { gameEvalAPI, teamsAPI, playersAPI, staffSharingAPI, coachesAPI, importsAPI } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
@@ -156,6 +156,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [trackMode, setTrackMode] = useState<'live' | 'post'>('live');
   const [newGameLevel, setNewGameLevel] = useState<string>('HS Varsity');
   const [importing, setImporting] = useState(false);
+  const [statPreview, setStatPreview] = useState<any[] | null>(null);
   const [teams, setTeams] = useState<any[]>([]);
   const [creating, setCreating] = useState(false);
 
@@ -325,6 +326,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
   // ── Post-game import ─────────────────────────────────────────────────────────
 
+  // AI stat import: any file → preview → confirm → commit.
   const importGameStats = async () => {
     if (!activeGame) return;
     try {
@@ -332,16 +334,35 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       if (res.canceled || !res.assets?.[0]) return;
       const f = res.assets[0];
       setImporting(true);
-      const result = await gameEvalAPI.importStats(
-        activeGame.id,
-        { uri: f.uri, name: f.name ?? 'boxscore.xlsx', type: f.mimeType ?? 'application/octet-stream' },
-        entryMode === 'opponent',
+      const result = await importsAPI.gameStatsPreview(
+        { uri: f.uri, name: f.name ?? 'boxscore', type: f.mimeType ?? 'application/octet-stream' },
       );
+      const players = (result?.players ?? []).map((p: any) => ({ ...p, _include: true }));
+      if (!players.length) {
+        Alert.alert('Nothing found', 'The AI could not read any stats from that file.');
+        return;
+      }
+      setStatPreview(players);
+    } catch (e: any) {
+      Alert.alert('Import Error', e?.response?.data?.detail ?? 'Could not read that file.');
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const commitGameStats = async () => {
+    if (!activeGame || !statPreview) return;
+    const players = statPreview.filter((p: any) => p._include).map(({ _include, ...rest }: any) => rest);
+    if (!players.length) { Alert.alert('Nothing selected', 'Keep at least one player to import.'); return; }
+    setImporting(true);
+    try {
+      const result = await importsAPI.gameStatsCommit({ game_id: activeGame.id, players });
       const stats = await gameEvalAPI.listStats(activeGame.id);
       setGameStats(stats);
-      Alert.alert('Imported', `${result?.imported ?? 0} stat${result?.imported === 1 ? '' : 's'} imported${entryMode === 'opponent' ? ' for the opponent' : ''}.`);
+      setStatPreview(null);
+      Alert.alert('Imported', `${result?.imported ?? 0} stat line${result?.imported === 1 ? '' : 's'} imported.`);
     } catch (e: any) {
-      Alert.alert('Import Error', e?.response?.data?.detail ?? 'Could not import that file. Use an .xlsx box score.');
+      Alert.alert('Import Error', e?.response?.data?.detail ?? 'Could not import stats.');
     } finally {
       setImporting(false);
     }
@@ -2252,6 +2273,47 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           )}
         </KeyboardAwareScrollView>
       )}
+
+      {/* Imported stats preview — confirm before committing */}
+      <Modal visible={!!statPreview} transparent animationType="slide" onRequestClose={() => setStatPreview(null)}>
+        <View style={s.modalOverlay}>
+          <View style={[s.modalBox, { maxHeight: '85%' }]}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <Text style={s.modalTitle}>Review Imported Stats</Text>
+              <TouchableOpacity onPress={() => setStatPreview(null)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
+            </View>
+            <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>
+              Tap a player to include/exclude. Confirm to add these stats to the game.
+            </Text>
+            <ScrollView style={{ maxHeight: 380 }}>
+              {(statPreview ?? []).map((p: any, i: number) => (
+                <TouchableOpacity
+                  key={i}
+                  style={{ backgroundColor: t.card, borderRadius: 10, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: p._include ? t.accent : t.line, opacity: p._include ? 1 : 0.5 }}
+                  onPress={() => setStatPreview(prev => prev!.map((x, xi) => xi === i ? { ...x, _include: !x._include } : x))}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Ionicons name={p._include ? 'checkmark-circle' : 'ellipse-outline'} size={18} color={p._include ? t.accent : t.muted} />
+                    <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700], flex: 1 }}>{p.player_name}</Text>
+                    {p.is_opponent && <Text style={{ color: t.negative, fontSize: 10, fontFamily: fonts[700] }}>OPP</Text>}
+                  </View>
+                  <Text style={{ color: t.muted2, fontSize: 11, marginTop: 4 }}>
+                    {Object.entries(p.stats ?? {}).map(([k, v]) => `${k}: ${v}`).join('  ·  ') || 'No stats read'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+              <TouchableOpacity style={[s.modalBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setStatPreview(null)}>
+                <Text style={{ color: t.muted, fontFamily: fonts[700] }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[s.modalBtn, { flex: 1.5, backgroundColor: t.ctaBg }]} onPress={commitGameStats} disabled={importing}>
+                {importing ? <ActivityIndicator color={t.ctaText} /> : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Import Stats</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* New Game Modal */}
       <Modal visible={showNewGame} transparent animationType="slide">

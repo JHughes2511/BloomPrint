@@ -84,10 +84,7 @@ export default function HomeScreen() {
   const importPhilosophyDoc = async () => {
     try {
       const res = await DocumentPicker.getDocumentAsync({
-        type: ['application/pdf', 'image/*',
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'text/*', 'text/csv'],
+        type: '*/*',
         copyToCacheDirectory: true,
       });
       if (res.canceled || !res.assets?.[0]) return;
