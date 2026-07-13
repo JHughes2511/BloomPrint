@@ -558,7 +558,12 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     except ValueError as e:
         return [types.TextContent(type="text", text=f"Error: {e}")]
 
-    if focus_prompt:
+    # Player evals request a tailored ADDITIONAL FOCUS output section; clip
+    # analyses just get the focus as plain context.
+    if args.get("additional_focus"):
+        from .bim import additional_focus_directive
+        bim_prompt += additional_focus_directive(focus_prompt)
+    elif focus_prompt:
         bim_prompt += f"\n\nADDITIONAL FOCUS:\n{focus_prompt}"
 
     # Interval sampling: one frame every `interval` seconds across the WHOLE film

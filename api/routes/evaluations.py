@@ -75,6 +75,7 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
             "coach_weight": coach_weight,
             "player_name": player_name,
             "focus_prompt": combined_focus,
+            "additional_focus": True,   # player eval → tailored ADDITIONAL FOCUS section
             "interval_seconds": 12.0,   # one frame ~every 12s; chunked for long film
             "max_frames": max_frames,
             "include_audio": include_audio,
@@ -258,14 +259,15 @@ async def submit_evaluation(
             detail="ANTHROPIC_API_KEY is not set on the server. Ask the server admin to configure it."
         )
     from video_vision.bim import build_prompt
+    from video_vision.bim import additional_focus_directive
     bim_prompt = build_prompt(output_type, coach.program_name, competition_level, coach.weight, player.name)
-    bim_prompt += f"\n\nADDITIONAL FOCUS:\n{combined_focus}"
+    bim_prompt += additional_focus_directive(combined_focus)
 
     import anthropic
     client = anthropic.AsyncAnthropic()
     response = await client.messages.create(
         model="claude-opus-4-7",
-        max_tokens=8192,
+        max_tokens=16000,
         messages=[{"role": "user", "content": bim_prompt}],
     )
     report_text = response.content[0].text

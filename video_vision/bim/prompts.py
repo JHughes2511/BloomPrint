@@ -46,6 +46,22 @@ from .vocabulary import (
 )
 
 
+def additional_focus_directive(context: str) -> str:
+    """Inject the coach's context (player metrics, notes, focus, program profile)
+    and REQUIRE the report to end with a tailored ADDITIONAL FOCUS section. The
+    context is guidance to weave in — not something to echo verbatim."""
+    context = (context or "").strip()
+    directive = (
+        "\n\nAlways END the report with a section titled exactly \"ADDITIONAL FOCUS:\" — a short, "
+        "prioritized list of concrete coaching and development recommendations tailored to THIS "
+        "player. List each recommendation on its own line starting with \"- \" (a hyphen and a "
+        "space), one idea per bullet. Do NOT echo the coach context verbatim; synthesize it."
+    )
+    if context:
+        return f"\n\nCOACH CONTEXT (use to tailor the whole report — do not echo verbatim):\n{context}{directive}"
+    return directive
+
+
 def _film_vocab_block() -> str:
     lines = ["LOCKED FILM VOCABULARY — label every concept you identify:"]
     for category, concepts in FILM_VOCABULARY.items():
