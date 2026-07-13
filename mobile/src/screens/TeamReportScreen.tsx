@@ -11,7 +11,8 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import { evalsAPI, teamsAPI, playerAPI, gameReportsAPI, staffSharingAPI, coachesAPI } from '../api/client';
+import { Video, ResizeMode } from 'expo-av';
+import { evalsAPI, teamsAPI, playerAPI, gameReportsAPI, staffSharingAPI, coachesAPI, authedVideoSource } from '../api/client';
 import ShareModal from '../components/ShareModal';
 import { useAuth } from '../context/AuthContext';
 import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
@@ -71,11 +72,26 @@ export default function TeamReportScreen() {
   const [gameReports, setGameReports] = useState<any[]>([]);
   const [loadingGameReports, setLoadingGameReports] = useState(true);
 
+  const [reportVideos, setReportVideos] = useState<any[]>([]);
+  const [videoSource, setVideoSource] = useState<any>(null);
+  const [videoTitle, setVideoTitle] = useState('');
+
   const loadGameReports = () => {
     gameReportsAPI.list().then(setGameReports).catch(() => {}).finally(() => setLoadingGameReports(false));
+    gameReportsAPI.videos().then(setReportVideos).catch(() => setReportVideos([]));
   };
 
   useFocusEffect(React.useCallback(() => { loadGameReports(); }, []));
+
+  const openReportVideo = async (v: any) => {
+    try {
+      const src = await authedVideoSource(v.stream_url);
+      setVideoTitle(`${v.report_title} · ${v.label}`);
+      setVideoSource(src);
+    } catch {
+      Alert.alert('Error', 'Could not load this video.');
+    }
+  };
 
   const [savedTeamReportId, setSavedTeamReportId] = useState<number | null>(null);
 
@@ -755,7 +771,57 @@ export default function TeamReportScreen() {
             )}
           </>
         )}
+
+        {/* Film Catalog — every clip attached to a game report packet */}
+        {reportVideos.length > 0 && (
+          <View style={{ marginTop: 24 }}>
+            <Text style={styles.label}>Film Catalog</Text>
+            <View style={{ marginTop: 12 }}>
+              {reportVideos.map((v: any) => (
+                <View key={v.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: t.chip }}>
+                  <TouchableOpacity onPress={() => openReportVideo(v)} style={{ width: 44, height: 44, borderRadius: 8, backgroundColor: t.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+                    <Ionicons name="play" size={20} color={t.accent} />
+                  </TouchableOpacity>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700] }} numberOfLines={1}>{v.report_title}</Text>
+                    <Text style={{ color: t.muted2, fontSize: 11, marginTop: 2 }}>
+                      {v.label}{v.created_at ? ` · ${new Date(v.created_at).toLocaleDateString()}` : ''}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: t.line }}
+                    onPress={() => navigation.navigate('GameReportBuilder', { reportId: v.report_id })}
+                  >
+                    <Ionicons name="document-text-outline" size={13} color={t.muted} />
+                    <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>Report</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
       </KeyboardAwareScrollView>
+
+      {/* Report film player modal */}
+      <Modal visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
+        <View style={{ flex: 1, backgroundColor: '#000000EE', justifyContent: 'center' }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: 48 }}>
+            <Text style={{ color: '#fff', fontSize: 15, fontFamily: fonts[700], flex: 1 }} numberOfLines={1}>{videoTitle}</Text>
+            <TouchableOpacity onPress={() => setVideoSource(null)}>
+              <Ionicons name="close" size={26} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          {videoSource && (
+            <Video
+              source={videoSource}
+              style={{ width: '100%', height: 300 }}
+              useNativeControls
+              resizeMode={ResizeMode.CONTAIN}
+              shouldPlay
+            />
+          )}
+        </View>
+      </Modal>
 
       {/* Previous Report Detail Modal */}
       <Modal visible={!!selectedPrevReport} animationType="slide" transparent>

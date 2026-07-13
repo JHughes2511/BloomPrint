@@ -426,6 +426,7 @@ export const gameReportsAPI = {
   addClip: (id: number, formData: FormData) =>
     api.post(`/game-reports/${id}/clips`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
   deleteClip: (id: number, clipId: number) => api.delete(`/game-reports/${id}/clips/${clipId}`).then(r => r.data),
+  videos: () => api.get('/game-reports/videos').then(r => r.data),
   uploadDoc: (id: number, formData: FormData) =>
     api.post(`/game-reports/${id}/upload-doc`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
   generate: (id: number) => api.post(`/game-reports/${id}/generate`).then(r => r.data),
