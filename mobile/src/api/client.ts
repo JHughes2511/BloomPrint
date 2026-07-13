@@ -87,6 +87,7 @@ export const playersAPI = {
   get: (id: number) => api.get(`/players/${id}`).then(r => r.data),
 
   videos: (playerId: number) => api.get(`/players/${playerId}/videos`).then(r => r.data),
+  deleteVideo: (videoId: number) => api.delete(`/players/videos/${videoId}`).then(r => r.data),
 
   create: (data: {
     name: string; position?: string; jersey_number?: string; age?: number;

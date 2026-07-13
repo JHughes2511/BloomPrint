@@ -252,6 +252,23 @@ export default function PlayerProfileScreen() {
     }
   };
 
+  const deleteVideo = (v: any) => {
+    Alert.alert('Delete Film', 'Remove this film from the catalog? This frees the storage it uses. The evaluation it created is kept.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete', style: 'destructive',
+        onPress: async () => {
+          try {
+            await playersAPI.deleteVideo(v.id);
+            setVideos(prev => prev.filter((x: any) => x.id !== v.id));
+          } catch (e: any) {
+            Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete film');
+          }
+        },
+      },
+    ]);
+  };
+
   const saveModalCorrectionForLater = async () => {
     if (!modalCorrection.trim() || !trainingModalItem) return;
     setSavingModalCorrection(true);
@@ -882,6 +899,9 @@ export default function PlayerProfileScreen() {
                   <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>Report</Text>
                 </TouchableOpacity>
               )}
+              <TouchableOpacity onPress={() => deleteVideo(v)} style={{ padding: 6 }}>
+                <Ionicons name="trash-outline" size={16} color={t.negative} />
+              </TouchableOpacity>
             </View>
           ))
         )}

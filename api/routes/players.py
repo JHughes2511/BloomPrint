@@ -238,6 +238,28 @@ def stream_player_video(
     return FileResponse(ensure_local(v.video_path), media_type="video/mp4")
 
 
+@router.delete("/videos/{video_id}")
+def delete_player_video(
+    video_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Remove a film from the player's catalog and free the file from storage.
+    Only the coach who uploaded it can delete it. The evaluation it created is
+    left intact — just the stored video is removed."""
+    v = db.get(models.PlayerVideo, video_id)
+    if not v:
+        raise HTTPException(status_code=404, detail="Video not found")
+    if v.coach_id != coach.id:
+        raise HTTPException(status_code=403, detail="Not your video to delete")
+    if v.video_path:
+        from ..storage import delete as storage_delete
+        storage_delete(v.video_path)
+    db.delete(v)
+    db.commit()
+    return {"ok": True}
+
+
 @router.post("/{player_id}/summary", response_model=schemas.SummaryOut)
 async def player_summary(
     player_id: int,
