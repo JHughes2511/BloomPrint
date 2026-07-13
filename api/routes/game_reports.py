@@ -407,7 +407,7 @@ async def generate_game_report(
     # For an Opponent-vs-Opponent report, both sides are opponents (two teams in
     # our division we may face) — my_team_id holds Opponent A, opponent side B.
     is_opp_vs_opp = gr.mode == "opp_vs_opp"
-    team_a_name = my_team_name if not is_opp_vs_opp else (gr.my_team.name if gr.my_team else "Opponent A")
+    team_a_name = my_team_name if not is_opp_vs_opp else (gr.my_team.name if gr.my_team else (gr.opponent_a_name or "Opponent A"))
     team_b_name = opp_name if not is_opp_vs_opp else (gr.opponent_team.name if gr.opponent_team else (gr.opponent_name or "Opponent B"))
 
     # Build matchup header

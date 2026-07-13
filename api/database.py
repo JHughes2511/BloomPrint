@@ -185,6 +185,11 @@ def _run_migrations():
                     "ALTER TABLE game_reports ADD COLUMN updated_at DATETIME"
                 ))
                 conn.commit()
+            if gr_cols and "opponent_a_name" not in gr_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE game_reports ADD COLUMN opponent_a_name TEXT"
+                ))
+                conn.commit()
         except Exception:
             pass
 

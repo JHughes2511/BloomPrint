@@ -75,6 +75,7 @@ export default function GameReportBuilderScreen() {
   const [myTeamId, setMyTeamId] = useState<number | null>(null);
   const [oppTeamId, setOppTeamId] = useState<number | null>(null);
   const [oppName, setOppName] = useState('');
+  const [oppAName, setOppAName] = useState(''); // free-text Opponent A (opp-vs-opp)
   const [outputType, setOutputType] = useState('coaching_report');
   const [focusPrompt, setFocusPrompt] = useState('');
   const [boxScore, setBoxScore] = useState('');
@@ -180,6 +181,7 @@ export default function GameReportBuilderScreen() {
     setTitle(r.title ?? '');
     setMode(r.mode ?? 'vs_opponent');
     setMyTeamId(r.my_team_id ?? null);
+    setOppAName(r.opponent_a_name ?? '');
     setOppTeamId(r.opponent_team_id ?? null);
     setOppName(r.opponent_name ?? '');
     setOutputType(r.output_type ?? 'coaching_report');
@@ -393,7 +395,7 @@ export default function GameReportBuilderScreen() {
     const myName = teams.find(t => t.id === myTeamId)?.name ?? coach?.program_name ?? 'My Program';
     const oppLabel = (teams.find(t => t.id === oppTeamId)?.name ?? oppName) || 'Opponent';
     if (mode === 'opp_vs_opp') {
-      const a = teams.find(t => t.id === myTeamId)?.name ?? 'Opponent A';
+      const a = teams.find(t => t.id === myTeamId)?.name ?? (oppAName || 'Opponent A');
       return `${a} vs ${oppLabel}`;
     }
     if (mode === 'vs_opponent') return `${myName} vs ${oppLabel}`;
@@ -469,15 +471,26 @@ export default function GameReportBuilderScreen() {
             <Text style={styles.cardLabel}>{mode === 'opp_vs_opp' ? 'Opponent A' : 'My Team'}</Text>
             <TouchableOpacity style={styles.teamPicker} onPress={() => { setShowMyTeamPicker(v => !v); setShowOppTeamPicker(false); }}>
               <Text style={styles.teamPickerText}>
-                {teams.find(t => t.id === myTeamId)?.name ?? 'Select a team...'}
+                {teams.find(t => t.id === myTeamId)?.name
+                  ?? (mode === 'opp_vs_opp' ? (oppAName || 'Select or type opponent...') : 'Select a team...')}
               </Text>
               <Ionicons name={showMyTeamPicker ? 'chevron-up' : 'chevron-down'} size={14} color={t.muted} />
             </TouchableOpacity>
             {showMyTeamPicker && (
               <View style={styles.pickerList}>
+                {mode === 'opp_vs_opp' && (
+                  <VoiceTextInput
+                    style={styles.oppNameInput}
+                    placeholder="Or type opponent name..."
+                    placeholderTextColor={t.muted2}
+                    value={oppAName}
+                    onChangeText={txt => { setOppAName(txt); setMyTeamId(null); }}
+                    onBlur={() => save({ opponent_a_name: oppAName.trim() || null, my_team_id: null })}
+                  />
+                )}
                 {teams.filter((tm: any) => !tm.parent_team_id).map(t => (
                   <TouchableOpacity key={t.id} style={[styles.pickerItem, myTeamId === t.id && styles.pickerItemActive]}
-                    onPress={() => { setMyTeamId(t.id); setShowMyTeamPicker(false); save({ my_team_id: t.id }); }}>
+                    onPress={() => { setMyTeamId(t.id); setOppAName(''); setShowMyTeamPicker(false); save({ my_team_id: t.id, opponent_a_name: null }); }}>
                     <Text style={[styles.pickerItemText, myTeamId === t.id && { color: t.ink }]}>{t.name}</Text>
                     {myTeamId === t.id && <Ionicons name="checkmark" size={14} color={t.accent} />}
                   </TouchableOpacity>

@@ -485,6 +485,9 @@ class GameReport(Base):
     my_team_id        = Column(Integer, ForeignKey("teams.id"), nullable=True)
     opponent_team_id  = Column(Integer, ForeignKey("teams.id"), nullable=True)
     opponent_name     = Column(String, nullable=True)
+    # Free-text name for "Opponent A" in opponent-vs-opponent mode (when A isn't
+    # one of the coach's saved teams). Opponent B uses opponent_name.
+    opponent_a_name   = Column(String, nullable=True)
     output_type       = Column(String, default="coaching_report")
     focus_prompt      = Column(Text, nullable=True)
     box_score         = Column(Text, nullable=True)

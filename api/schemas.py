@@ -469,6 +469,7 @@ class GameReportUpdate(BaseModel):
     my_team_id: int | None = None
     opponent_team_id: int | None = None
     opponent_name: str | None = None
+    opponent_a_name: str | None = None
     output_type: str | None = None
     focus_prompt: str | None = None
     box_score: str | None = None
@@ -492,6 +493,7 @@ class GameReportOut(BaseModel):
     my_team_id: int | None
     opponent_team_id: int | None
     opponent_name: str | None
+    opponent_a_name: str | None = None
     output_type: str
     focus_prompt: str | None
     box_score: str | None
