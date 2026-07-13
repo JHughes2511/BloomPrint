@@ -593,7 +593,9 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
         c = [{"type": "text", "text": (
             "\nVIDEO FRAMES (each is labeled with its film timestamp [MM:SS]). "
             "When you reference a specific moment, play, or action, cite the film "
-            "timestamp like (12:34) — never frame numbers or raw seconds. If a "
+            "timestamp like (12:34). NEVER write 'Frame' followed by a number "
+            "(e.g. 'Frame 60', 'Frame 132') and never use raw seconds or a 'KEY "
+            "FRAMES LOGGED' list — frame numbers mean nothing to a coach. If a "
             "scoreboard/game clock and score are visible in the frame, you may cite "
             "those instead (e.g. 'Q3 4:12, 45-40')."
         )}]

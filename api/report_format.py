@@ -27,6 +27,11 @@ REPORT_FORMAT = (
     "space), one idea per bullet, with a blank line between bullets so they don't "
     "run together.\n"
     "- Favor tight, scannable bullets over long paragraphs.\n"
+    "- When you reference a moment from film, cite the film time as (MM:SS) — or "
+    "the visible game clock and score. NEVER reference 'frame' plus a number "
+    "(e.g. 'Frame 60', 'Frame 132') and never use a 'KEY FRAMES LOGGED' section; "
+    "frame numbers are meaningless to a coach. Convert any frame references in the "
+    "source material to film time (MM:SS).\n"
     "- Do NOT write 'END OF REPORT' or any closing marker."
 )
 
