@@ -463,27 +463,14 @@ async def upload_doc(
         raise HTTPException(status_code=404, detail="Game report not found")
 
     content = await file.read()
-    filename = (file.filename or "").lower()
-    text = ""
-
-    if filename.endswith(".txt"):
-        text = content.decode("utf-8", errors="replace")
-    elif filename.endswith(".pdf"):
-        try:
-            import pypdf, io
-            reader = pypdf.PdfReader(io.BytesIO(content))
-            text = "\n".join(page.extract_text() or "" for page in reader.pages)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Could not read PDF: {e}")
-    elif filename.endswith(".docx"):
-        try:
-            import docx, io
-            doc = docx.Document(io.BytesIO(content))
-            text = "\n".join(p.text for p in doc.paragraphs)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Could not read Word doc: {e}")
-    else:
-        raise HTTPException(status_code=400, detail="Unsupported file type. Use .txt, .pdf, or .docx")
+    from .. import ai_import
+    purpose = "a game box score / stat sheet" if doc_type == "box_score" else "opponent scouting notes"
+    try:
+        text = ai_import.ai_extract_text(content, file.filename or "", file.content_type, purpose)
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    if not text:
+        raise HTTPException(status_code=422, detail="No readable content was found in that file.")
 
     if doc_type == "box_score":
         gr.box_score = text

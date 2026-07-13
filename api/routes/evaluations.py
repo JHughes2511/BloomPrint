@@ -131,32 +131,20 @@ async def upload_eval_video(
 @router.post("/extract-doc")
 async def extract_doc_text(
     file: UploadFile = File(...),
+    purpose: str = "coaching notes",
     coach: models.Coach = Depends(get_current_coach),
 ):
-    """Extract plain text from an uploaded .txt/.pdf/.docx so a coach can import
-    scouting notes or a focus prompt into the eval form instead of retyping."""
-    import io
+    """Extract clean text from ANY uploaded file (spreadsheet, PDF, Word, image/
+    photo, text) so a coach can import notes or a focus prompt. Images/PDFs are
+    transcribed by the model."""
+    from .. import ai_import
     content = await file.read()
-    filename = (file.filename or "").lower()
-    text = ""
-    if filename.endswith(".txt") or filename.endswith(".md") or filename.endswith(".csv"):
-        text = content.decode("utf-8", errors="replace")
-    elif filename.endswith(".pdf"):
-        try:
-            import pypdf
-            reader = pypdf.PdfReader(io.BytesIO(content))
-            text = "\n".join(page.extract_text() or "" for page in reader.pages)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Could not read PDF: {e}")
-    elif filename.endswith(".docx"):
-        try:
-            import docx
-            doc = docx.Document(io.BytesIO(content))
-            text = "\n".join(p.text for p in doc.paragraphs)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Could not read Word doc: {e}")
-    else:
-        raise HTTPException(status_code=400, detail="Unsupported file type. Use .txt, .pdf, or .docx")
+    try:
+        text = ai_import.ai_extract_text(content, file.filename or "", file.content_type, purpose)
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    if not text:
+        raise HTTPException(status_code=422, detail="No readable text was found in that file.")
     return {"text": text.strip()}
 
 
