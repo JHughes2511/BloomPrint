@@ -570,6 +570,13 @@ export default function GameReportBuilderScreen() {
           ))
         )}
 
+        {/* Film analysis progress — under the film area, above box score. */}
+        <GeneratingOverlay
+          visible={uploadingClip}
+          label={clipProgress || 'Analyzing film…'}
+          realProgress={parseGenProgress(clipProgress)}
+        />
+
         {/* Box Score */}
         <View onLayout={e => { boxScoreY.current = e.nativeEvent.layout.y; }}>
           <View style={styles.sectionHeader}>
