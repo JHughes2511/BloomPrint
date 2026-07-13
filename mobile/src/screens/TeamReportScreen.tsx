@@ -921,9 +921,13 @@ export default function TeamReportScreen() {
                 <TouchableOpacity
                   style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.ctaBg, borderRadius: 10, paddingVertical: 12 }}
                   onPress={() => {
-                    // Keep the report modal open behind the share sheet so it's
-                    // clear exactly which report is being shared.
-                    if (selectedPrevReport) setPrevShareReport(selectedPrevReport);
+                    // RN can't reliably present two modals at once, so close this
+                    // one first, then open the share sheet (which shows the report
+                    // title + a preview so it's clear what's being shared).
+                    if (!selectedPrevReport) return;
+                    const rep = selectedPrevReport;
+                    setSelectedPrevReport(null);
+                    setTimeout(() => setPrevShareReport(rep), 250);
                   }}
                 >
                   <Ionicons name="share-social-outline" size={15} color={t.ctaText} />
