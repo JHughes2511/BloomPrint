@@ -40,6 +40,7 @@ const MODES = [
   { key: 'vs_opponent', label: 'My Program vs Opponent' },
   { key: 'my_program', label: 'My Program' },
   { key: 'opponent_only', label: 'Opponent Only' },
+  { key: 'opp_vs_opp', label: 'Opponent vs Opponent' },
 ];
 
 /** Strip markdown for plain-text clip preview snippets */
@@ -386,6 +387,10 @@ export default function GameReportBuilderScreen() {
   const matchupLabel = () => {
     const myName = teams.find(t => t.id === myTeamId)?.name ?? coach?.program_name ?? 'My Program';
     const oppLabel = (teams.find(t => t.id === oppTeamId)?.name ?? oppName) || 'Opponent';
+    if (mode === 'opp_vs_opp') {
+      const a = teams.find(t => t.id === myTeamId)?.name ?? 'Opponent A';
+      return `${a} vs ${oppLabel}`;
+    }
     if (mode === 'vs_opponent') return `${myName} vs ${oppLabel}`;
     if (mode === 'my_program') return myName;
     return oppLabel;
@@ -456,7 +461,7 @@ export default function GameReportBuilderScreen() {
         {/* Team selectors */}
         {mode !== 'opponent_only' && (
           <View style={styles.card}>
-            <Text style={styles.cardLabel}>My Team</Text>
+            <Text style={styles.cardLabel}>{mode === 'opp_vs_opp' ? 'Opponent A' : 'My Team'}</Text>
             <TouchableOpacity style={styles.teamPicker} onPress={() => { setShowMyTeamPicker(v => !v); setShowOppTeamPicker(false); }}>
               <Text style={styles.teamPickerText}>
                 {teams.find(t => t.id === myTeamId)?.name ?? 'Select a team...'}
@@ -465,7 +470,7 @@ export default function GameReportBuilderScreen() {
             </TouchableOpacity>
             {showMyTeamPicker && (
               <View style={styles.pickerList}>
-                {teams.map(t => (
+                {teams.filter((tm: any) => !tm.parent_team_id).map(t => (
                   <TouchableOpacity key={t.id} style={[styles.pickerItem, myTeamId === t.id && styles.pickerItemActive]}
                     onPress={() => { setMyTeamId(t.id); setShowMyTeamPicker(false); save({ my_team_id: t.id }); }}>
                     <Text style={[styles.pickerItemText, myTeamId === t.id && { color: t.ink }]}>{t.name}</Text>
@@ -479,7 +484,7 @@ export default function GameReportBuilderScreen() {
 
         {mode !== 'my_program' && (
           <View style={styles.card}>
-            <Text style={styles.cardLabel}>Opponent</Text>
+            <Text style={styles.cardLabel}>{mode === 'opp_vs_opp' ? 'Opponent B' : 'Opponent'}</Text>
             <TouchableOpacity style={styles.teamPicker} onPress={() => { setShowOppTeamPicker(v => !v); setShowMyTeamPicker(false); }}>
               <Text style={styles.teamPickerText}>
                 {teams.find(t => t.id === oppTeamId)?.name ?? (oppName || 'Select or type opponent...')}
@@ -496,7 +501,7 @@ export default function GameReportBuilderScreen() {
                   onChangeText={txt => { setOppName(txt); setOppTeamId(null); }}
                   onBlur={() => save({ opponent_name: oppName.trim() || null, opponent_team_id: null })}
                 />
-                {teams.map(tm => (
+                {teams.filter((tm: any) => !tm.parent_team_id).map(tm => (
                   <TouchableOpacity key={tm.id} style={[styles.pickerItem, oppTeamId === tm.id && styles.pickerItemActive]}
                     onPress={() => { setOppTeamId(tm.id); setOppName(''); setShowOppTeamPicker(false); save({ opponent_team_id: tm.id, opponent_name: null }); }}>
                     <Text style={[styles.pickerItemText, oppTeamId === tm.id && { color: t.ink }]}>{tm.name}</Text>

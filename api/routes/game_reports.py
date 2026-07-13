@@ -278,8 +278,16 @@ async def generate_game_report(
     my_team_name = gr.my_team.name if gr.my_team else coach.program_name
     opp_name = gr.opponent_team.name if gr.opponent_team else (gr.opponent_name or None)
 
+    # For an Opponent-vs-Opponent report, both sides are opponents (two teams in
+    # our division we may face) — my_team_id holds Opponent A, opponent side B.
+    is_opp_vs_opp = gr.mode == "opp_vs_opp"
+    team_a_name = my_team_name if not is_opp_vs_opp else (gr.my_team.name if gr.my_team else "Opponent A")
+    team_b_name = opp_name if not is_opp_vs_opp else (gr.opponent_team.name if gr.opponent_team else (gr.opponent_name or "Opponent B"))
+
     # Build matchup header
-    if gr.mode == "vs_opponent" and opp_name:
+    if is_opp_vs_opp:
+        matchup = f"{team_a_name} vs {team_b_name} (opponent-vs-opponent scouting)"
+    elif gr.mode == "vs_opponent" and opp_name:
         matchup = f"{my_team_name} vs {opp_name}"
     elif gr.mode == "my_program":
         matchup = my_team_name
@@ -288,7 +296,7 @@ async def generate_game_report(
 
     # Build roster context for my team
     my_roster_context = ""
-    if gr.my_team_id and gr.mode in ("vs_opponent", "my_program"):
+    if gr.my_team_id and gr.mode in ("vs_opponent", "my_program", "opp_vs_opp"):
         players = db.query(models.Player).filter_by(team_id=gr.my_team_id).all()
         for p in players:
             name = f"#{p.jersey_number} {p.name}" if p.jersey_number else p.name
@@ -309,7 +317,7 @@ async def generate_game_report(
 
     # Build opponent roster context
     opp_roster_context = ""
-    if gr.opponent_team_id and gr.mode in ("vs_opponent", "opponent_only"):
+    if gr.opponent_team_id and gr.mode in ("vs_opponent", "opponent_only", "opp_vs_opp"):
         players = db.query(models.Player).filter_by(team_id=gr.opponent_team_id).all()
         for p in players:
             name = f"#{p.jersey_number} {p.name}" if p.jersey_number else p.name
@@ -374,10 +382,21 @@ async def generate_game_report(
             "name. Do NOT claim a player is absent or unknown if their number appears on a "
             "roster below — use the roster as the source of truth for who is on the floor."
         )
-    if my_roster_context:
-        sections.append(f"\nMY TEAM ROSTER ({my_team_name}):\n{my_roster_context}")
-    if opp_roster_context:
-        sections.append(f"\nOPPONENT ROSTER ({opp_name}):\n{opp_roster_context}")
+    if is_opp_vs_opp:
+        sections.append(
+            f"\nThis is an OPPONENT-vs-OPPONENT scouting report: {team_a_name} and {team_b_name} are two "
+            "teams we may face. Analyze BOTH teams, how they match up against each other, each team's "
+            "strengths/weaknesses, key players, and how WE should prepare for either one."
+        )
+        if my_roster_context:
+            sections.append(f"\n{team_a_name} ROSTER:\n{my_roster_context}")
+        if opp_roster_context:
+            sections.append(f"\n{team_b_name} ROSTER:\n{opp_roster_context}")
+    else:
+        if my_roster_context:
+            sections.append(f"\nMY TEAM ROSTER ({my_team_name}):\n{my_roster_context}")
+        if opp_roster_context:
+            sections.append(f"\nOPPONENT ROSTER ({opp_name}):\n{opp_roster_context}")
     if film_context:
         sections.append(f"\nFILM ANALYSIS:{film_context}")
     if gr.box_score:
