@@ -290,6 +290,13 @@ def delete_clip(
     clip = db.get(models.GameReportClip, clip_id)
     if not clip or clip.game_report_id != report_id:
         raise HTTPException(status_code=404, detail="Clip not found")
+    gr = db.get(models.GameReport, report_id)
+    if not gr or gr.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Game report not found")
+    # Free the actual film file from storage, not just the DB row.
+    if clip.video_path:
+        from ..storage import delete as storage_delete
+        storage_delete(clip.video_path)
     db.delete(clip)
     db.commit()
     return {"ok": True}

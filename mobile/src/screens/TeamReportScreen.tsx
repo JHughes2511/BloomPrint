@@ -93,6 +93,23 @@ export default function TeamReportScreen() {
     }
   };
 
+  const deleteReportVideo = (v: any) => {
+    Alert.alert('Delete Film', `Remove this ${v.label} clip from "${v.report_title}"? This frees the storage it uses.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete', style: 'destructive',
+        onPress: async () => {
+          try {
+            await gameReportsAPI.deleteClip(v.report_id, v.id);
+            setReportVideos(prev => prev.filter(x => x.id !== v.id));
+          } catch (e: any) {
+            Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete clip');
+          }
+        },
+      },
+    ]);
+  };
+
   const [savedTeamReportId, setSavedTeamReportId] = useState<number | null>(null);
 
   // Previous reports list
@@ -842,6 +859,9 @@ export default function TeamReportScreen() {
                   >
                     <Ionicons name="document-text-outline" size={13} color={t.muted} />
                     <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>Report</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => deleteReportVideo(v)} style={{ padding: 6 }}>
+                    <Ionicons name="trash-outline" size={16} color={t.negative} />
                   </TouchableOpacity>
                 </View>
               ))}
