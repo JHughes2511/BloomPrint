@@ -111,8 +111,37 @@ export default function TeamReportScreen() {
   const loadPrevReports = async () => {
     setLoadingPrevReports(true);
     try {
-      const reports = await evalsAPI.teamReports(50);
-      setPrevReports(reports);
+      const [reports, packets] = await Promise.all([
+        evalsAPI.teamReports(50),
+        gameReportsAPI.list().catch(() => []),
+      ]);
+      // Fold in finished packet game reports so they show alongside team reports.
+      const packetItems = (packets ?? [])
+        .filter((gr: any) => gr.report_text)
+        .map((gr: any) => {
+          const myName = gr.my_team_name;
+          const oppName = gr.opponent_team_name ?? gr.opponent_name;
+          let title = gr.title;
+          if (!title) {
+            if (gr.mode === 'opp_vs_opp') title = `${myName ?? 'Opponent A'} vs ${oppName ?? 'Opponent B'}`;
+            else if (gr.mode === 'vs_opponent' && oppName) title = `${myName ?? 'My Team'} vs ${oppName}`;
+            else if (gr.mode === 'my_program') title = myName ?? 'My Team';
+            else title = oppName ?? 'Opponent';
+          }
+          return {
+            id: gr.id,
+            _kind: 'game',
+            _reportId: gr.id,
+            title,
+            output_type: gr.output_type,
+            report_text: gr.report_text,
+            created_at: gr.updated_at || gr.created_at,
+          };
+        });
+      const merged = [...(reports ?? []), ...packetItems].sort(
+        (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+      setPrevReports(merged);
     } catch {}
     setLoadingPrevReports(false);
   };
@@ -120,6 +149,11 @@ export default function TeamReportScreen() {
   const openPrevReport = async (report: any) => {
     setSelectedPrevReport(report);
     setPrevReportCorrectionText('');
+    // Packet game reports are read-only here — corrections live in the builder.
+    if (report._kind === 'game') {
+      setPrevReportCorrections([]);
+      return;
+    }
     try {
       const corrs = await evalsAPI.teamReportCorrections(report.id);
       setPrevReportCorrections(corrs);
@@ -750,13 +784,23 @@ export default function TeamReportScreen() {
                     onPress={() => openPrevReport(r)}
                   >
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <View style={{ backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
-                        <Text style={{ color: t.accent, fontSize: 10, fontFamily: fonts[700] }}>
-                          {outputTypeLabel(r.output_type) ?? r.output_type}
-                        </Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <View style={{ backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
+                          <Text style={{ color: t.accent, fontSize: 10, fontFamily: fonts[700] }}>
+                            {outputTypeLabel(r.output_type) ?? r.output_type}
+                          </Text>
+                        </View>
+                        {r._kind === 'game' && (
+                          <View style={{ backgroundColor: t.chip, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
+                            <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }}>PACKET</Text>
+                          </View>
+                        )}
                       </View>
                       <Text style={{ color: t.muted2, fontSize: 11 }}>{new Date(r.created_at).toLocaleDateString()}</Text>
                     </View>
+                    {r.title ? (
+                      <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700], marginTop: 6 }} numberOfLines={1}>{r.title}</Text>
+                    ) : null}
                     {r.report_text ? (
                       <Text style={{ color: t.muted, fontSize: 12, marginTop: 8, lineHeight: 18 }} numberOfLines={2}>
                         {r.report_text.replace(/\*\*/g, '').replace(/^#+\s*/gm, '').trim().slice(0, 100)}...
@@ -910,37 +954,51 @@ export default function TeamReportScreen() {
                 </View>
               )}
 
-              {/* Add correction */}
-              <View style={{ marginTop: 20 }}>
-                <Text style={styles.label}>Add Correction</Text>
-                <VoiceTextInput
-                  style={{ backgroundColor: t.chip, borderRadius: 10, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 80, marginBottom: 8 }}
-                  placeholder="What needs to be corrected in this report?"
-                  placeholderTextColor={t.muted2}
-                  value={prevReportCorrectionText}
-                  onChangeText={setPrevReportCorrectionText}
-                  multiline
-                  textAlignVertical="top"
-                />
-                <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <TouchableOpacity
-                    style={{ flex: 1, backgroundColor: t.ctaBg, borderRadius: 10, padding: 14, alignItems: 'center' }}
-                    onPress={() => addPrevReportCorrection(true)}
-                    disabled={addingPrevCorrection || regeneratingPrevReport || !prevReportCorrectionText.trim()}
-                  >
-                    {addingPrevCorrection || regeneratingPrevReport
-                      ? <ActivityIndicator color={t.ctaText} />
-                      : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply & Regenerate</Text>}
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{ flex: 1, backgroundColor: t.line, borderRadius: 10, padding: 14, alignItems: 'center' }}
-                    onPress={() => addPrevReportCorrection(false)}
-                    disabled={addingPrevCorrection || !prevReportCorrectionText.trim()}
-                  >
-                    <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Save for Later</Text>
-                  </TouchableOpacity>
+              {/* Add correction (team reports only — packets are edited in the builder) */}
+              {selectedPrevReport?._kind === 'game' ? (
+                <TouchableOpacity
+                  style={{ marginTop: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 10, paddingVertical: 12, borderWidth: 1, borderColor: t.accent }}
+                  onPress={() => {
+                    const rid = selectedPrevReport._reportId;
+                    setSelectedPrevReport(null);
+                    navigation.navigate('GameReportBuilder', { reportId: rid });
+                  }}
+                >
+                  <Ionicons name="create-outline" size={15} color={t.accent} />
+                  <Text style={{ color: t.accent, fontFamily: fonts[700], fontSize: 13 }}>Open in Builder to Edit / Correct</Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={{ marginTop: 20 }}>
+                  <Text style={styles.label}>Add Correction</Text>
+                  <VoiceTextInput
+                    style={{ backgroundColor: t.chip, borderRadius: 10, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 80, marginBottom: 8 }}
+                    placeholder="What needs to be corrected in this report?"
+                    placeholderTextColor={t.muted2}
+                    value={prevReportCorrectionText}
+                    onChangeText={setPrevReportCorrectionText}
+                    multiline
+                    textAlignVertical="top"
+                  />
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <TouchableOpacity
+                      style={{ flex: 1, backgroundColor: t.ctaBg, borderRadius: 10, padding: 14, alignItems: 'center' }}
+                      onPress={() => addPrevReportCorrection(true)}
+                      disabled={addingPrevCorrection || regeneratingPrevReport || !prevReportCorrectionText.trim()}
+                    >
+                      {addingPrevCorrection || regeneratingPrevReport
+                        ? <ActivityIndicator color={t.ctaText} />
+                        : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply & Regenerate</Text>}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ flex: 1, backgroundColor: t.line, borderRadius: 10, padding: 14, alignItems: 'center' }}
+                      onPress={() => addPrevReportCorrection(false)}
+                      disabled={addingPrevCorrection || !prevReportCorrectionText.trim()}
+                    >
+                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Save for Later</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
+              )}
             </KeyboardAwareScrollView>
           </View>
         </View>
@@ -1187,11 +1245,11 @@ export default function TeamReportScreen() {
       <ShareModal
         visible={!!prevShareReport}
         onClose={() => setPrevShareReport(null)}
-        reportType="team_report"
-        reportId={prevShareReport.id}
+        reportType={prevShareReport._kind === 'game' ? 'game' : 'team_report'}
+        reportId={prevShareReport._kind === 'game' ? prevShareReport._reportId : prevShareReport.id}
         outputType={prevShareReport.output_type ?? 'coaching_report'}
         reportText={prevShareReport.report_text ?? ''}
-        title={outputTypeLabel(prevShareReport.output_type)}
+        title={prevShareReport.title || outputTypeLabel(prevShareReport.output_type)}
       />
     )}
     </ScreenBackground>
