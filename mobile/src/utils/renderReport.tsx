@@ -41,7 +41,10 @@ function renderTable(
 ): React.ReactElement {
   const cols = Math.max(header.length, ...rows.map(r => r.length));
   const cellW = 108;
-  const border = '#ffffff22';
+  // Gray-alpha borders/fills read on BOTH light and dark backgrounds (white-alpha
+  // was invisible in light mode).
+  const border = 'rgba(128,128,128,0.4)';
+  const headerBg = 'rgba(128,128,128,0.14)';
   const cell = (text: string, i: number, bold: boolean) => (
     <View key={i} style={{ width: cellW, paddingVertical: 7, paddingHorizontal: 8, borderRightWidth: i < cols - 1 ? 1 : 0, borderRightColor: border }}>
       <Text style={{ fontSize: 12.5, lineHeight: 18, color: bold ? colors.heading : colors.body, fontFamily: bold ? fonts[700] : fonts[400] }}>
@@ -53,7 +56,7 @@ function renderTable(
     <View key={key} style={{ marginVertical: 10 }}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={{ borderWidth: 1, borderColor: border, borderRadius: 8, overflow: 'hidden' }}>
-          <View style={{ flexDirection: 'row', backgroundColor: '#ffffff14', borderBottomWidth: 1, borderBottomColor: border }}>
+          <View style={{ flexDirection: 'row', backgroundColor: headerBg, borderBottomWidth: 1, borderBottomColor: border }}>
             {Array.from({ length: cols }).map((_, i) => cell(header[i] ?? '', i, true))}
           </View>
           {rows.map((r, ri) => (

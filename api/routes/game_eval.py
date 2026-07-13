@@ -991,7 +991,7 @@ async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSe
     try:
         import anthropic
         client = anthropic.AsyncAnthropic()
-        response = await client.messages.create(model="claude-opus-4-7", max_tokens=6000,
+        response = await client.messages.create(model="claude-opus-4-7", max_tokens=12000,
                                                  messages=[{"role": "user", "content": prompt}])
         blocks = [b for b in response.content if hasattr(b, "text")]
         if not blocks:

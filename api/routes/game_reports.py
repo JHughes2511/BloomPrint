@@ -578,7 +578,7 @@ async def generate_game_report(
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
             model="claude-opus-4-7",
-            max_tokens=8192,
+            max_tokens=16000,
             messages=[{"role": "user", "content": prompt}],
         )
         text_blocks = [b for b in response.content if hasattr(b, "text")]
@@ -671,7 +671,7 @@ async def generate_team_training(
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
             model="claude-opus-4-7",
-            max_tokens=8192,
+            max_tokens=16000,
             messages=[{"role": "user", "content": prompt}],
         )
         text_blocks = [b for b in response.content if hasattr(b, "text")]
@@ -753,7 +753,7 @@ async def correct_game_report(
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
             model="claude-opus-4-7",
-            max_tokens=8192,
+            max_tokens=16000,
             messages=[{"role": "user", "content": prompt}],
         )
         gr.report_text = response.content[0].text.strip()
@@ -836,7 +836,7 @@ async def regenerate_game_report(
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
             model="claude-opus-4-7",
-            max_tokens=8192,
+            max_tokens=16000,
             messages=[{"role": "user", "content": prompt}],
         )
         gr.report_text = response.content[0].text.strip()

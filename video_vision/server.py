@@ -611,7 +611,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
             content.append({"type": "text", "text": f"\nAUDIO TRANSCRIPT FROM VIDEO:\n{transcript_text}\n"})
         content += _frames_content(frames)
         response = _client().messages.create(
-            model="claude-opus-4-7", max_tokens=4096,
+            model="claude-opus-4-7", max_tokens=16000,
             messages=[{"role": "user", "content": content}],
         )
         answer = response.content[0].text
@@ -649,7 +649,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
         if transcript_text:
             synth += f"AUDIO TRANSCRIPT:\n{transcript_text[:2000]}\n\n"
         synth += "\n\n".join(seg_notes)
-        response = _client().messages.create(model="claude-opus-4-7", max_tokens=4096,
+        response = _client().messages.create(model="claude-opus-4-7", max_tokens=16000,
                                              messages=[{"role": "user", "content": synth}])
         answer = response.content[0].text
 

@@ -308,7 +308,7 @@ async def player_summary(
     )
 
     from video_vision.bim import parse_output_types
-    summary_max_tokens = 8192 if len(parse_output_types(body.output_type)) > 1 else 2048
+    summary_max_tokens = 16000 if len(parse_output_types(body.output_type)) > 1 else 6144
     try:
         import anthropic
         client = anthropic.AsyncAnthropic()
