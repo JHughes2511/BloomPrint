@@ -237,10 +237,16 @@ async def add_clip(
     if not gr or gr.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Game report not found")
 
-    from ..storage import save_fileobj
+    from ..storage import save_fileobj, StorageFullError
     from uuid import uuid4
     suffix = Path(video.filename or "clip.mp4").suffix
-    dest = save_fileobj(video.file, f"gr_{report_id}_clip_{uuid4().hex}{suffix}")
+    try:
+        dest = save_fileobj(video.file, f"gr_{report_id}_clip_{uuid4().hex}{suffix}")
+    except StorageFullError:
+        raise HTTPException(
+            status_code=507,
+            detail="The server is out of storage space. Free up disk space (or configure S3 storage) and try again.",
+        )
 
     label_text = "my team" if label == "my_team" else "the opponent"
     my_team_name = gr.my_team.name if gr.my_team else coach.program_name

@@ -40,6 +40,10 @@ def _parse(ref: str):
     return bucket, key
 
 
+class StorageFullError(Exception):
+    """Raised when a local write fails because the disk is out of space."""
+
+
 def save_fileobj(fileobj, key: str) -> str:
     """Persist a file-like object under `key`; returns its storage ref."""
     if use_s3():
@@ -47,8 +51,19 @@ def save_fileobj(fileobj, key: str) -> str:
         return f"s3://{_BUCKET}/{key}"
     dest = UPLOAD_DIR / key
     dest.parent.mkdir(parents=True, exist_ok=True)
-    with dest.open("wb") as f:
-        shutil.copyfileobj(fileobj, f)
+    try:
+        with dest.open("wb") as f:
+            shutil.copyfileobj(fileobj, f)
+    except OSError as exc:
+        # Don't leave a half-written file behind (it still consumes space).
+        try:
+            dest.unlink(missing_ok=True)
+        except Exception:
+            pass
+        import errno
+        if getattr(exc, "errno", None) == errno.ENOSPC:
+            raise StorageFullError("No space left on device") from exc
+        raise
     return str(dest)
 
 

@@ -114,10 +114,16 @@ async def upload_eval_video(
     """Stream one film to durable storage and return a token. The eval is then
     submitted with a list of tokens so several films can build one eval."""
     from uuid import uuid4
-    from ..storage import save_fileobj
+    from ..storage import save_fileobj, StorageFullError
     suffix = Path(video.filename or "video.mp4").suffix
     name = f"evalvid_{coach.id}_{uuid4().hex}{suffix}"
-    save_fileobj(video.file, name)
+    try:
+        save_fileobj(video.file, name)
+    except StorageFullError:
+        raise HTTPException(
+            status_code=507,
+            detail="The server is out of storage space. Free up disk space (or configure S3 storage) and try again.",
+        )
     return {"token": name}
 
 
