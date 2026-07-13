@@ -133,6 +133,11 @@ class TeamCreate(BaseModel):
     competition_level: str = "HS Varsity"
 
 
+class TeamUpdate(BaseModel):
+    name: str | None = None
+    competition_level: str | None = None
+
+
 class TeamOut(BaseModel):
     id: int
     name: str

@@ -527,6 +527,11 @@ export default function PlayerProfileScreen() {
   if (!player) return null;
 
   const latest = evals[evals.length - 1] ?? null;
+  // Flags come from the most recent eval that actually HAS flags — a newer eval
+  // that didn't emit any shouldn't blank out the section.
+  const flagSource = [...evals].reverse().find(
+    (e: any) => (e.green_flags?.length ?? 0) > 0 || (e.watch_flags?.length ?? 0) > 0,
+  ) ?? latest;
 
   return (
     <ScreenBackground>
@@ -574,18 +579,18 @@ export default function PlayerProfileScreen() {
       })()}
 
       {/* Flags */}
-      {latest && (
+      {flagSource && (
         <View style={styles.row}>
-          {latest.green_flags && latest.green_flags.length > 0 && (
+          {flagSource.green_flags && flagSource.green_flags.length > 0 && (
             <View style={[styles.flagBox, { borderColor: t.positive }]}>
               <Text style={[styles.flagTitle, { color: t.positive }]}>Green Flags</Text>
-              {latest.green_flags.map((f, i) => <Text key={i} style={styles.flagItem}>· {f}</Text>)}
+              {flagSource.green_flags.map((f, i) => <Text key={i} style={styles.flagItem}>· {f}</Text>)}
             </View>
           )}
-          {latest.watch_flags && latest.watch_flags.length > 0 && (
+          {flagSource.watch_flags && flagSource.watch_flags.length > 0 && (
             <View style={[styles.flagBox, { borderColor: t.negative }]}>
               <Text style={[styles.flagTitle, { color: t.negative }]}>Watch Flags</Text>
-              {latest.watch_flags.map((f, i) => <Text key={i} style={styles.flagItem}>· {f}</Text>)}
+              {flagSource.watch_flags.map((f, i) => <Text key={i} style={styles.flagItem}>· {f}</Text>)}
             </View>
           )}
         </View>

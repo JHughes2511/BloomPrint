@@ -198,6 +198,8 @@ export const teamsAPI = {
   list: () => api.get('/teams').then(r => r.data),
   create: (data: { name: string; competition_level?: string }) =>
     api.post('/teams', data).then(r => r.data),
+  update: (id: number, data: { name?: string; competition_level?: string }) =>
+    api.patch(`/teams/${id}`, data).then(r => r.data),
   delete: (id: number) => api.delete(`/teams/${id}`).then(r => r.data),
 };
 
