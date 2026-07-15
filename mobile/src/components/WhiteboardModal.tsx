@@ -185,9 +185,9 @@ function HardwoodCourt({ width, height, scale }: { width: number; height: number
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────
-interface Props { visible: boolean; gameId: number; onClose: () => void; }
+interface Props { visible: boolean; gameId: number; playbook?: boolean; onClose: () => void; }
 
-export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
+export default function WhiteboardModal({ visible, gameId, playbook = false, onClose }: Props) {
   const { t } = useTheme();
   const styles = makeStyles(t);
   const [boards, setBoards]                 = useState<Board[]>([]);
@@ -629,14 +629,14 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const mapPointRef = useRef(mapPoint);
   mapPointRef.current = mapPoint;
 
-  useEffect(() => { if (visible && gameId) loadBoards(); }, [visible, gameId]);
+  useEffect(() => { if (visible && (playbook || gameId)) loadBoards(); }, [visible, gameId, playbook]);
 
   const loadBoards = async () => {
     setLoading(true);
     try {
       // Never hang on a slow/unreachable API — fall back to a fresh board.
       const data = await Promise.race([
-        whiteboardAPI.list(gameId),
+        playbook ? whiteboardAPI.playbookList() : whiteboardAPI.list(gameId),
         new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), 5000)),
       ]);
       if (data.length > 0) {
@@ -673,12 +673,14 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       if (b.id) {
         await whiteboardAPI.update(b.id, { name: b.name, court_type: b.court_type, data: ds });
       } else {
-        const created = await whiteboardAPI.create(gameId, { name: b.name, court_type: b.court_type, data: ds });
+        const created = playbook
+          ? await whiteboardAPI.playbookCreate({ name: b.name, court_type: b.court_type, data: ds })
+          : await whiteboardAPI.create(gameId, { name: b.name, court_type: b.court_type, data: ds });
         setBoards(prev => { const n = [...prev]; n[idx] = { ...b, id: created.id }; return n; });
       }
     } catch {}
     setSaving(false);
-  }, [gameId]);
+  }, [gameId, playbook]);
   useEffect(() => { saveBoardRef.current = saveBoard; }, [saveBoard]);
 
   const commitStrokes = (idx: number, strokes: Stroke[]) => {

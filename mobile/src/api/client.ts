@@ -440,6 +440,10 @@ export const whiteboardAPI = {
   list: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/whiteboards`).then(r => r.data),
   create: (gameId: number, data: { name: string; court_type: string; data: string }) =>
     api.post(`/game-eval/sessions/${gameId}/whiteboards`, data).then(r => r.data),
+  // Coach-level playbook (persists independent of games).
+  playbookList: () => api.get('/game-eval/playbook/whiteboards').then(r => r.data),
+  playbookCreate: (data: { name: string; court_type: string; data: string }) =>
+    api.post('/game-eval/playbook/whiteboards', data).then(r => r.data),
   update: (boardId: number, data: { name?: string; court_type?: string; data?: string }) =>
     api.patch(`/game-eval/whiteboards/${boardId}`, data).then(r => r.data),
   delete: (boardId: number) => api.delete(`/game-eval/whiteboards/${boardId}`).then(r => r.data),

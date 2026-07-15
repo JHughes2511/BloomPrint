@@ -1594,6 +1594,39 @@ def list_whiteboards(
     return [{"id": b.id, "name": b.name, "court_type": b.court_type, "data": b.data, "created_at": b.created_at.isoformat()} for b in boards]
 
 
+# Coach-level PLAYBOOK boards — not tied to any game (game_id = 0 sentinel), so
+# plays the coach draws persist in "my boards" until deleted, regardless of games.
+_PLAYBOOK_GID = 0
+
+
+@router.get("/playbook/whiteboards")
+def list_playbook(
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    boards = db.query(models.GameWhiteboard).filter_by(game_id=_PLAYBOOK_GID, coach_id=coach.id).order_by(models.GameWhiteboard.created_at).all()
+    return [{"id": b.id, "name": b.name, "court_type": b.court_type, "data": b.data, "created_at": b.created_at.isoformat()} for b in boards]
+
+
+@router.post("/playbook/whiteboards")
+def create_playbook(
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    board = models.GameWhiteboard(
+        game_id=_PLAYBOOK_GID,
+        coach_id=coach.id,
+        name=body.get("name", "Untitled Board"),
+        court_type=body.get("court_type", "full"),
+        data=body.get("data", "[]"),
+    )
+    db.add(board)
+    db.commit()
+    db.refresh(board)
+    return {"id": board.id, "name": board.name, "court_type": board.court_type, "data": board.data, "created_at": board.created_at.isoformat()}
+
+
 @router.post("/sessions/{game_id}/whiteboards")
 def create_whiteboard(
     game_id: int,

@@ -129,6 +129,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const scoutScrollRef = useRef<any>(null);
   const noteInputY = useRef(0);
   const [whiteboardGameId, setWhiteboardGameId] = useState<number | null>(null);
+  const [whiteboardPlaybook, setWhiteboardPlaybook] = useState(false);
   const [activeView, setActiveView] = useState<ViewKey>('dashboard');
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1330,15 +1331,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         </ScrollView>
       )}
 
-      {/* Draggable floating whiteboard button on Games tab */}
+      {/* Draggable floating whiteboard button on Games tab — opens the persistent
+          playbook (plays saved here stay until deleted, independent of games). */}
       {activeView === 'games' && (
-        <DraggableWhiteboardButton
-          onPress={() => {
-            const firstGame = sessions[0];
-            if (firstGame) setWhiteboardGameId(firstGame.id);
-            else Alert.alert('No Games', 'Log a game first to use the whiteboard.');
-          }}
-        />
+        <DraggableWhiteboardButton onPress={() => setWhiteboardPlaybook(true)} />
       )}
 
       {/* Draggable floating whiteboard button on Game Detail tab */}
@@ -3002,9 +2998,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
       {/* Whiteboard */}
       <WhiteboardModal
-        visible={whiteboardGameId !== null}
+        visible={whiteboardGameId !== null || whiteboardPlaybook}
         gameId={whiteboardGameId ?? 0}
-        onClose={() => setWhiteboardGameId(null)}
+        playbook={whiteboardPlaybook}
+        onClose={() => { setWhiteboardGameId(null); setWhiteboardPlaybook(false); }}
       />
 
       {/* Share game with staff modal */}
