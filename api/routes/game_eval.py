@@ -1700,6 +1700,7 @@ def _parse_ai_play_json(raw: str):
 @router.post("/ai-play")
 async def ai_play(
     body: dict,
+    db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
     import os
@@ -1708,13 +1709,27 @@ async def ai_play(
     description = (body.get("description") or "").strip()
     if not description:
         raise HTTPException(status_code=400, detail="Describe the scene or play first")
+    # Fold any newly-drawn boards into the coach's style profile, then bias the
+    # generation toward how this coach positions players.
+    style_block = ""
+    try:
+        from ..play_style import refresh_and_get_profile
+        profile = refresh_and_get_profile(db, coach)
+        if profile and profile.strip():
+            style_block = (
+                "\n\nCOACH STYLE — how THIS coach positions players and what they favor. Bias the play "
+                "toward this (especially when the scene is brief), unless the scene says otherwise:\n"
+                f"{profile.strip()}\n"
+            )
+    except Exception:
+        style_block = ""
     try:
         import anthropic
         client = anthropic.AsyncAnthropic()
         resp = await client.messages.create(
             model="claude-opus-4-7",
             max_tokens=8000,
-            messages=[{"role": "user", "content": f"{_AI_PLAY_PROMPT}\n\nSCENE:\n{description}"}],
+            messages=[{"role": "user", "content": f"{_AI_PLAY_PROMPT}{style_block}\n\nSCENE:\n{description}"}],
         )
         blocks = [b for b in resp.content if hasattr(b, "text")]
         raw = (blocks[0].text if blocks else "{}").strip()

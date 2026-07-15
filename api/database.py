@@ -102,6 +102,16 @@ def _run_migrations():
                 "ALTER TABLE coaches ADD COLUMN google_sub TEXT"
             ))
             conn.commit()
+        if "play_style_profile" not in coach_cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE coaches ADD COLUMN play_style_profile TEXT"
+            ))
+            conn.commit()
+        if "play_style_synced_at" not in coach_cols:
+            conn.execute(__import__("sqlalchemy").text(
+                "ALTER TABLE coaches ADD COLUMN play_style_synced_at DATETIME"
+            ))
+            conn.commit()
 
         # Add roster-owner coach_id to players + backfill.
         if "coach_id" not in cols:

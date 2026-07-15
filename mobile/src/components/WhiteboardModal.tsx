@@ -652,7 +652,16 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const saveBoard = useCallback(async (idx: number, b: Board) => {
     setSaving(true);
     try {
-      const ds = JSON.stringify(b.ai ? { strokes: b.strokes, ai: b.ai } : b.strokes);
+      // Persist the canvas dimensions for this board's court view so the backend
+      // can convert hand-drawn pixel strokes back to court-feet when learning the
+      // coach's play-style.
+      const g = geomRef.current;
+      const vf = VISIBLE_FT[b.court_type] ?? VISIBLE_FT.full;
+      const sc = Math.min((g.availW - 20) / PADDED_FT_W, (g.availH - 20) / (vf + OOB_BASE_FT));
+      const payload: any = { strokes: b.strokes };
+      if (b.ai) payload.ai = b.ai;
+      if (Number.isFinite(sc) && sc > 0) payload.canvas = { w: PADDED_FT_W * sc, h: (vf + OOB_BASE_FT) * sc, type: b.court_type };
+      const ds = JSON.stringify(payload);
       if (b.id) {
         await whiteboardAPI.update(b.id, { name: b.name, court_type: b.court_type, data: ds });
       } else {

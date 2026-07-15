@@ -32,6 +32,11 @@ class Coach(Base):
     # reference that is fed to the model on every generation.
     philosophy_reference = Column(String, nullable=True)
     onboarded         = Column(Boolean, default=False)  # completed the philosophy onboarding
+    # Coaching-style profile the AI accumulates from the coach's drawn plays
+    # (hand-drawn + AI boards) and reads on every play draw-up so a short brief is
+    # positioned the way this coach draws. Learned incrementally over time.
+    play_style_profile   = Column(String, nullable=True)
+    play_style_synced_at = Column(DateTime, nullable=True)  # latest board updated_at folded into the profile
     last_season_reminder = Column(String, nullable=True)  # season year last nudged/acknowledged
     last_active       = Column(DateTime, nullable=True)   # last app-open / login / activity
     created_at        = Column(DateTime, default=datetime.utcnow)
@@ -709,7 +714,7 @@ class GameWhiteboard(Base):
     court_type = Column(String, default="full")  # full, half, three_quarter
     data = Column(Text, default="[]")  # JSON array of strokes/shapes
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     coach = relationship("Coach")
 
