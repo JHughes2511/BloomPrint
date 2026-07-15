@@ -911,6 +911,18 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     x: Math.max(-2, Math.min(52, xpx / scale - OOB_SIDE_FT)),
     y: Math.max(48, Math.min(96, ypx / scale + offsetFtForType(board?.court_type ?? 'full'))),
   });
+  // Grab-handle position (px) for one end of an arrow. The tail ('from') handle
+  // is nudged a little along the shaft so it clears the player it starts on — you
+  // can still grab the player. The head ('to') handle sits at the tip.
+  const arrowHandlePx = (fromFt: number[], toFt: number[], end: 'from' | 'to') => {
+    const a = unitToPx(fromFt[0], fromFt[1]);
+    const b = unitToPx(toFt[0], toFt[1]);
+    if (end === 'to') return b;
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const off = Math.min(15, len * 0.4);
+    return { x: a.x + (dx / len) * off, y: a.y + (dy / len) * off };
+  };
 
   // Nearest draggable thing on the active scheme: a player/defender marker, an
   // action-arrow endpoint, or (when the Key is shown) a key-arrow endpoint.
@@ -929,11 +941,14 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     if (sc) {
       (sc.players ?? []).forEach((u: any) => { const p = unitToPx(u.x, u.y); consider(p.x, p.y, { t: 'unit', scheme: activeScheme, id: u.id, kind: 'O', xpx: p.x, ypx: p.y }, 24); });
       (sc.defenders ?? []).forEach((u: any) => { const p = unitToPx(u.x, u.y); consider(p.x, p.y, { t: 'unit', scheme: activeScheme, id: u.id, kind: 'X', xpx: p.x, ypx: p.y }, 24); });
-      // Action arrows: only the HEAD ('to') is draggable — the tail stays attached
-      // to the player, so dragging the head just changes the arrow's direction.
+      // Action arrows: BOTH ends draggable — grab the head to redirect, or the
+      // tail (its handle sits just off the player) to move where it starts.
       (sc.actions ?? []).forEach((a: any, idx: number) => {
-        const pt = a.to; if (!Array.isArray(pt)) return;
-        const p = unitToPx(pt[0], pt[1]); consider(p.x, p.y, { t: 'action', scheme: activeScheme, idx, end: 'to', xpx: p.x, ypx: p.y }, 22, 12);
+        if (!Array.isArray(a.from) || !Array.isArray(a.to)) return;
+        (['from', 'to'] as const).forEach(end => {
+          const h = arrowHandlePx(a.from, a.to, end);
+          consider(h.x, h.y, { t: 'action', scheme: activeScheme, idx, end, xpx: h.x, ypx: h.y }, 18, 10);
+        });
       });
     }
     if (showKey) {
@@ -1036,15 +1051,11 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
             const r = (resArr || []).find((x: any) => x.id === u.id);
             return r && r.role ? { ...u, role: r.role } : u;   // keep x,y
           });
-          const nextScm: any = {
+          newAi.schemes[activeScheme] = {
             players: mergeRoles(curScm.players, rs.players),
             defenders: mergeRoles(curScm.defenders, rs.defenders),
             actions: Array.isArray(rs.actions) ? rs.actions : (curScm.actions ?? []),
           };
-          const pos: Record<string, number[]> = {};
-          [...(nextScm.players || []), ...(nextScm.defenders || [])].forEach((u: any) => { pos[u.id] = [u.x, u.y]; });
-          nextScm.actions = (nextScm.actions || []).map((a: any) => (a.actor && pos[a.actor] ? { ...a, from: pos[a.actor] } : a));
-          newAi.schemes[activeScheme] = nextScm;
         }
         // Downstream schemes: take the re-solved version wholesale (they react).
         downstream.forEach(sname => { if (resSchemes[sname]) newAi.schemes[sname] = resSchemes[sname]; });
@@ -1262,7 +1273,10 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       els.push(<Circle key={key} cx={p.x} cy={p.y} r={7} fill="#FFFFFF" stroke={color} strokeWidth={2.5} opacity={0.95} />);
     };
     (ai.schemes?.[activeScheme]?.actions ?? []).forEach((a: any, idx: number) => {
-      if (Array.isArray(a.to)) handle(`ah${idx}`, a.to[0], a.to[1], '#141414');
+      if (!Array.isArray(a.from) || !Array.isArray(a.to)) return;
+      const hf = arrowHandlePx(a.from, a.to, 'from');
+      els.push(<Circle key={`af${idx}`} cx={hf.x} cy={hf.y} r={6} fill="#FFFFFF" stroke="#141414" strokeWidth={2.5} opacity={0.9} />);
+      handle(`ah${idx}`, a.to[0], a.to[1], '#141414');
     });
     if (showKey) (ai.key ?? []).forEach((k: any, idx: number) => {
       if (Array.isArray(k.from)) handle(`kf${idx}`, k.from[0], k.from[1], '#1F6F9B');
@@ -1430,7 +1444,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         {tool === 'move' && board?.ai && !selectedTextId && (
           <View style={styles.textCtrlBar}>
             <Text style={styles.textCtrlLabel}>
-              Move — drag a player, or drag an arrow’s head (the ○ handle) to change its direction. Then tap “Adapt play”.
+              Move — drag a player, or drag either ○ end of an arrow to place it. Then tap “Adapt play”.
             </Text>
           </View>
         )}
