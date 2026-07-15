@@ -69,7 +69,9 @@ def _describe_handdrawn(strokes: list, canvas, court_type: str) -> str:
         w = 0
     if w and w > 0:
         scale = w / PADDED_FT_W
-        off = COURT_FT_L - VISIBLE_FT.get(ctype, 94)
+        vis = VISIBLE_FT.get(ctype, 94)
+        top_pad = OOB_BASE_FT if (COURT_FT_L - vis) == 0 else 0
+        off = (COURT_FT_L - vis) - top_pad
 
         def feet(px, py):
             return (round(px / scale - OOB_SIDE_FT), round(py / scale + off))

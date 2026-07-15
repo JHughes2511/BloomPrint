@@ -32,8 +32,13 @@ const VISIBLE_FT: Record<string, number> = { full: 94, three_quarter: 78, half: 
 // court is inset inside a slightly larger wood canvas. Feet→px adds OOB_SIDE_FT
 // on x; the baseline OOB sits below the court at the hoop end.
 const OOB_SIDE_FT = 3;                        // wood beyond each sideline
-const OOB_BASE_FT = 4;                        // wood beyond the baseline (hoop end)
+const OOB_BASE_FT = 4;                        // wood beyond a baseline
 const PADDED_FT_W = COURT_FT_W + OOB_SIDE_FT * 2;   // 56
+// Baseline OOB applies to each REAL endline in view. The bottom is always a
+// baseline (all views); the top is a baseline only on full court (its top edge
+// is court-feet y=0). Half / 3/4 clip the top mid-court, so no top OOB there.
+const topPadFt = (visFt: number) => (COURT_FT_L - visFt === 0 ? OOB_BASE_FT : 0);
+const vTotalFt = (visFt: number) => visFt + topPadFt(visFt) + OOB_BASE_FT;
 
 type CourtType = 'full' | 'half' | 'three_quarter';
 type Tool = 'pen' | 'circle' | 'xmark' | 'arrow' | 'text' | 'move';
@@ -586,11 +591,11 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const board  = boards[activeBoardIdx];
   const visFt  = VISIBLE_FT[board?.court_type ?? 'full'] ?? VISIBLE_FT.full;
   const rawScale = avail.w > 20 && avail.h > 20
-    ? Math.min((avail.w - 20) / PADDED_FT_W, (avail.h - 20) / (visFt + OOB_BASE_FT))
+    ? Math.min((avail.w - 20) / PADDED_FT_W, (avail.h - 20) / vTotalFt(visFt))
     : 0;
   const scale  = Number.isFinite(rawScale) && rawScale > 0 ? rawScale : 0;
   const courtW = PADDED_FT_W * scale;
-  const courtH = (visFt + OOB_BASE_FT) * scale;
+  const courtH = vTotalFt(visFt) * scale;
   // Landscape: rotate the whole court 90° for display and uniformly scale it to
   // fit the wide area. Strokes stay aligned (one transform on the whole wrapper).
   // Drawing is a portrait activity, so hand-draw input is paused in landscape.
@@ -657,10 +662,10 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       // coach's play-style.
       const g = geomRef.current;
       const vf = VISIBLE_FT[b.court_type] ?? VISIBLE_FT.full;
-      const sc = Math.min((g.availW - 20) / PADDED_FT_W, (g.availH - 20) / (vf + OOB_BASE_FT));
+      const sc = Math.min((g.availW - 20) / PADDED_FT_W, (g.availH - 20) / vTotalFt(vf));
       const payload: any = { strokes: b.strokes };
       if (b.ai) payload.ai = b.ai;
-      if (Number.isFinite(sc) && sc > 0) payload.canvas = { w: PADDED_FT_W * sc, h: (vf + OOB_BASE_FT) * sc, type: b.court_type };
+      if (Number.isFinite(sc) && sc > 0) payload.canvas = { w: PADDED_FT_W * sc, h: vTotalFt(vf) * sc, type: b.court_type };
       const ds = JSON.stringify(payload);
       if (b.id) {
         await whiteboardAPI.update(b.id, { name: b.name, court_type: b.court_type, data: ds });
@@ -851,10 +856,15 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   // so the top of the canvas corresponds to court-feet = COURT_FT_L - visibleFt).
   const scaleForType = (type: CourtType) => {
     const visFt = VISIBLE_FT[type] ?? VISIBLE_FT.full;
-    const raw = Math.min((avail.w - 20) / PADDED_FT_W, (avail.h - 20) / (visFt + OOB_BASE_FT));
+    const raw = Math.min((avail.w - 20) / PADDED_FT_W, (avail.h - 20) / vTotalFt(visFt));
     return Number.isFinite(raw) && raw > 0 ? raw : 1;
   };
-  const offsetFtForType = (type: CourtType) => COURT_FT_L - (VISIBLE_FT[type] ?? VISIBLE_FT.full);
+  // Court-feet at the top edge of the canvas. Shifted up by the top baseline OOB
+  // (full court only) so both baselines sit off the wood edge equally.
+  const offsetFtForType = (type: CourtType) => {
+    const visFt = VISIBLE_FT[type] ?? VISIBLE_FT.full;
+    return (COURT_FT_L - visFt) - topPadFt(visFt);
+  };
 
   // Re-map all strokes from one court view's pixel space into another so a play
   // drawn on (say) half court stays in the same real court location on full/¾.
