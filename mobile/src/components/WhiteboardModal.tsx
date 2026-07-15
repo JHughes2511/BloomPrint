@@ -1080,6 +1080,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       k[dt.end] = [xft, yft];
       pinsRef.current.keys.add(dt.idx);
     }
+    syncOffenseAcrossSchemes(ai);   // keep the offense mirrored into defense/counter
     const keep = b.strokes.filter(st => !st.layer);   // hand-drawn only; AI strokes fully rebuilt
     const updated: Board = { ...b, strokes: [...keep, ...buildAllStrokes(ai, b.court_type)], ai };
     setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
@@ -1101,6 +1102,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     } else if (ai.key && sel.idx < ai.key.length) {
       ai.key.splice(sel.idx, 1);
     }
+    syncOffenseAcrossSchemes(ai);   // removing an offensive action mirrors into defense
     const keep = b.strokes.filter(st => !st.layer);
     const updated: Board = { ...b, strokes: [...keep, ...buildAllStrokes(ai, b.court_type)], ai };
     setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
@@ -1125,6 +1127,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     units.forEach((u: any) => { const d = Math.hypot(u.x - fromFt.x, u.y - fromFt.y); if (d < bestD) { bestD = d; actor = u.id; } });
     const maxStep = (scm.actions ?? []).reduce((m: number, a: any) => Math.max(m, a.step || 1), 0);
     scm.actions = [...(scm.actions ?? []), { actor, kind, from: [fromFt.x, fromFt.y], to: [toFt.x, toFt.y], step: maxStep + 1 }];
+    syncOffenseAcrossSchemes(ai);   // a new offensive action mirrors into defense
     const keep = b.strokes.filter(st => !st.layer);
     const updated: Board = { ...b, ai, strokes: [...keep, ...buildAllStrokes(ai, b.court_type)] };
     setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
