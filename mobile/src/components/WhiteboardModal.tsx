@@ -1446,7 +1446,13 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           </View>
         )}
 
-        <GeneratingOverlay visible={adapting} label="Adapting the play around your changes…" />
+        {adapting && (
+          <View style={styles.adaptOverlay}>
+            <View style={styles.adaptCard}>
+              <GeneratingOverlay visible label="Adapting the play around your changes…" />
+            </View>
+          </View>
+        )}
 
         {/* AI Key — bottom overlay that pops up over the court when Key is on */}
         {board?.ai && showKey && board.ai.key.length > 0 && (
@@ -1859,4 +1865,6 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   lockBtnText:     { color: t.muted, fontSize: 12, fontFamily: fonts[700] },
   guideInput:      { backgroundColor: t.card, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, color: t.ink, fontSize: 13.5, borderWidth: 1, borderColor: t.line },
   byPlayerRow:     { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
+  adaptOverlay:    { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: t.scrim, paddingHorizontal: 30 },
+  adaptCard:       { backgroundColor: t.sheet, borderRadius: 16, padding: 20, width: '100%', maxWidth: 360, borderWidth: 1, borderColor: t.cardBorder },
 });

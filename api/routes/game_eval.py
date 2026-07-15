@@ -1751,8 +1751,11 @@ def _parse_ai_play_json(raw: str):
         pass
     # Repair: strip trailing commas before } or ]
     repaired = _re.sub(r",\s*([}\]])", r"\1", candidate)
-    # Repair: insert missing commas between adjacent } { , ] [ , } " etc.
+    # Repair: insert missing commas between adjacent tokens across a newline.
     repaired = _re.sub(r"([}\]0-9\"])\s*\n\s*([{\[\"])", r"\1,\n\2", repaired)
+    # Repair: missing comma between a value and the next object/array on the SAME
+    # line (e.g. "} {" or "] [" or "5 {") — common when the model omits a comma.
+    repaired = _re.sub(r"([}\]0-9])\s+([{\[])", r"\1,\2", repaired)
     return _json.loads(repaired)
 
 
@@ -1979,7 +1982,22 @@ async def ai_play_adapt(
             messages=[{"role": "user", "content": prompt}],
         )
         blocks = [b for b in resp.content if hasattr(b, "text")]
-        data = _parse_ai_play_json(blocks[0].text if blocks else "{}")
+        raw = (blocks[0].text if blocks else "{}").strip()
+        try:
+            data = _parse_ai_play_json(raw)
+        except Exception:
+            # One retry: ask the model to return corrected, strictly-valid JSON.
+            fix = await client.messages.create(
+                model="claude-opus-4-7", max_tokens=4000,
+                messages=[{"role": "user", "content":
+                    "The following was supposed to be strict JSON but is invalid. Return ONLY the "
+                    "corrected, strictly-valid JSON — same data, no prose, no trailing commas, no "
+                    f"comments, every element comma-separated:\n\n{raw}"}],
+            )
+            fblocks = [b for b in fix.content if hasattr(b, "text")]
+            data = _parse_ai_play_json(fblocks[0].text if fblocks else "{}")
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Adapt failed: {exc}")
 
