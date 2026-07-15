@@ -69,6 +69,18 @@ const dispText = (s?: string) => (s || '').replace(/\bX([1-5])\b/g, 'D$1');
 // counter stay independent.
 const gKey = (scheme: string, id: string) => `${scheme}:${id}`;
 
+// Scale every pixel coordinate of a stroke by `ratio` (used when the court
+// resizes for the same view, so marks keep their court location).
+const scaleStroke = (s: Stroke, ratio: number): Stroke => ({
+  ...s,
+  d: s.d ? s.d.replace(/-?\d*\.?\d+/g, m => (parseFloat(m) * ratio).toFixed(2)) : s.d,
+  cx: s.cx != null ? s.cx * ratio : s.cx, cy: s.cy != null ? s.cy * ratio : s.cy,
+  r: s.r != null ? s.r * ratio : s.r, size: s.size != null ? s.size * ratio : s.size,
+  x1: s.x1 != null ? s.x1 * ratio : s.x1, y1: s.y1 != null ? s.y1 * ratio : s.y1,
+  x2: s.x2 != null ? s.x2 * ratio : s.x2, y2: s.y2 != null ? s.y2 * ratio : s.y2,
+  x: s.x != null ? s.x * ratio : s.x, y: s.y != null ? s.y * ratio : s.y,
+});
+
 // Perpendicular distance from a point to a line segment (px).
 const distToSeg = (px: number, py: number, x1: number, y1: number, x2: number, y2: number) => {
   const dx = x2 - x1, dy = y2 - y1;
@@ -1060,17 +1072,31 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   // different-sized screen (iPad vs phone, rotate, resize, web) they mis-scale and
   // the grab handles drift off. Rebuild them from the feet-data whenever the
   // display scale changes; hand-drawn marks are left untouched.
-  const lastRebuilt = useRef('');
+  const prevScaleRef = useRef({ idx: -1, scale: 0 });
   useEffect(() => {
     if (!scale || loading) return;
-    const sig = `${activeBoardIdx}:${scale.toFixed(2)}`;
-    if (lastRebuilt.current === sig) return;
-    lastRebuilt.current = sig;
+    const p = prevScaleRef.current;
+    const sameBoard = p.idx === activeBoardIdx && p.scale > 0;
+    const ratio = sameBoard ? scale / p.scale : 1;
+    if (sameBoard && Math.abs(ratio - 1) < 0.002) { prevScaleRef.current = { idx: activeBoardIdx, scale }; return; }
+    prevScaleRef.current = { idx: activeBoardIdx, scale };
     setBoards(prev => {
       const b = prev[activeBoardIdx];
-      if (!b?.ai) return prev;
+      if (!b) return prev;
       const n = [...prev];
-      n[activeBoardIdx] = { ...b, strokes: [...b.strokes.filter((st: Stroke) => !st.layer), ...buildAllStrokes(b.ai, b.court_type)] };
+      if (ratio !== 1) {
+        // Court resized for the SAME board (e.g. a bar appeared / rotation):
+        // rescale the hand-drawn marks so they keep their court location.
+        const hand = b.strokes.filter(st => !st.layer).map(st => scaleStroke(st, ratio));
+        n[activeBoardIdx] = b.ai
+          ? { ...b, strokes: [...hand, ...buildAllStrokes(b.ai, b.court_type)] }
+          : { ...b, strokes: hand };
+      } else if (b.ai) {
+        // Board switch / first render: rebuild AI marks crisp at current scale.
+        n[activeBoardIdx] = { ...b, strokes: [...b.strokes.filter(st => !st.layer), ...buildAllStrokes(b.ai, b.court_type)] };
+      } else {
+        return prev;
+      }
       return n;
     });
   }, [scale, activeBoardIdx, loading]); // eslint-disable-line react-hooks/exhaustive-deps
