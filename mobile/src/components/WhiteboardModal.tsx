@@ -604,25 +604,16 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     ? Math.min((avail.w - 12) / courtH, (avail.h - 12) / courtW)
     : 1;
 
-  // Live geometry snapshot the (once-created) pan responder reads so touches map
-  // correctly in both orientations. The pan responder is attached to the OUTER
-  // (never-transformed) canvas container, so its locationX/locationY are in
-  // container space; mapPoint converts that into wrapper-local court pixels.
+  // Geometry snapshot for the (once-created) pan responder and for saveBoard's
+  // canvas-dimension capture.
   const geomRef = useRef({ isLandscape: false, landscapeFit: 1, availW: 0, availH: 0, courtW: 0, courtH: 0 });
   geomRef.current = { isLandscape, landscapeFit, availW: avail.w, availH: avail.h, courtW, courtH };
-  const mapPoint = (lx: number, ly: number) => {
-    const g = geomRef.current;
-    if (!g.isLandscape) {
-      // Wrapper is centered in the container.
-      return { x: lx - (g.availW - g.courtW) / 2, y: ly - (g.availH - g.courtH) / 2 };
-    }
-    // Landscape: wrapper is rendered rotated 90° clockwise + scaled about the
-    // container center. Invert that to recover wrapper-local coordinates.
-    const cx = g.availW / 2, cy = g.availH / 2;
-    const dx = lx - cx, dy = ly - cy;
-    const px = dy / g.landscapeFit, py = -dx / g.landscapeFit;
-    return { x: px + g.courtW / 2, y: py + g.courtH / 2 };
-  };
+  // The pan responder is attached to the court WRAPPER, so locationX/locationY
+  // are already in the wrapper's local (untransformed) coordinate space — the
+  // exact space the strokes are drawn in. That holds in landscape too: the
+  // rotate/scale transform is visual only, and the same transform is applied to
+  // the SVG we draw into, so a raw local point lands under the finger. No mapping.
+  const mapPoint = (lx: number, ly: number) => ({ x: lx, y: ly });
   const mapPointRef = useRef(mapPoint);
   mapPointRef.current = mapPoint;
 
@@ -1341,7 +1332,6 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                 }
               }
             }}
-            {...panResponder.panHandlers}
           >
             {scale > 0 && (
               <View
@@ -1350,6 +1340,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                   { width: courtW, height: courtH },
                   isLandscape ? { transform: [{ rotate: '90deg' }, { scale: landscapeFit }] } : null,
                 ]}
+                {...panResponder.panHandlers}
               >
                 <HardwoodCourt width={courtW} height={courtH} scale={scale} />
                 <Svg style={StyleSheet.absoluteFill} width={courtW} height={courtH}>
