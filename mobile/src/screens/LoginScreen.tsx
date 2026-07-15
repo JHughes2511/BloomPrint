@@ -16,6 +16,7 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import CountryField from '../components/CountryField';
 import GoogleSignInButton from '../components/GoogleSignInButton';
+import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
 
 const ROLES = [
   { key: 'coach',   label: 'Coach' },
@@ -23,15 +24,7 @@ const ROLES = [
   { key: 'trainer', label: 'Trainer' },
 ];
 
-const COMPETITION_LEVELS = [
-  'Youth',
-  'Middle School',
-  'HS JV',
-  'HS Varsity',
-  'AAU',
-  'College',
-  'Pro',
-];
+const COMPETITION_LEVELS = [...CANON_LEVELS];
 
 // Conferences shown for each competition level
 const CONFERENCES_BY_LEVEL: Record<string, string[]> = {

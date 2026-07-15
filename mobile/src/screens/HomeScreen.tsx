@@ -10,6 +10,7 @@ import { ScreenBackground, SectionLabel, Card, IconTile, Txt } from '../theme/co
 import { Icon, IconName } from '../theme/icons';
 import { fonts, type as typeScale } from '../theme/typography';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
+import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
 import CountryField from '../components/CountryField';
 
 // Which bottom tab each report type routes to when tapped on the Home page.
@@ -308,7 +309,7 @@ export default function HomeScreen() {
               Every eval, report, and training program is calibrated to this level. Changing it updates the default everywhere.
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {['Youth', 'Middle School', 'HS JV', 'HS Varsity', 'AAU', 'College', 'Pro'].map(lvl => (
+              {CANON_LEVELS.map(lvl => (
                 <TouchableOpacity
                   key={lvl}
                   onPress={() => setPLevel(lvl)}

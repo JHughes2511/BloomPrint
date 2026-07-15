@@ -94,9 +94,9 @@ COACH_WEIGHTS = {
 
 COMPETITION_LEVELS = [
     "NBA", "G-League", "High Europe", "Low Europe",
-    "D1", "D2", "D3", "JUCO",
-    "HS Varsity", "17U AAU", "16U AAU", "14U/15U AAU",
-    "Youth (5-13)", "European Pro", "International Academy",
+    "D1", "D2", "D3", "JUCO", "Prep School",
+    "HS Varsity", "HS JV", "17U AAU", "16U AAU", "14U/15U AAU",
+    "Middle School", "Youth (5-13)", "European Pro", "International Academy",
 ]
 
 AGE_TIERS = {

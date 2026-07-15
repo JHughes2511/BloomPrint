@@ -29,7 +29,8 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 
-const COMPETITION_LEVELS = ['Middle School', 'HS JV', 'HS Varsity', 'AAU', 'College', 'Pro'];
+import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
+const COMPETITION_LEVELS = [...CANON_LEVELS];
 
 const OUTPUT_TYPES = [
   { key: 'player_eval', label: 'Player Eval' },

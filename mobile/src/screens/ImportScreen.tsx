@@ -26,7 +26,8 @@ const OUTPUT_TYPES = [
   { key: 'game_analysis',       label: 'Game Analysis' },
 ];
 
-const LEVELS = ['Youth', 'MS', 'HS JV', 'HS Varsity', 'Prep School', 'JUCO', 'College', 'Pro'];
+import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
+const LEVELS = [...CANON_LEVELS];
 
 const TEMPLATE_COLUMNS = [
   { name: 'Player Name *', desc: 'Full name — required, used to match existing players' },

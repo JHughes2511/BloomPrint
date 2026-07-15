@@ -6,7 +6,8 @@ import {
   ActivityIndicator, TextInput, Modal, Alert, KeyboardAvoidingView, Platform, ScrollView, RefreshControl,
 } from 'react-native';
 
-const COMPETITION_LEVELS = ['Middle School', 'HS JV', 'HS Varsity', 'AAU', 'College', 'Pro'];
+import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
+const COMPETITION_LEVELS = [...CANON_LEVELS];
 
 function LevelDropdown({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [open, setOpen] = useState(false);

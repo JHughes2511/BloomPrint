@@ -15,7 +15,9 @@ D1_HIGH_MAJOR_CONFERENCES = {"Big Ten", "Big 12", "ACC", "Big East", "SEC"}
 
 
 def _auto_weight(competition_level: str, conference: str | None) -> int:
-    """Assign a BIM authority weight based on competition level."""
+    """Assign a BIM authority weight based on competition level. Weights train the
+    model's calibration, so keep this in sync with the coach-facing level list
+    (mobile/src/constants/levels.ts)."""
     lvl = (competition_level or "").strip()
     if lvl == "Pro":
         return 98
@@ -23,12 +25,20 @@ def _auto_weight(competition_level: str, conference: str | None) -> int:
         if conference and conference.strip() in D1_HIGH_MAJOR_CONFERENCES:
             return 82
         return 75
-    if lvl == "AAU":
-        return 40
+    if lvl == "JUCO":
+        return 60
+    if lvl == "Prep School":
+        return 50
     if lvl == "HS Varsity":
         return 45
-    if lvl in ("HS JV", "Middle School"):
+    if lvl == "AAU":
+        return 40
+    if lvl == "HS JV":
         return 35
+    if lvl == "Middle School":
+        return 30
+    if lvl == "Youth":
+        return 25
     return 45
 
 
