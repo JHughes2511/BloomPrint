@@ -283,7 +283,21 @@ TOOLS = [
      "input_schema": {"type": "object", "properties": {"game_id": {"type": "integer"}}}},
     {"name": "list_training", "description": "Training programs (optionally for one player).",
      "input_schema": {"type": "object", "properties": {"player": {"type": "string"}}}},
-    {"name": "suggest_navigation", "description": "Show the coach a 'Take me there' button that opens a screen. Use for 'where is X' / 'how do I Y'. Valid screens: home, roster, player (params: player_id), eval_report (params: eval_id), team_grade, team_eval, recent, new_eval (params: player_id), game_report_builder (params: report_id), import, training (params: player_id).",
+    {"name": "suggest_navigation", "description": (
+        "Show the coach a 'Take me there' button that opens a screen. Use for 'where is X' / 'how do I "
+        "Y'. Use EXACTLY one of these screen values:\n"
+        "- 'team_grade' — the TEAM GRADE tab: track/log games, enter box-score stats, season dashboard, "
+        "opponent scouting. Use this for 'how do I track a game', game stats, standings, scouting.\n"
+        "- 'team_eval' — the TEAM EVAL tab: build report PACKETS and team reports (params: report_id for "
+        "a specific packet).\n"
+        "- 'roster' — the roster of players.\n"
+        "- 'player' — one player's profile (params: player_id).\n"
+        "- 'eval_report' — a specific saved eval (params: eval_id).\n"
+        "- 'recent' — all saved reports.\n"
+        "- 'new_eval' — start a new video player eval (params: player_id).\n"
+        "- 'import' — import a roster.\n"
+        "- 'home' — the home screen.\n"
+        "Do NOT invent other screen names."),
      "input_schema": {"type": "object", "properties": {"screen": {"type": "string"}, "player_id": {"type": "integer"}, "eval_id": {"type": "integer"}, "report_id": {"type": "integer"}, "label": {"type": "string", "description": "button text"}}, "required": ["screen", "label"]}},
     {"name": "propose_generation", "description": (
         "Propose creating a NEW report the coach must confirm before it runs. Do NOT run generation "

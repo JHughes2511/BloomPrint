@@ -20,20 +20,43 @@ type Msg = {
 // Map the agent's logical screen name to an actual navigation call from the Home tab.
 function goTo(navigation: any, target: { screen: string; params?: any; label?: string }) {
   const p = target.params || {};
+  const key = String(target.screen || '').toLowerCase().replace(/[\s-]/g, '_');
   try {
-    switch (target.screen) {
+    switch (key) {
       case 'home': navigation.navigate('Home'); break;
       case 'roster': navigation.navigate('RosterTab', { screen: 'Roster' }); break;
-      case 'player': navigation.navigate('RosterTab', { screen: 'PlayerProfile', params: { playerId: p.player_id } }); break;
-      case 'training': navigation.navigate('RosterTab', { screen: 'PlayerProfile', params: { playerId: p.player_id } }); break;
-      case 'new_eval': navigation.navigate('RosterTab', { screen: 'PlayerProfile', params: { playerId: p.player_id } }); break;
-      case 'eval_report': navigation.navigate('RecentTab', { screen: 'EvalReport', params: { evalId: p.eval_id } }); break;
-      case 'team_grade': navigation.navigate('TeamEvalTab'); break;
-      case 'team_eval': navigation.navigate('TeamTab'); break;
-      case 'recent': navigation.navigate('RecentTab'); break;
-      case 'game_report_builder': navigation.navigate('TeamTab', { screen: 'GameReportBuilder', params: { reportId: p.report_id } }); break;
-      case 'import': navigation.navigate('RosterTab', { screen: 'Import', params: { mode: 'roster' } }); break;
-      default: navigation.navigate('Home');
+      case 'player':
+      case 'player_profile':
+      case 'training':
+      case 'new_eval':
+        navigation.navigate('RosterTab', { screen: 'PlayerProfile', params: { playerId: p.player_id } }); break;
+      case 'eval_report':
+      case 'report':
+        navigation.navigate('RecentTab', { screen: 'EvalReport', params: { evalId: p.eval_id } }); break;
+      // Team Grade tab = tracking games, stats, season dashboard, scouting.
+      case 'team_grade':
+      case 'games':
+      case 'game':
+      case 'track_game':
+      case 'scout':
+      case 'scouting':
+      case 'dashboard':
+      case 'season':
+        navigation.navigate('TeamEvalTab'); break;
+      // Team Eval tab = report packets / team reports.
+      case 'team_eval':
+      case 'team_report':
+      case 'packet':
+      case 'game_report_builder':
+        navigation.navigate('TeamTab', p.report_id != null ? { screen: 'GameReportBuilder', params: { reportId: p.report_id } } : undefined); break;
+      case 'recent':
+      case 'reports':
+        navigation.navigate('RecentTab'); break;
+      case 'import':
+        navigation.navigate('RosterTab', { screen: 'Import', params: { mode: 'roster' } }); break;
+      default:
+        // Unknown target — do nothing rather than jump to the wrong screen.
+        Alert.alert('Not sure where that is', "I couldn't map that to a screen. Try the tab bar at the bottom.");
     }
   } catch {
     Alert.alert('Could not open', "I couldn't open that screen automatically.");
@@ -125,7 +148,7 @@ export default function CommandBar() {
               )}
 
               {messages.map((m, i) => (
-                <View key={i} style={{ marginBottom: 14, alignItems: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                <View key={i} style={{ marginBottom: 14, alignItems: m.role === 'user' ? 'flex-end' : 'stretch' }}>
                   {m.role === 'user' ? (
                     <View style={s.userBubble}><Text style={s.userText}>{m.content}</Text></View>
                   ) : (
@@ -190,7 +213,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   exText: { color: t.inkSoft, fontSize: 13 },
   userBubble: { backgroundColor: t.ctaBg, borderRadius: 14, borderBottomRightRadius: 4, paddingHorizontal: 14, paddingVertical: 10, maxWidth: '85%' },
   userText: { color: t.ctaText, fontSize: 14 },
-  aiBubble: { backgroundColor: t.card, borderWidth: 1, borderColor: t.chip, borderRadius: 14, borderBottomLeftRadius: 4, paddingHorizontal: 14, paddingVertical: 10, maxWidth: '92%' },
+  aiBubble: { backgroundColor: t.card, borderWidth: 1, borderColor: t.chip, borderRadius: 14, borderBottomLeftRadius: 4, paddingHorizontal: 14, paddingVertical: 10, alignSelf: 'stretch' },
   navBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', backgroundColor: t.ctaBg, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8, marginTop: 10 },
   navBtnText: { color: t.ctaText, fontSize: 13, fontFamily: fonts[700] },
   confirmCard: { backgroundColor: t.accentSoft, borderRadius: 10, padding: 12, marginTop: 10 },
