@@ -1020,7 +1020,26 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         const cur = n[activeBoardIdx];
         if (!cur?.ai) return prev;
         const newAi = JSON.parse(JSON.stringify(cur.ai));
-        if (res?.scheme) newAi.schemes[activeScheme] = res.scheme;
+        if (res?.scheme) {
+          // Hard guarantee: starting positions never move on Adapt. Keep every
+          // current player/defender x,y; only pull in the updated role text and
+          // the new action arrows (the movement).
+          const curScm = newAi.schemes?.[activeScheme] || {};
+          const mergeRoles = (curArr: any[], resArr: any[]) => (curArr || []).map((u: any) => {
+            const r = (resArr || []).find((x: any) => x.id === u.id);
+            return r && r.role ? { ...u, role: r.role } : u;   // keep x,y
+          });
+          const nextScm: any = {
+            players: mergeRoles(curScm.players, res.scheme.players),
+            defenders: mergeRoles(curScm.defenders, res.scheme.defenders),
+            actions: Array.isArray(res.scheme.actions) ? res.scheme.actions : (curScm.actions ?? []),
+          };
+          // Keep each arrow's tail on its actor's (fixed) starting position.
+          const pos: Record<string, number[]> = {};
+          [...(nextScm.players || []), ...(nextScm.defenders || [])].forEach((u: any) => { pos[u.id] = [u.x, u.y]; });
+          nextScm.actions = (nextScm.actions || []).map((a: any) => (a.actor && pos[a.actor] ? { ...a, from: pos[a.actor] } : a));
+          newAi.schemes[activeScheme] = nextScm;
+        }
         if (res?.key?.length) newAi.key = res.key.map((k: any) => ({ n: k.n, text: k.text, from: k.from, to: k.to }));
         const keep = cur.strokes.filter((st: Stroke) => !st.layer);
         const updated: Board = { ...cur, ai: newAi, strokes: [...keep, ...buildAllStrokes(newAi, cur.court_type)] };
