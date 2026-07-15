@@ -457,7 +457,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   const regenerateWith = async (
     extra: string,
     promptNote?: string,
-    opts?: { guidanceMap?: Record<string, string>; persistExtra?: boolean },
+    opts?: { guidanceMap?: Record<string, string>; persistExtra?: boolean; preservePositions?: boolean },
   ) => {
     const b = boards[activeBoardIdx];
     if (!b?.ai) return;
@@ -466,7 +466,22 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     const sticky = buildStickyBlock(gmap);
     const promptToSend = [baseSource, sticky, extra].filter(Boolean).join('\n\n');
     const res = await whiteboardAPI.aiPlay(promptToSend);
-    const aiStrokes = remapStrokes(buildPlayStrokes(res), 'half', b.court_type);
+    // Minimal-change mode (Players panel): keep every current starting position;
+    // take only the new roles + movement so it's a minor edit, like Adapt.
+    let finalSchemes = res.schemes;
+    if (opts?.preservePositions && b.ai.schemes) {
+      finalSchemes = {};
+      (['offense', 'defense', 'counter'] as SchemeKey[]).forEach(name => {
+        const rs = res.schemes?.[name]; if (!rs) return;
+        const cs: any = (b.ai!.schemes as any)?.[name] || {};
+        const keepPos = (resArr: any[], curArr: any[]) => (resArr || []).map((u: any) => {
+          const cur = (curArr || []).find((x: any) => x.id === u.id);
+          return cur ? { ...u, x: cur.x, y: cur.y } : u;
+        });
+        (finalSchemes as any)[name] = { players: keepPos(rs.players, cs.players), defenders: keepPos(rs.defenders, cs.defenders), actions: rs.actions };
+      });
+    }
+    const aiStrokes = remapStrokes(buildPlayStrokes({ ...res, schemes: finalSchemes }), 'half', b.court_type);
     const kept = b.strokes.filter(st => !st.layer);   // hand-drawn marks only
     const newSource = opts?.persistExtra && extra
       ? [baseSource, extra].filter(Boolean).join('\n\n')
@@ -475,7 +490,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       ...b,
       name: res.play_name || b.name,
       strokes: [...kept, ...aiStrokes],
-      ai: { play_name: res.play_name ?? b.ai.play_name, key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text, from: k.from, to: k.to })), source: newSource, schemes: res.schemes,
+      ai: { play_name: res.play_name ?? b.ai.play_name, key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text, from: k.from, to: k.to })), source: newSource, schemes: finalSchemes,
             prompt: [b.ai.prompt, promptNote].filter(Boolean).join('\n'), attachedTitle: b.ai.attachedTitle, guidance: gmap },
     };
     setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
@@ -549,7 +564,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     ].join('\n\n');
     setApplyingGuidance(true);
     try {
-      await regenerateWith(extra, '+ player lock / guidance', { guidanceMap: newGuidance, persistExtra: false });
+      await regenerateWith(extra, '+ player lock / guidance', { guidanceMap: newGuidance, persistExtra: false, preservePositions: true });
       setShowPlayers(false);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update the play');
