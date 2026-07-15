@@ -197,11 +197,15 @@ export default function HomeScreen() {
               <Text style={[typeScale.label, { color: t.label, marginBottom: 4 }]}>Intelligence Model</Text>
               <Text style={[typeScale.h1, { color: t.ink }]}>BloomPrint</Text>
             </View>
-            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-              <CircleBtn icon={mode === 'dark' ? 'sun' : 'moon'} onPress={toggle} label="Toggle theme" />
-              <CircleBtn icon="user" onPress={openProfile} label="Edit profile" />
-              <CircleBtn icon="mail" onPress={() => navigation.navigate('StaffInbox')} label="Staff inbox" />
-              <CircleBtn icon="bell" onPress={() => navigation.navigate('CoachNotifications')} badge={unreadCount} label="Notifications" />
+            <View style={{ alignItems: 'flex-end', gap: 8 }}>
+              <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                <CircleBtn icon={mode === 'dark' ? 'sun' : 'moon'} onPress={toggle} label="Toggle theme" />
+                <CircleBtn icon="user" onPress={openProfile} label="Edit profile" />
+                <CircleBtn icon="mail" onPress={() => navigation.navigate('StaffInbox')} label="Staff inbox" />
+                <CircleBtn icon="bell" onPress={() => navigation.navigate('CoachNotifications')} badge={unreadCount} label="Notifications" />
+              </View>
+              {/* AI command bar — small pill under the icons */}
+              <CommandBar />
             </View>
           </View>
           {coach && (
@@ -211,11 +215,6 @@ export default function HomeScreen() {
               </Text>
             </View>
           )}
-        </View>
-
-        {/* AI command bar */}
-        <View style={{ marginBottom: 20 }}>
-          <CommandBar />
         </View>
 
         {/* Report Types */}

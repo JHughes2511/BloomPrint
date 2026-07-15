@@ -89,11 +89,10 @@ export default function CommandBar() {
 
   return (
     <>
-      {/* Collapsed command bar */}
+      {/* Collapsed command bar — compact pill */}
       <TouchableOpacity style={s.bar} onPress={() => setOpen(true)} activeOpacity={0.8}>
-        <Ionicons name="sparkles" size={16} color={t.accent} />
-        <Text style={s.barText}>Ask BloomPrint anything…</Text>
-        <Ionicons name="arrow-forward-circle" size={20} color={t.muted} />
+        <Ionicons name="sparkles" size={14} color={t.accent} />
+        <Text style={s.barText}>Ask BloomPrint</Text>
       </TouchableOpacity>
 
       <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
@@ -180,8 +179,8 @@ export default function CommandBar() {
 }
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
-  bar: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: t.card, borderWidth: 1, borderColor: t.line, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12 },
-  barText: { flex: 1, color: t.muted, fontSize: 14, fontFamily: fonts[600] },
+  bar: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-end', backgroundColor: t.card, borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
+  barText: { color: t.muted, fontSize: 12.5, fontFamily: fonts[700] },
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, height: '88%' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip },
