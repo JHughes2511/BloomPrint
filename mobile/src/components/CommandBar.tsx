@@ -1,0 +1,206 @@
+import React, { useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import VoiceTextInput from './VoiceTextInput';
+import { assistantAPI } from '../api/client';
+import { renderReport } from '../utils/renderReport';
+import { useTheme } from '../theme/ThemeProvider';
+import { ThemeTokens } from '../theme/tokens';
+import { fonts } from '../theme/typography';
+
+type Msg = {
+  role: 'user' | 'assistant';
+  content: string;
+  navigate?: { screen: string; params?: any; label?: string } | null;
+  pending?: any | null;
+  ran?: boolean;
+};
+
+// Map the agent's logical screen name to an actual navigation call from the Home tab.
+function goTo(navigation: any, target: { screen: string; params?: any; label?: string }) {
+  const p = target.params || {};
+  try {
+    switch (target.screen) {
+      case 'home': navigation.navigate('Home'); break;
+      case 'roster': navigation.navigate('RosterTab', { screen: 'Roster' }); break;
+      case 'player': navigation.navigate('RosterTab', { screen: 'PlayerProfile', params: { playerId: p.player_id } }); break;
+      case 'training': navigation.navigate('RosterTab', { screen: 'PlayerProfile', params: { playerId: p.player_id } }); break;
+      case 'new_eval': navigation.navigate('RosterTab', { screen: 'PlayerProfile', params: { playerId: p.player_id } }); break;
+      case 'eval_report': navigation.navigate('RecentTab', { screen: 'EvalReport', params: { evalId: p.eval_id } }); break;
+      case 'team_grade': navigation.navigate('TeamEvalTab'); break;
+      case 'team_eval': navigation.navigate('TeamTab'); break;
+      case 'recent': navigation.navigate('RecentTab'); break;
+      case 'game_report_builder': navigation.navigate('TeamTab', { screen: 'GameReportBuilder', params: { reportId: p.report_id } }); break;
+      case 'import': navigation.navigate('RosterTab', { screen: 'Import', params: { mode: 'roster' } }); break;
+      default: navigation.navigate('Home');
+    }
+  } catch {
+    Alert.alert('Could not open', "I couldn't open that screen automatically.");
+  }
+}
+
+export default function CommandBar() {
+  const { t } = useTheme();
+  const s = makeStyles(t);
+  const navigation = useNavigation<any>();
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<Msg[]>([]);
+  const [busy, setBusy] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
+
+  const send = async () => {
+    const text = input.trim();
+    if (!text || busy) return;
+    const history = messages.map(m => ({ role: m.role, content: m.content }));
+    setMessages(prev => [...prev, { role: 'user', content: text }]);
+    setInput('');
+    setBusy(true);
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 60);
+    try {
+      const res = await assistantAPI.ask(text, history);
+      setMessages(prev => [...prev, {
+        role: 'assistant', content: res.reply || '…',
+        navigate: res.navigate || null, pending: res.pending_action || null,
+      }]);
+    } catch (e: any) {
+      setMessages(prev => [...prev, { role: 'assistant', content: e?.response?.data?.detail ?? 'Something went wrong. Try again.' }]);
+    } finally {
+      setBusy(false);
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
+    }
+  };
+
+  const runPending = async (idx: number, action: any) => {
+    setBusy(true);
+    try {
+      const res = await assistantAPI.confirm(action);
+      setMessages(prev => prev.map((m, i) => i === idx ? { ...m, ran: true } : m).concat([{
+        role: 'assistant', content: res.message || 'Done.', navigate: res.navigate || null,
+      }]));
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not complete that.');
+    } finally {
+      setBusy(false);
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
+    }
+  };
+
+  return (
+    <>
+      {/* Collapsed command bar */}
+      <TouchableOpacity style={s.bar} onPress={() => setOpen(true)} activeOpacity={0.8}>
+        <Ionicons name="sparkles" size={16} color={t.accent} />
+        <Text style={s.barText}>Ask BloomPrint anything…</Text>
+        <Ionicons name="arrow-forward-circle" size={20} color={t.muted} />
+      </TouchableOpacity>
+
+      <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
+        <View style={s.overlay}>
+          <View style={s.sheet}>
+            <View style={s.header}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Ionicons name="sparkles" size={18} color={t.accent} />
+                <Text style={s.title}>BloomPrint Copilot</Text>
+              </View>
+              <TouchableOpacity onPress={() => setOpen(false)}><Ionicons name="close" size={24} color={t.muted} /></TouchableOpacity>
+            </View>
+
+            <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 8 }}>
+              {messages.length === 0 && (
+                <View style={{ paddingVertical: 24 }}>
+                  <Text style={s.emptyTitle}>Ask me about your program</Text>
+                  {[
+                    'Which opponents did my team struggle with?',
+                    'How do you see AJ developing?',
+                    'Create a 3-month report for my point guard',
+                    'Where is my last player report?',
+                    'How do I track a game?',
+                  ].map(ex => (
+                    <TouchableOpacity key={ex} style={s.exChip} onPress={() => setInput(ex)}>
+                      <Text style={s.exText}>{ex}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+
+              {messages.map((m, i) => (
+                <View key={i} style={{ marginBottom: 14, alignItems: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                  {m.role === 'user' ? (
+                    <View style={s.userBubble}><Text style={s.userText}>{m.content}</Text></View>
+                  ) : (
+                    <View style={s.aiBubble}>
+                      {renderReport(m.content, { heading: t.ink, body: t.inkSoft })}
+                      {m.navigate && (
+                        <TouchableOpacity style={s.navBtn} onPress={() => { goTo(navigation, m.navigate!); setOpen(false); }}>
+                          <Ionicons name="open-outline" size={15} color={t.ctaText} />
+                          <Text style={s.navBtnText}>{m.navigate.label || 'Take me there'}</Text>
+                        </TouchableOpacity>
+                      )}
+                      {m.pending && !m.ran && (
+                        <View style={s.confirmCard}>
+                          <Text style={s.confirmText}>{m.pending.description || 'Generate this?'}</Text>
+                          <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+                            <TouchableOpacity style={s.confirmNo} onPress={() => setMessages(prev => prev.map((x, xi) => xi === i ? { ...x, ran: true } : x))}>
+                              <Text style={s.confirmNoText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={s.confirmYes} onPress={() => runPending(i, m.pending)} disabled={busy}>
+                              <Ionicons name="sparkles" size={14} color={t.ctaText} />
+                              <Text style={s.confirmYesText}>Generate</Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </View>
+              ))}
+              {busy && <ActivityIndicator color={t.accent} style={{ marginVertical: 12 }} />}
+            </ScrollView>
+
+            <View style={s.inputRow}>
+              <VoiceTextInput
+                style={s.input}
+                placeholder="Ask or give a task…"
+                placeholderTextColor={t.muted2}
+                value={input}
+                onChangeText={setInput}
+                multiline
+              />
+              <TouchableOpacity style={[s.sendBtn, (!input.trim() || busy) && { opacity: 0.5 }]} onPress={send} disabled={!input.trim() || busy}>
+                <Ionicons name="arrow-up" size={20} color={t.ctaText} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </>
+  );
+}
+
+const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  bar: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: t.card, borderWidth: 1, borderColor: t.line, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12 },
+  barText: { flex: 1, color: t.muted, fontSize: 14, fontFamily: fonts[600] },
+  overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
+  sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, height: '88%' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip },
+  title: { color: t.ink, fontSize: 17, fontFamily: fonts[800] },
+  emptyTitle: { color: t.muted, fontSize: 13, fontFamily: fonts[700], marginBottom: 12 },
+  exChip: { backgroundColor: t.card, borderWidth: 1, borderColor: t.line, borderRadius: 10, padding: 12, marginBottom: 8 },
+  exText: { color: t.inkSoft, fontSize: 13 },
+  userBubble: { backgroundColor: t.ctaBg, borderRadius: 14, borderBottomRightRadius: 4, paddingHorizontal: 14, paddingVertical: 10, maxWidth: '85%' },
+  userText: { color: t.ctaText, fontSize: 14 },
+  aiBubble: { backgroundColor: t.card, borderWidth: 1, borderColor: t.chip, borderRadius: 14, borderBottomLeftRadius: 4, paddingHorizontal: 14, paddingVertical: 10, maxWidth: '92%' },
+  navBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', backgroundColor: t.ctaBg, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8, marginTop: 10 },
+  navBtnText: { color: t.ctaText, fontSize: 13, fontFamily: fonts[700] },
+  confirmCard: { backgroundColor: t.accentSoft, borderRadius: 10, padding: 12, marginTop: 10 },
+  confirmText: { color: t.ink, fontSize: 13 },
+  confirmNo: { flex: 1, backgroundColor: t.chip, borderRadius: 8, paddingVertical: 10, alignItems: 'center' },
+  confirmNoText: { color: t.muted, fontFamily: fonts[700], fontSize: 13 },
+  confirmYes: { flex: 1.4, flexDirection: 'row', gap: 5, backgroundColor: t.ctaBg, borderRadius: 8, paddingVertical: 10, alignItems: 'center', justifyContent: 'center' },
+  confirmYesText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 13 },
+  inputRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, padding: 12, borderTopWidth: 1, borderTopColor: t.chip },
+  input: { flex: 1, backgroundColor: t.card, borderRadius: 12, borderWidth: 1, borderColor: t.line, paddingHorizontal: 14, paddingVertical: 10, color: t.ink, fontSize: 14, maxHeight: 120 },
+  sendBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: t.ctaBg, alignItems: 'center', justifyContent: 'center' },
+});

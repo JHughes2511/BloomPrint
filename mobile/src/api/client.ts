@@ -215,6 +215,14 @@ export const importsAPI = {
     api.post('/imports/text', _importForm(file, { purpose }), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),
 };
 
+// ── AI Copilot (command bar) ──────────────────────────────────────────────────
+export const assistantAPI = {
+  ask: (message: string, history: { role: string; content: string }[] = []) =>
+    api.post('/assistant/ask', { message, history }, { timeout: 120000 }).then(r => r.data),
+  confirm: (action: any) =>
+    api.post('/assistant/confirm', { action }, { timeout: 120000 }).then(r => r.data),
+};
+
 // ── Teams ─────────────────────────────────────────────────────────────────────
 export const teamsAPI = {
   list: () => api.get('/teams').then(r => r.data),

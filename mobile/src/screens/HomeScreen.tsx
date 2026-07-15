@@ -11,6 +11,7 @@ import { Icon, IconName } from '../theme/icons';
 import { fonts, type as typeScale } from '../theme/typography';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
+import CommandBar from '../components/CommandBar';
 import CountryField from '../components/CountryField';
 
 // Which bottom tab each report type routes to when tapped on the Home page.
@@ -209,6 +210,11 @@ export default function HomeScreen() {
               </Text>
             </View>
           )}
+        </View>
+
+        {/* AI command bar */}
+        <View style={{ marginBottom: 20 }}>
+          <CommandBar />
         </View>
 
         {/* Report Types */}
