@@ -918,26 +918,29 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     const ai = boards[activeBoardIdx]?.ai;
     if (!ai) return null;
     const cands: { d: number; target: DragTarget }[] = [];
-    const consider = (px: number, py: number, target: DragTarget, r: number) => {
+    // `bias` shrinks a candidate's effective distance so it wins ties — arrow
+    // ENDS beat the player sitting under them, so you can bend an arrow without
+    // grabbing the player.
+    const consider = (px: number, py: number, target: DragTarget, r: number, bias = 0) => {
       const d = Math.hypot(px - xpx, py - ypx);
-      if (d < r) cands.push({ d, target });
+      if (d < r) cands.push({ d: d - bias, target });
     };
     const sc = ai.schemes?.[activeScheme];
     if (sc) {
       (sc.players ?? []).forEach((u: any) => { const p = unitToPx(u.x, u.y); consider(p.x, p.y, { t: 'unit', scheme: activeScheme, id: u.id, kind: 'O', xpx: p.x, ypx: p.y }, 24); });
       (sc.defenders ?? []).forEach((u: any) => { const p = unitToPx(u.x, u.y); consider(p.x, p.y, { t: 'unit', scheme: activeScheme, id: u.id, kind: 'X', xpx: p.x, ypx: p.y }, 24); });
+      // Action arrows: only the HEAD ('to') is draggable — the tail stays attached
+      // to the player, so dragging the head just changes the arrow's direction.
       (sc.actions ?? []).forEach((a: any, idx: number) => {
-        (['from', 'to'] as const).forEach(end => {
-          const pt = a[end]; if (!Array.isArray(pt)) return;
-          const p = unitToPx(pt[0], pt[1]); consider(p.x, p.y, { t: 'action', scheme: activeScheme, idx, end, xpx: p.x, ypx: p.y }, 20);
-        });
+        const pt = a.to; if (!Array.isArray(pt)) return;
+        const p = unitToPx(pt[0], pt[1]); consider(p.x, p.y, { t: 'action', scheme: activeScheme, idx, end: 'to', xpx: p.x, ypx: p.y }, 22, 12);
       });
     }
     if (showKey) {
       (ai.key ?? []).forEach((k: any, idx: number) => {
         (['from', 'to'] as const).forEach(end => {
           const pt = k[end]; if (!Array.isArray(pt)) return;
-          const p = unitToPx(pt[0], pt[1]); consider(p.x, p.y, { t: 'key', idx, end, xpx: p.x, ypx: p.y }, 20);
+          const p = unitToPx(pt[0], pt[1]); consider(p.x, p.y, { t: 'key', idx, end, xpx: p.x, ypx: p.y }, 22, 12);
         });
       });
     }
@@ -1221,6 +1224,26 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     return [...statics, ...renderAnimatedScheme()];
   };
 
+  // Small grab handles at the draggable arrow ends (Move tool only) so the coach
+  // can see where to grab to bend an arrow without moving the player.
+  const renderDragHandles = () => {
+    const ai = boards[activeBoardIdx]?.ai;
+    if (tool !== 'move' || !ai || animating || animDone) return null;
+    const els: React.ReactElement[] = [];
+    const handle = (key: string, xf: number, yf: number, color: string) => {
+      const p = unitToPx(xf, yf);
+      els.push(<Circle key={key} cx={p.x} cy={p.y} r={7} fill="#FFFFFF" stroke={color} strokeWidth={2.5} opacity={0.95} />);
+    };
+    (ai.schemes?.[activeScheme]?.actions ?? []).forEach((a: any, idx: number) => {
+      if (Array.isArray(a.to)) handle(`ah${idx}`, a.to[0], a.to[1], '#141414');
+    });
+    if (showKey) (ai.key ?? []).forEach((k: any, idx: number) => {
+      if (Array.isArray(k.from)) handle(`kf${idx}`, k.from[0], k.from[1], '#1F6F9B');
+      if (Array.isArray(k.to)) handle(`kt${idx}`, k.to[0], k.to[1], '#1F6F9B');
+    });
+    return els;
+  };
+
   if (!visible) return null;
 
   return (
@@ -1380,7 +1403,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         {tool === 'move' && board?.ai && !selectedTextId && (
           <View style={styles.textCtrlBar}>
             <Text style={styles.textCtrlLabel}>
-              Move — drag players or arrow ends{showKey ? ' (incl. key arrows)' : ''}. Then tap “Adapt play” to re-solve around your changes.
+              Move — drag a player, or drag an arrow’s head (the ○ handle) to change its direction. Then tap “Adapt play”.
             </Text>
           </View>
         )}
@@ -1417,6 +1440,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                 <HardwoodCourt width={courtW} height={courtH} scale={scale} />
                 <Svg style={StyleSheet.absoluteFill} width={courtW} height={courtH}>
                   {renderCourtStrokes()}
+                  {renderDragHandles()}
                   {livePath ? (
                     <Path d={livePath} stroke={color} strokeWidth={STROKE_WIDTH}
                           fill="none" strokeLinecap="round" strokeLinejoin="round" />
