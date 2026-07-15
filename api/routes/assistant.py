@@ -301,12 +301,16 @@ TOOLS = [
      "input_schema": {"type": "object", "properties": {"screen": {"type": "string"}, "player_id": {"type": "integer"}, "eval_id": {"type": "integer"}, "report_id": {"type": "integer"}, "label": {"type": "string", "description": "button text"}}, "required": ["screen", "label"]}},
     {"name": "propose_generation", "description": (
         "Propose creating a NEW report the coach must confirm before it runs. Do NOT run generation "
-        "yourself. Supported kinds: 'player_summary' (args: player_id, months optional) — summarize a "
-        "player's eval history; 'team_report' (args: team_id optional) — a report across a team's "
-        "roster; 'scouting_report' (args: game_id OR opponent_name) — pre-game opponent scouting; "
-        "'game_report' (args: game_id OR opponent_name) — our-team + opponent game report. Anything "
-        "needing NEW film (a fresh video player eval) is NOT supported here — use suggest_navigation to "
-        "'new_eval' instead. Always include a short human description."),
+        "yourself. Supported kinds:\n"
+        "- 'player_summary' (args: player_id REQUIRED, months optional, output_type optional) — a report "
+        "synthesized from a player's eval history. For a RECRUITING/SCOUTING report on the coach's own "
+        "player (to send to a scout / evaluate potential), use this kind with output_type='scouting_report'.\n"
+        "- 'team_report' (args: team_id optional) — a report across a team's roster.\n"
+        "- 'scouting_report' (args: game_id OR opponent_name) — PRE-GAME OPPONENT scouting only.\n"
+        "- 'game_report' (args: game_id OR opponent_name) — our-team + opponent game report.\n"
+        "For player generations, pass the exact player_id you confirmed via player_detail. Anything "
+        "needing NEW film is NOT supported — use suggest_navigation to 'new_eval'. Always include a short "
+        "human description that names the exact player/team/opponent."),
      "input_schema": {"type": "object", "properties": {"kind": {"type": "string"}, "player_id": {"type": "integer"}, "team_id": {"type": "integer"}, "game_id": {"type": "integer"}, "opponent_name": {"type": "string"}, "months": {"type": "integer"}, "output_type": {"type": "string"}, "description": {"type": "string"}}, "required": ["kind", "description"]}},
 ]
 
@@ -366,9 +370,19 @@ SYSTEM = (
     "how-to. (Tracking a game / stats / season dashboard / scouting = the 'team_grade' screen; report "
     "packets = 'team_eval'.)\n"
     "- CREATE (confirm-first): to make a NEW report, call propose_generation with a clear description "
-    "— NEVER generate directly; the coach approves first. Supported: player_summary, team_report, "
-    "scouting_report, game_report. Anything needing NEW film (a fresh video player eval) can't run "
-    "here — suggest_navigation to 'new_eval' instead.\n\n"
+    "— NEVER generate directly; the coach approves first. Anything needing NEW film (a fresh video "
+    "player eval) can't run here — suggest_navigation to 'new_eval' instead.\n\n"
+    "PICKING THE RIGHT GENERATION:\n"
+    "- A recruiting/scouting report ON ONE OF THE COACH'S OWN PLAYERS (to send to a college or NBA/Mavs "
+    "scout, evaluate their potential) IS supported — it's a player scouting report: propose_generation "
+    "kind='player_summary' with output_type='scouting_report'. Do this whenever the coach wants to "
+    "scout/pitch/evaluate one of their players for the next level. Never refuse this.\n"
+    "- The 'scouting_report' KIND is ONLY pre-game OPPONENT scouting and needs a tracked game/opponent.\n"
+    "- Other kinds: player_summary (eval-history summary of a player), team_report (across a roster), "
+    "game_report (our team + opponent for a tracked game).\n\n"
+    "ACCURACY: Before proposing any PLAYER generation, first call player_detail (or search_players) to "
+    "get the EXACT player_id for the player the coach means, and pass that player_id. Never guess an id "
+    "or propose for a player you haven't looked up.\n\n"
     "STYLE: plain text, lead with the answer, ALL-CAPS section titles and '- ' bullets when listing, "
     "and keep it tight."
 )

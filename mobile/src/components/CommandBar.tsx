@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import VoiceTextInput from './VoiceTextInput';
 import { assistantAPI } from '../api/client';
 import { renderReport } from '../utils/renderReport';
+import { GeneratingOverlay } from './GeneratingBasketball';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -17,10 +18,16 @@ type Msg = {
   ran?: boolean;
 };
 
-// Map the agent's logical screen name to an actual navigation call from the Home tab.
+// Map the agent's logical screen name to an actual navigation call from the Home
+// tab. For a screen nested in another tab's stack, seed the tab's ROOT first so
+// the in-screen back button and tab re-tap return to that root (not to Home).
 function goTo(navigation: any, target: { screen: string; params?: any; label?: string }) {
   const p = target.params || {};
   const key = String(target.screen || '').toLowerCase().replace(/[\s-]/g, '_');
+  const deep = (tab: string, root: string, screen: string, params?: any) => {
+    navigation.navigate(tab, { screen: root });
+    setTimeout(() => navigation.navigate(tab, { screen, params }), 0);
+  };
   try {
     switch (key) {
       case 'home': navigation.navigate('Home'); break;
@@ -29,10 +36,10 @@ function goTo(navigation: any, target: { screen: string; params?: any; label?: s
       case 'player_profile':
       case 'training':
       case 'new_eval':
-        navigation.navigate('RosterTab', { screen: 'PlayerProfile', params: { playerId: p.player_id } }); break;
+        deep('RosterTab', 'Roster', 'PlayerProfile', { playerId: p.player_id }); break;
       case 'eval_report':
       case 'report':
-        navigation.navigate('RecentTab', { screen: 'EvalReport', params: { evalId: p.eval_id } }); break;
+        deep('RecentTab', 'Recent', 'EvalReport', { evalId: p.eval_id }); break;
       // Team Grade tab = tracking games, stats, season dashboard, scouting.
       case 'team_grade':
       case 'games':
@@ -47,13 +54,15 @@ function goTo(navigation: any, target: { screen: string; params?: any; label?: s
       case 'team_eval':
       case 'team_report':
       case 'packet':
+        if (p.report_id != null) deep('TeamTab', 'Team', 'GameReportBuilder', { reportId: p.report_id });
+        else navigation.navigate('TeamTab'); break;
       case 'game_report_builder':
-        navigation.navigate('TeamTab', p.report_id != null ? { screen: 'GameReportBuilder', params: { reportId: p.report_id } } : undefined); break;
+        deep('TeamTab', 'Team', 'GameReportBuilder', { reportId: p.report_id }); break;
       case 'recent':
       case 'reports':
-        navigation.navigate('RecentTab'); break;
+        navigation.navigate('RecentTab', { screen: 'Recent' }); break;
       case 'import':
-        navigation.navigate('RosterTab', { screen: 'Import', params: { mode: 'roster' } }); break;
+        deep('RosterTab', 'Roster', 'Import', { mode: 'roster' }); break;
       default:
         // Unknown target — do nothing rather than jump to the wrong screen.
         Alert.alert('Not sure where that is', "I couldn't map that to a screen. Try the tab bar at the bottom.");
@@ -71,6 +80,7 @@ export default function CommandBar() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Msg[]>([]);
   const [busy, setBusy] = useState(false);
+  const [runningIdx, setRunningIdx] = useState<number | null>(null);
   const scrollRef = useRef<ScrollView>(null);
 
   const send = async () => {
@@ -97,6 +107,7 @@ export default function CommandBar() {
 
   const runPending = async (idx: number, action: any) => {
     setBusy(true);
+    setRunningIdx(idx);
     try {
       const res = await assistantAPI.confirm(action);
       setMessages(prev => prev.map((m, i) => i === idx ? { ...m, ran: true } : m).concat([{
@@ -106,6 +117,7 @@ export default function CommandBar() {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not complete that.');
     } finally {
       setBusy(false);
+      setRunningIdx(null);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
     }
   };
@@ -166,22 +178,28 @@ export default function CommandBar() {
                       {m.pending && !m.ran && (
                         <View style={s.confirmCard}>
                           <Text style={s.confirmText}>{m.pending.description || 'Generate this?'}</Text>
-                          <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-                            <TouchableOpacity style={s.confirmNo} onPress={() => setMessages(prev => prev.map((x, xi) => xi === i ? { ...x, ran: true } : x))}>
-                              <Text style={s.confirmNoText}>Cancel</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={s.confirmYes} onPress={() => runPending(i, m.pending)} disabled={busy}>
-                              <Ionicons name="sparkles" size={14} color={t.ctaText} />
-                              <Text style={s.confirmYesText}>Generate</Text>
-                            </TouchableOpacity>
-                          </View>
+                          {runningIdx === i ? (
+                            <View style={{ marginTop: 12 }}>
+                              <GeneratingOverlay visible label="Generating your report…" />
+                            </View>
+                          ) : (
+                            <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+                              <TouchableOpacity style={s.confirmNo} onPress={() => setMessages(prev => prev.map((x, xi) => xi === i ? { ...x, ran: true } : x))} disabled={busy}>
+                                <Text style={s.confirmNoText}>Cancel</Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity style={s.confirmYes} onPress={() => runPending(i, m.pending)} disabled={busy}>
+                                <Ionicons name="sparkles" size={14} color={t.ctaText} />
+                                <Text style={s.confirmYesText}>Generate</Text>
+                              </TouchableOpacity>
+                            </View>
+                          )}
                         </View>
                       )}
                     </View>
                   )}
                 </View>
               ))}
-              {busy && <ActivityIndicator color={t.accent} style={{ marginVertical: 12 }} />}
+              {busy && runningIdx === null && <ActivityIndicator color={t.accent} style={{ marginVertical: 12 }} />}
             </ScrollView>
 
             <View style={s.inputRow}>
