@@ -41,7 +41,7 @@ const topPadFt = (visFt: number) => (COURT_FT_L - visFt === 0 ? OOB_BASE_FT : 0)
 const vTotalFt = (visFt: number) => visFt + topPadFt(visFt) + OOB_BASE_FT;
 
 type CourtType = 'full' | 'half' | 'three_quarter';
-type Tool = 'pen' | 'circle' | 'xmark' | 'arrow' | 'text' | 'move';
+type Tool = 'pen' | 'circle' | 'xmark' | 'arrow' | 'arrow_dash' | 'text' | 'move';
 
 interface Stroke {
   id: string;
@@ -96,12 +96,14 @@ const COLORS = ['#141414', '#1F6F9B', '#C0392B'];   // ink black · sane blue ·
 const STROKE_WIDTH = 3.5;
 
 const TOOLS: { key: Tool; icon: string }[] = [
-  { key: 'pen',    icon: 'pencil' },
-  { key: 'circle', icon: 'ellipse-outline' },
-  { key: 'xmark',  icon: 'close' },
-  { key: 'arrow',  icon: 'arrow-forward' },
-  { key: 'text',   icon: 'text' },
+  { key: 'pen',        icon: 'pencil' },
+  { key: 'circle',     icon: 'ellipse-outline' },
+  { key: 'xmark',      icon: 'close' },
+  { key: 'arrow',      icon: 'arrow-forward' },
+  { key: 'arrow_dash', icon: 'arrow-forward' },   // dashed blue pass arrow
+  { key: 'text',       icon: 'text' },
 ];
+const PASS_BLUE = '#1F6F9B';
 
 // ── Classic hardwood court (SVG) ─────────────────────────────────────────────
 // Maple plank floor with painted lines: sidelines, center circle, keys,
@@ -875,6 +877,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         } else {
           push({ id: uid(), type: 'arrow', x1, y1, x2, y2, color: c, strokeWidth: STROKE_WIDTH });
         }
+      } else if (tl === 'arrow_dash') {
+        if (Math.sqrt((x2-x1)**2 + (y2-y1)**2) < 5) return;
+        // Freehand pass: blue dashed arrow (no type prompt).
+        push({ id: uid(), type: 'arrow', x1, y1, x2, y2, color: PASS_BLUE, strokeWidth: STROKE_WIDTH, dash: true });
       }
     },
   })).current;
@@ -1530,9 +1536,9 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
           <View style={styles.toolRow}>
             {TOOLS.map(tl => (
               <TouchableOpacity key={tl.key}
-                style={[styles.toolBtn, tool === tl.key && styles.toolBtnActive]}
+                style={[styles.toolBtn, tool === tl.key && styles.toolBtnActive, tl.key === 'arrow_dash' && tool !== tl.key && { borderWidth: 1, borderColor: PASS_BLUE, borderStyle: 'dashed' }]}
                 onPress={() => setTool(tl.key)}>
-                <Ionicons name={tl.icon as any} size={16} color={tool === tl.key ? t.ctaText : t.muted} />
+                <Ionicons name={tl.icon as any} size={16} color={tool === tl.key ? t.ctaText : (tl.key === 'arrow_dash' ? PASS_BLUE : t.muted)} />
               </TouchableOpacity>
             ))}
             <View style={styles.toolDivider} />
