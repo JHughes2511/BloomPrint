@@ -159,7 +159,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [newGameLevel, setNewGameLevel] = useState<string>((coach as any)?.competition_level ?? 'HS Varsity');
   const [showLevelDD, setShowLevelDD] = useState(false);
   const [showPhaseDD, setShowPhaseDD] = useState(false);
-  const GAME_PHASES = ['preseason', 'regular', 'playoff', 'scrimmage', 'tournament', 'exhibition'];
+  // The canonical game types, ordered by how much this coach actually tracks each
+  // (most → least). Used everywhere: New Game, Dashboard grade view, Games filter.
+  const orderedPhases = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    (sessions || []).forEach((sn: any) => { const p = sn.season_phase; if (p) counts[p] = (counts[p] || 0) + 1; });
+    const base = ['regular', 'tournament', 'playoff', 'preseason', 'scrimmage', 'exhibition'];
+    return [...base].sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
+  }, [sessions]);
   const [importing, setImporting] = useState(false);
   const [statPreview, setStatPreview] = useState<any[] | null>(null);
   const [teams, setTeams] = useState<any[]>([]);
@@ -1096,7 +1103,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             <Text style={[s.cardLabel, { marginBottom: 8 }]}>GRADE VIEW</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                {['preseason', 'regular', 'playoff', 'tournament'].map(phase => {
+                {orderedPhases.map(phase => {
                   const selected = dashPhases.includes(phase);
                   return (
                     <TouchableOpacity
@@ -1233,7 +1240,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         >
           {/* Phase filter */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
-            {['all', 'preseason', 'regular', 'playoff', 'tournament'].map(p => (
+            {['all', ...orderedPhases].map(p => (
               <TouchableOpacity
                 key={p}
                 style={[s.chip, phaseFilter === p && s.chipActive]}
@@ -2496,7 +2503,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               </TouchableOpacity>
               {showPhaseDD && (
                 <View style={{ borderWidth: 1, borderColor: t.line, borderRadius: 10, marginBottom: 16, overflow: 'hidden' }}>
-                  {GAME_PHASES.map((p, i) => (
+                  {orderedPhases.map((p, i) => (
                     <TouchableOpacity
                       key={p}
                       style={{ padding: 12, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: t.line, backgroundColor: newGamePhase === p ? t.accentSoft : 'transparent' }}

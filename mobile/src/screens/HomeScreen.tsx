@@ -197,24 +197,20 @@ export default function HomeScreen() {
               <Text style={[typeScale.label, { color: t.label, marginBottom: 4 }]}>Intelligence Model</Text>
               <Text style={[typeScale.h1, { color: t.ink }]}>BloomPrint</Text>
             </View>
-            <View style={{ alignItems: 'flex-end', gap: 8 }}>
-              <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-                <CircleBtn icon={mode === 'dark' ? 'sun' : 'moon'} onPress={toggle} label="Toggle theme" />
-                <CircleBtn icon="user" onPress={openProfile} label="Edit profile" />
-                <CircleBtn icon="mail" onPress={() => navigation.navigate('StaffInbox')} label="Staff inbox" />
-                <CircleBtn icon="bell" onPress={() => navigation.navigate('CoachNotifications')} badge={unreadCount} label="Notifications" />
-              </View>
-              {/* AI command bar — small pill under the icons */}
-              <CommandBar />
+            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+              <CircleBtn icon={mode === 'dark' ? 'sun' : 'moon'} onPress={toggle} label="Toggle theme" />
+              <CircleBtn icon="user" onPress={openProfile} label="Edit profile" />
+              <CircleBtn icon="mail" onPress={() => navigation.navigate('StaffInbox')} label="Staff inbox" />
+              <CircleBtn icon="bell" onPress={() => navigation.navigate('CoachNotifications')} badge={unreadCount} label="Notifications" />
             </View>
           </View>
-          {coach && (
-            <View style={{ marginTop: 8 }}>
-              <Text style={[typeScale.bodySoft, { color: t.muted }]}>
-                {coach.name} · {coach.role ? coach.role.charAt(0).toUpperCase() + coach.role.slice(1) : 'Coach'} · {coach.program_name}
-              </Text>
-            </View>
-          )}
+          {/* Coach line + AI command pill on one row */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 8 }}>
+            <Text style={[typeScale.bodySoft, { color: t.muted, flex: 1 }]} numberOfLines={1}>
+              {coach ? `${coach.name} · ${coach.role ? coach.role.charAt(0).toUpperCase() + coach.role.slice(1) : 'Coach'} · ${coach.program_name}` : ''}
+            </Text>
+            <CommandBar />
+          </View>
         </View>
 
         {/* Report Types */}
