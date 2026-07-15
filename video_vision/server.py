@@ -122,6 +122,156 @@ def _extract_frames_interval(
     return results
 
 
+# ── Adaptive, motion-aware sampling ───────────────────────────────────────────
+# Sample densely during action and sparsely during dead time, scaling the frame
+# budget to the film's length. A cheap local pre-scan scores per-timestamp motion
+# (and scene cuts); the budget is spent where the basketball is.
+
+def _frame_budget(duration: float) -> int:
+    """Frames to spend on a film, scaled by length with a sane max. Short clips
+    get near-1fps; full games are capped and rely on motion-gating."""
+    if duration <= 0:
+        return 60
+    if duration <= 120:          # short clip / single possession → near-exhaustive
+        return min(int(duration) + 12, 160)
+    if duration <= 900:          # up to 15 min → dense on action
+        return min(int(duration * 0.55), 460)
+    return 800                   # full game / half → sane max, motion-gated
+
+
+def _floor_interval(duration: float) -> float:
+    """Guaranteed baseline: at least one frame every N seconds even in dead time."""
+    if duration <= 120:
+        return 4.0
+    if duration <= 900:
+        return 8.0
+    return 15.0
+
+
+def _motion_profile(video_path: str) -> tuple[float, list[tuple[float, float]]]:
+    """Cheap pass: return (duration, [(timestamp, motion_score)]). Motion score is
+    the mean abs frame-to-frame difference on a tiny grayscale thumbnail."""
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        raise ValueError(f"Cannot open video: {video_path}")
+    fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
+    total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    duration = total / fps if fps else 0.0
+    if duration <= 0:
+        cap.release()
+        return 0.0, []
+    # Coarser scan for longer film so the scan itself stays fast.
+    scan_step = 0.5 if duration <= 300 else 1.0 if duration <= 1800 else 2.0
+    scores: list[tuple[float, float]] = []
+    prev = None
+    t = 0.0
+    while t <= duration:
+        cap.set(cv2.CAP_PROP_POS_MSEC, t * 1000)
+        ret, frame = cap.read()
+        if not ret:
+            t += scan_step
+            continue
+        small = cv2.resize(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (48, 48))
+        score = 0.0 if prev is None else float(np.mean(cv2.absdiff(small, prev)))
+        scores.append((round(t, 2), score))
+        prev = small
+        t += scan_step
+    cap.release()
+    return duration, scores
+
+
+def _select_adaptive_timestamps(duration: float, scores: list[tuple[float, float]], budget: int) -> list[float]:
+    """Pick which timestamps to actually analyze: a baseline floor everywhere,
+    every scene cut / motion burst, then the highest-motion moments until the
+    budget is spent."""
+    if not scores:
+        return []
+    vals = sorted(s for _, s in scores)
+    median = vals[len(vals) // 2] if vals else 0.0
+    cut_threshold = max(median * 3.0, 8.0)   # a spike vs the film's own baseline
+    floor_int = _floor_interval(duration)
+
+    chosen: set[float] = set()
+    t = 0.0
+    while t <= duration:                     # guaranteed baseline coverage
+        chosen.add(round(t, 1))
+        t += floor_int
+    for ts, s in scores:                     # every scene cut / motion burst
+        if s >= cut_threshold:
+            chosen.add(round(ts, 1))
+    for ts, s in sorted(scores, key=lambda x: x[1], reverse=True):  # spend rest on action
+        if len(chosen) >= budget:
+            break
+        chosen.add(round(ts, 1))
+    return sorted(chosen)[:budget]
+
+
+def _extract_frames_adaptive(video_path: str, budget_cap: int | None = None) -> list[tuple[float, np.ndarray]]:
+    """Motion-aware frame extraction: pre-scan for motion, then grab full-res
+    frames at the selected timestamps."""
+    duration, scores = _motion_profile(video_path)
+    if duration <= 0 or not scores:
+        return _extract_frames_interval(video_path, 4.0, budget_cap or 200)
+    budget = _frame_budget(duration)
+    if budget_cap:
+        budget = min(budget, budget_cap)
+    stamps = _select_adaptive_timestamps(duration, scores, budget)
+    cap = cv2.VideoCapture(video_path)
+    out: list[tuple[float, np.ndarray]] = []
+    for ts in stamps:
+        cap.set(cv2.CAP_PROP_POS_MSEC, ts * 1000)
+        ret, frame = cap.read()
+        if ret:
+            out.append((ts, frame))
+    cap.release()
+    return out
+
+
+# Full transcription is only worth it (and fast enough on CPU Whisper) for
+# shorter film; beyond this we skip audio even if speech is present.
+AUDIO_MAX_SECONDS = 600  # 10 minutes
+
+
+def _audio_is_useful(video_path: str, whisper_model: str) -> bool:
+    """Gauge, as part of the pre-scan, whether the film has speech worth
+    transcribing: probe the first 90s — reject near-silence, then confirm the
+    probe yields real words (commentary/coaching), not just crowd noise."""
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        probe = tmp.name
+    try:
+        res = subprocess.run(
+            ["ffmpeg", "-y", "-t", "90", "-i", video_path,
+             "-vn", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", probe],
+            capture_output=True, text=True,
+        )
+        if res.returncode != 0 or not Path(probe).exists() or Path(probe).stat().st_size < 4000:
+            return False
+        # Energy gate — skip near-silent tracks cheaply.
+        try:
+            import wave
+            with wave.open(probe, "rb") as w:
+                frames = w.readframes(w.getnframes())
+            samples = np.frombuffer(frames, dtype=np.int16).astype(np.float32)
+            if samples.size == 0:
+                return False
+            rms = float(np.sqrt(np.mean(samples ** 2)))
+            if rms < 250:            # essentially silence / faint hum
+                return False
+        except Exception:
+            pass
+        # Confirm it's actually speech by transcribing the short probe.
+        try:
+            import whisper  # type: ignore[import]
+            model = _whisper(whisper_model)
+            out = whisper.transcribe(model, probe, fp16=False)
+            return len((out.get("text") or "").split()) >= 15
+        except Exception:
+            return False
+    finally:
+        if Path(probe).exists():
+            os.unlink(probe)
+
+
 def _extract_audio(video_path: str, out_path: str) -> bool:
     """Extract audio track from video to a WAV file using ffmpeg. Returns False if no audio."""
     result = subprocess.run(
@@ -570,20 +720,31 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     # so a 6-min and a 60-min clip get the same per-minute coverage. For long
     # films we analyze in chunks (map) and synthesize one report (reduce).
     CHUNK = 40
-    TOTAL_CAP = 400
+    TOTAL_CAP = 900          # absolute safety ceiling across all films
     progress = args.get("_progress")   # optional callable(done, total, label)
-    # Sample frames from every film, sharing the total-frame budget across them.
-    per_cap = max(20, TOTAL_CAP // max(len(video_paths), 1))
+    # Motion-aware sampling: dense on action, sparse on dead time, budget scaled
+    # by each film's length. Split the absolute ceiling across multiple films.
+    per_cap = max(60, TOTAL_CAP // max(len(video_paths), 1))
+    if progress:
+        try:
+            progress(0, 1, "Scanning film for key action…")
+        except Exception:
+            pass
     frames = []
     for p in video_paths:
-        frames += _extract_frames_interval(p, interval, per_cap)
+        frames += _extract_frames_adaptive(p, budget_cap=per_cap)
     frames = frames[:TOTAL_CAP]
     if not frames:
         return [types.TextContent(type="text", text="Error: no frames could be extracted.")]
 
     transcript_text = ""
-    # Audio transcription only for a single film (keeps multi-film fast).
-    if include_audio and len(video_paths) == 1:
+    # Audio: gauge whether it's worth transcribing (part of the pre-scan). Only
+    # for a single film short enough that CPU Whisper stays reasonable.
+    duration_guess = frames[-1][0] if frames else 0.0
+    want_audio = include_audio
+    if args.get("audio_auto") and len(video_paths) == 1:
+        want_audio = duration_guess <= AUDIO_MAX_SECONDS and _audio_is_useful(video_path, whisper_model)
+    if want_audio and len(video_paths) == 1:
         try:
             result = _transcribe(video_path, whisper_model)
             transcript_text = result.get("text", "").strip()

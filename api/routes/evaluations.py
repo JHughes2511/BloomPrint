@@ -76,8 +76,7 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
             "player_name": player_name,
             "focus_prompt": combined_focus,
             "additional_focus": True,   # player eval → tailored ADDITIONAL FOCUS section
-            "interval_seconds": 12.0,   # one frame ~every 12s; chunked for long film
-            "max_frames": max_frames,
+            "audio_auto": True,         # gauge during pre-scan whether audio is worth transcribing
             "include_audio": include_audio,
             "_progress": _prog,
         }))

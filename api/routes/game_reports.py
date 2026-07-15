@@ -46,9 +46,7 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             "coach_weight": coach_weight,
             "player_name": label_text,
             "focus_prompt": f"This film is of {label_text}. My team: {program_name}. Opponent: {opp_name}.\n{focus_prompt or ''}",
-            "interval_seconds": 12.0,   # one frame ~every 12s; chunked for long film
-            "max_frames": 10,
-            "include_audio": False,
+            "audio_auto": True,         # gauge whether the film's audio is worth transcribing
             "_progress": _prog,
         }))
         text = result[0].text
@@ -119,9 +117,7 @@ def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_ty
             "coach_weight": coach_weight,
             "player_name": label_text,
             "focus_prompt": focus,
-            "interval_seconds": 8.0,   # denser sampling for a targeted re-watch
-            "max_frames": 12,
-            "include_audio": False,
+            "audio_auto": True,        # gauge whether the film's audio is worth transcribing
             "_progress": _prog,
         }))
         clip = db.get(models.GameReportClip, clip_id)
