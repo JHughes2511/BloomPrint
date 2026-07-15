@@ -589,6 +589,28 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     ? Math.min((avail.w - 12) / courtH, (avail.h - 12) / courtW)
     : 1;
 
+  // Live geometry snapshot the (once-created) pan responder reads so touches map
+  // correctly in both orientations. The pan responder is attached to the OUTER
+  // (never-transformed) canvas container, so its locationX/locationY are in
+  // container space; mapPoint converts that into wrapper-local court pixels.
+  const geomRef = useRef({ isLandscape: false, landscapeFit: 1, availW: 0, availH: 0, courtW: 0, courtH: 0 });
+  geomRef.current = { isLandscape, landscapeFit, availW: avail.w, availH: avail.h, courtW, courtH };
+  const mapPoint = (lx: number, ly: number) => {
+    const g = geomRef.current;
+    if (!g.isLandscape) {
+      // Wrapper is centered in the container.
+      return { x: lx - (g.availW - g.courtW) / 2, y: ly - (g.availH - g.courtH) / 2 };
+    }
+    // Landscape: wrapper is rendered rotated 90° clockwise + scaled about the
+    // container center. Invert that to recover wrapper-local coordinates.
+    const cx = g.availW / 2, cy = g.availH / 2;
+    const dx = lx - cx, dy = ly - cy;
+    const px = dy / g.landscapeFit, py = -dx / g.landscapeFit;
+    return { x: px + g.courtW / 2, y: py + g.courtH / 2 };
+  };
+  const mapPointRef = useRef(mapPoint);
+  mapPointRef.current = mapPoint;
+
   useEffect(() => { if (visible && gameId) loadBoards(); }, [visible, gameId]);
 
   const loadBoards = async () => {
@@ -691,7 +713,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     onMoveShouldSetPanResponder:  () => true,
 
     onPanResponderGrant: (evt) => {
-      const { locationX: x, locationY: y } = evt.nativeEvent;
+      const { x, y } = mapPointRef.current(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
       startPoint.current = { x, y };
       if (toolRef.current === 'pen') {
         currentPath.current = `M${x.toFixed(1)},${y.toFixed(1)}`;
@@ -710,7 +732,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     },
 
     onPanResponderMove: (evt) => {
-      const { locationX: x, locationY: y } = evt.nativeEvent;
+      const { x, y } = mapPointRef.current(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
       if (toolRef.current === 'pen') {
         currentPath.current += ` L${x.toFixed(1)},${y.toFixed(1)}`;
         setLivePath(currentPath.current);
@@ -721,7 +743,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     },
 
     onPanResponderRelease: (evt) => {
-      const { locationX: x2, locationY: y2 } = evt.nativeEvent;
+      const { x: x2, y: y2 } = mapPointRef.current(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
       const { x: x1, y: y1 } = startPoint.current;
       const idx = activeBoardIdxRef.current;
       const tl  = toolRef.current;
@@ -1100,14 +1122,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           </View>
         )}
 
-        {/* Toolbar — hidden in landscape (drawing is a portrait activity) */}
-        {isLandscape ? (
-          <View style={styles.toolbar}>
-            <Text style={styles.aiHint}>
-              Landscape view — switch to Portrait to draw. Play, Refine, Players and Key still work here.
-            </Text>
-          </View>
-        ) : (
+        {/* Toolbar — available in both orientations */}
         <View style={styles.toolbar}>
           <View style={styles.toolRow}>
             {TOOLS.map(tl => (
@@ -1137,7 +1152,6 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
             </View>
           </View>
         </View>
-        )}
 
         {/* Selected-text controls: resize / delete / done */}
         {selectedTextId && (
@@ -1186,6 +1200,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                 }
               }
             }}
+            {...panResponder.panHandlers}
           >
             {scale > 0 && (
               <View
@@ -1194,12 +1209,11 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                   { width: courtW, height: courtH },
                   isLandscape ? { transform: [{ rotate: '90deg' }, { scale: landscapeFit }] } : null,
                 ]}
-                {...(isLandscape ? {} : panResponder.panHandlers)}
               >
                 <HardwoodCourt width={courtW} height={courtH} scale={scale} />
                 <Svg style={StyleSheet.absoluteFill} width={courtW} height={courtH}>
                   {renderCourtStrokes()}
-                  {livePath && !isLandscape ? (
+                  {livePath ? (
                     <Path d={livePath} stroke={color} strokeWidth={STROKE_WIDTH}
                           fill="none" strokeLinecap="round" strokeLinejoin="round" />
                   ) : null}
