@@ -99,10 +99,13 @@ function renderLine(raw: string, index: number, colors: { heading: string; body:
     );
   }
   if (bullet) {
+    // Block layout (not a flex row): the bullet is absolutely positioned and the
+    // text is a normal full-width Text that wraps naturally. A flex-row with a
+    // flex:1 Text intermittently mis-measures and clips a line mid-word in RN.
     return (
-      <View key={`line-${index}`} style={{ flexDirection: 'row', marginBottom: 7, paddingLeft: 6 }}>
-        <Text style={{ fontSize: 14.5, lineHeight: 23, color: colors.body, marginRight: 8 }}>•</Text>
-        <Text style={{ fontSize: 14.5, lineHeight: 23, color: colors.body, flex: 1 }}>{trimmed}</Text>
+      <View key={`line-${index}`} style={{ marginBottom: 7, paddingLeft: 20 }}>
+        <Text style={{ position: 'absolute', left: 6, top: 0, fontSize: 14.5, lineHeight: 23, color: colors.body }}>•</Text>
+        <Text style={{ fontSize: 14.5, lineHeight: 23, color: colors.body }}>{trimmed}</Text>
       </View>
     );
   }
