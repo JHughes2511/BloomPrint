@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import VoiceTextInput from './VoiceTextInput';
@@ -119,7 +119,7 @@ export default function CommandBar() {
       </TouchableOpacity>
 
       <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
-        <View style={s.overlay}>
+        <KeyboardAvoidingView style={s.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={s.sheet}>
             <View style={s.header}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -132,13 +132,16 @@ export default function CommandBar() {
             <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 8 }}>
               {messages.length === 0 && (
                 <View style={{ paddingVertical: 24 }}>
-                  <Text style={s.emptyTitle}>Ask me about your program</Text>
+                  <Text style={s.emptyTitle}>Ask me about your program, or give me a task</Text>
                   {[
-                    'Which opponents did my team struggle with?',
-                    'How do you see AJ developing?',
-                    'Create a 3-month report for my point guard',
-                    'Where is my last player report?',
-                    'How do I track a game?',
+                    "What's my season record and average team grade?",
+                    'Which opponents did we struggle with?',
+                    'Who are my top-graded players right now?',
+                    'Summarize my point guard over the last 3 months',
+                    'Scout our next opponent',
+                    'Build a coaching report for my team',
+                    'Where is my most recent report?',
+                    'How do I import a roster?',
                   ].map(ex => (
                     <TouchableOpacity key={ex} style={s.exChip} onPress={() => setInput(ex)}>
                       <Text style={s.exText}>{ex}</Text>
@@ -195,7 +198,7 @@ export default function CommandBar() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </>
   );
@@ -205,7 +208,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   bar: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-end', backgroundColor: t.card, borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
   barText: { color: t.muted, fontSize: 12.5, fontFamily: fonts[700] },
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, height: '88%' },
+  sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, height: '90%' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip },
   title: { color: t.ink, fontSize: 17, fontFamily: fonts[800] },
   emptyTitle: { color: t.muted, fontSize: 13, fontFamily: fonts[700], marginBottom: 12 },
@@ -222,7 +225,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   confirmNoText: { color: t.muted, fontFamily: fonts[700], fontSize: 13 },
   confirmYes: { flex: 1.4, flexDirection: 'row', gap: 5, backgroundColor: t.ctaBg, borderRadius: 8, paddingVertical: 10, alignItems: 'center', justifyContent: 'center' },
   confirmYesText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 13 },
-  inputRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, padding: 12, borderTopWidth: 1, borderTopColor: t.chip },
+  inputRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 12, paddingTop: 12, paddingBottom: Platform.OS === 'ios' ? 30 : 14, borderTopWidth: 1, borderTopColor: t.chip },
   input: { flex: 1, backgroundColor: t.card, borderRadius: 12, borderWidth: 1, borderColor: t.line, paddingHorizontal: 14, paddingVertical: 10, color: t.ink, fontSize: 14, maxHeight: 120 },
   sendBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: t.ctaBg, alignItems: 'center', justifyContent: 'center' },
 });
