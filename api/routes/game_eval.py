@@ -1911,9 +1911,10 @@ async def ai_play_describe(
 
 
 # ── Adapt a play around the coach's manual moves ──────────────────────────────
-# The coach dragged some players/arrows. Keep every LOCKED piece exactly where it
-# is; re-solve the rest of ONE scheme (both offense and defense reposition and
-# redraw their actions to fit), and refresh the key.
+# The coach edited ONE scheme (moved players/arrows). Keep that scheme's starting
+# positions locked and its movement minimally changed; then cascade the change to
+# the DEPENDENT schemes (defense reacts to offense, counter adjusts to defense)
+# and refresh the key, so the whole play stays consistent.
 @router.post("/ai-play-adapt")
 async def ai_play_adapt(
     body: dict,
@@ -1922,8 +1923,12 @@ async def ai_play_adapt(
     import os
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise HTTPException(status_code=503, detail="ANTHROPIC_API_KEY not configured")
-    scheme_name = str(body.get("scheme_name") or "offense")
-    scheme = body.get("scheme") if isinstance(body.get("scheme"), dict) else {}
+    # Back-compat: accept old single-scheme shape too.
+    edited = str(body.get("edited") or body.get("scheme_name") or "offense")
+    schemes = body.get("schemes") if isinstance(body.get("schemes"), dict) else {}
+    if not schemes and isinstance(body.get("scheme"), dict):
+        schemes = {edited: body["scheme"]}
+    downstream = [s for s in (body.get("downstream") or []) if s in ("offense", "defense", "counter") and s != edited]
     key = body.get("key") if isinstance(body.get("key"), list) else []
     locked = body.get("locked") if isinstance(body.get("locked"), dict) else {}
     source = str(body.get("source") or "")[:2000]
@@ -1938,43 +1943,52 @@ async def ai_play_adapt(
         except Exception:
             return "(?,?)"
 
-    cur_units = "\n".join(
-        f"  - {_disp(u.get('id'))} at ({round(float(u.get('x', 25)))},{round(float(u.get('y', 80)))}): {str(u.get('role') or '')[:100]}"
-        for u in (list(scheme.get("players") or []) + list(scheme.get("defenders") or []))
-    )
-    cur_actions = "\n".join(
-        f"  - {_disp(a.get('actor'))} {a.get('kind')} {_pt2(a.get('from') or [0, 0])}->{_pt2(a.get('to') or [0, 0])} (step {a.get('step', 1)})"
-        for a in (scheme.get("actions") or [])
-    )
+    def _fmt_scheme(name):
+        sc = schemes.get(name) or {}
+        units = "\n".join(
+            f"    - {_disp(u.get('id'))} at ({round(float(u.get('x', 25)))},{round(float(u.get('y', 80)))}): {str(u.get('role') or '')[:90]}"
+            for u in (list(sc.get("players") or []) + list(sc.get("defenders") or []))
+        )
+        acts = "\n".join(
+            f"    - {_disp(a.get('actor'))} {a.get('kind')} {_pt2(a.get('from') or [0, 0])}->{_pt2(a.get('to') or [0, 0])} (step {a.get('step', 1)})"
+            for a in (sc.get("actions") or [])
+        )
+        return f"  {name.upper()}:\n   players/defenders:\n{units or '    (none)'}\n   actions:\n{acts or '    (none)'}"
+
+    all_txt = "\n\n".join(_fmt_scheme(n) for n in ("offense", "defense", "counter") if schemes.get(n))
     locked_units = ", ".join(f"{_disp(u.get('id'))}@{_pt2([u.get('x'), u.get('y')])}" for u in (locked.get("units") or [])) or "none"
     locked_actions = "; ".join(
         f"{_disp(a.get('actor'))} {a.get('kind')} {_pt2(a.get('from') or [0, 0])}->{_pt2(a.get('to') or [0, 0])}"
         for a in (locked.get("actions") or [])
     ) or "none"
     locked_keys = "; ".join(_pt2(k.get("from") or [0, 0]) + "->" + _pt2(k.get("to") or [0, 0]) for k in (locked.get("keys") or [])) or "none"
+    dep_list = ", ".join(s.upper() for s in downstream) or "none"
+    return_names = [edited] + downstream
 
     prompt = (
-        "You are an elite basketball tactician re-solving ONE scheme of a play after the coach manually "
-        "moved some pieces. COORDINATES: half-court feet, x 0=left/50=right, y grows toward the rim "
-        "(low y = up top, high y = at the basket; y>94 = out of bounds behind the baseline for inbounds).\n\n"
+        "You are an elite basketball tactician. A play has three schemes — OFFENSE (what the offense runs), "
+        "DEFENSE (the defensive scheme guarding it), COUNTER (the adjustment) — plus a KEY of suggested "
+        "improvements. COORDINATES: half-court feet, x 0=left/50=right, y grows toward the rim (low y = up "
+        "top, high y = at the basket; y>94 = out of bounds behind the baseline for inbounds).\n\n"
         f"ORIGINAL PLAY: {source or '(none given)'}\n\n"
-        f"CURRENT {scheme_name.upper()} — players & defenders:\n{cur_units or '  (none)'}\n"
-        f"CURRENT {scheme_name.upper()} — actions:\n{cur_actions or '  (none)'}\n\n"
-        f"LOCKED PIECES the coach placed — keep these EXACTLY, do not move them:\n"
+        f"THE FULL PLAY NOW:\n{all_txt}\n\n"
+        f"The coach just edited the {edited.upper()} scheme. Pieces the coach placed there (keep EXACTLY):\n"
         f"  players/defenders: {locked_units}\n  action arrows: {locked_actions}\n  key arrows: {locked_keys}\n\n"
-        "MAKE THE SMALLEST CHANGE POSSIBLE. Two hard rules:\n"
-        "1) KEEP EVERY player and defender at their EXACT current starting position above — never move a "
-        "starting spot. Return each one at its SAME coordinates (only its role text may change).\n"
-        "2) KEEP the existing ACTION arrows as they are. Only change an action arrow if the coach's move "
-        "makes it clearly wrong, and then change just that one minimally. You MAY ADD a few DEFENSIVE "
-        "reaction movements (rotations/help) so the defense responds to the coach's changes — but do not "
-        "re-choreograph or redraw the whole play.\n"
-        "Then refresh the KEY and keep the same ids. If a key arrow is locked, keep its endpoints and just "
-        "update its text.\n\n"
-        "Return STRICT JSON only, no prose:\n"
-        '{"scheme": {"players": [{"id":"O1","x":25,"y":62,"role":"..."}], '
+        f"Do this:\n"
+        f"1) EDITED scheme ({edited.upper()}) — MAKE THE SMALLEST CHANGE: keep EVERY player/defender at its "
+        f"EXACT position (never move a starting spot), keep the existing action arrows, only adjust an arrow "
+        f"if the coach's change broke it, and update role text.\n"
+        f"2) DEPENDENT schemes ({dep_list}) — UPDATE these so they stay consistent with the edited "
+        f"{edited.upper()}: re-solve each so it correctly reacts to / follows from it (the defense guards "
+        f"the offense's alignment; the counter adjusts to the defense). Here you MAY reposition players and "
+        f"redraw actions as needed.\n"
+        f"3) Refresh the KEY to match the updated play.\n"
+        f"Keep the same player/defender ids everywhere.\n\n"
+        "Return STRICT JSON only, no prose. Include ONLY these schemes: "
+        + ", ".join(f'"{n}"' for n in return_names) + ".\n"
+        '{"schemes": {"' + edited + '": {"players": [{"id":"O1","x":25,"y":62,"role":"..."}], '
         '"defenders": [{"id":"X1","x":25,"y":66,"role":"..."}], '
-        '"actions": [{"actor":"O2","kind":"cut|screen|pass|dribble","from":[x,y],"to":[x,y],"step":1}]}, '
+        '"actions": [{"actor":"O2","kind":"cut|screen|pass|dribble","from":[x,y],"to":[x,y],"step":1}]}}, '
         '"key": [{"n":1,"text":"<under 90 chars, refer to defenders as D1-D5>","from":[x,y],"to":[x,y]}]}. '
         "Give 3-5 key items. Defender ids stay X1-X5 in JSON."
     )
@@ -2005,9 +2019,16 @@ async def ai_play_adapt(
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Adapt failed: {exc}")
 
-    out_scheme = _clean_scheme(data.get("scheme") if isinstance(data.get("scheme"), dict) else {})
+    out_schemes = {}
+    raw_schemes = data.get("schemes") if isinstance(data.get("schemes"), dict) else {}
+    # Back-compat: a bare "scheme" applies to the edited scheme.
+    if not raw_schemes and isinstance(data.get("scheme"), dict):
+        raw_schemes = {edited: data["scheme"]}
+    for name in return_names:
+        if isinstance(raw_schemes.get(name), dict):
+            out_schemes[name] = _clean_scheme(raw_schemes[name])
     out_key = _clean_key(data.get("key"))
-    return {"scheme": out_scheme, "key": out_key}
+    return {"schemes": out_schemes, "key": out_key}
 
 
 @router.delete("/whiteboards/{board_id}")

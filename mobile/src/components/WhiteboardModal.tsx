@@ -1006,11 +1006,17 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       .map((k: any, idx: number) => ({ k, idx }))
       .filter(({ idx }) => pins.keys.has(idx))
       .map(({ k }) => ({ from: k.from, to: k.to }));
+    // Editing a scheme cascades to the schemes that depend on it: offense →
+    // defense → counter. Downstream schemes re-solve; the edited one keeps its
+    // starting positions.
+    const order: SchemeKey[] = ['offense', 'defense', 'counter'];
+    const downstream = order.slice(order.indexOf(activeScheme) + 1).filter(sname => ai.schemes?.[sname]);
     setAdapting(true);
     try {
       const res = await whiteboardAPI.adaptPlay({
-        scheme_name: activeScheme,
-        scheme: { players: scm.players ?? [], defenders: scm.defenders ?? [], actions: scm.actions ?? [] },
+        edited: activeScheme,
+        downstream,
+        schemes: ai.schemes,
         key: ai.key ?? [],
         locked: { units: lockedUnits, actions: lockedActions, keys: lockedKeys },
         source: ai.source ?? '',
@@ -1020,26 +1026,28 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         const cur = n[activeBoardIdx];
         if (!cur?.ai) return prev;
         const newAi = JSON.parse(JSON.stringify(cur.ai));
-        if (res?.scheme) {
-          // Hard guarantee: starting positions never move on Adapt. Keep every
-          // current player/defender x,y; only pull in the updated role text and
-          // the new action arrows (the movement).
+        const resSchemes = res?.schemes || {};
+        // Edited scheme: hard-preserve starting positions — keep every x,y, pull
+        // in only the updated role text and the (minimally changed) action arrows.
+        if (resSchemes[activeScheme]) {
+          const rs = resSchemes[activeScheme];
           const curScm = newAi.schemes?.[activeScheme] || {};
           const mergeRoles = (curArr: any[], resArr: any[]) => (curArr || []).map((u: any) => {
             const r = (resArr || []).find((x: any) => x.id === u.id);
             return r && r.role ? { ...u, role: r.role } : u;   // keep x,y
           });
           const nextScm: any = {
-            players: mergeRoles(curScm.players, res.scheme.players),
-            defenders: mergeRoles(curScm.defenders, res.scheme.defenders),
-            actions: Array.isArray(res.scheme.actions) ? res.scheme.actions : (curScm.actions ?? []),
+            players: mergeRoles(curScm.players, rs.players),
+            defenders: mergeRoles(curScm.defenders, rs.defenders),
+            actions: Array.isArray(rs.actions) ? rs.actions : (curScm.actions ?? []),
           };
-          // Keep each arrow's tail on its actor's (fixed) starting position.
           const pos: Record<string, number[]> = {};
           [...(nextScm.players || []), ...(nextScm.defenders || [])].forEach((u: any) => { pos[u.id] = [u.x, u.y]; });
           nextScm.actions = (nextScm.actions || []).map((a: any) => (a.actor && pos[a.actor] ? { ...a, from: pos[a.actor] } : a));
           newAi.schemes[activeScheme] = nextScm;
         }
+        // Downstream schemes: take the re-solved version wholesale (they react).
+        downstream.forEach(sname => { if (resSchemes[sname]) newAi.schemes[sname] = resSchemes[sname]; });
         if (res?.key?.length) newAi.key = res.key.map((k: any) => ({ n: k.n, text: k.text, from: k.from, to: k.to }));
         const keep = cur.strokes.filter((st: Stroke) => !st.layer);
         const updated: Board = { ...cur, ai: newAi, strokes: [...keep, ...buildAllStrokes(newAi, cur.court_type)] };
