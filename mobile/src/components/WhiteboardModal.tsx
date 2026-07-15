@@ -394,6 +394,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         attachedReport ? `REPORT (${attachedReport.title}):\n${attachedReport.text.trim().slice(0, 4000)}` : '',
       ].filter(Boolean).join('\n\n');
       const res = await whiteboardAPI.aiPlay(composed);
+      syncOffenseAcrossSchemes(res);   // same offense across defense/counter
       const idx = boards.length;
       // Seed standing per-player guidance from any By-Player draw-up notes so the
       // coach's intent persists (offense O#, defense D#→X#).
@@ -482,6 +483,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         (finalSchemes as any)[name] = { players: keepPos(rs.players, cs.players), defenders: keepPos(rs.defenders, cs.defenders), actions: rs.actions };
       });
     }
+    syncOffenseAcrossSchemes({ schemes: finalSchemes });   // same offense across schemes
     const aiStrokes = remapStrokes(buildPlayStrokes({ ...res, schemes: finalSchemes }), 'half', b.court_type);
     const kept = b.strokes.filter(st => !st.layer);   // hand-drawn marks only
     const newSource = opts?.persistExtra && extra
@@ -948,6 +950,28 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   const buildAllStrokes = (ai: any, to: CourtType) =>
     remapStrokes(buildPlayStrokes({ schemes: ai.schemes, key: ai.key ?? [] }), 'half', to);
 
+  // Guarantee the offense is shown IDENTICALLY across schemes: the DEFENSE and
+  // COUNTER views reuse the OFFENSE scheme's exact offensive players + positions;
+  // DEFENSE also reuses the exact offensive actions (keeping only its own
+  // defenders' reactions), so the coach always sees the same offense being
+  // defended / countered. Mutates and returns `ai`.
+  const syncOffenseAcrossSchemes = (ai: any) => {
+    const off = ai?.schemes?.offense;
+    if (!off || !Array.isArray(off.players)) return ai;
+    const offPlayers = JSON.parse(JSON.stringify(off.players));
+    const offActions = JSON.parse(JSON.stringify((off.actions || []).filter((a: any) => String(a.actor || '')[0] !== 'X')));
+    (['defense', 'counter'] as SchemeKey[]).forEach(name => {
+      const sc = ai.schemes?.[name];
+      if (!sc) return;
+      sc.players = JSON.parse(JSON.stringify(offPlayers));   // same offensive alignment
+      if (name === 'defense') {
+        const defActions = (sc.actions || []).filter((a: any) => String(a.actor || '')[0] === 'X');
+        sc.actions = [...JSON.parse(JSON.stringify(offActions)), ...defActions];   // exact offense + defenders' reactions
+      }
+    });
+    return ai;
+  };
+
   // Keep an AI play's arrows/markers crisp and aligned to the CURRENT court size.
   // Strokes are stored as pixels baked at the size they were first drawn, so on a
   // different-sized screen (iPad vs phone, rotate, resize, web) they mis-scale and
@@ -1175,6 +1199,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         // Downstream schemes: take the re-solved version wholesale (they react).
         downstream.forEach(sname => { if (resSchemes[sname]) newAi.schemes[sname] = resSchemes[sname]; });
         if (res?.key?.length) newAi.key = res.key.map((k: any) => ({ n: k.n, text: k.text, from: k.from, to: k.to }));
+        syncOffenseAcrossSchemes(newAi);   // defense/counter show the exact same offense
         const keep = cur.strokes.filter((st: Stroke) => !st.layer);
         const updated: Board = { ...cur, ai: newAi, strokes: [...keep, ...buildAllStrokes(newAi, cur.court_type)] };
         n[activeBoardIdx] = updated;

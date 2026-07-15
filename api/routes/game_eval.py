@@ -1768,9 +1768,11 @@ CONSTRAINTS: if the scene lists LOCKED PLAYERS or PER-PLAYER GUIDANCE / PLAYER A
 
 SCHEME CONSISTENCY (important): the three schemes are LAYERS of ONE play, not three separate plays. By default OFFENSE is the base:
 - OFFENSE = the base offensive play: the offensive players (O1-O5) and their movement.
-- DEFENSE = the SAME offensive players at the SAME starting positions with the SAME offensive movement/actions as OFFENSE, PLUS the defenders (X1-X5) and their reactions/rotations. (So the coach sees the offense the defense is reacting to.)
+- DEFENSE = the EXACT same offensive players, at the EXACT same starting positions, with the EXACT same offensive actions as OFFENSE (identical — do not change them), PLUS the defenders (X1-X5) and their reactions/rotations. (So the coach sees the offense the defense is reacting to.)
 - COUNTER = the SAME offensive starting positions and the SAME early actions as OFFENSE, but it DIVERGES near the end into a different finish/read (the alternate outcome). Keep the beginning identical; only the last step(s) differ.
 If the scene is a DEFENSE-FIRST request (the coach is drawing up a defense, e.g. "show a 2-3 zone", "how do we guard this"), then DEFENSE is the base instead, and OFFENSE/COUNTER layer onto that same defensive alignment.
+
+DEFENSIVE MOVEMENT (defense scheme) — the defenders must ACTIVELY MOVE to stop a basket, never stand still. Give the BEST realistic defense against the offense's actions: the on-ball defender slides and mirrors the ball-handler; every off-ball defender MOVES WITH their man and stays between their man and the rim; on a ball screen pick a coverage (hedge, switch, drop, or blitz) and move the defenders to execute it; help off the weakest shooter to wall up drives and TAG the roller, then recover/close out; deny the primary scoring option; contest the shot at the rim. Add a stepped defensive action for EVERY defender who must move to prevent the score, timed (same step) to the offensive action they are reacting to.
 
 RULES: 5 offensive players (O1-O5) and up to 5 defenders (X1-X5) per scheme; at most 10 actions per scheme; 3-5 key items. The key holds the suggested movements or positioning that would have made the play succeed (get a basket, find the open man, correct the rotation) — each key arrow shows the improved movement. Keep key text under 90 characters.
 
@@ -2018,9 +2020,13 @@ async def ai_play_adapt(
         f"EXACT position (never move a starting spot), keep the existing action arrows, only adjust an arrow "
         f"if the coach's change broke it, and update role text.\n"
         f"2) DEPENDENT schemes ({dep_list}) — UPDATE these so they stay consistent with the edited "
-        f"{edited.upper()}: re-solve each so it correctly reacts to / follows from it (the defense guards "
-        f"the offense's alignment; the counter adjusts to the defense). Here you MAY reposition players and "
-        f"redraw actions as needed.\n"
+        f"{edited.upper()}. If DEFENSE is dependent: keep the EXACT same offensive players, positions, and "
+        f"offensive actions as the edited offense (identical), then give the defenders the BEST realistic "
+        f"reaction to STOP a basket — the on-ball defender mirrors the ball, off-ball defenders move WITH "
+        f"their man between man and rim, help/tag the roller on drives and screens, deny the primary "
+        f"option, contest the shot — with a stepped defensive action for every defender who must move. If "
+        f"COUNTER is dependent: keep the same offensive start and early actions, diverge only at the end. "
+        f"Reposition/redraw within those rules.\n"
         f"3) Refresh the KEY to match the updated play.\n"
         f"Keep the same player/defender ids everywhere.\n\n"
         "Return STRICT JSON only, no prose. Include ONLY these schemes: "
