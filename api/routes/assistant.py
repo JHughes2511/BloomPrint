@@ -47,6 +47,20 @@ def _coach_games(db: Session, coach: models.Coach):
     return db.query(models.GameSession).filter(or_(*conds)).order_by(models.GameSession.date.desc()).all()
 
 
+def _find_game(db, coach, game_id=None, opponent_name=None):
+    games = _coach_games(db, coach)
+    if game_id:
+        return next((g for g in games if g.id == int(game_id)), None)
+    if opponent_name:
+        on = str(opponent_name).strip().lower()
+        exact = [g for g in games if (g.opponent_name or "").lower() == on]
+        if exact:
+            return exact[0]
+        part = [g for g in games if on and on in (g.opponent_name or "").lower()]
+        return part[0] if part else None
+    return None
+
+
 def _find_player(db, coach, ref):
     """Resolve a player by id or (fuzzy) name, scoped to the coach."""
     players = _coach_players(db, coach)
@@ -271,8 +285,15 @@ TOOLS = [
      "input_schema": {"type": "object", "properties": {"player": {"type": "string"}}}},
     {"name": "suggest_navigation", "description": "Show the coach a 'Take me there' button that opens a screen. Use for 'where is X' / 'how do I Y'. Valid screens: home, roster, player (params: player_id), eval_report (params: eval_id), team_grade, team_eval, recent, new_eval (params: player_id), game_report_builder (params: report_id), import, training (params: player_id).",
      "input_schema": {"type": "object", "properties": {"screen": {"type": "string"}, "player_id": {"type": "integer"}, "eval_id": {"type": "integer"}, "report_id": {"type": "integer"}, "label": {"type": "string", "description": "button text"}}, "required": ["screen", "label"]}},
-    {"name": "propose_generation", "description": "Propose creating a NEW report the coach must confirm before it runs. Do NOT run generation yourself. kind: 'player_summary' (args: player_id, months optional) or 'team_report' (args: team_id optional). Always include a short human description.",
-     "input_schema": {"type": "object", "properties": {"kind": {"type": "string"}, "player_id": {"type": "integer"}, "team_id": {"type": "integer"}, "months": {"type": "integer"}, "output_type": {"type": "string"}, "description": {"type": "string"}}, "required": ["kind", "description"]}},
+    {"name": "propose_generation", "description": (
+        "Propose creating a NEW report the coach must confirm before it runs. Do NOT run generation "
+        "yourself. Supported kinds: 'player_summary' (args: player_id, months optional) — summarize a "
+        "player's eval history; 'team_report' (args: team_id optional) — a report across a team's "
+        "roster; 'scouting_report' (args: game_id OR opponent_name) — pre-game opponent scouting; "
+        "'game_report' (args: game_id OR opponent_name) — our-team + opponent game report. Anything "
+        "needing NEW film (a fresh video player eval) is NOT supported here — use suggest_navigation to "
+        "'new_eval' instead. Always include a short human description."),
+     "input_schema": {"type": "object", "properties": {"kind": {"type": "string"}, "player_id": {"type": "integer"}, "team_id": {"type": "integer"}, "game_id": {"type": "integer"}, "opponent_name": {"type": "string"}, "months": {"type": "integer"}, "output_type": {"type": "string"}, "description": {"type": "string"}}, "required": ["kind", "description"]}},
 ]
 
 
@@ -398,4 +419,57 @@ async def confirm(body: ConfirmBody, db: Session = Depends(get_db), coach: model
         res = await _summary(p.id, req, db=db, coach=coach)
         return {"done": True, "message": f"Created a summary for {p.name}.",
                 "navigate": {"screen": "player", "params": {"player_id": p.id}, "label": f"Open {p.name}'s profile"}}
+
+    if kind == "scouting_report":
+        from .game_eval import _run_scouting
+        game = _find_game(db, coach, a.get("game_id"), a.get("opponent_name"))
+        if not game:
+            raise HTTPException(status_code=404, detail="Couldn't find that game/opponent to scout.")
+        await _run_scouting(db, coach, game, [])
+        return {"done": True, "message": f"Scouting report ready for vs {game.opponent_name}.",
+                "navigate": {"screen": "recent", "label": "Open Recent reports"}}
+
+    if kind == "game_report":
+        from .game_eval import _run_game_report
+        game = _find_game(db, coach, a.get("game_id"), a.get("opponent_name"))
+        if not game:
+            raise HTTPException(status_code=404, detail="Couldn't find that game to report on.")
+        await _run_game_report(db, coach, game, [])
+        return {"done": True, "message": f"Game report ready for vs {game.opponent_name}.",
+                "navigate": {"screen": "recent", "label": "Open Recent reports"}}
+
+    if kind == "team_report":
+        import os
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY is not configured.")
+        from .evaluations import _build_team_report_prompt
+        from ..coach_context import system_profile_block, resolve_level
+        team = db.get(models.Team, a["team_id"]) if a.get("team_id") else None
+        if team and team.coach_id != coach.id:
+            team = None
+        players = db.query(models.Player).filter_by(team_id=team.id).all() if team else _coach_players(db, coach)
+        roster_context = ""
+        for p in players:
+            own = [e for e in p.evaluations if e.coach_id == coach.id]
+            latest = own[-1] if own else None
+            if latest:
+                strengths = ", ".join((latest.green_flags or [])[:2])
+                roster_context += f"- {p.name} ({p.position or 'N/A'}): grade {latest.overall_grade}. {strengths}\n"
+            else:
+                roster_context += f"- {p.name} ({p.position or 'N/A'}): no evaluations yet.\n"
+        team_label = team.name if team else coach.program_name
+        level = resolve_level(coach, team=team)
+        output_type = a.get("output_type") or "coaching_report"
+        prompt = _build_team_report_prompt(output_type, team_label, roster_context, "", "",
+                                           system_profile_block(coach), level=level)
+        import anthropic
+        resp = anthropic.Anthropic().messages.create(
+            model="claude-opus-4-7", max_tokens=8000, messages=[{"role": "user", "content": prompt}])
+        text = "".join(b.text for b in resp.content if hasattr(b, "text"))
+        tr = models.TeamReport(coach_id=coach.id, output_type=output_type, report_text=text)
+        db.add(tr)
+        db.commit()
+        return {"done": True, "message": f"Team report ready for {team_label}.",
+                "navigate": {"screen": "recent", "label": "Open Recent reports"}}
+
     raise HTTPException(status_code=400, detail="That action can't be run here yet.")
