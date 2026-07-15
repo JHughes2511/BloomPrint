@@ -36,7 +36,7 @@ const OOB_BASE_FT = 4;                        // wood beyond the baseline (hoop 
 const PADDED_FT_W = COURT_FT_W + OOB_SIDE_FT * 2;   // 56
 
 type CourtType = 'full' | 'half' | 'three_quarter';
-type Tool = 'pen' | 'circle' | 'xmark' | 'arrow' | 'text';
+type Tool = 'pen' | 'circle' | 'xmark' | 'arrow' | 'text' | 'move';
 
 interface Stroke {
   id: string;
@@ -242,6 +242,16 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const [playerGuidance, setPlayerGuidance] = useState<Record<string, string>>({});
   const [applyingGuidance, setApplyingGuidance] = useState(false);
   useEffect(() => { setLockedPlayers({}); setPlayerGuidance({}); }, [activeBoardIdx]);
+  // ── Direct player drag (AI boards) ──
+  // With the Move tool, drag a player/defender marker to a new spot; on drop the
+  // AI re-describes that player's role from the new position (everyone else stays).
+  const [draggingUnit, setDraggingUnit] = useState<{ scheme: SchemeKey; id: string; kind: 'O' | 'X'; xpx: number; ypx: number } | null>(null);
+  const [reDescribing, setReDescribing] = useState(false);
+  const dragUnitRef = useRef<{ scheme: SchemeKey; id: string; kind: 'O' | 'X' } | null>(null);
+  const hitTestUnitRef = useRef<(x: number, y: number) => any>(() => null);
+  const moveCommitRef = useRef<(scheme: SchemeKey, id: string, kind: 'O' | 'X', xpx: number, ypx: number) => void>(() => {});
+  // Reset the Move tool when the active board has no AI play to drag.
+  useEffect(() => { if (tool === 'move' && !boards[activeBoardIdx]?.ai) setTool('pen'); }, [activeBoardIdx]); // eslint-disable-line react-hooks/exhaustive-deps
   // ── Scheme play-through animation ──
   const [animating, setAnimating]       = useState(false);
   const [animDone, setAnimDone]         = useState(false); // finished — markers at final spots
@@ -715,6 +725,11 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     onPanResponderGrant: (evt) => {
       const { x, y } = mapPointRef.current(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
       startPoint.current = { x, y };
+      if (toolRef.current === 'move') {
+        const hit = hitTestUnitRef.current(x, y);
+        if (hit) { dragUnitRef.current = { scheme: hit.scheme, id: hit.id, kind: hit.kind }; setDraggingUnit(hit); }
+        return;
+      }
       if (toolRef.current === 'pen') {
         currentPath.current = `M${x.toFixed(1)},${y.toFixed(1)}`;
       } else if (toolRef.current === 'text') {
@@ -733,6 +748,10 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
 
     onPanResponderMove: (evt) => {
       const { x, y } = mapPointRef.current(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
+      if (toolRef.current === 'move') {
+        if (dragUnitRef.current) setDraggingUnit(du => (du ? { ...du, xpx: x, ypx: y } : du));
+        return;
+      }
       if (toolRef.current === 'pen') {
         currentPath.current += ` L${x.toFixed(1)},${y.toFixed(1)}`;
         setLivePath(currentPath.current);
@@ -759,6 +778,13 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         });
       };
 
+      if (tl === 'move') {
+        const du = dragUnitRef.current;
+        if (du) moveCommitRef.current(du.scheme, du.id, du.kind, x2, y2);
+        dragUnitRef.current = null;
+        setDraggingUnit(null);
+        return;
+      }
       if (tl === 'text' && dragRef.current) {
         const d = dragRef.current;
         const moved = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) > 6;
@@ -851,6 +877,86 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       saveBoard(activeBoardIdx, updated);
       return next;
     });
+  };
+
+  // ── Direct player drag (Move tool) ────────────────────────────────────────
+  // Scheme marker strokes rebuilt from scheme feet-data (no key), for the active
+  // board's court view. Mirrors generatePlay: build on 'half', remap to the view.
+  const schemeStrokes = (schemes: any, to: CourtType) =>
+    remapStrokes(buildPlayStrokes({ schemes, key: [] }), 'half', to);
+
+  // Feet↔px for the CURRENT board's court view (same mapping the strokes use).
+  const unitToPx = (xf: number, yf: number) => ({ x: (xf + OOB_SIDE_FT) * scale, y: (yf - offsetFtForType(board?.court_type ?? 'full')) * scale });
+  const pxToFeet = (xpx: number, ypx: number) => ({
+    x: Math.max(-2, Math.min(52, xpx / scale - OOB_SIDE_FT)),
+    y: Math.max(48, Math.min(96, ypx / scale + offsetFtForType(board?.court_type ?? 'full'))),
+  });
+
+  // Which player/defender marker (active scheme) is nearest the touch, if any.
+  const hitTestUnit = (xpx: number, ypx: number) => {
+    const sc = boards[activeBoardIdx]?.ai?.schemes?.[activeScheme];
+    if (!sc) return null;
+    const units = [
+      ...((sc.players ?? []).map((u: any) => ({ ...u, kind: 'O' as const }))),
+      ...((sc.defenders ?? []).map((u: any) => ({ ...u, kind: 'X' as const }))),
+    ];
+    let best: any = null, bestD = 26;
+    for (const u of units) {
+      const p = unitToPx(u.x, u.y);
+      const d = Math.hypot(p.x - xpx, p.y - ypx);
+      if (d < bestD) { bestD = d; best = { scheme: activeScheme, id: u.id, kind: u.kind, xpx: p.x, ypx: p.y }; }
+    }
+    return best;
+  };
+  hitTestUnitRef.current = hitTestUnit;
+
+  // Commit a dropped player: write the new feet position (and re-attach its own
+  // action arrows), rebuild scheme strokes locally, then ask the AI to re-describe.
+  const commitPlayerMove = (scheme: SchemeKey, id: string, kind: 'O' | 'X', xpx: number, ypx: number) => {
+    const b = boards[activeBoardIdx];
+    if (!b?.ai?.schemes?.[scheme]) return;
+    const { x: xft, y: yft } = pxToFeet(xpx, ypx);
+    const schemes = JSON.parse(JSON.stringify(b.ai.schemes));
+    const scm = schemes[scheme];
+    const arr = kind === 'X' ? (scm.defenders ?? []) : (scm.players ?? []);
+    const unit = arr.find((u: any) => u.id === id);
+    if (!unit) return;
+    const oldX = unit.x, oldY = unit.y;
+    unit.x = xft; unit.y = yft;
+    const near = (pt: any, X: number, Y: number) => Array.isArray(pt) && Math.abs(pt[0] - X) < 2 && Math.abs(pt[1] - Y) < 2;
+    (scm.actions ?? []).forEach((a: any) => {
+      if (a.actor === id && near(a.from, oldX, oldY)) a.from = [xft, yft];
+      if (near(a.to, oldX, oldY)) a.to = [xft, yft];
+    });
+    const keep = b.strokes.filter(st => !st.layer || st.layer === 'key');
+    const updated: Board = { ...b, strokes: [...keep, ...schemeStrokes(schemes, b.court_type)], ai: { ...b.ai, schemes } };
+    setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
+    saveBoard(activeBoardIdx, updated);
+    describeAfterMove(updated, scheme, id);
+  };
+  moveCommitRef.current = commitPlayerMove;
+
+  const describeAfterMove = async (b: Board, scheme: SchemeKey, id: string) => {
+    if (!b.ai) return;
+    setReDescribing(true);
+    try {
+      const res = await whiteboardAPI.describeMove({ schemes: b.ai.schemes, scheme, player_id: id, source: b.ai.source ?? '' });
+      setBoards(prev => {
+        const n = [...prev];
+        const cur = n[activeBoardIdx];
+        if (!cur?.ai) return prev;
+        const schemes = JSON.parse(JSON.stringify(cur.ai.schemes));
+        const scm = schemes[scheme];
+        const u = [...(scm.players ?? []), ...(scm.defenders ?? [])].find((x: any) => x.id === id);
+        if (u && res?.role) u.role = res.role;
+        const key = res?.key?.length ? res.key.map((k: any) => ({ n: k.n, text: k.text })) : cur.ai.key;
+        const updated: Board = { ...cur, ai: { ...cur.ai, schemes, key } };
+        n[activeBoardIdx] = updated;
+        saveBoard(activeBoardIdx, updated);
+        return n;
+      });
+    } catch { /* keep the manual move even if re-describe fails */ }
+    setReDescribing(false);
   };
 
   // Animate the current scheme step by step (same step = together): each actor
@@ -1136,6 +1242,13 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
             <TouchableOpacity style={[styles.toolBtn, { backgroundColor: t.accentSoft }]} onPress={() => setShowAI(true)}>
               <Ionicons name="sparkles" size={15} color={t.accent} />
             </TouchableOpacity>
+            {board?.ai && (
+              <TouchableOpacity
+                style={[styles.toolBtn, tool === 'move' && styles.toolBtnActive]}
+                onPress={() => setTool(tool === 'move' ? 'pen' : 'move')}>
+                <Ionicons name="move" size={16} color={tool === 'move' ? t.ctaText : t.muted} />
+              </TouchableOpacity>
+            )}
             <TouchableOpacity style={styles.toolBtn} onPress={undo}>
               <Ionicons name="arrow-undo" size={16} color={t.muted} />
             </TouchableOpacity>
@@ -1181,6 +1294,15 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           </View>
         )}
 
+        {/* Move-tool hint */}
+        {tool === 'move' && board?.ai && !selectedTextId && (
+          <View style={styles.textCtrlBar}>
+            <Text style={styles.textCtrlLabel}>
+              Move — drag any {activeScheme === 'defense' ? 'defender' : 'player'} to reposition; the AI re-describes their role.
+            </Text>
+          </View>
+        )}
+
         {/* Canvas — court scales to fit the available area for the chosen view */}
         {loading ? (
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -1217,11 +1339,27 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                     <Path d={livePath} stroke={color} strokeWidth={STROKE_WIDTH}
                           fill="none" strokeLinecap="round" strokeLinejoin="round" />
                   ) : null}
+                  {draggingUnit ? (
+                    draggingUnit.kind === 'O' ? (
+                      <G>
+                        <Circle cx={draggingUnit.xpx} cy={draggingUnit.ypx} r={14} stroke="#141414" strokeWidth={3} fill="rgba(31,111,155,0.25)" />
+                        <SvgText x={draggingUnit.xpx - 8} y={draggingUnit.ypx + 5} fill="#141414" fontSize={13} fontWeight="bold">{draggingUnit.id}</SvgText>
+                      </G>
+                    ) : (
+                      <G>
+                        <Line x1={draggingUnit.xpx - 10} y1={draggingUnit.ypx - 10} x2={draggingUnit.xpx + 10} y2={draggingUnit.ypx + 10} stroke="#C0392B" strokeWidth={3.5} strokeLinecap="round" />
+                        <Line x1={draggingUnit.xpx + 10} y1={draggingUnit.ypx - 10} x2={draggingUnit.xpx - 10} y2={draggingUnit.ypx + 10} stroke="#C0392B" strokeWidth={3.5} strokeLinecap="round" />
+                        <SvgText x={draggingUnit.xpx + 12} y={draggingUnit.ypx + 5} fill="#C0392B" fontSize={12} fontWeight="bold">{dispId(draggingUnit.id)}</SvgText>
+                      </G>
+                    )
+                  ) : null}
                 </Svg>
               </View>
             )}
           </View>
         )}
+
+        <GeneratingOverlay visible={reDescribing} label="Updating this player's role…" />
 
         {/* AI Key — bottom overlay that pops up over the court when Key is on */}
         {board?.ai && showKey && board.ai.key.length > 0 && (

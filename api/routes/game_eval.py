@@ -1825,6 +1825,70 @@ async def ai_play(
     }
 
 
+# ── Re-describe after a manual player drag ────────────────────────────────────
+# The coach dragged one player to a new spot. Keep everyone else exactly where
+# they are; rewrite just the moved player's role and refresh the key.
+@router.post("/ai-play-describe")
+async def ai_play_describe(
+    body: dict,
+    coach: models.Coach = Depends(get_current_coach),
+):
+    import os
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(status_code=503, detail="ANTHROPIC_API_KEY not configured")
+    schemes = body.get("schemes") if isinstance(body.get("schemes"), dict) else {}
+    scheme = str(body.get("scheme") or "offense")
+    pid = str(body.get("player_id") or "")
+    source = str(body.get("source") or "")[:2000]
+    scm = schemes.get(scheme) or {}
+    units = list(scm.get("players") or []) + list(scm.get("defenders") or [])
+    moved = next((u for u in units if str(u.get("id")) == pid), None)
+    if not moved:
+        raise HTTPException(status_code=400, detail="Moved player not found in that scheme")
+
+    def _disp(i):
+        i = str(i or "")
+        return ("D" + i[1:]) if i[:1] == "X" else i
+
+    disp = _disp(pid)
+
+    def _fmt(s):
+        us = list(s.get("players") or []) + list(s.get("defenders") or [])
+        return "\n".join(
+            f"- {_disp(u.get('id'))} at x={round(float(u.get('x', 25)))}, y={round(float(u.get('y', 80)))}: {str(u.get('role') or '')[:120]}"
+            for u in us
+        )
+
+    prompt = (
+        "You are an elite basketball tactician. COORDINATES: half-court feet, x 0=left sideline / 50=right, "
+        "y grows toward the rim (low y = up top, high y = at the basket; y>94 is out of bounds behind the baseline).\n\n"
+        f"ORIGINAL PLAY: {source or '(none given)'}\n\n"
+        f"CURRENT {scheme.upper()} FORMATION (everyone stays here — do NOT move anyone):\n{_fmt(scm)}\n\n"
+        f"The coach just MANUALLY MOVED {disp} to x={round(float(moved.get('x', 25)))}, y={round(float(moved.get('y', 80)))}. "
+        f"Rewrite ONLY what {disp} does from this new spot, consistent with the rest of the formation. "
+        "Return STRICT JSON only, no prose: {\"role\": \"<one concise sentence under 120 chars>\", "
+        "\"key\": [{\"n\": 1, \"text\": \"<refreshed coaching point under 90 chars, refer to defenders as D1-D5>\"}]}. "
+        "Give 3-4 key items."
+    )
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        resp = await client.messages.create(
+            model="claude-opus-4-7", max_tokens=900,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        blocks = [b for b in resp.content if hasattr(b, "text")]
+        data = _parse_ai_play_json(blocks[0].text if blocks else "{}")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Re-describe failed: {exc}")
+
+    role = str(data.get("role") or moved.get("role") or "")[:200]
+    key = []
+    for i, k in enumerate((data.get("key") or [])[:5]):
+        key.append({"n": int(k.get("n") or i + 1), "text": str(k.get("text") or "")[:120]})
+    return {"role": role, "key": key}
+
+
 @router.delete("/whiteboards/{board_id}")
 def delete_whiteboard(
     board_id: int,

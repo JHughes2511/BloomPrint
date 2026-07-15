@@ -445,6 +445,8 @@ export const whiteboardAPI = {
   delete: (boardId: number) => api.delete(`/game-eval/whiteboards/${boardId}`).then(r => r.data),
   aiPlay: (description: string) =>
     api.post('/game-eval/ai-play', { description }).then(r => r.data),
+  describeMove: (body: { schemes: any; scheme: string; player_id: string; source?: string }) =>
+    api.post('/game-eval/ai-play-describe', body).then(r => r.data),
 };
 
 export const gameReportsAPI = {
