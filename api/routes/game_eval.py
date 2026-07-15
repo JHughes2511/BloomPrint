@@ -1645,7 +1645,9 @@ POSITIONS: the player numbers are basketball positions — 1 = Point Guard (O1),
 
 COORDINATES: feet on a regulation HALF court. x: 0 = left sideline, 25 = middle, 50 = right sideline. y grows toward the hoop — LOW y is farther from the basket (up top), HIGH y is at the rim. The x,y for every player and defender is their STARTING position, before the play develops (movement is expressed only through actions).
 
-DEFENDER POSITIONING: by default place each defender on the BASKET side of the player they guard — between their man and the rim. Because the rim is at HIGH y, that means the defender sits at a slightly HIGHER y than their man (about 3-5 ft toward the basket), roughly on the line from their man to the rim. So the on-ball defender of a point guard up top (y≈62) belongs just below him toward the basket (y≈66-67), NOT above him. Only put a defender on the non-basket (ball/deny) side when the scene or scheme calls for fronting the post, denying a wing, or top-locking a shooter. Landmarks: half-court line y=47, top of the 3-point arc / where the point guard initiates y≈62, free-throw line y=75, elbows y≈75 (x≈17 and x≈33), rim/basket y≈89, blocks/low post y≈84 (x≈19 and x≈31), wings y≈66 (x≈8 and x≈42), corners y≈90 (x≈4 and x≈46). The ball-handler up top belongs around y=60-64, NOT at the free-throw line. Keep every coordinate inside 2..48 for x and 48..92 for y.
+DEFENDER POSITIONING: by default place each defender on the BASKET side of the player they guard — between their man and the rim. Because the rim is at HIGH y, that means the defender sits at a slightly HIGHER y than their man (about 3-5 ft toward the basket), roughly on the line from their man to the rim. So the on-ball defender of a point guard up top (y≈62) belongs just below him toward the basket (y≈66-67), NOT above him. Only put a defender on the non-basket (ball/deny) side when the scene or scheme calls for fronting the post, denying a wing, or top-locking a shooter. Landmarks: half-court line y=47, top of the 3-point arc / where the point guard initiates y≈62, free-throw line y=75, elbows y≈75 (x≈17 and x≈33), rim/basket y≈89, blocks/low post y≈84 (x≈19 and x≈31), wings y≈66 (x≈8 and x≈42), corners y≈90 (x≈4 and x≈46). The ball-handler up top belongs around y=60-64, NOT at the free-throw line. Keep in-bounds coordinates inside 2..48 for x and 48..92 for y.
+
+INBOUND PLAYS (BLOB / SLOB): the court now shows a little out-of-bounds floor beyond the lines. If the scene is an inbound play, place the player taking the ball out (the inbounder) OUT OF BOUNDS and start the inbound pass from there: for a baseline out-of-bounds (BLOB) inbounder use y≈95 (just past the baseline) at the x you want along the endline; for a sideline out-of-bounds (SLOB) inbounder use x≈-1 (left) or x≈51 (right) at the y you want. Only use these out-of-bounds spots for an actual inbounder on an inbound play; everyone else stays in bounds.
 
 Return exactly this shape. Output play_name and the FULL key array FIRST, then the schemes last — the key must never be omitted:
 {
@@ -1747,11 +1749,11 @@ async def ai_play(
         out = {"players": [], "defenders": [], "actions": []}
         for i, pl in enumerate((sc.get("players") or [])[:5]):
             out["players"].append({"id": str(pl.get("id") or f"O{i+1}")[:3],
-                                   "x": _pt(pl.get("x"), 2, 48, 25), "y": _pt(pl.get("y"), 48, 92, 80),
+                                   "x": _pt(pl.get("x"), -2, 52, 25), "y": _pt(pl.get("y"), 48, 96, 80),
                                    "role": str(pl.get("role") or "")[:200]})
         for i, df in enumerate((sc.get("defenders") or [])[:5]):
             out["defenders"].append({"id": str(df.get("id") or f"X{i+1}")[:3],
-                                     "x": _pt(df.get("x"), 2, 48, 25), "y": _pt(df.get("y"), 48, 92, 74),
+                                     "x": _pt(df.get("x"), -2, 52, 25), "y": _pt(df.get("y"), 48, 96, 74),
                                      "role": str(df.get("role") or "")[:200]})
 
         # Auto-correct obviously-wrong on-ball defenders: a PERIMETER defender
@@ -1777,8 +1779,8 @@ async def ai_play(
                 step = idx + 1
             out["actions"].append({"kind": str(a.get("kind") or "cut"), "step": step,
                                    "actor": str(a.get("actor") or "")[:3],
-                                   "from": [_pt(fr[0], 2, 48, 25), _pt(fr[1], 48, 92, 80)],
-                                   "to":   [_pt(to[0], 2, 48, 25), _pt(to[1], 48, 92, 70)]})
+                                   "from": [_pt(fr[0], -2, 52, 25), _pt(fr[1], 48, 96, 80)],
+                                   "to":   [_pt(to[0], -2, 52, 25), _pt(to[1], 48, 96, 70)]})
         return out
 
     schemes = data.get("schemes") if isinstance(data.get("schemes"), dict) else {}
@@ -1789,8 +1791,8 @@ async def ai_play(
             fr, to = (k.get("from") or [25, 80]), (k.get("to") or [25, 70])
             out.append({"n": int(k.get("n") or i + 1),
                         "text": str(k.get("text") or "")[:120],
-                        "from": [_pt(fr[0], 2, 48, 25), _pt(fr[1], 48, 92, 80)],
-                        "to":   [_pt(to[0], 2, 48, 25), _pt(to[1], 48, 92, 70)]})
+                        "from": [_pt(fr[0], -2, 52, 25), _pt(fr[1], 48, 96, 80)],
+                        "to":   [_pt(to[0], -2, 52, 25), _pt(to[1], 48, 96, 70)]})
         return out
 
     key_items = _clean_key(data.get("key"))

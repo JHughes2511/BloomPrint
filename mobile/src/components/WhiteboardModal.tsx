@@ -28,6 +28,12 @@ import { GeneratingOverlay } from './GeneratingBasketball';
 const COURT_FT_W = 50;
 const COURT_FT_L = 94;
 const VISIBLE_FT: Record<string, number> = { full: 94, three_quarter: 78, half: 47 };
+// Out-of-bounds floor so inbound (BLOB / SLOB) plays fit: the painted 50×94
+// court is inset inside a slightly larger wood canvas. Feet→px adds OOB_SIDE_FT
+// on x; the baseline OOB sits below the court at the hoop end.
+const OOB_SIDE_FT = 3;                        // wood beyond each sideline
+const OOB_BASE_FT = 4;                        // wood beyond the baseline (hoop end)
+const PADDED_FT_W = COURT_FT_W + OOB_SIDE_FT * 2;   // 56
 
 type CourtType = 'full' | 'half' | 'three_quarter';
 type Tool = 'pen' | 'circle' | 'xmark' | 'arrow' | 'text';
@@ -98,18 +104,22 @@ const WOOD_B = '#DDBA84';   // alternating plank tone
 const LINE = '#7A4326';     // painted line — walnut brown, classic look
 const LINE_W = 2;
 
-function HardwoodCourt({ width, height }: { width: number; height: number }) {
-  const s = width / COURT_FT_W;       // feet -> px
-  const L = COURT_FT_L * s;           // full length in px
+// `width`/`height` are the FULL padded canvas (court + out-of-bounds wood);
+// `scale` is px-per-foot. The painted 50×94 court is inset by OOB_SIDE_FT on the
+// sides and lifted OOB_BASE_FT off the bottom so there's floor beyond the lines.
+function HardwoodCourt({ width, height, scale }: { width: number; height: number; scale: number }) {
+  const s = scale;                    // feet -> px
+  const cw = COURT_FT_W * s;          // painted court width in px
+  const L = COURT_FT_L * s;           // full court length in px
   const ft = (n: number) => n * s;
-  const M = 6;                        // uniform wood margin around the painted boundary
+  const M = 6;                        // uniform wood margin inside the painted boundary
 
-  // Plank stripes (vertical, ~3.5ft wide)
+  // Plank stripes fill the ENTIRE canvas (court + out-of-bounds wood).
   const planks = [];
   const plankW = ft(3.55);
   for (let i = 0; i * plankW < width; i++) {
     planks.push(
-      <Rect key={i} x={i * plankW} y={0} width={plankW} height={L}
+      <Rect key={i} x={i * plankW} y={0} width={plankW} height={height}
             fill={i % 2 === 0 ? WOOD_A : WOOD_B} />
     );
   }
@@ -118,7 +128,7 @@ function HardwoodCourt({ width, height }: { width: number; height: number }) {
   const End = ({ flip }: { flip?: boolean }) => {
     // Drawn relative to the NEAR baseline (y = L - M); flip rotates 180° about center.
     const base = L - M;
-    const cx = width / 2;
+    const cx = cw / 2;
     const rimY = base - ft(5.25);
     const keyW = ft(16), keyH = ft(19);
     const ftY = base - keyH;
@@ -138,9 +148,9 @@ function HardwoodCourt({ width, height }: { width: number; height: number }) {
         <Circle cx={cx} cy={rimY} r={ft(0.75)} stroke={LINE} strokeWidth={LINE_W} fill="none" />
         {/* three-point line: two corner segments + arc */}
         <Line x1={cornerX} y1={base} x2={cornerX} y2={yCorner} stroke={LINE} strokeWidth={LINE_W} />
-        <Line x1={width - cornerX} y1={base} x2={width - cornerX} y2={yCorner} stroke={LINE} strokeWidth={LINE_W} />
+        <Line x1={cw - cornerX} y1={base} x2={cw - cornerX} y2={yCorner} stroke={LINE} strokeWidth={LINE_W} />
         {/* baseline-to-arc geometry uses the inset base, so edges stay uniform */}
-        <Path d={`M ${cornerX} ${yCorner} A ${r3} ${r3} 0 0 1 ${width - cornerX} ${yCorner}`}
+        <Path d={`M ${cornerX} ${yCorner} A ${r3} ${r3} 0 0 1 ${cw - cornerX} ${yCorner}`}
               stroke={LINE} strokeWidth={LINE_W} fill="none" />
       </G>
     );
@@ -148,17 +158,19 @@ function HardwoodCourt({ width, height }: { width: number; height: number }) {
 
   return (
     <View style={{ width, height, overflow: 'hidden' }}>
-      {/* Full court anchored to the bottom; half / 3/4 clip the top away. */}
-      <View style={{ position: 'absolute', left: 0, bottom: 0, width, height: L }}>
-        <Svg width={width} height={L}>
-          {planks}
+      {/* Wood (incl. out-of-bounds) fills the whole canvas. */}
+      <Svg style={StyleSheet.absoluteFill} width={width} height={height}>{planks}</Svg>
+      {/* Painted court: inset by side OOB, lifted off the bottom by baseline OOB.
+          Full court anchored to the bottom; half / 3/4 clip the top away. */}
+      <View style={{ position: 'absolute', left: OOB_SIDE_FT * s, bottom: OOB_BASE_FT * s, width: cw, height: L }}>
+        <Svg width={cw} height={L}>
           {/* boundary — inset by the same margin on all four sides */}
-          <Rect x={M} y={M} width={width - M * 2} height={L - M * 2}
+          <Rect x={M} y={M} width={cw - M * 2} height={L - M * 2}
                 stroke={LINE} strokeWidth={LINE_W} fill="none" />
           {/* center line + circle */}
-          <Line x1={M} y1={L / 2} x2={width - M} y2={L / 2} stroke={LINE} strokeWidth={LINE_W} />
-          <Circle cx={width / 2} cy={L / 2} r={ft(6)} stroke={LINE} strokeWidth={LINE_W} fill="none" />
-          <Circle cx={width / 2} cy={L / 2} r={ft(2)} stroke={LINE} strokeWidth={LINE_W} fill="rgba(122,67,38,0.10)" />
+          <Line x1={M} y1={L / 2} x2={cw - M} y2={L / 2} stroke={LINE} strokeWidth={LINE_W} />
+          <Circle cx={cw / 2} cy={L / 2} r={ft(6)} stroke={LINE} strokeWidth={LINE_W} fill="none" />
+          <Circle cx={cw / 2} cy={L / 2} r={ft(2)} stroke={LINE} strokeWidth={LINE_W} fill="rgba(122,67,38,0.10)" />
           <End />
           <End flip />
         </Svg>
@@ -294,9 +306,9 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     // AI plays are drawn on a HALF court (bigger, easier to read). The half
     // court shows the near half (court-feet y 47..94) with the hoop at the
     // bottom, so we scale to that view and offset y by the half-court line.
-    const fs = Math.min((avail.w - 20) / COURT_FT_W, (avail.h - 20) / VISIBLE_FT.half);
+    const fs = scaleForType('half');
     const HALF_OFFSET = COURT_FT_L - VISIBLE_FT.half; // 94 - 47 = 47
-    const X = (xft: number) => xft * fs;
+    const X = (xft: number) => (xft + OOB_SIDE_FT) * fs;
     const Y = (yft: number) => (yft - HALF_OFFSET) * fs;
     const mk = () => Math.random().toString(36).slice(2);
     const out: Stroke[] = [];
@@ -564,11 +576,11 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const board  = boards[activeBoardIdx];
   const visFt  = VISIBLE_FT[board?.court_type ?? 'full'] ?? VISIBLE_FT.full;
   const rawScale = avail.w > 20 && avail.h > 20
-    ? Math.min((avail.w - 20) / COURT_FT_W, (avail.h - 20) / visFt)
+    ? Math.min((avail.w - 20) / PADDED_FT_W, (avail.h - 20) / (visFt + OOB_BASE_FT))
     : 0;
   const scale  = Number.isFinite(rawScale) && rawScale > 0 ? rawScale : 0;
-  const courtW = COURT_FT_W * scale;
-  const courtH = visFt * scale;
+  const courtW = PADDED_FT_W * scale;
+  const courtH = (visFt + OOB_BASE_FT) * scale;
   // Landscape: rotate the whole court 90° for display and uniformly scale it to
   // fit the wide area. Strokes stay aligned (one transform on the whole wrapper).
   // Drawing is a portrait activity, so hand-draw input is paused in landscape.
@@ -782,7 +794,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   // so the top of the canvas corresponds to court-feet = COURT_FT_L - visibleFt).
   const scaleForType = (type: CourtType) => {
     const visFt = VISIBLE_FT[type] ?? VISIBLE_FT.full;
-    const raw = Math.min((avail.w - 20) / COURT_FT_W, (avail.h - 20) / visFt);
+    const raw = Math.min((avail.w - 20) / PADDED_FT_W, (avail.h - 20) / (visFt + OOB_BASE_FT));
     return Number.isFinite(raw) && raw > 0 ? raw : 1;
   };
   const offsetFtForType = (type: CourtType) => COURT_FT_L - (VISIBLE_FT[type] ?? VISIBLE_FT.full);
@@ -937,7 +949,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     if (!scheme) return [];
     const sc = scaleForType(b!.court_type);
     const offFt = offsetFtForType(b!.court_type);
-    const px = (fx: number, fy: number) => ({ x: fx * sc, y: (fy - offFt) * sc });
+    const px = (fx: number, fy: number) => ({ x: (fx + OOB_SIDE_FT) * sc, y: (fy - offFt) * sc });
     const actions = (scheme.actions ?? []).slice().sort((a, c) => (a.step ?? 1) - (c.step ?? 1));
     const steps = [...new Set(actions.map(a => a.step ?? 1))].sort((x, y) => x - y);
     const maxStep = steps.length ? steps[steps.length - 1] : 0;
@@ -1184,7 +1196,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                 ]}
                 {...(isLandscape ? {} : panResponder.panHandlers)}
               >
-                <HardwoodCourt width={courtW} height={courtH} />
+                <HardwoodCourt width={courtW} height={courtH} scale={scale} />
                 <Svg style={StyleSheet.absoluteFill} width={courtW} height={courtH}>
                   {renderCourtStrokes()}
                   {livePath && !isLandscape ? (
