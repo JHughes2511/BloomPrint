@@ -1766,7 +1766,13 @@ LABELS: in the human-facing "text" of every key item, refer to defenders as D1-D
 
 CONSTRAINTS: if the scene lists LOCKED PLAYERS or PER-PLAYER GUIDANCE / PLAYER ADJUSTMENTS, honor them precisely — keep any locked player at the exact coordinates given and reposition (cascade) only the other players to make the play work, and follow each per-player note.
 
-RULES: 5 offensive players (O1-O5) and up to 5 defenders (X1-X5) per scheme; at most 10 actions per scheme; 3-5 key items. offense = what the offense ran / should run; defense = the defensive scheme and rotations; counter = the counter/adjustment. The key holds the suggested movements or positioning that would have made the play succeed (get a basket, find the open man, correct the rotation) — each key arrow shows the improved movement. Keep key text under 90 characters.
+SCHEME CONSISTENCY (important): the three schemes are LAYERS of ONE play, not three separate plays. By default OFFENSE is the base:
+- OFFENSE = the base offensive play: the offensive players (O1-O5) and their movement.
+- DEFENSE = the SAME offensive players at the SAME starting positions with the SAME offensive movement/actions as OFFENSE, PLUS the defenders (X1-X5) and their reactions/rotations. (So the coach sees the offense the defense is reacting to.)
+- COUNTER = the SAME offensive starting positions and the SAME early actions as OFFENSE, but it DIVERGES near the end into a different finish/read (the alternate outcome). Keep the beginning identical; only the last step(s) differ.
+If the scene is a DEFENSE-FIRST request (the coach is drawing up a defense, e.g. "show a 2-3 zone", "how do we guard this"), then DEFENSE is the base instead, and OFFENSE/COUNTER layer onto that same defensive alignment.
+
+RULES: 5 offensive players (O1-O5) and up to 5 defenders (X1-X5) per scheme; at most 10 actions per scheme; 3-5 key items. The key holds the suggested movements or positioning that would have made the play succeed (get a basket, find the open man, correct the rotation) — each key arrow shows the improved movement. Keep key text under 90 characters.
 
 OUTPUT ONLY the JSON object. It MUST be strictly valid: every array element and object property separated by a comma, no trailing commas, no comments, no prose before or after."""
 

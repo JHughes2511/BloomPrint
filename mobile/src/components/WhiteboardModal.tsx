@@ -53,7 +53,9 @@ interface Stroke {
   color: string; strokeWidth: number;
   dash?: boolean;                 // dashed rendering (passes, suggested movement)
   layer?: 'offense' | 'defense' | 'counter' | 'key';  // AI scheme layer
+  side?: 'off' | 'def';           // offensive vs defensive element (for ghosting)
   step?: number;                  // animation order within a scheme (1-based)
+  opacity?: number;               // render opacity (ghosting)
 }
 
 type SchemeKey = 'offense' | 'defense' | 'counter';
@@ -341,16 +343,17 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       const sc = res?.schemes?.[layer];
       if (!sc) return;
       (sc.players ?? []).forEach((pl: any) => {
-        out.push({ id: mk(), type: 'circle', cx: X(pl.x), cy: Y(pl.y), r: 13, color: '#141414', strokeWidth: 3, layer });
-        out.push({ id: mk(), type: 'text', x: X(pl.x) - 8, y: Y(pl.y) + 5, label: pl.id, size: 13, color: '#141414', strokeWidth: 1, layer });
+        out.push({ id: mk(), type: 'circle', cx: X(pl.x), cy: Y(pl.y), r: 13, color: '#141414', strokeWidth: 3, layer, side: 'off' });
+        out.push({ id: mk(), type: 'text', x: X(pl.x) - 8, y: Y(pl.y) + 5, label: pl.id, size: 13, color: '#141414', strokeWidth: 1, layer, side: 'off' });
       });
       (sc.defenders ?? []).forEach((df: any) => {
-        out.push({ id: mk(), type: 'xmark', cx: X(df.x), cy: Y(df.y), size: 10, color: '#C0392B', strokeWidth: 3, layer });
-        out.push({ id: mk(), type: 'text', x: X(df.x) + 12, y: Y(df.y) + 5, label: dispId(df.id), size: 12, color: '#C0392B', strokeWidth: 1, layer });
+        out.push({ id: mk(), type: 'xmark', cx: X(df.x), cy: Y(df.y), size: 10, color: '#C0392B', strokeWidth: 3, layer, side: 'def' });
+        out.push({ id: mk(), type: 'text', x: X(df.x) + 12, y: Y(df.y) + 5, label: dispId(df.id), size: 12, color: '#C0392B', strokeWidth: 1, layer, side: 'def' });
       });
       (sc.actions ?? []).forEach((a: any, i: number) => {
+        const side: 'off' | 'def' = String(a.actor || '')[0] === 'X' ? 'def' : 'off';
         out.push({ id: mk(), type: 'arrow', x1: X(a.from[0]), y1: Y(a.from[1]), x2: X(a.to[0]), y2: Y(a.to[1]),
-                   color: '#141414', strokeWidth: 3, dash: a.kind === 'pass', layer, step: a.step ?? (i + 1) });
+                   color: '#141414', strokeWidth: 3, dash: a.kind === 'pass', layer, side, step: a.step ?? (i + 1) });
       });
     });
     (res?.key ?? []).forEach((k: any) => {
@@ -1125,19 +1128,20 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   useEffect(() => { animCancel.current = true; setAnimating(false); setAnimDone(false); }, [activeScheme, activeBoardIdx]);
 
   const renderStroke = (s: Stroke) => {
+    const op = s.opacity ?? 1;
     if (s.type === 'path') {
-      return <Path key={s.id} d={s.d} stroke={s.color} strokeWidth={s.strokeWidth}
+      return <Path key={s.id} d={s.d} stroke={s.color} strokeWidth={s.strokeWidth} opacity={op}
                    strokeDasharray={s.dash ? '7,6' : undefined}
                    fill="none" strokeLinecap="round" strokeLinejoin="round" />;
     }
     if (s.type === 'circle') {
-      return <Circle key={s.id} cx={s.cx} cy={s.cy} r={s.r}
+      return <Circle key={s.id} cx={s.cx} cy={s.cy} r={s.r} opacity={op}
                      strokeDasharray={s.dash ? '7,6' : undefined}
                      stroke={s.color} strokeWidth={s.strokeWidth} fill="none" />;
     }
     if (s.type === 'xmark' && s.cx != null && s.cy != null && s.size != null) {
       return (
-        <G key={s.id}>
+        <G key={s.id} opacity={op}>
           <Line x1={s.cx - s.size} y1={s.cy - s.size} x2={s.cx + s.size} y2={s.cy + s.size}
                 stroke={s.color} strokeWidth={s.strokeWidth} strokeLinecap="round" />
           <Line x1={s.cx + s.size} y1={s.cy - s.size} x2={s.cx - s.size} y2={s.cy + s.size}
@@ -1156,7 +1160,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       // Shaft stops at the arrowhead's base so the line never pokes past the tip.
       const shaftEnd = { x: s.x2 - ux*as*0.85, y: s.y2 - uy*as*0.85 };
       return (
-        <G key={s.id}>
+        <G key={s.id} opacity={op}>
           <Line x1={s.x1} y1={s.y1} x2={shaftEnd.x} y2={shaftEnd.y} stroke={s.color} strokeWidth={s.strokeWidth} strokeLinecap="round"
                 strokeDasharray={s.dash ? '8,6' : undefined} />
           <Path d={`M${tip.x},${tip.y} L${b1.x},${b1.y} L${b2.x},${b2.y} Z`} fill={s.color} />
@@ -1168,7 +1172,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       const selected = s.id === selectedTextId;
       const w = (s.label?.length ?? 1) * fs * 0.62;
       return (
-        <G key={s.id}>
+        <G key={s.id} opacity={op}>
           {selected && s.x != null && s.y != null && (
             <Rect x={s.x - 6} y={s.y - fs - 4} width={w + 12} height={fs + 12}
                   stroke={s.color} strokeWidth={1} strokeDasharray="4,3" fill="none" rx={4} />
@@ -1274,9 +1278,12 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     const strokes = b?.strokes ?? [];
     const animMode = (animating || animDone) && !!b?.ai?.schemes?.[activeScheme];
     if (!animMode) {
+      // On the DEFENSE view, ghost the offensive elements so the coach sees the
+      // offense the defenders are reacting to, with the defense solid on top.
+      const ghost = activeScheme === 'defense';
       return strokes
         .filter(st => !st.layer || st.layer === activeScheme || (showKey && st.layer === 'key'))
-        .map(renderStroke);
+        .map(st => renderStroke(ghost && st.layer === 'defense' && st.side === 'off' ? { ...st, opacity: 0.28 } : st));
     }
     const statics = strokes
       .filter(st => !st.layer || (showKey && st.layer === 'key'))
