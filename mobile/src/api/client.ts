@@ -453,6 +453,8 @@ export const whiteboardAPI = {
     api.post('/game-eval/ai-play-describe', body).then(r => r.data),
   adaptPlay: (body: { edited: string; downstream: string[]; schemes: any; key: any[]; locked: any; source?: string }) =>
     api.post('/game-eval/ai-play-adapt', body).then(r => r.data),
+  nameFreehand: (body: { markers: any[]; arrows: any[]; labels: any[] }) =>
+    api.post('/game-eval/ai-play-name', body).then(r => r.data),
 };
 
 export const gameReportsAPI = {

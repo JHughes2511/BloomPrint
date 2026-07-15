@@ -2076,6 +2076,55 @@ async def ai_play_adapt(
     return {"schemes": out_schemes, "key": out_key}
 
 
+# ── Review + name a hand-drawn (freehand) play ────────────────────────────────
+# The coach played back a freehand drawing (players + ordered move/pass arrows).
+# Return a short play NAME and a 1-2 sentence read of what happens, in order.
+@router.post("/ai-play-name")
+async def ai_play_name(
+    body: dict,
+    coach: models.Coach = Depends(get_current_coach),
+):
+    import os
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(status_code=503, detail="ANTHROPIC_API_KEY not configured")
+    markers = body.get("markers") if isinstance(body.get("markers"), list) else []
+    arrows = body.get("arrows") if isinstance(body.get("arrows"), list) else []
+    labels = [str(x)[:40] for x in (body.get("labels") or []) if x][:12]
+
+    def _pt2(pt):
+        try:
+            return f"({round(float(pt[0]))},{round(float(pt[1]))})"
+        except Exception:
+            return "(?,?)"
+
+    mk_txt = ", ".join(f"{('O' if m.get('kind') == 'O' else 'X')}@{_pt2([m.get('x'), m.get('y')])}" for m in markers[:12]) or "none marked"
+    ar_txt = "\n".join(
+        f"  {i+1}. step {a.get('step', i+1)}: {a.get('kind', 'move')} {_pt2(a.get('from') or [0, 0])} -> {_pt2(a.get('to') or [0, 0])}"
+        for i, a in enumerate(sorted(arrows, key=lambda a: a.get('step', 0))[:20])
+    ) or "  (no movement)"
+    prompt = (
+        "A basketball coach hand-drew a play on a half court (feet: x 0=left/50=right, y grows toward the "
+        "rim). Players/defenders (O = offense, X = defense) are at these spots:\n"
+        f"{mk_txt}\n\n"
+        f"The movements, IN ORDER (move = a player cut/drive, pass = a pass):\n{ar_txt}\n"
+        + (f"\nLabels the coach wrote: {', '.join(labels)}\n" if labels else "")
+        + "\nReturn STRICT JSON only: {\"name\": \"<short play name, under 40 chars>\", "
+        "\"read\": \"<1-2 sentences describing what happens, in order>\"}. No prose."
+    )
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        resp = await client.messages.create(
+            model="claude-opus-4-7", max_tokens=500,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        blocks = [b for b in resp.content if hasattr(b, "text")]
+        data = _parse_ai_play_json(blocks[0].text if blocks else "{}")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Naming failed: {exc}")
+    return {"name": str(data.get("name") or "")[:60], "read": str(data.get("read") or "")[:400]}
+
+
 @router.delete("/whiteboards/{board_id}")
 def delete_whiteboard(
     board_id: int,
