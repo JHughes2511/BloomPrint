@@ -155,6 +155,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   }, [showNewGame]);
   const [trackMode, setTrackMode] = useState<'live' | 'post'>('live');
   const [newGameLevel, setNewGameLevel] = useState<string>((coach as any)?.competition_level ?? 'HS Varsity');
+  const [showLevelDD, setShowLevelDD] = useState(false);
+  const [showPhaseDD, setShowPhaseDD] = useState(false);
+  const GAME_PHASES = ['preseason', 'regular', 'playoff', 'scrimmage', 'tournament', 'exhibition'];
   const [importing, setImporting] = useState(false);
   const [statPreview, setStatPreview] = useState<any[] | null>(null);
   const [teams, setTeams] = useState<any[]>([]);
@@ -2448,17 +2451,29 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               )}
 
               <Text style={s.fieldLabel}>COMPETITION LEVEL</Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
-                {COMPETITION_LEVELS.map(lv => (
-                  <TouchableOpacity
-                    key={lv}
-                    style={[s.chip, newGameLevel === lv && s.chipActive]}
-                    onPress={() => setNewGameLevel(lv)}
-                  >
-                    <Text style={[s.chipText, newGameLevel === lv && s.chipTextActive, { fontSize: 12.5 }]}>{lv}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+              <TouchableOpacity
+                style={[s.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: showLevelDD ? 0 : 6 }]}
+                onPress={() => { setShowLevelDD(v => !v); setShowPhaseDD(false); }}
+                activeOpacity={0.7}
+              >
+                <Text style={{ color: t.ink, fontSize: 15 }}>{newGameLevel}</Text>
+                <Text style={{ color: t.muted, fontSize: 12 }}>{showLevelDD ? '▲' : '▼'}</Text>
+              </TouchableOpacity>
+              {showLevelDD && (
+                <View style={{ borderWidth: 1, borderColor: t.line, borderRadius: 10, marginBottom: 6, overflow: 'hidden' }}>
+                  <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled style={{ maxHeight: 220 }}>
+                    {COMPETITION_LEVELS.map((lv, i) => (
+                      <TouchableOpacity
+                        key={lv}
+                        style={{ padding: 12, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: t.line, backgroundColor: newGameLevel === lv ? t.accentSoft : 'transparent' }}
+                        onPress={() => { setNewGameLevel(lv); setShowLevelDD(false); }}
+                      >
+                        <Text style={{ color: newGameLevel === lv ? t.accent : t.inkSoft, fontSize: 14 }}>{lv}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
               {(() => {
                 const f = formatForLevel(newGameLevel);
                 return (
@@ -2469,19 +2484,27 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               })()}
 
               <Text style={s.fieldLabel}>TYPE</Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
-                {['preseason', 'regular', 'playoff', 'scrimmage', 'tournament', 'exhibition'].map(p => (
-                  <TouchableOpacity
-                    key={p}
-                    style={[s.chip, newGamePhase === p && s.chipActive]}
-                    onPress={() => setNewGamePhase(p)}
-                  >
-                    <Text style={[s.chipText, newGamePhase === p && s.chipTextActive, { fontSize: 12.5 }]}>
-                      {p.charAt(0).toUpperCase() + p.slice(1)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+              <TouchableOpacity
+                style={[s.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: showPhaseDD ? 0 : 16 }]}
+                onPress={() => { setShowPhaseDD(v => !v); setShowLevelDD(false); }}
+                activeOpacity={0.7}
+              >
+                <Text style={{ color: t.ink, fontSize: 15 }}>{newGamePhase.charAt(0).toUpperCase() + newGamePhase.slice(1)}</Text>
+                <Text style={{ color: t.muted, fontSize: 12 }}>{showPhaseDD ? '▲' : '▼'}</Text>
+              </TouchableOpacity>
+              {showPhaseDD && (
+                <View style={{ borderWidth: 1, borderColor: t.line, borderRadius: 10, marginBottom: 16, overflow: 'hidden' }}>
+                  {GAME_PHASES.map((p, i) => (
+                    <TouchableOpacity
+                      key={p}
+                      style={{ padding: 12, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: t.line, backgroundColor: newGamePhase === p ? t.accentSoft : 'transparent' }}
+                      onPress={() => { setNewGamePhase(p); setShowPhaseDD(false); }}
+                    >
+                      <Text style={{ color: newGamePhase === p ? t.accent : t.inkSoft, fontSize: 14 }}>{p.charAt(0).toUpperCase() + p.slice(1)}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
 
               <Text style={s.fieldLabel}>TRACKING MODE</Text>
               <View style={{ flexDirection: 'row', gap: 10, marginBottom: 4 }}>

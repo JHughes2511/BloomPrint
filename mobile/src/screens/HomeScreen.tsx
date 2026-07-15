@@ -73,6 +73,7 @@ export default function HomeScreen() {
   const [pEmail, setPEmail] = useState('');
   const [pProgram, setPProgram] = useState('');
   const [pLevel, setPLevel] = useState('HS Varsity');
+  const [showLevelDD, setShowLevelDD] = useState(false);
   const [pRole, setPRole] = useState('coach');
   const [pCountry, setPCountry] = useState('');
   const [pCity, setPCity] = useState('');
@@ -263,8 +264,9 @@ export default function HomeScreen() {
 
       {/* Profile edit modal */}
       <Modal visible={showProfile} transparent animationType="slide" onRequestClose={() => setShowProfile(false)}>
-        <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 36, borderWidth: 1, borderColor: t.cardBorder }}>
+        <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, maxHeight: '90%' }}>
+            <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 36 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20 }]}>Edit Profile</Text>
               <TouchableOpacity onPress={() => setShowProfile(false)}>
@@ -314,19 +316,28 @@ export default function HomeScreen() {
             <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 8 }}>
               Every eval, report, and training program is calibrated to this level. Changing it updates the default everywhere.
             </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {CANON_LEVELS.map(lvl => (
-                <TouchableOpacity
-                  key={lvl}
-                  onPress={() => setPLevel(lvl)}
-                  style={{ paddingHorizontal: 14, paddingVertical: 9, borderRadius: 999, borderWidth: 1,
-                    backgroundColor: pLevel === lvl ? t.ctaBg : t.card,
-                    borderColor: pLevel === lvl ? t.ctaBg : t.line }}
-                >
-                  <Text style={{ color: pLevel === lvl ? t.ctaText : t.muted, fontSize: 13, fontFamily: fonts[700] }}>{lvl}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <TouchableOpacity
+              style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: t.card, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: t.line }}
+              onPress={() => setShowLevelDD(v => !v)}
+              activeOpacity={0.7}
+            >
+              <Text style={{ color: t.ink, fontSize: 15 }}>{pLevel}</Text>
+              <Icon name={showLevelDD ? 'chevron-up' : 'chevron-down'} size={18} color={t.muted} strokeWidth={2} />
+            </TouchableOpacity>
+            {showLevelDD && (
+              <View style={{ borderWidth: 1, borderColor: t.line, borderRadius: 12, marginTop: 6, overflow: 'hidden' }}>
+                {CANON_LEVELS.map((lvl, i) => (
+                  <TouchableOpacity
+                    key={lvl}
+                    onPress={() => { setPLevel(lvl); setShowLevelDD(false); }}
+                    style={{ padding: 13, backgroundColor: pLevel === lvl ? t.accentSoft : 'transparent',
+                      borderTopWidth: i === 0 ? 0 : 1, borderTopColor: t.chip }}
+                  >
+                    <Text style={{ color: pLevel === lvl ? t.accent : t.inkSoft, fontSize: 14, fontFamily: pLevel === lvl ? fonts[700] : fonts[400] }}>{lvl}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
 
             <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>Location</Text>
             <CountryField value={pCountry} onChange={setPCountry} />
@@ -363,8 +374,9 @@ export default function HomeScreen() {
               <Icon name="log-out" size={16} color={t.negative} strokeWidth={2} />
               <Text style={{ color: t.negative, fontFamily: fonts[700], fontSize: 14 }}>Sign Out</Text>
             </TouchableOpacity>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Program System & Philosophy modal */}
