@@ -907,6 +907,26 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   const buildAllStrokes = (ai: any, to: CourtType) =>
     remapStrokes(buildPlayStrokes({ schemes: ai.schemes, key: ai.key ?? [] }), 'half', to);
 
+  // Keep an AI play's arrows/markers crisp and aligned to the CURRENT court size.
+  // Strokes are stored as pixels baked at the size they were first drawn, so on a
+  // different-sized screen (iPad vs phone, rotate, resize, web) they mis-scale and
+  // the grab handles drift off. Rebuild them from the feet-data whenever the
+  // display scale changes; hand-drawn marks are left untouched.
+  const lastRebuilt = useRef('');
+  useEffect(() => {
+    if (!scale || loading) return;
+    const sig = `${activeBoardIdx}:${scale.toFixed(2)}`;
+    if (lastRebuilt.current === sig) return;
+    lastRebuilt.current = sig;
+    setBoards(prev => {
+      const b = prev[activeBoardIdx];
+      if (!b?.ai) return prev;
+      const n = [...prev];
+      n[activeBoardIdx] = { ...b, strokes: [...b.strokes.filter((st: Stroke) => !st.layer), ...buildAllStrokes(b.ai, b.court_type)] };
+      return n;
+    });
+  }, [scale, activeBoardIdx, loading]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Feet↔px for the CURRENT board's court view (same mapping the strokes use).
   const unitToPx = (xf: number, yf: number) => ({ x: (xf + OOB_SIDE_FT) * scale, y: (yf - offsetFtForType(board?.court_type ?? 'full')) * scale });
   const pxToFeet = (xpx: number, ypx: number) => ({
@@ -1473,6 +1493,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
           >
             {scale > 0 && (
               <View
+                key={`cw-${Math.round(courtW)}x${Math.round(courtH)}`}
                 style={[
                   styles.canvasWrapper,
                   { width: courtW, height: courtH },
