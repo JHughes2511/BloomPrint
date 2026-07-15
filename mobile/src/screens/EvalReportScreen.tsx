@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -50,7 +50,7 @@ const EXPORT_CATEGORIES = [
 export default function EvalReportScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
-  const { evalId } = route.params;
+  const { evalId, openShare } = route.params;
   const { t, mode } = useTheme();
   const styles = makeStyles(t);
   // Solid surface for the sticky bottom bar — matches the app tab bar so it
@@ -96,6 +96,16 @@ export default function EvalReportScreen() {
 
   // Unified share modal (player / team / staff)
   const [showShareModal, setShowShareModal] = useState(false);
+  // When navigated here with an openShare param (e.g. from the Copilot), open the
+  // matching share flow once the report has loaded: 'player' = Send to Player,
+  // anything else = Share w/ Staff (recipient search + toggles).
+  const didAutoShare = useRef(false);
+  useEffect(() => {
+    if (didAutoShare.current || !ev || !openShare) return;
+    didAutoShare.current = true;
+    if (openShare === 'player') setShowShare(true);
+    else setShowShareModal(true);
+  }, [ev, openShare]);
 
   // Share with staff modal
   const [showStaffShare, setShowStaffShare] = useState(false);

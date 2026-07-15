@@ -296,13 +296,15 @@ TOOLS = [
         "wants a game report/packet for a matchup you have no tracked game for.\n"
         "- 'roster' — the roster of players.\n"
         "- 'player' — one player's profile (params: player_id).\n"
-        "- 'eval_report' — a specific saved eval (params: eval_id).\n"
+        "- 'eval_report' — a specific saved eval (params: eval_id; optional share='player' to open "
+        "Send-to-Player, or share='staff' to open Share-with-Staff so the coach can pick recipients "
+        "and share toggles). Use the share param when the coach wants to SEND/SHARE that eval.\n"
         "- 'recent' — all saved reports.\n"
         "- 'new_eval' — start a new video player eval (params: player_id).\n"
         "- 'import' — import a roster.\n"
         "- 'home' — the home screen.\n"
         "Do NOT invent other screen names."),
-     "input_schema": {"type": "object", "properties": {"screen": {"type": "string"}, "player_id": {"type": "integer"}, "eval_id": {"type": "integer"}, "report_id": {"type": "integer"}, "label": {"type": "string", "description": "button text"}}, "required": ["screen", "label"]}},
+     "input_schema": {"type": "object", "properties": {"screen": {"type": "string"}, "player_id": {"type": "integer"}, "eval_id": {"type": "integer"}, "report_id": {"type": "integer"}, "share": {"type": "string", "enum": ["player", "staff"], "description": "for eval_report: open Send-to-Player or Share-with-Staff"}, "label": {"type": "string", "description": "button text"}}, "required": ["screen", "label"]}},
     {"name": "propose_generation", "description": (
         "Propose creating a NEW report the coach must confirm before it runs. Do NOT run generation "
         "yourself. Supported kinds:\n"
@@ -344,7 +346,7 @@ def _run_tool(name, args, db, coach, result):
         return t_list_training(db, coach, args.get("player", ""))
     if name == "suggest_navigation":
         result["navigate"] = {"screen": args.get("screen"), "label": args.get("label", "Take me there"),
-                              "params": {k: args[k] for k in ("player_id", "eval_id", "report_id") if args.get(k) is not None}}
+                              "params": {k: args[k] for k in ("player_id", "eval_id", "report_id", "share") if args.get(k) is not None}}
         return {"ok": "Navigation button shown to the user."}
     if name == "propose_generation":
         result["pending_action"] = {k: v for k, v in args.items() if v is not None}
@@ -376,6 +378,16 @@ SYSTEM = (
     "- CREATE (confirm-first): to make a NEW report, call propose_generation with a clear description "
     "— NEVER generate directly; the coach approves first. Anything needing NEW film (a fresh video "
     "player eval) can't run here — suggest_navigation to 'new_eval' instead.\n\n"
+    "SENDING / SHARING REPORTS — NEVER say it can't be done. BloomPrint DOES send and share reports: "
+    "every saved eval/report has SEND TO PLAYER (share it with the player) and SHARE WITH STAFF (search "
+    "for a staff member / coach recipient and pick share toggles — what to include, allow-regenerate, "
+    "etc.), and shared reports land in the recipient's INBOX. So when a coach asks to send/share a report "
+    "to someone (e.g. 'send AJ's eval to Jaire'): first locate the exact eval via player_detail / "
+    "list_reports (or, if none exists yet, propose_generation to create it). Then call suggest_navigation "
+    "to 'eval_report' with that eval_id and share='staff' (sending to another person) or share='player' "
+    "(sending to the player themselves) — this opens the share sheet so the coach picks the recipient and "
+    "toggles. Tell them you've opened it and they can choose recipient + what to share. Do NOT claim "
+    "sharing/sending is unsupported.\n\n"
     "PICKING THE RIGHT GENERATION:\n"
     "- A recruiting/scouting report ON ONE OF THE COACH'S OWN PLAYERS (to send to a college or NBA/Mavs "
     "scout, evaluate their potential) IS supported — it's a player scouting report: propose_generation "

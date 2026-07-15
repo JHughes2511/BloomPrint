@@ -39,7 +39,7 @@ function goTo(navigation: any, target: { screen: string; params?: any; label?: s
         deep('RosterTab', 'Roster', 'PlayerProfile', { playerId: p.player_id }); break;
       case 'eval_report':
       case 'report':
-        deep('RecentTab', 'Recent', 'EvalReport', { evalId: p.eval_id }); break;
+        deep('RecentTab', 'Recent', 'EvalReport', { evalId: p.eval_id, openShare: p.share }); break;
       // Team Grade tab = tracking games, stats, season dashboard, scouting.
       case 'team_grade':
       case 'games':
