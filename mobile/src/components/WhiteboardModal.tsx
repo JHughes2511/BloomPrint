@@ -1678,6 +1678,58 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     return els;
   };
 
+  // Compact controls that FLOAT over the top of the court (so the court never
+  // resizes when they show/hide, and we keep maximum court vision).
+  const hasFreehandArrows = (board?.strokes ?? []).some(s => s.type === 'arrow' && !s.layer);
+  const floatingControls = (
+    <View style={styles.floatWrap} pointerEvents="box-none">
+      {selectedTextId && (
+        <View style={styles.floatBar}>
+          <TouchableOpacity style={styles.textCtrlBtn} onPress={() => {
+            const b = boardsRef.current[activeBoardIdxRef.current];
+            const st = b?.strokes.find(x => x.id === selectedTextIdRef.current);
+            if (st) { setEditingTextId(st.id); setTextInput(st.label ?? ''); setShowAddText(true); }
+          }}>
+            <Ionicons name="pencil" size={15} color={t.ink} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.textCtrlBtn} onPress={() => resizeSelectedText(-2)}><Text style={styles.textCtrlBtnLabel}>A−</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.textCtrlBtn} onPress={() => resizeSelectedText(2)}><Text style={styles.textCtrlBtnLabel}>A+</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.textCtrlBtn} onPress={deleteSelectedText}><Ionicons name="trash-outline" size={16} color={t.negative} /></TouchableOpacity>
+          <TouchableOpacity style={[styles.textCtrlBtn, { backgroundColor: t.ctaBg }]} onPress={() => setSelectedTextId(null)}><Ionicons name="checkmark" size={16} color={t.ctaText} /></TouchableOpacity>
+        </View>
+      )}
+      {tool === 'move' && board?.ai && !selectedTextId && (
+        <View style={styles.floatBar}>
+          {selectedArrow ? (
+            <>
+              <TouchableOpacity style={[styles.textCtrlBtn, { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12 }]} onPress={() => deleteArrowRef.current()}>
+                <Ionicons name="trash-outline" size={15} color={t.negative} />
+                <Text style={[styles.textCtrlBtnLabel, { color: t.negative }]}>Delete arrow</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.textCtrlBtn, { backgroundColor: t.ctaBg }]} onPress={() => setSelectedArrow(null)}><Ionicons name="checkmark" size={16} color={t.ctaText} /></TouchableOpacity>
+            </>
+          ) : (
+            <Text style={[styles.textCtrlLabel, { paddingHorizontal: 6 }]}>Drag a player or arrow end · tap an end to delete</Text>
+          )}
+        </View>
+      )}
+      {hasFreehandArrows && !selectedTextId && (
+        <View style={styles.floatBar}>
+          <TouchableOpacity style={[styles.floatChip, orderMode && { backgroundColor: t.ctaBg, borderColor: t.ctaBg }]} onPress={() => setOrderMode(v => !v)}>
+            <Text style={[styles.floatChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Tap arrows' : 'Order'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.floatChip} onPress={clearOrder}><Text style={styles.floatChipText}>Clear</Text></TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.floatChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
+            onPress={() => { if (freehandPlaying) { animCancel.current = true; setFreehandPlaying(false); setFreehandDone(true); } else playFreehand(); }}>
+            <Ionicons name={freehandPlaying ? 'stop' : freehandDone ? 'refresh' : 'play'} size={13} color={t.ctaText} />
+            <Text style={[styles.floatChipText, { color: t.ctaText }]}>{freehandPlaying ? 'Stop' : freehandDone ? 'Replay' : 'Play drawing'}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
+
   if (!visible) return null;
 
   return (
@@ -1805,76 +1857,6 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
           </View>
         </View>
 
-        {/* Selected-text controls: resize / delete / done */}
-        {selectedTextId && (
-          <View style={styles.textCtrlBar}>
-            <Text style={styles.textCtrlLabel}>Text selected — drag to move</Text>
-            <View style={{ flexDirection: 'row', gap: 6 }}>
-              <TouchableOpacity style={styles.textCtrlBtn} onPress={() => {
-                const b = boardsRef.current[activeBoardIdxRef.current];
-                const st = b?.strokes.find(x => x.id === selectedTextIdRef.current);
-                if (st) { setEditingTextId(st.id); setTextInput(st.label ?? ''); setShowAddText(true); }
-              }}>
-                <Ionicons name="pencil" size={15} color={t.ink} />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.textCtrlBtn} onPress={() => resizeSelectedText(-2)}>
-                <Text style={styles.textCtrlBtnLabel}>A−</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.textCtrlBtn} onPress={() => resizeSelectedText(2)}>
-                <Text style={styles.textCtrlBtnLabel}>A+</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.textCtrlBtn} onPress={deleteSelectedText}>
-                <Ionicons name="trash-outline" size={16} color={t.negative} />
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.textCtrlBtn, { backgroundColor: t.ctaBg }]} onPress={() => setSelectedTextId(null)}>
-                <Ionicons name="checkmark" size={16} color={t.ctaText} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        {/* Freehand sequence + play bar (shown when there are hand-drawn arrows) */}
-        {(board?.strokes ?? []).some(s => s.type === 'arrow' && !s.layer) && (
-          <View style={styles.schemeRow}>
-            <TouchableOpacity style={[styles.schemeChip, orderMode && styles.schemeChipActive]} onPress={() => setOrderMode(v => !v)}>
-              <Text style={[styles.schemeChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Ordering — tap arrows' : 'Order'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.schemeChip} onPress={clearOrder}>
-              <Text style={styles.schemeChipText}>Clear order</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
-              onPress={() => { if (freehandPlaying) { animCancel.current = true; setFreehandPlaying(false); setFreehandDone(true); } else playFreehand(); }}>
-              <Ionicons name={freehandPlaying ? 'stop' : freehandDone ? 'refresh' : 'play'} size={13} color={t.ctaText} />
-              <Text style={[styles.schemeChipText, { color: t.ctaText }]}>{freehandPlaying ? 'Stop' : freehandDone ? 'Replay' : 'Play drawing'}</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* Move-tool hint */}
-        {tool === 'move' && board?.ai && !selectedTextId && (
-          <View style={styles.textCtrlBar}>
-            {selectedArrow ? (
-              <>
-                <Text style={styles.textCtrlLabel}>Arrow selected</Text>
-                <View style={{ flexDirection: 'row', gap: 6 }}>
-                  <TouchableOpacity style={[styles.textCtrlBtn, { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12 }]} onPress={() => deleteArrowRef.current()}>
-                    <Ionicons name="trash-outline" size={15} color={t.negative} />
-                    <Text style={[styles.textCtrlBtnLabel, { color: t.negative }]}>Delete</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.textCtrlBtn, { backgroundColor: t.ctaBg }]} onPress={() => setSelectedArrow(null)}>
-                    <Ionicons name="checkmark" size={16} color={t.ctaText} />
-                  </TouchableOpacity>
-                </View>
-              </>
-            ) : (
-              <Text style={styles.textCtrlLabel}>
-                Move — drag a player or an arrow’s ○ end; tap an arrow end to delete it. Then “Adapt play”.
-              </Text>
-            )}
-          </View>
-        )}
-
         {/* Canvas — court scales to fit the available area for the chosen view */}
         {loading ? (
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -1936,6 +1918,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                 </Svg>
               </View>
             )}
+            {floatingControls}
           </View>
         )}
 
@@ -2323,15 +2306,15 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container:       { flex: 1 },
-  header:          { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: Platform.OS === 'ios' ? 56 : 16, paddingBottom: 10 },
+  header:          { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: Platform.OS === 'ios' ? 52 : 12, paddingBottom: 6 },
   headerBtn:       { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
   boardName:       { color: t.ink, fontSize: 16, fontFamily: fonts[700], flex: 1 },
   closeBtn:        { width: 36, height: 36, borderRadius: 18, backgroundColor: t.chip, alignItems: 'center', justifyContent: 'center' },
-  courtSelector:   { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: t.divider },
+  courtSelector:   { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: t.divider },
   courtChip:       { borderRadius: 16, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: t.line },
   courtChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   courtChipText:   { color: t.muted, fontSize: 13, fontFamily: fonts[600] },
-  toolbar:         { paddingVertical: 10, paddingHorizontal: 12, borderBottomWidth: 1, borderBottomColor: t.divider },
+  toolbar:         { paddingVertical: 6, paddingHorizontal: 12, borderBottomWidth: 1, borderBottomColor: t.divider },
   toolRow:         { flexDirection: 'row', alignItems: 'center', gap: 3, flexWrap: 'wrap', rowGap: 6 },
   toolBtn:         { width: 31, height: 31, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: t.chip },
   toolBtnActive:   { backgroundColor: t.ctaBg },
@@ -2355,7 +2338,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   textCtrlLabel:   { color: t.muted, fontSize: 12, fontFamily: fonts[600], flex: 1 },
   textCtrlBtn:     { minWidth: 36, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: t.chip, paddingHorizontal: 8 },
   textCtrlBtnLabel:{ color: t.ink, fontSize: 13, fontFamily: fonts[800] },
-  schemeRow:       { flexDirection: 'row', flexWrap: 'wrap', rowGap: 6, gap: 8, paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider },
+  schemeRow:       { flexDirection: 'row', flexWrap: 'wrap', rowGap: 6, gap: 8, paddingHorizontal: 16, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: t.divider },
   schemeChip:      { borderRadius: 16, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: t.line },
   schemeChipActive:{ backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   schemeChipText:  { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
@@ -2383,6 +2366,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   lockBtnText:     { color: t.muted, fontSize: 12, fontFamily: fonts[700] },
   guideInput:      { backgroundColor: t.card, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, color: t.ink, fontSize: 13.5, borderWidth: 1, borderColor: t.line },
   byPlayerRow:     { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
+  floatWrap:       { position: 'absolute', top: 8, left: 0, right: 0, alignItems: 'center', gap: 6 },
+  floatBar:        { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, maxWidth: '94%', backgroundColor: t.sheet, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 6, borderWidth: 1, borderColor: t.cardBorder, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 5 },
+  floatChip:       { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: t.line, backgroundColor: t.card },
+  floatChipText:   { color: t.inkSoft, fontSize: 12.5, fontFamily: fonts[700] },
   adaptOverlay:    { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: t.scrim, paddingHorizontal: 30 },
   adaptCard:       { backgroundColor: t.sheet, borderRadius: 16, padding: 20, width: '100%', maxWidth: 360, borderWidth: 1, borderColor: t.cardBorder },
 });
