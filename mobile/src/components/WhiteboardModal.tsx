@@ -260,6 +260,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   const [dragTarget, setDragTarget] = useState<DragTarget | null>(null);
   const [adapting, setAdapting] = useState(false);
   const [pinCount, setPinCount] = useState(0);
+  // A tapped (not dragged) arrow, selected for deletion.
+  const [selectedArrow, setSelectedArrow] = useState<{ kind: 'action'; scheme: SchemeKey; idx: number } | { kind: 'key'; idx: number } | null>(null);
+  const deleteArrowRef = useRef<() => void>(() => {});
+  useEffect(() => { setSelectedArrow(null); }, [activeScheme, activeBoardIdx, tool]);
   const dragTargetRef = useRef<DragTarget | null>(null);
   const hitTestRef = useRef<(x: number, y: number) => DragTarget | null>(() => null);
   const dropRef = useRef<(x: number, y: number) => void>(() => {});
@@ -801,7 +805,17 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       };
 
       if (tl === 'move') {
-        if (dragTargetRef.current) dropRef.current(x2, y2);
+        const dt = dragTargetRef.current;
+        if (dt) {
+          const moved = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) > 8;
+          if (!moved && (dt.t === 'action' || dt.t === 'key')) {
+            // Tap (no drag) on an arrow end: select it for deletion.
+            setSelectedArrow(dt.t === 'action' ? { kind: 'action', scheme: dt.scheme, idx: dt.idx } : { kind: 'key', idx: dt.idx });
+          } else {
+            dropRef.current(x2, y2);
+            setSelectedArrow(null);
+          }
+        }
         dragTargetRef.current = null;
         setDragTarget(null);
         return;
@@ -1025,6 +1039,28 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     setPinCount(pinsRef.current.units.size + pinsRef.current.actions.size + pinsRef.current.keys.size);
   };
   dropRef.current = commitDrag;
+
+  // Delete the tapped arrow (an action movement/pass, or a key arrow). The change
+  // is reflected in the play so Adapt re-solves around it.
+  const deleteSelectedArrow = () => {
+    const sel = selectedArrow;
+    const b = boards[activeBoardIdx];
+    if (!sel || !b?.ai) return;
+    const ai = JSON.parse(JSON.stringify(b.ai));
+    if (sel.kind === 'action') {
+      const scm = ai.schemes?.[sel.scheme];
+      if (scm?.actions && sel.idx < scm.actions.length) scm.actions.splice(sel.idx, 1);
+    } else if (ai.key && sel.idx < ai.key.length) {
+      ai.key.splice(sel.idx, 1);
+    }
+    const keep = b.strokes.filter(st => !st.layer);
+    const updated: Board = { ...b, strokes: [...keep, ...buildAllStrokes(ai, b.court_type)], ai };
+    setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
+    saveBoard(activeBoardIdx, updated);
+    setSelectedArrow(null);
+    setPinCount(c => c + 1);   // a change worth adapting
+  };
+  deleteArrowRef.current = deleteSelectedArrow;
 
   // Re-solve the active scheme around the coach's manual moves. Locked pieces
   // stay put; the rest of the offense AND defense reposition/redraw to fit, and
@@ -1303,9 +1339,13 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     };
     (ai.schemes?.[activeScheme]?.actions ?? []).forEach((a: any, idx: number) => {
       if (!Array.isArray(a.from) || !Array.isArray(a.to)) return;
+      const sel = selectedArrow?.kind === 'action' && selectedArrow.scheme === activeScheme && selectedArrow.idx === idx;
+      const color = sel ? '#C0392B' : '#141414';
+      const fill = sel ? '#C0392B' : '#FFFFFF';
       const hf = arrowHandlePx(a.from, a.to, 'from');
-      els.push(<Circle key={`af${idx}`} cx={hf.x} cy={hf.y} r={6} fill="#FFFFFF" stroke="#141414" strokeWidth={2.5} opacity={0.9} />);
-      handle(`ah${idx}`, a.to[0], a.to[1], '#141414');
+      els.push(<Circle key={`af${idx}`} cx={hf.x} cy={hf.y} r={6} fill={fill} stroke={color} strokeWidth={2.5} opacity={0.9} />);
+      const ht = unitToPx(a.to[0], a.to[1]);
+      els.push(<Circle key={`ah${idx}`} cx={ht.x} cy={ht.y} r={7} fill={fill} stroke={color} strokeWidth={2.5} opacity={0.95} />);
     });
     if (showKey) (ai.key ?? []).forEach((k: any, idx: number) => {
       if (Array.isArray(k.from)) handle(`kf${idx}`, k.from[0], k.from[1], '#1F6F9B');
@@ -1472,9 +1512,24 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         {/* Move-tool hint */}
         {tool === 'move' && board?.ai && !selectedTextId && (
           <View style={styles.textCtrlBar}>
-            <Text style={styles.textCtrlLabel}>
-              Move — drag a player, or drag either ○ end of an arrow to place it. Then tap “Adapt play”.
-            </Text>
+            {selectedArrow ? (
+              <>
+                <Text style={styles.textCtrlLabel}>Arrow selected</Text>
+                <View style={{ flexDirection: 'row', gap: 6 }}>
+                  <TouchableOpacity style={[styles.textCtrlBtn, { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12 }]} onPress={() => deleteArrowRef.current()}>
+                    <Ionicons name="trash-outline" size={15} color={t.negative} />
+                    <Text style={[styles.textCtrlBtnLabel, { color: t.negative }]}>Delete</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.textCtrlBtn, { backgroundColor: t.ctaBg }]} onPress={() => setSelectedArrow(null)}>
+                    <Ionicons name="checkmark" size={16} color={t.ctaText} />
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <Text style={styles.textCtrlLabel}>
+                Move — drag a player or an arrow’s ○ end; tap an arrow end to delete it. Then “Adapt play”.
+              </Text>
+            )}
           </View>
         )}
 
