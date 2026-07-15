@@ -263,6 +263,8 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   // A tapped (not dragged) arrow, selected for deletion.
   const [selectedArrow, setSelectedArrow] = useState<{ kind: 'action'; scheme: SchemeKey; idx: number } | { kind: 'key'; idx: number } | null>(null);
   const deleteArrowRef = useRef<() => void>(() => {});
+  // An arrow drawn on an AI board, awaiting a movement-type choice (pass/cut/…).
+  const [pendingArrow, setPendingArrow] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   useEffect(() => { setSelectedArrow(null); }, [activeScheme, activeBoardIdx, tool]);
   const dragTargetRef = useRef<DragTarget | null>(null);
   const hitTestRef = useRef<(x: number, y: number) => DragTarget | null>(() => null);
@@ -848,7 +850,13 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         push({ id: uid(), type: 'xmark', cx: (x1+x2)/2, cy: (y1+y2)/2, size: Math.max(size, 10), color: c, strokeWidth: STROKE_WIDTH });
       } else if (tl === 'arrow') {
         if (Math.sqrt((x2-x1)**2 + (y2-y1)**2) < 5) return;
-        push({ id: uid(), type: 'arrow', x1, y1, x2, y2, color: c, strokeWidth: STROKE_WIDTH });
+        // On an AI board, offer to add the drawn arrow to the play as a
+        // pass/cut/screen/dribble (or keep it as a plain mark).
+        if (boardsRef.current[activeBoardIdxRef.current]?.ai) {
+          setPendingArrow({ x1, y1, x2, y2 });
+        } else {
+          push({ id: uid(), type: 'arrow', x1, y1, x2, y2, color: c, strokeWidth: STROKE_WIDTH });
+        }
       }
     },
   })).current;
@@ -1061,6 +1069,36 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     setPinCount(c => c + 1);   // a change worth adapting
   };
   deleteArrowRef.current = deleteSelectedArrow;
+
+  // Add the pending drawn arrow to the active scheme as a movement of the chosen
+  // kind. Actor = the nearest player/defender to where the arrow starts.
+  const addPendingAsAction = (kind: 'pass' | 'cut' | 'screen' | 'dribble') => {
+    const p = pendingArrow;
+    const b = boards[activeBoardIdx];
+    if (!p || !b?.ai) { setPendingArrow(null); return; }
+    const fromFt = pxToFeet(p.x1, p.y1);
+    const toFt = pxToFeet(p.x2, p.y2);
+    const ai = JSON.parse(JSON.stringify(b.ai));
+    const scm = ai.schemes[activeScheme] || (ai.schemes[activeScheme] = { players: [], defenders: [], actions: [] });
+    const units = [...(scm.players ?? []), ...(scm.defenders ?? [])];
+    let actor = '', bestD = Infinity;
+    units.forEach((u: any) => { const d = Math.hypot(u.x - fromFt.x, u.y - fromFt.y); if (d < bestD) { bestD = d; actor = u.id; } });
+    const maxStep = (scm.actions ?? []).reduce((m: number, a: any) => Math.max(m, a.step || 1), 0);
+    scm.actions = [...(scm.actions ?? []), { actor, kind, from: [fromFt.x, fromFt.y], to: [toFt.x, toFt.y], step: maxStep + 1 }];
+    const keep = b.strokes.filter(st => !st.layer);
+    const updated: Board = { ...b, ai, strokes: [...keep, ...buildAllStrokes(ai, b.court_type)] };
+    setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
+    saveBoard(activeBoardIdx, updated);
+    setPendingArrow(null);
+    setPinCount(c => c + 1);
+  };
+  const keepPendingAsMark = () => {
+    const p = pendingArrow;
+    if (!p) return;
+    const b = boards[activeBoardIdx];
+    if (b) commitStrokes(activeBoardIdx, [...b.strokes, { id: uid(), type: 'arrow', x1: p.x1, y1: p.y1, x2: p.x2, y2: p.y2, color: colorRef.current, strokeWidth: STROKE_WIDTH }]);
+    setPendingArrow(null);
+  };
 
   // Re-solve the active scheme around the coach's manual moves. Locked pieces
   // stay put; the rest of the offense AND defense reposition/redraw to fit, and
@@ -1603,6 +1641,31 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
             </View>
           </View>
         )}
+
+        {/* Add-movement type picker (after drawing an arrow on an AI board) */}
+        <Modal visible={!!pendingArrow} transparent animationType="fade" onRequestClose={() => setPendingArrow(null)}>
+          <View style={styles.listOverlay}>
+            <View style={[styles.listBox, { padding: 20 }]}>
+              <Text style={styles.listTitle}>Add movement</Text>
+              <Text style={styles.aiHint}>What is this? It’s added to {activeScheme} and included when you tap Adapt play.</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {(['pass', 'cut', 'screen', 'dribble'] as const).map(k => (
+                  <TouchableOpacity key={k} style={[styles.schemeChip, { backgroundColor: t.ctaBg, borderColor: t.ctaBg }]} onPress={() => addPendingAsAction(k)}>
+                    <Text style={[styles.schemeChipText, { color: t.ctaText, textTransform: 'capitalize' }]}>{k}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+                <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]} onPress={keepPendingAsMark}>
+                  <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Just a line</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setPendingArrow(null)}>
+                  <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
 
         {/* AI Key — bottom overlay that pops up over the court when Key is on */}
         {board?.ai && showKey && board.ai.key.length > 0 && (
