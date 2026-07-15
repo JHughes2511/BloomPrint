@@ -30,11 +30,13 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
 
+// Highest competition level → lowest.
 const COMPETITION_LEVELS = [
-  'NBA', 'G-League', 'High Europe', 'Low Europe',
+  'NBA', 'European Pro', 'G-League',
   'D1', 'D2', 'D3', 'JUCO',
-  'HS Varsity', '17U AAU', '16U AAU', '14U/15U AAU',
-  'Youth (5-13)', 'European Pro', 'International Academy',
+  'International Academy', 'HS Varsity',
+  '17U AAU', '16U AAU', '14U/15U AAU',
+  'Youth (5-13)',
 ];
 
 // A basketball season spans Aug–Jul, so a game's season year is derived from
