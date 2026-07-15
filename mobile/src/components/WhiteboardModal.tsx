@@ -358,8 +358,9 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       });
       (sc.actions ?? []).forEach((a: any, i: number) => {
         const side: 'off' | 'def' = String(a.actor || '')[0] === 'X' ? 'def' : 'off';
+        const isPass = a.kind === 'pass';
         out.push({ id: mk(), type: 'arrow', x1: X(a.from[0]), y1: Y(a.from[1]), x2: X(a.to[0]), y2: Y(a.to[1]),
-                   color: '#141414', strokeWidth: 3, dash: a.kind === 'pass', layer, side, step: a.step ?? (i + 1) });
+                   color: isPass ? '#1F6F9B' : '#141414', strokeWidth: 3, dash: isPass, layer, side, step: a.step ?? (i + 1) });
       });
     });
     (res?.key ?? []).forEach((k: any) => {
