@@ -205,10 +205,12 @@ async def generate_training(
     from video_vision.bim import build_prompt
     import anthropic
 
+    from ..coach_context import resolve_level
+    team = db.get(models.Team, player.team_id) if player.team_id else None
     prompt = build_prompt(
         "training_program",
         coach.program_name,
-        player.competition_level,
+        resolve_level(coach, player, team),
         coach.weight,
         player.name,
     )

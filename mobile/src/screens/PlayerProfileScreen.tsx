@@ -22,6 +22,7 @@ import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
+import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -45,6 +46,7 @@ export default function PlayerProfileScreen() {
   const navigation = useNavigation<any>();
   const { playerId } = route.params;
   const { t } = useTheme();
+  const { coach } = useAuth();
   const styles = makeStyles(t);
 
   const scrollRef = useRef<ScrollView>(null);
@@ -154,7 +156,7 @@ export default function PlayerProfileScreen() {
     setEditState((player as any).state ?? '');
     setEditCity((player as any).city ?? '');
     setEditSchool((player as any).school_name ?? '');
-    setEditLevel(player.competition_level ?? 'HS Varsity');
+    setEditLevel(player.competition_level ?? (coach as any)?.competition_level ?? 'HS Varsity');
     setEditTeamId(player.team_id ?? null);
     setShowEdit(true);
   };

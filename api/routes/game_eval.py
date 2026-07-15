@@ -887,10 +887,13 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
             + "\n".join(f"- {c}" for c in corrections if c and c.strip())
         )
 
+    from ..coach_context import resolve_level
+    _lvl = resolve_level(coach, team=(db.get(models.Team, game.team_id) if game.team_id else None))
     prompt = (
         f"You are the BloomPrint Basketball Intelligence Model. "
         f"Generate a pre-game scouting report for the opponent: {game.opponent_name}\n\n"
         f"Game date: {game.date}\n"
+        f"COMPETITION LEVEL: {_lvl} — calibrate every read, tendency, and recommendation to this level.\n"
         f"{score_info}\n\n"
         f"OPPONENT PLAYER GRADES:\n{opp_context}"
         f"{notes_text}"
@@ -977,9 +980,13 @@ async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSe
             + "\n".join(f"- {c}" for c in corrections if c and c.strip())
         )
 
+    from ..coach_context import resolve_level
+    _lvl = resolve_level(coach, team=team_row)
     prompt = (
         f"You are the BloomPrint Basketball Intelligence Model. Generate a full GAME REPORT for "
-        f"{my_team} vs {game.opponent_name}.\n\nGame date: {game.date}\n{score_info}\n\n"
+        f"{my_team} vs {game.opponent_name}.\n\nGame date: {game.date}\n"
+        f"COMPETITION LEVEL: {_lvl} — calibrate every grade, comparison, and recommendation to this level.\n"
+        f"{score_info}\n\n"
         f"OUR TEAM PLAYER GRADES:{_side_context(False)}\n\n"
         f"OPPONENT PLAYER GRADES:{_side_context(True)}"
         f"{context}\n\n"

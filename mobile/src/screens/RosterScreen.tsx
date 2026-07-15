@@ -63,6 +63,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { playersAPI, teamsAPI } from '../api/client';
 import { Player, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
+import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -71,6 +72,8 @@ import { ScreenBackground } from '../theme/components';
 export default function RosterScreen() {
   const navigation = useNavigation<any>();
   const { t } = useTheme();
+  const { coach } = useAuth();
+  const defaultLevel = (coach as any)?.competition_level ?? 'HS Varsity';
   const styles = makeStyles(t);
 
   const [teams, setTeams] = useState<Team[]>([]);
@@ -95,7 +98,7 @@ export default function RosterScreen() {
   const [newCity, setNewCity] = useState('');
   const [newState, setNewState] = useState('');
   const [newCountry, setNewCountry] = useState('');
-  const [newLevel, setNewLevel] = useState('Middle School');
+  const [newLevel, setNewLevel] = useState(defaultLevel);
   const [parentPermission, setParentPermission] = useState(false);
   const [newTeamId, setNewTeamId] = useState<number | null>(null);
   const [showAddTeamPicker, setShowAddTeamPicker] = useState(false);
@@ -108,7 +111,7 @@ export default function RosterScreen() {
   // Create team modal
   const [showNewTeam, setShowNewTeam] = useState(false);
   const [newTeamName, setNewTeamName] = useState('');
-  const [newTeamLevel, setNewTeamLevel] = useState('Middle School');
+  const [newTeamLevel, setNewTeamLevel] = useState(defaultLevel);
   const [creatingTeam, setCreatingTeam] = useState(false);
 
   const [refreshing, setRefreshing] = useState(false);
@@ -175,7 +178,7 @@ export default function RosterScreen() {
     try {
       const team = await teamsAPI.create({ name: newTeamName, competition_level: newTeamLevel });
       setShowNewTeam(false);
-      setNewTeamName(''); setNewTeamLevel('Middle School');
+      setNewTeamName(''); setNewTeamLevel(defaultLevel);
       // Optimistically add team to list immediately, then refresh
       setTeams(prev => [...prev, team]);
       setSelectedTeamId(team.id);
@@ -257,7 +260,12 @@ export default function RosterScreen() {
           <Ionicons name="cloud-upload-outline" size={16} color={t.muted} />
           <Text style={styles.importBtnText}>Import Roster</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.addBtn} onPress={() => { setNewTeamId(selectedTeamId); setShowAddTeamPicker(false); setShowAdd(true); }}>
+        <TouchableOpacity style={styles.addBtn} onPress={() => {
+          setNewTeamId(selectedTeamId);
+          const selTeam = teams.find(tm => tm.id === selectedTeamId);
+          setNewLevel(selTeam?.competition_level || defaultLevel);
+          setShowAddTeamPicker(false); setShowAdd(true);
+        }}>
           <Ionicons name="add" size={22} color={t.ctaText} />
         </TouchableOpacity>
       </View>
@@ -396,7 +404,7 @@ export default function RosterScreen() {
                     <TouchableOpacity
                       key={tm.id}
                       style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: t.line, backgroundColor: newTeamId === tm.id ? t.accentSoft : 'transparent' }}
-                      onPress={() => { setNewTeamId(tm.id); setShowAddTeamPicker(false); }}
+                      onPress={() => { setNewTeamId(tm.id); if (tm.competition_level) setNewLevel(tm.competition_level); setShowAddTeamPicker(false); }}
                     >
                       <Text style={{ color: newTeamId === tm.id ? t.accent : t.inkSoft, fontSize: 14 }}>{tm.name}</Text>
                     </TouchableOpacity>

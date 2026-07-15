@@ -187,7 +187,7 @@ def _parse_sheet(ws) -> list[dict]:
 async def import_excel(
     file: UploadFile = File(...),
     output_type: str = Form("player_eval"),
-    competition_level: str = Form("HS Varsity"),
+    competition_level: str | None = Form(None),
     team_id: int | None = Form(None),
     roster_only: bool = Form(False),
     db: Session = Depends(get_db),
@@ -195,6 +195,9 @@ async def import_excel(
 ):
     if not file.filename or not file.filename.lower().endswith((".xlsx", ".xls")):
         raise HTTPException(status_code=400, detail="File must be an Excel file (.xlsx or .xls)")
+    from ..coach_context import resolve_level
+    _team = db.get(models.Team, team_id) if team_id else None
+    competition_level = (competition_level or "").strip() or resolve_level(coach, team=_team)
 
     content = await file.read()
     try:

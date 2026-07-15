@@ -93,7 +93,7 @@ class PlayerCreate(BaseModel):
     city: str | None = None
     school_name: str | None = None
     program_name: str | None = None
-    competition_level: str = "HS Varsity"
+    competition_level: str | None = None
     notes: str | None = None
     parent_permission: bool | None = None
     team_id: int | None = None

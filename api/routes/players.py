@@ -36,15 +36,18 @@ def create_player(
     data = body.model_dump()
     # Roster owner: a team player belongs to the team's owner; a team-less
     # personal player belongs to the coach who created it.
-    if data.get("team_id"):
-        team = db.get(models.Team, data["team_id"])
-        if team:
-            data["program_name"] = team.name
-            data["coach_id"] = team.coach_id
+    team = db.get(models.Team, data["team_id"]) if data.get("team_id") else None
+    if team:
+        data["program_name"] = team.name
+        data["coach_id"] = team.coach_id
     if not data.get("coach_id"):
         data["coach_id"] = coach.id
     if "program_name" not in data or not data.get("program_name"):
         data["program_name"] = coach.program_name
+    # Default the competition level to the team's, else the coach's signup level.
+    if not data.get("competition_level"):
+        from ..coach_context import resolve_level
+        data["competition_level"] = resolve_level(coach, team=team)
     player = models.Player(**data)
     db.add(player)
     db.commit()
@@ -294,9 +297,13 @@ async def player_summary(
 
     focus = body.focus_prompt or ""
     from video_vision.bim import describe_output_type, comprehensive_directive
+    from ..coach_context import resolve_level
+    _team = db.get(models.Team, player.team_id) if player.team_id else None
+    _lvl = resolve_level(coach, player, _team)
     prompt = (
         f"You are the BloomPrint Basketball Intelligence Model. "
         f"Generate a {describe_output_type(body.output_type)} that SUMMARIZES ALL EVALUATION HISTORY for {player.name}.\n\n"
+        f"COMPETITION LEVEL: {_lvl} — calibrate every grade, comparison, and recommendation to this level.\n\n"
         f"EVALUATION HISTORY:\n{eval_context}\n"
         f"{tracked_block}\n\n"
         f"{('FOCUS: ' + focus) if focus else ''}\n\n"

@@ -154,7 +154,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     if (showNewGame && !newGameYear.trim()) setNewGameYear(seasonForDate(newGameDate));
   }, [showNewGame]);
   const [trackMode, setTrackMode] = useState<'live' | 'post'>('live');
-  const [newGameLevel, setNewGameLevel] = useState<string>('HS Varsity');
+  const [newGameLevel, setNewGameLevel] = useState<string>((coach as any)?.competition_level ?? 'HS Varsity');
   const [importing, setImporting] = useState(false);
   const [statPreview, setStatPreview] = useState<any[] | null>(null);
   const [teams, setTeams] = useState<any[]>([]);

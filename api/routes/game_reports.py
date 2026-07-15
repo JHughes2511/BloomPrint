@@ -16,7 +16,7 @@ from .. import models, schemas
 
 def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: str,
                        program_name: str, opp_name: str, label_text: str,
-                       coach_weight: int, focus_prompt: str):
+                       coach_weight: int, focus_prompt: str, level: str = "HS Varsity"):
     """Background task: analyze a (possibly hour-long) film and fill in the clip.
     Reports per-segment progress on the GenerationJob so the app shows the same
     "Analyzing segment i of N" bar as the player-eval flow."""
@@ -42,7 +42,7 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             "video_path": ensure_local(video_path),
             "output_type": output_type,
             "program_name": program_name,
-            "competition_level": "HS Varsity",
+            "competition_level": level,
             "coach_weight": coach_weight,
             "player_name": label_text,
             "focus_prompt": f"This film is of {label_text}. My team: {program_name}. Opponent: {opp_name}.\n{focus_prompt or ''}",
@@ -73,7 +73,7 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
 
 def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_type: str,
                            program_name: str, opp_name: str, label_text: str,
-                           coach_weight: int, prior_text: str, correction: str):
+                           coach_weight: int, prior_text: str, correction: str, level: str = "HS Varsity"):
     """Background task: RE-WATCH the film guided by a coach correction. Instead of
     just rephrasing the old text, we re-run the vision analysis focused on the
     action the coach described so the model can LOCATE and VERIFY it in the film
@@ -113,7 +113,7 @@ def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_ty
             "video_path": ensure_local(video_path),
             "output_type": output_type,
             "program_name": program_name,
-            "competition_level": "HS Varsity",
+            "competition_level": level,
             "coach_weight": coach_weight,
             "player_name": label_text,
             "focus_prompt": focus,
@@ -148,6 +148,14 @@ def _build_out(gr: models.GameReport) -> schemas.GameReportOut:
     out.my_team_name = gr.my_team.name if gr.my_team else None
     out.opponent_team_name = gr.opponent_team.name if gr.opponent_team else None
     return out
+
+
+def _packet_level(db: Session, gr: models.GameReport, coach: models.Coach) -> str:
+    """Competition level to frame a packet's AI at — the packet's own team's
+    level, else the coach's signup level."""
+    from ..coach_context import resolve_level
+    team = gr.my_team or gr.opponent_team
+    return resolve_level(coach, team=team)
 
 
 def _save_version(db: Session, gr: models.GameReport, text: str) -> None:
@@ -363,6 +371,7 @@ async def add_clip(
     background_tasks.add_task(
         _run_clip_analysis, clip.id, job.id, str(dest), gr.output_type,
         my_team_name, opp_name, label_text, coach.weight, gr.focus_prompt or "",
+        _packet_level(db, gr, coach),
     )
     return {"job_id": job.id, "clip_id": clip.id}
 
@@ -587,6 +596,8 @@ async def generate_game_report(
         f"You are the BloomPrint Basketball Intelligence Model.",
         f"Generate a {describe_output_type(gr.output_type)} for: {matchup}",
         f"PROGRAM: {my_team_name}",
+        f"COMPETITION LEVEL: {_packet_level(db, gr, coach)} — calibrate every grade, "
+        f"expectation, comparison, and recommendation to this level.",
     ]
     if my_roster_context or opp_roster_context:
         sections.append(
@@ -800,6 +811,7 @@ async def correct_clip(
     background_tasks.add_task(
         _run_clip_recorrection, clip.id, job.id, clip.video_path, gr.output_type,
         my_team_name, opp_name, label_text, coach.weight, clip.analysis_text, body.correction,
+        _packet_level(db, gr, coach),
     )
     return {"job_id": job.id, "clip_id": clip.id}
 

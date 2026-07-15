@@ -13,6 +13,18 @@ SYSTEM_PROFILE_FIELDS = [
 ]
 
 
+def resolve_level(coach=None, player=None, team=None, fallback: str = "HS Varsity") -> str:
+    """The competition level an AI output should be framed at — the most specific
+    non-empty source wins (player > team > coach's signup level), so every eval,
+    report, scouting write-up, and training program is calibrated to the level
+    the coach actually works with instead of a hardcoded default."""
+    for src in (player, team, coach):
+        lvl = getattr(src, "competition_level", None) if src is not None else None
+        if lvl and str(lvl).strip() and str(lvl).strip().lower() != "team":
+            return str(lvl).strip()
+    return fallback
+
+
 def focus_directive(text: str | None) -> str:
     """Turn a coach's focus request into a strong scoping directive so the whole
     report centers on it (a person, a group, an action, or a situation)."""

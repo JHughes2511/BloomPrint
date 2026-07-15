@@ -70,6 +70,7 @@ export default function HomeScreen() {
   const [pName, setPName] = useState('');
   const [pEmail, setPEmail] = useState('');
   const [pProgram, setPProgram] = useState('');
+  const [pLevel, setPLevel] = useState('HS Varsity');
   const [pRole, setPRole] = useState('coach');
   const [pCountry, setPCountry] = useState('');
   const [pCity, setPCity] = useState('');
@@ -110,6 +111,7 @@ export default function HomeScreen() {
     setPName(coach?.name ?? '');
     setPEmail(coach?.email ?? '');
     setPProgram(coach?.program_name ?? '');
+    setPLevel((coach as any)?.competition_level ?? 'HS Varsity');
     setPRole(coach?.role ?? 'coach');
     setPCountry(coach?.country ?? '');
     setPCity(coach?.city ?? '');
@@ -142,7 +144,7 @@ export default function HomeScreen() {
     }
     setSavingProfile(true);
     try {
-      await updateProfile({ name: pName.trim(), email: email || undefined, program_name: pProgram.trim(), role: pRole, country: pCountry || undefined, city: pCity.trim() || undefined });
+      await updateProfile({ name: pName.trim(), email: email || undefined, program_name: pProgram.trim(), competition_level: pLevel, role: pRole, country: pCountry || undefined, city: pCity.trim() || undefined });
       setShowProfile(false);
     } catch (e: any) {
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update profile');
@@ -300,6 +302,24 @@ export default function HomeScreen() {
               value={pProgram} onChangeText={setPProgram}
               placeholder="Program name" placeholderTextColor={t.muted2}
             />
+
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>Competition Level</Text>
+            <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 8 }}>
+              Every eval, report, and training program is calibrated to this level. Changing it updates the default everywhere.
+            </Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {['Youth', 'Middle School', 'HS JV', 'HS Varsity', 'AAU', 'College', 'Pro'].map(lvl => (
+                <TouchableOpacity
+                  key={lvl}
+                  onPress={() => setPLevel(lvl)}
+                  style={{ paddingHorizontal: 14, paddingVertical: 9, borderRadius: 999, borderWidth: 1,
+                    backgroundColor: pLevel === lvl ? t.ctaBg : t.card,
+                    borderColor: pLevel === lvl ? t.ctaBg : t.line }}
+                >
+                  <Text style={{ color: pLevel === lvl ? t.ctaText : t.muted, fontSize: 13, fontFamily: fonts[700] }}>{lvl}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
             <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>Location</Text>
             <CountryField value={pCountry} onChange={setPCountry} />

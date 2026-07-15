@@ -170,7 +170,7 @@ async def submit_evaluation(
     background_tasks: BackgroundTasks,
     player_id: int = Form(...),
     output_type: str = Form(...),
-    competition_level: str = Form("HS Varsity"),
+    competition_level: str | None = Form(None),
     coach_notes: str | None = Form(None),
     focus_prompt: str | None = Form(None),
     interval_seconds: float = Form(5.0),
@@ -185,6 +185,12 @@ async def submit_evaluation(
     player = db.get(models.Player, player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
+
+    # Frame the eval at the right competition level: the player's own level (which
+    # itself defaults to their team's / the coach's), then the coach's signup level.
+    from ..coach_context import resolve_level
+    team = db.get(models.Team, player.team_id) if player.team_id else None
+    competition_level = (competition_level or "").strip() or resolve_level(coach, player, team)
 
     # Get latest grade for this player (most recent non-null overall_grade)
     latest_grade: float | None = None
@@ -329,7 +335,7 @@ def recent_team_reports(
     )
 
 
-def _build_team_report_prompt(output_type, team_label, roster_context, focus, video_context, system_block=""):
+def _build_team_report_prompt(output_type, team_label, roster_context, focus, video_context, system_block="", level="HS Varsity"):
     if output_type == "game_situational":
         type_instruction = (
             "Generate a GAME SITUATIONAL REPORT. Analyze the roster and provide a detailed report on: "
@@ -350,7 +356,9 @@ def _build_team_report_prompt(output_type, team_label, roster_context, focus, vi
     from ..coach_context import focus_directive
     return (
         f"You are the BloomPrint Basketball Intelligence Model. {type_instruction}\n\n"
-        f"PROGRAM: {team_label}\n\n"
+        f"PROGRAM: {team_label}\n"
+        f"COMPETITION LEVEL: {level} — calibrate every grade, expectation, comparison, and "
+        f"recommendation to this level.\n\n"
         f"ROSTER SUMMARY:\n{roster_context}\n\n"
         f"{focus_directive(focus)}"
         f"{video_context}"
@@ -363,7 +371,8 @@ def _build_team_report_prompt(output_type, team_label, roster_context, focus, vi
 
 def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_prompt: str | None,
                          team_label: str, roster_context: str, video_path: str,
-                         coach_program: str, coach_weight: int, system_block: str = ""):
+                         coach_program: str, coach_weight: int, system_block: str = "",
+                         coach_level: str = "HS Varsity"):
     """Background task: analyze a (potentially long) film for a team report and
     generate the report. The client polls the job."""
     import asyncio
@@ -390,7 +399,7 @@ def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_
                 "video_path": ensure_local(video_path),
                 "output_type": output_type,
                 "program_name": coach_program,
-                "competition_level": "Team",
+                "competition_level": coach_level,
                 "coach_weight": coach_weight,
                 "player_name": "Team",
                 "focus_prompt": focus_prompt or "",
@@ -404,7 +413,7 @@ def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_
             import logging
             logging.getLogger("bloomprint").warning("team_report video analysis skipped: %s", exc)
 
-        prompt = _build_team_report_prompt(output_type, team_label, roster_context, focus_prompt or "", video_context, system_block)
+        prompt = _build_team_report_prompt(output_type, team_label, roster_context, focus_prompt or "", video_context, system_block, level=coach_level)
         import anthropic
         client = anthropic.Anthropic()
         response = client.messages.create(
@@ -473,13 +482,15 @@ async def team_report(
             roster_context += f"- {p.name} ({p.position or 'N/A'}): No evaluations yet.\n"
 
     team_label = coach.program_name
+    team_obj = None
     if team_id is not None:
         team_obj = db.get(models.Team, team_id)
         if team_obj:
             team_label = f"{team_obj.name} ({coach.program_name})"
 
-    from ..coach_context import system_profile_block
+    from ..coach_context import system_profile_block, resolve_level
     system_block = system_profile_block(coach)
+    team_level = resolve_level(coach, team=team_obj)
 
     if video and video.filename:
         # Long film → save to durable storage and process in the background.
@@ -496,11 +507,12 @@ async def team_report(
             coach_id=coach.id, output_type=output_type, focus_prompt=focus_prompt,
             team_label=team_label, roster_context=roster_context, video_path=vid_ref,
             coach_program=coach.program_name, coach_weight=coach.weight, system_block=system_block,
+            coach_level=team_level,
         )
         return {"job_id": job.id, "status": "processing"}
 
     # No video — generate synchronously (fast).
-    prompt = _build_team_report_prompt(output_type, team_label, roster_context, focus_prompt or "", "", system_block)
+    prompt = _build_team_report_prompt(output_type, team_label, roster_context, focus_prompt or "", "", system_block, level=team_level)
     try:
         import anthropic
         client = anthropic.AsyncAnthropic()

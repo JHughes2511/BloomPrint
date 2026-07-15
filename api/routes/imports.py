@@ -66,12 +66,15 @@ def roster_commit(
     coach: models.Coach = Depends(get_current_coach),
 ):
     """Create the confirmed players on the given team (find-or-create by name)."""
+    from ..coach_context import resolve_level
     program_name = coach.program_name
+    team = None
     if body.team_id:
         team = db.get(models.Team, body.team_id)
         if not team or team.coach_id != coach.id:
             raise HTTPException(status_code=404, detail="Team not found")
         program_name = team.name
+    default_level = resolve_level(coach, team=team)
     created = updated = 0
     for p in body.players:
         name = str(p.get("name") or "").strip()
@@ -89,7 +92,7 @@ def roster_commit(
             wingspan=p.get("wingspan") or None,
             weight=p.get("weight") or None,
             school_name=p.get("school_name") or None,
-            competition_level=p.get("competition_level") or body.competition_level,
+            competition_level=p.get("competition_level") or default_level,
         )
         if existing:
             for k, v in fields.items():

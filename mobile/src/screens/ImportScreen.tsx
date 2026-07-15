@@ -10,6 +10,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { api, teamsAPI, importsAPI } from '../api/client';
 import { Team } from '../types';
+import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -63,12 +64,13 @@ export default function ImportScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { t } = useTheme();
+  const { coach } = useAuth();
   const styles = makeStyles(t);
   const isRosterMode = route.params?.mode === 'roster';
 
   const [file, setFile] = useState<{ uri: string; name: string; type?: string } | null>(null);
   const [outputType, setOutputType] = useState('player_eval');
-  const [level, setLevel] = useState('HS Varsity');
+  const [level, setLevel] = useState((coach as any)?.competition_level ?? 'HS Varsity');
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);

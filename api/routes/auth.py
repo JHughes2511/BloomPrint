@@ -47,7 +47,7 @@ def register(body: schemas.CoachCreate, db: Session = Depends(get_db)):
         program_name=body.program_name,
         role=body.role,
         conference=body.conference,
-        competition_level=body.competition_level,
+        competition_level=(body.competition_level or "HS Varsity"),
         country=body.country,
         city=body.city,
     )
@@ -107,7 +107,7 @@ def google_auth(body: schemas.CoachGoogleAuth, db: Session = Depends(get_db)):
         role=body.role or "coach",
         program_name=body.program_name or identity.name,
         conference=body.conference,
-        competition_level=body.competition_level,
+        competition_level=(body.competition_level or "HS Varsity"),
         country=body.country,
         city=body.city,
         google_sub=identity.sub or None,
