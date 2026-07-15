@@ -74,7 +74,7 @@ interface Board {
   strokes: Stroke[];
   ai?: {
     play_name: string;
-    key: { n: number; text: string }[];
+    key: { n: number; text: string; from?: number[]; to?: number[] }[];
     source?: string;
     prompt?: string;   // what the coach wrote to generate/refine the play
     attachedTitle?: string; // report attached at generation, if any
@@ -247,14 +247,24 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
   const [playerGuidance, setPlayerGuidance] = useState<Record<string, string>>({});
   const [applyingGuidance, setApplyingGuidance] = useState(false);
   useEffect(() => { setLockedPlayers({}); setPlayerGuidance({}); }, [activeBoardIdx]);
-  // ── Direct player drag (AI boards) ──
-  // With the Move tool, drag a player/defender marker to a new spot; on drop the
-  // AI re-describes that player's role from the new position (everyone else stays).
-  const [draggingUnit, setDraggingUnit] = useState<{ scheme: SchemeKey; id: string; kind: 'O' | 'X'; xpx: number; ypx: number } | null>(null);
-  const [reDescribing, setReDescribing] = useState(false);
-  const dragUnitRef = useRef<{ scheme: SchemeKey; id: string; kind: 'O' | 'X' } | null>(null);
-  const hitTestUnitRef = useRef<(x: number, y: number) => any>(() => null);
-  const moveCommitRef = useRef<(scheme: SchemeKey, id: string, kind: 'O' | 'X', xpx: number, ypx: number) => void>(() => {});
+  // ── Direct drag on AI boards (Move tool) ──
+  // Drag player/defender markers OR arrow endpoints (action arrows + key arrows).
+  // Drops are local and instant; the coach then taps "Adapt play" to re-solve the
+  // active scheme around whatever was moved (moved pieces stay locked).
+  type DragTarget =
+    | { t: 'unit'; scheme: SchemeKey; id: string; kind: 'O' | 'X'; xpx: number; ypx: number }
+    | { t: 'action'; scheme: SchemeKey; idx: number; end: 'from' | 'to'; xpx: number; ypx: number }
+    | { t: 'key'; idx: number; end: 'from' | 'to'; xpx: number; ypx: number };
+  const [dragTarget, setDragTarget] = useState<DragTarget | null>(null);
+  const [adapting, setAdapting] = useState(false);
+  const [pinCount, setPinCount] = useState(0);
+  const dragTargetRef = useRef<DragTarget | null>(null);
+  const hitTestRef = useRef<(x: number, y: number) => DragTarget | null>(() => null);
+  const dropRef = useRef<(x: number, y: number) => void>(() => {});
+  // What the coach manually placed → locked when the play is adapted.
+  const pinsRef = useRef<{ units: Set<string>; actions: Set<string>; keys: Set<number> }>({ units: new Set(), actions: new Set(), keys: new Set() });
+  const clearPins = () => { pinsRef.current = { units: new Set(), actions: new Set(), keys: new Set() }; setPinCount(0); };
+  useEffect(() => { clearPins(); }, [activeBoardIdx]); // eslint-disable-line react-hooks/exhaustive-deps
   // Reset the Move tool when the active board has no AI play to drag.
   useEffect(() => { if (tool === 'move' && !boards[activeBoardIdx]?.ai) setTool('pen'); }, [activeBoardIdx]); // eslint-disable-line react-hooks/exhaustive-deps
   // ── Scheme play-through animation ──
@@ -344,6 +354,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       });
     });
     (res?.key ?? []).forEach((k: any) => {
+      if (!Array.isArray(k.from) || !Array.isArray(k.to)) return;   // no coords → no arrow
       out.push({ id: mk(), type: 'arrow', x1: X(k.from[0]), y1: Y(k.from[1]), x2: X(k.to[0]), y2: Y(k.to[1]),
                  color: '#1F6F9B', strokeWidth: 3.5, dash: true, layer: 'key' });
       out.push({ id: mk(), type: 'text', x: X(k.to[0]) + 6, y: Y(k.to[1]) - 6, label: String(k.n), size: 15, color: '#1F6F9B', strokeWidth: 1, layer: 'key' });
@@ -389,7 +400,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         name: res.play_name || `AI Play ${idx + 1}`,
         court_type: 'half',
         strokes: buildPlayStrokes(res),
-        ai: { play_name: res.play_name ?? 'AI Play', key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })), source: composed, schemes: res.schemes,
+        ai: { play_name: res.play_name ?? 'AI Play', key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text, from: k.from, to: k.to })), source: composed, schemes: res.schemes,
               prompt: aiDescription.trim(), attachedTitle: attachedReport?.title, guidance: seedGuidance },
       };
       setBoards(prev => [...prev, newBoard]);
@@ -455,7 +466,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       ...b,
       name: res.play_name || b.name,
       strokes: [...kept, ...aiStrokes],
-      ai: { play_name: res.play_name ?? b.ai.play_name, key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text })), source: newSource, schemes: res.schemes,
+      ai: { play_name: res.play_name ?? b.ai.play_name, key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text, from: k.from, to: k.to })), source: newSource, schemes: res.schemes,
             prompt: [b.ai.prompt, promptNote].filter(Boolean).join('\n'), attachedTitle: b.ai.attachedTitle, guidance: gmap },
     };
     setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
@@ -463,6 +474,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     // Clear only the TRANSIENT field edits — they're now saved in ai.guidance and
     // will still show (and keep being applied) from there.
     setPlayerGuidance({});
+    clearPins();   // geometry changed — manual-move locks no longer apply
     saveBoard(activeBoardIdx, updated);
   };
 
@@ -731,8 +743,8 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       const { x, y } = mapPointRef.current(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
       startPoint.current = { x, y };
       if (toolRef.current === 'move') {
-        const hit = hitTestUnitRef.current(x, y);
-        if (hit) { dragUnitRef.current = { scheme: hit.scheme, id: hit.id, kind: hit.kind }; setDraggingUnit(hit); }
+        const hit = hitTestRef.current(x, y);
+        if (hit) { dragTargetRef.current = hit; setDragTarget(hit); }
         return;
       }
       if (toolRef.current === 'pen') {
@@ -754,7 +766,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     onPanResponderMove: (evt) => {
       const { x, y } = mapPointRef.current(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
       if (toolRef.current === 'move') {
-        if (dragUnitRef.current) setDraggingUnit(du => (du ? { ...du, xpx: x, ypx: y } : du));
+        if (dragTargetRef.current) setDragTarget(dt => (dt ? { ...dt, xpx: x, ypx: y } : dt));
         return;
       }
       if (toolRef.current === 'pen') {
@@ -784,10 +796,9 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
       };
 
       if (tl === 'move') {
-        const du = dragUnitRef.current;
-        if (du) moveCommitRef.current(du.scheme, du.id, du.kind, x2, y2);
-        dragUnitRef.current = null;
-        setDraggingUnit(null);
+        if (dragTargetRef.current) dropRef.current(x2, y2);
+        dragTargetRef.current = null;
+        setDragTarget(null);
         return;
       }
       if (tl === 'text' && dragRef.current) {
@@ -889,11 +900,10 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     });
   };
 
-  // ── Direct player drag (Move tool) ────────────────────────────────────────
-  // Scheme marker strokes rebuilt from scheme feet-data (no key), for the active
-  // board's court view. Mirrors generatePlay: build on 'half', remap to the view.
-  const schemeStrokes = (schemes: any, to: CourtType) =>
-    remapStrokes(buildPlayStrokes({ schemes, key: [] }), 'half', to);
+  // ── Direct drag (Move tool) ───────────────────────────────────────────────
+  // Rebuild ALL AI strokes (players/defenders/actions + key) from feet-data.
+  const buildAllStrokes = (ai: any, to: CourtType) =>
+    remapStrokes(buildPlayStrokes({ schemes: ai.schemes, key: ai.key ?? [] }), 'half', to);
 
   // Feet↔px for the CURRENT board's court view (same mapping the strokes use).
   const unitToPx = (xf: number, yf: number) => ({ x: (xf + OOB_SIDE_FT) * scale, y: (yf - offsetFtForType(board?.court_type ?? 'full')) * scale });
@@ -902,71 +912,125 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
     y: Math.max(48, Math.min(96, ypx / scale + offsetFtForType(board?.court_type ?? 'full'))),
   });
 
-  // Which player/defender marker (active scheme) is nearest the touch, if any.
-  const hitTestUnit = (xpx: number, ypx: number) => {
-    const sc = boards[activeBoardIdx]?.ai?.schemes?.[activeScheme];
-    if (!sc) return null;
-    const units = [
-      ...((sc.players ?? []).map((u: any) => ({ ...u, kind: 'O' as const }))),
-      ...((sc.defenders ?? []).map((u: any) => ({ ...u, kind: 'X' as const }))),
-    ];
-    let best: any = null, bestD = 26;
-    for (const u of units) {
-      const p = unitToPx(u.x, u.y);
-      const d = Math.hypot(p.x - xpx, p.y - ypx);
-      if (d < bestD) { bestD = d; best = { scheme: activeScheme, id: u.id, kind: u.kind, xpx: p.x, ypx: p.y }; }
+  // Nearest draggable thing on the active scheme: a player/defender marker, an
+  // action-arrow endpoint, or (when the Key is shown) a key-arrow endpoint.
+  const hitTestDrag = (xpx: number, ypx: number): DragTarget | null => {
+    const ai = boards[activeBoardIdx]?.ai;
+    if (!ai) return null;
+    const cands: { d: number; target: DragTarget }[] = [];
+    const consider = (px: number, py: number, target: DragTarget, r: number) => {
+      const d = Math.hypot(px - xpx, py - ypx);
+      if (d < r) cands.push({ d, target });
+    };
+    const sc = ai.schemes?.[activeScheme];
+    if (sc) {
+      (sc.players ?? []).forEach((u: any) => { const p = unitToPx(u.x, u.y); consider(p.x, p.y, { t: 'unit', scheme: activeScheme, id: u.id, kind: 'O', xpx: p.x, ypx: p.y }, 24); });
+      (sc.defenders ?? []).forEach((u: any) => { const p = unitToPx(u.x, u.y); consider(p.x, p.y, { t: 'unit', scheme: activeScheme, id: u.id, kind: 'X', xpx: p.x, ypx: p.y }, 24); });
+      (sc.actions ?? []).forEach((a: any, idx: number) => {
+        (['from', 'to'] as const).forEach(end => {
+          const pt = a[end]; if (!Array.isArray(pt)) return;
+          const p = unitToPx(pt[0], pt[1]); consider(p.x, p.y, { t: 'action', scheme: activeScheme, idx, end, xpx: p.x, ypx: p.y }, 20);
+        });
+      });
     }
-    return best;
+    if (showKey) {
+      (ai.key ?? []).forEach((k: any, idx: number) => {
+        (['from', 'to'] as const).forEach(end => {
+          const pt = k[end]; if (!Array.isArray(pt)) return;
+          const p = unitToPx(pt[0], pt[1]); consider(p.x, p.y, { t: 'key', idx, end, xpx: p.x, ypx: p.y }, 20);
+        });
+      });
+    }
+    if (!cands.length) return null;
+    cands.sort((a, b) => a.d - b.d);
+    return cands[0].target;
   };
-  hitTestUnitRef.current = hitTestUnit;
+  hitTestRef.current = hitTestDrag;
 
-  // Commit a dropped player: write the new feet position (and re-attach its own
-  // action arrows), rebuild scheme strokes locally, then ask the AI to re-describe.
-  const commitPlayerMove = (scheme: SchemeKey, id: string, kind: 'O' | 'X', xpx: number, ypx: number) => {
+  // Commit a dropped drag target: write the new feet coords, re-attach a moved
+  // player's own arrows, rebuild all strokes locally, and record a lock ("pin").
+  const commitDrag = (xpx: number, ypx: number) => {
+    const dt = dragTargetRef.current;
     const b = boards[activeBoardIdx];
-    if (!b?.ai?.schemes?.[scheme]) return;
+    if (!dt || !b?.ai) return;
     const { x: xft, y: yft } = pxToFeet(xpx, ypx);
-    const schemes = JSON.parse(JSON.stringify(b.ai.schemes));
-    const scm = schemes[scheme];
-    const arr = kind === 'X' ? (scm.defenders ?? []) : (scm.players ?? []);
-    const unit = arr.find((u: any) => u.id === id);
-    if (!unit) return;
-    const oldX = unit.x, oldY = unit.y;
-    unit.x = xft; unit.y = yft;
-    const near = (pt: any, X: number, Y: number) => Array.isArray(pt) && Math.abs(pt[0] - X) < 2 && Math.abs(pt[1] - Y) < 2;
-    (scm.actions ?? []).forEach((a: any) => {
-      if (a.actor === id && near(a.from, oldX, oldY)) a.from = [xft, yft];
-      if (near(a.to, oldX, oldY)) a.to = [xft, yft];
-    });
-    const keep = b.strokes.filter(st => !st.layer || st.layer === 'key');
-    const updated: Board = { ...b, strokes: [...keep, ...schemeStrokes(schemes, b.court_type)], ai: { ...b.ai, schemes } };
+    const ai = JSON.parse(JSON.stringify(b.ai));
+    if (dt.t === 'unit') {
+      const scm = ai.schemes?.[dt.scheme]; if (!scm) return;
+      const arr = dt.kind === 'X' ? (scm.defenders ?? []) : (scm.players ?? []);
+      const unit = arr.find((u: any) => u.id === dt.id); if (!unit) return;
+      const oldX = unit.x, oldY = unit.y; unit.x = xft; unit.y = yft;
+      const near = (pt: any, X: number, Y: number) => Array.isArray(pt) && Math.abs(pt[0] - X) < 2 && Math.abs(pt[1] - Y) < 2;
+      (scm.actions ?? []).forEach((a: any) => {
+        if (a.actor === dt.id && near(a.from, oldX, oldY)) a.from = [xft, yft];
+        if (near(a.to, oldX, oldY)) a.to = [xft, yft];
+      });
+      pinsRef.current.units.add(`${dt.scheme}:${dt.id}`);
+    } else if (dt.t === 'action') {
+      const a = ai.schemes?.[dt.scheme]?.actions?.[dt.idx]; if (!a) return;
+      a[dt.end] = [xft, yft];
+      pinsRef.current.actions.add(`${dt.scheme}:${dt.idx}`);
+    } else if (dt.t === 'key') {
+      const k = ai.key?.[dt.idx]; if (!k) return;
+      k[dt.end] = [xft, yft];
+      pinsRef.current.keys.add(dt.idx);
+    }
+    const keep = b.strokes.filter(st => !st.layer);   // hand-drawn only; AI strokes fully rebuilt
+    const updated: Board = { ...b, strokes: [...keep, ...buildAllStrokes(ai, b.court_type)], ai };
     setBoards(prev => { const n = [...prev]; n[activeBoardIdx] = updated; return n; });
     saveBoard(activeBoardIdx, updated);
-    describeAfterMove(updated, scheme, id);
+    setPinCount(pinsRef.current.units.size + pinsRef.current.actions.size + pinsRef.current.keys.size);
   };
-  moveCommitRef.current = commitPlayerMove;
+  dropRef.current = commitDrag;
 
-  const describeAfterMove = async (b: Board, scheme: SchemeKey, id: string) => {
-    if (!b.ai) return;
-    setReDescribing(true);
+  // Re-solve the active scheme around the coach's manual moves. Locked pieces
+  // stay put; the rest of the offense AND defense reposition/redraw to fit, and
+  // the roles + key refresh.
+  const adaptPlay = async () => {
+    const b = boards[activeBoardIdx];
+    const scm = b?.ai?.schemes?.[activeScheme];
+    if (!b?.ai || !scm) return;
+    const ai = b.ai;
+    const pins = pinsRef.current;
+    const lockedUnits = [...(scm.players ?? []), ...(scm.defenders ?? [])]
+      .filter((u: any) => pins.units.has(`${activeScheme}:${u.id}`))
+      .map((u: any) => ({ id: u.id, x: u.x, y: u.y }));
+    const lockedActions = (scm.actions ?? [])
+      .map((a: any, idx: number) => ({ a, idx }))
+      .filter(({ idx }) => pins.actions.has(`${activeScheme}:${idx}`))
+      .map(({ a }) => ({ actor: a.actor, kind: a.kind, from: a.from, to: a.to }));
+    const lockedKeys = (ai.key ?? [])
+      .map((k: any, idx: number) => ({ k, idx }))
+      .filter(({ idx }) => pins.keys.has(idx))
+      .map(({ k }) => ({ from: k.from, to: k.to }));
+    setAdapting(true);
     try {
-      const res = await whiteboardAPI.describeMove({ schemes: b.ai.schemes, scheme, player_id: id, source: b.ai.source ?? '' });
+      const res = await whiteboardAPI.adaptPlay({
+        scheme_name: activeScheme,
+        scheme: { players: scm.players ?? [], defenders: scm.defenders ?? [], actions: scm.actions ?? [] },
+        key: ai.key ?? [],
+        locked: { units: lockedUnits, actions: lockedActions, keys: lockedKeys },
+        source: ai.source ?? '',
+      });
       setBoards(prev => {
         const n = [...prev];
         const cur = n[activeBoardIdx];
         if (!cur?.ai) return prev;
-        const schemes = JSON.parse(JSON.stringify(cur.ai.schemes));
-        const scm = schemes[scheme];
-        const u = [...(scm.players ?? []), ...(scm.defenders ?? [])].find((x: any) => x.id === id);
-        if (u && res?.role) u.role = res.role;
-        const key = res?.key?.length ? res.key.map((k: any) => ({ n: k.n, text: k.text })) : cur.ai.key;
-        const updated: Board = { ...cur, ai: { ...cur.ai, schemes, key } };
+        const newAi = JSON.parse(JSON.stringify(cur.ai));
+        if (res?.scheme) newAi.schemes[activeScheme] = res.scheme;
+        if (res?.key?.length) newAi.key = res.key.map((k: any) => ({ n: k.n, text: k.text, from: k.from, to: k.to }));
+        const keep = cur.strokes.filter((st: Stroke) => !st.layer);
+        const updated: Board = { ...cur, ai: newAi, strokes: [...keep, ...buildAllStrokes(newAi, cur.court_type)] };
         n[activeBoardIdx] = updated;
         saveBoard(activeBoardIdx, updated);
         return n;
       });
-    } catch { /* keep the manual move even if re-describe fails */ }
-    setReDescribing(false);
+      clearPins();
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not adapt the play');
+    } finally {
+      setAdapting(false);
+    }
   };
 
   // Animate the current scheme step by step (same step = together): each actor
@@ -1235,6 +1299,14 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
               <Ionicons name="people-outline" size={13} color={t.muted} />
               <Text style={styles.schemeChipText}>Players</Text>
             </TouchableOpacity>
+            {pinCount > 0 && (
+              <TouchableOpacity
+                style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
+                onPress={adaptPlay} disabled={adapting}>
+                <Ionicons name="git-branch-outline" size={13} color={t.ctaText} />
+                <Text style={[styles.schemeChipText, { color: t.ctaText }]}>Adapt play</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 
@@ -1308,7 +1380,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
         {tool === 'move' && board?.ai && !selectedTextId && (
           <View style={styles.textCtrlBar}>
             <Text style={styles.textCtrlLabel}>
-              Move — drag any {activeScheme === 'defense' ? 'defender' : 'player'} to reposition; the AI re-describes their role.
+              Move — drag players or arrow ends{showKey ? ' (incl. key arrows)' : ''}. Then tap “Adapt play” to re-solve around your changes.
             </Text>
           </View>
         )}
@@ -1349,18 +1421,23 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
                     <Path d={livePath} stroke={color} strokeWidth={STROKE_WIDTH}
                           fill="none" strokeLinecap="round" strokeLinejoin="round" />
                   ) : null}
-                  {draggingUnit ? (
-                    draggingUnit.kind === 'O' ? (
-                      <G>
-                        <Circle cx={draggingUnit.xpx} cy={draggingUnit.ypx} r={14} stroke="#141414" strokeWidth={3} fill="rgba(31,111,155,0.25)" />
-                        <SvgText x={draggingUnit.xpx - 8} y={draggingUnit.ypx + 5} fill="#141414" fontSize={13} fontWeight="bold">{draggingUnit.id}</SvgText>
-                      </G>
+                  {dragTarget ? (
+                    dragTarget.t === 'unit' ? (
+                      dragTarget.kind === 'O' ? (
+                        <G>
+                          <Circle cx={dragTarget.xpx} cy={dragTarget.ypx} r={14} stroke="#141414" strokeWidth={3} fill="rgba(31,111,155,0.25)" />
+                          <SvgText x={dragTarget.xpx - 8} y={dragTarget.ypx + 5} fill="#141414" fontSize={13} fontWeight="bold">{dragTarget.id}</SvgText>
+                        </G>
+                      ) : (
+                        <G>
+                          <Line x1={dragTarget.xpx - 10} y1={dragTarget.ypx - 10} x2={dragTarget.xpx + 10} y2={dragTarget.ypx + 10} stroke="#C0392B" strokeWidth={3.5} strokeLinecap="round" />
+                          <Line x1={dragTarget.xpx + 10} y1={dragTarget.ypx - 10} x2={dragTarget.xpx - 10} y2={dragTarget.ypx + 10} stroke="#C0392B" strokeWidth={3.5} strokeLinecap="round" />
+                          <SvgText x={dragTarget.xpx + 12} y={dragTarget.ypx + 5} fill="#C0392B" fontSize={12} fontWeight="bold">{dispId(dragTarget.id)}</SvgText>
+                        </G>
+                      )
                     ) : (
-                      <G>
-                        <Line x1={draggingUnit.xpx - 10} y1={draggingUnit.ypx - 10} x2={draggingUnit.xpx + 10} y2={draggingUnit.ypx + 10} stroke="#C0392B" strokeWidth={3.5} strokeLinecap="round" />
-                        <Line x1={draggingUnit.xpx + 10} y1={draggingUnit.ypx - 10} x2={draggingUnit.xpx - 10} y2={draggingUnit.ypx + 10} stroke="#C0392B" strokeWidth={3.5} strokeLinecap="round" />
-                        <SvgText x={draggingUnit.xpx + 12} y={draggingUnit.ypx + 5} fill="#C0392B" fontSize={12} fontWeight="bold">{dispId(draggingUnit.id)}</SvgText>
-                      </G>
+                      <Circle cx={dragTarget.xpx} cy={dragTarget.ypx} r={9}
+                              fill={dragTarget.t === 'key' ? '#1F6F9B' : '#141414'} opacity={0.85} />
                     )
                   ) : null}
                 </Svg>
@@ -1369,7 +1446,7 @@ export default function WhiteboardModal({ visible, gameId, onClose }: Props) {
           </View>
         )}
 
-        <GeneratingOverlay visible={reDescribing} label="Updating this player's role…" />
+        <GeneratingOverlay visible={adapting} label="Adapting the play around your changes…" />
 
         {/* AI Key — bottom overlay that pops up over the court when Key is on */}
         {board?.ai && showKey && board.ai.key.length > 0 && (

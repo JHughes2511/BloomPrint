@@ -1636,6 +1636,65 @@ def update_whiteboard(
     return {"id": board.id, "name": board.name, "court_type": board.court_type, "data": board.data}
 
 
+# ── AI play validation (shared by draw-up / describe / adapt) ────────────────
+def _pt(v, lo, hi, d):
+    try:
+        return max(lo, min(hi, float(v)))
+    except (TypeError, ValueError):
+        return d
+
+
+def _clean_scheme(sc):
+    sc = sc if isinstance(sc, dict) else {}
+    out = {"players": [], "defenders": [], "actions": []}
+    for i, pl in enumerate((sc.get("players") or [])[:5]):
+        out["players"].append({"id": str(pl.get("id") or f"O{i+1}")[:3],
+                               "x": _pt(pl.get("x"), -2, 52, 25), "y": _pt(pl.get("y"), 48, 96, 80),
+                               "role": str(pl.get("role") or "")[:200]})
+    for i, df in enumerate((sc.get("defenders") or [])[:5]):
+        out["defenders"].append({"id": str(df.get("id") or f"X{i+1}")[:3],
+                                 "x": _pt(df.get("x"), -2, 52, 25), "y": _pt(df.get("y"), 48, 96, 74),
+                                 "role": str(df.get("role") or "")[:200]})
+
+    # Auto-correct obviously-wrong on-ball defenders: a PERIMETER defender
+    # (guarding a man up top, man.y < 76) that sits ON TOP of / above its man
+    # (farther from the basket) is almost never right — nudge it to the basket
+    # side (between man and rim). Post fronts / off-ball are left untouched.
+    by_num = {p["id"][1:]: p for p in out["players"] if len(p["id"]) > 1}
+    for df in out["defenders"]:
+        man = by_num.get(df["id"][1:]) if len(df["id"]) > 1 else None
+        if not man:
+            continue
+        perimeter = man["y"] < 76
+        guarding = abs(df["x"] - man["x"]) < 10
+        non_basket_side = df["y"] <= man["y"] + 1  # at/above man = away from rim
+        if perimeter and guarding and non_basket_side:
+            df["y"] = min(man["y"] + 5.0, 90.0)
+            df["x"] = man["x"] + (25.0 - man["x"]) * 0.12  # ease slightly toward the middle
+    for idx, a in enumerate((sc.get("actions") or [])[:10]):
+        fr, to = a.get("from") or [25, 80], a.get("to") or [25, 70]
+        try:
+            step = max(1, int(a.get("step") or (idx + 1)))
+        except (TypeError, ValueError):
+            step = idx + 1
+        out["actions"].append({"kind": str(a.get("kind") or "cut"), "step": step,
+                               "actor": str(a.get("actor") or "")[:3],
+                               "from": [_pt(fr[0], -2, 52, 25), _pt(fr[1], 48, 96, 80)],
+                               "to":   [_pt(to[0], -2, 52, 25), _pt(to[1], 48, 96, 70)]})
+    return out
+
+
+def _clean_key(raw_key):
+    out = []
+    for i, k in enumerate((raw_key or [])[:5]):
+        fr, to = (k.get("from") or [25, 80]), (k.get("to") or [25, 70])
+        out.append({"n": int(k.get("n") or i + 1),
+                    "text": str(k.get("text") or "")[:120],
+                    "from": [_pt(fr[0], -2, 52, 25), _pt(fr[1], 48, 96, 80)],
+                    "to":   [_pt(to[0], -2, 52, 25), _pt(to[1], 48, 96, 70)]})
+    return out
+
+
 # ── AI play draw-up ───────────────────────────────────────────────────────────
 # Turns a coach's description of a scene/play into a structured X's-and-O's
 # diagram: offense / defense / counter schemes plus a numbered improvement key.
@@ -1752,64 +1811,8 @@ async def ai_play(
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI play generation failed: {exc}")
 
-    # Validate + clamp everything the client will render.
-    def _pt(v, lo, hi, d):
-        try:
-            return max(lo, min(hi, float(v)))
-        except (TypeError, ValueError):
-            return d
-
-    def _clean_scheme(sc):
-        sc = sc if isinstance(sc, dict) else {}
-        out = {"players": [], "defenders": [], "actions": []}
-        for i, pl in enumerate((sc.get("players") or [])[:5]):
-            out["players"].append({"id": str(pl.get("id") or f"O{i+1}")[:3],
-                                   "x": _pt(pl.get("x"), -2, 52, 25), "y": _pt(pl.get("y"), 48, 96, 80),
-                                   "role": str(pl.get("role") or "")[:200]})
-        for i, df in enumerate((sc.get("defenders") or [])[:5]):
-            out["defenders"].append({"id": str(df.get("id") or f"X{i+1}")[:3],
-                                     "x": _pt(df.get("x"), -2, 52, 25), "y": _pt(df.get("y"), 48, 96, 74),
-                                     "role": str(df.get("role") or "")[:200]})
-
-        # Auto-correct obviously-wrong on-ball defenders: a PERIMETER defender
-        # (guarding a man up top, man.y < 76) that sits ON TOP of / above its man
-        # (farther from the basket) is almost never right — nudge it to the basket
-        # side (between man and rim). Post fronts / off-ball are left untouched.
-        by_num = {p["id"][1:]: p for p in out["players"] if len(p["id"]) > 1}
-        for df in out["defenders"]:
-            man = by_num.get(df["id"][1:]) if len(df["id"]) > 1 else None
-            if not man:
-                continue
-            perimeter = man["y"] < 76
-            guarding = abs(df["x"] - man["x"]) < 10
-            non_basket_side = df["y"] <= man["y"] + 1  # at/above man = away from rim
-            if perimeter and guarding and non_basket_side:
-                df["y"] = min(man["y"] + 5.0, 90.0)
-                df["x"] = man["x"] + (25.0 - man["x"]) * 0.12  # ease slightly toward the middle
-        for idx, a in enumerate((sc.get("actions") or [])[:10]):
-            fr, to = a.get("from") or [25, 80], a.get("to") or [25, 70]
-            try:
-                step = max(1, int(a.get("step") or (idx + 1)))
-            except (TypeError, ValueError):
-                step = idx + 1
-            out["actions"].append({"kind": str(a.get("kind") or "cut"), "step": step,
-                                   "actor": str(a.get("actor") or "")[:3],
-                                   "from": [_pt(fr[0], -2, 52, 25), _pt(fr[1], 48, 96, 80)],
-                                   "to":   [_pt(to[0], -2, 52, 25), _pt(to[1], 48, 96, 70)]})
-        return out
-
+    # Validate + clamp everything the client will render (helpers at module level).
     schemes = data.get("schemes") if isinstance(data.get("schemes"), dict) else {}
-
-    def _clean_key(raw_key):
-        out = []
-        for i, k in enumerate((raw_key or [])[:5]):
-            fr, to = (k.get("from") or [25, 80]), (k.get("to") or [25, 70])
-            out.append({"n": int(k.get("n") or i + 1),
-                        "text": str(k.get("text") or "")[:120],
-                        "from": [_pt(fr[0], -2, 52, 25), _pt(fr[1], 48, 96, 80)],
-                        "to":   [_pt(to[0], -2, 52, 25), _pt(to[1], 48, 96, 70)]})
-        return out
-
     key_items = _clean_key(data.get("key"))
 
     # Guarantee the key: if it came back empty, generate it in a separate,
@@ -1902,6 +1905,87 @@ async def ai_play_describe(
     for i, k in enumerate((data.get("key") or [])[:5]):
         key.append({"n": int(k.get("n") or i + 1), "text": str(k.get("text") or "")[:120]})
     return {"role": role, "key": key}
+
+
+# ── Adapt a play around the coach's manual moves ──────────────────────────────
+# The coach dragged some players/arrows. Keep every LOCKED piece exactly where it
+# is; re-solve the rest of ONE scheme (both offense and defense reposition and
+# redraw their actions to fit), and refresh the key.
+@router.post("/ai-play-adapt")
+async def ai_play_adapt(
+    body: dict,
+    coach: models.Coach = Depends(get_current_coach),
+):
+    import os
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(status_code=503, detail="ANTHROPIC_API_KEY not configured")
+    scheme_name = str(body.get("scheme_name") or "offense")
+    scheme = body.get("scheme") if isinstance(body.get("scheme"), dict) else {}
+    key = body.get("key") if isinstance(body.get("key"), list) else []
+    locked = body.get("locked") if isinstance(body.get("locked"), dict) else {}
+    source = str(body.get("source") or "")[:2000]
+
+    def _disp(i):
+        i = str(i or "")
+        return ("D" + i[1:]) if i[:1] == "X" else i
+
+    def _pt2(pt):
+        try:
+            return f"({round(float(pt[0]))},{round(float(pt[1]))})"
+        except Exception:
+            return "(?,?)"
+
+    cur_units = "\n".join(
+        f"  - {_disp(u.get('id'))} at ({round(float(u.get('x', 25)))},{round(float(u.get('y', 80)))}): {str(u.get('role') or '')[:100]}"
+        for u in (list(scheme.get("players") or []) + list(scheme.get("defenders") or []))
+    )
+    cur_actions = "\n".join(
+        f"  - {_disp(a.get('actor'))} {a.get('kind')} {_pt2(a.get('from') or [0, 0])}->{_pt2(a.get('to') or [0, 0])} (step {a.get('step', 1)})"
+        for a in (scheme.get("actions") or [])
+    )
+    locked_units = ", ".join(f"{_disp(u.get('id'))}@{_pt2([u.get('x'), u.get('y')])}" for u in (locked.get("units") or [])) or "none"
+    locked_actions = "; ".join(
+        f"{_disp(a.get('actor'))} {a.get('kind')} {_pt2(a.get('from') or [0, 0])}->{_pt2(a.get('to') or [0, 0])}"
+        for a in (locked.get("actions") or [])
+    ) or "none"
+    locked_keys = "; ".join(_pt2(k.get("from") or [0, 0]) + "->" + _pt2(k.get("to") or [0, 0]) for k in (locked.get("keys") or [])) or "none"
+
+    prompt = (
+        "You are an elite basketball tactician re-solving ONE scheme of a play after the coach manually "
+        "moved some pieces. COORDINATES: half-court feet, x 0=left/50=right, y grows toward the rim "
+        "(low y = up top, high y = at the basket; y>94 = out of bounds behind the baseline for inbounds).\n\n"
+        f"ORIGINAL PLAY: {source or '(none given)'}\n\n"
+        f"CURRENT {scheme_name.upper()} — players & defenders:\n{cur_units or '  (none)'}\n"
+        f"CURRENT {scheme_name.upper()} — actions:\n{cur_actions or '  (none)'}\n\n"
+        f"LOCKED PIECES the coach placed — keep these EXACTLY, do not move them:\n"
+        f"  players/defenders: {locked_units}\n  action arrows: {locked_actions}\n  key arrows: {locked_keys}\n\n"
+        "Re-solve the REST of this scheme so it is coherent given the locked pieces: reposition the "
+        "non-locked offensive players AND defenders, and redraw their action arrows, so BOTH sides react "
+        "correctly (defenders guard the offense's new spacing; offense adjusts to the defense). Keep the "
+        "same player/defender ids. Then refresh the KEY (the suggested improvements). If a key arrow is "
+        "locked, keep its arrow endpoints and just update its text to describe that movement.\n\n"
+        "Return STRICT JSON only, no prose:\n"
+        '{"scheme": {"players": [{"id":"O1","x":25,"y":62,"role":"..."}], '
+        '"defenders": [{"id":"X1","x":25,"y":66,"role":"..."}], '
+        '"actions": [{"actor":"O2","kind":"cut|screen|pass|dribble","from":[x,y],"to":[x,y],"step":1}]}, '
+        '"key": [{"n":1,"text":"<under 90 chars, refer to defenders as D1-D5>","from":[x,y],"to":[x,y]}]}. '
+        "Give 3-5 key items. Defender ids stay X1-X5 in JSON."
+    )
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        resp = await client.messages.create(
+            model="claude-opus-4-7", max_tokens=4000,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        blocks = [b for b in resp.content if hasattr(b, "text")]
+        data = _parse_ai_play_json(blocks[0].text if blocks else "{}")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Adapt failed: {exc}")
+
+    out_scheme = _clean_scheme(data.get("scheme") if isinstance(data.get("scheme"), dict) else {})
+    out_key = _clean_key(data.get("key"))
+    return {"scheme": out_scheme, "key": out_key}
 
 
 @router.delete("/whiteboards/{board_id}")

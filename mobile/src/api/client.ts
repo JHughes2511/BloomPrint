@@ -447,6 +447,8 @@ export const whiteboardAPI = {
     api.post('/game-eval/ai-play', { description }).then(r => r.data),
   describeMove: (body: { schemes: any; scheme: string; player_id: string; source?: string }) =>
     api.post('/game-eval/ai-play-describe', body).then(r => r.data),
+  adaptPlay: (body: { scheme_name: string; scheme: any; key: any[]; locked: any; source?: string }) =>
+    api.post('/game-eval/ai-play-adapt', body).then(r => r.data),
 };
 
 export const gameReportsAPI = {
