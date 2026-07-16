@@ -30,32 +30,47 @@ function goTo(navigation: any, target: { screen: string; params?: any; label?: s
   };
   try {
     switch (key) {
-      case 'home': navigation.navigate('Home'); break;
-      case 'roster': navigation.navigate('RosterTab', { screen: 'Roster' }); break;
+      case 'home':
+      case 'edit_profile':
+      case 'profile':
+      case 'settings':
+        navigation.navigate('HomeTab', { screen: 'Home' }); break;
+      case 'roster':
+      case 'add_team':
+      case 'create_team':
+      case 'add_player':
+      case 'new_player':
+        navigation.navigate('RosterTab', { screen: 'Roster' }); break;
       case 'player':
       case 'player_profile':
-      case 'training':
-      case 'new_eval':
         deep('RosterTab', 'Roster', 'PlayerProfile', { playerId: p.player_id }); break;
+      case 'new_eval':
+        deep('RosterTab', 'Roster', 'NewEval', { playerId: p.player_id, playerName: p.player_name }); break;
+      case 'training':
+        deep('RosterTab', 'Roster', 'Training', { playerId: p.player_id, evalId: p.eval_id }); break;
       case 'eval_report':
       case 'report':
         deep('RecentTab', 'Recent', 'EvalReport', { evalId: p.eval_id, openShare: p.share }); break;
-      // Team Grade tab = tracking games, stats, season dashboard, scouting.
+      // Team Grade tab = tracking games, stats, season dashboard, scouting, whiteboard.
       case 'team_grade':
       case 'games':
       case 'game':
       case 'track_game':
+      case 'new_game':
       case 'scout':
       case 'scouting':
       case 'dashboard':
       case 'season':
-        navigation.navigate('TeamEvalTab'); break;
-      // Team Eval tab = report packets / team reports.
+      case 'whiteboard':
+        navigation.navigate('TeamEvalTab', { screen: 'TeamEval' }); break;
+      case 'game_detail':
+        navigation.navigate('TeamEvalTab', { screen: 'TeamEval', params: { openGameId: p.game_id } }); break;
+      // Team Eval tab = report packets / team reports / film catalog.
       case 'team_eval':
       case 'team_report':
       case 'packet':
         if (p.report_id != null) deep('TeamTab', 'Team', 'GameReportBuilder', { reportId: p.report_id });
-        else navigation.navigate('TeamTab'); break;
+        else navigation.navigate('TeamTab', { screen: 'Team' }); break;
       case 'game_report_builder':
         deep('TeamTab', 'Team', 'GameReportBuilder', { reportId: p.report_id }); break;
       case 'recent':
@@ -63,9 +78,16 @@ function goTo(navigation: any, target: { screen: string; params?: any; label?: s
         navigation.navigate('RecentTab', { screen: 'Recent' }); break;
       case 'import':
         deep('RosterTab', 'Roster', 'Import', { mode: 'roster' }); break;
+      case 'staff_inbox':
+      case 'inbox':
+      case 'staff':
+        deep('HomeTab', 'Home', 'StaffInbox'); break;
+      case 'notifications':
+      case 'alerts':
+        deep('HomeTab', 'Home', 'CoachNotifications'); break;
       default:
-        // Unknown target — do nothing rather than jump to the wrong screen.
-        Alert.alert('Not sure where that is', "I couldn't map that to a screen. Try the tab bar at the bottom.");
+        // Unknown target — send to Home rather than a wrong screen.
+        navigation.navigate('HomeTab', { screen: 'Home' });
     }
   } catch {
     Alert.alert('Could not open', "I couldn't open that screen automatically.");
