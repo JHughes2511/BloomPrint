@@ -81,6 +81,10 @@ function goTo(navigation: any, target: { screen: string; params?: any; label?: s
       case 'staff_inbox':
       case 'inbox':
       case 'staff':
+      case 'messages':
+      case 'message':
+      case 'staff_messages':
+      case 'conversation':
         deep('HomeTab', 'Home', 'StaffInbox'); break;
       case 'notifications':
       case 'alerts':
