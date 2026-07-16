@@ -455,8 +455,19 @@ def ask(body: AskBody, db: Session = Depends(get_db), coach: models.Coach = Depe
         reply_text = "".join(b.text for b in resp.content if hasattr(b, "text")).strip()
         break
 
-    return {"reply": reply_text or "I couldn't work that out — try rephrasing.",
-            "navigate": result["navigate"], "pending_action": result["pending_action"]}
+    reply = reply_text
+    if not reply:
+        # Never show a generic error when we actually have something to offer.
+        if result["navigate"]:
+            reply = f"Here you go — tap “{result['navigate'].get('label', 'Take me there')}”."
+        elif result["pending_action"]:
+            reply = "I've set that up — confirm below and I'll run it."
+        else:
+            reply = ("I couldn't map that one. I can pull your player / team / game data, take you to any "
+                     "screen and walk you through how to do things (add a team, import players, track a game, "
+                     "run a film eval, build a report packet, share a report…), and create reports. "
+                     "Try asking for one of those.")
+    return {"reply": reply, "navigate": result["navigate"], "pending_action": result["pending_action"]}
 
 
 class ConfirmBody(BaseModel):
