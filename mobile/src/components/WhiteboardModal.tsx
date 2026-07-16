@@ -309,9 +309,12 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   const [freehandPlaying, setFreehandPlaying] = useState(false);
   const [freehandDone, setFreehandDone] = useState(false);
   const orderModeRef                    = useRef(false);
-  const arrowAtRef                      = useRef<(x: number, y: number) => Stroke | null>(() => null);
-  const assignStepRef                   = useRef<(id: string) => void>(() => {});
+  const arrowAtRef                      = useRef<any>(() => null);
+  const assignStepRef                   = useRef<any>(() => {});
+  const orderCounterRef                 = useRef(0);   // running number as you tap arrows
+  const activeSchemeRef                 = useRef<SchemeKey>('offense');
   useEffect(() => { orderModeRef.current = orderMode; }, [orderMode]);
+  useEffect(() => { activeSchemeRef.current = activeScheme; }, [activeScheme]);
   useEffect(() => { setOrderMode(false); }, [activeBoardIdx]);
   // Draw up from a report: pick a source type (Scout / Team), then a report.
   // The chosen report ATTACHES to the request (shown as a chip) so the text box
@@ -620,40 +623,70 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     return null;
   };
 
-  // Nearest hand-drawn (freehand) arrow to a point, for sequencing.
-  const arrowAt = (x: number, y: number): Stroke | null => {
-    const strokes = boardsRef.current[activeBoardIdxRef.current]?.strokes ?? [];
-    let best: Stroke | null = null, bd = 16;
-    for (const s of strokes) {
+  // Nearest orderable arrow to a point — a hand-drawn arrow OR one of the active
+  // scheme's action arrows (passes/movements). Returns which one to number.
+  const orderAt = (x: number, y: number): { kind: 'hand'; id: string } | { kind: 'action'; idx: number } | null => {
+    const b = boardsRef.current[activeBoardIdxRef.current];
+    if (!b) return null;
+    let best: { kind: 'hand'; id: string } | { kind: 'action'; idx: number } | null = null;
+    let bd = 26;
+    for (const s of b.strokes) {
       if (s.type !== 'arrow' || s.layer || s.x1 == null || s.y1 == null || s.x2 == null || s.y2 == null) continue;
       const d = distToSeg(x, y, s.x1, s.y1, s.x2, s.y2);
-      if (d < bd) { bd = d; best = s; }
+      if (d < bd) { bd = d; best = { kind: 'hand', id: s.id }; }
     }
+    const acts = b.ai?.schemes?.[activeSchemeRef.current]?.actions ?? [];
+    acts.forEach((a: any, idx: number) => {
+      if (!Array.isArray(a.from) || !Array.isArray(a.to)) return;
+      const p1 = unitToPx(a.from[0], a.from[1]), p2 = unitToPx(a.to[0], a.to[1]);
+      const d = distToSeg(x, y, p1.x, p1.y, p2.x, p2.y);
+      if (d < bd) { bd = d; best = { kind: 'action', idx }; }
+    });
     return best;
   };
-  arrowAtRef.current = arrowAt;
+  arrowAtRef.current = orderAt as any;
 
-  // Tap-to-order: assign the next number to an un-numbered freehand arrow, or
-  // clear it if it already has one.
-  const assignStep = (id: string) => {
+  // Tap-to-order: give the tapped arrow the next number in the sequence you tap.
+  const assignOrder = (target: { kind: 'hand'; id: string } | { kind: 'action'; idx: number }) => {
     const idx = activeBoardIdxRef.current;
     const b = boardsRef.current[idx];
     if (!b) return;
-    const target = b.strokes.find(s => s.id === id);
-    const handArrows = b.strokes.filter(s => s.type === 'arrow' && !s.layer);
-    const maxStep = handArrows.reduce((m, s) => Math.max(m, s.step ?? 0), 0);
-    const nextStep = target?.step != null ? undefined : maxStep + 1;
-    const updated = { ...b, strokes: b.strokes.map(s => s.id === id ? { ...s, step: nextStep } : s) };
+    const next = orderCounterRef.current + 1;
+    orderCounterRef.current = next;
+    let updated: Board;
+    if (target.kind === 'hand') {
+      updated = { ...b, strokes: b.strokes.map(s => s.id === target.id ? { ...s, step: next } : s) };
+    } else {
+      if (!b.ai) return;
+      const ai = JSON.parse(JSON.stringify(b.ai));
+      const sc = ai.schemes?.[activeSchemeRef.current];
+      if (!sc?.actions?.[target.idx]) return;
+      sc.actions[target.idx].step = next;
+      const keep = b.strokes.filter(st => !st.layer);
+      updated = { ...b, ai, strokes: [...keep, ...buildAllStrokes(ai, b.court_type)] };
+    }
     setBoards(prev => { const n = [...prev]; n[idx] = updated; return n; });
     saveBoardRef.current(idx, updated);
   };
-  assignStepRef.current = assignStep;
+  assignStepRef.current = assignOrder as any;
 
+  // Clear the order: hand-drawn arrows go back to draw order (no number); AI
+  // action arrows go back to the order they were placed (their array order).
   const clearOrder = () => {
     const idx = activeBoardIdx;
     const b = boards[idx];
     if (!b) return;
-    const updated = { ...b, strokes: b.strokes.map(s => (s.type === 'arrow' && !s.layer && s.step != null) ? { ...s, step: undefined } : s) };
+    orderCounterRef.current = 0;
+    let ai = b.ai;
+    if (ai) {
+      ai = JSON.parse(JSON.stringify(ai));
+      const sc = ai.schemes?.[activeScheme];
+      if (sc?.actions) sc.actions.forEach((a: any, i: number) => { a.step = i + 1; });
+    }
+    const cleared = b.strokes.map(s => (s.type === 'arrow' && !s.layer && s.step != null) ? { ...s, step: undefined } : s);
+    const updated: Board = ai
+      ? { ...b, ai, strokes: [...cleared.filter(st => !st.layer), ...buildAllStrokes(ai, b.court_type)] }
+      : { ...b, strokes: cleared };
     setBoards(prev => { const n = [...prev]; n[idx] = updated; return n; });
     saveBoard(idx, updated);
   };
@@ -858,8 +891,8 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       const { x, y } = mapPointRef.current(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
       startPoint.current = { x, y };
       if (orderModeRef.current) {
-        const hit = arrowAtRef.current(x, y);
-        if (hit) assignStepRef.current(hit.id);
+        const hit = (arrowAtRef.current as any)(x, y);
+        if (hit) (assignStepRef.current as any)(hit);
         return;
       }
       if (toolRef.current === 'move') {
@@ -1610,19 +1643,28 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     return els;
   };
 
-  // Number badges on sequenced freehand arrows (hidden during playback).
+  // Number badges: on sequenced freehand arrows (always), and on the active
+  // scheme's action arrows while ordering (so you can re-sequence passes/moves).
   const renderStepBadges = () => {
-    if (freehandPlaying || freehandDone) return null;
-    const strokes = boards[activeBoardIdx]?.strokes ?? [];
-    return strokes.filter(s => s.type === 'arrow' && !s.layer && s.step != null && s.x1 != null).map(s => {
-      const mx = (s.x1! + s.x2!) / 2, my = (s.y1! + s.y2!) / 2;
-      return (
-        <G key={`sb${s.id}`}>
-          <Circle cx={mx} cy={my} r={9} fill="#141414" opacity={0.9} />
-          <SvgText x={mx} y={my + 4} fill="#FFFFFF" fontSize={11} fontWeight="bold" textAnchor="middle">{String(s.step)}</SvgText>
-        </G>
-      );
-    });
+    if (freehandPlaying || freehandDone || animating || animDone) return null;
+    const b = boards[activeBoardIdx];
+    const els: React.ReactElement[] = [];
+    const badge = (key: string, x: number, y: number, n: any) => els.push(
+      <G key={key}>
+        <Circle cx={x} cy={y} r={9} fill="#141414" opacity={0.9} />
+        <SvgText x={x} y={y + 4} fill="#FFFFFF" fontSize={11} fontWeight="bold" textAnchor="middle">{String(n)}</SvgText>
+      </G>
+    );
+    (b?.strokes ?? []).filter(s => s.type === 'arrow' && !s.layer && s.step != null && s.x1 != null)
+      .forEach(s => badge(`sb${s.id}`, (s.x1! + s.x2!) / 2, (s.y1! + s.y2!) / 2, s.step));
+    if (orderMode) {
+      (b?.ai?.schemes?.[activeScheme]?.actions ?? []).forEach((a: any, i: number) => {
+        if (!Array.isArray(a.from) || !Array.isArray(a.to)) return;
+        const p1 = unitToPx(a.from[0], a.from[1]), p2 = unitToPx(a.to[0], a.to[1]);
+        badge(`ab${i}`, (p1.x + p2.x) / 2, (p1.y + p2.y) / 2, a.step ?? i + 1);
+      });
+    }
+    return els;
   };
 
   // On finishing a freehand play, if the board isn't named yet, have the AI
@@ -1715,8 +1757,8 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       )}
       {hasFreehandArrows && !selectedTextId && (
         <View style={styles.floatBar}>
-          <TouchableOpacity style={[styles.floatChip, orderMode && { backgroundColor: t.ctaBg, borderColor: t.ctaBg }]} onPress={() => setOrderMode(v => !v)}>
-            <Text style={[styles.floatChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Tap arrows' : 'Order'}</Text>
+          <TouchableOpacity style={[styles.floatChip, orderMode && { backgroundColor: t.ctaBg, borderColor: t.ctaBg }]} onPress={() => setOrderMode(v => { const nv = !v; if (nv) orderCounterRef.current = 0; return nv; })}>
+            <Text style={[styles.floatChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Tap arrows 1·2·3' : 'Order'}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.floatChip} onPress={clearOrder}><Text style={styles.floatChipText}>Clear</Text></TouchableOpacity>
           <TouchableOpacity
@@ -1808,6 +1850,16 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
               <Ionicons name="people-outline" size={13} color={t.muted} />
               <Text style={styles.schemeChipText}>Players</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.schemeChip, orderMode && styles.schemeChipActive]}
+              onPress={() => setOrderMode(v => { const nv = !v; if (nv) orderCounterRef.current = 0; return nv; })}>
+              <Text style={[styles.schemeChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Tap 1·2·3' : 'Order'}</Text>
+            </TouchableOpacity>
+            {orderMode && (
+              <TouchableOpacity style={styles.schemeChip} onPress={clearOrder}>
+                <Text style={styles.schemeChipText}>Clear</Text>
+              </TouchableOpacity>
+            )}
             {pinCount > 0 && (
               <TouchableOpacity
                 style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
