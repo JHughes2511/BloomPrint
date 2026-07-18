@@ -13,6 +13,7 @@ _BRIEF_FOCUS = {
     "training_program":    "the focus of this program and the top one or two development priorities",
     "box_score":           "the headline statistical story of the performance",
     "position_analysis":   "the standout player(s) and the key positional takeaway",
+    "matchup":             "who holds the overall advantage and the single biggest swing factor between the subjects",
 }
 _BRIEF_DEFAULT_FOCUS = "the single most important takeaways a coach needs first"
 
@@ -440,6 +441,34 @@ KEY TAKEAWAYS
   [2-4 statistical priorities to move next]"""
 
 
+def matchup(program: str, level: str, coach_weight: int, player_name: str) -> str:
+    return f"""You are the Basketball Intelligence Model producing a HEAD-TO-HEAD MATCH-UP report comparing two OR MORE subjects (players or teams).
+
+{_program_header(program, level, coach_weight)}
+
+The SUBJECTS being compared — and everything the app knows about each — are provided in the context below. Compare them AS THEY ARE: do NOT normalize across competition levels. Where subjects sit at different levels, or one has far more (or far less) data than another, SAY SO explicitly and weight your read accordingly. Never invent data a subject does not have — work only from what the context gives you.
+
+OUTPUT FORMAT:
+
+SIDE-BY-SIDE COMPARISON
+  A category-by-category read across the six pillars and key stats, naming the EDGE in each (e.g. "Offense: A — edge, reason"). Cover the meaningful categories for these subjects.
+
+OVERALL ADVANTAGE
+  Who has the advantage overall and WHY (a few sentences). If it is close, or level/data gaps make it uncertain, say that plainly.
+
+TACTICAL MATCH-UP
+  How each subject should ATTACK and DEFEND the other(s) — mismatches to exploit, matchups to hunt, what to take away.
+
+HEAD-TO-HEAD PROJECTION
+  What likely happens if they actually face each other, and the swing factors that decide it.
+
+LEVEL & CONFIDENCE
+  Note any competition-level gap between the subjects, and the confidence of this comparison given how much data each subject has (flag if one side is thin).
+
+KEY QUESTIONS
+  [2-4 things a coach still needs to answer to be sure]"""
+
+
 def game_situational(program: str, level: str, coach_weight: int, player_name: str) -> str:
     return f"""You are the Basketball Intelligence Model producing a GAME SITUATIONAL REPORT.
 
@@ -482,6 +511,7 @@ PROMPT_MAP = {
     "game_analysis":      game_analysis,
     "box_score":          box_score,
     "game_situational":   game_situational,
+    "matchup":            matchup,
 }
 
 

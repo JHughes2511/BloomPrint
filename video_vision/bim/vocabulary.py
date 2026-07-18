@@ -124,4 +124,5 @@ OUTPUT_TYPES = [
     "game_analysis",
     "box_score",
     "game_situational",
+    "matchup",
 ]

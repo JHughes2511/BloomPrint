@@ -165,6 +165,69 @@ def _tokens_to_refs(tokens: str | None, coach_id: int) -> list[str]:
     return refs
 
 
+def _gather_player_dossier(db, coach, player) -> str:
+    """Everything the app knows about a player — for a MATCH-UP comparison. Pulls
+    the player's own evals (grades, pillars, flags, latest report), training,
+    tracked box-score stats, and any mention of them across the coach's game /
+    team / scouting reports and the reports shared into their inbox."""
+    from .game_eval import player_tracked_stats_block
+    name = player.name
+    lines = [f"=== {name} ==="]
+    lines.append(
+        f"Position: {player.position or 'N/A'} | Height: {player.height or 'N/A'} | "
+        f"Level: {player.competition_level or 'N/A'}"
+        + (f" | Team: {player.program_name}" if getattr(player, 'program_name', None) else "")
+    )
+    own = [e for e in player.evaluations if e.coach_id == coach.id] or list(player.evaluations)
+    own = sorted(own, key=lambda e: e.id or 0, reverse=True)
+    if own:
+        latest = own[0]
+        if latest.overall_grade is not None:
+            lines.append(f"Latest BIM grade: {latest.overall_grade}/10 ({latest.output_type})")
+        try:
+            pg = ", ".join(f"{k}: {v}" for k, v in (latest.pillar_grades or {}).items())
+            if pg:
+                lines.append(f"Pillars: {pg}")
+        except Exception:
+            pass
+        if latest.green_flags:
+            lines.append("Green flags: " + "; ".join(str(x) for x in latest.green_flags[:4]))
+        if latest.watch_flags:
+            lines.append("Watch flags: " + "; ".join(str(x) for x in latest.watch_flags[:4]))
+        lines.append(f"Evaluations on file: {len(own)}")
+        if latest.report_text:
+            lines.append("From latest report:\n" + latest.report_text[:900])
+    else:
+        lines.append("No evaluations on file for this subject.")
+    tr = db.query(models.TrainingSession).filter_by(coach_id=coach.id, player_id=player.id).count()
+    if tr:
+        lines.append(f"Training programs on file: {tr}")
+    game_ids = [g.id for g in db.query(models.GameSession).filter_by(coach_id=coach.id).all()]
+    stats = player_tracked_stats_block(db, coach.id, name, game_ids) if game_ids else ""
+    if stats and "No tracked" not in stats:
+        lines.append(stats[:900])
+    # Mentions across other reports (by name).
+    mentions: list[str] = []
+
+    def _grab(text, src):
+        if text and name and name.lower() in text.lower() and len(mentions) < 6:
+            idx = text.lower().find(name.lower())
+            snippet = text[max(0, idx - 120):idx + 220].strip().replace("\n", " ")
+            mentions.append(f"[{src}] …{snippet}…")
+
+    for gr in db.query(models.GameReport).filter_by(coach_id=coach.id).limit(30).all():
+        _grab(gr.report_text, "game report")
+    for trp in db.query(models.TeamReport).filter_by(coach_id=coach.id).limit(30).all():
+        _grab(trp.report_text, "team report")
+    for gs in db.query(models.GameSession).filter_by(coach_id=coach.id).limit(40).all():
+        _grab(getattr(gs, "ai_scouting_report", None), f"scouting vs {gs.opponent_name}")
+    for sh in db.query(models.StaffSharedReport).filter_by(recipient_id=coach.id).limit(30).all():
+        _grab(sh.frozen_text, "shared with you")
+    if mentions:
+        lines.append("Mentioned in other reports:\n" + "\n".join(mentions))
+    return "\n".join(lines)
+
+
 @router.post("")
 async def submit_evaluation(
     background_tasks: BackgroundTasks,
@@ -177,6 +240,7 @@ async def submit_evaluation(
     max_frames: int = Form(10),
     include_audio: bool = Form(False),
     game_ids: str | None = Form(None),   # comma-separated tracked game ids (box score)
+    matchup_player_ids: str | None = Form(None),  # comma-separated player ids to compare against
     video_tokens: str | None = Form(None),  # comma-separated tokens from /upload-video
     video: UploadFile | None = File(None),
     db: Session = Depends(get_db),
@@ -217,6 +281,24 @@ async def submit_evaluation(
             from .game_eval import player_tracked_stats_block
             combined_focus += player_tracked_stats_block(db, coach.id, player.name, gid_list)
     combined_focus += system_profile_block(coach)
+
+    # MATCH-UP: aggregate everything the app knows about each subject and hand it
+    # to the model as the comparison material (works for film + text-only paths).
+    from video_vision.bim import parse_output_types
+    if "matchup" in parse_output_types(output_type):
+        ids = [int(x) for x in (matchup_player_ids or "").split(",") if x.strip().isdigit()]
+        others = [db.get(models.Player, i) for i in ids]
+        subjects = [player] + [p for p in others if p and p.id != player.id]
+        names = " vs ".join(p.name for p in subjects)
+        dossiers = "\n\n".join(_gather_player_dossier(db, coach, p) for p in subjects)
+        combined_focus += (
+            f"\n\nMATCH-UP SUBJECTS — {names}. Compare these subjects head-to-head using ONLY the data "
+            f"below. Compare them AS THEY ARE (do not normalize across competition levels); flag any "
+            f"level gap and, if a subject's data is thin, note the confidence gap. "
+            + ("(Only one subject was given — describe how they would match up against a typical "
+               "opponent at their level.)\n\n" if len(subjects) < 2 else "\n\n")
+            + dossiers
+        )
 
     # Collect film: pre-uploaded tokens (multiple) and/or one direct file (legacy).
     from ..storage import save_fileobj
