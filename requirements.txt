@@ -1,0 +1,17 @@
+# API-server runtime deps (core web stack). Installs cleanly on any Python 3.10+.
+# The heavy video-analysis deps (opencv-python-headless, openai-whisper, numpy,
+# Pillow, mcp) are declared in pyproject.toml and imported lazily — install them
+# with `pip install -e .` when you need the film-analysis / transcribe routes.
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+sqlalchemy>=2.0.0
+python-multipart>=0.0.9
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+bcrypt>=4.0.0
+aiofiles>=23.0.0
+openpyxl>=3.1.0
+python-docx>=1.1.0
+google-auth>=2.28.0
+boto3>=1.34.0
+anthropic>=0.40.0
