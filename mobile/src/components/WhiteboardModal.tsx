@@ -56,7 +56,6 @@ interface Stroke {
   side?: 'off' | 'def';           // offensive vs defensive element (for ghosting)
   step?: number;                  // animation order within a scheme (1-based)
   opacity?: number;               // render opacity (ghosting)
-  ball?: boolean;                 // this player/marker starts the play with the ball
 }
 
 type SchemeKey = 'offense' | 'defense' | 'counter';
@@ -314,17 +313,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   const assignStepRef                   = useRef<any>(() => {});
   const orderCounterRef                 = useRef(0);   // running number as you tap arrows
   const activeSchemeRef                 = useRef<SchemeKey>('offense');
-  const [ballMode, setBallMode]         = useState(false);   // tap a player to give them the ball
-  const ballModeRef                     = useRef(false);
-  const markerAtRef                     = useRef<any>(() => null);
-  const setBallRef                      = useRef<any>(() => {});
-  useEffect(() => { ballModeRef.current = ballMode; }, [ballMode]);
-  useEffect(() => { setBallMode(false); }, [activeBoardIdx]);
   useEffect(() => { orderModeRef.current = orderMode; }, [orderMode]);
-  const exitPlayRef = useRef<() => void>(() => {});
-  // Drop out of the "played" view (so badges show + the board is editable again)
-  // whenever the coach starts ordering, picks the ball, or draws.
-  useEffect(() => { if (orderMode || ballMode) exitPlayRef.current(); }, [orderMode, ballMode]);
   useEffect(() => { activeSchemeRef.current = activeScheme; }, [activeScheme]);
   useEffect(() => { setOrderMode(false); }, [activeBoardIdx]);
   // Draw up from a report: pick a source type (Scout / Team), then a report.
@@ -657,27 +646,22 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   };
   arrowAtRef.current = orderAt as any;
 
-  // Tap-to-order: tapping an arrow gives it the NEXT number after the highest so
-  // far (so tapping in sequence builds 1·2·3). Tapping a numbered hand-drawn arrow
-  // again removes its number (toggle). No shared counter → no collisions.
+  // Tap-to-order: give the tapped arrow the next number in the sequence you tap.
   const assignOrder = (target: { kind: 'hand'; id: string } | { kind: 'action'; idx: number }) => {
     const idx = activeBoardIdxRef.current;
     const b = boardsRef.current[idx];
     if (!b) return;
+    const next = orderCounterRef.current + 1;
+    orderCounterRef.current = next;
     let updated: Board;
     if (target.kind === 'hand') {
-      const cur = b.strokes.find(s => s.id === target.id);
-      const maxStep = b.strokes.filter(s => s.type === 'arrow' && !s.layer).reduce((m, s) => Math.max(m, s.step ?? 0), 0);
-      const nextStep = cur?.step != null ? undefined : maxStep + 1;   // toggle off if already numbered
-      updated = { ...b, strokes: b.strokes.map(s => s.id === target.id ? { ...s, step: nextStep } : s) };
+      updated = { ...b, strokes: b.strokes.map(s => s.id === target.id ? { ...s, step: next } : s) };
     } else {
       if (!b.ai) return;
       const ai = JSON.parse(JSON.stringify(b.ai));
       const sc = ai.schemes?.[activeSchemeRef.current];
-      const acts = sc?.actions ?? [];
-      if (!acts[target.idx]) return;
-      const maxStep = acts.reduce((m: number, x: any) => Math.max(m, x.step ?? 0), 0);
-      acts[target.idx].step = maxStep + 1;   // AI actions always keep a step; bump to end
+      if (!sc?.actions?.[target.idx]) return;
+      sc.actions[target.idx].step = next;
       const keep = b.strokes.filter(st => !st.layer);
       updated = { ...b, ai, strokes: [...keep, ...buildAllStrokes(ai, b.court_type)] };
     }
@@ -685,38 +669,6 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     saveBoardRef.current(idx, updated);
   };
   assignStepRef.current = assignOrder as any;
-
-  // Ball mode: nearest hand-drawn player/marker to a tap.
-  const markerAt = (x: number, y: number): string | null => {
-    const b = boardsRef.current[activeBoardIdxRef.current];
-    if (!b) return null;
-    let best: string | null = null, bd = 30;
-    for (const s of b.strokes) {
-      if ((s.type !== 'circle' && s.type !== 'xmark') || s.layer || s.cx == null || s.cy == null) continue;
-      const d = Math.hypot(x - s.cx, y - s.cy);
-      if (d < bd) { bd = d; best = s.id; }
-    }
-    return best;
-  };
-  markerAtRef.current = markerAt;
-
-  // Give a marker the ball (only one holder at a time; tap again to remove).
-  const setBallHolder = (id: string) => {
-    const idx = activeBoardIdxRef.current;
-    const b = boardsRef.current[idx];
-    if (!b) return;
-    const on = !b.strokes.find(s => s.id === id)?.ball;
-    const updated = {
-      ...b,
-      strokes: b.strokes.map(s => {
-        if (s.type !== 'circle' && s.type !== 'xmark') return s;
-        return s.id === id ? { ...s, ball: on } : (s.ball ? { ...s, ball: false } : s);
-      }),
-    };
-    setBoards(prev => { const n = [...prev]; n[idx] = updated; return n; });
-    saveBoardRef.current(idx, updated);
-  };
-  setBallRef.current = setBallHolder;
 
   // Clear the order: hand-drawn arrows go back to draw order (no number); AI
   // action arrows go back to the order they were placed (their array order).
@@ -938,11 +890,6 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     onPanResponderGrant: (evt) => {
       const { x, y } = mapPointRef.current(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
       startPoint.current = { x, y };
-      if (ballModeRef.current) {
-        const mid = markerAtRef.current(x, y);
-        if (mid) setBallRef.current(mid);
-        return;
-      }
       if (orderModeRef.current) {
         const hit = (arrowAtRef.current as any)(x, y);
         if (hit) (assignStepRef.current as any)(hit);
@@ -992,7 +939,6 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       const c   = colorRef.current;
 
       const push = (stroke: Stroke) => {
-        exitPlayRef.current();   // drawing leaves the "played" view
         setBoards(prev => {
           const next    = [...prev];
           const updated = { ...next[idx], strokes: [...next[idx].strokes, stroke] };
@@ -1444,9 +1390,6 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   // Play the FREEHAND drawing: run the hand-drawn arrows in order — a player
   // (circle/X) whose spot an arrow starts on slides along it; a blue dashed arrow
   // sends a ball. On an unnamed board, review + auto-name it when done.
-  const exitPlay = () => { animCancel.current = true; setFreehandPlaying(false); setFreehandDone(false); };
-  exitPlayRef.current = exitPlay;
-
   const playFreehand = () => {
     const seq = freehandSequence();
     if (!seq.length) return;
@@ -1675,39 +1618,6 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       const mv = moverOf(s);
       if (mv && !active[mv]) active[mv] = s;
     });
-
-    // ── Single ball that follows the play automatically ──
-    const nearestMarkerId = (p: { x: number; y: number }): string | null => {
-      let mv: string | null = null, bd = 40;
-      for (const m of markers) { const d = Math.hypot(pos[m.id].x - p.x, pos[m.id].y - p.y); if (d < bd) { bd = d; mv = m.id; } }
-      return mv;
-    };
-    // Start: the picked ball-handler, else infer from the first pass / first arrow.
-    let holderId: string | null = markers.find(m => m.ball)?.id ?? null;
-    if (!holderId) {
-      const ref = (seq.find(x => x.s.dash) ?? seq[0])?.s;
-      if (ref && ref.x1 != null) holderId = nearestMarkerId({ x: ref.x1, y: ref.y1! });
-    }
-    let ballPos: { x: number; y: number } | null = holderId ? { ...pos[holderId] } : null;
-    // Settle the ball through prior steps: a pass hands it to the receiver; a
-    // dribble/move by the holder carries it along.
-    for (const st of steps) {
-      if (st >= curStep) break;
-      if (!ballPos) break;
-      const acts = seq.filter(x => x.step === st);
-      const pass = acts.find(x => x.s.dash);
-      if (pass) { ballPos = { x: pass.s.x2!, y: pass.s.y2! }; holderId = nearestMarkerId(ballPos); }
-      else if (holderId && pos[holderId]) { ballPos = { ...pos[holderId] }; }
-    }
-    // Current step: does the ball travel? (a pass, or the holder dribbling)
-    let ballTravelTo: { x: number; y: number } | null = null;
-    if (ballPos) {
-      const curActs = seq.filter(x => x.step === curStep);
-      const curPass = curActs.find(x => x.s.dash);
-      if (curPass) ballTravelTo = { x: curPass.s.x2!, y: curPass.s.y2! };
-      else if (holderId && active[holderId]) ballTravelTo = { x: active[holderId].x2!, y: active[holderId].y2! };
-    }
-
     const els: any[] = [];
     markers.forEach(m => {
       const at = pos[m.id];
@@ -1720,51 +1630,23 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         els.push(<G key={`fm${m.id}`}>{renderStroke({ ...m, cx: at.x, cy: at.y })}</G>);
       }
     });
-    // Arrows draw in (no per-pass ball anymore — the single ball below carries it).
     seq.forEach(({ s, step }, i) => {
       if (step > curStep) return;
       if (step < curStep) { els.push(renderStroke({ ...s, id: `fa${i}` })); return; }
       els.push(renderAnimatedArrow({ ...s, id: `fa${i}` }));
-    });
-    // The ball — a small basketball that follows possession automatically.
-    const ballGlyph = (cx: number, cy: number) => (
-      <G>
-        <Circle cx={cx} cy={cy} r={7} fill={BALL} stroke="#FFFFFF" strokeWidth={1.5} />
-        <Line x1={cx - 7} y1={cy} x2={cx + 7} y2={cy} stroke="#8a4b1e" strokeWidth={1} />
-        <Line x1={cx} y1={cy - 7} x2={cx} y2={cy + 7} stroke="#8a4b1e" strokeWidth={1} />
-      </G>
-    );
-    if (ballPos && freehandPlaying) {   // only the moving ball during playback
-      if (ballTravelTo) {
-        const tx = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, ballTravelTo.x - ballPos.x] });
-        const ty = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, ballTravelTo.y - ballPos.y] });
-        els.push(<AnimatedG key="fball" translateX={tx as any} translateY={ty as any}>{ballGlyph(ballPos.x, ballPos.y)}</AnimatedG>);
-      } else {
-        els.push(<G key="fball">{ballGlyph(ballPos.x, ballPos.y)}</G>);
+      if (s.dash) {
+        const tx = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, s.x2! - s.x1!] });
+        const ty = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, s.y2! - s.y1!] });
+        els.push(<AnimatedG key={`fb${i}`} translateX={tx as any} translateY={ty as any}><Circle cx={s.x1} cy={s.y1} r={6} fill={BALL} /></AnimatedG>);
       }
-    }
+    });
     return els;
-  };
-
-  // A basketball on the player who starts with the ball (freehand boards). Hidden
-  // during playback — the moving ball shows possession then.
-  const renderBallHolder = () => {
-    if (freehandPlaying || freehandDone) return null;
-    const holder = (boards[activeBoardIdx]?.strokes ?? []).find(s => s.ball && !s.layer && s.cx != null);
-    if (!holder) return null;
-    return (
-      <G key="ballholder">
-        <Circle cx={holder.cx! + 13} cy={holder.cy! - 13} r={7} fill="#E67E22" stroke="#FFFFFF" strokeWidth={1.5} />
-        <Line x1={holder.cx! + 6} y1={holder.cy! - 13} x2={holder.cx! + 20} y2={holder.cy! - 13} stroke="#8a4b1e" strokeWidth={1} />
-        <Line x1={holder.cx! + 13} y1={holder.cy! - 20} x2={holder.cx! + 13} y2={holder.cy! - 6} stroke="#8a4b1e" strokeWidth={1} />
-      </G>
-    );
   };
 
   // Number badges: on sequenced freehand arrows (always), and on the active
   // scheme's action arrows while ordering (so you can re-sequence passes/moves).
   const renderStepBadges = () => {
-    if (freehandPlaying || animating) return null;   // hidden only during active playback
+    if (freehandPlaying || freehandDone || animating || animDone) return null;
     const b = boards[activeBoardIdx];
     const els: React.ReactElement[] = [];
     const badge = (key: string, x: number, y: number, n: any) => els.push(
@@ -1873,30 +1755,22 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
           )}
         </View>
       )}
+      {hasFreehandArrows && !selectedTextId && (
+        <View style={styles.floatBar}>
+          <TouchableOpacity style={[styles.floatChip, orderMode && { backgroundColor: t.ctaBg, borderColor: t.ctaBg }]} onPress={() => setOrderMode(v => { const nv = !v; if (nv) orderCounterRef.current = 0; return nv; })}>
+            <Text style={[styles.floatChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Tap arrows 1·2·3' : 'Order'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.floatChip} onPress={clearOrder}><Text style={styles.floatChipText}>Clear</Text></TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.floatChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
+            onPress={() => { if (freehandPlaying) { animCancel.current = true; setFreehandPlaying(false); setFreehandDone(true); } else playFreehand(); }}>
+            <Ionicons name={freehandPlaying ? 'stop' : freehandDone ? 'refresh' : 'play'} size={13} color={t.ctaText} />
+            <Text style={[styles.floatChipText, { color: t.ctaText }]}>{freehandPlaying ? 'Stop' : freehandDone ? 'Replay' : 'Play drawing'}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
-
-  // Freehand controls as a NORMAL row (above the court, not covering it) so you
-  // can tap every arrow to order it. Shown when there are hand-drawn arrows.
-  const freehandBar = hasFreehandArrows ? (
-    <View style={styles.fhBar}>
-      <TouchableOpacity style={[styles.fhChip, orderMode && styles.fhChipActive]} onPress={() => { setBallMode(false); setOrderMode(v => !v); }}>
-        <Text style={[styles.fhChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Ordering' : 'Order'}</Text>
-      </TouchableOpacity>
-      {orderMode && (
-        <TouchableOpacity style={styles.fhChip} onPress={clearOrder}><Text style={styles.fhChipText}>Clear</Text></TouchableOpacity>
-      )}
-      <TouchableOpacity style={[styles.fhChip, ballMode && styles.fhChipActive]} onPress={() => { setOrderMode(false); setBallMode(v => !v); }}>
-        <Text style={[styles.fhChipText, ballMode && { color: t.ctaText }]}>{ballMode ? 'Pick handler' : '🏀 Ball'}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.fhChip, styles.fhChipCta]}
-        onPress={() => { if (freehandPlaying) { animCancel.current = true; setFreehandPlaying(false); setFreehandDone(true); } else playFreehand(); }}>
-        <Ionicons name={freehandPlaying ? 'stop' : freehandDone ? 'refresh' : 'play'} size={12} color={t.ctaText} />
-        <Text style={[styles.fhChipText, { color: t.ctaText }]}>{freehandPlaying ? 'Stop' : freehandDone ? 'Replay' : 'Play'}</Text>
-      </TouchableOpacity>
-    </View>
-  ) : null;
 
   if (!visible) return null;
 
@@ -1978,7 +1852,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.schemeChip, orderMode && styles.schemeChipActive]}
-              onPress={() => setOrderMode(v => !v)}>
+              onPress={() => setOrderMode(v => { const nv = !v; if (nv) orderCounterRef.current = 0; return nv; })}>
               <Text style={[styles.schemeChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Tap 1·2·3' : 'Order'}</Text>
             </TouchableOpacity>
             {orderMode && (
@@ -2035,8 +1909,6 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
           </View>
         </View>
 
-        {freehandBar}
-
         {/* Canvas — court scales to fit the available area for the chosen view */}
         {loading ? (
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -2072,7 +1944,6 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                   {renderCourtStrokes()}
                   {renderDragHandles()}
                   {renderStepBadges()}
-                  {renderBallHolder()}
                   {livePath ? (
                     <Path d={livePath} stroke={color} strokeWidth={STROKE_WIDTH}
                           fill="none" strokeLinecap="round" strokeLinejoin="round" />
@@ -2551,11 +2422,6 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   floatBar:        { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, maxWidth: '94%', backgroundColor: t.sheet, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 6, borderWidth: 1, borderColor: t.cardBorder, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 5 },
   floatChip:       { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: t.line, backgroundColor: t.card },
   floatChipText:   { color: t.inkSoft, fontSize: 12.5, fontFamily: fonts[700] },
-  fhBar:           { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: t.divider },
-  fhChip:          { flexDirection: 'row', alignItems: 'center', gap: 4, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 5, borderWidth: 1, borderColor: t.line, minHeight: 30 },
-  fhChipActive:    { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
-  fhChipCta:       { backgroundColor: t.ctaBg, borderColor: t.ctaBg, marginLeft: 'auto' },
-  fhChipText:      { color: t.muted, fontSize: 12.5, fontFamily: fonts[700] },
   adaptOverlay:    { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: t.scrim, paddingHorizontal: 30 },
   adaptCard:       { backgroundColor: t.sheet, borderRadius: 16, padding: 20, width: '100%', maxWidth: 360, borderWidth: 1, borderColor: t.cardBorder },
 });
