@@ -13,6 +13,7 @@ import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
 import CommandBar from '../components/CommandBar';
 import CountryField from '../components/CountryField';
+import VoiceTextInput from '../components/VoiceTextInput';
 
 // Which bottom tab each report type routes to when tapped on the Home page.
 //   RosterTab   = Roster      TeamTab = Team Eval      TeamEvalTab = Team Grade
@@ -84,6 +85,25 @@ export default function HomeScreen() {
   const [sys, setSys] = useState<Record<string, string>>({});
   const [savingSystem, setSavingSystem] = useState(false);
   const [importingPhilosophy, setImportingPhilosophy] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
+
+  const submitFeedback = async () => {
+    const text = feedbackText.trim();
+    if (!text) return;
+    setSubmittingFeedback(true);
+    try {
+      // TODO: wire up what happens on submit (per your instructions to come).
+      Alert.alert('Thanks!', 'Your feedback has been submitted.');
+      setFeedbackText('');
+      setShowFeedback(false);
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not submit your feedback.');
+    } finally {
+      setSubmittingFeedback(false);
+    }
+  };
 
   const importPhilosophyDoc = async () => {
     try {
@@ -234,6 +254,19 @@ export default function HomeScreen() {
                 </Card>
               </TouchableOpacity>
             ))}
+            {/* Feedback — questions, comments, or issues */}
+            <TouchableOpacity
+              key="feedback"
+              style={{ width: '48%' }}
+              activeOpacity={0.7}
+              onPress={() => setShowFeedback(true)}
+            >
+              <Card padding={16} style={{ flex: 1 }}>
+                <IconTile name="message-square" variant="accent" size={44} />
+                <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 15.5, marginTop: 12 }]}>Feedback</Text>
+                <Text style={[typeScale.bodySoft, { color: t.muted, fontSize: 12, lineHeight: 17, marginTop: 4 }]}>Questions, comments, or issues — tell us anything</Text>
+              </Card>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -256,6 +289,38 @@ export default function HomeScreen() {
           </Card>
         </View>
       </ScrollView>
+
+      {/* Feedback modal */}
+      <Modal visible={showFeedback} transparent animationType="slide" onRequestClose={() => setShowFeedback(false)}>
+        <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, padding: 24, paddingBottom: 36 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20 }]}>Feedback</Text>
+              <TouchableOpacity onPress={() => setShowFeedback(false)}>
+                <Icon name="x" size={22} color={t.muted} strokeWidth={2} />
+              </TouchableOpacity>
+            </View>
+            <Text style={{ color: t.muted, fontSize: 13, lineHeight: 19, marginBottom: 14 }}>
+              Have a question, comment, or issue? Tell us anything — we read every note.
+            </Text>
+            <VoiceTextInput
+              style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line, minHeight: 120 }}
+              value={feedbackText} onChangeText={setFeedbackText}
+              placeholder="What's on your mind?" placeholderTextColor={t.muted2}
+              multiline textAlignVertical="top"
+            />
+            <TouchableOpacity
+              style={{ marginTop: 16, backgroundColor: t.ctaBg, borderRadius: 12, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, opacity: (!feedbackText.trim() || submittingFeedback) ? 0.5 : 1 }}
+              onPress={submitFeedback}
+              disabled={!feedbackText.trim() || submittingFeedback}
+            >
+              {submittingFeedback
+                ? <ActivityIndicator color={t.ctaText} size="small" />
+                : <><Icon name="send" size={16} color={t.ctaText} strokeWidth={2} /><Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 15 }}>Submit</Text></>}
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       {/* Profile edit modal */}
       <Modal visible={showProfile} transparent animationType="slide" onRequestClose={() => setShowProfile(false)}>
