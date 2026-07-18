@@ -56,6 +56,7 @@ interface Stroke {
   side?: 'off' | 'def';           // offensive vs defensive element (for ghosting)
   step?: number;                  // animation order within a scheme (1-based)
   opacity?: number;               // render opacity (ghosting)
+  ball?: boolean;                 // this player/marker starts the play with the ball
 }
 
 type SchemeKey = 'offense' | 'defense' | 'counter';
@@ -313,6 +314,12 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   const assignStepRef                   = useRef<any>(() => {});
   const orderCounterRef                 = useRef(0);   // running number as you tap arrows
   const activeSchemeRef                 = useRef<SchemeKey>('offense');
+  const [ballMode, setBallMode]         = useState(false);   // tap a player to give them the ball
+  const ballModeRef                     = useRef(false);
+  const markerAtRef                     = useRef<any>(() => null);
+  const setBallRef                      = useRef<any>(() => {});
+  useEffect(() => { ballModeRef.current = ballMode; }, [ballMode]);
+  useEffect(() => { setBallMode(false); }, [activeBoardIdx]);
   useEffect(() => { orderModeRef.current = orderMode; }, [orderMode]);
   useEffect(() => { activeSchemeRef.current = activeScheme; }, [activeScheme]);
   useEffect(() => { setOrderMode(false); }, [activeBoardIdx]);
@@ -646,22 +653,27 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   };
   arrowAtRef.current = orderAt as any;
 
-  // Tap-to-order: give the tapped arrow the next number in the sequence you tap.
+  // Tap-to-order: tapping an arrow gives it the NEXT number after the highest so
+  // far (so tapping in sequence builds 1·2·3). Tapping a numbered hand-drawn arrow
+  // again removes its number (toggle). No shared counter → no collisions.
   const assignOrder = (target: { kind: 'hand'; id: string } | { kind: 'action'; idx: number }) => {
     const idx = activeBoardIdxRef.current;
     const b = boardsRef.current[idx];
     if (!b) return;
-    const next = orderCounterRef.current + 1;
-    orderCounterRef.current = next;
     let updated: Board;
     if (target.kind === 'hand') {
-      updated = { ...b, strokes: b.strokes.map(s => s.id === target.id ? { ...s, step: next } : s) };
+      const cur = b.strokes.find(s => s.id === target.id);
+      const maxStep = b.strokes.filter(s => s.type === 'arrow' && !s.layer).reduce((m, s) => Math.max(m, s.step ?? 0), 0);
+      const nextStep = cur?.step != null ? undefined : maxStep + 1;   // toggle off if already numbered
+      updated = { ...b, strokes: b.strokes.map(s => s.id === target.id ? { ...s, step: nextStep } : s) };
     } else {
       if (!b.ai) return;
       const ai = JSON.parse(JSON.stringify(b.ai));
       const sc = ai.schemes?.[activeSchemeRef.current];
-      if (!sc?.actions?.[target.idx]) return;
-      sc.actions[target.idx].step = next;
+      const acts = sc?.actions ?? [];
+      if (!acts[target.idx]) return;
+      const maxStep = acts.reduce((m: number, x: any) => Math.max(m, x.step ?? 0), 0);
+      acts[target.idx].step = maxStep + 1;   // AI actions always keep a step; bump to end
       const keep = b.strokes.filter(st => !st.layer);
       updated = { ...b, ai, strokes: [...keep, ...buildAllStrokes(ai, b.court_type)] };
     }
@@ -669,6 +681,38 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     saveBoardRef.current(idx, updated);
   };
   assignStepRef.current = assignOrder as any;
+
+  // Ball mode: nearest hand-drawn player/marker to a tap.
+  const markerAt = (x: number, y: number): string | null => {
+    const b = boardsRef.current[activeBoardIdxRef.current];
+    if (!b) return null;
+    let best: string | null = null, bd = 30;
+    for (const s of b.strokes) {
+      if ((s.type !== 'circle' && s.type !== 'xmark') || s.layer || s.cx == null || s.cy == null) continue;
+      const d = Math.hypot(x - s.cx, y - s.cy);
+      if (d < bd) { bd = d; best = s.id; }
+    }
+    return best;
+  };
+  markerAtRef.current = markerAt;
+
+  // Give a marker the ball (only one holder at a time; tap again to remove).
+  const setBallHolder = (id: string) => {
+    const idx = activeBoardIdxRef.current;
+    const b = boardsRef.current[idx];
+    if (!b) return;
+    const on = !b.strokes.find(s => s.id === id)?.ball;
+    const updated = {
+      ...b,
+      strokes: b.strokes.map(s => {
+        if (s.type !== 'circle' && s.type !== 'xmark') return s;
+        return s.id === id ? { ...s, ball: on } : (s.ball ? { ...s, ball: false } : s);
+      }),
+    };
+    setBoards(prev => { const n = [...prev]; n[idx] = updated; return n; });
+    saveBoardRef.current(idx, updated);
+  };
+  setBallRef.current = setBallHolder;
 
   // Clear the order: hand-drawn arrows go back to draw order (no number); AI
   // action arrows go back to the order they were placed (their array order).
@@ -890,6 +934,11 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     onPanResponderGrant: (evt) => {
       const { x, y } = mapPointRef.current(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
       startPoint.current = { x, y };
+      if (ballModeRef.current) {
+        const mid = markerAtRef.current(x, y);
+        if (mid) setBallRef.current(mid);
+        return;
+      }
       if (orderModeRef.current) {
         const hit = (arrowAtRef.current as any)(x, y);
         if (hit) (assignStepRef.current as any)(hit);
@@ -1643,6 +1692,19 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     return els;
   };
 
+  // A basketball on the player who starts with the ball (freehand boards).
+  const renderBallHolder = () => {
+    const holder = (boards[activeBoardIdx]?.strokes ?? []).find(s => s.ball && !s.layer && s.cx != null);
+    if (!holder) return null;
+    return (
+      <G key="ballholder">
+        <Circle cx={holder.cx! + 13} cy={holder.cy! - 13} r={7} fill="#E67E22" stroke="#FFFFFF" strokeWidth={1.5} />
+        <Line x1={holder.cx! + 6} y1={holder.cy! - 13} x2={holder.cx! + 20} y2={holder.cy! - 13} stroke="#8a4b1e" strokeWidth={1} />
+        <Line x1={holder.cx! + 13} y1={holder.cy! - 20} x2={holder.cx! + 13} y2={holder.cy! - 6} stroke="#8a4b1e" strokeWidth={1} />
+      </G>
+    );
+  };
+
   // Number badges: on sequenced freehand arrows (always), and on the active
   // scheme's action arrows while ordering (so you can re-sequence passes/moves).
   const renderStepBadges = () => {
@@ -1755,22 +1817,30 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
           )}
         </View>
       )}
-      {hasFreehandArrows && !selectedTextId && (
-        <View style={styles.floatBar}>
-          <TouchableOpacity style={[styles.floatChip, orderMode && { backgroundColor: t.ctaBg, borderColor: t.ctaBg }]} onPress={() => setOrderMode(v => { const nv = !v; if (nv) orderCounterRef.current = 0; return nv; })}>
-            <Text style={[styles.floatChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Tap arrows 1·2·3' : 'Order'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.floatChip} onPress={clearOrder}><Text style={styles.floatChipText}>Clear</Text></TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.floatChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
-            onPress={() => { if (freehandPlaying) { animCancel.current = true; setFreehandPlaying(false); setFreehandDone(true); } else playFreehand(); }}>
-            <Ionicons name={freehandPlaying ? 'stop' : freehandDone ? 'refresh' : 'play'} size={13} color={t.ctaText} />
-            <Text style={[styles.floatChipText, { color: t.ctaText }]}>{freehandPlaying ? 'Stop' : freehandDone ? 'Replay' : 'Play drawing'}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
     </View>
   );
+
+  // Freehand controls as a NORMAL row (above the court, not covering it) so you
+  // can tap every arrow to order it. Shown when there are hand-drawn arrows.
+  const freehandBar = hasFreehandArrows ? (
+    <View style={styles.schemeRow}>
+      <TouchableOpacity style={[styles.schemeChip, orderMode && styles.schemeChipActive]} onPress={() => { setBallMode(false); setOrderMode(v => !v); }}>
+        <Text style={[styles.schemeChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Tap arrows 1·2·3' : 'Order'}</Text>
+      </TouchableOpacity>
+      {orderMode && (
+        <TouchableOpacity style={styles.schemeChip} onPress={clearOrder}><Text style={styles.schemeChipText}>Clear</Text></TouchableOpacity>
+      )}
+      <TouchableOpacity style={[styles.schemeChip, ballMode && styles.schemeChipActive]} onPress={() => { setOrderMode(false); setBallMode(v => !v); }}>
+        <Text style={[styles.schemeChipText, ballMode && { color: t.ctaText }]}>{ballMode ? 'Tap the ball-handler' : '🏀 Ball'}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
+        onPress={() => { if (freehandPlaying) { animCancel.current = true; setFreehandPlaying(false); setFreehandDone(true); } else playFreehand(); }}>
+        <Ionicons name={freehandPlaying ? 'stop' : freehandDone ? 'refresh' : 'play'} size={13} color={t.ctaText} />
+        <Text style={[styles.schemeChipText, { color: t.ctaText }]}>{freehandPlaying ? 'Stop' : freehandDone ? 'Replay' : 'Play drawing'}</Text>
+      </TouchableOpacity>
+    </View>
+  ) : null;
 
   if (!visible) return null;
 
@@ -1852,7 +1922,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.schemeChip, orderMode && styles.schemeChipActive]}
-              onPress={() => setOrderMode(v => { const nv = !v; if (nv) orderCounterRef.current = 0; return nv; })}>
+              onPress={() => setOrderMode(v => !v)}>
               <Text style={[styles.schemeChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Tap 1·2·3' : 'Order'}</Text>
             </TouchableOpacity>
             {orderMode && (
@@ -1909,6 +1979,8 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
           </View>
         </View>
 
+        {freehandBar}
+
         {/* Canvas — court scales to fit the available area for the chosen view */}
         {loading ? (
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -1944,6 +2016,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                   {renderCourtStrokes()}
                   {renderDragHandles()}
                   {renderStepBadges()}
+                  {renderBallHolder()}
                   {livePath ? (
                     <Path d={livePath} stroke={color} strokeWidth={STROKE_WIDTH}
                           fill="none" strokeLinecap="round" strokeLinejoin="round" />
