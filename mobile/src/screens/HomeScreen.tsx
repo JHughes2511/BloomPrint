@@ -254,18 +254,21 @@ export default function HomeScreen() {
                 </Card>
               </TouchableOpacity>
             ))}
-            {/* Feedback — questions, comments, or issues */}
+            {/* Feedback — styled to stand out from the report tiles (accent tint
+                + border), while still fitting light/dark themes. */}
             <TouchableOpacity
               key="feedback"
               style={{ width: '48%' }}
               activeOpacity={0.7}
               onPress={() => setShowFeedback(true)}
             >
-              <Card padding={16} style={{ flex: 1 }}>
-                <IconTile name="message-square" variant="accent" size={44} />
+              <View style={{ flex: 1, borderRadius: 18, borderWidth: 1.5, borderColor: t.accent, backgroundColor: t.accentSoft, padding: 16 }}>
+                <View style={{ width: 44, height: 44, borderRadius: 13, backgroundColor: t.accent, alignItems: 'center', justifyContent: 'center' }}>
+                  <Icon name="message-square" size={22} color={t.ctaText} strokeWidth={2} />
+                </View>
                 <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 15.5, marginTop: 12 }]}>Feedback</Text>
-                <Text style={[typeScale.bodySoft, { color: t.muted, fontSize: 12, lineHeight: 17, marginTop: 4 }]}>Questions, comments, or issues — tell us anything</Text>
-              </Card>
+                <Text style={[typeScale.bodySoft, { color: t.inkSoft, fontSize: 12, lineHeight: 17, marginTop: 4 }]}>Questions, comments, or issues — tell us anything</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
