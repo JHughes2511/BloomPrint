@@ -321,6 +321,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   useEffect(() => { ballModeRef.current = ballMode; }, [ballMode]);
   useEffect(() => { setBallMode(false); }, [activeBoardIdx]);
   useEffect(() => { orderModeRef.current = orderMode; }, [orderMode]);
+  const exitPlayRef = useRef<() => void>(() => {});
+  // Drop out of the "played" view (so badges show + the board is editable again)
+  // whenever the coach starts ordering, picks the ball, or draws.
+  useEffect(() => { if (orderMode || ballMode) exitPlayRef.current(); }, [orderMode, ballMode]);
   useEffect(() => { activeSchemeRef.current = activeScheme; }, [activeScheme]);
   useEffect(() => { setOrderMode(false); }, [activeBoardIdx]);
   // Draw up from a report: pick a source type (Scout / Team), then a report.
@@ -988,6 +992,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       const c   = colorRef.current;
 
       const push = (stroke: Stroke) => {
+        exitPlayRef.current();   // drawing leaves the "played" view
         setBoards(prev => {
           const next    = [...prev];
           const updated = { ...next[idx], strokes: [...next[idx].strokes, stroke] };
@@ -1439,6 +1444,9 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   // Play the FREEHAND drawing: run the hand-drawn arrows in order — a player
   // (circle/X) whose spot an arrow starts on slides along it; a blue dashed arrow
   // sends a ball. On an unnamed board, review + auto-name it when done.
+  const exitPlay = () => { animCancel.current = true; setFreehandPlaying(false); setFreehandDone(false); };
+  exitPlayRef.current = exitPlay;
+
   const playFreehand = () => {
     const seq = freehandSequence();
     if (!seq.length) return;
@@ -1718,14 +1726,21 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       if (step < curStep) { els.push(renderStroke({ ...s, id: `fa${i}` })); return; }
       els.push(renderAnimatedArrow({ ...s, id: `fa${i}` }));
     });
-    // The ball.
-    if (ballPos) {
+    // The ball — a small basketball that follows possession automatically.
+    const ballGlyph = (cx: number, cy: number) => (
+      <G>
+        <Circle cx={cx} cy={cy} r={7} fill={BALL} stroke="#FFFFFF" strokeWidth={1.5} />
+        <Line x1={cx - 7} y1={cy} x2={cx + 7} y2={cy} stroke="#8a4b1e" strokeWidth={1} />
+        <Line x1={cx} y1={cy - 7} x2={cx} y2={cy + 7} stroke="#8a4b1e" strokeWidth={1} />
+      </G>
+    );
+    if (ballPos && freehandPlaying) {   // only the moving ball during playback
       if (ballTravelTo) {
         const tx = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, ballTravelTo.x - ballPos.x] });
         const ty = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, ballTravelTo.y - ballPos.y] });
-        els.push(<AnimatedG key="fball" translateX={tx as any} translateY={ty as any}><Circle cx={ballPos.x} cy={ballPos.y} r={6.5} fill={BALL} stroke="#FFFFFF" strokeWidth={1.5} /></AnimatedG>);
+        els.push(<AnimatedG key="fball" translateX={tx as any} translateY={ty as any}>{ballGlyph(ballPos.x, ballPos.y)}</AnimatedG>);
       } else {
-        els.push(<Circle key="fball" cx={ballPos.x} cy={ballPos.y} r={6.5} fill={BALL} stroke="#FFFFFF" strokeWidth={1.5} />);
+        els.push(<G key="fball">{ballGlyph(ballPos.x, ballPos.y)}</G>);
       }
     }
     return els;
@@ -1749,7 +1764,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   // Number badges: on sequenced freehand arrows (always), and on the active
   // scheme's action arrows while ordering (so you can re-sequence passes/moves).
   const renderStepBadges = () => {
-    if (freehandPlaying || freehandDone || animating || animDone) return null;
+    if (freehandPlaying || animating) return null;   // hidden only during active playback
     const b = boards[activeBoardIdx];
     const els: React.ReactElement[] = [];
     const badge = (key: string, x: number, y: number, n: any) => els.push(
@@ -1864,21 +1879,21 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   // Freehand controls as a NORMAL row (above the court, not covering it) so you
   // can tap every arrow to order it. Shown when there are hand-drawn arrows.
   const freehandBar = hasFreehandArrows ? (
-    <View style={styles.schemeRow}>
-      <TouchableOpacity style={[styles.schemeChip, orderMode && styles.schemeChipActive]} onPress={() => { setBallMode(false); setOrderMode(v => !v); }}>
-        <Text style={[styles.schemeChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Tap arrows 1·2·3' : 'Order'}</Text>
+    <View style={styles.fhBar}>
+      <TouchableOpacity style={[styles.fhChip, orderMode && styles.fhChipActive]} onPress={() => { setBallMode(false); setOrderMode(v => !v); }}>
+        <Text style={[styles.fhChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Ordering' : 'Order'}</Text>
       </TouchableOpacity>
       {orderMode && (
-        <TouchableOpacity style={styles.schemeChip} onPress={clearOrder}><Text style={styles.schemeChipText}>Clear</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.fhChip} onPress={clearOrder}><Text style={styles.fhChipText}>Clear</Text></TouchableOpacity>
       )}
-      <TouchableOpacity style={[styles.schemeChip, ballMode && styles.schemeChipActive]} onPress={() => { setOrderMode(false); setBallMode(v => !v); }}>
-        <Text style={[styles.schemeChipText, ballMode && { color: t.ctaText }]}>{ballMode ? 'Tap the ball-handler' : '🏀 Ball'}</Text>
+      <TouchableOpacity style={[styles.fhChip, ballMode && styles.fhChipActive]} onPress={() => { setOrderMode(false); setBallMode(v => !v); }}>
+        <Text style={[styles.fhChipText, ballMode && { color: t.ctaText }]}>{ballMode ? 'Pick handler' : '🏀 Ball'}</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
+        style={[styles.fhChip, styles.fhChipCta]}
         onPress={() => { if (freehandPlaying) { animCancel.current = true; setFreehandPlaying(false); setFreehandDone(true); } else playFreehand(); }}>
-        <Ionicons name={freehandPlaying ? 'stop' : freehandDone ? 'refresh' : 'play'} size={13} color={t.ctaText} />
-        <Text style={[styles.schemeChipText, { color: t.ctaText }]}>{freehandPlaying ? 'Stop' : freehandDone ? 'Replay' : 'Play drawing'}</Text>
+        <Ionicons name={freehandPlaying ? 'stop' : freehandDone ? 'refresh' : 'play'} size={12} color={t.ctaText} />
+        <Text style={[styles.fhChipText, { color: t.ctaText }]}>{freehandPlaying ? 'Stop' : freehandDone ? 'Replay' : 'Play'}</Text>
       </TouchableOpacity>
     </View>
   ) : null;
@@ -2536,6 +2551,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   floatBar:        { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, maxWidth: '94%', backgroundColor: t.sheet, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 6, borderWidth: 1, borderColor: t.cardBorder, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 5 },
   floatChip:       { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: t.line, backgroundColor: t.card },
   floatChipText:   { color: t.inkSoft, fontSize: 12.5, fontFamily: fonts[700] },
+  fhBar:           { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: t.divider },
+  fhChip:          { flexDirection: 'row', alignItems: 'center', gap: 4, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 5, borderWidth: 1, borderColor: t.line, minHeight: 30 },
+  fhChipActive:    { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
+  fhChipCta:       { backgroundColor: t.ctaBg, borderColor: t.ctaBg, marginLeft: 'auto' },
+  fhChipText:      { color: t.muted, fontSize: 12.5, fontFamily: fonts[700] },
   adaptOverlay:    { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: t.scrim, paddingHorizontal: 30 },
   adaptCard:       { backgroundColor: t.sheet, borderRadius: 16, padding: 20, width: '100%', maxWidth: 360, borderWidth: 1, borderColor: t.cardBorder },
 });
