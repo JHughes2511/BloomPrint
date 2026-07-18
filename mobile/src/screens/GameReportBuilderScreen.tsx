@@ -34,6 +34,7 @@ const OUTPUT_TYPES = [
   { key: 'box_score', label: 'Box Score' },
   { key: 'team_training', label: 'Team Training' },
   { key: 'game_situational', label: 'Game Situational' },
+  { key: 'matchup', label: 'Match Up' },
 ];
 
 const MODES = [

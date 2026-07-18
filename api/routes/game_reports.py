@@ -632,7 +632,21 @@ async def generate_game_report(
     if gr.focus_prompt:
         sections.append(f"\nFOCUS:\n{gr.focus_prompt}")
 
-    if gr.output_type == "game_situational":
+    from video_vision.bim import parse_output_types as _parse_ot
+    if "matchup" in _parse_ot(gr.output_type):
+        sections.append(
+            "\nThis is a MATCH-UP report — a head-to-head comparison of the team(s) above. Compare them "
+            "AS THEY ARE (do NOT normalize across competition levels; flag any level gap, and note "
+            "confidence where a side's data is thin). Use ONLY the rosters, film, stats, and notes "
+            "provided. Produce these sections: SIDE-BY-SIDE COMPARISON (category-by-category with the "
+            "EDGE in each), OVERALL ADVANTAGE (who is better and why), TACTICAL MATCH-UP (how each side "
+            "should ATTACK and DEFEND the other — mismatches, what to take away), HEAD-TO-HEAD "
+            "PROJECTION (what happens if they play, and the swing factors), LEVEL & CONFIDENCE, and KEY "
+            "QUESTIONS. If only ONE team is given, describe how they would match up against a typical "
+            "opponent at their level."
+            f"{REPORT_FORMAT_WITH_TABLES}"
+        )
+    elif gr.output_type == "game_situational":
         sections.append(
             "\nGenerate a GAME SITUATIONAL REPORT. Analyze the film and produce a detailed report on: "
             "how the coach and team should read specific on-court actions, defensive sets and how to attack them, "
