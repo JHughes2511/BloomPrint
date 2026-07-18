@@ -1760,7 +1760,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
           <TouchableOpacity style={[styles.floatChip, orderMode && { backgroundColor: t.ctaBg, borderColor: t.ctaBg }]} onPress={() => setOrderMode(v => { const nv = !v; if (nv) orderCounterRef.current = 0; return nv; })}>
             <Text style={[styles.floatChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Tap arrows 1·2·3' : 'Order'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.floatChip} onPress={clearOrder}><Text style={styles.floatChipText}>Clear</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.floatChip} onPress={clearAll}><Text style={styles.floatChipText}>Clear board</Text></TouchableOpacity>
           <TouchableOpacity
             style={[styles.floatChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
             onPress={() => { if (freehandPlaying) { animCancel.current = true; setFreehandPlaying(false); setFreehandDone(true); } else playFreehand(); }}>

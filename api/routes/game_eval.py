@@ -2111,17 +2111,34 @@ async def ai_play_name(
         + "\nReturn STRICT JSON only: {\"name\": \"<short play name, under 40 chars>\", "
         "\"read\": \"<1-2 sentences describing what happens, in order>\"}. No prose."
     )
+    import anthropic
+    import sys
+    client = anthropic.AsyncAnthropic()
+    data: dict = {}
+    raw = ""
     try:
-        import anthropic
-        client = anthropic.AsyncAnthropic()
         resp = await client.messages.create(
             model="claude-opus-4-7", max_tokens=500,
             messages=[{"role": "user", "content": prompt}],
         )
         blocks = [b for b in resp.content if hasattr(b, "text")]
-        data = _parse_ai_play_json(blocks[0].text if blocks else "{}")
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Naming failed: {exc}")
+        raw = (blocks[0].text if blocks else "{}").strip()
+        data = _parse_ai_play_json(raw)
+    except Exception:
+        # One retry: ask for corrected strict JSON.
+        try:
+            fix = await client.messages.create(
+                model="claude-opus-4-7", max_tokens=500,
+                messages=[{"role": "user", "content":
+                    "Return ONLY strict JSON of the form {\"name\":\"...\",\"read\":\"...\"} for this play "
+                    "text — no prose, no markdown:\n\n" + (raw or prompt)}],
+            )
+            fb = [b for b in fix.content if hasattr(b, "text")]
+            data = _parse_ai_play_json(fb[0].text if fb else "{}")
+        except Exception as exc:
+            # Auto-naming is best-effort — never 500; the client just skips naming.
+            print(f"ai-play-name: naming skipped ({exc})", file=sys.stderr)
+            return {"name": "", "read": ""}
     return {"name": str(data.get("name") or "")[:60], "read": str(data.get("read") or "")[:400]}
 
 
