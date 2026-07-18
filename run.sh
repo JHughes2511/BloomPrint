@@ -25,6 +25,18 @@ fi
 source .venv/bin/activate
 python -m pip install --upgrade pip >/dev/null
 
+# Load local secrets if present (ANTHROPIC_API_KEY, GOOGLE_CLIENT_ID, S3/SMTP…).
+# Put them in ./.env (gitignored). Values already set in the shell win.
+if [ -f .env ]; then
+  echo "→ loading .env"
+  set -a; # shellcheck disable=SC1091
+  source .env; set +a
+fi
+if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
+  echo "⚠  ANTHROPIC_API_KEY is not set — AI features (Copilot, reports, film) will 503."
+  echo "   Set it in ~/BloomPrint/.env  (ANTHROPIC_API_KEY=sk-ant-...)  or export it in your shell."
+fi
+
 if ! python -c "import uvicorn, fastapi, sqlalchemy" >/dev/null 2>&1; then
   echo "→ installing dependencies (first run — this can take a minute)"
   # Full project (incl. video/whisper). If the heavy video deps fail to build on
