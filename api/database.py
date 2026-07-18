@@ -200,6 +200,24 @@ def _run_migrations():
                     "ALTER TABLE game_reports ADD COLUMN opponent_a_name TEXT"
                 ))
                 conn.commit()
+            if gr_cols and "extra_teams" not in gr_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE game_reports ADD COLUMN extra_teams TEXT"
+                ))
+                conn.commit()
+        except Exception:
+            pass
+
+        # Add title to evaluations if missing (match-up display title, e.g. "A vs B")
+        try:
+            ev_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(evaluations)")
+            )]
+            if ev_cols and "title" not in ev_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE evaluations ADD COLUMN title TEXT"
+                ))
+                conn.commit()
         except Exception:
             pass
 

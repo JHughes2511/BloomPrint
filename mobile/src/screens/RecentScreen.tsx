@@ -267,7 +267,8 @@ export default function RecentScreen() {
       const evalItems: ReportItem[] = evals.map((e: any) => ({
         id: e.id,
         kind: 'eval',
-        player_name: e.player_name,
+        // Match-ups carry a display title ("A vs B"); fall back to the player name.
+        player_name: e.title || e.player_name,
         output_type: e.output_type,
         overall_grade: e.overall_grade,
         created_at: e.created_at,

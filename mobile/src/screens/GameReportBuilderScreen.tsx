@@ -83,6 +83,9 @@ export default function GameReportBuilderScreen() {
   const [oppTeamId, setOppTeamId] = useState<number | null>(null);
   const [oppName, setOppName] = useState('');
   const [oppAName, setOppAName] = useState(''); // free-text Opponent A (opp-vs-opp)
+  // Additional teams for a 3+ team match-up. Tokens: "t<id>" (saved team) or a name.
+  const [extraTeams, setExtraTeams] = useState<string[]>([]);
+  const [extraTeamText, setExtraTeamText] = useState('');
   const [outputType, setOutputType] = useState('coaching_report');
   const [focusPrompt, setFocusPrompt] = useState('');
   const [boxScore, setBoxScore] = useState('');
@@ -192,6 +195,7 @@ export default function GameReportBuilderScreen() {
     setOppAName(r.opponent_a_name ?? '');
     setOppTeamId(r.opponent_team_id ?? null);
     setOppName(r.opponent_name ?? '');
+    setExtraTeams((r.extra_teams ?? '').split(',').map((s: string) => s.trim()).filter(Boolean));
     setOutputType(r.output_type ?? 'coaching_report');
     setFocusPrompt(r.focus_prompt ?? '');
     setBoxScore(r.box_score ?? '');
@@ -204,6 +208,33 @@ export default function GameReportBuilderScreen() {
       const updated = await gameReportsAPI.update(reportId, patch);
       setReport(updated);
     } catch {}
+  };
+
+  // Multi-team match-up: additional teams (beyond the two primary sides).
+  const isMatchup = outputType.split(',').includes('matchup');
+  const extraTeamLabel = (tok: string) => {
+    if (tok.startsWith('t') && /^\d+$/.test(tok.slice(1))) {
+      return teams.find((tm: any) => tm.id === Number(tok.slice(1)))?.name ?? 'Team';
+    }
+    return tok;
+  };
+  const toggleExtraTeam = (tok: string) => {
+    setExtraTeams(prev => {
+      const next = prev.includes(tok) ? prev.filter(x => x !== tok) : [...prev, tok];
+      save({ extra_teams: next.join(',') });
+      return next;
+    });
+  };
+  const addExtraTeamName = () => {
+    const name = extraTeamText.trim();
+    if (!name) return;
+    setExtraTeams(prev => {
+      if (prev.includes(name)) return prev;
+      const next = [...prev, name];
+      save({ extra_teams: next.join(',') });
+      return next;
+    });
+    setExtraTeamText('');
   };
 
   const pickClip = async () => {
@@ -534,6 +565,50 @@ export default function GameReportBuilderScreen() {
                 ))}
               </View>
             )}
+          </View>
+        )}
+
+        {/* Multi-team match-up: add a 3rd+ team to compare (only for Match Up) */}
+        {isMatchup && (
+          <View style={styles.card}>
+            <Text style={styles.cardLabel}>Additional Teams (Match Up)</Text>
+            <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8 }}>
+              Add a 3rd (or more) team to compare against the two above.
+            </Text>
+            {extraTeams.length > 0 && (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                {extraTeams.map(tok => (
+                  <TouchableOpacity key={tok} style={styles.selectedTeamChip} onPress={() => toggleExtraTeam(tok)}>
+                    <Text style={styles.selectedTeamChipText}>{extraTeamLabel(tok)}</Text>
+                    <Ionicons name="close" size={13} color={t.accent} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+            {/* Saved teams to add */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+              {teams.filter((tm: any) => !tm.parent_team_id && !extraTeams.includes(`t${tm.id}`)).map((tm: any) => (
+                <TouchableOpacity key={tm.id} style={styles.addTeamChip} onPress={() => toggleExtraTeam(`t${tm.id}`)}>
+                  <Ionicons name="add" size={13} color={t.muted} />
+                  <Text style={styles.addTeamChipText}>{tm.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {/* Free-text team name */}
+            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+              <VoiceTextInput
+                style={[styles.oppNameInput, { flex: 1, marginBottom: 0 }]}
+                placeholder="Or type a team/opponent name..."
+                placeholderTextColor={t.muted2}
+                value={extraTeamText}
+                onChangeText={setExtraTeamText}
+                onSubmitEditing={addExtraTeamName}
+                returnKeyType="done"
+              />
+              <TouchableOpacity style={styles.addTeamBtn} onPress={addExtraTeamName}>
+                <Text style={styles.addTeamBtnText}>Add</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
 
@@ -975,6 +1050,12 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   pickerItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: t.divider },
   pickerItemActive: { backgroundColor: t.accentSoft, borderRadius: 8 },
   pickerItemText: { color: t.inkSoft, fontSize: 14 },
+  selectedTeamChip: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.accentSoft, borderColor: t.accent, borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
+  selectedTeamChipText: { color: t.accent, fontSize: 13, fontFamily: fonts[600] },
+  addTeamChip: { flexDirection: 'row', alignItems: 'center', gap: 3, borderColor: t.line, borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
+  addTeamChipText: { color: t.muted, fontSize: 13 },
+  addTeamBtn: { backgroundColor: t.ctaBg, borderRadius: 10, paddingHorizontal: 16, paddingVertical: 11 },
+  addTeamBtnText: { color: t.ctaText, fontSize: 13, fontFamily: fonts[700] },
   chip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 9, marginRight: 8 },
   chipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   chipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },

@@ -168,6 +168,7 @@ class EvalOut(BaseModel):
     player_id: int
     coach_id: int
     output_type: str
+    title: str | None = None
     competition_level: str | None
     coach_weight: int | None
     coach_notes: str | None
@@ -470,6 +471,7 @@ class GameReportUpdate(BaseModel):
     opponent_team_id: int | None = None
     opponent_name: str | None = None
     opponent_a_name: str | None = None
+    extra_teams: str | None = None
     output_type: str | None = None
     focus_prompt: str | None = None
     box_score: str | None = None
@@ -494,6 +496,7 @@ class GameReportOut(BaseModel):
     opponent_team_id: int | None
     opponent_name: str | None
     opponent_a_name: str | None = None
+    extra_teams: str | None = None
     output_type: str
     focus_prompt: str | None
     box_score: str | None

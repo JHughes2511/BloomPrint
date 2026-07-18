@@ -100,6 +100,7 @@ class Evaluation(Base):
     player_id        = Column(Integer, ForeignKey("players.id"), nullable=False)
     coach_id         = Column(Integer, ForeignKey("coaches.id"), nullable=False)
     output_type      = Column(String, nullable=False)
+    title            = Column(String)   # optional display title (e.g. "A vs B" for match-ups)
     competition_level = Column(String)
     coach_weight     = Column(Integer)
     coach_notes      = Column(Text)
@@ -493,6 +494,9 @@ class GameReport(Base):
     # Free-text name for "Opponent A" in opponent-vs-opponent mode (when A isn't
     # one of the coach's saved teams). Opponent B uses opponent_name.
     opponent_a_name   = Column(String, nullable=True)
+    # Additional teams for a multi-team (3+) MATCH-UP, comma-separated tokens:
+    # "t<id>" for a saved team, or a free-text opponent name.
+    extra_teams       = Column(Text, nullable=True)
     output_type       = Column(String, default="coaching_report")
     focus_prompt      = Column(Text, nullable=True)
     box_score         = Column(Text, nullable=True)

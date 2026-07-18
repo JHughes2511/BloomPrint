@@ -18,12 +18,13 @@ router = APIRouter(prefix="/evaluations", tags=["evaluations"])
 
 
 def _finalize_eval(db, *, player_id, coach, output_type, competition_level,
-                   coach_notes, video_path, report_text):
+                   coach_notes, video_path, report_text, title=None):
     """Parse a report and persist the Evaluation row."""
     eval_record = models.Evaluation(
         player_id=player_id,
         coach_id=coach.id,
         output_type=output_type,
+        title=title,
         competition_level=competition_level,
         coach_weight=coach.weight,
         coach_notes=coach_notes,
@@ -44,7 +45,8 @@ def _finalize_eval(db, *, player_id, coach, output_type, competition_level,
 def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_type: str,
                         competition_level: str, coach_notes: str | None, combined_focus: str,
                         interval_seconds: float, max_frames: int, include_audio: bool,
-                        video_paths: list[str], player_name: str, coach_program: str, coach_weight: int):
+                        video_paths: list[str], player_name: str, coach_program: str, coach_weight: int,
+                        title: str | None = None):
     """Background task: analyze one or more films and create ONE evaluation. The
     client polls the job for completion, so nothing times out."""
     import asyncio
@@ -86,6 +88,7 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
             db, player_id=player_id, coach=coach, output_type=output_type,
             competition_level=competition_level, coach_notes=coach_notes,
             video_path=video_paths[0] if video_paths else None, report_text=report_text,
+            title=title,
         )
         # Keep every film in the player's video catalog, linked to this eval.
         for vp in video_paths:
@@ -285,11 +288,13 @@ async def submit_evaluation(
     # MATCH-UP: aggregate everything the app knows about each subject and hand it
     # to the model as the comparison material (works for film + text-only paths).
     from video_vision.bim import parse_output_types
+    matchup_title: str | None = None
     if "matchup" in parse_output_types(output_type):
         ids = [int(x) for x in (matchup_player_ids or "").split(",") if x.strip().isdigit()]
         others = [db.get(models.Player, i) for i in ids]
         subjects = [player] + [p for p in others if p and p.id != player.id]
         names = " vs ".join(p.name for p in subjects)
+        matchup_title = names
         dossiers = "\n\n".join(_gather_player_dossier(db, coach, p) for p in subjects)
         combined_focus += (
             f"\n\nMATCH-UP SUBJECTS — {names}. Compare these subjects head-to-head using ONLY the data "
@@ -323,6 +328,7 @@ async def submit_evaluation(
             combined_focus=combined_focus, interval_seconds=interval_seconds,
             max_frames=max_frames, include_audio=include_audio, video_paths=video_paths,
             player_name=player.name, coach_program=coach.program_name, coach_weight=coach.weight,
+            title=matchup_title,
         )
         return {"job_id": job.id, "status": "processing"}
 
@@ -349,7 +355,7 @@ async def submit_evaluation(
     eval_record = _finalize_eval(
         db, player_id=player_id, coach=coach, output_type=output_type,
         competition_level=competition_level, coach_notes=coach_notes,
-        video_path=None, report_text=report_text,
+        video_path=None, report_text=report_text, title=matchup_title,
     )
     return schemas.EvalOut.model_validate(eval_record)
 

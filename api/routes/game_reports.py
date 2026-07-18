@@ -516,6 +516,9 @@ async def generate_game_report(
     else:
         matchup = opp_name or "Opponent"
 
+    # For a multi-team match-up, fold the additional teams into the header below
+    # (after their rosters are resolved).
+
     # Build roster context for my team
     my_roster_context = ""
     if gr.my_team_id and gr.mode in ("vs_opponent", "my_program", "opp_vs_opp"):
@@ -553,6 +556,39 @@ async def generate_game_report(
                 grade_str = f"{latest.overall_grade:.1f}/10" if latest.overall_grade else "N/A"
                 parts.append(f"Grade {grade_str}")
             opp_roster_context += f"- {', '.join(parts)}\n"
+
+    # Additional teams for a multi-team (3+) MATCH-UP. Each token is either a
+    # saved team ("t<id>") whose roster we pull, or a free-text opponent name.
+    extra_matchup_blocks: list[tuple[str, str]] = []  # (team_name, roster_context)
+    if "matchup" in gr.output_type and gr.extra_teams:
+        for tok in gr.extra_teams.split(","):
+            tok = tok.strip()
+            if not tok:
+                continue
+            if tok.startswith("t") and tok[1:].isdigit():
+                team = db.get(models.Team, int(tok[1:]))
+                if not team:
+                    continue
+                roster = ""
+                for p in db.query(models.Player).filter_by(team_id=team.id).all():
+                    name = f"#{p.jersey_number} {p.name}" if p.jersey_number else p.name
+                    parts = [name]
+                    if p.position: parts.append(p.position)
+                    if p.height: parts.append(p.height)
+                    evals = p.evaluations
+                    if evals:
+                        latest = evals[-1]
+                        grade_str = f"{latest.overall_grade:.1f}/10" if latest.overall_grade else "N/A"
+                        parts.append(f"Grade {grade_str}")
+                        flags = ", ".join((latest.green_flags or [])[:3])
+                        if flags: parts.append(f"Strengths: {flags}")
+                    roster += f"- {', '.join(parts)}\n"
+                extra_matchup_blocks.append((team.name, roster))
+            else:
+                # Free-text team/opponent name with no roster on file.
+                extra_matchup_blocks.append((tok, ""))
+    if extra_matchup_blocks:
+        matchup = matchup + " vs " + " vs ".join(n for n, _ in extra_matchup_blocks)
 
     # Build film analysis context
     film_context = ""
@@ -621,6 +657,12 @@ async def generate_game_report(
             sections.append(f"\nMY TEAM ROSTER ({my_team_name}):\n{my_roster_context}")
         if opp_roster_context:
             sections.append(f"\nOPPONENT ROSTER ({opp_name}):\n{opp_roster_context}")
+    # Additional match-up teams (3+): append each one's roster (or a note if none).
+    for team_name, roster in extra_matchup_blocks:
+        if roster:
+            sections.append(f"\nADDITIONAL TEAM ROSTER ({team_name}):\n{roster}")
+        else:
+            sections.append(f"\nADDITIONAL TEAM: {team_name} (no roster on file — compare from general knowledge and any notes/film provided).")
     if film_context:
         sections.append(f"\nFILM ANALYSIS:{film_context}")
     if gr.box_score:
@@ -634,8 +676,13 @@ async def generate_game_report(
 
     from video_vision.bim import parse_output_types as _parse_ot
     if "matchup" in _parse_ot(gr.output_type):
+        multi = (
+            " NOTE: THREE OR MORE teams are provided — compare ALL of them against each other (not just "
+            "two), rank them, and make every comparison table cover every team."
+            if extra_matchup_blocks else ""
+        )
         sections.append(
-            "\nThis is a MATCH-UP report — a head-to-head comparison of the team(s) above. Compare them "
+            "\nThis is a MATCH-UP report — a head-to-head comparison of the team(s) above." + multi + " Compare them "
             "AS THEY ARE (do NOT normalize across competition levels; flag any level gap, and note "
             "confidence where a side's data is thin). Use ONLY the rosters, film, stats, and notes "
             "provided. Produce these sections: SIDE-BY-SIDE COMPARISON (category-by-category with the "
