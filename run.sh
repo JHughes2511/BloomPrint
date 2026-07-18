@@ -26,11 +26,27 @@ source .venv/bin/activate
 python -m pip install --upgrade pip >/dev/null
 
 # Load local secrets if present (ANTHROPIC_API_KEY, GOOGLE_CLIENT_ID, S3/SMTP…).
-# Put them in ./.env (gitignored). Values already set in the shell win.
+# Put them in ./.env (gitignored), OR just export them in your shell before
+# running. Values already set in the shell WIN — a var exported in the shell is
+# never overwritten by a (possibly stale) line in .env.
 if [ -f .env ]; then
-  echo "→ loading .env"
-  set -a; # shellcheck disable=SC1091
-  source .env; set +a
+  echo "→ loading .env (shell-exported values win)"
+  while IFS= read -r line || [ -n "$line" ]; do
+    # Skip blank lines, comments, and any line without a KEY=VALUE.
+    case "$line" in ''|\#*) continue;; esac
+    [ "${line#*=}" = "$line" ] && continue
+    key=${line%%=*}
+    key=${key#"${key%%[![:space:]]*}"}    # ltrim
+    key=${key%"${key##*[![:space:]]}"}    # rtrim
+    [ -z "$key" ] && continue
+    # Only take it from .env if the shell hasn't already set it.
+    if [ -z "${!key:-}" ]; then
+      val=${line#*=}
+      val=${val%\"}; val=${val#\"}          # strip surrounding double quotes
+      val=${val%\'}; val=${val#\'}          # strip surrounding single quotes
+      export "$key=$val"
+    fi
+  done < .env
 fi
 if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
   echo "⚠  ANTHROPIC_API_KEY is not set — AI features (Copilot, reports, film) will 503."
