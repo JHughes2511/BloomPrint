@@ -162,7 +162,7 @@ export default function CommandBar() {
             <View style={s.header}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Ionicons name="sparkles" size={18} color={t.accent} />
-                <Text style={s.title}>BloomPrint Copilot</Text>
+                <Text style={s.title}>Ask BloomPrint</Text>
               </View>
               <TouchableOpacity onPress={() => setOpen(false)}><Ionicons name="close" size={24} color={t.muted} /></TouchableOpacity>
             </View>
