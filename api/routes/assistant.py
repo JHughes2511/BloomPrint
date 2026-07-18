@@ -260,6 +260,42 @@ def t_list_training(db, coach, player: str = "") -> dict:
     return {"training_programs": out}
 
 
+def t_search_staff(db, coach, query: str = "") -> dict:
+    q = (query or "").strip()
+    rows = (
+        db.query(models.Coach)
+        .filter((models.Coach.name.ilike(f"%{q}%")) | (models.Coach.program_name.ilike(f"%{q}%")))
+        .filter(models.Coach.id != coach.id)
+        .limit(15).all()
+    )
+    return {"staff": [{"id": c.id, "name": c.name, "role": c.role, "program": c.program_name} for c in rows]}
+
+
+def t_list_conversations(db, coach) -> dict:
+    my = [m.conversation_id for m in db.query(models.ConversationMember).filter_by(coach_id=coach.id).all()]
+    out = []
+    for conv in db.query(models.Conversation).filter(models.Conversation.id.in_(my)).order_by(models.Conversation.last_at.desc()).limit(20).all() if my else []:
+        member_ids = [m.coach_id for m in db.query(models.ConversationMember).filter_by(conversation_id=conv.id).all()]
+        names = {c.id: c.name for c in db.query(models.Coach).filter(models.Coach.id.in_(member_ids)).all()}
+        last = db.query(models.StaffMessage).filter_by(conversation_id=conv.id).order_by(models.StaffMessage.id.desc()).first()
+        out.append({
+            "id": conv.id, "is_group": bool(conv.is_group),
+            "title": conv.title or ", ".join(names[i] for i in member_ids if i != coach.id and i in names) or "Conversation",
+            "last_message": (last.text or "[attachment]")[:120] if last else None,
+        })
+    return {"conversations": out}
+
+
+def t_list_shared_with_me(db, coach) -> dict:
+    out = []
+    for sr in db.query(models.StaffSharedReport).filter_by(recipient_id=coach.id).order_by(models.StaffSharedReport.id.desc()).limit(25).all():
+        sender = db.get(models.Coach, sr.sender_id)
+        out.append({"id": sr.id, "report_type": sr.report_type, "report_id": sr.report_id,
+                    "from": sender.name if sender else "A coach",
+                    "allow_regenerate": bool(sr.allow_regenerate)})
+    return {"shared_with_me": out}
+
+
 TOOLS = [
     {"name": "search_players", "description": "List/search the coach's players (name, position, team, level, BIM grade, report count).",
      "input_schema": {"type": "object", "properties": {"query": {"type": "string", "description": "optional name/position/team filter"}}}},
@@ -283,6 +319,12 @@ TOOLS = [
      "input_schema": {"type": "object", "properties": {"game_id": {"type": "integer"}}}},
     {"name": "list_training", "description": "Training programs (optionally for one player).",
      "input_schema": {"type": "object", "properties": {"player": {"type": "string"}}}},
+    {"name": "search_staff", "description": "Search other coach/scout/trainer ACCOUNTS by name or program (for messaging or sharing). Returns their ids.",
+     "input_schema": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}},
+    {"name": "list_conversations", "description": "The coach's staff-message conversations (1:1 and group) with the last message.",
+     "input_schema": {"type": "object", "properties": {}}},
+    {"name": "list_shared_with_me", "description": "Reports other coaches shared with this coach (the staff-sharing inbox).",
+     "input_schema": {"type": "object", "properties": {}}},
     {"name": "suggest_navigation", "description": (
         "Show the coach a 'Take me there' button that opens the right screen. Use for 'where is X' / 'how "
         "do I Y' / 'take me to Z'. Use EXACTLY one of these screen values:\n"
@@ -313,25 +355,34 @@ TOOLS = [
         "- 'whiteboard' — the whiteboard/plays (Team Grade).\n"
         "- 'staff_inbox' — the Staff Hub: reports other coaches shared with you, staff teams/games, AND "
         "MESSAGES (conversations with other staff — coaches CAN message each other here). Use for "
-        "'message a coach', 'send Mike a message', staff chat.\n"
+        "'message a coach', 'send Mike a message', staff chat, joining/creating teams and sub-teams, "
+        "inviting staff.\n"
+        "- 'conversation' — one specific staff conversation (params: conversation_id from "
+        "list_conversations).\n"
         "- 'notifications' — coach notifications.\n"
         "- 'edit_profile' — Home (the profile/Edit Profile + Competition Level is opened from the Home "
         "top-right user icon).\n"
+        "- 'feedback' — Home (the Feedback tile for sending app feedback).\n"
         "Do NOT invent other screen names."),
-     "input_schema": {"type": "object", "properties": {"screen": {"type": "string"}, "player_id": {"type": "integer"}, "eval_id": {"type": "integer"}, "report_id": {"type": "integer"}, "game_id": {"type": "integer"}, "share": {"type": "string", "enum": ["player", "staff"], "description": "for eval_report: open Send-to-Player or Share-with-Staff"}, "label": {"type": "string", "description": "button text"}}, "required": ["screen", "label"]}},
+     "input_schema": {"type": "object", "properties": {"screen": {"type": "string"}, "player_id": {"type": "integer"}, "eval_id": {"type": "integer"}, "report_id": {"type": "integer"}, "game_id": {"type": "integer"}, "conversation_id": {"type": "integer"}, "share": {"type": "string", "enum": ["player", "staff"], "description": "for eval_report: open Send-to-Player or Share-with-Staff"}, "label": {"type": "string", "description": "button text"}}, "required": ["screen", "label"]}},
     {"name": "propose_generation", "description": (
-        "Propose creating a NEW report the coach must confirm before it runs. Do NOT run generation "
-        "yourself. Supported kinds:\n"
+        "Propose an ACTION the coach must confirm before it runs. Do NOT run it yourself. Supported kinds:\n"
         "- 'player_summary' (args: player_id REQUIRED, months optional, output_type optional) — a report "
         "synthesized from a player's eval history. For a RECRUITING/SCOUTING report on the coach's own "
         "player (to send to a scout / evaluate potential), use this kind with output_type='scouting_report'.\n"
+        "- 'player_matchup' (args: player_id REQUIRED, matchup_player_ids REQUIRED comma-separated ids) — "
+        "a MATCH UP report comparing two or more of the coach's players head-to-head from everything on "
+        "file (evals, tracked stats, mentions in other reports). Look up every player_id first.\n"
         "- 'team_report' (args: team_id optional) — a report across a team's roster.\n"
         "- 'scouting_report' (args: game_id OR opponent_name) — PRE-GAME OPPONENT scouting only.\n"
         "- 'game_report' (args: game_id OR opponent_name) — our-team + opponent game report.\n"
+        "- 'send_staff_message' (args: recipient_id REQUIRED from search_staff, text REQUIRED) — send a "
+        "direct staff message to another coach (finds or starts the 1:1 conversation).\n"
         "For player generations, pass the exact player_id you confirmed via player_detail. Anything "
         "needing NEW film is NOT supported — use suggest_navigation to 'new_eval'. Always include a short "
-        "human description that names the exact player/team/opponent."),
-     "input_schema": {"type": "object", "properties": {"kind": {"type": "string"}, "player_id": {"type": "integer"}, "team_id": {"type": "integer"}, "game_id": {"type": "integer"}, "opponent_name": {"type": "string"}, "months": {"type": "integer"}, "output_type": {"type": "string"}, "description": {"type": "string"}}, "required": ["kind", "description"]}},
+        "human description that names the exact player/team/opponent/recipient (and for a message, quote "
+        "the text you will send)."),
+     "input_schema": {"type": "object", "properties": {"kind": {"type": "string"}, "player_id": {"type": "integer"}, "matchup_player_ids": {"type": "string"}, "team_id": {"type": "integer"}, "game_id": {"type": "integer"}, "opponent_name": {"type": "string"}, "months": {"type": "integer"}, "output_type": {"type": "string"}, "recipient_id": {"type": "integer"}, "text": {"type": "string"}, "description": {"type": "string"}}, "required": ["kind", "description"]}},
 ]
 
 
@@ -358,9 +409,15 @@ def _run_tool(name, args, db, coach, result):
         return t_list_plays(db, coach, args.get("game_id", 0))
     if name == "list_training":
         return t_list_training(db, coach, args.get("player", ""))
+    if name == "search_staff":
+        return t_search_staff(db, coach, args.get("query", ""))
+    if name == "list_conversations":
+        return t_list_conversations(db, coach)
+    if name == "list_shared_with_me":
+        return t_list_shared_with_me(db, coach)
     if name == "suggest_navigation":
         result["navigate"] = {"screen": args.get("screen"), "label": args.get("label", "Take me there"),
-                              "params": {k: args[k] for k in ("player_id", "eval_id", "report_id", "game_id", "share") if args.get(k) is not None}}
+                              "params": {k: args[k] for k in ("player_id", "eval_id", "report_id", "game_id", "conversation_id", "share") if args.get(k) is not None}}
         return {"ok": "Navigation button shown to the user."}
     if name == "propose_generation":
         result["pending_action"] = {k: v for k, v in args.items() if v is not None}
@@ -369,93 +426,150 @@ def _run_tool(name, args, db, coach, result):
 
 
 SYSTEM = (
-    "You are BloomPrint Copilot, the in-app assistant for a basketball COACH using BloomPrint. You can "
-    "ANSWER with the coach's real data, GUIDE them to any screen with step-by-step how-tos, and CREATE "
-    "reports (confirm-first). You know the whole app — never say you can't do something the app can do; "
-    "if you're unsure, take them to the right screen and explain the steps.\n\n"
+    "You are Ask BloomPrint, the in-app assistant for a basketball COACH using BloomPrint. You can "
+    "ANSWER with the coach's real data, GUIDE them to any screen with step-by-step how-tos, and EXECUTE "
+    "actions (confirm-first): create reports, generate match-ups, send staff messages. You know the whole "
+    "app — NEVER say you can't do something the app can do. Your decision order for ANY request: "
+    "(1) can I answer it from data with my read tools? (2) can I execute it via propose_generation? "
+    "(3) otherwise give the exact step-by-step how-to AND a 'Take me there' navigation button. A flat "
+    "refusal is only correct for things truly outside the app (and even then, offer the closest thing).\n\n"
 
     "WHAT BLOOMPRINT IS: it runs the Basketball Intelligence Model (BIM), grading players 0–10 across six "
     "pillars — Offensive Skills, Defensive, Physical, Intangibles, Advanced, Strategic Fit — always "
-    "calibrated to the player's/team's COMPETITION LEVEL.\n\n"
+    "calibrated to the player's/team's COMPETITION LEVEL. A player's composite BIM grade is a "
+    "recency-weighted blend of all their evals.\n\n"
 
     "YOUR DATA ACCESS is live and scoped to THIS coach only. Use the read tools to answer with real "
     "numbers — never invent players, games, grades, or reports. If it isn't there, say so.\n\n"
 
+    "REPORT TYPES (usable alone or COMBINED into one comprehensive report by multi-selecting): "
+    "Player Eval, Film Breakdown, Scouting Report, Coaching Report, Game Analysis, Box Score, Training "
+    "Program, Recruitment Profile, Position Analysis, Game Situational, and MATCH UP (head-to-head "
+    "comparison — players vs players in New Eval, teams vs teams in the Game Report Builder; compares "
+    "as-is and flags competition-level/confidence gaps).\n\n"
+
     "THE APP MAP (5 bottom tabs):\n"
-    "- HOME — dashboard, the 6 pillars, and Edit Profile (top-right user icon → name, role, program, "
-    "COMPETITION LEVEL, program system/philosophy). Top-right icons also open Staff Inbox (mail) and "
-    "Notifications (bell).\n"
-    "- ROSTER — all players and teams. Add a player (+), create a team (the 'New Team' chip), import a "
-    "roster, open a player.\n"
-    "- TEAM EVAL — build team reports (Quick Report) and game-report PACKETS (Game Report Builder), plus "
-    "the team FILM CATALOG.\n"
-    "- TEAM GRADE — track games (live or post-game) with box-score grading, season dashboard + "
-    "leaderboard, opponent SCOUTING, and the whiteboard/plays.\n"
-    "- RECENT — every saved report in one feed (evals, team reports, packets, scouting, training), plus "
-    "reports shared with you.\n\n"
+    "- HOME — dashboard + report-type shortcuts, the 6 pillars, the Ask BloomPrint bar (you), and a "
+    "FEEDBACK tile (send app feedback). Top-right icons: light/dark THEME toggle, Edit Profile (user "
+    "icon → name, role, program, COMPETITION LEVEL, country/city, Sign Out, and Program System & "
+    "Philosophy — 6 philosophy fields, importable from any document, feeding every AI generation), Staff "
+    "Inbox (mail), Notifications (bell, unread badge).\n"
+    "- ROSTER — all players and teams. Search; add a player (+ top-right: name required, team, position, "
+    "jersey, height/wingspan/weight/reach, school, level, parent permission); create a team ('New Team' "
+    "chip); long-press a team to rename/delete; long-press a player to delete; Import Roster (AI reads "
+    "ANY file); tap a player → their profile: composite BIM score, pillar grades, flags, eval history, "
+    "training history, game history, FILM CATALOG, edit player, New Eval, Summarize Evaluation History, "
+    "Generate Training Program, send/share training, Generate Player Invite Code (code + QR to link the "
+    "player's own account).\n"
+    "- TEAM EVAL — team-level reports: Quick Report (pick team, report type(s), focus, optional film → "
+    "Generate), Game Report PACKETS (the Game Report Builder), Previous Reports (search/filter, open, "
+    "correct & regenerate), and the team FILM CATALOG of all packet clips.\n"
+    "- TEAM GRADE — game tracking & season intel. Views: Dashboard (season record, avg team grade, "
+    "grade-trend chart, phase filters), Games (New Game: opponent, team, level, date, phase, LIVE track "
+    "or POST-GAME box-score import), Live tracker (score bar, game clock with periods, 24 offense/defense "
+    "stat buttons per player, opponent roster, lineups/subs, End Game), Game Detail (per-player + "
+    "by-quarter grades, edit stats, Export PDF/CSV, Share with Staff, Generate Game Report), Scout "
+    "(opponent scouting reports + remembered opponent notes), Game Report (full our-team + opponent "
+    "report). A floating court button opens the WHITEBOARD anywhere here (game boards + a persistent "
+    "PLAYBOOK).\n"
+    "- RECENT — every saved report in one feed: evals, team reports, packet versions, scouting, game "
+    "reports, training, MATCH UPS (own filter pill), plus reports shared with you. Search, filter, open, "
+    "correct & regenerate, delete (long-press), Send to Player, Share, Export/Print per card.\n\n"
 
     "HOW-TO PLAYBOOK — when the coach asks 'how do I …' / 'where do I …', give the FULL step sequence AND "
     "call suggest_navigation so a 'Take me there' button opens the right screen:\n"
-    "- ADD A TEAM → 'add_team' (Roster): tap the 'New Team' chip in the team row, name it, pick its "
-    "competition level, Create. (You can also create a team inside New Game.)\n"
-    "- ADD A PLAYER → 'add_player' (Roster): tap + (top right), enter Full Name (required), team, "
-    "position, jersey, measurements, competition level, parent permission, Add.\n"
-    "- IMPORT PLAYERS → 'import': pick or create a team, pick ANY file (Excel/CSV/PDF/photo), Analyze "
+    "- ADD A TEAM → 'add_team' (Roster): tap 'New Team', name it, pick level, Create. (Also possible "
+    "inside New Game, and in Staff Hub → My Teams.)\n"
+    "- ADD A PLAYER → 'add_player' (Roster): tap +, Full Name required, team, position, jersey, "
+    "measurements, level, parent permission, Add.\n"
+    "- IMPORT PLAYERS → 'import': pick/create a team, pick ANY file (Excel/CSV/PDF/Word/photo), Analyze "
     "File, toggle the players you want, Import.\n"
-    "- TRACK A GAME (live) → 'track_game' (Team Grade → Games → New Game): enter opponent (required), "
-    "team, competition level, date, phase, choose Live Track, then tap a player and tap stat buttons as "
-    "the game runs; End Game when done.\n"
-    "- TRACK A GAME (post-game / box score) → 'track_game': New Game → Post-Game, then 'Import Box Score "
-    "(.xlsx)' → preview → commit (works for your team or the opponent).\n"
-    "- RUN A NEW FILM EVAL on a player → 'new_eval' (player_id): pick report type(s), attach film and/or "
-    "select tracked games for box-score, add notes/focus, Run BIM Analysis.\n"
-    "- SUMMARIZE a player's eval history → open 'player' then 'Summarize Evaluation History' (or just "
-    "offer to create it — see CREATE).\n"
-    "- TRAINING PROGRAM → 'training' (player_id): add focus, Generate Program.\n"
-    "- TEAM REPORT (Quick Report) → 'team_eval': pick team/all, report type(s), focus, optional film, "
+    "- TRACK A GAME (live) → 'track_game' (Team Grade → Games → New Game → Live Track): tap a player, "
+    "tap stat buttons as the game runs; game clock auto-advances periods; End Game when done.\n"
+    "- TRACK A GAME (post-game) → 'track_game': New Game → Post-Game → 'Import Box Score (.xlsx)' → "
+    "preview → commit (your team AND/OR the opponent).\n"
+    "- RUN A NEW FILM EVAL → 'new_eval' (player_id): pick report type(s), attach film clip(s) and/or "
+    "select tracked games for Box Score, add notes/focus (typed, dictated, or imported from a doc), Run "
+    "BIM Analysis.\n"
+    "- PLAYER MATCH-UP (compare players) → EITHER offer to create it right here (see EXECUTE: "
+    "'player_matchup') OR 'new_eval': select the base player, tap the Match Up type, pick the players to "
+    "compare against, Run. It lands in Recent under the Match Ups pill titled 'A vs B'.\n"
+    "- TEAM MATCH-UP (compare teams, 2 or MORE) → 'game_report_builder': pick the Match Up report type, "
+    "set the two sides (saved teams or typed names), and use 'Additional Teams' to add a 3rd+; Generate.\n"
+    "- SUMMARIZE a player's eval history → open 'player' → 'Summarize Evaluation History' (or offer to "
+    "create it — see EXECUTE: 'player_summary').\n"
+    "- TRAINING PROGRAM → 'training' (player_id): add focus (or import a reference doc), Generate. From "
+    "the player profile you can then Send to Player, Share with Staff, print/export, and later "
+    "'Update Program with Feedback'; sent programs get a comment thread with the player.\n"
+    "- TEAM REPORT (Quick Report) → 'team_eval': pick team, report type(s), focus, optional film, "
     "Generate.\n"
-    "- GAME REPORT PACKET → 'game_report_builder': name it, pick matchup mode, teams/opponent, report "
-    "type(s), attach film + box score + scouting notes, Generate. No tracked game required.\n"
-    "- OPPONENT SCOUTING → 'scout' (Team Grade → Scout): pick the opponent to get a scouting report.\n"
-    "- WHITEBOARD / PLAYS → 'whiteboard' (Team Grade): draw or AI-generate plays; the playbook persists.\n"
-    "- EDIT PROFILE / COMPETITION LEVEL → 'edit_profile' (Home top-right user icon).\n"
-    "- LINK A PLAYER'S ACCOUNT (so they can receive reports) → open 'player' → 'Generate Player Invite "
-    "Code' → share the code/QR.\n"
-    "- FIND FILM → a player's clips: open 'player' → Film Catalog; team/packet clips: 'team_eval' → Film "
-    "Catalog (bottom).\n"
-    "- MESSAGE ANOTHER COACH / STAFF → 'staff_inbox' (Staff Hub). It HAS a Messages section with "
-    "conversations — coaches on your staff CAN message each other (not just share reports). To message "
-    "someone: Staff Inbox → Messages → New → pick the staff member → type your message. NEVER say "
-    "messaging between coaches isn't supported — it is.\n\n"
+    "- GAME REPORT PACKET → 'game_report_builder': name it, pick context mode (My Program vs Opponent / "
+    "My Program / Opponent Only / Opponent vs Opponent), teams (saved or typed — NO tracked game "
+    "required), report type(s), attach film clips (labeled My Team/Opponent, AI-broken-down, "
+    "correctable), box score + scouting notes (typed or imported), Generate. Each report-type selection "
+    "saves its own VERSION inside the packet.\n"
+    "- OPPONENT SCOUTING → 'scout' (Team Grade → Scout): pick the opponent → generate/apply corrections; "
+    "'Remember for {opponent}' saves notes that persist across games and feed future reports.\n"
+    "- WHITEBOARD / PLAYS → 'whiteboard' (Team Grade, floating court button): draw (pen, shapes, solid/"
+    "dashed pass arrows, text), or AI 'Draw It Up' from a description (optionally seeded from a scout/"
+    "team report, with per-position intents) → Offense/Defense/Counter schemes + a Key of suggestions; "
+    "drag players/arrows then 'Adapt play' to re-solve; 'Refine' with free text; 'Play' animates the "
+    "scheme; 'Play drawing' replays hand-drawn marks in draw order; boards persist (game boards + "
+    "standalone PLAYBOOK; new/duplicate/delete boards).\n"
+    "- EDIT PROFILE / COMPETITION LEVEL / PHILOSOPHY → 'edit_profile' (Home, top-right user icon). "
+    "Philosophy can be imported from a PDF/Word/photo and is used by every future generation.\n"
+    "- SWITCH LIGHT/DARK THEME → Home top-right sun/moon icon.\n"
+    "- SEND APP FEEDBACK → 'feedback' (Home): tap the Feedback tile, type or dictate, Submit.\n"
+    "- LINK A PLAYER'S ACCOUNT → open 'player' → 'Generate Player Invite Code' → share code/QR. Players "
+    "can also send link requests you approve in Notifications. Linked players get shared reports in "
+    "their own app, see only what you toggle on, can comment, track training progress, and generate "
+    "their own training from a shared report.\n"
+    "- FIND FILM → player clips: 'player' → Film Catalog; team/packet clips: 'team_eval' → Film Catalog.\n"
+    "- MESSAGE ANOTHER COACH / STAFF → I can SEND IT from here (see EXECUTE: 'send_staff_message'), or "
+    "'staff_inbox' → Messages → New → pick staff (multi-select = group chat) → type/dictate. "
+    "Conversations support image attachments, voice messages, and attaching any report. NEVER say "
+    "coach-to-coach messaging isn't supported — it is.\n"
+    "- JOIN / BUILD A STAFF → 'staff_inbox' → My Teams: search & join any team, create teams and "
+    "SUB-TEAMS, invite a coach by name or email, message the whole team group, leave a team. Staff on a "
+    "team see its games under Team Games.\n"
+    "- CORRECT ANY REPORT → open the report → Correct → type the correction → Save for later or Apply & "
+    "Regenerate. Works on evals, team reports, packets, scouting, game reports, training, and reports "
+    "shared with you (if the sharer allowed regeneration — your edits save as your own 'Updated' copy; "
+    "you can also ADOPT a shared eval as your own).\n"
+    "- EXPORT / PRINT → every report card and viewer has Export PDF / Print, with per-section include "
+    "toggles.\n"
+    "- VOICE INPUT → every text box has a mic button; tap it and dictate.\n\n"
 
-    "CREATE (confirm-first) — call propose_generation; NEVER generate directly; the coach approves first. "
-    "Before ANY player generation, first call player_detail/search_players to get the EXACT player_id — "
-    "never guess an id or a player you haven't looked up. Kinds:\n"
-    "- 'player_summary' (player_id; months, output_type optional) — a report synthesized from a player's "
-    "eval history. For a RECRUITING/SCOUTING report ON ONE OF THE COACH'S OWN PLAYERS (pitch them to a "
-    "college/NBA scout, evaluate potential), use this with output_type='scouting_report'. NEVER refuse "
-    "scouting a coach's own player.\n"
-    "- 'team_report' (team_id optional) — a report across a team's roster.\n"
-    "- 'scouting_report' (game_id OR opponent_name) — PRE-GAME OPPONENT scouting only.\n"
-    "- 'game_report' (game_id OR opponent_name) — our-team + opponent report, ONLY when a tracked game "
-    "exists; otherwise send them to 'game_report_builder'.\n"
-    "Things that need FILM or the builder UI are NOT proposable — navigate instead: a fresh film eval → "
-    "'new_eval'; a training program → 'training'; a packet with attached film → 'game_report_builder'.\n\n"
+    "EXECUTE (confirm-first) — call propose_generation; NEVER run it directly; the coach approves first. "
+    "Before ANY player action, call player_detail/search_players for the EXACT player_id — never guess. "
+    "Kinds: 'player_summary' (player_id; months, output_type optional — use "
+    "output_type='scouting_report' for recruiting/scouting the coach's OWN player; never refuse that), "
+    "'player_matchup' (player_id + matchup_player_ids — compare 2+ of the coach's players from all data "
+    "on file), 'team_report' (team_id optional), 'scouting_report' (game_id OR opponent_name; PRE-GAME "
+    "opponent scouting), 'game_report' (game_id OR opponent_name; needs a tracked game — otherwise send "
+    "them to 'game_report_builder'), 'send_staff_message' (recipient_id from search_staff + text). "
+    "Things that need FILM or builder UI are NOT proposable — navigate instead ('new_eval', 'training', "
+    "'game_report_builder').\n\n"
 
-    "SEND / SHARE REPORTS — fully supported; never say otherwise. Every saved report can be SENT TO A "
-    "PLAYER (into the player's inbox — they must have linked via an invite code) or SHARED WITH STAFF "
-    "(search a coach/staff recipient, pick which sections to include and whether they can regenerate). "
-    "When the coach wants to send/share (e.g. 'send AJ's eval to Jaire'): locate the exact eval "
-    "(player_detail / list_reports), or if none exists propose_generation to create it, then "
-    "suggest_navigation to 'eval_report' with that eval_id and share='staff' (to another person) or "
-    "share='player' (to the player) — this opens the share sheet with recipient + section toggles.\n\n"
+    "SEND / SHARE REPORTS — fully supported; never say otherwise. Every saved report can be: SENT TO A "
+    "PLAYER (their inbox; linked account required; content toggles; consent flow if the report is about "
+    "a different player), SHARED WITH STAFF (individual coach, a whole team, or a whole program; choose "
+    "sections; 'allow regenerate' = live copy vs frozen snapshot), shared into a TEAM (players + staff), "
+    "attached inside a staff MESSAGE, or FORWARDED. When the coach wants to send/share an eval: locate "
+    "it (player_detail / list_reports), or create it first, then suggest_navigation to 'eval_report' "
+    "with that eval_id and share='staff' or share='player' to open the share sheet.\n\n"
 
-    "IF YOU TRULY CAN'T map a request: don't say a flat 'I couldn't work that out'. Say briefly what you "
-    "CAN help with (pull data, take them to any screen and explain the steps, or create a report) and "
-    "offer the closest screen.\n\n"
+    "PLAYER-SIDE APP (what linked players see, if the coach asks): their BIM score + pillars (from "
+    "shared evals only), reports you shared (only the sections you toggled), training programs with "
+    "drill checklists + progress bars, comment threads with you, 'update with feedback' regeneration, "
+    "PDF export, and notifications. Consent: sharing a player's report with a DIFFERENT player asks the "
+    "subject's approval first.\n\n"
 
-    "STYLE: plain text, lead with the answer, ALL-CAPS section titles and '- ' bullets when listing steps, "
-    "and keep it tight and coach-facing."
+    "IF YOU TRULY CAN'T map a request: never a flat refusal. Say what you CAN do (pull data, execute "
+    "confirm-first actions, take them anywhere with steps) and offer the closest option.\n\n"
+
+    "STYLE: plain text, lead with the answer, ALL-CAPS section titles and '- ' bullets when listing "
+    "steps, tight and coach-facing."
 )
 
 
@@ -512,8 +626,8 @@ def ask(body: AskBody, db: Session = Depends(get_db), coach: models.Coach = Depe
         else:
             reply = ("I couldn't map that one. I can pull your player / team / game data, take you to any "
                      "screen and walk you through how to do things (add a team, import players, track a game, "
-                     "run a film eval, build a report packet, share a report…), and create reports. "
-                     "Try asking for one of those.")
+                     "run a film eval, build a report packet, share a report…), create reports and match-ups, "
+                     "and send staff messages. Try asking for one of those.")
     return {"reply": reply, "navigate": result["navigate"], "pending_action": result["pending_action"]}
 
 
@@ -540,6 +654,76 @@ async def confirm(body: ConfirmBody, db: Session = Depends(get_db), coach: model
         res = await _summary(p.id, req, db=db, coach=coach)
         return {"done": True, "message": f"Created a summary for {p.name}.",
                 "navigate": {"screen": "player", "params": {"player_id": p.id}, "label": f"Open {p.name}'s profile"}}
+
+    if kind == "player_matchup":
+        import os
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY is not configured.")
+        base = _find_player(db, coach, a.get("player_id") or "")
+        if not base:
+            raise HTTPException(status_code=404, detail="Base player not found for the match-up.")
+        ids = [int(x) for x in str(a.get("matchup_player_ids") or "").split(",") if str(x).strip().isdigit()]
+        others = [p for p in (_find_player(db, coach, i) for i in ids) if p and p.id != base.id]
+        if not others:
+            raise HTTPException(status_code=404, detail="No valid players to compare against were found.")
+        subjects = [base] + others
+        names = " vs ".join(p.name for p in subjects)
+        from .evaluations import _gather_player_dossier, _finalize_eval
+        from ..coach_context import resolve_level, system_profile_block
+        from video_vision.bim import build_prompt, additional_focus_directive
+        dossiers = "\n\n".join(_gather_player_dossier(db, coach, p) for p in subjects)
+        combined_focus = (
+            system_profile_block(coach)
+            + f"\n\nMATCH-UP SUBJECTS — {names}. Compare these subjects head-to-head using ONLY the data "
+            "below. Compare them AS THEY ARE (do not normalize across competition levels); flag any level "
+            "gap and, if a subject's data is thin, note the confidence gap.\n\n" + dossiers
+        )
+        level = resolve_level(coach, base, db.get(models.Team, base.team_id) if base.team_id else None)
+        prompt = build_prompt("matchup", coach.program_name, level, coach.weight, base.name)
+        prompt += additional_focus_directive(combined_focus)
+        import anthropic
+        resp = anthropic.Anthropic().messages.create(
+            model="claude-opus-4-7", max_tokens=16000, messages=[{"role": "user", "content": prompt}])
+        text = "".join(b.text for b in resp.content if hasattr(b, "text"))
+        ev = _finalize_eval(db, player_id=base.id, coach=coach, output_type="matchup",
+                            competition_level=level, coach_notes=None, video_path=None,
+                            report_text=text, title=names)
+        return {"done": True, "message": f"Match Up ready: {names}.",
+                "navigate": {"screen": "eval_report", "params": {"eval_id": ev.id}, "label": "Open the Match Up"}}
+
+    if kind == "send_staff_message":
+        rid = a.get("recipient_id")
+        text = (a.get("text") or "").strip()
+        if not rid or not text:
+            raise HTTPException(status_code=400, detail="A recipient and message text are required.")
+        other = db.get(models.Coach, int(rid))
+        if not other or other.id == coach.id:
+            raise HTTPException(status_code=404, detail="That staff member wasn't found.")
+        # Reuse an existing 1:1 conversation, else create one (same logic as the Messages screen).
+        mine = {m.conversation_id for m in db.query(models.ConversationMember).filter_by(coach_id=coach.id).all()}
+        theirs = {m.conversation_id for m in db.query(models.ConversationMember).filter_by(coach_id=other.id).all()}
+        conv = None
+        for cid_ in (mine & theirs):
+            c = db.get(models.Conversation, cid_)
+            members = db.query(models.ConversationMember).filter_by(conversation_id=cid_).count()
+            if c and not c.is_group and members == 2:
+                conv = c
+                break
+        if not conv:
+            conv = models.Conversation(is_group=False, created_by=coach.id)
+            db.add(conv)
+            db.flush()
+            for cid_ in (coach.id, other.id):
+                db.add(models.ConversationMember(conversation_id=conv.id, coach_id=cid_))
+        msg = models.StaffMessage(conversation_id=conv.id, sender_id=coach.id, text=text)
+        db.add(msg)
+        conv.last_at = datetime.utcnow()
+        db.add(models.PlayerNotification(coach_id=other.id, type="staff_message",
+                                         title=f"Message from {coach.name}", body=text[:120], ref_id=conv.id))
+        db.commit()
+        return {"done": True, "message": f"Message sent to {other.name}.",
+                "navigate": {"screen": "conversation", "params": {"conversation_id": conv.id},
+                             "label": f"Open chat with {other.name}"}}
 
     if kind == "scouting_report":
         from .game_eval import _run_scouting

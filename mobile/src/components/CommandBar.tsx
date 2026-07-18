@@ -84,8 +84,13 @@ function goTo(navigation: any, target: { screen: string; params?: any; label?: s
       case 'messages':
       case 'message':
       case 'staff_messages':
-      case 'conversation':
         deep('HomeTab', 'Home', 'StaffInbox'); break;
+      case 'conversation':
+        if (p.conversation_id != null) deep('HomeTab', 'Home', 'Conversation', { conversationId: p.conversation_id });
+        else deep('HomeTab', 'Home', 'StaffInbox');
+        break;
+      case 'feedback':
+        navigation.navigate('HomeTab', { screen: 'Home' }); break;
       case 'notifications':
       case 'alerts':
         deep('HomeTab', 'Home', 'CoachNotifications'); break;
@@ -214,8 +219,8 @@ export default function CommandBar() {
                                 <Text style={s.confirmNoText}>Cancel</Text>
                               </TouchableOpacity>
                               <TouchableOpacity style={s.confirmYes} onPress={() => runPending(i, m.pending)} disabled={busy}>
-                                <Ionicons name="sparkles" size={14} color={t.ctaText} />
-                                <Text style={s.confirmYesText}>Generate</Text>
+                                <Ionicons name={m.pending.kind === 'send_staff_message' ? 'send' : 'sparkles'} size={14} color={t.ctaText} />
+                                <Text style={s.confirmYesText}>{m.pending.kind === 'send_staff_message' ? 'Send' : 'Generate'}</Text>
                               </TouchableOpacity>
                             </View>
                           )}
