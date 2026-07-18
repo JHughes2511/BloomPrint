@@ -110,6 +110,10 @@ interface Board {
     // regeneration and shown in the panel until the coach changes them.
     guidance?: Record<string, string>;
   };
+  // Canvas dimensions the hand-drawn strokes were baked at (px). Used on reload to
+  // rescale strokes to the current court size so they don't drift when the board is
+  // reopened on a different-sized canvas.
+  canvas?: { w: number; h: number; type?: CourtType };
 }
 
 // Three marker colors with strong contrast on maple hardwood, one thickness.
@@ -790,7 +794,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
           const parsed = JSON.parse(b.data || '[]');
           return Array.isArray(parsed)
             ? { ...b, strokes: parsed }
-            : { ...b, strokes: parsed.strokes ?? [], ai: parsed.ai };
+            : { ...b, strokes: parsed.strokes ?? [], ai: parsed.ai, canvas: parsed.canvas };
         }));
       } else {
         setBoards([{ name: 'Board 1', court_type: 'full', strokes: [] }]);
@@ -1124,11 +1128,24 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         n[activeBoardIdx] = b.ai
           ? { ...b, strokes: [...hand, ...buildAllStrokes(b.ai, b.court_type)] }
           : { ...b, strokes: hand };
-      } else if (b.ai) {
-        // Board switch / first render: rebuild AI marks crisp at current scale.
-        n[activeBoardIdx] = { ...b, strokes: [...b.strokes.filter(st => !st.layer), ...buildAllStrokes(b.ai, b.court_type)] };
       } else {
-        return prev;
+        // Board switch / first render (e.g. reopening the board later). Hand-drawn
+        // strokes were baked at the canvas size they were drawn on; if that size
+        // differs from the current court, rescale them so they keep their court
+        // location instead of drifting. AI marks rebuild crisp from feet-data.
+        const bakedScale = b.canvas && b.canvas.w > 0 ? b.canvas.w / PADDED_FT_W : 0;
+        const loadRatio = bakedScale > 0 ? scale / bakedScale : 1;
+        const needsHandRescale = Math.abs(loadRatio - 1) > 0.002;
+        if (!b.ai && !needsHandRescale) return prev;
+        const hand = needsHandRescale
+          ? b.strokes.filter(st => !st.layer).map(st => scaleStroke(st, loadRatio))
+          : b.strokes.filter(st => !st.layer);
+        n[activeBoardIdx] = {
+          ...b,
+          // Mark strokes as now baked at the current scale so this doesn't re-apply.
+          canvas: { w: courtW, h: courtH, type: b.court_type },
+          strokes: b.ai ? [...hand, ...buildAllStrokes(b.ai, b.court_type)] : hand,
+        };
       }
       return n;
     });
@@ -1757,9 +1774,6 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       )}
       {hasFreehandArrows && !selectedTextId && (
         <View style={styles.floatBar}>
-          <TouchableOpacity style={[styles.floatChip, orderMode && { backgroundColor: t.ctaBg, borderColor: t.ctaBg }]} onPress={() => setOrderMode(v => { const nv = !v; if (nv) orderCounterRef.current = 0; return nv; })}>
-            <Text style={[styles.floatChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Tap arrows 1·2·3' : 'Order'}</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.floatChip} onPress={clearAll}><Text style={styles.floatChipText}>Clear board</Text></TouchableOpacity>
           <TouchableOpacity
             style={[styles.floatChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
@@ -1850,16 +1864,6 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
               <Ionicons name="people-outline" size={13} color={t.muted} />
               <Text style={styles.schemeChipText}>Players</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.schemeChip, orderMode && styles.schemeChipActive]}
-              onPress={() => setOrderMode(v => { const nv = !v; if (nv) orderCounterRef.current = 0; return nv; })}>
-              <Text style={[styles.schemeChipText, orderMode && { color: t.ctaText }]}>{orderMode ? 'Tap 1·2·3' : 'Order'}</Text>
-            </TouchableOpacity>
-            {orderMode && (
-              <TouchableOpacity style={styles.schemeChip} onPress={clearOrder}>
-                <Text style={styles.schemeChipText}>Clear</Text>
-              </TouchableOpacity>
-            )}
             {pinCount > 0 && (
               <TouchableOpacity
                 style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
