@@ -100,7 +100,8 @@ export type OutputType =
   | 'recruitment_profile'
   | 'position_analysis'
   | 'game_analysis'
-  | 'box_score';
+  | 'box_score'
+  | 'matchup';
 
 // ── Player system types ───────────────────────────────────────────────────────
 

@@ -74,6 +74,7 @@ type ModalReport = {
 const FILTER_CATS = [
   { key: 'all', label: 'All' },
   { key: 'eval', label: 'Player Evals' },
+  { key: 'matchup', label: 'Match Ups' },
   { key: 'team', label: 'Team Reports' },
   { key: 'game', label: 'Game Reports' },
   { key: 'scout', label: 'Scout' },
@@ -398,7 +399,10 @@ export default function RecentScreen() {
   const searchTerm = searchQuery.trim().toLowerCase();
   const filtered = items.filter(item => {
     // The "Game Reports" tab groups packet game reports and per-game reports.
-    const matchesFilter = item.kind === filter || (filter === 'game' && item.kind === 'gamereport');
+    // "Match Ups" spans any report whose type includes matchup (player or team).
+    const matchesFilter = filter === 'matchup'
+      ? (item.output_type ?? '').split(',').map(s => s.trim()).includes('matchup')
+      : (item.kind === filter || (filter === 'game' && item.kind === 'gamereport'));
     if (filter !== 'all' && !matchesFilter) return false;
     if (!searchTerm) return true;
     const kindLabel =

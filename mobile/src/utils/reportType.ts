@@ -5,6 +5,9 @@
 const titleCase = (s: string) =>
   s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
+const LABEL_OVERRIDES: Record<string, string> = { matchup: 'Match Up' };
+const typeName = (t: string) => LABEL_OVERRIDES[t] ?? titleCase(t);
+
 export function parseOutputTypes(outputType?: string | null): string[] {
   return (outputType ?? '').split(',').map(s => s.trim()).filter(Boolean);
 }
@@ -14,14 +17,14 @@ export function outputTypeLabel(outputType?: string | null): string {
   const types = parseOutputTypes(outputType);
   if (types.length === 0) return 'Report';
   if (types.length > 1) return 'Comprehensive Report';
-  return titleCase(types[0]);
+  return typeName(types[0]);
 }
 
 /** Subtitle for a combo: "Coaching Report + Scouting Report"; empty for a single. */
 export function outputTypeSubtitle(outputType?: string | null): string {
   const types = parseOutputTypes(outputType);
   if (types.length <= 1) return '';
-  return types.map(titleCase).join(' + ');
+  return types.map(typeName).join(' + ');
 }
 
 export function isComboReport(outputType?: string | null): boolean {

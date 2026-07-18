@@ -9,7 +9,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { evalsAPI, gameEvalAPI, uploadFileStreamed } from '../api/client';
+import { evalsAPI, gameEvalAPI, playersAPI, uploadFileStreamed } from '../api/client';
 import { OutputType } from '../types';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -27,6 +27,7 @@ const OUTPUT_TYPES: { key: OutputType; label: string }[] = [
   { key: 'training_program',   label: 'Training Program' },
   { key: 'recruitment_profile', label: 'Recruitment' },
   { key: 'position_analysis',  label: 'Position Analysis' },
+  { key: 'matchup',            label: 'Match Up' },
 ];
 
 export default function NewEvalScreen() {
@@ -54,6 +55,23 @@ export default function NewEvalScreen() {
   const [seasonYear, setSeasonYear] = useState<string>('all');
   const [seasonPhase, setSeasonPhase] = useState<string>('all');
   const [selectedGameIds, setSelectedGameIds] = useState<number[]>([]);
+
+  // Match Up: pick players to compare THIS player against (unlimited).
+  const wantsMatchup = outputType.split(',').includes('matchup');
+  const [rosterPlayers, setRosterPlayers] = useState<any[]>([]);
+  const [rosterLoaded, setRosterLoaded] = useState(false);
+  const [matchupIds, setMatchupIds] = useState<number[]>([]);
+  const [matchupSearch, setMatchupSearch] = useState('');
+  useEffect(() => {
+    if (wantsMatchup && !rosterLoaded) {
+      playersAPI.list()
+        .then((p: any[]) => setRosterPlayers(Array.isArray(p) ? p.filter(x => x.id !== playerId) : []))
+        .catch(() => setRosterPlayers([]))
+        .finally(() => setRosterLoaded(true));
+    }
+  }, [wantsMatchup, rosterLoaded, playerId]);
+  const matchupFiltered = rosterPlayers.filter(p =>
+    !matchupSearch.trim() || (p.name || '').toLowerCase().includes(matchupSearch.trim().toLowerCase()));
 
   useEffect(() => {
     if (wantsBoxScore && !gamesLoaded && playerName) {
@@ -128,6 +146,7 @@ export default function NewEvalScreen() {
         include_audio: 'false',
       };
       if (wantsBoxScore && selectedGameIds.length) fields.game_ids = selectedGameIds.join(',');
+      if (wantsMatchup && matchupIds.length) fields.matchup_player_ids = matchupIds.join(',');
 
       // Stream each film from disk (native) so large/multiple film doesn't OOM
       // the JS multipart buffer, collecting upload tokens.
@@ -269,6 +288,50 @@ export default function NewEvalScreen() {
                 <Text style={{ color: t.accent, fontSize: 12, marginTop: 8, fontFamily: fonts[700] }}>{selectedGameIds.length} game{selectedGameIds.length > 1 ? 's' : ''} selected</Text>
               )}
             </>
+          )}
+        </View>
+      )}
+
+      {wantsMatchup && (
+        <View style={{ marginBottom: 20 }}>
+          <Text style={styles.label}>Compare Against (Match Up)</Text>
+          <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
+            Pick one or more players to compare {playerName || 'this player'} against. The report pulls everything the app knows about each — evals, tracked stats, and mentions in your other reports.
+          </Text>
+          <TextInput
+            style={{ backgroundColor: t.card, borderRadius: 12, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, marginBottom: 8 }}
+            value={matchupSearch} onChangeText={setMatchupSearch}
+            placeholder="Search players…" placeholderTextColor={t.muted2}
+          />
+          {!rosterLoaded ? (
+            <ActivityIndicator color={t.accent} style={{ marginVertical: 12 }} />
+          ) : matchupFiltered.length === 0 ? (
+            <Text style={{ color: t.muted2, fontSize: 12, paddingVertical: 8 }}>
+              {rosterPlayers.length === 0 ? 'No other players on your roster yet.' : 'No players match that search.'}
+            </Text>
+          ) : (
+            matchupFiltered.slice(0, 40).map(p => {
+              const on = matchupIds.includes(p.id);
+              return (
+                <TouchableOpacity key={p.id}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: t.divider }}
+                  onPress={() => setMatchupIds(prev => on ? prev.filter(id => id !== p.id) : [...prev, p.id])}
+                >
+                  <Ionicons name={on ? 'checkbox' : 'square-outline'} size={20} color={on ? t.accent : t.muted2} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[600] }}>{p.name}</Text>
+                    <Text style={{ color: t.muted2, fontSize: 11 }}>
+                      {[p.position, p.competition_level, p.program_name].filter(Boolean).join(' · ')}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })
+          )}
+          {matchupIds.length > 0 && (
+            <Text style={{ color: t.accent, fontSize: 12, marginTop: 8, fontFamily: fonts[700] }}>
+              Comparing {matchupIds.length + 1} players ({playerName || 'base'} + {matchupIds.length})
+            </Text>
           )}
         </View>
       )}
