@@ -1667,6 +1667,39 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       const mv = moverOf(s);
       if (mv && !active[mv]) active[mv] = s;
     });
+
+    // ── Single ball that follows the play automatically ──
+    const nearestMarkerId = (p: { x: number; y: number }): string | null => {
+      let mv: string | null = null, bd = 40;
+      for (const m of markers) { const d = Math.hypot(pos[m.id].x - p.x, pos[m.id].y - p.y); if (d < bd) { bd = d; mv = m.id; } }
+      return mv;
+    };
+    // Start: the picked ball-handler, else infer from the first pass / first arrow.
+    let holderId: string | null = markers.find(m => m.ball)?.id ?? null;
+    if (!holderId) {
+      const ref = (seq.find(x => x.s.dash) ?? seq[0])?.s;
+      if (ref && ref.x1 != null) holderId = nearestMarkerId({ x: ref.x1, y: ref.y1! });
+    }
+    let ballPos: { x: number; y: number } | null = holderId ? { ...pos[holderId] } : null;
+    // Settle the ball through prior steps: a pass hands it to the receiver; a
+    // dribble/move by the holder carries it along.
+    for (const st of steps) {
+      if (st >= curStep) break;
+      if (!ballPos) break;
+      const acts = seq.filter(x => x.step === st);
+      const pass = acts.find(x => x.s.dash);
+      if (pass) { ballPos = { x: pass.s.x2!, y: pass.s.y2! }; holderId = nearestMarkerId(ballPos); }
+      else if (holderId && pos[holderId]) { ballPos = { ...pos[holderId] }; }
+    }
+    // Current step: does the ball travel? (a pass, or the holder dribbling)
+    let ballTravelTo: { x: number; y: number } | null = null;
+    if (ballPos) {
+      const curActs = seq.filter(x => x.step === curStep);
+      const curPass = curActs.find(x => x.s.dash);
+      if (curPass) ballTravelTo = { x: curPass.s.x2!, y: curPass.s.y2! };
+      else if (holderId && active[holderId]) ballTravelTo = { x: active[holderId].x2!, y: active[holderId].y2! };
+    }
+
     const els: any[] = [];
     markers.forEach(m => {
       const at = pos[m.id];
@@ -1679,21 +1712,29 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         els.push(<G key={`fm${m.id}`}>{renderStroke({ ...m, cx: at.x, cy: at.y })}</G>);
       }
     });
+    // Arrows draw in (no per-pass ball anymore — the single ball below carries it).
     seq.forEach(({ s, step }, i) => {
       if (step > curStep) return;
       if (step < curStep) { els.push(renderStroke({ ...s, id: `fa${i}` })); return; }
       els.push(renderAnimatedArrow({ ...s, id: `fa${i}` }));
-      if (s.dash) {
-        const tx = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, s.x2! - s.x1!] });
-        const ty = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, s.y2! - s.y1!] });
-        els.push(<AnimatedG key={`fb${i}`} translateX={tx as any} translateY={ty as any}><Circle cx={s.x1} cy={s.y1} r={6} fill={BALL} /></AnimatedG>);
-      }
     });
+    // The ball.
+    if (ballPos) {
+      if (ballTravelTo) {
+        const tx = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, ballTravelTo.x - ballPos.x] });
+        const ty = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, ballTravelTo.y - ballPos.y] });
+        els.push(<AnimatedG key="fball" translateX={tx as any} translateY={ty as any}><Circle cx={ballPos.x} cy={ballPos.y} r={6.5} fill={BALL} stroke="#FFFFFF" strokeWidth={1.5} /></AnimatedG>);
+      } else {
+        els.push(<Circle key="fball" cx={ballPos.x} cy={ballPos.y} r={6.5} fill={BALL} stroke="#FFFFFF" strokeWidth={1.5} />);
+      }
+    }
     return els;
   };
 
-  // A basketball on the player who starts with the ball (freehand boards).
+  // A basketball on the player who starts with the ball (freehand boards). Hidden
+  // during playback — the moving ball shows possession then.
   const renderBallHolder = () => {
+    if (freehandPlaying || freehandDone) return null;
     const holder = (boards[activeBoardIdx]?.strokes ?? []).find(s => s.ball && !s.layer && s.cx != null);
     if (!holder) return null;
     return (
