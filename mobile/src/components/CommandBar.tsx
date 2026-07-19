@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView, ActivityIndicator, Alert, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import VoiceTextInput from './VoiceTextInput';
@@ -114,6 +114,17 @@ export default function CommandBar() {
   const [runningIdx, setRunningIdx] = useState<number | null>(null);
   const scrollRef = useRef<ScrollView>(null);
 
+  // Keep the tail of the conversation visible while typing: when the keyboard
+  // slides up it covers the newest messages, so re-pin the scroll to the end.
+  useEffect(() => {
+    if (!open) return;
+    const evt = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const sub = Keyboard.addListener(evt, () => {
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
+    });
+    return () => sub.remove();
+  }, [open]);
+
   const send = async () => {
     const text = input.trim();
     if (!text || busy) return;
@@ -172,7 +183,13 @@ export default function CommandBar() {
               <TouchableOpacity onPress={() => setOpen(false)}><Ionicons name="close" size={24} color={t.muted} /></TouchableOpacity>
             </View>
 
-            <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 8 }}>
+            <ScrollView
+              ref={scrollRef}
+              style={{ flex: 1 }}
+              contentContainerStyle={{ padding: 16, paddingBottom: 8 }}
+              onContentSizeChange={() => { if (messages.length) scrollRef.current?.scrollToEnd({ animated: true }); }}
+              keyboardShouldPersistTaps="handled"
+            >
               {messages.length === 0 && (
                 <View style={{ paddingVertical: 24 }}>
                   <Text style={s.emptyTitle}>Ask me about your program, or give me a task</Text>

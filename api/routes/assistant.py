@@ -287,13 +287,87 @@ def t_list_conversations(db, coach) -> dict:
 
 
 def t_list_shared_with_me(db, coach) -> dict:
+    """Reports shared with this coach, identified the way a human would: subject
+    name, report type, sender, and date (ids kept only so other tools can fetch
+    the text — never show them to the coach)."""
+    from .staff_sharing import _report_meta
     out = []
     for sr in db.query(models.StaffSharedReport).filter_by(recipient_id=coach.id).order_by(models.StaffSharedReport.id.desc()).limit(25).all():
         sender = db.get(models.Coach, sr.sender_id)
-        out.append({"id": sr.id, "report_type": sr.report_type, "report_id": sr.report_id,
-                    "from": sender.name if sender else "A coach",
-                    "allow_regenerate": bool(sr.allow_regenerate)})
-    return {"shared_with_me": out}
+        try:
+            subject, otype, grade = _report_meta(sr.report_type, sr.report_id, db)
+        except Exception:
+            subject, otype, grade = None, None, None
+        out.append({
+            "share_id": sr.id,
+            "subject": subject or "Report",
+            "report_kind": otype or sr.report_type,
+            "from": sender.name if sender else "A coach",
+            "date": sr.created_at.strftime("%Y-%m-%d") if sr.created_at else None,
+            "grade": grade,
+            "allow_regenerate": bool(sr.allow_regenerate),
+        })
+    return {"shared_with_me": out,
+            "note": "Identify these to the coach by subject + report_kind + from + date. NEVER show ids. "
+                    "Use get_shared_report_text(share_id) to read one and say what it's about."}
+
+
+def t_get_shared_report_text(db, coach, share_id: int) -> dict:
+    """Full text of a report SHARED WITH this coach (frozen snapshot, the
+    recipient's regenerated copy, or the live underlying report)."""
+    from .staff_sharing import _resolve_report_text, _report_meta
+    sr = db.get(models.StaffSharedReport, int(share_id))
+    if not sr or sr.recipient_id != coach.id:
+        return {"error": "Shared report not found."}
+    text = sr.regenerated_text or sr.frozen_text or _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id)
+    try:
+        subject, otype, _g = _report_meta(sr.report_type, sr.report_id, db)
+    except Exception:
+        subject, otype = None, None
+    sender = db.get(models.Coach, sr.sender_id)
+    return {"subject": subject, "report_kind": otype or sr.report_type,
+            "from": sender.name if sender else "A coach",
+            "date": sr.created_at.strftime("%Y-%m-%d") if sr.created_at else None,
+            "text": (text or "")[:6000] or "No text available for this share."}
+
+
+def t_get_conversation_messages(db, coach, conversation_id: int = 0, with_name: str = "") -> dict:
+    """Recent messages in one staff conversation (both directions), so questions
+    like 'what was the last message from Mike' are answerable."""
+    conv = None
+    my = [m.conversation_id for m in db.query(models.ConversationMember).filter_by(coach_id=coach.id).all()]
+    if conversation_id:
+        conv = db.get(models.Conversation, int(conversation_id))
+        if not conv or conv.id not in my:
+            return {"error": "Conversation not found."}
+    elif with_name.strip():
+        wn = with_name.strip().lower()
+        newest = None
+        for cid_ in my:
+            member_ids = [m.coach_id for m in db.query(models.ConversationMember).filter_by(conversation_id=cid_).all()]
+            others = db.query(models.Coach).filter(models.Coach.id.in_([i for i in member_ids if i != coach.id])).all()
+            if any(wn in (c.name or "").lower() for c in others):
+                c = db.get(models.Conversation, cid_)
+                if c and (newest is None or (c.last_at or datetime.min) > (newest.last_at or datetime.min)):
+                    newest = c
+        conv = newest
+        if not conv:
+            return {"error": f"No conversation found with '{with_name}'."}
+    else:
+        return {"error": "Give a conversation_id or with_name."}
+    member_ids = [m.coach_id for m in db.query(models.ConversationMember).filter_by(conversation_id=conv.id).all()]
+    names = {c.id: c.name for c in db.query(models.Coach).filter(models.Coach.id.in_(member_ids)).all()}
+    msgs = (db.query(models.StaffMessage).filter_by(conversation_id=conv.id)
+            .order_by(models.StaffMessage.id.desc()).limit(15).all())
+    return {
+        "conversation_id": conv.id,
+        "with": [names.get(i, "Staff") for i in member_ids if i != coach.id],
+        "messages": [{
+            "from": "me" if m.sender_id == coach.id else names.get(m.sender_id, "Staff"),
+            "text": (m.text or "[attachment]")[:400],
+            "date": m.created_at.strftime("%Y-%m-%d %H:%M") if m.created_at else None,
+        } for m in reversed(msgs)],
+    }
 
 
 TOOLS = [
@@ -323,8 +397,12 @@ TOOLS = [
      "input_schema": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}},
     {"name": "list_conversations", "description": "The coach's staff-message conversations (1:1 and group) with the last message.",
      "input_schema": {"type": "object", "properties": {}}},
-    {"name": "list_shared_with_me", "description": "Reports other coaches shared with this coach (the staff-sharing inbox).",
+    {"name": "list_shared_with_me", "description": "Reports other coaches shared with this coach (the staff-sharing inbox), with subject name, report kind, sender, and date.",
      "input_schema": {"type": "object", "properties": {}}},
+    {"name": "get_shared_report_text", "description": "Read the full text of a report someone SHARED with this coach (use the share_id from list_shared_with_me) so you can say what it's about or answer questions on it.",
+     "input_schema": {"type": "object", "properties": {"share_id": {"type": "integer"}}, "required": ["share_id"]}},
+    {"name": "get_conversation_messages", "description": "Recent staff messages in one conversation (both directions, with sender + date). Pass conversation_id from list_conversations, OR just with_name (e.g. 'Mike') to find the chat with that person.",
+     "input_schema": {"type": "object", "properties": {"conversation_id": {"type": "integer"}, "with_name": {"type": "string"}}}},
     {"name": "suggest_navigation", "description": (
         "Show the coach a 'Take me there' button that opens the right screen. Use for 'where is X' / 'how "
         "do I Y' / 'take me to Z'. Use EXACTLY one of these screen values:\n"
@@ -376,13 +454,14 @@ TOOLS = [
         "- 'team_report' (args: team_id optional) — a report across a team's roster.\n"
         "- 'scouting_report' (args: game_id OR opponent_name) — PRE-GAME OPPONENT scouting only.\n"
         "- 'game_report' (args: game_id OR opponent_name) — our-team + opponent game report.\n"
-        "- 'send_staff_message' (args: recipient_id REQUIRED from search_staff, text REQUIRED) — send a "
-        "direct staff message to another coach (finds or starts the 1:1 conversation).\n"
+        "- 'send_staff_message' (args: recipient_ids REQUIRED comma-separated ids from search_staff, "
+        "text REQUIRED) — send a staff message. ONE id = direct 1:1; TWO OR MORE ids = creates/reuses a "
+        "GROUP chat with all of them and sends there.\n"
         "For player generations, pass the exact player_id you confirmed via player_detail. Anything "
         "needing NEW film is NOT supported — use suggest_navigation to 'new_eval'. Always include a short "
         "human description that names the exact player/team/opponent/recipient (and for a message, quote "
         "the text you will send)."),
-     "input_schema": {"type": "object", "properties": {"kind": {"type": "string"}, "player_id": {"type": "integer"}, "matchup_player_ids": {"type": "string"}, "team_id": {"type": "integer"}, "game_id": {"type": "integer"}, "opponent_name": {"type": "string"}, "months": {"type": "integer"}, "output_type": {"type": "string"}, "recipient_id": {"type": "integer"}, "text": {"type": "string"}, "description": {"type": "string"}}, "required": ["kind", "description"]}},
+     "input_schema": {"type": "object", "properties": {"kind": {"type": "string"}, "player_id": {"type": "integer"}, "matchup_player_ids": {"type": "string"}, "team_id": {"type": "integer"}, "game_id": {"type": "integer"}, "opponent_name": {"type": "string"}, "months": {"type": "integer"}, "output_type": {"type": "string"}, "recipient_ids": {"type": "string", "description": "comma-separated coach ids; 2+ = group chat"}, "recipient_id": {"type": "integer"}, "text": {"type": "string"}, "description": {"type": "string"}}, "required": ["kind", "description"]}},
 ]
 
 
@@ -415,6 +494,10 @@ def _run_tool(name, args, db, coach, result):
         return t_list_conversations(db, coach)
     if name == "list_shared_with_me":
         return t_list_shared_with_me(db, coach)
+    if name == "get_shared_report_text":
+        return t_get_shared_report_text(db, coach, args.get("share_id", 0))
+    if name == "get_conversation_messages":
+        return t_get_conversation_messages(db, coach, args.get("conversation_id", 0), args.get("with_name", ""))
     if name == "suggest_navigation":
         result["navigate"] = {"screen": args.get("screen"), "label": args.get("label", "Take me there"),
                               "params": {k: args[k] for k in ("player_id", "eval_id", "report_id", "game_id", "conversation_id", "share") if args.get(k) is not None}}
@@ -441,6 +524,18 @@ SYSTEM = (
 
     "YOUR DATA ACCESS is live and scoped to THIS coach only. Use the read tools to answer with real "
     "numbers — never invent players, games, grades, or reports. If it isn't there, say so.\n\n"
+
+    "SPEAK LIKE A HUMAN ABOUT REPORTS & MESSAGES — this rule applies to EVERYTHING you say:\n"
+    "- NEVER show internal ids (share id, report id, eval id, conversation id) to the coach. Ids are for "
+    "your tool calls only. Identify every report by SUBJECT NAME + REPORT TYPE + DATE (e.g. \"Ashten "
+    "Bloom's Player Eval from Jamie, Jul 11\"), and every conversation by WHO it's with.\n"
+    "- When several reports would read the same (same subject, same type), DISAMBIGUATE with the date, "
+    "grade, or a one-line gist — never print an identical line twice or collapse them into '×5'.\n"
+    "- When the coach asks WHAT a report says or is about, don't stop at metadata: READ it "
+    "(get_report_text for their own, get_shared_report_text for shares) and give a 2–3 sentence gist. "
+    "Never say you can't pull the text of a shared report — you can.\n"
+    "- When the coach asks about messages ('what did Mike say', 'what was the last message'), use "
+    "get_conversation_messages and quote the actual last messages with who sent them and when.\n\n"
 
     "REPORT TYPES (usable alone or COMBINED into one comprehensive report by multi-selecting): "
     "Player Eval, Film Breakdown, Scouting Report, Coaching Report, Game Analysis, Box Score, Training "
@@ -525,10 +620,12 @@ SYSTEM = (
     "their own app, see only what you toggle on, can comment, track training progress, and generate "
     "their own training from a shared report.\n"
     "- FIND FILM → player clips: 'player' → Film Catalog; team/packet clips: 'team_eval' → Film Catalog.\n"
-    "- MESSAGE ANOTHER COACH / STAFF → I can SEND IT from here (see EXECUTE: 'send_staff_message'), or "
+    "- MESSAGE ANOTHER COACH / STAFF (1:1 OR GROUP) → I can SEND IT from here, including CREATING A "
+    "GROUP CHAT (see EXECUTE: 'send_staff_message' — pass 2+ recipient_ids for a group). Or manually: "
     "'staff_inbox' → Messages → New → pick staff (multi-select = group chat) → type/dictate. "
     "Conversations support image attachments, voice messages, and attaching any report. NEVER say "
-    "coach-to-coach messaging isn't supported — it is.\n"
+    "coach-to-coach messaging or group chats aren't supported — both are, and you can send them "
+    "yourself.\n"
     "- JOIN / BUILD A STAFF → 'staff_inbox' → My Teams: search & join any team, create teams and "
     "SUB-TEAMS, invite a coach by name or email, message the whole team group, leave a team. Staff on a "
     "team see its games under Team Games.\n"
@@ -547,7 +644,9 @@ SYSTEM = (
     "'player_matchup' (player_id + matchup_player_ids — compare 2+ of the coach's players from all data "
     "on file), 'team_report' (team_id optional), 'scouting_report' (game_id OR opponent_name; PRE-GAME "
     "opponent scouting), 'game_report' (game_id OR opponent_name; needs a tracked game — otherwise send "
-    "them to 'game_report_builder'), 'send_staff_message' (recipient_id from search_staff + text). "
+    "them to 'game_report_builder'), 'send_staff_message' (recipient_ids from search_staff + text; "
+    "1 id = direct message, 2+ ids = GROUP chat — when asked to message a group, propose ONE "
+    "send_staff_message carrying all the ids; never offer separate 1:1s instead). "
     "Things that need FILM or builder UI are NOT proposable — navigate instead ('new_eval', 'training', "
     "'game_report_builder').\n\n"
 
@@ -617,6 +716,20 @@ def ask(body: AskBody, db: Session = Depends(get_db), coach: models.Coach = Depe
         break
 
     reply = reply_text
+    if not reply and (result["navigate"] or result["pending_action"]):
+        # The model ended on a tool call with no prose. Ask it once more, without
+        # tools, to actually write the coach-facing answer (steps included) —
+        # a bare button with no explanation is not an acceptable reply.
+        try:
+            follow = client.messages.create(
+                model="claude-opus-4-7", max_tokens=1000, system=SYSTEM,
+                messages=messages + [{"role": "user", "content":
+                    "Write your reply to the coach now (no tool calls): lead with the answer and, if you "
+                    "showed a navigation button, spell out the exact steps they'll take on that screen."}],
+            )
+            reply = "".join(b.text for b in follow.content if hasattr(b, "text")).strip()
+        except Exception:
+            reply = ""
     if not reply:
         # Never show a generic error when we actually have something to offer.
         if result["navigate"]:
@@ -692,38 +805,46 @@ async def confirm(body: ConfirmBody, db: Session = Depends(get_db), coach: model
                 "navigate": {"screen": "eval_report", "params": {"eval_id": ev.id}, "label": "Open the Match Up"}}
 
     if kind == "send_staff_message":
-        rid = a.get("recipient_id")
+        raw_ids = str(a.get("recipient_ids") or a.get("recipient_id") or "")
+        rids = sorted({int(x) for x in raw_ids.split(",") if x.strip().isdigit()} - {coach.id})
         text = (a.get("text") or "").strip()
-        if not rid or not text:
-            raise HTTPException(status_code=400, detail="A recipient and message text are required.")
-        other = db.get(models.Coach, int(rid))
-        if not other or other.id == coach.id:
-            raise HTTPException(status_code=404, detail="That staff member wasn't found.")
-        # Reuse an existing 1:1 conversation, else create one (same logic as the Messages screen).
+        if not rids or not text:
+            raise HTTPException(status_code=400, detail="At least one recipient and message text are required.")
+        others = [c for c in (db.get(models.Coach, i) for i in rids) if c]
+        if not others:
+            raise HTTPException(status_code=404, detail="Those staff members weren't found.")
+        is_group = len(others) > 1
+        want = {coach.id, *(c.id for c in others)}
+        # Reuse an existing conversation with EXACTLY these members, else create
+        # one (same logic as the Messages screen; groups match on full member set).
         mine = {m.conversation_id for m in db.query(models.ConversationMember).filter_by(coach_id=coach.id).all()}
-        theirs = {m.conversation_id for m in db.query(models.ConversationMember).filter_by(coach_id=other.id).all()}
         conv = None
-        for cid_ in (mine & theirs):
+        for cid_ in mine:
             c = db.get(models.Conversation, cid_)
-            members = db.query(models.ConversationMember).filter_by(conversation_id=cid_).count()
-            if c and not c.is_group and members == 2:
+            if not c or bool(c.is_group) != is_group:
+                continue
+            members = {m.coach_id for m in db.query(models.ConversationMember).filter_by(conversation_id=cid_).all()}
+            if members == want:
                 conv = c
                 break
         if not conv:
-            conv = models.Conversation(is_group=False, created_by=coach.id)
+            conv = models.Conversation(is_group=is_group, created_by=coach.id)
             db.add(conv)
             db.flush()
-            for cid_ in (coach.id, other.id):
+            for cid_ in want:
                 db.add(models.ConversationMember(conversation_id=conv.id, coach_id=cid_))
         msg = models.StaffMessage(conversation_id=conv.id, sender_id=coach.id, text=text)
         db.add(msg)
         conv.last_at = datetime.utcnow()
-        db.add(models.PlayerNotification(coach_id=other.id, type="staff_message",
-                                         title=f"Message from {coach.name}", body=text[:120], ref_id=conv.id))
+        for c in others:
+            db.add(models.PlayerNotification(coach_id=c.id, type="staff_message",
+                                             title=f"Message from {coach.name}", body=text[:120], ref_id=conv.id))
         db.commit()
-        return {"done": True, "message": f"Message sent to {other.name}.",
+        names = ", ".join(c.name for c in others)
+        return {"done": True,
+                "message": f"Message sent to the group with {names}." if is_group else f"Message sent to {names}.",
                 "navigate": {"screen": "conversation", "params": {"conversation_id": conv.id},
-                             "label": f"Open chat with {other.name}"}}
+                             "label": "Open the group chat" if is_group else f"Open chat with {names}"}}
 
     if kind == "scouting_report":
         from .game_eval import _run_scouting
