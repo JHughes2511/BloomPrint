@@ -31,10 +31,11 @@ function goTo(navigation: any, target: { screen: string; params?: any; label?: s
   try {
     switch (key) {
       case 'home':
+        navigation.navigate('HomeTab', { screen: 'Home' }); break;
       case 'edit_profile':
       case 'profile':
       case 'settings':
-        navigation.navigate('HomeTab', { screen: 'Home' }); break;
+        navigation.navigate('HomeTab', { screen: 'Home', params: { openEditProfile: true } }); break;
       case 'roster':
       case 'add_team':
       case 'create_team':
@@ -51,18 +52,25 @@ function goTo(navigation: any, target: { screen: string; params?: any; label?: s
       case 'eval_report':
       case 'report':
         deep('RecentTab', 'Recent', 'EvalReport', { evalId: p.eval_id, openShare: p.share }); break;
-      // Team Grade tab = tracking games, stats, season dashboard, scouting, whiteboard.
+      // Team Grade tab = tracking games, stats, season dashboard, scouting,
+      // whiteboard. Deep-link straight to the promised view/modal.
       case 'team_grade':
-      case 'games':
-      case 'game':
-      case 'track_game':
-      case 'new_game':
-      case 'scout':
-      case 'scouting':
       case 'dashboard':
       case 'season':
+        navigation.navigate('TeamEvalTab', { screen: 'TeamEval', params: { openView: 'dashboard' } }); break;
+      case 'games':
+      case 'game':
+        navigation.navigate('TeamEvalTab', { screen: 'TeamEval', params: { openView: 'games' } }); break;
+      case 'track_game':
+      case 'new_game':
+        navigation.navigate('TeamEvalTab', { screen: 'TeamEval', params: { openNewGame: true } }); break;
+      case 'scout':
+      case 'scouting':
+        navigation.navigate('TeamEvalTab', { screen: 'TeamEval', params: { openView: 'scout' } }); break;
+      case 'game_report_view':
+        navigation.navigate('TeamEvalTab', { screen: 'TeamEval', params: { openView: 'gamereport' } }); break;
       case 'whiteboard':
-        navigation.navigate('TeamEvalTab', { screen: 'TeamEval' }); break;
+        navigation.navigate('TeamEvalTab', { screen: 'TeamEval', params: { openPlaybook: true } }); break;
       case 'game_detail':
         navigation.navigate('TeamEvalTab', { screen: 'TeamEval', params: { openGameId: p.game_id } }); break;
       // Team Eval tab = report packets / team reports / film catalog.
@@ -90,7 +98,7 @@ function goTo(navigation: any, target: { screen: string; params?: any; label?: s
         else deep('HomeTab', 'Home', 'StaffInbox');
         break;
       case 'feedback':
-        navigation.navigate('HomeTab', { screen: 'Home' }); break;
+        navigation.navigate('HomeTab', { screen: 'Home', params: { openFeedback: true } }); break;
       case 'notifications':
       case 'alerts':
         deep('HomeTab', 'Home', 'CoachNotifications'); break;

@@ -608,6 +608,23 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     }
   }, [route?.params?.openGameId]));
 
+  // Deep link from Ask BloomPrint: land on the exact view/modal it promised —
+  // openView ('dashboard'|'games'|'scout'|'gamereport'), openNewGame (Games +
+  // the New Game form), openPlaybook (the whiteboard playbook).
+  useFocusEffect(useCallback(() => {
+    const p = route?.params ?? {};
+    if (!p.openView && !p.openNewGame && !p.openPlaybook) return;
+    if (p.openView && ['dashboard', 'games', 'scout', 'gamereport'].includes(p.openView)) {
+      setActiveView(p.openView as ViewKey);
+    }
+    if (p.openNewGame) {
+      setActiveView('games');
+      setShowNewGame(true);
+    }
+    if (p.openPlaybook) setWhiteboardPlaybook(true);
+    navigation?.setParams?.({ openView: undefined, openNewGame: undefined, openPlaybook: undefined });
+  }, [route?.params?.openView, route?.params?.openNewGame, route?.params?.openPlaybook]));
+
   const isOwnedGame = (game: any) => !game || game.coach_id === coach?.id;
 
   const openPlayerStats = (playerName: string) => {

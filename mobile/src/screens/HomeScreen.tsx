@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useAuth } from '../context/AuthContext';
 import { playerAPI } from '../api/client';
@@ -146,6 +146,16 @@ export default function HomeScreen() {
     setShowProfile(false);
     setShowSystem(true);
   };
+
+  // Deep link from Ask BloomPrint: open the exact modal it promised.
+  const route = useRoute<any>();
+  useFocusEffect(useCallback(() => {
+    const p = route?.params ?? {};
+    if (!p.openEditProfile && !p.openFeedback) return;
+    if (p.openEditProfile) openProfile();
+    if (p.openFeedback) setShowFeedback(true);
+    navigation?.setParams?.({ openEditProfile: undefined, openFeedback: undefined });
+  }, [route?.params?.openEditProfile, route?.params?.openFeedback]));
 
   const saveSystem = async () => {
     setSavingSystem(true);

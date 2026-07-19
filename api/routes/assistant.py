@@ -424,13 +424,14 @@ TOOLS = [
         "- 'game_report_builder' — a FRESH Game Report Builder (Team Eval tab). Pick a report type + "
         "matchup mode, TYPE ANY opponent (no tracked game needed), optionally attach film/box-score/notes. "
         "Use whenever a coach wants a game report/packet for a matchup with no tracked game.\n"
-        "- 'team_grade' — the TEAM GRADE tab: track/log games (live or post-game), enter box-score stats, "
-        "season dashboard + leaderboard, opponent scouting, and the whiteboard/plays. Use for 'how do I "
-        "track a game', stats, standings.\n"
-        "- 'track_game' / 'new_game' — Team Grade (to start a new game).\n"
+        "- 'team_grade' — Team Grade SEASON DASHBOARD (record, avg grade, trend, leaderboard).\n"
+        "- 'games' — Team Grade GAMES LIST.\n"
+        "- 'track_game' / 'new_game' — opens the NEW GAME form directly (opponent, team, level, date, "
+        "Live Track vs Post-Game). Use for 'track a game' AND 'import a box score after a game'.\n"
         "- 'game_detail' — one tracked game's detail (params: game_id).\n"
-        "- 'scout' — opponent scouting (Team Grade → Scout).\n"
-        "- 'whiteboard' — the whiteboard/plays (Team Grade).\n"
+        "- 'scout' — opens the SCOUT view directly (opponent scouting).\n"
+        "- 'game_report_view' — opens the per-game GAME REPORT view.\n"
+        "- 'whiteboard' — opens the whiteboard PLAYBOOK directly.\n"
         "- 'staff_inbox' — the Staff Hub: reports other coaches shared with you, staff teams/games, AND "
         "MESSAGES (conversations with other staff — coaches CAN message each other here). Use for "
         "'message a coach', 'send Mike a message', staff chat, joining/creating teams and sub-teams, "
@@ -438,10 +439,11 @@ TOOLS = [
         "- 'conversation' — one specific staff conversation (params: conversation_id from "
         "list_conversations).\n"
         "- 'notifications' — coach notifications.\n"
-        "- 'edit_profile' — Home (the profile/Edit Profile + Competition Level is opened from the Home "
-        "top-right user icon).\n"
-        "- 'feedback' — Home (the Feedback tile for sending app feedback).\n"
-        "Do NOT invent other screen names."),
+        "- 'edit_profile' — opens the EDIT PROFILE modal directly (name, role, program, COMPETITION "
+        "LEVEL, philosophy). Use for any profile/level/philosophy change.\n"
+        "- 'feedback' — opens the FEEDBACK form directly.\n"
+        "Do NOT invent other screen names. These land on the EXACT view/modal — say 'this button opens "
+        "it right there', not 'then find X'."),
      "input_schema": {"type": "object", "properties": {"screen": {"type": "string"}, "player_id": {"type": "integer"}, "eval_id": {"type": "integer"}, "report_id": {"type": "integer"}, "game_id": {"type": "integer"}, "conversation_id": {"type": "integer"}, "share": {"type": "string", "enum": ["player", "staff"], "description": "for eval_report: open Send-to-Player or Share-with-Staff"}, "label": {"type": "string", "description": "button text"}}, "required": ["screen", "label"]}},
     {"name": "propose_generation", "description": (
         "Propose an ACTION the coach must confirm before it runs. Do NOT run it yourself. Supported kinds:\n"
@@ -572,7 +574,8 @@ SYSTEM = (
     "correct & regenerate, delete (long-press), Send to Player, Share, Export/Print per card.\n\n"
 
     "HOW-TO PLAYBOOK — when the coach asks 'how do I …' / 'where do I …', give the FULL step sequence AND "
-    "call suggest_navigation so a 'Take me there' button opens the right screen:\n"
+    "you MUST ALWAYS call suggest_navigation in the same turn — a how-to answer WITHOUT a 'Take me "
+    "there' button is a broken answer, no exceptions (yes, even for profile/settings changes):\n"
     "- ADD A TEAM → 'add_team' (Roster): tap 'New Team', name it, pick level, Create. (Also possible "
     "inside New Game, and in Staff Hub → My Teams.)\n"
     "- ADD A PLAYER → 'add_player' (Roster): tap +, Full Name required, team, position, jersey, "
@@ -764,7 +767,14 @@ async def confirm(body: ConfirmBody, db: Session = Depends(get_db), coach: model
         if months:
             focus = f"Focus the summary on the most recent {months} months of evaluations and trajectory."
         req = schemas.SummaryRequest(output_type=a.get("output_type") or "player_eval", focus_prompt=focus)
-        res = await _summary(p.id, req, db=db, coach=coach)
+        await _summary(p.id, req, db=db, coach=coach)
+        # The summary is saved as an Evaluation — open THAT report, not the profile.
+        ev = (db.query(models.Evaluation).filter_by(coach_id=coach.id, player_id=p.id)
+              .order_by(models.Evaluation.id.desc()).first())
+        if ev:
+            return {"done": True, "message": f"Report ready for {p.name}.",
+                    "navigate": {"screen": "eval_report", "params": {"eval_id": ev.id},
+                                 "label": f"Open {p.name}'s report"}}
         return {"done": True, "message": f"Created a summary for {p.name}.",
                 "navigate": {"screen": "player", "params": {"player_id": p.id}, "label": f"Open {p.name}'s profile"}}
 
