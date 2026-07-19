@@ -114,15 +114,20 @@ export default function CommandBar() {
   const [runningIdx, setRunningIdx] = useState<number | null>(null);
   const scrollRef = useRef<ScrollView>(null);
 
+  const pinToEnd = (animated = true) => {
+    requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated }));
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated }), 120);
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated }), 320);
+  };
+
   // Keep the tail of the conversation visible while typing: when the keyboard
   // slides up it covers the newest messages, so re-pin the scroll to the end.
+  // Listen to BOTH will/did so it lands whether or not the frame is settled.
   useEffect(() => {
     if (!open) return;
-    const evt = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-    const sub = Keyboard.addListener(evt, () => {
-      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
-    });
-    return () => sub.remove();
+    const subs = ['keyboardWillShow', 'keyboardDidShow', 'keyboardWillChangeFrame']
+      .map(evt => Keyboard.addListener(evt as any, () => pinToEnd(true)));
+    return () => subs.forEach(s => s.remove());
   }, [open]);
 
   const send = async () => {
@@ -186,8 +191,8 @@ export default function CommandBar() {
             <ScrollView
               ref={scrollRef}
               style={{ flex: 1 }}
-              contentContainerStyle={{ padding: 16, paddingBottom: 8 }}
-              onContentSizeChange={() => { if (messages.length) scrollRef.current?.scrollToEnd({ animated: true }); }}
+              contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+              onContentSizeChange={() => { if (messages.length) pinToEnd(true); }}
               keyboardShouldPersistTaps="handled"
             >
               {messages.length === 0 && (
