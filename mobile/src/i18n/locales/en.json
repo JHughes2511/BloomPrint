@@ -32,6 +32,23 @@
       "recent": "Recent"
     }
   },
+  "reportTypes": {
+    "report": "Report",
+    "comprehensive": "Comprehensive Report",
+    "player_eval": "Player Eval",
+    "film_breakdown": "Film Breakdown",
+    "scouting_report": "Scouting Report",
+    "coaching_report": "Coaching Report",
+    "game_analysis": "Game Analysis",
+    "training_program": "Training Program",
+    "recruitment_profile": "Recruitment Profile",
+    "position_analysis": "Position Analysis",
+    "box_score": "Box Score",
+    "team_training": "Team Training",
+    "game_situational": "Game Situational",
+    "matchup": "Match Up",
+    "game_report": "Game Report"
+  },
   "auth": {
     "whoAreYou": "Who are you?",
     "chooseHow": "Choose how you'll use BloomPrint. You can switch later in settings.",

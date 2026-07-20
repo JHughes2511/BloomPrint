@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -40,6 +41,7 @@ export default function TeamReportScreen() {
   const { coach } = useAuth();
   const navigation = useNavigation<any>();
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const styles = makeStyles(t);
   const shareStyles = makeShareStyles(t);
   const [outputType, setOutputType] = useState('coaching_report');

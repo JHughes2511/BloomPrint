@@ -2,11 +2,13 @@
 // "coaching_report") or a comma-separated combination
 // (e.g. "coaching_report,scouting_report") that produces one comprehensive report.
 
+import i18n from '../i18n';
+
 const titleCase = (s: string) =>
   s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
-const LABEL_OVERRIDES: Record<string, string> = { matchup: 'Match Up' };
-const typeName = (t: string) => LABEL_OVERRIDES[t] ?? titleCase(t);
+const typeName = (t: string) =>
+  i18n.t(`reportTypes.${t}`, { defaultValue: titleCase(t) });
 
 export function parseOutputTypes(outputType?: string | null): string[] {
   return (outputType ?? '').split(',').map(s => s.trim()).filter(Boolean);
@@ -15,8 +17,8 @@ export function parseOutputTypes(outputType?: string | null): string[] {
 /** Display title: a single type's name, or "Comprehensive Report" for a combo. */
 export function outputTypeLabel(outputType?: string | null): string {
   const types = parseOutputTypes(outputType);
-  if (types.length === 0) return 'Report';
-  if (types.length > 1) return 'Comprehensive Report';
+  if (types.length === 0) return i18n.t('reportTypes.report', { defaultValue: 'Report' });
+  if (types.length > 1) return i18n.t('reportTypes.comprehensive', { defaultValue: 'Comprehensive Report' });
   return typeName(types[0]);
 }
 

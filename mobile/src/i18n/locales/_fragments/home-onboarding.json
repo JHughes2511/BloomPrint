@@ -1,0 +1,152 @@
+{
+  "home": {
+    "intelligenceModel": "Intelligence Model",
+    "toggleTheme": "Toggle theme",
+    "editProfileLabel": "Edit profile",
+    "staffInboxLabel": "Staff inbox",
+    "notificationsLabel": "Notifications",
+    "reportTypesHeader": "Report Types",
+    "sixPillarsHeader": "The 6 Pillars",
+    "reportTypes": {
+      "player_eval": { "label": "Player Eval", "desc": "Individual BIM evaluation scored across all 6 pillars" },
+      "film_breakdown": { "label": "Film Breakdown", "desc": "Frame-by-frame film analysis of technique and decisions" },
+      "scouting_report": { "label": "Scouting Report", "desc": "Recruitment-grade scouting report for a target player" },
+      "coaching_report": { "label": "Coaching Report", "desc": "Coach-facing breakdown with practice and scheme focus" },
+      "game_analysis": { "label": "Game Analysis", "desc": "Full game film analysis covering both sides of the ball" },
+      "training_program": { "label": "Training Program", "desc": "Personalized skill development program from eval data" },
+      "recruitment_profile": { "label": "Recruitment", "desc": "Next-level recruitment profile and college projection" },
+      "position_analysis": { "label": "Position Analysis", "desc": "Position-specific role fit and skill translation analysis" },
+      "box_score": { "label": "Box Score", "desc": "Game and season box score stats imported and analyzed by BIM" }
+    },
+    "pillars": {
+      "offensive_skills": { "label": "Offensive Skills", "desc": "Scoring, creation, shooting mechanics, footwork, P&R" },
+      "defensive_capabilities": { "label": "Defense", "desc": "On-ball defense, help-side, IQ, communication, rotations" },
+      "physical_attributes": { "label": "Physical", "desc": "Athleticism, size, length, speed, strength, explosiveness" },
+      "intangibles": { "label": "Intangibles", "desc": "IQ, coachability, leadership, motor, competitive drive" },
+      "advanced_analysis": { "label": "Advanced", "desc": "Shot selection, efficiency metrics, tendencies, adjustments" },
+      "strategic_fit": { "label": "Strategic Fit", "desc": "System fit, positional versatility, lineup compatibility" }
+    },
+    "feedbackTitle": "Feedback",
+    "feedbackTileDesc": "Questions, comments, or issues — tell us anything",
+    "feedbackIntro": "Have a question, comment, or issue? Tell us anything — we read every note.",
+    "feedbackPlaceholder": "What's on your mind?",
+    "submit": "Submit",
+    "feedbackThanksTitle": "Thanks!",
+    "feedbackThanksMsg": "Your feedback has been submitted.",
+    "feedbackSubmitError": "Could not submit your feedback.",
+    "editProfileTitle": "Edit Profile",
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "you@email.com",
+    "emailHint": "This is the email you sign in with.",
+    "role": "Role",
+    "appLanguageHint": "The app, your reports, and Ask BloomPrint all use this language.",
+    "programOrganization": "Program / Organization",
+    "programNamePlaceholder": "Program name",
+    "competitionLevelHint": "Every eval, report, and training program is calibrated to this level. Changing it updates the default everywhere.",
+    "systemPhilosophyRowTitle": "Program System & Philosophy",
+    "systemPhilosophyRowDesc": "How the AI should read the game for you",
+    "saveChanges": "Save Changes",
+    "signOut": "Sign Out",
+    "signOutConfirm": "Are you sure you want to sign out?",
+    "nameRequiredTitle": "Name required",
+    "nameRequiredMsg": "Please enter your name.",
+    "invalidEmailTitle": "Invalid email",
+    "invalidEmailMsg": "Please enter a valid email address.",
+    "updateProfileError": "Could not update profile",
+    "systemModalTitle": "System & Philosophy",
+    "systemIntro": "Describe your program's system and what you value. The AI keeps this in mind on every report, framing players as fit for the way YOU play. Fill in what's relevant — leave the rest blank.",
+    "importPhilosophyBtn": "Import philosophy document (PDF, Word, image, text)",
+    "importPhilosophyHint": "The AI reads it, adds the details to the fields below, and keeps the document as a standing reference on every future report.",
+    "referenceOnFile": "Reference document on file for the AI",
+    "rerunGuidedSetup": "Re-run the guided setup (chips + questions)",
+    "readingPhilosophy": "Reading your philosophy document…",
+    "savePhilosophy": "Save Philosophy",
+    "saveSystemError": "Could not save system profile",
+    "importedTitle": "Imported",
+    "importedMsg": "Your philosophy fields were updated and the document is now kept as a standing reference for the AI. Review below, then Save.",
+    "importFailedTitle": "Import failed",
+    "importFailedMsg": "Could not import that document.",
+    "systemFields": {
+      "offensive_system": { "label": "Offensive System", "placeholder": "Pace, spacing, primary actions (motion, ball-screen heavy, Princeton…), who initiates." },
+      "defensive_system": { "label": "Defensive System", "placeholder": "Man / zone / switch-everything / drop / press, physicality, rotations." },
+      "archetypes": { "label": "Player Archetypes You Value", "placeholder": "What you recruit/develop for — 3&D wings, positionless bigs, rim protection, secondary creators…" },
+      "development": { "label": "Development / Training Philosophy", "placeholder": "Skill priorities, how you build players, load approach." },
+      "recruiting": { "label": "Recruiting Lens", "placeholder": "Level, timeline, the swing skills that change your evaluation." },
+      "culture": { "label": "Culture / Non-Negotiables", "placeholder": "The intangibles and standards you weight heavily." }
+    }
+  },
+  "onboarding": {
+    "step": "Step {{current}} of {{total}}",
+    "selectAllThatApply": "Select all that apply",
+    "addYourOwnDetails": "Add your own details",
+    "detailsPlaceholder": "Type or dictate anything specific to how YOU do this…",
+    "finish": "Finish",
+    "joinTeamTitle": "Join your team",
+    "joinTeamDesc": "Search for your team to join its staff. You can also do this later, or continue without a team.",
+    "teamSearchPlaceholder": "Search by team name...",
+    "headCoach": "Head Coach: {{name}}",
+    "join": "Join",
+    "joinedTitle": "Joined",
+    "joinedMsg": "You joined {{name}}.",
+    "joinedSubteamPrompt": "Joined {{name}}. Join a sub-team?",
+    "noSubteams": "No sub-teams available.",
+    "couldNotJoin": "Could not join.",
+    "couldNotFinish": "Could not finish setup.",
+    "fields": {
+      "offensive_system": {
+        "label": "Offensive System",
+        "desc": "How your team plays on offense — pace, spacing, primary actions.",
+        "chips": ["Motion", "Ball-screen heavy", "Pace-and-space", "Princeton", "Dribble-drive", "Triangle", "Flex", "Read-and-react", "Transition / Run", "Five-out", "Horns", "Post-centric", "Two-man game", "Skilled/High IQ guard"]
+      },
+      "defensive_system": {
+        "label": "Defensive System",
+        "desc": "Your defensive identity and coverages.",
+        "chips": ["Man-to-man", "Pack-line", "Switch everything", "Drop coverage", "Hedge / Blitz", "2-3 zone", "3-2 zone", "1-3-1 zone", "Merrimack zone", "Full-court press", "Half-court trap", "No-middle / Force baseline"]
+      },
+      "archetypes": {
+        "label": "Player Archetypes You Value",
+        "desc": "The kinds of players you recruit and develop for.",
+        "chips": ["3&D wings", "Positionless bigs", "Rim protectors", "Secondary creators", "Two-way guards", "Stretch bigs", "Point-of-attack defenders", "High-motor connectors", "Shot creators", "Floor generals", "Crafty shot-maker / Scoring mindset"]
+      },
+      "development": {
+        "label": "Development / Training Philosophy",
+        "desc": "How you build players.",
+        "chips": ["Skill-first", "Strength & conditioning", "Film / IQ", "Shooting mechanics / Ball handling", "Individual workouts", "Load management", "Positionless development", "Habits & fundamentals"]
+      },
+      "recruiting": {
+        "label": "Recruiting Lens",
+        "desc": "Where and how you recruit, and what swings your evaluation.",
+        "chips": ["High school", "AAU / club", "JUCO", "Transfer portal", "International", "Prep school", "Local / regional", "National", "Character-first", "Upside / projection", "Immediate impact", "Adaptability / positional versatility"]
+      },
+      "culture": {
+        "label": "Culture / Non-Negotiables",
+        "desc": "The standards and intangibles you weight heavily.",
+        "chips": ["Accountability", "Toughness", "Selflessness", "Competitiveness", "Discipline", "Coachability", "Work ethic", "Communication", "Family / brotherhood", "Detail-oriented"]
+      }
+    }
+  },
+  "copilot": {
+    "askBloomPrint": "Ask BloomPrint",
+    "emptyTitle": "Ask me about your program, or give me a task",
+    "examples": [
+      "What's my season record and average team grade?",
+      "Which opponents did we struggle with?",
+      "Who are my top-graded players right now?",
+      "Summarize my point guard over the last 3 months",
+      "Scout our next opponent",
+      "Build a coaching report for my team",
+      "Where is my most recent report?",
+      "How do I import a roster?"
+    ],
+    "inputPlaceholder": "Ask or give a task…",
+    "takeMeThere": "Take me there",
+    "generateThis": "Generate this?",
+    "generatingReport": "Generating your report…",
+    "done": "Done.",
+    "errorTryAgain": "Something went wrong. Try again.",
+    "couldNotComplete": "Could not complete that.",
+    "couldNotOpenTitle": "Could not open",
+    "couldNotOpenMsg": "I couldn't open that screen automatically."
+  }
+}
