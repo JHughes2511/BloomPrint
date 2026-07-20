@@ -6,6 +6,7 @@ import {
   ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { trainingAPI } from '../api/client';
@@ -22,6 +23,7 @@ export default function TrainingScreen() {
   const navigation = useNavigation<any>();
   const { playerId, evalId } = route.params;
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const styles = makeStyles(t);
 
   const [sessions, setSessions] = useState<TrainingSession[]>([]);
@@ -48,7 +50,7 @@ export default function TrainingScreen() {
         setReference({ uri: a.uri, name: a.name ?? 'reference', type: a.mimeType ?? 'application/octet-stream' });
       }
     } catch {
-      Alert.alert('Error', 'Could not open file picker.');
+      Alert.alert(tr('common.error'), tr('training.couldNotOpenFilePicker'));
     }
   };
 
@@ -61,7 +63,7 @@ export default function TrainingScreen() {
       setFocusPrompt('');
       setReference(null);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate program');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('training.couldNotGenerateProgram'));
     } finally {
       setGenerating(false);
     }
@@ -80,15 +82,15 @@ export default function TrainingScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
-        <Text style={styles.title}>Training Program</Text>
+        <Text style={styles.title}>{tr('reportTypes.training_program')}</Text>
       </View>
 
       {/* Focus input */}
       <View style={styles.section}>
-        <Text style={styles.label}>Additional Focus (optional)</Text>
+        <Text style={styles.label}>{tr('training.additionalFocus')}</Text>
         <VoiceTextInput
           style={styles.input}
-          placeholder="e.g. Focus on P&R pace variation this week..."
+          placeholder={tr('training.focusPlaceholder')}
           placeholderTextColor={t.muted2}
           value={focusPrompt}
           onChangeText={setFocusPrompt}
@@ -107,23 +109,23 @@ export default function TrainingScreen() {
         ) : (
           <TouchableOpacity style={styles.importBtn} onPress={pickReference}>
             <Ionicons name="cloud-upload-outline" size={16} color={t.accent} />
-            <Text style={styles.importBtnText}>Import reference content (PDF, Word, Excel, image)</Text>
+            <Text style={styles.importBtnText}>{tr('training.importReference')}</Text>
           </TouchableOpacity>
         )}
 
         <TouchableOpacity style={styles.generateBtn} onPress={generate} disabled={generating}>
           {generating
-            ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.generateText}>  Generating...</Text></>
-            : <><Ionicons name="barbell" size={16} color={t.ctaText} /><Text style={styles.generateText}>  Generate Program</Text></>
+            ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.generateText}>{'  ' + tr('training.generating')}</Text></>
+            : <><Ionicons name="barbell" size={16} color={t.ctaText} /><Text style={styles.generateText}>{'  ' + tr('training.generateProgram')}</Text></>
           }
         </TouchableOpacity>
-        <GeneratingOverlay visible={generating} label="Building the training program…" />
+        <GeneratingOverlay visible={generating} label={tr('training.buildingOverlay')} />
       </View>
 
       {/* Priority stack */}
       {current?.priorities && current.priorities.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.label}>Priority Stack</Text>
+          <Text style={styles.label}>{tr('training.priorityStack')}</Text>
           {current.priorities
             .filter(p => p && p.replace(/[^A-Za-z0-9]/g, '').length >= 3)
             .map((p, i) => (
@@ -140,7 +142,7 @@ export default function TrainingScreen() {
       {/* Program text */}
       {current?.program_text && (
         <View style={styles.section}>
-          <Text style={styles.label}>Full Program</Text>
+          <Text style={styles.label}>{tr('training.fullProgram')}</Text>
           {renderReport(current.program_text, { heading: t.ink, body: t.inkSoft })}
         </View>
       )}
@@ -148,12 +150,12 @@ export default function TrainingScreen() {
       {/* History */}
       {sessions.length > 1 && (
         <View style={styles.section}>
-          <Text style={styles.label}>Previous Programs</Text>
+          <Text style={styles.label}>{tr('training.previousPrograms')}</Text>
           {[...sessions].reverse().slice(1).map((s, i, arr) => {
             const focus = (s.priorities ?? []).find(p => p && p.replace(/[^A-Za-z0-9]/g, '').length >= 3);
             return (
               <TouchableOpacity key={s.id} style={styles.historyCard} onPress={() => setCurrent(s)}>
-                <Text style={styles.historyPriority}>Training Program #{arr.length - i}</Text>
+                <Text style={styles.historyPriority}>{tr('training.programNumber', { num: arr.length - i })}</Text>
                 <Text style={styles.historyDate}>
                   {new Date(s.created_at).toLocaleDateString()}{focus ? ` · ${focus}` : ''}
                 </Text>
@@ -165,7 +167,7 @@ export default function TrainingScreen() {
 
       {!current && !generating && (
         <View style={styles.empty}>
-          <Text style={styles.emptyText}>No training program yet. Generate one based on the latest evaluation.</Text>
+          <Text style={styles.emptyText}>{tr('training.emptyText')}</Text>
         </View>
       )}
     </KeyboardAwareScrollView>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import * as Print from 'expo-print';
@@ -14,6 +15,7 @@ import { ScreenBackground } from '../theme/components';
 
 export default function SummaryScreen() {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const styles = makeStyles(t);
   const markdownStyles = makeMarkdownStyles(t);
   const route = useRoute<any>();
@@ -25,7 +27,7 @@ export default function SummaryScreen() {
   const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
   const buildFileName = () => {
-    const base = safeFileName(fileNameParam || title) || 'BIM Report';
+    const base = safeFileName(fileNameParam || title) || tr('summary.reportFallback');
     const d = new Date();
     const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     // Avoid double-stamping if the passed name already ends with a date
@@ -40,9 +42,9 @@ export default function SummaryScreen() {
       const { uri } = await Print.printToFileAsync({ html: buildHtml() });
       const dest = FileSystem.cacheDirectory + buildFileName() + '.pdf';
       await FileSystem.copyAsync({ from: uri, to: dest });
-      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: 'Share Summary' });
+      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: tr('summary.shareDialogTitle') });
     } catch (e: any) {
-      Alert.alert('Export Error', e?.message ?? 'Could not export');
+      Alert.alert(tr('summary.exportErrorTitle'), e?.message ?? tr('summary.couldNotExport'));
     }
   };
 
@@ -50,7 +52,7 @@ export default function SummaryScreen() {
     try {
       await Print.printAsync({ html: buildHtml() });
     } catch (e: any) {
-      Alert.alert('Print Error', e?.message ?? 'Could not print');
+      Alert.alert(tr('summary.printErrorTitle'), e?.message ?? tr('summary.couldNotPrint'));
     }
   };
 
@@ -71,11 +73,11 @@ export default function SummaryScreen() {
         <View style={styles.actionRow}>
           <TouchableOpacity style={styles.actionBtn} onPress={exportPdf}>
             <Ionicons name="share-outline" size={18} color={t.muted} />
-            <Text style={styles.actionText}>Export PDF</Text>
+            <Text style={styles.actionText}>{tr('summary.exportPdf')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionBtn} onPress={printDoc}>
             <Ionicons name="print-outline" size={18} color={t.muted} />
-            <Text style={styles.actionText}>Print</Text>
+            <Text style={styles.actionText}>{tr('common.print')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

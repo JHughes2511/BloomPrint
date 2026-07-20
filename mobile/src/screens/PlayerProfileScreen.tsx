@@ -6,6 +6,7 @@ import {
   Modal, Alert, KeyboardAvoidingView, Platform, TextInput, RefreshControl,
 } from 'react-native';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -33,13 +34,13 @@ import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
 const COMPETITION_LEVELS = [...CANON_LEVELS];
 
 const OUTPUT_TYPES = [
-  { key: 'player_eval', label: 'Player Eval' },
-  { key: 'film_breakdown', label: 'Film Breakdown' },
-  { key: 'scouting_report', label: 'Scouting Report' },
-  { key: 'coaching_report', label: 'Coaching Report' },
-  { key: 'recruitment_profile', label: 'Recruitment' },
-  { key: 'position_analysis', label: 'Position Analysis' },
-  { key: 'box_score', label: 'Box Score' },
+  { key: 'player_eval', labelKey: 'reportTypes.player_eval' },
+  { key: 'film_breakdown', labelKey: 'reportTypes.film_breakdown' },
+  { key: 'scouting_report', labelKey: 'reportTypes.scouting_report' },
+  { key: 'coaching_report', labelKey: 'reportTypes.coaching_report' },
+  { key: 'recruitment_profile', labelKey: 'playerProfile.recruitmentShort' },
+  { key: 'position_analysis', labelKey: 'reportTypes.position_analysis' },
+  { key: 'box_score', labelKey: 'reportTypes.box_score' },
 ];
 
 export default function PlayerProfileScreen() {
@@ -47,6 +48,7 @@ export default function PlayerProfileScreen() {
   const navigation = useNavigation<any>();
   const { playerId } = route.params;
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const { coach } = useAuth();
   const styles = makeStyles(t);
 
@@ -184,7 +186,7 @@ export default function PlayerProfileScreen() {
       setPlayer(updated);
       setShowEdit(false);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save changes');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerProfile.couldNotSaveChanges'));
     } finally {
       setSaving(false);
     }
@@ -203,10 +205,10 @@ export default function PlayerProfileScreen() {
       const typeLabel = outputTypeLabel(summaryType);
       const sanitize = (s: string) => (s ?? '').replace(/[^a-zA-Z0-9 \-]/g, '').trim();
       navigation.navigate('Summary', {
-        title: `${player.name} — ${typeLabel} Summary`,
+        title: tr('playerProfile.summaryTitle', { name: player.name, type: typeLabel }),
         reportText: result.report_text,
         fileName: [
-          'Player Summary',
+          tr('playerProfile.playerSummaryFileName'),
           sanitize(player.name),
           sanitize(player.team_name ?? player.program_name),
           sanitize(player.position ?? ''),
@@ -214,8 +216,8 @@ export default function PlayerProfileScreen() {
         ].filter(Boolean).join(' - '),
       });
     } catch (e: any) {
-      const msg = e?.response?.data?.detail ?? e?.message ?? 'Could not generate summary';
-      Alert.alert('Error', String(msg));
+      const msg = e?.response?.data?.detail ?? e?.message ?? tr('playerProfile.couldNotGenerateSummary');
+      Alert.alert(tr('common.error'), String(msg));
     } finally {
       setSummaryLoading(false);
     }
@@ -251,21 +253,21 @@ export default function PlayerProfileScreen() {
       setVideoMeta(v);
       setVideoSource(src);
     } catch {
-      Alert.alert('Error', 'Could not open this video.');
+      Alert.alert(tr('common.error'), tr('playerProfile.couldNotOpenVideo'));
     }
   };
 
   const deleteVideo = (v: any) => {
-    Alert.alert('Delete Film', 'Remove this film from the catalog? This frees the storage it uses. The evaluation it created is kept.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(tr('playerProfile.deleteFilmTitle'), tr('playerProfile.deleteFilmMsg'), [
+      { text: tr('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete', style: 'destructive',
+        text: tr('common.delete'), style: 'destructive',
         onPress: async () => {
           try {
             await playersAPI.deleteVideo(v.id);
             setVideos(prev => prev.filter((x: any) => x.id !== v.id));
           } catch (e: any) {
-            Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete film');
+            Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerProfile.couldNotDeleteFilm'));
           }
         },
       },
@@ -279,9 +281,9 @@ export default function PlayerProfileScreen() {
       await trainingAPI.addCorrection(trainingModalItem.id, modalCorrection.trim());
       setModalCorrection('');
       loadModalCorrections(trainingModalItem.id);
-      Alert.alert('Saved', 'Correction saved. Apply & Regenerate when ready.');
+      Alert.alert(tr('playerProfile.savedTitle'), tr('playerProfile.correctionSavedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save correction');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerProfile.couldNotSaveCorrection'));
     } finally {
       setSavingModalCorrection(false);
     }
@@ -310,7 +312,7 @@ export default function PlayerProfileScreen() {
       setPlayerComments(prev => [...prev, c]);
       setPlayerCommentText('');
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not send comment');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerProfile.couldNotSendComment'));
     } finally {
       setSendingPlayerComment(false);
     }
@@ -323,9 +325,9 @@ export default function PlayerProfileScreen() {
       const updated = await trainingAPI.refreshPlayerProgram(trainingModalItem.id, playerFeedbackText.trim());
       setTrainingModalItem((prev: any) => prev ? { ...prev, ...updated } : prev);
       setPlayerFeedbackText('');
-      Alert.alert('Updated', "The player's training program has been updated.");
+      Alert.alert(tr('playerProfile.updatedTitle'), tr('playerProfile.playerProgramUpdatedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? "Could not update player's program");
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerProfile.couldNotUpdatePlayerProgram'));
     } finally {
       setUpdatingPlayerProgram(false);
     }
@@ -357,7 +359,7 @@ export default function PlayerProfileScreen() {
       setShowCreateTeam(false);
       setShowTeamPicker(false);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not create team');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerProfile.couldNotCreateTeam'));
     } finally {
       setCreatingTeam(false);
     }
@@ -365,7 +367,7 @@ export default function PlayerProfileScreen() {
 
   const openTrainingPicker = (action: 'player' | 'staff' | 'regen') => {
     if (allTraining.length === 0) {
-      Alert.alert('No Training', 'Generate a training program first.');
+      Alert.alert(tr('playerProfile.noTrainingTitle'), tr('playerProfile.noTrainingMsg'));
       return;
     }
     setTrainingPickerAction(action);
@@ -375,20 +377,20 @@ export default function PlayerProfileScreen() {
   const sendTrainingToPlayer = async (trainingId?: number) => {
     const id = trainingId ?? latestTraining?.id;
     if (!id) {
-      Alert.alert('No Training', 'Generate a training program first.');
+      Alert.alert(tr('playerProfile.noTrainingTitle'), tr('playerProfile.noTrainingMsg'));
       return;
     }
     setSendingTraining(true);
     try {
       const result = await trainingAPI.sendToPlayer(id);
       setAllTraining(prev => prev.map(s => s.id === id ? { ...s, sent_to_player: true, reformatting: true } : s));
-      Alert.alert('Sent!', `Training program sent to ${result.player_name ?? 'the player'}.`);
+      Alert.alert(tr('playerProfile.sentTitle'), tr('playerProfile.trainingSentMsg', { name: result.player_name ?? tr('playerProfile.thePlayer') }));
     } catch (e: any) {
-      const msg = e?.response?.data?.detail ?? 'Could not send training';
+      const msg = e?.response?.data?.detail ?? tr('playerProfile.couldNotSendTraining');
       if (msg.includes('not linked')) {
-        Alert.alert('Not Linked', 'This player has not linked a player account yet. Generate an invite code for them first.');
+        Alert.alert(tr('playerProfile.notLinkedTitle'), tr('playerProfile.notLinkedMsg'));
       } else {
-        Alert.alert('Error', msg);
+        Alert.alert(tr('common.error'), msg);
       }
     } finally {
       setSendingTraining(false);
@@ -412,9 +414,9 @@ export default function PlayerProfileScreen() {
         setAllTraining(prev => [...prev, newSession]);
         setLatestTraining(newSession);
       }
-      Alert.alert('Training Updated', 'A new training program has been generated with your feedback.');
+      Alert.alert(tr('playerProfile.trainingUpdatedTitle'), tr('playerProfile.trainingUpdatedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate training');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerProfile.couldNotRegenerateTraining'));
     } finally {
       setRegeneratingTraining(false);
     }
@@ -424,7 +426,7 @@ export default function PlayerProfileScreen() {
     if (!trainingModalItem) return;
     const pending = modalCorrection.trim();
     if (!pending && modalCorrections.filter(c => !c.applied).length === 0) {
-      Alert.alert('Nothing to apply', 'Add a correction first.');
+      Alert.alert(tr('playerProfile.nothingToApplyTitle'), tr('playerProfile.nothingToApplyMsg'));
       return;
     }
     setRegeneratingModal(true);
@@ -441,9 +443,9 @@ export default function PlayerProfileScreen() {
         setAllTraining(refreshed);
         setLatestTraining(refreshed[refreshed.length - 1]);
       }
-      Alert.alert('Regenerated', 'Training program updated with your corrections.');
+      Alert.alert(tr('playerProfile.regeneratedTitle'), tr('playerProfile.regeneratedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate training');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerProfile.couldNotRegenerateTraining'));
     } finally {
       setRegeneratingModal(false);
     }
@@ -452,7 +454,7 @@ export default function PlayerProfileScreen() {
   const printTraining = async () => {
     if (!trainingModalItem?.program_text) return;
     const html = buildReportHtml({
-      title: 'Training Program',
+      title: tr('reportTypes.training_program'),
       subject: player?.name ?? '',
       date: new Date(trainingModalItem.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
       body: trainingModalItem.program_text,
@@ -466,12 +468,12 @@ export default function PlayerProfileScreen() {
     try {
       const reportDate = new Date(trainingModalItem.created_at);
       const html = buildReportHtml({
-        title: 'Training Program',
+        title: tr('reportTypes.training_program'),
         subject: player?.name ?? '',
         date: reportDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
         body: trainingModalItem.program_text,
       });
-      const fileName = buildPdfFileName('Training Program', player?.name ?? 'Player', reportDate);
+      const fileName = buildPdfFileName(tr('reportTypes.training_program'), player?.name ?? 'Player', reportDate);
       const { uri } = await Print.printToFileAsync({ html });
       // Copy to a properly-named file so the export keeps the standard convention.
       const dest = FileSystem.cacheDirectory + fileName + '.pdf';
@@ -480,7 +482,7 @@ export default function PlayerProfileScreen() {
         await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: fileName });
       }
     } catch {
-      Alert.alert('Error', 'Could not export training program');
+      Alert.alert(tr('common.error'), tr('playerProfile.couldNotExportTraining'));
     } finally {
       setExportingTraining(false);
     }
@@ -511,12 +513,12 @@ export default function PlayerProfileScreen() {
         allow_regenerate: allowRegen,
         frozen_text: frozenText,
       });
-      Alert.alert('Shared!', `Training program shared with ${target.name}.`);
+      Alert.alert(tr('playerProfile.sharedTitle'), tr('playerProfile.sharedWithMsg', { name: target.name }));
       setShowStaffShare(false);
       setStaffSearch('');
       setStaffResults([]);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerProfile.couldNotShare'));
     } finally {
       setSendingStaff(false);
     }
@@ -537,7 +539,7 @@ export default function PlayerProfileScreen() {
       const result = await playerAPI.generateInvite(player!.id);
       setInviteCode(result.code);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate invite code');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerProfile.couldNotGenerateInvite'));
     } finally {
       setGeneratingInvite(false);
     }

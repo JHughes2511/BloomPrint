@@ -5,6 +5,7 @@ import {
   Platform, KeyboardAvoidingView, Dimensions, Keyboard, TouchableWithoutFeedback, Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import Svg, { Path, Circle, Line, Rect, G, Text as SvgText } from 'react-native-svg';
 
 const AnimatedLine = Animated.createAnimatedComponent(Line);
@@ -218,7 +219,10 @@ interface Props { visible: boolean; gameId: number; playbook?: boolean; onClose:
 
 export default function WhiteboardModal({ visible, gameId, playbook = false, onClose }: Props) {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const styles = makeStyles(t);
+  // Display label for a scheme (the scheme KEY strings stay English — they're data).
+  const schemeLabel = (s: SchemeKey) => tr(`whiteboard.${s}`);
   const [boards, setBoards]                 = useState<Board[]>([]);
   const [activeBoardIdx, setActiveBoardIdx] = useState(0);
   const [tool, setTool]                     = useState<Tool>('pen');
@@ -340,7 +344,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         const teamReports = await evalsAPI.teamReports(30).catch(() => []);
         (teamReports ?? []).forEach((r: any) => {
           if (!r.report_text) return;
-          const typeLabel = outputTypeLabel(r.output_type) || 'Team Report';
+          const typeLabel = outputTypeLabel(r.output_type) || tr('whiteboard.teamReport');
           const subject = reportSubject(r.report_text, r.output_type ?? '');
           items.push({
             id: `team-${r.id}`,
@@ -356,8 +360,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
           const subject = reportSubject(g.ai_scouting_report, 'scouting_report');
           items.push({
             id: `scout-${g.id}`,
-            title: subject ? `vs ${g.opponent_name} — ${subject}` : `vs ${g.opponent_name}`,
-            sub: `Scout Report · ${new Date(g.date).toLocaleDateString()}`,
+            title: subject
+              ? tr('whiteboard.vsOpponentSubject', { opponent: g.opponent_name, subject })
+              : tr('whiteboard.vsOpponent', { opponent: g.opponent_name }),
+            sub: `${tr('whiteboard.scoutReport')} · ${new Date(g.date).toLocaleDateString()}`,
             text: g.ai_scouting_report,
           });
         });
@@ -447,10 +453,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         if (v) seedGuidance[gKey('defense', 'X' + id.slice(1))] = v;
       });
       const newBoard: Board = {
-        name: res.play_name || `AI Play ${idx + 1}`,
+        name: res.play_name || tr('whiteboard.aiPlayN', { n: idx + 1 }),
         court_type: 'half',
         strokes: buildPlayStrokes(res),
-        ai: { play_name: res.play_name ?? 'AI Play', key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text, from: k.from, to: k.to })), source: composed, schemes: res.schemes,
+        ai: { play_name: res.play_name ?? tr('whiteboard.aiPlay'), key: (res.key ?? []).map((k: any) => ({ n: k.n, text: k.text, from: k.from, to: k.to })), source: composed, schemes: res.schemes,
               prompt: aiDescription.trim(), attachedTitle: attachedReport?.title, guidance: seedGuidance },
       };
       setBoards(prev => [...prev, newBoard]);
@@ -464,7 +470,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       setByPlayerNotes({});
       setAiByPlayer(false);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate the play');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('whiteboard.couldNotGenerate'));
     } finally {
       setAiGenerating(false);
     }
@@ -553,7 +559,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       setShowRefine(false);
       setRefineText('');
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update the play');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('whiteboard.couldNotUpdate'));
     } finally {
       setRefining(false);
     }
@@ -584,7 +590,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     });
     const lockedIds = units.filter(p => lockedPlayers[p.id]).map(p => dispId(p.id));
     if (!lockedIds.length && Object.keys(newGuidance).length === 0) {
-      Alert.alert('Nothing to apply', 'Lock a player or edit their detail first.');
+      Alert.alert(tr('whiteboard.nothingToApplyTitle'), tr('whiteboard.nothingToApplyMsg'));
       return;
     }
     // Full current formation for EVERY scheme — the AI must keep them all exactly
@@ -609,7 +615,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       await regenerateWith(extra, '+ player lock / guidance', { guidanceMap: newGuidance, persistExtra: false, preservePositions: true });
       setShowPlayers(false);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update the play');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('whiteboard.couldNotUpdate'));
     } finally {
       setApplyingGuidance(false);
     }
@@ -797,11 +803,11 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
             : { ...b, strokes: parsed.strokes ?? [], ai: parsed.ai, canvas: parsed.canvas };
         }));
       } else {
-        setBoards([{ name: 'Board 1', court_type: 'full', strokes: [] }]);
+        setBoards([{ name: tr('whiteboard.boardN', { n: 1 }), court_type: 'full', strokes: [] }]);
       }
       setActiveBoardIdx(0);
     } catch {
-      setBoards([{ name: 'Board 1', court_type: 'full', strokes: [] }]);
+      setBoards([{ name: tr('whiteboard.boardN', { n: 1 }), court_type: 'full', strokes: [] }]);
     }
     setLoading(false);
   };
@@ -844,7 +850,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   };
 
   const addNewBoard = () => {
-    setBoards(prev => [...prev, { name: `Board ${prev.length + 1}`, court_type: 'full', strokes: [] }]);
+    setBoards(prev => [...prev, { name: tr('whiteboard.boardN', { n: prev.length + 1 }), court_type: 'full', strokes: [] }]);
     setActiveBoardIdx(boards.length);
     setShowBoardList(false);
   };
@@ -854,7 +860,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     const src = boards[idx];
     if (!src) return;
     const copy: Board = {
-      name: `${src.name} copy`,
+      name: tr('whiteboard.copyName', { name: src.name }),
       court_type: src.court_type,
       strokes: src.strokes.map(s => ({ ...s, id: Math.random().toString(36).slice(2) })),
       ai: src.ai ? { ...src.ai, key: src.ai.key.map(k => ({ ...k })) } : undefined,
@@ -869,9 +875,9 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
 
   const deleteBoard = (idx: number) => {
     const b = boards[idx];
-    Alert.alert('Delete Board', `Delete "${b.name}"?`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: async () => {
+    Alert.alert(tr('whiteboard.deleteBoardTitle'), tr('whiteboard.deleteBoardMsg', { name: b.name }), [
+      { text: tr('common.cancel'), style: 'cancel' },
+      { text: tr('common.delete'), style: 'destructive', onPress: async () => {
         if (b.id) await whiteboardAPI.delete(b.id);
         setBoards(prev => prev.filter((_, i) => i !== idx));
         setActiveBoardIdx(Math.max(0, idx - 1));
@@ -880,9 +886,9 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   };
 
   const undo     = () => { if (board) commitStrokes(activeBoardIdx, board.strokes.slice(0, -1)); };
-  const clearAll = () => Alert.alert('Clear Board', 'Remove all marks?', [
-    { text: 'Cancel', style: 'cancel' },
-    { text: 'Clear', style: 'destructive', onPress: () => commitStrokes(activeBoardIdx, []) },
+  const clearAll = () => Alert.alert(tr('whiteboard.clearBoardTitle'), tr('whiteboard.clearBoardMsg'), [
+    { text: tr('common.cancel'), style: 'cancel' },
+    { text: tr('whiteboard.clear'), style: 'destructive', onPress: () => commitStrokes(activeBoardIdx, []) },
   ]);
 
   const uid = () => Math.random().toString(36).slice(2);
@@ -1370,7 +1376,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       });
       clearPins();
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not adapt the play');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('whiteboard.couldNotAdapt'));
     } finally {
       setAdapting(false);
     }
@@ -1763,23 +1769,23 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
             <>
               <TouchableOpacity style={[styles.textCtrlBtn, { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12 }]} onPress={() => deleteArrowRef.current()}>
                 <Ionicons name="trash-outline" size={15} color={t.negative} />
-                <Text style={[styles.textCtrlBtnLabel, { color: t.negative }]}>Delete arrow</Text>
+                <Text style={[styles.textCtrlBtnLabel, { color: t.negative }]}>{tr('whiteboard.deleteArrow')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.textCtrlBtn, { backgroundColor: t.ctaBg }]} onPress={() => setSelectedArrow(null)}><Ionicons name="checkmark" size={16} color={t.ctaText} /></TouchableOpacity>
             </>
           ) : (
-            <Text style={[styles.textCtrlLabel, { paddingHorizontal: 6 }]}>Drag a player or arrow end · tap an end to delete</Text>
+            <Text style={[styles.textCtrlLabel, { paddingHorizontal: 6 }]}>{tr('whiteboard.moveHint')}</Text>
           )}
         </View>
       )}
       {hasFreehandArrows && !selectedTextId && (
         <View style={styles.floatBar}>
-          <TouchableOpacity style={styles.floatChip} onPress={clearAll}><Text style={styles.floatChipText}>Clear board</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.floatChip} onPress={clearAll}><Text style={styles.floatChipText}>{tr('whiteboard.clearBoard')}</Text></TouchableOpacity>
           <TouchableOpacity
             style={[styles.floatChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
             onPress={() => { if (freehandPlaying) { animCancel.current = true; setFreehandPlaying(false); setFreehandDone(true); } else playFreehand(); }}>
             <Ionicons name={freehandPlaying ? 'stop' : freehandDone ? 'refresh' : 'play'} size={13} color={t.ctaText} />
-            <Text style={[styles.floatChipText, { color: t.ctaText }]}>{freehandPlaying ? 'Stop' : freehandDone ? 'Replay' : 'Play drawing'}</Text>
+            <Text style={[styles.floatChipText, { color: t.ctaText }]}>{freehandPlaying ? tr('whiteboard.stop') : freehandDone ? tr('whiteboard.replay') : tr('whiteboard.playDrawing')}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -1797,7 +1803,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         <View style={styles.header}>
           <TouchableOpacity onPress={() => setShowBoardList(true)} style={styles.headerBtn}>
             <Ionicons name="layers-outline" size={20} color={t.ink} />
-            <Text style={styles.boardName} numberOfLines={1}>{board?.name ?? 'Whiteboard'}</Text>
+            <Text style={styles.boardName} numberOfLines={1}>{board?.name ?? tr('whiteboard.title')}</Text>
           </TouchableOpacity>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             {saving && <ActivityIndicator size="small" color={t.accent} />}
@@ -1814,7 +1820,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
               style={[styles.courtChip, board?.court_type === ct && styles.courtChipActive]}
               onPress={() => setCourtType(ct)}>
               <Text style={[styles.courtChipText, board?.court_type === ct && { color: t.ctaText }]}>
-                {ct === 'full' ? 'Full' : ct === 'half' ? 'Half' : '3/4'}
+                {ct === 'full' ? tr('whiteboard.full') : ct === 'half' ? tr('whiteboard.half') : tr('whiteboard.threeQuarter')}
               </Text>
             </TouchableOpacity>
           ))}
@@ -1824,7 +1830,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
             onPress={() => setOrientation(o => (o === 'portrait' ? 'landscape' : 'portrait'))}>
             <Ionicons name={isLandscape ? 'tablet-landscape-outline' : 'tablet-portrait-outline'} size={14} color={isLandscape ? t.ctaText : t.muted} />
             <Text style={[styles.courtChipText, isLandscape && { color: t.ctaText }]}>
-              {isLandscape ? 'Landscape' : 'Portrait'}
+              {isLandscape ? tr('whiteboard.landscape') : tr('whiteboard.portrait')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -1837,39 +1843,39 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                 style={[styles.schemeChip, activeScheme === sc && styles.schemeChipActive]}
                 onPress={() => setActiveScheme(sc)}>
                 <Text style={[styles.schemeChipText, activeScheme === sc && { color: t.ctaText }]}>
-                  {sc === 'offense' ? 'Offense' : sc === 'defense' ? 'Defense' : 'Counter'}
+                  {schemeLabel(sc)}
                 </Text>
               </TouchableOpacity>
             ))}
             <TouchableOpacity
               style={[styles.schemeChip, showKey && { backgroundColor: '#1F6F9B22', borderColor: '#1F6F9B' }]}
               onPress={() => setShowKey(v => !v)}>
-              <Text style={[styles.schemeChipText, showKey && { color: '#1F6F9B' }]}>Key</Text>
+              <Text style={[styles.schemeChipText, showKey && { color: '#1F6F9B' }]}>{tr('whiteboard.keyChip')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
               onPress={() => { if (animating) { animCancel.current = true; setAnimating(false); setAnimDone(true); } else playScheme(); }}>
               <Ionicons name={animating ? 'stop' : animDone ? 'refresh' : 'play'} size={13} color={t.ctaText} />
-              <Text style={[styles.schemeChipText, { color: t.ctaText }]}>{animating ? 'Stop' : animDone ? 'Replay' : 'Play'}</Text>
+              <Text style={[styles.schemeChipText, { color: t.ctaText }]}>{animating ? tr('whiteboard.stop') : animDone ? tr('whiteboard.replay') : tr('whiteboard.play')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.accentSoft, borderColor: t.accent }]}
               onPress={() => { setRefineText(''); setShowRefine(true); }}>
               <Ionicons name="create-outline" size={13} color={t.accent} />
-              <Text style={[styles.schemeChipText, { color: t.accent }]}>Refine</Text>
+              <Text style={[styles.schemeChipText, { color: t.accent }]}>{tr('whiteboard.refine')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5 }]}
               onPress={() => setShowPlayers(true)}>
               <Ionicons name="people-outline" size={13} color={t.muted} />
-              <Text style={styles.schemeChipText}>Players</Text>
+              <Text style={styles.schemeChipText}>{tr('whiteboard.players')}</Text>
             </TouchableOpacity>
             {pinCount > 0 && (
               <TouchableOpacity
                 style={[styles.schemeChip, { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderColor: t.ctaBg }]}
                 onPress={adaptPlay} disabled={adapting}>
                 <Ionicons name="git-branch-outline" size={13} color={t.ctaText} />
-                <Text style={[styles.schemeChipText, { color: t.ctaText }]}>Adapt play</Text>
+                <Text style={[styles.schemeChipText, { color: t.ctaText }]}>{tr('whiteboard.adaptPlay')}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -1981,7 +1987,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         {adapting && (
           <View style={styles.adaptOverlay}>
             <View style={styles.adaptCard}>
-              <GeneratingOverlay visible label="Adapting the play around your changes…" />
+              <GeneratingOverlay visible label={tr('whiteboard.adaptingLabel')} />
             </View>
           </View>
         )}
@@ -1990,21 +1996,21 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         <Modal visible={!!pendingArrow} transparent animationType="fade" onRequestClose={() => setPendingArrow(null)}>
           <View style={styles.listOverlay}>
             <View style={[styles.listBox, { padding: 20 }]}>
-              <Text style={styles.listTitle}>Add movement</Text>
-              <Text style={styles.aiHint}>What is this? It’s added to {activeScheme} and included when you tap Adapt play.</Text>
+              <Text style={styles.listTitle}>{tr('whiteboard.addMovement')}</Text>
+              <Text style={styles.aiHint}>{tr('whiteboard.addMovementHint', { scheme: schemeLabel(activeScheme) })}</Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                 {(['pass', 'cut', 'screen', 'dribble'] as const).map(k => (
                   <TouchableOpacity key={k} style={[styles.schemeChip, { backgroundColor: t.ctaBg, borderColor: t.ctaBg }]} onPress={() => addPendingAsAction(k)}>
-                    <Text style={[styles.schemeChipText, { color: t.ctaText, textTransform: 'capitalize' }]}>{k}</Text>
+                    <Text style={[styles.schemeChipText, { color: t.ctaText, textTransform: 'capitalize' }]}>{tr(`whiteboard.${k}`)}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
               <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
                 <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]} onPress={keepPendingAsMark}>
-                  <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Just a line</Text>
+                  <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('whiteboard.justALine')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setPendingArrow(null)}>
-                  <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
+                  <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('common.cancel')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -2015,7 +2021,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         {board?.ai && showKey && board.ai.key.length > 0 && (
           <View style={styles.keyPanel}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-              <Text style={styles.keyTitle}>KEY — SUGGESTED IMPROVEMENTS</Text>
+              <Text style={styles.keyTitle}>{tr('whiteboard.keyPanelTitle')}</Text>
               <TouchableOpacity onPress={() => setShowKey(false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                 <Ionicons name="chevron-down" size={18} color={t.muted} />
               </TouchableOpacity>
@@ -2037,23 +2043,20 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={[styles.listBox, { padding: 20, maxHeight: '88%' }]}>
                 <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-                  <Text style={styles.listTitle}>Refine Play</Text>
+                  <Text style={styles.listTitle}>{tr('whiteboard.refinePlay')}</Text>
                   {!!boards[activeBoardIdx]?.ai?.prompt && (
                     <View style={{ backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 10, borderWidth: 1, borderColor: t.line }}>
-                      <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 4 }}>WHAT YOU WROTE</Text>
+                      <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 4 }}>{tr('whiteboard.whatYouWrote')}</Text>
                       <Text style={{ color: t.inkSoft, fontSize: 13, lineHeight: 18 }}>{boards[activeBoardIdx]!.ai!.prompt}</Text>
                       {!!boards[activeBoardIdx]?.ai?.attachedTitle && (
                         <Text style={{ color: t.muted, fontSize: 11, marginTop: 4 }}>📎 {boards[activeBoardIdx]!.ai!.attachedTitle}</Text>
                       )}
                     </View>
                   )}
-                  <Text style={styles.aiHint}>
-                    Describe the change and the AI will redraw the play (offense, defense, counter, and key).
-                    Your hand-drawn marks are kept.
-                  </Text>
+                  <Text style={styles.aiHint}>{tr('whiteboard.refineHint')}</Text>
                   <VoiceTextInput
                     style={[styles.textField, { minHeight: 90 }]}
-                    placeholder="e.g. add a weak-side flare, roller should short-roll, bring the 5 to the top..."
+                    placeholder={tr('whiteboard.refinePlaceholder')}
                     placeholderTextColor={t.muted2}
                     value={refineText}
                     onChangeText={setRefineText}
@@ -2063,14 +2066,14 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                 </ScrollView>
                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                   <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setShowRefine(false)}>
-                    <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
+                    <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('common.cancel')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.addBoardBtn, { flex: 1, opacity: (refineText.trim() && !refining) ? 1 : 0.5 }]}
                     onPress={refinePlay} disabled={!refineText.trim() || refining}>
                     {refining
                       ? <ActivityIndicator color={t.ctaText} size="small" />
-                      : <><Ionicons name="sparkles" size={16} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Update Play</Text></>}
+                      : <><Ionicons name="sparkles" size={16} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('whiteboard.updatePlay')}</Text></>}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -2084,12 +2087,9 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={[styles.listBox, { padding: 20, maxHeight: '88%' }]}>
                 <Text style={styles.listTitle}>
-                  {activeScheme === 'offense' ? 'Offense' : activeScheme === 'defense' ? 'Defense' : 'Counter'} — By Player
+                  {tr('whiteboard.playersTitle', { scheme: schemeLabel(activeScheme) })}
                 </Text>
-                <Text style={styles.aiHint}>
-                  Each player's detail is how the AI read your play for them. Edit any of them and/or
-                  lock a player in place (the AI cascades the others around a lock), then Apply & Regenerate.
-                </Text>
+                <Text style={styles.aiHint}>{tr('whiteboard.playersHint')}</Text>
                 <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
                   {guidanceUnits().map(pl => {
                     const locked = !!lockedPlayers[pl.id];
@@ -2105,12 +2105,12 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                             style={[styles.lockBtn, locked && { backgroundColor: t.accentSoft, borderColor: t.accent }]}
                             onPress={() => setLockedPlayers(prev => ({ ...prev, [pl.id]: !locked }))}>
                             <Ionicons name={locked ? 'lock-closed' : 'lock-open-outline'} size={14} color={locked ? t.accent : t.muted} />
-                            <Text style={[styles.lockBtnText, locked && { color: t.accent }]}>{locked ? 'Locked' : 'Open'}</Text>
+                            <Text style={[styles.lockBtnText, locked && { color: t.accent }]}>{locked ? tr('whiteboard.locked') : tr('whiteboard.open')}</Text>
                           </TouchableOpacity>
                         </View>
                         <TextInput
                           style={[styles.guideInput, { minHeight: 44 }, persisted != null && { borderColor: t.accent }]}
-                          placeholder={`What ${dispId(pl.id)} does…`}
+                          placeholder={tr('whiteboard.playerDoesPlaceholder', { id: dispId(pl.id) })}
                           placeholderTextColor={t.muted2}
                           value={playerGuidance[gk] ?? persisted ?? dispText(pl.role)}
                           onChangeText={txt => setPlayerGuidance(prev => ({ ...prev, [gk]: txt }))}
@@ -2120,20 +2120,20 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                     );
                   })}
                   {guidanceUnits().length === 0 && (
-                    <Text style={styles.aiHint}>No {activeScheme === 'defense' ? 'defenders' : 'players'} in this scheme yet.</Text>
+                    <Text style={styles.aiHint}>{activeScheme === 'defense' ? tr('whiteboard.noDefendersYet') : tr('whiteboard.noPlayersYet')}</Text>
                   )}
                 </ScrollView>
-                <GeneratingOverlay visible={applyingGuidance} label="Cascading the play around your locks…" />
+                <GeneratingOverlay visible={applyingGuidance} label={tr('whiteboard.cascadingLabel')} />
                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                   <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setShowPlayers(false)}>
-                    <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
+                    <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('common.cancel')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.addBoardBtn, { flex: 1, opacity: applyingGuidance ? 0.5 : 1 }]}
                     onPress={applyPlayerGuidance} disabled={applyingGuidance}>
                     {applyingGuidance
                       ? <ActivityIndicator color={t.ctaText} size="small" />
-                      : <><Ionicons name="sparkles" size={16} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply & Regenerate</Text></>}
+                      : <><Ionicons name="sparkles" size={16} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('whiteboard.applyRegenerate')}</Text></>}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -2153,14 +2153,11 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
               <View style={[styles.listBox, { padding: 20, maxHeight: '80%' }]}>
               {(!aiByPlayer && seedMode === 'none') ? (
                 <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-                  <Text style={styles.listTitle}>AI Play Draw-Up</Text>
-                  <Text style={styles.aiHint}>
-                    Describe the scene or play — what was run, what the defense did, what went wrong.
-                    The AI draws the offense, defense, and counter, plus a key of what would have made it work.
-                  </Text>
+                  <Text style={styles.listTitle}>{tr('whiteboard.aiTitle')}</Text>
+                  <Text style={styles.aiHint}>{tr('whiteboard.aiHint')}</Text>
                   <VoiceTextInput
                     style={[styles.textField, { minHeight: 110 }]}
-                    placeholder="e.g. High P&R left, their big hedged hard, roller was open but the pass came late, weak-side corner never lifted..."
+                    placeholder={tr('whiteboard.aiPlaceholder')}
                     placeholderTextColor={t.muted2}
                     value={aiDescription}
                     onChangeText={setAiDescription}
@@ -2180,28 +2177,28 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                   ) : (
                     <TouchableOpacity style={styles.seedBtn} onPress={() => { Keyboard.dismiss(); setSeedMode('type'); }}>
                       <Ionicons name="document-text-outline" size={16} color={t.accent} />
-                      <Text style={styles.seedBtnText}>Draw up from a report</Text>
+                      <Text style={styles.seedBtnText}>{tr('whiteboard.drawFromReport')}</Text>
                     </TouchableOpacity>
                   )}
                   {/* By Player — set what each player does before drawing it up */}
                   <TouchableOpacity style={styles.seedBtn} onPress={() => { Keyboard.dismiss(); setAiByPlayer(true); }}>
                     <Ionicons name="people-outline" size={16} color={t.accent} />
                     <Text style={styles.seedBtnText}>
-                      {byPlayerCount ? `By Player · ${byPlayerCount} set` : 'By Player — set roles for O1–O5 / D1–D5'}
+                      {byPlayerCount ? tr('whiteboard.byPlayerSet', { n: byPlayerCount }) : tr('whiteboard.byPlayerCta')}
                     </Text>
                   </TouchableOpacity>
-                  <GeneratingOverlay visible={aiGenerating} label="Drawing up the play…" />
+                  <GeneratingOverlay visible={aiGenerating} label={tr('whiteboard.drawingUp')} />
                   <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                     <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]}
                       onPress={() => setShowAI(false)}>
-                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
+                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('common.cancel')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.addBoardBtn, { flex: 1, opacity: (aiDescription.trim() || attachedReport || byPlayerCount > 0) && !aiGenerating ? 1 : 0.5 }]}
                       onPress={generatePlay} disabled={(!aiDescription.trim() && !attachedReport && byPlayerCount === 0) || aiGenerating}>
                       {aiGenerating
                         ? <ActivityIndicator color={t.ctaText} size="small" />
-                        : <><Ionicons name="sparkles" size={16} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Draw It Up</Text></>}
+                        : <><Ionicons name="sparkles" size={16} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('whiteboard.drawItUp')}</Text></>}
                     </TouchableOpacity>
                   </View>
                 </ScrollView>
@@ -2211,12 +2208,9 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                     <TouchableOpacity onPress={() => setAiByPlayer(false)}>
                       <Ionicons name="chevron-back" size={22} color={t.ink} />
                     </TouchableOpacity>
-                    <Text style={[styles.listTitle, { marginBottom: 0 }]}>By Player</Text>
+                    <Text style={[styles.listTitle, { marginBottom: 0 }]}>{tr('whiteboard.byPlayer')}</Text>
                   </View>
-                  <Text style={styles.aiHint}>
-                    Set what any player should do — offense (O1–O5) or defense (D1–D5). Leave the rest blank.
-                    The AI builds the play from these, and you can fine-tune per player afterward.
-                  </Text>
+                  <Text style={styles.aiHint}>{tr('whiteboard.byPlayerHint')}</Text>
                   <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
                     {(['O1', 'O2', 'O3', 'O4', 'O5', 'D1', 'D2', 'D3', 'D4', 'D5']).map(id => (
                       <View key={id} style={styles.byPlayerRow}>
@@ -2225,7 +2219,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                         </View>
                         <TextInput
                           style={[styles.guideInput, { flex: 1 }]}
-                          placeholder={id[0] === 'O' ? `What ${id} runs…` : `What ${id} does on defense…`}
+                          placeholder={id[0] === 'O' ? tr('whiteboard.playerRunsPlaceholder', { id }) : tr('whiteboard.playerDefendsPlaceholder', { id })}
                           placeholderTextColor={t.muted2}
                           value={byPlayerNotes[id] ?? ''}
                           onChangeText={txt => setByPlayerNotes(prev => ({ ...prev, [id]: txt }))}
@@ -2235,7 +2229,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                   </ScrollView>
                   <TouchableOpacity style={[styles.addBoardBtn, { marginTop: 12 }]} onPress={() => setAiByPlayer(false)}>
                     <Ionicons name="checkmark" size={18} color={t.ctaText} />
-                    <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Done{byPlayerCount ? ` · ${byPlayerCount} set` : ''}</Text>
+                    <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{byPlayerCount ? tr('whiteboard.doneCountSet', { n: byPlayerCount }) : tr('common.done')}</Text>
                   </TouchableOpacity>
                 </>
               ) : (
@@ -2245,7 +2239,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                       <Ionicons name="chevron-back" size={22} color={t.ink} />
                     </TouchableOpacity>
                     <Text style={[styles.listTitle, { marginBottom: 0 }]}>
-                      {seedMode === 'type' ? 'Report Source' : seedType === 'scout' ? 'Scout Reports' : 'Team Reports'}
+                      {seedMode === 'type' ? tr('whiteboard.reportSource') : seedType === 'scout' ? tr('whiteboard.scoutReports') : tr('whiteboard.teamReports')}
                     </Text>
                   </View>
                   {seedMode === 'type' ? (
@@ -2255,8 +2249,8 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                           <Ionicons name="telescope-outline" size={22} color={t.accent} />
                         </View>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.listItemText}>Scout Report</Text>
-                          <Text style={styles.listItemSub}>Opponent scouting from the Team Grade scout section</Text>
+                          <Text style={styles.listItemText}>{tr('whiteboard.scoutReport')}</Text>
+                          <Text style={styles.listItemSub}>{tr('whiteboard.scoutReportDesc')}</Text>
                         </View>
                         <Ionicons name="chevron-forward" size={16} color={t.muted2} />
                       </TouchableOpacity>
@@ -2265,8 +2259,8 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                           <Ionicons name="people-outline" size={22} color={t.positive} />
                         </View>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.listItemText}>Team Report</Text>
-                          <Text style={styles.listItemSub}>Reports you created in the Team Reports section</Text>
+                          <Text style={styles.listItemText}>{tr('whiteboard.teamReport')}</Text>
+                          <Text style={styles.listItemSub}>{tr('whiteboard.teamReportDesc')}</Text>
                         </View>
                         <Ionicons name="chevron-forward" size={16} color={t.muted2} />
                       </TouchableOpacity>
@@ -2278,8 +2272,8 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                       {seedItems.length === 0
                         ? <Text style={styles.aiHint}>
                             {seedType === 'scout'
-                              ? 'No opponent scouting reports yet — generate one from the Team Grade scout section.'
-                              : 'No team reports yet — create one in the Team Reports section.'}
+                              ? tr('whiteboard.noScoutReports')
+                              : tr('whiteboard.noTeamReports')}
                           </Text>
                         : seedItems.map(item => (
                           <TouchableOpacity key={item.id} style={styles.listRow} onPress={() => attachReport(item)}>
@@ -2303,7 +2297,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         <Modal visible={showBoardList} transparent animationType="slide" onRequestClose={() => setShowBoardList(false)}>
           <View style={styles.listOverlay}>
             <View style={styles.listBox}>
-              <Text style={styles.listTitle}>Boards</Text>
+              <Text style={styles.listTitle}>{tr('whiteboard.boards')}</Text>
               <ScrollView>
                 {boards.map((b, i) => (
                   <View key={i} style={styles.listRow}>
@@ -2311,7 +2305,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                       onPress={() => { setActiveBoardIdx(i); setShowBoardList(false); }}>
                       <Text style={[styles.listItemText, i === activeBoardIdx && { color: t.accent }]}>{b.name}</Text>
                       <Text style={styles.listItemSub}>
-                        {b.court_type === 'full' ? 'Full Court' : b.court_type === 'half' ? 'Half Court' : '3/4 Court'} · {b.strokes.length} marks
+                        {b.court_type === 'full' ? tr('whiteboard.fullCourt') : b.court_type === 'half' ? tr('whiteboard.halfCourt') : tr('whiteboard.threeQuarterCourt')} · {tr('whiteboard.marksCount', { n: b.strokes.length })}
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => duplicateBoard(i)} style={{ padding: 4 }}>
@@ -2325,10 +2319,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
               </ScrollView>
               <TouchableOpacity style={styles.addBoardBtn} onPress={addNewBoard}>
                 <Ionicons name="add" size={18} color={t.ctaText} />
-                <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>New Board</Text>
+                <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('whiteboard.newBoard')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.listClose} onPress={() => setShowBoardList(false)}>
-                <Text style={{ color: t.muted, fontSize: 14 }}>Close</Text>
+                <Text style={{ color: t.muted, fontSize: 14 }}>{tr('common.close')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -2338,16 +2332,16 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         <Modal visible={showAddText} transparent animationType="fade" onRequestClose={() => setShowAddText(false)}>
           <KeyboardAvoidingView style={styles.listOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View style={[styles.listBox, { padding: 20 }]}>
-              <Text style={styles.listTitle}>{editingTextId ? 'Edit Label' : 'Add Label'}</Text>
-              <TextInput style={styles.textField} placeholder="Enter text..."
+              <Text style={styles.listTitle}>{editingTextId ? tr('whiteboard.editLabel') : tr('whiteboard.addLabel')}</Text>
+              <TextInput style={styles.textField} placeholder={tr('whiteboard.enterText')}
                 placeholderTextColor={t.muted2} value={textInput} onChangeText={setTextInput} autoFocus />
               <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                 <TouchableOpacity style={[styles.addBoardBtn, { flex: 1, backgroundColor: t.chip }]}
                   onPress={() => { setShowAddText(false); setEditingTextId(null); }}>
-                  <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
+                  <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('common.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.addBoardBtn, { flex: 1 }]} onPress={addText}>
-                  <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Add</Text>
+                  <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('whiteboard.add')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
