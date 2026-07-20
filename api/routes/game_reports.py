@@ -713,6 +713,11 @@ async def generate_game_report(
     if directive:
         sections.append(directive)
 
+    from ..coach_context import language_directive
+    lang = language_directive(coach)
+    if lang:
+        sections.append(lang)
+
     prompt = "\n".join(sections)
 
     import os

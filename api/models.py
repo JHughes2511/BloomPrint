@@ -25,6 +25,9 @@ class Coach(Base):
     country           = Column(String, nullable=True)     # account location
     city              = Column(String, nullable=True)
     google_sub        = Column(String, nullable=True)      # Google account id (Sign-In)
+    # UI + AI output language (BCP-47 primary tag, e.g. "es", "ru"). Reports,
+    # Ask BloomPrint, and the app interface all follow this choice.
+    preferred_language = Column(String, default="en")
     # Program system & philosophy — free-text per category. Injected into every
     # report so evaluations are framed as fit-for-this-program.
     system_profile    = Column(JSON, nullable=True)

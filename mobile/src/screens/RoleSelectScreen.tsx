@@ -4,6 +4,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import LanguagePicker from '../components/LanguagePicker';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -12,6 +14,7 @@ import { ScreenBackground } from '../theme/components';
 export default function RoleSelectScreen() {
   const navigation = useNavigation<any>();
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const styles = makeStyles(t);
 
   return (
@@ -19,8 +22,8 @@ export default function RoleSelectScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.inner}>
         <Text style={styles.brand}>BloomPrint</Text>
-        <Text style={styles.title}>Who are you?</Text>
-        <Text style={styles.sub}>Choose how you'll use BloomPrint. You can switch later in settings.</Text>
+        <Text style={styles.title}>{tr('auth.whoAreYou')}</Text>
+        <Text style={styles.sub}>{tr('auth.chooseHow')}</Text>
 
         <View style={styles.cards}>
           <TouchableOpacity
@@ -31,8 +34,8 @@ export default function RoleSelectScreen() {
               <Ionicons name="clipboard-outline" size={28} color={t.accent} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>Coach</Text>
-              <Text style={styles.cardDesc}>Build reports, track games, evaluate your roster</Text>
+              <Text style={styles.cardTitle}>{tr('auth.coach')}</Text>
+              <Text style={styles.cardDesc}>{tr('auth.coachDesc')}</Text>
             </View>
             <Ionicons name="chevron-forward" size={22} color={t.accent} />
           </TouchableOpacity>
@@ -45,13 +48,16 @@ export default function RoleSelectScreen() {
               <Ionicons name="person-outline" size={28} color={t.brown} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>Player</Text>
-              <Text style={styles.cardDesc}>Receive reports, follow training, track your growth</Text>
+              <Text style={styles.cardTitle}>{tr('auth.player')}</Text>
+              <Text style={styles.cardDesc}>{tr('auth.playerDesc')}</Text>
             </View>
             <Ionicons name="chevron-forward" size={22} color={t.muted2} />
           </TouchableOpacity>
         </View>
 
+        <View style={{ marginTop: 34, alignItems: 'center' }}>
+          <LanguagePicker />
+        </View>
       </View>
     </SafeAreaView>
     </ScreenBackground>

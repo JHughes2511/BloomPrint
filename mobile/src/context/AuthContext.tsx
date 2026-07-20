@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { setAppLanguage } from '../i18n';
 import { authAPI } from '../api/client';
 import { Coach } from '../types';
 
@@ -30,6 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const me = await authAPI.me();
           setCoach(me);
+          adoptLanguage(me);
         } catch {
           await SecureStore.deleteItemAsync('auth_token');
         }
@@ -38,11 +40,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
+
+  // The account's saved language wins once signed in: switch the UI to it so a
+  // coach gets their own language on any device they log into.
+  const adoptLanguage = (c: any) => {
+    const lang = c?.preferred_language;
+    if (lang) setAppLanguage(lang).catch(() => {});
+  };
+
   const login = async (email: string, password: string) => {
     const res = await authAPI.login(email, password);
     await SecureStore.setItemAsync('auth_token', res.access_token);
     setToken(res.access_token);
     setCoach(res.coach);
+    adoptLanguage(res.coach);
   };
 
   const register = async (data: Parameters<typeof authAPI.register>[0]) => {
@@ -67,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await SecureStore.setItemAsync('auth_token', accessToken);
     setToken(accessToken);
     setCoach(coachData);
+    adoptLanguage(coachData);
   };
 
   const logout = async () => {

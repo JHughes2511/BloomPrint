@@ -60,6 +60,7 @@ def register(body: schemas.CoachCreate, db: Session = Depends(get_db)):
         competition_level=(body.competition_level or "HS Varsity"),
         country=body.country,
         city=body.city,
+        preferred_language=(body.preferred_language or "en"),
     )
     db.add(coach)
     db.commit()
@@ -120,6 +121,7 @@ def google_auth(body: schemas.CoachGoogleAuth, db: Session = Depends(get_db)):
         competition_level=(body.competition_level or "HS Varsity"),
         country=body.country,
         city=body.city,
+        preferred_language=(body.preferred_language or "en"),
         google_sub=identity.sub or None,
     )
     db.add(coach)
@@ -160,7 +162,7 @@ def update_me(
             if taken:
                 raise HTTPException(status_code=400, detail="That email is already used by another account.")
             coach.email = new_email
-    for field in ("name", "role", "program_name", "competition_level", "conference", "system_profile", "country", "city", "onboarded"):
+    for field in ("name", "role", "program_name", "competition_level", "conference", "system_profile", "country", "city", "onboarded", "preferred_language"):
         if field in data and data[field] is not None:
             setattr(coach, field, data[field])
     # Recompute BIM authority weight if the competition level/conference changed.

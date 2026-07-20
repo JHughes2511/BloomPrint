@@ -887,7 +887,7 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
             + "\n".join(f"- {c}" for c in corrections if c and c.strip())
         )
 
-    from ..coach_context import resolve_level
+    from ..coach_context import resolve_level, language_directive
     _lvl = resolve_level(coach, team=(db.get(models.Team, game.team_id) if game.team_id else None))
     prompt = (
         f"You are the BloomPrint Basketball Intelligence Model. "
@@ -901,6 +901,7 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
         f"Analyze the opponent's strengths, weaknesses, top players to watch, offensive tendencies, "
         f"defensive tendencies, and strategic recommendations for the next game against them."
         f"{REPORT_FORMAT}"
+        f"{language_directive(coach)}"
     )
 
     try:
@@ -980,7 +981,7 @@ async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSe
             + "\n".join(f"- {c}" for c in corrections if c and c.strip())
         )
 
-    from ..coach_context import resolve_level
+    from ..coach_context import resolve_level, language_directive
     _lvl = resolve_level(coach, team=team_row)
     prompt = (
         f"You are the BloomPrint Basketball Intelligence Model. Generate a full GAME REPORT for "
@@ -994,6 +995,7 @@ async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSe
         "and adjustments for next time; 2) OPPONENT BREAKDOWN — their tendencies, key players, how to attack "
         "and defend them going forward; 3) KEY TAKEAWAYS."
         f"{REPORT_FORMAT_WITH_TABLES}"
+        f"{language_directive(coach)}"
     )
     try:
         import anthropic

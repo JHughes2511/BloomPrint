@@ -297,7 +297,7 @@ async def player_summary(
 
     focus = body.focus_prompt or ""
     from video_vision.bim import describe_output_type, comprehensive_directive
-    from ..coach_context import resolve_level
+    from ..coach_context import resolve_level, language_directive
     _team = db.get(models.Team, player.team_id) if player.team_id else None
     _lvl = resolve_level(coach, player, _team)
     prompt = (
@@ -312,6 +312,7 @@ async def player_summary(
         "Format with clear BIM sections including OVERALL GRADE, pillar grades, GREEN FLAGS, WATCH FLAGS, and KEY QUESTIONS."
         f"{comprehensive_directive(body.output_type)}"
         f"{REPORT_FORMAT_WITH_TABLES}"
+        f"{language_directive(coach)}"
     )
 
     from video_vision.bim import parse_output_types

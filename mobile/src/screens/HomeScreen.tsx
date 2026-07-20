@@ -13,6 +13,7 @@ import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
 import CommandBar from '../components/CommandBar';
 import CountryField from '../components/CountryField';
+import LanguagePicker from '../components/LanguagePicker';
 import VoiceTextInput from '../components/VoiceTextInput';
 
 // Which bottom tab each report type routes to when tapped on the Home page.
@@ -376,6 +377,14 @@ export default function HomeScreen() {
                   </Text>
                 </TouchableOpacity>
               ))}
+            </View>
+
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>App Language</Text>
+            <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 8 }}>
+              The app, your reports, and Ask BloomPrint all use this language.
+            </Text>
+            <View style={{ alignItems: 'flex-start' }}>
+              <LanguagePicker onChanged={(code) => { updateProfile({ preferred_language: code } as any).catch(() => {}); }} />
             </View>
 
             <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>Program / Organization</Text>

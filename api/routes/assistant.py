@@ -696,11 +696,22 @@ def ask(body: AskBody, db: Session = Depends(get_db), coach: models.Coach = Depe
             messages.append({"role": role, "content": content})
     messages.append({"role": "user", "content": body.message})
 
+    # Answer in the coach's chosen language (UI + reports follow the same choice).
+    from ..coach_context import LANGUAGE_NAMES
+    _lang = (getattr(coach, "preferred_language", None) or "en").strip().lower()
+    system = SYSTEM
+    if _lang not in ("", "en"):
+        system = SYSTEM + (
+            f"\n\nREPLY LANGUAGE: The coach uses the app in {LANGUAGE_NAMES.get(_lang, _lang)}. "
+            "Write ALL replies (including section titles, steps, and button labels you reference) "
+            "in that language; keep player/team names and stat abbreviations as-is."
+        )
+
     result = {"navigate": None, "pending_action": None}
     reply_text = ""
     for _ in range(6):  # bounded tool-use loop
         resp = client.messages.create(
-            model="claude-opus-4-7", max_tokens=2000, system=SYSTEM, tools=TOOLS, messages=messages,
+            model="claude-opus-4-7", max_tokens=2000, system=system, tools=TOOLS, messages=messages,
         )
         if resp.stop_reason == "tool_use":
             messages.append({"role": "assistant", "content": resp.content})
@@ -725,7 +736,7 @@ def ask(body: AskBody, db: Session = Depends(get_db), coach: models.Coach = Depe
         # a bare button with no explanation is not an acceptable reply.
         try:
             follow = client.messages.create(
-                model="claude-opus-4-7", max_tokens=1000, system=SYSTEM,
+                model="claude-opus-4-7", max_tokens=1000, system=system,
                 messages=messages + [{"role": "user", "content":
                     "Write your reply to the coach now (no tool calls): lead with the answer and, if you "
                     "showed a navigation button, spell out the exact steps they'll take on that screen."}],

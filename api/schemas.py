@@ -19,6 +19,7 @@ class CoachCreate(BaseModel):
     competition_level: str | None = None
     country: str | None = None
     city: str | None = None
+    preferred_language: str | None = None
 
 
 class CoachLogin(BaseModel):
@@ -36,6 +37,7 @@ class CoachGoogleAuth(BaseModel):
     conference: str | None = None
     country: str | None = None
     city: str | None = None
+    preferred_language: str | None = None
 
 
 class CoachUpdate(BaseModel):
@@ -49,6 +51,7 @@ class CoachUpdate(BaseModel):
     country: str | None = None
     city: str | None = None
     onboarded: bool | None = None
+    preferred_language: str | None = None
 
 
 class CoachOut(BaseModel):
@@ -66,6 +69,7 @@ class CoachOut(BaseModel):
     system_profile: dict | None = None
     philosophy_reference: str | None = None
     onboarded: bool | None = None
+    preferred_language: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

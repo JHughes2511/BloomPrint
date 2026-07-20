@@ -8,6 +8,9 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import LanguagePicker from '../components/LanguagePicker';
+import { currentLanguage } from '../i18n';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../api/client';
 import { useTheme } from '../theme/ThemeProvider';
@@ -19,9 +22,9 @@ import GoogleSignInButton from '../components/GoogleSignInButton';
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
 
 const ROLES = [
-  { key: 'coach',   label: 'Coach' },
-  { key: 'scout',   label: 'Scout' },
-  { key: 'trainer', label: 'Trainer' },
+  { key: 'coach',   labelKey: 'auth.roleCoach' },
+  { key: 'scout',   labelKey: 'auth.roleScout' },
+  { key: 'trainer', labelKey: 'auth.roleTrainer' },
 ];
 
 const COMPETITION_LEVELS = [...CANON_LEVELS];
@@ -125,6 +128,7 @@ function PickerModal({
   onClose: () => void;
 }) {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const pickerModalStyles = makePickerStyles(t);
   const [search, setSearch] = useState('');
   const filtered = search.trim()
@@ -143,7 +147,7 @@ function PickerModal({
           </View>
           <VoiceTextInput
             style={pickerModalStyles.search}
-            placeholder="Search..."
+            placeholder={tr('common.search')}
             placeholderTextColor={t.muted2}
             value={search}
             onChangeText={setSearch}
@@ -173,6 +177,7 @@ function PickerModal({
 export default function LoginScreen() {
   const { login, register, applyAuth } = useAuth();
   const navigation = useNavigation<any>();
+  const { t: tr } = useTranslation();
   const { t } = useTheme();
   const styles = makeStyles(t);
   const [mode, setMode] = useState<'login' | 'register'>('login');
@@ -205,10 +210,10 @@ export default function LoginScreen() {
         setName(res.name ?? '');
         setEmail(res.email ?? '');
         setMode('register');
-        Alert.alert('Almost there', 'Finish setting up your account, then tap Create Account.');
+        Alert.alert(tr('auth.googleAlmostThere'), tr('auth.googleFinishSetup'));
       }
     } catch (e: any) {
-      Alert.alert('Google sign-in', e?.response?.data?.detail ?? 'Could not sign in with Google.');
+      Alert.alert(tr('auth.googleSignInTitle'), e?.response?.data?.detail ?? tr('auth.googleSignInFailed'));
     } finally {
       setGoogleBusy(false);
     }
@@ -217,7 +222,7 @@ export default function LoginScreen() {
   const submit = async () => {
     if (mode === 'register') {
       if (competitionLevel === 'College' && !conference) {
-        Alert.alert('Conference Required', 'Please select your conference to continue.');
+        Alert.alert(tr('auth.conferenceRequired'), tr('auth.conferenceRequiredMsg'));
         return;
       }
     }
@@ -235,6 +240,7 @@ export default function LoginScreen() {
           conference: competitionLevel === 'College' ? conference : undefined,
           country: country || undefined,
           city: city.trim() || undefined,
+          preferred_language: currentLanguage(),
         });
         if (res.status === 'ok') await applyAuth(res.access_token, res.coach);
         else throw new Error('Could not create the account.');
@@ -247,10 +253,11 @@ export default function LoginScreen() {
           conference: competitionLevel === 'College' ? conference : undefined,
           country: country || undefined,
           city: city.trim() || undefined,
+          preferred_language: currentLanguage(),
         } as any);
       }
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Something went wrong');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('common.somethingWentWrong'));
     } finally {
       setLoading(false);
     }
@@ -270,22 +277,22 @@ export default function LoginScreen() {
         {mode === 'register' && (
           <TouchableOpacity style={styles.backBtn} onPress={() => { setGoogleIdToken(null); setMode('login'); }}>
             <Ionicons name="chevron-back" size={18} color={t.muted} />
-            <Text style={styles.backText}>Back</Text>
+            <Text style={styles.backText}>{tr('common.back')}</Text>
           </TouchableOpacity>
         )}
 
         <Text style={styles.logo}>BloomPrint</Text>
-        <Text style={styles.sub}>Coach · Scout · Trainer</Text>
+        <Text style={styles.sub}>{tr('auth.coachScoutTrainer')}</Text>
 
         {mode === 'register' && (
           <>
             {!!googleIdToken && (
               <View style={styles.googleBanner}>
                 <Ionicons name="logo-google" size={16} color={t.accent} />
-                <Text style={styles.googleBannerText}>Complete your account to finish signing up with Google</Text>
+                <Text style={styles.googleBannerText}>{tr('auth.googleComplete')}</Text>
               </View>
             )}
-            <Text style={styles.sectionLabel}>I am a</Text>
+            <Text style={styles.sectionLabel}>{tr('auth.iAmA')}</Text>
             <View style={styles.roleRow}>
               {ROLES.map(r => (
                 <TouchableOpacity
@@ -294,24 +301,24 @@ export default function LoginScreen() {
                   onPress={() => setRole(r.key)}
                 >
                   <Text style={[styles.roleText, role === r.key && styles.roleTextActive]}>
-                    {r.label}
+                    {tr(r.labelKey)}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
-            <VoiceTextInput style={styles.input} placeholder="Full Name" placeholderTextColor={t.muted2}
+            <VoiceTextInput style={styles.input} placeholder={tr('auth.fullName')} placeholderTextColor={t.muted2}
               value={name} onChangeText={setName} />
-            <VoiceTextInput style={styles.input} placeholder="Program / Organization Name" placeholderTextColor={t.muted2}
+            <VoiceTextInput style={styles.input} placeholder={tr('auth.programName')} placeholderTextColor={t.muted2}
               value={program} onChangeText={setProgram} />
 
             {/* Competition Level picker */}
-            <Text style={styles.sectionLabel}>Competition Level</Text>
+            <Text style={styles.sectionLabel}>{tr('auth.competitionLevel')}</Text>
             <TouchableOpacity
               style={styles.pickerBtn}
               onPress={() => setShowLevelPicker(true)}
             >
               <Text style={[styles.pickerBtnText, !competitionLevel && { color: t.muted2 }]}>
-                {competitionLevel || 'Select level...'}
+                {competitionLevel || tr('auth.selectLevel')}
               </Text>
               <Ionicons name="chevron-down" size={14} color={t.muted} />
             </TouchableOpacity>
@@ -320,7 +327,7 @@ export default function LoginScreen() {
             {competitionLevel && (CONFERENCES_BY_LEVEL[competitionLevel]?.length ?? 0) > 0 && (
               <>
                 <Text style={[styles.sectionLabel, { marginTop: 8 }]}>
-                  {competitionLevel === 'College' ? 'Conference' : 'League / Association'}
+                  {competitionLevel === 'College' ? tr('auth.conference') : tr('auth.leagueAssociation')}
                   {competitionLevel === 'College' && <Text style={{ color: t.negative }}> *</Text>}
                 </Text>
                 <TouchableOpacity
@@ -328,7 +335,7 @@ export default function LoginScreen() {
                   onPress={() => setShowConferencePicker(true)}
                 >
                   <Text style={[styles.pickerBtnText, !conference && { color: t.muted2 }]}>
-                    {conference || (competitionLevel === 'College' ? 'Select conference (required)...' : 'Select league (optional)...')}
+                    {conference || (competitionLevel === 'College' ? tr('auth.selectConferenceRequired') : tr('auth.selectLeagueOptional'))}
                   </Text>
                   <Ionicons name="chevron-down" size={14} color={t.muted} />
                 </TouchableOpacity>
@@ -336,11 +343,11 @@ export default function LoginScreen() {
             )}
 
             {/* Location */}
-            <Text style={[styles.sectionLabel, { marginTop: 8 }]}>Location</Text>
+            <Text style={[styles.sectionLabel, { marginTop: 8 }]}>{tr('auth.location')}</Text>
             <CountryField value={country} onChange={setCountry} />
             <VoiceTextInput
               style={styles.input}
-              placeholder="City / Region (optional)"
+              placeholder={tr('auth.cityRegionOptional')}
               placeholderTextColor={t.muted2}
               value={city}
               onChangeText={setCity}
@@ -350,7 +357,7 @@ export default function LoginScreen() {
 
         <VoiceTextInput
           style={[styles.input, mode === 'register' && { marginTop: 16 }, !!googleIdToken && { opacity: 0.6 }]}
-          placeholder="Email"
+          placeholder={tr('auth.email')}
           placeholderTextColor={t.muted2}
           value={email}
           onChangeText={setEmail}
@@ -359,26 +366,26 @@ export default function LoginScreen() {
           editable={!googleIdToken}
         />
         {!googleIdToken && (
-          <VoiceTextInput style={styles.input} placeholder="Password" placeholderTextColor={t.muted2}
+          <VoiceTextInput style={styles.input} placeholder={tr('auth.password')} placeholderTextColor={t.muted2}
             value={password} onChangeText={setPassword} secureTextEntry />
         )}
         {!!googleIdToken && (
           <Text style={{ color: t.muted, fontSize: 12, alignSelf: 'flex-start', marginBottom: 8 }}>
-            Signing up with Google — no password needed.
+            {tr('auth.googleNoPassword')}
           </Text>
         )}
 
         <TouchableOpacity style={styles.btn} onPress={submit} disabled={loading}>
           {loading
             ? <ActivityIndicator color={t.ctaText} />
-            : <Text style={styles.btnText}>{mode === 'login' ? 'Sign In' : 'Create Account'}</Text>}
+            : <Text style={styles.btnText}>{mode === 'login' ? tr('auth.signIn') : tr('auth.createAccount')}</Text>}
         </TouchableOpacity>
 
         {!googleIdToken && (
           <>
             <View style={styles.orRow}>
               <View style={styles.orLine} />
-              <Text style={styles.orText}>or</Text>
+              <Text style={styles.orText}>{tr('auth.or')}</Text>
               <View style={styles.orLine} />
             </View>
             <GoogleSignInButton onIdToken={handleGoogleIdToken} busy={googleBusy} color={t.accent} />
@@ -387,20 +394,24 @@ export default function LoginScreen() {
 
         <TouchableOpacity onPress={() => { if (mode === 'register') setGoogleIdToken(null); setMode(mode === 'login' ? 'register' : 'login'); }}>
           <Text style={styles.toggle}>
-            {mode === 'login' ? "Don't have an account? Register" : 'Already have an account? Sign In'}
+            {mode === 'login' ? tr('auth.noAccountRegister') : tr('auth.haveAccountSignIn')}
           </Text>
         </TouchableOpacity>
 
+        <View style={{ marginTop: 22 }}>
+          <LanguagePicker compact />
+        </View>
+
         {mode === 'login' && (
           <TouchableOpacity style={styles.roleSelectBtn} onPress={() => navigation.navigate('RoleSelect')}>
-            <Text style={styles.roleSelectText}>← Back to Role Select</Text>
+            <Text style={styles.roleSelectText}>{tr('auth.backToRoleSelect')}</Text>
           </TouchableOpacity>
         )}
       </KeyboardAwareScrollView>
 
       <PickerModal
         visible={showLevelPicker}
-        title="Competition Level"
+        title={tr('auth.competitionLevel')}
         options={COMPETITION_LEVELS}
         selected={competitionLevel}
         onSelect={(val) => { setCompetitionLevel(val); if (val !== 'College') setConference(''); }}
@@ -409,7 +420,7 @@ export default function LoginScreen() {
 
       <PickerModal
         visible={showConferencePicker}
-        title={competitionLevel === 'College' ? 'Conference' : 'League / Association'}
+        title={competitionLevel === 'College' ? tr('auth.conference') : tr('auth.leagueAssociation')}
         options={CONFERENCES_BY_LEVEL[competitionLevel] ?? []}
         selected={conference}
         onSelect={setConference}

@@ -39,10 +39,40 @@ def focus_directive(text: str | None) -> str:
     )
 
 
+# English names for the language codes the app ships. Used to tell the model
+# which language to write in ("Write the entire report in Spanish").
+LANGUAGE_NAMES = {
+    "en": "English", "es": "Spanish", "fr": "French", "de": "German",
+    "it": "Italian", "pt": "Portuguese", "nl": "Dutch", "sv": "Swedish",
+    "pl": "Polish", "ro": "Romanian", "el": "Greek", "tr": "Turkish",
+    "ru": "Russian", "uk": "Ukrainian", "sr": "Serbian", "hr": "Croatian",
+    "lt": "Lithuanian", "ka": "Georgian", "zh": "Chinese (Simplified)",
+    "ja": "Japanese", "ko": "Korean", "hi": "Hindi", "tl": "Tagalog",
+    "ar": "Arabic", "he": "Hebrew",
+}
+
+
+def language_directive(coach) -> str:
+    """A prompt directive that makes AI output come back in the coach's chosen
+    language. Empty for English (the default) so existing prompts are untouched."""
+    code = (getattr(coach, "preferred_language", None) or "en").strip().lower()
+    if code in ("", "en"):
+        return ""
+    name = LANGUAGE_NAMES.get(code, code)
+    return (
+        f"\n\nOUTPUT LANGUAGE: Write the ENTIRE output in {name}. Every section title, "
+        "bullet, table, and sentence must be in that language. Use the standard "
+        "basketball terminology a native-speaking coach would use; keep player names, "
+        "team names, and stat abbreviations (PPG, FG%, etc.) as they are."
+    )
+
+
 def system_profile_block(coach) -> str:
     """Return a PROGRAM SYSTEM & PHILOSOPHY block for the prompt, or "" if the
     coach hasn't filled anything in. Includes any imported philosophy reference
-    material so the model keeps it in mind on every generation."""
+    material so the model keeps it in mind on every generation. Also carries the
+    coach's OUTPUT LANGUAGE directive so every generation that includes this
+    block automatically answers in their language."""
     profile = getattr(coach, "system_profile", None)
     lines = []
     if isinstance(profile, dict):
@@ -67,5 +97,10 @@ def system_profile_block(coach) -> str:
             "recruits):\n"
             + reference[:4000]
         )
+
+    # Ride the language directive on this block: it is already injected into
+    # every report/eval/packet/scouting generation, so a non-English coach gets
+    # every output in their language with no per-endpoint changes.
+    block += language_directive(coach)
 
     return block

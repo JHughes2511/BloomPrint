@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import LanguagePicker from '../components/LanguagePicker';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import { useAuth } from '../context/AuthContext';
@@ -114,7 +115,10 @@ export default function OnboardingScreen() {
     <ScreenBackground>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.header}>
-          <Text style={styles.stepLabel}>Step {page + 1} of {totalPages}</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={styles.stepLabel}>Step {page + 1} of {totalPages}</Text>
+            <LanguagePicker compact onChanged={(code) => { updateProfile({ preferred_language: code } as any).catch(() => {}); }} />
+          </View>
           <View style={styles.progressTrack}>
             <View style={[styles.progressFill, { width: `${((page + 1) / totalPages) * 100}%` }]} />
           </View>

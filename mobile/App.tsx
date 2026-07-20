@@ -9,6 +9,9 @@ import { useNavigation } from '@react-navigation/native';
 
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { PlayerAuthProvider, usePlayerAuth } from './src/context/PlayerAuthContext';
+import './src/i18n';
+import { initAppLanguage } from './src/i18n';
+import { useTranslation } from 'react-i18next';
 
 // Coach screens
 import LoginScreen from './src/screens/LoginScreen';
@@ -131,6 +134,7 @@ function RecentStack() {
 
 function AppTabs() {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -154,11 +158,11 @@ function AppTabs() {
         },
       })}
     >
-      <Tab.Screen name="HomeTab"     component={HomeStack}     options={{ title: 'Home' }} />
-      <Tab.Screen name="TeamTab"     component={TeamStack}     options={{ title: 'Team Eval' }} />
-      <Tab.Screen name="TeamEvalTab" component={TeamEvalStack} options={{ title: 'Team Grade' }} />
-      <Tab.Screen name="RosterTab"   component={RosterStack}   options={{ title: 'Roster' }} />
-      <Tab.Screen name="RecentTab"   component={RecentStack}   options={{ title: 'Recent' }} />
+      <Tab.Screen name="HomeTab"     component={HomeStack}     options={{ title: tr('common.tabs.home') }} />
+      <Tab.Screen name="TeamTab"     component={TeamStack}     options={{ title: tr('common.tabs.teamEval') }} />
+      <Tab.Screen name="TeamEvalTab" component={TeamEvalStack} options={{ title: tr('common.tabs.teamGrade') }} />
+      <Tab.Screen name="RosterTab"   component={RosterStack}   options={{ title: tr('common.tabs.roster') }} />
+      <Tab.Screen name="RecentTab"   component={RecentStack}   options={{ title: tr('common.tabs.recent') }} />
     </Tab.Navigator>
   );
 }
@@ -323,8 +327,10 @@ export default function App() {
     HankenGrotesk_400Regular, HankenGrotesk_500Medium, HankenGrotesk_600SemiBold,
     HankenGrotesk_700Bold, HankenGrotesk_800ExtraBold, HankenGrotesk_900Black,
   });
+  const [langReady, setLangReady] = React.useState(false);
+  React.useEffect(() => { initAppLanguage().finally(() => setLangReady(true)); }, []);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !langReady) {
     return <View style={{ flex: 1, backgroundColor: '#0C2331', alignItems: 'center', justifyContent: 'center' }} />;
   }
 
