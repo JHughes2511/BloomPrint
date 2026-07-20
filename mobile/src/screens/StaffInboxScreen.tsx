@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -17,19 +18,23 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 
-const REPORT_TYPE_LABELS: Record<string, string> = {
-  eval: 'Player Eval',
-  game: 'Game Report',
-  game_session: 'Live Game',
-  team_training: 'Team Training',
-  team_report: 'Team Report',
-  training: 'Training Program',
+// Maps staff-share report_type keys to i18n label keys.
+const REPORT_TYPE_LABEL_KEYS: Record<string, string> = {
+  eval: 'reportTypes.player_eval',
+  game: 'reportTypes.game_report',
+  game_session: 'staffHub.liveGame',
+  team_training: 'reportTypes.team_training',
+  team_report: 'staffHub.teamReport',
+  training: 'reportTypes.training_program',
 };
 
 type TabKey = 'inbox' | 'team_games' | 'my_teams';
 
 export default function StaffInboxScreen() {
+  const { t: tr } = useTranslation();
   const { t } = useTheme();
+  const reportTypeLabel = (rt: string): string =>
+    REPORT_TYPE_LABEL_KEYS[rt] ? tr(REPORT_TYPE_LABEL_KEYS[rt]) : rt;
   const { coach: me } = useAuth();
   const coachId = me?.id;
   const styles = makeStyles(t);
@@ -109,7 +114,7 @@ export default function StaffInboxScreen() {
       await teamsAPI.create({ name: newTeamName.trim() });
       setShowCreateTeam(false); setNewTeamName('');
       await loadMyTeams();
-    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not create the team.'); }
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.createTeamError')); }
     finally { setCreatingTeam(false); }
   };
 
@@ -118,10 +123,10 @@ export default function StaffInboxScreen() {
     try {
       const members = await teamStaffAPI.members(team.id);
       const others = (members ?? []).filter((m: any) => m.id !== coachId);
-      if (others.length === 0) { Alert.alert('No other members', 'This group has no other staff to message yet — invite someone first.'); return; }
+      if (others.length === 0) { Alert.alert(tr('staffHub.noOtherMembersTitle'), tr('staffHub.noOtherMembersMsg')); return; }
       const conv = await staffMessagesAPI.create({ member_ids: others.map((m: any) => m.id), is_group: others.length > 1, title: team.name });
       navigation.navigate('Conversation', { conversationId: conv.id, title: conv.title || team.name });
-    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not open the group message.'); }
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.openGroupError')); }
     finally { setMessagingTeam(null); }
   };
 
@@ -132,7 +137,7 @@ export default function StaffInboxScreen() {
       await teamStaffAPI.createSubteam(subFor.id, subName.trim());
       setSubFor(null); setSubName('');
       await loadMyTeams();
-    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not create the sub-team.'); }
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.createSubteamError')); }
     finally { setCreatingSub(false); }
   };
 
@@ -148,12 +153,12 @@ export default function StaffInboxScreen() {
     setInviting(true);
     try {
       const res = await teamStaffAPI.invite(inviteFor.id, data);
-      if (res.status === 'invited') Alert.alert('Invite sent', `${res.name} was invited and will approve or reject it.`);
-      else Alert.alert('Email invite', res.email_sent
-        ? `We emailed ${res.email} an invite to sign up and join.`
-        : `No account for ${res.email} yet. Share this invite code so they can sign up: ${res.code}`);
+      if (res.status === 'invited') Alert.alert(tr('staffHub.inviteSentTitle'), tr('staffHub.inviteSentMsg', { name: res.name }));
+      else Alert.alert(tr('staffHub.emailInviteTitle'), res.email_sent
+        ? tr('staffHub.emailInviteSentMsg', { email: res.email })
+        : tr('staffHub.emailInviteCodeMsg', { email: res.email, code: res.code }));
       setInviteFor(null); setInviteSearch(''); setInviteResults([]);
-    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not invite.'); }
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.inviteError')); }
     finally { setInviting(false); }
   };
 
@@ -190,7 +195,7 @@ export default function StaffInboxScreen() {
       setSelectedStaff([]); setStaffSearch(''); setStaffResults([]);
       navigation.navigate('Conversation', { conversationId: conv.id, title: conv.title });
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not start the conversation.');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.startConvError'));
     } finally { setCreating(false); }
   };
 
@@ -229,7 +234,7 @@ export default function StaffInboxScreen() {
       setComments(prev => [...prev, c]);
       setCommentText('');
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not add comment');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.addCommentError'));
     } finally {
       setSubmittingComment(false);
     }
@@ -243,9 +248,9 @@ export default function StaffInboxScreen() {
       setActiveItem({ ...activeItem, regenerated_text: updated.regenerated_text });
       setRegenerateFeedback('');
       setView('regenerated');
-      Alert.alert('Updated', 'Report regenerated with your feedback.');
+      Alert.alert(tr('staffHub.updatedTitle'), tr('staffHub.regeneratedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.regenerateError'));
     } finally {
       setRegenerating(false);
     }
@@ -268,19 +273,19 @@ export default function StaffInboxScreen() {
       await loadMyTeams();
       setSearchResults([]);
       setTeamSearch('');
-      Alert.alert('Joined', 'You are now linked to this team. All their games are visible to you.');
+      Alert.alert(tr('staffHub.joinedTitle'), tr('staffHub.joinedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not join team');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.joinTeamError'));
     } finally {
       setJoining(null);
     }
   };
 
   const leaveTeam = async (teamId: number) => {
-    Alert.alert('Leave Team', 'You will no longer see this team\'s games or receive their notifications.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(tr('staffHub.leaveTeamTitle'), tr('staffHub.leaveTeamMsg'), [
+      { text: tr('common.cancel'), style: 'cancel' },
       {
-        text: 'Leave', style: 'destructive', onPress: async () => {
+        text: tr('staffHub.leave'), style: 'destructive', onPress: async () => {
           setLeaving(teamId);
           try {
             await teamStaffAPI.leave(teamId);
@@ -290,7 +295,7 @@ export default function StaffInboxScreen() {
               setTeamGames([]);
             }
           } catch (e: any) {
-            Alert.alert('Error', e?.response?.data?.detail ?? 'Could not leave team');
+            Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.leaveTeamError'));
           } finally {
             setLeaving(null);
           }
@@ -305,7 +310,7 @@ export default function StaffInboxScreen() {
     const convFiltered = !q ? conversations : conversations.filter((c: any) =>
       (c.title ?? '').toLowerCase().includes(q) || (c.last_text ?? '').toLowerCase().includes(q));
     const itemsFiltered = !q ? items : items.filter((it: any) =>
-      (REPORT_TYPE_LABELS[it.report_type] ?? it.report_type ?? '').toLowerCase().includes(q) ||
+      (reportTypeLabel(it.report_type ?? '') ?? '').toLowerCase().includes(q) ||
       (it.sender_name ?? '').toLowerCase().includes(q));
     return (
       <FlatList
@@ -320,7 +325,7 @@ export default function StaffInboxScreen() {
               <Ionicons name="search" size={16} color={t.muted} />
               <TextInput
                 style={styles.searchBarInput}
-                placeholder="Search messages & reports..."
+                placeholder={tr('staffHub.searchInboxPlaceholder')}
                 placeholderTextColor={t.muted2}
                 value={inboxSearch}
                 onChangeText={setInboxSearch}
@@ -332,14 +337,14 @@ export default function StaffInboxScreen() {
               )}
             </View>
             <View style={styles.sectionRow}>
-              <Text style={styles.sectionLabel}>Messages</Text>
+              <Text style={styles.sectionLabel}>{tr('staffHub.messages')}</Text>
               <TouchableOpacity style={styles.newMsgBtn} onPress={() => setShowCompose(true)}>
                 <Ionicons name="create-outline" size={15} color={t.ctaText} />
-                <Text style={styles.newMsgText}>New</Text>
+                <Text style={styles.newMsgText}>{tr('staffHub.new')}</Text>
               </TouchableOpacity>
             </View>
             {convFiltered.length === 0 && (
-              <Text style={[styles.cardSub, { paddingHorizontal: 20, marginBottom: 6 }]}>{q ? 'No matching conversations.' : 'No conversations yet — tap New to message a staff member.'}</Text>
+              <Text style={[styles.cardSub, { paddingHorizontal: 20, marginBottom: 6 }]}>{q ? tr('staffHub.noMatchingConversations') : tr('staffHub.noConversationsYet')}</Text>
             )}
             {convFiltered.map(c => (
               <TouchableOpacity key={`conv-${c.id}`} style={styles.card} onPress={() => navigation.navigate('Conversation', { conversationId: c.id, title: c.title })}>
@@ -348,20 +353,20 @@ export default function StaffInboxScreen() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.cardTitle} numberOfLines={1}>{c.title}</Text>
-                  <Text style={styles.cardSub} numberOfLines={1}>{c.last_text || 'No messages yet'}</Text>
+                  <Text style={styles.cardSub} numberOfLines={1}>{c.last_text || tr('staffHub.noMessagesYet')}</Text>
                 </View>
                 {c.unread > 0 && <View style={styles.unreadDot}><Text style={styles.unreadDotText}>{c.unread}</Text></View>}
                 <Ionicons name="chevron-forward" size={14} color={t.muted2} />
               </TouchableOpacity>
             ))}
-            {itemsFiltered.length > 0 && <Text style={[styles.sectionLabel, { marginTop: 14, paddingHorizontal: 20 }]}>Shared Reports</Text>}
+            {itemsFiltered.length > 0 && <Text style={[styles.sectionLabel, { marginTop: 14, paddingHorizontal: 20 }]}>{tr('staffHub.sharedReports')}</Text>}
           </View>
         }
         ListEmptyComponent={
           items.length === 0 ? null : (
             <View style={styles.center}>
               <Ionicons name="mail-outline" size={48} color={t.muted2} />
-              <Text style={styles.emptyText}>{inboxSearch.trim() ? 'No matching reports.' : 'No reports shared with you yet.'}</Text>
+              <Text style={styles.emptyText}>{inboxSearch.trim() ? tr('staffHub.noMatchingReports') : tr('staffHub.noSharedReports')}</Text>
             </View>
           )
         }
@@ -370,7 +375,7 @@ export default function StaffInboxScreen() {
           const iconName = item.report_type === 'training' ? 'barbell-outline' :
                            item.report_type === 'team_report' || item.report_type === 'team_training' ? 'people-outline' :
                            item.report_type === 'game' || item.report_type === 'game_session' ? 'clipboard-outline' : 'document-text-outline';
-          const typeLabel = REPORT_TYPE_LABELS[item.report_type] ?? item.report_type;
+          const typeLabel = reportTypeLabel(item.report_type);
           const title = (item.subject_name && String(item.subject_name).trim()) || typeLabel;
           const chips: { icon: string; n: number; color: string }[] = [
             { icon: 'create-outline', n: item.correction_count ?? 0, color: t.accent },
@@ -384,7 +389,7 @@ export default function StaffInboxScreen() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.cardTitle} numberOfLines={1}>{title}</Text>
-                <Text style={styles.cardSub}>{typeLabel} · From {item.sender_name}</Text>
+                <Text style={styles.cardSub}>{tr('staffHub.fromSender', { type: typeLabel, name: item.sender_name })}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3, flexWrap: 'wrap' }}>
                   <Text style={styles.cardDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
                   {chips.map((c, i) => (
@@ -408,7 +413,7 @@ export default function StaffInboxScreen() {
       return (
         <View style={styles.center}>
           <Ionicons name="people-outline" size={48} color={t.muted2} />
-          <Text style={styles.emptyText}>Join a team in the My Teams tab to see their games.</Text>
+          <Text style={styles.emptyText}>{tr('staffHub.joinTeamPrompt')}</Text>
         </View>
       );
     }
@@ -431,7 +436,7 @@ export default function StaffInboxScreen() {
 
         {!selectedTeam && (
           <View style={styles.center}>
-            <Text style={styles.emptyText}>Select a team above to see their games.</Text>
+            <Text style={styles.emptyText}>{tr('staffHub.selectTeamPrompt')}</Text>
           </View>
         )}
 
@@ -444,7 +449,7 @@ export default function StaffInboxScreen() {
             <Ionicons name="search" size={16} color={t.muted} />
             <TextInput
               style={styles.searchBarInput}
-              placeholder="Search games..."
+              placeholder={tr('staffHub.searchGamesPlaceholder')}
               placeholderTextColor={t.muted2}
               value={gamesSearch}
               onChangeText={setGamesSearch}
@@ -460,7 +465,7 @@ export default function StaffInboxScreen() {
         {selectedTeam && !teamGamesLoading && teamGames.length === 0 && (
           <View style={styles.center}>
             <Ionicons name="basketball-outline" size={48} color={t.muted2} />
-            <Text style={styles.emptyText}>No games yet for {selectedTeam.name}.</Text>
+            <Text style={styles.emptyText}>{tr('staffHub.noGamesYet', { team: selectedTeam.name })}</Text>
           </View>
         )}
 
@@ -480,7 +485,7 @@ export default function StaffInboxScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.cardTitle}>{game.title}</Text>
-              <Text style={styles.cardSub}>{game.kind === 'session' ? 'Live Game Stats' : 'Game Report'}</Text>
+              <Text style={styles.cardSub}>{game.kind === 'session' ? tr('staffHub.liveGameStats') : tr('reportTypes.game_report')}</Text>
               {game.date && <Text style={styles.cardDate}>{game.date}</Text>}
             </View>
             <Ionicons name="chevron-forward" size={14} color={t.muted2} />
@@ -495,11 +500,11 @@ export default function StaffInboxScreen() {
     return (
       <KeyboardAwareScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}>
         {/* Search to join */}
-        <Text style={styles.sectionLabel}>FIND A TEAM TO JOIN</Text>
+        <Text style={styles.sectionLabel}>{tr('staffHub.findTeamLabel')}</Text>
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
           <TextInput
             style={[styles.input, { flex: 1, marginBottom: 0 }]}
-            placeholder="Search by team name..."
+            placeholder={tr('staffHub.searchTeamPlaceholder')}
             placeholderTextColor={t.muted2}
             value={teamSearch}
             onChangeText={setTeamSearch}
@@ -513,7 +518,7 @@ export default function StaffInboxScreen() {
 
         <TouchableOpacity style={styles.createTeamBtn} onPress={() => { setNewTeamName(''); setShowCreateTeam(true); }}>
           <Ionicons name="add-circle-outline" size={18} color={t.accent} />
-          <Text style={styles.createTeamText}>Create a new team</Text>
+          <Text style={styles.createTeamText}>{tr('staffHub.createNewTeam')}</Text>
         </TouchableOpacity>
 
         {searchResults.map((team: any) => {
@@ -522,12 +527,12 @@ export default function StaffInboxScreen() {
             <View key={team.id} style={[styles.card, { marginHorizontal: 0 }]}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.cardTitle}>{team.name}</Text>
-                {team.coach_name && <Text style={styles.cardSub}>Head Coach: {team.coach_name}</Text>}
+                {team.coach_name && <Text style={styles.cardSub}>{tr('staffHub.headCoach', { name: team.coach_name })}</Text>}
                 {team.competition_level && <Text style={styles.cardDate}>{team.competition_level}</Text>}
               </View>
               {isMember ? (
                 <View style={{ backgroundColor: t.positiveSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 }}>
-                  <Text style={{ color: t.positive, fontSize: 12, fontFamily: fonts[700] }}>Joined</Text>
+                  <Text style={{ color: t.positive, fontSize: 12, fontFamily: fonts[700] }}>{tr('staffHub.joinedBadge')}</Text>
                 </View>
               ) : (
                 <TouchableOpacity
@@ -537,7 +542,7 @@ export default function StaffInboxScreen() {
                 >
                   {joining === team.id
                     ? <ActivityIndicator color={t.ctaText} size="small" />
-                    : <Text style={{ color: t.ctaText, fontSize: 13, fontFamily: fonts[700] }}>Join</Text>}
+                    : <Text style={{ color: t.ctaText, fontSize: 13, fontFamily: fonts[700] }}>{tr('staffHub.join')}</Text>}
                 </TouchableOpacity>
               )}
             </View>
@@ -547,7 +552,7 @@ export default function StaffInboxScreen() {
         {/* My current teams — nested sub-team breakout */}
         {myTeams.length > 0 && (
           <>
-            <Text style={[styles.sectionLabel, { marginTop: 20 }]}>MY TEAMS</Text>
+            <Text style={[styles.sectionLabel, { marginTop: 20 }]}>{tr('staffHub.myTeamsLabel')}</Text>
             {teamsLoading ? <ActivityIndicator color={t.accent} /> : (() => {
               const ids = new Set(myTeams.map((tm: any) => tm.id));
               const byParent: Record<number, any[]> = {};
@@ -564,7 +569,7 @@ export default function StaffInboxScreen() {
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.cardTitle}>{tm.name}</Text>
-                      <Text style={styles.cardSub}>{tm.member_count ?? 1} member{(tm.member_count ?? 1) === 1 ? '' : 's'}{tm.is_owner ? ' · You own this' : tm.coach_name ? ` · ${tm.coach_name}` : ''}</Text>
+                      <Text style={styles.cardSub}>{(tm.member_count ?? 1) === 1 ? tr('staffHub.memberCountOne', { count: tm.member_count ?? 1 }) : tr('staffHub.memberCountOther', { count: tm.member_count ?? 1 })}{tm.is_owner ? ` · ${tr('staffHub.ownedByYou')}` : tm.coach_name ? ` · ${tm.coach_name}` : ''}</Text>
                     </View>
                     {kids.length > 0 && (
                       <TouchableOpacity onPress={() => setCollapsedTeams(prev => ({ ...prev, [tm.id]: !prev[tm.id] }))} style={{ padding: 4 }}>
@@ -577,17 +582,17 @@ export default function StaffInboxScreen() {
                   </View>
                   <View style={{ flexDirection: 'row', gap: 8, marginLeft: depth * 16, marginBottom: 8, flexWrap: 'wrap' }}>
                     <TouchableOpacity style={styles.teamActBtn} onPress={() => messageGroup(tm)} disabled={messagingTeam === tm.id}>
-                      {messagingTeam === tm.id ? <ActivityIndicator color={t.accent} size="small" /> : <><Ionicons name="chatbubble-ellipses-outline" size={14} color={t.accent} /><Text style={styles.teamActText}>Message</Text></>}
+                      {messagingTeam === tm.id ? <ActivityIndicator color={t.accent} size="small" /> : <><Ionicons name="chatbubble-ellipses-outline" size={14} color={t.accent} /><Text style={styles.teamActText}>{tr('staffHub.message')}</Text></>}
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.teamActBtn} onPress={() => { setSubFor(tm); setSubName(''); }}>
-                      <Ionicons name="add" size={14} color={t.accent} /><Text style={styles.teamActText}>Sub-team</Text>
+                      <Ionicons name="add" size={14} color={t.accent} /><Text style={styles.teamActText}>{tr('staffHub.subTeam')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.teamActBtn} onPress={() => { setInviteFor(tm); setInviteSearch(''); setInviteResults([]); }}>
-                      <Ionicons name="person-add-outline" size={14} color={t.accent} /><Text style={styles.teamActText}>Invite</Text>
+                      <Ionicons name="person-add-outline" size={14} color={t.accent} /><Text style={styles.teamActText}>{tr('staffHub.invite')}</Text>
                     </TouchableOpacity>
                     {!tm.is_owner && (
                       <TouchableOpacity style={[styles.teamActBtn, { borderColor: t.negative }]} onPress={() => leaveTeam(tm.id)} disabled={leaving === tm.id}>
-                        {leaving === tm.id ? <ActivityIndicator color={t.negative} size="small" /> : <Text style={[styles.teamActText, { color: t.negative }]}>Leave</Text>}
+                        {leaving === tm.id ? <ActivityIndicator color={t.negative} size="small" /> : <Text style={[styles.teamActText, { color: t.negative }]}>{tr('staffHub.leave')}</Text>}
                       </TouchableOpacity>
                     )}
                   </View>
@@ -603,7 +608,7 @@ export default function StaffInboxScreen() {
         {myTeams.length === 0 && searchResults.length === 0 && !teamsLoading && (
           <View style={styles.center}>
             <Ionicons name="people-outline" size={48} color={t.muted2} />
-            <Text style={styles.emptyText}>Search for a team above to get started.</Text>
+            <Text style={styles.emptyText}>{tr('staffHub.searchToGetStarted')}</Text>
           </View>
         )}
       </KeyboardAwareScrollView>
@@ -617,15 +622,15 @@ export default function StaffInboxScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
-        <Text style={styles.title}>Staff Hub</Text>
+        <Text style={styles.title}>{tr('staffHub.title')}</Text>
       </View>
 
       {/* Tab bar */}
       <View style={styles.tabBar}>
         {([
-          { key: 'inbox', label: 'Inbox', icon: 'mail-outline' },
-          { key: 'team_games', label: 'Team Games', icon: 'basketball-outline' },
-          { key: 'my_teams', label: 'My Teams', icon: 'people-outline' },
+          { key: 'inbox', label: tr('staffHub.tabInbox'), icon: 'mail-outline' },
+          { key: 'team_games', label: tr('staffHub.tabTeamGames'), icon: 'basketball-outline' },
+          { key: 'my_teams', label: tr('staffHub.tabMyTeams'), icon: 'people-outline' },
         ] as { key: TabKey; label: string; icon: string }[]).map(tm => (
           <TouchableOpacity
             key={tm.key}

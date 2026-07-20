@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -25,20 +26,6 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
-
-const TYPE_LABELS: Record<string, string> = {
-  player_eval: 'Player Eval',
-  film_breakdown: 'Film Breakdown',
-  scouting_report: 'Scouting Report',
-  coaching_report: 'Coaching Report',
-  game_analysis: 'Game Analysis',
-  training_program: 'Training Program',
-  recruitment_profile: 'Recruitment',
-  position_analysis: 'Position Analysis',
-  box_score: 'Box Score',
-  team_training: 'Team Training',
-  game_situational: 'Game Situational',
-};
 
 type ReportItem = {
   id: number | string;
@@ -71,15 +58,7 @@ type ModalReport = {
   evalId?: number;
 };
 
-const FILTER_CATS = [
-  { key: 'all', label: 'All' },
-  { key: 'eval', label: 'Player Evals' },
-  { key: 'matchup', label: 'Match Ups' },
-  { key: 'team', label: 'Team Reports' },
-  { key: 'game', label: 'Game Reports' },
-  { key: 'scout', label: 'Scout' },
-  { key: 'training', label: 'Training' },
-];
+const FILTER_CATS = ['all', 'eval', 'matchup', 'team', 'game', 'scout', 'training'];
 
 type StaffShareContext = {
   report_type: string;
@@ -89,6 +68,7 @@ type StaffShareContext = {
 
 export default function RecentScreen() {
   const { coach } = useAuth();
+  const { t: tr } = useTranslation();
   const { t } = useTheme();
   const styles = makeStyles(t);
   const sendStyles = makeSendStyles(t);
@@ -157,9 +137,9 @@ export default function RecentScreen() {
       }
       setTeamCorrectText('');
       await loadCorrections(activeModal);
-      Alert.alert('Saved', 'Correction saved. Apply & Regenerate when ready.');
+      Alert.alert(tr('recent.correctionSavedTitle'), tr('recent.correctionSavedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save correction');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('recent.saveCorrectionError'));
     } finally {
       setSavingCorrect(false);
     }
@@ -243,10 +223,10 @@ export default function RecentScreen() {
         allow_regenerate: staffAllowRegen,
         frozen_text: frozenText,
       });
-      Alert.alert('Shared!', `${staffShareCtx.label} shared with ${target.name}.`);
+      Alert.alert(tr('recent.sharedTitle'), tr('recent.sharedMsg', { label: staffShareCtx.label, name: target.name }));
       closeStaffShareModal();
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('recent.shareError'));
     } finally {
       setSendingToStaff(false);
     }
@@ -276,7 +256,7 @@ export default function RecentScreen() {
       const teamItems: ReportItem[] = teamReports.map((tr: any) => ({
         id: tr.id,
         kind: 'team',
-        player_name: 'Team Report',
+        player_name: tr('recent.teamReport'),
         output_type: tr.output_type,
         overall_grade: null,
         created_at: tr.created_at,
@@ -286,7 +266,7 @@ export default function RecentScreen() {
         id: `gv-${v.id}`,
         report_id: v.report_id,
         kind: 'game',
-        player_name: v.title || 'Game Report',
+        player_name: v.title || tr('recent.gameReport'),
         output_type: v.output_type,
         overall_grade: null,
         created_at: v.updated_at || v.created_at,
@@ -295,7 +275,7 @@ export default function RecentScreen() {
       const trainingItems: ReportItem[] = trainingSessions.map((ts: any) => ({
         id: ts.id,
         kind: 'training' as const,
-        player_name: ts.player_name || `Player #${ts.player_id}`,
+        player_name: ts.player_name || tr('recent.playerNumber', { id: ts.player_id }),
         output_type: 'training_program',
         overall_grade: null,
         created_at: ts.created_at,
@@ -311,7 +291,7 @@ export default function RecentScreen() {
         .map((g: any) => ({
           id: g.id,
           kind: 'scout' as const,
-          player_name: g.opponent_name ? `vs ${g.opponent_name}` : (g.title || 'Scout Report'),
+          player_name: g.opponent_name ? tr('recent.vsOpponent', { name: g.opponent_name }) : (g.title || tr('recent.scoutReport')),
           output_type: 'scouting_report',
           overall_grade: null,
           // Sort by when the scout was generated/updated so a freshly created
@@ -326,7 +306,7 @@ export default function RecentScreen() {
         .map((g: any) => ({
           id: g.id,
           kind: 'gamereport' as const,
-          player_name: g.opponent_name ? `vs ${g.opponent_name}` : (g.title || 'Game Report'),
+          player_name: g.opponent_name ? tr('recent.vsOpponent', { name: g.opponent_name }) : (g.title || tr('recent.gameReport')),
           output_type: 'game_report',
           overall_grade: null,
           created_at: g.game_report_updated_at || g.date || g.created_at,
@@ -351,7 +331,7 @@ export default function RecentScreen() {
         return {
           id: sr.report_id,
           kind,
-          player_name: sr.subject_name || 'Shared report',
+          player_name: sr.subject_name || tr('recent.sharedReportFallback'),
           output_type: sr.output_type ?? 'coaching_report',
           overall_grade: sr.overall_grade ?? null,
           created_at: sr.created_at,
@@ -360,7 +340,7 @@ export default function RecentScreen() {
           shared: true,
           shared_id: sr.id,
           allow_regenerate: !!sr.allow_regenerate,
-          sender_name: sr.sender_name || 'A coach',
+          sender_name: sr.sender_name || tr('recent.senderFallback'),
           share_report_type: sr.report_type,
           raw: sr,
         } as ReportItem;
@@ -379,7 +359,7 @@ export default function RecentScreen() {
       [...evalItems, ...teamItems, ...gameItems, ...trainingItems, ...scoutItems, ...gameReportItems].forEach((it: ReportItem) => {
         const sr = updatedFrom[`${it.kind}:${it.id}`];
         if (sr) {
-          it.updated_from = sr.sender_name || 'a coach';
+          it.updated_from = sr.sender_name || tr('recent.senderFallbackLower');
           it.raw = sr;
           it.shared_id = sr.id;
           it.allow_regenerate = !!sr.allow_regenerate;
@@ -407,10 +387,10 @@ export default function RecentScreen() {
     if (filter !== 'all' && !matchesFilter) return false;
     if (!searchTerm) return true;
     const kindLabel =
-      item.kind === 'game' ? 'Game Report Packet' :
-      item.kind === 'scout' ? 'Scout Report' :
-      item.kind === 'training' ? 'Training Program' :
-      (TYPE_LABELS[item.output_type] ?? outputTypeLabel(item.output_type));
+      item.kind === 'game' ? tr('recent.gameReportPacket') :
+      item.kind === 'scout' ? tr('recent.scoutReport') :
+      item.kind === 'training' ? tr('reportTypes.training_program') :
+      outputTypeLabel(item.output_type);
     const haystack = [
       item.player_name ?? '',
       kindLabel,
@@ -441,14 +421,14 @@ export default function RecentScreen() {
     }
     if (item.kind === 'scout') {
       setGameReportModal({
-        title: 'Scouting Report', subject: item.player_name, text: item.report_text ?? '',
+        title: tr('reportTypes.scouting_report'), subject: item.player_name, text: item.report_text ?? '',
         reportType: 'game_session', reportId: item.id, outputType: 'scouting_report',
       });
       return;
     }
     if (item.kind === 'gamereport') {
       setGameReportModal({
-        title: 'Game Report', subject: item.player_name, text: item.report_text ?? '',
+        title: tr('reportTypes.game_report'), subject: item.player_name, text: item.report_text ?? '',
         reportType: 'game_report', reportId: item.id, outputType: 'game_report',
       });
       return;
@@ -492,9 +472,9 @@ export default function RecentScreen() {
     if (item.shared) return; // a report shared with me isn't mine to delete
     // Packet reports (and versions) are managed from Team Eval, not deletable here.
     if (item.kind === 'training' || item.kind === 'scout' || item.kind === 'gamereport' || item.kind === 'game') return;
-    Alert.alert('Delete Report', 'Permanently delete this report?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: async () => {
+    Alert.alert(tr('recent.deleteReportTitle'), tr('recent.deleteReportMsg'), [
+      { text: tr('common.cancel'), style: 'cancel' },
+      { text: tr('common.delete'), style: 'destructive', onPress: async () => {
         try {
           if (item.kind === 'eval') {
             await evalsAPI.delete(item.id as number);
@@ -505,7 +485,7 @@ export default function RecentScreen() {
           }
           load();
         } catch (e: any) {
-          Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete');
+          Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('recent.deleteError'));
         }
       }},
     ]);
@@ -515,7 +495,7 @@ export default function RecentScreen() {
     if (!activeModal?.text) return;
     setExporting(true);
     try {
-      const title = TYPE_LABELS[activeModal.outputType] ?? outputTypeLabel(activeModal.outputType);
+      const title = outputTypeLabel(activeModal.outputType);
       const html = `<html><head><style>
         body{font-family:Georgia,serif;padding:40px;color:#111;max-width:800px;margin:auto}
         h1{font-size:22px;border-bottom:2px solid #2563eb;padding-bottom:8px}
@@ -532,9 +512,9 @@ export default function RecentScreen() {
       const fileName = `${safeFileName(title)}.pdf`;
       const dest = FileSystem.cacheDirectory + fileName;
       await FileSystem.copyAsync({ from: uri, to: dest });
-      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: 'Share Report' });
+      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: tr('recent.shareReportDialog') });
     } catch (e: any) {
-      Alert.alert('Export Error', e?.message ?? 'Could not export');
+      Alert.alert(tr('recent.exportErrorTitle'), e?.message ?? tr('recent.exportErrorMsg'));
     } finally {
       setExporting(false);
     }
@@ -543,7 +523,7 @@ export default function RecentScreen() {
   const printModalReport = async () => {
     if (!activeModal?.text) return;
     try {
-      const title = TYPE_LABELS[activeModal.outputType] ?? outputTypeLabel(activeModal.outputType);
+      const title = outputTypeLabel(activeModal.outputType);
       const html = `<html><head><style>
         body{font-family:Georgia,serif;padding:40px;color:#111}
         h1{font-size:22px}h2{font-size:17px;color:#1e40af}
@@ -554,7 +534,7 @@ export default function RecentScreen() {
       </body></html>`;
       await Print.printAsync({ html });
     } catch (e: any) {
-      Alert.alert('Print Error', e?.message ?? 'Could not print');
+      Alert.alert(tr('recent.printErrorTitle'), e?.message ?? tr('recent.printErrorMsg'));
     }
   };
 
@@ -577,9 +557,9 @@ export default function RecentScreen() {
       const { uri } = await Print.printToFileAsync({ html: buildReportHtmlDoc(title, text, subject) });
       const dest = FileSystem.cacheDirectory + `${safeFileName(title)}.pdf`;
       await FileSystem.copyAsync({ from: uri, to: dest });
-      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: 'Share Report' });
+      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: tr('recent.shareReportDialog') });
     } catch (e: any) {
-      Alert.alert('Export Error', e?.message ?? 'Could not export');
+      Alert.alert(tr('recent.exportErrorTitle'), e?.message ?? tr('recent.exportErrorMsg'));
     } finally { setExporting(false); }
   };
 
@@ -588,7 +568,7 @@ export default function RecentScreen() {
     try {
       await Print.printAsync({ html: buildReportHtmlDoc(title, text, subject) });
     } catch (e: any) {
-      Alert.alert('Print Error', e?.message ?? 'Could not print');
+      Alert.alert(tr('recent.printErrorTitle'), e?.message ?? tr('recent.printErrorMsg'));
     }
   };
 
@@ -637,9 +617,9 @@ export default function RecentScreen() {
       setSendSearch('');
       setSendResults([]);
       setModalView('report');
-      Alert.alert('Sent!', `Report sent to ${target.name}.`);
+      Alert.alert(tr('recent.sentTitle'), tr('recent.sentMsg', { name: target.name }));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not send report');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('recent.sendError'));
     } finally {
       setSending(false);
     }
@@ -650,12 +630,12 @@ export default function RecentScreen() {
   const applyCorrection = async () => {
     if (!activeModal) return;
     if (activeModal.kind === 'training') {
-      Alert.alert('Info', 'To regenerate training with feedback, use the Player Profile screen.');
+      Alert.alert(tr('recent.infoTitle'), tr('recent.trainingRegenInfoMsg'));
       return;
     }
     const pending = teamCorrectText.trim();
     if (!pending && corrections.filter(c => !c.applied).length === 0) {
-      Alert.alert('Nothing to apply', 'Add a correction first.');
+      Alert.alert(tr('recent.nothingToApplyTitle'), tr('recent.nothingToApplyMsg'));
       return;
     }
     setApplyingCorrect(true);
@@ -680,9 +660,9 @@ export default function RecentScreen() {
       setTeamCorrectText('');
       await loadCorrections(activeModal);
       setModalView('report');
-      Alert.alert('Updated', 'Report regenerated with your corrections.');
+      Alert.alert(tr('recent.updatedTitle'), tr('recent.regeneratedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not apply correction');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('recent.applyCorrectionError'));
     } finally {
       setApplyingCorrect(false);
     }
@@ -696,7 +676,7 @@ export default function RecentScreen() {
     <ScreenBackground>
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Recent Reports</Text>
+        <Text style={styles.title}>{tr('recent.title')}</Text>
         <TouchableOpacity
           style={styles.searchIconBtn}
           onPress={() => {
@@ -715,7 +695,7 @@ export default function RecentScreen() {
           <Ionicons name="search" size={18} color={t.muted2} />
           <TextInput
             style={styles.searchBarInput}
-            placeholder="Search reports..."
+            placeholder={tr('recent.searchPlaceholder')}
             placeholderTextColor={t.muted2}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -734,12 +714,12 @@ export default function RecentScreen() {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={{ paddingHorizontal: 16, paddingRight: 24, gap: 8, alignItems: 'center' }}>
         {FILTER_CATS.map(cat => (
           <TouchableOpacity
-            key={cat.key}
-            style={[styles.filterChip, filter === cat.key && styles.filterChipActive]}
-            onPress={() => setFilter(cat.key)}
+            key={cat}
+            style={[styles.filterChip, filter === cat && styles.filterChipActive]}
+            onPress={() => setFilter(cat)}
           >
-            <Text style={[styles.filterChipText, filter === cat.key && styles.filterChipTextActive]}>
-              {cat.label}
+            <Text style={[styles.filterChipText, filter === cat && styles.filterChipTextActive]}>
+              {tr(`recent.filters.${cat}`)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -753,7 +733,7 @@ export default function RecentScreen() {
         ListEmptyComponent={
           <View style={styles.center}>
             <Ionicons name="document-text-outline" size={48} color={t.muted2} />
-            <Text style={styles.emptyText}>No reports yet.</Text>
+            <Text style={styles.emptyText}>{tr('recent.noReportsYet')}</Text>
           </View>
         }
         renderItem={({ item }) => {
@@ -811,20 +791,20 @@ export default function RecentScreen() {
                         item.kind === 'training' && { color: t.positive },
                       ]}
                     >
-                      {item.kind === 'game' ? 'Game Report Packet' :
-                       item.kind === 'scout' ? 'Scout Report' :
-                       item.kind === 'gamereport' ? 'Game Report' :
-                       item.kind === 'training' ? 'Training Program' :
-                       (TYPE_LABELS[item.output_type] ?? outputTypeLabel(item.output_type))}
+                      {item.kind === 'game' ? tr('recent.gameReportPacket') :
+                       item.kind === 'scout' ? tr('recent.scoutReport') :
+                       item.kind === 'gamereport' ? tr('recent.gameReport') :
+                       item.kind === 'training' ? tr('reportTypes.training_program') :
+                       outputTypeLabel(item.output_type)}
                     </Text>
                     {item.shared && (
                       <Text numberOfLines={1} style={styles.sharedByLabel}>
-                        Shared by {item.sender_name}
+                        {tr('recent.sharedBy', { name: item.sender_name })}
                       </Text>
                     )}
                     {!item.shared && item.updated_from && (
                       <Text numberOfLines={1} style={[styles.sharedByLabel, { color: t.accent }]}>
-                        Updated · from {item.updated_from}
+                        {tr('recent.updatedFrom', { name: item.updated_from })}
                       </Text>
                     )}
                   </View>
@@ -838,14 +818,14 @@ export default function RecentScreen() {
                     <TouchableOpacity
                       style={styles.gameActionBtn}
                       onPress={() => setGameReportModal({
-                        title: item.kind === 'scout' ? 'Scouting Report' : 'Game Report',
+                        title: item.kind === 'scout' ? tr('reportTypes.scouting_report') : tr('reportTypes.game_report'),
                         subject: item.player_name, text: item.report_text!,
                         reportType: item.kind === 'scout' ? 'game_session' : item.kind === 'gamereport' ? 'game_report' : 'game',
                         reportId: (item.kind === 'game' ? (item.report_id ?? item.id) : item.id) as number, outputType: item.kind === 'scout' ? 'scouting_report' : item.kind === 'gamereport' ? 'game_report' : (item.output_type ?? 'coaching_report'),
                       })}
                     >
                       <Ionicons name="document-text-outline" size={13} color={t.accent} />
-                      <Text style={[styles.gameActionText, { color: t.accent }]}>View Report</Text>
+                      <Text style={[styles.gameActionText, { color: t.accent }]}>{tr('recent.viewReport')}</Text>
                     </TouchableOpacity>
                   ) : null}
                   {item.kind === 'game' && !item.shared && (
@@ -854,7 +834,7 @@ export default function RecentScreen() {
                       onPress={() => navigation.navigate('GameReportBuilder', { reportId: item.report_id ?? item.id })}
                     >
                       <Ionicons name="create-outline" size={13} color={t.muted} />
-                      <Text style={styles.gameActionText}>Edit Packet</Text>
+                      <Text style={styles.gameActionText}>{tr('recent.editPacket')}</Text>
                     </TouchableOpacity>
                   )}
 
@@ -875,7 +855,7 @@ export default function RecentScreen() {
                       }}
                     >
                       <Ionicons name="person-outline" size={13} color={t.positive} />
-                      <Text style={[styles.gameActionText, { color: t.positive }]}>Send to Player</Text>
+                      <Text style={[styles.gameActionText, { color: t.positive }]}>{tr('recent.sendToPlayer')}</Text>
                     </TouchableOpacity>
                   )}
 
@@ -887,7 +867,7 @@ export default function RecentScreen() {
                       onPress={() => openViewer(item)}
                     >
                       <Ionicons name="create-outline" size={13} color={t.accent} />
-                      <Text style={[styles.gameActionText, { color: t.accent }]}>Correct</Text>
+                      <Text style={[styles.gameActionText, { color: t.accent }]}>{tr('recent.correct')}</Text>
                     </TouchableOpacity>
                   )}
 
@@ -904,11 +884,11 @@ export default function RecentScreen() {
                                          item.kind === 'gamereport' ? 'game_report' :
                                          item.kind === 'game' ? 'game' :
                                          'training';
-                      const label = item.kind === 'training' ? 'Training Program' :
-                                    item.kind === 'scout' ? 'Scout Report' :
-                                    item.kind === 'gamereport' ? 'Game Report' :
-                                    item.kind === 'game' ? 'Game Report' :
-                                    item.kind === 'team' ? 'Team Report' : 'Player Eval';
+                      const label = item.kind === 'training' ? tr('reportTypes.training_program') :
+                                    item.kind === 'scout' ? tr('recent.scoutReport') :
+                                    item.kind === 'gamereport' ? tr('recent.gameReport') :
+                                    item.kind === 'game' ? tr('recent.gameReport') :
+                                    item.kind === 'team' ? tr('recent.teamReport') : tr('reportTypes.player_eval');
                       const fullText = item.program_text ?? item.report_text ?? (teamReportTexts[item.id as number] ?? '');
                       setShareCtx({
                         reportType,
@@ -920,7 +900,7 @@ export default function RecentScreen() {
                     }}
                   >
                     <Ionicons name="share-social-outline" size={13} color={t.brown} />
-                    <Text style={[styles.gameActionText, { color: t.brown }]}>Share</Text>
+                    <Text style={[styles.gameActionText, { color: t.brown }]}>{tr('common.share')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -942,7 +922,7 @@ export default function RecentScreen() {
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.modalTitle}>{gameReportModal?.title ?? 'Report'}</Text>
+                <Text style={styles.modalTitle}>{gameReportModal?.title ?? tr('reportTypes.report')}</Text>
                 {!!gameReportModal?.subject && <Text style={styles.modalSub}>{gameReportModal.subject}</Text>}
               </View>
               <TouchableOpacity onPress={() => { setGameReportModal(null); setScoutCorrectMode(false); }}>
@@ -965,7 +945,7 @@ export default function RecentScreen() {
                 <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
                   {gameReportModal?.text
                     ? renderReport(gameReportModal.text, { heading: t.ink, body: t.inkSoft })
-                    : <Text style={{ color: t.muted2 }}>No report content available.</Text>
+                    : <Text style={{ color: t.muted2 }}>{tr('recent.noReportContentAvailable')}</Text>
                   }
                 </KeyboardAwareScrollView>
                 {gameReportModal && (
@@ -973,12 +953,12 @@ export default function RecentScreen() {
                     {gameReportModal.reportType === 'game_session' && gameReportModal.reportId != null && (
                       <TouchableOpacity style={styles.actionBtn} onPress={() => setScoutCorrectMode(true)}>
                         <Ionicons name="create-outline" size={18} color={t.ink} />
-                        <Text style={styles.actionText}>Correct</Text>
+                        <Text style={styles.actionText}>{tr('recent.correct')}</Text>
                       </TouchableOpacity>
                     )}
                     <TouchableOpacity style={styles.actionBtn} onPress={() => setExportCtx({ title: gameReportModal.title, subject: gameReportModal.subject, text: gameReportModal.text })}>
                       <Ionicons name="download-outline" size={18} color={t.ink} />
-                      <Text style={styles.actionText}>Export / Print</Text>
+                      <Text style={styles.actionText}>{tr('recent.exportPrint')}</Text>
                     </TouchableOpacity>
                     {gameReportModal.reportType && gameReportModal.reportId != null && (
                       <>
@@ -991,7 +971,7 @@ export default function RecentScreen() {
                           }}
                         >
                           <Ionicons name="person-outline" size={18} color={t.positive} />
-                          <Text style={[styles.actionText, { color: t.positive }]}>Player</Text>
+                          <Text style={[styles.actionText, { color: t.positive }]}>{tr('recent.playerBtn')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           style={[styles.actionBtn, { borderColor: t.brownSoft }]}
@@ -1002,7 +982,7 @@ export default function RecentScreen() {
                           }}
                         >
                           <Ionicons name="share-social-outline" size={18} color={t.brown} />
-                          <Text style={[styles.actionText, { color: t.brown }]}>Share</Text>
+                          <Text style={[styles.actionText, { color: t.brown }]}>{tr('common.share')}</Text>
                         </TouchableOpacity>
                       </>
                     )}
@@ -1025,7 +1005,7 @@ export default function RecentScreen() {
       {/* Section-selectable export / print */}
       <ExportSectionsModal
         visible={!!exportCtx}
-        title={exportCtx?.title ?? 'Report'}
+        title={exportCtx?.title ?? tr('reportTypes.report')}
         subject={exportCtx?.subject}
         reportText={exportCtx?.text ?? ''}
         onClose={() => setExportCtx(null)}
@@ -1037,9 +1017,9 @@ export default function RecentScreen() {
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.modalTitle}>Send to Staff</Text>
+                <Text style={styles.modalTitle}>{tr('recent.sendToStaffTitle')}</Text>
                 <Text style={styles.modalSub}>
-                  Share {staffShareCtx?.label ?? 'this report'} with a coach, scout, or trainer.
+                  {tr('recent.sendToStaffSub', { label: staffShareCtx?.label ?? tr('recent.thisReport') })}
                 </Text>
               </View>
               <TouchableOpacity onPress={closeStaffShareModal}>
@@ -1051,7 +1031,7 @@ export default function RecentScreen() {
               {/* Report preview */}
               {staffSharePreview && (
                 <View style={[sendStyles.reportPreview, { marginBottom: 12 }]}>
-                  <Text style={sendStyles.reportPreviewTitle}>Report Preview</Text>
+                  <Text style={sendStyles.reportPreviewTitle}>{tr('recent.reportPreview')}</Text>
                   <Text style={sendStyles.reportPreviewText} numberOfLines={3}>{staffSharePreview}</Text>
                 </View>
               )}
@@ -1060,7 +1040,7 @@ export default function RecentScreen() {
               {staffShareCtx?.report_type === 'training' ? (
                 <>
                   {[
-                    { key: 'share_report_text', label: 'Share Program Text' },
+                    { key: 'share_report_text', label: tr('recent.toggles.programText') },
                   ].map(tog => (
                     <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider }}>
                       <Text style={{ color: t.inkSoft, fontSize: 13 }}>{tog.label}</Text>
@@ -1071,12 +1051,12 @@ export default function RecentScreen() {
               ) : (
                 <>
                   {[
-                    { key: 'share_report_text', label: 'Share Report Text' },
-                    { key: 'share_overall_grade', label: 'Share Overall Grade' },
-                    { key: 'share_pillar_grades', label: 'Share Pillar Grades' },
-                    { key: 'share_grades', label: 'Share Green Flags' },
-                    { key: 'share_flags', label: 'Share Watch Flags' },
-                    { key: 'share_questions', label: 'Share Key Questions' },
+                    { key: 'share_report_text', label: tr('recent.toggles.reportText') },
+                    { key: 'share_overall_grade', label: tr('recent.toggles.overallGrade') },
+                    { key: 'share_pillar_grades', label: tr('recent.toggles.pillarGrades') },
+                    { key: 'share_grades', label: tr('recent.toggles.greenFlags') },
+                    { key: 'share_flags', label: tr('recent.toggles.watchFlags') },
+                    { key: 'share_questions', label: tr('recent.toggles.keyQuestions') },
                   ].map(tog => (
                     <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider }}>
                       <Text style={{ color: t.inkSoft, fontSize: 13 }}>{tog.label}</Text>
@@ -1088,7 +1068,7 @@ export default function RecentScreen() {
 
               {/* Allow regenerate toggle */}
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, marginBottom: 4, backgroundColor: t.chip, borderRadius: 8, padding: 12 }}>
-                <Text style={{ color: t.inkSoft, fontSize: 13 }}>Allow recipient to regenerate</Text>
+                <Text style={{ color: t.inkSoft, fontSize: 13 }}>{tr('recent.allowRegenerate')}</Text>
                 <Switch
                   value={staffAllowRegen}
                   onValueChange={setStaffAllowRegen}
@@ -1098,8 +1078,8 @@ export default function RecentScreen() {
               </View>
               <Text style={{ color: t.muted2, fontSize: 11, marginBottom: 12, marginLeft: 2 }}>
                 {staffAllowRegen
-                  ? 'Sends a live, regenerable copy — recipient sees the full report.'
-                  : 'Sends a frozen snapshot — choose which sections to include below.'}
+                  ? tr('recent.regenOnHint')
+                  : tr('recent.regenOffHint')}
               </Text>
 
               {/* Section toggles — only in frozen mode (regenerate OFF) */}
@@ -1107,7 +1087,7 @@ export default function RecentScreen() {
                 const secs = splitReportSections(staffShareFullText);
                 return !staffAllowRegen && secs.length > 1 ? (
                   <>
-                    <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600], marginBottom: 6 }}>Include Sections</Text>
+                    <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600], marginBottom: 6 }}>{tr('recent.includeSections')}</Text>
                     {secs.map(sec => (
                       <View key={sec.heading} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: t.chip, borderRadius: 8, padding: 10 }}>
                         <Text style={{ color: t.inkSoft, fontSize: 13, flex: 1, marginRight: 8 }} numberOfLines={1}>{sec.heading}</Text>
@@ -1126,7 +1106,7 @@ export default function RecentScreen() {
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
                 <VoiceTextInput
                   style={[sendStyles.searchInput, { flex: 1 }]}
-                  placeholder="Search coach/program name..."
+                  placeholder={tr('recent.searchStaffPlaceholder')}
                   placeholderTextColor={t.muted2}
                   value={staffSearch}
                   onChangeText={setStaffSearch}
@@ -1154,14 +1134,14 @@ export default function RecentScreen() {
                 </TouchableOpacity>
               ))}
               {staffResults.length === 0 && staffSearch.trim().length > 0 && !staffSearchLoading && (
-                <Text style={{ color: t.muted2, textAlign: 'center', paddingVertical: 20 }}>No staff found.</Text>
+                <Text style={{ color: t.muted2, textAlign: 'center', paddingVertical: 20 }}>{tr('recent.noStaffFound')}</Text>
               )}
             </KeyboardAwareScrollView>
             <TouchableOpacity
               style={[sendStyles.cancelBtn, { marginTop: 12, flex: 0 }]}
               onPress={closeStaffShareModal}
             >
-              <Text style={{ color: t.muted, fontFamily: fonts[600] }}>Cancel</Text>
+              <Text style={{ color: t.muted, fontFamily: fonts[600] }}>{tr('common.cancel')}</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -1181,9 +1161,9 @@ export default function RecentScreen() {
               ) : null}
               <View style={{ flex: 1 }}>
                 <Text style={styles.modalTitle}>
-                  {modalView === 'send' ? 'Send Report' :
-                   modalView === 'correct' ? 'Correct Report' :
-                   (TYPE_LABELS[activeModal?.outputType ?? ''] ?? outputTypeLabel(activeModal?.outputType) ?? 'Report')}
+                  {modalView === 'send' ? tr('recent.sendReport') :
+                   modalView === 'correct' ? tr('recent.correctReport') :
+                   (outputTypeLabel(activeModal?.outputType) ?? tr('reportTypes.report'))}
                 </Text>
                 {modalView === 'report' && activeModal?.playerName && (
                   <Text style={styles.modalSub}>{activeModal.playerName}</Text>
@@ -1200,27 +1180,27 @@ export default function RecentScreen() {
                 <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
                   {activeModal?.text
                     ? renderReport(activeModal.text, { heading: t.ink, body: t.inkSoft })
-                    : <Text style={{ color: t.muted2 }}>No report content</Text>
+                    : <Text style={{ color: t.muted2 }}>{tr('recent.noReportContent')}</Text>
                   }
                 </KeyboardAwareScrollView>
                 <View style={styles.actionRow}>
                   {supportsCorrections(activeModal) && (
                     <TouchableOpacity style={styles.actionBtn} onPress={() => { setTeamCorrectText(''); loadCorrections(activeModal); setModalView('correct'); }}>
                       <Ionicons name="create-outline" size={18} color={t.ink} />
-                      <Text style={styles.actionText}>Correct</Text>
+                      <Text style={styles.actionText}>{tr('recent.correct')}</Text>
                     </TouchableOpacity>
                   )}
                   <TouchableOpacity
                     style={styles.actionBtn}
-                    onPress={() => activeModal && setExportCtx({ title: TYPE_LABELS[activeModal.outputType] ?? outputTypeLabel(activeModal.outputType), subject: activeModal.playerName, text: activeModal.text })}
+                    onPress={() => activeModal && setExportCtx({ title: outputTypeLabel(activeModal.outputType), subject: activeModal.playerName, text: activeModal.text })}
                   >
                     <Ionicons name="download-outline" size={18} color={t.ink} />
-                    <Text style={styles.actionText}>Export / Print</Text>
+                    <Text style={styles.actionText}>{tr('recent.exportPrint')}</Text>
                   </TouchableOpacity>
                   {/* Send to Player */}
                   <TouchableOpacity style={[styles.actionBtn, { borderColor: t.positiveSoft }]} onPress={() => { setSendSearch(''); setSendResults([]); setModalView('send'); }}>
                     <Ionicons name="person-outline" size={18} color={t.positive} />
-                    <Text style={[styles.actionText, { color: t.positive }]}>Player</Text>
+                    <Text style={[styles.actionText, { color: t.positive }]}>{tr('recent.playerBtn')}</Text>
                   </TouchableOpacity>
                   {/* Share — player / team / staff */}
                   <TouchableOpacity
@@ -1229,8 +1209,8 @@ export default function RecentScreen() {
                       if (!activeModal) return;
                       const reportType = activeModal.kind === 'eval' ? 'eval' :
                                           activeModal.kind === 'team' ? 'team_report' : 'training';
-                      const label = activeModal.kind === 'training' ? 'Training Program' :
-                                    activeModal.kind === 'team' ? 'Team Report' : 'Player Eval';
+                      const label = activeModal.kind === 'training' ? tr('reportTypes.training_program') :
+                                    activeModal.kind === 'team' ? tr('recent.teamReport') : tr('reportTypes.player_eval');
                       const fullText = activeModal.text ?? '';
                       const reportId = activeModal.id;
                       const outputType = activeModal.outputType ?? (activeModal.kind === 'training' ? 'training_program' : 'coaching_report');
@@ -1239,7 +1219,7 @@ export default function RecentScreen() {
                     }}
                   >
                     <Ionicons name="share-social-outline" size={18} color={t.brown} />
-                    <Text style={[styles.actionText, { color: t.brown }]}>Share</Text>
+                    <Text style={[styles.actionText, { color: t.brown }]}>{tr('common.share')}</Text>
                   </TouchableOpacity>
                 </View>
               </>
@@ -1250,7 +1230,7 @@ export default function RecentScreen() {
               <>
                 {/* Report preview */}
                 <View style={sendStyles.reportPreview}>
-                  <Text style={sendStyles.reportPreviewTitle}>{TYPE_LABELS[activeModal?.outputType ?? ''] ?? outputTypeLabel(activeModal?.outputType)}</Text>
+                  <Text style={sendStyles.reportPreviewTitle}>{outputTypeLabel(activeModal?.outputType)}</Text>
                   <Text style={sendStyles.reportPreviewText} numberOfLines={2}>{activeModal?.text?.replace(/[#*_]/g, '').trim().slice(0, 120)}...</Text>
                 </View>
 
@@ -1258,7 +1238,7 @@ export default function RecentScreen() {
                 {activeModal?.kind === 'training' ? (
                   <View style={{ marginBottom: 10 }}>
                     {[
-                      { key: 'share_report_text', label: 'Share Program Text' },
+                      { key: 'share_report_text', label: tr('recent.toggles.programText') },
                     ].map(tog => (
                       <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: t.divider }}>
                         <Text style={{ color: t.inkSoft, fontSize: 13 }}>{tog.label}</Text>
@@ -1269,12 +1249,12 @@ export default function RecentScreen() {
                 ) : (
                   <View style={{ marginBottom: 10 }}>
                     {[
-                      { key: 'share_report_text', label: 'Share Report Text' },
-                      { key: 'share_overall_grade', label: 'Share Overall Grade' },
-                      { key: 'share_pillar_grades', label: 'Share Pillar Grades' },
-                      { key: 'share_green_flags', label: 'Share Green Flags' },
-                      { key: 'share_watch_flags', label: 'Share Watch Flags' },
-                      { key: 'share_key_questions', label: 'Share Key Questions' },
+                      { key: 'share_report_text', label: tr('recent.toggles.reportText') },
+                      { key: 'share_overall_grade', label: tr('recent.toggles.overallGrade') },
+                      { key: 'share_pillar_grades', label: tr('recent.toggles.pillarGrades') },
+                      { key: 'share_green_flags', label: tr('recent.toggles.greenFlags') },
+                      { key: 'share_watch_flags', label: tr('recent.toggles.watchFlags') },
+                      { key: 'share_key_questions', label: tr('recent.toggles.keyQuestions') },
                     ].map(tog => (
                       <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: t.divider }}>
                         <Text style={{ color: t.inkSoft, fontSize: 13 }}>{tog.label}</Text>
@@ -1284,11 +1264,11 @@ export default function RecentScreen() {
                   </View>
                 )}
 
-                <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>Search for a player to send this report to their inbox.</Text>
+                <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>{tr('recent.sendToPlayerHint')}</Text>
                 <View style={{ marginBottom: 12 }}>
                   <VoiceTextInput
                     style={sendStyles.searchInput}
-                    placeholder="Type a name to search..."
+                    placeholder={tr('recent.typeNamePlaceholder')}
                     placeholderTextColor={t.muted2}
                     value={sendSearch}
                     onChangeText={setSendSearch}
@@ -1311,7 +1291,7 @@ export default function RecentScreen() {
                     </TouchableOpacity>
                   ))}
                   {sendResults.length === 0 && sendSearch.trim().length > 0 && !sendSearchLoading && (
-                    <Text style={{ color: t.muted2, textAlign: 'center', paddingVertical: 20 }}>No players found. Make sure they've registered on the player portal.</Text>
+                    <Text style={{ color: t.muted2, textAlign: 'center', paddingVertical: 20 }}>{tr('recent.noPlayersFound')}</Text>
                   )}
                 </KeyboardAwareScrollView>
               </>
@@ -1321,13 +1301,13 @@ export default function RecentScreen() {
             {modalView === 'correct' && (
               <>
                 <View style={sendStyles.reportPreview}>
-                  <Text style={sendStyles.reportPreviewTitle}>{TYPE_LABELS[activeModal?.outputType ?? ''] ?? outputTypeLabel(activeModal?.outputType)}</Text>
+                  <Text style={sendStyles.reportPreviewTitle}>{outputTypeLabel(activeModal?.outputType)}</Text>
                   <Text style={sendStyles.reportPreviewText} numberOfLines={2}>{activeModal?.text?.replace(/[#*_]/g, '').trim().slice(0, 120)}...</Text>
                 </View>
-                <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>Save corrections for later, then Apply & Regenerate to update the report using all un-applied corrections.</Text>
+                <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>{tr('recent.correctHint')}</Text>
                 <VoiceTextInput
                   style={sendStyles.correctInput}
-                  placeholder="What needs to be corrected in this report?"
+                  placeholder={tr('recent.correctPlaceholder')}
                   placeholderTextColor={t.muted2}
                   value={teamCorrectText}
                   onChangeText={setTeamCorrectText}
@@ -1336,28 +1316,28 @@ export default function RecentScreen() {
                 />
                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                   <TouchableOpacity style={sendStyles.cancelBtn} onPress={saveCorrectionForLater} disabled={savingCorrect || !teamCorrectText.trim()}>
-                    {savingCorrect ? <ActivityIndicator color={t.muted} size="small" /> : <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Save for Later</Text>}
+                    {savingCorrect ? <ActivityIndicator color={t.muted} size="small" /> : <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('recent.saveForLater')}</Text>}
                   </TouchableOpacity>
                   <TouchableOpacity style={sendStyles.applyBtn} onPress={applyCorrection} disabled={applyingCorrect}>
-                    {applyingCorrect ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply & Regenerate</Text>}
+                    {applyingCorrect ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('recent.applyRegenerate')}</Text>}
                   </TouchableOpacity>
                 </View>
-                <GeneratingOverlay visible={applyingCorrect} label="Regenerating the report…" />
+                <GeneratingOverlay visible={applyingCorrect} label={tr('recent.regeneratingLabel')} />
 
                 {corrections.length > 0 && (
                   <View style={{ marginTop: 18 }}>
                     <Text style={{ color: t.label, fontSize: 11, fontFamily: fonts[700], letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>
-                      Corrections ({corrections.length})
+                      {tr('recent.correctionsCount', { count: corrections.length })}
                     </Text>
                     {corrections.map((c: any) => (
                       <View key={c.id} style={{ backgroundColor: t.card, borderRadius: 10, padding: 11, marginBottom: 6, borderWidth: 1, borderColor: t.cardBorder, opacity: c.applied ? 0.55 : 1 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
                           {c.applied
                             ? <View style={{ backgroundColor: t.positiveSoft, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}>
-                                <Text style={{ color: t.positive, fontSize: 9, fontFamily: fonts[700] }}>APPLIED</Text>
+                                <Text style={{ color: t.positive, fontSize: 9, fontFamily: fonts[700] }}>{tr('recent.applied')}</Text>
                               </View>
                             : <View style={{ backgroundColor: t.chip, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}>
-                                <Text style={{ color: t.muted, fontSize: 9, fontFamily: fonts[700] }}>PENDING</Text>
+                                <Text style={{ color: t.muted, fontSize: 9, fontFamily: fonts[700] }}>{tr('recent.pending')}</Text>
                               </View>}
                           <Text style={{ color: t.muted2, fontSize: 10 }}>{c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}</Text>
                         </View>
