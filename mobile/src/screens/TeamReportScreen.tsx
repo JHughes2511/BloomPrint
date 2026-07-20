@@ -27,14 +27,15 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import { GeneratingOverlay, parseGenProgress } from '../components/GeneratingBasketball';
 
+// Labels come from the `reportTypes.*` translation keys at render time.
 const OUTPUT_TYPES = [
-  { key: 'coaching_report',  label: 'Coaching Report' },
-  { key: 'game_analysis',    label: 'Game Analysis' },
-  { key: 'game_situational', label: 'Game Situational' },
-  { key: 'film_breakdown',   label: 'Film Breakdown' },
-  { key: 'scouting_report',  label: 'Scouting Report' },
-  { key: 'training_program', label: 'Training Program' },
-  { key: 'box_score',        label: 'Box Score' },
+  { key: 'coaching_report' },
+  { key: 'game_analysis' },
+  { key: 'game_situational' },
+  { key: 'film_breakdown' },
+  { key: 'scouting_report' },
+  { key: 'training_program' },
+  { key: 'box_score' },
 ];
 
 export default function TeamReportScreen() {
@@ -91,21 +92,21 @@ export default function TeamReportScreen() {
       setVideoTitle(`${v.report_title} · ${v.label}`);
       setVideoSource(src);
     } catch {
-      Alert.alert('Error', 'Could not load this video.');
+      Alert.alert(tr('common.error'), tr('teamReport.couldNotLoadVideo'));
     }
   };
 
   const deleteReportVideo = (v: any) => {
-    Alert.alert('Delete Film', `Remove this ${v.label} clip from "${v.report_title}"? This frees the storage it uses.`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(tr('teamReport.deleteFilmTitle'), tr('teamReport.deleteFilmMessage', { label: v.label, title: v.report_title }), [
+      { text: tr('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete', style: 'destructive',
+        text: tr('common.delete'), style: 'destructive',
         onPress: async () => {
           try {
             await gameReportsAPI.deleteClip(v.report_id, v.id);
             setReportVideos(prev => prev.filter(x => x.id !== v.id));
           } catch (e: any) {
-            Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete clip');
+            Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamReport.couldNotDeleteClip'));
           }
         },
       },
@@ -184,17 +185,17 @@ export default function TeamReportScreen() {
           setPrevReports(prev => prev.map(r => r.id === updated.id ? updated : r));
           const updatedCorrs = await evalsAPI.teamReportCorrections(selectedPrevReport.id);
           setPrevReportCorrections(updatedCorrs);
-          Alert.alert('Regenerated', 'Team report updated with your corrections.');
+          Alert.alert(tr('teamReport.regeneratedTitle'), tr('teamReport.regeneratedMessage'));
         } catch (e: any) {
-          Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate');
+          Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamReport.couldNotRegenerate'));
         } finally {
           setRegeneratingPrevReport(false);
         }
       } else {
-        Alert.alert('Saved', 'Correction saved for later.');
+        Alert.alert(tr('teamReport.correctionSavedTitle'), tr('teamReport.correctionSavedMessage'));
       }
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save correction');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamReport.couldNotSaveCorrection'));
     } finally {
       setAddingPrevCorrection(false);
     }
@@ -204,7 +205,7 @@ export default function TeamReportScreen() {
     if (!selectedPrevReport) return;
     const unapplied = prevReportCorrections.filter((c: any) => !c.applied);
     if (unapplied.length === 0) {
-      Alert.alert('No Pending Corrections', 'Add at least one correction before regenerating.');
+      Alert.alert(tr('teamReport.noPendingCorrectionsTitle'), tr('teamReport.noPendingCorrectionsMessage'));
       return;
     }
     setRegeneratingPrevReport(true);
@@ -214,9 +215,9 @@ export default function TeamReportScreen() {
       setPrevReports(prev => prev.map(r => r.id === updated.id ? updated : r));
       const updatedCorrs = await evalsAPI.teamReportCorrections(selectedPrevReport.id);
       setPrevReportCorrections(updatedCorrs);
-      Alert.alert('Regenerated', 'Team report updated with your corrections.');
+      Alert.alert(tr('teamReport.regeneratedTitle'), tr('teamReport.regeneratedMessage'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamReport.couldNotRegenerate'));
     } finally {
       setRegeneratingPrevReport(false);
     }
@@ -255,17 +256,17 @@ export default function TeamReportScreen() {
       const now = new Date();
       const html = buildReportHtml({
         title: typeLabel(),
-        subject: coach?.program_name ?? 'Team',
+        subject: coach?.program_name ?? tr('teamReport.teamFallback'),
         date: now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
         body: reportText,
       });
-      const fileName = buildPdfFileName(typeLabel(), coach?.program_name ?? 'Team', now);
+      const fileName = buildPdfFileName(typeLabel(), coach?.program_name ?? tr('teamReport.teamFallback'), now);
       const { uri } = await Print.printToFileAsync({ html });
       const dest = FileSystem.cacheDirectory + fileName + '.pdf';
       await FileSystem.copyAsync({ from: uri, to: dest });
       await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: fileName });
     } catch (e: any) {
-      Alert.alert('Export Error', e?.message ?? 'Could not export');
+      Alert.alert(tr('teamReport.exportErrorTitle'), e?.message ?? tr('teamReport.couldNotExport'));
     } finally {
       setExporting(false);
     }
@@ -277,13 +278,13 @@ export default function TeamReportScreen() {
       const now = new Date();
       const html = buildReportHtml({
         title: typeLabel(),
-        subject: coach?.program_name ?? 'Team',
+        subject: coach?.program_name ?? tr('teamReport.teamFallback'),
         date: now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
         body: reportText,
       });
       await Print.printAsync({ html });
     } catch (e: any) {
-      Alert.alert('Print Error', e?.message ?? 'Could not print');
+      Alert.alert(tr('teamReport.printErrorTitle'), e?.message ?? tr('teamReport.couldNotPrint'));
     }
   };
 
@@ -336,14 +337,14 @@ export default function TeamReportScreen() {
         data.staff_coach_id = selectedShareTarget.id;
       }
       const result = await playerAPI.shareTeamReport(data);
-      Alert.alert('Shared!', `Report shared with ${result.shared_count ?? 1} recipient(s).`);
+      Alert.alert(tr('teamReport.sharedTitle'), tr('teamReport.sharedWithRecipients', { count: result.shared_count ?? 1 }));
       setShowShare(false);
       setSelectedShareTarget(null);
       setShareSearch('');
       setShareResults([]);
       setShareMessage('');
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share report');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamReport.couldNotShareReport'));
     } finally {
       setSharing(false);
     }
@@ -351,10 +352,10 @@ export default function TeamReportScreen() {
 
   const printPrevReport = async (report: any) => {
     if (!report?.report_text) return;
-    const rType = (report.output_type ?? '').replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
+    const rType = outputTypeLabel(report.output_type);
     const html = buildReportHtml({
       title: rType,
-      subject: coach?.program_name ?? 'Team',
+      subject: coach?.program_name ?? tr('teamReport.teamFallback'),
       date: new Date(report.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
       body: report.report_text,
     });
@@ -369,11 +370,11 @@ export default function TeamReportScreen() {
       const rType = outputTypeLabel(report.output_type);
       const html = buildReportHtml({
         title: rType,
-        subject: coach?.program_name ?? 'Team',
+        subject: coach?.program_name ?? tr('teamReport.teamFallback'),
         date: rDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
         body: report.report_text,
       });
-      const fileName = buildPdfFileName(rType, coach?.program_name ?? 'Team', rDate);
+      const fileName = buildPdfFileName(rType, coach?.program_name ?? tr('teamReport.teamFallback'), rDate);
       const { uri } = await Print.printToFileAsync({ html });
       // Copy to a properly-named file so the export keeps the standard convention
       // (Type - Subject - YYYY-MM-DD) instead of the random Print temp name.
@@ -382,7 +383,7 @@ export default function TeamReportScreen() {
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: fileName });
       }
-    } catch { Alert.alert('Error', 'Could not export report'); }
+    } catch { Alert.alert(tr('common.error'), tr('teamReport.couldNotExportReport')); }
     setExportingPrevReport(false);
   };
 
@@ -415,12 +416,12 @@ export default function TeamReportScreen() {
         allow_regenerate: allowRegen,
         frozen_text: frozenText ?? undefined,
       });
-      Alert.alert('Shared!', `Report shared with ${res.shared_count ?? 1} staff member(s).`);
+      Alert.alert(tr('teamReport.sharedTitle'), tr('teamReport.sharedWithStaff', { count: res.shared_count ?? 1 }));
       setShowStaffShare(false);
       setStaffSearch('');
       setStaffResults([]);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share report');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamReport.couldNotShareReport'));
     } finally {
       setSendingStaff(false);
     }
@@ -445,7 +446,7 @@ export default function TeamReportScreen() {
         }
       }, 300);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate team report');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamReport.couldNotGenerate'));
     } finally {
       setGenerating(false);
       setGenProgress('');
@@ -492,24 +493,24 @@ export default function TeamReportScreen() {
       >
         <View style={styles.titleRow}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.title}>Team Reports</Text>
+            <Text style={styles.title}>{tr('teamReport.title')}</Text>
           </View>
           <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import')}>
             <Ionicons name="cloud-upload-outline" size={18} color={t.muted} />
-            <Text style={styles.importText}>Import Roster</Text>
+            <Text style={styles.importText}>{tr('teamReport.importRoster')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Game Reports (packet builder) */}
         <View style={{ marginBottom: 24 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <Text style={styles.label}>Game Reports</Text>
+            <Text style={styles.label}>{tr('teamReport.gameReports')}</Text>
             <TouchableOpacity
               style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.accent, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 }}
               onPress={() => navigation.navigate('GameReportBuilder')}
             >
               <Ionicons name="add" size={14} color={t.ctaText} />
-              <Text style={{ color: t.ink, fontSize: 12, fontFamily: fonts[700] }}>New</Text>
+              <Text style={{ color: t.ink, fontSize: 12, fontFamily: fonts[700] }}>{tr('teamReport.new')}</Text>
             </TouchableOpacity>
           </View>
           {loadingGameReports ? (
@@ -520,7 +521,7 @@ export default function TeamReportScreen() {
               onPress={() => navigation.navigate('GameReportBuilder')}
             >
               <Ionicons name="albums-outline" size={28} color={t.line} />
-              <Text style={{ color: t.muted, fontSize: 13 }}>Build your first game report packet</Text>
+              <Text style={{ color: t.muted, fontSize: 13 }}>{tr('teamReport.buildFirstPacket')}</Text>
             </TouchableOpacity>
           ) : (
             gameReports.map((gr: any) => {
@@ -528,19 +529,19 @@ export default function TeamReportScreen() {
               const oppName = gr.opponent_team_name ?? gr.opponent_name;
               let matchup = gr.title;
               if (!matchup) {
-                if (gr.mode === 'vs_opponent' && oppName) matchup = `${myName ?? 'My Team'} vs ${oppName}`;
-                else if (gr.mode === 'my_program') matchup = myName ?? 'My Team';
-                else matchup = oppName ?? 'Opponent';
+                if (gr.mode === 'vs_opponent' && oppName) matchup = tr('teamReport.vs', { a: myName ?? tr('teamReport.myTeamFallback'), b: oppName });
+                else if (gr.mode === 'my_program') matchup = myName ?? tr('teamReport.myTeamFallback');
+                else matchup = oppName ?? tr('teamReport.opponentFallback');
               }
               const deleteGameReport = () => {
-                Alert.alert('Delete Game Report', `Delete "${matchup}"?`, [
-                  { text: 'Cancel', style: 'cancel' },
-                  { text: 'Delete', style: 'destructive', onPress: async () => {
+                Alert.alert(tr('teamReport.deleteGameReportTitle'), tr('teamReport.deleteGameReportMessage', { title: matchup }), [
+                  { text: tr('common.cancel'), style: 'cancel' },
+                  { text: tr('common.delete'), style: 'destructive', onPress: async () => {
                     try {
                       await gameReportsAPI.delete(gr.id);
                       setGameReports(prev => prev.filter(r => r.id !== gr.id));
                     } catch {
-                      Alert.alert('Error', 'Could not delete report');
+                      Alert.alert(tr('common.error'), tr('teamReport.couldNotDeleteReport'));
                     }
                   }},
                 ]);
@@ -554,20 +555,20 @@ export default function TeamReportScreen() {
                   <View style={{ flex: 1 }}>
                     <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700] }} numberOfLines={1}>{matchup}</Text>
                     <Text style={{ color: t.muted, fontSize: 11, marginTop: 2 }}>
-                      {gr.output_type.replace(/_/g, ' ')} · {new Date(gr.updated_at).toLocaleDateString()}
+                      {outputTypeLabel(gr.output_type)} · {new Date(gr.updated_at).toLocaleDateString()}
                     </Text>
                   </View>
                   <View style={{ alignItems: 'flex-end', gap: 4 }}>
                     {gr.report_text ? (
                       <View style={{ backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
-                        <Text style={{ color: t.accent, fontSize: 10, fontFamily: fonts[700] }}>REPORT READY</Text>
+                        <Text style={{ color: t.accent, fontSize: 10, fontFamily: fonts[700] }}>{tr('teamReport.reportReady')}</Text>
                       </View>
                     ) : (
                       <View style={{ backgroundColor: t.chip, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
-                        <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }}>IN PROGRESS</Text>
+                        <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }}>{tr('teamReport.inProgress')}</Text>
                       </View>
                     )}
-                    <Text style={{ color: t.muted2, fontSize: 10 }}>{(gr.clips?.length ?? 0)} clip{gr.clips?.length !== 1 ? 's' : ''}</Text>
+                    <Text style={{ color: t.muted2, fontSize: 10 }}>{tr('teamReport.clipCount', { count: gr.clips?.length ?? 0 })}</Text>
                   </View>
                   <TouchableOpacity onPress={deleteGameReport} style={{ padding: 4, marginLeft: 4 }}>
                     <Ionicons name="trash-outline" size={16} color={t.muted2} />
@@ -584,19 +585,19 @@ export default function TeamReportScreen() {
           style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: showQuickReport ? 16 : 0 }}
           onPress={() => setShowQuickReport(v => !v)}
         >
-          <Text style={styles.label}>Quick Report</Text>
+          <Text style={styles.label}>{tr('teamReport.quickReport')}</Text>
           <Ionicons name={showQuickReport ? 'chevron-up' : 'chevron-down'} size={16} color={t.muted} />
         </TouchableOpacity>
 
         {showQuickReport && (<>
 
-        <Text style={styles.label}>Select Team</Text>
+        <Text style={styles.label}>{tr('teamReport.selectTeam')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
           <TouchableOpacity
             style={[styles.chip, selectedTeamId === null && styles.chipActive]}
             onPress={() => setSelectedTeamId(null)}
           >
-            <Text style={[styles.chipText, selectedTeamId === null && styles.chipTextActive]}>All Players</Text>
+            <Text style={[styles.chipText, selectedTeamId === null && styles.chipTextActive]}>{tr('teamReport.allPlayers')}</Text>
           </TouchableOpacity>
           {teams.map(t => (
             <TouchableOpacity
@@ -609,9 +610,9 @@ export default function TeamReportScreen() {
           ))}
         </ScrollView>
 
-        <Text style={styles.label}>Report Type</Text>
+        <Text style={styles.label}>{tr('teamReport.reportType')}</Text>
         <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
-          Tap multiple to combine them into one comprehensive report.
+          {tr('teamReport.reportTypeHint')}
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
           {OUTPUT_TYPES.map(t => {
@@ -626,19 +627,19 @@ export default function TeamReportScreen() {
                   setOutputType((next.length ? next : [t.key]).join(','));
                 }}
               >
-                <Text style={[styles.chipText, isOn && styles.chipTextActive]}>{t.label}</Text>
+                <Text style={[styles.chipText, isOn && styles.chipTextActive]}>{tr(`reportTypes.${t.key}`)}</Text>
               </TouchableOpacity>
             );
           })}
         </ScrollView>
 
-        <Text style={styles.label}>Focus (optional)</Text>
+        <Text style={styles.label}>{tr('teamReport.focusOptional')}</Text>
         <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
-          Center the report on specific players, a unit, an action, or a situation.
+          {tr('teamReport.focusHint')}
         </Text>
         <VoiceTextInput
           style={styles.input}
-          placeholder="e.g. Focus on our guards' P&R defense; the bigs' rim protection; the press break..."
+          placeholder={tr('teamReport.focusPlaceholder')}
           placeholderTextColor={t.muted2}
           value={focusPrompt}
           onChangeText={setFocusPrompt}
@@ -647,11 +648,11 @@ export default function TeamReportScreen() {
 
         />
 
-        <Text style={styles.label}>Upload Footage (optional)</Text>
+        <Text style={styles.label}>{tr('teamReport.uploadFootage')}</Text>
         <TouchableOpacity style={styles.videoPickerBtn} onPress={pickVideo}>
           <Ionicons name={videoAsset ? 'videocam' : 'videocam-outline'} size={18} color={videoAsset ? t.positive : t.muted} />
           <Text style={[styles.videoPickerText, videoAsset && { color: t.positive }]}>
-            {videoAsset ? videoAsset.name.slice(-30) : 'Pick a video for visual context...'}
+            {videoAsset ? videoAsset.name.slice(-30) : tr('teamReport.pickVideo')}
           </Text>
           {videoAsset && (
             <TouchableOpacity onPress={() => setVideoAsset(null)}>
@@ -662,12 +663,12 @@ export default function TeamReportScreen() {
 
         <TouchableOpacity style={styles.generateBtn} onPress={generate} disabled={generating}>
           {generating
-            ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.generateText}>  Generating...</Text></>
-            : <><Ionicons name="people" size={18} color={t.ctaText} /><Text style={styles.generateText}>  Generate Team Report</Text></>
+            ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.generateText}>  {tr('teamReport.generating')}</Text></>
+            : <><Ionicons name="people" size={18} color={t.ctaText} /><Text style={styles.generateText}>  {tr('teamReport.generateTeamReport')}</Text></>
           }
         </TouchableOpacity>
 
-        <GeneratingOverlay visible={generating} realProgress={parseGenProgress(genProgress)} label={genProgress || 'Analyzing roster and generating report — keep this screen open.'} />
+        <GeneratingOverlay visible={generating} realProgress={parseGenProgress(genProgress)} label={genProgress || tr('teamReport.generatingOverlay')} />
 
         {reportText && (
           <View
@@ -680,7 +681,7 @@ export default function TeamReportScreen() {
               }
             }}
           >
-            <Text style={styles.label}>Team Report</Text>
+            <Text style={styles.label}>{tr('teamReport.teamReportLabel')}</Text>
             <View style={styles.reportBox}>
               {renderReport(reportText, { heading: t.ink, body: t.inkSoft })}
             </View>
@@ -689,25 +690,25 @@ export default function TeamReportScreen() {
                 {exporting
                   ? <ActivityIndicator color={t.muted} size="small" />
                   : <Ionicons name="share-outline" size={20} color={t.muted} />}
-                <Text style={styles.actionText}>Export PDF</Text>
+                <Text style={styles.actionText}>{tr('teamReport.exportPdf')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn} onPress={printPdf}>
                 <Ionicons name="print-outline" size={20} color={t.muted} />
-                <Text style={styles.actionText}>Print</Text>
+                <Text style={styles.actionText}>{tr('common.print')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.actionBtn, { borderColor: t.positive }]} onPress={() => { setShareSourceReport(null); initSectionToggles(); setShowShare(true); }}>
                 <Ionicons name="person-add-outline" size={20} color={t.positive} />
-                <Text style={[styles.actionText, { color: t.positive }]}>Share</Text>
+                <Text style={[styles.actionText, { color: t.positive }]}>{tr('common.share')}</Text>
               </TouchableOpacity>
               {savedTeamReportId && (
                 <TouchableOpacity style={[styles.actionBtn, { borderColor: t.accent }]} onPress={() => { setShareSourceReport(null); initSectionToggles(); setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }}>
                   <Ionicons name="people-outline" size={20} color={t.accent} />
-                  <Text style={[styles.actionText, { color: t.accent }]}>Staff</Text>
+                  <Text style={[styles.actionText, { color: t.accent }]}>{tr('teamReport.staff')}</Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity style={styles.actionBtn} onPress={() => { setReportText(null); setFocusPrompt(''); setSelectedTeamId(null); setVideoAsset(null); setSavedTeamReportId(null); }}>
                 <Ionicons name="add-circle-outline" size={20} color={t.muted} />
-                <Text style={styles.actionText}>New Report</Text>
+                <Text style={styles.actionText}>{tr('teamReport.newReport')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -723,7 +724,7 @@ export default function TeamReportScreen() {
               setShowPrevReports(v => !v);
             }}
           >
-            <Text style={styles.label}>Previous Reports</Text>
+            <Text style={styles.label}>{tr('teamReport.previousReports')}</Text>
           </TouchableOpacity>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
             {showPrevReports && (
@@ -754,20 +755,20 @@ export default function TeamReportScreen() {
           <>
             {/* Filter by output_type */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
-              {[{ key: 'all', label: 'All' }, ...OUTPUT_TYPES].map(t => (
+              {[{ key: 'all' }, ...OUTPUT_TYPES].map(t => (
                 <TouchableOpacity
                   key={t.key}
                   style={[styles.chip, prevReportFilter === t.key && styles.chipActive]}
                   onPress={() => setPrevReportFilter(t.key)}
                 >
-                  <Text style={[styles.chipText, prevReportFilter === t.key && styles.chipTextActive]}>{t.label}</Text>
+                  <Text style={[styles.chipText, prevReportFilter === t.key && styles.chipTextActive]}>{t.key === 'all' ? tr('teamReport.filterAll') : tr(`reportTypes.${t.key}`)}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
             {showPrevSearch && (
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search team, opponent, type, or title..."
+                placeholder={tr('teamReport.searchPlaceholder')}
                 placeholderTextColor={t.muted2}
                 value={prevSearchText}
                 onChangeText={setPrevSearchText}
@@ -780,7 +781,7 @@ export default function TeamReportScreen() {
               <ActivityIndicator color={t.accent} size="small" />
             ) : filteredPrevReports.length === 0 ? (
               <Text style={{ color: t.muted2, fontSize: 13, textAlign: 'center', paddingVertical: 16 }}>
-                {prevSearchText.trim() ? 'No matching reports.' : 'No team reports yet.'}
+                {prevSearchText.trim() ? tr('teamReport.noMatchingReports') : tr('teamReport.noReportsYet')}
               </Text>
             ) : (
               filteredPrevReports
@@ -799,7 +800,7 @@ export default function TeamReportScreen() {
                         </View>
                         {r._kind === 'game' && (
                           <View style={{ backgroundColor: t.chip, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
-                            <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }}>PACKET</Text>
+                            <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }}>{tr('teamReport.packet')}</Text>
                           </View>
                         )}
                       </View>
@@ -815,7 +816,7 @@ export default function TeamReportScreen() {
                     ) : null}
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 }}>
                       <Ionicons name="chevron-forward" size={12} color={t.line} />
-                      <Text style={{ color: t.line, fontSize: 11 }}>Tap to view full report</Text>
+                      <Text style={{ color: t.line, fontSize: 11 }}>{tr('teamReport.tapToView')}</Text>
                     </View>
                   </TouchableOpacity>
                 ))
@@ -825,10 +826,10 @@ export default function TeamReportScreen() {
 
         {/* Film Catalog — every clip attached to a game report packet */}
         <View style={{ marginTop: 24 }}>
-          <Text style={styles.label}>Film Catalog</Text>
+          <Text style={styles.label}>{tr('teamReport.filmCatalog')}</Text>
           {reportVideos.length === 0 ? (
             <Text style={{ color: t.muted2, fontSize: 13, paddingVertical: 12 }}>
-              No film attached to a game report yet. Add film to a packet and it shows up here.
+              {tr('teamReport.noFilmYet')}
             </Text>
           ) : (
             <View style={{ marginTop: 12 }}>
@@ -848,7 +849,7 @@ export default function TeamReportScreen() {
                     onPress={() => navigation.navigate('GameReportBuilder', { reportId: v.report_id })}
                   >
                     <Ionicons name="document-text-outline" size={13} color={t.muted} />
-                    <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>Report</Text>
+                    <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>{tr('reportTypes.report')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => deleteReportVideo(v)} style={{ padding: 6 }}>
                     <Ionicons name="trash-outline" size={16} color={t.negative} />
@@ -902,7 +903,7 @@ export default function TeamReportScreen() {
               {selectedPrevReport?.report_text ? (
                 renderReport(selectedPrevReport.report_text, { heading: t.ink, body: t.inkSoft })
               ) : (
-                <Text style={{ color: t.muted }}>No report content.</Text>
+                <Text style={{ color: t.muted }}>{tr('teamReport.noReportContent')}</Text>
               )}
 
               {/* Share + Print/Export buttons */}
@@ -921,7 +922,7 @@ export default function TeamReportScreen() {
                   }}
                 >
                   <Ionicons name="share-social-outline" size={15} color={t.ctaText} />
-                  <Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>Share — Player, Team, or Staff</Text>
+                  <Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>{tr('teamReport.sharePlayerTeamStaff')}</Text>
                 </TouchableOpacity>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   <TouchableOpacity
@@ -929,7 +930,7 @@ export default function TeamReportScreen() {
                     onPress={() => printPrevReport(selectedPrevReport)}
                   >
                     <Ionicons name="print-outline" size={15} color={t.inkSoft} />
-                    <Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13 }}>Print</Text>
+                    <Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13 }}>{tr('common.print')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.chip, borderRadius: 10, paddingVertical: 12, borderWidth: 1, borderColor: t.line }}
@@ -938,7 +939,7 @@ export default function TeamReportScreen() {
                   >
                     {exportingPrevReport
                       ? <ActivityIndicator color={t.inkSoft} size="small" />
-                      : <><Ionicons name="share-outline" size={15} color={t.inkSoft} /><Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13 }}>Export PDF</Text></>}
+                      : <><Ionicons name="share-outline" size={15} color={t.inkSoft} /><Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13 }}>{tr('teamReport.exportPdf')}</Text></>}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -946,13 +947,13 @@ export default function TeamReportScreen() {
               {/* Corrections section */}
               {prevReportCorrections.length > 0 && (
                 <View style={{ marginTop: 20 }}>
-                  <Text style={styles.label}>Corrections ({prevReportCorrections.length})</Text>
+                  <Text style={styles.label}>{tr('teamReport.correctionsCount', { count: prevReportCorrections.length })}</Text>
                   {prevReportCorrections.map((c: any) => (
                     <View key={c.id} style={{ backgroundColor: t.chip, borderRadius: 8, padding: 12, marginBottom: 6, opacity: c.applied ? 0.55 : 1 }}>
                       <Text style={{ color: t.inkSoft, fontSize: 13 }}>{c.correction}</Text>
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
                         <Text style={{ color: t.muted2, fontSize: 11 }}>{new Date(c.created_at).toLocaleDateString()}</Text>
-                        {c.applied && <Text style={{ color: t.positive, fontSize: 10, fontFamily: fonts[700] }}>APPLIED</Text>}
+                        {c.applied && <Text style={{ color: t.positive, fontSize: 10, fontFamily: fonts[700] }}>{tr('teamReport.applied')}</Text>}
                       </View>
                     </View>
                   ))}
@@ -964,10 +965,10 @@ export default function TeamReportScreen() {
                     >
                       {regeneratingPrevReport
                         ? <ActivityIndicator color={t.ctaText} />
-                        : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply & Regenerate</Text>}
+                        : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('teamReport.applyRegenerate')}</Text>}
                     </TouchableOpacity>
                   )}
-                  <GeneratingOverlay visible={regeneratingPrevReport} label="Regenerating the report…" />
+                  <GeneratingOverlay visible={regeneratingPrevReport} label={tr('teamReport.regeneratingOverlay')} />
                 </View>
               )}
 
@@ -982,14 +983,14 @@ export default function TeamReportScreen() {
                   }}
                 >
                   <Ionicons name="create-outline" size={15} color={t.accent} />
-                  <Text style={{ color: t.accent, fontFamily: fonts[700], fontSize: 13 }}>Open in Builder to Edit / Correct</Text>
+                  <Text style={{ color: t.accent, fontFamily: fonts[700], fontSize: 13 }}>{tr('teamReport.openInBuilder')}</Text>
                 </TouchableOpacity>
               ) : (
                 <View style={{ marginTop: 20 }}>
-                  <Text style={styles.label}>Add Correction</Text>
+                  <Text style={styles.label}>{tr('teamReport.addCorrection')}</Text>
                   <VoiceTextInput
                     style={{ backgroundColor: t.chip, borderRadius: 10, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 80, marginBottom: 8 }}
-                    placeholder="What needs to be corrected in this report?"
+                    placeholder={tr('teamReport.correctionPlaceholder')}
                     placeholderTextColor={t.muted2}
                     value={prevReportCorrectionText}
                     onChangeText={setPrevReportCorrectionText}
@@ -1004,14 +1005,14 @@ export default function TeamReportScreen() {
                     >
                       {addingPrevCorrection || regeneratingPrevReport
                         ? <ActivityIndicator color={t.ctaText} />
-                        : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Apply & Regenerate</Text>}
+                        : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('teamReport.applyRegenerate')}</Text>}
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={{ flex: 1, backgroundColor: t.line, borderRadius: 10, padding: 14, alignItems: 'center' }}
                       onPress={() => addPrevReportCorrection(false)}
                       disabled={addingPrevCorrection || !prevReportCorrectionText.trim()}
                     >
-                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Save for Later</Text>
+                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('teamReport.saveForLater')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -1025,13 +1026,13 @@ export default function TeamReportScreen() {
       <Modal visible={showStaffShare} transparent animationType="slide">
         <KeyboardAvoidingView style={shareStyles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <KeyboardAwareScrollView style={shareStyles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
-            <Text style={shareStyles.title}>Share with Staff</Text>
+            <Text style={shareStyles.title}>{tr('teamReport.shareWithStaff')}</Text>
             {/* Report preview */}
             {shareSourceReport && (
               <View style={{ backgroundColor: t.chip, borderRadius: 8, padding: 12, marginBottom: 12 }}>
-                <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[700], marginBottom: 2 }}>SENDING REPORT</Text>
+                <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[700], marginBottom: 2 }}>{tr('teamReport.sendingReport')}</Text>
                 <Text style={{ color: t.ink, fontSize: 13, fontFamily: fonts[700] }}>
-                  {(shareSourceReport.output_type ?? outputType).replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                  {outputTypeLabel(shareSourceReport.output_type ?? outputType)}
                 </Text>
                 <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>
                   {new Date(shareSourceReport.created_at ?? Date.now()).toLocaleDateString()}
@@ -1042,19 +1043,19 @@ export default function TeamReportScreen() {
                 ON  = live, regenerable copy (recipient can regenerate; no filtering)
                 OFF = frozen snapshot (you control which sections are included) */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, backgroundColor: t.chip, borderRadius: 8, padding: 10 }}>
-              <Text style={{ color: t.inkSoft, fontSize: 13 }}>Allow recipient to regenerate</Text>
+              <Text style={{ color: t.inkSoft, fontSize: 13 }}>{tr('teamReport.allowRegenerate')}</Text>
               <Switch value={allowRegen} onValueChange={setAllowRegen} trackColor={{ true: t.accent, false: t.line }} thumbColor="#fff" />
             </View>
             <Text style={{ color: t.muted, fontSize: 11, marginBottom: 12, marginLeft: 2 }}>
               {allowRegen
-                ? 'Sends a live, regenerable copy — recipient sees the full report.'
-                : 'Sends a frozen snapshot — choose which sections to include below.'}
+                ? tr('teamReport.allowRegenOnHint')
+                : tr('teamReport.allowRegenOffHint')}
             </Text>
 
             {/* Section toggles — only in frozen mode (regenerate OFF) */}
             {!allowRegen && reportSections.length > 1 && (
               <>
-                <Text style={[shareStyles.label, { marginBottom: 6 }]}>Include Sections</Text>
+                <Text style={[shareStyles.label, { marginBottom: 6 }]}>{tr('teamReport.includeSections')}</Text>
                 {reportSections.map(sec => (
                   <View key={sec.heading} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: t.chip, borderRadius: 8, padding: 10 }}>
                     <Text style={{ color: t.inkSoft, fontSize: 13, flex: 1, marginRight: 8 }} numberOfLines={1}>{sec.heading}</Text>
@@ -1071,7 +1072,7 @@ export default function TeamReportScreen() {
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
               <VoiceTextInput
                 style={[shareStyles.input, { flex: 1 }]}
-                placeholder="Search coach, team, or program name..."
+                placeholder={tr('teamReport.staffSearchPlaceholder')}
                 placeholderTextColor={t.muted2}
                 value={staffSearch}
                 onChangeText={setStaffSearch}
@@ -1084,7 +1085,7 @@ export default function TeamReportScreen() {
               </TouchableOpacity>
             </View>
             <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
-              Search a team or program to reach every connected staff member at once.
+              {tr('teamReport.staffSearchHint')}
             </Text>
             {staffResults.map((r: any, idx: number) => (
               <TouchableOpacity key={idx} style={[shareStyles.resultRow, { flexDirection: 'row', alignItems: 'center' }]} onPress={() => sendToStaff(r)} disabled={sendingStaff}>
@@ -1097,7 +1098,7 @@ export default function TeamReportScreen() {
             ))}
             <View style={shareStyles.btnRow}>
               <TouchableOpacity style={shareStyles.cancelBtn} onPress={() => { setShowStaffShare(false); setShareSourceReport(null); }}>
-                <Text style={shareStyles.cancelText}>Cancel</Text>
+                <Text style={shareStyles.cancelText}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
             </View>
           </KeyboardAwareScrollView>
@@ -1108,13 +1109,13 @@ export default function TeamReportScreen() {
       <Modal visible={showShare} transparent animationType="slide">
         <KeyboardAvoidingView style={shareStyles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <KeyboardAwareScrollView style={shareStyles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
-            <Text style={shareStyles.title}>Share Team Report</Text>
+            <Text style={shareStyles.title}>{tr('teamReport.shareTeamReport')}</Text>
             {/* Report preview */}
             {shareSourceReport && (
               <View style={{ backgroundColor: t.chip, borderRadius: 8, padding: 12, marginBottom: 12 }}>
-                <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[700], marginBottom: 2 }}>SENDING REPORT</Text>
+                <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[700], marginBottom: 2 }}>{tr('teamReport.sendingReport')}</Text>
                 <Text style={{ color: t.ink, fontSize: 13, fontFamily: fonts[700] }}>
-                  {(shareSourceReport.output_type ?? outputType).replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                  {outputTypeLabel(shareSourceReport.output_type ?? outputType)}
                 </Text>
                 <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>
                   {new Date(shareSourceReport.created_at ?? Date.now()).toLocaleDateString()}
@@ -1124,7 +1125,7 @@ export default function TeamReportScreen() {
             {/* Section toggles — derived from this report's actual headings */}
             {reportSections.length > 1 && (
               <>
-                <Text style={[shareStyles.label, { marginBottom: 6 }]}>Include Sections</Text>
+                <Text style={[shareStyles.label, { marginBottom: 6 }]}>{tr('teamReport.includeSections')}</Text>
                 {reportSections.map(sec => (
                   <View key={sec.heading} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: t.chip, borderRadius: 8, padding: 10 }}>
                     <Text style={{ color: t.inkSoft, fontSize: 13, flex: 1, marginRight: 8 }} numberOfLines={1}>{sec.heading}</Text>
@@ -1140,15 +1141,15 @@ export default function TeamReportScreen() {
             )}
 
             {/* Target type selector */}
-            <Text style={shareStyles.label}>Send To</Text>
+            <Text style={shareStyles.label}>{tr('teamReport.sendTo')}</Text>
             <View style={shareStyles.targetRow}>
-              {([['player', 'Individual Player'], ['team', 'Whole Team']] as const).map(([key, label]) => (
+              {(['player', 'team'] as const).map(key => (
                 <TouchableOpacity
                   key={key}
                   style={[shareStyles.targetChip, shareTarget === key && shareStyles.targetChipActive]}
                   onPress={() => { setShareTarget(key); setSelectedShareTarget(null); setShareResults([]); }}
                 >
-                  <Text style={[shareStyles.targetChipText, shareTarget === key && shareStyles.targetChipTextActive]}>{label}</Text>
+                  <Text style={[shareStyles.targetChipText, shareTarget === key && shareStyles.targetChipTextActive]}>{key === 'player' ? tr('teamReport.individualPlayer') : tr('teamReport.wholeTeam')}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -1159,7 +1160,7 @@ export default function TeamReportScreen() {
                 <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
                   <VoiceTextInput
                     style={[shareStyles.input, { flex: 1 }]}
-                    placeholder="Search player name..."
+                    placeholder={tr('teamReport.searchPlayerPlaceholder')}
                     placeholderTextColor={t.muted2}
                     value={shareSearch}
                     onChangeText={setShareSearch}
@@ -1210,7 +1211,7 @@ export default function TeamReportScreen() {
                 <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
                   <VoiceTextInput
                     style={[shareStyles.input, { flex: 1 }]}
-                    placeholder="Search coach/program name..."
+                    placeholder={tr('teamReport.searchCoachPlaceholder')}
                     placeholderTextColor={t.muted2}
                     value={shareSearch}
                     onChangeText={setShareSearch}
@@ -1228,13 +1229,13 @@ export default function TeamReportScreen() {
                     <Text style={shareStyles.resultMeta}>{r.role} · {r.program_name}</Text>
                   </TouchableOpacity>
                 ))}
-                <Text style={{ color: t.muted2, fontSize: 11, marginTop: 4 }}>Search to find a specific staff member, or leave empty to notify all staff.</Text>
+                <Text style={{ color: t.muted2, fontSize: 11, marginTop: 4 }}>{tr('teamReport.allStaffHint')}</Text>
               </View>
             )}
 
             <VoiceTextInput
               style={[shareStyles.input, { marginTop: 8 }]}
-              placeholder="Add a message (optional)..."
+              placeholder={tr('teamReport.messagePlaceholder')}
               placeholderTextColor={t.muted2}
               value={shareMessage}
               onChangeText={setShareMessage}
@@ -1242,14 +1243,14 @@ export default function TeamReportScreen() {
 
             <View style={shareStyles.btnRow}>
               <TouchableOpacity style={shareStyles.cancelBtn} onPress={() => { setShowShare(false); setSelectedShareTarget(null); }}>
-                <Text style={shareStyles.cancelText}>Cancel</Text>
+                <Text style={shareStyles.cancelText}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[shareStyles.shareBtn, { opacity: (shareTarget === 'all_staff' || selectedShareTarget) ? 1 : 0.4 }]}
                 onPress={submitShare}
                 disabled={sharing || (shareTarget !== 'all_staff' && !selectedShareTarget)}
               >
-                {sharing ? <ActivityIndicator color={t.ctaText} /> : <Text style={shareStyles.shareBtnText}>Send</Text>}
+                {sharing ? <ActivityIndicator color={t.ctaText} /> : <Text style={shareStyles.shareBtnText}>{tr('common.send')}</Text>}
               </TouchableOpacity>
             </View>
           </KeyboardAwareScrollView>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -26,22 +27,26 @@ import { ScreenBackground } from '../theme/components';
 import { mdToHtml, safeFileName, wrapPrintDocument } from '../utils/mdToHtml';
 import { useAuth } from '../context/AuthContext';
 
+// Labels come from `reportTypes.*` translation keys at render time.
+// KEY values are API values — never translate them.
 const OUTPUT_TYPES = [
-  { key: 'coaching_report', label: 'Coaching Report' },
-  { key: 'game_analysis', label: 'Game Analysis' },
-  { key: 'scouting_report', label: 'Scouting Report' },
-  { key: 'film_breakdown', label: 'Film Breakdown' },
-  { key: 'box_score', label: 'Box Score' },
-  { key: 'team_training', label: 'Team Training' },
-  { key: 'game_situational', label: 'Game Situational' },
-  { key: 'matchup', label: 'Match Up' },
+  { key: 'coaching_report' },
+  { key: 'game_analysis' },
+  { key: 'scouting_report' },
+  { key: 'film_breakdown' },
+  { key: 'box_score' },
+  { key: 'team_training' },
+  { key: 'game_situational' },
+  { key: 'matchup' },
 ];
 
+// Labels come from `gameBuilder.modes.*` translation keys at render time.
+// KEY values are API values — never translate them.
 const MODES = [
-  { key: 'vs_opponent', label: 'My Program vs Opponent' },
-  { key: 'my_program', label: 'My Program' },
-  { key: 'opponent_only', label: 'Opponent Only' },
-  { key: 'opp_vs_opp', label: 'Opponent vs Opponent' },
+  { key: 'vs_opponent' },
+  { key: 'my_program' },
+  { key: 'opponent_only' },
+  { key: 'opp_vs_opp' },
 ];
 
 /** Strip markdown for plain-text clip preview snippets */
@@ -59,6 +64,7 @@ export default function GameReportBuilderScreen() {
   const navigation = useNavigation<any>();
   const { coach } = useAuth();
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const styles = makeStyles(t);
 
   const existingId: number | undefined = route.params?.reportId;
@@ -114,9 +120,9 @@ export default function GameReportBuilderScreen() {
       await gameReportsAPI.addCorrection(reportId, correctionText.trim());
       setCorrectionText('');
       await loadGameCorrections(reportId);
-      Alert.alert('Saved', 'Correction saved. Apply & Regenerate when ready.');
+      Alert.alert(tr('gameBuilder.correctionSavedTitle'), tr('gameBuilder.correctionSavedMessage'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save correction');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('gameBuilder.couldNotSaveCorrection'));
     } finally {
       setSavingCorrection(false);
     }
@@ -214,7 +220,7 @@ export default function GameReportBuilderScreen() {
   const isMatchup = outputType.split(',').includes('matchup');
   const extraTeamLabel = (tok: string) => {
     if (tok.startsWith('t') && /^\d+$/.test(tok.slice(1))) {
-      return teams.find((tm: any) => tm.id === Number(tok.slice(1)))?.name ?? 'Team';
+      return teams.find((tm: any) => tm.id === Number(tok.slice(1)))?.name ?? tr('gameBuilder.teamFallback');
     }
     return tok;
   };
@@ -245,17 +251,17 @@ export default function GameReportBuilderScreen() {
     });
     if (result.canceled || !result.assets[0]) return;
     const asset = result.assets[0];
-    Alert.alert('Whose film is this?', '', [
-      { text: 'My Team', onPress: () => uploadClip(asset, 'my_team') },
-      { text: 'Opponent', onPress: () => uploadClip(asset, 'opponent') },
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(tr('gameBuilder.whoseFilm'), '', [
+      { text: tr('gameBuilder.myTeam'), onPress: () => uploadClip(asset, 'my_team') },
+      { text: tr('gameBuilder.opponent'), onPress: () => uploadClip(asset, 'opponent') },
+      { text: tr('common.cancel'), style: 'cancel' },
     ]);
   };
 
   const uploadClip = async (asset: any, label: string) => {
     if (!reportId) return;
     setUploadingClip(true);
-    setClipProgress('Uploading film…');
+    setClipProgress(tr('gameBuilder.uploadingFilm'));
     try {
       // Stream the file straight from disk (native), NOT via FormData in JS
       // memory — that's what throws "Failed to grow buffer" on long film. The
@@ -263,13 +269,13 @@ export default function GameReportBuilderScreen() {
       // shown on the same overlay as the player-eval flow.
       const created = await uploadFileStreamed(`/game-reports/${reportId}/clips`, asset.uri, { label });
       if (created?.job_id) {
-        setClipProgress('Analyzing film…');
+        setClipProgress(tr('gameBuilder.analyzingFilm'));
         await evalsAPI.awaitJob(created.job_id, setClipProgress);
       }
       const refreshed = await gameReportsAPI.get(reportId);
       setReport(refreshed);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? e?.message ?? 'Could not upload clip');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('gameBuilder.couldNotUploadClip'));
     } finally {
       setUploadingClip(false);
       setClipProgress('');
@@ -288,7 +294,7 @@ export default function GameReportBuilderScreen() {
   const applyClipCorrection = async () => {
     if (!reportId || !clipModal || !clipCorrectionText.trim()) return;
     setClipCorrecting(true);
-    setClipProgress('Re-watching the film…');
+    setClipProgress(tr('gameBuilder.rewatchingFilm'));
     try {
       // Correcting a clip re-analyzes the actual film focused on the correction,
       // so it runs as a background job the client polls.
@@ -300,7 +306,7 @@ export default function GameReportBuilderScreen() {
       const updatedClip = (refreshed.clips ?? []).find((c: any) => c.id === clipModal.id);
       if (updatedClip) setClipModal(updatedClip);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not apply correction');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('gameBuilder.couldNotApplyCorrection'));
     } finally {
       setClipCorrecting(false);
       setClipProgress('');
@@ -325,7 +331,7 @@ export default function GameReportBuilderScreen() {
       if (docType === 'box_score') setBoxScore(updated.box_score ?? '');
       else setScoutingNotes(updated.scouting_notes ?? '');
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not read document');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('gameBuilder.couldNotReadDocument'));
     } finally {
       setUploadingDoc(null);
     }
@@ -345,7 +351,7 @@ export default function GameReportBuilderScreen() {
       loadVersions(reportId);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate report');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('gameBuilder.couldNotGenerate'));
     } finally {
       setGenerating(false);
     }
@@ -355,7 +361,7 @@ export default function GameReportBuilderScreen() {
     if (!reportId) return;
     const pending = correctionText.trim();
     if (!pending && gameCorrections.filter(c => !c.applied).length === 0) {
-      Alert.alert('Nothing to apply', 'Add a correction first.');
+      Alert.alert(tr('gameBuilder.nothingToApplyTitle'), tr('gameBuilder.nothingToApplyMessage'));
       return;
     }
     setCorrecting(true);
@@ -367,7 +373,7 @@ export default function GameReportBuilderScreen() {
       setCorrectionText('');
       await loadGameCorrections(reportId);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not apply correction');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('gameBuilder.couldNotApplyCorrection'));
     } finally {
       setCorrecting(false);
     }
@@ -395,16 +401,25 @@ export default function GameReportBuilderScreen() {
       setShowShare(false);
       setShareSearch('');
       setShareResults([]);
-      Alert.alert('Sent!', `Report sent to ${target.name}.`);
+      Alert.alert(tr('gameBuilder.sentTitle'), tr('gameBuilder.sentMessage', { name: target.name }));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not send report');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('gameBuilder.couldNotSendReport'));
     } finally {
       setSharing(false);
     }
   };
 
   const reportTypeLabel = () =>
-    report?.output_type ? outputTypeLabel(report.output_type) : 'Game Report';
+    report?.output_type ? outputTypeLabel(report.output_type) : tr('reportTypes.game_report');
+
+  // Display title for a saved version: one translated name per selected type.
+  const versionTitle = (ot: any) =>
+    String(ot || '')
+      .split(',')
+      .map((s: string) => s.trim())
+      .filter(Boolean)
+      .map((s: string) => tr(`reportTypes.${s}`, { defaultValue: s.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) }))
+      .join(' · ') || tr('reportTypes.report');
 
   const exportPdf = async () => {
     if (!report?.report_text) return;
@@ -424,18 +439,18 @@ export default function GameReportBuilderScreen() {
       await FileSystem.copyAsync({ from: uri, to: dest });
       await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: fileName });
     } catch (e: any) {
-      Alert.alert('Export Error', e?.message ?? 'Could not export');
+      Alert.alert(tr('gameBuilder.exportErrorTitle'), e?.message ?? tr('gameBuilder.couldNotExport'));
     }
   };
 
   const matchupLabel = () => {
-    const myName = teams.find(t => t.id === myTeamId)?.name ?? coach?.program_name ?? 'My Program';
-    const oppLabel = (teams.find(t => t.id === oppTeamId)?.name ?? oppName) || 'Opponent';
+    const myName = teams.find(t => t.id === myTeamId)?.name ?? coach?.program_name ?? tr('gameBuilder.myProgramFallback');
+    const oppLabel = (teams.find(t => t.id === oppTeamId)?.name ?? oppName) || tr('gameBuilder.opponentFallback');
     if (mode === 'opp_vs_opp') {
-      const a = teams.find(t => t.id === myTeamId)?.name ?? (oppAName || 'Opponent A');
-      return `${a} vs ${oppLabel}`;
+      const a = teams.find(t => t.id === myTeamId)?.name ?? (oppAName || tr('gameBuilder.opponentA'));
+      return tr('gameBuilder.vs', { a, b: oppLabel });
     }
-    if (mode === 'vs_opponent') return `${myName} vs ${oppLabel}`;
+    if (mode === 'vs_opponent') return tr('gameBuilder.vs', { a: myName, b: oppLabel });
     if (mode === 'my_program') return myName;
     return oppLabel;
   };
@@ -471,25 +486,25 @@ export default function GameReportBuilderScreen() {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Game Packet</Text>
+          <Text style={styles.headerTitle}>{tr('gameBuilder.headerTitle')}</Text>
         </View>
 
         {/* Packet name — prominent so it isn't skipped */}
-        <Text style={styles.label}>Packet Name</Text>
+        <Text style={styles.label}>{tr('gameBuilder.packetName')}</Text>
         <VoiceTextInput
           style={[styles.nameInput, !title.trim() && { borderColor: t.accent }]}
           value={title}
           onChangeText={setTitle}
           onBlur={() => save({ title: title.trim() || null })}
-          placeholder="Name this packet so you can find it later"
+          placeholder={tr('gameBuilder.packetNamePlaceholder')}
           placeholderTextColor={t.muted2}
         />
         {!title.trim() && (
-          <Text style={styles.nameHint}>Give your packet a name before you generate it.</Text>
+          <Text style={styles.nameHint}>{tr('gameBuilder.packetNameHint')}</Text>
         )}
 
         {/* Mode selector */}
-        <Text style={styles.label}>Report Context</Text>
+        <Text style={styles.label}>{tr('gameBuilder.reportContext')}</Text>
         <View style={styles.modeRow}>
           {MODES.map(m => (
             <TouchableOpacity
@@ -497,7 +512,7 @@ export default function GameReportBuilderScreen() {
               style={[styles.modeChip, mode === m.key && styles.modeChipActive]}
               onPress={() => { setMode(m.key); save({ mode: m.key }); }}
             >
-              <Text style={[styles.modeChipText, mode === m.key && styles.modeChipTextActive]}>{m.label}</Text>
+              <Text style={[styles.modeChipText, mode === m.key && styles.modeChipTextActive]}>{tr(`gameBuilder.modes.${m.key}`)}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -505,11 +520,11 @@ export default function GameReportBuilderScreen() {
         {/* Team selectors */}
         {mode !== 'opponent_only' && (
           <View style={styles.card}>
-            <Text style={styles.cardLabel}>{mode === 'opp_vs_opp' ? 'Opponent A' : 'My Team'}</Text>
+            <Text style={styles.cardLabel}>{mode === 'opp_vs_opp' ? tr('gameBuilder.opponentA') : tr('gameBuilder.myTeam')}</Text>
             <TouchableOpacity style={styles.teamPicker} onPress={() => { setShowMyTeamPicker(v => !v); setShowOppTeamPicker(false); }}>
               <Text style={styles.teamPickerText}>
                 {teams.find(t => t.id === myTeamId)?.name
-                  ?? (mode === 'opp_vs_opp' ? (oppAName || 'Select or type opponent...') : 'Select a team...')}
+                  ?? (mode === 'opp_vs_opp' ? (oppAName || tr('gameBuilder.selectOrTypeOpponent')) : tr('gameBuilder.selectTeam'))}
               </Text>
               <Ionicons name={showMyTeamPicker ? 'chevron-up' : 'chevron-down'} size={14} color={t.muted} />
             </TouchableOpacity>
@@ -518,7 +533,7 @@ export default function GameReportBuilderScreen() {
                 {mode === 'opp_vs_opp' && (
                   <VoiceTextInput
                     style={styles.oppNameInput}
-                    placeholder="Or type opponent name..."
+                    placeholder={tr('gameBuilder.typeOpponentPlaceholder')}
                     placeholderTextColor={t.muted2}
                     value={oppAName}
                     onChangeText={txt => { setOppAName(txt); setMyTeamId(null); }}
@@ -539,10 +554,10 @@ export default function GameReportBuilderScreen() {
 
         {mode !== 'my_program' && (
           <View style={styles.card}>
-            <Text style={styles.cardLabel}>{mode === 'opp_vs_opp' ? 'Opponent B' : 'Opponent'}</Text>
+            <Text style={styles.cardLabel}>{mode === 'opp_vs_opp' ? tr('gameBuilder.opponentB') : tr('gameBuilder.opponent')}</Text>
             <TouchableOpacity style={styles.teamPicker} onPress={() => { setShowOppTeamPicker(v => !v); setShowMyTeamPicker(false); }}>
               <Text style={styles.teamPickerText}>
-                {teams.find(t => t.id === oppTeamId)?.name ?? (oppName || 'Select or type opponent...')}
+                {teams.find(t => t.id === oppTeamId)?.name ?? (oppName || tr('gameBuilder.selectOrTypeOpponent'))}
               </Text>
               <Ionicons name={showOppTeamPicker ? 'chevron-up' : 'chevron-down'} size={14} color={t.muted} />
             </TouchableOpacity>
@@ -550,7 +565,7 @@ export default function GameReportBuilderScreen() {
               <View style={styles.pickerList}>
                 <VoiceTextInput
                   style={styles.oppNameInput}
-                  placeholder="Or type opponent name..."
+                  placeholder={tr('gameBuilder.typeOpponentPlaceholder')}
                   placeholderTextColor={t.muted2}
                   value={oppName}
                   onChangeText={txt => { setOppName(txt); setOppTeamId(null); }}
@@ -571,9 +586,9 @@ export default function GameReportBuilderScreen() {
         {/* Multi-team match-up: add a 3rd+ team to compare (only for Match Up) */}
         {isMatchup && (
           <View style={styles.card}>
-            <Text style={styles.cardLabel}>Additional Teams (Match Up)</Text>
+            <Text style={styles.cardLabel}>{tr('gameBuilder.additionalTeams')}</Text>
             <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8 }}>
-              Add a 3rd (or more) team to compare against the two above.
+              {tr('gameBuilder.additionalTeamsHint')}
             </Text>
             {extraTeams.length > 0 && (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
@@ -598,7 +613,7 @@ export default function GameReportBuilderScreen() {
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
               <VoiceTextInput
                 style={[styles.oppNameInput, { flex: 1, marginBottom: 0 }]}
-                placeholder="Or type a team/opponent name..."
+                placeholder={tr('gameBuilder.typeTeamPlaceholder')}
                 placeholderTextColor={t.muted2}
                 value={extraTeamText}
                 onChangeText={setExtraTeamText}
@@ -606,16 +621,16 @@ export default function GameReportBuilderScreen() {
                 returnKeyType="done"
               />
               <TouchableOpacity style={styles.addTeamBtn} onPress={addExtraTeamName}>
-                <Text style={styles.addTeamBtnText}>Add</Text>
+                <Text style={styles.addTeamBtnText}>{tr('gameBuilder.add')}</Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
 
         {/* Output type — select one or more to combine into a comprehensive report */}
-        <Text style={styles.label}>Report Type</Text>
+        <Text style={styles.label}>{tr('gameBuilder.reportType')}</Text>
         <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
-          Tap multiple to combine them into one comprehensive report.
+          {tr('gameBuilder.reportTypeHint')}
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
           {OUTPUT_TYPES.map(t => {
@@ -629,7 +644,7 @@ export default function GameReportBuilderScreen() {
                   const joined = (next.length ? next : [t.key]).join(',');
                   setOutputType(joined); save({ output_type: joined });
                 }}>
-                <Text style={[styles.chipText, isOn && styles.chipTextActive]}>{t.label}</Text>
+                <Text style={[styles.chipText, isOn && styles.chipTextActive]}>{tr(`reportTypes.${t.key}`)}</Text>
               </TouchableOpacity>
             );
           })}
@@ -637,32 +652,32 @@ export default function GameReportBuilderScreen() {
 
         {/* Film clips */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.label}>Film</Text>
+          <Text style={styles.label}>{tr('gameBuilder.film')}</Text>
           <TouchableOpacity style={styles.addBtn} onPress={pickClip} disabled={uploadingClip}>
             {uploadingClip
               ? <ActivityIndicator color={t.ctaText} size="small" />
-              : <><Ionicons name="add" size={14} color={t.ctaText} /><Text style={styles.addBtnText}>Add Film</Text></>
+              : <><Ionicons name="add" size={14} color={t.ctaText} /><Text style={styles.addBtnText}>{tr('gameBuilder.addFilm')}</Text></>
             }
           </TouchableOpacity>
         </View>
         {clips.length === 0 ? (
-          <Text style={styles.emptyHint}>No film added yet. Tap "Add Film" to upload a clip.</Text>
+          <Text style={styles.emptyHint}>{tr('gameBuilder.noFilmYet')}</Text>
         ) : (
           clips.map((clip: any) => (
             <TouchableOpacity
               key={clip.id}
               style={styles.clipCard}
               onPress={() => { setClipModal(clip); setClipCorrectionText(''); }}
-              onLongPress={() => Alert.alert('Delete clip?', '', [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Delete', style: 'destructive', onPress: () => deleteClip(clip.id) },
+              onLongPress={() => Alert.alert(tr('gameBuilder.deleteClipTitle'), '', [
+                { text: tr('common.cancel'), style: 'cancel' },
+                { text: tr('common.delete'), style: 'destructive', onPress: () => deleteClip(clip.id) },
               ])}
             >
               <View style={[styles.clipLabel, clip.label === 'my_team' ? styles.clipLabelMy : styles.clipLabelOpp]}>
-                <Text style={styles.clipLabelText}>{clip.label === 'my_team' ? 'My Team' : 'Opponent'}</Text>
+                <Text style={styles.clipLabelText}>{clip.label === 'my_team' ? tr('gameBuilder.myTeam') : tr('gameBuilder.opponent')}</Text>
               </View>
               <Text style={styles.clipAnalysis} numberOfLines={2}>
-                {clip.analysis_text ? stripMarkdownForPreview(clip.analysis_text).slice(0, 120) + '...' : 'Analyzing...'}
+                {clip.analysis_text ? stripMarkdownForPreview(clip.analysis_text).slice(0, 120) + '...' : tr('gameBuilder.analyzing')}
               </Text>
               <Ionicons name="chevron-forward" size={14} color={t.muted2} />
             </TouchableOpacity>
@@ -672,24 +687,24 @@ export default function GameReportBuilderScreen() {
         {/* Film analysis progress — under the film area, above box score. */}
         <GeneratingOverlay
           visible={uploadingClip}
-          label={clipProgress || 'Analyzing film…'}
+          label={clipProgress || tr('gameBuilder.analyzingFilm')}
           realProgress={parseGenProgress(clipProgress)}
         />
 
         {/* Box Score */}
         <View onLayout={e => { boxScoreY.current = e.nativeEvent.layout.y; }}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.label}>Box Score / Stats</Text>
+            <Text style={styles.label}>{tr('gameBuilder.boxScoreStats')}</Text>
             <TouchableOpacity style={styles.importBtn} onPress={() => pickDoc('box_score')} disabled={uploadingDoc === 'box_score'}>
               {uploadingDoc === 'box_score'
                 ? <ActivityIndicator color={t.muted} size="small" />
-                : <><Ionicons name="document-outline" size={14} color={t.muted} /><Text style={styles.importBtnText}>Import</Text></>
+                : <><Ionicons name="document-outline" size={14} color={t.muted} /><Text style={styles.importBtnText}>{tr('gameBuilder.import')}</Text></>
               }
             </TouchableOpacity>
           </View>
           <VoiceTextInput
             style={styles.textArea}
-            placeholder="Paste box score, stats, or game data..."
+            placeholder={tr('gameBuilder.boxScorePlaceholder')}
             placeholderTextColor={t.muted2}
             value={boxScore}
             onChangeText={setBoxScore}
@@ -703,17 +718,17 @@ export default function GameReportBuilderScreen() {
         {/* Scouting Notes */}
         <View onLayout={e => { scoutingY.current = e.nativeEvent.layout.y; }}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.label}>Scouting Notes</Text>
+            <Text style={styles.label}>{tr('gameBuilder.scoutingNotes')}</Text>
             <TouchableOpacity style={styles.importBtn} onPress={() => pickDoc('scouting_notes')} disabled={uploadingDoc === 'scouting_notes'}>
               {uploadingDoc === 'scouting_notes'
                 ? <ActivityIndicator color={t.muted} size="small" />
-                : <><Ionicons name="document-outline" size={14} color={t.muted} /><Text style={styles.importBtnText}>Import</Text></>
+                : <><Ionicons name="document-outline" size={14} color={t.muted} /><Text style={styles.importBtnText}>{tr('gameBuilder.import')}</Text></>
               }
             </TouchableOpacity>
           </View>
           <VoiceTextInput
             style={styles.textArea}
-            placeholder="Add scouting notes, observations, tendencies..."
+            placeholder={tr('gameBuilder.scoutingNotesPlaceholder')}
             placeholderTextColor={t.muted2}
             value={scoutingNotes}
             onChangeText={setScoutingNotes}
@@ -726,10 +741,10 @@ export default function GameReportBuilderScreen() {
 
         {/* Focus */}
         <View onLayout={e => { focusPromptY.current = e.nativeEvent.layout.y; }}>
-          <Text style={styles.label}>Focus (optional)</Text>
+          <Text style={styles.label}>{tr('gameBuilder.focusOptional')}</Text>
           <VoiceTextInput
             style={[styles.textArea, { minHeight: 60 }]}
-            placeholder="e.g. Upcoming tournament, press defense scheme..."
+            placeholder={tr('gameBuilder.focusPlaceholder')}
             placeholderTextColor={t.muted2}
             value={focusPrompt}
             onChangeText={setFocusPrompt}
@@ -743,24 +758,24 @@ export default function GameReportBuilderScreen() {
         {/* Generate */}
         <TouchableOpacity style={styles.generateBtn} onPress={generate} disabled={generating}>
           {generating
-            ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.generateText}>  Generating...</Text></>
-            : <><Ionicons name="sparkles" size={18} color={t.ctaText} /><Text style={styles.generateText}>  Generate Report</Text></>
+            ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.generateText}>  {tr('gameBuilder.generating')}</Text></>
+            : <><Ionicons name="sparkles" size={18} color={t.ctaText} /><Text style={styles.generateText}>  {tr('gameBuilder.generateReport')}</Text></>
           }
         </TouchableOpacity>
         {generating && (
-          <Text style={styles.hint}>Analyzing all sources. This may take 30–60 seconds.</Text>
+          <Text style={styles.hint}>{tr('gameBuilder.generatingHint')}</Text>
         )}
-        <GeneratingOverlay visible={generating} label="Analyzing all sources and building the report…" />
+        <GeneratingOverlay visible={generating} label={tr('gameBuilder.generatingOverlay')} />
         <GeneratingOverlay
           visible={uploadingClip}
           realProgress={parseGenProgress(clipProgress)}
-          label={clipProgress || 'Uploading and analyzing film — keep this screen open.'}
+          label={clipProgress || tr('gameBuilder.uploadingOverlay')}
         />
 
         {/* Saved reports — one per report-type selection, kept in the packet */}
         {versions.length > 0 && (
           <View style={{ marginTop: 28 }}>
-            <Text style={styles.label}>Saved Reports ({versions.length})</Text>
+            <Text style={styles.label}>{tr('gameBuilder.savedReports', { count: versions.length })}</Text>
             <View style={{ marginTop: 10, gap: 8 }}>
               {versions.map((v: any) => (
                 <TouchableOpacity
@@ -770,10 +785,10 @@ export default function GameReportBuilderScreen() {
                 >
                   <View style={{ flex: 1 }}>
                     <Text style={{ color: t.ink, fontSize: 13, fontFamily: fonts[700] }} numberOfLines={1}>
-                      {String(v.output_type || '').split(',').map((s: string) => s.replace(/_/g, ' ').trim()).filter(Boolean).map((s: string) => s.replace(/\b\w/g, c => c.toUpperCase())).join(' · ') || 'Report'}
+                      {versionTitle(v.output_type)}
                     </Text>
                     <Text style={{ color: t.muted2, fontSize: 11, marginTop: 2 }}>
-                      Updated {new Date(v.updated_at || v.created_at).toLocaleDateString()}
+                      {tr('gameBuilder.updated', { date: new Date(v.updated_at || v.created_at).toLocaleDateString() })}
                     </Text>
                   </View>
                   <Ionicons name="chevron-forward" size={16} color={t.muted2} />
@@ -786,18 +801,18 @@ export default function GameReportBuilderScreen() {
         {/* Report output */}
         {report?.report_text ? (
           <View style={{ marginTop: 28 }}>
-            <Text style={styles.label}>Generated Report</Text>
+            <Text style={styles.label}>{tr('gameBuilder.generatedReport')}</Text>
             <View style={styles.reportBox}>
               {renderReport(report.report_text, { heading: t.ink, body: t.inkSoft })}
             </View>
             <View style={styles.actionRow}>
               <TouchableOpacity style={styles.actionBtn} onPress={() => setShowExport(true)}>
                 <Ionicons name="download-outline" size={16} color={t.muted} />
-                <Text style={styles.actionText}>Export / Print</Text>
+                <Text style={styles.actionText}>{tr('gameBuilder.exportPrint')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn} onPress={() => setShowShareModal(true)}>
                 <Ionicons name="share-social-outline" size={16} color={t.muted} />
-                <Text style={styles.actionText}>Share</Text>
+                <Text style={styles.actionText}>{tr('common.share')}</Text>
               </TouchableOpacity>
             </View>
 
