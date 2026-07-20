@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
@@ -31,34 +32,37 @@ const REPORT_TYPE_TAB: Record<string, string> = {
 };
 
 // Program system & philosophy — matches the backend coach_context field keys.
-const SYSTEM_FIELDS: { key: string; label: string; placeholder: string }[] = [
-  { key: 'offensive_system', label: 'Offensive System', placeholder: 'Pace, spacing, primary actions (motion, ball-screen heavy, Princeton…), who initiates.' },
-  { key: 'defensive_system', label: 'Defensive System', placeholder: 'Man / zone / switch-everything / drop / press, physicality, rotations.' },
-  { key: 'archetypes', label: 'Player Archetypes You Value', placeholder: 'What you recruit/develop for — 3&D wings, positionless bigs, rim protection, secondary creators…' },
-  { key: 'development', label: 'Development / Training Philosophy', placeholder: 'Skill priorities, how you build players, load approach.' },
-  { key: 'recruiting', label: 'Recruiting Lens', placeholder: 'Level, timeline, the swing skills that change your evaluation.' },
-  { key: 'culture', label: 'Culture / Non-Negotiables', placeholder: 'The intangibles and standards you weight heavily.' },
+// Labels/placeholders come from the `home.systemFields.*` translation keys.
+const SYSTEM_FIELDS: { key: string }[] = [
+  { key: 'offensive_system' },
+  { key: 'defensive_system' },
+  { key: 'archetypes' },
+  { key: 'development' },
+  { key: 'recruiting' },
+  { key: 'culture' },
 ];
 
-const REPORT_TYPES: { key: string; label: string; icon: IconName; desc: string }[] = [
-  { key: 'player_eval', label: 'Player Eval', icon: 'user', desc: 'Individual BIM evaluation scored across all 6 pillars' },
-  { key: 'film_breakdown', label: 'Film Breakdown', icon: 'film', desc: 'Frame-by-frame film analysis of technique and decisions' },
-  { key: 'scouting_report', label: 'Scouting Report', icon: 'search', desc: 'Recruitment-grade scouting report for a target player' },
-  { key: 'coaching_report', label: 'Coaching Report', icon: 'clipboard', desc: 'Coach-facing breakdown with practice and scheme focus' },
-  { key: 'game_analysis', label: 'Game Analysis', icon: 'bar-chart-3', desc: 'Full game film analysis covering both sides of the ball' },
-  { key: 'training_program', label: 'Training Program', icon: 'dumbbell', desc: 'Personalized skill development program from eval data' },
-  { key: 'recruitment_profile', label: 'Recruitment', icon: 'award', desc: 'Next-level recruitment profile and college projection' },
-  { key: 'position_analysis', label: 'Position Analysis', icon: 'map-pin', desc: 'Position-specific role fit and skill translation analysis' },
-  { key: 'box_score', label: 'Box Score', icon: 'list', desc: 'Game and season box score stats imported and analyzed by BIM' },
+// Labels/descs come from the `home.reportTypes.*` translation keys.
+const REPORT_TYPES: { key: string; icon: IconName }[] = [
+  { key: 'player_eval', icon: 'user' },
+  { key: 'film_breakdown', icon: 'film' },
+  { key: 'scouting_report', icon: 'search' },
+  { key: 'coaching_report', icon: 'clipboard' },
+  { key: 'game_analysis', icon: 'bar-chart-3' },
+  { key: 'training_program', icon: 'dumbbell' },
+  { key: 'recruitment_profile', icon: 'award' },
+  { key: 'position_analysis', icon: 'map-pin' },
+  { key: 'box_score', icon: 'list' },
 ];
 
-const PILLARS: { key: string; label: string; icon: IconName; desc: string }[] = [
-  { key: 'offensive_skills', label: 'Offensive Skills', icon: 'target', desc: 'Scoring, creation, shooting mechanics, footwork, P&R' },
-  { key: 'defensive_capabilities', label: 'Defense', icon: 'shield', desc: 'On-ball defense, help-side, IQ, communication, rotations' },
-  { key: 'physical_attributes', label: 'Physical', icon: 'dumbbell', desc: 'Athleticism, size, length, speed, strength, explosiveness' },
-  { key: 'intangibles', label: 'Intangibles', icon: 'brain', desc: 'IQ, coachability, leadership, motor, competitive drive' },
-  { key: 'advanced_analysis', label: 'Advanced', icon: 'activity', desc: 'Shot selection, efficiency metrics, tendencies, adjustments' },
-  { key: 'strategic_fit', label: 'Strategic Fit', icon: 'crosshair', desc: 'System fit, positional versatility, lineup compatibility' },
+// Labels/descs come from the `home.pillars.*` translation keys.
+const PILLARS: { key: string; icon: IconName }[] = [
+  { key: 'offensive_skills', icon: 'target' },
+  { key: 'defensive_capabilities', icon: 'shield' },
+  { key: 'physical_attributes', icon: 'dumbbell' },
+  { key: 'intangibles', icon: 'brain' },
+  { key: 'advanced_analysis', icon: 'activity' },
+  { key: 'strategic_fit', icon: 'crosshair' },
 ];
 
 const ROLES = ['coach', 'scout', 'trainer'];
@@ -67,6 +71,7 @@ export default function HomeScreen() {
   const { coach, logout, updateProfile, importPhilosophy } = useAuth();
   const navigation = useNavigation<any>();
   const { t, mode, toggle } = useTheme();
+  const { t: tr } = useTranslation();
   const [unreadCount, setUnreadCount] = useState(0);
 
   // Profile edit modal
@@ -96,11 +101,11 @@ export default function HomeScreen() {
     setSubmittingFeedback(true);
     try {
       // TODO: wire up what happens on submit (per your instructions to come).
-      Alert.alert('Thanks!', 'Your feedback has been submitted.');
+      Alert.alert(tr('home.feedbackThanksTitle'), tr('home.feedbackThanksMsg'));
       setFeedbackText('');
       setShowFeedback(false);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not submit your feedback.');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('home.feedbackSubmitError'));
     } finally {
       setSubmittingFeedback(false);
     }
@@ -123,9 +128,9 @@ export default function HomeScreen() {
       setImportingPhilosophy(true);
       const updated = await importPhilosophy(form);
       setSys({ ...(updated.system_profile ?? {}) });
-      Alert.alert('Imported', 'Your philosophy fields were updated and the document is now kept as a standing reference for the AI. Review below, then Save.');
+      Alert.alert(tr('home.importedTitle'), tr('home.importedMsg'));
     } catch (e: any) {
-      Alert.alert('Import failed', e?.response?.data?.detail ?? 'Could not import that document.');
+      Alert.alert(tr('home.importFailedTitle'), e?.response?.data?.detail ?? tr('home.importFailedMsg'));
     } finally {
       setImportingPhilosophy(false);
     }
@@ -164,24 +169,24 @@ export default function HomeScreen() {
       await updateProfile({ system_profile: sys });
       setShowSystem(false);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save system profile');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('home.saveSystemError'));
     } finally {
       setSavingSystem(false);
     }
   };
 
   const saveProfile = async () => {
-    if (!pName.trim()) { Alert.alert('Name required', 'Please enter your name.'); return; }
+    if (!pName.trim()) { Alert.alert(tr('home.nameRequiredTitle'), tr('home.nameRequiredMsg')); return; }
     const email = pEmail.trim();
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      Alert.alert('Invalid email', 'Please enter a valid email address.'); return;
+      Alert.alert(tr('home.invalidEmailTitle'), tr('home.invalidEmailMsg')); return;
     }
     setSavingProfile(true);
     try {
       await updateProfile({ name: pName.trim(), email: email || undefined, program_name: pProgram.trim(), competition_level: pLevel, role: pRole, country: pCountry || undefined, city: pCity.trim() || undefined });
       setShowProfile(false);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update profile');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('home.updateProfileError'));
     } finally {
       setSavingProfile(false);
     }
@@ -194,11 +199,15 @@ export default function HomeScreen() {
   }, []));
 
   const handleSignOut = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign Out', style: 'destructive', onPress: logout },
+    Alert.alert(tr('home.signOut'), tr('home.signOutConfirm'), [
+      { text: tr('common.cancel'), style: 'cancel' },
+      { text: tr('home.signOut'), style: 'destructive', onPress: logout },
     ]);
   };
+
+  // Display label for a role key ('coach' | 'scout' | 'trainer').
+  const roleLabel = (r?: string | null) =>
+    r === 'scout' ? tr('auth.roleScout') : r === 'trainer' ? tr('auth.roleTrainer') : tr('auth.roleCoach');
 
   const CircleBtn = ({ icon, onPress, badge, label }: { icon: IconName; onPress: () => void; badge?: number; label: string }) => (
     <TouchableOpacity
@@ -225,20 +234,20 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <View style={{ flex: 1, marginRight: 8 }}>
-              <Text style={[typeScale.label, { color: t.label, marginBottom: 4 }]}>Intelligence Model</Text>
+              <Text style={[typeScale.label, { color: t.label, marginBottom: 4 }]}>{tr('home.intelligenceModel')}</Text>
               <Text style={[typeScale.h1, { color: t.ink }]}>BloomPrint</Text>
             </View>
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-              <CircleBtn icon={mode === 'dark' ? 'sun' : 'moon'} onPress={toggle} label="Toggle theme" />
-              <CircleBtn icon="user" onPress={openProfile} label="Edit profile" />
-              <CircleBtn icon="mail" onPress={() => navigation.navigate('StaffInbox')} label="Staff inbox" />
-              <CircleBtn icon="bell" onPress={() => navigation.navigate('CoachNotifications')} badge={unreadCount} label="Notifications" />
+              <CircleBtn icon={mode === 'dark' ? 'sun' : 'moon'} onPress={toggle} label={tr('home.toggleTheme')} />
+              <CircleBtn icon="user" onPress={openProfile} label={tr('home.editProfileLabel')} />
+              <CircleBtn icon="mail" onPress={() => navigation.navigate('StaffInbox')} label={tr('home.staffInboxLabel')} />
+              <CircleBtn icon="bell" onPress={() => navigation.navigate('CoachNotifications')} badge={unreadCount} label={tr('home.notificationsLabel')} />
             </View>
           </View>
           {/* Coach line + AI command pill on one row */}
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 8 }}>
             <Text style={[typeScale.bodySoft, { color: t.muted, flex: 1 }]} numberOfLines={1}>
-              {coach ? `${coach.name} · ${coach.role ? coach.role.charAt(0).toUpperCase() + coach.role.slice(1) : 'Coach'} · ${coach.program_name}` : ''}
+              {coach ? `${coach.name} · ${roleLabel(coach.role)} · ${coach.program_name}` : ''}
             </Text>
             <CommandBar />
           </View>
@@ -246,7 +255,7 @@ export default function HomeScreen() {
 
         {/* Report Types */}
         <View style={{ paddingHorizontal: 22, marginTop: 22 }}>
-          <SectionLabel>Report Types</SectionLabel>
+          <SectionLabel>{tr('home.reportTypesHeader')}</SectionLabel>
           <View style={styles.grid}>
             {REPORT_TYPES.map(rt => (
               <TouchableOpacity
@@ -260,8 +269,8 @@ export default function HomeScreen() {
               >
                 <Card padding={16} style={{ flex: 1 }}>
                   <IconTile name={rt.icon} variant="accent" size={44} />
-                  <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 15.5, marginTop: 12 }]}>{rt.label}</Text>
-                  <Text style={[typeScale.bodySoft, { color: t.muted, fontSize: 12, lineHeight: 17, marginTop: 4 }]}>{rt.desc}</Text>
+                  <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 15.5, marginTop: 12 }]}>{tr(`home.reportTypes.${rt.key}.label`)}</Text>
+                  <Text style={[typeScale.bodySoft, { color: t.muted, fontSize: 12, lineHeight: 17, marginTop: 4 }]}>{tr(`home.reportTypes.${rt.key}.desc`)}</Text>
                 </Card>
               </TouchableOpacity>
             ))}
@@ -277,8 +286,8 @@ export default function HomeScreen() {
                 <View style={{ width: 44, height: 44, borderRadius: 13, backgroundColor: t.accent, alignItems: 'center', justifyContent: 'center' }}>
                   <Icon name="message-square" size={22} color={t.ctaText} strokeWidth={2} />
                 </View>
-                <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 15.5, marginTop: 12 }]}>Feedback</Text>
-                <Text style={[typeScale.bodySoft, { color: t.inkSoft, fontSize: 12, lineHeight: 17, marginTop: 4 }]}>Questions, comments, or issues — tell us anything</Text>
+                <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 15.5, marginTop: 12 }]}>{tr('home.feedbackTitle')}</Text>
+                <Text style={[typeScale.bodySoft, { color: t.inkSoft, fontSize: 12, lineHeight: 17, marginTop: 4 }]}>{tr('home.feedbackTileDesc')}</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -286,15 +295,15 @@ export default function HomeScreen() {
 
         {/* 6 Pillars */}
         <View style={{ paddingHorizontal: 22, marginTop: 26 }}>
-          <SectionLabel>The 6 Pillars</SectionLabel>
+          <SectionLabel>{tr('home.sixPillarsHeader')}</SectionLabel>
           <Card padding={6}>
             {PILLARS.map((p, i) => (
               <View key={p.key}>
                 <View style={styles.pillarRow}>
                   <IconTile name={p.icon} variant="accent" size={44} />
                   <View style={{ flex: 1 }}>
-                    <Text style={{ fontFamily: fonts[700], fontSize: 14.5, color: t.ink }}>{p.label}</Text>
-                    <Text style={[typeScale.bodySoft, { color: t.muted, fontSize: 12, lineHeight: 17, marginTop: 2 }]}>{p.desc}</Text>
+                    <Text style={{ fontFamily: fonts[700], fontSize: 14.5, color: t.ink }}>{tr(`home.pillars.${p.key}.label`)}</Text>
+                    <Text style={[typeScale.bodySoft, { color: t.muted, fontSize: 12, lineHeight: 17, marginTop: 2 }]}>{tr(`home.pillars.${p.key}.desc`)}</Text>
                   </View>
                 </View>
                 {i < PILLARS.length - 1 && <View style={{ height: 1, backgroundColor: t.divider, marginLeft: 12 }} />}
@@ -309,18 +318,18 @@ export default function HomeScreen() {
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, padding: 24, paddingBottom: 36 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20 }]}>Feedback</Text>
+              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20 }]}>{tr('home.feedbackTitle')}</Text>
               <TouchableOpacity onPress={() => setShowFeedback(false)}>
                 <Icon name="x" size={22} color={t.muted} strokeWidth={2} />
               </TouchableOpacity>
             </View>
             <Text style={{ color: t.muted, fontSize: 13, lineHeight: 19, marginBottom: 14 }}>
-              Have a question, comment, or issue? Tell us anything — we read every note.
+              {tr('home.feedbackIntro')}
             </Text>
             <VoiceTextInput
               style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line, minHeight: 120 }}
               value={feedbackText} onChangeText={setFeedbackText}
-              placeholder="What's on your mind?" placeholderTextColor={t.muted2}
+              placeholder={tr('home.feedbackPlaceholder')} placeholderTextColor={t.muted2}
               multiline textAlignVertical="top"
             />
             <TouchableOpacity
@@ -330,7 +339,7 @@ export default function HomeScreen() {
             >
               {submittingFeedback
                 ? <ActivityIndicator color={t.ctaText} size="small" />
-                : <><Icon name="send" size={16} color={t.ctaText} strokeWidth={2} /><Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 15 }}>Submit</Text></>}
+                : <><Icon name="send" size={16} color={t.ctaText} strokeWidth={2} /><Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 15 }}>{tr('home.submit')}</Text></>}
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -342,29 +351,29 @@ export default function HomeScreen() {
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, maxHeight: '90%' }}>
             <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 36 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20 }]}>Edit Profile</Text>
+              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20 }]}>{tr('home.editProfileTitle')}</Text>
               <TouchableOpacity onPress={() => setShowProfile(false)}>
                 <Icon name="x" size={22} color={t.muted} strokeWidth={2} />
               </TouchableOpacity>
             </View>
 
-            <Text style={[typeScale.label, { color: t.label, marginBottom: 8 }]}>Name</Text>
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8 }]}>{tr('home.name')}</Text>
             <TextInput
               style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line }}
               value={pName} onChangeText={setPName}
-              placeholder="Your name" placeholderTextColor={t.muted2}
+              placeholder={tr('home.namePlaceholder')} placeholderTextColor={t.muted2}
             />
 
-            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>Email</Text>
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>{tr('auth.email')}</Text>
             <TextInput
               style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line }}
               value={pEmail} onChangeText={setPEmail}
-              placeholder="you@email.com" placeholderTextColor={t.muted2}
+              placeholder={tr('home.emailPlaceholder')} placeholderTextColor={t.muted2}
               autoCapitalize="none" keyboardType="email-address"
             />
-            <Text style={{ color: t.muted2, fontSize: 11, marginTop: 4 }}>This is the email you sign in with.</Text>
+            <Text style={{ color: t.muted2, fontSize: 11, marginTop: 4 }}>{tr('home.emailHint')}</Text>
 
-            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>Role</Text>
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>{tr('home.role')}</Text>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               {ROLES.map(r => (
                 <TouchableOpacity
@@ -373,30 +382,30 @@ export default function HomeScreen() {
                   onPress={() => setPRole(r)}
                 >
                   <Text style={{ color: pRole === r ? t.ctaText : t.muted, fontFamily: fonts[700], fontSize: 14 }}>
-                    {r.charAt(0).toUpperCase() + r.slice(1)}
+                    {roleLabel(r)}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
 
-            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>App Language</Text>
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>{tr('home.appLanguage')}</Text>
             <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 8 }}>
-              The app, your reports, and Ask BloomPrint all use this language.
+              {tr('home.appLanguageHint')}
             </Text>
             <View style={{ alignItems: 'flex-start' }}>
               <LanguagePicker onChanged={(code) => { updateProfile({ preferred_language: code } as any).catch(() => {}); }} />
             </View>
 
-            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>Program / Organization</Text>
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>{tr('home.programOrganization')}</Text>
             <TextInput
               style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line }}
               value={pProgram} onChangeText={setPProgram}
-              placeholder="Program name" placeholderTextColor={t.muted2}
+              placeholder={tr('home.programNamePlaceholder')} placeholderTextColor={t.muted2}
             />
 
-            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>Competition Level</Text>
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>{tr('auth.competitionLevel')}</Text>
             <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 8 }}>
-              Every eval, report, and training program is calibrated to this level. Changing it updates the default everywhere.
+              {tr('home.competitionLevelHint')}
             </Text>
             <TouchableOpacity
               style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: t.card, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: t.line }}
@@ -421,12 +430,12 @@ export default function HomeScreen() {
               </View>
             )}
 
-            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>Location</Text>
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>{tr('auth.location')}</Text>
             <CountryField value={pCountry} onChange={setPCountry} />
             <TextInput
               style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line }}
               value={pCity} onChangeText={setPCity}
-              placeholder="City / Region (optional)" placeholderTextColor={t.muted2}
+              placeholder={tr('auth.cityRegionOptional')} placeholderTextColor={t.muted2}
             />
 
             <TouchableOpacity
@@ -434,8 +443,8 @@ export default function HomeScreen() {
               onPress={openSystem}
             >
               <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 14 }}>Program System & Philosophy</Text>
-                <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>How the AI should read the game for you</Text>
+                <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 14 }}>{tr('home.systemPhilosophyRowTitle')}</Text>
+                <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>{tr('home.systemPhilosophyRowDesc')}</Text>
               </View>
               <Icon name="chevron-right" size={18} color={t.muted} strokeWidth={2} />
             </TouchableOpacity>
@@ -446,7 +455,7 @@ export default function HomeScreen() {
             >
               {savingProfile
                 ? <ActivityIndicator color={t.ctaText} />
-                : <Text style={{ color: t.ctaText, fontFamily: fonts[800], fontSize: 15 }}>Save Changes</Text>}
+                : <Text style={{ color: t.ctaText, fontFamily: fonts[800], fontSize: 15 }}>{tr('home.saveChanges')}</Text>}
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -454,7 +463,7 @@ export default function HomeScreen() {
               onPress={() => { setShowProfile(false); handleSignOut(); }}
             >
               <Icon name="log-out" size={16} color={t.negative} strokeWidth={2} />
-              <Text style={{ color: t.negative, fontFamily: fonts[700], fontSize: 14 }}>Sign Out</Text>
+              <Text style={{ color: t.negative, fontFamily: fonts[700], fontSize: 14 }}>{tr('home.signOut')}</Text>
             </TouchableOpacity>
             </ScrollView>
           </View>
@@ -466,15 +475,14 @@ export default function HomeScreen() {
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 50, borderWidth: 1, borderColor: t.cardBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingBottom: 8 }}>
-              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 19 }]}>System & Philosophy</Text>
+              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 19 }]}>{tr('home.systemModalTitle')}</Text>
               <TouchableOpacity onPress={() => setShowSystem(false)}>
                 <Icon name="x" size={22} color={t.muted} strokeWidth={2} />
               </TouchableOpacity>
             </View>
             <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingTop: 4, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
               <Text style={{ color: t.muted, fontSize: 13, lineHeight: 19, marginBottom: 14 }}>
-                Describe your program's system and what you value. The AI keeps this in mind on every report,
-                framing players as fit for the way YOU play. Fill in what's relevant — leave the rest blank.
+                {tr('home.systemIntro')}
               </Text>
 
               {/* Import philosophy document */}
@@ -485,18 +493,17 @@ export default function HomeScreen() {
               >
                 <Icon name="upload" size={16} color={t.accent} strokeWidth={2} />
                 <Text style={{ color: t.accent, fontFamily: fonts[700], fontSize: 12.5, flex: 1 }}>
-                  Import philosophy document (PDF, Word, image, text)
+                  {tr('home.importPhilosophyBtn')}
                 </Text>
               </TouchableOpacity>
               <Text style={{ color: t.muted2, fontSize: 11.5, lineHeight: 16, marginBottom: 10 }}>
-                The AI reads it, adds the details to the fields below, and keeps the document as a standing
-                reference on every future report.
+                {tr('home.importPhilosophyHint')}
               </Text>
               {!!coach?.philosophy_reference && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 14 }}>
                   <Icon name="check-circle" size={14} color={t.positive} strokeWidth={2} />
                   <Text style={{ color: t.positive, fontSize: 12, fontFamily: fonts[600] }}>
-                    Reference document on file for the AI
+                    {tr('home.referenceOnFile')}
                   </Text>
                 </View>
               )}
@@ -506,20 +513,20 @@ export default function HomeScreen() {
               >
                 <Icon name="list" size={16} color={t.ink} strokeWidth={2} />
                 <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 12.5, flex: 1 }}>
-                  Re-run the guided setup (chips + questions)
+                  {tr('home.rerunGuidedSetup')}
                 </Text>
                 <Icon name="chevron-right" size={16} color={t.muted} strokeWidth={2} />
               </TouchableOpacity>
-              <GeneratingOverlay visible={importingPhilosophy} label="Reading your philosophy document…" />
+              <GeneratingOverlay visible={importingPhilosophy} label={tr('home.readingPhilosophy')} />
 
               {SYSTEM_FIELDS.map(f => (
                 <View key={f.key} style={{ marginBottom: 16 }}>
-                  <Text style={[typeScale.label, { color: t.label, marginBottom: 6 }]}>{f.label}</Text>
+                  <Text style={[typeScale.label, { color: t.label, marginBottom: 6 }]}>{tr(`home.systemFields.${f.key}.label`)}</Text>
                   <TextInput
                     style={{ backgroundColor: t.card, borderRadius: 12, padding: 13, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 76, textAlignVertical: 'top' }}
                     value={sys[f.key] ?? ''}
                     onChangeText={txt => setSys(prev => ({ ...prev, [f.key]: txt }))}
-                    placeholder={f.placeholder} placeholderTextColor={t.muted2}
+                    placeholder={tr(`home.systemFields.${f.key}.placeholder`)} placeholderTextColor={t.muted2}
                     multiline
                   />
                 </View>
@@ -530,7 +537,7 @@ export default function HomeScreen() {
               >
                 {savingSystem
                   ? <ActivityIndicator color={t.ctaText} />
-                  : <Text style={{ color: t.ctaText, fontFamily: fonts[800], fontSize: 15 }}>Save Philosophy</Text>}
+                  : <Text style={{ color: t.ctaText, fontFamily: fonts[800], fontSize: 15 }}>{tr('home.savePhilosophy')}</Text>}
               </TouchableOpacity>
             </KeyboardAwareScrollView>
           </View>

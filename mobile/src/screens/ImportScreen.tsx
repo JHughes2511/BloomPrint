@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -16,42 +17,28 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 
-const OUTPUT_TYPES = [
-  { key: 'player_eval',         label: 'Player Eval' },
-  { key: 'box_score',           label: 'Box Score' },
-  { key: 'scouting_report',     label: 'Scouting Report' },
-  { key: 'film_breakdown',      label: 'Film Breakdown' },
-  { key: 'coaching_report',     label: 'Coaching Report' },
-  { key: 'recruitment_profile', label: 'Recruitment' },
-  { key: 'game_analysis',       label: 'Game Analysis' },
+// API output_type keys — labels come from the importScreen.outputTypes.* catalog.
+const OUTPUT_TYPE_KEYS = [
+  'player_eval',
+  'box_score',
+  'scouting_report',
+  'film_breakdown',
+  'coaching_report',
+  'recruitment_profile',
+  'game_analysis',
 ];
 
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
 const LEVELS = [...CANON_LEVELS];
 
-const TEMPLATE_COLUMNS = [
-  { name: 'Player Name *', desc: 'Full name — required, used to match existing players' },
-  { name: 'Position', desc: 'PG, SG, SF, PF, C' },
-  { name: 'Competition Level', desc: 'HS Varsity, College, Pro, etc.' },
-  { name: 'Overall Grade', desc: 'Number 0–10' },
-  { name: 'Offensive Skills', desc: 'Pillar grade 0–10' },
-  { name: 'Defense', desc: 'Pillar grade 0–10' },
-  { name: 'Physical', desc: 'Pillar grade 0–10' },
-  { name: 'Intangibles', desc: 'Pillar grade 0–10' },
-  { name: 'Advanced', desc: 'Pillar grade 0–10' },
-  { name: 'Strategic Fit', desc: 'Pillar grade 0–10' },
-  { name: 'Green Flags', desc: 'Comma-separated strengths' },
-  { name: 'Watch Flags', desc: 'Comma-separated concerns' },
-  { name: 'Notes', desc: 'Free-text scouting notes or report' },
+// Catalog keys under importScreen.templateColumns.* / importScreen.rosterColumns.*
+const TEMPLATE_COLUMN_KEYS = [
+  'playerName', 'position', 'competitionLevel', 'overallGrade', 'offensiveSkills',
+  'defense', 'physical', 'intangibles', 'advanced', 'strategicFit',
+  'greenFlags', 'watchFlags', 'notes',
 ];
 
-const ROSTER_COLUMNS = [
-  { name: 'Player Name *', desc: 'Full name — required' },
-  { name: 'Position', desc: 'PG, SG, SF, PF, C' },
-  { name: 'Height', desc: "e.g. 6'2\"" },
-  { name: 'Wingspan', desc: "e.g. 6'5\" (also accepted: WS)" },
-  { name: 'Competition Level', desc: 'HS Varsity, College, Pro, etc.' },
-];
+const ROSTER_COLUMN_KEYS = ['playerName', 'position', 'height', 'wingspan', 'competitionLevel'];
 
 interface ImportResult {
   players_created: number;
@@ -65,6 +52,7 @@ export default function ImportScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const { coach } = useAuth();
   const styles = makeStyles(t);
   const isRosterMode = route.params?.mode === 'roster';
@@ -108,7 +96,7 @@ export default function ImportScreen() {
       setSelectedTeamId(team.id);
       setNewTeamName('');
     } catch {
-      Alert.alert('Error', 'Could not create team');
+      Alert.alert(tr('common.error'), tr('importScreen.couldNotCreateTeam'));
     } finally {
       setCreatingTeam(false);
     }
@@ -117,7 +105,7 @@ export default function ImportScreen() {
   // Step 1: AI reads any file and extracts the roster for the coach to confirm.
   const analyzeFile = async () => {
     if (!file) {
-      Alert.alert('Select a file', 'Tap the box above to choose a file first — any type works (Excel, PDF, photo, Word, text).');
+      Alert.alert(tr('importScreen.selectFileTitle'), tr('importScreen.selectFileMsg'));
       return;
     }
     setAnalyzing(true);
@@ -125,11 +113,11 @@ export default function ImportScreen() {
       const res = await importsAPI.rosterPreview({ uri: file.uri, name: file.name, type: file.type ?? 'application/octet-stream' });
       const players = (res?.players ?? []).map((p: any) => ({ ...p, _include: true }));
       if (!players.length) {
-        Alert.alert('Nothing found', 'The AI could not find any players in that file. Try a clearer roster.');
+        Alert.alert(tr('importScreen.nothingFoundTitle'), tr('importScreen.nothingFoundMsg'));
       }
       setPreview(players);
     } catch (e: any) {
-      Alert.alert('Import Error', e?.response?.data?.detail ?? 'Could not read that file');
+      Alert.alert(tr('importScreen.importErrorTitle'), e?.response?.data?.detail ?? tr('importScreen.couldNotReadFile'));
     } finally {
       setAnalyzing(false);
     }
@@ -139,9 +127,9 @@ export default function ImportScreen() {
   const commitPlayers = async () => {
     if (!preview) return;
     const players = preview.filter(p => p._include).map(({ _include, ...rest }) => rest);
-    if (!players.length) { Alert.alert('No players selected', 'Keep at least one player to import.'); return; }
+    if (!players.length) { Alert.alert(tr('importScreen.noPlayersSelectedTitle'), tr('importScreen.noPlayersSelectedMsg')); return; }
     if (isRosterMode && !selectedTeamId) {
-      Alert.alert('Team Required', 'Please select or create a team before importing.');
+      Alert.alert(tr('importScreen.teamRequiredTitle'), tr('importScreen.teamRequiredMsg'));
       return;
     }
     setUploading(true);
@@ -150,7 +138,7 @@ export default function ImportScreen() {
       setResult({ players_created: res.created, players_found: res.updated, evaluations_created: 0, rows_processed: players.length, errors: [] });
       setPreview(null);
     } catch (e: any) {
-      Alert.alert('Import Error', e?.response?.data?.detail ?? 'Could not import players');
+      Alert.alert(tr('importScreen.importErrorTitle'), e?.response?.data?.detail ?? tr('importScreen.couldNotImportPlayers'));
     } finally {
       setUploading(false);
     }
@@ -175,11 +163,9 @@ export default function ImportScreen() {
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
           <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.title}>{isRosterMode ? 'Import Roster' : 'Import Players'}</Text>
+            <Text style={styles.title}>{isRosterMode ? tr('importScreen.titleRoster') : tr('importScreen.titlePlayers')}</Text>
             <Text style={styles.sub}>
-              {isRosterMode
-                ? 'Add players to a team from any file — the AI reads it'
-                : 'Import players from any file — the AI reads it'}
+              {isRosterMode ? tr('importScreen.subRoster') : tr('importScreen.subPlayers')}
             </Text>
           </View>
         </View>
@@ -187,8 +173,8 @@ export default function ImportScreen() {
         {/* ── ROSTER MODE: Team selector ── */}
         {isRosterMode && (
           <View style={styles.teamSection}>
-            <Text style={styles.label}>Team *</Text>
-            <Text style={styles.hint}>Select a team or create a new one. Players will be added to this team.</Text>
+            <Text style={styles.label}>{tr('importScreen.teamRequiredLabel')}</Text>
+            <Text style={styles.hint}>{tr('importScreen.teamHint')}</Text>
 
             {/* Selected team badge */}
             {selectedTeam && (
@@ -205,7 +191,7 @@ export default function ImportScreen() {
             <View style={styles.createTeamRow}>
               <VoiceTextInput
                 style={styles.createTeamInput}
-                placeholder="Create new team name..."
+                placeholder={tr('importScreen.createTeamPlaceholder')}
                 placeholderTextColor={t.muted2}
                 value={newTeamName}
                 onChangeText={setNewTeamName}
@@ -218,7 +204,7 @@ export default function ImportScreen() {
               >
                 {creatingTeam
                   ? <ActivityIndicator color={t.ctaText} size="small" />
-                  : <Text style={styles.createTeamBtnText}>Create</Text>
+                  : <Text style={styles.createTeamBtnText}>{tr('common.create')}</Text>
                 }
               </TouchableOpacity>
             </View>
@@ -227,7 +213,7 @@ export default function ImportScreen() {
             {teams.length > 0 && (
               <>
                 <TouchableOpacity style={styles.teamPickerToggle} onPress={() => setShowTeamPicker(v => !v)}>
-                  <Text style={styles.teamPickerToggleText}>Or select existing team</Text>
+                  <Text style={styles.teamPickerToggleText}>{tr('importScreen.orSelectExisting')}</Text>
                   <Ionicons name={showTeamPicker ? 'chevron-up' : 'chevron-down'} size={14} color={t.muted} />
                 </TouchableOpacity>
                 {showTeamPicker && (
@@ -250,8 +236,8 @@ export default function ImportScreen() {
         )}
 
         {/* File picker — any file type */}
-        <Text style={styles.label}>File</Text>
-        <Text style={styles.hint}>Any file works — Excel, CSV, PDF, Word, or a photo/screenshot of a roster. The AI reads it and shows you a preview.</Text>
+        <Text style={styles.label}>{tr('importScreen.fileLabel')}</Text>
+        <Text style={styles.hint}>{tr('importScreen.fileHint')}</Text>
         <TouchableOpacity style={[styles.filePicker, file && styles.filePickerDone]} onPress={pickFile}>
           <Ionicons
             name={file ? 'document-text' : 'cloud-upload-outline'}
@@ -259,13 +245,13 @@ export default function ImportScreen() {
             color={file ? t.positive : t.muted}
           />
           <Text style={[styles.filePickerText, file && { color: t.positive }]}>
-            {file ? file.name : 'Tap to select a file (any type)'}
+            {file ? file.name : tr('importScreen.tapToSelectFile')}
           </Text>
         </TouchableOpacity>
 
         {/* Default competition level — shown for both modes */}
-        <Text style={styles.label}>Default Competition Level</Text>
-        <Text style={styles.hint}>Used for rows that don't have a "Competition Level" column.</Text>
+        <Text style={styles.label}>{tr('importScreen.defaultLevelLabel')}</Text>
+        <Text style={styles.hint}>{tr('importScreen.defaultLevelHint')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24 }}>
           {LEVELS.map(l => (
             <TouchableOpacity
@@ -281,30 +267,30 @@ export default function ImportScreen() {
         {/* Eval mode only: report type + team assignment */}
         {!isRosterMode && (
           <>
-            <Text style={styles.label}>Default Report Type</Text>
-            <Text style={styles.hint}>Used for rows that don't have an "Output Type" column.</Text>
+            <Text style={styles.label}>{tr('importScreen.defaultReportType')}</Text>
+            <Text style={styles.hint}>{tr('importScreen.defaultReportHint')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
-              {OUTPUT_TYPES.map(t => (
+              {OUTPUT_TYPE_KEYS.map(key => (
                 <TouchableOpacity
-                  key={t.key}
-                  style={[styles.chip, outputType === t.key && styles.chipActive]}
-                  onPress={() => setOutputType(t.key)}
+                  key={key}
+                  style={[styles.chip, outputType === key && styles.chipActive]}
+                  onPress={() => setOutputType(key)}
                 >
-                  <Text style={[styles.chipText, outputType === t.key && styles.chipTextActive]}>{t.label}</Text>
+                  <Text style={[styles.chipText, outputType === key && styles.chipTextActive]}>{tr(`importScreen.outputTypes.${key}`)}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
 
             {teams.length > 0 && (
               <>
-                <Text style={styles.label}>Assign to Team (optional)</Text>
-                <Text style={styles.hint}>Imported players will be added to this team.</Text>
+                <Text style={styles.label}>{tr('importScreen.assignToTeam')}</Text>
+                <Text style={styles.hint}>{tr('importScreen.assignToTeamHint')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24 }}>
                   <TouchableOpacity
                     style={[styles.chip, selectedTeamId == null && styles.chipActive]}
                     onPress={() => setSelectedTeamId(null)}
                   >
-                    <Text style={[styles.chipText, selectedTeamId == null && styles.chipTextActive]}>No Team</Text>
+                    <Text style={[styles.chipText, selectedTeamId == null && styles.chipTextActive]}>{tr('importScreen.noTeamChip')}</Text>
                   </TouchableOpacity>
                   {teams.map(t => (
                     <TouchableOpacity
@@ -330,8 +316,8 @@ export default function ImportScreen() {
             activeOpacity={0.85}
           >
             {analyzing
-              ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.uploadText}>  Reading file…</Text></>
-              : <><Ionicons name="sparkles" size={18} color={t.ctaText} /><Text style={styles.uploadText}>  Analyze File</Text></>
+              ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.uploadText}>  {tr('importScreen.readingFile')}</Text></>
+              : <><Ionicons name="sparkles" size={18} color={t.ctaText} /><Text style={styles.uploadText}>  {tr('importScreen.analyzeFile')}</Text></>
             }
           </TouchableOpacity>
         )}
@@ -339,8 +325,8 @@ export default function ImportScreen() {
         {/* Step 2 — preview + confirm */}
         {preview && (
           <View style={{ marginTop: 8 }}>
-            <Text style={styles.label}>Preview ({preview.filter(p => p._include).length} players)</Text>
-            <Text style={styles.hint}>Review what the AI found. Tap a player to include/exclude, then import.</Text>
+            <Text style={styles.label}>{tr('importScreen.previewCount', { count: preview.filter(p => p._include).length })}</Text>
+            <Text style={styles.hint}>{tr('importScreen.previewHint')}</Text>
             {preview.map((p, i) => (
               <TouchableOpacity
                 key={i}
@@ -353,14 +339,14 @@ export default function ImportScreen() {
                     {p.jersey_number ? `#${p.jersey_number} ` : ''}{p.name}
                   </Text>
                   <Text style={{ color: t.muted2, fontSize: 11, marginTop: 2 }}>
-                    {[p.position, p.height, p.wingspan ? `ws ${p.wingspan}` : '', p.school_name].filter(Boolean).join(' · ') || 'No extra details'}
+                    {[p.position, p.height, p.wingspan ? tr('importScreen.wingspanShort', { value: p.wingspan }) : '', p.school_name].filter(Boolean).join(' · ') || tr('importScreen.noExtraDetails')}
                   </Text>
                 </View>
               </TouchableOpacity>
             ))}
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
               <TouchableOpacity style={[styles.uploadBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setPreview(null)}>
-                <Ionicons name="refresh" size={16} color={t.ink} /><Text style={[styles.uploadText, { color: t.ink }]}>  Redo</Text>
+                <Ionicons name="refresh" size={16} color={t.ink} /><Text style={[styles.uploadText, { color: t.ink }]}>  {tr('importScreen.redo')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.uploadBtn, { flex: 1.6 }, (isRosterMode && !selectedTeamId) && styles.uploadBtnDisabled]}
@@ -369,8 +355,8 @@ export default function ImportScreen() {
                 activeOpacity={0.85}
               >
                 {uploading
-                  ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.uploadText}>  Importing…</Text></>
-                  : <><Ionicons name="cloud-upload" size={18} color={t.ctaText} /><Text style={styles.uploadText}>  Import {preview.filter(p => p._include).length} Players</Text></>}
+                  ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.uploadText}>  {tr('importScreen.importing')}</Text></>
+                  : <><Ionicons name="cloud-upload" size={18} color={t.ctaText} /><Text style={styles.uploadText}>  {tr('importScreen.importCount', { count: preview.filter(p => p._include).length })}</Text></>}
               </TouchableOpacity>
             </View>
           </View>
@@ -379,63 +365,57 @@ export default function ImportScreen() {
         {/* Result */}
         {result && (
           <View style={styles.resultBox}>
-            <Text style={styles.resultTitle}>Import Complete</Text>
+            <Text style={styles.resultTitle}>{tr('importScreen.importComplete')}</Text>
             <View style={styles.statRow}>
               <View style={styles.stat}>
                 <Text style={styles.statNum}>{result.rows_processed}</Text>
-                <Text style={styles.statLabel}>Rows Read</Text>
+                <Text style={styles.statLabel}>{tr('importScreen.rowsRead')}</Text>
               </View>
               <View style={styles.stat}>
                 <Text style={[styles.statNum, { color: t.positive }]}>{result.players_created}</Text>
-                <Text style={styles.statLabel}>Players Added</Text>
+                <Text style={styles.statLabel}>{tr('importScreen.playersAdded')}</Text>
               </View>
               <View style={styles.stat}>
                 <Text style={[styles.statNum, { color: t.accent }]}>{result.players_found}</Text>
-                <Text style={styles.statLabel}>Players Matched</Text>
+                <Text style={styles.statLabel}>{tr('importScreen.playersMatched')}</Text>
               </View>
               {!isRosterMode && (
                 <View style={styles.stat}>
                   <Text style={[styles.statNum, { color: t.accent }]}>{result.evaluations_created}</Text>
-                  <Text style={styles.statLabel}>Evals Created</Text>
+                  <Text style={styles.statLabel}>{tr('importScreen.evalsCreated')}</Text>
                 </View>
               )}
             </View>
             {result.errors.length > 0 && (
               <View style={styles.errorBox}>
-                <Text style={styles.errorTitle}>Errors ({result.errors.length})</Text>
+                <Text style={styles.errorTitle}>{tr('importScreen.errorsCount', { count: result.errors.length })}</Text>
                 {result.errors.map((e, i) => (
                   <Text key={i} style={styles.errorText}>· {e}</Text>
                 ))}
               </View>
             )}
             <TouchableOpacity style={styles.doneBtn} onPress={() => navigation.goBack()}>
-              <Text style={styles.doneBtnText}>{isRosterMode ? 'Back to Roster' : 'Go to Roster'}</Text>
+              <Text style={styles.doneBtnText}>{isRosterMode ? tr('importScreen.backToRoster') : tr('importScreen.goToRoster')}</Text>
             </TouchableOpacity>
           </View>
         )}
 
         {/* Column guide */}
-        <Text style={[styles.label, { marginTop: 32 }]}>Expected Columns</Text>
-        <Text style={styles.hint}>
-          Row 1 must be a header row. Column names are flexible — the system recognises common variations.
-          Only "Player Name" is required.
-        </Text>
+        <Text style={[styles.label, { marginTop: 32 }]}>{tr('importScreen.expectedColumns')}</Text>
+        <Text style={styles.hint}>{tr('importScreen.expectedColumnsHint')}</Text>
         <View style={styles.columnGuide}>
-          {(isRosterMode ? ROSTER_COLUMNS : TEMPLATE_COLUMNS).map((col, i) => (
-            <View key={i} style={styles.colRow}>
-              <Text style={styles.colName}>{col.name}</Text>
-              <Text style={styles.colDesc}>{col.desc}</Text>
+          {(isRosterMode ? ROSTER_COLUMN_KEYS : TEMPLATE_COLUMN_KEYS).map((colKey) => (
+            <View key={colKey} style={styles.colRow}>
+              <Text style={styles.colName}>{tr(`importScreen.${isRosterMode ? 'rosterColumns' : 'templateColumns'}.${colKey}.name`)}</Text>
+              <Text style={styles.colDesc}>{tr(`importScreen.${isRosterMode ? 'rosterColumns' : 'templateColumns'}.${colKey}.desc`)}</Text>
             </View>
           ))}
         </View>
 
         {!isRosterMode && (
           <View style={styles.exampleBox}>
-            <Text style={styles.exampleTitle}>Example row</Text>
-            <Text style={styles.exampleText}>
-              John Doe | PG | HS Varsity | 8.5 | 9.0 | 7.5 | 8.0 | 8.5 | 7.0 | 9.0 |
-              Elite shooter, High IQ | Needs off-dribble work | Great court vision and leadership
-            </Text>
+            <Text style={styles.exampleTitle}>{tr('importScreen.exampleRow')}</Text>
+            <Text style={styles.exampleText}>{tr('importScreen.exampleText')}</Text>
           </View>
         )}
       </KeyboardAwareScrollView>

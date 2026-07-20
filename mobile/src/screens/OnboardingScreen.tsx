@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert,
   KeyboardAvoidingView, Platform, TextInput,
@@ -15,20 +16,15 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 
-// Draft preset chips per field — refine later.
-const FIELDS = [
-  { key: 'offensive_system', label: 'Offensive System', desc: 'How your team plays on offense — pace, spacing, primary actions.',
-    chips: ['Motion', 'Ball-screen heavy', 'Pace-and-space', 'Princeton', 'Dribble-drive', 'Triangle', 'Flex', 'Read-and-react', 'Transition / Run', 'Five-out', 'Horns', 'Post-centric', 'Two-man game', 'Skilled/High IQ guard'] },
-  { key: 'defensive_system', label: 'Defensive System', desc: 'Your defensive identity and coverages.',
-    chips: ['Man-to-man', 'Pack-line', 'Switch everything', 'Drop coverage', 'Hedge / Blitz', '2-3 zone', '3-2 zone', '1-3-1 zone', 'Merrimack zone', 'Full-court press', 'Half-court trap', 'No-middle / Force baseline'] },
-  { key: 'archetypes', label: 'Player Archetypes You Value', desc: 'The kinds of players you recruit and develop for.',
-    chips: ['3&D wings', 'Positionless bigs', 'Rim protectors', 'Secondary creators', 'Two-way guards', 'Stretch bigs', 'Point-of-attack defenders', 'High-motor connectors', 'Shot creators', 'Floor generals', 'Crafty shot-maker / Scoring mindset'] },
-  { key: 'development', label: 'Development / Training Philosophy', desc: 'How you build players.',
-    chips: ['Skill-first', 'Strength & conditioning', 'Film / IQ', 'Shooting mechanics / Ball handling', 'Individual workouts', 'Load management', 'Positionless development', 'Habits & fundamentals'] },
-  { key: 'recruiting', label: 'Recruiting Lens', desc: 'Where and how you recruit, and what swings your evaluation.',
-    chips: ['High school', 'AAU / club', 'JUCO', 'Transfer portal', 'International', 'Prep school', 'Local / regional', 'National', 'Character-first', 'Upside / projection', 'Immediate impact', 'Adaptability / positional versatility'] },
-  { key: 'culture', label: 'Culture / Non-Negotiables', desc: 'The standards and intangibles you weight heavily.',
-    chips: ['Accountability', 'Toughness', 'Selflessness', 'Competitiveness', 'Discipline', 'Coachability', 'Work ethic', 'Communication', 'Family / brotherhood', 'Detail-oriented'] },
+// Wizard fields — labels/descs/chips come from the `onboarding.fields.*`
+// translation keys. Keys match the backend coach_context field keys.
+const FIELD_KEYS = [
+  'offensive_system',
+  'defensive_system',
+  'archetypes',
+  'development',
+  'recruiting',
+  'culture',
 ];
 
 type FieldVal = { chips: string[]; text: string };
@@ -37,8 +33,9 @@ export default function OnboardingScreen() {
   const { coach, updateProfile } = useAuth();
   const navigation = useNavigation<any>();
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const styles = makeStyles(t);
-  const totalPages = FIELDS.length + 1; // + team step
+  const totalPages = FIELD_KEYS.length + 1; // + team step
   const [page, setPage] = useState(0);
   const [values, setValues] = useState<Record<string, FieldVal>>({});
   const [saving, setSaving] = useState(false);
@@ -51,9 +48,10 @@ export default function OnboardingScreen() {
   const [subteams, setSubteams] = useState<any[]>([]);
   const [joining, setJoining] = useState<number | null>(null);
 
-  const isTeamPage = page === FIELDS.length;
-  const field = !isTeamPage ? FIELDS[page] : null;
-  const val = field ? (values[field.key] ?? { chips: [], text: '' }) : { chips: [], text: '' };
+  const isTeamPage = page === FIELD_KEYS.length;
+  const fieldKey = !isTeamPage ? FIELD_KEYS[page] : null;
+  const fieldChips = fieldKey ? (tr(`onboarding.fields.${fieldKey}.chips`, { returnObjects: true }) as string[]) : [];
+  const val = fieldKey ? (values[fieldKey] ?? { chips: [], text: '' }) : { chips: [], text: '' };
 
   const toggleChip = (key: string, chip: string) => {
     setValues(prev => {
@@ -78,13 +76,13 @@ export default function OnboardingScreen() {
       await teamStaffAPI.join(team.id);
       setJoinedTeam(team);
       try { setSubteams(await teamStaffAPI.subteams(team.id)); } catch { setSubteams([]); }
-    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not join.'); }
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('onboarding.couldNotJoin')); }
     finally { setJoining(null); }
   };
   const joinSubteam = async (sub: any) => {
     setJoining(sub.id);
-    try { await teamStaffAPI.join(sub.id); Alert.alert('Joined', `You joined ${sub.name}.`); }
-    catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not join.'); }
+    try { await teamStaffAPI.join(sub.id); Alert.alert(tr('onboarding.joinedTitle'), tr('onboarding.joinedMsg', { name: sub.name })); }
+    catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('onboarding.couldNotJoin')); }
     finally { setJoining(null); }
   };
 
@@ -92,18 +90,18 @@ export default function OnboardingScreen() {
     setSaving(true);
     try {
       const sp: Record<string, string> = { ...(coach?.system_profile ?? {}) };
-      FIELDS.forEach(f => {
-        const v = values[f.key];
+      FIELD_KEYS.forEach(k => {
+        const v = values[k];
         if (!v) return;
         const parts = [v.chips.join(', '), (v.text || '').trim()].filter(Boolean);
-        if (parts.length) sp[f.key] = parts.join('. ');
+        if (parts.length) sp[k] = parts.join('. ');
       });
       await updateProfile({ system_profile: sp, onboarded: true });
       // When re-run from Profile, pop back; on first-run the Root re-renders
       // into the app once onboarded flips true.
       if (navigation.canGoBack()) navigation.goBack();
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not finish setup.');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('onboarding.couldNotFinish'));
       setSaving(false);
     }
   };
@@ -116,7 +114,7 @@ export default function OnboardingScreen() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.header}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={styles.stepLabel}>Step {page + 1} of {totalPages}</Text>
+            <Text style={styles.stepLabel}>{tr('onboarding.step', { current: page + 1, total: totalPages })}</Text>
             <LanguagePicker compact onChanged={(code) => { updateProfile({ preferred_language: code } as any).catch(() => {}); }} />
           </View>
           <View style={styles.progressTrack}>
@@ -125,40 +123,40 @@ export default function OnboardingScreen() {
         </View>
 
         <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 22, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
-          {field ? (
+          {fieldKey ? (
             <>
-              <Text style={styles.title}>{field.label}</Text>
-              <Text style={styles.desc}>{field.desc}</Text>
-              <Text style={styles.subLabel}>Select all that apply</Text>
+              <Text style={styles.title}>{tr(`onboarding.fields.${fieldKey}.label`)}</Text>
+              <Text style={styles.desc}>{tr(`onboarding.fields.${fieldKey}.desc`)}</Text>
+              <Text style={styles.subLabel}>{tr('onboarding.selectAllThatApply')}</Text>
               <View style={styles.chipWrap}>
-                {field.chips.map(chip => {
+                {fieldChips.map(chip => {
                   const on = val.chips.includes(chip);
                   return (
-                    <TouchableOpacity key={chip} style={[styles.chip, on && styles.chipOn]} onPress={() => toggleChip(field.key, chip)}>
+                    <TouchableOpacity key={chip} style={[styles.chip, on && styles.chipOn]} onPress={() => toggleChip(fieldKey, chip)}>
                       <Text style={[styles.chipText, on && styles.chipTextOn]}>{chip}</Text>
                     </TouchableOpacity>
                   );
                 })}
               </View>
-              <Text style={styles.subLabel}>Add your own details</Text>
+              <Text style={styles.subLabel}>{tr('onboarding.addYourOwnDetails')}</Text>
               <VoiceTextInput
                 style={styles.input}
-                placeholder="Type or dictate anything specific to how YOU do this…"
+                placeholder={tr('onboarding.detailsPlaceholder')}
                 placeholderTextColor={t.muted2}
                 value={val.text}
-                onChangeText={txt => setText(field.key, txt)}
+                onChangeText={txt => setText(fieldKey, txt)}
                 multiline
                 textAlignVertical="top"
               />
             </>
           ) : (
             <>
-              <Text style={styles.title}>Join your team</Text>
-              <Text style={styles.desc}>Search for your team to join its staff. You can also do this later, or continue without a team.</Text>
+              <Text style={styles.title}>{tr('onboarding.joinTeamTitle')}</Text>
+              <Text style={styles.desc}>{tr('onboarding.joinTeamDesc')}</Text>
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
                 <TextInput
                   style={[styles.input, { flex: 1, minHeight: 46 }]}
-                  placeholder="Search by team name..."
+                  placeholder={tr('onboarding.teamSearchPlaceholder')}
                   placeholderTextColor={t.muted2}
                   value={teamSearch}
                   onChangeText={setTeamSearch}
@@ -173,22 +171,22 @@ export default function OnboardingScreen() {
                 <View key={team.id} style={styles.teamRow}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.teamName}>{team.name}</Text>
-                    {team.coach_name && <Text style={styles.teamSub}>Head Coach: {team.coach_name}</Text>}
+                    {team.coach_name && <Text style={styles.teamSub}>{tr('onboarding.headCoach', { name: team.coach_name })}</Text>}
                   </View>
                   <TouchableOpacity style={styles.joinBtn} onPress={() => joinTeam(team)} disabled={joining === team.id}>
-                    {joining === team.id ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.joinText}>Join</Text>}
+                    {joining === team.id ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.joinText}>{tr('onboarding.join')}</Text>}
                   </TouchableOpacity>
                 </View>
               ))}
               {joinedTeam && (
                 <View style={{ marginTop: 12 }}>
-                  <Text style={styles.subLabel}>Joined {joinedTeam.name}. Join a sub-team?</Text>
-                  {subteams.length === 0 && <Text style={styles.teamSub}>No sub-teams available.</Text>}
+                  <Text style={styles.subLabel}>{tr('onboarding.joinedSubteamPrompt', { name: joinedTeam.name })}</Text>
+                  {subteams.length === 0 && <Text style={styles.teamSub}>{tr('onboarding.noSubteams')}</Text>}
                   {subteams.map(sub => (
                     <View key={sub.id} style={styles.teamRow}>
                       <Text style={[styles.teamName, { flex: 1 }]}>{sub.name}</Text>
                       <TouchableOpacity style={styles.joinBtn} onPress={() => joinSubteam(sub)} disabled={joining === sub.id}>
-                        {joining === sub.id ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.joinText}>Join</Text>}
+                        {joining === sub.id ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.joinText}>{tr('onboarding.join')}</Text>}
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -200,13 +198,13 @@ export default function OnboardingScreen() {
 
         <View style={styles.footer}>
           {page > 0 ? (
-            <TouchableOpacity style={styles.backBtn} onPress={back}><Text style={styles.backText}>Back</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.backBtn} onPress={back}><Text style={styles.backText}>{tr('common.back')}</Text></TouchableOpacity>
           ) : <View style={{ flex: 1 }} />}
           {!isTeamPage && (
-            <TouchableOpacity style={styles.skipBtn} onPress={next}><Text style={styles.skipText}>Skip</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.skipBtn} onPress={next}><Text style={styles.skipText}>{tr('common.skip')}</Text></TouchableOpacity>
           )}
           <TouchableOpacity style={styles.nextBtn} onPress={next} disabled={saving}>
-            {saving ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.nextText}>{isTeamPage ? 'Finish' : 'Next'}</Text>}
+            {saving ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.nextText}>{isTeamPage ? tr('onboarding.finish') : tr('common.next')}</Text>}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

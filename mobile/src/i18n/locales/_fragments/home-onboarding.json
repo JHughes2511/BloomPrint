@@ -40,6 +40,7 @@
     "emailPlaceholder": "you@email.com",
     "emailHint": "This is the email you sign in with.",
     "role": "Role",
+    "appLanguage": "App Language",
     "appLanguageHint": "The app, your reports, and Ask BloomPrint all use this language.",
     "programOrganization": "Program / Organization",
     "programNamePlaceholder": "Program name",

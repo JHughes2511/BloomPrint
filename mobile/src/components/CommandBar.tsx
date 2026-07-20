@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView, ActivityIndicator, Alert, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -7,6 +8,7 @@ import { assistantAPI } from '../api/client';
 import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay } from './GeneratingBasketball';
 import { useTheme } from '../theme/ThemeProvider';
+import i18n from '../i18n';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 
@@ -107,12 +109,13 @@ function goTo(navigation: any, target: { screen: string; params?: any; label?: s
         navigation.navigate('HomeTab', { screen: 'Home' });
     }
   } catch {
-    Alert.alert('Could not open', "I couldn't open that screen automatically.");
+    Alert.alert(i18n.t('copilot.couldNotOpenTitle'), i18n.t('copilot.couldNotOpenMsg'));
   }
 }
 
 export default function CommandBar() {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const s = makeStyles(t);
   const navigation = useNavigation<any>();
   const [open, setOpen] = useState(false);
@@ -153,7 +156,7 @@ export default function CommandBar() {
         navigate: res.navigate || null, pending: res.pending_action || null,
       }]);
     } catch (e: any) {
-      setMessages(prev => [...prev, { role: 'assistant', content: e?.response?.data?.detail ?? 'Something went wrong. Try again.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: e?.response?.data?.detail ?? tr('copilot.errorTryAgain') }]);
     } finally {
       setBusy(false);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
@@ -166,10 +169,10 @@ export default function CommandBar() {
     try {
       const res = await assistantAPI.confirm(action);
       setMessages(prev => prev.map((m, i) => i === idx ? { ...m, ran: true } : m).concat([{
-        role: 'assistant', content: res.message || 'Done.', navigate: res.navigate || null,
+        role: 'assistant', content: res.message || tr('copilot.done'), navigate: res.navigate || null,
       }]));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not complete that.');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('copilot.couldNotComplete'));
     } finally {
       setBusy(false);
       setRunningIdx(null);
@@ -182,7 +185,7 @@ export default function CommandBar() {
       {/* Collapsed command bar — compact pill */}
       <TouchableOpacity style={s.bar} onPress={() => setOpen(true)} activeOpacity={0.8}>
         <Ionicons name="sparkles" size={14} color={t.accent} />
-        <Text style={s.barText}>Ask BloomPrint</Text>
+        <Text style={s.barText}>{tr('copilot.askBloomPrint')}</Text>
       </TouchableOpacity>
 
       <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
@@ -191,7 +194,7 @@ export default function CommandBar() {
             <View style={s.header}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Ionicons name="sparkles" size={18} color={t.accent} />
-                <Text style={s.title}>Ask BloomPrint</Text>
+                <Text style={s.title}>{tr('copilot.askBloomPrint')}</Text>
               </View>
               <TouchableOpacity onPress={() => setOpen(false)}><Ionicons name="close" size={24} color={t.muted} /></TouchableOpacity>
             </View>
@@ -205,17 +208,8 @@ export default function CommandBar() {
             >
               {messages.length === 0 && (
                 <View style={{ paddingVertical: 24 }}>
-                  <Text style={s.emptyTitle}>Ask me about your program, or give me a task</Text>
-                  {[
-                    "What's my season record and average team grade?",
-                    'Which opponents did we struggle with?',
-                    'Who are my top-graded players right now?',
-                    'Summarize my point guard over the last 3 months',
-                    'Scout our next opponent',
-                    'Build a coaching report for my team',
-                    'Where is my most recent report?',
-                    'How do I import a roster?',
-                  ].map(ex => (
+                  <Text style={s.emptyTitle}>{tr('copilot.emptyTitle')}</Text>
+                  {(tr('copilot.examples', { returnObjects: true }) as string[]).map(ex => (
                     <TouchableOpacity key={ex} style={s.exChip} onPress={() => setInput(ex)}>
                       <Text style={s.exText}>{ex}</Text>
                     </TouchableOpacity>
@@ -233,24 +227,24 @@ export default function CommandBar() {
                       {m.navigate && (
                         <TouchableOpacity style={s.navBtn} onPress={() => { goTo(navigation, m.navigate!); setOpen(false); }}>
                           <Ionicons name="open-outline" size={15} color={t.ctaText} />
-                          <Text style={s.navBtnText}>{m.navigate.label || 'Take me there'}</Text>
+                          <Text style={s.navBtnText}>{m.navigate.label || tr('copilot.takeMeThere')}</Text>
                         </TouchableOpacity>
                       )}
                       {m.pending && !m.ran && (
                         <View style={s.confirmCard}>
-                          <Text style={s.confirmText}>{m.pending.description || 'Generate this?'}</Text>
+                          <Text style={s.confirmText}>{m.pending.description || tr('copilot.generateThis')}</Text>
                           {runningIdx === i ? (
                             <View style={{ marginTop: 12 }}>
-                              <GeneratingOverlay visible label="Generating your report…" />
+                              <GeneratingOverlay visible label={tr('copilot.generatingReport')} />
                             </View>
                           ) : (
                             <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
                               <TouchableOpacity style={s.confirmNo} onPress={() => setMessages(prev => prev.map((x, xi) => xi === i ? { ...x, ran: true } : x))} disabled={busy}>
-                                <Text style={s.confirmNoText}>Cancel</Text>
+                                <Text style={s.confirmNoText}>{tr('common.cancel')}</Text>
                               </TouchableOpacity>
                               <TouchableOpacity style={s.confirmYes} onPress={() => runPending(i, m.pending)} disabled={busy}>
                                 <Ionicons name={m.pending.kind === 'send_staff_message' ? 'send' : 'sparkles'} size={14} color={t.ctaText} />
-                                <Text style={s.confirmYesText}>{m.pending.kind === 'send_staff_message' ? 'Send' : 'Generate'}</Text>
+                                <Text style={s.confirmYesText}>{m.pending.kind === 'send_staff_message' ? tr('common.send') : tr('common.generate')}</Text>
                               </TouchableOpacity>
                             </View>
                           )}
@@ -266,7 +260,7 @@ export default function CommandBar() {
             <View style={s.inputRow}>
               <VoiceTextInput
                 style={s.input}
-                placeholder="Ask or give a task…"
+                placeholder={tr('copilot.inputPlaceholder')}
                 placeholderTextColor={t.muted2}
                 value={input}
                 onChangeText={setInput}

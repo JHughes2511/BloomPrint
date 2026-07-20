@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -12,6 +13,7 @@ const COMPETITION_LEVELS = [...CANON_LEVELS];
 function LevelDropdown({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [open, setOpen] = useState(false);
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const ddStyles = makeDdStyles(t);
   return (
     <>
@@ -25,7 +27,7 @@ function LevelDropdown({ value, onChange }: { value: string; onChange: (v: strin
       <Modal visible={open} transparent animationType="fade">
         <TouchableOpacity style={ddStyles.overlay} activeOpacity={1} onPress={() => setOpen(false)}>
           <View style={ddStyles.menu}>
-            <Text style={ddStyles.menuTitle}>Competition Level</Text>
+            <Text style={ddStyles.menuTitle}>{tr('roster.competitionLevel')}</Text>
             {COMPETITION_LEVELS.map(lvl => (
               <TouchableOpacity
                 key={lvl}
@@ -73,6 +75,7 @@ import { ScreenBackground } from '../theme/components';
 export default function RosterScreen() {
   const navigation = useNavigation<any>();
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const { coach } = useAuth();
   const defaultLevel = (coach as any)?.competition_level ?? 'HS Varsity';
   const styles = makeStyles(t);
@@ -167,7 +170,7 @@ export default function RosterScreen() {
       setParentPermission(false);
       load();
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not add player');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('roster.couldNotAddPlayer'));
     } finally {
       setSaving(false);
     }
@@ -185,24 +188,24 @@ export default function RosterScreen() {
       setSelectedTeamId(team.id);
       load();
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not create team');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('roster.couldNotCreateTeam'));
     } finally {
       setCreatingTeam(false);
     }
   };
 
   const deleteTeam = (team: Team) => {
-    Alert.alert('Delete Team', `Delete "${team.name}"? Players will remain but lose their team assignment.`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(tr('roster.deleteTeamTitle'), tr('roster.deleteTeamMsg', { name: team.name }), [
+      { text: tr('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete', style: 'destructive',
+        text: tr('common.delete'), style: 'destructive',
         onPress: async () => {
           try {
             await teamsAPI.delete(team.id);
             if (selectedTeamId === team.id) setSelectedTeamId(null);
             load();
           } catch (e: any) {
-            Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete team');
+            Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('roster.couldNotDeleteTeam'));
           }
         },
       },
@@ -210,10 +213,10 @@ export default function RosterScreen() {
   };
 
   const manageTeam = (team: Team) => {
-    Alert.alert(team.name, 'Manage this team', [
-      { text: 'Rename', onPress: () => { setEditTeam(team); setEditTeamName(team.name); } },
-      { text: 'Delete', style: 'destructive', onPress: () => deleteTeam(team) },
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(team.name, tr('roster.manageTeam'), [
+      { text: tr('common.rename'), onPress: () => { setEditTeam(team); setEditTeamName(team.name); } },
+      { text: tr('common.delete'), style: 'destructive', onPress: () => deleteTeam(team) },
+      { text: tr('common.cancel'), style: 'cancel' },
     ]);
   };
 
@@ -226,7 +229,7 @@ export default function RosterScreen() {
       setEditTeamName('');
       load();
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not rename team');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('roster.couldNotRenameTeam'));
     } finally {
       setSavingTeam(false);
     }
@@ -242,9 +245,9 @@ export default function RosterScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.title}>Roster</Text>
+          <Text style={styles.title}>{tr('roster.title')}</Text>
           <Text style={styles.sub}>
-            {currentTeamName ?? 'All Teams'} · {visiblePlayers.length} players
+            {currentTeamName ?? tr('roster.allTeams')} · {tr('roster.playersCount', { count: visiblePlayers.length })}
           </Text>
         </View>
         <TouchableOpacity
@@ -259,7 +262,7 @@ export default function RosterScreen() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import', { mode: 'roster' })}>
           <Ionicons name="cloud-upload-outline" size={16} color={t.muted} />
-          <Text style={styles.importBtnText}>Import Roster</Text>
+          <Text style={styles.importBtnText}>{tr('roster.importRoster')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.addBtn} onPress={() => {
           setNewTeamId(selectedTeamId);
@@ -277,7 +280,7 @@ export default function RosterScreen() {
           <Ionicons name="search" size={16} color={t.muted} style={{ marginRight: 8 }} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search players by name, position, team…"
+            placeholder={tr('roster.searchPlaceholder')}
             placeholderTextColor={t.muted2}
             value={query}
             onChangeText={setQuery}
@@ -299,7 +302,7 @@ export default function RosterScreen() {
           style={[styles.teamChip, selectedTeamId == null && styles.teamChipActive]}
           onPress={() => setSelectedTeamId(null)}
         >
-          <Text style={[styles.teamChipText, selectedTeamId == null && styles.teamChipTextActive]}>All</Text>
+          <Text style={[styles.teamChipText, selectedTeamId == null && styles.teamChipTextActive]}>{tr('roster.all')}</Text>
         </TouchableOpacity>
         {teams.filter((tm: any) => !tm.parent_team_id).map(tm => (
           <TouchableOpacity
@@ -313,7 +316,7 @@ export default function RosterScreen() {
         ))}
         <TouchableOpacity style={styles.newTeamChip} onPress={() => setShowNewTeam(true)}>
           <Ionicons name="add" size={14} color={t.accent} />
-          <Text style={styles.newTeamText}>New Team</Text>
+          <Text style={styles.newTeamText}>{tr('roster.newTeam')}</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -328,14 +331,14 @@ export default function RosterScreen() {
             style={styles.card}
             onPress={() => navigation.navigate('PlayerProfile', { playerId: item.id })}
             onLongPress={() => {
-              Alert.alert('Delete Player', `Remove ${item.name} from the roster?`, [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Delete', style: 'destructive', onPress: async () => {
+              Alert.alert(tr('roster.deletePlayerTitle'), tr('roster.deletePlayerMsg', { name: item.name }), [
+                { text: tr('common.cancel'), style: 'cancel' },
+                { text: tr('common.delete'), style: 'destructive', onPress: async () => {
                   try {
                     await playersAPI.delete(item.id);
                     load();
                   } catch (e: any) {
-                    Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete player');
+                    Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('roster.couldNotDeletePlayer'));
                   }
                 }},
               ]);
@@ -353,19 +356,19 @@ export default function RosterScreen() {
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
             {teams.length === 0 ? (
-              <Text style={styles.emptyText}>Create a team first, then add players.</Text>
+              <Text style={styles.emptyText}>{tr('roster.emptyCreateTeamFirst')}</Text>
             ) : selectedTeamId != null ? (
               <>
                 <Ionicons name="people-outline" size={40} color={t.line} />
-                <Text style={styles.emptyText}>No players in this team yet.</Text>
+                <Text style={styles.emptyText}>{tr('roster.emptyNoPlayersInTeam')}</Text>
                 <TouchableOpacity style={styles.importRosterBtn} onPress={() => navigation.navigate('Import', { mode: 'roster' })}>
                   <Ionicons name="cloud-upload-outline" size={16} color={t.ctaText} />
-                  <Text style={styles.importRosterBtnText}>Import Roster from Excel</Text>
+                  <Text style={styles.importRosterBtnText}>{tr('roster.importFromExcel')}</Text>
                 </TouchableOpacity>
-                <Text style={styles.importRosterHint}>or tap + to add players one by one</Text>
+                <Text style={styles.importRosterHint}>{tr('roster.importOneByOneHint')}</Text>
               </>
             ) : (
-              <Text style={styles.emptyText}>No players yet. Create a team and add players.</Text>
+              <Text style={styles.emptyText}>{tr('roster.emptyNoPlayers')}</Text>
             )}
           </View>
         }
@@ -376,19 +379,19 @@ export default function RosterScreen() {
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={[styles.modal, { maxHeight: '90%', flex: 0 }]}>
           <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 16 }}>
-            <Text style={styles.modalTitle}>Add Player</Text>
-            <VoiceTextInput style={styles.input} placeholder="Full Name *" placeholderTextColor={t.muted}
+            <Text style={styles.modalTitle}>{tr('roster.addPlayer')}</Text>
+            <VoiceTextInput style={styles.input} placeholder={tr('roster.fullNamePlaceholder')} placeholderTextColor={t.muted}
               value={newName} onChangeText={setNewName} />
 
             {/* Team assignment */}
-            <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600], marginBottom: 6, marginTop: 4 }}>Team</Text>
+            <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600], marginBottom: 6, marginTop: 4 }}>{tr('roster.teamLabel')}</Text>
             <TouchableOpacity
               style={[styles.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: showAddTeamPicker ? 0 : 12 }]}
               onPress={() => setShowAddTeamPicker(v => !v)}
               activeOpacity={0.7}
             >
               <Text style={{ color: newTeamId == null ? t.muted : t.ink, fontSize: 15 }}>
-                {newTeamId == null ? 'No team' : (teams.find(tm => tm.id === newTeamId)?.name ?? 'Select team')}
+                {newTeamId == null ? tr('roster.noTeam') : (teams.find(tm => tm.id === newTeamId)?.name ?? tr('roster.selectTeam'))}
               </Text>
               <Text style={{ color: t.muted, fontSize: 12 }}>{showAddTeamPicker ? '▲' : '▼'}</Text>
             </TouchableOpacity>
@@ -399,7 +402,7 @@ export default function RosterScreen() {
                     style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: t.line, backgroundColor: newTeamId == null ? t.accentSoft : 'transparent' }}
                     onPress={() => { setNewTeamId(null); setShowAddTeamPicker(false); }}
                   >
-                    <Text style={{ color: newTeamId == null ? t.accent : t.inkSoft, fontSize: 14 }}>No team</Text>
+                    <Text style={{ color: newTeamId == null ? t.accent : t.inkSoft, fontSize: 14 }}>{tr('roster.noTeam')}</Text>
                   </TouchableOpacity>
                   {teams.filter((tm: any) => !tm.parent_team_id).map(tm => (
                     <TouchableOpacity
@@ -414,45 +417,45 @@ export default function RosterScreen() {
               </View>
             )}
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder="Position (e.g. PG, SG, SF)" placeholderTextColor={t.muted}
+              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder={tr('roster.positionPlaceholder')} placeholderTextColor={t.muted}
                 value={newPos} onChangeText={setNewPos} />
-              <TextInput style={[styles.input, { flex: 1 }]} placeholder="Jersey # (e.g. 23)" placeholderTextColor={t.muted}
+              <TextInput style={[styles.input, { flex: 1 }]} placeholder={tr('roster.jerseyPlaceholder')} placeholderTextColor={t.muted}
                 keyboardType="number-pad" value={newJersey} onChangeText={setNewJersey} />
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder={`Height (e.g. 6'2")`} placeholderTextColor={t.muted}
+              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder={tr('roster.heightPlaceholder')} placeholderTextColor={t.muted}
                 value={newHeight} onChangeText={setNewHeight} />
-              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder={`Wingspan (e.g. 6'5")`} placeholderTextColor={t.muted}
+              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder={tr('roster.wingspanPlaceholder')} placeholderTextColor={t.muted}
                 value={newWingspan} onChangeText={setNewWingspan} />
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder="Weight (e.g. 185 lbs)" placeholderTextColor={t.muted}
+              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder={tr('roster.weightPlaceholder')} placeholderTextColor={t.muted}
                 value={newWeight} onChangeText={setNewWeight} />
-              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder={`Standing Reach (e.g. 8'2")`} placeholderTextColor={t.muted}
+              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder={tr('roster.standingReachPlaceholder')} placeholderTextColor={t.muted}
                 value={newStandingReach} onChangeText={setNewStandingReach} />
             </View>
-            <VoiceTextInput style={styles.input} placeholder="School name" placeholderTextColor={t.muted}
+            <VoiceTextInput style={styles.input} placeholder={tr('roster.schoolPlaceholder')} placeholderTextColor={t.muted}
               value={newSchool} onChangeText={setNewSchool} />
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder="City" placeholderTextColor={t.muted}
+              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder={tr('roster.cityPlaceholder')} placeholderTextColor={t.muted}
                 value={newCity} onChangeText={setNewCity} />
-              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder="State" placeholderTextColor={t.muted}
+              <VoiceTextInput style={[styles.input, { flex: 1 }]} placeholder={tr('roster.statePlaceholder')} placeholderTextColor={t.muted}
                 value={newState} onChangeText={setNewState} />
             </View>
-            <VoiceTextInput style={styles.input} placeholder="Country" placeholderTextColor={t.muted}
+            <VoiceTextInput style={styles.input} placeholder={tr('roster.countryPlaceholder')} placeholderTextColor={t.muted}
               value={newCountry} onChangeText={setNewCountry} />
-            <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600], marginBottom: 6, marginTop: 4 }}>Competition Level</Text>
+            <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600], marginBottom: 6, marginTop: 4 }}>{tr('roster.competitionLevel')}</Text>
             <LevelDropdown value={newLevel} onChange={setNewLevel} />
 
             {/* Parent/Guardian permission — required for minors */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 16, marginBottom: 4 }}>
-              <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600] }}>Parent/Guardian Permission</Text>
+              <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600] }}>{tr('roster.parentPermission')}</Text>
               <TouchableOpacity onPress={() => setShowDisclaimer(true)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} style={{ marginLeft: 6 }}>
                 <Ionicons name="information-circle-outline" size={16} color={t.accent} />
               </TouchableOpacity>
             </View>
             <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8 }}>
-              Required for any player under 18. Tap the ⓘ for the full consent disclaimer.
+              {tr('roster.parentPermissionHint')}
             </Text>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 4 }}>
               <TouchableOpacity
@@ -460,23 +463,23 @@ export default function RosterScreen() {
                 style={{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center', borderWidth: 1,
                          backgroundColor: parentPermission ? t.positive : t.chip,
                          borderColor: parentPermission ? t.positive : t.line }}>
-                <Text style={{ color: parentPermission ? '#16201A' : t.muted, fontFamily: fonts[700] }}>Yes</Text>
+                <Text style={{ color: parentPermission ? '#16201A' : t.muted, fontFamily: fonts[700] }}>{tr('common.yes')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setParentPermission(false)}
                 style={{ flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center', borderWidth: 1,
                          backgroundColor: !parentPermission ? t.line : t.chip,
                          borderColor: !parentPermission ? t.muted : t.line }}>
-                <Text style={{ color: !parentPermission ? t.ink : t.muted, fontFamily: fonts[700] }}>No</Text>
+                <Text style={{ color: !parentPermission ? t.ink : t.muted, fontFamily: fonts[700] }}>{tr('common.no')}</Text>
               </TouchableOpacity>
             </View>
 
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowAdd(false)}>
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveBtn} onPress={addPlayer} disabled={saving}>
-                {saving ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>Add</Text>}
+                {saving ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>{tr('common.add')}</Text>}
               </TouchableOpacity>
             </View>
           </KeyboardAwareScrollView>
@@ -489,27 +492,20 @@ export default function RosterScreen() {
               <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, maxHeight: '80%', borderWidth: 1, borderColor: t.cardBorder }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                   <Ionicons name="shield-checkmark-outline" size={20} color={t.accent} />
-                  <Text style={{ color: t.ink, fontSize: 17, fontFamily: fonts[800], marginLeft: 8, flex: 1 }}>Parent/Guardian Consent</Text>
+                  <Text style={{ color: t.ink, fontSize: 17, fontFamily: fonts[800], marginLeft: 8, flex: 1 }}>{tr('roster.consentTitle')}</Text>
                   <TouchableOpacity onPress={() => setShowDisclaimer(false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                     <Ionicons name="close" size={22} color={t.muted} />
                   </TouchableOpacity>
                 </View>
                 <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
                   <Text style={{ color: t.inkSoft, fontSize: 13, lineHeight: 20 }}>
-                    For any athlete under the age of 18, a parent or legal guardian must grant permission before their
-                    information, evaluations, and film are collected, analyzed, or shared within BloomPrint.{'\n\n'}
-                    By selecting “Yes,” you confirm that you have obtained verifiable consent from the player’s parent or
-                    legal guardian to create and maintain this profile — including the storage of biometric and performance
-                    data and the generation of AI scouting and development reports.{'\n\n'}
-                    If the player is 18 or older, parental permission is not required and you may select “No.”{'\n\n'}
-                    You are responsible for ensuring this consent complies with all applicable privacy laws, including
-                    COPPA and any local regulations governing minors’ data.
+                    {tr('roster.consentBody')}
                   </Text>
                 </ScrollView>
                 <TouchableOpacity
                   style={{ marginTop: 16, backgroundColor: t.ctaBg, borderRadius: 10, paddingVertical: 12, alignItems: 'center' }}
                   onPress={() => setShowDisclaimer(false)}>
-                  <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Got it</Text>
+                  <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('common.gotIt')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -521,17 +517,17 @@ export default function RosterScreen() {
       <Modal visible={showNewTeam} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>New Team</Text>
-            <VoiceTextInput style={styles.input} placeholder="Team Name *" placeholderTextColor={t.muted}
+            <Text style={styles.modalTitle}>{tr('roster.newTeam')}</Text>
+            <VoiceTextInput style={styles.input} placeholder={tr('roster.teamNamePlaceholder')} placeholderTextColor={t.muted}
               value={newTeamName} onChangeText={setNewTeamName} />
-            <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600], marginBottom: 6 }}>Competition Level</Text>
+            <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[600], marginBottom: 6 }}>{tr('roster.competitionLevel')}</Text>
             <LevelDropdown value={newTeamLevel} onChange={setNewTeamLevel} />
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowNewTeam(false)}>
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveBtn} onPress={createTeam} disabled={creatingTeam}>
-                {creatingTeam ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>Create</Text>}
+                {creatingTeam ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>{tr('common.create')}</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -542,15 +538,15 @@ export default function RosterScreen() {
       <Modal visible={!!editTeam} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>Rename Team</Text>
-            <VoiceTextInput style={styles.input} placeholder="Team Name *" placeholderTextColor={t.muted}
+            <Text style={styles.modalTitle}>{tr('roster.renameTeam')}</Text>
+            <VoiceTextInput style={styles.input} placeholder={tr('roster.teamNamePlaceholder')} placeholderTextColor={t.muted}
               value={editTeamName} onChangeText={setEditTeamName} autoFocus />
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => { setEditTeam(null); setEditTeamName(''); }}>
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveBtn} onPress={saveTeamName} disabled={savingTeam || !editTeamName.trim()}>
-                {savingTeam ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>Save</Text>}
+                {savingTeam ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>{tr('common.save')}</Text>}
               </TouchableOpacity>
             </View>
           </View>
