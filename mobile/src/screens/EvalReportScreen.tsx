@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -30,29 +31,19 @@ const PILLARS = [
   'intangibles', 'advanced_analysis', 'strategic_fit',
 ];
 
-const PILLAR_LABELS: Record<string, string> = {
-  offensive_skills: 'Offensive Skills',
-  defensive_capabilities: 'Defense',
-  physical_attributes: 'Physical',
-  intangibles: 'Intangibles',
-  advanced_analysis: 'Advanced',
-  strategic_fit: 'Strategic Fit',
-};
-
-const EXPORT_CATEGORIES = [
-  { key: 'grades',     label: 'Overall Grade + Pillar Grades' },
-  { key: 'flags',      label: 'Green Flags & Watch Flags' },
-  { key: 'questions',  label: 'Key Questions' },
-  { key: 'report',     label: 'Full Report' },
-  { key: 'corrections', label: 'Corrections' },
-];
+// Export section keys — labels resolved at render via i18n (evalReport.exportCats.*).
+const EXPORT_CATEGORIES = ['grades', 'flags', 'questions', 'report', 'corrections'];
 
 export default function EvalReportScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { evalId, openShare } = route.params;
   const { t, mode } = useTheme();
+  const { t: tr } = useTranslation();
   const styles = makeStyles(t);
+  // Display label for a pillar key (API keys stay untouched).
+  const pillarLabel = (k: string) =>
+    tr(`evalReport.pillars.${k}`, { defaultValue: k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) });
   // Solid surface for the sticky bottom bar — matches the app tab bar so it
   // reads as themed (not a floating white card) in both light and dark.
   const barBg = mode === 'dark' ? '#0C2331' : '#EFE7DA';
@@ -158,12 +149,12 @@ export default function EvalReportScreen() {
         recipient_id: target.id,
         allow_regenerate: allowRegen,
       });
-      Alert.alert('Shared!', `Report shared with ${target.name}.`);
+      Alert.alert(tr('evalReport.sharedTitle'), tr('evalReport.sharedWithMsg', { name: target.name }));
       setShowStaffShare(false);
       setStaffSearch('');
       setStaffResults([]);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share report');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('evalReport.couldNotShareReport'));
     } finally {
       setSendingStaff(false);
     }
@@ -207,39 +198,39 @@ export default function EvalReportScreen() {
       });
       if (res?.status === 'pending_approval') {
         setSharing(false);
-        Alert.alert('Pending approval',
-          `This report is about ${res.subject_name}. We sent ${res.subject_name} a request to approve sharing it with ${res.recipient_name}. It will send automatically once they approve.`);
+        Alert.alert(tr('evalReport.pendingApprovalTitle'),
+          tr('evalReport.pendingApprovalMsg', { subject: res.subject_name, recipient: res.recipient_name }));
         setShowShare(false); setSelectedPlayerUser(null); setShareSearch(''); setShareResults([]); setShareMessage('');
         return;
       }
       if (res?.status === 'needs_override') {
         setSharing(false);
-        Alert.alert('No account to approve',
-          `${res.subject_name} doesn't have an account to approve this yet. Their report isn't about ${res.recipient_name}. Send it anyway?`,
-          [{ text: 'Cancel', style: 'cancel' }, { text: 'Send anyway', style: 'destructive', onPress: () => submitShare(true) }]);
+        Alert.alert(tr('evalReport.noAccountTitle'),
+          tr('evalReport.noAccountMsg', { subject: res.subject_name, recipient: res.recipient_name }),
+          [{ text: tr('common.cancel'), style: 'cancel' }, { text: tr('evalReport.sendAnyway'), style: 'destructive', onPress: () => submitShare(true) }]);
         return;
       }
-      Alert.alert('Shared!', `Report shared with ${selectedPlayerUser.name}.`);
+      Alert.alert(tr('evalReport.sharedTitle'), tr('evalReport.sharedWithMsg', { name: selectedPlayerUser.name }));
       setShowShare(false);
       setSelectedPlayerUser(null);
       setShareSearch('');
       setShareResults([]);
       setShareMessage('');
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share report');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('evalReport.couldNotShareReport'));
     } finally {
       setSharing(false);
     }
   };
 
   const buildFileName = () => {
-    if (!ev) return 'Evaluation Report';
+    if (!ev) return tr('evalReport.evalReportFileName');
     const sanitize = (s: string) => s.replace(/[^a-zA-Z0-9 \-]/g, '').trim();
     const type = outputTypeLabel(ev.output_type);
-    const name = sanitize(player?.name ?? 'Player');
+    const name = sanitize(player?.name ?? tr('evalReport.playerFallbackName'));
     const team = sanitize(player?.team_name ?? player?.program_name ?? '');
     const pos  = sanitize(player?.position ?? '');
-    return ['Evaluation Report', name, team, pos, type].filter(Boolean).join(' - ');
+    return [tr('evalReport.evalReportFileName'), name, team, pos, type].filter(Boolean).join(' - ');
   };
 
   const submitCorrection = async (generateNew: boolean) => {
@@ -263,17 +254,17 @@ export default function EvalReportScreen() {
           // Reload corrections to reflect applied=true
           const updatedCorrs = await evalsAPI.corrections(evalId);
           setCorrections(updatedCorrs);
-          Alert.alert('Evaluation Regenerated', 'The evaluation has been updated with your corrections.');
+          Alert.alert(tr('evalReport.regeneratedTitle'), tr('evalReport.regeneratedMsg'));
         } catch (e: any) {
-          Alert.alert('Regeneration Failed', e?.response?.data?.detail ?? 'Could not regenerate evaluation');
+          Alert.alert(tr('evalReport.regenFailedTitle'), e?.response?.data?.detail ?? tr('evalReport.regenFailedMsg'));
         } finally {
           setRegenerating(false);
         }
       } else {
-        Alert.alert('Saved', 'Correction saved. You can generate a new evaluation when ready.');
+        Alert.alert(tr('evalReport.savedTitle'), tr('evalReport.correctionSavedMsg'));
       }
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save correction');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('evalReport.couldNotSaveCorrection'));
     } finally {
       setSaving(false);
     }
@@ -281,7 +272,7 @@ export default function EvalReportScreen() {
 
   const generateNewEval = async () => {
     if (corrections.filter((c: any) => !c.applied).length === 0) {
-      Alert.alert('No Pending Corrections', 'Add at least one correction before regenerating.');
+      Alert.alert(tr('evalReport.noPendingCorrectionsTitle'), tr('evalReport.noPendingCorrectionsMsg'));
       return;
     }
     setRegenerating(true);
@@ -290,16 +281,16 @@ export default function EvalReportScreen() {
       setEv(updated);
       const updatedCorrs = await evalsAPI.corrections(evalId);
       setCorrections(updatedCorrs);
-      Alert.alert('Evaluation Regenerated', 'The evaluation has been updated with your corrections.');
+      Alert.alert(tr('evalReport.regeneratedTitle'), tr('evalReport.regeneratedMsg'));
     } catch (e: any) {
-      Alert.alert('Regeneration Failed', e?.response?.data?.detail ?? 'Could not regenerate evaluation');
+      Alert.alert(tr('evalReport.regenFailedTitle'), e?.response?.data?.detail ?? tr('evalReport.regenFailedMsg'));
     } finally {
       setRegenerating(false);
     }
   };
 
   const buildHtml = (cats: Record<string, boolean>, rToggles: Record<string, boolean> = reportToggles) => {
-    if (!ev) return '<html><body><p>No data</p></body></html>';
+    if (!ev) return `<html><body><p>${tr('evalReport.pdfNoData')}</p></body></html>`;
     const date = new Date(ev.created_at).toLocaleDateString();
     const type = outputTypeLabel(ev.output_type).toUpperCase();
     const sanitize = (s: string) =>
@@ -309,14 +300,14 @@ export default function EvalReportScreen() {
       <p style="color:#555;margin-top:0">${sanitize(ev.competition_level ?? '')} &bull; ${date}</p>`;
 
     if (cats.grades && ev.overall_grade != null) {
-      body += `<h3>Overall Grade</h3><div class="grade">${ev.overall_grade.toFixed(1)} / 10</div>`;
+      body += `<h3>${tr('evalReport.overallGrade')}</h3><div class="grade">${ev.overall_grade.toFixed(1)} / 10</div>`;
       if (ev.pillar_grades) {
-        body += `<h3>Pillar Grades</h3>`;
+        body += `<h3>${tr('evalReport.pillarGrades')}</h3>`;
         PILLARS.filter(k => ev.pillar_grades![k] != null).forEach(k => {
           const g = ev.pillar_grades![k];
           const pct = Math.round((g / 10) * 100);
           body += `<table width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0">
-            <tr><td style="font-size:13px">${PILLAR_LABELS[k]}</td><td align="right" style="font-size:13px"><strong>${g.toFixed(1)}</strong></td></tr>
+            <tr><td style="font-size:13px">${pillarLabel(k)}</td><td align="right" style="font-size:13px"><strong>${g.toFixed(1)}</strong></td></tr>
             <tr><td colspan="2"><div style="background:#eee;border-radius:4px;height:8px;margin-top:3px">
               <div style="background:#2563eb;border-radius:4px;height:8px;width:${pct}%"></div></div></td></tr>
           </table>`;
@@ -326,17 +317,17 @@ export default function EvalReportScreen() {
 
     if (cats.flags) {
       if (ev.green_flags?.length) {
-        body += `<h3>Green Flags</h3>`;
+        body += `<h3>${tr('evalReport.greenFlags')}</h3>`;
         ev.green_flags.forEach(f => { body += `<p style="color:#16a34a;margin:3px 0">&#10003; ${sanitize(f)}</p>`; });
       }
       if (ev.watch_flags?.length) {
-        body += `<h3>Watch Flags</h3>`;
+        body += `<h3>${tr('evalReport.watchFlags')}</h3>`;
         ev.watch_flags.forEach(f => { body += `<p style="color:#dc2626;margin:3px 0">&#9888; ${sanitize(f)}</p>`; });
       }
     }
 
     if (cats.questions && ev.key_questions?.length) {
-      body += `<h3>Key Questions</h3><ol>`;
+      body += `<h3>${tr('evalReport.keyQuestions')}</h3><ol>`;
       ev.key_questions.forEach(q => { body += `<li style="font-size:13px;margin:4px 0">${sanitize(q)}</li>`; });
       body += `</ol>`;
     }
@@ -349,21 +340,21 @@ export default function EvalReportScreen() {
       const anyEnabled = toggleable.length === 0 || toggleable.some(sec => rToggles[sec.heading] !== false);
       if (anyEnabled) {
         const joined = joinReportSections(secs, rToggles) || ev.report_text;
-        body += `<h3>Full Report</h3><div style="margin-top:8px">${mdToHtml(joined)}</div>`;
+        body += `<h3>${tr('evalReport.fullReport')}</h3><div style="margin-top:8px">${mdToHtml(joined)}</div>`;
       }
     }
 
     if (cats.corrections && corrections.length) {
-      body += `<h3>Corrections</h3>`;
+      body += `<h3>${tr('evalReport.corrections')}</h3>`;
       corrections.forEach(c => {
-        const pillarLabel = c.pillar ? `<strong>${c.pillar.replace(/_/g, ' ').toUpperCase()}</strong><br/>` : '';
-        body += `<div style="background:#f9fafb;border-left:3px solid #2563eb;padding:8px 12px;margin:6px 0;font-size:12px">${pillarLabel}${sanitize(c.correction)}</div>`;
+        const pillarHead = c.pillar ? `<strong>${pillarLabel(c.pillar).toUpperCase()}</strong><br/>` : '';
+        body += `<div style="background:#f9fafb;border-left:3px solid #2563eb;padding:8px 12px;margin:6px 0;font-size:12px">${pillarHead}${sanitize(c.correction)}</div>`;
       });
     }
 
     // Ensure body has content
     if (!body.includes('<h3>') && !body.includes('<div class="grade">')) {
-      body += `<p style="color:#555">No sections selected for export.</p>`;
+      body += `<p style="color:#555">${tr('evalReport.noSectionsSelected')}</p>`;
     }
 
     return `<!DOCTYPE html><html><head><meta charset="utf-8"/><style>
@@ -379,7 +370,7 @@ export default function EvalReportScreen() {
       ol, ul { padding-left: 20px; }
     </style></head><body>${body}
       <div style="margin-top:40px;font-size:11px;color:#999;border-top:1px solid #eee;padding-top:12px">
-        Generated by BloomPrint Basketball Intelligence Model
+        ${tr('evalReport.generatedBy')}
       </div>
     </body></html>`;
   };
@@ -391,9 +382,9 @@ export default function EvalReportScreen() {
       const { uri } = await Print.printToFileAsync({ html });
       const dest = FileSystem.cacheDirectory + safeFileName(buildFileName()) + '.pdf';
       await FileSystem.copyAsync({ from: uri, to: dest });
-      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: 'Share BIM Report' });
+      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: tr('evalReport.shareBimReport') });
     } catch (e: any) {
-      Alert.alert('Export Error', e?.message ?? 'Could not generate report');
+      Alert.alert(tr('evalReport.exportErrorTitle'), e?.message ?? tr('evalReport.couldNotGenerateReport'));
     } finally {
       setExporting(false);
       setShowExport(false);
@@ -411,9 +402,9 @@ export default function EvalReportScreen() {
       const { uri } = await Print.printToFileAsync({ html });
       const dest = FileSystem.cacheDirectory + safeFileName(buildFileName()) + '.pdf';
       await FileSystem.copyAsync({ from: uri, to: dest });
-      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: 'Share BIM Report' });
+      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: tr('evalReport.shareBimReport') });
     } catch (e: any) {
-      Alert.alert('Share Error', e?.message ?? 'Could not generate report');
+      Alert.alert(tr('evalReport.shareErrorTitle'), e?.message ?? tr('evalReport.couldNotGenerateReport'));
     } finally {
       setExporting(false);
     }
@@ -423,7 +414,7 @@ export default function EvalReportScreen() {
     try {
       await Print.printAsync({ html: buildHtml(exportCats) });
     } catch (e: any) {
-      Alert.alert('Print Error', e?.message ?? 'Could not print report');
+      Alert.alert(tr('evalReport.printErrorTitle'), e?.message ?? tr('evalReport.couldNotPrintReport'));
     } finally {
       setShowExport(false);
     }
@@ -491,12 +482,12 @@ export default function EvalReportScreen() {
       {isSingle && ev.overall_grade != null && (
         <View style={styles.pillRow}>
           <TouchableOpacity style={styles.bimPill} onPress={() => setShowBim(true)}>
-            <Text style={styles.bimPillText}>BIM Score {ev.overall_grade.toFixed(1)}</Text>
+            <Text style={styles.bimPillText}>{tr('evalReport.bimScore', { score: ev.overall_grade.toFixed(1) })}</Text>
             <Ionicons name="chevron-forward" size={12} color={t.badgeText} />
           </TouchableOpacity>
           {showsRecruit && recruit && (
             <TouchableOpacity style={styles.recruitPill} onPress={() => setShowRecruit(true)}>
-              <Text style={styles.recruitPillText}>Recruit Grade {recruit.letter}</Text>
+              <Text style={styles.recruitPillText}>{tr('evalReport.recruitGrade', { letter: recruit.letter })}</Text>
               <Ionicons name="chevron-forward" size={12} color={t.accent} />
             </TouchableOpacity>
           )}
@@ -506,7 +497,7 @@ export default function EvalReportScreen() {
       {/* Brief (AI TL;DR) */}
       {isSingle && brief && (
         <View style={styles.briefBox}>
-          <Text style={styles.briefLabel}>Brief</Text>
+          <Text style={styles.briefLabel}>{tr('evalReport.brief')}</Text>
           <Text style={styles.briefText}>{brief}</Text>
         </View>
       )}
@@ -526,7 +517,7 @@ export default function EvalReportScreen() {
           ))}
 
           <TouchableOpacity style={styles.fullToggle} onPress={() => setShowFull(v => !v)}>
-            <Text style={styles.fullToggleText}>{showFull ? 'Hide full report' : 'See full report'}</Text>
+            <Text style={styles.fullToggleText}>{showFull ? tr('evalReport.hideFullReport') : tr('evalReport.seeFullReport')}</Text>
             <Ionicons name={showFull ? 'chevron-up' : 'chevron-down'} size={16} color={t.accent} />
           </TouchableOpacity>
           {showFull && ev.report_text && (
@@ -542,14 +533,14 @@ export default function EvalReportScreen() {
         <View style={styles.pdOverlay}>
           <View style={styles.pdBox}>
             <View style={styles.pdHeader}>
-              <Text style={styles.pdName}>BIM Score {ev.overall_grade?.toFixed(1)}</Text>
+              <Text style={styles.pdName}>{tr('evalReport.bimScore', { score: ev.overall_grade?.toFixed(1) })}</Text>
               <TouchableOpacity onPress={() => setShowBim(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
-            <Text style={styles.modalSub}>The Basketball Intelligence Model grade, out of 10, across the six evaluation pillars.</Text>
+            <Text style={styles.modalSub}>{tr('evalReport.bimScoreDesc')}</Text>
             <ScrollView style={{ maxHeight: 460 }} showsVerticalScrollIndicator={false}>
             {hasPillars && (
               <View style={{ marginTop: 4 }}>
-                <Text style={styles.sectionLabel}>Pillar Breakdown</Text>
+                <Text style={styles.sectionLabel}>{tr('evalReport.pillarBreakdown')}</Text>
                 {PILLARS.filter(k => ev.pillar_grades![k] !== undefined).map(k => (
                   <PillarCard key={k} pillarKey={k} grade={ev.pillar_grades![k]} />
                 ))}
@@ -557,7 +548,7 @@ export default function EvalReportScreen() {
             )}
             {gradeTrend.length > 1 && (
               <View style={{ marginTop: 16 }}>
-                <Text style={styles.sectionLabel}>Grade Trend</Text>
+                <Text style={styles.sectionLabel}>{tr('evalReport.gradeTrend')}</Text>
                 <View style={styles.trendRow}>
                   {gradeTrend.map((h, i) => {
                     const g = h.overall_grade ?? 0;
@@ -582,12 +573,12 @@ export default function EvalReportScreen() {
         <View style={styles.pdOverlay}>
           <View style={styles.pdBox}>
             <View style={styles.pdHeader}>
-              <Text style={styles.pdName}>Recruit Grade {recruit?.letter}</Text>
+              <Text style={styles.pdName}>{tr('evalReport.recruitGrade', { letter: recruit?.letter })}</Text>
               <TouchableOpacity onPress={() => setShowRecruit(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
             {recruit && <Text style={styles.recruitTier}>{recruit.tier}</Text>}
             {recruit && <Text style={styles.modalSub}>{recruit.blurb}</Text>}
-            <Text style={[styles.sectionLabel, { marginTop: 16 }]}>How it maps</Text>
+            <Text style={[styles.sectionLabel, { marginTop: 16 }]}>{tr('evalReport.howItMaps')}</Text>
             {recruitGradeScale.map(r => {
               const active = recruit?.letter === r.letter;
               return (
@@ -627,13 +618,13 @@ export default function EvalReportScreen() {
                 {player.height ? (
                   <View style={styles.pdStat}>
                     <Text style={styles.pdStatVal}>{player.height}</Text>
-                    <Text style={styles.pdStatLabel}>Height</Text>
+                    <Text style={styles.pdStatLabel}>{tr('evalReport.height')}</Text>
                   </View>
                 ) : null}
                 {player.wingspan ? (
                   <View style={styles.pdStat}>
                     <Text style={styles.pdStatVal}>{player.wingspan}</Text>
-                    <Text style={styles.pdStatLabel}>Wingspan</Text>
+                    <Text style={styles.pdStatLabel}>{tr('evalReport.wingspan')}</Text>
                   </View>
                 ) : null}
               </View>
@@ -663,7 +654,7 @@ export default function EvalReportScreen() {
               onPress={() => { setShowPlayerDetail(false); navigation.navigate('PlayerProfile', { playerId: ev!.player_id }); }}
             >
               <Ionicons name="person" size={15} color={t.ctaText} />
-              <Text style={styles.pdProfileBtnText}>View Full Profile</Text>
+              <Text style={styles.pdProfileBtnText}>{tr('evalReport.viewFullProfile')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -672,7 +663,7 @@ export default function EvalReportScreen() {
       {/* Pillar grades */}
       {hasPillars && (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Pillar Grades</Text>
+          <Text style={styles.sectionLabel}>{tr('evalReport.pillarGrades')}</Text>
           {PILLARS.filter(k => ev.pillar_grades![k] !== undefined).map(k => (
             <PillarCard key={k} pillarKey={k} grade={ev.pillar_grades![k]} />
           ))}
@@ -684,7 +675,7 @@ export default function EvalReportScreen() {
         <View style={styles.flagSection}>
           {ev.green_flags && ev.green_flags.length > 0 && (
             <View style={{ marginBottom: 12 }}>
-              <Text style={[styles.flagTitle, { color: t.positive }]}>Green Flags</Text>
+              <Text style={[styles.flagTitle, { color: t.positive }]}>{tr('evalReport.greenFlags')}</Text>
               {ev.green_flags.map((f, i) => (
                 <View key={i} style={styles.flagListItem}>
                   <View style={styles.flagDotGreen} />
@@ -695,7 +686,7 @@ export default function EvalReportScreen() {
           )}
           {ev.watch_flags && ev.watch_flags.length > 0 && (
             <View>
-              <Text style={[styles.flagTitle, { color: t.brown }]}>Watch Flags</Text>
+              <Text style={[styles.flagTitle, { color: t.brown }]}>{tr('evalReport.watchFlags')}</Text>
               {ev.watch_flags.map((f, i) => (
                 <View key={i} style={styles.flagListItem}>
                   <View style={styles.flagDotWatch} />
@@ -710,7 +701,7 @@ export default function EvalReportScreen() {
       {/* Key questions */}
       {ev.key_questions && ev.key_questions.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Key Questions</Text>
+          <Text style={styles.sectionLabel}>{tr('evalReport.keyQuestions')}</Text>
           {ev.key_questions.map((q, i) => (
             <View key={i} style={styles.questionRow}>
               <Text style={styles.questionNum}>{i + 1}</Text>
@@ -724,7 +715,7 @@ export default function EvalReportScreen() {
           no broken-out section map (those use the dropdown above instead). */}
       {(!isSingle || !fixedSections) && ev.report_text && (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Full Report</Text>
+          <Text style={styles.sectionLabel}>{tr('evalReport.fullReport')}</Text>
           <View style={styles.reportBox}>
             {renderReport(ev.report_text, { heading: t.ink, body: t.inkSoft })}
           </View>
@@ -734,16 +725,16 @@ export default function EvalReportScreen() {
       {/* Corrections */}
       {corrections.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Corrections ({corrections.length})</Text>
+          <Text style={styles.sectionLabel}>{tr('evalReport.correctionsCount', { count: corrections.length })}</Text>
           {corrections.map((c: any) => (
             <View key={c.id} style={[styles.correctionCard, c.applied && { opacity: 0.55 }]}>
-              {c.pillar && <Text style={styles.correctionPillar}>{c.pillar.replace(/_/g, ' ').toUpperCase()}</Text>}
+              {c.pillar && <Text style={styles.correctionPillar}>{pillarLabel(c.pillar).toUpperCase()}</Text>}
               <Text style={styles.correctionText}>{c.correction}</Text>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
                 <Text style={styles.correctionMeta}>{new Date(c.created_at).toLocaleDateString()}</Text>
                 {c.applied && (
                   <View style={{ backgroundColor: t.positiveSoft, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, borderWidth: 1, borderColor: t.positive }}>
-                    <Text style={{ color: t.positive, fontSize: 10, fontFamily: fonts[700] }}>APPLIED</Text>
+                    <Text style={{ color: t.positive, fontSize: 10, fontFamily: fonts[700] }}>{tr('evalReport.applied')}</Text>
                   </View>
                 )}
               </View>
@@ -758,10 +749,10 @@ export default function EvalReportScreen() {
             >
               {regenerating
                 ? <ActivityIndicator color={t.ctaText} />
-                : <Text style={styles.saveText}>Generate New Evaluation</Text>}
+                : <Text style={styles.saveText}>{tr('evalReport.generateNewEval')}</Text>}
             </TouchableOpacity>
           )}
-          <GeneratingOverlay visible={regenerating} label="Regenerating the evaluation…" />
+          <GeneratingOverlay visible={regenerating} label={tr('evalReport.regeneratingLabel')} />
         </View>
       )}
 
@@ -770,19 +761,19 @@ export default function EvalReportScreen() {
       <View style={styles.actionRow}>
         <TouchableOpacity style={styles.actionBtn} onPress={() => setShowCorrect(true)}>
           <Ionicons name="create-outline" size={18} color={t.muted} />
-          <Text style={styles.actionText}>Correct</Text>
+          <Text style={styles.actionText}>{tr('evalReport.correct')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionBtn} onPress={() => setShowExport(true)}>
           <Ionicons name="share-outline" size={18} color={t.muted} />
-          <Text style={styles.actionText}>Export</Text>
+          <Text style={styles.actionText}>{tr('common.export')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionBtn, { borderColor: t.positive }]} onPress={() => setShowShare(true)}>
           <Ionicons name="person-add-outline" size={18} color={t.positive} />
-          <Text style={[styles.actionText, { color: t.positive }]}>Player</Text>
+          <Text style={[styles.actionText, { color: t.positive }]}>{tr('evalReport.playerAction')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionBtn, { borderColor: t.accent }]} onPress={() => setShowShareModal(true)}>
           <Ionicons name="share-social-outline" size={18} color={t.accent} />
-          <Text style={[styles.actionText, { color: t.accent }]}>Share</Text>
+          <Text style={[styles.actionText, { color: t.accent }]}>{tr('common.share')}</Text>
         </TouchableOpacity>
       </View>
       )}
@@ -796,7 +787,7 @@ export default function EvalReportScreen() {
           reportId={evalId}
           outputType={ev.output_type ?? 'player_eval'}
           reportText={ev.report_text ?? ''}
-          title={ev.output_type ? outputTypeLabel(ev.output_type) : 'Player Eval'}
+          title={ev.output_type ? outputTypeLabel(ev.output_type) : tr('reportTypes.player_eval')}
           subjectPlayerId={player?.id}
           subjectPlayerName={player?.name}
         />
@@ -806,16 +797,16 @@ export default function EvalReportScreen() {
       <Modal visible={showStaffShare} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>Share with Staff</Text>
-            <Text style={styles.modalSub}>Search for a coach, scout, or trainer to share this eval report.</Text>
+            <Text style={styles.modalTitle}>{tr('evalReport.shareWithStaff')}</Text>
+            <Text style={styles.modalSub}>{tr('evalReport.shareWithStaffSub')}</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, backgroundColor: t.chip, borderRadius: 8, padding: 12 }}>
-              <Text style={{ color: t.inkSoft, fontSize: 13 }}>Allow recipient to regenerate</Text>
+              <Text style={{ color: t.inkSoft, fontSize: 13 }}>{tr('evalReport.allowRegen')}</Text>
               <Switch value={allowRegen} onValueChange={setAllowRegen} trackColor={{ true: t.accent, false: t.line }} thumbColor="#fff" />
             </View>
             <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
               <VoiceTextInput
                 style={[styles.input, { flex: 1, marginBottom: 0 }]}
-                placeholder="Search coach/program name..."
+                placeholder={tr('evalReport.searchCoachPlaceholder')}
                 placeholderTextColor={t.muted2}
                 value={staffSearch}
                 onChangeText={setStaffSearch}
@@ -841,7 +832,7 @@ export default function EvalReportScreen() {
             ))}
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowStaffShare(false)}>
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -852,24 +843,24 @@ export default function EvalReportScreen() {
       <Modal visible={showExport} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>Export Report</Text>
-            <Text style={styles.modalSub}>Choose what to include:</Text>
+            <Text style={styles.modalTitle}>{tr('evalReport.exportReportTitle')}</Text>
+            <Text style={styles.modalSub}>{tr('evalReport.chooseInclude')}</Text>
             <ScrollView style={{ maxHeight: 360 }}>
-            {EXPORT_CATEGORIES.filter(cat => {
+            {EXPORT_CATEGORIES.filter(key => {
               // Only show toggles for sections that actually exist in THIS report
-              if (cat.key === 'grades') return ev?.overall_grade != null || ev?.pillar_grades != null;
-              if (cat.key === 'flags') return (ev?.green_flags?.length ?? 0) > 0 || (ev?.watch_flags?.length ?? 0) > 0;
-              if (cat.key === 'questions') return (ev?.key_questions?.length ?? 0) > 0;
+              if (key === 'grades') return ev?.overall_grade != null || ev?.pillar_grades != null;
+              if (key === 'flags') return (ev?.green_flags?.length ?? 0) > 0 || (ev?.watch_flags?.length ?? 0) > 0;
+              if (key === 'questions') return (ev?.key_questions?.length ?? 0) > 0;
               // The report is broken into its own per-section toggles below.
-              if (cat.key === 'report') return !!ev?.report_text && reportToggleSections.length <= 1;
-              if (cat.key === 'corrections') return corrections.length > 0;
+              if (key === 'report') return !!ev?.report_text && reportToggleSections.length <= 1;
+              if (key === 'corrections') return corrections.length > 0;
               return true;
-            }).map(cat => (
-              <View key={cat.key} style={styles.toggleRow}>
-                <Text style={styles.toggleLabel}>{cat.label}</Text>
+            }).map(key => (
+              <View key={key} style={styles.toggleRow}>
+                <Text style={styles.toggleLabel}>{tr(`evalReport.exportCats.${key}`)}</Text>
                 <Switch
-                  value={exportCats[cat.key]}
-                  onValueChange={v => setExportCats(prev => ({ ...prev, [cat.key]: v }))}
+                  value={exportCats[key]}
+                  onValueChange={v => setExportCats(prev => ({ ...prev, [key]: v }))}
                   trackColor={{ true: t.accent }}
                   thumbColor="#fff"
                 />
@@ -878,7 +869,7 @@ export default function EvalReportScreen() {
             {/* Report broken into its real sections, mirroring the share toggles. */}
             {!!ev?.report_text && reportToggleSections.length > 1 && (
               <>
-                <Text style={[styles.modalSub, { marginTop: 12, marginBottom: 2 }]}>Report sections</Text>
+                <Text style={[styles.modalSub, { marginTop: 12, marginBottom: 2 }]}>{tr('evalReport.reportSections')}</Text>
                 {reportToggleSections.map((sec, i) => (
                   <View key={`report-${sec.heading}-${i}`} style={styles.toggleRow}>
                     <Text style={[styles.toggleLabel, { flex: 1, marginRight: 8 }]} numberOfLines={1}>{sec.heading}</Text>
@@ -895,15 +886,15 @@ export default function EvalReportScreen() {
             </ScrollView>
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowExport(false)}>
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.saveBtn, { backgroundColor: t.line }]} onPress={printPdf} disabled={exporting}>
-                <Text style={styles.saveText}>Print</Text>
+                <Text style={styles.saveText}>{tr('common.print')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveBtn} onPress={exportReport} disabled={exporting}>
                 {exporting
                   ? <ActivityIndicator color={t.ctaText} />
-                  : <Text style={styles.saveText}>Share PDF</Text>}
+                  : <Text style={styles.saveText}>{tr('evalReport.sharePdf')}</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -917,8 +908,8 @@ export default function EvalReportScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>Share with Player</Text>
-            <Text style={styles.modalSub}>Search for a player account and share this report.</Text>
+            <Text style={styles.modalTitle}>{tr('evalReport.shareWithPlayer')}</Text>
+            <Text style={styles.modalSub}>{tr('evalReport.shareWithPlayerSub')}</Text>
 
             {selectedPlayerUser ? (
               <View style={{ marginBottom: 12 }}>
@@ -931,12 +922,12 @@ export default function EvalReportScreen() {
                     <Ionicons name="close-circle" size={20} color={t.muted} />
                   </TouchableOpacity>
                 </View>
-                <Text style={[styles.label, { marginTop: 12 }]}>Include in Share</Text>
+                <Text style={[styles.label, { marginTop: 12 }]}>{tr('evalReport.includeInShare')}</Text>
                 {[
-                  { key: 'share_report_text', label: 'Full Report', has: !!ev?.report_text },
-                  { key: 'share_grades', label: 'Grades', has: ev?.overall_grade != null || ev?.pillar_grades != null },
-                  { key: 'share_flags', label: 'Flags', has: (ev?.green_flags?.length ?? 0) > 0 || (ev?.watch_flags?.length ?? 0) > 0 },
-                  { key: 'share_questions', label: 'Key Questions', has: (ev?.key_questions?.length ?? 0) > 0 },
+                  { key: 'share_report_text', label: tr('evalReport.fullReport'), has: !!ev?.report_text },
+                  { key: 'share_grades', label: tr('evalReport.grades'), has: ev?.overall_grade != null || ev?.pillar_grades != null },
+                  { key: 'share_flags', label: tr('evalReport.flags'), has: (ev?.green_flags?.length ?? 0) > 0 || (ev?.watch_flags?.length ?? 0) > 0 },
+                  { key: 'share_questions', label: tr('evalReport.keyQuestions'), has: (ev?.key_questions?.length ?? 0) > 0 },
                 ].filter(cat => cat.has).map(cat => (
                   <View key={cat.key} style={styles.toggleRow}>
                     <Text style={styles.toggleLabel}>{cat.label}</Text>
@@ -948,10 +939,10 @@ export default function EvalReportScreen() {
                     />
                   </View>
                 ))}
-                <Text style={styles.label}>Message (optional)</Text>
+                <Text style={styles.label}>{tr('evalReport.messageOptional')}</Text>
                 <VoiceTextInput
                   style={styles.input}
-                  placeholder="Add a message to the player..."
+                  placeholder={tr('evalReport.messagePlaceholder')}
                   placeholderTextColor={t.muted2}
                   value={shareMessage}
                   onChangeText={setShareMessage}
@@ -963,7 +954,7 @@ export default function EvalReportScreen() {
                 <View style={{ flexDirection: 'row', gap: 10, marginBottom: 8 }}>
                   <VoiceTextInput
                     style={[styles.input, { flex: 1, marginBottom: 0 }]}
-                    placeholder="Search player name..."
+                    placeholder={tr('evalReport.searchPlayerPlaceholder')}
                     placeholderTextColor={t.muted2}
                     value={shareSearch}
                     onChangeText={setShareSearch}
@@ -991,11 +982,11 @@ export default function EvalReportScreen() {
 
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => { setShowShare(false); setSelectedPlayerUser(null); setShareResults([]); }}>
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
               {selectedPlayerUser && (
                 <TouchableOpacity style={[styles.saveBtn, { backgroundColor: t.positive }]} onPress={() => submitShare()} disabled={sharing}>
-                  {sharing ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>Share</Text>}
+                  {sharing ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>{tr('common.share')}</Text>}
                 </TouchableOpacity>
               )}
             </View>
@@ -1010,9 +1001,9 @@ export default function EvalReportScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>Add Correction</Text>
-            <Text style={styles.modalSub}>Sharpen this evaluation by noting what needs to be corrected.</Text>
-            <Text style={styles.label}>Pillar (optional)</Text>
+            <Text style={styles.modalTitle}>{tr('evalReport.addCorrection')}</Text>
+            <Text style={styles.modalSub}>{tr('evalReport.addCorrectionSub')}</Text>
+            <Text style={styles.label}>{tr('evalReport.pillarOptional')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
               {['', ...PILLARS].map(p => (
                 <TouchableOpacity
@@ -1021,15 +1012,15 @@ export default function EvalReportScreen() {
                   onPress={() => setSelectedPillar(p)}
                 >
                   <Text style={[styles.pillarChipText, selectedPillar === p && { color: t.ctaText, fontFamily: fonts[700] }]}>
-                    {p ? PILLAR_LABELS[p] : 'General'}
+                    {p ? pillarLabel(p) : tr('evalReport.general')}
                   </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <Text style={styles.label}>Your Correction</Text>
+            <Text style={styles.label}>{tr('evalReport.yourCorrection')}</Text>
             <VoiceTextInput
               style={[styles.input, { height: 100 }]}
-              placeholder="What needs to be corrected in this report?"
+              placeholder={tr('evalReport.correctionPlaceholder')}
               placeholderTextColor={t.muted2}
               value={correctionText}
               onChangeText={setCorrectionText}
@@ -1047,19 +1038,19 @@ export default function EvalReportScreen() {
                   ? <ActivityIndicator color={t.ctaText} />
                   : <>
                       <Ionicons name="refresh" size={16} color={t.ctaText} />
-                      <Text style={[styles.saveText, { color: t.ctaText, marginLeft: 8 }]}>Apply & Regenerate</Text>
+                      <Text style={[styles.saveText, { color: t.ctaText, marginLeft: 8 }]}>{tr('evalReport.applyRegenerate')}</Text>
                     </>}
               </TouchableOpacity>
               <View style={styles.modalRow}>
                 <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowCorrect(false)}>
-                  <Text style={styles.cancelText}>Cancel</Text>
+                  <Text style={styles.cancelText}>{tr('common.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.saveBtn, { backgroundColor: t.chip }]}
                   onPress={() => submitCorrection(false)}
                   disabled={saving}
                 >
-                  {saving ? <ActivityIndicator color={t.ink} /> : <Text style={[styles.saveText, { color: t.ink }]}>Save for Later</Text>}
+                  {saving ? <ActivityIndicator color={t.ink} /> : <Text style={[styles.saveText, { color: t.ink }]}>{tr('evalReport.saveForLater')}</Text>}
                 </TouchableOpacity>
               </View>
             </View>
@@ -1074,21 +1065,21 @@ export default function EvalReportScreen() {
         <View style={styles.bottomRow}>
           <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.ctaBg }]} onPress={() => setShowCorrect(true)}>
             <Ionicons name="create-outline" size={16} color={t.ctaText} />
-            <Text style={[styles.bbText, { color: t.ctaText }]}>Correct</Text>
+            <Text style={[styles.bbText, { color: t.ctaText }]}>{tr('evalReport.correct')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.chip, borderColor: t.cta2Border }]} onPress={() => setShowExport(true)} disabled={exporting}>
             <Ionicons name="document-text-outline" size={16} color={t.ink} />
-            <Text style={[styles.bbText, { color: t.ink }]}>Export</Text>
+            <Text style={[styles.bbText, { color: t.ink }]}>{tr('common.export')}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.bottomRow}>
           <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.pistachio }]} onPress={() => setShowShare(true)}>
             <Ionicons name="send" size={15} color="#16201A" />
-            <Text style={[styles.bbText, { color: '#16201A' }]}>Send to Player</Text>
+            <Text style={[styles.bbText, { color: '#16201A' }]}>{tr('evalReport.sendToPlayer')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.brown }]} onPress={() => setShowShareModal(true)}>
             <Ionicons name="people" size={15} color={t.brownInk} />
-            <Text style={[styles.bbText, { color: t.brownInk }]}>Share w/ Staff</Text>
+            <Text style={[styles.bbText, { color: t.brownInk }]}>{tr('evalReport.shareWithStaffShort')}</Text>
           </TouchableOpacity>
         </View>
       </View>

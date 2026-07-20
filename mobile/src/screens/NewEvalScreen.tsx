@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -17,17 +18,11 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import { GeneratingOverlay, parseGenProgress } from '../components/GeneratingBasketball';
 
-const OUTPUT_TYPES: { key: OutputType; label: string }[] = [
-  { key: 'player_eval',        label: 'Player Eval' },
-  { key: 'film_breakdown',     label: 'Film Breakdown' },
-  { key: 'scouting_report',    label: 'Scouting Report' },
-  { key: 'coaching_report',    label: 'Coaching Report' },
-  { key: 'game_analysis',      label: 'Game Analysis' },
-  { key: 'box_score',          label: 'Box Score' },
-  { key: 'training_program',   label: 'Training Program' },
-  { key: 'recruitment_profile', label: 'Recruitment' },
-  { key: 'position_analysis',  label: 'Position Analysis' },
-  { key: 'matchup',            label: 'Match Up' },
+// API output_type keys — labels are resolved at render via i18n.
+const OUTPUT_TYPES: OutputType[] = [
+  'player_eval', 'film_breakdown', 'scouting_report', 'coaching_report',
+  'game_analysis', 'box_score', 'training_program', 'recruitment_profile',
+  'position_analysis', 'matchup',
 ];
 
 export default function NewEvalScreen() {
@@ -35,6 +30,7 @@ export default function NewEvalScreen() {
   const navigation = useNavigation<any>();
   const { playerId, playerName } = route.params;
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const styles = makeStyles(t);
 
   // comma-separated when multiple types are combined into one comprehensive eval
@@ -124,12 +120,12 @@ export default function NewEvalScreen() {
       });
       const clean = (text ?? '').trim();
       if (!clean) {
-        Alert.alert('Nothing to import', 'No readable text was found in that file.');
+        Alert.alert(tr('newEval.nothingToImportTitle'), tr('newEval.nothingToImportMsg'));
         return;
       }
       setValue(prev => (prev.trim() ? `${prev.trim()}\n\n${clean}` : clean));
     } catch (e: any) {
-      Alert.alert('Import failed', e?.response?.data?.detail ?? 'Could not read that file.');
+      Alert.alert(tr('newEval.importFailedTitle'), e?.response?.data?.detail ?? tr('newEval.importFailedMsg'));
     } finally {
       setBusy(false);
     }
@@ -152,12 +148,12 @@ export default function NewEvalScreen() {
       // the JS multipart buffer, collecting upload tokens.
       const tokens: string[] = [];
       for (let i = 0; i < videos.length; i++) {
-        setProgress(`Uploading film ${i + 1} of ${videos.length}…`);
+        setProgress(tr('newEval.uploadingFilm', { current: i + 1, total: videos.length }));
         const up = await uploadFileStreamed('/evaluations/upload-video', videos[i].uri, {});
         if (up?.token) tokens.push(up.token);
       }
       if (tokens.length) fields.video_tokens = tokens.join(',');
-      setProgress(videos.length ? 'Analyzing film…' : '');
+      setProgress(videos.length ? tr('newEval.analyzingFilm') : '');
 
       const form = new FormData();
       Object.entries(fields).forEach(([k, v]) => form.append(k, v));
@@ -167,7 +163,7 @@ export default function NewEvalScreen() {
       if (!ev?.id) throw new Error('No evaluation returned');
       navigation.replace('EvalReport', { evalId: ev.id });
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? e?.message ?? 'Evaluation failed. Check API connection.');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('newEval.evalFailedMsg'));
     } finally {
       setSubmitting(false);
       setProgress('');
@@ -192,30 +188,32 @@ export default function NewEvalScreen() {
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={styles.title}>New Evaluation</Text>
+          <Text style={styles.title}>{tr('newEval.title')}</Text>
           <Text style={styles.sub}>{playerName}</Text>
         </View>
       </View>
 
       {/* Output type selector — combine multiple for a comprehensive eval */}
-      <Text style={styles.label}>Report Type</Text>
+      <Text style={styles.label}>{tr('newEval.reportType')}</Text>
       <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
-        Tap multiple to combine them into one comprehensive report.
+        {tr('newEval.reportTypeHint')}
       </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
-        {OUTPUT_TYPES.map(t => {
+        {OUTPUT_TYPES.map(key => {
           const selected = outputType.split(',').filter(Boolean);
-          const isOn = selected.includes(t.key);
+          const isOn = selected.includes(key);
           return (
           <TouchableOpacity
-            key={t.key}
+            key={key}
             style={[styles.typeChip, isOn && styles.typeChipActive]}
             onPress={() => {
-              const next = isOn ? selected.filter(k => k !== t.key) : [...selected, t.key];
-              setOutputType((next.length ? next : [t.key]).join(','));
+              const next = isOn ? selected.filter(k => k !== key) : [...selected, key];
+              setOutputType((next.length ? next : [key]).join(','));
             }}
           >
-            <Text style={[styles.typeLabel, isOn && styles.typeLabelActive]}>{t.label}</Text>
+            <Text style={[styles.typeLabel, isOn && styles.typeLabelActive]}>
+              {key === 'recruitment_profile' ? tr('newEval.recruitmentShort') : tr(`reportTypes.${key}`)}
+            </Text>
           </TouchableOpacity>
           );
         })}
@@ -224,15 +222,15 @@ export default function NewEvalScreen() {
       {/* Box Score — tracked game selection */}
       {wantsBoxScore && (
         <View style={{ marginBottom: 20 }}>
-          <Text style={styles.label}>Tracked Games (Box Score)</Text>
+          <Text style={styles.label}>{tr('newEval.trackedGamesLabel')}</Text>
           <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
-            Pick a season/type and select one or more tracked games — their real stats are attached to the report.
+            {tr('newEval.trackedGamesHint')}
           </Text>
           {!gamesLoaded ? (
             <ActivityIndicator color={t.accent} style={{ marginVertical: 12 }} />
           ) : games.length === 0 ? (
             <Text style={{ color: t.muted2, fontSize: 12, paddingVertical: 8 }}>
-              No tracked games for {playerName} yet. Track games in Team Grade first.
+              {tr('newEval.noTrackedGames', { name: playerName })}
             </Text>
           ) : (
             <>
@@ -240,7 +238,7 @@ export default function NewEvalScreen() {
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>
                 {seasonYears.map(y => (
                   <TouchableOpacity key={y} style={[styles.typeChip, seasonYear === y && styles.typeChipActive]} onPress={() => setSeasonYear(y)}>
-                    <Text style={[styles.typeLabel, seasonYear === y && styles.typeLabelActive]}>{y === 'all' ? 'All Seasons' : y}</Text>
+                    <Text style={[styles.typeLabel, seasonYear === y && styles.typeLabelActive]}>{y === 'all' ? tr('newEval.allSeasons') : y}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
@@ -248,7 +246,7 @@ export default function NewEvalScreen() {
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }}>
                 {seasonPhases.map(p => (
                   <TouchableOpacity key={p} style={[styles.typeChip, seasonPhase === p && styles.typeChipActive]} onPress={() => setSeasonPhase(p)}>
-                    <Text style={[styles.typeLabel, seasonPhase === p && styles.typeLabelActive]}>{p === 'all' ? 'All Types' : p.charAt(0).toUpperCase() + p.slice(1)}</Text>
+                    <Text style={[styles.typeLabel, seasonPhase === p && styles.typeLabelActive]}>{p === 'all' ? tr('newEval.allTypes') : p.charAt(0).toUpperCase() + p.slice(1)}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
@@ -264,7 +262,7 @@ export default function NewEvalScreen() {
                   }}
                 >
                   <Ionicons name={allFilteredSelected ? 'checkbox' : 'square-outline'} size={20} color={allFilteredSelected ? t.accent : t.muted2} />
-                  <Text style={{ color: t.inkSoft, fontSize: 13, fontFamily: fonts[700] }}>Select all shown ({filteredGames.length})</Text>
+                  <Text style={{ color: t.inkSoft, fontSize: 13, fontFamily: fonts[700] }}>{tr('newEval.selectAllShown', { count: filteredGames.length })}</Text>
                 </TouchableOpacity>
               )}
               {filteredGames.map(g => {
@@ -276,16 +274,16 @@ export default function NewEvalScreen() {
                   >
                     <Ionicons name={on ? 'checkbox' : 'square-outline'} size={20} color={on ? t.accent : t.muted2} />
                     <View style={{ flex: 1 }}>
-                      <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[600] }}>vs {g.opponent_name}</Text>
+                      <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[600] }}>{tr('newEval.vsOpponent', { opponent: g.opponent_name })}</Text>
                       <Text style={{ color: t.muted2, fontSize: 11 }}>
-                        {g.date ?? ''}{g.season_phase ? ` · ${g.season_phase}` : ''}{g.game_grade != null ? ` · Grade ${g.game_grade}` : ''}
+                        {g.date ?? ''}{g.season_phase ? ` · ${g.season_phase}` : ''}{g.game_grade != null ? ` · ${tr('newEval.gradeShort', { grade: g.game_grade })}` : ''}
                       </Text>
                     </View>
                   </TouchableOpacity>
                 );
               })}
               {selectedGameIds.length > 0 && (
-                <Text style={{ color: t.accent, fontSize: 12, marginTop: 8, fontFamily: fonts[700] }}>{selectedGameIds.length} game{selectedGameIds.length > 1 ? 's' : ''} selected</Text>
+                <Text style={{ color: t.accent, fontSize: 12, marginTop: 8, fontFamily: fonts[700] }}>{tr('newEval.gamesSelected', { count: selectedGameIds.length })}</Text>
               )}
             </>
           )}
@@ -294,20 +292,20 @@ export default function NewEvalScreen() {
 
       {wantsMatchup && (
         <View style={{ marginBottom: 20 }}>
-          <Text style={styles.label}>Compare Against (Match Up)</Text>
+          <Text style={styles.label}>{tr('newEval.matchupLabel')}</Text>
           <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
-            Pick one or more players to compare {playerName || 'this player'} against. The report pulls everything the app knows about each — evals, tracked stats, and mentions in your other reports.
+            {tr('newEval.matchupHint', { name: playerName || tr('newEval.thisPlayer') })}
           </Text>
           <TextInput
             style={{ backgroundColor: t.card, borderRadius: 12, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, marginBottom: 8 }}
             value={matchupSearch} onChangeText={setMatchupSearch}
-            placeholder="Search players…" placeholderTextColor={t.muted2}
+            placeholder={tr('newEval.searchPlayersPlaceholder')} placeholderTextColor={t.muted2}
           />
           {!rosterLoaded ? (
             <ActivityIndicator color={t.accent} style={{ marginVertical: 12 }} />
           ) : matchupFiltered.length === 0 ? (
             <Text style={{ color: t.muted2, fontSize: 12, paddingVertical: 8 }}>
-              {rosterPlayers.length === 0 ? 'No other players on your roster yet.' : 'No players match that search.'}
+              {rosterPlayers.length === 0 ? tr('newEval.noOtherPlayers') : tr('newEval.noPlayersMatch')}
             </Text>
           ) : (
             matchupFiltered.slice(0, 40).map(p => {
@@ -330,14 +328,14 @@ export default function NewEvalScreen() {
           )}
           {matchupIds.length > 0 && (
             <Text style={{ color: t.accent, fontSize: 12, marginTop: 8, fontFamily: fonts[700] }}>
-              Comparing {matchupIds.length + 1} players ({playerName || 'base'} + {matchupIds.length})
+              {tr('newEval.comparingPlayers', { total: matchupIds.length + 1, name: playerName || tr('newEval.thisPlayer'), count: matchupIds.length })}
             </Text>
           )}
         </View>
       )}
 
       {/* Video picker — multiple films allowed */}
-      <Text style={styles.label}>Film (optional)</Text>
+      <Text style={styles.label}>{tr('newEval.filmLabel')}</Text>
       {videos.map((v, i) => (
         <View key={`${v.uri}-${i}`} style={[styles.videoPicker, styles.videoPickerDone, { justifyContent: 'space-between', marginBottom: 8 }]}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
@@ -352,13 +350,13 @@ export default function NewEvalScreen() {
       <TouchableOpacity style={styles.videoPicker} onPress={pickVideo}>
         <Ionicons name="cloud-upload-outline" size={28} color={t.muted} />
         <Text style={styles.videoPickerText}>
-          {videos.length ? 'Add more film' : 'Tap to select film (you can pick several)'}
+          {videos.length ? tr('newEval.addMoreFilm') : tr('newEval.tapToSelectFilm')}
         </Text>
       </TouchableOpacity>
 
       {/* Notes */}
       <View style={styles.labelRow}>
-        <Text style={styles.label}>Notes</Text>
+        <Text style={styles.label}>{tr('newEval.notesLabel')}</Text>
         <TouchableOpacity
           style={styles.importBtn}
           onPress={() => importDoc('notes', setImportingNotes, setCoachNotes)}
@@ -367,12 +365,12 @@ export default function NewEvalScreen() {
           {importingNotes
             ? <ActivityIndicator size="small" color={t.accent} />
             : <><Ionicons name="document-attach-outline" size={13} color={t.accent} />
-              <Text style={styles.importBtnText}>Import</Text></>}
+              <Text style={styles.importBtnText}>{tr('newEval.import')}</Text></>}
         </TouchableOpacity>
       </View>
       <VoiceTextInput
         style={[styles.input, { height: 100 }]}
-        placeholder="e.g. Elite catch and shoot, plays at one pace, need to see more P&R midrange..."
+        placeholder={tr('newEval.notesPlaceholder')}
         placeholderTextColor={t.muted2}
         value={coachNotes}
         onChangeText={setCoachNotes}
@@ -382,7 +380,7 @@ export default function NewEvalScreen() {
 
       {/* Focus */}
       <View style={styles.labelRow}>
-        <Text style={styles.label}>Focus (optional)</Text>
+        <Text style={styles.label}>{tr('newEval.focusLabel')}</Text>
         <TouchableOpacity
           style={styles.importBtn}
           onPress={() => importDoc('focus', setImportingFocus, setFocusPrompt)}
@@ -391,15 +389,15 @@ export default function NewEvalScreen() {
           {importingFocus
             ? <ActivityIndicator size="small" color={t.accent} />
             : <><Ionicons name="document-attach-outline" size={13} color={t.accent} />
-              <Text style={styles.importBtnText}>Import</Text></>}
+              <Text style={styles.importBtnText}>{tr('newEval.import')}</Text></>}
         </TouchableOpacity>
       </View>
       <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
-        Center the report on a person, matchup, action, or situation.
+        {tr('newEval.focusHint')}
       </Text>
       <VoiceTextInput
         style={[styles.input, { height: 80 }]}
-        placeholder="e.g. Focus on the two guards' P&R defense; grade the 4's spacing on the weak side"
+        placeholder={tr('newEval.focusPlaceholder')}
         placeholderTextColor={t.muted2}
         value={focusPrompt}
         onChangeText={setFocusPrompt}
@@ -410,15 +408,15 @@ export default function NewEvalScreen() {
 
       <TouchableOpacity style={styles.submitBtn} onPress={submit} disabled={submitting}>
         {submitting
-          ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.submitText}>  Analyzing...</Text></>
-          : <><Ionicons name="analytics" size={18} color={t.ctaText} /><Text style={styles.submitText}>  Run BIM Analysis</Text></>
+          ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.submitText}>{'  ' + tr('newEval.analyzing')}</Text></>
+          : <><Ionicons name="analytics" size={18} color={t.ctaText} /><Text style={styles.submitText}>{'  ' + tr('newEval.runBimAnalysis')}</Text></>
         }
       </TouchableOpacity>
 
       <GeneratingOverlay
         visible={submitting}
         realProgress={parseGenProgress(progress)}
-        label={progress || 'Uploading and analyzing with Claude — keep this screen open.'}
+        label={progress || tr('newEval.overlayLabel')}
       />
     </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
