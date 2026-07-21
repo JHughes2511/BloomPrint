@@ -6,6 +6,7 @@ import {
   ActivityIndicator, TextInput, Alert,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import { playerReportsAPI, playerTrainingAPI } from '../../api/playerClient';
@@ -21,19 +22,11 @@ const PILLARS = [
   'intangibles', 'advanced_analysis', 'strategic_fit',
 ];
 
-const PILLAR_LABELS: Record<string, string> = {
-  offensive_skills: 'Offensive Skills',
-  defensive_capabilities: 'Defense',
-  physical_attributes: 'Physical',
-  intangibles: 'Intangibles',
-  advanced_analysis: 'Advanced',
-  strategic_fit: 'Strategic Fit',
-};
-
 export default function PlayerReportDetailScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { reportId } = route.params;
+  const { t: tr } = useTranslation();
   const { t } = useTheme();
   const styles = makeStyles(t);
   const markdownStyles = makeMarkdownStyles(t);
@@ -64,7 +57,7 @@ export default function PlayerReportDetailScreen() {
       setComments(prev => [...prev, c]);
       setCommentText('');
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to add comment');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerApp.reportDetail.failedAddComment'));
     } finally {
       setSubmitting(false);
     }
@@ -74,12 +67,12 @@ export default function PlayerReportDetailScreen() {
     setGenerating(true);
     try {
       const pt = await playerTrainingAPI.generate(reportId);
-      Alert.alert('Training Generated!', 'Your personalized training program is ready.', [
-        { text: 'View Training', onPress: () => navigation.navigate('TrainingTab') },
-        { text: 'OK' },
+      Alert.alert(tr('playerApp.reportDetail.trainingGeneratedTitle'), tr('playerApp.reportDetail.trainingGeneratedMsg'), [
+        { text: tr('playerApp.reportDetail.viewTraining'), onPress: () => navigation.navigate('TrainingTab') },
+        { text: tr('common.ok') },
       ]);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to generate training');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerApp.reportDetail.failedGenerateTraining'));
     } finally {
       setGenerating(false);
     }
@@ -109,34 +102,34 @@ export default function PlayerReportDetailScreen() {
               {report.output_type.replace(/_/g, ' ').toUpperCase()}
             </Text>
             <Text style={styles.sub}>
-              From {report.shared_by_name} · {new Date(report.created_at).toLocaleDateString()}
+              {tr('playerApp.reportDetail.sharedBy', { name: report.shared_by_name, date: new Date(report.created_at).toLocaleDateString() })}
             </Text>
           </View>
         </View>
 
         {report.message && (
           <View style={styles.messageBox}>
-            <Text style={styles.messageLabel}>Coach Message</Text>
+            <Text style={styles.messageLabel}>{tr('playerApp.reportDetail.coachMessage')}</Text>
             <Text style={styles.messageText}>{report.message}</Text>
           </View>
         )}
 
         {report.overall_grade != null && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Overall Grade</Text>
-            <Text style={styles.grade}>{report.overall_grade.toFixed(1)} / 10</Text>
+            <Text style={styles.sectionLabel}>{tr('playerApp.reportDetail.overallGrade')}</Text>
+            <Text style={styles.grade}>{tr('playerApp.reportDetail.gradeOutOf', { grade: report.overall_grade.toFixed(1) })}</Text>
           </View>
         )}
 
         {report.pillar_grades && Object.keys(report.pillar_grades).length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Pillar Grades</Text>
+            <Text style={styles.sectionLabel}>{tr('playerApp.reportDetail.pillarGrades')}</Text>
             {PILLARS.filter(k => report.pillar_grades![k] != null).map(k => {
               const g = report.pillar_grades![k];
               const pct = Math.round((g / 10) * 100);
               return (
                 <View key={k} style={styles.pillarRow}>
-                  <Text style={styles.pillarName}>{PILLAR_LABELS[k]}</Text>
+                  <Text style={styles.pillarName}>{tr(`playerApp.reportDetail.pillars.${k}`)}</Text>
                   <View style={styles.barContainer}>
                     <View style={[styles.bar, { width: `${pct}%` as any }]} />
                   </View>
@@ -151,7 +144,7 @@ export default function PlayerReportDetailScreen() {
           <View style={styles.flagRow}>
             {report.green_flags && report.green_flags.length > 0 && (
               <View style={[styles.flagBox, { borderColor: t.positive }]}>
-                <Text style={[styles.flagTitle, { color: t.positive }]}>Green Flags</Text>
+                <Text style={[styles.flagTitle, { color: t.positive }]}>{tr('playerApp.reportDetail.greenFlags')}</Text>
                 {report.green_flags.map((f, i) => (
                   <Text key={i} style={styles.flagItem}>· {f}</Text>
                 ))}
@@ -159,7 +152,7 @@ export default function PlayerReportDetailScreen() {
             )}
             {report.watch_flags && report.watch_flags.length > 0 && (
               <View style={[styles.flagBox, { borderColor: t.negative }]}>
-                <Text style={[styles.flagTitle, { color: t.negative }]}>Watch Flags</Text>
+                <Text style={[styles.flagTitle, { color: t.negative }]}>{tr('playerApp.reportDetail.watchFlags')}</Text>
                 {report.watch_flags.map((f, i) => (
                   <Text key={i} style={styles.flagItem}>· {f}</Text>
                 ))}
@@ -170,7 +163,7 @@ export default function PlayerReportDetailScreen() {
 
         {report.key_questions && report.key_questions.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Key Questions</Text>
+            <Text style={styles.sectionLabel}>{tr('playerApp.reportDetail.keyQuestions')}</Text>
             {report.key_questions.map((q, i) => (
               <View key={i} style={styles.questionRow}>
                 <Text style={styles.questionNum}>{i + 1}</Text>
@@ -182,7 +175,7 @@ export default function PlayerReportDetailScreen() {
 
         {report.report_text && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Full Report</Text>
+            <Text style={styles.sectionLabel}>{tr('playerApp.reportDetail.fullReport')}</Text>
             <View style={styles.reportBox}>
               <Markdown style={markdownStyles}>{report.report_text}</Markdown>
             </View>
@@ -199,12 +192,12 @@ export default function PlayerReportDetailScreen() {
             {generating ? (
               <>
                 <ActivityIndicator color="#fff" size="small" />
-                <Text style={styles.generateBtnText}>Generating Training...</Text>
+                <Text style={styles.generateBtnText}>{tr('playerApp.reportDetail.generatingTraining')}</Text>
               </>
             ) : (
               <>
                 <Ionicons name="barbell" size={18} color="#fff" />
-                <Text style={styles.generateBtnText}>Generate Training Program</Text>
+                <Text style={styles.generateBtnText}>{tr('playerApp.reportDetail.generateTraining')}</Text>
               </>
             )}
           </TouchableOpacity>
@@ -212,7 +205,7 @@ export default function PlayerReportDetailScreen() {
 
         {/* Comments */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Comments ({comments.length})</Text>
+          <Text style={styles.sectionLabel}>{tr('playerApp.reportDetail.commentsCount', { count: comments.length })}</Text>
           <CommentThread
             comments={comments as any}
             accent={t.positive}
@@ -224,7 +217,7 @@ export default function PlayerReportDetailScreen() {
           <View style={styles.commentInput}>
             <VoiceTextInput
               style={styles.input}
-              placeholder="Add a comment..."
+              placeholder={tr('playerApp.reportDetail.addCommentPlaceholder')}
               placeholderTextColor={t.muted2}
               value={commentText}
               onChangeText={setCommentText}

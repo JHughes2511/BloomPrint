@@ -4,6 +4,7 @@ import {
   ActivityIndicator, RefreshControl, TextInput,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { playerTrainingAPI } from '../../api/playerClient';
 import { PlayerTraining } from '../../types';
@@ -31,6 +32,7 @@ interface UnifiedProgram {
 
 export default function PlayerTrainingScreen() {
   const navigation = useNavigation<any>();
+  const { t: tr } = useTranslation();
   const { t } = useTheme();
   const styles = makeStyles(t);
   const [programs, setPrograms] = useState<PlayerTraining[]>([]);
@@ -73,9 +75,9 @@ export default function PlayerTrainingScreen() {
   const q = query.trim().toLowerCase();
   const filtered = q
     ? sorted.filter((pt, idx) => {
-        const title = idx === 0 ? 'Latest Program' : 'Training Program';
+        const title = idx === 0 ? tr('playerApp.training.latestProgram') : tr('reportTypes.training_program');
         const preview = pt.program_text ? cleanPreview(pt.program_text) : '';
-        const date = `Sent ${timeAgo(pt.created_at)}`;
+        const date = tr('playerApp.training.sentTime', { time: timeAgo(pt.created_at) });
         return [title, preview, date].some((s) => s.toLowerCase().includes(q));
       })
     : sorted;
@@ -99,7 +101,7 @@ export default function PlayerTrainingScreen() {
     >
       <View style={styles.header}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>My Training</Text>
+          <Text style={styles.title}>{tr('playerApp.training.title')}</Text>
           <TouchableOpacity
             style={styles.searchBtn}
             onPress={() => {
@@ -113,14 +115,14 @@ export default function PlayerTrainingScreen() {
           </TouchableOpacity>
         </View>
         <Text style={styles.sub}>
-          {unified.length > 0 ? 'Programs your coach built for you' : 'Training from your coach'}
+          {unified.length > 0 ? tr('playerApp.training.subtitleHasPrograms') : tr('playerApp.training.subtitleEmpty')}
         </Text>
         {searchOpen ? (
           <View style={styles.searchBox}>
             <Ionicons name="search" size={16} color={t.muted2} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search programs"
+              placeholder={tr('playerApp.training.searchPlaceholder')}
               placeholderTextColor={t.muted2}
               value={query}
               onChangeText={setQuery}
@@ -136,17 +138,17 @@ export default function PlayerTrainingScreen() {
       {unified.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="barbell-outline" size={48} color={t.muted2} />
-          <Text style={styles.emptyTitle}>No training programs yet</Text>
+          <Text style={styles.emptyTitle}>{tr('playerApp.training.emptyTitle')}</Text>
           <Text style={styles.emptyDesc}>
-            Open a shared report and tap "Generate Training Program" to create one.
+            {tr('playerApp.training.emptyDesc')}
           </Text>
         </View>
       ) : (
         <>
-          <Text style={[styles.sectionLabel, { marginTop: 22 }]}>Sent to You</Text>
+          <Text style={[styles.sectionLabel, { marginTop: 22 }]}>{tr('playerApp.training.sentToYou')}</Text>
 
           {filtered.length === 0 ? (
-            <Text style={styles.noResults}>No programs match "{query.trim()}"</Text>
+            <Text style={styles.noResults}>{tr('playerApp.training.noMatch', { query: query.trim() })}</Text>
           ) : null}
 
           {filtered.map((pt, idx) => (
@@ -163,23 +165,23 @@ export default function PlayerTrainingScreen() {
                   <Ionicons name="barbell" size={20} color="#16201A" />
                 </View>
                 <View style={{ flex: 1, marginLeft: 13 }}>
-                  <Text style={styles.cardTitle}>{idx === 0 ? 'Latest Program' : 'Training Program'}</Text>
-                  <Text style={styles.cardDate}>Sent {timeAgo(pt.created_at)}</Text>
+                  <Text style={styles.cardTitle}>{idx === 0 ? tr('playerApp.training.latestProgram') : tr('reportTypes.training_program')}</Text>
+                  <Text style={styles.cardDate}>{tr('playerApp.training.sentTime', { time: timeAgo(pt.created_at) })}</Text>
                 </View>
                 {pt.origin === 'coach' ? (
                   <View style={styles.coachBadge}>
-                    <Text style={styles.coachBadgeText}>From Coach</Text>
+                    <Text style={styles.coachBadgeText}>{tr('playerApp.training.fromCoach')}</Text>
                   </View>
                 ) : pt.coach_notes ? (
                   <View style={styles.notesBadge}>
                     <Ionicons name="chatbubble-ellipses-outline" size={12} color={t.positive} />
-                    <Text style={styles.notesBadgeText}>Coach Notes</Text>
+                    <Text style={styles.notesBadgeText}>{tr('playerApp.training.coachNotes')}</Text>
                   </View>
                 ) : null}
                 <Ionicons name="chevron-forward" size={16} color={t.muted2} style={{ marginLeft: 8 }} />
               </View>
               {pt.reformatting ? (
-                <Text style={styles.preview}>AI is preparing this program...</Text>
+                <Text style={styles.preview}>{tr('playerApp.training.preparingProgram')}</Text>
               ) : pt.program_text ? (
                 <Text style={styles.preview} numberOfLines={2}>{cleanPreview(pt.program_text)}</Text>
               ) : null}

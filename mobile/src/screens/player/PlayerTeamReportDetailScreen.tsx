@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import { playerReportsAPI } from '../../api/playerClient';
@@ -24,6 +25,7 @@ function cleanMarkdown(text: string): string {
 }
 
 export default function PlayerTeamReportDetailScreen() {
+  const { t: tr } = useTranslation();
   const { t } = useTheme();
   const styles = makeStyles(t);
   const markdownStyles = makeMarkdownStyles(t);
@@ -56,7 +58,7 @@ export default function PlayerTeamReportDetailScreen() {
     return (
       <ScreenBackground>
         <View style={styles.center}>
-          <Text style={{ color: t.ink }}>Report not found</Text>
+          <Text style={{ color: t.ink }}>{tr('playerApp.teamReportDetail.notFound')}</Text>
         </View>
       </ScreenBackground>
     );
@@ -74,21 +76,21 @@ export default function PlayerTeamReportDetailScreen() {
               {report.output_type.replace(/_/g, ' ').toUpperCase()}
             </Text>
             <Text style={styles.sub}>
-              From {report.shared_by_name || 'Coach'} · {new Date(report.created_at).toLocaleDateString()}
+              {tr('playerApp.teamReportDetail.sharedBy', { name: report.shared_by_name || tr('playerApp.teamReportDetail.coachFallback'), date: new Date(report.created_at).toLocaleDateString() })}
             </Text>
           </View>
         </View>
 
         {report.message ? (
           <View style={styles.messageBox}>
-            <Text style={styles.messageLabel}>Coach Message</Text>
+            <Text style={styles.messageLabel}>{tr('playerApp.teamReportDetail.coachMessage')}</Text>
             <Text style={styles.messageText}>{report.message}</Text>
           </View>
         ) : null}
 
         {report.report_text ? (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Team Report</Text>
+            <Text style={styles.sectionLabel}>{tr('playerApp.teamReportDetail.teamReport')}</Text>
             <View style={styles.reportBox}>
               <Markdown style={markdownStyles}>{cleanMarkdown(report.report_text)}</Markdown>
             </View>

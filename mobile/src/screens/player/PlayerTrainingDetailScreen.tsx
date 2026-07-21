@@ -6,6 +6,7 @@ import {
   ActivityIndicator, TextInput, Alert,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import * as Print from 'expo-print';
@@ -28,6 +29,7 @@ export default function PlayerTrainingDetailScreen() {
   const navigation = useNavigation<any>();
   const { trainingId } = route.params;
   const { playerUser } = usePlayerAuth();
+  const { t: tr } = useTranslation();
   const { t } = useTheme();
   const styles = makeStyles(t);
   const markdownStyles = makeMarkdownStyles(t);
@@ -54,10 +56,10 @@ export default function PlayerTrainingDetailScreen() {
         list.find(item => item.id === trainingId) ?? null
       ),
       playerTrainingAPI.getComments(trainingId),
-    ]).then(([tr, c]) => {
-      setTraining(tr);
+    ]).then(([item, c]) => {
+      setTraining(item);
       setComments(c);
-      setCompleted(new Set(tr?.completed_drills ?? []));
+      setCompleted(new Set(item?.completed_drills ?? []));
     }).finally(() => setLoading(false));
     loadCorrections();
   }, [trainingId]);
@@ -109,12 +111,12 @@ export default function PlayerTrainingDetailScreen() {
         + buildPdfFileName('Training Program', playerUser?.name ?? 'Player', new Date(training.created_at)) + '.pdf';
       await FileSystem.copyAsync({ from: uri, to: dest });
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: 'Training Program' });
+        await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: tr('reportTypes.training_program') });
       } else {
         await Print.printAsync({ html });
       }
     } catch (e: any) {
-      Alert.alert('Export Error', e?.message ?? 'Could not export program');
+      Alert.alert(tr('playerApp.trainingDetail.exportErrorTitle'), e?.message ?? tr('playerApp.trainingDetail.exportErrorMsg'));
     } finally {
       setExporting(false);
     }
@@ -127,9 +129,9 @@ export default function PlayerTrainingDetailScreen() {
       await playerTrainingAPI.addCorrection(trainingId, feedbackText.trim());
       setFeedbackText('');
       await loadCorrections();
-      Alert.alert('Saved', 'Correction saved. Apply & Regenerate when ready.');
+      Alert.alert(tr('playerApp.trainingDetail.savedTitle'), tr('playerApp.trainingDetail.savedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to save correction');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerApp.trainingDetail.failedSaveCorrection'));
     } finally {
       setSavingCorrection(false);
     }
@@ -138,7 +140,7 @@ export default function PlayerTrainingDetailScreen() {
   const refreshTraining = async () => {
     const pending = feedbackText.trim();
     if (!pending && trainingCorrections.filter(c => !c.applied).length === 0) {
-      Alert.alert('Nothing to apply', 'Add a correction first.');
+      Alert.alert(tr('playerApp.trainingDetail.nothingToApplyTitle'), tr('playerApp.trainingDetail.nothingToApplyMsg'));
       return;
     }
     setRefreshing(true);
@@ -148,9 +150,9 @@ export default function PlayerTrainingDetailScreen() {
       setTraining(updated);
       setFeedbackText('');
       await loadCorrections();
-      Alert.alert('Updated!', 'Your training program has been updated based on your corrections.');
+      Alert.alert(tr('playerApp.trainingDetail.updatedTitle'), tr('playerApp.trainingDetail.updatedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to update training');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerApp.trainingDetail.failedUpdateTraining'));
     } finally {
       setRefreshing(false);
     }
@@ -164,7 +166,7 @@ export default function PlayerTrainingDetailScreen() {
       setComments(prev => [...prev, c]);
       setCommentText('');
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to add comment');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerApp.trainingDetail.failedAddComment'));
     } finally {
       setSubmitting(false);
     }
@@ -184,7 +186,7 @@ export default function PlayerTrainingDetailScreen() {
     return (
       <ScreenBackground>
         <View style={styles.center}>
-          <Text style={{ color: t.ink }}>Training not found</Text>
+          <Text style={{ color: t.ink }}>{tr('playerApp.trainingDetail.notFound')}</Text>
         </View>
       </ScreenBackground>
     );
@@ -198,7 +200,7 @@ export default function PlayerTrainingDetailScreen() {
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
           <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.title}>Training Program</Text>
+            <Text style={styles.title}>{tr('reportTypes.training_program')}</Text>
             <Text style={styles.sub}>{new Date(training.created_at).toLocaleDateString()}</Text>
           </View>
         </View>
@@ -207,7 +209,7 @@ export default function PlayerTrainingDetailScreen() {
           <View style={styles.coachNotesBox}>
             <View style={styles.coachNotesHeader}>
               <Ionicons name="chatbubble" size={14} color={t.positive} />
-              <Text style={styles.coachNotesLabel}>Coach Notes</Text>
+              <Text style={styles.coachNotesLabel}>{tr('playerApp.trainingDetail.coachNotes')}</Text>
             </View>
             <Text style={styles.coachNotesText}>{training.coach_notes}</Text>
           </View>
@@ -218,7 +220,7 @@ export default function PlayerTrainingDetailScreen() {
           <>
             <View style={styles.progressCard}>
               <View style={styles.progressTop}>
-                <Text style={styles.progressLabel}>This Week's Progress</Text>
+                <Text style={styles.progressLabel}>{tr('playerApp.trainingDetail.weeklyProgress')}</Text>
                 <Text style={styles.progressCount}>{doneCount} / {drillTotal}</Text>
               </View>
               <View style={styles.progressTrack}>
@@ -228,7 +230,7 @@ export default function PlayerTrainingDetailScreen() {
 
             {drillSections.map((sec, si) => (
               <View key={si} style={styles.section}>
-                <Text style={styles.sectionLabel}>{sec.title || 'Drills'}</Text>
+                <Text style={styles.sectionLabel}>{sec.title || tr('playerApp.trainingDetail.drills')}</Text>
                 {sec.drills.map(d => {
                   const done = completed.has(d.key);
                   return (
@@ -254,14 +256,14 @@ export default function PlayerTrainingDetailScreen() {
         )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Your Program</Text>
+          <Text style={styles.sectionLabel}>{tr('playerApp.trainingDetail.yourProgram')}</Text>
           <View style={styles.programBox}>
             {training.program_text ? (
               <Markdown style={markdownStyles}>{training.program_text}</Markdown>
             ) : (
               <View style={styles.generatingBox}>
                 <ActivityIndicator color={t.positive} />
-                <Text style={styles.generatingText}>Generating your program...</Text>
+                <Text style={styles.generatingText}>{tr('playerApp.trainingDetail.generatingProgram')}</Text>
               </View>
             )}
           </View>
@@ -269,7 +271,7 @@ export default function PlayerTrainingDetailScreen() {
 
         {/* Comments */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Comments ({comments.length})</Text>
+          <Text style={styles.sectionLabel}>{tr('playerApp.trainingDetail.commentsCount', { count: comments.length })}</Text>
           <CommentThread
             comments={comments as any}
             accent={t.positive}
@@ -281,7 +283,7 @@ export default function PlayerTrainingDetailScreen() {
           <View style={styles.commentInput}>
             <VoiceTextInput
               style={styles.input}
-              placeholder="Add a comment..."
+              placeholder={tr('playerApp.trainingDetail.addCommentPlaceholder')}
               placeholderTextColor={t.muted2}
               value={commentText}
               onChangeText={setCommentText}
@@ -302,14 +304,14 @@ export default function PlayerTrainingDetailScreen() {
 
         {/* Update Report with Feedback */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Update Training with Feedback</Text>
+          <Text style={styles.sectionLabel}>{tr('playerApp.trainingDetail.updateWithFeedback')}</Text>
           <View style={styles.programBox}>
             <Text style={{ color: t.muted, fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
-              Share what's working, what's not, or any changes to your schedule and the AI will update your program.
+              {tr('playerApp.trainingDetail.feedbackHint')}
             </Text>
             <VoiceTextInput
               style={styles.input}
-              placeholder="e.g. I want more shooting drills, reduce weight sessions, focus on ball-handling..."
+              placeholder={tr('playerApp.trainingDetail.feedbackPlaceholder')}
               placeholderTextColor={t.muted2}
               value={feedbackText}
               onChangeText={setFeedbackText}
@@ -324,7 +326,7 @@ export default function PlayerTrainingDetailScreen() {
               >
                 {savingCorrection
                   ? <ActivityIndicator color={t.ink} size="small" />
-                  : <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 14 }}>Save for Later</Text>}
+                  : <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 14 }}>{tr('playerApp.trainingDetail.saveForLater')}</Text>}
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.sendBtn, { flex: 1, borderRadius: 12, paddingVertical: 14, flexDirection: 'row', gap: 6, justifyContent: 'center' }, refreshing && { opacity: 0.5 }]}
@@ -332,12 +334,12 @@ export default function PlayerTrainingDetailScreen() {
                 disabled={refreshing}
               >
                 {refreshing
-                  ? <><ActivityIndicator color="#fff" size="small" /><Text style={{ color: '#fff', fontFamily: fonts[700], fontSize: 13 }}>Updating...</Text></>
-                  : <><Ionicons name="refresh" size={15} color="#fff" /><Text style={{ color: '#fff', fontFamily: fonts[700], fontSize: 13 }}>Apply & Regenerate</Text></>
+                  ? <><ActivityIndicator color="#fff" size="small" /><Text style={{ color: '#fff', fontFamily: fonts[700], fontSize: 13 }}>{tr('playerApp.trainingDetail.updating')}</Text></>
+                  : <><Ionicons name="refresh" size={15} color="#fff" /><Text style={{ color: '#fff', fontFamily: fonts[700], fontSize: 13 }}>{tr('playerApp.trainingDetail.applyRegenerate')}</Text></>
                 }
               </TouchableOpacity>
             </View>
-            <GeneratingOverlay visible={refreshing} label="Updating your program…" />
+            <GeneratingOverlay visible={refreshing} label={tr('playerApp.trainingDetail.updatingOverlay')} />
 
             {trainingCorrections.length > 0 && (
               <View style={{ marginTop: 14 }}>
@@ -345,8 +347,8 @@ export default function PlayerTrainingDetailScreen() {
                   <View key={c.id} style={{ backgroundColor: t.chip, borderRadius: 10, padding: 10, marginBottom: 6, opacity: c.applied ? 0.55 : 1 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
                       {c.applied
-                        ? <View style={{ backgroundColor: t.positiveSoft, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}><Text style={{ color: t.positive, fontSize: 9, fontFamily: fonts[700] }}>APPLIED</Text></View>
-                        : <View style={{ backgroundColor: t.card, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}><Text style={{ color: t.muted, fontSize: 9, fontFamily: fonts[700] }}>PENDING</Text></View>}
+                        ? <View style={{ backgroundColor: t.positiveSoft, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}><Text style={{ color: t.positive, fontSize: 9, fontFamily: fonts[700] }}>{tr('playerApp.trainingDetail.applied')}</Text></View>
+                        : <View style={{ backgroundColor: t.card, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}><Text style={{ color: t.muted, fontSize: 9, fontFamily: fonts[700] }}>{tr('playerApp.trainingDetail.pending')}</Text></View>}
                       <Text style={{ color: t.muted2, fontSize: 10 }}>{c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}</Text>
                     </View>
                     <Text style={{ color: t.inkSoft, fontSize: 12.5 }}>{c.correction}</Text>
@@ -363,7 +365,7 @@ export default function PlayerTrainingDetailScreen() {
             <TouchableOpacity style={styles.exportBtn} onPress={exportProgram} disabled={exporting}>
               {exporting
                 ? <ActivityIndicator color={t.ink} />
-                : <><Ionicons name="share-outline" size={18} color={t.ink} /><Text style={styles.exportBtnText}>Export — Print or Send</Text></>}
+                : <><Ionicons name="share-outline" size={18} color={t.ink} /><Text style={styles.exportBtnText}>{tr('playerApp.trainingDetail.exportBtn')}</Text></>}
             </TouchableOpacity>
           </View>
         ) : null}
