@@ -4,6 +4,7 @@ import {
   Image, Modal, KeyboardAvoidingView, Platform, Alert,
 } from 'react-native';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -26,9 +27,10 @@ export default function ConversationScreen() {
   const navigation = useNavigation<any>();
   const { coach } = useAuth();
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const styles = makeStyles(t);
   const cid: number = route.params?.conversationId;
-  const initialTitle: string = route.params?.title ?? 'Conversation';
+  const initialTitle: string = route.params?.title ?? tr('conversation.title');
 
   const [title, setTitle] = useState(initialTitle);
   const [isGroup, setIsGroup] = useState(false);
@@ -74,7 +76,7 @@ export default function ConversationScreen() {
       setPending([]);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not send.');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('conversation.sendError'));
     } finally {
       setSending(false);
     }
@@ -85,26 +87,26 @@ export default function ConversationScreen() {
     const perm = fromCamera
       ? await ImagePicker.requestCameraPermissionsAsync()
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) { Alert.alert('Permission needed', 'Allow access to attach an image.'); return; }
+    if (!perm.granted) { Alert.alert(tr('conversation.permissionNeededTitle'), tr('conversation.imagePermissionMsg')); return; }
     const res = fromCamera
       ? await ImagePicker.launchCameraAsync({ base64: true, quality: 0.5 })
       : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, base64: true, quality: 0.5 });
     if (!res.canceled && res.assets?.[0]?.base64) {
-      setPending(prev => [...prev, { kind: 'image', data: `data:image/jpeg;base64,${res.assets[0].base64}`, name: 'Image' }]);
+      setPending(prev => [...prev, { kind: 'image', data: `data:image/jpeg;base64,${res.assets[0].base64}`, name: tr('conversation.image') }]);
     }
   };
 
   const startRec = async () => {
     try {
       const perm = await Audio.requestPermissionsAsync();
-      if (!perm.granted) { Alert.alert('Permission needed', 'Allow microphone access to record audio.'); return; }
+      if (!perm.granted) { Alert.alert(tr('conversation.permissionNeededTitle'), tr('conversation.micPermissionMsg')); return; }
       await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
       const r = new Audio.Recording();
       await r.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
       await r.startAsync();
       rec.current = r;
       setRecording(true);
-    } catch { Alert.alert('Error', 'Could not start recording.'); }
+    } catch { Alert.alert(tr('common.error'), tr('conversation.recordStartError')); }
   };
 
   const stopRec = async () => {
@@ -117,7 +119,7 @@ export default function ConversationScreen() {
       setRecording(false);
       if (uri) {
         const b64 = await FileSystem.readAsStringAsync(uri, { encoding: 'base64' as any });
-        setPending(prev => [...prev, { kind: 'audio', data: `data:audio/m4a;base64,${b64}`, name: 'Voice message' }]);
+        setPending(prev => [...prev, { kind: 'audio', data: `data:audio/m4a;base64,${b64}`, name: tr('conversation.voiceMessage') }]);
       }
     } catch { setRecording(false); }
   };
@@ -135,7 +137,7 @@ export default function ConversationScreen() {
       }
       const { sound } = await Audio.Sound.createAsync({ uri }, { shouldPlay: true });
       sound.setOnPlaybackStatusUpdate((st: any) => { if (st?.isLoaded && st.didJustFinish) sound.unloadAsync().catch(() => {}); });
-    } catch { Alert.alert('Error', 'Could not play audio.'); }
+    } catch { Alert.alert(tr('common.error'), tr('conversation.playAudioError')); }
   };
 
   const openReportPicker = async () => {
@@ -153,35 +155,35 @@ export default function ConversationScreen() {
       ]);
       const items = [
         ...(evals ?? []).map((e: any) => ({
-          category: 'Player Evals', report_type: 'eval', report_id: e.id,
-          report_title: `${e.player_name ?? 'Player'} · ${outputTypeLabel(e.output_type ?? '')}`,
+          category: tr('conversation.categories.evals'), report_type: 'eval', report_id: e.id,
+          report_title: `${e.player_name ?? tr('conversation.playerFallback')} · ${outputTypeLabel(e.output_type ?? '')}`,
           sub: d(e.created_at),
         })),
-        ...(team ?? []).map((tr: any) => {
-          const subject = reportSubject(tr.report_text ?? '', tr.output_type ?? '');
+        ...(team ?? []).map((rep: any) => {
+          const subject = reportSubject(rep.report_text ?? '', rep.output_type ?? '');
           return {
-            category: 'Team Reports', report_type: 'team_report', report_id: tr.id,
-            report_title: subject || outputTypeLabel(tr.output_type ?? '') || 'Team Report',
-            sub: `${outputTypeLabel(tr.output_type ?? '') || 'Team Report'} · ${d(tr.created_at)}`,
-            report_text: tr.report_text,
+            category: tr('conversation.categories.teamReports'), report_type: 'team_report', report_id: rep.id,
+            report_title: subject || outputTypeLabel(rep.output_type ?? '') || tr('conversation.teamReport'),
+            sub: `${outputTypeLabel(rep.output_type ?? '') || tr('conversation.teamReport')} · ${d(rep.created_at)}`,
+            report_text: rep.report_text,
           };
         }),
         ...(games ?? []).map((g: any) => ({
-          category: 'Game Reports', report_type: 'game', report_id: g.id,
-          report_title: g.title || (g.my_team_name ? `${g.my_team_name}${g.opponent_team_name ? ` vs ${g.opponent_team_name}` : ''}` : 'Game Report'),
-          sub: `Game Report · ${d(g.updated_at || g.created_at)}`,
+          category: tr('conversation.categories.gameReports'), report_type: 'game', report_id: g.id,
+          report_title: g.title || (g.my_team_name ? `${g.my_team_name}${g.opponent_team_name ? ` ${tr('conversation.vsOpponent', { name: g.opponent_team_name })}` : ''}` : tr('conversation.gameReport')),
+          sub: `${tr('conversation.gameReport')} · ${d(g.updated_at || g.created_at)}`,
           report_text: g.report_text,
         })),
         ...(scout ?? []).filter((g: any) => g.ai_scouting_report).map((g: any) => ({
-          category: 'Scout Reports', report_type: 'scout', report_id: g.id,
-          report_title: `vs ${g.opponent_name ?? 'Opponent'}`,
-          sub: `Scout Report · ${d(g.date || g.created_at)}`,
+          category: tr('conversation.categories.scoutReports'), report_type: 'scout', report_id: g.id,
+          report_title: tr('conversation.vsOpponent', { name: g.opponent_name ?? tr('conversation.opponentFallback') }),
+          sub: `${tr('conversation.scoutReport')} · ${d(g.date || g.created_at)}`,
           report_text: String(g.ai_scouting_report).replace(/\s*END OF REPORT\.?\s*$/i, ''),
         })),
         ...(training ?? []).map((ts: any) => ({
-          category: 'Training', report_type: 'training', report_id: ts.id,
-          report_title: `${ts.player_name ?? 'Player'} Training`,
-          sub: `Training Program · ${d(ts.created_at)}`,
+          category: tr('conversation.categories.training'), report_type: 'training', report_id: ts.id,
+          report_title: tr('conversation.playerTraining', { name: ts.player_name ?? tr('conversation.playerFallback') }),
+          sub: `${tr('conversation.trainingProgram')} · ${d(ts.created_at)}`,
           report_text: ts.program_text,
         })),
       ];
@@ -207,19 +209,19 @@ export default function ConversationScreen() {
       return (
         <TouchableOpacity key={a.id ?? 'aud'} style={styles.attAudio} onPress={() => playAudio(a.data)}>
           <Ionicons name="play" size={16} color={mine ? '#fff' : t.accent} />
-          <Text style={[styles.attAudioText, mine && { color: '#fff' }]}>Voice message</Text>
+          <Text style={[styles.attAudioText, mine && { color: '#fff' }]}>{tr('conversation.voiceMessage')}</Text>
         </TouchableOpacity>
       );
     }
     // report
-    const typeLabel = ({ eval: 'Player Eval', team_report: 'Team Report', game: 'Game Report', scout: 'Scout Report', training: 'Training' } as Record<string, string>)[a.report_type] || 'Report';
+    const typeLabel = ({ eval: tr('conversation.playerEval'), team_report: tr('conversation.teamReport'), game: tr('conversation.gameReport'), scout: tr('conversation.scoutReport'), training: tr('conversation.trainingLabel') } as Record<string, string>)[a.report_type] || tr('conversation.report');
     const title = (a.report_title && String(a.report_title).trim()) || typeLabel;
     return (
-      <TouchableOpacity key={a.id ?? a.report_id} style={styles.attReport} onPress={() => setReportView({ title, text: a.report_text || 'No content.' })}>
+      <TouchableOpacity key={a.id ?? a.report_id} style={styles.attReport} onPress={() => setReportView({ title, text: a.report_text || tr('conversation.noContent') })}>
         <View style={styles.attReportIcon}><Ionicons name="document-text" size={18} color="#fff" /></View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={styles.attReportTitle} numberOfLines={2}>{title}</Text>
-          <Text style={styles.attReportSub} numberOfLines={1}>{typeLabel} · Tap to open</Text>
+          <Text style={styles.attReportSub} numberOfLines={1}>{tr('conversation.tapToOpen', { type: typeLabel })}</Text>
         </View>
         <Ionicons name="chevron-forward" size={16} color={t.muted2} />
       </TouchableOpacity>
@@ -240,7 +242,7 @@ export default function ConversationScreen() {
           <View style={styles.center}><ActivityIndicator color={t.accent} size="large" /></View>
         ) : (
           <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 12 }}>
-            {messages.length === 0 && <Text style={styles.empty}>No messages yet. Say hello.</Text>}
+            {messages.length === 0 && <Text style={styles.empty}>{tr('conversation.noMessagesYet')}</Text>}
             {messages.map(m => {
               const mine = m.sender_id === coach?.id;
               return (
@@ -282,7 +284,7 @@ export default function ConversationScreen() {
           </TouchableOpacity>
           <VoiceTextInput
             style={styles.input}
-            placeholder="Message…"
+            placeholder={tr('conversation.messagePlaceholder')}
             placeholderTextColor={t.muted2}
             value={text}
             onChangeText={setText}
@@ -299,14 +301,14 @@ export default function ConversationScreen() {
         <View style={styles.overlay}>
           <View style={styles.sheet}>
             <View style={styles.sheetHead}>
-              <Text style={styles.sheetTitle}>Attach a report</Text>
+              <Text style={styles.sheetTitle}>{tr('conversation.attachReport')}</Text>
               <TouchableOpacity onPress={() => setShowReportPicker(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
             <View style={styles.pickerSearch}>
               <Ionicons name="search" size={16} color={t.muted} />
               <VoiceTextInput
                 style={styles.pickerSearchInput}
-                placeholder="Search reports..."
+                placeholder={tr('conversation.searchReportsPlaceholder')}
                 placeholderTextColor={t.muted2}
                 value={reportSearch}
                 onChangeText={setReportSearch}
@@ -315,10 +317,10 @@ export default function ConversationScreen() {
             {reportsLoading ? <ActivityIndicator color={t.accent} style={{ marginVertical: 24 }} /> : (() => {
               const q = reportSearch.trim().toLowerCase();
               const filtered = reportList.filter(r => !q || `${r.report_title} ${r.sub} ${r.category}`.toLowerCase().includes(q));
-              const cats = ['Player Evals', 'Team Reports', 'Game Reports', 'Scout Reports', 'Training'];
+              const cats = [tr('conversation.categories.evals'), tr('conversation.categories.teamReports'), tr('conversation.categories.gameReports'), tr('conversation.categories.scoutReports'), tr('conversation.categories.training')];
               return (
                 <ScrollView style={{ maxHeight: 420 }} keyboardShouldPersistTaps="handled">
-                  {filtered.length === 0 && <Text style={styles.empty}>No reports found.</Text>}
+                  {filtered.length === 0 && <Text style={styles.empty}>{tr('conversation.noReportsFound')}</Text>}
                   {cats.map(cat => {
                     const rows = filtered.filter(r => r.category === cat);
                     if (!rows.length) return null;

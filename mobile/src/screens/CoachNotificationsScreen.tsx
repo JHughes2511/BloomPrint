@@ -6,6 +6,7 @@ import {
   ActivityIndicator, RefreshControl, Alert, TextInput,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { playerAPI, trainingAPI, teamStaffAPI, staffSharingAPI } from '../api/client';
 import CommentThread from '../components/CommentThread';
@@ -35,6 +36,7 @@ export default function CoachNotificationsScreen() {
   const navigation = useNavigation<any>();
   const { coach } = useAuth();
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const styles = makeStyles(t);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,11 +55,11 @@ export default function CoachNotificationsScreen() {
   const [requestedIds, setRequestedIds] = useState<Record<number, boolean>>({});
 
   const TYPE_WORD: Record<string, string> = {
-    training: 'Training', eval: 'Eval', team_report: 'Team Report',
-    team_training: 'Team Report', game: 'Game Report', game_session: 'Scout Report',
+    training: tr('coachNotifs.typeTraining'), eval: tr('coachNotifs.typeEval'), team_report: tr('coachNotifs.typeTeamReport'),
+    team_training: tr('coachNotifs.typeTeamReport'), game: tr('coachNotifs.typeGameReport'), game_session: tr('coachNotifs.typeScoutReport'),
   };
   const typeWord = (sharedId?: number | null) =>
-    TYPE_WORD[(sharedId != null ? sharedMeta[sharedId] : '') ?? ''] ?? 'Report';
+    TYPE_WORD[(sharedId != null ? sharedMeta[sharedId] : '') ?? ''] ?? tr('coachNotifs.typeReport');
 
   const openSharedReport = async (sharedId: number) => {
     try {
@@ -66,26 +68,26 @@ export default function CoachNotificationsScreen() {
         staffSharingAPI.sent().catch(() => []),
       ]);
       const found = [...(inbox ?? []), ...(sent ?? [])].find((s: any) => s.id === sharedId);
-      if (!found) { Alert.alert('Unavailable', 'This shared report is no longer available.'); return; }
+      if (!found) { Alert.alert(tr('coachNotifs.unavailableTitle'), tr('coachNotifs.unavailableMsg')); return; }
       const amRecipient = found.recipient_id === coach?.id;
       // As the sharer, I can view the original + comments/notes freely. But if
       // the recipient made an updated version, that's private until they approve
       // — offer to request it.
       if (!amRecipient && found.has_update) {
         Alert.alert(
-          'Updated version',
-          'This coach has their own updated version. It stays private until they approve your request. You can request it, or view the original report and its comments.',
+          tr('coachNotifs.updatedVersionTitle'),
+          tr('coachNotifs.updatedVersionMsg'),
           [
-            { text: 'Request Approval', onPress: () => requestUpdated(sharedId) },
-            { text: 'View Original & Comments', onPress: () => setViewerShared(found) },
-            { text: 'Cancel', style: 'cancel' },
+            { text: tr('coachNotifs.requestApproval'), onPress: () => requestUpdated(sharedId) },
+            { text: tr('coachNotifs.viewOriginal'), onPress: () => setViewerShared(found) },
+            { text: tr('common.cancel'), style: 'cancel' },
           ],
         );
       } else {
         setViewerShared(found);
       }
     } catch {
-      Alert.alert('Error', 'Could not open the report.');
+      Alert.alert(tr('common.error'), tr('coachNotifs.openReportError'));
     }
   };
 
@@ -93,9 +95,9 @@ export default function CoachNotificationsScreen() {
     try {
       await staffSharingAPI.requestUpdated(sharedId);
       setRequestedIds(prev => ({ ...prev, [sharedId]: true }));
-      Alert.alert('Requested', 'We asked them to share their updated version. You\'ll be notified if they approve.');
+      Alert.alert(tr('coachNotifs.requested'), tr('coachNotifs.requestedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not send the request.');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('coachNotifs.requestError'));
     }
   };
 
@@ -107,9 +109,9 @@ export default function CoachNotificationsScreen() {
       const sameShare = notifications.filter(x => x.type === 'staff_report_request' && x.ref_id === n.ref_id && !x.read);
       await Promise.all(sameShare.map(x => playerAPI.coachMarkRead(x.id).catch(() => {})));
       setNotifications(prev => prev.map(x => (x.type === 'staff_report_request' && x.ref_id === n.ref_id) ? { ...x, read: true } : x));
-      Alert.alert(approve ? 'Shared' : 'Declined', approve ? 'Your updated report was shared.' : 'Request declined.');
+      Alert.alert(approve ? tr('coachNotifs.sharedTitle') : tr('coachNotifs.declinedTitle'), approve ? tr('coachNotifs.sharedMsg') : tr('coachNotifs.declinedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not respond.');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('coachNotifs.respondError'));
     }
   };
 
@@ -149,9 +151,9 @@ export default function CoachNotificationsScreen() {
         prev.map(n => n.id === notifId ? { ...n, read: true } : n)
       );
       setExpandedId(null);
-      Alert.alert('Approved', 'Player profile has been linked.');
+      Alert.alert(tr('coachNotifs.approvedTitle'), tr('coachNotifs.approvedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to approve');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('coachNotifs.approveError'));
     }
   };
 
@@ -163,9 +165,9 @@ export default function CoachNotificationsScreen() {
         prev.map(n => n.id === notifId ? { ...n, read: true } : n)
       );
       setExpandedId(null);
-      Alert.alert('Rejected', 'Link request rejected.');
+      Alert.alert(tr('coachNotifs.rejectedTitle'), tr('coachNotifs.rejectedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to reject');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('coachNotifs.rejectError'));
     }
   };
 
@@ -190,13 +192,13 @@ export default function CoachNotificationsScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
-        <Text style={styles.title}>Notifications</Text>
+        <Text style={styles.title}>{tr('coachNotifs.title')}</Text>
       </View>
 
       {notifications.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="notifications-outline" size={48} color={t.muted2} />
-          <Text style={styles.emptyTitle}>No notifications</Text>
+          <Text style={styles.emptyTitle}>{tr('coachNotifs.noNotifications')}</Text>
         </View>
       ) : (
         notifications.map(n => (
@@ -264,7 +266,7 @@ export default function CoachNotificationsScreen() {
                     )}
                     <VoiceTextInput
                       style={styles.replyInput}
-                      placeholder="Reply to player..."
+                      placeholder={tr('coachNotifs.replyPlaceholder')}
                       placeholderTextColor={t.muted2}
                       value={replyTexts[n.id] ?? ''}
                       onChangeText={text => setReplyTexts(prev => ({ ...prev, [n.id]: text }))}
@@ -290,13 +292,13 @@ export default function CoachNotificationsScreen() {
                           setReplyTexts(prev => ({ ...prev, [n.id]: '' }));
                           setExpandedId(null);
                         } catch (e: any) {
-                          Alert.alert('Error', e?.response?.data?.detail ?? 'Could not send reply');
+                          Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('coachNotifs.sendReplyError'));
                         } finally {
                           setReplying(null);
                         }
                       }}
                     >
-                      {replying === n.id ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.replyBtnText}>Send Reply</Text>}
+                      {replying === n.id ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.replyBtnText}>{tr('coachNotifs.sendReply')}</Text>}
                     </TouchableOpacity>
                   </>
                 ) : n.type === 'philosophy_update' ? (
@@ -307,7 +309,7 @@ export default function CoachNotificationsScreen() {
                         try { await playerAPI.coachMarkRead(n.id); } catch {}
                         setNotifications(prev => prev.filter(x => x.id !== n.id));
                       }}>
-                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>No update needed</Text>
+                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('coachNotifs.noUpdateNeeded')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.approveBtn, { backgroundColor: t.ctaBg, flex: 1, alignItems: 'center' }]}
@@ -316,7 +318,7 @@ export default function CoachNotificationsScreen() {
                         setNotifications(prev => prev.filter(x => x.id !== n.id));
                         navigation.navigate('Onboarding');
                       }}>
-                      <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Review & update</Text>
+                      <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('coachNotifs.reviewUpdate')}</Text>
                     </TouchableOpacity>
                   </View>
                 ) : n.type === 'team_invite' && n.ref_id ? (
@@ -328,23 +330,23 @@ export default function CoachNotificationsScreen() {
                         await playerAPI.coachMarkRead(n.id);
                         setNotifications(prev => prev.filter(x => x.id !== n.id));
                       }}>
-                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Reject</Text>
+                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('coachNotifs.reject')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.approveBtn, { backgroundColor: t.ctaBg, flex: 1, alignItems: 'center' }]}
                       onPress={async () => {
-                        try { await teamStaffAPI.approveInvite(n.ref_id!); } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not accept.'); return; }
+                        try { await teamStaffAPI.approveInvite(n.ref_id!); } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('coachNotifs.acceptError')); return; }
                         await playerAPI.coachMarkRead(n.id);
                         setNotifications(prev => prev.filter(x => x.id !== n.id));
-                        Alert.alert('Joined', 'You joined the team.');
+                        Alert.alert(tr('coachNotifs.joinedTitle'), tr('coachNotifs.joinedMsg'));
                       }}>
-                      <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>Accept</Text>
+                      <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('coachNotifs.accept')}</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (n.type === 'training_generated' || n.type === 'training_refreshed') && n.ref_id ? (
                   <View>
                     <Text style={{ color: t.muted, fontSize: 12, marginBottom: 8 }}>
-                      {n.type === 'training_refreshed' ? 'Player updated their training with feedback.' : 'Player generated a new training program.'}
+                      {n.type === 'training_refreshed' ? tr('coachNotifs.trainingRefreshedMsg') : tr('coachNotifs.trainingGeneratedMsg')}
                     </Text>
                     <View style={styles.actionRow}>
                       <TouchableOpacity
@@ -356,47 +358,47 @@ export default function CoachNotificationsScreen() {
                           navigation.navigate('CoachTrainingDetail', { trainingId: n.ref_id });
                         }}
                       >
-                        <Text style={[styles.approveBtnText, { color: t.ctaText }]}>View Training</Text>
+                        <Text style={[styles.approveBtnText, { color: t.ctaText }]}>{tr('coachNotifs.viewTraining')}</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
                 ) : n.type === 'link_requested' && n.ref_id ? (
                   <View style={styles.actionRow}>
                     <TouchableOpacity style={styles.approveBtn} onPress={() => approveLink(n.ref_id!, n.id)}>
-                      <Text style={styles.approveBtnText}>Approve</Text>
+                      <Text style={styles.approveBtnText}>{tr('coachNotifs.approve')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.rejectBtn} onPress={() => rejectLink(n.ref_id!, n.id)}>
-                      <Text style={styles.rejectBtnText}>Reject</Text>
+                      <Text style={styles.rejectBtnText}>{tr('coachNotifs.reject')}</Text>
                     </TouchableOpacity>
                   </View>
                 ) : n.type === 'staff_report_regenerated' && n.ref_id ? (
                   // I'm the original sharer: their updated copy is private — ask for it.
                   requestedIds[n.ref_id] ? (
                     <View style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center', opacity: 0.7 }]}>
-                      <Text style={[styles.approveBtnText, { color: t.ctaText }]}>Requested</Text>
+                      <Text style={[styles.approveBtnText, { color: t.ctaText }]}>{tr('coachNotifs.requested')}</Text>
                     </View>
                   ) : (
                     <TouchableOpacity
                       style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center' }]}
                       onPress={() => requestUpdated(n.ref_id!)}
                     >
-                      <Text style={[styles.approveBtnText, { color: t.ctaText }]}>Request {typeWord(n.ref_id)}</Text>
+                      <Text style={[styles.approveBtnText, { color: t.ctaText }]}>{tr('coachNotifs.requestType', { type: typeWord(n.ref_id) })}</Text>
                     </TouchableOpacity>
                   )
                 ) : n.type === 'staff_report_request' && n.ref_id ? (
                   requestResponses[n.ref_id] ? (
                     <View style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center', opacity: 0.7 }]}>
                       <Text style={[styles.approveBtnText, { color: t.ctaText }]}>
-                        {requestResponses[n.ref_id] === 'denied' ? 'Denied' : 'Approved'}
+                        {requestResponses[n.ref_id] === 'denied' ? tr('coachNotifs.denied') : tr('coachNotifs.approvedTitle')}
                       </Text>
                     </View>
                   ) : (
                     <View style={styles.actionRow}>
                       <TouchableOpacity style={styles.approveBtn} onPress={() => respondRequest(n, true)}>
-                        <Text style={styles.approveBtnText}>Approve</Text>
+                        <Text style={styles.approveBtnText}>{tr('coachNotifs.approve')}</Text>
                       </TouchableOpacity>
                       <TouchableOpacity style={styles.rejectBtn} onPress={() => respondRequest(n, false)}>
-                        <Text style={styles.rejectBtnText}>Reject</Text>
+                        <Text style={styles.rejectBtnText}>{tr('coachNotifs.reject')}</Text>
                       </TouchableOpacity>
                     </View>
                   )
@@ -405,7 +407,7 @@ export default function CoachNotificationsScreen() {
                     style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center' }]}
                     onPress={() => openSharedReport(n.ref_id!)}
                   >
-                    <Text style={[styles.approveBtnText, { color: t.ctaText }]}>View {typeWord(n.ref_id)}</Text>
+                    <Text style={[styles.approveBtnText, { color: t.ctaText }]}>{tr('coachNotifs.viewType', { type: typeWord(n.ref_id) })}</Text>
                   </TouchableOpacity>
                 ) : !n.read ? (
                   <TouchableOpacity
@@ -416,7 +418,7 @@ export default function CoachNotificationsScreen() {
                       setExpandedId(null);
                     }}
                   >
-                    <Text style={styles.markReadText}>Mark as Read</Text>
+                    <Text style={styles.markReadText}>{tr('coachNotifs.markAsRead')}</Text>
                   </TouchableOpacity>
                 ) : null}
               </View>

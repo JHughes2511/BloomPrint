@@ -6,6 +6,7 @@ import {
   ActivityIndicator, TextInput, Alert,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import { playerAPI } from '../api/client';
@@ -33,6 +34,7 @@ export default function CoachTrainingDetailScreen() {
   const navigation = useNavigation<any>();
   const { trainingId } = route.params;
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const styles = makeStyles(t);
   const markdownStyles = makeMarkdownStyles(t);
 
@@ -71,7 +73,7 @@ export default function CoachTrainingDetailScreen() {
       const updated = await playerAPI.getTrainingDetail(trainingId);
       setTraining(updated);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to add comment');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('coachTraining.addCommentError'));
     } finally {
       setSubmittingComment(false);
     }
@@ -85,7 +87,7 @@ export default function CoachTrainingDetailScreen() {
       setTraining((prev: any) => ({ ...prev, coach_notes: noteText.trim() }));
       setNoteText('');
     } catch {
-      Alert.alert('Error', 'Failed to save notes');
+      Alert.alert(tr('common.error'), tr('coachTraining.saveNotesError'));
     } finally {
       setSavingNote(false);
     }
@@ -98,9 +100,9 @@ export default function CoachTrainingDetailScreen() {
       const updated = await playerAPI.coachRefreshTraining(trainingId, feedbackText.trim());
       setTraining((prev: any) => ({ ...prev, program_text: updated.program_text }));
       setFeedbackText('');
-      Alert.alert('Updated!', 'Training program has been updated.');
+      Alert.alert(tr('coachTraining.updatedTitle'), tr('coachTraining.updatedMsg'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to update training');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('coachTraining.updateError'));
     } finally {
       setRefreshing(false);
     }
@@ -120,7 +122,7 @@ export default function CoachTrainingDetailScreen() {
     return (
       <ScreenBackground>
         <View style={styles.center}>
-          <Text style={{ color: t.ink }}>Training not found</Text>
+          <Text style={{ color: t.ink }}>{tr('coachTraining.notFound')}</Text>
         </View>
       </ScreenBackground>
     );
@@ -140,24 +142,24 @@ export default function CoachTrainingDetailScreen() {
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
           <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.title}>{training.player_name}'s Training</Text>
+            <Text style={styles.title}>{tr('coachTraining.titleWithName', { name: training.player_name })}</Text>
             <Text style={styles.sub}>{new Date(training.created_at).toLocaleDateString()}</Text>
           </View>
         </View>
 
         {training.coach_notes ? (
           <View style={styles.notesBox}>
-            <Text style={styles.notesLabel}>Coach Notes</Text>
+            <Text style={styles.notesLabel}>{tr('coachTraining.coachNotes')}</Text>
             <Text style={styles.notesText}>{training.coach_notes}</Text>
           </View>
         ) : null}
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Training Program</Text>
+          <Text style={styles.sectionLabel}>{tr('coachTraining.trainingProgram')}</Text>
           <View style={styles.programBox}>
             {training.program_text
               ? <Markdown style={markdownStyles}>{cleanMarkdown(training.program_text)}</Markdown>
-              : <Text style={{ color: t.muted2 }}>No program text</Text>}
+              : <Text style={{ color: t.muted2 }}>{tr('coachTraining.noProgramText')}</Text>}
           </View>
         </View>
 
@@ -166,7 +168,7 @@ export default function CoachTrainingDetailScreen() {
           style={styles.section}
           onLayout={e => { commentY.current = e.nativeEvent.layout.y; }}
         >
-          <Text style={styles.sectionLabel}>Comments ({training.comments?.length ?? 0})</Text>
+          <Text style={styles.sectionLabel}>{tr('coachTraining.commentsCount', { count: training.comments?.length ?? 0 })}</Text>
           <CommentThread
             comments={(training.comments ?? []) as any}
             accent={t.accent}
@@ -179,7 +181,7 @@ export default function CoachTrainingDetailScreen() {
           <View style={styles.commentInput}>
             <VoiceTextInput
               style={styles.input}
-              placeholder="Leave a comment for the player..."
+              placeholder={tr('coachTraining.commentPlaceholder')}
               placeholderTextColor={t.muted2}
               value={commentText}
               onChangeText={setCommentText}
@@ -203,14 +205,14 @@ export default function CoachTrainingDetailScreen() {
           style={styles.section}
           onLayout={e => { notesY.current = e.nativeEvent.layout.y; }}
         >
-          <Text style={styles.sectionLabel}>Add Coach Notes</Text>
+          <Text style={styles.sectionLabel}>{tr('coachTraining.addCoachNotes')}</Text>
           <View style={styles.programBox}>
             <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
-              Notes are saved to the training record and visible to the player.
+              {tr('coachTraining.notesHint')}
             </Text>
             <VoiceTextInput
               style={styles.noteInput}
-              placeholder="Add notes for the player..."
+              placeholder={tr('coachTraining.notesPlaceholder')}
               placeholderTextColor={t.muted2}
               value={noteText}
               onChangeText={setNoteText}
@@ -223,7 +225,7 @@ export default function CoachTrainingDetailScreen() {
               onPress={saveNote}
               disabled={savingNote || !noteText.trim()}
             >
-              {savingNote ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.btnText}>Save Notes</Text>}
+              {savingNote ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.btnText}>{tr('coachTraining.saveNotes')}</Text>}
             </TouchableOpacity>
           </View>
         </View>
@@ -233,14 +235,14 @@ export default function CoachTrainingDetailScreen() {
           style={styles.section}
           onLayout={e => { feedbackY.current = e.nativeEvent.layout.y; }}
         >
-          <Text style={styles.sectionLabel}>Update Program with Feedback</Text>
+          <Text style={styles.sectionLabel}>{tr('coachTraining.updateWithFeedback')}</Text>
           <View style={styles.programBox}>
             <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
-              Provide coaching feedback to regenerate the player's training program with AI.
+              {tr('coachTraining.feedbackHint')}
             </Text>
             <VoiceTextInput
               style={styles.noteInput}
-              placeholder="e.g. Focus more on defensive footwork, increase conditioning..."
+              placeholder={tr('coachTraining.feedbackPlaceholder')}
               placeholderTextColor={t.muted2}
               value={feedbackText}
               onChangeText={setFeedbackText}
@@ -254,11 +256,11 @@ export default function CoachTrainingDetailScreen() {
               disabled={refreshing || !feedbackText.trim()}
             >
               {refreshing
-                ? <><ActivityIndicator color={t.ctaText} size="small" /><Text style={styles.btnText}>Updating...</Text></>
-                : <><Ionicons name="refresh" size={16} color={t.ctaText} /><Text style={styles.btnText}>Update Report</Text></>
+                ? <><ActivityIndicator color={t.ctaText} size="small" /><Text style={styles.btnText}>{tr('coachTraining.updating')}</Text></>
+                : <><Ionicons name="refresh" size={16} color={t.ctaText} /><Text style={styles.btnText}>{tr('coachTraining.updateReport')}</Text></>
               }
             </TouchableOpacity>
-            <GeneratingOverlay visible={refreshing} label="Updating the program…" />
+            <GeneratingOverlay visible={refreshing} label={tr('coachTraining.updatingProgramLabel')} />
           </View>
         </View>
       </KeyboardAwareScrollView>
