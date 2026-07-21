@@ -1,5 +1,7 @@
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../../components/VoiceTextInput';
+import LanguagePicker from '../../components/LanguagePicker';
 import KeyboardAwareScrollView from '../../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
@@ -22,6 +24,7 @@ const ROLE_LABELS: Record<string, string> = { coach: 'Coach', scout: 'Scout', tr
 type Link = { player_id: number; player_name: string; program_name?: string | null; team_name?: string | null; coach_name?: string | null; is_primary?: boolean };
 
 export default function PlayerLinkScreen() {
+  const { t: tr } = useTranslation();
   const { playerUser, logout, refreshUser } = usePlayerAuth();
   const { t, mode, toggle } = useTheme();
   const styles = makeStyles(t);
@@ -80,9 +83,9 @@ export default function PlayerLinkScreen() {
       setInviteCode('');
       setShowLink(false);
       load();
-      Alert.alert('Linked!', `Your account is now linked to ${res?.player_name ?? 'a profile'}.`);
+      Alert.alert(tr('playerApp.link.linkedTitle'), tr('playerApp.link.linkedMsg', { name: res?.player_name ?? tr('playerApp.link.aProfile') }));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Invalid invite code');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerApp.link.invalidInviteCode'));
     } finally {
       setInviteLoading(false);
     }
@@ -95,7 +98,7 @@ export default function PlayerLinkScreen() {
       const results = await playerApi.get('/player/search-staff', { params: { q: searchQ.trim() } }).then(r => r.data);
       setSearchResults(results);
     } catch {
-      Alert.alert('Error', 'Search failed. Please try again.');
+      Alert.alert(tr('common.error'), tr('playerApp.link.searchFailed'));
     } finally {
       setSearchLoading(false);
     }
@@ -105,22 +108,22 @@ export default function PlayerLinkScreen() {
     setRequestingId(coachId);
     try {
       await playerApi.post(`/player/link-request/coach/${coachId}`).then(r => r.data);
-      Alert.alert('Request Sent', `A link request was sent to ${coachName}.`);
+      Alert.alert(tr('playerApp.link.requestSentTitle'), tr('playerApp.link.requestSentMsg', { name: coachName }));
       setSearchResults([]); setSearchQ('');
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to send request');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerApp.link.failedToSendRequest'));
     } finally {
       setRequestingId(null);
     }
   };
 
   const unlink = (link: Link) => {
-    Alert.alert('Unlink', `Unlink from ${link.team_name || link.program_name || link.player_name}?`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(tr('playerApp.link.unlink'), tr('playerApp.link.unlinkConfirm', { name: link.team_name || link.program_name || link.player_name }), [
+      { text: tr('common.cancel'), style: 'cancel' },
       {
-        text: 'Unlink', style: 'destructive', onPress: async () => {
+        text: tr('playerApp.link.unlink'), style: 'destructive', onPress: async () => {
           try { await playerLinkAPI.unlink(link.player_id); await refreshUser(); load(); }
-          catch { Alert.alert('Error', 'Could not unlink.'); }
+          catch { Alert.alert(tr('common.error'), tr('playerApp.link.couldNotUnlink')); }
         },
       },
     ]);
@@ -138,7 +141,7 @@ export default function PlayerLinkScreen() {
 
   const pickAvatar = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) { Alert.alert('Permission needed', 'Allow photo access to set a profile picture.'); return; }
+    if (!perm.granted) { Alert.alert(tr('playerApp.link.permissionNeeded'), tr('playerApp.link.photoAccessMsg')); return; }
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true, aspect: [1, 1], quality: 0.4, base64: true,
@@ -164,14 +167,14 @@ export default function PlayerLinkScreen() {
       }
       await refreshUser();
       setShowEdit(false);
-    } catch { Alert.alert('Error', 'Failed to save profile.'); }
+    } catch { Alert.alert(tr('common.error'), tr('playerApp.link.failedToSaveProfile')); }
     finally { setSaving(false); }
   };
 
   const openScanner = async () => {
     if (!permission?.granted) {
       const res = await requestPermission();
-      if (!res.granted) { Alert.alert('Camera needed', 'Enable camera access to scan a QR code.'); return; }
+      if (!res.granted) { Alert.alert(tr('playerApp.link.cameraNeeded'), tr('playerApp.link.cameraMsg')); return; }
     }
     setScanned(false);
     setShowScanner(true);
@@ -188,12 +191,12 @@ export default function PlayerLinkScreen() {
     <ScreenBackground>
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Profile</Text>
+        <Text style={styles.title}>{tr('playerApp.link.title')}</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.circleBtn} onPress={toggle} accessibilityLabel="Toggle theme">
+          <TouchableOpacity style={styles.circleBtn} onPress={toggle} accessibilityLabel={tr('playerApp.link.toggleTheme')}>
             <Ionicons name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'} size={18} color={t.inkSoft} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.circleBtn} onPress={logout} accessibilityLabel="Sign out">
+          <TouchableOpacity style={styles.circleBtn} onPress={logout} accessibilityLabel={tr('playerApp.link.signOut')}>
             <Ionicons name="log-out-outline" size={18} color={t.muted2} />
           </TouchableOpacity>
         </View>
@@ -221,14 +224,14 @@ export default function PlayerLinkScreen() {
       {profile && (
         <View style={styles.section}>
           <View style={styles.sectionHead}>
-            <Text style={styles.sectionLabel}>Athletic Profile</Text>
+            <Text style={styles.sectionLabel}>{tr('playerApp.link.athleticProfile')}</Text>
             <TouchableOpacity style={styles.editBtn} onPress={openEdit}>
               <Ionicons name="pencil-outline" size={14} color={t.accent} />
-              <Text style={styles.editBtnText}>Edit</Text>
+              <Text style={styles.editBtnText}>{tr('playerApp.link.edit')}</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.statsCard}>
-            {[['Position', profile.position], ['Height', profile.height], ['Wingspan', profile.wingspan], ['Weight', profile.weight]].map(([label, val], i) => (
+            {[[tr('playerApp.link.position'), profile.position], [tr('playerApp.link.height'), profile.height], [tr('playerApp.link.wingspan'), profile.wingspan], [tr('playerApp.link.weight'), profile.weight]].map(([label, val], i) => (
               <View key={label as string} style={[styles.stat, i < 3 && styles.statBorder]}>
                 <Text style={styles.statVal}>{(val as string) || '—'}</Text>
                 <Text style={styles.statLabel}>{label as string}</Text>
@@ -240,9 +243,9 @@ export default function PlayerLinkScreen() {
 
       {/* Linked coaches & teams */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Linked Coaches & Teams</Text>
+        <Text style={styles.sectionLabel}>{tr('playerApp.link.linkedCoachesTeams')}</Text>
         {links.length === 0 ? (
-          <Text style={styles.emptyLinks}>You're not linked to any coaches yet. Link with a coach to receive reports and training.</Text>
+          <Text style={styles.emptyLinks}>{tr('playerApp.link.notLinkedYet')}</Text>
         ) : (
           links.map(link => (
             <View key={link.player_id} style={styles.linkCard}>
@@ -250,16 +253,16 @@ export default function PlayerLinkScreen() {
               <View style={{ flex: 1 }}>
                 <Text style={styles.linkName}>{link.team_name || link.program_name || link.player_name}</Text>
                 <Text style={styles.linkSub}>
-                  Linked{link.coach_name ? ` · Coach ${link.coach_name}` : ''}{link.is_primary ? ' · Primary' : ''}
+                  {tr('playerApp.link.linked')}{link.coach_name ? ` · ${tr('playerApp.link.coach')} ${link.coach_name}` : ''}{link.is_primary ? ` · ${tr('playerApp.link.primary')}` : ''}
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => unlink(link)}><Text style={styles.unlinkText}>Unlink</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => unlink(link)}><Text style={styles.unlinkText}>{tr('playerApp.link.unlink')}</Text></TouchableOpacity>
             </View>
           ))
         )}
         <TouchableOpacity style={styles.linkCta} onPress={() => setShowLink(true)}>
           <Ionicons name="link" size={18} color={t.ctaText} />
-          <Text style={styles.linkCtaText}>Link to Coach</Text>
+          <Text style={styles.linkCtaText}>{tr('playerApp.link.linkToCoach')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -269,7 +272,7 @@ export default function PlayerLinkScreen() {
       <View style={styles.modalOverlay}>
         <View style={styles.sheet}>
           <View style={styles.sheetHeader}>
-            <Text style={styles.sheetTitle}>Edit Profile</Text>
+            <Text style={styles.sheetTitle}>{tr('playerApp.link.editProfile')}</Text>
             <TouchableOpacity onPress={() => setShowEdit(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
           </View>
           <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 40 }}>
@@ -283,22 +286,22 @@ export default function PlayerLinkScreen() {
               <View style={styles.avatarCam}><Ionicons name="camera" size={15} color={t.ctaText} /></View>
             </TouchableOpacity>
 
-            <Text style={styles.fieldLabel}>Full Name</Text>
-            <VoiceTextInput style={styles.input} value={eName} onChangeText={setEName} placeholder="Your name" placeholderTextColor={t.muted2} />
+            <Text style={styles.fieldLabel}>{tr('auth.fullName')}</Text>
+            <VoiceTextInput style={styles.input} value={eName} onChangeText={setEName} placeholder={tr('playerApp.link.yourName')} placeholderTextColor={t.muted2} />
 
-            <Text style={styles.fieldLabel}>Country</Text>
-            <CountryField value={eCountry} onChange={setECountry} placeholder="Select country..." />
-            <Text style={styles.fieldLabel}>City / Region</Text>
-            <VoiceTextInput style={styles.input} value={eCity} onChangeText={setECity} placeholder="City / Region (optional)" placeholderTextColor={t.muted2} />
+            <Text style={styles.fieldLabel}>{tr('playerApp.link.country')}</Text>
+            <CountryField value={eCountry} onChange={setECountry} placeholder={tr('playerApp.link.selectCountry')} />
+            <Text style={styles.fieldLabel}>{tr('playerApp.link.cityRegion')}</Text>
+            <VoiceTextInput style={styles.input} value={eCity} onChangeText={setECity} placeholder={tr('auth.cityRegionOptional')} placeholderTextColor={t.muted2} />
 
             {(playerUser?.player_id
               ? ([
-                  ['Position', eP, setEP, 'e.g. SF'],
-                  ['Height', eH, setEH, `e.g. 6'6"`],
-                  ['Wingspan', eW, setEW, `e.g. 6'9"`],
-                  ['Weight', eWt, setEWt, 'e.g. 200 lbs'],
-                  ['Standing Reach', eSr, setESr, `e.g. 8'6"`],
-                  ['School / Org', eSchool, setESchool, 'e.g. Creator Academy'],
+                  [tr('playerApp.link.position'), eP, setEP, tr('playerApp.link.phPosition')],
+                  [tr('playerApp.link.height'), eH, setEH, tr('playerApp.link.phHeight')],
+                  [tr('playerApp.link.wingspan'), eW, setEW, tr('playerApp.link.phWingspan')],
+                  [tr('playerApp.link.weight'), eWt, setEWt, tr('playerApp.link.phWeight')],
+                  [tr('playerApp.link.standingReach'), eSr, setESr, tr('playerApp.link.phStandingReach')],
+                  [tr('playerApp.link.schoolOrg'), eSchool, setESchool, tr('playerApp.link.phSchool')],
                 ] as [string, string, (v: string) => void, string][])
               : []
             ).map(([label, val, setter, ph]) => (
@@ -307,8 +310,11 @@ export default function PlayerLinkScreen() {
                 <VoiceTextInput style={styles.input} value={val} onChangeText={setter} placeholder={ph} placeholderTextColor={t.muted2} />
               </View>
             ))}
+            <View style={{ marginTop: 20 }}>
+              <LanguagePicker />
+            </View>
             <TouchableOpacity style={[styles.btn, saving && { opacity: 0.6 }]} onPress={saveProfile} disabled={saving}>
-              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Save Changes</Text>}
+              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>{tr('playerApp.link.saveChanges')}</Text>}
             </TouchableOpacity>
           </KeyboardAwareScrollView>
         </View>
@@ -320,37 +326,37 @@ export default function PlayerLinkScreen() {
       <View style={styles.modalOverlay}>
         <View style={styles.sheet}>
           <View style={styles.sheetHeader}>
-            <Text style={styles.sheetTitle}>Link to Coach</Text>
+            <Text style={styles.sheetTitle}>{tr('playerApp.link.linkToCoach')}</Text>
             <TouchableOpacity onPress={() => setShowLink(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
           </View>
           <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 40 }}>
             <View style={styles.linkHero}>
               <View style={styles.linkHeroIcon}><Ionicons name="link" size={30} color={t.accent} /></View>
-              <Text style={styles.linkHeroTitle}>Connect with your coach</Text>
-              <Text style={styles.linkHeroDesc}>Enter the code your coach shared, or scan their QR to link your portal to the team. You can link to more than one.</Text>
+              <Text style={styles.linkHeroTitle}>{tr('playerApp.link.connectTitle')}</Text>
+              <Text style={styles.linkHeroDesc}>{tr('playerApp.link.connectDesc')}</Text>
             </View>
 
-            <Text style={styles.fieldLabel}>Enter Link Code</Text>
-            <VoiceTextInput style={styles.input} placeholder="Invite code (e.g. ABC12345)" placeholderTextColor={t.muted2}
+            <Text style={styles.fieldLabel}>{tr('playerApp.link.enterLinkCode')}</Text>
+            <VoiceTextInput style={styles.input} placeholder={tr('playerApp.link.inviteCodePlaceholder')} placeholderTextColor={t.muted2}
               value={inviteCode} onChangeText={setInviteCode} autoCapitalize="characters" />
 
             <TouchableOpacity style={styles.scanBtn} onPress={openScanner}>
               <Ionicons name="qr-code-outline" size={20} color={t.ink} />
-              <Text style={styles.scanBtnText}>Scan QR Code</Text>
+              <Text style={styles.scanBtnText}>{tr('playerApp.link.scanQrCode')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.btn, { backgroundColor: t.ctaBg, marginTop: 14 }, (!inviteCode.trim() || inviteLoading) && { opacity: 0.5 }]}
               onPress={() => submitInvite()} disabled={!inviteCode.trim() || inviteLoading}>
-              {inviteLoading ? <ActivityIndicator color={t.ctaText} /> : <Text style={[styles.btnText, { color: t.ctaText }]}>Link Account</Text>}
+              {inviteLoading ? <ActivityIndicator color={t.ctaText} /> : <Text style={[styles.btnText, { color: t.ctaText }]}>{tr('playerApp.link.linkAccount')}</Text>}
             </TouchableOpacity>
 
             <View style={styles.orRow}>
-              <View style={styles.orLine} /><Text style={styles.orText}>OR</Text><View style={styles.orLine} />
+              <View style={styles.orLine} /><Text style={styles.orText}>{tr('playerApp.link.or')}</Text><View style={styles.orLine} />
             </View>
 
-            <Text style={styles.fieldLabel}>Find a Coach or Trainer</Text>
+            <Text style={styles.fieldLabel}>{tr('playerApp.link.findCoachTrainer')}</Text>
             <View style={styles.searchRow}>
-              <VoiceTextInput style={[styles.input, { flex: 1, marginBottom: 0 }]} placeholder="Search by name or program..." placeholderTextColor={t.muted2}
+              <VoiceTextInput style={[styles.input, { flex: 1, marginBottom: 0 }]} placeholder={tr('playerApp.link.searchByNameProgram')} placeholderTextColor={t.muted2}
                 value={searchQ} onChangeText={setSearchQ} />
               <TouchableOpacity style={styles.searchBtn} onPress={searchStaff} disabled={searchLoading}>
                 {searchLoading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="search" size={18} color="#fff" />}
@@ -360,15 +366,15 @@ export default function PlayerLinkScreen() {
               <View key={c.id} style={styles.resultCard}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.resultName}>{c.name}</Text>
-                  <Text style={styles.resultSub}>{ROLE_LABELS[c.role] ?? c.role} · {c.program_name}</Text>
+                  <Text style={styles.resultSub}>{tr(`auth.role${(c.role ?? '').charAt(0).toUpperCase()}${(c.role ?? '').slice(1)}`, ROLE_LABELS[c.role] ?? c.role)} · {c.program_name}</Text>
                 </View>
                 <TouchableOpacity style={styles.requestBtn} onPress={() => requestLink(c.id, c.name)} disabled={requestingId === c.id}>
-                  {requestingId === c.id ? <ActivityIndicator color={t.accent} size="small" /> : <Text style={styles.requestBtnText}>Request</Text>}
+                  {requestingId === c.id ? <ActivityIndicator color={t.accent} size="small" /> : <Text style={styles.requestBtnText}>{tr('playerApp.link.request')}</Text>}
                 </TouchableOpacity>
               </View>
             ))}
             {searchResults.length === 0 && searchQ.trim().length > 0 && !searchLoading && (
-              <Text style={{ color: t.muted, fontSize: 12, marginTop: 8 }}>No staff found. Try a different search.</Text>
+              <Text style={{ color: t.muted, fontSize: 12, marginTop: 8 }}>{tr('playerApp.link.noStaffFound')}</Text>
             )}
           </KeyboardAwareScrollView>
         </View>
@@ -386,7 +392,7 @@ export default function PlayerLinkScreen() {
         />
         <View style={styles.scanOverlay} pointerEvents="box-none">
           <View style={styles.scanFrame} />
-          <Text style={styles.scanHint}>Point at your coach's QR code</Text>
+          <Text style={styles.scanHint}>{tr('playerApp.link.pointAtQr')}</Text>
         </View>
         <TouchableOpacity style={styles.scanClose} onPress={() => setShowScanner(false)}>
           <Ionicons name="close" size={26} color="#fff" />

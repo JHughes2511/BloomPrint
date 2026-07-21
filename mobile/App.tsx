@@ -254,6 +254,7 @@ const SwipedPlayerLinkScreen = withTabSwipe(PlayerLinkScreen);
 
 function PlayerTabs() {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -274,11 +275,11 @@ function PlayerTabs() {
         },
       })}
     >
-      <Tab.Screen name="PlayerHomeTab"   component={SwipedPlayerHomeStack}     options={{ title: 'Home' }} />
-      <Tab.Screen name="InboxTab"        component={SwipedPlayerInboxStack}    options={{ title: 'Reports' }} />
-      <Tab.Screen name="TrainingTab"     component={SwipedPlayerTrainingStack} options={{ title: 'Training' }} />
-      <Tab.Screen name="PlayerNotifsTab" component={SwipedPlayerNotifStack}    options={{ title: 'Alerts' }} />
-      <Tab.Screen name="ProfileTab"      component={SwipedPlayerLinkScreen}    options={{ title: 'Profile' }} />
+      <Tab.Screen name="PlayerHomeTab"   component={SwipedPlayerHomeStack}     options={{ title: tr('playerApp.tabs.home') }} />
+      <Tab.Screen name="InboxTab"        component={SwipedPlayerInboxStack}    options={{ title: tr('playerApp.tabs.reports') }} />
+      <Tab.Screen name="TrainingTab"     component={SwipedPlayerTrainingStack} options={{ title: tr('playerApp.tabs.training') }} />
+      <Tab.Screen name="PlayerNotifsTab" component={SwipedPlayerNotifStack}    options={{ title: tr('playerApp.tabs.alerts') }} />
+      <Tab.Screen name="ProfileTab"      component={SwipedPlayerLinkScreen}    options={{ title: tr('playerApp.tabs.profile') }} />
     </Tab.Navigator>
   );
 }

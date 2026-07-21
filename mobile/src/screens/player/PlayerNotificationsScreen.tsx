@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, RefreshControl,
@@ -24,6 +25,7 @@ const NOTIF_ICONS: Record<string, string> = {
 
 export default function PlayerNotificationsScreen() {
   const navigation = useNavigation<any>();
+  const { t: tr } = useTranslation();
   const { t } = useTheme();
   const styles = makeStyles(t);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -57,7 +59,7 @@ export default function PlayerNotificationsScreen() {
       else await shareApprovalsAPI.reject(id);
       setApprovals(prev => prev.filter(a => a.id !== id));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not update the request.');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerApp.notifications.couldNotUpdate'));
     } finally {
       setActioning(null);
     }
@@ -97,8 +99,8 @@ export default function PlayerNotificationsScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={t.positive} />}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Notifications</Text>
-          <Text style={styles.sub}>{notifications.filter(n => !n.read).length} unread</Text>
+          <Text style={styles.title}>{tr('playerApp.notifications.title')}</Text>
+          <Text style={styles.sub}>{tr('playerApp.notifications.unread', { count: notifications.filter(n => !n.read).length })}</Text>
         </View>
 
         {/* Pending consent requests — someone wants to share YOUR report */}
@@ -106,23 +108,23 @@ export default function PlayerNotificationsScreen() {
           <View key={`appr-${a.id}`} style={styles.approvalCard}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <Ionicons name="shield-checkmark-outline" size={18} color={t.accent} />
-              <Text style={styles.approvalTitle}>Approval needed</Text>
+              <Text style={styles.approvalTitle}>{tr('playerApp.notifications.approvalNeeded')}</Text>
             </View>
             <Text style={styles.approvalBody}>
-              <Text style={{ fontFamily: fonts[700], color: t.ink }}>{a.coach_name}</Text> wants to send your{' '}
-              {String(a.output_type || 'report').replace(/_/g, ' ')} report (about {a.subject_player_name || 'you'}) to{' '}
-              <Text style={{ fontFamily: fonts[700], color: t.ink }}>{a.recipient_name}</Text> — a player it isn't about.
+              <Text style={{ fontFamily: fonts[700], color: t.ink }}>{a.coach_name}</Text> {tr('playerApp.notifications.wantsToSendYour')}{' '}
+              {String(a.output_type || tr('playerApp.notifications.report')).replace(/_/g, ' ')} {tr('playerApp.notifications.reportParenAbout')} {a.subject_player_name || tr('playerApp.notifications.you')}{tr('playerApp.notifications.toRecipientClose')}{' '}
+              <Text style={{ fontFamily: fonts[700], color: t.ink }}>{a.recipient_name}</Text> {tr('playerApp.notifications.notAboutPlayer')}
             </Text>
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
               <TouchableOpacity
                 style={[styles.rejectBtn, actioning === a.id && { opacity: 0.5 }]}
                 onPress={() => resolveApproval(a.id, 'reject')} disabled={actioning === a.id}>
-                <Text style={styles.rejectText}>Reject</Text>
+                <Text style={styles.rejectText}>{tr('playerApp.notifications.reject')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.approveBtn, actioning === a.id && { opacity: 0.5 }]}
                 onPress={() => resolveApproval(a.id, 'approve')} disabled={actioning === a.id}>
-                {actioning === a.id ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.approveText}>Approve</Text>}
+                {actioning === a.id ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.approveText}>{tr('playerApp.notifications.approve')}</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -131,7 +133,7 @@ export default function PlayerNotificationsScreen() {
         {notifications.length === 0 && approvals.length === 0 ? (
           <View style={styles.empty}>
             <Ionicons name="notifications-outline" size={48} color={t.muted2} />
-            <Text style={styles.emptyTitle}>No notifications</Text>
+            <Text style={styles.emptyTitle}>{tr('playerApp.notifications.noNotifications')}</Text>
           </View>
         ) : (
           notifications.map(n => (
