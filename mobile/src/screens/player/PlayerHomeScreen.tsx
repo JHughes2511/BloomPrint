@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../../components/KeyboardAwareScrollView';
 import {
@@ -27,6 +28,7 @@ import { ScreenBackground } from '../../theme/components';
 import { timeAgo } from '../../utils/timeAgo';
 
 export default function PlayerHomeScreen() {
+  const { t: tr } = useTranslation();
   const { t, mode, toggle } = useTheme();
   const styles = makeStyles(t);
   const { playerUser, logout, refreshUser } = usePlayerAuth();
@@ -76,7 +78,7 @@ export default function PlayerHomeScreen() {
   }, [loadHome, refreshUser]);
 
   // ── Derived data for the reference-style header + BIM score card ──
-  const firstName = (playerUser?.name ?? '').trim().split(/\s+/)[0] || 'Player';
+  const firstName = (playerUser?.name ?? '').trim().split(/\s+/)[0] || tr('playerApp.home.playerFallback');
   const initials = (playerUser?.name ?? '')
     .trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('') || 'P';
   const programName = (playerUser as any)?.linked_program_name ?? profile?.program_name ?? '';
@@ -95,10 +97,10 @@ export default function PlayerHomeScreen() {
     ? (profile as any).bim_pillars
     : (reports.find(r => r.pillar_grades && Object.keys(r.pillar_grades).length)?.pillar_grades ?? null);
   const PILLAR_BAR = [
-    { key: 'offensive_skills', label: 'Offense', color: t.accent },
-    { key: 'defensive_capabilities', label: 'Defense', color: t.pistachio },
-    { key: 'physical_attributes', label: 'Physical', color: t.brown },
-    { key: 'intangibles', label: 'IQ', color: t.chip },
+    { key: 'offensive_skills', label: tr('playerApp.home.pillarShort.offense'), color: t.accent },
+    { key: 'defensive_capabilities', label: tr('playerApp.home.pillarShort.defense'), color: t.pistachio },
+    { key: 'physical_attributes', label: tr('playerApp.home.pillarShort.physical'), color: t.brown },
+    { key: 'intangibles', label: tr('playerApp.home.pillarShort.iq'), color: t.chip },
   ];
 
   const coachFeed = [...reports]
@@ -116,9 +118,9 @@ export default function PlayerHomeScreen() {
       const res = await playerLinkAPI.useInvite(inviteCode.trim());
       await refreshUser();
       setInviteCode('');
-      Alert.alert('Linked!', `Your account is now linked to ${res?.player_name ?? 'your player profile'}.`);
+      Alert.alert(tr('playerApp.home.linkedTitle'), tr('playerApp.home.linkedMsg', { name: res?.player_name ?? tr('playerApp.home.yourPlayerProfile') }));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Invalid invite code');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerApp.home.invalidInviteCode'));
     } finally {
       setLinking(false);
     }
@@ -188,16 +190,16 @@ export default function PlayerHomeScreen() {
       setProfile(updated);
       setShowEditModal(false);
     } catch {
-      Alert.alert('Error', 'Failed to save profile. Please try again.');
+      Alert.alert(tr('common.error'), tr('playerApp.home.failedToSaveProfile'));
     } finally {
       setSaving(false);
     }
   };
 
   const handleSignOut = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign Out', style: 'destructive', onPress: logout },
+    Alert.alert(tr('playerApp.home.signOut'), tr('playerApp.home.signOutConfirm'), [
+      { text: tr('common.cancel'), style: 'cancel' },
+      { text: tr('playerApp.home.signOut'), style: 'destructive', onPress: logout },
     ]);
   };
 
@@ -211,17 +213,17 @@ export default function PlayerHomeScreen() {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View style={{ flex: 1, marginRight: 10 }}>
-            <Text style={styles.eyebrow}>Player Portal</Text>
-            <Text style={styles.greeting}>Hey, {firstName}</Text>
+            <Text style={styles.eyebrow}>{tr('playerApp.home.playerPortal')}</Text>
+            <Text style={styles.greeting}>{tr('playerApp.home.greeting', { name: firstName })}</Text>
             {subtitleBits.length > 0 && (
               <Text style={styles.greetingSub}>{subtitleBits.join(' · ')}</Text>
             )}
           </View>
           <View style={styles.headerActions}>
-            <TouchableOpacity style={styles.circleBtn} onPress={toggle} accessibilityLabel="Toggle theme">
+            <TouchableOpacity style={styles.circleBtn} onPress={toggle} accessibilityLabel={tr('playerApp.home.toggleTheme')}>
               <Ionicons name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'} size={18} color={t.inkSoft} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.circleBtn} onPress={() => navigation.navigate('PlayerNotifsTab' as any)} accessibilityLabel="Notifications">
+            <TouchableOpacity style={styles.circleBtn} onPress={() => navigation.navigate('PlayerNotifsTab' as any)} accessibilityLabel={tr('playerApp.home.notifications')}>
               <Ionicons name="notifications-outline" size={18} color={t.inkSoft} />
               {unreadCount > 0 && (
                 <View style={styles.badge}>
@@ -229,7 +231,7 @@ export default function PlayerHomeScreen() {
                 </View>
               )}
             </TouchableOpacity>
-            <TouchableOpacity style={styles.circleBtn} onPress={handleSignOut} accessibilityLabel="Sign out">
+            <TouchableOpacity style={styles.circleBtn} onPress={handleSignOut} accessibilityLabel={tr('playerApp.home.signOut')}>
               <Ionicons name="log-out-outline" size={18} color={t.muted2} />
             </TouchableOpacity>
           </View>
@@ -239,13 +241,13 @@ export default function PlayerHomeScreen() {
             <View style={styles.linkedBadge}>
               <Ionicons name="checkmark-circle" size={12} color={t.positive} />
               <Text style={styles.linkedText}>
-                Linked{(playerUser as any).linked_program_name ? ` · ${(playerUser as any).linked_program_name}` : ''}
+                {tr('playerApp.home.linked')}{(playerUser as any).linked_program_name ? ` · ${(playerUser as any).linked_program_name}` : ''}
               </Text>
             </View>
           ) : (
             <TouchableOpacity style={styles.notLinkedBadge} onPress={openEdit}>
               <Ionicons name="link-outline" size={12} color={t.muted} />
-              <Text style={styles.notLinkedText}>Not linked · tap to link</Text>
+              <Text style={styles.notLinkedText}>{tr('playerApp.home.notLinkedTapToLink')}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -255,7 +257,7 @@ export default function PlayerHomeScreen() {
       {bimScore != null && (
         <TouchableOpacity style={styles.bimCard} activeOpacity={0.85} onPress={() => setShowBim(true)}>
           <View style={styles.bimTop}>
-            <Text style={styles.bimCardLabel}>Current BIM Score</Text>
+            <Text style={styles.bimCardLabel}>{tr('playerApp.home.currentBimScore')}</Text>
             {trend != null && Math.abs(trend) >= 0.05 && (
               <View style={[styles.trendPill, { backgroundColor: trend >= 0 ? t.positiveSoft : t.negativeSoft }]}>
                 <Text style={[styles.trendText, { color: trend >= 0 ? t.positive : t.negative }]}>
@@ -267,7 +269,7 @@ export default function PlayerHomeScreen() {
           <View style={styles.bimScoreRow}>
             <Text style={styles.bimScore}>{bimScore.toFixed(1)}</Text>
             <Text style={styles.bimOf}>
-              of 10{trend != null && Math.abs(trend) >= 0.05 ? (trend >= 0 ? ' · trending up' : ' · trending down') : ''}
+              {tr('playerApp.home.ofTen')}{trend != null && Math.abs(trend) >= 0.05 ? (trend >= 0 ? ` · ${tr('playerApp.home.trendingUp')}` : ` · ${tr('playerApp.home.trendingDown')}`) : ''}
             </Text>
           </View>
           {pillarSource && (
@@ -284,7 +286,7 @@ export default function PlayerHomeScreen() {
             </>
           )}
           <View style={styles.bimHint}>
-            <Text style={styles.bimHintText}>Tap for full breakdown</Text>
+            <Text style={styles.bimHintText}>{tr('playerApp.home.tapForBreakdown')}</Text>
             <Ionicons name="chevron-forward" size={13} color={t.muted2} />
           </View>
         </TouchableOpacity>
@@ -293,15 +295,15 @@ export default function PlayerHomeScreen() {
       {/* From Your Coach */}
       {coachFeed.length > 0 && (
         <>
-          <Text style={styles.sectionLabel}>From Your Coach</Text>
+          <Text style={styles.sectionLabel}>{tr('playerApp.home.fromYourCoach')}</Text>
           {coachFeed.map(r => (
             <TouchableOpacity key={r.id} style={styles.feedCard} onPress={() => openReport(r)}>
               <View style={[styles.feedIcon, { backgroundColor: t.accentSoft }]}>
                 <Ionicons name="document-text-outline" size={22} color={t.accent} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.feedTitle}>{outputTypeLabel(r.output_type) || 'New Report'}</Text>
-                <Text style={styles.feedSub}>Shared {timeAgo(r.created_at)} · tap to read</Text>
+                <Text style={styles.feedTitle}>{outputTypeLabel(r.output_type) || tr('playerApp.home.newReport')}</Text>
+                <Text style={styles.feedSub}>{tr('playerApp.home.sharedTapToRead', { time: timeAgo(r.created_at) })}</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={t.muted2} />
             </TouchableOpacity>
@@ -309,7 +311,7 @@ export default function PlayerHomeScreen() {
         </>
       )}
 
-      <Text style={styles.sectionLabel}>Your Dashboard</Text>
+      <Text style={styles.sectionLabel}>{tr('playerApp.home.yourDashboard')}</Text>
 
       <View style={styles.cardGrid}>
         <TouchableOpacity
@@ -319,8 +321,8 @@ export default function PlayerHomeScreen() {
           <View style={[styles.cardIcon, { backgroundColor: t.positiveSoft }]}>
             <Ionicons name="mail" size={28} color={t.positive} />
           </View>
-          <Text style={styles.cardTitle}>My Reports</Text>
-          <Text style={styles.cardDesc}>View reports shared by your coaches</Text>
+          <Text style={styles.cardTitle}>{tr('playerApp.home.myReports')}</Text>
+          <Text style={styles.cardDesc}>{tr('playerApp.home.myReportsDesc')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -330,48 +332,48 @@ export default function PlayerHomeScreen() {
           <View style={[styles.cardIcon, { backgroundColor: t.positiveSoft }]}>
             <Ionicons name="barbell" size={28} color={t.positive} />
           </View>
-          <Text style={styles.cardTitle}>My Training</Text>
-          <Text style={styles.cardDesc}>View and generate training programs</Text>
+          <Text style={styles.cardTitle}>{tr('playerApp.home.myTraining')}</Text>
+          <Text style={styles.cardDesc}>{tr('playerApp.home.myTrainingDesc')}</Text>
         </TouchableOpacity>
       </View>
 
       {playerUser?.player_id && profile && (
         <>
-          <Text style={styles.sectionLabel}>My Profile</Text>
+          <Text style={styles.sectionLabel}>{tr('playerApp.home.myProfile')}</Text>
           <View style={styles.profileCard}>
             <View style={styles.profileCardHeader}>
               <Ionicons name="person-circle-outline" size={20} color={t.positive} />
-              <Text style={styles.profileCardTitle}>Athletic Profile</Text>
+              <Text style={styles.profileCardTitle}>{tr('playerApp.home.athleticProfile')}</Text>
               <TouchableOpacity style={styles.editBtn} onPress={openEdit}>
                 <Ionicons name="pencil-outline" size={15} color={t.positive} />
-                <Text style={styles.editBtnText}>Edit</Text>
+                <Text style={styles.editBtnText}>{tr('playerApp.home.edit')}</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.profileStats}>
               <View style={styles.profileStat}>
                 <Text style={styles.profileStatVal}>{profile.position || '—'}</Text>
-                <Text style={styles.profileStatLabel}>Position</Text>
+                <Text style={styles.profileStatLabel}>{tr('playerApp.home.position')}</Text>
               </View>
               <View style={styles.profileStatDivider} />
               <View style={styles.profileStat}>
                 <Text style={styles.profileStatVal}>{profile.height || '—'}</Text>
-                <Text style={styles.profileStatLabel}>Height</Text>
+                <Text style={styles.profileStatLabel}>{tr('playerApp.home.height')}</Text>
               </View>
               <View style={styles.profileStatDivider} />
               <View style={styles.profileStat}>
                 <Text style={styles.profileStatVal}>{profile.wingspan || '—'}</Text>
-                <Text style={styles.profileStatLabel}>Wingspan</Text>
+                <Text style={styles.profileStatLabel}>{tr('playerApp.home.wingspan')}</Text>
               </View>
             </View>
             <View style={[styles.profileStats, { marginTop: 10 }]}>
               <View style={styles.profileStat}>
                 <Text style={styles.profileStatVal}>{profile.weight || '—'}</Text>
-                <Text style={styles.profileStatLabel}>Weight</Text>
+                <Text style={styles.profileStatLabel}>{tr('playerApp.home.weight')}</Text>
               </View>
               <View style={styles.profileStatDivider} />
               <View style={styles.profileStat}>
                 <Text style={styles.profileStatVal}>{profile.standing_reach || '—'}</Text>
-                <Text style={styles.profileStatLabel}>Standing Reach</Text>
+                <Text style={styles.profileStatLabel}>{tr('playerApp.home.standingReach')}</Text>
               </View>
             </View>
             {(profile.school_name || profile.city || profile.state || profile.country) && (
@@ -401,12 +403,12 @@ export default function PlayerHomeScreen() {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalBox, { maxHeight: '85%' }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>BIM Score {bimScore != null ? bimScore.toFixed(1) : ''}</Text>
+              <Text style={styles.modalTitle}>{tr('playerApp.home.bimScoreTitle', { score: bimScore != null ? bimScore.toFixed(1) : '' })}</Text>
               <TouchableOpacity onPress={() => setShowBim(false)}>
                 <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
-            <Text style={styles.bimModalSub}>How your score breaks down across the evaluation pillars, with the strengths and watch areas your coach flagged.</Text>
+            <Text style={styles.bimModalSub}>{tr('playerApp.home.bimModalSub')}</Text>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
               {pillarSource ? (
                 PILLAR_ORDER.filter(k => pillarSource[k] != null).map(k => {
@@ -414,7 +416,7 @@ export default function PlayerHomeScreen() {
                   return (
                     <View key={k} style={styles.pbRow}>
                       <View style={styles.pbHead}>
-                        <Text style={styles.pbLabel}>{PILLAR_LABELS[k] ?? k}</Text>
+                        <Text style={styles.pbLabel}>{tr(`playerApp.home.pillars.${k}`, PILLAR_LABELS[k] ?? k)}</Text>
                         <Text style={styles.pbVal}>{g.toFixed(1)}</Text>
                       </View>
                       <View style={styles.pbTrack}>
@@ -424,12 +426,12 @@ export default function PlayerHomeScreen() {
                   );
                 })
               ) : (
-                <Text style={styles.bimModalSub}>No pillar breakdown was shared on your reports yet.</Text>
+                <Text style={styles.bimModalSub}>{tr('playerApp.home.noPillarBreakdown')}</Text>
               )}
 
               {flagSource?.green_flags?.length ? (
                 <View style={{ marginTop: 18 }}>
-                  <Text style={[styles.bimGroupLabel, { color: t.positive }]}>Strengths</Text>
+                  <Text style={[styles.bimGroupLabel, { color: t.positive }]}>{tr('playerApp.home.strengths')}</Text>
                   {flagSource.green_flags.map((f: string, i: number) => (
                     <View key={i} style={styles.flagItem}>
                       <View style={[styles.flagDot, { backgroundColor: t.positive }]} />
@@ -441,7 +443,7 @@ export default function PlayerHomeScreen() {
 
               {flagSource?.watch_flags?.length ? (
                 <View style={{ marginTop: 16 }}>
-                  <Text style={[styles.bimGroupLabel, { color: t.brown }]}>Watch Areas</Text>
+                  <Text style={[styles.bimGroupLabel, { color: t.brown }]}>{tr('playerApp.home.watchAreas')}</Text>
                   {flagSource.watch_flags.map((f: string, i: number) => (
                     <View key={i} style={styles.flagItem}>
                       <View style={[styles.flagDot, { backgroundColor: t.brown }]} />
@@ -464,7 +466,7 @@ export default function PlayerHomeScreen() {
             <TouchableOpacity activeOpacity={1}>
               <View style={styles.dragHandle} />
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Edit My Profile</Text>
+                <Text style={styles.modalTitle}>{tr('playerApp.home.editMyProfile')}</Text>
                 <TouchableOpacity onPress={() => { Keyboard.dismiss(); closeModal(); }}>
                   <Ionicons name="close" size={22} color={t.muted} />
                 </TouchableOpacity>
@@ -476,23 +478,25 @@ export default function PlayerHomeScreen() {
                 contentContainerStyle={{ paddingBottom: 48 }}
               >
                 {/* Link to Coach */}
-                <Text style={styles.linkSectionLabel}>Link to Coach</Text>
+                <Text style={styles.linkSectionLabel}>{tr('playerApp.home.linkToCoach')}</Text>
                 {isLinked ? (
                   <View style={styles.linkedRow}>
                     <Ionicons name="checkmark-circle" size={18} color={t.positive} />
                     <Text style={styles.linkedRowText}>
-                      Linked{(playerUser as any)?.linked_program_name ? ` to ${(playerUser as any).linked_program_name}` : ''}
+                      {(playerUser as any)?.linked_program_name
+                        ? tr('playerApp.home.linkedTo', { program: (playerUser as any).linked_program_name })
+                        : tr('playerApp.home.linked')}
                     </Text>
                   </View>
                 ) : (
                   <>
-                    <Text style={styles.linkHint}>Enter the invite code your coach gave you to connect your account.</Text>
+                    <Text style={styles.linkHint}>{tr('playerApp.home.enterInviteCodeHint')}</Text>
                     <View style={{ flexDirection: 'row', gap: 8 }}>
                       <VoiceTextInput
                         style={[styles.input, { flex: 1 }]}
                         value={inviteCode}
                         onChangeText={setInviteCode}
-                        placeholder="Invite code (e.g. ABC12345)"
+                        placeholder={tr('playerApp.home.inviteCodePlaceholder')}
                         placeholderTextColor={t.muted2}
                         autoCapitalize="characters"
                       />
@@ -501,68 +505,68 @@ export default function PlayerHomeScreen() {
                         onPress={linkWithInvite}
                         disabled={!inviteCode.trim() || linking}
                       >
-                        <Text style={styles.linkBtnText}>{linking ? '…' : 'Link'}</Text>
+                        <Text style={styles.linkBtnText}>{linking ? '…' : tr('playerApp.home.link')}</Text>
                       </TouchableOpacity>
                     </View>
                     <TouchableOpacity onPress={() => { closeModal(); navigation.navigate('ProfileTab' as any); }}>
-                      <Text style={styles.findCoachText}>Find your coach instead →</Text>
+                      <Text style={styles.findCoachText}>{tr('playerApp.home.findYourCoachInstead')}</Text>
                     </TouchableOpacity>
                   </>
                 )}
                 <View style={styles.linkDivider} />
 
                 <View onLayout={e => { fieldY.current['position'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>Position</Text>
+                  <Text style={styles.fieldLabel}>{tr('playerApp.home.position')}</Text>
                   <VoiceTextInput style={styles.input} value={editPosition} onChangeText={setEditPosition}
-                    placeholder="e.g. PG, SG, SF, PF, C" placeholderTextColor={t.muted2}
+                    placeholder={tr('playerApp.home.phPosition')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['height'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>Height</Text>
+                  <Text style={styles.fieldLabel}>{tr('playerApp.home.height')}</Text>
                   <VoiceTextInput style={styles.input} value={editHeight} onChangeText={setEditHeight}
-                    placeholder={`e.g. 6'2"`} placeholderTextColor={t.muted2}
+                    placeholder={tr('playerApp.home.phHeight')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['wingspan'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>Wingspan</Text>
+                  <Text style={styles.fieldLabel}>{tr('playerApp.home.wingspan')}</Text>
                   <VoiceTextInput style={styles.input} value={editWingspan} onChangeText={setEditWingspan}
-                    placeholder={`e.g. 6'5"`} placeholderTextColor={t.muted2}
+                    placeholder={tr('playerApp.home.phWingspan')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['weight'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>Weight</Text>
+                  <Text style={styles.fieldLabel}>{tr('playerApp.home.weight')}</Text>
                   <VoiceTextInput style={styles.input} value={editWeight} onChangeText={setEditWeight}
-                    placeholder={`e.g. 185 lbs`} placeholderTextColor={t.muted2}
+                    placeholder={tr('playerApp.home.phWeight')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['standing_reach'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>Standing Reach</Text>
+                  <Text style={styles.fieldLabel}>{tr('playerApp.home.standingReach')}</Text>
                   <VoiceTextInput style={styles.input} value={editStandingReach} onChangeText={setEditStandingReach}
-                    placeholder={`e.g. 8'2"`} placeholderTextColor={t.muted2}
+                    placeholder={tr('playerApp.home.phStandingReach')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['school'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>School</Text>
+                  <Text style={styles.fieldLabel}>{tr('playerApp.home.school')}</Text>
                   <VoiceTextInput style={styles.input} value={editSchool} onChangeText={setEditSchool}
-                    placeholder="e.g. Lincoln High School" placeholderTextColor={t.muted2}
+                    placeholder={tr('playerApp.home.phSchool')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['city'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>City</Text>
+                  <Text style={styles.fieldLabel}>{tr('playerApp.home.city')}</Text>
                   <VoiceTextInput style={styles.input} value={editCity} onChangeText={setEditCity}
-                    placeholder="e.g. Atlanta" placeholderTextColor={t.muted2}
+                    placeholder={tr('playerApp.home.phCity')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['state'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>State</Text>
+                  <Text style={styles.fieldLabel}>{tr('playerApp.home.state')}</Text>
                   <VoiceTextInput style={styles.input} value={editState} onChangeText={setEditState}
-                    placeholder="e.g. Georgia" placeholderTextColor={t.muted2}
+                    placeholder={tr('playerApp.home.phState')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['country'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>Country</Text>
+                  <Text style={styles.fieldLabel}>{tr('playerApp.home.country')}</Text>
                   <VoiceTextInput style={styles.input} value={editCountry} onChangeText={setEditCountry}
-                    placeholder="e.g. USA" placeholderTextColor={t.muted2}
+                    placeholder={tr('playerApp.home.phCountry')} placeholderTextColor={t.muted2}
                     returnKeyType="done" />
                 </View>
                 <TouchableOpacity
@@ -570,7 +574,7 @@ export default function PlayerHomeScreen() {
                   onPress={saveProfile}
                   disabled={saving}
                 >
-                  <Text style={styles.saveBtnText}>{saving ? 'Saving…' : 'Save Changes'}</Text>
+                  <Text style={styles.saveBtnText}>{saving ? tr('playerApp.home.saving') : tr('playerApp.home.saveChanges')}</Text>
                 </TouchableOpacity>
               </KeyboardAwareScrollView>
             </TouchableOpacity>

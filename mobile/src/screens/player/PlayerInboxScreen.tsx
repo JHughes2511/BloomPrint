@@ -1,4 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, RefreshControl, TextInput,
@@ -60,12 +62,12 @@ const cleanSubject = (reportText: string, outputType: string): string | null => 
 // What the player actually received, used as a clean fallback name when the
 // report body was excluded from the share.
 const sharedContentLabel = (item: InboxItem): string => {
-  if (item.kind === 'team') return 'Full Report';
-  if (item.share_report_text) return 'Full Report';
-  if (item.share_grades) return 'Pillar Grades';
-  if (item.share_flags) return 'Flags & Notes';
-  if (item.share_questions) return 'Key Questions';
-  return 'Shared Report';
+  if (item.kind === 'team') return i18n.t('playerApp.inbox.fullReport');
+  if (item.share_report_text) return i18n.t('playerApp.inbox.fullReport');
+  if (item.share_grades) return i18n.t('playerApp.inbox.pillarGrades');
+  if (item.share_flags) return i18n.t('playerApp.inbox.flagsNotes');
+  if (item.share_questions) return i18n.t('playerApp.inbox.keyQuestions');
+  return i18n.t('playerApp.inbox.sharedReport');
 };
 
 // Every report gets a clean sub-name: the body's subject when available, else a
@@ -94,13 +96,14 @@ type InboxItem = {
 };
 
 const FILTERS = [
-  { key: 'all', label: 'All' },
-  { key: 'evals', label: 'Evaluations' },
-  { key: 'film', label: 'Film' },
+  { key: 'all' },
+  { key: 'evals' },
+  { key: 'film' },
 ] as const;
 
 
 export default function PlayerInboxScreen() {
+  const { t: tr } = useTranslation();
   const { t } = useTheme();
   const styles = makeStyles(t);
   const navigation = useNavigation<any>();
@@ -176,7 +179,7 @@ export default function PlayerInboxScreen() {
     >
       <View style={styles.header}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>My Reports</Text>
+          <Text style={styles.title}>{tr('playerApp.inbox.title')}</Text>
           <TouchableOpacity
             style={styles.searchButton}
             onPress={() => {
@@ -189,7 +192,7 @@ export default function PlayerInboxScreen() {
             <Ionicons name={searchOpen ? 'close' : 'search'} size={20} color={t.ink} />
           </TouchableOpacity>
         </View>
-        <Text style={styles.sub}>Shared with you by your coaching staff</Text>
+        <Text style={styles.sub}>{tr('playerApp.inbox.sub')}</Text>
       </View>
 
       {/* Filter pills */}
@@ -202,7 +205,7 @@ export default function PlayerInboxScreen() {
               style={[styles.filterPill, active ? styles.filterPillActive : styles.filterPillIdle]}
               onPress={() => setFilter(f.key)}
             >
-              <Text style={active ? styles.filterTextActive : styles.filterTextIdle}>{f.label}</Text>
+              <Text style={active ? styles.filterTextActive : styles.filterTextIdle}>{tr(`playerApp.inbox.filter.${f.key}`)}</Text>
             </TouchableOpacity>
           );
         })}
@@ -215,7 +218,7 @@ export default function PlayerInboxScreen() {
             style={styles.searchInput}
             value={search}
             onChangeText={setSearch}
-            placeholder="Search reports"
+            placeholder={tr('playerApp.inbox.searchReports')}
             placeholderTextColor={t.muted2}
             autoFocus
             autoCorrect={false}
@@ -227,13 +230,13 @@ export default function PlayerInboxScreen() {
       {searched.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="mail-outline" size={48} color={t.muted2} />
-          <Text style={styles.emptyTitle}>{search.trim() ? 'No matches' : 'No reports yet'}</Text>
+          <Text style={styles.emptyTitle}>{search.trim() ? tr('playerApp.inbox.noMatches') : tr('playerApp.inbox.noReportsYet')}</Text>
           <Text style={styles.emptyDesc}>
             {search.trim()
-              ? 'No reports match your search.'
+              ? tr('playerApp.inbox.noMatchDesc')
               : filter === 'all'
-                ? 'When a coach shares a report with you, it will appear here.'
-                : 'No reports in this category yet.'}
+                ? tr('playerApp.inbox.emptyAllDesc')
+                : tr('playerApp.inbox.emptyCategoryDesc')}
           </Text>
         </View>
       ) : (
@@ -248,7 +251,7 @@ export default function PlayerInboxScreen() {
               <View style={styles.cardTop}>
                 <View style={[styles.typeBadge, isFilm ? styles.typeBadgeFilm : styles.typeBadgeEval]}>
                   <Text style={[styles.typeText, { color: isFilm ? t.brown : t.accent }]}>
-                    {item.kind === 'team' ? 'TEAM · ' : ''}{(outputTypeLabel(item.output_type) || 'Report').toUpperCase()}
+                    {item.kind === 'team' ? tr('playerApp.inbox.teamPrefix') : ''}{(outputTypeLabel(item.output_type) || tr('reportTypes.report')).toUpperCase()}
                   </Text>
                 </View>
                 <Text style={styles.date}>{timeAgo(item.created_at)}</Text>
@@ -259,19 +262,19 @@ export default function PlayerInboxScreen() {
               <View style={styles.cardFooter}>
                 <View style={styles.sharedItems}>
                   {item.kind === 'eval' && item.share_grades && (
-                    <View style={styles.chip}><Text style={styles.chipText}>Grades</Text></View>
+                    <View style={styles.chip}><Text style={styles.chipText}>{tr('playerApp.inbox.chipGrades')}</Text></View>
                   )}
                   {item.kind === 'eval' && item.share_report_text && (
-                    <View style={styles.chip}><Text style={styles.chipText}>Report</Text></View>
+                    <View style={styles.chip}><Text style={styles.chipText}>{tr('reportTypes.report')}</Text></View>
                   )}
                   {item.kind === 'eval' && item.share_flags && (
-                    <View style={styles.chip}><Text style={styles.chipText}>Flags</Text></View>
+                    <View style={styles.chip}><Text style={styles.chipText}>{tr('playerApp.inbox.chipFlags')}</Text></View>
                   )}
                   {item.kind === 'eval' && item.share_questions && (
-                    <View style={styles.chip}><Text style={styles.chipText}>Questions</Text></View>
+                    <View style={styles.chip}><Text style={styles.chipText}>{tr('playerApp.inbox.chipQuestions')}</Text></View>
                   )}
                   {item.kind === 'team' && (
-                    <View style={styles.chip}><Text style={styles.chipText}>Full Report</Text></View>
+                    <View style={styles.chip}><Text style={styles.chipText}>{tr('playerApp.inbox.fullReport')}</Text></View>
                   )}
                 </View>
                 <Ionicons name="chevron-forward" size={16} color={t.muted2} />

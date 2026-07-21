@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../../components/KeyboardAwareScrollView';
 import {
@@ -17,6 +18,7 @@ import CountryField from '../../components/CountryField';
 import GoogleSignInButton from '../../components/GoogleSignInButton';
 
 export default function PlayerRegisterScreen() {
+  const { t: tr } = useTranslation();
   const { t } = useTheme();
   const styles = makeStyles(t);
   const { register, playerUser, applyAuth } = usePlayerAuth();
@@ -45,7 +47,7 @@ export default function PlayerRegisterScreen() {
         setEmail(res.email ?? '');
       }
     } catch (e: any) {
-      Alert.alert('Google sign-in', e?.response?.data?.detail ?? 'Could not sign in with Google.');
+      Alert.alert(tr('auth.googleSignInTitle'), e?.response?.data?.detail ?? tr('auth.googleSignInFailed'));
     } finally {
       setGoogleBusy(false);
     }
@@ -64,14 +66,14 @@ export default function PlayerRegisterScreen() {
       try {
         const res = await playerAuthAPI.google({ id_token: googleIdToken, mode: 'register', country: country || undefined, city: city.trim() || undefined });
         if (res.status === 'ok') { await applyAuth(res.access_token, res.player_user); setRegistered(true); }
-        else throw new Error('Could not create the account.');
+        else throw new Error(tr('playerApp.register.couldNotCreate'));
       } catch (e: any) {
-        Alert.alert('Error', e?.response?.data?.detail ?? 'Registration failed');
+        Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerApp.register.registrationFailed'));
       } finally { setLoading(false); }
       return;
     }
     if (!name.trim() || !email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(tr('common.error'), tr('playerApp.register.fillAllFields'));
       return;
     }
     setLoading(true);
@@ -79,7 +81,7 @@ export default function PlayerRegisterScreen() {
       await register({ name: name.trim(), email: email.trim(), password, country: country || undefined, city: city.trim() || undefined });
       setRegistered(true);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Registration failed');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerApp.register.registrationFailed'));
     } finally {
       setLoading(false);
     }
@@ -90,10 +92,10 @@ export default function PlayerRegisterScreen() {
     setInviteLoading(true);
     try {
       const res = await playerLinkAPI.useInvite(inviteCode.trim());
-      Alert.alert('Linked!', `Your account is now linked to ${res.player_name}'s profile.`);
+      Alert.alert(tr('playerApp.register.linkedTitle'), tr('playerApp.register.linkedToProfile', { name: res.player_name }));
       navigation.navigate('PlayerHome');
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Invalid invite code');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerApp.register.invalidInviteCode'));
     } finally {
       setInviteLoading(false);
     }
@@ -106,7 +108,7 @@ export default function PlayerRegisterScreen() {
       const results = await playerLinkAPI.searchPlayers(searchQ.trim());
       setSearchResults(results);
     } catch {
-      Alert.alert('Error', 'Search failed');
+      Alert.alert(tr('common.error'), tr('playerApp.register.searchFailed'));
     } finally {
       setLinkLoading(false);
     }
@@ -115,11 +117,11 @@ export default function PlayerRegisterScreen() {
   const requestLink = async (playerId: number, playerName: string) => {
     try {
       await playerLinkAPI.requestLink(playerId);
-      Alert.alert('Request Sent', `A link request has been sent to coaches for ${playerName}'s profile.`);
+      Alert.alert(tr('playerApp.register.requestSentTitle'), tr('playerApp.register.requestSentMsg', { name: playerName }));
       setSearchResults([]);
       setSearchQ('');
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Failed to send request');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerApp.register.failedToSendRequest'));
     }
   };
 
@@ -127,15 +129,15 @@ export default function PlayerRegisterScreen() {
     return (
       <ScreenBackground>
       <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ padding: 24, paddingTop: 60 }}>
-        <Text style={styles.logo}>Welcome!</Text>
-        <Text style={styles.sub}>Link your player profile</Text>
+        <Text style={styles.logo}>{tr('playerApp.register.welcome')}</Text>
+        <Text style={styles.sub}>{tr('playerApp.register.linkYourProfile')}</Text>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Enter Invite Code</Text>
-          <Text style={styles.sectionDesc}>If a coach gave you an invite code, enter it here.</Text>
+          <Text style={styles.sectionTitle}>{tr('playerApp.register.enterInviteCode')}</Text>
+          <Text style={styles.sectionDesc}>{tr('playerApp.register.enterInviteCodeDesc')}</Text>
           <VoiceTextInput
             style={styles.input}
-            placeholder="Invite code (e.g. ABC12345)"
+            placeholder={tr('playerApp.register.inviteCodePlaceholder')}
             placeholderTextColor={t.muted2}
             value={inviteCode}
             onChangeText={setInviteCode}
@@ -144,19 +146,19 @@ export default function PlayerRegisterScreen() {
           <TouchableOpacity style={styles.btn} onPress={useInvite} disabled={inviteLoading}>
             {inviteLoading
               ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.btnText}>Use Invite Code</Text>}
+              : <Text style={styles.btnText}>{tr('playerApp.register.useInviteCode')}</Text>}
           </TouchableOpacity>
         </View>
 
         <View style={styles.divider} />
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Find My Profile</Text>
-          <Text style={styles.sectionDesc}>Search for your name in the roster and request to link.</Text>
+          <Text style={styles.sectionTitle}>{tr('playerApp.register.findMyProfile')}</Text>
+          <Text style={styles.sectionDesc}>{tr('playerApp.register.findMyProfileDesc')}</Text>
           <View style={styles.searchRow}>
             <VoiceTextInput
               style={[styles.input, { flex: 1 }]}
-              placeholder="Search your name..."
+              placeholder={tr('playerApp.register.searchYourName')}
               placeholderTextColor={t.muted2}
               value={searchQ}
               onChangeText={setSearchQ}
@@ -177,14 +179,14 @@ export default function PlayerRegisterScreen() {
                 style={styles.requestBtn}
                 onPress={() => requestLink(p.id, p.name)}
               >
-                <Text style={styles.requestBtnText}>Request Link</Text>
+                <Text style={styles.requestBtnText}>{tr('playerApp.register.requestLink')}</Text>
               </TouchableOpacity>
             </View>
           ))}
         </View>
 
         <TouchableOpacity style={styles.skipBtn} onPress={() => navigation.navigate('PlayerHome')}>
-          <Text style={styles.skipText}>Skip for now →</Text>
+          <Text style={styles.skipText}>{tr('playerApp.register.skipForNow')}</Text>
         </TouchableOpacity>
       </KeyboardAwareScrollView>
       </ScreenBackground>
@@ -203,25 +205,25 @@ export default function PlayerRegisterScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.logo}>BloomPrint</Text>
-        <Text style={styles.sub}>Create Player Account</Text>
+        <Text style={styles.sub}>{tr('playerApp.register.createPlayerAccount')}</Text>
 
         {!!googleIdToken && (
           <View style={styles.googleBanner}>
             <Ionicons name="logo-google" size={16} color={t.positive} />
-            <Text style={styles.googleBannerText}>Complete your account to finish signing up with Google</Text>
+            <Text style={styles.googleBannerText}>{tr('auth.googleComplete')}</Text>
           </View>
         )}
 
         <VoiceTextInput
           style={styles.input}
-          placeholder="Full Name"
+          placeholder={tr('auth.fullName')}
           placeholderTextColor={t.muted2}
           value={name}
           onChangeText={setName}
         />
         <VoiceTextInput
           style={[styles.input, !!googleIdToken && { opacity: 0.6 }]}
-          placeholder="Email"
+          placeholder={tr('auth.email')}
           placeholderTextColor={t.muted2}
           value={email}
           onChangeText={setEmail}
@@ -232,7 +234,7 @@ export default function PlayerRegisterScreen() {
         {!googleIdToken && (
           <VoiceTextInput
             style={styles.input}
-            placeholder="Password"
+            placeholder={tr('auth.password')}
             placeholderTextColor={t.muted2}
             value={password}
             onChangeText={setPassword}
@@ -241,13 +243,13 @@ export default function PlayerRegisterScreen() {
         )}
         {!!googleIdToken && (
           <Text style={{ color: t.muted, fontSize: 12, marginBottom: 8 }}>
-            Signing up with Google — no password needed.
+            {tr('auth.googleNoPassword')}
           </Text>
         )}
-        <CountryField value={country} onChange={setCountry} placeholder="Country (optional)" />
+        <CountryField value={country} onChange={setCountry} placeholder={tr('playerApp.register.countryOptional')} />
         <VoiceTextInput
           style={styles.input}
-          placeholder="City / Region (optional)"
+          placeholder={tr('auth.cityRegionOptional')}
           placeholderTextColor={t.muted2}
           value={city}
           onChangeText={setCity}
@@ -256,14 +258,14 @@ export default function PlayerRegisterScreen() {
         <TouchableOpacity style={styles.btn} onPress={submit} disabled={loading}>
           {loading
             ? <ActivityIndicator color="#fff" />
-            : <Text style={styles.btnText}>Create Account</Text>}
+            : <Text style={styles.btnText}>{tr('auth.createAccount')}</Text>}
         </TouchableOpacity>
 
         {!googleIdToken && (
           <>
             <View style={styles.orRow}>
               <View style={styles.orLine} />
-              <Text style={styles.orText}>or</Text>
+              <Text style={styles.orText}>{tr('auth.or')}</Text>
               <View style={styles.orLine} />
             </View>
             <GoogleSignInButton onIdToken={handleGoogleIdToken} busy={googleBusy} color={t.positive} />
@@ -271,11 +273,11 @@ export default function PlayerRegisterScreen() {
         )}
 
         <TouchableOpacity onPress={() => navigation.navigate('PlayerLogin')}>
-          <Text style={styles.toggle}>Already have an account? Sign In</Text>
+          <Text style={styles.toggle}>{tr('auth.haveAccountSignIn')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('RoleSelect')}>
-          <Text style={styles.backText}>← Back to Role Select</Text>
+          <Text style={styles.backText}>{tr('auth.backToRoleSelect')}</Text>
         </TouchableOpacity>
       </KeyboardAwareScrollView>
     </KeyboardAvoidingView>

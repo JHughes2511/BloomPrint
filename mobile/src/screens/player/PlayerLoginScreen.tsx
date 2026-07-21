@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../../components/VoiceTextInput';
+import LanguagePicker from '../../components/LanguagePicker';
 import KeyboardAwareScrollView from '../../components/KeyboardAwareScrollView';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
@@ -17,6 +19,7 @@ import GoogleSignInButton from '../../components/GoogleSignInButton';
 export default function PlayerLoginScreen() {
   const { login, applyAuth } = usePlayerAuth();
   const navigation = useNavigation<any>();
+  const { t: tr } = useTranslation();
   const { t } = useTheme();
   const styles = makeStyles(t);
   const [email, setEmail] = useState('');
@@ -35,7 +38,7 @@ export default function PlayerLoginScreen() {
         navigation.navigate('PlayerRegister', { googleIdToken: idToken, email: res.email, name: res.name });
       }
     } catch (e: any) {
-      Alert.alert('Google sign-in', e?.response?.data?.detail ?? 'Could not sign in with Google.');
+      Alert.alert(tr('auth.googleSignInTitle'), e?.response?.data?.detail ?? tr('auth.googleSignInFailed'));
     } finally {
       setGoogleBusy(false);
     }
@@ -43,14 +46,14 @@ export default function PlayerLoginScreen() {
 
   const submit = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please enter your email and password');
+      Alert.alert(tr('common.error'), tr('playerApp.login.enterEmailPassword'));
       return;
     }
     setLoading(true);
     try {
       await login(email.trim(), password);
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Invalid email or password');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('playerApp.login.invalidCredentials'));
     } finally {
       setLoading(false);
     }
@@ -68,11 +71,11 @@ export default function PlayerLoginScreen() {
           showsVerticalScrollIndicator={false}
         >
           <Text style={styles.logo}>BloomPrint</Text>
-          <Text style={styles.sub}>Player Portal</Text>
+          <Text style={styles.sub}>{tr('playerApp.login.playerPortal')}</Text>
 
           <VoiceTextInput
             style={styles.input}
-            placeholder="Email"
+            placeholder={tr('auth.email')}
             placeholderTextColor={t.muted2}
             value={email}
             onChangeText={setEmail}
@@ -81,7 +84,7 @@ export default function PlayerLoginScreen() {
           />
           <VoiceTextInput
             style={styles.input}
-            placeholder="Password"
+            placeholder={tr('auth.password')}
             placeholderTextColor={t.muted2}
             value={password}
             onChangeText={setPassword}
@@ -91,26 +94,30 @@ export default function PlayerLoginScreen() {
           <TouchableOpacity style={styles.btn} onPress={submit} disabled={loading}>
             {loading
               ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.btnText}>Sign In</Text>}
+              : <Text style={styles.btnText}>{tr('auth.signIn')}</Text>}
           </TouchableOpacity>
 
           <View style={styles.orRow}>
             <View style={styles.orLine} />
-            <Text style={styles.orText}>or</Text>
+            <Text style={styles.orText}>{tr('auth.or')}</Text>
             <View style={styles.orLine} />
           </View>
           <GoogleSignInButton onIdToken={handleGoogleIdToken} busy={googleBusy} color={t.positive} />
 
           <TouchableOpacity onPress={() => navigation.navigate('PlayerRegister')}>
-            <Text style={styles.toggle}>Don't have an account? Register</Text>
+            <Text style={styles.toggle}>{tr('auth.noAccountRegister')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.backBtn}
             onPress={() => navigation.navigate('RoleSelect')}
           >
-            <Text style={styles.backText}>← Back to Role Select</Text>
+            <Text style={styles.backText}>{tr('auth.backToRoleSelect')}</Text>
           </TouchableOpacity>
+
+          <View style={{ marginTop: 20, alignItems: 'center' }}>
+            <LanguagePicker compact />
+          </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
     </ScreenBackground>
