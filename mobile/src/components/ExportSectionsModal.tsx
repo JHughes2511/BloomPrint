@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Switch, Modal, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -24,6 +25,7 @@ export type ExportSectionsModalProps = {
 
 export default function ExportSectionsModal({ visible, title, subject, reportText, onClose }: ExportSectionsModalProps) {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const s = makeStyles(t);
   const sections = splitReportSections(reportText ?? '');
   const toggleSections = sections.filter(sec => !sec.pinned);
@@ -50,13 +52,13 @@ export default function ExportSectionsModal({ visible, title, subject, reportTex
       await FileSystem.copyAsync({ from: uri, to: dest });
       if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: title });
       onClose();
-    } catch (e: any) { Alert.alert('Export Error', e?.message ?? 'Could not export'); }
+    } catch (e: any) { Alert.alert(tr('components.exportSections.exportErrorTitle'), e?.message ?? tr('components.exportSections.couldNotExport')); }
     setBusy(false);
   };
   const doPrint = async () => {
     setBusy(true);
     try { await Print.printAsync({ html: html() }); onClose(); }
-    catch (e: any) { Alert.alert('Print Error', e?.message ?? 'Could not print'); }
+    catch (e: any) { Alert.alert(tr('components.exportSections.printErrorTitle'), e?.message ?? tr('components.exportSections.couldNotPrint')); }
     setBusy(false);
   };
 
@@ -66,14 +68,14 @@ export default function ExportSectionsModal({ visible, title, subject, reportTex
         <View style={s.box}>
           <View style={s.header}>
             <View style={{ flex: 1 }}>
-              <Text style={s.title}>Export / Print</Text>
-              <Text style={s.sub}>Choose the sections to include</Text>
+              <Text style={s.title}>{tr('components.exportSections.exportPrint')}</Text>
+              <Text style={s.sub}>{tr('components.exportSections.chooseSections')}</Text>
             </View>
             <TouchableOpacity onPress={onClose}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
           </View>
 
           <ScrollView style={{ maxHeight: 340 }}>
-            {toggleSections.length === 0 && <Text style={{ color: t.muted2, paddingVertical: 12 }}>This report has one section — it will export in full.</Text>}
+            {toggleSections.length === 0 && <Text style={{ color: t.muted2, paddingVertical: 12 }}>{tr('components.exportSections.oneSection')}</Text>}
             {toggleSections.map((sec, i) => (
               <View key={`${sec.heading}-${i}`} style={s.row}>
                 <Text style={s.rowLabel} numberOfLines={1}>{sec.heading}</Text>
@@ -89,11 +91,11 @@ export default function ExportSectionsModal({ visible, title, subject, reportTex
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
             <TouchableOpacity style={s.secondaryBtn} onPress={doPrint} disabled={busy}>
               <Ionicons name="print-outline" size={16} color={t.ink} />
-              <Text style={s.secondaryText}>Print</Text>
+              <Text style={s.secondaryText}>{tr('common.print')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={s.primaryBtn} onPress={doExport} disabled={busy}>
               {busy ? <ActivityIndicator color={t.ctaText} size="small" /> : (
-                <><Ionicons name="download-outline" size={16} color={t.ctaText} /><Text style={s.primaryText}>Export PDF</Text></>
+                <><Ionicons name="download-outline" size={16} color={t.ctaText} /><Text style={s.primaryText}>{tr('components.exportSections.exportPdf')}</Text></>
               )}
             </TouchableOpacity>
           </View>

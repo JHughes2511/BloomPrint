@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from './VoiceTextInput';
 import { GeneratingOverlay } from './GeneratingBasketball';
 import { useTheme } from '../theme/ThemeProvider';
@@ -24,6 +25,7 @@ export type ReportCorrectionsPanelProps = {
 
 export default function ReportCorrectionsPanel({ list, add, remove, apply, resultKey, onApplied }: ReportCorrectionsPanelProps) {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const s = makeStyles(t);
   const [corrections, setCorrections] = useState<any[]>([]);
   const [text, setText] = useState('');
@@ -40,13 +42,13 @@ export default function ReportCorrectionsPanel({ list, add, remove, apply, resul
       await add(text.trim());
       setText('');
       await reload();
-    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save correction'); }
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.reportCorrections.couldNotSaveCorrection')); }
     setBusy(false);
   };
 
   const delCorrection = async (id: number) => {
     try { await remove(id); await reload(); }
-    catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete'); }
+    catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.reportCorrections.couldNotDelete')); }
   };
 
   const applyCorrections = async () => {
@@ -56,7 +58,7 @@ export default function ReportCorrectionsPanel({ list, add, remove, apply, resul
       const res = await apply();
       await reload();
       onApplied?.(res?.[resultKey] ?? '');
-    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not apply corrections'); }
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.reportCorrections.couldNotApply')); }
     setApplying(false);
   };
 
@@ -65,12 +67,12 @@ export default function ReportCorrectionsPanel({ list, add, remove, apply, resul
   return (
     <View>
       <Text style={s.hint}>
-        Something wrong in the report? Note the correction, then Apply Corrections to rebuild it with your fixes.
+        {tr('components.reportCorrections.hint')}
       </Text>
 
       <VoiceTextInput
         style={s.input}
-        placeholder="e.g. The 3PT number is wrong — he was 8-of-13, not 12-of-13"
+        placeholder={tr('components.reportCorrections.placeholder')}
         placeholderTextColor={t.muted2}
         value={text}
         onChangeText={setText}
@@ -79,7 +81,7 @@ export default function ReportCorrectionsPanel({ list, add, remove, apply, resul
 
       <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, alignItems: 'stretch' }}>
         <TouchableOpacity style={[s.secondaryBtn, (!text.trim() || busy) && { opacity: 0.5 }]} onPress={addCorrection} disabled={!text.trim() || busy}>
-          <Text style={s.secondaryText} numberOfLines={1}>Add</Text>
+          <Text style={s.secondaryText} numberOfLines={1}>{tr('components.reportCorrections.add')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[s.primaryBtn, (applying || (pending.length === 0 && !text.trim())) && { opacity: 0.5 }]}
@@ -89,25 +91,25 @@ export default function ReportCorrectionsPanel({ list, add, remove, apply, resul
           {applying ? <ActivityIndicator color={t.ctaText} size="small" /> : (
             <>
               <Ionicons name="sparkles-outline" size={14} color={t.ctaText} />
-              <Text style={s.primaryText} numberOfLines={1}>Apply Corrections</Text>
+              <Text style={s.primaryText} numberOfLines={1}>{tr('components.reportCorrections.applyCorrections')}</Text>
             </>
           )}
         </TouchableOpacity>
       </View>
 
       <ScrollView style={{ maxHeight: 180, marginTop: 12 }}>
-        {corrections.length === 0 && <Text style={s.empty}>No corrections yet.</Text>}
+        {corrections.length === 0 && <Text style={s.empty}>{tr('components.reportCorrections.noCorrections')}</Text>}
         {corrections.map((c: any) => (
           <View key={`corr-${c.id}`} style={s.row}>
             <Text style={[s.rowText, c.applied && { color: t.muted2 }]}>{c.correction}</Text>
             {c.applied
-              ? <Text style={s.appliedTag}>applied</Text>
+              ? <Text style={s.appliedTag}>{tr('components.reportCorrections.applied')}</Text>
               : <TouchableOpacity onPress={() => delCorrection(c.id)}><Ionicons name="trash-outline" size={16} color={t.negative} /></TouchableOpacity>}
           </View>
         ))}
       </ScrollView>
 
-      <GeneratingOverlay visible={applying} label="Applying your corrections…" />
+      <GeneratingOverlay visible={applying} label={tr('components.reportCorrections.applying')} />
     </View>
   );
 }

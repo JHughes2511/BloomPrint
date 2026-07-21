@@ -4,6 +4,7 @@ import {
   Modal, Alert, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from './VoiceTextInput';
 import KeyboardAwareScrollView from './KeyboardAwareScrollView';
 import { staffSharingAPI } from '../api/client';
@@ -13,16 +14,6 @@ import { GeneratingOverlay } from './GeneratingBasketball';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
-
-const TYPE_LABEL: Record<string, string> = {
-  eval: 'Player Eval', game: 'Game Report', team_report: 'Team Report',
-  team_training: 'Team Report', training: 'Training Program', game_session: 'Scout Report',
-};
-// "Updated ___" for the toggle chip / label, per report type.
-const UPDATED_LABEL: Record<string, string> = {
-  eval: 'Updated Eval', game: 'Updated Game Report', team_report: 'Updated Team Report',
-  team_training: 'Updated Team Report', training: 'Updated Program', game_session: 'Updated Scout Report',
-};
 
 type BottomTab = 'correct' | 'comments' | 'notes';
 
@@ -35,8 +26,13 @@ export type SharedReportViewerProps = {
 
 export default function SharedReportViewer({ shared, visible, onClose, onChanged }: SharedReportViewerProps) {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const { coach } = useAuth();
   const styles = makeStyles(t);
+
+  // Per-report-type display labels, translated with an English fallback.
+  const typeLabelFor = (rt: string) => tr(`components.viewer.typeLabels.${rt}`, { defaultValue: rt });
+  const updatedLabelFor = (rt: string) => tr(`components.viewer.updatedLabels.${rt}`, { defaultValue: tr('components.viewer.updatedReportFallback') });
 
   const [item, setItem] = useState<any | null>(shared);
   const [bodyMode, setBodyMode] = useState<'original' | 'updated'>('original');
@@ -90,7 +86,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
       setComments(await staffSharingAPI.getComments(item.id));
       setCommentText('');
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not add comment');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.viewer.couldNotAddComment'));
     }
     setBusy(false);
   };
@@ -102,9 +98,9 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
       await staffSharingAPI.addComment(item.id, `[Coach Note] ${noteText.trim()}`, bodyMode);
       setComments(await staffSharingAPI.getComments(item.id));
       setNoteText('');
-      Alert.alert('Saved', 'Note saved.');
+      Alert.alert(tr('components.viewer.saved'), tr('components.viewer.noteSaved'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save note');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.viewer.couldNotSaveNote'));
     }
     setBusy(false);
   };
@@ -116,9 +112,9 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
       await staffSharingAPI.addCorrection(item.id, correctText.trim());
       setCorrections(await staffSharingAPI.listCorrections(item.id));
       setCorrectText('');
-      Alert.alert('Saved', 'Correction saved. Apply & Regenerate when ready.');
+      Alert.alert(tr('components.viewer.saved'), tr('components.viewer.correctionSaved'));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save correction');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.viewer.couldNotSaveCorrection'));
     }
     setBusy(false);
   };
@@ -131,20 +127,20 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
       setCorrections(await staffSharingAPI.listCorrections(item.id));
       setEditingId(null); setEditingText('');
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not edit correction');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.viewer.couldNotEditCorrection'));
     }
     setBusy(false);
   };
 
   const deleteCorrection = (id: number) => {
-    Alert.alert('Delete correction', 'Remove this correction?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: async () => {
+    Alert.alert(tr('components.viewer.deleteCorrectionTitle'), tr('components.viewer.deleteCorrectionMsg'), [
+      { text: tr('common.cancel'), style: 'cancel' },
+      { text: tr('common.delete'), style: 'destructive', onPress: async () => {
         try {
           await staffSharingAPI.deleteCorrection(id);
           setCorrections(await staffSharingAPI.listCorrections(item.id));
         } catch (e: any) {
-          Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete');
+          Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.viewer.couldNotDelete'));
         }
       } },
     ]);
@@ -159,9 +155,9 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
       setCorrectText('');
       setBodyMode('updated');
       onChanged?.();
-      Alert.alert('Updated', `Saved as your own ${UPDATED_LABEL[item.report_type] ?? 'Updated Report'}. It's now in your Recents.`);
+      Alert.alert(tr('components.viewer.updatedTitle'), tr('components.viewer.updatedSavedMsg', { label: updatedLabelFor(item.report_type) }));
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.viewer.couldNotRegenerate'));
     }
     setRegenerating(false);
   };
@@ -169,7 +165,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
   // Only the recipient sees their own updated version; the sharer sees the
   // original + comments/notes until the recipient approves a request.
   const hasUpdated = isRecipient && !!item.regenerated_text;
-  const updatedLabel = UPDATED_LABEL[item.report_type] ?? 'Updated Report';
+  const updatedLabel = updatedLabelFor(item.report_type);
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -178,8 +174,8 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
           {/* Header */}
           <View style={styles.header}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.title}>{item.subject_name || TYPE_LABEL[item.report_type] || 'Report'}</Text>
-              <Text style={styles.sub}>{TYPE_LABEL[item.report_type] ?? item.report_type} · from {item.sender_name}</Text>
+              <Text style={styles.title}>{item.subject_name || typeLabelFor(item.report_type) || tr('components.viewer.reportFallback')}</Text>
+              <Text style={styles.sub}>{tr('components.viewer.fromSender', { type: typeLabelFor(item.report_type), sender: item.sender_name })}</Text>
             </View>
             <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <Ionicons name="close" size={24} color={t.muted} />
@@ -189,7 +185,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
           {/* Body-version chips */}
           <View style={styles.chipRow}>
             <TouchableOpacity style={[styles.chip, bodyMode === 'original' && styles.chipActive]} onPress={() => setBodyMode('original')}>
-              <Text style={[styles.chipText, bodyMode === 'original' && styles.chipTextActive]}>Original</Text>
+              <Text style={[styles.chipText, bodyMode === 'original' && styles.chipTextActive]}>{tr('components.viewer.original')}</Text>
             </TouchableOpacity>
             {hasUpdated && (
               <TouchableOpacity style={[styles.chip, bodyMode === 'updated' && styles.chipActive]} onPress={() => setBodyMode('updated')}>
@@ -203,7 +199,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
             <KeyboardAwareScrollView contentContainerStyle={styles.bodyContent}>
               {bodyText
                 ? renderReport(bodyText, { heading: t.ink, body: t.inkSoft })
-                : <Text style={{ color: t.muted2 }}>No report content available.</Text>}
+                : <Text style={{ color: t.muted2 }}>{tr('components.viewer.noContent')}</Text>}
             </KeyboardAwareScrollView>
           </View>
 
@@ -213,15 +209,15 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
               {canRegen && (
                 <TouchableOpacity style={[styles.bottomTab, bottomTab === 'correct' && styles.bottomTabActive]} onPress={() => setBottomTab('correct')}>
                   <Text style={[styles.bottomTabText, bottomTab === 'correct' && styles.bottomTabTextActive]}>
-                    Corrections ({corrections.length})
+                    {tr('components.viewer.correctionsTab', { count: corrections.length })}
                   </Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity style={[styles.bottomTab, bottomTab === 'comments' && styles.bottomTabActive]} onPress={() => setBottomTab('comments')}>
-                <Text style={[styles.bottomTabText, bottomTab === 'comments' && styles.bottomTabTextActive]}>Comments ({comments.filter(c => !isNote(c) && underCurrent(c)).length})</Text>
+                <Text style={[styles.bottomTabText, bottomTab === 'comments' && styles.bottomTabTextActive]}>{tr('components.viewer.commentsTab', { count: comments.filter(c => !isNote(c) && underCurrent(c)).length })}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.bottomTab, bottomTab === 'notes' && styles.bottomTabActive]} onPress={() => setBottomTab('notes')}>
-                <Text style={[styles.bottomTabText, bottomTab === 'notes' && styles.bottomTabTextActive]}>Notes ({comments.filter(c => isNote(c) && underCurrent(c)).length})</Text>
+                <Text style={[styles.bottomTabText, bottomTab === 'notes' && styles.bottomTabTextActive]}>{tr('components.viewer.notesTab', { count: comments.filter(c => isNote(c) && underCurrent(c)).length })}</Text>
               </TouchableOpacity>
             </View>
 
@@ -251,7 +247,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                           <>
                             <View style={{ flex: 1 }}>
                               <Text style={[styles.corrText, c.applied && { color: t.muted2 }]}>{c.correction}</Text>
-                              {c.applied && <Text style={styles.corrApplied}>Applied</Text>}
+                              {c.applied && <Text style={styles.corrApplied}>{tr('components.viewer.applied')}</Text>}
                             </View>
                             {!c.applied && (
                               <>
@@ -271,7 +267,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                 )}
                 <VoiceTextInput
                   style={styles.input}
-                  placeholder="What should change? (saved to your correction list)"
+                  placeholder={tr('components.viewer.correctPlaceholder')}
                   placeholderTextColor={t.muted2}
                   value={correctText}
                   onChangeText={setCorrectText}
@@ -283,7 +279,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                     onPress={applyCorrection}
                     disabled={!correctText.trim() || busy}
                   >
-                    <Text style={styles.secondaryBtnText}>Save Corrections</Text>
+                    <Text style={styles.secondaryBtnText}>{tr('components.viewer.saveCorrections')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.primaryBtn, ((pendingCount === 0 && !correctText.trim()) || regenerating) && { opacity: 0.5 }]}
@@ -291,7 +287,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                     disabled={(pendingCount === 0 && !correctText.trim()) || regenerating}
                   >
                     <Ionicons name="sparkles-outline" size={14} color={t.ctaText} />
-                    <Text style={styles.primaryBtnText}>Apply & Regenerate</Text>
+                    <Text style={styles.primaryBtnText}>{tr('components.viewer.applyRegenerate')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -299,10 +295,10 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
 
             {bottomTab === 'comments' && (
               <View>
-                <Text style={styles.scopeHint}>Comments on the {bodyMode === 'updated' ? updatedLabel : 'Original'}</Text>
+                <Text style={styles.scopeHint}>{tr('components.viewer.commentsOn', { version: bodyMode === 'updated' ? updatedLabel : tr('components.viewer.original') })}</Text>
                 <ScrollView style={{ maxHeight: 120 }}>
                   {comments.filter(c => !isNote(c) && underCurrent(c)).length === 0 && (
-                    <Text style={styles.empty}>No comments on this version yet.</Text>
+                    <Text style={styles.empty}>{tr('components.viewer.noCommentsYet')}</Text>
                   )}
                   {comments.filter(c => !isNote(c) && underCurrent(c)).map((c: any) => (
                     <View key={c.id} style={styles.commentCard}>
@@ -314,7 +310,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                 <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
                   <VoiceTextInput
                     style={[styles.input, { flex: 1 }]}
-                    placeholder="Add a comment..."
+                    placeholder={tr('components.viewer.addCommentPlaceholder')}
                     placeholderTextColor={t.muted2}
                     value={commentText}
                     onChangeText={setCommentText}
@@ -329,10 +325,10 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
 
             {bottomTab === 'notes' && (
               <View>
-                <Text style={styles.scopeHint}>Notes on the {bodyMode === 'updated' ? updatedLabel : 'Original'}</Text>
+                <Text style={styles.scopeHint}>{tr('components.viewer.notesOn', { version: bodyMode === 'updated' ? updatedLabel : tr('components.viewer.original') })}</Text>
                 <ScrollView style={{ maxHeight: 100 }}>
                   {comments.filter(c => isNote(c) && underCurrent(c)).length === 0 && (
-                    <Text style={styles.empty}>No notes on this version yet.</Text>
+                    <Text style={styles.empty}>{tr('components.viewer.noNotesYet')}</Text>
                   )}
                   {comments.filter(c => isNote(c) && underCurrent(c)).map((c: any) => (
                     <View key={c.id} style={styles.commentCard}>
@@ -343,7 +339,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                 <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
                   <VoiceTextInput
                     style={[styles.input, { flex: 1 }]}
-                    placeholder="Add a private note..."
+                    placeholder={tr('components.viewer.addNotePlaceholder')}
                     placeholderTextColor={t.muted2}
                     value={noteText}
                     onChangeText={setNoteText}
@@ -357,7 +353,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
             )}
           </View>
 
-          <GeneratingOverlay visible={regenerating} label="Building your updated report…" />
+          <GeneratingOverlay visible={regenerating} label={tr('components.viewer.buildingUpdated')} />
         </View>
       </KeyboardAvoidingView>
     </Modal>

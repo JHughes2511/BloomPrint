@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -27,6 +28,7 @@ export default function CommentThread({
   accent?: string;
 }) {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const s = makeStyles(t);
   const acc = accent ?? t.accent;
   const [replyTo, setReplyTo] = useState<number | null>(null);
@@ -64,18 +66,18 @@ export default function CommentThread({
         <View key={c.id} style={[depth > 0 && { marginLeft: 14, borderLeftWidth: 2, borderLeftColor: t.line, paddingLeft: 10 }]}>
           <View style={s.card}>
             <View style={s.head}>
-              <Text style={[s.author, { color: acc }]}>{c.author_name || 'Unknown'}</Text>
+              <Text style={[s.author, { color: acc }]}>{c.author_name || tr('components.commentThread.unknown')}</Text>
               <Text style={s.date}>{new Date(c.created_at).toLocaleDateString()}</Text>
             </View>
             <Text style={s.text}>{c.text}</Text>
             <View style={s.actionsRow}>
               <TouchableOpacity onPress={() => { setReplyTo(replyTo === c.id ? null : c.id); setReplyText(''); }} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
-                <Text style={[s.replyLink, { color: acc }]}>{replyTo === c.id ? 'Cancel' : 'Reply'}</Text>
+                <Text style={[s.replyLink, { color: acc }]}>{replyTo === c.id ? tr('common.cancel') : tr('components.commentThread.reply')}</Text>
               </TouchableOpacity>
               {childCount > 0 && (
                 <TouchableOpacity onPress={() => setCollapsed(prev => ({ ...prev, [c.id]: !prev[c.id] }))} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
                   <Text style={[s.replyLink, { color: t.muted }]}>
-                    {isCollapsed ? `Show ${childCount} ${childCount === 1 ? 'reply' : 'replies'}` : 'Hide replies'}
+                    {isCollapsed ? tr('components.commentThread.showReplies', { count: childCount }) : tr('components.commentThread.hideReplies')}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -85,7 +87,7 @@ export default function CommentThread({
             <View style={s.replyRow}>
               <TextInput
                 style={s.input}
-                placeholder={`Reply to ${c.author_name || 'comment'}…`}
+                placeholder={tr('components.commentThread.replyPlaceholder', { name: c.author_name || tr('components.commentThread.commentFallback') })}
                 placeholderTextColor={t.muted2}
                 value={replyText}
                 onChangeText={setReplyText}

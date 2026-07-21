@@ -4,6 +4,7 @@ import {
   Modal, Alert, KeyboardAvoidingView, Platform, Switch, Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from './VoiceTextInput';
 import { playerAPI, teamsAPI, staffSharingAPI, teamStaffAPI } from '../api/client';
 import { splitReportSections, joinReportSections } from '../utils/mdToHtml';
@@ -31,6 +32,7 @@ export default function ShareModal({
   subjectPlayerId, subjectPlayerName,
 }: ShareModalProps) {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const styles = makeStyles(t);
   const [target, setTarget] = useState<Target>('player');
   const [search, setSearch] = useState('');
@@ -130,7 +132,7 @@ export default function ShareModal({
             report_type: reportType, report_id: reportId, team_id: selected.id,
             allow_regenerate: allowRegen, frozen_text: frozen,
           });
-          Alert.alert('Shared!', `Report shared with ${res.shared_count ?? 0} staff member(s) in ${res.team_name ?? selected.name}.`);
+          Alert.alert(tr('components.shareModal.sharedTitle'), tr('components.shareModal.sharedTeamStaff', { count: res.shared_count ?? 0, team: res.team_name ?? selected.name }));
         } else {
           const res = await staffSharingAPI.shareGroup({
             report_type: reportType, report_id: reportId, kind: selected.kind,
@@ -138,7 +140,7 @@ export default function ShareModal({
             program_name: selected.program_name ?? undefined,
             allow_regenerate: allowRegen, frozen_text: frozen,
           });
-          Alert.alert('Shared!', `Report shared with ${res.shared_count ?? 1} staff member(s).`);
+          Alert.alert(tr('components.shareModal.sharedTitle'), tr('components.shareModal.sharedStaff', { count: res.shared_count ?? 1 }));
         }
       } else if (target === 'team') {
         // Whole team: players AND the team's staff coaches.
@@ -154,7 +156,7 @@ export default function ShareModal({
           staffCount = staffRes.shared_count ?? 0;
         } catch {}
         const p = playersRes.shared_count ?? 0;
-        Alert.alert('Shared!', `Report shared with ${p} player(s) and ${staffCount} staff on ${selected.name}.`);
+        Alert.alert(tr('components.shareModal.sharedTitle'), tr('components.shareModal.sharedTeamMsg', { players: p, staff: staffCount, team: selected.name }));
       } else {
         // Individual player (consent flow).
         const res = await playerAPI.shareTeamReport({
@@ -166,23 +168,23 @@ export default function ShareModal({
         });
         if (res.status === 'pending_approval') {
           setSending(false);
-          Alert.alert('Pending approval',
-            `This report is about ${res.subject_name}. We sent ${res.subject_name} a request to approve sharing it with ${res.recipient_name}. It will send automatically once they approve.`);
+          Alert.alert(tr('components.shareModal.pendingApprovalTitle'),
+            tr('components.shareModal.pendingApprovalMsg', { subject: res.subject_name, recipient: res.recipient_name }));
           onClose();
           return;
         }
         if (res.status === 'needs_override') {
           setSending(false);
-          Alert.alert('No account to approve',
-            `${res.subject_name} doesn't have an account to approve this yet. Their report is not about ${res.recipient_name}. Send it to ${res.recipient_name} anyway?`,
-            [{ text: 'Cancel', style: 'cancel' }, { text: 'Send anyway', style: 'destructive', onPress: () => doSend(true) }]);
+          Alert.alert(tr('components.shareModal.noAccountTitle'),
+            tr('components.shareModal.noAccountMsg', { subject: res.subject_name, recipient: res.recipient_name }),
+            [{ text: tr('common.cancel'), style: 'cancel' }, { text: tr('components.shareModal.sendAnyway'), style: 'destructive', onPress: () => doSend(true) }]);
           return;
         }
-        Alert.alert('Shared!', `Report shared with ${selected.name ?? 'player'}.`);
+        Alert.alert(tr('components.shareModal.sharedTitle'), tr('components.shareModal.sharedPlayer', { name: selected.name ?? tr('components.shareModal.playerLower') }));
       }
       onClose();
     } catch (e: any) {
-      Alert.alert('Error', e?.response?.data?.detail ?? 'Could not share report');
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.shareModal.couldNotShare'));
     } finally {
       setSending(false);
     }
@@ -191,7 +193,7 @@ export default function ShareModal({
   const targetLabel = (s: any): string => {
     if (target === 'all_staff') return s.label;
     if (target === 'team') return s.name;
-    return s.name ?? s.linked_player_name ?? 'Player';
+    return s.name ?? s.linked_player_name ?? tr('components.shareModal.tabPlayer');
   };
 
   return (
@@ -203,7 +205,7 @@ export default function ShareModal({
         <View style={styles.box}>
           <View style={styles.header}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.headerTitle}>Share Report</Text>
+              <Text style={styles.headerTitle}>{tr('components.shareModal.shareReport')}</Text>
               {!!title && <Text style={styles.headerSub} numberOfLines={1}>{title}</Text>}
             </View>
             <TouchableOpacity onPress={onClose}>
@@ -213,7 +215,7 @@ export default function ShareModal({
 
           {/* Target selector */}
           <View style={styles.targetRow}>
-            {([['player', 'Player'], ['team', 'Team'], ['all_staff', 'Staff']] as const).map(([key, label]) => (
+            {([['player', tr('components.shareModal.tabPlayer')], ['team', tr('components.shareModal.tabTeam')], ['all_staff', tr('components.shareModal.tabStaff')]] as const).map(([key, label]) => (
               <TouchableOpacity
                 key={key}
                 style={[styles.targetChip, target === key && styles.targetChipActive]}
@@ -228,13 +230,13 @@ export default function ShareModal({
             {/* Whole Team — pick from your teams */}
             {target === 'team' ? (
               <>
-                <Text style={styles.label}>Select a Team</Text>
-                <Text style={styles.hint}>Sends to the team's players and its staff coaches.</Text>
+                <Text style={styles.label}>{tr('components.shareModal.selectTeam')}</Text>
+                <Text style={styles.hint}>{tr('components.shareModal.selectTeamHint')}</Text>
                 {/* Top-level teams I own OR am a staff member of (sub-teams live
                     under the Staff tab). Searchable by name. */}
                 <VoiceTextInput
                   style={[styles.input, { marginBottom: 8 }]}
-                  placeholder="Search a team you're on..."
+                  placeholder={tr('components.shareModal.searchTeamPlaceholder')}
                   placeholderTextColor={t.muted2}
                   value={search}
                   onChangeText={setSearch}
@@ -245,7 +247,7 @@ export default function ShareModal({
                     .filter((tm: any) => !tm.parent_team_id)
                     .filter((tm: any) => !q || (tm.name ?? '').toLowerCase().includes(q));
                   if (topTeams.length === 0) {
-                    return <Text style={styles.empty}>{q ? 'No teams match.' : "You're not on any teams yet."}</Text>;
+                    return <Text style={styles.empty}>{q ? tr('components.shareModal.noTeamsMatch') : tr('components.shareModal.notOnTeams')}</Text>;
                   }
                   return topTeams.map((tm: any) => (
                     <TouchableOpacity
@@ -255,7 +257,7 @@ export default function ShareModal({
                     >
                       <View style={{ flex: 1 }}>
                         <Text style={styles.rowTitle}>{tm.name}</Text>
-                        {tm.is_owner === false && <Text style={styles.rowSub}>Staff member</Text>}
+                        {tm.is_owner === false && <Text style={styles.rowSub}>{tr('components.shareModal.staffMember')}</Text>}
                       </View>
                       {selected?.id === tm.id && !selected?.__group && <Ionicons name="checkmark-circle" size={18} color={t.accent} />}
                     </TouchableOpacity>
@@ -268,7 +270,7 @@ export default function ShareModal({
                 {target === 'all_staff' && (
                   <>
                     <View style={styles.toggleRow}>
-                      <Text style={styles.toggleLabel}>Allow recipient to regenerate</Text>
+                      <Text style={styles.toggleLabel}>{tr('components.shareModal.allowRegenerate')}</Text>
                       <Switch
                         value={allowRegen}
                         onValueChange={setAllowRegen}
@@ -278,16 +280,15 @@ export default function ShareModal({
                     </View>
                     <Text style={styles.hint}>
                       {allowRegen
-                        ? 'Recipient can regenerate it — only the sections you include below are shared.'
-                        : 'Sends a snapshot — only the sections you include below are shared.'}
+                        ? tr('components.shareModal.regenerateOnHint')
+                        : tr('components.shareModal.regenerateOffHint')}
                     </Text>
                   </>
                 )}
                 {/* Consent note for individual player reports */}
                 {target === 'player' && !!subjectPlayerName && (
                   <Text style={styles.hint}>
-                    This report is about {subjectPlayerName}. Sending it to {subjectPlayerName} is instant;
-                    sending to a different player needs {subjectPlayerName}'s approval first.
+                    {tr('components.shareModal.consentHint', { name: subjectPlayerName })}
                   </Text>
                 )}
                 {/* Player or Staff — search */}
@@ -295,8 +296,8 @@ export default function ShareModal({
                   <VoiceTextInput
                     style={[styles.input, { flex: 1 }]}
                     placeholder={target === 'all_staff'
-                      ? 'Search coach, team, or program name...'
-                      : 'Search player name...'}
+                      ? tr('components.shareModal.searchStaffPlaceholder')
+                      : tr('components.shareModal.searchPlayerPlaceholder')}
                     placeholderTextColor={t.muted2}
                     value={search}
                     onChangeText={setSearch}
@@ -307,7 +308,7 @@ export default function ShareModal({
                 </View>
                 {target === 'all_staff' && (
                   <Text style={styles.hint}>
-                    Search a team or program name to reach every connected staff member at once.
+                    {tr('components.shareModal.staffSearchHint')}
                   </Text>
                 )}
                 {results.map((r: any, i: number) => {
@@ -350,7 +351,7 @@ export default function ShareModal({
                         >
                           <View style={{ flex: 1 }}>
                             <Text style={styles.rowTitle}>{g.name}</Text>
-                            <Text style={styles.rowSub}>{g.member_count ?? 1} staff{g.parent_team_id ? ' · sub-team' : ''}</Text>
+                            <Text style={styles.rowSub}>{g.parent_team_id ? tr('components.shareModal.staffCountSubTeam', { count: g.member_count ?? 1 }) : tr('components.shareModal.staffCount', { count: g.member_count ?? 1 })}</Text>
                           </View>
                           {sel && <Ionicons name="checkmark-circle" size={18} color={t.accent} />}
                         </TouchableOpacity>
@@ -360,7 +361,7 @@ export default function ShareModal({
                   };
                   return (
                     <>
-                      <Text style={[styles.label, { marginTop: 14 }]}>My Groups — staff only</Text>
+                      <Text style={[styles.label, { marginTop: 14 }]}>{tr('components.shareModal.myGroupsStaffOnly')}</Text>
                       {roots.map((r: any) => renderNode(r, 0))}
                     </>
                   );
@@ -371,7 +372,7 @@ export default function ShareModal({
             {/* Section toggles — available on every target (frozen filtering) */}
             {showSectionToggles && (
               <>
-                <Text style={[styles.label, { marginTop: 8 }]}>Include Sections</Text>
+                <Text style={[styles.label, { marginTop: 8 }]}>{tr('components.shareModal.includeSections')}</Text>
                 {toggleSections.map((sec, i) => (
                   <View key={`${sec.heading}-${i}`} style={styles.toggleRow}>
                     <Text style={[styles.toggleLabel, { flex: 1, marginRight: 8 }]} numberOfLines={1}>{sec.heading}</Text>
@@ -389,14 +390,14 @@ export default function ShareModal({
 
           <View style={styles.footer}>
             <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={styles.cancelText}>{tr('common.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.sendBtn, { opacity: canSend() ? 1 : 0.4 }]}
               onPress={() => doSend()}
               disabled={sending || !canSend()}
             >
-              {sending ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.sendText}>Share</Text>}
+              {sending ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.sendText}>{tr('common.share')}</Text>}
             </TouchableOpacity>
           </View>
         </View>

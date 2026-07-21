@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { TouchableOpacity, Text, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -38,6 +39,7 @@ export default function GoogleSignInButton(props: Props) {
 
 function GoogleReady({ onIdToken, busy, color }: Props) {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const s = makeStyles(t);
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     iosClientId: GOOGLE_CLIENT_IDS.ios,
@@ -49,9 +51,9 @@ function GoogleReady({ onIdToken, busy, color }: Props) {
     if (response?.type === 'success') {
       const idToken = response.params?.id_token ?? response.authentication?.idToken;
       if (idToken) onIdToken(idToken);
-      else Alert.alert('Google sign-in', 'No token returned. Please try again.');
+      else Alert.alert(tr('components.googleSignIn.signInTitle'), tr('components.googleSignIn.noTokenReturned'));
     } else if (response?.type === 'error') {
-      Alert.alert('Google sign-in', 'Something went wrong signing in with Google.');
+      Alert.alert(tr('components.googleSignIn.signInTitle'), tr('components.googleSignIn.somethingWentWrong'));
     }
   }, [response]);
 
@@ -65,7 +67,7 @@ function GoogleReady({ onIdToken, busy, color }: Props) {
         ? <ActivityIndicator color={color ?? t.ink} />
         : <>
             <Ionicons name="logo-google" size={18} color={color ?? t.ink} />
-            <Text style={[s.text, { color: t.ink }]}>Continue with Google</Text>
+            <Text style={[s.text, { color: t.ink }]}>{tr('components.googleSignIn.continueWithGoogle')}</Text>
           </>}
     </TouchableOpacity>
   );
@@ -73,17 +75,18 @@ function GoogleReady({ onIdToken, busy, color }: Props) {
 
 function GoogleDisabled({ color }: Props) {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const s = makeStyles(t);
   return (
     <TouchableOpacity
       style={[s.btn, { borderColor: color ?? t.line, opacity: 0.9 }]}
       onPress={() => Alert.alert(
-        'Continue with Google',
-        'Google sign-in will be enabled when the app launches. For now, please use email and password.',
+        tr('components.googleSignIn.continueWithGoogle'),
+        tr('components.googleSignIn.disabledMsg'),
       )}
     >
       <Ionicons name="logo-google" size={18} color={color ?? t.muted} />
-      <Text style={[s.text, { color: t.muted }]}>Continue with Google</Text>
+      <Text style={[s.text, { color: t.muted }]}>{tr('components.googleSignIn.continueWithGoogle')}</Text>
     </TouchableOpacity>
   );
 }

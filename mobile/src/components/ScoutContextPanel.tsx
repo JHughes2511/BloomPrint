@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from './VoiceTextInput';
 import { gameEvalAPI } from '../api/client';
 import { GeneratingOverlay } from './GeneratingBasketball';
@@ -24,6 +25,7 @@ export type ScoutContextPanelProps = {
 
 export default function ScoutContextPanel({ gameId, opponentName, onRegenerated, onBack }: ScoutContextPanelProps) {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const s = makeStyles(t);
   const [notes, setNotes] = useState<any[]>([]);       // opponent notes (remembered)
   const [corrections, setCorrections] = useState<any[]>([]); // game corrections (this report)
@@ -48,18 +50,18 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
       else await gameEvalAPI.addScoutingCorrection(gameId, text.trim());
       setText('');
       await reload();
-      Alert.alert('Saved', 'Context saved. Apply & Regenerate when ready.');
-    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save'); }
+      Alert.alert(tr('components.scoutContext.saved'), tr('components.scoutContext.contextSaved'));
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.scoutContext.couldNotSave')); }
     setBusy(false);
   };
 
   const delNote = async (id: number) => {
     try { await gameEvalAPI.deleteOpponentNote(id); await reload(); }
-    catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete'); }
+    catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.scoutContext.couldNotDelete')); }
   };
   const delCorrection = async (id: number) => {
     try { await gameEvalAPI.deleteScoutingCorrection(id); await reload(); }
-    catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete'); }
+    catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.scoutContext.couldNotDelete')); }
   };
 
   const applyRegen = async () => {
@@ -73,19 +75,19 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
       const res = await gameEvalAPI.applyScoutingCorrections(gameId);
       await reload();
       onRegenerated?.(res.ai_scouting_report ?? '');
-    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not regenerate'); }
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.scoutContext.couldNotRegenerate')); }
     setApplying(false);
   };
 
   return (
     <View>
       <Text style={s.hint}>
-        Add context the box score can't capture — schemes, personnel, injuries, tendencies. Apply & Regenerate rebuilds the report from the stats plus everything here.
+        {tr('components.scoutContext.hint')}
       </Text>
 
       <VoiceTextInput
         style={s.input}
-        placeholder="Add context or an adjustment..."
+        placeholder={tr('components.scoutContext.contextPlaceholder')}
         placeholderTextColor={t.muted2}
         value={text}
         onChangeText={setText}
@@ -94,8 +96,8 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
       {!!opponentName && (
         <View style={s.rememberRow}>
           <View style={{ flex: 1 }}>
-            <Text style={s.rememberLabel}>Remember for {opponentName}</Text>
-            <Text style={s.rememberSub}>{remember ? 'Kept for every future scout of this opponent' : 'Applies to this report only'}</Text>
+            <Text style={s.rememberLabel}>{tr('components.scoutContext.rememberFor', { opponent: opponentName })}</Text>
+            <Text style={s.rememberSub}>{remember ? tr('components.scoutContext.rememberOn') : tr('components.scoutContext.rememberOff')}</Text>
           </View>
           <Switch value={remember} onValueChange={setRemember} trackColor={{ false: t.line, true: t.accent }} thumbColor="#fff" />
         </View>
@@ -104,17 +106,17 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
       <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, alignItems: 'stretch' }}>
         {onBack && (
           <TouchableOpacity style={s.backBtn} onPress={onBack}>
-            <Text style={s.backText} numberOfLines={1}>Back</Text>
+            <Text style={s.backText} numberOfLines={1}>{tr('common.back')}</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity style={[s.secondaryBtn, (!text.trim() || busy) && { opacity: 0.5 }]} onPress={add} disabled={!text.trim() || busy}>
-          <Text style={s.secondaryText} numberOfLines={1}>Save</Text>
+          <Text style={s.secondaryText} numberOfLines={1}>{tr('common.save')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[s.primaryBtn, applying && { opacity: 0.6 }]} onPress={applyRegen} disabled={applying}>
           {applying ? <ActivityIndicator color={t.ctaText} size="small" /> : (
             <>
               <Ionicons name="sparkles-outline" size={14} color={t.ctaText} />
-              <Text style={s.primaryText} numberOfLines={1}>Apply & Regenerate</Text>
+              <Text style={s.primaryText} numberOfLines={1}>{tr('components.scoutContext.applyRegenerate')}</Text>
             </>
           )}
         </TouchableOpacity>
@@ -123,8 +125,8 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
       <ScrollView style={{ maxHeight: 200, marginTop: 12 }}>
         {!!opponentName && (
           <>
-            <Text style={s.section}>REMEMBERED ABOUT {String(opponentName).toUpperCase()}</Text>
-            {notes.length === 0 && <Text style={s.empty}>None yet.</Text>}
+            <Text style={s.section}>{tr('components.scoutContext.rememberedAbout', { opponent: String(opponentName).toUpperCase() })}</Text>
+            {notes.length === 0 && <Text style={s.empty}>{tr('components.scoutContext.noneYet')}</Text>}
             {notes.map((n: any) => (
               <View key={`note-${n.id}`} style={s.row}>
                 <Text style={s.rowText}>{n.note_text ?? n.text}</Text>
@@ -133,8 +135,8 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
             ))}
           </>
         )}
-        <Text style={[s.section, { marginTop: 10 }]}>THIS REPORT</Text>
-        {corrections.length === 0 && <Text style={s.empty}>None yet.</Text>}
+        <Text style={[s.section, { marginTop: 10 }]}>{tr('components.scoutContext.thisReport')}</Text>
+        {corrections.length === 0 && <Text style={s.empty}>{tr('components.scoutContext.noneYet')}</Text>}
         {corrections.map((c: any) => (
           <View key={`corr-${c.id}`} style={s.row}>
             <Text style={[s.rowText, c.applied && { color: t.muted2 }]}>{c.correction}</Text>
@@ -143,7 +145,7 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
         ))}
       </ScrollView>
 
-      <GeneratingOverlay visible={applying} label="Rebuilding the scouting report…" />
+      <GeneratingOverlay visible={applying} label={tr('components.scoutContext.rebuilding')} />
     </View>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import VoiceTextInput from './VoiceTextInput';
 import { gameEvalAPI } from '../api/client';
 import { GeneratingOverlay } from './GeneratingBasketball';
@@ -27,6 +28,7 @@ export type GameReportPanelProps = {
 
 export default function GameReportPanel({ gameId, opponentName, hasReport, onRegenerated }: GameReportPanelProps) {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const s = makeStyles(t);
   const [notes, setNotes] = useState<any[]>([]);
   const [corrections, setCorrections] = useState<any[]>([]);
@@ -51,18 +53,18 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
       else await gameEvalAPI.addGameReportCorrection(gameId, text.trim());
       setText('');
       await reload();
-      Alert.alert('Saved', 'Context saved. Generate / Apply & Regenerate when ready.');
-    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not save'); }
+      Alert.alert(tr('components.gameReport.saved'), tr('components.gameReport.contextSaved'));
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.gameReport.couldNotSave')); }
     setBusy(false);
   };
 
   const delNote = async (id: number) => {
     try { await gameEvalAPI.deleteOpponentNote(id); await reload(); }
-    catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete'); }
+    catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.gameReport.couldNotDelete')); }
   };
   const delCorrection = async (id: number) => {
     try { await gameEvalAPI.deleteGameReportCorrection(id); await reload(); }
-    catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not delete'); }
+    catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.gameReport.couldNotDelete')); }
   };
 
   const applyRegen = async () => {
@@ -76,20 +78,19 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
       const res = await gameEvalAPI.applyGameReportCorrections(gameId);
       await reload();
       onRegenerated?.(res.ai_game_report ?? '');
-    } catch (e: any) { Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate'); }
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.gameReport.couldNotGenerate')); }
     setApplying(false);
   };
 
   return (
     <View>
       <Text style={s.hint}>
-        Add context the box score can't capture — schemes, personnel, injuries, what actually happened. It rebuilds
-        the game report from the stats plus everything here, and feeds future game packets.
+        {tr('components.gameReport.hint')}
       </Text>
 
       <VoiceTextInput
         style={s.input}
-        placeholder="Add context or an adjustment..."
+        placeholder={tr('components.gameReport.contextPlaceholder')}
         placeholderTextColor={t.muted2}
         value={text}
         onChangeText={setText}
@@ -98,8 +99,8 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
       {!!opponentName && (
         <View style={s.rememberRow}>
           <View style={{ flex: 1 }}>
-            <Text style={s.rememberLabel}>Remember for {opponentName}</Text>
-            <Text style={s.rememberSub}>{remember ? 'Kept for every future report/packet on this opponent' : 'Applies to this report only'}</Text>
+            <Text style={s.rememberLabel}>{tr('components.gameReport.rememberFor', { opponent: opponentName })}</Text>
+            <Text style={s.rememberSub}>{remember ? tr('components.gameReport.rememberOn') : tr('components.gameReport.rememberOff')}</Text>
           </View>
           <Switch value={remember} onValueChange={setRemember} trackColor={{ false: t.line, true: t.accent }} thumbColor="#fff" />
         </View>
@@ -107,13 +108,13 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
 
       <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, alignItems: 'stretch' }}>
         <TouchableOpacity style={[s.secondaryBtn, (!text.trim() || busy) && { opacity: 0.5 }]} onPress={add} disabled={!text.trim() || busy}>
-          <Text style={s.secondaryText} numberOfLines={1}>Save</Text>
+          <Text style={s.secondaryText} numberOfLines={1}>{tr('common.save')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[s.primaryBtn, applying && { opacity: 0.6 }]} onPress={applyRegen} disabled={applying}>
           {applying ? <ActivityIndicator color={t.ctaText} size="small" /> : (
             <>
               <Ionicons name="sparkles-outline" size={14} color={t.ctaText} />
-              <Text style={s.primaryText} numberOfLines={1}>{hasReport ? 'Apply & Regenerate' : 'Generate Game Report'}</Text>
+              <Text style={s.primaryText} numberOfLines={1}>{hasReport ? tr('components.gameReport.applyRegenerate') : tr('components.gameReport.generateGameReport')}</Text>
             </>
           )}
         </TouchableOpacity>
@@ -122,8 +123,8 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
       <ScrollView style={{ maxHeight: 200, marginTop: 12 }}>
         {!!opponentName && (
           <>
-            <Text style={s.section}>REMEMBERED ABOUT {String(opponentName).toUpperCase()}</Text>
-            {notes.length === 0 && <Text style={s.empty}>None yet.</Text>}
+            <Text style={s.section}>{tr('components.gameReport.rememberedAbout', { opponent: String(opponentName).toUpperCase() })}</Text>
+            {notes.length === 0 && <Text style={s.empty}>{tr('components.gameReport.noneYet')}</Text>}
             {notes.map((n: any) => (
               <View key={`note-${n.id}`} style={s.row}>
                 <Text style={s.rowText}>{n.note_text ?? n.text}</Text>
@@ -132,8 +133,8 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
             ))}
           </>
         )}
-        <Text style={[s.section, { marginTop: 10 }]}>THIS REPORT</Text>
-        {corrections.length === 0 && <Text style={s.empty}>None yet.</Text>}
+        <Text style={[s.section, { marginTop: 10 }]}>{tr('components.gameReport.thisReport')}</Text>
+        {corrections.length === 0 && <Text style={s.empty}>{tr('components.gameReport.noneYet')}</Text>}
         {corrections.map((c: any) => (
           <View key={`corr-${c.id}`} style={s.row}>
             <Text style={[s.rowText, c.applied && { color: t.muted2 }]}>{c.correction}</Text>
@@ -142,7 +143,7 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
         ))}
       </ScrollView>
 
-      <GeneratingOverlay visible={applying} label="Building the full game report…" />
+      <GeneratingOverlay visible={applying} label={tr('components.gameReport.building')} />
     </View>
   );
 }
