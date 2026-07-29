@@ -251,6 +251,15 @@
       "noTokenReturned": "कोई टोकन नहीं मिला। कृपया दोबारा कोशिश करें।",
       "somethingWentWrong": "Google से साइन इन करते समय कुछ गलत हो गया।",
       "disabledMsg": "ऐप लॉन्च होने पर Google साइन-इन चालू कर दिया जाएगा। फ़िलहाल कृपया ईमेल और पासवर्ड का उपयोग करें।"
+    },
+    "voiceInput": {
+      "permissionTitle": "अनुमति आवश्यक",
+      "permissionMsg": "वॉइस इनपुट के लिए माइक्रोफ़ोन एक्सेस ज़रूरी है।",
+      "recordFailed": "रिकॉर्डिंग शुरू नहीं हो सकी।"
+    },
+    "country": {
+      "selectCountry": "देश चुनें",
+      "searchCountries": "देश खोजें..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "सभी प्रकार",
     "selectAllShown": "दिखाए गए सभी चुनें ({{count}})",
     "grade": "ग्रेड",
-    "synthesizingOverlay": "सारांश तैयार हो रहा है…"
+    "synthesizingOverlay": "सारांश तैयार हो रहा है…",
+    "generateTraining": "ट्रेनिंग प्रोग्राम बनाएँ",
+    "regenTrainingFeedback": "फ़ीडबैक के साथ ट्रेनिंग दोबारा बनाएँ",
+    "latest": "नवीनतम",
+    "playerProfile": "खिलाड़ी प्रोफ़ाइल",
+    "checklistFeedback": "खिलाड़ी की चेकलिस्ट वर्ज़न में बदलाव के लिए फ़ीडबैक...",
+    "schoolPlaceholder": "स्कूल का नाम",
+    "cityPlaceholder": "शहर",
+    "statePlaceholder": "राज्य",
+    "countryPlaceholder": "देश",
+    "allowRegenerate": "प्राप्तकर्ता को दोबारा बनाने दें",
+    "searchCoachPlaceholder": "कोच/प्रोग्राम का नाम खोजें...",
+    "summarizeHistoryTitle": "इतिहास का सारांश बनाएँ"
   },
   "training": {
     "couldNotOpenFilePicker": "फ़ाइल पिकर नहीं खुल सका।",
@@ -1359,7 +1380,9 @@
     "noReportYet": "अभी कोई रिपोर्ट नहीं बनी है।",
     "noScoutingReportYet": "इस मैच के लिए अभी कोई AI स्काउटिंग रिपोर्ट नहीं बनी है।",
     "addCommentPlaceholder": "टिप्पणी जोड़ें...",
-    "you": "आप"
+    "you": "आप",
+    "subTeamPlaceholder": "उप-टीम का नाम (जैसे Offense, Guards)...",
+    "coachNameOrEmail": "कोच का नाम या ईमेल..."
   },
   "conversation": {
     "title": "बातचीत",
@@ -1812,7 +1835,18 @@
     "savedReports": "सहेजी गई रिपोर्ट ({{count}})",
     "updated": "{{date}} को अपडेट हुई",
     "generatedReport": "बनी हुई रिपोर्ट",
-    "exportPrint": "एक्सपोर्ट / प्रिंट"
+    "exportPrint": "एक्सपोर्ट / प्रिंट",
+    "makeCorrection": "सुधार करें",
+    "saveForLater": "बाद के लिए सहेजें",
+    "applied": "लागू",
+    "pending": "लंबित",
+    "correctThisAnalysis": "इस विश्लेषण को सुधारें",
+    "filmCorrectionPlaceholder": "इस फ़िल्म विश्लेषण में क्या अपडेट करना है?",
+    "sendReport": "रिपोर्ट भेजें",
+    "player": "खिलाड़ी",
+    "staff": "स्टाफ़",
+    "allowRegenerate": "प्राप्तकर्ता को दोबारा बनाने दें",
+    "typeNameToSearch": "खोजने के लिए नाम टाइप करें..."
   },
   "teamGrade": {
     "views": {

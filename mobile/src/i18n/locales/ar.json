@@ -251,6 +251,15 @@
       "noTokenReturned": "لم يتم إرجاع أي رمز. يرجى المحاولة مرة أخرى.",
       "somethingWentWrong": "حدث خطأ أثناء تسجيل الدخول عبر Google.",
       "disabledMsg": "سيُفعَّل تسجيل الدخول عبر Google عند إطلاق التطبيق. في الوقت الحالي، يرجى استخدام البريد الإلكتروني وكلمة المرور."
+    },
+    "voiceInput": {
+      "permissionTitle": "الإذن مطلوب",
+      "permissionMsg": "يلزم الوصول إلى الميكروفون للإدخال الصوتي.",
+      "recordFailed": "تعذّر بدء التسجيل."
+    },
+    "country": {
+      "selectCountry": "اختر الدولة",
+      "searchCountries": "البحث عن الدول..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "كل الأنواع",
     "selectAllShown": "تحديد كل المعروض ({{count}})",
     "grade": "الدرجة",
-    "synthesizingOverlay": "جارٍ تركيب الملخص…"
+    "synthesizingOverlay": "جارٍ تركيب الملخص…",
+    "generateTraining": "إنشاء برنامج تدريبي",
+    "regenTrainingFeedback": "إعادة إنشاء التدريب مع الملاحظات",
+    "latest": "الأحدث",
+    "playerProfile": "ملف اللاعب",
+    "checklistFeedback": "ملاحظات لتعديل نسخة قائمة اللاعب...",
+    "schoolPlaceholder": "اسم المدرسة",
+    "cityPlaceholder": "المدينة",
+    "statePlaceholder": "الولاية",
+    "countryPlaceholder": "الدولة",
+    "allowRegenerate": "السماح للمستلم بإعادة الإنشاء",
+    "searchCoachPlaceholder": "البحث باسم المدرب/البرنامج...",
+    "summarizeHistoryTitle": "تلخيص السجل"
   },
   "training": {
     "couldNotOpenFilePicker": "تعذّر فتح منتقي الملفات.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "لم يُنشأ أي تقرير بعد.",
     "noScoutingReportYet": "لم يُنشأ تقرير استكشاف بالذكاء الاصطناعي لهذه المباراة بعد.",
     "addCommentPlaceholder": "أضف تعليقًا...",
-    "you": "أنت"
+    "you": "أنت",
+    "subTeamPlaceholder": "اسم المجموعة الفرعية (مثل الهجوم، صانعو اللعب)...",
+    "coachNameOrEmail": "اسم المدرب أو بريده الإلكتروني..."
   },
   "conversation": {
     "title": "محادثة",
@@ -1812,7 +1835,18 @@
     "savedReports": "التقارير المحفوظة ({{count}})",
     "updated": "حُدِّث {{date}}",
     "generatedReport": "التقرير المُنشأ",
-    "exportPrint": "تصدير / طباعة"
+    "exportPrint": "تصدير / طباعة",
+    "makeCorrection": "إجراء تصحيح",
+    "saveForLater": "الحفظ لوقت لاحق",
+    "applied": "مُطبَّق",
+    "pending": "قيد الانتظار",
+    "correctThisAnalysis": "تصحيح هذا التحليل",
+    "filmCorrectionPlaceholder": "ما الذي يحتاج إلى تحديث في تحليل الفيديو هذا؟",
+    "sendReport": "إرسال التقرير",
+    "player": "لاعب",
+    "staff": "الجهاز الفني",
+    "allowRegenerate": "السماح للمستلم بإعادة الإنشاء",
+    "typeNameToSearch": "اكتب اسمًا للبحث..."
   },
   "teamGrade": {
     "views": {

@@ -251,6 +251,15 @@
       "noTokenReturned": "Token nije vraćen. Pokušajte ponovo.",
       "somethingWentWrong": "Došlo je do greške pri prijavi putem Google-a.",
       "disabledMsg": "Prijava putem Google-a biće omogućena kada aplikacija bude puštena. Za sada koristite imejl i lozinku."
+    },
+    "voiceInput": {
+      "permissionTitle": "Potrebna dozvola",
+      "permissionMsg": "Za glasovni unos potreban je pristup mikrofonu.",
+      "recordFailed": "Snimanje nije moglo da počne."
+    },
+    "country": {
+      "selectCountry": "Izaberi državu",
+      "searchCountries": "Pretraži države..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "Svi tipovi",
     "selectAllShown": "Izaberi sve prikazane ({{count}})",
     "grade": "Ocena",
-    "synthesizingOverlay": "Sintetizovanje sažetka…"
+    "synthesizingOverlay": "Sintetizovanje sažetka…",
+    "generateTraining": "Generiši program treninga",
+    "regenTrainingFeedback": "Ponovo generiši trening uz povratnu informaciju",
+    "latest": "NAJNOVIJE",
+    "playerProfile": "Profil igrača",
+    "checklistFeedback": "Povratna informacija za izmenu verzije igračeve liste...",
+    "schoolPlaceholder": "Naziv škole",
+    "cityPlaceholder": "Grad",
+    "statePlaceholder": "Država (regija)",
+    "countryPlaceholder": "Država",
+    "allowRegenerate": "Dozvoli primaocu da ponovo generiše",
+    "searchCoachPlaceholder": "Pretraži ime trenera/programa...",
+    "summarizeHistoryTitle": "Sažmi istoriju"
   },
   "training": {
     "couldNotOpenFilePicker": "Nije moguće otvoriti birač datoteka.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "Još nije generisan izveštaj.",
     "noScoutingReportYet": "Još nije generisan AI skaut izveštaj za ovu utakmicu.",
     "addCommentPlaceholder": "Dodaj komentar...",
-    "you": "Ti"
+    "you": "Ti",
+    "subTeamPlaceholder": "Naziv podgrupe (npr. Napad, Bekovi)...",
+    "coachNameOrEmail": "Ime ili imejl trenera..."
   },
   "conversation": {
     "title": "Razgovor",
@@ -1812,7 +1835,18 @@
     "savedReports": "Sačuvani izveštaji ({{count}})",
     "updated": "Ažurirano {{date}}",
     "generatedReport": "Generisani izveštaj",
-    "exportPrint": "Izvoz / Štampa"
+    "exportPrint": "Izvoz / Štampa",
+    "makeCorrection": "Unesi ispravku",
+    "saveForLater": "Sačuvaj za kasnije",
+    "applied": "PRIMENJENO",
+    "pending": "NA ČEKANJU",
+    "correctThisAnalysis": "Ispravi ovu analizu",
+    "filmCorrectionPlaceholder": "Šta treba ažurirati u ovoj video analizi?",
+    "sendReport": "Pošalji izveštaj",
+    "player": "Igrač",
+    "staff": "Stručni štab",
+    "allowRegenerate": "Dozvoli primaocu da ponovo generiše",
+    "typeNameToSearch": "Ukucaj ime za pretragu..."
   },
   "teamGrade": {
     "views": {

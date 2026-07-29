@@ -251,6 +251,15 @@
       "noTokenReturned": "Kein Token erhalten. Bitte versuche es erneut.",
       "somethingWentWrong": "Bei der Anmeldung mit Google ist etwas schiefgelaufen.",
       "disabledMsg": "Die Google-Anmeldung wird aktiviert, wenn die App startet. Bitte nutze vorerst E-Mail und Passwort."
+    },
+    "voiceInput": {
+      "permissionTitle": "Berechtigung erforderlich",
+      "permissionMsg": "Für die Spracheingabe wird Mikrofonzugriff benötigt.",
+      "recordFailed": "Aufnahme konnte nicht gestartet werden."
+    },
+    "country": {
+      "selectCountry": "Land auswählen",
+      "searchCountries": "Länder suchen..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "Alle Typen",
     "selectAllShown": "Alle angezeigten auswählen ({{count}})",
     "grade": "Note",
-    "synthesizingOverlay": "Die Zusammenfassung wird erstellt…"
+    "synthesizingOverlay": "Die Zusammenfassung wird erstellt…",
+    "generateTraining": "Trainingsprogramm erstellen",
+    "regenTrainingFeedback": "Training mit Feedback neu erstellen",
+    "latest": "NEUESTE",
+    "playerProfile": "Spielerprofil",
+    "checklistFeedback": "Feedback zur Anpassung der Checklisten-Version des Spielers...",
+    "schoolPlaceholder": "Name der Schule",
+    "cityPlaceholder": "Stadt",
+    "statePlaceholder": "Bundesland",
+    "countryPlaceholder": "Land",
+    "allowRegenerate": "Empfänger darf neu generieren",
+    "searchCoachPlaceholder": "Trainer-/Programmnamen suchen...",
+    "summarizeHistoryTitle": "Verlauf zusammenfassen"
   },
   "training": {
     "couldNotOpenFilePicker": "Dateiauswahl konnte nicht geöffnet werden.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "Noch kein Bericht erstellt.",
     "noScoutingReportYet": "Für dieses Spiel wurde noch kein KI-Scouting-Bericht erstellt.",
     "addCommentPlaceholder": "Kommentar hinzufügen...",
-    "you": "Du"
+    "you": "Du",
+    "subTeamPlaceholder": "Name der Teilgruppe (z. B. Offense, Guards)...",
+    "coachNameOrEmail": "Trainername oder E-Mail..."
   },
   "conversation": {
     "title": "Unterhaltung",
@@ -1812,7 +1835,18 @@
     "savedReports": "Gespeicherte Berichte ({{count}})",
     "updated": "Aktualisiert {{date}}",
     "generatedReport": "Erstellter Bericht",
-    "exportPrint": "Exportieren / Drucken"
+    "exportPrint": "Exportieren / Drucken",
+    "makeCorrection": "Korrektur vornehmen",
+    "saveForLater": "Für später speichern",
+    "applied": "ANGEWENDET",
+    "pending": "AUSSTEHEND",
+    "correctThisAnalysis": "Diese Analyse korrigieren",
+    "filmCorrectionPlaceholder": "Was muss in dieser Videoanalyse aktualisiert werden?",
+    "sendReport": "Bericht senden",
+    "player": "Spieler",
+    "staff": "Staff",
+    "allowRegenerate": "Empfänger darf neu generieren",
+    "typeNameToSearch": "Namen zum Suchen eingeben..."
   },
   "teamGrade": {
     "views": {

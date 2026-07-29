@@ -251,6 +251,15 @@
       "noTokenReturned": "Niciun token returnat. Te rugăm să încerci din nou.",
       "somethingWentWrong": "Ceva nu a mers bine la autentificarea cu Google.",
       "disabledMsg": "Autentificarea cu Google va fi activată la lansarea aplicației. Deocamdată, te rugăm să folosești email și parolă."
+    },
+    "voiceInput": {
+      "permissionTitle": "Permisiune necesară",
+      "permissionMsg": "Accesul la microfon este necesar pentru introducerea vocală.",
+      "recordFailed": "Înregistrarea nu a putut fi pornită."
+    },
+    "country": {
+      "selectCountry": "Selectează țara",
+      "searchCountries": "Caută țări..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "Toate tipurile",
     "selectAllShown": "Selectează tot ce e afișat ({{count}})",
     "grade": "Notă",
-    "synthesizingOverlay": "Se sintetizează rezumatul…"
+    "synthesizingOverlay": "Se sintetizează rezumatul…",
+    "generateTraining": "Generează programul de antrenament",
+    "regenTrainingFeedback": "Regenerează antrenamentul cu feedback",
+    "latest": "CEL MAI RECENT",
+    "playerProfile": "Profilul jucătorului",
+    "checklistFeedback": "Feedback pentru ajustarea versiunii listei jucătorului...",
+    "schoolPlaceholder": "Numele școlii",
+    "cityPlaceholder": "Oraș",
+    "statePlaceholder": "Județ",
+    "countryPlaceholder": "Țară",
+    "allowRegenerate": "Permite destinatarului să regenereze",
+    "searchCoachPlaceholder": "Caută numele antrenorului/programului...",
+    "summarizeHistoryTitle": "Rezumă istoricul"
   },
   "training": {
     "couldNotOpenFilePicker": "Selectorul de fișiere nu a putut fi deschis.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "Niciun raport generat încă.",
     "noScoutingReportYet": "Niciun raport de scouting AI generat încă pentru acest meci.",
     "addCommentPlaceholder": "Adaugă un comentariu...",
-    "you": "Tu"
+    "you": "Tu",
+    "subTeamPlaceholder": "Numele subgrupei (ex. Atac, Fundași)...",
+    "coachNameOrEmail": "Numele sau e-mailul antrenorului..."
   },
   "conversation": {
     "title": "Conversație",
@@ -1812,7 +1835,18 @@
     "savedReports": "Rapoarte salvate ({{count}})",
     "updated": "Actualizat {{date}}",
     "generatedReport": "Raport generat",
-    "exportPrint": "Exportă / Printează"
+    "exportPrint": "Exportă / Printează",
+    "makeCorrection": "Fă o corectură",
+    "saveForLater": "Salvează pentru mai târziu",
+    "applied": "APLICATE",
+    "pending": "ÎN AȘTEPTARE",
+    "correctThisAnalysis": "Corectează această analiză",
+    "filmCorrectionPlaceholder": "Ce trebuie actualizat în această analiză video?",
+    "sendReport": "Trimite raportul",
+    "player": "Jucător",
+    "staff": "Staff",
+    "allowRegenerate": "Permite destinatarului să regenereze",
+    "typeNameToSearch": "Scrie un nume pentru a căuta..."
   },
   "teamGrade": {
     "views": {

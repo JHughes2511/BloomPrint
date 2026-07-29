@@ -251,6 +251,15 @@
       "noTokenReturned": "Nutrūko atsakas. Bandykite dar kartą.",
       "somethingWentWrong": "Prisijungiant su Google kažkas nepavyko.",
       "disabledMsg": "Google prisijungimas bus įjungtas, kai programėlė bus paleista. Kol kas naudokite el. paštą ir slaptažodį."
+    },
+    "voiceInput": {
+      "permissionTitle": "Reikalingas leidimas",
+      "permissionMsg": "Balso įvesčiai reikalinga prieiga prie mikrofono.",
+      "recordFailed": "Nepavyko pradėti įrašymo."
+    },
+    "country": {
+      "selectCountry": "Pasirinkite šalį",
+      "searchCountries": "Ieškoti šalių..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "Visi tipai",
     "selectAllShown": "Pasirinkti visus rodomus ({{count}})",
     "grade": "Įvertis",
-    "synthesizingOverlay": "Sudaroma santrauka…"
+    "synthesizingOverlay": "Sudaroma santrauka…",
+    "generateTraining": "Sukurti treniruočių programą",
+    "regenTrainingFeedback": "Sukurti treniruotę iš naujo su atsiliepimu",
+    "latest": "NAUJAUSIA",
+    "playerProfile": "Žaidėjo profilis",
+    "checklistFeedback": "Atsiliepimas žaidėjo kontrolinio sąrašo versijai pakoreguoti...",
+    "schoolPlaceholder": "Mokyklos pavadinimas",
+    "cityPlaceholder": "Miestas",
+    "statePlaceholder": "Valstija",
+    "countryPlaceholder": "Šalis",
+    "allowRegenerate": "Leisti gavėjui generuoti iš naujo",
+    "searchCoachPlaceholder": "Ieškoti trenerio / programos pavadinimo...",
+    "summarizeHistoryTitle": "Apibendrinti istoriją"
   },
   "training": {
     "couldNotOpenFilePicker": "Nepavyko atidaryti failų parinkiklio.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "Ataskaita dar nesugeneruota.",
     "noScoutingReportYet": "Šioms rungtynėms dar nesugeneruota DI skautų ataskaita.",
     "addCommentPlaceholder": "Pridėti komentarą...",
-    "you": "Jūs"
+    "you": "Jūs",
+    "subTeamPlaceholder": "Pogrupio pavadinimas (pvz., Puolimas, Įžaidėjai)...",
+    "coachNameOrEmail": "Trenerio vardas arba el. paštas..."
   },
   "conversation": {
     "title": "Pokalbis",
@@ -1812,7 +1835,18 @@
     "savedReports": "Išsaugotos ataskaitos ({{count}})",
     "updated": "Atnaujinta {{date}}",
     "generatedReport": "Sugeneruota ataskaita",
-    "exportPrint": "Eksportuoti / spausdinti"
+    "exportPrint": "Eksportuoti / spausdinti",
+    "makeCorrection": "Pataisyti",
+    "saveForLater": "Išsaugoti vėlesniam laikui",
+    "applied": "PRITAIKYTA",
+    "pending": "LAUKIAMA",
+    "correctThisAnalysis": "Pataisyti šią analizę",
+    "filmCorrectionPlaceholder": "Ką reikia atnaujinti šioje vaizdo įrašo analizėje?",
+    "sendReport": "Siųsti ataskaitą",
+    "player": "Žaidėjas",
+    "staff": "Personalas",
+    "allowRegenerate": "Leisti gavėjui generuoti iš naujo",
+    "typeNameToSearch": "Įveskite vardą paieškai..."
   },
   "teamGrade": {
     "views": {

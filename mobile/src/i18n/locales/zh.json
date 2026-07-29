@@ -251,6 +251,15 @@
       "noTokenReturned": "未返回令牌。请重试。",
       "somethingWentWrong": "使用 Google 登录时出错。",
       "disabledMsg": "Google 登录将在应用正式上线时启用。目前请使用邮箱和密码。"
+    },
+    "voiceInput": {
+      "permissionTitle": "需要权限",
+      "permissionMsg": "语音输入需要访问麦克风。",
+      "recordFailed": "无法开始录音。"
+    },
+    "country": {
+      "selectCountry": "选择国家",
+      "searchCountries": "搜索国家..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "所有类型",
     "selectAllShown": "全选已显示（{{count}}）",
     "grade": "评分",
-    "synthesizingOverlay": "正在综合生成总结…"
+    "synthesizingOverlay": "正在综合生成总结…",
+    "generateTraining": "生成训练计划",
+    "regenTrainingFeedback": "根据反馈重新生成训练",
+    "latest": "最新",
+    "playerProfile": "球员资料",
+    "checklistFeedback": "用于调整球员清单版本的反馈...",
+    "schoolPlaceholder": "学校名称",
+    "cityPlaceholder": "城市",
+    "statePlaceholder": "州/省",
+    "countryPlaceholder": "国家",
+    "allowRegenerate": "允许接收者重新生成",
+    "searchCoachPlaceholder": "搜索教练/项目名称...",
+    "summarizeHistoryTitle": "总结历史记录"
   },
   "training": {
     "couldNotOpenFilePicker": "无法打开文件选择器。",
@@ -1359,7 +1380,9 @@
     "noReportYet": "还没有生成报告。",
     "noScoutingReportYet": "此比赛还没有生成 AI 球探报告。",
     "addCommentPlaceholder": "添加评论...",
-    "you": "你"
+    "you": "你",
+    "subTeamPlaceholder": "小组名称（例如 进攻组、后卫组）...",
+    "coachNameOrEmail": "教练姓名或邮箱..."
   },
   "conversation": {
     "title": "对话",
@@ -1812,7 +1835,18 @@
     "savedReports": "已保存报告（{{count}}）",
     "updated": "更新于 {{date}}",
     "generatedReport": "生成的报告",
-    "exportPrint": "导出 / 打印"
+    "exportPrint": "导出 / 打印",
+    "makeCorrection": "进行更正",
+    "saveForLater": "稍后保存",
+    "applied": "已应用",
+    "pending": "待处理",
+    "correctThisAnalysis": "更正此分析",
+    "filmCorrectionPlaceholder": "这份录像分析需要更新什么？",
+    "sendReport": "发送报告",
+    "player": "球员",
+    "staff": "教练组",
+    "allowRegenerate": "允许接收者重新生成",
+    "typeNameToSearch": "输入姓名以搜索..."
   },
   "teamGrade": {
     "views": {

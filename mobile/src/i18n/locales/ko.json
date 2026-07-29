@@ -251,6 +251,15 @@
       "noTokenReturned": "토큰이 반환되지 않았습니다. 다시 시도해 주세요.",
       "somethingWentWrong": "Google 로그인 중 문제가 발생했습니다.",
       "disabledMsg": "Google 로그인은 앱 정식 출시 후 사용할 수 있습니다. 지금은 이메일과 비밀번호를 사용해 주세요."
+    },
+    "voiceInput": {
+      "permissionTitle": "권한 필요",
+      "permissionMsg": "음성 입력을 위해 마이크 접근 권한이 필요합니다.",
+      "recordFailed": "녹음을 시작할 수 없습니다."
+    },
+    "country": {
+      "selectCountry": "국가 선택",
+      "searchCountries": "국가 검색..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "전체 유형",
     "selectAllShown": "표시된 항목 모두 선택 ({{count}})",
     "grade": "등급",
-    "synthesizingOverlay": "요약을 정리하는 중…"
+    "synthesizingOverlay": "요약을 정리하는 중…",
+    "generateTraining": "훈련 프로그램 생성",
+    "regenTrainingFeedback": "피드백으로 훈련 다시 생성",
+    "latest": "최신",
+    "playerProfile": "선수 프로필",
+    "checklistFeedback": "선수 체크리스트 버전을 조정하기 위한 피드백...",
+    "schoolPlaceholder": "학교 이름",
+    "cityPlaceholder": "도시",
+    "statePlaceholder": "주",
+    "countryPlaceholder": "국가",
+    "allowRegenerate": "수신자의 재생성 허용",
+    "searchCoachPlaceholder": "코치/프로그램 이름 검색...",
+    "summarizeHistoryTitle": "기록 요약"
   },
   "training": {
     "couldNotOpenFilePicker": "파일 선택기를 열 수 없습니다.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "아직 생성된 리포트가 없습니다.",
     "noScoutingReportYet": "이 경기의 AI 스카우팅 리포트가 아직 생성되지 않았습니다.",
     "addCommentPlaceholder": "댓글 추가...",
-    "you": "나"
+    "you": "나",
+    "subTeamPlaceholder": "세부 팀 이름 (예: 오펜스, 가드)...",
+    "coachNameOrEmail": "코치 이름 또는 이메일..."
   },
   "conversation": {
     "title": "대화",
@@ -1812,7 +1835,18 @@
     "savedReports": "저장된 리포트 ({{count}})",
     "updated": "{{date}} 업데이트",
     "generatedReport": "생성된 리포트",
-    "exportPrint": "내보내기 / 인쇄"
+    "exportPrint": "내보내기 / 인쇄",
+    "makeCorrection": "수정하기",
+    "saveForLater": "나중에 저장",
+    "applied": "적용됨",
+    "pending": "대기 중",
+    "correctThisAnalysis": "이 분석 수정",
+    "filmCorrectionPlaceholder": "이 영상 분석에서 무엇을 업데이트해야 하나요?",
+    "sendReport": "리포트 보내기",
+    "player": "선수",
+    "staff": "스태프",
+    "allowRegenerate": "수신자의 재생성 허용",
+    "typeNameToSearch": "검색할 이름을 입력하세요..."
   },
   "teamGrade": {
     "views": {

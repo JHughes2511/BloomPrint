@@ -251,6 +251,15 @@
       "noTokenReturned": "Nie zwrócono tokenu. Spróbuj ponownie.",
       "somethingWentWrong": "Coś poszło nie tak podczas logowania przez Google.",
       "disabledMsg": "Logowanie przez Google zostanie włączone po premierze aplikacji. Na razie użyj e-maila i hasła."
+    },
+    "voiceInput": {
+      "permissionTitle": "Wymagane uprawnienie",
+      "permissionMsg": "Do wprowadzania głosowego wymagany jest dostęp do mikrofonu.",
+      "recordFailed": "Nie udało się rozpocząć nagrywania."
+    },
+    "country": {
+      "selectCountry": "Wybierz kraj",
+      "searchCountries": "Szukaj krajów..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "Wszystkie typy",
     "selectAllShown": "Zaznacz wszystkie widoczne ({{count}})",
     "grade": "Ocena",
-    "synthesizingOverlay": "Tworzenie podsumowania…"
+    "synthesizingOverlay": "Tworzenie podsumowania…",
+    "generateTraining": "Wygeneruj program treningowy",
+    "regenTrainingFeedback": "Wygeneruj trening ponownie z uwagami",
+    "latest": "NAJNOWSZE",
+    "playerProfile": "Profil zawodnika",
+    "checklistFeedback": "Uwagi do korekty wersji listy kontrolnej zawodnika...",
+    "schoolPlaceholder": "Nazwa szkoły",
+    "cityPlaceholder": "Miasto",
+    "statePlaceholder": "Województwo",
+    "countryPlaceholder": "Kraj",
+    "allowRegenerate": "Zezwól odbiorcy na ponowne wygenerowanie",
+    "searchCoachPlaceholder": "Szukaj nazwy trenera/programu...",
+    "summarizeHistoryTitle": "Podsumuj historię"
   },
   "training": {
     "couldNotOpenFilePicker": "Nie udało się otworzyć wyboru plików.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "Nie wygenerowano jeszcze raportu.",
     "noScoutingReportYet": "Nie wygenerowano jeszcze raportu skautingowego AI dla tego meczu.",
     "addCommentPlaceholder": "Dodaj komentarz...",
-    "you": "Ty"
+    "you": "Ty",
+    "subTeamPlaceholder": "Nazwa podzespołu (np. Atak, Rozgrywający)...",
+    "coachNameOrEmail": "Imię i nazwisko lub e-mail trenera..."
   },
   "conversation": {
     "title": "Konwersacja",
@@ -1812,7 +1835,18 @@
     "savedReports": "Zapisane raporty ({{count}})",
     "updated": "Zaktualizowano {{date}}",
     "generatedReport": "Wygenerowany raport",
-    "exportPrint": "Eksportuj / drukuj"
+    "exportPrint": "Eksportuj / drukuj",
+    "makeCorrection": "Wprowadź korektę",
+    "saveForLater": "Zapisz na później",
+    "applied": "ZASTOSOWANE",
+    "pending": "OCZEKUJĄCE",
+    "correctThisAnalysis": "Popraw tę analizę",
+    "filmCorrectionPlaceholder": "Co należy zaktualizować w tej analizie wideo?",
+    "sendReport": "Wyślij raport",
+    "player": "Zawodnik",
+    "staff": "Sztab",
+    "allowRegenerate": "Zezwól odbiorcy na ponowne wygenerowanie",
+    "typeNameToSearch": "Wpisz nazwisko, aby wyszukać..."
   },
   "teamGrade": {
     "views": {

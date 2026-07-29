@@ -251,6 +251,15 @@
       "noTokenReturned": "No se devolvió ningún token. Inténtalo de nuevo.",
       "somethingWentWrong": "Algo salió mal al iniciar sesión con Google.",
       "disabledMsg": "El inicio de sesión con Google se activará cuando la app se lance. Por ahora, usa correo y contraseña."
+    },
+    "voiceInput": {
+      "permissionTitle": "Permiso necesario",
+      "permissionMsg": "Se necesita acceso al micrófono para la entrada de voz.",
+      "recordFailed": "No se pudo iniciar la grabación."
+    },
+    "country": {
+      "selectCountry": "Seleccionar país",
+      "searchCountries": "Buscar países..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "Todos los Tipos",
     "selectAllShown": "Seleccionar todos los mostrados ({{count}})",
     "grade": "Nota",
-    "synthesizingOverlay": "Sintetizando el resumen…"
+    "synthesizingOverlay": "Sintetizando el resumen…",
+    "generateTraining": "Generar programa de entrenamiento",
+    "regenTrainingFeedback": "Regenerar entrenamiento con comentarios",
+    "latest": "ÚLTIMO",
+    "playerProfile": "Perfil del jugador",
+    "checklistFeedback": "Comentarios para ajustar la versión de la lista del jugador...",
+    "schoolPlaceholder": "Nombre del colegio",
+    "cityPlaceholder": "Ciudad",
+    "statePlaceholder": "Estado",
+    "countryPlaceholder": "País",
+    "allowRegenerate": "Permitir que el destinatario regenere",
+    "searchCoachPlaceholder": "Buscar nombre de entrenador/programa...",
+    "summarizeHistoryTitle": "Resumir historial"
   },
   "training": {
     "couldNotOpenFilePicker": "No se pudo abrir el selector de archivos.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "Aún no se ha generado ningún informe.",
     "noScoutingReportYet": "Aún no se ha generado ningún informe de ojeo con IA para este partido.",
     "addCommentPlaceholder": "Añadir un comentario...",
-    "you": "Tú"
+    "you": "Tú",
+    "subTeamPlaceholder": "Nombre del subequipo (p. ej. Ataque, Bases)...",
+    "coachNameOrEmail": "Nombre o correo del entrenador..."
   },
   "conversation": {
     "title": "Conversación",
@@ -1812,7 +1835,18 @@
     "savedReports": "Informes Guardados ({{count}})",
     "updated": "Actualizado {{date}}",
     "generatedReport": "Informe Generado",
-    "exportPrint": "Exportar / Imprimir"
+    "exportPrint": "Exportar / Imprimir",
+    "makeCorrection": "Hacer una corrección",
+    "saveForLater": "Guardar para después",
+    "applied": "APLICADAS",
+    "pending": "PENDIENTES",
+    "correctThisAnalysis": "Corregir este análisis",
+    "filmCorrectionPlaceholder": "¿Qué hay que actualizar en este análisis de video?",
+    "sendReport": "Enviar informe",
+    "player": "Jugador",
+    "staff": "Cuerpo técnico",
+    "allowRegenerate": "Permitir que el destinatario regenere",
+    "typeNameToSearch": "Escribe un nombre para buscar..."
   },
   "teamGrade": {
     "views": {

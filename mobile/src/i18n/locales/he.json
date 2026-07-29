@@ -251,6 +251,15 @@
       "noTokenReturned": "לא הוחזר טוקן. נסה שוב.",
       "somethingWentWrong": "משהו השתבש בהתחברות עם Google.",
       "disabledMsg": "התחברות עם Google תופעל עם השקת האפליקציה. בינתיים, השתמש באימייל וסיסמה."
+    },
+    "voiceInput": {
+      "permissionTitle": "נדרשת הרשאה",
+      "permissionMsg": "נדרשת גישה למיקרופון עבור קלט קולי.",
+      "recordFailed": "לא ניתן היה להתחיל בהקלטה."
+    },
+    "country": {
+      "selectCountry": "בחר מדינה",
+      "searchCountries": "חיפוש מדינות..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "כל הסוגים",
     "selectAllShown": "בחר את כל המוצגים ({{count}})",
     "grade": "ציון",
-    "synthesizingOverlay": "מרכיב את הסיכום…"
+    "synthesizingOverlay": "מרכיב את הסיכום…",
+    "generateTraining": "צור תוכנית אימונים",
+    "regenTrainingFeedback": "צור מחדש אימון עם משוב",
+    "latest": "האחרון",
+    "playerProfile": "פרופיל שחקן",
+    "checklistFeedback": "משוב לעדכון גרסת הצ'קליסט של השחקן...",
+    "schoolPlaceholder": "שם בית הספר",
+    "cityPlaceholder": "עיר",
+    "statePlaceholder": "מדינה/מחוז",
+    "countryPlaceholder": "מדינה",
+    "allowRegenerate": "אפשר לנמען ליצור מחדש",
+    "searchCoachPlaceholder": "חיפוש שם מאמן/תוכנית...",
+    "summarizeHistoryTitle": "סכם היסטוריה"
   },
   "training": {
     "couldNotOpenFilePicker": "לא ניתן לפתוח את בוחר הקבצים.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "עדיין לא נוצר דוח.",
     "noScoutingReportYet": "עדיין לא נוצר דוח סקאוטינג של AI למשחק הזה.",
     "addCommentPlaceholder": "הוסף תגובה...",
-    "you": "אתה"
+    "you": "אתה",
+    "subTeamPlaceholder": "שם תת-קבוצה (למשל התקפה, גארדים)...",
+    "coachNameOrEmail": "שם המאמן או אימייל..."
   },
   "conversation": {
     "title": "שיחה",
@@ -1812,7 +1835,18 @@
     "savedReports": "דוחות שמורים ({{count}})",
     "updated": "עודכן {{date}}",
     "generatedReport": "דוח שנוצר",
-    "exportPrint": "ייצוא / הדפסה"
+    "exportPrint": "ייצוא / הדפסה",
+    "makeCorrection": "בצע תיקון",
+    "saveForLater": "שמור למועד מאוחר יותר",
+    "applied": "הוחל",
+    "pending": "ממתין",
+    "correctThisAnalysis": "תקן ניתוח זה",
+    "filmCorrectionPlaceholder": "מה צריך לעדכן בניתוח הווידאו הזה?",
+    "sendReport": "שלח דוח",
+    "player": "שחקן",
+    "staff": "סגל",
+    "allowRegenerate": "אפשר לנמען ליצור מחדש",
+    "typeNameToSearch": "הקלד שם לחיפוש..."
   },
   "teamGrade": {
     "views": {

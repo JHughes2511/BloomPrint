@@ -251,6 +251,15 @@
       "noTokenReturned": "Belirteç döndürülmedi. Lütfen tekrar deneyin.",
       "somethingWentWrong": "Google ile giriş yapılırken bir şeyler ters gitti.",
       "disabledMsg": "Google ile giriş, uygulama yayına alındığında etkinleştirilecek. Şimdilik lütfen e-posta ve şifre kullanın."
+    },
+    "voiceInput": {
+      "permissionTitle": "İzin gerekli",
+      "permissionMsg": "Sesli giriş için mikrofon erişimi gerekiyor.",
+      "recordFailed": "Kayıt başlatılamadı."
+    },
+    "country": {
+      "selectCountry": "Ülke seç",
+      "searchCountries": "Ülke ara..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "Tüm Türler",
     "selectAllShown": "Gösterilenlerin tümünü seç ({{count}})",
     "grade": "Not",
-    "synthesizingOverlay": "Özet sentezleniyor…"
+    "synthesizingOverlay": "Özet sentezleniyor…",
+    "generateTraining": "Antrenman programı oluştur",
+    "regenTrainingFeedback": "Geri bildirimle antrenmanı yeniden oluştur",
+    "latest": "EN SON",
+    "playerProfile": "Oyuncu profili",
+    "checklistFeedback": "Oyuncunun kontrol listesi sürümünü ayarlamak için geri bildirim...",
+    "schoolPlaceholder": "Okul adı",
+    "cityPlaceholder": "Şehir",
+    "statePlaceholder": "Eyalet",
+    "countryPlaceholder": "Ülke",
+    "allowRegenerate": "Alıcının yeniden oluşturmasına izin ver",
+    "searchCoachPlaceholder": "Antrenör/program adı ara...",
+    "summarizeHistoryTitle": "Geçmişi özetle"
   },
   "training": {
     "couldNotOpenFilePicker": "Dosya seçici açılamadı.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "Henüz rapor oluşturulmadı.",
     "noScoutingReportYet": "Bu maç için henüz yapay zeka skaut raporu oluşturulmadı.",
     "addCommentPlaceholder": "Yorum ekle...",
-    "you": "Siz"
+    "you": "Siz",
+    "subTeamPlaceholder": "Alt grup adı (ör. Hücum, Gardlar)...",
+    "coachNameOrEmail": "Antrenör adı veya e-postası..."
   },
   "conversation": {
     "title": "Sohbet",
@@ -1812,7 +1835,18 @@
     "savedReports": "Kaydedilen Raporlar ({{count}})",
     "updated": "Güncellendi {{date}}",
     "generatedReport": "Oluşturulan Rapor",
-    "exportPrint": "Dışa Aktar / Yazdır"
+    "exportPrint": "Dışa Aktar / Yazdır",
+    "makeCorrection": "Düzeltme yap",
+    "saveForLater": "Sonrası için kaydet",
+    "applied": "UYGULANAN",
+    "pending": "BEKLEYEN",
+    "correctThisAnalysis": "Bu analizi düzelt",
+    "filmCorrectionPlaceholder": "Bu video analizinde neyin güncellenmesi gerekiyor?",
+    "sendReport": "Raporu gönder",
+    "player": "Oyuncu",
+    "staff": "Teknik ekip",
+    "allowRegenerate": "Alıcının yeniden oluşturmasına izin ver",
+    "typeNameToSearch": "Aramak için bir ad yazın..."
   },
   "teamGrade": {
     "views": {

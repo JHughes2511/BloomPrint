@@ -251,6 +251,15 @@
       "noTokenReturned": "Δεν επιστράφηκε token. Δοκίμασε ξανά.",
       "somethingWentWrong": "Κάτι πήγε στραβά κατά τη σύνδεση με Google.",
       "disabledMsg": "Η σύνδεση με Google θα ενεργοποιηθεί με την κυκλοφορία της εφαρμογής. Προς το παρόν, χρησιμοποίησε email και κωδικό."
+    },
+    "voiceInput": {
+      "permissionTitle": "Απαιτείται άδεια",
+      "permissionMsg": "Απαιτείται πρόσβαση στο μικρόφωνο για φωνητική εισαγωγή.",
+      "recordFailed": "Δεν ήταν δυνατή η έναρξη της εγγραφής."
+    },
+    "country": {
+      "selectCountry": "Επιλογή χώρας",
+      "searchCountries": "Αναζήτηση χωρών..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "Όλοι οι Τύποι",
     "selectAllShown": "Επιλογή όλων όσων εμφανίζονται ({{count}})",
     "grade": "Βαθμός",
-    "synthesizingOverlay": "Σύνθεση της σύνοψης…"
+    "synthesizingOverlay": "Σύνθεση της σύνοψης…",
+    "generateTraining": "Δημιουργία προγράμματος προπόνησης",
+    "regenTrainingFeedback": "Αναδημιουργία προπόνησης με σχόλια",
+    "latest": "ΠΙΟ ΠΡΟΣΦΑΤΟ",
+    "playerProfile": "Προφίλ παίκτη",
+    "checklistFeedback": "Σχόλια για προσαρμογή της έκδοσης λίστας του παίκτη...",
+    "schoolPlaceholder": "Όνομα σχολείου",
+    "cityPlaceholder": "Πόλη",
+    "statePlaceholder": "Πολιτεία",
+    "countryPlaceholder": "Χώρα",
+    "allowRegenerate": "Να επιτρέπεται στον παραλήπτη η αναδημιουργία",
+    "searchCoachPlaceholder": "Αναζήτηση ονόματος προπονητή/προγράμματος...",
+    "summarizeHistoryTitle": "Σύνοψη ιστορικού"
   },
   "training": {
     "couldNotOpenFilePicker": "Δεν ήταν δυνατό το άνοιγμα του επιλογέα αρχείων.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "Δεν δημιουργήθηκε ακόμα αναφορά.",
     "noScoutingReportYet": "Δεν δημιουργήθηκε ακόμα αναφορά σκάουτινγκ AI για αυτόν τον αγώνα.",
     "addCommentPlaceholder": "Πρόσθεσε ένα σχόλιο...",
-    "you": "Εσύ"
+    "you": "Εσύ",
+    "subTeamPlaceholder": "Όνομα υποομάδας (π.χ. Επίθεση, Γκαρντ)...",
+    "coachNameOrEmail": "Όνομα ή email προπονητή..."
   },
   "conversation": {
     "title": "Συνομιλία",
@@ -1812,7 +1835,18 @@
     "savedReports": "Αποθηκευμένες Αναφορές ({{count}})",
     "updated": "Ενημερώθηκε {{date}}",
     "generatedReport": "Δημιουργημένη Αναφορά",
-    "exportPrint": "Εξαγωγή / Εκτύπωση"
+    "exportPrint": "Εξαγωγή / Εκτύπωση",
+    "makeCorrection": "Κάντε μια διόρθωση",
+    "saveForLater": "Αποθήκευση για αργότερα",
+    "applied": "ΕΦΑΡΜΟΣΜΕΝΕΣ",
+    "pending": "ΣΕ ΕΚΚΡΕΜΟΤΗΤΑ",
+    "correctThisAnalysis": "Διόρθωση αυτής της ανάλυσης",
+    "filmCorrectionPlaceholder": "Τι πρέπει να ενημερωθεί σε αυτήν την ανάλυση βίντεο;",
+    "sendReport": "Αποστολή αναφοράς",
+    "player": "Παίκτης",
+    "staff": "Προπονητικό τιμ",
+    "allowRegenerate": "Να επιτρέπεται στον παραλήπτη η αναδημιουργία",
+    "typeNameToSearch": "Πληκτρολογήστε ένα όνομα για αναζήτηση..."
   },
   "teamGrade": {
     "views": {

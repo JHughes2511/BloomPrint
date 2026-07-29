@@ -251,6 +251,15 @@
       "noTokenReturned": "Ingen token returnerades. Försök igen.",
       "somethingWentWrong": "Något gick fel vid inloggning med Google.",
       "disabledMsg": "Google-inloggning aktiveras när appen lanseras. Använd e-post och lösenord tills vidare."
+    },
+    "voiceInput": {
+      "permissionTitle": "Behörighet krävs",
+      "permissionMsg": "Mikrofonåtkomst krävs för röstinmatning.",
+      "recordFailed": "Det gick inte att starta inspelningen."
+    },
+    "country": {
+      "selectCountry": "Välj land",
+      "searchCountries": "Sök länder..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "Alla typer",
     "selectAllShown": "Markera alla visade ({{count}})",
     "grade": "Betyg",
-    "synthesizingOverlay": "Sammanställer sammanfattningen…"
+    "synthesizingOverlay": "Sammanställer sammanfattningen…",
+    "generateTraining": "Skapa träningsprogram",
+    "regenTrainingFeedback": "Skapa om träningen med feedback",
+    "latest": "SENASTE",
+    "playerProfile": "Spelarprofil",
+    "checklistFeedback": "Feedback för att justera spelarens checklisteversion...",
+    "schoolPlaceholder": "Skolans namn",
+    "cityPlaceholder": "Stad",
+    "statePlaceholder": "Region",
+    "countryPlaceholder": "Land",
+    "allowRegenerate": "Tillåt mottagaren att generera om",
+    "searchCoachPlaceholder": "Sök tränar-/programnamn...",
+    "summarizeHistoryTitle": "Sammanfatta historik"
   },
   "training": {
     "couldNotOpenFilePicker": "Kunde inte öppna filväljaren.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "Ingen rapport genererad ännu.",
     "noScoutingReportYet": "Ingen AI-scoutingrapport genererad ännu för den här matchen.",
     "addCommentPlaceholder": "Lägg till en kommentar...",
-    "you": "Du"
+    "you": "Du",
+    "subTeamPlaceholder": "Namn på undergrupp (t.ex. Offense, Guards)...",
+    "coachNameOrEmail": "Tränarens namn eller e-post..."
   },
   "conversation": {
     "title": "Konversation",
@@ -1812,7 +1835,18 @@
     "savedReports": "Sparade rapporter ({{count}})",
     "updated": "Uppdaterad {{date}}",
     "generatedReport": "Genererad rapport",
-    "exportPrint": "Exportera / Skriv ut"
+    "exportPrint": "Exportera / Skriv ut",
+    "makeCorrection": "Gör en korrigering",
+    "saveForLater": "Spara till senare",
+    "applied": "TILLÄMPADE",
+    "pending": "VÄNTANDE",
+    "correctThisAnalysis": "Korrigera denna analys",
+    "filmCorrectionPlaceholder": "Vad behöver uppdateras i den här videoanalysen?",
+    "sendReport": "Skicka rapport",
+    "player": "Spelare",
+    "staff": "Ledarstab",
+    "allowRegenerate": "Tillåt mottagaren att generera om",
+    "typeNameToSearch": "Skriv ett namn för att söka..."
   },
   "teamGrade": {
     "views": {

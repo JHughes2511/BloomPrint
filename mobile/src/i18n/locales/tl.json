@@ -251,6 +251,15 @@
       "noTokenReturned": "Walang naibalik na token. Subukan ulit.",
       "somethingWentWrong": "May nangyaring mali sa pag-sign in gamit ang Google.",
       "disabledMsg": "Magagamit ang Google sign-in kapag na-launch na ang app. Sa ngayon, gamitin ang email at password."
+    },
+    "voiceInput": {
+      "permissionTitle": "Kailangan ng pahintulot",
+      "permissionMsg": "Kailangan ng access sa mikropono para sa voice input.",
+      "recordFailed": "Hindi masimulan ang pagre-record."
+    },
+    "country": {
+      "selectCountry": "Pumili ng bansa",
+      "searchCountries": "Maghanap ng bansa..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "Lahat ng Uri",
     "selectAllShown": "Piliin lahat ng nakikita ({{count}})",
     "grade": "Grado",
-    "synthesizingOverlay": "Binubuo ang buod…"
+    "synthesizingOverlay": "Binubuo ang buod…",
+    "generateTraining": "Bumuo ng programa ng pagsasanay",
+    "regenTrainingFeedback": "Bumuo muli ng pagsasanay gamit ang feedback",
+    "latest": "PINAKABAGO",
+    "playerProfile": "Profile ng manlalaro",
+    "checklistFeedback": "Feedback para iayos ang bersyon ng checklist ng manlalaro...",
+    "schoolPlaceholder": "Pangalan ng paaralan",
+    "cityPlaceholder": "Lungsod",
+    "statePlaceholder": "Estado",
+    "countryPlaceholder": "Bansa",
+    "allowRegenerate": "Payagan ang tatanggap na bumuo muli",
+    "searchCoachPlaceholder": "Maghanap ng pangalan ng coach/programa...",
+    "summarizeHistoryTitle": "Ibuod ang kasaysayan"
   },
   "training": {
     "couldNotOpenFilePicker": "Hindi mabuksan ang file picker.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "Wala pang nabuong ulat.",
     "noScoutingReportYet": "Wala pang nabuong AI scouting report para sa larong ito.",
     "addCommentPlaceholder": "Magdagdag ng komento...",
-    "you": "Ikaw"
+    "you": "Ikaw",
+    "subTeamPlaceholder": "Pangalan ng sub-team (hal. Offense, Guards)...",
+    "coachNameOrEmail": "Pangalan o email ng coach..."
   },
   "conversation": {
     "title": "Usapan",
@@ -1812,7 +1835,18 @@
     "savedReports": "Mga Na-save na Ulat ({{count}})",
     "updated": "Na-update {{date}}",
     "generatedReport": "Nabuong Ulat",
-    "exportPrint": "I-export / I-print"
+    "exportPrint": "I-export / I-print",
+    "makeCorrection": "Gumawa ng pagwawasto",
+    "saveForLater": "I-save para mamaya",
+    "applied": "NAILAPAT",
+    "pending": "NAKABINBIN",
+    "correctThisAnalysis": "Iwasto ang pagsusuring ito",
+    "filmCorrectionPlaceholder": "Ano ang kailangang i-update sa film analysis na ito?",
+    "sendReport": "Ipadala ang ulat",
+    "player": "Manlalaro",
+    "staff": "Staff",
+    "allowRegenerate": "Payagan ang tatanggap na bumuo muli",
+    "typeNameToSearch": "Mag-type ng pangalan para maghanap..."
   },
   "teamGrade": {
     "views": {

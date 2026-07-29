@@ -251,6 +251,15 @@
       "noTokenReturned": "Токен не отримано. Спробуйте ще раз.",
       "somethingWentWrong": "Щось пішло не так під час входу через Google.",
       "disabledMsg": "Вхід через Google буде увімкнено після запуску застосунку. Наразі використовуйте email і пароль."
+    },
+    "voiceInput": {
+      "permissionTitle": "Потрібен дозвіл",
+      "permissionMsg": "Для голосового введення потрібен доступ до мікрофона.",
+      "recordFailed": "Не вдалося розпочати запис."
+    },
+    "country": {
+      "selectCountry": "Виберіть країну",
+      "searchCountries": "Пошук країн..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "Усі типи",
     "selectAllShown": "Обрати всі показані ({{count}})",
     "grade": "Оцінка",
-    "synthesizingOverlay": "Синтезуємо підсумок…"
+    "synthesizingOverlay": "Синтезуємо підсумок…",
+    "generateTraining": "Створити тренувальну програму",
+    "regenTrainingFeedback": "Створити тренування знову з відгуком",
+    "latest": "ОСТАННЄ",
+    "playerProfile": "Профіль гравця",
+    "checklistFeedback": "Відгук для коригування версії чек-листа гравця...",
+    "schoolPlaceholder": "Назва школи",
+    "cityPlaceholder": "Місто",
+    "statePlaceholder": "Штат",
+    "countryPlaceholder": "Країна",
+    "allowRegenerate": "Дозволити одержувачу генерувати заново",
+    "searchCoachPlaceholder": "Пошук імені тренера/програми...",
+    "summarizeHistoryTitle": "Стисло описати історію"
   },
   "training": {
     "couldNotOpenFilePicker": "Не вдалося відкрити вибір файлів.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "Звіт ще не згенеровано.",
     "noScoutingReportYet": "Для цієї гри ще не згенеровано скаутського звіту ШІ.",
     "addCommentPlaceholder": "Додати коментар...",
-    "you": "Ви"
+    "you": "Ви",
+    "subTeamPlaceholder": "Назва підгрупи (напр. Напад, Захисники)...",
+    "coachNameOrEmail": "Ім'я або email тренера..."
   },
   "conversation": {
     "title": "Розмова",
@@ -1812,7 +1835,18 @@
     "savedReports": "Збережені звіти ({{count}})",
     "updated": "Оновлено {{date}}",
     "generatedReport": "Згенерований звіт",
-    "exportPrint": "Експорт / Друк"
+    "exportPrint": "Експорт / Друк",
+    "makeCorrection": "Внести виправлення",
+    "saveForLater": "Зберегти на потім",
+    "applied": "ЗАСТОСОВАНО",
+    "pending": "В ОЧІКУВАННІ",
+    "correctThisAnalysis": "Виправити цей аналіз",
+    "filmCorrectionPlaceholder": "Що потрібно оновити в цьому відеоаналізі?",
+    "sendReport": "Надіслати звіт",
+    "player": "Гравець",
+    "staff": "Тренерський штаб",
+    "allowRegenerate": "Дозволити одержувачу генерувати заново",
+    "typeNameToSearch": "Введіть ім'я для пошуку..."
   },
   "teamGrade": {
     "views": {

@@ -251,6 +251,15 @@
       "noTokenReturned": "トークンが返されませんでした。もう一度お試しください。",
       "somethingWentWrong": "Googleでのサインイン中に問題が発生しました。",
       "disabledMsg": "Googleサインインはアプリの正式リリース時に利用可能になります。現在はメールアドレスとパスワードをご利用ください。"
+    },
+    "voiceInput": {
+      "permissionTitle": "権限が必要です",
+      "permissionMsg": "音声入力にはマイクへのアクセスが必要です。",
+      "recordFailed": "録音を開始できませんでした。"
+    },
+    "country": {
+      "selectCountry": "国を選択",
+      "searchCountries": "国を検索..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "すべての種別",
     "selectAllShown": "表示中をすべて選択 ({{count}})",
     "grade": "グレード",
-    "synthesizingOverlay": "要約を統合中…"
+    "synthesizingOverlay": "要約を統合中…",
+    "generateTraining": "トレーニングプログラムを作成",
+    "regenTrainingFeedback": "フィードバックでトレーニングを再作成",
+    "latest": "最新",
+    "playerProfile": "選手プロフィール",
+    "checklistFeedback": "選手のチェックリスト版を調整するためのフィードバック...",
+    "schoolPlaceholder": "学校名",
+    "cityPlaceholder": "市区町村",
+    "statePlaceholder": "州",
+    "countryPlaceholder": "国",
+    "allowRegenerate": "受信者による再作成を許可",
+    "searchCoachPlaceholder": "コーチ／プログラム名を検索...",
+    "summarizeHistoryTitle": "履歴を要約"
   },
   "training": {
     "couldNotOpenFilePicker": "ファイル選択を開けませんでした。",
@@ -1359,7 +1380,9 @@
     "noReportYet": "まだレポートが生成されていません。",
     "noScoutingReportYet": "この試合のAIスカウティングレポートはまだ生成されていません。",
     "addCommentPlaceholder": "コメントを追加...",
-    "you": "あなた"
+    "you": "あなた",
+    "subTeamPlaceholder": "サブチーム名（例：オフェンス、ガード）...",
+    "coachNameOrEmail": "コーチ名またはメール..."
   },
   "conversation": {
     "title": "会話",
@@ -1812,7 +1835,18 @@
     "savedReports": "保存済みレポート ({{count}})",
     "updated": "{{date}}に更新",
     "generatedReport": "生成されたレポート",
-    "exportPrint": "エクスポート／印刷"
+    "exportPrint": "エクスポート／印刷",
+    "makeCorrection": "修正する",
+    "saveForLater": "後で保存",
+    "applied": "適用済み",
+    "pending": "保留中",
+    "correctThisAnalysis": "この分析を修正",
+    "filmCorrectionPlaceholder": "この映像分析で更新が必要な点は？",
+    "sendReport": "レポートを送信",
+    "player": "選手",
+    "staff": "スタッフ",
+    "allowRegenerate": "受信者による再作成を許可",
+    "typeNameToSearch": "名前を入力して検索..."
   },
   "teamGrade": {
     "views": {

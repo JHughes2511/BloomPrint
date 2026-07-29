@@ -251,6 +251,15 @@
       "noTokenReturned": "Geen token ontvangen. Probeer het opnieuw.",
       "somethingWentWrong": "Er is iets misgegaan bij het inloggen met Google.",
       "disabledMsg": "Inloggen met Google wordt ingeschakeld zodra de app live gaat. Gebruik voorlopig e-mail en wachtwoord."
+    },
+    "voiceInput": {
+      "permissionTitle": "Toestemming vereist",
+      "permissionMsg": "Microfoontoegang is nodig voor spraakinvoer.",
+      "recordFailed": "Opname kon niet worden gestart."
+    },
+    "country": {
+      "selectCountry": "Land selecteren",
+      "searchCountries": "Landen zoeken..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "Alle types",
     "selectAllShown": "Selecteer alle getoonde ({{count}})",
     "grade": "Cijfer",
-    "synthesizingOverlay": "De samenvatting wordt samengesteld…"
+    "synthesizingOverlay": "De samenvatting wordt samengesteld…",
+    "generateTraining": "Trainingsprogramma genereren",
+    "regenTrainingFeedback": "Training opnieuw genereren met feedback",
+    "latest": "NIEUWSTE",
+    "playerProfile": "Spelersprofiel",
+    "checklistFeedback": "Feedback om de checklistversie van de speler aan te passen...",
+    "schoolPlaceholder": "Naam van de school",
+    "cityPlaceholder": "Stad",
+    "statePlaceholder": "Provincie",
+    "countryPlaceholder": "Land",
+    "allowRegenerate": "Ontvanger mag opnieuw genereren",
+    "searchCoachPlaceholder": "Naam van coach/programma zoeken...",
+    "summarizeHistoryTitle": "Geschiedenis samenvatten"
   },
   "training": {
     "couldNotOpenFilePicker": "Kon bestandskiezer niet openen.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "Nog geen rapport gegenereerd.",
     "noScoutingReportYet": "Nog geen AI-scoutingrapport gegenereerd voor deze wedstrijd.",
     "addCommentPlaceholder": "Voeg een opmerking toe...",
-    "you": "Jij"
+    "you": "Jij",
+    "subTeamPlaceholder": "Naam subteam (bijv. Offense, Guards)...",
+    "coachNameOrEmail": "Naam of e-mail van coach..."
   },
   "conversation": {
     "title": "Gesprek",
@@ -1812,7 +1835,18 @@
     "savedReports": "Opgeslagen rapporten ({{count}})",
     "updated": "Bijgewerkt {{date}}",
     "generatedReport": "Gegenereerd rapport",
-    "exportPrint": "Exporteren / Afdrukken"
+    "exportPrint": "Exporteren / Afdrukken",
+    "makeCorrection": "Een correctie doorvoeren",
+    "saveForLater": "Bewaren voor later",
+    "applied": "TOEGEPAST",
+    "pending": "IN AFWACHTING",
+    "correctThisAnalysis": "Deze analyse corrigeren",
+    "filmCorrectionPlaceholder": "Wat moet er in deze videoanalyse worden bijgewerkt?",
+    "sendReport": "Rapport versturen",
+    "player": "Speler",
+    "staff": "Staf",
+    "allowRegenerate": "Ontvanger mag opnieuw genereren",
+    "typeNameToSearch": "Typ een naam om te zoeken..."
   },
   "teamGrade": {
     "views": {

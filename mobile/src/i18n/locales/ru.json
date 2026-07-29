@@ -251,6 +251,15 @@
       "noTokenReturned": "Токен не получен. Пожалуйста, попробуйте ещё раз.",
       "somethingWentWrong": "При входе через Google что-то пошло не так.",
       "disabledMsg": "Вход через Google будет включён при запуске приложения. Пока используйте эл. почту и пароль."
+    },
+    "voiceInput": {
+      "permissionTitle": "Требуется разрешение",
+      "permissionMsg": "Для голосового ввода нужен доступ к микрофону.",
+      "recordFailed": "Не удалось начать запись."
+    },
+    "country": {
+      "selectCountry": "Выберите страну",
+      "searchCountries": "Поиск стран..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "Все типы",
     "selectAllShown": "Выбрать все показанные ({{count}})",
     "grade": "Класс",
-    "synthesizingOverlay": "Формируем сводку…"
+    "synthesizingOverlay": "Формируем сводку…",
+    "generateTraining": "Создать тренировочную программу",
+    "regenTrainingFeedback": "Пересоздать тренировку с учётом отзыва",
+    "latest": "ПОСЛЕДНЕЕ",
+    "playerProfile": "Профиль игрока",
+    "checklistFeedback": "Отзыв для корректировки версии чек-листа игрока...",
+    "schoolPlaceholder": "Название школы",
+    "cityPlaceholder": "Город",
+    "statePlaceholder": "Штат",
+    "countryPlaceholder": "Страна",
+    "allowRegenerate": "Разрешить получателю пересоздавать",
+    "searchCoachPlaceholder": "Поиск имени тренера/программы...",
+    "summarizeHistoryTitle": "Кратко изложить историю"
   },
   "training": {
     "couldNotOpenFilePicker": "Не удалось открыть выбор файлов.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "Отчёт ещё не создан.",
     "noScoutingReportYet": "ИИ-скаутинг-отчёт для этой игры ещё не создан.",
     "addCommentPlaceholder": "Добавить комментарий...",
-    "you": "Вы"
+    "you": "Вы",
+    "subTeamPlaceholder": "Название подгруппы (напр. Нападение, Защитники)...",
+    "coachNameOrEmail": "Имя или email тренера..."
   },
   "conversation": {
     "title": "Переписка",
@@ -1812,7 +1835,18 @@
     "savedReports": "Сохранённые отчёты ({{count}})",
     "updated": "Обновлено {{date}}",
     "generatedReport": "Созданный отчёт",
-    "exportPrint": "Экспорт / Печать"
+    "exportPrint": "Экспорт / Печать",
+    "makeCorrection": "Внести исправление",
+    "saveForLater": "Сохранить на потом",
+    "applied": "ПРИМЕНЕНО",
+    "pending": "В ОЖИДАНИИ",
+    "correctThisAnalysis": "Исправить этот анализ",
+    "filmCorrectionPlaceholder": "Что нужно обновить в этом видеоразборе?",
+    "sendReport": "Отправить отчёт",
+    "player": "Игрок",
+    "staff": "Тренерский штаб",
+    "allowRegenerate": "Разрешить получателю пересоздавать",
+    "typeNameToSearch": "Введите имя для поиска..."
   },
   "teamGrade": {
     "views": {

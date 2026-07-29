@@ -251,6 +251,15 @@
       "noTokenReturned": "ტოკენი ვერ დაბრუნდა. გთხოვთ, სცადოთ ხელახლა.",
       "somethingWentWrong": "Google-ით შესვლისას რაღაც შეცდომა მოხდა.",
       "disabledMsg": "Google-ით შესვლა ჩაირთვება აპლიკაციის გაშვებისას. ამჟამად, გთხოვთ, გამოიყენოთ ელფოსტა და პაროლი."
+    },
+    "voiceInput": {
+      "permissionTitle": "საჭიროა ნებართვა",
+      "permissionMsg": "ხმოვანი შეყვანისთვის საჭიროა მიკროფონზე წვდომა.",
+      "recordFailed": "ჩაწერის დაწყება ვერ მოხერხდა."
+    },
+    "country": {
+      "selectCountry": "აირჩიეთ ქვეყანა",
+      "searchCountries": "ქვეყნების ძიება..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "ყველა ტიპი",
     "selectAllShown": "ყველა ნაჩვენების მონიშვნა ({{count}})",
     "grade": "ნიშანი",
-    "synthesizingOverlay": "მიმდინარეობს შეჯამების სინთეზი…"
+    "synthesizingOverlay": "მიმდინარეობს შეჯამების სინთეზი…",
+    "generateTraining": "სავარჯიშო პროგრამის შექმნა",
+    "regenTrainingFeedback": "ვარჯიშის ხელახლა შექმნა უკუკავშირით",
+    "latest": "უახლესი",
+    "playerProfile": "მოთამაშის პროფილი",
+    "checklistFeedback": "უკუკავშირი მოთამაშის სიის ვერსიის დასაზუსტებლად...",
+    "schoolPlaceholder": "სკოლის სახელი",
+    "cityPlaceholder": "ქალაქი",
+    "statePlaceholder": "შტატი",
+    "countryPlaceholder": "ქვეყანა",
+    "allowRegenerate": "მიმღებს ხელახლა გენერირების უფლება",
+    "searchCoachPlaceholder": "მწვრთნელის/პროგრამის სახელის ძიება...",
+    "summarizeHistoryTitle": "ისტორიის შეჯამება"
   },
   "training": {
     "couldNotOpenFilePicker": "ფაილის ამრჩევის გახსნა ვერ მოხერხდა.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "ჯერ ანგარიში არ დაგენერირებულა.",
     "noScoutingReportYet": "ამ თამაშისთვის ჯერ AI სკაუტინგის ანგარიში არ დაგენერირებულა.",
     "addCommentPlaceholder": "დაამატეთ კომენტარი...",
-    "you": "თქვენ"
+    "you": "თქვენ",
+    "subTeamPlaceholder": "ქვეჯგუფის სახელი (მაგ. შეტევა, გარდები)...",
+    "coachNameOrEmail": "მწვრთნელის სახელი ან ელფოსტა..."
   },
   "conversation": {
     "title": "საუბარი",
@@ -1812,7 +1835,18 @@
     "savedReports": "შენახული ანგარიშები ({{count}})",
     "updated": "განახლდა {{date}}",
     "generatedReport": "დაგენერირებული ანგარიში",
-    "exportPrint": "ექსპორტი / ბეჭდვა"
+    "exportPrint": "ექსპორტი / ბეჭდვა",
+    "makeCorrection": "შესწორების შეტანა",
+    "saveForLater": "შენახვა მოგვიანებისთვის",
+    "applied": "გამოყენებული",
+    "pending": "მოლოდინში",
+    "correctThisAnalysis": "ამ ანალიზის შესწორება",
+    "filmCorrectionPlaceholder": "რა უნდა განახლდეს ამ ვიდეოანალიზში?",
+    "sendReport": "ანგარიშის გაგზავნა",
+    "player": "მოთამაშე",
+    "staff": "შტაბი",
+    "allowRegenerate": "მიმღებს ხელახლა გენერირების უფლება",
+    "typeNameToSearch": "ჩაწერეთ სახელი ძიებისთვის..."
   },
   "teamGrade": {
     "views": {
