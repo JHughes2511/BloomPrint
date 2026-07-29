@@ -251,6 +251,15 @@
       "noTokenReturned": "No token returned. Please try again.",
       "somethingWentWrong": "Something went wrong signing in with Google.",
       "disabledMsg": "Google sign-in will be enabled when the app launches. For now, please use email and password."
+    },
+    "voiceInput": {
+      "permissionTitle": "Permission required",
+      "permissionMsg": "Microphone access is needed for voice input.",
+      "recordFailed": "Could not start recording."
+    },
+    "country": {
+      "selectCountry": "Select Country",
+      "searchCountries": "Search countries..."
     }
   },
   "newEval": {
@@ -836,7 +845,19 @@
     "allTypes": "All Types",
     "selectAllShown": "Select all shown ({{count}})",
     "grade": "Grade",
-    "synthesizingOverlay": "Synthesizing the summary…"
+    "synthesizingOverlay": "Synthesizing the summary…",
+    "generateTraining": "Generate Training Program",
+    "regenTrainingFeedback": "Regenerate Training with Feedback",
+    "latest": "LATEST",
+    "playerProfile": "Player Profile",
+    "checklistFeedback": "Feedback to adjust the player's checklist version...",
+    "schoolPlaceholder": "School name",
+    "cityPlaceholder": "City",
+    "statePlaceholder": "State",
+    "countryPlaceholder": "Country",
+    "allowRegenerate": "Allow recipient to regenerate",
+    "searchCoachPlaceholder": "Search coach/program name...",
+    "summarizeHistoryTitle": "Summarize History"
   },
   "training": {
     "couldNotOpenFilePicker": "Could not open file picker.",
@@ -1359,7 +1380,9 @@
     "noReportYet": "No report generated yet.",
     "noScoutingReportYet": "No AI scouting report generated yet for this game.",
     "addCommentPlaceholder": "Add a comment...",
-    "you": "You"
+    "you": "You",
+    "subTeamPlaceholder": "Sub-team name (e.g. Offense, Guards)...",
+    "coachNameOrEmail": "Coach name or email..."
   },
   "conversation": {
     "title": "Conversation",
@@ -1812,7 +1835,18 @@
     "savedReports": "Saved Reports ({{count}})",
     "updated": "Updated {{date}}",
     "generatedReport": "Generated Report",
-    "exportPrint": "Export / Print"
+    "exportPrint": "Export / Print",
+    "makeCorrection": "Make a Correction",
+    "saveForLater": "Save for Later",
+    "applied": "APPLIED",
+    "pending": "PENDING",
+    "correctThisAnalysis": "Correct This Analysis",
+    "filmCorrectionPlaceholder": "What needs to be updated in this film analysis?",
+    "sendReport": "Send Report",
+    "player": "Player",
+    "staff": "Staff",
+    "allowRegenerate": "Allow recipient to regenerate",
+    "typeNameToSearch": "Type a name to search..."
   },
   "teamGrade": {
     "views": {

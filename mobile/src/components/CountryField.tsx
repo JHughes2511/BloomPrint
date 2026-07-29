@@ -4,6 +4,7 @@ import {
   KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -25,6 +26,7 @@ export default function CountryField({
   label?: string;
 }) {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const s = makeStyles(t);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -50,14 +52,14 @@ export default function CountryField({
         >
           <SafeAreaView style={s.sheet}>
             <View style={s.header}>
-              <Text style={s.title}>Select Country</Text>
+              <Text style={s.title}>{tr('components.country.selectCountry')}</Text>
               <TouchableOpacity onPress={() => { setOpen(false); setSearch(''); }}>
                 <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
             <TextInput
               style={s.search}
-              placeholder="Search countries..."
+              placeholder={tr('components.country.searchCountries')}
               placeholderTextColor={t.muted2}
               value={search}
               onChangeText={setSearch}

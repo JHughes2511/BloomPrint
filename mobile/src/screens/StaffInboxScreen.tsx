@@ -652,7 +652,7 @@ export default function StaffInboxScreen() {
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={[styles.modalBox, { maxHeight: '80%' }]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <Text style={styles.modalTitle}>New Message</Text>
+              <Text style={styles.modalTitle}>{tr('staffHub.newMessage')}</Text>
               <TouchableOpacity onPress={() => { setShowCompose(false); setSelectedStaff([]); }}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
             <Text style={[styles.cardSub, { marginBottom: 8 }]}>Search staff by name. Add more than one for a group message.</Text>
@@ -669,7 +669,7 @@ export default function StaffInboxScreen() {
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
               <TextInput
                 style={[styles.searchInput, { flex: 1 }]}
-                placeholder="Search staff name..."
+                placeholder={tr('staffHub.searchStaffPlaceholder')}
                 placeholderTextColor={t.muted2}
                 value={staffSearch}
                 onChangeText={setStaffSearch}
@@ -707,11 +707,11 @@ export default function StaffInboxScreen() {
       <Modal visible={showCreateTeam} transparent animationType="fade" onRequestClose={() => setShowCreateTeam(false)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={[styles.modalBox, { padding: 20 }]}>
-            <Text style={styles.modalTitle}>New Team</Text>
+            <Text style={styles.modalTitle}>{tr('staffHub.newTeam')}</Text>
             <Text style={[styles.cardSub, { marginTop: 4, marginBottom: 12 }]}>Create a team, then add sub-teams and invite coaches.</Text>
             <TextInput
               style={styles.searchInput}
-              placeholder="Team name..."
+              placeholder={tr('staffHub.teamNamePlaceholder')}
               placeholderTextColor={t.muted2}
               value={newTeamName}
               onChangeText={setNewTeamName}
@@ -719,10 +719,10 @@ export default function StaffInboxScreen() {
             />
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity style={[styles.startBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setShowCreateTeam(false)}>
-                <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
+                <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.startBtn, { flex: 1, opacity: newTeamName.trim() && !creatingTeam ? 1 : 0.5 }]} onPress={createTeam} disabled={!newTeamName.trim() || creatingTeam}>
-                {creatingTeam ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.startBtnText}>Create</Text>}
+                {creatingTeam ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.startBtnText}>{tr('staffHub.create')}</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -737,7 +737,7 @@ export default function StaffInboxScreen() {
             <Text style={[styles.cardSub, { marginTop: 4, marginBottom: 12 }]}>Under {subFor?.name}</Text>
             <TextInput
               style={styles.searchInput}
-              placeholder="Sub-team name (e.g. Offense, Guards)..."
+              placeholder={tr('staffHub.subTeamPlaceholder')}
               placeholderTextColor={t.muted2}
               value={subName}
               onChangeText={setSubName}
@@ -745,10 +745,10 @@ export default function StaffInboxScreen() {
             />
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity style={[styles.startBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setSubFor(null)}>
-                <Text style={{ color: t.ink, fontFamily: fonts[700] }}>Cancel</Text>
+                <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.startBtn, { flex: 1, opacity: subName.trim() && !creatingSub ? 1 : 0.5 }]} onPress={createSubteam} disabled={!subName.trim() || creatingSub}>
-                {creatingSub ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.startBtnText}>Create</Text>}
+                {creatingSub ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.startBtnText}>{tr('staffHub.create')}</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -767,7 +767,7 @@ export default function StaffInboxScreen() {
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
               <TextInput
                 style={[styles.searchInput, { flex: 1 }]}
-                placeholder="Coach name or email..."
+                placeholder={tr('staffHub.coachNameOrEmail')}
                 placeholderTextColor={t.muted2}
                 value={inviteSearch}
                 onChangeText={setInviteSearch}
@@ -853,7 +853,7 @@ export default function StaffInboxScreen() {
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
               <VoiceTextInput
                 style={[styles.input, { flex: 1, marginBottom: 0 }]}
-                placeholder="Add a comment..."
+                placeholder={tr('staffHub.addCommentPlaceholder')}
                 placeholderTextColor={t.muted2}
                 value={gameCommentText}
                 onChangeText={setGameCommentText}

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, Pressable, TextInputProps, Alert, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Audio } from 'expo-av';
 import { transcribeAPI } from '../api/client';
 import { useTheme } from '../theme/ThemeProvider';
@@ -22,6 +23,7 @@ export default function VoiceTextInput({
   ...rest
 }: Props) {
   const { t } = useTheme();
+  const { t: tr } = useTranslation();
   const [listening, setListening] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
 
@@ -122,7 +124,7 @@ export default function VoiceTextInput({
     try {
       const { granted } = await Audio.requestPermissionsAsync();
       if (!granted) {
-        Alert.alert('Permission required', 'Microphone access is needed for voice input.');
+        Alert.alert(tr('components.voiceInput.permissionTitle'), tr('components.voiceInput.permissionMsg'));
         return;
       }
       await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
@@ -130,7 +132,7 @@ export default function VoiceTextInput({
       setListening(true);
       await startChunk();
     } catch {
-      Alert.alert('Error', 'Could not start recording.');
+      Alert.alert(tr('common.error'), tr('components.voiceInput.recordFailed'));
     }
   };
 

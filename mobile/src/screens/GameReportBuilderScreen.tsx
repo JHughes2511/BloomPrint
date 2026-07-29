@@ -818,7 +818,7 @@ export default function GameReportBuilderScreen() {
 
             {/* Correction section */}
             <View style={styles.correctionSection}>
-              <Text style={styles.correctionLabel}>Make a Correction</Text>
+              <Text style={styles.correctionLabel}>{tr('gameBuilder.makeCorrection')}</Text>
               <VoiceTextInput
                 style={styles.correctionInput}
                 placeholder="e.g. The point guard is actually a better defender than scorer..."
@@ -837,7 +837,7 @@ export default function GameReportBuilderScreen() {
                 >
                   {savingCorrection
                     ? <ActivityIndicator color={t.ink} size="small" />
-                    : <Text style={[styles.correctionBtnText, { color: t.ink }]}>Save for Later</Text>}
+                    : <Text style={[styles.correctionBtnText, { color: t.ink }]}>{tr('gameBuilder.saveForLater')}</Text>}
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.correctionBtn, { flex: 1 }, correcting && { opacity: 0.5 }]}
@@ -859,10 +859,10 @@ export default function GameReportBuilderScreen() {
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
                         {c.applied
                           ? <View style={{ backgroundColor: t.positiveSoft, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}>
-                              <Text style={{ color: t.positive, fontSize: 9, fontFamily: fonts[700] }}>APPLIED</Text>
+                              <Text style={{ color: t.positive, fontSize: 9, fontFamily: fonts[700] }}>{tr('gameBuilder.applied')}</Text>
                             </View>
                           : <View style={{ backgroundColor: t.chip, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}>
-                              <Text style={{ color: t.muted, fontSize: 9, fontFamily: fonts[700] }}>PENDING</Text>
+                              <Text style={{ color: t.muted, fontSize: 9, fontFamily: fonts[700] }}>{tr('gameBuilder.pending')}</Text>
                             </View>}
                         <Text style={{ color: t.muted2, fontSize: 10 }}>{c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}</Text>
                       </View>
@@ -918,10 +918,10 @@ export default function GameReportBuilderScreen() {
                 : <Text style={{ color: t.muted }}>No analysis yet.</Text>
               }
             </KeyboardAwareScrollView>
-            <Text style={[styles.correctionLabel, { marginTop: 16 }]}>Correct This Analysis</Text>
+            <Text style={[styles.correctionLabel, { marginTop: 16 }]}>{tr('gameBuilder.correctThisAnalysis')}</Text>
             <VoiceTextInput
               style={styles.correctionInput}
-              placeholder="What needs to be updated in this film analysis?"
+              placeholder={tr('gameBuilder.filmCorrectionPlaceholder')}
               placeholderTextColor={t.muted2}
               value={clipCorrectionText}
               onChangeText={setClipCorrectionText}
@@ -973,7 +973,7 @@ export default function GameReportBuilderScreen() {
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Send Report</Text>
+              <Text style={styles.modalTitle}>{tr('gameBuilder.sendReport')}</Text>
               <TouchableOpacity onPress={() => setShowShare(false)}>
                 <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
@@ -984,18 +984,18 @@ export default function GameReportBuilderScreen() {
                 style={[styles.chip, shareMode === 'player' && styles.chipActive, { flex: 1 }]}
                 onPress={() => { setShareMode('player'); setShareSearch(''); setShareResults([]); }}
               >
-                <Text style={[styles.chipText, shareMode === 'player' && styles.chipTextActive]}>Player</Text>
+                <Text style={[styles.chipText, shareMode === 'player' && styles.chipTextActive]}>{tr('gameBuilder.player')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.chip, shareMode === 'staff' && styles.chipActive, { flex: 1 }]}
                 onPress={() => { setShareMode('staff'); setShareSearch(''); setShareResults([]); }}
               >
-                <Text style={[styles.chipText, shareMode === 'staff' && styles.chipTextActive]}>Staff</Text>
+                <Text style={[styles.chipText, shareMode === 'staff' && styles.chipTextActive]}>{tr('gameBuilder.staff')}</Text>
               </TouchableOpacity>
             </View>
             {shareMode === 'staff' && (
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, backgroundColor: t.chip, borderRadius: 8, padding: 12 }}>
-                <Text style={{ color: t.inkSoft, fontSize: 13 }}>Allow recipient to regenerate</Text>
+                <Text style={{ color: t.inkSoft, fontSize: 13 }}>{tr('gameBuilder.allowRegenerate')}</Text>
                 <TouchableOpacity
                   onPress={() => setAllowRegenerate(v => !v)}
                   style={{ width: 40, height: 22, borderRadius: 11, backgroundColor: allowRegenerate ? t.accent : t.line, justifyContent: 'center', paddingHorizontal: 2 }}
@@ -1009,7 +1009,7 @@ export default function GameReportBuilderScreen() {
             </Text>
             <VoiceTextInput
               style={styles.searchInput}
-              placeholder="Type a name to search..."
+              placeholder={tr('gameBuilder.typeNameToSearch')}
               placeholderTextColor={t.muted}
               value={shareSearch}
               onChangeText={setShareSearch}
