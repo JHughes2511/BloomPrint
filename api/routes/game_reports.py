@@ -12,6 +12,7 @@ from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
+from ..ownership import owns
 
 
 def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: str,
@@ -566,8 +567,11 @@ async def generate_game_report(
             if not tok:
                 continue
             if tok.startswith("t") and tok[1:].isdigit():
+                # A match-up may only pull in rosters from this coach's own
+                # teams — otherwise any team id would leak its roster into
+                # the prompt (and from there into the report).
                 team = db.get(models.Team, int(tok[1:]))
-                if not team:
+                if not owns(team, coach.id):
                     continue
                 roster = ""
                 for p in db.query(models.Player).filter_by(team_id=team.id).all():

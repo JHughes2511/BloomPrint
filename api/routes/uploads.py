@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from ..auth import get_current_coach
 from ..database import get_db
 from .. import models
+from ..ownership import owns
 
 router = APIRouter(prefix="/uploads", tags=["uploads"])
 
@@ -228,7 +229,7 @@ async def import_excel(
                     program_name = coach.program_name
                     if team_id:
                         t = db.get(models.Team, team_id)
-                        if t:
+                        if owns(t, coach.id):
                             program_name = t.name
                     player = models.Player(
                         name=player_name,

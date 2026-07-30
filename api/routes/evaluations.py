@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
 from .. import models, schemas
+from ..ownership import get_owned
 
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -249,9 +250,7 @@ async def submit_evaluation(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    player = db.get(models.Player, player_id)
-    if not player:
-        raise HTTPException(status_code=404, detail="Player not found")
+    player = get_owned(db, models.Player, player_id, coach.id, "Player")
 
     # Frame the eval at the right competition level: the player's own level (which
     # itself defaults to their team's / the coach's), then the coach's signup level.
@@ -572,7 +571,7 @@ async def team_report(
     team_label = coach.program_name
     team_obj = None
     if team_id is not None:
-        team_obj = db.get(models.Team, team_id)
+        team_obj = get_owned(db, models.Team, team_id, coach.id, "Team")
         if team_obj:
             team_label = f"{team_obj.name} ({coach.program_name})"
 
@@ -634,9 +633,7 @@ def get_evaluation(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    ev = db.get(models.Evaluation, eval_id)
-    if not ev:
-        raise HTTPException(status_code=404, detail="Evaluation not found")
+    ev = get_owned(db, models.Evaluation, eval_id, coach.id, "Evaluation")
     _backfill_parsed(db, ev)
     return ev
 
@@ -647,9 +644,7 @@ def delete_evaluation(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    ev = db.get(models.Evaluation, eval_id)
-    if not ev:
-        raise HTTPException(status_code=404, detail="Evaluation not found")
+    ev = get_owned(db, models.Evaluation, eval_id, coach.id, "Evaluation")
     db.delete(ev)
     db.commit()
     return {"ok": True}
@@ -661,9 +656,7 @@ def delete_team_report(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    tr = db.get(models.TeamReport, report_id)
-    if not tr:
-        raise HTTPException(status_code=404, detail="Team report not found")
+    tr = get_owned(db, models.TeamReport, report_id, coach.id, "Team report")
     db.delete(tr)
     db.commit()
     return {"ok": True}
@@ -680,9 +673,7 @@ def add_team_report_correction(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    tr = db.get(models.TeamReport, report_id)
-    if not tr:
-        raise HTTPException(status_code=404, detail="Team report not found")
+    get_owned(db, models.TeamReport, report_id, coach.id, "Team report")
     c = models.TeamReportCorrection(
         team_report_id=report_id,
         coach_id=coach.id,
@@ -709,8 +700,8 @@ async def regenerate_team_report(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    tr = db.get(models.TeamReport, report_id)
-    if not tr or not tr.report_text:
+    tr = get_owned(db, models.TeamReport, report_id, coach.id, "Team report")
+    if not tr.report_text:
         raise HTTPException(status_code=404, detail="Team report not found")
     corrections = db.query(models.TeamReportCorrection).filter_by(team_report_id=report_id, applied=False).all()
     if not corrections:
@@ -760,8 +751,8 @@ async def correct_team_report(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    tr = db.get(models.TeamReport, report_id)
-    if not tr or not tr.report_text:
+    tr = get_owned(db, models.TeamReport, report_id, coach.id, "Team report")
+    if not tr.report_text:
         raise HTTPException(status_code=404, detail="Team report not found")
 
     prompt = (
@@ -792,9 +783,7 @@ def submit_correction(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    ev = db.get(models.Evaluation, eval_id)
-    if not ev:
-        raise HTTPException(status_code=404, detail="Evaluation not found")
+    get_owned(db, models.Evaluation, eval_id, coach.id, "Evaluation")
     correction = models.Correction(
         evaluation_id=eval_id,
         coach_id=coach.id,
@@ -825,9 +814,7 @@ async def regenerate_evaluation(
     coach: models.Coach = Depends(get_current_coach),
 ):
     """Re-run AI with all unapplied corrections, update the eval in-place, mark corrections applied."""
-    ev = db.get(models.Evaluation, eval_id)
-    if not ev:
-        raise HTTPException(status_code=404, detail="Evaluation not found")
+    ev = get_owned(db, models.Evaluation, eval_id, coach.id, "Evaluation")
     corrections = db.query(models.Correction).filter_by(evaluation_id=eval_id, applied=False).all()
     if not corrections or not ev.report_text:
         return ev
@@ -894,9 +881,7 @@ async def apply_corrections(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    ev = db.get(models.Evaluation, eval_id)
-    if not ev:
-        raise HTTPException(status_code=404, detail="Evaluation not found")
+    ev = get_owned(db, models.Evaluation, eval_id, coach.id, "Evaluation")
     corrections = db.query(models.Correction).filter_by(evaluation_id=eval_id).all()
     if not corrections or not ev.report_text:
         return ev

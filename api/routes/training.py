@@ -7,6 +7,7 @@ from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
+from ..ownership import get_owned
 
 router = APIRouter(prefix="/training", tags=["training"])
 
@@ -148,14 +149,12 @@ async def generate_training(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    player = db.get(models.Player, player_id)
-    if not player:
-        raise HTTPException(status_code=404, detail="Player not found")
+    player = get_owned(db, models.Player, player_id, coach.id, "Player")
 
     eval_record = None
     if evaluation_id:
-        eval_record = db.get(models.Evaluation, evaluation_id)
-        if not eval_record or eval_record.player_id != player_id:
+        eval_record = get_owned(db, models.Evaluation, evaluation_id, coach.id, "Evaluation")
+        if eval_record.player_id != player_id:
             raise HTTPException(status_code=404, detail="Evaluation not found for this player")
 
     # Optional coach-uploaded reference material (PDF/Word/txt/xlsx/csv/image).
@@ -277,9 +276,7 @@ def send_training_to_player(
     """Send a training session notification to the linked player user. The
     AI reformats it into the player's checklist format in the background —
     the coach's own program_text is never touched."""
-    session = db.get(models.TrainingSession, training_id)
-    if not session:
-        raise HTTPException(status_code=404, detail="Training session not found")
+    session = get_owned(db, models.TrainingSession, training_id, coach.id, "Training session")
     player = db.get(models.Player, session.player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
@@ -534,9 +531,7 @@ async def regenerate_training(
     coach: models.Coach = Depends(get_current_coach),
 ):
     """Regenerate training program with coach feedback, replacing the latest session."""
-    player = db.get(models.Player, player_id)
-    if not player:
-        raise HTTPException(status_code=404, detail="Player not found")
+    player = get_owned(db, models.Player, player_id, coach.id, "Player")
 
     # Get the latest training session for this player
     latest = (

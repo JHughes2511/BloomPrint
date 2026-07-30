@@ -7,6 +7,7 @@ from ..database import get_db
 from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
+from ..ownership import get_owned
 
 
 class PlayerUpdate(BaseModel):
@@ -118,9 +119,7 @@ def update_player(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    player = db.get(models.Player, player_id)
-    if not player:
-        raise HTTPException(status_code=404, detail="Player not found")
+    player = get_owned(db, models.Player, player_id, coach.id, "Player")
     if body.name is not None:
         player.name = body.name
     if body.position is not None:
@@ -130,7 +129,9 @@ def update_player(
     if body.competition_level is not None:
         player.competition_level = body.competition_level
     if body.team_id is not None:
-        team = db.get(models.Team, body.team_id)
+        # Only a team this coach owns — otherwise a player could be labelled
+        # with another coach's team name.
+        team = get_owned(db, models.Team, body.team_id, coach.id, "Team")
         player.team_id = body.team_id
         if team:
             player.program_name = team.name
@@ -155,9 +156,7 @@ def delete_player(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    player = db.get(models.Player, player_id)
-    if not player:
-        raise HTTPException(status_code=404, detail="Player not found")
+    player = get_owned(db, models.Player, player_id, coach.id, "Player")
     db.delete(player)
     db.commit()
     return {"ok": True}
@@ -275,9 +274,7 @@ async def player_summary(
             status_code=500,
             detail="ANTHROPIC_API_KEY is not set on the server. Ask the server admin to configure it."
         )
-    player = db.get(models.Player, player_id)
-    if not player:
-        raise HTTPException(status_code=404, detail="Player not found")
+    player = get_owned(db, models.Player, player_id, coach.id, "Player")
 
     evals = player.evaluations
     if not evals:

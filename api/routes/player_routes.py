@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
 from .. import models, schemas
+from ..ownership import get_owned
 from .player_auth import get_current_player_user
 
 router = APIRouter(prefix="/player", tags=["player"])
@@ -20,9 +21,7 @@ def generate_invite(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    player = db.get(models.Player, player_id)
-    if not player:
-        raise HTTPException(status_code=404, detail="Player not found")
+    player = get_owned(db, models.Player, player_id, coach.id, "Player")
     code = secrets.token_urlsafe(8).upper()
     invite = models.InviteCode(code=code, coach_id=coach.id, player_id=player_id)
     db.add(invite)
@@ -342,9 +341,7 @@ def share_report(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    ev = db.get(models.Evaluation, eval_id)
-    if not ev:
-        raise HTTPException(status_code=404, detail="Evaluation not found")
+    ev = get_owned(db, models.Evaluation, eval_id, coach.id, "Evaluation")
     pu = db.get(models.PlayerUser, body.player_user_id)
     if not pu:
         raise HTTPException(status_code=404, detail="Player user not found")
