@@ -68,14 +68,15 @@ export default function PlayerTeamReportDetailScreen() {
     <ScreenBackground>
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.title}>
+          {/* Long translated report types clip instead of wrapping the header. */}
+          <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginLeft: 12, marginRight: 8 }}>
+            <Text style={styles.title} numberOfLines={1}>
               {report.output_type.replace(/_/g, ' ').toUpperCase()}
             </Text>
-            <Text style={styles.sub}>
+            <Text style={styles.sub} numberOfLines={1}>
               {tr('playerApp.teamReportDetail.sharedBy', { name: report.shared_by_name || tr('playerApp.teamReportDetail.coachFallback'), date: new Date(report.created_at).toLocaleDateString() })}
             </Text>
           </View>
@@ -83,14 +84,14 @@ export default function PlayerTeamReportDetailScreen() {
 
         {report.message ? (
           <View style={styles.messageBox}>
-            <Text style={styles.messageLabel}>{tr('playerApp.teamReportDetail.coachMessage')}</Text>
+            <Text style={styles.messageLabel} numberOfLines={1}>{tr('playerApp.teamReportDetail.coachMessage')}</Text>
             <Text style={styles.messageText}>{report.message}</Text>
           </View>
         ) : null}
 
         {report.report_text ? (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{tr('playerApp.teamReportDetail.teamReport')}</Text>
+            <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.teamReportDetail.teamReport')}</Text>
             <View style={styles.reportBox}>
               <Markdown style={markdownStyles}>{cleanMarkdown(report.report_text)}</Markdown>
             </View>
@@ -114,8 +115,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56 },
-  title: { color: t.ink, fontSize: 16, fontFamily: fonts[900] },
-  sub: { color: t.muted, fontSize: 11, marginTop: 2 },
+  title: { color: t.ink, fontSize: 16, fontFamily: fonts[900], flexShrink: 1 },
+  sub: { color: t.muted, fontSize: 11, marginTop: 2, flexShrink: 1 },
   messageBox: {
     backgroundColor: t.positiveSoft,
     borderLeftWidth: 3,
@@ -125,7 +126,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     padding: 12,
     borderRadius: 8,
   },
-  messageLabel: { color: t.positive, fontSize: 10, fontFamily: fonts[700], marginBottom: 4, textTransform: 'uppercase' },
+  messageLabel: { color: t.positive, fontSize: 10, fontFamily: fonts[700], marginBottom: 4, textTransform: 'uppercase', flexShrink: 1 },
   messageText: { color: t.inkSoft, fontSize: 13 },
   section: { paddingHorizontal: 20, marginTop: 20 },
   sectionLabel: { color: t.label, fontSize: 11, fontFamily: fonts[700], letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 },

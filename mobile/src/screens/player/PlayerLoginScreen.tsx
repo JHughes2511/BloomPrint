@@ -70,8 +70,8 @@ export default function PlayerLoginScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.logo}>BloomPrint</Text>
-          <Text style={styles.sub}>{tr('playerApp.login.playerPortal')}</Text>
+          <Text style={styles.logo} numberOfLines={1}>BloomPrint</Text>
+          <Text style={styles.sub} numberOfLines={1}>{tr('playerApp.login.playerPortal')}</Text>
 
           <VoiceTextInput
             style={styles.input}
@@ -94,25 +94,25 @@ export default function PlayerLoginScreen() {
           <TouchableOpacity style={styles.btn} onPress={submit} disabled={loading}>
             {loading
               ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.btnText}>{tr('auth.signIn')}</Text>}
+              : <Text style={styles.btnText} numberOfLines={1}>{tr('auth.signIn')}</Text>}
           </TouchableOpacity>
 
           <View style={styles.orRow}>
             <View style={styles.orLine} />
-            <Text style={styles.orText}>{tr('auth.or')}</Text>
+            <Text style={styles.orText} numberOfLines={1}>{tr('auth.or')}</Text>
             <View style={styles.orLine} />
           </View>
           <GoogleSignInButton onIdToken={handleGoogleIdToken} busy={googleBusy} color={t.positive} />
 
           <TouchableOpacity onPress={() => navigation.navigate('PlayerRegister')}>
-            <Text style={styles.toggle}>{tr('auth.noAccountRegister')}</Text>
+            <Text style={styles.toggle} numberOfLines={2}>{tr('auth.noAccountRegister')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.backBtn}
             onPress={() => navigation.navigate('RoleSelect')}
           >
-            <Text style={styles.backText}>{tr('auth.backToRoleSelect')}</Text>
+            <Text style={styles.backText} numberOfLines={2}>{tr('auth.backToRoleSelect')}</Text>
           </TouchableOpacity>
 
           <View style={{ marginTop: 20, alignItems: 'center' }}>
@@ -132,7 +132,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     padding: 24,
   },
   logo: { fontSize: 36, fontFamily: fonts[900], color: t.ink, letterSpacing: 1 },
-  sub: { fontSize: 13, color: t.positive, marginBottom: 40, marginTop: 4, fontFamily: fonts[600] },
+  sub: { fontSize: 13, color: t.positive, marginBottom: 40, marginTop: 4, fontFamily: fonts[600], flexShrink: 1 },
   input: {
     width: '100%',
     backgroundColor: t.card,
@@ -152,11 +152,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
   },
-  btnText: { color: '#fff', fontFamily: fonts[700], fontSize: 16 },
-  toggle: { color: t.positive, marginTop: 20, fontSize: 13 },
+  btnText: { color: '#fff', fontFamily: fonts[700], fontSize: 16, flexShrink: 1 },
+  toggle: { color: t.positive, marginTop: 20, fontSize: 13, textAlign: 'center' },
   backBtn: { marginTop: 32 },
-  backText: { color: t.muted2, fontSize: 12 },
+  backText: { color: t.muted2, fontSize: 12, textAlign: 'center' },
   orRow: { flexDirection: 'row', alignItems: 'center', width: '100%', marginTop: 16, marginBottom: 4, gap: 10 },
-  orLine: { flex: 1, height: 1, backgroundColor: t.divider },
-  orText: { color: t.muted2, fontSize: 12 },
+  orLine: { flex: 1, flexShrink: 1, minWidth: 0, height: 1, backgroundColor: t.divider },
+  orText: { color: t.muted2, fontSize: 12, flexShrink: 0 },
 });

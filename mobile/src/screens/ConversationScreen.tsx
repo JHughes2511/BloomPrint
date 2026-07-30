@@ -209,7 +209,7 @@ export default function ConversationScreen() {
       return (
         <TouchableOpacity key={a.id ?? 'aud'} style={styles.attAudio} onPress={() => playAudio(a.data)}>
           <Ionicons name="play" size={16} color={mine ? '#fff' : t.accent} />
-          <Text style={[styles.attAudioText, mine && { color: '#fff' }]}>{tr('conversation.voiceMessage')}</Text>
+          <Text style={[styles.attAudioText, mine && { color: '#fff' }]} numberOfLines={1}>{tr('conversation.voiceMessage')}</Text>
         </TouchableOpacity>
       );
     }
@@ -231,10 +231,12 @@ export default function ConversationScreen() {
   return (
     <ScreenBackground>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
-        <Text style={styles.title} numberOfLines={1}>{title}</Text>
+        {/* Conversation titles are user data and translated fallbacks run longer,
+            so the title shrinks and clips instead of pushing the row wider. */}
+        <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{title}</Text>
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={0}>
@@ -301,8 +303,8 @@ export default function ConversationScreen() {
         <View style={styles.overlay}>
           <View style={styles.sheet}>
             <View style={styles.sheetHead}>
-              <Text style={styles.sheetTitle}>{tr('conversation.attachReport')}</Text>
-              <TouchableOpacity onPress={() => setShowReportPicker(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
+              <Text style={styles.sheetTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('conversation.attachReport')}</Text>
+              <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setShowReportPicker(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
             <View style={styles.pickerSearch}>
               <Ionicons name="search" size={16} color={t.muted} />
@@ -326,11 +328,11 @@ export default function ConversationScreen() {
                     if (!rows.length) return null;
                     return (
                       <View key={cat}>
-                        <Text style={styles.catHeader}>{cat}</Text>
+                        <Text style={styles.catHeader} numberOfLines={1}>{cat}</Text>
                         {rows.map((r, i) => (
                           <TouchableOpacity key={`${r.report_type}-${r.report_id}-${i}`} style={styles.reportRow} onPress={() => attachReport(r)}>
                             <Ionicons name="document-text-outline" size={16} color={t.accent} />
-                            <View style={{ flex: 1 }}>
+                            <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
                               <Text style={styles.reportRowText} numberOfLines={1}>{r.report_title}</Text>
                               {!!r.sub && <Text style={styles.reportRowSub} numberOfLines={1}>{r.sub}</Text>}
                             </View>
@@ -351,8 +353,8 @@ export default function ConversationScreen() {
         <View style={styles.overlay}>
           <View style={[styles.sheet, { maxHeight: '85%' }]}>
             <View style={styles.sheetHead}>
-              <Text style={styles.sheetTitle} numberOfLines={1}>{reportView?.title}</Text>
-              <TouchableOpacity onPress={() => setReportView(null)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
+              <Text style={styles.sheetTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{reportView?.title}</Text>
+              <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setReportView(null)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
             <ScrollView>{reportView ? renderReport(reportView.text, { heading: t.ink, body: t.inkSoft }) : null}</ScrollView>
           </View>
@@ -364,7 +366,7 @@ export default function ConversationScreen() {
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingTop: 56, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: t.divider },
-  title: { color: t.ink, fontSize: 18, fontFamily: fonts[800], flex: 1 },
+  title: { color: t.ink, fontSize: 18, fontFamily: fonts[800], flex: 1, flexShrink: 1, minWidth: 0 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   empty: { color: t.muted2, fontSize: 13, textAlign: 'center', marginVertical: 20 },
   bubbleRow: { flexDirection: 'row', marginBottom: 8 },
@@ -376,7 +378,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   bubbleTime: { color: t.muted2, fontSize: 10, marginTop: 4, alignSelf: 'flex-end' },
   attImage: { width: 200, height: 150, borderRadius: 10, marginBottom: 6 },
   attAudio: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.chip, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 6 },
-  attAudioText: { color: t.inkSoft, fontSize: 13, fontFamily: fonts[600] },
+  attAudioText: { color: t.inkSoft, fontSize: 13, fontFamily: fonts[600], flexShrink: 1 },
   attReport: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: t.card, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 11, marginBottom: 6, borderWidth: 1, borderColor: t.cardBorder, width: 240, maxWidth: '100%' },
   attReportIcon: { width: 34, height: 34, borderRadius: 9, backgroundColor: t.accent, alignItems: 'center', justifyContent: 'center' },
   attReportTitle: { color: t.ink, fontSize: 13.5, fontFamily: fonts[700] },
@@ -385,13 +387,13 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   pendingChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: t.accentSoft, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: t.accent, maxWidth: 200 },
   pendingChipText: { color: t.accent, fontSize: 12, fontFamily: fonts[600], flexShrink: 1 },
   composer: { flexDirection: 'row', alignItems: 'flex-end', gap: 4, paddingHorizontal: 8, paddingVertical: 8, borderTopWidth: 1, borderTopColor: t.divider },
-  attachBtn: { width: 34, height: 40, alignItems: 'center', justifyContent: 'center' },
+  attachBtn: { width: 34, height: 40, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   input: { flex: 1, backgroundColor: t.chip, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 9, color: t.ink, fontSize: 14.5, borderWidth: 1, borderColor: t.line, maxHeight: 110, minHeight: 40 },
-  sendBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.accent, alignItems: 'center', justifyContent: 'center' },
+  sendBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.accent, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, maxHeight: '70%', borderWidth: 1, borderColor: t.cardBorder },
   sheetHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sheetTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[800], flex: 1 },
+  sheetTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[800], flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 },
   reportRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: t.divider },
   reportRowText: { color: t.inkSoft, fontSize: 14, fontFamily: fonts[600] },
   reportRowSub: { color: t.muted2, fontSize: 11, marginTop: 1 },

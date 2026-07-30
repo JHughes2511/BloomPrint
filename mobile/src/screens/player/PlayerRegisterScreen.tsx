@@ -129,11 +129,11 @@ export default function PlayerRegisterScreen() {
     return (
       <ScreenBackground>
       <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ padding: 24, paddingTop: 60 }}>
-        <Text style={styles.logo}>{tr('playerApp.register.welcome')}</Text>
-        <Text style={styles.sub}>{tr('playerApp.register.linkYourProfile')}</Text>
+        <Text style={styles.logo} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('playerApp.register.welcome')}</Text>
+        <Text style={styles.sub} numberOfLines={1}>{tr('playerApp.register.linkYourProfile')}</Text>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{tr('playerApp.register.enterInviteCode')}</Text>
+          <Text style={styles.sectionTitle} numberOfLines={1}>{tr('playerApp.register.enterInviteCode')}</Text>
           <Text style={styles.sectionDesc}>{tr('playerApp.register.enterInviteCodeDesc')}</Text>
           <VoiceTextInput
             style={styles.input}
@@ -146,14 +146,14 @@ export default function PlayerRegisterScreen() {
           <TouchableOpacity style={styles.btn} onPress={useInvite} disabled={inviteLoading}>
             {inviteLoading
               ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.btnText}>{tr('playerApp.register.useInviteCode')}</Text>}
+              : <Text style={styles.btnText} numberOfLines={1}>{tr('playerApp.register.useInviteCode')}</Text>}
           </TouchableOpacity>
         </View>
 
         <View style={styles.divider} />
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{tr('playerApp.register.findMyProfile')}</Text>
+          <Text style={styles.sectionTitle} numberOfLines={1}>{tr('playerApp.register.findMyProfile')}</Text>
           <Text style={styles.sectionDesc}>{tr('playerApp.register.findMyProfileDesc')}</Text>
           <View style={styles.searchRow}>
             <VoiceTextInput
@@ -171,22 +171,22 @@ export default function PlayerRegisterScreen() {
           </View>
           {searchResults.map((p: any) => (
             <View key={p.id} style={styles.resultCard}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.resultName}>{p.name}</Text>
-                <Text style={styles.resultSub}>{p.position ?? '—'} · {p.team_name ?? '—'}</Text>
+              <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+                <Text style={styles.resultName} numberOfLines={1}>{p.name}</Text>
+                <Text style={styles.resultSub} numberOfLines={1}>{p.position ?? '—'} · {p.team_name ?? '—'}</Text>
               </View>
               <TouchableOpacity
                 style={styles.requestBtn}
                 onPress={() => requestLink(p.id, p.name)}
               >
-                <Text style={styles.requestBtnText}>{tr('playerApp.register.requestLink')}</Text>
+                <Text style={styles.requestBtnText} numberOfLines={1}>{tr('playerApp.register.requestLink')}</Text>
               </TouchableOpacity>
             </View>
           ))}
         </View>
 
         <TouchableOpacity style={styles.skipBtn} onPress={() => navigation.navigate('PlayerHome')}>
-          <Text style={styles.skipText}>{tr('playerApp.register.skipForNow')}</Text>
+          <Text style={styles.skipText} numberOfLines={1}>{tr('playerApp.register.skipForNow')}</Text>
         </TouchableOpacity>
       </KeyboardAwareScrollView>
       </ScreenBackground>
@@ -204,13 +204,13 @@ export default function PlayerRegisterScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.logo}>BloomPrint</Text>
-        <Text style={styles.sub}>{tr('playerApp.register.createPlayerAccount')}</Text>
+        <Text style={styles.logo} numberOfLines={1}>BloomPrint</Text>
+        <Text style={styles.sub} numberOfLines={1}>{tr('playerApp.register.createPlayerAccount')}</Text>
 
         {!!googleIdToken && (
           <View style={styles.googleBanner}>
             <Ionicons name="logo-google" size={16} color={t.positive} />
-            <Text style={styles.googleBannerText}>{tr('auth.googleComplete')}</Text>
+            <Text style={styles.googleBannerText} numberOfLines={2}>{tr('auth.googleComplete')}</Text>
           </View>
         )}
 
@@ -258,14 +258,14 @@ export default function PlayerRegisterScreen() {
         <TouchableOpacity style={styles.btn} onPress={submit} disabled={loading}>
           {loading
             ? <ActivityIndicator color="#fff" />
-            : <Text style={styles.btnText}>{tr('auth.createAccount')}</Text>}
+            : <Text style={styles.btnText} numberOfLines={1}>{tr('auth.createAccount')}</Text>}
         </TouchableOpacity>
 
         {!googleIdToken && (
           <>
             <View style={styles.orRow}>
               <View style={styles.orLine} />
-              <Text style={styles.orText}>{tr('auth.or')}</Text>
+              <Text style={styles.orText} numberOfLines={1}>{tr('auth.or')}</Text>
               <View style={styles.orLine} />
             </View>
             <GoogleSignInButton onIdToken={handleGoogleIdToken} busy={googleBusy} color={t.positive} />
@@ -273,11 +273,11 @@ export default function PlayerRegisterScreen() {
         )}
 
         <TouchableOpacity onPress={() => navigation.navigate('PlayerLogin')}>
-          <Text style={styles.toggle}>{tr('auth.haveAccountSignIn')}</Text>
+          <Text style={styles.toggle} numberOfLines={2}>{tr('auth.haveAccountSignIn')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('RoleSelect')}>
-          <Text style={styles.backText}>{tr('auth.backToRoleSelect')}</Text>
+          <Text style={styles.backText} numberOfLines={2}>{tr('auth.backToRoleSelect')}</Text>
         </TouchableOpacity>
       </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
@@ -294,8 +294,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
   },
-  logo: { fontSize: 32, fontFamily: fonts[900], color: t.ink, letterSpacing: 1, marginBottom: 4 },
-  sub: { fontSize: 13, color: t.positive, marginBottom: 32, fontFamily: fonts[600] },
+  logo: { fontSize: 32, fontFamily: fonts[900], color: t.ink, letterSpacing: 1, marginBottom: 4, flexShrink: 1, textAlign: 'center' },
+  sub: { fontSize: 13, color: t.positive, marginBottom: 32, fontFamily: fonts[600], flexShrink: 1 },
   input: {
     width: '100%',
     backgroundColor: t.card,
@@ -315,17 +315,17 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
   },
-  btnText: { color: '#fff', fontFamily: fonts[700], fontSize: 16 },
-  toggle: { color: t.positive, marginTop: 20, fontSize: 13 },
+  btnText: { color: '#fff', fontFamily: fonts[700], fontSize: 16, flexShrink: 1 },
+  toggle: { color: t.positive, marginTop: 20, fontSize: 13, textAlign: 'center' },
   backBtn: { marginTop: 32 },
-  backText: { color: t.muted2, fontSize: 12 },
+  backText: { color: t.muted2, fontSize: 12, textAlign: 'center' },
   orRow: { flexDirection: 'row', alignItems: 'center', width: '100%', marginTop: 16, marginBottom: 4, gap: 10 },
-  orLine: { flex: 1, height: 1, backgroundColor: t.divider },
-  orText: { color: t.muted2, fontSize: 12 },
+  orLine: { flex: 1, flexShrink: 1, minWidth: 0, height: 1, backgroundColor: t.divider },
+  orText: { color: t.muted2, fontSize: 12, flexShrink: 0 },
   googleBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.positiveSoft, borderRadius: 10, padding: 12, marginBottom: 14, borderWidth: 1, borderColor: t.positive, width: '100%' },
   googleBannerText: { color: t.positive, fontSize: 12.5, fontFamily: fonts[700], flex: 1 },
   section: { marginBottom: 24 },
-  sectionTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[700], marginBottom: 4 },
+  sectionTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[700], marginBottom: 4, flexShrink: 1 },
   sectionDesc: { color: t.muted, fontSize: 12, marginBottom: 12 },
   divider: { height: 1, backgroundColor: t.divider, marginVertical: 24 },
   searchRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
@@ -335,6 +335,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     padding: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   resultCard: {
     flexDirection: 'row',
@@ -346,8 +347,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderWidth: 1,
     borderColor: t.cardBorder,
   },
-  resultName: { color: t.ink, fontSize: 14, fontFamily: fonts[600] },
-  resultSub: { color: t.muted, fontSize: 12, marginTop: 2 },
+  resultName: { color: t.ink, fontSize: 14, fontFamily: fonts[600], flexShrink: 1 },
+  resultSub: { color: t.muted, fontSize: 12, marginTop: 2, flexShrink: 1 },
   requestBtn: {
     backgroundColor: t.positiveSoft,
     borderRadius: 8,
@@ -355,8 +356,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     paddingVertical: 6,
     borderWidth: 1,
     borderColor: t.positive,
+    flexShrink: 0,
   },
-  requestBtnText: { color: t.positive, fontSize: 12, fontFamily: fonts[600] },
+  requestBtnText: { color: t.positive, fontSize: 12, fontFamily: fonts[600], flexShrink: 1 },
   skipBtn: { alignItems: 'center', marginTop: 8, marginBottom: 40 },
   skipText: { color: t.muted, fontSize: 13 },
 });

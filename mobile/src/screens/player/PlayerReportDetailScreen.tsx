@@ -94,14 +94,15 @@ export default function PlayerReportDetailScreen() {
     <ScreenBackground>
       <KeyboardAwareScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.title}>
+          {/* Long translated report types clip instead of wrapping the header. */}
+          <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginLeft: 12, marginRight: 8 }}>
+            <Text style={styles.title} numberOfLines={1}>
               {report.output_type.replace(/_/g, ' ').toUpperCase()}
             </Text>
-            <Text style={styles.sub}>
+            <Text style={styles.sub} numberOfLines={1}>
               {tr('playerApp.reportDetail.sharedBy', { name: report.shared_by_name, date: new Date(report.created_at).toLocaleDateString() })}
             </Text>
           </View>
@@ -109,31 +110,31 @@ export default function PlayerReportDetailScreen() {
 
         {report.message && (
           <View style={styles.messageBox}>
-            <Text style={styles.messageLabel}>{tr('playerApp.reportDetail.coachMessage')}</Text>
+            <Text style={styles.messageLabel} numberOfLines={1}>{tr('playerApp.reportDetail.coachMessage')}</Text>
             <Text style={styles.messageText}>{report.message}</Text>
           </View>
         )}
 
         {report.overall_grade != null && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{tr('playerApp.reportDetail.overallGrade')}</Text>
-            <Text style={styles.grade}>{tr('playerApp.reportDetail.gradeOutOf', { grade: report.overall_grade.toFixed(1) })}</Text>
+            <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.reportDetail.overallGrade')}</Text>
+            <Text style={styles.grade} numberOfLines={1}>{tr('playerApp.reportDetail.gradeOutOf', { grade: report.overall_grade.toFixed(1) })}</Text>
           </View>
         )}
 
         {report.pillar_grades && Object.keys(report.pillar_grades).length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{tr('playerApp.reportDetail.pillarGrades')}</Text>
+            <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.reportDetail.pillarGrades')}</Text>
             {PILLARS.filter(k => report.pillar_grades![k] != null).map(k => {
               const g = report.pillar_grades![k];
               const pct = Math.round((g / 10) * 100);
               return (
                 <View key={k} style={styles.pillarRow}>
-                  <Text style={styles.pillarName}>{tr(`playerApp.reportDetail.pillars.${k}`)}</Text>
+                  <Text style={styles.pillarName} numberOfLines={1}>{tr(`playerApp.reportDetail.pillars.${k}`)}</Text>
                   <View style={styles.barContainer}>
                     <View style={[styles.bar, { width: `${pct}%` as any }]} />
                   </View>
-                  <Text style={styles.pillarGrade}>{g.toFixed(1)}</Text>
+                  <Text style={styles.pillarGrade} numberOfLines={1}>{g.toFixed(1)}</Text>
                 </View>
               );
             })}
@@ -144,7 +145,7 @@ export default function PlayerReportDetailScreen() {
           <View style={styles.flagRow}>
             {report.green_flags && report.green_flags.length > 0 && (
               <View style={[styles.flagBox, { borderColor: t.positive }]}>
-                <Text style={[styles.flagTitle, { color: t.positive }]}>{tr('playerApp.reportDetail.greenFlags')}</Text>
+                <Text style={[styles.flagTitle, { color: t.positive }]} numberOfLines={1}>{tr('playerApp.reportDetail.greenFlags')}</Text>
                 {report.green_flags.map((f, i) => (
                   <Text key={i} style={styles.flagItem}>· {f}</Text>
                 ))}
@@ -152,7 +153,7 @@ export default function PlayerReportDetailScreen() {
             )}
             {report.watch_flags && report.watch_flags.length > 0 && (
               <View style={[styles.flagBox, { borderColor: t.negative }]}>
-                <Text style={[styles.flagTitle, { color: t.negative }]}>{tr('playerApp.reportDetail.watchFlags')}</Text>
+                <Text style={[styles.flagTitle, { color: t.negative }]} numberOfLines={1}>{tr('playerApp.reportDetail.watchFlags')}</Text>
                 {report.watch_flags.map((f, i) => (
                   <Text key={i} style={styles.flagItem}>· {f}</Text>
                 ))}
@@ -163,7 +164,7 @@ export default function PlayerReportDetailScreen() {
 
         {report.key_questions && report.key_questions.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{tr('playerApp.reportDetail.keyQuestions')}</Text>
+            <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.reportDetail.keyQuestions')}</Text>
             {report.key_questions.map((q, i) => (
               <View key={i} style={styles.questionRow}>
                 <Text style={styles.questionNum}>{i + 1}</Text>
@@ -175,7 +176,7 @@ export default function PlayerReportDetailScreen() {
 
         {report.report_text && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{tr('playerApp.reportDetail.fullReport')}</Text>
+            <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.reportDetail.fullReport')}</Text>
             <View style={styles.reportBox}>
               <Markdown style={markdownStyles}>{report.report_text}</Markdown>
             </View>
@@ -192,12 +193,12 @@ export default function PlayerReportDetailScreen() {
             {generating ? (
               <>
                 <ActivityIndicator color="#fff" size="small" />
-                <Text style={styles.generateBtnText}>{tr('playerApp.reportDetail.generatingTraining')}</Text>
+                <Text style={styles.generateBtnText} numberOfLines={1}>{tr('playerApp.reportDetail.generatingTraining')}</Text>
               </>
             ) : (
               <>
                 <Ionicons name="barbell" size={18} color="#fff" />
-                <Text style={styles.generateBtnText}>{tr('playerApp.reportDetail.generateTraining')}</Text>
+                <Text style={styles.generateBtnText} numberOfLines={1}>{tr('playerApp.reportDetail.generateTraining')}</Text>
               </>
             )}
           </TouchableOpacity>
@@ -205,7 +206,7 @@ export default function PlayerReportDetailScreen() {
 
         {/* Comments */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{tr('playerApp.reportDetail.commentsCount', { count: comments.length })}</Text>
+          <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.reportDetail.commentsCount', { count: comments.length })}</Text>
           <CommentThread
             comments={comments as any}
             accent={t.positive}
@@ -253,8 +254,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56 },
-  title: { color: t.ink, fontSize: 16, fontFamily: fonts[900] },
-  sub: { color: t.muted, fontSize: 11, marginTop: 2 },
+  title: { color: t.ink, fontSize: 16, fontFamily: fonts[900], flexShrink: 1 },
+  sub: { color: t.muted, fontSize: 11, marginTop: 2, flexShrink: 1 },
   messageBox: {
     backgroundColor: t.positiveSoft,
     borderLeftWidth: 3,
@@ -264,7 +265,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     padding: 12,
     borderRadius: 8,
   },
-  messageLabel: { color: t.positive, fontSize: 10, fontFamily: fonts[700], marginBottom: 4, textTransform: 'uppercase' },
+  messageLabel: { color: t.positive, fontSize: 10, fontFamily: fonts[700], marginBottom: 4, textTransform: 'uppercase', flexShrink: 1 },
   messageText: { color: t.inkSoft, fontSize: 13 },
   section: { paddingHorizontal: 20, marginTop: 24 },
   sectionLabel: {
@@ -273,13 +274,13 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   grade: { fontSize: 48, fontFamily: fonts[900], color: t.positive },
   pillarRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 10 },
-  pillarName: { color: t.inkSoft, fontSize: 12, width: 100 },
-  barContainer: { flex: 1, height: 6, backgroundColor: t.chip, borderRadius: 3 },
+  pillarName: { color: t.inkSoft, fontSize: 12, width: 100, flexShrink: 0 },
+  barContainer: { flex: 1, flexShrink: 1, minWidth: 0, height: 6, backgroundColor: t.chip, borderRadius: 3 },
   bar: { height: 6, backgroundColor: t.positive, borderRadius: 3 },
-  pillarGrade: { color: t.positive, fontSize: 12, fontFamily: fonts[700], width: 30, textAlign: 'right' },
+  pillarGrade: { color: t.positive, fontSize: 12, fontFamily: fonts[700], width: 30, textAlign: 'right', flexShrink: 0 },
   flagRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 20, marginTop: 20 },
-  flagBox: { flex: 1, borderWidth: 1, borderRadius: 10, padding: 12 },
-  flagTitle: { fontSize: 11, fontFamily: fonts[700], marginBottom: 6, textTransform: 'uppercase' },
+  flagBox: { flex: 1, flexShrink: 1, minWidth: 0, borderWidth: 1, borderRadius: 10, padding: 12 },
+  flagTitle: { fontSize: 11, fontFamily: fonts[700], marginBottom: 6, textTransform: 'uppercase', flexShrink: 1 },
   flagItem: { color: t.inkSoft, fontSize: 12, marginBottom: 3 },
   questionRow: { flexDirection: 'row', marginBottom: 10, gap: 10 },
   questionNum: { color: t.positive, fontFamily: fonts[800], fontSize: 14, width: 20 },
@@ -294,7 +295,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderRadius: 12,
     padding: 16,
   },
-  generateBtnText: { color: '#fff', fontFamily: fonts[700], fontSize: 15 },
+  generateBtnText: { color: '#fff', fontFamily: fonts[700], fontSize: 15, flexShrink: 1 },
   commentCard: {
     backgroundColor: t.card,
     borderRadius: 10,

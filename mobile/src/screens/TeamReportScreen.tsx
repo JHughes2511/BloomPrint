@@ -492,25 +492,27 @@ export default function TeamReportScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         <View style={styles.titleRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.title}>{tr('teamReport.title')}</Text>
+          {/* Translated titles run 20-40% longer than English, so the text block
+              shrinks and clips rather than pushing the import button off-screen. */}
+          <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+            <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('teamReport.title')}</Text>
           </View>
           <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import')}>
             <Ionicons name="cloud-upload-outline" size={18} color={t.muted} />
-            <Text style={styles.importText}>{tr('teamReport.importRoster')}</Text>
+            <Text style={styles.importText} numberOfLines={1}>{tr('teamReport.importRoster')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Game Reports (packet builder) */}
         <View style={{ marginBottom: 24 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <Text style={styles.label}>{tr('teamReport.gameReports')}</Text>
+            <Text style={[styles.label, { flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>{tr('teamReport.gameReports')}</Text>
             <TouchableOpacity
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.accent, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 }}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.accent, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, flexShrink: 0, maxWidth: 140 }}
               onPress={() => navigation.navigate('GameReportBuilder')}
             >
               <Ionicons name="add" size={14} color={t.ctaText} />
-              <Text style={{ color: t.ink, fontSize: 12, fontFamily: fonts[700] }}>{tr('teamReport.new')}</Text>
+              <Text style={{ color: t.ink, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('teamReport.new')}</Text>
             </TouchableOpacity>
           </View>
           {loadingGameReports ? (
@@ -552,23 +554,23 @@ export default function TeamReportScreen() {
                   style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: gr.report_text ? t.accent : t.chip, flexDirection: 'row', alignItems: 'center', gap: 12 }}
                   onPress={() => navigation.navigate('GameReportBuilder', { reportId: gr.id })}
                 >
-                  <View style={{ flex: 1 }}>
+                  <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
                     <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700] }} numberOfLines={1}>{matchup}</Text>
-                    <Text style={{ color: t.muted, fontSize: 11, marginTop: 2 }}>
+                    <Text style={{ color: t.muted, fontSize: 11, marginTop: 2 }} numberOfLines={1}>
                       {outputTypeLabel(gr.output_type)} · {new Date(gr.updated_at).toLocaleDateString()}
                     </Text>
                   </View>
-                  <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                  <View style={{ alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
                     {gr.report_text ? (
                       <View style={{ backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
-                        <Text style={{ color: t.accent, fontSize: 10, fontFamily: fonts[700] }}>{tr('teamReport.reportReady')}</Text>
+                        <Text style={{ color: t.accent, fontSize: 10, fontFamily: fonts[700] }} numberOfLines={1}>{tr('teamReport.reportReady')}</Text>
                       </View>
                     ) : (
                       <View style={{ backgroundColor: t.chip, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
-                        <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }}>{tr('teamReport.inProgress')}</Text>
+                        <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }} numberOfLines={1}>{tr('teamReport.inProgress')}</Text>
                       </View>
                     )}
-                    <Text style={{ color: t.muted2, fontSize: 10 }}>{tr('teamReport.clipCount', { count: gr.clips?.length ?? 0 })}</Text>
+                    <Text style={{ color: t.muted2, fontSize: 10 }} numberOfLines={1}>{tr('teamReport.clipCount', { count: gr.clips?.length ?? 0 })}</Text>
                   </View>
                   <TouchableOpacity onPress={deleteGameReport} style={{ padding: 4, marginLeft: 4 }}>
                     <Ionicons name="trash-outline" size={16} color={t.muted2} />
@@ -585,7 +587,7 @@ export default function TeamReportScreen() {
           style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: showQuickReport ? 16 : 0 }}
           onPress={() => setShowQuickReport(v => !v)}
         >
-          <Text style={styles.label}>{tr('teamReport.quickReport')}</Text>
+          <Text style={[styles.label, { flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>{tr('teamReport.quickReport')}</Text>
           <Ionicons name={showQuickReport ? 'chevron-up' : 'chevron-down'} size={16} color={t.muted} />
         </TouchableOpacity>
 
@@ -597,7 +599,7 @@ export default function TeamReportScreen() {
             style={[styles.chip, selectedTeamId === null && styles.chipActive]}
             onPress={() => setSelectedTeamId(null)}
           >
-            <Text style={[styles.chipText, selectedTeamId === null && styles.chipTextActive]}>{tr('teamReport.allPlayers')}</Text>
+            <Text style={[styles.chipText, selectedTeamId === null && styles.chipTextActive]} numberOfLines={1}>{tr('teamReport.allPlayers')}</Text>
           </TouchableOpacity>
           {teams.map(t => (
             <TouchableOpacity
@@ -605,7 +607,7 @@ export default function TeamReportScreen() {
               style={[styles.chip, selectedTeamId === t.id && styles.chipActive]}
               onPress={() => setSelectedTeamId(t.id)}
             >
-              <Text style={[styles.chipText, selectedTeamId === t.id && styles.chipTextActive]}>{t.name}</Text>
+              <Text style={[styles.chipText, selectedTeamId === t.id && styles.chipTextActive]} numberOfLines={1}>{t.name}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -627,7 +629,7 @@ export default function TeamReportScreen() {
                   setOutputType((next.length ? next : [t.key]).join(','));
                 }}
               >
-                <Text style={[styles.chipText, isOn && styles.chipTextActive]}>{tr(`reportTypes.${t.key}`)}</Text>
+                <Text style={[styles.chipText, isOn && styles.chipTextActive]} numberOfLines={1}>{tr(`reportTypes.${t.key}`)}</Text>
               </TouchableOpacity>
             );
           })}
@@ -651,7 +653,7 @@ export default function TeamReportScreen() {
         <Text style={styles.label}>{tr('teamReport.uploadFootage')}</Text>
         <TouchableOpacity style={styles.videoPickerBtn} onPress={pickVideo}>
           <Ionicons name={videoAsset ? 'videocam' : 'videocam-outline'} size={18} color={videoAsset ? t.positive : t.muted} />
-          <Text style={[styles.videoPickerText, videoAsset && { color: t.positive }]}>
+          <Text style={[styles.videoPickerText, videoAsset && { color: t.positive }]} numberOfLines={1}>
             {videoAsset ? videoAsset.name.slice(-30) : tr('teamReport.pickVideo')}
           </Text>
           {videoAsset && (
@@ -663,8 +665,8 @@ export default function TeamReportScreen() {
 
         <TouchableOpacity style={styles.generateBtn} onPress={generate} disabled={generating}>
           {generating
-            ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.generateText}>  {tr('teamReport.generating')}</Text></>
-            : <><Ionicons name="people" size={18} color={t.ctaText} /><Text style={styles.generateText}>  {tr('teamReport.generateTeamReport')}</Text></>
+            ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.generateText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>  {tr('teamReport.generating')}</Text></>
+            : <><Ionicons name="people" size={18} color={t.ctaText} /><Text style={styles.generateText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>  {tr('teamReport.generateTeamReport')}</Text></>
           }
         </TouchableOpacity>
 
@@ -681,7 +683,7 @@ export default function TeamReportScreen() {
               }
             }}
           >
-            <Text style={styles.label}>{tr('teamReport.teamReportLabel')}</Text>
+            <Text style={styles.label} numberOfLines={1}>{tr('teamReport.teamReportLabel')}</Text>
             <View style={styles.reportBox}>
               {renderReport(reportText, { heading: t.ink, body: t.inkSoft })}
             </View>
@@ -690,25 +692,25 @@ export default function TeamReportScreen() {
                 {exporting
                   ? <ActivityIndicator color={t.muted} size="small" />
                   : <Ionicons name="share-outline" size={20} color={t.muted} />}
-                <Text style={styles.actionText}>{tr('teamReport.exportPdf')}</Text>
+                <Text style={styles.actionText} numberOfLines={1}>{tr('teamReport.exportPdf')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn} onPress={printPdf}>
                 <Ionicons name="print-outline" size={20} color={t.muted} />
-                <Text style={styles.actionText}>{tr('common.print')}</Text>
+                <Text style={styles.actionText} numberOfLines={1}>{tr('common.print')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.actionBtn, { borderColor: t.positive }]} onPress={() => { setShareSourceReport(null); initSectionToggles(); setShowShare(true); }}>
                 <Ionicons name="person-add-outline" size={20} color={t.positive} />
-                <Text style={[styles.actionText, { color: t.positive }]}>{tr('common.share')}</Text>
+                <Text style={[styles.actionText, { color: t.positive }]} numberOfLines={1}>{tr('common.share')}</Text>
               </TouchableOpacity>
               {savedTeamReportId && (
                 <TouchableOpacity style={[styles.actionBtn, { borderColor: t.accent }]} onPress={() => { setShareSourceReport(null); initSectionToggles(); setShowStaffShare(true); setStaffSearch(''); setStaffResults([]); }}>
                   <Ionicons name="people-outline" size={20} color={t.accent} />
-                  <Text style={[styles.actionText, { color: t.accent }]}>{tr('teamReport.staff')}</Text>
+                  <Text style={[styles.actionText, { color: t.accent }]} numberOfLines={1}>{tr('teamReport.staff')}</Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity style={styles.actionBtn} onPress={() => { setReportText(null); setFocusPrompt(''); setSelectedTeamId(null); setVideoAsset(null); setSavedTeamReportId(null); }}>
                 <Ionicons name="add-circle-outline" size={20} color={t.muted} />
-                <Text style={styles.actionText}>{tr('teamReport.newReport')}</Text>
+                <Text style={styles.actionText} numberOfLines={1}>{tr('teamReport.newReport')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -718,15 +720,15 @@ export default function TeamReportScreen() {
         {/* Previous Team Reports */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, marginBottom: showPrevReports ? 12 : 0 }}>
           <TouchableOpacity
-            style={{ flex: 1 }}
+            style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}
             onPress={() => {
               if (!showPrevReports) loadPrevReports();
               setShowPrevReports(v => !v);
             }}
           >
-            <Text style={styles.label}>{tr('teamReport.previousReports')}</Text>
+            <Text style={styles.label} numberOfLines={1}>{tr('teamReport.previousReports')}</Text>
           </TouchableOpacity>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, flexShrink: 0 }}>
             {showPrevReports && (
               <TouchableOpacity
                 onPress={() => {
@@ -761,7 +763,7 @@ export default function TeamReportScreen() {
                   style={[styles.chip, prevReportFilter === t.key && styles.chipActive]}
                   onPress={() => setPrevReportFilter(t.key)}
                 >
-                  <Text style={[styles.chipText, prevReportFilter === t.key && styles.chipTextActive]}>{t.key === 'all' ? tr('teamReport.filterAll') : tr(`reportTypes.${t.key}`)}</Text>
+                  <Text style={[styles.chipText, prevReportFilter === t.key && styles.chipTextActive]} numberOfLines={1}>{t.key === 'all' ? tr('teamReport.filterAll') : tr(`reportTypes.${t.key}`)}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -792,19 +794,19 @@ export default function TeamReportScreen() {
                     onPress={() => openPrevReport(r)}
                   >
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <View style={{ backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
-                          <Text style={{ color: t.accent, fontSize: 10, fontFamily: fonts[700] }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+                        <View style={{ backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, flexShrink: 1 }}>
+                          <Text style={{ color: t.accent, fontSize: 10, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>
                             {outputTypeLabel(r.output_type) ?? r.output_type}
                           </Text>
                         </View>
                         {r._kind === 'game' && (
-                          <View style={{ backgroundColor: t.chip, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
-                            <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }}>{tr('teamReport.packet')}</Text>
+                          <View style={{ backgroundColor: t.chip, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, flexShrink: 0 }}>
+                            <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }} numberOfLines={1}>{tr('teamReport.packet')}</Text>
                           </View>
                         )}
                       </View>
-                      <Text style={{ color: t.muted2, fontSize: 11 }}>{new Date(r.created_at).toLocaleDateString()}</Text>
+                      <Text style={{ color: t.muted2, fontSize: 11, flexShrink: 0 }} numberOfLines={1}>{new Date(r.created_at).toLocaleDateString()}</Text>
                     </View>
                     {r.title ? (
                       <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700], marginTop: 6 }} numberOfLines={1}>{r.title}</Text>
@@ -816,7 +818,7 @@ export default function TeamReportScreen() {
                     ) : null}
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 }}>
                       <Ionicons name="chevron-forward" size={12} color={t.line} />
-                      <Text style={{ color: t.line, fontSize: 11 }}>{tr('teamReport.tapToView')}</Text>
+                      <Text style={{ color: t.line, fontSize: 11, flexShrink: 1 }} numberOfLines={1}>{tr('teamReport.tapToView')}</Text>
                     </View>
                   </TouchableOpacity>
                 ))
@@ -887,15 +889,15 @@ export default function TeamReportScreen() {
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }}>
+              <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+                <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
                   {outputTypeLabel(selectedPrevReport?.output_type) ?? selectedPrevReport?.output_type}
                 </Text>
-                <Text style={{ color: t.muted, fontSize: 11, marginTop: 2 }}>
+                <Text style={{ color: t.muted, fontSize: 11, marginTop: 2 }} numberOfLines={1}>
                   {selectedPrevReport ? new Date(selectedPrevReport.created_at).toLocaleDateString() : ''}
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => setSelectedPrevReport(null)}>
+              <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setSelectedPrevReport(null)}>
                 <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
@@ -922,7 +924,7 @@ export default function TeamReportScreen() {
                   }}
                 >
                   <Ionicons name="share-social-outline" size={15} color={t.ctaText} />
-                  <Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>{tr('teamReport.sharePlayerTeamStaff')}</Text>
+                  <Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13, flexShrink: 1 }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('teamReport.sharePlayerTeamStaff')}</Text>
                 </TouchableOpacity>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   <TouchableOpacity
@@ -930,7 +932,7 @@ export default function TeamReportScreen() {
                     onPress={() => printPrevReport(selectedPrevReport)}
                   >
                     <Ionicons name="print-outline" size={15} color={t.inkSoft} />
-                    <Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13 }}>{tr('common.print')}</Text>
+                    <Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13, flexShrink: 1 }} numberOfLines={1}>{tr('common.print')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.chip, borderRadius: 10, paddingVertical: 12, borderWidth: 1, borderColor: t.line }}
@@ -939,7 +941,7 @@ export default function TeamReportScreen() {
                   >
                     {exportingPrevReport
                       ? <ActivityIndicator color={t.inkSoft} size="small" />
-                      : <><Ionicons name="share-outline" size={15} color={t.inkSoft} /><Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13 }}>{tr('teamReport.exportPdf')}</Text></>}
+                      : <><Ionicons name="share-outline" size={15} color={t.inkSoft} /><Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13, flexShrink: 1 }} numberOfLines={1}>{tr('teamReport.exportPdf')}</Text></>}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -965,7 +967,7 @@ export default function TeamReportScreen() {
                     >
                       {regeneratingPrevReport
                         ? <ActivityIndicator color={t.ctaText} />
-                        : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('teamReport.applyRegenerate')}</Text>}
+                        : <Text style={{ color: t.ctaText, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('teamReport.applyRegenerate')}</Text>}
                     </TouchableOpacity>
                   )}
                   <GeneratingOverlay visible={regeneratingPrevReport} label={tr('teamReport.regeneratingOverlay')} />
@@ -983,7 +985,7 @@ export default function TeamReportScreen() {
                   }}
                 >
                   <Ionicons name="create-outline" size={15} color={t.accent} />
-                  <Text style={{ color: t.accent, fontFamily: fonts[700], fontSize: 13 }}>{tr('teamReport.openInBuilder')}</Text>
+                  <Text style={{ color: t.accent, fontFamily: fonts[700], fontSize: 13, flexShrink: 1 }} numberOfLines={1}>{tr('teamReport.openInBuilder')}</Text>
                 </TouchableOpacity>
               ) : (
                 <View style={{ marginTop: 20 }}>
@@ -1005,14 +1007,14 @@ export default function TeamReportScreen() {
                     >
                       {addingPrevCorrection || regeneratingPrevReport
                         ? <ActivityIndicator color={t.ctaText} />
-                        : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('teamReport.applyRegenerate')}</Text>}
+                        : <Text style={{ color: t.ctaText, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('teamReport.applyRegenerate')}</Text>}
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={{ flex: 1, backgroundColor: t.line, borderRadius: 10, padding: 14, alignItems: 'center' }}
                       onPress={() => addPrevReportCorrection(false)}
                       disabled={addingPrevCorrection || !prevReportCorrectionText.trim()}
                     >
-                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('teamReport.saveForLater')}</Text>
+                      <Text style={{ color: t.ink, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('teamReport.saveForLater')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -1026,7 +1028,7 @@ export default function TeamReportScreen() {
       <Modal visible={showStaffShare} transparent animationType="slide">
         <KeyboardAvoidingView style={shareStyles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <KeyboardAwareScrollView style={shareStyles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
-            <Text style={shareStyles.title}>{tr('teamReport.shareWithStaff')}</Text>
+            <Text style={shareStyles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('teamReport.shareWithStaff')}</Text>
             {/* Report preview */}
             {shareSourceReport && (
               <View style={{ backgroundColor: t.chip, borderRadius: 8, padding: 12, marginBottom: 12 }}>
@@ -1043,7 +1045,7 @@ export default function TeamReportScreen() {
                 ON  = live, regenerable copy (recipient can regenerate; no filtering)
                 OFF = frozen snapshot (you control which sections are included) */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, backgroundColor: t.chip, borderRadius: 8, padding: 10 }}>
-              <Text style={{ color: t.inkSoft, fontSize: 13 }}>{tr('teamReport.allowRegenerate')}</Text>
+              <Text style={{ color: t.inkSoft, fontSize: 13, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }} numberOfLines={2}>{tr('teamReport.allowRegenerate')}</Text>
               <Switch value={allowRegen} onValueChange={setAllowRegen} trackColor={{ true: t.accent, false: t.line }} thumbColor="#fff" />
             </View>
             <Text style={{ color: t.muted, fontSize: 11, marginBottom: 12, marginLeft: 2 }}>
@@ -1109,7 +1111,7 @@ export default function TeamReportScreen() {
       <Modal visible={showShare} transparent animationType="slide">
         <KeyboardAvoidingView style={shareStyles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <KeyboardAwareScrollView style={shareStyles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
-            <Text style={shareStyles.title}>{tr('teamReport.shareTeamReport')}</Text>
+            <Text style={shareStyles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('teamReport.shareTeamReport')}</Text>
             {/* Report preview */}
             {shareSourceReport && (
               <View style={{ backgroundColor: t.chip, borderRadius: 8, padding: 12, marginBottom: 12 }}>
@@ -1149,7 +1151,14 @@ export default function TeamReportScreen() {
                   style={[shareStyles.targetChip, shareTarget === key && shareStyles.targetChipActive]}
                   onPress={() => { setShareTarget(key); setSelectedShareTarget(null); setShareResults([]); }}
                 >
-                  <Text style={[shareStyles.targetChipText, shareTarget === key && shareStyles.targetChipTextActive]}>{key === 'player' ? tr('teamReport.individualPlayer') : tr('teamReport.wholeTeam')}</Text>
+                  <Text
+                    style={[shareStyles.targetChipText, shareTarget === key && shareStyles.targetChipTextActive]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.7}
+                  >
+                    {key === 'player' ? tr('teamReport.individualPlayer') : tr('teamReport.wholeTeam')}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -1284,8 +1293,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 6,
     borderWidth: 1, borderColor: t.cta2Border, borderRadius: 999,
     paddingHorizontal: 14, paddingVertical: 9, marginTop: 4,
+    flexShrink: 1, maxWidth: 160,
   },
-  importText: { color: t.cta2Text, fontSize: 12, fontFamily: fonts[700] },
+  importText: { color: t.cta2Text, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 },
   label: {
     color: t.label, fontSize: 11.5, fontFamily: fonts[700],
     letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12,
@@ -1293,9 +1303,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   chip: {
     borderWidth: 1, borderColor: t.line, borderRadius: 999,
     paddingHorizontal: 16, height: 36, justifyContent: 'center', alignItems: 'center', marginRight: 8,
+    flexShrink: 1, maxWidth: 220,
   },
   chipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
-  chipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
+  chipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700], flexShrink: 1 },
   chipTextActive: { color: t.ctaText },
   input: {
     backgroundColor: t.card, borderRadius: 14, padding: 14,
@@ -1307,7 +1318,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.card, borderRadius: 14, padding: 14,
     borderWidth: 1, borderColor: t.line, marginBottom: 16,
   },
-  videoPickerText: { color: t.muted, fontSize: 13, flex: 1 },
+  videoPickerText: { color: t.muted, fontSize: 13, flex: 1, flexShrink: 1, minWidth: 0 },
   searchInput: {
     backgroundColor: t.card, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10,
     color: t.ink, fontSize: 14, marginBottom: 12,
@@ -1317,7 +1328,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.ctaBg, borderRadius: 999, padding: 15,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
   },
-  generateText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15, marginLeft: 8 },
+  generateText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15, marginLeft: 8, flexShrink: 1 },
   hint: { color: t.muted2, fontSize: 12, textAlign: 'center', marginTop: 12 },
   reportSection: { marginTop: 28 },
   reportBox: { backgroundColor: t.card, borderRadius: 18, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: t.cardBorder },
@@ -1327,7 +1338,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     gap: 8, paddingVertical: 14, paddingHorizontal: 12,
     borderRadius: 999, borderWidth: 1, borderColor: t.cta2Border,
   },
-  actionText: { color: t.cta2Text, fontFamily: fonts[700], fontSize: 14 },
+  actionText: { color: t.cta2Text, fontFamily: fonts[700], fontSize: 14, flexShrink: 1 },
 });
 
 const makeShareStyles = (t: ThemeTokens) => StyleSheet.create({
