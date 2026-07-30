@@ -2177,6 +2177,8 @@
     "unsavedMsg": "Această tablă nu a putut fi salvată. Reîncerci sau închizi și pierzi modificările?",
     "retrySave": "Reîncearcă salvarea",
     "closeAnyway": "Închide oricum",
-    "deleteFailed": "Nu s-a putut șterge această tablă."
+    "deleteFailed": "Nu s-a putut șterge această tablă.",
+    "renameBoard": "Redenumește tabla",
+    "boardNamePlaceholder": "Denumește această schemă…"
   }
 }

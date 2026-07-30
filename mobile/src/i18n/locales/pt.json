@@ -2177,6 +2177,8 @@
     "unsavedMsg": "Não foi possível salvar esta prancheta. Tentar novamente ou fechar e perder as alterações?",
     "retrySave": "Tentar salvar novamente",
     "closeAnyway": "Fechar mesmo assim",
-    "deleteFailed": "Não foi possível excluir esta prancheta."
+    "deleteFailed": "Não foi possível excluir esta prancheta.",
+    "renameBoard": "Renomear prancheta",
+    "boardNamePlaceholder": "Dê um nome a esta jogada…"
   }
 }

@@ -2177,6 +2177,8 @@
     "unsavedMsg": "Bu taktik tahtası kaydedilemedi. Yeniden denemek mi, kapatıp değişiklikleri kaybetmek mi?",
     "retrySave": "Kaydetmeyi yeniden dene",
     "closeAnyway": "Yine de kapat",
-    "deleteFailed": "Bu taktik tahtası silinemedi."
+    "deleteFailed": "Bu taktik tahtası silinemedi.",
+    "renameBoard": "Tahtayı yeniden adlandır",
+    "boardNamePlaceholder": "Bu oyuna ad ver…"
   }
 }

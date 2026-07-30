@@ -38,6 +38,18 @@ export default function CoachNotificationsScreen() {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
   const styles = makeStyles(t);
+
+  // Notifications are created server-side. Newer ones carry an i18n key + params
+  // so they can render in the coach's language; older rows (and senders not yet
+  // migrated) only have English title/body, which stays the fallback.
+  // i18n_key points at the BODY string; the matching title lives at
+  // "<namespace>.title" (first path segment), so one convention covers both.
+  const notifTitle = (n: any) =>
+    n.i18n_key
+      ? tr(`${String(n.i18n_key).split('.')[0]}.title`, { ...(n.i18n_params ?? {}), defaultValue: n.title })
+      : n.title;
+  const notifBody = (n: any) =>
+    n.i18n_key ? tr(n.i18n_key, { ...(n.i18n_params ?? {}), defaultValue: n.body }) : n.body;
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -233,9 +245,9 @@ export default function CoachNotificationsScreen() {
               </View>
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <Text style={[styles.notifTitle, !n.read && styles.notifTitleUnread]}>
-                  {n.title}
+                  {notifTitle(n)}
                 </Text>
-                <Text style={styles.notifBody}>{n.body}</Text>
+                <Text style={styles.notifBody}>{notifBody(n)}</Text>
                 <Text style={styles.notifDate}>{new Date(n.created_at).toLocaleDateString()}</Text>
               </View>
               {!n.read && <View style={styles.dot} />}

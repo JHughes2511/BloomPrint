@@ -2177,6 +2177,8 @@
     "unsavedMsg": "このボードを保存できませんでした。再試行しますか、それとも閉じて変更を破棄しますか？",
     "retrySave": "保存を再試行",
     "closeAnyway": "それでも閉じる",
-    "deleteFailed": "このボードを削除できませんでした。"
+    "deleteFailed": "このボードを削除できませんでした。",
+    "renameBoard": "ボード名を変更",
+    "boardNamePlaceholder": "このプレーに名前を付ける…"
   }
 }

@@ -411,6 +411,10 @@ class NotificationOut(BaseModel):
     type: str
     title: str
     body: str
+    # When present the client renders the translated string with these params;
+    # title/body stay as the English fallback.
+    i18n_key: str | None = None
+    i18n_params: dict | None = None
     read: bool
     ref_id: int | None
     created_at: datetime

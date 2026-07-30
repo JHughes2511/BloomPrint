@@ -2177,6 +2177,8 @@
     "unsavedMsg": "Impossibile salvare questa lavagna. Riprovare o chiudere e perdere le modifiche?",
     "retrySave": "Riprova salvataggio",
     "closeAnyway": "Chiudi comunque",
-    "deleteFailed": "Impossibile eliminare questa lavagna."
+    "deleteFailed": "Impossibile eliminare questa lavagna.",
+    "renameBoard": "Rinomina lavagna",
+    "boardNamePlaceholder": "Dai un nome a questo schema…"
   }
 }

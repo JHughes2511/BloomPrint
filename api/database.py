@@ -213,6 +213,23 @@ def _run_migrations():
         except Exception:
             pass
 
+        # Notifications carry an optional i18n key + params so the client can
+        # render them in the coach's language instead of stored English prose.
+        try:
+            pn_cols = [row[1] for row in conn.execute(
+                __import__("sqlalchemy").text("PRAGMA table_info(player_notifications)")
+            )]
+            if pn_cols and "i18n_key" not in pn_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE player_notifications ADD COLUMN i18n_key TEXT"))
+                conn.commit()
+            if pn_cols and "i18n_params" not in pn_cols:
+                conn.execute(__import__("sqlalchemy").text(
+                    "ALTER TABLE player_notifications ADD COLUMN i18n_params TEXT"))
+                conn.commit()
+        except Exception:
+            pass
+
         # Add title to evaluations if missing (match-up display title, e.g. "A vs B")
         try:
             ev_cols = [row[1] for row in conn.execute(

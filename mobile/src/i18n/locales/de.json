@@ -2177,6 +2177,8 @@
     "unsavedMsg": "Dieses Taktikboard konnte nicht gespeichert werden. Erneut versuchen oder schließen und die Änderungen verwerfen?",
     "retrySave": "Speichern wiederholen",
     "closeAnyway": "Trotzdem schließen",
-    "deleteFailed": "Dieses Taktikboard konnte nicht gelöscht werden."
+    "deleteFailed": "Dieses Taktikboard konnte nicht gelöscht werden.",
+    "renameBoard": "Board umbenennen",
+    "boardNamePlaceholder": "Diesen Spielzug benennen…"
   }
 }

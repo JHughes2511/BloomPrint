@@ -1,17 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
-
-const PILLAR_LABELS: Record<string, string> = {
-  offensive_skills: 'Offensive Skills',
-  defensive_capabilities: 'Defensive',
-  physical_attributes: 'Physical',
-  intangibles: 'Intangibles',
-  advanced_analysis: 'Advanced',
-  strategic_fit: 'Strategic Fit',
-};
 
 // Each pillar keeps its own identity color (blues + browns), theme-aware —
 // alternating so the six bars read as distinct rather than one solid block.
@@ -42,7 +34,12 @@ function hashKey(s: string) {
 
 export function PillarCard({ pillarKey, grade }: { pillarKey: string; grade: number }) {
   const { t } = useTheme();
-  const label = PILLAR_LABELS[pillarKey] ?? pillarKey;
+  const { t: tr } = useTranslation();
+  // Pillar keys come from AI-parsed report text, so an unknown key is possible —
+  // fall back to a readable title-cased version of the key itself.
+  const label = tr(`evalReport.pillars.${pillarKey}`, {
+    defaultValue: pillarKey.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+  });
   const color = pillarColor(pillarKey, t);
   const pct = (grade / 10) * 100;
 

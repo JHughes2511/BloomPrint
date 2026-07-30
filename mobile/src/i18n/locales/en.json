@@ -2177,6 +2177,13 @@
     "unsavedMsg": "This board couldn't be saved. Retry, or close and lose the changes?",
     "retrySave": "Retry save",
     "closeAnyway": "Close anyway",
-    "deleteFailed": "Could not delete this board."
+    "deleteFailed": "Could not delete this board.",
+    "renameBoard": "Rename board",
+    "boardNamePlaceholder": "Name this play…"
+  },
+  "seasonReminder": {
+    "title": "Review your system & philosophy",
+    "newSeason": "A new season ({{season}}) has started — a good time to review and update your system & philosophy for {{season}}.",
+    "welcomeBack": "Welcome back — a good time to review and update your system & philosophy for {{season}}."
   }
 }

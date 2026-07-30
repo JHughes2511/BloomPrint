@@ -2177,6 +2177,8 @@
     "unsavedMsg": "无法保存此战术板。重试，还是关闭并放弃更改？",
     "retrySave": "重试保存",
     "closeAnyway": "仍然关闭",
-    "deleteFailed": "无法删除此战术板。"
+    "deleteFailed": "无法删除此战术板。",
+    "renameBoard": "重命名战术板",
+    "boardNamePlaceholder": "为该战术命名…"
   }
 }

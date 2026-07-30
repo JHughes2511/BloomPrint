@@ -2177,6 +2177,8 @@
     "unsavedMsg": "Nie udało się zapisać tej tablicy. Ponowić próbę czy zamknąć i utracić zmiany?",
     "retrySave": "Ponów zapis",
     "closeAnyway": "Zamknij mimo to",
-    "deleteFailed": "Nie udało się usunąć tej tablicy."
+    "deleteFailed": "Nie udało się usunąć tej tablicy.",
+    "renameBoard": "Zmień nazwę tablicy",
+    "boardNamePlaceholder": "Nazwij tę akcję…"
   }
 }

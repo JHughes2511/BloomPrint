@@ -2177,6 +2177,8 @@
     "unsavedMsg": "Ovu taktičku ploču nije bilo moguće spremiti. Pokušati ponovno ili zatvoriti i izgubiti promjene?",
     "retrySave": "Ponovi spremanje",
     "closeAnyway": "Ipak zatvori",
-    "deleteFailed": "Ovu ploču nije bilo moguće izbrisati."
+    "deleteFailed": "Ovu ploču nije bilo moguće izbrisati.",
+    "renameBoard": "Preimenuj ploču",
+    "boardNamePlaceholder": "Nazovite ovu akciju…"
   }
 }

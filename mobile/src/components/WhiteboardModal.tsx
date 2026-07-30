@@ -228,6 +228,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   const [tool, setTool]                     = useState<Tool>('pen');
   const [color, setColor]                   = useState(COLORS[0]);
   const [showBoardList, setShowBoardList]   = useState(false);
+  // Renaming a board: boards were previously only ever named "Board N" or by the
+  // AI — there was no way for a coach to title their own play.
+  const [renamingIdx, setRenamingIdx]       = useState<number | null>(null);
+  const [renameText, setRenameText]         = useState('');
   const [showAddText, setShowAddText]       = useState(false);
   const [pendingTextPos, setPendingTextPos] = useState({ x: 0, y: 0 });
   const [textInput, setTextInput]           = useState('');
@@ -934,6 +938,26 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         setActiveBoardIdx(Math.max(0, idx - 1));
       }},
     ]);
+  };
+
+  const openRename = (idx: number) => {
+    setRenamingIdx(idx);
+    setRenameText(boardsRef.current[idx]?.name ?? '');
+    setShowBoardList(false);
+  };
+
+  const commitRename = () => {
+    const idx = renamingIdx;
+    if (idx == null) return;
+    const name = renameText.trim();
+    const cur = boardsRef.current[idx];
+    if (cur && name && name !== cur.name) {
+      const updated = { ...cur, name };
+      setBoards(prev => { const n = [...prev]; n[idx] = updated; return n; });
+      saveBoard(idx, updated);
+    }
+    setRenamingIdx(null);
+    setRenameText('');
   };
 
   const undo     = () => { if (board) commitStrokes(activeBoardIdx, board.strokes.slice(0, -1)); };
@@ -1863,10 +1887,19 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
 
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => setShowBoardList(true)} style={styles.headerBtn}>
-            <Ionicons name="layers-outline" size={20} color={t.ink} />
-            <Text style={styles.boardName} numberOfLines={1}>{board?.name ?? tr('whiteboard.title')}</Text>
-          </TouchableOpacity>
+          <View style={styles.headerBtn}>
+            <TouchableOpacity onPress={() => setShowBoardList(true)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 4 }}>
+              <Ionicons name="layers-outline" size={20} color={t.ink} />
+            </TouchableOpacity>
+            {/* Tap the title to rename this board. */}
+            <TouchableOpacity
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flexShrink: 1 }}
+              onPress={() => board && openRename(activeBoardIdx)}
+            >
+              <Text style={styles.boardName} numberOfLines={1}>{board?.name ?? tr('whiteboard.title')}</Text>
+              <Ionicons name="pencil" size={12} color={t.muted2} />
+            </TouchableOpacity>
+          </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             {saving && <ActivityIndicator size="small" color={t.accent} />}
             {saveFailed && !saving && (
@@ -2373,6 +2406,33 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         </Modal>
 
         {/* Board list modal */}
+        <Modal visible={renamingIdx !== null} transparent animationType="fade" onRequestClose={() => setRenamingIdx(null)}>
+          <View style={styles.listOverlay}>
+            <View style={styles.listBox}>
+              <Text style={styles.listTitle}>{tr('whiteboard.renameBoard')}</Text>
+              <TextInput
+                style={styles.renameInput}
+                value={renameText}
+                onChangeText={setRenameText}
+                placeholder={tr('whiteboard.boardNamePlaceholder')}
+                placeholderTextColor={t.muted2}
+                autoFocus
+                returnKeyType="done"
+                onSubmitEditing={commitRename}
+                maxLength={60}
+              />
+              <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+                <TouchableOpacity style={styles.renameCancel} onPress={() => setRenamingIdx(null)}>
+                  <Text style={styles.renameCancelText}>{tr('common.cancel')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.renameSave} onPress={commitRename}>
+                  <Text style={styles.renameSaveText}>{tr('common.save')}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
         <Modal visible={showBoardList} transparent animationType="slide" onRequestClose={() => setShowBoardList(false)}>
           <View style={styles.listOverlay}>
             <View style={styles.listBox}>
@@ -2386,6 +2446,9 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                       <Text style={styles.listItemSub}>
                         {b.court_type === 'full' ? tr('whiteboard.fullCourt') : b.court_type === 'half' ? tr('whiteboard.halfCourt') : tr('whiteboard.threeQuarterCourt')} · {tr('whiteboard.marksCount', { n: b.strokes.length })}
                       </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => openRename(i)} style={{ padding: 4 }}>
+                      <Ionicons name="pencil-outline" size={16} color={t.muted2} />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => duplicateBoard(i)} style={{ padding: 4 }}>
                       <Ionicons name="copy-outline" size={16} color={t.muted2} />
@@ -2438,6 +2501,12 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   header:          { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: Platform.OS === 'ios' ? 52 : 12, paddingBottom: 6 },
   headerBtn:       { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
   boardName:       { color: t.ink, fontSize: 16, fontFamily: fonts[700], flex: 1 },
+  renameInput: { backgroundColor: t.chip, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 11,
+    color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line, marginTop: 12 },
+  renameCancel: { flex: 1, backgroundColor: t.chip, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
+  renameCancelText: { color: t.muted, fontFamily: fonts[700], fontSize: 14 },
+  renameSave: { flex: 1.3, backgroundColor: t.ctaBg, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
+  renameSaveText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
   saveFailChip: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1,
     borderColor: t.negative, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 4 },
   saveFailText: { color: t.negative, fontSize: 11, fontFamily: fonts[700] },

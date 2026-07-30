@@ -1209,7 +1209,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                           return (
                             <React.Fragment key={pt.game_id}>
                               <SvgText x={x + barW / 2} y={y - 6} fill={t.inkSoft} fontSize={10} fontWeight="800" textAnchor="middle">{pt.team_grade.toFixed(1)}</SvgText>
-                              <Rect x={x} y={y} width={barW} height={h} rx={6} fill={barColor} onPressIn={onTap} />
+                              <Rect x={x} y={y} width={barW} height={h} rx={6} fill={barColor} onPress={onTap} />  {/* onPress (release), not onPressIn: onPressIn fired on touch-down and
+                                   hijacked every attempt to scroll the chart. */}
                               <SvgText x={x + barW / 2} y={chartH + 16} fill={t.muted} fontSize={9} textAnchor="middle">{(pt.opponent ?? '').slice(0, 7)}</SvgText>
                               <SvgText x={x + barW / 2} y={chartH + 32} fill={won ? t.positive : t.negative} fontSize={10} fontWeight="800" textAnchor="middle">{won ? tr('teamGrade.winShort') : tr('teamGrade.lossShort')}</SvgText>
                             </React.Fragment>

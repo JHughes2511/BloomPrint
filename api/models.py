@@ -383,6 +383,11 @@ class PlayerNotification(Base):
     type           = Column(String, nullable=False)
     title          = Column(String, nullable=False)
     body           = Column(Text, nullable=False)
+    # Optional i18n pointer. When set, clients render the translated string with
+    # these params; `title`/`body` remain as the English fallback so existing
+    # rows and not-yet-migrated senders keep working.
+    i18n_key       = Column(String, nullable=True)
+    i18n_params    = Column(JSON, nullable=True)
     read           = Column(Boolean, default=False)
     ref_id         = Column(Integer, nullable=True)
     created_at     = Column(DateTime, default=datetime.utcnow)

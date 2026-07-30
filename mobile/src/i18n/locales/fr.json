@@ -2177,6 +2177,8 @@
     "unsavedMsg": "Impossible d'enregistrer ce tableau. Réessayer, ou fermer et perdre les modifications ?",
     "retrySave": "Réessayer l'enregistrement",
     "closeAnyway": "Fermer quand même",
-    "deleteFailed": "Impossible de supprimer ce tableau."
+    "deleteFailed": "Impossible de supprimer ce tableau.",
+    "renameBoard": "Renommer le tableau",
+    "boardNamePlaceholder": "Nommez ce système…"
   }
 }

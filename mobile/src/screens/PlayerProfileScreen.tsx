@@ -589,7 +589,7 @@ export default function PlayerProfileScreen() {
               <Text style={styles.sectionTitle}>{tr('playerProfile.bimScore')}</Text>
               {count > 0 && (
                 <Text style={{ color: t.muted2, fontSize: 11 }}>
-                  {count === 1 ? 'from 1 report' : `composite of ${count} reports`}
+                  {count === 1 ? tr('playerProfile.fromOneReport') : tr('playerProfile.compositeOfReports', { count })}
                 </Text>
               )}
             </View>

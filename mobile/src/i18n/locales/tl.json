@@ -2177,6 +2177,8 @@
     "unsavedMsg": "Hindi na-save ang board na ito. Subukan muli, o isara at mawala ang mga pagbabago?",
     "retrySave": "Subukang mag-save muli",
     "closeAnyway": "Isara pa rin",
-    "deleteFailed": "Hindi na-delete ang board na ito."
+    "deleteFailed": "Hindi na-delete ang board na ito.",
+    "renameBoard": "Palitan ang pangalan ng board",
+    "boardNamePlaceholder": "Pangalanan ang play na ito…"
   }
 }

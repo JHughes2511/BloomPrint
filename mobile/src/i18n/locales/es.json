@@ -2177,6 +2177,8 @@
     "unsavedMsg": "No se pudo guardar esta pizarra. ¿Reintentar o cerrar y perder los cambios?",
     "retrySave": "Reintentar guardado",
     "closeAnyway": "Cerrar de todos modos",
-    "deleteFailed": "No se pudo eliminar esta pizarra."
+    "deleteFailed": "No se pudo eliminar esta pizarra.",
+    "renameBoard": "Renombrar pizarra",
+    "boardNamePlaceholder": "Nombra esta jugada…"
   }
 }

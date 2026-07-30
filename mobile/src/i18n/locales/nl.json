@@ -2177,6 +2177,8 @@
     "unsavedMsg": "Dit tactiekbord kon niet worden opgeslagen. Opnieuw proberen, of sluiten en de wijzigingen verliezen?",
     "retrySave": "Opnieuw opslaan",
     "closeAnyway": "Toch sluiten",
-    "deleteFailed": "Dit tactiekbord kon niet worden verwijderd."
+    "deleteFailed": "Dit tactiekbord kon niet worden verwijderd.",
+    "renameBoard": "Bord hernoemen",
+    "boardNamePlaceholder": "Geef deze play een naam…"
   }
 }
