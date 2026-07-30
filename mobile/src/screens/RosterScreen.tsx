@@ -266,7 +266,7 @@ export default function RosterScreen() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import', { mode: 'roster' })}>
           <Ionicons name="cloud-upload-outline" size={16} color={t.muted} />
-          <Text style={styles.importBtnText}>{tr('roster.importRoster')}</Text>
+          <Text style={styles.importBtnText} numberOfLines={1}>{tr('roster.importRoster')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.addBtn} onPress={() => {
           setNewTeamId(selectedTeamId);
