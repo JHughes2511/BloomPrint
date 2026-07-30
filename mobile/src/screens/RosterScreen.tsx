@@ -244,9 +244,13 @@ export default function RosterScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.title}>{tr('roster.title')}</Text>
-          <Text style={styles.sub}>
+        {/* Translated headers run 20-40% longer than English, so the text block
+            shrinks and clips rather than wrapping into the row below. */}
+        <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+          <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+            {tr('roster.title')}
+          </Text>
+          <Text style={styles.sub} numberOfLines={1}>
             {currentTeamName ?? tr('roster.allTeams')} · {tr('roster.playersCount', { count: visiblePlayers.length })}
           </Text>
         </View>
@@ -563,12 +567,12 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 12 },
   title: { fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6, color: t.ink },
   sub: { fontSize: 12, color: t.muted, marginTop: 2 },
-  importBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: t.cta2Border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, marginRight: 8 },
-  importBtnText: { color: t.cta2Text, fontSize: 12, fontFamily: fonts[700] },
-  searchBtn: { width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: t.line, alignItems: 'center', justifyContent: 'center', marginRight: 8 },
+  importBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: t.cta2Border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, marginRight: 8, flexShrink: 1, maxWidth: 150 },
+  importBtnText: { color: t.cta2Text, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 },
+  searchBtn: { width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: t.line, alignItems: 'center', justifyContent: 'center', marginRight: 8, flexShrink: 0 },
   searchRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: t.chip, borderRadius: 14, borderWidth: 1, borderColor: t.line, paddingHorizontal: 14, paddingVertical: 10, marginHorizontal: 20, marginBottom: 12 },
   searchInput: { flex: 1, color: t.ink, fontSize: 14, padding: 0 },
-  addBtn: { backgroundColor: t.ctaBg, width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  addBtn: { backgroundColor: t.ctaBg, width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   importRosterBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.ctaBg, borderRadius: 999, paddingHorizontal: 20, paddingVertical: 13, marginTop: 16 },
   importRosterBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
   importRosterHint: { color: t.muted2, fontSize: 12, marginTop: 10 },

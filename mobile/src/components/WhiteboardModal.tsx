@@ -1891,13 +1891,15 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
             <TouchableOpacity onPress={() => setShowBoardList(true)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 4 }}>
               <Ionicons name="layers-outline" size={20} color={t.ink} />
             </TouchableOpacity>
-            {/* Tap the title to rename this board. */}
+            {/* Tap the title to rename. hitSlop keeps the target comfortable without
+                widening the row toward the close button. */}
             <TouchableOpacity
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flexShrink: 1 }}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1, marginRight: 12 }}
+              hitSlop={{ top: 10, bottom: 10, left: 4, right: 10 }}
               onPress={() => board && openRename(activeBoardIdx)}
             >
               <Text style={styles.boardName} numberOfLines={1}>{board?.name ?? tr('whiteboard.title')}</Text>
-              <Ionicons name="pencil" size={12} color={t.muted2} />
+              <Ionicons name="pencil" size={13} color={t.muted} />
             </TouchableOpacity>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -2407,8 +2409,11 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
 
         {/* Board list modal */}
         <Modal visible={renamingIdx !== null} transparent animationType="fade" onRequestClose={() => setRenamingIdx(null)}>
-          <View style={styles.listOverlay}>
-            <View style={styles.listBox}>
+          <KeyboardAvoidingView
+            style={styles.renameOverlay}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
+            <View style={styles.renameBox}>
               <Text style={styles.listTitle}>{tr('whiteboard.renameBoard')}</Text>
               <TextInput
                 style={styles.renameInput}
@@ -2430,7 +2435,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         </Modal>
 
         <Modal visible={showBoardList} transparent animationType="slide" onRequestClose={() => setShowBoardList(false)}>
@@ -2501,6 +2506,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   header:          { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: Platform.OS === 'ios' ? 52 : 12, paddingBottom: 6 },
   headerBtn:       { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
   boardName:       { color: t.ink, fontSize: 16, fontFamily: fonts[700], flex: 1 },
+  renameOverlay:   { flex: 1, backgroundColor: t.scrim, justifyContent: 'center', paddingHorizontal: 24 },
+  renameBox:       { backgroundColor: t.sheet, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: t.cardBorder },
   renameInput: { backgroundColor: t.chip, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 11,
     color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line, marginTop: 12 },
   renameCancel: { flex: 1, backgroundColor: t.chip, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
