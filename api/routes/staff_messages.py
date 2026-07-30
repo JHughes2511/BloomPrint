@@ -189,6 +189,7 @@ def send_message(
             type="staff_message",
             title=f"Message from {coach.name}",
             body=preview[:120],
+            i18n_key="notifs.staffMessage", i18n_params={"coach": coach.name, "preview": preview[:120]},
             ref_id=cid,
         ))
     db.commit()

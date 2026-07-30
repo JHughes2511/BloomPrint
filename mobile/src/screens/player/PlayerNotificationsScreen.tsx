@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { notificationTitle, notificationBody } from '../../utils/notificationText';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, RefreshControl,
@@ -154,9 +155,9 @@ export default function PlayerNotificationsScreen() {
               </View>
               <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginLeft: 12 }}>
                 <Text style={[styles.notifTitle, !n.read && styles.notifTitleUnread]} numberOfLines={1}>
-                  {n.title}
+                  {notificationTitle(n, tr)}
                 </Text>
-                <Text style={styles.notifBody} numberOfLines={2}>{n.body}</Text>
+                <Text style={styles.notifBody} numberOfLines={2}>{notificationBody(n, tr)}</Text>
                 <Text style={styles.notifDate} numberOfLines={1}>{new Date(n.created_at).toLocaleDateString()}</Text>
               </View>
               {!n.read && <View style={styles.dot} />}

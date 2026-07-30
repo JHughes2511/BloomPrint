@@ -103,6 +103,8 @@ def join_team(
         coach_id=team.coach_id,
         title=f"{coach.name} joined your team",
         body=f"{coach.name} ({coach.role or 'staff'}) has joined {team.name}.",
+        i18n_key="notifs.teamStaffJoined",
+        i18n_params={"coach": coach.name, "role": coach.role or "staff", "team": team.name},
         type="team_staff_joined",
     )
     db.add(notif)
@@ -251,6 +253,7 @@ def invite_to_team(
             type="team_invite",
             title="Team invite",
             body=f"{coach.name} invited you to join {team.name}.",
+            i18n_key="notifs.teamInvite", i18n_params={"coach": coach.name, "team": team.name},
             ref_id=inv.id,
         ))
         db.commit()
@@ -305,6 +308,8 @@ def approve_invite(
         db.add(models.PlayerNotification(
             coach_id=inv.invited_by, type="team_invite_approved", title="Invite accepted",
             body=f"{coach.name} joined {team.name if team else 'your team'}.",
+            i18n_key="notifs.teamInviteAccepted",
+            i18n_params={"coach": coach.name, "team": team.name if team else None},
         ))
         db.commit()
     return {"ok": True, "status": inv.status}
@@ -324,6 +329,7 @@ def reject_invite(
         db.add(models.PlayerNotification(
             coach_id=inv.invited_by, type="team_invite_rejected", title="Invite declined",
             body=f"{coach.name} declined the team invite.",
+            i18n_key="notifs.teamInviteRejected", i18n_params={"coach": coach.name},
         ))
         db.commit()
     return {"ok": True, "status": inv.status}

@@ -828,3 +828,17 @@ def _run_migrations():
             sess.close()
         except Exception:
             pass
+
+        # Coach notifications gained the same i18n pointer the player ones have,
+        # so a notification is stored once and rendered in the reader's language.
+        try:
+            text = __import__("sqlalchemy").text
+            cn_cols = [row[1] for row in conn.execute(text("PRAGMA table_info(coach_notifications)"))]
+            if cn_cols and "i18n_key" not in cn_cols:
+                conn.execute(text("ALTER TABLE coach_notifications ADD COLUMN i18n_key TEXT"))
+                conn.commit()
+            if cn_cols and "i18n_params" not in cn_cols:
+                conn.execute(text("ALTER TABLE coach_notifications ADD COLUMN i18n_params TEXT"))
+                conn.commit()
+        except Exception:
+            pass

@@ -51,7 +51,11 @@
     "team_training": "Timski trening",
     "game_situational": "Situacijska analiza",
     "matchup": "Sučeljavanje",
-    "game_report": "Izvještaj s utakmice"
+    "game_report": "Izvještaj s utakmice",
+    "eval": "Procjena igrača",
+    "game": "Izvještaj s utakmice",
+    "training": "Program treninga",
+    "team_report": "Timski izvještaj"
   },
   "auth": {
     "whoAreYou": "Tko si ti?",
@@ -2210,5 +2214,155 @@
     "scanning": "Pretražujem snimku za ključne akcije…",
     "segment": "Analiziram segment {{i}} od {{n}}",
     "synthesizing": "Sastavljam izvještaj"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "Pregledajte svoj sustav i filozofiju",
+      "body": "Počela je nova sezona — dobar trenutak da pregledate i ažurirate svoj sustav i filozofiju za {{season}}."
+    },
+    "seasonWelcome": {
+      "title": "Pregledajte svoj sustav i filozofiju",
+      "body": "Dobro došli natrag — dobar trenutak da pregledate i ažurirate svoj sustav i filozofiju za {{season}}."
+    },
+    "staffMessage": {
+      "title": "Poruka od {{coach}}",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "Program treninga poslan",
+      "body": "{{coach}} vam je poslao program treninga. Pogledajte karticu treninga."
+    },
+    "coachRepliedTraining": {
+      "title": "Trener je odgovorio",
+      "body": "{{coach}} je komentirao vaš trening: „{{text}}”"
+    },
+    "trainingUpdatedByCoach": {
+      "title": "Program treninga ažuriran",
+      "body": "{{coach}} je ažurirao vaš program treninga."
+    },
+    "trainingNotesAdded": {
+      "title": "Trening ažuriran",
+      "body": "Trener je dodao bilješke u vaš program treninga."
+    },
+    "coachCommentedTraining": {
+      "title": "Trener je dodao bilješke",
+      "body": "Trener je komentirao vaš trening: „{{text}}”"
+    },
+    "coachRepliedComment": {
+      "title": "Trener je odgovorio",
+      "body": "{{coach}} je odgovorio na vaš komentar o izvještaju: „{{text}}”"
+    },
+    "linkRequest": {
+      "title": "Zahtjev za povezivanje",
+      "body": "{{player}} traži povezivanje s profilom igrača {{profile}}."
+    },
+    "linkRequestSelf": {
+      "title": "Zahtjev za povezivanje",
+      "body": "{{player}} traži povezivanje s vašim računom."
+    },
+    "linkApprovedProgram": {
+      "title": "Profil povezan",
+      "body": "Vaš račun povezan je s {{program}}."
+    },
+    "linkApprovedProfile": {
+      "title": "Profil povezan",
+      "body": "Vaš račun povezan je s profilom igrača {{player}}."
+    },
+    "shareApproval": {
+      "title": "Potrebno odobrenje",
+      "body": "{{coach}} želi poslati vaš {{type}} igraču {{recipient}}. Odobrite ili odbijte dijeljenje izvještaja s igračem na kojeg se ne odnosi."
+    },
+    "shareApproved": {
+      "title": "Dijeljenje odobreno",
+      "body": "{{player}} je odobrio dijeljenje svog izvještaja ({{type}})."
+    },
+    "shareRejected": {
+      "title": "Dijeljenje odbijeno",
+      "body": "{{player}} je odbio dijeljenje svog izvještaja ({{type}})."
+    },
+    "reportShared": {
+      "title": "Novi izvještaj podijeljen",
+      "body": "{{coach}} je s vama podijelio: {{type}}."
+    },
+    "teamReportSharedCoach": {
+      "title": "Momčadski izvještaj podijeljen",
+      "body": "{{coach}} je s vama podijelio momčadski izvještaj.\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "Momčadski izvještaj podijeljen",
+      "body": "{{coach}} je s vama podijelio momčadski izvještaj ({{type}})."
+    },
+    "playerGeneratedTraining": {
+      "title": "Igrač je izradio trening",
+      "body": "{{player}} je izradio program treninga na temelju podijeljenog izvještaja."
+    },
+    "playerUpdatedTraining": {
+      "title": "Igrač je ažurirao trening",
+      "body": "{{player}} je ažurirao svoj program treninga novim primjedbama."
+    },
+    "playerCommentedTraining": {
+      "title": "Igrač je odgovorio",
+      "body": "{{player}} je komentirao svoj trening: „{{text}}”"
+    },
+    "playerCommentedReport": {
+      "title": "Igrač je odgovorio",
+      "body": "{{player}} je komentirao podijeljeni izvještaj: „{{text}}”"
+    },
+    "trainingFeedbackRequest": {
+      "title": "Povratna informacija o treningu",
+      "body": "{{player}} je zatražio ažuriranje svog treninga: „{{text}}”"
+    },
+    "trainingFeedbackApplied": {
+      "title": "Povratna informacija o treningu",
+      "body": "{{player}} je primijenio ispravke na svoj trening."
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} se pridružio vašoj momčadi",
+      "body": "{{coach}} ({{role}}) se pridružio momčadi {{team}}."
+    },
+    "teamInvite": {
+      "title": "Pozivnica za momčad",
+      "body": "{{coach}} vas je pozvao da se pridružite momčadi {{team}}."
+    },
+    "teamInviteAccepted": {
+      "title": "Pozivnica prihvaćena",
+      "body": "{{coach}} se pridružio momčadi {{team}}."
+    },
+    "teamInviteRejected": {
+      "title": "Pozivnica odbijena",
+      "body": "{{coach}} je odbio pozivnicu za momčad."
+    },
+    "staffReportShared": {
+      "title": "Izvještaj podijelio {{coach}}",
+      "body": "{{coach}} je s vama podijelio: {{type}}."
+    },
+    "staffReportSharedTeam": {
+      "title": "Izvještaj podijelio {{coach}}",
+      "body": "{{coach}} je podijelio izvještaj ({{type}}) s momčadi {{team}}."
+    },
+    "staffReportComment": {
+      "title": "Novi komentar od {{coach}}",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "{{coach}} je ponovno generirao izvještaj",
+      "body": "{{coach}} je ponovno generirao izvještaj ({{type}}) koji ste podijelili."
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} je zatražio vaš ažurirani izvještaj",
+      "body": "{{coach}} želi vidjeti vašu ažuriranu verziju izvještaja ({{type}})."
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} je odbio vaš zahtjev",
+      "body": "{{coach}} je odbio podijeliti svoj ažurirani izvještaj ({{type}})."
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} je podijelio ažurirani izvještaj",
+      "body": "{{coach}} je s vama podijelio svoj ažurirani izvještaj ({{type}})."
+    },
+    "staffReportForwarded": {
+      "title": "Izvještaj proslijedio {{coach}}",
+      "body": "{{coach}} vam je proslijedio izvještaj ({{type}})."
+    }
   }
 }

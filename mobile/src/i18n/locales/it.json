@@ -51,7 +51,11 @@
     "team_training": "Allenamento di Squadra",
     "game_situational": "Situazioni di Gioco",
     "matchup": "Confronto",
-    "game_report": "Report Partita"
+    "game_report": "Report Partita",
+    "eval": "Valutazione Giocatore",
+    "game": "Report Partita",
+    "training": "Programma di Allenamento",
+    "team_report": "Report Squadra"
   },
   "auth": {
     "whoAreYou": "Chi sei?",
@@ -2210,5 +2214,155 @@
     "scanning": "Scansione del video alla ricerca delle azioni chiave…",
     "segment": "Analisi del segmento {{i}} di {{n}}",
     "synthesizing": "Sintesi del report"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "Rivedi il tuo sistema e la tua filosofia",
+      "body": "È iniziata una nuova stagione — un buon momento per rivedere e aggiornare il tuo sistema e la tua filosofia per {{season}}."
+    },
+    "seasonWelcome": {
+      "title": "Rivedi il tuo sistema e la tua filosofia",
+      "body": "Bentornato — un buon momento per rivedere e aggiornare il tuo sistema e la tua filosofia per {{season}}."
+    },
+    "staffMessage": {
+      "title": "Messaggio da {{coach}}",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "Programma di allenamento inviato",
+      "body": "{{coach}} ti ha inviato un programma di allenamento. Controlla la scheda Allenamento."
+    },
+    "coachRepliedTraining": {
+      "title": "L'allenatore ha risposto",
+      "body": "{{coach}} ha commentato il tuo allenamento: \"{{text}}\""
+    },
+    "trainingUpdatedByCoach": {
+      "title": "Programma di allenamento aggiornato",
+      "body": "{{coach}} ha aggiornato il tuo programma di allenamento."
+    },
+    "trainingNotesAdded": {
+      "title": "Allenamento aggiornato",
+      "body": "Un allenatore ha aggiunto note al tuo programma di allenamento."
+    },
+    "coachCommentedTraining": {
+      "title": "L'allenatore ha aggiunto note",
+      "body": "Un allenatore ha commentato il tuo allenamento: \"{{text}}\""
+    },
+    "coachRepliedComment": {
+      "title": "L'allenatore ha risposto",
+      "body": "{{coach}} ha risposto al tuo commento sul report: \"{{text}}\""
+    },
+    "linkRequest": {
+      "title": "Richiesta di collegamento",
+      "body": "{{player}} chiede di collegarsi al profilo di {{profile}}."
+    },
+    "linkRequestSelf": {
+      "title": "Richiesta di collegamento",
+      "body": "{{player}} chiede di collegarsi al tuo account."
+    },
+    "linkApprovedProgram": {
+      "title": "Profilo collegato",
+      "body": "Il tuo account è stato collegato a {{program}}."
+    },
+    "linkApprovedProfile": {
+      "title": "Profilo collegato",
+      "body": "Il tuo account è stato collegato al profilo di {{player}}."
+    },
+    "shareApproval": {
+      "title": "Approvazione necessaria",
+      "body": "{{coach}} vuole inviare il tuo {{type}} a {{recipient}}. Approva o rifiuta la condivisione del tuo report con un giocatore che non ne è il soggetto."
+    },
+    "shareApproved": {
+      "title": "Condivisione approvata",
+      "body": "{{player}} ha approvato la condivisione del suo {{type}}."
+    },
+    "shareRejected": {
+      "title": "Condivisione rifiutata",
+      "body": "{{player}} ha rifiutato la condivisione del suo {{type}}."
+    },
+    "reportShared": {
+      "title": "Nuovo report condiviso",
+      "body": "{{coach}} ha condiviso un {{type}} con te."
+    },
+    "teamReportSharedCoach": {
+      "title": "Report di squadra condiviso",
+      "body": "{{coach}} ha condiviso un report di squadra con te.\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "Report di squadra condiviso",
+      "body": "{{coach}} ha condiviso con te un report di squadra di tipo {{type}}."
+    },
+    "playerGeneratedTraining": {
+      "title": "Il giocatore ha generato un allenamento",
+      "body": "{{player}} ha generato un programma di allenamento da un report condiviso."
+    },
+    "playerUpdatedTraining": {
+      "title": "Il giocatore ha aggiornato l'allenamento",
+      "body": "{{player}} ha aggiornato il suo programma di allenamento con nuovi feedback."
+    },
+    "playerCommentedTraining": {
+      "title": "Il giocatore ha risposto",
+      "body": "{{player}} ha commentato il suo allenamento: \"{{text}}\""
+    },
+    "playerCommentedReport": {
+      "title": "Il giocatore ha risposto",
+      "body": "{{player}} ha commentato un report condiviso: \"{{text}}\""
+    },
+    "trainingFeedbackRequest": {
+      "title": "Feedback sull'allenamento",
+      "body": "{{player}} ha richiesto un aggiornamento del suo allenamento: \"{{text}}\""
+    },
+    "trainingFeedbackApplied": {
+      "title": "Feedback sull'allenamento",
+      "body": "{{player}} ha applicato correzioni al suo allenamento."
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} è entrato nella tua squadra",
+      "body": "{{coach}} ({{role}}) è entrato in {{team}}."
+    },
+    "teamInvite": {
+      "title": "Invito alla squadra",
+      "body": "{{coach}} ti ha invitato a unirti a {{team}}."
+    },
+    "teamInviteAccepted": {
+      "title": "Invito accettato",
+      "body": "{{coach}} è entrato in {{team}}."
+    },
+    "teamInviteRejected": {
+      "title": "Invito rifiutato",
+      "body": "{{coach}} ha rifiutato l'invito alla squadra."
+    },
+    "staffReportShared": {
+      "title": "Report condiviso da {{coach}}",
+      "body": "{{coach}} ha condiviso un {{type}} con te."
+    },
+    "staffReportSharedTeam": {
+      "title": "Report condiviso da {{coach}}",
+      "body": "{{coach}} ha condiviso un {{type}} con {{team}}."
+    },
+    "staffReportComment": {
+      "title": "Nuovo commento da {{coach}}",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "Report rigenerato da {{coach}}",
+      "body": "{{coach}} ha rigenerato il {{type}} che hai condiviso."
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} ha richiesto il tuo report aggiornato",
+      "body": "{{coach}} ha chiesto di vedere la tua versione aggiornata del {{type}}."
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} ha rifiutato la tua richiesta",
+      "body": "{{coach}} ha rifiutato di condividere il suo {{type}} aggiornato."
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} ha condiviso il report aggiornato",
+      "body": "{{coach}} ha condiviso con te il suo {{type}} aggiornato."
+    },
+    "staffReportForwarded": {
+      "title": "Report inoltrato da {{coach}}",
+      "body": "{{coach}} ti ha inoltrato un {{type}}."
+    }
   }
 }

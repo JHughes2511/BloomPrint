@@ -51,7 +51,11 @@
     "team_training": "אימון קבוצתי",
     "game_situational": "מצבי משחק",
     "matchup": "השוואה",
-    "game_report": "דוח משחק"
+    "game_report": "דוח משחק",
+    "eval": "הערכת שחקן",
+    "game": "דוח משחק",
+    "training": "תוכנית אימונים",
+    "team_report": "דוח קבוצה"
   },
   "auth": {
     "whoAreYou": "מי אתה?",
@@ -2210,5 +2214,155 @@
     "scanning": "סורק את הווידאו אחר רגעי מפתח…",
     "segment": "מנתח קטע {{i}} מתוך {{n}}",
     "synthesizing": "מרכיב את הדוח"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "עברו על השיטה והפילוסופיה שלכם",
+      "body": "עונה חדשה התחילה — זמן טוב לעבור ולעדכן את השיטה והפילוסופיה שלכם לעונת {{season}}."
+    },
+    "seasonWelcome": {
+      "title": "עברו על השיטה והפילוסופיה שלכם",
+      "body": "ברוכים השבים — זמן טוב לעבור ולעדכן את השיטה והפילוסופיה שלכם לעונת {{season}}."
+    },
+    "staffMessage": {
+      "title": "הודעה מ{{coach}}",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "תוכנית אימונים נשלחה",
+      "body": "{{coach}} שלח לך תוכנית אימונים. בדוק בלשונית האימונים."
+    },
+    "coachRepliedTraining": {
+      "title": "המאמן הגיב",
+      "body": "{{coach}} הגיב על האימון שלך: \"{{text}}\""
+    },
+    "trainingUpdatedByCoach": {
+      "title": "תוכנית האימונים עודכנה",
+      "body": "{{coach}} עדכן את תוכנית האימונים שלך."
+    },
+    "trainingNotesAdded": {
+      "title": "האימון עודכן",
+      "body": "מאמן הוסיף הערות לתוכנית האימונים שלך."
+    },
+    "coachCommentedTraining": {
+      "title": "המאמן הוסיף הערות",
+      "body": "מאמן הגיב על האימון שלך: \"{{text}}\""
+    },
+    "coachRepliedComment": {
+      "title": "המאמן הגיב",
+      "body": "{{coach}} השיב להערה שלך על הדוח: \"{{text}}\""
+    },
+    "linkRequest": {
+      "title": "בקשת קישור",
+      "body": "{{player}} מבקש להתקשר לפרופיל של {{profile}}."
+    },
+    "linkRequestSelf": {
+      "title": "בקשת קישור",
+      "body": "{{player}} מבקש להתקשר לחשבון שלך."
+    },
+    "linkApprovedProgram": {
+      "title": "הפרופיל קושר",
+      "body": "החשבון שלך קושר ל{{program}}."
+    },
+    "linkApprovedProfile": {
+      "title": "הפרופיל קושר",
+      "body": "החשבון שלך קושר לפרופיל של {{player}}."
+    },
+    "shareApproval": {
+      "title": "נדרש אישור",
+      "body": "{{coach}} רוצה לשלוח את {{type}} שלך אל {{recipient}}. אשר או דחה שיתוף הדוח שלך עם שחקן שהוא לא נושא הדוח."
+    },
+    "shareApproved": {
+      "title": "השיתוף אושר",
+      "body": "{{player}} אישר לשתף את {{type}} שלו."
+    },
+    "shareRejected": {
+      "title": "השיתוף נדחה",
+      "body": "{{player}} דחה את שיתוף {{type}} שלו."
+    },
+    "reportShared": {
+      "title": "דוח חדש שותף",
+      "body": "{{coach}} שיתף איתך {{type}}."
+    },
+    "teamReportSharedCoach": {
+      "title": "דוח קבוצה שותף",
+      "body": "{{coach}} שיתף איתך דוח קבוצה.\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "דוח קבוצה שותף",
+      "body": "{{coach}} שיתף איתך דוח קבוצה מסוג {{type}}."
+    },
+    "playerGeneratedTraining": {
+      "title": "השחקן יצר אימון",
+      "body": "{{player}} יצר תוכנית אימונים מתוך דוח משותף."
+    },
+    "playerUpdatedTraining": {
+      "title": "השחקן עדכן את האימון",
+      "body": "{{player}} עדכן את תוכנית האימונים שלו עם משוב חדש."
+    },
+    "playerCommentedTraining": {
+      "title": "השחקן הגיב",
+      "body": "{{player}} הגיב על האימון שלו: \"{{text}}\""
+    },
+    "playerCommentedReport": {
+      "title": "השחקן הגיב",
+      "body": "{{player}} הגיב על דוח משותף: \"{{text}}\""
+    },
+    "trainingFeedbackRequest": {
+      "title": "משוב על האימון",
+      "body": "{{player}} ביקש עדכון לאימון שלו: \"{{text}}\""
+    },
+    "trainingFeedbackApplied": {
+      "title": "משוב על האימון",
+      "body": "{{player}} החיל תיקונים על האימון שלו."
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} הצטרף לקבוצה שלך",
+      "body": "{{coach}} ({{role}}) הצטרף ל{{team}}."
+    },
+    "teamInvite": {
+      "title": "הזמנה לקבוצה",
+      "body": "{{coach}} הזמין אותך להצטרף ל{{team}}."
+    },
+    "teamInviteAccepted": {
+      "title": "ההזמנה התקבלה",
+      "body": "{{coach}} הצטרף ל{{team}}."
+    },
+    "teamInviteRejected": {
+      "title": "ההזמנה נדחתה",
+      "body": "{{coach}} דחה את ההזמנה לקבוצה."
+    },
+    "staffReportShared": {
+      "title": "דוח שותף על ידי {{coach}}",
+      "body": "{{coach}} שיתף איתך {{type}}."
+    },
+    "staffReportSharedTeam": {
+      "title": "דוח שותף על ידי {{coach}}",
+      "body": "{{coach}} שיתף {{type}} עם {{team}}."
+    },
+    "staffReportComment": {
+      "title": "תגובה חדשה מ{{coach}}",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "{{coach}} יצר מחדש את הדוח",
+      "body": "{{coach}} יצר מחדש את {{type}} ששיתפת."
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} ביקש את הדוח המעודכן שלך",
+      "body": "{{coach}} ביקש לראות את הגרסה המעודכנת שלך של {{type}}."
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} דחה את בקשתך",
+      "body": "{{coach}} סירב לשתף את {{type}} המעודכן שלו."
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} שיתף את הדוח המעודכן",
+      "body": "{{coach}} שיתף איתך את {{type}} המעודכן שלו."
+    },
+    "staffReportForwarded": {
+      "title": "דוח הועבר על ידי {{coach}}",
+      "body": "{{coach}} העביר אליך {{type}}."
+    }
   }
 }

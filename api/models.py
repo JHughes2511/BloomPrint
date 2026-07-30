@@ -447,6 +447,12 @@ class CoachNotification(Base):
     coach_id   = Column(Integer, ForeignKey("coaches.id"), nullable=False)
     title      = Column(String, nullable=False)
     body       = Column(Text, nullable=False)
+    # Same contract as PlayerNotification: i18n_key points at a "notifs.<name>"
+    # base with .title/.body underneath, rendered by the reader's client in the
+    # reader's language. title/body stay as the English fallback for rows
+    # written before a sender was migrated.
+    i18n_key   = Column(String, nullable=True)
+    i18n_params = Column(JSON, nullable=True)
     read       = Column(Boolean, default=False)
     ref_id     = Column(Integer, nullable=True)
     type       = Column(String, nullable=False, default="info")

@@ -137,6 +137,7 @@ def request_link(
             type="link_requested",
             title="Player Link Request",
             body=f"{pu.name} is requesting to link to {player.name}'s profile.",
+            i18n_key="notifs.linkRequest", i18n_params={"player": pu.name, "profile": player.name},
             ref_id=lr.id,
         )
         db.add(notif)
@@ -177,7 +178,9 @@ def approve_link(
         _add_player_link(db, pu, player.id, coach.id)
         db.add(models.PlayerNotification(
             player_user_id=pu.id, type="link_approved", title="Profile Linked",
-            body=f"Your account has been linked to {coach.program_name}.", ref_id=player.id,
+            body=f"Your account has been linked to {coach.program_name}.",
+            i18n_key="notifs.linkApprovedProgram", i18n_params={"program": coach.program_name},
+            ref_id=player.id,
         ))
         db.commit()
         return {"ok": True}
@@ -188,6 +191,7 @@ def approve_link(
         type="link_approved",
         title="Profile Linked",
         body=f"Your account has been linked to {lr.player.name}'s profile.",
+        i18n_key="notifs.linkApprovedProfile", i18n_params={"player": lr.player.name},
         ref_id=lr.player_id,
     )
     db.add(notif)
@@ -247,6 +251,7 @@ def request_link_to_coach(
         type="link_requested",
         title="Player Link Request",
         body=f"{pu.name} is requesting to link to your account.",
+        i18n_key="notifs.linkRequestSelf", i18n_params={"player": pu.name},
         ref_id=lr.id,
     )
     db.add(notif)
@@ -376,6 +381,8 @@ def share_report(
                 title="Approval needed",
                 body=(f"{coach.name} wants to send your {ev.output_type.replace('_', ' ')} report "
                       f"to {recipient_name}. Approve or reject sharing your report with a player it isn't about."),
+                i18n_key="notifs.shareApproval",
+                i18n_params={"coach": coach.name, "type": ev.output_type, "recipient": recipient_name},
                 ref_id=approval.id,
             ))
             db.commit()
@@ -403,6 +410,7 @@ def share_report(
         type="report_shared",
         title="New Report Shared",
         body=f"{coach.name} shared a {ev.output_type.replace('_', ' ')} report with you.",
+        i18n_key="notifs.reportShared", i18n_params={"coach": coach.name, "type": ev.output_type},
         ref_id=shared.id,
     )
     db.add(notif)
@@ -505,6 +513,7 @@ async def generate_player_training(
             type="training_generated",
             title="Player Generated Training",
             body=f"{pu.name} generated a training program from a shared report.",
+            i18n_key="notifs.playerGeneratedTraining", i18n_params={"player": pu.name},
             ref_id=pt.id,
         )
         db.add(notif)
@@ -632,6 +641,7 @@ def add_coach_training_comment_player(
         type="player_commented_coach_training",
         title="Player Responded",
         body=f"{pu.name} commented on their training: \"{body.text[:80]}\"",
+        i18n_key="notifs.playerCommentedTraining", i18n_params={"player": pu.name, "text": body.text[:80]},
         ref_id=training_id,
     )
     db.add(notif)
@@ -673,6 +683,7 @@ def refresh_coach_training(
         type="training_feedback",
         title="Training Feedback",
         body=f"{pu.name} requested an update to their training: \"{body.feedback[:80]}\"",
+        i18n_key="notifs.trainingFeedbackRequest", i18n_params={"player": pu.name, "text": body.feedback[:80]},
         ref_id=training_id,
     )
     db.add(notif)
@@ -732,6 +743,7 @@ def update_player_training(
         type="training_updated",
         title="Training Updated",
         body="A coach has added notes to your training program.",
+        i18n_key="notifs.trainingNotesAdded",
         ref_id=pt.id,
     )
     db.add(notif)
@@ -809,6 +821,7 @@ async def refresh_player_training(
                 type="training_refreshed",
                 title="Player Updated Training",
                 body=f"{pu.name} updated their training program with new feedback.",
+                i18n_key="notifs.playerUpdatedTraining", i18n_params={"player": pu.name},
                 ref_id=pt.id,
             )
             db.add(notif)
@@ -986,6 +999,7 @@ def apply_coach_training_corrections(
         type="training_feedback",
         title="Training Feedback",
         body=f"{pu.name} applied corrections to their training.",
+        i18n_key="notifs.trainingFeedbackApplied", i18n_params={"player": pu.name},
         ref_id=training_id,
     ))
     db.commit()
@@ -1033,6 +1047,7 @@ async def coach_refresh_training(
             type="training_updated",
             title="Training Updated by Coach",
             body=f"{coach.name} has updated your training program.",
+            i18n_key="notifs.trainingUpdatedByCoach", i18n_params={"coach": coach.name},
             ref_id=pt.id,
         )
         db.add(notif)
@@ -1070,6 +1085,7 @@ def add_player_comment(
         type="player_commented",
         title="Player Responded",
         body=f"{pu.name} commented on a shared report: \"{body.text[:80]}\"",
+        i18n_key="notifs.playerCommentedReport", i18n_params={"player": pu.name, "text": body.text[:80]},
         ref_id=shared_id,
     )
     db.add(notif)
@@ -1104,6 +1120,7 @@ def add_training_comment_player(
         type="player_commented_training",
         title="Player Responded",
         body=f"{pu.name} commented on their training: \"{body.text[:80]}\"",
+        i18n_key="notifs.playerCommentedTraining", i18n_params={"player": pu.name, "text": body.text[:80]},
         ref_id=training_id,
     )
     db.add(notif)
@@ -1137,6 +1154,7 @@ def add_training_comment_coach(
         type="training_updated",
         title="Coach Added Notes",
         body=f"A coach commented on your training: \"{body.text[:80]}\"",
+        i18n_key="notifs.coachCommentedTraining", i18n_params={"text": body.text[:80]},
         ref_id=training_id,
     )
     db.add(notif)
@@ -1334,6 +1352,7 @@ def coach_reply_to_shared_report(
                 type="training_updated",
                 title="Coach Added Notes",
                 body=f"A coach commented on your training: \"{body.text[:80]}\"",
+                i18n_key="notifs.coachCommentedTraining", i18n_params={"text": body.text[:80]},
                 ref_id=shared_id,
             ))
             db.commit()
@@ -1352,6 +1371,8 @@ def coach_reply_to_shared_report(
                     type="training_shared",
                     title="Coach Replied",
                     body=f"{coach.name} commented on your training: \"{body.text[:80]}\"",
+                    i18n_key="notifs.coachRepliedTraining",
+                    i18n_params={"coach": coach.name, "text": body.text[:80]},
                     ref_id=shared_id,
                 ))
             db.commit()
@@ -1373,6 +1394,7 @@ def coach_reply_to_shared_report(
         type="coach_replied",
         title="Coach Replied",
         body=f"{coach.name} replied to your report comment: \"{body.text[:80]}\"",
+        i18n_key="notifs.coachRepliedComment", i18n_params={"coach": coach.name, "text": body.text[:80]},
         ref_id=shared_id,
     )
     db.add(notif)
@@ -1441,6 +1463,9 @@ def share_team_report(
                         body=(f"{coach.name} wants to send your "
                               f"{body.output_type.replace('_', ' ')} report to {recipient_name}. "
                               f"Approve or reject sharing your report with a player it isn't about."),
+                        i18n_key="notifs.shareApproval",
+                        i18n_params={"coach": coach.name, "type": body.output_type,
+                                     "recipient": recipient_name},
                         ref_id=approval.id,
                     ))
                     db.commit()
@@ -1475,6 +1500,8 @@ def share_team_report(
                 type="team_report_shared",
                 title=f"Team Report: {body.output_type.replace('_', ' ').title()}",
                 body=f"{coach.name} shared a team report with you.\n\n{preview}...",
+                i18n_key="notifs.teamReportSharedCoach",
+                i18n_params={"coach": coach.name, "type": body.output_type, "preview": preview},
             )
             db.add(notif)
         db.commit()
@@ -1500,6 +1527,8 @@ def share_team_report(
             type="team_report_shared",
             title=f"Team Report Shared",
             body=f"{coach.name} shared a {body.output_type.replace('_', ' ')} team report with you.",
+            i18n_key="notifs.teamReportSharedPlayer",
+            i18n_params={"coach": coach.name, "type": body.output_type},
             ref_id=tsr.id,
         )
         db.add(notif)
@@ -1568,6 +1597,8 @@ def approve_share(
             type="report_shared",
             title="New Report Shared",
             body=f"{coach.name if coach else 'A coach'} shared a {a.output_type.replace('_', ' ')} report with you.",
+            i18n_key="notifs.reportShared",
+            i18n_params={"coach": coach.name if coach else None, "type": a.output_type},
             ref_id=shared.id,
         ))
     else:
@@ -1585,6 +1616,8 @@ def approve_share(
             type="team_report_shared",
             title="Report Shared",
             body=f"{coach.name if coach else 'A coach'} shared a {a.output_type.replace('_', ' ')} report with you.",
+            i18n_key="notifs.reportShared",
+            i18n_params={"coach": coach.name if coach else None, "type": a.output_type},
             ref_id=tsr.id,
         ))
     db.add(models.PlayerNotification(
@@ -1592,6 +1625,7 @@ def approve_share(
         type="share_approved",
         title="Share approved",
         body=f"{pu.name} approved sharing their {a.output_type.replace('_', ' ')} report.",
+        i18n_key="notifs.shareApproved", i18n_params={"player": pu.name, "type": a.output_type},
     ))
     a.status = "approved"
     db.commit()
@@ -1614,6 +1648,7 @@ def reject_share(
             type="share_rejected",
             title="Share declined",
             body=f"{pu.name} declined sharing their {a.output_type.replace('_', ' ')} report.",
+            i18n_key="notifs.shareRejected", i18n_params={"player": pu.name, "type": a.output_type},
         ))
         db.commit()
     return {"ok": True, "status": a.status}

@@ -51,7 +51,11 @@
     "team_training": "Takım Antrenmanı",
     "game_situational": "Maç Durumsal Analizi",
     "matchup": "Karşılaşma",
-    "game_report": "Maç Raporu"
+    "game_report": "Maç Raporu",
+    "eval": "Oyuncu Değerlendirmesi",
+    "game": "Maç Raporu",
+    "training": "Antrenman Programı",
+    "team_report": "Takım Raporu"
   },
   "auth": {
     "whoAreYou": "Kimsiniz?",
@@ -2210,5 +2214,155 @@
     "scanning": "Videoda kilit anlar taranıyor…",
     "segment": "{{n}} bölümden {{i}}. bölüm analiz ediliyor",
     "synthesizing": "Rapor derleniyor"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "Sistem ve felsefeni gözden geçir",
+      "body": "Yeni bir sezon başladı — {{season}} için sistemini ve felsefeni gözden geçirip güncellemek için iyi bir zaman."
+    },
+    "seasonWelcome": {
+      "title": "Sistem ve felsefeni gözden geçir",
+      "body": "Tekrar hoş geldin — {{season}} için sistemini ve felsefeni gözden geçirip güncellemek için iyi bir zaman."
+    },
+    "staffMessage": {
+      "title": "{{coach}} kişisinden mesaj",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "Antrenman programı gönderildi",
+      "body": "{{coach}} sana bir antrenman programı gönderdi. Antrenman sekmene bak."
+    },
+    "coachRepliedTraining": {
+      "title": "Antrenör yanıtladı",
+      "body": "{{coach}} antrenmanın hakkında yorum yaptı: \"{{text}}\""
+    },
+    "trainingUpdatedByCoach": {
+      "title": "Antrenman programı güncellendi",
+      "body": "{{coach}} antrenman programını güncelledi."
+    },
+    "trainingNotesAdded": {
+      "title": "Antrenman güncellendi",
+      "body": "Bir antrenör antrenman programına notlar ekledi."
+    },
+    "coachCommentedTraining": {
+      "title": "Antrenör not ekledi",
+      "body": "Bir antrenör antrenmanın hakkında yorum yaptı: \"{{text}}\""
+    },
+    "coachRepliedComment": {
+      "title": "Antrenör yanıtladı",
+      "body": "{{coach}} rapor yorumuna yanıt verdi: \"{{text}}\""
+    },
+    "linkRequest": {
+      "title": "Bağlantı isteği",
+      "body": "{{player}}, {{profile}} adlı oyuncunun profiline bağlanmak istiyor."
+    },
+    "linkRequestSelf": {
+      "title": "Bağlantı isteği",
+      "body": "{{player}} hesabına bağlanmak istiyor."
+    },
+    "linkApprovedProgram": {
+      "title": "Profil bağlandı",
+      "body": "Hesabın {{program}} ile bağlandı."
+    },
+    "linkApprovedProfile": {
+      "title": "Profil bağlandı",
+      "body": "Hesabın {{player}} adlı oyuncunun profiline bağlandı."
+    },
+    "shareApproval": {
+      "title": "Onay gerekiyor",
+      "body": "{{coach}}, {{type}} raporunu {{recipient}} kişisine göndermek istiyor. Raporunun konusu olmayan bir oyuncuyla paylaşılmasını onayla veya reddet."
+    },
+    "shareApproved": {
+      "title": "Paylaşım onaylandı",
+      "body": "{{player}} kendi {{type}} raporunun paylaşılmasını onayladı."
+    },
+    "shareRejected": {
+      "title": "Paylaşım reddedildi",
+      "body": "{{player}} kendi {{type}} raporunun paylaşılmasını reddetti."
+    },
+    "reportShared": {
+      "title": "Yeni rapor paylaşıldı",
+      "body": "{{coach}} seninle bir {{type}} paylaştı."
+    },
+    "teamReportSharedCoach": {
+      "title": "Takım raporu paylaşıldı",
+      "body": "{{coach}} seninle bir takım raporu paylaştı.\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "Takım raporu paylaşıldı",
+      "body": "{{coach}} seninle {{type}} türünde bir takım raporu paylaştı."
+    },
+    "playerGeneratedTraining": {
+      "title": "Oyuncu antrenman oluşturdu",
+      "body": "{{player}} paylaşılan bir rapordan antrenman programı oluşturdu."
+    },
+    "playerUpdatedTraining": {
+      "title": "Oyuncu antrenmanı güncelledi",
+      "body": "{{player}} antrenman programını yeni geri bildirimle güncelledi."
+    },
+    "playerCommentedTraining": {
+      "title": "Oyuncu yanıtladı",
+      "body": "{{player}} kendi antrenmanı hakkında yorum yaptı: \"{{text}}\""
+    },
+    "playerCommentedReport": {
+      "title": "Oyuncu yanıtladı",
+      "body": "{{player}} paylaşılan bir rapor hakkında yorum yaptı: \"{{text}}\""
+    },
+    "trainingFeedbackRequest": {
+      "title": "Antrenman geri bildirimi",
+      "body": "{{player}} antrenmanının güncellenmesini istedi: \"{{text}}\""
+    },
+    "trainingFeedbackApplied": {
+      "title": "Antrenman geri bildirimi",
+      "body": "{{player}} antrenmanına düzeltmeler uyguladı."
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} takımına katıldı",
+      "body": "{{coach}} ({{role}}), {{team}} takımına katıldı."
+    },
+    "teamInvite": {
+      "title": "Takım daveti",
+      "body": "{{coach}} seni {{team}} takımına davet etti."
+    },
+    "teamInviteAccepted": {
+      "title": "Davet kabul edildi",
+      "body": "{{coach}}, {{team}} takımına katıldı."
+    },
+    "teamInviteRejected": {
+      "title": "Davet reddedildi",
+      "body": "{{coach}} takım davetini reddetti."
+    },
+    "staffReportShared": {
+      "title": "{{coach}} bir rapor paylaştı",
+      "body": "{{coach}} seninle bir {{type}} paylaştı."
+    },
+    "staffReportSharedTeam": {
+      "title": "{{coach}} bir rapor paylaştı",
+      "body": "{{coach}}, {{team}} ile bir {{type}} paylaştı."
+    },
+    "staffReportComment": {
+      "title": "{{coach}} kişisinden yeni yorum",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "{{coach}} raporu yeniden oluşturdu",
+      "body": "{{coach}} paylaştığın {{type}} raporunu yeniden oluşturdu."
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} güncel raporunu istedi",
+      "body": "{{coach}}, {{type}} raporunun güncel sürümünü görmek istiyor."
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} isteğini reddetti",
+      "body": "{{coach}} güncellenmiş {{type}} raporunu paylaşmayı reddetti."
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} güncel raporunu paylaştı",
+      "body": "{{coach}} güncellenmiş {{type}} raporunu seninle paylaştı."
+    },
+    "staffReportForwarded": {
+      "title": "{{coach}} bir rapor iletti",
+      "body": "{{coach}} sana bir {{type}} iletti."
+    }
   }
 }

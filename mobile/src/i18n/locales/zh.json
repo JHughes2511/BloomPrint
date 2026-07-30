@@ -51,7 +51,11 @@
     "team_training": "球队训练",
     "game_situational": "比赛情境",
     "matchup": "对位分析",
-    "game_report": "比赛报告"
+    "game_report": "比赛报告",
+    "eval": "球员评估",
+    "game": "比赛报告",
+    "training": "训练计划",
+    "team_report": "球队报告"
   },
   "auth": {
     "whoAreYou": "你是谁？",
@@ -2210,5 +2214,155 @@
     "scanning": "正在扫描影片中的关键动作…",
     "segment": "正在分析第 {{i}} 段，共 {{n}} 段",
     "synthesizing": "正在汇总报告"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "回顾你的体系与理念",
+      "body": "新赛季开始了——正是回顾并更新你 {{season}} 赛季体系与理念的好时机。"
+    },
+    "seasonWelcome": {
+      "title": "回顾你的体系与理念",
+      "body": "欢迎回来——正是回顾并更新你 {{season}} 赛季体系与理念的好时机。"
+    },
+    "staffMessage": {
+      "title": "{{coach}} 的消息",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "训练计划已发送",
+      "body": "{{coach}} 给你发送了一份训练计划。请查看训练标签页。"
+    },
+    "coachRepliedTraining": {
+      "title": "教练已回复",
+      "body": "{{coach}} 评论了你的训练：“{{text}}”"
+    },
+    "trainingUpdatedByCoach": {
+      "title": "训练计划已更新",
+      "body": "{{coach}} 更新了你的训练计划。"
+    },
+    "trainingNotesAdded": {
+      "title": "训练已更新",
+      "body": "有教练在你的训练计划中添加了备注。"
+    },
+    "coachCommentedTraining": {
+      "title": "教练添加了备注",
+      "body": "有教练评论了你的训练：“{{text}}”"
+    },
+    "coachRepliedComment": {
+      "title": "教练已回复",
+      "body": "{{coach}} 回复了你对报告的评论：“{{text}}”"
+    },
+    "linkRequest": {
+      "title": "关联请求",
+      "body": "{{player}} 请求关联到 {{profile}} 的档案。"
+    },
+    "linkRequestSelf": {
+      "title": "关联请求",
+      "body": "{{player}} 请求关联到你的账户。"
+    },
+    "linkApprovedProgram": {
+      "title": "档案已关联",
+      "body": "你的账户已关联到 {{program}}。"
+    },
+    "linkApprovedProfile": {
+      "title": "档案已关联",
+      "body": "你的账户已关联到 {{player}} 的档案。"
+    },
+    "shareApproval": {
+      "title": "需要批准",
+      "body": "{{coach}} 想把你的{{type}}发送给 {{recipient}}。请批准或拒绝将你的报告分享给并非报告对象的球员。"
+    },
+    "shareApproved": {
+      "title": "分享已批准",
+      "body": "{{player}} 批准了分享其{{type}}。"
+    },
+    "shareRejected": {
+      "title": "分享已拒绝",
+      "body": "{{player}} 拒绝了分享其{{type}}。"
+    },
+    "reportShared": {
+      "title": "有新报告分享给你",
+      "body": "{{coach}} 与你分享了一份{{type}}。"
+    },
+    "teamReportSharedCoach": {
+      "title": "球队报告已分享",
+      "body": "{{coach}} 与你分享了一份球队报告。\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "球队报告已分享",
+      "body": "{{coach}} 与你分享了一份{{type}}球队报告。"
+    },
+    "playerGeneratedTraining": {
+      "title": "球员生成了训练",
+      "body": "{{player}} 根据一份分享的报告生成了训练计划。"
+    },
+    "playerUpdatedTraining": {
+      "title": "球员更新了训练",
+      "body": "{{player}} 用新的反馈更新了自己的训练计划。"
+    },
+    "playerCommentedTraining": {
+      "title": "球员已回复",
+      "body": "{{player}} 评论了自己的训练：“{{text}}”"
+    },
+    "playerCommentedReport": {
+      "title": "球员已回复",
+      "body": "{{player}} 评论了一份分享的报告：“{{text}}”"
+    },
+    "trainingFeedbackRequest": {
+      "title": "训练反馈",
+      "body": "{{player}} 请求更新自己的训练：“{{text}}”"
+    },
+    "trainingFeedbackApplied": {
+      "title": "训练反馈",
+      "body": "{{player}} 对自己的训练应用了修改。"
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} 加入了你的球队",
+      "body": "{{coach}}（{{role}}）已加入 {{team}}。"
+    },
+    "teamInvite": {
+      "title": "球队邀请",
+      "body": "{{coach}} 邀请你加入 {{team}}。"
+    },
+    "teamInviteAccepted": {
+      "title": "邀请已接受",
+      "body": "{{coach}} 已加入 {{team}}。"
+    },
+    "teamInviteRejected": {
+      "title": "邀请已谢绝",
+      "body": "{{coach}} 谢绝了球队邀请。"
+    },
+    "staffReportShared": {
+      "title": "{{coach}} 分享了报告",
+      "body": "{{coach}} 与你分享了一份{{type}}。"
+    },
+    "staffReportSharedTeam": {
+      "title": "{{coach}} 分享了报告",
+      "body": "{{coach}} 与 {{team}} 分享了一份{{type}}。"
+    },
+    "staffReportComment": {
+      "title": "{{coach}} 的新评论",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "{{coach}} 重新生成了报告",
+      "body": "{{coach}} 重新生成了你分享的{{type}}。"
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} 请求你的最新报告",
+      "body": "{{coach}} 希望查看你更新后的{{type}}。"
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} 谢绝了你的请求",
+      "body": "{{coach}} 谢绝分享其更新后的{{type}}。"
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} 分享了更新后的报告",
+      "body": "{{coach}} 与你分享了其更新后的{{type}}。"
+    },
+    "staffReportForwarded": {
+      "title": "{{coach}} 转发了报告",
+      "body": "{{coach}} 向你转发了一份{{type}}。"
+    }
   }
 }

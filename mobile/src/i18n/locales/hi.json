@@ -51,7 +51,11 @@
     "team_training": "टीम ट्रेनिंग",
     "game_situational": "मैच परिस्थिति",
     "matchup": "मैचअप",
-    "game_report": "मैच रिपोर्ट"
+    "game_report": "मैच रिपोर्ट",
+    "eval": "खिलाड़ी मूल्यांकन",
+    "game": "मैच रिपोर्ट",
+    "training": "ट्रेनिंग प्रोग्राम",
+    "team_report": "टीम रिपोर्ट"
   },
   "auth": {
     "whoAreYou": "आप कौन हैं?",
@@ -2210,5 +2214,155 @@
     "scanning": "मुख्य एक्शन के लिए फ़िल्म स्कैन की जा रही है…",
     "segment": "{{n}} में से खंड {{i}} का विश्लेषण",
     "synthesizing": "रिपोर्ट संश्लेषित की जा रही है"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "अपना सिस्टम और दर्शन देखें",
+      "body": "नया सीज़न शुरू हो गया है — {{season}} के लिए अपने सिस्टम और दर्शन की समीक्षा और अपडेट करने का अच्छा समय।"
+    },
+    "seasonWelcome": {
+      "title": "अपना सिस्टम और दर्शन देखें",
+      "body": "वापसी पर स्वागत है — {{season}} के लिए अपने सिस्टम और दर्शन की समीक्षा और अपडेट करने का अच्छा समय।"
+    },
+    "staffMessage": {
+      "title": "{{coach}} का संदेश",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "प्रशिक्षण कार्यक्रम भेजा गया",
+      "body": "{{coach}} ने आपको एक प्रशिक्षण कार्यक्रम भेजा है। अपना प्रशिक्षण टैब देखें।"
+    },
+    "coachRepliedTraining": {
+      "title": "कोच ने जवाब दिया",
+      "body": "{{coach}} ने आपके प्रशिक्षण पर टिप्पणी की: \"{{text}}\""
+    },
+    "trainingUpdatedByCoach": {
+      "title": "प्रशिक्षण कार्यक्रम अपडेट हुआ",
+      "body": "{{coach}} ने आपका प्रशिक्षण कार्यक्रम अपडेट किया।"
+    },
+    "trainingNotesAdded": {
+      "title": "प्रशिक्षण अपडेट हुआ",
+      "body": "एक कोच ने आपके प्रशिक्षण कार्यक्रम में नोट्स जोड़े हैं।"
+    },
+    "coachCommentedTraining": {
+      "title": "कोच ने नोट्स जोड़े",
+      "body": "एक कोच ने आपके प्रशिक्षण पर टिप्पणी की: \"{{text}}\""
+    },
+    "coachRepliedComment": {
+      "title": "कोच ने जवाब दिया",
+      "body": "{{coach}} ने रिपोर्ट पर आपकी टिप्पणी का उत्तर दिया: \"{{text}}\""
+    },
+    "linkRequest": {
+      "title": "लिंक अनुरोध",
+      "body": "{{player}} {{profile}} की प्रोफ़ाइल से जुड़ने का अनुरोध कर रहे हैं।"
+    },
+    "linkRequestSelf": {
+      "title": "लिंक अनुरोध",
+      "body": "{{player}} आपके खाते से जुड़ने का अनुरोध कर रहे हैं।"
+    },
+    "linkApprovedProgram": {
+      "title": "प्रोफ़ाइल जुड़ी",
+      "body": "आपका खाता {{program}} से जोड़ दिया गया है।"
+    },
+    "linkApprovedProfile": {
+      "title": "प्रोफ़ाइल जुड़ी",
+      "body": "आपका खाता {{player}} की प्रोफ़ाइल से जोड़ दिया गया है।"
+    },
+    "shareApproval": {
+      "title": "स्वीकृति आवश्यक",
+      "body": "{{coach}} आपकी {{type}} {{recipient}} को भेजना चाहते हैं। ऐसे खिलाड़ी के साथ अपनी रिपोर्ट साझा करने की स्वीकृति दें या अस्वीकार करें जिसके बारे में यह नहीं है।"
+    },
+    "shareApproved": {
+      "title": "साझा करना स्वीकृत",
+      "body": "{{player}} ने अपनी {{type}} साझा करने की स्वीकृति दी।"
+    },
+    "shareRejected": {
+      "title": "साझा करना अस्वीकृत",
+      "body": "{{player}} ने अपनी {{type}} साझा करने से मना किया।"
+    },
+    "reportShared": {
+      "title": "नई रिपोर्ट साझा हुई",
+      "body": "{{coach}} ने आपके साथ एक {{type}} साझा की।"
+    },
+    "teamReportSharedCoach": {
+      "title": "टीम रिपोर्ट साझा हुई",
+      "body": "{{coach}} ने आपके साथ एक टीम रिपोर्ट साझा की।\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "टीम रिपोर्ट साझा हुई",
+      "body": "{{coach}} ने आपके साथ {{type}} प्रकार की टीम रिपोर्ट साझा की।"
+    },
+    "playerGeneratedTraining": {
+      "title": "खिलाड़ी ने प्रशिक्षण बनाया",
+      "body": "{{player}} ने एक साझा रिपोर्ट से प्रशिक्षण कार्यक्रम बनाया।"
+    },
+    "playerUpdatedTraining": {
+      "title": "खिलाड़ी ने प्रशिक्षण अपडेट किया",
+      "body": "{{player}} ने नई प्रतिक्रिया के साथ अपना प्रशिक्षण कार्यक्रम अपडेट किया।"
+    },
+    "playerCommentedTraining": {
+      "title": "खिलाड़ी ने जवाब दिया",
+      "body": "{{player}} ने अपने प्रशिक्षण पर टिप्पणी की: \"{{text}}\""
+    },
+    "playerCommentedReport": {
+      "title": "खिलाड़ी ने जवाब दिया",
+      "body": "{{player}} ने एक साझा रिपोर्ट पर टिप्पणी की: \"{{text}}\""
+    },
+    "trainingFeedbackRequest": {
+      "title": "प्रशिक्षण प्रतिक्रिया",
+      "body": "{{player}} ने अपने प्रशिक्षण में अपडेट का अनुरोध किया: \"{{text}}\""
+    },
+    "trainingFeedbackApplied": {
+      "title": "प्रशिक्षण प्रतिक्रिया",
+      "body": "{{player}} ने अपने प्रशिक्षण में सुधार लागू किए।"
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} आपकी टीम में शामिल हुए",
+      "body": "{{coach}} ({{role}}) {{team}} में शामिल हुए हैं।"
+    },
+    "teamInvite": {
+      "title": "टीम आमंत्रण",
+      "body": "{{coach}} ने आपको {{team}} में शामिल होने के लिए आमंत्रित किया।"
+    },
+    "teamInviteAccepted": {
+      "title": "आमंत्रण स्वीकार",
+      "body": "{{coach}} {{team}} में शामिल हुए।"
+    },
+    "teamInviteRejected": {
+      "title": "आमंत्रण अस्वीकार",
+      "body": "{{coach}} ने टीम का आमंत्रण अस्वीकार किया।"
+    },
+    "staffReportShared": {
+      "title": "{{coach}} ने रिपोर्ट साझा की",
+      "body": "{{coach}} ने आपके साथ एक {{type}} साझा की।"
+    },
+    "staffReportSharedTeam": {
+      "title": "{{coach}} ने रिपोर्ट साझा की",
+      "body": "{{coach}} ने {{team}} के साथ एक {{type}} साझा की।"
+    },
+    "staffReportComment": {
+      "title": "{{coach}} की नई टिप्पणी",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "{{coach}} ने रिपोर्ट फिर से बनाई",
+      "body": "{{coach}} ने आपकी साझा की गई {{type}} फिर से बनाई।"
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} ने आपकी अपडेट रिपोर्ट माँगी",
+      "body": "{{coach}} आपकी {{type}} का अपडेट संस्करण देखना चाहते हैं।"
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} ने आपका अनुरोध अस्वीकार किया",
+      "body": "{{coach}} ने अपनी अपडेट की गई {{type}} साझा करने से मना किया।"
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} ने अपनी अपडेट रिपोर्ट साझा की",
+      "body": "{{coach}} ने अपनी अपडेट की गई {{type}} आपके साथ साझा की।"
+    },
+    "staffReportForwarded": {
+      "title": "{{coach}} ने रिपोर्ट अग्रेषित की",
+      "body": "{{coach}} ने आपको एक {{type}} अग्रेषित की।"
+    }
   }
 }

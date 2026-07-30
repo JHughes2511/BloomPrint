@@ -51,7 +51,11 @@
     "team_training": "Teamtraining",
     "game_situational": "Wedstrijdsituaties",
     "matchup": "Matchup",
-    "game_report": "Wedstrijdrapport"
+    "game_report": "Wedstrijdrapport",
+    "eval": "Spelerevaluatie",
+    "game": "Wedstrijdrapport",
+    "training": "Trainingsprogramma",
+    "team_report": "Teamrapport"
   },
   "auth": {
     "whoAreYou": "Wie ben je?",
@@ -2210,5 +2214,155 @@
     "scanning": "Beelden worden gescand op sleutelmomenten…",
     "segment": "Segment {{i}} van {{n}} analyseren",
     "synthesizing": "Rapport samenstellen"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "Bekijk je systeem en filosofie",
+      "body": "Een nieuw seizoen is begonnen — een goed moment om je systeem en filosofie voor {{season}} te bekijken en bij te werken."
+    },
+    "seasonWelcome": {
+      "title": "Bekijk je systeem en filosofie",
+      "body": "Welkom terug — een goed moment om je systeem en filosofie voor {{season}} te bekijken en bij te werken."
+    },
+    "staffMessage": {
+      "title": "Bericht van {{coach}}",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "Trainingsprogramma verstuurd",
+      "body": "{{coach}} heeft je een trainingsprogramma gestuurd. Kijk in je trainingstabblad."
+    },
+    "coachRepliedTraining": {
+      "title": "Coach heeft gereageerd",
+      "body": "{{coach}} gaf commentaar op je training: \"{{text}}\""
+    },
+    "trainingUpdatedByCoach": {
+      "title": "Trainingsprogramma bijgewerkt",
+      "body": "{{coach}} heeft je trainingsprogramma bijgewerkt."
+    },
+    "trainingNotesAdded": {
+      "title": "Training bijgewerkt",
+      "body": "Een coach heeft notities aan je trainingsprogramma toegevoegd."
+    },
+    "coachCommentedTraining": {
+      "title": "Coach heeft notities toegevoegd",
+      "body": "Een coach gaf commentaar op je training: \"{{text}}\""
+    },
+    "coachRepliedComment": {
+      "title": "Coach heeft gereageerd",
+      "body": "{{coach}} reageerde op je opmerking bij het rapport: \"{{text}}\""
+    },
+    "linkRequest": {
+      "title": "Koppelverzoek",
+      "body": "{{player}} vraagt om gekoppeld te worden aan het profiel van {{profile}}."
+    },
+    "linkRequestSelf": {
+      "title": "Koppelverzoek",
+      "body": "{{player}} vraagt om gekoppeld te worden aan jouw account."
+    },
+    "linkApprovedProgram": {
+      "title": "Profiel gekoppeld",
+      "body": "Je account is gekoppeld aan {{program}}."
+    },
+    "linkApprovedProfile": {
+      "title": "Profiel gekoppeld",
+      "body": "Je account is gekoppeld aan het profiel van {{player}}."
+    },
+    "shareApproval": {
+      "title": "Goedkeuring nodig",
+      "body": "{{coach}} wil je {{type}} naar {{recipient}} sturen. Keur goed of weiger het delen van je rapport met een speler over wie het niet gaat."
+    },
+    "shareApproved": {
+      "title": "Delen goedgekeurd",
+      "body": "{{player}} heeft het delen van zijn {{type}} goedgekeurd."
+    },
+    "shareRejected": {
+      "title": "Delen geweigerd",
+      "body": "{{player}} heeft het delen van zijn {{type}} geweigerd."
+    },
+    "reportShared": {
+      "title": "Nieuw rapport gedeeld",
+      "body": "{{coach}} heeft een {{type}} met je gedeeld."
+    },
+    "teamReportSharedCoach": {
+      "title": "Teamrapport gedeeld",
+      "body": "{{coach}} heeft een teamrapport met je gedeeld.\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "Teamrapport gedeeld",
+      "body": "{{coach}} heeft een teamrapport van het type {{type}} met je gedeeld."
+    },
+    "playerGeneratedTraining": {
+      "title": "Speler heeft training gemaakt",
+      "body": "{{player}} heeft een trainingsprogramma gemaakt op basis van een gedeeld rapport."
+    },
+    "playerUpdatedTraining": {
+      "title": "Speler heeft training bijgewerkt",
+      "body": "{{player}} heeft zijn trainingsprogramma bijgewerkt met nieuwe feedback."
+    },
+    "playerCommentedTraining": {
+      "title": "Speler heeft gereageerd",
+      "body": "{{player}} gaf commentaar op zijn training: \"{{text}}\""
+    },
+    "playerCommentedReport": {
+      "title": "Speler heeft gereageerd",
+      "body": "{{player}} gaf commentaar op een gedeeld rapport: \"{{text}}\""
+    },
+    "trainingFeedbackRequest": {
+      "title": "Trainingsfeedback",
+      "body": "{{player}} vroeg om een update van zijn training: \"{{text}}\""
+    },
+    "trainingFeedbackApplied": {
+      "title": "Trainingsfeedback",
+      "body": "{{player}} heeft correcties op zijn training toegepast."
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} is bij je team gekomen",
+      "body": "{{coach}} ({{role}}) heeft zich aangesloten bij {{team}}."
+    },
+    "teamInvite": {
+      "title": "Teamuitnodiging",
+      "body": "{{coach}} heeft je uitgenodigd voor {{team}}."
+    },
+    "teamInviteAccepted": {
+      "title": "Uitnodiging geaccepteerd",
+      "body": "{{coach}} heeft zich aangesloten bij {{team}}."
+    },
+    "teamInviteRejected": {
+      "title": "Uitnodiging geweigerd",
+      "body": "{{coach}} heeft de teamuitnodiging geweigerd."
+    },
+    "staffReportShared": {
+      "title": "Rapport gedeeld door {{coach}}",
+      "body": "{{coach}} heeft een {{type}} met je gedeeld."
+    },
+    "staffReportSharedTeam": {
+      "title": "Rapport gedeeld door {{coach}}",
+      "body": "{{coach}} heeft een {{type}} gedeeld met {{team}}."
+    },
+    "staffReportComment": {
+      "title": "Nieuwe opmerking van {{coach}}",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "Rapport opnieuw gegenereerd door {{coach}}",
+      "body": "{{coach}} heeft de door jou gedeelde {{type}} opnieuw gegenereerd."
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} vroeg om je bijgewerkte rapport",
+      "body": "{{coach}} wil je bijgewerkte versie van de {{type}} zien."
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} heeft je verzoek geweigerd",
+      "body": "{{coach}} wilde zijn bijgewerkte {{type}} niet delen."
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} heeft het bijgewerkte rapport gedeeld",
+      "body": "{{coach}} heeft zijn bijgewerkte {{type}} met je gedeeld."
+    },
+    "staffReportForwarded": {
+      "title": "Rapport doorgestuurd door {{coach}}",
+      "body": "{{coach}} heeft je een {{type}} doorgestuurd."
+    }
   }
 }

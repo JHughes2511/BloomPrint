@@ -51,7 +51,11 @@
     "team_training": "Komandos treniruotė",
     "game_situational": "Rungtynių situacijos",
     "matchup": "Dvikova",
-    "game_report": "Rungtynių ataskaita"
+    "game_report": "Rungtynių ataskaita",
+    "eval": "Žaidėjo vertinimas",
+    "game": "Rungtynių ataskaita",
+    "training": "Treniruočių programa",
+    "team_report": "Komandos ataskaita"
   },
   "auth": {
     "whoAreYou": "Kas jūs esate?",
@@ -2210,5 +2214,155 @@
     "scanning": "Ieškoma svarbiausių epizodų įraše…",
     "segment": "Analizuojamas {{i}} segmentas iš {{n}}",
     "synthesizing": "Rengiama ataskaita"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "Peržiūrėkite savo sistemą ir filosofiją",
+      "body": "Prasidėjo naujas sezonas — geras metas peržiūrėti ir atnaujinti savo sistemą bei filosofiją {{season}} sezonui."
+    },
+    "seasonWelcome": {
+      "title": "Peržiūrėkite savo sistemą ir filosofiją",
+      "body": "Sveiki sugrįžę — geras metas peržiūrėti ir atnaujinti savo sistemą bei filosofiją {{season}} sezonui."
+    },
+    "staffMessage": {
+      "title": "Žinutė nuo {{coach}}",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "Treniruočių programa išsiųsta",
+      "body": "{{coach}} atsiuntė jums treniruočių programą. Patikrinkite treniruočių skirtuką."
+    },
+    "coachRepliedTraining": {
+      "title": "Treneris atsakė",
+      "body": "{{coach}} pakomentavo jūsų treniruotę: „{{text}}“"
+    },
+    "trainingUpdatedByCoach": {
+      "title": "Treniruočių programa atnaujinta",
+      "body": "{{coach}} atnaujino jūsų treniruočių programą."
+    },
+    "trainingNotesAdded": {
+      "title": "Treniruotė atnaujinta",
+      "body": "Treneris pridėjo pastabų prie jūsų treniruočių programos."
+    },
+    "coachCommentedTraining": {
+      "title": "Treneris pridėjo pastabų",
+      "body": "Treneris pakomentavo jūsų treniruotę: „{{text}}“"
+    },
+    "coachRepliedComment": {
+      "title": "Treneris atsakė",
+      "body": "{{coach}} atsakė į jūsų komentarą apie ataskaitą: „{{text}}“"
+    },
+    "linkRequest": {
+      "title": "Susiejimo prašymas",
+      "body": "{{player}} prašo susieti su {{profile}} profiliu."
+    },
+    "linkRequestSelf": {
+      "title": "Susiejimo prašymas",
+      "body": "{{player}} prašo susieti su jūsų paskyra."
+    },
+    "linkApprovedProgram": {
+      "title": "Profilis susietas",
+      "body": "Jūsų paskyra susieta su {{program}}."
+    },
+    "linkApprovedProfile": {
+      "title": "Profilis susietas",
+      "body": "Jūsų paskyra susieta su {{player}} profiliu."
+    },
+    "shareApproval": {
+      "title": "Reikalingas patvirtinimas",
+      "body": "{{coach}} nori išsiųsti jūsų {{type}} žaidėjui {{recipient}}. Patvirtinkite arba atmeskite ataskaitos bendrinimą su žaidėju, apie kurį ji nėra."
+    },
+    "shareApproved": {
+      "title": "Bendrinimas patvirtintas",
+      "body": "{{player}} patvirtino savo ataskaitos ({{type}}) bendrinimą."
+    },
+    "shareRejected": {
+      "title": "Bendrinimas atmestas",
+      "body": "{{player}} atmetė savo ataskaitos ({{type}}) bendrinimą."
+    },
+    "reportShared": {
+      "title": "Nauja ataskaita",
+      "body": "{{coach}} pasidalijo su jumis: {{type}}."
+    },
+    "teamReportSharedCoach": {
+      "title": "Komandos ataskaita",
+      "body": "{{coach}} pasidalijo su jumis komandos ataskaita.\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "Komandos ataskaita",
+      "body": "{{coach}} pasidalijo su jumis komandos ataskaita ({{type}})."
+    },
+    "playerGeneratedTraining": {
+      "title": "Žaidėjas sukūrė treniruotę",
+      "body": "{{player}} sukūrė treniruočių programą iš bendrintos ataskaitos."
+    },
+    "playerUpdatedTraining": {
+      "title": "Žaidėjas atnaujino treniruotę",
+      "body": "{{player}} atnaujino savo treniruočių programą naujomis pastabomis."
+    },
+    "playerCommentedTraining": {
+      "title": "Žaidėjas atsakė",
+      "body": "{{player}} pakomentavo savo treniruotę: „{{text}}“"
+    },
+    "playerCommentedReport": {
+      "title": "Žaidėjas atsakė",
+      "body": "{{player}} pakomentavo bendrintą ataskaitą: „{{text}}“"
+    },
+    "trainingFeedbackRequest": {
+      "title": "Treniruotės atsiliepimas",
+      "body": "{{player}} paprašė atnaujinti savo treniruotę: „{{text}}“"
+    },
+    "trainingFeedbackApplied": {
+      "title": "Treniruotės atsiliepimas",
+      "body": "{{player}} pritaikė pataisymus savo treniruotei."
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} prisijungė prie jūsų komandos",
+      "body": "{{coach}} ({{role}}) prisijungė prie {{team}}."
+    },
+    "teamInvite": {
+      "title": "Kvietimas į komandą",
+      "body": "{{coach}} pakvietė jus prisijungti prie {{team}}."
+    },
+    "teamInviteAccepted": {
+      "title": "Kvietimas priimtas",
+      "body": "{{coach}} prisijungė prie {{team}}."
+    },
+    "teamInviteRejected": {
+      "title": "Kvietimas atmestas",
+      "body": "{{coach}} atmetė kvietimą į komandą."
+    },
+    "staffReportShared": {
+      "title": "Ataskaita nuo {{coach}}",
+      "body": "{{coach}} pasidalijo su jumis: {{type}}."
+    },
+    "staffReportSharedTeam": {
+      "title": "Ataskaita nuo {{coach}}",
+      "body": "{{coach}} pasidalijo ataskaita ({{type}}) su komanda {{team}}."
+    },
+    "staffReportComment": {
+      "title": "Naujas komentaras nuo {{coach}}",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "{{coach}} pergeneravo ataskaitą",
+      "body": "{{coach}} pergeneravo jūsų bendrintą ataskaitą ({{type}})."
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} paprašė jūsų atnaujintos ataskaitos",
+      "body": "{{coach}} nori pamatyti jūsų atnaujintą ataskaitos ({{type}}) versiją."
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} atmetė jūsų prašymą",
+      "body": "{{coach}} atsisakė bendrinti savo atnaujintą ataskaitą ({{type}})."
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} pasidalijo atnaujinta ataskaita",
+      "body": "{{coach}} pasidalijo su jumis savo atnaujinta ataskaita ({{type}})."
+    },
+    "staffReportForwarded": {
+      "title": "Ataskaitą persiuntė {{coach}}",
+      "body": "{{coach}} persiuntė jums ataskaitą ({{type}})."
+    }
   }
 }

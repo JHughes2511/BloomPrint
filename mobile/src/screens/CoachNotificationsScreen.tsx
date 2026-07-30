@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { notificationTitle, notificationBody } from '../utils/notificationText';
 import { Ionicons } from '@expo/vector-icons';
 import { playerAPI, trainingAPI, teamStaffAPI, staffSharingAPI } from '../api/client';
 import CommentThread from '../components/CommentThread';
@@ -39,17 +40,10 @@ export default function CoachNotificationsScreen() {
   const { t: tr } = useTranslation();
   const styles = makeStyles(t);
 
-  // Notifications are created server-side. Newer ones carry an i18n key + params
-  // so they can render in the coach's language; older rows (and senders not yet
-  // migrated) only have English title/body, which stays the fallback.
-  // i18n_key points at the BODY string; the matching title lives at
-  // "<namespace>.title" (first path segment), so one convention covers both.
-  const notifTitle = (n: any) =>
-    n.i18n_key
-      ? tr(`${String(n.i18n_key).split('.')[0]}.title`, { ...(n.i18n_params ?? {}), defaultValue: n.title })
-      : n.title;
-  const notifBody = (n: any) =>
-    n.i18n_key ? tr(n.i18n_key, { ...(n.i18n_params ?? {}), defaultValue: n.body }) : n.body;
+  // Notifications are created server-side and render in the reader's language.
+  // See utils/notificationText for the key/fallback contract.
+  const notifTitle = (n: any) => notificationTitle(n, tr);
+  const notifBody = (n: any) => notificationBody(n, tr);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

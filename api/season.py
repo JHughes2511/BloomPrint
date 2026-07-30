@@ -73,7 +73,7 @@ def maybe_season_reminder(db, coach, game_year: str | None = None, now: datetime
             coach_id=coach.id, type="philosophy_update",
             title="Review your system & philosophy",
             body=f"{reason} — a good time to review and update your system & philosophy for {season}.",
-            i18n_key="seasonReminder.newSeason" if season_changed else "seasonReminder.welcomeBack",
+            i18n_key="notifs.seasonNew" if season_changed else "notifs.seasonWelcome",
             i18n_params={"season": season},
         ))
     return True

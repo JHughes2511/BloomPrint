@@ -51,7 +51,11 @@
     "team_training": "Командные тренировки",
     "game_situational": "Игровые ситуации",
     "matchup": "Противостояние",
-    "game_report": "Отчёт по игре"
+    "game_report": "Отчёт по игре",
+    "eval": "Оценка игрока",
+    "game": "Отчёт по игре",
+    "training": "Программа тренировок",
+    "team_report": "Командный отчёт"
   },
   "auth": {
     "whoAreYou": "Кто вы?",
@@ -2210,5 +2214,155 @@
     "scanning": "Поиск ключевых моментов в записи…",
     "segment": "Анализ сегмента {{i}} из {{n}}",
     "synthesizing": "Формирование отчёта"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "Пересмотрите систему и философию",
+      "body": "Начался новый сезон — подходящий момент пересмотреть и обновить свою систему и философию на {{season}}."
+    },
+    "seasonWelcome": {
+      "title": "Пересмотрите систему и философию",
+      "body": "С возвращением — подходящий момент пересмотреть и обновить свою систему и философию на {{season}}."
+    },
+    "staffMessage": {
+      "title": "Сообщение от {{coach}}",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "Программа тренировок отправлена",
+      "body": "{{coach}} отправил вам программу тренировок. Загляните во вкладку тренировок."
+    },
+    "coachRepliedTraining": {
+      "title": "Тренер ответил",
+      "body": "{{coach}} прокомментировал вашу тренировку: «{{text}}»"
+    },
+    "trainingUpdatedByCoach": {
+      "title": "Программа тренировок обновлена",
+      "body": "{{coach}} обновил вашу программу тренировок."
+    },
+    "trainingNotesAdded": {
+      "title": "Тренировка обновлена",
+      "body": "Тренер добавил заметки к вашей программе тренировок."
+    },
+    "coachCommentedTraining": {
+      "title": "Тренер добавил заметки",
+      "body": "Тренер прокомментировал вашу тренировку: «{{text}}»"
+    },
+    "coachRepliedComment": {
+      "title": "Тренер ответил",
+      "body": "{{coach}} ответил на ваш комментарий к отчёту: «{{text}}»"
+    },
+    "linkRequest": {
+      "title": "Запрос на привязку",
+      "body": "{{player}} просит привязать аккаунт к профилю {{profile}}."
+    },
+    "linkRequestSelf": {
+      "title": "Запрос на привязку",
+      "body": "{{player}} просит привязать аккаунт к вашей учётной записи."
+    },
+    "linkApprovedProgram": {
+      "title": "Профиль привязан",
+      "body": "Ваш аккаунт привязан к {{program}}."
+    },
+    "linkApprovedProfile": {
+      "title": "Профиль привязан",
+      "body": "Ваш аккаунт привязан к профилю {{player}}."
+    },
+    "shareApproval": {
+      "title": "Требуется подтверждение",
+      "body": "{{coach}} хочет отправить ваш {{type}} игроку {{recipient}}. Разрешите или отклоните передачу вашего отчёта игроку, о котором он не идёт."
+    },
+    "shareApproved": {
+      "title": "Доступ разрешён",
+      "body": "{{player}} разрешил поделиться своим отчётом ({{type}})."
+    },
+    "shareRejected": {
+      "title": "Доступ отклонён",
+      "body": "{{player}} отказался делиться своим отчётом ({{type}})."
+    },
+    "reportShared": {
+      "title": "Новый отчёт",
+      "body": "{{coach}} поделился с вами: {{type}}."
+    },
+    "teamReportSharedCoach": {
+      "title": "Командный отчёт",
+      "body": "{{coach}} поделился с вами командным отчётом.\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "Командный отчёт",
+      "body": "{{coach}} поделился с вами командным отчётом ({{type}})."
+    },
+    "playerGeneratedTraining": {
+      "title": "Игрок создал тренировку",
+      "body": "{{player}} создал программу тренировок на основе присланного отчёта."
+    },
+    "playerUpdatedTraining": {
+      "title": "Игрок обновил тренировку",
+      "body": "{{player}} обновил свою программу тренировок с новыми замечаниями."
+    },
+    "playerCommentedTraining": {
+      "title": "Игрок ответил",
+      "body": "{{player}} прокомментировал свою тренировку: «{{text}}»"
+    },
+    "playerCommentedReport": {
+      "title": "Игрок ответил",
+      "body": "{{player}} прокомментировал присланный отчёт: «{{text}}»"
+    },
+    "trainingFeedbackRequest": {
+      "title": "Отзыв о тренировке",
+      "body": "{{player}} попросил обновить свою тренировку: «{{text}}»"
+    },
+    "trainingFeedbackApplied": {
+      "title": "Отзыв о тренировке",
+      "body": "{{player}} применил правки к своей тренировке."
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} присоединился к вашей команде",
+      "body": "{{coach}} ({{role}}) присоединился к {{team}}."
+    },
+    "teamInvite": {
+      "title": "Приглашение в команду",
+      "body": "{{coach}} пригласил вас в {{team}}."
+    },
+    "teamInviteAccepted": {
+      "title": "Приглашение принято",
+      "body": "{{coach}} присоединился к {{team}}."
+    },
+    "teamInviteRejected": {
+      "title": "Приглашение отклонено",
+      "body": "{{coach}} отклонил приглашение в команду."
+    },
+    "staffReportShared": {
+      "title": "Отчёт от {{coach}}",
+      "body": "{{coach}} поделился с вами: {{type}}."
+    },
+    "staffReportSharedTeam": {
+      "title": "Отчёт от {{coach}}",
+      "body": "{{coach}} поделился отчётом ({{type}}) с командой {{team}}."
+    },
+    "staffReportComment": {
+      "title": "Новый комментарий от {{coach}}",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "{{coach}} пересоздал отчёт",
+      "body": "{{coach}} пересоздал отчёт ({{type}}), которым вы поделились."
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} запросил ваш обновлённый отчёт",
+      "body": "{{coach}} просит показать вашу обновлённую версию отчёта ({{type}})."
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} отклонил ваш запрос",
+      "body": "{{coach}} отказался поделиться своим обновлённым отчётом ({{type}})."
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} поделился обновлённым отчётом",
+      "body": "{{coach}} поделился с вами своим обновлённым отчётом ({{type}})."
+    },
+    "staffReportForwarded": {
+      "title": "Отчёт переслан от {{coach}}",
+      "body": "{{coach}} переслал вам отчёт ({{type}})."
+    }
   }
 }

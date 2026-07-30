@@ -51,7 +51,11 @@
     "team_training": "チームトレーニング",
     "game_situational": "試合状況分析",
     "matchup": "マッチアップ",
-    "game_report": "試合レポート"
+    "game_report": "試合レポート",
+    "eval": "選手評価",
+    "game": "試合レポート",
+    "training": "トレーニングプログラム",
+    "team_report": "チームレポート"
   },
   "auth": {
     "whoAreYou": "あなたはどなたですか？",
@@ -2210,5 +2214,155 @@
     "scanning": "映像から重要なプレーを検出中…",
     "segment": "セグメント {{i}} / {{n}} を分析中",
     "synthesizing": "レポートを統合中"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "システムと哲学を見直しましょう",
+      "body": "新シーズンが始まりました。{{season}} に向けてシステムと哲学を見直し、更新する良い機会です。"
+    },
+    "seasonWelcome": {
+      "title": "システムと哲学を見直しましょう",
+      "body": "おかえりなさい。{{season}} に向けてシステムと哲学を見直し、更新する良い機会です。"
+    },
+    "staffMessage": {
+      "title": "{{coach}} からのメッセージ",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "トレーニングプログラムを送信しました",
+      "body": "{{coach}} からトレーニングプログラムが届きました。トレーニングタブを確認してください。"
+    },
+    "coachRepliedTraining": {
+      "title": "コーチが返信しました",
+      "body": "{{coach}} があなたのトレーニングにコメントしました:「{{text}}」"
+    },
+    "trainingUpdatedByCoach": {
+      "title": "トレーニングプログラムを更新しました",
+      "body": "{{coach}} があなたのトレーニングプログラムを更新しました。"
+    },
+    "trainingNotesAdded": {
+      "title": "トレーニングを更新しました",
+      "body": "コーチがあなたのトレーニングプログラムにメモを追加しました。"
+    },
+    "coachCommentedTraining": {
+      "title": "コーチがメモを追加しました",
+      "body": "コーチがあなたのトレーニングにコメントしました:「{{text}}」"
+    },
+    "coachRepliedComment": {
+      "title": "コーチが返信しました",
+      "body": "{{coach}} がレポートへのあなたのコメントに返信しました:「{{text}}」"
+    },
+    "linkRequest": {
+      "title": "連携リクエスト",
+      "body": "{{player}} が {{profile}} のプロフィールへの連携を希望しています。"
+    },
+    "linkRequestSelf": {
+      "title": "連携リクエスト",
+      "body": "{{player}} があなたのアカウントへの連携を希望しています。"
+    },
+    "linkApprovedProgram": {
+      "title": "プロフィールを連携しました",
+      "body": "あなたのアカウントが {{program}} と連携されました。"
+    },
+    "linkApprovedProfile": {
+      "title": "プロフィールを連携しました",
+      "body": "あなたのアカウントが {{player}} のプロフィールと連携されました。"
+    },
+    "shareApproval": {
+      "title": "承認が必要です",
+      "body": "{{coach}} があなたの{{type}}を {{recipient}} に送ろうとしています。対象ではない選手へのレポート共有を承認または拒否してください。"
+    },
+    "shareApproved": {
+      "title": "共有が承認されました",
+      "body": "{{player}} が自分の{{type}}の共有を承認しました。"
+    },
+    "shareRejected": {
+      "title": "共有が拒否されました",
+      "body": "{{player}} が自分の{{type}}の共有を拒否しました。"
+    },
+    "reportShared": {
+      "title": "新しいレポートが共有されました",
+      "body": "{{coach}} があなたと{{type}}を共有しました。"
+    },
+    "teamReportSharedCoach": {
+      "title": "チームレポートが共有されました",
+      "body": "{{coach}} があなたとチームレポートを共有しました。\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "チームレポートが共有されました",
+      "body": "{{coach}} があなたと{{type}}のチームレポートを共有しました。"
+    },
+    "playerGeneratedTraining": {
+      "title": "選手がトレーニングを作成しました",
+      "body": "{{player}} が共有レポートからトレーニングプログラムを作成しました。"
+    },
+    "playerUpdatedTraining": {
+      "title": "選手がトレーニングを更新しました",
+      "body": "{{player}} が新しいフィードバックでトレーニングプログラムを更新しました。"
+    },
+    "playerCommentedTraining": {
+      "title": "選手が返信しました",
+      "body": "{{player}} が自分のトレーニングにコメントしました:「{{text}}」"
+    },
+    "playerCommentedReport": {
+      "title": "選手が返信しました",
+      "body": "{{player}} が共有レポートにコメントしました:「{{text}}」"
+    },
+    "trainingFeedbackRequest": {
+      "title": "トレーニングへのフィードバック",
+      "body": "{{player}} がトレーニングの更新を依頼しました:「{{text}}」"
+    },
+    "trainingFeedbackApplied": {
+      "title": "トレーニングへのフィードバック",
+      "body": "{{player}} が自分のトレーニングに修正を適用しました。"
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} がチームに加わりました",
+      "body": "{{coach}}（{{role}}）が {{team}} に加わりました。"
+    },
+    "teamInvite": {
+      "title": "チームへの招待",
+      "body": "{{coach}} があなたを {{team}} に招待しました。"
+    },
+    "teamInviteAccepted": {
+      "title": "招待が承認されました",
+      "body": "{{coach}} が {{team}} に加わりました。"
+    },
+    "teamInviteRejected": {
+      "title": "招待が辞退されました",
+      "body": "{{coach}} がチームへの招待を辞退しました。"
+    },
+    "staffReportShared": {
+      "title": "{{coach}} がレポートを共有しました",
+      "body": "{{coach}} があなたと{{type}}を共有しました。"
+    },
+    "staffReportSharedTeam": {
+      "title": "{{coach}} がレポートを共有しました",
+      "body": "{{coach}} が {{team}} と{{type}}を共有しました。"
+    },
+    "staffReportComment": {
+      "title": "{{coach}} からの新しいコメント",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "{{coach}} がレポートを再生成しました",
+      "body": "{{coach}} があなたが共有した{{type}}を再生成しました。"
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} が更新版レポートを求めています",
+      "body": "{{coach}} があなたの{{type}}の更新版を見たがっています。"
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} が依頼を辞退しました",
+      "body": "{{coach}} は更新版の{{type}}の共有を辞退しました。"
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} が更新版レポートを共有しました",
+      "body": "{{coach}} が更新版の{{type}}をあなたと共有しました。"
+    },
+    "staffReportForwarded": {
+      "title": "{{coach}} がレポートを転送しました",
+      "body": "{{coach}} があなたに{{type}}を転送しました。"
+    }
   }
 }

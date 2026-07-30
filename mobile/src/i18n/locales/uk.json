@@ -51,7 +51,11 @@
     "team_training": "Командне тренування",
     "game_situational": "Ігрові ситуації",
     "matchup": "Протистояння",
-    "game_report": "Звіт про гру"
+    "game_report": "Звіт про гру",
+    "eval": "Оцінка гравця",
+    "game": "Звіт про гру",
+    "training": "Тренувальна програма",
+    "team_report": "Командний звіт"
   },
   "auth": {
     "whoAreYou": "Хто ви?",
@@ -2210,5 +2214,155 @@
     "scanning": "Пошук ключових моментів у записі…",
     "segment": "Аналіз сегмента {{i}} з {{n}}",
     "synthesizing": "Формування звіту"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "Перегляньте систему та філософію",
+      "body": "Розпочався новий сезон — гарний час переглянути й оновити свою систему та філософію на {{season}}."
+    },
+    "seasonWelcome": {
+      "title": "Перегляньте систему та філософію",
+      "body": "З поверненням — гарний час переглянути й оновити свою систему та філософію на {{season}}."
+    },
+    "staffMessage": {
+      "title": "Повідомлення від {{coach}}",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "Програму тренувань надіслано",
+      "body": "{{coach}} надіслав вам програму тренувань. Загляньте у вкладку тренувань."
+    },
+    "coachRepliedTraining": {
+      "title": "Тренер відповів",
+      "body": "{{coach}} прокоментував ваше тренування: «{{text}}»"
+    },
+    "trainingUpdatedByCoach": {
+      "title": "Програму тренувань оновлено",
+      "body": "{{coach}} оновив вашу програму тренувань."
+    },
+    "trainingNotesAdded": {
+      "title": "Тренування оновлено",
+      "body": "Тренер додав нотатки до вашої програми тренувань."
+    },
+    "coachCommentedTraining": {
+      "title": "Тренер додав нотатки",
+      "body": "Тренер прокоментував ваше тренування: «{{text}}»"
+    },
+    "coachRepliedComment": {
+      "title": "Тренер відповів",
+      "body": "{{coach}} відповів на ваш коментар до звіту: «{{text}}»"
+    },
+    "linkRequest": {
+      "title": "Запит на прив'язку",
+      "body": "{{player}} просить прив'язати акаунт до профілю {{profile}}."
+    },
+    "linkRequestSelf": {
+      "title": "Запит на прив'язку",
+      "body": "{{player}} просить прив'язати акаунт до вашого облікового запису."
+    },
+    "linkApprovedProgram": {
+      "title": "Профіль прив'язано",
+      "body": "Ваш акаунт прив'язано до {{program}}."
+    },
+    "linkApprovedProfile": {
+      "title": "Профіль прив'язано",
+      "body": "Ваш акаунт прив'язано до профілю {{player}}."
+    },
+    "shareApproval": {
+      "title": "Потрібне підтвердження",
+      "body": "{{coach}} хоче надіслати ваш {{type}} гравцю {{recipient}}. Дозвольте або відхиліть передавання вашого звіту гравцю, якого він не стосується."
+    },
+    "shareApproved": {
+      "title": "Доступ надано",
+      "body": "{{player}} дозволив поділитися своїм звітом ({{type}})."
+    },
+    "shareRejected": {
+      "title": "Доступ відхилено",
+      "body": "{{player}} відмовився ділитися своїм звітом ({{type}})."
+    },
+    "reportShared": {
+      "title": "Новий звіт",
+      "body": "{{coach}} поділився з вами: {{type}}."
+    },
+    "teamReportSharedCoach": {
+      "title": "Командний звіт",
+      "body": "{{coach}} поділився з вами командним звітом.\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "Командний звіт",
+      "body": "{{coach}} поділився з вами командним звітом ({{type}})."
+    },
+    "playerGeneratedTraining": {
+      "title": "Гравець створив тренування",
+      "body": "{{player}} створив програму тренувань на основі надісланого звіту."
+    },
+    "playerUpdatedTraining": {
+      "title": "Гравець оновив тренування",
+      "body": "{{player}} оновив свою програму тренувань новими зауваженнями."
+    },
+    "playerCommentedTraining": {
+      "title": "Гравець відповів",
+      "body": "{{player}} прокоментував своє тренування: «{{text}}»"
+    },
+    "playerCommentedReport": {
+      "title": "Гравець відповів",
+      "body": "{{player}} прокоментував надісланий звіт: «{{text}}»"
+    },
+    "trainingFeedbackRequest": {
+      "title": "Відгук про тренування",
+      "body": "{{player}} попросив оновити своє тренування: «{{text}}»"
+    },
+    "trainingFeedbackApplied": {
+      "title": "Відгук про тренування",
+      "body": "{{player}} застосував правки до свого тренування."
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} приєднався до вашої команди",
+      "body": "{{coach}} ({{role}}) приєднався до {{team}}."
+    },
+    "teamInvite": {
+      "title": "Запрошення до команди",
+      "body": "{{coach}} запросив вас до {{team}}."
+    },
+    "teamInviteAccepted": {
+      "title": "Запрошення прийнято",
+      "body": "{{coach}} приєднався до {{team}}."
+    },
+    "teamInviteRejected": {
+      "title": "Запрошення відхилено",
+      "body": "{{coach}} відхилив запрошення до команди."
+    },
+    "staffReportShared": {
+      "title": "Звіт від {{coach}}",
+      "body": "{{coach}} поділився з вами: {{type}}."
+    },
+    "staffReportSharedTeam": {
+      "title": "Звіт від {{coach}}",
+      "body": "{{coach}} поділився звітом ({{type}}) з командою {{team}}."
+    },
+    "staffReportComment": {
+      "title": "Новий коментар від {{coach}}",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "{{coach}} перестворив звіт",
+      "body": "{{coach}} перестворив звіт ({{type}}), яким ви поділилися."
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} запитав ваш оновлений звіт",
+      "body": "{{coach}} просить показати вашу оновлену версію звіту ({{type}})."
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} відхилив ваш запит",
+      "body": "{{coach}} відмовився поділитися своїм оновленим звітом ({{type}})."
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} поділився оновленим звітом",
+      "body": "{{coach}} поділився з вами своїм оновленим звітом ({{type}})."
+    },
+    "staffReportForwarded": {
+      "title": "Звіт переслано від {{coach}}",
+      "body": "{{coach}} переслав вам звіт ({{type}})."
+    }
   }
 }

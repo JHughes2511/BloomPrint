@@ -51,7 +51,11 @@
     "team_training": "Team Training",
     "game_situational": "Game Situational",
     "matchup": "Match Up",
-    "game_report": "Game Report"
+    "game_report": "Game Report",
+    "eval": "Player Eval",
+    "game": "Game Report",
+    "training": "Training Program",
+    "team_report": "Team Report"
   },
   "auth": {
     "whoAreYou": "Who are you?",
@@ -2210,5 +2214,155 @@
     "scanning": "Scanning film for key action…",
     "segment": "Analyzing segment {{i}} of {{n}}",
     "synthesizing": "Synthesizing report"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "Review your system & philosophy",
+      "body": "A new season has started — a good time to review and update your system & philosophy for {{season}}."
+    },
+    "seasonWelcome": {
+      "title": "Review your system & philosophy",
+      "body": "Welcome back — a good time to review and update your system & philosophy for {{season}}."
+    },
+    "staffMessage": {
+      "title": "Message from {{coach}}",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "Training program sent",
+      "body": "{{coach}} sent you a training program. Check your training tab."
+    },
+    "coachRepliedTraining": {
+      "title": "Coach replied",
+      "body": "{{coach}} commented on your training: \"{{text}}\""
+    },
+    "trainingUpdatedByCoach": {
+      "title": "Training program updated",
+      "body": "{{coach}} updated your training program."
+    },
+    "trainingNotesAdded": {
+      "title": "Training updated",
+      "body": "A coach has added notes to your training program."
+    },
+    "coachCommentedTraining": {
+      "title": "Coach added notes",
+      "body": "A coach commented on your training: \"{{text}}\""
+    },
+    "coachRepliedComment": {
+      "title": "Coach replied",
+      "body": "{{coach}} replied to your report comment: \"{{text}}\""
+    },
+    "linkRequest": {
+      "title": "Player link request",
+      "body": "{{player}} is requesting to link to {{profile}}'s profile."
+    },
+    "linkRequestSelf": {
+      "title": "Player link request",
+      "body": "{{player}} is requesting to link to your account."
+    },
+    "linkApprovedProgram": {
+      "title": "Profile linked",
+      "body": "Your account has been linked to {{program}}."
+    },
+    "linkApprovedProfile": {
+      "title": "Profile linked",
+      "body": "Your account has been linked to {{player}}'s profile."
+    },
+    "shareApproval": {
+      "title": "Approval needed",
+      "body": "{{coach}} wants to send your {{type}} to {{recipient}}. Approve or reject sharing your report with a player it isn't about."
+    },
+    "shareApproved": {
+      "title": "Share approved",
+      "body": "{{player}} approved sharing their {{type}}."
+    },
+    "shareRejected": {
+      "title": "Share declined",
+      "body": "{{player}} declined sharing their {{type}}."
+    },
+    "reportShared": {
+      "title": "New report shared",
+      "body": "{{coach}} shared a {{type}} with you."
+    },
+    "teamReportSharedCoach": {
+      "title": "Team report shared",
+      "body": "{{coach}} shared a team report with you.\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "Team report shared",
+      "body": "{{coach}} shared a {{type}} team report with you."
+    },
+    "playerGeneratedTraining": {
+      "title": "Player generated training",
+      "body": "{{player}} generated a training program from a shared report."
+    },
+    "playerUpdatedTraining": {
+      "title": "Player updated training",
+      "body": "{{player}} updated their training program with new feedback."
+    },
+    "playerCommentedTraining": {
+      "title": "Player responded",
+      "body": "{{player}} commented on their training: \"{{text}}\""
+    },
+    "playerCommentedReport": {
+      "title": "Player responded",
+      "body": "{{player}} commented on a shared report: \"{{text}}\""
+    },
+    "trainingFeedbackRequest": {
+      "title": "Training feedback",
+      "body": "{{player}} requested an update to their training: \"{{text}}\""
+    },
+    "trainingFeedbackApplied": {
+      "title": "Training feedback",
+      "body": "{{player}} applied corrections to their training."
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} joined your team",
+      "body": "{{coach}} ({{role}}) has joined {{team}}."
+    },
+    "teamInvite": {
+      "title": "Team invite",
+      "body": "{{coach}} invited you to join {{team}}."
+    },
+    "teamInviteAccepted": {
+      "title": "Invite accepted",
+      "body": "{{coach}} joined {{team}}."
+    },
+    "teamInviteRejected": {
+      "title": "Invite declined",
+      "body": "{{coach}} declined the team invite."
+    },
+    "staffReportShared": {
+      "title": "Report shared by {{coach}}",
+      "body": "{{coach}} shared a {{type}} with you."
+    },
+    "staffReportSharedTeam": {
+      "title": "Report shared by {{coach}}",
+      "body": "{{coach}} shared a {{type}} with {{team}}."
+    },
+    "staffReportComment": {
+      "title": "New comment from {{coach}}",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "Report regenerated by {{coach}}",
+      "body": "{{coach}} regenerated your shared {{type}}."
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} requested your updated report",
+      "body": "{{coach}} asked to see your updated version of the {{type}}."
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} declined your request",
+      "body": "{{coach}} declined to share their updated {{type}}."
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} shared their updated report",
+      "body": "{{coach}} shared their updated {{type}} with you."
+    },
+    "staffReportForwarded": {
+      "title": "Report forwarded by {{coach}}",
+      "body": "{{coach}} forwarded a {{type}} to you."
+    }
   }
 }

@@ -51,7 +51,11 @@
     "team_training": "팀 훈련",
     "game_situational": "경기 상황별 분석",
     "matchup": "매치업",
-    "game_report": "경기 리포트"
+    "game_report": "경기 리포트",
+    "eval": "선수 평가",
+    "game": "경기 리포트",
+    "training": "훈련 프로그램",
+    "team_report": "팀 리포트"
   },
   "auth": {
     "whoAreYou": "어떤 사용자이신가요?",
@@ -2210,5 +2214,155 @@
     "scanning": "영상에서 주요 장면을 스캔하는 중…",
     "segment": "{{n}}개 중 {{i}}번째 구간 분석 중",
     "synthesizing": "리포트 종합 중"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "시스템과 철학을 점검하세요",
+      "body": "새 시즌이 시작되었습니다 — {{season}} 시즌을 위해 시스템과 철학을 점검하고 업데이트하기 좋은 시기입니다."
+    },
+    "seasonWelcome": {
+      "title": "시스템과 철학을 점검하세요",
+      "body": "다시 오신 것을 환영합니다 — {{season}} 시즌을 위해 시스템과 철학을 점검하고 업데이트하기 좋은 시기입니다."
+    },
+    "staffMessage": {
+      "title": "{{coach}} 님의 메시지",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "훈련 프로그램 전송됨",
+      "body": "{{coach}} 님이 훈련 프로그램을 보냈습니다. 훈련 탭을 확인하세요."
+    },
+    "coachRepliedTraining": {
+      "title": "코치가 답변했습니다",
+      "body": "{{coach}} 님이 회원님의 훈련에 댓글을 남겼습니다: \"{{text}}\""
+    },
+    "trainingUpdatedByCoach": {
+      "title": "훈련 프로그램 업데이트됨",
+      "body": "{{coach}} 님이 회원님의 훈련 프로그램을 업데이트했습니다."
+    },
+    "trainingNotesAdded": {
+      "title": "훈련 업데이트됨",
+      "body": "코치가 회원님의 훈련 프로그램에 메모를 추가했습니다."
+    },
+    "coachCommentedTraining": {
+      "title": "코치가 메모를 추가했습니다",
+      "body": "코치가 회원님의 훈련에 댓글을 남겼습니다: \"{{text}}\""
+    },
+    "coachRepliedComment": {
+      "title": "코치가 답변했습니다",
+      "body": "{{coach}} 님이 리포트에 남긴 회원님의 댓글에 답했습니다: \"{{text}}\""
+    },
+    "linkRequest": {
+      "title": "연결 요청",
+      "body": "{{player}} 님이 {{profile}} 님의 프로필과 연결을 요청했습니다."
+    },
+    "linkRequestSelf": {
+      "title": "연결 요청",
+      "body": "{{player}} 님이 회원님의 계정과 연결을 요청했습니다."
+    },
+    "linkApprovedProgram": {
+      "title": "프로필 연결됨",
+      "body": "회원님의 계정이 {{program}}과(와) 연결되었습니다."
+    },
+    "linkApprovedProfile": {
+      "title": "프로필 연결됨",
+      "body": "회원님의 계정이 {{player}} 님의 프로필과 연결되었습니다."
+    },
+    "shareApproval": {
+      "title": "승인 필요",
+      "body": "{{coach}} 님이 회원님의 {{type}}을(를) {{recipient}} 님에게 보내려 합니다. 리포트의 대상이 아닌 선수와의 공유를 승인하거나 거절하세요."
+    },
+    "shareApproved": {
+      "title": "공유 승인됨",
+      "body": "{{player}} 님이 자신의 {{type}} 공유를 승인했습니다."
+    },
+    "shareRejected": {
+      "title": "공유 거절됨",
+      "body": "{{player}} 님이 자신의 {{type}} 공유를 거절했습니다."
+    },
+    "reportShared": {
+      "title": "새 리포트 공유됨",
+      "body": "{{coach}} 님이 회원님과 {{type}}을(를) 공유했습니다."
+    },
+    "teamReportSharedCoach": {
+      "title": "팀 리포트 공유됨",
+      "body": "{{coach}} 님이 회원님과 팀 리포트를 공유했습니다.\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "팀 리포트 공유됨",
+      "body": "{{coach}} 님이 회원님과 {{type}} 팀 리포트를 공유했습니다."
+    },
+    "playerGeneratedTraining": {
+      "title": "선수가 훈련을 생성했습니다",
+      "body": "{{player}} 님이 공유된 리포트로 훈련 프로그램을 만들었습니다."
+    },
+    "playerUpdatedTraining": {
+      "title": "선수가 훈련을 업데이트했습니다",
+      "body": "{{player}} 님이 새 피드백으로 훈련 프로그램을 업데이트했습니다."
+    },
+    "playerCommentedTraining": {
+      "title": "선수가 답변했습니다",
+      "body": "{{player}} 님이 자신의 훈련에 댓글을 남겼습니다: \"{{text}}\""
+    },
+    "playerCommentedReport": {
+      "title": "선수가 답변했습니다",
+      "body": "{{player}} 님이 공유된 리포트에 댓글을 남겼습니다: \"{{text}}\""
+    },
+    "trainingFeedbackRequest": {
+      "title": "훈련 피드백",
+      "body": "{{player}} 님이 훈련 업데이트를 요청했습니다: \"{{text}}\""
+    },
+    "trainingFeedbackApplied": {
+      "title": "훈련 피드백",
+      "body": "{{player}} 님이 자신의 훈련에 수정 사항을 적용했습니다."
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} 님이 팀에 합류했습니다",
+      "body": "{{coach}}({{role}}) 님이 {{team}}에 합류했습니다."
+    },
+    "teamInvite": {
+      "title": "팀 초대",
+      "body": "{{coach}} 님이 회원님을 {{team}}에 초대했습니다."
+    },
+    "teamInviteAccepted": {
+      "title": "초대 수락됨",
+      "body": "{{coach}} 님이 {{team}}에 합류했습니다."
+    },
+    "teamInviteRejected": {
+      "title": "초대 거절됨",
+      "body": "{{coach}} 님이 팀 초대를 거절했습니다."
+    },
+    "staffReportShared": {
+      "title": "{{coach}} 님이 리포트를 공유했습니다",
+      "body": "{{coach}} 님이 회원님과 {{type}}을(를) 공유했습니다."
+    },
+    "staffReportSharedTeam": {
+      "title": "{{coach}} 님이 리포트를 공유했습니다",
+      "body": "{{coach}} 님이 {{team}}과(와) {{type}}을(를) 공유했습니다."
+    },
+    "staffReportComment": {
+      "title": "{{coach}} 님의 새 댓글",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "{{coach}} 님이 리포트를 다시 생성했습니다",
+      "body": "{{coach}} 님이 회원님이 공유한 {{type}}을(를) 다시 생성했습니다."
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} 님이 업데이트된 리포트를 요청했습니다",
+      "body": "{{coach}} 님이 회원님의 {{type}} 최신 버전을 보고 싶어 합니다."
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} 님이 요청을 거절했습니다",
+      "body": "{{coach}} 님이 업데이트된 {{type}} 공유를 거절했습니다."
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} 님이 업데이트된 리포트를 공유했습니다",
+      "body": "{{coach}} 님이 업데이트된 {{type}}을(를) 회원님과 공유했습니다."
+    },
+    "staffReportForwarded": {
+      "title": "{{coach}} 님이 리포트를 전달했습니다",
+      "body": "{{coach}} 님이 회원님에게 {{type}}을(를) 전달했습니다."
+    }
   }
 }

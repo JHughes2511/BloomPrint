@@ -51,7 +51,11 @@
     "team_training": "Treino de Equipe",
     "game_situational": "Situações de Jogo",
     "matchup": "Confronto",
-    "game_report": "Relatório de Jogo"
+    "game_report": "Relatório de Jogo",
+    "eval": "Avaliação de Jogador",
+    "game": "Relatório de Jogo",
+    "training": "Programa de Treino",
+    "team_report": "Relatório de Equipe"
   },
   "auth": {
     "whoAreYou": "Quem é você?",
@@ -2210,5 +2214,155 @@
     "scanning": "A analisar o vídeo em busca das jogadas-chave…",
     "segment": "A analisar o segmento {{i}} de {{n}}",
     "synthesizing": "A sintetizar o relatório"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "Reveja o seu sistema e filosofia",
+      "body": "Começou uma nova época — boa altura para rever e atualizar o seu sistema e filosofia para {{season}}."
+    },
+    "seasonWelcome": {
+      "title": "Reveja o seu sistema e filosofia",
+      "body": "Bem-vindo de volta — boa altura para rever e atualizar o seu sistema e filosofia para {{season}}."
+    },
+    "staffMessage": {
+      "title": "Mensagem de {{coach}}",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "Programa de treino enviado",
+      "body": "{{coach}} enviou-lhe um programa de treino. Verifique o separador de treino."
+    },
+    "coachRepliedTraining": {
+      "title": "O treinador respondeu",
+      "body": "{{coach}} comentou o seu treino: \"{{text}}\""
+    },
+    "trainingUpdatedByCoach": {
+      "title": "Programa de treino atualizado",
+      "body": "{{coach}} atualizou o seu programa de treino."
+    },
+    "trainingNotesAdded": {
+      "title": "Treino atualizado",
+      "body": "Um treinador adicionou notas ao seu programa de treino."
+    },
+    "coachCommentedTraining": {
+      "title": "O treinador adicionou notas",
+      "body": "Um treinador comentou o seu treino: \"{{text}}\""
+    },
+    "coachRepliedComment": {
+      "title": "O treinador respondeu",
+      "body": "{{coach}} respondeu ao seu comentário sobre o relatório: \"{{text}}\""
+    },
+    "linkRequest": {
+      "title": "Pedido de ligação",
+      "body": "{{player}} está a pedir para se ligar ao perfil de {{profile}}."
+    },
+    "linkRequestSelf": {
+      "title": "Pedido de ligação",
+      "body": "{{player}} está a pedir para se ligar à sua conta."
+    },
+    "linkApprovedProgram": {
+      "title": "Perfil ligado",
+      "body": "A sua conta foi ligada a {{program}}."
+    },
+    "linkApprovedProfile": {
+      "title": "Perfil ligado",
+      "body": "A sua conta foi ligada ao perfil de {{player}}."
+    },
+    "shareApproval": {
+      "title": "Aprovação necessária",
+      "body": "{{coach}} quer enviar o seu {{type}} para {{recipient}}. Aprove ou rejeite a partilha do seu relatório com um jogador que não é o tema."
+    },
+    "shareApproved": {
+      "title": "Partilha aprovada",
+      "body": "{{player}} aprovou a partilha do seu {{type}}."
+    },
+    "shareRejected": {
+      "title": "Partilha recusada",
+      "body": "{{player}} recusou a partilha do seu {{type}}."
+    },
+    "reportShared": {
+      "title": "Novo relatório partilhado",
+      "body": "{{coach}} partilhou um {{type}} consigo."
+    },
+    "teamReportSharedCoach": {
+      "title": "Relatório de equipa partilhado",
+      "body": "{{coach}} partilhou um relatório de equipa consigo.\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "Relatório de equipa partilhado",
+      "body": "{{coach}} partilhou consigo um relatório de equipa do tipo {{type}}."
+    },
+    "playerGeneratedTraining": {
+      "title": "O jogador gerou um treino",
+      "body": "{{player}} gerou um programa de treino a partir de um relatório partilhado."
+    },
+    "playerUpdatedTraining": {
+      "title": "O jogador atualizou o treino",
+      "body": "{{player}} atualizou o seu programa de treino com novo feedback."
+    },
+    "playerCommentedTraining": {
+      "title": "O jogador respondeu",
+      "body": "{{player}} comentou o seu treino: \"{{text}}\""
+    },
+    "playerCommentedReport": {
+      "title": "O jogador respondeu",
+      "body": "{{player}} comentou um relatório partilhado: \"{{text}}\""
+    },
+    "trainingFeedbackRequest": {
+      "title": "Feedback de treino",
+      "body": "{{player}} pediu uma atualização do seu treino: \"{{text}}\""
+    },
+    "trainingFeedbackApplied": {
+      "title": "Feedback de treino",
+      "body": "{{player}} aplicou correções ao seu treino."
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} juntou-se à sua equipa",
+      "body": "{{coach}} ({{role}}) juntou-se a {{team}}."
+    },
+    "teamInvite": {
+      "title": "Convite de equipa",
+      "body": "{{coach}} convidou-o para se juntar a {{team}}."
+    },
+    "teamInviteAccepted": {
+      "title": "Convite aceite",
+      "body": "{{coach}} juntou-se a {{team}}."
+    },
+    "teamInviteRejected": {
+      "title": "Convite recusado",
+      "body": "{{coach}} recusou o convite para a equipa."
+    },
+    "staffReportShared": {
+      "title": "Relatório partilhado por {{coach}}",
+      "body": "{{coach}} partilhou um {{type}} consigo."
+    },
+    "staffReportSharedTeam": {
+      "title": "Relatório partilhado por {{coach}}",
+      "body": "{{coach}} partilhou um {{type}} com {{team}}."
+    },
+    "staffReportComment": {
+      "title": "Novo comentário de {{coach}}",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "Relatório regenerado por {{coach}}",
+      "body": "{{coach}} regenerou o {{type}} que partilhou."
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} pediu o seu relatório atualizado",
+      "body": "{{coach}} pediu para ver a sua versão atualizada do {{type}}."
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} recusou o seu pedido",
+      "body": "{{coach}} recusou partilhar o seu {{type}} atualizado."
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} partilhou o relatório atualizado",
+      "body": "{{coach}} partilhou consigo o seu {{type}} atualizado."
+    },
+    "staffReportForwarded": {
+      "title": "Relatório reencaminhado por {{coach}}",
+      "body": "{{coach}} reencaminhou-lhe um {{type}}."
+    }
   }
 }

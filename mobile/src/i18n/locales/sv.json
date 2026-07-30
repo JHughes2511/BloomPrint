@@ -51,7 +51,11 @@
     "team_training": "Lagträning",
     "game_situational": "Matchsituation",
     "matchup": "Matchning",
-    "game_report": "Matchrapport"
+    "game_report": "Matchrapport",
+    "eval": "Spelarutvärdering",
+    "game": "Matchrapport",
+    "training": "Träningsprogram",
+    "team_report": "Lagrapport"
   },
   "auth": {
     "whoAreYou": "Vem är du?",
@@ -2210,5 +2214,155 @@
     "scanning": "Söker igenom filmen efter nyckelmoment…",
     "segment": "Analyserar segment {{i}} av {{n}}",
     "synthesizing": "Sammanställer rapport"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "Se över ditt system och din filosofi",
+      "body": "En ny säsong har börjat — ett bra tillfälle att se över och uppdatera ditt system och din filosofi för {{season}}."
+    },
+    "seasonWelcome": {
+      "title": "Se över ditt system och din filosofi",
+      "body": "Välkommen tillbaka — ett bra tillfälle att se över och uppdatera ditt system och din filosofi för {{season}}."
+    },
+    "staffMessage": {
+      "title": "Meddelande från {{coach}}",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "Träningsprogram skickat",
+      "body": "{{coach}} har skickat ett träningsprogram till dig. Titta i din träningsflik."
+    },
+    "coachRepliedTraining": {
+      "title": "Tränaren svarade",
+      "body": "{{coach}} kommenterade din träning: \"{{text}}\""
+    },
+    "trainingUpdatedByCoach": {
+      "title": "Träningsprogram uppdaterat",
+      "body": "{{coach}} har uppdaterat ditt träningsprogram."
+    },
+    "trainingNotesAdded": {
+      "title": "Träning uppdaterad",
+      "body": "En tränare har lagt till anteckningar i ditt träningsprogram."
+    },
+    "coachCommentedTraining": {
+      "title": "Tränaren lade till anteckningar",
+      "body": "En tränare kommenterade din träning: \"{{text}}\""
+    },
+    "coachRepliedComment": {
+      "title": "Tränaren svarade",
+      "body": "{{coach}} svarade på din kommentar om rapporten: \"{{text}}\""
+    },
+    "linkRequest": {
+      "title": "Begäran om koppling",
+      "body": "{{player}} begär att kopplas till {{profile}}s profil."
+    },
+    "linkRequestSelf": {
+      "title": "Begäran om koppling",
+      "body": "{{player}} begär att kopplas till ditt konto."
+    },
+    "linkApprovedProgram": {
+      "title": "Profil kopplad",
+      "body": "Ditt konto har kopplats till {{program}}."
+    },
+    "linkApprovedProfile": {
+      "title": "Profil kopplad",
+      "body": "Ditt konto har kopplats till {{player}}s profil."
+    },
+    "shareApproval": {
+      "title": "Godkännande krävs",
+      "body": "{{coach}} vill skicka din {{type}} till {{recipient}}. Godkänn eller avvisa att din rapport delas med en spelare den inte handlar om."
+    },
+    "shareApproved": {
+      "title": "Delning godkänd",
+      "body": "{{player}} godkände delning av sin {{type}}."
+    },
+    "shareRejected": {
+      "title": "Delning avvisad",
+      "body": "{{player}} avvisade delning av sin {{type}}."
+    },
+    "reportShared": {
+      "title": "Ny rapport delad",
+      "body": "{{coach}} delade en {{type}} med dig."
+    },
+    "teamReportSharedCoach": {
+      "title": "Lagrapport delad",
+      "body": "{{coach}} delade en lagrapport med dig.\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "Lagrapport delad",
+      "body": "{{coach}} delade en lagrapport av typen {{type}} med dig."
+    },
+    "playerGeneratedTraining": {
+      "title": "Spelaren skapade träning",
+      "body": "{{player}} skapade ett träningsprogram från en delad rapport."
+    },
+    "playerUpdatedTraining": {
+      "title": "Spelaren uppdaterade träningen",
+      "body": "{{player}} uppdaterade sitt träningsprogram med ny återkoppling."
+    },
+    "playerCommentedTraining": {
+      "title": "Spelaren svarade",
+      "body": "{{player}} kommenterade sin träning: \"{{text}}\""
+    },
+    "playerCommentedReport": {
+      "title": "Spelaren svarade",
+      "body": "{{player}} kommenterade en delad rapport: \"{{text}}\""
+    },
+    "trainingFeedbackRequest": {
+      "title": "Träningsåterkoppling",
+      "body": "{{player}} bad om en uppdatering av sin träning: \"{{text}}\""
+    },
+    "trainingFeedbackApplied": {
+      "title": "Träningsåterkoppling",
+      "body": "{{player}} tillämpade korrigeringar på sin träning."
+    },
+    "teamStaffJoined": {
+      "title": "{{coach}} gick med i ditt lag",
+      "body": "{{coach}} ({{role}}) har gått med i {{team}}."
+    },
+    "teamInvite": {
+      "title": "Laginbjudan",
+      "body": "{{coach}} bjöd in dig till {{team}}."
+    },
+    "teamInviteAccepted": {
+      "title": "Inbjudan accepterad",
+      "body": "{{coach}} gick med i {{team}}."
+    },
+    "teamInviteRejected": {
+      "title": "Inbjudan avböjd",
+      "body": "{{coach}} avböjde laginbjudan."
+    },
+    "staffReportShared": {
+      "title": "Rapport delad av {{coach}}",
+      "body": "{{coach}} delade en {{type}} med dig."
+    },
+    "staffReportSharedTeam": {
+      "title": "Rapport delad av {{coach}}",
+      "body": "{{coach}} delade en {{type}} med {{team}}."
+    },
+    "staffReportComment": {
+      "title": "Ny kommentar från {{coach}}",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "Rapport återskapad av {{coach}}",
+      "body": "{{coach}} återskapade den {{type}} du delade."
+    },
+    "staffReportRequest": {
+      "title": "{{coach}} bad om din uppdaterade rapport",
+      "body": "{{coach}} vill se din uppdaterade version av {{type}}."
+    },
+    "staffReportDeclined": {
+      "title": "{{coach}} avböjde din begäran",
+      "body": "{{coach}} ville inte dela sin uppdaterade {{type}}."
+    },
+    "staffReportUpdatedShared": {
+      "title": "{{coach}} delade sin uppdaterade rapport",
+      "body": "{{coach}} delade sin uppdaterade {{type}} med dig."
+    },
+    "staffReportForwarded": {
+      "title": "Rapport vidarebefordrad av {{coach}}",
+      "body": "{{coach}} vidarebefordrade en {{type}} till dig."
+    }
   }
 }

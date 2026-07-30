@@ -858,8 +858,12 @@ async def confirm(body: ConfirmBody, db: Session = Depends(get_db), coach: model
         db.add(msg)
         conv.last_at = datetime.utcnow()
         for c in others:
-            db.add(models.PlayerNotification(coach_id=c.id, type="staff_message",
-                                             title=f"Message from {coach.name}", body=text[:120], ref_id=conv.id))
+            db.add(models.PlayerNotification(
+                coach_id=c.id, type="staff_message",
+                title=f"Message from {coach.name}", body=text[:120],
+                i18n_key="notifs.staffMessage",
+                i18n_params={"coach": coach.name, "preview": text[:120]},
+                ref_id=conv.id))
         db.commit()
         names = ", ".join(c.name for c in others)
         return {"done": True,

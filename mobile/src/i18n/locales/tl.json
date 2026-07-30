@@ -51,7 +51,11 @@
     "team_training": "Training ng Team",
     "game_situational": "Sitwasyon sa Laro",
     "matchup": "Match up",
-    "game_report": "Ulat ng Laro"
+    "game_report": "Ulat ng Laro",
+    "eval": "Eval ng Player",
+    "game": "Ulat ng Laro",
+    "training": "Programa ng Training",
+    "team_report": "Ulat ng Team"
   },
   "auth": {
     "whoAreYou": "Sino ka?",
@@ -2210,5 +2214,155 @@
     "scanning": "Sinusuri ang film para sa mahahalagang aksyon…",
     "segment": "Sinusuri ang segment {{i}} ng {{n}}",
     "synthesizing": "Binubuo ang ulat"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "Suriin ang iyong sistema at pilosopiya",
+      "body": "Nagsimula na ang bagong season — magandang panahon para suriin at i-update ang iyong sistema at pilosopiya para sa {{season}}."
+    },
+    "seasonWelcome": {
+      "title": "Suriin ang iyong sistema at pilosopiya",
+      "body": "Maligayang pagbabalik — magandang panahon para suriin at i-update ang iyong sistema at pilosopiya para sa {{season}}."
+    },
+    "staffMessage": {
+      "title": "Mensahe mula kay {{coach}}",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "Naipadala ang programa ng pagsasanay",
+      "body": "Nagpadala si {{coach}} ng programa ng pagsasanay. Tingnan ang iyong tab ng pagsasanay."
+    },
+    "coachRepliedTraining": {
+      "title": "Sumagot ang coach",
+      "body": "Nag-komento si {{coach}} sa iyong pagsasanay: \"{{text}}\""
+    },
+    "trainingUpdatedByCoach": {
+      "title": "Na-update ang programa ng pagsasanay",
+      "body": "In-update ni {{coach}} ang iyong programa ng pagsasanay."
+    },
+    "trainingNotesAdded": {
+      "title": "Na-update ang pagsasanay",
+      "body": "May coach na nagdagdag ng mga tala sa iyong programa ng pagsasanay."
+    },
+    "coachCommentedTraining": {
+      "title": "Nagdagdag ng tala ang coach",
+      "body": "May coach na nag-komento sa iyong pagsasanay: \"{{text}}\""
+    },
+    "coachRepliedComment": {
+      "title": "Sumagot ang coach",
+      "body": "Sumagot si {{coach}} sa iyong komento sa ulat: \"{{text}}\""
+    },
+    "linkRequest": {
+      "title": "Hiling na mag-link",
+      "body": "Hinihiling ni {{player}} na mag-link sa profile ni {{profile}}."
+    },
+    "linkRequestSelf": {
+      "title": "Hiling na mag-link",
+      "body": "Hinihiling ni {{player}} na mag-link sa iyong account."
+    },
+    "linkApprovedProgram": {
+      "title": "Na-link ang profile",
+      "body": "Na-link na ang iyong account sa {{program}}."
+    },
+    "linkApprovedProfile": {
+      "title": "Na-link ang profile",
+      "body": "Na-link na ang iyong account sa profile ni {{player}}."
+    },
+    "shareApproval": {
+      "title": "Kailangan ng pag-apruba",
+      "body": "Gustong ipadala ni {{coach}} ang iyong {{type}} kay {{recipient}}. Aprubahan o tanggihan ang pagbabahagi ng iyong ulat sa manlalarong hindi naman ito tungkol sa kanya."
+    },
+    "shareApproved": {
+      "title": "Naaprubahan ang pagbabahagi",
+      "body": "Inaprubahan ni {{player}} ang pagbabahagi ng kanyang {{type}}."
+    },
+    "shareRejected": {
+      "title": "Tinanggihan ang pagbabahagi",
+      "body": "Tinanggihan ni {{player}} ang pagbabahagi ng kanyang {{type}}."
+    },
+    "reportShared": {
+      "title": "May bagong ulat na ibinahagi",
+      "body": "Ibinahagi ni {{coach}} sa iyo ang isang {{type}}."
+    },
+    "teamReportSharedCoach": {
+      "title": "Ibinahagi ang ulat ng koponan",
+      "body": "Ibinahagi ni {{coach}} sa iyo ang isang ulat ng koponan.\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "Ibinahagi ang ulat ng koponan",
+      "body": "Ibinahagi ni {{coach}} sa iyo ang isang ulat ng koponan na uri ng {{type}}."
+    },
+    "playerGeneratedTraining": {
+      "title": "Gumawa ng pagsasanay ang manlalaro",
+      "body": "Gumawa si {{player}} ng programa ng pagsasanay mula sa ibinahaging ulat."
+    },
+    "playerUpdatedTraining": {
+      "title": "In-update ng manlalaro ang pagsasanay",
+      "body": "In-update ni {{player}} ang kanyang programa ng pagsasanay gamit ang bagong feedback."
+    },
+    "playerCommentedTraining": {
+      "title": "Sumagot ang manlalaro",
+      "body": "Nag-komento si {{player}} sa kanyang pagsasanay: \"{{text}}\""
+    },
+    "playerCommentedReport": {
+      "title": "Sumagot ang manlalaro",
+      "body": "Nag-komento si {{player}} sa isang ibinahaging ulat: \"{{text}}\""
+    },
+    "trainingFeedbackRequest": {
+      "title": "Feedback sa pagsasanay",
+      "body": "Humiling si {{player}} ng update sa kanyang pagsasanay: \"{{text}}\""
+    },
+    "trainingFeedbackApplied": {
+      "title": "Feedback sa pagsasanay",
+      "body": "Naglapat si {{player}} ng mga pagwawasto sa kanyang pagsasanay."
+    },
+    "teamStaffJoined": {
+      "title": "Sumali si {{coach}} sa iyong koponan",
+      "body": "Sumali si {{coach}} ({{role}}) sa {{team}}."
+    },
+    "teamInvite": {
+      "title": "Imbitasyon sa koponan",
+      "body": "Inimbitahan ka ni {{coach}} na sumali sa {{team}}."
+    },
+    "teamInviteAccepted": {
+      "title": "Tinanggap ang imbitasyon",
+      "body": "Sumali si {{coach}} sa {{team}}."
+    },
+    "teamInviteRejected": {
+      "title": "Tinanggihan ang imbitasyon",
+      "body": "Tinanggihan ni {{coach}} ang imbitasyon sa koponan."
+    },
+    "staffReportShared": {
+      "title": "Ulat na ibinahagi ni {{coach}}",
+      "body": "Ibinahagi ni {{coach}} sa iyo ang isang {{type}}."
+    },
+    "staffReportSharedTeam": {
+      "title": "Ulat na ibinahagi ni {{coach}}",
+      "body": "Ibinahagi ni {{coach}} ang isang {{type}} sa {{team}}."
+    },
+    "staffReportComment": {
+      "title": "Bagong komento mula kay {{coach}}",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "Muling binuo ni {{coach}} ang ulat",
+      "body": "Muling binuo ni {{coach}} ang {{type}} na ibinahagi mo."
+    },
+    "staffReportRequest": {
+      "title": "Hiningi ni {{coach}} ang iyong na-update na ulat",
+      "body": "Gustong makita ni {{coach}} ang iyong na-update na bersyon ng {{type}}."
+    },
+    "staffReportDeclined": {
+      "title": "Tinanggihan ni {{coach}} ang iyong hiling",
+      "body": "Tumanggi si {{coach}} na ibahagi ang kanyang na-update na {{type}}."
+    },
+    "staffReportUpdatedShared": {
+      "title": "Ibinahagi ni {{coach}} ang na-update na ulat",
+      "body": "Ibinahagi ni {{coach}} sa iyo ang kanyang na-update na {{type}}."
+    },
+    "staffReportForwarded": {
+      "title": "Ulat na ipinasa ni {{coach}}",
+      "body": "Ipinasa sa iyo ni {{coach}} ang isang {{type}}."
+    }
   }
 }

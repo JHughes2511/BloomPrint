@@ -51,7 +51,11 @@
     "team_training": "تدريب الفريق",
     "game_situational": "مواقف المباراة",
     "matchup": "مقارنة",
-    "game_report": "تقرير المباراة"
+    "game_report": "تقرير المباراة",
+    "eval": "تقييم لاعب",
+    "game": "تقرير المباراة",
+    "training": "برنامج تدريبي",
+    "team_report": "تقرير الفريق"
   },
   "auth": {
     "whoAreYou": "من أنت؟",
@@ -2210,5 +2214,155 @@
     "scanning": "جارٍ فحص الفيديو بحثًا عن اللقطات المهمة…",
     "segment": "تحليل المقطع {{i}} من {{n}}",
     "synthesizing": "تجميع التقرير"
+  },
+  "notifs": {
+    "seasonNew": {
+      "title": "راجع نظامك وفلسفتك",
+      "body": "بدأ موسم جديد — وقت مناسب لمراجعة نظامك وفلسفتك وتحديثهما لموسم {{season}}."
+    },
+    "seasonWelcome": {
+      "title": "راجع نظامك وفلسفتك",
+      "body": "أهلًا بعودتك — وقت مناسب لمراجعة نظامك وفلسفتك وتحديثهما لموسم {{season}}."
+    },
+    "staffMessage": {
+      "title": "رسالة من {{coach}}",
+      "body": "{{preview}}"
+    },
+    "trainingSent": {
+      "title": "تم إرسال برنامج التدريب",
+      "body": "أرسل لك {{coach}} برنامج تدريب. راجع تبويب التدريب."
+    },
+    "coachRepliedTraining": {
+      "title": "رد المدرب",
+      "body": "علّق {{coach}} على تدريبك: «{{text}}»"
+    },
+    "trainingUpdatedByCoach": {
+      "title": "تم تحديث برنامج التدريب",
+      "body": "حدّث {{coach}} برنامج تدريبك."
+    },
+    "trainingNotesAdded": {
+      "title": "تم تحديث التدريب",
+      "body": "أضاف مدرب ملاحظات إلى برنامج تدريبك."
+    },
+    "coachCommentedTraining": {
+      "title": "أضاف المدرب ملاحظات",
+      "body": "علّق مدرب على تدريبك: «{{text}}»"
+    },
+    "coachRepliedComment": {
+      "title": "رد المدرب",
+      "body": "رد {{coach}} على تعليقك بشأن التقرير: «{{text}}»"
+    },
+    "linkRequest": {
+      "title": "طلب ربط لاعب",
+      "body": "يطلب {{player}} الربط بملف {{profile}}."
+    },
+    "linkRequestSelf": {
+      "title": "طلب ربط لاعب",
+      "body": "يطلب {{player}} الربط بحسابك."
+    },
+    "linkApprovedProgram": {
+      "title": "تم ربط الملف",
+      "body": "تم ربط حسابك بـ {{program}}."
+    },
+    "linkApprovedProfile": {
+      "title": "تم ربط الملف",
+      "body": "تم ربط حسابك بملف {{player}}."
+    },
+    "shareApproval": {
+      "title": "مطلوب موافقة",
+      "body": "يريد {{coach}} إرسال {{type}} الخاص بك إلى {{recipient}}. وافق أو ارفض مشاركة تقريرك مع لاعب لا يتعلق التقرير به."
+    },
+    "shareApproved": {
+      "title": "تمت الموافقة على المشاركة",
+      "body": "وافق {{player}} على مشاركة {{type}} الخاص به."
+    },
+    "shareRejected": {
+      "title": "تم رفض المشاركة",
+      "body": "رفض {{player}} مشاركة {{type}} الخاص به."
+    },
+    "reportShared": {
+      "title": "تمت مشاركة تقرير جديد",
+      "body": "شارك {{coach}} معك {{type}}."
+    },
+    "teamReportSharedCoach": {
+      "title": "تمت مشاركة تقرير الفريق",
+      "body": "شارك {{coach}} معك تقرير فريق.\n\n{{preview}}..."
+    },
+    "teamReportSharedPlayer": {
+      "title": "تمت مشاركة تقرير الفريق",
+      "body": "شارك {{coach}} معك تقرير فريق من نوع {{type}}."
+    },
+    "playerGeneratedTraining": {
+      "title": "أنشأ اللاعب تدريبًا",
+      "body": "أنشأ {{player}} برنامج تدريب من تقرير تمت مشاركته."
+    },
+    "playerUpdatedTraining": {
+      "title": "حدّث اللاعب تدريبه",
+      "body": "حدّث {{player}} برنامج تدريبه بملاحظات جديدة."
+    },
+    "playerCommentedTraining": {
+      "title": "رد اللاعب",
+      "body": "علّق {{player}} على تدريبه: «{{text}}»"
+    },
+    "playerCommentedReport": {
+      "title": "رد اللاعب",
+      "body": "علّق {{player}} على تقرير تمت مشاركته: «{{text}}»"
+    },
+    "trainingFeedbackRequest": {
+      "title": "ملاحظات التدريب",
+      "body": "طلب {{player}} تحديث تدريبه: «{{text}}»"
+    },
+    "trainingFeedbackApplied": {
+      "title": "ملاحظات التدريب",
+      "body": "طبّق {{player}} تصحيحات على تدريبه."
+    },
+    "teamStaffJoined": {
+      "title": "انضم {{coach}} إلى فريقك",
+      "body": "انضم {{coach}} ({{role}}) إلى {{team}}."
+    },
+    "teamInvite": {
+      "title": "دعوة إلى فريق",
+      "body": "دعاك {{coach}} للانضمام إلى {{team}}."
+    },
+    "teamInviteAccepted": {
+      "title": "تم قبول الدعوة",
+      "body": "انضم {{coach}} إلى {{team}}."
+    },
+    "teamInviteRejected": {
+      "title": "تم رفض الدعوة",
+      "body": "رفض {{coach}} دعوة الفريق."
+    },
+    "staffReportShared": {
+      "title": "تقرير من {{coach}}",
+      "body": "شارك {{coach}} معك {{type}}."
+    },
+    "staffReportSharedTeam": {
+      "title": "تقرير من {{coach}}",
+      "body": "شارك {{coach}} {{type}} مع {{team}}."
+    },
+    "staffReportComment": {
+      "title": "تعليق جديد من {{coach}}",
+      "body": "{{text}}"
+    },
+    "staffReportRegenerated": {
+      "title": "أعاد {{coach}} إنشاء التقرير",
+      "body": "أعاد {{coach}} إنشاء {{type}} الذي شاركته."
+    },
+    "staffReportRequest": {
+      "title": "طلب {{coach}} تقريرك المحدّث",
+      "body": "طلب {{coach}} رؤية نسختك المحدّثة من {{type}}."
+    },
+    "staffReportDeclined": {
+      "title": "رفض {{coach}} طلبك",
+      "body": "رفض {{coach}} مشاركة {{type}} المحدّث الخاص به."
+    },
+    "staffReportUpdatedShared": {
+      "title": "شارك {{coach}} تقريره المحدّث",
+      "body": "شارك {{coach}} معك {{type}} المحدّث الخاص به."
+    },
+    "staffReportForwarded": {
+      "title": "تقرير أعاد {{coach}} توجيهه",
+      "body": "أعاد {{coach}} توجيه {{type}} إليك."
+    }
   }
 }

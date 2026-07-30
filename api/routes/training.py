@@ -290,6 +290,7 @@ def send_training_to_player(
         type="training_shared",
         title="Training Program Sent",
         body=f"{coach.name} sent you a training program. Check your training tab.",
+        i18n_key="notifs.trainingSent", i18n_params={"coach": coach.name},
         ref_id=training_id,
     )
     db.add(notif)
@@ -435,6 +436,8 @@ def add_coach_training_comment(
             type="training_shared",
             title="Coach Replied",
             body=f"{coach.name} commented on your training: \"{body.text[:80]}\"",
+            i18n_key="notifs.coachRepliedTraining",
+            i18n_params={"coach": coach.name, "text": body.text[:80]},
             ref_id=training_id,
         )
         db.add(notif)
@@ -477,6 +480,7 @@ def refresh_player_program(
             type="training_shared",
             title="Training Program Updated",
             body=f"{coach.name} updated your training program.",
+            i18n_key="notifs.trainingUpdatedByCoach", i18n_params={"coach": coach.name},
             ref_id=training_id,
         )
         db.add(notif)
