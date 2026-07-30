@@ -933,19 +933,58 @@ async def apply_corrections(
 
 # ── Parsing helpers ────────────────────────────────────────────────────────────
 
+# Everything the model puts between a "GRADE" label and the number itself:
+# markdown bold, a colon, brackets or parens. "**OVERALL GRADE:** [8.5 / 10]"
+# and "OVERALL GRADE 8.5/10" both have to parse — a miss here silently drops
+# the eval out of the BIM composite, and nothing surfaces the failure.
+_GRADE_GAP = r"[\s:\*_\[\(\-–—]*"
+_OUT_OF_TEN = r"\s*(?:/|out\s+of)\s*10"
+
+
+def _grade_value(m: re.Match) -> float | None:
+    """A grade only counts if it is on the 0-10 scale the app grades against."""
+    try:
+        v = float(m.group(1))
+    except (TypeError, ValueError):
+        return None
+    return v if 0.0 <= v <= 10.0 else None
+
+
 def _parse_grade(text: str) -> float | None:
-    m = re.search(r"OVERALL GRADE[:\s]+(\d+\.?\d*)\s*/\s*10", text, re.IGNORECASE)
-    return float(m.group(1)) if m else None
+    if not text:
+        return None
+    m = re.search(rf"OVERALL GRADE{_GRADE_GAP}(\d+(?:\.\d+)?){_OUT_OF_TEN}", text, re.IGNORECASE)
+    if m:
+        return _grade_value(m)
+    # Some reports write the scale only in the header ("OVERALL GRADE: 8.5").
+    m = re.search(rf"OVERALL GRADE{_GRADE_GAP}(\d+(?:\.\d+)?)", text, re.IGNORECASE)
+    return _grade_value(m) if m else None
 
 
 def _parse_pillar_grades(text: str) -> dict:
-    grades = {}
-    for m in re.finditer(
-        r"PILLAR\s+\d+[^:]*:\s*(.+?)\n.*?GRADE[:\s]+(\d+\.?\d*)\s*/\s*10",
-        text, re.IGNORECASE | re.DOTALL
-    ):
-        name = m.group(1).strip().lower().replace(" ", "_").replace("·", "").strip("_")
-        grades[name] = float(m.group(2))
+    """Map each PILLAR heading to its grade.
+
+    The search for a pillar's grade stops at the next PILLAR heading, so a
+    pillar the model left ungraded can't silently borrow the following
+    pillar's number.
+    """
+    if not text:
+        return {}
+    grades: dict[str, float] = {}
+    heads = list(re.finditer(r"PILLAR\s+\d+[^:\n]*:\s*(.+)", text, re.IGNORECASE))
+    for i, h in enumerate(heads):
+        end = heads[i + 1].start() if i + 1 < len(heads) else len(text)
+        block = text[h.end():end]
+        m = (re.search(rf"GRADE{_GRADE_GAP}(\d+(?:\.\d+)?){_OUT_OF_TEN}", block, re.IGNORECASE)
+             or re.search(rf"GRADE{_GRADE_GAP}(\d+(?:\.\d+)?)", block, re.IGNORECASE))
+        if not m:
+            continue
+        val = _grade_value(m)
+        if val is None:
+            continue
+        name = _strip_md(h.group(1)).strip().lower().replace(" ", "_").replace("·", "").strip("_")
+        if name:
+            grades[name] = val
     return grades
 
 
@@ -978,10 +1017,15 @@ def _parse_list_section(text: str, section: str) -> list[str]:
     return [p.strip() for p in parts if p.strip()]
 
 
-def _backfill_parsed(db, ev) -> None:
-    """Older evals were parsed with a stricter parser that missed inline flag
-    paragraphs, leaving green/watch/questions empty. Re-parse from report_text on
-    read and persist so they populate without regenerating the report."""
+def _backfill_parsed(db, ev, persist: bool = False) -> None:
+    """Fill green/watch/questions from report_text when an older, stricter
+    parser left them empty.
+
+    Called from read paths, so it does not commit by default: a GET that writes
+    turns every list request into N transactions and can fail the read outright
+    if the write does. The values are filled on the in-memory object for the
+    response; the one-time pass in init_db() persists them.
+    """
     if not ev or not ev.report_text:
         return
     changed = False
@@ -997,7 +1041,7 @@ def _backfill_parsed(db, ev) -> None:
         q = _parse_list_section(ev.report_text, "KEY QUESTIONS")
         if q:
             ev.key_questions = q; changed = True
-    if changed:
+    if changed and persist:
         try:
             db.commit()
         except Exception:

@@ -680,6 +680,10 @@ class GamePlayerStat(Base):
     quarter_multiplier = Column(Float, default=1.0)
     weighted_points = Column(Float, nullable=False)
     count = Column(Integer, default=1)
+    # "live" for stats tapped in during a game, "import" for a box score read
+    # from a file. Re-importing replaces the previous import for that game
+    # without touching anything the coach tracked live.
+    source = Column(String, default="live")
     created_at = Column(DateTime, default=datetime.utcnow)
 
     game = relationship("GameSession", back_populates="player_stats")

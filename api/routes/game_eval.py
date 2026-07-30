@@ -51,6 +51,18 @@ DEFENSE_STATS: dict[str, dict] = {
 ALL_STAT_NAMES = list(OFFENSE_STATS.keys()) + list(DEFENSE_STATS.keys())
 
 
+def stat_category(stat_name: str) -> str:
+    """The only correct source of a stat's category.
+
+    Every consumer — grades, quarter splits, the BIM composite, the prompt
+    blocks — buckets rows by "offense"/"defense". A row stored under any other
+    value is silently dropped from the off/def sums and raises a KeyError in the
+    per-quarter split, so this must never be derived from the sign of the
+    points: a missed shot is negative but still offense.
+    """
+    return "defense" if stat_name in DEFENSE_STATS else "offense"
+
+
 def _quarter_multiplier(quarter: int) -> float:
     if quarter <= 2:
         return 1.0
@@ -82,6 +94,28 @@ _IMPORT_COL_MAP: list[tuple[str, str]] = [
     (r"^(to|tov|turnovers?)", "Turnover"),
     (r"^(pf|fouls?)", "Foul Against"),
 ]
+
+
+# A box score covers the whole game, so it is stored under a neutral quarter
+# with no clutch multiplier rather than being attributed to any one quarter.
+IMPORT_QUARTER = 1
+IMPORT_MULTIPLIER = 1.0
+
+
+def _clear_prior_import(db: Session, game_id: int, is_opponent: bool | None = None) -> None:
+    """Drop the previous imported box score for this game.
+
+    Imports are whole-game totals, so importing twice would double every count.
+    Only rows marked source="import" are removed — anything the coach tracked
+    live during the game is left untouched.
+    """
+    q = db.query(models.GamePlayerStat).filter(
+        models.GamePlayerStat.game_id == game_id,
+        models.GamePlayerStat.source == "import",
+    )
+    if is_opponent is not None:
+        q = q.filter(models.GamePlayerStat.is_opponent == is_opponent)
+    q.delete(synchronize_session=False)
 
 
 def _import_raw(stat: str, count: int) -> float:
@@ -126,7 +160,11 @@ async def import_game_stats(
     if not col_stats:
         raise HTTPException(status_code=400, detail="No recognizable stat columns (PTS/REB/AST/…) found.")
 
-    q, mult = 4, _quarter_multiplier(4)
+    # A box score is whole-game totals, not a Q4 performance: recording it under
+    # quarter 4 would apply the 1.5x clutch multiplier to the entire game and
+    # inflate every imported game against live-tracked ones.
+    q, mult = IMPORT_QUARTER, IMPORT_MULTIPLIER
+    _clear_prior_import(db, game.id, is_opponent)
     imported = 0
     for row in rows[1:]:
         if name_idx >= len(row) or not row[name_idx] or not str(row[name_idx]).strip():
@@ -144,8 +182,9 @@ async def import_game_stats(
             raw = _import_raw(stat, count)
             db.add(models.GamePlayerStat(
                 game_id=game.id, player_name=pname, is_opponent=is_opponent,
-                quarter=q, stat_name=stat, stat_category=("negative" if raw < 0 else "positive"),
+                quarter=q, stat_name=stat, stat_category=stat_category(stat),
                 raw_points=raw, quarter_multiplier=mult, weighted_points=raw * mult, count=count,
+                source="import",
             ))
             imported += 1
     db.commit()
@@ -760,6 +799,7 @@ async def upload_excel(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Could not read Excel file: {e}")
 
+    _clear_prior_import(db, game.id)
     imported = 0
     for sheet_name in wb.sheetnames:
         ws = wb[sheet_name]
@@ -801,10 +841,7 @@ async def upload_excel(
             if not matches:
                 continue
             stat_name = matches[0]
-            if stat_name in OFFENSE_STATS:
-                stat_category = "offense"
-            else:
-                stat_category = "defense"
+            cat = stat_category(stat_name)
 
             for col_idx, player_name in player_cols.items():
                 if col_idx >= len(row):
@@ -820,20 +857,20 @@ async def upload_excel(
                     continue
 
                 raw_points, _ = _compute_raw_points(stat_name, count)
-                multiplier = 1.0  # default Q1/Q2 for imports
-                weighted = raw_points * multiplier
+                weighted = raw_points * IMPORT_MULTIPLIER
 
                 stat = models.GamePlayerStat(
                     game_id=game.id,
                     player_name=player_name,
                     is_opponent="opp" in sheet_name.lower() or "opponent" in sheet_name.lower(),
-                    quarter=1,
+                    quarter=IMPORT_QUARTER,
                     stat_name=stat_name,
-                    stat_category=stat_category,
+                    stat_category=cat,
                     raw_points=raw_points,
-                    quarter_multiplier=multiplier,
+                    quarter_multiplier=IMPORT_MULTIPLIER,
                     weighted_points=weighted,
                     count=count,
+                    source="import",
                 )
                 db.add(stat)
                 imported += 1

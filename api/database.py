@@ -754,3 +754,77 @@ def _run_migrations():
                 conn.commit()
         except Exception:
             pass
+
+        # Box-score imports used to store stat_category as "positive"/"negative"
+        # (the sign of the points) instead of "offense"/"defense". Rows written
+        # that way are dropped from the off/def totals and raise a KeyError in
+        # the per-quarter split, so re-derive the category from the stat name.
+        try:
+            from .routes.game_eval import DEFENSE_STATS
+            text = __import__("sqlalchemy").text
+            bad = conn.execute(text(
+                "SELECT COUNT(*) FROM game_player_stats "
+                "WHERE stat_category NOT IN ('offense', 'defense')"
+            )).scalar()
+            if bad:
+                for name in DEFENSE_STATS:
+                    conn.execute(text(
+                        "UPDATE game_player_stats SET stat_category = 'defense' "
+                        "WHERE stat_category NOT IN ('offense', 'defense') "
+                        "AND stat_name = :n"
+                    ), {"n": name})
+                # Everything left is offense — including the negative offensive
+                # stats (missed shots, turnovers) the old code mislabelled.
+                conn.execute(text(
+                    "UPDATE game_player_stats SET stat_category = 'offense' "
+                    "WHERE stat_category NOT IN ('offense', 'defense')"))
+                conn.commit()
+        except Exception:
+            pass
+
+        # Distinguish live-tracked stats from imported box scores so a re-import
+        # can replace the previous import instead of doubling every count.
+        try:
+            text = __import__("sqlalchemy").text
+            cols = [row[1] for row in conn.execute(text("PRAGMA table_info(game_player_stats)"))]
+            if cols and "source" not in cols:
+                conn.execute(text(
+                    "ALTER TABLE game_player_stats ADD COLUMN source TEXT DEFAULT 'live'"))
+                conn.execute(text(
+                    "UPDATE game_player_stats SET source = 'live' WHERE source IS NULL"))
+                conn.commit()
+        except Exception:
+            pass
+
+        # One-time re-parse of evals whose flag sections were left empty by an
+        # older, stricter parser. Read paths fill these in memory for the
+        # response; doing the write here keeps GETs from committing.
+        try:
+            from sqlalchemy.orm import Session as _Session
+            from .routes.evaluations import _parse_list_section
+            from . import models
+            sess = _Session(bind=conn)
+            # Empty JSON lists read back as [] rather than NULL, so filter on
+            # falsiness in Python instead of in SQL.
+            stale = (
+                sess.query(models.Evaluation)
+                .filter(models.Evaluation.report_text.isnot(None))
+                .all()
+            )
+            touched = 0
+            for ev in stale:
+                for field, header in (
+                    ("green_flags", "GREEN FLAGS"),
+                    ("watch_flags", "WATCH FLAGS"),
+                    ("key_questions", "KEY QUESTIONS"),
+                ):
+                    if not getattr(ev, field):
+                        parsed = _parse_list_section(ev.report_text, header)
+                        if parsed:
+                            setattr(ev, field, parsed)
+                            touched += 1
+            if touched:
+                sess.commit()
+            sess.close()
+        except Exception:
+            pass

@@ -161,9 +161,14 @@ def game_stats_commit(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    from .game_eval import _get_game, _import_raw, _quarter_multiplier
+    from .game_eval import (
+        _get_game, _import_raw, stat_category, _clear_prior_import,
+        IMPORT_QUARTER, IMPORT_MULTIPLIER,
+    )
     game = _get_game(db, body.game_id, coach.id)
-    q, mult = 4, _quarter_multiplier(4)
+    # Whole-game totals: neutral quarter, no clutch multiplier. See game_eval.
+    q, mult = IMPORT_QUARTER, IMPORT_MULTIPLIER
+    _clear_prior_import(db, game.id)
     imported = 0
     for p in body.players:
         name = str(p.get("player_name") or "").strip()
@@ -181,8 +186,9 @@ def game_stats_commit(
             raw = _import_raw(stat, count)
             db.add(models.GamePlayerStat(
                 game_id=game.id, player_name=name, is_opponent=is_opp,
-                quarter=q, stat_name=stat, stat_category=("negative" if raw < 0 else "positive"),
+                quarter=q, stat_name=stat, stat_category=stat_category(stat),
                 raw_points=raw, quarter_multiplier=mult, weighted_points=raw * mult, count=count,
+                source="import",
             ))
             imported += 1
     db.commit()
