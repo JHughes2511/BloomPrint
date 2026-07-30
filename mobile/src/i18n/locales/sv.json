@@ -2171,6 +2171,12 @@
     "editLabel": "Redigera etikett",
     "addLabel": "Lägg till etikett",
     "enterText": "Ange text...",
-    "add": "Lägg till"
+    "add": "Lägg till",
+    "notSavedRetry": "Inte sparat — tryck för att försöka igen",
+    "unsavedTitle": "Osparade ändringar",
+    "unsavedMsg": "Taktiktavlan kunde inte sparas. Försöka igen, eller stänga och förlora ändringarna?",
+    "retrySave": "Försök spara igen",
+    "closeAnyway": "Stäng ändå",
+    "deleteFailed": "Det gick inte att ta bort taktiktavlan."
   }
 }

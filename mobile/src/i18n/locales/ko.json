@@ -2171,6 +2171,12 @@
     "editLabel": "라벨 편집",
     "addLabel": "라벨 추가",
     "enterText": "텍스트 입력...",
-    "add": "추가"
+    "add": "추가",
+    "notSavedRetry": "저장되지 않음 — 탭하여 재시도",
+    "unsavedTitle": "저장되지 않은 변경사항",
+    "unsavedMsg": "이 작전판을 저장할 수 없습니다. 다시 시도할까요, 아니면 닫고 변경사항을 버릴까요?",
+    "retrySave": "저장 다시 시도",
+    "closeAnyway": "그래도 닫기",
+    "deleteFailed": "이 작전판을 삭제할 수 없습니다."
   }
 }

@@ -2171,6 +2171,12 @@
     "editLabel": "Etiketi Düzenle",
     "addLabel": "Etiket Ekle",
     "enterText": "Metin girin...",
-    "add": "Ekle"
+    "add": "Ekle",
+    "notSavedRetry": "Kaydedilmedi — yeniden denemek için dokun",
+    "unsavedTitle": "Kaydedilmemiş değişiklikler",
+    "unsavedMsg": "Bu taktik tahtası kaydedilemedi. Yeniden denemek mi, kapatıp değişiklikleri kaybetmek mi?",
+    "retrySave": "Kaydetmeyi yeniden dene",
+    "closeAnyway": "Yine de kapat",
+    "deleteFailed": "Bu taktik tahtası silinemedi."
   }
 }

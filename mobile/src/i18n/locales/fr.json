@@ -2171,6 +2171,12 @@
     "editLabel": "Modifier l'étiquette",
     "addLabel": "Ajouter une étiquette",
     "enterText": "Saisir le texte...",
-    "add": "Ajouter"
+    "add": "Ajouter",
+    "notSavedRetry": "Non enregistré — appuyez pour réessayer",
+    "unsavedTitle": "Modifications non enregistrées",
+    "unsavedMsg": "Impossible d'enregistrer ce tableau. Réessayer, ou fermer et perdre les modifications ?",
+    "retrySave": "Réessayer l'enregistrement",
+    "closeAnyway": "Fermer quand même",
+    "deleteFailed": "Impossible de supprimer ce tableau."
   }
 }

@@ -2171,6 +2171,12 @@
     "editLabel": "Editar Rótulo",
     "addLabel": "Adicionar Rótulo",
     "enterText": "Insira o texto...",
-    "add": "Adicionar"
+    "add": "Adicionar",
+    "notSavedRetry": "Não salvo — toque para tentar novamente",
+    "unsavedTitle": "Alterações não salvas",
+    "unsavedMsg": "Não foi possível salvar esta prancheta. Tentar novamente ou fechar e perder as alterações?",
+    "retrySave": "Tentar salvar novamente",
+    "closeAnyway": "Fechar mesmo assim",
+    "deleteFailed": "Não foi possível excluir esta prancheta."
   }
 }

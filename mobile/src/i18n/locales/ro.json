@@ -2171,6 +2171,12 @@
     "editLabel": "Editează eticheta",
     "addLabel": "Adaugă etichetă",
     "enterText": "Introdu text...",
-    "add": "Adaugă"
+    "add": "Adaugă",
+    "notSavedRetry": "Nesalvat — atinge pentru reîncercare",
+    "unsavedTitle": "Modificări nesalvate",
+    "unsavedMsg": "Această tablă nu a putut fi salvată. Reîncerci sau închizi și pierzi modificările?",
+    "retrySave": "Reîncearcă salvarea",
+    "closeAnyway": "Închide oricum",
+    "deleteFailed": "Nu s-a putut șterge această tablă."
   }
 }

@@ -2171,6 +2171,12 @@
     "editLabel": "Redaguoti žymą",
     "addLabel": "Pridėti žymą",
     "enterText": "Įveskite tekstą...",
-    "add": "Pridėti"
+    "add": "Pridėti",
+    "notSavedRetry": "Neišsaugota — palieskite, kad pakartotumėte",
+    "unsavedTitle": "Neišsaugoti pakeitimai",
+    "unsavedMsg": "Nepavyko išsaugoti šios taktikos lentos. Pakartoti ar užverti ir prarasti pakeitimus?",
+    "retrySave": "Išsaugoti dar kartą",
+    "closeAnyway": "Vis tiek užverti",
+    "deleteFailed": "Nepavyko ištrinti šios lentos."
   }
 }

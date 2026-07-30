@@ -2171,6 +2171,12 @@
     "editLabel": "Edytuj etykietę",
     "addLabel": "Dodaj etykietę",
     "enterText": "Wpisz tekst...",
-    "add": "Dodaj"
+    "add": "Dodaj",
+    "notSavedRetry": "Nie zapisano — dotknij, aby ponowić",
+    "unsavedTitle": "Niezapisane zmiany",
+    "unsavedMsg": "Nie udało się zapisać tej tablicy. Ponowić próbę czy zamknąć i utracić zmiany?",
+    "retrySave": "Ponów zapis",
+    "closeAnyway": "Zamknij mimo to",
+    "deleteFailed": "Nie udało się usunąć tej tablicy."
   }
 }

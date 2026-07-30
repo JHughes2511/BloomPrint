@@ -2171,6 +2171,12 @@
     "editLabel": "Izmeni oznaku",
     "addLabel": "Dodaj oznaku",
     "enterText": "Unesi tekst...",
-    "add": "Dodaj"
+    "add": "Dodaj",
+    "notSavedRetry": "Nije sačuvano — dodirnite da pokušate ponovo",
+    "unsavedTitle": "Nesačuvane promene",
+    "unsavedMsg": "Ova taktička tabla nije mogla da se sačuva. Pokušati ponovo ili zatvoriti i izgubiti promene?",
+    "retrySave": "Pokušaj čuvanje ponovo",
+    "closeAnyway": "Ipak zatvori",
+    "deleteFailed": "Ova tabla nije mogla da se izbriše."
   }
 }

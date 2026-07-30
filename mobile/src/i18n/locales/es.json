@@ -2171,6 +2171,12 @@
     "editLabel": "Editar Etiqueta",
     "addLabel": "Añadir Etiqueta",
     "enterText": "Introduce texto...",
-    "add": "Añadir"
+    "add": "Añadir",
+    "notSavedRetry": "No guardado — toca para reintentar",
+    "unsavedTitle": "Cambios sin guardar",
+    "unsavedMsg": "No se pudo guardar esta pizarra. ¿Reintentar o cerrar y perder los cambios?",
+    "retrySave": "Reintentar guardado",
+    "closeAnyway": "Cerrar de todos modos",
+    "deleteFailed": "No se pudo eliminar esta pizarra."
   }
 }

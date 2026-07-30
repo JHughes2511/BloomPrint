@@ -2171,6 +2171,12 @@
     "editLabel": "Beschriftung bearbeiten",
     "addLabel": "Beschriftung hinzufügen",
     "enterText": "Text eingeben...",
-    "add": "Hinzufügen"
+    "add": "Hinzufügen",
+    "notSavedRetry": "Nicht gespeichert — zum Wiederholen tippen",
+    "unsavedTitle": "Nicht gespeicherte Änderungen",
+    "unsavedMsg": "Dieses Taktikboard konnte nicht gespeichert werden. Erneut versuchen oder schließen und die Änderungen verwerfen?",
+    "retrySave": "Speichern wiederholen",
+    "closeAnyway": "Trotzdem schließen",
+    "deleteFailed": "Dieses Taktikboard konnte nicht gelöscht werden."
   }
 }

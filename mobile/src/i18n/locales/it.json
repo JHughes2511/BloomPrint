@@ -2171,6 +2171,12 @@
     "editLabel": "Modifica Etichetta",
     "addLabel": "Aggiungi Etichetta",
     "enterText": "Inserisci testo...",
-    "add": "Aggiungi"
+    "add": "Aggiungi",
+    "notSavedRetry": "Non salvato — tocca per riprovare",
+    "unsavedTitle": "Modifiche non salvate",
+    "unsavedMsg": "Impossibile salvare questa lavagna. Riprovare o chiudere e perdere le modifiche?",
+    "retrySave": "Riprova salvataggio",
+    "closeAnyway": "Chiudi comunque",
+    "deleteFailed": "Impossibile eliminare questa lavagna."
   }
 }

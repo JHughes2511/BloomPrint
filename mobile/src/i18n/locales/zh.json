@@ -2171,6 +2171,12 @@
     "editLabel": "编辑标签",
     "addLabel": "添加标签",
     "enterText": "输入文本...",
-    "add": "添加"
+    "add": "添加",
+    "notSavedRetry": "未保存 — 点按重试",
+    "unsavedTitle": "未保存的更改",
+    "unsavedMsg": "无法保存此战术板。重试，还是关闭并放弃更改？",
+    "retrySave": "重试保存",
+    "closeAnyway": "仍然关闭",
+    "deleteFailed": "无法删除此战术板。"
   }
 }

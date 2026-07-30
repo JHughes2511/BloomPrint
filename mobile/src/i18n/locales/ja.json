@@ -2171,6 +2171,12 @@
     "editLabel": "ラベルを編集",
     "addLabel": "ラベルを追加",
     "enterText": "テキストを入力...",
-    "add": "追加"
+    "add": "追加",
+    "notSavedRetry": "未保存 — タップして再試行",
+    "unsavedTitle": "未保存の変更",
+    "unsavedMsg": "このボードを保存できませんでした。再試行しますか、それとも閉じて変更を破棄しますか？",
+    "retrySave": "保存を再試行",
+    "closeAnyway": "それでも閉じる",
+    "deleteFailed": "このボードを削除できませんでした。"
   }
 }

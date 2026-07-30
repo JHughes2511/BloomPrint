@@ -2171,6 +2171,12 @@
     "editLabel": "Label bewerken",
     "addLabel": "Label toevoegen",
     "enterText": "Voer tekst in...",
-    "add": "Toevoegen"
+    "add": "Toevoegen",
+    "notSavedRetry": "Niet opgeslagen — tik om opnieuw te proberen",
+    "unsavedTitle": "Niet-opgeslagen wijzigingen",
+    "unsavedMsg": "Dit tactiekbord kon niet worden opgeslagen. Opnieuw proberen, of sluiten en de wijzigingen verliezen?",
+    "retrySave": "Opnieuw opslaan",
+    "closeAnyway": "Toch sluiten",
+    "deleteFailed": "Dit tactiekbord kon niet worden verwijderd."
   }
 }

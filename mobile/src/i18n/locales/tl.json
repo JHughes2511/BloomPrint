@@ -2171,6 +2171,12 @@
     "editLabel": "I-edit ang Label",
     "addLabel": "Magdagdag ng Label",
     "enterText": "Maglagay ng teksto...",
-    "add": "Idagdag"
+    "add": "Idagdag",
+    "notSavedRetry": "Hindi na-save — i-tap para subukan muli",
+    "unsavedTitle": "Mga hindi na-save na pagbabago",
+    "unsavedMsg": "Hindi na-save ang board na ito. Subukan muli, o isara at mawala ang mga pagbabago?",
+    "retrySave": "Subukang mag-save muli",
+    "closeAnyway": "Isara pa rin",
+    "deleteFailed": "Hindi na-delete ang board na ito."
   }
 }

@@ -2171,6 +2171,12 @@
     "editLabel": "Uredi oznaku",
     "addLabel": "Dodaj oznaku",
     "enterText": "Unesi tekst...",
-    "add": "Dodaj"
+    "add": "Dodaj",
+    "notSavedRetry": "Nije spremljeno — dodirnite za ponovni pokušaj",
+    "unsavedTitle": "Nespremljene promjene",
+    "unsavedMsg": "Ovu taktičku ploču nije bilo moguće spremiti. Pokušati ponovno ili zatvoriti i izgubiti promjene?",
+    "retrySave": "Ponovi spremanje",
+    "closeAnyway": "Ipak zatvori",
+    "deleteFailed": "Ovu ploču nije bilo moguće izbrisati."
   }
 }
