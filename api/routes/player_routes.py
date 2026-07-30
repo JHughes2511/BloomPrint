@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
 from .. import models, schemas
+from ..softdelete import soft_delete
 from ..ownership import get_owned
 from .player_auth import get_current_player_user
 
@@ -213,7 +214,7 @@ def reject_link(
     if lr.coach_id and lr.player and not lr.player.evaluations:
         player = lr.player
         db.delete(lr)
-        db.delete(player)
+        soft_delete(db, player)
     db.commit()
     return {"ok": True}
 

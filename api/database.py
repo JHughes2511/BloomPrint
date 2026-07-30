@@ -855,3 +855,17 @@ def _run_migrations():
                 conn.commit()
         except Exception:
             pass
+
+        # Deleting hides a record now instead of destroying it. Every table
+        # behind a SoftDeleteMixin model needs the column before the global
+        # filter (which runs on every SELECT) can reference it.
+        try:
+            text = __import__("sqlalchemy").text
+            for table in ("evaluations", "team_reports", "game_reports",
+                          "game_sessions", "training_sessions", "players", "teams"):
+                cols = [row[1] for row in conn.execute(text(f"PRAGMA table_info({table})"))]
+                if cols and "deleted_at" not in cols:
+                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN deleted_at DATETIME"))
+                    conn.commit()
+        except Exception:
+            pass

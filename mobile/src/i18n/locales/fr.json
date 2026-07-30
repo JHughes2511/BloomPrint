@@ -1396,7 +1396,17 @@
     "requestSentTitle": "Demande envoyée",
     "requestSentMsg": "Le propriétaire de l'équipe approuvera ou refusera votre demande.",
     "joinRequestsLabel": "DEMANDES ({{count}})",
-    "wantsToJoin": "{{role}} · souhaite rejoindre {{team}}"
+    "wantsToJoin": "{{role}} · souhaite rejoindre {{team}}",
+    "transferOwner": "Transférer",
+    "transferHint": "Choisissez qui reprend {{team}}. Les sous-équipes suivent et vous restez dans le staff.",
+    "transferNoStaff": "Invitez d'abord un entraîneur — vous ne pouvez confier l'équipe qu'à un membre du staff.",
+    "transferDoneTitle": "Équipe transférée",
+    "transferDoneMsg": "L'équipe lui appartient désormais. Vous restez dans le staff.",
+    "transferError": "Impossible de transférer l'équipe",
+    "claimOwnership": "Reprendre",
+    "claimTitle": "Reprendre la propriété",
+    "claimMsg": "Le propriétaire de {{team}} n'a plus de compte. Voulez-vous en devenir propriétaire ?",
+    "claimConfirm": "Reprendre"
   },
   "conversation": {
     "title": "Conversation",

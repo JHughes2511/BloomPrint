@@ -7,6 +7,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from .database import Base
+from .softdelete import SoftDeleteMixin
 
 
 class Coach(Base):
@@ -51,7 +52,7 @@ class Coach(Base):
     coach_notifications = relationship("CoachNotification", foreign_keys="CoachNotification.coach_id", cascade="all, delete-orphan")
 
 
-class Team(Base):
+class Team(SoftDeleteMixin, Base):
     __tablename__ = "teams"
 
     id               = Column(Integer, primary_key=True, index=True)
@@ -65,7 +66,7 @@ class Team(Base):
     players = relationship("Player", back_populates="team")
 
 
-class Player(Base):
+class Player(SoftDeleteMixin, Base):
     __tablename__ = "players"
 
     id               = Column(Integer, primary_key=True, index=True)
@@ -96,7 +97,7 @@ class Player(Base):
     player_user      = relationship("PlayerUser", back_populates="player", uselist=False)
 
 
-class Evaluation(Base):
+class Evaluation(SoftDeleteMixin, Base):
     __tablename__ = "evaluations"
 
     id               = Column(Integer, primary_key=True, index=True)
@@ -169,7 +170,7 @@ class GenerationJob(Base):
     updated_at  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
-class TeamReport(Base):
+class TeamReport(SoftDeleteMixin, Base):
     __tablename__ = "team_reports"
 
     id           = Column(Integer, primary_key=True, index=True)
@@ -197,7 +198,7 @@ class TeamReportCorrection(Base):
     coach          = relationship("Coach")
 
 
-class TrainingSession(Base):
+class TrainingSession(SoftDeleteMixin, Base):
     __tablename__ = "training_sessions"
 
     id            = Column(Integer, primary_key=True, index=True)
@@ -514,7 +515,7 @@ class StaffReportComment(Base):
     author        = relationship("Coach")
 
 
-class GameReport(Base):
+class GameReport(SoftDeleteMixin, Base):
     __tablename__ = "game_reports"
 
     id                = Column(Integer, primary_key=True, index=True)
@@ -592,7 +593,7 @@ class GameReportClip(Base):
     game_report = relationship("GameReport", back_populates="clips")
 
 
-class GameSession(Base):
+class GameSession(SoftDeleteMixin, Base):
     __tablename__ = "game_sessions"
     id = Column(Integer, primary_key=True, index=True)
     coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)

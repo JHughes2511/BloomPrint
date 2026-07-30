@@ -1396,7 +1396,17 @@
     "requestSentTitle": "Zahtjev poslan",
     "requestSentMsg": "Vlasnik momčadi odobrit će ili odbiti vaš zahtjev.",
     "joinRequestsLabel": "ZAHTJEVI ({{count}})",
-    "wantsToJoin": "{{role}} · želi se pridružiti momčadi {{team}}"
+    "wantsToJoin": "{{role}} · želi se pridružiti momčadi {{team}}",
+    "transferOwner": "Prenesi",
+    "transferHint": "Odaberite tko preuzima momčad {{team}}. Podmomčadi idu s njom, a vi ostajete u stožeru.",
+    "transferNoStaff": "Prvo pozovite trenera — momčad možete predati samo nekome tko je već u stožeru.",
+    "transferDoneTitle": "Momčad prenesena",
+    "transferDoneMsg": "Momčad sada pripada njima. I dalje ste u stožeru.",
+    "transferError": "Nije moguće prenijeti momčad",
+    "claimOwnership": "Preuzmi",
+    "claimTitle": "Preuzmi vlasništvo",
+    "claimMsg": "Vlasnik momčadi {{team}} više nema račun. Želite li preuzeti momčad?",
+    "claimConfirm": "Preuzmi"
   },
   "conversation": {
     "title": "Razgovor",

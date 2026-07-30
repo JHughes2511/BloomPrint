@@ -12,6 +12,7 @@ from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
+from ..softdelete import soft_delete
 from ..ownership import owns
 
 
@@ -315,7 +316,7 @@ def delete_game_report(
     gr = db.get(models.GameReport, report_id)
     if not gr or gr.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Game report not found")
-    db.delete(gr)
+    soft_delete(db, gr)
     db.commit()
     return {"ok": True}
 

@@ -1396,7 +1396,17 @@
     "requestSentTitle": "Request sent",
     "requestSentMsg": "The team owner will approve or decline your request.",
     "joinRequestsLabel": "JOIN REQUESTS ({{count}})",
-    "wantsToJoin": "{{role}} · wants to join {{team}}"
+    "wantsToJoin": "{{role}} · wants to join {{team}}",
+    "transferOwner": "Transfer",
+    "transferHint": "Choose who takes over {{team}}. Sub-teams move with it and you stay on as staff.",
+    "transferNoStaff": "Invite a coach to this team first — you can only hand it to someone already on its staff.",
+    "transferDoneTitle": "Team transferred",
+    "transferDoneMsg": "They own the team now. You are still on its staff.",
+    "transferError": "Could not transfer the team",
+    "claimOwnership": "Claim",
+    "claimTitle": "Claim ownership",
+    "claimMsg": "The owner of {{team}} no longer has an account. Take over as owner?",
+    "claimConfirm": "Claim"
   },
   "conversation": {
     "title": "Conversation",

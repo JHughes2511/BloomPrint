@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
 from .. import models, schemas
+from ..softdelete import soft_delete
 
 router = APIRouter(prefix="/teams", tags=["teams"])
 
@@ -61,6 +62,6 @@ def delete_team(
     team = db.get(models.Team, team_id)
     if not team or team.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Team not found")
-    db.delete(team)
+    soft_delete(db, team)
     db.commit()
     return {"ok": True}

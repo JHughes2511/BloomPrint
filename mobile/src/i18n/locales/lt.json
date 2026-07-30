@@ -1396,7 +1396,17 @@
     "requestSentTitle": "Prašymas išsiųstas",
     "requestSentMsg": "Komandos savininkas patvirtins arba atmes jūsų prašymą.",
     "joinRequestsLabel": "PRAŠYMAI ({{count}})",
-    "wantsToJoin": "{{role}} · nori prisijungti prie {{team}}"
+    "wantsToJoin": "{{role}} · nori prisijungti prie {{team}}",
+    "transferOwner": "Perduoti",
+    "transferHint": "Pasirinkite, kas perims {{team}}. Pakomandės keliauja kartu, o jūs liekate štabe.",
+    "transferNoStaff": "Pirma pakvieskite trenerį — perduoti galima tik tam, kas jau yra štabe.",
+    "transferDoneTitle": "Komanda perduota",
+    "transferDoneMsg": "Dabar komanda priklauso jiems. Jūs vis dar štabe.",
+    "transferError": "Nepavyko perduoti komandos",
+    "claimOwnership": "Perimti",
+    "claimTitle": "Perimti nuosavybę",
+    "claimMsg": "Komandos {{team}} savininkas nebeturi paskyros. Norite perimti komandą?",
+    "claimConfirm": "Perimti"
   },
   "conversation": {
     "title": "Pokalbis",

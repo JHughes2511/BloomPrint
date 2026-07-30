@@ -1396,7 +1396,17 @@
     "requestSentTitle": "申请已发送",
     "requestSentMsg": "球队所有者将批准或拒绝你的申请。",
     "joinRequestsLabel": "加入申请（{{count}}）",
-    "wantsToJoin": "{{role}} · 想加入 {{team}}"
+    "wantsToJoin": "{{role}} · 想加入 {{team}}",
+    "transferOwner": "转让",
+    "transferHint": "选择由谁接管 {{team}}。子队会一并转移，你仍留在教练组。",
+    "transferNoStaff": "请先邀请一位教练——只能转让给已在教练组的人。",
+    "transferDoneTitle": "球队已转让",
+    "transferDoneMsg": "球队现在归他们所有。你仍在教练组。",
+    "transferError": "无法转让球队",
+    "claimOwnership": "接管",
+    "claimTitle": "接管所有权",
+    "claimMsg": "{{team}} 的所有者账号已不存在。要接管为所有者吗？",
+    "claimConfirm": "接管"
   },
   "conversation": {
     "title": "对话",

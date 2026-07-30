@@ -1396,7 +1396,17 @@
     "requestSentTitle": "अनुरोध भेजा गया",
     "requestSentMsg": "टीम का स्वामी आपके अनुरोध को स्वीकार या अस्वीकार करेगा।",
     "joinRequestsLabel": "अनुरोध ({{count}})",
-    "wantsToJoin": "{{role}} · {{team}} में शामिल होना चाहते हैं"
+    "wantsToJoin": "{{role}} · {{team}} में शामिल होना चाहते हैं",
+    "transferOwner": "स्थानांतरित करें",
+    "transferHint": "चुनें कि {{team}} किसे मिलेगी। उप-टीमें साथ जाती हैं और आप स्टाफ़ में बने रहते हैं।",
+    "transferNoStaff": "पहले किसी कोच को आमंत्रित करें — आप इसे केवल स्टाफ़ में मौजूद किसी को सौंप सकते हैं।",
+    "transferDoneTitle": "टीम स्थानांतरित हुई",
+    "transferDoneMsg": "अब टीम उनकी है। आप अब भी स्टाफ़ में हैं।",
+    "transferError": "टीम स्थानांतरित नहीं हो सकी",
+    "claimOwnership": "अपनाएँ",
+    "claimTitle": "स्वामित्व लें",
+    "claimMsg": "{{team}} के स्वामी का खाता अब नहीं है। क्या आप स्वामी बनना चाहते हैं?",
+    "claimConfirm": "अपनाएँ"
   },
   "conversation": {
     "title": "बातचीत",

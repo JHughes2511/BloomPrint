@@ -1396,7 +1396,17 @@
     "requestSentTitle": "הבקשה נשלחה",
     "requestSentMsg": "בעל הקבוצה יאשר או ידחה את בקשתך.",
     "joinRequestsLabel": "בקשות ({{count}})",
-    "wantsToJoin": "{{role}} · רוצה להצטרף ל{{team}}"
+    "wantsToJoin": "{{role}} · רוצה להצטרף ל{{team}}",
+    "transferOwner": "העברה",
+    "transferHint": "בחר מי מקבל את {{team}}. תת-קבוצות עוברות איתה ואתה נשאר בצוות.",
+    "transferNoStaff": "הזמן קודם מאמן — אפשר להעביר רק למי שכבר בצוות.",
+    "transferDoneTitle": "הקבוצה הועברה",
+    "transferDoneMsg": "הקבוצה שייכת להם כעת. אתה עדיין בצוות.",
+    "transferError": "לא ניתן היה להעביר את הקבוצה",
+    "claimOwnership": "תבע בעלות",
+    "claimTitle": "תביעת בעלות",
+    "claimMsg": "לבעלים של {{team}} אין יותר חשבון. להפוך לבעלים?",
+    "claimConfirm": "תבע בעלות"
   },
   "conversation": {
     "title": "שיחה",

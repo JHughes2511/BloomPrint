@@ -1396,7 +1396,17 @@
     "requestSentTitle": "Запит надіслано",
     "requestSentMsg": "Власник команди схвалить або відхилить ваш запит.",
     "joinRequestsLabel": "ЗАПИТИ ({{count}})",
-    "wantsToJoin": "{{role}} · хоче приєднатися до {{team}}"
+    "wantsToJoin": "{{role}} · хоче приєднатися до {{team}}",
+    "transferOwner": "Передати",
+    "transferHint": "Виберіть, хто прийме {{team}}. Підкоманди перейдуть разом, а ви залишитесь у штабі.",
+    "transferNoStaff": "Спершу запросіть тренера — передати можна лише тому, хто вже в штабі.",
+    "transferDoneTitle": "Команду передано",
+    "transferDoneMsg": "Тепер команда належить їм. Ви залишились у штабі.",
+    "transferError": "Не вдалося передати команду",
+    "claimOwnership": "Прийняти",
+    "claimTitle": "Стати власником",
+    "claimMsg": "У власника команди {{team}} більше немає акаунта. Стати власником?",
+    "claimConfirm": "Прийняти"
   },
   "conversation": {
     "title": "Розмова",

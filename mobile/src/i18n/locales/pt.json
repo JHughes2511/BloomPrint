@@ -1396,7 +1396,17 @@
     "requestSentTitle": "Pedido enviado",
     "requestSentMsg": "O proprietário da equipa vai aprovar ou recusar o seu pedido.",
     "joinRequestsLabel": "PEDIDOS ({{count}})",
-    "wantsToJoin": "{{role}} · quer entrar em {{team}}"
+    "wantsToJoin": "{{role}} · quer entrar em {{team}}",
+    "transferOwner": "Transferir",
+    "transferHint": "Escolha quem assume {{team}}. As sub-equipas vão junto e continua na equipa técnica.",
+    "transferNoStaff": "Convide primeiro um treinador — só pode entregá-la a alguém já na equipa técnica.",
+    "transferDoneTitle": "Equipa transferida",
+    "transferDoneMsg": "A equipa passou a ser dele. Continua na equipa técnica.",
+    "transferError": "Não foi possível transferir a equipa",
+    "claimOwnership": "Assumir",
+    "claimTitle": "Assumir a propriedade",
+    "claimMsg": "O proprietário de {{team}} já não tem conta. Quer assumir a propriedade?",
+    "claimConfirm": "Assumir"
   },
   "conversation": {
     "title": "Conversa",

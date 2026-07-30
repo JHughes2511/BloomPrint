@@ -19,6 +19,9 @@ class TeamOut(BaseModel):
     parent_team_id: int | None = None
     member_count: int | None = None
     is_owner: bool | None = None
+    # The owner's account no longer exists — the team is unmanageable until a
+    # staff member claims it, so the client needs to offer that.
+    owner_missing: bool | None = None
     model_config = {"from_attributes": True}
 
 
@@ -288,6 +291,7 @@ def my_teams(
             parent_team_id=t.parent_team_id,
             member_count=_member_count(db, t.id),
             is_owner=(t.coach_id == coach.id),
+            owner_missing=(owner is None),
         ))
     return result
 

@@ -1396,7 +1396,17 @@
     "requestSentTitle": "تم إرسال الطلب",
     "requestSentMsg": "سيوافق مالك الفريق على طلبك أو يرفضه.",
     "joinRequestsLabel": "الطلبات ({{count}})",
-    "wantsToJoin": "{{role}} · يريد الانضمام إلى {{team}}"
+    "wantsToJoin": "{{role}} · يريد الانضمام إلى {{team}}",
+    "transferOwner": "نقل الملكية",
+    "transferHint": "اختر من سيتولى فريق {{team}}. تنتقل الفرق الفرعية معه وتبقى أنت ضمن الطاقم.",
+    "transferNoStaff": "ادعُ مدربًا أولًا — لا يمكنك تسليم الفريق إلا لشخص ضمن الطاقم.",
+    "transferDoneTitle": "تم نقل الفريق",
+    "transferDoneMsg": "الفريق لهم الآن. ما زلت ضمن الطاقم.",
+    "transferError": "تعذّر نقل الفريق",
+    "claimOwnership": "المطالبة",
+    "claimTitle": "المطالبة بالملكية",
+    "claimMsg": "لم يعد لمالك فريق {{team}} حساب. هل تريد أن تصبح المالك؟",
+    "claimConfirm": "المطالبة"
   },
   "conversation": {
     "title": "محادثة",

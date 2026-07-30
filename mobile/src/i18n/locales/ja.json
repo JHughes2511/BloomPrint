@@ -1396,7 +1396,17 @@
     "requestSentTitle": "申請を送信しました",
     "requestSentMsg": "チームのオーナーが承認または却下します。",
     "joinRequestsLabel": "参加申請（{{count}}）",
-    "wantsToJoin": "{{role}} · {{team}} への参加を希望"
+    "wantsToJoin": "{{role}} · {{team}} への参加を希望",
+    "transferOwner": "譲渡",
+    "transferHint": "{{team}} を引き継ぐ人を選んでください。サブチームも一緒に移り、あなたはスタッフとして残ります。",
+    "transferNoStaff": "先にコーチを招待してください。スタッフにいる人にしか譲渡できません。",
+    "transferDoneTitle": "チームを譲渡しました",
+    "transferDoneMsg": "チームは相手のものになりました。あなたはスタッフとして残っています。",
+    "transferError": "チームを譲渡できませんでした",
+    "claimOwnership": "引き継ぐ",
+    "claimTitle": "オーナー権を引き継ぐ",
+    "claimMsg": "{{team}} のオーナーのアカウントはもうありません。オーナーになりますか？",
+    "claimConfirm": "引き継ぐ"
   },
   "conversation": {
     "title": "会話",

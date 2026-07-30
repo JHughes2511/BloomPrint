@@ -1396,7 +1396,17 @@
     "requestSentTitle": "Cerere trimisă",
     "requestSentMsg": "Proprietarul echipei va aproba sau respinge cererea ta.",
     "joinRequestsLabel": "CERERI ({{count}})",
-    "wantsToJoin": "{{role}} · vrea să se alăture echipei {{team}}"
+    "wantsToJoin": "{{role}} · vrea să se alăture echipei {{team}}",
+    "transferOwner": "Transferă",
+    "transferHint": "Alege cine preia {{team}}. Sub-echipele merg odată cu ea și rămâi în staff.",
+    "transferNoStaff": "Invită mai întâi un antrenor — o poți preda doar cuiva deja din staff.",
+    "transferDoneTitle": "Echipă transferată",
+    "transferDoneMsg": "Echipa le aparține acum. Tu rămâi în staff.",
+    "transferError": "Nu s-a putut transfera echipa",
+    "claimOwnership": "Preia",
+    "claimTitle": "Preia proprietatea",
+    "claimMsg": "Proprietarul echipei {{team}} nu mai are cont. Vrei să preiei echipa?",
+    "claimConfirm": "Preia"
   },
   "conversation": {
     "title": "Conversație",

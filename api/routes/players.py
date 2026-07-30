@@ -7,6 +7,7 @@ from ..database import get_db
 from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
+from ..softdelete import soft_delete
 from ..ownership import get_owned
 
 
@@ -157,7 +158,9 @@ def delete_player(
     coach: models.Coach = Depends(get_current_coach),
 ):
     player = get_owned(db, models.Player, player_id, coach.id, "Player")
-    db.delete(player)
+    # Deleting a player hides them along with their evaluation history; the
+    # global filter takes care of the rest.
+    soft_delete(db, player)
     db.commit()
     return {"ok": True}
 

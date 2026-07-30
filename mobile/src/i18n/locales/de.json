@@ -1396,7 +1396,17 @@
     "requestSentTitle": "Anfrage gesendet",
     "requestSentMsg": "Der Team-Eigentümer wird deine Anfrage annehmen oder ablehnen.",
     "joinRequestsLabel": "ANFRAGEN ({{count}})",
-    "wantsToJoin": "{{role}} · möchte zu {{team}}"
+    "wantsToJoin": "{{role}} · möchte zu {{team}}",
+    "transferOwner": "Übertragen",
+    "transferHint": "Wähle, wer {{team}} übernimmt. Unterteams gehen mit, und du bleibst im Staff.",
+    "transferNoStaff": "Lade zuerst einen Trainer ein — übergeben kannst du nur an jemanden aus dem Staff.",
+    "transferDoneTitle": "Team übertragen",
+    "transferDoneMsg": "Das Team gehört jetzt ihnen. Du bleibst im Staff.",
+    "transferError": "Team konnte nicht übertragen werden",
+    "claimOwnership": "Übernehmen",
+    "claimTitle": "Eigentum übernehmen",
+    "claimMsg": "Der Eigentümer von {{team}} hat kein Konto mehr. Möchtest du das Team übernehmen?",
+    "claimConfirm": "Übernehmen"
   },
   "conversation": {
     "title": "Unterhaltung",

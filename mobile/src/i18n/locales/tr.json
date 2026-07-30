@@ -1396,7 +1396,17 @@
     "requestSentTitle": "İstek gönderildi",
     "requestSentMsg": "Takım sahibi isteğini onaylayacak veya reddedecek.",
     "joinRequestsLabel": "İSTEKLER ({{count}})",
-    "wantsToJoin": "{{role}} · {{team}} takımına katılmak istiyor"
+    "wantsToJoin": "{{role}} · {{team}} takımına katılmak istiyor",
+    "transferOwner": "Devret",
+    "transferHint": "{{team}} takımını kimin devralacağını seç. Alt takımlar da geçer ve sen teknik ekipte kalırsın.",
+    "transferNoStaff": "Önce bir antrenör davet et — takımı yalnızca teknik ekipteki birine devredebilirsin.",
+    "transferDoneTitle": "Takım devredildi",
+    "transferDoneMsg": "Takım artık onların. Sen hâlâ teknik ekiptesin.",
+    "transferError": "Takım devredilemedi",
+    "claimOwnership": "Sahiplen",
+    "claimTitle": "Sahipliği al",
+    "claimMsg": "{{team}} takımının sahibinin artık hesabı yok. Sahipliği almak ister misin?",
+    "claimConfirm": "Sahiplen"
   },
   "conversation": {
     "title": "Sohbet",

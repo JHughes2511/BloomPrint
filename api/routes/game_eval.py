@@ -13,6 +13,7 @@ from ..database import get_db
 from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
+from ..softdelete import soft_delete
 
 router = APIRouter(prefix="/game-eval", tags=["game-eval"])
 
@@ -450,7 +451,8 @@ def delete_session(
     coach: models.Coach = Depends(get_current_coach),
 ):
     game = _get_game(db, game_id, coach.id)
-    db.delete(game)
+    # Hidden, not destroyed — a tracked game carries a whole night's stats.
+    soft_delete(db, game)
     db.commit()
     return {"ok": True}
 

@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
 from .. import models, schemas
+from ..softdelete import soft_delete
 from ..ownership import get_owned
 
 UPLOAD_DIR = Path("uploads")
@@ -645,7 +646,7 @@ def delete_evaluation(
     coach: models.Coach = Depends(get_current_coach),
 ):
     ev = get_owned(db, models.Evaluation, eval_id, coach.id, "Evaluation")
-    db.delete(ev)
+    soft_delete(db, ev)
     db.commit()
     return {"ok": True}
 
@@ -657,7 +658,7 @@ def delete_team_report(
     coach: models.Coach = Depends(get_current_coach),
 ):
     tr = get_owned(db, models.TeamReport, report_id, coach.id, "Team report")
-    db.delete(tr)
+    soft_delete(db, tr)
     db.commit()
     return {"ok": True}
 

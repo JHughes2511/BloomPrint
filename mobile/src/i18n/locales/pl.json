@@ -1396,7 +1396,17 @@
     "requestSentTitle": "Wysłano prośbę",
     "requestSentMsg": "Właściciel drużyny zatwierdzi lub odrzuci Twoją prośbę.",
     "joinRequestsLabel": "PROŚBY ({{count}})",
-    "wantsToJoin": "{{role}} · chce dołączyć do {{team}}"
+    "wantsToJoin": "{{role}} · chce dołączyć do {{team}}",
+    "transferOwner": "Przekaż",
+    "transferHint": "Wybierz, kto przejmie {{team}}. Podzespoły przechodzą razem, a Ty zostajesz w sztabie.",
+    "transferNoStaff": "Najpierw zaproś trenera — możesz przekazać drużynę tylko komuś ze sztabu.",
+    "transferDoneTitle": "Drużyna przekazana",
+    "transferDoneMsg": "Drużyna należy teraz do nich. Nadal jesteś w sztabie.",
+    "transferError": "Nie udało się przekazać drużyny",
+    "claimOwnership": "Przejmij",
+    "claimTitle": "Przejmij własność",
+    "claimMsg": "Właściciel {{team}} nie ma już konta. Chcesz przejąć drużynę?",
+    "claimConfirm": "Przejmij"
   },
   "conversation": {
     "title": "Konwersacja",

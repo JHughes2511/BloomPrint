@@ -1396,7 +1396,17 @@
     "requestSentTitle": "Verzoek verstuurd",
     "requestSentMsg": "De teameigenaar keurt je verzoek goed of af.",
     "joinRequestsLabel": "VERZOEKEN ({{count}})",
-    "wantsToJoin": "{{role}} · wil bij {{team}}"
+    "wantsToJoin": "{{role}} · wil bij {{team}}",
+    "transferOwner": "Overdragen",
+    "transferHint": "Kies wie {{team}} overneemt. Subteams gaan mee en jij blijft in de staf.",
+    "transferNoStaff": "Nodig eerst een coach uit — je kunt het alleen overdragen aan iemand in de staf.",
+    "transferDoneTitle": "Team overgedragen",
+    "transferDoneMsg": "Het team is nu van hen. Jij blijft in de staf.",
+    "transferError": "Kon het team niet overdragen",
+    "claimOwnership": "Claimen",
+    "claimTitle": "Eigendom claimen",
+    "claimMsg": "De eigenaar van {{team}} heeft geen account meer. Wil je eigenaar worden?",
+    "claimConfirm": "Claimen"
   },
   "conversation": {
     "title": "Gesprek",

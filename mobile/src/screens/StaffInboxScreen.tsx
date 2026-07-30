@@ -298,6 +298,45 @@ export default function StaffInboxScreen() {
     }
   };
 
+  // Handing a team over: pick from its existing staff. An outsider can't be
+  // named, so the list IS the set of valid choices.
+  const [transferFor, setTransferFor] = useState<any | null>(null);
+  const [transferStaff, setTransferStaff] = useState<any[]>([]);
+  const [transferLoading, setTransferLoading] = useState(false);
+  const [transferring, setTransferring] = useState<number | null>(null);
+
+  const openTransfer = async (team: any) => {
+    setTransferFor(team);
+    setTransferStaff([]);
+    setTransferLoading(true);
+    try {
+      const members = await teamStaffAPI.members(team.id);
+      setTransferStaff((members || []).filter((m: any) => !m.is_owner));
+    } catch {}
+    setTransferLoading(false);
+  };
+
+  const doTransfer = async (teamId: number, coachId?: number) => {
+    setTransferring(coachId ?? -1);
+    try {
+      await teamStaffAPI.transferOwner(teamId, coachId);
+      setTransferFor(null);
+      await loadMyTeams();
+      Alert.alert(tr('staffHub.transferDoneTitle'), tr('staffHub.transferDoneMsg'));
+    } catch (e: any) {
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.transferError'));
+    } finally {
+      setTransferring(null);
+    }
+  };
+
+  const claimTeam = (team: any) => {
+    Alert.alert(tr('staffHub.claimTitle'), tr('staffHub.claimMsg', { team: team.name }), [
+      { text: tr('common.cancel'), style: 'cancel' },
+      { text: tr('staffHub.claimConfirm'), onPress: () => doTransfer(team.id) },
+    ]);
+  };
+
   const actOnJoinRequest = async (id: number, approve: boolean) => {
     setActingRequest(id);
     try {
@@ -666,6 +705,16 @@ export default function StaffInboxScreen() {
                     <TouchableOpacity style={styles.teamActBtn} onPress={() => { setInviteFor(tm); setInviteSearch(''); setInviteResults([]); }}>
                       <Ionicons name="person-add-outline" size={14} color={t.accent} /><Text style={styles.teamActText} numberOfLines={1}>{tr('staffHub.invite')}</Text>
                     </TouchableOpacity>
+                    {tm.is_owner && (
+                      <TouchableOpacity style={styles.teamActBtn} onPress={() => openTransfer(tm)}>
+                        <Ionicons name="swap-horizontal-outline" size={14} color={t.accent} /><Text style={styles.teamActText} numberOfLines={1}>{tr('staffHub.transferOwner')}</Text>
+                      </TouchableOpacity>
+                    )}
+                    {!tm.is_owner && tm.owner_missing && (
+                      <TouchableOpacity style={styles.teamActBtn} onPress={() => claimTeam(tm)}>
+                        <Ionicons name="flag-outline" size={14} color={t.accent} /><Text style={styles.teamActText} numberOfLines={1}>{tr('staffHub.claimOwnership')}</Text>
+                      </TouchableOpacity>
+                    )}
                     {!tm.is_owner && (
                       <TouchableOpacity style={[styles.teamActBtn, { borderColor: t.negative }]} onPress={() => leaveTeam(tm.id)} disabled={leaving === tm.id}>
                         {leaving === tm.id ? <ActivityIndicator color={t.negative} size="small" /> : <Text style={[styles.teamActText, { color: t.negative }]} numberOfLines={1}>{tr('staffHub.leave')}</Text>}
@@ -815,6 +864,52 @@ export default function StaffInboxScreen() {
       </Modal>
 
       {/* Create sub-team modal */}
+      {/* Hand the team to a staff member. Only current staff can be named, so
+          the roster below is exactly the set of legal choices. */}
+      <Modal visible={!!transferFor} transparent animationType="fade" onRequestClose={() => setTransferFor(null)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalBox, { padding: 20 }]}>
+            <Text style={styles.modalTitle}>{tr('staffHub.transferOwner')}</Text>
+            <Text style={[styles.cardSub, { marginTop: 4, marginBottom: 12 }]}>
+              {tr('staffHub.transferHint', { team: transferFor?.name })}
+            </Text>
+            {transferLoading ? (
+              <ActivityIndicator color={t.accent} />
+            ) : transferStaff.length === 0 ? (
+              <Text style={[styles.cardSub, { paddingVertical: 12 }]}>{tr('staffHub.transferNoStaff')}</Text>
+            ) : (
+              <ScrollView style={{ maxHeight: 300 }}>
+                {transferStaff.map((m: any) => (
+                  <TouchableOpacity
+                    key={m.id}
+                    style={[styles.card, { marginHorizontal: 0 }]}
+                    onPress={() => doTransfer(transferFor.id, m.id)}
+                    disabled={transferring !== null}
+                  >
+                    <View style={[styles.iconBox, { backgroundColor: t.accentSoft }]}>
+                      <Ionicons name="person-outline" size={17} color={t.accent} />
+                    </View>
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <Text style={styles.cardTitle} numberOfLines={1}>{m.name}</Text>
+                      {!!m.role && <Text style={styles.cardSub} numberOfLines={1}>{m.role}</Text>}
+                    </View>
+                    {transferring === m.id
+                      ? <ActivityIndicator color={t.accent} size="small" />
+                      : <Ionicons name="chevron-forward" size={18} color={t.muted} />}
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+            <TouchableOpacity
+              style={[styles.startBtn, { backgroundColor: t.chip, marginTop: 12 }]}
+              onPress={() => setTransferFor(null)}
+            >
+              <Text style={{ color: t.ink, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('common.cancel')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <Modal visible={!!subFor} transparent animationType="fade" onRequestClose={() => setSubFor(null)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={[styles.modalBox, { padding: 20 }]}>

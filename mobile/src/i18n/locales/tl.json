@@ -1396,7 +1396,17 @@
     "requestSentTitle": "Naipadala ang hiling",
     "requestSentMsg": "Aaprubahan o tatanggihan ng may-ari ng koponan ang iyong hiling.",
     "joinRequestsLabel": "MGA HILING ({{count}})",
-    "wantsToJoin": "{{role}} · gustong sumali sa {{team}}"
+    "wantsToJoin": "{{role}} · gustong sumali sa {{team}}",
+    "transferOwner": "Ilipat",
+    "transferHint": "Piliin kung sino ang mangangasiwa sa {{team}}. Kasama ang mga sub-team at mananatili kang staff.",
+    "transferNoStaff": "Mag-imbita muna ng coach — maaari mo lang ibigay ito sa nasa staff na.",
+    "transferDoneTitle": "Nailipat ang koponan",
+    "transferDoneMsg": "Sa kanila na ang koponan. Nasa staff ka pa rin.",
+    "transferError": "Hindi nailipat ang koponan",
+    "claimOwnership": "Angkinin",
+    "claimTitle": "Angkinin ang pagmamay-ari",
+    "claimMsg": "Wala nang account ang may-ari ng {{team}}. Gusto mo bang maging may-ari?",
+    "claimConfirm": "Angkinin"
   },
   "conversation": {
     "title": "Usapan",

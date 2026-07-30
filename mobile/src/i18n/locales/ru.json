@@ -1396,7 +1396,17 @@
     "requestSentTitle": "Запрос отправлен",
     "requestSentMsg": "Владелец команды одобрит или отклонит ваш запрос.",
     "joinRequestsLabel": "ЗАПРОСЫ ({{count}})",
-    "wantsToJoin": "{{role}} · хочет вступить в {{team}}"
+    "wantsToJoin": "{{role}} · хочет вступить в {{team}}",
+    "transferOwner": "Передать",
+    "transferHint": "Выберите, кто примет {{team}}. Подкоманды перейдут вместе с ней, а вы останетесь в штабе.",
+    "transferNoStaff": "Сначала пригласите тренера — передать можно только тому, кто уже в штабе.",
+    "transferDoneTitle": "Команда передана",
+    "transferDoneMsg": "Теперь команда принадлежит им. Вы остались в штабе.",
+    "transferError": "Не удалось передать команду",
+    "claimOwnership": "Принять",
+    "claimTitle": "Стать владельцем",
+    "claimMsg": "У владельца команды {{team}} больше нет аккаунта. Стать владельцем?",
+    "claimConfirm": "Принять"
   },
   "conversation": {
     "title": "Переписка",
