@@ -2180,5 +2180,17 @@
     "deleteFailed": "无法删除此战术板。",
     "renameBoard": "重命名战术板",
     "boardNamePlaceholder": "为该战术命名…"
+  },
+  "seasonReminder": {
+    "title": "回顾你的体系与理念",
+    "newSeason": "新赛季（{{season}}）已经开始——正是回顾并更新你 {{season}} 赛季体系与理念的好时机。",
+    "welcomeBack": "欢迎回来——正是回顾并更新你 {{season}} 赛季体系与理念的好时机。"
+  },
+  "translation": {
+    "translating": "正在翻译…",
+    "autoTranslated": "自动翻译",
+    "showingOriginal": "正在显示原文",
+    "viewOriginal": "查看原文",
+    "showTranslation": "显示译文"
   }
 }

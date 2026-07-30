@@ -2180,5 +2180,17 @@
     "deleteFailed": "Bu taktik tahtası silinemedi.",
     "renameBoard": "Tahtayı yeniden adlandır",
     "boardNamePlaceholder": "Bu oyuna ad ver…"
+  },
+  "seasonReminder": {
+    "title": "Sistemini ve felsefeni gözden geçir",
+    "newSeason": "Yeni bir sezon ({{season}}) başladı — {{season}} için sistemini ve felsefeni gözden geçirip güncellemek için iyi bir zaman.",
+    "welcomeBack": "Tekrar hoş geldin — {{season}} için sistemini ve felsefeni gözden geçirip güncellemek için iyi bir zaman."
+  },
+  "translation": {
+    "translating": "Çevriliyor…",
+    "autoTranslated": "Otomatik çevrildi",
+    "showingOriginal": "Orijinal gösteriliyor",
+    "viewOriginal": "Orijinali görüntüle",
+    "showTranslation": "Çeviriyi göster"
   }
 }

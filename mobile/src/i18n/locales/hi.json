@@ -2180,5 +2180,17 @@
     "deleteFailed": "यह बोर्ड डिलीट नहीं हो सका।",
     "renameBoard": "बोर्ड का नाम बदलें",
     "boardNamePlaceholder": "इस प्ले को नाम दें…"
+  },
+  "seasonReminder": {
+    "title": "अपने सिस्टम और सोच की समीक्षा करें",
+    "newSeason": "नया सीज़न ({{season}}) शुरू हो गया है — {{season}} के लिए अपने सिस्टम और सोच की समीक्षा और अद्यतन करने का यह अच्छा समय है।",
+    "welcomeBack": "वापस स्वागत है — {{season}} के लिए अपने सिस्टम और सोच की समीक्षा और अद्यतन करने का यह अच्छा समय है।"
+  },
+  "translation": {
+    "translating": "अनुवाद हो रहा है…",
+    "autoTranslated": "स्वतः अनुवादित",
+    "showingOriginal": "मूल दिखाया जा रहा है",
+    "viewOriginal": "मूल देखें",
+    "showTranslation": "अनुवाद दिखाएँ"
   }
 }

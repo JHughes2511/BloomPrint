@@ -2180,5 +2180,17 @@
     "deleteFailed": "Dieses Taktikboard konnte nicht gelöscht werden.",
     "renameBoard": "Board umbenennen",
     "boardNamePlaceholder": "Diesen Spielzug benennen…"
+  },
+  "seasonReminder": {
+    "title": "Überprüfe dein System & deine Philosophie",
+    "newSeason": "Eine neue Saison ({{season}}) hat begonnen – ein guter Zeitpunkt, dein System & deine Philosophie für {{season}} zu überprüfen und zu aktualisieren.",
+    "welcomeBack": "Willkommen zurück – ein guter Zeitpunkt, dein System & deine Philosophie für {{season}} zu überprüfen und zu aktualisieren."
+  },
+  "translation": {
+    "translating": "Übersetzen…",
+    "autoTranslated": "Automatisch übersetzt",
+    "showingOriginal": "Original wird angezeigt",
+    "viewOriginal": "Original ansehen",
+    "showTranslation": "Übersetzung anzeigen"
   }
 }

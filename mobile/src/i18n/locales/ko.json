@@ -2180,5 +2180,17 @@
     "deleteFailed": "이 작전판을 삭제할 수 없습니다.",
     "renameBoard": "보드 이름 변경",
     "boardNamePlaceholder": "이 플레이의 이름 입력…"
+  },
+  "seasonReminder": {
+    "title": "시스템과 철학 검토하기",
+    "newSeason": "새 시즌({{season}})이 시작되었습니다. {{season}} 시즌의 시스템과 철학을 검토하고 업데이트할 좋은 시기입니다.",
+    "welcomeBack": "다시 오셨군요. {{season}} 시즌의 시스템과 철학을 검토하고 업데이트할 좋은 시기입니다."
+  },
+  "translation": {
+    "translating": "번역 중…",
+    "autoTranslated": "자동 번역됨",
+    "showingOriginal": "원문 표시 중",
+    "viewOriginal": "원문 보기",
+    "showTranslation": "번역 보기"
   }
 }

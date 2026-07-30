@@ -2180,5 +2180,17 @@
     "deleteFailed": "Ovu ploču nije bilo moguće izbrisati.",
     "renameBoard": "Preimenuj ploču",
     "boardNamePlaceholder": "Nazovite ovu akciju…"
+  },
+  "seasonReminder": {
+    "title": "Pregledajte svoj sustav i filozofiju",
+    "newSeason": "Počela je nova sezona ({{season}}) — dobar trenutak da pregledate i ažurirate svoj sustav i filozofiju za {{season}}.",
+    "welcomeBack": "Dobro došli natrag — dobar trenutak da pregledate i ažurirate svoj sustav i filozofiju za {{season}}."
+  },
+  "translation": {
+    "translating": "Prevođenje…",
+    "autoTranslated": "Automatski prevedeno",
+    "showingOriginal": "Prikazan je izvornik",
+    "viewOriginal": "Prikaži izvornik",
+    "showTranslation": "Prikaži prijevod"
   }
 }

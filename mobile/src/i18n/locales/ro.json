@@ -2180,5 +2180,17 @@
     "deleteFailed": "Nu s-a putut șterge această tablă.",
     "renameBoard": "Redenumește tabla",
     "boardNamePlaceholder": "Denumește această schemă…"
+  },
+  "seasonReminder": {
+    "title": "Revizuiește-ți sistemul și filozofia",
+    "newSeason": "A început un nou sezon ({{season}}) — un moment bun pentru a revizui și actualiza sistemul și filozofia ta pentru {{season}}.",
+    "welcomeBack": "Bine ai revenit — un moment bun pentru a revizui și actualiza sistemul și filozofia ta pentru {{season}}."
+  },
+  "translation": {
+    "translating": "Se traduce…",
+    "autoTranslated": "Tradus automat",
+    "showingOriginal": "Se afișează originalul",
+    "viewOriginal": "Vezi originalul",
+    "showTranslation": "Arată traducerea"
   }
 }

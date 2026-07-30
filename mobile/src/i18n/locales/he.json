@@ -2180,5 +2180,17 @@
     "deleteFailed": "לא ניתן היה למחוק את הלוח הזה.",
     "renameBoard": "שינוי שם הלוח",
     "boardNamePlaceholder": "תן שם למהלך הזה…"
+  },
+  "seasonReminder": {
+    "title": "סקור את השיטה והתפיסה שלך",
+    "newSeason": "עונה חדשה ({{season}}) התחילה — זמן טוב לסקור ולעדכן את השיטה והתפיסה שלך לעונת {{season}}.",
+    "welcomeBack": "ברוך שובך — זמן טוב לסקור ולעדכן את השיטה והתפיסה שלך לעונת {{season}}."
+  },
+  "translation": {
+    "translating": "מתרגם…",
+    "autoTranslated": "תורגם אוטומטית",
+    "showingOriginal": "מוצג המקור",
+    "viewOriginal": "הצג מקור",
+    "showTranslation": "הצג תרגום"
   }
 }

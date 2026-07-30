@@ -2180,5 +2180,17 @@
     "deleteFailed": "Nepavyko ištrinti šios lentos.",
     "renameBoard": "Pervadinti lentą",
     "boardNamePlaceholder": "Pavadinkite šį ėjimą…"
+  },
+  "seasonReminder": {
+    "title": "Peržiūrėkite savo sistemą ir filosofiją",
+    "newSeason": "Prasidėjo naujas sezonas ({{season}}) – geras laikas peržiūrėti ir atnaujinti savo sistemą ir filosofiją {{season}} sezonui.",
+    "welcomeBack": "Sveiki sugrįžę – geras laikas peržiūrėti ir atnaujinti savo sistemą ir filosofiją {{season}} sezonui."
+  },
+  "translation": {
+    "translating": "Verčiama…",
+    "autoTranslated": "Išversta automatiškai",
+    "showingOriginal": "Rodomas originalas",
+    "viewOriginal": "Rodyti originalą",
+    "showTranslation": "Rodyti vertimą"
   }
 }

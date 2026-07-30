@@ -2180,5 +2180,17 @@
     "deleteFailed": "このボードを削除できませんでした。",
     "renameBoard": "ボード名を変更",
     "boardNamePlaceholder": "このプレーに名前を付ける…"
+  },
+  "seasonReminder": {
+    "title": "システムと哲学を見直す",
+    "newSeason": "新しいシーズン（{{season}}）が始まりました。{{season}} のシステムと哲学を見直して更新する良いタイミングです。",
+    "welcomeBack": "お帰りなさい。{{season}} のシステムと哲学を見直して更新する良いタイミングです。"
+  },
+  "translation": {
+    "translating": "翻訳中…",
+    "autoTranslated": "自動翻訳",
+    "showingOriginal": "原文を表示中",
+    "viewOriginal": "原文を表示",
+    "showTranslation": "翻訳を表示"
   }
 }

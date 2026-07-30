@@ -2180,5 +2180,17 @@
     "deleteFailed": "Impossibile eliminare questa lavagna.",
     "renameBoard": "Rinomina lavagna",
     "boardNamePlaceholder": "Dai un nome a questo schema…"
+  },
+  "seasonReminder": {
+    "title": "Rivedi il tuo sistema e la tua filosofia",
+    "newSeason": "È iniziata una nuova stagione ({{season}}): un buon momento per rivedere e aggiornare il tuo sistema e la tua filosofia per {{season}}.",
+    "welcomeBack": "Bentornato: un buon momento per rivedere e aggiornare il tuo sistema e la tua filosofia per {{season}}."
+  },
+  "translation": {
+    "translating": "Traduzione…",
+    "autoTranslated": "Tradotto automaticamente",
+    "showingOriginal": "Visualizzazione dell'originale",
+    "viewOriginal": "Vedi originale",
+    "showTranslation": "Mostra traduzione"
   }
 }

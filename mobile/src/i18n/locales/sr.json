@@ -2180,5 +2180,17 @@
     "deleteFailed": "Ova tabla nije mogla da se izbriše.",
     "renameBoard": "Preimenuj tablu",
     "boardNamePlaceholder": "Nazovite ovu akciju…"
+  },
+  "seasonReminder": {
+    "title": "Pregledajte svoj sistem i filozofiju",
+    "newSeason": "Počela je nova sezona ({{season}}) — dobar trenutak da pregledate i ažurirate svoj sistem i filozofiju za {{season}}.",
+    "welcomeBack": "Dobro došli nazad — dobar trenutak da pregledate i ažurirate svoj sistem i filozofiju za {{season}}."
+  },
+  "translation": {
+    "translating": "Prevođenje…",
+    "autoTranslated": "Automatski prevedeno",
+    "showingOriginal": "Prikazan je original",
+    "viewOriginal": "Prikaži original",
+    "showTranslation": "Prikaži prevod"
   }
 }

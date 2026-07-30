@@ -2180,5 +2180,17 @@
     "deleteFailed": "Não foi possível excluir esta prancheta.",
     "renameBoard": "Renomear prancheta",
     "boardNamePlaceholder": "Dê um nome a esta jogada…"
+  },
+  "seasonReminder": {
+    "title": "Revise o seu sistema e filosofia",
+    "newSeason": "Uma nova temporada ({{season}}) começou — um bom momento para revisar e atualizar o seu sistema e filosofia para {{season}}.",
+    "welcomeBack": "Bem-vindo de volta — um bom momento para revisar e atualizar o seu sistema e filosofia para {{season}}."
+  },
+  "translation": {
+    "translating": "A traduzir…",
+    "autoTranslated": "Traduzido automaticamente",
+    "showingOriginal": "Mostrando o original",
+    "viewOriginal": "Ver original",
+    "showTranslation": "Mostrar tradução"
   }
 }

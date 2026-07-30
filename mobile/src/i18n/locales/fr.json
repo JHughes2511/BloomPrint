@@ -2180,5 +2180,17 @@
     "deleteFailed": "Impossible de supprimer ce tableau.",
     "renameBoard": "Renommer le tableau",
     "boardNamePlaceholder": "Nommez ce système…"
+  },
+  "seasonReminder": {
+    "title": "Revoyez votre système et votre philosophie",
+    "newSeason": "Une nouvelle saison ({{season}}) a commencé — un bon moment pour revoir et mettre à jour votre système et votre philosophie pour {{season}}.",
+    "welcomeBack": "Bon retour — un bon moment pour revoir et mettre à jour votre système et votre philosophie pour {{season}}."
+  },
+  "translation": {
+    "translating": "Traduction…",
+    "autoTranslated": "Traduit automatiquement",
+    "showingOriginal": "Affichage de l'original",
+    "viewOriginal": "Voir l'original",
+    "showTranslation": "Afficher la traduction"
   }
 }

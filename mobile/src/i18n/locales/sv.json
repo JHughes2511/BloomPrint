@@ -2180,5 +2180,17 @@
     "deleteFailed": "Det gick inte att ta bort taktiktavlan.",
     "renameBoard": "Byt namn på tavlan",
     "boardNamePlaceholder": "Namnge det här spelet…"
+  },
+  "seasonReminder": {
+    "title": "Se över ditt system och din filosofi",
+    "newSeason": "En ny säsong ({{season}}) har börjat – ett bra tillfälle att se över och uppdatera ditt system och din filosofi för {{season}}.",
+    "welcomeBack": "Välkommen tillbaka – ett bra tillfälle att se över och uppdatera ditt system och din filosofi för {{season}}."
+  },
+  "translation": {
+    "translating": "Översätter…",
+    "autoTranslated": "Automatiskt översatt",
+    "showingOriginal": "Visar originalet",
+    "viewOriginal": "Visa originalet",
+    "showTranslation": "Visa översättning"
   }
 }

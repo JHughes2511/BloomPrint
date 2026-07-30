@@ -2180,5 +2180,17 @@
     "deleteFailed": "Hindi na-delete ang board na ito.",
     "renameBoard": "Palitan ang pangalan ng board",
     "boardNamePlaceholder": "Pangalanan ang play na ito…"
+  },
+  "seasonReminder": {
+    "title": "Repasuhin ang iyong sistema at pilosopiya",
+    "newSeason": "Nagsimula na ang bagong season ({{season}}) — magandang panahon para repasuhin at i-update ang iyong sistema at pilosopiya para sa {{season}}.",
+    "welcomeBack": "Maligayang pagbabalik — magandang panahon para repasuhin at i-update ang iyong sistema at pilosopiya para sa {{season}}."
+  },
+  "translation": {
+    "translating": "Isinasalin…",
+    "autoTranslated": "Awtomatikong isinalin",
+    "showingOriginal": "Ipinapakita ang orihinal",
+    "viewOriginal": "Tingnan ang orihinal",
+    "showTranslation": "Ipakita ang salin"
   }
 }

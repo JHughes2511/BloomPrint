@@ -2180,5 +2180,17 @@
     "deleteFailed": "No se pudo eliminar esta pizarra.",
     "renameBoard": "Renombrar pizarra",
     "boardNamePlaceholder": "Nombra esta jugada…"
+  },
+  "seasonReminder": {
+    "title": "Revisa tu sistema y filosofía",
+    "newSeason": "Ha comenzado una nueva temporada ({{season}}): un buen momento para revisar y actualizar tu sistema y filosofía para {{season}}.",
+    "welcomeBack": "Bienvenido de nuevo: un buen momento para revisar y actualizar tu sistema y filosofía para {{season}}."
+  },
+  "translation": {
+    "translating": "Traduciendo…",
+    "autoTranslated": "Traducido automáticamente",
+    "showingOriginal": "Mostrando el original",
+    "viewOriginal": "Ver original",
+    "showTranslation": "Mostrar traducción"
   }
 }

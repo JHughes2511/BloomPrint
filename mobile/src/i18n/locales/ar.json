@@ -2180,5 +2180,17 @@
     "deleteFailed": "تعذّر حذف هذه اللوحة.",
     "renameBoard": "إعادة تسمية اللوح",
     "boardNamePlaceholder": "اسم هذه الخطة…"
+  },
+  "seasonReminder": {
+    "title": "راجع نظامك وفلسفتك",
+    "newSeason": "بدأ موسم جديد ({{season}}) — وقت مناسب لمراجعة وتحديث نظامك وفلسفتك لموسم {{season}}.",
+    "welcomeBack": "مرحبًا بعودتك — وقت مناسب لمراجعة وتحديث نظامك وفلسفتك لموسم {{season}}."
+  },
+  "translation": {
+    "translating": "جارٍ الترجمة…",
+    "autoTranslated": "تُرجم تلقائيًا",
+    "showingOriginal": "يتم عرض النص الأصلي",
+    "viewOriginal": "عرض النص الأصلي",
+    "showTranslation": "عرض الترجمة"
   }
 }

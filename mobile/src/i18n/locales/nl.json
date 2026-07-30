@@ -2180,5 +2180,17 @@
     "deleteFailed": "Dit tactiekbord kon niet worden verwijderd.",
     "renameBoard": "Bord hernoemen",
     "boardNamePlaceholder": "Geef deze play een naam…"
+  },
+  "seasonReminder": {
+    "title": "Bekijk je systeem & filosofie",
+    "newSeason": "Een nieuw seizoen ({{season}}) is begonnen — een goed moment om je systeem & filosofie voor {{season}} te bekijken en bij te werken.",
+    "welcomeBack": "Welkom terug — een goed moment om je systeem & filosofie voor {{season}} te bekijken en bij te werken."
+  },
+  "translation": {
+    "translating": "Vertalen…",
+    "autoTranslated": "Automatisch vertaald",
+    "showingOriginal": "Origineel wordt weergegeven",
+    "viewOriginal": "Origineel bekijken",
+    "showTranslation": "Vertaling weergeven"
   }
 }

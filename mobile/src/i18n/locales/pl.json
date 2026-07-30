@@ -2180,5 +2180,17 @@
     "deleteFailed": "Nie udało się usunąć tej tablicy.",
     "renameBoard": "Zmień nazwę tablicy",
     "boardNamePlaceholder": "Nazwij tę akcję…"
+  },
+  "seasonReminder": {
+    "title": "Przejrzyj swój system i filozofię",
+    "newSeason": "Rozpoczął się nowy sezon ({{season}}) — to dobry moment, aby przejrzeć i zaktualizować swój system i filozofię na {{season}}.",
+    "welcomeBack": "Witaj ponownie — to dobry moment, aby przejrzeć i zaktualizować swój system i filozofię na {{season}}."
+  },
+  "translation": {
+    "translating": "Tłumaczenie…",
+    "autoTranslated": "Przetłumaczono automatycznie",
+    "showingOriginal": "Wyświetlanie oryginału",
+    "viewOriginal": "Zobacz oryginał",
+    "showTranslation": "Pokaż tłumaczenie"
   }
 }
