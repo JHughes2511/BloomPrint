@@ -756,6 +756,9 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   // court_type values fall back to full court (never NaN -> blank).
   const win = Dimensions.get('window');
   const [avail, setAvail] = useState({ w: win.width, h: Math.max(win.height - 240, 300) });
+  // Sync during render, not just in the effect below: commitStrokes and the
+  // save queue read this in the same tick they are called.
+  boardsRef.current = boards;
   const board  = boards[activeBoardIdx];
   const visFt  = VISIBLE_FT[board?.court_type ?? 'full'] ?? VISIBLE_FT.full;
   const rawScale = avail.w > 20 && avail.h > 20
@@ -813,40 +816,81 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   };
 
   const saveBoardRef = useRef<(idx: number, b: Board) => void>(() => {});
+  // A drawing is real work — never lose it silently. If a save fails the board
+  // is flagged so the UI can show it and offer a retry.
+  const [saveFailed, setSaveFailed] = useState(false);
+  const lastSaveRef = useRef<{ idx: number; board: Board } | null>(null);
+
+  // Saves are serialized PER BOARD and coalesced: while one request is in
+  // flight, later strokes replace the queued payload instead of racing it.
+  // Without this, a brand-new board (no id yet) issues one CREATE per stroke —
+  // producing duplicate boards — and out-of-order responses can persist an
+  // older stroke set than what is on screen.
+  const saveQ = useRef<Map<number, { running: boolean; next: Board | null }>>(new Map());
+
+  const writeBoard = async (idx: number, b: Board) => {
+    // Persist the canvas dimensions for this board's court view so the backend
+    // can convert hand-drawn pixel strokes back to court-feet when learning the
+    // coach's play-style.
+    const g = geomRef.current;
+    const vf = VISIBLE_FT[b.court_type] ?? VISIBLE_FT.full;
+    const sc = Math.min((g.availW - 20) / PADDED_FT_W, (g.availH - 20) / vTotalFt(vf));
+    const payload: any = { strokes: b.strokes };
+    if (b.ai) payload.ai = b.ai;
+    if (Number.isFinite(sc) && sc > 0) payload.canvas = { w: PADDED_FT_W * sc, h: vTotalFt(vf) * sc, type: b.court_type };
+    const ds = JSON.stringify(payload);
+    if (b.id) {
+      await whiteboardAPI.update(b.id, { name: b.name, court_type: b.court_type, data: ds });
+    } else {
+      const created = playbook
+        ? await whiteboardAPI.playbookCreate({ name: b.name, court_type: b.court_type, data: ds })
+        : await whiteboardAPI.create(gameId, { name: b.name, court_type: b.court_type, data: ds });
+      // Attach the new id to whatever is CURRENT — not to the snapshot this
+      // request started with — so strokes drawn during the request survive.
+      setBoards(prev => {
+        const n = [...prev];
+        if (n[idx]) n[idx] = { ...n[idx], id: created.id };
+        return n;
+      });
+    }
+  };
+
   const saveBoard = useCallback(async (idx: number, b: Board) => {
+    const slot = saveQ.current.get(idx) ?? { running: false, next: null };
+    saveQ.current.set(idx, slot);
+    if (slot.running) { slot.next = b; return; }   // coalesce onto the in-flight save
+    slot.running = true;
     setSaving(true);
-    try {
-      // Persist the canvas dimensions for this board's court view so the backend
-      // can convert hand-drawn pixel strokes back to court-feet when learning the
-      // coach's play-style.
-      const g = geomRef.current;
-      const vf = VISIBLE_FT[b.court_type] ?? VISIBLE_FT.full;
-      const sc = Math.min((g.availW - 20) / PADDED_FT_W, (g.availH - 20) / vTotalFt(vf));
-      const payload: any = { strokes: b.strokes };
-      if (b.ai) payload.ai = b.ai;
-      if (Number.isFinite(sc) && sc > 0) payload.canvas = { w: PADDED_FT_W * sc, h: vTotalFt(vf) * sc, type: b.court_type };
-      const ds = JSON.stringify(payload);
-      if (b.id) {
-        await whiteboardAPI.update(b.id, { name: b.name, court_type: b.court_type, data: ds });
-      } else {
-        const created = playbook
-          ? await whiteboardAPI.playbookCreate({ name: b.name, court_type: b.court_type, data: ds })
-          : await whiteboardAPI.create(gameId, { name: b.name, court_type: b.court_type, data: ds });
-        setBoards(prev => { const n = [...prev]; n[idx] = { ...b, id: created.id }; return n; });
+    let cur: Board | null = b;
+    while (cur) {
+      lastSaveRef.current = { idx, board: cur };
+      try {
+        await writeBoard(idx, cur);
+        setSaveFailed(false);
+      } catch {
+        setSaveFailed(true);   // surfaced in the UI; the payload stays in lastSaveRef
+        break;
       }
-    } catch {}
+      cur = slot.next;
+      slot.next = null;
+    }
+    slot.running = false;
     setSaving(false);
   }, [gameId, playbook]);
   useEffect(() => { saveBoardRef.current = saveBoard; }, [saveBoard]);
 
+  const retrySave = () => {
+    const last = lastSaveRef.current;
+    if (last) saveBoard(last.idx, last.board);
+  };
+
   const commitStrokes = (idx: number, strokes: Stroke[]) => {
-    setBoards(prev => {
-      const next    = [...prev];
-      const updated = { ...next[idx], strokes };
-      next[idx]     = updated;
-      saveBoard(idx, updated);
-      return next;
-    });
+    // Build the next board, set state, then save OUTSIDE the updater — an
+    // updater must stay pure (React may invoke it twice in dev/concurrent mode,
+    // which would double every request).
+    const updated = { ...boardsRef.current[idx], strokes } as Board;
+    setBoards(prev => { const n = [...prev]; n[idx] = updated; return n; });
+    saveBoard(idx, updated);
   };
 
   const addNewBoard = () => {
@@ -878,7 +922,14 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     Alert.alert(tr('whiteboard.deleteBoardTitle'), tr('whiteboard.deleteBoardMsg', { name: b.name }), [
       { text: tr('common.cancel'), style: 'cancel' },
       { text: tr('common.delete'), style: 'destructive', onPress: async () => {
-        if (b.id) await whiteboardAPI.delete(b.id);
+        try {
+          if (b.id) await whiteboardAPI.delete(b.id);
+        } catch (e: any) {
+          // Without this the rejection was unhandled and the board stayed put
+          // with no feedback — the coach taps Delete and nothing happens.
+          Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('whiteboard.deleteFailed'));
+          return;
+        }
         setBoards(prev => prev.filter((_, i) => i !== idx));
         setActiveBoardIdx(Math.max(0, idx - 1));
       }},
@@ -1118,6 +1169,11 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   const prevScaleRef = useRef({ idx: -1, scale: 0 });
   useEffect(() => {
     if (!scale || loading) return;
+    // Do NOT record a scale before the board is loaded. `avail` starts as a
+    // window-size ESTIMATE and is refined by onLayout; recording the estimate
+    // here made the first real layout look like a resize and rescaled strokes
+    // by a ratio derived from a guessed header height.
+    if (!boardsRef.current[activeBoardIdx]) return;
     const p = prevScaleRef.current;
     const sameBoard = p.idx === activeBoardIdx && p.scale > 0;
     const ratio = sameBoard ? scale / p.scale : 1;
@@ -1131,9 +1187,15 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         // Court resized for the SAME board (e.g. a bar appeared / rotation):
         // rescale the hand-drawn marks so they keep their court location.
         const hand = b.strokes.filter(st => !st.layer).map(st => scaleStroke(st, ratio));
-        n[activeBoardIdx] = b.ai
-          ? { ...b, strokes: [...hand, ...buildAllStrokes(b.ai, b.court_type)] }
-          : { ...b, strokes: hand };
+        // Re-stamp `canvas` to the size the strokes are NOW baked at. Leaving it
+        // stale made a later board switch compute the same ratio a second time
+        // and scale the drawing again (S1^2/S0), which a following stroke then
+        // persisted — permanently corrupting the board.
+        n[activeBoardIdx] = {
+          ...b,
+          canvas: { w: courtW, h: courtH, type: b.court_type },
+          strokes: b.ai ? [...hand, ...buildAllStrokes(b.ai, b.court_type)] : hand,
+        };
       } else {
         // Board switch / first render (e.g. reopening the board later). Hand-drawn
         // strokes were baked at the canvas size they were drawn on; if that size
@@ -1807,7 +1869,24 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
           </TouchableOpacity>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             {saving && <ActivityIndicator size="small" color={t.accent} />}
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            {saveFailed && !saving && (
+              <TouchableOpacity onPress={retrySave} style={styles.saveFailChip}>
+                <Ionicons name="cloud-offline-outline" size={13} color={t.negative} />
+                <Text style={styles.saveFailText}>{tr('whiteboard.notSavedRetry')}</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              onPress={() => {
+                if (saveFailed) {
+                  Alert.alert(tr('whiteboard.unsavedTitle'), tr('whiteboard.unsavedMsg'), [
+                    { text: tr('common.cancel'), style: 'cancel' },
+                    { text: tr('whiteboard.retrySave'), onPress: retrySave },
+                    { text: tr('whiteboard.closeAnyway'), style: 'destructive', onPress: onClose },
+                  ]);
+                } else onClose();
+              }}
+              style={styles.closeBtn}
+            >
               <Ionicons name="close" size={22} color={t.ink} />
             </TouchableOpacity>
           </View>
@@ -2359,6 +2438,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   header:          { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: Platform.OS === 'ios' ? 52 : 12, paddingBottom: 6 },
   headerBtn:       { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
   boardName:       { color: t.ink, fontSize: 16, fontFamily: fonts[700], flex: 1 },
+  saveFailChip: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1,
+    borderColor: t.negative, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 4 },
+  saveFailText: { color: t.negative, fontSize: 11, fontFamily: fonts[700] },
   closeBtn:        { width: 36, height: 36, borderRadius: 18, backgroundColor: t.chip, alignItems: 'center', justifyContent: 'center' },
   courtSelector:   { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: t.divider },
   courtChip:       { borderRadius: 16, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: t.line },

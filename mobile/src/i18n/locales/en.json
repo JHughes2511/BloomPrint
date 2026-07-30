@@ -2171,6 +2171,12 @@
     "editLabel": "Edit Label",
     "addLabel": "Add Label",
     "enterText": "Enter text...",
-    "add": "Add"
+    "add": "Add",
+    "notSavedRetry": "Not saved — tap to retry",
+    "unsavedTitle": "Unsaved changes",
+    "unsavedMsg": "This board couldn't be saved. Retry, or close and lose the changes?",
+    "retrySave": "Retry save",
+    "closeAnyway": "Close anyway",
+    "deleteFailed": "Could not delete this board."
   }
 }
