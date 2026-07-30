@@ -142,8 +142,10 @@ function AppTabs() {
         tabBarStyle: { backgroundColor: t.isDark ? '#0C2331' : '#EFE7DA', borderTopColor: t.divider },
         tabBarActiveTintColor: t.accent,
         tabBarInactiveTintColor: t.muted2,
-        tabBarLabelStyle: { fontSize: 9, marginBottom: 2, textAlign: 'center', includeFontPadding: false },
-        tabBarItemStyle: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2 },
+        // 5 tabs at fontSize 9: translated labels (de/ru run 30-40% longer) must
+        // clip to a single line instead of wrapping or pushing the row wider.
+        tabBarLabelStyle: { fontSize: 9, marginBottom: 2, textAlign: 'center', includeFontPadding: false, numberOfLines: 1, flexShrink: 1 },
+        tabBarItemStyle: { flex: 1, flexShrink: 1, minWidth: 0, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2 },
         tabBarIconStyle: { marginBottom: 0 },
         tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, [string, string]> = {
@@ -262,6 +264,10 @@ function PlayerTabs() {
         tabBarStyle: { backgroundColor: t.isDark ? '#0C2331' : '#EFE7DA', borderTopColor: t.divider },
         tabBarActiveTintColor: t.positive,
         tabBarInactiveTintColor: t.muted2,
+        // Same constraint as the coach tabs: 5 tabs, tiny label, long translations.
+        tabBarLabelStyle: { fontSize: 9, marginBottom: 2, textAlign: 'center', includeFontPadding: false, numberOfLines: 1, flexShrink: 1 },
+        tabBarItemStyle: { flex: 1, flexShrink: 1, minWidth: 0, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2 },
+        tabBarIconStyle: { marginBottom: 0 },
         tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, [string, string]> = {
             PlayerHomeTab:    ['home',          'home-outline'],

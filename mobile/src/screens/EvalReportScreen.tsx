@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useReportTranslation } from '../hooks/useReportTranslation';
+import TranslationToggle from '../components/TranslationToggle';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -432,6 +434,11 @@ export default function EvalReportScreen() {
   const showsRecruit = ['scouting_report', 'player_eval', 'recruitment_profile'].includes(singleType);
   const brief = extractBrief(ev.report_text);
   const fixedSections = isSingle ? getFixedSections(ev.output_type, ev.report_text) : null;
+  // Reports keep the language they were written in. When the reader's language
+  // differs, the FULL report body is shown translated (with a toggle back).
+  // The broken-out section view above still reads from the original, because
+  // getFixedSections matches English headings — translating it would blank it.
+  const rt = useReportTranslation('eval', ev.id, ev.report_text ?? undefined);
   const recruit = recruitGrade(ev.overall_grade);
   const gradeTrend = history
     .filter(h => h.overall_grade != null)
@@ -522,7 +529,11 @@ export default function EvalReportScreen() {
           </TouchableOpacity>
           {showFull && ev.report_text && (
             <View style={styles.reportBox}>
-              {renderReport(ev.report_text, { heading: t.ink, body: t.inkSoft })}
+              <TranslationToggle
+                canToggle={rt.canToggle} isTranslated={rt.isTranslated}
+                showOriginal={rt.showOriginal} loading={rt.loading} onToggle={rt.toggle}
+              />
+              {renderReport(rt.text, { heading: t.ink, body: t.inkSoft })}
             </View>
           )}
         </View>
@@ -717,7 +728,11 @@ export default function EvalReportScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>{tr('evalReport.fullReport')}</Text>
           <View style={styles.reportBox}>
-            {renderReport(ev.report_text, { heading: t.ink, body: t.inkSoft })}
+            <TranslationToggle
+              canToggle={rt.canToggle} isTranslated={rt.isTranslated}
+              showOriginal={rt.showOriginal} loading={rt.loading} onToggle={rt.toggle}
+            />
+            {renderReport(rt.text, { heading: t.ink, body: t.inkSoft })}
           </View>
         </View>
       )}

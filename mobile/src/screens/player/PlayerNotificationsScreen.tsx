@@ -99,8 +99,11 @@ export default function PlayerNotificationsScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={t.positive} />}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>{tr('playerApp.notifications.title')}</Text>
-          <Text style={styles.sub}>{tr('playerApp.notifications.unread', { count: notifications.filter(n => !n.read).length })}</Text>
+          {/* Long translated titles scale down to one line instead of wrapping. */}
+          <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+            {tr('playerApp.notifications.title')}
+          </Text>
+          <Text style={styles.sub} numberOfLines={1}>{tr('playerApp.notifications.unread', { count: notifications.filter(n => !n.read).length })}</Text>
         </View>
 
         {/* Pending consent requests — someone wants to share YOUR report */}
@@ -108,7 +111,7 @@ export default function PlayerNotificationsScreen() {
           <View key={`appr-${a.id}`} style={styles.approvalCard}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <Ionicons name="shield-checkmark-outline" size={18} color={t.accent} />
-              <Text style={styles.approvalTitle}>{tr('playerApp.notifications.approvalNeeded')}</Text>
+              <Text style={styles.approvalTitle} numberOfLines={1}>{tr('playerApp.notifications.approvalNeeded')}</Text>
             </View>
             <Text style={styles.approvalBody}>
               <Text style={{ fontFamily: fonts[700], color: t.ink }}>{a.coach_name}</Text> {tr('playerApp.notifications.wantsToSendYour')}{' '}
@@ -119,12 +122,12 @@ export default function PlayerNotificationsScreen() {
               <TouchableOpacity
                 style={[styles.rejectBtn, actioning === a.id && { opacity: 0.5 }]}
                 onPress={() => resolveApproval(a.id, 'reject')} disabled={actioning === a.id}>
-                <Text style={styles.rejectText}>{tr('playerApp.notifications.reject')}</Text>
+                <Text style={styles.rejectText} numberOfLines={1}>{tr('playerApp.notifications.reject')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.approveBtn, actioning === a.id && { opacity: 0.5 }]}
                 onPress={() => resolveApproval(a.id, 'approve')} disabled={actioning === a.id}>
-                {actioning === a.id ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.approveText}>{tr('playerApp.notifications.approve')}</Text>}
+                {actioning === a.id ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.approveText} numberOfLines={1}>{tr('playerApp.notifications.approve')}</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -133,7 +136,7 @@ export default function PlayerNotificationsScreen() {
         {notifications.length === 0 && approvals.length === 0 ? (
           <View style={styles.empty}>
             <Ionicons name="notifications-outline" size={48} color={t.muted2} />
-            <Text style={styles.emptyTitle}>{tr('playerApp.notifications.noNotifications')}</Text>
+            <Text style={styles.emptyTitle} numberOfLines={2}>{tr('playerApp.notifications.noNotifications')}</Text>
           </View>
         ) : (
           notifications.map(n => (
@@ -149,12 +152,12 @@ export default function PlayerNotificationsScreen() {
                   color={n.read ? t.muted : t.positive}
                 />
               </View>
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={[styles.notifTitle, !n.read && styles.notifTitleUnread]}>
+              <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginLeft: 12 }}>
+                <Text style={[styles.notifTitle, !n.read && styles.notifTitleUnread]} numberOfLines={1}>
                   {n.title}
                 </Text>
                 <Text style={styles.notifBody} numberOfLines={2}>{n.body}</Text>
-                <Text style={styles.notifDate}>{new Date(n.created_at).toLocaleDateString()}</Text>
+                <Text style={styles.notifDate} numberOfLines={1}>{new Date(n.created_at).toLocaleDateString()}</Text>
               </View>
               {!n.read && <View style={styles.dot} />}
             </TouchableOpacity>
@@ -169,8 +172,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { alignItems: 'center', justifyContent: 'center' },
   header: { padding: 24, paddingTop: 60 },
-  title: { color: t.ink, fontSize: 26, fontFamily: fonts[900] },
-  sub: { color: t.positive, fontSize: 12, marginTop: 4 },
+  title: { color: t.ink, fontSize: 26, fontFamily: fonts[900], flexShrink: 1 },
+  sub: { color: t.positive, fontSize: 12, marginTop: 4, flexShrink: 1 },
   empty: { alignItems: 'center', paddingTop: 80 },
   emptyTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[700], marginTop: 16 },
   card: {
@@ -192,9 +195,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.chip,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   iconBgUnread: { backgroundColor: t.positiveSoft },
-  notifTitle: { color: t.muted, fontSize: 13, fontFamily: fonts[600], marginBottom: 2 },
+  notifTitle: { color: t.muted, fontSize: 13, fontFamily: fonts[600], marginBottom: 2, flexShrink: 1 },
   notifTitleUnread: { color: t.ink },
   notifBody: { color: t.muted2, fontSize: 12, lineHeight: 18 },
   notifDate: { color: t.muted, fontSize: 11, marginTop: 4 },
@@ -205,15 +209,16 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.positive,
     marginTop: 4,
     marginLeft: 8,
+    flexShrink: 0,
   },
   approvalCard: {
     backgroundColor: t.card, borderRadius: 12, padding: 14,
     marginHorizontal: 20, marginBottom: 10, borderWidth: 1, borderColor: t.accent,
   },
-  approvalTitle: { color: t.ink, fontSize: 14, fontFamily: fonts[800] },
+  approvalTitle: { color: t.ink, fontSize: 14, fontFamily: fonts[800], flexShrink: 1 },
   approvalBody: { color: t.inkSoft, fontSize: 13, lineHeight: 19 },
-  rejectBtn: { flex: 1, paddingVertical: 11, borderRadius: 10, alignItems: 'center', backgroundColor: t.chip, borderWidth: 1, borderColor: t.line },
-  rejectText: { color: t.ink, fontFamily: fonts[700], fontSize: 14 },
-  approveBtn: { flex: 1, paddingVertical: 11, borderRadius: 10, alignItems: 'center', backgroundColor: t.accent },
-  approveText: { color: '#fff', fontFamily: fonts[700], fontSize: 14 },
+  rejectBtn: { flex: 1, flexShrink: 1, minWidth: 0, paddingVertical: 11, borderRadius: 10, alignItems: 'center', backgroundColor: t.chip, borderWidth: 1, borderColor: t.line },
+  rejectText: { color: t.ink, fontFamily: fonts[700], fontSize: 14, flexShrink: 1 },
+  approveBtn: { flex: 1, flexShrink: 1, minWidth: 0, paddingVertical: 11, borderRadius: 10, alignItems: 'center', backgroundColor: t.accent },
+  approveText: { color: '#fff', fontFamily: fonts[700], fontSize: 14, flexShrink: 1 },
 });

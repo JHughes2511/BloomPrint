@@ -213,6 +213,26 @@ def _run_migrations():
         except Exception:
             pass
 
+        # Cached on-view report translations (created by create_all on fresh DBs;
+        # this guard covers databases that predate the table).
+        try:
+            conn.execute(__import__("sqlalchemy").text(
+                """CREATE TABLE IF NOT EXISTS report_translations (
+                       id INTEGER PRIMARY KEY AUTOINCREMENT,
+                       report_type TEXT NOT NULL,
+                       report_id INTEGER NOT NULL,
+                       lang TEXT NOT NULL,
+                       source_hash TEXT NOT NULL,
+                       text TEXT NOT NULL,
+                       created_at DATETIME
+                   )"""))
+            conn.execute(__import__("sqlalchemy").text(
+                "CREATE INDEX IF NOT EXISTS ix_report_tr_lookup "
+                "ON report_translations (report_type, report_id, lang)"))
+            conn.commit()
+        except Exception:
+            pass
+
         # Notifications carry an optional i18n key + params so the client can
         # render them in the coach's language instead of stored English prose.
         try:

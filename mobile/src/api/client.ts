@@ -216,6 +216,13 @@ export const importsAPI = {
 };
 
 // ── AI Copilot (command bar) ──────────────────────────────────────────────────
+export const translationsAPI = {
+  /** Translate a stored report on view. The server caches per (report, language). */
+  report: (report_type: string, report_id: number, target_lang: string) =>
+    api.post('/translations/report', { report_type, report_id, target_lang })
+       .then(r => r.data as { text: string; cached: boolean; language: string }),
+};
+
 export const assistantAPI = {
   ask: (message: string, history: { role: string; content: string }[] = []) =>
     api.post('/assistant/ask', { message, history }, { timeout: 120000 }).then(r => r.data),

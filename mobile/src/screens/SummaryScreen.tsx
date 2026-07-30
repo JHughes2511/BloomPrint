@@ -60,9 +60,11 @@ export default function SummaryScreen() {
     <ScreenBackground>
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
+          {/* Long translated report titles shrink and clip here instead of
+              pushing the chevron off the row. */}
           <Text style={styles.title} numberOfLines={2}>{title}</Text>
         </View>
 
@@ -73,11 +75,11 @@ export default function SummaryScreen() {
         <View style={styles.actionRow}>
           <TouchableOpacity style={styles.actionBtn} onPress={exportPdf}>
             <Ionicons name="share-outline" size={18} color={t.muted} />
-            <Text style={styles.actionText}>{tr('summary.exportPdf')}</Text>
+            <Text style={styles.actionText} numberOfLines={1}>{tr('summary.exportPdf')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionBtn} onPress={printDoc}>
             <Ionicons name="print-outline" size={18} color={t.muted} />
-            <Text style={styles.actionText}>{tr('common.print')}</Text>
+            <Text style={styles.actionText} numberOfLines={1}>{tr('common.print')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -98,12 +100,13 @@ const makeMarkdownStyles = (t: ThemeTokens) => ({
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   header: { flexDirection: 'row', alignItems: 'flex-start', padding: 20, paddingTop: 56, gap: 12 },
-  title: { color: t.ink, fontSize: 18, fontFamily: fonts[900], flex: 1 },
+  backBtn: { flexShrink: 0 },
+  title: { color: t.ink, fontSize: 18, fontFamily: fonts[900], flex: 1, flexShrink: 1, minWidth: 0 },
   reportBox: { backgroundColor: t.card, margin: 16, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: t.cardBorder },
   actionRow: { flexDirection: 'row', margin: 16, gap: 10 },
   actionBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    flex: 1, flexShrink: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 6, padding: 14, borderRadius: 12, borderWidth: 1, borderColor: t.line,
   },
-  actionText: { color: t.muted, fontFamily: fonts[600], fontSize: 13 },
+  actionText: { color: t.muted, fontFamily: fonts[600], fontSize: 13, flexShrink: 1 },
 });

@@ -179,7 +179,12 @@ export default function PlayerInboxScreen() {
     >
       <View style={styles.header}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>{tr('playerApp.inbox.title')}</Text>
+          {/* Long translations shrink and clip instead of shoving the search button out. */}
+          <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+            <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+              {tr('playerApp.inbox.title')}
+            </Text>
+          </View>
           <TouchableOpacity
             style={styles.searchButton}
             onPress={() => {
@@ -192,7 +197,7 @@ export default function PlayerInboxScreen() {
             <Ionicons name={searchOpen ? 'close' : 'search'} size={20} color={t.ink} />
           </TouchableOpacity>
         </View>
-        <Text style={styles.sub}>{tr('playerApp.inbox.sub')}</Text>
+        <Text style={styles.sub} numberOfLines={1}>{tr('playerApp.inbox.sub')}</Text>
       </View>
 
       {/* Filter pills */}
@@ -205,7 +210,7 @@ export default function PlayerInboxScreen() {
               style={[styles.filterPill, active ? styles.filterPillActive : styles.filterPillIdle]}
               onPress={() => setFilter(f.key)}
             >
-              <Text style={active ? styles.filterTextActive : styles.filterTextIdle}>{tr(`playerApp.inbox.filter.${f.key}`)}</Text>
+              <Text style={active ? styles.filterTextActive : styles.filterTextIdle} numberOfLines={1}>{tr(`playerApp.inbox.filter.${f.key}`)}</Text>
             </TouchableOpacity>
           );
         })}
@@ -230,7 +235,7 @@ export default function PlayerInboxScreen() {
       {searched.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="mail-outline" size={48} color={t.muted2} />
-          <Text style={styles.emptyTitle}>{search.trim() ? tr('playerApp.inbox.noMatches') : tr('playerApp.inbox.noReportsYet')}</Text>
+          <Text style={styles.emptyTitle} numberOfLines={2}>{search.trim() ? tr('playerApp.inbox.noMatches') : tr('playerApp.inbox.noReportsYet')}</Text>
           <Text style={styles.emptyDesc}>
             {search.trim()
               ? tr('playerApp.inbox.noMatchDesc')
@@ -250,11 +255,11 @@ export default function PlayerInboxScreen() {
             >
               <View style={styles.cardTop}>
                 <View style={[styles.typeBadge, isFilm ? styles.typeBadgeFilm : styles.typeBadgeEval]}>
-                  <Text style={[styles.typeText, { color: isFilm ? t.brown : t.accent }]}>
+                  <Text style={[styles.typeText, { color: isFilm ? t.brown : t.accent }]} numberOfLines={1}>
                     {item.kind === 'team' ? tr('playerApp.inbox.teamPrefix') : ''}{(outputTypeLabel(item.output_type) || tr('reportTypes.report')).toUpperCase()}
                   </Text>
                 </View>
-                <Text style={styles.date}>{timeAgo(item.created_at)}</Text>
+                <Text style={styles.date} numberOfLines={1}>{timeAgo(item.created_at)}</Text>
               </View>
 
               <Text style={styles.cardTitle} numberOfLines={2}>{reportSubName(item)}</Text>
@@ -262,19 +267,19 @@ export default function PlayerInboxScreen() {
               <View style={styles.cardFooter}>
                 <View style={styles.sharedItems}>
                   {item.kind === 'eval' && item.share_grades && (
-                    <View style={styles.chip}><Text style={styles.chipText}>{tr('playerApp.inbox.chipGrades')}</Text></View>
+                    <View style={styles.chip}><Text style={styles.chipText} numberOfLines={1}>{tr('playerApp.inbox.chipGrades')}</Text></View>
                   )}
                   {item.kind === 'eval' && item.share_report_text && (
-                    <View style={styles.chip}><Text style={styles.chipText}>{tr('reportTypes.report')}</Text></View>
+                    <View style={styles.chip}><Text style={styles.chipText} numberOfLines={1}>{tr('reportTypes.report')}</Text></View>
                   )}
                   {item.kind === 'eval' && item.share_flags && (
-                    <View style={styles.chip}><Text style={styles.chipText}>{tr('playerApp.inbox.chipFlags')}</Text></View>
+                    <View style={styles.chip}><Text style={styles.chipText} numberOfLines={1}>{tr('playerApp.inbox.chipFlags')}</Text></View>
                   )}
                   {item.kind === 'eval' && item.share_questions && (
-                    <View style={styles.chip}><Text style={styles.chipText}>{tr('playerApp.inbox.chipQuestions')}</Text></View>
+                    <View style={styles.chip}><Text style={styles.chipText} numberOfLines={1}>{tr('playerApp.inbox.chipQuestions')}</Text></View>
                   )}
                   {item.kind === 'team' && (
-                    <View style={styles.chip}><Text style={styles.chipText}>{tr('playerApp.inbox.fullReport')}</Text></View>
+                    <View style={styles.chip}><Text style={styles.chipText} numberOfLines={1}>{tr('playerApp.inbox.fullReport')}</Text></View>
                   )}
                 </View>
                 <Ionicons name="chevron-forward" size={16} color={t.muted2} />
@@ -302,6 +307,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: t.line,
+    flexShrink: 0,
   },
   searchWrap: {
     flexDirection: 'row',
@@ -324,12 +330,12 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     paddingVertical: 12,
   },
   sub: { color: t.muted, fontSize: 13.5, marginTop: 5 },
-  filterRow: { flexDirection: 'row', gap: 9, paddingHorizontal: 22, marginTop: 20, marginBottom: 8 },
-  filterPill: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 999 },
+  filterRow: { flexDirection: 'row', gap: 9, paddingHorizontal: 22, marginTop: 20, marginBottom: 8, flexWrap: 'wrap' },
+  filterPill: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 999, flexShrink: 1 },
   filterPillActive: { backgroundColor: t.ctaBg },
   filterPillIdle: { borderWidth: 1, borderColor: t.line },
-  filterTextActive: { color: t.ctaText, fontSize: 13.5, fontFamily: fonts[800] },
-  filterTextIdle: { color: t.ink, fontSize: 13.5, fontFamily: fonts[700] },
+  filterTextActive: { color: t.ctaText, fontSize: 13.5, fontFamily: fonts[800], flexShrink: 1 },
+  filterTextIdle: { color: t.ink, fontSize: 13.5, fontFamily: fonts[700], flexShrink: 1 },
   empty: { alignItems: 'center', paddingTop: 70, paddingHorizontal: 40 },
   emptyTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[700], marginTop: 16 },
   emptyDesc: { color: t.muted, fontSize: 13, textAlign: 'center', marginTop: 8, lineHeight: 20 },
@@ -343,20 +349,22 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderColor: t.cardBorder,
   },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  typeBadge: { borderRadius: 999, paddingHorizontal: 11, paddingVertical: 5 },
+  typeBadge: { borderRadius: 999, paddingHorizontal: 11, paddingVertical: 5, flexShrink: 1, marginRight: 8 },
   typeBadgeEval: { backgroundColor: t.accentSoft },
   typeBadgeFilm: { backgroundColor: t.brownSoft },
-  typeText: { fontSize: 10.5, fontFamily: fonts[800], letterSpacing: 0.4 },
-  date: { color: t.muted2, fontSize: 12.5 },
+  typeText: { fontSize: 10.5, fontFamily: fonts[800], letterSpacing: 0.4, flexShrink: 1 },
+  date: { color: t.muted2, fontSize: 12.5, flexShrink: 0 },
   cardTitle: { color: t.ink, fontSize: 17.5, fontFamily: fonts[800], marginTop: 12 },
   cardMeta: { color: t.muted, fontSize: 13.5, marginTop: 3 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 },
-  sharedItems: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', flex: 1 },
+  sharedItems: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 },
   chip: {
     backgroundColor: t.chip,
     borderRadius: 999,
     paddingHorizontal: 11,
     paddingVertical: 5,
+    flexShrink: 1,
+    maxWidth: '100%',
   },
-  chipText: { color: t.muted, fontSize: 10.5, fontFamily: fonts[600] },
+  chipText: { color: t.muted, fontSize: 10.5, fontFamily: fonts[600], flexShrink: 1 },
 });

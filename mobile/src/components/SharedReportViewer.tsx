@@ -5,6 +5,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useReportTranslation } from '../hooks/useReportTranslation';
+import TranslationToggle from './TranslationToggle';
 import VoiceTextInput from './VoiceTextInput';
 import KeyboardAwareScrollView from './KeyboardAwareScrollView';
 import { staffSharingAPI } from '../api/client';
@@ -77,6 +79,9 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
   const bodyText = bodyMode === 'updated'
     ? (item.regenerated_text ?? item.report_text ?? '')
     : (item.report_text ?? '');
+  // A shared report is the most likely place to hit another language: translate
+  // on view, keeping a toggle back to what the sharer actually wrote.
+  const rt = useReportTranslation('shared', item?.id, bodyText || undefined);
 
   const submitComment = async () => {
     if (!commentText.trim()) return;
@@ -197,9 +202,15 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
           {/* Report body — always visible + scrollable */}
           <View style={styles.bodyWrap}>
             <KeyboardAwareScrollView contentContainerStyle={styles.bodyContent}>
-              {bodyText
-                ? renderReport(bodyText, { heading: t.ink, body: t.inkSoft })
-                : <Text style={{ color: t.muted2 }}>{tr('components.viewer.noContent')}</Text>}
+              {bodyText ? (
+                <>
+                  <TranslationToggle
+                    canToggle={rt.canToggle} isTranslated={rt.isTranslated}
+                    showOriginal={rt.showOriginal} loading={rt.loading} onToggle={rt.toggle}
+                  />
+                  {renderReport(rt.text, { heading: t.ink, body: t.inkSoft })}
+                </>
+              ) : <Text style={{ color: t.muted2 }}>{tr('components.viewer.noContent')}</Text>}
             </KeyboardAwareScrollView>
           </View>
 

@@ -215,7 +215,7 @@ export default function HomeScreen() {
       accessibilityLabel={label}
       style={{
         width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center',
-        backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder,
+        backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder, flexShrink: 0,
       }}
     >
       <Icon name={icon} size={18} color={t.inkSoft} strokeWidth={2} />
@@ -233,11 +233,13 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
-            <View style={{ flex: 1, marginRight: 8 }}>
-              <Text style={[typeScale.label, { color: t.label, marginBottom: 4 }]}>{tr('home.intelligenceModel')}</Text>
-              <Text style={[typeScale.h1, { color: t.ink }]}>BloomPrint</Text>
+            {/* Translated labels run 20-40% longer than English, so the text block
+                shrinks and clips instead of pushing the icon buttons off-screen. */}
+            <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+              <Text style={[typeScale.label, { color: t.label, marginBottom: 4 }]} numberOfLines={1}>{tr('home.intelligenceModel')}</Text>
+              <Text style={[typeScale.h1, { color: t.ink }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>BloomPrint</Text>
             </View>
-            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', flexShrink: 0 }}>
               <CircleBtn icon={mode === 'dark' ? 'sun' : 'moon'} onPress={toggle} label={tr('home.toggleTheme')} />
               <CircleBtn icon="user" onPress={openProfile} label={tr('home.editProfileLabel')} />
               <CircleBtn icon="mail" onPress={() => navigation.navigate('StaffInbox')} label={tr('home.staffInboxLabel')} />
@@ -246,7 +248,14 @@ export default function HomeScreen() {
           </View>
           {/* Coach line + AI command pill on one row */}
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 8 }}>
-            <Text style={[typeScale.bodySoft, { color: t.muted, flex: 1 }]} numberOfLines={1}>
+            {/* Coach · role · program is user data plus a translated role label, so it
+                shrinks a little before clipping rather than truncating immediately. */}
+            <Text
+              style={[typeScale.bodySoft, { color: t.muted, flex: 1, flexShrink: 1, minWidth: 0 }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}
+            >
               {coach ? `${coach.name} · ${roleLabel(coach.role)} · ${coach.program_name}` : ''}
             </Text>
             <CommandBar />
@@ -301,8 +310,8 @@ export default function HomeScreen() {
               <View key={p.key}>
                 <View style={styles.pillarRow}>
                   <IconTile name={p.icon} variant="accent" size={44} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontFamily: fonts[700], fontSize: 14.5, color: t.ink }}>{tr(`home.pillars.${p.key}.label`)}</Text>
+                  <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
+                    <Text style={{ fontFamily: fonts[700], fontSize: 14.5, color: t.ink }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr(`home.pillars.${p.key}.label`)}</Text>
                     <Text style={[typeScale.bodySoft, { color: t.muted, fontSize: 12, lineHeight: 17, marginTop: 2 }]}>{tr(`home.pillars.${p.key}.desc`)}</Text>
                   </View>
                 </View>
@@ -318,8 +327,8 @@ export default function HomeScreen() {
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, padding: 24, paddingBottom: 36 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20 }]}>{tr('home.feedbackTitle')}</Text>
-              <TouchableOpacity onPress={() => setShowFeedback(false)}>
+              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('home.feedbackTitle')}</Text>
+              <TouchableOpacity onPress={() => setShowFeedback(false)} style={{ flexShrink: 0 }}>
                 <Icon name="x" size={22} color={t.muted} strokeWidth={2} />
               </TouchableOpacity>
             </View>
@@ -339,7 +348,7 @@ export default function HomeScreen() {
             >
               {submittingFeedback
                 ? <ActivityIndicator color={t.ctaText} size="small" />
-                : <><Icon name="send" size={16} color={t.ctaText} strokeWidth={2} /><Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 15 }}>{tr('home.submit')}</Text></>}
+                : <><Icon name="send" size={16} color={t.ctaText} strokeWidth={2} /><Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 15, flexShrink: 1 }} numberOfLines={1}>{tr('home.submit')}</Text></>}
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -351,8 +360,8 @@ export default function HomeScreen() {
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, maxHeight: '90%' }}>
             <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 36 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20 }]}>{tr('home.editProfileTitle')}</Text>
-              <TouchableOpacity onPress={() => setShowProfile(false)}>
+              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('home.editProfileTitle')}</Text>
+              <TouchableOpacity onPress={() => setShowProfile(false)} style={{ flexShrink: 0 }}>
                 <Icon name="x" size={22} color={t.muted} strokeWidth={2} />
               </TouchableOpacity>
             </View>
@@ -381,7 +390,12 @@ export default function HomeScreen() {
                   style={{ flex: 1, paddingVertical: 11, borderRadius: 10, borderWidth: 1, alignItems: 'center', borderColor: pRole === r ? t.ctaBg : t.line, backgroundColor: pRole === r ? t.ctaBg : 'transparent' }}
                   onPress={() => setPRole(r)}
                 >
-                  <Text style={{ color: pRole === r ? t.ctaText : t.muted, fontFamily: fonts[700], fontSize: 14 }}>
+                  <Text
+                    style={{ color: pRole === r ? t.ctaText : t.muted, fontFamily: fonts[700], fontSize: 14, flexShrink: 1 }}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.7}
+                  >
                     {roleLabel(r)}
                   </Text>
                 </TouchableOpacity>
@@ -412,7 +426,7 @@ export default function HomeScreen() {
               onPress={() => setShowLevelDD(v => !v)}
               activeOpacity={0.7}
             >
-              <Text style={{ color: t.ink, fontSize: 15 }}>{pLevel}</Text>
+              <Text style={{ color: t.ink, fontSize: 15, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }} numberOfLines={1}>{pLevel}</Text>
               <Icon name={showLevelDD ? 'chevron-up' : 'chevron-down'} size={18} color={t.muted} strokeWidth={2} />
             </TouchableOpacity>
             {showLevelDD && (
@@ -442,9 +456,9 @@ export default function HomeScreen() {
               style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.card, borderRadius: 12, padding: 14, marginTop: 16, borderWidth: 1, borderColor: t.line }}
               onPress={openSystem}
             >
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 14 }}>{tr('home.systemPhilosophyRowTitle')}</Text>
-                <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>{tr('home.systemPhilosophyRowDesc')}</Text>
+              <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+                <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 14 }} numberOfLines={1}>{tr('home.systemPhilosophyRowTitle')}</Text>
+                <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }} numberOfLines={2}>{tr('home.systemPhilosophyRowDesc')}</Text>
               </View>
               <Icon name="chevron-right" size={18} color={t.muted} strokeWidth={2} />
             </TouchableOpacity>
@@ -455,7 +469,7 @@ export default function HomeScreen() {
             >
               {savingProfile
                 ? <ActivityIndicator color={t.ctaText} />
-                : <Text style={{ color: t.ctaText, fontFamily: fonts[800], fontSize: 15 }}>{tr('home.saveChanges')}</Text>}
+                : <Text style={{ color: t.ctaText, fontFamily: fonts[800], fontSize: 15, flexShrink: 1 }} numberOfLines={1}>{tr('home.saveChanges')}</Text>}
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -463,7 +477,7 @@ export default function HomeScreen() {
               onPress={() => { setShowProfile(false); handleSignOut(); }}
             >
               <Icon name="log-out" size={16} color={t.negative} strokeWidth={2} />
-              <Text style={{ color: t.negative, fontFamily: fonts[700], fontSize: 14 }}>{tr('home.signOut')}</Text>
+              <Text style={{ color: t.negative, fontFamily: fonts[700], fontSize: 14, flexShrink: 1 }} numberOfLines={1}>{tr('home.signOut')}</Text>
             </TouchableOpacity>
             </ScrollView>
           </View>
@@ -475,8 +489,8 @@ export default function HomeScreen() {
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 50, borderWidth: 1, borderColor: t.cardBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingBottom: 8 }}>
-              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 19 }]}>{tr('home.systemModalTitle')}</Text>
-              <TouchableOpacity onPress={() => setShowSystem(false)}>
+              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 19, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('home.systemModalTitle')}</Text>
+              <TouchableOpacity onPress={() => setShowSystem(false)} style={{ flexShrink: 0 }}>
                 <Icon name="x" size={22} color={t.muted} strokeWidth={2} />
               </TouchableOpacity>
             </View>
@@ -512,7 +526,7 @@ export default function HomeScreen() {
                 onPress={() => { setShowSystem(false); navigation.navigate('Onboarding'); }}
               >
                 <Icon name="list" size={16} color={t.ink} strokeWidth={2} />
-                <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 12.5, flex: 1 }}>
+                <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 12.5, flex: 1, flexShrink: 1, minWidth: 0 }} numberOfLines={2}>
                   {tr('home.rerunGuidedSetup')}
                 </Text>
                 <Icon name="chevron-right" size={16} color={t.muted} strokeWidth={2} />
@@ -537,7 +551,7 @@ export default function HomeScreen() {
               >
                 {savingSystem
                   ? <ActivityIndicator color={t.ctaText} />
-                  : <Text style={{ color: t.ctaText, fontFamily: fonts[800], fontSize: 15 }}>{tr('home.savePhilosophy')}</Text>}
+                  : <Text style={{ color: t.ctaText, fontFamily: fonts[800], fontSize: 15, flexShrink: 1 }} numberOfLines={1}>{tr('home.savePhilosophy')}</Text>}
               </TouchableOpacity>
             </KeyboardAwareScrollView>
           </View>

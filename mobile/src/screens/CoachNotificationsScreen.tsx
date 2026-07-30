@@ -201,10 +201,14 @@ export default function CoachNotificationsScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={t.accent} />}
     >
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
-        <Text style={styles.title}>{tr('coachNotifs.title')}</Text>
+        {/* Translated titles run 20-40% longer than English: shrink + clip
+            instead of wrapping under the back chevron. */}
+        <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+          {tr('coachNotifs.title')}
+        </Text>
       </View>
 
       {notifications.length === 0 ? (
@@ -243,8 +247,8 @@ export default function CoachNotificationsScreen() {
                   color={n.read ? t.muted2 : t.accent}
                 />
               </View>
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={[styles.notifTitle, !n.read && styles.notifTitleUnread]}>
+              <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginLeft: 12 }}>
+                <Text style={[styles.notifTitle, !n.read && styles.notifTitleUnread]} numberOfLines={2}>
                   {notifTitle(n)}
                 </Text>
                 <Text style={styles.notifBody}>{notifBody(n)}</Text>
@@ -310,7 +314,7 @@ export default function CoachNotificationsScreen() {
                         }
                       }}
                     >
-                      {replying === n.id ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.replyBtnText}>{tr('coachNotifs.sendReply')}</Text>}
+                      {replying === n.id ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.replyBtnText} numberOfLines={1}>{tr('coachNotifs.sendReply')}</Text>}
                     </TouchableOpacity>
                   </>
                 ) : n.type === 'philosophy_update' ? (
@@ -321,7 +325,7 @@ export default function CoachNotificationsScreen() {
                         try { await playerAPI.coachMarkRead(n.id); } catch {}
                         setNotifications(prev => prev.filter(x => x.id !== n.id));
                       }}>
-                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('coachNotifs.noUpdateNeeded')}</Text>
+                      <Text style={{ color: t.ink, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('coachNotifs.noUpdateNeeded')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.approveBtn, { backgroundColor: t.ctaBg, flex: 1, alignItems: 'center' }]}
@@ -330,7 +334,7 @@ export default function CoachNotificationsScreen() {
                         setNotifications(prev => prev.filter(x => x.id !== n.id));
                         navigation.navigate('Onboarding');
                       }}>
-                      <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('coachNotifs.reviewUpdate')}</Text>
+                      <Text style={{ color: t.ctaText, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('coachNotifs.reviewUpdate')}</Text>
                     </TouchableOpacity>
                   </View>
                 ) : n.type === 'team_invite' && n.ref_id ? (
@@ -342,7 +346,7 @@ export default function CoachNotificationsScreen() {
                         await playerAPI.coachMarkRead(n.id);
                         setNotifications(prev => prev.filter(x => x.id !== n.id));
                       }}>
-                      <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('coachNotifs.reject')}</Text>
+                      <Text style={{ color: t.ink, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('coachNotifs.reject')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.approveBtn, { backgroundColor: t.ctaBg, flex: 1, alignItems: 'center' }]}
@@ -352,7 +356,7 @@ export default function CoachNotificationsScreen() {
                         setNotifications(prev => prev.filter(x => x.id !== n.id));
                         Alert.alert(tr('coachNotifs.joinedTitle'), tr('coachNotifs.joinedMsg'));
                       }}>
-                      <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('coachNotifs.accept')}</Text>
+                      <Text style={{ color: t.ctaText, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('coachNotifs.accept')}</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (n.type === 'training_generated' || n.type === 'training_refreshed') && n.ref_id ? (
@@ -370,47 +374,47 @@ export default function CoachNotificationsScreen() {
                           navigation.navigate('CoachTrainingDetail', { trainingId: n.ref_id });
                         }}
                       >
-                        <Text style={[styles.approveBtnText, { color: t.ctaText }]}>{tr('coachNotifs.viewTraining')}</Text>
+                        <Text style={[styles.approveBtnText, { color: t.ctaText }]} numberOfLines={1}>{tr('coachNotifs.viewTraining')}</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
                 ) : n.type === 'link_requested' && n.ref_id ? (
                   <View style={styles.actionRow}>
                     <TouchableOpacity style={styles.approveBtn} onPress={() => approveLink(n.ref_id!, n.id)}>
-                      <Text style={styles.approveBtnText}>{tr('coachNotifs.approve')}</Text>
+                      <Text style={styles.approveBtnText} numberOfLines={1}>{tr('coachNotifs.approve')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.rejectBtn} onPress={() => rejectLink(n.ref_id!, n.id)}>
-                      <Text style={styles.rejectBtnText}>{tr('coachNotifs.reject')}</Text>
+                      <Text style={styles.rejectBtnText} numberOfLines={1}>{tr('coachNotifs.reject')}</Text>
                     </TouchableOpacity>
                   </View>
                 ) : n.type === 'staff_report_regenerated' && n.ref_id ? (
                   // I'm the original sharer: their updated copy is private — ask for it.
                   requestedIds[n.ref_id] ? (
                     <View style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center', opacity: 0.7 }]}>
-                      <Text style={[styles.approveBtnText, { color: t.ctaText }]}>{tr('coachNotifs.requested')}</Text>
+                      <Text style={[styles.approveBtnText, { color: t.ctaText }]} numberOfLines={1}>{tr('coachNotifs.requested')}</Text>
                     </View>
                   ) : (
                     <TouchableOpacity
                       style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center' }]}
                       onPress={() => requestUpdated(n.ref_id!)}
                     >
-                      <Text style={[styles.approveBtnText, { color: t.ctaText }]}>{tr('coachNotifs.requestType', { type: typeWord(n.ref_id) })}</Text>
+                      <Text style={[styles.approveBtnText, { color: t.ctaText }]} numberOfLines={1}>{tr('coachNotifs.requestType', { type: typeWord(n.ref_id) })}</Text>
                     </TouchableOpacity>
                   )
                 ) : n.type === 'staff_report_request' && n.ref_id ? (
                   requestResponses[n.ref_id] ? (
                     <View style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center', opacity: 0.7 }]}>
-                      <Text style={[styles.approveBtnText, { color: t.ctaText }]}>
+                      <Text style={[styles.approveBtnText, { color: t.ctaText }]} numberOfLines={1}>
                         {requestResponses[n.ref_id] === 'denied' ? tr('coachNotifs.denied') : tr('coachNotifs.approvedTitle')}
                       </Text>
                     </View>
                   ) : (
                     <View style={styles.actionRow}>
                       <TouchableOpacity style={styles.approveBtn} onPress={() => respondRequest(n, true)}>
-                        <Text style={styles.approveBtnText}>{tr('coachNotifs.approve')}</Text>
+                        <Text style={styles.approveBtnText} numberOfLines={1}>{tr('coachNotifs.approve')}</Text>
                       </TouchableOpacity>
                       <TouchableOpacity style={styles.rejectBtn} onPress={() => respondRequest(n, false)}>
-                        <Text style={styles.rejectBtnText}>{tr('coachNotifs.reject')}</Text>
+                        <Text style={styles.rejectBtnText} numberOfLines={1}>{tr('coachNotifs.reject')}</Text>
                       </TouchableOpacity>
                     </View>
                   )
@@ -419,7 +423,7 @@ export default function CoachNotificationsScreen() {
                     style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center' }]}
                     onPress={() => openSharedReport(n.ref_id!)}
                   >
-                    <Text style={[styles.approveBtnText, { color: t.ctaText }]}>{tr('coachNotifs.viewType', { type: typeWord(n.ref_id) })}</Text>
+                    <Text style={[styles.approveBtnText, { color: t.ctaText }]} numberOfLines={1}>{tr('coachNotifs.viewType', { type: typeWord(n.ref_id) })}</Text>
                   </TouchableOpacity>
                 ) : !n.read ? (
                   <TouchableOpacity
@@ -430,7 +434,7 @@ export default function CoachNotificationsScreen() {
                       setExpandedId(null);
                     }}
                   >
-                    <Text style={styles.markReadText}>{tr('coachNotifs.markAsRead')}</Text>
+                    <Text style={styles.markReadText} numberOfLines={1}>{tr('coachNotifs.markAsRead')}</Text>
                   </TouchableOpacity>
                 ) : null}
               </View>
@@ -453,7 +457,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, paddingTop: 56 },
-  title: { color: t.ink, fontSize: 20, fontFamily: fonts[800] },
+  backBtn: { flexShrink: 0 },
+  title: { color: t.ink, fontSize: 20, fontFamily: fonts[800], flex: 1, flexShrink: 1, minWidth: 0 },
   empty: { alignItems: 'center', paddingTop: 80 },
   emptyTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[700], marginTop: 16 },
   card: {
@@ -468,6 +473,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   cardMain: { flexDirection: 'row', alignItems: 'flex-start' },
   cardUnread: { borderColor: t.accent },
   iconBg: {
+    flexShrink: 0,
     width: 36,
     height: 36,
     borderRadius: 10,
@@ -486,6 +492,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.accent,
     marginTop: 4,
     marginLeft: 8,
+    flexShrink: 0,
   },
   expandedContent: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: t.line },
   replyInput: {
@@ -507,8 +514,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
+    flexShrink: 1,
   },
-  approveBtnText: { color: t.brownInk, fontFamily: fonts[700], fontSize: 12 },
+  approveBtnText: { color: t.brownInk, fontFamily: fonts[700], fontSize: 12, flexShrink: 1 },
   rejectBtn: {
     backgroundColor: t.negativeSoft,
     borderRadius: 8,
@@ -516,8 +524,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     paddingVertical: 8,
     borderWidth: 1,
     borderColor: t.negative,
+    flexShrink: 1,
   },
-  rejectBtnText: { color: t.negative, fontFamily: fonts[700], fontSize: 12 },
+  rejectBtnText: { color: t.negative, fontFamily: fonts[700], fontSize: 12, flexShrink: 1 },
   markReadBtn: { padding: 8, alignItems: 'center', borderWidth: 1, borderColor: t.line, borderRadius: 8 },
   markReadText: { color: t.muted, fontSize: 12, fontFamily: fonts[600] },
 });

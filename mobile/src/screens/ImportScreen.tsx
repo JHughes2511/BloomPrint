@@ -159,12 +159,16 @@ export default function ImportScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.title}>{isRosterMode ? tr('importScreen.titleRoster') : tr('importScreen.titlePlayers')}</Text>
-            <Text style={styles.sub}>
+          {/* Translated titles run 20-40% longer, so the text block shrinks and
+              clips instead of wrapping under the chevron. */}
+          <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginLeft: 12, marginRight: 8 }}>
+            <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+              {isRosterMode ? tr('importScreen.titleRoster') : tr('importScreen.titlePlayers')}
+            </Text>
+            <Text style={styles.sub} numberOfLines={1}>
               {isRosterMode ? tr('importScreen.subRoster') : tr('importScreen.subPlayers')}
             </Text>
           </View>
@@ -173,15 +177,15 @@ export default function ImportScreen() {
         {/* ── ROSTER MODE: Team selector ── */}
         {isRosterMode && (
           <View style={styles.teamSection}>
-            <Text style={styles.label}>{tr('importScreen.teamRequiredLabel')}</Text>
+            <Text style={styles.label} numberOfLines={1}>{tr('importScreen.teamRequiredLabel')}</Text>
             <Text style={styles.hint}>{tr('importScreen.teamHint')}</Text>
 
             {/* Selected team badge */}
             {selectedTeam && (
               <View style={styles.selectedTeamBadge}>
                 <Ionicons name="checkmark-circle" size={16} color={t.positive} />
-                <Text style={styles.selectedTeamText}>{selectedTeam.name}</Text>
-                <TouchableOpacity onPress={() => setSelectedTeamId(null)}>
+                <Text style={styles.selectedTeamText} numberOfLines={1}>{selectedTeam.name}</Text>
+                <TouchableOpacity onPress={() => setSelectedTeamId(null)} style={styles.badgeClearBtn}>
                   <Ionicons name="close-circle" size={16} color={t.muted} />
                 </TouchableOpacity>
               </View>
@@ -204,7 +208,7 @@ export default function ImportScreen() {
               >
                 {creatingTeam
                   ? <ActivityIndicator color={t.ctaText} size="small" />
-                  : <Text style={styles.createTeamBtnText}>{tr('common.create')}</Text>
+                  : <Text style={styles.createTeamBtnText} numberOfLines={1}>{tr('common.create')}</Text>
                 }
               </TouchableOpacity>
             </View>
@@ -213,7 +217,7 @@ export default function ImportScreen() {
             {teams.length > 0 && (
               <>
                 <TouchableOpacity style={styles.teamPickerToggle} onPress={() => setShowTeamPicker(v => !v)}>
-                  <Text style={styles.teamPickerToggleText}>{tr('importScreen.orSelectExisting')}</Text>
+                  <Text style={styles.teamPickerToggleText} numberOfLines={1}>{tr('importScreen.orSelectExisting')}</Text>
                   <Ionicons name={showTeamPicker ? 'chevron-up' : 'chevron-down'} size={14} color={t.muted} />
                 </TouchableOpacity>
                 {showTeamPicker && (
@@ -224,7 +228,7 @@ export default function ImportScreen() {
                         style={[styles.teamPickerItem, selectedTeamId === tm.id && styles.teamPickerItemActive]}
                         onPress={() => { setSelectedTeamId(tm.id); setShowTeamPicker(false); }}
                       >
-                        <Text style={[styles.teamPickerItemText, selectedTeamId === tm.id && { color: t.ink }]}>{tm.name}</Text>
+                        <Text style={[styles.teamPickerItemText, selectedTeamId === tm.id && { color: t.ink }]} numberOfLines={1}>{tm.name}</Text>
                         {selectedTeamId === tm.id && <Ionicons name="checkmark" size={14} color={t.positive} />}
                       </TouchableOpacity>
                     ))}
@@ -236,7 +240,7 @@ export default function ImportScreen() {
         )}
 
         {/* File picker — any file type */}
-        <Text style={styles.label}>{tr('importScreen.fileLabel')}</Text>
+        <Text style={styles.label} numberOfLines={1}>{tr('importScreen.fileLabel')}</Text>
         <Text style={styles.hint}>{tr('importScreen.fileHint')}</Text>
         <TouchableOpacity style={[styles.filePicker, file && styles.filePickerDone]} onPress={pickFile}>
           <Ionicons
@@ -244,13 +248,13 @@ export default function ImportScreen() {
             size={28}
             color={file ? t.positive : t.muted}
           />
-          <Text style={[styles.filePickerText, file && { color: t.positive }]}>
+          <Text style={[styles.filePickerText, file && { color: t.positive }]} numberOfLines={1}>
             {file ? file.name : tr('importScreen.tapToSelectFile')}
           </Text>
         </TouchableOpacity>
 
         {/* Default competition level — shown for both modes */}
-        <Text style={styles.label}>{tr('importScreen.defaultLevelLabel')}</Text>
+        <Text style={styles.label} numberOfLines={1}>{tr('importScreen.defaultLevelLabel')}</Text>
         <Text style={styles.hint}>{tr('importScreen.defaultLevelHint')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24 }}>
           {LEVELS.map(l => (
@@ -259,7 +263,7 @@ export default function ImportScreen() {
               style={[styles.chip, level === l && styles.chipActive]}
               onPress={() => setLevel(l)}
             >
-              <Text style={[styles.chipText, level === l && styles.chipTextActive]}>{l}</Text>
+              <Text style={[styles.chipText, level === l && styles.chipTextActive]} numberOfLines={1}>{l}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -267,7 +271,7 @@ export default function ImportScreen() {
         {/* Eval mode only: report type + team assignment */}
         {!isRosterMode && (
           <>
-            <Text style={styles.label}>{tr('importScreen.defaultReportType')}</Text>
+            <Text style={styles.label} numberOfLines={1}>{tr('importScreen.defaultReportType')}</Text>
             <Text style={styles.hint}>{tr('importScreen.defaultReportHint')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
               {OUTPUT_TYPE_KEYS.map(key => (
@@ -276,21 +280,21 @@ export default function ImportScreen() {
                   style={[styles.chip, outputType === key && styles.chipActive]}
                   onPress={() => setOutputType(key)}
                 >
-                  <Text style={[styles.chipText, outputType === key && styles.chipTextActive]}>{tr(`importScreen.outputTypes.${key}`)}</Text>
+                  <Text style={[styles.chipText, outputType === key && styles.chipTextActive]} numberOfLines={1}>{tr(`importScreen.outputTypes.${key}`)}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
 
             {teams.length > 0 && (
               <>
-                <Text style={styles.label}>{tr('importScreen.assignToTeam')}</Text>
+                <Text style={styles.label} numberOfLines={1}>{tr('importScreen.assignToTeam')}</Text>
                 <Text style={styles.hint}>{tr('importScreen.assignToTeamHint')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24 }}>
                   <TouchableOpacity
                     style={[styles.chip, selectedTeamId == null && styles.chipActive]}
                     onPress={() => setSelectedTeamId(null)}
                   >
-                    <Text style={[styles.chipText, selectedTeamId == null && styles.chipTextActive]}>{tr('importScreen.noTeamChip')}</Text>
+                    <Text style={[styles.chipText, selectedTeamId == null && styles.chipTextActive]} numberOfLines={1}>{tr('importScreen.noTeamChip')}</Text>
                   </TouchableOpacity>
                   {teams.map(t => (
                     <TouchableOpacity
@@ -298,7 +302,7 @@ export default function ImportScreen() {
                       style={[styles.chip, selectedTeamId === t.id && styles.chipActive]}
                       onPress={() => setSelectedTeamId(t.id)}
                     >
-                      <Text style={[styles.chipText, selectedTeamId === t.id && styles.chipTextActive]}>{t.name}</Text>
+                      <Text style={[styles.chipText, selectedTeamId === t.id && styles.chipTextActive]} numberOfLines={1}>{t.name}</Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -316,8 +320,8 @@ export default function ImportScreen() {
             activeOpacity={0.85}
           >
             {analyzing
-              ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.uploadText}>  {tr('importScreen.readingFile')}</Text></>
-              : <><Ionicons name="sparkles" size={18} color={t.ctaText} /><Text style={styles.uploadText}>  {tr('importScreen.analyzeFile')}</Text></>
+              ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.uploadText} numberOfLines={1}>  {tr('importScreen.readingFile')}</Text></>
+              : <><Ionicons name="sparkles" size={18} color={t.ctaText} /><Text style={styles.uploadText} numberOfLines={1}>  {tr('importScreen.analyzeFile')}</Text></>
             }
           </TouchableOpacity>
         )}
@@ -325,7 +329,7 @@ export default function ImportScreen() {
         {/* Step 2 — preview + confirm */}
         {preview && (
           <View style={{ marginTop: 8 }}>
-            <Text style={styles.label}>{tr('importScreen.previewCount', { count: preview.filter(p => p._include).length })}</Text>
+            <Text style={styles.label} numberOfLines={1}>{tr('importScreen.previewCount', { count: preview.filter(p => p._include).length })}</Text>
             <Text style={styles.hint}>{tr('importScreen.previewHint')}</Text>
             {preview.map((p, i) => (
               <TouchableOpacity
@@ -334,11 +338,11 @@ export default function ImportScreen() {
                 onPress={() => setPreview(prev => prev!.map((x, xi) => xi === i ? { ...x, _include: !x._include } : x))}
               >
                 <Ionicons name={p._include ? 'checkmark-circle' : 'ellipse-outline'} size={20} color={p._include ? t.positive : t.muted} />
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700] }}>
+                <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
+                  <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700] }} numberOfLines={1}>
                     {p.jersey_number ? `#${p.jersey_number} ` : ''}{p.name}
                   </Text>
-                  <Text style={{ color: t.muted2, fontSize: 11, marginTop: 2 }}>
+                  <Text style={{ color: t.muted2, fontSize: 11, marginTop: 2 }} numberOfLines={1}>
                     {[p.position, p.height, p.wingspan ? tr('importScreen.wingspanShort', { value: p.wingspan }) : '', p.school_name].filter(Boolean).join(' · ') || tr('importScreen.noExtraDetails')}
                   </Text>
                 </View>
@@ -346,7 +350,7 @@ export default function ImportScreen() {
             ))}
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
               <TouchableOpacity style={[styles.uploadBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setPreview(null)}>
-                <Ionicons name="refresh" size={16} color={t.ink} /><Text style={[styles.uploadText, { color: t.ink }]}>  {tr('importScreen.redo')}</Text>
+                <Ionicons name="refresh" size={16} color={t.ink} /><Text style={[styles.uploadText, { color: t.ink }]} numberOfLines={1}>  {tr('importScreen.redo')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.uploadBtn, { flex: 1.6 }, (isRosterMode && !selectedTeamId) && styles.uploadBtnDisabled]}
@@ -355,8 +359,8 @@ export default function ImportScreen() {
                 activeOpacity={0.85}
               >
                 {uploading
-                  ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.uploadText}>  {tr('importScreen.importing')}</Text></>
-                  : <><Ionicons name="cloud-upload" size={18} color={t.ctaText} /><Text style={styles.uploadText}>  {tr('importScreen.importCount', { count: preview.filter(p => p._include).length })}</Text></>}
+                  ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.uploadText} numberOfLines={1}>  {tr('importScreen.importing')}</Text></>
+                  : <><Ionicons name="cloud-upload" size={18} color={t.ctaText} /><Text style={styles.uploadText} numberOfLines={1}>  {tr('importScreen.importCount', { count: preview.filter(p => p._include).length })}</Text></>}
               </TouchableOpacity>
             </View>
           </View>
@@ -365,7 +369,7 @@ export default function ImportScreen() {
         {/* Result */}
         {result && (
           <View style={styles.resultBox}>
-            <Text style={styles.resultTitle}>{tr('importScreen.importComplete')}</Text>
+            <Text style={styles.resultTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('importScreen.importComplete')}</Text>
             <View style={styles.statRow}>
               <View style={styles.stat}>
                 <Text style={styles.statNum}>{result.rows_processed}</Text>
@@ -388,20 +392,20 @@ export default function ImportScreen() {
             </View>
             {result.errors.length > 0 && (
               <View style={styles.errorBox}>
-                <Text style={styles.errorTitle}>{tr('importScreen.errorsCount', { count: result.errors.length })}</Text>
+                <Text style={styles.errorTitle} numberOfLines={1}>{tr('importScreen.errorsCount', { count: result.errors.length })}</Text>
                 {result.errors.map((e, i) => (
                   <Text key={i} style={styles.errorText}>· {e}</Text>
                 ))}
               </View>
             )}
             <TouchableOpacity style={styles.doneBtn} onPress={() => navigation.goBack()}>
-              <Text style={styles.doneBtnText}>{isRosterMode ? tr('importScreen.backToRoster') : tr('importScreen.goToRoster')}</Text>
+              <Text style={styles.doneBtnText} numberOfLines={1}>{isRosterMode ? tr('importScreen.backToRoster') : tr('importScreen.goToRoster')}</Text>
             </TouchableOpacity>
           </View>
         )}
 
         {/* Column guide */}
-        <Text style={[styles.label, { marginTop: 32 }]}>{tr('importScreen.expectedColumns')}</Text>
+        <Text style={[styles.label, { marginTop: 32 }]} numberOfLines={1}>{tr('importScreen.expectedColumns')}</Text>
         <Text style={styles.hint}>{tr('importScreen.expectedColumnsHint')}</Text>
         <View style={styles.columnGuide}>
           {(isRosterMode ? ROSTER_COLUMN_KEYS : TEMPLATE_COLUMN_KEYS).map((colKey) => (
@@ -414,7 +418,7 @@ export default function ImportScreen() {
 
         {!isRosterMode && (
           <View style={styles.exampleBox}>
-            <Text style={styles.exampleTitle}>{tr('importScreen.exampleRow')}</Text>
+            <Text style={styles.exampleTitle} numberOfLines={1}>{tr('importScreen.exampleRow')}</Text>
             <Text style={styles.exampleText}>{tr('importScreen.exampleText')}</Text>
           </View>
         )}
@@ -427,6 +431,7 @@ export default function ImportScreen() {
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, padding: 20, paddingTop: 56 },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 28 },
+  backBtn: { flexShrink: 0 },
   title: { color: t.ink, fontSize: 22, fontFamily: fonts[800] },
   sub: { color: t.muted, fontSize: 12, marginTop: 2 },
   label: {
@@ -442,7 +447,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: t.positiveSoft, borderRadius: 10, padding: 10, marginBottom: 12,
   },
-  selectedTeamText: { color: t.positive, fontFamily: fonts[700], flex: 1, fontSize: 14 },
+  selectedTeamText: { color: t.positive, fontFamily: fonts[700], flex: 1, flexShrink: 1, minWidth: 0, fontSize: 14 },
+  badgeClearBtn: { flexShrink: 0 },
   createTeamRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
   createTeamInput: {
     flex: 1, backgroundColor: t.chip, borderRadius: 12, padding: 12,
@@ -450,40 +456,41 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   createTeamBtn: {
     backgroundColor: t.ctaBg, borderRadius: 999, paddingHorizontal: 16,
-    justifyContent: 'center', alignItems: 'center',
+    justifyContent: 'center', alignItems: 'center', flexShrink: 0, maxWidth: 140,
   },
-  createTeamBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
+  createTeamBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14, flexShrink: 1 },
   teamPickerToggle: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingVertical: 10, borderTopWidth: 1, borderTopColor: t.divider,
   },
-  teamPickerToggleText: { color: t.muted, fontSize: 13 },
+  teamPickerToggleText: { color: t.muted, fontSize: 13, flexShrink: 1, minWidth: 0, marginRight: 8 },
   teamPickerList: { marginTop: 6 },
   teamPickerItem: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingVertical: 10, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: t.divider,
   },
   teamPickerItemActive: { backgroundColor: t.accentSoft, borderRadius: 8 },
-  teamPickerItemText: { color: t.inkSoft, fontSize: 14 },
+  teamPickerItemText: { color: t.inkSoft, fontSize: 14, flexShrink: 1, minWidth: 0, marginRight: 8 },
   filePicker: {
     borderWidth: 2, borderColor: t.line, borderStyle: 'dashed',
     borderRadius: 14, padding: 24, alignItems: 'center', marginBottom: 24, gap: 8,
   },
   filePickerDone: { borderColor: t.positive, borderStyle: 'solid' },
-  filePickerText: { color: t.muted, fontSize: 14 },
+  filePickerText: { color: t.muted, fontSize: 14, flexShrink: 1 },
   chip: {
     borderWidth: 1, borderColor: t.line, borderRadius: 999,
     paddingHorizontal: 16, paddingVertical: 9, marginRight: 8,
+    flexShrink: 1, maxWidth: 260,
   },
   chipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
-  chipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
+  chipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700], flexShrink: 1 },
   chipTextActive: { color: t.ctaText },
   uploadBtn: {
     backgroundColor: t.ctaBg, borderRadius: 999, padding: 15,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
   },
   uploadBtnDisabled: { opacity: 0.5 },
-  uploadText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15 },
+  uploadText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15, flexShrink: 1 },
   resultBox: {
     backgroundColor: t.card, borderRadius: 18, padding: 20, marginTop: 24, borderWidth: 1, borderColor: t.cardBorder,
   },
@@ -498,7 +505,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   doneBtn: {
     backgroundColor: t.ctaBg, borderRadius: 999, padding: 14, alignItems: 'center',
   },
-  doneBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
+  doneBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14, flexShrink: 1 },
   columnGuide: { backgroundColor: t.card, borderRadius: 14, overflow: 'hidden', marginBottom: 16, borderWidth: 1, borderColor: t.cardBorder },
   colRow: {
     padding: 12, borderBottomWidth: 1, borderBottomColor: t.divider,

@@ -138,24 +138,28 @@ export default function CoachTrainingDetailScreen() {
        
       >
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.title}>{tr('coachTraining.titleWithName', { name: training.player_name })}</Text>
-            <Text style={styles.sub}>{new Date(training.created_at).toLocaleDateString()}</Text>
+          {/* Translated titles + long player names must shrink and clip here
+              rather than wrap into the row below. */}
+          <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginLeft: 12, marginRight: 8 }}>
+            <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+              {tr('coachTraining.titleWithName', { name: training.player_name })}
+            </Text>
+            <Text style={styles.sub} numberOfLines={1}>{new Date(training.created_at).toLocaleDateString()}</Text>
           </View>
         </View>
 
         {training.coach_notes ? (
           <View style={styles.notesBox}>
-            <Text style={styles.notesLabel}>{tr('coachTraining.coachNotes')}</Text>
+            <Text style={styles.notesLabel} numberOfLines={1}>{tr('coachTraining.coachNotes')}</Text>
             <Text style={styles.notesText}>{training.coach_notes}</Text>
           </View>
         ) : null}
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{tr('coachTraining.trainingProgram')}</Text>
+          <Text style={styles.sectionLabel} numberOfLines={1}>{tr('coachTraining.trainingProgram')}</Text>
           <View style={styles.programBox}>
             {training.program_text
               ? <Markdown style={markdownStyles}>{cleanMarkdown(training.program_text)}</Markdown>
@@ -168,7 +172,7 @@ export default function CoachTrainingDetailScreen() {
           style={styles.section}
           onLayout={e => { commentY.current = e.nativeEvent.layout.y; }}
         >
-          <Text style={styles.sectionLabel}>{tr('coachTraining.commentsCount', { count: training.comments?.length ?? 0 })}</Text>
+          <Text style={styles.sectionLabel} numberOfLines={1}>{tr('coachTraining.commentsCount', { count: training.comments?.length ?? 0 })}</Text>
           <CommentThread
             comments={(training.comments ?? []) as any}
             accent={t.accent}
@@ -205,7 +209,7 @@ export default function CoachTrainingDetailScreen() {
           style={styles.section}
           onLayout={e => { notesY.current = e.nativeEvent.layout.y; }}
         >
-          <Text style={styles.sectionLabel}>{tr('coachTraining.addCoachNotes')}</Text>
+          <Text style={styles.sectionLabel} numberOfLines={1}>{tr('coachTraining.addCoachNotes')}</Text>
           <View style={styles.programBox}>
             <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
               {tr('coachTraining.notesHint')}
@@ -225,7 +229,7 @@ export default function CoachTrainingDetailScreen() {
               onPress={saveNote}
               disabled={savingNote || !noteText.trim()}
             >
-              {savingNote ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.btnText}>{tr('coachTraining.saveNotes')}</Text>}
+              {savingNote ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={styles.btnText} numberOfLines={1}>{tr('coachTraining.saveNotes')}</Text>}
             </TouchableOpacity>
           </View>
         </View>
@@ -235,7 +239,7 @@ export default function CoachTrainingDetailScreen() {
           style={styles.section}
           onLayout={e => { feedbackY.current = e.nativeEvent.layout.y; }}
         >
-          <Text style={styles.sectionLabel}>{tr('coachTraining.updateWithFeedback')}</Text>
+          <Text style={styles.sectionLabel} numberOfLines={1}>{tr('coachTraining.updateWithFeedback')}</Text>
           <View style={styles.programBox}>
             <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
               {tr('coachTraining.feedbackHint')}
@@ -256,8 +260,8 @@ export default function CoachTrainingDetailScreen() {
               disabled={refreshing || !feedbackText.trim()}
             >
               {refreshing
-                ? <><ActivityIndicator color={t.ctaText} size="small" /><Text style={styles.btnText}>{tr('coachTraining.updating')}</Text></>
-                : <><Ionicons name="refresh" size={16} color={t.ctaText} /><Text style={styles.btnText}>{tr('coachTraining.updateReport')}</Text></>
+                ? <><ActivityIndicator color={t.ctaText} size="small" /><Text style={styles.btnText} numberOfLines={1}>{tr('coachTraining.updating')}</Text></>
+                : <><Ionicons name="refresh" size={16} color={t.ctaText} /><Text style={styles.btnText} numberOfLines={1}>{tr('coachTraining.updateReport')}</Text></>
               }
             </TouchableOpacity>
             <GeneratingOverlay visible={refreshing} label={tr('coachTraining.updatingProgramLabel')} />
@@ -282,6 +286,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56 },
+  backBtn: { flexShrink: 0 },
   title: { color: t.ink, fontSize: 16, fontFamily: fonts[900] },
   sub: { color: t.muted2, fontSize: 11, marginTop: 2 },
   notesBox: {
@@ -307,7 +312,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.chip, borderRadius: 10, padding: 12, color: t.ink,
     fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 80,
   },
-  sendBtn: { backgroundColor: t.ctaBg, borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' },
+  sendBtn: { backgroundColor: t.ctaBg, borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   btn: { backgroundColor: t.ctaBg, borderRadius: 10, padding: 12, alignItems: 'center' },
-  btnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
+  btnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14, flexShrink: 1 },
 });

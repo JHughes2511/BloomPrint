@@ -212,11 +212,15 @@ export default function PlayerHomeScreen() {
     >
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <View style={{ flex: 1, marginRight: 10 }}>
-            <Text style={styles.eyebrow}>{tr('playerApp.home.playerPortal')}</Text>
-            <Text style={styles.greeting}>{tr('playerApp.home.greeting', { name: firstName })}</Text>
+          {/* Translated headers run 20-40% longer than English, so the text block
+              shrinks and clips rather than pushing the action buttons off-screen. */}
+          <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 10 }}>
+            <Text style={styles.eyebrow} numberOfLines={1}>{tr('playerApp.home.playerPortal')}</Text>
+            <Text style={styles.greeting} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+              {tr('playerApp.home.greeting', { name: firstName })}
+            </Text>
             {subtitleBits.length > 0 && (
-              <Text style={styles.greetingSub}>{subtitleBits.join(' · ')}</Text>
+              <Text style={styles.greetingSub} numberOfLines={1}>{subtitleBits.join(' · ')}</Text>
             )}
           </View>
           <View style={styles.headerActions}>
@@ -240,14 +244,14 @@ export default function PlayerHomeScreen() {
           {isLinked ? (
             <View style={styles.linkedBadge}>
               <Ionicons name="checkmark-circle" size={12} color={t.positive} />
-              <Text style={styles.linkedText}>
+              <Text style={styles.linkedText} numberOfLines={1}>
                 {tr('playerApp.home.linked')}{(playerUser as any).linked_program_name ? ` · ${(playerUser as any).linked_program_name}` : ''}
               </Text>
             </View>
           ) : (
             <TouchableOpacity style={styles.notLinkedBadge} onPress={openEdit}>
               <Ionicons name="link-outline" size={12} color={t.muted} />
-              <Text style={styles.notLinkedText}>{tr('playerApp.home.notLinkedTapToLink')}</Text>
+              <Text style={styles.notLinkedText} numberOfLines={1}>{tr('playerApp.home.notLinkedTapToLink')}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -257,10 +261,10 @@ export default function PlayerHomeScreen() {
       {bimScore != null && (
         <TouchableOpacity style={styles.bimCard} activeOpacity={0.85} onPress={() => setShowBim(true)}>
           <View style={styles.bimTop}>
-            <Text style={styles.bimCardLabel}>{tr('playerApp.home.currentBimScore')}</Text>
+            <Text style={styles.bimCardLabel} numberOfLines={1}>{tr('playerApp.home.currentBimScore')}</Text>
             {trend != null && Math.abs(trend) >= 0.05 && (
               <View style={[styles.trendPill, { backgroundColor: trend >= 0 ? t.positiveSoft : t.negativeSoft }]}>
-                <Text style={[styles.trendText, { color: trend >= 0 ? t.positive : t.negative }]}>
+                <Text style={[styles.trendText, { color: trend >= 0 ? t.positive : t.negative }]} numberOfLines={1}>
                   {trend >= 0 ? '▲ +' : '▼ '}{Math.abs(trend).toFixed(1)}
                 </Text>
               </View>
@@ -268,7 +272,7 @@ export default function PlayerHomeScreen() {
           </View>
           <View style={styles.bimScoreRow}>
             <Text style={styles.bimScore}>{bimScore.toFixed(1)}</Text>
-            <Text style={styles.bimOf}>
+            <Text style={styles.bimOf} numberOfLines={1}>
               {tr('playerApp.home.ofTen')}{trend != null && Math.abs(trend) >= 0.05 ? (trend >= 0 ? ` · ${tr('playerApp.home.trendingUp')}` : ` · ${tr('playerApp.home.trendingDown')}`) : ''}
             </Text>
           </View>
@@ -281,12 +285,14 @@ export default function PlayerHomeScreen() {
                 })}
               </View>
               <View style={styles.pillarLabels}>
-                {PILLAR_BAR.map(p => <Text key={p.key} style={styles.pillarLabelText}>{p.label}</Text>)}
+                {PILLAR_BAR.map(p => (
+                  <Text key={p.key} style={styles.pillarLabelText} numberOfLines={1}>{p.label}</Text>
+                ))}
               </View>
             </>
           )}
           <View style={styles.bimHint}>
-            <Text style={styles.bimHintText}>{tr('playerApp.home.tapForBreakdown')}</Text>
+            <Text style={styles.bimHintText} numberOfLines={1}>{tr('playerApp.home.tapForBreakdown')}</Text>
             <Ionicons name="chevron-forward" size={13} color={t.muted2} />
           </View>
         </TouchableOpacity>
@@ -295,15 +301,15 @@ export default function PlayerHomeScreen() {
       {/* From Your Coach */}
       {coachFeed.length > 0 && (
         <>
-          <Text style={styles.sectionLabel}>{tr('playerApp.home.fromYourCoach')}</Text>
+          <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.home.fromYourCoach')}</Text>
           {coachFeed.map(r => (
             <TouchableOpacity key={r.id} style={styles.feedCard} onPress={() => openReport(r)}>
               <View style={[styles.feedIcon, { backgroundColor: t.accentSoft }]}>
                 <Ionicons name="document-text-outline" size={22} color={t.accent} />
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.feedTitle}>{outputTypeLabel(r.output_type) || tr('playerApp.home.newReport')}</Text>
-                <Text style={styles.feedSub}>{tr('playerApp.home.sharedTapToRead', { time: timeAgo(r.created_at) })}</Text>
+              <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
+                <Text style={styles.feedTitle} numberOfLines={1}>{outputTypeLabel(r.output_type) || tr('playerApp.home.newReport')}</Text>
+                <Text style={styles.feedSub} numberOfLines={1}>{tr('playerApp.home.sharedTapToRead', { time: timeAgo(r.created_at) })}</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={t.muted2} />
             </TouchableOpacity>
@@ -311,7 +317,7 @@ export default function PlayerHomeScreen() {
         </>
       )}
 
-      <Text style={styles.sectionLabel}>{tr('playerApp.home.yourDashboard')}</Text>
+      <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.home.yourDashboard')}</Text>
 
       <View style={styles.cardGrid}>
         <TouchableOpacity
@@ -321,7 +327,7 @@ export default function PlayerHomeScreen() {
           <View style={[styles.cardIcon, { backgroundColor: t.positiveSoft }]}>
             <Ionicons name="mail" size={28} color={t.positive} />
           </View>
-          <Text style={styles.cardTitle}>{tr('playerApp.home.myReports')}</Text>
+          <Text style={styles.cardTitle} numberOfLines={1}>{tr('playerApp.home.myReports')}</Text>
           <Text style={styles.cardDesc}>{tr('playerApp.home.myReportsDesc')}</Text>
         </TouchableOpacity>
 
@@ -332,48 +338,48 @@ export default function PlayerHomeScreen() {
           <View style={[styles.cardIcon, { backgroundColor: t.positiveSoft }]}>
             <Ionicons name="barbell" size={28} color={t.positive} />
           </View>
-          <Text style={styles.cardTitle}>{tr('playerApp.home.myTraining')}</Text>
+          <Text style={styles.cardTitle} numberOfLines={1}>{tr('playerApp.home.myTraining')}</Text>
           <Text style={styles.cardDesc}>{tr('playerApp.home.myTrainingDesc')}</Text>
         </TouchableOpacity>
       </View>
 
       {playerUser?.player_id && profile && (
         <>
-          <Text style={styles.sectionLabel}>{tr('playerApp.home.myProfile')}</Text>
+          <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.home.myProfile')}</Text>
           <View style={styles.profileCard}>
             <View style={styles.profileCardHeader}>
               <Ionicons name="person-circle-outline" size={20} color={t.positive} />
-              <Text style={styles.profileCardTitle}>{tr('playerApp.home.athleticProfile')}</Text>
+              <Text style={styles.profileCardTitle} numberOfLines={1}>{tr('playerApp.home.athleticProfile')}</Text>
               <TouchableOpacity style={styles.editBtn} onPress={openEdit}>
                 <Ionicons name="pencil-outline" size={15} color={t.positive} />
-                <Text style={styles.editBtnText}>{tr('playerApp.home.edit')}</Text>
+                <Text style={styles.editBtnText} numberOfLines={1}>{tr('playerApp.home.edit')}</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.profileStats}>
               <View style={styles.profileStat}>
-                <Text style={styles.profileStatVal}>{profile.position || '—'}</Text>
-                <Text style={styles.profileStatLabel}>{tr('playerApp.home.position')}</Text>
+                <Text style={styles.profileStatVal} numberOfLines={1}>{profile.position || '—'}</Text>
+                <Text style={styles.profileStatLabel} numberOfLines={1}>{tr('playerApp.home.position')}</Text>
               </View>
               <View style={styles.profileStatDivider} />
               <View style={styles.profileStat}>
-                <Text style={styles.profileStatVal}>{profile.height || '—'}</Text>
-                <Text style={styles.profileStatLabel}>{tr('playerApp.home.height')}</Text>
+                <Text style={styles.profileStatVal} numberOfLines={1}>{profile.height || '—'}</Text>
+                <Text style={styles.profileStatLabel} numberOfLines={1}>{tr('playerApp.home.height')}</Text>
               </View>
               <View style={styles.profileStatDivider} />
               <View style={styles.profileStat}>
-                <Text style={styles.profileStatVal}>{profile.wingspan || '—'}</Text>
-                <Text style={styles.profileStatLabel}>{tr('playerApp.home.wingspan')}</Text>
+                <Text style={styles.profileStatVal} numberOfLines={1}>{profile.wingspan || '—'}</Text>
+                <Text style={styles.profileStatLabel} numberOfLines={1}>{tr('playerApp.home.wingspan')}</Text>
               </View>
             </View>
             <View style={[styles.profileStats, { marginTop: 10 }]}>
               <View style={styles.profileStat}>
-                <Text style={styles.profileStatVal}>{profile.weight || '—'}</Text>
-                <Text style={styles.profileStatLabel}>{tr('playerApp.home.weight')}</Text>
+                <Text style={styles.profileStatVal} numberOfLines={1}>{profile.weight || '—'}</Text>
+                <Text style={styles.profileStatLabel} numberOfLines={1}>{tr('playerApp.home.weight')}</Text>
               </View>
               <View style={styles.profileStatDivider} />
               <View style={styles.profileStat}>
-                <Text style={styles.profileStatVal}>{profile.standing_reach || '—'}</Text>
-                <Text style={styles.profileStatLabel}>{tr('playerApp.home.standingReach')}</Text>
+                <Text style={styles.profileStatVal} numberOfLines={1}>{profile.standing_reach || '—'}</Text>
+                <Text style={styles.profileStatLabel} numberOfLines={1}>{tr('playerApp.home.standingReach')}</Text>
               </View>
             </View>
             {(profile.school_name || profile.city || profile.state || profile.country) && (
@@ -381,13 +387,13 @@ export default function PlayerHomeScreen() {
                 {profile.school_name && (
                   <View style={styles.profileLocationRow}>
                     <Ionicons name="school-outline" size={13} color={t.muted} />
-                    <Text style={styles.profileLocationText}>{profile.school_name}</Text>
+                    <Text style={styles.profileLocationText} numberOfLines={1}>{profile.school_name}</Text>
                   </View>
                 )}
                 {(profile.city || profile.state || profile.country) && (
                   <View style={styles.profileLocationRow}>
                     <Ionicons name="location-outline" size={13} color={t.muted} />
-                    <Text style={styles.profileLocationText}>
+                    <Text style={styles.profileLocationText} numberOfLines={1}>
                       {[profile.city, profile.state, profile.country].filter(Boolean).join(', ')}
                     </Text>
                   </View>
@@ -403,7 +409,7 @@ export default function PlayerHomeScreen() {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalBox, { maxHeight: '85%' }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{tr('playerApp.home.bimScoreTitle', { score: bimScore != null ? bimScore.toFixed(1) : '' })}</Text>
+              <Text style={styles.modalTitle} numberOfLines={1}>{tr('playerApp.home.bimScoreTitle', { score: bimScore != null ? bimScore.toFixed(1) : '' })}</Text>
               <TouchableOpacity onPress={() => setShowBim(false)}>
                 <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
@@ -416,8 +422,8 @@ export default function PlayerHomeScreen() {
                   return (
                     <View key={k} style={styles.pbRow}>
                       <View style={styles.pbHead}>
-                        <Text style={styles.pbLabel}>{tr(`playerApp.home.pillars.${k}`, PILLAR_LABELS[k] ?? k)}</Text>
-                        <Text style={styles.pbVal}>{g.toFixed(1)}</Text>
+                        <Text style={styles.pbLabel} numberOfLines={1}>{tr(`playerApp.home.pillars.${k}`, PILLAR_LABELS[k] ?? k)}</Text>
+                        <Text style={styles.pbVal} numberOfLines={1}>{g.toFixed(1)}</Text>
                       </View>
                       <View style={styles.pbTrack}>
                         <View style={[styles.pbFill, { width: `${Math.min(100, (g / 10) * 100)}%` }]} />
@@ -466,7 +472,7 @@ export default function PlayerHomeScreen() {
             <TouchableOpacity activeOpacity={1}>
               <View style={styles.dragHandle} />
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>{tr('playerApp.home.editMyProfile')}</Text>
+                <Text style={styles.modalTitle} numberOfLines={1}>{tr('playerApp.home.editMyProfile')}</Text>
                 <TouchableOpacity onPress={() => { Keyboard.dismiss(); closeModal(); }}>
                   <Ionicons name="close" size={22} color={t.muted} />
                 </TouchableOpacity>
@@ -478,11 +484,11 @@ export default function PlayerHomeScreen() {
                 contentContainerStyle={{ paddingBottom: 48 }}
               >
                 {/* Link to Coach */}
-                <Text style={styles.linkSectionLabel}>{tr('playerApp.home.linkToCoach')}</Text>
+                <Text style={styles.linkSectionLabel} numberOfLines={1}>{tr('playerApp.home.linkToCoach')}</Text>
                 {isLinked ? (
                   <View style={styles.linkedRow}>
                     <Ionicons name="checkmark-circle" size={18} color={t.positive} />
-                    <Text style={styles.linkedRowText}>
+                    <Text style={styles.linkedRowText} numberOfLines={1}>
                       {(playerUser as any)?.linked_program_name
                         ? tr('playerApp.home.linkedTo', { program: (playerUser as any).linked_program_name })
                         : tr('playerApp.home.linked')}
@@ -505,7 +511,7 @@ export default function PlayerHomeScreen() {
                         onPress={linkWithInvite}
                         disabled={!inviteCode.trim() || linking}
                       >
-                        <Text style={styles.linkBtnText}>{linking ? '…' : tr('playerApp.home.link')}</Text>
+                        <Text style={styles.linkBtnText} numberOfLines={1}>{linking ? '…' : tr('playerApp.home.link')}</Text>
                       </TouchableOpacity>
                     </View>
                     <TouchableOpacity onPress={() => { closeModal(); navigation.navigate('ProfileTab' as any); }}>
@@ -516,55 +522,55 @@ export default function PlayerHomeScreen() {
                 <View style={styles.linkDivider} />
 
                 <View onLayout={e => { fieldY.current['position'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>{tr('playerApp.home.position')}</Text>
+                  <Text style={styles.fieldLabel} numberOfLines={1}>{tr('playerApp.home.position')}</Text>
                   <VoiceTextInput style={styles.input} value={editPosition} onChangeText={setEditPosition}
                     placeholder={tr('playerApp.home.phPosition')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['height'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>{tr('playerApp.home.height')}</Text>
+                  <Text style={styles.fieldLabel} numberOfLines={1}>{tr('playerApp.home.height')}</Text>
                   <VoiceTextInput style={styles.input} value={editHeight} onChangeText={setEditHeight}
                     placeholder={tr('playerApp.home.phHeight')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['wingspan'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>{tr('playerApp.home.wingspan')}</Text>
+                  <Text style={styles.fieldLabel} numberOfLines={1}>{tr('playerApp.home.wingspan')}</Text>
                   <VoiceTextInput style={styles.input} value={editWingspan} onChangeText={setEditWingspan}
                     placeholder={tr('playerApp.home.phWingspan')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['weight'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>{tr('playerApp.home.weight')}</Text>
+                  <Text style={styles.fieldLabel} numberOfLines={1}>{tr('playerApp.home.weight')}</Text>
                   <VoiceTextInput style={styles.input} value={editWeight} onChangeText={setEditWeight}
                     placeholder={tr('playerApp.home.phWeight')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['standing_reach'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>{tr('playerApp.home.standingReach')}</Text>
+                  <Text style={styles.fieldLabel} numberOfLines={1}>{tr('playerApp.home.standingReach')}</Text>
                   <VoiceTextInput style={styles.input} value={editStandingReach} onChangeText={setEditStandingReach}
                     placeholder={tr('playerApp.home.phStandingReach')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['school'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>{tr('playerApp.home.school')}</Text>
+                  <Text style={styles.fieldLabel} numberOfLines={1}>{tr('playerApp.home.school')}</Text>
                   <VoiceTextInput style={styles.input} value={editSchool} onChangeText={setEditSchool}
                     placeholder={tr('playerApp.home.phSchool')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['city'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>{tr('playerApp.home.city')}</Text>
+                  <Text style={styles.fieldLabel} numberOfLines={1}>{tr('playerApp.home.city')}</Text>
                   <VoiceTextInput style={styles.input} value={editCity} onChangeText={setEditCity}
                     placeholder={tr('playerApp.home.phCity')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['state'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>{tr('playerApp.home.state')}</Text>
+                  <Text style={styles.fieldLabel} numberOfLines={1}>{tr('playerApp.home.state')}</Text>
                   <VoiceTextInput style={styles.input} value={editState} onChangeText={setEditState}
                     placeholder={tr('playerApp.home.phState')} placeholderTextColor={t.muted2}
                     returnKeyType="next" />
                 </View>
                 <View onLayout={e => { fieldY.current['country'] = e.nativeEvent.layout.y; }}>
-                  <Text style={styles.fieldLabel}>{tr('playerApp.home.country')}</Text>
+                  <Text style={styles.fieldLabel} numberOfLines={1}>{tr('playerApp.home.country')}</Text>
                   <VoiceTextInput style={styles.input} value={editCountry} onChangeText={setEditCountry}
                     placeholder={tr('playerApp.home.phCountry')} placeholderTextColor={t.muted2}
                     returnKeyType="done" />
@@ -574,7 +580,7 @@ export default function PlayerHomeScreen() {
                   onPress={saveProfile}
                   disabled={saving}
                 >
-                  <Text style={styles.saveBtnText}>{saving ? tr('playerApp.home.saving') : tr('playerApp.home.saveChanges')}</Text>
+                  <Text style={styles.saveBtnText} numberOfLines={1}>{saving ? tr('playerApp.home.saving') : tr('playerApp.home.saveChanges')}</Text>
                 </TouchableOpacity>
               </KeyboardAwareScrollView>
             </TouchableOpacity>
@@ -592,7 +598,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   logo: { fontSize: 32, fontFamily: fonts[900], color: t.ink, letterSpacing: 0.5 },
   sub: { fontSize: 13, color: t.positive, marginTop: 2, fontFamily: fonts[600] },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6, flexShrink: 0 },
   notifBtn: { position: 'relative', padding: 4 },
   badge: {
     position: 'absolute',
@@ -619,8 +625,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
     marginLeft: 6,
+    flexShrink: 1,
+    maxWidth: '100%',
   },
-  linkedText: { color: t.positive, fontSize: 11, fontFamily: fonts[600] },
+  linkedText: { color: t.positive, fontSize: 11, fontFamily: fonts[600], flexShrink: 1 },
   programBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
   programText: { color: t.muted, fontSize: 12 },
   eyebrow: { color: t.label, fontSize: 12, fontFamily: fonts[600], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
@@ -628,28 +636,28 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   greetingSub: { color: t.muted, fontSize: 14, marginTop: 8 },
   circleBtn: {
     width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder, position: 'relative',
+    backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder, position: 'relative', flexShrink: 0,
   },
   bimCard: {
     backgroundColor: t.card, borderRadius: 22, padding: 20, marginHorizontal: 20, marginTop: 22,
     borderWidth: 1, borderColor: t.cardBorder,
   },
   bimTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  bimCardLabel: { color: t.muted2, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 1.6, textTransform: 'uppercase' },
-  trendPill: { paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999 },
+  bimCardLabel: { color: t.muted2, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 1.6, textTransform: 'uppercase', flexShrink: 1, marginRight: 8 },
+  trendPill: { paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999, flexShrink: 0 },
   trendText: { fontSize: 11, fontFamily: fonts[800] },
   bimScoreRow: { flexDirection: 'row', alignItems: 'baseline', gap: 12, marginTop: 8 },
-  bimScore: { color: t.ink, fontSize: 46, fontFamily: fonts[900], letterSpacing: -1, lineHeight: 48 },
-  bimOf: { color: t.muted, fontSize: 15, fontFamily: fonts[600] },
+  bimScore: { color: t.ink, fontSize: 46, fontFamily: fonts[900], letterSpacing: -1, lineHeight: 48, flexShrink: 0 },
+  bimOf: { color: t.muted, fontSize: 15, fontFamily: fonts[600], flexShrink: 1 },
   pillarBar: { flexDirection: 'row', gap: 5, marginTop: 18, height: 7 },
   pillarLabels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 9 },
-  pillarLabelText: { color: t.muted, fontSize: 11, fontFamily: fonts[600] },
+  pillarLabelText: { color: t.muted, fontSize: 11, fontFamily: fonts[600], flexShrink: 1, marginRight: 4 },
   feedCard: {
     flexDirection: 'row', alignItems: 'center', gap: 13,
     backgroundColor: t.card, borderRadius: 18, padding: 16, marginHorizontal: 20, marginBottom: 11,
     borderWidth: 1, borderColor: t.cardBorder,
   },
-  feedIcon: { width: 46, height: 46, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
+  feedIcon: { width: 46, height: 46, borderRadius: 13, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   feedTitle: { color: t.ink, fontSize: 16.5, fontFamily: fonts[800] },
   feedSub: { color: t.muted, fontSize: 13, marginTop: 2 },
   sectionLabel: {
@@ -678,7 +686,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
   },
-  cardTitle: { color: t.ink, fontSize: 15, fontFamily: fonts[800], marginBottom: 4 },
+  cardTitle: { color: t.ink, fontSize: 15, fontFamily: fonts[800], marginBottom: 4, flexShrink: 1 },
   cardDesc: { color: t.muted, fontSize: 11, lineHeight: 16 },
   linkRow: {
     flexDirection: 'row',
@@ -701,7 +709,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderColor: t.cardBorder,
   },
   profileCardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
-  profileCardTitle: { color: t.ink, fontSize: 14, fontFamily: fonts[700], flex: 1 },
+  profileCardTitle: { color: t.ink, fontSize: 14, fontFamily: fonts[700], flex: 1, flexShrink: 1, minWidth: 0 },
   editBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -710,16 +718,17 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 4,
+    flexShrink: 0,
   },
   editBtnText: { color: t.positive, fontSize: 12, fontFamily: fonts[600] },
   profileStats: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
-  profileStat: { flex: 1, alignItems: 'center' },
+  profileStat: { flex: 1, flexShrink: 1, minWidth: 0, alignItems: 'center', paddingHorizontal: 4 },
   profileStatVal: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   profileStatLabel: { color: t.muted, fontSize: 11, marginTop: 2 },
-  profileStatDivider: { width: 1, height: 36, backgroundColor: t.divider },
+  profileStatDivider: { width: 1, height: 36, backgroundColor: t.divider, flexShrink: 0 },
   profileLocation: { marginTop: 12, gap: 5, borderTopWidth: 1, borderTopColor: t.divider, paddingTop: 12 },
   profileLocationRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  profileLocationText: { color: t.muted, fontSize: 12 },
+  profileLocationText: { color: t.muted, fontSize: 12, flexShrink: 1 },
   modalOverlay: {
     flex: 1,
     backgroundColor: t.scrim,
@@ -738,7 +747,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.line, alignSelf: 'center', marginBottom: 16,
   },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  modalTitle: { color: t.ink, fontSize: 17, fontFamily: fonts[800] },
+  modalTitle: { color: t.ink, fontSize: 17, fontFamily: fonts[800], flexShrink: 1, minWidth: 0, marginRight: 10 },
   fieldLabel: { color: t.muted, fontSize: 12, fontFamily: fonts[600], marginBottom: 6, marginTop: 14 },
   input: {
     backgroundColor: t.chip,
@@ -761,17 +770,17 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   statusRow: { flexDirection: 'row', marginTop: 12 },
   notLinkedBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: t.chip, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 5,
+    backgroundColor: t.chip, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 5, flexShrink: 1,
   },
-  notLinkedText: { color: t.muted, fontSize: 11.5, fontFamily: fonts[600] },
+  notLinkedText: { color: t.muted, fontSize: 11.5, fontFamily: fonts[600], flexShrink: 1 },
   bimHint: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 3, marginTop: 16 },
   bimHintText: { color: t.muted2, fontSize: 12, fontFamily: fonts[600] },
 
   bimModalSub: { color: t.muted, fontSize: 13, lineHeight: 19, marginBottom: 16 },
   pbRow: { marginBottom: 14 },
   pbHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  pbLabel: { color: t.ink, fontSize: 14, fontFamily: fonts[700] },
-  pbVal: { color: t.inkSoft, fontSize: 14, fontFamily: fonts[800] },
+  pbLabel: { color: t.ink, fontSize: 14, fontFamily: fonts[700], flexShrink: 1, minWidth: 0, marginRight: 10 },
+  pbVal: { color: t.inkSoft, fontSize: 14, fontFamily: fonts[800], flexShrink: 0 },
   pbTrack: { height: 8, borderRadius: 4, backgroundColor: t.chip, overflow: 'hidden' },
   pbFill: { height: 8, borderRadius: 4, backgroundColor: t.accent },
   bimGroupLabel: { fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 1.4, textTransform: 'uppercase', marginBottom: 8 },
@@ -782,8 +791,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   linkSectionLabel: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 1.4, textTransform: 'uppercase', marginBottom: 8 },
   linkHint: { color: t.muted, fontSize: 12.5, lineHeight: 18, marginBottom: 10 },
   linkedRow: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.positiveSoft, borderRadius: 10, padding: 12 },
-  linkedRowText: { color: t.positive, fontSize: 14, fontFamily: fonts[700] },
-  linkBtn: { backgroundColor: t.positive, borderRadius: 10, paddingHorizontal: 18, alignItems: 'center', justifyContent: 'center' },
+  linkedRowText: { color: t.positive, fontSize: 14, fontFamily: fonts[700], flexShrink: 1 },
+  linkBtn: { backgroundColor: t.positive, borderRadius: 10, paddingHorizontal: 18, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   linkBtnText: { color: '#fff', fontSize: 14, fontFamily: fonts[800] },
   findCoachText: { color: t.label, fontSize: 13, fontFamily: fonts[700], marginTop: 12 },
   linkDivider: { height: 1, backgroundColor: t.divider, marginVertical: 18 },

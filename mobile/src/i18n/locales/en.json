@@ -2185,5 +2185,12 @@
     "title": "Review your system & philosophy",
     "newSeason": "A new season ({{season}}) has started — a good time to review and update your system & philosophy for {{season}}.",
     "welcomeBack": "Welcome back — a good time to review and update your system & philosophy for {{season}}."
+  },
+  "translation": {
+    "translating": "Translating…",
+    "autoTranslated": "Auto-translated",
+    "showingOriginal": "Showing the original",
+    "viewOriginal": "View original",
+    "showTranslation": "Show translation"
   }
 }

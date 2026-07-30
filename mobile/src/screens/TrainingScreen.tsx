@@ -79,15 +79,18 @@ export default function TrainingScreen() {
     >
     <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
-        <Text style={styles.title}>{tr('reportTypes.training_program')}</Text>
+        {/* Translated titles run 20-40% longer: shrink to fit one line. */}
+        <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+          {tr('reportTypes.training_program')}
+        </Text>
       </View>
 
       {/* Focus input */}
       <View style={styles.section}>
-        <Text style={styles.label}>{tr('training.additionalFocus')}</Text>
+        <Text style={styles.label} numberOfLines={1}>{tr('training.additionalFocus')}</Text>
         <VoiceTextInput
           style={styles.input}
           placeholder={tr('training.focusPlaceholder')}
@@ -102,21 +105,21 @@ export default function TrainingScreen() {
           <View style={styles.refChip}>
             <Ionicons name="document-attach" size={16} color={t.accent} />
             <Text style={styles.refChipText} numberOfLines={1}>{reference.name}</Text>
-            <TouchableOpacity onPress={() => setReference(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <TouchableOpacity style={styles.refChipClear} onPress={() => setReference(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <Ionicons name="close-circle" size={18} color={t.muted} />
             </TouchableOpacity>
           </View>
         ) : (
           <TouchableOpacity style={styles.importBtn} onPress={pickReference}>
             <Ionicons name="cloud-upload-outline" size={16} color={t.accent} />
-            <Text style={styles.importBtnText}>{tr('training.importReference')}</Text>
+            <Text style={styles.importBtnText} numberOfLines={1}>{tr('training.importReference')}</Text>
           </TouchableOpacity>
         )}
 
         <TouchableOpacity style={styles.generateBtn} onPress={generate} disabled={generating}>
           {generating
-            ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.generateText}>{'  ' + tr('training.generating')}</Text></>
-            : <><Ionicons name="barbell" size={16} color={t.ctaText} /><Text style={styles.generateText}>{'  ' + tr('training.generateProgram')}</Text></>
+            ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.generateText} numberOfLines={1}>{'  ' + tr('training.generating')}</Text></>
+            : <><Ionicons name="barbell" size={16} color={t.ctaText} /><Text style={styles.generateText} numberOfLines={1}>{'  ' + tr('training.generateProgram')}</Text></>
           }
         </TouchableOpacity>
         <GeneratingOverlay visible={generating} label={tr('training.buildingOverlay')} />
@@ -125,7 +128,7 @@ export default function TrainingScreen() {
       {/* Priority stack */}
       {current?.priorities && current.priorities.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.label}>{tr('training.priorityStack')}</Text>
+          <Text style={styles.label} numberOfLines={1}>{tr('training.priorityStack')}</Text>
           {current.priorities
             .filter(p => p && p.replace(/[^A-Za-z0-9]/g, '').length >= 3)
             .map((p, i) => (
@@ -142,7 +145,7 @@ export default function TrainingScreen() {
       {/* Program text */}
       {current?.program_text && (
         <View style={styles.section}>
-          <Text style={styles.label}>{tr('training.fullProgram')}</Text>
+          <Text style={styles.label} numberOfLines={1}>{tr('training.fullProgram')}</Text>
           {renderReport(current.program_text, { heading: t.ink, body: t.inkSoft })}
         </View>
       )}
@@ -150,13 +153,13 @@ export default function TrainingScreen() {
       {/* History */}
       {sessions.length > 1 && (
         <View style={styles.section}>
-          <Text style={styles.label}>{tr('training.previousPrograms')}</Text>
+          <Text style={styles.label} numberOfLines={1}>{tr('training.previousPrograms')}</Text>
           {[...sessions].reverse().slice(1).map((s, i, arr) => {
             const focus = (s.priorities ?? []).find(p => p && p.replace(/[^A-Za-z0-9]/g, '').length >= 3);
             return (
               <TouchableOpacity key={s.id} style={styles.historyCard} onPress={() => setCurrent(s)}>
-                <Text style={styles.historyPriority}>{tr('training.programNumber', { num: arr.length - i })}</Text>
-                <Text style={styles.historyDate}>
+                <Text style={styles.historyPriority} numberOfLines={1}>{tr('training.programNumber', { num: arr.length - i })}</Text>
+                <Text style={styles.historyDate} numberOfLines={1}>
                   {new Date(s.created_at).toLocaleDateString()}{focus ? ` · ${focus}` : ''}
                 </Text>
               </TouchableOpacity>
@@ -180,7 +183,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56, gap: 12 },
-  title: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6 },
+  backBtn: { flexShrink: 0 },
+  title: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6, flex: 1, flexShrink: 1, minWidth: 0 },
   section: { paddingHorizontal: 20, marginTop: 24 },
   label: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 },
   input: {
@@ -191,21 +195,22 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.ctaBg, borderRadius: 999, padding: 15,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
   },
-  generateText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15 },
+  generateText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15, flexShrink: 1 },
   importBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12,
-    backgroundColor: t.accentSoft, borderRadius: 12, padding: 13,
+    backgroundColor: t.accentSoft, borderRadius: 12, padding: 13, flexShrink: 1,
   },
-  importBtnText: { color: t.accent, fontFamily: fonts[600], fontSize: 12.5, flex: 1 },
+  importBtnText: { color: t.accent, fontFamily: fonts[600], fontSize: 12.5, flex: 1, flexShrink: 1, minWidth: 0 },
   refChip: {
     flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12,
     backgroundColor: t.card, borderRadius: 12, padding: 13, borderWidth: 1, borderColor: t.cardBorder,
   },
-  refChipText: { color: t.ink, fontFamily: fonts[600], fontSize: 13, flex: 1 },
+  refChipText: { color: t.ink, fontFamily: fonts[600], fontSize: 13, flex: 1, flexShrink: 1, minWidth: 0 },
+  refChipClear: { flexShrink: 0 },
   priorityRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12, gap: 12 },
   priorityNum: {
     width: 28, height: 28, borderRadius: 14, backgroundColor: t.accent,
-    alignItems: 'center', justifyContent: 'center',
+    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
   priorityNumText: { color: t.ctaText, fontSize: 13, fontFamily: fonts[800] },
   priorityText: { color: t.inkSoft, fontSize: 14, flex: 1, lineHeight: 20, paddingTop: 4 },

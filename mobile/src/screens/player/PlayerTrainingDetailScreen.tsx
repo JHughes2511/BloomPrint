@@ -196,12 +196,13 @@ export default function PlayerTrainingDetailScreen() {
     <ScreenBackground>
       <KeyboardAwareScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.title}>{tr('reportTypes.training_program')}</Text>
-            <Text style={styles.sub}>{new Date(training.created_at).toLocaleDateString()}</Text>
+          {/* Long translated titles clip instead of wrapping under the back button. */}
+          <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginLeft: 12, marginRight: 8 }}>
+            <Text style={styles.title} numberOfLines={1}>{tr('reportTypes.training_program')}</Text>
+            <Text style={styles.sub} numberOfLines={1}>{new Date(training.created_at).toLocaleDateString()}</Text>
           </View>
         </View>
 
@@ -209,7 +210,7 @@ export default function PlayerTrainingDetailScreen() {
           <View style={styles.coachNotesBox}>
             <View style={styles.coachNotesHeader}>
               <Ionicons name="chatbubble" size={14} color={t.positive} />
-              <Text style={styles.coachNotesLabel}>{tr('playerApp.trainingDetail.coachNotes')}</Text>
+              <Text style={styles.coachNotesLabel} numberOfLines={1}>{tr('playerApp.trainingDetail.coachNotes')}</Text>
             </View>
             <Text style={styles.coachNotesText}>{training.coach_notes}</Text>
           </View>
@@ -220,8 +221,8 @@ export default function PlayerTrainingDetailScreen() {
           <>
             <View style={styles.progressCard}>
               <View style={styles.progressTop}>
-                <Text style={styles.progressLabel}>{tr('playerApp.trainingDetail.weeklyProgress')}</Text>
-                <Text style={styles.progressCount}>{doneCount} / {drillTotal}</Text>
+                <Text style={styles.progressLabel} numberOfLines={1}>{tr('playerApp.trainingDetail.weeklyProgress')}</Text>
+                <Text style={styles.progressCount} numberOfLines={1}>{doneCount} / {drillTotal}</Text>
               </View>
               <View style={styles.progressTrack}>
                 <View style={[styles.progressFill, { width: `${drillTotal ? (doneCount / drillTotal) * 100 : 0}%` }]} />
@@ -230,7 +231,7 @@ export default function PlayerTrainingDetailScreen() {
 
             {drillSections.map((sec, si) => (
               <View key={si} style={styles.section}>
-                <Text style={styles.sectionLabel}>{sec.title || tr('playerApp.trainingDetail.drills')}</Text>
+                <Text style={styles.sectionLabel} numberOfLines={1}>{sec.title || tr('playerApp.trainingDetail.drills')}</Text>
                 {sec.drills.map(d => {
                   const done = completed.has(d.key);
                   return (
@@ -243,9 +244,10 @@ export default function PlayerTrainingDetailScreen() {
                       <View style={[styles.checkbox, done ? styles.checkboxDone : styles.checkboxIdle]}>
                         {done && <Ionicons name="checkmark" size={15} color="#16201A" />}
                       </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={[styles.drillLabel, done && styles.drillLabelDone]}>{d.label}</Text>
-                        {d.meta ? <Text style={styles.drillMeta}>{d.meta}</Text> : null}
+                      {/* A long translated drill label clips here; the checkbox never moves. */}
+                      <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
+                        <Text style={[styles.drillLabel, done && styles.drillLabelDone]} numberOfLines={2}>{d.label}</Text>
+                        {d.meta ? <Text style={styles.drillMeta} numberOfLines={1}>{d.meta}</Text> : null}
                       </View>
                     </TouchableOpacity>
                   );
@@ -256,7 +258,7 @@ export default function PlayerTrainingDetailScreen() {
         )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{tr('playerApp.trainingDetail.yourProgram')}</Text>
+          <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.trainingDetail.yourProgram')}</Text>
           <View style={styles.programBox}>
             {training.program_text ? (
               <Markdown style={markdownStyles}>{training.program_text}</Markdown>
@@ -271,7 +273,7 @@ export default function PlayerTrainingDetailScreen() {
 
         {/* Comments */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{tr('playerApp.trainingDetail.commentsCount', { count: comments.length })}</Text>
+          <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.trainingDetail.commentsCount', { count: comments.length })}</Text>
           <CommentThread
             comments={comments as any}
             accent={t.positive}
@@ -304,7 +306,7 @@ export default function PlayerTrainingDetailScreen() {
 
         {/* Update Report with Feedback */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{tr('playerApp.trainingDetail.updateWithFeedback')}</Text>
+          <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.trainingDetail.updateWithFeedback')}</Text>
           <View style={styles.programBox}>
             <Text style={{ color: t.muted, fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
               {tr('playerApp.trainingDetail.feedbackHint')}
@@ -326,7 +328,7 @@ export default function PlayerTrainingDetailScreen() {
               >
                 {savingCorrection
                   ? <ActivityIndicator color={t.ink} size="small" />
-                  : <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 14 }}>{tr('playerApp.trainingDetail.saveForLater')}</Text>}
+                  : <Text numberOfLines={1} style={{ color: t.ink, fontFamily: fonts[700], fontSize: 14 }}>{tr('playerApp.trainingDetail.saveForLater')}</Text>}
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.sendBtn, { flex: 1, borderRadius: 12, paddingVertical: 14, flexDirection: 'row', gap: 6, justifyContent: 'center' }, refreshing && { opacity: 0.5 }]}
@@ -334,8 +336,8 @@ export default function PlayerTrainingDetailScreen() {
                 disabled={refreshing}
               >
                 {refreshing
-                  ? <><ActivityIndicator color="#fff" size="small" /><Text style={{ color: '#fff', fontFamily: fonts[700], fontSize: 13 }}>{tr('playerApp.trainingDetail.updating')}</Text></>
-                  : <><Ionicons name="refresh" size={15} color="#fff" /><Text style={{ color: '#fff', fontFamily: fonts[700], fontSize: 13 }}>{tr('playerApp.trainingDetail.applyRegenerate')}</Text></>
+                  ? <><ActivityIndicator color="#fff" size="small" /><Text numberOfLines={1} style={{ color: '#fff', fontFamily: fonts[700], fontSize: 13, flexShrink: 1 }}>{tr('playerApp.trainingDetail.updating')}</Text></>
+                  : <><Ionicons name="refresh" size={15} color="#fff" /><Text numberOfLines={1} style={{ color: '#fff', fontFamily: fonts[700], fontSize: 13, flexShrink: 1 }}>{tr('playerApp.trainingDetail.applyRegenerate')}</Text></>
                 }
               </TouchableOpacity>
             </View>
@@ -347,9 +349,9 @@ export default function PlayerTrainingDetailScreen() {
                   <View key={c.id} style={{ backgroundColor: t.chip, borderRadius: 10, padding: 10, marginBottom: 6, opacity: c.applied ? 0.55 : 1 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
                       {c.applied
-                        ? <View style={{ backgroundColor: t.positiveSoft, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}><Text style={{ color: t.positive, fontSize: 9, fontFamily: fonts[700] }}>{tr('playerApp.trainingDetail.applied')}</Text></View>
-                        : <View style={{ backgroundColor: t.card, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}><Text style={{ color: t.muted, fontSize: 9, fontFamily: fonts[700] }}>{tr('playerApp.trainingDetail.pending')}</Text></View>}
-                      <Text style={{ color: t.muted2, fontSize: 10 }}>{c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}</Text>
+                        ? <View style={{ backgroundColor: t.positiveSoft, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}><Text numberOfLines={1} style={{ color: t.positive, fontSize: 9, fontFamily: fonts[700] }}>{tr('playerApp.trainingDetail.applied')}</Text></View>
+                        : <View style={{ backgroundColor: t.card, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 1 }}><Text numberOfLines={1} style={{ color: t.muted, fontSize: 9, fontFamily: fonts[700] }}>{tr('playerApp.trainingDetail.pending')}</Text></View>}
+                      <Text numberOfLines={1} style={{ color: t.muted2, fontSize: 10, flexShrink: 0, marginLeft: 8 }}>{c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}</Text>
                     </View>
                     <Text style={{ color: t.inkSoft, fontSize: 12.5 }}>{c.correction}</Text>
                   </View>
@@ -365,7 +367,7 @@ export default function PlayerTrainingDetailScreen() {
             <TouchableOpacity style={styles.exportBtn} onPress={exportProgram} disabled={exporting}>
               {exporting
                 ? <ActivityIndicator color={t.ink} />
-                : <><Ionicons name="share-outline" size={18} color={t.ink} /><Text style={styles.exportBtnText}>{tr('playerApp.trainingDetail.exportBtn')}</Text></>}
+                : <><Ionicons name="share-outline" size={18} color={t.ink} /><Text style={styles.exportBtnText} numberOfLines={1}>{tr('playerApp.trainingDetail.exportBtn')}</Text></>}
             </TouchableOpacity>
           </View>
         ) : null}
@@ -388,8 +390,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56 },
-  title: { color: t.ink, fontSize: 16, fontFamily: fonts[900] },
-  sub: { color: t.muted2, fontSize: 11, marginTop: 2 },
+  title: { color: t.ink, fontSize: 16, fontFamily: fonts[900], flexShrink: 1 },
+  sub: { color: t.muted2, fontSize: 11, marginTop: 2, flexShrink: 1 },
   coachNotesBox: {
     backgroundColor: t.positiveSoft,
     borderLeftWidth: 3,
@@ -400,7 +402,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderRadius: 10,
   },
   coachNotesHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  coachNotesLabel: { color: t.positive, fontSize: 11, fontFamily: fonts[700], textTransform: 'uppercase' },
+  coachNotesLabel: { color: t.positive, fontSize: 11, fontFamily: fonts[700], textTransform: 'uppercase', flexShrink: 1 },
   coachNotesText: { color: t.inkSoft, fontSize: 13, lineHeight: 20 },
   section: { paddingHorizontal: 20, marginTop: 24 },
   sectionLabel: {
@@ -414,8 +416,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     marginHorizontal: 20, marginTop: 20, borderWidth: 1, borderColor: t.cardBorder,
   },
   progressTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  progressLabel: { color: t.muted2, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 1.6, textTransform: 'uppercase' },
-  progressCount: { color: t.accent, fontSize: 15, fontFamily: fonts[800] },
+  progressLabel: { color: t.muted2, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 1.6, textTransform: 'uppercase', flexShrink: 1, marginRight: 8 },
+  progressCount: { color: t.accent, fontSize: 15, fontFamily: fonts[800], flexShrink: 0 },
   progressTrack: { height: 9, borderRadius: 5, backgroundColor: t.chip, marginTop: 12, overflow: 'hidden' },
   progressFill: { height: 9, borderRadius: 5, backgroundColor: t.accent },
 
@@ -425,19 +427,19 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderWidth: 1, borderColor: t.cardBorder,
   },
   drillRowDone: { borderColor: t.cardBorder },
-  checkbox: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  checkbox: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   checkboxIdle: { borderWidth: 2, borderColor: t.line },
   checkboxDone: { backgroundColor: t.pistachio },
-  drillLabel: { color: t.ink, fontSize: 15.5, fontFamily: fonts[800] },
+  drillLabel: { color: t.ink, fontSize: 15.5, fontFamily: fonts[800], flexShrink: 1 },
   drillLabelDone: { color: t.muted, textDecorationLine: 'line-through', fontFamily: fonts[700] },
-  drillMeta: { color: t.muted2, fontSize: 12.5, marginTop: 1 },
+  drillMeta: { color: t.muted2, fontSize: 12.5, marginTop: 1, flexShrink: 1 },
 
   exportBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: t.chip, borderRadius: 12, paddingVertical: 15,
     borderWidth: 1, borderColor: t.cta2Border,
   },
-  exportBtnText: { color: t.ink, fontSize: 15, fontFamily: fonts[800] },
+  exportBtnText: { color: t.ink, fontSize: 15, fontFamily: fonts[800], flexShrink: 1 },
   generatingBox: { alignItems: 'center', paddingVertical: 32, gap: 12 },
   generatingText: { color: t.muted2, fontSize: 13 },
   commentCard: {

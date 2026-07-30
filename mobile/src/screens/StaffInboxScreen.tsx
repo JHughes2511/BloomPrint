@@ -337,10 +337,10 @@ export default function StaffInboxScreen() {
               )}
             </View>
             <View style={styles.sectionRow}>
-              <Text style={styles.sectionLabel}>{tr('staffHub.messages')}</Text>
+              <Text style={[styles.sectionLabel, { flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>{tr('staffHub.messages')}</Text>
               <TouchableOpacity style={styles.newMsgBtn} onPress={() => setShowCompose(true)}>
                 <Ionicons name="create-outline" size={15} color={t.ctaText} />
-                <Text style={styles.newMsgText}>{tr('staffHub.new')}</Text>
+                <Text style={styles.newMsgText} numberOfLines={1}>{tr('staffHub.new')}</Text>
               </TouchableOpacity>
             </View>
             {convFiltered.length === 0 && (
@@ -351,7 +351,7 @@ export default function StaffInboxScreen() {
                 <View style={[styles.iconBox, { backgroundColor: t.accentSoft }]}>
                   <Ionicons name={c.is_group ? 'people' : 'chatbubble-ellipses-outline'} size={18} color={t.accent} />
                 </View>
-                <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
                   <Text style={styles.cardTitle} numberOfLines={1}>{c.title}</Text>
                   <Text style={styles.cardSub} numberOfLines={1}>{c.last_text || tr('staffHub.noMessagesYet')}</Text>
                 </View>
@@ -387,9 +387,9 @@ export default function StaffInboxScreen() {
               <View style={[styles.iconBox, { backgroundColor: badgeColor.bg }]}>
                 <Ionicons name={iconName as any} size={18} color={badgeColor.text} />
               </View>
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
                 <Text style={styles.cardTitle} numberOfLines={1}>{title}</Text>
-                <Text style={styles.cardSub}>{tr('staffHub.fromSender', { type: typeLabel, name: item.sender_name })}</Text>
+                <Text style={styles.cardSub} numberOfLines={1}>{tr('staffHub.fromSender', { type: typeLabel, name: item.sender_name })}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3, flexWrap: 'wrap' }}>
                   <Text style={styles.cardDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
                   {chips.map((c, i) => (
@@ -427,7 +427,7 @@ export default function StaffInboxScreen() {
               style={[styles.teamChip, selectedTeam?.id === team.id && styles.teamChipActive]}
               onPress={() => loadTeamGames(team)}
             >
-              <Text style={[styles.teamChipText, selectedTeam?.id === team.id && styles.teamChipTextActive]}>
+              <Text style={[styles.teamChipText, selectedTeam?.id === team.id && styles.teamChipTextActive]} numberOfLines={1}>
                 {team.name}
               </Text>
             </TouchableOpacity>
@@ -483,10 +483,10 @@ export default function StaffInboxScreen() {
             <View style={[styles.iconBox, { backgroundColor: game.kind === 'session' ? t.positiveSoft : t.accentSoft }]}>
               <Ionicons name={game.kind === 'session' ? 'stats-chart-outline' : 'clipboard-outline'} size={18} color={game.kind === 'session' ? t.positive : t.accent} />
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>{game.title}</Text>
-              <Text style={styles.cardSub}>{game.kind === 'session' ? tr('staffHub.liveGameStats') : tr('reportTypes.game_report')}</Text>
-              {game.date && <Text style={styles.cardDate}>{game.date}</Text>}
+            <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
+              <Text style={styles.cardTitle} numberOfLines={1}>{game.title}</Text>
+              <Text style={styles.cardSub} numberOfLines={1}>{game.kind === 'session' ? tr('staffHub.liveGameStats') : tr('reportTypes.game_report')}</Text>
+              {game.date && <Text style={styles.cardDate} numberOfLines={1}>{game.date}</Text>}
             </View>
             <Ionicons name="chevron-forward" size={14} color={t.muted2} />
           </TouchableOpacity>
@@ -518,31 +518,31 @@ export default function StaffInboxScreen() {
 
         <TouchableOpacity style={styles.createTeamBtn} onPress={() => { setNewTeamName(''); setShowCreateTeam(true); }}>
           <Ionicons name="add-circle-outline" size={18} color={t.accent} />
-          <Text style={styles.createTeamText}>{tr('staffHub.createNewTeam')}</Text>
+          <Text style={styles.createTeamText} numberOfLines={1}>{tr('staffHub.createNewTeam')}</Text>
         </TouchableOpacity>
 
         {searchResults.map((team: any) => {
           const isMember = myTeamIds.has(team.id);
           return (
             <View key={team.id} style={[styles.card, { marginHorizontal: 0 }]}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.cardTitle}>{team.name}</Text>
-                {team.coach_name && <Text style={styles.cardSub}>{tr('staffHub.headCoach', { name: team.coach_name })}</Text>}
-                {team.competition_level && <Text style={styles.cardDate}>{team.competition_level}</Text>}
+              <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+                <Text style={styles.cardTitle} numberOfLines={1}>{team.name}</Text>
+                {team.coach_name && <Text style={styles.cardSub} numberOfLines={1}>{tr('staffHub.headCoach', { name: team.coach_name })}</Text>}
+                {team.competition_level && <Text style={styles.cardDate} numberOfLines={1}>{team.competition_level}</Text>}
               </View>
               {isMember ? (
-                <View style={{ backgroundColor: t.positiveSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 }}>
-                  <Text style={{ color: t.positive, fontSize: 12, fontFamily: fonts[700] }}>{tr('staffHub.joinedBadge')}</Text>
+                <View style={{ backgroundColor: t.positiveSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, flexShrink: 0, maxWidth: 120 }}>
+                  <Text style={{ color: t.positive, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('staffHub.joinedBadge')}</Text>
                 </View>
               ) : (
                 <TouchableOpacity
-                  style={{ backgroundColor: t.ctaBg, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 }}
+                  style={{ backgroundColor: t.ctaBg, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, flexShrink: 0, maxWidth: 120 }}
                   onPress={() => joinTeam(team.id)}
                   disabled={joining === team.id}
                 >
                   {joining === team.id
                     ? <ActivityIndicator color={t.ctaText} size="small" />
-                    : <Text style={{ color: t.ctaText, fontSize: 13, fontFamily: fonts[700] }}>{tr('staffHub.join')}</Text>}
+                    : <Text style={{ color: t.ctaText, fontSize: 13, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('staffHub.join')}</Text>}
                 </TouchableOpacity>
               )}
             </View>
@@ -567,9 +567,9 @@ export default function StaffInboxScreen() {
                     <View style={[styles.iconBox, { backgroundColor: t.accentSoft }]}>
                       <Ionicons name={depth ? 'git-branch-outline' : 'people'} size={17} color={t.accent} />
                     </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.cardTitle}>{tm.name}</Text>
-                      <Text style={styles.cardSub}>{(tm.member_count ?? 1) === 1 ? tr('staffHub.memberCountOne', { count: tm.member_count ?? 1 }) : tr('staffHub.memberCountOther', { count: tm.member_count ?? 1 })}{tm.is_owner ? ` · ${tr('staffHub.ownedByYou')}` : tm.coach_name ? ` · ${tm.coach_name}` : ''}</Text>
+                    <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
+                      <Text style={styles.cardTitle} numberOfLines={1}>{tm.name}</Text>
+                      <Text style={styles.cardSub} numberOfLines={1}>{(tm.member_count ?? 1) === 1 ? tr('staffHub.memberCountOne', { count: tm.member_count ?? 1 }) : tr('staffHub.memberCountOther', { count: tm.member_count ?? 1 })}{tm.is_owner ? ` · ${tr('staffHub.ownedByYou')}` : tm.coach_name ? ` · ${tm.coach_name}` : ''}</Text>
                     </View>
                     {kids.length > 0 && (
                       <TouchableOpacity onPress={() => setCollapsedTeams(prev => ({ ...prev, [tm.id]: !prev[tm.id] }))} style={{ padding: 4 }}>
@@ -582,17 +582,17 @@ export default function StaffInboxScreen() {
                   </View>
                   <View style={{ flexDirection: 'row', gap: 8, marginLeft: depth * 16, marginBottom: 8, flexWrap: 'wrap' }}>
                     <TouchableOpacity style={styles.teamActBtn} onPress={() => messageGroup(tm)} disabled={messagingTeam === tm.id}>
-                      {messagingTeam === tm.id ? <ActivityIndicator color={t.accent} size="small" /> : <><Ionicons name="chatbubble-ellipses-outline" size={14} color={t.accent} /><Text style={styles.teamActText}>{tr('staffHub.message')}</Text></>}
+                      {messagingTeam === tm.id ? <ActivityIndicator color={t.accent} size="small" /> : <><Ionicons name="chatbubble-ellipses-outline" size={14} color={t.accent} /><Text style={styles.teamActText} numberOfLines={1}>{tr('staffHub.message')}</Text></>}
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.teamActBtn} onPress={() => { setSubFor(tm); setSubName(''); }}>
-                      <Ionicons name="add" size={14} color={t.accent} /><Text style={styles.teamActText}>{tr('staffHub.subTeam')}</Text>
+                      <Ionicons name="add" size={14} color={t.accent} /><Text style={styles.teamActText} numberOfLines={1}>{tr('staffHub.subTeam')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.teamActBtn} onPress={() => { setInviteFor(tm); setInviteSearch(''); setInviteResults([]); }}>
-                      <Ionicons name="person-add-outline" size={14} color={t.accent} /><Text style={styles.teamActText}>{tr('staffHub.invite')}</Text>
+                      <Ionicons name="person-add-outline" size={14} color={t.accent} /><Text style={styles.teamActText} numberOfLines={1}>{tr('staffHub.invite')}</Text>
                     </TouchableOpacity>
                     {!tm.is_owner && (
                       <TouchableOpacity style={[styles.teamActBtn, { borderColor: t.negative }]} onPress={() => leaveTeam(tm.id)} disabled={leaving === tm.id}>
-                        {leaving === tm.id ? <ActivityIndicator color={t.negative} size="small" /> : <Text style={[styles.teamActText, { color: t.negative }]}>{tr('staffHub.leave')}</Text>}
+                        {leaving === tm.id ? <ActivityIndicator color={t.negative} size="small" /> : <Text style={[styles.teamActText, { color: t.negative }]} numberOfLines={1}>{tr('staffHub.leave')}</Text>}
                       </TouchableOpacity>
                     )}
                   </View>
@@ -619,10 +619,12 @@ export default function StaffInboxScreen() {
     <ScreenBackground>
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
-        <Text style={styles.title}>{tr('staffHub.title')}</Text>
+        {/* Translated titles run 20-40% longer than English, so the title shrinks
+            and clips instead of wrapping into the tab bar below. */}
+        <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('staffHub.title')}</Text>
       </View>
 
       {/* Tab bar */}
@@ -638,7 +640,16 @@ export default function StaffInboxScreen() {
             onPress={() => setTab(tm.key)}
           >
             <Ionicons name={tm.icon as any} size={16} color={tab === tm.key ? t.ctaText : t.muted2} />
-            <Text style={[styles.tabBtnText, tab === tm.key && styles.tabBtnTextActive]}>{tm.label}</Text>
+            {/* German tab labels are much longer, so each label shrinks a little
+                then clips instead of widening the tab and overflowing the bar. */}
+            <Text
+              style={[styles.tabBtnText, tab === tm.key && styles.tabBtnTextActive]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}
+            >
+              {tm.label}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -652,15 +663,15 @@ export default function StaffInboxScreen() {
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={[styles.modalBox, { maxHeight: '80%' }]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <Text style={styles.modalTitle}>{tr('staffHub.newMessage')}</Text>
-              <TouchableOpacity onPress={() => { setShowCompose(false); setSelectedStaff([]); }}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
+              <Text style={[styles.modalTitle, { flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('staffHub.newMessage')}</Text>
+              <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => { setShowCompose(false); setSelectedStaff([]); }}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
             <Text style={[styles.cardSub, { marginBottom: 8 }]}>Search staff by name. Add more than one for a group message.</Text>
             {selectedStaff.length > 0 && (
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }} contentContainerStyle={{ gap: 6 }}>
                 {selectedStaff.map(s => (
                   <TouchableOpacity key={s.id} style={styles.selChip} onPress={() => toggleStaff(s)}>
-                    <Text style={styles.selChipText}>{s.name}</Text>
+                    <Text style={styles.selChipText} numberOfLines={1}>{s.name}</Text>
                     <Ionicons name="close-circle" size={14} color={t.accent} />
                   </TouchableOpacity>
                 ))}
@@ -685,9 +696,9 @@ export default function StaffInboxScreen() {
                 const sel = selectedStaff.some(x => x.id === s.id);
                 return (
                   <TouchableOpacity key={s.id} style={[styles.staffRow, sel && { borderColor: t.accent }]} onPress={() => toggleStaff(s)}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.cardTitle}>{s.name}</Text>
-                      <Text style={styles.cardSub}>{[s.role, s.program_name].filter(Boolean).join(' · ')}</Text>
+                    <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+                      <Text style={styles.cardTitle} numberOfLines={1}>{s.name}</Text>
+                      <Text style={styles.cardSub} numberOfLines={1}>{[s.role, s.program_name].filter(Boolean).join(' · ')}</Text>
                     </View>
                     {sel && <Ionicons name="checkmark-circle" size={18} color={t.accent} />}
                   </TouchableOpacity>
@@ -719,10 +730,10 @@ export default function StaffInboxScreen() {
             />
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity style={[styles.startBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setShowCreateTeam(false)}>
-                <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('common.cancel')}</Text>
+                <Text style={{ color: t.ink, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.startBtn, { flex: 1, opacity: newTeamName.trim() && !creatingTeam ? 1 : 0.5 }]} onPress={createTeam} disabled={!newTeamName.trim() || creatingTeam}>
-                {creatingTeam ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.startBtnText}>{tr('staffHub.create')}</Text>}
+                {creatingTeam ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.startBtnText} numberOfLines={1}>{tr('staffHub.create')}</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -745,10 +756,10 @@ export default function StaffInboxScreen() {
             />
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity style={[styles.startBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setSubFor(null)}>
-                <Text style={{ color: t.ink, fontFamily: fonts[700] }}>{tr('common.cancel')}</Text>
+                <Text style={{ color: t.ink, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.startBtn, { flex: 1, opacity: subName.trim() && !creatingSub ? 1 : 0.5 }]} onPress={createSubteam} disabled={!subName.trim() || creatingSub}>
-                {creatingSub ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.startBtnText}>{tr('staffHub.create')}</Text>}
+                {creatingSub ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.startBtnText} numberOfLines={1}>{tr('staffHub.create')}</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -760,8 +771,8 @@ export default function StaffInboxScreen() {
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={[styles.modalBox, { maxHeight: '80%' }]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <Text style={styles.modalTitle}>Invite to {inviteFor?.name}</Text>
-              <TouchableOpacity onPress={() => setInviteFor(null)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
+              <Text style={[styles.modalTitle, { flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>Invite to {inviteFor?.name}</Text>
+              <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setInviteFor(null)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
             <Text style={[styles.cardSub, { marginBottom: 8 }]}>Search a coach by name, or enter an email to invite someone new. Coach accounts only.</Text>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
@@ -781,16 +792,16 @@ export default function StaffInboxScreen() {
             </View>
             {inviteSearch.includes('@') && (
               <TouchableOpacity style={[styles.staffRow, { justifyContent: 'space-between' }]} onPress={() => doInvite({ email: inviteSearch.trim() })} disabled={inviting}>
-                <Text style={styles.cardTitle}>Email invite: {inviteSearch.trim()}</Text>
+                <Text style={[styles.cardTitle, { flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>Email invite: {inviteSearch.trim()}</Text>
                 <Ionicons name="mail-outline" size={18} color={t.accent} />
               </TouchableOpacity>
             )}
             <ScrollView style={{ maxHeight: 260 }}>
               {inviteResults.map((c: any) => (
                 <TouchableOpacity key={c.id} style={styles.staffRow} onPress={() => doInvite({ coach_id: c.id })} disabled={inviting}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.cardTitle}>{c.name}</Text>
-                    <Text style={styles.cardSub}>{[c.role, c.program_name].filter(Boolean).join(' · ')}</Text>
+                  <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+                    <Text style={styles.cardTitle} numberOfLines={1}>{c.name}</Text>
+                    <Text style={styles.cardSub} numberOfLines={1}>{[c.role, c.program_name].filter(Boolean).join(' · ')}</Text>
                   </View>
                   <Ionicons name="person-add-outline" size={18} color={t.accent} />
                 </TouchableOpacity>
@@ -813,11 +824,11 @@ export default function StaffInboxScreen() {
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.modalTitle}>{activeGame?.title}</Text>
-                <Text style={styles.modalSub}>{activeGame?.kind === 'session' ? 'Live Game Stats' : 'Game Report'} · {activeGame?.date}</Text>
+              <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+                <Text style={styles.modalTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{activeGame?.title}</Text>
+                <Text style={styles.modalSub} numberOfLines={1}>{activeGame?.kind === 'session' ? 'Live Game Stats' : 'Game Report'} · {activeGame?.date}</Text>
               </View>
-              <TouchableOpacity onPress={() => setActiveGame(null)}>
+              <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setActiveGame(null)}>
                 <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
@@ -895,12 +906,12 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent', paddingTop: 56 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 60, paddingHorizontal: 20 },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 8, marginBottom: 12, gap: 12 },
-  title: { fontSize: 22, fontFamily: fonts[900], color: t.ink },
+  title: { fontSize: 22, fontFamily: fonts[900], color: t.ink, flex: 1, flexShrink: 1, minWidth: 0 },
   emptyText: { color: t.muted2, marginTop: 12, fontSize: 14, textAlign: 'center' },
   tabBar: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 12, backgroundColor: t.card, borderRadius: 12, padding: 4 },
-  tabBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 8, borderRadius: 10 },
+  tabBtn: { flex: 1, flexShrink: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 8, borderRadius: 10 },
   tabBtnActive: { backgroundColor: t.ctaBg },
-  tabBtnText: { color: t.muted2, fontSize: 11, fontFamily: fonts[700] },
+  tabBtnText: { color: t.muted2, fontSize: 11, fontFamily: fonts[700], flexShrink: 1, minWidth: 0 },
   tabBtnTextActive: { color: t.ctaText },
   sectionLabel: { color: t.label, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10, marginTop: 4 },
   card: {
@@ -918,11 +929,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.accentSoft, borderRadius: 10, padding: 12,
     borderWidth: 1, borderColor: t.accent, marginBottom: 12,
   },
-  fullDataBtnText: { flex: 1, color: t.accent, fontSize: 13, fontFamily: fonts[700] },
+  fullDataBtnText: { flex: 1, flexShrink: 1, minWidth: 0, color: t.accent, fontSize: 13, fontFamily: fonts[700] },
   regenBadgeText: { color: t.accent, fontSize: 10, fontFamily: fonts[700] },
-  teamChip: { borderWidth: 1, borderColor: t.line, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7 },
+  teamChip: { borderWidth: 1, borderColor: t.line, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7, flexShrink: 1, maxWidth: 220 },
   teamChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
-  teamChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600] },
+  teamChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600], flexShrink: 1 },
   teamChipTextActive: { color: t.ctaText },
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8 },
@@ -946,20 +957,20 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   sendBtn: { backgroundColor: t.ctaBg, borderRadius: 10, width: 44, alignItems: 'center', justifyContent: 'center' },
   regenBtn: { backgroundColor: t.accent, borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 4 },
   sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20 },
-  newMsgBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6, marginBottom: 8 },
-  newMsgText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 12.5 },
+  newMsgBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6, marginBottom: 8, flexShrink: 1, maxWidth: 160 },
+  newMsgText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 12.5, flexShrink: 1 },
   unreadDot: { minWidth: 20, height: 20, borderRadius: 10, backgroundColor: t.accent, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6, marginRight: 6 },
   unreadDotText: { color: '#fff', fontSize: 11, fontFamily: fonts[800] },
   searchInput: { backgroundColor: t.chip, borderRadius: 10, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line },
   searchBar: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.chip, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, borderWidth: 1, borderColor: t.line, marginHorizontal: 16, marginBottom: 12 },
   searchBarInput: { flex: 1, color: t.ink, fontSize: 14, paddingVertical: 0 },
-  selChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: t.accentSoft, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, borderWidth: 1, borderColor: t.accent },
-  selChipText: { color: t.accent, fontSize: 13, fontFamily: fonts[600] },
+  selChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: t.accentSoft, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, borderWidth: 1, borderColor: t.accent, flexShrink: 1, maxWidth: 200 },
+  selChipText: { color: t.accent, fontSize: 13, fontFamily: fonts[600], flexShrink: 1 },
   staffRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: t.card, borderRadius: 12, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: t.cardBorder },
   startBtn: { backgroundColor: t.ctaBg, borderRadius: 999, padding: 15, alignItems: 'center', marginTop: 10 },
-  startBtnText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15 },
-  teamActBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: t.accent },
-  teamActText: { color: t.accent, fontSize: 12, fontFamily: fonts[700] },
-  createTeamBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.accentSoft, borderRadius: 12, paddingVertical: 12, borderWidth: 1, borderColor: t.accent, marginBottom: 8 },
-  createTeamText: { color: t.accent, fontFamily: fonts[700], fontSize: 13.5 },
+  startBtnText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15, flexShrink: 1 },
+  teamActBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: t.accent, flexShrink: 1, maxWidth: '100%' },
+  teamActText: { color: t.accent, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 },
+  createTeamBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.accentSoft, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 12, borderWidth: 1, borderColor: t.accent, marginBottom: 8 },
+  createTeamText: { color: t.accent, fontFamily: fonts[700], fontSize: 13.5, flexShrink: 1 },
 });

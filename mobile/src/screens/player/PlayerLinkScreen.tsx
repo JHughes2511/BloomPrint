@@ -191,7 +191,12 @@ export default function PlayerLinkScreen() {
     <ScreenBackground>
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>{tr('playerApp.link.title')}</Text>
+        {/* Translated headers run 20-40% longer, so the title shrinks and clips. */}
+        <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+          <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+            {tr('playerApp.link.title')}
+          </Text>
+        </View>
         <View style={styles.headerActions}>
           <TouchableOpacity style={styles.circleBtn} onPress={toggle} accessibilityLabel={tr('playerApp.link.toggleTheme')}>
             <Ionicons name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'} size={18} color={t.inkSoft} />
@@ -212,9 +217,9 @@ export default function PlayerLinkScreen() {
           </View>
           <View style={styles.avatarCam}><Ionicons name="camera" size={15} color={t.ctaText} /></View>
         </View>
-        <Text style={styles.name}>{playerUser?.name}</Text>
+        <Text style={styles.name} numberOfLines={1}>{playerUser?.name}</Text>
         {(profile?.position || profile?.school_name) ? (
-          <Text style={styles.nameSub}>
+          <Text style={styles.nameSub} numberOfLines={1}>
             {[profile?.position, profile?.school_name].filter(Boolean).join(' · ')}
           </Text>
         ) : null}
@@ -224,17 +229,17 @@ export default function PlayerLinkScreen() {
       {profile && (
         <View style={styles.section}>
           <View style={styles.sectionHead}>
-            <Text style={styles.sectionLabel}>{tr('playerApp.link.athleticProfile')}</Text>
+            <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.link.athleticProfile')}</Text>
             <TouchableOpacity style={styles.editBtn} onPress={openEdit}>
               <Ionicons name="pencil-outline" size={14} color={t.accent} />
-              <Text style={styles.editBtnText}>{tr('playerApp.link.edit')}</Text>
+              <Text style={styles.editBtnText} numberOfLines={1}>{tr('playerApp.link.edit')}</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.statsCard}>
             {[[tr('playerApp.link.position'), profile.position], [tr('playerApp.link.height'), profile.height], [tr('playerApp.link.wingspan'), profile.wingspan], [tr('playerApp.link.weight'), profile.weight]].map(([label, val], i) => (
               <View key={label as string} style={[styles.stat, i < 3 && styles.statBorder]}>
-                <Text style={styles.statVal}>{(val as string) || '—'}</Text>
-                <Text style={styles.statLabel}>{label as string}</Text>
+                <Text style={styles.statVal} numberOfLines={1}>{(val as string) || '—'}</Text>
+                <Text style={styles.statLabel} numberOfLines={1}>{label as string}</Text>
               </View>
             ))}
           </View>
@@ -243,26 +248,26 @@ export default function PlayerLinkScreen() {
 
       {/* Linked coaches & teams */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>{tr('playerApp.link.linkedCoachesTeams')}</Text>
+        <Text style={styles.sectionLabel} numberOfLines={1}>{tr('playerApp.link.linkedCoachesTeams')}</Text>
         {links.length === 0 ? (
           <Text style={styles.emptyLinks}>{tr('playerApp.link.notLinkedYet')}</Text>
         ) : (
           links.map(link => (
             <View key={link.player_id} style={styles.linkCard}>
               <View style={styles.linkIcon}><Ionicons name="shield-checkmark" size={20} color={t.accent} /></View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.linkName}>{link.team_name || link.program_name || link.player_name}</Text>
-                <Text style={styles.linkSub}>
+              <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+                <Text style={styles.linkName} numberOfLines={1}>{link.team_name || link.program_name || link.player_name}</Text>
+                <Text style={styles.linkSub} numberOfLines={1}>
                   {tr('playerApp.link.linked')}{link.coach_name ? ` · ${tr('playerApp.link.coach')} ${link.coach_name}` : ''}{link.is_primary ? ` · ${tr('playerApp.link.primary')}` : ''}
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => unlink(link)}><Text style={styles.unlinkText}>{tr('playerApp.link.unlink')}</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => unlink(link)}><Text style={styles.unlinkText} numberOfLines={1}>{tr('playerApp.link.unlink')}</Text></TouchableOpacity>
             </View>
           ))
         )}
         <TouchableOpacity style={styles.linkCta} onPress={() => setShowLink(true)}>
           <Ionicons name="link" size={18} color={t.ctaText} />
-          <Text style={styles.linkCtaText}>{tr('playerApp.link.linkToCoach')}</Text>
+          <Text style={styles.linkCtaText} numberOfLines={1}>{tr('playerApp.link.linkToCoach')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -272,7 +277,7 @@ export default function PlayerLinkScreen() {
       <View style={styles.modalOverlay}>
         <View style={styles.sheet}>
           <View style={styles.sheetHeader}>
-            <Text style={styles.sheetTitle}>{tr('playerApp.link.editProfile')}</Text>
+            <Text style={styles.sheetTitle} numberOfLines={1}>{tr('playerApp.link.editProfile')}</Text>
             <TouchableOpacity onPress={() => setShowEdit(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
           </View>
           <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 40 }}>
@@ -286,12 +291,12 @@ export default function PlayerLinkScreen() {
               <View style={styles.avatarCam}><Ionicons name="camera" size={15} color={t.ctaText} /></View>
             </TouchableOpacity>
 
-            <Text style={styles.fieldLabel}>{tr('auth.fullName')}</Text>
+            <Text style={styles.fieldLabel} numberOfLines={1}>{tr('auth.fullName')}</Text>
             <VoiceTextInput style={styles.input} value={eName} onChangeText={setEName} placeholder={tr('playerApp.link.yourName')} placeholderTextColor={t.muted2} />
 
-            <Text style={styles.fieldLabel}>{tr('playerApp.link.country')}</Text>
+            <Text style={styles.fieldLabel} numberOfLines={1}>{tr('playerApp.link.country')}</Text>
             <CountryField value={eCountry} onChange={setECountry} placeholder={tr('playerApp.link.selectCountry')} />
-            <Text style={styles.fieldLabel}>{tr('playerApp.link.cityRegion')}</Text>
+            <Text style={styles.fieldLabel} numberOfLines={1}>{tr('playerApp.link.cityRegion')}</Text>
             <VoiceTextInput style={styles.input} value={eCity} onChangeText={setECity} placeholder={tr('auth.cityRegionOptional')} placeholderTextColor={t.muted2} />
 
             {(playerUser?.player_id
@@ -306,7 +311,7 @@ export default function PlayerLinkScreen() {
               : []
             ).map(([label, val, setter, ph]) => (
               <View key={label}>
-                <Text style={styles.fieldLabel}>{label}</Text>
+                <Text style={styles.fieldLabel} numberOfLines={1}>{label}</Text>
                 <VoiceTextInput style={styles.input} value={val} onChangeText={setter} placeholder={ph} placeholderTextColor={t.muted2} />
               </View>
             ))}
@@ -314,7 +319,7 @@ export default function PlayerLinkScreen() {
               <LanguagePicker />
             </View>
             <TouchableOpacity style={[styles.btn, saving && { opacity: 0.6 }]} onPress={saveProfile} disabled={saving}>
-              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>{tr('playerApp.link.saveChanges')}</Text>}
+              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText} numberOfLines={1}>{tr('playerApp.link.saveChanges')}</Text>}
             </TouchableOpacity>
           </KeyboardAwareScrollView>
         </View>
@@ -326,35 +331,35 @@ export default function PlayerLinkScreen() {
       <View style={styles.modalOverlay}>
         <View style={styles.sheet}>
           <View style={styles.sheetHeader}>
-            <Text style={styles.sheetTitle}>{tr('playerApp.link.linkToCoach')}</Text>
+            <Text style={styles.sheetTitle} numberOfLines={1}>{tr('playerApp.link.linkToCoach')}</Text>
             <TouchableOpacity onPress={() => setShowLink(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
           </View>
           <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 40 }}>
             <View style={styles.linkHero}>
               <View style={styles.linkHeroIcon}><Ionicons name="link" size={30} color={t.accent} /></View>
-              <Text style={styles.linkHeroTitle}>{tr('playerApp.link.connectTitle')}</Text>
+              <Text style={styles.linkHeroTitle} numberOfLines={2}>{tr('playerApp.link.connectTitle')}</Text>
               <Text style={styles.linkHeroDesc}>{tr('playerApp.link.connectDesc')}</Text>
             </View>
 
-            <Text style={styles.fieldLabel}>{tr('playerApp.link.enterLinkCode')}</Text>
+            <Text style={styles.fieldLabel} numberOfLines={1}>{tr('playerApp.link.enterLinkCode')}</Text>
             <VoiceTextInput style={styles.input} placeholder={tr('playerApp.link.inviteCodePlaceholder')} placeholderTextColor={t.muted2}
               value={inviteCode} onChangeText={setInviteCode} autoCapitalize="characters" />
 
             <TouchableOpacity style={styles.scanBtn} onPress={openScanner}>
               <Ionicons name="qr-code-outline" size={20} color={t.ink} />
-              <Text style={styles.scanBtnText}>{tr('playerApp.link.scanQrCode')}</Text>
+              <Text style={styles.scanBtnText} numberOfLines={1}>{tr('playerApp.link.scanQrCode')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.btn, { backgroundColor: t.ctaBg, marginTop: 14 }, (!inviteCode.trim() || inviteLoading) && { opacity: 0.5 }]}
               onPress={() => submitInvite()} disabled={!inviteCode.trim() || inviteLoading}>
-              {inviteLoading ? <ActivityIndicator color={t.ctaText} /> : <Text style={[styles.btnText, { color: t.ctaText }]}>{tr('playerApp.link.linkAccount')}</Text>}
+              {inviteLoading ? <ActivityIndicator color={t.ctaText} /> : <Text style={[styles.btnText, { color: t.ctaText }]} numberOfLines={1}>{tr('playerApp.link.linkAccount')}</Text>}
             </TouchableOpacity>
 
             <View style={styles.orRow}>
-              <View style={styles.orLine} /><Text style={styles.orText}>{tr('playerApp.link.or')}</Text><View style={styles.orLine} />
+              <View style={styles.orLine} /><Text style={styles.orText} numberOfLines={1}>{tr('playerApp.link.or')}</Text><View style={styles.orLine} />
             </View>
 
-            <Text style={styles.fieldLabel}>{tr('playerApp.link.findCoachTrainer')}</Text>
+            <Text style={styles.fieldLabel} numberOfLines={1}>{tr('playerApp.link.findCoachTrainer')}</Text>
             <View style={styles.searchRow}>
               <VoiceTextInput style={[styles.input, { flex: 1, marginBottom: 0 }]} placeholder={tr('playerApp.link.searchByNameProgram')} placeholderTextColor={t.muted2}
                 value={searchQ} onChangeText={setSearchQ} />
@@ -364,12 +369,12 @@ export default function PlayerLinkScreen() {
             </View>
             {searchResults.map((c: any) => (
               <View key={c.id} style={styles.resultCard}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.resultName}>{c.name}</Text>
-                  <Text style={styles.resultSub}>{tr(`auth.role${(c.role ?? '').charAt(0).toUpperCase()}${(c.role ?? '').slice(1)}`, ROLE_LABELS[c.role] ?? c.role)} · {c.program_name}</Text>
+                <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+                  <Text style={styles.resultName} numberOfLines={1}>{c.name}</Text>
+                  <Text style={styles.resultSub} numberOfLines={1}>{tr(`auth.role${(c.role ?? '').charAt(0).toUpperCase()}${(c.role ?? '').slice(1)}`, ROLE_LABELS[c.role] ?? c.role)} · {c.program_name}</Text>
                 </View>
                 <TouchableOpacity style={styles.requestBtn} onPress={() => requestLink(c.id, c.name)} disabled={requestingId === c.id}>
-                  {requestingId === c.id ? <ActivityIndicator color={t.accent} size="small" /> : <Text style={styles.requestBtnText}>{tr('playerApp.link.request')}</Text>}
+                  {requestingId === c.id ? <ActivityIndicator color={t.accent} size="small" /> : <Text style={styles.requestBtnText} numberOfLines={1}>{tr('playerApp.link.request')}</Text>}
                 </TouchableOpacity>
               </View>
             ))}
@@ -392,7 +397,7 @@ export default function PlayerLinkScreen() {
         />
         <View style={styles.scanOverlay} pointerEvents="box-none">
           <View style={styles.scanFrame} />
-          <Text style={styles.scanHint}>{tr('playerApp.link.pointAtQr')}</Text>
+          <Text style={styles.scanHint} numberOfLines={2}>{tr('playerApp.link.pointAtQr')}</Text>
         </View>
         <TouchableOpacity style={styles.scanClose} onPress={() => setShowScanner(false)}>
           <Ionicons name="close" size={26} color="#fff" />
@@ -406,9 +411,9 @@ export default function PlayerLinkScreen() {
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingTop: 56 },
-  title: { color: t.ink, fontSize: 28, fontFamily: fonts[800], letterSpacing: -0.6 },
-  headerActions: { flexDirection: 'row', gap: 8 },
-  circleBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder },
+  title: { color: t.ink, fontSize: 28, fontFamily: fonts[800], letterSpacing: -0.6, flexShrink: 1 },
+  headerActions: { flexDirection: 'row', gap: 8, flexShrink: 0 },
+  circleBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder, flexShrink: 0 },
 
   avatarWrap: { alignItems: 'center', marginTop: 12, marginBottom: 8 },
   editAvatarWrap: { alignSelf: 'center', marginBottom: 8 },
@@ -421,49 +426,49 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
 
   section: { paddingHorizontal: 22, marginTop: 24 },
   sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sectionLabel: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 1.6, textTransform: 'uppercase', marginBottom: 12 },
-  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, marginBottom: 12 },
-  editBtnText: { color: t.accent, fontSize: 12, fontFamily: fonts[700] },
+  sectionLabel: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 1.6, textTransform: 'uppercase', marginBottom: 12, flexShrink: 1, marginRight: 8 },
+  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, marginBottom: 12, flexShrink: 0 },
+  editBtnText: { color: t.accent, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 },
   statsCard: { flexDirection: 'row', backgroundColor: t.card, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: t.cardBorder },
-  stat: { flex: 1, alignItems: 'center' },
+  stat: { flex: 1, flexShrink: 1, minWidth: 0, alignItems: 'center', paddingHorizontal: 3 },
   statBorder: { borderRightWidth: 1, borderRightColor: t.divider },
   statVal: { color: t.ink, fontSize: 16, fontFamily: fonts[800] },
   statLabel: { color: t.muted, fontSize: 10.5, marginTop: 3 },
 
   emptyLinks: { color: t.muted, fontSize: 13, lineHeight: 19, marginBottom: 14 },
   linkCard: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: t.card, borderRadius: 15, padding: 15, borderWidth: 1, borderColor: t.cardBorder, marginBottom: 10 },
-  linkIcon: { width: 42, height: 42, borderRadius: 11, backgroundColor: t.accentSoft, alignItems: 'center', justifyContent: 'center' },
-  linkName: { color: t.ink, fontSize: 16, fontFamily: fonts[800] },
-  linkSub: { color: t.positive, fontSize: 12.5, fontFamily: fonts[700], marginTop: 1 },
-  unlinkText: { color: t.negative, fontSize: 13, fontFamily: fonts[700] },
+  linkIcon: { width: 42, height: 42, borderRadius: 11, backgroundColor: t.accentSoft, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  linkName: { color: t.ink, fontSize: 16, fontFamily: fonts[800], flexShrink: 1 },
+  linkSub: { color: t.positive, fontSize: 12.5, fontFamily: fonts[700], marginTop: 1, flexShrink: 1 },
+  unlinkText: { color: t.negative, fontSize: 13, fontFamily: fonts[700], flexShrink: 0 },
   linkCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.ctaBg, borderRadius: 14, paddingVertical: 15, marginTop: 6 },
-  linkCtaText: { color: t.ctaText, fontSize: 15.5, fontFamily: fonts[800] },
+  linkCtaText: { color: t.ctaText, fontSize: 15.5, fontFamily: fonts[800], flexShrink: 1 },
 
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 24, paddingBottom: 36, maxHeight: '88%' },
   sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 },
-  sheetTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800] },
+  sheetTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], flexShrink: 1, minWidth: 0, marginRight: 10 },
   fieldLabel: { color: t.muted2, fontSize: 10.5, fontFamily: fonts[700], letterSpacing: 1.6, textTransform: 'uppercase', marginBottom: 8, marginTop: 14 },
   input: { backgroundColor: t.card, borderRadius: 12, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.cardBorder, marginBottom: 4 },
   btn: { backgroundColor: t.positive, borderRadius: 12, padding: 15, alignItems: 'center', marginTop: 24 },
-  btnText: { color: '#fff', fontFamily: fonts[800], fontSize: 15 },
+  btnText: { color: '#fff', fontFamily: fonts[800], fontSize: 15, flexShrink: 1 },
 
   linkHero: { alignItems: 'center', marginBottom: 8 },
   linkHeroIcon: { width: 70, height: 70, borderRadius: 20, backgroundColor: t.accentSoft, alignItems: 'center', justifyContent: 'center' },
   linkHeroTitle: { color: t.ink, fontSize: 19, fontFamily: fonts[800], marginTop: 14 },
   linkHeroDesc: { color: t.muted, fontSize: 13.5, textAlign: 'center', marginTop: 8, lineHeight: 20, paddingHorizontal: 8 },
   scanBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, borderWidth: 1, borderColor: t.cta2Border, borderRadius: 14, paddingVertical: 15, marginTop: 12 },
-  scanBtnText: { color: t.ink, fontSize: 15, fontFamily: fonts[800] },
+  scanBtnText: { color: t.ink, fontSize: 15, fontFamily: fonts[800], flexShrink: 1 },
   orRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginVertical: 22 },
   orLine: { flex: 1, height: 1, backgroundColor: t.divider },
   orText: { color: t.muted2, fontSize: 12, fontFamily: fonts[700], letterSpacing: 1 },
   searchRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
-  searchBtn: { backgroundColor: t.positive, borderRadius: 12, padding: 14, alignItems: 'center', justifyContent: 'center' },
+  searchBtn: { backgroundColor: t.positive, borderRadius: 12, padding: 14, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   resultCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: t.card, borderRadius: 12, padding: 12, marginTop: 8, borderWidth: 1, borderColor: t.cardBorder },
-  resultName: { color: t.ink, fontSize: 14, fontFamily: fonts[700] },
-  resultSub: { color: t.muted, fontSize: 12, marginTop: 2 },
-  requestBtn: { backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
-  requestBtnText: { color: t.accent, fontSize: 12, fontFamily: fonts[700] },
+  resultName: { color: t.ink, fontSize: 14, fontFamily: fonts[700], flexShrink: 1 },
+  resultSub: { color: t.muted, fontSize: 12, marginTop: 2, flexShrink: 1 },
+  requestBtn: { backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, flexShrink: 0 },
+  requestBtnText: { color: t.accent, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 },
 
   scanOverlay: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
   scanFrame: { width: 230, height: 230, borderRadius: 24, borderWidth: 3, borderColor: '#fff' },

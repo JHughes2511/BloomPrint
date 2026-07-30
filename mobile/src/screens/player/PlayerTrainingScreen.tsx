@@ -101,7 +101,12 @@ export default function PlayerTrainingScreen() {
     >
       <View style={styles.header}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>{tr('playerApp.training.title')}</Text>
+          {/* Long translations shrink and clip rather than pushing the search button out. */}
+          <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+            <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+              {tr('playerApp.training.title')}
+            </Text>
+          </View>
           <TouchableOpacity
             style={styles.searchBtn}
             onPress={() => {
@@ -114,7 +119,7 @@ export default function PlayerTrainingScreen() {
             <Ionicons name={searchOpen ? 'close' : 'search'} size={20} color={t.ink} />
           </TouchableOpacity>
         </View>
-        <Text style={styles.sub}>
+        <Text style={styles.sub} numberOfLines={1}>
           {unified.length > 0 ? tr('playerApp.training.subtitleHasPrograms') : tr('playerApp.training.subtitleEmpty')}
         </Text>
         {searchOpen ? (
@@ -138,14 +143,14 @@ export default function PlayerTrainingScreen() {
       {unified.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="barbell-outline" size={48} color={t.muted2} />
-          <Text style={styles.emptyTitle}>{tr('playerApp.training.emptyTitle')}</Text>
+          <Text style={styles.emptyTitle} numberOfLines={2}>{tr('playerApp.training.emptyTitle')}</Text>
           <Text style={styles.emptyDesc}>
             {tr('playerApp.training.emptyDesc')}
           </Text>
         </View>
       ) : (
         <>
-          <Text style={[styles.sectionLabel, { marginTop: 22 }]}>{tr('playerApp.training.sentToYou')}</Text>
+          <Text style={[styles.sectionLabel, { marginTop: 22 }]} numberOfLines={1}>{tr('playerApp.training.sentToYou')}</Text>
 
           {filtered.length === 0 ? (
             <Text style={styles.noResults}>{tr('playerApp.training.noMatch', { query: query.trim() })}</Text>
@@ -164,18 +169,18 @@ export default function PlayerTrainingScreen() {
                 <View style={styles.iconBg}>
                   <Ionicons name="barbell" size={20} color="#16201A" />
                 </View>
-                <View style={{ flex: 1, marginLeft: 13 }}>
-                  <Text style={styles.cardTitle}>{idx === 0 ? tr('playerApp.training.latestProgram') : tr('reportTypes.training_program')}</Text>
-                  <Text style={styles.cardDate}>{tr('playerApp.training.sentTime', { time: timeAgo(pt.created_at) })}</Text>
+                <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginLeft: 13, marginRight: 8 }}>
+                  <Text style={styles.cardTitle} numberOfLines={1}>{idx === 0 ? tr('playerApp.training.latestProgram') : tr('reportTypes.training_program')}</Text>
+                  <Text style={styles.cardDate} numberOfLines={1}>{tr('playerApp.training.sentTime', { time: timeAgo(pt.created_at) })}</Text>
                 </View>
                 {pt.origin === 'coach' ? (
                   <View style={styles.coachBadge}>
-                    <Text style={styles.coachBadgeText}>{tr('playerApp.training.fromCoach')}</Text>
+                    <Text style={styles.coachBadgeText} numberOfLines={1}>{tr('playerApp.training.fromCoach')}</Text>
                   </View>
                 ) : pt.coach_notes ? (
                   <View style={styles.notesBadge}>
                     <Ionicons name="chatbubble-ellipses-outline" size={12} color={t.positive} />
-                    <Text style={styles.notesBadgeText}>{tr('playerApp.training.coachNotes')}</Text>
+                    <Text style={styles.notesBadgeText} numberOfLines={1}>{tr('playerApp.training.coachNotes')}</Text>
                   </View>
                 ) : null}
                 <Ionicons name="chevron-forward" size={16} color={t.muted2} style={{ marginLeft: 8 }} />
@@ -194,7 +199,7 @@ export default function PlayerTrainingScreen() {
                     <View style={styles.progressTrack}>
                       <View style={[styles.progressFill, { width: `${Math.min(100, (done / total) * 100)}%` }]} />
                     </View>
-                    <Text style={styles.progressLabel}>{done}/{total}</Text>
+                    <Text style={styles.progressLabel} numberOfLines={1}>{done}/{total}</Text>
                   </View>
                 );
               })()}
@@ -215,7 +220,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   title: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6 },
   searchBtn: {
     width: 40, height: 40, borderRadius: 12, backgroundColor: t.card,
-    borderWidth: 1, borderColor: t.cardBorder, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: t.cardBorder, alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
   searchBox: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
@@ -251,21 +256,22 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   cardTop: { flexDirection: 'row', alignItems: 'center' },
   iconBg: {
     width: 40, height: 40, borderRadius: 12, backgroundColor: t.pistachio,
-    alignItems: 'center', justifyContent: 'center',
+    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
-  cardTitle: { color: t.ink, fontSize: 15.5, fontFamily: fonts[800] },
-  cardDate: { color: t.muted, fontSize: 12.5, marginTop: 1 },
+  cardTitle: { color: t.ink, fontSize: 15.5, fontFamily: fonts[800], flexShrink: 1 },
+  cardDate: { color: t.muted, fontSize: 12.5, marginTop: 1, flexShrink: 1 },
   notesBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: t.positiveSoft, borderRadius: 999,
     paddingHorizontal: 10, paddingVertical: 4,
+    flexShrink: 1, maxWidth: 130,
   },
-  notesBadgeText: { color: t.positive, fontSize: 10.5, fontFamily: fonts[700] },
-  coachBadge: { backgroundColor: t.accentSoft, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
-  coachBadgeText: { color: t.accent, fontSize: 10.5, fontFamily: fonts[700] },
+  notesBadgeText: { color: t.positive, fontSize: 10.5, fontFamily: fonts[700], flexShrink: 1 },
+  coachBadge: { backgroundColor: t.accentSoft, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, flexShrink: 1, maxWidth: 130 },
+  coachBadgeText: { color: t.accent, fontSize: 10.5, fontFamily: fonts[700], flexShrink: 1 },
   preview: { color: t.muted, fontSize: 12.5, marginTop: 11, lineHeight: 18 },
   progressWrap: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 },
-  progressTrack: { flex: 1, height: 7, borderRadius: 4, backgroundColor: t.chip, overflow: 'hidden' },
+  progressTrack: { flex: 1, flexShrink: 1, minWidth: 0, height: 7, borderRadius: 4, backgroundColor: t.chip, overflow: 'hidden' },
   progressFill: { height: 7, borderRadius: 4, backgroundColor: t.accent },
-  progressLabel: { color: t.muted, fontSize: 11.5, fontFamily: fonts[700] },
+  progressLabel: { color: t.muted, fontSize: 11.5, fontFamily: fonts[700], flexShrink: 0 },
 });

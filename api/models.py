@@ -421,6 +421,25 @@ class ShareApproval(Base):
     created_at               = Column(DateTime, default=datetime.utcnow)
 
 
+class ReportTranslation(Base):
+    """Cached translation of a report's text into one language.
+
+    Reports are written in whatever language the coach used at generation time and
+    kept as the source of truth. When someone reads one in a different language we
+    translate on view and cache it here, keyed by the SOURCE text's hash so an
+    edited/regenerated report invalidates itself instead of serving a stale copy.
+    """
+    __tablename__ = "report_translations"
+
+    id          = Column(Integer, primary_key=True, index=True)
+    report_type = Column(String, nullable=False)   # eval / team_report / game / game_session / game_report / training
+    report_id   = Column(Integer, nullable=False)
+    lang        = Column(String, nullable=False)   # BCP-47 primary tag
+    source_hash = Column(String, nullable=False)   # sha256 of the source text
+    text        = Column(Text, nullable=False)
+    created_at  = Column(DateTime, default=datetime.utcnow)
+
+
 class CoachNotification(Base):
     __tablename__ = "coach_notifications"
 
