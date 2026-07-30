@@ -165,7 +165,7 @@ export default function ImportScreen() {
           {/* Translated titles run 20-40% longer, so the text block shrinks and
               clips instead of wrapping under the chevron. */}
           <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginLeft: 12, marginRight: 8 }}>
-            <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+            <Text style={styles.title} numberOfLines={1}>
               {isRosterMode ? tr('importScreen.titleRoster') : tr('importScreen.titlePlayers')}
             </Text>
             <Text style={styles.sub} numberOfLines={1}>
@@ -369,7 +369,7 @@ export default function ImportScreen() {
         {/* Result */}
         {result && (
           <View style={styles.resultBox}>
-            <Text style={styles.resultTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('importScreen.importComplete')}</Text>
+            <Text style={styles.resultTitle} numberOfLines={1}>{tr('importScreen.importComplete')}</Text>
             <View style={styles.statRow}>
               <View style={styles.stat}>
                 <Text style={styles.statNum}>{result.rows_processed}</Text>

@@ -216,7 +216,7 @@ export default function PlayerHomeScreen() {
               shrinks and clips rather than pushing the action buttons off-screen. */}
           <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 10 }}>
             <Text style={styles.eyebrow} numberOfLines={1}>{tr('playerApp.home.playerPortal')}</Text>
-            <Text style={styles.greeting} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+            <Text style={styles.greeting} numberOfLines={1}>
               {tr('playerApp.home.greeting', { name: firstName })}
             </Text>
             {subtitleBits.length > 0 && (

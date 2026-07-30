@@ -1190,19 +1190,44 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   // different-sized screen (iPad vs phone, rotate, resize, web) they mis-scale and
   // the grab handles drift off. Rebuild them from the feet-data whenever the
   // display scale changes; hand-drawn marks are left untouched.
-  const prevScaleRef = useRef({ idx: -1, scale: 0 });
+  const prevScaleRef = useRef({ idx: -1, scale: 0, courtType: '' as string });
   useEffect(() => {
     if (!scale || loading) return;
     // Do NOT record a scale before the board is loaded. `avail` starts as a
     // window-size ESTIMATE and is refined by onLayout; recording the estimate
     // here made the first real layout look like a resize and rescaled strokes
     // by a ratio derived from a guessed header height.
-    if (!boardsRef.current[activeBoardIdx]) return;
+    const curBoard = boardsRef.current[activeBoardIdx];
+    if (!curBoard) return;
+    const ct = curBoard.court_type;
     const p = prevScaleRef.current;
-    const sameBoard = p.idx === activeBoardIdx && p.scale > 0;
+
+    // A court-type switch (Full <-> Half <-> 3/4) ALSO changes `scale`, but
+    // setCourtType has already converted the coordinates via remapStrokes.
+    // Treating that as a display resize scaled every mark a second time, which
+    // is why players moved after switching court size. Only a scale change with
+    // the SAME court type is a real resize.
+    const sameBoard = p.idx === activeBoardIdx && p.scale > 0 && p.courtType === ct;
     const ratio = sameBoard ? scale / p.scale : 1;
-    if (sameBoard && Math.abs(ratio - 1) < 0.002) { prevScaleRef.current = { idx: activeBoardIdx, scale }; return; }
-    prevScaleRef.current = { idx: activeBoardIdx, scale };
+    if (sameBoard && Math.abs(ratio - 1) < 0.002) {
+      prevScaleRef.current = { idx: activeBoardIdx, scale, courtType: ct };
+      return;
+    }
+    const courtTypeChanged = p.idx === activeBoardIdx && p.courtType && p.courtType !== ct;
+    prevScaleRef.current = { idx: activeBoardIdx, scale, courtType: ct };
+
+    if (courtTypeChanged) {
+      // Coordinates are already correct for the new court; just re-baseline the
+      // canvas stamp so the next load doesn't think they need rescaling.
+      setBoards(prev => {
+        const b = prev[activeBoardIdx];
+        if (!b) return prev;
+        const n = [...prev];
+        n[activeBoardIdx] = { ...b, canvas: { w: courtW, h: courtH, type: b.court_type } };
+        return n;
+      });
+      return;
+    }
     setBoards(prev => {
       const b = prev[activeBoardIdx];
       if (!b) return prev;

@@ -624,7 +624,7 @@ export default function StaffInboxScreen() {
         </TouchableOpacity>
         {/* Translated titles run 20-40% longer than English, so the title shrinks
             and clips instead of wrapping into the tab bar below. */}
-        <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('staffHub.title')}</Text>
+        <Text style={styles.title} numberOfLines={1}>{tr('staffHub.title')}</Text>
       </View>
 
       {/* Tab bar */}
@@ -645,8 +645,6 @@ export default function StaffInboxScreen() {
             <Text
               style={[styles.tabBtnText, tab === tm.key && styles.tabBtnTextActive]}
               numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.7}
             >
               {tm.label}
             </Text>
@@ -663,7 +661,7 @@ export default function StaffInboxScreen() {
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={[styles.modalBox, { maxHeight: '80%' }]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <Text style={[styles.modalTitle, { flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('staffHub.newMessage')}</Text>
+              <Text style={[styles.modalTitle, { flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>{tr('staffHub.newMessage')}</Text>
               <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => { setShowCompose(false); setSelectedStaff([]); }}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
             <Text style={[styles.cardSub, { marginBottom: 8 }]}>Search staff by name. Add more than one for a group message.</Text>
@@ -771,7 +769,7 @@ export default function StaffInboxScreen() {
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={[styles.modalBox, { maxHeight: '80%' }]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <Text style={[styles.modalTitle, { flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>Invite to {inviteFor?.name}</Text>
+              <Text style={[styles.modalTitle, { flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>Invite to {inviteFor?.name}</Text>
               <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setInviteFor(null)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
             <Text style={[styles.cardSub, { marginBottom: 8 }]}>Search a coach by name, or enter an email to invite someone new. Coach accounts only.</Text>
@@ -825,7 +823,7 @@ export default function StaffInboxScreen() {
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
               <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
-                <Text style={styles.modalTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{activeGame?.title}</Text>
+                <Text style={styles.modalTitle} numberOfLines={1}>{activeGame?.title}</Text>
                 <Text style={styles.modalSub} numberOfLines={1}>{activeGame?.kind === 'session' ? 'Live Game Stats' : 'Game Report'} · {activeGame?.date}</Text>
               </View>
               <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setActiveGame(null)}>

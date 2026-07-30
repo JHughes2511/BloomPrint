@@ -100,7 +100,7 @@ export default function PlayerNotificationsScreen() {
       >
         <View style={styles.header}>
           {/* Long translated titles scale down to one line instead of wrapping. */}
-          <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+          <Text style={styles.title} numberOfLines={1}>
             {tr('playerApp.notifications.title')}
           </Text>
           <Text style={styles.sub} numberOfLines={1}>{tr('playerApp.notifications.unread', { count: notifications.filter(n => !n.read).length })}</Text>

@@ -244,13 +244,13 @@ export default function RosterScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        {/* Translated headers run 20-40% longer than English, so the text block
-            shrinks and clips rather than wrapping into the row below. */}
+        {/* Translated headers run 20-40% longer than English. Keep English's type
+            size and let the subtitle take a second line instead of clipping. */}
         <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
-          <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+          <Text style={styles.title} numberOfLines={1}>
             {tr('roster.title')}
           </Text>
-          <Text style={styles.sub} numberOfLines={1}>
+          <Text style={styles.sub} numberOfLines={2}>
             {currentTeamName ?? tr('roster.allTeams')} · {tr('roster.playersCount', { count: visiblePlayers.length })}
           </Text>
         </View>
@@ -564,7 +564,7 @@ export default function RosterScreen() {
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, paddingTop: 56 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 12 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 20, marginBottom: 12 },
   title: { fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6, color: t.ink },
   sub: { fontSize: 12, color: t.muted, marginTop: 2 },
   importBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: t.cta2Border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, marginRight: 8, flexShrink: 1, maxWidth: 150 },

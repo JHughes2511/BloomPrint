@@ -126,7 +126,7 @@ export default function OnboardingScreen() {
         <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 22, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
           {fieldKey ? (
             <>
-              <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr(`onboarding.fields.${fieldKey}.label`)}</Text>
+              <Text style={styles.title} numberOfLines={1}>{tr(`onboarding.fields.${fieldKey}.label`)}</Text>
               <Text style={styles.desc}>{tr(`onboarding.fields.${fieldKey}.desc`)}</Text>
               <Text style={styles.subLabel} numberOfLines={1}>{tr('onboarding.selectAllThatApply')}</Text>
               <View style={styles.chipWrap}>
@@ -152,7 +152,7 @@ export default function OnboardingScreen() {
             </>
           ) : (
             <>
-              <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('onboarding.joinTeamTitle')}</Text>
+              <Text style={styles.title} numberOfLines={1}>{tr('onboarding.joinTeamTitle')}</Text>
               <Text style={styles.desc}>{tr('onboarding.joinTeamDesc')}</Text>
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
                 <TextInput

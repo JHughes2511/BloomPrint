@@ -422,6 +422,15 @@ export default function EvalReportScreen() {
     }
   };
 
+  // MUST be above the early returns below: a hook that only runs once `ev` has
+  // loaded changes the hook count between renders and crashes with "Rendered
+  // more hooks than during the previous render".
+  // Reports keep the language they were written in; when the reader's language
+  // differs the FULL report body is shown translated, with a toggle back. The
+  // broken-out section view still reads the original, because getFixedSections
+  // matches English headings and would come back empty.
+  const rt = useReportTranslation('eval', ev?.id, ev?.report_text ?? undefined);
+
   if (loading) return <ScreenBackground><View style={styles.center}><ActivityIndicator color={t.accent} size="large" /></View></ScreenBackground>;
   if (!ev) return null;
 
@@ -434,11 +443,6 @@ export default function EvalReportScreen() {
   const showsRecruit = ['scouting_report', 'player_eval', 'recruitment_profile'].includes(singleType);
   const brief = extractBrief(ev.report_text);
   const fixedSections = isSingle ? getFixedSections(ev.output_type, ev.report_text) : null;
-  // Reports keep the language they were written in. When the reader's language
-  // differs, the FULL report body is shown translated (with a toggle back).
-  // The broken-out section view above still reads from the original, because
-  // getFixedSections matches English headings — translating it would blank it.
-  const rt = useReportTranslation('eval', ev.id, ev.report_text ?? undefined);
   const recruit = recruitGrade(ev.overall_grade);
   const gradeTrend = history
     .filter(h => h.overall_grade != null)

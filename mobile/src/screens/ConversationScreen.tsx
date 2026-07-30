@@ -236,7 +236,7 @@ export default function ConversationScreen() {
         </TouchableOpacity>
         {/* Conversation titles are user data and translated fallbacks run longer,
             so the title shrinks and clips instead of pushing the row wider. */}
-        <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{title}</Text>
+        <Text style={styles.title} numberOfLines={1}>{title}</Text>
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={0}>
@@ -303,7 +303,7 @@ export default function ConversationScreen() {
         <View style={styles.overlay}>
           <View style={styles.sheet}>
             <View style={styles.sheetHead}>
-              <Text style={styles.sheetTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('conversation.attachReport')}</Text>
+              <Text style={styles.sheetTitle} numberOfLines={1}>{tr('conversation.attachReport')}</Text>
               <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setShowReportPicker(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
             <View style={styles.pickerSearch}>
@@ -353,7 +353,7 @@ export default function ConversationScreen() {
         <View style={styles.overlay}>
           <View style={[styles.sheet, { maxHeight: '85%' }]}>
             <View style={styles.sheetHead}>
-              <Text style={styles.sheetTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{reportView?.title}</Text>
+              <Text style={styles.sheetTitle} numberOfLines={1}>{reportView?.title}</Text>
               <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setReportView(null)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
             <ScrollView>{reportView ? renderReport(reportView.text, { heading: t.ink, body: t.inkSoft }) : null}</ScrollView>

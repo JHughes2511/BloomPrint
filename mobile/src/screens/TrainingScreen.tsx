@@ -83,7 +83,7 @@ export default function TrainingScreen() {
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
         {/* Translated titles run 20-40% longer: shrink to fit one line. */}
-        <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+        <Text style={styles.title} numberOfLines={1}>
           {tr('reportTypes.training_program')}
         </Text>
       </View>

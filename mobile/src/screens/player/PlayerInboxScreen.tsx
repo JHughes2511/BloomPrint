@@ -181,7 +181,7 @@ export default function PlayerInboxScreen() {
         <View style={styles.headerRow}>
           {/* Long translations shrink and clip instead of shoving the search button out. */}
           <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
-            <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+            <Text style={styles.title} numberOfLines={1}>
               {tr('playerApp.inbox.title')}
             </Text>
           </View>

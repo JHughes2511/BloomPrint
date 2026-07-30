@@ -70,18 +70,22 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
     }
   }, [visible, shared]);
 
+  // Computed with optional access so the hook below can run on EVERY render —
+  // it must sit above the `if (!item)` return or the hook count changes between
+  // renders and React throws "Rendered more hooks than during the previous render".
+  const bodyText = bodyMode === 'updated'
+    ? (item?.regenerated_text ?? item?.report_text ?? '')
+    : (item?.report_text ?? '');
+  // A shared report is the most likely place to hit another language: translate
+  // on view, keeping a toggle back to what the sharer actually wrote.
+  const rt = useReportTranslation('shared', item?.id, bodyText || undefined);
+
   if (!item) return null;
 
   const pendingCount = corrections.filter(c => !c.applied).length;
   // Comments/notes are tied to the Original vs Updated version you're viewing.
   const isNote = (c: any) => String(c.text).startsWith('[Coach Note]');
   const underCurrent = (c: any) => (c.target ?? 'original') === bodyMode;
-  const bodyText = bodyMode === 'updated'
-    ? (item.regenerated_text ?? item.report_text ?? '')
-    : (item.report_text ?? '');
-  // A shared report is the most likely place to hit another language: translate
-  // on view, keeping a toggle back to what the sharer actually wrote.
-  const rt = useReportTranslation('shared', item?.id, bodyText || undefined);
 
   const submitComment = async () => {
     if (!commentText.trim()) return;

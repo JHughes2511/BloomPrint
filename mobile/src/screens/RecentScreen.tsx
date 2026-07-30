@@ -688,7 +688,7 @@ export default function RecentScreen() {
       <View style={styles.headerRow}>
         {/* Translated titles run 20-40% longer than English, so the title shrinks
             and clips rather than pushing the search button off-screen. */}
-        <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('recent.title')}</Text>
+        <Text style={styles.title} numberOfLines={1}>{tr('recent.title')}</Text>
         <TouchableOpacity
           style={styles.searchIconBtn}
           onPress={() => {
@@ -934,7 +934,7 @@ export default function RecentScreen() {
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
               <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
-                <Text style={styles.modalTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{gameReportModal?.title ?? tr('reportTypes.report')}</Text>
+                <Text style={styles.modalTitle} numberOfLines={1}>{gameReportModal?.title ?? tr('reportTypes.report')}</Text>
                 {!!gameReportModal?.subject && <Text style={styles.modalSub} numberOfLines={1}>{gameReportModal.subject}</Text>}
               </View>
               <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => { setGameReportModal(null); setScoutCorrectMode(false); }}>
@@ -1029,7 +1029,7 @@ export default function RecentScreen() {
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
               <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
-                <Text style={styles.modalTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('recent.sendToStaffTitle')}</Text>
+                <Text style={styles.modalTitle} numberOfLines={1}>{tr('recent.sendToStaffTitle')}</Text>
                 <Text style={styles.modalSub} numberOfLines={2}>
                   {tr('recent.sendToStaffSub', { label: staffShareCtx?.label ?? tr('recent.thisReport') })}
                 </Text>
@@ -1172,7 +1172,7 @@ export default function RecentScreen() {
                 </TouchableOpacity>
               ) : null}
               <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
-                <Text style={styles.modalTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+                <Text style={styles.modalTitle} numberOfLines={1}>
                   {modalView === 'send' ? tr('recent.sendReport') :
                    modalView === 'correct' ? tr('recent.correctReport') :
                    (outputTypeLabel(activeModal?.outputType) ?? tr('reportTypes.report'))}
@@ -1336,10 +1336,10 @@ export default function RecentScreen() {
                 />
                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
                   <TouchableOpacity style={sendStyles.cancelBtn} onPress={saveCorrectionForLater} disabled={savingCorrect || !teamCorrectText.trim()}>
-                    {savingCorrect ? <ActivityIndicator color={t.muted} size="small" /> : <Text style={{ color: t.ink, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('recent.saveForLater')}</Text>}
+                    {savingCorrect ? <ActivityIndicator color={t.muted} size="small" /> : <Text style={{ color: t.ink, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('recent.saveForLater')}</Text>}
                   </TouchableOpacity>
                   <TouchableOpacity style={sendStyles.applyBtn} onPress={applyCorrection} disabled={applyingCorrect}>
-                    {applyingCorrect ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('recent.applyRegenerate')}</Text>}
+                    {applyingCorrect ? <ActivityIndicator color={t.ctaText} size="small" /> : <Text style={{ color: t.ctaText, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('recent.applyRegenerate')}</Text>}
                   </TouchableOpacity>
                 </View>
                 <GeneratingOverlay visible={applyingCorrect} label={tr('recent.regeneratingLabel')} />

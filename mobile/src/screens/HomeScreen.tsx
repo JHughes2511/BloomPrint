@@ -233,11 +233,12 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
-            {/* Translated labels run 20-40% longer than English, so the text block
-                shrinks and clips instead of pushing the icon buttons off-screen. */}
+            {/* Translated labels run 20-40% longer than English. Keep the SAME
+                type size as English and let the text wrap onto a second line —
+                shrinking the font made translated screens look inconsistent. */}
             <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
-              <Text style={[typeScale.label, { color: t.label, marginBottom: 4 }]} numberOfLines={1}>{tr('home.intelligenceModel')}</Text>
-              <Text style={[typeScale.h1, { color: t.ink }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>BloomPrint</Text>
+              <Text style={[typeScale.label, { color: t.label, marginBottom: 4 }]} numberOfLines={2}>{tr('home.intelligenceModel')}</Text>
+              <Text style={[typeScale.h1, { color: t.ink }]} numberOfLines={1}>BloomPrint</Text>
             </View>
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', flexShrink: 0 }}>
               <CircleBtn icon={mode === 'dark' ? 'sun' : 'moon'} onPress={toggle} label={tr('home.toggleTheme')} />
@@ -247,14 +248,12 @@ export default function HomeScreen() {
             </View>
           </View>
           {/* Coach line + AI command pill on one row */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 8 }}>
-            {/* Coach · role · program is user data plus a translated role label, so it
-                shrinks a little before clipping rather than truncating immediately. */}
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginTop: 8 }}>
+            {/* Coach · role · program: keep English's type size and allow a
+                second line, rather than shrinking the text to fit one. */}
             <Text
               style={[typeScale.bodySoft, { color: t.muted, flex: 1, flexShrink: 1, minWidth: 0 }]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.7}
+              numberOfLines={2}
             >
               {coach ? `${coach.name} · ${roleLabel(coach.role)} · ${coach.program_name}` : ''}
             </Text>
@@ -311,7 +310,7 @@ export default function HomeScreen() {
                 <View style={styles.pillarRow}>
                   <IconTile name={p.icon} variant="accent" size={44} />
                   <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
-                    <Text style={{ fontFamily: fonts[700], fontSize: 14.5, color: t.ink }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr(`home.pillars.${p.key}.label`)}</Text>
+                    <Text style={{ fontFamily: fonts[700], fontSize: 14.5, color: t.ink }} numberOfLines={1}>{tr(`home.pillars.${p.key}.label`)}</Text>
                     <Text style={[typeScale.bodySoft, { color: t.muted, fontSize: 12, lineHeight: 17, marginTop: 2 }]}>{tr(`home.pillars.${p.key}.desc`)}</Text>
                   </View>
                 </View>
@@ -327,7 +326,7 @@ export default function HomeScreen() {
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, padding: 24, paddingBottom: 36 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('home.feedbackTitle')}</Text>
+              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>{tr('home.feedbackTitle')}</Text>
               <TouchableOpacity onPress={() => setShowFeedback(false)} style={{ flexShrink: 0 }}>
                 <Icon name="x" size={22} color={t.muted} strokeWidth={2} />
               </TouchableOpacity>
@@ -360,7 +359,7 @@ export default function HomeScreen() {
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, maxHeight: '90%' }}>
             <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 36 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('home.editProfileTitle')}</Text>
+              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>{tr('home.editProfileTitle')}</Text>
               <TouchableOpacity onPress={() => setShowProfile(false)} style={{ flexShrink: 0 }}>
                 <Icon name="x" size={22} color={t.muted} strokeWidth={2} />
               </TouchableOpacity>
@@ -393,8 +392,6 @@ export default function HomeScreen() {
                   <Text
                     style={{ color: pRole === r ? t.ctaText : t.muted, fontFamily: fonts[700], fontSize: 14, flexShrink: 1 }}
                     numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.7}
                   >
                     {roleLabel(r)}
                   </Text>
@@ -489,7 +486,7 @@ export default function HomeScreen() {
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 50, borderWidth: 1, borderColor: t.cardBorder }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingBottom: 8 }}>
-              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 19, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('home.systemModalTitle')}</Text>
+              <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 19, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>{tr('home.systemModalTitle')}</Text>
               <TouchableOpacity onPress={() => setShowSystem(false)} style={{ flexShrink: 0 }}>
                 <Icon name="x" size={22} color={t.muted} strokeWidth={2} />
               </TouchableOpacity>

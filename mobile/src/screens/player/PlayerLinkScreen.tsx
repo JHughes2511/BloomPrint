@@ -193,7 +193,7 @@ export default function PlayerLinkScreen() {
       <View style={styles.headerRow}>
         {/* Translated headers run 20-40% longer, so the title shrinks and clips. */}
         <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
-          <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+          <Text style={styles.title} numberOfLines={1}>
             {tr('playerApp.link.title')}
           </Text>
         </View>

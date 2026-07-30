@@ -144,7 +144,7 @@ export default function CoachTrainingDetailScreen() {
           {/* Translated titles + long player names must shrink and clip here
               rather than wrap into the row below. */}
           <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginLeft: 12, marginRight: 8 }}>
-            <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+            <Text style={styles.title} numberOfLines={1}>
               {tr('coachTraining.titleWithName', { name: training.player_name })}
             </Text>
             <Text style={styles.sub} numberOfLines={1}>{new Date(training.created_at).toLocaleDateString()}</Text>

@@ -206,7 +206,7 @@ export default function CoachNotificationsScreen() {
         </TouchableOpacity>
         {/* Translated titles run 20-40% longer than English: shrink + clip
             instead of wrapping under the back chevron. */}
-        <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+        <Text style={styles.title} numberOfLines={1}>
           {tr('coachNotifs.title')}
         </Text>
       </View>

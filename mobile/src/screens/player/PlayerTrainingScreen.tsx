@@ -103,7 +103,7 @@ export default function PlayerTrainingScreen() {
         <View style={styles.headerRow}>
           {/* Long translations shrink and clip rather than pushing the search button out. */}
           <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
-            <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+            <Text style={styles.title} numberOfLines={1}>
               {tr('playerApp.training.title')}
             </Text>
           </View>

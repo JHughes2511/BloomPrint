@@ -129,7 +129,7 @@ export default function PlayerRegisterScreen() {
     return (
       <ScreenBackground>
       <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ padding: 24, paddingTop: 60 }}>
-        <Text style={styles.logo} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{tr('playerApp.register.welcome')}</Text>
+        <Text style={styles.logo} numberOfLines={1}>{tr('playerApp.register.welcome')}</Text>
         <Text style={styles.sub} numberOfLines={1}>{tr('playerApp.register.linkYourProfile')}</Text>
 
         <View style={styles.section}>
