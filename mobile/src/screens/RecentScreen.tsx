@@ -1,5 +1,7 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useReportTranslation } from '../hooks/useReportTranslation';
+import TranslationToggle from '../components/TranslationToggle';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -104,6 +106,14 @@ export default function RecentScreen() {
   const [applyingCorrect, setApplyingCorrect] = useState(false);
   const [savingCorrect, setSavingCorrect] = useState(false);
   const [corrections, setCorrections] = useState<any[]>([]);
+
+  // Reports keep the language they were written in; show them in the reader's
+  // language with a toggle back to the original. `kind` maps to the server's
+  // report_type vocabulary.
+  const modalReportType = activeModal?.kind === 'eval' ? 'eval'
+    : activeModal?.kind === 'team' ? 'team_report'
+    : activeModal?.kind === 'training' ? 'training' : undefined;
+  const rt = useReportTranslation(modalReportType, activeModal?.id as number | undefined, activeModal?.text);
 
   const supportsCorrections = (m: ModalReport | null) =>
     !!m && (m.kind === 'eval' ? !!m.evalId : (m.kind === 'team' || m.kind === 'training'));
@@ -1181,7 +1191,15 @@ export default function RecentScreen() {
               <>
                 <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
                   {activeModal?.text
-                    ? renderReport(activeModal.text, { heading: t.ink, body: t.inkSoft })
+                    ? (
+                      <>
+                        <TranslationToggle
+                          canToggle={rt.canToggle} isTranslated={rt.isTranslated}
+                          showOriginal={rt.showOriginal} loading={rt.loading} onToggle={rt.toggle}
+                        />
+                        {renderReport(rt.text, { heading: t.ink, body: t.inkSoft })}
+                      </>
+                    )
                     : <Text style={{ color: t.muted2 }}>{tr('recent.noReportContent')}</Text>
                   }
                 </KeyboardAwareScrollView>
