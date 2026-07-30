@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { setAppLanguage } from '../i18n';
 import { authAPI } from '../api/client';
+import { isAuthRejection, onCoachUnauthorized } from '../api/authFailure';
 import { Coach } from '../types';
 
 interface AuthState {
@@ -32,13 +33,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const me = await authAPI.me();
           setCoach(me);
           adoptLanguage(me);
-        } catch {
-          await SecureStore.deleteItemAsync('auth_token');
+        } catch (e) {
+          // Only a rejected token justifies signing the coach out. A backend
+          // that's asleep or a dropped connection says nothing about whether
+          // the token is still good, and throwing it away there means the app
+          // demands a fresh login every time the network hiccups.
+          if (isAuthRejection(e)) {
+            await SecureStore.deleteItemAsync('auth_token');
+            setToken(null);
+          }
         }
       }
       setLoading(false);
     })();
   }, []);
+
+  // Any request can hit a rejected token, not just the one at startup. Clearing
+  // state here sends the app back to login once, instead of leaving whatever
+  // screen is open failing silently against a token the server won't accept.
+  useEffect(() => onCoachUnauthorized(() => {
+    SecureStore.deleteItemAsync('auth_token').catch(() => {});
+    setToken(null);
+    setCoach(null);
+  }), []);
 
 
   // The account's saved language wins once signed in: switch the UI to it so a

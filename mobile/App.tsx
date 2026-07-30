@@ -12,6 +12,7 @@ import { PlayerAuthProvider, usePlayerAuth } from './src/context/PlayerAuthConte
 import './src/i18n';
 import { initAppLanguage } from './src/i18n';
 import { useTranslation } from 'react-i18next';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 // 5 tabs at fontSize 9: translated labels (de/nl/el run 30-40% longer than the
 // English) used to clip mid-word. Wrapping to two tight lines keeps the label
@@ -359,7 +360,12 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <PlayerAuthProvider>
-          <Root />
+          {/* Inside the providers, so "Try again" remounts the navigator while
+              the session and theme survive — the coach lands back where they
+              were rather than at the login screen. */}
+          <ErrorBoundary>
+            <Root />
+          </ErrorBoundary>
         </PlayerAuthProvider>
       </AuthProvider>
     </ThemeProvider>

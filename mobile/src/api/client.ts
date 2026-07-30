@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import * as FileSystem from 'expo-file-system/legacy';
+import { emitCoachUnauthorized } from './authFailure';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000';
 
@@ -48,6 +49,21 @@ api.interceptors.request.use(async (config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
+// A rejected token can surface on any request, not just the one at startup.
+// Announce it once, centrally, so the app returns to the login screen instead
+// of every open screen showing its own unexplained failure. Login and register
+// are exempt: a 401 there is "wrong password", which the form reports itself.
+const AUTH_EXEMPT = /\/auth\/(login|register|google)/;
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    const status = err?.response?.status;
+    const url = err?.config?.url ?? '';
+    if (status === 401 && !AUTH_EXEMPT.test(url)) emitCoachUnauthorized();
+    return Promise.reject(err);
+  },
+);
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const authAPI = {

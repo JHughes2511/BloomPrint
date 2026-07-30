@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { emitPlayerUnauthorized } from './authFailure';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000';
 export const playerApi = axios.create({ baseURL: BASE_URL });
@@ -9,6 +10,19 @@ playerApi.interceptors.request.use(async (config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
+// Same contract as the coach client: a rejected token is announced once and
+// centrally. Login and register are exempt — a 401 there means wrong password.
+const AUTH_EXEMPT = /\/player-auth\/(login|register|google)/;
+playerApi.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    const status = err?.response?.status;
+    const url = err?.config?.url ?? '';
+    if (status === 401 && !AUTH_EXEMPT.test(url)) emitPlayerUnauthorized();
+    return Promise.reject(err);
+  },
+);
 
 export const playerAuthAPI = {
   register: (data: { name: string; email: string; password: string; country?: string; city?: string }) =>

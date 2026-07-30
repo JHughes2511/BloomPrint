@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { playerAuthAPI } from '../api/playerClient';
+import { isAuthRejection, onPlayerUnauthorized } from '../api/authFailure';
 import { PlayerUser } from '../types';
 
 interface PlayerAuthState {
@@ -29,13 +30,24 @@ export function PlayerAuthProvider({ children }: { children: React.ReactNode }) 
         try {
           const me = await playerAuthAPI.me();
           setPlayerUser(me);
-        } catch {
-          await SecureStore.deleteItemAsync('player_auth_token');
+        } catch (e) {
+          // Same rule as the coach side: sign out only when the server actually
+          // rejected the token, never because the request couldn't complete.
+          if (isAuthRejection(e)) {
+            await SecureStore.deleteItemAsync('player_auth_token');
+            setPlayerToken(null);
+          }
         }
       }
       setLoading(false);
     })();
   }, []);
+
+  useEffect(() => onPlayerUnauthorized(() => {
+    SecureStore.deleteItemAsync('player_auth_token').catch(() => {});
+    setPlayerToken(null);
+    setPlayerUser(null);
+  }), []);
 
   const login = async (email: string, password: string) => {
     const res = await playerAuthAPI.login(email, password);
