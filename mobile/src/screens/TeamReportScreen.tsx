@@ -851,7 +851,7 @@ export default function TeamReportScreen() {
                     onPress={() => navigation.navigate('GameReportBuilder', { reportId: v.report_id })}
                   >
                     <Ionicons name="document-text-outline" size={13} color={t.muted} />
-                    <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>{tr('reportTypes.report')}</Text>
+                    <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600], flexShrink: 1 }} numberOfLines={1}>{tr('reportTypes.report')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => deleteReportVideo(v)} style={{ padding: 6 }}>
                     <Ionicons name="trash-outline" size={16} color={t.negative} />
@@ -1091,16 +1091,16 @@ export default function TeamReportScreen() {
             </Text>
             {staffResults.map((r: any, idx: number) => (
               <TouchableOpacity key={idx} style={[shareStyles.resultRow, { flexDirection: 'row', alignItems: 'center' }]} onPress={() => sendToStaff(r)} disabled={sendingStaff}>
-                <View style={{ flex: 1 }}>
-                  <Text style={shareStyles.resultName}>{r.label ?? r.name}</Text>
-                  <Text style={shareStyles.resultMeta}>{r.sublabel ?? `${r.role} · ${r.program_name}`}</Text>
+                <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+                  <Text style={shareStyles.resultName} numberOfLines={1}>{r.label ?? r.name}</Text>
+                  <Text style={shareStyles.resultMeta} numberOfLines={1}>{r.sublabel ?? `${r.role} · ${r.program_name}`}</Text>
                 </View>
                 {r.kind && r.kind !== 'coach' && <Ionicons name="people" size={16} color={t.accent} />}
               </TouchableOpacity>
             ))}
             <View style={shareStyles.btnRow}>
               <TouchableOpacity style={shareStyles.cancelBtn} onPress={() => { setShowStaffShare(false); setShareSourceReport(null); }}>
-                <Text style={shareStyles.cancelText}>{tr('common.cancel')}</Text>
+                <Text style={shareStyles.cancelText} numberOfLines={1}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
             </View>
           </KeyboardAwareScrollView>
@@ -1208,8 +1208,8 @@ export default function TeamReportScreen() {
             {/* Selected target badge */}
             {selectedShareTarget && (
               <View style={shareStyles.selectedBadge}>
-                <Text style={shareStyles.selectedName}>{selectedShareTarget.name}</Text>
-                <TouchableOpacity onPress={() => setSelectedShareTarget(null)}>
+                <Text style={shareStyles.selectedName} numberOfLines={1}>{selectedShareTarget.name}</Text>
+                <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setSelectedShareTarget(null)}>
                   <Ionicons name="close-circle" size={18} color={t.muted} />
                 </TouchableOpacity>
               </View>
@@ -1252,14 +1252,14 @@ export default function TeamReportScreen() {
 
             <View style={shareStyles.btnRow}>
               <TouchableOpacity style={shareStyles.cancelBtn} onPress={() => { setShowShare(false); setSelectedShareTarget(null); }}>
-                <Text style={shareStyles.cancelText}>{tr('common.cancel')}</Text>
+                <Text style={shareStyles.cancelText} numberOfLines={1}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[shareStyles.shareBtn, { opacity: (shareTarget === 'all_staff' || selectedShareTarget) ? 1 : 0.4 }]}
                 onPress={submitShare}
                 disabled={sharing || (shareTarget !== 'all_staff' && !selectedShareTarget)}
               >
-                {sharing ? <ActivityIndicator color={t.ctaText} /> : <Text style={shareStyles.shareBtnText}>{tr('common.send')}</Text>}
+                {sharing ? <ActivityIndicator color={t.ctaText} /> : <Text style={shareStyles.shareBtnText} numberOfLines={1}>{tr('common.send')}</Text>}
               </TouchableOpacity>
             </View>
           </KeyboardAwareScrollView>
@@ -1347,16 +1347,16 @@ const makeShareStyles = (t: ThemeTokens) => StyleSheet.create({
   title: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 16 },
   label: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
   targetRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  targetChip: { flex: 1, paddingVertical: 9, borderRadius: 999, borderWidth: 1, borderColor: t.line, alignItems: 'center' },
+  targetChip: { flex: 1, flexShrink: 1, minWidth: 0, paddingVertical: 9, paddingHorizontal: 8, borderRadius: 999, borderWidth: 1, borderColor: t.line, alignItems: 'center' },
   targetChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
-  targetChipText: { color: t.muted, fontSize: 12, fontFamily: fonts[700] },
+  targetChipText: { color: t.muted, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 },
   targetChipTextActive: { color: t.ctaText },
   input: { backgroundColor: t.chip, borderRadius: 14, padding: 12, color: t.ink, fontSize: 14, marginBottom: 8, borderWidth: 1, borderColor: t.line },
   resultRow: { backgroundColor: t.chip, borderRadius: 14, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: t.cardBorder },
-  resultName: { color: t.ink, fontFamily: fonts[600], fontSize: 14 },
-  resultMeta: { color: t.muted, fontSize: 11, marginTop: 2 },
+  resultName: { color: t.ink, fontFamily: fonts[600], fontSize: 14, flexShrink: 1 },
+  resultMeta: { color: t.muted, fontSize: 11, marginTop: 2, flexShrink: 1 },
   selectedBadge: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: t.accentSoft, borderRadius: 14, padding: 12, borderWidth: 1.5, borderColor: t.accent, marginBottom: 8 },
-  selectedName: { color: t.ink, fontFamily: fonts[700] },
+  selectedName: { color: t.ink, fontFamily: fonts[700], flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 },
   staffNote: { color: t.muted, fontSize: 12, marginBottom: 12, lineHeight: 18 },
   btnRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
   cancelBtn: { flex: 1, padding: 14, borderRadius: 999, borderWidth: 1, borderColor: t.cta2Border, alignItems: 'center' },
