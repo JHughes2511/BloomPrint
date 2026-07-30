@@ -1390,7 +1390,13 @@
     "you": "You",
     "subTeamPlaceholder": "Sub-team name (e.g. Offense, Guards)...",
     "coachNameOrEmail": "Coach name or email...",
-    "noReportGenerated": "No report generated yet."
+    "noReportGenerated": "No report generated yet.",
+    "requestJoin": "Request",
+    "requestPending": "Requested",
+    "requestSentTitle": "Request sent",
+    "requestSentMsg": "The team owner will approve or decline your request.",
+    "joinRequestsLabel": "JOIN REQUESTS ({{count}})",
+    "wantsToJoin": "{{role}} · wants to join {{team}}"
   },
   "conversation": {
     "title": "Conversation",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "Report forwarded by {{coach}}",
       "body": "{{coach}} forwarded a {{type}} to you."
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} asked to join your team",
+      "body": "{{coach}} ({{role}}) asked to join {{team}}."
+    },
+    "teamJoinApproved": {
+      "title": "Join request approved",
+      "body": "You are now staff on {{team}}."
+    },
+    "teamJoinRejected": {
+      "title": "Join request declined",
+      "body": "Your request to join {{team}} was declined."
+    },
+    "teamOwnerChanged": {
+      "title": "Team ownership changed",
+      "body": "{{coach}} is now the owner of {{team}}."
     }
   }
 }

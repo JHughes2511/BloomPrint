@@ -544,4 +544,13 @@ export const teamStaffAPI = {
   invites: () => api.get('/team-staff/invites').then(r => r.data),
   approveInvite: (id: number) => api.post(`/team-staff/invites/${id}/approve`).then(r => r.data),
   rejectInvite: (id: number) => api.post(`/team-staff/invites/${id}/reject`).then(r => r.data),
+  // Requests to join a team YOU own — the mirror image of invites().
+  joinRequests: () => api.get('/team-staff/join-requests').then(r => r.data),
+  approveJoinRequest: (id: number) =>
+    api.post(`/team-staff/join-requests/${id}/approve`).then(r => r.data),
+  rejectJoinRequest: (id: number) =>
+    api.post(`/team-staff/join-requests/${id}/reject`).then(r => r.data),
+  // Omit coachId to claim a team whose owner has left the app.
+  transferOwner: (teamId: number, coachId?: number) =>
+    api.post(`/team-staff/${teamId}/transfer-owner`, { coach_id: coachId ?? null }).then(r => r.data),
 };

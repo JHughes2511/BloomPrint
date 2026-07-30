@@ -205,6 +205,10 @@ export default function StaffInboxScreen() {
       const teams = await teamStaffAPI.myTeams();
       setMyTeams(teams);
     } catch {}
+    // Only owners get any rows back, so this is a no-op for everyone else.
+    try {
+      setJoinRequests(await teamStaffAPI.joinRequests());
+    } catch {}
     setTeamsLoading(false);
   };
 
@@ -266,18 +270,45 @@ export default function StaffInboxScreen() {
     setSearching(false);
   };
 
+  // Teams this coach has asked to join in this session: the button must not
+  // still say "Join" once the request is in.
+  const [requestedTeams, setRequestedTeams] = useState<number[]>([]);
+  const [joinRequests, setJoinRequests] = useState<any[]>([]);
+  const [actingRequest, setActingRequest] = useState<number | null>(null);
+
   const joinTeam = async (teamId: number) => {
     setJoining(teamId);
     try {
-      await teamStaffAPI.join(teamId);
+      // Joining is a request now, not an act. The owner decides — except when
+      // they already invited this coach, which the server settles immediately.
+      const res = await teamStaffAPI.join(teamId);
       await loadMyTeams();
       setSearchResults([]);
       setTeamSearch('');
-      Alert.alert(tr('staffHub.joinedTitle'), tr('staffHub.joinedMsg'));
+      if (res?.status === 'pending') {
+        setRequestedTeams(prev => [...prev, teamId]);
+        Alert.alert(tr('staffHub.requestSentTitle'), tr('staffHub.requestSentMsg'));
+      } else {
+        Alert.alert(tr('staffHub.joinedTitle'), tr('staffHub.joinedMsg'));
+      }
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.joinTeamError'));
     } finally {
       setJoining(null);
+    }
+  };
+
+  const actOnJoinRequest = async (id: number, approve: boolean) => {
+    setActingRequest(id);
+    try {
+      if (approve) await teamStaffAPI.approveJoinRequest(id);
+      else await teamStaffAPI.rejectJoinRequest(id);
+      setJoinRequests(prev => prev.filter(r => r.id !== id));
+      if (approve) await loadMyTeams();
+    } catch (e: any) {
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.joinTeamError'));
+    } finally {
+      setActingRequest(null);
     }
   };
 
@@ -534,6 +565,10 @@ export default function StaffInboxScreen() {
                 <View style={{ backgroundColor: t.positiveSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, flexShrink: 0, maxWidth: 120 }}>
                   <Text style={{ color: t.positive, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('staffHub.joinedBadge')}</Text>
                 </View>
+              ) : requestedTeams.includes(team.id) ? (
+                <View style={{ backgroundColor: t.chip, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, flexShrink: 0, maxWidth: 120 }}>
+                  <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('staffHub.requestPending')}</Text>
+                </View>
               ) : (
                 <TouchableOpacity
                   style={{ backgroundColor: t.ctaBg, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, flexShrink: 0, maxWidth: 120 }}
@@ -542,12 +577,53 @@ export default function StaffInboxScreen() {
                 >
                   {joining === team.id
                     ? <ActivityIndicator color={t.ctaText} size="small" />
-                    : <Text style={{ color: t.ctaText, fontSize: 13, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('staffHub.join')}</Text>}
+                    : <Text style={{ color: t.ctaText, fontSize: 13, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('staffHub.requestJoin')}</Text>}
                 </TouchableOpacity>
               )}
             </View>
           );
         })}
+
+        {/* Coaches waiting on this owner. Sits above My Teams because it needs
+            a decision, where the list below is just reference. */}
+        {joinRequests.length > 0 && (
+          <>
+            <Text style={[styles.sectionLabel, { marginTop: 20 }]}>
+              {tr('staffHub.joinRequestsLabel', { count: joinRequests.length })}
+            </Text>
+            {joinRequests.map((r: any) => (
+              <View key={r.id} style={[styles.card, { marginHorizontal: 0 }]}>
+                <View style={[styles.iconBox, { backgroundColor: t.accentSoft }]}>
+                  <Ionicons name="person-add-outline" size={17} color={t.accent} />
+                </View>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={styles.cardTitle} numberOfLines={2}>{r.coach_name}</Text>
+                  <Text style={styles.cardSub} numberOfLines={2}>
+                    {tr('staffHub.wantsToJoin', { role: r.coach_role, team: r.team_name })}
+                  </Text>
+                </View>
+                {actingRequest === r.id ? (
+                  <ActivityIndicator color={t.accent} size="small" />
+                ) : (
+                  <View style={{ flexDirection: 'row', gap: 8, flexShrink: 0 }}>
+                    <TouchableOpacity
+                      onPress={() => actOnJoinRequest(r.id, false)}
+                      style={{ backgroundColor: t.chip, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 }}
+                    >
+                      <Ionicons name="close" size={16} color={t.muted} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => actOnJoinRequest(r.id, true)}
+                      style={{ backgroundColor: t.ctaBg, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 }}
+                    >
+                      <Ionicons name="checkmark" size={16} color={t.ctaText} />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            ))}
+          </>
+        )}
 
         {/* My current teams — nested sub-team breakout */}
         {myTeams.length > 0 && (

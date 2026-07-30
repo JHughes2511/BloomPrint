@@ -1390,7 +1390,13 @@
     "you": "你",
     "subTeamPlaceholder": "小组名称（例如 进攻组、后卫组）...",
     "coachNameOrEmail": "教练姓名或邮箱...",
-    "noReportGenerated": "尚未生成报告。"
+    "noReportGenerated": "尚未生成报告。",
+    "requestJoin": "申请",
+    "requestPending": "已申请",
+    "requestSentTitle": "申请已发送",
+    "requestSentMsg": "球队所有者将批准或拒绝你的申请。",
+    "joinRequestsLabel": "加入申请（{{count}}）",
+    "wantsToJoin": "{{role}} · 想加入 {{team}}"
   },
   "conversation": {
     "title": "对话",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "{{coach}} 转发了报告",
       "body": "{{coach}} 向你转发了一份{{type}}。"
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} 申请加入你的球队",
+      "body": "{{coach}}（{{role}}）申请加入 {{team}}。"
+    },
+    "teamJoinApproved": {
+      "title": "申请已通过",
+      "body": "你现在是 {{team}} 的教练组成员。"
+    },
+    "teamJoinRejected": {
+      "title": "申请被拒绝",
+      "body": "你加入 {{team}} 的申请被拒绝。"
+    },
+    "teamOwnerChanged": {
+      "title": "球队所有者已变更",
+      "body": "{{coach}} 现在是 {{team}} 的所有者。"
     }
   }
 }

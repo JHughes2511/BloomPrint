@@ -1390,7 +1390,13 @@
     "you": "Ti",
     "subTeamPlaceholder": "Naziv podgrupe (npr. Napad, Bekovi)...",
     "coachNameOrEmail": "Ime ili imejl trenera...",
-    "noReportGenerated": "Извештај још није генерисан."
+    "noReportGenerated": "Извештај још није генерисан.",
+    "requestJoin": "Затражи",
+    "requestPending": "Затражено",
+    "requestSentTitle": "Захтев послат",
+    "requestSentMsg": "Власник тима ће одобрити или одбити ваш захтев.",
+    "joinRequestsLabel": "ЗАХТЕВИ ({{count}})",
+    "wantsToJoin": "{{role}} · жели да се придружи тиму {{team}}"
   },
   "conversation": {
     "title": "Razgovor",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "Извештај проследио {{coach}}",
       "body": "{{coach}} вам је проследио извештај ({{type}})."
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} тражи да се придружи вашем тиму",
+      "body": "{{coach}} ({{role}}) је затражио да се придружи тиму {{team}}."
+    },
+    "teamJoinApproved": {
+      "title": "Захтев одобрен",
+      "body": "Сада сте у стручном штабу тима {{team}}."
+    },
+    "teamJoinRejected": {
+      "title": "Захтев одбијен",
+      "body": "Ваш захтев да се придружите тиму {{team}} је одбијен."
+    },
+    "teamOwnerChanged": {
+      "title": "Власник тима промењен",
+      "body": "{{coach}} је сада власник тима {{team}}."
     }
   }
 }

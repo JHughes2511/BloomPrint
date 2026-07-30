@@ -1390,7 +1390,13 @@
     "you": "Jūs",
     "subTeamPlaceholder": "Pogrupio pavadinimas (pvz., Puolimas, Įžaidėjai)...",
     "coachNameOrEmail": "Trenerio vardas arba el. paštas...",
-    "noReportGenerated": "Ataskaita dar nesugeneruota."
+    "noReportGenerated": "Ataskaita dar nesugeneruota.",
+    "requestJoin": "Prašyti",
+    "requestPending": "Paprašyta",
+    "requestSentTitle": "Prašymas išsiųstas",
+    "requestSentMsg": "Komandos savininkas patvirtins arba atmes jūsų prašymą.",
+    "joinRequestsLabel": "PRAŠYMAI ({{count}})",
+    "wantsToJoin": "{{role}} · nori prisijungti prie {{team}}"
   },
   "conversation": {
     "title": "Pokalbis",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "Ataskaitą persiuntė {{coach}}",
       "body": "{{coach}} persiuntė jums ataskaitą ({{type}})."
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} prašo prisijungti prie jūsų komandos",
+      "body": "{{coach}} ({{role}}) paprašė prisijungti prie {{team}}."
+    },
+    "teamJoinApproved": {
+      "title": "Prašymas patvirtintas",
+      "body": "Dabar esate {{team}} štabe."
+    },
+    "teamJoinRejected": {
+      "title": "Prašymas atmestas",
+      "body": "Jūsų prašymas prisijungti prie {{team}} buvo atmestas."
+    },
+    "teamOwnerChanged": {
+      "title": "Komandos savininkas pakeistas",
+      "body": "{{coach}} dabar yra {{team}} savininkas."
     }
   }
 }

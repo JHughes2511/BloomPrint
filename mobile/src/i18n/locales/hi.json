@@ -1390,7 +1390,13 @@
     "you": "आप",
     "subTeamPlaceholder": "उप-टीम का नाम (जैसे Offense, Guards)...",
     "coachNameOrEmail": "कोच का नाम या ईमेल...",
-    "noReportGenerated": "अभी तक कोई रिपोर्ट नहीं बनी।"
+    "noReportGenerated": "अभी तक कोई रिपोर्ट नहीं बनी।",
+    "requestJoin": "अनुरोध भेजें",
+    "requestPending": "अनुरोध भेजा गया",
+    "requestSentTitle": "अनुरोध भेजा गया",
+    "requestSentMsg": "टीम का स्वामी आपके अनुरोध को स्वीकार या अस्वीकार करेगा।",
+    "joinRequestsLabel": "अनुरोध ({{count}})",
+    "wantsToJoin": "{{role}} · {{team}} में शामिल होना चाहते हैं"
   },
   "conversation": {
     "title": "बातचीत",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "{{coach}} ने रिपोर्ट अग्रेषित की",
       "body": "{{coach}} ने आपको एक {{type}} अग्रेषित की।"
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} ने आपकी टीम में शामिल होने का अनुरोध किया",
+      "body": "{{coach}} ({{role}}) ने {{team}} में शामिल होने का अनुरोध किया।"
+    },
+    "teamJoinApproved": {
+      "title": "अनुरोध स्वीकृत",
+      "body": "अब आप {{team}} के स्टाफ़ में हैं।"
+    },
+    "teamJoinRejected": {
+      "title": "अनुरोध अस्वीकृत",
+      "body": "{{team}} में शामिल होने का आपका अनुरोध अस्वीकार कर दिया गया।"
+    },
+    "teamOwnerChanged": {
+      "title": "टीम का स्वामित्व बदला",
+      "body": "अब {{coach}} {{team}} के स्वामी हैं।"
     }
   }
 }

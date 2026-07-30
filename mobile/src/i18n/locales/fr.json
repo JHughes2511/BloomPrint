@@ -1390,7 +1390,13 @@
     "you": "Vous",
     "subTeamPlaceholder": "Nom du sous-groupe (p. ex. Attaque, Meneurs)...",
     "coachNameOrEmail": "Nom ou e-mail du coach...",
-    "noReportGenerated": "Aucun rapport généré pour l'instant."
+    "noReportGenerated": "Aucun rapport généré pour l'instant.",
+    "requestJoin": "Demander",
+    "requestPending": "Demandé",
+    "requestSentTitle": "Demande envoyée",
+    "requestSentMsg": "Le propriétaire de l'équipe approuvera ou refusera votre demande.",
+    "joinRequestsLabel": "DEMANDES ({{count}})",
+    "wantsToJoin": "{{role}} · souhaite rejoindre {{team}}"
   },
   "conversation": {
     "title": "Conversation",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "Rapport transféré par {{coach}}",
       "body": "{{coach}} vous a transféré un {{type}}."
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} a demandé à rejoindre votre équipe",
+      "body": "{{coach}} ({{role}}) a demandé à rejoindre {{team}}."
+    },
+    "teamJoinApproved": {
+      "title": "Demande approuvée",
+      "body": "Vous faites désormais partie du staff de {{team}}."
+    },
+    "teamJoinRejected": {
+      "title": "Demande refusée",
+      "body": "Votre demande pour rejoindre {{team}} a été refusée."
+    },
+    "teamOwnerChanged": {
+      "title": "Changement de propriétaire",
+      "body": "{{coach}} est désormais propriétaire de {{team}}."
     }
   }
 }

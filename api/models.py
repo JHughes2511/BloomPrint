@@ -831,5 +831,10 @@ class TeamInvite(Base):
     invited_coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=True)
     invited_email    = Column(String, nullable=True)
     code             = Column(String, nullable=True)   # signup/join code for email invites
+    # "invite": the team asked a coach in — that coach approves.
+    # "request": a coach asked to join — the team OWNER approves.
+    # The row shape is identical; only who may approve it differs, so the two
+    # must never be listed in the same inbox.
+    kind             = Column(String, default="invite")
     status           = Column(String, default="pending")  # pending / approved / rejected
     created_at       = Column(DateTime, default=datetime.utcnow)

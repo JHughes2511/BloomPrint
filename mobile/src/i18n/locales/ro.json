@@ -1390,7 +1390,13 @@
     "you": "Tu",
     "subTeamPlaceholder": "Numele subgrupei (ex. Atac, Fundași)...",
     "coachNameOrEmail": "Numele sau e-mailul antrenorului...",
-    "noReportGenerated": "Niciun raport generat încă."
+    "noReportGenerated": "Niciun raport generat încă.",
+    "requestJoin": "Solicită",
+    "requestPending": "Solicitat",
+    "requestSentTitle": "Cerere trimisă",
+    "requestSentMsg": "Proprietarul echipei va aproba sau respinge cererea ta.",
+    "joinRequestsLabel": "CERERI ({{count}})",
+    "wantsToJoin": "{{role}} · vrea să se alăture echipei {{team}}"
   },
   "conversation": {
     "title": "Conversație",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "Raport redirecționat de {{coach}}",
       "body": "{{coach}} ți-a redirecționat un {{type}}."
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} a cerut să se alăture echipei tale",
+      "body": "{{coach}} ({{role}}) a cerut să se alăture echipei {{team}}."
+    },
+    "teamJoinApproved": {
+      "title": "Cerere aprobată",
+      "body": "Faci acum parte din staff-ul echipei {{team}}."
+    },
+    "teamJoinRejected": {
+      "title": "Cerere respinsă",
+      "body": "Cererea ta de a te alătura echipei {{team}} a fost respinsă."
+    },
+    "teamOwnerChanged": {
+      "title": "Proprietarul echipei s-a schimbat",
+      "body": "{{coach}} este acum proprietarul echipei {{team}}."
     }
   }
 }

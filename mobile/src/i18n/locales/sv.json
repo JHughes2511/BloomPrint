@@ -1390,7 +1390,13 @@
     "you": "Du",
     "subTeamPlaceholder": "Namn på undergrupp (t.ex. Offense, Guards)...",
     "coachNameOrEmail": "Tränarens namn eller e-post...",
-    "noReportGenerated": "Ingen rapport har genererats ännu."
+    "noReportGenerated": "Ingen rapport har genererats ännu.",
+    "requestJoin": "Begär",
+    "requestPending": "Begärd",
+    "requestSentTitle": "Förfrågan skickad",
+    "requestSentMsg": "Lagets ägare godkänner eller avslår din förfrågan.",
+    "joinRequestsLabel": "FÖRFRÅGNINGAR ({{count}})",
+    "wantsToJoin": "{{role}} · vill gå med i {{team}}"
   },
   "conversation": {
     "title": "Konversation",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "Rapport vidarebefordrad av {{coach}}",
       "body": "{{coach}} vidarebefordrade en {{type}} till dig."
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} vill gå med i ditt lag",
+      "body": "{{coach}} ({{role}}) har bett om att få gå med i {{team}}."
+    },
+    "teamJoinApproved": {
+      "title": "Förfrågan godkänd",
+      "body": "Du ingår nu i staben för {{team}}."
+    },
+    "teamJoinRejected": {
+      "title": "Förfrågan avslogs",
+      "body": "Din förfrågan om att gå med i {{team}} avslogs."
+    },
+    "teamOwnerChanged": {
+      "title": "Lagets ägare ändrad",
+      "body": "{{coach}} äger nu {{team}}."
     }
   }
 }

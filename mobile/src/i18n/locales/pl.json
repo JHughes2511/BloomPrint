@@ -1390,7 +1390,13 @@
     "you": "Ty",
     "subTeamPlaceholder": "Nazwa podzespołu (np. Atak, Rozgrywający)...",
     "coachNameOrEmail": "Imię i nazwisko lub e-mail trenera...",
-    "noReportGenerated": "Nie wygenerowano jeszcze raportu."
+    "noReportGenerated": "Nie wygenerowano jeszcze raportu.",
+    "requestJoin": "Poproś",
+    "requestPending": "Wysłano",
+    "requestSentTitle": "Wysłano prośbę",
+    "requestSentMsg": "Właściciel drużyny zatwierdzi lub odrzuci Twoją prośbę.",
+    "joinRequestsLabel": "PROŚBY ({{count}})",
+    "wantsToJoin": "{{role}} · chce dołączyć do {{team}}"
   },
   "conversation": {
     "title": "Konwersacja",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "Raport przekazany przez {{coach}}",
       "body": "{{coach}} przekazał Ci {{type}}."
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} prosi o dołączenie do drużyny",
+      "body": "{{coach}} ({{role}}) poprosił o dołączenie do {{team}}."
+    },
+    "teamJoinApproved": {
+      "title": "Prośba zatwierdzona",
+      "body": "Należysz teraz do sztabu {{team}}."
+    },
+    "teamJoinRejected": {
+      "title": "Prośba odrzucona",
+      "body": "Twoja prośba o dołączenie do {{team}} została odrzucona."
+    },
+    "teamOwnerChanged": {
+      "title": "Zmiana właściciela drużyny",
+      "body": "{{coach}} jest teraz właścicielem {{team}}."
     }
   }
 }

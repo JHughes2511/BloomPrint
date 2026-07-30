@@ -842,3 +842,16 @@ def _run_migrations():
                 conn.commit()
         except Exception:
             pass
+
+        # Team joins became approval-gated: the same table now also carries
+        # coach-asked-to-join rows, distinguished by kind.
+        try:
+            text = __import__("sqlalchemy").text
+            ti_cols = [row[1] for row in conn.execute(text("PRAGMA table_info(team_invites)"))]
+            if ti_cols and "kind" not in ti_cols:
+                conn.execute(text("ALTER TABLE team_invites ADD COLUMN kind TEXT DEFAULT 'invite'"))
+                # Everything that existed before was an owner-issued invite.
+                conn.execute(text("UPDATE team_invites SET kind = 'invite' WHERE kind IS NULL"))
+                conn.commit()
+        except Exception:
+            pass

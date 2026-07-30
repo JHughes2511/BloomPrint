@@ -1390,7 +1390,13 @@
     "you": "أنت",
     "subTeamPlaceholder": "اسم المجموعة الفرعية (مثل الهجوم، صانعو اللعب)...",
     "coachNameOrEmail": "اسم المدرب أو بريده الإلكتروني...",
-    "noReportGenerated": "لم يتم إنشاء تقرير بعد."
+    "noReportGenerated": "لم يتم إنشاء تقرير بعد.",
+    "requestJoin": "إرسال طلب",
+    "requestPending": "تم الطلب",
+    "requestSentTitle": "تم إرسال الطلب",
+    "requestSentMsg": "سيوافق مالك الفريق على طلبك أو يرفضه.",
+    "joinRequestsLabel": "الطلبات ({{count}})",
+    "wantsToJoin": "{{role}} · يريد الانضمام إلى {{team}}"
   },
   "conversation": {
     "title": "محادثة",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "تقرير أعاد {{coach}} توجيهه",
       "body": "أعاد {{coach}} توجيه {{type}} إليك."
+    },
+    "teamJoinRequest": {
+      "title": "طلب {{coach}} الانضمام إلى فريقك",
+      "body": "طلب {{coach}} ({{role}}) الانضمام إلى {{team}}."
+    },
+    "teamJoinApproved": {
+      "title": "تمت الموافقة على الطلب",
+      "body": "أنت الآن ضمن الطاقم الفني لفريق {{team}}."
+    },
+    "teamJoinRejected": {
+      "title": "تم رفض الطلب",
+      "body": "تم رفض طلبك للانضمام إلى {{team}}."
+    },
+    "teamOwnerChanged": {
+      "title": "تغيّر مالك الفريق",
+      "body": "{{coach}} هو الآن مالك فريق {{team}}."
     }
   }
 }

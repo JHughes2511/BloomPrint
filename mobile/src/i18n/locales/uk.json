@@ -1390,7 +1390,13 @@
     "you": "Ви",
     "subTeamPlaceholder": "Назва підгрупи (напр. Напад, Захисники)...",
     "coachNameOrEmail": "Ім'я або email тренера...",
-    "noReportGenerated": "Звіт ще не створено."
+    "noReportGenerated": "Звіт ще не створено.",
+    "requestJoin": "Запросити",
+    "requestPending": "Запит надіслано",
+    "requestSentTitle": "Запит надіслано",
+    "requestSentMsg": "Власник команди схвалить або відхилить ваш запит.",
+    "joinRequestsLabel": "ЗАПИТИ ({{count}})",
+    "wantsToJoin": "{{role}} · хоче приєднатися до {{team}}"
   },
   "conversation": {
     "title": "Розмова",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "Звіт переслано від {{coach}}",
       "body": "{{coach}} переслав вам звіт ({{type}})."
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} просить приєднатися до вашої команди",
+      "body": "{{coach}} ({{role}}) попросив приєднатися до {{team}}."
+    },
+    "teamJoinApproved": {
+      "title": "Запит схвалено",
+      "body": "Ви тепер у штабі команди {{team}}."
+    },
+    "teamJoinRejected": {
+      "title": "Запит відхилено",
+      "body": "Ваш запит на приєднання до {{team}} відхилено."
+    },
+    "teamOwnerChanged": {
+      "title": "Власника команди змінено",
+      "body": "{{coach}} тепер власник команди {{team}}."
     }
   }
 }

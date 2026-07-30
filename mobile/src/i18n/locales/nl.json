@@ -1390,7 +1390,13 @@
     "you": "Jij",
     "subTeamPlaceholder": "Naam subteam (bijv. Offense, Guards)...",
     "coachNameOrEmail": "Naam of e-mail van coach...",
-    "noReportGenerated": "Nog geen rapport gegenereerd."
+    "noReportGenerated": "Nog geen rapport gegenereerd.",
+    "requestJoin": "Aanvragen",
+    "requestPending": "Aangevraagd",
+    "requestSentTitle": "Verzoek verstuurd",
+    "requestSentMsg": "De teameigenaar keurt je verzoek goed of af.",
+    "joinRequestsLabel": "VERZOEKEN ({{count}})",
+    "wantsToJoin": "{{role}} · wil bij {{team}}"
   },
   "conversation": {
     "title": "Gesprek",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "Rapport doorgestuurd door {{coach}}",
       "body": "{{coach}} heeft je een {{type}} doorgestuurd."
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} wil bij je team",
+      "body": "{{coach}} ({{role}}) heeft gevraagd om bij {{team}} te komen."
+    },
+    "teamJoinApproved": {
+      "title": "Verzoek goedgekeurd",
+      "body": "Je hoort nu bij de staf van {{team}}."
+    },
+    "teamJoinRejected": {
+      "title": "Verzoek geweigerd",
+      "body": "Je verzoek om bij {{team}} te komen is geweigerd."
+    },
+    "teamOwnerChanged": {
+      "title": "Teameigenaar gewijzigd",
+      "body": "{{coach}} is nu de eigenaar van {{team}}."
     }
   }
 }

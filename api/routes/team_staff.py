@@ -80,36 +80,161 @@ def join_team(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    """Auto-join a team — no approval required."""
+    """Ask to join a team. The owner approves or rejects.
+
+    Joining used to be automatic, which made team membership self-service: any
+    coach could add themselves and immediately read every game, report and
+    notification belonging to that team. Membership is what the visibility
+    checks elsewhere are built on, so it has to be granted, not taken.
+    """
     team = db.get(models.Team, team_id)
     if not team:
         raise HTTPException(status_code=404, detail="Team not found")
     if team.coach_id == coach.id:
         raise HTTPException(status_code=400, detail="You already own this team")
 
-    existing = (
-        db.query(models.TeamStaff)
-        .filter_by(coach_id=coach.id, team_id=team_id)
+    if db.query(models.TeamStaff).filter_by(coach_id=coach.id, team_id=team_id).first():
+        return {"ok": True, "already_member": True, "status": "approved"}
+
+    pending = (
+        db.query(models.TeamInvite)
+        .filter_by(team_id=team_id, invited_coach_id=coach.id, kind="request", status="pending")
         .first()
     )
-    if existing:
-        return {"ok": True, "already_member": True}
+    if pending:
+        return {"ok": True, "status": "pending", "already_requested": True}
 
-    link = models.TeamStaff(coach_id=coach.id, team_id=team_id)
-    db.add(link)
+    # An owner-issued invite already waiting for this coach is a straight yes —
+    # both sides have now agreed, so don't make the owner approve twice.
+    invited = (
+        db.query(models.TeamInvite)
+        .filter_by(team_id=team_id, invited_coach_id=coach.id, kind="invite", status="pending")
+        .first()
+    )
+    if invited:
+        invited.status = "approved"
+        db.add(models.TeamStaff(coach_id=coach.id, team_id=team_id))
+        _notify_owner_joined(db, team, coach)
+        db.commit()
+        return {"ok": True, "status": "approved"}
 
-    # Notify the team owner
-    notif = models.CoachNotification(
+    req = models.TeamInvite(
+        team_id=team_id, invited_by=coach.id, invited_coach_id=coach.id,
+        kind="request", status="pending",
+    )
+    db.add(req)
+    db.flush()
+    db.add(models.CoachNotification(
+        coach_id=team.coach_id,
+        title=f"{coach.name} asked to join your team",
+        body=f"{coach.name} ({coach.role or 'staff'}) asked to join {team.name}.",
+        i18n_key="notifs.teamJoinRequest",
+        i18n_params={"coach": coach.name, "role": coach.role or "staff", "team": team.name},
+        type="team_join_request",
+        ref_id=req.id,
+    ))
+    db.commit()
+    return {"ok": True, "status": "pending"}
+
+
+def _notify_owner_joined(db: Session, team, coach) -> None:
+    db.add(models.CoachNotification(
         coach_id=team.coach_id,
         title=f"{coach.name} joined your team",
         body=f"{coach.name} ({coach.role or 'staff'}) has joined {team.name}.",
         i18n_key="notifs.teamStaffJoined",
         i18n_params={"coach": coach.name, "role": coach.role or "staff", "team": team.name},
         type="team_staff_joined",
+    ))
+
+
+def _get_join_request(db: Session, request_id: int, owner_id: int):
+    """A pending join request on a team this coach owns."""
+    req = db.get(models.TeamInvite, request_id)
+    if not req or req.kind != "request":
+        raise HTTPException(status_code=404, detail="Join request not found")
+    team = db.get(models.Team, req.team_id)
+    if not team or team.coach_id != owner_id:
+        raise HTTPException(status_code=404, detail="Join request not found")
+    return req, team
+
+
+@router.get("/join-requests")
+def my_join_requests(
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Pending requests to join any team this coach owns."""
+    team_ids = [t.id for t in db.query(models.Team).filter_by(coach_id=coach.id).all()]
+    if not team_ids:
+        return []
+    rows = (
+        db.query(models.TeamInvite)
+        .filter(
+            models.TeamInvite.team_id.in_(team_ids),
+            models.TeamInvite.kind == "request",
+            models.TeamInvite.status == "pending",
+        )
+        .all()
     )
-    db.add(notif)
-    db.commit()
-    return {"ok": True}
+    out = []
+    for req in rows:
+        team = db.get(models.Team, req.team_id)
+        applicant = db.get(models.Coach, req.invited_coach_id)
+        out.append({
+            "id": req.id,
+            "team_id": req.team_id,
+            "team_name": team.name if team else "Team",
+            "coach_id": req.invited_coach_id,
+            "coach_name": applicant.name if applicant else "A coach",
+            "coach_role": (applicant.role if applicant else None) or "staff",
+            "created_at": req.created_at,
+        })
+    return out
+
+
+@router.post("/join-requests/{request_id}/approve")
+def approve_join_request(
+    request_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    req, team = _get_join_request(db, request_id, coach.id)
+    if req.status == "pending":
+        if not db.query(models.TeamStaff).filter_by(team_id=req.team_id, coach_id=req.invited_coach_id).first():
+            db.add(models.TeamStaff(team_id=req.team_id, coach_id=req.invited_coach_id))
+        req.status = "approved"
+        db.add(models.CoachNotification(
+            coach_id=req.invited_coach_id,
+            title="Join request approved",
+            body=f"You are now staff on {team.name}.",
+            i18n_key="notifs.teamJoinApproved",
+            i18n_params={"team": team.name},
+            type="team_join_approved",
+        ))
+        db.commit()
+    return {"ok": True, "status": req.status}
+
+
+@router.post("/join-requests/{request_id}/reject")
+def reject_join_request(
+    request_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    req, team = _get_join_request(db, request_id, coach.id)
+    if req.status == "pending":
+        req.status = "rejected"
+        db.add(models.CoachNotification(
+            coach_id=req.invited_coach_id,
+            title="Join request declined",
+            body=f"Your request to join {team.name} was declined.",
+            i18n_key="notifs.teamJoinRejected",
+            i18n_params={"team": team.name},
+            type="team_join_rejected",
+        ))
+        db.commit()
+    return {"ok": True, "status": req.status}
 
 
 @router.delete("/{team_id}/leave")
@@ -276,7 +401,13 @@ def my_invites(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    rows = db.query(models.TeamInvite).filter_by(invited_coach_id=coach.id, status="pending").all()
+    # kind="invite" only: a join request this coach raised is waiting on the
+    # team owner, not on them, and must not appear as something to accept.
+    rows = (
+        db.query(models.TeamInvite)
+        .filter_by(invited_coach_id=coach.id, status="pending", kind="invite")
+        .all()
+    )
     out = []
     for inv in rows:
         team = db.get(models.Team, inv.team_id)
@@ -297,8 +428,11 @@ def approve_invite(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
+    # kind must be "invite". On a join-request row invited_coach_id is the
+    # requester, so without this check a coach could approve their own request
+    # here and grant themselves the membership the owner never agreed to.
     inv = db.get(models.TeamInvite, invite_id)
-    if not inv or inv.invited_coach_id != coach.id:
+    if not inv or inv.kind != "invite" or inv.invited_coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Invite not found")
     if inv.status == "pending":
         if not db.query(models.TeamStaff).filter_by(team_id=inv.team_id, coach_id=coach.id).first():
@@ -321,8 +455,11 @@ def reject_invite(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
+    # kind must be "invite". On a join-request row invited_coach_id is the
+    # requester, so without this check a coach could approve their own request
+    # here and grant themselves the membership the owner never agreed to.
     inv = db.get(models.TeamInvite, invite_id)
-    if not inv or inv.invited_coach_id != coach.id:
+    if not inv or inv.kind != "invite" or inv.invited_coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Invite not found")
     if inv.status == "pending":
         inv.status = "rejected"
@@ -333,6 +470,122 @@ def reject_invite(
         ))
         db.commit()
     return {"ok": True, "status": inv.status}
+
+
+class TransferOwnerBody(BaseModel):
+    coach_id: int | None = None   # omit to claim an orphaned team yourself
+
+
+def _team_and_subteams(db: Session, team) -> list:
+    """The team plus every sub-team beneath it that shares its owner.
+
+    Ownership has to move as a unit. Leaving sub-teams behind would strand them
+    under a coach who no longer runs the program, and nobody could then reassign
+    them because the transfer endpoint only accepts the current owner.
+    """
+    out, frontier = [team], [team.id]
+    while frontier:
+        children = (
+            db.query(models.Team)
+            .filter(models.Team.parent_team_id.in_(frontier))
+            .all()
+        )
+        children = [c for c in children if c.coach_id == team.coach_id]
+        if not children:
+            break
+        out.extend(children)
+        frontier = [c.id for c in children]
+    return out
+
+
+@router.post("/{team_id}/transfer-owner")
+def transfer_owner(
+    team_id: int,
+    body: TransferOwnerBody,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Hand a team to another coach.
+
+    Normally the current owner names their successor. If the owner's account is
+    gone — they left the app — the team would otherwise be frozen forever, with
+    no one able to invite, rename or reassign it, so any staff member may claim
+    it. Claiming is limited to existing staff: it must not become a way for an
+    outsider to take over a team by watching for a deleted account.
+    """
+    team = db.get(models.Team, team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+
+    owner = db.get(models.Coach, team.coach_id)
+    orphaned = owner is None
+    is_owner = team.coach_id == coach.id
+    is_staff = db.query(models.TeamStaff).filter_by(team_id=team_id, coach_id=coach.id).first() is not None
+
+    if is_owner:
+        if body.coach_id is None:
+            raise HTTPException(status_code=400, detail="Choose the coach to hand the team to.")
+        new_owner_id = body.coach_id
+    elif orphaned and is_staff:
+        # Reclaiming a team whose owner is gone: you may only claim it yourself,
+        # not hand it to a third party.
+        new_owner_id = coach.id
+    else:
+        raise HTTPException(status_code=403, detail="Only the team owner can transfer this team.")
+
+    if new_owner_id == team.coach_id:
+        raise HTTPException(status_code=400, detail="That coach already owns this team.")
+
+    new_owner = db.get(models.Coach, new_owner_id)
+    if not new_owner:
+        raise HTTPException(status_code=404, detail="Coach not found")
+    if new_owner_id != coach.id and not db.query(models.TeamStaff).filter_by(
+        team_id=team_id, coach_id=new_owner_id
+    ).first():
+        raise HTTPException(status_code=400, detail="Hand the team to someone already on its staff.")
+
+    moved = _team_and_subteams(db, team)
+    previous_owner_id = team.coach_id
+    for t in moved:
+        t.coach_id = new_owner_id
+
+    for t in moved:
+        # The new owner is no longer merely staff.
+        link = db.query(models.TeamStaff).filter_by(team_id=t.id, coach_id=new_owner_id).first()
+        if link:
+            db.delete(link)
+        # The outgoing owner keeps access as staff rather than being locked out
+        # of a program they still work in. They can leave if they want to.
+        if not orphaned and not db.query(models.TeamStaff).filter_by(
+            team_id=t.id, coach_id=previous_owner_id
+        ).first():
+            db.add(models.TeamStaff(team_id=t.id, coach_id=previous_owner_id))
+
+    db.add(models.CoachNotification(
+        coach_id=new_owner_id,
+        title=f"You now own {team.name}",
+        body=f"{coach.name} made you the owner of {team.name}.",
+        i18n_key="notifs.teamOwnerChanged",
+        i18n_params={"coach": coach.name, "team": team.name},
+        type="team_owner_changed",
+    ))
+    if not orphaned and previous_owner_id != coach.id:
+        db.add(models.CoachNotification(
+            coach_id=previous_owner_id,
+            title=f"{new_owner.name} now owns {team.name}",
+            body=f"{new_owner.name} is now the owner of {team.name}.",
+            i18n_key="notifs.teamOwnerChanged",
+            i18n_params={"coach": new_owner.name, "team": team.name},
+            type="team_owner_changed",
+        ))
+    db.commit()
+    return {
+        "ok": True,
+        "team_id": team.id,
+        "new_owner_id": new_owner_id,
+        "teams_moved": len(moved),
+        "claimed": orphaned and not is_owner,
+    }
 
 
 @router.get("/team-games")

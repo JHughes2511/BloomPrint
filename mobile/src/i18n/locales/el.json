@@ -1390,7 +1390,13 @@
     "you": "Εσύ",
     "subTeamPlaceholder": "Όνομα υποομάδας (π.χ. Επίθεση, Γκαρντ)...",
     "coachNameOrEmail": "Όνομα ή email προπονητή...",
-    "noReportGenerated": "Δεν έχει δημιουργηθεί αναφορά ακόμη."
+    "noReportGenerated": "Δεν έχει δημιουργηθεί αναφορά ακόμη.",
+    "requestJoin": "Αίτημα",
+    "requestPending": "Στάλθηκε",
+    "requestSentTitle": "Το αίτημα στάλθηκε",
+    "requestSentMsg": "Ο ιδιοκτήτης της ομάδας θα εγκρίνει ή θα απορρίψει το αίτημά σας.",
+    "joinRequestsLabel": "ΑΙΤΗΜΑΤΑ ({{count}})",
+    "wantsToJoin": "{{role}} · θέλει να μπει στην ομάδα {{team}}"
   },
   "conversation": {
     "title": "Συνομιλία",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "Αναφορά προωθήθηκε από {{coach}}",
       "body": "Ο/Η {{coach}} σας προώθησε μια {{type}}."
+    },
+    "teamJoinRequest": {
+      "title": "Ο/Η {{coach}} ζήτησε να μπει στην ομάδα σας",
+      "body": "Ο/Η {{coach}} ({{role}}) ζήτησε να μπει στην ομάδα {{team}}."
+    },
+    "teamJoinApproved": {
+      "title": "Το αίτημα εγκρίθηκε",
+      "body": "Ανήκετε πλέον στο επιτελείο της ομάδας {{team}}."
+    },
+    "teamJoinRejected": {
+      "title": "Το αίτημα απορρίφθηκε",
+      "body": "Το αίτημά σας να μπείτε στην ομάδα {{team}} απορρίφθηκε."
+    },
+    "teamOwnerChanged": {
+      "title": "Αλλαγή ιδιοκτήτη ομάδας",
+      "body": "Ο/Η {{coach}} είναι πλέον ιδιοκτήτης της ομάδας {{team}}."
     }
   }
 }

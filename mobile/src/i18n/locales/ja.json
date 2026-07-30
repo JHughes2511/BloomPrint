@@ -1390,7 +1390,13 @@
     "you": "あなた",
     "subTeamPlaceholder": "サブチーム名（例：オフェンス、ガード）...",
     "coachNameOrEmail": "コーチ名またはメール...",
-    "noReportGenerated": "レポートはまだ作成されていません。"
+    "noReportGenerated": "レポートはまだ作成されていません。",
+    "requestJoin": "申請",
+    "requestPending": "申請済み",
+    "requestSentTitle": "申請を送信しました",
+    "requestSentMsg": "チームのオーナーが承認または却下します。",
+    "joinRequestsLabel": "参加申請（{{count}}）",
+    "wantsToJoin": "{{role}} · {{team}} への参加を希望"
   },
   "conversation": {
     "title": "会話",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "{{coach}} がレポートを転送しました",
       "body": "{{coach}} があなたに{{type}}を転送しました。"
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} がチームへの参加を希望しています",
+      "body": "{{coach}}（{{role}}）が {{team}} への参加を希望しました。"
+    },
+    "teamJoinApproved": {
+      "title": "参加リクエストが承認されました",
+      "body": "あなたは {{team}} のスタッフになりました。"
+    },
+    "teamJoinRejected": {
+      "title": "参加リクエストが却下されました",
+      "body": "{{team}} への参加リクエストは却下されました。"
+    },
+    "teamOwnerChanged": {
+      "title": "チームのオーナーが変わりました",
+      "body": "{{coach}} が {{team}} のオーナーになりました。"
     }
   }
 }

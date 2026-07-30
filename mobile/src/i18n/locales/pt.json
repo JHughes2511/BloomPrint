@@ -1390,7 +1390,13 @@
     "you": "Você",
     "subTeamPlaceholder": "Nome do subgrupo (ex. Ataque, Armadores)...",
     "coachNameOrEmail": "Nome ou e-mail do treinador...",
-    "noReportGenerated": "Ainda não foi gerado nenhum relatório."
+    "noReportGenerated": "Ainda não foi gerado nenhum relatório.",
+    "requestJoin": "Pedir",
+    "requestPending": "Pedido enviado",
+    "requestSentTitle": "Pedido enviado",
+    "requestSentMsg": "O proprietário da equipa vai aprovar ou recusar o seu pedido.",
+    "joinRequestsLabel": "PEDIDOS ({{count}})",
+    "wantsToJoin": "{{role}} · quer entrar em {{team}}"
   },
   "conversation": {
     "title": "Conversa",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "Relatório reencaminhado por {{coach}}",
       "body": "{{coach}} reencaminhou-lhe um {{type}}."
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} pediu para entrar na sua equipa",
+      "body": "{{coach}} ({{role}}) pediu para entrar em {{team}}."
+    },
+    "teamJoinApproved": {
+      "title": "Pedido aprovado",
+      "body": "Faz agora parte da equipa técnica de {{team}}."
+    },
+    "teamJoinRejected": {
+      "title": "Pedido recusado",
+      "body": "O seu pedido para entrar em {{team}} foi recusado."
+    },
+    "teamOwnerChanged": {
+      "title": "Propriedade da equipa alterada",
+      "body": "{{coach}} é agora o proprietário de {{team}}."
     }
   }
 }

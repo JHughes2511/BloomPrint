@@ -1390,7 +1390,13 @@
     "you": "Ikaw",
     "subTeamPlaceholder": "Pangalan ng sub-team (hal. Offense, Guards)...",
     "coachNameOrEmail": "Pangalan o email ng coach...",
-    "noReportGenerated": "Wala pang nabuong ulat."
+    "noReportGenerated": "Wala pang nabuong ulat.",
+    "requestJoin": "Humiling",
+    "requestPending": "Naipadala",
+    "requestSentTitle": "Naipadala ang hiling",
+    "requestSentMsg": "Aaprubahan o tatanggihan ng may-ari ng koponan ang iyong hiling.",
+    "joinRequestsLabel": "MGA HILING ({{count}})",
+    "wantsToJoin": "{{role}} · gustong sumali sa {{team}}"
   },
   "conversation": {
     "title": "Usapan",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "Ulat na ipinasa ni {{coach}}",
       "body": "Ipinasa sa iyo ni {{coach}} ang isang {{type}}."
+    },
+    "teamJoinRequest": {
+      "title": "Humiling si {{coach}} na sumali sa koponan mo",
+      "body": "Humiling si {{coach}} ({{role}}) na sumali sa {{team}}."
+    },
+    "teamJoinApproved": {
+      "title": "Naaprubahan ang hiling",
+      "body": "Kabilang ka na sa staff ng {{team}}."
+    },
+    "teamJoinRejected": {
+      "title": "Tinanggihan ang hiling",
+      "body": "Tinanggihan ang iyong hiling na sumali sa {{team}}."
+    },
+    "teamOwnerChanged": {
+      "title": "Nagbago ang may-ari ng koponan",
+      "body": "Si {{coach}} na ang may-ari ng {{team}}."
     }
   }
 }

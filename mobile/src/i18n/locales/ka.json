@@ -1390,7 +1390,13 @@
     "you": "თქვენ",
     "subTeamPlaceholder": "ქვეჯგუფის სახელი (მაგ. შეტევა, გარდები)...",
     "coachNameOrEmail": "მწვრთნელის სახელი ან ელფოსტა...",
-    "noReportGenerated": "ანგარიში ჯერ არ შექმნილა."
+    "noReportGenerated": "ანგარიში ჯერ არ შექმნილა.",
+    "requestJoin": "მოთხოვნა",
+    "requestPending": "მოთხოვნილია",
+    "requestSentTitle": "მოთხოვნა გაიგზავნა",
+    "requestSentMsg": "გუნდის მფლობელი დაამტკიცებს ან უარყოფს თქვენს მოთხოვნას.",
+    "joinRequestsLabel": "მოთხოვნები ({{count}})",
+    "wantsToJoin": "{{role}} · სურს გუნდში {{team}} გაწევრიანება"
   },
   "conversation": {
     "title": "საუბარი",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "ანგარიში გადმოაგზავნა {{coach}}-მა",
       "body": "{{coach}}-მა გადმოგიგზავნათ {{type}}."
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}}-მა მოითხოვა თქვენს გუნდში გაწევრიანება",
+      "body": "{{coach}}-მა ({{role}}) მოითხოვა გუნდში {{team}} გაწევრიანება."
+    },
+    "teamJoinApproved": {
+      "title": "მოთხოვნა დამტკიცდა",
+      "body": "თქვენ ახლა {{team}}-ის შტაბში ხართ."
+    },
+    "teamJoinRejected": {
+      "title": "მოთხოვნა უარყოფილია",
+      "body": "თქვენი მოთხოვნა {{team}}-ში გაწევრიანებაზე უარყოფილია."
+    },
+    "teamOwnerChanged": {
+      "title": "გუნდის მფლობელი შეიცვალა",
+      "body": "{{coach}} ახლა {{team}}-ის მფლობელია."
     }
   }
 }

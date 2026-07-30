@@ -1390,7 +1390,13 @@
     "you": "אתה",
     "subTeamPlaceholder": "שם תת-קבוצה (למשל התקפה, גארדים)...",
     "coachNameOrEmail": "שם המאמן או אימייל...",
-    "noReportGenerated": "עדיין לא נוצר דוח."
+    "noReportGenerated": "עדיין לא נוצר דוח.",
+    "requestJoin": "שליחת בקשה",
+    "requestPending": "נשלחה בקשה",
+    "requestSentTitle": "הבקשה נשלחה",
+    "requestSentMsg": "בעל הקבוצה יאשר או ידחה את בקשתך.",
+    "joinRequestsLabel": "בקשות ({{count}})",
+    "wantsToJoin": "{{role}} · רוצה להצטרף ל{{team}}"
   },
   "conversation": {
     "title": "שיחה",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "דוח הועבר על ידי {{coach}}",
       "body": "{{coach}} העביר אליך {{type}}."
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} ביקש להצטרף לקבוצה שלך",
+      "body": "{{coach}} ({{role}}) ביקש להצטרף ל{{team}}."
+    },
+    "teamJoinApproved": {
+      "title": "הבקשה אושרה",
+      "body": "אתה כעת חלק מהצוות של {{team}}."
+    },
+    "teamJoinRejected": {
+      "title": "הבקשה נדחתה",
+      "body": "בקשתך להצטרף ל{{team}} נדחתה."
+    },
+    "teamOwnerChanged": {
+      "title": "בעלות הקבוצה השתנתה",
+      "body": "{{coach}} הוא כעת הבעלים של {{team}}."
     }
   }
 }

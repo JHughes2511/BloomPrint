@@ -1390,7 +1390,13 @@
     "you": "Du",
     "subTeamPlaceholder": "Name der Teilgruppe (z. B. Offense, Guards)...",
     "coachNameOrEmail": "Trainername oder E-Mail...",
-    "noReportGenerated": "Noch kein Bericht erstellt."
+    "noReportGenerated": "Noch kein Bericht erstellt.",
+    "requestJoin": "Anfragen",
+    "requestPending": "Angefragt",
+    "requestSentTitle": "Anfrage gesendet",
+    "requestSentMsg": "Der Team-Eigentümer wird deine Anfrage annehmen oder ablehnen.",
+    "joinRequestsLabel": "ANFRAGEN ({{count}})",
+    "wantsToJoin": "{{role}} · möchte zu {{team}}"
   },
   "conversation": {
     "title": "Unterhaltung",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "Bericht weitergeleitet von {{coach}}",
       "body": "{{coach}} hat dir einen {{type}} weitergeleitet."
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} möchte deinem Team beitreten",
+      "body": "{{coach}} ({{role}}) hat angefragt, {{team}} beizutreten."
+    },
+    "teamJoinApproved": {
+      "title": "Anfrage genehmigt",
+      "body": "Du gehörst jetzt zum Staff von {{team}}."
+    },
+    "teamJoinRejected": {
+      "title": "Anfrage abgelehnt",
+      "body": "Deine Anfrage, {{team}} beizutreten, wurde abgelehnt."
+    },
+    "teamOwnerChanged": {
+      "title": "Team-Eigentümer geändert",
+      "body": "{{coach}} ist jetzt Eigentümer von {{team}}."
     }
   }
 }

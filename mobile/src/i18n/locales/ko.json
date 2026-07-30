@@ -1390,7 +1390,13 @@
     "you": "나",
     "subTeamPlaceholder": "세부 팀 이름 (예: 오펜스, 가드)...",
     "coachNameOrEmail": "코치 이름 또는 이메일...",
-    "noReportGenerated": "아직 생성된 리포트가 없습니다."
+    "noReportGenerated": "아직 생성된 리포트가 없습니다.",
+    "requestJoin": "요청",
+    "requestPending": "요청됨",
+    "requestSentTitle": "요청을 보냈습니다",
+    "requestSentMsg": "팀 소유자가 요청을 승인하거나 거절합니다.",
+    "joinRequestsLabel": "합류 요청 ({{count}})",
+    "wantsToJoin": "{{role}} · {{team}} 합류 희망"
   },
   "conversation": {
     "title": "대화",
@@ -2363,6 +2369,22 @@
     "staffReportForwarded": {
       "title": "{{coach}} 님이 리포트를 전달했습니다",
       "body": "{{coach}} 님이 회원님에게 {{type}}을(를) 전달했습니다."
+    },
+    "teamJoinRequest": {
+      "title": "{{coach}} 님이 팀 합류를 요청했습니다",
+      "body": "{{coach}}({{role}}) 님이 {{team}} 합류를 요청했습니다."
+    },
+    "teamJoinApproved": {
+      "title": "합류 요청 승인됨",
+      "body": "이제 {{team}}의 스태프입니다."
+    },
+    "teamJoinRejected": {
+      "title": "합류 요청 거절됨",
+      "body": "{{team}} 합류 요청이 거절되었습니다."
+    },
+    "teamOwnerChanged": {
+      "title": "팀 소유자 변경됨",
+      "body": "{{coach}} 님이 이제 {{team}}의 소유자입니다."
     }
   }
 }
