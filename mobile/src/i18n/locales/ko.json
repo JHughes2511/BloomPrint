@@ -857,7 +857,10 @@
     "countryPlaceholder": "국가",
     "allowRegenerate": "수신자의 재생성 허용",
     "searchCoachPlaceholder": "코치/프로그램 이름 검색...",
-    "summarizeHistoryTitle": "기록 요약"
+    "summarizeHistoryTitle": "기록 요약",
+    "noEvalsYet": "아직 평가가 없습니다.",
+    "updatePlayerProgram": "선수 프로그램 업데이트",
+    "createAssign": "생성 및 배정"
   },
   "training": {
     "couldNotOpenFilePicker": "파일 선택기를 열 수 없습니다.",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "팀 나가기",
     "leaveTeamMsg": "더 이상 이 팀의 경기를 보거나 알림을 받을 수 없습니다.",
     "leaveTeamError": "팀에서 나갈 수 없습니다",
-    "viewFullGameData": "전체 경기 데이터 보기 (기록 및 등급)",
+    "viewFullGameData": "전체 경기 데이터 보기 (기록 및 평점)",
     "noReportYet": "아직 생성된 리포트가 없습니다.",
     "noScoutingReportYet": "이 경기의 AI 스카우팅 리포트가 아직 생성되지 않았습니다.",
     "addCommentPlaceholder": "댓글 추가...",
     "you": "나",
     "subTeamPlaceholder": "세부 팀 이름 (예: 오펜스, 가드)...",
-    "coachNameOrEmail": "코치 이름 또는 이메일..."
+    "coachNameOrEmail": "코치 이름 또는 이메일...",
+    "noReportGenerated": "아직 생성된 리포트가 없습니다."
   },
   "conversation": {
     "title": "대화",
@@ -1846,7 +1850,16 @@
     "player": "선수",
     "staff": "스태프",
     "allowRegenerate": "수신자의 재생성 허용",
-    "typeNameToSearch": "검색할 이름을 입력하세요..."
+    "typeNameToSearch": "검색할 이름을 입력하세요...",
+    "updating": "업데이트 중...",
+    "applyRegenerate": "적용 후 재생성",
+    "regeneratingLabel": "리포트를 다시 생성하는 중…",
+    "noContent": "내용이 없습니다.",
+    "noAnalysisYet": "아직 분석이 없습니다.",
+    "applyCorrection": "수정 적용",
+    "noPlayersFound": "선수를 찾을 수 없습니다.",
+    "myTeamFilm": "우리 팀 영상",
+    "opponentFilm": "상대 팀 영상"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "원문 표시 중",
     "viewOriginal": "원문 보기",
     "showTranslation": "번역 보기"
+  },
+  "jobProgress": {
+    "scanning": "영상에서 주요 장면을 스캔하는 중…",
+    "segment": "{{n}}개 중 {{i}}번째 구간 분석 중",
+    "synthesizing": "리포트 종합 중"
   }
 }

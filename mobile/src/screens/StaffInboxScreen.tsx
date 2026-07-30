@@ -742,8 +742,8 @@ export default function StaffInboxScreen() {
       <Modal visible={!!subFor} transparent animationType="fade" onRequestClose={() => setSubFor(null)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={[styles.modalBox, { padding: 20 }]}>
-            <Text style={styles.modalTitle}>New Sub-team</Text>
-            <Text style={[styles.cardSub, { marginTop: 4, marginBottom: 12 }]}>Under {subFor?.name}</Text>
+            <Text style={styles.modalTitle}>{tr('staffHub.newSubteam')}</Text>
+            <Text style={[styles.cardSub, { marginTop: 4, marginBottom: 12 }]}>{tr('staffHub.underTeam', { name: subFor?.name })}</Text>
             <TextInput
               style={styles.searchInput}
               placeholder={tr('staffHub.subTeamPlaceholder')}
@@ -841,7 +841,7 @@ export default function StaffInboxScreen() {
                 }}
               >
                 <Ionicons name="stats-chart-outline" size={16} color={t.accent} />
-                <Text style={styles.fullDataBtnText}>View full game data (stats & grades)</Text>
+                <Text style={styles.fullDataBtnText}>{tr('staffHub.viewFullGameData')}</Text>
                 <Ionicons name="chevron-forward" size={16} color={t.accent} />
               </TouchableOpacity>
             )}
@@ -850,7 +850,7 @@ export default function StaffInboxScreen() {
               {activeGame?.kind === 'report' && (
                 activeGame.report_text
                   ? renderReport(String(activeGame.report_text).replace(/\s*END OF REPORT\.?\s*$/i, ''), { heading: t.ink, body: t.inkSoft })
-                  : <Text style={{ color: t.muted2 }}>No report generated yet.</Text>
+                  : <Text style={{ color: t.muted2 }}>{tr('staffHub.noReportGenerated')}</Text>
               )}
               {activeGame?.kind === 'session' && (
                 activeGame.ai_scouting_report

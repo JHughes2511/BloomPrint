@@ -795,7 +795,7 @@
     "evaluations": "Evaluaciones",
     "trainingPlans": "Planes de Entrenamiento",
     "memberSince": "Miembro desde {{date}}",
-    "noTrainingContent": "Sin contenido de entrenamiento.",
+    "noTrainingContent": "No hay contenido de entrenamiento.",
     "corrections": "CORRECCIONES",
     "correctionsPlaceholder": "Introduce correcciones o comentarios para un nuevo programa de entrenamiento...",
     "saveForLater": "Guardar para Después",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "País",
     "allowRegenerate": "Permitir que el destinatario regenere",
     "searchCoachPlaceholder": "Buscar nombre de entrenador/programa...",
-    "summarizeHistoryTitle": "Resumir historial"
+    "summarizeHistoryTitle": "Resumir historial",
+    "noEvalsYet": "Aún no hay evaluaciones.",
+    "updatePlayerProgram": "Actualizar programa del jugador",
+    "createAssign": "Crear y asignar"
   },
   "training": {
     "couldNotOpenFilePicker": "No se pudo abrir el selector de archivos.",
@@ -1382,7 +1385,8 @@
     "addCommentPlaceholder": "Añadir un comentario...",
     "you": "Tú",
     "subTeamPlaceholder": "Nombre del subequipo (p. ej. Ataque, Bases)...",
-    "coachNameOrEmail": "Nombre o correo del entrenador..."
+    "coachNameOrEmail": "Nombre o correo del entrenador...",
+    "noReportGenerated": "Aún no se ha generado ningún informe."
   },
   "conversation": {
     "title": "Conversación",
@@ -1424,7 +1428,7 @@
     "title": "Notificaciones",
     "noNotifications": "No hay notificaciones",
     "typeTraining": "Entrenamiento",
-    "typeEval": "Eval",
+    "typeEval": "Evaluación",
     "typeTeamReport": "Informe de Equipo",
     "typeGameReport": "Informe de Partido",
     "typeScoutReport": "Informe de Ojeo",
@@ -1846,7 +1850,16 @@
     "player": "Jugador",
     "staff": "Cuerpo técnico",
     "allowRegenerate": "Permitir que el destinatario regenere",
-    "typeNameToSearch": "Escribe un nombre para buscar..."
+    "typeNameToSearch": "Escribe un nombre para buscar...",
+    "updating": "Actualizando...",
+    "applyRegenerate": "Aplicar y Regenerar",
+    "regeneratingLabel": "Regenerando el informe…",
+    "noContent": "Sin contenido.",
+    "noAnalysisYet": "Aún no hay análisis.",
+    "applyCorrection": "Aplicar corrección",
+    "noPlayersFound": "No se encontraron jugadores.",
+    "myTeamFilm": "Vídeo de mi equipo",
+    "opponentFilm": "Vídeo del rival"
   },
   "teamGrade": {
     "views": {
@@ -1856,9 +1869,9 @@
     },
     "phases": {
       "all": "Todas",
-      "regular": "Regular",
+      "regular": "Temporada regular",
       "tournament": "Torneo",
-      "playoff": "Playoff",
+      "playoff": "Playoffs",
       "preseason": "Pretemporada",
       "scrimmage": "Amistoso",
       "exhibition": "Exhibición"
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Mostrando el original",
     "viewOriginal": "Ver original",
     "showTranslation": "Mostrar traducción"
+  },
+  "jobProgress": {
+    "scanning": "Analizando el vídeo en busca de jugadas clave…",
+    "segment": "Analizando el segmento {{i}} de {{n}}",
+    "synthesizing": "Sintetizando el informe"
   }
 }

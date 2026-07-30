@@ -795,7 +795,7 @@
     "evaluations": "Oceny",
     "trainingPlans": "Plany treningowe",
     "memberSince": "Członek od {{date}}",
-    "noTrainingContent": "Brak treści treningu.",
+    "noTrainingContent": "Brak treści treningowych.",
     "corrections": "POPRAWKI",
     "correctionsPlaceholder": "Wpisz poprawki lub uwagi do nowego programu treningowego...",
     "saveForLater": "Zapisz na później",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "Kraj",
     "allowRegenerate": "Zezwól odbiorcy na ponowne wygenerowanie",
     "searchCoachPlaceholder": "Szukaj nazwy trenera/programu...",
-    "summarizeHistoryTitle": "Podsumuj historię"
+    "summarizeHistoryTitle": "Podsumuj historię",
+    "noEvalsYet": "Brak ocen.",
+    "updatePlayerProgram": "Zaktualizuj program zawodnika",
+    "createAssign": "Utwórz i przypisz"
   },
   "training": {
     "couldNotOpenFilePicker": "Nie udało się otworzyć wyboru plików.",
@@ -1382,7 +1385,8 @@
     "addCommentPlaceholder": "Dodaj komentarz...",
     "you": "Ty",
     "subTeamPlaceholder": "Nazwa podzespołu (np. Atak, Rozgrywający)...",
-    "coachNameOrEmail": "Imię i nazwisko lub e-mail trenera..."
+    "coachNameOrEmail": "Imię i nazwisko lub e-mail trenera...",
+    "noReportGenerated": "Nie wygenerowano jeszcze raportu."
   },
   "conversation": {
     "title": "Konwersacja",
@@ -1846,7 +1850,16 @@
     "player": "Zawodnik",
     "staff": "Sztab",
     "allowRegenerate": "Zezwól odbiorcy na ponowne wygenerowanie",
-    "typeNameToSearch": "Wpisz nazwisko, aby wyszukać..."
+    "typeNameToSearch": "Wpisz nazwisko, aby wyszukać...",
+    "updating": "Aktualizowanie...",
+    "applyRegenerate": "Zastosuj i wygeneruj ponownie",
+    "regeneratingLabel": "Ponowne generowanie raportu…",
+    "noContent": "Brak treści.",
+    "noAnalysisYet": "Brak analizy.",
+    "applyCorrection": "Zastosuj korektę",
+    "noPlayersFound": "Nie znaleziono zawodników.",
+    "myTeamFilm": "Nagranie mojej drużyny",
+    "opponentFilm": "Nagranie przeciwnika"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Wyświetlanie oryginału",
     "viewOriginal": "Zobacz oryginał",
     "showTranslation": "Pokaż tłumaczenie"
+  },
+  "jobProgress": {
+    "scanning": "Skanowanie nagrania w poszukiwaniu kluczowych akcji…",
+    "segment": "Analiza fragmentu {{i}} z {{n}}",
+    "synthesizing": "Tworzenie raportu"
   }
 }

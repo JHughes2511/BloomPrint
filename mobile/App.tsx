@@ -13,6 +13,24 @@ import './src/i18n';
 import { initAppLanguage } from './src/i18n';
 import { useTranslation } from 'react-i18next';
 
+// 5 tabs at fontSize 9: translated labels (de/nl/el run 30-40% longer than the
+// English) used to clip mid-word. Wrapping to two tight lines keeps the label
+// readable at full size and still fits above the standard tab-bar height.
+function tabLabel(label: string) {
+  return ({ color }: { color: string }) => (
+    <Text
+      numberOfLines={2}
+      ellipsizeMode="tail"
+      style={{
+        fontSize: 9, lineHeight: 10, textAlign: 'center', color,
+        includeFontPadding: false, marginBottom: 2, paddingHorizontal: 1,
+      }}
+    >
+      {label}
+    </Text>
+  );
+}
+
 // Coach screens
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -142,12 +160,9 @@ function AppTabs() {
         tabBarStyle: { backgroundColor: t.isDark ? '#0C2331' : '#EFE7DA', borderTopColor: t.divider },
         tabBarActiveTintColor: t.accent,
         tabBarInactiveTintColor: t.muted2,
-        // 5 tabs at fontSize 9: translated labels (de/ru run 30-40% longer) must
-        // clip to a single line instead of wrapping or pushing the row wider.
-        tabBarLabelStyle: { fontSize: 9, marginBottom: 2, textAlign: 'center', includeFontPadding: false, numberOfLines: 1, flexShrink: 1 },
-        tabBarItemStyle: { flex: 1, flexShrink: 1, minWidth: 0, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2 },
-        tabBarIconStyle: { marginBottom: 0 },
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarItemStyle: { flex: 1, flexShrink: 1, minWidth: 0, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 1 },
+        tabBarIconStyle: { marginBottom: -1 },
+        tabBarIcon: ({ focused, color }) => {
           const icons: Record<string, [string, string]> = {
             HomeTab:     ['home',        'home-outline'],
             TeamTab:     ['people',      'people-outline'],
@@ -156,15 +171,15 @@ function AppTabs() {
             RecentTab:   ['time',        'time-outline'],
           };
           const [active, inactive] = icons[route.name] ?? ['grid', 'grid-outline'];
-          return <Ionicons name={(focused ? active : inactive) as any} size={size} color={color} />;
+          return <Ionicons name={(focused ? active : inactive) as any} size={22} color={color} />;
         },
       })}
     >
-      <Tab.Screen name="HomeTab"     component={HomeStack}     options={{ title: tr('common.tabs.home') }} />
-      <Tab.Screen name="TeamTab"     component={TeamStack}     options={{ title: tr('common.tabs.teamEval') }} />
-      <Tab.Screen name="TeamEvalTab" component={TeamEvalStack} options={{ title: tr('common.tabs.teamGrade') }} />
-      <Tab.Screen name="RosterTab"   component={RosterStack}   options={{ title: tr('common.tabs.roster') }} />
-      <Tab.Screen name="RecentTab"   component={RecentStack}   options={{ title: tr('common.tabs.recent') }} />
+      <Tab.Screen name="HomeTab"     component={HomeStack}     options={{ tabBarLabel: tabLabel(tr('common.tabs.home')) }} />
+      <Tab.Screen name="TeamTab"     component={TeamStack}     options={{ tabBarLabel: tabLabel(tr('common.tabs.teamEval')) }} />
+      <Tab.Screen name="TeamEvalTab" component={TeamEvalStack} options={{ tabBarLabel: tabLabel(tr('common.tabs.teamGrade')) }} />
+      <Tab.Screen name="RosterTab"   component={RosterStack}   options={{ tabBarLabel: tabLabel(tr('common.tabs.roster')) }} />
+      <Tab.Screen name="RecentTab"   component={RecentStack}   options={{ tabBarLabel: tabLabel(tr('common.tabs.recent')) }} />
     </Tab.Navigator>
   );
 }
@@ -265,10 +280,9 @@ function PlayerTabs() {
         tabBarActiveTintColor: t.positive,
         tabBarInactiveTintColor: t.muted2,
         // Same constraint as the coach tabs: 5 tabs, tiny label, long translations.
-        tabBarLabelStyle: { fontSize: 9, marginBottom: 2, textAlign: 'center', includeFontPadding: false, numberOfLines: 1, flexShrink: 1 },
-        tabBarItemStyle: { flex: 1, flexShrink: 1, minWidth: 0, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2 },
-        tabBarIconStyle: { marginBottom: 0 },
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarItemStyle: { flex: 1, flexShrink: 1, minWidth: 0, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 1 },
+        tabBarIconStyle: { marginBottom: -1 },
+        tabBarIcon: ({ focused, color }) => {
           const icons: Record<string, [string, string]> = {
             PlayerHomeTab:    ['home',          'home-outline'],
             InboxTab:         ['document-text', 'document-text-outline'],
@@ -277,15 +291,15 @@ function PlayerTabs() {
             ProfileTab:       ['person',        'person-outline'],
           };
           const [active, inactive] = icons[route.name] ?? ['grid', 'grid-outline'];
-          return <Ionicons name={(focused ? active : inactive) as any} size={size} color={color} />;
+          return <Ionicons name={(focused ? active : inactive) as any} size={22} color={color} />;
         },
       })}
     >
-      <Tab.Screen name="PlayerHomeTab"   component={SwipedPlayerHomeStack}     options={{ title: tr('playerApp.tabs.home') }} />
-      <Tab.Screen name="InboxTab"        component={SwipedPlayerInboxStack}    options={{ title: tr('playerApp.tabs.reports') }} />
-      <Tab.Screen name="TrainingTab"     component={SwipedPlayerTrainingStack} options={{ title: tr('playerApp.tabs.training') }} />
-      <Tab.Screen name="PlayerNotifsTab" component={SwipedPlayerNotifStack}    options={{ title: tr('playerApp.tabs.alerts') }} />
-      <Tab.Screen name="ProfileTab"      component={SwipedPlayerLinkScreen}    options={{ title: tr('playerApp.tabs.profile') }} />
+      <Tab.Screen name="PlayerHomeTab"   component={SwipedPlayerHomeStack}     options={{ tabBarLabel: tabLabel(tr('playerApp.tabs.home')) }} />
+      <Tab.Screen name="InboxTab"        component={SwipedPlayerInboxStack}    options={{ tabBarLabel: tabLabel(tr('playerApp.tabs.reports')) }} />
+      <Tab.Screen name="TrainingTab"     component={SwipedPlayerTrainingStack} options={{ tabBarLabel: tabLabel(tr('playerApp.tabs.training')) }} />
+      <Tab.Screen name="PlayerNotifsTab" component={SwipedPlayerNotifStack}    options={{ tabBarLabel: tabLabel(tr('playerApp.tabs.alerts')) }} />
+      <Tab.Screen name="ProfileTab"      component={SwipedPlayerLinkScreen}    options={{ tabBarLabel: tabLabel(tr('playerApp.tabs.profile')) }} />
     </Tab.Navigator>
   );
 }

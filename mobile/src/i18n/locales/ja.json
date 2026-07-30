@@ -857,7 +857,10 @@
     "countryPlaceholder": "国",
     "allowRegenerate": "受信者による再作成を許可",
     "searchCoachPlaceholder": "コーチ／プログラム名を検索...",
-    "summarizeHistoryTitle": "履歴を要約"
+    "summarizeHistoryTitle": "履歴を要約",
+    "noEvalsYet": "評価はまだありません。",
+    "updatePlayerProgram": "選手のプログラムを更新",
+    "createAssign": "作成して割り当て"
   },
   "training": {
     "couldNotOpenFilePicker": "ファイル選択を開けませんでした。",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "チームを退出",
     "leaveTeamMsg": "このチームの試合が見られなくなり、通知も受け取れなくなります。",
     "leaveTeamError": "チームを退出できませんでした",
-    "viewFullGameData": "試合データ全体を見る（スタッツ＆グレード）",
+    "viewFullGameData": "試合の全データを見る（スタッツと評価）",
     "noReportYet": "まだレポートが生成されていません。",
     "noScoutingReportYet": "この試合のAIスカウティングレポートはまだ生成されていません。",
     "addCommentPlaceholder": "コメントを追加...",
     "you": "あなた",
     "subTeamPlaceholder": "サブチーム名（例：オフェンス、ガード）...",
-    "coachNameOrEmail": "コーチ名またはメール..."
+    "coachNameOrEmail": "コーチ名またはメール...",
+    "noReportGenerated": "レポートはまだ作成されていません。"
   },
   "conversation": {
     "title": "会話",
@@ -1846,7 +1850,16 @@
     "player": "選手",
     "staff": "スタッフ",
     "allowRegenerate": "受信者による再作成を許可",
-    "typeNameToSearch": "名前を入力して検索..."
+    "typeNameToSearch": "名前を入力して検索...",
+    "updating": "更新中...",
+    "applyRegenerate": "適用して再生成",
+    "regeneratingLabel": "レポートを再生成中…",
+    "noContent": "内容がありません。",
+    "noAnalysisYet": "分析はまだありません。",
+    "applyCorrection": "修正を適用",
+    "noPlayersFound": "選手が見つかりません。",
+    "myTeamFilm": "自チームの映像",
+    "opponentFilm": "相手チームの映像"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "原文を表示中",
     "viewOriginal": "原文を表示",
     "showTranslation": "翻訳を表示"
+  },
+  "jobProgress": {
+    "scanning": "映像から重要なプレーを検出中…",
+    "segment": "セグメント {{i}} / {{n}} を分析中",
+    "synthesizing": "レポートを統合中"
   }
 }

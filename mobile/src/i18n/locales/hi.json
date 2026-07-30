@@ -795,7 +795,7 @@
     "evaluations": "मूल्यांकन",
     "trainingPlans": "ट्रेनिंग प्लान",
     "memberSince": "{{date}} से सदस्य",
-    "noTrainingContent": "कोई ट्रेनिंग सामग्री नहीं।",
+    "noTrainingContent": "कोई प्रशिक्षण सामग्री नहीं।",
     "corrections": "सुधार",
     "correctionsPlaceholder": "नए ट्रेनिंग प्रोग्राम के लिए सुधार या फ़ीडबैक लिखें...",
     "saveForLater": "बाद के लिए सहेजें",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "देश",
     "allowRegenerate": "प्राप्तकर्ता को दोबारा बनाने दें",
     "searchCoachPlaceholder": "कोच/प्रोग्राम का नाम खोजें...",
-    "summarizeHistoryTitle": "इतिहास का सारांश बनाएँ"
+    "summarizeHistoryTitle": "इतिहास का सारांश बनाएँ",
+    "noEvalsYet": "अभी तक कोई मूल्यांकन नहीं।",
+    "updatePlayerProgram": "खिलाड़ी का कार्यक्रम अपडेट करें",
+    "createAssign": "बनाएँ और सौंपें"
   },
   "training": {
     "couldNotOpenFilePicker": "फ़ाइल पिकर नहीं खुल सका।",
@@ -1382,7 +1385,8 @@
     "addCommentPlaceholder": "टिप्पणी जोड़ें...",
     "you": "आप",
     "subTeamPlaceholder": "उप-टीम का नाम (जैसे Offense, Guards)...",
-    "coachNameOrEmail": "कोच का नाम या ईमेल..."
+    "coachNameOrEmail": "कोच का नाम या ईमेल...",
+    "noReportGenerated": "अभी तक कोई रिपोर्ट नहीं बनी।"
   },
   "conversation": {
     "title": "बातचीत",
@@ -1846,7 +1850,16 @@
     "player": "खिलाड़ी",
     "staff": "स्टाफ़",
     "allowRegenerate": "प्राप्तकर्ता को दोबारा बनाने दें",
-    "typeNameToSearch": "खोजने के लिए नाम टाइप करें..."
+    "typeNameToSearch": "खोजने के लिए नाम टाइप करें...",
+    "updating": "अपडेट हो रहा है...",
+    "applyRegenerate": "लागू करें और दोबारा बनाएँ",
+    "regeneratingLabel": "रिपोर्ट दोबारा बन रही है…",
+    "noContent": "कोई सामग्री नहीं।",
+    "noAnalysisYet": "अभी तक कोई विश्लेषण नहीं।",
+    "applyCorrection": "सुधार लागू करें",
+    "noPlayersFound": "कोई खिलाड़ी नहीं मिला।",
+    "myTeamFilm": "मेरी टीम की फ़िल्म",
+    "opponentFilm": "प्रतिद्वंद्वी की फ़िल्म"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "मूल दिखाया जा रहा है",
     "viewOriginal": "मूल देखें",
     "showTranslation": "अनुवाद दिखाएँ"
+  },
+  "jobProgress": {
+    "scanning": "मुख्य एक्शन के लिए फ़िल्म स्कैन की जा रही है…",
+    "segment": "{{n}} में से खंड {{i}} का विश्लेषण",
+    "synthesizing": "रिपोर्ट संश्लेषित की जा रही है"
   }
 }

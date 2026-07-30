@@ -795,7 +795,7 @@
     "evaluations": "评估",
     "trainingPlans": "训练计划",
     "memberSince": "加入于 {{date}}",
-    "noTrainingContent": "无训练内容。",
+    "noTrainingContent": "暂无训练内容。",
     "corrections": "更正",
     "correctionsPlaceholder": "输入更正或反馈以生成新的训练计划...",
     "saveForLater": "稍后保存",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "国家",
     "allowRegenerate": "允许接收者重新生成",
     "searchCoachPlaceholder": "搜索教练/项目名称...",
-    "summarizeHistoryTitle": "总结历史记录"
+    "summarizeHistoryTitle": "总结历史记录",
+    "noEvalsYet": "暂无评估。",
+    "updatePlayerProgram": "更新球员训练计划",
+    "createAssign": "创建并分配"
   },
   "training": {
     "couldNotOpenFilePicker": "无法打开文件选择器。",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "退出球队",
     "leaveTeamMsg": "你将不再看到此球队的比赛或接收其通知。",
     "leaveTeamError": "无法退出球队",
-    "viewFullGameData": "查看完整比赛数据（统计与评分）",
+    "viewFullGameData": "查看完整比赛数据（数据与评分）",
     "noReportYet": "还没有生成报告。",
     "noScoutingReportYet": "此比赛还没有生成 AI 球探报告。",
     "addCommentPlaceholder": "添加评论...",
     "you": "你",
     "subTeamPlaceholder": "小组名称（例如 进攻组、后卫组）...",
-    "coachNameOrEmail": "教练姓名或邮箱..."
+    "coachNameOrEmail": "教练姓名或邮箱...",
+    "noReportGenerated": "尚未生成报告。"
   },
   "conversation": {
     "title": "对话",
@@ -1846,7 +1850,16 @@
     "player": "球员",
     "staff": "教练组",
     "allowRegenerate": "允许接收者重新生成",
-    "typeNameToSearch": "输入姓名以搜索..."
+    "typeNameToSearch": "输入姓名以搜索...",
+    "updating": "更新中...",
+    "applyRegenerate": "应用并重新生成",
+    "regeneratingLabel": "正在重新生成报告…",
+    "noContent": "无内容。",
+    "noAnalysisYet": "暂无分析。",
+    "applyCorrection": "应用修正",
+    "noPlayersFound": "未找到球员。",
+    "myTeamFilm": "本队录像",
+    "opponentFilm": "对手录像"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "正在显示原文",
     "viewOriginal": "查看原文",
     "showTranslation": "显示译文"
+  },
+  "jobProgress": {
+    "scanning": "正在扫描影片中的关键动作…",
+    "segment": "正在分析第 {{i}} 段，共 {{n}} 段",
+    "synthesizing": "正在汇总报告"
   }
 }

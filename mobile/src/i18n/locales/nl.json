@@ -69,7 +69,7 @@
     "programName": "Naam programma / organisatie",
     "competitionLevel": "Competitieniveau",
     "selectLevel": "Selecteer niveau...",
-    "conference": "Conference",
+    "conference": "Conferentie",
     "leagueAssociation": "Competitie / Bond",
     "selectConferenceRequired": "Selecteer conference (verplicht)...",
     "selectLeagueOptional": "Selecteer competitie (optioneel)...",
@@ -264,7 +264,7 @@
   },
   "newEval": {
     "title": "Nieuwe evaluatie",
-    "recruitmentShort": "Recruitment",
+    "recruitmentShort": "Werving",
     "reportType": "Rapporttype",
     "reportTypeHint": "Tik er meerdere aan om ze te combineren in één uitgebreid rapport.",
     "trackedGamesLabel": "Bijgehouden wedstrijden (boxscore)",
@@ -402,7 +402,7 @@
     "noPendingCorrectionsMsg": "Voeg ten minste één correctie toe voordat je opnieuw genereert."
   },
   "home": {
-    "intelligenceModel": "Intelligence Model",
+    "intelligenceModel": "Intelligentiemodel",
     "toggleTheme": "Thema wisselen",
     "editProfileLabel": "Profiel bewerken",
     "staffInboxLabel": "Staf-inbox",
@@ -435,7 +435,7 @@
         "desc": "Persoonlijk vaardigheidsprogramma op basis van evaluatiegegevens"
       },
       "recruitment_profile": {
-        "label": "Recruitment",
+        "label": "Werving",
         "desc": "Recruitmentprofiel voor het volgende niveau en collegeprognose"
       },
       "position_analysis": {
@@ -769,7 +769,7 @@
     "offDefLine": "OFF {{off}} · DEF {{def}}",
     "filmCatalog": "Filmcatalogus",
     "noFilmYet": "Nog geen film geüpload voor deze speler.",
-    "film": "Film",
+    "film": "Beelden",
     "chooseTrainingToRegenerate": "Kies training om opnieuw te genereren",
     "selectTrainingToRegenerate": "Selecteer welk trainingsprogramma je opnieuw wilt genereren met jouw feedback:",
     "selectTrainingToSend": "Selecteer welk trainingsprogramma je wilt versturen:",
@@ -803,7 +803,7 @@
     "regeneratingOverlay": "Training wordt opnieuw gegenereerd…",
     "applied": "TOEGEPAST",
     "pending": "IN AFWACHTING",
-    "playersVersion": "VERSIE VAN SPELER",
+    "playersVersion": "SPELERSVERSIE",
     "sentBadge": "VERZONDEN",
     "preparingChecklist": "AI bereidt de checklistversie voor de speler voor...",
     "commentsCount": "Opmerkingen ({{count}})",
@@ -838,7 +838,7 @@
     "staffSearchPlaceholder": "Zoek op naam van coach/programma...",
     "summarizeHistory": "Geschiedenis samenvatten",
     "summarizeHistorySub": "Kies een of meer rapporttypes — combineer ze voor een uitgebreide samenvatting over alle {{count}} evaluaties.",
-    "recruitmentShort": "Recruitment",
+    "recruitmentShort": "Werving",
     "pickSeasonMsg": "Kies een seizoen/type en selecteer daarna wedstrijden — hun echte statistieken bouwen de boxscore op:",
     "noTrackedGamesMsg": "Nog geen bijgehouden wedstrijden voor deze speler (houd wedstrijden bij in Teamcijfer).",
     "allSeasons": "Alle seizoenen",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "Land",
     "allowRegenerate": "Ontvanger mag opnieuw genereren",
     "searchCoachPlaceholder": "Naam van coach/programma zoeken...",
-    "summarizeHistoryTitle": "Geschiedenis samenvatten"
+    "summarizeHistoryTitle": "Geschiedenis samenvatten",
+    "noEvalsYet": "Nog geen evaluaties.",
+    "updatePlayerProgram": "Programma van speler bijwerken",
+    "createAssign": "Aanmaken en toewijzen"
   },
   "training": {
     "couldNotOpenFilePicker": "Kon bestandskiezer niet openen.",
@@ -1008,7 +1011,7 @@
       "filter": {
         "all": "Alle",
         "evals": "Evaluaties",
-        "film": "Film"
+        "film": "Beelden"
       },
       "title": "Mijn rapporten",
       "sub": "Met jou gedeeld door je technische staf",
@@ -1049,7 +1052,7 @@
       "wingspan": "Spanwijdte",
       "weight": "Gewicht",
       "standingReach": "Staande reikwijdte",
-      "schoolOrg": "School / Org",
+      "schoolOrg": "School / organisatie",
       "linkedCoachesTeams": "Gekoppelde coaches & teams",
       "notLinkedYet": "Je bent nog niet gekoppeld aan coaches. Koppel met een coach om rapporten en training te ontvangen.",
       "linked": "Gekoppeld",
@@ -1222,7 +1225,7 @@
       "matchup": "Matchups",
       "team": "Teamrapporten",
       "game": "Wedstrijdrapporten",
-      "scout": "Scout",
+      "scout": "Scouting",
       "training": "Training"
     },
     "teamReport": "Teamrapport",
@@ -1303,7 +1306,7 @@
   },
   "staffHub": {
     "title": "Staf-hub",
-    "tabInbox": "Inbox",
+    "tabInbox": "Postvak",
     "tabTeamGames": "Teamwedstrijden",
     "tabMyTeams": "Mijn teams",
     "liveGame": "Live wedstrijd",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "Team verlaten",
     "leaveTeamMsg": "Je ziet de wedstrijden van dit team niet meer en ontvangt hun meldingen niet meer.",
     "leaveTeamError": "Kon team niet verlaten",
-    "viewFullGameData": "Volledige wedstrijdgegevens bekijken (statistieken & cijfers)",
+    "viewFullGameData": "Bekijk alle wedstrijdgegevens (statistieken en cijfers)",
     "noReportYet": "Nog geen rapport gegenereerd.",
     "noScoutingReportYet": "Nog geen AI-scoutingrapport gegenereerd voor deze wedstrijd.",
     "addCommentPlaceholder": "Voeg een opmerking toe...",
     "you": "Jij",
     "subTeamPlaceholder": "Naam subteam (bijv. Offense, Guards)...",
-    "coachNameOrEmail": "Naam of e-mail van coach..."
+    "coachNameOrEmail": "Naam of e-mail van coach...",
+    "noReportGenerated": "Nog geen rapport gegenereerd."
   },
   "conversation": {
     "title": "Gesprek",
@@ -1597,7 +1601,7 @@
       "scouting_report": "Scoutingrapport",
       "film_breakdown": "Filmanalyse",
       "coaching_report": "Coachrapport",
-      "recruitment_profile": "Recruitment",
+      "recruitment_profile": "Werving",
       "game_analysis": "Wedstrijdanalyse"
     },
     "templateColumns": {
@@ -1797,7 +1801,7 @@
     "add": "Toevoegen",
     "reportType": "Rapporttype",
     "reportTypeHint": "Tik er meerdere aan om ze te combineren in één uitgebreid rapport.",
-    "film": "Film",
+    "film": "Beelden",
     "addFilm": "Film toevoegen",
     "noFilmYet": "Nog geen film toegevoegd. Tik op \"Film toevoegen\" om een clip te uploaden.",
     "deleteClipTitle": "Clip verwijderen?",
@@ -1846,13 +1850,22 @@
     "player": "Speler",
     "staff": "Staf",
     "allowRegenerate": "Ontvanger mag opnieuw genereren",
-    "typeNameToSearch": "Typ een naam om te zoeken..."
+    "typeNameToSearch": "Typ een naam om te zoeken...",
+    "updating": "Bijwerken...",
+    "applyRegenerate": "Toepassen & opnieuw genereren",
+    "regeneratingLabel": "Het rapport wordt opnieuw gegenereerd…",
+    "noContent": "Geen inhoud.",
+    "noAnalysisYet": "Nog geen analyse.",
+    "applyCorrection": "Correctie toepassen",
+    "noPlayersFound": "Geen spelers gevonden.",
+    "myTeamFilm": "Beelden eigen team",
+    "opponentFilm": "Beelden tegenstander"
   },
   "teamGrade": {
     "views": {
-      "dashboard": "Dashboard",
+      "dashboard": "Overzicht",
       "games": "Wedstrijden",
-      "scout": "Scout"
+      "scout": "Scouting"
     },
     "phases": {
       "all": "Alle",
@@ -1876,7 +1889,7 @@
       "FT Made": "Vrije worp raak",
       "FT Missed": "Vrije worp mis",
       "Def. Reb": "Def. reb",
-      "Steal": "Steal",
+      "Steal": "Balverovering",
       "Deflection": "Onderschepping",
       "Def. Stop": "Def. stop",
       "Charge": "Charge",
@@ -2081,7 +2094,7 @@
     "noStaffFound": "Geen staf gevonden."
   },
   "whiteboard": {
-    "title": "Whiteboard",
+    "title": "Tactiekbord",
     "boardN": "Bord {{n}}",
     "aiPlay": "AI-play",
     "aiPlayN": "AI-play {{n}}",
@@ -2099,13 +2112,13 @@
     "clear": "Wissen",
     "clearBoard": "Bord wissen",
     "full": "Heel",
-    "half": "Half",
+    "half": "Halve",
     "threeQuarter": "3/4",
     "portrait": "Staand",
     "landscape": "Liggend",
     "offense": "Aanval",
     "defense": "Verdediging",
-    "counter": "Counter",
+    "counter": "Tegenzet",
     "keyChip": "Sleutel",
     "play": "Afspelen",
     "stop": "Stop",
@@ -2124,7 +2137,7 @@
     "addMovementHint": "Wat is dit? Het wordt toegevoegd aan {{scheme}} en meegenomen wanneer je op Play aanpassen tikt.",
     "pass": "Pass",
     "cut": "Cut",
-    "screen": "Screen",
+    "screen": "Blok",
     "dribble": "Dribbel",
     "justALine": "Gewoon een lijn",
     "keyPanelTitle": "SLEUTEL — VOORGESTELDE VERBETERINGEN",
@@ -2136,7 +2149,7 @@
     "playersTitle": "{{scheme}} — Per speler",
     "playersHint": "Het detail van elke speler is hoe de AI jouw play voor hen heeft gelezen. Bewerk er een en/of zet een speler vast (de AI cascadeert de anderen rond een vaste speler), en tik daarna op Toepassen & opnieuw genereren.",
     "locked": "Vast",
-    "open": "Open",
+    "open": "Openen",
     "playerDoesPlaceholder": "Wat {{id}} doet…",
     "noPlayersYet": "Nog geen spelers in dit schema.",
     "noDefendersYet": "Nog geen verdedigers in dit schema.",
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Origineel wordt weergegeven",
     "viewOriginal": "Origineel bekijken",
     "showTranslation": "Vertaling weergeven"
+  },
+  "jobProgress": {
+    "scanning": "Beelden worden gescand op sleutelmomenten…",
+    "segment": "Segment {{i}} van {{n}} analyseren",
+    "synthesizing": "Rapport samenstellen"
   }
 }

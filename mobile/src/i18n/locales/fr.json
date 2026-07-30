@@ -56,13 +56,13 @@
   "auth": {
     "whoAreYou": "Qui êtes-vous ?",
     "chooseHow": "Choisissez comment vous utiliserez BloomPrint. Vous pourrez changer plus tard dans les réglages.",
-    "coach": "Coach",
+    "coach": "Entraîneur",
     "coachDesc": "Créez des rapports, suivez les matchs, évaluez votre effectif",
     "player": "Joueur",
     "playerDesc": "Recevez des rapports, suivez votre entraînement, mesurez votre progression",
     "coachScoutTrainer": "Coach · Recruteur · Préparateur",
     "iAmA": "Je suis",
-    "roleCoach": "Coach",
+    "roleCoach": "Entraîneur",
     "roleScout": "Recruteur",
     "roleTrainer": "Préparateur",
     "fullName": "Nom complet",
@@ -402,7 +402,7 @@
     "noPendingCorrectionsMsg": "Ajoutez au moins une correction avant de régénérer."
   },
   "home": {
-    "intelligenceModel": "Intelligence Model",
+    "intelligenceModel": "Modèle d'intelligence",
     "toggleTheme": "Changer de thème",
     "editProfileLabel": "Modifier le profil",
     "staffInboxLabel": "Boîte de réception du staff",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "Pays",
     "allowRegenerate": "Autoriser le destinataire à régénérer",
     "searchCoachPlaceholder": "Rechercher un nom de coach/programme...",
-    "summarizeHistoryTitle": "Résumer l'historique"
+    "summarizeHistoryTitle": "Résumer l'historique",
+    "noEvalsYet": "Aucune évaluation pour l'instant.",
+    "updatePlayerProgram": "Mettre à jour le programme du joueur",
+    "createAssign": "Créer et attribuer"
   },
   "training": {
     "couldNotOpenFilePicker": "Impossible d'ouvrir le sélecteur de fichiers.",
@@ -1053,7 +1056,7 @@
       "linkedCoachesTeams": "Coachs et équipes liés",
       "notLinkedYet": "Vous n'êtes lié à aucun coach pour l'instant. Liez-vous à un coach pour recevoir des rapports et des entraînements.",
       "linked": "Lié",
-      "coach": "Coach",
+      "coach": "Entraîneur",
       "primary": "Principal",
       "unlink": "Délier",
       "unlinkConfirm": "Se délier de {{name}} ?",
@@ -1128,7 +1131,7 @@
     "teamReportDetail": {
       "notFound": "Rapport introuvable",
       "sharedBy": "De {{name}} · {{date}}",
-      "coachFallback": "Coach",
+      "coachFallback": "Entraîneur",
       "coachMessage": "Message du coach",
       "teamReport": "Rapport d'équipe"
     },
@@ -1259,7 +1262,7 @@
     "correctionSavedTitle": "Enregistré",
     "correctionSavedMsg": "Correction enregistrée. Appliquez et régénérez quand vous êtes prêt.",
     "saveCorrectionError": "Impossible d'enregistrer la correction",
-    "infoTitle": "Info",
+    "infoTitle": "Infos",
     "trainingRegenInfoMsg": "Pour régénérer un entraînement avec des retours, utilisez l'écran Profil du joueur.",
     "nothingToApplyTitle": "Rien à appliquer",
     "nothingToApplyMsg": "Ajoutez d'abord une correction.",
@@ -1382,7 +1385,8 @@
     "addCommentPlaceholder": "Ajouter un commentaire...",
     "you": "Vous",
     "subTeamPlaceholder": "Nom du sous-groupe (p. ex. Attaque, Meneurs)...",
-    "coachNameOrEmail": "Nom ou e-mail du coach..."
+    "coachNameOrEmail": "Nom ou e-mail du coach...",
+    "noReportGenerated": "Aucun rapport généré pour l'instant."
   },
   "conversation": {
     "title": "Conversation",
@@ -1846,7 +1850,16 @@
     "player": "Joueur",
     "staff": "Staff",
     "allowRegenerate": "Autoriser le destinataire à régénérer",
-    "typeNameToSearch": "Saisissez un nom pour rechercher..."
+    "typeNameToSearch": "Saisissez un nom pour rechercher...",
+    "updating": "Mise à jour...",
+    "applyRegenerate": "Appliquer et régénérer",
+    "regeneratingLabel": "Régénération du rapport…",
+    "noContent": "Aucun contenu.",
+    "noAnalysisYet": "Aucune analyse pour l'instant.",
+    "applyCorrection": "Appliquer la correction",
+    "noPlayersFound": "Aucun joueur trouvé.",
+    "myTeamFilm": "Vidéo de mon équipe",
+    "opponentFilm": "Vidéo de l'adversaire"
   },
   "teamGrade": {
     "views": {
@@ -2056,7 +2069,7 @@
     "substitutions": "REMPLACEMENTS",
     "overtime": "PROLONGATION",
     "quarterN": "QUART-TEMPS {{q}}",
-    "statsTitle": "Stats",
+    "statsTitle": "Statistiques",
     "addMissingStat": "AJOUTER UNE STAT MANQUANTE",
     "quarterLabel": "QUART-TEMPS",
     "statLabelCaps": "STAT",
@@ -2101,7 +2114,7 @@
     "full": "Entier",
     "half": "Demi",
     "threeQuarter": "3/4",
-    "portrait": "Portrait",
+    "portrait": "Vertical",
     "landscape": "Paysage",
     "offense": "Attaque",
     "defense": "Défense",
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Affichage de l'original",
     "viewOriginal": "Voir l'original",
     "showTranslation": "Afficher la traduction"
+  },
+  "jobProgress": {
+    "scanning": "Analyse de la vidéo à la recherche des actions clés…",
+    "segment": "Analyse du segment {{i}} sur {{n}}",
+    "synthesizing": "Synthèse du rapport"
   }
 }

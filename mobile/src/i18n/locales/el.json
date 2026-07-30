@@ -402,7 +402,7 @@
     "noPendingCorrectionsMsg": "Πρόσθεσε τουλάχιστον μία διόρθωση πριν την αναδημιουργία."
   },
   "home": {
-    "intelligenceModel": "Intelligence Model",
+    "intelligenceModel": "Μοντέλο νοημοσύνης",
     "toggleTheme": "Εναλλαγή θέματος",
     "editProfileLabel": "Επεξεργασία προφίλ",
     "staffInboxLabel": "Εισερχόμενα επιτελείου",
@@ -795,7 +795,7 @@
     "evaluations": "Αξιολογήσεις",
     "trainingPlans": "Πλάνα Προπόνησης",
     "memberSince": "Μέλος από {{date}}",
-    "noTrainingContent": "Χωρίς περιεχόμενο προπόνησης.",
+    "noTrainingContent": "Κανένα περιεχόμενο προπόνησης.",
     "corrections": "ΔΙΟΡΘΩΣΕΙΣ",
     "correctionsPlaceholder": "Εισάγαγε διορθώσεις ή σχόλια για ένα νέο πρόγραμμα προπόνησης...",
     "saveForLater": "Αποθήκευση για Αργότερα",
@@ -803,8 +803,8 @@
     "regeneratingOverlay": "Αναδημιουργία της προπόνησης…",
     "applied": "ΕΦΑΡΜΟΣΤΗΚΕ",
     "pending": "ΕΚΚΡΕΜΕΙ",
-    "playersVersion": "ΕΚΔΟΣΗ ΤΟΥ ΠΑΙΚΤΗ",
-    "sentBadge": "ΣΤΑΛΘΗΚΕ",
+    "playersVersion": "ΕΚΔΟΣΗ ΠΑΙΚΤΗ",
+    "sentBadge": "ΕΣΤΑΛΗ",
     "preparingChecklist": "Η AI ετοιμάζει την έκδοση λίστας ελέγχου του παίκτη...",
     "commentsCount": "Σχόλια ({{count}})",
     "unknown": "Άγνωστο",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "Χώρα",
     "allowRegenerate": "Να επιτρέπεται στον παραλήπτη η αναδημιουργία",
     "searchCoachPlaceholder": "Αναζήτηση ονόματος προπονητή/προγράμματος...",
-    "summarizeHistoryTitle": "Σύνοψη ιστορικού"
+    "summarizeHistoryTitle": "Σύνοψη ιστορικού",
+    "noEvalsYet": "Καμία αξιολόγηση ακόμη.",
+    "updatePlayerProgram": "Ενημέρωση προγράμματος παίκτη",
+    "createAssign": "Δημιουργία & ανάθεση"
   },
   "training": {
     "couldNotOpenFilePicker": "Δεν ήταν δυνατό το άνοιγμα του επιλογέα αρχείων.",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "Αποχώρηση από Ομάδα",
     "leaveTeamMsg": "Δεν θα βλέπεις πλέον τους αγώνες αυτής της ομάδας ούτε θα λαμβάνεις τις ειδοποιήσεις τους.",
     "leaveTeamError": "Δεν ήταν δυνατή η αποχώρηση από την ομάδα",
-    "viewFullGameData": "Δες τα πλήρη δεδομένα αγώνα (στατιστικά & βαθμοί)",
+    "viewFullGameData": "Προβολή πλήρων δεδομένων αγώνα (στατιστικά & βαθμοί)",
     "noReportYet": "Δεν δημιουργήθηκε ακόμα αναφορά.",
     "noScoutingReportYet": "Δεν δημιουργήθηκε ακόμα αναφορά σκάουτινγκ AI για αυτόν τον αγώνα.",
     "addCommentPlaceholder": "Πρόσθεσε ένα σχόλιο...",
     "you": "Εσύ",
     "subTeamPlaceholder": "Όνομα υποομάδας (π.χ. Επίθεση, Γκαρντ)...",
-    "coachNameOrEmail": "Όνομα ή email προπονητή..."
+    "coachNameOrEmail": "Όνομα ή email προπονητή...",
+    "noReportGenerated": "Δεν έχει δημιουργηθεί αναφορά ακόμη."
   },
   "conversation": {
     "title": "Συνομιλία",
@@ -1846,7 +1850,16 @@
     "player": "Παίκτης",
     "staff": "Προπονητικό τιμ",
     "allowRegenerate": "Να επιτρέπεται στον παραλήπτη η αναδημιουργία",
-    "typeNameToSearch": "Πληκτρολογήστε ένα όνομα για αναζήτηση..."
+    "typeNameToSearch": "Πληκτρολογήστε ένα όνομα για αναζήτηση...",
+    "updating": "Ενημέρωση...",
+    "applyRegenerate": "Εφαρμογή & Αναδημιουργία",
+    "regeneratingLabel": "Αναδημιουργία της αναφοράς…",
+    "noContent": "Χωρίς περιεχόμενο.",
+    "noAnalysisYet": "Καμία ανάλυση ακόμη.",
+    "applyCorrection": "Εφαρμογή διόρθωσης",
+    "noPlayersFound": "Δεν βρέθηκαν παίκτες.",
+    "myTeamFilm": "Βίντεο ομάδας μου",
+    "opponentFilm": "Βίντεο αντιπάλου"
   },
   "teamGrade": {
     "views": {
@@ -1864,30 +1877,30 @@
       "exhibition": "Επίδειξη"
     },
     "stats": {
-      "2 FG Made": "2 FG Made",
-      "2 FG Missed": "2 FG Missed",
-      "3 FG Made": "3 FG Made",
-      "3 FG Missed": "3 FG Missed",
-      "Off. Reb": "Off. Reb",
-      "Draw PF": "Draw PF",
-      "Assists": "Assists",
-      "Turnover": "Turnover",
-      "Hockey Assist": "Hockey Assist",
-      "FT Made": "FT Made",
-      "FT Missed": "FT Missed",
-      "Def. Reb": "Def. Reb",
-      "Steal": "Steal",
-      "Deflection": "Deflection",
-      "Def. Stop": "Def. Stop",
-      "Charge": "Charge",
-      "Bluff": "Bluff",
-      "Blocked Shot": "Blocked Shot",
-      "Jog Back": "Jog Back",
-      "No Ball Pressure": "No Ball Pressure",
-      "Defensive Mistake": "Defensive Mistake",
-      "No Contest": "No Contest",
-      "No Block Out": "No Block Out",
-      "Foul Against": "Foul Against"
+      "2 FG Made": "Εύστοχο δίποντο",
+      "2 FG Missed": "Άστοχο δίποντο",
+      "3 FG Made": "Εύστοχο τρίποντο",
+      "3 FG Missed": "Άστοχο τρίποντο",
+      "Off. Reb": "Επ. ριμπάουντ",
+      "Draw PF": "Κερδισμένο φάουλ",
+      "Assists": "Ασίστ",
+      "Turnover": "Λάθος",
+      "Hockey Assist": "Προ-ασίστ",
+      "FT Made": "Εύστοχη βολή",
+      "FT Missed": "Άστοχη βολή",
+      "Def. Reb": "Αμ. ριμπάουντ",
+      "Steal": "Κλέψιμο",
+      "Deflection": "Απόκρουση",
+      "Def. Stop": "Αμ. στοπ",
+      "Charge": "Επιθετικό φάουλ",
+      "Bluff": "Προσποίηση",
+      "Blocked Shot": "Κόψιμο",
+      "Jog Back": "Αργή επιστροφή",
+      "No Ball Pressure": "Χωρίς πίεση στη μπάλα",
+      "Defensive Mistake": "Αμυντικό λάθος",
+      "No Contest": "Χωρίς αμφισβήτηση",
+      "No Block Out": "Χωρίς μπλοκ άουτ",
+      "Foul Against": "Φάουλ εναντίον"
     },
     "gradeView": "ΠΡΟΒΟΛΗ ΒΑΘΜΟΥ",
     "clear": "Καθαρισμός",
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Εμφάνιση του αρχικού",
     "viewOriginal": "Προβολή αρχικού",
     "showTranslation": "Εμφάνιση μετάφρασης"
+  },
+  "jobProgress": {
+    "scanning": "Σάρωση βίντεο για κρίσιμες φάσεις…",
+    "segment": "Ανάλυση τμήματος {{i}} από {{n}}",
+    "synthesizing": "Σύνθεση αναφοράς"
   }
 }

@@ -795,7 +795,7 @@
     "evaluations": "Vertinimai",
     "trainingPlans": "Treniruočių planai",
     "memberSince": "Narys nuo {{date}}",
-    "noTrainingContent": "Nėra treniruotės turinio.",
+    "noTrainingContent": "Treniruočių turinio nėra.",
     "corrections": "PATAISYMAI",
     "correctionsPlaceholder": "Įveskite pataisymus ar atsiliepimus naujai treniruočių programai...",
     "saveForLater": "Išsaugoti vėliau",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "Šalis",
     "allowRegenerate": "Leisti gavėjui generuoti iš naujo",
     "searchCoachPlaceholder": "Ieškoti trenerio / programos pavadinimo...",
-    "summarizeHistoryTitle": "Apibendrinti istoriją"
+    "summarizeHistoryTitle": "Apibendrinti istoriją",
+    "noEvalsYet": "Vertinimų kol kas nėra.",
+    "updatePlayerProgram": "Atnaujinti žaidėjo programą",
+    "createAssign": "Sukurti ir priskirti"
   },
   "training": {
     "couldNotOpenFilePicker": "Nepavyko atidaryti failų parinkiklio.",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "Palikti komandą",
     "leaveTeamMsg": "Jūs nebematysite šios komandos rungtynių ir negausite jų pranešimų.",
     "leaveTeamError": "Nepavyko palikti komandos",
-    "viewFullGameData": "Peržiūrėti visus rungtynių duomenis (statistika ir įverčiai)",
+    "viewFullGameData": "Peržiūrėti visus rungtynių duomenis (statistika ir įvertinimai)",
     "noReportYet": "Ataskaita dar nesugeneruota.",
     "noScoutingReportYet": "Šioms rungtynėms dar nesugeneruota DI skautų ataskaita.",
     "addCommentPlaceholder": "Pridėti komentarą...",
     "you": "Jūs",
     "subTeamPlaceholder": "Pogrupio pavadinimas (pvz., Puolimas, Įžaidėjai)...",
-    "coachNameOrEmail": "Trenerio vardas arba el. paštas..."
+    "coachNameOrEmail": "Trenerio vardas arba el. paštas...",
+    "noReportGenerated": "Ataskaita dar nesugeneruota."
   },
   "conversation": {
     "title": "Pokalbis",
@@ -1846,7 +1850,16 @@
     "player": "Žaidėjas",
     "staff": "Personalas",
     "allowRegenerate": "Leisti gavėjui generuoti iš naujo",
-    "typeNameToSearch": "Įveskite vardą paieškai..."
+    "typeNameToSearch": "Įveskite vardą paieškai...",
+    "updating": "Atnaujinama...",
+    "applyRegenerate": "Taikyti ir pergeneruoti",
+    "regeneratingLabel": "Pergeneruojama ataskaita…",
+    "noContent": "Nėra turinio.",
+    "noAnalysisYet": "Analizės kol kas nėra.",
+    "applyCorrection": "Taikyti pataisymą",
+    "noPlayersFound": "Žaidėjų nerasta.",
+    "myTeamFilm": "Mano komandos vaizdo įrašas",
+    "opponentFilm": "Varžovų vaizdo įrašas"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Rodomas originalas",
     "viewOriginal": "Rodyti originalą",
     "showTranslation": "Rodyti vertimą"
+  },
+  "jobProgress": {
+    "scanning": "Ieškoma svarbiausių epizodų įraše…",
+    "segment": "Analizuojamas {{i}} segmentas iš {{n}}",
+    "synthesizing": "Rengiama ataskaita"
   }
 }

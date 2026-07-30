@@ -402,7 +402,7 @@
     "noPendingCorrectionsMsg": "Adaugă cel puțin o corectură înainte de a regenera."
   },
   "home": {
-    "intelligenceModel": "Intelligence Model",
+    "intelligenceModel": "Model de inteligență",
     "toggleTheme": "Comută tema",
     "editProfileLabel": "Editează profilul",
     "staffInboxLabel": "Inbox staff",
@@ -443,7 +443,7 @@
         "desc": "Analiză a potrivirii pe post și a transferabilității abilităților"
       },
       "box_score": {
-        "label": "Box Score",
+        "label": "Fișă de statistici",
         "desc": "Statistici box score pe meci și sezon, importate și analizate de BIM"
       }
     },
@@ -795,7 +795,7 @@
     "evaluations": "Evaluări",
     "trainingPlans": "Planuri de antrenament",
     "memberSince": "Membru din {{date}}",
-    "noTrainingContent": "Fără conținut de antrenament.",
+    "noTrainingContent": "Niciun conținut de antrenament.",
     "corrections": "CORECTURI",
     "correctionsPlaceholder": "Introdu corecturi sau feedback pentru un nou program de antrenament...",
     "saveForLater": "Salvează pentru mai târziu",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "Țară",
     "allowRegenerate": "Permite destinatarului să regenereze",
     "searchCoachPlaceholder": "Caută numele antrenorului/programului...",
-    "summarizeHistoryTitle": "Rezumă istoricul"
+    "summarizeHistoryTitle": "Rezumă istoricul",
+    "noEvalsYet": "Încă nicio evaluare.",
+    "updatePlayerProgram": "Actualizează programul jucătorului",
+    "createAssign": "Creează și atribuie"
   },
   "training": {
     "couldNotOpenFilePicker": "Selectorul de fișiere nu a putut fi deschis.",
@@ -1302,8 +1305,8 @@
     "pending": "ÎN AȘTEPTARE"
   },
   "staffHub": {
-    "title": "Staff Hub",
-    "tabInbox": "Inbox",
+    "title": "Zona staff",
+    "tabInbox": "Mesaje",
     "tabTeamGames": "Meciurile echipei",
     "tabMyTeams": "Echipele mele",
     "liveGame": "Meci live",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "Părăsește echipa",
     "leaveTeamMsg": "Nu vei mai vedea meciurile acestei echipe și nu vei mai primi notificările ei.",
     "leaveTeamError": "Nu s-a putut părăsi echipa",
-    "viewFullGameData": "Vezi datele complete ale meciului (statistici și note)",
+    "viewFullGameData": "Vezi toate datele meciului (statistici și note)",
     "noReportYet": "Niciun raport generat încă.",
     "noScoutingReportYet": "Niciun raport de scouting AI generat încă pentru acest meci.",
     "addCommentPlaceholder": "Adaugă un comentariu...",
     "you": "Tu",
     "subTeamPlaceholder": "Numele subgrupei (ex. Atac, Fundași)...",
-    "coachNameOrEmail": "Numele sau e-mailul antrenorului..."
+    "coachNameOrEmail": "Numele sau e-mailul antrenorului...",
+    "noReportGenerated": "Niciun raport generat încă."
   },
   "conversation": {
     "title": "Conversație",
@@ -1593,7 +1597,7 @@
     "teamRequiredMsg": "Te rugăm să selectezi sau să creezi o echipă înainte de import.",
     "outputTypes": {
       "player_eval": "Eval. jucător",
-      "box_score": "Box Score",
+      "box_score": "Fișă de statistici",
       "scouting_report": "Raport de scouting",
       "film_breakdown": "Analiză video",
       "coaching_report": "Raport pentru antrenor",
@@ -1846,7 +1850,16 @@
     "player": "Jucător",
     "staff": "Staff",
     "allowRegenerate": "Permite destinatarului să regenereze",
-    "typeNameToSearch": "Scrie un nume pentru a căuta..."
+    "typeNameToSearch": "Scrie un nume pentru a căuta...",
+    "updating": "Se actualizează...",
+    "applyRegenerate": "Aplică și regenerează",
+    "regeneratingLabel": "Se regenerează raportul…",
+    "noContent": "Fără conținut.",
+    "noAnalysisYet": "Încă nicio analiză.",
+    "applyCorrection": "Aplică corecția",
+    "noPlayersFound": "Niciun jucător găsit.",
+    "myTeamFilm": "Filmarea echipei mele",
+    "opponentFilm": "Filmarea adversarului"
   },
   "teamGrade": {
     "views": {
@@ -1914,8 +1927,8 @@
     "us": "NOI",
     "them": "EI",
     "vsOpponent": "vs {{opponent}}",
-    "stop": "Stop",
-    "start": "Start",
+    "stop": "Oprește",
+    "start": "Pornește",
     "setClock": "Setează cronometrul",
     "set": "Setează",
     "ourTeam": "Echipa noastră",
@@ -2108,7 +2121,7 @@
     "counter": "Contra",
     "keyChip": "Legendă",
     "play": "Redă",
-    "stop": "Stop",
+    "stop": "Oprește",
     "replay": "Reia",
     "playDrawing": "Redă desenul",
     "refine": "Rafinează",
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Se afișează originalul",
     "viewOriginal": "Vezi originalul",
     "showTranslation": "Arată traducerea"
+  },
+  "jobProgress": {
+    "scanning": "Se scanează filmarea după acțiunile-cheie…",
+    "segment": "Se analizează segmentul {{i}} din {{n}}",
+    "synthesizing": "Se sintetizează raportul"
   }
 }

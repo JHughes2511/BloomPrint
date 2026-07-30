@@ -47,7 +47,7 @@
     "training_program": "Trainingsprogramm",
     "recruitment_profile": "Recruiting-Profil",
     "position_analysis": "Positionsanalyse",
-    "box_score": "Box Score",
+    "box_score": "Statistikbogen",
     "team_training": "Teamtraining",
     "game_situational": "Spielsituationen",
     "matchup": "Matchup",
@@ -63,13 +63,13 @@
     "coachScoutTrainer": "Trainer · Scout · Athletiktrainer",
     "iAmA": "Ich bin",
     "roleCoach": "Trainer",
-    "roleScout": "Scout",
+    "roleScout": "Späher",
     "roleTrainer": "Athletiktrainer",
     "fullName": "Vollständiger Name",
     "programName": "Name des Programms / der Organisation",
     "competitionLevel": "Wettbewerbsniveau",
     "selectLevel": "Niveau auswählen...",
-    "conference": "Conference",
+    "conference": "Konferenz",
     "leagueAssociation": "Liga / Verband",
     "selectConferenceRequired": "Conference auswählen (erforderlich)...",
     "selectLeagueOptional": "Liga auswählen (optional)...",
@@ -308,7 +308,7 @@
   "evalReport": {
     "pillars": {
       "offensive_skills": "Offensivfähigkeiten",
-      "defensive_capabilities": "Defense",
+      "defensive_capabilities": "Defensive",
       "physical_attributes": "Physis",
       "intangibles": "Intangibles",
       "advanced_analysis": "Erweitert",
@@ -328,12 +328,12 @@
     "viewFullProfile": "Vollständiges Profil anzeigen",
     "overallGrade": "Gesamtnote",
     "pillarGrades": "Säulen-Noten",
-    "greenFlags": "Green Flags",
-    "watchFlags": "Watch Flags",
+    "greenFlags": "Grüne Flaggen",
+    "watchFlags": "Warnflaggen",
     "keyQuestions": "Kernfragen",
     "fullReport": "Vollständiger Bericht",
     "grades": "Noten",
-    "flags": "Flags",
+    "flags": "Flaggen",
     "corrections": "Korrekturen",
     "correctionsCount": "Korrekturen ({{count}})",
     "applied": "ANGEWENDET",
@@ -365,7 +365,7 @@
     "chooseInclude": "Wähle, was eingeschlossen werden soll:",
     "exportCats": {
       "grades": "Gesamtnote + Säulen-Noten",
-      "flags": "Green Flags & Watch Flags",
+      "flags": "Grüne Flaggen & Warnflaggen",
       "questions": "Kernfragen",
       "report": "Vollständiger Bericht",
       "corrections": "Korrekturen"
@@ -402,7 +402,7 @@
     "noPendingCorrectionsMsg": "Füge mindestens eine Korrektur hinzu, bevor du neu generierst."
   },
   "home": {
-    "intelligenceModel": "Intelligence Model",
+    "intelligenceModel": "Intelligenzmodell",
     "toggleTheme": "Design umschalten",
     "editProfileLabel": "Profil bearbeiten",
     "staffInboxLabel": "Staff-Posteingang",
@@ -443,7 +443,7 @@
         "desc": "Positionsspezifische Rollenpassung und Analyse der Fähigkeitsübertragung"
       },
       "box_score": {
-        "label": "Box Score",
+        "label": "Statistikbogen",
         "desc": "Spiel- und Saison-Box-Score-Statistiken, von BIM importiert und analysiert"
       }
     },
@@ -453,7 +453,7 @@
         "desc": "Scoring, Kreation, Wurfmechanik, Beinarbeit, P&R"
       },
       "defensive_capabilities": {
-        "label": "Defense",
+        "label": "Defensive",
         "desc": "On-Ball-Defense, Helpside, IQ, Kommunikation, Rotationen"
       },
       "physical_attributes": {
@@ -473,7 +473,7 @@
         "desc": "Systempassung, positionelle Vielseitigkeit, Lineup-Kompatibilität"
       }
     },
-    "feedbackTitle": "Feedback",
+    "feedbackTitle": "Rückmeldung",
     "feedbackTileDesc": "Fragen, Kommentare oder Probleme — sag uns alles",
     "feedbackIntro": "Hast du eine Frage, einen Kommentar oder ein Problem? Sag uns alles — wir lesen jede Nachricht.",
     "feedbackPlaceholder": "Was beschäftigt dich?",
@@ -729,8 +729,8 @@
     "bimScore": "BIM-Score",
     "fromOneReport": "aus 1 Bericht",
     "compositeOfReports": "zusammengesetzt aus {{count}} Berichten",
-    "greenFlags": "Green Flags",
-    "watchFlags": "Watch Flags",
+    "greenFlags": "Grüne Flaggen",
+    "watchFlags": "Warnflaggen",
     "evaluationHistory": "Bewertungsverlauf",
     "newEval": "Neue Bewertung",
     "noEvaluationsYet": "Noch keine Bewertungen.",
@@ -795,7 +795,7 @@
     "evaluations": "Bewertungen",
     "trainingPlans": "Trainingspläne",
     "memberSince": "Mitglied seit {{date}}",
-    "noTrainingContent": "Kein Trainingsinhalt.",
+    "noTrainingContent": "Keine Trainingsinhalte.",
     "corrections": "KORREKTUREN",
     "correctionsPlaceholder": "Gib Korrekturen oder Feedback für ein neues Trainingsprogramm ein...",
     "saveForLater": "Für später speichern",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "Land",
     "allowRegenerate": "Empfänger darf neu generieren",
     "searchCoachPlaceholder": "Trainer-/Programmnamen suchen...",
-    "summarizeHistoryTitle": "Verlauf zusammenfassen"
+    "summarizeHistoryTitle": "Verlauf zusammenfassen",
+    "noEvalsYet": "Noch keine Bewertungen.",
+    "updatePlayerProgram": "Spielerprogramm aktualisieren",
+    "createAssign": "Erstellen & zuweisen"
   },
   "training": {
     "couldNotOpenFilePicker": "Dateiauswahl konnte nicht geöffnet werden.",
@@ -937,14 +940,14 @@
       "trendingUp": "steigend",
       "trendingDown": "fallend",
       "pillarShort": {
-        "offense": "Offense",
-        "defense": "Defense",
+        "offense": "Offensive",
+        "defense": "Defensive",
         "physical": "Physis",
         "iq": "IQ"
       },
       "pillars": {
         "offensive_skills": "Offensivfähigkeiten",
-        "defensive_capabilities": "Defense",
+        "defensive_capabilities": "Defensive",
         "physical_attributes": "Physis",
         "intangibles": "Intangibles",
         "advanced_analysis": "Erweitert",
@@ -1020,7 +1023,7 @@
       "emptyCategoryDesc": "Noch keine Berichte in dieser Kategorie.",
       "teamPrefix": "TEAM · ",
       "chipGrades": "Noten",
-      "chipFlags": "Flags",
+      "chipFlags": "Flaggen",
       "chipQuestions": "Fragen"
     },
     "notifications": {
@@ -1105,14 +1108,14 @@
       "pillarGrades": "Säulen-Noten",
       "pillars": {
         "offensive_skills": "Offensivfähigkeiten",
-        "defensive_capabilities": "Defense",
+        "defensive_capabilities": "Defensive",
         "physical_attributes": "Physis",
         "intangibles": "Intangibles",
         "advanced_analysis": "Erweitert",
         "strategic_fit": "Strategische Passung"
       },
-      "greenFlags": "Green Flags",
-      "watchFlags": "Watch Flags",
+      "greenFlags": "Grüne Flaggen",
+      "watchFlags": "Warnflaggen",
       "keyQuestions": "Kernfragen",
       "fullReport": "Vollständiger Bericht",
       "generatingTraining": "Training wird erstellt...",
@@ -1222,7 +1225,7 @@
       "matchup": "Matchups",
       "team": "Teamberichte",
       "game": "Spielberichte",
-      "scout": "Scout",
+      "scout": "Scouting",
       "training": "Training"
     },
     "teamReport": "Teambericht",
@@ -1259,7 +1262,7 @@
     "correctionSavedTitle": "Gespeichert",
     "correctionSavedMsg": "Korrektur gespeichert. Anwenden & neu generieren, wenn bereit.",
     "saveCorrectionError": "Korrektur konnte nicht gespeichert werden",
-    "infoTitle": "Info",
+    "infoTitle": "Infos",
     "trainingRegenInfoMsg": "Um Training mit Feedback neu zu generieren, nutze den Spielerprofil-Bildschirm.",
     "nothingToApplyTitle": "Nichts anzuwenden",
     "nothingToApplyMsg": "Füge zuerst eine Korrektur hinzu.",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "Team verlassen",
     "leaveTeamMsg": "Du siehst die Spiele dieses Teams nicht mehr und erhältst keine Benachrichtigungen mehr.",
     "leaveTeamError": "Team konnte nicht verlassen werden",
-    "viewFullGameData": "Vollständige Spieldaten anzeigen (Statistiken & Noten)",
+    "viewFullGameData": "Alle Spieldaten ansehen (Statistiken & Noten)",
     "noReportYet": "Noch kein Bericht erstellt.",
     "noScoutingReportYet": "Für dieses Spiel wurde noch kein KI-Scouting-Bericht erstellt.",
     "addCommentPlaceholder": "Kommentar hinzufügen...",
     "you": "Du",
     "subTeamPlaceholder": "Name der Teilgruppe (z. B. Offense, Guards)...",
-    "coachNameOrEmail": "Trainername oder E-Mail..."
+    "coachNameOrEmail": "Trainername oder E-Mail...",
+    "noReportGenerated": "Noch kein Bericht erstellt."
   },
   "conversation": {
     "title": "Unterhaltung",
@@ -1593,7 +1597,7 @@
     "teamRequiredMsg": "Bitte wähle ein Team aus oder erstelle eines, bevor du importierst.",
     "outputTypes": {
       "player_eval": "Spielerbewertung",
-      "box_score": "Box Score",
+      "box_score": "Statistikbogen",
       "scouting_report": "Scouting-Bericht",
       "film_breakdown": "Videoanalyse",
       "coaching_report": "Trainerbericht",
@@ -1622,7 +1626,7 @@
         "desc": "Säulen-Note 0–10"
       },
       "defense": {
-        "name": "Defense",
+        "name": "Defensive",
         "desc": "Säulen-Note 0–10"
       },
       "physical": {
@@ -1642,11 +1646,11 @@
         "desc": "Säulen-Note 0–10"
       },
       "greenFlags": {
-        "name": "Green Flags",
+        "name": "Grüne Flaggen",
         "desc": "Kommagetrennte Stärken"
       },
       "watchFlags": {
-        "name": "Watch Flags",
+        "name": "Warnflaggen",
         "desc": "Kommagetrennte Bedenken"
       },
       "notes": {
@@ -1846,19 +1850,28 @@
     "player": "Spieler",
     "staff": "Staff",
     "allowRegenerate": "Empfänger darf neu generieren",
-    "typeNameToSearch": "Namen zum Suchen eingeben..."
+    "typeNameToSearch": "Namen zum Suchen eingeben...",
+    "updating": "Wird aktualisiert...",
+    "applyRegenerate": "Anwenden & neu generieren",
+    "regeneratingLabel": "Der Bericht wird neu generiert…",
+    "noContent": "Kein Inhalt.",
+    "noAnalysisYet": "Noch keine Analyse.",
+    "applyCorrection": "Korrektur anwenden",
+    "noPlayersFound": "Keine Spieler gefunden.",
+    "myTeamFilm": "Film meines Teams",
+    "opponentFilm": "Gegner-Film"
   },
   "teamGrade": {
     "views": {
-      "dashboard": "Dashboard",
+      "dashboard": "Übersicht",
       "games": "Spiele",
-      "scout": "Scout"
+      "scout": "Scouting"
     },
     "phases": {
       "all": "Alle",
       "regular": "Regulär",
       "tournament": "Turnier",
-      "playoff": "Playoff",
+      "playoff": "Playoffs",
       "preseason": "Vorsaison",
       "scrimmage": "Testspiel",
       "exhibition": "Freundschaftsspiel"
@@ -1876,11 +1889,11 @@
       "FT Made": "FW getroffen",
       "FT Missed": "FW verfehlt",
       "Def. Reb": "Def.-Reb",
-      "Steal": "Steal",
+      "Steal": "Ballgewinn",
       "Deflection": "Ballabwehr",
       "Def. Stop": "Def.-Stopp",
-      "Charge": "Charge",
-      "Bluff": "Bluff",
+      "Charge": "Offensivfoul gezogen",
+      "Bluff": "Finte",
       "Blocked Shot": "Block",
       "Jog Back": "Zurückgetrottet",
       "No Ball Pressure": "Kein Balldruck",
@@ -1926,9 +1939,9 @@
     "noRoster": "Kein Kader geladen. Füge zuerst Spieler zum Team hinzu.",
     "opponentPlayerNamePlaceholder": "Name des gegnerischen Spielers...",
     "posPlaceholder": "Pos",
-    "offense": "OFFENSE",
-    "defense": "DEFENSE",
-    "lineup": "Lineup",
+    "offense": "OFFENSIVE",
+    "defense": "DEFENSIVE",
+    "lineup": "Aufstellung",
     "endGame": "Spiel beenden",
     "selectPlayerAlertTitle": "Spieler auswählen",
     "selectPlayerAlertMsg": "Tippe zuerst auf einen Spieler und wähle dann eine Statistik.",
@@ -2081,12 +2094,12 @@
     "noStaffFound": "Kein Staff gefunden."
   },
   "whiteboard": {
-    "title": "Whiteboard",
-    "boardN": "Board {{n}}",
+    "title": "Taktiktafel",
+    "boardN": "Tafel {{n}}",
     "aiPlay": "KI-Spielzug",
     "aiPlayN": "KI-Spielzug {{n}}",
     "copyName": "{{name}} Kopie",
-    "boards": "Boards",
+    "boards": "Tafeln",
     "newBoard": "Neues Board",
     "fullCourt": "Ganzes Feld",
     "halfCourt": "Halbfeld",
@@ -2103,8 +2116,8 @@
     "threeQuarter": "3/4",
     "portrait": "Hochformat",
     "landscape": "Querformat",
-    "offense": "Offense",
-    "defense": "Defense",
+    "offense": "Offensive",
+    "defense": "Defensive",
     "counter": "Konter",
     "keyChip": "Legende",
     "play": "Abspielen",
@@ -2124,7 +2137,7 @@
     "addMovementHint": "Was ist das? Es wird zu {{scheme}} hinzugefügt und einbezogen, wenn du auf Spielzug anpassen tippst.",
     "pass": "Pass",
     "cut": "Cut",
-    "screen": "Screen",
+    "screen": "Block",
     "dribble": "Dribbling",
     "justALine": "Nur eine Linie",
     "keyPanelTitle": "LEGENDE — VORGESCHLAGENE VERBESSERUNGEN",
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Original wird angezeigt",
     "viewOriginal": "Original ansehen",
     "showTranslation": "Übersetzung anzeigen"
+  },
+  "jobProgress": {
+    "scanning": "Film wird nach Schlüsselszenen durchsucht…",
+    "segment": "Abschnitt {{i}} von {{n}} wird analysiert",
+    "synthesizing": "Bericht wird zusammengestellt"
   }
 }

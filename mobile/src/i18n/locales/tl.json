@@ -40,17 +40,17 @@
     "report": "Ulat",
     "comprehensive": "Komprehensibong Ulat",
     "player_eval": "Eval ng Player",
-    "film_breakdown": "Film Breakdown",
-    "scouting_report": "Scouting Report",
-    "coaching_report": "Coaching Report",
+    "film_breakdown": "Pagsusuri ng film",
+    "scouting_report": "Ulat ng scouting",
+    "coaching_report": "Ulat sa pagko-coach",
     "game_analysis": "Pagsusuri ng Laro",
     "training_program": "Programa ng Training",
-    "recruitment_profile": "Recruitment Profile",
+    "recruitment_profile": "Profile ng recruitment",
     "position_analysis": "Pagsusuri ng Posisyon",
-    "box_score": "Box Score",
+    "box_score": "Box score",
     "team_training": "Training ng Team",
     "game_situational": "Sitwasyon sa Laro",
-    "matchup": "Match Up",
+    "matchup": "Match up",
     "game_report": "Ulat ng Laro"
   },
   "auth": {
@@ -58,7 +58,7 @@
     "chooseHow": "Piliin kung paano mo gagamitin ang BloomPrint. Puwede mo itong palitan mamaya sa settings.",
     "coach": "Coach",
     "coachDesc": "Gumawa ng ulat, subaybayan ang mga laro, i-evaluate ang roster mo",
-    "player": "Player",
+    "player": "Manlalaro",
     "playerDesc": "Tumanggap ng ulat, sundan ang training, subaybayan ang paglago mo",
     "coachScoutTrainer": "Coach · Scout · Trainer",
     "iAmA": "Ako ay isang",
@@ -69,7 +69,7 @@
     "programName": "Pangalan ng Programa / Organisasyon",
     "competitionLevel": "Antas ng Kompetisyon",
     "selectLevel": "Pumili ng antas...",
-    "conference": "Conference",
+    "conference": "Kompetisyon",
     "leagueAssociation": "Liga / Asosasyon",
     "selectConferenceRequired": "Pumili ng conference (kailangan)...",
     "selectLeagueOptional": "Pumili ng liga (opsyonal)...",
@@ -87,7 +87,7 @@
     "googleNoPassword": "Nag-sign up gamit ang Google — hindi na kailangan ng password.",
     "googleAlmostThere": "Malapit na",
     "googleFinishSetup": "Tapusin ang pag-set up ng account mo, tapos i-tap ang Gumawa ng Account.",
-    "googleSignInTitle": "Google sign-in",
+    "googleSignInTitle": "Pag-sign in sa Google",
     "googleSignInFailed": "Hindi makapag-sign in gamit ang Google.",
     "conferenceRequired": "Kailangan ng Conference",
     "conferenceRequiredMsg": "Pumili ng conference mo para makatuloy.",
@@ -96,10 +96,10 @@
   "components": {
     "shareModal": {
       "shareReport": "Ibahagi ang Ulat",
-      "tabPlayer": "Player",
-      "tabTeam": "Team",
+      "tabPlayer": "Manlalaro",
+      "tabTeam": "Koponan",
       "tabStaff": "Staff",
-      "playerLower": "player",
+      "playerLower": "manlalaro",
       "selectTeam": "Pumili ng Team",
       "selectTeamHint": "Ipapadala sa mga player ng team at sa mga staff coach nito.",
       "searchTeamPlaceholder": "Maghanap ng team na kasama ka...",
@@ -136,7 +136,7 @@
         "team_report": "Ulat ng Team",
         "team_training": "Ulat ng Team",
         "training": "Programa ng Training",
-        "game_session": "Scout Report"
+        "game_session": "Ulat ng scouting"
       },
       "updatedLabels": {
         "eval": "Na-update na Eval",
@@ -151,9 +151,9 @@
       "fromSender": "{{type}} · mula kay {{sender}}",
       "original": "Orihinal",
       "noContent": "Walang available na nilalaman ang ulat.",
-      "correctionsTab": "Mga Pagwawasto ({{count}})",
+      "correctionsTab": "Mga pagwawasto ({{count}})",
       "commentsTab": "Mga Komento ({{count}})",
-      "notesTab": "Mga Tala ({{count}})",
+      "notesTab": "Mga tala ({{count}})",
       "correctPlaceholder": "Ano ang dapat baguhin? (ise-save sa listahan ng pagwawasto mo)",
       "saveCorrections": "I-save ang mga Pagwawasto",
       "applyRegenerate": "I-apply at I-regenerate",
@@ -247,7 +247,7 @@
     },
     "googleSignIn": {
       "continueWithGoogle": "Magpatuloy gamit ang Google",
-      "signInTitle": "Google sign-in",
+      "signInTitle": "Pag-sign in sa Google",
       "noTokenReturned": "Walang naibalik na token. Subukan ulit.",
       "somethingWentWrong": "May nangyaring mali sa pag-sign in gamit ang Google.",
       "disabledMsg": "Magagamit ang Google sign-in kapag na-launch na ang app. Sa ngayon, gamitin ang email at password."
@@ -287,7 +287,7 @@
     "filmLabel": "Film (opsyonal)",
     "addMoreFilm": "Magdagdag pa ng film",
     "tapToSelectFilm": "I-tap para pumili ng film (puwedeng marami)",
-    "notesLabel": "Mga Tala",
+    "notesLabel": "Mga tala",
     "import": "I-import",
     "notesPlaceholder": "hal. Elite sa catch and shoot, iisa ang bilis ng laro, kailangan pang makita sa P&R midrange...",
     "focusLabel": "Focus (opsyonal)",
@@ -307,12 +307,12 @@
   },
   "evalReport": {
     "pillars": {
-      "offensive_skills": "Offensive Skills",
+      "offensive_skills": "Mga kasanayan sa opensa",
       "defensive_capabilities": "Depensa",
       "physical_attributes": "Pisikal",
       "intangibles": "Intangibles",
       "advanced_analysis": "Advanced",
-      "strategic_fit": "Strategic Fit"
+      "strategic_fit": "Estratehikong angkop"
     },
     "bimScore": "BIM Score {{score}}",
     "recruitGrade": "Recruit Grade {{letter}}",
@@ -324,23 +324,23 @@
     "gradeTrend": "Trend ng Grado",
     "howItMaps": "Paano ito nakaugnay",
     "height": "Taas",
-    "wingspan": "Wingspan",
+    "wingspan": "Haba ng bisig",
     "viewFullProfile": "Tingnan ang Buong Profile",
     "overallGrade": "Kabuuang Grado",
     "pillarGrades": "Mga Grado sa Pillar",
-    "greenFlags": "Green Flags",
-    "watchFlags": "Watch Flags",
+    "greenFlags": "Green flags",
+    "watchFlags": "Watch flags",
     "keyQuestions": "Mahahalagang Tanong",
     "fullReport": "Buong Ulat",
     "grades": "Mga Grado",
-    "flags": "Mga Flag",
-    "corrections": "Mga Pagwawasto",
-    "correctionsCount": "Mga Pagwawasto ({{count}})",
+    "flags": "Mga flag",
+    "corrections": "Mga pagwawasto",
+    "correctionsCount": "Mga pagwawasto ({{count}})",
     "applied": "NA-APPLY",
     "generateNewEval": "Bumuo ng Bagong Ebalwasyon",
     "regeneratingLabel": "Muling binubuo ang ebalwasyon…",
     "correct": "Iwasto",
-    "playerAction": "Player",
+    "playerAction": "Manlalaro",
     "sendToPlayer": "Ipadala sa Player",
     "shareWithStaffShort": "Ibahagi sa Staff",
     "shareWithStaff": "Ibahagi sa Staff",
@@ -365,16 +365,16 @@
     "chooseInclude": "Piliin ang isasama:",
     "exportCats": {
       "grades": "Kabuuang Grado + Mga Grado sa Pillar",
-      "flags": "Green Flags at Watch Flags",
+      "flags": "Green flags at watch flags",
       "questions": "Mahahalagang Tanong",
       "report": "Buong Ulat",
-      "corrections": "Mga Pagwawasto"
+      "corrections": "Mga pagwawasto"
     },
     "reportSections": "Mga seksyon ng ulat",
     "sharePdf": "Ibahagi ang PDF",
     "shareBimReport": "Ibahagi ang BIM Report",
     "evalReportFileName": "Ulat ng Ebalwasyon",
-    "playerFallbackName": "Player",
+    "playerFallbackName": "Manlalaro",
     "pdfNoData": "Walang data",
     "noSectionsSelected": "Walang piniling seksyon para i-export.",
     "generatedBy": "Binuo ng BloomPrint Basketball Intelligence Model",
@@ -402,11 +402,11 @@
     "noPendingCorrectionsMsg": "Magdagdag ng kahit isang pagwawasto bago mag-regenerate."
   },
   "home": {
-    "intelligenceModel": "Intelligence Model",
+    "intelligenceModel": "Modelo ng katalinuhan",
     "toggleTheme": "Palitan ang tema",
     "editProfileLabel": "I-edit ang profile",
     "staffInboxLabel": "Inbox ng staff",
-    "notificationsLabel": "Mga Notipikasyon",
+    "notificationsLabel": "Mga abiso",
     "reportTypesHeader": "Mga Uri ng Ulat",
     "sixPillarsHeader": "Ang 6 na Pillar",
     "reportTypes": {
@@ -415,15 +415,15 @@
         "desc": "Indibidwal na BIM na ebalwasyon na may grado sa lahat ng 6 na pillar"
       },
       "film_breakdown": {
-        "label": "Film Breakdown",
+        "label": "Pagsusuri ng film",
         "desc": "Frame-by-frame na pagsusuri ng film sa teknik at desisyon"
       },
       "scouting_report": {
-        "label": "Scouting Report",
+        "label": "Ulat ng scouting",
         "desc": "Scouting report na pang-recruitment para sa isang target na player"
       },
       "coaching_report": {
-        "label": "Coaching Report",
+        "label": "Ulat sa pagko-coach",
         "desc": "Breakdown para sa coach na nakatuon sa praktis at scheme"
       },
       "game_analysis": {
@@ -443,13 +443,13 @@
         "desc": "Pagsusuri ng akmang role at pagsasalin ng skill ayon sa posisyon"
       },
       "box_score": {
-        "label": "Box Score",
+        "label": "Box score",
         "desc": "Stats ng box score sa laro at season na na-import at sinuri ng BIM"
       }
     },
     "pillars": {
       "offensive_skills": {
-        "label": "Offensive Skills",
+        "label": "Mga kasanayan sa opensa",
         "desc": "Pag-iskor, paglikha, mekanika ng shooting, footwork, P&R"
       },
       "defensive_capabilities": {
@@ -466,10 +466,10 @@
       },
       "advanced_analysis": {
         "label": "Advanced",
-        "desc": "Shot selection, efficiency metrics, tendencies, adjustments"
+        "desc": "Pagpili ng tira, sukatan ng kahusayan, tendensya, pag-aayos"
       },
       "strategic_fit": {
-        "label": "Strategic Fit",
+        "label": "Estratehikong angkop",
         "desc": "Bagay sa sistema, versatility sa posisyon, tugma sa lineup"
       }
     },
@@ -486,7 +486,7 @@
     "namePlaceholder": "Pangalan mo",
     "emailPlaceholder": "ikaw@email.com",
     "emailHint": "Ito ang email na ginagamit mo sa pag-sign in.",
-    "role": "Role",
+    "role": "Papel",
     "appLanguage": "Wika ng App",
     "appLanguageHint": "Ang app, ang mga ulat mo, at ang Ask BloomPrint ay gumagamit lahat ng wikang ito.",
     "programOrganization": "Programa / Organisasyon",
@@ -517,11 +517,11 @@
     "importFailedMsg": "Hindi ma-import ang dokumentong iyon.",
     "systemFields": {
       "offensive_system": {
-        "label": "Offensive System",
+        "label": "Sistema sa opensa",
         "placeholder": "Bilis, spacing, pangunahing aksyon (motion, ball-screen heavy, Princeton…), sino ang nag-iinitiate."
       },
       "defensive_system": {
-        "label": "Defensive System",
+        "label": "Sistema sa depensa",
         "placeholder": "Man / zone / switch-everything / drop / press, pisikalidad, rotations."
       },
       "archetypes": {
@@ -551,7 +551,7 @@
     "joinTeamTitle": "Sumali sa team mo",
     "joinTeamDesc": "Hanapin ang team mo para sumali sa staff nito. Puwede mo rin itong gawin mamaya, o magpatuloy nang walang team.",
     "teamSearchPlaceholder": "Maghanap ayon sa pangalan ng team...",
-    "headCoach": "Head Coach: {{name}}",
+    "headCoach": "Head coach: {{name}}",
     "join": "Sumali",
     "joinedTitle": "Sumali",
     "joinedMsg": "Sumali ka sa {{name}}.",
@@ -561,7 +561,7 @@
     "couldNotFinish": "Hindi matapos ang setup.",
     "fields": {
       "offensive_system": {
-        "label": "Offensive System",
+        "label": "Sistema sa opensa",
         "desc": "Kung paano naglalaro ang team mo sa opensa — bilis, spacing, pangunahing aksyon.",
         "chips": [
           "Motion",
@@ -581,7 +581,7 @@
         ]
       },
       "defensive_system": {
-        "label": "Defensive System",
+        "label": "Sistema sa depensa",
         "desc": "Ang pagkakakilanlan at coverage mo sa depensa.",
         "chips": [
           "Man-to-man",
@@ -729,8 +729,8 @@
     "bimScore": "BIM Score",
     "fromOneReport": "mula sa 1 ulat",
     "compositeOfReports": "pinagsama mula sa {{count}} ulat",
-    "greenFlags": "Green Flags",
-    "watchFlags": "Watch Flags",
+    "greenFlags": "Green flags",
+    "watchFlags": "Watch flags",
     "evaluationHistory": "Kasaysayan ng Ebalwasyon",
     "newEval": "Bagong Eval",
     "noEvaluationsYet": "Wala pang ebalwasyon.",
@@ -761,7 +761,7 @@
     "statBlk": "BLK",
     "statTo": "TO",
     "statFg": "FG",
-    "gradingStats": "GRADING STATS",
+    "gradingStats": "ESTADISTIKA NG GRADING",
     "offDefMinLine": "OFF {{off}} · DEF {{def}} · {{min}}min",
     "perQuarter": "BAWAT QUARTER",
     "overtimeShort": "OT",
@@ -779,12 +779,12 @@
     "age": "Edad",
     "jersey": "Jersey",
     "height": "Taas",
-    "wingspan": "Wingspan",
+    "wingspan": "Haba ng bisig",
     "weight": "Timbang",
-    "standingReach": "Standing Reach",
+    "standingReach": "Abot nakatayo",
     "school": "Paaralan",
     "program": "Programa",
-    "team": "Team",
+    "team": "Koponan",
     "level": "Antas",
     "city": "Lungsod",
     "state": "Estado",
@@ -795,7 +795,7 @@
     "evaluations": "Mga Ebalwasyon",
     "trainingPlans": "Mga Plano ng Training",
     "memberSince": "Miyembro simula {{date}}",
-    "noTrainingContent": "Walang nilalaman ang training.",
+    "noTrainingContent": "Walang nilalaman ng pagsasanay.",
     "corrections": "MGA PAGWAWASTO",
     "correctionsPlaceholder": "Ilagay ang mga pagwawasto o feedback para sa bagong programa ng training...",
     "saveForLater": "I-save para Mamaya",
@@ -803,7 +803,7 @@
     "regeneratingOverlay": "Muling binubuo ang training…",
     "applied": "NA-APPLY",
     "pending": "NAKABINBIN",
-    "playersVersion": "BERSYON NG PLAYER",
+    "playersVersion": "BERSYON NG MANLALARO",
     "sentBadge": "NAIPADALA",
     "preparingChecklist": "Inihahanda ng AI ang bersyong checklist ng player...",
     "commentsCount": "Mga Komento ({{count}})",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "Bansa",
     "allowRegenerate": "Payagan ang tatanggap na bumuo muli",
     "searchCoachPlaceholder": "Maghanap ng pangalan ng coach/programa...",
-    "summarizeHistoryTitle": "Ibuod ang kasaysayan"
+    "summarizeHistoryTitle": "Ibuod ang kasaysayan",
+    "noEvalsYet": "Wala pang mga ebalwasyon.",
+    "updatePlayerProgram": "I-update ang programa ng manlalaro",
+    "createAssign": "Gumawa at italaga"
   },
   "training": {
     "couldNotOpenFilePicker": "Hindi mabuksan ang file picker.",
@@ -868,14 +871,14 @@
     "generating": "Bumubuo...",
     "generateProgram": "Bumuo ng Programa",
     "buildingOverlay": "Binubuo ang programa ng training…",
-    "priorityStack": "Priority Stack",
+    "priorityStack": "Priority stack",
     "fullProgram": "Buong Programa",
     "previousPrograms": "Mga Nakaraang Programa",
     "programNumber": "Programa ng Training #{{num}}",
     "emptyText": "Wala pang programa ng training. Bumuo ng isa batay sa pinakabagong ebalwasyon."
   },
   "summary": {
-    "reportFallback": "BIM Report",
+    "reportFallback": "Ulat ng BIM",
     "shareDialogTitle": "Ibahagi ang Buod",
     "exportErrorTitle": "Error sa Pag-export",
     "couldNotExport": "Hindi ma-export",
@@ -887,12 +890,12 @@
     "tabs": {
       "home": "Home",
       "reports": "Ulat",
-      "training": "Training",
+      "training": "Pagsasanay",
       "alerts": "Alerto",
       "profile": "Profile"
     },
     "login": {
-      "playerPortal": "Player Portal",
+      "playerPortal": "Player portal",
       "enterEmailPassword": "Ilagay ang email at password mo",
       "invalidCredentials": "Maling email o password"
     },
@@ -922,11 +925,11 @@
       "skipForNow": "Laktawan muna →"
     },
     "home": {
-      "playerPortal": "Player Portal",
+      "playerPortal": "Player portal",
       "greeting": "Hoy, {{name}}",
-      "playerFallback": "Player",
+      "playerFallback": "Manlalaro",
       "toggleTheme": "Palitan ang tema",
-      "notifications": "Mga Notipikasyon",
+      "notifications": "Mga abiso",
       "signOut": "Mag-sign Out",
       "signOutConfirm": "Sigurado kang gusto mong mag-sign out?",
       "linked": "Naka-link",
@@ -943,12 +946,12 @@
         "iq": "IQ"
       },
       "pillars": {
-        "offensive_skills": "Offensive Skills",
+        "offensive_skills": "Mga kasanayan sa opensa",
         "defensive_capabilities": "Depensa",
         "physical_attributes": "Pisikal",
         "intangibles": "Intangibles",
         "advanced_analysis": "Advanced",
-        "strategic_fit": "Strategic Fit"
+        "strategic_fit": "Estratehikong angkop"
       },
       "linkedTitle": "Naka-link!",
       "linkedMsg": "Naka-link na ang account mo kay {{name}}.",
@@ -964,13 +967,13 @@
       "myTraining": "Ang Training Ko",
       "myTrainingDesc": "Tingnan at bumuo ng mga programa ng training",
       "myProfile": "Profile Ko",
-      "athleticProfile": "Athletic Profile",
+      "athleticProfile": "Profile ng atleta",
       "edit": "I-edit",
       "position": "Posisyon",
       "height": "Taas",
-      "wingspan": "Wingspan",
+      "wingspan": "Haba ng bisig",
       "weight": "Timbang",
-      "standingReach": "Standing Reach",
+      "standingReach": "Abot nakatayo",
       "bimScoreTitle": "BIM Score {{score}}",
       "bimModalSub": "Kung paano nahahati ang score mo sa mga pillar ng ebalwasyon, kasama ang mga lakas at watch area na binanggit ng coach mo.",
       "tapForBreakdown": "I-tap para sa buong breakdown",
@@ -1018,14 +1021,14 @@
       "noMatchDesc": "Walang ulat na tumutugma sa hinanap mo.",
       "emptyAllDesc": "Kapag may ibinahaging ulat sa iyo ang coach, lalabas ito rito.",
       "emptyCategoryDesc": "Wala pang ulat sa kategoryang ito.",
-      "teamPrefix": "TEAM · ",
+      "teamPrefix": "KOPONAN · ",
       "chipGrades": "Mga Grado",
-      "chipFlags": "Mga Flag",
-      "chipQuestions": "Mga Tanong"
+      "chipFlags": "Mga flag",
+      "chipQuestions": "Mga tanong"
     },
     "notifications": {
       "couldNotUpdate": "Hindi ma-update ang hiling.",
-      "title": "Mga Notipikasyon",
+      "title": "Mga abiso",
       "unread": "{{count}} hindi pa nababasa",
       "approvalNeeded": "Kailangan ng pag-apruba",
       "report": "ulat",
@@ -1042,14 +1045,14 @@
       "toggleTheme": "Palitan ang tema",
       "signOut": "Mag-sign out",
       "title": "Profile",
-      "athleticProfile": "Athletic Profile",
+      "athleticProfile": "Profile ng atleta",
       "edit": "I-edit",
       "position": "Posisyon",
       "height": "Taas",
-      "wingspan": "Wingspan",
+      "wingspan": "Haba ng bisig",
       "weight": "Timbang",
-      "standingReach": "Standing Reach",
-      "schoolOrg": "Paaralan / Org",
+      "standingReach": "Abot nakatayo",
+      "schoolOrg": "Paaralan / organisasyon",
       "linkedCoachesTeams": "Mga Naka-link na Coach at Team",
       "notLinkedYet": "Wala ka pang naka-link na coach. Mag-link sa isang coach para makatanggap ng mga ulat at training.",
       "linked": "Naka-link",
@@ -1104,15 +1107,15 @@
       "gradeOutOf": "{{grade}} / 10",
       "pillarGrades": "Mga Grado sa Pillar",
       "pillars": {
-        "offensive_skills": "Offensive Skills",
+        "offensive_skills": "Mga kasanayan sa opensa",
         "defensive_capabilities": "Depensa",
         "physical_attributes": "Pisikal",
         "intangibles": "Intangibles",
         "advanced_analysis": "Advanced",
-        "strategic_fit": "Strategic Fit"
+        "strategic_fit": "Estratehikong angkop"
       },
-      "greenFlags": "Green Flags",
-      "watchFlags": "Watch Flags",
+      "greenFlags": "Green flags",
+      "watchFlags": "Watch flags",
       "keyQuestions": "Mahahalagang Tanong",
       "fullReport": "Buong Ulat",
       "generatingTraining": "Bumubuo ng Training...",
@@ -1222,14 +1225,14 @@
       "matchup": "Mga Match Up",
       "team": "Mga Ulat ng Team",
       "game": "Mga Ulat ng Laro",
-      "scout": "Scout",
-      "training": "Training"
+      "scout": "Scouting",
+      "training": "Pagsasanay"
     },
     "teamReport": "Ulat ng Team",
     "gameReport": "Ulat ng Laro",
-    "scoutReport": "Scout Report",
-    "gameReportPacket": "Game Report Packet",
-    "playerNumber": "Player #{{id}}",
+    "scoutReport": "Ulat ng scouting",
+    "gameReportPacket": "Packet ng ulat ng laro",
+    "playerNumber": "Manlalaro #{{id}}",
     "vsOpponent": "vs {{name}}",
     "sharedReportFallback": "Ibinahaging ulat",
     "senderFallback": "Isang coach",
@@ -1241,7 +1244,7 @@
     "sendToPlayer": "Ipadala sa Player",
     "correct": "Iwasto",
     "exportPrint": "I-export / I-print",
-    "playerBtn": "Player",
+    "playerBtn": "Manlalaro",
     "deleteReportTitle": "Burahin ang Ulat",
     "deleteReportMsg": "Permanenteng burahin ang ulat na ito?",
     "deleteError": "Hindi mabura",
@@ -1297,19 +1300,19 @@
     "saveForLater": "I-save para Mamaya",
     "applyRegenerate": "I-apply at I-regenerate",
     "regeneratingLabel": "Muling binubuo ang ulat…",
-    "correctionsCount": "Mga Pagwawasto ({{count}})",
+    "correctionsCount": "Mga pagwawasto ({{count}})",
     "applied": "NA-APPLY",
     "pending": "NAKABINBIN"
   },
   "staffHub": {
-    "title": "Staff Hub",
+    "title": "Staff hub",
     "tabInbox": "Inbox",
     "tabTeamGames": "Mga Laro ng Team",
     "tabMyTeams": "Mga Team Ko",
     "liveGame": "Live na Laro",
     "teamReport": "Ulat ng Team",
     "searchInboxPlaceholder": "Maghanap ng mensahe at ulat...",
-    "messages": "Mga Mensahe",
+    "messages": "Mga mensahe",
     "new": "Bago",
     "noMatchingConversations": "Walang tumugmang usapan.",
     "noConversationsYet": "Wala pang usapan — i-tap ang Bago para mag-message sa isang staff.",
@@ -1327,7 +1330,7 @@
     "myTeamsLabel": "MGA TEAM KO",
     "searchTeamPlaceholder": "Maghanap ayon sa pangalan ng team...",
     "createNewTeam": "Gumawa ng bagong team",
-    "headCoach": "Head Coach: {{name}}",
+    "headCoach": "Head coach: {{name}}",
     "joinedBadge": "Sumali",
     "join": "Sumali",
     "memberCountOne": "{{count}} miyembro",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "Umalis sa Team",
     "leaveTeamMsg": "Hindi mo na makikita ang mga laro ng team na ito at hindi ka na makakatanggap ng mga notipikasyon nila.",
     "leaveTeamError": "Hindi makaalis sa team",
-    "viewFullGameData": "Tingnan ang buong game data (stats at grado)",
+    "viewFullGameData": "Tingnan ang buong datos ng laro (estadistika at grado)",
     "noReportYet": "Wala pang nabuong ulat.",
     "noScoutingReportYet": "Wala pang nabuong AI scouting report para sa larong ito.",
     "addCommentPlaceholder": "Magdagdag ng komento...",
     "you": "Ikaw",
     "subTeamPlaceholder": "Pangalan ng sub-team (hal. Offense, Guards)...",
-    "coachNameOrEmail": "Pangalan o email ng coach..."
+    "coachNameOrEmail": "Pangalan o email ng coach...",
+    "noReportGenerated": "Wala pang nabuong ulat."
   },
   "conversation": {
     "title": "Usapan",
@@ -1399,18 +1403,18 @@
       "teamReports": "Mga Ulat ng Team",
       "gameReports": "Mga Ulat ng Laro",
       "scoutReports": "Mga Scout Report",
-      "training": "Training"
+      "training": "Pagsasanay"
     },
-    "playerFallback": "Player",
+    "playerFallback": "Manlalaro",
     "opponentFallback": "Kalaban",
     "vsOpponent": "vs {{name}}",
     "teamReport": "Ulat ng Team",
     "gameReport": "Ulat ng Laro",
-    "scoutReport": "Scout Report",
+    "scoutReport": "Ulat ng scouting",
     "playerEval": "Eval ng Player",
     "report": "Ulat",
     "trainingProgram": "Programa ng Training",
-    "trainingLabel": "Training",
+    "trainingLabel": "Pagsasanay",
     "playerTraining": "Training ni {{name}}",
     "tapToOpen": "{{type}} · I-tap para buksan",
     "noContent": "Walang nilalaman.",
@@ -1421,13 +1425,13 @@
     "noReportsFound": "Walang nakitang ulat."
   },
   "coachNotifs": {
-    "title": "Mga Notipikasyon",
+    "title": "Mga abiso",
     "noNotifications": "Walang notipikasyon",
-    "typeTraining": "Training",
-    "typeEval": "Eval",
+    "typeTraining": "Pagsasanay",
+    "typeEval": "Ebalwasyon",
     "typeTeamReport": "Ulat ng Team",
     "typeGameReport": "Ulat ng Laro",
-    "typeScoutReport": "Scout Report",
+    "typeScoutReport": "Ulat ng scouting",
     "typeReport": "Ulat",
     "unavailableTitle": "Hindi Available",
     "unavailableMsg": "Hindi na available ang ibinahaging ulat na ito.",
@@ -1504,7 +1508,7 @@
     "competitionLevel": "Antas ng Kompetisyon",
     "addPlayer": "Magdagdag ng Player",
     "fullNamePlaceholder": "Buong Pangalan *",
-    "teamLabel": "Team",
+    "teamLabel": "Koponan",
     "noTeam": "Walang team",
     "selectTeam": "Pumili ng team",
     "positionPlaceholder": "Posisyon (hal. PG, SG, SF)",
@@ -1544,7 +1548,7 @@
     "titlePlayers": "Mag-import ng mga Player",
     "subRoster": "Magdagdag ng player sa isang team mula sa kahit anong file — babasahin ito ng AI",
     "subPlayers": "Mag-import ng player mula sa kahit anong file — babasahin ito ng AI",
-    "teamRequiredLabel": "Team *",
+    "teamRequiredLabel": "Koponan *",
     "teamHint": "Pumili ng team o gumawa ng bago. Idadagdag ang mga player sa team na ito.",
     "createTeamPlaceholder": "Pangalan ng bagong team...",
     "orSelectExisting": "O pumili ng umiiral na team",
@@ -1578,7 +1582,7 @@
     "expectedColumns": "Mga Inaasahang Column",
     "expectedColumnsHint": "Ang Row 1 ay dapat header row. Nababaluktot ang pangalan ng column — kinikilala ng sistema ang mga karaniwang bersyon. Ang \"Player Name\" lang ang kailangan.",
     "exampleRow": "Halimbawang row",
-    "exampleText": "John Doe | PG | HS Varsity | 8.5 | 9.0 | 7.5 | 8.0 | 8.5 | 7.0 | 9.0 | Elite shooter, mataas ang IQ | Kailangan pang ayusin ang off-dribble | Magaling ang court vision at pamumuno",
+    "exampleText": "Juan dela Cruz | PG | HS Varsity | 8.5 | 9.0 | 7.5 | 8.0 | 8.5 | 7.0 | 9.0 | Mahusay na shooter, mataas ang IQ | Kailangan pang sanayin ang off-dribble | Magaling tumingin sa court at manguna",
     "selectFileTitle": "Pumili ng file",
     "selectFileMsg": "I-tap muna ang kahon sa itaas para pumili ng file — kahit anong uri ay puwede (Excel, PDF, larawan, Word, teksto).",
     "nothingFoundTitle": "Walang nakita",
@@ -1593,16 +1597,16 @@
     "teamRequiredMsg": "Pumili o gumawa ng team bago mag-import.",
     "outputTypes": {
       "player_eval": "Eval ng Player",
-      "box_score": "Box Score",
-      "scouting_report": "Scouting Report",
-      "film_breakdown": "Film Breakdown",
-      "coaching_report": "Coaching Report",
+      "box_score": "Box score",
+      "scouting_report": "Ulat ng scouting",
+      "film_breakdown": "Pagsusuri ng film",
+      "coaching_report": "Ulat sa pagko-coach",
       "recruitment_profile": "Recruitment",
       "game_analysis": "Pagsusuri ng Laro"
     },
     "templateColumns": {
       "playerName": {
-        "name": "Player Name *",
+        "name": "Pangalan ng manlalaro *",
         "desc": "Buong pangalan — kailangan, ginagamit sa pagtugma sa mga kasalukuyang player"
       },
       "position": {
@@ -1610,15 +1614,15 @@
         "desc": "PG, SG, SF, PF, C"
       },
       "competitionLevel": {
-        "name": "Antas ng Kompetisyon",
+        "name": "Antas ng kompetisyon",
         "desc": "HS Varsity, Kolehiyo, Pro, atbp."
       },
       "overallGrade": {
-        "name": "Kabuuang Grado",
+        "name": "Kabuuang grado",
         "desc": "Numerong 0–10"
       },
       "offensiveSkills": {
-        "name": "Offensive Skills",
+        "name": "Mga kasanayan sa opensa",
         "desc": "Grado sa pillar 0–10"
       },
       "defense": {
@@ -1638,25 +1642,25 @@
         "desc": "Grado sa pillar 0–10"
       },
       "strategicFit": {
-        "name": "Strategic Fit",
+        "name": "Estratehikong angkop",
         "desc": "Grado sa pillar 0–10"
       },
       "greenFlags": {
-        "name": "Green Flags",
+        "name": "Green flags",
         "desc": "Mga lakas na pinaghihiwalay ng kuwit"
       },
       "watchFlags": {
-        "name": "Watch Flags",
+        "name": "Watch flags",
         "desc": "Mga alalahanin na pinaghihiwalay ng kuwit"
       },
       "notes": {
-        "name": "Mga Tala",
+        "name": "Mga tala",
         "desc": "Malayang teksto ng scouting notes o ulat"
       }
     },
     "rosterColumns": {
       "playerName": {
-        "name": "Player Name *",
+        "name": "Pangalan ng manlalaro *",
         "desc": "Buong pangalan — kailangan"
       },
       "position": {
@@ -1668,11 +1672,11 @@
         "desc": "hal. 6'2\""
       },
       "wingspan": {
-        "name": "Wingspan",
+        "name": "Haba ng bisig",
         "desc": "hal. 6'5\" (tinatanggap din: WS)"
       },
       "competitionLevel": {
-        "name": "Antas ng Kompetisyon",
+        "name": "Antas ng kompetisyon",
         "desc": "HS Varsity, Kolehiyo, Pro, atbp."
       }
     }
@@ -1686,7 +1690,7 @@
     "vs": "{{a}} vs {{b}}",
     "myTeamFallback": "Team Ko",
     "opponentFallback": "Kalaban",
-    "teamFallback": "Team",
+    "teamFallback": "Koponan",
     "deleteGameReportTitle": "Burahin ang Ulat ng Laro",
     "deleteGameReportMessage": "Burahin ang \"{{title}}\"?",
     "couldNotDeleteReport": "Hindi mabura ang ulat",
@@ -1721,7 +1725,7 @@
     "noFilmYet": "Wala pang film na nakakabit sa isang ulat ng laro. Magdagdag ng film sa isang packet at lalabas ito rito.",
     "noReportContent": "Walang nilalaman ang ulat.",
     "sharePlayerTeamStaff": "Ibahagi — Player, Team, o Staff",
-    "correctionsCount": "Mga Pagwawasto ({{count}})",
+    "correctionsCount": "Mga pagwawasto ({{count}})",
     "applied": "NA-APPLY",
     "applyRegenerate": "I-apply at I-regenerate",
     "regeneratingOverlay": "Muling binubuo ang ulat…",
@@ -1769,7 +1773,7 @@
     "couldNotGenerate": "Hindi makabuo ng ulat ng team"
   },
   "gameBuilder": {
-    "headerTitle": "Game Packet",
+    "headerTitle": "Game packet",
     "packetName": "Pangalan ng Packet",
     "packetNamePlaceholder": "Pangalanan ang packet na ito para mahanap mo mamaya",
     "packetNameHint": "Bigyan ng pangalan ang packet mo bago ito buuin.",
@@ -1786,7 +1790,7 @@
     "opponentB": "Kalaban B",
     "myProgramFallback": "Programa Ko",
     "opponentFallback": "Kalaban",
-    "teamFallback": "Team",
+    "teamFallback": "Koponan",
     "vs": "{{a}} vs {{b}}",
     "selectOrTypeOpponent": "Pumili o mag-type ng kalaban...",
     "selectTeam": "Pumili ng team...",
@@ -1820,10 +1824,10 @@
     "sentTitle": "Naipadala!",
     "sentMessage": "Naipadala ang ulat kay {{name}}.",
     "exportErrorTitle": "Error sa Pag-export",
-    "boxScoreStats": "Box Score / Stats",
+    "boxScoreStats": "Box score / estadistika",
     "import": "I-import",
     "boxScorePlaceholder": "I-paste ang box score, stats, o game data...",
-    "scoutingNotes": "Scouting Notes",
+    "scoutingNotes": "Mga tala ng scouting",
     "scoutingNotesPlaceholder": "Magdagdag ng scouting notes, obserbasyon, tendencies...",
     "focusOptional": "Focus (opsyonal)",
     "focusPlaceholder": "hal. Paparating na torneo, scheme laban sa press defense...",
@@ -1846,13 +1850,22 @@
     "player": "Manlalaro",
     "staff": "Staff",
     "allowRegenerate": "Payagan ang tatanggap na bumuo muli",
-    "typeNameToSearch": "Mag-type ng pangalan para maghanap..."
+    "typeNameToSearch": "Mag-type ng pangalan para maghanap...",
+    "updating": "Ina-update...",
+    "applyRegenerate": "I-apply at I-regenerate",
+    "regeneratingLabel": "Muling binubuo ang ulat…",
+    "noContent": "Walang nilalaman.",
+    "noAnalysisYet": "Wala pang pagsusuri.",
+    "applyCorrection": "Ilapat ang pagwawasto",
+    "noPlayersFound": "Walang nahanap na manlalaro.",
+    "myTeamFilm": "Film ng aking koponan",
+    "opponentFilm": "Film ng kalaban"
   },
   "teamGrade": {
     "views": {
       "dashboard": "Dashboard",
       "games": "Mga Laro",
-      "scout": "Scout"
+      "scout": "Scouting"
     },
     "phases": {
       "all": "Lahat",
@@ -1864,30 +1877,30 @@
       "exhibition": "Exhibition"
     },
     "stats": {
-      "2 FG Made": "2 FG Pasok",
-      "2 FG Missed": "2 FG Miss",
-      "3 FG Made": "3 FG Pasok",
-      "3 FG Missed": "3 FG Miss",
-      "Off. Reb": "Off. Reb",
-      "Draw PF": "Draw PF",
-      "Assists": "Assists",
+      "2 FG Made": "Pumasok na 2 puntos",
+      "2 FG Missed": "Sablay na 2 puntos",
+      "3 FG Made": "Pumasok na 3 puntos",
+      "3 FG Missed": "Sablay na 3 puntos",
+      "Off. Reb": "Opensang rebound",
+      "Draw PF": "Nakuhang foul",
+      "Assists": "Assist",
       "Turnover": "Turnover",
-      "Hockey Assist": "Hockey Assist",
-      "FT Made": "FT Pasok",
-      "FT Missed": "FT Miss",
-      "Def. Reb": "Def. Reb",
+      "Hockey Assist": "Hockey assist",
+      "FT Made": "Pumasok na free throw",
+      "FT Missed": "Sablay na free throw",
+      "Def. Reb": "Depensang rebound",
       "Steal": "Steal",
       "Deflection": "Deflection",
-      "Def. Stop": "Def. Stop",
+      "Def. Stop": "Depensang stop",
       "Charge": "Charge",
-      "Bluff": "Bluff",
-      "Blocked Shot": "Blocked Shot",
-      "Jog Back": "Mabagal Bumalik",
-      "No Ball Pressure": "Walang Ball Pressure",
-      "Defensive Mistake": "Mali sa Depensa",
-      "No Contest": "Walang Contest",
-      "No Block Out": "Walang Block Out",
-      "Foul Against": "Foul Laban"
+      "Bluff": "Pekeng galaw",
+      "Blocked Shot": "Block",
+      "Jog Back": "Mabagal na pagbalik",
+      "No Ball Pressure": "Walang presyon sa bola",
+      "Defensive Mistake": "Pagkakamali sa depensa",
+      "No Contest": "Walang kontra",
+      "No Block Out": "Walang block out",
+      "Foul Against": "Foul laban"
     },
     "gradeView": "VIEW NG GRADO",
     "clear": "I-clear",
@@ -1965,16 +1978,16 @@
     "noStatsLogged": "Wala pang na-log na stats.",
     "quarterComparison": "PAGHAHAMBING NG QUARTER",
     "quarterComparisonHint": "Grade points bawat quarter — i-tap ang player para sa buong breakdown",
-    "playerHead": "PLAYER",
+    "playerHead": "MANLALARO",
     "tot": "TOT",
-    "teamRow": "TEAM",
+    "teamRow": "KOPONAN",
     "otShort": "OT",
     "quarterShort": "Q{{q}}",
     "ptsAbbr": "pts",
     "playerGrades": "MGA GRADO NG PLAYER",
     "searchPlayersPlaceholder": "Maghanap ng mga player…",
     "offDefMin": "OFF {{off}} · DEF {{def}} · {{min}}min",
-    "gradingStats": "GRADING STATS",
+    "gradingStats": "ESTADISTIKA NG GRADING",
     "perQuarter": "BAWAT QUARTER",
     "offDef": "OFF {{off}} · DEF {{def}}",
     "viewDetails": "Tingnan ang Detalye",
@@ -1985,7 +1998,7 @@
     "exportCsv": "I-export ang CSV",
     "generateGameReport": "Bumuo ng Ulat ng Laro",
     "continueLiveEntry": "Ipagpatuloy ang Live Entry",
-    "scoutingReport": "SCOUTING REPORT",
+    "scoutingReport": "ULAT NG SCOUTING",
     "selectOpponent": "PUMILI NG KALABAN",
     "noOpponents": "Wala pang kalaban. Mag-log muna ng mga laro.",
     "gamesCount": "{{count}} laro",
@@ -2016,7 +2029,7 @@
     "opp": "OPP",
     "noStatsRead": "Walang nabasang stats",
     "importStats": "Mag-import ng Stats",
-    "teamOptional": "TEAM (opsyonal)",
+    "teamOptional": "KOPONAN (opsyonal)",
     "noneNoTeam": "Wala (walang team)",
     "selectTeam": "Pumili ng team",
     "none": "Wala",
@@ -2031,12 +2044,12 @@
     "seasonYearPlaceholder": "hal. 2025-2026",
     "date": "PETSA",
     "competitionLevel": "ANTAS NG KOMPETISYON",
-    "halves": "halves",
-    "quarters": "quarters",
+    "halves": "kalahati",
+    "quarters": "quarter",
     "periodsFormat": "{{count}} {{unit}} × {{clock}} — bumibilang pababa ang game clock bawat period.",
     "typeLabel": "URI",
     "trackingMode": "MODE NG PAG-TRACK",
-    "trackLiveTitle": "Live Track",
+    "trackLiveTitle": "Live tracking",
     "trackLiveDesc": "I-tap ang mga event nang live",
     "trackPostTitle": "Pagkatapos ng Laro",
     "trackPostDesc": "Ilagay o i-import ang stats pagkatapos",
@@ -2056,7 +2069,7 @@
     "substitutions": "MGA SUBSTITUTION",
     "overtime": "OVERTIME",
     "quarterN": "QUARTER {{q}}",
-    "statsTitle": "Stats",
+    "statsTitle": "Estadistika",
     "addMissingStat": "MAGDAGDAG NG NAWAWALANG STAT",
     "quarterLabel": "QUARTER",
     "statLabelCaps": "STAT",
@@ -2069,8 +2082,8 @@
     "gradeEarnedSub": "Kung paano nakuha ang grado, laro bawat laro",
     "noGameStatsPlayer": "Wala pang naitalang game stats para sa player na ito.",
     "seasonAvgGames": "AVERAGE NA GRADO SA SEASON · {{count}} LARO",
-    "offensePts": "OFFENSE PTS",
-    "defensePts": "DEFENSE PTS",
+    "offensePts": "PUNTOS SA OPENSA",
+    "defensePts": "PUNTOS SA DEPENSA",
     "statBreakdown": "BREAKDOWN NG STAT",
     "shareGameHint": "Maghanap ng staff, team, o programa para ibahagi ang game session na ito. Ang paghahanap ng team o programa ay umaabot sa lahat ng konektadong staff.",
     "searchStaffPlaceholder": "Maghanap ng staff ayon sa pangalan...",
@@ -2083,14 +2096,14 @@
   "whiteboard": {
     "title": "Whiteboard",
     "boardN": "Board {{n}}",
-    "aiPlay": "AI Play",
-    "aiPlayN": "AI Play {{n}}",
+    "aiPlay": "AI play",
+    "aiPlayN": "AI play {{n}}",
     "copyName": "kopya ng {{name}}",
-    "boards": "Mga Board",
+    "boards": "Mga board",
     "newBoard": "Bagong Board",
     "fullCourt": "Buong Court",
     "halfCourt": "Kalahating Court",
-    "threeQuarterCourt": "3/4 Court",
+    "threeQuarterCourt": "3/4 court",
     "marksCount": "{{n}} marka",
     "deleteBoardTitle": "Burahin ang Board",
     "deleteBoardMsg": "Burahin ang \"{{name}}\"?",
@@ -2105,7 +2118,7 @@
     "landscape": "Pahiga",
     "offense": "Opensa",
     "defense": "Depensa",
-    "counter": "Counter",
+    "counter": "Kontra",
     "keyChip": "Key",
     "play": "Play",
     "stop": "Itigil",
@@ -2122,7 +2135,7 @@
     "moveHint": "I-drag ang player o dulo ng arrow · i-tap ang dulo para burahin",
     "addMovement": "Magdagdag ng galaw",
     "addMovementHint": "Ano ito? Idadagdag ito sa {{scheme}} at isasama kapag i-tap mo ang Iakma ang play.",
-    "pass": "Pass",
+    "pass": "Pasa",
     "cut": "Cut",
     "screen": "Screen",
     "dribble": "Dribble",
@@ -2136,7 +2149,7 @@
     "playersTitle": "{{scheme}} — Ayon sa Player",
     "playersHint": "Ang detalye ng bawat player ay kung paano binasa ng AI ang play mo para sa kanila. I-edit ang alinman at/o i-lock ang isang player sa lugar niya (iaayos ng AI ang iba sa paligid ng lock), tapos I-apply at I-regenerate.",
     "locked": "Naka-lock",
-    "open": "Bukas",
+    "open": "Buksan",
     "playerDoesPlaceholder": "Ang ginagawa ni {{id}}…",
     "noPlayersYet": "Wala pang player sa scheme na ito.",
     "noDefendersYet": "Wala pang defender sa scheme na ito.",
@@ -2144,7 +2157,7 @@
     "applyRegenerate": "I-apply at I-regenerate",
     "nothingToApplyTitle": "Walang ma-apply",
     "nothingToApplyMsg": "Mag-lock muna ng player o i-edit ang detalye nila.",
-    "aiTitle": "AI Play Draw-Up",
+    "aiTitle": "AI play draw-up",
     "aiHint": "Ilarawan ang eksena o play — ano ang tinakbo, ano ang ginawa ng depensa, ano ang nagkamali. Iguguhit ng AI ang opensa, depensa, at counter, kasama ang key kung ano sana ang magpapagana nito.",
     "aiPlaceholder": "hal. High P&R sa kaliwa, mahigpit na naghedge ang big nila, bukas ang roller pero huli ang pass, hindi kailanman umangat ang weak-side corner...",
     "drawFromReport": "Iguhit mula sa isang ulat",
@@ -2160,7 +2173,7 @@
     "reportSource": "Pinagkunan ng Ulat",
     "scoutReports": "Mga Scout Report",
     "teamReports": "Mga Ulat ng Team",
-    "scoutReport": "Scout Report",
+    "scoutReport": "Ulat ng scouting",
     "teamReport": "Ulat ng Team",
     "scoutReportDesc": "Scouting sa kalaban mula sa scout section ng Team Grade",
     "teamReportDesc": "Mga ulat na ginawa mo sa section na Mga Ulat ng Team",
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Ipinapakita ang orihinal",
     "viewOriginal": "Tingnan ang orihinal",
     "showTranslation": "Ipakita ang salin"
+  },
+  "jobProgress": {
+    "scanning": "Sinusuri ang film para sa mahahalagang aksyon…",
+    "segment": "Sinusuri ang segment {{i}} ng {{n}}",
+    "synthesizing": "Binubuo ang ulat"
   }
 }

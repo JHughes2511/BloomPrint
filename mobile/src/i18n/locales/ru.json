@@ -795,7 +795,7 @@
     "evaluations": "Оценки",
     "trainingPlans": "Планы тренировок",
     "memberSince": "Участник с {{date}}",
-    "noTrainingContent": "Нет содержимого тренировки.",
+    "noTrainingContent": "Нет тренировочного материала.",
     "corrections": "ПРАВКИ",
     "correctionsPlaceholder": "Введите правки или обратную связь для новой программы тренировок...",
     "saveForLater": "Сохранить на потом",
@@ -803,7 +803,7 @@
     "regeneratingOverlay": "Перегенерируем тренировку…",
     "applied": "ПРИМЕНЕНО",
     "pending": "ОЖИДАЕТ",
-    "playersVersion": "ВЕРСИЯ ИГРОКА",
+    "playersVersion": "ВЕРСИЯ ДЛЯ ИГРОКА",
     "sentBadge": "ОТПРАВЛЕНО",
     "preparingChecklist": "ИИ готовит версию чек-листа для игрока...",
     "commentsCount": "Комментарии ({{count}})",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "Страна",
     "allowRegenerate": "Разрешить получателю пересоздавать",
     "searchCoachPlaceholder": "Поиск имени тренера/программы...",
-    "summarizeHistoryTitle": "Кратко изложить историю"
+    "summarizeHistoryTitle": "Кратко изложить историю",
+    "noEvalsYet": "Оценок пока нет.",
+    "updatePlayerProgram": "Обновить программу игрока",
+    "createAssign": "Создать и назначить"
   },
   "training": {
     "couldNotOpenFilePicker": "Не удалось открыть выбор файлов.",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "Покинуть команду",
     "leaveTeamMsg": "Вы больше не будете видеть игры этой команды и получать их уведомления.",
     "leaveTeamError": "Не удалось покинуть команду",
-    "viewFullGameData": "Смотреть полные данные игры (статистика и оценки)",
+    "viewFullGameData": "Посмотреть все данные матча (статистика и оценки)",
     "noReportYet": "Отчёт ещё не создан.",
     "noScoutingReportYet": "ИИ-скаутинг-отчёт для этой игры ещё не создан.",
     "addCommentPlaceholder": "Добавить комментарий...",
     "you": "Вы",
     "subTeamPlaceholder": "Название подгруппы (напр. Нападение, Защитники)...",
-    "coachNameOrEmail": "Имя или email тренера..."
+    "coachNameOrEmail": "Имя или email тренера...",
+    "noReportGenerated": "Отчёт ещё не создан."
   },
   "conversation": {
     "title": "Переписка",
@@ -1846,7 +1850,16 @@
     "player": "Игрок",
     "staff": "Тренерский штаб",
     "allowRegenerate": "Разрешить получателю пересоздавать",
-    "typeNameToSearch": "Введите имя для поиска..."
+    "typeNameToSearch": "Введите имя для поиска...",
+    "updating": "Обновляем...",
+    "applyRegenerate": "Применить и перегенерировать",
+    "regeneratingLabel": "Перегенерируем отчёт…",
+    "noContent": "Нет содержимого.",
+    "noAnalysisYet": "Анализа пока нет.",
+    "applyCorrection": "Применить исправление",
+    "noPlayersFound": "Игроки не найдены.",
+    "myTeamFilm": "Видео моей команды",
+    "opponentFilm": "Видео соперника"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Показан оригинал",
     "viewOriginal": "Показать оригинал",
     "showTranslation": "Показать перевод"
+  },
+  "jobProgress": {
+    "scanning": "Поиск ключевых моментов в записи…",
+    "segment": "Анализ сегмента {{i}} из {{n}}",
+    "synthesizing": "Формирование отчёта"
   }
 }

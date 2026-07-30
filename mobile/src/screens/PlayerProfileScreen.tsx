@@ -631,7 +631,7 @@ export default function PlayerProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {evals.length === 0 && <Text style={styles.emptyText}>No evaluations yet.</Text>}
+        {evals.length === 0 && <Text style={styles.emptyText}>{tr('playerProfile.noEvalsYet')}</Text>}
         {[...evals].reverse().map(ev => (
           <TouchableOpacity
             key={ev.id}
@@ -741,7 +741,7 @@ export default function PlayerProfileScreen() {
         >
           {regeneratingTraining
             ? <ActivityIndicator color={t.ctaText} size="small" />
-            : <><Ionicons name="refresh" size={16} color={t.ctaText} /><Text style={styles.regenBtnText}> Regenerate</Text></>}
+            : <><Ionicons name="refresh" size={16} color={t.ctaText} /><Text style={styles.regenBtnText}> {tr('playerProfile.regenerate')}</Text></>}
         </TouchableOpacity>
       </View>
 
@@ -1113,7 +1113,7 @@ export default function PlayerProfileScreen() {
               >
                 {trainingModalItem?.program_text
                   ? renderReport(trainingModalItem.program_text, { heading: t.ink, body: t.inkSoft })
-                  : <Text style={{ color: t.muted }}>No training content.</Text>
+                  : <Text style={{ color: t.muted }}>{tr('playerProfile.noTrainingContent')}</Text>
                 }
 
                 {/* Corrections section */}
@@ -1160,11 +1160,11 @@ export default function PlayerProfileScreen() {
                     >
                       {regeneratingModal
                         ? <ActivityIndicator color={t.ctaText} size="small" />
-                        : <><Ionicons name="refresh" size={15} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>Apply & Regenerate</Text></>}
+                        : <><Ionicons name="refresh" size={15} color={t.ctaText} /><Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>{tr('playerProfile.applyRegenerate')}</Text></>}
                     </TouchableOpacity>
                   </View>
 
-                  <GeneratingOverlay visible={regeneratingModal} label="Regenerating training…" />
+                  <GeneratingOverlay visible={regeneratingModal} label={tr('playerProfile.regeneratingOverlay')} />
 
                   {modalCorrections.length > 0 && (
                     <View style={{ marginTop: 12 }}>
@@ -1187,9 +1187,9 @@ export default function PlayerProfileScreen() {
                 {trainingModalItem?.sent_to_player && (
                   <View style={{ marginTop: 24, borderTopWidth: 1, borderTopColor: t.chip, paddingTop: 16 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                      <Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13 }}>PLAYER'S VERSION</Text>
+                      <Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 13 }}>{tr('playerProfile.playersVersion')}</Text>
                       <View style={{ backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 2 }}>
-                        <Text style={{ color: t.accent, fontSize: 9.5, fontFamily: fonts[700] }}>SENT</Text>
+                        <Text style={{ color: t.accent, fontSize: 9.5, fontFamily: fonts[700] }}>{tr('playerProfile.sentBadge')}</Text>
                       </View>
                     </View>
 
@@ -1230,7 +1230,7 @@ export default function PlayerProfileScreen() {
                           </TouchableOpacity>
                         </View>
 
-                        <Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 12, marginTop: 18, marginBottom: 8 }}>Update Player's Program</Text>
+                        <Text style={{ color: t.inkSoft, fontFamily: fonts[700], fontSize: 12, marginTop: 18, marginBottom: 8 }}>{tr('playerProfile.updatePlayerProgram')}</Text>
                         <VoiceTextInput
                           style={{ backgroundColor: t.chip, color: t.ink, borderRadius: 10, padding: 12, fontSize: 13, minHeight: 60, borderWidth: 1, borderColor: t.line }}
                           placeholder={tr('playerProfile.checklistFeedback')}
@@ -1246,9 +1246,9 @@ export default function PlayerProfileScreen() {
                         >
                           {updatingPlayerProgram
                             ? <ActivityIndicator color={t.accent} size="small" />
-                            : <><Ionicons name="refresh" size={14} color={t.accent} /><Text style={{ color: t.accent, fontFamily: fonts[700], fontSize: 12.5 }}>Update Player's Program</Text></>}
+                            : <><Ionicons name="refresh" size={14} color={t.accent} /><Text style={{ color: t.accent, fontFamily: fonts[700], fontSize: 12.5 }}>{tr('playerProfile.updatePlayerProgram')}</Text></>}
                         </TouchableOpacity>
-                        <GeneratingOverlay visible={updatingPlayerProgram} label="Updating the player's program…" />
+                        <GeneratingOverlay visible={updatingPlayerProgram} label={tr('playerProfile.updatingPlayerOverlay')} />
                       </>
                     )}
                   </View>
@@ -1427,7 +1427,7 @@ export default function PlayerProfileScreen() {
             )}
 
             {/* Inline team picker */}
-            <Text style={[styles.inputLabel, { marginTop: 8 }]}>Team</Text>
+            <Text style={[styles.inputLabel, { marginTop: 8 }]}>{tr('playerProfile.team')}</Text>
             <TouchableOpacity
               style={styles.dropdownTrigger}
               onPress={() => { setShowTeamPicker(v => !v); setShowLevelPicker(false); setShowCreateTeam(false); }}
@@ -1479,7 +1479,7 @@ export default function PlayerProfileScreen() {
                       onPress={createTeamFromEdit}
                       disabled={creatingTeam || !newTeamName.trim()}
                     >
-                      {creatingTeam ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>Create & Assign</Text>}
+                      {creatingTeam ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>{tr('playerProfile.createAssign')}</Text>}
                     </TouchableOpacity>
                   </View>
                 )}
@@ -1491,7 +1491,7 @@ export default function PlayerProfileScreen() {
                 <Text style={styles.cancelText}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveBtn} onPress={saveEdit} disabled={saving}>
-                {saving ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>Save</Text>}
+                {saving ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>{tr('common.save')}</Text>}
               </TouchableOpacity>
             </View>
           </KeyboardAwareScrollView>
@@ -1666,7 +1666,7 @@ export default function PlayerProfileScreen() {
               );
             })()}
 
-            <GeneratingOverlay visible={summaryLoading} label="Synthesizing the summary…" />
+            <GeneratingOverlay visible={summaryLoading} label={tr('playerProfile.synthesizingOverlay')} />
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowSummary(false)}>
                 <Text style={styles.cancelText}>{tr('common.cancel')}</Text>

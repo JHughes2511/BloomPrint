@@ -149,7 +149,7 @@
       "reportFallback": "Izveštaj",
       "updatedReportFallback": "Ažuriran izveštaj",
       "fromSender": "{{type}} · od {{sender}}",
-      "original": "Original",
+      "original": "Оригинал",
       "noContent": "Nema dostupnog sadržaja izveštaja.",
       "correctionsTab": "Ispravke ({{count}})",
       "commentsTab": "Komentari ({{count}})",
@@ -783,7 +783,7 @@
     "weight": "Težina",
     "standingReach": "Domet u stojećem stavu",
     "school": "Škola",
-    "program": "Program",
+    "program": "Програм",
     "team": "Tim",
     "level": "Nivo",
     "city": "Grad",
@@ -795,7 +795,7 @@
     "evaluations": "Procene",
     "trainingPlans": "Planovi treninga",
     "memberSince": "Član od {{date}}",
-    "noTrainingContent": "Nema sadržaja treninga.",
+    "noTrainingContent": "Нема тренажног садржаја.",
     "corrections": "ISPRAVKE",
     "correctionsPlaceholder": "Unesi ispravke ili povratne informacije za novi program treninga...",
     "saveForLater": "Sačuvaj za kasnije",
@@ -803,8 +803,8 @@
     "regeneratingOverlay": "Regenerisanje treninga…",
     "applied": "PRIMENJENO",
     "pending": "NA ČEKANJU",
-    "playersVersion": "IGRAČEVA VERZIJA",
-    "sentBadge": "POSLATO",
+    "playersVersion": "ИГРАЧЕВА ВЕРЗИЈА",
+    "sentBadge": "ПОСЛАТО",
     "preparingChecklist": "AI priprema igračevu verziju kontrolne liste...",
     "commentsCount": "Komentari ({{count}})",
     "unknown": "Nepoznato",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "Država",
     "allowRegenerate": "Dozvoli primaocu da ponovo generiše",
     "searchCoachPlaceholder": "Pretraži ime trenera/programa...",
-    "summarizeHistoryTitle": "Sažmi istoriju"
+    "summarizeHistoryTitle": "Sažmi istoriju",
+    "noEvalsYet": "Још нема евалуација.",
+    "updatePlayerProgram": "Ажурирај играчев програм",
+    "createAssign": "Направи и додели"
   },
   "training": {
     "couldNotOpenFilePicker": "Nije moguće otvoriti birač datoteka.",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "Napusti tim",
     "leaveTeamMsg": "Više nećete videti utakmice ovog tima niti primati njihova obaveštenja.",
     "leaveTeamError": "Nije moguće napustiti tim",
-    "viewFullGameData": "Vidi kompletne podatke utakmice (statistika i ocene)",
+    "viewFullGameData": "Прикажи све податке утакмице (статистика и оцене)",
     "noReportYet": "Još nije generisan izveštaj.",
     "noScoutingReportYet": "Još nije generisan AI skaut izveštaj za ovu utakmicu.",
     "addCommentPlaceholder": "Dodaj komentar...",
     "you": "Ti",
     "subTeamPlaceholder": "Naziv podgrupe (npr. Napad, Bekovi)...",
-    "coachNameOrEmail": "Ime ili imejl trenera..."
+    "coachNameOrEmail": "Ime ili imejl trenera...",
+    "noReportGenerated": "Извештај још није генерисан."
   },
   "conversation": {
     "title": "Razgovor",
@@ -1846,7 +1850,16 @@
     "player": "Igrač",
     "staff": "Stručni štab",
     "allowRegenerate": "Dozvoli primaocu da ponovo generiše",
-    "typeNameToSearch": "Ukucaj ime za pretragu..."
+    "typeNameToSearch": "Ukucaj ime za pretragu...",
+    "updating": "Ažuriranje...",
+    "applyRegenerate": "Primeni i regeneriši",
+    "regeneratingLabel": "Regenerisanje izveštaja…",
+    "noContent": "Nema sadržaja.",
+    "noAnalysisYet": "Још нема анализе.",
+    "applyCorrection": "Примени исправку",
+    "noPlayersFound": "Нема пронађених играча.",
+    "myTeamFilm": "Снимак мог тима",
+    "opponentFilm": "Снимак противника"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Prikazan je original",
     "viewOriginal": "Prikaži original",
     "showTranslation": "Prikaži prevod"
+  },
+  "jobProgress": {
+    "scanning": "Скенирање снимка у потрази за кључним акцијама…",
+    "segment": "Анализа сегмента {{i}} од {{n}}",
+    "synthesizing": "Састављање извештаја"
   }
 }

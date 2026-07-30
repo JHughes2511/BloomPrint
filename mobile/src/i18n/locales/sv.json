@@ -402,7 +402,7 @@
     "noPendingCorrectionsMsg": "Lägg till minst en rättelse innan du genererar om."
   },
   "home": {
-    "intelligenceModel": "Intelligence Model",
+    "intelligenceModel": "Intelligensmodell",
     "toggleTheme": "Växla tema",
     "editProfileLabel": "Redigera profil",
     "staffInboxLabel": "Stabens inkorg",
@@ -804,7 +804,7 @@
     "applied": "TILLÄMPAD",
     "pending": "VÄNTANDE",
     "playersVersion": "SPELARENS VERSION",
-    "sentBadge": "SKICKAD",
+    "sentBadge": "SKICKAT",
     "preparingChecklist": "AI:n förbereder spelarens checklisteversion...",
     "commentsCount": "Kommentarer ({{count}})",
     "unknown": "Okänd",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "Land",
     "allowRegenerate": "Tillåt mottagaren att generera om",
     "searchCoachPlaceholder": "Sök tränar-/programnamn...",
-    "summarizeHistoryTitle": "Sammanfatta historik"
+    "summarizeHistoryTitle": "Sammanfatta historik",
+    "noEvalsYet": "Inga utvärderingar ännu.",
+    "updatePlayerProgram": "Uppdatera spelarens program",
+    "createAssign": "Skapa och tilldela"
   },
   "training": {
     "couldNotOpenFilePicker": "Kunde inte öppna filväljaren.",
@@ -1222,7 +1225,7 @@
       "matchup": "Matchningar",
       "team": "Lagrapporter",
       "game": "Matchrapporter",
-      "scout": "Scout",
+      "scout": "Scouting",
       "training": "Träning"
     },
     "teamReport": "Lagrapport",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "Lämna lag",
     "leaveTeamMsg": "Du kommer inte längre att se det här lagets matcher eller ta emot deras aviseringar.",
     "leaveTeamError": "Kunde inte lämna laget",
-    "viewFullGameData": "Visa fullständig matchdata (statistik & betyg)",
+    "viewFullGameData": "Visa all matchdata (statistik och betyg)",
     "noReportYet": "Ingen rapport genererad ännu.",
     "noScoutingReportYet": "Ingen AI-scoutingrapport genererad ännu för den här matchen.",
     "addCommentPlaceholder": "Lägg till en kommentar...",
     "you": "Du",
     "subTeamPlaceholder": "Namn på undergrupp (t.ex. Offense, Guards)...",
-    "coachNameOrEmail": "Tränarens namn eller e-post..."
+    "coachNameOrEmail": "Tränarens namn eller e-post...",
+    "noReportGenerated": "Ingen rapport har genererats ännu."
   },
   "conversation": {
     "title": "Konversation",
@@ -1846,13 +1850,22 @@
     "player": "Spelare",
     "staff": "Ledarstab",
     "allowRegenerate": "Tillåt mottagaren att generera om",
-    "typeNameToSearch": "Skriv ett namn för att söka..."
+    "typeNameToSearch": "Skriv ett namn för att söka...",
+    "updating": "Uppdaterar...",
+    "applyRegenerate": "Tillämpa & Generera om",
+    "regeneratingLabel": "Genererar om rapporten…",
+    "noContent": "Inget innehåll.",
+    "noAnalysisYet": "Ingen analys ännu.",
+    "applyCorrection": "Tillämpa korrigering",
+    "noPlayersFound": "Inga spelare hittades.",
+    "myTeamFilm": "Film på mitt lag",
+    "opponentFilm": "Film på motståndaren"
   },
   "teamGrade": {
     "views": {
       "dashboard": "Översikt",
       "games": "Matcher",
-      "scout": "Scout"
+      "scout": "Scouting"
     },
     "phases": {
       "all": "Alla",
@@ -1880,7 +1893,7 @@
       "Deflection": "Bolltouch",
       "Def. Stop": "Def. stopp",
       "Charge": "Framtvingad charge",
-      "Bluff": "Bluff",
+      "Bluff": "Finte",
       "Blocked Shot": "Blockerat skott",
       "Jog Back": "Lunkar tillbaka",
       "No Ball Pressure": "Ingen bollpress",
@@ -1915,7 +1928,7 @@
     "them": "DE",
     "vsOpponent": "mot {{opponent}}",
     "stop": "Stopp",
-    "start": "Start",
+    "start": "Starta",
     "setClock": "Ställ klocka",
     "set": "Ställ",
     "ourTeam": "Vårt lag",
@@ -1928,7 +1941,7 @@
     "posPlaceholder": "Pos",
     "offense": "OFFENSIV",
     "defense": "FÖRSVAR",
-    "lineup": "Lineup",
+    "lineup": "Laguppställning",
     "endGame": "Avsluta match",
     "selectPlayerAlertTitle": "Välj spelare",
     "selectPlayerAlertMsg": "Tryck på en spelare först, välj sedan en statistikhändelse.",
@@ -2081,7 +2094,7 @@
     "noStaffFound": "Ingen personal hittad."
   },
   "whiteboard": {
-    "title": "Whiteboard",
+    "title": "Taktiktavla",
     "boardN": "Tavla {{n}}",
     "aiPlay": "AI-spel",
     "aiPlayN": "AI-spel {{n}}",
@@ -2122,7 +2135,7 @@
     "moveHint": "Dra en spelare eller piländ · tryck på en ände för att ta bort",
     "addMovement": "Lägg till rörelse",
     "addMovementHint": "Vad är detta? Det läggs till i {{scheme}} och inkluderas när du trycker på Anpassa spel.",
-    "pass": "Pass",
+    "pass": "Passning",
     "cut": "Cut",
     "screen": "Screen",
     "dribble": "Dribbling",
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Visar originalet",
     "viewOriginal": "Visa originalet",
     "showTranslation": "Visa översättning"
+  },
+  "jobProgress": {
+    "scanning": "Söker igenom filmen efter nyckelmoment…",
+    "segment": "Analyserar segment {{i}} av {{n}}",
+    "synthesizing": "Sammanställer rapport"
   }
 }

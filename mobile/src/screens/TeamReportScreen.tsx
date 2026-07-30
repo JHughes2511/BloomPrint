@@ -25,7 +25,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
-import { GeneratingOverlay, parseGenProgress } from '../components/GeneratingBasketball';
+import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
 
 // Labels come from the `reportTypes.*` translation keys at render time.
 const OUTPUT_TYPES = [
@@ -670,7 +670,7 @@ export default function TeamReportScreen() {
           }
         </TouchableOpacity>
 
-        <GeneratingOverlay visible={generating} realProgress={parseGenProgress(genProgress)} label={genProgress || tr('teamReport.generatingOverlay')} />
+        <GeneratingOverlay visible={generating} realProgress={parseGenProgress(genProgress)} label={jobProgressLabel(genProgress, tr) || tr('teamReport.generatingOverlay')} />
 
         {reportText && (
           <View

@@ -402,7 +402,7 @@
     "noPendingCorrectionsMsg": "Aggiungi almeno una correzione prima di rigenerare."
   },
   "home": {
-    "intelligenceModel": "Intelligence Model",
+    "intelligenceModel": "Modello di intelligenza",
     "toggleTheme": "Cambia tema",
     "editProfileLabel": "Modifica profilo",
     "staffInboxLabel": "Posta staff",
@@ -781,7 +781,7 @@
     "height": "Altezza",
     "wingspan": "Apertura Alare",
     "weight": "Peso",
-    "standingReach": "Standing Reach",
+    "standingReach": "Estensione da fermo",
     "school": "Scuola",
     "program": "Programma",
     "team": "Squadra",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "Paese",
     "allowRegenerate": "Consenti al destinatario di rigenerare",
     "searchCoachPlaceholder": "Cerca nome allenatore/programma...",
-    "summarizeHistoryTitle": "Riepiloga cronologia"
+    "summarizeHistoryTitle": "Riepiloga cronologia",
+    "noEvalsYet": "Nessuna valutazione ancora.",
+    "updatePlayerProgram": "Aggiorna il programma del giocatore",
+    "createAssign": "Crea e assegna"
   },
   "training": {
     "couldNotOpenFilePicker": "Impossibile aprire il selettore file.",
@@ -970,7 +973,7 @@
       "height": "Altezza",
       "wingspan": "Apertura Alare",
       "weight": "Peso",
-      "standingReach": "Standing Reach",
+      "standingReach": "Estensione da fermo",
       "bimScoreTitle": "Punteggio BIM {{score}}",
       "bimModalSub": "Come si distribuisce il tuo punteggio sui pilastri di valutazione, con i punti di forza e le aree da monitorare segnalati dal tuo allenatore.",
       "tapForBreakdown": "Tocca per il dettaglio completo",
@@ -1048,7 +1051,7 @@
       "height": "Altezza",
       "wingspan": "Apertura Alare",
       "weight": "Peso",
-      "standingReach": "Standing Reach",
+      "standingReach": "Estensione da fermo",
       "schoolOrg": "Scuola / Org.",
       "linkedCoachesTeams": "Allenatori e Squadre Collegati",
       "notLinkedYet": "Non sei ancora collegato a nessun allenatore. Collegati con un allenatore per ricevere report e allenamenti.",
@@ -1302,7 +1305,7 @@
     "pending": "IN SOSPESO"
   },
   "staffHub": {
-    "title": "Staff Hub",
+    "title": "Area staff",
     "tabInbox": "Posta",
     "tabTeamGames": "Partite Squadra",
     "tabMyTeams": "Le Mie Squadre",
@@ -1382,7 +1385,8 @@
     "addCommentPlaceholder": "Aggiungi un commento...",
     "you": "Tu",
     "subTeamPlaceholder": "Nome del sottogruppo (es. Attacco, Guardie)...",
-    "coachNameOrEmail": "Nome o email dell'allenatore..."
+    "coachNameOrEmail": "Nome o email dell'allenatore...",
+    "noReportGenerated": "Nessun report ancora generato."
   },
   "conversation": {
     "title": "Conversazione",
@@ -1846,17 +1850,26 @@
     "player": "Giocatore",
     "staff": "Staff",
     "allowRegenerate": "Consenti al destinatario di rigenerare",
-    "typeNameToSearch": "Digita un nome per cercare..."
+    "typeNameToSearch": "Digita un nome per cercare...",
+    "updating": "Aggiornamento...",
+    "applyRegenerate": "Applica e Rigenera",
+    "regeneratingLabel": "Rigenerazione del report…",
+    "noContent": "Nessun contenuto.",
+    "noAnalysisYet": "Nessuna analisi ancora.",
+    "applyCorrection": "Applica correzione",
+    "noPlayersFound": "Nessun giocatore trovato.",
+    "myTeamFilm": "Video della mia squadra",
+    "opponentFilm": "Video dell'avversario"
   },
   "teamGrade": {
     "views": {
-      "dashboard": "Dashboard",
+      "dashboard": "Riepilogo",
       "games": "Partite",
       "scout": "Scouting"
     },
     "phases": {
       "all": "Tutte",
-      "regular": "Regular",
+      "regular": "Regular season",
       "tournament": "Torneo",
       "playoff": "Playoff",
       "preseason": "Precampionato",
@@ -2054,7 +2067,7 @@
     "mAbbr": "m",
     "gradeLabel": "VOTO",
     "substitutions": "SOSTITUZIONI",
-    "overtime": "OVERTIME",
+    "overtime": "SUPPLEMENTARE",
     "quarterN": "QUARTO {{q}}",
     "statsTitle": "Statistiche",
     "addMissingStat": "AGGIUNGI STATISTICA MANCANTE",
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Visualizzazione dell'originale",
     "viewOriginal": "Vedi originale",
     "showTranslation": "Mostra traduzione"
+  },
+  "jobProgress": {
+    "scanning": "Scansione del video alla ricerca delle azioni chiave…",
+    "segment": "Analisi del segmento {{i}} di {{n}}",
+    "synthesizing": "Sintesi del report"
   }
 }

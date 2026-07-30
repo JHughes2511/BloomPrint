@@ -16,7 +16,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
-import { GeneratingOverlay, parseGenProgress } from '../components/GeneratingBasketball';
+import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
 
 // API output_type keys — labels are resolved at render via i18n.
 const OUTPUT_TYPES: OutputType[] = [
@@ -416,7 +416,7 @@ export default function NewEvalScreen() {
       <GeneratingOverlay
         visible={submitting}
         realProgress={parseGenProgress(progress)}
-        label={progress || tr('newEval.overlayLabel')}
+        label={jobProgressLabel(progress, tr) || tr('newEval.overlayLabel')}
       />
     </KeyboardAwareScrollView>
     </KeyboardAvoidingView>

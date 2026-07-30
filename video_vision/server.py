@@ -722,12 +722,16 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     CHUNK = 40
     TOTAL_CAP = 900          # absolute safety ceiling across all films
     progress = args.get("_progress")   # optional callable(done, total, label)
+    # Progress labels are stable machine codes ("job:scanning", "job:segment:i:n",
+    # "job:synthesizing"), not prose — the client renders them in the coach's
+    # language. Changing a code without updating jobProgressLabel() in the app
+    # will surface the raw code to the user.
     # Motion-aware sampling: dense on action, sparse on dead time, budget scaled
     # by each film's length. Split the absolute ceiling across multiple films.
     per_cap = max(60, TOTAL_CAP // max(len(video_paths), 1))
     if progress:
         try:
-            progress(0, 1, "Scanning film for key action…")
+            progress(0, 1, "job:scanning")
         except Exception:
             pass
     frames = []
@@ -788,7 +792,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
         for i, ch in enumerate(chunks, 1):
             if progress:
                 try:
-                    progress(i, len(chunks), f"Analyzing segment {i} of {len(chunks)}")
+                    progress(i, len(chunks), f"job:segment:{i}:{len(chunks)}")
                 except Exception:
                     pass
             t0, t1 = ch[0][0], ch[-1][0]
@@ -808,7 +812,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                 seg_notes.append(f"SEGMENT {i}: (analysis unavailable: {exc})")
         if progress:
             try:
-                progress(len(chunks), len(chunks), "Synthesizing report")
+                progress(len(chunks), len(chunks), "job:synthesizing")
             except Exception:
                 pass
         synth = bim_prompt + "\n\nOBSERVATIONS FROM ACROSS THE FULL FILM (synthesize these into the complete report):\n\n"

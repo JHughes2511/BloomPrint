@@ -857,7 +857,10 @@
     "countryPlaceholder": "Država",
     "allowRegenerate": "Dopusti primatelju ponovno generiranje",
     "searchCoachPlaceholder": "Pretraži ime trenera/programa...",
-    "summarizeHistoryTitle": "Sažmi povijest"
+    "summarizeHistoryTitle": "Sažmi povijest",
+    "noEvalsYet": "Još nema evaluacija.",
+    "updatePlayerProgram": "Ažuriraj igračev program",
+    "createAssign": "Kreiraj i dodijeli"
   },
   "training": {
     "couldNotOpenFilePicker": "Nije moguće otvoriti odabir datoteka.",
@@ -1382,7 +1385,8 @@
     "addCommentPlaceholder": "Dodaj komentar...",
     "you": "Ti",
     "subTeamPlaceholder": "Naziv podskupine (npr. Napad, Bekovi)...",
-    "coachNameOrEmail": "Ime ili e-mail trenera..."
+    "coachNameOrEmail": "Ime ili e-mail trenera...",
+    "noReportGenerated": "Izvještaj još nije generiran."
   },
   "conversation": {
     "title": "Razgovor",
@@ -1846,7 +1850,16 @@
     "player": "Igrač",
     "staff": "Stručni stožer",
     "allowRegenerate": "Dopusti primatelju ponovno generiranje",
-    "typeNameToSearch": "Upiši ime za pretragu..."
+    "typeNameToSearch": "Upiši ime za pretragu...",
+    "updating": "Ažuriram...",
+    "applyRegenerate": "Primijeni i ponovno generiraj",
+    "regeneratingLabel": "Ponovno generiram izvještaj…",
+    "noContent": "Nema sadržaja.",
+    "noAnalysisYet": "Još nema analize.",
+    "applyCorrection": "Primijeni ispravak",
+    "noPlayersFound": "Nema pronađenih igrača.",
+    "myTeamFilm": "Snimka moje momčadi",
+    "opponentFilm": "Snimka protivnika"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Prikazan je izvornik",
     "viewOriginal": "Prikaži izvornik",
     "showTranslation": "Prikaži prijevod"
+  },
+  "jobProgress": {
+    "scanning": "Pretražujem snimku za ključne akcije…",
+    "segment": "Analiziram segment {{i}} od {{n}}",
+    "synthesizing": "Sastavljam izvještaj"
   }
 }

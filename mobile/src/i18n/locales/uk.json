@@ -795,7 +795,7 @@
     "evaluations": "Оцінки",
     "trainingPlans": "Тренувальні плани",
     "memberSince": "Учасник з {{date}}",
-    "noTrainingContent": "Немає вмісту тренування.",
+    "noTrainingContent": "Немає тренувального матеріалу.",
     "corrections": "ВИПРАВЛЕННЯ",
     "correctionsPlaceholder": "Введіть виправлення чи відгук для нової тренувальної програми...",
     "saveForLater": "Зберегти на потім",
@@ -803,7 +803,7 @@
     "regeneratingOverlay": "Перегенеровуємо тренування…",
     "applied": "ЗАСТОСОВАНО",
     "pending": "ОЧІКУЄ",
-    "playersVersion": "ВЕРСІЯ ГРАВЦЯ",
+    "playersVersion": "ВЕРСІЯ ДЛЯ ГРАВЦЯ",
     "sentBadge": "НАДІСЛАНО",
     "preparingChecklist": "ШІ готує версію чеклиста для гравця...",
     "commentsCount": "Коментарі ({{count}})",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "Країна",
     "allowRegenerate": "Дозволити одержувачу генерувати заново",
     "searchCoachPlaceholder": "Пошук імені тренера/програми...",
-    "summarizeHistoryTitle": "Стисло описати історію"
+    "summarizeHistoryTitle": "Стисло описати історію",
+    "noEvalsYet": "Оцінок ще немає.",
+    "updatePlayerProgram": "Оновити програму гравця",
+    "createAssign": "Створити й призначити"
   },
   "training": {
     "couldNotOpenFilePicker": "Не вдалося відкрити вибір файлів.",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "Покинути команду",
     "leaveTeamMsg": "Ви більше не бачитимете ігор цієї команди й не отримуватимете їхніх сповіщень.",
     "leaveTeamError": "Не вдалося покинути команду",
-    "viewFullGameData": "Переглянути повні дані гри (статистика та оцінки)",
+    "viewFullGameData": "Переглянути всі дані матчу (статистика та оцінки)",
     "noReportYet": "Звіт ще не згенеровано.",
     "noScoutingReportYet": "Для цієї гри ще не згенеровано скаутського звіту ШІ.",
     "addCommentPlaceholder": "Додати коментар...",
     "you": "Ви",
     "subTeamPlaceholder": "Назва підгрупи (напр. Напад, Захисники)...",
-    "coachNameOrEmail": "Ім'я або email тренера..."
+    "coachNameOrEmail": "Ім'я або email тренера...",
+    "noReportGenerated": "Звіт ще не створено."
   },
   "conversation": {
     "title": "Розмова",
@@ -1602,77 +1606,77 @@
     },
     "templateColumns": {
       "playerName": {
-        "name": "Player Name *",
+        "name": "Ім'я гравця *",
         "desc": "Повне імʼя — обовʼязкове, використовується для зіставлення з наявними гравцями"
       },
       "position": {
-        "name": "Position",
+        "name": "Позиція",
         "desc": "PG, SG, SF, PF, C"
       },
       "competitionLevel": {
-        "name": "Competition Level",
+        "name": "Рівень змагань",
         "desc": "HS Varsity, College, Pro тощо."
       },
       "overallGrade": {
-        "name": "Overall Grade",
+        "name": "Загальна оцінка",
         "desc": "Число 0–10"
       },
       "offensiveSkills": {
-        "name": "Offensive Skills",
+        "name": "Атакувальні навички",
         "desc": "Оцінка за стовпом 0–10"
       },
       "defense": {
-        "name": "Defense",
+        "name": "Захист",
         "desc": "Оцінка за стовпом 0–10"
       },
       "physical": {
-        "name": "Physical",
+        "name": "Фізичні дані",
         "desc": "Оцінка за стовпом 0–10"
       },
       "intangibles": {
-        "name": "Intangibles",
+        "name": "Нематеріальні якості",
         "desc": "Оцінка за стовпом 0–10"
       },
       "advanced": {
-        "name": "Advanced",
+        "name": "Поглиблений аналіз",
         "desc": "Оцінка за стовпом 0–10"
       },
       "strategicFit": {
-        "name": "Strategic Fit",
+        "name": "Тактична відповідність",
         "desc": "Оцінка за стовпом 0–10"
       },
       "greenFlags": {
-        "name": "Green Flags",
+        "name": "Зелені прапорці",
         "desc": "Сильні сторони через кому"
       },
       "watchFlags": {
-        "name": "Watch Flags",
+        "name": "Тривожні прапорці",
         "desc": "Занепокоєння через кому"
       },
       "notes": {
-        "name": "Notes",
+        "name": "Нотатки",
         "desc": "Скаутські нотатки чи звіт вільним текстом"
       }
     },
     "rosterColumns": {
       "playerName": {
-        "name": "Player Name *",
+        "name": "Ім'я гравця *",
         "desc": "Повне імʼя — обовʼязкове"
       },
       "position": {
-        "name": "Position",
+        "name": "Позиція",
         "desc": "PG, SG, SF, PF, C"
       },
       "height": {
-        "name": "Height",
+        "name": "Зріст",
         "desc": "напр. 6'2\""
       },
       "wingspan": {
-        "name": "Wingspan",
+        "name": "Розмах рук",
         "desc": "напр. 6'5\" (також приймається: WS)"
       },
       "competitionLevel": {
-        "name": "Competition Level",
+        "name": "Рівень змагань",
         "desc": "HS Varsity, College, Pro тощо."
       }
     }
@@ -1846,7 +1850,16 @@
     "player": "Гравець",
     "staff": "Тренерський штаб",
     "allowRegenerate": "Дозволити одержувачу генерувати заново",
-    "typeNameToSearch": "Введіть ім'я для пошуку..."
+    "typeNameToSearch": "Введіть ім'я для пошуку...",
+    "updating": "Оновлюємо...",
+    "applyRegenerate": "Застосувати й перегенерувати",
+    "regeneratingLabel": "Перегенеровуємо звіт…",
+    "noContent": "Немає вмісту.",
+    "noAnalysisYet": "Аналізу ще немає.",
+    "applyCorrection": "Застосувати виправлення",
+    "noPlayersFound": "Гравців не знайдено.",
+    "myTeamFilm": "Відео моєї команди",
+    "opponentFilm": "Відео суперника"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Показано оригінал",
     "viewOriginal": "Показати оригінал",
     "showTranslation": "Показати переклад"
+  },
+  "jobProgress": {
+    "scanning": "Пошук ключових моментів у записі…",
+    "segment": "Аналіз сегмента {{i}} з {{n}}",
+    "synthesizing": "Формування звіту"
   }
 }

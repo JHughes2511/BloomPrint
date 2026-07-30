@@ -803,7 +803,7 @@
     "regeneratingOverlay": "יוצר מחדש את האימון…",
     "applied": "הוחל",
     "pending": "ממתין",
-    "playersVersion": "הגרסה של השחקן",
+    "playersVersion": "גרסת השחקן",
     "sentBadge": "נשלח",
     "preparingChecklist": "ה-AI מכין את גרסת הצ'קליסט של השחקן...",
     "commentsCount": "תגובות ({{count}})",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "מדינה",
     "allowRegenerate": "אפשר לנמען ליצור מחדש",
     "searchCoachPlaceholder": "חיפוש שם מאמן/תוכנית...",
-    "summarizeHistoryTitle": "סכם היסטוריה"
+    "summarizeHistoryTitle": "סכם היסטוריה",
+    "noEvalsYet": "אין הערכות עדיין.",
+    "updatePlayerProgram": "עדכון תוכנית השחקן",
+    "createAssign": "צור והקצה"
   },
   "training": {
     "couldNotOpenFilePicker": "לא ניתן לפתוח את בוחר הקבצים.",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "עזיבת קבוצה",
     "leaveTeamMsg": "לא תראה יותר את משחקי הקבוצה הזו ולא תקבל את ההתראות שלה.",
     "leaveTeamError": "לא ניתן לעזוב את הקבוצה",
-    "viewFullGameData": "הצג נתוני משחק מלאים (סטטיסטיקות וציונים)",
+    "viewFullGameData": "הצג את כל נתוני המשחק (סטטיסטיקות וציונים)",
     "noReportYet": "עדיין לא נוצר דוח.",
     "noScoutingReportYet": "עדיין לא נוצר דוח סקאוטינג של AI למשחק הזה.",
     "addCommentPlaceholder": "הוסף תגובה...",
     "you": "אתה",
     "subTeamPlaceholder": "שם תת-קבוצה (למשל התקפה, גארדים)...",
-    "coachNameOrEmail": "שם המאמן או אימייל..."
+    "coachNameOrEmail": "שם המאמן או אימייל...",
+    "noReportGenerated": "עדיין לא נוצר דוח."
   },
   "conversation": {
     "title": "שיחה",
@@ -1846,7 +1850,16 @@
     "player": "שחקן",
     "staff": "סגל",
     "allowRegenerate": "אפשר לנמען ליצור מחדש",
-    "typeNameToSearch": "הקלד שם לחיפוש..."
+    "typeNameToSearch": "הקלד שם לחיפוש...",
+    "updating": "מעדכן...",
+    "applyRegenerate": "החל וצור מחדש",
+    "regeneratingLabel": "יוצר מחדש את הדוח…",
+    "noContent": "אין תוכן.",
+    "noAnalysisYet": "אין ניתוח עדיין.",
+    "applyCorrection": "החל תיקון",
+    "noPlayersFound": "לא נמצאו שחקנים.",
+    "myTeamFilm": "וידאו הקבוצה שלי",
+    "opponentFilm": "וידאו היריבה"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "מוצג המקור",
     "viewOriginal": "הצג מקור",
     "showTranslation": "הצג תרגום"
+  },
+  "jobProgress": {
+    "scanning": "סורק את הווידאו אחר רגעי מפתח…",
+    "segment": "מנתח קטע {{i}} מתוך {{n}}",
+    "synthesizing": "מרכיב את הדוח"
   }
 }

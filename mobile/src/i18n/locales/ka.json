@@ -402,7 +402,7 @@
     "noPendingCorrectionsMsg": "ხელახლა გენერაციამდე დაამატეთ მინიმუმ ერთი შესწორება."
   },
   "home": {
-    "intelligenceModel": "Intelligence Model",
+    "intelligenceModel": "ინტელექტის მოდელი",
     "toggleTheme": "თემის გადართვა",
     "editProfileLabel": "პროფილის რედაქტირება",
     "staffInboxLabel": "პერსონალის შემოსული",
@@ -795,7 +795,7 @@
     "evaluations": "შეფასებები",
     "trainingPlans": "საწვრთნელო გეგმები",
     "memberSince": "წევრი {{date}}-დან",
-    "noTrainingContent": "საწვრთნელო შიგთავსი არ არის.",
+    "noTrainingContent": "სავარჯიშო მასალა არ არის.",
     "corrections": "შესწორებები",
     "correctionsPlaceholder": "შეიყვანეთ შესწორებები ან უკუკავშირი ახალი საწვრთნელო პროგრამისთვის...",
     "saveForLater": "შენახვა მოგვიანებისთვის",
@@ -804,7 +804,7 @@
     "applied": "გამოყენებულია",
     "pending": "მოლოდინში",
     "playersVersion": "მოთამაშის ვერსია",
-    "sentBadge": "გაგზავნილი",
+    "sentBadge": "გაგზავნილია",
     "preparingChecklist": "AI ამზადებს მოთამაშის საკონტროლო სიის ვერსიას...",
     "commentsCount": "კომენტარები ({{count}})",
     "unknown": "უცნობი",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "ქვეყანა",
     "allowRegenerate": "მიმღებს ხელახლა გენერირების უფლება",
     "searchCoachPlaceholder": "მწვრთნელის/პროგრამის სახელის ძიება...",
-    "summarizeHistoryTitle": "ისტორიის შეჯამება"
+    "summarizeHistoryTitle": "ისტორიის შეჯამება",
+    "noEvalsYet": "შეფასებები ჯერ არ არის.",
+    "updatePlayerProgram": "მოთამაშის პროგრამის განახლება",
+    "createAssign": "შექმნა და მინიჭება"
   },
   "training": {
     "couldNotOpenFilePicker": "ფაილის ამრჩევის გახსნა ვერ მოხერხდა.",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "გუნდის დატოვება",
     "leaveTeamMsg": "თქვენ ვეღარ ნახავთ ამ გუნდის თამაშებს და ვეღარ მიიღებთ მათ შეტყობინებებს.",
     "leaveTeamError": "გუნდის დატოვება ვერ მოხერხდა",
-    "viewFullGameData": "სრული თამაშის მონაცემების ნახვა (სტატისტიკა და ნიშნები)",
+    "viewFullGameData": "თამაშის სრული მონაცემების ნახვა (სტატისტიკა და შეფასებები)",
     "noReportYet": "ჯერ ანგარიში არ დაგენერირებულა.",
     "noScoutingReportYet": "ამ თამაშისთვის ჯერ AI სკაუტინგის ანგარიში არ დაგენერირებულა.",
     "addCommentPlaceholder": "დაამატეთ კომენტარი...",
     "you": "თქვენ",
     "subTeamPlaceholder": "ქვეჯგუფის სახელი (მაგ. შეტევა, გარდები)...",
-    "coachNameOrEmail": "მწვრთნელის სახელი ან ელფოსტა..."
+    "coachNameOrEmail": "მწვრთნელის სახელი ან ელფოსტა...",
+    "noReportGenerated": "ანგარიში ჯერ არ შექმნილა."
   },
   "conversation": {
     "title": "საუბარი",
@@ -1602,77 +1606,77 @@
     },
     "templateColumns": {
       "playerName": {
-        "name": "Player Name *",
+        "name": "მოთამაშის სახელი *",
         "desc": "სრული სახელი — სავალდებულო, გამოიყენება არსებულ მოთამაშეებთან დასამთხვევად"
       },
       "position": {
-        "name": "Position",
+        "name": "პოზიცია",
         "desc": "PG, SG, SF, PF, C"
       },
       "competitionLevel": {
-        "name": "Competition Level",
+        "name": "შეჯიბრის დონე",
         "desc": "HS Varsity, College, Pro და ა.შ."
       },
       "overallGrade": {
-        "name": "Overall Grade",
+        "name": "საერთო შეფასება",
         "desc": "რიცხვი 0–10"
       },
       "offensiveSkills": {
-        "name": "Offensive Skills",
+        "name": "შეტევითი უნარები",
         "desc": "მიმართულების ნიშანი 0–10"
       },
       "defense": {
-        "name": "Defense",
+        "name": "დაცვა",
         "desc": "მიმართულების ნიშანი 0–10"
       },
       "physical": {
-        "name": "Physical",
+        "name": "ფიზიკური",
         "desc": "მიმართულების ნიშანი 0–10"
       },
       "intangibles": {
-        "name": "Intangibles",
+        "name": "არამატერიალური თვისებები",
         "desc": "მიმართულების ნიშანი 0–10"
       },
       "advanced": {
-        "name": "Advanced",
+        "name": "გაფართოებული",
         "desc": "მიმართულების ნიშანი 0–10"
       },
       "strategicFit": {
-        "name": "Strategic Fit",
+        "name": "სტრატეგიული შესაბამისობა",
         "desc": "მიმართულების ნიშანი 0–10"
       },
       "greenFlags": {
-        "name": "Green Flags",
+        "name": "მწვანე ნიშნები",
         "desc": "მძიმით გამოყოფილი ძლიერი მხარეები"
       },
       "watchFlags": {
-        "name": "Watch Flags",
+        "name": "საყურადღებო ნიშნები",
         "desc": "მძიმით გამოყოფილი საყურადღებო საკითხები"
       },
       "notes": {
-        "name": "Notes",
+        "name": "შენიშვნები",
         "desc": "თავისუფალი ტექსტის სკაუტინგის შენიშვნები ან ანგარიში"
       }
     },
     "rosterColumns": {
       "playerName": {
-        "name": "Player Name *",
+        "name": "მოთამაშის სახელი *",
         "desc": "სრული სახელი — სავალდებულო"
       },
       "position": {
-        "name": "Position",
+        "name": "პოზიცია",
         "desc": "PG, SG, SF, PF, C"
       },
       "height": {
-        "name": "Height",
+        "name": "სიმაღლე",
         "desc": "მაგ. 6'2\""
       },
       "wingspan": {
-        "name": "Wingspan",
+        "name": "მკლავების გაშლა",
         "desc": "მაგ. 6'5\" (ასევე მიღებულია: WS)"
       },
       "competitionLevel": {
-        "name": "Competition Level",
+        "name": "შეჯიბრის დონე",
         "desc": "HS Varsity, College, Pro და ა.შ."
       }
     }
@@ -1846,7 +1850,16 @@
     "player": "მოთამაშე",
     "staff": "შტაბი",
     "allowRegenerate": "მიმღებს ხელახლა გენერირების უფლება",
-    "typeNameToSearch": "ჩაწერეთ სახელი ძიებისთვის..."
+    "typeNameToSearch": "ჩაწერეთ სახელი ძიებისთვის...",
+    "updating": "მიმდინარეობს განახლება...",
+    "applyRegenerate": "გამოყენება და ხელახლა გენერაცია",
+    "regeneratingLabel": "მიმდინარეობს ანგარიშის ხელახლა გენერაცია…",
+    "noContent": "შიგთავსი არ არის.",
+    "noAnalysisYet": "ანალიზი ჯერ არ არის.",
+    "applyCorrection": "შესწორების გამოყენება",
+    "noPlayersFound": "მოთამაშეები ვერ მოიძებნა.",
+    "myTeamFilm": "ჩემი გუნდის ვიდეო",
+    "opponentFilm": "მოწინააღმდეგის ვიდეო"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "ნაჩვენებია ორიგინალი",
     "viewOriginal": "ორიგინალის ნახვა",
     "showTranslation": "თარგმანის ჩვენება"
+  },
+  "jobProgress": {
+    "scanning": "ვიდეოს სკანირება მთავარი მომენტებისთვის…",
+    "segment": "სეგმენტის {{i}} ანალიზი {{n}}-დან",
+    "synthesizing": "ანგარიშის შედგენა"
   }
 }

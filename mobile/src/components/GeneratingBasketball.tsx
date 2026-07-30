@@ -8,10 +8,26 @@ import { fonts } from '../theme/typography';
  *  for single-call generations (which then use the estimated time curve). */
 export function parseGenProgress(label?: string): number | undefined {
   if (!label) return undefined;
+  // Current backend codes ("job:segment:3:8"), then the older English prose so
+  // jobs already in flight during an update keep reporting real progress.
+  const c = label.match(/^job:segment:(\d+):(\d+)$/);
+  if (c) return Math.min(92, Math.round((parseInt(c[1], 10) / parseInt(c[2], 10)) * 90));
+  if (label === 'job:synthesizing') return 95;
   const m = label.match(/segment\s+(\d+)\s+of\s+(\d+)/i);
   if (m) return Math.min(92, Math.round((parseInt(m[1], 10) / parseInt(m[2], 10)) * 90));
   if (/synthesiz/i.test(label)) return 95;
   return undefined;
+}
+
+/** Render a backend job-progress code in the coach's language.
+ *  Anything that isn't a known code is passed through unchanged. */
+export function jobProgressLabel(label: string | undefined, tr: (k: string, o?: any) => string): string {
+  if (!label) return '';
+  if (label === 'job:scanning') return tr('jobProgress.scanning');
+  if (label === 'job:synthesizing') return tr('jobProgress.synthesizing');
+  const c = label.match(/^job:segment:(\d+):(\d+)$/);
+  if (c) return tr('jobProgress.segment', { i: c[1], n: c[2] });
+  return label;
 }
 
 /**

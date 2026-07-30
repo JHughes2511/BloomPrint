@@ -402,7 +402,7 @@
     "noPendingCorrectionsMsg": "Adicione pelo menos uma correção antes de regenerar."
   },
   "home": {
-    "intelligenceModel": "Intelligence Model",
+    "intelligenceModel": "Modelo de inteligência",
     "toggleTheme": "Alternar tema",
     "editProfileLabel": "Editar perfil",
     "staffInboxLabel": "Caixa de entrada da comissão",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "País",
     "allowRegenerate": "Permitir que o destinatário gere novamente",
     "searchCoachPlaceholder": "Buscar nome de treinador/programa...",
-    "summarizeHistoryTitle": "Resumir histórico"
+    "summarizeHistoryTitle": "Resumir histórico",
+    "noEvalsYet": "Ainda sem avaliações.",
+    "updatePlayerProgram": "Atualizar programa do jogador",
+    "createAssign": "Criar e atribuir"
   },
   "training": {
     "couldNotOpenFilePicker": "Não foi possível abrir o seletor de arquivos.",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "Sair da Equipe",
     "leaveTeamMsg": "Você não verá mais os jogos desta equipe nem receberá as notificações dela.",
     "leaveTeamError": "Não foi possível sair da equipe",
-    "viewFullGameData": "Ver dados completos do jogo (estatísticas e notas)",
+    "viewFullGameData": "Ver todos os dados do jogo (estatísticas e notas)",
     "noReportYet": "Nenhum relatório gerado ainda.",
     "noScoutingReportYet": "Nenhum relatório de scouting da IA gerado ainda para este jogo.",
     "addCommentPlaceholder": "Adicionar um comentário...",
     "you": "Você",
     "subTeamPlaceholder": "Nome do subgrupo (ex. Ataque, Armadores)...",
-    "coachNameOrEmail": "Nome ou e-mail do treinador..."
+    "coachNameOrEmail": "Nome ou e-mail do treinador...",
+    "noReportGenerated": "Ainda não foi gerado nenhum relatório."
   },
   "conversation": {
     "title": "Conversa",
@@ -1846,7 +1850,16 @@
     "player": "Jogador",
     "staff": "Comissão técnica",
     "allowRegenerate": "Permitir que o destinatário gere novamente",
-    "typeNameToSearch": "Digite um nome para buscar..."
+    "typeNameToSearch": "Digite um nome para buscar...",
+    "updating": "Atualizando...",
+    "applyRegenerate": "Aplicar e Regenerar",
+    "regeneratingLabel": "Regenerando o relatório…",
+    "noContent": "Sem conteúdo.",
+    "noAnalysisYet": "Ainda sem análise.",
+    "applyCorrection": "Aplicar correção",
+    "noPlayersFound": "Nenhum jogador encontrado.",
+    "myTeamFilm": "Vídeo da minha equipa",
+    "opponentFilm": "Vídeo do adversário"
   },
   "teamGrade": {
     "views": {
@@ -1856,9 +1869,9 @@
     },
     "phases": {
       "all": "Todas",
-      "regular": "Regular",
+      "regular": "Época regular",
       "tournament": "Torneio",
-      "playoff": "Playoff",
+      "playoff": "Playoffs",
       "preseason": "Pré-temporada",
       "scrimmage": "Coletivo",
       "exhibition": "Amistoso"
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Mostrando o original",
     "viewOriginal": "Ver original",
     "showTranslation": "Mostrar tradução"
+  },
+  "jobProgress": {
+    "scanning": "A analisar o vídeo em busca das jogadas-chave…",
+    "segment": "A analisar o segmento {{i}} de {{n}}",
+    "synthesizing": "A sintetizar o relatório"
   }
 }

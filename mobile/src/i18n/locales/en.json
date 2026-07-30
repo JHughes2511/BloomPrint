@@ -857,7 +857,10 @@
     "countryPlaceholder": "Country",
     "allowRegenerate": "Allow recipient to regenerate",
     "searchCoachPlaceholder": "Search coach/program name...",
-    "summarizeHistoryTitle": "Summarize History"
+    "summarizeHistoryTitle": "Summarize History",
+    "noEvalsYet": "No evaluations yet.",
+    "updatePlayerProgram": "Update Player's Program",
+    "createAssign": "Create & Assign"
   },
   "training": {
     "couldNotOpenFilePicker": "Could not open file picker.",
@@ -1382,7 +1385,8 @@
     "addCommentPlaceholder": "Add a comment...",
     "you": "You",
     "subTeamPlaceholder": "Sub-team name (e.g. Offense, Guards)...",
-    "coachNameOrEmail": "Coach name or email..."
+    "coachNameOrEmail": "Coach name or email...",
+    "noReportGenerated": "No report generated yet."
   },
   "conversation": {
     "title": "Conversation",
@@ -1846,7 +1850,16 @@
     "player": "Player",
     "staff": "Staff",
     "allowRegenerate": "Allow recipient to regenerate",
-    "typeNameToSearch": "Type a name to search..."
+    "typeNameToSearch": "Type a name to search...",
+    "updating": "Updating...",
+    "applyRegenerate": "Apply & Regenerate",
+    "regeneratingLabel": "Regenerating the report…",
+    "noContent": "No content.",
+    "noAnalysisYet": "No analysis yet.",
+    "applyCorrection": "Apply Correction",
+    "noPlayersFound": "No players found.",
+    "myTeamFilm": "My Team Film",
+    "opponentFilm": "Opponent Film"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Showing the original",
     "viewOriginal": "View original",
     "showTranslation": "Show translation"
+  },
+  "jobProgress": {
+    "scanning": "Scanning film for key action…",
+    "segment": "Analyzing segment {{i}} of {{n}}",
+    "synthesizing": "Synthesizing report"
   }
 }

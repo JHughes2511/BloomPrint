@@ -803,7 +803,7 @@
     "regeneratingOverlay": "Antrenman yeniden oluşturuluyor…",
     "applied": "UYGULANDI",
     "pending": "BEKLİYOR",
-    "playersVersion": "OYUNCUNUN SÜRÜMÜ",
+    "playersVersion": "OYUNCU SÜRÜMÜ",
     "sentBadge": "GÖNDERİLDİ",
     "preparingChecklist": "Yapay zeka oyuncunun kontrol listesi sürümünü hazırlıyor...",
     "commentsCount": "Yorumlar ({{count}})",
@@ -857,7 +857,10 @@
     "countryPlaceholder": "Ülke",
     "allowRegenerate": "Alıcının yeniden oluşturmasına izin ver",
     "searchCoachPlaceholder": "Antrenör/program adı ara...",
-    "summarizeHistoryTitle": "Geçmişi özetle"
+    "summarizeHistoryTitle": "Geçmişi özetle",
+    "noEvalsYet": "Henüz değerlendirme yok.",
+    "updatePlayerProgram": "Oyuncunun programını güncelle",
+    "createAssign": "Oluştur ve ata"
   },
   "training": {
     "couldNotOpenFilePicker": "Dosya seçici açılamadı.",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "Takımdan Ayrıl",
     "leaveTeamMsg": "Artık bu takımın maçlarını görmeyecek veya bildirimlerini almayacaksınız.",
     "leaveTeamError": "Takımdan ayrılınamadı",
-    "viewFullGameData": "Tam maç verilerini görüntüle (istatistikler ve notlar)",
+    "viewFullGameData": "Tüm maç verilerini gör (istatistikler ve notlar)",
     "noReportYet": "Henüz rapor oluşturulmadı.",
     "noScoutingReportYet": "Bu maç için henüz yapay zeka skaut raporu oluşturulmadı.",
     "addCommentPlaceholder": "Yorum ekle...",
     "you": "Siz",
     "subTeamPlaceholder": "Alt grup adı (ör. Hücum, Gardlar)...",
-    "coachNameOrEmail": "Antrenör adı veya e-postası..."
+    "coachNameOrEmail": "Antrenör adı veya e-postası...",
+    "noReportGenerated": "Henüz rapor oluşturulmadı."
   },
   "conversation": {
     "title": "Sohbet",
@@ -1846,7 +1850,16 @@
     "player": "Oyuncu",
     "staff": "Teknik ekip",
     "allowRegenerate": "Alıcının yeniden oluşturmasına izin ver",
-    "typeNameToSearch": "Aramak için bir ad yazın..."
+    "typeNameToSearch": "Aramak için bir ad yazın...",
+    "updating": "Güncelleniyor...",
+    "applyRegenerate": "Uygula ve Yeniden Oluştur",
+    "regeneratingLabel": "Rapor yeniden oluşturuluyor…",
+    "noContent": "İçerik yok.",
+    "noAnalysisYet": "Henüz analiz yok.",
+    "applyCorrection": "Düzeltmeyi uygula",
+    "noPlayersFound": "Oyuncu bulunamadı.",
+    "myTeamFilm": "Kendi takım videom",
+    "opponentFilm": "Rakip videosu"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "Orijinal gösteriliyor",
     "viewOriginal": "Orijinali görüntüle",
     "showTranslation": "Çeviriyi göster"
+  },
+  "jobProgress": {
+    "scanning": "Videoda kilit anlar taranıyor…",
+    "segment": "{{n}} bölümden {{i}}. bölüm analiz ediliyor",
+    "synthesizing": "Rapor derleniyor"
   }
 }

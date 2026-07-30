@@ -10,7 +10,7 @@ import {
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { renderReport } from '../utils/renderReport';
-import { GeneratingOverlay, parseGenProgress } from '../components/GeneratingBasketball';
+import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Print from 'expo-print';
@@ -687,7 +687,7 @@ export default function GameReportBuilderScreen() {
         {/* Film analysis progress — under the film area, above box score. */}
         <GeneratingOverlay
           visible={uploadingClip}
-          label={clipProgress || tr('gameBuilder.analyzingFilm')}
+          label={jobProgressLabel(clipProgress, tr) || tr('gameBuilder.analyzingFilm')}
           realProgress={parseGenProgress(clipProgress)}
         />
 
@@ -769,7 +769,7 @@ export default function GameReportBuilderScreen() {
         <GeneratingOverlay
           visible={uploadingClip}
           realProgress={parseGenProgress(clipProgress)}
-          label={clipProgress || tr('gameBuilder.uploadingOverlay')}
+          label={jobProgressLabel(clipProgress, tr) || tr('gameBuilder.uploadingOverlay')}
         />
 
         {/* Saved reports — one per report-type selection, kept in the packet */}
@@ -845,12 +845,12 @@ export default function GameReportBuilderScreen() {
                   disabled={correcting}
                 >
                   {correcting
-                    ? <><ActivityIndicator color={t.ctaText} size="small" /><Text style={styles.correctionBtnText}>  Updating...</Text></>
-                    : <><Ionicons name="refresh" size={15} color={t.ctaText} /><Text style={styles.correctionBtnText}>  Apply & Regenerate</Text></>
+                    ? <><ActivityIndicator color={t.ctaText} size="small" /><Text style={styles.correctionBtnText}>  {tr('gameBuilder.updating')}</Text></>
+                    : <><Ionicons name="refresh" size={15} color={t.ctaText} /><Text style={styles.correctionBtnText}>  {tr('gameBuilder.applyRegenerate')}</Text></>
                   }
                 </TouchableOpacity>
               </View>
-              <GeneratingOverlay visible={correcting} label="Regenerating the report…" />
+              <GeneratingOverlay visible={correcting} label={tr('gameBuilder.regeneratingLabel')} />
 
               {gameCorrections.length > 0 && (
                 <View style={{ marginTop: 14 }}>
@@ -895,7 +895,7 @@ export default function GameReportBuilderScreen() {
             <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }}>
               {versionView?.report_text
                 ? renderReport(versionView.report_text, { heading: t.ink, body: t.inkSoft })
-                : <Text style={{ color: t.muted }}>No content.</Text>}
+                : <Text style={{ color: t.muted }}>{tr('gameBuilder.noContent')}</Text>}
             </KeyboardAwareScrollView>
           </View>
         </View>
@@ -906,7 +906,7 @@ export default function GameReportBuilderScreen() {
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
               <View style={[styles.clipLabel, clipModal?.label === 'my_team' ? styles.clipLabelMy : styles.clipLabelOpp]}>
-                <Text style={styles.clipLabelText}>{clipModal?.label === 'my_team' ? 'My Team Film' : 'Opponent Film'}</Text>
+                <Text style={styles.clipLabelText}>{clipModal?.label === 'my_team' ? tr('gameBuilder.myTeamFilm') : tr('gameBuilder.opponentFilm')}</Text>
               </View>
               <TouchableOpacity onPress={() => setClipModal(null)} style={{ marginLeft: 'auto' }}>
                 <Ionicons name="close" size={22} color={t.muted} />
@@ -915,7 +915,7 @@ export default function GameReportBuilderScreen() {
             <KeyboardAwareScrollView style={{ maxHeight: 280 }} contentContainerStyle={{ paddingBottom: 8 }}>
               {clipModal?.analysis_text
                 ? renderReport(clipModal.analysis_text, { heading: t.ink, body: t.inkSoft })
-                : <Text style={{ color: t.muted }}>No analysis yet.</Text>
+                : <Text style={{ color: t.muted }}>{tr('gameBuilder.noAnalysisYet')}</Text>
               }
             </KeyboardAwareScrollView>
             <Text style={[styles.correctionLabel, { marginTop: 16 }]}>{tr('gameBuilder.correctThisAnalysis')}</Text>
@@ -934,13 +934,13 @@ export default function GameReportBuilderScreen() {
               disabled={!clipCorrectionText.trim() || clipCorrecting}
             >
               {clipCorrecting
-                ? <><ActivityIndicator color={t.ctaText} size="small" /><Text style={styles.correctionBtnText}>  Updating...</Text></>
-                : <><Ionicons name="checkmark-circle" size={16} color={t.ctaText} /><Text style={styles.correctionBtnText}>  Apply Correction</Text></>
+                ? <><ActivityIndicator color={t.ctaText} size="small" /><Text style={styles.correctionBtnText}>  {tr('gameBuilder.updating')}</Text></>
+                : <><Ionicons name="checkmark-circle" size={16} color={t.ctaText} /><Text style={styles.correctionBtnText}>  {tr('gameBuilder.applyCorrection')}</Text></>
               }
             </TouchableOpacity>
             <GeneratingOverlay
               visible={clipCorrecting}
-              label={clipProgress || 'Re-watching the film with your correction…'}
+              label={jobProgressLabel(clipProgress, tr) || tr('gameBuilder.rewatchingFilm')}
               realProgress={parseGenProgress(clipProgress)}
             />
           </View>
@@ -1030,7 +1030,7 @@ export default function GameReportBuilderScreen() {
                 </TouchableOpacity>
               ))}
               {shareResults.length === 0 && shareSearch.trim().length > 0 && !shareSearchLoading && (
-                <Text style={{ color: t.muted2, textAlign: 'center', paddingVertical: 20 }}>No players found.</Text>
+                <Text style={{ color: t.muted2, textAlign: 'center', paddingVertical: 20 }}>{tr('gameBuilder.noPlayersFound')}</Text>
               )}
             </ScrollView>
           </View>

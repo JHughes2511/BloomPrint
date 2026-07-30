@@ -857,7 +857,10 @@
     "countryPlaceholder": "الدولة",
     "allowRegenerate": "السماح للمستلم بإعادة الإنشاء",
     "searchCoachPlaceholder": "البحث باسم المدرب/البرنامج...",
-    "summarizeHistoryTitle": "تلخيص السجل"
+    "summarizeHistoryTitle": "تلخيص السجل",
+    "noEvalsYet": "لا توجد تقييمات بعد.",
+    "updatePlayerProgram": "تحديث برنامج اللاعب",
+    "createAssign": "إنشاء وتعيين"
   },
   "training": {
     "couldNotOpenFilePicker": "تعذّر فتح منتقي الملفات.",
@@ -1376,13 +1379,14 @@
     "leaveTeamTitle": "مغادرة الفريق",
     "leaveTeamMsg": "لن ترى بعد الآن مباريات هذا الفريق ولن تصلك إشعاراته.",
     "leaveTeamError": "تعذّرت مغادرة الفريق",
-    "viewFullGameData": "عرض بيانات المباراة الكاملة (الإحصائيات والدرجات)",
+    "viewFullGameData": "عرض بيانات المباراة الكاملة (الإحصائيات والتقييمات)",
     "noReportYet": "لم يُنشأ أي تقرير بعد.",
     "noScoutingReportYet": "لم يُنشأ تقرير استكشاف بالذكاء الاصطناعي لهذه المباراة بعد.",
     "addCommentPlaceholder": "أضف تعليقًا...",
     "you": "أنت",
     "subTeamPlaceholder": "اسم المجموعة الفرعية (مثل الهجوم، صانعو اللعب)...",
-    "coachNameOrEmail": "اسم المدرب أو بريده الإلكتروني..."
+    "coachNameOrEmail": "اسم المدرب أو بريده الإلكتروني...",
+    "noReportGenerated": "لم يتم إنشاء تقرير بعد."
   },
   "conversation": {
     "title": "محادثة",
@@ -1846,7 +1850,16 @@
     "player": "لاعب",
     "staff": "الجهاز الفني",
     "allowRegenerate": "السماح للمستلم بإعادة الإنشاء",
-    "typeNameToSearch": "اكتب اسمًا للبحث..."
+    "typeNameToSearch": "اكتب اسمًا للبحث...",
+    "updating": "جارٍ التحديث...",
+    "applyRegenerate": "تطبيق وإعادة الإنشاء",
+    "regeneratingLabel": "جارٍ إعادة إنشاء التقرير…",
+    "noContent": "لا يوجد محتوى.",
+    "noAnalysisYet": "لا يوجد تحليل بعد.",
+    "applyCorrection": "تطبيق التصحيح",
+    "noPlayersFound": "لم يتم العثور على لاعبين.",
+    "myTeamFilm": "فيديو فريقي",
+    "opponentFilm": "فيديو الخصم"
   },
   "teamGrade": {
     "views": {
@@ -2192,5 +2205,10 @@
     "showingOriginal": "يتم عرض النص الأصلي",
     "viewOriginal": "عرض النص الأصلي",
     "showTranslation": "عرض الترجمة"
+  },
+  "jobProgress": {
+    "scanning": "جارٍ فحص الفيديو بحثًا عن اللقطات المهمة…",
+    "segment": "تحليل المقطع {{i}} من {{n}}",
+    "synthesizing": "تجميع التقرير"
   }
 }
