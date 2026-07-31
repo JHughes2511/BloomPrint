@@ -1,11 +1,44 @@
-"""SQLite database setup via SQLAlchemy."""
+"""Database setup: SQLite by default, any SQLAlchemy URL when configured.
 
+SQLite is right for one coach on one Mac and wrong the moment there are two
+servers — it is a file, so "the database" is whatever disk that process
+happens to have. DATABASE_URL is what lets this run somewhere else without
+touching the code.
+
+Env:
+  DATABASE_URL    full SQLAlchemy URL, e.g. postgresql+psycopg://user:pw@host/db
+  BLOOMPRINT_DB   SQLite file path, used only when DATABASE_URL is unset
+"""
+import logging
 import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
+log = logging.getLogger(__name__)
+
 DB_PATH = os.environ.get("BLOOMPRINT_DB", "bloomprint.db")
-engine = create_engine(f"sqlite:///{DB_PATH}", connect_args={"check_same_thread": False})
+DATABASE_URL = os.environ.get("DATABASE_URL") or f"sqlite:///{DB_PATH}"
+
+
+def _engine_kwargs(url: str) -> dict:
+    if url.startswith("sqlite"):
+        # SQLite ties a connection to the thread that opened it; FastAPI runs
+        # handlers on a threadpool, so that check has to be off.
+        return {"connect_args": {"check_same_thread": False}}
+    # Networked databases drop idle connections, and a pooled-but-dead one
+    # surfaces as a random query failure. pre_ping trades a cheap round trip
+    # for not serving errors after a restart or an idle period.
+    return {"pool_pre_ping": True, "pool_recycle": 1800}
+
+
+# Heroku and some others still hand out the legacy postgres:// scheme, which
+# SQLAlchemy 2 no longer recognises. Rewriting it here beats a deploy that
+# fails on a URL the platform generated itself.
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+
+engine = create_engine(DATABASE_URL, **_engine_kwargs(DATABASE_URL))
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 
@@ -24,11 +57,30 @@ def get_db():
 def init_db():
     from . import models  # noqa: F401 — registers all models
     Base.metadata.create_all(bind=engine)
-    _run_migrations()
+    if engine.dialect.name == "sqlite":
+        _run_migrations()
+    else:
+        # _run_migrations() is written in SQLite's dialect — PRAGMA table_info,
+        # AUTOINCREMENT — and exists to evolve an existing bloomprint.db in
+        # place. A database created fresh from create_all() already has every
+        # column those migrations add, and every table they create is also a
+        # declared model, so skipping them loses nothing on a new backend.
+        #
+        # It does mean there is no schema-change path on a server yet. Half-
+        # porting 26 PRAGMA calls would produce something that looks portable
+        # and silently isn't; the real answer when this ships is Alembic.
+        log.info(
+            "Skipping in-place migrations on %s — schema comes from create_all(). "
+            "Add Alembic before making schema changes against this database.",
+            engine.dialect.name,
+        )
 
 
 def _run_migrations():
-    """Apply any schema changes that create_all() can't handle (column additions)."""
+    """Apply any schema changes that create_all() can't handle (column additions).
+
+    SQLite only — see init_db().
+    """
     with engine.connect() as conn:
         # Add team_id to players if missing
         cols = [row[1] for row in conn.execute(

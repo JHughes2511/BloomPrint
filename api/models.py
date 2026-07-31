@@ -49,7 +49,14 @@ class Coach(Base):
     corrections         = relationship("Correction", back_populates="coach")
     teams               = relationship("Team", back_populates="coach")
     notifications       = relationship("PlayerNotification", back_populates="coach", cascade="all, delete-orphan")
-    coach_notifications = relationship("CoachNotification", foreign_keys="CoachNotification.coach_id", cascade="all, delete-orphan")
+    # back_populates, not two independent relationships over the same foreign
+    # key: without it SQLAlchemy treats these as separate mappings that both
+    # write coach_notifications.coach_id, so setting one side leaves the other
+    # stale in the same session until a refresh.
+    coach_notifications = relationship(
+        "CoachNotification", foreign_keys="CoachNotification.coach_id",
+        cascade="all, delete-orphan", back_populates="coach",
+    )
 
 
 class Team(SoftDeleteMixin, Base):
@@ -488,7 +495,7 @@ class CoachNotification(Base):
     type       = Column(String, nullable=False, default="info")
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    coach = relationship("Coach", foreign_keys=[coach_id])
+    coach = relationship("Coach", foreign_keys=[coach_id], back_populates="coach_notifications")
 
 
 class StaffSharedReport(Base):

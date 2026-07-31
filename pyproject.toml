@@ -36,6 +36,13 @@ local-whisper = [
     "openai-whisper @ git+https://github.com/openai/whisper.git",
 ]
 
+# PostgreSQL driver, for running against DATABASE_URL instead of the local
+# SQLite file. Optional because nothing needs it until this leaves one machine.
+#     pip install -e ".[postgres]"
+postgres = [
+    "psycopg[binary]>=3.1",
+]
+
 [project.scripts]
 video-vision-mcp = "video_vision.server:main"
 bloomprint-api   = "api.main:start"
