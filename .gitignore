@@ -19,6 +19,11 @@ mobile/node_modules/
 mobile/package-lock.json
 # Expo's local cache — regenerated on every start, never worth committing.
 mobile/.expo/
+# Native projects are generated from app.json by `expo prebuild`. Nothing here
+# is hand-edited, so it rebuilds from source; committing it would mean keeping
+# two copies of the same config in sync.
+mobile/ios/
+mobile/android/
 
 # Root-level (accidental installs)
 node_modules/
