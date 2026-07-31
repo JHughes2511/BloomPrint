@@ -12,6 +12,7 @@ from ..auth import get_current_coach
 from ..database import get_db
 from .. import models
 from ..ownership import owns
+from ..uploadguard import read_upload
 
 router = APIRouter(prefix="/uploads", tags=["uploads"])
 
@@ -200,7 +201,7 @@ async def import_excel(
     _team = db.get(models.Team, team_id) if team_id else None
     competition_level = (competition_level or "").strip() or resolve_level(coach, team=_team)
 
-    content = await file.read()
+    content = await read_upload(file, what='spreadsheet')
     try:
         wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
     except Exception as exc:

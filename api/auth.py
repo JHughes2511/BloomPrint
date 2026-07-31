@@ -10,7 +10,8 @@ from sqlalchemy.orm import Session
 from .database import get_db
 from . import models
 
-SECRET_KEY = os.environ.get("BLOOMPRINT_SECRET", "change-me-in-production")
+from .appsecrets import coach_key
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 72
 
@@ -28,7 +29,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 def create_token(coach_id: int) -> str:
     expire = datetime.utcnow() + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
-    return jwt.encode({"sub": str(coach_id), "exp": expire}, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode({"sub": str(coach_id), "exp": expire}, coach_key(), algorithm=ALGORITHM)
 
 
 def get_current_coach(
@@ -41,7 +42,7 @@ def get_current_coach(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, coach_key(), algorithms=[ALGORITHM])
         coach_id = int(payload["sub"])
     except (JWTError, KeyError, ValueError):
         raise credentials_error

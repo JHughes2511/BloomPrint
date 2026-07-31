@@ -15,6 +15,7 @@ from .. import models, schemas
 from ..softdelete import soft_delete
 from ..ownership import owns
 from ..ai_models import OPUS, text_of
+from ..uploadguard import read_upload
 
 
 def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: str,
@@ -470,7 +471,7 @@ async def upload_doc(
     if not gr or gr.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Game report not found")
 
-    content = await file.read()
+    content = await read_upload(file, what='document')
     from .. import ai_import
     purpose = "a game box score / stat sheet" if doc_type == "box_score" else "opponent scouting notes"
     try:

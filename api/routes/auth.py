@@ -2,13 +2,14 @@ import json
 import os
 import re
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import Request, APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from ..database import get_db
 from .. import models, schemas
 from ..auth import hash_password, verify_password, create_token, get_current_coach
 from ..coach_context import SYSTEM_PROFILE_FIELDS
 from ..ai_models import SONNET
+from .. import ratelimit
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -44,7 +45,8 @@ def _auto_weight(competition_level: str, conference: str | None) -> int:
 
 
 @router.post("/register", response_model=schemas.Token)
-def register(body: schemas.CoachCreate, db: Session = Depends(get_db)):
+def register(request: Request, body: schemas.CoachCreate, db: Session = Depends(get_db)):
+    ratelimit.check(request, "coach-register")
     if db.query(models.Coach).filter_by(email=body.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     # Auto-assign weight from competition_level if not explicitly provided
@@ -70,7 +72,8 @@ def register(body: schemas.CoachCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=schemas.Token)
-def login(body: schemas.CoachLogin, db: Session = Depends(get_db)):
+def login(request: Request, body: schemas.CoachLogin, db: Session = Depends(get_db)):
+    ratelimit.check(request, "coach-login")
     coach = db.query(models.Coach).filter_by(email=body.email).first()
     if not coach or not verify_password(body.password, coach.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -84,13 +87,14 @@ def login(body: schemas.CoachLogin, db: Session = Depends(get_db)):
 
 
 @router.post("/google")
-def google_auth(body: schemas.CoachGoogleAuth, db: Session = Depends(get_db)):
+def google_auth(request: Request, body: schemas.CoachGoogleAuth, db: Session = Depends(get_db)):
     """Google Sign-In for coaches. Returns either:
       {status:'ok', access_token, coach}         — signed in / created
       {status:'needs_signup', email, name}       — no account; app routes to
                                                     the signup form (prefilled)
     mode='login' never creates; mode='register' creates with the required
     profile fields the user filled in on the signup form."""
+    ratelimit.check(request, "coach-google")
     from ..google_auth import verify_google_token, random_unusable_password_hash
 
     identity = verify_google_token(body.id_token)

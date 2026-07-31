@@ -29,3 +29,6 @@ mobile/android/
 node_modules/
 package-lock.json
 package.json
+
+# Per-machine token signing key, generated on first run.
+.bloomprint-secret

@@ -10,6 +10,7 @@ from ..database import get_db
 from ..auth import get_current_coach
 from .. import models
 from .. import ai_import
+from ..uploadguard import read_upload
 
 router = APIRouter(prefix="/imports", tags=["imports"])
 
@@ -23,7 +24,7 @@ async def roster_preview(
 ):
     """Extract a roster from any file → a list of players for the coach to
     confirm. Nothing is saved yet."""
-    data = await file.read()
+    data = await read_upload(file, what='file')
     try:
         parsed = ai_import.ai_extract_json(data, file.filename or "", file.content_type, ai_import.ROSTER_INSTRUCTION)
     except RuntimeError as e:
@@ -119,7 +120,7 @@ async def game_stats_preview(
     file: UploadFile = File(...),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    data = await file.read()
+    data = await read_upload(file, what='file')
     try:
         parsed = ai_import.ai_extract_json(data, file.filename or "", file.content_type, ai_import.GAME_STATS_INSTRUCTION)
     except RuntimeError as e:
@@ -205,7 +206,7 @@ async def import_text(
 ):
     """Return clean extracted text from any file (for Notes / Focus / Box Score /
     Scouting Notes fields). Images and PDFs are transcribed by the model."""
-    data = await file.read()
+    data = await read_upload(file, what='file')
     try:
         text = ai_import.ai_extract_text(data, file.filename or "", file.content_type, purpose)
     except RuntimeError as e:

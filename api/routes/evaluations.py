@@ -13,6 +13,7 @@ from .. import models, schemas
 from ..softdelete import soft_delete
 from ..ownership import get_owned
 from ..ai_models import OPUS, text_of
+from ..uploadguard import read_upload
 
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -143,7 +144,7 @@ async def extract_doc_text(
     photo, text) so a coach can import notes or a focus prompt. Images/PDFs are
     transcribed by the model."""
     from .. import ai_import
-    content = await file.read()
+    content = await read_upload(file, what='document')
     try:
         text = ai_import.ai_extract_text(content, file.filename or "", file.content_type, purpose)
     except RuntimeError as e:

@@ -1,5 +1,7 @@
 """BloomPrint FastAPI backend."""
 
+import os
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,10 +11,18 @@ from .routes import auth, players, evaluations, training, uploads, teams, player
 
 app = FastAPI(title="BloomPrint API", version="1.0.0")
 
+# CORS is a browser control, and the mobile app isn't a browser — it is
+# unaffected either way. What the wildcard did do was let any web page a coach
+# had open call this API with their session. Note that allow_origins=["*"] with
+# allow_credentials=True is rejected by browsers anyway, so the old config was
+# both unsafe in intent and broken in practice.
+#
+# Set BLOOMPRINT_CORS_ORIGINS (comma-separated) when a real web front end exists.
+_origins = [o.strip() for o in os.environ.get("BLOOMPRINT_CORS_ORIGINS", "").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_origins,
+    allow_credentials=bool(_origins),
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -1,7 +1,7 @@
 """Player authentication routes."""
 
 from datetime import datetime, timedelta
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Request, APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -10,7 +10,9 @@ from jose import jwt
 from ..database import get_db
 from .. import models, schemas
 
-SECRET_KEY = "bloomprint-player-secret-change-in-prod"
+from ..appsecrets import player_key
+from .. import ratelimit
+
 ALGORITHM = "HS256"
 player_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/player-auth/login")
 
@@ -28,7 +30,7 @@ router = APIRouter(prefix="/player-auth", tags=["player-auth"])
 def _make_token(player_user_id: int) -> str:
     return jwt.encode(
         {"sub": f"player:{player_user_id}", "exp": datetime.utcnow() + timedelta(days=30)},
-        SECRET_KEY,
+        player_key(),
         algorithm=ALGORITHM,
     )
 
@@ -38,7 +40,7 @@ def get_current_player_user(
     db: Session = Depends(get_db),
 ) -> models.PlayerUser:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, player_key(), algorithms=[ALGORITHM])
         sub = payload.get("sub", "")
         if not sub.startswith("player:"):
             raise ValueError("Not a player token")
@@ -52,7 +54,8 @@ def get_current_player_user(
 
 
 @router.post("/register", response_model=schemas.PlayerToken)
-def register(body: schemas.PlayerUserCreate, db: Session = Depends(get_db)):
+def register(request: Request, body: schemas.PlayerUserCreate, db: Session = Depends(get_db)):
+    ratelimit.check(request, "player-register")
     if db.query(models.PlayerUser).filter_by(email=body.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     pu = models.PlayerUser(
@@ -72,7 +75,8 @@ def register(body: schemas.PlayerUserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=schemas.PlayerToken)
-def login(body: schemas.CoachLogin, db: Session = Depends(get_db)):
+def login(request: Request, body: schemas.CoachLogin, db: Session = Depends(get_db)):
+    ratelimit.check(request, "player-login")
     pu = db.query(models.PlayerUser).filter_by(email=body.email).first()
     if not pu or not _verify_pw(body.password, pu.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
@@ -83,12 +87,13 @@ def login(body: schemas.CoachLogin, db: Session = Depends(get_db)):
 
 
 @router.post("/google")
-def google_auth(body: schemas.PlayerGoogleAuth, db: Session = Depends(get_db)):
+def google_auth(request: Request, body: schemas.PlayerGoogleAuth, db: Session = Depends(get_db)):
     """Google Sign-In for players. Returns either:
       {status:'ok', access_token, player_user}   — signed in / created
       {status:'needs_signup', email, name}       — no account; app routes to
                                                     the signup form (prefilled)
     The player still completes the coach-link flow after a Google signup."""
+    ratelimit.check(request, "player-google")
     from ..google_auth import verify_google_token, random_unusable_password_hash
 
     identity = verify_google_token(body.id_token)

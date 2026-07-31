@@ -8,11 +8,41 @@ import os
 import tempfile
 from typing import Optional
 
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt, JWTError
 
 from .. import speech
+from ..appsecrets import coach_key, player_key
+from ..uploadguard import read_upload
 
 router = APIRouter(prefix="/transcribe", tags=["transcribe"])
+
+_bearer = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+
+def require_any_user(token: str = Depends(_bearer)) -> str:
+    """Accept a signed-in coach or player, and nobody else.
+
+    This endpoint was open to anyone who could reach the server. That was
+    already wrong, and became expensive when transcription moved to a metered
+    API — an unauthenticated POST loop is a bill.
+
+    Both audiences need dictation, so either token is fine; no database lookup
+    is needed because nothing here is scoped to a user. A valid signature is
+    the whole question being asked.
+    """
+    for key in (coach_key(), player_key()):
+        try:
+            jwt.decode(token, key, algorithms=["HS256"])
+            return token
+        except JWTError:
+            continue
+    raise HTTPException(
+        status_code=401,
+        detail="Sign in to use voice input.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 # A dictation chunk is seconds of speech. Anything approaching this is either a
 # bug in the client or someone using the endpoint for something else; either way
@@ -25,6 +55,7 @@ async def transcribe_audio(
     audio: UploadFile = File(...),
     context: Optional[str] = Form(None),
     language: Optional[str] = Form(None),
+    _user: str = Depends(require_any_user),
 ):
     """Transcribe one chunk of dictated speech.
 
@@ -38,11 +69,9 @@ async def transcribe_audio(
         if ext:
             suffix = ext
 
-    content = await audio.read()
+    content = await read_upload(audio, MAX_AUDIO_BYTES, what="recording")
     if not content:
         raise HTTPException(status_code=400, detail="No audio received.")
-    if len(content) > MAX_AUDIO_BYTES:
-        raise HTTPException(status_code=413, detail="That recording is too long to transcribe.")
 
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
         tmp.write(content)

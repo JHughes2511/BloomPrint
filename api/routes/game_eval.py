@@ -15,6 +15,7 @@ from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
 from ..softdelete import soft_delete
 from ..ai_models import OPUS
+from ..uploadguard import read_upload
 
 router = APIRouter(prefix="/game-eval", tags=["game-eval"])
 
@@ -142,7 +143,7 @@ async def import_game_stats(
     import openpyxl
 
     game = _get_game(db, game_id, coach.id)
-    content = await file.read()
+    content = await read_upload(file, what='spreadsheet')
     try:
         wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
         rows = [list(r) for r in wb.active.iter_rows(values_only=True)]
@@ -794,7 +795,7 @@ async def upload_excel(
     coach: models.Coach = Depends(get_current_coach),
 ):
     game = _get_game(db, game_id, coach.id)
-    content = await file.read()
+    content = await read_upload(file, what='spreadsheet')
 
     try:
         import openpyxl
