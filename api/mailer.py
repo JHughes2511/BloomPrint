@@ -8,9 +8,13 @@ never set up.
 
 Env:
   RESEND_API_KEY   enables Resend (preferred)
-  MAIL_FROM        sending address, e.g. "BloomPrint <noreply@bloomprint.org>"
-  FEEDBACK_TO      where in-app feedback is delivered (defaults to MAIL_FROM)
+  MAIL_FROM        default sender, e.g. "BloomPrint <noreply@bloomprint.org>"
+  FEEDBACK_FROM    sender for the internal feedback notification
+  FEEDBACK_TO      where in-app feedback is delivered
   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD   fallback transport
+
+A mailbox that sends to itself is widely treated as spoofing and gets bounced,
+so FEEDBACK_FROM and FEEDBACK_TO must be different addresses.
 """
 import logging
 import os
@@ -30,17 +34,30 @@ def feedback_to() -> str:
     return os.environ.get("FEEDBACK_TO") or mail_from()
 
 
+def feedback_from() -> str:
+    """Sender for the internal feedback notification.
+
+    Kept separate from MAIL_FROM so the notification isn't sent from the same
+    mailbox it's delivered to — receiving servers reject a message that claims
+    to come from their own domain but arrives from a third-party sender.
+    """
+    return os.environ.get("FEEDBACK_FROM") or mail_from()
+
+
 def mail_enabled() -> bool:
     return bool(os.environ.get("RESEND_API_KEY") or os.environ.get("SMTP_HOST"))
 
 
-def _send_resend(to: str, subject: str, text: str, html: str | None) -> bool:
+def _send_resend(to: str, subject: str, text: str, html: str | None,
+                 from_addr: str, reply_to: str | None) -> bool:
     import json
     import urllib.request
 
-    payload = {"from": mail_from(), "to": [to], "subject": subject, "text": text}
+    payload = {"from": from_addr, "to": [to], "subject": subject, "text": text}
     if html:
         payload["html"] = html
+    if reply_to:
+        payload["reply_to"] = [reply_to]
     req = urllib.request.Request(
         "https://api.resend.com/emails",
         data=json.dumps(payload).encode("utf-8"),
@@ -54,11 +71,14 @@ def _send_resend(to: str, subject: str, text: str, html: str | None) -> bool:
         return 200 <= resp.status < 300
 
 
-def _send_smtp(to: str, subject: str, text: str, html: str | None) -> bool:
+def _send_smtp(to: str, subject: str, text: str, html: str | None,
+               from_addr: str, reply_to: str | None) -> bool:
     msg = EmailMessage()
     msg["Subject"] = subject
-    msg["From"] = mail_from()
+    msg["From"] = from_addr
     msg["To"] = to
+    if reply_to:
+        msg["Reply-To"] = reply_to
     msg.set_content(text)
     if html:
         msg.add_alternative(html, subtype="html")
@@ -74,19 +94,24 @@ def _send_smtp(to: str, subject: str, text: str, html: str | None) -> bool:
     return True
 
 
-def send_email(to: str, subject: str, text: str, html: str | None = None) -> bool:
+def send_email(to: str, subject: str, text: str, html: str | None = None, *,
+               from_addr: str | None = None, reply_to: str | None = None) -> bool:
     """Send one email. Returns whether it went out; never raises.
+
+    `reply_to` is what makes a noreply@ sender usable: the message still comes
+    from an address nobody monitors, but hitting Reply reaches someone real.
 
     A caller that wants to know it failed can check the return value, but no
     caller should have its own work fail because mail did.
     """
     if not to:
         return False
+    sender = from_addr or mail_from()
     try:
         if os.environ.get("RESEND_API_KEY"):
-            return _send_resend(to, subject, text, html)
+            return _send_resend(to, subject, text, html, sender, reply_to)
         if os.environ.get("SMTP_HOST"):
-            return _send_smtp(to, subject, text, html)
+            return _send_smtp(to, subject, text, html, sender, reply_to)
     except Exception as exc:
         log.warning("Email to %s failed (%s): %s", to, subject, exc)
         return False

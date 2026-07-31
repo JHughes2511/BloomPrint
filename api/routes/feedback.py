@@ -2,9 +2,9 @@
 
 Two deliberately separate steps.
 
-Submitting stores the row and emails a copy. No AI runs here — a coach tapping
-Send should not wait on a model call, and a model outage must not lose their
-words.
+Submitting stores the row, emails a copy inwards, and sends the coach a
+receipt. No AI runs here — a coach tapping Send should not wait on a model
+call, and a model outage must not lose their words.
 
 The digest is where the AI earns its place: it reads everything not yet
 digested, groups the duplicates, and returns a ranked list separating what's
@@ -22,7 +22,8 @@ from sqlalchemy.orm import Session
 from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
 from .. import models
-from ..mailer import send_email, feedback_to
+from ..mailer import send_email, feedback_to, feedback_from, mail_from
+from ..feedback_emails import ack_message
 
 router = APIRouter(prefix="/feedback", tags=["feedback"])
 
@@ -37,14 +38,25 @@ class FeedbackCreate(BaseModel):
 
 
 def _notify(row_id: int) -> None:
-    """Email one piece of feedback. Runs in the background — the coach's tap
-    shouldn't wait on an SMTP round trip."""
+    """Email the feedback inwards, and send the coach a receipt.
+
+    Runs in the background — the coach's tap shouldn't wait on two SMTP round
+    trips. Each send is independent: a failure on one must not skip the other.
+    """
     db = SessionLocal()
+    # Read once into plain values. The receipt is sent after the notification's
+    # error handling, which may have rolled the session back — reaching into
+    # ORM objects at that point would raise and silently skip the receipt.
+    coach_email: str | None = None
+    ack_language: str | None = None
+    ack_text: str | None = None
     try:
         row = db.get(models.Feedback, row_id)
         if not row:
             return
         coach = db.get(models.Coach, row.coach_id) if row.coach_id else None
+        coach_email = coach.email if coach else None
+        ack_language, ack_text = row.language, row.text
         who = f"{coach.name} <{coach.email}>" if coach else "Unknown coach"
         context = " · ".join(x for x in [row.screen, row.platform, row.app_version, row.language] if x)
         body = (
@@ -56,13 +68,36 @@ def _notify(row_id: int) -> None:
             f"Feedback #{row.id}\n"
         )
         subject = f"BloomPrint feedback — {row.text.strip()[:60]}"
-        if send_email(feedback_to(), subject, body):
+        # Sent FROM the feedback mailbox so it isn't delivered to the address it
+        # was sent from, which receiving servers reject as spoofing. Reply-To is
+        # the coach, so answering the notification reaches them directly.
+        sent = send_email(
+            feedback_to(), subject, body,
+            from_addr=feedback_from(),
+            reply_to=coach_email,
+        )
+        if sent:
             row.emailed = True
             db.commit()
     except Exception:
         # Never let the notification path surface as a failed submission; the
         # row is already saved and the digest will still pick it up.
         db.rollback()
+
+    # The coach's receipt is a separate send: if the internal notification
+    # failed, they should still learn their feedback landed.
+    try:
+        if coach_email and ack_text:
+            ack_subject, ack_body = ack_message(ack_language, ack_text)
+            send_email(
+                coach_email, ack_subject, ack_body,
+                from_addr=mail_from(),
+                # noreply@ can't take replies, so point answers at the mailbox
+                # that can — otherwise a coach replying is talking to nobody.
+                reply_to=feedback_to(),
+            )
+    except Exception:
+        pass
     finally:
         db.close()
 
