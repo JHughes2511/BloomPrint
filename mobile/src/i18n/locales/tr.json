@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "İzin gerekli",
       "permissionMsg": "Sesli giriş için mikrofon erişimi gerekiyor.",
-      "recordFailed": "Kayıt başlatılamadı."
+      "recordFailed": "Kayıt başlatılamadı.",
+      "transcribeFailedTitle": "Sesli giriş başarısız oldu",
+      "transcribeFailed": "Hiçbir şey yazıya dökülemedi. Sunucu şunu bildirdi:"
     },
     "country": {
       "selectCountry": "Ülke seç",

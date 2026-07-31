@@ -120,6 +120,35 @@ def _deepgram_params(language: str | None, keyterms: list[str] | None) -> list[t
     return params
 
 
+# What Deepgram accepted for a given requested language, remembered after the
+# first successful call. Dictation sends a 2.5-second chunk at a time, so paying
+# the discovery cost on every chunk would triple the latency of every word.
+_STRATEGY_CACHE: dict[str, tuple[str | None, bool]] = {}
+
+
+def _strategies(language: str | None) -> list[tuple[str | None, bool]]:
+    """Ways to ask for `language`, best first, as (language_param, send_keyterms).
+
+    The transcription model covers a subset of the 25 languages this app ships
+    in, and that subset keeps growing. Rather than hardcode a list — a guess
+    today and stale in a month — ask for what we want and step down when it's
+    refused, remembering what worked. New language support starts working on its
+    own; unsupported ones still transcribe.
+    """
+    if not language:
+        return [(None, True), (None, False)]
+    return [
+        # What the coach actually set the app to.
+        (language, True),
+        # Multilingual codeswitching — covers the widely-spoken languages even
+        # when the specific code isn't accepted on its own.
+        ("multi", False),
+        # Let the model work it out from the audio. Last because a couple of
+        # seconds of speech is thin evidence.
+        (None, False),
+    ]
+
+
 def _deepgram_result(payload: dict) -> dict:
     """Map Deepgram's response onto Whisper's result shape."""
     results = payload.get("results") or {}
@@ -174,27 +203,45 @@ def _transcribe_deepgram(path: str, language: str | None,
         return {"text": "", "segments": [], "language": "unknown"}
     content_type = _MIME.get(ext, "application/octet-stream")
 
-    try:
-        return _deepgram_post(body, content_type, language, keyterms, timeout)
-    except urllib.error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", "replace")[:300]
-        # The app ships in 25 languages and this model doesn't necessarily speak
-        # all of them. A hint it can't honour comes back as a 400, which would
-        # otherwise mean dictation is simply broken for those coaches — so drop
-        # the hint and let it detect instead. Losing some accuracy beats losing
-        # the feature.
-        if exc.code == 400 and language:
-            log.info("Deepgram rejected language %r; retrying with auto-detect", language)
-            try:
-                return _deepgram_post(body, content_type, None, keyterms, timeout)
-            except urllib.error.HTTPError as retry_exc:
-                detail = retry_exc.read().decode("utf-8", "replace")[:300]
-                exc = retry_exc
-        # 401 is a bad key, 400 an unsupported option — both are configuration
-        # rather than transient, so say which rather than just "failed".
-        raise SpeechUnavailable(
-            f"Deepgram rejected the request ({exc.code}): {detail}"
-        ) from exc
+    cache_key = language or ""
+    known = _STRATEGY_CACHE.get(cache_key)
+    attempts = [known] if known else _strategies(language)
+
+    last_detail = ""
+    last_code = 0
+    for lang_param, use_keyterms in attempts:
+        try:
+            result = _deepgram_post(
+                body, content_type, lang_param,
+                keyterms if use_keyterms else None, timeout,
+            )
+        except urllib.error.HTTPError as exc:
+            last_code, last_detail = exc.code, exc.read().decode("utf-8", "replace")[:300]
+            # 400 means it won't accept these options — worth trying a different
+            # way of asking. 401 (bad key) or 5xx won't change with the params,
+            # so stop rather than hammering the API three times over.
+            if exc.code != 400:
+                break
+            log.warning(
+                "Deepgram refused language=%r keyterms=%s (%s): %s",
+                lang_param, use_keyterms, exc.code, last_detail,
+            )
+            if known:
+                # The remembered strategy stopped working; rediscover it.
+                _STRATEGY_CACHE.pop(cache_key, None)
+                return _transcribe_deepgram(path, language, keyterms, timeout)
+            continue
+        if not known and (lang_param, use_keyterms) != (language, True):
+            log.info(
+                "Deepgram: %r not accepted directly, using language=%r for this language",
+                language, lang_param,
+            )
+        _STRATEGY_CACHE[cache_key] = (lang_param, use_keyterms)
+        return result
+
+    raise SpeechUnavailable(
+        f"Deepgram rejected the request ({last_code}): {last_detail}"
+    )
 
 
 # ── Local Whisper (fallback only) ─────────────────────────────────────────────

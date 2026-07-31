@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "Potrebna dozvola",
       "permissionMsg": "Za glasovni unos potreban je pristup mikrofonu.",
-      "recordFailed": "Snimanje nije moglo da počne."
+      "recordFailed": "Snimanje nije moglo da počne.",
+      "transcribeFailedTitle": "Гласовни унос није успео",
+      "transcribeFailed": "Ништа није могло да се транскрибује. Сервер је пријавио:"
     },
     "country": {
       "selectCountry": "Izaberi državu",

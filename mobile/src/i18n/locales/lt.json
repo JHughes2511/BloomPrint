@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "Reikalingas leidimas",
       "permissionMsg": "Balso įvesčiai reikalinga prieiga prie mikrofono.",
-      "recordFailed": "Nepavyko pradėti įrašymo."
+      "recordFailed": "Nepavyko pradėti įrašymo.",
+      "transcribeFailedTitle": "Balso įvestis nepavyko",
+      "transcribeFailed": "Nepavyko nieko transkribuoti. Serveris pranešė:"
     },
     "country": {
       "selectCountry": "Pasirinkite šalį",

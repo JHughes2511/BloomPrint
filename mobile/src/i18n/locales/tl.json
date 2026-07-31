@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "Kailangan ng pahintulot",
       "permissionMsg": "Kailangan ng access sa mikropono para sa voice input.",
-      "recordFailed": "Hindi masimulan ang pagre-record."
+      "recordFailed": "Hindi masimulan ang pagre-record.",
+      "transcribeFailedTitle": "Nabigo ang voice input",
+      "transcribeFailed": "Walang na-transcribe. Iniulat ng server:"
     },
     "country": {
       "selectCountry": "Pumili ng bansa",

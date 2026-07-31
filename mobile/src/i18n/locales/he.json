@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "נדרשת הרשאה",
       "permissionMsg": "נדרשת גישה למיקרופון עבור קלט קולי.",
-      "recordFailed": "לא ניתן היה להתחיל בהקלטה."
+      "recordFailed": "לא ניתן היה להתחיל בהקלטה.",
+      "transcribeFailedTitle": "הקלט הקולי נכשל",
+      "transcribeFailed": "לא ניתן היה לתמלל דבר. השרת דיווח:"
     },
     "country": {
       "selectCountry": "בחר מדינה",

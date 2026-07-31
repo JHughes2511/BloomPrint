@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "権限が必要です",
       "permissionMsg": "音声入力にはマイクへのアクセスが必要です。",
-      "recordFailed": "録音を開始できませんでした。"
+      "recordFailed": "録音を開始できませんでした。",
+      "transcribeFailedTitle": "音声入力に失敗しました",
+      "transcribeFailed": "文字起こしできませんでした。サーバーからの応答:"
     },
     "country": {
       "selectCountry": "国を選択",

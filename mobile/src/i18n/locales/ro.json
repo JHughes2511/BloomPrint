@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "Permisiune necesară",
       "permissionMsg": "Accesul la microfon este necesar pentru introducerea vocală.",
-      "recordFailed": "Înregistrarea nu a putut fi pornită."
+      "recordFailed": "Înregistrarea nu a putut fi pornită.",
+      "transcribeFailedTitle": "Introducerea vocală a eșuat",
+      "transcribeFailed": "Nu s-a putut transcrie nimic. Serverul a raportat:"
     },
     "country": {
       "selectCountry": "Selectează țara",

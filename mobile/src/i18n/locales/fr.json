@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "Autorisation requise",
       "permissionMsg": "L'accès au micro est nécessaire pour la saisie vocale.",
-      "recordFailed": "Impossible de démarrer l'enregistrement."
+      "recordFailed": "Impossible de démarrer l'enregistrement.",
+      "transcribeFailedTitle": "Échec de la saisie vocale",
+      "transcribeFailed": "Rien n'a pu être transcrit. Le serveur a répondu :"
     },
     "country": {
       "selectCountry": "Sélectionner le pays",

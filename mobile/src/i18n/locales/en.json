@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "Permission required",
       "permissionMsg": "Microphone access is needed for voice input.",
-      "recordFailed": "Could not start recording."
+      "recordFailed": "Could not start recording.",
+      "transcribeFailedTitle": "Voice input failed",
+      "transcribeFailed": "Nothing could be transcribed. The server reported:"
     },
     "country": {
       "selectCountry": "Select Country",

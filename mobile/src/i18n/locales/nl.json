@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "Toestemming vereist",
       "permissionMsg": "Microfoontoegang is nodig voor spraakinvoer.",
-      "recordFailed": "Opname kon niet worden gestart."
+      "recordFailed": "Opname kon niet worden gestart.",
+      "transcribeFailedTitle": "Spraakinvoer mislukt",
+      "transcribeFailed": "Er kon niets worden getranscribeerd. De server meldde:"
     },
     "country": {
       "selectCountry": "Land selecteren",

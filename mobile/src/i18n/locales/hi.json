@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "अनुमति आवश्यक",
       "permissionMsg": "वॉइस इनपुट के लिए माइक्रोफ़ोन एक्सेस ज़रूरी है।",
-      "recordFailed": "रिकॉर्डिंग शुरू नहीं हो सकी।"
+      "recordFailed": "रिकॉर्डिंग शुरू नहीं हो सकी।",
+      "transcribeFailedTitle": "वॉइस इनपुट विफल",
+      "transcribeFailed": "कुछ भी ट्रांसक्राइब नहीं किया जा सका। सर्वर ने बताया:"
     },
     "country": {
       "selectCountry": "देश चुनें",

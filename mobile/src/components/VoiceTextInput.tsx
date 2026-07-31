@@ -34,6 +34,12 @@ export default function VoiceTextInput({
   const valueRef = useRef(value);
   const activeTranscriptions = useRef(0);
   const transcribeChainRef = useRef<Promise<void>>(Promise.resolve());
+  // A failed chunk used to be discarded silently, so a server that couldn't
+  // transcribe at all looked exactly like a coach who hadn't spoken: the mic
+  // animated, nothing appeared, and nothing said why. These track whether the
+  // session produced anything so we can tell those two cases apart on stop.
+  const gotTextRef = useRef(false);
+  const lastErrorRef = useRef<string | null>(null);
 
   useEffect(() => {
     valueRef.current = value;
@@ -110,9 +116,15 @@ export default function VoiceTextInput({
     transcribeChainRef.current = transcribeChainRef.current.then(async () => {
       try {
         const text = await transcribeAPI.transcribe(clipUri, getContext(), i18n.language);
-        if (text) appendText(text);
-      } catch {
-        // silently skip bad chunks
+        if (text) {
+          gotTextRef.current = true;
+          appendText(text);
+        }
+      } catch (e: any) {
+        // Keep going — one bad chunk shouldn't end the session — but remember
+        // why, so stopRecording can report it if nothing ever came through.
+        lastErrorRef.current =
+          e?.response?.data?.detail || e?.message || 'Unknown error';
       } finally {
         activeTranscriptions.current -= 1;
         if (activeTranscriptions.current === 0) setTranscribing(false);
@@ -128,6 +140,8 @@ export default function VoiceTextInput({
         return;
       }
       await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+      gotTextRef.current = false;
+      lastErrorRef.current = null;
       listeningRef.current = true;
       setListening(true);
       await startChunk();
@@ -145,6 +159,22 @@ export default function VoiceTextInput({
     }
     await processChunk();
     await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+
+    // Wait for the last chunks to finish before judging the session. Reported
+    // once, on stop, rather than per chunk — a two-minute dictation against a
+    // misconfigured server would otherwise fire fifty alerts.
+    try {
+      await transcribeChainRef.current;
+    } catch {
+      // the chain never rejects; each chunk handles its own failure
+    }
+    if (!gotTextRef.current && lastErrorRef.current) {
+      Alert.alert(
+        tr('components.voiceInput.transcribeFailedTitle'),
+        `${tr('components.voiceInput.transcribeFailed')}\n\n${lastErrorRef.current}`,
+      );
+      lastErrorRef.current = null;
+    }
   };
 
   const toggleVoice = () => (listening ? stopRecording() : startRecording());

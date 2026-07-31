@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "需要权限",
       "permissionMsg": "语音输入需要访问麦克风。",
-      "recordFailed": "无法开始录音。"
+      "recordFailed": "无法开始录音。",
+      "transcribeFailedTitle": "语音输入失败",
+      "transcribeFailed": "无法转写任何内容。服务器报告："
     },
     "country": {
       "selectCountry": "选择国家",

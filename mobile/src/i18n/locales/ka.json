@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "საჭიროა ნებართვა",
       "permissionMsg": "ხმოვანი შეყვანისთვის საჭიროა მიკროფონზე წვდომა.",
-      "recordFailed": "ჩაწერის დაწყება ვერ მოხერხდა."
+      "recordFailed": "ჩაწერის დაწყება ვერ მოხერხდა.",
+      "transcribeFailedTitle": "ხმოვანი შეყვანა ვერ მოხერხდა",
+      "transcribeFailed": "ტექსტად გადაყვანა ვერ მოხერხდა. სერვერმა შეატყობინა:"
     },
     "country": {
       "selectCountry": "აირჩიეთ ქვეყანა",

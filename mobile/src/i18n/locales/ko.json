@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "권한 필요",
       "permissionMsg": "음성 입력을 위해 마이크 접근 권한이 필요합니다.",
-      "recordFailed": "녹음을 시작할 수 없습니다."
+      "recordFailed": "녹음을 시작할 수 없습니다.",
+      "transcribeFailedTitle": "음성 입력 실패",
+      "transcribeFailed": "받아쓰기를 할 수 없습니다. 서버 응답:"
     },
     "country": {
       "selectCountry": "국가 선택",

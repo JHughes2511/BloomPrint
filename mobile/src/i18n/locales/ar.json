@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "الإذن مطلوب",
       "permissionMsg": "يلزم الوصول إلى الميكروفون للإدخال الصوتي.",
-      "recordFailed": "تعذّر بدء التسجيل."
+      "recordFailed": "تعذّر بدء التسجيل.",
+      "transcribeFailedTitle": "فشل الإدخال الصوتي",
+      "transcribeFailed": "تعذّر تفريغ أي نص. أفاد الخادم:"
     },
     "country": {
       "selectCountry": "اختر الدولة",

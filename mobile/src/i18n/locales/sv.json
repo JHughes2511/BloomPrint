@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "Behörighet krävs",
       "permissionMsg": "Mikrofonåtkomst krävs för röstinmatning.",
-      "recordFailed": "Det gick inte att starta inspelningen."
+      "recordFailed": "Det gick inte att starta inspelningen.",
+      "transcribeFailedTitle": "Röstinmatning misslyckades",
+      "transcribeFailed": "Inget kunde transkriberas. Servern svarade:"
     },
     "country": {
       "selectCountry": "Välj land",

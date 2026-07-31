@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "Потрібен дозвіл",
       "permissionMsg": "Для голосового введення потрібен доступ до мікрофона.",
-      "recordFailed": "Не вдалося розпочати запис."
+      "recordFailed": "Не вдалося розпочати запис.",
+      "transcribeFailedTitle": "Помилка голосового введення",
+      "transcribeFailed": "Не вдалося розшифрувати запис. Сервер повідомив:"
     },
     "country": {
       "selectCountry": "Виберіть країну",

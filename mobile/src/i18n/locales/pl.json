@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "Wymagane uprawnienie",
       "permissionMsg": "Do wprowadzania głosowego wymagany jest dostęp do mikrofonu.",
-      "recordFailed": "Nie udało się rozpocząć nagrywania."
+      "recordFailed": "Nie udało się rozpocząć nagrywania.",
+      "transcribeFailedTitle": "Błąd wprowadzania głosowego",
+      "transcribeFailed": "Nie udało się nic przepisać. Serwer zgłosił:"
     },
     "country": {
       "selectCountry": "Wybierz kraj",

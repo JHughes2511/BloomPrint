@@ -259,7 +259,9 @@
     "voiceInput": {
       "permissionTitle": "Berechtigung erforderlich",
       "permissionMsg": "Für die Spracheingabe wird Mikrofonzugriff benötigt.",
-      "recordFailed": "Aufnahme konnte nicht gestartet werden."
+      "recordFailed": "Aufnahme konnte nicht gestartet werden.",
+      "transcribeFailedTitle": "Spracheingabe fehlgeschlagen",
+      "transcribeFailed": "Es konnte nichts transkribiert werden. Der Server meldete:"
     },
     "country": {
       "selectCountry": "Land auswählen",
