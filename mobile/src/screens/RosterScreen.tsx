@@ -71,6 +71,8 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import { useBreakpoint } from '../responsive/useBreakpoint';
+import PageContainer from '../responsive/PageContainer';
 
 export default function RosterScreen() {
   const navigation = useNavigation<any>();
@@ -79,6 +81,7 @@ export default function RosterScreen() {
   const { coach } = useAuth();
   const defaultLevel = (coach as any)?.competition_level ?? 'HS Varsity';
   const styles = makeStyles(t);
+  const { gridColumns } = useBreakpoint();
 
   const [teams, setTeams] = useState<Team[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -241,6 +244,7 @@ export default function RosterScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer padded={false}>
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
@@ -327,15 +331,22 @@ export default function RosterScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Player list */}
+      {/* Player list. One column on a phone, a grid once there's room — a
+          single column of cards on a wide screen wastes most of it and makes
+          a 40-player roster far longer to scan than it needs to be. `key`
+          changes with the column count because FlatList cannot change
+          numColumns on an existing list. */}
       <FlatList
+        key={`roster-${gridColumns}`}
+        numColumns={gridColumns}
+        columnWrapperStyle={gridColumns > 1 ? { gap: 12, paddingHorizontal: 4 } : undefined}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} tintColor={t.accent} />}
         data={visiblePlayers}
         keyExtractor={p => String(p.id)}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={styles.card}
+            style={[styles.card, gridColumns > 1 && styles.cardInGrid]}
             onPress={() => navigation.navigate('PlayerProfile', { playerId: item.id })}
             onLongPress={() => {
               Alert.alert(tr('roster.deletePlayerTitle'), tr('roster.deletePlayerMsg', { name: item.name }), [
@@ -560,6 +571,7 @@ export default function RosterScreen() {
         </KeyboardAvoidingView>
       </Modal>
     </View>
+    </PageContainer>
     </ScreenBackground>
   );
 }
@@ -594,6 +606,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.card, marginHorizontal: 16, marginBottom: 10,
     borderRadius: 18, padding: 16, borderWidth: 1, borderColor: t.cardBorder,
   },
+  // In a grid the row gap comes from columnWrapperStyle, so the card drops its
+  // own horizontal margin and takes an equal share of the row instead.
+  cardInGrid: { flex: 1, marginHorizontal: 0 },
   cardLeft: { flex: 1 },
   playerName: { color: t.ink, fontSize: 16, fontFamily: fonts[700] },
   playerMeta: { color: t.muted, fontSize: 12, marginTop: 2 },

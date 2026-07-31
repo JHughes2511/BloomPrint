@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator, BottomTabBar } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, View, Text, PanResponder } from 'react-native';
@@ -16,12 +16,26 @@ import ErrorBoundary from './src/components/ErrorBoundary';
 // Side-effect import: patches react-native-web's do-nothing Alert and installs
 // the global CSS. Must run before anything renders or reports an error.
 import './src/web/webShims';
-import WebFrame from './src/web/WebFrame';
+import { useBreakpoint } from './src/responsive/useBreakpoint';
+import Sidebar from './src/navigation/Sidebar';
 
 // 5 tabs at fontSize 9: translated labels (de/nl/el run 30-40% longer than the
 // English) used to clip mid-word. Wrapping to two tight lines keeps the label
 // readable at full size and still fits above the standard tab-bar height.
-function tabLabel(label: string) {
+function tabLabel(label: string, sidebar = false) {
+  if (sidebar) {
+    // A sidebar row has horizontal room, so the label is set at a readable size
+    // on one line — the two-line 9px treatment below exists only because five
+    // tabs have to share the width of a phone.
+    return ({ color }: { color: string }) => (
+      <Text
+        numberOfLines={1}
+        style={{ fontSize: 14, lineHeight: 18, color, marginLeft: 10, flexShrink: 1 }}
+      >
+        {label}
+      </Text>
+    );
+  }
   return ({ color }: { color: string }) => (
     <Text
       numberOfLines={2}
@@ -158,10 +172,20 @@ function RecentStack() {
 function AppTabs() {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
+  // Sidebar once there's width for it. Keyed off window width, not platform, so
+  // a half-width browser window still gets bottom tabs and a big tablet gets
+  // the sidebar — the question is how much room there is, not which OS it is.
+  const { isDesktop } = useBreakpoint();
+
   return (
     <Tab.Navigator
+      // Left rail once there's room, the stock bottom bar otherwise. The custom
+      // bar owns its own width and active styling; see src/navigation/Sidebar.tsx.
+      tabBar={(props) => (isDesktop ? <Sidebar {...props} /> : <BottomTabBar {...props} />)}
       screenOptions={({ route }) => ({
         headerShown: false,
+        // Lays the navigator out as a row so the rail sits beside the content.
+        tabBarPosition: isDesktop ? ('left' as const) : ('bottom' as const),
         tabBarStyle: { backgroundColor: t.isDark ? '#0C2331' : '#EFE7DA', borderTopColor: t.divider },
         tabBarActiveTintColor: t.accent,
         tabBarInactiveTintColor: t.muted2,
@@ -180,11 +204,11 @@ function AppTabs() {
         },
       })}
     >
-      <Tab.Screen name="HomeTab"     component={HomeStack}     options={{ tabBarLabel: tabLabel(tr('common.tabs.home')) }} />
-      <Tab.Screen name="TeamTab"     component={TeamStack}     options={{ tabBarLabel: tabLabel(tr('common.tabs.teamEval')) }} />
-      <Tab.Screen name="TeamEvalTab" component={TeamEvalStack} options={{ tabBarLabel: tabLabel(tr('common.tabs.teamGrade')) }} />
-      <Tab.Screen name="RosterTab"   component={RosterStack}   options={{ tabBarLabel: tabLabel(tr('common.tabs.roster')) }} />
-      <Tab.Screen name="RecentTab"   component={RecentStack}   options={{ tabBarLabel: tabLabel(tr('common.tabs.recent')) }} />
+      <Tab.Screen name="HomeTab"     component={HomeStack}     options={{ tabBarLabel: isDesktop ? tr('common.tabs.home') : tabLabel(tr('common.tabs.home')) }} />
+      <Tab.Screen name="TeamTab"     component={TeamStack}     options={{ tabBarLabel: isDesktop ? tr('common.tabs.teamEval') : tabLabel(tr('common.tabs.teamEval')) }} />
+      <Tab.Screen name="TeamEvalTab" component={TeamEvalStack} options={{ tabBarLabel: isDesktop ? tr('common.tabs.teamGrade') : tabLabel(tr('common.tabs.teamGrade')) }} />
+      <Tab.Screen name="RosterTab"   component={RosterStack}   options={{ tabBarLabel: isDesktop ? tr('common.tabs.roster') : tabLabel(tr('common.tabs.roster')) }} />
+      <Tab.Screen name="RecentTab"   component={RecentStack}   options={{ tabBarLabel: isDesktop ? tr('common.tabs.recent') : tabLabel(tr('common.tabs.recent')) }} />
     </Tab.Navigator>
   );
 }
@@ -368,11 +392,7 @@ export default function App() {
               the session and theme survive — the coach lands back where they
               were rather than at the login screen. */}
           <ErrorBoundary>
-            {/* Phone proportions in a browser; passes children straight through
-                on iOS and Android. */}
-            <WebFrame>
-              <Root />
-            </WebFrame>
+            <Root />
           </ErrorBoundary>
         </PlayerAuthProvider>
       </AuthProvider>
