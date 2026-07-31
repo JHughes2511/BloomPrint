@@ -1,7 +1,7 @@
 """BloomPrint Video Vision MCP Server.
 
 Exposes tools for extracting and analyzing video frames via Claude's vision API,
-transcribing audio via OpenAI Whisper, and basketball-specific analysis via the
+transcribing audio via Deepgram, and basketball-specific analysis via the
 Basketball Intelligence Model (BIM).
 """
 
@@ -22,11 +22,11 @@ from PIL import Image
 
 from .bim import build_prompt, OUTPUT_TYPES, COACH_WEIGHTS, COMPETITION_LEVELS
 from api.ai_models import OPUS, text_of
+from api import speech
 
 app = Server("video-vision")
 
 _anthropic_client: anthropic.Anthropic | None = None
-_whisper_model: Any = None
 
 
 def _client() -> anthropic.Anthropic:
@@ -36,14 +36,6 @@ def _client() -> anthropic.Anthropic:
     return _anthropic_client
 
 
-def _whisper(model_name: str = "base") -> Any:
-    """Lazy-load Whisper to avoid slow startup when transcription isn't used."""
-    global _whisper_model
-    import whisper  # type: ignore[import]
-
-    if _whisper_model is None or _whisper_model.dims.n_mels != whisper.load_model(model_name).dims.n_mels:
-        _whisper_model = whisper.load_model(model_name)
-    return _whisper_model
 
 
 def _frame_to_base64(frame: np.ndarray) -> str:
@@ -228,12 +220,16 @@ def _extract_frames_adaptive(video_path: str, budget_cap: int | None = None) -> 
     return out
 
 
-# Full transcription is only worth it (and fast enough on CPU Whisper) for
-# shorter film; beyond this we skip audio even if speech is present.
-AUDIO_MAX_SECONDS = 600  # 10 minutes
+# How much film audio is worth transcribing before we skip it even when speech
+# is present. The old 10-minute cap was a CPU-Whisper limit — a full game took
+# longer to transcribe than to watch. Deepgram runs far faster than real time,
+# so a whole game's audio is now affordable and a coach's second-half comments
+# stop being invisible to the analysis. The local fallback keeps the old cap,
+# because on that path the old reason still holds.
+AUDIO_MAX_SECONDS = 3600 if speech.deepgram_enabled() else 600
 
 
-def _audio_is_useful(video_path: str, whisper_model: str) -> bool:
+def _audio_is_useful(video_path: str) -> bool:
     """Gauge, as part of the pre-scan, whether the film has speech worth
     transcribing: probe the first 90s — reject near-silence, then confirm the
     probe yields real words (commentary/coaching), not just crowd noise."""
@@ -262,9 +258,7 @@ def _audio_is_useful(video_path: str, whisper_model: str) -> bool:
             pass
         # Confirm it's actually speech by transcribing the short probe.
         try:
-            import whisper  # type: ignore[import]
-            model = _whisper(whisper_model)
-            out = whisper.transcribe(model, probe, fp16=False)
+            out = speech.transcribe_file(probe, keyterms=speech.BASKETBALL_TERMS, timeout=90.0)
             return len((out.get("text") or "").split()) >= 15
         except Exception:
             return False
@@ -287,16 +281,18 @@ def _extract_audio(video_path: str, out_path: str) -> bool:
     return result.returncode == 0 and Path(out_path).exists() and Path(out_path).stat().st_size > 0
 
 
-def _transcribe(video_path: str, model_name: str) -> dict[str, Any]:
-    """Extract audio from video then transcribe with Whisper. Returns Whisper result dict."""
+def _transcribe(video_path: str, model_name: str = "") -> dict[str, Any]:
+    """Extract the audio track, then transcribe it. Returns Whisper's result shape.
+
+    `model_name` is accepted and ignored — it was a Whisper size ("tiny".."large")
+    and the tool schema still exposes it, so callers that pass one keep working.
+    """
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
         audio_path = tmp.name
     try:
         if not _extract_audio(video_path, audio_path):
-            return {"text": "", "segments": []}
-        model = _whisper(model_name)
-        import whisper  # type: ignore[import]
-        return whisper.transcribe(model, audio_path, fp16=False)
+            return {"text": "", "segments": [], "language": "unknown"}
+        return speech.transcribe_file(audio_path, keyterms=speech.BASKETBALL_TERMS)
     finally:
         if Path(audio_path).exists():
             os.unlink(audio_path)
@@ -397,12 +393,12 @@ async def list_tools() -> list[types.Tool]:
                     },
                     "include_audio": {
                         "type": "boolean",
-                        "description": "Transcribe audio with Whisper and include it as context (default true).",
+                        "description": "Transcribe audio and include it as context (default true).",
                         "default": True,
                     },
                     "whisper_model": {
                         "type": "string",
-                        "description": "Whisper model size: tiny, base, small, medium, large (default base).",
+                        "description": "Deprecated and ignored — transcription no longer uses a local model size.",
                         "default": "base",
                     },
                 },
@@ -412,7 +408,7 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="transcribe_audio",
             description=(
-                "Transcribe the audio track of a video file using OpenAI Whisper (runs locally). "
+                "Transcribe the audio track of a video file. "
                 "Returns the full transcript with per-segment timestamps."
             ),
             inputSchema={
@@ -424,7 +420,7 @@ async def list_tools() -> list[types.Tool]:
                     },
                     "model": {
                         "type": "string",
-                        "description": "Whisper model size: tiny, base, small, medium, large (default base).",
+                        "description": "Deprecated and ignored — transcription no longer uses a local model size.",
                         "default": "base",
                     },
                     "language": {
@@ -442,7 +438,7 @@ async def list_tools() -> list[types.Tool]:
                 "Produces one of 8 structured output types: film_breakdown, player_eval, "
                 "scouting_report, coaching_report, training_program, recruitment_profile, "
                 "position_analysis, or game_analysis. Frames are sampled and optionally "
-                "transcribed with Whisper before being sent to Claude with the BIM prompt."
+                "transcribed before being sent to Claude with the BIM prompt."
             ),
             inputSchema={
                 "type": "object",
@@ -500,12 +496,12 @@ async def list_tools() -> list[types.Tool]:
                     },
                     "include_audio": {
                         "type": "boolean",
-                        "description": "Transcribe audio with Whisper and include as context (default true).",
+                        "description": "Transcribe audio and include as context (default true).",
                         "default": True,
                     },
                     "whisper_model": {
                         "type": "string",
-                        "description": "Whisper model size: tiny, base, small, medium, large (default base).",
+                        "description": "Deprecated and ignored — transcription no longer uses a local model size.",
                         "default": "base",
                     },
                 },
@@ -588,7 +584,6 @@ async def _handle_analyze_frame(args: dict[str, Any]) -> list[types.TextContent]
 
 async def _handle_transcribe_audio(args: dict[str, Any]) -> list[types.TextContent]:
     video_path = args["video_path"]
-    model_name = args.get("model", "base")
     language = args.get("language")
 
     if not Path(video_path).exists():
@@ -599,14 +594,11 @@ async def _handle_transcribe_audio(args: dict[str, Any]) -> list[types.TextConte
     try:
         if not _extract_audio(video_path, audio_path):
             return [types.TextContent(type="text", text="Error: no audio track found or ffmpeg unavailable.")]
-
-        model = _whisper(model_name)
-        import whisper  # type: ignore[import]
-
-        kwargs: dict[str, Any] = {"fp16": False}
-        if language:
-            kwargs["language"] = language
-        result = whisper.transcribe(model, audio_path, **kwargs)
+        result = speech.transcribe_file(
+            audio_path, language=language, keyterms=speech.BASKETBALL_TERMS
+        )
+    except speech.SpeechUnavailable as e:
+        return [types.TextContent(type="text", text=f"Error: {e}")]
     finally:
         if Path(audio_path).exists():
             os.unlink(audio_path)
@@ -634,7 +626,6 @@ async def _handle_analyze_video(args: dict[str, Any]) -> list[types.TextContent]
     interval = float(args.get("interval_seconds", 2.0))
     max_frames = min(int(args.get("max_frames", 8)), 20)
     include_audio = bool(args.get("include_audio", True))
-    whisper_model = args.get("whisper_model", "base")
 
     if not Path(video_path).exists():
         return [types.TextContent(type="text", text=f"Error: file not found: {video_path}")]
@@ -646,7 +637,7 @@ async def _handle_analyze_video(args: dict[str, Any]) -> list[types.TextContent]
     transcript_text = ""
     if include_audio:
         try:
-            result = _transcribe(video_path, whisper_model)
+            result = _transcribe(video_path)
             transcript_text = result.get("text", "").strip()
         except Exception:
             transcript_text = ""
@@ -699,7 +690,6 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     interval = float(args.get("interval_seconds", 2.0))
     max_frames = min(int(args.get("max_frames", 10)), 20)
     include_audio = bool(args.get("include_audio", True))
-    whisper_model = args.get("whisper_model", "base")
 
     if not video_paths:
         return [types.TextContent(type="text", text=f"Error: file not found: {video_path}")]
@@ -744,14 +734,14 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
 
     transcript_text = ""
     # Audio: gauge whether it's worth transcribing (part of the pre-scan). Only
-    # for a single film short enough that CPU Whisper stays reasonable.
+    # for a single film whose audio is short enough to be worth transcribing.
     duration_guess = frames[-1][0] if frames else 0.0
     want_audio = include_audio
     if args.get("audio_auto") and len(video_paths) == 1:
-        want_audio = duration_guess <= AUDIO_MAX_SECONDS and _audio_is_useful(video_path, whisper_model)
+        want_audio = duration_guess <= AUDIO_MAX_SECONDS and _audio_is_useful(video_path)
     if want_audio and len(video_paths) == 1:
         try:
-            result = _transcribe(video_path, whisper_model)
+            result = _transcribe(video_path)
             transcript_text = result.get("text", "").strip()
         except Exception:
             transcript_text = ""

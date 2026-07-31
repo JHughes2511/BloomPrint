@@ -519,10 +519,14 @@ export const gameReportsAPI = {
 
 
 export const transcribeAPI = {
-  transcribe: (uri: string, context?: string) => {
+  transcribe: (uri: string, context?: string, language?: string) => {
     const formData = new FormData();
     formData.append('audio', { uri, name: 'audio.m4a', type: 'audio/m4a' } as any);
     if (context) formData.append('context', context);
+    // A dictation chunk is a couple of seconds long, which is thin evidence for
+    // auto-detection. The app already knows what language the coach uses, so
+    // tell the server rather than making it guess from the audio.
+    if (language) formData.append('language', language);
     return api.post('/transcribe', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
       timeout: 45000,

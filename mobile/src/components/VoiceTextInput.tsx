@@ -23,7 +23,7 @@ export default function VoiceTextInput({
   ...rest
 }: Props) {
   const { t } = useTheme();
-  const { t: tr } = useTranslation();
+  const { t: tr, i18n } = useTranslation();
   const [listening, setListening] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
 
@@ -109,7 +109,7 @@ export default function VoiceTextInput({
     // includes everything appended from earlier chunks.
     transcribeChainRef.current = transcribeChainRef.current.then(async () => {
       try {
-        const text = await transcribeAPI.transcribe(clipUri, getContext());
+        const text = await transcribeAPI.transcribe(clipUri, getContext(), i18n.language);
         if (text) appendText(text);
       } catch {
         // silently skip bad chunks
