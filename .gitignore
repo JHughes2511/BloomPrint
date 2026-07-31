@@ -16,7 +16,11 @@ uploads/
 
 # Mobile
 mobile/node_modules/
-mobile/package-lock.json
+# package-lock.json IS committed. Ignoring it meant every machine resolved its
+# own dependency tree: a caret range let one install take react-dom 19.2.8
+# against react 19.1.0, which renders a blank white screen, while the machine
+# it was tested on had resolved 19.1.0 and looked fine. A lockfile is what makes
+# "it works here" mean anything.
 # Expo's local cache — regenerated on every start, never worth committing.
 mobile/.expo/
 # Native projects are generated from app.json by `expo prebuild`. Nothing here
@@ -25,10 +29,12 @@ mobile/.expo/
 mobile/ios/
 mobile/android/
 
-# Root-level (accidental installs)
-node_modules/
-package-lock.json
-package.json
+# Root-level (accidental installs). Leading slashes matter: an unanchored
+# "package-lock.json" matches at every depth, which would keep ignoring
+# mobile/package-lock.json no matter what the Mobile section above says.
+/node_modules/
+/package-lock.json
+/package.json
 
 # Per-machine token signing key, generated on first run.
 .bloomprint-secret
