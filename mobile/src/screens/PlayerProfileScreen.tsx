@@ -1581,7 +1581,7 @@ export default function PlayerProfileScreen() {
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('playerProfile.summarizeHistoryTitle')}</Text>
-            <Text style={styles.modalSub}>Choose one or more report types — combine them for a comprehensive summary across all {evals.length} evaluations.</Text>
+            <Text style={styles.modalSub}>{tr('playerProfile.summarizeHistorySub', { count: evals.length })}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
               {OUTPUT_TYPES.map(ot => {
                 const selected = summaryType.split(',').filter(Boolean);
@@ -1595,7 +1595,7 @@ export default function PlayerProfileScreen() {
                     setSummaryType((next.length ? next : [ot.key]).join(','));
                   }}
                 >
-                  <Text style={[styles.chipText, isOn && { color: t.ctaText }]}>{ot.label}</Text>
+                  <Text style={[styles.chipText, isOn && { color: t.ctaText }]}>{tr(ot.labelKey)}</Text>
                 </TouchableOpacity>
                 );
               })}

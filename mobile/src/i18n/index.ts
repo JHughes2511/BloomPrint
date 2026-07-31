@@ -4,7 +4,7 @@
 // always safely usable.
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '../storage/secureStore';
 import { getLocales } from 'expo-localization';
 import { resources } from './resources';
 import { LANGUAGE_CODES } from './languages';

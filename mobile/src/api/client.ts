@@ -1,5 +1,6 @@
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
+import * as SecureStore from '../storage/secureStore';
 import * as FileSystem from 'expo-file-system/legacy';
 import { emitCoachUnauthorized } from './authFailure';
 
@@ -8,9 +9,16 @@ const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000';
 export const api = axios.create({ baseURL: BASE_URL, timeout: 120000 });
 
 /**
- * Upload a video (or any file) STREAMED from disk via native code, instead of
- * building the multipart body in JS memory. This avoids RN's "Failed to grow
- * buffer" OOM on large files (long film), which axios/FormData hits.
+ * Upload a video (or any file) without building the multipart body in JS memory.
+ *
+ * Native uses FileSystem.uploadAsync, which streams from disk in native code —
+ * React Native's FormData loads the whole file into JS heap first and dies with
+ * "Failed to grow buffer" on long film.
+ *
+ * The web has no uploadAsync (expo-file-system ships no web implementation of
+ * it) and doesn't need one: a browser's FormData takes a Blob by reference and
+ * the network stack streams it, so the OOM this function exists to avoid is a
+ * React Native problem the browser never had.
  */
 export async function uploadFileStreamed(
   path: string,
@@ -20,13 +28,37 @@ export async function uploadFileStreamed(
   mimeType = 'video/mp4',
 ): Promise<any> {
   const token = await SecureStore.getItemAsync('auth_token');
+  const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
+  if (Platform.OS === 'web') {
+    // On web a picked file's uri is a blob:/data: URL; fetch turns it back into
+    // the Blob without ever materialising the bytes as a JS string.
+    const blob = await (await fetch(fileUri)).blob();
+    const form = new FormData();
+    // The three-argument append (value + filename) is the DOM signature; React
+    // Native's FormData typing only declares two, so this is cast rather than
+    // restructured — at runtime on web this is the browser's FormData.
+    (form.append as any)(fieldName, blob, `upload.${mimeType.split('/')[1] || 'mp4'}`);
+    for (const [k, v] of Object.entries(parameters)) form.append(k, v);
+    // Content-Type is deliberately unset: the browser must add the multipart
+    // boundary itself, and setting it by hand produces a body the server can't parse.
+    const res = await fetch(`${BASE_URL}${path}`, { method: 'POST', body: form, headers });
+    const body = await res.text();
+    if (!res.ok) {
+      let detail = `Upload failed (${res.status})`;
+      try { detail = JSON.parse(body || '{}').detail || detail; } catch {}
+      throw new Error(detail);
+    }
+    try { return JSON.parse(body || '{}'); } catch { return {}; }
+  }
+
   const res = await FileSystem.uploadAsync(`${BASE_URL}${path}`, fileUri, {
     httpMethod: 'POST',
     uploadType: FileSystem.FileSystemUploadType.MULTIPART,
     fieldName,
     mimeType,
     parameters,
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    headers,
   });
   if (res.status >= 400) {
     let detail = `Upload failed (${res.status})`;

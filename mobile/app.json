@@ -20,16 +20,37 @@
       }
     },
     "android": {
-      "adaptiveIcon": { "backgroundColor": "#0a0a0a" },
+      "adaptiveIcon": {
+        "backgroundColor": "#0a0a0a"
+      },
       "package": "com.bloomprint.app",
-      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "RECORD_AUDIO"],
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "RECORD_AUDIO"
+      ],
       "softwareKeyboardLayoutMode": "resize"
     },
     "plugins": [
       "expo-secure-store",
-      ["expo-image-picker", { "photosPermission": "Select video clips for BIM analysis" }],
-      ["expo-camera", { "cameraPermission": "Scan a coach's QR code to link your account." }],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Select video clips for BIM analysis"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Scan a coach's QR code to link your account."
+        }
+      ],
       "expo-av"
-    ]
+    ],
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/icon.png"
+    }
   }
 }

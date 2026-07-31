@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '../storage/secureStore';
 import { playerAuthAPI } from '../api/playerClient';
 import { isAuthRejection, onPlayerUnauthorized } from '../api/authFailure';
 import { PlayerUser } from '../types';

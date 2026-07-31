@@ -32,3 +32,6 @@ package.json
 
 # Per-machine token signing key, generated on first run.
 .bloomprint-secret
+
+# Expo web build output
+mobile/dist/

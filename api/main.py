@@ -17,12 +17,25 @@ app = FastAPI(title="BloomPrint API", version="1.0.0")
 # allow_credentials=True is rejected by browsers anyway, so the old config was
 # both unsafe in intent and broken in practice.
 #
-# Set BLOOMPRINT_CORS_ORIGINS (comma-separated) when a real web front end exists.
+# The web build IS a browser, so CORS now decides whether the app can talk to
+# its own API at all. Set BLOOMPRINT_CORS_ORIGINS (comma-separated) to the
+# deployed web origin in production.
 _origins = [o.strip() for o in os.environ.get("BLOOMPRINT_CORS_ORIGINS", "").split(",") if o.strip()]
+
+# Local development is allowed on any port, by regex rather than by listing
+# guesses: `expo start --web` picks a free port, and an allowlist that misses it
+# fails as an opaque CORS error rather than a clear one. This grants nothing to
+# a remote attacker — a page they serve is on their origin, not localhost.
+_LOCAL_ORIGINS = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_origins,
-    allow_credentials=bool(_origins),
+    allow_origin_regex=_LOCAL_ORIGINS,
+    # Tokens travel in the Authorization header, not cookies, so credentialed
+    # requests aren't needed. Leaving this off keeps the browser from ever
+    # attaching cookies cross-origin if session cookies are added later.
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
