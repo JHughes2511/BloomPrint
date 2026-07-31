@@ -17,6 +17,8 @@ uploads/
 # Mobile
 mobile/node_modules/
 mobile/package-lock.json
+# Expo's local cache — regenerated on every start, never worth committing.
+mobile/.expo/
 
 # Root-level (accidental installs)
 node_modules/
