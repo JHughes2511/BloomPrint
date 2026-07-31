@@ -209,6 +209,10 @@ export default function VoiceTextInput({
         editable={editable}
         style={{
           flex: 1,
+          // Without minWidth the field refuses to shrink below its placeholder,
+          // so in a narrow column it pushes the mic button outside the box
+          // instead of truncating the text.
+          minWidth: 0,
           alignSelf: 'stretch',
           backgroundColor: 'transparent',
           borderWidth: 0,

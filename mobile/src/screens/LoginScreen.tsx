@@ -17,7 +17,8 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
-import PageContainer from '../responsive/PageContainer';
+import AuthLayout from '../responsive/AuthLayout';
+import FieldRow from '../responsive/FieldRow';
 import CountryField from '../components/CountryField';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
@@ -266,7 +267,7 @@ export default function LoginScreen() {
 
   return (
     <ScreenBackground>
-    <PageContainer maxWidth={460}>
+    <AuthLayout>
     <KeyboardAvoidingView
       behavior={undefined}
       style={{ flex: 1 }}
@@ -308,10 +309,12 @@ export default function LoginScreen() {
                 </TouchableOpacity>
               ))}
             </View>
-            <VoiceTextInput style={styles.input} placeholder={tr('auth.fullName')} placeholderTextColor={t.muted2}
-              value={name} onChangeText={setName} />
-            <VoiceTextInput style={styles.input} placeholder={tr('auth.programName')} placeholderTextColor={t.muted2}
-              value={program} onChangeText={setProgram} />
+            <FieldRow>
+              <VoiceTextInput style={styles.input} placeholder={tr('auth.fullName')} placeholderTextColor={t.muted2}
+                value={name} onChangeText={setName} />
+              <VoiceTextInput style={styles.input} placeholder={tr('auth.programName')} placeholderTextColor={t.muted2}
+                value={program} onChangeText={setProgram} />
+            </FieldRow>
 
             {/* Competition Level picker */}
             <Text style={styles.sectionLabel}>{tr('auth.competitionLevel')}</Text>
@@ -346,14 +349,16 @@ export default function LoginScreen() {
 
             {/* Location */}
             <Text style={[styles.sectionLabel, { marginTop: 8 }]}>{tr('auth.location')}</Text>
-            <CountryField value={country} onChange={setCountry} />
-            <VoiceTextInput
-              style={styles.input}
-              placeholder={tr('auth.cityRegionOptional')}
-              placeholderTextColor={t.muted2}
-              value={city}
-              onChangeText={setCity}
-            />
+            <FieldRow>
+              <CountryField value={country} onChange={setCountry} />
+              <VoiceTextInput
+                style={styles.input}
+                placeholder={tr('auth.cityRegionOptional')}
+                placeholderTextColor={t.muted2}
+                value={city}
+                onChangeText={setCity}
+              />
+            </FieldRow>
           </>
         )}
 
@@ -429,7 +434,7 @@ export default function LoginScreen() {
         onClose={() => setShowConferencePicker(false)}
       />
     </KeyboardAvoidingView>
-    </PageContainer>
+    </AuthLayout>
     </ScreenBackground>
   );
 }

@@ -14,7 +14,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
-import PageContainer from '../../responsive/PageContainer';
+import AuthLayout from '../../responsive/AuthLayout';
 import GoogleSignInButton from '../../components/GoogleSignInButton';
 
 export default function PlayerLoginScreen() {
@@ -62,7 +62,7 @@ export default function PlayerLoginScreen() {
 
   return (
     <ScreenBackground>
-    <PageContainer maxWidth={460}>
+    <AuthLayout>
       <KeyboardAvoidingView
         behavior={undefined}
         style={{ flex: 1, backgroundColor: 'transparent' }}
@@ -122,7 +122,7 @@ export default function PlayerLoginScreen() {
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
-    </PageContainer>
+    </AuthLayout>
     </ScreenBackground>
   );
 }

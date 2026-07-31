@@ -10,7 +10,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
-import PageContainer from '../responsive/PageContainer';
+import AuthLayout from '../responsive/AuthLayout';
 
 export default function RoleSelectScreen() {
   const navigation = useNavigation<any>();
@@ -20,7 +20,7 @@ export default function RoleSelectScreen() {
 
   return (
     <ScreenBackground>
-    <PageContainer maxWidth={460}>
+    <AuthLayout>
     <SafeAreaView style={styles.container}>
       <View style={styles.inner}>
         <Text style={styles.brand}>BloomPrint</Text>
@@ -62,7 +62,7 @@ export default function RoleSelectScreen() {
         </View>
       </View>
     </SafeAreaView>
-    </PageContainer>
+    </AuthLayout>
     </ScreenBackground>
   );
 }

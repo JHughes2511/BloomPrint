@@ -14,7 +14,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
-import PageContainer from '../../responsive/PageContainer';
+import AuthLayout from '../../responsive/AuthLayout';
 import CountryField from '../../components/CountryField';
 import GoogleSignInButton from '../../components/GoogleSignInButton';
 
@@ -196,7 +196,7 @@ export default function PlayerRegisterScreen() {
 
   return (
     <ScreenBackground>
-    <PageContainer maxWidth={460}>
+    <AuthLayout>
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1, backgroundColor: 'transparent' }}
@@ -283,7 +283,7 @@ export default function PlayerRegisterScreen() {
         </TouchableOpacity>
       </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
-    </PageContainer>
+    </AuthLayout>
     </ScreenBackground>
   );
 }
