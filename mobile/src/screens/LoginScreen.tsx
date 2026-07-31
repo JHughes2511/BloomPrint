@@ -17,6 +17,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import PageContainer from '../responsive/PageContainer';
 import CountryField from '../components/CountryField';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
@@ -265,6 +266,7 @@ export default function LoginScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer maxWidth={460}>
     <KeyboardAvoidingView
       behavior={undefined}
       style={{ flex: 1 }}
@@ -427,6 +429,7 @@ export default function LoginScreen() {
         onClose={() => setShowConferencePicker(false)}
       />
     </KeyboardAvoidingView>
+    </PageContainer>
     </ScreenBackground>
   );
 }
@@ -435,8 +438,7 @@ const makePickerStyles = (t: ThemeTokens) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   sheet: {
     backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    maxHeight: '80%', paddingBottom: 20,
-  },
+    maxHeight: '80%', paddingBottom: 20, width: '100%', maxWidth: 560, alignSelf: 'center'},
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     padding: 20, borderBottomWidth: 1, borderBottomColor: t.divider,

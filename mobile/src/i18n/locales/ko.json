@@ -34,7 +34,8 @@
     "create": "만들기",
     "add": "추가",
     "rename": "이름 변경",
-    "gotIt": "확인했어요"
+    "gotIt": "확인했어요",
+    "noResults": "결과 없음"
   },
   "reportTypes": {
     "report": "리포트",
@@ -562,7 +563,8 @@
         "label": "문화 / 절대 기준",
         "placeholder": "크게 비중을 두는 무형의 자질과 기준."
       }
-    }
+    },
+    "askBloomprint": "BloomPrint에 질문"
   },
   "onboarding": {
     "step": "{{total}}단계 중 {{current}}단계",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "이 팀에 아직 선수가 없습니다.",
     "importFromExcel": "Excel에서 로스터 가져오기",
     "importOneByOneHint": "또는 +를 눌러 선수를 한 명씩 추가하세요",
-    "emptyNoPlayers": "아직 선수가 없습니다. 팀을 만들고 선수를 추가하세요."
+    "emptyNoPlayers": "아직 선수가 없습니다. 팀을 만들고 선수를 추가하세요.",
+    "teams": "팀"
   },
   "importScreen": {
     "titleRoster": "로스터 가져오기",

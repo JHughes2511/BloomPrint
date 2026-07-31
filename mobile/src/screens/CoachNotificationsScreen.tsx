@@ -18,6 +18,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import PageContainer from '../responsive/PageContainer';
 
 const NOTIF_ICONS: Record<string, string> = {
   link_requested: 'link',
@@ -189,6 +190,7 @@ export default function CoachNotificationsScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer padded={false} maxWidth={1600}>
     <KeyboardAwareScrollView
       style={styles.container}
       contentContainerStyle={{ paddingBottom: 100 }}
@@ -444,6 +446,7 @@ export default function CoachNotificationsScreen() {
       onClose={() => setViewerShared(null)}
       onChanged={load}
     />
+    </PageContainer>
     </ScreenBackground>
   );
 }

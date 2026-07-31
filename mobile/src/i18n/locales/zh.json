@@ -34,7 +34,8 @@
     "create": "创建",
     "add": "添加",
     "rename": "重命名",
-    "gotIt": "知道了"
+    "gotIt": "知道了",
+    "noResults": "无匹配结果"
   },
   "reportTypes": {
     "report": "报告",
@@ -562,7 +563,8 @@
         "label": "文化 / 不可妥协的底线",
         "placeholder": "你高度看重的无形素质与标准。"
       }
-    }
+    },
+    "askBloomprint": "询问 BloomPrint"
   },
   "onboarding": {
     "step": "第 {{current}} 步，共 {{total}} 步",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "此球队还没有球员。",
     "importFromExcel": "从 Excel 导入阵容",
     "importOneByOneHint": "或点击 + 逐个添加球员",
-    "emptyNoPlayers": "还没有球员。创建球队并添加球员。"
+    "emptyNoPlayers": "还没有球员。创建球队并添加球员。",
+    "teams": "球队"
   },
   "importScreen": {
     "titleRoster": "导入阵容",

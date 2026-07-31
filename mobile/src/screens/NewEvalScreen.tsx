@@ -16,6 +16,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import PageContainer from '../responsive/PageContainer';
 import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
 
 // API output_type keys — labels are resolved at render via i18n.
@@ -172,6 +173,7 @@ export default function NewEvalScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer maxWidth={900}>
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={undefined}
@@ -420,6 +422,7 @@ export default function NewEvalScreen() {
       />
     </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
+    </PageContainer>
     </ScreenBackground>
   );
 }

@@ -34,7 +34,8 @@
     "create": "Create",
     "add": "Add",
     "rename": "Rename",
-    "gotIt": "Got it"
+    "gotIt": "Got it",
+    "noResults": "No matches"
   },
   "reportTypes": {
     "report": "Report",
@@ -562,7 +563,8 @@
         "label": "Culture / Non-Negotiables",
         "placeholder": "The intangibles and standards you weight heavily."
       }
-    }
+    },
+    "askBloomprint": "Ask BloomPrint"
   },
   "onboarding": {
     "step": "Step {{current}} of {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "No players in this team yet.",
     "importFromExcel": "Import Roster from Excel",
     "importOneByOneHint": "or tap + to add players one by one",
-    "emptyNoPlayers": "No players yet. Create a team and add players."
+    "emptyNoPlayers": "No players yet. Create a team and add players.",
+    "teams": "Teams"
   },
   "importScreen": {
     "titleRoster": "Import Roster",

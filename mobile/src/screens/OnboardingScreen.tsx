@@ -15,6 +15,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import PageContainer from '../responsive/PageContainer';
 
 // Wizard fields — labels/descs/chips come from the `onboarding.fields.*`
 // translation keys. Keys match the backend coach_context field keys.
@@ -111,6 +112,7 @@ export default function OnboardingScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer maxWidth={900}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.header}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -209,6 +211,7 @@ export default function OnboardingScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+    </PageContainer>
     </ScreenBackground>
   );
 }

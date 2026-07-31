@@ -34,7 +34,8 @@
     "create": "Sukurti",
     "add": "Pridėti",
     "rename": "Pervadinti",
-    "gotIt": "Supratau"
+    "gotIt": "Supratau",
+    "noResults": "Nėra atitikmenų"
   },
   "reportTypes": {
     "report": "Ataskaita",
@@ -562,7 +563,8 @@
         "label": "Kultūra / neginčijamos nuostatos",
         "placeholder": "Neapčiuopiamos savybės ir standartai, kuriuos labai vertinate."
       }
-    }
+    },
+    "askBloomprint": "Klauskite BloomPrint"
   },
   "onboarding": {
     "step": "{{current}} žingsnis iš {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "Šioje komandoje dar nėra žaidėjų.",
     "importFromExcel": "Importuoti sąrašą iš Excel",
     "importOneByOneHint": "arba palieskite +, kad pridėtumėte žaidėjus po vieną",
-    "emptyNoPlayers": "Kol kas žaidėjų nėra. Sukurkite komandą ir pridėkite žaidėjų."
+    "emptyNoPlayers": "Kol kas žaidėjų nėra. Sukurkite komandą ir pridėkite žaidėjų.",
+    "teams": "Komandos"
   },
   "importScreen": {
     "titleRoster": "Importuoti sąrašą",

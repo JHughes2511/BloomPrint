@@ -34,7 +34,8 @@
     "create": "Crea",
     "add": "Aggiungi",
     "rename": "Rinomina",
-    "gotIt": "Ho capito"
+    "gotIt": "Ho capito",
+    "noResults": "Nessun risultato"
   },
   "reportTypes": {
     "report": "Report",
@@ -562,7 +563,8 @@
         "label": "Cultura / Aspetti Irrinunciabili",
         "placeholder": "Gli intangibili e gli standard a cui dai molto peso."
       }
-    }
+    },
+    "askBloomprint": "Chiedi a BloomPrint"
   },
   "onboarding": {
     "step": "Passo {{current}} di {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "Ancora nessun giocatore in questa squadra.",
     "importFromExcel": "Importa Rosa da Excel",
     "importOneByOneHint": "oppure tocca + per aggiungere i giocatori uno alla volta",
-    "emptyNoPlayers": "Ancora nessun giocatore. Crea una squadra e aggiungi giocatori."
+    "emptyNoPlayers": "Ancora nessun giocatore. Crea una squadra e aggiungi giocatori.",
+    "teams": "Squadre"
   },
   "importScreen": {
     "titleRoster": "Importa Rosa",

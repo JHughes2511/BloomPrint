@@ -107,7 +107,7 @@ export default function ExportSectionsModal({ visible, title, subject, reportTex
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  box: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, paddingBottom: 30 },
+  box: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, paddingBottom: 30, width: '100%', maxWidth: 560, alignSelf: 'center'},
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
   title: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   sub: { color: t.muted2, fontSize: 12, marginTop: 3 },

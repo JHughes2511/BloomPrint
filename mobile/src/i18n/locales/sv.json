@@ -34,7 +34,8 @@
     "create": "Skapa",
     "add": "Lägg till",
     "rename": "Byt namn",
-    "gotIt": "Uppfattat"
+    "gotIt": "Uppfattat",
+    "noResults": "Inga träffar"
   },
   "reportTypes": {
     "report": "Rapport",
@@ -562,7 +563,8 @@
         "label": "Kultur / Icke förhandlingsbart",
         "placeholder": "De mentala kvaliteter och standarder du väger tungt."
       }
-    }
+    },
+    "askBloomprint": "Fråga BloomPrint"
   },
   "onboarding": {
     "step": "Steg {{current}} av {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "Inga spelare i det här laget ännu.",
     "importFromExcel": "Importera trupp från Excel",
     "importOneByOneHint": "eller tryck på + för att lägga till spelare en och en",
-    "emptyNoPlayers": "Inga spelare ännu. Skapa ett lag och lägg till spelare."
+    "emptyNoPlayers": "Inga spelare ännu. Skapa ett lag och lägg till spelare.",
+    "teams": "Lag"
   },
   "importScreen": {
     "titleRoster": "Importera trupp",

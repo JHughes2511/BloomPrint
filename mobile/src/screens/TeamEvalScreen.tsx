@@ -29,6 +29,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import PageContainer from '../responsive/PageContainer';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
 
 // Highest competition level → lowest.
@@ -1101,6 +1102,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
   return (
     <ScreenBackground>
+    <PageContainer>
     <View style={s.root}>
       {/* Top nav */}
       <View style={s.topNav}>
@@ -1456,7 +1458,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* Clock edit modal */}
           <Modal visible={showClockEdit} transparent animationType="fade" onRequestClose={() => setShowClockEdit(false)}>
             <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'center', padding: 32 }}>
-              <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: t.cardBorder }}>
+              <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center' }}>
                 <Text style={{ color: t.ink, fontSize: 16, fontFamily: fonts[800], marginBottom: 14 }}>{tr('teamGrade.setClock')}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
                   <TextInput
@@ -2923,7 +2925,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       {/* Player grade detail (from leaderboard) */}
       <Modal visible={gradeDetailPlayer !== null} transparent animationType="slide" onRequestClose={() => setGradeDetailPlayer(null)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', paddingBottom: 24, borderWidth: 1, borderColor: t.cardBorder }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', paddingBottom: 24, borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip }}>
               <View>
                 <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }}>{gradeDetailPlayer}</Text>
@@ -3032,7 +3034,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       {/* Share game with staff modal */}
       <Modal visible={shareGameModalVisible} animationType="slide" transparent>
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={{ backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '80%', margin: 8, borderWidth: 1, borderColor: t.cardBorder }}>
+          <View style={{ backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '80%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center' }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }}>{tr('teamGrade.shareWithStaff')}</Text>
               <TouchableOpacity onPress={() => setShareGameModalVisible(false)}>
@@ -3121,6 +3123,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         </KeyboardAvoidingView>
       </Modal>
     </View>
+    </PageContainer>
     </ScreenBackground>
   );
 }
@@ -3279,8 +3282,7 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   },
   modalBox: {
     backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    padding: 24, maxHeight: '85%', borderWidth: 1, borderColor: t.cardBorder,
-  },
+    padding: 24, maxHeight: '85%', borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center'},
   modalTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 20 },
   fieldLabel: {
     color: t.label, fontSize: 11, fontFamily: fonts[700],

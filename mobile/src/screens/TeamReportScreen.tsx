@@ -25,6 +25,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import PageContainer from '../responsive/PageContainer';
 import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
 
 // Labels come from the `reportTypes.*` translation keys at render time.
@@ -482,6 +483,7 @@ export default function TeamReportScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer>
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={undefined}
@@ -888,7 +890,7 @@ export default function TeamReportScreen() {
       {/* Previous Report Detail Modal */}
       <Modal visible={!!selectedPrevReport} animationType="slide" transparent>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60 }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60, width: '100%', maxWidth: 560, alignSelf: 'center' }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
                 <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }} numberOfLines={1}>
@@ -1278,6 +1280,7 @@ export default function TeamReportScreen() {
         title={prevShareReport.title || outputTypeLabel(prevShareReport.output_type)}
       />
     )}
+    </PageContainer>
     </ScreenBackground>
   );
 }
@@ -1342,7 +1345,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
 
 const makeShareStyles = (t: ThemeTokens) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder },
+  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center'},
   title: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 16 },
   label: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
   targetRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },

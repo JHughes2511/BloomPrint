@@ -34,7 +34,8 @@
     "create": "إنشاء",
     "add": "إضافة",
     "rename": "إعادة تسمية",
-    "gotIt": "فهمت"
+    "gotIt": "فهمت",
+    "noResults": "لا توجد نتائج"
   },
   "reportTypes": {
     "report": "تقرير",
@@ -562,7 +563,8 @@
         "label": "الثقافة / الثوابت",
         "placeholder": "الصفات المعنوية والمعايير التي تعطيها وزنًا كبيرًا."
       }
-    }
+    },
+    "askBloomprint": "اسأل BloomPrint"
   },
   "onboarding": {
     "step": "الخطوة {{current}} من {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "لا يوجد لاعبون في هذا الفريق بعد.",
     "importFromExcel": "استيراد القائمة من Excel",
     "importOneByOneHint": "أو اضغط + لإضافة اللاعبين واحدًا تلو الآخر",
-    "emptyNoPlayers": "لا يوجد لاعبون بعد. أنشئ فريقًا وأضف اللاعبين."
+    "emptyNoPlayers": "لا يوجد لاعبون بعد. أنشئ فريقًا وأضف اللاعبين.",
+    "teams": "الفرق"
   },
   "importScreen": {
     "titleRoster": "استيراد القائمة",

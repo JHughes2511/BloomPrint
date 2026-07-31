@@ -34,7 +34,8 @@
     "create": "יצירה",
     "add": "הוספה",
     "rename": "שינוי שם",
-    "gotIt": "הבנתי"
+    "gotIt": "הבנתי",
+    "noResults": "אין תוצאות"
   },
   "reportTypes": {
     "report": "דוח",
@@ -562,7 +563,8 @@
         "label": "תרבות / עקרונות שאין עליהם ויכוח",
         "placeholder": "התכונות והסטנדרטים שאתה מייחס להם משקל רב."
       }
-    }
+    },
+    "askBloomprint": "שאל את BloomPrint"
   },
   "onboarding": {
     "step": "שלב {{current}} מתוך {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "עדיין אין שחקנים בקבוצה הזו.",
     "importFromExcel": "ייבא סגל מ-Excel",
     "importOneByOneHint": "או הקש + כדי להוסיף שחקנים אחד-אחד",
-    "emptyNoPlayers": "עדיין אין שחקנים. צור קבוצה והוסף שחקנים."
+    "emptyNoPlayers": "עדיין אין שחקנים. צור קבוצה והוסף שחקנים.",
+    "teams": "קבוצות"
   },
   "importScreen": {
     "titleRoster": "ייבוא סגל",

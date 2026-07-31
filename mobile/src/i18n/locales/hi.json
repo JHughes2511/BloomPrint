@@ -34,7 +34,8 @@
     "create": "बनाएँ",
     "add": "जोड़ें",
     "rename": "नाम बदलें",
-    "gotIt": "समझ गया"
+    "gotIt": "समझ गया",
+    "noResults": "कोई परिणाम नहीं"
   },
   "reportTypes": {
     "report": "रिपोर्ट",
@@ -562,7 +563,8 @@
         "label": "संस्कृति / अनिवार्य बातें",
         "placeholder": "वे अदृश्य गुण और मानक जिन्हें आप सबसे ज़्यादा महत्व देते हैं।"
       }
-    }
+    },
+    "askBloomprint": "BloomPrint से पूछें"
   },
   "onboarding": {
     "step": "चरण {{current}} / {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "इस टीम में अभी कोई खिलाड़ी नहीं है।",
     "importFromExcel": "Excel से रोस्टर इम्पोर्ट करें",
     "importOneByOneHint": "या एक-एक करके खिलाड़ी जोड़ने के लिए + पर टैप करें",
-    "emptyNoPlayers": "अभी कोई खिलाड़ी नहीं। टीम बनाएँ और खिलाड़ी जोड़ें।"
+    "emptyNoPlayers": "अभी कोई खिलाड़ी नहीं। टीम बनाएँ और खिलाड़ी जोड़ें।",
+    "teams": "टीमें"
   },
   "importScreen": {
     "titleRoster": "रोस्टर इम्पोर्ट करें",

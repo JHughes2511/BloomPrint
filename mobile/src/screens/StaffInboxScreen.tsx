@@ -17,6 +17,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import PageContainer from '../responsive/PageContainer';
 
 // Maps staff-share report_type keys to i18n label keys.
 const REPORT_TYPE_LABEL_KEYS: Record<string, string> = {
@@ -742,6 +743,7 @@ export default function StaffInboxScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer padded={false} maxWidth={1600}>
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
@@ -1068,6 +1070,7 @@ export default function StaffInboxScreen() {
         </KeyboardAvoidingView>
       </Modal>
     </View>
+    </PageContainer>
     </ScreenBackground>
   );
 }
@@ -1106,7 +1109,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   teamChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600], flexShrink: 1 },
   teamChipTextActive: { color: t.ctaText },
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8 },
+  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, width: '100%', maxWidth: 560, alignSelf: 'center'},
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
   modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   modalSub: { color: t.muted, fontSize: 12, marginTop: 2 },

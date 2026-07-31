@@ -34,7 +34,8 @@
     "create": "Creează",
     "add": "Adaugă",
     "rename": "Redenumește",
-    "gotIt": "Am înțeles"
+    "gotIt": "Am înțeles",
+    "noResults": "Niciun rezultat"
   },
   "reportTypes": {
     "report": "Raport",
@@ -562,7 +563,8 @@
         "label": "Cultură / Reguli fără compromis",
         "placeholder": "Calitățile intangibile și standardele pe care le apreciezi mult."
       }
-    }
+    },
+    "askBloomprint": "Întreabă BloomPrint"
   },
   "onboarding": {
     "step": "Pasul {{current}} din {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "Niciun jucător în această echipă încă.",
     "importFromExcel": "Importă lot din Excel",
     "importOneByOneHint": "sau apasă + pentru a adăuga jucători unul câte unul",
-    "emptyNoPlayers": "Niciun jucător încă. Creează o echipă și adaugă jucători."
+    "emptyNoPlayers": "Niciun jucător încă. Creează o echipă și adaugă jucători.",
+    "teams": "Echipe"
   },
   "importScreen": {
     "titleRoster": "Importă lot",

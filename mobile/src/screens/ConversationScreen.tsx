@@ -18,6 +18,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import PageContainer from '../responsive/PageContainer';
 import { renderReport } from '../utils/renderReport';
 import { reportSubject } from '../utils/reportSubject';
 import { outputTypeLabel } from '../utils/reportType';
@@ -230,6 +231,7 @@ export default function ConversationScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer maxWidth={900}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
@@ -361,6 +363,7 @@ export default function ConversationScreen() {
           </View>
         </View>
       </Modal>
+    </PageContainer>
     </ScreenBackground>
   );
 }
@@ -392,7 +395,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   input: { flex: 1, backgroundColor: t.chip, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 9, color: t.ink, fontSize: 14.5, borderWidth: 1, borderColor: t.line, maxHeight: 110, minHeight: 40 },
   sendBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.accent, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, maxHeight: '70%', borderWidth: 1, borderColor: t.cardBorder },
+  sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, maxHeight: '70%', borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center'},
   sheetHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   sheetTitle: { color: t.ink, fontSize: 16, fontFamily: fonts[800], flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 },
   reportRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: t.divider },

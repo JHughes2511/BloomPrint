@@ -17,6 +17,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
+import PageContainer from '../../responsive/PageContainer';
 import CountryField from '../../components/CountryField';
 
 const ROLE_LABELS: Record<string, string> = { coach: 'Coach', scout: 'Scout', trainer: 'Trainer' };
@@ -189,6 +190,7 @@ export default function PlayerLinkScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer maxWidth={900}>
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }}>
       <View style={styles.headerRow}>
         {/* Translated headers run 20-40% longer, so the title shrinks and clips. */}
@@ -404,6 +406,7 @@ export default function PlayerLinkScreen() {
         </TouchableOpacity>
       </View>
     </Modal>
+    </PageContainer>
     </ScreenBackground>
   );
 }
@@ -445,7 +448,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   linkCtaText: { color: t.ctaText, fontSize: 15.5, fontFamily: fonts[800], flexShrink: 1 },
 
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 24, paddingBottom: 36, maxHeight: '88%' },
+  sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 24, paddingBottom: 36, maxHeight: '88%', width: '100%', maxWidth: 560, alignSelf: 'center'},
   sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 },
   sheetTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], flexShrink: 1, minWidth: 0, marginRight: 10 },
   fieldLabel: { color: t.muted2, fontSize: 10.5, fontFamily: fonts[700], letterSpacing: 1.6, textTransform: 'uppercase', marginBottom: 8, marginTop: 14 },

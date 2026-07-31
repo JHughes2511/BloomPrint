@@ -14,6 +14,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
+import PageContainer from '../../responsive/PageContainer';
 
 const NOTIF_ICONS: Record<string, string> = {
   report_shared: 'mail',
@@ -94,6 +95,7 @@ export default function PlayerNotificationsScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer padded={false} maxWidth={1600}>
       <ScrollView
         style={styles.container}
         contentContainerStyle={{ paddingBottom: 40 }}
@@ -165,6 +167,7 @@ export default function PlayerNotificationsScreen() {
           ))
         )}
       </ScrollView>
+    </PageContainer>
     </ScreenBackground>
   );
 }

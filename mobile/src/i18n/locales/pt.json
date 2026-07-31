@@ -34,7 +34,8 @@
     "create": "Criar",
     "add": "Adicionar",
     "rename": "Renomear",
-    "gotIt": "Entendi"
+    "gotIt": "Entendi",
+    "noResults": "Sem resultados"
   },
   "reportTypes": {
     "report": "Relatório",
@@ -562,7 +563,8 @@
         "label": "Cultura / Inegociáveis",
         "placeholder": "Os intangíveis e padrões que você pondera fortemente."
       }
-    }
+    },
+    "askBloomprint": "Perguntar ao BloomPrint"
   },
   "onboarding": {
     "step": "Etapa {{current}} de {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "Nenhum jogador nesta equipe ainda.",
     "importFromExcel": "Importar Elenco do Excel",
     "importOneByOneHint": "ou toque em + para adicionar jogadores um por um",
-    "emptyNoPlayers": "Nenhum jogador ainda. Crie uma equipe e adicione jogadores."
+    "emptyNoPlayers": "Nenhum jogador ainda. Crie uma equipe e adicione jogadores.",
+    "teams": "Equipes"
   },
   "importScreen": {
     "titleRoster": "Importar Elenco",

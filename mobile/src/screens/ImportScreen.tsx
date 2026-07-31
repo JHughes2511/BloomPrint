@@ -16,6 +16,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import PageContainer from '../responsive/PageContainer';
 
 // API output_type keys — labels come from the importScreen.outputTypes.* catalog.
 const OUTPUT_TYPE_KEYS = [
@@ -148,6 +149,7 @@ export default function ImportScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer maxWidth={900}>
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={undefined}
@@ -425,6 +427,7 @@ export default function ImportScreen() {
         )}
       </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
+    </PageContainer>
     </ScreenBackground>
   );
 }

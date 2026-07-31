@@ -12,6 +12,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
+import PageContainer from '../../responsive/PageContainer';
 import { parseDrills } from '../../utils/trainingDrills';
 import { timeAgo } from '../../utils/timeAgo';
 
@@ -94,6 +95,7 @@ export default function PlayerTrainingScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer padded={false} maxWidth={1600}>
     <ScrollView
       style={styles.container}
       contentContainerStyle={{ paddingBottom: 40 }}
@@ -208,6 +210,7 @@ export default function PlayerTrainingScreen() {
         </>
       )}
     </ScrollView>
+    </PageContainer>
     </ScreenBackground>
   );
 }

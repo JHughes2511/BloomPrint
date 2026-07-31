@@ -34,7 +34,8 @@
     "create": "Créer",
     "add": "Ajouter",
     "rename": "Renommer",
-    "gotIt": "Compris"
+    "gotIt": "Compris",
+    "noResults": "Aucun résultat"
   },
   "reportTypes": {
     "report": "Rapport",
@@ -562,7 +563,8 @@
         "label": "Culture / Non-négociables",
         "placeholder": "Les intangibles et les standards auxquels vous accordez un poids important."
       }
-    }
+    },
+    "askBloomprint": "Demander à BloomPrint"
   },
   "onboarding": {
     "step": "Étape {{current}} sur {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "Aucun joueur dans cette équipe pour l'instant.",
     "importFromExcel": "Importer l'effectif depuis Excel",
     "importOneByOneHint": "ou appuyez sur + pour ajouter les joueurs un par un",
-    "emptyNoPlayers": "Aucun joueur pour l'instant. Créez une équipe et ajoutez des joueurs."
+    "emptyNoPlayers": "Aucun joueur pour l'instant. Créez une équipe et ajoutez des joueurs.",
+    "teams": "Équipes"
   },
   "importScreen": {
     "titleRoster": "Importer l'effectif",

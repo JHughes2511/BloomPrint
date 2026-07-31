@@ -12,6 +12,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
+import PageContainer from '../../responsive/PageContainer';
 import { outputTypeLabel } from '../../utils/reportType';
 import { timeAgo } from '../../utils/timeAgo';
 
@@ -172,6 +173,7 @@ export default function PlayerInboxScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer padded={false} maxWidth={1600}>
     <ScrollView
       style={styles.container}
       contentContainerStyle={{ paddingBottom: 40 }}
@@ -289,6 +291,7 @@ export default function PlayerInboxScreen() {
         })
       )}
     </ScrollView>
+    </PageContainer>
     </ScreenBackground>
   );
 }

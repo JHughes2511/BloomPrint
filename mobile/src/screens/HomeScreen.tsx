@@ -11,6 +11,8 @@ import { playerAPI, feedbackAPI } from '../api/client';
 const APP_VERSION: string | undefined = require('../../app.json')?.expo?.version;
 import { useTheme } from '../theme/ThemeProvider';
 import { ScreenBackground, SectionLabel, Card, IconTile, Txt } from '../theme/components';
+import PageContainer from '../responsive/PageContainer';
+import { useBreakpoint } from '../responsive/useBreakpoint';
 import { Icon, IconName } from '../theme/icons';
 import { fonts, type as typeScale } from '../theme/typography';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
@@ -76,6 +78,9 @@ export default function HomeScreen() {
   const { t, mode, toggle } = useTheme();
   const { t: tr } = useTranslation();
   const [unreadCount, setUnreadCount] = useState(0);
+  // On desktop these same four controls live in the sidebar, permanently. Two
+  // copies of the theme toggle on one screen is worse than none.
+  const { isDesktop } = useBreakpoint();
 
   // Profile edit modal
   const [showProfile, setShowProfile] = useState(false);
@@ -237,6 +242,7 @@ export default function HomeScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
@@ -248,12 +254,14 @@ export default function HomeScreen() {
               <Text style={[typeScale.label, { color: t.label, marginBottom: 4 }]} numberOfLines={2}>{tr('home.intelligenceModel')}</Text>
               <Text style={[typeScale.h1, { color: t.ink }]} numberOfLines={1}>BloomPrint</Text>
             </View>
-            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-              <CircleBtn icon={mode === 'dark' ? 'sun' : 'moon'} onPress={toggle} label={tr('home.toggleTheme')} />
-              <CircleBtn icon="user" onPress={openProfile} label={tr('home.editProfileLabel')} />
-              <CircleBtn icon="mail" onPress={() => navigation.navigate('StaffInbox')} label={tr('home.staffInboxLabel')} />
-              <CircleBtn icon="bell" onPress={() => navigation.navigate('CoachNotifications')} badge={unreadCount} label={tr('home.notificationsLabel')} />
-            </View>
+            {!isDesktop && (
+              <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+                <CircleBtn icon={mode === 'dark' ? 'sun' : 'moon'} onPress={toggle} label={tr('home.toggleTheme')} />
+                <CircleBtn icon="user" onPress={openProfile} label={tr('home.editProfileLabel')} />
+                <CircleBtn icon="mail" onPress={() => navigation.navigate('StaffInbox')} label={tr('home.staffInboxLabel')} />
+                <CircleBtn icon="bell" onPress={() => navigation.navigate('CoachNotifications')} badge={unreadCount} label={tr('home.notificationsLabel')} />
+              </View>
+            )}
           </View>
           {/* Coach line + AI command pill on one row */}
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginTop: 8 }}>
@@ -265,7 +273,7 @@ export default function HomeScreen() {
             >
               {coach ? `${coach.name} · ${roleLabel(coach.role)} · ${coach.program_name}` : ''}
             </Text>
-            <CommandBar />
+            {!isDesktop && <CommandBar />}
           </View>
         </View>
 
@@ -332,7 +340,7 @@ export default function HomeScreen() {
       {/* Feedback modal */}
       <Modal visible={showFeedback} transparent animationType="slide" onRequestClose={() => setShowFeedback(false)}>
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, padding: 24, paddingBottom: 36 }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, padding: 24, paddingBottom: 36, width: '100%', maxWidth: 560, alignSelf: 'center' }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>{tr('home.feedbackTitle')}</Text>
               <TouchableOpacity onPress={() => setShowFeedback(false)} style={{ flexShrink: 0 }}>
@@ -364,7 +372,7 @@ export default function HomeScreen() {
       {/* Profile edit modal */}
       <Modal visible={showProfile} transparent animationType="slide" onRequestClose={() => setShowProfile(false)}>
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, maxHeight: '90%' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, maxHeight: '90%', width: '100%', maxWidth: 560, alignSelf: 'center' }}>
             <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 36 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>{tr('home.editProfileTitle')}</Text>
@@ -492,7 +500,7 @@ export default function HomeScreen() {
       {/* Program System & Philosophy modal */}
       <Modal visible={showSystem} transparent animationType="slide" onRequestClose={() => setShowSystem(false)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 50, borderWidth: 1, borderColor: t.cardBorder }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 50, borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center' }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingBottom: 8 }}>
               <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 19, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>{tr('home.systemModalTitle')}</Text>
               <TouchableOpacity onPress={() => setShowSystem(false)} style={{ flexShrink: 0 }}>
@@ -562,6 +570,7 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
+    </PageContainer>
     </ScreenBackground>
   );
 }

@@ -25,6 +25,7 @@ const PILLAR_ORDER = ['offensive_skills', 'defensive_capabilities', 'physical_at
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
+import PageContainer from '../../responsive/PageContainer';
 import { timeAgo } from '../../utils/timeAgo';
 
 export default function PlayerHomeScreen() {
@@ -205,6 +206,7 @@ export default function PlayerHomeScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer>
     <ScrollView
       style={styles.container}
       contentContainerStyle={{ paddingBottom: 40 }}
@@ -588,6 +590,7 @@ export default function PlayerHomeScreen() {
         </TouchableOpacity>
       </Modal>
     </ScrollView>
+    </PageContainer>
     </ScreenBackground>
   );
 }
@@ -740,8 +743,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 24,
     paddingBottom: 40,
-    maxHeight: '85%',
-  },
+    maxHeight: '85%', width: '100%', maxWidth: 560, alignSelf: 'center'},
   dragHandle: {
     width: 40, height: 4, borderRadius: 2,
     backgroundColor: t.line, alignSelf: 'center', marginBottom: 16,

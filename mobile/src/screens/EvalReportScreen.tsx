@@ -21,6 +21,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import PageContainer, { READING_MAX_WIDTH } from '../responsive/PageContainer';
 import { Evaluation, Correction, Player } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
@@ -455,6 +456,7 @@ export default function EvalReportScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer maxWidth={READING_MAX_WIDTH}>
     <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: isSingle ? 24 : 100 }}>
 
       {/* Header */}
@@ -1107,6 +1109,7 @@ export default function EvalReportScreen() {
         </View>
       </View>
     )}
+    </PageContainer>
     </ScreenBackground>
   );
 }
@@ -1125,7 +1128,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   playerPos: { color: t.muted, fontSize: 12 },
   // Player detail modal
   pdOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  pdBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 8, paddingBottom: 36, borderWidth: 1, borderColor: t.cardBorder },
+  pdBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 8, paddingBottom: 36, borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center'},
   pdHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   pdName: { color: t.ink, fontSize: 22, fontFamily: fonts[900], flex: 1 },
   pdRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
@@ -1184,7 +1187,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   ladderLetter: { color: t.ink, fontSize: 13, fontFamily: fonts[800], width: 32 },
   ladderTier: { color: t.inkSoft, fontSize: 12.5, flex: 1 },
   ladderRange: { color: t.muted, fontSize: 11.5 },
-  bottomBar: { gap: 10, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, backgroundColor: t.sheet, borderTopWidth: 1, borderTopColor: t.divider },
+  bottomBar: { gap: 10, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, backgroundColor: t.sheet, borderTopWidth: 1, borderTopColor: t.divider, width: '100%', maxWidth: 560, alignSelf: 'center'},
   bottomRow: { flexDirection: 'row', gap: 10 },
   bbBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 14, paddingVertical: 14, borderWidth: 1, borderColor: 'transparent' },
   bbText: { fontFamily: fonts[800], fontSize: 14 },
@@ -1200,7 +1203,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   actionText: { color: t.cta2Text, fontFamily: fonts[700], fontSize: 13 },
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder },
+  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center'},
   modalTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 4 },
   modalSub: { color: t.muted, fontSize: 12, marginBottom: 16 },
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: t.divider },

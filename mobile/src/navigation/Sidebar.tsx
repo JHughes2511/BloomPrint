@@ -311,7 +311,13 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
               style={s.menuRow}
               onPress={() => {
                 setAccountOpen(false);
-                (navigation as any).navigate('HomeTab', { screen: 'Home' });
+                // Home already opens this modal on request — Ask BloomPrint
+                // uses the same param — so reuse it rather than landing the
+                // coach on Home and making them find the button.
+                (navigation as any).navigate('HomeTab', {
+                  screen: 'Home',
+                  params: { openEditProfile: true },
+                });
               }}
             >
               <Ionicons name="person-outline" size={16} color={t.muted} />

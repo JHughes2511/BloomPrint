@@ -34,7 +34,8 @@
     "create": "Aanmaken",
     "add": "Toevoegen",
     "rename": "Hernoemen",
-    "gotIt": "Begrepen"
+    "gotIt": "Begrepen",
+    "noResults": "Geen resultaten"
   },
   "reportTypes": {
     "report": "Rapport",
@@ -562,7 +563,8 @@
         "label": "Cultuur / Non-negotiables",
         "placeholder": "De onmeetbare kwaliteiten en normen die je zwaar laat wegen."
       }
-    }
+    },
+    "askBloomprint": "Vraag BloomPrint"
   },
   "onboarding": {
     "step": "Stap {{current}} van {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "Nog geen spelers in dit team.",
     "importFromExcel": "Selectie importeren uit Excel",
     "importOneByOneHint": "of tik op + om spelers één voor één toe te voegen",
-    "emptyNoPlayers": "Nog geen spelers. Maak een team aan en voeg spelers toe."
+    "emptyNoPlayers": "Nog geen spelers. Maak een team aan en voeg spelers toe.",
+    "teams": "Teams"
   },
   "importScreen": {
     "titleRoster": "Selectie importeren",

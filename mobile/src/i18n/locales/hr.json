@@ -34,7 +34,8 @@
     "create": "Stvori",
     "add": "Dodaj",
     "rename": "Preimenuj",
-    "gotIt": "Razumijem"
+    "gotIt": "Razumijem",
+    "noResults": "Nema rezultata"
   },
   "reportTypes": {
     "report": "Izvještaj",
@@ -562,7 +563,8 @@
         "label": "Kultura / neupitne vrijednosti",
         "placeholder": "Nemjerljive kvalitete i standardi kojima daješ veliku težinu."
       }
-    }
+    },
+    "askBloomprint": "Pitaj BloomPrint"
   },
   "onboarding": {
     "step": "Korak {{current}} od {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "Još nema igrača u ovoj ekipi.",
     "importFromExcel": "Uvezi sastav iz Excela",
     "importOneByOneHint": "ili dodirni + da dodaš igrače jednog po jednog",
-    "emptyNoPlayers": "Još nema igrača. Stvori ekipu i dodaj igrače."
+    "emptyNoPlayers": "Još nema igrača. Stvori ekipu i dodaj igrače.",
+    "teams": "Ekipe"
   },
   "importScreen": {
     "titleRoster": "Uvezi sastav",

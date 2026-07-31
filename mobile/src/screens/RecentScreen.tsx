@@ -28,6 +28,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import PageContainer from '../responsive/PageContainer';
 
 type ReportItem = {
   id: number | string;
@@ -684,6 +685,7 @@ export default function RecentScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer padded={false} maxWidth={1600}>
     <View style={styles.container}>
       <View style={styles.headerRow}>
         {/* Translated titles run 20-40% longer than English. Wrap to a second
@@ -1387,6 +1389,7 @@ export default function RecentScreen() {
         />
       )}
     </View>
+    </PageContainer>
     </ScreenBackground>
   );
 }
@@ -1465,7 +1468,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8 },
+  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, width: '100%', maxWidth: 560, alignSelf: 'center'},
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
   modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   modalSub: { color: t.muted2, fontSize: 12, marginTop: 4, lineHeight: 18 },

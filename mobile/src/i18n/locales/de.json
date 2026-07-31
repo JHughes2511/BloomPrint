@@ -34,7 +34,8 @@
     "create": "Erstellen",
     "add": "Hinzufügen",
     "rename": "Umbenennen",
-    "gotIt": "Verstanden"
+    "gotIt": "Verstanden",
+    "noResults": "Keine Treffer"
   },
   "reportTypes": {
     "report": "Bericht",
@@ -562,7 +563,8 @@
         "label": "Kultur / Nicht-Verhandelbares",
         "placeholder": "Die Intangibles und Standards, die du stark gewichtest."
       }
-    }
+    },
+    "askBloomprint": "BloomPrint fragen"
   },
   "onboarding": {
     "step": "Schritt {{current}} von {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "Noch keine Spieler in diesem Team.",
     "importFromExcel": "Kader aus Excel importieren",
     "importOneByOneHint": "oder tippe auf +, um Spieler einzeln hinzuzufügen",
-    "emptyNoPlayers": "Noch keine Spieler. Erstelle ein Team und füge Spieler hinzu."
+    "emptyNoPlayers": "Noch keine Spieler. Erstelle ein Team und füge Spieler hinzu.",
+    "teams": "Teams"
   },
   "importScreen": {
     "titleRoster": "Kader importieren",

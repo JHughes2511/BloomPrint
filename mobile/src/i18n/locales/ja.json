@@ -34,7 +34,8 @@
     "create": "作成",
     "add": "追加",
     "rename": "名前を変更",
-    "gotIt": "了解"
+    "gotIt": "了解",
+    "noResults": "該当なし"
   },
   "reportTypes": {
     "report": "レポート",
@@ -562,7 +563,8 @@
         "label": "文化／譲れないもの",
         "placeholder": "あなたが重く見る無形の要素や基準。"
       }
-    }
+    },
+    "askBloomprint": "BloomPrint に質問"
   },
   "onboarding": {
     "step": "ステップ {{current}}／{{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "このチームにはまだ選手がいません。",
     "importFromExcel": "Excelから名簿をインポート",
     "importOneByOneHint": "または + をタップして選手を1人ずつ追加",
-    "emptyNoPlayers": "まだ選手がいません。チームを作成して選手を追加してください。"
+    "emptyNoPlayers": "まだ選手がいません。チームを作成して選手を追加してください。",
+    "teams": "チーム"
   },
   "importScreen": {
     "titleRoster": "名簿をインポート",

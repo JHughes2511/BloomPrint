@@ -12,6 +12,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import PageContainer, { READING_MAX_WIDTH } from '../responsive/PageContainer';
 
 export default function SummaryScreen() {
   const { t } = useTheme();
@@ -58,6 +59,7 @@ export default function SummaryScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer maxWidth={READING_MAX_WIDTH}>
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
@@ -84,6 +86,7 @@ export default function SummaryScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+    </PageContainer>
     </ScreenBackground>
   );
 }

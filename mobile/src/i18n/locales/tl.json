@@ -34,7 +34,8 @@
     "create": "Gumawa",
     "add": "Idagdag",
     "rename": "Palitan ang Pangalan",
-    "gotIt": "Nakuha ko"
+    "gotIt": "Nakuha ko",
+    "noResults": "Walang resulta"
   },
   "reportTypes": {
     "report": "Ulat",
@@ -562,7 +563,8 @@
         "label": "Kultura / Hindi Mapag-uusapan",
         "placeholder": "Ang mga intangible at pamantayang binibigyan mo ng malaking timbang."
       }
-    }
+    },
+    "askBloomprint": "Magtanong sa BloomPrint"
   },
   "onboarding": {
     "step": "Hakbang {{current}} ng {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "Wala pang player sa team na ito.",
     "importFromExcel": "Mag-import ng Roster mula sa Excel",
     "importOneByOneHint": "o i-tap ang + para magdagdag ng player nang isa-isa",
-    "emptyNoPlayers": "Wala pang player. Gumawa ng team at magdagdag ng mga player."
+    "emptyNoPlayers": "Wala pang player. Gumawa ng team at magdagdag ng mga player.",
+    "teams": "Mga Team"
   },
   "importScreen": {
     "titleRoster": "Mag-import ng Roster",

@@ -54,7 +54,7 @@ const makeDdStyles = (t: ThemeTokens) => StyleSheet.create({
   triggerText: { color: t.ink, fontSize: 14 },
   chevron: { color: t.muted, fontSize: 14 },
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'center', paddingHorizontal: 32 },
-  menu: { backgroundColor: t.sheet, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: t.cardBorder },
+  menu: { backgroundColor: t.sheet, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center'},
   menuTitle: { color: t.muted, fontSize: 11, fontFamily: fonts[700], textTransform: 'uppercase', letterSpacing: 1, padding: 14, paddingBottom: 8 },
   option: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 13, borderTopWidth: 1, borderTopColor: t.divider },
   optionActive: { backgroundColor: t.accentSoft },
@@ -526,7 +526,7 @@ export default function RosterScreen() {
               nested <Modal> won't present over an already-open Modal on iOS. */}
           {showDisclaimer && (
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: t.scrim, justifyContent: 'center', padding: 20 }}>
-              <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, maxHeight: '80%', borderWidth: 1, borderColor: t.cardBorder }}>
+              <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, maxHeight: '80%', borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                   <Ionicons name="shield-checkmark-outline" size={20} color={t.accent} />
                   <Text style={{ color: t.ink, fontSize: 17, fontFamily: fonts[800], marginLeft: 8, flex: 1 }}>{tr('roster.consentTitle')}</Text>
@@ -639,7 +639,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   emptyWrap: { alignItems: 'center', marginTop: 60 },
   emptyText: { color: t.muted, textAlign: 'center', paddingHorizontal: 32 },
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 16, borderWidth: 1, borderColor: t.cardBorder },
+  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 16, borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center'},
   modalTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 4 },
   modalSub: { color: t.muted, fontSize: 12, marginBottom: 12 },
   input: { backgroundColor: t.chip, borderRadius: 14, padding: 14, color: t.ink, fontSize: 14, marginBottom: 10, borderWidth: 1, borderColor: t.line },

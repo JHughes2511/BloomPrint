@@ -34,7 +34,8 @@
     "create": "Utwórz",
     "add": "Dodaj",
     "rename": "Zmień nazwę",
-    "gotIt": "Rozumiem"
+    "gotIt": "Rozumiem",
+    "noResults": "Brak wyników"
   },
   "reportTypes": {
     "report": "Raport",
@@ -562,7 +563,8 @@
         "label": "Kultura / kwestie bezdyskusyjne",
         "placeholder": "Cechy niemierzalne i standardy, które mocno cenisz."
       }
-    }
+    },
+    "askBloomprint": "Zapytaj BloomPrint"
   },
   "onboarding": {
     "step": "Krok {{current}} z {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "Brak zawodników w tym zespole.",
     "importFromExcel": "Importuj skład z Excela",
     "importOneByOneHint": "lub dotknij +, aby dodać zawodników pojedynczo",
-    "emptyNoPlayers": "Brak zawodników. Utwórz zespół i dodaj zawodników."
+    "emptyNoPlayers": "Brak zawodników. Utwórz zespół i dodaj zawodników.",
+    "teams": "Zespoły"
   },
   "importScreen": {
     "titleRoster": "Importuj skład",

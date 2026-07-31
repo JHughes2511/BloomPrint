@@ -14,6 +14,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
+import PageContainer, { READING_MAX_WIDTH } from '../responsive/PageContainer';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import CommentThread from '../components/CommentThread';
 
@@ -130,6 +131,7 @@ export default function CoachTrainingDetailScreen() {
 
   return (
     <ScreenBackground>
+    <PageContainer maxWidth={READING_MAX_WIDTH}>
       <KeyboardAwareScrollView
         ref={scrollRef}
         style={styles.container}
@@ -269,6 +271,7 @@ export default function CoachTrainingDetailScreen() {
           </View>
         </View>
       </KeyboardAwareScrollView>
+    </PageContainer>
     </ScreenBackground>
   );
 }

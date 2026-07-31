@@ -34,7 +34,8 @@
     "create": "Oluştur",
     "add": "Ekle",
     "rename": "Yeniden Adlandır",
-    "gotIt": "Anladım"
+    "gotIt": "Anladım",
+    "noResults": "Sonuç yok"
   },
   "reportTypes": {
     "report": "Rapor",
@@ -562,7 +563,8 @@
         "label": "Kültür / Ödün Verilmeyenler",
         "placeholder": "Ağırlıklı olarak önem verdiğiniz soyut nitelikler ve standartlar."
       }
-    }
+    },
+    "askBloomprint": "BloomPrint'e sor"
   },
   "onboarding": {
     "step": "Adım {{current}} / {{total}}",
@@ -1579,7 +1581,8 @@
     "emptyNoPlayersInTeam": "Bu takımda henüz oyuncu yok.",
     "importFromExcel": "Excel'den Kadro İçe Aktar",
     "importOneByOneHint": "veya oyuncuları tek tek eklemek için +'ya dokunun",
-    "emptyNoPlayers": "Henüz oyuncu yok. Bir takım oluşturun ve oyuncu ekleyin."
+    "emptyNoPlayers": "Henüz oyuncu yok. Bir takım oluşturun ve oyuncu ekleyin.",
+    "teams": "Takımlar"
   },
   "importScreen": {
     "titleRoster": "Kadro İçe Aktar",
