@@ -13,6 +13,10 @@ import './src/i18n';
 import { initAppLanguage } from './src/i18n';
 import { useTranslation } from 'react-i18next';
 import ErrorBoundary from './src/components/ErrorBoundary';
+// Side-effect import: patches react-native-web's do-nothing Alert and installs
+// the global CSS. Must run before anything renders or reports an error.
+import './src/web/webShims';
+import WebFrame from './src/web/WebFrame';
 
 // 5 tabs at fontSize 9: translated labels (de/nl/el run 30-40% longer than the
 // English) used to clip mid-word. Wrapping to two tight lines keeps the label
@@ -364,7 +368,11 @@ export default function App() {
               the session and theme survive — the coach lands back where they
               were rather than at the login screen. */}
           <ErrorBoundary>
-            <Root />
+            {/* Phone proportions in a browser; passes children straight through
+                on iOS and Android. */}
+            <WebFrame>
+              <Root />
+            </WebFrame>
           </ErrorBoundary>
         </PlayerAuthProvider>
       </AuthProvider>
