@@ -19,6 +19,7 @@ from ..database import get_db
 from ..auth import get_current_coach
 from .. import models
 from ..coach_context import LANGUAGE_NAMES
+from ..ai_models import SONNET
 
 router = APIRouter(prefix="/translations", tags=["translations"])
 
@@ -113,7 +114,7 @@ async def translate_report(
         import anthropic
         client = anthropic.AsyncAnthropic()
         resp = await client.messages.create(
-            model="claude-opus-4-7",
+            model=SONNET,
             max_tokens=16000,
             messages=[{"role": "user", "content": prompt}],
         )

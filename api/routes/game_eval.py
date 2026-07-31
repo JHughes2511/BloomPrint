@@ -14,6 +14,7 @@ from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
 from ..softdelete import soft_delete
+from ..ai_models import OPUS
 
 router = APIRouter(prefix="/game-eval", tags=["game-eval"])
 
@@ -947,7 +948,7 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=8000,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -1039,7 +1040,7 @@ async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSe
     try:
         import anthropic
         client = anthropic.AsyncAnthropic()
-        response = await client.messages.create(model="claude-opus-4-7", max_tokens=12000,
+        response = await client.messages.create(model=OPUS, max_tokens=12000,
                                                  messages=[{"role": "user", "content": prompt}])
         blocks = [b for b in response.content if hasattr(b, "text")]
         if not blocks:
@@ -1871,7 +1872,7 @@ async def ai_play(
         import anthropic
         client = anthropic.AsyncAnthropic()
         resp = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=8000,
             messages=[{"role": "user", "content": f"{_AI_PLAY_PROMPT}{style_block}\n\nSCENE:\n{description}"}],
         )
@@ -1882,7 +1883,7 @@ async def ai_play(
         except Exception:
             # One retry: ask the model to return corrected, strictly-valid JSON.
             fix = await client.messages.create(
-                model="claude-opus-4-7",
+                model=OPUS,
                 max_tokens=8000,
                 messages=[{"role": "user", "content":
                     "The following was supposed to be strict JSON but is invalid. "
@@ -1906,8 +1907,8 @@ async def ai_play(
         try:
             import json as _json2
             kresp = await client.messages.create(
-                model="claude-opus-4-7",
-                max_tokens=1200,
+                model=OPUS,
+                max_tokens=2000,
                 messages=[{"role": "user", "content":
                     "For the basketball play below, list 3-5 KEY suggested improvements — the movements or "
                     "positioning that would have made it succeed (get a basket, find the open man, correct the "
@@ -1977,7 +1978,7 @@ async def ai_play_describe(
         import anthropic
         client = anthropic.AsyncAnthropic()
         resp = await client.messages.create(
-            model="claude-opus-4-7", max_tokens=900,
+            model=OPUS, max_tokens=2000,
             messages=[{"role": "user", "content": prompt}],
         )
         blocks = [b for b in resp.content if hasattr(b, "text")]
@@ -2082,7 +2083,7 @@ async def ai_play_adapt(
         import anthropic
         client = anthropic.AsyncAnthropic()
         resp = await client.messages.create(
-            model="claude-opus-4-7", max_tokens=4000,
+            model=OPUS, max_tokens=4000,
             messages=[{"role": "user", "content": prompt}],
         )
         blocks = [b for b in resp.content if hasattr(b, "text")]
@@ -2092,7 +2093,7 @@ async def ai_play_adapt(
         except Exception:
             # One retry: ask the model to return corrected, strictly-valid JSON.
             fix = await client.messages.create(
-                model="claude-opus-4-7", max_tokens=4000,
+                model=OPUS, max_tokens=4000,
                 messages=[{"role": "user", "content":
                     "The following was supposed to be strict JSON but is invalid. Return ONLY the "
                     "corrected, strictly-valid JSON — same data, no prose, no trailing commas, no "
@@ -2159,7 +2160,7 @@ async def ai_play_name(
     raw = ""
     try:
         resp = await client.messages.create(
-            model="claude-opus-4-7", max_tokens=500,
+            model=OPUS, max_tokens=2000,
             messages=[{"role": "user", "content": prompt}],
         )
         blocks = [b for b in resp.content if hasattr(b, "text")]
@@ -2169,7 +2170,7 @@ async def ai_play_name(
         # One retry: ask for corrected strict JSON.
         try:
             fix = await client.messages.create(
-                model="claude-opus-4-7", max_tokens=500,
+                model=OPUS, max_tokens=2000,
                 messages=[{"role": "user", "content":
                     "Return ONLY strict JSON of the form {\"name\":\"...\",\"read\":\"...\"} for this play "
                     "text — no prose, no markdown:\n\n" + (raw or prompt)}],

@@ -8,6 +8,7 @@ from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
 from ..ownership import get_owned
+from ..ai_models import OPUS, text_of
 
 router = APIRouter(prefix="/training", tags=["training"])
 
@@ -126,11 +127,11 @@ def reformat_training_for_player(training_id: int) -> None:
             import anthropic
             client = anthropic.Anthropic()
             response = client.messages.create(
-                model="claude-opus-4-7",
+                model=OPUS,
                 max_tokens=3000,
                 messages=[{"role": "user", "content": prompt}],
             )
-            session.player_program_text = response.content[0].text
+            session.player_program_text = text_of(response)
             session.completed_drills = []
         except Exception:
             pass
@@ -246,11 +247,11 @@ async def generate_training(
 
     client = anthropic.Anthropic()
     response = client.messages.create(
-        model="claude-opus-4-7",
+        model=OPUS,
         max_tokens=3000,
         messages=[{"role": "user", "content": content}],
     )
-    program_text = response.content[0].text
+    program_text = text_of(response)
     priorities = _extract_priorities(program_text)
 
     session = models.TrainingSession(
@@ -370,11 +371,11 @@ def apply_coach_training_corrections(
         import anthropic
         client = anthropic.Anthropic()
         response = client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=3000,
             messages=[{"role": "user", "content": prompt}],
         )
-        session.program_text = response.content[0].text
+        session.program_text = text_of(response)
         session.priorities = _extract_priorities(session.program_text)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI update failed: {exc}")
@@ -463,11 +464,11 @@ def refresh_player_program(
         import anthropic
         client = anthropic.Anthropic()
         response = client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=3000,
             messages=[{"role": "user", "content": prompt}],
         )
-        session.player_program_text = response.content[0].text
+        session.player_program_text = text_of(response)
         session.completed_drills = []
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI update failed: {exc}")
@@ -565,11 +566,11 @@ async def regenerate_training(
     import anthropic
     client = anthropic.Anthropic()
     response = client.messages.create(
-        model="claude-opus-4-7",
+        model=OPUS,
         max_tokens=3000,
         messages=[{"role": "user", "content": prompt}],
     )
-    program_text = response.content[0].text
+    program_text = text_of(response)
     priorities = _extract_priorities(program_text)
 
     # Always insert a new row so the new training appears as a separate entry

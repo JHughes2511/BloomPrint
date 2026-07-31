@@ -8,6 +8,7 @@ from ..database import get_db
 from .. import models, schemas
 from ..auth import hash_password, verify_password, create_token, get_current_coach
 from ..coach_context import SYSTEM_PROFILE_FIELDS
+from ..ai_models import SONNET
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -232,8 +233,11 @@ def import_philosophy(
     import anthropic
     client = anthropic.Anthropic()
     resp = client.messages.create(
-        model="claude-opus-4-7",
-        max_tokens=2000,
+        model=SONNET,
+        # Six category fields plus a "thorough" reference_summary — this asks for
+        # a lot of JSON, and a truncated object parses as nothing rather than as
+        # a partial profile. Budgeted generously; unused tokens aren't billed.
+        max_tokens=6000,
         messages=[{"role": "user", "content": content}],
     )
     raw = "".join(getattr(b, "text", "") for b in resp.content)

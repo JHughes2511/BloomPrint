@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
 from .. import models
+from ..ai_models import OPUS
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
 
@@ -711,7 +712,7 @@ def ask(body: AskBody, db: Session = Depends(get_db), coach: models.Coach = Depe
     reply_text = ""
     for _ in range(6):  # bounded tool-use loop
         resp = client.messages.create(
-            model="claude-opus-4-7", max_tokens=2000, system=system, tools=TOOLS, messages=messages,
+            model=OPUS, max_tokens=2000, system=system, tools=TOOLS, messages=messages,
         )
         if resp.stop_reason == "tool_use":
             messages.append({"role": "assistant", "content": resp.content})
@@ -736,7 +737,7 @@ def ask(body: AskBody, db: Session = Depends(get_db), coach: models.Coach = Depe
         # a bare button with no explanation is not an acceptable reply.
         try:
             follow = client.messages.create(
-                model="claude-opus-4-7", max_tokens=1000, system=system,
+                model=OPUS, max_tokens=2000, system=system,
                 messages=messages + [{"role": "user", "content":
                     "Write your reply to the coach now (no tool calls): lead with the answer and, if you "
                     "showed a navigation button, spell out the exact steps they'll take on that screen."}],
@@ -817,7 +818,7 @@ async def confirm(body: ConfirmBody, db: Session = Depends(get_db), coach: model
         prompt += additional_focus_directive(combined_focus)
         import anthropic
         resp = anthropic.Anthropic().messages.create(
-            model="claude-opus-4-7", max_tokens=16000, messages=[{"role": "user", "content": prompt}])
+            model=OPUS, max_tokens=16000, messages=[{"role": "user", "content": prompt}])
         text = "".join(b.text for b in resp.content if hasattr(b, "text"))
         ev = _finalize_eval(db, player_id=base.id, coach=coach, output_type="matchup",
                             competition_level=level, coach_notes=None, video_path=None,
@@ -915,7 +916,7 @@ async def confirm(body: ConfirmBody, db: Session = Depends(get_db), coach: model
                                            system_profile_block(coach), level=level)
         import anthropic
         resp = anthropic.Anthropic().messages.create(
-            model="claude-opus-4-7", max_tokens=8000, messages=[{"role": "user", "content": prompt}])
+            model=OPUS, max_tokens=8000, messages=[{"role": "user", "content": prompt}])
         text = "".join(b.text for b in resp.content if hasattr(b, "text"))
         tr = models.TeamReport(coach_id=coach.id, output_type=output_type, report_text=text)
         db.add(tr)

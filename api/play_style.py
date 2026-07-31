@@ -10,6 +10,7 @@ changed boards, and at most a handful of boards are described per pass.
 import json
 
 from . import models
+from .ai_models import OPUS
 
 # Court geometry — MUST match the client (WhiteboardModal.tsx) so hand-drawn
 # pixel strokes convert back to court-feet the same way.
@@ -136,7 +137,7 @@ def _merge_profile(existing: str, descs: list) -> str:
         "bulleted tendencies. Output ONLY the profile text, no preamble."
     )
     resp = anthropic.Anthropic().messages.create(
-        model="claude-opus-4-7", max_tokens=900,
+        model=OPUS, max_tokens=2000,
         messages=[{"role": "user", "content": prompt}],
     )
     return "".join(b.text for b in resp.content if hasattr(b, "text"))

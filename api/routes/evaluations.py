@@ -12,6 +12,7 @@ from ..auth import get_current_coach
 from .. import models, schemas
 from ..softdelete import soft_delete
 from ..ownership import get_owned
+from ..ai_models import OPUS, text_of
 
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -347,11 +348,11 @@ async def submit_evaluation(
     import anthropic
     client = anthropic.AsyncAnthropic()
     response = await client.messages.create(
-        model="claude-opus-4-7",
+        model=OPUS,
         max_tokens=16000,
         messages=[{"role": "user", "content": bim_prompt}],
     )
-    report_text = response.content[0].text
+    report_text = text_of(response)
     eval_record = _finalize_eval(
         db, player_id=player_id, coach=coach, output_type=output_type,
         competition_level=competition_level, coach_notes=coach_notes,
@@ -505,7 +506,7 @@ def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_
         import anthropic
         client = anthropic.Anthropic()
         response = client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=8192,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -605,7 +606,7 @@ async def team_report(
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=8192,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -721,7 +722,7 @@ async def regenerate_team_report(
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=8192,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -767,11 +768,11 @@ async def correct_team_report(
     import anthropic
     client = anthropic.Anthropic()
     response = client.messages.create(
-        model="claude-opus-4-7",
+        model=OPUS,
         max_tokens=4096,
         messages=[{"role": "user", "content": prompt}],
     )
-    tr.report_text = response.content[0].text.strip()
+    tr.report_text = text_of(response).strip()
     db.commit()
     db.refresh(tr)
     return tr
@@ -839,7 +840,7 @@ async def regenerate_evaluation(
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=8192,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -905,11 +906,11 @@ async def apply_corrections(
     import anthropic
     client = anthropic.Anthropic()
     response = client.messages.create(
-        model="claude-opus-4-7",
+        model=OPUS,
         max_tokens=4096,
         messages=[{"role": "user", "content": prompt}],
     )
-    updated_text = response.content[0].text.strip()
+    updated_text = text_of(response).strip()
 
     ev.report_text = updated_text
     db.commit()

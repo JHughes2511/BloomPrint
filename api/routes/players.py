@@ -9,6 +9,7 @@ from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
 from ..softdelete import soft_delete
 from ..ownership import get_owned
+from ..ai_models import OPUS
 
 
 class PlayerUpdate(BaseModel):
@@ -321,7 +322,7 @@ async def player_summary(
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=summary_max_tokens,
             messages=[{"role": "user", "content": prompt}],
         )

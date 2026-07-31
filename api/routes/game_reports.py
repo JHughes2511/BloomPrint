@@ -14,6 +14,7 @@ from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
 from ..softdelete import soft_delete
 from ..ownership import owns
+from ..ai_models import OPUS, text_of
 
 
 def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: str,
@@ -733,7 +734,7 @@ async def generate_game_report(
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=16000,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -826,7 +827,7 @@ async def generate_team_training(
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=16000,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -909,11 +910,11 @@ async def correct_game_report(
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=16000,
             messages=[{"role": "user", "content": prompt}],
         )
-        _save_version(db, gr, response.content[0].text.strip())
+        _save_version(db, gr, text_of(response).strip())
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Correction failed: {exc}")
 
@@ -992,11 +993,11 @@ async def regenerate_game_report(
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=16000,
             messages=[{"role": "user", "content": prompt}],
         )
-        _save_version(db, gr, response.content[0].text.strip())
+        _save_version(db, gr, text_of(response).strip())
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Correction failed: {exc}")
     for c in pending:

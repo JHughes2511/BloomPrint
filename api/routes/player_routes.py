@@ -10,6 +10,7 @@ from .. import models, schemas
 from ..softdelete import soft_delete
 from ..ownership import get_owned
 from .player_auth import get_current_player_user
+from ..ai_models import OPUS, text_of
 
 router = APIRouter(prefix="/player", tags=["player"])
 
@@ -483,7 +484,7 @@ async def generate_player_training(
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=8192,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -668,11 +669,11 @@ def refresh_coach_training(
         import anthropic
         client = anthropic.Anthropic()
         response = client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=3000,
             messages=[{"role": "user", "content": prompt}],
         )
-        session.player_program_text = response.content[0].text
+        session.player_program_text = text_of(response)
         session.completed_drills = []
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI update failed: {exc}")
@@ -804,7 +805,7 @@ async def refresh_player_training(
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=8192,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -904,7 +905,7 @@ async def apply_player_training_corrections(
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=8192,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -982,11 +983,11 @@ def apply_coach_training_corrections(
         import anthropic
         client = anthropic.Anthropic()
         response = client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=3000,
             messages=[{"role": "user", "content": prompt}],
         )
-        session.player_program_text = response.content[0].text
+        session.player_program_text = text_of(response)
         session.completed_drills = []
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI update failed: {exc}")
@@ -1032,7 +1033,7 @@ async def coach_refresh_training(
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=8192,
             messages=[{"role": "user", "content": prompt}],
         )

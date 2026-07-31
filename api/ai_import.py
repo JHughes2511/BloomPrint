@@ -13,6 +13,7 @@ import io
 import json
 import re
 from typing import Any
+from .ai_models import SONNET, text_of
 
 
 def file_to_content_blocks(data: bytes, filename: str, content_type: str | None) -> tuple[list[dict], bool]:
@@ -99,10 +100,10 @@ def ai_extract_json(data: bytes, filename: str, content_type: str | None, instru
         return None
     content = [{"type": "text", "text": instruction}] + blocks
     resp = _client().messages.create(
-        model="claude-opus-4-7", max_tokens=8000,
+        model=SONNET, max_tokens=8000,
         messages=[{"role": "user", "content": content}],
     )
-    return _extract_json(resp.content[0].text)
+    return _extract_json(text_of(resp))
 
 
 def ai_extract_text(data: bytes, filename: str, content_type: str | None, purpose: str) -> str:
@@ -125,10 +126,10 @@ def ai_extract_text(data: bytes, filename: str, content_type: str | None, purpos
     )
     content = [{"type": "text", "text": instruction}] + blocks
     resp = _client().messages.create(
-        model="claude-opus-4-7", max_tokens=6000,
+        model=SONNET, max_tokens=6000,
         messages=[{"role": "user", "content": content}],
     )
-    return resp.content[0].text.strip()
+    return text_of(resp).strip()
 
 
 # ── Context-specific structured extractors ────────────────────────────────────

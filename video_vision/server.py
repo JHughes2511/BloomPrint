@@ -21,6 +21,7 @@ from mcp.server import Server
 from PIL import Image
 
 from .bim import build_prompt, OUTPUT_TYPES, COACH_WEIGHTS, COMPETITION_LEVELS
+from api.ai_models import OPUS, text_of
 
 app = Server("video-vision")
 
@@ -566,7 +567,7 @@ async def _handle_analyze_frame(args: dict[str, Any]) -> list[types.TextContent]
 
     img_b64 = _frame_to_base64(frame)
     response = _client().messages.create(
-        model="claude-opus-4-7",
+        model=OPUS,
         max_tokens=4096,
         messages=[
             {
@@ -581,7 +582,7 @@ async def _handle_analyze_frame(args: dict[str, Any]) -> list[types.TextContent]
             }
         ],
     )
-    answer = response.content[0].text
+    answer = text_of(response)
     return [types.TextContent(type="text", text=f"[Frame at {ts:.2f}s]\n{answer}")]
 
 
@@ -672,11 +673,11 @@ async def _handle_analyze_video(args: dict[str, Any]) -> list[types.TextContent]
     content.append({"type": "text", "text": prompt})
 
     response = _client().messages.create(
-        model="claude-opus-4-7",
+        model=OPUS,
         max_tokens=8192,
         messages=[{"role": "user", "content": content}],
     )
-    answer = response.content[0].text
+    answer = text_of(response)
 
     audio_note = " + audio transcript" if transcript_text else ""
     header = f"Video analysis ({len(frames)} frames{audio_note}): {video_path}\n{'─' * 60}\n"
@@ -781,10 +782,10 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
             content.append({"type": "text", "text": f"\nAUDIO TRANSCRIPT FROM VIDEO:\n{transcript_text}\n"})
         content += _frames_content(frames)
         response = _client().messages.create(
-            model="claude-opus-4-7", max_tokens=16000,
+            model=OPUS, max_tokens=16000,
             messages=[{"role": "user", "content": content}],
         )
-        answer = response.content[0].text
+        answer = text_of(response)
     else:
         # ── Multi-pass: map each chunk to observations, then synthesize ──
         chunks = [frames[i:i + CHUNK] for i in range(0, len(frames), CHUNK)]
@@ -805,9 +806,9 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
             )
             seg_content = [{"type": "text", "text": seg_prompt}] + _frames_content(ch)
             try:
-                r = _client().messages.create(model="claude-opus-4-7", max_tokens=1200,
+                r = _client().messages.create(model=OPUS, max_tokens=2000,
                                               messages=[{"role": "user", "content": seg_content}])
-                seg_notes.append(f"SEGMENT {i} ({t0:.0f}s–{t1:.0f}s):\n{r.content[0].text}")
+                seg_notes.append(f"SEGMENT {i} ({t0:.0f}s–{t1:.0f}s):\n{text_of(r)}")
             except Exception as exc:
                 seg_notes.append(f"SEGMENT {i}: (analysis unavailable: {exc})")
         if progress:
@@ -819,9 +820,9 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
         if transcript_text:
             synth += f"AUDIO TRANSCRIPT:\n{transcript_text[:2000]}\n\n"
         synth += "\n\n".join(seg_notes)
-        response = _client().messages.create(model="claude-opus-4-7", max_tokens=16000,
+        response = _client().messages.create(model=OPUS, max_tokens=16000,
                                              messages=[{"role": "user", "content": synth}])
-        answer = response.content[0].text
+        answer = text_of(response)
 
     header = f"BIM {output_type.upper().replace('_', ' ')} — {program} | {level}\n\n"
     return [types.TextContent(type="text", text=header + answer)]

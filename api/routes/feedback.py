@@ -24,6 +24,7 @@ from ..auth import get_current_coach
 from .. import models
 from ..mailer import send_email, feedback_to, feedback_from, mail_from
 from ..feedback_emails import ack_message
+from ..ai_models import SONNET
 
 router = APIRouter(prefix="/feedback", tags=["feedback"])
 
@@ -221,7 +222,7 @@ def build_digest(
         import anthropic
         client = anthropic.Anthropic()
         resp = client.messages.create(
-            model="claude-opus-4-7",
+            model=SONNET,
             max_tokens=8000,
             messages=[{"role": "user", "content": _digest_prompt(rows)}],
         )

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
 from .. import models, schemas
+from ..ai_models import OPUS
 
 router = APIRouter(prefix="/staff-sharing", tags=["staff-sharing"])
 
@@ -505,7 +506,7 @@ async def regenerate_shared(
         import anthropic
         client = anthropic.AsyncAnthropic()
         response = await client.messages.create(
-            model="claude-opus-4-7",
+            model=OPUS,
             max_tokens=8192,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -550,7 +551,7 @@ async def _ai_update_report(base_text: str, corrections: list[str]) -> str:
     import anthropic
     client = anthropic.AsyncAnthropic()
     response = await client.messages.create(
-        model="claude-opus-4-7", max_tokens=8192,
+        model=OPUS, max_tokens=8192,
         messages=[{"role": "user", "content": prompt}],
     )
     blocks = [b for b in response.content if hasattr(b, "text")]
