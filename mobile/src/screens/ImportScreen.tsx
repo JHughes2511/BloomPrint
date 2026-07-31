@@ -162,10 +162,11 @@ export default function ImportScreen() {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
-          {/* Translated titles run 20-40% longer, so the text block shrinks and
-              clips instead of wrapping under the chevron. */}
+          {/* Translated titles run 20-40% longer than English. Wrap to a second
+              line rather than clipping — a truncated heading tells the coach
+              less than a taller one costs them. */}
           <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginLeft: 12, marginRight: 8 }}>
-            <Text style={styles.title} numberOfLines={1}>
+            <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>
               {isRosterMode ? tr('importScreen.titleRoster') : tr('importScreen.titlePlayers')}
             </Text>
             <Text style={styles.sub} numberOfLines={1}>

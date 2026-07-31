@@ -686,9 +686,10 @@ export default function RecentScreen() {
     <ScreenBackground>
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        {/* Translated titles run 20-40% longer than English, so the title shrinks
-            and clips rather than pushing the search button off-screen. */}
-        <Text style={styles.title} numberOfLines={1}>{tr('recent.title')}</Text>
+        {/* Translated titles run 20-40% longer than English. Wrap to a second
+            line rather than clipping — a truncated heading tells the coach
+            less than a taller one costs them. */}
+        <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>{tr('recent.title')}</Text>
         <TouchableOpacity
           style={styles.searchIconBtn}
           onPress={() => {

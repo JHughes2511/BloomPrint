@@ -63,9 +63,10 @@ export default function SummaryScreen() {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
-          {/* Long translated report titles shrink and clip here instead of
-              pushing the chevron off the row. */}
-          <Text style={styles.title} numberOfLines={2}>{title}</Text>
+          {/* Long translated report titles wrap to a second line rather than
+              clipping — a truncated heading tells the coach less than a taller
+              one costs them. */}
+          <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>{title}</Text>
         </View>
 
         <View style={styles.reportBox}>

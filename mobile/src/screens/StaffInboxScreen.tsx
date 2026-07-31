@@ -747,9 +747,10 @@ export default function StaffInboxScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
-        {/* Translated titles run 20-40% longer than English, so the title shrinks
-            and clips instead of wrapping into the tab bar below. */}
-        <Text style={styles.title} numberOfLines={1}>{tr('staffHub.title')}</Text>
+        {/* Translated titles run 20-40% longer than English. Wrap to a second
+            line rather than clipping — a truncated heading tells the coach
+            less than a taller one costs them. */}
+        <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>{tr('staffHub.title')}</Text>
       </View>
 
       {/* Tab bar */}

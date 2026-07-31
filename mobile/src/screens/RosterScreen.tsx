@@ -244,10 +244,11 @@ export default function RosterScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        {/* Translated headers run 20-40% longer than English. Keep English's type
-            size and let the subtitle take a second line instead of clipping. */}
+        {/* Translated titles run 20-40% longer than English. Wrap to a second
+            line rather than clipping — a truncated heading tells the coach
+            less than a taller one costs them. */}
         <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
-          <Text style={styles.title} numberOfLines={1}>
+          <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>
             {tr('roster.title')}
           </Text>
           <Text style={styles.sub} numberOfLines={2}>

@@ -234,9 +234,10 @@ export default function ConversationScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
-        {/* Conversation titles are user data and translated fallbacks run longer,
-            so the title shrinks and clips instead of pushing the row wider. */}
-        <Text style={styles.title} numberOfLines={1}>{title}</Text>
+        {/* Translated titles run 20-40% longer than English. Wrap to a second
+            line rather than clipping — a truncated heading tells the coach
+            less than a taller one costs them. */}
+        <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>{title}</Text>
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={0}>

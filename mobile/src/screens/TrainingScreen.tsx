@@ -82,8 +82,10 @@ export default function TrainingScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
-        {/* Translated titles run 20-40% longer: shrink to fit one line. */}
-        <Text style={styles.title} numberOfLines={1}>
+        {/* Translated titles run 20-40% longer than English. Wrap to a second
+            line rather than clipping — a truncated heading tells the coach
+            less than a taller one costs them. */}
+        <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>
           {tr('reportTypes.training_program')}
         </Text>
       </View>

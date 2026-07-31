@@ -492,10 +492,11 @@ export default function TeamReportScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         <View style={styles.titleRow}>
-          {/* Translated titles run 20-40% longer than English, so the text block
-              shrinks and clips rather than pushing the import button off-screen. */}
+          {/* Translated titles run 20-40% longer than English. Wrap to a second
+            line rather than clipping — a truncated heading tells the coach
+            less than a taller one costs them. */}
           <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
-            <Text style={styles.title} numberOfLines={1}>{tr('teamReport.title')}</Text>
+            <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>{tr('teamReport.title')}</Text>
           </View>
           <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import')}>
             <Ionicons name="cloud-upload-outline" size={18} color={t.muted} />
