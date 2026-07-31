@@ -279,6 +279,11 @@ export const assistantAPI = {
 };
 
 // ── Teams ─────────────────────────────────────────────────────────────────────
+export const searchAPI = {
+  /** Global search across the coach's players, reports, teams and games. */
+  all: (q: string) => api.get('/search', { params: { q } }).then(r => r.data),
+};
+
 export const teamsAPI = {
   list: () => api.get('/teams').then(r => r.data),
   create: (data: { name: string; competition_level?: string }) =>

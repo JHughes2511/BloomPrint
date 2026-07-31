@@ -18,6 +18,7 @@ import ErrorBoundary from './src/components/ErrorBoundary';
 import './src/web/webShims';
 import { useBreakpoint } from './src/responsive/useBreakpoint';
 import Sidebar from './src/navigation/Sidebar';
+import { TeamProvider } from './src/context/TeamContext';
 
 // 5 tabs at fontSize 9: translated labels (de/nl/el run 30-40% longer than the
 // English) used to clip mid-word. Wrapping to two tight lines keeps the label
@@ -388,12 +389,16 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <PlayerAuthProvider>
+        {/* Current team is app-wide: the sidebar switcher has to mean the same
+            thing on every screen, not just on Roster. */}
+        <TeamProvider>
           {/* Inside the providers, so "Try again" remounts the navigator while
               the session and theme survive — the coach lands back where they
               were rather than at the login screen. */}
           <ErrorBoundary>
             <Root />
           </ErrorBoundary>
+        </TeamProvider>
         </PlayerAuthProvider>
       </AuthProvider>
     </ThemeProvider>

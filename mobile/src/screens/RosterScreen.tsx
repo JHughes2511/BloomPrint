@@ -72,6 +72,7 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import { useBreakpoint } from '../responsive/useBreakpoint';
+import { useTeam } from '../context/TeamContext';
 import PageContainer from '../responsive/PageContainer';
 
 export default function RosterScreen() {
@@ -81,11 +82,23 @@ export default function RosterScreen() {
   const { coach } = useAuth();
   const defaultLevel = (coach as any)?.competition_level ?? 'HS Varsity';
   const styles = makeStyles(t);
-  const { gridColumns } = useBreakpoint();
+  const { isPhone } = useBreakpoint();
+  // Team scope is app-wide now: picking a team in the sidebar filters here too,
+  // and picking one here is remembered when the coach moves to another screen.
+  const { teams, currentTeamId, setCurrentTeamId, reloadTeams } = useTeam();
 
-  const [teams, setTeams] = useState<Team[]>([]);
+  // Columns are fitted to the measured width rather than to a breakpoint, so
+  // an in-between window never leaves a stretched card or a cramped one. The
+  // grid is the only thing that knows how much room it actually got — the
+  // sidebar takes a fixed slice out of the window, so window width alone
+  // would over-count on desktop.
+  const [gridWidth, setGridWidth] = useState(0);
+  const TARGET_CARD = 280;
+  const gridColumns = gridWidth === 0
+    ? 1
+    : Math.max(1, Math.min(6, Math.floor(gridWidth / TARGET_CARD)));
+
   const [players, setPlayers] = useState<Player[]>([]);
-  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Search
@@ -124,8 +137,7 @@ export default function RosterScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const load = async () => {
     try {
-      const [t, p] = await Promise.all([teamsAPI.list(), playersAPI.list()]);
-      setTeams(t);
+      const [, p] = await Promise.all([reloadTeams(), playersAPI.list()]);
       setPlayers(p);
     } finally {
       setLoading(false);
@@ -134,9 +146,9 @@ export default function RosterScreen() {
 
   useFocusEffect(useCallback(() => { load(); }, []));
 
-  const teamFilteredPlayers = selectedTeamId == null
+  const teamFilteredPlayers = currentTeamId == null
     ? players
-    : players.filter(p => p.team_id === selectedTeamId);
+    : players.filter(p => p.team_id === currentTeamId);
 
   const q = query.trim().toLowerCase();
   const visiblePlayers = q === ''
@@ -187,8 +199,8 @@ export default function RosterScreen() {
       setShowNewTeam(false);
       setNewTeamName(''); setNewTeamLevel(defaultLevel);
       // Optimistically add team to list immediately, then refresh
-      setTeams(prev => [...prev, team]);
-      setSelectedTeamId(team.id);
+      await reloadTeams();
+      setCurrentTeamId(team.id);
       load();
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('roster.couldNotCreateTeam'));
@@ -205,7 +217,8 @@ export default function RosterScreen() {
         onPress: async () => {
           try {
             await teamsAPI.delete(team.id);
-            if (selectedTeamId === team.id) setSelectedTeamId(null);
+            await reloadTeams();
+            if (currentTeamId === team.id) setCurrentTeamId(null);
             load();
           } catch (e: any) {
             Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('roster.couldNotDeleteTeam'));
@@ -228,6 +241,7 @@ export default function RosterScreen() {
     setSavingTeam(true);
     try {
       await teamsAPI.update(editTeam.id, { name: editTeamName.trim() });
+      await reloadTeams();
       setEditTeam(null);
       setEditTeamName('');
       load();
@@ -238,13 +252,13 @@ export default function RosterScreen() {
     }
   };
 
-  const currentTeamName = teams.find(t => t.id === selectedTeamId)?.name;
+  const currentTeamName = teams.find(t => t.id === currentTeamId)?.name;
 
   if (loading) return <ScreenBackground><View style={styles.center}><ActivityIndicator color={t.accent} size="large" /></View></ScreenBackground>;
 
   return (
     <ScreenBackground>
-    <PageContainer padded={false}>
+    <PageContainer padded={false} maxWidth={1600}>
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
@@ -275,8 +289,8 @@ export default function RosterScreen() {
             <Text style={styles.importBtnText} numberOfLines={1}>{tr('roster.importRoster')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.addBtn} onPress={() => {
-            setNewTeamId(selectedTeamId);
-            const selTeam = teams.find(tm => tm.id === selectedTeamId);
+            setNewTeamId(currentTeamId);
+            const selTeam = teams.find(tm => tm.id === currentTeamId);
             setNewLevel(selTeam?.competition_level || defaultLevel);
             setShowAddTeamPicker(false); setShowAdd(true);
           }}>
@@ -310,19 +324,19 @@ export default function RosterScreen() {
       {/* Team filter chips */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.teamsRow} contentContainerStyle={{ paddingHorizontal: 16, gap: 8, alignItems: 'center' }}>
         <TouchableOpacity
-          style={[styles.teamChip, selectedTeamId == null && styles.teamChipActive]}
-          onPress={() => setSelectedTeamId(null)}
+          style={[styles.teamChip, currentTeamId == null && styles.teamChipActive]}
+          onPress={() => setCurrentTeamId(null)}
         >
-          <Text style={[styles.teamChipText, selectedTeamId == null && styles.teamChipTextActive]}>{tr('roster.all')}</Text>
+          <Text style={[styles.teamChipText, currentTeamId == null && styles.teamChipTextActive]}>{tr('roster.all')}</Text>
         </TouchableOpacity>
         {teams.filter((tm: any) => !tm.parent_team_id).map(tm => (
           <TouchableOpacity
             key={tm.id}
-            style={[styles.teamChip, selectedTeamId === tm.id && styles.teamChipActive]}
-            onPress={() => setSelectedTeamId(tm.id)}
+            style={[styles.teamChip, currentTeamId === tm.id && styles.teamChipActive]}
+            onPress={() => setCurrentTeamId(tm.id)}
             onLongPress={() => manageTeam(tm)}
           >
-            <Text style={[styles.teamChipText, selectedTeamId === tm.id && styles.teamChipTextActive]}>{tm.name}</Text>
+            <Text style={[styles.teamChipText, currentTeamId === tm.id && styles.teamChipTextActive]}>{tm.name}</Text>
           </TouchableOpacity>
         ))}
         <TouchableOpacity style={styles.newTeamChip} onPress={() => setShowNewTeam(true)}>
@@ -336,6 +350,9 @@ export default function RosterScreen() {
           a 40-player roster far longer to scan than it needs to be. `key`
           changes with the column count because FlatList cannot change
           numColumns on an existing list. */}
+      {/* Measured here, not from window width: the sidebar takes a fixed slice
+          out of the window, so only the grid knows how much room it really got. */}
+      <View style={{ flex: 1 }} onLayout={e => setGridWidth(e.nativeEvent.layout.width)}>
       <FlatList
         key={`roster-${gridColumns}`}
         numColumns={gridColumns}
@@ -346,7 +363,8 @@ export default function RosterScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={[styles.card, gridColumns > 1 && styles.cardInGrid]}
+            style={[styles.card, gridColumns > 1 && styles.cardInGrid,
+                    gridColumns > 1 && { maxWidth: `${100 / gridColumns}%` }]}
             onPress={() => navigation.navigate('PlayerProfile', { playerId: item.id })}
             onLongPress={() => {
               Alert.alert(tr('roster.deletePlayerTitle'), tr('roster.deletePlayerMsg', { name: item.name }), [
@@ -375,7 +393,7 @@ export default function RosterScreen() {
           <View style={styles.emptyWrap}>
             {teams.length === 0 ? (
               <Text style={styles.emptyText}>{tr('roster.emptyCreateTeamFirst')}</Text>
-            ) : selectedTeamId != null ? (
+            ) : currentTeamId != null ? (
               <>
                 <Ionicons name="people-outline" size={40} color={t.line} />
                 <Text style={styles.emptyText}>{tr('roster.emptyNoPlayersInTeam')}</Text>
@@ -391,6 +409,7 @@ export default function RosterScreen() {
           </View>
         }
       />
+      </View>
 
       {/* Add Player Modal */}
       <Modal visible={showAdd} transparent animationType="slide">
@@ -608,6 +627,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   // In a grid the row gap comes from columnWrapperStyle, so the card drops its
   // own horizontal margin and takes an equal share of the row instead.
+  //
+  // maxWidth matters on the LAST row: with flex alone, a row holding one
+  // leftover player stretches that card across the full width and it stops
+  // looking like part of the grid. The cap only binds when a row is short —
+  // a full row is already narrower than its share once the gaps are removed.
   cardInGrid: { flex: 1, marginHorizontal: 0 },
   cardLeft: { flex: 1 },
   playerName: { color: t.ink, fontSize: 16, fontFamily: fonts[700] },
