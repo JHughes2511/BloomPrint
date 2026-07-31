@@ -403,7 +403,23 @@
     "regenFailedTitle": "重新生成失败",
     "regenFailedMsg": "无法重新生成评估",
     "noPendingCorrectionsTitle": "无待处理更正",
-    "noPendingCorrectionsMsg": "重新生成前请至少添加一条更正。"
+    "noPendingCorrectionsMsg": "重新生成前请至少添加一条更正。",
+    "fixed": {
+      "offensiveSkills": "进攻技术",
+      "defense": "防守",
+      "projection": "前景预测",
+      "systemFit": "体系契合度",
+      "development": "发展",
+      "outlook": "展望",
+      "offense": "进攻",
+      "adjustments": "调整",
+      "analysis": "分析",
+      "whatsWorking": "有效的部分",
+      "players": "球员",
+      "lineupsDepth": "阵容与厚度",
+      "clips": "片段",
+      "summary": "总结"
+    }
   },
   "home": {
     "intelligenceModel": "智能模型",

@@ -403,7 +403,23 @@
     "regenFailedTitle": "Regenerare eșuată",
     "regenFailedMsg": "Evaluarea nu a putut fi regenerată",
     "noPendingCorrectionsTitle": "Nicio corectură în așteptare",
-    "noPendingCorrectionsMsg": "Adaugă cel puțin o corectură înainte de a regenera."
+    "noPendingCorrectionsMsg": "Adaugă cel puțin o corectură înainte de a regenera.",
+    "fixed": {
+      "offensiveSkills": "Abilități ofensive",
+      "defense": "Apărare",
+      "projection": "Proiecție",
+      "systemFit": "Potrivire în sistem",
+      "development": "Dezvoltare",
+      "outlook": "Perspective",
+      "offense": "Atac",
+      "adjustments": "Ajustări",
+      "analysis": "Analiză",
+      "whatsWorking": "Ce funcționează",
+      "players": "Jucători",
+      "lineupsDepth": "Formule și adâncime",
+      "clips": "Clipuri",
+      "summary": "Rezumat"
+    }
   },
   "home": {
     "intelligenceModel": "Model de inteligență",

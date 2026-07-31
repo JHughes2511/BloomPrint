@@ -403,7 +403,23 @@
     "regenFailedTitle": "Yeniden Oluşturma Başarısız",
     "regenFailedMsg": "Değerlendirme yeniden oluşturulamadı",
     "noPendingCorrectionsTitle": "Bekleyen Düzeltme Yok",
-    "noPendingCorrectionsMsg": "Yeniden oluşturmadan önce en az bir düzeltme ekleyin."
+    "noPendingCorrectionsMsg": "Yeniden oluşturmadan önce en az bir düzeltme ekleyin.",
+    "fixed": {
+      "offensiveSkills": "Hücum becerileri",
+      "defense": "Savunma",
+      "projection": "Projeksiyon",
+      "systemFit": "Sisteme uyum",
+      "development": "Gelişim",
+      "outlook": "Görünüm",
+      "offense": "Hücum",
+      "adjustments": "Ayarlamalar",
+      "analysis": "Analiz",
+      "whatsWorking": "İşe yarayanlar",
+      "players": "Oyuncular",
+      "lineupsDepth": "Beşliler ve derinlik",
+      "clips": "Klipler",
+      "summary": "Özet"
+    }
   },
   "home": {
     "intelligenceModel": "Zeka Modeli",

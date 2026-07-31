@@ -403,7 +403,23 @@
     "regenFailedTitle": "Ponowne generowanie nie powiodło się",
     "regenFailedMsg": "Nie udało się wygenerować oceny ponownie",
     "noPendingCorrectionsTitle": "Brak oczekujących poprawek",
-    "noPendingCorrectionsMsg": "Dodaj co najmniej jedną poprawkę przed ponownym generowaniem."
+    "noPendingCorrectionsMsg": "Dodaj co najmniej jedną poprawkę przed ponownym generowaniem.",
+    "fixed": {
+      "offensiveSkills": "Umiejętności ofensywne",
+      "defense": "Obrona",
+      "projection": "Prognoza",
+      "systemFit": "Dopasowanie do systemu",
+      "development": "Rozwój",
+      "outlook": "Perspektywy",
+      "offense": "Atak",
+      "adjustments": "Korekty",
+      "analysis": "Analiza",
+      "whatsWorking": "Co działa",
+      "players": "Zawodnicy",
+      "lineupsDepth": "Składy i głębia",
+      "clips": "Klipy",
+      "summary": "Podsumowanie"
+    }
   },
   "home": {
     "intelligenceModel": "Model inteligencji",

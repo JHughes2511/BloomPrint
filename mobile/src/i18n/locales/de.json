@@ -403,7 +403,23 @@
     "regenFailedTitle": "Neu generieren fehlgeschlagen",
     "regenFailedMsg": "Bewertung konnte nicht neu generiert werden",
     "noPendingCorrectionsTitle": "Keine ausstehenden Korrekturen",
-    "noPendingCorrectionsMsg": "Füge mindestens eine Korrektur hinzu, bevor du neu generierst."
+    "noPendingCorrectionsMsg": "Füge mindestens eine Korrektur hinzu, bevor du neu generierst.",
+    "fixed": {
+      "offensiveSkills": "Offensive Fähigkeiten",
+      "defense": "Defensive",
+      "projection": "Prognose",
+      "systemFit": "System-Passung",
+      "development": "Entwicklung",
+      "outlook": "Ausblick",
+      "offense": "Offensive",
+      "adjustments": "Anpassungen",
+      "analysis": "Analyse",
+      "whatsWorking": "Was funktioniert",
+      "players": "Spieler",
+      "lineupsDepth": "Aufstellungen & Kadertiefe",
+      "clips": "Clips",
+      "summary": "Zusammenfassung"
+    }
   },
   "home": {
     "intelligenceModel": "Intelligenzmodell",

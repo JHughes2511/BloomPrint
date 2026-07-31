@@ -403,7 +403,23 @@
     "regenFailedTitle": "Ponovno generiranje nije uspjelo",
     "regenFailedMsg": "Nije moguće ponovno generirati procjenu",
     "noPendingCorrectionsTitle": "Nema ispravaka na čekanju",
-    "noPendingCorrectionsMsg": "Dodaj barem jedan ispravak prije ponovnog generiranja."
+    "noPendingCorrectionsMsg": "Dodaj barem jedan ispravak prije ponovnog generiranja.",
+    "fixed": {
+      "offensiveSkills": "Napadačke vještine",
+      "defense": "Obrana",
+      "projection": "Projekcija",
+      "systemFit": "Uklapanje u sustav",
+      "development": "Razvoj",
+      "outlook": "Izgledi",
+      "offense": "Napad",
+      "adjustments": "Prilagodbe",
+      "analysis": "Analiza",
+      "whatsWorking": "Što funkcionira",
+      "players": "Igrači",
+      "lineupsDepth": "Postave i dubina",
+      "clips": "Klipovi",
+      "summary": "Sažetak"
+    }
   },
   "home": {
     "intelligenceModel": "Model inteligencije",

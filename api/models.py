@@ -441,6 +441,35 @@ class ReportTranslation(Base):
     created_at  = Column(DateTime, default=datetime.utcnow)
 
 
+class Feedback(Base):
+    """In-app feedback from a coach.
+
+    Stored before it is emailed, and kept afterwards: the email is a nudge, the
+    row is the record. The digest reads these rows, so losing them to a failed
+    send would lose the input the priorities email is built from.
+    """
+    __tablename__ = "feedback"
+
+    id          = Column(Integer, primary_key=True, index=True)
+    coach_id    = Column(Integer, ForeignKey("coaches.id"), nullable=True)
+    text        = Column(Text, nullable=False)
+    # Context that makes a report actionable without having to ask.
+    screen      = Column(String, nullable=True)   # where they were when they wrote it
+    app_version = Column(String, nullable=True)
+    platform    = Column(String, nullable=True)   # ios / android / web
+    language    = Column(String, nullable=True)   # so a non-English report is readable in context
+    # Filled by the digest pass, not at submit time — categorising on submit
+    # would put an AI call in the way of the coach's tap.
+    category    = Column(String, nullable=True)   # bug / confusing / feature / praise / other
+    priority    = Column(String, nullable=True)   # must_have / nice_to_have
+    summary     = Column(Text, nullable=True)     # one-line normalisation for the digest
+    emailed     = Column(Boolean, default=False)  # the immediate notification went out
+    digested_at = Column(DateTime, nullable=True) # included in a priorities email
+    created_at  = Column(DateTime, default=datetime.utcnow)
+
+    coach = relationship("Coach")
+
+
 class CoachNotification(Base):
     __tablename__ = "coach_notifications"
 

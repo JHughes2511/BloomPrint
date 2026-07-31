@@ -403,7 +403,23 @@
     "regenFailedTitle": "Omgenerering misslyckades",
     "regenFailedMsg": "Kunde inte generera om utvärderingen",
     "noPendingCorrectionsTitle": "Inga väntande rättelser",
-    "noPendingCorrectionsMsg": "Lägg till minst en rättelse innan du genererar om."
+    "noPendingCorrectionsMsg": "Lägg till minst en rättelse innan du genererar om.",
+    "fixed": {
+      "offensiveSkills": "Offensiva färdigheter",
+      "defense": "Försvar",
+      "projection": "Prognos",
+      "systemFit": "Systempassning",
+      "development": "Utveckling",
+      "outlook": "Utsikter",
+      "offense": "Anfall",
+      "adjustments": "Justeringar",
+      "analysis": "Analys",
+      "whatsWorking": "Det som fungerar",
+      "players": "Spelare",
+      "lineupsDepth": "Laguppställningar & djup",
+      "clips": "Klipp",
+      "summary": "Sammanfattning"
+    }
   },
   "home": {
     "intelligenceModel": "Intelligensmodell",

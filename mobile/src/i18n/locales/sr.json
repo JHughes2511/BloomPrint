@@ -403,7 +403,23 @@
     "regenFailedTitle": "Regenerisanje nije uspelo",
     "regenFailedMsg": "Nije moguće regenerisati procenu",
     "noPendingCorrectionsTitle": "Nema ispravki na čekanju",
-    "noPendingCorrectionsMsg": "Dodaj bar jednu ispravku pre regenerisanja."
+    "noPendingCorrectionsMsg": "Dodaj bar jednu ispravku pre regenerisanja.",
+    "fixed": {
+      "offensiveSkills": "Нападачке вештине",
+      "defense": "Одбрана",
+      "projection": "Пројекција",
+      "systemFit": "Уклапање у систем",
+      "development": "Развој",
+      "outlook": "Изгледи",
+      "offense": "Напад",
+      "adjustments": "Прилагођавања",
+      "analysis": "Анализа",
+      "whatsWorking": "Шта функционише",
+      "players": "Играчи",
+      "lineupsDepth": "Поставе и дубина",
+      "clips": "Клипови",
+      "summary": "Резиме"
+    }
   },
   "home": {
     "intelligenceModel": "Model inteligencije",

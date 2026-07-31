@@ -426,9 +426,8 @@ export default function EvalReportScreen() {
   // loaded changes the hook count between renders and crashes with "Rendered
   // more hooks than during the previous render".
   // Reports keep the language they were written in; when the reader's language
-  // differs the FULL report body is shown translated, with a toggle back. The
-  // broken-out section view still reads the original, because getFixedSections
-  // matches English headings and would come back empty.
+  // differs both the full body AND the broken-out sections are shown
+  // translated, with a toggle back to the original.
   const rt = useReportTranslation('eval', ev?.id, ev?.report_text ?? undefined);
 
   if (loading) return <ScreenBackground><View style={styles.center}><ActivityIndicator color={t.accent} size="large" /></View></ScreenBackground>;
@@ -441,8 +440,13 @@ export default function EvalReportScreen() {
   const isSingle = parseOutputTypes(ev.output_type).length === 1;
   // Recruit grade only makes sense for player-evaluation report types.
   const showsRecruit = ['scouting_report', 'player_eval', 'recruitment_profile'].includes(singleType);
-  const brief = extractBrief(ev.report_text);
-  const fixedSections = isSingle ? getFixedSections(ev.output_type, ev.report_text) : null;
+  const brief = extractBrief(rt.showOriginal ? ev.report_text : rt.text) || extractBrief(ev.report_text);
+  // Sections are bucketed from the original headings but rendered from the
+  // translation, so the view follows the reader's language without the
+  // English matchers coming back empty. "View original" reverts both.
+  const fixedSections = isSingle
+    ? getFixedSections(ev.output_type, ev.report_text, rt.showOriginal ? null : rt.text)
+    : null;
   const recruit = recruitGrade(ev.overall_grade);
   const gradeTrend = history
     .filter(h => h.overall_grade != null)
@@ -520,7 +524,7 @@ export default function EvalReportScreen() {
             <View key={s.key}>
               <View style={styles.fixedHead}>
                 <Ionicons name={s.icon as any} size={17} color={s.tone === 'brown' ? t.brown : t.label} />
-                <Text style={[styles.fixedHeadLabel, { color: s.tone === 'brown' ? t.brown : t.label }]}>{s.label}</Text>
+                <Text style={[styles.fixedHeadLabel, { color: s.tone === 'brown' ? t.brown : t.label }]}>{tr(s.labelKey)}</Text>
               </View>
               <View>{renderReport(s.body, { heading: t.ink, body: t.inkSoft })}</View>
               {i < arr.length - 1 && <View style={styles.fixedDivider} />}

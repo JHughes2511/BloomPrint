@@ -5,7 +5,10 @@ import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useAuth } from '../context/AuthContext';
-import { playerAPI } from '../api/client';
+import { playerAPI, feedbackAPI } from '../api/client';
+// Read straight from app.json rather than pulling in expo-application just to
+// stamp a version on a feedback row.
+const APP_VERSION: string | undefined = require('../../app.json')?.expo?.version;
 import { useTheme } from '../theme/ThemeProvider';
 import { ScreenBackground, SectionLabel, Card, IconTile, Txt } from '../theme/components';
 import { Icon, IconName } from '../theme/icons';
@@ -100,7 +103,12 @@ export default function HomeScreen() {
     if (!text) return;
     setSubmittingFeedback(true);
     try {
-      // TODO: wire up what happens on submit (per your instructions to come).
+      await feedbackAPI.submit({
+        text,
+        screen: 'Home',
+        platform: Platform.OS,
+        app_version: APP_VERSION,
+      });
       Alert.alert(tr('home.feedbackThanksTitle'), tr('home.feedbackThanksMsg'));
       setFeedbackText('');
       setShowFeedback(false);

@@ -403,7 +403,23 @@
     "regenFailedTitle": "فشلت إعادة الإنشاء",
     "regenFailedMsg": "تعذّرت إعادة إنشاء التقييم",
     "noPendingCorrectionsTitle": "لا توجد تصحيحات معلّقة",
-    "noPendingCorrectionsMsg": "أضف تصحيحًا واحدًا على الأقل قبل إعادة الإنشاء."
+    "noPendingCorrectionsMsg": "أضف تصحيحًا واحدًا على الأقل قبل إعادة الإنشاء.",
+    "fixed": {
+      "offensiveSkills": "المهارات الهجومية",
+      "defense": "الدفاع",
+      "projection": "التوقعات",
+      "systemFit": "الملاءمة للنظام",
+      "development": "التطوير",
+      "outlook": "النظرة المستقبلية",
+      "offense": "الهجوم",
+      "adjustments": "التعديلات",
+      "analysis": "التحليل",
+      "whatsWorking": "ما ينجح",
+      "players": "اللاعبون",
+      "lineupsDepth": "التشكيلات والعمق",
+      "clips": "المقاطع",
+      "summary": "الملخص"
+    }
   },
   "home": {
     "intelligenceModel": "نموذج الذكاء",

@@ -403,7 +403,23 @@
     "regenFailedTitle": "Перегенерація не вдалася",
     "regenFailedMsg": "Не вдалося перегенерувати оцінку",
     "noPendingCorrectionsTitle": "Немає незастосованих виправлень",
-    "noPendingCorrectionsMsg": "Додайте принаймні одне виправлення перед перегенерацією."
+    "noPendingCorrectionsMsg": "Додайте принаймні одне виправлення перед перегенерацією.",
+    "fixed": {
+      "offensiveSkills": "Атакувальні навички",
+      "defense": "Захист",
+      "projection": "Прогноз",
+      "systemFit": "Відповідність системі",
+      "development": "Розвиток",
+      "outlook": "Перспективи",
+      "offense": "Напад",
+      "adjustments": "Коригування",
+      "analysis": "Аналіз",
+      "whatsWorking": "Що працює",
+      "players": "Гравці",
+      "lineupsDepth": "Склади та глибина",
+      "clips": "Кліпи",
+      "summary": "Підсумок"
+    }
   },
   "home": {
     "intelligenceModel": "Модель інтелекту",

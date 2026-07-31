@@ -403,7 +403,23 @@
     "regenFailedTitle": "ხელახლა გენერაცია ჩაიშალა",
     "regenFailedMsg": "შეფასების ხელახლა გენერაცია ვერ მოხერხდა",
     "noPendingCorrectionsTitle": "მოლოდინში მყოფი შესწორებები არ არის",
-    "noPendingCorrectionsMsg": "ხელახლა გენერაციამდე დაამატეთ მინიმუმ ერთი შესწორება."
+    "noPendingCorrectionsMsg": "ხელახლა გენერაციამდე დაამატეთ მინიმუმ ერთი შესწორება.",
+    "fixed": {
+      "offensiveSkills": "შეტევითი უნარები",
+      "defense": "დაცვა",
+      "projection": "პროგნოზი",
+      "systemFit": "სისტემასთან შესაბამისობა",
+      "development": "განვითარება",
+      "outlook": "პერსპექტივა",
+      "offense": "შეტევა",
+      "adjustments": "კორექტივები",
+      "analysis": "ანალიზი",
+      "whatsWorking": "რა მუშაობს",
+      "players": "მოთამაშეები",
+      "lineupsDepth": "შემადგენლობა და სიღრმე",
+      "clips": "კლიპები",
+      "summary": "შეჯამება"
+    }
   },
   "home": {
     "intelligenceModel": "ინტელექტის მოდელი",

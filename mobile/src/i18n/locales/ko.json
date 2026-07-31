@@ -403,7 +403,23 @@
     "regenFailedTitle": "재생성 실패",
     "regenFailedMsg": "평가를 재생성할 수 없습니다",
     "noPendingCorrectionsTitle": "대기 중인 수정 사항 없음",
-    "noPendingCorrectionsMsg": "재생성하기 전에 수정 사항을 하나 이상 추가하세요."
+    "noPendingCorrectionsMsg": "재생성하기 전에 수정 사항을 하나 이상 추가하세요.",
+    "fixed": {
+      "offensiveSkills": "공격 기술",
+      "defense": "수비",
+      "projection": "전망",
+      "systemFit": "시스템 적합성",
+      "development": "성장",
+      "outlook": "향후 전망",
+      "offense": "공격",
+      "adjustments": "조정 사항",
+      "analysis": "분석",
+      "whatsWorking": "잘되고 있는 점",
+      "players": "선수",
+      "lineupsDepth": "라인업 및 뎁스",
+      "clips": "클립",
+      "summary": "요약"
+    }
   },
   "home": {
     "intelligenceModel": "인텔리전스 모델",

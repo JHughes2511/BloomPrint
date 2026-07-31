@@ -403,7 +403,23 @@
     "regenFailedTitle": "Falha na Regeneração",
     "regenFailedMsg": "Não foi possível regenerar a avaliação",
     "noPendingCorrectionsTitle": "Sem Correções Pendentes",
-    "noPendingCorrectionsMsg": "Adicione pelo menos uma correção antes de regenerar."
+    "noPendingCorrectionsMsg": "Adicione pelo menos uma correção antes de regenerar.",
+    "fixed": {
+      "offensiveSkills": "Competências ofensivas",
+      "defense": "Defesa",
+      "projection": "Projeção",
+      "systemFit": "Encaixe no sistema",
+      "development": "Desenvolvimento",
+      "outlook": "Perspetiva",
+      "offense": "Ataque",
+      "adjustments": "Ajustes",
+      "analysis": "Análise",
+      "whatsWorking": "O que está a funcionar",
+      "players": "Jogadores",
+      "lineupsDepth": "Quintetos e profundidade",
+      "clips": "Clips",
+      "summary": "Resumo"
+    }
   },
   "home": {
     "intelligenceModel": "Modelo de inteligência",

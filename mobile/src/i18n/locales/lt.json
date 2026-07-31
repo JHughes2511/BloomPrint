@@ -403,7 +403,23 @@
     "regenFailedTitle": "Pergeneravimas nepavyko",
     "regenFailedMsg": "Nepavyko pergeneruoti vertinimo",
     "noPendingCorrectionsTitle": "Nėra laukiančių pataisymų",
-    "noPendingCorrectionsMsg": "Prieš pergeneruodami pridėkite bent vieną pataisymą."
+    "noPendingCorrectionsMsg": "Prieš pergeneruodami pridėkite bent vieną pataisymą.",
+    "fixed": {
+      "offensiveSkills": "Puolimo įgūdžiai",
+      "defense": "Gynyba",
+      "projection": "Prognozė",
+      "systemFit": "Tinkamumas sistemai",
+      "development": "Vystymasis",
+      "outlook": "Perspektyvos",
+      "offense": "Puolimas",
+      "adjustments": "Korekcijos",
+      "analysis": "Analizė",
+      "whatsWorking": "Kas veikia",
+      "players": "Žaidėjai",
+      "lineupsDepth": "Sudėtys ir gylis",
+      "clips": "Klipai",
+      "summary": "Santrauka"
+    }
   },
   "home": {
     "intelligenceModel": "Intelekto modelis",

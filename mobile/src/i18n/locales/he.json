@@ -403,7 +403,23 @@
     "regenFailedTitle": "היצירה מחדש נכשלה",
     "regenFailedMsg": "לא ניתן ליצור מחדש את ההערכה",
     "noPendingCorrectionsTitle": "אין תיקונים ממתינים",
-    "noPendingCorrectionsMsg": "הוסף לפחות תיקון אחד לפני יצירה מחדש."
+    "noPendingCorrectionsMsg": "הוסף לפחות תיקון אחד לפני יצירה מחדש.",
+    "fixed": {
+      "offensiveSkills": "יכולות התקפיות",
+      "defense": "הגנה",
+      "projection": "תחזית",
+      "systemFit": "התאמה לשיטה",
+      "development": "פיתוח",
+      "outlook": "מבט קדימה",
+      "offense": "התקפה",
+      "adjustments": "התאמות",
+      "analysis": "ניתוח",
+      "whatsWorking": "מה עובד",
+      "players": "שחקנים",
+      "lineupsDepth": "חמישיות ועומק",
+      "clips": "קטעים",
+      "summary": "סיכום"
+    }
   },
   "home": {
     "intelligenceModel": "מודל אינטליגנציה",

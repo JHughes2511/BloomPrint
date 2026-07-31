@@ -403,7 +403,23 @@
     "regenFailedTitle": "Nabigo ang Pag-regenerate",
     "regenFailedMsg": "Hindi ma-regenerate ang ebalwasyon",
     "noPendingCorrectionsTitle": "Walang Nakabinbing Pagwawasto",
-    "noPendingCorrectionsMsg": "Magdagdag ng kahit isang pagwawasto bago mag-regenerate."
+    "noPendingCorrectionsMsg": "Magdagdag ng kahit isang pagwawasto bago mag-regenerate.",
+    "fixed": {
+      "offensiveSkills": "Mga kasanayan sa opensa",
+      "defense": "Depensa",
+      "projection": "Projection",
+      "systemFit": "Angkop sa sistema",
+      "development": "Pag-unlad",
+      "outlook": "Pananaw",
+      "offense": "Opensa",
+      "adjustments": "Mga adjustment",
+      "analysis": "Pagsusuri",
+      "whatsWorking": "Ang gumagana",
+      "players": "Mga manlalaro",
+      "lineupsDepth": "Lineup at lalim",
+      "clips": "Mga clip",
+      "summary": "Buod"
+    }
   },
   "home": {
     "intelligenceModel": "Modelo ng katalinuhan",

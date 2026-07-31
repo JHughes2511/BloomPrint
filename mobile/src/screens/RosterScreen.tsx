@@ -254,28 +254,30 @@ export default function RosterScreen() {
             {currentTeamName ?? tr('roster.allTeams')} · {tr('roster.playersCount', { count: visiblePlayers.length })}
           </Text>
         </View>
-        <TouchableOpacity
-          style={styles.searchBtn}
-          onPress={() => setSearchOpen(o => {
-            const next = !o;
-            if (!next) setQuery('');
-            return next;
-          })}
-        >
-          <Ionicons name={searchOpen ? 'search' : 'search-outline'} size={18} color={searchOpen ? t.accent : t.muted} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import', { mode: 'roster' })}>
-          <Ionicons name="cloud-upload-outline" size={16} color={t.muted} />
-          <Text style={styles.importBtnText} numberOfLines={1}>{tr('roster.importRoster')}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.addBtn} onPress={() => {
-          setNewTeamId(selectedTeamId);
-          const selTeam = teams.find(tm => tm.id === selectedTeamId);
-          setNewLevel(selTeam?.competition_level || defaultLevel);
-          setShowAddTeamPicker(false); setShowAdd(true);
-        }}>
-          <Ionicons name="add" size={22} color={t.ctaText} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            style={styles.searchBtn}
+            onPress={() => setSearchOpen(o => {
+              const next = !o;
+              if (!next) setQuery('');
+              return next;
+            })}
+          >
+            <Ionicons name={searchOpen ? 'search' : 'search-outline'} size={18} color={searchOpen ? t.accent : t.muted} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import', { mode: 'roster' })}>
+            <Ionicons name="cloud-upload-outline" size={16} color={t.muted} />
+            <Text style={styles.importBtnText} numberOfLines={1}>{tr('roster.importRoster')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.addBtn} onPress={() => {
+            setNewTeamId(selectedTeamId);
+            const selTeam = teams.find(tm => tm.id === selectedTeamId);
+            setNewLevel(selTeam?.competition_level || defaultLevel);
+            setShowAddTeamPicker(false); setShowAdd(true);
+          }}>
+            <Ionicons name="add" size={22} color={t.ctaText} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Search bar */}
@@ -565,6 +567,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, paddingTop: 56 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 20, marginBottom: 12 },
+  // The row top-aligns so the title sits high, which pushed these against the
+  // status bar and clipped them on the taller iPhones. Nudged down to clear it.
+  headerActions: { flexDirection: 'row', alignItems: 'center', flexShrink: 1, minWidth: 0, marginTop: 6 },
   title: { fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6, color: t.ink },
   sub: { fontSize: 12, color: t.muted, marginTop: 2 },
   importBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: t.cta2Border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, marginRight: 8, flexShrink: 1, maxWidth: 150 },

@@ -403,7 +403,23 @@
     "regenFailedTitle": "Η Αναδημιουργία Απέτυχε",
     "regenFailedMsg": "Δεν ήταν δυνατή η αναδημιουργία της αξιολόγησης",
     "noPendingCorrectionsTitle": "Καμία Εκκρεμής Διόρθωση",
-    "noPendingCorrectionsMsg": "Πρόσθεσε τουλάχιστον μία διόρθωση πριν την αναδημιουργία."
+    "noPendingCorrectionsMsg": "Πρόσθεσε τουλάχιστον μία διόρθωση πριν την αναδημιουργία.",
+    "fixed": {
+      "offensiveSkills": "Επιθετικές ικανότητες",
+      "defense": "Άμυνα",
+      "projection": "Πρόβλεψη",
+      "systemFit": "Ταίριασμα στο σύστημα",
+      "development": "Ανάπτυξη",
+      "outlook": "Προοπτικές",
+      "offense": "Επίθεση",
+      "adjustments": "Προσαρμογές",
+      "analysis": "Ανάλυση",
+      "whatsWorking": "Τι λειτουργεί",
+      "players": "Παίκτες",
+      "lineupsDepth": "Πεντάδες & βάθος",
+      "clips": "Κλιπ",
+      "summary": "Σύνοψη"
+    }
   },
   "home": {
     "intelligenceModel": "Μοντέλο νοημοσύνης",

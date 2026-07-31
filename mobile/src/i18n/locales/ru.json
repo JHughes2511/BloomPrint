@@ -403,7 +403,23 @@
     "regenFailedTitle": "Ошибка перегенерации",
     "regenFailedMsg": "Не удалось перегенерировать оценку",
     "noPendingCorrectionsTitle": "Нет ожидающих правок",
-    "noPendingCorrectionsMsg": "Добавьте хотя бы одну правку перед перегенерацией."
+    "noPendingCorrectionsMsg": "Добавьте хотя бы одну правку перед перегенерацией.",
+    "fixed": {
+      "offensiveSkills": "Атакующие навыки",
+      "defense": "Защита",
+      "projection": "Прогноз",
+      "systemFit": "Соответствие системе",
+      "development": "Развитие",
+      "outlook": "Перспективы",
+      "offense": "Нападение",
+      "adjustments": "Корректировки",
+      "analysis": "Анализ",
+      "whatsWorking": "Что работает",
+      "players": "Игроки",
+      "lineupsDepth": "Составы и глубина",
+      "clips": "Клипы",
+      "summary": "Итоги"
+    }
   },
   "home": {
     "intelligenceModel": "Модель интеллекта",

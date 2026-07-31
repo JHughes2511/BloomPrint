@@ -403,7 +403,23 @@
     "regenFailedTitle": "Regeneration Failed",
     "regenFailedMsg": "Could not regenerate evaluation",
     "noPendingCorrectionsTitle": "No Pending Corrections",
-    "noPendingCorrectionsMsg": "Add at least one correction before regenerating."
+    "noPendingCorrectionsMsg": "Add at least one correction before regenerating.",
+    "fixed": {
+      "offensiveSkills": "Offensive Skills",
+      "defense": "Defense",
+      "projection": "Projection",
+      "systemFit": "System Fit",
+      "development": "Development",
+      "outlook": "Outlook",
+      "offense": "Offense",
+      "adjustments": "Adjustments",
+      "analysis": "Analysis",
+      "whatsWorking": "What's Working",
+      "players": "Players",
+      "lineupsDepth": "Lineups & Depth",
+      "clips": "Clips",
+      "summary": "Summary"
+    }
   },
   "home": {
     "intelligenceModel": "Intelligence Model",

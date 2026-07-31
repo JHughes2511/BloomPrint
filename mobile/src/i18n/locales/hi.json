@@ -403,7 +403,23 @@
     "regenFailedTitle": "दोबारा बनाना विफल",
     "regenFailedMsg": "मूल्यांकन दोबारा नहीं बनाया जा सका",
     "noPendingCorrectionsTitle": "कोई लंबित सुधार नहीं",
-    "noPendingCorrectionsMsg": "दोबारा बनाने से पहले कम से कम एक सुधार जोड़ें।"
+    "noPendingCorrectionsMsg": "दोबारा बनाने से पहले कम से कम एक सुधार जोड़ें।",
+    "fixed": {
+      "offensiveSkills": "आक्रामक कौशल",
+      "defense": "रक्षा",
+      "projection": "भविष्यवाणी",
+      "systemFit": "सिस्टम फ़िट",
+      "development": "विकास",
+      "outlook": "दृष्टिकोण",
+      "offense": "आक्रमण",
+      "adjustments": "समायोजन",
+      "analysis": "विश्लेषण",
+      "whatsWorking": "जो काम कर रहा है",
+      "players": "खिलाड़ी",
+      "lineupsDepth": "लाइनअप और गहराई",
+      "clips": "क्लिप",
+      "summary": "सारांश"
+    }
   },
   "home": {
     "intelligenceModel": "इंटेलिजेंस मॉडल",

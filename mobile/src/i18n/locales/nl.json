@@ -403,7 +403,23 @@
     "regenFailedTitle": "Opnieuw genereren mislukt",
     "regenFailedMsg": "Kon evaluatie niet opnieuw genereren",
     "noPendingCorrectionsTitle": "Geen openstaande correcties",
-    "noPendingCorrectionsMsg": "Voeg ten minste één correctie toe voordat je opnieuw genereert."
+    "noPendingCorrectionsMsg": "Voeg ten minste één correctie toe voordat je opnieuw genereert.",
+    "fixed": {
+      "offensiveSkills": "Aanvallende vaardigheden",
+      "defense": "Verdediging",
+      "projection": "Prognose",
+      "systemFit": "Systeemfit",
+      "development": "Ontwikkeling",
+      "outlook": "Vooruitzicht",
+      "offense": "Aanval",
+      "adjustments": "Aanpassingen",
+      "analysis": "Analyse",
+      "whatsWorking": "Wat werkt",
+      "players": "Spelers",
+      "lineupsDepth": "Opstellingen & diepte",
+      "clips": "Clips",
+      "summary": "Samenvatting"
+    }
   },
   "home": {
     "intelligenceModel": "Intelligentiemodel",

@@ -403,7 +403,23 @@
     "regenFailedTitle": "再生成に失敗しました",
     "regenFailedMsg": "評価を再生成できませんでした",
     "noPendingCorrectionsTitle": "保留中の修正がありません",
-    "noPendingCorrectionsMsg": "再生成する前に、少なくとも1つの修正を追加してください。"
+    "noPendingCorrectionsMsg": "再生成する前に、少なくとも1つの修正を追加してください。",
+    "fixed": {
+      "offensiveSkills": "オフェンススキル",
+      "defense": "ディフェンス",
+      "projection": "将来予測",
+      "systemFit": "システム適合",
+      "development": "育成",
+      "outlook": "展望",
+      "offense": "オフェンス",
+      "adjustments": "調整",
+      "analysis": "分析",
+      "whatsWorking": "機能している点",
+      "players": "選手",
+      "lineupsDepth": "ラインナップと選手層",
+      "clips": "クリップ",
+      "summary": "まとめ"
+    }
   },
   "home": {
     "intelligenceModel": "インテリジェンスモデル",

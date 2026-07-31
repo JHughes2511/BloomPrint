@@ -411,6 +411,14 @@ export const coachesAPI = {
   list: () => api.get('/auth/coaches').then(r => r.data),
 };
 
+export const feedbackAPI = {
+  // `screen` is what makes a report actionable — "this is confusing" is worth
+  // far more when the server knows where they were standing when they wrote it.
+  submit: (data: { text: string; screen?: string; app_version?: string; platform?: string }) =>
+    api.post('/feedback', data).then(r => r.data),
+  mine: () => api.get('/feedback').then(r => r.data),
+};
+
 // ── Game Evaluation ────────────────────────────────────────────────────────────
 export const gameEvalAPI = {
   createSession: (data: any) => api.post('/game-eval/sessions', data).then(r => r.data),
