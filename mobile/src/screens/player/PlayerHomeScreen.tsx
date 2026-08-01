@@ -27,6 +27,7 @@ import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 import PageContainer from '../../responsive/PageContainer';
 import { timeAgo } from '../../utils/timeAgo';
+import { sheetCap } from '../../responsive/modalSizes';
 
 export default function PlayerHomeScreen() {
   const { t: tr } = useTranslation();
@@ -743,7 +744,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 24,
     paddingBottom: 40,
-    maxHeight: '85%', maxWidth: 560, marginHorizontal: 'auto'},
+    maxHeight: '85%', ...sheetCap(560)},
   dragHandle: {
     width: 40, height: 4, borderRadius: 2,
     backgroundColor: t.line, alignSelf: 'center', marginBottom: 16,

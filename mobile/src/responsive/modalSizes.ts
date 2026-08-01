@@ -44,3 +44,35 @@ export function useSheetScrollHeight(phoneMax: number, fraction = 0.6): number {
   if (width < BREAKPOINTS.desktop) return phoneMax;
   return Math.max(phoneMax, Math.round(height * fraction));
 }
+
+
+/**
+ * Width cap for a sheet, applied on web only.
+ *
+ * Native gets an empty object — literally the styles these sheets had before
+ * any of this — because there is no such thing as a 2000px React Native
+ * window, so the cap has nothing to do there and every reason not to be
+ * present: `marginHorizontal: 'auto'` reads like CSS on web but in Yoga an
+ * auto cross-axis margin disables stretch, so the card sizes to its content
+ * and can collapse. That is a native-only failure mode, invisible in a
+ * browser, which is exactly how it shipped.
+ *
+ * Gating on Platform rather than on a breakpoint is deliberate: a breakpoint
+ * is a runtime value a phone could in principle satisfy, Platform.OS cannot.
+ */
+import { Platform, ViewStyle } from 'react-native';
+
+export const sheetCap = (max: number): ViewStyle =>
+  Platform.OS === 'web' ? { maxWidth: max, marginHorizontal: 'auto' } : {};
+
+
+/**
+ * Any style that exists purely to make a wide window look right.
+ *
+ * Same reasoning as sheetCap: bounding a button or a tab bar is a desktop
+ * concern, and on a phone those controls were already the right size. Spread
+ * this instead of writing the properties inline, so native keeps exactly the
+ * styles it had.
+ */
+export const webOnly = (style: ViewStyle): ViewStyle =>
+  Platform.OS === 'web' ? style : {};

@@ -54,7 +54,7 @@ const makeDdStyles = (t: ThemeTokens) => StyleSheet.create({
   triggerText: { color: t.ink, fontSize: 14 },
   chevron: { color: t.muted, fontSize: 14 },
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'center', paddingHorizontal: 32 },
-  menu: { backgroundColor: t.sheet, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto'},
+  menu: { backgroundColor: t.sheet, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560)},
   menuTitle: { color: t.muted, fontSize: 11, fontFamily: fonts[700], textTransform: 'uppercase', letterSpacing: 1, padding: 14, paddingBottom: 8 },
   option: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 13, borderTopWidth: 1, borderTopColor: t.divider },
   optionActive: { backgroundColor: t.accentSoft },
@@ -74,6 +74,7 @@ import { ScreenBackground } from '../theme/components';
 import { useBreakpoint } from '../responsive/useBreakpoint';
 import { useTeam } from '../context/TeamContext';
 import PageContainer from '../responsive/PageContainer';
+import { sheetCap } from '../responsive/modalSizes';
 
 export default function RosterScreen() {
   const navigation = useNavigation<any>();
@@ -539,7 +540,7 @@ export default function RosterScreen() {
               nested <Modal> won't present over an already-open Modal on iOS. */}
           {showDisclaimer && (
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: t.scrim, justifyContent: 'center', padding: 20 }}>
-              <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, maxHeight: '80%', borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto' }}>
+              <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, maxHeight: '80%', borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                   <Ionicons name="shield-checkmark-outline" size={20} color={t.accent} />
                   <Text style={{ color: t.ink, fontSize: 17, fontFamily: fonts[800], marginLeft: 8, flex: 1 }}>{tr('roster.consentTitle')}</Text>
@@ -652,14 +653,15 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   emptyWrap: { alignItems: 'center', marginTop: 60 },
   emptyText: { color: t.muted, textAlign: 'center', paddingHorizontal: 32 },
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  // Centred with auto margins rather than alignSelf. alignSelf: 'center'
-  // takes the card out of cross-axis stretch, and the scroll view inside then
-  // has no definite box to measure against — the sheet collapsed to a 14px
-  // sliver at the bottom of the screen and the form was unreachable.
+  // Native keeps exactly the margin it always had. The cap is web-only:
+  // alignSelf: 'center' collapsed this sheet to a 14px sliver in a browser,
+  // and marginHorizontal: 'auto' — the fix for that — is a CSS behaviour that
+  // Yoga reads differently, where an auto cross-axis margin cancels stretch.
+  // Neither belongs in a style a phone renders.
   modal: {
-    backgroundColor: t.sheet, borderRadius: 20, padding: 24, marginVertical: 16,
-    marginHorizontal: 'auto', borderWidth: 1, borderColor: t.cardBorder,
-    width: '100%', maxWidth: 560,
+    backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 16,
+    borderWidth: 1, borderColor: t.cardBorder,
+    ...sheetCap(560),
   },
   modalTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 4 },
   modalSub: { color: t.muted, fontSize: 12, marginBottom: 12 },

@@ -7,6 +7,7 @@ import { setAppLanguage, currentLanguage } from '../i18n';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
+import { sheetCap } from '../responsive/modalSizes';
 
 /**
  * App-language selector. Renders as a tappable row (globe + current language)
@@ -99,7 +100,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   sheet: {
     backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    maxHeight: '80%', paddingBottom: 20, maxWidth: 560, marginHorizontal: 'auto'},
+    maxHeight: '80%', paddingBottom: 20, ...sheetCap(560)},
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     padding: 20, borderBottomWidth: 1, borderBottomColor: t.divider,

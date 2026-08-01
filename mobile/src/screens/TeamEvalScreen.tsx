@@ -31,8 +31,7 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
-import { useSheetScrollHeight } from '../responsive/modalSizes';
-import { CONTENT_MAX_WIDTH } from '../responsive/modalSizes';
+import { useSheetScrollHeight, sheetCap, webOnly, CONTENT_MAX_WIDTH } from '../responsive/modalSizes';
 
 // Highest competition level → lowest.
 const COMPETITION_LEVELS = [
@@ -1462,7 +1461,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* Clock edit modal */}
           <Modal visible={showClockEdit} transparent animationType="fade" onRequestClose={() => setShowClockEdit(false)}>
             <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'center', padding: 32 }}>
-              <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto' }}>
+              <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) }}>
                 <Text style={{ color: t.ink, fontSize: 16, fontFamily: fonts[800], marginBottom: 14 }}>{tr('teamGrade.setClock')}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
                   <TextInput
@@ -2929,7 +2928,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       {/* Player grade detail (from leaderboard) */}
       <Modal visible={gradeDetailPlayer !== null} transparent animationType="slide" onRequestClose={() => setGradeDetailPlayer(null)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', paddingBottom: 24, borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', paddingBottom: 24, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip }}>
               <View>
                 <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }}>{gradeDetailPlayer}</Text>
@@ -3038,7 +3037,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       {/* Share game with staff modal */}
       <Modal visible={shareGameModalVisible} animationType="slide" transparent>
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={{ backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, maxWidth: CONTENT_MAX_WIDTH, marginHorizontal: 'auto' }}>
+          <View style={{ backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(CONTENT_MAX_WIDTH) }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }}>{tr('teamGrade.shareWithStaff')}</Text>
               <TouchableOpacity onPress={() => setShareGameModalVisible(false)}>
@@ -3191,7 +3190,7 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   newGameBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: t.ctaBg, borderRadius: 999, paddingVertical: 14, marginBottom: 16,
-    paddingHorizontal: 28, alignSelf: 'flex-start', minWidth: 200,
+    ...webOnly({ paddingHorizontal: 28, alignSelf: 'flex-start', minWidth: 200 }),
   },
   newGameBtnText: { color: t.ctaText, fontSize: 15, fontFamily: fonts[700] },
   gameCard: {
@@ -3289,7 +3288,7 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   },
   modalBox: {
     backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    padding: 24, maxHeight: '85%', borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto'},
+    padding: 24, maxHeight: '85%', borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560)},
   modalTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 20 },
   fieldLabel: {
     color: t.label, fontSize: 11, fontFamily: fonts[700],

@@ -9,6 +9,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { COUNTRIES } from '../data/countries';
+import { sheetCap } from '../responsive/modalSizes';
 
 /**
  * A reusable searchable country picker rendered as a tappable field.
@@ -105,7 +106,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   sheet: {
     backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    height: '75%', paddingBottom: 12, maxWidth: 560, marginHorizontal: 'auto'},
+    height: '75%', paddingBottom: 12, ...sheetCap(560)},
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     padding: 20, borderBottomWidth: 1, borderBottomColor: t.divider,

@@ -11,6 +11,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import i18n from '../i18n';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
+import { sheetCap } from '../responsive/modalSizes';
 
 type Msg = {
   role: 'user' | 'assistant';
@@ -304,7 +305,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   bar: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-end', backgroundColor: t.card, borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
   barText: { color: t.muted, fontSize: 12.5, fontFamily: fonts[700] },
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, height: '90%', maxWidth: 820, marginHorizontal: 'auto'},
+  sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, height: '90%', ...sheetCap(820)},
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip },
   title: { color: t.ink, fontSize: 17, fontFamily: fonts[800] },
   emptyTitle: { color: t.muted, fontSize: 13, fontFamily: fonts[700], marginBottom: 12 },

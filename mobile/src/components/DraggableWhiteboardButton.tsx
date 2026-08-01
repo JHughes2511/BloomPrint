@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Animated, PanResponder, Dimensions, StyleSheet, View } from 'react-native';
+import { Animated, PanResponder, Dimensions, StyleSheet, View, Platform } from 'react-native';
 import Svg, { Rect, Circle, Path, Line, Defs, ClipPath } from 'react-native-svg';
 
 const W = 52;
@@ -79,6 +79,10 @@ export default function DraggableWhiteboardButton({ onPress }: Props) {
   // Only the first measurement repositions it — after that the coach's own
   // dragged position wins, including across a window resize.
   const placeInParent = (w: number, h: number) => {
+    // Web only: the button is clipped there because screens sit in a
+    // width-capped container. On a phone the window IS the parent, so the
+    // original window-derived position is already correct.
+    if (Platform.OS !== 'web') return;
     if (placed.current || w <= 0 || h <= 0) return;
     placed.current = true;
     const next = { x: Math.max(12, w - W - 20), y: Math.max(12, h - H - 100) };

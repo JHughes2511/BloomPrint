@@ -22,6 +22,7 @@ import FieldRow from '../responsive/FieldRow';
 import CountryField from '../components/CountryField';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
+import { sheetCap } from '../responsive/modalSizes';
 
 const ROLES = [
   { key: 'coach',   labelKey: 'auth.roleCoach' },
@@ -443,7 +444,7 @@ const makePickerStyles = (t: ThemeTokens) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   sheet: {
     backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    maxHeight: '80%', paddingBottom: 20, maxWidth: 560, marginHorizontal: 'auto'},
+    maxHeight: '80%', paddingBottom: 20, ...sheetCap(560)},
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     padding: 20, borderBottomWidth: 1, borderBottomColor: t.divider,

@@ -18,6 +18,7 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
+import { sheetCap, webOnly } from '../responsive/modalSizes';
 
 // Maps staff-share report_type keys to i18n label keys.
 const REPORT_TYPE_LABEL_KEYS: Record<string, string> = {
@@ -1086,11 +1087,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.card, borderRadius: 12, padding: 4,
     // Left, matching the page title and the team chips beneath it —
     // centring it left the bar floating between two left edges.
-    width: '100%', maxWidth: 560, alignSelf: 'flex-start',
+    ...webOnly({ width: '100%', maxWidth: 560, alignSelf: 'flex-start' }),
   },
-  tabBtn: { flex: 1, flexShrink: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 10 },
+  tabBtn: { flex: 1, flexShrink: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 8, borderRadius: 10 },
   tabBtnActive: { backgroundColor: t.ctaBg },
-  tabBtnText: { color: t.muted2, fontSize: 13, fontFamily: fonts[700], flexShrink: 1, minWidth: 0 },
+  tabBtnText: { color: t.muted2, fontSize: 11, fontFamily: fonts[700], flexShrink: 1, minWidth: 0 },
   tabBtnTextActive: { color: t.ctaText },
   sectionLabel: { color: t.label, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10, marginTop: 4 },
   card: {
@@ -1115,7 +1116,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   teamChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600], flexShrink: 1 },
   teamChipTextActive: { color: t.ctaText },
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, maxWidth: 560, marginHorizontal: 'auto'},
+  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, ...sheetCap(560)},
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
   modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   modalSub: { color: t.muted, fontSize: 12, marginTop: 2 },
@@ -1150,6 +1151,6 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   startBtnText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15, flexShrink: 1 },
   teamActBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: t.accent, flexShrink: 1, maxWidth: '100%' },
   teamActText: { color: t.accent, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 },
-  createTeamBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.accentSoft, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20, borderWidth: 1, borderColor: t.accent, marginBottom: 8, alignSelf: 'flex-start', minWidth: 240 },
+  createTeamBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.accentSoft, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20, borderWidth: 1, borderColor: t.accent, marginBottom: 8, ...webOnly({ alignSelf: 'flex-start', minWidth: 240 }) },
   createTeamText: { color: t.accent, fontFamily: fonts[700], fontSize: 13.5, flexShrink: 1 },
 });

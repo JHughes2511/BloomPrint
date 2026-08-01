@@ -29,6 +29,7 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
+import { sheetCap } from '../responsive/modalSizes';
 
 type ReportItem = {
   id: number | string;
@@ -1468,7 +1469,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, maxWidth: 560, marginHorizontal: 'auto'},
+  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, ...sheetCap(560)},
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
   modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   modalSub: { color: t.muted2, fontSize: 12, marginTop: 4, lineHeight: 18 },

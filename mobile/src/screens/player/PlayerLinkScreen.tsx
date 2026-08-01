@@ -19,6 +19,7 @@ import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 import PageContainer from '../../responsive/PageContainer';
 import CountryField from '../../components/CountryField';
+import { sheetCap } from '../../responsive/modalSizes';
 
 const ROLE_LABELS: Record<string, string> = { coach: 'Coach', scout: 'Scout', trainer: 'Trainer' };
 
@@ -448,7 +449,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   linkCtaText: { color: t.ctaText, fontSize: 15.5, fontFamily: fonts[800], flexShrink: 1 },
 
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 24, paddingBottom: 36, maxHeight: '88%', maxWidth: 560, marginHorizontal: 'auto'},
+  sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 24, paddingBottom: 36, maxHeight: '88%', ...sheetCap(560)},
   sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 },
   sheetTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], flexShrink: 1, minWidth: 0, marginRight: 10 },
   fieldLabel: { color: t.muted2, fontSize: 10.5, fontFamily: fonts[700], letterSpacing: 1.6, textTransform: 'uppercase', marginBottom: 8, marginTop: 14 },

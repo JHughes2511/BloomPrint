@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Pressable, TextInputProps, Alert, StyleSheet } from 'react-native';
+import { View, TextInput, TouchableOpacity, Pressable, TextInputProps, Alert, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Audio } from 'expo-av';
@@ -209,10 +209,11 @@ export default function VoiceTextInput({
         editable={editable}
         style={{
           flex: 1,
-          // Without minWidth the field refuses to shrink below its placeholder,
-          // so in a narrow column it pushes the mic button outside the box
-          // instead of truncating the text.
-          minWidth: 0,
+          // Web only: in a narrow desktop column the field refuses to shrink
+          // below its placeholder and pushes the mic button outside the box.
+          // Native never puts these fields in a narrow column, and the phone
+          // layout is not mine to change.
+          ...(Platform.OS === 'web' ? { minWidth: 0 } : null),
           alignSelf: 'stretch',
           backgroundColor: 'transparent',
           borderWidth: 0,

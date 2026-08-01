@@ -12,6 +12,7 @@ import KeyboardAwareScrollView from './KeyboardAwareScrollView';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
+import { sheetCap } from '../responsive/modalSizes';
 
 type Target = 'player' | 'team' | 'all_staff';
 
@@ -408,7 +409,7 @@ export default function ShareModal({
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  box: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto'},
+  box: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560)},
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
   headerTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   headerSub: { color: t.muted, fontSize: 12, marginTop: 4 },

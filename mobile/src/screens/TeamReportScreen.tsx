@@ -28,6 +28,7 @@ import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
 import ChipRow from '../responsive/ChipRow';
+import { sheetCap } from '../responsive/modalSizes';
 
 // Labels come from the `reportTypes.*` translation keys at render time.
 // Quick Report is roster-scoped, so training here is TEAM training. It was
@@ -907,7 +908,7 @@ export default function TeamReportScreen() {
 
       {/* Report film player modal */}
       <Modal visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
-        <View style={{ flex: 1, backgroundColor: '#000000EE' }}>
+        <View style={{ flex: 1, backgroundColor: '#000000EE', ...(Platform.OS === 'web' ? null : { justifyContent: 'center' as const }) }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: 48 }}>
             <Text style={{ color: '#fff', fontSize: 15, fontFamily: fonts[700], flex: 1 }} numberOfLines={1}>{videoTitle}</Text>
             <TouchableOpacity onPress={() => setVideoSource(null)}>
@@ -922,12 +923,14 @@ export default function TeamReportScreen() {
             // resolve against, so it falls back to the file's intrinsic size and
             // sits at 360x180 in the corner of a full-screen black sheet.
             <View
-              style={{ flex: 1, paddingHorizontal: 24, paddingBottom: 32 }}
+              style={Platform.OS === 'web' ? { flex: 1, paddingHorizontal: 24, paddingBottom: 32 } : undefined}
               onLayout={e => setVideoBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
             >
               <Video
                 source={videoSource}
-                style={{ width: videoBox.w || undefined, height: videoBox.h || undefined }}
+                style={Platform.OS === 'web'
+                  ? { width: videoBox.w || undefined, height: videoBox.h || undefined }
+                  : { width: '100%', height: 300 }}
                 useNativeControls
                 resizeMode={ResizeMode.CONTAIN}
                 shouldPlay
@@ -940,7 +943,7 @@ export default function TeamReportScreen() {
       {/* Previous Report Detail Modal */}
       <Modal visible={!!selectedPrevReport} animationType="slide" transparent>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60, maxWidth: 560, marginHorizontal: 'auto' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60, ...sheetCap(560) }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
                 <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }} numberOfLines={1}>
@@ -1395,7 +1398,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
 
 const makeShareStyles = (t: ThemeTokens) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto'},
+  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560)},
   title: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 16 },
   label: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
   targetRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },

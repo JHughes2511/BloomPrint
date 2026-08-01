@@ -19,6 +19,7 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import { GeneratingOverlay } from './GeneratingBasketball';
+import { sheetCap } from '../responsive/modalSizes';
 
 // ── Court sizing ──────────────────────────────────────────────────────────
 // Classic hardwood court drawn in SVG at regulation 50ft x 94ft proportions.
@@ -774,17 +775,23 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   // portrait rendered at 3.5 x fit. Sizing the court correctly in the first
   // place keeps every stroke the width it was drawn at.
   const isLandscape = orientation === 'landscape';
-  const fitW = isLandscape ? avail.h : avail.w;
-  const fitH = isLandscape ? avail.w : avail.h;
+  // Swapping the fit axes removes the up-scale that thickened strokes, but it
+  // changes how a phone renders landscape too — so it is web-only, and native
+  // keeps the scale-to-fill it has always used.
+  const rotateFit = isLandscape && Platform.OS === 'web';
+  const fitW = rotateFit ? avail.h : avail.w;
+  const fitH = rotateFit ? avail.w : avail.h;
   const rawScale = fitW > 20 && fitH > 20
     ? Math.min((fitW - 20) / PADDED_FT_W, (fitH - 20) / vTotalFt(visFt))
     : 0;
   const scale  = Number.isFinite(rawScale) && rawScale > 0 ? rawScale : 0;
   const courtW = PADDED_FT_W * scale;
   const courtH = vTotalFt(visFt) * scale;
-  // Kept at 1: the fit above already sized the court for the rotated area.
-  // geomRef and saveBoard still read it, so it stays rather than disappearing.
-  const landscapeFit = 1;
+  const landscapeFit = rotateFit
+    ? 1                       // already sized for the rotated area
+    : (isLandscape && courtW > 0 && courtH > 0
+        ? Math.min((avail.w - 12) / courtH, (avail.h - 12) / courtW)
+        : 1);
 
   // Geometry snapshot for the (once-created) pan responder and for saveBoard's
   // canvas-dimension capture.
@@ -801,7 +808,9 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
 
   /** Smallest a tapped player marker may be, as a share of court width. */
   const minMarkRef = useRef<() => number>(() => 10);
-  minMarkRef.current = () => Math.max(10, Math.round(geomRef.current.courtW * 0.028));
+  minMarkRef.current = () => Platform.OS === 'web'
+    ? Math.max(10, Math.round(geomRef.current.courtW * 0.028))
+    : 10;
 
   useEffect(() => { if (visible && (playbook || gameId)) loadBoards(); }, [visible, gameId, playbook]);
 
@@ -1744,7 +1753,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     const pos: Record<string, { x: number; y: number }> = {};
     markers.forEach(m => { pos[m.id] = { x: m.cx!, y: m.cy! }; });
     const moverOf = (s: Stroke): string | null => {
-      let mv: string | null = null, bd = Math.max(34, courtW * 0.06);
+      let mv: string | null = null, bd = Platform.OS === 'web' ? Math.max(34, courtW * 0.06) : 34;
       for (const m of markers) { const p = pos[m.id]; const d = Math.hypot(p.x - s.x1!, p.y - s.y1!); if (d < bd) { bd = d; mv = m.id; } }
       return mv;
     };
@@ -2095,7 +2104,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                 style={[
                   styles.canvasWrapper,
                   { width: courtW, height: courtH },
-                  isLandscape ? { transform: [{ rotate: '90deg' }] } : null,
+                  isLandscape ? { transform: [{ rotate: '90deg' }, { scale: landscapeFit }] } : null,
                 ]}
                 {...panResponder.panHandlers}
               >
@@ -2543,7 +2552,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   headerBtn:       { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
   boardName:       { color: t.ink, fontSize: 16, fontFamily: fonts[700], flex: 1 },
   renameOverlay:   { flex: 1, backgroundColor: t.scrim, justifyContent: 'center', paddingHorizontal: 24 },
-  renameBox:       { backgroundColor: t.sheet, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto'},
+  renameBox:       { backgroundColor: t.sheet, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560)},
   renameInput: { backgroundColor: t.chip, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 11,
     color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line, marginTop: 12 },
   renameCancel: { flex: 1, backgroundColor: t.chip, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
@@ -2568,9 +2577,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   colorRow:        { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 'auto' },
   colorDot:        { width: 21, height: 21, borderRadius: 11, borderWidth: 2, borderColor: 'transparent' },
   colorDotActive:  { borderColor: t.accent },
-  canvasWrapper:   { overflow: 'hidden' },
+  canvasWrapper:   { overflow: 'hidden', ...(Platform.OS === 'web' ? null : { borderWidth: 1, borderColor: t.cardBorder }) },
   listOverlay:     { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  listBox:         { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, maxHeight: '60%', borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto'},
+  listBox:         { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, maxHeight: '60%', borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560)},
   listTitle:       { color: t.ink, fontSize: 17, fontFamily: fonts[800], marginBottom: 14 },
   listRow:         { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: t.divider },
   listItemText:    { color: t.inkSoft, fontSize: 15, fontFamily: fonts[600] },

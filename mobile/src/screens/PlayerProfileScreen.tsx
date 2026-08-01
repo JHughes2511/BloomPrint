@@ -32,6 +32,7 @@ import PageContainer from '../responsive/PageContainer';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
+import { sheetCap, webOnly } from '../responsive/modalSizes';
 const COMPETITION_LEVELS = [...CANON_LEVELS];
 
 const OUTPUT_TYPES = [
@@ -932,7 +933,7 @@ export default function PlayerProfileScreen() {
 
       {/* Video player modal */}
       <Modal visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
-        <View style={{ flex: 1, backgroundColor: '#000000EE' }}>
+        <View style={{ flex: 1, backgroundColor: '#000000EE', ...(Platform.OS === 'web' ? null : { justifyContent: 'center' as const }) }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: 48 }}>
             <Text style={{ color: '#fff', fontSize: 15, fontFamily: fonts[700], flex: 1 }} numberOfLines={1}>
               {videoMeta?.report_label || 'Film'}
@@ -952,12 +953,14 @@ export default function PlayerProfileScreen() {
             // resolve against, so it falls back to the file's intrinsic size and
             // sits at 360x180 in the corner of a full-screen black sheet.
             <View
-              style={{ flex: 1, paddingHorizontal: 24, paddingBottom: 32 }}
+              style={Platform.OS === 'web' ? { flex: 1, paddingHorizontal: 24, paddingBottom: 32 } : undefined}
               onLayout={e => setVideoBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
             >
               <Video
                 source={videoSource as any}
-                style={{ width: videoBox.w || undefined, height: videoBox.h || undefined, backgroundColor: '#000' }}
+                style={Platform.OS === 'web'
+                  ? { width: videoBox.w || undefined, height: videoBox.h || undefined, backgroundColor: '#000' }
+                  : { width: '100%', height: 260, backgroundColor: '#000' }}
                 useNativeControls
                 resizeMode={ResizeMode.CONTAIN}
                 shouldPlay
@@ -970,7 +973,7 @@ export default function PlayerProfileScreen() {
       {/* Training picker modal — choose which training to send */}
       <Modal visible={showTrainingPicker} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%', borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%', borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip }}>
               <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[800] }}>
                 {trainingPickerAction === 'player' ? 'Send Training to Player' :
@@ -1033,7 +1036,7 @@ export default function PlayerProfileScreen() {
       {/* Player profile detail modal */}
       <Modal visible={showProfileDetail} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) }}>
             {/* Header */}
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: t.chip }}>
               <Text style={{ color: t.ink, fontSize: 16, fontFamily: fonts[800] }}>{tr('playerProfile.playerProfile')}</Text>
@@ -1114,7 +1117,7 @@ export default function PlayerProfileScreen() {
       {/* Training detail modal — full-screen so all text is readable */}
       <Modal visible={!!trainingModalItem} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 60, maxWidth: 560, marginHorizontal: 'auto' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 60, ...sheetCap(560) }}>
             {/* Compact header — max ~50px tall */}
             <View style={{
               flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -1762,21 +1765,21 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   // Same width as the other page actions so the stack reads as one group.
   summaryBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: t.ctaBg, marginVertical: 8, padding: 15, borderRadius: 999,
-    maxWidth: 380, marginHorizontal: 'auto', paddingHorizontal: 28,
+    backgroundColor: t.ctaBg, margin: 20, marginBottom: 8, padding: 15, borderRadius: 999,
+    ...sheetCap(380),
   },
   summaryText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15 },
   trainingBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: t.chip, marginTop: 0, marginBottom: 0, padding: 15, borderRadius: 999,
+    backgroundColor: t.chip, marginHorizontal: 20, marginTop: 0, marginBottom: 0, padding: 15, borderRadius: 999,
     // Capped and centred: inert on a phone (the cap is wider than the screen,
     // so it still fills the column), a bounded button on a desktop.
-    maxWidth: 380, marginHorizontal: 'auto', paddingHorizontal: 28,
+    ...sheetCap(380),
   },
   trainingText: { color: t.ink, fontFamily: fonts[700], fontSize: 15 },
   // Modal styles
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto'},
+  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560)},
   modalTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 4 },
   modalSub: { color: t.muted, fontSize: 12, marginBottom: 16, lineHeight: 18 },
   chip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 9, marginRight: 8 },
@@ -1789,8 +1792,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   saveText: { color: t.ctaText, fontFamily: fonts[700] },
   inviteBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: t.chip, marginTop: 10, padding: 14, borderRadius: 999,
-    maxWidth: 380, marginHorizontal: 'auto', paddingHorizontal: 28,
+    backgroundColor: t.chip, marginHorizontal: 20, marginTop: 10, padding: 14, borderRadius: 999,
+    ...sheetCap(380),
   },
   inviteText: { color: t.ink, fontFamily: fonts[700], fontSize: 14 },
   inviteCodeBox: {
@@ -1836,7 +1839,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.ctaBg, borderRadius: 999, padding: 12,
     // Full width of the feedback card it lives in — it acts on that card's
     // input, not on the page, so it should read as part of it.
-    width: '100%', alignSelf: 'stretch',
+    ...webOnly({ width: '100%', alignSelf: 'stretch' }),
   },
   regenBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
 });
