@@ -15,6 +15,8 @@ import { ScreenBackground } from '../../theme/components';
 import PageContainer from '../../responsive/PageContainer';
 import { outputTypeLabel } from '../../utils/reportType';
 import { timeAgo } from '../../utils/timeAgo';
+import { useGridColumns } from '../../responsive/useGridColumns';
+import { webOnly } from '../../responsive/modalSizes';
 
 const LEVEL_RE = /\b(HS Varsity|HS JV|Varsity|JUCO|NAIA|D1|D2|D3|College|Pro|AAU|Middle School|Youth|EYBL|Prep)\b/i;
 const SKIP_TITLE = /^(bim\b|player\b|program\b|framework\b|overall\b|grade\b|evaluation\b|status\b|rating\b|section\b|output\b|\d+\s+frames|rating scale|status options|comparable|floor comp|ceiling comp)/i;
@@ -104,6 +106,7 @@ const FILTERS = [
 
 
 export default function PlayerInboxScreen() {
+  const reportGrid = useGridColumns({ columns: 3, inset: 32 });
   const { t: tr } = useTranslation();
   const { t } = useTheme();
   const styles = makeStyles(t);
@@ -247,12 +250,14 @@ export default function PlayerInboxScreen() {
           </Text>
         </View>
       ) : (
-        searched.map(item => {
+        <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap, paddingHorizontal: 16 })}
+              onLayout={reportGrid.onLayout}>
+        {searched.map(item => {
           const isFilm = (item.output_type || '').includes('film');
           return (
             <TouchableOpacity
               key={`${item.kind}-${item.id}`}
-              style={styles.card}
+              style={[styles.card, reportGrid.cardWidth ? { width: reportGrid.cardWidth, marginHorizontal: 0 } : null]}
               onPress={() => handleTap(item)}
             >
               <View style={styles.cardTop}>
@@ -288,7 +293,8 @@ export default function PlayerInboxScreen() {
               </View>
             </TouchableOpacity>
           );
-        })
+        })}
+        </View>
       )}
     </ScrollView>
     </PageContainer>

@@ -15,6 +15,8 @@ import { ScreenBackground } from '../../theme/components';
 import PageContainer from '../../responsive/PageContainer';
 import { parseDrills } from '../../utils/trainingDrills';
 import { timeAgo } from '../../utils/timeAgo';
+import { useGridColumns } from '../../responsive/useGridColumns';
+import { webOnly } from '../../responsive/modalSizes';
 
 
 const cleanPreview = (s: string) =>
@@ -32,6 +34,7 @@ interface UnifiedProgram {
 }
 
 export default function PlayerTrainingScreen() {
+  const trainGrid = useGridColumns({ columns: 3, inset: 32 });
   const navigation = useNavigation<any>();
   const { t: tr } = useTranslation();
   const { t } = useTheme();
@@ -158,10 +161,12 @@ export default function PlayerTrainingScreen() {
             <Text style={styles.noResults}>{tr('playerApp.training.noMatch', { query: query.trim() })}</Text>
           ) : null}
 
+          <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: trainGrid.gap, paddingHorizontal: 16 })}
+                onLayout={trainGrid.onLayout}>
           {filtered.map((pt, idx) => (
             <TouchableOpacity
               key={`${pt.origin}-${pt.id}`}
-              style={styles.card}
+              style={[styles.card, trainGrid.cardWidth ? { width: trainGrid.cardWidth, marginHorizontal: 0 } : null]}
               onPress={() => navigation.navigate(
                 pt.origin === 'coach' ? 'PlayerCoachTrainingDetail' : 'PlayerTrainingDetail',
                 { trainingId: pt.id },
@@ -207,6 +212,7 @@ export default function PlayerTrainingScreen() {
               })()}
             </TouchableOpacity>
           ))}
+          </View>
         </>
       )}
     </ScrollView>

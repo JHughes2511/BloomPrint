@@ -11,7 +11,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import i18n from '../i18n';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
-import { sheetCap } from '../responsive/modalSizes';
+import { sheetCap, webOnly } from '../responsive/modalSizes';
 
 type Msg = {
   role: 'user' | 'assistant';
@@ -324,5 +324,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   confirmYesText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 13 },
   inputRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 12, paddingTop: 12, paddingBottom: Platform.OS === 'ios' ? 30 : 14, borderTopWidth: 1, borderTopColor: t.chip },
   input: { flex: 1, backgroundColor: t.card, borderRadius: 12, borderWidth: 1, borderColor: t.line, paddingHorizontal: 14, paddingVertical: 10, color: t.ink, fontSize: 14, maxHeight: 120 },
-  sendBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: t.ctaBg, alignItems: 'center', justifyContent: 'center' },
+  sendBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: t.ctaBg, alignItems: 'center', justifyContent: 'center',
+    // Web matches the game-detail send button so the same action does not
+    // look like three different controls across three screens.
+    ...webOnly({ width: 44, height: 44, borderRadius: 10 }) },
 });

@@ -808,6 +808,8 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
 
   /** Smallest a tapped player marker may be, as a share of court width. */
   const minMarkRef = useRef<() => number>(() => 10);
+  /** Ball radius, held at the phone's 60% of a player marker. */
+  const ballR = () => Math.round(minMarkRef.current() * 0.6);
   minMarkRef.current = () => Platform.OS === 'web'
     ? Math.max(10, Math.round(geomRef.current.courtW * 0.028))
     : 10;
@@ -1718,7 +1720,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         const tx = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, tt.x - f.x] });
         const ty = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, tt.y - f.y] });
         els.push(<AnimatedG key={`ball${i}`} translateX={tx as any} translateY={ty as any}>
-          <Circle cx={f.x} cy={f.y} r={6} fill={BALL} /></AnimatedG>);
+          <Circle cx={f.x} cy={f.y} r={ballR()} fill={BALL} /></AnimatedG>);
       }
     });
     return els;
@@ -1804,7 +1806,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       if (s.dash) {
         const tx = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, s.x2! - s.x1!] });
         const ty = drawProgress.interpolate({ inputRange: [0, 1], outputRange: [0, s.y2! - s.y1!] });
-        els.push(<AnimatedG key={`fb${i}`} translateX={tx as any} translateY={ty as any}><Circle cx={s.x1} cy={s.y1} r={6} fill={BALL} /></AnimatedG>);
+        els.push(<AnimatedG key={`fb${i}`} translateX={tx as any} translateY={ty as any}><Circle cx={s.x1} cy={s.y1} r={ballR()} fill={BALL} /></AnimatedG>);
       }
     });
     return els;
