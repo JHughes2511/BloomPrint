@@ -378,7 +378,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  box: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 20, paddingTop: 18, paddingBottom: 20, height: '90%', width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center'},
+  box: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 20, paddingTop: 18, paddingBottom: 20, height: '90%', maxWidth: CONTENT_MAX_WIDTH, marginHorizontal: 'auto'},
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
   title: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   sub: { color: t.muted2, fontSize: 12, marginTop: 4 },

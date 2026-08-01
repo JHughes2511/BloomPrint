@@ -743,7 +743,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 24,
     paddingBottom: 40,
-    maxHeight: '85%', width: '100%', maxWidth: 560, alignSelf: 'center'},
+    maxHeight: '85%', maxWidth: 560, marginHorizontal: 'auto'},
   dragHandle: {
     width: 40, height: 4, borderRadius: 2,
     backgroundColor: t.line, alignSelf: 'center', marginBottom: 16,

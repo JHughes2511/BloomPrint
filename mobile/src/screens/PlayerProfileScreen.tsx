@@ -970,7 +970,7 @@ export default function PlayerProfileScreen() {
       {/* Training picker modal — choose which training to send */}
       <Modal visible={showTrainingPicker} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%', borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%', borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip }}>
               <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[800] }}>
                 {trainingPickerAction === 'player' ? 'Send Training to Player' :
@@ -1033,7 +1033,7 @@ export default function PlayerProfileScreen() {
       {/* Player profile detail modal */}
       <Modal visible={showProfileDetail} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto' }}>
             {/* Header */}
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: t.chip }}>
               <Text style={{ color: t.ink, fontSize: 16, fontFamily: fonts[800] }}>{tr('playerProfile.playerProfile')}</Text>
@@ -1114,7 +1114,7 @@ export default function PlayerProfileScreen() {
       {/* Training detail modal — full-screen so all text is readable */}
       <Modal visible={!!trainingModalItem} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 60, width: '100%', maxWidth: 560, alignSelf: 'center' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 60, maxWidth: 560, marginHorizontal: 'auto' }}>
             {/* Compact header — max ~50px tall */}
             <View style={{
               flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -1763,18 +1763,20 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   summaryBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: t.ctaBg, marginVertical: 8, padding: 15, borderRadius: 999,
-    width: '100%', maxWidth: 380, alignSelf: 'center', paddingHorizontal: 28,
+    maxWidth: 380, marginHorizontal: 'auto', paddingHorizontal: 28,
   },
   summaryText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15 },
   trainingBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: t.chip, marginHorizontal: 20, marginTop: 0, marginBottom: 0, padding: 15, borderRadius: 999,
-    width: '100%', maxWidth: 380, alignSelf: 'center', paddingHorizontal: 28,
+    backgroundColor: t.chip, marginTop: 0, marginBottom: 0, padding: 15, borderRadius: 999,
+    // Capped and centred: inert on a phone (the cap is wider than the screen,
+    // so it still fills the column), a bounded button on a desktop.
+    maxWidth: 380, marginHorizontal: 'auto', paddingHorizontal: 28,
   },
   trainingText: { color: t.ink, fontFamily: fonts[700], fontSize: 15 },
   // Modal styles
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center'},
+  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder, maxWidth: 560, marginHorizontal: 'auto'},
   modalTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 4 },
   modalSub: { color: t.muted, fontSize: 12, marginBottom: 16, lineHeight: 18 },
   chip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 9, marginRight: 8 },
@@ -1787,8 +1789,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   saveText: { color: t.ctaText, fontFamily: fonts[700] },
   inviteBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: t.chip, marginHorizontal: 20, marginTop: 10, padding: 14, borderRadius: 999,
-    width: '100%', maxWidth: 380, alignSelf: 'center', paddingHorizontal: 28,
+    backgroundColor: t.chip, marginTop: 10, padding: 14, borderRadius: 999,
+    maxWidth: 380, marginHorizontal: 'auto', paddingHorizontal: 28,
   },
   inviteText: { color: t.ink, fontFamily: fonts[700], fontSize: 14 },
   inviteCodeBox: {

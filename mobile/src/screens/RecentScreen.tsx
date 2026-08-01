@@ -1468,7 +1468,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, width: '100%', maxWidth: 560, alignSelf: 'center'},
+  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, maxWidth: 560, marginHorizontal: 'auto'},
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
   modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   modalSub: { color: t.muted2, fontSize: 12, marginTop: 4, lineHeight: 18 },

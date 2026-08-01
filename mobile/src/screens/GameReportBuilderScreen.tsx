@@ -888,7 +888,7 @@ export default function GameReportBuilderScreen() {
       {/* Saved report version viewer */}
       <Modal visible={!!versionView} animationType="slide" transparent onRequestClose={() => setVersionView(null)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60, width: '100%', maxWidth: 560, alignSelf: 'center' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60, maxWidth: 560, marginHorizontal: 'auto' }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: t.ink, fontSize: 17, fontFamily: fonts[800] }} numberOfLines={2}>
@@ -1111,7 +1111,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   correctionBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
   // Modals
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center'},
+  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, maxWidth: CONTENT_MAX_WIDTH, marginHorizontal: 'auto'},
   modalHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },
   modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800], flex: 1 },
   searchInput: { backgroundColor: t.chip, borderRadius: 14, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line },
