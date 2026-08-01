@@ -24,7 +24,13 @@ type Props = {
 };
 
 export default function PageContainer({ children, maxWidth, padded = true, style }: Props) {
-  const { gutter } = useBreakpoint();
+  const { gutter, isPhone } = useBreakpoint();
+  // No gutter on a phone. Every screen already carries its own horizontal
+  // padding, tuned against a phone long before this wrapper existed, so adding
+  // one here took 32px out of the content width on the exact device that has
+  // the least to spare. The gutter exists to hold a centred column off the
+  // edge of a wide window — a phone has no centred column and no spare edge.
+  const pad = padded && !isPhone ? gutter : 0;
   return (
     <View style={[{ flex: 1, width: '100%', alignItems: 'center' }, style]}>
       <View
@@ -32,7 +38,7 @@ export default function PageContainer({ children, maxWidth, padded = true, style
           flex: 1,
           width: '100%',
           maxWidth: maxWidth ?? CONTENT_MAX_WIDTH,
-          paddingHorizontal: padded ? gutter : 0,
+          paddingHorizontal: pad,
         }}
       >
         {children}
