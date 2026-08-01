@@ -265,13 +265,20 @@ export default function RecentScreen() {
         overall_grade: e.overall_grade,
         created_at: e.created_at,
       }));
-      const teamItems: ReportItem[] = teamReports.map((tr: any) => ({
-        id: tr.id,
+      // 'rep', not 'tr': naming this parameter tr shadowed the translator, so
+      // tr('recent.teamReport') called a team-report object as a function and
+      // threw. Everything built after this line — game reports, training,
+      // shared inbox — was lost with it, and the catch below turned the whole
+      // failure into an empty list. It only fired once a coach had at least
+      // one team report, which is why it looked like missing data rather than
+      // a crash.
+      const teamItems: ReportItem[] = teamReports.map((rep: any) => ({
+        id: rep.id,
         kind: 'team',
         player_name: tr('recent.teamReport'),
-        output_type: tr.output_type,
+        output_type: rep.output_type,
         overall_grade: null,
-        created_at: tr.created_at,
+        created_at: rep.created_at,
       }));
       // Each saved packet report VERSION (one per report-type selection).
       const gameItems: ReportItem[] = (gameReports ?? []).map((v: any) => ({
