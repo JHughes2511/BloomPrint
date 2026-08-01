@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Report shared with {{count}} recipient(s).",
     "sharedWithStaff": "Report shared with {{count}} staff member(s).",
     "couldNotShareReport": "Could not share report",
-    "couldNotGenerate": "Could not generate team report"
+    "couldNotGenerate": "Could not generate team report",
+    "opponent": "Opponent"
   },
   "gameBuilder": {
     "headerTitle": "Game Packet",

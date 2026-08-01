@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Informe compartido con {{count}} destinatario(s).",
     "sharedWithStaff": "Informe compartido con {{count}} miembro(s) del cuerpo técnico.",
     "couldNotShareReport": "No se pudo compartir el informe",
-    "couldNotGenerate": "No se pudo generar el informe de equipo"
+    "couldNotGenerate": "No se pudo generar el informe de equipo",
+    "opponent": "Rival"
   },
   "gameBuilder": {
     "headerTitle": "Dossier de Partido",

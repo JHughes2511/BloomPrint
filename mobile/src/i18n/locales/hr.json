@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Izvještaj podijeljen s {{count}} primatelja.",
     "sharedWithStaff": "Izvještaj podijeljen s {{count}} članom stožera.",
     "couldNotShareReport": "Nije moguće podijeliti izvještaj",
-    "couldNotGenerate": "Nije moguće generirati timski izvještaj"
+    "couldNotGenerate": "Nije moguće generirati timski izvještaj",
+    "opponent": "Protivnik"
   },
   "gameBuilder": {
     "headerTitle": "Paket utakmice",

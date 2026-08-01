@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Rapport gedeeld met {{count}} ontvanger(s).",
     "sharedWithStaff": "Rapport gedeeld met {{count}} staflid/-leden.",
     "couldNotShareReport": "Kon rapport niet delen",
-    "couldNotGenerate": "Kon teamrapport niet genereren"
+    "couldNotGenerate": "Kon teamrapport niet genereren",
+    "opponent": "Tegenstander"
   },
   "gameBuilder": {
     "headerTitle": "Wedstrijdpakket",

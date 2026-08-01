@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Relatório compartilhado com {{count}} destinatário(s).",
     "sharedWithStaff": "Relatório compartilhado com {{count}} membro(s) da comissão.",
     "couldNotShareReport": "Não foi possível compartilhar o relatório",
-    "couldNotGenerate": "Não foi possível gerar o relatório de equipe"
+    "couldNotGenerate": "Não foi possível gerar o relatório de equipe",
+    "opponent": "Adversário"
   },
   "gameBuilder": {
     "headerTitle": "Pacote de Jogo",

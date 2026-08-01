@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "تمت مشاركة التقرير مع {{count}} مستلم.",
     "sharedWithStaff": "تمت مشاركة التقرير مع {{count}} من أعضاء الطاقم.",
     "couldNotShareReport": "تعذّرت مشاركة التقرير",
-    "couldNotGenerate": "تعذّر إنشاء تقرير الفريق"
+    "couldNotGenerate": "تعذّر إنشاء تقرير الفريق",
+    "opponent": "الخصم"
   },
   "gameBuilder": {
     "headerTitle": "ملف المباراة",

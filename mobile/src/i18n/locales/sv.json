@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Rapporten delades med {{count}} mottagare.",
     "sharedWithStaff": "Rapporten delades med {{count}} i staben.",
     "couldNotShareReport": "Kunde inte dela rapporten",
-    "couldNotGenerate": "Kunde inte generera lagrapport"
+    "couldNotGenerate": "Kunde inte generera lagrapport",
+    "opponent": "Motståndare"
   },
   "gameBuilder": {
     "headerTitle": "Matchpaket",

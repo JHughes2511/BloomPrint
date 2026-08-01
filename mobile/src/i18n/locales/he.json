@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "הדוח שותף עם {{count}} נמענים.",
     "sharedWithStaff": "הדוח שותף עם {{count}} אנשי צוות.",
     "couldNotShareReport": "לא ניתן לשתף את הדוח",
-    "couldNotGenerate": "לא ניתן ליצור את דוח הקבוצה"
+    "couldNotGenerate": "לא ניתן ליצור את דוח הקבוצה",
+    "opponent": "יריב"
   },
   "gameBuilder": {
     "headerTitle": "חבילת משחק",

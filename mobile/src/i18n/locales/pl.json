@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Raport udostępniono {{count}} odbiorcom.",
     "sharedWithStaff": "Raport udostępniono {{count}} członkom sztabu.",
     "couldNotShareReport": "Nie udało się udostępnić raportu",
-    "couldNotGenerate": "Nie udało się wygenerować raportu zespołowego"
+    "couldNotGenerate": "Nie udało się wygenerować raportu zespołowego",
+    "opponent": "Przeciwnik"
   },
   "gameBuilder": {
     "headerTitle": "Pakiet meczowy",

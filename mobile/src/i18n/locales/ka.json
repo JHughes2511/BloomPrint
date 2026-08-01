@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "ანგარიში გაზიარდა {{count}} მიმღებთან.",
     "sharedWithStaff": "ანგარიში გაზიარდა {{count}} პერსონალის წევრთან.",
     "couldNotShareReport": "ანგარიშის გაზიარება ვერ მოხერხდა",
-    "couldNotGenerate": "გუნდის ანგარიშის გენერაცია ვერ მოხერხდა"
+    "couldNotGenerate": "გუნდის ანგარიშის გენერაცია ვერ მოხერხდა",
+    "opponent": "მოწინააღმდეგე"
   },
   "gameBuilder": {
     "headerTitle": "თამაშის პაკეტი",

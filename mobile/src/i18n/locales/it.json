@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Report condiviso con {{count}} destinatario/i.",
     "sharedWithStaff": "Report condiviso con {{count}} membro/i dello staff.",
     "couldNotShareReport": "Impossibile condividere il report",
-    "couldNotGenerate": "Impossibile generare il report squadra"
+    "couldNotGenerate": "Impossibile generare il report squadra",
+    "opponent": "Avversario"
   },
   "gameBuilder": {
     "headerTitle": "Dossier Partita",

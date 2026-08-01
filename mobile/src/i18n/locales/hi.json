@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "रिपोर्ट {{count}} प्राप्तकर्ताओं के साथ साझा की गई।",
     "sharedWithStaff": "रिपोर्ट {{count}} स्टाफ़ सदस्यों के साथ साझा की गई।",
     "couldNotShareReport": "रिपोर्ट साझा नहीं हो सकी",
-    "couldNotGenerate": "टीम रिपोर्ट नहीं बनाई जा सकी"
+    "couldNotGenerate": "टीम रिपोर्ट नहीं बनाई जा सकी",
+    "opponent": "प्रतिद्वंद्वी"
   },
   "gameBuilder": {
     "headerTitle": "गेम पैकेट",

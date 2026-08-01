@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "{{count}}名の受信者にレポートを共有しました。",
     "sharedWithStaff": "スタッフ{{count}}名にレポートを共有しました。",
     "couldNotShareReport": "レポートを共有できませんでした",
-    "couldNotGenerate": "チームレポートを生成できませんでした"
+    "couldNotGenerate": "チームレポートを生成できませんでした",
+    "opponent": "対戦相手"
   },
   "gameBuilder": {
     "headerTitle": "試合資料",

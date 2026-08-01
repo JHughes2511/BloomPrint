@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Ataskaita bendrinama su {{count}} gavėju(-ais).",
     "sharedWithStaff": "Ataskaita bendrinama su {{count}} personalo nariu(-iais).",
     "couldNotShareReport": "Nepavyko pasidalinti ataskaita",
-    "couldNotGenerate": "Nepavyko generuoti komandos ataskaitos"
+    "couldNotGenerate": "Nepavyko generuoti komandos ataskaitos",
+    "opponent": "Varžovas"
   },
   "gameBuilder": {
     "headerTitle": "Rungtynių paketas",

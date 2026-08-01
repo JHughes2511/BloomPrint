@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "{{count}}명에게 리포트를 공유했습니다.",
     "sharedWithStaff": "스태프 {{count}}명에게 리포트를 공유했습니다.",
     "couldNotShareReport": "리포트를 공유할 수 없습니다",
-    "couldNotGenerate": "팀 리포트를 생성할 수 없습니다"
+    "couldNotGenerate": "팀 리포트를 생성할 수 없습니다",
+    "opponent": "상대 팀"
   },
   "gameBuilder": {
     "headerTitle": "경기 패킷",

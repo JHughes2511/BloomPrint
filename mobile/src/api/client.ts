@@ -192,11 +192,12 @@ export const evalsAPI = {
   recent: (limit = 30) =>
     api.get('/evaluations/recent', { params: { limit } }).then(r => r.data),
 
-  teamReport: (data: { output_type: string; focus_prompt?: string; team_id?: number; video?: { uri: string; name: string; type: string } }) => {
+  teamReport: (data: { output_type: string; focus_prompt?: string; team_id?: number; opponent_team_id?: number; video?: { uri: string; name: string; type: string } }) => {
     const form = new FormData();
     form.append('output_type', data.output_type);
     if (data.focus_prompt) form.append('focus_prompt', data.focus_prompt);
     if (data.team_id != null) form.append('team_id', String(data.team_id));
+    if (data.opponent_team_id != null) form.append('opponent_team_id', String(data.opponent_team_id));
     if (data.video) form.append('video', { uri: data.video.uri, name: data.video.name, type: data.video.type } as any);
     return api.post('/evaluations/team-report', form, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: UPLOAD_TIMEOUT }).then(r => r.data);
   },

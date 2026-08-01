@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Отчёт отправлен {{count}} получател(ям).",
     "sharedWithStaff": "Отчёт отправлен {{count}} сотрудник(ам).",
     "couldNotShareReport": "Не удалось поделиться отчётом",
-    "couldNotGenerate": "Не удалось создать командный отчёт"
+    "couldNotGenerate": "Не удалось создать командный отчёт",
+    "opponent": "Соперник"
   },
   "gameBuilder": {
     "headerTitle": "Игровой пакет",

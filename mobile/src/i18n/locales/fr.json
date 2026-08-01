@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Rapport partagé avec {{count}} destinataire(s).",
     "sharedWithStaff": "Rapport partagé avec {{count}} membre(s) du staff.",
     "couldNotShareReport": "Impossible de partager le rapport",
-    "couldNotGenerate": "Impossible de générer le rapport d'équipe"
+    "couldNotGenerate": "Impossible de générer le rapport d'équipe",
+    "opponent": "Adversaire"
   },
   "gameBuilder": {
     "headerTitle": "Dossier de match",

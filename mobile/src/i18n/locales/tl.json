@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Naibahagi ang ulat sa {{count}} tatanggap.",
     "sharedWithStaff": "Naibahagi ang ulat sa {{count}} miyembro ng staff.",
     "couldNotShareReport": "Hindi maibahagi ang ulat",
-    "couldNotGenerate": "Hindi makabuo ng ulat ng team"
+    "couldNotGenerate": "Hindi makabuo ng ulat ng team",
+    "opponent": "Kalaban"
   },
   "gameBuilder": {
     "headerTitle": "Game packet",

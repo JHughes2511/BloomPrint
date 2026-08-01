@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Raport distribuit către {{count}} destinatar(i).",
     "sharedWithStaff": "Raport distribuit către {{count}} membru(i) din staff.",
     "couldNotShareReport": "Raportul nu a putut fi distribuit",
-    "couldNotGenerate": "Raportul de echipă nu a putut fi generat"
+    "couldNotGenerate": "Raportul de echipă nu a putut fi generat",
+    "opponent": "Adversar"
   },
   "gameBuilder": {
     "headerTitle": "Pachet de meci",

@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Η αναφορά κοινοποιήθηκε σε {{count}} παραλήπτες.",
     "sharedWithStaff": "Η αναφορά κοινοποιήθηκε σε {{count}} μέλη επιτελείου.",
     "couldNotShareReport": "Δεν ήταν δυνατή η κοινοποίηση της αναφοράς",
-    "couldNotGenerate": "Δεν ήταν δυνατή η δημιουργία της ομαδικής αναφοράς"
+    "couldNotGenerate": "Δεν ήταν δυνατή η δημιουργία της ομαδικής αναφοράς",
+    "opponent": "Αντίπαλος"
   },
   "gameBuilder": {
     "headerTitle": "Φάκελος Αγώνα",

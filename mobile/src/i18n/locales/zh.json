@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "报告已分享给 {{count}} 位接收者。",
     "sharedWithStaff": "报告已分享给 {{count}} 名工作人员。",
     "couldNotShareReport": "无法分享报告",
-    "couldNotGenerate": "无法生成球队报告"
+    "couldNotGenerate": "无法生成球队报告",
+    "opponent": "对手"
   },
   "gameBuilder": {
     "headerTitle": "比赛资料包",

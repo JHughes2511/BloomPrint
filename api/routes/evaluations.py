@@ -539,6 +539,9 @@ async def team_report(
     output_type: str = Form("coaching_report"),
     focus_prompt: str | None = Form(None),
     team_id: int | None = Form(None),
+    # The other side of a match-up. Only meaningful when 'matchup' is among the
+    # output types; ignored otherwise so the field can be sent unconditionally.
+    opponent_team_id: int | None = Form(None),
     video: UploadFile | None = File(None),
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
@@ -549,8 +552,14 @@ async def team_report(
             status_code=500,
             detail="ANTHROPIC_API_KEY is not set on the server. Ask the server admin to configure it."
         )
-    query = db.query(models.Player)
+    # Scoped to the caller. Without the coach filter a roster-wide team report
+    # pulled every player in the database — one coach's report describing
+    # another coach's players, by name, with their grades and flags. The
+    # team_id filter alone did not save it: it was also unvalidated, so passing
+    # someone else's team id returned their roster.
+    query = db.query(models.Player).filter(models.Player.coach_id == coach.id)
     if team_id is not None:
+        get_owned(db, models.Team, team_id, coach.id, "Team")
         query = query.filter_by(team_id=team_id)
     players = query.all()
     if not players:
@@ -577,6 +586,34 @@ async def team_report(
         team_obj = get_owned(db, models.Team, team_id, coach.id, "Team")
         if team_obj:
             team_label = f"{team_obj.name} ({coach.program_name})"
+
+    # MATCH-UP: a second roster to compare against. Built from the same owned
+    # data as the first, so a match-up cannot become a way to read a roster the
+    # caller could not otherwise see.
+    from video_vision.bim import parse_output_types
+    if "matchup" in parse_output_types(output_type) and opponent_team_id is not None:
+        opp = get_owned(db, models.Team, opponent_team_id, coach.id, "Team")
+        opp_players = (
+            db.query(models.Player)
+            .filter(models.Player.coach_id == coach.id, models.Player.team_id == opp.id)
+            .all()
+        )
+        if opp_players:
+            roster_context += f"\n--- OPPONENT ROSTER: {opp.name} ---\n"
+            for p in opp_players:
+                evals = p.evaluations
+                if evals:
+                    latest = evals[-1]
+                    grade_str = f"{latest.overall_grade:.1f}/10" if latest.overall_grade else "N/A"
+                    flags = ", ".join((latest.green_flags or [])[:3])
+                    watch = ", ".join((latest.watch_flags or [])[:3])
+                    roster_context += (
+                        f"- {p.name} ({p.position or 'N/A'}, {p.competition_level}): "
+                        f"Grade {grade_str}. Strengths: {flags or 'N/A'}. Watch: {watch or 'N/A'}.\n"
+                    )
+                else:
+                    roster_context += f"- {p.name} ({p.position or 'N/A'}): No evaluations yet.\n"
+            team_label = f"{team_label} vs {opp.name}"
 
     from ..coach_context import system_profile_block, resolve_level
     system_block = system_profile_block(coach)

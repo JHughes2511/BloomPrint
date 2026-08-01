@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Rapor {{count}} alıcıyla paylaşıldı.",
     "sharedWithStaff": "Rapor {{count}} ekip üyesiyle paylaşıldı.",
     "couldNotShareReport": "Rapor paylaşılamadı",
-    "couldNotGenerate": "Takım raporu oluşturulamadı"
+    "couldNotGenerate": "Takım raporu oluşturulamadı",
+    "opponent": "Rakip"
   },
   "gameBuilder": {
     "headerTitle": "Maç Dosyası",

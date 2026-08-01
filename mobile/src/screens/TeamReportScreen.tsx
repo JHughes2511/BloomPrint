@@ -35,9 +35,9 @@ import ChipRow from '../responsive/ChipRow';
 // as "Training Program" on this screen and "Team Training" in the Game Packet
 // builder next door.
 //
-// 'matchup' is deliberately absent rather than overlooked: it compares named
-// subjects and the team-report endpoint takes no matchup_player_ids, so the
-// chip would generate a comparison against nobody.
+// 'matchup' compares two rosters, so it needs an opponent. The endpoint takes
+// an opponent_team_id now and the picker below appears only when this chip is
+// on — an opponent field on every report would be noise for the other six.
 const OUTPUT_TYPES = [
   { key: 'coaching_report' },
   { key: 'game_analysis' },
@@ -46,6 +46,7 @@ const OUTPUT_TYPES = [
   { key: 'scouting_report' },
   { key: 'team_training' },
   { key: 'box_score' },
+  { key: 'matchup' },
 ];
 
 /** Reports written before a type was renamed still carry the old key. */
@@ -71,6 +72,7 @@ export default function TeamReportScreen() {
   const pendingScrollToReport = React.useRef(false);
 
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+  const [opponentTeamId, setOpponentTeamId] = useState<number | null>(null);
   const [videoAsset, setVideoAsset] = useState<{ uri: string; name: string; type: string } | null>(null);
 
   const pickVideo = async () => {
@@ -448,7 +450,7 @@ export default function TeamReportScreen() {
     setReportText(null);
     setSavedTeamReportId(null);
     try {
-      const res = await evalsAPI.teamReport({ output_type: outputType, focus_prompt: focusPrompt, team_id: selectedTeamId ?? undefined, video: videoAsset ?? undefined });
+      const res = await evalsAPI.teamReport({ output_type: outputType, focus_prompt: focusPrompt, team_id: selectedTeamId ?? undefined, opponent_team_id: opponentTeamId ?? undefined, video: videoAsset ?? undefined });
       // Film uploads process in the background and return a job id; poll for it.
       const result = res?.job_id ? await evalsAPI.awaitJob(res.job_id, setGenProgress) : res;
       setReportText(result.report_text);
@@ -635,11 +637,28 @@ export default function TeamReportScreen() {
           ))}
         </ChipRow>
 
+        {outputType.split(',').includes('matchup') && (
+          <>
+            <Text style={styles.label}>{tr('teamReport.opponent')}</Text>
+            <ChipRow style={{ marginBottom: 20 }}>
+              {teams.filter(tm => tm.id !== selectedTeamId).map(tm => (
+                <TouchableOpacity
+                  key={tm.id}
+                  style={[styles.chip, opponentTeamId === tm.id && styles.chipActive]}
+                  onPress={() => setOpponentTeamId(opponentTeamId === tm.id ? null : tm.id)}
+                >
+                  <Text style={[styles.chipText, opponentTeamId === tm.id && styles.chipTextActive]} numberOfLines={1}>{tm.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </ChipRow>
+          </>
+        )}
+
         <Text style={styles.label}>{tr('teamReport.reportType')}</Text>
         <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
           {tr('teamReport.reportTypeHint')}
         </Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+        <ChipRow style={{ marginBottom: 20 }}>
           {OUTPUT_TYPES.map(t => {
             const selected = outputType.split(',').filter(Boolean);
             const isOn = selected.includes(t.key);
@@ -656,7 +675,7 @@ export default function TeamReportScreen() {
               </TouchableOpacity>
             );
           })}
-        </ScrollView>
+        </ChipRow>
 
         <Text style={styles.label}>{tr('teamReport.focusOptional')}</Text>
         <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>

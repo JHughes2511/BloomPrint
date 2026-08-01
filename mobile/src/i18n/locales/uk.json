@@ -1812,7 +1812,8 @@
     "sharedWithRecipients": "Звіт надіслано {{count}} одержувачу(ам).",
     "sharedWithStaff": "Звіт надіслано {{count}} члену(ам) персоналу.",
     "couldNotShareReport": "Не вдалося поділитися звітом",
-    "couldNotGenerate": "Не вдалося згенерувати командний звіт"
+    "couldNotGenerate": "Не вдалося згенерувати командний звіт",
+    "opponent": "Суперник"
   },
   "gameBuilder": {
     "headerTitle": "Ігровий пакет",
