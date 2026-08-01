@@ -1081,7 +1081,13 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 8, marginBottom: 12, gap: 12 },
   title: { fontSize: 22, fontFamily: fonts[900], color: t.ink, flex: 1, flexShrink: 1, minWidth: 0 },
   emptyText: { color: t.muted2, marginTop: 12, fontSize: 14, textAlign: 'center' },
-  tabBar: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 12, backgroundColor: t.card, borderRadius: 12, padding: 4 },
+  tabBar: {
+    flexDirection: 'row', marginHorizontal: 16, marginBottom: 12,
+    backgroundColor: t.card, borderRadius: 12, padding: 4,
+    // Left, matching the page title and the team chips beneath it —
+    // centring it left the bar floating between two left edges.
+    width: '100%', maxWidth: 560, alignSelf: 'flex-start',
+  },
   tabBtn: { flex: 1, flexShrink: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 10 },
   tabBtnActive: { backgroundColor: t.ctaBg },
   tabBtnText: { color: t.muted2, fontSize: 13, fontFamily: fonts[700], flexShrink: 1, minWidth: 0 },
@@ -1113,7 +1119,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
   modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   modalSub: { color: t.muted, fontSize: 12, marginTop: 2 },
-  tabRow: { flexDirection: 'row', gap: 8, width: '100%', maxWidth: 560, alignSelf: 'center' },
+  tabRow: { flexDirection: 'row', gap: 8 },
   tab: { borderWidth: 1, borderColor: t.line, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6 },
   tabActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   tabText: { color: t.muted, fontSize: 12, fontFamily: fonts[600] },

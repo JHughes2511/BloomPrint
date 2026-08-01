@@ -31,6 +31,8 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
+import { useSheetScrollHeight } from '../responsive/modalSizes';
+import { CONTENT_MAX_WIDTH } from '../responsive/modalSizes';
 
 // Highest competition level → lowest.
 const COMPETITION_LEVELS = [
@@ -127,6 +129,8 @@ type ViewKey = 'dashboard' | 'games' | 'live' | 'detail' | 'scout' | 'gamereport
 export default function TeamEvalScreen({ route, navigation }: any) {
   const { coach } = useAuth();
   const { t, mode } = useTheme();
+  // Scales with the window on desktop; unchanged on phones.
+  const sheetScroll300 = useSheetScrollHeight(300);
   const { t: tr } = useTranslation();
   const s = makeS(t);
   // Closed-enum display helpers (keys never touch the API values).
@@ -3034,7 +3038,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       {/* Share game with staff modal */}
       <Modal visible={shareGameModalVisible} animationType="slide" transparent>
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={{ backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '80%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center' }}>
+          <View style={{ backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }}>{tr('teamGrade.shareWithStaff')}</Text>
               <TouchableOpacity onPress={() => setShareGameModalVisible(false)}>
@@ -3076,7 +3080,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 {staffSearching ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="search" size={18} color={t.ctaText} />}
               </TouchableOpacity>
             </View>
-            <ScrollView style={{ maxHeight: 300 }}>
+            <ScrollView style={{ maxHeight: sheetScroll300 }}>
               {staffResults.map((staff: any, idx: number) => (
                 <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 8 }}>
                   <View style={{ flex: 1 }}>

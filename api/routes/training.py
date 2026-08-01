@@ -8,13 +8,58 @@ from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
 from ..ownership import get_owned
-from ..ai_models import OPUS, text_of
+from ..ai_models import OPUS, SONNET, text_of
 
 router = APIRouter(prefix="/training", tags=["training"])
 
 
 class RegenerateRequest(BaseModel):
     feedback: str
+
+
+def _title_for(program_text: str, priorities: list[str]) -> str | None:
+    """A short subject line for a training program.
+
+    Asks the model for one, because the program is the only thing that knows
+    what it is actually about. Falls back to _derive_title, which reads the
+    leading terms off the priorities — that fallback is what runs with no API
+    key, on a failed call, and for programs written before titles existed, so
+    it has to stand on its own rather than being a placeholder.
+
+    SONNET rather than OPUS: naming text another model already reasoned about
+    is a transformation, not analysis.
+    """
+    fallback = _derive_title(program_text, priorities)
+    if not (program_text or "").strip():
+        return fallback
+    try:
+        import anthropic
+
+        client = anthropic.Anthropic()
+        response = client.messages.create(
+            model=SONNET,
+            max_tokens=40,
+            messages=[{
+                "role": "user",
+                "content": (
+                    "Title this basketball training program in 3-6 words, naming the "
+                    "skills it develops. It is a subject line in a list of programs for "
+                    "one player, so it has to distinguish this program from others for "
+                    "the same player. No quotes, no trailing punctuation, no player "
+                    "name, no the word 'training'. Reply with the title only.\n\n"
+                    + (program_text or "")[:4000]
+                ),
+            }],
+        )
+        title = (text_of(response) or "").strip().strip('"').strip()
+        # One line, sane length, and actually words — otherwise take the fallback
+        # rather than putting a refusal or a paragraph in the list.
+        title = title.splitlines()[0].strip() if title else ""
+        if 3 <= len(title) <= 60 and not title.endswith((".", ":")):
+            return title
+    except Exception:
+        pass
+    return fallback
 
 
 def _derive_title(program_text: str, priorities: list[str]) -> str | None:
@@ -289,7 +334,7 @@ async def generate_training(
         evaluation_id=evaluation_id,
         program_text=program_text,
         priorities=priorities[:6],
-        title=_derive_title(program_text, priorities),
+        title=_title_for(program_text, priorities),
     )
     db.add(session)
     db.commit()
@@ -611,7 +656,7 @@ async def regenerate_training(
         evaluation_id=latest.evaluation_id if latest else None,
         program_text=program_text,
         priorities=priorities[:6],
-        title=_derive_title(program_text, priorities),
+        title=_title_for(program_text, priorities),
     )
     db.add(session)
     db.commit()

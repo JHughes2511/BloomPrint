@@ -27,6 +27,7 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
+import ChipRow from '../responsive/ChipRow';
 
 // Labels come from the `reportTypes.*` translation keys at render time.
 const OUTPUT_TYPES = [
@@ -597,7 +598,7 @@ export default function TeamReportScreen() {
         {showQuickReport && (<>
 
         <Text style={styles.label}>{tr('teamReport.selectTeam')}</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+        <ChipRow style={{ marginBottom: 20 }}>
           <TouchableOpacity
             style={[styles.chip, selectedTeamId === null && styles.chipActive]}
             onPress={() => setSelectedTeamId(null)}
@@ -613,7 +614,7 @@ export default function TeamReportScreen() {
               <Text style={[styles.chipText, selectedTeamId === t.id && styles.chipTextActive]} numberOfLines={1}>{t.name}</Text>
             </TouchableOpacity>
           ))}
-        </ScrollView>
+        </ChipRow>
 
         <Text style={styles.label}>{tr('teamReport.reportType')}</Text>
         <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>

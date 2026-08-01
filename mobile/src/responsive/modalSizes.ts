@@ -23,3 +23,24 @@ export const CONTENT_MAX_WIDTH = 1100;
 
 /** Content modals also want the vertical space; they're a workspace, not a card. */
 export const CONTENT_MAX_HEIGHT = '90%' as const;
+
+
+/**
+ * Height for a scrollable region inside a modal.
+ *
+ * These were fixed pixel caps — 260, 300, 460 — chosen against a phone. On a
+ * tall desktop window they hold the sheet to a third of the screen no matter
+ * how much room there is, so a film breakdown reads through a letterbox with
+ * the page visible above and below it.
+ *
+ * The phone value is kept as the floor so nothing shrinks on the devices it
+ * was tuned for; desktop scales with the window instead.
+ */
+import { useWindowDimensions } from 'react-native';
+import { BREAKPOINTS } from './useBreakpoint';
+
+export function useSheetScrollHeight(phoneMax: number, fraction = 0.6): number {
+  const { width, height } = useWindowDimensions();
+  if (width < BREAKPOINTS.desktop) return phoneMax;
+  return Math.max(phoneMax, Math.round(height * fraction));
+}

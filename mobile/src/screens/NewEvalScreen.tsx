@@ -18,6 +18,7 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
+import ChipRow from '../responsive/ChipRow';
 
 // API output_type keys — labels are resolved at render via i18n.
 const OUTPUT_TYPES: OutputType[] = [
@@ -200,7 +201,7 @@ export default function NewEvalScreen() {
       <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
         {tr('newEval.reportTypeHint')}
       </Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+      <ChipRow style={{ marginBottom: 20 }}>
         {OUTPUT_TYPES.map(key => {
           const selected = outputType.split(',').filter(Boolean);
           const isOn = selected.includes(key);
@@ -219,7 +220,7 @@ export default function NewEvalScreen() {
           </TouchableOpacity>
           );
         })}
-      </ScrollView>
+      </ChipRow>
 
       {/* Box Score — tracked game selection */}
       {wantsBoxScore && (

@@ -28,6 +28,7 @@ import { PillarCard } from '../components/PillarCard';
 import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
+import { useSheetScrollHeight } from '../responsive/modalSizes';
 
 const PILLARS = [
   'offensive_skills', 'defensive_capabilities', 'physical_attributes',
@@ -42,6 +43,9 @@ export default function EvalReportScreen() {
   const navigation = useNavigation<any>();
   const { evalId, openShare } = route.params;
   const { t, mode } = useTheme();
+  // Scales with the window on desktop; unchanged on phones.
+  const sheetScroll460 = useSheetScrollHeight(460);
+  const sheetScroll360 = useSheetScrollHeight(360);
   const { t: tr } = useTranslation();
   const styles = makeStyles(t);
   // Display label for a pillar key (API keys stay untouched).
@@ -558,7 +562,7 @@ export default function EvalReportScreen() {
               <TouchableOpacity onPress={() => setShowBim(false)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
             <Text style={styles.modalSub}>{tr('evalReport.bimScoreDesc')}</Text>
-            <ScrollView style={{ maxHeight: 460 }} showsVerticalScrollIndicator={false}>
+            <ScrollView style={{ maxHeight: sheetScroll460 }} showsVerticalScrollIndicator={false}>
             {hasPillars && (
               <View style={{ marginTop: 4 }}>
                 <Text style={styles.sectionLabel}>{tr('evalReport.pillarBreakdown')}</Text>
@@ -870,7 +874,7 @@ export default function EvalReportScreen() {
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('evalReport.exportReportTitle')}</Text>
             <Text style={styles.modalSub}>{tr('evalReport.chooseInclude')}</Text>
-            <ScrollView style={{ maxHeight: 360 }}>
+            <ScrollView style={{ maxHeight: sheetScroll360 }}>
             {EXPORT_CATEGORIES.filter(key => {
               // Only show toggles for sections that actually exist in THIS report
               if (key === 'grades') return ev?.overall_grade != null || ev?.pillar_grades != null;

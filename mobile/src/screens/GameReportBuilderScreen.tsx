@@ -28,6 +28,8 @@ import PageContainer from '../responsive/PageContainer';
 import { mdToHtml, safeFileName, wrapPrintDocument } from '../utils/mdToHtml';
 import { useAuth } from '../context/AuthContext';
 import { CONTENT_MAX_WIDTH } from '../responsive/modalSizes';
+import ChipRow from '../responsive/ChipRow';
+import { useSheetScrollHeight } from '../responsive/modalSizes';
 
 // Labels come from `reportTypes.*` translation keys at render time.
 // KEY values are API values — never translate them.
@@ -66,6 +68,9 @@ export default function GameReportBuilderScreen() {
   const navigation = useNavigation<any>();
   const { coach } = useAuth();
   const { t } = useTheme();
+  // Scales with the window on desktop; unchanged on phones.
+  const sheetScroll280 = useSheetScrollHeight(280);
+  const sheetScroll260 = useSheetScrollHeight(260);
   const { t: tr } = useTranslation();
   const styles = makeStyles(t);
 
@@ -635,7 +640,7 @@ export default function GameReportBuilderScreen() {
         <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
           {tr('gameBuilder.reportTypeHint')}
         </Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+        <ChipRow style={{ marginBottom: 20 }}>
           {OUTPUT_TYPES.map(t => {
             const selected = outputType.split(',').filter(Boolean);
             const isOn = selected.includes(t.key);
@@ -651,7 +656,7 @@ export default function GameReportBuilderScreen() {
               </TouchableOpacity>
             );
           })}
-        </ScrollView>
+        </ChipRow>
 
         {/* Film clips */}
         <View style={styles.sectionHeader}>
@@ -915,7 +920,7 @@ export default function GameReportBuilderScreen() {
                 <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
-            <KeyboardAwareScrollView style={{ maxHeight: 280 }} contentContainerStyle={{ paddingBottom: 8 }}>
+            <KeyboardAwareScrollView style={{ maxHeight: sheetScroll280 }} contentContainerStyle={{ paddingBottom: 8 }}>
               {clipModal?.analysis_text
                 ? renderReport(clipModal.analysis_text, { heading: t.ink, body: t.inkSoft })
                 : <Text style={{ color: t.muted }}>{tr('gameBuilder.noAnalysisYet')}</Text>
@@ -1019,7 +1024,7 @@ export default function GameReportBuilderScreen() {
               autoFocus
             />
             {shareSearchLoading && <ActivityIndicator color={t.muted} size="small" style={{ marginTop: 8 }} />}
-            <ScrollView style={{ maxHeight: 260, marginTop: 8 }} keyboardShouldPersistTaps="handled">
+            <ScrollView style={{ maxHeight: sheetScroll260, marginTop: 8 }} keyboardShouldPersistTaps="handled">
               {shareResults.map(r => (
                 <TouchableOpacity key={r.id} style={styles.searchResult} onPress={() => sendReport(r)} disabled={sharing}>
                   <View style={styles.searchAvatar}>
