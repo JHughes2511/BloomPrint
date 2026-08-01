@@ -32,6 +32,7 @@ import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
 import { useSheetScrollHeight, sheetCap, webOnly, CONTENT_MAX_WIDTH } from '../responsive/modalSizes';
+import { useGridColumns } from '../responsive/useGridColumns';
 
 // Highest competition level → lowest.
 const COMPETITION_LEVELS = [
@@ -236,6 +237,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [gameLineup, setGameLineup] = useState<any[]>([]);
   // Player grade-detail modal (from leaderboard)
   const [gradeDetailPlayer, setGradeDetailPlayer] = useState<string | null>(null);
+  // Web card grids. Targets land on 4 games across and 3 of the roomier scout
+  // and game-report cards at ~1900px; narrower windows drop a column on their
+  // own. Native always reports a single column.
+  const gamesGrid  = useGridColumns(390);
+  const scoutGrid  = useGridColumns(520);
+  const reportGrid = useGridColumns(520);
   const [gradeDetailData, setGradeDetailData] = useState<any[]>([]);
   const [gradeDetailLoading, setGradeDetailLoading] = useState(false);
   // for edit modal — add stat
@@ -1299,13 +1306,15 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               <Text style={{ color: t.muted, fontSize: 13, marginTop: 10 }}>{tr('teamGrade.noGames')}</Text>
             </View>
           ) : (
-            filteredSessions.map((game: any) => {
+            <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: gamesGrid.gap })}
+                  onLayout={gamesGrid.onLayout}>
+            {filteredSessions.map((game: any) => {
               const won = game.our_score != null && game.opponent_score != null && game.our_score > game.opponent_score;
               const hasScore = game.our_score != null;
               return (
                 <TouchableOpacity
                   key={game.id}
-                  style={s.gameCard}
+                  style={[s.gameCard, gamesGrid.cardWidth ? { width: gamesGrid.cardWidth } : null]}
                   onPress={() => (game.status === 'in_progress' && isOwnedGame(game)) ? openLiveEntry(game) : openDetail(game)}
                 >
                   <View style={{ flex: 1 }}>
@@ -1357,7 +1366,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   )}
                 </TouchableOpacity>
               );
-            })
+            })}
+            </View>
           )}
         </ScrollView>
       )}

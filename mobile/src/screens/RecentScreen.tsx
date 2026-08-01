@@ -30,6 +30,8 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import { sheetCap } from '../responsive/modalSizes';
+import ChipRow from '../responsive/ChipRow';
+import { webOnly } from '../responsive/modalSizes';
 
 type ReportItem = {
   id: number | string;
@@ -734,7 +736,7 @@ export default function RecentScreen() {
       )}
 
       {/* Category filter */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={{ paddingHorizontal: 16, paddingRight: 24, gap: 8, alignItems: 'center' }}>
+      <ChipRow style={styles.filterRow} gap={8}>
         {FILTER_CATS.map(cat => (
           <TouchableOpacity
             key={cat}
@@ -746,7 +748,7 @@ export default function RecentScreen() {
             </Text>
           </TouchableOpacity>
         ))}
-      </ScrollView>
+      </ChipRow>
 
       <FlatList
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} tintColor={t.accent} />}
@@ -1448,7 +1450,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     marginHorizontal: 16, marginBottom: 12, paddingHorizontal: 12, height: 44,
   },
   searchBarInput: { flex: 1, color: t.ink, fontSize: 15, paddingVertical: 0 },
-  filterRow: { marginBottom: 12, flexGrow: 0, height: 52 },
+  filterRow: { marginBottom: 12, flexGrow: 0, height: 52, paddingHorizontal: 16,
+    ...webOnly({ height: undefined, paddingRight: 24, paddingBottom: 4 }) },
   filterChip: { borderWidth: 1, borderColor: t.line, borderRadius: 18, paddingHorizontal: 14, justifyContent: 'center', alignItems: 'center', height: 34, flexShrink: 1, maxWidth: 180 },
   filterChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   filterChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600], flexShrink: 1 },
