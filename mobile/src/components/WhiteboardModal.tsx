@@ -765,19 +765,26 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   boardsRef.current = boards;
   const board  = boards[activeBoardIdx];
   const visFt  = VISIBLE_FT[board?.court_type ?? 'full'] ?? VISIBLE_FT.full;
-  const rawScale = avail.w > 20 && avail.h > 20
-    ? Math.min((avail.w - 20) / PADDED_FT_W, (avail.h - 20) / vTotalFt(visFt))
+  // Landscape: the court is rotated 90° for display, so it is fitted against
+  // the available space with the axes swapped and then only rotated.
+  //
+  // It used to be built at portrait size and scaled up to fill the wide area,
+  // which is why lines thickened in landscape: a uniform scale multiplies
+  // stroke widths along with everything else, so a 3.5px arrow drawn in
+  // portrait rendered at 3.5 x fit. Sizing the court correctly in the first
+  // place keeps every stroke the width it was drawn at.
+  const isLandscape = orientation === 'landscape';
+  const fitW = isLandscape ? avail.h : avail.w;
+  const fitH = isLandscape ? avail.w : avail.h;
+  const rawScale = fitW > 20 && fitH > 20
+    ? Math.min((fitW - 20) / PADDED_FT_W, (fitH - 20) / vTotalFt(visFt))
     : 0;
   const scale  = Number.isFinite(rawScale) && rawScale > 0 ? rawScale : 0;
   const courtW = PADDED_FT_W * scale;
   const courtH = vTotalFt(visFt) * scale;
-  // Landscape: rotate the whole court 90° for display and uniformly scale it to
-  // fit the wide area. Strokes stay aligned (one transform on the whole wrapper).
-  // Drawing is a portrait activity, so hand-draw input is paused in landscape.
-  const isLandscape = orientation === 'landscape';
-  const landscapeFit = isLandscape && courtW > 0 && courtH > 0
-    ? Math.min((avail.w - 12) / courtH, (avail.h - 12) / courtW)
-    : 1;
+  // Kept at 1: the fit above already sized the court for the rotated area.
+  // geomRef and saveBoard still read it, so it stays rather than disappearing.
+  const landscapeFit = 1;
 
   // Geometry snapshot for the (once-created) pan responder and for saveBoard's
   // canvas-dimension capture.
@@ -791,6 +798,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   const mapPoint = (lx: number, ly: number) => ({ x: lx, y: ly });
   const mapPointRef = useRef(mapPoint);
   mapPointRef.current = mapPoint;
+
+  /** Smallest a tapped player marker may be, as a share of court width. */
+  const minMarkRef = useRef<() => number>(() => 10);
+  minMarkRef.current = () => Math.max(10, Math.round(geomRef.current.courtW * 0.028));
 
   useEffect(() => { if (visible && (playbook || gameId)) loadBoards(); }, [visible, gameId, playbook]);
 
@@ -1071,10 +1082,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         setLivePath('');
       } else if (tl === 'circle') {
         const r = Math.sqrt((x2-x1)**2 + (y2-y1)**2) / 2;
-        push({ id: uid(), type: 'circle', cx: (x1+x2)/2, cy: (y1+y2)/2, r: Math.max(r, 10), color: c, strokeWidth: STROKE_WIDTH });
+        push({ id: uid(), type: 'circle', cx: (x1+x2)/2, cy: (y1+y2)/2, r: Math.max(r, minMarkRef.current()), color: c, strokeWidth: STROKE_WIDTH });
       } else if (tl === 'xmark') {
         const size = Math.max(Math.abs(x2-x1), Math.abs(y2-y1)) / 2;
-        push({ id: uid(), type: 'xmark', cx: (x1+x2)/2, cy: (y1+y2)/2, size: Math.max(size, 10), color: c, strokeWidth: STROKE_WIDTH });
+        push({ id: uid(), type: 'xmark', cx: (x1+x2)/2, cy: (y1+y2)/2, size: Math.max(size, minMarkRef.current()), color: c, strokeWidth: STROKE_WIDTH });
       } else if (tl === 'arrow') {
         if (Math.sqrt((x2-x1)**2 + (y2-y1)**2) < 5) return;
         // On an AI board, offer to add the drawn arrow to the play as a
@@ -1733,7 +1744,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     const pos: Record<string, { x: number; y: number }> = {};
     markers.forEach(m => { pos[m.id] = { x: m.cx!, y: m.cy! }; });
     const moverOf = (s: Stroke): string | null => {
-      let mv: string | null = null, bd = 34;
+      let mv: string | null = null, bd = Math.max(34, courtW * 0.06);
       for (const m of markers) { const p = pos[m.id]; const d = Math.hypot(p.x - s.x1!, p.y - s.y1!); if (d < bd) { bd = d; mv = m.id; } }
       return mv;
     };
@@ -2084,7 +2095,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                 style={[
                   styles.canvasWrapper,
                   { width: courtW, height: courtH },
-                  isLandscape ? { transform: [{ rotate: '90deg' }, { scale: landscapeFit }] } : null,
+                  isLandscape ? { transform: [{ rotate: '90deg' }] } : null,
                 ]}
                 {...panResponder.panHandlers}
               >
@@ -2557,7 +2568,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   colorRow:        { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 'auto' },
   colorDot:        { width: 21, height: 21, borderRadius: 11, borderWidth: 2, borderColor: 'transparent' },
   colorDotActive:  { borderColor: t.accent },
-  canvasWrapper:   { overflow: 'hidden', borderWidth: 1, borderColor: t.cardBorder },
+  canvasWrapper:   { overflow: 'hidden' },
   listOverlay:     { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   listBox:         { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, maxHeight: '60%', borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center'},
   listTitle:       { color: t.ink, fontSize: 17, fontFamily: fonts[800], marginBottom: 14 },
