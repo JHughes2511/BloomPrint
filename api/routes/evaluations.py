@@ -1067,6 +1067,12 @@ def _strip_md(s: str) -> str:
     if not s:
         return s
     s = re.sub(r"\*\*|__", "", s)          # bold markers
+    # Single-asterisk italics too. Without this, lines the model writes as
+    # "Shooting: 5/10 *(placeholder)*" reach the UI with the asterisks intact
+    # and read as part of the grade. Only paired markers around non-space text
+    # are removed, so a literal "3 * 4" or a trailing footnote star survives.
+    s = re.sub(r"\*(?=\S)([^*\n]*?)(?<=\S)\*", r"\1", s)
+    s = re.sub(r"_(?=\S)([^_\n]*?)(?<=\S)_", r"\1", s)
     s = re.sub(r"^\s*#{1,6}\s*", "", s)    # leading heading hashes
     s = s.replace("##", "")                 # any stray hashes
     return s

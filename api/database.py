@@ -75,6 +75,85 @@ def init_db():
             engine.dialect.name,
         )
 
+    # Backend-independent: operates on rows, not schema.
+    _reparse_eval_sections()
+    _backfill_training_titles()
+
+
+def _backfill_training_titles():
+    """Give existing training programs the subject line new ones get.
+
+    Derived from the same function the create path uses, so an old program and
+    a new one are labelled identically rather than by whichever code wrote them.
+    """
+    try:
+        from sqlalchemy.orm import Session as _Session
+        from .routes.training import _derive_title
+        from . import models
+
+        with _Session(engine) as sess:
+            rows = (
+                sess.query(models.TrainingSession)
+                .filter(models.TrainingSession.title.is_(None))
+                .all()
+            )
+            touched = 0
+            for tr in rows:
+                title = _derive_title(tr.program_text or "", tr.priorities or [])
+                if title:
+                    tr.title = title
+                    touched += 1
+            if touched:
+                sess.commit()
+    except Exception:
+        pass
+
+
+def _reparse_eval_sections():
+    """Recompute green/watch/questions from report_text for existing rows.
+
+    Deliberately its own Session on the engine rather than part of
+    _run_migrations: that runs inside `engine.connect()`, and a nested
+    Session's commit does not survive the enclosing block, so the rows were
+    read, corrected in memory, and silently discarded.
+
+    Re-parses rather than filling only the empties. The earlier parser ended a
+    section only at a header carrying a colon, so on the other two header
+    shapes GREEN FLAGS absorbed the watch flags, the key questions and the
+    stat lines. Those rows are populated and wrong, so a fill-if-empty pass
+    leaves every existing report showing a player's weaknesses as strengths.
+
+    report_text is the source of truth — these columns are derived from it on
+    write and recomputed after any correction — so this cannot lose coach input.
+    """
+    try:
+        from sqlalchemy.orm import Session as _Session
+        from .routes.evaluations import _parse_list_section
+        from . import models
+
+        with _Session(engine) as sess:
+            rows = (
+                sess.query(models.Evaluation)
+                .filter(models.Evaluation.report_text.isnot(None))
+                .all()
+            )
+            touched = 0
+            for ev in rows:
+                for field, header in (
+                    ("green_flags", "GREEN FLAGS"),
+                    ("watch_flags", "WATCH FLAGS"),
+                    ("key_questions", "KEY QUESTIONS"),
+                ):
+                    parsed = _parse_list_section(ev.report_text, header)
+                    if parsed and parsed != (getattr(ev, field) or []):
+                        setattr(ev, field, parsed)
+                        touched += 1
+            if touched:
+                sess.commit()
+    except Exception:
+        # A failed backfill must not stop the server booting.
+        pass
+
 
 def _run_migrations():
     """Apply any schema changes that create_all() can't handle (column additions).
@@ -350,7 +429,7 @@ def _run_migrations():
         # Add completed_drills to player_training if missing
         try:
             ptr_cols = [row[1] for row in conn.execute(
-                __import__("sqlalchemy").text("PRAGMA table_info(player_training)")
+                __import__("sqlalchemy").text("PRAGMA table_info(training_sessions)")
             )]
             if ptr_cols and "completed_drills" not in ptr_cols:
                 conn.execute(__import__("sqlalchemy").text(
@@ -834,6 +913,16 @@ def _run_migrations():
         except Exception:
             pass
 
+        # Training programs gained a subject line.
+        try:
+            text = __import__("sqlalchemy").text
+            cols = [row[1] for row in conn.execute(text("PRAGMA table_info(training_sessions)"))]
+            if cols and "title" not in cols:
+                conn.execute(text("ALTER TABLE training_sessions ADD COLUMN title TEXT"))
+                conn.commit()
+        except Exception:
+            pass
+
         # Distinguish live-tracked stats from imported box scores so a re-import
         # can replace the previous import instead of doubling every count.
         try:
@@ -845,39 +934,6 @@ def _run_migrations():
                 conn.execute(text(
                     "UPDATE game_player_stats SET source = 'live' WHERE source IS NULL"))
                 conn.commit()
-        except Exception:
-            pass
-
-        # One-time re-parse of evals whose flag sections were left empty by an
-        # older, stricter parser. Read paths fill these in memory for the
-        # response; doing the write here keeps GETs from committing.
-        try:
-            from sqlalchemy.orm import Session as _Session
-            from .routes.evaluations import _parse_list_section
-            from . import models
-            sess = _Session(bind=conn)
-            # Empty JSON lists read back as [] rather than NULL, so filter on
-            # falsiness in Python instead of in SQL.
-            stale = (
-                sess.query(models.Evaluation)
-                .filter(models.Evaluation.report_text.isnot(None))
-                .all()
-            )
-            touched = 0
-            for ev in stale:
-                for field, header in (
-                    ("green_flags", "GREEN FLAGS"),
-                    ("watch_flags", "WATCH FLAGS"),
-                    ("key_questions", "KEY QUESTIONS"),
-                ):
-                    if not getattr(ev, field):
-                        parsed = _parse_list_section(ev.report_text, header)
-                        if parsed:
-                            setattr(ev, field, parsed)
-                            touched += 1
-            if touched:
-                sess.commit()
-            sess.close()
         except Exception:
             pass
 

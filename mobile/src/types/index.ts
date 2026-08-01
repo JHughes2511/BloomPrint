@@ -85,6 +85,8 @@ export interface TrainingSession {
   evaluation_id: number | null;
   program_text: string | null;
   priorities: string[] | null;
+  /** Short subject line derived from the program's priorities. */
+  title?: string | null;
   created_at: string;
   sent_to_player?: boolean;
   reformatting?: boolean;

@@ -214,6 +214,10 @@ class TrainingSession(SoftDeleteMixin, Base):
     evaluation_id = Column(Integer, ForeignKey("evaluations.id"), nullable=True)
     program_text  = Column(Text)
     priorities    = Column(JSON)   # ordered list of focus areas
+    # A short subject so a coach can tell two programs apart in a list. Without
+    # it every row rendered as "Training Program" plus a date, and the preview
+    # line was whatever the text opened with — usually the word "BRIEF:".
+    title         = Column(String)
     created_at    = Column(DateTime, default=datetime.utcnow)
 
     # Player-facing version: once sent, the AI reformats program_text into the

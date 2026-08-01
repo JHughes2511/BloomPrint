@@ -17,6 +17,35 @@ class RegenerateRequest(BaseModel):
     feedback: str
 
 
+def _derive_title(program_text: str, priorities: list[str]) -> str | None:
+    """A short subject line for a training program.
+
+    Built from the leading term of the first few priorities — "Shooting ·
+    Ball security · Closeouts" — which is what a coach actually scans for when
+    looking back through a player's programs. Falls back to the first real
+    line of the brief, and finally to nothing, so the UI keeps its old label
+    rather than inventing a wrong one.
+    """
+    import re as _re
+
+    def head(item: str) -> str:
+        # Keep the skill, drop the target: "Shooting: 5/10 makes" -> "Shooting"
+        part = _re.split(r"[:\u2014\u2013(]|\s+-\s+", item, 1)[0].strip()
+        return part[:34].strip(" .")
+
+    heads = [h for h in (head(p) for p in (priorities or [])) if len(h) > 2]
+    if heads:
+        # dict.fromkeys keeps first-seen order while removing repeats
+        return " · ".join(list(dict.fromkeys(heads))[:3])
+
+    for raw in (program_text or "").splitlines():
+        line = _re.sub(r"^[\s\-·•*#\d\.\)]+", "", raw).strip().rstrip(":").strip()
+        # Skip section headers — they name the format, not the content
+        if len(line) > 6 and not line.isupper():
+            return line[:60].strip()
+    return None
+
+
 def _extract_priorities(program_text: str) -> list[str]:
     """Pull the ordered priority/KPI list out of a program, skipping headers and
     stray punctuation (e.g. a leftover ':' from the 'KPI TARGETS:' line)."""
@@ -260,6 +289,7 @@ async def generate_training(
         evaluation_id=evaluation_id,
         program_text=program_text,
         priorities=priorities[:6],
+        title=_derive_title(program_text, priorities),
     )
     db.add(session)
     db.commit()
@@ -581,6 +611,7 @@ async def regenerate_training(
         evaluation_id=latest.evaluation_id if latest else None,
         program_text=program_text,
         priorities=priorities[:6],
+        title=_derive_title(program_text, priorities),
     )
     db.add(session)
     db.commit()

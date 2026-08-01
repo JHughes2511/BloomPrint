@@ -224,6 +224,7 @@ class TrainingOut(BaseModel):
     evaluation_id: int | None
     program_text: str | None
     priorities: list[str] | None
+    title: str | None = None
     created_at: datetime
     player_name: str | None = None
     sent_to_player: bool = False

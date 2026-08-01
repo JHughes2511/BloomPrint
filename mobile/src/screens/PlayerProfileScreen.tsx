@@ -660,11 +660,26 @@ export default function PlayerProfileScreen() {
               onPress={() => setTrainingModalItem(ts)}
             >
               <View style={{ flex: 1 }}>
-                <Text style={styles.evalType}>{tr('reportTypes.training_program')}</Text>
-                <Text style={styles.evalDate}>{new Date(ts.created_at).toLocaleDateString()}</Text>
+                {/* Subject first: three programs for the same player were
+                    previously distinguishable only by date, and the preview
+                    line underneath was whatever the text opened with — usually
+                    the literal word "BRIEF:". */}
+                <Text style={styles.evalType} numberOfLines={1}>
+                  {ts.title || tr('reportTypes.training_program')}
+                </Text>
+                <Text style={styles.evalDate}>
+                  {ts.title
+                    ? `${tr('reportTypes.training_program')} · ${new Date(ts.created_at).toLocaleDateString()}`
+                    : new Date(ts.created_at).toLocaleDateString()}
+                </Text>
                 {ts.program_text ? (
                   <Text style={{ color: t.muted, fontSize: 11, marginTop: 4 }} numberOfLines={2}>
-                    {ts.program_text.replace(/\*\*/g, '').trim().slice(0, 120)}
+                    {ts.program_text
+                      .replace(/\*\*/g, '')
+                      // Drop leading section headers so the preview shows content
+                      .replace(/^\s*(?:#{1,6}\s*)?[A-Z][A-Z /&'()-]{2,}:?\s*/m, '')
+                      .trim()
+                      .slice(0, 120)}
                   </Text>
                 ) : null}
               </View>
@@ -916,7 +931,7 @@ export default function PlayerProfileScreen() {
 
       {/* Video player modal */}
       <Modal visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
-        <View style={{ flex: 1, backgroundColor: '#000000EE', justifyContent: 'center' }}>
+        <View style={{ flex: 1, backgroundColor: '#000000EE' }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: 48 }}>
             <Text style={{ color: '#fff', fontSize: 15, fontFamily: fonts[700], flex: 1 }} numberOfLines={1}>
               {videoMeta?.report_label || 'Film'}
@@ -926,13 +941,20 @@ export default function PlayerProfileScreen() {
             </TouchableOpacity>
           </View>
           {videoSource && (
-            <Video
-              source={videoSource as any}
-              style={{ width: '100%', height: 260, backgroundColor: '#000' }}
-              useNativeControls
-              resizeMode={ResizeMode.CONTAIN}
-              shouldPlay
-            />
+            // Fills the space between the header and the bottom of the sheet
+            // rather than a fixed 260px strip. That height was chosen for a
+            // phone; on a desktop it left film playing in a band across the
+            // top of an otherwise black screen. CONTAIN means letterboxing,
+            // not cropping, so no aspect ratio gets cut off.
+            <View style={{ flex: 1, paddingHorizontal: 24, paddingBottom: 32 }}>
+              <Video
+                source={videoSource as any}
+                style={{ width: '100%', height: '100%', backgroundColor: '#000' }}
+                useNativeControls
+                resizeMode={ResizeMode.CONTAIN}
+                shouldPlay
+              />
+            </View>
           )}
         </View>
       </Modal>
@@ -973,7 +995,7 @@ export default function PlayerProfileScreen() {
                         reportId: ts.id,
                         outputType: 'training_program',
                         reportText: ts.program_text ?? '',
-                        title: 'Training Program',
+                        title: ts.title || 'Training Program',
                       });
                     }
                   }}
@@ -1737,6 +1759,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   trainingBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: t.chip, marginHorizontal: 20, marginTop: 0, marginBottom: 0, padding: 15, borderRadius: 999,
+    width: '100%', maxWidth: 380, alignSelf: 'flex-start', paddingHorizontal: 28,
   },
   trainingText: { color: t.ink, fontFamily: fonts[700], fontSize: 15 },
   // Modal styles
@@ -1755,6 +1778,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   inviteBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: t.chip, marginHorizontal: 20, marginTop: 10, padding: 14, borderRadius: 999,
+    width: '100%', maxWidth: 380, alignSelf: 'flex-start', paddingHorizontal: 28,
   },
   inviteText: { color: t.ink, fontFamily: fonts[700], fontSize: 14 },
   inviteCodeBox: {
@@ -1798,6 +1822,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   regenBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     backgroundColor: t.ctaBg, borderRadius: 999, padding: 12,
+    width: '100%', maxWidth: 380, alignSelf: 'flex-start', paddingHorizontal: 28,
   },
   regenBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
 });
