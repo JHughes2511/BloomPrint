@@ -96,7 +96,8 @@
     "googleSignInFailed": "Could not sign in with Google.",
     "conferenceRequired": "Conference Required",
     "conferenceRequiredMsg": "Please select your conference to continue.",
-    "appLanguage": "App Language"
+    "appLanguage": "App Language",
+    "panelTagline": "Film breakdown, player evaluations, and training plans — in one system."
   },
   "components": {
     "shareModal": {

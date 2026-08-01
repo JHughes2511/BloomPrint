@@ -21,7 +21,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
-import PageContainer, { READING_MAX_WIDTH } from '../responsive/PageContainer';
+import PageContainer, { REPORT_MAX_WIDTH } from '../responsive/PageContainer';
 import { Evaluation, Correction, Player } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
@@ -456,7 +456,7 @@ export default function EvalReportScreen() {
 
   return (
     <ScreenBackground>
-    <PageContainer maxWidth={READING_MAX_WIDTH}>
+    <PageContainer maxWidth={REPORT_MAX_WIDTH}>
     <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: isSingle ? 24 : 100 }}>
 
       {/* Header */}

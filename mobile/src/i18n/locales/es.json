@@ -96,7 +96,8 @@
     "googleSignInFailed": "No se pudo iniciar sesión con Google.",
     "conferenceRequired": "Conferencia Obligatoria",
     "conferenceRequiredMsg": "Selecciona tu conferencia para continuar.",
-    "appLanguage": "Idioma de la App"
+    "appLanguage": "Idioma de la App",
+    "panelTagline": "Análisis de video, evaluaciones de jugadores y planes de entrenamiento: todo en un sistema."
   },
   "components": {
     "shareModal": {

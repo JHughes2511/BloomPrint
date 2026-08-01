@@ -41,7 +41,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <View style={s.panel}>
         <View style={s.panelInner}>
           <Text style={s.panelMark}>BloomPrint</Text>
-          <Text style={s.panelSub}>{tr('auth.coachScoutTrainer')}</Text>
+          {/* Says what the product does rather than repeating the wordmark and
+              the subtitle the form already shows two inches to the right. Same
+              line on the coach and player portals — it describes BloomPrint,
+              not whichever door you came in through. */}
+          <Text style={s.panelSub}>{tr('auth.panelTagline')}</Text>
         </View>
       </View>
 
@@ -67,9 +71,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 48,
   },
-  panelInner: { gap: 10 },
+  panelInner: { gap: 16 },
   panelMark: { color: '#FFFFFF', fontSize: 40, fontFamily: fonts[800], letterSpacing: -0.5 },
-  panelSub: { color: 'rgba(255,255,255,0.72)', fontSize: 15, fontFamily: fonts[500] },
+  panelSub: { color: 'rgba(255,255,255,0.72)', fontSize: 17, lineHeight: 26, fontFamily: fonts[500], maxWidth: 340 },
 
   formSide: { flex: 1, alignItems: 'center' },
   formCol: { flex: 1, width: '100%', maxWidth: FORM_WIDTH, paddingHorizontal: 24 },

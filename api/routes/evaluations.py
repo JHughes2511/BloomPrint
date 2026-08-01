@@ -981,9 +981,35 @@ def _parse_list_section(text: str, section: str) -> list[str]:
     items. Handles BOTH shapes the model produces: bulleted lines under the header,
     AND an inline paragraph on the same line ("GREEN FLAGS: point one. point two.")
     — the latter is split into items by sentence."""
-    # Capture everything after the header (inline or on following lines) up to the
-    # next ALL-CAPS header (start of line) or end of text.
-    pattern = rf"{re.escape(section)}\s*:?\s*(.*?)(?=\n\s*[A-Z][A-Z0-9 /&'()\-]{{3,}}\s*:|\Z)"
+    # Capture everything after the header (inline or on following lines) up to
+    # the next section header, or end of text.
+    #
+    # The lookahead has to recognise a header in every shape the model emits,
+    # because if it fails to, this section silently absorbs the rest of the
+    # report. That is not a subtle formatting issue: GREEN FLAGS ends up holding
+    # the watch flags, the key questions and the stat lines, so the UI shows a
+    # player's problems listed as things they do well.
+    #
+    #   GREEN FLAGS          plain, no colon    <- the old pattern missed this
+    #   **WATCH FLAGS**      markdown bold      <- and this
+    #   KEY QUESTIONS:       colon              <- only this one worked
+    #
+    # The uppercase run is matched case-sensitively via (?-i:...) even though
+    # the section name itself is matched case-insensitively. With IGNORECASE
+    # applied throughout, "ALL-CAPS header" matches any capitalised phrase, so
+    # an ordinary line like "Next 6 months: ..." reads as a header and truncates
+    # the section early — the opposite failure, equally wrong.
+    # A header is an uppercase run that either ends its line ("GREEN FLAGS") or
+    # is followed by a colon and its content ("GREEN FLAGS: point one."). Both
+    # shapes appear in real reports, and matching only the first let the inline
+    # form run straight through the next header.
+    header = (
+        r"(?:\*{1,2}|#{1,6}\s*)?"                       # optional markdown
+        r"(?-i:[A-Z][A-Z0-9 /&'()\-]{3,})"               # genuinely upper-case
+        r"(?:\*{1,2})?\s*"                              # optional closing markdown
+        r"(?::|(?=\n|$))"                                # colon, or end of line
+    )
+    pattern = rf"{re.escape(section)}\s*:?\s*(.*?)(?=\n\s*{header}|\Z)"
     m = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
     if not m:
         return []

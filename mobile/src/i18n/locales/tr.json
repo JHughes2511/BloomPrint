@@ -96,7 +96,8 @@
     "googleSignInFailed": "Google ile giriş yapılamadı.",
     "conferenceRequired": "Konferans Gerekli",
     "conferenceRequiredMsg": "Devam etmek için lütfen konferansınızı seçin.",
-    "appLanguage": "Uygulama Dili"
+    "appLanguage": "Uygulama Dili",
+    "panelTagline": "Video analizi, oyuncu değerlendirmeleri ve antrenman planları — tek bir sistemde."
   },
   "components": {
     "shareModal": {

@@ -96,7 +96,8 @@
     "googleSignInFailed": "Не вдалося увійти через Google.",
     "conferenceRequired": "Потрібна конференція",
     "conferenceRequiredMsg": "Оберіть свою конференцію, щоб продовжити.",
-    "appLanguage": "Мова застосунку"
+    "appLanguage": "Мова застосунку",
+    "panelTagline": "Розбір відео, оцінки гравців і плани тренувань — в одній системі."
   },
   "components": {
     "shareModal": {

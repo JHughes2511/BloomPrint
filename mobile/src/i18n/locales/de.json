@@ -96,7 +96,8 @@
     "googleSignInFailed": "Anmeldung mit Google nicht möglich.",
     "conferenceRequired": "Conference erforderlich",
     "conferenceRequiredMsg": "Bitte wähle deine Conference aus, um fortzufahren.",
-    "appLanguage": "App-Sprache"
+    "appLanguage": "App-Sprache",
+    "panelTagline": "Filmanalyse, Spielerbewertungen und Trainingspläne — in einem System."
   },
   "components": {
     "shareModal": {

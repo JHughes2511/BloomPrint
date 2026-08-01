@@ -96,7 +96,8 @@
     "googleSignInFailed": "Nie udało się zalogować przez Google.",
     "conferenceRequired": "Wymagana konferencja",
     "conferenceRequiredMsg": "Wybierz konferencję, aby kontynuować.",
-    "appLanguage": "Język aplikacji"
+    "appLanguage": "Język aplikacji",
+    "panelTagline": "Analiza wideo, oceny zawodników i plany treningowe — w jednym systemie."
   },
   "components": {
     "shareModal": {

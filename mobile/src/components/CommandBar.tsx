@@ -113,12 +113,33 @@ function goTo(navigation: any, target: { screen: string; params?: any; label?: s
   }
 }
 
-export default function CommandBar() {
+/**
+ * Renders its own trigger pill by default. The sidebar already has an "Ask
+ * BloomPrint" row, so it drives this in controlled mode instead: without that,
+ * nesting the component inside another modal meant clicking the sidebar opened
+ * a sheet showing the pill, which you then had to click a second time to reach
+ * the chat.
+ */
+type Props = {
+  /** Controlled visibility. Omit for the standalone pill-and-sheet behaviour. */
+  open?: boolean;
+  onOpenChange?: (next: boolean) => void;
+  /** Hide the pill when something else is the entry point. */
+  hideTrigger?: boolean;
+};
+
+export default function CommandBar({ open: openProp, onOpenChange, hideTrigger }: Props = {}) {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
   const s = makeStyles(t);
   const navigation = useNavigation<any>();
-  const [open, setOpen] = useState(false);
+  const [openSelf, setOpenSelf] = useState(false);
+  const controlled = openProp !== undefined;
+  const open = controlled ? openProp! : openSelf;
+  const setOpen = (next: boolean) => {
+    if (!controlled) setOpenSelf(next);
+    onOpenChange?.(next);
+  };
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Msg[]>([]);
   const [busy, setBusy] = useState(false);
@@ -183,10 +204,12 @@ export default function CommandBar() {
   return (
     <>
       {/* Collapsed command bar — compact pill */}
-      <TouchableOpacity style={s.bar} onPress={() => setOpen(true)} activeOpacity={0.8}>
-        <Ionicons name="sparkles" size={14} color={t.accent} />
-        <Text style={s.barText}>{tr('copilot.askBloomPrint')}</Text>
-      </TouchableOpacity>
+      {!hideTrigger && (
+        <TouchableOpacity style={s.bar} onPress={() => setOpen(true)} activeOpacity={0.8}>
+          <Ionicons name="sparkles" size={14} color={t.accent} />
+          <Text style={s.barText}>{tr('copilot.askBloomPrint')}</Text>
+        </TouchableOpacity>
+      )}
 
       <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
         <KeyboardAvoidingView style={s.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>

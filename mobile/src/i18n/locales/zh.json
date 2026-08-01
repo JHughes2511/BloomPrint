@@ -96,7 +96,8 @@
     "googleSignInFailed": "无法使用 Google 登录。",
     "conferenceRequired": "需要选择联盟分区",
     "conferenceRequiredMsg": "请选择你的联盟分区以继续。",
-    "appLanguage": "应用语言"
+    "appLanguage": "应用语言",
+    "panelTagline": "影像分析、球员评估与训练计划，尽在一个系统。"
   },
   "components": {
     "shareModal": {

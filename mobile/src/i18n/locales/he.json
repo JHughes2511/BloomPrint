@@ -96,7 +96,8 @@
     "googleSignInFailed": "לא ניתן להתחבר עם Google.",
     "conferenceRequired": "נדרש קונפרנס",
     "conferenceRequiredMsg": "בחר קונפרנס כדי להמשיך.",
-    "appLanguage": "שפת האפליקציה"
+    "appLanguage": "שפת האפליקציה",
+    "panelTagline": "ניתוח וידאו, הערכות שחקנים ותוכניות אימון — במערכת אחת."
   },
   "components": {
     "shareModal": {

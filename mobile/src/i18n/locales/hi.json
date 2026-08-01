@@ -96,7 +96,8 @@
     "googleSignInFailed": "Google से साइन इन नहीं हो सका।",
     "conferenceRequired": "कॉन्फ्रेंस आवश्यक",
     "conferenceRequiredMsg": "जारी रखने के लिए कृपया अपनी कॉन्फ्रेंस चुनें।",
-    "appLanguage": "ऐप की भाषा"
+    "appLanguage": "ऐप की भाषा",
+    "panelTagline": "वीडियो विश्लेषण, खिलाड़ी मूल्यांकन और प्रशिक्षण योजनाएँ — एक ही सिस्टम में।"
   },
   "components": {
     "shareModal": {

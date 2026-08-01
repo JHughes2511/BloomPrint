@@ -96,7 +96,8 @@
     "googleSignInFailed": "Impossibile accedere con Google.",
     "conferenceRequired": "Conference Obbligatoria",
     "conferenceRequiredMsg": "Seleziona la tua conference per continuare.",
-    "appLanguage": "Lingua dell'App"
+    "appLanguage": "Lingua dell'App",
+    "panelTagline": "Analisi video, valutazioni dei giocatori e piani di allenamento — in un unico sistema."
   },
   "components": {
     "shareModal": {

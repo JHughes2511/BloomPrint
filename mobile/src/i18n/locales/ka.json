@@ -96,7 +96,8 @@
     "googleSignInFailed": "Google-ით შესვლა ვერ მოხერხდა.",
     "conferenceRequired": "საჭიროა კონფერენცია",
     "conferenceRequiredMsg": "გასაგრძელებლად აირჩიეთ თქვენი კონფერენცია.",
-    "appLanguage": "აპლიკაციის ენა"
+    "appLanguage": "აპლიკაციის ენა",
+    "panelTagline": "ვიდეოს ანალიზი, მოთამაშეთა შეფასებები და სავარჯიშო გეგმები — ერთ სისტემაში."
   },
   "components": {
     "shareModal": {

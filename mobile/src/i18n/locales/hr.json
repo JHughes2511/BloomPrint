@@ -96,7 +96,8 @@
     "googleSignInFailed": "Prijava putem Googlea nije uspjela.",
     "conferenceRequired": "Konferencija je obavezna",
     "conferenceRequiredMsg": "Odaberi svoju konferenciju za nastavak.",
-    "appLanguage": "Jezik aplikacije"
+    "appLanguage": "Jezik aplikacije",
+    "panelTagline": "Analiza snimaka, ocjene igrača i planovi treninga — u jednom sustavu."
   },
   "components": {
     "shareModal": {

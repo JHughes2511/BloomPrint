@@ -96,7 +96,8 @@
     "googleSignInFailed": "Kon niet inloggen met Google.",
     "conferenceRequired": "Conference verplicht",
     "conferenceRequiredMsg": "Selecteer je conference om door te gaan.",
-    "appLanguage": "App-taal"
+    "appLanguage": "App-taal",
+    "panelTagline": "Videoanalyse, spelerevaluaties en trainingsplannen — in één systeem."
   },
   "components": {
     "shareModal": {

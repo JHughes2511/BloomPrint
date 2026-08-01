@@ -96,7 +96,8 @@
     "googleSignInFailed": "Googleでサインインできませんでした。",
     "conferenceRequired": "カンファレンスが必要です",
     "conferenceRequiredMsg": "続行するにはカンファレンスを選択してください。",
-    "appLanguage": "アプリの言語"
+    "appLanguage": "アプリの言語",
+    "panelTagline": "映像分析、選手評価、トレーニング計画をひとつのシステムで。"
   },
   "components": {
     "shareModal": {

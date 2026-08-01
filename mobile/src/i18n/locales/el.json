@@ -96,7 +96,8 @@
     "googleSignInFailed": "Δεν ήταν δυνατή η σύνδεση με Google.",
     "conferenceRequired": "Απαιτείται Όμιλος",
     "conferenceRequiredMsg": "Επίλεξε τον όμιλό σου για να συνεχίσεις.",
-    "appLanguage": "Γλώσσα Εφαρμογής"
+    "appLanguage": "Γλώσσα Εφαρμογής",
+    "panelTagline": "Ανάλυση βίντεο, αξιολογήσεις παικτών και προγράμματα προπόνησης — σε ένα σύστημα."
   },
   "components": {
     "shareModal": {

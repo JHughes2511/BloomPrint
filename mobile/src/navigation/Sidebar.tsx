@@ -238,6 +238,16 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
       {/* ── Bottom: alerts, appearance, account ──────────────────────── */}
       <View style={s.bottom}>
         <Pressable
+          onPress={() => (navigation as any).navigate('HomeTab', { screen: 'StaffInbox' })}
+          style={({ hovered }: any) => [s.item, hovered && s.itemHover]}
+        >
+          <Ionicons name="people-circle-outline" size={20} color={t.muted2} />
+          <Text numberOfLines={1} style={[s.label, { color: t.muted2 }]}>
+            {tr('staffHub.title')}
+          </Text>
+        </Pressable>
+
+        <Pressable
           onPress={() => (navigation as any).navigate('HomeTab', { screen: 'CoachNotifications' })}
           style={({ hovered }: any) => [s.item, hovered && s.itemHover]}
         >
@@ -323,16 +333,6 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
               <Ionicons name="person-outline" size={16} color={t.muted} />
               <Text style={s.menuText}>{tr('home.editProfileLabel')}</Text>
             </Pressable>
-            <Pressable
-              style={s.menuRow}
-              onPress={() => {
-                setAccountOpen(false);
-                (navigation as any).navigate('HomeTab', { screen: 'StaffInbox' });
-              }}
-            >
-              <Ionicons name="mail-outline" size={16} color={t.muted} />
-              <Text style={s.menuText}>{tr('home.staffInboxLabel')}</Text>
-            </Pressable>
             <Pressable style={s.menuRow} onPress={() => { setAccountOpen(false); logout(); }}>
               <Ionicons name="log-out-outline" size={16} color={t.negative} />
               <Text style={[s.menuText, { color: t.negative }]}>{tr('home.signOut')}</Text>
@@ -341,15 +341,9 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
         </Pressable>
       </Modal>
 
-      {/* Ask BloomPrint reuses the same component as Home rather than a second
-          implementation that would drift from it. */}
-      <Modal visible={askOpen} transparent animationType="fade" onRequestClose={() => setAskOpen(false)}>
-        <Pressable style={s.overlay} onPress={() => setAskOpen(false)}>
-          <Pressable style={s.askSheet} onPress={e => e.stopPropagation()}>
-            <CommandBar />
-          </Pressable>
-        </Pressable>
-      </Modal>
+      {/* Driven directly rather than wrapped in another modal: the component
+          owns its own sheet, so nesting it meant two clicks to reach the chat. */}
+      <CommandBar open={askOpen} onOpenChange={setAskOpen} hideTrigger />
     </View>
   );
 }

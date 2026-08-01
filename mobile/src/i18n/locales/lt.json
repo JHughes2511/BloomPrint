@@ -96,7 +96,8 @@
     "googleSignInFailed": "Nepavyko prisijungti su Google.",
     "conferenceRequired": "Reikalinga konferencija",
     "conferenceRequiredMsg": "Norėdami tęsti, pasirinkite savo konferenciją.",
-    "appLanguage": "Programėlės kalba"
+    "appLanguage": "Programėlės kalba",
+    "panelTagline": "Vaizdo analizė, žaidėjų vertinimai ir treniruočių planai — vienoje sistemoje."
   },
   "components": {
     "shareModal": {

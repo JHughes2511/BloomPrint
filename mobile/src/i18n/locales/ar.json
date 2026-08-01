@@ -96,7 +96,8 @@
     "googleSignInFailed": "تعذّر تسجيل الدخول عبر Google.",
     "conferenceRequired": "المجموعة مطلوبة",
     "conferenceRequiredMsg": "يرجى اختيار مجموعتك للمتابعة.",
-    "appLanguage": "لغة التطبيق"
+    "appLanguage": "لغة التطبيق",
+    "panelTagline": "تحليل الفيديو وتقييم اللاعبين وخطط التدريب — في نظام واحد."
   },
   "components": {
     "shareModal": {

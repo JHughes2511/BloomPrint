@@ -96,7 +96,8 @@
     "googleSignInFailed": "Kunde inte logga in med Google.",
     "conferenceRequired": "Konferens krävs",
     "conferenceRequiredMsg": "Välj din konferens för att fortsätta.",
-    "appLanguage": "Appspråk"
+    "appLanguage": "Appspråk",
+    "panelTagline": "Filmanalys, spelarutvärderingar och träningsplaner – i ett system."
   },
   "components": {
     "shareModal": {

@@ -50,3 +50,18 @@ export default function PageContainer({ children, maxWidth, padded = true, style
  * what this works out to at the app's body size.
  */
 export const READING_MAX_WIDTH = 760;
+
+/**
+ * Width for report and evaluation screens.
+ *
+ * Deliberately wider than READING_MAX_WIDTH, because these are not prose. A
+ * BIM report is mostly short bullets, stat rows and flag cards — content that
+ * is *shorter* than a line of text, not longer. Capping it at reading width
+ * left a 760px ribbon down the middle of a 2000px display and made every
+ * section three times taller than it needed to be, so a report that fits on
+ * one screen became a long scroll.
+ *
+ * Genuine paragraphs inside these screens still get the narrower reading
+ * measure applied locally, so nothing here produces 1100px lines of prose.
+ */
+export const REPORT_MAX_WIDTH = 1100;

@@ -96,7 +96,8 @@
     "googleSignInFailed": "Hindi makapag-sign in gamit ang Google.",
     "conferenceRequired": "Kailangan ng Conference",
     "conferenceRequiredMsg": "Pumili ng conference mo para makatuloy.",
-    "appLanguage": "Wika ng App"
+    "appLanguage": "Wika ng App",
+    "panelTagline": "Pagsusuri ng film, evaluation ng manlalaro, at training plan — sa iisang sistema."
   },
   "components": {
     "shareModal": {

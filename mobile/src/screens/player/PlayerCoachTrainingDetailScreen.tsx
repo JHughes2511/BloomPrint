@@ -17,7 +17,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
-import PageContainer, { READING_MAX_WIDTH } from '../../responsive/PageContainer';
+import PageContainer, { REPORT_MAX_WIDTH } from '../../responsive/PageContainer';
 import { renderReport } from '../../utils/renderReport';
 import { GeneratingOverlay } from '../../components/GeneratingBasketball';
 import CommentThread from '../../components/CommentThread';
@@ -216,7 +216,7 @@ export default function PlayerCoachTrainingDetailScreen() {
 
   return (
     <ScreenBackground>
-    <PageContainer maxWidth={READING_MAX_WIDTH}>
+    <PageContainer maxWidth={REPORT_MAX_WIDTH}>
       <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>

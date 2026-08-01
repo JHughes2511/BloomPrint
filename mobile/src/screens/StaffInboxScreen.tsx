@@ -743,7 +743,7 @@ export default function StaffInboxScreen() {
 
   return (
     <ScreenBackground>
-    <PageContainer padded={false} maxWidth={1600}>
+    <PageContainer padded={false} maxWidth={1280}>
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
@@ -1082,9 +1082,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   title: { fontSize: 22, fontFamily: fonts[900], color: t.ink, flex: 1, flexShrink: 1, minWidth: 0 },
   emptyText: { color: t.muted2, marginTop: 12, fontSize: 14, textAlign: 'center' },
   tabBar: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 12, backgroundColor: t.card, borderRadius: 12, padding: 4 },
-  tabBtn: { flex: 1, flexShrink: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 8, borderRadius: 10 },
+  tabBtn: { flex: 1, flexShrink: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 10 },
   tabBtnActive: { backgroundColor: t.ctaBg },
-  tabBtnText: { color: t.muted2, fontSize: 11, fontFamily: fonts[700], flexShrink: 1, minWidth: 0 },
+  tabBtnText: { color: t.muted2, fontSize: 13, fontFamily: fonts[700], flexShrink: 1, minWidth: 0 },
   tabBtnTextActive: { color: t.ctaText },
   sectionLabel: { color: t.label, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10, marginTop: 4 },
   card: {
@@ -1113,7 +1113,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
   modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   modalSub: { color: t.muted, fontSize: 12, marginTop: 2 },
-  tabRow: { flexDirection: 'row', gap: 8 },
+  tabRow: { flexDirection: 'row', gap: 8, width: '100%', maxWidth: 560, alignSelf: 'center' },
   tab: { borderWidth: 1, borderColor: t.line, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6 },
   tabActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   tabText: { color: t.muted, fontSize: 12, fontFamily: fonts[600] },
@@ -1144,6 +1144,6 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   startBtnText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15, flexShrink: 1 },
   teamActBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: t.accent, flexShrink: 1, maxWidth: '100%' },
   teamActText: { color: t.accent, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 },
-  createTeamBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.accentSoft, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 12, borderWidth: 1, borderColor: t.accent, marginBottom: 8 },
+  createTeamBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.accentSoft, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20, borderWidth: 1, borderColor: t.accent, marginBottom: 8, alignSelf: 'flex-start', minWidth: 240 },
   createTeamText: { color: t.accent, fontFamily: fonts[700], fontSize: 13.5, flexShrink: 1 },
 });

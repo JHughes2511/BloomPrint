@@ -96,7 +96,8 @@
     "googleSignInFailed": "Autentificarea cu Google a eșuat.",
     "conferenceRequired": "Conferință obligatorie",
     "conferenceRequiredMsg": "Te rugăm să alegi conferința pentru a continua.",
-    "appLanguage": "Limba aplicației"
+    "appLanguage": "Limba aplicației",
+    "panelTagline": "Analiză video, evaluări ale jucătorilor și planuri de antrenament — într-un singur sistem."
   },
   "components": {
     "shareModal": {

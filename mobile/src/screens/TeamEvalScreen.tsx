@@ -3182,9 +3182,12 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   chipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   chipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
   chipTextActive: { color: t.ctaText },
+  // Sized to its action rather than to the page. Full-bleed, "New Game" became
+  // a 1460px pill for two words and read as a banner instead of a button.
   newGameBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: t.ctaBg, borderRadius: 999, paddingVertical: 14, marginBottom: 16,
+    paddingHorizontal: 28, alignSelf: 'flex-start', minWidth: 200,
   },
   newGameBtnText: { color: t.ctaText, fontSize: 15, fontFamily: fonts[700] },
   gameCard: {

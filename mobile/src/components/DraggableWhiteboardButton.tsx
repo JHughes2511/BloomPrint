@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Animated, PanResponder, Dimensions, StyleSheet } from 'react-native';
+import { Animated, PanResponder, Dimensions, StyleSheet, View } from 'react-native';
 import Svg, { Rect, Circle, Path, Line, Defs, ClipPath } from 'react-native-svg';
 
 const W = 52;
@@ -61,13 +61,30 @@ type Props = {
  * Position persists for the lifetime of the component instance.
  */
 export default function DraggableWhiteboardButton({ onPress }: Props) {
+  // Seeded from the window, then corrected once the parent measures itself.
+  //
+  // The window is the wrong frame of reference on web: this button is
+  // positioned absolutely inside whatever screen renders it, and those screens
+  // now sit in a width-capped, centred container. On a 2000px display the
+  // window-derived x lands ~700px past the right edge of that container, so
+  // the button renders outside its parent and is clipped — the whiteboard
+  // looks like it disappeared.
   const { width, height } = Dimensions.get('window');
+  const start = { x: width - W - 20, y: height - H - 160 };
 
-  // Start near the bottom-right corner.
-  const pan = useRef(
-    new Animated.ValueXY({ x: width - W - 20, y: height - H - 160 })
-  ).current;
-  const offset = useRef({ x: width - W - 20, y: height - H - 160 });
+  const pan = useRef(new Animated.ValueXY(start)).current;
+  const offset = useRef(start);
+  const placed = useRef(false);
+
+  // Only the first measurement repositions it — after that the coach's own
+  // dragged position wins, including across a window resize.
+  const placeInParent = (w: number, h: number) => {
+    if (placed.current || w <= 0 || h <= 0) return;
+    placed.current = true;
+    const next = { x: Math.max(12, w - W - 20), y: Math.max(12, h - H - 100) };
+    offset.current = next;
+    pan.setValue(next);
+  };
   const dragged = useRef(false);
 
   const panResponder = useRef(
@@ -105,12 +122,21 @@ export default function DraggableWhiteboardButton({ onPress }: Props) {
   ).current;
 
   return (
-    <Animated.View
-      style={[styles.button, { transform: pan.getTranslateTransform() }]}
-      {...panResponder.panHandlers}
+    // A transparent full-size layer purely to measure the space the button
+    // actually has. box-none so it never intercepts touches meant for the
+    // screen underneath — only the button itself is interactive.
+    <View
+      style={StyleSheet.absoluteFill}
+      pointerEvents="box-none"
+      onLayout={e => placeInParent(e.nativeEvent.layout.width, e.nativeEvent.layout.height)}
     >
-      <CourtClipboard />
-    </Animated.View>
+      <Animated.View
+        style={[styles.button, { transform: pan.getTranslateTransform() }]}
+        {...panResponder.panHandlers}
+      >
+        <CourtClipboard />
+      </Animated.View>
+    </View>
   );
 }
 
