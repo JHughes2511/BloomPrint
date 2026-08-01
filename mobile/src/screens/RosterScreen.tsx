@@ -93,10 +93,23 @@ export default function RosterScreen() {
   // sidebar takes a fixed slice out of the window, so window width alone
   // would over-count on desktop.
   const [gridWidth, setGridWidth] = useState(0);
-  const TARGET_CARD = 280;
-  const gridColumns = gridWidth === 0
+
+  // Column count and card width are solved together, from the space the grid
+  // actually has. Fitting the count first and sizing cards with a percentage
+  // afterwards does not work: five columns at 20% each plus four 12px gaps is
+  // wider than the row, so the last card ran off the right edge. Subtracting
+  // the gutters before dividing gives cards that are exactly equal and always
+  // fit — and it settles the 4-vs-5 question by measurement rather than taste.
+  const GRID_GAP = 12;
+  const GRID_PAD = 8;            // columnWrapperStyle paddingHorizontal, both sides
+  const TARGET_CARD = 300;
+  const usable = Math.max(0, gridWidth - GRID_PAD);
+  const gridColumns = usable === 0
     ? 1
-    : Math.max(1, Math.min(6, Math.floor(gridWidth / TARGET_CARD)));
+    : Math.max(1, Math.min(6, Math.floor((usable + GRID_GAP) / (TARGET_CARD + GRID_GAP))));
+  const cardWidth = usable === 0
+    ? undefined
+    : Math.floor((usable - GRID_GAP * (gridColumns - 1)) / gridColumns);
 
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
@@ -364,7 +377,7 @@ export default function RosterScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={[styles.card, gridColumns > 1 && styles.cardInGrid,
-                    gridColumns > 1 && { maxWidth: `${100 / gridColumns}%` }]}
+                    gridColumns > 1 && cardWidth ? { width: cardWidth, maxWidth: cardWidth } : null]}
             onPress={() => navigation.navigate('PlayerProfile', { playerId: item.id })}
             onLongPress={() => {
               Alert.alert(tr('roster.deletePlayerTitle'), tr('roster.deletePlayerMsg', { name: item.name }), [
@@ -632,14 +645,22 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   // leftover player stretches that card across the full width and it stops
   // looking like part of the grid. The cap only binds when a row is short —
   // a full row is already narrower than its share once the gaps are removed.
-  cardInGrid: { flex: 1, marginHorizontal: 0 },
+  cardInGrid: { marginHorizontal: 0 },
   cardLeft: { flex: 1 },
   playerName: { color: t.ink, fontSize: 16, fontFamily: fonts[700] },
   playerMeta: { color: t.muted, fontSize: 12, marginTop: 2 },
   emptyWrap: { alignItems: 'center', marginTop: 60 },
   emptyText: { color: t.muted, textAlign: 'center', paddingHorizontal: 32 },
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 16, borderWidth: 1, borderColor: t.cardBorder, width: '100%', maxWidth: 560, alignSelf: 'center'},
+  // Centred with auto margins rather than alignSelf. alignSelf: 'center'
+  // takes the card out of cross-axis stretch, and the scroll view inside then
+  // has no definite box to measure against — the sheet collapsed to a 14px
+  // sliver at the bottom of the screen and the form was unreachable.
+  modal: {
+    backgroundColor: t.sheet, borderRadius: 20, padding: 24, marginVertical: 16,
+    marginHorizontal: 'auto', borderWidth: 1, borderColor: t.cardBorder,
+    width: '100%', maxWidth: 560,
+  },
   modalTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 4 },
   modalSub: { color: t.muted, fontSize: 12, marginBottom: 12 },
   input: { backgroundColor: t.chip, borderRadius: 14, padding: 14, color: t.ink, fontSize: 14, marginBottom: 10, borderWidth: 1, borderColor: t.line },

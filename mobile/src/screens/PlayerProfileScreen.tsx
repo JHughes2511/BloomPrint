@@ -62,6 +62,7 @@ export default function PlayerProfileScreen() {
   const [evals, setEvals] = useState<Evaluation[]>([]);
   const [videos, setVideos] = useState<any[]>([]);
   const [videoSource, setVideoSource] = useState<{ uri: string; headers?: any } | null>(null);
+  const [videoBox, setVideoBox] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
   const [videoMeta, setVideoMeta] = useState<any | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [latestTraining, setLatestTraining] = useState<any | null>(null);
@@ -946,10 +947,17 @@ export default function PlayerProfileScreen() {
             // phone; on a desktop it left film playing in a band across the
             // top of an otherwise black screen. CONTAIN means letterboxing,
             // not cropping, so no aspect ratio gets cut off.
-            <View style={{ flex: 1, paddingHorizontal: 24, paddingBottom: 32 }}>
+            // Measured, then passed in pixels: on web expo-av renders a real
+            // <video>, and a percentage height there has no containing block to
+            // resolve against, so it falls back to the file's intrinsic size and
+            // sits at 360x180 in the corner of a full-screen black sheet.
+            <View
+              style={{ flex: 1, paddingHorizontal: 24, paddingBottom: 32 }}
+              onLayout={e => setVideoBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
+            >
               <Video
                 source={videoSource as any}
-                style={{ width: '100%', height: '100%', backgroundColor: '#000' }}
+                style={{ width: videoBox.w || undefined, height: videoBox.h || undefined, backgroundColor: '#000' }}
                 useNativeControls
                 resizeMode={ResizeMode.CONTAIN}
                 shouldPlay
@@ -1751,15 +1759,17 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.ctaBg, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999,
   },
   newEvalText: { color: t.ctaText, fontSize: 12, fontFamily: fonts[700] },
+  // Same width as the other page actions so the stack reads as one group.
   summaryBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: t.ctaBg, margin: 20, marginBottom: 8, padding: 15, borderRadius: 999,
+    backgroundColor: t.ctaBg, marginVertical: 8, padding: 15, borderRadius: 999,
+    width: '100%', maxWidth: 380, alignSelf: 'center', paddingHorizontal: 28,
   },
   summaryText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15 },
   trainingBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: t.chip, marginHorizontal: 20, marginTop: 0, marginBottom: 0, padding: 15, borderRadius: 999,
-    width: '100%', maxWidth: 380, alignSelf: 'flex-start', paddingHorizontal: 28,
+    width: '100%', maxWidth: 380, alignSelf: 'center', paddingHorizontal: 28,
   },
   trainingText: { color: t.ink, fontFamily: fonts[700], fontSize: 15 },
   // Modal styles
@@ -1778,7 +1788,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   inviteBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: t.chip, marginHorizontal: 20, marginTop: 10, padding: 14, borderRadius: 999,
-    width: '100%', maxWidth: 380, alignSelf: 'flex-start', paddingHorizontal: 28,
+    width: '100%', maxWidth: 380, alignSelf: 'center', paddingHorizontal: 28,
   },
   inviteText: { color: t.ink, fontFamily: fonts[700], fontSize: 14 },
   inviteCodeBox: {
@@ -1822,7 +1832,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   regenBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     backgroundColor: t.ctaBg, borderRadius: 999, padding: 12,
-    width: '100%', maxWidth: 380, alignSelf: 'flex-start', paddingHorizontal: 28,
+    // Full width of the feedback card it lives in — it acts on that card's
+    // input, not on the page, so it should read as part of it.
+    width: '100%', alignSelf: 'stretch',
   },
   regenBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
 });

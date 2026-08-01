@@ -79,6 +79,7 @@ export default function TeamReportScreen() {
 
   const [reportVideos, setReportVideos] = useState<any[]>([]);
   const [videoSource, setVideoSource] = useState<any>(null);
+  const [videoBox, setVideoBox] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
   const [videoTitle, setVideoTitle] = useState('');
 
   const loadGameReports = () => {
@@ -879,10 +880,17 @@ export default function TeamReportScreen() {
           {videoSource && (
             // Same as the roster film player: fill the sheet rather than a
             // fixed strip sized for a phone.
-            <View style={{ flex: 1, paddingHorizontal: 24, paddingBottom: 32 }}>
+            // Measured, then passed in pixels: on web expo-av renders a real
+            // <video>, and a percentage height there has no containing block to
+            // resolve against, so it falls back to the file's intrinsic size and
+            // sits at 360x180 in the corner of a full-screen black sheet.
+            <View
+              style={{ flex: 1, paddingHorizontal: 24, paddingBottom: 32 }}
+              onLayout={e => setVideoBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
+            >
               <Video
                 source={videoSource}
-                style={{ width: '100%', height: '100%' }}
+                style={{ width: videoBox.w || undefined, height: videoBox.h || undefined }}
                 useNativeControls
                 resizeMode={ResizeMode.CONTAIN}
                 shouldPlay
