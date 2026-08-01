@@ -4,8 +4,7 @@ import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
-  StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal, Switch,
-} from 'react-native';
+  StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal, Switch, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -59,6 +58,7 @@ export default function TeamReportScreen() {
   const { coach } = useAuth();
   const navigation = useNavigation<any>();
   const { t } = useTheme();
+  const win = useWindowDimensions();
   const { t: tr } = useTranslation();
   const styles = makeStyles(t);
   const shareStyles = makeShareStyles(t);
@@ -923,13 +923,14 @@ export default function TeamReportScreen() {
             // resolve against, so it falls back to the file's intrinsic size and
             // sits at 360x180 in the corner of a full-screen black sheet.
             <View
-              style={Platform.OS === 'web' ? { flex: 1, paddingHorizontal: 24, paddingBottom: 32 } : undefined}
-              onLayout={e => setVideoBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
+              style={Platform.OS === 'web'
+                ? { flex: 1, paddingHorizontal: 24, paddingBottom: 32, alignItems: 'center', justifyContent: 'center' }
+                : undefined}
             >
               <Video
                 source={videoSource}
                 style={Platform.OS === 'web'
-                  ? { width: videoBox.w || undefined, height: videoBox.h || undefined }
+                  ? { width: win.width - 48, height: win.height - 190 }
                   : { width: '100%', height: 300 }}
                 useNativeControls
                 resizeMode={ResizeMode.CONTAIN}

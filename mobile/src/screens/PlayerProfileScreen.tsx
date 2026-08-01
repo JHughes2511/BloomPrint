@@ -3,8 +3,7 @@ import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
-  Modal, Alert, KeyboardAvoidingView, Platform, TextInput, RefreshControl,
-} from 'react-native';
+  Modal, Alert, KeyboardAvoidingView, Platform, TextInput, RefreshControl, useWindowDimensions } from 'react-native';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -51,6 +50,7 @@ export default function PlayerProfileScreen() {
   const navigation = useNavigation<any>();
   const { playerId } = route.params;
   const { t } = useTheme();
+  const win = useWindowDimensions();
   // Definite height for a sheet body on web; ignored on native.
   const sheetBody = useSheetScrollHeight(420);
   const { t: tr } = useTranslation();
@@ -959,13 +959,14 @@ export default function PlayerProfileScreen() {
             // resolve against, so it falls back to the file's intrinsic size and
             // sits at 360x180 in the corner of a full-screen black sheet.
             <View
-              style={Platform.OS === 'web' ? { flex: 1, paddingHorizontal: 24, paddingBottom: 32 } : undefined}
-              onLayout={e => setVideoBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
+              style={Platform.OS === 'web'
+                ? { flex: 1, paddingHorizontal: 24, paddingBottom: 32, alignItems: 'center', justifyContent: 'center' }
+                : undefined}
             >
               <Video
                 source={videoSource as any}
                 style={Platform.OS === 'web'
-                  ? { width: videoBox.w || undefined, height: videoBox.h || undefined, backgroundColor: '#000' }
+                  ? { width: win.width - 48, height: win.height - 190, backgroundColor: '#000' }
                   : { width: '100%', height: 260, backgroundColor: '#000' }}
                 useNativeControls
                 resizeMode={ResizeMode.CONTAIN}
@@ -1804,7 +1805,6 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   inviteBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: t.chip, marginHorizontal: 20, marginTop: 10, padding: 14, borderRadius: 999,
-    ...webOnly({ marginHorizontal: 0, width: '100%' }),
   },
   inviteText: { color: t.ink, fontFamily: fonts[700], fontSize: 14 },
   inviteCodeBox: {

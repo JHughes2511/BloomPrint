@@ -492,7 +492,7 @@ export default function StaffInboxScreen() {
     return (
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Team switcher */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12, gap: 8 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12, gap: 8, alignItems: 'center', ...webOnly({ paddingVertical: 8 }) }}>
           {myTeams.filter((team: any) => !team.parent_team_id).map(team => (
             <TouchableOpacity
               key={team.id}
@@ -1087,7 +1087,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.card, borderRadius: 12, padding: 4,
     // Left, matching the page title and the team chips beneath it —
     // centring it left the bar floating between two left edges.
-    ...webOnly({ width: '100%', maxWidth: 560, alignSelf: 'flex-start' }),
+    ...webOnly({ width: '100%', alignSelf: 'stretch' }),
   },
   tabBtn: { flex: 1, flexShrink: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 8, borderRadius: 10 },
   tabBtnActive: { backgroundColor: t.ctaBg },
@@ -1111,7 +1111,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   fullDataBtnText: { flex: 1, flexShrink: 1, minWidth: 0, color: t.accent, fontSize: 13, fontFamily: fonts[700] },
   regenBadgeText: { color: t.accent, fontSize: 10, fontFamily: fonts[700] },
-  teamChip: { borderWidth: 1, borderColor: t.line, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7, flexShrink: 1, maxWidth: 220 },
+  // Matches Roster's team chips: same radius and padding, so the same
+  // control does not look like two different controls on two screens.
+  teamChip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 8, flexShrink: 1, maxWidth: 220 },
   teamChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   teamChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600], flexShrink: 1 },
   teamChipTextActive: { color: t.ctaText },

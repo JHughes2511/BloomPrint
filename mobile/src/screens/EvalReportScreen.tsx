@@ -638,18 +638,32 @@ export default function EvalReportScreen() {
               ) : null}
             </View>
 
-            {(player?.height || player?.wingspan) ? (
+            {(player?.height || player?.wingspan
+              || (Platform.OS === 'web' && ((player as any)?.weight || (player as any)?.standing_reach))) ? (
               <View style={styles.pdMeasurements}>
-                {player.height ? (
+                {player?.height ? (
                   <View style={styles.pdStat}>
                     <Text style={styles.pdStatVal}>{player.height}</Text>
                     <Text style={styles.pdStatLabel}>{tr('evalReport.height')}</Text>
                   </View>
                 ) : null}
-                {player.wingspan ? (
+                {player?.wingspan ? (
                   <View style={styles.pdStat}>
                     <Text style={styles.pdStatVal}>{player.wingspan}</Text>
                     <Text style={styles.pdStatLabel}>{tr('evalReport.wingspan')}</Text>
+                  </View>
+                ) : null}
+                {/* Web has the room for these; the phone card stays as it was. */}
+                {Platform.OS === 'web' && (player as any)?.weight ? (
+                  <View style={styles.pdStat}>
+                    <Text style={styles.pdStatVal}>{(player as any)?.weight}</Text>
+                    <Text style={styles.pdStatLabel}>{tr('playerProfile.weight')}</Text>
+                  </View>
+                ) : null}
+                {Platform.OS === 'web' && (player as any)?.standing_reach ? (
+                  <View style={styles.pdStat}>
+                    <Text style={styles.pdStatVal}>{(player as any)?.standing_reach}</Text>
+                    <Text style={styles.pdStatLabel}>{tr('playerProfile.standingReach')}</Text>
                   </View>
                 ) : null}
               </View>
@@ -1090,7 +1104,7 @@ export default function EvalReportScreen() {
 
     {/* Sticky bottom action bar — Correct · Export · Send to Player · Share w/ Staff */}
     {isSingle && (
-      <View style={[styles.bottomBar, { backgroundColor: barBg }]}>
+      <View style={[styles.bottomBar, Platform.OS === 'web' ? null : { backgroundColor: barBg }]}>
         <View style={styles.bottomRow}>
           <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.ctaBg }]} onPress={() => setShowCorrect(true)}>
             <Ionicons name="create-outline" size={16} color={t.ctaText} />
@@ -1194,7 +1208,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   // Spans the report column rather than a dialog width. Capped at 560 under a
   // 1100 report it read as a narrow tray under wide content, and the labels
   // wrapped onto two lines inside their own buttons.
-  bottomBar: { gap: 10, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, backgroundColor: t.sheet, borderTopWidth: 1, borderTopColor: t.divider, ...webOnly({ width: '100%' })},
+  bottomBar: { gap: 10, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, backgroundColor: t.sheet, borderTopWidth: 1, borderTopColor: t.divider,
+    ...webOnly({ width: '100%', backgroundColor: 'transparent', borderTopWidth: 0, paddingTop: 20, paddingBottom: 28 })},
   bottomRow: { flexDirection: 'row', gap: 10 },
   bbBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 14, paddingVertical: 14, borderWidth: 1, borderColor: 'transparent' },
   bbText: { fontFamily: fonts[800], fontSize: 14 },
