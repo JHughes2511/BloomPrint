@@ -240,9 +240,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // Web card grids. Targets land on 4 games across and 3 of the roomier scout
   // and game-report cards at ~1900px; narrower windows drop a column on their
   // own. Native always reports a single column.
-  const gamesGrid  = useGridColumns(390);
-  const scoutGrid  = useGridColumns(520);
-  const reportGrid = useGridColumns(520);
+  const gamesGrid  = useGridColumns(330);
+  const scoutGrid  = useGridColumns(470);
+  const reportGrid = useGridColumns(470);
   const [gradeDetailData, setGradeDetailData] = useState<any[]>([]);
   const [gradeDetailLoading, setGradeDetailLoading] = useState(false);
   // for edit modal — add stat
@@ -1112,11 +1112,19 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
   return (
     <ScreenBackground>
-    <PageContainer>
+    <PageContainer maxWidth={Platform.OS === 'web' ? 1600 : undefined}>
     <View style={s.root}>
       {/* Top nav */}
       <View style={s.topNav}>
-        <Text style={s.screenTitle}>{tr('common.tabs.teamGrade')}</Text>
+        <View style={webOnly({ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' })}>
+          <Text style={s.screenTitle}>{tr('common.tabs.teamGrade')}</Text>
+          {Platform.OS === 'web' && activeView === 'games' && (
+            <TouchableOpacity style={[s.newGameBtn, { marginBottom: 0 }]} onPress={() => setShowNewGame(true)}>
+              <Ionicons name="add-circle-outline" size={18} color={t.ctaText} />
+              <Text style={s.newGameBtnText}>{tr('teamGrade.newGame')}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {(['dashboard', 'games', 'scout', 'gamereport'] as const).map(v => (
             <TouchableOpacity
@@ -1293,7 +1301,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           </ScrollView>
 
           {/* New game button */}
-          <TouchableOpacity style={s.newGameBtn} onPress={() => setShowNewGame(true)}>
+          <TouchableOpacity style={[s.newGameBtn, webOnly({ display: 'none' })]} onPress={() => setShowNewGame(true)}>
             <Ionicons name="add-circle-outline" size={18} color={t.ctaText} />
             <Text style={s.newGameBtnText}>{tr('teamGrade.newGame')}</Text>
           </TouchableOpacity>
@@ -2073,15 +2081,18 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   <Text style={{ color: t.muted, fontSize: 13 }}>{tr('teamGrade.noOpponents')}</Text>
                 </View>
               ) : (
-                uniqueOpponents.map(opp => (
-                  <TouchableOpacity key={opp} style={s.gameCard} onPress={() => openScout(opp)}>
+                <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: scoutGrid.gap })}
+                      onLayout={scoutGrid.onLayout}>
+                {uniqueOpponents.map(opp => (
+                  <TouchableOpacity key={opp} style={[s.gameCard, scoutGrid.cardWidth ? { width: scoutGrid.cardWidth } : null]} onPress={() => openScout(opp)}>
                     <Text style={s.gameCardOpponent}>{opp}</Text>
                     <Text style={{ color: t.muted, fontSize: 12 }}>
                       {tr('teamGrade.gamesCount', { count: sessions.filter((x: any) => x.opponent_name === opp).length })}
                     </Text>
                     <Ionicons name="chevron-forward" size={16} color={t.line} />
                   </TouchableOpacity>
-                ))
+                ))}
+                </View>
               )}
             </>
           ) : (
@@ -2229,10 +2240,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               {sessions.length === 0 && (
                 <Text style={{ color: t.muted2, fontSize: 13, marginHorizontal: 16 }}>{tr('teamGrade.noGamesYet')}</Text>
               )}
+              <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap })}
+                    onLayout={reportGrid.onLayout}>
               {sessions.map((g: any) => {
                 const won = g.our_score != null && g.opponent_score != null && g.our_score > g.opponent_score;
                 return (
-                  <TouchableOpacity key={g.id} style={s.gameCard} onPress={() => openGameReport(g)}>
+                  <TouchableOpacity key={g.id} style={[s.gameCard, reportGrid.cardWidth ? { width: reportGrid.cardWidth } : null]} onPress={() => openGameReport(g)}>
                     <View style={{ flex: 1 }}>
                       <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[700] }}>{tr('teamGrade.vsOpponent', { opponent: g.opponent_name })}</Text>
                       <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>
@@ -2250,6 +2263,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   </TouchableOpacity>
                 );
               })}
+              </View>
             </>
           ) : (
             <>

@@ -32,6 +32,7 @@ import PageContainer from '../responsive/PageContainer';
 import { sheetCap } from '../responsive/modalSizes';
 import ChipRow from '../responsive/ChipRow';
 import { webOnly } from '../responsive/modalSizes';
+import { useGridColumns } from '../responsive/useGridColumns';
 
 type ReportItem = {
   id: number | string;
@@ -73,6 +74,9 @@ type StaffShareContext = {
 };
 
 export default function RecentScreen() {
+  // 3 across at ~1900px. Date headers span a full row, so they still break the
+  // grid into days rather than landing mid-row.
+  const recentGrid = useGridColumns(470);
   const { coach } = useAuth();
   const { t: tr } = useTranslation();
   const { t } = useTheme();
@@ -420,6 +424,19 @@ export default function RecentScreen() {
     return haystack.includes(searchTerm);
   });
 
+  // On web the day headers are separate list entries so each can occupy a full
+  // grid row; on a phone the list is one column and the header stays inline.
+  const listData: any[] = Platform.OS !== 'web' ? filtered : (() => {
+    const out: any[] = [];
+    let last = '';
+    for (const it of filtered) {
+      const d = new Date(it.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      if (d !== last) { out.push({ __dayHeader: d, created_at: it.created_at }); last = d; }
+      out.push(it);
+    }
+    return out;
+  })();
+
   const openModal = (report: ModalReport) => {
     setActiveModal(report);
     setModalView('report');
@@ -752,22 +769,35 @@ export default function RecentScreen() {
 
       <FlatList
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} tintColor={t.accent} />}
-        data={filtered}
-        keyExtractor={e => e.shared ? `shared-${e.shared_id}` : `${e.kind}-${e.id}`}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        data={listData}
+        keyExtractor={(e: any) => e.__dayHeader ? `day-${e.__dayHeader}` : (e.shared ? `shared-${e.shared_id}` : `${e.kind}-${e.id}`)}
+        onLayout={recentGrid.onLayout}
+        CellRendererComponent={Platform.OS === 'web' ? ({ children, index, style, ...rest }: any) => (
+          <View
+            {...rest}
+            style={[style, listData[index]?.__dayHeader
+              ? { flexBasis: '100%', width: '100%' }
+              : (recentGrid.cardWidth ? { width: recentGrid.cardWidth } : null)]}
+          >
+            {children}
+          </View>
+        ) : undefined}
+        contentContainerStyle={{ paddingBottom: 100,
+          ...(Platform.OS === 'web' ? { flexDirection: 'row', flexWrap: 'wrap', gap: recentGrid.gap, alignContent: 'flex-start' } : null) }}
         ListEmptyComponent={
           <View style={styles.center}>
             <Ionicons name="document-text-outline" size={48} color={t.muted2} />
             <Text style={styles.emptyText}>{tr('recent.noReportsYet')}</Text>
           </View>
         }
-        renderItem={({ item }) => {
+        renderItem={({ item }: any) => {
+          if (item.__dayHeader) return <Text style={styles.dateHeader}>{item.__dayHeader}</Text>;
           const dateStr = new Date(item.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
           const showDate = dateStr !== lastDate;
           lastDate = dateStr;
           return (
             <>
-              {showDate && (
+              {showDate && Platform.OS !== 'web' && (
                 <Text style={styles.dateHeader}>{dateStr}</Text>
               )}
               <View
@@ -777,6 +807,7 @@ export default function RecentScreen() {
                   item.kind === 'game' && styles.cardGame,
                   item.kind === 'training' && styles.cardTraining,
                   { flexDirection: 'column', alignItems: 'flex-start' },
+                  recentGrid.cardWidth ? { width: recentGrid.cardWidth, marginHorizontal: 0 } : null,
                 ]}
               >
                 <TouchableOpacity
