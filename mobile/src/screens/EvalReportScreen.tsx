@@ -28,7 +28,7 @@ import { PillarCard } from '../components/PillarCard';
 import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
-import { useSheetScrollHeight, sheetCap } from '../responsive/modalSizes';
+import { useSheetScrollHeight, sheetCap, webOnly } from '../responsive/modalSizes';
 
 const PILLARS = [
   'offensive_skills', 'defensive_capabilities', 'physical_attributes',
@@ -1191,7 +1191,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   ladderLetter: { color: t.ink, fontSize: 13, fontFamily: fonts[800], width: 32 },
   ladderTier: { color: t.inkSoft, fontSize: 12.5, flex: 1 },
   ladderRange: { color: t.muted, fontSize: 11.5 },
-  bottomBar: { gap: 10, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, backgroundColor: t.sheet, borderTopWidth: 1, borderTopColor: t.divider, ...sheetCap(560)},
+  // Spans the report column rather than a dialog width. Capped at 560 under a
+  // 1100 report it read as a narrow tray under wide content, and the labels
+  // wrapped onto two lines inside their own buttons.
+  bottomBar: { gap: 10, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, backgroundColor: t.sheet, borderTopWidth: 1, borderTopColor: t.divider, ...webOnly({ width: '100%' })},
   bottomRow: { flexDirection: 'row', gap: 10 },
   bbBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 14, paddingVertical: 14, borderWidth: 1, borderColor: 'transparent' },
   bbText: { fontFamily: fonts[800], fontSize: 14 },

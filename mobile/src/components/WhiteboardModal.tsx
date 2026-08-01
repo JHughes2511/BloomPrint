@@ -2624,5 +2624,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   floatChip:       { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: t.line, backgroundColor: t.card },
   floatChipText:   { color: t.inkSoft, fontSize: 12.5, fontFamily: fonts[700] },
   adaptOverlay:    { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: t.scrim, paddingHorizontal: 30 },
-  adaptCard:       { backgroundColor: t.sheet, borderRadius: 16, padding: 20, width: '100%', maxWidth: 360, borderWidth: 1, borderColor: t.cardBorder },
+  // 360 is the phone size; web takes the standard dialog width like every
+  // other popup, so sizes do not vary popup to popup.
+  adaptCard:       { backgroundColor: t.sheet, borderRadius: 16, padding: 20, width: '100%', maxWidth: 360, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) },
 });

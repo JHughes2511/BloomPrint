@@ -32,7 +32,8 @@ import PageContainer from '../responsive/PageContainer';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
-import { sheetCap, webOnly } from '../responsive/modalSizes';
+import { sheetCap, webOnly, useSheetScrollHeight } from '../responsive/modalSizes';
+import ActionGrid from '../responsive/ActionGrid';
 const COMPETITION_LEVELS = [...CANON_LEVELS];
 
 const OUTPUT_TYPES = [
@@ -50,6 +51,8 @@ export default function PlayerProfileScreen() {
   const navigation = useNavigation<any>();
   const { playerId } = route.params;
   const { t } = useTheme();
+  // Definite height for a sheet body on web; ignored on native.
+  const sheetBody = useSheetScrollHeight(420);
   const { t: tr } = useTranslation();
   const { coach } = useAuth();
   const styles = makeStyles(t);
@@ -691,6 +694,8 @@ export default function PlayerProfileScreen() {
         </View>
       )}
 
+      {/* Web pairs these into a 2x2; native keeps the stack it always had. */}
+      <ActionGrid>
       {/* Summarize history */}
       {evals.length > 0 && (
         <TouchableOpacity style={styles.summaryBtn} onPress={() => setShowSummary(true)}>
@@ -710,7 +715,7 @@ export default function PlayerProfileScreen() {
 
       {/* Send training to player */}
       <TouchableOpacity
-        style={[styles.trainingBtn, { backgroundColor: t.positive, marginTop: 8 }]}
+        style={[styles.trainingBtn, { backgroundColor: t.positive, marginTop: 8 }, webOnly({ marginTop: 0 })]}
         onPress={() => openTrainingPicker('player')}
         disabled={sendingTraining}
       >
@@ -722,13 +727,14 @@ export default function PlayerProfileScreen() {
       {/* Share training with staff */}
       {allTraining.length > 0 && (
         <TouchableOpacity
-          style={[styles.trainingBtn, { backgroundColor: t.accent, marginTop: 8 }]}
+          style={[styles.trainingBtn, { backgroundColor: t.accent, marginTop: 8 }, webOnly({ marginTop: 0 })]}
           onPress={() => openTrainingPicker('staff')}
         >
           <Ionicons name="people-outline" size={18} color={t.ink} />
           <Text style={styles.trainingText}>{tr('playerProfile.shareTrainingWithStaff')}</Text>
         </TouchableOpacity>
       )}
+      </ActionGrid>
 
       {/* Training feedback / regenerate */}
       <View
@@ -1138,7 +1144,7 @@ export default function PlayerProfileScreen() {
               </TouchableOpacity>
             </View>
 
-            <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
               <KeyboardAwareScrollView
                 ref={modalScrollRef}
                 style={{ flex: 1 }}
@@ -1346,9 +1352,14 @@ export default function PlayerProfileScreen() {
 
       {/* Edit Player Modal — compact floating card */}
       <Modal visible={showEdit} transparent animationType="slide">
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={[styles.modal, { maxHeight: '90%', flex: 0 }]}>
-          <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 16 }}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
+          <View style={[styles.modal, { maxHeight: '90%', flex: 0 },
+                       // flex: 0 compiles to flex-basis: 0%, and in a column that wins
+                       // over height — which is why the sheet collapsed to ~50px no
+                       // matter what height it was given. Restoring an auto basis on
+                       // web lets the height apply.
+                       webOnly({ flexBasis: 'auto', height: sheetBody + 96 })]}>
+          <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} style={webOnly({ height: sheetBody })} contentContainerStyle={{ paddingBottom: 16 }}>
             <Text style={styles.modalTitle}>{tr('playerProfile.editPlayer')}</Text>
             <VoiceTextInput
               style={styles.input}
@@ -1536,7 +1547,7 @@ export default function PlayerProfileScreen() {
 
       {/* Share with Staff modal */}
       <Modal visible={showStaffShare} transparent animationType="slide">
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')} keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('playerProfile.shareWithStaff')}</Text>
             <Text style={styles.modalSub}>Search for a coach, scout, or trainer to share this training program.</Text>
@@ -1613,7 +1624,7 @@ export default function PlayerProfileScreen() {
 
       {/* Summary modal */}
       <Modal visible={showSummary} transparent animationType="slide">
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('playerProfile.summarizeHistoryTitle')}</Text>
             <Text style={styles.modalSub}>{tr('playerProfile.summarizeHistorySub', { count: evals.length })}</Text>
@@ -1766,15 +1777,15 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   summaryBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: t.ctaBg, margin: 20, marginBottom: 8, padding: 15, borderRadius: 999,
-    ...sheetCap(380),
+    ...webOnly({ margin: 0, width: '100%' }),
   },
   summaryText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15 },
   trainingBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: t.chip, marginHorizontal: 20, marginTop: 0, marginBottom: 0, padding: 15, borderRadius: 999,
-    // Capped and centred: inert on a phone (the cap is wider than the screen,
-    // so it still fills the column), a bounded button on a desktop.
-    ...sheetCap(380),
+    // In the web grid the cell sets the width, so the button fills its cell —
+    // a 380 cap here made three of the four narrower than the fourth.
+    ...webOnly({ marginHorizontal: 0, width: '100%' }),
   },
   trainingText: { color: t.ink, fontFamily: fonts[700], fontSize: 15 },
   // Modal styles
@@ -1793,7 +1804,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   inviteBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: t.chip, marginHorizontal: 20, marginTop: 10, padding: 14, borderRadius: 999,
-    ...sheetCap(380),
+    ...webOnly({ marginHorizontal: 0, width: '100%' }),
   },
   inviteText: { color: t.ink, fontFamily: fonts[700], fontSize: 14 },
   inviteCodeBox: {

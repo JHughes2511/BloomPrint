@@ -63,7 +63,11 @@ export function useSheetScrollHeight(phoneMax: number, fraction = 0.6): number {
 import { Platform, ViewStyle } from 'react-native';
 
 export const sheetCap = (max: number): ViewStyle =>
-  Platform.OS === 'web' ? { maxWidth: max, marginHorizontal: 'auto' } : {};
+  // width: '100%' is required, not decorative. Without it the card sizes to
+  // its content in a browser instead of filling to the cap, and a sheet whose
+  // body is a flex child then collapses — that is why Add Player, Edit Player
+  // and the player quick-look rendered as slivers or tiny cards.
+  Platform.OS === 'web' ? { width: '100%', maxWidth: max, marginHorizontal: 'auto' } : {};
 
 
 /**

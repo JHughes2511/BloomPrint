@@ -74,11 +74,13 @@ import { ScreenBackground } from '../theme/components';
 import { useBreakpoint } from '../responsive/useBreakpoint';
 import { useTeam } from '../context/TeamContext';
 import PageContainer from '../responsive/PageContainer';
-import { sheetCap } from '../responsive/modalSizes';
+import { sheetCap, webOnly, useSheetScrollHeight } from '../responsive/modalSizes';
 
 export default function RosterScreen() {
   const navigation = useNavigation<any>();
   const { t } = useTheme();
+  // Definite height for the sheet body on web; ignored on native.
+  const sheetBody = useSheetScrollHeight(420);
   const { t: tr } = useTranslation();
   const { coach } = useAuth();
   const defaultLevel = (coach as any)?.competition_level ?? 'HS Varsity';
@@ -427,9 +429,14 @@ export default function RosterScreen() {
 
       {/* Add Player Modal */}
       <Modal visible={showAdd} transparent animationType="slide">
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={[styles.modal, { maxHeight: '90%', flex: 0 }]}>
-          <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} contentContainerStyle={{ paddingBottom: 16 }}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
+          <View style={[styles.modal, { maxHeight: '90%', flex: 0 },
+                       // flex: 0 compiles to flex-basis: 0%, and in a column that wins
+                       // over height — which is why the sheet collapsed to ~50px no
+                       // matter what height it was given. Restoring an auto basis on
+                       // web lets the height apply.
+                       webOnly({ flexBasis: 'auto', height: sheetBody + 96 })]}>
+          <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} style={webOnly({ height: sheetBody })} contentContainerStyle={{ paddingBottom: 16 }}>
             <Text style={styles.modalTitle}>{tr('roster.addPlayer')}</Text>
             <VoiceTextInput style={styles.input} placeholder={tr('roster.fullNamePlaceholder')} placeholderTextColor={t.muted}
               value={newName} onChangeText={setNewName} />
@@ -566,7 +573,7 @@ export default function RosterScreen() {
 
       {/* Create Team Modal */}
       <Modal visible={showNewTeam} transparent animationType="slide">
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('roster.newTeam')}</Text>
             <VoiceTextInput style={styles.input} placeholder={tr('roster.teamNamePlaceholder')} placeholderTextColor={t.muted}
@@ -587,7 +594,7 @@ export default function RosterScreen() {
 
       {/* Rename Team Modal */}
       <Modal visible={!!editTeam} transparent animationType="slide">
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('roster.renameTeam')}</Text>
             <VoiceTextInput style={styles.input} placeholder={tr('roster.teamNamePlaceholder')} placeholderTextColor={t.muted}
