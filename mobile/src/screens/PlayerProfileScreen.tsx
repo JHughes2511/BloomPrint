@@ -966,7 +966,7 @@ export default function PlayerProfileScreen() {
               <Video
                 source={videoSource as any}
                 style={Platform.OS === 'web'
-                  ? { width: win.width - 48, height: win.height - 190, backgroundColor: '#000' }
+                  ? { ...StyleSheet.absoluteFillObject, backgroundColor: '#000' }
                   : { width: '100%', height: 260, backgroundColor: '#000' }}
                 useNativeControls
                 resizeMode={ResizeMode.CONTAIN}

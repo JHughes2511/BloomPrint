@@ -1556,12 +1556,25 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       if (animCancel.current) { setFreehandPlaying(false); return; }
       setAnimStep(steps[i]);
       drawProgress.setValue(0);
-      Animated.timing(drawProgress, { toValue: 1, duration: 800, useNativeDriver: false }).start(({ finished }) => {
+      // Start after this step's render has committed.
+      //
+      // setAnimStep re-renders, and that re-render rebuilds the interpolations
+      // this animation drives. Detaching the old ones stops the animation with
+      // finished:false, which the callback below reads as "cancelled" — so
+      // playback ran step 1 and then quit. Measured: step 1 finished=true,
+      // step 2 finished=false, every time.
+      //
+      // Two frames, not one: the first lets React commit, the second lets the
+      // new interpolations attach before the value starts moving. Web only, so
+      // the phone keeps the timing it has always had.
+      const begin = () => Animated.timing(drawProgress, { toValue: 1, duration: 800, useNativeDriver: false }).start(({ finished }) => {
         if (!finished || animCancel.current) { setFreehandPlaying(false); return; }
         i += 1;
         if (i < steps.length) setTimeout(runStep, 260);
         else { setFreehandPlaying(false); setFreehandDone(true); maybeAutoName(); }
       });
+      if (Platform.OS === 'web') requestAnimationFrame(() => requestAnimationFrame(begin));
+      else begin();
     };
     runStep();
   };

@@ -930,7 +930,7 @@ export default function TeamReportScreen() {
               <Video
                 source={videoSource}
                 style={Platform.OS === 'web'
-                  ? { width: win.width - 48, height: win.height - 190 }
+                  ? { ...StyleSheet.absoluteFillObject }
                   : { width: '100%', height: 300 }}
                 useNativeControls
                 resizeMode={ResizeMode.CONTAIN}
