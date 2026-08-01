@@ -1,29 +1,42 @@
 /**
- * Column count and card width for a card grid, solved together from the space
- * the grid actually has.
+ * Column count and card width for a card grid.
  *
- * The two have to be solved together. Fitting the count first and then sizing
- * cards with a percentage does not work: N columns at 100/N% plus (N-1) gaps is
- * wider than the row, so the last card runs off the edge. Subtracting the
- * gutters before dividing gives cards that are exactly equal and always fit —
- * including a short final row, which otherwise ends up a different width from a
- * full one.
+ * Takes the number of columns the screen WANTS, not a card width to aim at.
+ * Deriving the count from a target width was too easy to get wrong: the same
+ * target lands on a different count depending on the page cap, the sidebar and
+ * the window, so a screen that showed three columns on one display showed two
+ * on another. Asking for three and stepping down only when there genuinely
+ * isn't room is predictable, and it is what a person actually means when they
+ * say "three across".
  *
- * Driven by the measured width rather than the window, because the sidebar
- * takes a fixed slice out of the window and every screen sits in a capped,
- * centred column. The grid is the only thing that knows what it actually got.
+ * Width is then an exact division of the measured row after the gutters are
+ * removed, so every card is the same size — including the last row, which with
+ * a percentage or a flex basis ends up wider than a full row's cards.
  *
- * `target` is the width a card wants; the grid fits as many as it can at or
- * above that. Screens pass different targets so a dense list and a roomy one
- * can land on different counts at the same window size.
- *
- * Web only. On native this always reports a single column, which is what every
- * one of these screens has always rendered on a phone.
+ * Web only. On native this always reports one column and no width, which is
+ * what every one of these screens has always rendered on a phone.
  */
 import { useCallback, useState } from 'react';
 import { LayoutChangeEvent, Platform } from 'react-native';
 
-export function useGridColumns(target: number, gap = 12, pad = 8) {
+type Options = {
+  /** Columns to use when there is room. */
+  columns: number;
+  /** Never make a card narrower than this; drop a column instead. */
+  min?: number;
+  gap?: number;
+  /**
+   * Total horizontal padding on the grid, both sides combined.
+   *
+   * Subtracted before the division because onLayout reports the padded box:
+   * without this the cards are sized for a row wider than the one they sit in
+   * and the last column overhangs the right edge — which is the asymmetry
+   * where cards have space on the left and none on the right.
+   */
+  inset?: number;
+};
+
+export function useGridColumns({ columns: want, min = 260, gap = 12, inset = 0 }: Options) {
   const [width, setWidth] = useState(0);
 
   const onLayout = useCallback((e: LayoutChangeEvent) => {
@@ -31,14 +44,16 @@ export function useGridColumns(target: number, gap = 12, pad = 8) {
     setWidth(prev => (Math.abs(prev - w) > 1 ? w : prev));
   }, []);
 
-  const usable = Math.max(0, width - pad);
-  const columns =
-    Platform.OS !== 'web' || usable === 0
-      ? 1
-      : Math.max(1, Math.min(6, Math.floor((usable + gap) / (target + gap))));
+  const isWeb = Platform.OS === 'web';
+
+  const usable = Math.max(0, width - inset);
+
+  // How many of `want` actually fit at the minimum card size.
+  const fits = usable > 0 ? Math.floor((usable + gap) / (min + gap)) : 1;
+  const columns = !isWeb || usable === 0 ? 1 : Math.max(1, Math.min(want, fits));
 
   const cardWidth =
-    Platform.OS !== 'web' || usable === 0 || columns === 1
+    !isWeb || usable === 0 || columns === 1
       ? undefined
       : Math.floor((usable - gap * (columns - 1)) / columns);
 

@@ -76,7 +76,7 @@ type StaffShareContext = {
 export default function RecentScreen() {
   // 3 across at ~1900px. Date headers span a full row, so they still break the
   // grid into days rather than landing mid-row.
-  const recentGrid = useGridColumns(470);
+  const recentGrid = useGridColumns({ columns: 3, inset: 32 });
   const { coach } = useAuth();
   const { t: tr } = useTranslation();
   const { t } = useTheme();
@@ -787,7 +787,7 @@ export default function RecentScreen() {
           </View>
         ) : undefined}
         contentContainerStyle={{ paddingBottom: 100,
-          ...(Platform.OS === 'web' ? { flexDirection: 'row', flexWrap: 'wrap', gap: recentGrid.gap, alignContent: 'flex-start' } : null) }}
+          ...(Platform.OS === 'web' ? { flexDirection: 'row', flexWrap: 'wrap', gap: recentGrid.gap, alignContent: 'flex-start', paddingHorizontal: 16 } : null) }}
         ListEmptyComponent={
           <View style={styles.center}>
             <Ionicons name="document-text-outline" size={48} color={t.muted2} />
@@ -1496,6 +1496,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   card: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: t.card, marginHorizontal: 16, marginBottom: 8,
+    ...webOnly({ minHeight: 132, marginBottom: 0 }),
     borderRadius: 12, padding: 14, gap: 10,
     borderWidth: 1, borderColor: t.cardBorder,
   },

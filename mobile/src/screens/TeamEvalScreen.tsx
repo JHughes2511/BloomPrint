@@ -240,9 +240,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // Web card grids. Targets land on 4 games across and 3 of the roomier scout
   // and game-report cards at ~1900px; narrower windows drop a column on their
   // own. Native always reports a single column.
-  const gamesGrid  = useGridColumns(330);
-  const scoutGrid  = useGridColumns(470);
-  const reportGrid = useGridColumns(470);
+  const gamesGrid  = useGridColumns({ columns: 4, inset: 32 });
+  const scoutGrid  = useGridColumns({ columns: 3, inset: 32 });
+  const reportGrid = useGridColumns({ columns: 3, inset: 32 });
   const [gradeDetailData, setGradeDetailData] = useState<any[]>([]);
   const [gradeDetailLoading, setGradeDetailLoading] = useState(false);
   // for edit modal — add stat
@@ -1314,7 +1314,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               <Text style={{ color: t.muted, fontSize: 13, marginTop: 10 }}>{tr('teamGrade.noGames')}</Text>
             </View>
           ) : (
-            <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: gamesGrid.gap })}
+            <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: gamesGrid.gap, paddingHorizontal: 16 })}
                   onLayout={gamesGrid.onLayout}>
             {filteredSessions.map((game: any) => {
               const won = game.our_score != null && game.opponent_score != null && game.our_score > game.opponent_score;
@@ -2081,7 +2081,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   <Text style={{ color: t.muted, fontSize: 13 }}>{tr('teamGrade.noOpponents')}</Text>
                 </View>
               ) : (
-                <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: scoutGrid.gap })}
+                <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: scoutGrid.gap, paddingHorizontal: 16 })}
                       onLayout={scoutGrid.onLayout}>
                 {uniqueOpponents.map(opp => (
                   <TouchableOpacity key={opp} style={[s.gameCard, scoutGrid.cardWidth ? { width: scoutGrid.cardWidth } : null]} onPress={() => openScout(opp)}>
@@ -2240,7 +2240,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               {sessions.length === 0 && (
                 <Text style={{ color: t.muted2, fontSize: 13, marginHorizontal: 16 }}>{tr('teamGrade.noGamesYet')}</Text>
               )}
-              <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap })}
+              <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap, paddingHorizontal: 16 })}
                     onLayout={reportGrid.onLayout}>
               {sessions.map((g: any) => {
                 const won = g.our_score != null && g.opponent_score != null && g.our_score > g.opponent_score;
@@ -3220,6 +3220,9 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   gameCard: {
     backgroundColor: t.card, borderRadius: 18, padding: 14, marginBottom: 8,
     borderWidth: 1, borderColor: t.cardBorder,
+    // Common floor so a card with a score badge is not taller than one
+    // without, which left the rows ragged.
+    ...webOnly({ minHeight: 88, marginBottom: 0 }),
     flexDirection: 'row', alignItems: 'center', gap: 10,
   },
   gameCardOpponent: { color: t.ink, fontSize: 15, fontFamily: fonts[700] },
