@@ -753,7 +753,11 @@ export default function RecentScreen() {
       )}
 
       {/* Category filter */}
-      <ChipRow style={styles.filterRow} gap={8}>
+      <ChipRow
+        style={styles.filterRow}
+        gap={8}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingRight: 24, gap: 8, alignItems: 'center' }}
+      >
         {FILTER_CATS.map(cat => (
           <TouchableOpacity
             key={cat}
@@ -1481,8 +1485,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     marginHorizontal: 16, marginBottom: 12, paddingHorizontal: 12, height: 44,
   },
   searchBarInput: { flex: 1, color: t.ink, fontSize: 15, paddingVertical: 0 },
-  filterRow: { marginBottom: 12, flexGrow: 0, height: 52, paddingHorizontal: 16,
-    ...webOnly({ height: undefined, paddingRight: 24, paddingBottom: 4 }) },
+  filterRow: { marginBottom: 12, flexGrow: 0, height: 52,
+    ...webOnly({ height: undefined, paddingHorizontal: 16, paddingRight: 24, paddingBottom: 4 }) },
   filterChip: { borderWidth: 1, borderColor: t.line, borderRadius: 18, paddingHorizontal: 14, justifyContent: 'center', alignItems: 'center', height: 34, flexShrink: 1, maxWidth: 180 },
   filterChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   filterChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600], flexShrink: 1 },

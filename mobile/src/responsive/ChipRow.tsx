@@ -11,7 +11,7 @@
  * Same children either way, so the chips themselves don't change.
  */
 import React from 'react';
-import { View, ScrollView, StyleProp, ViewStyle } from 'react-native';
+import { View, ScrollView, StyleProp, ViewStyle, Platform } from 'react-native';
 import { useBreakpoint } from './useBreakpoint';
 
 type Props = {
@@ -19,12 +19,23 @@ type Props = {
   style?: StyleProp<ViewStyle>;
   /** Gap between chips when wrapped. Matches the scroller's spacing. */
   gap?: number;
+  /**
+   * Passed straight through to the native scroller. Required, not optional
+   * polish: a horizontal ScrollView puts its padding and gap on the CONTENT
+   * container, not on the view, so dropping it silently changes the phone
+   * layout — which is exactly what happened when this component replaced a
+   * scroller that had one.
+   */
+  contentContainerStyle?: StyleProp<ViewStyle>;
 };
 
-export default function ChipRow({ children, style, gap = 8 }: Props) {
+export default function ChipRow({ children, style, gap = 8, contentContainerStyle }: Props) {
   const { isDesktop } = useBreakpoint();
 
-  if (isDesktop) {
+  // Platform AND width: a large tablet in landscape can satisfy the desktop
+  // breakpoint, and wrapping there would be a native layout change. The phone
+  // and tablet path has to stay the scroller it has always been.
+  if (Platform.OS === 'web' && isDesktop) {
     return (
       <View style={[{ flexDirection: 'row', flexWrap: 'wrap', gap, alignItems: 'center' }, style]}>
         {children}
@@ -33,7 +44,12 @@ export default function ChipRow({ children, style, gap = 8 }: Props) {
   }
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={style}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={style}
+      contentContainerStyle={contentContainerStyle}
+    >
       {children}
     </ScrollView>
   );
