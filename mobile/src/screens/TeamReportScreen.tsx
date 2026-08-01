@@ -30,15 +30,28 @@ import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../compon
 import ChipRow from '../responsive/ChipRow';
 
 // Labels come from the `reportTypes.*` translation keys at render time.
+// Quick Report is roster-scoped, so training here is TEAM training. It was
+// listed under the player-level name, which is why the same concept appeared
+// as "Training Program" on this screen and "Team Training" in the Game Packet
+// builder next door.
+//
+// 'matchup' is deliberately absent rather than overlooked: it compares named
+// subjects and the team-report endpoint takes no matchup_player_ids, so the
+// chip would generate a comparison against nobody.
 const OUTPUT_TYPES = [
   { key: 'coaching_report' },
   { key: 'game_analysis' },
   { key: 'game_situational' },
   { key: 'film_breakdown' },
   { key: 'scouting_report' },
-  { key: 'training_program' },
+  { key: 'team_training' },
   { key: 'box_score' },
 ];
+
+/** Reports written before a type was renamed still carry the old key. */
+const LEGACY_TYPE_KEYS: Record<string, string[]> = {
+  team_training: ['training_program'],
+};
 
 export default function TeamReportScreen() {
   const { coach } = useAuth();
@@ -461,7 +474,12 @@ export default function TeamReportScreen() {
   // name, opponent, output type, and any title/date text on the item.
   const prevSearchQuery = prevSearchText.trim().toLowerCase();
   const filteredPrevReports = prevReports
-    .filter(r => prevReportFilter === 'all' || (r.output_type ?? '').split(',').includes(prevReportFilter))
+    .filter(r => {
+      if (prevReportFilter === 'all') return true;
+      const types = (r.output_type ?? '').split(',');
+      const accepted = [prevReportFilter, ...(LEGACY_TYPE_KEYS[prevReportFilter] ?? [])];
+      return accepted.some(k => types.includes(k));
+    })
     .filter((r: any) => {
       if (!prevSearchQuery) return true;
       const typeLabelText = outputTypeLabel(r.output_type) ?? r.output_type ?? '';
