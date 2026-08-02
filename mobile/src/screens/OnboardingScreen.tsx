@@ -115,7 +115,11 @@ export default function OnboardingScreen() {
     <PageContainer maxWidth={900}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.header}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          {/* The gap above the progress bar belongs to this row, not to the
+              label inside it. It used to live on stepLabel's marginBottom,
+              which only pushed the text up — the language picker beside it kept
+              sitting flush against the bar. */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             {/* Long translations must shrink beside the language picker, not push it off-screen. */}
             <Text style={styles.stepLabel} numberOfLines={1}>{tr('onboarding.step', { current: page + 1, total: totalPages })}</Text>
             <LanguagePicker compact onChanged={(code) => { updateProfile({ preferred_language: code } as any).catch(() => {}); }} />
@@ -218,7 +222,7 @@ export default function OnboardingScreen() {
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   header: { paddingHorizontal: 22, paddingTop: 60, paddingBottom: 8 },
-  stepLabel: { color: t.muted, fontSize: 12, fontFamily: fonts[700], marginBottom: 8, flexShrink: 1, minWidth: 0, marginRight: 8 },
+  stepLabel: { color: t.muted, fontSize: 12, fontFamily: fonts[700], flexShrink: 1, minWidth: 0, marginRight: 8 },
   progressTrack: { height: 6, borderRadius: 999, backgroundColor: t.chip, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: t.accent, borderRadius: 999 },
   title: { color: t.ink, fontSize: 26, fontFamily: fonts[900], letterSpacing: -0.5 },
