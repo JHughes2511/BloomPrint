@@ -846,6 +846,9 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   // is flagged so the UI can show it and offer a retry.
   const [saveFailed, setSaveFailed] = useState(false);
   const lastSaveRef = useRef<{ idx: number; board: Board } | null>(null);
+  // Why the last save failed, kept so retry can report it rather than
+  // failing the same way in silence.
+  const saveErrRef = useRef<string | null>(null);
 
   // Saves are serialized PER BOARD and coalesced: while one request is in
   // flight, later strokes replace the queued payload instead of racing it.
@@ -893,7 +896,17 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       try {
         await writeBoard(idx, cur);
         setSaveFailed(false);
-      } catch {
+        saveErrRef.current = null;
+      } catch (e: any) {
+        // Keep WHY. "Not saved" with the reason discarded leaves a coach tapping
+        // retry against a failure nothing can describe — and leaves us guessing.
+        const d = e?.response?.data?.detail;
+        saveErrRef.current =
+          (typeof d === 'string' && d) ||
+          (Array.isArray(d) ? d.map((x: any) => x?.msg).filter(Boolean).join('; ') : '') ||
+          e?.message ||
+          (e?.response?.status ? `Request failed (${e.response.status})` : 'Unknown error');
+        console.warn('[whiteboard] save failed:', saveErrRef.current, e?.response?.status);
         setSaveFailed(true);   // surfaced in the UI; the payload stays in lastSaveRef
         break;
       }
@@ -905,9 +918,16 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   }, [gameId, playbook]);
   useEffect(() => { saveBoardRef.current = saveBoard; }, [saveBoard]);
 
-  const retrySave = () => {
+  const retrySave = async () => {
     const last = lastSaveRef.current;
-    if (last) saveBoard(last.idx, last.board);
+    if (!last) return;
+    await saveBoard(last.idx, last.board);
+    // Retrying into the same failure silently is the worst outcome: the chip
+    // stays, nothing changes, and there is no way to tell a stuck save from an
+    // ignored tap. Say what the server said.
+    if (saveErrRef.current) {
+      Alert.alert(tr('whiteboard.notSavedRetry'), saveErrRef.current);
+    }
   };
 
   const commitStrokes = (idx: number, strokes: Stroke[]) => {

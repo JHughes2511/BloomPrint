@@ -153,11 +153,21 @@ const styles = StyleSheet.create({
     height: H,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 8,
     zIndex: 100,
+    // The clipboard is a transparent SVG in a rectangular view. On web these
+    // shadow props become box-shadow, which follows the border-box rather than
+    // the artwork — so a rectangle was painted behind a clipboard-shaped
+    // drawing, reading as a card the button was sitting on. drop-shadow follows
+    // the alpha channel, so the shadow is clipboard-shaped too.
+    ...Platform.select({
+      web: { filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.3))' } as any,
+      default: {
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+        elevation: 8,
+      },
+    }),
   },
 });

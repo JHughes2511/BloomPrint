@@ -568,9 +568,24 @@ export const gameReportsAPI = {
 
 
 export const transcribeAPI = {
-  transcribe: (uri: string, context?: string, language?: string) => {
+  transcribe: async (uri: string, context?: string, language?: string) => {
     const formData = new FormData();
-    formData.append('audio', { uri, name: 'audio.m4a', type: 'audio/m4a' } as any);
+    if (Platform.OS === 'web') {
+      // The {uri, name, type} object is React Native's file API. A browser has
+      // no idea what to do with it: FormData stringifies it and sends the text
+      // "[object Object]" as an ordinary field, so the server sees no file at
+      // all and rejects the request. Dictation has never worked in a browser
+      // for this reason — and the 422 it produces carries a list of objects as
+      // its detail, which is what surfaced as "[object Object]" in the alert.
+      //
+      // Same treatment uploadFileStreamed already gives video on web: fetch the
+      // recording back as a Blob and append it as a real file.
+      const blob = await (await fetch(uri)).blob();
+      const ext = (blob.type.split('/')[1] || 'webm').split(';')[0];
+      (formData.append as any)('audio', blob, `audio.${ext}`);
+    } else {
+      formData.append('audio', { uri, name: 'audio.m4a', type: 'audio/m4a' } as any);
+    }
     if (context) formData.append('context', context);
     // A dictation chunk is a couple of seconds long, which is thin evidence for
     // auto-detection. The app already knows what language the coach uses, so

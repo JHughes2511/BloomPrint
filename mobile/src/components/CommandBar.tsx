@@ -340,10 +340,12 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderWidth: 1, borderColor: t.line,
     paddingHorizontal: 14, paddingVertical: 10,
     color: t.ink, fontSize: 14,
-    minHeight: CONTROL_H,
-    // Still grows with a long question; the row is bottom-aligned, so Send
-    // stays level with the last line rather than drifting up the field.
-    maxHeight: 120,
+    // height, not minHeight. A multiline TextInput is a <textarea> on web, and
+    // its intrinsic height comes from its row count — taller than 44, so a
+    // minimum never bound and the field stayed larger than the button next to
+    // it. Stating the height is what actually makes the two match.
+    height: CONTROL_H,
+    maxHeight: CONTROL_H,
   },
   sendBtn: {
     width: CONTROL_H, height: CONTROL_H, borderRadius: 10,

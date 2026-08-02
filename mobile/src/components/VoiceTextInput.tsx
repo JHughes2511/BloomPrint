@@ -11,6 +11,32 @@ type Props = TextInputProps & {
   onChangeText?: (text: string) => void;
 };
 
+/**
+ * A server error as a sentence, not as "[object Object]".
+ *
+ * FastAPI answers a validation failure with a LIST of objects under `detail`,
+ * so interpolating it into a string produced "[object Object]" — a message that
+ * told a coach something broke while hiding the one fact that would explain it.
+ */
+function describeError(e: any): string {
+  const detail = e?.response?.data?.detail;
+  if (typeof detail === 'string' && detail) return detail;
+  if (Array.isArray(detail)) {
+    const parts = detail
+      .map((d: any) => {
+        const where = Array.isArray(d?.loc) ? d.loc.filter((x: any) => x !== 'body').join('.') : '';
+        return [where, d?.msg].filter(Boolean).join(': ');
+      })
+      .filter(Boolean);
+    if (parts.length) return parts.join('\n');
+  }
+  if (detail && typeof detail === 'object') {
+    try { return JSON.stringify(detail); } catch { /* fall through */ }
+  }
+  const status = e?.response?.status;
+  return e?.message || (status ? `Request failed (${status})` : 'Unknown error');
+}
+
 const CHUNK_MS = 2500; // recording chunk length — shorter = words appear sooner
 
 export default function VoiceTextInput({
@@ -123,8 +149,7 @@ export default function VoiceTextInput({
       } catch (e: any) {
         // Keep going — one bad chunk shouldn't end the session — but remember
         // why, so stopRecording can report it if nothing ever came through.
-        lastErrorRef.current =
-          e?.response?.data?.detail || e?.message || 'Unknown error';
+        lastErrorRef.current = describeError(e);
       } finally {
         activeTranscriptions.current -= 1;
         if (activeTranscriptions.current === 0) setTranscribing(false);
