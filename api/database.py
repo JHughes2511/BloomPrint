@@ -234,6 +234,7 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     ("player_users", "preferred_language", "VARCHAR DEFAULT 'en'"),
     ("staff_shared_reports", "request_status", "VARCHAR"),
     ("feedback", "images", "TEXT"),
+    ("coaches", "job_title", "VARCHAR"),
 ]
 
 

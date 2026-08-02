@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, FlatList, SafeAreaView, TextInput } from 'react-native';
+import Sheet from './Sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES, languageName } from '../i18n/languages';
@@ -47,7 +48,7 @@ export default function LanguagePicker({ compact, onChanged }: {
         <Ionicons name="chevron-down" size={compact ? 12 : 14} color={theme.muted2} />
       </TouchableOpacity>
 
-      <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
+      <Sheet visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
         <View style={s.overlay}>
           <SafeAreaView style={s.sheet}>
             <View style={s.header}>
@@ -84,7 +85,7 @@ export default function LanguagePicker({ compact, onChanged }: {
             />
           </SafeAreaView>
         </View>
-      </Modal>
+      </Sheet>
     </>
   );
 }

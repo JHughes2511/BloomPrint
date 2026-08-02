@@ -511,6 +511,8 @@
     "emailPlaceholder": "siz@email.com",
     "emailHint": "Giriş yaptığınız e-posta budur.",
     "role": "Rol",
+    "jobTitle": "Görev unvanı",
+    "jobTitlePlaceholder": "örn. Oyuncu Gelişim Direktörü",
     "appLanguage": "Uygulama Dili",
     "appLanguageHint": "Uygulama, raporlarınız ve Ask BloomPrint bu dili kullanır.",
     "programOrganization": "Program / Kulüp",

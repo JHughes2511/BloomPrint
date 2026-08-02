@@ -125,8 +125,8 @@ export const authAPI = {
     api.patch('/auth/email-prefs', { email_enabled }).then(r => r.data),
 
   updateProfile: (data: {
-    name?: string; email?: string; role?: string; program_name?: string;
-    competition_level?: string; conference?: string;
+    name?: string; email?: string; role?: string; job_title?: string;
+    program_name?: string; competition_level?: string; conference?: string;
     system_profile?: Record<string, string>;
     country?: string; city?: string; onboarded?: boolean;
   }) => api.patch('/auth/me', data).then(r => r.data),

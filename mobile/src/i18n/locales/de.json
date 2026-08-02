@@ -511,6 +511,8 @@
     "emailPlaceholder": "du@email.de",
     "emailHint": "Das ist die E-Mail, mit der du dich anmeldest.",
     "role": "Rolle",
+    "jobTitle": "Funktion",
+    "jobTitlePlaceholder": "z. B. Leiter Spielerentwicklung",
     "appLanguage": "App-Sprache",
     "appLanguageHint": "Die App, deine Berichte und Ask BloomPrint verwenden alle diese Sprache.",
     "programOrganization": "Programm / Organisation",

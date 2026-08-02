@@ -7,6 +7,7 @@ import {
   ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform, Modal,
   findNodeHandle,
 } from 'react-native';
+import Sheet from '../components/Sheet';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { renderReport } from '../utils/renderReport';
@@ -887,7 +888,7 @@ export default function GameReportBuilderScreen() {
 
       {/* Clip analysis modal */}
       {/* Saved report version viewer */}
-      <Modal visible={!!versionView} animationType="slide" transparent onRequestClose={() => setVersionView(null)}>
+      <Sheet visible={!!versionView} animationType="slide" transparent onRequestClose={() => setVersionView(null)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60, ...sheetCap(560) }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
@@ -908,9 +909,9 @@ export default function GameReportBuilderScreen() {
             </KeyboardAwareScrollView>
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
-      <Modal visible={!!clipModal} animationType="slide" transparent>
+      <Sheet visible={!!clipModal} animationType="slide" transparent>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
@@ -954,7 +955,7 @@ export default function GameReportBuilderScreen() {
             />
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Unified Share modal — player / team / staff */}
       {report && showShareModal && (
@@ -978,7 +979,7 @@ export default function GameReportBuilderScreen() {
       />
 
       {/* Share modal */}
-      <Modal visible={showShare} animationType="slide" transparent>
+      <Sheet visible={showShare} animationType="slide" transparent>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
@@ -1044,7 +1045,7 @@ export default function GameReportBuilderScreen() {
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
     </KeyboardAvoidingView>
     </PageContainer>
     </ScreenBackground>

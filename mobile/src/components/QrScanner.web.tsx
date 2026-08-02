@@ -19,6 +19,7 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet } from 'react-native';
+import Sheet from './Sheet';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import jsQR from 'jsqr';
@@ -158,7 +159,7 @@ export default function QrScanner({ visible, onScan, onClose }: QrScannerProps) 
   }, [visible, stop, tr]);
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose} transparent={false}>
+    <Sheet visible={visible} animationType="slide" onRequestClose={onClose} transparent={false}>
       <View style={styles.root}>
         {/* A DOM <video> rather than a react-native <Image>: this is a live
             MediaStream, which only a video element can render. */}
@@ -181,7 +182,7 @@ export default function QrScanner({ visible, onScan, onClose }: QrScannerProps) 
           <Ionicons name="close" size={26} color="#fff" />
         </TouchableOpacity>
       </View>
-    </Modal>
+    </Sheet>
   );
 }
 

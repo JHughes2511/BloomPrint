@@ -159,9 +159,9 @@ export default function PlayerInboxScreen() {
 
   const handleTap = (item: InboxItem) => {
     if (item.kind === 'eval') {
-      navigation.navigate('PlayerReportDetail', { reportId: item.id });
+      navigation.push('PlayerReportDetail', { reportId: item.id });
     } else {
-      navigation.navigate('PlayerTeamReportDetail', { reportId: item.id });
+      navigation.push('PlayerTeamReportDetail', { reportId: item.id });
     }
   };
 

@@ -6,6 +6,7 @@ import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Modal, Alert, KeyboardAvoidingView, Platform, ScrollView, RefreshControl,
 } from 'react-native';
+import Sheet from '../components/Sheet';
 
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
 const COMPETITION_LEVELS = [...CANON_LEVELS];
@@ -24,7 +25,7 @@ function LevelDropdown({ value, onChange }: { value: string; onChange: (v: strin
         <Text style={ddStyles.triggerText}>{value}</Text>
         <Text style={ddStyles.chevron}>▾</Text>
       </TouchableOpacity>
-      <Modal visible={open} transparent animationType="fade">
+      <Sheet visible={open} transparent animationType="fade">
         <TouchableOpacity style={ddStyles.overlay} activeOpacity={1} onPress={() => setOpen(false)}>
           <View style={ddStyles.menu}>
             <Text style={ddStyles.menuTitle}>{tr('roster.competitionLevel')}</Text>
@@ -40,7 +41,7 @@ function LevelDropdown({ value, onChange }: { value: string; onChange: (v: strin
             ))}
           </View>
         </TouchableOpacity>
-      </Modal>
+      </Sheet>
     </>
   );
 }
@@ -405,7 +406,7 @@ export default function RosterScreen() {
           <TouchableOpacity
             style={[styles.card, gridColumns > 1 && styles.cardInGrid,
                     gridColumns > 1 && cardWidth ? { width: cardWidth, maxWidth: cardWidth } : null]}
-            onPress={() => navigation.navigate('PlayerProfile', { playerId: item.id })}
+            onPress={() => navigation.push('PlayerProfile', { playerId: item.id })}
             onLongPress={() => {
               Alert.alert(tr('roster.deletePlayerTitle'), tr('roster.deletePlayerMsg', { name: item.name }), [
                 { text: tr('common.cancel'), style: 'cancel' },
@@ -452,7 +453,7 @@ export default function RosterScreen() {
       </View>
 
       {/* Add Player Modal */}
-      <Modal visible={showAdd} transparent animationType="slide">
+      <Sheet visible={showAdd} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
           <View style={[styles.modal, { maxHeight: '90%', flex: 0 },
                        // flex: 0 compiles to flex-basis: 0%, and in a column that wins
@@ -568,7 +569,7 @@ export default function RosterScreen() {
           </View>
 
           {/* Parent/Guardian consent disclaimer — an in-modal overlay, because a
-              nested <Modal> won't present over an already-open Modal on iOS. */}
+              nested <Sheet> won't present over an already-open Modal on iOS. */}
           {showDisclaimer && (
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: t.scrim, justifyContent: 'center', padding: 20 }}>
               <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, maxHeight: '80%', borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) }}>
@@ -593,10 +594,10 @@ export default function RosterScreen() {
             </View>
           )}
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Create Team Modal */}
-      <Modal visible={showNewTeam} transparent animationType="slide">
+      <Sheet visible={showNewTeam} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('roster.newTeam')}</Text>
@@ -614,10 +615,10 @@ export default function RosterScreen() {
             </View>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Manage Team Modal */}
-      <Modal visible={!!editTeam} transparent animationType="slide" onRequestClose={closeManage}>
+      <Sheet visible={!!editTeam} transparent animationType="slide" onRequestClose={closeManage}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('roster.manageTeam')}</Text>
@@ -648,7 +649,7 @@ export default function RosterScreen() {
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
     </View>
     </PageContainer>
     </ScreenBackground>

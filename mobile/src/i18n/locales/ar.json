@@ -511,6 +511,8 @@
     "emailPlaceholder": "you@email.com",
     "emailHint": "هذا هو البريد الإلكتروني الذي تسجّل الدخول به.",
     "role": "الدور",
+    "jobTitle": "المسمى الوظيفي",
+    "jobTitlePlaceholder": "مثال: مدير تطوير اللاعبين",
     "appLanguage": "لغة التطبيق",
     "appLanguageHint": "التطبيق وتقاريرك و«اسأل BloomPrint» تستخدم جميعها هذه اللغة.",
     "programOrganization": "البرنامج / المؤسسة",

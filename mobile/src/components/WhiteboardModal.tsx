@@ -4,6 +4,7 @@ import {
   PanResponder, Alert, TextInput, ScrollView, ActivityIndicator,
   Platform, KeyboardAvoidingView, Dimensions, Keyboard, TouchableWithoutFeedback, Animated,
 } from 'react-native';
+import Sheet from './Sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import Svg, { Path, Circle, Line, Rect, G, Text as SvgText } from 'react-native-svg';
@@ -2018,7 +2019,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   if (!visible) return null;
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+    <Sheet visible={visible} animationType="slide" onRequestClose={onClose}>
       <ScreenBackground>
       <View style={styles.container}>
 
@@ -2263,7 +2264,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         )}
 
         {/* Add-movement type picker (after drawing an arrow on an AI board) */}
-        <Modal visible={!!pendingArrow} transparent animationType="fade" onRequestClose={() => setPendingArrow(null)}>
+        <Sheet visible={!!pendingArrow} transparent animationType="fade" onRequestClose={() => setPendingArrow(null)}>
           <View style={styles.listOverlay}>
             <View style={[styles.listBox, { padding: 20 }]}>
               <Text style={styles.listTitle}>{tr('whiteboard.addMovement')}</Text>
@@ -2285,7 +2286,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
               </View>
             </View>
           </View>
-        </Modal>
+        </Sheet>
 
         {/* AI Key — bottom overlay that pops up over the court when Key is on */}
         {board?.ai && showKey && board.ai.key.length > 0 && (
@@ -2308,7 +2309,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         )}
 
         {/* Refine play modal */}
-        <Modal visible={showRefine} transparent animationType="slide" onRequestClose={() => setShowRefine(false)}>
+        <Sheet visible={showRefine} transparent animationType="slide" onRequestClose={() => setShowRefine(false)}>
           <KeyboardAvoidingView style={styles.listOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={0}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={[styles.listBox, { padding: 20, maxHeight: '88%' }]}>
@@ -2349,10 +2350,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
               </View>
             </TouchableWithoutFeedback>
           </KeyboardAvoidingView>
-        </Modal>
+        </Sheet>
 
         {/* Player guidance modal — per-player lock/cascade + notes */}
-        <Modal visible={showPlayers} transparent animationType="slide" onRequestClose={() => setShowPlayers(false)}>
+        <Sheet visible={showPlayers} transparent animationType="slide" onRequestClose={() => setShowPlayers(false)}>
           <KeyboardAvoidingView style={styles.listOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={0}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={[styles.listBox, { padding: 20, maxHeight: '88%' }]}>
@@ -2409,10 +2410,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
               </View>
             </TouchableWithoutFeedback>
           </KeyboardAvoidingView>
-        </Modal>
+        </Sheet>
 
         {/* AI play modal */}
-        <Modal visible={showAI} transparent animationType="slide" onRequestClose={() => { setShowAI(false); setSeedMode('none'); setAiByPlayer(false); }}>
+        <Sheet visible={showAI} transparent animationType="slide" onRequestClose={() => { setShowAI(false); setSeedMode('none'); setAiByPlayer(false); }}>
           {/* seedMode handled inside */}
           <KeyboardAvoidingView
             style={styles.listOverlay}
@@ -2561,10 +2562,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
               </View>
             </TouchableWithoutFeedback>
           </KeyboardAvoidingView>
-        </Modal>
+        </Sheet>
 
         {/* Board list modal */}
-        <Modal visible={renamingIdx !== null} transparent animationType="fade" onRequestClose={() => setRenamingIdx(null)}>
+        <Sheet visible={renamingIdx !== null} transparent animationType="fade" onRequestClose={() => setRenamingIdx(null)}>
           <KeyboardAvoidingView
             style={styles.renameOverlay}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -2592,9 +2593,9 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
               </View>
             </View>
           </KeyboardAvoidingView>
-        </Modal>
+        </Sheet>
 
-        <Modal visible={showBoardList} transparent animationType="slide" onRequestClose={() => setShowBoardList(false)}>
+        <Sheet visible={showBoardList} transparent animationType="slide" onRequestClose={() => setShowBoardList(false)}>
           <View style={styles.listOverlay}>
             <View style={styles.listBox}>
               <Text style={styles.listTitle}>{tr('whiteboard.boards')}</Text>
@@ -2629,10 +2630,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
               </TouchableOpacity>
             </View>
           </View>
-        </Modal>
+        </Sheet>
 
         {/* Text input modal */}
-        <Modal visible={showAddText} transparent animationType="fade" onRequestClose={() => setShowAddText(false)}>
+        <Sheet visible={showAddText} transparent animationType="fade" onRequestClose={() => setShowAddText(false)}>
           <KeyboardAvoidingView style={styles.listOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View style={[styles.listBox, { padding: 20 }]}>
               <Text style={styles.listTitle}>{editingTextId ? tr('whiteboard.editLabel') : tr('whiteboard.addLabel')}</Text>
@@ -2649,11 +2650,11 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
               </View>
             </View>
           </KeyboardAvoidingView>
-        </Modal>
+        </Sheet>
 
       </View>
       </ScreenBackground>
-    </Modal>
+    </Sheet>
   );
 }
 

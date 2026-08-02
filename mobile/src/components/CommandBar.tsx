@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView, ActivityIndicator, Alert, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
+import Sheet from './Sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import VoiceTextInput from './VoiceTextInput';
@@ -212,7 +213,7 @@ export default function CommandBar({ open: openProp, onOpenChange, hideTrigger }
         </TouchableOpacity>
       )}
 
-      <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
+      <Sheet visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
         <KeyboardAvoidingView style={s.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={s.sheet}>
             <View style={s.header}>
@@ -296,7 +297,7 @@ export default function CommandBar({ open: openProp, onOpenChange, hideTrigger }
             </View>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
     </>
   );
 }

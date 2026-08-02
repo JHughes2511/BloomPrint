@@ -511,6 +511,8 @@
     "emailPlaceholder": "you@email.com",
     "emailHint": "זה האימייל שאיתו אתה מתחבר.",
     "role": "תפקיד",
+    "jobTitle": "תפקיד",
+    "jobTitlePlaceholder": "לדוגמה: מנהל פיתוח שחקנים",
     "appLanguage": "שפת האפליקציה",
     "appLanguageHint": "האפליקציה, הדוחות שלך ו-Ask BloomPrint משתמשים כולם בשפה הזו.",
     "programOrganization": "תוכנית / ארגון",

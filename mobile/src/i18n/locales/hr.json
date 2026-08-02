@@ -511,6 +511,8 @@
     "emailPlaceholder": "ti@email.com",
     "emailHint": "Ovo je e-pošta s kojom se prijavljuješ.",
     "role": "Uloga",
+    "jobTitle": "Funkcija",
+    "jobTitlePlaceholder": "npr. direktor razvoja igrača",
     "appLanguage": "Jezik aplikacije",
     "appLanguageHint": "Aplikacija, tvoji izvještaji i Pitaj BloomPrint koriste ovaj jezik.",
     "programOrganization": "Program / organizacija",

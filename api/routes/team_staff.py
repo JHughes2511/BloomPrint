@@ -15,6 +15,7 @@ class TeamMemberOut(BaseModel):
     id: int
     name: str
     role: str | None = None
+    job_title: str | None = None
     is_owner: bool = False
     model_config = {"from_attributes": True}
 
@@ -76,10 +77,12 @@ def _members_by_team(db: Session, team_ids: list[int]) -> dict[int, list[TeamMem
         rows: list[TeamMemberOut] = []
         owner = coaches.get(team.coach_id)
         if owner:
-            rows.append(TeamMemberOut(id=owner.id, name=owner.name, role=owner.role, is_owner=True))
+            rows.append(TeamMemberOut(id=owner.id, name=owner.name, role=owner.role,
+                                     job_title=owner.job_title, is_owner=True))
         others = [coaches[cid] for cid in staff_ids.get(team.id, []) if cid in coaches and cid != team.coach_id]
         for c in sorted(others, key=lambda c: (c.name or "").lower()):
-            rows.append(TeamMemberOut(id=c.id, name=c.name, role=c.role, is_owner=False))
+            rows.append(TeamMemberOut(id=c.id, name=c.name, role=c.role,
+                                     job_title=c.job_title, is_owner=False))
         out[team.id] = rows
     return out
 
@@ -386,7 +389,8 @@ def create_subteam(
     db.refresh(sub)
     return TeamOut(id=sub.id, name=sub.name, competition_level=sub.competition_level,
                    coach_name=coach.name, parent_team_id=team_id, member_count=1, is_owner=True,
-                   members=[TeamMemberOut(id=coach.id, name=coach.name, role=coach.role, is_owner=True)])
+                   members=[TeamMemberOut(id=coach.id, name=coach.name, role=coach.role,
+                                    job_title=coach.job_title, is_owner=True)])
 
 
 @router.get("/{team_id}/subteams", response_model=list[TeamOut])
@@ -419,7 +423,11 @@ def list_members(
         raise HTTPException(status_code=404, detail="Team not found")
     ids = {team.coach_id, *[l.coach_id for l in db.query(models.TeamStaff).filter_by(team_id=team_id).all()]}
     coaches = db.query(models.Coach).filter(models.Coach.id.in_(ids)).all() if ids else []
-    return [{"id": c.id, "name": c.name, "role": c.role, "is_owner": c.id == team.coach_id} for c in coaches]
+    return [
+        {"id": c.id, "name": c.name, "role": c.role, "job_title": c.job_title,
+         "is_owner": c.id == team.coach_id}
+        for c in coaches
+    ]
 
 
 def _teams_of(db: Session, coach_id: int) -> set[int]:
@@ -452,6 +460,7 @@ def coach_profile(
         "id": target.id,
         "name": target.name,
         "role": target.role,
+        "job_title": target.job_title,
         "program_name": target.program_name,
         "conference": target.conference,
         "competition_level": target.competition_level,

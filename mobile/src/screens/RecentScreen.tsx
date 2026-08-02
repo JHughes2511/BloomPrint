@@ -8,6 +8,7 @@ import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, Alert, ScrollView, Modal, TextInput, KeyboardAvoidingView, Platform, Switch, RefreshControl,
 } from 'react-native';
+import Sheet from '../components/Sheet';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
@@ -459,7 +460,7 @@ export default function RecentScreen() {
       return;
     }
     if (item.kind === 'game') {
-      navigation.navigate('GameReportBuilder', { reportId: item.report_id ?? item.id });
+      navigation.push('GameReportBuilder', { reportId: item.report_id ?? item.id });
       return;
     }
     if (item.kind === 'scout') {
@@ -896,7 +897,7 @@ export default function RecentScreen() {
                   {item.kind === 'game' && !item.shared && (
                     <TouchableOpacity
                       style={styles.gameActionBtn}
-                      onPress={() => navigation.navigate('GameReportBuilder', { reportId: item.report_id ?? item.id })}
+                      onPress={() => navigation.push('GameReportBuilder', { reportId: item.report_id ?? item.id })}
                     >
                       <Ionicons name="create-outline" size={13} color={t.muted} />
                       <Text style={styles.gameActionText} numberOfLines={1}>{tr('recent.editPacket')}</Text>
@@ -982,7 +983,7 @@ export default function RecentScreen() {
       )}
 
       {/* Game Report View Modal */}
-      <Modal visible={!!gameReportModal} animationType="slide" transparent>
+      <Sheet visible={!!gameReportModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
@@ -1057,7 +1058,7 @@ export default function RecentScreen() {
             )}
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Unified shared-report viewer (correct / regenerate / comment / notes) */}
       <SharedReportViewer
@@ -1077,7 +1078,7 @@ export default function RecentScreen() {
       />
 
       {/* Generic Send to Staff Modal */}
-      <Modal visible={showStaffShareModal} animationType="slide" transparent>
+      <Sheet visible={showStaffShareModal} animationType="slide" transparent>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
@@ -1210,10 +1211,10 @@ export default function RecentScreen() {
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Single modal — swaps between report / send / correct views */}
-      <Modal visible={!!activeModal} animationType="slide" transparent>
+      <Sheet visible={!!activeModal} animationType="slide" transparent>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
 
@@ -1424,7 +1425,7 @@ export default function RecentScreen() {
 
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Unified Share modal — player / team / staff */}
       {shareCtx && (

@@ -313,7 +313,11 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
           </View>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text numberOfLines={1} style={s.accountName}>{coach?.name ?? ''}</Text>
-            <Text numberOfLines={1} style={s.accountSub}>{coach?.program_name ?? ''}</Text>
+            {/* Title over program: it is the more specific of the two, and a
+                coach reading their own row knows their program already. */}
+            <Text numberOfLines={1} style={s.accountSub}>
+              {(coach as any)?.job_title || coach?.program_name || ''}
+            </Text>
           </View>
           <Ionicons name="ellipsis-horizontal" size={16} color={t.muted2} />
         </Pressable>

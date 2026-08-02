@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, Switch } from 'react-native';
+import Sheet from '../components/Sheet';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
@@ -93,6 +94,7 @@ export default function HomeScreen() {
   const [pLevel, setPLevel] = useState('HS Varsity');
   const [showLevelDD, setShowLevelDD] = useState(false);
   const [pRole, setPRole] = useState('coach');
+  const [pJobTitle, setPJobTitle] = useState('');
   const [pCountry, setPCountry] = useState('');
   const [pCity, setPCity] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
@@ -206,6 +208,7 @@ export default function HomeScreen() {
     setPProgram(coach?.program_name ?? '');
     setPLevel((coach as any)?.competition_level ?? 'HS Varsity');
     setPRole(coach?.role ?? 'coach');
+    setPJobTitle((coach as any)?.job_title ?? '');
     setPCountry(coach?.country ?? '');
     setPCity(coach?.city ?? '');
     setShowProfile(true);
@@ -247,7 +250,7 @@ export default function HomeScreen() {
     }
     setSavingProfile(true);
     try {
-      await updateProfile({ name: pName.trim(), email: email || undefined, program_name: pProgram.trim(), competition_level: pLevel, role: pRole, country: pCountry || undefined, city: pCity.trim() || undefined });
+      await updateProfile({ name: pName.trim(), email: email || undefined, program_name: pProgram.trim(), competition_level: pLevel, role: pRole, job_title: pJobTitle.trim(), country: pCountry || undefined, city: pCity.trim() || undefined });
       setShowProfile(false);
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('home.updateProfileError'));
@@ -322,7 +325,7 @@ export default function HomeScreen() {
               style={[typeScale.bodySoft, { color: t.muted, flex: 1, flexShrink: 1, minWidth: 0 }]}
               numberOfLines={2}
             >
-              {coach ? `${coach.name} · ${roleLabel(coach.role)} · ${coach.program_name}` : ''}
+              {coach ? [coach.name, (coach as any).job_title || roleLabel(coach.role), coach.program_name].filter(Boolean).join(' · ') : ''}
             </Text>
             {!isDesktop && <CommandBar />}
           </View>
@@ -389,7 +392,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* Feedback modal */}
-      <Modal visible={showFeedback} transparent animationType="slide" onRequestClose={() => setShowFeedback(false)}>
+      <Sheet visible={showFeedback} transparent animationType="slide" onRequestClose={() => setShowFeedback(false)}>
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, padding: 24, paddingBottom: 36, ...sheetCap(560) }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
@@ -454,10 +457,10 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Profile edit modal */}
-      <Modal visible={showProfile} transparent animationType="slide" onRequestClose={() => setShowProfile(false)}>
+      <Sheet visible={showProfile} transparent animationType="slide" onRequestClose={() => setShowProfile(false)}>
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, maxHeight: '90%', ...sheetCap(560) }}>
             {/* flexBasis auto is what stops this sheet opening blank in a
@@ -509,6 +512,18 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               ))}
             </View>
+
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>{tr('home.jobTitle')}</Text>
+            {/* Free text under the role: role is what kind of account this is,
+                the title is what you actually do in the program, and no fixed
+                list survives contact with how programs name their staff. */}
+            <TextInput
+              style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line }}
+              placeholder={tr('home.jobTitlePlaceholder')}
+              placeholderTextColor={t.muted2}
+              value={pJobTitle}
+              onChangeText={setPJobTitle}
+            />
 
             <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>{tr('home.appLanguage')}</Text>
             <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 8 }}>
@@ -611,10 +626,10 @@ export default function HomeScreen() {
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Program System & Philosophy modal */}
-      <Modal visible={showSystem} transparent animationType="slide" onRequestClose={() => setShowSystem(false)}>
+      <Sheet visible={showSystem} transparent animationType="slide" onRequestClose={() => setShowSystem(false)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 50, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingBottom: 8 }}>
@@ -685,7 +700,7 @@ export default function HomeScreen() {
             </KeyboardAwareScrollView>
           </View>
         </View>
-      </Modal>
+      </Sheet>
     </PageContainer>
     </ScreenBackground>
   );

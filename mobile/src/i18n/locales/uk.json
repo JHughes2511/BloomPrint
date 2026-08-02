@@ -511,6 +511,8 @@
     "emailPlaceholder": "you@email.com",
     "emailHint": "Це email, з яким ви входите.",
     "role": "Роль",
+    "jobTitle": "Посада",
+    "jobTitlePlaceholder": "напр. директор з розвитку гравців",
     "appLanguage": "Мова застосунку",
     "appLanguageHint": "Застосунок, ваші звіти та Ask BloomPrint використовують цю мову.",
     "programOrganization": "Програма / організація",

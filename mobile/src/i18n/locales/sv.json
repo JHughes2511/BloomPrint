@@ -511,6 +511,8 @@
     "emailPlaceholder": "du@epost.com",
     "emailHint": "Detta är e-postadressen du loggar in med.",
     "role": "Roll",
+    "jobTitle": "Befattning",
+    "jobTitlePlaceholder": "t.ex. Chef för spelarutveckling",
     "appLanguage": "Appspråk",
     "appLanguageHint": "Appen, dina rapporter och Fråga BloomPrint använder alla detta språk.",
     "programOrganization": "Program / Organisation",

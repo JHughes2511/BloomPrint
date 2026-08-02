@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, Modal, FlatList, TextInput, SafeAreaView,
   KeyboardAvoidingView, Platform,
 } from 'react-native';
+import Sheet from './Sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeProvider';
@@ -46,7 +47,7 @@ export default function CountryField({
         <Ionicons name="chevron-down" size={14} color={t.muted} />
       </TouchableOpacity>
 
-      <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
+      <Sheet visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
         <KeyboardAvoidingView
           style={s.overlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -87,7 +88,7 @@ export default function CountryField({
             />
           </SafeAreaView>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
     </>
   );
 }

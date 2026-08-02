@@ -511,6 +511,8 @@
     "emailPlaceholder": "you@email.com",
     "emailHint": "로그인에 사용하는 이메일입니다.",
     "role": "역할",
+    "jobTitle": "직함",
+    "jobTitlePlaceholder": "예: 선수 육성 디렉터",
     "appLanguage": "앱 언어",
     "appLanguageHint": "앱, 리포트, Ask BloomPrint 모두 이 언어를 사용합니다.",
     "programOrganization": "프로그램 / 소속 단체",

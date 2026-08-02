@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, View, StyleSheet, StyleProp, ViewStyle, ScrollView } from 'react-native';
+import Sheet from './Sheet';
 import KeyboardAwareScrollView from './KeyboardAwareScrollView';
 
 type Props = {
@@ -27,7 +28,7 @@ type Props = {
 /**
  * Standardized modal shell that keeps text inputs visible above the keyboard on
  * iOS, Android, and web. Drop-in replacement for the
- * `<Modal><KeyboardAvoidingView><View>…</View></KeyboardAvoidingView></Modal>`
+ * `<Sheet><KeyboardAvoidingView><View>…</View></KeyboardAvoidingView></Sheet>`
  * pattern. Pass the screen's existing overlay/box styles via overlayStyle and
  * containerStyle to preserve the look; put ALL inner content (header, body,
  * footer) as children — do not nest another ScrollView when scroll is true.
@@ -45,7 +46,7 @@ export default function KeyboardAwareModal({
   children,
 }: Props) {
   return (
-    <Modal visible={visible} transparent animationType={animationType} onRequestClose={onRequestClose}>
+    <Sheet visible={visible} transparent animationType={animationType} onRequestClose={onRequestClose}>
       <View style={[styles.overlay, position === 'center' ? styles.center : styles.bottom, overlayStyle]}>
         <View style={[styles.card, containerStyle]}>
           {scroll ? (
@@ -57,7 +58,7 @@ export default function KeyboardAwareModal({
           )}
         </View>
       </View>
-    </Modal>
+    </Sheet>
   );
 }
 

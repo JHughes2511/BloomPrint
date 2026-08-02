@@ -12,6 +12,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet } from 'react-native';
+import Sheet from './Sheet';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -46,7 +47,7 @@ export default function QrScanner({ visible, onScan, onClose }: QrScannerProps) 
   const denied = permission != null && !permission.granted && !permission.canAskAgain;
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+    <Sheet visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.root}>
         {permission?.granted ? (
           <CameraView
@@ -68,7 +69,7 @@ export default function QrScanner({ visible, onScan, onClose }: QrScannerProps) 
           <Ionicons name="close" size={26} color="#fff" />
         </TouchableOpacity>
       </View>
-    </Modal>
+    </Sheet>
   );
 }
 

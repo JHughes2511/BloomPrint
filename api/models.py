@@ -20,6 +20,11 @@ class Coach(Base):
     weight            = Column(Integer, default=45)       # BIM authority weight
     level             = Column(String, default="hs_elite_aau")
     role              = Column(String, default="coach")   # coach / scout / trainer
+    # The specific title inside a program — "Director of Player Development",
+    # "Assistant Coach — Guards". Free text: role says what kind of account this
+    # is, and no fixed list survives contact with how programs actually title
+    # their staff.
+    job_title         = Column(String, nullable=True)
     program_name      = Column(String, default="SEED Academy")
     conference        = Column(String, nullable=True)     # college conference
     competition_level = Column(String, nullable=True)     # signup competition level

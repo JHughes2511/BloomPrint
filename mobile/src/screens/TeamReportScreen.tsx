@@ -5,6 +5,7 @@ import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
   StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal, Switch, useWindowDimensions } from 'react-native';
+import Sheet from '../components/Sheet';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -540,7 +541,7 @@ export default function TeamReportScreen() {
             <Text style={[styles.label, { flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>{tr('teamReport.gameReports')}</Text>
             <TouchableOpacity
               style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.accent, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, flexShrink: 0, maxWidth: 140 }}
-              onPress={() => navigation.navigate('GameReportBuilder')}
+              onPress={() => navigation.push('GameReportBuilder')}
             >
               <Ionicons name="add" size={14} color={t.ctaText} />
               <Text style={{ color: t.ink, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('teamReport.new')}</Text>
@@ -551,7 +552,7 @@ export default function TeamReportScreen() {
           ) : gameReports.length === 0 ? (
             <TouchableOpacity
               style={{ borderWidth: 1, borderColor: t.line, borderStyle: 'dashed', borderRadius: 12, padding: 20, alignItems: 'center', gap: 6 }}
-              onPress={() => navigation.navigate('GameReportBuilder')}
+              onPress={() => navigation.push('GameReportBuilder')}
             >
               <Ionicons name="albums-outline" size={28} color={t.line} />
               <Text style={{ color: t.muted, fontSize: 13 }}>{tr('teamReport.buildFirstPacket')}</Text>
@@ -583,7 +584,7 @@ export default function TeamReportScreen() {
                 <TouchableOpacity
                   key={gr.id}
                   style={{ backgroundColor: t.card, borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: gr.report_text ? t.accent : t.chip, flexDirection: 'row', alignItems: 'center', gap: 12 }}
-                  onPress={() => navigation.navigate('GameReportBuilder', { reportId: gr.id })}
+                  onPress={() => navigation.push('GameReportBuilder', { reportId: gr.id })}
                 >
                   <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
                     <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700] }} numberOfLines={1}>{matchup}</Text>
@@ -896,7 +897,7 @@ export default function TeamReportScreen() {
                   </View>
                   <TouchableOpacity
                     style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: t.line }}
-                    onPress={() => navigation.navigate('GameReportBuilder', { reportId: v.report_id })}
+                    onPress={() => navigation.push('GameReportBuilder', { reportId: v.report_id })}
                   >
                     <Ionicons name="document-text-outline" size={13} color={t.muted} />
                     <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600], flexShrink: 1 }} numberOfLines={1}>{tr('reportTypes.report')}</Text>
@@ -912,7 +913,7 @@ export default function TeamReportScreen() {
       </KeyboardAwareScrollView>
 
       {/* Report film player modal */}
-      <Modal visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
+      <Sheet visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
         <View style={{ flex: 1, backgroundColor: '#000000EE', ...(isWide ? null : { justifyContent: 'center' as const }) }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: topPad(48) }}>
             <Text style={{ color: '#fff', fontSize: 15, fontFamily: fonts[700], flex: 1 }} numberOfLines={1}>{videoTitle}</Text>
@@ -944,10 +945,10 @@ export default function TeamReportScreen() {
             </View>
           )}
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Previous Report Detail Modal */}
-      <Modal visible={!!selectedPrevReport} animationType="slide" transparent>
+      <Sheet visible={!!selectedPrevReport} animationType="slide" transparent>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60, ...sheetCap(560) }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -1043,7 +1044,7 @@ export default function TeamReportScreen() {
                   onPress={() => {
                     const rid = selectedPrevReport._reportId;
                     setSelectedPrevReport(null);
-                    navigation.navigate('GameReportBuilder', { reportId: rid });
+                    navigation.push('GameReportBuilder', { reportId: rid });
                   }}
                 >
                   <Ionicons name="create-outline" size={15} color={t.accent} />
@@ -1084,10 +1085,10 @@ export default function TeamReportScreen() {
             </KeyboardAwareScrollView>
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Share with Staff Modal */}
-      <Modal visible={showStaffShare} transparent animationType="slide">
+      <Sheet visible={showStaffShare} transparent animationType="slide">
         <KeyboardAvoidingView style={shareStyles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <KeyboardAwareScrollView style={shareStyles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
             <Text style={shareStyles.title} numberOfLines={1}>{tr('teamReport.shareWithStaff')}</Text>
@@ -1167,10 +1168,10 @@ export default function TeamReportScreen() {
             </View>
           </KeyboardAwareScrollView>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Share Modal */}
-      <Modal visible={showShare} transparent animationType="slide">
+      <Sheet visible={showShare} transparent animationType="slide">
         <KeyboardAvoidingView style={shareStyles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <KeyboardAwareScrollView style={shareStyles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
             <Text style={shareStyles.title} numberOfLines={1}>{tr('teamReport.shareTeamReport')}</Text>
@@ -1324,7 +1325,7 @@ export default function TeamReportScreen() {
             </View>
           </KeyboardAwareScrollView>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
     </KeyboardAvoidingView>
 
     {/* Unified share for previous reports — player / whole team / all staff */}

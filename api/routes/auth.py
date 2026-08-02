@@ -175,7 +175,7 @@ def update_me(
                 raise HTTPException(status_code=400, detail="That email is already used by another account.")
             email_changed_from = coach.email
             coach.email = new_email
-    for field in ("name", "role", "program_name", "competition_level", "conference", "system_profile", "country", "city", "onboarded", "preferred_language"):
+    for field in ("name", "role", "job_title", "program_name", "competition_level", "conference", "system_profile", "country", "city", "onboarded", "preferred_language"):
         if field in data and data[field] is not None:
             setattr(coach, field, data[field])
     # Recompute BIM authority weight if the competition level/conference changed.
@@ -302,7 +302,8 @@ def list_coaches(
         .all()
     )
     return [
-        {"id": c.id, "name": c.name, "role": c.role, "program_name": c.program_name}
+        {"id": c.id, "name": c.name, "role": c.role, "job_title": c.job_title,
+         "program_name": c.program_name}
         for c in results
     ]
 
@@ -331,6 +332,7 @@ def search_coaches(
         .all()
     )
     return [
-        {"id": c.id, "name": c.name, "role": c.role, "program_name": c.program_name}
+        {"id": c.id, "name": c.name, "role": c.role, "job_title": c.job_title,
+         "program_name": c.program_name}
         for c in results
     ]

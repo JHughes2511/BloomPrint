@@ -511,6 +511,8 @@
     "emailPlaceholder": "you@email.com",
     "emailHint": "这是你登录时使用的邮箱。",
     "role": "角色",
+    "jobTitle": "职位",
+    "jobTitlePlaceholder": "例如：球员发展总监",
     "appLanguage": "应用语言",
     "appLanguageHint": "应用、你的报告以及 Ask BloomPrint 都使用此语言。",
     "programOrganization": "球队 / 机构",

@@ -511,6 +511,8 @@
     "emailPlaceholder": "you@email.com",
     "emailHint": "サインインに使用するメールアドレスです。",
     "role": "役割",
+    "jobTitle": "役職",
+    "jobTitlePlaceholder": "例：プレーヤー育成ディレクター",
     "appLanguage": "アプリの言語",
     "appLanguageHint": "アプリ、レポート、Ask BloomPrintはすべてこの言語を使用します。",
     "programOrganization": "プログラム／組織",

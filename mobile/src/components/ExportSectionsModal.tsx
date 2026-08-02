@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Switch, Modal, ActivityIndicator, Alert } from 'react-native';
+import Sheet from './Sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import * as Print from 'expo-print';
@@ -64,7 +65,7 @@ export default function ExportSectionsModal({ visible, title, subject, reportTex
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Sheet visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={s.overlay}>
         <View style={s.box}>
           <View style={s.header}>
@@ -102,7 +103,7 @@ export default function ExportSectionsModal({ visible, title, subject, reportTex
           </View>
         </View>
       </View>
-    </Modal>
+    </Sheet>
   );
 }
 

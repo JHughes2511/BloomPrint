@@ -6,6 +6,7 @@ import {
   StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert,
   Modal, FlatList, SafeAreaView,
 } from 'react-native';
+import Sheet from '../components/Sheet';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -139,7 +140,7 @@ function PickerModal({
     : options;
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+    <Sheet visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={pickerModalStyles.overlay}>
         <SafeAreaView style={pickerModalStyles.sheet}>
           <View style={pickerModalStyles.header}>
@@ -173,7 +174,7 @@ function PickerModal({
           />
         </SafeAreaView>
       </View>
-    </Modal>
+    </Sheet>
   );
 }
 

@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
   Image, Modal, KeyboardAvoidingView, Platform, Alert,
 } from 'react-native';
+import Sheet from '../components/Sheet';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -304,7 +305,7 @@ export default function ConversationScreen() {
       </KeyboardAvoidingView>
 
       {/* Report picker */}
-      <Modal visible={showReportPicker} transparent animationType="slide" onRequestClose={() => setShowReportPicker(false)}>
+      <Sheet visible={showReportPicker} transparent animationType="slide" onRequestClose={() => setShowReportPicker(false)}>
         <View style={styles.overlay}>
           <View style={styles.sheet}>
             <View style={styles.sheetHead}>
@@ -351,10 +352,10 @@ export default function ConversationScreen() {
             })()}
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Report reader */}
-      <Modal visible={!!reportView} transparent animationType="slide" onRequestClose={() => setReportView(null)}>
+      <Sheet visible={!!reportView} transparent animationType="slide" onRequestClose={() => setReportView(null)}>
         <View style={styles.overlay}>
           <View style={[styles.sheet, { maxHeight: '85%' }]}>
             <View style={styles.sheetHead}>
@@ -364,7 +365,7 @@ export default function ConversationScreen() {
             <ScrollView>{reportView ? renderReport(reportView.text, { heading: t.ink, body: t.inkSoft }) : null}</ScrollView>
           </View>
         </View>
-      </Modal>
+      </Sheet>
     </PageContainer>
     </ScreenBackground>
   );

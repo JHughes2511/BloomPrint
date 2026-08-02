@@ -511,6 +511,8 @@
     "emailPlaceholder": "you@email.com",
     "emailHint": "ეს არის ელფოსტა, რომლითაც შედიხართ.",
     "role": "როლი",
+    "jobTitle": "თანამდებობა",
+    "jobTitlePlaceholder": "მაგ. მოთამაშეთა განვითარების დირექტორი",
     "appLanguage": "აპლიკაციის ენა",
     "appLanguageHint": "აპლიკაცია, თქვენი ანგარიშები და Ask BloomPrint ყველა ამ ენას იყენებს.",
     "programOrganization": "პროგრამა / ორგანიზაცია",

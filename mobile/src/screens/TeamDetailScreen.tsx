@@ -11,6 +11,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, Modal, Alert, TextInput,
 } from 'react-native';
+import Sheet from '../components/Sheet';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,7 +26,7 @@ import PageContainer from '../responsive/PageContainer';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import { sheetCap } from '../responsive/modalSizes';
 
-type Member = { id: number; name: string; role?: string | null; is_owner?: boolean };
+type Member = { id: number; name: string; role?: string | null; job_title?: string | null; is_owner?: boolean };
 type Team = {
   id: number; name: string; competition_level?: string | null; coach_name?: string | null;
   parent_team_id?: number | null; is_owner?: boolean; owner_missing?: boolean; members?: Member[];
@@ -94,7 +95,7 @@ export default function TeamDetailScreen() {
     setBusyMember(m.id);
     try {
       const conv = await staffMessagesAPI.create({ member_ids: [m.id], is_group: false });
-      navigation.navigate('Conversation', { conversationId: conv.id, title: conv.title || m.name });
+      navigation.push('Conversation', { conversationId: conv.id, title: conv.title || m.name });
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.startConvError'));
     } finally { setBusyMember(null); }
@@ -144,7 +145,7 @@ export default function TeamDetailScreen() {
       const conv = await staffMessagesAPI.create({
         member_ids: others.map(m => m.id), is_group: others.length > 1, title: team?.name,
       });
-      navigation.navigate('Conversation', { conversationId: conv.id, title: conv.title || team?.name });
+      navigation.push('Conversation', { conversationId: conv.id, title: conv.title || team?.name });
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.openGroupError'));
     }
@@ -292,7 +293,9 @@ export default function TeamDetailScreen() {
                       <Text style={styles.memberName} numberOfLines={1}>
                         {m.name}{isMe ? ` · ${tr('staffHub.you')}` : ''}
                       </Text>
-                      <Text style={styles.memberRole} numberOfLines={1}>{roleLabel(m)}</Text>
+                      <Text style={styles.memberRole} numberOfLines={1}>
+                        {[roleLabel(m), (m.job_title || '').trim()].filter(Boolean).join(' · ')}
+                      </Text>
                     </View>
                     {busyMember === m.id ? (
                       <ActivityIndicator color={t.accent} size="small" />
@@ -370,7 +373,7 @@ export default function TeamDetailScreen() {
         </View>
 
         {/* Create sub-team */}
-        <Modal visible={showSub} transparent animationType="slide" onRequestClose={() => setShowSub(false)}>
+        <Sheet visible={showSub} transparent animationType="slide" onRequestClose={() => setShowSub(false)}>
           <View style={styles.overlay}>
             <View style={styles.sheet}>
               <View style={styles.sheetHead}>
@@ -389,10 +392,10 @@ export default function TeamDetailScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </Modal>
+        </Sheet>
 
         {/* Invite */}
-        <Modal visible={inviteOpen} transparent animationType="slide" onRequestClose={() => setInviteOpen(false)}>
+        <Sheet visible={inviteOpen} transparent animationType="slide" onRequestClose={() => setInviteOpen(false)}>
           <View style={styles.overlay}>
             <View style={styles.sheet}>
               <View style={styles.sheetHead}>
@@ -413,7 +416,7 @@ export default function TeamDetailScreen() {
                   <TouchableOpacity key={c.id} style={styles.memberCard} onPress={() => doInvite({ coach_id: c.id })} disabled={inviting}>
                     <View style={{ flex: 1, minWidth: 0, marginRight: 8 }}>
                       <Text style={styles.memberName} numberOfLines={1}>{c.name}</Text>
-                      <Text style={styles.memberRole} numberOfLines={1}>{[c.role, c.program_name].filter(Boolean).join(' · ')}</Text>
+                      <Text style={styles.memberRole} numberOfLines={1}>{[c.job_title || c.role, c.program_name].filter(Boolean).join(' · ')}</Text>
                     </View>
                     <Ionicons name="person-add-outline" size={18} color={t.accent} />
                   </TouchableOpacity>
@@ -433,10 +436,10 @@ export default function TeamDetailScreen() {
               </KeyboardAwareScrollView>
             </View>
           </View>
-        </Modal>
+        </Sheet>
 
         {/* Pick a sub-team to add someone to */}
-        <Modal visible={!!addingTo} transparent animationType="slide" onRequestClose={() => setAddingTo(null)}>
+        <Sheet visible={!!addingTo} transparent animationType="slide" onRequestClose={() => setAddingTo(null)}>
           <View style={styles.overlay}>
             <View style={styles.sheet}>
               <View style={styles.sheetHead}>
@@ -454,11 +457,11 @@ export default function TeamDetailScreen() {
               </ScrollView>
             </View>
           </View>
-        </Modal>
+        </Sheet>
 
         {/* Hand the team over. Only its existing staff can be named — the
             server rejects anyone else — so the member list IS the choice. */}
-        <Modal visible={transferOpen} transparent animationType="slide" onRequestClose={() => setTransferOpen(false)}>
+        <Sheet visible={transferOpen} transparent animationType="slide" onRequestClose={() => setTransferOpen(false)}>
           <View style={styles.overlay}>
             <View style={styles.sheet}>
               <View style={styles.sheetHead}>
@@ -486,10 +489,10 @@ export default function TeamDetailScreen() {
               </ScrollView>
             </View>
           </View>
-        </Modal>
+        </Sheet>
 
         {/* Member card */}
-        <Modal visible={!!profile} transparent animationType="slide" onRequestClose={() => setProfile(null)}>
+        <Sheet visible={!!profile} transparent animationType="slide" onRequestClose={() => setProfile(null)}>
           <View style={styles.overlay}>
             <View style={styles.sheet}>
               <View style={styles.sheetHead}>
@@ -499,6 +502,7 @@ export default function TeamDetailScreen() {
               {profileLoading && <ActivityIndicator color={t.accent} />}
               {[
                 [tr('teamDetail.roleLabel'), profile?.role],
+                [tr('home.jobTitle'), profile?.job_title],
                 [tr('teamDetail.programLabel'), profile?.program_name],
                 [tr('teamDetail.conferenceLabel'), profile?.conference],
                 [tr('teamDetail.levelLabel'), profile?.competition_level],
@@ -512,7 +516,7 @@ export default function TeamDetailScreen() {
               ))}
             </View>
           </View>
-        </Modal>
+        </Sheet>
       </PageContainer>
     </ScreenBackground>
   );

@@ -511,6 +511,8 @@
     "emailPlaceholder": "you@email.com",
     "emailHint": "यही ईमेल है जिससे आप साइन इन करते हैं।",
     "role": "भूमिका",
+    "jobTitle": "पद",
+    "jobTitlePlaceholder": "जैसे प्लेयर डेवलपमेंट डायरेक्टर",
     "appLanguage": "ऐप की भाषा",
     "appLanguageHint": "ऐप, आपकी रिपोर्ट और Ask BloomPrint — सब यही भाषा इस्तेमाल करते हैं।",
     "programOrganization": "प्रोग्राम / संगठन",

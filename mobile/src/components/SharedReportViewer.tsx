@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
   Modal, Alert, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import Sheet from './Sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useReportTranslation } from '../hooks/useReportTranslation';
@@ -178,7 +179,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
   const updatedLabel = updatedLabelFor(item.report_type);
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Sheet visible={visible} animationType="slide" transparent>
       <KeyboardAvoidingView style={styles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.box}>
           {/* Header */}
@@ -372,7 +373,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
           <GeneratingOverlay visible={regenerating} label={tr('components.viewer.buildingUpdated')} />
         </View>
       </KeyboardAvoidingView>
-    </Modal>
+    </Sheet>
   );
 }
 

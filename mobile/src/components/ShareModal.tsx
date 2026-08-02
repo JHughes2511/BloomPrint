@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
   Modal, Alert, KeyboardAvoidingView, Platform, Switch, Keyboard,
 } from 'react-native';
+import Sheet from './Sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from './VoiceTextInput';
@@ -198,7 +199,7 @@ export default function ShareModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
+    <Sheet visible={visible} transparent animationType="slide">
       <KeyboardAvoidingView
         style={styles.overlay}
         behavior={Platform.OS === 'android' ? 'height' : undefined}
@@ -403,7 +404,7 @@ export default function ShareModal({
           </View>
         </View>
       </KeyboardAvoidingView>
-    </Modal>
+    </Sheet>
   );
 }
 

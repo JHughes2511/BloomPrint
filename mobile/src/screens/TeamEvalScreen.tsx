@@ -5,6 +5,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
   StyleSheet, ActivityIndicator, Alert, Modal, KeyboardAvoidingView, Platform, RefreshControl,
 } from 'react-native';
+import Sheet from '../components/Sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
@@ -1489,7 +1490,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           </ScrollView>
 
           {/* Clock edit modal */}
-          <Modal visible={showClockEdit} transparent animationType="fade" onRequestClose={() => setShowClockEdit(false)}>
+          <Sheet visible={showClockEdit} transparent animationType="fade" onRequestClose={() => setShowClockEdit(false)}>
             <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'center', padding: 32 }}>
               <View style={{ backgroundColor: t.sheet, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) }}>
                 <Text style={{ color: t.ink, fontSize: 16, fontFamily: fonts[800], marginBottom: 14 }}>{tr('teamGrade.setClock')}</Text>
@@ -1514,7 +1515,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 </View>
               </View>
             </View>
-          </Modal>
+          </Sheet>
 
           {/* Team toggle */}
           <View style={s.teamToggle}>
@@ -2349,7 +2350,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       )}
 
       {/* Imported stats preview — confirm before committing */}
-      <Modal visible={!!statPreview} transparent animationType="slide" onRequestClose={() => setStatPreview(null)}>
+      <Sheet visible={!!statPreview} transparent animationType="slide" onRequestClose={() => setStatPreview(null)}>
         <View style={s.modalOverlay}>
           <View style={[s.modalBox, { maxHeight: '85%' }]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
@@ -2387,10 +2388,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </View>
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* New Game Modal */}
-      <Modal visible={showNewGame} transparent animationType="slide">
+      <Sheet visible={showNewGame} transparent animationType="slide">
         <KeyboardAvoidingView style={s.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={[s.modalBox, { maxHeight: '85%' }]}>
             <Text style={s.modalTitle}>{tr('teamGrade.newGame')}</Text>
@@ -2618,10 +2619,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </View>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Lineup Modal */}
-      <Modal visible={showLineupModal} transparent animationType="slide">
+      <Sheet visible={showLineupModal} transparent animationType="slide">
         <View style={s.modalOverlay}>
           <View style={[s.modalBox, { maxHeight: '80%' }]}>
             <Text style={s.modalTitle}>{subOutPlayer ? tr('teamGrade.whoCameIn') : tr('teamGrade.manageLineup')}</Text>
@@ -2710,10 +2711,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             )}
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Player Detail Modal */}
-      <Modal visible={showDetailModal} transparent animationType="slide">
+      <Sheet visible={showDetailModal} transparent animationType="slide">
         <View style={s.modalOverlay}>
           <View style={[s.modalBox, { maxHeight: '90%' }]}>
             {/* Header */}
@@ -2832,10 +2833,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </TouchableOpacity>
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Player Stats Edit Modal */}
-      <Modal visible={showStatsModal} transparent animationType="slide">
+      <Sheet visible={showStatsModal} transparent animationType="slide">
         <View style={s.modalOverlay}>
           <View style={[s.modalBox, { maxHeight: '90%' }]}>
             <Text style={s.modalTitle}>{isOwnedGame(detailGame) ? tr('teamGrade.editStats') : tr('teamGrade.statsTitle')} — {statsModalPlayer}</Text>
@@ -2959,10 +2960,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </TouchableOpacity>
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Player grade detail (from leaderboard) */}
-      <Modal visible={gradeDetailPlayer !== null} transparent animationType="slide" onRequestClose={() => setGradeDetailPlayer(null)}>
+      <Sheet visible={gradeDetailPlayer !== null} transparent animationType="slide" onRequestClose={() => setGradeDetailPlayer(null)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', paddingBottom: 24, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip }}>
@@ -3060,7 +3061,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             )}
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Whiteboard */}
       <WhiteboardModal
@@ -3071,7 +3072,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       />
 
       {/* Share game with staff modal */}
-      <Modal visible={shareGameModalVisible} animationType="slide" transparent>
+      <Sheet visible={shareGameModalVisible} animationType="slide" transparent>
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={{ backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(CONTENT_MAX_WIDTH) }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -3160,7 +3161,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
     </View>
     </PageContainer>
     </ScreenBackground>

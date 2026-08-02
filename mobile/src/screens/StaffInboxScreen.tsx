@@ -7,6 +7,7 @@ import {
   ActivityIndicator, Modal, KeyboardAvoidingView,
   Platform, ScrollView, Alert, TextInput, RefreshControl,
 } from 'react-native';
+import Sheet from '../components/Sheet';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { staffSharingAPI, teamStaffAPI, staffMessagesAPI, coachesAPI, teamsAPI } from '../api/client';
@@ -139,7 +140,7 @@ export default function StaffInboxScreen() {
       const conv = await staffMessagesAPI.create({ member_ids: selectedStaff.map(s => s.id), is_group: selectedStaff.length > 1 });
       setShowCompose(false);
       setSelectedStaff([]); setStaffSearch(''); setStaffResults([]);
-      navigation.navigate('Conversation', { conversationId: conv.id, title: conv.title });
+      navigation.push('Conversation', { conversationId: conv.id, title: conv.title });
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.startConvError'));
     } finally { setCreating(false); }
@@ -304,7 +305,7 @@ export default function StaffInboxScreen() {
               <Text style={[styles.cardSub, { paddingHorizontal: 20, marginBottom: 6 }]}>{q ? tr('staffHub.noMatchingConversations') : tr('staffHub.noConversationsYet')}</Text>
             )}
             {convFiltered.map(c => (
-              <TouchableOpacity key={`conv-${c.id}`} style={styles.card} onPress={() => navigation.navigate('Conversation', { conversationId: c.id, title: c.title })}>
+              <TouchableOpacity key={`conv-${c.id}`} style={styles.card} onPress={() => navigation.push('Conversation', { conversationId: c.id, title: c.title })}>
                 <View style={[styles.iconBox, { backgroundColor: t.accentSoft }]}>
                   <Ionicons name={c.is_group ? 'people' : 'chatbubble-ellipses-outline'} size={18} color={t.accent} />
                 </View>
@@ -573,7 +574,7 @@ export default function StaffInboxScreen() {
                       cost a screenful per team and left no room per person. */}
                   <TouchableOpacity
                     style={[styles.card, { marginHorizontal: 0, marginLeft: depth * 16, borderLeftWidth: depth ? 3 : 1, borderLeftColor: depth ? t.accent : t.cardBorder }]}
-                    onPress={() => navigation.navigate('TeamDetail', { teamId: tm.id, teamName: tm.name, team: tm })}
+                    onPress={() => navigation.push('TeamDetail', { teamId: tm.id, teamName: tm.name, team: tm })}
                   >
                     <View style={[styles.iconBox, { backgroundColor: t.accentSoft }]}>
                       <Ionicons name={depth ? 'git-branch-outline' : 'people'} size={17} color={t.accent} />
@@ -656,7 +657,7 @@ export default function StaffInboxScreen() {
       {tab === 'my_teams' && renderMyTeamsTab()}
 
       {/* Compose / new message modal */}
-      <Modal visible={showCompose} transparent animationType="slide" onRequestClose={() => setShowCompose(false)}>
+      <Sheet visible={showCompose} transparent animationType="slide" onRequestClose={() => setShowCompose(false)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={[styles.modalBox, { maxHeight: '80%' }]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -709,10 +710,10 @@ export default function StaffInboxScreen() {
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Create team modal */}
-      <Modal visible={showCreateTeam} transparent animationType="fade" onRequestClose={() => setShowCreateTeam(false)}>
+      <Sheet visible={showCreateTeam} transparent animationType="fade" onRequestClose={() => setShowCreateTeam(false)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={[styles.modalBox, { padding: 20 }]}>
             <Text style={styles.modalTitle}>{tr('staffHub.newTeam')}</Text>
@@ -735,7 +736,7 @@ export default function StaffInboxScreen() {
             </View>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Create sub-team modal */}
 
@@ -748,7 +749,7 @@ export default function StaffInboxScreen() {
       />
 
       {/* Team Game detail modal */}
-      <Modal visible={!!activeGame} animationType="slide" transparent>
+      <Sheet visible={!!activeGame} animationType="slide" transparent>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
@@ -824,7 +825,7 @@ export default function StaffInboxScreen() {
             ))}
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
     </View>
     </PageContainer>
     </ScreenBackground>

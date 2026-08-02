@@ -511,6 +511,8 @@
     "emailPlaceholder": "voce@email.com",
     "emailHint": "Este é o e-mail com o qual você faz login.",
     "role": "Função",
+    "jobTitle": "Cargo",
+    "jobTitlePlaceholder": "ex.: Diretor de Desenvolvimento de Jogadores",
     "appLanguage": "Idioma do app",
     "appLanguageHint": "O app, seus relatórios e o Ask BloomPrint usam este idioma.",
     "programOrganization": "Programa / Organização",

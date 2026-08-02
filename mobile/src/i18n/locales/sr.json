@@ -511,6 +511,8 @@
     "emailPlaceholder": "vi@imejl.com",
     "emailHint": "Ovo je imejl sa kojim se prijavljujete.",
     "role": "Uloga",
+    "jobTitle": "Функција",
+    "jobTitlePlaceholder": "нпр. директор развоја играча",
     "appLanguage": "Jezik aplikacije",
     "appLanguageHint": "Aplikacija, vaši izveštaji i Pitaj BloomPrint koriste ovaj jezik.",
     "programOrganization": "Program / Organizacija",

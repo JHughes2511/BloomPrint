@@ -511,6 +511,8 @@
     "emailPlaceholder": "jij@email.com",
     "emailHint": "Dit is het e-mailadres waarmee je inlogt.",
     "role": "Rol",
+    "jobTitle": "Functietitel",
+    "jobTitlePlaceholder": "bijv. Hoofd spelersontwikkeling",
     "appLanguage": "App-taal",
     "appLanguageHint": "De app, je rapporten en Ask BloomPrint gebruiken allemaal deze taal.",
     "programOrganization": "Programma / Organisatie",

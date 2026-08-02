@@ -511,6 +511,8 @@
     "emailPlaceholder": "ty@email.com",
     "emailHint": "To adres e-mail, którym się logujesz.",
     "role": "Rola",
+    "jobTitle": "Stanowisko",
+    "jobTitlePlaceholder": "np. Dyrektor ds. rozwoju zawodników",
     "appLanguage": "Język aplikacji",
     "appLanguageHint": "Aplikacja, Twoje raporty i Zapytaj BloomPrint korzystają z tego języka.",
     "programOrganization": "Program / organizacja",

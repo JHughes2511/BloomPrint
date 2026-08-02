@@ -511,6 +511,8 @@
     "emailPlaceholder": "tu@email.com",
     "emailHint": "Acesta este emailul cu care te autentifici.",
     "role": "Rol",
+    "jobTitle": "Funcție",
+    "jobTitlePlaceholder": "ex. Director dezvoltare jucători",
     "appLanguage": "Limba aplicației",
     "appLanguageHint": "Aplicația, rapoartele tale și Ask BloomPrint folosesc toate această limbă.",
     "programOrganization": "Program / Organizație",

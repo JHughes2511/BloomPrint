@@ -511,6 +511,8 @@
     "emailPlaceholder": "tu@correo.com",
     "emailHint": "Este es el correo con el que inicias sesión.",
     "role": "Rol",
+    "jobTitle": "Cargo",
+    "jobTitlePlaceholder": "p. ej. Director de Desarrollo de Jugadores",
     "appLanguage": "Idioma de la App",
     "appLanguageHint": "La app, tus informes y Pregunta a BloomPrint usan este idioma.",
     "programOrganization": "Programa / Organización",

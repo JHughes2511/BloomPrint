@@ -511,6 +511,8 @@
     "emailPlaceholder": "jus@paštas.lt",
     "emailHint": "Tai el. paštas, su kuriuo prisijungiate.",
     "role": "Vaidmuo",
+    "jobTitle": "Pareigos",
+    "jobTitlePlaceholder": "pvz. žaidėjų ugdymo vadovas",
     "appLanguage": "Programėlės kalba",
     "appLanguageHint": "Programėlė, jūsų ataskaitos ir Ask BloomPrint naudoja šią kalbą.",
     "programOrganization": "Programa / organizacija",

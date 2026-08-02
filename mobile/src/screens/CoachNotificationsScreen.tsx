@@ -243,7 +243,7 @@ export default function CoachNotificationsScreen() {
             onPress={async () => {
               if (n.type === 'staff_message' && n.ref_id) {
                 if (!n.read) { try { await playerAPI.coachMarkRead(n.id); } catch {} }
-                navigation.navigate('Conversation', { conversationId: n.ref_id });
+                navigation.push('Conversation', { conversationId: n.ref_id });
                 return;
               }
               const willExpand = expandedId !== n.id;
@@ -390,7 +390,7 @@ export default function CoachNotificationsScreen() {
                           await playerAPI.coachMarkRead(n.id);
                           setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
                           setExpandedId(null);
-                          navigation.navigate('CoachTrainingDetail', { trainingId: n.ref_id });
+                          navigation.push('CoachTrainingDetail', { trainingId: n.ref_id });
                         }}
                       >
                         <Text style={[styles.approveBtnText, { color: t.ctaText }]} numberOfLines={1}>{tr('coachNotifs.viewTraining')}</Text>

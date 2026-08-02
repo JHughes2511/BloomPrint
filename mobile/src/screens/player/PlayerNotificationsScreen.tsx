@@ -74,15 +74,15 @@ export default function PlayerNotificationsScreen() {
     // Mark as read visually
     setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
     if (notif.type === 'report_shared' && notif.ref_id) {
-      navigation.navigate('PlayerReportDetail', { reportId: notif.ref_id });
+      navigation.push('PlayerReportDetail', { reportId: notif.ref_id });
     } else if (notif.type === 'training_updated' && notif.ref_id) {
-      navigation.navigate('PlayerTrainingDetail', { trainingId: notif.ref_id });
+      navigation.push('PlayerTrainingDetail', { trainingId: notif.ref_id });
     } else if (notif.type === 'training_generated' && notif.ref_id) {
-      navigation.navigate('PlayerTrainingDetail', { trainingId: notif.ref_id });
+      navigation.push('PlayerTrainingDetail', { trainingId: notif.ref_id });
     } else if (notif.type === 'training_shared' && notif.ref_id) {
-      navigation.navigate('PlayerCoachTrainingDetail', { trainingId: notif.ref_id });
+      navigation.push('PlayerCoachTrainingDetail', { trainingId: notif.ref_id });
     } else if (notif.type === 'team_report_shared' && notif.ref_id) {
-      navigation.navigate('PlayerTeamReportDetail', { reportId: notif.ref_id });
+      navigation.push('PlayerTeamReportDetail', { reportId: notif.ref_id });
     }
   };
 

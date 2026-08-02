@@ -511,6 +511,8 @@
     "emailPlaceholder": "you@email.com",
     "emailHint": "This is the email you sign in with.",
     "role": "Role",
+    "jobTitle": "Job title",
+    "jobTitlePlaceholder": "e.g. Director of Player Development",
     "appLanguage": "App Language",
     "appLanguageHint": "The app, your reports, and Ask BloomPrint all use this language.",
     "programOrganization": "Program / Organization",

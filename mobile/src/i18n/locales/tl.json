@@ -511,6 +511,8 @@
     "emailPlaceholder": "ikaw@email.com",
     "emailHint": "Ito ang email na ginagamit mo sa pag-sign in.",
     "role": "Papel",
+    "jobTitle": "Posisyon sa trabaho",
+    "jobTitlePlaceholder": "hal. Director of Player Development",
     "appLanguage": "Wika ng App",
     "appLanguageHint": "Ang app, ang mga ulat mo, at ang Ask BloomPrint ay gumagamit lahat ng wikang ito.",
     "programOrganization": "Programa / Organisasyon",

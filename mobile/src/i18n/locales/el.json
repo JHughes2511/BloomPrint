@@ -511,6 +511,8 @@
     "emailPlaceholder": "you@email.com",
     "emailHint": "Αυτό είναι το email με το οποίο συνδέεσαι.",
     "role": "Ρόλος",
+    "jobTitle": "Θέση",
+    "jobTitlePlaceholder": "π.χ. Διευθυντής Ανάπτυξης Παικτών",
     "appLanguage": "Γλώσσα Εφαρμογής",
     "appLanguageHint": "Η εφαρμογή, οι αναφορές σου και το Ask BloomPrint χρησιμοποιούν όλα αυτήν τη γλώσσα.",
     "programOrganization": "Πρόγραμμα / Οργανισμός",

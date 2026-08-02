@@ -8,6 +8,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   Alert, ActivityIndicator, Modal, Image,
 } from 'react-native';
+import Sheet from '../../components/Sheet';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -295,7 +296,7 @@ export default function PlayerLinkScreen() {
     </ScrollView>
 
     {/* Edit profile modal */}
-    <Modal visible={showEdit} transparent animationType="slide" onRequestClose={() => setShowEdit(false)}>
+    <Sheet visible={showEdit} transparent animationType="slide" onRequestClose={() => setShowEdit(false)}>
       <View style={styles.modalOverlay}>
         <View style={styles.sheet}>
           <View style={styles.sheetHeader}>
@@ -375,10 +376,10 @@ export default function PlayerLinkScreen() {
           </KeyboardAwareScrollView>
         </View>
       </View>
-    </Modal>
+    </Sheet>
 
     {/* Link to Coach modal */}
-    <Modal visible={showLink} transparent animationType="slide" onRequestClose={() => setShowLink(false)}>
+    <Sheet visible={showLink} transparent animationType="slide" onRequestClose={() => setShowLink(false)}>
       <View style={styles.modalOverlay}>
         <View style={styles.sheet}>
           <View style={styles.sheetHeader}>
@@ -435,7 +436,7 @@ export default function PlayerLinkScreen() {
           </KeyboardAwareScrollView>
         </View>
       </View>
-    </Modal>
+    </Sheet>
 
     {/* QR scanner */}
     <QrScanner visible={showScanner} onScan={onScan} onClose={() => setShowScanner(false)} />

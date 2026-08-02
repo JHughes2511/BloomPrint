@@ -6,6 +6,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
   Modal, TextInput, Platform, PanResponder, Animated, Keyboard, RefreshControl,
 } from 'react-native';
+import Sheet from '../../components/Sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
@@ -112,7 +113,7 @@ export default function PlayerHomeScreen() {
   const flagSource = reports.find(r => (r.green_flags?.length || r.watch_flags?.length)) ?? null;
 
   const openReport = (r: any) =>
-    navigation.navigate('PlayerReportDetail' as any, { reportId: r.id });
+    navigation.push('PlayerReportDetail' as any, { reportId: r.id });
 
   const linkWithInvite = async () => {
     if (!inviteCode.trim()) return;
@@ -409,7 +410,7 @@ export default function PlayerHomeScreen() {
       )}
 
       {/* BIM Score breakdown modal */}
-      <Modal visible={showBim} transparent animationType="slide" onRequestClose={() => setShowBim(false)}>
+      <Sheet visible={showBim} transparent animationType="slide" onRequestClose={() => setShowBim(false)}>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalBox, { maxHeight: '85%' }]}>
             <View style={styles.modalHeader}>
@@ -465,9 +466,9 @@ export default function PlayerHomeScreen() {
             </ScrollView>
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
-      <Modal visible={showEditModal} transparent animationType="none">
+      <Sheet visible={showEditModal} transparent animationType="none">
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => { Keyboard.dismiss(); closeModal(); }}>
           <Animated.View
             style={[styles.modalBox, { transform: [{ translateY: slideY }] }]}
@@ -590,7 +591,7 @@ export default function PlayerHomeScreen() {
             </TouchableOpacity>
           </Animated.View>
         </TouchableOpacity>
-      </Modal>
+      </Sheet>
     </ScrollView>
     </PageContainer>
     </ScreenBackground>

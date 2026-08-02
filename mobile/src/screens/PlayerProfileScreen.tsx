@@ -4,6 +4,7 @@ import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
   Modal, Alert, KeyboardAvoidingView, Platform, TextInput, RefreshControl, useWindowDimensions } from 'react-native';
+import Sheet from '../components/Sheet';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -639,7 +640,7 @@ export default function PlayerProfileScreen() {
           <Text style={styles.sectionTitle}>{tr('playerProfile.evaluationHistory')}</Text>
           <TouchableOpacity
             style={styles.newEvalBtn}
-            onPress={() => navigation.navigate('NewEval', { playerId: player.id, playerName: player.name })}
+            onPress={() => navigation.push('NewEval', { playerId: player.id, playerName: player.name })}
           >
             <Ionicons name="videocam" size={14} color={t.ctaText} />
             <Text style={styles.newEvalText}>{tr('playerProfile.newEval')}</Text>
@@ -651,7 +652,7 @@ export default function PlayerProfileScreen() {
           <TouchableOpacity
             key={ev.id}
             style={styles.evalCard}
-            onPress={() => navigation.navigate('EvalReport', { evalId: ev.id })}
+            onPress={() => navigation.push('EvalReport', { evalId: ev.id })}
           >
             <View style={{ flex: 1 }}>
               <Text style={styles.evalType}>{ev.output_type.replace(/_/g, ' ').toUpperCase()}</Text>
@@ -715,7 +716,7 @@ export default function PlayerProfileScreen() {
       {/* Training */}
       <TouchableOpacity
         style={styles.trainingBtn}
-        onPress={() => navigation.navigate('Training', { playerId: player.id, evalId: latest?.id })}
+        onPress={() => navigation.push('Training', { playerId: player.id, evalId: latest?.id })}
       >
         <Ionicons name="barbell" size={18} color={t.ink} />
         <Text style={styles.trainingText}>{tr('playerProfile.generateTraining')}</Text>
@@ -931,7 +932,7 @@ export default function PlayerProfileScreen() {
               {v.source_kind === 'eval' && v.source_id && (
                 <TouchableOpacity
                   style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: t.line }}
-                  onPress={() => navigation.navigate('EvalReport' as never, { evalId: v.source_id } as never)}
+                  onPress={() => navigation.push('EvalReport' as never, { evalId: v.source_id } as never)}
                 >
                   <Ionicons name="document-text-outline" size={13} color={t.muted} />
                   <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[600] }}>{tr('reportTypes.report')}</Text>
@@ -946,7 +947,7 @@ export default function PlayerProfileScreen() {
       </View>
 
       {/* Video player modal */}
-      <Modal visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
+      <Sheet visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
         <View style={{ flex: 1, backgroundColor: '#000000EE', ...(isWide ? null : { justifyContent: 'center' as const }) }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: topPad(48) }}>
             <Text style={{ color: '#fff', fontSize: 15, fontFamily: fonts[700], flex: 1 }} numberOfLines={1}>
@@ -983,10 +984,10 @@ export default function PlayerProfileScreen() {
             </View>
           )}
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Training picker modal — choose which training to send */}
-      <Modal visible={showTrainingPicker} transparent animationType="slide">
+      <Sheet visible={showTrainingPicker} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%', borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip }}>
@@ -1046,10 +1047,10 @@ export default function PlayerProfileScreen() {
             </ScrollView>
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Player profile detail modal */}
-      <Modal visible={showProfileDetail} transparent animationType="slide">
+      <Sheet visible={showProfileDetail} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) }}>
             {/* Header */}
@@ -1127,10 +1128,10 @@ export default function PlayerProfileScreen() {
             </ScrollView>
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Training detail modal — full-screen so all text is readable */}
-      <Modal visible={!!trainingModalItem} transparent animationType="slide">
+      <Sheet visible={!!trainingModalItem} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 60, ...sheetCap(560) }}>
             {/* Compact header — max ~50px tall */}
@@ -1357,10 +1358,10 @@ export default function PlayerProfileScreen() {
             </View>
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Edit Player Modal — compact floating card */}
-      <Modal visible={showEdit} transparent animationType="slide">
+      <Sheet visible={showEdit} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
           <View style={[styles.modal, { maxHeight: '90%', flex: 0 },
                        // flex: 0 compiles to flex-basis: 0%, and in a column that wins
@@ -1552,10 +1553,10 @@ export default function PlayerProfileScreen() {
           </KeyboardAwareScrollView>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Share with Staff modal */}
-      <Modal visible={showStaffShare} transparent animationType="slide">
+      <Sheet visible={showStaffShare} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')} keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('playerProfile.shareWithStaff')}</Text>
@@ -1629,10 +1630,10 @@ export default function PlayerProfileScreen() {
             </View>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Summary modal */}
-      <Modal visible={showSummary} transparent animationType="slide">
+      <Sheet visible={showSummary} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('playerProfile.summarizeHistoryTitle')}</Text>
@@ -1734,7 +1735,7 @@ export default function PlayerProfileScreen() {
             </View>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Unified Share modal — player / team / staff */}
       {shareCtx && (

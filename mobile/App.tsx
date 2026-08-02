@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, StackActions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator, BottomTabBar } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -99,7 +99,21 @@ import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-const SCREEN_OPTIONS = { headerShown: false, contentStyle: { backgroundColor: '#0a0a0a' } };
+/**
+ * Every stack screen can be swiped back.
+ *
+ * gestureEnabled is iOS-only in native-stack, and there it is already the
+ * default — it is stated here so that turning a header off, which is what the
+ * rest of this object does, never reads as turning the gesture off with it.
+ * Android's back gesture is the system one and needs no opt-in; the slide
+ * animation is set so a swipe there has something to follow.
+ */
+const SCREEN_OPTIONS = {
+  headerShown: false,
+  gestureEnabled: true,
+  animation: 'slide_from_right' as const,
+  contentStyle: { backgroundColor: '#0a0a0a' },
+};
 
 /**
  * How long startup may wait on fonts before rendering without them.
@@ -109,7 +123,12 @@ const SCREEN_OPTIONS = { headerShown: false, contentStyle: { backgroundColor: '#
  * not mistaken by the person waiting for a broken site.
  */
 const STARTUP_MAX_WAIT_MS = 3000;
-const PLAYER_SCREEN_OPTIONS = { headerShown: false, contentStyle: { backgroundColor: '#0f1a0f' } };
+const PLAYER_SCREEN_OPTIONS = {
+  headerShown: false,
+  gestureEnabled: true,
+  animation: 'slide_from_right' as const,
+  contentStyle: { backgroundColor: '#0f1a0f' },
+};
 
 function HomeStack() {
   return (
@@ -185,32 +204,25 @@ function RecentStack() {
 }
 
 /**
- * The first screen of each tab's stack.
+ * Pressing a tab lands on that tab's first screen, however deep it is.
  *
- * Pressing the tab you are already on should return you to the top of it —
- * tapping Roster from a player profile means "show me the roster". React
- * Navigation does not do this on its own: both tab bars guard their navigate
- * call with `!isFocused`, so re-pressing the active tab did nothing at all.
+ * This used to navigate to the root screen by name, which walks the stack back
+ * one step at a time: from Home > Staff Hub > a team, pressing Home showed
+ * Staff Hub and you had to press again. popToTop on the tab's own stack is the
+ * action that actually means "take me to the top of this section", and it is
+ * dispatched at the nested navigator by key rather than guessed at from the
+ * tab level.
+ *
+ * No isFocused guard: this fires for whichever tab was pressed, so an unpressed
+ * tab is already at its root by the time the tab bar switches to it.
  */
-const TAB_ROOT: Record<string, string> = {
-  HomeTab: 'Home',
-  TeamTab: 'Team',
-  TeamEvalTab: 'TeamEval',
-  RosterTab: 'Roster',
-  RecentTab: 'Recent',
-  PlayerHomeTab: 'PlayerHome',
-  InboxTab: 'PlayerInbox',
-  TrainingTab: 'PlayerTraining',
-  PlayerNotifsTab: 'PlayerNotifications',
-};
-
-/** Re-pressing the active tab pops its stack back to that tab's first screen. */
 const backToTabRoot = ({ navigation, route }: any) => ({
   tabPress: () => {
-    const root = TAB_ROOT[route.name];
-    // Navigating to a screen already in the stack pops back to it rather than
-    // pushing a second copy, so this is a return rather than a new screen.
-    if (root && navigation.isFocused()) navigation.navigate(route.name, { screen: root });
+    const stackKey = route?.state?.key;
+    const depth = route?.state?.index ?? 0;
+    if (stackKey && depth > 0) {
+      navigation.dispatch({ ...StackActions.popToTop(), target: stackKey });
+    }
   },
 });
 

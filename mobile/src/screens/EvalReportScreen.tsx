@@ -8,6 +8,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Alert, Modal, Switch, KeyboardAvoidingView, Platform, SafeAreaView,
 } from 'react-native';
+import Sheet from '../components/Sheet';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
@@ -559,7 +560,7 @@ export default function EvalReportScreen() {
       )}
 
       {/* BIM Score detail — pillar breakdown + grade trend */}
-      <Modal visible={showBim} animationType="slide" transparent onRequestClose={() => setShowBim(false)}>
+      <Sheet visible={showBim} animationType="slide" transparent onRequestClose={() => setShowBim(false)}>
         <View style={styles.pdOverlay}>
           <View style={styles.pdBox}>
             <View style={styles.pdHeader}>
@@ -596,10 +597,10 @@ export default function EvalReportScreen() {
             </ScrollView>
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Recruit Grade detail — how the letter maps from the BIM score */}
-      <Modal visible={showRecruit} animationType="slide" transparent onRequestClose={() => setShowRecruit(false)}>
+      <Sheet visible={showRecruit} animationType="slide" transparent onRequestClose={() => setShowRecruit(false)}>
         <View style={styles.pdOverlay}>
           <View style={styles.pdBox}>
             <View style={styles.pdHeader}>
@@ -621,10 +622,10 @@ export default function EvalReportScreen() {
             })}
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Player detail modal */}
-      <Modal visible={showPlayerDetail} animationType="slide" transparent>
+      <Sheet visible={showPlayerDetail} animationType="slide" transparent>
         <View style={styles.pdOverlay}>
           <View style={styles.pdBox}>
             <View style={styles.pdHeader}>
@@ -695,14 +696,14 @@ export default function EvalReportScreen() {
 
             <TouchableOpacity
               style={styles.pdProfileBtn}
-              onPress={() => { setShowPlayerDetail(false); navigation.navigate('PlayerProfile', { playerId: ev!.player_id }); }}
+              onPress={() => { setShowPlayerDetail(false); navigation.push('PlayerProfile', { playerId: ev!.player_id }); }}
             >
               <Ionicons name="person" size={15} color={t.ctaText} />
               <Text style={styles.pdProfileBtnText}>{tr('evalReport.viewFullProfile')}</Text>
             </TouchableOpacity>
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Pillar grades */}
       {hasPillars && (
@@ -842,7 +843,7 @@ export default function EvalReportScreen() {
       )}
 
       {/* Share with Staff modal */}
-      <Modal visible={showStaffShare} transparent animationType="slide">
+      <Sheet visible={showStaffShare} transparent animationType="slide">
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('evalReport.shareWithStaff')}</Text>
@@ -885,10 +886,10 @@ export default function EvalReportScreen() {
             </View>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Export modal */}
-      <Modal visible={showExport} transparent animationType="slide">
+      <Sheet visible={showExport} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('evalReport.exportReportTitle')}</Text>
@@ -947,10 +948,10 @@ export default function EvalReportScreen() {
             </View>
           </View>
         </View>
-      </Modal>
+      </Sheet>
 
       {/* Share with Player modal */}
-      <Modal visible={showShare} transparent animationType="slide">
+      <Sheet visible={showShare} transparent animationType="slide">
         <KeyboardAvoidingView
           style={styles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -1040,10 +1041,10 @@ export default function EvalReportScreen() {
             </View>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
 
       {/* Correction modal */}
-      <Modal visible={showCorrect} transparent animationType="slide">
+      <Sheet visible={showCorrect} transparent animationType="slide">
         <KeyboardAvoidingView
           style={styles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -1104,7 +1105,7 @@ export default function EvalReportScreen() {
             </View>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </Sheet>
     </KeyboardAwareScrollView>
 
     {/* Sticky bottom action bar — Correct · Export · Send to Player · Share w/ Staff */}

@@ -49,6 +49,7 @@ class CoachUpdate(BaseModel):
     name: str | None = None
     email: str | None = None
     role: str | None = None
+    job_title: str | None = None
     program_name: str | None = None
     competition_level: str | None = None
     conference: str | None = None
@@ -66,6 +67,7 @@ class CoachOut(BaseModel):
     weight: int
     level: str
     role: str
+    job_title: str | None = None
     program_name: str
     conference: str | None = None
     competition_level: str | None = None
