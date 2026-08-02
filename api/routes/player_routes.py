@@ -193,7 +193,11 @@ def approve_link(
         pu = db.get(models.PlayerUser, request_id)
         if not pu:
             raise HTTPException(status_code=404, detail="Request not found")
-        player = models.Player(name=pu.name, program_name=coach.program_name)
+        # coach_id is what puts a player on a roster: the list is filtered by
+        # ownership or team. Without it this row was created and immediately
+        # invisible to the coach who had just approved it.
+        player = models.Player(name=pu.name, program_name=coach.program_name,
+                               coach_id=coach.id)
         db.add(player)
         db.flush()
         _add_player_link(db, pu, player.id, coach.id)
@@ -207,6 +211,14 @@ def approve_link(
         return {"ok": True}
     lr.status = "approved"
     _add_player_link(db, lr.player_user, lr.player_id, coach.id)
+    # Approving a link is how a player joins this coach's roster, but the roster
+    # is filtered on Player.coach_id and nothing was setting it — so a coach
+    # approved someone and then could not find them. Only claimed when the row
+    # has no owner: a player already on another coach's roster keeps that owner,
+    # and both coaches keep their own record of the same athlete.
+    linked_player = db.get(models.Player, lr.player_id)
+    if linked_player and not linked_player.coach_id:
+        linked_player.coach_id = coach.id
     notif = models.PlayerNotification(
         player_user_id=lr.player_user_id,
         type="link_approved",
