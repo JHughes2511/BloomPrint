@@ -565,7 +565,10 @@
         "placeholder": "התכונות והסטנדרטים שאתה מייחס להם משקל רב."
       }
     },
-    "askBloomprint": "שאל את BloomPrint"
+    "askBloomprint": "שאל את BloomPrint",
+    "emailNotifications": "התראות במייל",
+    "emailNotificationsHint": "קבל מייל כשמישהו משתף דוח, מזמין אותך או עונה לבקשה.",
+    "emailNotificationsLabel": "שלחו לי מייל על פעילות"
   },
   "onboarding": {
     "step": "שלב {{current}} מתוך {{total}}",

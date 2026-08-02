@@ -565,7 +565,10 @@
         "placeholder": "Nemjerljive kvalitete i standardi kojima daješ veliku težinu."
       }
     },
-    "askBloomprint": "Pitaj BloomPrint"
+    "askBloomprint": "Pitaj BloomPrint",
+    "emailNotifications": "Obavijesti e-poštom",
+    "emailNotificationsHint": "Primajte e-poštu kada netko podijeli izvještaj, pozove vas ili odgovori na zahtjev.",
+    "emailNotificationsLabel": "Šalji mi e-poštu o aktivnosti"
   },
   "onboarding": {
     "step": "Korak {{current}} od {{total}}",

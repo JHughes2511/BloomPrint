@@ -565,7 +565,10 @@
         "placeholder": "Los intangibles y estándares que valoras mucho."
       }
     },
-    "askBloomprint": "Preguntar a BloomPrint"
+    "askBloomprint": "Preguntar a BloomPrint",
+    "emailNotifications": "Notificaciones por correo",
+    "emailNotificationsHint": "Recibe un correo cuando alguien comparta un informe, te invite o responda a una solicitud.",
+    "emailNotificationsLabel": "Avisarme por correo"
   },
   "onboarding": {
     "step": "Paso {{current}} de {{total}}",

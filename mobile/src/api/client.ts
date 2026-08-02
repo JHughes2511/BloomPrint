@@ -117,6 +117,13 @@ export const authAPI = {
 
   me: () => api.get('/auth/me').then(r => r.data),
 
+  // Activity email on/off. Separate from the profile record because the same
+  // setting is writable from the unsubscribe link in any message.
+  getEmailPrefs: (): Promise<{ email_enabled: boolean }> =>
+    api.get('/auth/email-prefs').then(r => r.data),
+  setEmailPrefs: (email_enabled: boolean) =>
+    api.patch('/auth/email-prefs', { email_enabled }).then(r => r.data),
+
   updateProfile: (data: {
     name?: string; email?: string; role?: string; program_name?: string;
     competition_level?: string; conference?: string;

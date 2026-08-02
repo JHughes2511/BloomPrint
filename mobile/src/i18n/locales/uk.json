@@ -565,7 +565,10 @@
         "placeholder": "Нематеріальні якості та стандарти, яким ви надаєте велику вагу."
       }
     },
-    "askBloomprint": "Запитати BloomPrint"
+    "askBloomprint": "Запитати BloomPrint",
+    "emailNotifications": "Сповіщення поштою",
+    "emailNotificationsHint": "Отримувати лист, коли хтось ділиться звітом, запрошує вас або відповідає на запит.",
+    "emailNotificationsLabel": "Надсилати листи про активність"
   },
   "onboarding": {
     "step": "Крок {{current}} з {{total}}",

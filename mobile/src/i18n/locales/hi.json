@@ -565,7 +565,10 @@
         "placeholder": "वे अदृश्य गुण और मानक जिन्हें आप सबसे ज़्यादा महत्व देते हैं।"
       }
     },
-    "askBloomprint": "BloomPrint से पूछें"
+    "askBloomprint": "BloomPrint से पूछें",
+    "emailNotifications": "ईमेल सूचनाएँ",
+    "emailNotificationsHint": "जब कोई रिपोर्ट साझा करे, आपको आमंत्रित करे या अनुरोध का उत्तर दे तो ईमेल पाएँ।",
+    "emailNotificationsLabel": "गतिविधि के बारे में ईमेल भेजें"
   },
   "onboarding": {
     "step": "चरण {{current}} / {{total}}",

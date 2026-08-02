@@ -565,7 +565,10 @@
         "placeholder": "Ang mga intangible at pamantayang binibigyan mo ng malaking timbang."
       }
     },
-    "askBloomprint": "Magtanong sa BloomPrint"
+    "askBloomprint": "Magtanong sa BloomPrint",
+    "emailNotifications": "Mga abiso sa email",
+    "emailNotificationsHint": "Makatanggap ng email kapag may nagbahagi ng report, nag-imbita sa iyo, o sumagot sa hiling.",
+    "emailNotificationsLabel": "I-email ako tungkol sa aktibidad"
   },
   "onboarding": {
     "step": "Hakbang {{current}} ng {{total}}",

@@ -565,7 +565,10 @@
         "placeholder": "Nemerljive vrednosti i standardi kojima dajete veliku težinu."
       }
     },
-    "askBloomprint": "Pitaj BloomPrint"
+    "askBloomprint": "Pitaj BloomPrint",
+    "emailNotifications": "Обавештења имејлом",
+    "emailNotificationsHint": "Примајте имејл када неко подели извештај, позове вас или одговори на захтев.",
+    "emailNotificationsLabel": "Шаљи ми имејл о активности"
   },
   "onboarding": {
     "step": "Korak {{current}} od {{total}}",

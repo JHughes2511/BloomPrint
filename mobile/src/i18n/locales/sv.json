@@ -565,7 +565,10 @@
         "placeholder": "De mentala kvaliteter och standarder du väger tungt."
       }
     },
-    "askBloomprint": "Fråga BloomPrint"
+    "askBloomprint": "Fråga BloomPrint",
+    "emailNotifications": "E-postaviseringar",
+    "emailNotificationsHint": "Få ett mejl när någon delar en rapport, bjuder in dig eller svarar på en förfrågan.",
+    "emailNotificationsLabel": "Mejla mig om aktivitet"
   },
   "onboarding": {
     "step": "Steg {{current}} av {{total}}",

@@ -565,7 +565,10 @@
         "placeholder": "你高度看重的无形素质与标准。"
       }
     },
-    "askBloomprint": "询问 BloomPrint"
+    "askBloomprint": "询问 BloomPrint",
+    "emailNotifications": "邮件通知",
+    "emailNotificationsHint": "当有人分享报告、邀请你或回复请求时收到邮件。",
+    "emailNotificationsLabel": "通过邮件通知我"
   },
   "onboarding": {
     "step": "第 {{current}} 步，共 {{total}} 步",

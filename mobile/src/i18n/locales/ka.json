@@ -565,7 +565,10 @@
         "placeholder": "შინაგანი თვისებები და სტანდარტები, რომლებსაც დიდ წონას აძლევთ."
       }
     },
-    "askBloomprint": "ჰკითხეთ BloomPrint-ს"
+    "askBloomprint": "ჰკითხეთ BloomPrint-ს",
+    "emailNotifications": "ელფოსტის შეტყობინებები",
+    "emailNotificationsHint": "მიიღეთ წერილი, როცა ვინმე გაგიზიარებთ ანგარიშს, მოგიწვევთ ან უპასუხებს მოთხოვნას.",
+    "emailNotificationsLabel": "მომწერეთ აქტივობის შესახებ"
   },
   "onboarding": {
     "step": "ნაბიჯი {{current}} / {{total}}",

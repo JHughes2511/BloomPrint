@@ -130,19 +130,39 @@ def request_link(
     lr = models.LinkRequest(player_user_id=pu.id, player_id=player_id)
     db.add(lr)
     db.flush()
-    # Notify all coaches about the link request
-    coaches = db.query(models.Coach).all()
-    for coach in coaches:
-        notif = models.PlayerNotification(
-            coach_id=coach.id,
+    # The coaches this request concerns: whoever owns the roster row, plus the
+    # staff of that player's team. It used to be every coach in the database,
+    # so a request about one program's player reached every unrelated coach —
+    # noise in-app, and an unacceptable mailing once email rides these events.
+    coach_ids: list[int] = []
+    if player.coach_id:
+        coach_ids.append(player.coach_id)
+    if player.team_id:
+        team = db.get(models.Team, player.team_id)
+        if team:
+            coach_ids.append(team.coach_id)
+        coach_ids += [
+            ts.coach_id for ts in
+            db.query(models.TeamStaff).filter_by(team_id=player.team_id).all()
+        ]
+    # Dedupe while keeping order, so the roster owner is notified first and
+    # nobody is told twice for holding two roles on the same team.
+    seen: set[int] = set()
+    recipients = [c for c in coach_ids if not (c in seen or seen.add(c))]
+
+    for coach_id in recipients:
+        db.add(models.PlayerNotification(
+            coach_id=coach_id,
             type="link_requested",
             title="Player Link Request",
             body=f"{pu.name} is requesting to link to {player.name}'s profile.",
             i18n_key="notifs.linkRequest", i18n_params={"player": pu.name, "profile": player.name},
             ref_id=lr.id,
-        )
-        db.add(notif)
+        ))
     db.commit()
+    for coach_id in recipients:
+        notify.coach_event(db.get(models.Coach, coach_id), "player_link_request",
+                           {"player": pu.name, "profile": player.name})
     return {"ok": True}
 
 

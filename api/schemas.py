@@ -266,6 +266,7 @@ class PlayerUserCreate(BaseModel):
     password: str
     country: str | None = None
     city: str | None = None
+    preferred_language: str | None = None
 
 
 class PlayerUserOut(BaseModel):
@@ -288,6 +289,7 @@ class PlayerUserUpdate(BaseModel):
     avatar: str | None = None
     country: str | None = None
     city: str | None = None
+    preferred_language: str | None = None
 
 
 class PlayerGoogleAuth(BaseModel):
@@ -297,6 +299,7 @@ class PlayerGoogleAuth(BaseModel):
     name: str | None = None
     country: str | None = None
     city: str | None = None
+    preferred_language: str | None = None
 
 
 class PlayerToken(BaseModel):

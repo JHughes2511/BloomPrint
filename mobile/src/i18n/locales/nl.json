@@ -565,7 +565,10 @@
         "placeholder": "De onmeetbare kwaliteiten en normen die je zwaar laat wegen."
       }
     },
-    "askBloomprint": "Vraag BloomPrint"
+    "askBloomprint": "Vraag BloomPrint",
+    "emailNotifications": "E-mailmeldingen",
+    "emailNotificationsHint": "Ontvang een e-mail wanneer iemand een rapport deelt, je uitnodigt of op een verzoek reageert.",
+    "emailNotificationsLabel": "Mail me over activiteit"
   },
   "onboarding": {
     "step": "Stap {{current}} van {{total}}",

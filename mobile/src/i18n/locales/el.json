@@ -565,7 +565,10 @@
         "placeholder": "Τα άυλα στοιχεία και τα στάνταρ που βαραίνουν πολύ."
       }
     },
-    "askBloomprint": "Ρωτήστε το BloomPrint"
+    "askBloomprint": "Ρωτήστε το BloomPrint",
+    "emailNotifications": "Ειδοποιήσεις email",
+    "emailNotificationsHint": "Λάβε email όταν κάποιος μοιράζεται μια αναφορά, σε προσκαλεί ή απαντά σε αίτημα.",
+    "emailNotificationsLabel": "Στείλε μου email για δραστηριότητα"
   },
   "onboarding": {
     "step": "Βήμα {{current}} από {{total}}",

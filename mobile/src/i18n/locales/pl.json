@@ -565,7 +565,10 @@
         "placeholder": "Cechy niemierzalne i standardy, które mocno cenisz."
       }
     },
-    "askBloomprint": "Zapytaj BloomPrint"
+    "askBloomprint": "Zapytaj BloomPrint",
+    "emailNotifications": "Powiadomienia e-mail",
+    "emailNotificationsHint": "Otrzymuj e-mail, gdy ktoś udostępni raport, zaprosi Cię lub odpowie na prośbę.",
+    "emailNotificationsLabel": "Powiadamiaj mnie e-mailem"
   },
   "onboarding": {
     "step": "Krok {{current}} z {{total}}",

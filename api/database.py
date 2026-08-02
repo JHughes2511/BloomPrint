@@ -109,6 +109,7 @@ def init_db():
             "Add Alembic before making schema changes against this database.",
             engine.dialect.name,
         )
+        _add_missing_columns()
 
     # Backend-independent: operates on rows, not schema.
     _reparse_eval_sections()
@@ -188,6 +189,42 @@ def _reparse_eval_sections():
     except Exception:
         # A failed backfill must not stop the server booting.
         pass
+
+
+ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
+    # (table, column, SQL type + default)
+    ("player_users", "preferred_language", "VARCHAR DEFAULT 'en'"),
+]
+
+
+def _add_missing_columns():
+    """Add columns create_all() cannot, on backends that support IF NOT EXISTS.
+
+    Deliberately not a port of _run_migrations(). That function is twenty-six
+    PRAGMA calls in SQLite's dialect, and half-porting it would produce
+    something that looks portable and silently isn't. This is a short, explicit,
+    additive list: every statement is idempotent, so a redeploy is a no-op and
+    a fresh database created by create_all() already satisfies all of them.
+
+    Additive only. A column that needs backfilling, renaming or dropping is the
+    point at which this stops being enough and Alembic starts being the answer.
+    """
+    from sqlalchemy import text
+
+    if not ADDITIVE_COLUMNS:
+        return
+    with engine.connect() as conn:
+        for table, column, spec in ADDITIVE_COLUMNS:
+            try:
+                conn.execute(text(
+                    f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {spec}"
+                ))
+                conn.commit()
+            except Exception as exc:
+                # A backend without IF NOT EXISTS, or a table that does not
+                # exist yet. Neither is worth refusing to start over.
+                conn.rollback()
+                log.warning("Could not add %s.%s: %s", table, column, exc)
 
 
 def _run_migrations():

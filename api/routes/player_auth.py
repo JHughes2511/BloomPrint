@@ -64,6 +64,7 @@ def register(request: Request, body: schemas.PlayerUserCreate, db: Session = Dep
         password_hash=_hash_pw(body.password),
         country=body.country,
         city=body.city,
+        preferred_language=(body.preferred_language or "en"),
     )
     db.add(pu)
     db.commit()
@@ -121,6 +122,7 @@ def google_auth(request: Request, body: schemas.PlayerGoogleAuth, db: Session = 
         password_hash=random_unusable_password_hash(_hash_pw),
         country=body.country,
         city=body.city,
+        preferred_language=(body.preferred_language or "en"),
         google_sub=identity.sub or None,
     )
     db.add(pu)
@@ -163,6 +165,8 @@ def update_me(
         pu.country = data["country"] or None
     if "city" in data:
         pu.city = data["city"] or None
+    if data.get("preferred_language"):
+        pu.preferred_language = data["preferred_language"]
     db.commit()
     db.refresh(pu)
     return _player_user_out(pu)

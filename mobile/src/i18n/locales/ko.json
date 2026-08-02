@@ -565,7 +565,10 @@
         "placeholder": "크게 비중을 두는 무형의 자질과 기준."
       }
     },
-    "askBloomprint": "BloomPrint에 질문"
+    "askBloomprint": "BloomPrint에 질문",
+    "emailNotifications": "이메일 알림",
+    "emailNotificationsHint": "누군가 리포트를 공유하거나, 초대하거나, 요청에 답하면 이메일을 받습니다.",
+    "emailNotificationsLabel": "활동을 이메일로 알림"
   },
   "onboarding": {
     "step": "{{total}}단계 중 {{current}}단계",

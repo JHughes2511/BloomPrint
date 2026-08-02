@@ -565,7 +565,10 @@
         "placeholder": "الصفات المعنوية والمعايير التي تعطيها وزنًا كبيرًا."
       }
     },
-    "askBloomprint": "اسأل BloomPrint"
+    "askBloomprint": "اسأل BloomPrint",
+    "emailNotifications": "إشعارات البريد",
+    "emailNotificationsHint": "استلم بريدًا عندما يشارك أحدهم تقريرًا أو يدعوك أو يرد على طلب.",
+    "emailNotificationsLabel": "أرسل لي بريدًا عن النشاط"
   },
   "onboarding": {
     "step": "الخطوة {{current}} من {{total}}",

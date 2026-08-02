@@ -565,7 +565,10 @@
         "placeholder": "Neapčiuopiamos savybės ir standartai, kuriuos labai vertinate."
       }
     },
-    "askBloomprint": "Klauskite BloomPrint"
+    "askBloomprint": "Klauskite BloomPrint",
+    "emailNotifications": "El. pašto pranešimai",
+    "emailNotificationsHint": "Gaukite el. laišką, kai kas nors pasidalija ataskaita, pakviečia jus ar atsako į prašymą.",
+    "emailNotificationsLabel": "Siųsti el. laiškus apie veiklą"
   },
   "onboarding": {
     "step": "{{current}} žingsnis iš {{total}}",

@@ -565,7 +565,10 @@
         "placeholder": "Нематериальные качества и стандарты, которым вы придаёте большой вес."
       }
     },
-    "askBloomprint": "Спросить BloomPrint"
+    "askBloomprint": "Спросить BloomPrint",
+    "emailNotifications": "Уведомления по почте",
+    "emailNotificationsHint": "Получать письмо, когда кто-то делится отчётом, приглашает вас или отвечает на запрос.",
+    "emailNotificationsLabel": "Присылать письма об активности"
   },
   "onboarding": {
     "step": "Шаг {{current}} из {{total}}",

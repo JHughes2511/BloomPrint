@@ -565,7 +565,10 @@
         "placeholder": "あなたが重く見る無形の要素や基準。"
       }
     },
-    "askBloomprint": "BloomPrint に質問"
+    "askBloomprint": "BloomPrint に質問",
+    "emailNotifications": "メール通知",
+    "emailNotificationsHint": "レポートの共有、招待、リクエストへの返答があったときにメールを受け取ります。",
+    "emailNotificationsLabel": "アクティビティをメールで知らせる"
   },
   "onboarding": {
     "step": "ステップ {{current}}／{{total}}",

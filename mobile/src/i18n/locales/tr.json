@@ -565,7 +565,10 @@
         "placeholder": "Ağırlıklı olarak önem verdiğiniz soyut nitelikler ve standartlar."
       }
     },
-    "askBloomprint": "BloomPrint'e sor"
+    "askBloomprint": "BloomPrint'e sor",
+    "emailNotifications": "E-posta bildirimleri",
+    "emailNotificationsHint": "Biri rapor paylaştığında, sizi davet ettiğinde veya bir isteği yanıtladığında e-posta alın.",
+    "emailNotificationsLabel": "Etkinlik için e-posta gönder"
   },
   "onboarding": {
     "step": "Adım {{current}} / {{total}}",

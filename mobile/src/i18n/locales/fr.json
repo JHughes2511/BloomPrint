@@ -565,7 +565,10 @@
         "placeholder": "Les intangibles et les standards auxquels vous accordez un poids important."
       }
     },
-    "askBloomprint": "Demander à BloomPrint"
+    "askBloomprint": "Demander à BloomPrint",
+    "emailNotifications": "Notifications par e-mail",
+    "emailNotificationsHint": "Recevez un e-mail quand quelqu'un partage un rapport, vous invite ou répond à une demande.",
+    "emailNotificationsLabel": "M'avertir par e-mail"
   },
   "onboarding": {
     "step": "Étape {{current}} sur {{total}}",

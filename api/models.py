@@ -246,6 +246,11 @@ class PlayerUser(Base):
     country       = Column(String, nullable=True) # account location
     city          = Column(String, nullable=True)
     google_sub    = Column(String, nullable=True)  # Google account id (Sign-In)
+    # Same contract as Coach.preferred_language: the app and any mail we send
+    # follow it. The picker existed on the player's login and link screens long
+    # before this column, so the choice was device-local and forgotten on the
+    # next sign-in.
+    preferred_language = Column(String, default="en")
     created_at    = Column(DateTime, default=datetime.utcnow)
 
     player        = relationship("Player", back_populates="player_user")

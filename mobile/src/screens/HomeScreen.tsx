@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, Switch } from 'react-native';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useAuth } from '../context/AuthContext';
-import { playerAPI, feedbackAPI } from '../api/client';
+import { playerAPI, feedbackAPI, authAPI } from '../api/client';
 // Read straight from app.json rather than pulling in expo-application just to
 // stamp a version on a feedback row.
 const APP_VERSION: string | undefined = require('../../app.json')?.expo?.version;
@@ -94,6 +94,9 @@ export default function HomeScreen() {
   const [pCountry, setPCountry] = useState('');
   const [pCity, setPCity] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
+  // Activity email on/off. Lives outside the profile record, so it is read
+  // and written on its own rather than with the Save button.
+  const [emailOptIn, setEmailOptIn] = useState(true);
 
   // System & philosophy profile
   const [showSystem, setShowSystem] = useState(false);
@@ -151,6 +154,12 @@ export default function HomeScreen() {
   };
 
   const openProfile = () => {
+    // Read the current setting each time the sheet opens: it can also be
+    // changed from the unsubscribe link in an email, so cached state here
+    // would show a stale switch.
+    authAPI.getEmailPrefs()
+      .then(r => setEmailOptIn(r.email_enabled !== false))
+      .catch(() => {});
     setPName(coach?.name ?? '');
     setPEmail(coach?.email ?? '');
     setPProgram(coach?.program_name ?? '');
@@ -422,6 +431,27 @@ export default function HomeScreen() {
             </Text>
             <View style={{ alignItems: 'flex-start' }}>
               <LanguagePicker onChanged={(code) => { updateProfile({ preferred_language: code } as any).catch(() => {}); }} />
+            </View>
+
+            <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>{tr('home.emailNotifications')}</Text>
+            <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 8 }}>
+              {tr('home.emailNotificationsHint')}
+            </Text>
+            {/* Saved on toggle rather than with the rest of the form: this one
+                lives outside the profile record, and someone switching it off
+                should not have to find a Save button to be left alone. */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.card, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: t.line }}>
+              <Text style={{ color: t.ink, fontSize: 15, flexShrink: 1, marginRight: 12 }}>
+                {tr('home.emailNotificationsLabel')}
+              </Text>
+              <Switch
+                value={emailOptIn}
+                onValueChange={(v) => {
+                  setEmailOptIn(v);   // optimistic: the switch should not lag the finger
+                  authAPI.setEmailPrefs(v).catch(() => setEmailOptIn(!v));
+                }}
+                trackColor={{ false: t.line, true: t.accent }}
+              />
             </View>
 
             <Text style={[typeScale.label, { color: t.label, marginBottom: 8, marginTop: 16 }]}>{tr('home.programOrganization')}</Text>

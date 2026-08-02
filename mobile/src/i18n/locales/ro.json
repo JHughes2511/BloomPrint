@@ -565,7 +565,10 @@
         "placeholder": "Calitățile intangibile și standardele pe care le apreciezi mult."
       }
     },
-    "askBloomprint": "Întreabă BloomPrint"
+    "askBloomprint": "Întreabă BloomPrint",
+    "emailNotifications": "Notificări prin email",
+    "emailNotificationsHint": "Primește un email când cineva partajează un raport, te invită sau răspunde unei cereri.",
+    "emailNotificationsLabel": "Trimite-mi email despre activitate"
   },
   "onboarding": {
     "step": "Pasul {{current}} din {{total}}",

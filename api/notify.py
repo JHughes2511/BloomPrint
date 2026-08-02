@@ -107,12 +107,7 @@ def coach_event(coach: "models.Coach | None", event: str,
 
 def player_event(user: "models.PlayerUser | None", event: str,
                  params: dict | None = None, *, link: str | None = None) -> None:
-    """send_event for a player account.
-
-    PlayerUser has no language column, so these render in English until it does
-    — better than not sending, and falling back is already the documented
-    behaviour for an unknown language.
-    """
+    """send_event for a player account, in the player's own language."""
     if user is None:
         return
     p = dict(params or {})
@@ -120,3 +115,29 @@ def player_event(user: "models.PlayerUser | None", event: str,
     send_event(PLAYER, user.id, event, to=user.email,
                lang=getattr(user, "preferred_language", None),
                params=p, link=link)
+
+
+def is_opted_out(audience: str, user_id: int) -> bool:
+    """Whether this account has activity email switched off."""
+    return _preference(audience, user_id)[1]
+
+
+def set_opted_out(audience: str, user_id: int, value: bool) -> bool:
+    """Switch activity email on or off. Returns the stored value.
+
+    Creates the row if this account has never been emailed, so the setting can
+    be turned off before the first message rather than only after one arrives.
+    """
+    _preference(audience, user_id)  # ensure the row and token exist
+    db = SessionLocal()
+    try:
+        pref = (
+            db.query(models.EmailPreference)
+            .filter_by(audience=audience, user_id=user_id)
+            .one()
+        )
+        pref.opted_out = bool(value)
+        db.commit()
+        return bool(pref.opted_out)
+    finally:
+        db.close()
