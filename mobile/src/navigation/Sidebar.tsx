@@ -21,7 +21,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, ScrollView, TextInput, Modal } from 'react-native';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { useFocusEffect } from '@react-navigation/native';
+import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeProvider';
@@ -234,9 +234,25 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
 
           const onPress = () => {
             const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-            // A tab may cancel its own press (to scroll to top, say); navigating
+            // A tab may cancel its own press (to scroll to top, say); acting
             // anyway would override that.
-            if (!tabFocused && !event.defaultPrevented) navigation.navigate(route.name, route.params);
+            if (event.defaultPrevented) return;
+
+            // Popping to the top is done here rather than left to the screen's
+            // own tabPress listener. That listener reads state through the
+            // screen it is attached to, and a tab screen does not re-render
+            // when the stack nested inside it changes — so from Staff Hub > a
+            // team, pressing Home could find a stale depth of zero, decline to
+            // pop, and do nothing at all. The tab bar re-renders on every
+            // navigation change, so the route object here is always current.
+            const nested: any = (route as any).state;
+            if (tabFocused) {
+              if (nested?.key && (nested.index ?? 0) > 0) {
+                navigation.dispatch({ ...StackActions.popToTop(), target: nested.key });
+              }
+              return;
+            }
+            navigation.navigate(route.name, route.params);
           };
 
           const color = focused ? t.accent : t.muted2;
