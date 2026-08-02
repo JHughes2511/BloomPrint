@@ -21,6 +21,16 @@ DB_PATH = os.environ.get("BLOOMPRINT_DB", "bloomprint.db")
 DATABASE_URL = os.environ.get("DATABASE_URL") or f"sqlite:///{DB_PATH}"
 
 
+def _through_a_transaction_pooler(url: str) -> bool:
+    """Is this URL pointed at PgBouncer (or similar) in transaction mode?
+
+    Neon spells it with a -pooler suffix on the host; Supabase and a bare
+    PgBouncer are matched too. A false negative here costs nothing — it is the
+    behaviour this project had all along — so the test errs toward matching.
+    """
+    return "-pooler." in url or "pgbouncer" in url
+
+
 def _engine_kwargs(url: str) -> dict:
     if url.startswith("sqlite"):
         # SQLite ties a connection to the thread that opened it; FastAPI runs
@@ -29,7 +39,24 @@ def _engine_kwargs(url: str) -> dict:
     # Networked databases drop idle connections, and a pooled-but-dead one
     # surfaces as a random query failure. pre_ping trades a cheap round trip
     # for not serving errors after a restart or an idle period.
-    return {"pool_pre_ping": True, "pool_recycle": 1800}
+    kwargs: dict = {"pool_pre_ping": True, "pool_recycle": 1800}
+
+    if _through_a_transaction_pooler(url):
+        # psycopg promotes a statement to a server-side PREPARE once it has run
+        # a few times. A server-side prepare belongs to a backend connection —
+        # but a transaction pooler hands the next transaction whichever backend
+        # is free, so the prepared name is either missing or belongs to someone
+        # else. The result is "prepared statement _pg3_0 already exists", and
+        # the shape of the bug is what makes it worth pre-empting: nothing is
+        # wrong at startup or in testing, because the threshold hasn't been
+        # crossed yet. It appears once a query gets popular, intermittently,
+        # under load, reading as a database outage rather than a config choice.
+        #
+        # None disables the promotion. The cost is re-planning a query the
+        # server could have cached; the benefit is that both endpoints work.
+        kwargs["connect_args"] = {"prepare_threshold": None}
+
+    return kwargs
 
 
 # Heroku and some others still hand out the legacy postgres:// scheme, which
