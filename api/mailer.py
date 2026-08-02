@@ -64,6 +64,12 @@ def _send_resend(to: str, subject: str, text: str, html: str | None,
         headers={
             "Authorization": f"Bearer {os.environ['RESEND_API_KEY']}",
             "Content-Type": "application/json",
+            # Resend's API sits behind Cloudflare, which rejects urllib's
+            # default "Python-urllib/3.x" signature with a 403 whose body is
+            # "error code: 1010" — before the key is ever looked at. Naming
+            # ourselves gets the request through to the API that can answer it.
+            "User-Agent": "BloomPrint/1.0 (+https://bloomprint.org)",
+            "Accept": "application/json",
         },
         method="POST",
     )
