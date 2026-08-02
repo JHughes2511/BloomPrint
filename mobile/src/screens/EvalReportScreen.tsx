@@ -1141,7 +1141,7 @@ export default function EvalReportScreen() {
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: topPad(56) },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, paddingTop: topPad(56) },
   playerNameRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     marginHorizontal: 20, marginBottom: 12, backgroundColor: t.card,

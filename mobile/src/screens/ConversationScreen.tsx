@@ -371,7 +371,10 @@ export default function ConversationScreen() {
 }
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingTop: topPad(56), paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: t.divider },
+  // Aligned with the other detail headers on inset, gap and top. The compact
+  // bottom and the divider stay: this is a chat toolbar with a message list
+  // under it, not a page heading with content below.
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingTop: topPad(56), paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: t.divider },
   title: { color: t.ink, fontSize: 18, fontFamily: fonts[800], flex: 1, flexShrink: 1, minWidth: 0 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   empty: { color: t.muted2, fontSize: 13, textAlign: 'center', marginVertical: 20 },

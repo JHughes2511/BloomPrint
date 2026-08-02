@@ -257,7 +257,7 @@ const makeMarkdownStyles = (t: ThemeTokens) => ({
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: topPad(56) },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, paddingTop: topPad(56) },
   title: { color: t.ink, fontSize: 16, fontFamily: fonts[900], flexShrink: 1 },
   sub: { color: t.muted, fontSize: 11, marginTop: 2, flexShrink: 1 },
   messageBox: {

@@ -104,7 +104,7 @@ const makeMarkdownStyles = (t: ThemeTokens) => ({
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
-  header: { flexDirection: 'row', alignItems: 'flex-start', padding: 20, paddingTop: topPad(56), gap: 12 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, paddingTop: topPad(56) },
   backBtn: { flexShrink: 0 },
   title: { color: t.ink, fontSize: 18, fontFamily: fonts[900], flex: 1, flexShrink: 1, minWidth: 0 },
   reportBox: { backgroundColor: t.card, margin: 16, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: t.cardBorder },

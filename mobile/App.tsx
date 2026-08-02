@@ -180,6 +180,36 @@ function RecentStack() {
   );
 }
 
+/**
+ * The first screen of each tab's stack.
+ *
+ * Pressing the tab you are already on should return you to the top of it —
+ * tapping Roster from a player profile means "show me the roster". React
+ * Navigation does not do this on its own: both tab bars guard their navigate
+ * call with `!isFocused`, so re-pressing the active tab did nothing at all.
+ */
+const TAB_ROOT: Record<string, string> = {
+  HomeTab: 'Home',
+  TeamTab: 'Team',
+  TeamEvalTab: 'TeamEval',
+  RosterTab: 'Roster',
+  RecentTab: 'Recent',
+  PlayerHomeTab: 'PlayerHome',
+  InboxTab: 'PlayerInbox',
+  TrainingTab: 'PlayerTraining',
+  PlayerNotifsTab: 'PlayerNotifications',
+};
+
+/** Re-pressing the active tab pops its stack back to that tab's first screen. */
+const backToTabRoot = ({ navigation, route }: any) => ({
+  tabPress: () => {
+    const root = TAB_ROOT[route.name];
+    // Navigating to a screen already in the stack pops back to it rather than
+    // pushing a second copy, so this is a return rather than a new screen.
+    if (root && navigation.isFocused()) navigation.navigate(route.name, { screen: root });
+  },
+});
+
 function AppTabs() {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
@@ -193,6 +223,7 @@ function AppTabs() {
       // Left rail once there's room, the stock bottom bar otherwise. The custom
       // bar owns its own width and active styling; see src/navigation/Sidebar.tsx.
       tabBar={(props) => (isDesktop ? <Sidebar {...props} /> : <BottomTabBar {...props} />)}
+      screenListeners={backToTabRoot}
       screenOptions={({ route }) => ({
         headerShown: false,
         // Lays the navigator out as a row so the rail sits beside the content.
@@ -314,6 +345,7 @@ function PlayerTabs() {
   const { t: tr } = useTranslation();
   return (
     <Tab.Navigator
+      screenListeners={backToTabRoot}
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: { backgroundColor: t.isDark ? '#0C2331' : '#EFE7DA', borderTopColor: t.divider },

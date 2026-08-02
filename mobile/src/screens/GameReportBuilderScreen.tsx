@@ -1055,7 +1055,7 @@ export default function GameReportBuilderScreen() {
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, padding: 20 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', paddingTop: topPad(48), marginBottom: 24, gap: 12 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, paddingTop: topPad(56) },
   titleInput: { flex: 1, color: t.ink, fontSize: 18, fontFamily: fonts[800], borderBottomWidth: 1, borderBottomColor: t.line, paddingBottom: 4 },
   headerTitle: { flex: 1, color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   nameInput: { backgroundColor: t.card, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, color: t.ink, fontSize: 16, fontFamily: fonts[700], borderWidth: 1.5, borderColor: t.line, marginBottom: 4 },

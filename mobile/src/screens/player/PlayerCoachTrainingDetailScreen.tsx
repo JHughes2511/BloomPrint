@@ -433,7 +433,7 @@ const makeMarkdownStyles = (t: ThemeTokens) => ({
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: topPad(56) },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, paddingTop: topPad(56) },
   title: { color: t.ink, fontSize: 16, fontFamily: fonts[900], flexShrink: 1, minWidth: 0 },
   sub: { color: t.muted2, fontSize: 11, marginTop: 2, flexShrink: 1 },
   coachTag: { backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 2, flexShrink: 1, maxWidth: 120 },
