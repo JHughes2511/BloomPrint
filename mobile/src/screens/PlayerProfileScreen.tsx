@@ -24,7 +24,7 @@ import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
-import { topPad, titleTopPad } from '../responsive/screenPadding';
+import { topPad } from '../responsive/screenPadding';
 import { useBreakpoint } from '../responsive/useBreakpoint';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -572,15 +572,13 @@ export default function PlayerProfileScreen() {
     <KeyboardAwareScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}
       refreshControl={<RefreshControl refreshing={refreshingProfile} onRefresh={onRefreshProfile} tintColor={t.accent} />}>
       {/* Header */}
-      {/* Back on its own line, so the name starts where every other screen's
-          title starts. Beside the chevron it sat ~40px further right, and this
-          screen read as indented next to Roster and Team Grade. */}
-      <View style={styles.headerTop}>
-        <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={8}>
+      {/* Same shape as the notifications header: chevron inline with the title,
+          one row. Back on its own line lined the name up with the tab screens
+          but cost a row of height and read as a gap rather than a heading. */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={8}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
-      </View>
-      <View style={styles.header}>
         <TouchableOpacity style={styles.headerCenter} onPress={() => setShowProfileDetail(true)} activeOpacity={0.75}>
           <Text style={styles.name}>{(player as any).jersey_number ? `#${(player as any).jersey_number} ` : ''}{player.name}</Text>
           <Text style={styles.meta}>{[player.position, player.team_name ?? player.competition_level].filter(Boolean).join(' · ')}</Text>
@@ -1761,10 +1759,10 @@ export default function PlayerProfileScreen() {
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  // 16 across and no top inset of its own — headerTop above already holds the
-  // screen off the top, matching the tab screens.
-  headerTop: { paddingHorizontal: 16, paddingTop: titleTopPad(56), paddingBottom: 4 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
+  // Matched to CoachNotificationsScreen's header, which is the reference for
+  // every screen you arrive at from somewhere else.
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, paddingTop: topPad(56) },
+  backBtn: { flexShrink: 0 },
   headerCenter: { flex: 1 },
   name: { color: t.ink, fontSize: 22, fontFamily: fonts[900] },
   meta: { color: t.muted, fontSize: 12, marginTop: 2 },
