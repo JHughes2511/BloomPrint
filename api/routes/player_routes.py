@@ -291,6 +291,10 @@ def request_link_to_coach(
     )
     db.add(notif)
     db.commit()
+    # The other link-request route emails the coach; this one wrote the in-app
+    # notification and stopped, so a request raised by searching for a coach by
+    # name reached them only if they happened to open the app.
+    notify.coach_event(coach, "player_link_request", {"player": pu.name})
     return {"ok": True}
 
 

@@ -602,6 +602,11 @@ def invite_to_team(
             ref_id=inv.id,
         ))
         db.commit()
+        # An existing account gets the same message a stranger would, minus the
+        # signup code they don't need. Without this the only invite anyone was
+        # emailed about was one sent to an address with no account.
+        notify.coach_event(target, "staff_invite",
+                           {"inviter": coach.name, "team": team.name})
         return {"status": "invited", "name": target.name}
 
     if not email:

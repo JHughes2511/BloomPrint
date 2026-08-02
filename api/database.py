@@ -1119,3 +1119,19 @@ def _run_migrations():
                     conn.commit()
         except Exception:
             pass
+
+        # Everything in ADDITIVE_COLUMNS, applied the SQLite way.
+        #
+        # That list is what the server path uses; sharing it means a new column
+        # is declared once and lands on both backends, instead of a developer's
+        # existing bloomprint.db quietly missing a column the models select.
+        # SQLite has no ADD COLUMN IF NOT EXISTS, so existence is checked first.
+        try:
+            text = __import__("sqlalchemy").text
+            for table, column, spec in ADDITIVE_COLUMNS:
+                cols = [row[1] for row in conn.execute(text(f"PRAGMA table_info({table})"))]
+                if cols and column not in cols:
+                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {spec}"))
+                    conn.commit()
+        except Exception as exc:
+            log.warning("Could not apply additive columns on SQLite: %s", exc)
