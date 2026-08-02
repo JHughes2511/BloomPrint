@@ -617,6 +617,10 @@ export default function RosterScreen() {
   );
 }
 
+// One height for every pill in the teams row, so an icon in one of them
+// cannot make it taller than the rest.
+const CHIP_H = 34;
+
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, paddingTop: titleTopPad(56) },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
@@ -636,13 +640,18 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   importRosterBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
   importRosterHint: { color: t.muted2, fontSize: 12, marginTop: 10 },
   teamsRow: { marginBottom: 16, flexGrow: 0 },
-  teamChip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 8 },
+  // Both pills state a height rather than deriving one from padding. The New
+  // Team pill carries an icon, and an icon glyph brings its own line box —
+  // taller than the text's, so it drove the row height and the pill grew
+  // beside its neighbours despite identical padding. A stated height cannot
+  // be pushed around by what happens to be inside it.
+  teamChip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, height: CHIP_H, justifyContent: 'center' },
   teamChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   teamChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
   teamChipTextActive: { color: t.ctaText },
   // Sits directly beside teamChip in the same row, so it matches its padding;
   // at 14 it was 2px narrower than its neighbours for no reason.
-  newTeamChip: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: t.accent, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 8, borderStyle: 'dashed' },
+  newTeamChip: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, borderWidth: 1, borderColor: t.accent, borderRadius: 999, paddingHorizontal: 16, height: CHIP_H, borderStyle: 'dashed' },
   newTeamText: { color: t.accent, fontSize: 13, fontFamily: fonts[700] },
   card: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
