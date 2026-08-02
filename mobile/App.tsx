@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator, BottomTabBar } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, View, Text, PanResponder } from 'react-native';
+import { ActivityIndicator, View, Text, PanResponder, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { AuthProvider, useAuth } from './src/context/AuthContext';
@@ -18,6 +18,7 @@ import ErrorBoundary from './src/components/ErrorBoundary';
 import './src/web/webShims';
 import { useBreakpoint } from './src/responsive/useBreakpoint';
 import Sidebar from './src/navigation/Sidebar';
+import { linking } from './src/navigation/linking';
 import { TeamProvider } from './src/context/TeamContext';
 
 // 5 tabs at fontSize 9: translated labels (de/nl/el run 30-40% longer than the
@@ -365,7 +366,9 @@ function Root() {
   const loading = coachLoading || playerLoading;
 
   return (
-    <NavigationContainer>
+    // linking only on web: a phone app has no address bar, and the config
+    // would only add a way for a malformed deep link to land somewhere odd.
+    <NavigationContainer linking={Platform.OS === 'web' ? linking : undefined}>
       <StatusBar style="light" />
       {loading ? (
         <View style={{ flex: 1, backgroundColor: '#0a0a0a', alignItems: 'center', justifyContent: 'center' }}>
