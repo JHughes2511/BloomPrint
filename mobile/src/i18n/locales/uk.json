@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Ігрову сесію надіслано {{count}} члену персоналу.",
     "sharedGameMsg_plural": "Ігрову сесію надіслано {{count}} членам персоналу.",
     "couldNotShare": "Не вдалося поділитися",
-    "noStaffFound": "Персонал не знайдено."
+    "noStaffFound": "Персонал не знайдено.",
+    "gameView": "ПЕРЕГЛЯД ІГОР"
   },
   "whiteboard": {
     "title": "Тактична дошка",

@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Sesija utakmice podeljena sa {{count}} članom štaba.",
     "sharedGameMsg_plural": "Sesija utakmice podeljena sa {{count}} članova štaba.",
     "couldNotShare": "Nije moguće podeliti",
-    "noStaffFound": "Nije pronađen štab."
+    "noStaffFound": "Nije pronađen štab.",
+    "gameView": "PRIKAZ UTAKMICA"
   },
   "whiteboard": {
     "title": "Tabla",

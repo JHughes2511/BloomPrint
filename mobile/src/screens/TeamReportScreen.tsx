@@ -1363,7 +1363,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   chip: {
     borderWidth: 1, borderColor: t.line, borderRadius: 999,
-    paddingHorizontal: 16, height: 36, justifyContent: 'center', alignItems: 'center', marginRight: 8,
+    paddingHorizontal: 16, paddingVertical: 8, justifyContent: 'center', alignItems: 'center', marginRight: 8,
     flexShrink: 1, maxWidth: 220,
   },
   chipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },

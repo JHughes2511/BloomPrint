@@ -640,7 +640,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   teamChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   teamChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
   teamChipTextActive: { color: t.ctaText },
-  newTeamChip: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: t.accent, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8, borderStyle: 'dashed' },
+  // Sits directly beside teamChip in the same row, so it matches its padding;
+  // at 14 it was 2px narrower than its neighbours for no reason.
+  newTeamChip: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: t.accent, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 8, borderStyle: 'dashed' },
   newTeamText: { color: t.accent, fontSize: 13, fontFamily: fonts[700] },
   card: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

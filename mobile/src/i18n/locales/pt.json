@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Sessão de jogo compartilhada com {{count}} membro da comissão.",
     "sharedGameMsg_plural": "Sessão de jogo compartilhada com {{count}} membros da comissão.",
     "couldNotShare": "Não foi possível compartilhar",
-    "noStaffFound": "Nenhum membro da comissão encontrado."
+    "noStaffFound": "Nenhum membro da comissão encontrado.",
+    "gameView": "VISÃO DE JOGOS"
   },
   "whiteboard": {
     "title": "Quadro Tático",

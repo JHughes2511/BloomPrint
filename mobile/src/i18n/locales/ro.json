@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Sesiune de meci distribuită către {{count}} membru staff.",
     "sharedGameMsg_plural": "Sesiune de meci distribuită către {{count}} membri staff.",
     "couldNotShare": "Nu s-a putut distribui",
-    "noStaffFound": "Niciun membru staff găsit."
+    "noStaffFound": "Niciun membru staff găsit.",
+    "gameView": "VIZUALIZARE MECIURI"
   },
   "whiteboard": {
     "title": "Tablă tactică",

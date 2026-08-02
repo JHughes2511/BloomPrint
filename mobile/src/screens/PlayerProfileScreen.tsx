@@ -1799,7 +1799,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560)},
   modalTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 4 },
   modalSub: { color: t.muted, fontSize: 12, marginBottom: 16, lineHeight: 18 },
-  chip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 9, marginRight: 8 },
+  chip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 8, marginRight: 8 },
   chipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   chipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
   modalRow: { flexDirection: 'row', gap: 10, marginTop: 8 },

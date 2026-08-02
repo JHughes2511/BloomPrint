@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "تمت مشاركة جلسة المباراة مع {{count}} عضو في الطاقم.",
     "sharedGameMsg_plural": "تمت مشاركة جلسة المباراة مع {{count}} أعضاء في الطاقم.",
     "couldNotShare": "تعذّرت المشاركة",
-    "noStaffFound": "لم يُعثر على أي طاقم."
+    "noStaffFound": "لم يُعثر على أي طاقم.",
+    "gameView": "عرض المباريات"
   },
   "whiteboard": {
     "title": "السبورة",

@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Rungtynių sesija bendrinama su {{count}} personalo nariu.",
     "sharedGameMsg_plural": "Rungtynių sesija bendrinama su {{count}} personalo nariais.",
     "couldNotShare": "Nepavyko pasidalinti",
-    "noStaffFound": "Personalo nerasta."
+    "noStaffFound": "Personalo nerasta.",
+    "gameView": "RUNGTYNIŲ RODINYS"
   },
   "whiteboard": {
     "title": "Lenta",

@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "スタッフ{{count}}名に試合セッションを共有しました。",
     "sharedGameMsg_plural": "スタッフ{{count}}名に試合セッションを共有しました。",
     "couldNotShare": "共有できませんでした",
-    "noStaffFound": "スタッフが見つかりません。"
+    "noStaffFound": "スタッフが見つかりません。",
+    "gameView": "試合表示"
   },
   "whiteboard": {
     "title": "ホワイトボード",

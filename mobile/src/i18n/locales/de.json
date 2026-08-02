@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Spielsitzung mit {{count}} Staff-Mitglied geteilt.",
     "sharedGameMsg_plural": "Spielsitzung mit {{count}} Staff-Mitgliedern geteilt.",
     "couldNotShare": "Teilen nicht möglich",
-    "noStaffFound": "Kein Staff gefunden."
+    "noStaffFound": "Kein Staff gefunden.",
+    "gameView": "SPIELANSICHT"
   },
   "whiteboard": {
     "title": "Taktiktafel",

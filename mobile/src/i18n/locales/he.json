@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "מפגש המשחק שותף עם {{count}} איש צוות.",
     "sharedGameMsg_plural": "מפגש המשחק שותף עם {{count}} אנשי צוות.",
     "couldNotShare": "לא ניתן לשתף",
-    "noStaffFound": "לא נמצאו אנשי צוות."
+    "noStaffFound": "לא נמצאו אנשי צוות.",
+    "gameView": "תצוגת משחקים"
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

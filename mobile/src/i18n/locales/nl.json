@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Wedstrijdsessie gedeeld met {{count}} staflid.",
     "sharedGameMsg_plural": "Wedstrijdsessie gedeeld met {{count}} stafleden.",
     "couldNotShare": "Kon niet delen",
-    "noStaffFound": "Geen staf gevonden."
+    "noStaffFound": "Geen staf gevonden.",
+    "gameView": "WEDSTRIJDWEERGAVE"
   },
   "whiteboard": {
     "title": "Tactiekbord",

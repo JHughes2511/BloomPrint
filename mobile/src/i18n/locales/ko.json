@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "스태프 {{count}}명에게 경기 세션을 공유했습니다.",
     "sharedGameMsg_plural": "스태프 {{count}}명에게 경기 세션을 공유했습니다.",
     "couldNotShare": "공유할 수 없습니다",
-    "noStaffFound": "스태프를 찾을 수 없습니다."
+    "noStaffFound": "스태프를 찾을 수 없습니다.",
+    "gameView": "경기 보기"
   },
   "whiteboard": {
     "title": "작전판",

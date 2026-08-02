@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Sesję meczową udostępniono {{count}} członkowi sztabu.",
     "sharedGameMsg_plural": "Sesję meczową udostępniono {{count}} członkom sztabu.",
     "couldNotShare": "Nie udało się udostępnić",
-    "noStaffFound": "Nie znaleziono sztabu."
+    "noStaffFound": "Nie znaleziono sztabu.",
+    "gameView": "WIDOK MECZÓW"
   },
   "whiteboard": {
     "title": "Tablica",

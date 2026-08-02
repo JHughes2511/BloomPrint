@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Ο αγώνας κοινοποιήθηκε σε {{count}} μέλος επιτελείου.",
     "sharedGameMsg_plural": "Ο αγώνας κοινοποιήθηκε σε {{count}} μέλη επιτελείου.",
     "couldNotShare": "Δεν ήταν δυνατή η κοινοποίηση",
-    "noStaffFound": "Δεν βρέθηκε επιτελείο."
+    "noStaffFound": "Δεν βρέθηκε επιτελείο.",
+    "gameView": "ΠΡΟΒΟΛΗ ΑΓΩΝΩΝ"
   },
   "whiteboard": {
     "title": "Πίνακας",

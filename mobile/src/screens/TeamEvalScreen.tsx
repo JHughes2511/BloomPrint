@@ -1152,7 +1152,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           <View style={{ marginBottom: 16 }}>
             <Text style={[s.cardLabel, { marginBottom: 8 }]}>{tr('teamGrade.gradeView')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
+              {/* No gap here: s.chip carries marginRight: 8, and adding a gap
+                  put these chips 16 apart while every other row sat at 8. */}
+              <View style={{ flexDirection: 'row' }}>
                 {orderedPhases.map(phase => {
                   const selected = dashPhases.includes(phase);
                   return (
@@ -1290,8 +1292,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           contentContainerStyle={{ paddingBottom: 100 }}
           refreshControl={<RefreshControl refreshing={gamesRefreshing} onRefresh={async () => { setGamesRefreshing(true); await loadData(); setGamesRefreshing(false); }} tintColor={t.accent} />}
         >
-          {/* Phase filter */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16, ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
+          {/* Phase filter. Same shape as the dashboard's: a label, then the row.
+              Without the label the chips sat tight under the divider while the
+              dashboard's started lower, so switching tabs shifted everything. */}
+          <View style={{ marginBottom: 16 }}>
+          <Text style={[s.cardLabel, { marginBottom: 8 }]}>{tr('teamGrade.gameView')}</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
             {['all', ...orderedPhases].map(p => (
               <TouchableOpacity
                 key={p}
@@ -1304,6 +1310,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               </TouchableOpacity>
             ))}
           </ScrollView>
+          </View>
 
           {/* New game button */}
           <TouchableOpacity style={[s.newGameBtn, desktopOnly({ display: 'none' })]} onPress={() => setShowNewGame(true)}>

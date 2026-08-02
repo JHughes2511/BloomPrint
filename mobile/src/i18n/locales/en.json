@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Game session shared with {{count}} staff member.",
     "sharedGameMsg_plural": "Game session shared with {{count}} staff members.",
     "couldNotShare": "Could not share",
-    "noStaffFound": "No staff found."
+    "noStaffFound": "No staff found.",
+    "gameView": "GAME VIEW"
   },
   "whiteboard": {
     "title": "Whiteboard",

@@ -484,7 +484,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   filePickerText: { color: t.muted, fontSize: 14, flexShrink: 1 },
   chip: {
     borderWidth: 1, borderColor: t.line, borderRadius: 999,
-    paddingHorizontal: 16, paddingVertical: 9, marginRight: 8,
+    paddingHorizontal: 16, paddingVertical: 8, marginRight: 8,
     flexShrink: 1, maxWidth: 260,
   },
   chipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },

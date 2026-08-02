@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Session de match partagée avec {{count}} membre du staff.",
     "sharedGameMsg_plural": "Session de match partagée avec {{count}} membres du staff.",
     "couldNotShare": "Impossible de partager",
-    "noStaffFound": "Aucun membre du staff trouvé."
+    "noStaffFound": "Aucun membre du staff trouvé.",
+    "gameView": "VUE MATCHS"
   },
   "whiteboard": {
     "title": "Tableau blanc",

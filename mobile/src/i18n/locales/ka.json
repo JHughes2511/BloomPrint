@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "თამაშის სესია გაზიარდა {{count}} პერსონალის წევრთან.",
     "sharedGameMsg_plural": "თამაშის სესია გაზიარდა {{count}} პერსონალის წევრთან.",
     "couldNotShare": "გაზიარება ვერ მოხერხდა",
-    "noStaffFound": "პერსონალი ვერ მოიძებნა."
+    "noStaffFound": "პერსონალი ვერ მოიძებნა.",
+    "gameView": "თამაშების ხედი"
   },
   "whiteboard": {
     "title": "დაფა",

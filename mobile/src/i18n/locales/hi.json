@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "गेम सेशन {{count}} स्टाफ़ सदस्य के साथ साझा किया गया।",
     "sharedGameMsg_plural": "गेम सेशन {{count}} स्टाफ़ सदस्यों के साथ साझा किया गया।",
     "couldNotShare": "साझा नहीं हो सका",
-    "noStaffFound": "कोई स्टाफ़ नहीं मिला।"
+    "noStaffFound": "कोई स्टाफ़ नहीं मिला।",
+    "gameView": "गेम व्यू"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",

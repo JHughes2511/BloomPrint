@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Sesión de partido compartida con {{count}} miembro del cuerpo técnico.",
     "sharedGameMsg_plural": "Sesión de partido compartida con {{count}} miembros del cuerpo técnico.",
     "couldNotShare": "No se pudo compartir",
-    "noStaffFound": "No se encontró cuerpo técnico."
+    "noStaffFound": "No se encontró cuerpo técnico.",
+    "gameView": "VISTA DE PARTIDOS"
   },
   "whiteboard": {
     "title": "Pizarra",

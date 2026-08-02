@@ -1492,7 +1492,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   searchBarInput: { flex: 1, color: t.ink, fontSize: 15, paddingVertical: 0 },
   filterRow: { marginBottom: 12, flexGrow: 0, height: 52,
     ...desktopOnly({ height: undefined, paddingHorizontal: 16, paddingRight: 24, paddingBottom: 4 }) },
-  filterChip: { borderWidth: 1, borderColor: t.line, borderRadius: 18, paddingHorizontal: 14, justifyContent: 'center', alignItems: 'center', height: 34, flexShrink: 1, maxWidth: 180 },
+  // Same shape as every other chip: pill, 16 across, 8 down. This one was a
+  // squarer 18-radius box at 14/34, which read as a different control for the
+  // same kind of choice. flexShrink/maxWidth stay — these labels are the
+  // longest in the app and still have to survive a narrow window.
+  filterChip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 8, justifyContent: 'center', alignItems: 'center', flexShrink: 1, maxWidth: 180 },
   filterChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   filterChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600], flexShrink: 1 },
   filterChipTextActive: { color: t.ctaText },

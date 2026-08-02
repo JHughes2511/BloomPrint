@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Matchsession delad med {{count}} i staben.",
     "sharedGameMsg_plural": "Matchsession delad med {{count}} i staben.",
     "couldNotShare": "Kunde inte dela",
-    "noStaffFound": "Ingen personal hittad."
+    "noStaffFound": "Ingen personal hittad.",
+    "gameView": "MATCHVY"
   },
   "whiteboard": {
     "title": "Taktiktavla",

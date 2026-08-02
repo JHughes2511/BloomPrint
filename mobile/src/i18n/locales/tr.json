@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Maç oturumu {{count}} ekip üyesiyle paylaşıldı.",
     "sharedGameMsg_plural": "Maç oturumu {{count}} ekip üyesiyle paylaşıldı.",
     "couldNotShare": "Paylaşılamadı",
-    "noStaffFound": "Ekip üyesi bulunamadı."
+    "noStaffFound": "Ekip üyesi bulunamadı.",
+    "gameView": "MAÇ GÖRÜNÜMÜ"
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

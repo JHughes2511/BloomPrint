@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Utakmica podijeljena s {{count}} članom stožera.",
     "sharedGameMsg_plural": "Utakmica podijeljena s {{count}} članova stožera.",
     "couldNotShare": "Nije moguće podijeliti",
-    "noStaffFound": "Nije pronađen stožer."
+    "noStaffFound": "Nije pronađen stožer.",
+    "gameView": "PRIKAZ UTAKMICA"
   },
   "whiteboard": {
     "title": "Ploča",

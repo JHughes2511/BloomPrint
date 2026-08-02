@@ -444,7 +444,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   importBtnText: { color: t.accent, fontSize: 12, fontFamily: fonts[600] },
   typeChip: {
     borderWidth: 1, borderColor: t.line, borderRadius: 999,
-    paddingHorizontal: 16, paddingVertical: 9, marginRight: 8,
+    paddingHorizontal: 16, paddingVertical: 8, marginRight: 8,
   },
   typeChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   typeLabel: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },

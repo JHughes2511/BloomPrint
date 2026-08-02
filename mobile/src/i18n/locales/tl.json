@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Naibahagi ang game session sa {{count}} miyembro ng staff.",
     "sharedGameMsg_plural": "Naibahagi ang game session sa {{count}} miyembro ng staff.",
     "couldNotShare": "Hindi maibahagi",
-    "noStaffFound": "Walang nakitang staff."
+    "noStaffFound": "Walang nakitang staff.",
+    "gameView": "VIEW NG LARO"
   },
   "whiteboard": {
     "title": "Whiteboard",

@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "比赛记录已分享给 {{count}} 名工作人员。",
     "sharedGameMsg_plural": "比赛记录已分享给 {{count}} 名工作人员。",
     "couldNotShare": "无法分享",
-    "noStaffFound": "未找到工作人员。"
+    "noStaffFound": "未找到工作人员。",
+    "gameView": "比赛视图"
   },
   "whiteboard": {
     "title": "战术板",

@@ -2137,7 +2137,8 @@
     "sharedGameMsg": "Sessione di gioco condivisa con {{count}} membro dello staff.",
     "sharedGameMsg_plural": "Sessione di gioco condivisa con {{count}} membri dello staff.",
     "couldNotShare": "Impossibile condividere",
-    "noStaffFound": "Nessun membro dello staff trovato."
+    "noStaffFound": "Nessun membro dello staff trovato.",
+    "gameView": "VISTA PARTITE"
   },
   "whiteboard": {
     "title": "Lavagna",
