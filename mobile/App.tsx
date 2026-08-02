@@ -221,10 +221,19 @@ function RecentStack() {
 const backToTabRoot = ({ navigation, route }: any) => ({
   tabPress: () => {
     if (!navigation.isFocused()) return;
-    const stackKey = route?.state?.key;
-    const depth = route?.state?.index ?? 0;
-    if (stackKey && depth > 0) {
-      navigation.dispatch({ ...StackActions.popToTop(), target: stackKey });
+
+    // Read the nested stack out of the navigator's *current* state rather than
+    // out of the `route` this listener closed over. That route is a snapshot
+    // from when the listener was built, and a tab screen does not necessarily
+    // re-render when the stack inside it changes — so the snapshot could still
+    // say the stack was one screen deep, the guard below would decline to pop,
+    // and pressing the tab did nothing at all.
+    const tabState: any = navigation.getState?.();
+    const live = tabState?.routes?.find((r: any) => r.key === route.key) ?? route;
+    const nested = live?.state;
+
+    if (nested?.key && (nested.index ?? 0) > 0) {
+      navigation.dispatch({ ...StackActions.popToTop(), target: nested.key });
     }
   },
 });
