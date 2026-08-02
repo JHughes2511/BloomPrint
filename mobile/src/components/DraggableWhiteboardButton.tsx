@@ -75,6 +75,12 @@ export default function DraggableWhiteboardButton({ onPress }: Props) {
   const pan = useRef(new Animated.ValueXY(start)).current;
   const offset = useRef(start);
   const placed = useRef(false);
+  // The box the button is actually positioned inside. Measured, because on web
+  // it is NOT the window: screens sit in a width-capped container beside a
+  // sidebar. The drag is in this box's coordinates, so the release clamp has to
+  // be too — clamping against the window instead is what made the button spring
+  // back from an edge that was not the edge it was hitting.
+  const parentSize = useRef({ w: width, h: height });
 
   // Only the first measurement repositions it — after that the coach's own
   // dragged position wins, including across a window resize.
@@ -82,6 +88,7 @@ export default function DraggableWhiteboardButton({ onPress }: Props) {
     // Web only: the button is clipped there because screens sit in a
     // width-capped container. On a phone the window IS the parent, so the
     // original window-derived position is already correct.
+    if (w > 0 && h > 0) parentSize.current = { w, h };   // keeps up with resizes
     if (Platform.OS !== 'web') return;
     if (placed.current || w <= 0 || h <= 0) return;
     placed.current = true;
@@ -112,8 +119,9 @@ export default function DraggableWhiteboardButton({ onPress }: Props) {
         // Clamp inside the screen.
         let nx = offset.current.x + g.dx;
         let ny = offset.current.y + g.dy;
-        nx = Math.max(8, Math.min(nx, width - W - 8));
-        ny = Math.max(40, Math.min(ny, height - H - 40));
+        const { w: pw, h: ph } = parentSize.current;
+        nx = Math.max(8, Math.min(nx, pw - W - 8));
+        ny = Math.max(40, Math.min(ny, ph - H - 40));
         offset.current = { x: nx, y: ny };
         Animated.spring(pan, {
           toValue: { x: nx, y: ny },

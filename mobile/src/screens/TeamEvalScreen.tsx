@@ -2083,7 +2083,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
       {/* Opponent Scout */}
       {activeView === 'scout' && (
-        <KeyboardAwareScrollView ref={scoutScrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }}>
+        <KeyboardAwareScrollView ref={scoutScrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
           {/* Opponent selector */}
           {!scoutOpponent ? (
             <>
@@ -2242,15 +2242,15 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
       {/* Full Game Report — our team + opponent, with add-context (like Scout) */}
       {activeView === 'gamereport' && (
-        <KeyboardAwareScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }}>
+        <KeyboardAwareScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
           {!gameReportGame ? (
             <>
-              <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900], marginHorizontal: 16, marginBottom: 4 }}>{tr('reportTypes.game_report')}</Text>
-              <Text style={{ color: t.muted2, fontSize: 13, marginHorizontal: 16, marginBottom: 12 }}>
+              <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900], marginBottom: 4 }}>{tr('reportTypes.game_report')}</Text>
+              <Text style={{ color: t.muted2, fontSize: 13, marginBottom: 12 }}>
                 {tr('teamGrade.gameReportPickHint')}
               </Text>
               {sessions.length === 0 && (
-                <Text style={{ color: t.muted2, fontSize: 13, marginHorizontal: 16 }}>{tr('teamGrade.noGamesYet')}</Text>
+                <Text style={{ color: t.muted2, fontSize: 13 }}>{tr('teamGrade.noGamesYet')}</Text>
               )}
               <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap, paddingHorizontal: 16 })}
                     onLayout={reportGrid.onLayout}>
@@ -2280,17 +2280,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           ) : (
             <>
               <TouchableOpacity
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginHorizontal: 16, marginBottom: 8 }}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}
                 onPress={() => setGameReportGame(null)}
               >
                 <Ionicons name="arrow-back" size={18} color={t.muted} />
                 <Text style={{ color: t.muted, fontSize: 14 }}>{tr('teamGrade.allGames')}</Text>
               </TouchableOpacity>
 
-              <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900], marginHorizontal: 16, marginBottom: 2 }}>
+              <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900], marginBottom: 2 }}>
                 {tr('teamGrade.vsOpponent', { opponent: gameReportGame.opponent_name })}
               </Text>
-              <Text style={{ color: t.muted2, fontSize: 13, marginHorizontal: 16, marginBottom: 12 }}>
+              <Text style={{ color: t.muted2, fontSize: 13, marginBottom: 12 }}>
                 {gameReportGame.date ? new Date(gameReportGame.date).toLocaleDateString() : ''}
                 {gameReportGame.our_score != null ? `  ·  ${gameReportGame.our_score}-${gameReportGame.opponent_score}` : ''}
               </Text>
@@ -2337,7 +2337,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                       </View>
                     </>
                   ) : (
-                    <Text style={{ color: t.muted2, fontSize: 13, marginHorizontal: 16 }}>
+                    <Text style={{ color: t.muted2, fontSize: 13 }}>
                       {tr('teamGrade.noReportYet')}
                     </Text>
                   )}
