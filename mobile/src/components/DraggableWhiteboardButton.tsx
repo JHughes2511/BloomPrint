@@ -154,13 +154,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 100,
-    // The clipboard is a transparent SVG in a rectangular view. On web these
-    // shadow props become box-shadow, which follows the border-box rather than
-    // the artwork — so a rectangle was painted behind a clipboard-shaped
-    // drawing, reading as a card the button was sitting on. drop-shadow follows
-    // the alpha channel, so the shadow is clipboard-shaped too.
+    // The clipboard is a transparent SVG in a rectangular view, so on web the
+    // shadow props become a box-shadow that follows the border-box rather than
+    // the artwork — a rectangle painted behind a clipboard-shaped drawing.
+    //
+    // drop-shadow would follow the alpha channel and was tried here, but this
+    // view is dragged by an animated transform, and the filter re-rasterised
+    // every frame and smeared a trail across the screen. A button you drag
+    // cannot carry a filter. No shadow on web is the honest trade: the icon
+    // reads fine without one, and nothing is painted that shouldn't be.
     ...Platform.select({
-      web: { filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.3))' } as any,
+      web: {},
       default: {
         shadowColor: '#000',
         shadowOpacity: 0.3,
