@@ -1448,6 +1448,28 @@
     "claimMsg": "Der Eigentümer von {{team}} hat kein Konto mehr. Möchtest du das Team übernehmen?",
     "claimConfirm": "Übernehmen"
   },
+  "teamDetail": {
+    "title": "Team",
+    "staffLabel": "Staff",
+    "subteamsLabel": "Unterteams",
+    "viewProfile": "Profil ansehen",
+    "messageMember": "Nachricht",
+    "addToSubteam": "Zu einem Unterteam hinzufügen",
+    "addToWhich": "{{name}} hinzufügen zu",
+    "addedTitle": "Hinzugefügt",
+    "addedMsg": "{{name}} ist jetzt bei {{team}}.",
+    "addError": "Konnte nicht zu diesem Team hinzugefügt werden.",
+    "remove": "Entfernen",
+    "removeTitle": "Aus dem Team entfernen",
+    "removeMsg": "{{name}} aus {{team}} entfernen?",
+    "removeError": "Konnte nicht entfernt werden.",
+    "roleLabel": "Rolle",
+    "programLabel": "Programm",
+    "conferenceLabel": "Conference",
+    "levelLabel": "Niveau",
+    "locationLabel": "Ort",
+    "sharedTeamsLabel": "Gemeinsame Teams"
+  },
   "conversation": {
     "title": "Unterhaltung",
     "sendError": "Senden nicht möglich.",

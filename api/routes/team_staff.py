@@ -422,6 +422,141 @@ def list_members(
     return [{"id": c.id, "name": c.name, "role": c.role, "is_owner": c.id == team.coach_id} for c in coaches]
 
 
+def _teams_of(db: Session, coach_id: int) -> set[int]:
+    owned = {t.id for t in db.query(models.Team).filter_by(coach_id=coach_id).all()}
+    joined = {l.team_id for l in db.query(models.TeamStaff).filter_by(coach_id=coach_id).all()}
+    return owned | joined
+
+
+@router.get("/coach/{coach_id}")
+def coach_profile(
+    coach_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """A staff member's card, readable by anyone who shares a team with them.
+
+    Deliberately not the whole Coach row: this is the person standing next to
+    you on a team sheet, not their account.
+    """
+    target = db.get(models.Coach, coach_id)
+    if not target:
+        raise HTTPException(status_code=404, detail="Coach not found")
+
+    shared_ids = _teams_of(db, coach.id) & _teams_of(db, coach_id)
+    if coach_id != coach.id and not shared_ids:
+        raise HTTPException(status_code=403, detail="You don't share a team with this coach.")
+
+    shared = db.query(models.Team).filter(models.Team.id.in_(shared_ids)).all() if shared_ids else []
+    return {
+        "id": target.id,
+        "name": target.name,
+        "role": target.role,
+        "program_name": target.program_name,
+        "conference": target.conference,
+        "competition_level": target.competition_level,
+        "country": target.country,
+        "city": target.city,
+        "shared_teams": [{"id": t.id, "name": t.name} for t in shared],
+    }
+
+
+def _ancestors(db: Session, team) -> list[int]:
+    """This team's id plus every team above it."""
+    ids, cur, guard = [team.id], team, 0
+    while cur is not None and cur.parent_team_id and guard < 20:
+        cur = db.get(models.Team, cur.parent_team_id)
+        if cur is None:
+            break
+        ids.append(cur.id)
+        guard += 1
+    return ids
+
+
+@router.post("/{team_id}/members/{coach_id}")
+def add_member(
+    team_id: int,
+    coach_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Put an existing staff member of a parent team straight onto a sub-team.
+
+    Not an invite: they are already approved staff on the program above, and
+    making them accept a second time to be moved between that program's own
+    sub-teams would be asking permission they have already given.
+    """
+    team = db.get(models.Team, team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    if not _can_manage(db, team_id, coach.id):
+        raise HTTPException(status_code=403, detail="Only the team owner or its staff can add members.")
+
+    target = db.get(models.Coach, coach_id)
+    if not target:
+        raise HTTPException(status_code=404, detail="Coach not found")
+    if target.id == team.coach_id:
+        raise HTTPException(status_code=400, detail=f"{target.name} owns this team.")
+    if db.query(models.TeamStaff).filter_by(team_id=team_id, coach_id=coach_id).first():
+        raise HTTPException(status_code=400, detail=f"{target.name} is already on this team.")
+
+    # They must already belong somewhere in this branch of the tree. Otherwise
+    # this would be a way to add any coach in the app to a team without asking.
+    lineage = _ancestors(db, team)
+    known = (
+        db.query(models.Team).filter(models.Team.id.in_(lineage), models.Team.coach_id == coach_id).first()
+        or db.query(models.TeamStaff)
+        .filter(models.TeamStaff.team_id.in_(lineage), models.TeamStaff.coach_id == coach_id)
+        .first()
+    )
+    if not known:
+        raise HTTPException(status_code=403, detail="Invite them to the program first.")
+
+    db.add(models.TeamStaff(team_id=team_id, coach_id=coach_id))
+    db.add(models.CoachNotification(
+        coach_id=coach_id,
+        title=f"Added to {team.name}",
+        body=f"{coach.name} added you to {team.name}.",
+        i18n_key="notifs.teamMemberAdded",
+        i18n_params={"coach": coach.name, "team": team.name},
+        type="team_member_added",
+    ))
+    db.commit()
+    return {"ok": True, "team_id": team_id, "coach_id": coach_id}
+
+
+@router.delete("/{team_id}/members/{coach_id}")
+def remove_member(
+    team_id: int,
+    coach_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Take a staff member off a team. Owner only — the mirror of them leaving."""
+    team = db.get(models.Team, team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    if team.coach_id != coach.id:
+        raise HTTPException(status_code=403, detail="Only the team owner can remove staff.")
+    if coach_id == team.coach_id:
+        raise HTTPException(status_code=400, detail="Transfer the team before removing its owner.")
+
+    link = db.query(models.TeamStaff).filter_by(team_id=team_id, coach_id=coach_id).first()
+    if not link:
+        raise HTTPException(status_code=404, detail="Not a member of this team")
+    db.delete(link)
+    db.add(models.CoachNotification(
+        coach_id=coach_id,
+        title=f"Removed from {team.name}",
+        body=f"You were removed from {team.name}.",
+        i18n_key="notifs.teamMemberRemoved",
+        i18n_params={"team": team.name},
+        type="team_member_removed",
+    ))
+    db.commit()
+    return {"ok": True}
+
+
 @router.post("/{team_id}/invite")
 def invite_to_team(
     team_id: int,

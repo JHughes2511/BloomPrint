@@ -618,6 +618,14 @@ export const teamStaffAPI = {
     api.get(`/team-staff/${teamId}/subteams`).then(r => r.data),
   members: (teamId: number) =>
     api.get(`/team-staff/${teamId}/members`).then(r => r.data),
+  // Straight onto a sub-team: they are already staff on the program above, so
+  // there is nothing left for them to accept.
+  addMember: (teamId: number, coachId: number) =>
+    api.post(`/team-staff/${teamId}/members/${coachId}`).then(r => r.data),
+  removeMember: (teamId: number, coachId: number) =>
+    api.delete(`/team-staff/${teamId}/members/${coachId}`).then(r => r.data),
+  coachProfile: (coachId: number) =>
+    api.get(`/team-staff/coach/${coachId}`).then(r => r.data),
   invite: (teamId: number, data: { coach_id?: number; email?: string }) =>
     api.post(`/team-staff/${teamId}/invite`, data).then(r => r.data),
   invites: () => api.get('/team-staff/invites').then(r => r.data),

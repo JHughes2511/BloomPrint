@@ -1448,6 +1448,28 @@
     "claimMsg": "لم يعد لمالك فريق {{team}} حساب. هل تريد أن تصبح المالك؟",
     "claimConfirm": "المطالبة"
   },
+  "teamDetail": {
+    "title": "الفريق",
+    "staffLabel": "الطاقم",
+    "subteamsLabel": "الفرق الفرعية",
+    "viewProfile": "عرض الملف",
+    "messageMember": "رسالة",
+    "addToSubteam": "إضافة إلى فريق فرعي",
+    "addToWhich": "إضافة {{name}} إلى",
+    "addedTitle": "تمت الإضافة",
+    "addedMsg": "{{name}} أصبح الآن في {{team}}.",
+    "addError": "تعذّرت الإضافة إلى ذلك الفريق.",
+    "remove": "إزالة",
+    "removeTitle": "إزالة من الفريق",
+    "removeMsg": "إزالة {{name}} من {{team}}؟",
+    "removeError": "تعذّرت الإزالة.",
+    "roleLabel": "الدور",
+    "programLabel": "البرنامج",
+    "conferenceLabel": "الدوري",
+    "levelLabel": "المستوى",
+    "locationLabel": "الموقع",
+    "sharedTeamsLabel": "الفرق المشتركة"
+  },
   "conversation": {
     "title": "محادثة",
     "sendError": "تعذّر الإرسال.",

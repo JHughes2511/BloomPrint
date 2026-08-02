@@ -1448,6 +1448,28 @@
     "claimMsg": "У владельца команды {{team}} больше нет аккаунта. Стать владельцем?",
     "claimConfirm": "Принять"
   },
+  "teamDetail": {
+    "title": "Команда",
+    "staffLabel": "Персонал",
+    "subteamsLabel": "Подкоманды",
+    "viewProfile": "Открыть профиль",
+    "messageMember": "Написать",
+    "addToSubteam": "Добавить в подкоманду",
+    "addToWhich": "Добавить {{name}} в",
+    "addedTitle": "Добавлено",
+    "addedMsg": "{{name}} теперь в {{team}}.",
+    "addError": "Не удалось добавить в эту команду.",
+    "remove": "Удалить",
+    "removeTitle": "Удалить из команды",
+    "removeMsg": "Убрать {{name}} из {{team}}?",
+    "removeError": "Не удалось удалить.",
+    "roleLabel": "Роль",
+    "programLabel": "Программа",
+    "conferenceLabel": "Конференция",
+    "levelLabel": "Уровень",
+    "locationLabel": "Местоположение",
+    "sharedTeamsLabel": "Общие команды"
+  },
   "conversation": {
     "title": "Переписка",
     "sendError": "Не удалось отправить.",

@@ -1448,6 +1448,28 @@
     "claimMsg": "Komandos {{team}} savininkas nebeturi paskyros. Norite perimti komandą?",
     "claimConfirm": "Perimti"
   },
+  "teamDetail": {
+    "title": "Komanda",
+    "staffLabel": "Personalas",
+    "subteamsLabel": "Pakomandės",
+    "viewProfile": "Peržiūrėti profilį",
+    "messageMember": "Žinutė",
+    "addToSubteam": "Pridėti į pakomandę",
+    "addToWhich": "Pridėti {{name}} į",
+    "addedTitle": "Pridėta",
+    "addedMsg": "{{name}} dabar yra {{team}}.",
+    "addError": "Nepavyko pridėti į tą komandą.",
+    "remove": "Pašalinti",
+    "removeTitle": "Pašalinti iš komandos",
+    "removeMsg": "Pašalinti {{name}} iš {{team}}?",
+    "removeError": "Nepavyko pašalinti.",
+    "roleLabel": "Vaidmuo",
+    "programLabel": "Programa",
+    "conferenceLabel": "Konferencija",
+    "levelLabel": "Lygis",
+    "locationLabel": "Vieta",
+    "sharedTeamsLabel": "Bendros komandos"
+  },
   "conversation": {
     "title": "Pokalbis",
     "sendError": "Nepavyko išsiųsti.",

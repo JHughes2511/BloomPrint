@@ -1448,6 +1448,28 @@
     "claimMsg": "De eigenaar van {{team}} heeft geen account meer. Wil je eigenaar worden?",
     "claimConfirm": "Claimen"
   },
+  "teamDetail": {
+    "title": "Team",
+    "staffLabel": "Staf",
+    "subteamsLabel": "Subteams",
+    "viewProfile": "Profiel bekijken",
+    "messageMember": "Bericht",
+    "addToSubteam": "Aan een subteam toevoegen",
+    "addToWhich": "{{name}} toevoegen aan",
+    "addedTitle": "Toegevoegd",
+    "addedMsg": "{{name}} zit nu bij {{team}}.",
+    "addError": "Kon niet aan dat team worden toegevoegd.",
+    "remove": "Verwijderen",
+    "removeTitle": "Uit team verwijderen",
+    "removeMsg": "{{name}} uit {{team}} halen?",
+    "removeError": "Kon niet worden verwijderd.",
+    "roleLabel": "Rol",
+    "programLabel": "Programma",
+    "conferenceLabel": "Conference",
+    "levelLabel": "Niveau",
+    "locationLabel": "Locatie",
+    "sharedTeamsLabel": "Gedeelde teams"
+  },
   "conversation": {
     "title": "Gesprek",
     "sendError": "Kon niet versturen.",

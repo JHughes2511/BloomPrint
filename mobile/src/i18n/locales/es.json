@@ -1448,6 +1448,28 @@
     "claimMsg": "El propietario de {{team}} ya no tiene cuenta. ¿Quieres asumir la propiedad?",
     "claimConfirm": "Reclamar"
   },
+  "teamDetail": {
+    "title": "Equipo",
+    "staffLabel": "Personal",
+    "subteamsLabel": "Subequipos",
+    "viewProfile": "Ver perfil",
+    "messageMember": "Mensaje",
+    "addToSubteam": "Añadir a un subequipo",
+    "addToWhich": "Añadir a {{name}} a",
+    "addedTitle": "Añadido",
+    "addedMsg": "{{name}} ya está en {{team}}.",
+    "addError": "No se pudo añadir a ese equipo.",
+    "remove": "Quitar",
+    "removeTitle": "Quitar del equipo",
+    "removeMsg": "¿Quitar a {{name}} de {{team}}?",
+    "removeError": "No se pudo quitar.",
+    "roleLabel": "Rol",
+    "programLabel": "Programa",
+    "conferenceLabel": "Conferencia",
+    "levelLabel": "Nivel",
+    "locationLabel": "Ubicación",
+    "sharedTeamsLabel": "Equipos compartidos"
+  },
   "conversation": {
     "title": "Conversación",
     "sendError": "No se pudo enviar.",

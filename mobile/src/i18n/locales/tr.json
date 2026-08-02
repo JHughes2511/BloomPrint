@@ -1448,6 +1448,28 @@
     "claimMsg": "{{team}} takımının sahibinin artık hesabı yok. Sahipliği almak ister misin?",
     "claimConfirm": "Sahiplen"
   },
+  "teamDetail": {
+    "title": "Takım",
+    "staffLabel": "Ekip",
+    "subteamsLabel": "Alt takımlar",
+    "viewProfile": "Profili gör",
+    "messageMember": "Mesaj",
+    "addToSubteam": "Bir alt takıma ekle",
+    "addToWhich": "{{name}} şuraya eklensin",
+    "addedTitle": "Eklendi",
+    "addedMsg": "{{name}} artık {{team}} takımında.",
+    "addError": "Bu takıma eklenemedi.",
+    "remove": "Çıkar",
+    "removeTitle": "Takımdan çıkar",
+    "removeMsg": "{{name}} adlı kişi {{team}} takımından çıkarılsın mı?",
+    "removeError": "Çıkarılamadı.",
+    "roleLabel": "Rol",
+    "programLabel": "Program",
+    "conferenceLabel": "Konferans",
+    "levelLabel": "Seviye",
+    "locationLabel": "Konum",
+    "sharedTeamsLabel": "Ortak takımlar"
+  },
   "conversation": {
     "title": "Sohbet",
     "sendError": "Gönderilemedi.",

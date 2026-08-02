@@ -1448,6 +1448,28 @@
     "claimMsg": "У власника команди {{team}} більше немає акаунта. Стати власником?",
     "claimConfirm": "Прийняти"
   },
+  "teamDetail": {
+    "title": "Команда",
+    "staffLabel": "Персонал",
+    "subteamsLabel": "Підкоманди",
+    "viewProfile": "Відкрити профіль",
+    "messageMember": "Написати",
+    "addToSubteam": "Додати до підкоманди",
+    "addToWhich": "Додати {{name}} до",
+    "addedTitle": "Додано",
+    "addedMsg": "{{name}} тепер у {{team}}.",
+    "addError": "Не вдалося додати до цієї команди.",
+    "remove": "Видалити",
+    "removeTitle": "Видалити з команди",
+    "removeMsg": "Прибрати {{name}} з {{team}}?",
+    "removeError": "Не вдалося видалити.",
+    "roleLabel": "Роль",
+    "programLabel": "Програма",
+    "conferenceLabel": "Конференція",
+    "levelLabel": "Рівень",
+    "locationLabel": "Розташування",
+    "sharedTeamsLabel": "Спільні команди"
+  },
   "conversation": {
     "title": "Розмова",
     "sendError": "Не вдалося надіслати.",

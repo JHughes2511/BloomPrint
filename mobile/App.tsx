@@ -69,6 +69,7 @@ import CoachTrainingDetailScreen from './src/screens/CoachTrainingDetailScreen';
 import GameReportBuilderScreen from './src/screens/GameReportBuilderScreen';
 import StaffInboxScreen from './src/screens/StaffInboxScreen';
 import ConversationScreen from './src/screens/ConversationScreen';
+import TeamDetailScreen from './src/screens/TeamDetailScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import TeamEvalScreen from './src/screens/TeamEvalScreen';
 
@@ -117,6 +118,7 @@ function HomeStack() {
       <Stack.Screen name="CoachNotifications" component={CoachNotificationsScreen} />
       <Stack.Screen name="CoachTrainingDetail" component={CoachTrainingDetailScreen} />
       <Stack.Screen name="StaffInbox" component={StaffInboxScreen} />
+      <Stack.Screen name="TeamDetail" component={TeamDetailScreen} />
       <Stack.Screen name="Conversation" component={ConversationScreen} />
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
     </Stack.Navigator>
@@ -176,6 +178,8 @@ function RecentStack() {
       <Stack.Screen name="Summary" component={SummaryScreen} />
       <Stack.Screen name="GameReportBuilder" component={GameReportBuilderScreen} />
       <Stack.Screen name="StaffInbox" component={StaffInboxScreen} />
+      <Stack.Screen name="TeamDetail" component={TeamDetailScreen} />
+      <Stack.Screen name="Conversation" component={ConversationScreen} />
     </Stack.Navigator>
   );
 }

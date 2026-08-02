@@ -1448,6 +1448,28 @@
     "claimMsg": "לבעלים של {{team}} אין יותר חשבון. להפוך לבעלים?",
     "claimConfirm": "תבע בעלות"
   },
+  "teamDetail": {
+    "title": "קבוצה",
+    "staffLabel": "צוות",
+    "subteamsLabel": "תת-קבוצות",
+    "viewProfile": "הצג פרופיל",
+    "messageMember": "הודעה",
+    "addToSubteam": "הוספה לתת-קבוצה",
+    "addToWhich": "הוספת {{name}} אל",
+    "addedTitle": "נוסף",
+    "addedMsg": "{{name}} נמצא כעת ב{{team}}.",
+    "addError": "לא ניתן היה להוסיף לקבוצה הזו.",
+    "remove": "הסרה",
+    "removeTitle": "הסרה מהקבוצה",
+    "removeMsg": "להסיר את {{name}} מ{{team}}?",
+    "removeError": "לא ניתן היה להסיר.",
+    "roleLabel": "תפקיד",
+    "programLabel": "תוכנית",
+    "conferenceLabel": "ליגה",
+    "levelLabel": "רמה",
+    "locationLabel": "מיקום",
+    "sharedTeamsLabel": "קבוצות משותפות"
+  },
   "conversation": {
     "title": "שיחה",
     "sendError": "לא ניתן לשלוח.",

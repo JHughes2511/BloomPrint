@@ -1448,6 +1448,28 @@
     "claimMsg": "{{team}}의 소유자 계정이 더 이상 없습니다. 소유자가 되시겠습니까?",
     "claimConfirm": "가져오기"
   },
+  "teamDetail": {
+    "title": "팀",
+    "staffLabel": "스태프",
+    "subteamsLabel": "하위 팀",
+    "viewProfile": "프로필 보기",
+    "messageMember": "메시지",
+    "addToSubteam": "하위 팀에 추가",
+    "addToWhich": "{{name}} 추가 대상",
+    "addedTitle": "추가됨",
+    "addedMsg": "{{name}} 님이 이제 {{team}}에 있습니다.",
+    "addError": "해당 팀에 추가하지 못했습니다.",
+    "remove": "제외",
+    "removeTitle": "팀에서 제외",
+    "removeMsg": "{{name}} 님을 {{team}}에서 제외할까요?",
+    "removeError": "제외하지 못했습니다.",
+    "roleLabel": "역할",
+    "programLabel": "프로그램",
+    "conferenceLabel": "컨퍼런스",
+    "levelLabel": "레벨",
+    "locationLabel": "위치",
+    "sharedTeamsLabel": "함께 있는 팀"
+  },
   "conversation": {
     "title": "대화",
     "sendError": "보낼 수 없습니다.",

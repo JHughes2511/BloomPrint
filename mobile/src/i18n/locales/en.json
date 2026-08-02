@@ -1448,6 +1448,28 @@
     "claimMsg": "The owner of {{team}} no longer has an account. Take over as owner?",
     "claimConfirm": "Claim"
   },
+  "teamDetail": {
+    "title": "Team",
+    "staffLabel": "Staff",
+    "subteamsLabel": "Sub-teams",
+    "viewProfile": "View profile",
+    "messageMember": "Message",
+    "addToSubteam": "Add to a sub-team",
+    "addToWhich": "Add {{name}} to",
+    "addedTitle": "Added",
+    "addedMsg": "{{name}} is now on {{team}}.",
+    "addError": "Could not add them to that team.",
+    "remove": "Remove",
+    "removeTitle": "Remove from team",
+    "removeMsg": "Take {{name}} off {{team}}?",
+    "removeError": "Could not remove them.",
+    "roleLabel": "Role",
+    "programLabel": "Program",
+    "conferenceLabel": "Conference",
+    "levelLabel": "Level",
+    "locationLabel": "Location",
+    "sharedTeamsLabel": "Shared teams"
+  },
   "conversation": {
     "title": "Conversation",
     "sendError": "Could not send.",

@@ -1448,6 +1448,28 @@
     "claimMsg": "{{team}} 的所有者账号已不存在。要接管为所有者吗？",
     "claimConfirm": "接管"
   },
+  "teamDetail": {
+    "title": "球队",
+    "staffLabel": "教练组",
+    "subteamsLabel": "子队",
+    "viewProfile": "查看资料",
+    "messageMember": "发消息",
+    "addToSubteam": "加入子队",
+    "addToWhich": "将 {{name}} 加入",
+    "addedTitle": "已添加",
+    "addedMsg": "{{name}} 现在在 {{team}}。",
+    "addError": "无法加入该球队。",
+    "remove": "移除",
+    "removeTitle": "移出球队",
+    "removeMsg": "将 {{name}} 移出 {{team}}？",
+    "removeError": "无法移除。",
+    "roleLabel": "角色",
+    "programLabel": "项目",
+    "conferenceLabel": "联盟",
+    "levelLabel": "级别",
+    "locationLabel": "所在地",
+    "sharedTeamsLabel": "共同球队"
+  },
   "conversation": {
     "title": "对话",
     "sendError": "无法发送。",

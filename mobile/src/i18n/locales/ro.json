@@ -1448,6 +1448,28 @@
     "claimMsg": "Proprietarul echipei {{team}} nu mai are cont. Vrei să preiei echipa?",
     "claimConfirm": "Preia"
   },
+  "teamDetail": {
+    "title": "Echipă",
+    "staffLabel": "Staff",
+    "subteamsLabel": "Subechipe",
+    "viewProfile": "Vezi profilul",
+    "messageMember": "Mesaj",
+    "addToSubteam": "Adaugă într-o subechipă",
+    "addToWhich": "Adaugă {{name}} în",
+    "addedTitle": "Adăugat",
+    "addedMsg": "{{name}} este acum în {{team}}.",
+    "addError": "Nu s-a putut adăuga în acea echipă.",
+    "remove": "Elimină",
+    "removeTitle": "Elimină din echipă",
+    "removeMsg": "Scoți {{name}} din {{team}}?",
+    "removeError": "Nu s-a putut elimina.",
+    "roleLabel": "Rol",
+    "programLabel": "Program",
+    "conferenceLabel": "Conferință",
+    "levelLabel": "Nivel",
+    "locationLabel": "Locație",
+    "sharedTeamsLabel": "Echipe comune"
+  },
   "conversation": {
     "title": "Conversație",
     "sendError": "Nu s-a putut trimite.",

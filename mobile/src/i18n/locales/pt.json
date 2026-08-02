@@ -1448,6 +1448,28 @@
     "claimMsg": "O proprietário de {{team}} já não tem conta. Quer assumir a propriedade?",
     "claimConfirm": "Assumir"
   },
+  "teamDetail": {
+    "title": "Time",
+    "staffLabel": "Comissão",
+    "subteamsLabel": "Subequipes",
+    "viewProfile": "Ver perfil",
+    "messageMember": "Mensagem",
+    "addToSubteam": "Adicionar a uma subequipe",
+    "addToWhich": "Adicionar {{name}} a",
+    "addedTitle": "Adicionado",
+    "addedMsg": "{{name}} agora está em {{team}}.",
+    "addError": "Não foi possível adicionar a esse time.",
+    "remove": "Remover",
+    "removeTitle": "Remover do time",
+    "removeMsg": "Remover {{name}} de {{team}}?",
+    "removeError": "Não foi possível remover.",
+    "roleLabel": "Função",
+    "programLabel": "Programa",
+    "conferenceLabel": "Conferência",
+    "levelLabel": "Nível",
+    "locationLabel": "Local",
+    "sharedTeamsLabel": "Times em comum"
+  },
   "conversation": {
     "title": "Conversa",
     "sendError": "Não foi possível enviar.",

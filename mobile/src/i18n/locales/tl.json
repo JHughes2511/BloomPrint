@@ -1448,6 +1448,28 @@
     "claimMsg": "Wala nang account ang may-ari ng {{team}}. Gusto mo bang maging may-ari?",
     "claimConfirm": "Angkinin"
   },
+  "teamDetail": {
+    "title": "Team",
+    "staffLabel": "Staff",
+    "subteamsLabel": "Mga sub-team",
+    "viewProfile": "Tingnan ang profile",
+    "messageMember": "Mensahe",
+    "addToSubteam": "Idagdag sa sub-team",
+    "addToWhich": "Idagdag si {{name}} sa",
+    "addedTitle": "Naidagdag",
+    "addedMsg": "Nasa {{team}} na si {{name}}.",
+    "addError": "Hindi maidagdag sa team na iyon.",
+    "remove": "Alisin",
+    "removeTitle": "Alisin sa team",
+    "removeMsg": "Alisin si {{name}} sa {{team}}?",
+    "removeError": "Hindi maalis.",
+    "roleLabel": "Papel",
+    "programLabel": "Programa",
+    "conferenceLabel": "Conference",
+    "levelLabel": "Antas",
+    "locationLabel": "Lokasyon",
+    "sharedTeamsLabel": "Magkasamang team"
+  },
   "conversation": {
     "title": "Usapan",
     "sendError": "Hindi maipadala.",

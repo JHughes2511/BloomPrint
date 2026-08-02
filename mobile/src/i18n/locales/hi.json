@@ -1448,6 +1448,28 @@
     "claimMsg": "{{team}} के स्वामी का खाता अब नहीं है। क्या आप स्वामी बनना चाहते हैं?",
     "claimConfirm": "अपनाएँ"
   },
+  "teamDetail": {
+    "title": "टीम",
+    "staffLabel": "स्टाफ़",
+    "subteamsLabel": "उप-टीमें",
+    "viewProfile": "प्रोफ़ाइल देखें",
+    "messageMember": "संदेश",
+    "addToSubteam": "उप-टीम में जोड़ें",
+    "addToWhich": "{{name}} को जोड़ें",
+    "addedTitle": "जोड़ा गया",
+    "addedMsg": "{{name}} अब {{team}} में है।",
+    "addError": "उस टीम में नहीं जोड़ा जा सका।",
+    "remove": "हटाएँ",
+    "removeTitle": "टीम से हटाएँ",
+    "removeMsg": "{{name}} को {{team}} से हटाएँ?",
+    "removeError": "हटाया नहीं जा सका।",
+    "roleLabel": "भूमिका",
+    "programLabel": "प्रोग्राम",
+    "conferenceLabel": "कॉन्फ्रेंस",
+    "levelLabel": "स्तर",
+    "locationLabel": "स्थान",
+    "sharedTeamsLabel": "साझा टीमें"
+  },
   "conversation": {
     "title": "बातचीत",
     "sendError": "भेजा नहीं जा सका।",

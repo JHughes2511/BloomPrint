@@ -1448,6 +1448,28 @@
     "claimMsg": "Ägaren av {{team}} har inget konto längre. Vill du ta över som ägare?",
     "claimConfirm": "Ta över"
   },
+  "teamDetail": {
+    "title": "Lag",
+    "staffLabel": "Stab",
+    "subteamsLabel": "Underlag",
+    "viewProfile": "Visa profil",
+    "messageMember": "Meddelande",
+    "addToSubteam": "Lägg till i ett underlag",
+    "addToWhich": "Lägg till {{name}} i",
+    "addedTitle": "Tillagd",
+    "addedMsg": "{{name}} är nu med i {{team}}.",
+    "addError": "Kunde inte läggas till i det laget.",
+    "remove": "Ta bort",
+    "removeTitle": "Ta bort från laget",
+    "removeMsg": "Ta bort {{name}} från {{team}}?",
+    "removeError": "Kunde inte tas bort.",
+    "roleLabel": "Roll",
+    "programLabel": "Program",
+    "conferenceLabel": "Serie",
+    "levelLabel": "Nivå",
+    "locationLabel": "Plats",
+    "sharedTeamsLabel": "Gemensamma lag"
+  },
   "conversation": {
     "title": "Konversation",
     "sendError": "Kunde inte skicka.",

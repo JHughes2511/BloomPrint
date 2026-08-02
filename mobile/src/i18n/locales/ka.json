@@ -1448,6 +1448,28 @@
     "claimMsg": "გუნდის {{team}} მფლობელს აღარ აქვს ანგარიში. გსურთ გახდეთ მფლობელი?",
     "claimConfirm": "დაბრუნება"
   },
+  "teamDetail": {
+    "title": "გუნდი",
+    "staffLabel": "პერსონალი",
+    "subteamsLabel": "ქვეგუნდები",
+    "viewProfile": "პროფილის ნახვა",
+    "messageMember": "შეტყობინება",
+    "addToSubteam": "ქვეგუნდში დამატება",
+    "addToWhich": "{{name}}-ის დამატება",
+    "addedTitle": "დაემატა",
+    "addedMsg": "{{name}} ახლა {{team}}-შია.",
+    "addError": "ვერ დაემატა ამ გუნდში.",
+    "remove": "წაშლა",
+    "removeTitle": "გუნდიდან წაშლა",
+    "removeMsg": "წაიშალოს {{name}} {{team}}-იდან?",
+    "removeError": "ვერ წაიშალა.",
+    "roleLabel": "როლი",
+    "programLabel": "პროგრამა",
+    "conferenceLabel": "კონფერენცია",
+    "levelLabel": "დონე",
+    "locationLabel": "მდებარეობა",
+    "sharedTeamsLabel": "საერთო გუნდები"
+  },
   "conversation": {
     "title": "საუბარი",
     "sendError": "გაგზავნა ვერ მოხერხდა.",

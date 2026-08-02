@@ -1448,6 +1448,28 @@
     "claimMsg": "Власник тима {{team}} више нема налог. Желите ли да преузмете тим?",
     "claimConfirm": "Преузми"
   },
+  "teamDetail": {
+    "title": "Тим",
+    "staffLabel": "Особље",
+    "subteamsLabel": "Подтимови",
+    "viewProfile": "Погледај профил",
+    "messageMember": "Порука",
+    "addToSubteam": "Додај у подтим",
+    "addToWhich": "Додај {{name}} у",
+    "addedTitle": "Додато",
+    "addedMsg": "{{name}} је сада у {{team}}.",
+    "addError": "Није могуће додати у тај тим.",
+    "remove": "Уклони",
+    "removeTitle": "Уклони из тима",
+    "removeMsg": "Уклонити {{name}} из {{team}}?",
+    "removeError": "Није могуће уклонити.",
+    "roleLabel": "Улога",
+    "programLabel": "Програм",
+    "conferenceLabel": "Конференција",
+    "levelLabel": "Ниво",
+    "locationLabel": "Локација",
+    "sharedTeamsLabel": "Заједнички тимови"
+  },
   "conversation": {
     "title": "Razgovor",
     "sendError": "Nije moguće poslati.",

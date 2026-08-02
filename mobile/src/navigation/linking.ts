@@ -36,7 +36,8 @@ const leadingId = (v: string): number => parseInt(String(v), 10);
 
 const id = {
   parse: { playerId: leadingId, evalId: leadingId, trainingId: leadingId,
-           reportId: leadingId, conversationId: leadingId, gameId: leadingId },
+           reportId: leadingId, conversationId: leadingId, gameId: leadingId,
+           teamId: leadingId },
 };
 
 export const linking: LinkingOptions<any> = {
@@ -57,6 +58,7 @@ export const linking: LinkingOptions<any> = {
           CoachNotifications: 'notifications',
           CoachTrainingDetail: { path: 'training/:trainingId', ...id },
           StaffInbox: 'staff',
+          TeamDetail: { path: 'staff/team/:teamId', ...id },
           Conversation: { path: 'staff/:conversationId', ...id },
           Onboarding: 'onboarding',
         },
@@ -97,6 +99,8 @@ export const linking: LinkingOptions<any> = {
           GameReportBuilder: { path: 'packet/:reportId', ...id },
           Summary: 'summary',
           StaffInbox: 'staff',
+          TeamDetail: { path: 'staff/team/:teamId', ...id },
+          Conversation: { path: 'staff/:conversationId', ...id },
         },
       },
 

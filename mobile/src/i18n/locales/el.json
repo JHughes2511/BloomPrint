@@ -1448,6 +1448,28 @@
     "claimMsg": "Ο ιδιοκτήτης της ομάδας {{team}} δεν έχει πια λογαριασμό. Θέλετε να αναλάβετε;",
     "claimConfirm": "Ανάληψη"
   },
+  "teamDetail": {
+    "title": "Ομάδα",
+    "staffLabel": "Προσωπικό",
+    "subteamsLabel": "Υποομάδες",
+    "viewProfile": "Προβολή προφίλ",
+    "messageMember": "Μήνυμα",
+    "addToSubteam": "Προσθήκη σε υποομάδα",
+    "addToWhich": "Προσθήκη {{name}} σε",
+    "addedTitle": "Προστέθηκε",
+    "addedMsg": "Ο/Η {{name}} είναι τώρα στην {{team}}.",
+    "addError": "Δεν ήταν δυνατή η προσθήκη σε αυτή την ομάδα.",
+    "remove": "Αφαίρεση",
+    "removeTitle": "Αφαίρεση από την ομάδα",
+    "removeMsg": "Αφαίρεση {{name}} από {{team}};",
+    "removeError": "Δεν ήταν δυνατή η αφαίρεση.",
+    "roleLabel": "Ρόλος",
+    "programLabel": "Πρόγραμμα",
+    "conferenceLabel": "Conference",
+    "levelLabel": "Επίπεδο",
+    "locationLabel": "Τοποθεσία",
+    "sharedTeamsLabel": "Κοινές ομάδες"
+  },
   "conversation": {
     "title": "Συνομιλία",
     "sendError": "Δεν ήταν δυνατή η αποστολή.",

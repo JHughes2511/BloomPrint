@@ -1448,6 +1448,28 @@
     "claimMsg": "{{team}} のオーナーのアカウントはもうありません。オーナーになりますか？",
     "claimConfirm": "引き継ぐ"
   },
+  "teamDetail": {
+    "title": "チーム",
+    "staffLabel": "スタッフ",
+    "subteamsLabel": "サブチーム",
+    "viewProfile": "プロフィールを見る",
+    "messageMember": "メッセージ",
+    "addToSubteam": "サブチームに追加",
+    "addToWhich": "{{name}} の追加先",
+    "addedTitle": "追加しました",
+    "addedMsg": "{{name}} は {{team}} に参加しました。",
+    "addError": "そのチームに追加できませんでした。",
+    "remove": "外す",
+    "removeTitle": "チームから外す",
+    "removeMsg": "{{name}} を {{team}} から外しますか？",
+    "removeError": "外せませんでした。",
+    "roleLabel": "役割",
+    "programLabel": "プログラム",
+    "conferenceLabel": "カンファレンス",
+    "levelLabel": "レベル",
+    "locationLabel": "所在地",
+    "sharedTeamsLabel": "共通のチーム"
+  },
   "conversation": {
     "title": "会話",
     "sendError": "送信できませんでした。",

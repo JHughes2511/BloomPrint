@@ -1448,6 +1448,28 @@
     "claimMsg": "Właściciel {{team}} nie ma już konta. Chcesz przejąć drużynę?",
     "claimConfirm": "Przejmij"
   },
+  "teamDetail": {
+    "title": "Zespół",
+    "staffLabel": "Sztab",
+    "subteamsLabel": "Podzespoły",
+    "viewProfile": "Zobacz profil",
+    "messageMember": "Wiadomość",
+    "addToSubteam": "Dodaj do podzespołu",
+    "addToWhich": "Dodaj {{name}} do",
+    "addedTitle": "Dodano",
+    "addedMsg": "{{name}} jest teraz w {{team}}.",
+    "addError": "Nie udało się dodać do tego zespołu.",
+    "remove": "Usuń",
+    "removeTitle": "Usuń z zespołu",
+    "removeMsg": "Usunąć {{name}} z {{team}}?",
+    "removeError": "Nie udało się usunąć.",
+    "roleLabel": "Rola",
+    "programLabel": "Program",
+    "conferenceLabel": "Konferencja",
+    "levelLabel": "Poziom",
+    "locationLabel": "Lokalizacja",
+    "sharedTeamsLabel": "Wspólne zespoły"
+  },
   "conversation": {
     "title": "Konwersacja",
     "sendError": "Nie udało się wysłać.",
