@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "नाम या प्रोग्राम से खोजें...",
       "request": "अनुरोध करें",
       "noStaffFound": "कोई स्टाफ़ नहीं मिला। कोई दूसरी खोज आज़माएँ।",
-      "pointAtQr": "अपने कोच के QR कोड पर कैमरा रखें"
+      "pointAtQr": "अपने कोच के QR कोड पर कैमरा रखें",
+      "age": "आयु",
+      "phAge": "जैसे 17",
+      "onRosterAs": "रोस्टर में {{name}} के रूप में"
     },
     "reportDetail": {
       "sharedBy": "{{name}} की ओर से · {{date}}",

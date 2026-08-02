@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Zoek op naam of programma...",
       "request": "Aanvragen",
       "noStaffFound": "Geen staf gevonden. Probeer een andere zoekopdracht.",
-      "pointAtQr": "Richt op de QR-code van je coach"
+      "pointAtQr": "Richt op de QR-code van je coach",
+      "age": "Leeftijd",
+      "phAge": "bijv. 17",
+      "onRosterAs": "In de selectie als {{name}}"
     },
     "reportDetail": {
       "sharedBy": "Van {{name}} · {{date}}",

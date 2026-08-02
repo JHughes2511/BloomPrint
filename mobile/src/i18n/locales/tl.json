@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Maghanap ayon sa pangalan o programa...",
       "request": "Humiling",
       "noStaffFound": "Walang nakitang staff. Subukan ang ibang paghahanap.",
-      "pointAtQr": "Itutok sa QR code ng coach mo"
+      "pointAtQr": "Itutok sa QR code ng coach mo",
+      "age": "Edad",
+      "phAge": "hal. 17",
+      "onRosterAs": "Nasa roster bilang {{name}}"
     },
     "reportDetail": {
       "sharedBy": "Mula kay {{name}} · {{date}}",

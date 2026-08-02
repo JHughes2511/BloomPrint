@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Nach Name oder Programm suchen...",
       "request": "Anfragen",
       "noStaffFound": "Kein Staff gefunden. Versuche eine andere Suche.",
-      "pointAtQr": "Richte die Kamera auf den QR-Code deines Trainers"
+      "pointAtQr": "Richte die Kamera auf den QR-Code deines Trainers",
+      "age": "Alter",
+      "phAge": "z. B. 17",
+      "onRosterAs": "Im Kader als {{name}}"
     },
     "reportDetail": {
       "sharedBy": "Von {{name}} · {{date}}",

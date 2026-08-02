@@ -161,7 +161,15 @@ export default function RosterScreen() {
     }
   };
 
-  useFocusEffect(useCallback(() => { load(); }, []));
+  // Refetch on arrival, then every 10s while the screen is up. A linked player
+  // can change their own height or school from their phone, and a coach sitting
+  // on the roster should see it without knowing to pull down. The interval is
+  // cleared on blur, so nothing polls in the background.
+  useFocusEffect(useCallback(() => {
+    load();
+    const id = setInterval(load, 10_000);
+    return () => clearInterval(id);
+  }, []));
 
   const teamFilteredPlayers = currentTeamId == null
     ? players

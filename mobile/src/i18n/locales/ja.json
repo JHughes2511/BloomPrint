@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "名前またはプログラムで検索...",
       "request": "リクエスト",
       "noStaffFound": "スタッフが見つかりません。別のキーワードで検索してください。",
-      "pointAtQr": "コーチのQRコードに向けてください"
+      "pointAtQr": "コーチのQRコードに向けてください",
+      "age": "年齢",
+      "phAge": "例: 17",
+      "onRosterAs": "ロスターでは {{name}}"
     },
     "reportDetail": {
       "sharedBy": "{{name}}より · {{date}}",

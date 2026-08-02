@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Ad veya programa göre arayın...",
       "request": "İste",
       "noStaffFound": "Ekip üyesi bulunamadı. Farklı bir arama deneyin.",
-      "pointAtQr": "Antrenörünüzün QR koduna doğrultun"
+      "pointAtQr": "Antrenörünüzün QR koduna doğrultun",
+      "age": "Yaş",
+      "phAge": "örn. 17",
+      "onRosterAs": "Kadroda {{name}} olarak"
     },
     "reportDetail": {
       "sharedBy": "{{name}} tarafından · {{date}}",

@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Caută după nume sau program...",
       "request": "Cere",
       "noStaffFound": "Niciun membru staff găsit. Încearcă o altă căutare.",
-      "pointAtQr": "Îndreaptă camera spre codul QR al antrenorului tău"
+      "pointAtQr": "Îndreaptă camera spre codul QR al antrenorului tău",
+      "age": "Vârstă",
+      "phAge": "ex. 17",
+      "onRosterAs": "În lot ca {{name}}"
     },
     "reportDetail": {
       "sharedBy": "De la {{name}} · {{date}}",

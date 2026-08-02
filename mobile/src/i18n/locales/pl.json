@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Szukaj po nazwisku lub programie...",
       "request": "Poproś",
       "noStaffFound": "Nie znaleziono sztabu. Spróbuj innego wyszukiwania.",
-      "pointAtQr": "Skieruj na kod QR trenera"
+      "pointAtQr": "Skieruj na kod QR trenera",
+      "age": "Wiek",
+      "phAge": "np. 17",
+      "onRosterAs": "W składzie jako {{name}}"
     },
     "reportDetail": {
       "sharedBy": "Od {{name}} · {{date}}",

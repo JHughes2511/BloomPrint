@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Ieškoti pagal vardą ar programą...",
       "request": "Prašyti",
       "noStaffFound": "Personalo nerasta. Bandykite kitą paiešką.",
-      "pointAtQr": "Nukreipkite į trenerio QR kodą"
+      "pointAtQr": "Nukreipkite į trenerio QR kodą",
+      "age": "Amžius",
+      "phAge": "pvz., 17",
+      "onRosterAs": "Sudėtyje kaip {{name}}"
     },
     "reportDetail": {
       "sharedBy": "Nuo {{name}} · {{date}}",

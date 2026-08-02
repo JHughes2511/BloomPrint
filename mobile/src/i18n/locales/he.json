@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "חפש לפי שם או תוכנית...",
       "request": "בקש",
       "noStaffFound": "לא נמצאו אנשי צוות. נסה חיפוש אחר.",
-      "pointAtQr": "כוון אל קוד ה-QR של המאמן שלך"
+      "pointAtQr": "כוון אל קוד ה-QR של המאמן שלך",
+      "age": "גיל",
+      "phAge": "לדוגמה 17",
+      "onRosterAs": "בסגל בשם {{name}}"
     },
     "reportDetail": {
       "sharedBy": "מאת {{name}} · {{date}}",

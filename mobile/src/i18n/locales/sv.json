@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Sök på namn eller program...",
       "request": "Begär",
       "noStaffFound": "Ingen personal hittad. Prova en annan sökning.",
-      "pointAtQr": "Rikta mot din tränares QR-kod"
+      "pointAtQr": "Rikta mot din tränares QR-kod",
+      "age": "Ålder",
+      "phAge": "t.ex. 17",
+      "onRosterAs": "I truppen som {{name}}"
     },
     "reportDetail": {
       "sharedBy": "Från {{name}} · {{date}}",

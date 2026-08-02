@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "ابحث بالاسم أو البرنامج...",
       "request": "طلب",
       "noStaffFound": "لم يُعثر على أي طاقم. جرّب بحثًا آخر.",
-      "pointAtQr": "وجّه الكاميرا إلى رمز QR الخاص بمدربك"
+      "pointAtQr": "وجّه الكاميرا إلى رمز QR الخاص بمدربك",
+      "age": "العمر",
+      "phAge": "مثال: 17",
+      "onRosterAs": "في القائمة باسم {{name}}"
     },
     "reportDetail": {
       "sharedBy": "من {{name}} · {{date}}",

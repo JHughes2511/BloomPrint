@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Pesquisar por nome ou programa...",
       "request": "Solicitar",
       "noStaffFound": "Nenhum membro da comissão encontrado. Tente outra pesquisa.",
-      "pointAtQr": "Aponte para o QR code do seu treinador"
+      "pointAtQr": "Aponte para o QR code do seu treinador",
+      "age": "Idade",
+      "phAge": "ex. 17",
+      "onRosterAs": "No plantel como {{name}}"
     },
     "reportDetail": {
       "sharedBy": "De {{name}} · {{date}}",

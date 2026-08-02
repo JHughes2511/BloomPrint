@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Пошук за імʼям чи програмою...",
       "request": "Запит",
       "noStaffFound": "Персонал не знайдено. Спробуйте інший пошук.",
-      "pointAtQr": "Наведіть на QR-код вашого тренера"
+      "pointAtQr": "Наведіть на QR-код вашого тренера",
+      "age": "Вік",
+      "phAge": "наприклад, 17",
+      "onRosterAs": "У складі як {{name}}"
     },
     "reportDetail": {
       "sharedBy": "Від {{name}} · {{date}}",

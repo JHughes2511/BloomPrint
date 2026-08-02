@@ -54,6 +54,7 @@ export default function PlayerLinkScreen() {
   const [eWt, setEWt] = useState('');   // weight
   const [eSr, setESr] = useState('');   // standing reach
   const [eSchool, setESchool] = useState('');
+  const [eAge, setEAge] = useState('');
   const [eCountry, setECountry] = useState('');
   const [eCity, setECity] = useState('');
   const [saving, setSaving] = useState(false);
@@ -72,7 +73,13 @@ export default function PlayerLinkScreen() {
     }
   }, [playerUser?.player_id]);
 
-  useFocusEffect(useCallback(() => { load(); }, [load]));
+  // Same cadence as the coach's roster: the record is shared, so a coach editing
+  // a player's details should appear here without the player reopening the tab.
+  useFocusEffect(useCallback(() => {
+    load();
+    const id = setInterval(load, 10_000);
+    return () => clearInterval(id);
+  }, [load]));
 
   const initials = (playerUser?.name ?? '').trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('') || 'P';
 
@@ -135,10 +142,13 @@ export default function PlayerLinkScreen() {
   const openEdit = () => {
     setEName(playerUser?.name ?? '');
     setEAvatar((playerUser as any)?.avatar ?? null);
-    setECountry((playerUser as any)?.country ?? '');
-    setECity((playerUser as any)?.city ?? '');
+    // The roster row first: it is the record the coach sees and both sides now
+    // edit. The account value is only a fallback for an unlinked player.
+    setECountry(profile?.country ?? (playerUser as any)?.country ?? '');
+    setECity(profile?.city ?? (playerUser as any)?.city ?? '');
     setEP(profile?.position ?? ''); setEH(profile?.height ?? ''); setEW(profile?.wingspan ?? '');
     setEWt(profile?.weight ?? ''); setESr(profile?.standing_reach ?? ''); setESchool(profile?.school_name ?? '');
+    setEAge(profile?.age != null ? String(profile.age) : '');
     setShowEdit(true);
   };
 
@@ -161,10 +171,16 @@ export default function PlayerLinkScreen() {
       await playerAuthAPI.updateMe({ name: eName.trim() || undefined, avatar: eAvatar, country: eCountry || undefined, city: eCity.trim() || undefined });
       // Profile-level: athletic fields (only when linked)
       if (playerUser?.player_id) {
+        // Country and city go here as well as on the account. They were only
+        // ever written to the account before, so a coach never saw a player
+        // fill them in — the roster row is what a coach reads.
+        const parsedAge = parseInt(eAge.trim(), 10);
         const updated = await playerProfileAPI.update({
           position: eP.trim() || undefined, height: eH.trim() || undefined,
           wingspan: eW.trim() || undefined, weight: eWt.trim() || undefined,
           standing_reach: eSr.trim() || undefined, school_name: eSchool.trim() || undefined,
+          country: eCountry || undefined, city: eCity.trim() || undefined,
+          age: Number.isFinite(parsedAge) && parsedAge > 0 ? parsedAge : undefined,
         });
         setProfile(updated);
       }
@@ -225,6 +241,16 @@ export default function PlayerLinkScreen() {
         {(profile?.position || profile?.school_name) ? (
           <Text style={styles.nameSub} numberOfLines={1}>
             {[profile?.position, profile?.school_name].filter(Boolean).join(' · ')}
+          </Text>
+        ) : null}
+        {/* A coach's roster keeps whatever they call this player, and a player
+            editing their account does not rename themselves on someone else's
+            team sheet. Shown only when the two differ, so the player can see
+            they are the same person under another name rather than wondering
+            whether they linked to the wrong profile. */}
+        {profile?.name && playerUser?.name && profile.name !== playerUser.name ? (
+          <Text style={styles.nameSub} numberOfLines={1}>
+            {tr('playerApp.link.onRosterAs', { name: profile.name })}
           </Text>
         ) : null}
       </TouchableOpacity>
@@ -311,6 +337,7 @@ export default function PlayerLinkScreen() {
                   [tr('playerApp.link.weight'), eWt, setEWt, tr('playerApp.link.phWeight')],
                   [tr('playerApp.link.standingReach'), eSr, setESr, tr('playerApp.link.phStandingReach')],
                   [tr('playerApp.link.schoolOrg'), eSchool, setESchool, tr('playerApp.link.phSchool')],
+                  [tr('playerApp.link.age'), eAge, setEAge, tr('playerApp.link.phAge')],
                 ] as [string, string, (v: string) => void, string][])
               : []
             ).map(([label, val, setter, ph]) => (

@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Pretraži po imenu ili programu...",
       "request": "Zatraži",
       "noStaffFound": "Nije pronađen štab. Probaj drugu pretragu.",
-      "pointAtQr": "Usmeri ka QR kodu svog trenera"
+      "pointAtQr": "Usmeri ka QR kodu svog trenera",
+      "age": "Године",
+      "phAge": "нпр. 17",
+      "onRosterAs": "У тиму као {{name}}"
     },
     "reportDetail": {
       "sharedBy": "Od {{name}} · {{date}}",

@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Search by name or program...",
       "request": "Request",
       "noStaffFound": "No staff found. Try a different search.",
-      "pointAtQr": "Point at your coach's QR code"
+      "pointAtQr": "Point at your coach's QR code",
+      "age": "Age",
+      "phAge": "e.g. 17",
+      "onRosterAs": "On the roster as {{name}}"
     },
     "reportDetail": {
       "sharedBy": "From {{name}} · {{date}}",

@@ -112,6 +112,9 @@ export const playerLinkAPI = {
 
 export const playerProfileAPI = {
   get: () => playerApi.get('/player-auth/linked-player').then(r => r.data),
+  // Everything a player owns about themselves. country/state/city were already
+  // accepted by the server and simply never sent — they went to the account
+  // record instead, where a coach cannot see them.
   update: (data: {
     position?: string;
     height?: string;
@@ -122,5 +125,6 @@ export const playerProfileAPI = {
     state?: string;
     city?: string;
     school_name?: string;
+    age?: number;
   }) => playerApi.patch('/player-auth/linked-player', data).then(r => r.data),
 };

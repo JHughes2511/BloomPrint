@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Cerca per nome o programma...",
       "request": "Richiedi",
       "noStaffFound": "Nessun membro dello staff trovato. Prova con un'altra ricerca.",
-      "pointAtQr": "Punta il codice QR del tuo allenatore"
+      "pointAtQr": "Punta il codice QR del tuo allenatore",
+      "age": "Età",
+      "phAge": "es. 17",
+      "onRosterAs": "In rosa come {{name}}"
     },
     "reportDetail": {
       "sharedBy": "Da {{name}} · {{date}}",

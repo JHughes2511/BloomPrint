@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "按姓名或球队搜索...",
       "request": "请求",
       "noStaffFound": "未找到工作人员。请尝试其他搜索。",
-      "pointAtQr": "对准你教练的二维码"
+      "pointAtQr": "对准你教练的二维码",
+      "age": "年龄",
+      "phAge": "例如 17",
+      "onRosterAs": "名单上显示为 {{name}}"
     },
     "reportDetail": {
       "sharedBy": "来自 {{name}} · {{date}}",

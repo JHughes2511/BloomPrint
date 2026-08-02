@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Busca por nombre o programa...",
       "request": "Solicitar",
       "noStaffFound": "No se encontró cuerpo técnico. Prueba otra búsqueda.",
-      "pointAtQr": "Apunta al código QR de tu entrenador"
+      "pointAtQr": "Apunta al código QR de tu entrenador",
+      "age": "Edad",
+      "phAge": "p. ej. 17",
+      "onRosterAs": "En la plantilla como {{name}}"
     },
     "reportDetail": {
       "sharedBy": "De {{name}} · {{date}}",

@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "Pretraži po imenu ili programu...",
       "request": "Zatraži",
       "noStaffFound": "Nije pronađen stožer. Pokušaj s drugom pretragom.",
-      "pointAtQr": "Usmjeri na QR kod svog trenera"
+      "pointAtQr": "Usmjeri na QR kod svog trenera",
+      "age": "Godine",
+      "phAge": "npr. 17",
+      "onRosterAs": "U sastavu kao {{name}}"
     },
     "reportDetail": {
       "sharedBy": "Od {{name}} · {{date}}",

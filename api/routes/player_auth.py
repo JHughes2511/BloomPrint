@@ -196,6 +196,14 @@ def get_linked_player(
 
 
 class PlayerSelfUpdate(BaseModel):
+    """What a player may change about themselves on a coach's roster.
+
+    Facts about the athlete, not about the program. Jersey number, notes,
+    team and competition level stay with the coach: a number varies by team, and
+    notes are the coach's own record of the player rather than the player's.
+    Name is deliberately absent too — the roster keeps whatever the coach calls
+    them, and the linked account name is shown alongside instead.
+    """
     position: str | None = None
     height: str | None = None
     wingspan: str | None = None
@@ -205,6 +213,7 @@ class PlayerSelfUpdate(BaseModel):
     state: str | None = None
     city: str | None = None
     school_name: str | None = None
+    age: int | None = None
 
 
 @router.patch("/linked-player", response_model=schemas.PlayerOut)
@@ -218,10 +227,27 @@ def update_linked_player(
     player = db.get(models.Player, pu.player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
-    for field in ("position", "height", "wingspan", "weight", "standing_reach", "country", "state", "city", "school_name"):
-        val = getattr(body, field)
-        if val is not None:
-            setattr(player, field, val)
+
+    # Every roster this account is linked to, not just the primary one. A player
+    # on two coaches' rosters is one person: measuring themselves once should not
+    # leave the second coach with last season's height. The player is the
+    # authority on these facts, and either side may edit them afterwards.
+    linked_ids = {
+        row.player_id for row in
+        db.query(models.PlayerUserLink).filter_by(player_user_id=pu.id).all()
+    }
+    linked_ids.add(pu.player_id)
+
+    fields = ("position", "height", "wingspan", "weight", "standing_reach",
+              "country", "state", "city", "school_name", "age")
+    for pid in linked_ids:
+        target = db.get(models.Player, pid)
+        if not target:
+            continue
+        for field in fields:
+            val = getattr(body, field)
+            if val is not None:
+                setattr(target, field, val)
     db.commit()
     db.refresh(player)
     return schemas.PlayerOut.model_validate(player)

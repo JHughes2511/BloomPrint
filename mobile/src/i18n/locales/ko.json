@@ -1126,7 +1126,10 @@
       "searchByNameProgram": "이름이나 프로그램으로 검색...",
       "request": "요청",
       "noStaffFound": "스태프를 찾을 수 없습니다. 다른 검색어를 사용해 보세요.",
-      "pointAtQr": "코치의 QR 코드를 비춰주세요"
+      "pointAtQr": "코치의 QR 코드를 비춰주세요",
+      "age": "나이",
+      "phAge": "예: 17",
+      "onRosterAs": "로스터에는 {{name}}(으)로"
     },
     "reportDetail": {
       "sharedBy": "{{name}} 보냄 · {{date}}",
