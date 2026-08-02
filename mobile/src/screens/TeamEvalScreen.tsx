@@ -26,7 +26,7 @@ import ReportCorrectionsPanel from '../components/ReportCorrectionsPanel';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeProvider';
-import { topPad, bleedRow, bleedContent } from '../responsive/screenPadding';
+import { titleTopPad, bleedRow, bleedContent } from '../responsive/screenPadding';
 import { useBreakpoint } from '../responsive/useBreakpoint';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -3173,7 +3173,7 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   root: { flex: 1 },
   scroll: { flex: 1, padding: 16 },
   topNav: {
-    paddingTop: topPad(56), paddingHorizontal: 16, paddingBottom: 12,
+    paddingTop: titleTopPad(56), paddingHorizontal: 16, paddingBottom: 12,
     borderBottomWidth: 1, borderBottomColor: t.divider,
   },
   screenTitle: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6, marginBottom: 12 },

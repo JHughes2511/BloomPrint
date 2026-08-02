@@ -21,7 +21,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { renderReport } from '../utils/renderReport';
 import { outputTypeLabel } from '../utils/reportType';
 import { useTheme } from '../theme/ThemeProvider';
-import { topPad, bleedRow, bleedContent } from '../responsive/screenPadding';
+import { topPad, titleTopPad, bleedRow, bleedContent } from '../responsive/screenPadding';
 import { useBreakpoint } from '../responsive/useBreakpoint';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -1346,7 +1346,7 @@ export default function TeamReportScreen() {
 
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingTop: topPad(56) },
+  container: { flex: 1, padding: 20, paddingTop: titleTopPad(56) },
   titleRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 28 },
   title: { fontFamily: fonts[800], fontSize: 30, letterSpacing: -0.6, color: t.ink, marginBottom: 4 },
   sub: { color: t.muted, fontSize: 13 },

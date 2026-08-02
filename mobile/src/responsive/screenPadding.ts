@@ -24,6 +24,23 @@ export const topPad = (nativeValue: number): number =>
   Platform.OS === 'web' ? WEB_TOP_PAD : nativeValue;
 
 /**
+ * Top padding for a screen that opens with a large title.
+ *
+ * Less than topPad on purpose, and the difference is optical rather than
+ * arithmetic. Home opens with a small overline; these screens open with a 34pt
+ * title, whose glyphs sit low inside a much taller line box. Give both the same
+ * 24 and the titles read as starting lower even though the boxes begin at the
+ * same place — the space is real, it just belongs to the font.
+ *
+ * 12 lands the title's cap-height a little above where Home's overline sits, so
+ * the screens line up by eye rather than by number.
+ */
+const WEB_TITLE_TOP_PAD = 12;
+
+export const titleTopPad = (nativeValue: number): number =>
+  Platform.OS === 'web' ? WEB_TITLE_TOP_PAD : nativeValue;
+
+/**
  * A horizontal chip scroller that runs to the edge of the screen.
  *
  * A row of chips is only readable as scrollable if a chip is visibly cut by the

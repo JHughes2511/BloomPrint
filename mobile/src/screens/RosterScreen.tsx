@@ -68,7 +68,7 @@ import { Player, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
-import { topPad } from '../responsive/screenPadding';
+import { titleTopPad } from '../responsive/screenPadding';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
@@ -618,7 +618,7 @@ export default function RosterScreen() {
 }
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
-  container: { flex: 1, paddingTop: topPad(56) },
+  container: { flex: 1, paddingTop: titleTopPad(56) },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 20, marginBottom: 12 },
   // The row top-aligns so the title sits high, which pushed these against the
