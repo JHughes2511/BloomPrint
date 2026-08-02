@@ -113,8 +113,9 @@ def google_auth(request: Request, body: schemas.PlayerGoogleAuth, db: Session = 
     if body.mode != "register":
         return {"status": "needs_signup", "email": identity.email, "name": identity.name}
 
+    # The typed name wins over the Google profile name; see the coach route.
     pu = models.PlayerUser(
-        name=identity.name,
+        name=(body.name or "").strip() or identity.name,
         email=identity.email,
         password_hash=random_unusable_password_hash(_hash_pw),
         country=body.country,

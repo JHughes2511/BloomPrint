@@ -65,7 +65,7 @@ export default function PlayerRegisterScreen() {
     if (googleIdToken) {
       setLoading(true);
       try {
-        const res = await playerAuthAPI.google({ id_token: googleIdToken, mode: 'register', country: country || undefined, city: city.trim() || undefined });
+        const res = await playerAuthAPI.google({ id_token: googleIdToken, mode: 'register', name: name.trim() || undefined, country: country || undefined, city: city.trim() || undefined });
         if (res.status === 'ok') { await applyAuth(res.access_token, res.player_user); setRegistered(true); }
         else throw new Error(tr('playerApp.register.couldNotCreate'));
       } catch (e: any) {

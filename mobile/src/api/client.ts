@@ -107,6 +107,10 @@ export const authAPI = {
 
   google: (data: {
     id_token: string; mode: 'login' | 'register';
+    // Editable on the signup form, so it has to be sendable. The type is what
+    // enforces that: the field was missing here, so passing it was a compile
+    // error and the app quietly created accounts under the Google profile name.
+    name?: string;
     role?: string; program_name?: string; competition_level?: string;
     conference?: string; country?: string; city?: string;
   }) => api.post('/auth/google', data).then(r => r.data),

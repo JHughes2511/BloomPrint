@@ -31,6 +31,11 @@ class CoachGoogleAuth(BaseModel):
     id_token: str
     mode: str = "login"   # "login" (existing only) or "register" (create with fields)
     # Required-profile fields collected during Google signup (ignored on login):
+    # The signup form prefills this from the Google account and lets it be
+    # edited, so the edited value has to be able to reach us. Without it the
+    # account was always created under the Google profile name and the field
+    # looked broken.
+    name: str | None = None
     role: str = "coach"
     program_name: str | None = None
     competition_level: str | None = None
@@ -288,6 +293,8 @@ class PlayerUserUpdate(BaseModel):
 class PlayerGoogleAuth(BaseModel):
     id_token: str
     mode: str = "login"   # "login" (existing only) or "register" (create)
+    # Editable on the signup form, same as the coach's — see CoachGoogleAuth.
+    name: str | None = None
     country: str | None = None
     city: str | None = None
 

@@ -115,13 +115,17 @@ def google_auth(request: Request, body: schemas.CoachGoogleAuth, db: Session = D
         return {"status": "needs_signup", "email": identity.email, "name": identity.name}
 
     weight = _auto_weight(body.competition_level, body.conference) if body.competition_level else 45
+    # What the person typed wins over what Google knows them as; the Google name
+    # is only the prefill. Falls back to the identity when the form sent nothing,
+    # which keeps older clients working.
+    chosen_name = (body.name or "").strip() or identity.name
     coach = models.Coach(
-        name=identity.name,
+        name=chosen_name,
         email=identity.email,
         password_hash=random_unusable_password_hash(hash_password),
         weight=weight,
         role=body.role or "coach",
-        program_name=body.program_name or identity.name,
+        program_name=body.program_name or chosen_name,
         conference=body.conference,
         competition_level=(body.competition_level or "HS Varsity"),
         country=body.country,

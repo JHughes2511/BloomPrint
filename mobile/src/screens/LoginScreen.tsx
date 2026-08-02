@@ -22,7 +22,7 @@ import FieldRow from '../responsive/FieldRow';
 import CountryField from '../components/CountryField';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
-import { sheetCap } from '../responsive/modalSizes';
+import { sheetCap, webOnly } from '../responsive/modalSizes';
 
 const ROLES = [
   { key: 'coach',   labelKey: 'auth.roleCoach' },
@@ -237,6 +237,7 @@ export default function LoginScreen() {
         // Google-based signup: create the account with the required fields.
         const res = await authAPI.google({
           id_token: googleIdToken, mode: 'register',
+          name: name.trim() || undefined,
           role,
           program_name: program || name,
           competition_level: competitionLevel || undefined,
@@ -441,10 +442,23 @@ export default function LoginScreen() {
 }
 
 const makePickerStyles = (t: ThemeTokens) => StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
+  // A sheet that rises from the bottom edge is the phone idiom and stays that
+  // way there. In a browser it reads as stuck to the window: square-bottomed,
+  // flush against the edge, with its padding trailing off the screen — which is
+  // what looked like empty space under the last option rather than the base of
+  // the card. Centred, it is a dialog, which is what a picker is on a desktop.
+  overlay: {
+    flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end',
+    ...webOnly({ justifyContent: 'center', padding: 24 }),
+  },
   sheet: {
     backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    maxHeight: '80%', paddingBottom: 20, ...sheetCap(560)},
+    maxHeight: '80%', paddingBottom: 20, ...sheetCap(560),
+    // Rounded on all four corners once it is no longer resting on an edge.
+    // Named per corner because a plain borderRadius does not win against the
+    // two explicit top corners above.
+    ...webOnly({ borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }),
+  },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     padding: 20, borderBottomWidth: 1, borderBottomColor: t.divider,
