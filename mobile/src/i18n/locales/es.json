@@ -568,7 +568,12 @@
     "askBloomprint": "Preguntar a BloomPrint",
     "emailNotifications": "Notificaciones por correo",
     "emailNotificationsHint": "Recibe un correo cuando alguien comparta un informe, te invite o responda a una solicitud.",
-    "emailNotificationsLabel": "Avisarme por correo"
+    "emailNotificationsLabel": "Avisarme por correo",
+    "feedbackAttach": "Adjuntar",
+    "feedbackTakePhoto": "Hacer foto",
+    "feedbackPhotoPermTitle": "Se necesita la cámara",
+    "feedbackPhotoPermMsg": "Permite el acceso a la cámara para adjuntar una foto.",
+    "feedbackPhotoError": "No se pudo adjuntar esa foto."
   },
   "onboarding": {
     "step": "Paso {{current}} de {{total}}",

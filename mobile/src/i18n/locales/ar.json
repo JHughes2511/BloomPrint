@@ -568,7 +568,12 @@
     "askBloomprint": "اسأل BloomPrint",
     "emailNotifications": "إشعارات البريد",
     "emailNotificationsHint": "استلم بريدًا عندما يشارك أحدهم تقريرًا أو يدعوك أو يرد على طلب.",
-    "emailNotificationsLabel": "أرسل لي بريدًا عن النشاط"
+    "emailNotificationsLabel": "أرسل لي بريدًا عن النشاط",
+    "feedbackAttach": "إرفاق",
+    "feedbackTakePhoto": "التقاط صورة",
+    "feedbackPhotoPermTitle": "مطلوب الوصول إلى الكاميرا",
+    "feedbackPhotoPermMsg": "اسمح بالوصول إلى الكاميرا لإرفاق صورة.",
+    "feedbackPhotoError": "تعذّر إرفاق تلك الصورة."
   },
   "onboarding": {
     "step": "الخطوة {{current}} من {{total}}",

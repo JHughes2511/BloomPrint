@@ -568,7 +568,12 @@
     "askBloomprint": "Magtanong sa BloomPrint",
     "emailNotifications": "Mga abiso sa email",
     "emailNotificationsHint": "Makatanggap ng email kapag may nagbahagi ng report, nag-imbita sa iyo, o sumagot sa hiling.",
-    "emailNotificationsLabel": "I-email ako tungkol sa aktibidad"
+    "emailNotificationsLabel": "I-email ako tungkol sa aktibidad",
+    "feedbackAttach": "Maglakip",
+    "feedbackTakePhoto": "Kumuha ng larawan",
+    "feedbackPhotoPermTitle": "Kailangan ng access sa camera",
+    "feedbackPhotoPermMsg": "Payagan ang camera para makapaglakip ng larawan.",
+    "feedbackPhotoError": "Hindi mailakip ang larawang iyon."
   },
   "onboarding": {
     "step": "Hakbang {{current}} ng {{total}}",

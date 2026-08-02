@@ -4,6 +4,8 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal, Tex
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
+import { Image } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { playerAPI, feedbackAPI, authAPI } from '../api/client';
 // Read straight from app.json rather than pulling in expo-application just to
@@ -105,7 +107,44 @@ export default function HomeScreen() {
   const [importingPhilosophy, setImportingPhilosophy] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
+  // Screenshots as base64 data URIs, ready to travel with the report.
+  const [feedbackImages, setFeedbackImages] = useState<string[]>([]);
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
+
+  const MAX_FEEDBACK_IMAGES = 4;
+
+  /**
+   * Attach a screenshot, from the camera or the library.
+   *
+   * quality 0.5 and base64 straight from the picker: a phone screenshot is
+   * several megabytes at full size, and four of those would be an email nobody
+   * can receive. Half quality is indistinguishable for showing a broken layout.
+   */
+  const addFeedbackImage = async (from: 'camera' | 'library') => {
+    const room = MAX_FEEDBACK_IMAGES - feedbackImages.length;
+    if (room <= 0) return;
+    try {
+      if (from === 'camera') {
+        const perm = await ImagePicker.requestCameraPermissionsAsync();
+        if (!perm.granted) {
+          Alert.alert(tr('home.feedbackPhotoPermTitle'), tr('home.feedbackPhotoPermMsg'));
+          return;
+        }
+      }
+      const opts = { mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.5, base64: true } as const;
+      const res = from === 'camera'
+        ? await ImagePicker.launchCameraAsync(opts)
+        : await ImagePicker.launchImageLibraryAsync({ ...opts, allowsMultipleSelection: true, selectionLimit: room });
+      if (res.canceled || !res.assets?.length) return;
+      const uris = res.assets
+        .slice(0, room)
+        .map(a => (a.base64 ? `data:image/jpeg;base64,${a.base64}` : null))
+        .filter((x): x is string => !!x);
+      setFeedbackImages(prev => [...prev, ...uris].slice(0, MAX_FEEDBACK_IMAGES));
+    } catch {
+      Alert.alert(tr('common.error'), tr('home.feedbackPhotoError'));
+    }
+  };
 
   const submitFeedback = async () => {
     const text = feedbackText.trim();
@@ -117,9 +156,11 @@ export default function HomeScreen() {
         screen: 'Home',
         platform: Platform.OS,
         app_version: APP_VERSION,
+        images: feedbackImages.length ? feedbackImages : undefined,
       });
       Alert.alert(tr('home.feedbackThanksTitle'), tr('home.feedbackThanksMsg'));
       setFeedbackText('');
+      setFeedbackImages([]);
       setShowFeedback(false);
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('home.feedbackSubmitError'));
@@ -366,6 +407,42 @@ export default function HomeScreen() {
               placeholder={tr('home.feedbackPlaceholder')} placeholderTextColor={t.muted2}
               multiline textAlignVertical="top"
             />
+            {/* Attachments. A photo of the problem is worth more than a
+                paragraph describing it, and these ride along to the inbox
+                rather than sitting behind a login. */}
+            {feedbackImages.length > 0 && (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+                {feedbackImages.map((uri, i) => (
+                  <View key={i}>
+                    <Image source={{ uri }} style={{ width: 64, height: 64, borderRadius: 8, borderWidth: 1, borderColor: t.line }} />
+                    <TouchableOpacity
+                      onPress={() => setFeedbackImages(prev => prev.filter((_, j) => j !== i))}
+                      style={{ position: 'absolute', top: -6, right: -6, backgroundColor: t.sheet, borderRadius: 999, borderWidth: 1, borderColor: t.line, padding: 2 }}
+                    >
+                      <Icon name="x" size={13} color={t.muted} strokeWidth={2} />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            )}
+            {feedbackImages.length < MAX_FEEDBACK_IMAGES && (
+              <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+                <TouchableOpacity
+                  onPress={() => addFeedbackImage('library')}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 14, height: 36 }}
+                >
+                  <Icon name="upload" size={15} color={t.muted} strokeWidth={2} />
+                  <Text style={{ color: t.muted, fontSize: 13, fontFamily: fonts[700] }} numberOfLines={1}>{tr('home.feedbackAttach')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => addFeedbackImage('camera')}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 14, height: 36 }}
+                >
+                  <Icon name="camera" size={15} color={t.muted} strokeWidth={2} />
+                  <Text style={{ color: t.muted, fontSize: 13, fontFamily: fonts[700] }} numberOfLines={1}>{tr('home.feedbackTakePhoto')}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
             <TouchableOpacity
               style={{ marginTop: 16, backgroundColor: t.ctaBg, borderRadius: 12, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, opacity: (!feedbackText.trim() || submittingFeedback) ? 0.5 : 1 }}
               onPress={submitFeedback}

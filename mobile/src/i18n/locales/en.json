@@ -568,7 +568,12 @@
     "askBloomprint": "Ask BloomPrint",
     "emailNotifications": "Email notifications",
     "emailNotificationsHint": "Get an email when someone shares a report, invites you, or answers a request.",
-    "emailNotificationsLabel": "Email me about activity"
+    "emailNotificationsLabel": "Email me about activity",
+    "feedbackAttach": "Attach",
+    "feedbackTakePhoto": "Take photo",
+    "feedbackPhotoPermTitle": "Camera access needed",
+    "feedbackPhotoPermMsg": "Allow camera access to attach a photo.",
+    "feedbackPhotoError": "Could not attach that photo."
   },
   "onboarding": {
     "step": "Step {{current}} of {{total}}",

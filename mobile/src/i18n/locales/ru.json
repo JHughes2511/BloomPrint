@@ -568,7 +568,12 @@
     "askBloomprint": "Спросить BloomPrint",
     "emailNotifications": "Уведомления по почте",
     "emailNotificationsHint": "Получать письмо, когда кто-то делится отчётом, приглашает вас или отвечает на запрос.",
-    "emailNotificationsLabel": "Присылать письма об активности"
+    "emailNotificationsLabel": "Присылать письма об активности",
+    "feedbackAttach": "Прикрепить",
+    "feedbackTakePhoto": "Сделать фото",
+    "feedbackPhotoPermTitle": "Нужен доступ к камере",
+    "feedbackPhotoPermMsg": "Разрешите доступ к камере, чтобы прикрепить фото.",
+    "feedbackPhotoError": "Не удалось прикрепить это фото."
   },
   "onboarding": {
     "step": "Шаг {{current}} из {{total}}",

@@ -568,7 +568,12 @@
     "askBloomprint": "Pitaj BloomPrint",
     "emailNotifications": "Обавештења имејлом",
     "emailNotificationsHint": "Примајте имејл када неко подели извештај, позове вас или одговори на захтев.",
-    "emailNotificationsLabel": "Шаљи ми имејл о активности"
+    "emailNotificationsLabel": "Шаљи ми имејл о активности",
+    "feedbackAttach": "Приложи",
+    "feedbackTakePhoto": "Сликај",
+    "feedbackPhotoPermTitle": "Потребан приступ камери",
+    "feedbackPhotoPermMsg": "Дозволите приступ камери да приложите фотографију.",
+    "feedbackPhotoError": "Није могуће приложити ту фотографију."
   },
   "onboarding": {
     "step": "Korak {{current}} od {{total}}",

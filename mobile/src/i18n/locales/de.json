@@ -568,7 +568,12 @@
     "askBloomprint": "BloomPrint fragen",
     "emailNotifications": "E-Mail-Benachrichtigungen",
     "emailNotificationsHint": "E-Mail erhalten, wenn jemand einen Bericht teilt, dich einlädt oder auf eine Anfrage antwortet.",
-    "emailNotificationsLabel": "Per E-Mail benachrichtigen"
+    "emailNotificationsLabel": "Per E-Mail benachrichtigen",
+    "feedbackAttach": "Anhängen",
+    "feedbackTakePhoto": "Foto aufnehmen",
+    "feedbackPhotoPermTitle": "Kamerazugriff nötig",
+    "feedbackPhotoPermMsg": "Erlaube den Kamerazugriff, um ein Foto anzuhängen.",
+    "feedbackPhotoError": "Dieses Foto konnte nicht angehängt werden."
   },
   "onboarding": {
     "step": "Schritt {{current}} von {{total}}",

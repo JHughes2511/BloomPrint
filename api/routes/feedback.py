@@ -31,11 +31,44 @@ router = APIRouter(prefix="/feedback", tags=["feedback"])
 MAX_FEEDBACK_CHARS = 4000
 
 
+MAX_IMAGES = 4
+
+
 class FeedbackCreate(BaseModel):
     text: str
     screen: str | None = None
     app_version: str | None = None
     platform: str | None = None
+    # Screenshots as base64 data URIs. A photo of the problem says in one glance
+    # what a paragraph struggles to, and the cap keeps both the row and the
+    # resulting email a sensible size.
+    images: list[str] | None = None
+
+
+def _as_attachments(raw: str | None) -> list[dict]:
+    """Stored data URIs to mail attachments, skipping anything malformed.
+
+    A screenshot that cannot be decoded must not cost us the report it came
+    with — the words are the part we cannot reconstruct.
+    """
+    if not raw:
+        return []
+    try:
+        uris = json.loads(raw)
+    except Exception:
+        return []
+    out: list[dict] = []
+    for i, uri in enumerate(uris[:MAX_IMAGES], start=1):
+        if not isinstance(uri, str) or "," not in uri:
+            continue
+        header, _, b64 = uri.partition(",")
+        subtype = "png" if "image/png" in header else "jpeg"
+        out.append({
+            "filename": f"screenshot-{i}.{'png' if subtype == 'png' else 'jpg'}",
+            "content": b64,
+            "subtype": subtype,
+        })
+    return out
 
 
 def _notify(row_id: int) -> None:
@@ -58,6 +91,7 @@ def _notify(row_id: int) -> None:
         coach = db.get(models.Coach, row.coach_id) if row.coach_id else None
         coach_email = coach.email if coach else None
         ack_language, ack_text = row.language, row.text
+        shots = _as_attachments(row.images)
         who = f"{coach.name} <{coach.email}>" if coach else "Unknown coach"
         context = " · ".join(x for x in [row.screen, row.platform, row.app_version, row.language] if x)
         body = (
@@ -72,10 +106,13 @@ def _notify(row_id: int) -> None:
         # Sent FROM the feedback mailbox so it isn't delivered to the address it
         # was sent from, which receiving servers reject as spoofing. Reply-To is
         # the coach, so answering the notification reaches them directly.
+        if shots:
+            body += f"\n{len(shots)} screenshot(s) attached.\n"
         sent = send_email(
             feedback_to(), subject, body,
             from_addr=feedback_from(),
             reply_to=coach_email,
+            attachments=shots,
         )
         if sent:
             row.emailed = True
@@ -122,6 +159,9 @@ def submit_feedback(
         # Recorded so a report written in Spanish is read as Spanish rather than
         # mistaken for a broken translation.
         language=coach.preferred_language or "en",
+        # Capped here rather than trusted from the client, and stored as JSON so
+        # the column stays a plain text field on every backend.
+        images=json.dumps((body.images or [])[:MAX_IMAGES]) if body.images else None,
     )
     db.add(row)
     db.commit()

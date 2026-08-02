@@ -463,7 +463,10 @@ export const coachesAPI = {
 export const feedbackAPI = {
   // `screen` is what makes a report actionable — "this is confusing" is worth
   // far more when the server knows where they were standing when they wrote it.
-  submit: (data: { text: string; screen?: string; app_version?: string; platform?: string }) =>
+  // `images` are base64 data URIs, capped and compressed on the client. They
+  // ride with the report and are attached to the notification email, so a
+  // screenshot of the problem arrives in the inbox rather than behind a login.
+  submit: (data: { text: string; screen?: string; app_version?: string; platform?: string; images?: string[] }) =>
     api.post('/feedback', data).then(r => r.data),
   mine: () => api.get('/feedback').then(r => r.data),
 };

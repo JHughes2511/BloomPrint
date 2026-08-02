@@ -568,7 +568,12 @@
     "askBloomprint": "שאל את BloomPrint",
     "emailNotifications": "התראות במייל",
     "emailNotificationsHint": "קבל מייל כשמישהו משתף דוח, מזמין אותך או עונה לבקשה.",
-    "emailNotificationsLabel": "שלחו לי מייל על פעילות"
+    "emailNotificationsLabel": "שלחו לי מייל על פעילות",
+    "feedbackAttach": "צירוף",
+    "feedbackTakePhoto": "צילום תמונה",
+    "feedbackPhotoPermTitle": "נדרשת גישה למצלמה",
+    "feedbackPhotoPermMsg": "אפשר גישה למצלמה כדי לצרף תמונה.",
+    "feedbackPhotoError": "לא ניתן לצרף את התמונה."
   },
   "onboarding": {
     "step": "שלב {{current}} מתוך {{total}}",

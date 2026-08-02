@@ -49,7 +49,8 @@ def mail_enabled() -> bool:
 
 
 def _send_resend(to: str, subject: str, text: str, html: str | None,
-                 from_addr: str, reply_to: str | None) -> bool:
+                 from_addr: str, reply_to: str | None,
+                 attachments: list[dict] | None = None) -> bool:
     import json
     import urllib.request
 
@@ -58,6 +59,11 @@ def _send_resend(to: str, subject: str, text: str, html: str | None,
         payload["html"] = html
     if reply_to:
         payload["reply_to"] = [reply_to]
+    if attachments:
+        # Resend wants raw base64 under `content`, with no data: prefix.
+        payload["attachments"] = [
+            {"filename": a["filename"], "content": a["content"]} for a in attachments
+        ]
     req = urllib.request.Request(
         "https://api.resend.com/emails",
         data=json.dumps(payload).encode("utf-8"),
@@ -78,7 +84,8 @@ def _send_resend(to: str, subject: str, text: str, html: str | None,
 
 
 def _send_smtp(to: str, subject: str, text: str, html: str | None,
-               from_addr: str, reply_to: str | None) -> bool:
+               from_addr: str, reply_to: str | None,
+               attachments: list[dict] | None = None) -> bool:
     msg = EmailMessage()
     msg["Subject"] = subject
     msg["From"] = from_addr
@@ -88,6 +95,10 @@ def _send_smtp(to: str, subject: str, text: str, html: str | None,
     msg.set_content(text)
     if html:
         msg.add_alternative(html, subtype="html")
+    for a in attachments or []:
+        import base64 as _b64
+        msg.add_attachment(_b64.b64decode(a["content"]), maintype="image",
+                           subtype=a.get("subtype", "jpeg"), filename=a["filename"])
     host = os.environ["SMTP_HOST"]
     port = int(os.environ.get("SMTP_PORT", "587"))
     user = os.environ.get("SMTP_USER")
@@ -118,7 +129,8 @@ def _explain(exc: Exception) -> str:
 
 
 def try_send(to: str, subject: str, text: str, html: str | None = None, *,
-             from_addr: str | None = None, reply_to: str | None = None) -> tuple[bool, str]:
+             from_addr: str | None = None, reply_to: str | None = None,
+             attachments: list[dict] | None = None) -> tuple[bool, str]:
     """Send one email, reporting why if it didn't go. Never raises.
 
     Same work as send_email, with the reason kept rather than dropped, so a
@@ -130,10 +142,10 @@ def try_send(to: str, subject: str, text: str, html: str | None = None, *,
     sender = from_addr or mail_from()
     try:
         if os.environ.get("RESEND_API_KEY"):
-            ok = _send_resend(to, subject, text, html, sender, reply_to)
+            ok = _send_resend(to, subject, text, html, sender, reply_to, attachments)
             return ok, "sent via Resend" if ok else "Resend accepted the request but did not confirm"
         if os.environ.get("SMTP_HOST"):
-            ok = _send_smtp(to, subject, text, html, sender, reply_to)
+            ok = _send_smtp(to, subject, text, html, sender, reply_to, attachments)
             return ok, "sent via SMTP" if ok else "SMTP accepted the request but did not confirm"
     except Exception as exc:
         detail = _explain(exc)
@@ -144,7 +156,8 @@ def try_send(to: str, subject: str, text: str, html: str | None = None, *,
 
 
 def send_email(to: str, subject: str, text: str, html: str | None = None, *,
-               from_addr: str | None = None, reply_to: str | None = None) -> bool:
+               from_addr: str | None = None, reply_to: str | None = None,
+               attachments: list[dict] | None = None) -> bool:
     """Send one email. Returns whether it went out; never raises.
 
     `reply_to` is what makes a noreply@ sender usable: the message still comes
@@ -153,4 +166,5 @@ def send_email(to: str, subject: str, text: str, html: str | None = None, *,
     A caller that wants to know it failed can check the return value, but no
     caller should have its own work fail because mail did.
     """
-    return try_send(to, subject, text, html, from_addr=from_addr, reply_to=reply_to)[0]
+    return try_send(to, subject, text, html, from_addr=from_addr, reply_to=reply_to,
+                    attachments=attachments)[0]

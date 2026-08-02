@@ -568,7 +568,12 @@
     "askBloomprint": "Întreabă BloomPrint",
     "emailNotifications": "Notificări prin email",
     "emailNotificationsHint": "Primește un email când cineva partajează un raport, te invită sau răspunde unei cereri.",
-    "emailNotificationsLabel": "Trimite-mi email despre activitate"
+    "emailNotificationsLabel": "Trimite-mi email despre activitate",
+    "feedbackAttach": "Atașează",
+    "feedbackTakePhoto": "Fă o poză",
+    "feedbackPhotoPermTitle": "Este nevoie de acces la cameră",
+    "feedbackPhotoPermMsg": "Permite accesul la cameră pentru a atașa o poză.",
+    "feedbackPhotoError": "Nu s-a putut atașa acea poză."
   },
   "onboarding": {
     "step": "Pasul {{current}} din {{total}}",

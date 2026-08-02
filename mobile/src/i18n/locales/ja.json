@@ -568,7 +568,12 @@
     "askBloomprint": "BloomPrint に質問",
     "emailNotifications": "メール通知",
     "emailNotificationsHint": "レポートの共有、招待、リクエストへの返答があったときにメールを受け取ります。",
-    "emailNotificationsLabel": "アクティビティをメールで知らせる"
+    "emailNotificationsLabel": "アクティビティをメールで知らせる",
+    "feedbackAttach": "添付",
+    "feedbackTakePhoto": "写真を撮る",
+    "feedbackPhotoPermTitle": "カメラへのアクセスが必要です",
+    "feedbackPhotoPermMsg": "写真を添付するにはカメラへのアクセスを許可してください。",
+    "feedbackPhotoError": "その写真を添付できませんでした。"
   },
   "onboarding": {
     "step": "ステップ {{current}}／{{total}}",

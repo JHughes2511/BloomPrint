@@ -568,7 +568,12 @@
     "askBloomprint": "询问 BloomPrint",
     "emailNotifications": "邮件通知",
     "emailNotificationsHint": "当有人分享报告、邀请你或回复请求时收到邮件。",
-    "emailNotificationsLabel": "通过邮件通知我"
+    "emailNotificationsLabel": "通过邮件通知我",
+    "feedbackAttach": "添加附件",
+    "feedbackTakePhoto": "拍照",
+    "feedbackPhotoPermTitle": "需要相机权限",
+    "feedbackPhotoPermMsg": "请允许访问相机以添加照片。",
+    "feedbackPhotoError": "无法添加该照片。"
   },
   "onboarding": {
     "step": "第 {{current}} 步，共 {{total}} 步",

@@ -568,7 +568,12 @@
     "askBloomprint": "ჰკითხეთ BloomPrint-ს",
     "emailNotifications": "ელფოსტის შეტყობინებები",
     "emailNotificationsHint": "მიიღეთ წერილი, როცა ვინმე გაგიზიარებთ ანგარიშს, მოგიწვევთ ან უპასუხებს მოთხოვნას.",
-    "emailNotificationsLabel": "მომწერეთ აქტივობის შესახებ"
+    "emailNotificationsLabel": "მომწერეთ აქტივობის შესახებ",
+    "feedbackAttach": "მიმაგრება",
+    "feedbackTakePhoto": "ფოტოს გადაღება",
+    "feedbackPhotoPermTitle": "საჭიროა კამერაზე წვდომა",
+    "feedbackPhotoPermMsg": "დაუშვით კამერაზე წვდომა ფოტოს მისამაგრებლად.",
+    "feedbackPhotoError": "ფოტოს მიმაგრება ვერ მოხერხდა."
   },
   "onboarding": {
     "step": "ნაბიჯი {{current}} / {{total}}",

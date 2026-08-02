@@ -568,7 +568,12 @@
     "askBloomprint": "BloomPrint से पूछें",
     "emailNotifications": "ईमेल सूचनाएँ",
     "emailNotificationsHint": "जब कोई रिपोर्ट साझा करे, आपको आमंत्रित करे या अनुरोध का उत्तर दे तो ईमेल पाएँ।",
-    "emailNotificationsLabel": "गतिविधि के बारे में ईमेल भेजें"
+    "emailNotificationsLabel": "गतिविधि के बारे में ईमेल भेजें",
+    "feedbackAttach": "संलग्न करें",
+    "feedbackTakePhoto": "फ़ोटो लें",
+    "feedbackPhotoPermTitle": "कैमरा एक्सेस चाहिए",
+    "feedbackPhotoPermMsg": "फ़ोटो जोड़ने के लिए कैमरा एक्सेस दें।",
+    "feedbackPhotoError": "वह फ़ोटो संलग्न नहीं हो सकी।"
   },
   "onboarding": {
     "step": "चरण {{current}} / {{total}}",

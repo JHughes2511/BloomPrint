@@ -568,7 +568,12 @@
     "askBloomprint": "Запитати BloomPrint",
     "emailNotifications": "Сповіщення поштою",
     "emailNotificationsHint": "Отримувати лист, коли хтось ділиться звітом, запрошує вас або відповідає на запит.",
-    "emailNotificationsLabel": "Надсилати листи про активність"
+    "emailNotificationsLabel": "Надсилати листи про активність",
+    "feedbackAttach": "Прикріпити",
+    "feedbackTakePhoto": "Зробити фото",
+    "feedbackPhotoPermTitle": "Потрібен доступ до камери",
+    "feedbackPhotoPermMsg": "Дозвольте доступ до камери, щоб прикріпити фото.",
+    "feedbackPhotoError": "Не вдалося прикріпити це фото."
   },
   "onboarding": {
     "step": "Крок {{current}} з {{total}}",

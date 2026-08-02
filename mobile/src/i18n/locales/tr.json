@@ -568,7 +568,12 @@
     "askBloomprint": "BloomPrint'e sor",
     "emailNotifications": "E-posta bildirimleri",
     "emailNotificationsHint": "Biri rapor paylaştığında, sizi davet ettiğinde veya bir isteği yanıtladığında e-posta alın.",
-    "emailNotificationsLabel": "Etkinlik için e-posta gönder"
+    "emailNotificationsLabel": "Etkinlik için e-posta gönder",
+    "feedbackAttach": "Ekle",
+    "feedbackTakePhoto": "Fotoğraf çek",
+    "feedbackPhotoPermTitle": "Kamera erişimi gerekli",
+    "feedbackPhotoPermMsg": "Fotoğraf eklemek için kamera erişimine izin verin.",
+    "feedbackPhotoError": "Bu fotoğraf eklenemedi."
   },
   "onboarding": {
     "step": "Adım {{current}} / {{total}}",

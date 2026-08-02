@@ -568,7 +568,12 @@
     "askBloomprint": "Fråga BloomPrint",
     "emailNotifications": "E-postaviseringar",
     "emailNotificationsHint": "Få ett mejl när någon delar en rapport, bjuder in dig eller svarar på en förfrågan.",
-    "emailNotificationsLabel": "Mejla mig om aktivitet"
+    "emailNotificationsLabel": "Mejla mig om aktivitet",
+    "feedbackAttach": "Bifoga",
+    "feedbackTakePhoto": "Ta foto",
+    "feedbackPhotoPermTitle": "Kameraåtkomst krävs",
+    "feedbackPhotoPermMsg": "Tillåt kameraåtkomst för att bifoga ett foto.",
+    "feedbackPhotoError": "Det gick inte att bifoga fotot."
   },
   "onboarding": {
     "step": "Steg {{current}} av {{total}}",

@@ -568,7 +568,12 @@
     "askBloomprint": "Klauskite BloomPrint",
     "emailNotifications": "El. pašto pranešimai",
     "emailNotificationsHint": "Gaukite el. laišką, kai kas nors pasidalija ataskaita, pakviečia jus ar atsako į prašymą.",
-    "emailNotificationsLabel": "Siųsti el. laiškus apie veiklą"
+    "emailNotificationsLabel": "Siųsti el. laiškus apie veiklą",
+    "feedbackAttach": "Pridėti",
+    "feedbackTakePhoto": "Fotografuoti",
+    "feedbackPhotoPermTitle": "Reikia prieigos prie kameros",
+    "feedbackPhotoPermMsg": "Leiskite prieigą prie kameros, kad pridėtumėte nuotrauką.",
+    "feedbackPhotoError": "Nepavyko pridėti šios nuotraukos."
   },
   "onboarding": {
     "step": "{{current}} žingsnis iš {{total}}",

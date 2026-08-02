@@ -568,7 +568,12 @@
     "askBloomprint": "BloomPrint에 질문",
     "emailNotifications": "이메일 알림",
     "emailNotificationsHint": "누군가 리포트를 공유하거나, 초대하거나, 요청에 답하면 이메일을 받습니다.",
-    "emailNotificationsLabel": "활동을 이메일로 알림"
+    "emailNotificationsLabel": "활동을 이메일로 알림",
+    "feedbackAttach": "첨부",
+    "feedbackTakePhoto": "사진 촬영",
+    "feedbackPhotoPermTitle": "카메라 접근 권한 필요",
+    "feedbackPhotoPermMsg": "사진을 첨부하려면 카메라 접근을 허용하세요.",
+    "feedbackPhotoError": "해당 사진을 첨부할 수 없습니다."
   },
   "onboarding": {
     "step": "{{total}}단계 중 {{current}}단계",

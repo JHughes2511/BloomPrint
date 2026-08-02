@@ -568,7 +568,12 @@
     "askBloomprint": "Zapytaj BloomPrint",
     "emailNotifications": "Powiadomienia e-mail",
     "emailNotificationsHint": "Otrzymuj e-mail, gdy ktoś udostępni raport, zaprosi Cię lub odpowie na prośbę.",
-    "emailNotificationsLabel": "Powiadamiaj mnie e-mailem"
+    "emailNotificationsLabel": "Powiadamiaj mnie e-mailem",
+    "feedbackAttach": "Załącz",
+    "feedbackTakePhoto": "Zrób zdjęcie",
+    "feedbackPhotoPermTitle": "Potrzebny dostęp do aparatu",
+    "feedbackPhotoPermMsg": "Zezwól na dostęp do aparatu, aby załączyć zdjęcie.",
+    "feedbackPhotoError": "Nie udało się załączyć tego zdjęcia."
   },
   "onboarding": {
     "step": "Krok {{current}} z {{total}}",

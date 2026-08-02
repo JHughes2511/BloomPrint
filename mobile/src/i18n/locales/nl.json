@@ -568,7 +568,12 @@
     "askBloomprint": "Vraag BloomPrint",
     "emailNotifications": "E-mailmeldingen",
     "emailNotificationsHint": "Ontvang een e-mail wanneer iemand een rapport deelt, je uitnodigt of op een verzoek reageert.",
-    "emailNotificationsLabel": "Mail me over activiteit"
+    "emailNotificationsLabel": "Mail me over activiteit",
+    "feedbackAttach": "Bijvoegen",
+    "feedbackTakePhoto": "Foto maken",
+    "feedbackPhotoPermTitle": "Cameratoegang nodig",
+    "feedbackPhotoPermMsg": "Sta cameratoegang toe om een foto bij te voegen.",
+    "feedbackPhotoError": "Die foto kon niet worden bijgevoegd."
   },
   "onboarding": {
     "step": "Stap {{current}} van {{total}}",

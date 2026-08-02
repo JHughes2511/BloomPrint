@@ -568,7 +568,12 @@
     "askBloomprint": "Demander à BloomPrint",
     "emailNotifications": "Notifications par e-mail",
     "emailNotificationsHint": "Recevez un e-mail quand quelqu'un partage un rapport, vous invite ou répond à une demande.",
-    "emailNotificationsLabel": "M'avertir par e-mail"
+    "emailNotificationsLabel": "M'avertir par e-mail",
+    "feedbackAttach": "Joindre",
+    "feedbackTakePhoto": "Prendre une photo",
+    "feedbackPhotoPermTitle": "Accès à l'appareil photo requis",
+    "feedbackPhotoPermMsg": "Autorisez l'appareil photo pour joindre une photo.",
+    "feedbackPhotoError": "Impossible de joindre cette photo."
   },
   "onboarding": {
     "step": "Étape {{current}} sur {{total}}",
