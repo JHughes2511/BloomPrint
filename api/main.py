@@ -65,6 +65,23 @@ app.include_router(search.router)
 @app.on_event("startup")
 def on_startup():
     init_db()
+    # Whether mail can go out at all, stated once at boot. Every send is
+    # fire-and-forget by design, so a missing provider is otherwise invisible
+    # until someone notices an email that never arrived — and by then the
+    # question "is it configured?" is the hard one to answer.
+    import logging
+
+    from .mailer import mail_enabled, mail_from
+
+    log = logging.getLogger(__name__)
+    if mail_enabled():
+        provider = "Resend" if os.environ.get("RESEND_API_KEY") else "SMTP"
+        log.info("Email enabled via %s, sending as %s", provider, mail_from())
+    else:
+        log.warning(
+            "Email is NOT configured — no signup, share or invite mail will be "
+            "sent. Set RESEND_API_KEY (or SMTP_HOST) to turn it on."
+        )
 
 
 @app.get("/health")

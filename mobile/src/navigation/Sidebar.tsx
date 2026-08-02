@@ -92,8 +92,11 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
   const nested = focusedTab?.state;
   const screenName: string | undefined =
     nested?.routes?.[nested.index ?? nested.routes.length - 1]?.name;
-  // A conversation is reached from the staff inbox and is part of it.
-  const staffActive = screenName === 'StaffInbox' || screenName === 'Conversation';
+  // A conversation and a team page are both reached from the staff inbox and
+  // belong to it — the rail should keep marking Staff Hub, not fall back to the
+  // tab the stack happens to live in.
+  const STAFF_SCREENS = ['StaffInbox', 'Conversation', 'TeamDetail'];
+  const staffActive = STAFF_SCREENS.includes(screenName ?? '');
   const notifsActive = screenName === 'CoachNotifications';
   // While one of those is showing, no tab is the current section.
   const inBottomZone = staffActive || notifsActive;
@@ -315,7 +318,10 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
             <Text numberOfLines={1} style={s.accountName}>{coach?.name ?? ''}</Text>
             {/* Title over program: it is the more specific of the two, and a
                 coach reading their own row knows their program already. */}
-            <Text numberOfLines={1} style={s.accountSub}>
+            {/* Two lines: a real job title is longer than a 248px rail, and
+                truncating it to "Director of Player Devel…" tells the reader
+                less than a second line costs. */}
+            <Text numberOfLines={2} style={s.accountSub}>
               {(coach as any)?.job_title || coach?.program_name || ''}
             </Text>
           </View>
@@ -455,7 +461,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   avatarText: { color: t.accent, fontSize: 12, fontFamily: fonts[800] },
   accountName: { color: t.ink, fontSize: 13, fontFamily: fonts[700] },
-  accountSub: { color: t.muted2, fontSize: 11 },
+  accountSub: { color: t.muted2, fontSize: 11, lineHeight: 14 },
 
   overlay: { flex: 1, backgroundColor: t.scrim, alignItems: 'center', justifyContent: 'center', padding: 24 },
   menu: {

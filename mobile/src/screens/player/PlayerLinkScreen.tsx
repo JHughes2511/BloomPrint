@@ -13,6 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import QrScanner from '../../components/QrScanner';
+import { roleLabel } from '../../utils/roleLabel';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { playerLinkAPI, playerProfileAPI, playerApi, playerAuthAPI } from '../../api/playerClient';
 import { useTheme } from '../../theme/ThemeProvider';
@@ -23,8 +24,6 @@ import { ScreenBackground } from '../../theme/components';
 import PageContainer from '../../responsive/PageContainer';
 import CountryField from '../../components/CountryField';
 import { sheetCap } from '../../responsive/modalSizes';
-
-const ROLE_LABELS: Record<string, string> = { coach: 'Coach', scout: 'Scout', trainer: 'Trainer' };
 
 type Link = { player_id: number; player_name: string; program_name?: string | null; team_name?: string | null; coach_name?: string | null; is_primary?: boolean };
 
@@ -423,7 +422,7 @@ export default function PlayerLinkScreen() {
               <View key={c.id} style={styles.resultCard}>
                 <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
                   <Text style={styles.resultName} numberOfLines={1}>{c.name}</Text>
-                  <Text style={styles.resultSub} numberOfLines={1}>{tr(`auth.role${(c.role ?? '').charAt(0).toUpperCase()}${(c.role ?? '').slice(1)}`, ROLE_LABELS[c.role] ?? c.role)} · {c.program_name}</Text>
+                  <Text style={styles.resultSub} numberOfLines={1}>{roleLabel(c.role, tr)} · {c.program_name}</Text>
                 </View>
                 <TouchableOpacity style={styles.requestBtn} onPress={() => requestLink(c.id, c.name)} disabled={requestingId === c.id}>
                   {requestingId === c.id ? <ActivityIndicator color={t.accent} size="small" /> : <Text style={styles.requestBtnText} numberOfLines={1}>{tr('playerApp.link.request')}</Text>}

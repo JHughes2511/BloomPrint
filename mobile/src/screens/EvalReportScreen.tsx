@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { roleLabel } from '../utils/roleLabel';
 import { useTranslation } from 'react-i18next';
 import { useReportTranslation } from '../hooks/useReportTranslation';
 import TranslationToggle from '../components/TranslationToggle';
@@ -876,7 +877,7 @@ export default function EvalReportScreen() {
                 disabled={sendingStaff}
               >
                 <Text style={{ color: t.ink, fontFamily: fonts[600] }}>{r.name}</Text>
-                <Text style={{ color: t.muted, fontSize: 11 }}>{r.role} · {r.program_name}</Text>
+                <Text style={{ color: t.muted, fontSize: 11 }}>{roleLabel(r.role, tr)} · {r.program_name}</Text>
               </TouchableOpacity>
             ))}
             <View style={styles.modalRow}>

@@ -12,6 +12,7 @@ import { playerAPI, feedbackAPI, authAPI } from '../api/client';
 // Read straight from app.json rather than pulling in expo-application just to
 // stamp a version on a feedback row.
 const APP_VERSION: string | undefined = require('../../app.json')?.expo?.version;
+import { roleLabel as sharedRoleLabel } from '../utils/roleLabel';
 import { useTheme } from '../theme/ThemeProvider';
 import { ScreenBackground, SectionLabel, Card, IconTile, Txt } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
@@ -273,8 +274,7 @@ export default function HomeScreen() {
   };
 
   // Display label for a role key ('coach' | 'scout' | 'trainer').
-  const roleLabel = (r?: string | null) =>
-    r === 'scout' ? tr('auth.roleScout') : r === 'trainer' ? tr('auth.roleTrainer') : tr('auth.roleCoach');
+  const roleLabel = (r?: string | null) => sharedRoleLabel(r, tr) || tr('auth.roleCoach');
 
   const CircleBtn = ({ icon, onPress, badge, label }: { icon: IconName; onPress: () => void; badge?: number; label: string }) => (
     <TouchableOpacity

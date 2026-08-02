@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { roleLabel } from '../utils/roleLabel';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import {
@@ -1122,28 +1123,35 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     <View style={s.root}>
       {/* Top nav */}
       <View style={s.topNav}>
-        <View style={desktopOnly({ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' })}>
-          <Text style={s.screenTitle}>{tr('common.tabs.teamGrade')}</Text>
+        {/* Title and view chips are one column, with New Game beside them and
+            aligned to the bottom of it — so on a wide window the button sits
+            level with the chip row rather than up against the title. On a
+            phone desktopOnly returns nothing, these are plain blocks, and the
+            button isn't rendered at all. */}
+        <View style={desktopOnly({ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', width: '100%' })}>
+          <View style={desktopOnly({ flex: 1, minWidth: 0 })}>
+            <Text style={s.screenTitle}>{tr('common.tabs.teamGrade')}</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 8)}>
+              {(['dashboard', 'games', 'scout', 'gamereport'] as const).map(v => (
+                <TouchableOpacity
+                  key={v}
+                  style={[s.navBtn, activeView === v && s.navBtnActive]}
+                  onPress={() => { if (v === 'gamereport') setGameReportGame(null); setActiveView(v); }}
+                >
+                  <Text style={[s.navBtnText, activeView === v && s.navBtnTextActive]}>
+                    {v === 'dashboard' ? tr('teamGrade.views.dashboard') : v === 'games' ? tr('teamGrade.views.games') : v === 'scout' ? tr('teamGrade.views.scout') : tr('reportTypes.game_report')}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
           {isWide && activeView === 'games' && (
-            <TouchableOpacity style={[s.newGameBtn, { marginBottom: 0 }]} onPress={() => setShowNewGame(true)}>
+            <TouchableOpacity style={[s.newGameBtn, { marginBottom: 0, marginLeft: 16 }]} onPress={() => setShowNewGame(true)}>
               <Ionicons name="add-circle-outline" size={18} color={t.ctaText} />
               <Text style={s.newGameBtnText}>{tr('teamGrade.newGame')}</Text>
             </TouchableOpacity>
           )}
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 8)}>
-          {(['dashboard', 'games', 'scout', 'gamereport'] as const).map(v => (
-            <TouchableOpacity
-              key={v}
-              style={[s.navBtn, activeView === v && s.navBtnActive]}
-              onPress={() => { if (v === 'gamereport') setGameReportGame(null); setActiveView(v); }}
-            >
-              <Text style={[s.navBtnText, activeView === v && s.navBtnTextActive]}>
-                {v === 'dashboard' ? tr('teamGrade.views.dashboard') : v === 'games' ? tr('teamGrade.views.games') : v === 'scout' ? tr('teamGrade.views.scout') : tr('reportTypes.game_report')}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
       </View>
 
       {/* Dashboard */}
@@ -3121,7 +3129,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 8 }}>
                   <View style={{ flex: 1 }}>
                     <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700] }}>{staff.label ?? staff.name}</Text>
-                    <Text style={{ color: t.muted, fontSize: 12 }}>{staff.sublabel ?? `${staff.role} · ${staff.program_name}`}</Text>
+                    <Text style={{ color: t.muted, fontSize: 12 }}>{staff.sublabel ?? `${roleLabel(staff.role, tr)} · ${staff.program_name}`}</Text>
                   </View>
                   {staff.kind && staff.kind !== 'coach' && (
                     <Ionicons name="people" size={16} color={t.accent} style={{ marginRight: 8 }} />

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { roleLabel } from '../utils/roleLabel';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
@@ -1156,7 +1157,7 @@ export default function TeamReportScreen() {
               <TouchableOpacity key={idx} style={[shareStyles.resultRow, { flexDirection: 'row', alignItems: 'center' }]} onPress={() => sendToStaff(r)} disabled={sendingStaff}>
                 <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
                   <Text style={shareStyles.resultName} numberOfLines={1}>{r.label ?? r.name}</Text>
-                  <Text style={shareStyles.resultMeta} numberOfLines={1}>{r.sublabel ?? `${r.role} · ${r.program_name}`}</Text>
+                  <Text style={shareStyles.resultMeta} numberOfLines={1}>{r.sublabel ?? `${roleLabel(r.role, tr)} · ${r.program_name}`}</Text>
                 </View>
                 {r.kind && r.kind !== 'coach' && <Ionicons name="people" size={16} color={t.accent} />}
               </TouchableOpacity>
@@ -1296,7 +1297,7 @@ export default function TeamReportScreen() {
                 {shareResults.map((r: any) => (
                   <TouchableOpacity key={r.id} style={shareStyles.resultRow} onPress={() => { setSelectedShareTarget(r); setShareResults([]); }}>
                     <Text style={shareStyles.resultName}>{r.name}</Text>
-                    <Text style={shareStyles.resultMeta}>{r.role} · {r.program_name}</Text>
+                    <Text style={shareStyles.resultMeta}>{roleLabel(r.role, tr)} · {r.program_name}</Text>
                   </TouchableOpacity>
                 ))}
                 <Text style={{ color: t.muted2, fontSize: 11, marginTop: 4 }}>{tr('teamReport.allStaffHint')}</Text>

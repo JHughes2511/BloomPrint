@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
+import { roleLabel } from '../utils/roleLabel';
 import { useTranslation } from 'react-i18next';
 import { useReportTranslation } from '../hooks/useReportTranslation';
 import TranslationToggle from '../components/TranslationToggle';
@@ -1194,7 +1195,7 @@ export default function RecentScreen() {
                 >
                   <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
                     <Text style={{ color: t.ink, fontFamily: fonts[600] }} numberOfLines={1}>{r.name}</Text>
-                    <Text style={{ color: t.muted2, fontSize: 12 }} numberOfLines={1}>{r.role} · {r.program_name}</Text>
+                    <Text style={{ color: t.muted2, fontSize: 12 }} numberOfLines={1}>{roleLabel(r.role, tr)} · {r.program_name}</Text>
                   </View>
                   {sendingToStaff ? <ActivityIndicator color={t.brown} size="small" /> : <Ionicons name="paper-plane-outline" size={18} color={t.brown} />}
                 </TouchableOpacity>

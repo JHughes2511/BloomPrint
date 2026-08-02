@@ -7,6 +7,7 @@
  * is a list again; this is the page you land on when you tap a team.
  */
 import React, { useCallback, useState } from 'react';
+import { roleLabel as sharedRoleLabel } from '../utils/roleLabel';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, Modal, Alert, TextInput,
@@ -214,13 +215,10 @@ export default function TeamDetailScreen() {
     ]);
   };
 
-  const roleLabel = (m: Member) => {
-    if (m.is_owner) return tr('staffHub.ownerRole');
-    const role = (m.role || '').trim();
-    return role
-      ? tr(`auth.role${role.charAt(0).toUpperCase()}${role.slice(1)}`, { defaultValue: role })
-      : tr('staffHub.staffRole');
-  };
+  const roleLabel = (m: Member) =>
+    m.is_owner
+      ? tr('staffHub.ownerRole')
+      : sharedRoleLabel(m.role, tr) || tr('staffHub.staffRole');
 
   return (
     <ScreenBackground>
@@ -416,7 +414,7 @@ export default function TeamDetailScreen() {
                   <TouchableOpacity key={c.id} style={styles.memberCard} onPress={() => doInvite({ coach_id: c.id })} disabled={inviting}>
                     <View style={{ flex: 1, minWidth: 0, marginRight: 8 }}>
                       <Text style={styles.memberName} numberOfLines={1}>{c.name}</Text>
-                      <Text style={styles.memberRole} numberOfLines={1}>{[c.job_title || c.role, c.program_name].filter(Boolean).join(' · ')}</Text>
+                      <Text style={styles.memberRole} numberOfLines={1}>{[c.job_title || sharedRoleLabel(c.role, tr), c.program_name].filter(Boolean).join(' · ')}</Text>
                     </View>
                     <Ionicons name="person-add-outline" size={18} color={t.accent} />
                   </TouchableOpacity>
@@ -501,7 +499,7 @@ export default function TeamDetailScreen() {
               </View>
               {profileLoading && <ActivityIndicator color={t.accent} />}
               {[
-                [tr('teamDetail.roleLabel'), profile?.role],
+                [tr('teamDetail.roleLabel'), sharedRoleLabel(profile?.role, tr)],
                 [tr('home.jobTitle'), profile?.job_title],
                 [tr('teamDetail.programLabel'), profile?.program_name],
                 [tr('teamDetail.conferenceLabel'), profile?.conference],

@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { roleLabel } from '../utils/roleLabel';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
@@ -529,7 +530,7 @@ export default function StaffInboxScreen() {
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text style={styles.cardTitle} numberOfLines={2}>{r.coach_name}</Text>
                   <Text style={styles.cardSub} numberOfLines={2}>
-                    {tr('staffHub.wantsToJoin', { role: r.coach_role, team: r.team_name })}
+                    {tr('staffHub.wantsToJoin', { role: roleLabel(r.coach_role, tr), team: r.team_name })}
                   </Text>
                 </View>
                 {actingRequest === r.id ? (
@@ -696,7 +697,7 @@ export default function StaffInboxScreen() {
                   <TouchableOpacity key={s.id} style={[styles.staffRow, sel && { borderColor: t.accent }]} onPress={() => toggleStaff(s)}>
                     <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
                       <Text style={styles.cardTitle} numberOfLines={1}>{s.name}</Text>
-                      <Text style={styles.cardSub} numberOfLines={1}>{[s.role, s.program_name].filter(Boolean).join(' · ')}</Text>
+                      <Text style={styles.cardSub} numberOfLines={1}>{[roleLabel(s.role, tr), s.program_name].filter(Boolean).join(' · ')}</Text>
                     </View>
                     {sel && <Ionicons name="checkmark-circle" size={18} color={t.accent} />}
                   </TouchableOpacity>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { roleLabel } from '../utils/roleLabel';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -1619,7 +1620,7 @@ export default function PlayerProfileScreen() {
               >
                 {sendingStaff ? <ActivityIndicator color={t.accent} /> : <>
                   <Text style={{ color: t.ink, fontFamily: fonts[600] }}>{r.name}</Text>
-                  <Text style={{ color: t.muted, fontSize: 11 }}>{r.role} · {r.program_name}</Text>
+                  <Text style={{ color: t.muted, fontSize: 11 }}>{roleLabel(r.role, tr)} · {r.program_name}</Text>
                 </>}
               </TouchableOpacity>
             ))}

@@ -25,7 +25,7 @@ from concurrent.futures import ThreadPoolExecutor
 from . import models
 from .database import SessionLocal
 from .emails import ACCOUNT_EVENTS, render
-from .mailer import mail_from, send_email
+from .mailer import mail_from, try_send
 
 log = logging.getLogger(__name__)
 
@@ -74,7 +74,13 @@ def _deliver(audience: str, user_id: int, event: str, to: str,
         if opted_out and event not in ACCOUNT_EVENTS:
             return
         subject, body = render(event, lang, params, token=token, link=link)
-        send_email(to, subject, body, from_addr=mail_from())
+        ok, reason = try_send(to, subject, body, from_addr=mail_from())
+        if not ok:
+            # Said out loud rather than swallowed. Mail failing must not break
+            # the event, but a silent return means "no mail arrived" and "no
+            # mail was configured" look identical from the outside, and that is
+            # exactly the question to answer when someone reports missing mail.
+            log.warning("Email %s to %s not sent: %s", event, to, reason)
     except Exception:
         log.warning("Could not email %s to %s #%s", event, audience, user_id,
                     exc_info=True)

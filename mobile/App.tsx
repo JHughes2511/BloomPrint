@@ -242,6 +242,15 @@ function AppTabs() {
       // Left rail once there's room, the stock bottom bar otherwise. The custom
       // bar owns its own width and active styling; see src/navigation/Sidebar.tsx.
       tabBar={(props) => (isDesktop ? <Sidebar {...props} /> : <BottomTabBar {...props} />)}
+      // Back goes to the tab you came from, not to the first one.
+      //
+      // This is also what makes the browser's back button work across tabs: the
+      // web linking layer pushes a history entry when the focused navigator's
+      // history grows, and with the default 'firstRoute' a tab navigator keeps
+      // no history at all — so every tab switch had the same length as the last
+      // and replaced the URL instead of adding to it. Eight screens produced
+      // four history entries, and back jumped out of the app.
+      backBehavior="history"
       screenListeners={backToTabRoot}
       screenOptions={({ route }) => ({
         headerShown: false,
@@ -364,6 +373,9 @@ function PlayerTabs() {
   const { t: tr } = useTranslation();
   return (
     <Tab.Navigator
+      // Same as the coach tabs: back returns to the previous tab, and the web
+      // build gets a history entry per tab switch because of it.
+      backBehavior="history"
       screenListeners={backToTabRoot}
       screenOptions={({ route }) => ({
         headerShown: false,
