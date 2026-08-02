@@ -130,15 +130,20 @@ def update_player(
         player.jersey_number = body.jersey_number
     if body.competition_level is not None:
         player.competition_level = body.competition_level
-    if body.team_id is not None:
+    # 0 means "no team", and it has to be tested FIRST. The old order asked
+    # `is not None` before `== 0`, and 0 is not None — so the clear-the-team
+    # branch could never run, and every edit of a player without a team looked
+    # up team id 0, found nothing, and failed with "Team not found" no matter
+    # which field the coach had actually changed.
+    if body.team_id == 0:
+        player.team_id = None
+    elif body.team_id is not None:
         # Only a team this coach owns — otherwise a player could be labelled
         # with another coach's team name.
         team = get_owned(db, models.Team, body.team_id, coach.id, "Team")
         player.team_id = body.team_id
         if team:
             player.program_name = team.name
-    elif body.team_id == 0:
-        player.team_id = None
     if body.height is not None:
         player.height = body.height
     if body.wingspan is not None:

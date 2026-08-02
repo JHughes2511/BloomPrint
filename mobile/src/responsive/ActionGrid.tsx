@@ -19,6 +19,7 @@
  */
 import React from 'react';
 import { View, Platform } from 'react-native';
+import { useBreakpoint } from './useBreakpoint';
 
 type Props = {
   children: React.ReactNode;
@@ -29,9 +30,15 @@ type Props = {
 };
 
 export default function ActionGrid({ children, gap = 12, full = [] }: Props) {
+  const { isWide } = useBreakpoint();
   const items = React.Children.toArray(children).filter(Boolean);
 
-  if (Platform.OS !== 'web') return <>{children}</>;
+  // Width, not platform. A phone browser is web, so gating on platform alone
+  // put two buttons per row on a 390px screen — roughly 180px each, which turns
+  // "Generate Training Program" into three wrapped lines inside a pill. Below
+  // the tablet breakpoint these stack full width, one per row, exactly as they
+  // do in the native app.
+  if (Platform.OS !== 'web' || !isWide) return <>{children}</>;
 
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap, width: '100%', maxWidth: 840, marginHorizontal: 'auto' }}>
