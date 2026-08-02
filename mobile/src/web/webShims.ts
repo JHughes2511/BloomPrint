@@ -110,6 +110,15 @@ function installGlobalCss() {
 
     /* The app scrolls its own panes; the page itself never should. */
     body { overflow: hidden; }
+
+    /* A background on the document, not only inside the app.
+       Every screen paints its own gradient, but the page beneath it is white by
+       default — so overscrolling in a phone browser shows a white band above or
+       below, and the keyboard accessory bar sits against it. ThemeProvider
+       replaces this with the live theme's colour; this value only has to hold
+       for the moment before React runs, so it matches the dark canvas the app
+       opens in. */
+    html, body { background-color: #0C2331; }
   `;
   const tag = document.createElement('style');
   tag.setAttribute('data-bloomprint', 'web-shims');

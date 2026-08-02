@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { useColorScheme } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 import * as SecureStore from '../storage/secureStore';
 import { ThemeTokens, light, dark } from './tokens';
 
@@ -22,6 +22,33 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const system = useColorScheme(); // 'light' | 'dark' | null
   const [mode, setModeState] = useState<Mode>(system === 'light' ? 'light' : 'dark');
   const [ready, setReady] = useState(false);
+
+  // Paint the page itself, not just the app inside it.
+  //
+  // Every screen draws its own gradient, but the document underneath stays the
+  // browser default — white. Overscroll a phone browser and that white appears
+  // above or below the app, and it is doubly obvious in dark mode. The keyboard
+  // accessory bar sits against it too.
+  //
+  // The first colour of the canvas gradient is the right one to use: it is what
+  // the top of every screen already is, so the seam is invisible.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    // The gradient's colours are typed as ColorValue (React Native allows
+    // more than strings); CSS only takes a string, so state that here.
+    const bg = String((mode === 'light' ? light : dark).canvas.colors[0]);
+    document.documentElement.style.backgroundColor = bg;
+    document.body.style.backgroundColor = bg;
+    // Tells the browser to tint its own overscroll and, on iOS, the status bar
+    // area — otherwise the page is dark and the chrome around it is not.
+    let meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'theme-color');
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', bg);
+  }, [mode]);
 
   // Load persisted choice once; fall back to the system setting on first launch.
   useEffect(() => {

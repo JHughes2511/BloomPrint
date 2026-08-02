@@ -19,16 +19,6 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 
-// API output_type keys — labels come from the importScreen.outputTypes.* catalog.
-const OUTPUT_TYPE_KEYS = [
-  'player_eval',
-  'box_score',
-  'scouting_report',
-  'film_breakdown',
-  'coaching_report',
-  'recruitment_profile',
-  'game_analysis',
-];
 
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
 const LEVELS = [...CANON_LEVELS];
@@ -60,7 +50,6 @@ export default function ImportScreen() {
   const isRosterMode = route.params?.mode === 'roster';
 
   const [file, setFile] = useState<{ uri: string; name: string; type?: string } | null>(null);
-  const [outputType, setOutputType] = useState('player_eval');
   const [level, setLevel] = useState((coach as any)?.competition_level ?? 'HS Varsity');
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
@@ -275,20 +264,11 @@ export default function ImportScreen() {
         {/* Eval mode only: report type + team assignment */}
         {!isRosterMode && (
           <>
-            <Text style={styles.label} numberOfLines={1}>{tr('importScreen.defaultReportType')}</Text>
-            <Text style={styles.hint}>{tr('importScreen.defaultReportHint')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
-              {OUTPUT_TYPE_KEYS.map(key => (
-                <TouchableOpacity
-                  key={key}
-                  style={[styles.chip, outputType === key && styles.chipActive]}
-                  onPress={() => setOutputType(key)}
-                >
-                  <Text style={[styles.chipText, outputType === key && styles.chipTextActive]} numberOfLines={1}>{tr(`importScreen.outputTypes.${key}`)}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
+            {/* "Default report type" used to sit here. The chips set state that
+                nothing ever read: the commit sends team, level and players, and
+                the server has no such field — so choosing one changed nothing.
+                A control that appears to configure something and does not is
+                worse than no control, so it is gone rather than disabled. */}
             {teams.length > 0 && (
               <>
                 <Text style={styles.label} numberOfLines={1}>{tr('importScreen.assignToTeam')}</Text>
