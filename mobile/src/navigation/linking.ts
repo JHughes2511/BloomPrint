@@ -15,13 +15,28 @@
  * Ids are parsed to numbers. A URL only carries strings, and screens compare
  * these against numeric ids from the API — `"12" === 12` is false, so a
  * player's own row would fail to match and the screen would render as though
- * the record were missing.
+ * the record were missing. See leadingId: a segment may also carry a readable
+ * suffix, which is understood on the way in and never written on the way out.
  */
 import type { LinkingOptions } from '@react-navigation/native';
 
+/**
+ * Read the id off the front of a segment, ignoring anything after it.
+ *
+ * Accepts "1" and "1-bloom" alike, so a link someone typed or tidied by hand
+ * still opens the right record. The app writes the plain id; the readable
+ * suffix is understood, not generated — producing it would mean every navigate
+ * call carrying a name, and navigation is not where this needs more moving
+ * parts.
+ *
+ * Number() would not do: Number("1-bloom") is NaN, so a link with a name in it
+ * would fail rather than simply lose the decoration.
+ */
+const leadingId = (v: string): number => parseInt(String(v), 10);
+
 const id = {
-  parse: { playerId: Number, evalId: Number, trainingId: Number,
-           reportId: Number, conversationId: Number, gameId: Number },
+  parse: { playerId: leadingId, evalId: leadingId, trainingId: leadingId,
+           reportId: leadingId, conversationId: leadingId, gameId: leadingId },
 };
 
 export const linking: LinkingOptions<any> = {
