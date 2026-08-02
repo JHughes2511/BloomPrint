@@ -213,11 +213,14 @@ function RecentStack() {
  * dispatched at the nested navigator by key rather than guessed at from the
  * tab level.
  *
- * No isFocused guard: this fires for whichever tab was pressed, so an unpressed
- * tab is already at its root by the time the tab bar switches to it.
+ * Only the tab you are already on. Switching to a different tab restores
+ * wherever you left it — that is what makes tabs worth having, and resetting
+ * one you have not looked at in a while throws away a place you never asked to
+ * leave.
  */
 const backToTabRoot = ({ navigation, route }: any) => ({
   tabPress: () => {
+    if (!navigation.isFocused()) return;
     const stackKey = route?.state?.key;
     const depth = route?.state?.index ?? 0;
     if (stackKey && depth > 0) {
