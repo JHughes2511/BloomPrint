@@ -98,6 +98,15 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const SCREEN_OPTIONS = { headerShown: false, contentStyle: { backgroundColor: '#0a0a0a' } };
+
+/**
+ * How long startup may wait on fonts before rendering without them.
+ *
+ * Long enough that a slow-but-working connection still gets the real typeface
+ * rather than a flash of the fallback; short enough that a blocked request is
+ * not mistaken by the person waiting for a broken site.
+ */
+const STARTUP_MAX_WAIT_MS = 3000;
 const PLAYER_SCREEN_OPTIONS = { headerShown: false, contentStyle: { backgroundColor: '#0f1a0f' } };
 
 function HomeStack() {
@@ -377,11 +386,40 @@ export default function App() {
   const [fontsLoaded] = useFonts({
     HankenGrotesk_400Regular, HankenGrotesk_500Medium, HankenGrotesk_600SemiBold,
     HankenGrotesk_700Bold, HankenGrotesk_800ExtraBold, HankenGrotesk_900Black,
+    // Icons load with the text, not after it. @expo/vector-icons otherwise
+    // fetches this the first time an icon renders, which is after the UI is
+    // already on screen — so every icon in the app spends a moment as an empty
+    // square before the glyphs arrive. Waiting for it here costs nothing: the
+    // app is already waiting on six other fonts, and on web it is preloaded
+    // alongside them (scripts/preload-fonts.mjs).
+    ...Ionicons.font,
   });
   const [langReady, setLangReady] = React.useState(false);
   React.useEffect(() => { initAppLanguage().finally(() => setLangReady(true)); }, []);
 
-  if (!fontsLoaded || !langReady) {
+  // Startup must not be able to hang.
+  //
+  // Fonts are files on a server when this runs in a browser, and a request that
+  // never completes — an extension, a filtering proxy, a dropped connection —
+  // left the app on the blank box below indefinitely. Nothing threw, so there
+  // was no error in the console and nothing to retry: the site simply looked
+  // dead. That is a worse outcome than any imperfect rendering.
+  //
+  // After the cap the app renders regardless. Text falls back to a system font
+  // and swaps the moment the real one arrives, which is a visible imperfection
+  // for a second in a rare failure — against a site that never loads at all.
+  //
+  // It should effectively never fire. The fonts are preloaded from the HTML
+  // <head> on web, so they are normally in memory before React asks, and on a
+  // phone they ship inside the binary and resolve immediately.
+  const [startupTimedOut, setStartupTimedOut] = React.useState(false);
+  React.useEffect(() => {
+    if (fontsLoaded && langReady) return;
+    const t = setTimeout(() => setStartupTimedOut(true), STARTUP_MAX_WAIT_MS);
+    return () => clearTimeout(t);
+  }, [fontsLoaded, langReady]);
+
+  if ((!fontsLoaded || !langReady) && !startupTimedOut) {
     return <View style={{ flex: 1, backgroundColor: '#0C2331', alignItems: 'center', justifyContent: 'center' }} />;
   }
 
