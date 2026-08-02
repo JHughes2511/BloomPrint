@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { TouchableOpacity, Text, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, Alert, ActivityIndicator, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeProvider';
@@ -45,6 +45,24 @@ function GoogleReady({ onIdToken, busy, color }: Props) {
     iosClientId: GOOGLE_CLIENT_IDS.ios,
     androidClientId: GOOGLE_CLIENT_IDS.android,
     webClientId: GOOGLE_CLIENT_IDS.web,
+    // Say the redirect URI rather than let the library derive one.
+    //
+    // Google matches this string exactly against the list registered in the
+    // Cloud Console, and a mismatch is a dead end: redirect_uri_mismatch, on
+    // Google's own error page, with nothing in our logs. The library's default
+    // is built from the current URL and can carry a path or a trailing slash
+    // depending on where the user happens to be standing when they sign in —
+    // so the registered value would have to anticipate every page.
+    //
+    // window.location.origin is scheme + host + port and nothing else, which is
+    // stable across every route in the app and is exactly the form registered:
+    // https://bloomprint.org, https://www.bloomprint.org, http://localhost:8081.
+    // Both apex and www work without listing them separately here, because each
+    // serves its own origin back.
+    //
+    // Web only. On a phone the redirect is a deep link into the app's own
+    // scheme, which the library builds correctly and window does not exist for.
+    ...(Platform.OS === 'web' ? { redirectUri: window.location.origin } : {}),
   });
 
   useEffect(() => {
