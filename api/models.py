@@ -795,7 +795,14 @@ class OpponentPlayer(Base):
 class GameWhiteboard(Base):
     __tablename__ = "game_whiteboards"
     id = Column(Integer, primary_key=True, index=True)
-    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False)
+    # NULL means the coach's playbook rather than one game's board.
+    #
+    # The playbook used a sentinel game_id of 0, and no game session has id 0.
+    # SQLite does not enforce foreign keys by default so it saved locally; the
+    # deployed Postgres does, so every playbook save violated the constraint and
+    # answered 500. A foreign key permits NULL, which is what "belongs to no
+    # game" actually means.
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=True)
     coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
     name = Column(String, default="Untitled Board")
     court_type = Column(String, default="full")  # full, half, three_quarter

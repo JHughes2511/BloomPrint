@@ -1637,9 +1637,23 @@ def list_whiteboards(
     return [{"id": b.id, "name": b.name, "court_type": b.court_type, "data": b.data, "created_at": b.created_at.isoformat()} for b in boards]
 
 
-# Coach-level PLAYBOOK boards — not tied to any game (game_id = 0 sentinel), so
-# plays the coach draws persist in "my boards" until deleted, regardless of games.
-_PLAYBOOK_GID = 0
+# Coach-level PLAYBOOK boards — not tied to any game, so plays the coach draws
+# persist in "my boards" until deleted, regardless of games.
+#
+# NULL, not a 0 sentinel. game_id is a foreign key to game_sessions and no
+# session has id 0: SQLite does not enforce foreign keys by default so this
+# saved locally, while the deployed Postgres rejected every playbook write with
+# a constraint violation surfacing as a 500. Rows written under the old sentinel
+# are still read below so nothing drawn before this is lost.
+_PLAYBOOK_GID = None
+_LEGACY_PLAYBOOK_GID = 0
+
+
+def _playbook_filter():
+    """Match a coach's playbook boards, written under either convention."""
+    from sqlalchemy import or_
+    return or_(models.GameWhiteboard.game_id.is_(None),
+               models.GameWhiteboard.game_id == _LEGACY_PLAYBOOK_GID)
 
 
 @router.get("/playbook/whiteboards")
@@ -1647,7 +1661,12 @@ def list_playbook(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    boards = db.query(models.GameWhiteboard).filter_by(game_id=_PLAYBOOK_GID, coach_id=coach.id).order_by(models.GameWhiteboard.created_at).all()
+    boards = (
+        db.query(models.GameWhiteboard)
+        .filter(_playbook_filter(), models.GameWhiteboard.coach_id == coach.id)
+        .order_by(models.GameWhiteboard.created_at)
+        .all()
+    )
     return [{"id": b.id, "name": b.name, "court_type": b.court_type, "data": b.data, "created_at": b.created_at.isoformat()} for b in boards]
 
 

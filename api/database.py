@@ -110,6 +110,7 @@ def init_db():
             engine.dialect.name,
         )
         _add_missing_columns()
+        _relax_not_null()
 
     # Backend-independent: operates on rows, not schema.
     _reparse_eval_sections()
@@ -195,6 +196,35 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     # (table, column, SQL type + default)
     ("player_users", "preferred_language", "VARCHAR DEFAULT 'en'"),
 ]
+
+
+# Columns whose NOT NULL has to be lifted on an existing table.
+#
+# Kept separate from ADDITIVE_COLUMNS and deliberately short: this is the one
+# schema change that is not additive and still cannot wait for Alembic, because
+# without it the playbook whiteboard cannot save at all on Postgres.
+RELAXED_COLUMNS: list[tuple[str, str]] = [
+    # A playbook board belongs to no game. The column is a foreign key to
+    # game_sessions, and the old code wrote a sentinel 0 that matches no row —
+    # rejected by Postgres on every write.
+    ("game_whiteboards", "game_id"),
+]
+
+
+def _relax_not_null():
+    """Drop NOT NULL where the model now allows NULL. Idempotent."""
+    from sqlalchemy import text
+
+    with engine.connect() as conn:
+        for table, column in RELAXED_COLUMNS:
+            try:
+                conn.execute(text(f"ALTER TABLE {table} ALTER COLUMN {column} DROP NOT NULL"))
+                conn.commit()
+            except Exception as exc:
+                # Already nullable, or a backend without this syntax. Neither is
+                # worth refusing to start over.
+                conn.rollback()
+                log.warning("Could not relax %s.%s: %s", table, column, exc)
 
 
 def _add_missing_columns():
