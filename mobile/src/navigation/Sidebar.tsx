@@ -84,6 +84,20 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
     return () => { cancelled = true; clearTimeout(timer); };
   }, [query]);
 
+  // Staff Hub and Notifications are screens inside a tab's stack, not tabs of
+  // their own, so the navigator's idea of "where am I" is the tab — and the
+  // sidebar lit Home while showing the staff inbox. Reading the focused screen
+  // out of the nested state is what tells those two rows apart from Home.
+  const focusedTab: any = state.routes[state.index];
+  const nested = focusedTab?.state;
+  const screenName: string | undefined =
+    nested?.routes?.[nested.index ?? nested.routes.length - 1]?.name;
+  // A conversation is reached from the staff inbox and is part of it.
+  const staffActive = screenName === 'StaffInbox' || screenName === 'Conversation';
+  const notifsActive = screenName === 'CoachNotifications';
+  // While one of those is showing, no tab is the current section.
+  const inBottomZone = staffActive || notifsActive;
+
   const go = (tab: string, screen: string, params: Record<string, unknown>) => {
     setQuery('');
     setResults(null);
@@ -196,7 +210,11 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
       <ScrollView style={s.items} contentContainerStyle={{ gap: 2 }} showsVerticalScrollIndicator={false}>
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
-          const focused = state.index === index;
+          // Two ideas of focus: `tabFocused` is where the navigator is, which
+          // decides whether a press has anywhere to go; `focused` is what the
+          // sidebar shows as the current section.
+          const tabFocused = state.index === index;
+          const focused = tabFocused && !inBottomZone;
           const label =
             typeof options.tabBarLabel === 'string' ? options.tabBarLabel : (options.title ?? route.name);
 
@@ -204,7 +222,7 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
             const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
             // A tab may cancel its own press (to scroll to top, say); navigating
             // anyway would override that.
-            if (!focused && !event.defaultPrevented) navigation.navigate(route.name, route.params);
+            if (!tabFocused && !event.defaultPrevented) navigation.navigate(route.name, route.params);
           };
 
           const color = focused ? t.accent : t.muted2;
@@ -239,27 +257,31 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
       <View style={s.bottom}>
         <Pressable
           onPress={() => (navigation as any).navigate('HomeTab', { screen: 'StaffInbox' })}
-          style={({ hovered }: any) => [s.item, hovered && s.itemHover]}
+          accessibilityRole="button"
+          accessibilityState={{ selected: staffActive }}
+          style={({ hovered }: any) => [s.item, hovered && !staffActive && s.itemHover, staffActive && s.itemActive]}
         >
-          <Ionicons name="people-circle-outline" size={20} color={t.muted2} />
-          <Text numberOfLines={1} style={[s.label, { color: t.muted2 }]}>
+          <Ionicons name="people-circle-outline" size={20} color={staffActive ? t.accent : t.muted2} />
+          <Text numberOfLines={1} style={[s.label, { color: staffActive ? t.accent : t.muted2 }, staffActive && s.labelActive]}>
             {tr('staffHub.title')}
           </Text>
         </Pressable>
 
         <Pressable
           onPress={() => (navigation as any).navigate('HomeTab', { screen: 'CoachNotifications' })}
-          style={({ hovered }: any) => [s.item, hovered && s.itemHover]}
+          accessibilityRole="button"
+          accessibilityState={{ selected: notifsActive }}
+          style={({ hovered }: any) => [s.item, hovered && !notifsActive && s.itemHover, notifsActive && s.itemActive]}
         >
           <View>
-            <Ionicons name="notifications-outline" size={20} color={t.muted2} />
+            <Ionicons name="notifications-outline" size={20} color={notifsActive ? t.accent : t.muted2} />
             {unread > 0 && (
               <View style={s.badge}>
                 <Text style={s.badgeText}>{unread > 9 ? '9+' : unread}</Text>
               </View>
             )}
           </View>
-          <Text numberOfLines={1} style={[s.label, { color: t.muted2 }]}>
+          <Text numberOfLines={1} style={[s.label, { color: notifsActive ? t.accent : t.muted2 }, notifsActive && s.labelActive]}>
             {tr('home.notificationsLabel')}
           </Text>
         </Pressable>

@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
+import QrScanner from '../../components/QrScanner';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { playerLinkAPI, playerProfileAPI, playerApi, playerAuthAPI } from '../../api/playerClient';
 import { useTheme } from '../../theme/ThemeProvider';
@@ -61,10 +61,9 @@ export default function PlayerLinkScreen() {
   const [eCity, setECity] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // QR scanner
+  // QR scanner — permission and camera both live inside the component, so all
+  // this screen has to decide is whether it is open.
   const [showScanner, setShowScanner] = useState(false);
-  const [permission, requestPermission] = useCameraPermissions();
-  const [scanned, setScanned] = useState(false);
 
   const load = useCallback(() => {
     playerLinkAPI.listLinks().then((l: Link[]) => setLinks(Array.isArray(l) ? l : [])).catch(() => {});
@@ -194,21 +193,10 @@ export default function PlayerLinkScreen() {
     finally { setSaving(false); }
   };
 
-  const openScanner = async () => {
-    if (!permission?.granted) {
-      const res = await requestPermission();
-      if (!res.granted) { Alert.alert(tr('playerApp.link.cameraNeeded'), tr('playerApp.link.cameraMsg')); return; }
-    }
-    setScanned(false);
-    setShowScanner(true);
-  };
-
-  const onScan = ({ data }: { data: string }) => {
-    if (scanned) return;
-    setScanned(true);
+  const onScan = useCallback((code: string) => {
     setShowScanner(false);
-    submitInvite((data || '').trim());
-  };
+    submitInvite(code);
+  }, []);
 
   return (
     <ScreenBackground>
@@ -408,7 +396,7 @@ export default function PlayerLinkScreen() {
             <VoiceTextInput style={styles.input} placeholder={tr('playerApp.link.inviteCodePlaceholder')} placeholderTextColor={t.muted2}
               value={inviteCode} onChangeText={setInviteCode} autoCapitalize="characters" />
 
-            <TouchableOpacity style={styles.scanBtn} onPress={openScanner}>
+            <TouchableOpacity style={styles.scanBtn} onPress={() => setShowScanner(true)}>
               <Ionicons name="qr-code-outline" size={20} color={t.ink} />
               <Text style={styles.scanBtnText} numberOfLines={1}>{tr('playerApp.link.scanQrCode')}</Text>
             </TouchableOpacity>
@@ -450,23 +438,7 @@ export default function PlayerLinkScreen() {
     </Modal>
 
     {/* QR scanner */}
-    <Modal visible={showScanner} animationType="slide" onRequestClose={() => setShowScanner(false)}>
-      <View style={{ flex: 1, backgroundColor: '#000' }}>
-        <CameraView
-          style={{ flex: 1 }}
-          facing="back"
-          barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-          onBarcodeScanned={onScan}
-        />
-        <View style={styles.scanOverlay} pointerEvents="box-none">
-          <View style={styles.scanFrame} />
-          <Text style={styles.scanHint} numberOfLines={2}>{tr('playerApp.link.pointAtQr')}</Text>
-        </View>
-        <TouchableOpacity style={styles.scanClose} onPress={() => setShowScanner(false)}>
-          <Ionicons name="close" size={26} color="#fff" />
-        </TouchableOpacity>
-      </View>
-    </Modal>
+    <QrScanner visible={showScanner} onScan={onScan} onClose={() => setShowScanner(false)} />
     </PageContainer>
     </ScreenBackground>
   );
@@ -533,9 +505,4 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   resultSub: { color: t.muted, fontSize: 12, marginTop: 2, flexShrink: 1 },
   requestBtn: { backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, flexShrink: 0 },
   requestBtnText: { color: t.accent, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 },
-
-  scanOverlay: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
-  scanFrame: { width: 230, height: 230, borderRadius: 24, borderWidth: 3, borderColor: '#fff' },
-  scanHint: { color: '#fff', fontSize: 14, fontFamily: fonts[700], marginTop: 20 },
-  scanClose: { position: 'absolute', top: 56, right: 24, width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' },
 });
