@@ -126,5 +126,6 @@ export const playerProfileAPI = {
     city?: string;
     school_name?: string;
     age?: number;
+    competition_level?: string;
   }) => playerApi.patch('/player-auth/linked-player', data).then(r => r.data),
 };

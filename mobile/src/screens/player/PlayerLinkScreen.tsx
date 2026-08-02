@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../../components/VoiceTextInput';
 import LanguagePicker from '../../components/LanguagePicker';
+import { COMPETITION_LEVELS as CANON_LEVELS } from '../../constants/levels';
 import KeyboardAwareScrollView from '../../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
@@ -55,6 +56,7 @@ export default function PlayerLinkScreen() {
   const [eSr, setESr] = useState('');   // standing reach
   const [eSchool, setESchool] = useState('');
   const [eAge, setEAge] = useState('');
+  const [eLevel, setELevel] = useState('');
   const [eCountry, setECountry] = useState('');
   const [eCity, setECity] = useState('');
   const [saving, setSaving] = useState(false);
@@ -149,6 +151,7 @@ export default function PlayerLinkScreen() {
     setEP(profile?.position ?? ''); setEH(profile?.height ?? ''); setEW(profile?.wingspan ?? '');
     setEWt(profile?.weight ?? ''); setESr(profile?.standing_reach ?? ''); setESchool(profile?.school_name ?? '');
     setEAge(profile?.age != null ? String(profile.age) : '');
+    setELevel(profile?.competition_level ?? '');
     setShowEdit(true);
   };
 
@@ -181,6 +184,7 @@ export default function PlayerLinkScreen() {
           standing_reach: eSr.trim() || undefined, school_name: eSchool.trim() || undefined,
           country: eCountry || undefined, city: eCity.trim() || undefined,
           age: Number.isFinite(parsedAge) && parsedAge > 0 ? parsedAge : undefined,
+          competition_level: eLevel || undefined,
         });
         setProfile(updated);
       }
@@ -346,6 +350,34 @@ export default function PlayerLinkScreen() {
                 <VoiceTextInput style={styles.input} value={val} onChangeText={setter} placeholder={ph} placeholderTextColor={t.muted2} />
               </View>
             ))}
+            {!!playerUser?.player_id && (
+              <View>
+                <Text style={styles.fieldLabel} numberOfLines={1}>{tr('auth.competitionLevel')}</Text>
+                {/* Chosen from the canonical list rather than typed. This value
+                    weights how evaluations are graded, so a free-text typo would
+                    quietly change a player's scoring rather than just look wrong. */}
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 4 }}>
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    {CANON_LEVELS.map(lvl => (
+                      <TouchableOpacity
+                        key={lvl}
+                        onPress={() => setELevel(lvl)}
+                        style={{
+                          borderWidth: 1, borderRadius: 999, paddingHorizontal: 16, height: 34,
+                          justifyContent: 'center',
+                          borderColor: eLevel === lvl ? t.ctaBg : t.line,
+                          backgroundColor: eLevel === lvl ? t.ctaBg : 'transparent',
+                        }}
+                      >
+                        <Text style={{ color: eLevel === lvl ? t.ctaText : t.muted, fontSize: 13, fontFamily: fonts[700] }}>
+                          {lvl}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </ScrollView>
+              </View>
+            )}
             <View style={{ marginTop: 20 }}>
               <LanguagePicker />
             </View>

@@ -198,11 +198,15 @@ def get_linked_player(
 class PlayerSelfUpdate(BaseModel):
     """What a player may change about themselves on a coach's roster.
 
-    Facts about the athlete, not about the program. Jersey number, notes,
-    team and competition level stay with the coach: a number varies by team, and
-    notes are the coach's own record of the player rather than the player's.
-    Name is deliberately absent too — the roster keeps whatever the coach calls
-    them, and the linked account name is shown alongside instead.
+    Facts about the athlete, not about the program. Jersey number and notes stay
+    with the coach: a number varies by team, and notes are the coach's own record
+    of the player rather than the player's. Name is deliberately absent too — the
+    roster keeps whatever the coach calls them, and the linked account name is
+    shown alongside instead.
+
+    Competition level IS the player's to set. It reads like a property of the
+    team, but a player knows what level they are playing at — and when they move
+    up, they know before anyone updates a roster.
     """
     position: str | None = None
     height: str | None = None
@@ -214,6 +218,7 @@ class PlayerSelfUpdate(BaseModel):
     city: str | None = None
     school_name: str | None = None
     age: int | None = None
+    competition_level: str | None = None
 
 
 @router.patch("/linked-player", response_model=schemas.PlayerOut)
@@ -239,7 +244,8 @@ def update_linked_player(
     linked_ids.add(pu.player_id)
 
     fields = ("position", "height", "wingspan", "weight", "standing_reach",
-              "country", "state", "city", "school_name", "age")
+              "country", "state", "city", "school_name", "age",
+              "competition_level")
     for pid in linked_ids:
         target = db.get(models.Player, pid)
         if not target:
