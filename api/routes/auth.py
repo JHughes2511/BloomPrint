@@ -5,7 +5,7 @@ import re
 from fastapi import Request, APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from ..database import get_db
-from .. import models, schemas
+from .. import models, notify, schemas
 from ..auth import hash_password, verify_password, create_token, get_current_coach
 from ..coach_context import SYSTEM_PROFILE_FIELDS
 from ..ai_models import SONNET
@@ -68,6 +68,7 @@ def register(request: Request, body: schemas.CoachCreate, db: Session = Depends(
     db.add(coach)
     db.commit()
     db.refresh(coach)
+    notify.coach_event(coach, "signup_coach")
     return {"access_token": create_token(coach.id), "coach": coach}
 
 
@@ -136,6 +137,7 @@ def google_auth(request: Request, body: schemas.CoachGoogleAuth, db: Session = D
     db.add(coach)
     db.commit()
     db.refresh(coach)
+    notify.coach_event(coach, "signup_coach")
     return {
         "status": "ok",
         "access_token": create_token(coach.id),
@@ -164,12 +166,14 @@ def update_me(
 ):
     data = body.model_dump(exclude_unset=True)
     # Email is the login identity — change it directly but reject a duplicate.
+    email_changed_from: str | None = None
     if "email" in data and data["email"]:
         new_email = data["email"].strip().lower()
         if new_email and new_email != (coach.email or "").lower():
             taken = db.query(models.Coach).filter(models.Coach.email == new_email, models.Coach.id != coach.id).first()
             if taken:
                 raise HTTPException(status_code=400, detail="That email is already used by another account.")
+            email_changed_from = coach.email
             coach.email = new_email
     for field in ("name", "role", "program_name", "competition_level", "conference", "system_profile", "country", "city", "onboarded", "preferred_language"):
         if field in data and data[field] is not None:
@@ -179,6 +183,14 @@ def update_me(
         coach.weight = _auto_weight(coach.competition_level, coach.conference)
     db.commit()
     db.refresh(coach)
+    if email_changed_from:
+        # Both addresses are told. The new one confirms the change took; the old
+        # one is the only warning someone gets if they did not make it, and it
+        # is the address an attacker has just locked them out of.
+        notify.coach_event(coach, "email_changed", {"email": coach.email})
+        notify.send_event("coach", coach.id, "email_changed",
+                          to=email_changed_from, lang=coach.preferred_language,
+                          params={"name": coach.name, "email": coach.email})
     return coach
 
 

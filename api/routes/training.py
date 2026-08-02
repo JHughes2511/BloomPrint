@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
-from .. import models, schemas
+from .. import models, notify, schemas
 from ..ownership import get_owned
 from ..ai_models import OPUS, SONNET, text_of
 
@@ -370,6 +370,9 @@ def send_training_to_player(
     session.sent_to_player = True
     session.reformatting = True
     db.commit()
+    notify.player_event(player.player_user, "training_assigned",
+                        {"coach": coach.name,
+                         "title": session.title or "Training program"})
     background_tasks.add_task(reformat_training_for_player, training_id)
     return {"ok": True, "player_name": player.name}
 

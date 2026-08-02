@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import models
+from .. import models, notify
 
 router = APIRouter(prefix="/team-staff", tags=["team-staff"])
 
@@ -137,6 +137,8 @@ def join_team(
         ref_id=req.id,
     ))
     db.commit()
+    notify.coach_event(db.get(models.Coach, team.coach_id), "team_join_request",
+                       {"coach": coach.name, "team": team.name})
     return {"ok": True, "status": "pending"}
 
 
@@ -216,6 +218,8 @@ def approve_join_request(
             type="team_join_approved",
         ))
         db.commit()
+        notify.coach_event(db.get(models.Coach, req.invited_coach_id),
+                           "team_join_approved", {"team": team.name})
     return {"ok": True, "status": req.status}
 
 
@@ -237,6 +241,8 @@ def reject_join_request(
             type="team_join_rejected",
         ))
         db.commit()
+        notify.coach_event(db.get(models.Coach, req.invited_coach_id),
+                           "team_join_rejected", {"team": team.name})
     return {"ok": True, "status": req.status}
 
 

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import models, schemas
+from .. import models, notify, schemas
 from ..ai_models import OPUS
 
 router = APIRouter(prefix="/staff-sharing", tags=["staff-sharing"])
@@ -118,6 +118,15 @@ def _build_out(sr: models.StaffSharedReport, db: Session) -> schemas.StaffShared
     return out
 
 
+# Which in-app notification types are also worth an email. Types absent here
+# stay in-app only.
+_EMAIL_EVENTS = {
+    "staff_report_shared": "report_shared",
+    "staff_report_request": "report_request",
+    "staff_report_declined": "report_declined",
+}
+
+
 def _coach_notify(db: Session, coach_id: int, title: str, body: str, ref_id: int | None = None,
                   ntype: str = "staff_share", key: str | None = None, params: dict | None = None):
     """Queue a notification for a coach.
@@ -136,6 +145,18 @@ def _coach_notify(db: Session, coach_id: int, title: str, body: str, ref_id: int
         type=ntype,
     )
     db.add(notif)
+
+    # Email is a channel on this same event, decided in one place rather than at
+    # each of the ten call sites. Comments and regenerations are deliberately
+    # absent: they are frequent, in-app is enough, and mailing them is how
+    # people learn to filter the domain.
+    event = _EMAIL_EVENTS.get(ntype)
+    if event:
+        p = params or {}
+        notify.coach_event(db.get(models.Coach, coach_id), event, {
+            "sender": p.get("coach") or "A coach",
+            "report": (p.get("type") or "report").replace("_", " "),
+        })
 
 
 def _upsert_share(db: Session, report_type: str, report_id: int, sender_id: int,

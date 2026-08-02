@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 import bcrypt
 from jose import jwt
 from ..database import get_db
-from .. import models, schemas
+from .. import models, notify, schemas
 
 from ..appsecrets import player_key
 from .. import ratelimit
@@ -68,6 +68,7 @@ def register(request: Request, body: schemas.PlayerUserCreate, db: Session = Dep
     db.add(pu)
     db.commit()
     db.refresh(pu)
+    notify.player_event(pu, "signup_player")
     return schemas.PlayerToken(
         access_token=_make_token(pu.id),
         player_user=schemas.PlayerUserOut.model_validate(pu),
@@ -125,6 +126,7 @@ def google_auth(request: Request, body: schemas.PlayerGoogleAuth, db: Session = 
     db.add(pu)
     db.commit()
     db.refresh(pu)
+    notify.player_event(pu, "signup_player")
     return {
         "status": "ok",
         "access_token": _make_token(pu.id),

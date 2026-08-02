@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import models, schemas
+from .. import models, notify, schemas
 from ..softdelete import soft_delete
 from ..ownership import get_owned
 from .player_auth import get_current_player_user
@@ -197,6 +197,8 @@ def approve_link(
     )
     db.add(notif)
     db.commit()
+    notify.player_event(lr.player_user, "player_link_approved",
+                        {"team": coach.program_name or "your team"})
     return {"ok": True}
 
 
