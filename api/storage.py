@@ -27,10 +27,24 @@ def use_s3() -> bool:
 
 def _client():
     import boto3  # imported lazily so local dev needs no boto3
+    from botocore.config import Config
+
+    endpoint = os.environ.get("S3_ENDPOINT_URL") or None
+    # A custom endpoint means R2, MinIO or similar, and those want "auto".
+    # Without a region boto3 quietly falls back to SigV2 — a presigned URL of
+    # the form ?AWSAccessKeyId=..&Signature=..&Expires=.. — and R2 does not
+    # accept SigV2 at all, so every upload and every playback URL is refused.
+    # Nothing in the app reports that as a configuration problem: it surfaces as
+    # film that will not upload or will not play.
+    region = os.environ.get("AWS_REGION") or ("auto" if endpoint else None)
     return boto3.client(
         "s3",
-        endpoint_url=os.environ.get("S3_ENDPOINT_URL") or None,
-        region_name=os.environ.get("AWS_REGION") or None,
+        endpoint_url=endpoint,
+        region_name=region,
+        # Stated rather than inferred. The signature version is the difference
+        # between a URL R2 honours and one it rejects, and it should not depend
+        # on which environment variables happen to be present.
+        config=Config(signature_version="s3v4"),
     )
 
 
