@@ -138,7 +138,13 @@ export default function DraggableWhiteboardButton({ onPress }: Props) {
     // actually has. box-none so it never intercepts touches meant for the
     // screen underneath — only the button itself is interactive.
     <View
-      style={StyleSheet.absoluteFill}
+      // zIndex, not source order: the screens that render this put it before
+      // the panel it floats over, so the clipboard was painted under the very
+      // buttons it is supposed to sit above — visible as a corner poking out
+      // from behind Generate Game Report. The inner zIndex only ordered the
+      // button within this wrapper; the wrapper itself has to outrank its
+      // siblings.
+      style={[StyleSheet.absoluteFill, { zIndex: 200 }]}
       pointerEvents="box-none"
       onLayout={e => placeInParent(e.nativeEvent.layout.width, e.nativeEvent.layout.height)}
     >

@@ -141,6 +141,7 @@ export default function RosterScreen() {
   const [showAddTeamPicker, setShowAddTeamPicker] = useState(false);
   const [editTeam, setEditTeam] = useState<Team | null>(null);
   const [editTeamName, setEditTeamName] = useState('');
+  const [editTeamLevel, setEditTeamLevel] = useState('');
   const [savingTeam, setSavingTeam] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -253,22 +254,33 @@ export default function RosterScreen() {
     ]);
   };
 
+  /**
+   * Open the manage sheet.
+   *
+   * This used to be a three-button Alert — rename, delete, cancel — which works
+   * on a phone and cannot work in a browser: Alert.alert has no web equivalent
+   * beyond window.confirm, which offers exactly two answers, so the shim kept
+   * the destructive one and rename was unreachable. A sheet says the same thing
+   * on both platforms and has room for the competition level as well.
+   */
   const manageTeam = (team: Team) => {
-    Alert.alert(team.name, tr('roster.manageTeam'), [
-      { text: tr('common.rename'), onPress: () => { setEditTeam(team); setEditTeamName(team.name); } },
-      { text: tr('common.delete'), style: 'destructive', onPress: () => deleteTeam(team) },
-      { text: tr('common.cancel'), style: 'cancel' },
-    ]);
+    setEditTeam(team);
+    setEditTeamName(team.name);
+    setEditTeamLevel(team.competition_level ?? COMPETITION_LEVELS[0]);
   };
 
-  const saveTeamName = async () => {
+  const closeManage = () => { setEditTeam(null); setEditTeamName(''); setEditTeamLevel(''); };
+
+  const saveTeam = async () => {
     if (!editTeam || !editTeamName.trim()) return;
     setSavingTeam(true);
     try {
-      await teamsAPI.update(editTeam.id, { name: editTeamName.trim() });
+      await teamsAPI.update(editTeam.id, {
+        name: editTeamName.trim(),
+        competition_level: editTeamLevel || undefined,
+      });
       await reloadTeams();
-      setEditTeam(null);
-      setEditTeamName('');
+      closeManage();
       load();
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('roster.couldNotRenameTeam'));
@@ -364,7 +376,10 @@ export default function RosterScreen() {
             <Text style={[styles.teamChipText, currentTeamId === tm.id && styles.teamChipTextActive]}>{tm.name}</Text>
           </TouchableOpacity>
         ))}
-        <TouchableOpacity style={styles.newTeamChip} onPress={() => setShowNewTeam(true)}>
+        {/* The level is set here rather than only in useState: the screen can
+            mount before the coach's profile has loaded, and an initial value
+            captured then would keep the fallback for the whole session. */}
+        <TouchableOpacity style={styles.newTeamChip} onPress={() => { setNewTeamLevel(defaultLevel); setShowNewTeam(true); }}>
           <Ionicons name="add" size={14} color={t.accent} />
           <Text style={styles.newTeamText}>{tr('roster.newTeam')}</Text>
         </TouchableOpacity>
@@ -601,21 +616,36 @@ export default function RosterScreen() {
         </KeyboardAvoidingView>
       </Modal>
 
-      {/* Rename Team Modal */}
-      <Modal visible={!!editTeam} transparent animationType="slide">
+      {/* Manage Team Modal */}
+      <Modal visible={!!editTeam} transparent animationType="slide" onRequestClose={closeManage}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>{tr('roster.renameTeam')}</Text>
+            <Text style={styles.modalTitle}>{tr('roster.manageTeam')}</Text>
+
             <VoiceTextInput style={styles.input} placeholder={tr('roster.teamNamePlaceholder')} placeholderTextColor={t.muted}
-              value={editTeamName} onChangeText={setEditTeamName} autoFocus />
+              value={editTeamName} onChangeText={setEditTeamName} />
+
+            <Text style={styles.fieldLabel}>{tr('roster.competitionLevel')}</Text>
+            <LevelDropdown value={editTeamLevel || COMPETITION_LEVELS[0]} onChange={setEditTeamLevel} />
+
             <View style={styles.modalRow}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => { setEditTeam(null); setEditTeamName(''); }}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={closeManage}>
                 <Text style={styles.cancelText}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.saveBtn} onPress={saveTeamName} disabled={savingTeam || !editTeamName.trim()}>
+              <TouchableOpacity style={styles.saveBtn} onPress={saveTeam} disabled={savingTeam || !editTeamName.trim()}>
                 {savingTeam ? <ActivityIndicator color={t.ctaText} /> : <Text style={styles.saveText}>{tr('common.save')}</Text>}
               </TouchableOpacity>
             </View>
+
+            {/* Below the save row and outlined rather than filled: deleting a
+                team is not one of the things you came here to do. */}
+            <TouchableOpacity
+              style={styles.deleteTeamBtn}
+              onPress={() => { const team = editTeam!; closeManage(); deleteTeam(team); }}
+            >
+              <Ionicons name="trash-outline" size={15} color={t.negative} />
+              <Text style={styles.deleteTeamText} numberOfLines={1}>{tr('roster.deleteTeamTitle')}</Text>
+            </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
       </Modal>
@@ -691,6 +721,16 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     ...sheetCap(560),
   },
   modalTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 4 },
+  fieldLabel: {
+    color: t.muted2, fontSize: 10.5, fontFamily: fonts[700], letterSpacing: 1.5,
+    textTransform: 'uppercase', marginTop: 12, marginBottom: 6,
+  },
+  deleteTeamBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    marginTop: 12, paddingVertical: 12, borderRadius: 999,
+    borderWidth: 1, borderColor: t.negative,
+  },
+  deleteTeamText: { color: t.negative, fontSize: 14, fontFamily: fonts[700], flexShrink: 1 },
   modalSub: { color: t.muted, fontSize: 12, marginBottom: 12 },
   input: { backgroundColor: t.chip, borderRadius: 14, padding: 14, color: t.ink, fontSize: 14, marginBottom: 10, borderWidth: 1, borderColor: t.line },
   modalRow: { flexDirection: 'row', gap: 10, marginTop: 8 },

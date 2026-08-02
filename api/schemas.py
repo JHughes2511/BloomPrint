@@ -138,8 +138,11 @@ class PlayerOut(BaseModel):
 
 
 class TeamCreate(BaseModel):
+    # Omitted means "whatever level this coach works at" — see create_team.
+    # A literal default here made every team created outside the roster screen
+    # HS Varsity regardless of who made it.
     name: str
-    competition_level: str = "HS Varsity"
+    competition_level: str | None = None
 
 
 class TeamUpdate(BaseModel):

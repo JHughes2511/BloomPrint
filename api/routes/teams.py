@@ -13,7 +13,12 @@ def create_team(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    team = models.Team(name=body.name, coach_id=coach.id, competition_level=body.competition_level)
+    # A coach who told us their level at signup should not have to say it again
+    # for every team they create. Staff Hub's Create a team asks for a name and
+    # nothing else, and was landing every one of them on the schema's old
+    # hard-coded HS Varsity.
+    level = body.competition_level or coach.competition_level or "HS Varsity"
+    team = models.Team(name=body.name, coach_id=coach.id, competition_level=level)
     db.add(team)
     db.commit()
     db.refresh(team)
