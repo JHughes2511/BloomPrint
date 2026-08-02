@@ -3,7 +3,7 @@
 from datetime import datetime
 from sqlalchemy import (
     Column, Integer, String, Float, Text, DateTime,
-    ForeignKey, Boolean, JSON,
+    ForeignKey, Boolean, JSON, UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
 from .database import Base
@@ -879,3 +879,33 @@ class TeamInvite(Base):
     kind             = Column(String, default="invite")
     status           = Column(String, default="pending")  # pending / approved / rejected
     created_at       = Column(DateTime, default=datetime.utcnow)
+
+
+class EmailPreference(Base):
+    """Whether one account wants activity email, and the token that turns it off.
+
+    A separate table rather than columns on coaches/player_users on purpose.
+    init_db() creates missing tables on every backend but only adds columns on
+    SQLite, so a column added here would work locally and silently not exist on
+    the deployed database. A new table needs no migration path to arrive.
+
+    A missing row means opted in — the default has to hold for every account
+    that existed before this table did, without backfilling anything.
+    """
+    __tablename__ = "email_preferences"
+
+    id          = Column(Integer, primary_key=True, index=True)
+    # "coach" or "player". The two id spaces are independent, so audience is
+    # part of the identity of a row, not a detail of it.
+    audience    = Column(String, nullable=False, index=True)
+    user_id     = Column(Integer, nullable=False, index=True)
+    opted_out   = Column(Boolean, default=False, nullable=False)
+    # Unguessable and stable: it goes in the footer of every message, and a
+    # link that stops working is a link that traps someone in a mailing list.
+    token       = Column(String, unique=True, index=True, nullable=False)
+    created_at  = Column(DateTime, default=datetime.utcnow)
+    updated_at  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        UniqueConstraint("audience", "user_id", name="uq_email_pref_audience_user"),
+    )
