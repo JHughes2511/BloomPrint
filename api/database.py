@@ -37,6 +37,14 @@ def _engine_kwargs(url: str) -> dict:
 # fails on a URL the platform generated itself.
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+# The modern scheme needs rewriting too, for a less obvious reason: a bare
+# postgresql:// URL is valid, so SQLAlchemy accepts it and reaches for its
+# DEFAULT driver, psycopg2 — which this project does not install and does not
+# use. The failure is "No module named psycopg2" on a URL nobody typed, handed
+# out by the platform, against a database that is up. Naming psycopg (v3)
+# explicitly is what makes the connection use the driver we actually ship.
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
 engine = create_engine(DATABASE_URL, **_engine_kwargs(DATABASE_URL))
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)

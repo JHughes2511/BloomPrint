@@ -1,0 +1,41 @@
+# Everything here is sent to the build daemon before the first instruction
+# runs, so anything large and irrelevant is paid for on every single deploy.
+#
+# mobile/ is the big one: node_modules alone is hundreds of megabytes and this
+# image never builds the app. .git is the second — full history, no build use.
+
+mobile/
+node_modules/
+.git/
+.github/
+
+# Local dev state. uploads/ in particular can hold gigabytes of film, and
+# copying a developer's local film into a production image is both slow and
+# wrong — the container gets its own empty directory.
+uploads/
+*.db
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Secrets. .env is gitignored, but .dockerignore is a separate list and an
+# untracked file in the build context is still copied by a COPY . instruction.
+.env
+.bloomprint-secret
+
+# Media that occasionally gets left in the tree.
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.tmp_frames/
+
+# Docs and design assets — nothing the server reads.
+docs/
+design_handoff_bloomprint_luxury_recolor/
+scripts/
+.claude/
