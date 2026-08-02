@@ -12,6 +12,7 @@ import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import { useAuth } from '../context/AuthContext';
 import { teamStaffAPI } from '../api/client';
 import { useTheme } from '../theme/ThemeProvider';
+import { topPad } from '../responsive/screenPadding';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
@@ -221,7 +222,7 @@ export default function OnboardingScreen() {
 }
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
-  header: { paddingHorizontal: 22, paddingTop: 60, paddingBottom: 8 },
+  header: { paddingHorizontal: 22, paddingTop: topPad(60), paddingBottom: 8 },
   stepLabel: { color: t.muted, fontSize: 12, fontFamily: fonts[700], flexShrink: 1, minWidth: 0, marginRight: 8 },
   progressTrack: { height: 6, borderRadius: 999, backgroundColor: t.chip, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: t.accent, borderRadius: 999 },

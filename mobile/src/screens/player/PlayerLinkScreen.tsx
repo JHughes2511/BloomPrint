@@ -14,6 +14,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { playerLinkAPI, playerProfileAPI, playerApi, playerAuthAPI } from '../../api/playerClient';
 import { useTheme } from '../../theme/ThemeProvider';
+import { topPad } from '../../responsive/screenPadding';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
@@ -414,7 +415,7 @@ export default function PlayerLinkScreen() {
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingTop: 56 },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingTop: topPad(56) },
   title: { color: t.ink, fontSize: 28, fontFamily: fonts[800], letterSpacing: -0.6, flexShrink: 1 },
   headerActions: { flexDirection: 'row', gap: 8, flexShrink: 0 },
   circleBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder, flexShrink: 0 },

@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { playerTrainingAPI } from '../../api/playerClient';
 import { PlayerTraining } from '../../types';
 import { useTheme } from '../../theme/ThemeProvider';
+import { topPad } from '../../responsive/screenPadding';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
@@ -224,7 +225,7 @@ export default function PlayerTrainingScreen() {
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { paddingHorizontal: 22, paddingTop: 60 },
+  header: { paddingHorizontal: 22, paddingTop: topPad(60) },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6 },
   searchBtn: {

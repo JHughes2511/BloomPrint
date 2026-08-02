@@ -13,6 +13,7 @@ import { playerReportsAPI, playerTrainingAPI } from '../../api/playerClient';
 import { SharedReport, PlayerComment } from '../../types';
 import CommentThread from '../../components/CommentThread';
 import { useTheme } from '../../theme/ThemeProvider';
+import { topPad } from '../../responsive/screenPadding';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
@@ -256,7 +257,7 @@ const makeMarkdownStyles = (t: ThemeTokens) => ({
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56 },
+  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: topPad(56) },
   title: { color: t.ink, fontSize: 16, fontFamily: fonts[900], flexShrink: 1 },
   sub: { color: t.muted, fontSize: 11, marginTop: 2, flexShrink: 1 },
   messageBox: {

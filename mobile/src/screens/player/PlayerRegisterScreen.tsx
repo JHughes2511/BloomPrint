@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { playerLinkAPI, playerAuthAPI } from '../../api/playerClient';
 import { useTheme } from '../../theme/ThemeProvider';
+import { topPad } from '../../responsive/screenPadding';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
@@ -129,7 +130,7 @@ export default function PlayerRegisterScreen() {
   if (registered) {
     return (
       <ScreenBackground>
-      <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ padding: 24, paddingTop: 60 }}>
+      <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ padding: 24, paddingTop: topPad(60) }}>
         <Text style={styles.logo} numberOfLines={1}>{tr('playerApp.register.welcome')}</Text>
         <Text style={styles.sub} numberOfLines={1}>{tr('playerApp.register.linkYourProfile')}</Text>
 

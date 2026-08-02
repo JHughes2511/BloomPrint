@@ -24,6 +24,7 @@ import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
+import { topPad } from '../responsive/screenPadding';
 import { useBreakpoint } from '../responsive/useBreakpoint';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -944,7 +945,7 @@ export default function PlayerProfileScreen() {
       {/* Video player modal */}
       <Modal visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
         <View style={{ flex: 1, backgroundColor: '#000000EE', ...(isWide ? null : { justifyContent: 'center' as const }) }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: 48 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: topPad(48) }}>
             <Text style={{ color: '#fff', fontSize: 15, fontFamily: fonts[700], flex: 1 }} numberOfLines={1}>
               {videoMeta?.report_label || 'Film'}
             </Text>
@@ -1755,7 +1756,7 @@ export default function PlayerProfileScreen() {
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56, gap: 12 },
+  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: topPad(56), gap: 12 },
   headerCenter: { flex: 1 },
   name: { color: t.ink, fontSize: 22, fontFamily: fonts[900] },
   meta: { color: t.muted, fontSize: 12, marginTop: 2 },

@@ -15,6 +15,7 @@ import SharedReportViewer from '../components/SharedReportViewer';
 import { useAuth } from '../context/AuthContext';
 import { AppNotification } from '../types';
 import { useTheme } from '../theme/ThemeProvider';
+import { topPad } from '../responsive/screenPadding';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
@@ -454,7 +455,7 @@ export default function CoachNotificationsScreen() {
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, paddingTop: 56 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, paddingTop: topPad(56) },
   backBtn: { flexShrink: 0 },
   title: { color: t.ink, fontSize: 20, fontFamily: fonts[800], flex: 1, flexShrink: 1, minWidth: 0 },
   empty: { alignItems: 'center', paddingTop: 80 },

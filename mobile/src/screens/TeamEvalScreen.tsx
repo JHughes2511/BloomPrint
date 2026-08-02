@@ -26,6 +26,7 @@ import ReportCorrectionsPanel from '../components/ReportCorrectionsPanel';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeProvider';
+import { topPad, bleedRow, bleedContent } from '../responsive/screenPadding';
 import { useBreakpoint } from '../responsive/useBreakpoint';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -1129,7 +1130,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </TouchableOpacity>
           )}
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(16) }} contentContainerStyle={bleedContent(16)}>
           {(['dashboard', 'games', 'scout', 'gamereport'] as const).map(v => (
             <TouchableOpacity
               key={v}
@@ -1150,7 +1151,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* Phase filter */}
           <View style={{ marginBottom: 16 }}>
             <Text style={[s.cardLabel, { marginBottom: 8 }]}>{tr('teamGrade.gradeView')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(16) }} contentContainerStyle={bleedContent(16)}>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 {orderedPhases.map(phase => {
                   const selected = dashPhases.includes(phase);
@@ -1218,7 +1219,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 return (
                   <View style={s.card}>
                     <Text style={s.cardLabel}>{tr('teamGrade.gradeTrend')}</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14 }}>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14, ...bleedRow(16) }} contentContainerStyle={bleedContent(16)}>
                       <Svg width={chartW} height={chartH + 48}>
                         <Line x1={0} y1={chartH} x2={chartW} y2={chartH} stroke={t.divider} strokeWidth={1} />
                         {data.map((pt: any, i: number) => {
@@ -1290,7 +1291,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           refreshControl={<RefreshControl refreshing={gamesRefreshing} onRefresh={async () => { setGamesRefreshing(true); await loadData(); setGamesRefreshing(false); }} tintColor={t.accent} />}
         >
           {/* Phase filter */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16, ...bleedRow(16) }} contentContainerStyle={bleedContent(16)}>
             {['all', ...orderedPhases].map(p => (
               <TouchableOpacity
                 key={p}
@@ -3165,7 +3166,7 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   root: { flex: 1 },
   scroll: { flex: 1, padding: 16 },
   topNav: {
-    paddingTop: 56, paddingHorizontal: 16, paddingBottom: 12,
+    paddingTop: topPad(56), paddingHorizontal: 16, paddingBottom: 12,
     borderBottomWidth: 1, borderBottomColor: t.divider,
   },
   screenTitle: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6, marginBottom: 12 },

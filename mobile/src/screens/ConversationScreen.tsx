@@ -15,6 +15,7 @@ import {
 } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
+import { topPad } from '../responsive/screenPadding';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
@@ -370,7 +371,7 @@ export default function ConversationScreen() {
 }
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingTop: 56, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: t.divider },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingTop: topPad(56), paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: t.divider },
   title: { color: t.ink, fontSize: 18, fontFamily: fonts[800], flex: 1, flexShrink: 1, minWidth: 0 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   empty: { color: t.muted2, fontSize: 13, textAlign: 'center', marginVertical: 20 },

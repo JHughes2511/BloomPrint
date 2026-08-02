@@ -18,6 +18,7 @@ import ShareModal from '../components/ShareModal';
 import { outputTypeLabel, parseOutputTypes } from '../utils/reportType';
 import { extractBrief, getFixedSections, recruitGrade, recruitGradeScale } from '../utils/reportSections';
 import { useTheme } from '../theme/ThemeProvider';
+import { topPad } from '../responsive/screenPadding';
 import { useBreakpoint } from '../responsive/useBreakpoint';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -1140,7 +1141,7 @@ export default function EvalReportScreen() {
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56 },
+  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: topPad(56) },
   playerNameRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     marginHorizontal: 20, marginBottom: 12, backgroundColor: t.card,

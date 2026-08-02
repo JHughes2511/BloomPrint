@@ -21,6 +21,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { renderReport } from '../utils/renderReport';
 import { outputTypeLabel } from '../utils/reportType';
 import { useTheme } from '../theme/ThemeProvider';
+import { topPad, bleedRow, bleedContent } from '../responsive/screenPadding';
 import { useBreakpoint } from '../responsive/useBreakpoint';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -803,7 +804,7 @@ export default function TeamReportScreen() {
         {showPrevReports && (
           <>
             {/* Filter by output_type */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12, ...bleedRow(20) }} contentContainerStyle={bleedContent(20)}>
               {[{ key: 'all' }, ...OUTPUT_TYPES].map(t => (
                 <TouchableOpacity
                   key={t.key}
@@ -913,7 +914,7 @@ export default function TeamReportScreen() {
       {/* Report film player modal */}
       <Modal visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
         <View style={{ flex: 1, backgroundColor: '#000000EE', ...(isWide ? null : { justifyContent: 'center' as const }) }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: 48 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: topPad(48) }}>
             <Text style={{ color: '#fff', fontSize: 15, fontFamily: fonts[700], flex: 1 }} numberOfLines={1}>{videoTitle}</Text>
             <TouchableOpacity onPress={() => setVideoSource(null)}>
               <Ionicons name="close" size={26} color="#fff" />
@@ -1345,7 +1346,7 @@ export default function TeamReportScreen() {
 
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingTop: 56 },
+  container: { flex: 1, padding: 20, paddingTop: topPad(56) },
   titleRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 28 },
   title: { fontFamily: fonts[800], fontSize: 30, letterSpacing: -0.6, color: t.ink, marginBottom: 4 },
   sub: { color: t.muted, fontSize: 13 },

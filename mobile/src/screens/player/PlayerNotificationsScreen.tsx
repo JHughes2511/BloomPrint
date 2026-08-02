@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { playerNotificationsAPI, shareApprovalsAPI } from '../../api/playerClient';
 import { AppNotification } from '../../types';
 import { Alert } from 'react-native';
+import { topPad } from '../../responsive/screenPadding';
 import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
@@ -175,7 +176,7 @@ export default function PlayerNotificationsScreen() {
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { alignItems: 'center', justifyContent: 'center' },
-  header: { padding: 24, paddingTop: 60 },
+  header: { padding: 24, paddingTop: topPad(60) },
   title: { color: t.ink, fontSize: 26, fontFamily: fonts[900], flexShrink: 1 },
   sub: { color: t.positive, fontSize: 12, marginTop: 4, flexShrink: 1 },
   empty: { alignItems: 'center', paddingTop: 80 },

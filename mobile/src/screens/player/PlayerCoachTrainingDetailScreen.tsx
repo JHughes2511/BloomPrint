@@ -14,6 +14,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { playerTrainingAPI } from '../../api/playerClient';
 import { PlayerComment } from '../../types';
 import { useTheme } from '../../theme/ThemeProvider';
+import { topPad } from '../../responsive/screenPadding';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
@@ -432,7 +433,7 @@ const makeMarkdownStyles = (t: ThemeTokens) => ({
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56 },
+  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: topPad(56) },
   title: { color: t.ink, fontSize: 16, fontFamily: fonts[900], flexShrink: 1, minWidth: 0 },
   sub: { color: t.muted2, fontSize: 11, marginTop: 2, flexShrink: 1 },
   coachTag: { backgroundColor: t.accentSoft, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 2, flexShrink: 1, maxWidth: 120 },

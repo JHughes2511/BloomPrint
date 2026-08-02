@@ -14,6 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import SharedReportViewer from '../components/SharedReportViewer';
 import { useTheme } from '../theme/ThemeProvider';
+import { topPad } from '../responsive/screenPadding';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
@@ -1077,8 +1078,8 @@ export default function StaffInboxScreen() {
 }
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'transparent', paddingTop: 56 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 60, paddingHorizontal: 20 },
+  container: { flex: 1, backgroundColor: 'transparent', paddingTop: topPad(56) },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: topPad(60), paddingHorizontal: 20 },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 8, marginBottom: 12, gap: 12 },
   title: { fontSize: 22, fontFamily: fonts[900], color: t.ink, flex: 1, flexShrink: 1, minWidth: 0 },
   emptyText: { color: t.muted2, marginTop: 12, fontSize: 14, textAlign: 'center' },

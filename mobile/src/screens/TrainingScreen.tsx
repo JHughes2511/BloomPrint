@@ -12,6 +12,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { trainingAPI } from '../api/client';
 import { TrainingSession } from '../types';
 import { useTheme } from '../theme/ThemeProvider';
+import { topPad } from '../responsive/screenPadding';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
@@ -187,7 +188,7 @@ export default function TrainingScreen() {
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 56, gap: 12 },
+  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: topPad(56), gap: 12 },
   backBtn: { flexShrink: 0 },
   title: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6, flex: 1, flexShrink: 1, minWidth: 0 },
   section: { paddingHorizontal: 20, marginTop: 24 },

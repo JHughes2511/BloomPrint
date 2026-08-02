@@ -25,6 +25,7 @@ import ScoutContextPanel from '../components/ScoutContextPanel';
 import ExportSectionsModal from '../components/ExportSectionsModal';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
+import { topPad } from '../responsive/screenPadding';
 import { useBreakpoint } from '../responsive/useBreakpoint';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -1474,7 +1475,7 @@ const makeSendStyles = (t: ThemeTokens) => StyleSheet.create({
 
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'transparent', paddingTop: 56 },
+  container: { flex: 1, backgroundColor: 'transparent', paddingTop: topPad(56) },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80 },
   title: { fontSize: 28, fontFamily: fonts[900], color: t.ink, marginHorizontal: 20, marginBottom: 12, flex: 1, flexShrink: 1, minWidth: 0 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 16 },

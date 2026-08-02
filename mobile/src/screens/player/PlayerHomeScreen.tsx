@@ -11,6 +11,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { playerNotificationsAPI, playerProfileAPI, playerReportsAPI, playerLinkAPI } from '../../api/playerClient';
 import { useTheme } from '../../theme/ThemeProvider';
+import { topPad } from '../../responsive/screenPadding';
 import { outputTypeLabel } from '../../utils/reportType';
 
 const PILLAR_LABELS: Record<string, string> = {
@@ -598,7 +599,7 @@ export default function PlayerHomeScreen() {
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   container: { flex: 1, backgroundColor: 'transparent' },
-  header: { padding: 24, paddingTop: 60, marginBottom: 4 },
+  header: { padding: 24, paddingTop: topPad(60), marginBottom: 4 },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   logo: { fontSize: 32, fontFamily: fonts[900], color: t.ink, letterSpacing: 0.5 },
   sub: { fontSize: 13, color: t.positive, marginTop: 2, fontFamily: fonts[600] },

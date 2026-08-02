@@ -13,6 +13,7 @@ import { api, teamsAPI, importsAPI } from '../api/client';
 import { Team } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
+import { topPad, bleedRow, bleedContent } from '../responsive/screenPadding';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
@@ -259,7 +260,7 @@ export default function ImportScreen() {
         {/* Default competition level — shown for both modes */}
         <Text style={styles.label} numberOfLines={1}>{tr('importScreen.defaultLevelLabel')}</Text>
         <Text style={styles.hint}>{tr('importScreen.defaultLevelHint')}</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24, ...bleedRow(20) }} contentContainerStyle={bleedContent(20)}>
           {LEVELS.map(l => (
             <TouchableOpacity
               key={l}
@@ -276,7 +277,7 @@ export default function ImportScreen() {
           <>
             <Text style={styles.label} numberOfLines={1}>{tr('importScreen.defaultReportType')}</Text>
             <Text style={styles.hint}>{tr('importScreen.defaultReportHint')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20, ...bleedRow(20) }} contentContainerStyle={bleedContent(20)}>
               {OUTPUT_TYPE_KEYS.map(key => (
                 <TouchableOpacity
                   key={key}
@@ -292,7 +293,7 @@ export default function ImportScreen() {
               <>
                 <Text style={styles.label} numberOfLines={1}>{tr('importScreen.assignToTeam')}</Text>
                 <Text style={styles.hint}>{tr('importScreen.assignToTeamHint')}</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24 }}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24, ...bleedRow(20) }} contentContainerStyle={bleedContent(20)}>
                   <TouchableOpacity
                     style={[styles.chip, selectedTeamId == null && styles.chipActive]}
                     onPress={() => setSelectedTeamId(null)}
@@ -433,7 +434,7 @@ export default function ImportScreen() {
 }
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingTop: 56 },
+  container: { flex: 1, padding: 20, paddingTop: topPad(56) },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 28 },
   backBtn: { flexShrink: 0 },
   title: { color: t.ink, fontSize: 22, fontFamily: fonts[800] },
