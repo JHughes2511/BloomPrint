@@ -59,6 +59,8 @@ export default function CoachNotificationsScreen() {
   // shared_id -> how I responded to a request (keyed by share so ALL request
   // notifications for the same report update, not just the one I tapped).
   const [requestResponses, setRequestResponses] = useState<Record<number, 'approved' | 'denied'>>({});
+  // Same idea for link requests: instant feedback before the refetch lands.
+  const [linkResponses, setLinkResponses] = useState<Record<number, 'approved' | 'rejected'>>({});
   // shared_ids where I've sent a request (button becomes disabled "Requested")
   const [requestedIds, setRequestedIds] = useState<Record<number, boolean>>({});
 
@@ -151,9 +153,27 @@ export default function CoachNotificationsScreen() {
 
   useFocusEffect(useCallback(() => { load(); }, []));
 
+  /**
+   * The settled state of a request, spanning the row where its buttons were.
+   *
+   * Not a disabled button: there is nothing left to press, and a greyed button
+   * invites a tap that would ask the server to redo a decision it has already
+   * recorded.
+   */
+  const outcomePill = (outcome: string) => (
+    <View style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center', opacity: 0.7 }]}>
+      <Text style={[styles.approveBtnText, { color: t.ctaText }]} numberOfLines={1}>
+        {outcome === 'rejected' || outcome === 'declined'
+          ? tr('coachNotifs.denied')
+          : tr('coachNotifs.approvedTitle')}
+      </Text>
+    </View>
+  );
+
   const approveLink = async (requestId: number, notifId: number) => {
     try {
       await playerAPI.approveLink(requestId);
+      setLinkResponses(prev => ({ ...prev, [requestId]: 'approved' }));
       await playerAPI.coachMarkRead(notifId);
       setNotifications(prev =>
         prev.map(n => n.id === notifId ? { ...n, read: true } : n)
@@ -168,6 +188,7 @@ export default function CoachNotificationsScreen() {
   const rejectLink = async (requestId: number, notifId: number) => {
     try {
       await playerAPI.rejectLink(requestId);
+      setLinkResponses(prev => ({ ...prev, [requestId]: 'rejected' }));
       await playerAPI.coachMarkRead(notifId);
       setNotifications(prev =>
         prev.map(n => n.id === notifId ? { ...n, read: true } : n)
@@ -377,6 +398,12 @@ export default function CoachNotificationsScreen() {
                     </View>
                   </View>
                 ) : n.type === 'link_requested' && n.ref_id ? (
+                  // The server's own record first, so the decision survives a
+                  // reload; local state only covers the moment before the list
+                  // is refetched.
+                  (linkResponses[n.ref_id] ?? (n.outcome && n.outcome !== 'pending' ? n.outcome : null)) ? (
+                    outcomePill(linkResponses[n.ref_id] ?? n.outcome)
+                  ) : (
                   <View style={styles.actionRow}>
                     <TouchableOpacity style={styles.approveBtn} onPress={() => approveLink(n.ref_id!, n.id)}>
                       <Text style={styles.approveBtnText} numberOfLines={1}>{tr('coachNotifs.approve')}</Text>
@@ -385,6 +412,7 @@ export default function CoachNotificationsScreen() {
                       <Text style={styles.rejectBtnText} numberOfLines={1}>{tr('coachNotifs.reject')}</Text>
                     </TouchableOpacity>
                   </View>
+                  )
                 ) : n.type === 'staff_report_regenerated' && n.ref_id ? (
                   // I'm the original sharer: their updated copy is private — ask for it.
                   requestedIds[n.ref_id] ? (
@@ -400,12 +428,8 @@ export default function CoachNotificationsScreen() {
                     </TouchableOpacity>
                   )
                 ) : n.type === 'staff_report_request' && n.ref_id ? (
-                  requestResponses[n.ref_id] ? (
-                    <View style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center', opacity: 0.7 }]}>
-                      <Text style={[styles.approveBtnText, { color: t.ctaText }]} numberOfLines={1}>
-                        {requestResponses[n.ref_id] === 'denied' ? tr('coachNotifs.denied') : tr('coachNotifs.approvedTitle')}
-                      </Text>
-                    </View>
+                  (requestResponses[n.ref_id] ?? (n.outcome && n.outcome !== 'pending' ? n.outcome : null)) ? (
+                    outcomePill(requestResponses[n.ref_id] ?? n.outcome)
                   ) : (
                     <View style={styles.actionRow}>
                       <TouchableOpacity style={styles.approveBtn} onPress={() => respondRequest(n, true)}>

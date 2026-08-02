@@ -1261,6 +1261,26 @@ def mark_read(
     return {"ok": True}
 
 
+def _request_outcome(db: Session, ntype: str, ref_id: int | None) -> str | None:
+    """Where an actionable notification's request stands, or None.
+
+    The coach's decision used to live only in the responding session, so a
+    reload put the Approve and Deny buttons back on a request that was already
+    settled — and clicking them again asked the server to redo something it had
+    already done. Reading the referenced row is what makes the answer outlive
+    the screen.
+    """
+    if not ref_id:
+        return None
+    if ntype == "link_requested":
+        lr = db.get(models.LinkRequest, ref_id)
+        return lr.status if lr else None
+    if ntype == "staff_report_request":
+        sr = db.get(models.StaffSharedReport, ref_id)
+        return sr.request_status if sr else None
+    return None
+
+
 @router.get("/coach-notifications")
 def coach_notifications(
     db: Session = Depends(get_db),
@@ -1292,6 +1312,7 @@ def coach_notifications(
             "ref_id": n.ref_id,
             "created_at": n.created_at,
             "source": "player_notif",
+            "outcome": _request_outcome(db, n.type, n.ref_id),
         })
     for n in coach_notifs:
         result.append({
@@ -1304,6 +1325,7 @@ def coach_notifications(
             "created_at": n.created_at,
             "source": "coach_notif",
             "coach_notif_id": n.id,
+            "outcome": _request_outcome(db, n.type, n.ref_id),
         })
     result.sort(key=lambda x: x["created_at"] or "", reverse=True)
     return result[:60]

@@ -474,6 +474,11 @@ class Feedback(Base):
     app_version = Column(String, nullable=True)
     platform    = Column(String, nullable=True)   # ios / android / web
     language    = Column(String, nullable=True)   # so a non-English report is readable in context
+    # Screenshots, as a JSON array of base64 data URIs — the same shape as an
+    # avatar. A photo of the problem says in one glance what a paragraph
+    # struggles to, and these are small enough to live beside the text rather
+    # than depending on object storage that is not yet proven.
+    images      = Column(Text, nullable=True)
     # Filled by the digest pass, not at submit time — categorising on submit
     # would put an AI call in the way of the coach's tap.
     category    = Column(String, nullable=True)   # bug / confusing / feature / praise / other
@@ -527,6 +532,11 @@ class StaffSharedReport(Base):
     # it (points to the appropriate table for report_type). Lets the viewer and
     # Recents surface the updated version distinctly from the original.
     updated_report_id = Column(Integer, nullable=True)
+    # Where a request-to-share-back stands: pending / approved / declined, or
+    # NULL when no request was ever made. Recorded because the outcome was
+    # previously only held in the responding coach's session — reload the app
+    # and a resolved request offered its Approve and Deny buttons again.
+    request_status   = Column(String, nullable=True)
 
     sender    = relationship("Coach", foreign_keys=[sender_id])
     recipient = relationship("Coach", foreign_keys=[recipient_id])

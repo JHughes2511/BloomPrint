@@ -171,4 +171,11 @@ export interface AppNotification {
   read: boolean;
   ref_id: number | null;
   created_at: string;
+  /**
+   * Where an actionable notification's request stands, read from the row it
+   * refers to: pending / approved / rejected / declined, or absent when the
+   * notification asks for nothing. This is what lets a decision survive a
+   * reload instead of living only in the screen that made it.
+   */
+  outcome?: string | null;
 }

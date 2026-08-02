@@ -829,6 +829,9 @@ def request_updated(
         ref_id=sr.id, ntype="staff_report_request",
         key="notifs.staffReportRequest", params={"coach": coach.name, "type": sr.report_type},
     )
+    # Recorded so the recipient's notification can show where the request stands
+    # after a reload, rather than offering its buttons again.
+    sr.request_status = "pending"
     db.commit()
     return {"ok": True}
 
@@ -847,6 +850,7 @@ def respond_request(
     if not sr or sr.recipient_id != coach.id:
         raise HTTPException(status_code=404, detail="Shared report not found")
     approve = bool(body.get("approve"))
+    sr.request_status = "approved" if approve else "declined"
     if not approve:
         _coach_notify(
             db, sr.sender_id,

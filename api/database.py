@@ -195,6 +195,8 @@ def _reparse_eval_sections():
 ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     # (table, column, SQL type + default)
     ("player_users", "preferred_language", "VARCHAR DEFAULT 'en'"),
+    ("staff_shared_reports", "request_status", "VARCHAR"),
+    ("feedback", "images", "TEXT"),
 ]
 
 
