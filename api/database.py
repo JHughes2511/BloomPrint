@@ -115,6 +115,43 @@ def init_db():
     # Backend-independent: operates on rows, not schema.
     _reparse_eval_sections()
     _backfill_training_titles()
+    _claim_linked_players()
+
+
+def _claim_linked_players():
+    """Put already-linked players onto the roster of the coach who approved them.
+
+    Approving a link used to record the PlayerUserLink and leave
+    Player.coach_id unset, and the roster is filtered on that column — so every
+    link approved before that was fixed left a player the coach could not see.
+    The link row already names the approving coach, so the information to repair
+    it was there all along.
+
+    Fills empties only. A player already owned by a coach keeps that owner; this
+    can move nobody between rosters.
+    """
+    try:
+        from sqlalchemy.orm import Session as _Session
+        from . import models
+
+        with _Session(engine) as sess:
+            links = (
+                sess.query(models.PlayerUserLink)
+                .filter(models.PlayerUserLink.coach_id.isnot(None))
+                .all()
+            )
+            claimed = 0
+            for link in links:
+                player = sess.get(models.Player, link.player_id)
+                if player and not player.coach_id:
+                    player.coach_id = link.coach_id
+                    claimed += 1
+            if claimed:
+                sess.commit()
+                log.info("Claimed %s linked player(s) onto their coach's roster", claimed)
+    except Exception:
+        # A repair that cannot run must not stop the app from starting.
+        pass
 
 
 def _backfill_training_titles():
