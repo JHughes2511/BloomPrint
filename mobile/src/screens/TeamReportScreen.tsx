@@ -804,7 +804,7 @@ export default function TeamReportScreen() {
         {showPrevReports && (
           <>
             {/* Filter by output_type */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12, ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
               {[{ key: 'all' }, ...OUTPUT_TYPES].map(t => (
                 <TouchableOpacity
                   key={t.key}
@@ -1346,7 +1346,10 @@ export default function TeamReportScreen() {
 
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingTop: titleTopPad(56) },
+  // 16 across, matching Team Grade and Roster. At 20 this screen's title sat
+  // 4pt right of every other tab's, which reads as a wobble when you switch
+  // between them rather than as a deliberate inset.
+  container: { flex: 1, paddingHorizontal: 16, paddingBottom: 20, paddingTop: titleTopPad(56) },
   titleRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 28 },
   title: { fontFamily: fonts[800], fontSize: 30, letterSpacing: -0.6, color: t.ink, marginBottom: 4 },
   sub: { color: t.muted, fontSize: 13 },
