@@ -1130,7 +1130,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </TouchableOpacity>
           )}
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(16) }} contentContainerStyle={bleedContent(16)}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 8)}>
           {(['dashboard', 'games', 'scout', 'gamereport'] as const).map(v => (
             <TouchableOpacity
               key={v}
@@ -1151,7 +1151,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* Phase filter */}
           <View style={{ marginBottom: 16 }}>
             <Text style={[s.cardLabel, { marginBottom: 8 }]}>{tr('teamGrade.gradeView')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(16) }} contentContainerStyle={bleedContent(16)}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 {orderedPhases.map(phase => {
                   const selected = dashPhases.includes(phase);
@@ -1219,7 +1219,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 return (
                   <View style={s.card}>
                     <Text style={s.cardLabel}>{tr('teamGrade.gradeTrend')}</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14, ...bleedRow(16) }} contentContainerStyle={bleedContent(16)}>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14, ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
                       <Svg width={chartW} height={chartH + 48}>
                         <Line x1={0} y1={chartH} x2={chartW} y2={chartH} stroke={t.divider} strokeWidth={1} />
                         {data.map((pt: any, i: number) => {
@@ -1291,7 +1291,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           refreshControl={<RefreshControl refreshing={gamesRefreshing} onRefresh={async () => { setGamesRefreshing(true); await loadData(); setGamesRefreshing(false); }} tintColor={t.accent} />}
         >
           {/* Phase filter */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16, ...bleedRow(16) }} contentContainerStyle={bleedContent(16)}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16, ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
             {['all', ...orderedPhases].map(p => (
               <TouchableOpacity
                 key={p}
@@ -3172,7 +3172,11 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   screenTitle: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6, marginBottom: 12 },
   navBtn: {
     paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999,
-    borderWidth: 1, borderColor: t.line, marginRight: 8,
+    borderWidth: 1, borderColor: t.line,
+    // Spacing comes from the row's gap, not a trailing margin on every chip.
+    // With marginRight the LAST tab carried one too, so the row ended 24 from
+    // the edge while it started at 16 — the four tabs looked pushed left for a
+    // reason nothing on screen explained.
   },
   navBtnActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   navBtnText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },

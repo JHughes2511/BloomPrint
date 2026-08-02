@@ -239,7 +239,7 @@ export default function NewEvalScreen() {
           ) : (
             <>
               {/* Season filter */}
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8, ...bleedRow(20) }} contentContainerStyle={bleedContent(20)}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
                 {seasonYears.map(y => (
                   <TouchableOpacity key={y} style={[styles.typeChip, seasonYear === y && styles.typeChipActive]} onPress={() => setSeasonYear(y)}>
                     <Text style={[styles.typeLabel, seasonYear === y && styles.typeLabelActive]}>{y === 'all' ? tr('newEval.allSeasons') : y}</Text>
@@ -247,7 +247,7 @@ export default function NewEvalScreen() {
                 ))}
               </ScrollView>
               {/* Season type filter */}
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10, ...bleedRow(20) }} contentContainerStyle={bleedContent(20)}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
                 {seasonPhases.map(p => (
                   <TouchableOpacity key={p} style={[styles.typeChip, seasonPhase === p && styles.typeChipActive]} onPress={() => setSeasonPhase(p)}>
                     <Text style={[styles.typeLabel, seasonPhase === p && styles.typeLabelActive]}>{p === 'all' ? tr('newEval.allTypes') : p.charAt(0).toUpperCase() + p.slice(1)}</Text>

@@ -804,7 +804,7 @@ export default function TeamReportScreen() {
         {showPrevReports && (
           <>
             {/* Filter by output_type */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12, ...bleedRow(20) }} contentContainerStyle={bleedContent(20)}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
               {[{ key: 'all' }, ...OUTPUT_TYPES].map(t => (
                 <TouchableOpacity
                   key={t.key}

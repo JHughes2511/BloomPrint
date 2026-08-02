@@ -260,7 +260,7 @@ export default function ImportScreen() {
         {/* Default competition level — shown for both modes */}
         <Text style={styles.label} numberOfLines={1}>{tr('importScreen.defaultLevelLabel')}</Text>
         <Text style={styles.hint}>{tr('importScreen.defaultLevelHint')}</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24, ...bleedRow(20) }} contentContainerStyle={bleedContent(20)}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
           {LEVELS.map(l => (
             <TouchableOpacity
               key={l}
@@ -277,7 +277,7 @@ export default function ImportScreen() {
           <>
             <Text style={styles.label} numberOfLines={1}>{tr('importScreen.defaultReportType')}</Text>
             <Text style={styles.hint}>{tr('importScreen.defaultReportHint')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20, ...bleedRow(20) }} contentContainerStyle={bleedContent(20)}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
               {OUTPUT_TYPE_KEYS.map(key => (
                 <TouchableOpacity
                   key={key}
@@ -293,7 +293,7 @@ export default function ImportScreen() {
               <>
                 <Text style={styles.label} numberOfLines={1}>{tr('importScreen.assignToTeam')}</Text>
                 <Text style={styles.hint}>{tr('importScreen.assignToTeamHint')}</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24, ...bleedRow(20) }} contentContainerStyle={bleedContent(20)}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
                   <TouchableOpacity
                     style={[styles.chip, selectedTeamId == null && styles.chipActive]}
                     onPress={() => setSelectedTeamId(null)}

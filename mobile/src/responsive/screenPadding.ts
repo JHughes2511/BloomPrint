@@ -57,8 +57,14 @@ export const bleedRow = (parentPad: number): ViewStyle => ({
  * Trailing padding matters as much as leading: without it the last chip ends
  * flush against the glass with nothing after it, and a row that is scrolled to
  * its end looks identical to one that was cut off.
+ *
+ * `gap` defaults to 0 because most chip styles here already space themselves
+ * with marginRight. Adding 8 on top of that doubles the spacing to 16 — which
+ * is what happened when these rows were first bled, and it is invisible in the
+ * diff because the two halves live in different files. Pass a gap only for
+ * chips that carry no margin of their own.
  */
-export const bleedContent = (gutter: number, gap = 8): ViewStyle => ({
+export const bleedContent = (gutter: number, gap = 0): ViewStyle => ({
   flexDirection: 'row',
   alignItems: 'center',
   gap,
