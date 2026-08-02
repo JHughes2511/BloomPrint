@@ -301,6 +301,10 @@ export default function CommandBar({ open: openProp, onOpenChange, hideTrigger }
   );
 }
 
+// One height for the field and the Send button in the composer, matched to the
+// suggestion cards they sit beneath.
+const CONTROL_H = 44;
+
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   bar: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-end', backgroundColor: t.card, borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
   barText: { color: t.muted, fontSize: 12.5, fontFamily: fonts[700] },
@@ -323,12 +327,26 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   confirmYes: { flex: 1.4, flexDirection: 'row', gap: 5, backgroundColor: t.ctaBg, borderRadius: 8, paddingVertical: 10, alignItems: 'center', justifyContent: 'center' },
   confirmYesText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 13 },
   inputRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 12, paddingTop: 12, paddingBottom: Platform.OS === 'ios' ? 30 : 14, borderTopWidth: 1, borderTopColor: t.chip },
-  input: { flex: 1, backgroundColor: t.card, borderRadius: 12, borderWidth: 1, borderColor: t.line, paddingHorizontal: 14, paddingVertical: 10, color: t.ink, fontSize: 14, maxHeight: 120 },
-  // Deliberately not gated on width. This one is not a desktop accommodation —
-  // it is what Send looks like, and the same action should not read as three
-  // different controls across three screens because of the window size.
+  // The field and Send are one control in two pieces, so they share a height
+  // rather than each arriving at one through its own padding — which is how
+  // they ended up different: the field's height fell out of its font size and
+  // padding, and grew again when phone fields went to 16px to stop iOS zooming.
+  //
+  // CONTROL_H matches exChip above — 12 padding either side of 13pt text plus
+  // borders. The suggestions sit directly above this row, so anything else
+  // reads as a mistake next to them.
+  input: {
+    flex: 1, backgroundColor: t.card, borderRadius: 10,
+    borderWidth: 1, borderColor: t.line,
+    paddingHorizontal: 14, paddingVertical: 10,
+    color: t.ink, fontSize: 14,
+    minHeight: CONTROL_H,
+    // Still grows with a long question; the row is bottom-aligned, so Send
+    // stays level with the last line rather than drifting up the field.
+    maxHeight: 120,
+  },
   sendBtn: {
-    width: 44, height: 44, borderRadius: 10, backgroundColor: t.ctaBg,
-    alignItems: 'center', justifyContent: 'center',
+    width: CONTROL_H, height: CONTROL_H, borderRadius: 10,
+    backgroundColor: t.ctaBg, alignItems: 'center', justifyContent: 'center',
   },
 });
