@@ -313,12 +313,18 @@ def search_coaches(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    """Search coach/trainer/scout accounts by name."""
+    """Search coach/trainer/scout accounts by name, program, or email address.
+
+    Email was not searched before, so typing a colleague's address found nothing
+    and the invite sheet offered to email an invitation to someone who already
+    has an account — the one case where an email invite is the wrong answer.
+    """
     results = (
         db.query(models.Coach)
         .filter(
             (models.Coach.name.ilike(f"%{q}%")) |
-            (models.Coach.program_name.ilike(f"%{q}%"))
+            (models.Coach.program_name.ilike(f"%{q}%")) |
+            (models.Coach.email.ilike(f"%{q}%"))
         )
         .filter(models.Coach.id != coach.id)
         .limit(15)

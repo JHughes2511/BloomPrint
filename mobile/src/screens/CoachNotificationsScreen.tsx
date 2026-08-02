@@ -450,10 +450,14 @@ export default function CoachNotificationsScreen() {
                 ) : !n.read ? (
                   <TouchableOpacity
                     style={styles.markReadBtn}
-                    onPress={async () => {
-                      await playerAPI.coachMarkRead(n.id);
+                    onPress={() => {
+                      // Marked read on screen first, then on the server. The
+                      // row is the coach's own action and cannot fail in a way
+                      // they'd act on, so waiting for the round-trip only made
+                      // the button feel unresponsive.
                       setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
                       setExpandedId(null);
+                      playerAPI.coachMarkRead(n.id).catch(() => {});
                     }}
                   >
                     <Text style={styles.markReadText} numberOfLines={1}>{tr('coachNotifs.markAsRead')}</Text>

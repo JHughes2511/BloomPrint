@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
@@ -103,6 +103,9 @@ export default function StaffInboxScreen() {
   const [inviteSearch, setInviteSearch] = useState('');
   const [inviteResults, setInviteResults] = useState<any[]>([]);
   const [inviteSearching, setInviteSearching] = useState(false);
+  // The term the results on screen belong to — an email invite is only the
+  // right offer once a search for that exact text has come back empty.
+  const [inviteSearchedFor, setInviteSearchedFor] = useState('');
   const [inviting, setInviting] = useState(false);
   const [showCreateTeam, setShowCreateTeam] = useState(false);
   const [newTeamName, setNewTeamName] = useState('');
@@ -145,11 +148,34 @@ export default function StaffInboxScreen() {
   };
 
   const searchInvite = async () => {
-    if (!inviteSearch.trim()) return;
+    const term = inviteSearch.trim();
+    if (!term) return;
     setInviteSearching(true);
-    try { setInviteResults(await coachesAPI.search(inviteSearch.trim())); } catch {}
+    try { setInviteResults(await coachesAPI.search(term)); setInviteSearchedFor(term); } catch {}
     setInviteSearching(false);
   };
+
+  // Search as they type. Pressing the button was the only way to look someone
+  // up, so typing an address and seeing nothing but "Email invite" read as
+  // "this person has no account" — when in fact nobody had searched yet.
+  useEffect(() => {
+    if (!inviteFor) return;
+    const term = inviteSearch.trim();
+    if (term.length < 2) { setInviteResults([]); setInviteSearchedFor(''); return; }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setInviteSearching(true);
+      try {
+        const res = await coachesAPI.search(term);
+        if (!cancelled) { setInviteResults(res ?? []); setInviteSearchedFor(term); }
+      } catch {
+        if (!cancelled) { setInviteResults([]); setInviteSearchedFor(term); }
+      } finally {
+        if (!cancelled) setInviteSearching(false);
+      }
+    }, 250);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [inviteSearch, inviteFor]);
 
   const doInvite = async (data: { coach_id?: number; email?: string }) => {
     if (!inviteFor) return;
@@ -286,8 +312,10 @@ export default function StaffInboxScreen() {
       // they already invited this coach, which the server settles immediately.
       const res = await teamStaffAPI.join(teamId);
       await loadMyTeams();
-      setSearchResults([]);
-      setTeamSearch('');
+      // The row stays put and changes state. Clearing the search emptied the
+      // list instead, so asking to join looked like nothing had happened.
+      setSearchResults(prev => prev.map((tm: any) =>
+        tm.id === teamId ? { ...tm, join_status: res?.status === 'pending' ? 'pending' : 'member' } : tm));
       if (res?.status === 'pending') {
         setRequestedTeams(prev => [...prev, teamId]);
         Alert.alert(tr('staffHub.requestSentTitle'), tr('staffHub.requestSentMsg'));
@@ -595,7 +623,10 @@ export default function StaffInboxScreen() {
         </TouchableOpacity>
 
         {searchResults.map((team: any) => {
-          const isMember = myTeamIds.has(team.id);
+          // The server knows both states; myTeamIds and requestedTeams only
+          // cover what has happened since this screen mounted.
+          const isMember = myTeamIds.has(team.id) || team.join_status === 'member';
+          const isPending = team.join_status === 'pending' || requestedTeams.includes(team.id);
           return (
             <View key={team.id} style={[styles.card, { marginHorizontal: 0 }]}>
               <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
@@ -607,7 +638,7 @@ export default function StaffInboxScreen() {
                 <View style={{ backgroundColor: t.positiveSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, flexShrink: 0, maxWidth: 120 }}>
                   <Text style={{ color: t.positive, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('staffHub.joinedBadge')}</Text>
                 </View>
-              ) : requestedTeams.includes(team.id) ? (
+              ) : isPending ? (
                 <View style={{ backgroundColor: t.chip, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, flexShrink: 0, maxWidth: 120 }}>
                   <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('staffHub.requestPending')}</Text>
                 </View>
@@ -698,6 +729,35 @@ export default function StaffInboxScreen() {
                       </TouchableOpacity>
                     )}
                   </View>
+                  {/* Who is on the team. Before this the card showed a count
+                      and nothing else, so a coach who had just been approved
+                      had no way to see that they -- or anyone they invited --
+                      had actually joined. */}
+                  <View style={{ marginLeft: depth * 16, marginBottom: 8 }}>
+                    {(tm.members ?? []).map((m: any) => {
+                      const role = (m.role || '').trim();
+                      const roleLabel = m.is_owner
+                        ? tr('staffHub.ownerRole')
+                        : role
+                          ? tr(`auth.role${role.charAt(0).toUpperCase()}${role.slice(1)}`, { defaultValue: role })
+                          : tr('staffHub.staffRole');
+                      return (
+                        <View key={m.id} style={styles.memberRow}>
+                          <View style={styles.memberAvatar}>
+                            <Text style={styles.memberInitial}>{(m.name || '?').trim().charAt(0).toUpperCase()}</Text>
+                          </View>
+                          <Text style={styles.memberName} numberOfLines={1}>
+                            {m.name}{m.id === coachId ? ` · ${tr('staffHub.you')}` : ''}
+                          </Text>
+                          <Text style={styles.memberRole} numberOfLines={1}>{roleLabel}</Text>
+                        </View>
+                      );
+                    })}
+                    {(tm.members ?? []).length <= 1 && (
+                      <Text style={styles.memberHint} numberOfLines={2}>{tr('staffHub.onlyYouHint')}</Text>
+                    )}
+                  </View>
+
                   <View style={{ flexDirection: 'row', gap: 8, marginLeft: depth * 16, marginBottom: 8, flexWrap: 'wrap' }}>
                     <TouchableOpacity style={styles.teamActBtn} onPress={() => messageGroup(tm)} disabled={messagingTeam === tm.id}>
                       {messagingTeam === tm.id ? <ActivityIndicator color={t.accent} size="small" /> : <><Ionicons name="chatbubble-ellipses-outline" size={14} color={t.accent} /><Text style={styles.teamActText} numberOfLines={1}>{tr('staffHub.message')}</Text></>}
@@ -948,7 +1008,7 @@ export default function StaffInboxScreen() {
               <Text style={[styles.modalTitle, { flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>Invite to {inviteFor?.name}</Text>
               <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setInviteFor(null)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
-            <Text style={[styles.cardSub, { marginBottom: 8 }]}>Search a coach by name, or enter an email to invite someone new. Coach accounts only.</Text>
+            <Text style={[styles.cardSub, { marginBottom: 8 }]}>{tr('staffHub.inviteSheetHint')}</Text>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
               <TextInput
                 style={[styles.searchInput, { flex: 1 }]}
@@ -964,13 +1024,7 @@ export default function StaffInboxScreen() {
                 {inviteSearching ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="search" size={18} color={t.ctaText} />}
               </TouchableOpacity>
             </View>
-            {inviteSearch.includes('@') && (
-              <TouchableOpacity style={[styles.staffRow, { justifyContent: 'space-between' }]} onPress={() => doInvite({ email: inviteSearch.trim() })} disabled={inviting}>
-                <Text style={[styles.cardTitle, { flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>Email invite: {inviteSearch.trim()}</Text>
-                <Ionicons name="mail-outline" size={18} color={t.accent} />
-              </TouchableOpacity>
-            )}
-            <ScrollView style={{ maxHeight: 260 }}>
+            <ScrollView style={{ maxHeight: 260 }} keyboardShouldPersistTaps="handled">
               {inviteResults.map((c: any) => (
                 <TouchableOpacity key={c.id} style={styles.staffRow} onPress={() => doInvite({ coach_id: c.id })} disabled={inviting}>
                   <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
@@ -980,6 +1034,22 @@ export default function StaffInboxScreen() {
                   <Ionicons name="person-add-outline" size={18} color={t.accent} />
                 </TouchableOpacity>
               ))}
+              {/* Last resort, below the accounts and only once the search for
+                  this exact text has come back with nothing. Offering it up
+                  front told the coach an account didn't exist before anyone
+                  had looked. */}
+              {inviteSearch.trim().includes('@')
+                && inviteSearchedFor === inviteSearch.trim()
+                && !inviteSearching
+                && inviteResults.length === 0 && (
+                <TouchableOpacity style={[styles.staffRow, { justifyContent: 'space-between' }]} onPress={() => doInvite({ email: inviteSearch.trim() })} disabled={inviting}>
+                  <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+                    <Text style={styles.cardTitle} numberOfLines={1}>{tr('staffHub.emailInviteRow', { email: inviteSearch.trim() })}</Text>
+                    <Text style={styles.cardSub} numberOfLines={1}>{tr('staffHub.noAccountYet')}</Text>
+                  </View>
+                  <Ionicons name="mail-outline" size={18} color={t.accent} />
+                </TouchableOpacity>
+              )}
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
@@ -1154,6 +1224,13 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   startBtnText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15, flexShrink: 1 },
   teamActBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: t.accent, flexShrink: 1, maxWidth: '100%' },
   teamActText: { color: t.accent, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 },
+
+  memberRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 5, paddingLeft: 4 },
+  memberAvatar: { width: 22, height: 22, borderRadius: 11, backgroundColor: t.accentSoft, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  memberInitial: { color: t.accent, fontSize: 11, fontFamily: fonts[800] },
+  memberName: { color: t.inkSoft, fontSize: 13, fontFamily: fonts[600], flex: 1, flexShrink: 1, minWidth: 0 },
+  memberRole: { color: t.muted2, fontSize: 11.5, fontFamily: fonts[700], flexShrink: 0, marginLeft: 8 },
+  memberHint: { color: t.muted2, fontSize: 12, paddingLeft: 4, paddingTop: 2, lineHeight: 17 },
   createTeamBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.accentSoft, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20, borderWidth: 1, borderColor: t.accent, marginBottom: 8, ...desktopOnly({ alignSelf: 'flex-start', minWidth: 240 }) },
   createTeamText: { color: t.accent, fontFamily: fonts[700], fontSize: 13.5, flexShrink: 1 },
 });

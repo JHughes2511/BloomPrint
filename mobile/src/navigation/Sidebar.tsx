@@ -56,13 +56,13 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
   const [results, setResults] = useState<SearchResults | null>(null);
   const [unread, setUnread] = useState(0);
 
-  useFocusEffect(
-    useCallback(() => {
-      playerAPI.coachNotifications()
-        .then((n: any[]) => setUnread(n.filter(x => !x.read).length))
-        .catch(() => {});
-    }, []),
-  );
+  const countUnread = useCallback(() => {
+    playerAPI.coachNotifications()
+      .then((n: any[]) => setUnread(n.filter(x => !x.read).length))
+      .catch(() => {});
+  }, []);
+
+  useFocusEffect(countUnread);
 
   // Debounced, and every in-flight response is checked against the query that
   // is current when it lands. Without that check a slow request for "mar" can
@@ -97,6 +97,17 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
   const notifsActive = screenName === 'CoachNotifications';
   // While one of those is showing, no tab is the current section.
   const inBottomZone = staffActive || notifsActive;
+
+  // The rail mounts once and never unmounts, so its useFocusEffect fires a
+  // single time: reading a notification left the badge showing until a full
+  // page reload. Recount whenever the screen changes, and keep it live while
+  // the coach is actually on the notifications screen clearing them.
+  useEffect(() => {
+    countUnread();
+    if (!notifsActive) return;
+    const id = setInterval(countUnread, 5000);
+    return () => clearInterval(id);
+  }, [screenName, focusedTab?.name, notifsActive, countUnread]);
 
   const go = (tab: string, screen: string, params: Record<string, unknown>) => {
     setQuery('');

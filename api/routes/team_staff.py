@@ -11,6 +11,14 @@ from .. import models, notify
 router = APIRouter(prefix="/team-staff", tags=["team-staff"])
 
 
+class TeamMemberOut(BaseModel):
+    id: int
+    name: str
+    role: str | None = None
+    is_owner: bool = False
+    model_config = {"from_attributes": True}
+
+
 class TeamOut(BaseModel):
     id: int
     name: str
@@ -18,7 +26,15 @@ class TeamOut(BaseModel):
     coach_name: str | None = None
     parent_team_id: int | None = None
     member_count: int | None = None
+    # Who is actually on the team. Sent with the team rather than fetched per
+    # card: a coach who has just been approved wants to see themselves on the
+    # roster, and a count alone doesn't show that.
+    members: list[TeamMemberOut] | None = None
     is_owner: bool | None = None
+    # Search results only: "member", "pending", or None. Without it the Join
+    # button came back after a reload on a team the coach had already asked to
+    # join, because the pending state lived in component state and died with it.
+    join_status: str | None = None
     # The owner's account no longer exists — the team is unmanageable until a
     # staff member claims it, so the client needs to offer that.
     owner_missing: bool | None = None
@@ -35,9 +51,37 @@ def _can_manage(db: Session, team_id: int, coach_id: int) -> bool:
     return db.query(models.TeamStaff).filter_by(team_id=team_id, coach_id=coach_id).first() is not None
 
 
-def _member_count(db: Session, team_id: int) -> int:
-    staff = db.query(models.TeamStaff).filter_by(team_id=team_id).count()
-    return staff + 1  # + owner
+def _members_by_team(db: Session, team_ids: list[int]) -> dict[int, list[TeamMemberOut]]:
+    """Every team's staff, in two queries rather than two per team.
+
+    Owner first, then staff by name — the order the list is read in.
+    """
+    if not team_ids:
+        return {}
+    teams = db.query(models.Team).filter(models.Team.id.in_(team_ids)).all()
+    links = db.query(models.TeamStaff).filter(models.TeamStaff.team_id.in_(team_ids)).all()
+
+    coach_ids = {t.coach_id for t in teams} | {l.coach_id for l in links}
+    coaches = {
+        c.id: c
+        for c in (db.query(models.Coach).filter(models.Coach.id.in_(coach_ids)).all() if coach_ids else [])
+    }
+
+    staff_ids: dict[int, list[int]] = {}
+    for l in links:
+        staff_ids.setdefault(l.team_id, []).append(l.coach_id)
+
+    out: dict[int, list[TeamMemberOut]] = {}
+    for team in teams:
+        rows: list[TeamMemberOut] = []
+        owner = coaches.get(team.coach_id)
+        if owner:
+            rows.append(TeamMemberOut(id=owner.id, name=owner.name, role=owner.role, is_owner=True))
+        others = [coaches[cid] for cid in staff_ids.get(team.id, []) if cid in coaches and cid != team.coach_id]
+        for c in sorted(others, key=lambda c: (c.name or "").lower()):
+            rows.append(TeamMemberOut(id=c.id, name=c.name, role=c.role, is_owner=False))
+        out[team.id] = rows
+    return out
 
 
 class TeamGameItem(BaseModel):
@@ -65,6 +109,15 @@ def search_teams(
         .limit(20)
         .all()
     )
+    member_of = {
+        l.team_id for l in db.query(models.TeamStaff).filter_by(coach_id=coach.id).all()
+    }
+    pending = {
+        r.team_id
+        for r in db.query(models.TeamInvite)
+        .filter_by(invited_coach_id=coach.id, kind="request", status="pending")
+        .all()
+    }
     result = []
     for t in teams:
         owner = db.get(models.Coach, t.coach_id)
@@ -73,6 +126,11 @@ def search_teams(
             name=t.name,
             competition_level=t.competition_level,
             coach_name=owner.name if owner else None,
+            join_status=(
+                "member" if t.coach_id == coach.id or t.id in member_of
+                else "pending" if t.id in pending
+                else None
+            ),
         ))
     return result
 
@@ -288,14 +346,19 @@ def my_teams(
                 break
             teams[parent.id] = parent
             cur = parent
+    members = _members_by_team(db, list(teams))
     result = []
     for t in teams.values():
         owner = db.get(models.Coach, t.coach_id)
+        rows = members.get(t.id, [])
         result.append(TeamOut(
             id=t.id, name=t.name, competition_level=t.competition_level,
             coach_name=owner.name if owner else None,
             parent_team_id=t.parent_team_id,
-            member_count=_member_count(db, t.id),
+            # An orphaned team has no owner row, so the count comes from the
+            # list rather than assuming an owner is always there to add.
+            member_count=len(rows),
+            members=rows,
             is_owner=(t.coach_id == coach.id),
             owner_missing=(owner is None),
         ))
@@ -322,7 +385,8 @@ def create_subteam(
     db.commit()
     db.refresh(sub)
     return TeamOut(id=sub.id, name=sub.name, competition_level=sub.competition_level,
-                   coach_name=coach.name, parent_team_id=team_id, member_count=1, is_owner=True)
+                   coach_name=coach.name, parent_team_id=team_id, member_count=1, is_owner=True,
+                   members=[TeamMemberOut(id=coach.id, name=coach.name, role=coach.role, is_owner=True)])
 
 
 @router.get("/{team_id}/subteams", response_model=list[TeamOut])
@@ -332,12 +396,14 @@ def list_subteams(
     coach: models.Coach = Depends(get_current_coach),
 ):
     subs = db.query(models.Team).filter_by(parent_team_id=team_id).order_by(models.Team.name).all()
+    members = _members_by_team(db, [s.id for s in subs])
     out = []
     for s in subs:
         owner = db.get(models.Coach, s.coach_id)
+        rows = members.get(s.id, [])
         out.append(TeamOut(id=s.id, name=s.name, competition_level=s.competition_level,
                            coach_name=owner.name if owner else None, parent_team_id=team_id,
-                           member_count=_member_count(db, s.id),
+                           member_count=len(rows), members=rows,
                            is_owner=(s.coach_id == coach.id)))
     return out
 
