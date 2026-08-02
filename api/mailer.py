@@ -94,6 +94,49 @@ def _send_smtp(to: str, subject: str, text: str, html: str | None,
     return True
 
 
+def _explain(exc: Exception) -> str:
+    """Turn a send failure into something a person can act on.
+
+    A provider's refusal arrives as an HTTP error whose body carries the actual
+    reason — an unverified domain, a rejected sender. That body is the useful
+    part and is otherwise discarded, leaving only a stack type to go on.
+    """
+    import urllib.error
+    if isinstance(exc, urllib.error.HTTPError):
+        try:
+            body = exc.read().decode("utf-8", "replace").strip()[:500]
+        except Exception:
+            body = ""
+        return f"provider returned HTTP {exc.code}: {body or exc.reason}"
+    return f"{type(exc).__name__}: {exc}"
+
+
+def try_send(to: str, subject: str, text: str, html: str | None = None, *,
+             from_addr: str | None = None, reply_to: str | None = None) -> tuple[bool, str]:
+    """Send one email, reporting why if it didn't go. Never raises.
+
+    Same work as send_email, with the reason kept rather than dropped, so a
+    diagnostic caller can say what went wrong instead of only that something
+    did. Ordinary callers want send_email.
+    """
+    if not to:
+        return False, "no destination address"
+    sender = from_addr or mail_from()
+    try:
+        if os.environ.get("RESEND_API_KEY"):
+            ok = _send_resend(to, subject, text, html, sender, reply_to)
+            return ok, "sent via Resend" if ok else "Resend accepted the request but did not confirm"
+        if os.environ.get("SMTP_HOST"):
+            ok = _send_smtp(to, subject, text, html, sender, reply_to)
+            return ok, "sent via SMTP" if ok else "SMTP accepted the request but did not confirm"
+    except Exception as exc:
+        detail = _explain(exc)
+        log.warning("Email to %s failed (%s): %s", to, subject, detail)
+        return False, detail
+    log.info("Email not sent (no provider configured): %s -> %s", subject, to)
+    return False, "no email provider configured (set RESEND_API_KEY or SMTP_HOST)"
+
+
 def send_email(to: str, subject: str, text: str, html: str | None = None, *,
                from_addr: str | None = None, reply_to: str | None = None) -> bool:
     """Send one email. Returns whether it went out; never raises.
@@ -104,16 +147,4 @@ def send_email(to: str, subject: str, text: str, html: str | None = None, *,
     A caller that wants to know it failed can check the return value, but no
     caller should have its own work fail because mail did.
     """
-    if not to:
-        return False
-    sender = from_addr or mail_from()
-    try:
-        if os.environ.get("RESEND_API_KEY"):
-            return _send_resend(to, subject, text, html, sender, reply_to)
-        if os.environ.get("SMTP_HOST"):
-            return _send_smtp(to, subject, text, html, sender, reply_to)
-    except Exception as exc:
-        log.warning("Email to %s failed (%s): %s", to, subject, exc)
-        return False
-    log.info("Email not sent (no provider configured): %s -> %s", subject, to)
-    return False
+    return try_send(to, subject, text, html, from_addr=from_addr, reply_to=reply_to)[0]

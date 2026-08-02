@@ -22,7 +22,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
 from .. import models
-from ..mailer import send_email, feedback_to, feedback_from, mail_from
+from ..mailer import send_email, try_send, feedback_to, feedback_from, mail_from
 from ..feedback_emails import ack_message
 from ..ai_models import SONNET
 
@@ -258,6 +258,62 @@ def build_digest(
     subject, text = _render_digest(themes, len(rows))
     sent = send_email(feedback_to(), subject, text)
     return {"ok": True, "count": len(rows), "themes": themes, "emailed": sent}
+
+
+@router.get("/mail-status")
+def mail_status(
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Where feedback mail is meant to go, and whether it got there.
+
+    Submitting deliberately survives a mail outage, which means a broken mail
+    setup looks exactly like a working one from the app. This says which of the
+    two it is. Addresses and flags only — never the key.
+    """
+    to, frm = feedback_to(), feedback_from()
+    recent = (
+        db.query(models.Feedback)
+        .filter_by(coach_id=coach.id)
+        .order_by(models.Feedback.id.desc())
+        .limit(5)
+        .all()
+    )
+    return {
+        "provider": "resend" if os.environ.get("RESEND_API_KEY")
+                    else ("smtp" if os.environ.get("SMTP_HOST") else None),
+        "feedback_to": to,
+        "feedback_from": frm,
+        "mail_from": mail_from(),
+        # Receiving servers reject a message that claims to come from their own
+        # domain but arrives from a third-party sender, so these must differ.
+        "from_equals_to": frm == to,
+        # FEEDBACK_TO unset falls back to the noreply sender — mail then goes to
+        # a mailbox nobody reads, which looks identical to mail never being sent.
+        "feedback_to_is_default": not os.environ.get("FEEDBACK_TO"),
+        "recent": [
+            {"id": r.id, "emailed": bool(r.emailed), "created_at": r.created_at}
+            for r in recent
+        ],
+    }
+
+
+@router.post("/mail-test")
+def mail_test(coach: models.Coach = Depends(get_current_coach)):
+    """Attempt a real send and report the provider's answer verbatim.
+
+    The submit path swallows failures on purpose — a coach's feedback must save
+    whatever mail does. That leaves the reason only in the logs. This runs the
+    same send and hands the reason back.
+    """
+    ok, detail = try_send(
+        feedback_to(),
+        "BloomPrint mail test",
+        f"Test message requested by {coach.email}.\n\n"
+        "If you are reading this, feedback notifications can be delivered.\n",
+        from_addr=feedback_from(),
+    )
+    return {"ok": ok, "detail": detail, "to": feedback_to(), "from": feedback_from()}
 
 
 @router.get("")
