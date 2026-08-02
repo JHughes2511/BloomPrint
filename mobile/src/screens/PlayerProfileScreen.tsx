@@ -33,7 +33,7 @@ import PageContainer from '../responsive/PageContainer';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
-import { sheetCap, desktopOnly, useSheetScrollHeight } from '../responsive/modalSizes';
+import { sheetCap, desktopOnly, webOnly, useSheetScrollHeight } from '../responsive/modalSizes';
 import ActionGrid from '../responsive/ActionGrid';
 const COMPETITION_LEVELS = [...CANON_LEVELS];
 
@@ -1364,8 +1364,8 @@ export default function PlayerProfileScreen() {
                        // over height — which is why the sheet collapsed to ~50px no
                        // matter what height it was given. Restoring an auto basis on
                        // web lets the height apply.
-                       desktopOnly({ flexBasis: 'auto', height: sheetBody + 96 })]}>
-          <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} style={desktopOnly({ height: sheetBody })} contentContainerStyle={{ paddingBottom: 16 }}>
+                       webOnly({ flexBasis: 'auto', height: sheetBody + 96 })]}>
+          <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} style={webOnly({ height: sheetBody })} contentContainerStyle={{ paddingBottom: 16 }}>
             <Text style={styles.modalTitle}>{tr('playerProfile.editPlayer')}</Text>
             <VoiceTextInput
               style={styles.input}

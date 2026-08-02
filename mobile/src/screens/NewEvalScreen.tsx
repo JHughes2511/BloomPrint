@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { evalsAPI, gameEvalAPI, playersAPI, uploadFileStreamed } from '../api/client';
 import { OutputType } from '../types';
 import { useTheme } from '../theme/ThemeProvider';
-import { topPad, bleedRow, bleedContent } from '../responsive/screenPadding';
+import { titleTopPad, bleedRow, bleedContent } from '../responsive/screenPadding';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
@@ -239,7 +239,7 @@ export default function NewEvalScreen() {
           ) : (
             <>
               {/* Season filter */}
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8, ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
                 {seasonYears.map(y => (
                   <TouchableOpacity key={y} style={[styles.typeChip, seasonYear === y && styles.typeChipActive]} onPress={() => setSeasonYear(y)}>
                     <Text style={[styles.typeLabel, seasonYear === y && styles.typeLabelActive]}>{y === 'all' ? tr('newEval.allSeasons') : y}</Text>
@@ -247,7 +247,7 @@ export default function NewEvalScreen() {
                 ))}
               </ScrollView>
               {/* Season type filter */}
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10, ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
                 {seasonPhases.map(p => (
                   <TouchableOpacity key={p} style={[styles.typeChip, seasonPhase === p && styles.typeChipActive]} onPress={() => setSeasonPhase(p)}>
                     <Text style={[styles.typeLabel, seasonPhase === p && styles.typeLabelActive]}>{p === 'all' ? tr('newEval.allTypes') : p.charAt(0).toUpperCase() + p.slice(1)}</Text>
@@ -412,8 +412,8 @@ export default function NewEvalScreen() {
 
       <TouchableOpacity style={styles.submitBtn} onPress={submit} disabled={submitting}>
         {submitting
-          ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.submitText}>{'  ' + tr('newEval.analyzing')}</Text></>
-          : <><Ionicons name="analytics" size={18} color={t.ctaText} /><Text style={styles.submitText}>{'  ' + tr('newEval.runBimAnalysis')}</Text></>
+          ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.submitText}>{tr('newEval.analyzing')}</Text></>
+          : <><Ionicons name="analytics" size={18} color={t.ctaText} /><Text style={styles.submitText}>{tr('newEval.runBimAnalysis')}</Text></>
         }
       </TouchableOpacity>
 
@@ -430,7 +430,9 @@ export default function NewEvalScreen() {
 }
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingTop: topPad(56) },
+  // 16 across and the title inset the other tab screens use, so moving into
+  // this screen does not shift everything sideways and down.
+  container: { flex: 1, paddingHorizontal: 16, paddingBottom: 20, paddingTop: titleTopPad(56) },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 28 },
   title: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6 },
   sub: { color: t.muted, fontSize: 12, marginTop: 2 },
@@ -461,7 +463,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   submitBtn: {
     backgroundColor: t.ctaBg, borderRadius: 999, padding: 16,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 8,
   },
   submitText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 16 },
   hint: { color: t.muted2, fontSize: 12, textAlign: 'center', marginTop: 12 },

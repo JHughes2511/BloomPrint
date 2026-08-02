@@ -23,7 +23,7 @@ import CommandBar from '../components/CommandBar';
 import CountryField from '../components/CountryField';
 import LanguagePicker from '../components/LanguagePicker';
 import VoiceTextInput from '../components/VoiceTextInput';
-import { sheetCap } from '../responsive/modalSizes';
+import { sheetCap, webOnly } from '../responsive/modalSizes';
 
 // Which bottom tab each report type routes to when tapped on the Home page.
 //   RosterTab   = Roster      TeamTab = Team Eval      TeamEvalTab = Team Grade
@@ -460,7 +460,15 @@ export default function HomeScreen() {
       <Modal visible={showProfile} transparent animationType="slide" onRequestClose={() => setShowProfile(false)}>
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 1, borderColor: t.cardBorder, maxHeight: '90%', ...sheetCap(560) }}>
-            <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 36 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator>
+            {/* flexBasis auto is what stops this sheet opening blank in a
+                browser. react-native-web gives a ScrollView flex-basis 0, so
+                inside a box with only a maxHeight it contributes no height at
+                all and the sheet renders as an empty card. Same fix Add Player
+                and the player quick-look already carry. */}
+            <ScrollView
+              style={webOnly({ flexGrow: 0, flexBasis: 'auto' })}
+              contentContainerStyle={{ padding: 24, paddingBottom: 36 }}
+              keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <Text style={[typeScale.sectionTitle, { color: t.ink, fontSize: 20, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }]} numberOfLines={1}>{tr('home.editProfileTitle')}</Text>
               <TouchableOpacity onPress={() => setShowProfile(false)} style={{ flexShrink: 0 }}>

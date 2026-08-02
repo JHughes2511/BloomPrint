@@ -123,8 +123,8 @@ export default function TrainingScreen() {
 
         <TouchableOpacity style={styles.generateBtn} onPress={generate} disabled={generating}>
           {generating
-            ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.generateText} numberOfLines={1}>{'  ' + tr('training.generating')}</Text></>
-            : <><Ionicons name="barbell" size={16} color={t.ctaText} /><Text style={styles.generateText} numberOfLines={1}>{'  ' + tr('training.generateProgram')}</Text></>
+            ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.generateText} numberOfLines={1}>{tr('training.generating')}</Text></>
+            : <><Ionicons name="barbell" size={16} color={t.ctaText} /><Text style={styles.generateText} numberOfLines={1}>{tr('training.generateProgram')}</Text></>
           }
         </TouchableOpacity>
         <GeneratingOverlay visible={generating} label={tr('training.buildingOverlay')} />
@@ -199,7 +199,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   generateBtn: {
     backgroundColor: t.ctaBg, borderRadius: 999, padding: 15,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    // gap, not two spaces inside the label: leading whitespace in a text node
+    // collapses in a browser, so the icon sat flush against the word.
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
   },
   generateText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15, flexShrink: 1 },
   importBtn: {

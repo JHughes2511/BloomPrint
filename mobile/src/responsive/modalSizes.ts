@@ -71,6 +71,20 @@ export const sheetCap = (max: number): ViewStyle =>
 
 
 /**
+ * A style that exists because the browser behaves differently — at ANY width.
+ *
+ * Distinct from desktopOnly, and the distinction matters: that one asks "is
+ * there room", this one asks "is this a browser". Workarounds for react-native-
+ * web's layout belong here. Gating one of those on width means it vanishes on a
+ * phone browser, which is where it was needed most — a sheet whose body is a
+ * ScrollView collapses to a sliver without it, and reads as a popup that opened
+ * blank.
+ */
+export const webOnly = (style: ViewStyle): ViewStyle =>
+  Platform.OS === 'web' ? style : {};
+
+
+/**
  * Any style that exists purely to make a wide window look right.
  *
  * Same reasoning as sheetCap: bounding a button or a tab bar is a desktop
