@@ -281,6 +281,11 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   // animation and waits on this before showing anything.
   const playbackDoneRef                 = useRef<Promise<void>>(Promise.resolve());
   const playbackResolve                 = useRef<() => void>(() => {});
+  // How long the players hold their finishing spots before the board resets.
+  // Long enough to read where everyone ended up, short enough that it clearly
+  // belongs to the play rather than being where the board now lives.
+  const REST_MS = 1400;
+  const restTimer                       = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Per-player guidance: lock a player in place (AI cascades the others around
   // it) and/or attach a per-player note. Keyed by player id (O1..O5). Reset per
   // board. Applied on regenerate.
@@ -1547,6 +1552,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     const actions = scheme?.actions ?? [];
     const steps = [...new Set(actions.map(a => a.step ?? 1))].sort((x, y) => x - y);
     if (steps.length === 0) return;
+    cancelSettle();
     animCancel.current = false;
     setAnimDone(false);
     setAnimating(true);
@@ -1559,13 +1565,39 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         if (!finished || animCancel.current) { setAnimating(false); return; }
         i += 1;
         if (i < steps.length) setTimeout(runStep, 250);
-        else { setAnimating(false); setAnimDone(false); }   // return to the START view
+        else { setAnimating(false); setAnimDone(true); settleToStart('ai'); }
       });
     };
     runStep();
   };
   // Reset animation when switching schemes/boards.
-  useEffect(() => { animCancel.current = true; setAnimating(false); setAnimDone(false); }, [activeScheme, activeBoardIdx]);
+  useEffect(() => { cancelSettle(); animCancel.current = true; setAnimating(false); setAnimDone(false); }, [activeScheme, activeBoardIdx]);
+
+  /**
+   * Hold the finished play, then put the players back where they started.
+   *
+   * A play is a loop: you watch it, then you want to run it again, and a board
+   * left at the final positions cannot be replayed without first being reset in
+   * your head. The AI animation already returned to the start but did it on the
+   * last frame, so the ending was never actually visible; the freehand replay
+   * did the opposite and simply stayed at the end.
+   */
+  const settleToStart = (kind: 'freehand' | 'ai') => {
+    if (restTimer.current) clearTimeout(restTimer.current);
+    restTimer.current = setTimeout(() => {
+      if (kind === 'freehand') setFreehandDone(false);
+      else setAnimDone(false);
+      setAnimStep(0);
+      drawProgress.setValue(0);
+    }, REST_MS);
+  };
+
+  // A new play, a different scheme or a different board all cancel a pending
+  // settle — otherwise it fires mid-way through whatever replaced it.
+  const cancelSettle = () => {
+    if (restTimer.current) { clearTimeout(restTimer.current); restTimer.current = null; }
+  };
+  useEffect(() => cancelSettle, []);
 
   // Play the FREEHAND drawing: run the hand-drawn arrows in order — a player
   // (circle/X) whose spot an arrow starts on slides along it; a blue dashed arrow
@@ -1574,6 +1606,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     const seq = freehandSequence();
     if (!seq.length) return;
     const steps = [...new Set(seq.map(x => x.step))].sort((a, b) => a - b);
+    cancelSettle();
     animCancel.current = false;
     setFreehandDone(false);
     setFreehandPlaying(true);
@@ -1599,7 +1632,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         if (!finished || animCancel.current) { setFreehandPlaying(false); playbackResolve.current(); return; }
         i += 1;
         if (i < steps.length) setTimeout(runStep, 260);
-        else { setFreehandPlaying(false); setFreehandDone(true); playbackResolve.current(); }
+        else { setFreehandPlaying(false); setFreehandDone(true); playbackResolve.current(); settleToStart('freehand'); }
       });
       if (Platform.OS === 'web') requestAnimationFrame(() => requestAnimationFrame(begin));
       else begin();
