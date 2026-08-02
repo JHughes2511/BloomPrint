@@ -22,7 +22,7 @@ import PageContainer from '../responsive/PageContainer';
 import { renderReport } from '../utils/renderReport';
 import { reportSubject } from '../utils/reportSubject';
 import { outputTypeLabel } from '../utils/reportType';
-import { sheetCap, webOnly } from '../responsive/modalSizes';
+import { sheetCap, desktopOnly } from '../responsive/modalSizes';
 
 export default function ConversationScreen() {
   const route = useRoute<any>();
@@ -395,7 +395,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   attachBtn: { width: 34, height: 40, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   input: { flex: 1, backgroundColor: t.chip, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 9, color: t.ink, fontSize: 14.5, borderWidth: 1, borderColor: t.line, maxHeight: 110, minHeight: 40 },
   sendBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.accent, alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-    ...webOnly({ width: 44, height: 44, borderRadius: 10, backgroundColor: t.ctaBg }) },
+    ...desktopOnly({ width: 44, height: 44, borderRadius: 10, backgroundColor: t.ctaBg }) },
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, maxHeight: '70%', borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560)},
   sheetHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },

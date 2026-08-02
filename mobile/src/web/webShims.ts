@@ -88,6 +88,26 @@ function installGlobalCss() {
     /* Match the type rendering the native apps get. */
     * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
+    /* iOS Safari zooms the whole page when a field smaller than 16px takes
+       focus, and stays zoomed after the keyboard closes — so tapping a search
+       box left the app scaled up and scrolled sideways.
+
+       16px is the entire fix. maximum-scale and user-scalable are the usual
+       suggestions and do nothing: iOS has ignored both since iOS 10 precisely
+       so that pages cannot disable pinch zoom, and disabling it is not
+       something we would want anyway.
+
+       Phone widths only. Wider windows keep the sizes the design uses, and no
+       desktop browser zooms on focus.
+
+       !important is required, not defensive: react-native-web writes font-size
+       as an inline style on every field, and an inline style beats a stylesheet
+       rule. Without it this silently does nothing — the fields stay at 15px and
+       keep zooming. */
+    @media (max-width: 767px) {
+      input, textarea, select { font-size: 16px !important; }
+    }
+
     /* The app scrolls its own panes; the page itself never should. */
     body { overflow: hidden; }
   `;

@@ -16,7 +16,7 @@ import PageContainer from '../../responsive/PageContainer';
 import { outputTypeLabel } from '../../utils/reportType';
 import { timeAgo } from '../../utils/timeAgo';
 import { useGridColumns } from '../../responsive/useGridColumns';
-import { webOnly } from '../../responsive/modalSizes';
+import { desktopOnly } from '../../responsive/modalSizes';
 
 const LEVEL_RE = /\b(HS Varsity|HS JV|Varsity|JUCO|NAIA|D1|D2|D3|College|Pro|AAU|Middle School|Youth|EYBL|Prep)\b/i;
 const SKIP_TITLE = /^(bim\b|player\b|program\b|framework\b|overall\b|grade\b|evaluation\b|status\b|rating\b|section\b|output\b|\d+\s+frames|rating scale|status options|comparable|floor comp|ceiling comp)/i;
@@ -250,7 +250,7 @@ export default function PlayerInboxScreen() {
           </Text>
         </View>
       ) : (
-        <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap, paddingHorizontal: 16 })}
+        <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap, paddingHorizontal: 16 })}
               onLayout={reportGrid.onLayout}>
         {searched.map(item => {
           const isFilm = (item.output_type || '').includes('film');

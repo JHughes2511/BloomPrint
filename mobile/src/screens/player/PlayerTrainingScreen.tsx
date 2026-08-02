@@ -16,7 +16,7 @@ import PageContainer from '../../responsive/PageContainer';
 import { parseDrills } from '../../utils/trainingDrills';
 import { timeAgo } from '../../utils/timeAgo';
 import { useGridColumns } from '../../responsive/useGridColumns';
-import { webOnly } from '../../responsive/modalSizes';
+import { desktopOnly } from '../../responsive/modalSizes';
 
 
 const cleanPreview = (s: string) =>
@@ -161,7 +161,7 @@ export default function PlayerTrainingScreen() {
             <Text style={styles.noResults}>{tr('playerApp.training.noMatch', { query: query.trim() })}</Text>
           ) : null}
 
-          <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: trainGrid.gap, paddingHorizontal: 16 })}
+          <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: trainGrid.gap, paddingHorizontal: 16 })}
                 onLayout={trainGrid.onLayout}>
           {filtered.map((pt, idx) => (
             <TouchableOpacity

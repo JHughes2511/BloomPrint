@@ -22,7 +22,7 @@ import FieldRow from '../responsive/FieldRow';
 import CountryField from '../components/CountryField';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
-import { sheetCap, webOnly } from '../responsive/modalSizes';
+import { sheetCap, desktopOnly } from '../responsive/modalSizes';
 
 const ROLES = [
   { key: 'coach',   labelKey: 'auth.roleCoach' },
@@ -407,15 +407,18 @@ export default function LoginScreen() {
           </Text>
         </TouchableOpacity>
 
-        <View style={{ marginTop: 22 }}>
-          <LanguagePicker compact />
-        </View>
-
+        {/* Back link above the language picker, matching Role Select and the
+            player login. The three auth screens had two different orders, so
+            moving between them shuffled the last two controls. */}
         {mode === 'login' && (
           <TouchableOpacity style={styles.roleSelectBtn} onPress={() => navigation.navigate('RoleSelect')}>
             <Text style={styles.roleSelectText}>{tr('auth.backToRoleSelect')}</Text>
           </TouchableOpacity>
         )}
+
+        <View style={{ marginTop: 22, alignItems: 'center' }}>
+          <LanguagePicker compact />
+        </View>
       </KeyboardAwareScrollView>
 
       <PickerModal
@@ -449,7 +452,7 @@ const makePickerStyles = (t: ThemeTokens) => StyleSheet.create({
   // the card. Centred, it is a dialog, which is what a picker is on a desktop.
   overlay: {
     flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end',
-    ...webOnly({ justifyContent: 'center', padding: 24 }),
+    ...desktopOnly({ justifyContent: 'center', padding: 24 }),
   },
   sheet: {
     backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20,
@@ -463,7 +466,7 @@ const makePickerStyles = (t: ThemeTokens) => StyleSheet.create({
     // final gap came to 34 and the card looked like it had a stray band under
     // the last option. On a phone the 20 stays — there the card rests on the
     // bottom edge of the screen, where the extra room is doing a job.
-    ...webOnly({ borderBottomLeftRadius: 20, borderBottomRightRadius: 20, paddingBottom: 14 }),
+    ...desktopOnly({ borderBottomLeftRadius: 20, borderBottomRightRadius: 20, paddingBottom: 14 }),
   },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',

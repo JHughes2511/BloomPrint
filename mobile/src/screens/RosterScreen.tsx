@@ -74,7 +74,7 @@ import { ScreenBackground } from '../theme/components';
 import { useBreakpoint } from '../responsive/useBreakpoint';
 import { useTeam } from '../context/TeamContext';
 import PageContainer from '../responsive/PageContainer';
-import { sheetCap, webOnly, useSheetScrollHeight } from '../responsive/modalSizes';
+import { sheetCap, desktopOnly, useSheetScrollHeight } from '../responsive/modalSizes';
 
 export default function RosterScreen() {
   const navigation = useNavigation<any>();
@@ -435,8 +435,8 @@ export default function RosterScreen() {
                        // over height — which is why the sheet collapsed to ~50px no
                        // matter what height it was given. Restoring an auto basis on
                        // web lets the height apply.
-                       webOnly({ flexBasis: 'auto', height: sheetBody + 96 })]}>
-          <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} style={webOnly({ height: sheetBody })} contentContainerStyle={{ paddingBottom: 16 }}>
+                       desktopOnly({ flexBasis: 'auto', height: sheetBody + 96 })]}>
+          <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} style={desktopOnly({ height: sheetBody })} contentContainerStyle={{ paddingBottom: 16 }}>
             <Text style={styles.modalTitle}>{tr('roster.addPlayer')}</Text>
             <VoiceTextInput style={styles.input} placeholder={tr('roster.fullNamePlaceholder')} placeholderTextColor={t.muted}
               value={newName} onChangeText={setNewName} />

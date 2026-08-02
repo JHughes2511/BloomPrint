@@ -60,7 +60,7 @@ export function useSheetScrollHeight(phoneMax: number, fraction = 0.6): number {
  * Gating on Platform rather than on a breakpoint is deliberate: a breakpoint
  * is a runtime value a phone could in principle satisfy, Platform.OS cannot.
  */
-import { Platform, ViewStyle } from 'react-native';
+import { Dimensions, Platform, ViewStyle } from 'react-native';
 
 export const sheetCap = (max: number): ViewStyle =>
   // width: '100%' is required, not decorative. Without it the card sizes to
@@ -75,8 +75,20 @@ export const sheetCap = (max: number): ViewStyle =>
  *
  * Same reasoning as sheetCap: bounding a button or a tab bar is a desktop
  * concern, and on a phone those controls were already the right size. Spread
- * this instead of writing the properties inline, so native keeps exactly the
+ * this instead of writing the properties inline, so a phone keeps exactly the
  * styles it had.
+ *
+ * Gated on width as well as platform, and that second half matters more than
+ * it looks. A phone browser is Platform.OS === 'web' — visiting the site in
+ * Safari on an iPhone is web. Gating on platform alone put the desktop layout
+ * on every phone that opened the URL: the width caps, the card grids, the
+ * bigger buttons. The question was never "is this a browser" but "is there
+ * room", which is what useBreakpoint has always said.
+ *
+ * Read at call time rather than through the hook because most callers are
+ * StyleSheet factories, not components. Those are rebuilt per render on the
+ * screens that re-render on resize; a phone does not resize anyway.
  */
-export const webOnly = (style: ViewStyle): ViewStyle =>
-  Platform.OS === 'web' ? style : {};
+export const desktopOnly = (style: ViewStyle): ViewStyle =>
+  Platform.OS === 'web' && Dimensions.get('window').width >= BREAKPOINTS.tablet
+    ? style : {};

@@ -18,6 +18,7 @@ import ShareModal from '../components/ShareModal';
 import { outputTypeLabel, parseOutputTypes } from '../utils/reportType';
 import { extractBrief, getFixedSections, recruitGrade, recruitGradeScale } from '../utils/reportSections';
 import { useTheme } from '../theme/ThemeProvider';
+import { useBreakpoint } from '../responsive/useBreakpoint';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
@@ -28,7 +29,7 @@ import { PillarCard } from '../components/PillarCard';
 import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
-import { useSheetScrollHeight, sheetCap, webOnly } from '../responsive/modalSizes';
+import { useSheetScrollHeight, sheetCap, desktopOnly } from '../responsive/modalSizes';
 
 const PILLARS = [
   'offensive_skills', 'defensive_capabilities', 'physical_attributes',
@@ -39,6 +40,9 @@ const PILLARS = [
 const EXPORT_CATEGORIES = ['grades', 'flags', 'questions', 'report', 'corrections'];
 
 export default function EvalReportScreen() {
+  // Tablet and up. Not Platform: a phone browser is web too, and gating the
+  // desktop layout on platform put it on every phone that opened the site.
+  const { isWide } = useBreakpoint();
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { evalId, openShare } = route.params;
@@ -639,7 +643,7 @@ export default function EvalReportScreen() {
             </View>
 
             {(player?.height || player?.wingspan
-              || (Platform.OS === 'web' && ((player as any)?.weight || (player as any)?.standing_reach))) ? (
+              || (isWide && ((player as any)?.weight || (player as any)?.standing_reach))) ? (
               <View style={styles.pdMeasurements}>
                 {player?.height ? (
                   <View style={styles.pdStat}>
@@ -654,13 +658,13 @@ export default function EvalReportScreen() {
                   </View>
                 ) : null}
                 {/* Web has the room for these; the phone card stays as it was. */}
-                {Platform.OS === 'web' && (player as any)?.weight ? (
+                {isWide && (player as any)?.weight ? (
                   <View style={styles.pdStat}>
                     <Text style={styles.pdStatVal}>{(player as any)?.weight}</Text>
                     <Text style={styles.pdStatLabel}>{tr('playerProfile.weight')}</Text>
                   </View>
                 ) : null}
-                {Platform.OS === 'web' && (player as any)?.standing_reach ? (
+                {isWide && (player as any)?.standing_reach ? (
                   <View style={styles.pdStat}>
                     <Text style={styles.pdStatVal}>{(player as any)?.standing_reach}</Text>
                     <Text style={styles.pdStatLabel}>{tr('playerProfile.standingReach')}</Text>
@@ -1104,7 +1108,7 @@ export default function EvalReportScreen() {
 
     {/* Sticky bottom action bar — Correct · Export · Send to Player · Share w/ Staff */}
     {isSingle && (
-      <View style={[styles.bottomBar, Platform.OS === 'web' ? null : { backgroundColor: barBg }]}>
+      <View style={[styles.bottomBar, isWide ? null : { backgroundColor: barBg }]}>
         <View style={styles.bottomRow}>
           <TouchableOpacity style={[styles.bbBtn, { backgroundColor: t.ctaBg }]} onPress={() => setShowCorrect(true)}>
             <Ionicons name="create-outline" size={16} color={t.ctaText} />
@@ -1209,7 +1213,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   // 1100 report it read as a narrow tray under wide content, and the labels
   // wrapped onto two lines inside their own buttons.
   bottomBar: { gap: 10, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, backgroundColor: t.sheet, borderTopWidth: 1, borderTopColor: t.divider,
-    ...webOnly({ width: '100%', backgroundColor: 'transparent', borderTopWidth: 0, paddingTop: 20, paddingBottom: 28 })},
+    ...desktopOnly({ width: '100%', backgroundColor: 'transparent', borderTopWidth: 0, paddingTop: 20, paddingBottom: 28 })},
   bottomRow: { flexDirection: 'row', gap: 10 },
   bbBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 14, paddingVertical: 14, borderWidth: 1, borderColor: 'transparent' },
   bbText: { fontFamily: fonts[800], fontSize: 14 },

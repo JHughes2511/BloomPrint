@@ -25,13 +25,14 @@ import ScoutContextPanel from '../components/ScoutContextPanel';
 import ExportSectionsModal from '../components/ExportSectionsModal';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
+import { useBreakpoint } from '../responsive/useBreakpoint';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import { sheetCap } from '../responsive/modalSizes';
 import ChipRow from '../responsive/ChipRow';
-import { webOnly } from '../responsive/modalSizes';
+import { desktopOnly } from '../responsive/modalSizes';
 import { useGridColumns } from '../responsive/useGridColumns';
 
 type ReportItem = {
@@ -74,6 +75,9 @@ type StaffShareContext = {
 };
 
 export default function RecentScreen() {
+  // Tablet and up. Not Platform: a phone browser is web too, and gating the
+  // desktop layout on platform put it on every phone that opened the site.
+  const { isWide } = useBreakpoint();
   // 3 across at ~1900px. Date headers span a full row, so they still break the
   // grid into days rather than landing mid-row.
   const recentGrid = useGridColumns({ columns: 3, inset: 32 });
@@ -776,7 +780,7 @@ export default function RecentScreen() {
         data={listData}
         keyExtractor={(e: any) => e.__dayHeader ? `day-${e.__dayHeader}` : (e.shared ? `shared-${e.shared_id}` : `${e.kind}-${e.id}`)}
         onLayout={recentGrid.onLayout}
-        CellRendererComponent={Platform.OS === 'web' ? ({ children, index, style, ...rest }: any) => (
+        CellRendererComponent={isWide ? ({ children, index, style, ...rest }: any) => (
           <View
             {...rest}
             style={[style, listData[index]?.__dayHeader
@@ -787,7 +791,7 @@ export default function RecentScreen() {
           </View>
         ) : undefined}
         contentContainerStyle={{ paddingBottom: 100,
-          ...(Platform.OS === 'web' ? { flexDirection: 'row', flexWrap: 'wrap', gap: recentGrid.gap, alignContent: 'flex-start', paddingHorizontal: 16 } : null) }}
+          ...(isWide ? { flexDirection: 'row', flexWrap: 'wrap', gap: recentGrid.gap, alignContent: 'flex-start', paddingHorizontal: 16 } : null) }}
         ListEmptyComponent={
           <View style={styles.center}>
             <Ionicons name="document-text-outline" size={48} color={t.muted2} />
@@ -1486,7 +1490,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   searchBarInput: { flex: 1, color: t.ink, fontSize: 15, paddingVertical: 0 },
   filterRow: { marginBottom: 12, flexGrow: 0, height: 52,
-    ...webOnly({ height: undefined, paddingHorizontal: 16, paddingRight: 24, paddingBottom: 4 }) },
+    ...desktopOnly({ height: undefined, paddingHorizontal: 16, paddingRight: 24, paddingBottom: 4 }) },
   filterChip: { borderWidth: 1, borderColor: t.line, borderRadius: 18, paddingHorizontal: 14, justifyContent: 'center', alignItems: 'center', height: 34, flexShrink: 1, maxWidth: 180 },
   filterChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   filterChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600], flexShrink: 1 },
@@ -1496,7 +1500,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   card: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: t.card, marginHorizontal: 16, marginBottom: 8,
-    ...webOnly({ minHeight: 132, marginBottom: 0 }),
+    ...desktopOnly({ minHeight: 132, marginBottom: 0 }),
     borderRadius: 12, padding: 14, gap: 10,
     borderWidth: 1, borderColor: t.cardBorder,
   },

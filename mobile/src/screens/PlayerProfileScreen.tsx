@@ -24,6 +24,7 @@ import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeProvider';
+import { useBreakpoint } from '../responsive/useBreakpoint';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
@@ -31,7 +32,7 @@ import PageContainer from '../responsive/PageContainer';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
-import { sheetCap, webOnly, useSheetScrollHeight } from '../responsive/modalSizes';
+import { sheetCap, desktopOnly, useSheetScrollHeight } from '../responsive/modalSizes';
 import ActionGrid from '../responsive/ActionGrid';
 const COMPETITION_LEVELS = [...CANON_LEVELS];
 
@@ -46,6 +47,9 @@ const OUTPUT_TYPES = [
 ];
 
 export default function PlayerProfileScreen() {
+  // Tablet and up. Not Platform: a phone browser is web too, and gating the
+  // desktop layout on platform put it on every phone that opened the site.
+  const { isWide } = useBreakpoint();
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { playerId } = route.params;
@@ -715,7 +719,7 @@ export default function PlayerProfileScreen() {
 
       {/* Send training to player */}
       <TouchableOpacity
-        style={[styles.trainingBtn, { backgroundColor: t.positive, marginTop: 8 }, webOnly({ marginTop: 0 })]}
+        style={[styles.trainingBtn, { backgroundColor: t.positive, marginTop: 8 }, desktopOnly({ marginTop: 0 })]}
         onPress={() => openTrainingPicker('player')}
         disabled={sendingTraining}
       >
@@ -727,7 +731,7 @@ export default function PlayerProfileScreen() {
       {/* Share training with staff */}
       {allTraining.length > 0 && (
         <TouchableOpacity
-          style={[styles.trainingBtn, { backgroundColor: t.accent, marginTop: 8 }, webOnly({ marginTop: 0 })]}
+          style={[styles.trainingBtn, { backgroundColor: t.accent, marginTop: 8 }, desktopOnly({ marginTop: 0 })]}
           onPress={() => openTrainingPicker('staff')}
         >
           <Ionicons name="people-outline" size={18} color={t.ink} />
@@ -939,7 +943,7 @@ export default function PlayerProfileScreen() {
 
       {/* Video player modal */}
       <Modal visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
-        <View style={{ flex: 1, backgroundColor: '#000000EE', ...(Platform.OS === 'web' ? null : { justifyContent: 'center' as const }) }}>
+        <View style={{ flex: 1, backgroundColor: '#000000EE', ...(isWide ? null : { justifyContent: 'center' as const }) }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: 48 }}>
             <Text style={{ color: '#fff', fontSize: 15, fontFamily: fonts[700], flex: 1 }} numberOfLines={1}>
               {videoMeta?.report_label || 'Film'}
@@ -1359,8 +1363,8 @@ export default function PlayerProfileScreen() {
                        // over height — which is why the sheet collapsed to ~50px no
                        // matter what height it was given. Restoring an auto basis on
                        // web lets the height apply.
-                       webOnly({ flexBasis: 'auto', height: sheetBody + 96 })]}>
-          <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} style={webOnly({ height: sheetBody })} contentContainerStyle={{ paddingBottom: 16 }}>
+                       desktopOnly({ flexBasis: 'auto', height: sheetBody + 96 })]}>
+          <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={true} style={desktopOnly({ height: sheetBody })} contentContainerStyle={{ paddingBottom: 16 }}>
             <Text style={styles.modalTitle}>{tr('playerProfile.editPlayer')}</Text>
             <VoiceTextInput
               style={styles.input}
@@ -1778,7 +1782,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   summaryBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: t.ctaBg, margin: 20, marginBottom: 8, padding: 15, borderRadius: 999,
-    ...webOnly({ margin: 0, width: '100%' }),
+    ...desktopOnly({ margin: 0, width: '100%' }),
   },
   summaryText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15 },
   trainingBtn: {
@@ -1786,7 +1790,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.chip, marginHorizontal: 20, marginTop: 0, marginBottom: 0, padding: 15, borderRadius: 999,
     // In the web grid the cell sets the width, so the button fills its cell —
     // a 380 cap here made three of the four narrower than the fourth.
-    ...webOnly({ marginHorizontal: 0, width: '100%' }),
+    ...desktopOnly({ marginHorizontal: 0, width: '100%' }),
   },
   trainingText: { color: t.ink, fontFamily: fonts[700], fontSize: 15 },
   // Modal styles
@@ -1850,7 +1854,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.ctaBg, borderRadius: 999, padding: 12,
     // Full width of the feedback card it lives in — it acts on that card's
     // input, not on the page, so it should read as part of it.
-    ...webOnly({ width: '100%', alignSelf: 'stretch' }),
+    ...desktopOnly({ width: '100%', alignSelf: 'stretch' }),
   },
   regenBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
 });

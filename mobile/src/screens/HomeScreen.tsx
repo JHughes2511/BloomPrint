@@ -607,7 +607,12 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: 22, paddingTop: 64 },
+  // 64 is safe-area room for the status bar and notch, which the native app has
+  // to reserve itself. A browser already sits below its own chrome, so the same
+  // 64 is just an empty band above the title — and it is the first thing on the
+  // screen, so it pushes everything down for nothing. Platform, not width: this
+  // is about who owns the space above us, not how much of it there is.
+  header: { paddingHorizontal: 22, paddingTop: Platform.OS === 'web' ? 24 : 64 },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   notifBadge: {
     position: 'absolute', top: 2, right: 2, borderRadius: 7, minWidth: 14, height: 14,

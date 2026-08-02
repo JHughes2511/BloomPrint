@@ -18,7 +18,7 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
-import { sheetCap, webOnly } from '../responsive/modalSizes';
+import { sheetCap, desktopOnly } from '../responsive/modalSizes';
 
 // Maps staff-share report_type keys to i18n label keys.
 const REPORT_TYPE_LABEL_KEYS: Record<string, string> = {
@@ -492,7 +492,7 @@ export default function StaffInboxScreen() {
     return (
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Team switcher */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12, gap: 8, alignItems: 'center', ...webOnly({ paddingVertical: 8 }) }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12, gap: 8, alignItems: 'center', ...desktopOnly({ paddingVertical: 8 }) }}>
           {myTeams.filter((team: any) => !team.parent_team_id).map(team => (
             <TouchableOpacity
               key={team.id}
@@ -1087,7 +1087,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.card, borderRadius: 12, padding: 4,
     // Left, matching the page title and the team chips beneath it —
     // centring it left the bar floating between two left edges.
-    ...webOnly({ width: '100%', alignSelf: 'stretch' }),
+    ...desktopOnly({ width: '100%', alignSelf: 'stretch' }),
   },
   tabBtn: { flex: 1, flexShrink: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 8, borderRadius: 10 },
   tabBtnActive: { backgroundColor: t.ctaBg },
@@ -1153,6 +1153,6 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   startBtnText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15, flexShrink: 1 },
   teamActBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: t.accentSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: t.accent, flexShrink: 1, maxWidth: '100%' },
   teamActText: { color: t.accent, fontSize: 12, fontFamily: fonts[700], flexShrink: 1 },
-  createTeamBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.accentSoft, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20, borderWidth: 1, borderColor: t.accent, marginBottom: 8, ...webOnly({ alignSelf: 'flex-start', minWidth: 240 }) },
+  createTeamBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.accentSoft, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20, borderWidth: 1, borderColor: t.accent, marginBottom: 8, ...desktopOnly({ alignSelf: 'flex-start', minWidth: 240 }) },
   createTeamText: { color: t.accent, fontFamily: fonts[700], fontSize: 13.5, flexShrink: 1 },
 });

@@ -26,12 +26,13 @@ import ReportCorrectionsPanel from '../components/ReportCorrectionsPanel';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeProvider';
+import { useBreakpoint } from '../responsive/useBreakpoint';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
-import { useSheetScrollHeight, sheetCap, webOnly, CONTENT_MAX_WIDTH } from '../responsive/modalSizes';
+import { useSheetScrollHeight, sheetCap, desktopOnly, CONTENT_MAX_WIDTH } from '../responsive/modalSizes';
 import { useGridColumns } from '../responsive/useGridColumns';
 
 // Highest competition level → lowest.
@@ -127,6 +128,9 @@ function quarterMultiplier(q: number): number {
 type ViewKey = 'dashboard' | 'games' | 'live' | 'detail' | 'scout' | 'gamereport';
 
 export default function TeamEvalScreen({ route, navigation }: any) {
+  // Tablet and up. Not Platform: a phone browser is web too, and gating the
+  // desktop layout on platform put it on every phone that opened the site.
+  const { isWide } = useBreakpoint();
   const { coach } = useAuth();
   const { t, mode } = useTheme();
   // Scales with the window on desktop; unchanged on phones.
@@ -1112,13 +1116,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
   return (
     <ScreenBackground>
-    <PageContainer maxWidth={Platform.OS === 'web' ? 1600 : undefined}>
+    <PageContainer maxWidth={isWide ? 1600 : undefined}>
     <View style={s.root}>
       {/* Top nav */}
       <View style={s.topNav}>
-        <View style={webOnly({ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' })}>
+        <View style={desktopOnly({ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' })}>
           <Text style={s.screenTitle}>{tr('common.tabs.teamGrade')}</Text>
-          {Platform.OS === 'web' && activeView === 'games' && (
+          {isWide && activeView === 'games' && (
             <TouchableOpacity style={[s.newGameBtn, { marginBottom: 0 }]} onPress={() => setShowNewGame(true)}>
               <Ionicons name="add-circle-outline" size={18} color={t.ctaText} />
               <Text style={s.newGameBtnText}>{tr('teamGrade.newGame')}</Text>
@@ -1301,7 +1305,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           </ScrollView>
 
           {/* New game button */}
-          <TouchableOpacity style={[s.newGameBtn, webOnly({ display: 'none' })]} onPress={() => setShowNewGame(true)}>
+          <TouchableOpacity style={[s.newGameBtn, desktopOnly({ display: 'none' })]} onPress={() => setShowNewGame(true)}>
             <Ionicons name="add-circle-outline" size={18} color={t.ctaText} />
             <Text style={s.newGameBtnText}>{tr('teamGrade.newGame')}</Text>
           </TouchableOpacity>
@@ -1314,7 +1318,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               <Text style={{ color: t.muted, fontSize: 13, marginTop: 10 }}>{tr('teamGrade.noGames')}</Text>
             </View>
           ) : (
-            <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: gamesGrid.gap, paddingHorizontal: 16 })}
+            <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: gamesGrid.gap, paddingHorizontal: 16 })}
                   onLayout={gamesGrid.onLayout}>
             {filteredSessions.map((game: any) => {
               const won = game.our_score != null && game.opponent_score != null && game.our_score > game.opponent_score;
@@ -2081,7 +2085,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   <Text style={{ color: t.muted, fontSize: 13 }}>{tr('teamGrade.noOpponents')}</Text>
                 </View>
               ) : (
-                <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: scoutGrid.gap, paddingHorizontal: 16 })}
+                <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: scoutGrid.gap, paddingHorizontal: 16 })}
                       onLayout={scoutGrid.onLayout}>
                 {uniqueOpponents.map(opp => (
                   <TouchableOpacity key={opp} style={[s.gameCard, scoutGrid.cardWidth ? { width: scoutGrid.cardWidth } : null]} onPress={() => openScout(opp)}>
@@ -2240,7 +2244,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               {sessions.length === 0 && (
                 <Text style={{ color: t.muted2, fontSize: 13, marginHorizontal: 16 }}>{tr('teamGrade.noGamesYet')}</Text>
               )}
-              <View style={webOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap, paddingHorizontal: 16 })}
+              <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap, paddingHorizontal: 16 })}
                     onLayout={reportGrid.onLayout}>
               {sessions.map((g: any) => {
                 const won = g.our_score != null && g.opponent_score != null && g.our_score > g.opponent_score;
@@ -3214,7 +3218,7 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   newGameBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: t.ctaBg, borderRadius: 999, paddingVertical: 14, marginBottom: 16,
-    ...webOnly({ paddingHorizontal: 28, alignSelf: 'flex-start', minWidth: 200 }),
+    ...desktopOnly({ paddingHorizontal: 28, alignSelf: 'flex-start', minWidth: 200 }),
   },
   newGameBtnText: { color: t.ctaText, fontSize: 15, fontFamily: fonts[700] },
   gameCard: {
@@ -3222,7 +3226,7 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
     borderWidth: 1, borderColor: t.cardBorder,
     // Common floor so a card with a score badge is not taller than one
     // without, which left the rows ragged.
-    ...webOnly({ minHeight: 88, marginBottom: 0 }),
+    ...desktopOnly({ minHeight: 88, marginBottom: 0 }),
     flexDirection: 'row', alignItems: 'center', gap: 10,
   },
   gameCardOpponent: { color: t.ink, fontSize: 15, fontFamily: fonts[700] },

@@ -21,6 +21,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { renderReport } from '../utils/renderReport';
 import { outputTypeLabel } from '../utils/reportType';
 import { useTheme } from '../theme/ThemeProvider';
+import { useBreakpoint } from '../responsive/useBreakpoint';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
@@ -55,6 +56,9 @@ const LEGACY_TYPE_KEYS: Record<string, string[]> = {
 };
 
 export default function TeamReportScreen() {
+  // Tablet and up. Not Platform: a phone browser is web too, and gating the
+  // desktop layout on platform put it on every phone that opened the site.
+  const { isWide } = useBreakpoint();
   const { coach } = useAuth();
   const navigation = useNavigation<any>();
   const { t } = useTheme();
@@ -908,7 +912,7 @@ export default function TeamReportScreen() {
 
       {/* Report film player modal */}
       <Modal visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
-        <View style={{ flex: 1, backgroundColor: '#000000EE', ...(Platform.OS === 'web' ? null : { justifyContent: 'center' as const }) }}>
+        <View style={{ flex: 1, backgroundColor: '#000000EE', ...(isWide ? null : { justifyContent: 'center' as const }) }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: 48 }}>
             <Text style={{ color: '#fff', fontSize: 15, fontFamily: fonts[700], flex: 1 }} numberOfLines={1}>{videoTitle}</Text>
             <TouchableOpacity onPress={() => setVideoSource(null)}>
