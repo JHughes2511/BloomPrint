@@ -277,6 +277,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   // Court orientation — portrait (default) or landscape for tablets / wide screens.
   const [orientation, setOrientation]   = useState<'portrait' | 'landscape'>('portrait');
   const didAutoOrient                   = useRef(false);
+  // Resolved when a replay finishes. The auto-naming request starts with the
+  // animation and waits on this before showing anything.
+  const playbackDoneRef                 = useRef<Promise<void>>(Promise.resolve());
+  const playbackResolve                 = useRef<() => void>(() => {});
   // Per-player guidance: lock a player in place (AI cascades the others around
   // it) and/or attach a per-player note. Keyed by player id (O1..O5). Reset per
   // board. Applied on regenerate.
@@ -1573,6 +1577,8 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     animCancel.current = false;
     setFreehandDone(false);
     setFreehandPlaying(true);
+    // Ask the model to read the play now, while the animation runs.
+    startAutoName();
     let i = 0;
     const runStep = () => {
       if (animCancel.current) { setFreehandPlaying(false); return; }
@@ -1590,10 +1596,10 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
       // new interpolations attach before the value starts moving. Web only, so
       // the phone keeps the timing it has always had.
       const begin = () => Animated.timing(drawProgress, { toValue: 1, duration: 800, useNativeDriver: false }).start(({ finished }) => {
-        if (!finished || animCancel.current) { setFreehandPlaying(false); return; }
+        if (!finished || animCancel.current) { setFreehandPlaying(false); playbackResolve.current(); return; }
         i += 1;
         if (i < steps.length) setTimeout(runStep, 260);
-        else { setFreehandPlaying(false); setFreehandDone(true); maybeAutoName(); }
+        else { setFreehandPlaying(false); setFreehandDone(true); playbackResolve.current(); }
       });
       if (Platform.OS === 'web') requestAnimationFrame(() => requestAnimationFrame(begin));
       else begin();
@@ -1871,6 +1877,9 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     const labels = (boards[activeBoardIdx]?.strokes ?? []).filter(s => s.type === 'text' && !s.layer && s.label).map(s => s.label);
     try {
       const res = await whiteboardAPI.nameFreehand({ markers, arrows, labels });
+      // Hold the result until the replay has finished. Renaming the board and
+      // popping the read mid-animation would talk over the thing being watched.
+      await playbackDoneRef.current;
       if (res?.name) {
         setBoards(prev => {
           const n = [...prev]; const cur = n[activeBoardIdx]; if (!cur) return prev;
@@ -1880,6 +1889,21 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
         if (res.read) Alert.alert(res.name, res.read);
       }
     } catch { /* naming is best-effort */ }
+  };
+
+  // The naming request, started when playback BEGINS rather than after it ends.
+  //
+  // It used to fire on the last frame, so the coach waited out the whole replay
+  // — 800ms per arrow plus 260 between — and only then began a round trip to the
+  // model. On a six-arrow play that is the better part of ten seconds before
+  // anything appears. The animation is dead time we already own; spending it on
+  // the request means the answer is usually waiting by the time the play stops.
+  const namingRef = useRef<Promise<void> | null>(null);
+  const startAutoName = () => {
+    // Fresh gate per playback: the request resolves against THIS run, not a
+    // previous one that already finished.
+    playbackDoneRef.current = new Promise<void>(res => { playbackResolve.current = res; });
+    namingRef.current = maybeAutoName();
   };
 
   // Small grab handles at the draggable arrow ends (Move tool only) so the coach
@@ -2125,10 +2149,29 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
               const { width: lw, height: lh } = e.nativeEvent.layout;
               if (lw > 50 && lh > 50) {
                 setAvail({ w: lw, h: lh });
-                // Auto-pick landscape once on wide screens (tablets / web).
+                // Pick the court and the orientation that actually fit, once.
+                //
+                // A full court is roughly twice as wide as it is deep, so on a
+                // tall phone it can only fit by shrinking until the paint is
+                // unreadable. Half court is nearly square and fills that shape.
+                // Wide screens have room for the whole floor and read best
+                // rotated. Only ever applied to a board that is empty and has
+                // never been saved: changing court_type rewrites the board, and
+                // silently reshaping a play a coach already drew would lose the
+                // relationship between their strokes and the markings.
                 if (!didAutoOrient.current) {
                   didAutoOrient.current = true;
-                  if (lw > lh * 1.2) setOrientation('landscape');
+                  const wide = lw > lh * 1.2;
+                  if (wide) setOrientation('landscape');
+                  const b = boards[activeBoardIdx];
+                  const untouched = b && !b.id && !(b.strokes ?? []).length && !b.ai;
+                  if (untouched && !wide && b.court_type !== 'half') {
+                    setBoards(prev => {
+                      const n = [...prev];
+                      if (n[activeBoardIdx]) n[activeBoardIdx] = { ...n[activeBoardIdx], court_type: 'half' };
+                      return n;
+                    });
+                  }
                 }
               }
             }}

@@ -1273,7 +1273,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               )}
 
               {dashboard.team_grade_trend.length === 0 && (
-                <View style={[s.card, { alignItems: 'center', paddingVertical: 32 }]}>
+                <View style={[s.card, { alignItems: 'center' }]}>
                   <Ionicons name="stats-chart-outline" size={36} color={t.line} />
                   <Text style={{ color: t.muted, fontSize: 13, marginTop: 10 }}>
                     {tr('teamGrade.noCompletedGames')}
@@ -1321,7 +1321,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {loading ? (
             <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />
           ) : filteredSessions.length === 0 ? (
-            <View style={[s.card, { alignItems: 'center', paddingVertical: 32 }]}>
+            <View style={[s.card, { alignItems: 'center' }]}>
               <Ionicons name="basketball-outline" size={36} color={t.line} />
               <Text style={{ color: t.muted, fontSize: 13, marginTop: 10 }}>{tr('teamGrade.noGames')}</Text>
             </View>
@@ -2089,7 +2089,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             <>
               <Text style={[s.cardLabel, { marginBottom: 10 }]}>{tr('teamGrade.selectOpponent')}</Text>
               {uniqueOpponents.length === 0 ? (
-                <View style={[s.card, { alignItems: 'center', paddingVertical: 32 }]}>
+            <View style={[s.card, { alignItems: 'center' }]}>
                   <Text style={{ color: t.muted, fontSize: 13 }}>{tr('teamGrade.noOpponents')}</Text>
                 </View>
               ) : (
