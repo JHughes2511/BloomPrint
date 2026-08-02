@@ -1288,8 +1288,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       {/* Games list */}
       {activeView === 'games' && (
         <ScrollView
-          style={s.scroll}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
           refreshControl={<RefreshControl refreshing={gamesRefreshing} onRefresh={async () => { setGamesRefreshing(true); await loadData(); setGamesRefreshing(false); }} tintColor={t.accent} />}
         >
           {/* Phase filter. Same shape as the dashboard's: a label, then the row.
