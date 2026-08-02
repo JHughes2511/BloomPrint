@@ -457,7 +457,13 @@ const makePickerStyles = (t: ThemeTokens) => StyleSheet.create({
     // Rounded on all four corners once it is no longer resting on an edge.
     // Named per corner because a plain borderRadius does not win against the
     // two explicit top corners above.
-    ...webOnly({ borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }),
+    //
+    // The bottom padding drops to match the list's rhythm. Each row carries 14
+    // above and below its label, so consecutive labels sit 28 apart; at 20 the
+    // final gap came to 34 and the card looked like it had a stray band under
+    // the last option. On a phone the 20 stays — there the card rests on the
+    // bottom edge of the screen, where the extra room is doing a job.
+    ...webOnly({ borderBottomLeftRadius: 20, borderBottomRightRadius: 20, paddingBottom: 14 }),
   },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
