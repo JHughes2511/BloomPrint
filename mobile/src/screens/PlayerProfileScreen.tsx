@@ -774,9 +774,14 @@ export default function PlayerProfileScreen() {
           }}
           disabled={!trainingFeedback.trim() || regeneratingTraining}
         >
+          {/* barbell, not refresh: the label says Generate, and a circular
+              arrow beside it reads as "redo the last one" — which is not what
+              this does for a player with no training yet. Same icon as
+              Generate Training Program above, because it is the same act with
+              feedback attached. */}
           {regeneratingTraining
             ? <ActivityIndicator color={t.ctaText} size="small" />
-            : <><Ionicons name="refresh" size={16} color={t.ctaText} /><Text style={styles.regenBtnText}> {tr('playerProfile.regenerate')}</Text></>}
+            : <><Ionicons name="barbell" size={16} color={t.ctaText} /><Text style={styles.regenBtnText}> {tr('playerProfile.regenerate')}</Text></>}
         </TouchableOpacity>
       </View>
 
