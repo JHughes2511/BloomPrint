@@ -647,7 +647,7 @@ export default function GameReportBuilderScreen() {
         <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
           {tr('gameBuilder.reportTypeHint')}
         </Text>
-        <ChipRow style={{ marginBottom: 20 }}>
+        <ChipRow style={{ marginBottom: 20 }} bleed={20}>
           {OUTPUT_TYPES.map(t => {
             const selected = outputType.split(',').filter(Boolean);
             const isOn = selected.includes(t.key);

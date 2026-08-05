@@ -627,7 +627,7 @@ export default function TeamReportScreen() {
         {showQuickReport && (<>
 
         <Text style={styles.label}>{tr('teamReport.selectTeam')}</Text>
-        <ChipRow style={{ marginBottom: 20 }}>
+        <ChipRow style={{ marginBottom: 20 }} bleed={16}>
           <TouchableOpacity
             style={[styles.chip, selectedTeamId === null && styles.chipActive]}
             onPress={() => setSelectedTeamId(null)}
@@ -648,7 +648,7 @@ export default function TeamReportScreen() {
         {outputType.split(',').includes('matchup') && (
           <>
             <Text style={styles.label}>{tr('teamReport.opponent')}</Text>
-            <ChipRow style={{ marginBottom: 20 }}>
+            <ChipRow style={{ marginBottom: 20 }} bleed={16}>
               {teams.filter(tm => tm.id !== selectedTeamId).map(tm => (
                 <TouchableOpacity
                   key={tm.id}
@@ -666,7 +666,7 @@ export default function TeamReportScreen() {
         <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
           {tr('teamReport.reportTypeHint')}
         </Text>
-        <ChipRow style={{ marginBottom: 20 }}>
+        <ChipRow style={{ marginBottom: 20 }} bleed={16}>
           {OUTPUT_TYPES.map(t => {
             const selected = outputType.split(',').filter(Boolean);
             const isOn = selected.includes(t.key);

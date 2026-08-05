@@ -13,6 +13,7 @@
 import React from 'react';
 import { View, ScrollView, StyleProp, ViewStyle, Platform } from 'react-native';
 import { useBreakpoint } from './useBreakpoint';
+import { bleedRow, bleedContent } from './screenPadding';
 
 type Props = {
   children: React.ReactNode;
@@ -27,9 +28,22 @@ type Props = {
    * scroller that had one.
    */
   contentContainerStyle?: StyleProp<ViewStyle>;
+  /**
+   * The parent's horizontal padding, so the scroller can span the screen.
+   *
+   * Without it the row is inset by that padding, and a chip scrolled past the
+   * start is cut 16 or 20px in from the glass with a stripe of background
+   * beside it — which reads as a clipped layout rather than as more content.
+   * The rows that already do this by hand (Recent's filters, Team Grade's
+   * views) are the ones that look right; this is that arrangement as a prop.
+   *
+   * Ignored on the wrapping desktop path, where a negative margin would just
+   * pull the chips outside the content column.
+   */
+  bleed?: number;
 };
 
-export default function ChipRow({ children, style, gap = 8, contentContainerStyle }: Props) {
+export default function ChipRow({ children, style, gap = 8, contentContainerStyle, bleed }: Props) {
   const { isDesktop } = useBreakpoint();
 
   // Platform AND width: a large tablet in landscape can satisfy the desktop
@@ -47,8 +61,10 @@ export default function ChipRow({ children, style, gap = 8, contentContainerStyl
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      style={style}
-      contentContainerStyle={contentContainerStyle}
+      style={[style, bleed != null && bleedRow(bleed)]}
+      // gap 0: these chips space themselves with marginRight, and adding the
+      // wrap gap on top would double it.
+      contentContainerStyle={[bleed != null && bleedContent(bleed, 0), contentContainerStyle]}
     >
       {children}
     </ScrollView>
