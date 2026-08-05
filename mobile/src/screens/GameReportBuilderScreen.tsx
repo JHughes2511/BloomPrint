@@ -65,6 +65,15 @@ function stripMarkdownForPreview(text: string): string {
     .trim();
 }
 
+/**
+ * Reading width for this page's form.
+ *
+ * The page is as wide as the others so its header lines up; the fields are not,
+ * because a form is a column of one-line answers and stretching it across a
+ * monitor makes every label a long way from its input.
+ */
+const FORM_MAX_WIDTH = 900;
+
 export default function GameReportBuilderScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
@@ -478,7 +487,12 @@ export default function GameReportBuilderScreen() {
 
   return (
     <ScreenBackground>
-    <PageContainer maxWidth={900}>
+    {/* Same shell as the team page and the other detail screens: full pane,
+        no outer gutter, header inset 20. A 900px centred column put this
+        page's title 180px right of where every other title starts, which is
+        what made it read as a different app. The form itself stays capped
+        below — a text field 1240px wide is not an improvement. */}
+    <PageContainer padded={false} maxWidth={1280}>
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -487,7 +501,7 @@ export default function GameReportBuilderScreen() {
       <KeyboardAwareScrollView
         ref={scrollRef}
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 100, width: '100%', maxWidth: FORM_MAX_WIDTH }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
       >
@@ -1054,11 +1068,17 @@ export default function GameReportBuilderScreen() {
 
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  // Top padding on the scroller, matching the other detail screens; the
+  // header adds its own 8 on top of it and the body keeps the 20 inset.
+  container: { flex: 1, paddingHorizontal: 20, paddingBottom: 20, paddingTop: topPad(56) },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, paddingTop: topPad(56) },
+  // titleTopPad and a 20px inset, the same as Roster, Recent, Team Eval and
+  // Team Grade. This page used the plain topPad, which is 12px lower on web —
+  // enough that opening a packet from one of those screens visibly dropped the
+  // title, and the page read as belonging to a different app.
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 8, marginBottom: 12 },
   titleInput: { flex: 1, color: t.ink, fontSize: 18, fontFamily: fonts[800], borderBottomWidth: 1, borderBottomColor: t.line, paddingBottom: 4 },
-  headerTitle: { flex: 1, color: t.ink, fontSize: 18, fontFamily: fonts[800] },
+  headerTitle: { flex: 1, color: t.ink, fontSize: 22, fontFamily: fonts[900] },
   nameInput: { backgroundColor: t.card, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, color: t.ink, fontSize: 16, fontFamily: fonts[700], borderWidth: 1.5, borderColor: t.line, marginBottom: 4 },
   nameHint: { color: t.accent, fontSize: 11, fontFamily: fonts[600], marginBottom: 8 },
   label: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 },
