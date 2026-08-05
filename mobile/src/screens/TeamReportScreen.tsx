@@ -513,7 +513,9 @@ export default function TeamReportScreen() {
 
   return (
     <ScreenBackground>
-    <PageContainer>
+    {/* Same shell as Roster and Recent: no container gutter, 20 of our own,
+        1600 cap. The default container added its gutter to this screen's 16. */}
+    <PageContainer padded={false} maxWidth={1600}>
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={undefined}
@@ -627,7 +629,7 @@ export default function TeamReportScreen() {
         {showQuickReport && (<>
 
         <Text style={styles.label}>{tr('teamReport.selectTeam')}</Text>
-        <ChipRow style={{ marginBottom: 20 }} bleed={16}>
+        <ChipRow style={{ marginBottom: 20 }} bleed={20}>
           <TouchableOpacity
             style={[styles.chip, selectedTeamId === null && styles.chipActive]}
             onPress={() => setSelectedTeamId(null)}
@@ -648,7 +650,7 @@ export default function TeamReportScreen() {
         {outputType.split(',').includes('matchup') && (
           <>
             <Text style={styles.label}>{tr('teamReport.opponent')}</Text>
-            <ChipRow style={{ marginBottom: 20 }} bleed={16}>
+            <ChipRow style={{ marginBottom: 20 }} bleed={20}>
               {teams.filter(tm => tm.id !== selectedTeamId).map(tm => (
                 <TouchableOpacity
                   key={tm.id}
@@ -666,7 +668,7 @@ export default function TeamReportScreen() {
         <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
           {tr('teamReport.reportTypeHint')}
         </Text>
-        <ChipRow style={{ marginBottom: 20 }} bleed={16}>
+        <ChipRow style={{ marginBottom: 20 }} bleed={20}>
           {OUTPUT_TYPES.map(t => {
             const selected = outputType.split(',').filter(Boolean);
             const isOn = selected.includes(t.key);
@@ -806,7 +808,7 @@ export default function TeamReportScreen() {
         {showPrevReports && (
           <>
             {/* Filter by output_type */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12, ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
               {[{ key: 'all' }, ...OUTPUT_TYPES].map(t => (
                 <TouchableOpacity
                   key={t.key}
@@ -1351,7 +1353,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   // 16 across, matching Team Grade and Roster. At 20 this screen's title sat
   // 4pt right of every other tab's, which reads as a wobble when you switch
   // between them rather than as a deliberate inset.
-  container: { flex: 1, paddingHorizontal: 16, paddingBottom: 20, paddingTop: titleTopPad(56) },
+  container: { flex: 1, paddingHorizontal: 20, paddingBottom: 20, paddingTop: titleTopPad(56) },
   titleRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 28 },
   title: { fontFamily: fonts[800], fontSize: 30, letterSpacing: -0.6, color: t.ink, marginBottom: 4 },
   sub: { color: t.muted, fontSize: 13 },

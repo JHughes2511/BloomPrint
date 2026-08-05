@@ -479,11 +479,12 @@ export default function GameReportBuilderScreen() {
   return (
     <ScreenBackground>
     {/* Same shell as the team page and the other detail screens: full pane,
-        no outer gutter, header inset 20. A 900px centred column put this
-        page's title 180px right of where every other title starts and left
-        the right third of the window empty, which is what made it read as
-        belonging to a different app. */}
-    <PageContainer padded={false} maxWidth={1600}>
+        no outer gutter, header inset 20, and the same 1280 cap Staff Hub and
+        the team page use. A 900px centred column put this page's title 180px
+        right of where every other title starts and left the right third of
+        the window empty, which is what made it read as belonging to a
+        different app. */}
+    <PageContainer padded={false} maxWidth={1280}>
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

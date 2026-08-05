@@ -1119,7 +1119,11 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
   return (
     <ScreenBackground>
-    <PageContainer maxWidth={isWide ? 1600 : undefined}>
+    {/* padded={false} and a 20 inset of our own, the same as Roster and
+        Recent. With the container's gutter on top of this screen's 16, the
+        title sat 28px further right than theirs — the "more space on the
+        side" that made these two look like a different width of page. */}
+    <PageContainer padded={false} maxWidth={isWide ? 1600 : undefined}>
     <View style={s.root}>
       {/* Top nav */}
       <View style={s.topNav}>
@@ -1131,7 +1135,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         <View style={desktopOnly({ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', width: '100%' })}>
           <View style={desktopOnly({ flex: 1, minWidth: 0 })}>
             <Text style={s.screenTitle}>{tr('common.tabs.teamGrade')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 8)}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 8)}>
               {(['dashboard', 'games', 'scout', 'gamereport'] as const).map(v => (
                 <TouchableOpacity
                   key={v}
@@ -1160,7 +1164,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* Phase filter */}
           <View style={{ marginBottom: 16 }}>
             <Text style={[s.cardLabel, { marginBottom: 8 }]}>{tr('teamGrade.gradeView')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
               {/* No gap here: s.chip carries marginRight: 8, and adding a gap
                   put these chips 16 apart while every other row sat at 8. */}
               <View style={{ flexDirection: 'row' }}>
@@ -1230,7 +1234,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 return (
                   <View style={s.card}>
                     <Text style={s.cardLabel}>{tr('teamGrade.gradeTrend')}</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14, ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
                       <Svg width={chartW} height={chartH + 48}>
                         <Line x1={0} y1={chartH} x2={chartW} y2={chartH} stroke={t.divider} strokeWidth={1} />
                         {data.map((pt: any, i: number) => {
@@ -1306,7 +1310,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               dashboard's started lower, so switching tabs shifted everything. */}
           <View style={{ marginBottom: 16 }}>
           <Text style={[s.cardLabel, { marginBottom: 8 }]}>{tr('teamGrade.gameView')}</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
             {['all', ...orderedPhases].map(p => (
               <TouchableOpacity
                 key={p}
@@ -3180,9 +3184,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
 const makeS = (t: ThemeTokens) => StyleSheet.create({
   root: { flex: 1 },
-  scroll: { flex: 1, padding: 16 },
+  scroll: { flex: 1, paddingHorizontal: 20, paddingVertical: 16 },
   topNav: {
-    paddingTop: titleTopPad(56), paddingHorizontal: 16, paddingBottom: 12,
+    paddingTop: titleTopPad(56), paddingHorizontal: 20, paddingBottom: 12,
     borderBottomWidth: 1, borderBottomColor: t.divider,
   },
   screenTitle: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6, marginBottom: 12 },
