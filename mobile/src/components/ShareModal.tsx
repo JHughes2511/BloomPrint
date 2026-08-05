@@ -199,7 +199,7 @@ export default function ShareModal({
   };
 
   return (
-    <Sheet visible={visible} transparent animationType="slide">
+    <Sheet visible={visible} transparent animationType="slide" onRequestClose={() => onClose()}>
       <KeyboardAvoidingView
         style={styles.overlay}
         behavior={Platform.OS === 'android' ? 'height' : undefined}

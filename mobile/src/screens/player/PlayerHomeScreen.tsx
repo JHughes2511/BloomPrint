@@ -468,7 +468,7 @@ export default function PlayerHomeScreen() {
         </View>
       </Sheet>
 
-      <Sheet visible={showEditModal} transparent animationType="none">
+      <Sheet visible={showEditModal} transparent animationType="none" onRequestClose={() => setShowEditModal(false)}>
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => { Keyboard.dismiss(); closeModal(); }}>
           <Animated.View
             style={[styles.modalBox, { transform: [{ translateY: slideY }] }]}

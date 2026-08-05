@@ -750,7 +750,7 @@ export default function StaffInboxScreen() {
       />
 
       {/* Team Game detail modal */}
-      <Sheet visible={!!activeGame} animationType="slide" transparent>
+      <Sheet visible={!!activeGame} animationType="slide" transparent onRequestClose={() => setActiveGame(null)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>

@@ -2399,7 +2399,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       </Sheet>
 
       {/* New Game Modal */}
-      <Sheet visible={showNewGame} transparent animationType="slide">
+      <Sheet visible={showNewGame} transparent animationType="slide" onRequestClose={() => setShowNewGame(false)}>
         <KeyboardAvoidingView style={s.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={[s.modalBox, { maxHeight: '85%' }]}>
             <Text style={s.modalTitle}>{tr('teamGrade.newGame')}</Text>
@@ -2630,7 +2630,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       </Sheet>
 
       {/* Lineup Modal */}
-      <Sheet visible={showLineupModal} transparent animationType="slide">
+      <Sheet visible={showLineupModal} transparent animationType="slide" onRequestClose={() => setShowLineupModal(false)}>
         <View style={s.modalOverlay}>
           <View style={[s.modalBox, { maxHeight: '80%' }]}>
             <Text style={s.modalTitle}>{subOutPlayer ? tr('teamGrade.whoCameIn') : tr('teamGrade.manageLineup')}</Text>
@@ -2722,7 +2722,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       </Sheet>
 
       {/* Player Detail Modal */}
-      <Sheet visible={showDetailModal} transparent animationType="slide">
+      <Sheet visible={showDetailModal} transparent animationType="slide" onRequestClose={() => setShowDetailModal(false)}>
         <View style={s.modalOverlay}>
           <View style={[s.modalBox, { maxHeight: '90%' }]}>
             {/* Header */}
@@ -2844,7 +2844,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       </Sheet>
 
       {/* Player Stats Edit Modal */}
-      <Sheet visible={showStatsModal} transparent animationType="slide">
+      <Sheet visible={showStatsModal} transparent animationType="slide" onRequestClose={() => setShowStatsModal(false)}>
         <View style={s.modalOverlay}>
           <View style={[s.modalBox, { maxHeight: '90%' }]}>
             <Text style={s.modalTitle}>{isOwnedGame(detailGame) ? tr('teamGrade.editStats') : tr('teamGrade.statsTitle')} — {statsModalPlayer}</Text>
@@ -3080,7 +3080,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       />
 
       {/* Share game with staff modal */}
-      <Sheet visible={shareGameModalVisible} animationType="slide" transparent>
+      <Sheet visible={shareGameModalVisible} animationType="slide" transparent onRequestClose={() => setShareGameModalVisible(false)}>
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={{ backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(CONTENT_MAX_WIDTH) }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>

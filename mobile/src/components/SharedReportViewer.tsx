@@ -179,7 +179,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
   const updatedLabel = updatedLabelFor(item.report_type);
 
   return (
-    <Sheet visible={visible} animationType="slide" transparent>
+    <Sheet visible={visible} animationType="slide" transparent onRequestClose={() => onClose()}>
       <KeyboardAvoidingView style={styles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.box}>
           {/* Header */}

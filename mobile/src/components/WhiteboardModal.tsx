@@ -702,9 +702,11 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     const b = boards[idx];
     if (!b) return;
     orderCounterRef.current = 0;
+    // Cloned through JSON, which TypeScript types as `any` and therefore as
+    // possibly undefined again; the clone of a value inside `if (ai)` is not.
     let ai = b.ai;
     if (ai) {
-      ai = JSON.parse(JSON.stringify(ai));
+      ai = JSON.parse(JSON.stringify(ai)) as NonNullable<typeof ai>;
       const sc = ai.schemes?.[activeScheme];
       if (sc?.actions) sc.actions.forEach((a: any, i: number) => { a.step = i + 1; });
     }

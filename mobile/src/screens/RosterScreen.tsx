@@ -25,7 +25,7 @@ function LevelDropdown({ value, onChange }: { value: string; onChange: (v: strin
         <Text style={ddStyles.triggerText}>{value}</Text>
         <Text style={ddStyles.chevron}>▾</Text>
       </TouchableOpacity>
-      <Sheet visible={open} transparent animationType="fade">
+      <Sheet visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <TouchableOpacity style={ddStyles.overlay} activeOpacity={1} onPress={() => setOpen(false)}>
           <View style={ddStyles.menu}>
             <Text style={ddStyles.menuTitle}>{tr('roster.competitionLevel')}</Text>
@@ -453,7 +453,7 @@ export default function RosterScreen() {
       </View>
 
       {/* Add Player Modal */}
-      <Sheet visible={showAdd} transparent animationType="slide">
+      <Sheet visible={showAdd} transparent animationType="slide" onRequestClose={() => setShowAdd(false)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
           <View style={[styles.modal, { maxHeight: '90%', flex: 0 },
                        // flex: 0 compiles to flex-basis: 0%, and in a column that wins
@@ -597,7 +597,7 @@ export default function RosterScreen() {
       </Sheet>
 
       {/* Create Team Modal */}
-      <Sheet visible={showNewTeam} transparent animationType="slide">
+      <Sheet visible={showNewTeam} transparent animationType="slide" onRequestClose={() => setShowNewTeam(false)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('roster.newTeam')}</Text>

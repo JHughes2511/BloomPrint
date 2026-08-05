@@ -39,7 +39,7 @@ import { desktopOnly } from '../responsive/modalSizes';
 import { useGridColumns } from '../responsive/useGridColumns';
 
 type ReportItem = {
-  id: number | string;
+  id: number;
   report_id?: number;   // for packet report versions: the owning packet id
   kind: 'eval' | 'team' | 'game' | 'training' | 'scout' | 'gamereport';
   player_name?: string;
@@ -295,7 +295,12 @@ export default function RecentScreen() {
       }));
       // Each saved packet report VERSION (one per report-type selection).
       const gameItems: ReportItem[] = (gameReports ?? []).map((v: any) => ({
-        id: `gv-${v.id}`,
+        // The version's own id. It used to be prefixed "gv-" for list-key
+        // uniqueness, which keyExtractor already gets from kind + id — and the
+        // prefix broke the updated-from lookup below, which keys on kind:id
+        // with a numeric id, so a packet version regenerated from someone
+        // else's share never got its "Updated · from X" label.
+        id: v.id,
         report_id: v.report_id,
         kind: 'game',
         player_name: v.title || tr('recent.gameReport'),
@@ -522,11 +527,11 @@ export default function RecentScreen() {
       { text: tr('common.delete'), style: 'destructive', onPress: async () => {
         try {
           if (item.kind === 'eval') {
-            await evalsAPI.delete(item.id as number);
+            await evalsAPI.delete(item.id);
           } else if (item.kind === 'team') {
-            await evalsAPI.deleteTeamReport(item.id as number);
+            await evalsAPI.deleteTeamReport(item.id);
           } else {
-            await gameReportsAPI.delete(item.id as number);
+            await gameReportsAPI.delete(item.id);
           }
           load();
         } catch (e: any) {
@@ -691,10 +696,6 @@ export default function RecentScreen() {
         const updated = await evalsAPI.regenerate(activeModal.evalId);
         updatedText = updated.report_text;
         setEvalCache(prev => ({ ...prev, [activeModal.evalId!]: updated }));
-      } else if (activeModal.kind === 'training') {
-        if (pending) await trainingAPI.addCorrection(activeModal.id, pending);
-        const updated = await trainingAPI.applyCorrections(activeModal.id);
-        updatedText = updated.program_text ?? updated.report_text ?? '';
       } else {
         if (pending) await evalsAPI.addTeamReportCorrection(activeModal.id, pending);
         const updated = await evalsAPI.regenerateTeamReport(activeModal.id);
@@ -888,7 +889,7 @@ export default function RecentScreen() {
                         title: item.kind === 'scout' ? tr('reportTypes.scouting_report') : tr('reportTypes.game_report'),
                         subject: item.player_name, text: item.report_text!,
                         reportType: item.kind === 'scout' ? 'game_session' : item.kind === 'gamereport' ? 'game_report' : 'game',
-                        reportId: (item.kind === 'game' ? (item.report_id ?? item.id) : item.id) as number, outputType: item.kind === 'scout' ? 'scouting_report' : item.kind === 'gamereport' ? 'game_report' : (item.output_type ?? 'coaching_report'),
+                        reportId: item.kind === 'game' ? (item.report_id ?? item.id) : item.id, outputType: item.kind === 'scout' ? 'scouting_report' : item.kind === 'gamereport' ? 'game_report' : (item.output_type ?? 'coaching_report'),
                       })}
                     >
                       <Ionicons name="document-text-outline" size={13} color={t.accent} />
@@ -959,7 +960,7 @@ export default function RecentScreen() {
                       const fullText = item.program_text ?? item.report_text ?? (teamReportTexts[item.id as number] ?? '');
                       setShareCtx({
                         reportType,
-                        reportId: (item.kind === 'game' ? (item.report_id ?? item.id) : item.id) as number,
+                        reportId: item.kind === 'game' ? (item.report_id ?? item.id) : item.id,
                         outputType: item.output_type ?? (item.kind === 'training' ? 'training_program' : 'coaching_report'),
                         reportText: fullText,
                         title: label,
@@ -984,7 +985,7 @@ export default function RecentScreen() {
       )}
 
       {/* Game Report View Modal */}
-      <Sheet visible={!!gameReportModal} animationType="slide" transparent>
+      <Sheet visible={!!gameReportModal} animationType="slide" transparent onRequestClose={() => setGameReportModal(null)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
@@ -1079,7 +1080,7 @@ export default function RecentScreen() {
       />
 
       {/* Generic Send to Staff Modal */}
-      <Sheet visible={showStaffShareModal} animationType="slide" transparent>
+      <Sheet visible={showStaffShareModal} animationType="slide" transparent onRequestClose={() => setShowStaffShareModal(false)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
@@ -1215,7 +1216,7 @@ export default function RecentScreen() {
       </Sheet>
 
       {/* Single modal — swaps between report / send / correct views */}
-      <Sheet visible={!!activeModal} animationType="slide" transparent>
+      <Sheet visible={!!activeModal} animationType="slide" transparent onRequestClose={() => setActiveModal(null)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
 

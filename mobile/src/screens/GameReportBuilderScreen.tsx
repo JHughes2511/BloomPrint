@@ -911,7 +911,7 @@ export default function GameReportBuilderScreen() {
         </View>
       </Sheet>
 
-      <Sheet visible={!!clipModal} animationType="slide" transparent>
+      <Sheet visible={!!clipModal} animationType="slide" transparent onRequestClose={() => setClipModal(null)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
@@ -979,7 +979,7 @@ export default function GameReportBuilderScreen() {
       />
 
       {/* Share modal */}
-      <Sheet visible={showShare} animationType="slide" transparent>
+      <Sheet visible={showShare} animationType="slide" transparent onRequestClose={() => setShowShare(false)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>

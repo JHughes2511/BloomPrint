@@ -949,7 +949,7 @@ export default function TeamReportScreen() {
       </Sheet>
 
       {/* Previous Report Detail Modal */}
-      <Sheet visible={!!selectedPrevReport} animationType="slide" transparent>
+      <Sheet visible={!!selectedPrevReport} animationType="slide" transparent onRequestClose={() => setSelectedPrevReport(null)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60, ...sheetCap(560) }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -1089,7 +1089,7 @@ export default function TeamReportScreen() {
       </Sheet>
 
       {/* Share with Staff Modal */}
-      <Sheet visible={showStaffShare} transparent animationType="slide">
+      <Sheet visible={showStaffShare} transparent animationType="slide" onRequestClose={() => setShowStaffShare(false)}>
         <KeyboardAvoidingView style={shareStyles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <KeyboardAwareScrollView style={shareStyles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
             <Text style={shareStyles.title} numberOfLines={1}>{tr('teamReport.shareWithStaff')}</Text>
@@ -1172,7 +1172,7 @@ export default function TeamReportScreen() {
       </Sheet>
 
       {/* Share Modal */}
-      <Sheet visible={showShare} transparent animationType="slide">
+      <Sheet visible={showShare} transparent animationType="slide" onRequestClose={() => setShowShare(false)}>
         <KeyboardAvoidingView style={shareStyles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <KeyboardAwareScrollView style={shareStyles.modal} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
             <Text style={shareStyles.title} numberOfLines={1}>{tr('teamReport.shareTeamReport')}</Text>

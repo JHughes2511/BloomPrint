@@ -626,7 +626,7 @@ export default function EvalReportScreen() {
       </Sheet>
 
       {/* Player detail modal */}
-      <Sheet visible={showPlayerDetail} animationType="slide" transparent>
+      <Sheet visible={showPlayerDetail} animationType="slide" transparent onRequestClose={() => setShowPlayerDetail(false)}>
         <View style={styles.pdOverlay}>
           <View style={styles.pdBox}>
             <View style={styles.pdHeader}>
@@ -844,7 +844,7 @@ export default function EvalReportScreen() {
       )}
 
       {/* Share with Staff modal */}
-      <Sheet visible={showStaffShare} transparent animationType="slide">
+      <Sheet visible={showStaffShare} transparent animationType="slide" onRequestClose={() => setShowStaffShare(false)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('evalReport.shareWithStaff')}</Text>
@@ -890,7 +890,7 @@ export default function EvalReportScreen() {
       </Sheet>
 
       {/* Export modal */}
-      <Sheet visible={showExport} transparent animationType="slide">
+      <Sheet visible={showExport} transparent animationType="slide" onRequestClose={() => setShowExport(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('evalReport.exportReportTitle')}</Text>
@@ -952,7 +952,7 @@ export default function EvalReportScreen() {
       </Sheet>
 
       {/* Share with Player modal */}
-      <Sheet visible={showShare} transparent animationType="slide">
+      <Sheet visible={showShare} transparent animationType="slide" onRequestClose={() => setShowShare(false)}>
         <KeyboardAvoidingView
           style={styles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -1045,7 +1045,7 @@ export default function EvalReportScreen() {
       </Sheet>
 
       {/* Correction modal */}
-      <Sheet visible={showCorrect} transparent animationType="slide">
+      <Sheet visible={showCorrect} transparent animationType="slide" onRequestClose={() => setShowCorrect(false)}>
         <KeyboardAvoidingView
           style={styles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

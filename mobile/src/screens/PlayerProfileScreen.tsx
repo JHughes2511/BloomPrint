@@ -988,7 +988,7 @@ export default function PlayerProfileScreen() {
       </Sheet>
 
       {/* Training picker modal — choose which training to send */}
-      <Sheet visible={showTrainingPicker} transparent animationType="slide">
+      <Sheet visible={showTrainingPicker} transparent animationType="slide" onRequestClose={() => setShowTrainingPicker(false)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%', borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: t.chip }}>
@@ -1051,7 +1051,7 @@ export default function PlayerProfileScreen() {
       </Sheet>
 
       {/* Player profile detail modal */}
-      <Sheet visible={showProfileDetail} transparent animationType="slide">
+      <Sheet visible={showProfileDetail} transparent animationType="slide" onRequestClose={() => setShowProfileDetail(false)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) }}>
             {/* Header */}
@@ -1132,7 +1132,7 @@ export default function PlayerProfileScreen() {
       </Sheet>
 
       {/* Training detail modal — full-screen so all text is readable */}
-      <Sheet visible={!!trainingModalItem} transparent animationType="slide">
+      <Sheet visible={!!trainingModalItem} transparent animationType="slide" onRequestClose={() => setTrainingModalItem(null)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 60, ...sheetCap(560) }}>
             {/* Compact header — max ~50px tall */}
@@ -1362,7 +1362,7 @@ export default function PlayerProfileScreen() {
       </Sheet>
 
       {/* Edit Player Modal — compact floating card */}
-      <Sheet visible={showEdit} transparent animationType="slide">
+      <Sheet visible={showEdit} transparent animationType="slide" onRequestClose={() => setShowEdit(false)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
           <View style={[styles.modal, { maxHeight: '90%', flex: 0 },
                        // flex: 0 compiles to flex-basis: 0%, and in a column that wins
@@ -1557,7 +1557,7 @@ export default function PlayerProfileScreen() {
       </Sheet>
 
       {/* Share with Staff modal */}
-      <Sheet visible={showStaffShare} transparent animationType="slide">
+      <Sheet visible={showStaffShare} transparent animationType="slide" onRequestClose={() => setShowStaffShare(false)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')} keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('playerProfile.shareWithStaff')}</Text>
@@ -1634,7 +1634,7 @@ export default function PlayerProfileScreen() {
       </Sheet>
 
       {/* Summary modal */}
-      <Sheet visible={showSummary} transparent animationType="slide">
+      <Sheet visible={showSummary} transparent animationType="slide" onRequestClose={() => setShowSummary(false)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('playerProfile.summarizeHistoryTitle')}</Text>

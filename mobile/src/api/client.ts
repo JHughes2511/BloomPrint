@@ -113,6 +113,7 @@ export const authAPI = {
     name?: string;
     role?: string; program_name?: string; competition_level?: string;
     conference?: string; country?: string; city?: string;
+    preferred_language?: string;
   }) => api.post('/auth/google', data).then(r => r.data),
 
   me: () => api.get('/auth/me').then(r => r.data),
