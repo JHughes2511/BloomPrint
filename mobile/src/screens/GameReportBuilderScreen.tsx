@@ -65,15 +65,6 @@ function stripMarkdownForPreview(text: string): string {
     .trim();
 }
 
-/**
- * Reading width for this page's form.
- *
- * The page is as wide as the others so its header lines up; the fields are not,
- * because a form is a column of one-line answers and stretching it across a
- * monitor makes every label a long way from its input.
- */
-const FORM_MAX_WIDTH = 900;
-
 export default function GameReportBuilderScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
@@ -489,10 +480,10 @@ export default function GameReportBuilderScreen() {
     <ScreenBackground>
     {/* Same shell as the team page and the other detail screens: full pane,
         no outer gutter, header inset 20. A 900px centred column put this
-        page's title 180px right of where every other title starts, which is
-        what made it read as a different app. The form itself stays capped
-        below — a text field 1240px wide is not an improvement. */}
-    <PageContainer padded={false} maxWidth={1280}>
+        page's title 180px right of where every other title starts and left
+        the right third of the window empty, which is what made it read as
+        belonging to a different app. */}
+    <PageContainer padded={false} maxWidth={1600}>
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -501,7 +492,7 @@ export default function GameReportBuilderScreen() {
       <KeyboardAwareScrollView
         ref={scrollRef}
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: 100, width: '100%', maxWidth: FORM_MAX_WIDTH }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
       >
