@@ -219,6 +219,19 @@ function HardwoodCourt({ width, height, scale }: { width: number; height: number
 // ── Modal ─────────────────────────────────────────────────────────────────
 interface Props { visible: boolean; gameId: number; playbook?: boolean; onClose: () => void; }
 
+/**
+ * The orientation a browser should open a new board in, or null off the web.
+ *
+ * Desktop opens portrait, a tablet opens landscape. Window size cannot make
+ * that call — an iPad held sideways and a laptop window are the same shape —
+ * so this asks what is pointing at the screen instead.
+ */
+function webPointerOrientation(): 'portrait' | 'landscape' | null {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
+  const coarse = window.matchMedia?.('(pointer: coarse)')?.matches;
+  return coarse ? 'landscape' : 'portrait';
+}
+
 export default function WhiteboardModal({ visible, gameId, playbook = false, onClose }: Props) {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
@@ -2198,9 +2211,23 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                 if (!didAutoOrient.current) {
                   didAutoOrient.current = true;
                   const wide = lw > lh * 1.2;
-                  if (wide) setOrientation('landscape');
+                  // In a browser the shape of the window is a poor guide: a
+                  // desktop window and an iPad in landscape are the same shape
+                  // and want opposite things. A coach at a desk is reading a
+                  // play on a tall screen and wants the half court upright; an
+                  // iPad is the thing you hold sideways on a bench. The
+                  // primary pointer tells them apart where size cannot —
+                  // coarse is a finger, fine is a mouse, and a touchscreen
+                  // laptop still reports fine because its mouse leads.
+                  const forced = webPointerOrientation();
+                  const next = forced ?? (wide ? 'landscape' : 'portrait');
+                  if (next === 'landscape') setOrientation('landscape');
                   const b = boards[activeBoardIdx];
                   const untouched = b && !b.id && !(b.strokes ?? []).length && !b.ai;
+                  // Court type is left alone: it still follows the shape of
+                  // the space, which is what it was choosing well before the
+                  // orientation default changed. A desktop window has room for
+                  // the full floor whichever way the board is turned.
                   if (untouched && !wide && b.court_type !== 'half') {
                     setBoards(prev => {
                       const n = [...prev];
