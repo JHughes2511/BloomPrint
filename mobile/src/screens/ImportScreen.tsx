@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { describeError } from '../utils/describeError';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
@@ -305,8 +306,8 @@ export default function ImportScreen() {
             activeOpacity={0.85}
           >
             {analyzing
-              ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.uploadText} numberOfLines={1}>  {tr('importScreen.readingFile')}</Text></>
-              : <><Ionicons name="sparkles" size={18} color={t.ctaText} /><Text style={styles.uploadText} numberOfLines={1}>  {tr('importScreen.analyzeFile')}</Text></>
+              ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.uploadText} numberOfLines={1}>{tr('importScreen.readingFile')}</Text></>
+              : <><Ionicons name="sparkles" size={18} color={t.ctaText} /><Text style={styles.uploadText} numberOfLines={1}>{tr('importScreen.analyzeFile')}</Text></>
             }
           </TouchableOpacity>
         )}
@@ -335,7 +336,7 @@ export default function ImportScreen() {
             ))}
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
               <TouchableOpacity style={[styles.uploadBtn, { flex: 1, backgroundColor: t.chip }]} onPress={() => setPreview(null)}>
-                <Ionicons name="refresh" size={16} color={t.ink} /><Text style={[styles.uploadText, { color: t.ink }]} numberOfLines={1}>  {tr('importScreen.redo')}</Text>
+                <Ionicons name="refresh" size={16} color={t.ink} /><Text style={[styles.uploadText, { color: t.ink }]} numberOfLines={1}>{tr('importScreen.redo')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.uploadBtn, { flex: 1.6 }, (isRosterMode && !selectedTeamId) && styles.uploadBtnDisabled]}
@@ -344,8 +345,8 @@ export default function ImportScreen() {
                 activeOpacity={0.85}
               >
                 {uploading
-                  ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.uploadText} numberOfLines={1}>  {tr('importScreen.importing')}</Text></>
-                  : <><Ionicons name="cloud-upload" size={18} color={t.ctaText} /><Text style={styles.uploadText} numberOfLines={1}>  {tr('importScreen.importCount', { count: preview.filter(p => p._include).length })}</Text></>}
+                  ? <><ActivityIndicator color={t.ctaText} /><Text style={styles.uploadText} numberOfLines={1}>{tr('importScreen.importing')}</Text></>
+                  : <><Ionicons name="cloud-upload" size={18} color={t.ctaText} /><Text style={styles.uploadText} numberOfLines={1}>{tr('importScreen.importCount', { count: preview.filter(p => p._include).length })}</Text></>}
               </TouchableOpacity>
             </View>
           </View>
@@ -409,6 +410,10 @@ export default function ImportScreen() {
         )}
       </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
+    {/* Reading a roster is an AI call and takes as long as one. The button
+        spinner said so from inside a control you scroll past; this is the same
+        progress bar the rest of the app uses for work of this length. */}
+    <GeneratingOverlay visible={analyzing} label={tr('importScreen.readingFile')} />
     </PageContainer>
     </ScreenBackground>
   );
@@ -473,7 +478,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   chipTextActive: { color: t.ctaText },
   uploadBtn: {
     backgroundColor: t.ctaBg, borderRadius: 999, padding: 15,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    // gap, not two spaces typed into the label. A space inside <Text> is
+    // rendered by the font — it collapses at some sizes and sits tight against
+    // the glyph at others, which is why these read as icon-jammed-into-word.
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
   },
   uploadBtnDisabled: { opacity: 0.5 },
   uploadText: { color: t.ctaText, fontFamily: fonts[800], fontSize: 15, flexShrink: 1 },
