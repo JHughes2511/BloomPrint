@@ -721,7 +721,8 @@
     "errorTryAgain": "May nangyaring mali. Subukan ulit.",
     "couldNotComplete": "Hindi matapos iyon.",
     "couldNotOpenTitle": "Hindi mabuksan",
-    "couldNotOpenMsg": "Hindi ko awtomatikong mabuksan ang screen na iyon."
+    "couldNotOpenMsg": "Hindi ko awtomatikong mabuksan ang screen na iyon.",
+    "noPlayerResolved": "Hindi ko natukoy kung sinong player ang tinutukoy mo. Subukan ang pangalan gaya ng nasa roster mo."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Hindi ma-save ang mga pagbabago",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Ilapat ang pagwawasto",
     "noPlayersFound": "Walang nahanap na manlalaro.",
     "myTeamFilm": "Film ng aking koponan",
-    "opponentFilm": "Film ng kalaban"
+    "opponentFilm": "Film ng kalaban",
+    "teamFilm": "Film ng {{team}}"
   },
   "teamGrade": {
     "views": {

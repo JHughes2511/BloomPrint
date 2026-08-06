@@ -721,7 +721,8 @@
     "errorTryAgain": "Bir şeyler ters gitti. Tekrar deneyin.",
     "couldNotComplete": "Bu tamamlanamadı.",
     "couldNotOpenTitle": "Açılamadı",
-    "couldNotOpenMsg": "Bu ekranı otomatik olarak açamadım."
+    "couldNotOpenMsg": "Bu ekranı otomatik olarak açamadım.",
+    "noPlayerResolved": "Hangi oyuncuyu kastettiğinizi anlayamadım. Adını kadroda göründüğü gibi yazmayı deneyin."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Değişiklikler kaydedilemedi",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Düzeltmeyi uygula",
     "noPlayersFound": "Oyuncu bulunamadı.",
     "myTeamFilm": "Kendi takım videom",
-    "opponentFilm": "Rakip videosu"
+    "opponentFilm": "Rakip videosu",
+    "teamFilm": "{{team}} videosu"
   },
   "teamGrade": {
     "views": {

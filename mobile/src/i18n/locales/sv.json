@@ -721,7 +721,8 @@
     "errorTryAgain": "Något gick fel. Försök igen.",
     "couldNotComplete": "Kunde inte slutföra det.",
     "couldNotOpenTitle": "Kunde inte öppna",
-    "couldNotOpenMsg": "Jag kunde inte öppna den skärmen automatiskt."
+    "couldNotOpenMsg": "Jag kunde inte öppna den skärmen automatiskt.",
+    "noPlayerResolved": "Jag kunde inte avgöra vilken spelare du menade. Prova namnet så som det står i truppen."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Kunde inte spara ändringar",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Tillämpa korrigering",
     "noPlayersFound": "Inga spelare hittades.",
     "myTeamFilm": "Film på mitt lag",
-    "opponentFilm": "Film på motståndaren"
+    "opponentFilm": "Film på motståndaren",
+    "teamFilm": "Film på {{team}}"
   },
   "teamGrade": {
     "views": {

@@ -721,7 +721,8 @@
     "errorTryAgain": "Algo salió mal. Inténtalo de nuevo.",
     "couldNotComplete": "No se pudo completar eso.",
     "couldNotOpenTitle": "No se pudo abrir",
-    "couldNotOpenMsg": "No pude abrir esa pantalla automáticamente."
+    "couldNotOpenMsg": "No pude abrir esa pantalla automáticamente.",
+    "noPlayerResolved": "No supe a qué jugador te referías. Prueba con su nombre tal como aparece en tu plantilla."
   },
   "playerProfile": {
     "couldNotSaveChanges": "No se pudieron guardar los cambios",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Aplicar corrección",
     "noPlayersFound": "No se encontraron jugadores.",
     "myTeamFilm": "Vídeo de mi equipo",
-    "opponentFilm": "Vídeo del rival"
+    "opponentFilm": "Vídeo del rival",
+    "teamFilm": "Vídeo de {{team}}"
   },
   "teamGrade": {
     "views": {

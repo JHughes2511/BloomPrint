@@ -721,7 +721,8 @@
     "errorTryAgain": "Kažkas nepavyko. Bandykite dar kartą.",
     "couldNotComplete": "Nepavyko to atlikti.",
     "couldNotOpenTitle": "Nepavyko atidaryti",
-    "couldNotOpenMsg": "Nepavyko automatiškai atidaryti to ekrano."
+    "couldNotOpenMsg": "Nepavyko automatiškai atidaryti to ekrano.",
+    "noPlayerResolved": "Nesupratau, kurį žaidėją turėjai omenyje. Pabandyk vardą tokį, koks yra sąraše."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Nepavyko išsaugoti pakeitimų",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Taikyti pataisymą",
     "noPlayersFound": "Žaidėjų nerasta.",
     "myTeamFilm": "Mano komandos vaizdo įrašas",
-    "opponentFilm": "Varžovų vaizdo įrašas"
+    "opponentFilm": "Varžovų vaizdo įrašas",
+    "teamFilm": "{{team}} įrašas"
   },
   "teamGrade": {
     "views": {

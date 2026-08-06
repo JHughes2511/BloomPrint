@@ -721,7 +721,8 @@
     "errorTryAgain": "حدث خطأ ما. حاول مرة أخرى.",
     "couldNotComplete": "تعذّر إتمام ذلك.",
     "couldNotOpenTitle": "تعذّر الفتح",
-    "couldNotOpenMsg": "لم أتمكن من فتح تلك الشاشة تلقائيًا."
+    "couldNotOpenMsg": "لم أتمكن من فتح تلك الشاشة تلقائيًا.",
+    "noPlayerResolved": "لم أتبيّن أي لاعب تقصد. جرّب كتابة اسمه كما يظهر في قائمتك."
   },
   "playerProfile": {
     "couldNotSaveChanges": "تعذّر حفظ التغييرات",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "تطبيق التصحيح",
     "noPlayersFound": "لم يتم العثور على لاعبين.",
     "myTeamFilm": "فيديو فريقي",
-    "opponentFilm": "فيديو الخصم"
+    "opponentFilm": "فيديو الخصم",
+    "teamFilm": "فيديو {{team}}"
   },
   "teamGrade": {
     "views": {

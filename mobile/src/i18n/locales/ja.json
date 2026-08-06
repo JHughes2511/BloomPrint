@@ -721,7 +721,8 @@
     "errorTryAgain": "問題が発生しました。もう一度お試しください。",
     "couldNotComplete": "それを完了できませんでした。",
     "couldNotOpenTitle": "開けませんでした",
-    "couldNotOpenMsg": "その画面を自動で開けませんでした。"
+    "couldNotOpenMsg": "その画面を自動で開けませんでした。",
+    "noPlayerResolved": "どの選手のことか判断できませんでした。ロースターに表示されている名前で試してください。"
   },
   "playerProfile": {
     "couldNotSaveChanges": "変更を保存できませんでした",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "修正を適用",
     "noPlayersFound": "選手が見つかりません。",
     "myTeamFilm": "自チームの映像",
-    "opponentFilm": "相手チームの映像"
+    "opponentFilm": "相手チームの映像",
+    "teamFilm": "{{team}} の映像"
   },
   "teamGrade": {
     "views": {

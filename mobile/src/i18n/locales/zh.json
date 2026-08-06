@@ -721,7 +721,8 @@
     "errorTryAgain": "出错了。请重试。",
     "couldNotComplete": "无法完成该操作。",
     "couldNotOpenTitle": "无法打开",
-    "couldNotOpenMsg": "我无法自动打开那个界面。"
+    "couldNotOpenMsg": "我无法自动打开那个界面。",
+    "noPlayerResolved": "我无法确定你指的是哪位球员。请使用花名册上显示的名字。"
   },
   "playerProfile": {
     "couldNotSaveChanges": "无法保存更改",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "应用修正",
     "noPlayersFound": "未找到球员。",
     "myTeamFilm": "本队录像",
-    "opponentFilm": "对手录像"
+    "opponentFilm": "对手录像",
+    "teamFilm": "{{team}} 影片"
   },
   "teamGrade": {
     "views": {

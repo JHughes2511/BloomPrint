@@ -721,7 +721,8 @@
     "errorTryAgain": "कुछ गलत हो गया। दोबारा कोशिश करें।",
     "couldNotComplete": "यह पूरा नहीं हो सका।",
     "couldNotOpenTitle": "खोला नहीं जा सका",
-    "couldNotOpenMsg": "मैं वह स्क्रीन अपने आप नहीं खोल सका।"
+    "couldNotOpenMsg": "मैं वह स्क्रीन अपने आप नहीं खोल सका।",
+    "noPlayerResolved": "मैं समझ नहीं पाया कि आपका मतलब किस खिलाड़ी से है। वही नाम आज़माएँ जो आपकी रोस्टर में है।"
   },
   "playerProfile": {
     "couldNotSaveChanges": "बदलाव सहेजे नहीं जा सके",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "सुधार लागू करें",
     "noPlayersFound": "कोई खिलाड़ी नहीं मिला।",
     "myTeamFilm": "मेरी टीम की फ़िल्म",
-    "opponentFilm": "प्रतिद्वंद्वी की फ़िल्म"
+    "opponentFilm": "प्रतिद्वंद्वी की फ़िल्म",
+    "teamFilm": "{{team}} की फ़िल्म"
   },
   "teamGrade": {
     "views": {

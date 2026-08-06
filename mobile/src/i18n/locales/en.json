@@ -721,7 +721,8 @@
     "errorTryAgain": "Something went wrong. Try again.",
     "couldNotComplete": "Could not complete that.",
     "couldNotOpenTitle": "Could not open",
-    "couldNotOpenMsg": "I couldn't open that screen automatically."
+    "couldNotOpenMsg": "I couldn't open that screen automatically.",
+    "noPlayerResolved": "I couldn't tell which player you meant. Try their name as it appears on your roster."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Could not save changes",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Apply Correction",
     "noPlayersFound": "No players found.",
     "myTeamFilm": "My Team Film",
-    "opponentFilm": "Opponent Film"
+    "opponentFilm": "Opponent Film",
+    "teamFilm": "{{team}} Film"
   },
   "teamGrade": {
     "views": {

@@ -412,7 +412,9 @@ TOOLS = [
         "CREATE A TEAM (the 'New Team' chip), and start a roster import.\n"
         "- 'add_team' — Roster (for creating a team). 'add_player' — Roster (for adding a player).\n"
         "- 'import' — the Import screen (AI-reads any file: Excel/CSV/PDF/photo) to bulk-add players.\n"
-        "- 'player' — one player's profile (params: player_id). Their evals, training, film catalog, invite code.\n"
+        "- 'player' — one player's profile (params: player_id REQUIRED — call search_players first to get "
+        "it, or pass player_name). NEVER send a coach to 'roster' when they named a player: that reads as "
+        "the app taking them somewhere wrong. Their evals, training, film catalog, invite code.\n"
         "- 'new_eval' — start a NEW film/AI eval on a player (params: player_id) — the coach attaches film "
         "and/or picks report types. Use this for a fresh eval that needs film.\n"
         "- 'training' — generate a training program for a player (params: player_id).\n"
@@ -445,7 +447,8 @@ TOOLS = [
         "- 'feedback' — opens the FEEDBACK form directly.\n"
         "Do NOT invent other screen names. These land on the EXACT view/modal — say 'this button opens "
         "it right there', not 'then find X'."),
-     "input_schema": {"type": "object", "properties": {"screen": {"type": "string"}, "player_id": {"type": "integer"}, "eval_id": {"type": "integer"}, "report_id": {"type": "integer"}, "game_id": {"type": "integer"}, "conversation_id": {"type": "integer"}, "share": {"type": "string", "enum": ["player", "staff"], "description": "for eval_report: open Send-to-Player or Share-with-Staff"}, "label": {"type": "string", "description": "button text"}}, "required": ["screen", "label"]}},
+     "input_schema": {"type": "object", "properties": {"screen": {"type": "string"}, "player_id": {"type": "integer"},
+                      "player_name": {"type": "string", "description": "the player's name, when you have it but not their id"}, "eval_id": {"type": "integer"}, "report_id": {"type": "integer"}, "game_id": {"type": "integer"}, "conversation_id": {"type": "integer"}, "share": {"type": "string", "enum": ["player", "staff"], "description": "for eval_report: open Send-to-Player or Share-with-Staff"}, "label": {"type": "string", "description": "button text"}}, "required": ["screen", "label"]}},
     {"name": "propose_generation", "description": (
         "Propose an ACTION the coach must confirm before it runs. Do NOT run it yourself. Supported kinds:\n"
         "- 'player_summary' (args: player_id REQUIRED, months optional, output_type optional) — a report "
@@ -502,8 +505,33 @@ def _run_tool(name, args, db, coach, result):
     if name == "get_conversation_messages":
         return t_get_conversation_messages(db, coach, args.get("conversation_id", 0), args.get("with_name", ""))
     if name == "suggest_navigation":
+        screen = str(args.get("screen") or "").strip().lower()
+        params = {k: args[k] for k in ("player_id", "eval_id", "report_id", "game_id", "conversation_id", "share")
+                  if args.get(k) is not None}
+        # "Take me to Marcus" has to land ON Marcus. These screens are a player's
+        # screens, and without an id the app can only fall back to the roster —
+        # which is exactly what a coach reports as "it went to the wrong place".
+        # A name is accepted and resolved here; if nothing resolves, the tool
+        # fails loudly so the model looks the player up instead of guessing.
+        if screen in ("player", "player_profile", "new_eval", "training"):
+            if "player_id" not in params:
+                named = str(args.get("player_name") or "").strip()
+                p = _find_player(db, coach, named) if named else None
+                if p:
+                    params["player_id"] = p.id
+                    params.setdefault("player_name", p.name)
+                else:
+                    return {"error": (
+                        f"'{screen}' needs the player. "
+                        + (f"No player of this coach matches '{named}'. " if named else "No player was given. ")
+                        + "Call search_players first and pass that player's id as player_id "
+                          "(or pass player_name exactly as it appears there). Do NOT fall back to "
+                          "the 'roster' screen when the coach named someone — say you couldn't find "
+                          "that name and list the closest matches instead.")}
+            elif args.get("player_name"):
+                params.setdefault("player_name", args["player_name"])
         result["navigate"] = {"screen": args.get("screen"), "label": args.get("label", "Take me there"),
-                              "params": {k: args[k] for k in ("player_id", "eval_id", "report_id", "game_id", "conversation_id", "share") if args.get(k) is not None}}
+                              "params": params}
         return {"ok": "Navigation button shown to the user."}
     if name == "propose_generation":
         result["pending_action"] = {k: v for k, v in args.items() if v is not None}

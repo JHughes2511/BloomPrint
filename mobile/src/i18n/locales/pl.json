@@ -721,7 +721,8 @@
     "errorTryAgain": "Coś poszło nie tak. Spróbuj ponownie.",
     "couldNotComplete": "Nie udało się tego wykonać.",
     "couldNotOpenTitle": "Nie udało się otworzyć",
-    "couldNotOpenMsg": "Nie udało mi się automatycznie otworzyć tego ekranu."
+    "couldNotOpenMsg": "Nie udało mi się automatycznie otworzyć tego ekranu.",
+    "noPlayerResolved": "Nie rozpoznałem, o którego zawodnika chodzi. Spróbuj podać imię tak, jak widnieje w składzie."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Nie udało się zapisać zmian",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Zastosuj korektę",
     "noPlayersFound": "Nie znaleziono zawodników.",
     "myTeamFilm": "Nagranie mojej drużyny",
-    "opponentFilm": "Nagranie przeciwnika"
+    "opponentFilm": "Nagranie przeciwnika",
+    "teamFilm": "Nagranie: {{team}}"
   },
   "teamGrade": {
     "views": {

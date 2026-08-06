@@ -721,7 +721,8 @@
     "errorTryAgain": "Ceva nu a mers bine. Încearcă din nou.",
     "couldNotComplete": "Nu am putut finaliza asta.",
     "couldNotOpenTitle": "Nu s-a putut deschide",
-    "couldNotOpenMsg": "Nu am putut deschide automat acel ecran."
+    "couldNotOpenMsg": "Nu am putut deschide automat acel ecran.",
+    "noPlayerResolved": "Nu mi-am dat seama la ce jucător te refereai. Încearcă numele așa cum apare în lot."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Modificările nu au putut fi salvate",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Aplică corecția",
     "noPlayersFound": "Niciun jucător găsit.",
     "myTeamFilm": "Filmarea echipei mele",
-    "opponentFilm": "Filmarea adversarului"
+    "opponentFilm": "Filmarea adversarului",
+    "teamFilm": "Filmare {{team}}"
   },
   "teamGrade": {
     "views": {

@@ -252,6 +252,35 @@ export default function GameReportBuilderScreen() {
     setExtraTeamText('');
   };
 
+  /** Resolve an extra-team token ("t<id>" for a saved team, else a typed name). */
+  const extraTeamName = (tok: string) =>
+    (tok.startsWith('t') && teams.find(tm => `t${tm.id}` === tok)?.name) || tok;
+
+  /**
+   * Who a film could be of, for THIS packet.
+   *
+   * The two fixed buttons ("My Team" / "Opponent") were wrong in three of the
+   * four modes: an opponent-only packet has no my-team film, opponent-vs-opponent
+   * has no my-team side at all, and in every mode the coach has already named
+   * the teams above — so the buttons should say those names.
+   */
+  const filmSides = (): { name: string; label: string }[] => {
+    const myName = teams.find(tm => tm.id === myTeamId)?.name ?? coach?.program_name ?? tr('gameBuilder.myTeam');
+    const oppLabel = (teams.find(tm => tm.id === oppTeamId)?.name ?? oppName.trim()) || tr('gameBuilder.opponent');
+    if (mode === 'my_program') return [{ name: myName, label: 'my_team' }];
+    if (mode === 'opponent_only') return [{ name: oppLabel, label: 'opponent' }];
+    if (mode === 'opp_vs_opp') {
+      // Both sides are opponents here; the name is what tells them apart.
+      const a = teams.find(tm => tm.id === myTeamId)?.name ?? (oppAName.trim() || tr('gameBuilder.opponentA'));
+      return [
+        { name: a, label: 'opponent' },
+        { name: oppLabel, label: 'opponent' },
+        ...extraTeams.map(tok => ({ name: extraTeamName(tok), label: 'opponent' })),
+      ];
+    }
+    return [{ name: myName, label: 'my_team' }, { name: oppLabel, label: 'opponent' }];
+  };
+
   const pickClip = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Videos,
@@ -260,14 +289,16 @@ export default function GameReportBuilderScreen() {
     });
     if (result.canceled || !result.assets[0]) return;
     const asset = result.assets[0];
+    const sides = filmSides();
+    // One possible team means there is nothing to ask.
+    if (sides.length === 1) { uploadClip(asset, sides[0].label, sides[0].name); return; }
     Alert.alert(tr('gameBuilder.whoseFilm'), '', [
-      { text: tr('gameBuilder.myTeam'), onPress: () => uploadClip(asset, 'my_team') },
-      { text: tr('gameBuilder.opponent'), onPress: () => uploadClip(asset, 'opponent') },
-      { text: tr('common.cancel'), style: 'cancel' },
+      ...sides.map(s => ({ text: s.name, onPress: () => uploadClip(asset, s.label, s.name) })),
+      { text: tr('common.cancel'), style: 'cancel' as const },
     ]);
   };
 
-  const uploadClip = async (asset: any, label: string) => {
+  const uploadClip = async (asset: any, label: string, teamName = '') => {
     if (!reportId) return;
     setUploadingClip(true);
     setClipProgress(tr('gameBuilder.uploadingFilm'));
@@ -280,7 +311,7 @@ export default function GameReportBuilderScreen() {
       // the coach watches an invented curve for the better part of an hour and
       // cannot tell an upload in progress from one that has stalled.
       const created = await uploadFileStreamed(
-        `/game-reports/${reportId}/clips`, asset.uri, { label }, 'video', 'video/mp4',
+        `/game-reports/${reportId}/clips`, asset.uri, { label, team_name: teamName }, 'video', 'video/mp4',
         (p) => setClipProgress(uploadProgressCode(p.sent, p.total)),
       );
       if (created?.job_id) {
@@ -696,7 +727,9 @@ export default function GameReportBuilderScreen() {
               ])}
             >
               <View style={[styles.clipLabel, clip.label === 'my_team' ? styles.clipLabelMy : styles.clipLabelOpp]}>
-                <Text style={styles.clipLabelText}>{clip.label === 'my_team' ? tr('gameBuilder.myTeam') : tr('gameBuilder.opponent')}</Text>
+                {/* The team the coach picked, when there is one — in an
+                    opponent-vs-opponent packet "Opponent" describes both films. */}
+                <Text style={styles.clipLabelText}>{clip.team_name || (clip.label === 'my_team' ? tr('gameBuilder.myTeam') : tr('gameBuilder.opponent'))}</Text>
               </View>
               <Text style={styles.clipAnalysis} numberOfLines={2}>
                 {clip.analysis_text ? stripMarkdownForPreview(clip.analysis_text).slice(0, 120) + '...' : tr('gameBuilder.analyzing')}
@@ -928,7 +961,9 @@ export default function GameReportBuilderScreen() {
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
               <View style={[styles.clipLabel, clipModal?.label === 'my_team' ? styles.clipLabelMy : styles.clipLabelOpp]}>
-                <Text style={styles.clipLabelText}>{clipModal?.label === 'my_team' ? tr('gameBuilder.myTeamFilm') : tr('gameBuilder.opponentFilm')}</Text>
+                <Text style={styles.clipLabelText}>{clipModal?.team_name
+                  ? tr('gameBuilder.teamFilm', { team: clipModal.team_name })
+                  : (clipModal?.label === 'my_team' ? tr('gameBuilder.myTeamFilm') : tr('gameBuilder.opponentFilm'))}</Text>
               </View>
               <TouchableOpacity onPress={() => setClipModal(null)} style={{ marginLeft: 'auto' }}>
                 <Ionicons name="close" size={22} color={t.muted} />

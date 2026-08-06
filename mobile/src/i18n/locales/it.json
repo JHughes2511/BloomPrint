@@ -721,7 +721,8 @@
     "errorTryAgain": "Qualcosa è andato storto. Riprova.",
     "couldNotComplete": "Impossibile completare l'operazione.",
     "couldNotOpenTitle": "Impossibile aprire",
-    "couldNotOpenMsg": "Non sono riuscito ad aprire quella schermata automaticamente."
+    "couldNotOpenMsg": "Non sono riuscito ad aprire quella schermata automaticamente.",
+    "noPlayerResolved": "Non ho capito quale giocatore intendevi. Prova con il nome come appare nel tuo roster."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Impossibile salvare le modifiche",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Applica correzione",
     "noPlayersFound": "Nessun giocatore trovato.",
     "myTeamFilm": "Video della mia squadra",
-    "opponentFilm": "Video dell'avversario"
+    "opponentFilm": "Video dell'avversario",
+    "teamFilm": "Video di {{team}}"
   },
   "teamGrade": {
     "views": {

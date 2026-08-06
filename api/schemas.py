@@ -506,6 +506,7 @@ class GameReportClipOut(BaseModel):
     id: int
     game_report_id: int
     label: str
+    team_name: str | None = None
     analysis_text: str | None
     created_at: datetime
     model_config = {"from_attributes": True}

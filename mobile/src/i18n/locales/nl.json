@@ -721,7 +721,8 @@
     "errorTryAgain": "Er is iets misgegaan. Probeer het opnieuw.",
     "couldNotComplete": "Kon dat niet voltooien.",
     "couldNotOpenTitle": "Kon niet openen",
-    "couldNotOpenMsg": "Ik kon dat scherm niet automatisch openen."
+    "couldNotOpenMsg": "Ik kon dat scherm niet automatisch openen.",
+    "noPlayerResolved": "Ik kon niet bepalen welke speler je bedoelde. Probeer de naam zoals die in je selectie staat."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Kon wijzigingen niet opslaan",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Correctie toepassen",
     "noPlayersFound": "Geen spelers gevonden.",
     "myTeamFilm": "Beelden eigen team",
-    "opponentFilm": "Beelden tegenstander"
+    "opponentFilm": "Beelden tegenstander",
+    "teamFilm": "Beelden van {{team}}"
   },
   "teamGrade": {
     "views": {

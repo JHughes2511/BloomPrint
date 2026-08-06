@@ -331,7 +331,7 @@ def game_report_videos(
             "id": c.id,
             "report_id": c.game_report_id,
             "report_title": title,
-            "label": "My Team" if c.label == "my_team" else "Opponent",
+            "label": c.team_name or ("My Team" if c.label == "my_team" else "Opponent"),
             "created_at": c.created_at,
             "stream_url": playback_url(c.video_path, f"/game-reports/{c.game_report_id}/clips/{c.id}/stream"),
         })
@@ -398,6 +398,7 @@ async def add_clip(
     report_id: int,
     background_tasks: BackgroundTasks,
     label: str = Form(...),
+    team_name: str = Form(""),
     video: UploadFile = File(...),
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
@@ -417,9 +418,13 @@ async def add_clip(
             detail="The server is out of storage space. Free up disk space (or configure S3 storage) and try again.",
         )
 
-    label_text = "my team" if label == "my_team" else "the opponent"
     my_team_name = gr.my_team.name if gr.my_team else coach.program_name
     opp_name = gr.opponent_team.name if gr.opponent_team else (gr.opponent_name or "Opponent")
+    # Name the team if the coach picked one. It matters most in an
+    # opponent-vs-opponent packet, where "the opponent" describes both films and
+    # the model has no way to tell which team it is watching.
+    team_name = (team_name or "").strip()
+    label_text = team_name or ("my team" if label == "my_team" else "the opponent")
 
     # Create the clip in an "analyzing" state (analysis_text=None) and run the
     # AI breakdown in the BACKGROUND so the upload request returns immediately —
@@ -429,6 +434,7 @@ async def add_clip(
         game_report_id=report_id,
         video_path=str(dest),
         label=label,
+        team_name=team_name or None,
         analysis_text=None,
     )
     db.add(clip)
@@ -643,7 +649,7 @@ async def generate_game_report(
     film_context = ""
     for clip in gr.clips:
         if clip.analysis_text:
-            label_str = "My Team Film" if clip.label == "my_team" else "Opponent Film"
+            label_str = f"{clip.team_name} Film" if clip.team_name else ("My Team Film" if clip.label == "my_team" else "Opponent Film")
             film_context += f"\n{label_str.upper()}:\n{clip.analysis_text}\n"
 
     # Auto-include what we've already "remembered" about this opponent — the
@@ -842,7 +848,7 @@ async def generate_team_training(
     film_context = ""
     for clip in gr.clips:
         if clip.analysis_text:
-            label_str = "My Team Film" if clip.label == "my_team" else "Opponent Film"
+            label_str = f"{clip.team_name} Film" if clip.team_name else ("My Team Film" if clip.label == "my_team" else "Opponent Film")
             film_context += f"\n{label_str.upper()}:\n{clip.analysis_text[:800]}\n"
 
     sections = [

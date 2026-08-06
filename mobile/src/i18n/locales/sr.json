@@ -721,7 +721,8 @@
     "errorTryAgain": "Nešto je pošlo naopako. Pokušaj ponovo.",
     "couldNotComplete": "Nije moguće završiti to.",
     "couldNotOpenTitle": "Nije moguće otvoriti",
-    "couldNotOpenMsg": "Nisam mogao automatski da otvorim taj ekran."
+    "couldNotOpenMsg": "Nisam mogao automatski da otvorim taj ekran.",
+    "noPlayerResolved": "Нисам препознао на ког играча мислиш. Покушај са именом како стоји на списку."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Nije moguće sačuvati izmene",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Примени исправку",
     "noPlayersFound": "Нема пронађених играча.",
     "myTeamFilm": "Снимак мог тима",
-    "opponentFilm": "Снимак противника"
+    "opponentFilm": "Снимак противника",
+    "teamFilm": "Снимак: {{team}}"
   },
   "teamGrade": {
     "views": {

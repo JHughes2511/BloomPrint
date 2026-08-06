@@ -721,7 +721,8 @@
     "errorTryAgain": "რაღაც შეცდომა მოხდა. სცადეთ ხელახლა.",
     "couldNotComplete": "ამის შესრულება ვერ მოხერხდა.",
     "couldNotOpenTitle": "გახსნა ვერ მოხერხდა",
-    "couldNotOpenMsg": "ვერ გავხსენი ის ეკრანი ავტომატურად."
+    "couldNotOpenMsg": "ვერ გავხსენი ის ეკრანი ავტომატურად.",
+    "noPlayerResolved": "ვერ გავიგე, რომელ მოთამაშეს გულისხმობდით. სცადეთ სახელი ისე, როგორც შემადგენლობაშია."
   },
   "playerProfile": {
     "couldNotSaveChanges": "ცვლილებების შენახვა ვერ მოხერხდა",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "შესწორების გამოყენება",
     "noPlayersFound": "მოთამაშეები ვერ მოიძებნა.",
     "myTeamFilm": "ჩემი გუნდის ვიდეო",
-    "opponentFilm": "მოწინააღმდეგის ვიდეო"
+    "opponentFilm": "მოწინააღმდეგის ვიდეო",
+    "teamFilm": "{{team}}-ის ვიდეო"
   },
   "teamGrade": {
     "views": {

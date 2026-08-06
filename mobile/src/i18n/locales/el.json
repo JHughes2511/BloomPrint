@@ -721,7 +721,8 @@
     "errorTryAgain": "Κάτι πήγε στραβά. Δοκίμασε ξανά.",
     "couldNotComplete": "Δεν ήταν δυνατή η ολοκλήρωση αυτού.",
     "couldNotOpenTitle": "Δεν ήταν δυνατό το άνοιγμα",
-    "couldNotOpenMsg": "Δεν μπόρεσα να ανοίξω αυτόματα αυτήν την οθόνη."
+    "couldNotOpenMsg": "Δεν μπόρεσα να ανοίξω αυτόματα αυτήν την οθόνη.",
+    "noPlayerResolved": "Δεν κατάλαβα ποιον παίκτη εννοούσες. Δοκίμασε το όνομα όπως εμφανίζεται στο ρόστερ σου."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Δεν ήταν δυνατή η αποθήκευση των αλλαγών",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Εφαρμογή διόρθωσης",
     "noPlayersFound": "Δεν βρέθηκαν παίκτες.",
     "myTeamFilm": "Βίντεο ομάδας μου",
-    "opponentFilm": "Βίντεο αντιπάλου"
+    "opponentFilm": "Βίντεο αντιπάλου",
+    "teamFilm": "Βίντεο {{team}}"
   },
   "teamGrade": {
     "views": {

@@ -721,7 +721,8 @@
     "errorTryAgain": "משהו השתבש. נסה שוב.",
     "couldNotComplete": "לא ניתן להשלים את זה.",
     "couldNotOpenTitle": "לא ניתן לפתוח",
-    "couldNotOpenMsg": "לא הצלחתי לפתוח את המסך הזה אוטומטית."
+    "couldNotOpenMsg": "לא הצלחתי לפתוח את המסך הזה אוטומטית.",
+    "noPlayerResolved": "לא הצלחתי לזהות לאיזה שחקן התכוונת. נסה את השם כפי שהוא מופיע בסגל."
   },
   "playerProfile": {
     "couldNotSaveChanges": "לא ניתן לשמור את השינויים",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "החל תיקון",
     "noPlayersFound": "לא נמצאו שחקנים.",
     "myTeamFilm": "וידאו הקבוצה שלי",
-    "opponentFilm": "וידאו היריבה"
+    "opponentFilm": "וידאו היריבה",
+    "teamFilm": "וידאו של {{team}}"
   },
   "teamGrade": {
     "views": {

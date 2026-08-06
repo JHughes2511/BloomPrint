@@ -3,6 +3,7 @@ import { roleLabel } from '../utils/roleLabel';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
+import { useKeyboardInset } from '../web/keyboardInset';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, Modal, KeyboardAvoidingView,
@@ -40,6 +41,8 @@ export default function StaffInboxScreen() {
   const reportTypeLabel = (rt: string): string =>
     REPORT_TYPE_LABEL_KEYS[rt] ? tr(REPORT_TYPE_LABEL_KEYS[rt]) : rt;
   const styles = makeStyles(t);
+  // Pixels the phone keyboard is covering, so bottom-anchored sheets clear it.
+  const kbInset = useKeyboardInset();
   const navigation = useNavigation<any>();
 
   // Themed report-type badge colors (adapt to light/dark instead of fixed hex).
@@ -715,7 +718,14 @@ export default function StaffInboxScreen() {
 
       {/* Create team modal */}
       <Sheet visible={showCreateTeam} transparent animationType="fade" onRequestClose={() => setShowCreateTeam(false)}>
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        {/* The box is anchored to the bottom of the screen, which is where a
+            phone puts its keyboard. `behavior` covers native; the inset covers
+            the browser, where RN emits no keyboard events at all and the field
+            you are typing the team name into ended up behind the keys. */}
+        <KeyboardAvoidingView
+          style={[styles.modalOverlay, { paddingBottom: kbInset }]}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
           <View style={[styles.modalBox, { padding: 20 }]}>
             <Text style={styles.modalTitle}>{tr('staffHub.newTeam')}</Text>
             <Text style={[styles.cardSub, { marginTop: 4, marginBottom: 12 }]}>Create a team, then add sub-teams and invite coaches.</Text>

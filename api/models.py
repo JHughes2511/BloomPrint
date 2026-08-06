@@ -658,6 +658,10 @@ class GameReportClip(Base):
     game_report_id = Column(Integer, ForeignKey("game_reports.id"), nullable=False)
     video_path     = Column(String, nullable=False)
     label          = Column(String, nullable=False)  # 'my_team' or 'opponent'
+    # The team this film is actually of. `label` only says which side, which is
+    # not enough for an opponent-vs-opponent packet where both films are the
+    # opponent — and "Opponent Film" is not what a coach called the team.
+    team_name      = Column(String, nullable=True)
     analysis_text  = Column(Text, nullable=True)
     created_at     = Column(DateTime, default=datetime.utcnow)
 

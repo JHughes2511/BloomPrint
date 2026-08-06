@@ -721,7 +721,8 @@
     "errorTryAgain": "Что-то пошло не так. Попробуйте ещё раз.",
     "couldNotComplete": "Не удалось выполнить это.",
     "couldNotOpenTitle": "Не удалось открыть",
-    "couldNotOpenMsg": "Мне не удалось открыть этот экран автоматически."
+    "couldNotOpenMsg": "Мне не удалось открыть этот экран автоматически.",
+    "noPlayerResolved": "Не понял, о каком игроке речь. Попробуйте имя так, как оно указано в составе."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Не удалось сохранить изменения",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Применить исправление",
     "noPlayersFound": "Игроки не найдены.",
     "myTeamFilm": "Видео моей команды",
-    "opponentFilm": "Видео соперника"
+    "opponentFilm": "Видео соперника",
+    "teamFilm": "Запись: {{team}}"
   },
   "teamGrade": {
     "views": {

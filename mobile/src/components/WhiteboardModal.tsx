@@ -412,7 +412,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     // AI plays are drawn on a HALF court (bigger, easier to read). The half
     // court shows the near half (court-feet y 47..94) with the hoop at the
     // bottom, so we scale to that view and offset y by the half-court line.
-    const fs = scaleForType('half');
+    const fs = scaleForType('half') || 1;   // pre-layout, avoid collapsing to 0
     const HALF_OFFSET = COURT_FT_L - VISIBLE_FT.half; // 94 - 47 = 47
     const X = (xft: number) => (xft + OOB_SIDE_FT) * fs;
     const Y = (yft: number) => (yft - HALF_OFFSET) * fs;
@@ -806,10 +806,24 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   const rotateFit = isLandscape && Platform.OS === 'web';
   const fitW = rotateFit ? avail.h : avail.w;
   const fitH = rotateFit ? avail.w : avail.h;
-  const rawScale = fitW > 20 && fitH > 20
-    ? Math.min((fitW - 20) / PADDED_FT_W, (fitH - 20) / vTotalFt(visFt))
-    : 0;
-  const scale  = Number.isFinite(rawScale) && rawScale > 0 ? rawScale : 0;
+  /**
+   * Pixels per foot for ANY court view, in the orientation showing now.
+   *
+   * This is the single definition of the court's scale, and it has to be: marks
+   * are stored as pixels, so switching views converts them with the ratio
+   * between two of these numbers. A second copy of this that left out the
+   * landscape axis swap computed portrait scales for a rotated board, and
+   * changing Full/Half/¾ while in landscape then threw every X and O off the
+   * floor — a mark at 80 feet came back at 149, well past the far baseline.
+   */
+  const scaleForType = (type: CourtType) => {
+    const vis = VISIBLE_FT[type] ?? VISIBLE_FT.full;
+    const raw = fitW > 20 && fitH > 20
+      ? Math.min((fitW - 20) / PADDED_FT_W, (fitH - 20) / vTotalFt(vis))
+      : 0;
+    return Number.isFinite(raw) && raw > 0 ? raw : 0;
+  };
+  const scale  = scaleForType((board?.court_type as CourtType) ?? 'full');
   const courtW = PADDED_FT_W * scale;
   const courtH = vTotalFt(visFt) * scale;
   const landscapeFit = rotateFit
@@ -1181,11 +1195,6 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
 
   // Scale + court-feet offset for a given court view (court is bottom-anchored,
   // so the top of the canvas corresponds to court-feet = COURT_FT_L - visibleFt).
-  const scaleForType = (type: CourtType) => {
-    const visFt = VISIBLE_FT[type] ?? VISIBLE_FT.full;
-    const raw = Math.min((avail.w - 20) / PADDED_FT_W, (avail.h - 20) / vTotalFt(visFt));
-    return Number.isFinite(raw) && raw > 0 ? raw : 1;
-  };
   // Court-feet at the top edge of the canvas. Shifted up by the top baseline OOB
   // (full court only) so both baselines sit off the wood edge equally.
   const offsetFtForType = (type: CourtType) => {
@@ -1198,6 +1207,9 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
   const remapStrokes = (strokes: Stroke[], from: CourtType, to: CourtType): Stroke[] => {
     if (from === to) return strokes;
     const sA = scaleForType(from), sB = scaleForType(to);
+    // Before the first layout there is no scale to convert between; moving the
+    // marks by a guess is worse than leaving them where they are.
+    if (!sA || !sB) return strokes;
     const offA = offsetFtForType(from), offB = offsetFtForType(to);
     const mapX = (px?: number) => px == null ? px : (px / sA) * sB;
     const mapY = (px?: number) => px == null ? px : ((px / sA + offA) - offB) * sB;

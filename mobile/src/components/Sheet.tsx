@@ -13,6 +13,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Modal, ModalProps, BackHandler, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { registerSheet } from '../web/sheetHistory';
 
 export function useSheetBack(visible: boolean, onClose?: () => void) {
   // Read through a ref so the effect depends on `visible` alone. An inline
@@ -27,22 +28,9 @@ export function useSheetBack(visible: boolean, onClose?: () => void) {
     if (!visible || !closeRef.current) return;
 
     if (Platform.OS === 'web') {
-      if (typeof window === 'undefined') return;
-      // An entry of our own, so back has something to consume that isn't the
-      // page. The state marks it as ours; nothing reads it back, but it makes
-      // the entry legible in devtools.
-      window.history.pushState({ bloomprintSheet: true }, '');
-      let closedByBack = false;
-      const onPop = () => { closedByBack = true; closeRef.current?.(); };
-      window.addEventListener('popstate', onPop);
-      return () => {
-        window.removeEventListener('popstate', onPop);
-        // Closed from the UI instead — an X, a Cancel, a successful save. The
-        // entry we pushed is still there and would swallow the next back
-        // press, so spend it now. The listener is already gone, so this
-        // cannot re-enter.
-        if (!closedByBack) window.history.back();
-      };
+      // One shared manager owns the history entries — see sheetHistory.ts for
+      // why a sheet cannot safely push and pop its own.
+      return registerSheet(() => closeRef.current?.());
     }
 
     // Android's hardware/gesture back.

@@ -32,6 +32,13 @@ function goTo(navigation: any, target: { screen: string; params?: any; label?: s
     navigation.navigate(tab, { screen: root });
     setTimeout(() => navigation.navigate(tab, { screen, params }), 0);
   };
+  // A player screen with no player cannot open anything; it used to fall
+  // through to the plain Roster, which looks like the app ignoring the request.
+  // Say so instead of going somewhere the coach didn't ask for.
+  if (['player', 'player_profile', 'new_eval', 'training'].includes(key) && p.player_id == null) {
+    Alert.alert(i18n.t('copilot.couldNotOpenTitle'), i18n.t('copilot.noPlayerResolved'));
+    return;
+  }
   try {
     switch (key) {
       case 'home':

@@ -721,7 +721,8 @@
     "errorTryAgain": "Algo deu errado. Tente novamente.",
     "couldNotComplete": "Não foi possível concluir isso.",
     "couldNotOpenTitle": "Não foi possível abrir",
-    "couldNotOpenMsg": "Não consegui abrir essa tela automaticamente."
+    "couldNotOpenMsg": "Não consegui abrir essa tela automaticamente.",
+    "noPlayerResolved": "Não consegui identificar o jogador. Tente o nome tal como aparece no seu plantel."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Não foi possível salvar as alterações",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Aplicar correção",
     "noPlayersFound": "Nenhum jogador encontrado.",
     "myTeamFilm": "Vídeo da minha equipa",
-    "opponentFilm": "Vídeo do adversário"
+    "opponentFilm": "Vídeo do adversário",
+    "teamFilm": "Vídeo de {{team}}"
   },
   "teamGrade": {
     "views": {

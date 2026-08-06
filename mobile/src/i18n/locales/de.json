@@ -721,7 +721,8 @@
     "errorTryAgain": "Etwas ist schiefgelaufen. Versuche es erneut.",
     "couldNotComplete": "Das konnte nicht abgeschlossen werden.",
     "couldNotOpenTitle": "Konnte nicht geöffnet werden",
-    "couldNotOpenMsg": "Ich konnte diesen Bildschirm nicht automatisch öffnen."
+    "couldNotOpenMsg": "Ich konnte diesen Bildschirm nicht automatisch öffnen.",
+    "noPlayerResolved": "Ich konnte den Spieler nicht zuordnen. Versuche den Namen so, wie er im Kader steht."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Änderungen konnten nicht gespeichert werden",
@@ -1946,7 +1947,8 @@
     "applyCorrection": "Korrektur anwenden",
     "noPlayersFound": "Keine Spieler gefunden.",
     "myTeamFilm": "Film meines Teams",
-    "opponentFilm": "Gegner-Film"
+    "opponentFilm": "Gegner-Film",
+    "teamFilm": "Video von {{team}}"
   },
   "teamGrade": {
     "views": {
