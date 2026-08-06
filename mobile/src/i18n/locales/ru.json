@@ -2297,7 +2297,9 @@
   "jobProgress": {
     "scanning": "Поиск ключевых моментов в записи…",
     "segment": "Анализ сегмента {{i}} из {{n}}",
-    "synthesizing": "Формирование отчёта"
+    "synthesizing": "Формирование отчёта",
+    "uploading": "Загрузка записи — {{pct}} % ({{sent}} из {{total}})",
+    "uploadingOf": "Загрузка записи {{i}} из {{n}} — {{pct}} % ({{sent}} из {{total}})"
   },
   "notifs": {
     "seasonNew": {

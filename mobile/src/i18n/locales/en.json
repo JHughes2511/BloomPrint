@@ -2297,7 +2297,9 @@
   "jobProgress": {
     "scanning": "Scanning film for key action…",
     "segment": "Analyzing segment {{i}} of {{n}}",
-    "synthesizing": "Synthesizing report"
+    "synthesizing": "Synthesizing report",
+    "uploading": "Uploading film — {{pct}}% ({{sent}} of {{total}})",
+    "uploadingOf": "Uploading film {{i}} of {{n}} — {{pct}}% ({{sent}} of {{total}})"
   },
   "notifs": {
     "seasonNew": {

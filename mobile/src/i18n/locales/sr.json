@@ -2297,7 +2297,9 @@
   "jobProgress": {
     "scanning": "Скенирање снимка у потрази за кључним акцијама…",
     "segment": "Анализа сегмента {{i}} од {{n}}",
-    "synthesizing": "Састављање извештаја"
+    "synthesizing": "Састављање извештаја",
+    "uploading": "Отпремање снимка — {{pct}}% ({{sent}} од {{total}})",
+    "uploadingOf": "Отпремање снимка {{i}} од {{n}} — {{pct}}% ({{sent}} од {{total}})"
   },
   "notifs": {
     "seasonNew": {

@@ -2297,7 +2297,9 @@
   "jobProgress": {
     "scanning": "ვიდეოს სკანირება მთავარი მომენტებისთვის…",
     "segment": "სეგმენტის {{i}} ანალიზი {{n}}-დან",
-    "synthesizing": "ანგარიშის შედგენა"
+    "synthesizing": "ანგარიშის შედგენა",
+    "uploading": "ვიდეო იტვირთება — {{pct}}% ({{sent}} / {{total}})",
+    "uploadingOf": "იტვირთება ვიდეო {{i}} / {{n}} — {{pct}}% ({{sent}} / {{total}})"
   },
   "notifs": {
     "seasonNew": {

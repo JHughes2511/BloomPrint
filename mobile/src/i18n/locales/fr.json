@@ -2297,7 +2297,9 @@
   "jobProgress": {
     "scanning": "Analyse de la vidéo à la recherche des actions clés…",
     "segment": "Analyse du segment {{i}} sur {{n}}",
-    "synthesizing": "Synthèse du rapport"
+    "synthesizing": "Synthèse du rapport",
+    "uploading": "Envoi de la vidéo — {{pct}} % ({{sent}} sur {{total}})",
+    "uploadingOf": "Envoi de la vidéo {{i}} sur {{n}} — {{pct}} % ({{sent}} sur {{total}})"
   },
   "notifs": {
     "seasonNew": {

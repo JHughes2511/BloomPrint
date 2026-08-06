@@ -2297,7 +2297,9 @@
   "jobProgress": {
     "scanning": "Beelden worden gescand op sleutelmomenten…",
     "segment": "Segment {{i}} van {{n}} analyseren",
-    "synthesizing": "Rapport samenstellen"
+    "synthesizing": "Rapport samenstellen",
+    "uploading": "Video uploaden — {{pct}}% ({{sent}} van {{total}})",
+    "uploadingOf": "Video {{i}} van {{n}} uploaden — {{pct}}% ({{sent}} van {{total}})"
   },
   "notifs": {
     "seasonNew": {

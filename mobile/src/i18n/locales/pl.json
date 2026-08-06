@@ -2297,7 +2297,9 @@
   "jobProgress": {
     "scanning": "Skanowanie nagrania w poszukiwaniu kluczowych akcji…",
     "segment": "Analiza fragmentu {{i}} z {{n}}",
-    "synthesizing": "Tworzenie raportu"
+    "synthesizing": "Tworzenie raportu",
+    "uploading": "Przesyłanie nagrania — {{pct}}% ({{sent}} z {{total}})",
+    "uploadingOf": "Przesyłanie nagrania {{i}} z {{n}} — {{pct}}% ({{sent}} z {{total}})"
   },
   "notifs": {
     "seasonNew": {

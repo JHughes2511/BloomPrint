@@ -11,7 +11,7 @@ import Sheet from '../components/Sheet';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { renderReport } from '../utils/renderReport';
-import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
+import { GeneratingOverlay, parseGenProgress, jobProgressLabel, uploadProgressCode } from '../components/GeneratingBasketball';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Print from 'expo-print';
@@ -276,7 +276,13 @@ export default function GameReportBuilderScreen() {
       // memory — that's what throws "Failed to grow buffer" on long film. The
       // breakdown runs as a background job that reports per-segment progress,
       // shown on the same overlay as the player-eval flow.
-      const created = await uploadFileStreamed(`/game-reports/${reportId}/clips`, asset.uri, { label });
+      // Report bytes actually sent. A two-hour film is gigabytes; without this
+      // the coach watches an invented curve for the better part of an hour and
+      // cannot tell an upload in progress from one that has stalled.
+      const created = await uploadFileStreamed(
+        `/game-reports/${reportId}/clips`, asset.uri, { label }, 'video', 'video/mp4',
+        (p) => setClipProgress(uploadProgressCode(p.sent, p.total)),
+      );
       if (created?.job_id) {
         setClipProgress(tr('gameBuilder.analyzingFilm'));
         await evalsAPI.awaitJob(created.job_id, setClipProgress);

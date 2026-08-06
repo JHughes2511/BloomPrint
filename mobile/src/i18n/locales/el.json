@@ -2297,7 +2297,9 @@
   "jobProgress": {
     "scanning": "Σάρωση βίντεο για κρίσιμες φάσεις…",
     "segment": "Ανάλυση τμήματος {{i}} από {{n}}",
-    "synthesizing": "Σύνθεση αναφοράς"
+    "synthesizing": "Σύνθεση αναφοράς",
+    "uploading": "Μεταφόρτωση βίντεο — {{pct}}% ({{sent}} από {{total}})",
+    "uploadingOf": "Μεταφόρτωση βίντεο {{i}} από {{n}} — {{pct}}% ({{sent}} από {{total}})"
   },
   "notifs": {
     "seasonNew": {

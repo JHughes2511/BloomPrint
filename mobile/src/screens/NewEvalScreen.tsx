@@ -18,7 +18,7 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
-import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
+import { GeneratingOverlay, parseGenProgress, jobProgressLabel, uploadProgressCode } from '../components/GeneratingBasketball';
 import ChipRow from '../responsive/ChipRow';
 
 // API output_type keys — labels are resolved at render via i18n.
@@ -152,7 +152,10 @@ export default function NewEvalScreen() {
       const tokens: string[] = [];
       for (let i = 0; i < videos.length; i++) {
         setProgress(tr('newEval.uploadingFilm', { current: i + 1, total: videos.length }));
-        const up = await uploadFileStreamed('/evaluations/upload-video', videos[i].uri, {});
+        const up = await uploadFileStreamed(
+          '/evaluations/upload-video', videos[i].uri, {}, 'video', 'video/mp4',
+          (p) => setProgress(uploadProgressCode(p.sent, p.total, i + 1, videos.length)),
+        );
         if (up?.token) tokens.push(up.token);
       }
       if (tokens.length) fields.video_tokens = tokens.join(',');

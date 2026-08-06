@@ -2297,7 +2297,9 @@
   "jobProgress": {
     "scanning": "Analizando el vídeo en busca de jugadas clave…",
     "segment": "Analizando el segmento {{i}} de {{n}}",
-    "synthesizing": "Sintetizando el informe"
+    "synthesizing": "Sintetizando el informe",
+    "uploading": "Subiendo el vídeo: {{pct}} % ({{sent}} de {{total}})",
+    "uploadingOf": "Subiendo el vídeo {{i}} de {{n}}: {{pct}} % ({{sent}} de {{total}})"
   },
   "notifs": {
     "seasonNew": {

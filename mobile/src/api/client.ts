@@ -20,12 +20,15 @@ export const api = axios.create({ baseURL: BASE_URL, timeout: 120000 });
  * the network stack streams it, so the OOM this function exists to avoid is a
  * React Native problem the browser never had.
  */
+export type UploadProgress = { sent: number; total: number; fraction: number };
+
 export async function uploadFileStreamed(
   path: string,
   fileUri: string,
   parameters: Record<string, string> = {},
   fieldName = 'video',
   mimeType = 'video/mp4',
+  onProgress?: (p: UploadProgress) => void,
 ): Promise<any> {
   const token = await SecureStore.getItemAsync('auth_token');
   const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
@@ -40,26 +43,59 @@ export async function uploadFileStreamed(
     // restructured — at runtime on web this is the browser's FormData.
     (form.append as any)(fieldName, blob, `upload.${mimeType.split('/')[1] || 'mp4'}`);
     for (const [k, v] of Object.entries(parameters)) form.append(k, v);
-    // Content-Type is deliberately unset: the browser must add the multipart
-    // boundary itself, and setting it by hand produces a body the server can't parse.
-    const res = await fetch(`${BASE_URL}${path}`, { method: 'POST', body: form, headers });
-    const body = await res.text();
-    if (!res.ok) {
-      let detail = `Upload failed (${res.status})`;
-      try { detail = JSON.parse(body || '{}').detail || detail; } catch {}
-      throw new Error(detail);
-    }
-    try { return JSON.parse(body || '{}'); } catch { return {}; }
+
+    // XHR rather than fetch, for one reason: fetch cannot report how much of a
+    // request body has gone out. A game film is gigabytes and can take an hour
+    // on a home connection, and with no progress the coach has nothing to tell
+    // uploading apart from stalled. XMLHttpRequest.upload.onprogress is still
+    // the only browser API that answers that question.
+    return await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${BASE_URL}${path}`);
+      // Content-Type is deliberately unset: the browser must add the multipart
+      // boundary itself, and setting it by hand produces a body the server can't parse.
+      for (const [k, v] of Object.entries(headers)) xhr.setRequestHeader(k, v);
+      xhr.upload.onprogress = (e) => {
+        if (!onProgress || !e.lengthComputable) return;
+        onProgress({ sent: e.loaded, total: e.total, fraction: e.total ? e.loaded / e.total : 0 });
+      };
+      xhr.onload = () => {
+        const body = xhr.responseText || '';
+        if (xhr.status >= 400) {
+          let detail = `Upload failed (${xhr.status})`;
+          try { detail = JSON.parse(body || '{}').detail || detail; } catch {}
+          return reject(new Error(detail));
+        }
+        try { resolve(JSON.parse(body || '{}')); } catch { resolve({}); }
+      };
+      xhr.onerror = () => reject(new Error('Upload failed — the connection dropped.'));
+      xhr.ontimeout = () => reject(new Error('Upload timed out.'));
+      xhr.send(form as any);
+    });
   }
 
-  const res = await FileSystem.uploadAsync(`${BASE_URL}${path}`, fileUri, {
-    httpMethod: 'POST',
+  const options = {
+    httpMethod: 'POST' as const,
     uploadType: FileSystem.FileSystemUploadType.MULTIPART,
     fieldName,
     mimeType,
     parameters,
     headers,
-  });
+  };
+
+  // createUploadTask is uploadAsync with a progress callback. Same transport,
+  // same streaming from disk; the only difference is that it says how far it
+  // has got, which on an hour-long upload is the difference between waiting
+  // and wondering.
+  const res = onProgress
+    ? await FileSystem.createUploadTask(`${BASE_URL}${path}`, fileUri, options, (p: any) => {
+        const total = p?.totalBytesExpectedToSend ?? 0;
+        const sent = p?.totalBytesSent ?? 0;
+        onProgress({ sent, total, fraction: total ? sent / total : 0 });
+      }).uploadAsync()
+    : await FileSystem.uploadAsync(`${BASE_URL}${path}`, fileUri, options);
+
+  if (!res) throw new Error('Upload failed.');
   if (res.status >= 400) {
     let detail = `Upload failed (${res.status})`;
     try { detail = JSON.parse(res.body || '{}').detail || detail; } catch {}

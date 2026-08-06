@@ -2297,7 +2297,9 @@
   "jobProgress": {
     "scanning": "Ieškoma svarbiausių epizodų įraše…",
     "segment": "Analizuojamas {{i}} segmentas iš {{n}}",
-    "synthesizing": "Rengiama ataskaita"
+    "synthesizing": "Rengiama ataskaita",
+    "uploading": "Įrašas įkeliamas — {{pct}} % ({{sent}} iš {{total}})",
+    "uploadingOf": "Įkeliamas {{i}} įrašas iš {{n}} — {{pct}} % ({{sent}} iš {{total}})"
   },
   "notifs": {
     "seasonNew": {

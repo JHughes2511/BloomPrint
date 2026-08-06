@@ -2297,7 +2297,9 @@
   "jobProgress": {
     "scanning": "סורק את הווידאו אחר רגעי מפתח…",
     "segment": "מנתח קטע {{i}} מתוך {{n}}",
-    "synthesizing": "מרכיב את הדוח"
+    "synthesizing": "מרכיב את הדוח",
+    "uploading": "מעלה את הווידאו — {{pct}}% ({{sent}} מתוך {{total}})",
+    "uploadingOf": "מעלה וידאו {{i}} מתוך {{n}} — {{pct}}% ({{sent}} מתוך {{total}})"
   },
   "notifs": {
     "seasonNew": {

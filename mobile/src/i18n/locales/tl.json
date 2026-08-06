@@ -2297,7 +2297,9 @@
   "jobProgress": {
     "scanning": "Sinusuri ang film para sa mahahalagang aksyon…",
     "segment": "Sinusuri ang segment {{i}} ng {{n}}",
-    "synthesizing": "Binubuo ang ulat"
+    "synthesizing": "Binubuo ang ulat",
+    "uploading": "Ina-upload ang film — {{pct}}% ({{sent}} sa {{total}})",
+    "uploadingOf": "Ina-upload ang film {{i}} sa {{n}} — {{pct}}% ({{sent}} sa {{total}})"
   },
   "notifs": {
     "seasonNew": {

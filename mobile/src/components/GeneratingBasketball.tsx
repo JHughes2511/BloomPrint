@@ -4,10 +4,34 @@ import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 
+/** Human file size, one decimal only where it reads better ("1.4 GB", "820 MB"). */
+export function formatBytes(n: number): string {
+  if (!n || n < 0) return '0 MB';
+  const gb = n / 1024 ** 3;
+  if (gb >= 1) return `${gb.toFixed(1)} GB`;
+  return `${Math.round(n / 1024 ** 2)} MB`;
+}
+
+/**
+ * Encode upload progress into the same label channel the backend job codes use,
+ * so a screen can hand one string to both the bar and the caption. `i`/`n` are
+ * for flows that upload several films in a row.
+ */
+export function uploadProgressCode(sent: number, total: number, i?: number, n?: number): string {
+  const pct = total ? Math.round((sent / total) * 100) : 0;
+  const base = `job:upload:${pct}:${formatBytes(sent)}:${formatBytes(total)}`;
+  return i && n && n > 1 ? `${base}:${i}:${n}` : base;
+}
+
 /** Derive a real 0-100 progress from a backend job progress label, or undefined
  *  for single-call generations (which then use the estimated time curve). */
 export function parseGenProgress(label?: string): number | undefined {
   if (!label) return undefined;
+  // The upload runs before any job exists, and on a multi-gigabyte film it is
+  // the longest phase of the whole flow. Its own 0-100 is a real measurement —
+  // bytes actually put on the wire — so it drives the bar directly.
+  const up = label.match(/^job:upload:(\d+):/);
+  if (up) return Math.min(100, parseInt(up[1], 10));
   // Current backend codes ("job:segment:3:8"), then the older English prose so
   // jobs already in flight during an update keep reporting real progress.
   const c = label.match(/^job:segment:(\d+):(\d+)$/);
@@ -23,6 +47,13 @@ export function parseGenProgress(label?: string): number | undefined {
  *  Anything that isn't a known code is passed through unchanged. */
 export function jobProgressLabel(label: string | undefined, tr: (k: string, o?: any) => string): string {
   if (!label) return '';
+  const up = label.match(/^job:upload:(\d+):([^:]*):([^:]*)(?::(\d+):(\d+))?$/);
+  if (up) {
+    const o = { pct: up[1], sent: up[2], total: up[3] };
+    return up[4]
+      ? tr('jobProgress.uploadingOf', { ...o, i: up[4], n: up[5] })
+      : tr('jobProgress.uploading', o);
+  }
   if (label === 'job:scanning') return tr('jobProgress.scanning');
   if (label === 'job:synthesizing') return tr('jobProgress.synthesizing');
   const c = label.match(/^job:segment:(\d+):(\d+)$/);
@@ -76,14 +107,21 @@ function GeneratingBar({
 
   // Estimated curve when there's no real signal: quick to ~55%, then a steady
   // crawl toward 99% (faster than before) so the number never appears frozen.
+  //
+  // Keyed on whether a real signal exists rather than on mount, because a film
+  // runs in two phases: the upload measures itself, the breakdown that follows
+  // does not. Without this the bar would freeze at the 100% the upload left
+  // behind while the caption said the analysis was under way. Losing the real
+  // signal starts a fresh bar for the new phase.
+  const hasReal = realProgress != null;
   useEffect(() => {
-    if (realProgress == null && !done) {
-      Animated.sequence([
-        Animated.timing(fill, { toValue: 0.55, duration: 3500, easing: Easing.out(Easing.quad), useNativeDriver: false }),
-        Animated.timing(fill, { toValue: 0.99, duration: 42000, easing: Easing.linear, useNativeDriver: false }),
-      ]).start();
-    }
-  }, []);
+    if (hasReal || done) return;
+    fill.setValue(0);
+    Animated.sequence([
+      Animated.timing(fill, { toValue: 0.55, duration: 3500, easing: Easing.out(Easing.quad), useNativeDriver: false }),
+      Animated.timing(fill, { toValue: 0.99, duration: 42000, easing: Easing.linear, useNativeDriver: false }),
+    ]).start();
+  }, [hasReal, done]);
 
   // Real progress wins.
   useEffect(() => {
