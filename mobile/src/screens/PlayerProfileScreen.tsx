@@ -35,7 +35,7 @@ import PageContainer from '../responsive/PageContainer';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 
 import { COMPETITION_LEVELS as CANON_LEVELS } from '../constants/levels';
-import { sheetCap, desktopOnly, webOnly, useSheetScrollHeight } from '../responsive/modalSizes';
+import { sheetCap, desktopOnly, webOnly, useSheetScrollHeight, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
 import ActionGrid from '../responsive/ActionGrid';
 const COMPETITION_LEVELS = [...CANON_LEVELS];
 
@@ -675,10 +675,11 @@ export default function PlayerProfileScreen() {
               onPress={() => setTrainingModalItem(ts)}
             >
               <View style={{ flex: 1 }}>
-                {/* Subject first: three programs for the same player were
-                    previously distinguishable only by date, and the preview
-                    line underneath was whatever the text opened with — usually
-                    the literal word "BRIEF:". */}
+                {/* Title and date, nothing else. The preview line under them
+                    tried to strip the report's own opening header and never
+                    quite managed it, so what showed was "— BLOOM (6'2 GUARD):"
+                    followed by an ellipsis: the name of the player whose page
+                    you are already on, and no content. */}
                 <Text style={styles.evalType} numberOfLines={1}>
                   {ts.title || tr('reportTypes.training_program')}
                 </Text>
@@ -687,16 +688,6 @@ export default function PlayerProfileScreen() {
                     ? `${tr('reportTypes.training_program')} · ${new Date(ts.created_at).toLocaleDateString()}`
                     : new Date(ts.created_at).toLocaleDateString()}
                 </Text>
-                {ts.program_text ? (
-                  <Text style={{ color: t.muted, fontSize: 11, marginTop: 4 }} numberOfLines={2}>
-                    {ts.program_text
-                      .replace(/\*\*/g, '')
-                      // Drop leading section headers so the preview shows content
-                      .replace(/^\s*(?:#{1,6}\s*)?[A-Z][A-Z /&'()-]{2,}:?\s*/m, '')
-                      .trim()
-                      .slice(0, 120)}
-                  </Text>
-                ) : null}
               </View>
               <Ionicons name="chevron-forward" size={16} color={t.line} />
             </TouchableOpacity>
@@ -754,7 +745,7 @@ export default function PlayerProfileScreen() {
         <Text style={styles.trainingFeedbackLabel}>{tr('playerProfile.regenTrainingFeedback')}</Text>
         <VoiceTextInput
           style={styles.trainingFeedbackInput}
-          placeholder="e.g. Focus more on 3-point shooting and off-ball movement..."
+          placeholder={tr('playerProfile.trainingFeedbackPlaceholder')}
           placeholderTextColor={t.muted2}
           value={trainingFeedback}
           onChangeText={setTrainingFeedback}
@@ -1139,7 +1130,7 @@ export default function PlayerProfileScreen() {
       {/* Training detail modal — full-screen so all text is readable */}
       <Sheet visible={!!trainingModalItem} transparent animationType="slide" onRequestClose={() => setTrainingModalItem(null)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 60, ...sheetCap(560) }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, flex: 1, marginTop: 60, ...sheetCap(REPORT_MODAL_WIDTH) }}>
             {/* Compact header — max ~50px tall */}
             <View style={{
               flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

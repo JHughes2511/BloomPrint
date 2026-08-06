@@ -884,6 +884,7 @@
     "synthesizingOverlay": "Synthesizing the summary…",
     "generateTraining": "Generate Training Program",
     "regenTrainingFeedback": "Generate Training with Feedback",
+    "trainingFeedbackPlaceholder": "e.g. Focus more on 3-point shooting and off-ball movement…",
     "latest": "LATEST",
     "playerProfile": "Player Profile",
     "checklistFeedback": "Feedback to adjust the player's checklist version...",

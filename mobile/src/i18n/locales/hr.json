@@ -884,6 +884,7 @@
     "synthesizingOverlay": "Sintetiziram sažetak…",
     "generateTraining": "Generiraj program treninga",
     "regenTrainingFeedback": "Generiraj trening s povratnim informacijama",
+    "trainingFeedbackPlaceholder": "npr. Više šuteva za tri i kretanja bez lopte…",
     "latest": "NAJNOVIJE",
     "playerProfile": "Profil igrača",
     "checklistFeedback": "Povratna informacija za prilagodbu verzije igračeve liste...",

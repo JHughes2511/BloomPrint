@@ -35,7 +35,7 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
-import { useSheetScrollHeight, sheetCap, desktopOnly, CONTENT_MAX_WIDTH } from '../responsive/modalSizes';
+import { useSheetScrollHeight, sheetCap, desktopOnly, CONTENT_MAX_WIDTH, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
 import { useGridColumns } from '../responsive/useGridColumns';
 
 // Highest competition level → lowest.
@@ -3086,7 +3086,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       {/* Share game with staff modal */}
       <Sheet visible={shareGameModalVisible} animationType="slide" transparent onRequestClose={() => setShareGameModalVisible(false)}>
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={{ backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(CONTENT_MAX_WIDTH) }}>
+          <View style={{ backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(REPORT_MODAL_WIDTH) }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }}>{tr('teamGrade.shareWithStaff')}</Text>
               <TouchableOpacity onPress={() => setShareGameModalVisible(false)}>

@@ -884,6 +884,7 @@
     "synthesizingOverlay": "Tworzenie podsumowania…",
     "generateTraining": "Wygeneruj program treningowy",
     "regenTrainingFeedback": "Generuj trening z uwagami",
+    "trainingFeedbackPlaceholder": "np. Więcej rzutów za trzy i gry bez piłki…",
     "latest": "NAJNOWSZE",
     "playerProfile": "Profil zawodnika",
     "checklistFeedback": "Uwagi do korekty wersji listy kontrolnej zawodnika...",

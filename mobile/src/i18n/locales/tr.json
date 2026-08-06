@@ -884,6 +884,7 @@
     "synthesizingOverlay": "Özet sentezleniyor…",
     "generateTraining": "Antrenman programı oluştur",
     "regenTrainingFeedback": "Geri bildirimle antrenman oluştur",
+    "trainingFeedbackPlaceholder": "örn. Daha çok üçlük ve topsuz hareket…",
     "latest": "EN SON",
     "playerProfile": "Oyuncu profili",
     "checklistFeedback": "Oyuncunun kontrol listesi sürümünü ayarlamak için geri bildirim...",

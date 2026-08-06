@@ -884,6 +884,7 @@
     "synthesizingOverlay": "Sammanställer sammanfattningen…",
     "generateTraining": "Skapa träningsprogram",
     "regenTrainingFeedback": "Skapa träning med feedback",
+    "trainingFeedbackPlaceholder": "t.ex. Mer trepoängsskott och rörelse utan boll…",
     "latest": "SENASTE",
     "playerProfile": "Spelarprofil",
     "checklistFeedback": "Feedback för att justera spelarens checklisteversion...",

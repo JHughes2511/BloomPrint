@@ -884,6 +884,7 @@
     "synthesizingOverlay": "Синтезуємо підсумок…",
     "generateTraining": "Створити тренувальну програму",
     "regenTrainingFeedback": "Створити тренування з відгуком",
+    "trainingFeedbackPlaceholder": "напр. Більше триочкових і руху без м’яча…",
     "latest": "ОСТАННЄ",
     "playerProfile": "Профіль гравця",
     "checklistFeedback": "Відгук для коригування версії чек-листа гравця...",

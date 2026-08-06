@@ -21,6 +21,20 @@ export const DIALOG_MAX_WIDTH = 560;
 /** Reports, film analysis, game detail — anything you read rather than answer. */
 export const CONTENT_MAX_WIDTH = 1100;
 
+/**
+ * One width for every popup that shows a report.
+ *
+ * These were 560, 820 and 1100 depending on which screen opened them, so the
+ * same training program was three different shapes depending on where you
+ * tapped it, and the line length changed with it. 820 is what Ask BloomPrint
+ * already used — wide enough to stop feeling like a phone sheet on a monitor,
+ * short enough that the eye still finds the start of the next line.
+ *
+ * Forms and pickers keep their own narrower cap: a two-field sheet stretched
+ * to 820 is mostly empty.
+ */
+export const REPORT_MODAL_WIDTH = 820;
+
 /** Content modals also want the vertical space; they're a workspace, not a card. */
 export const CONTENT_MAX_HEIGHT = '90%' as const;
 

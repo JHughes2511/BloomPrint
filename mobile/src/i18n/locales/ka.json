@@ -884,6 +884,7 @@
     "synthesizingOverlay": "მიმდინარეობს შეჯამების სინთეზი…",
     "generateTraining": "სავარჯიშო პროგრამის შექმნა",
     "regenTrainingFeedback": "ვარჯიშის შექმნა უკუკავშირით",
+    "trainingFeedbackPlaceholder": "მაგ. მეტი სამქულიანი და მოძრაობა ბურთის გარეშე…",
     "latest": "უახლესი",
     "playerProfile": "მოთამაშის პროფილი",
     "checklistFeedback": "უკუკავშირი მოთამაშის სიის ვერსიის დასაზუსტებლად...",

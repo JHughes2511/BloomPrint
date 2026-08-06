@@ -884,6 +884,7 @@
     "synthesizingOverlay": "Sintesi del riepilogo…",
     "generateTraining": "Genera programma di allenamento",
     "regenTrainingFeedback": "Genera Allenamento con Feedback",
+    "trainingFeedbackPlaceholder": "es. Più tiro da tre e movimento senza palla…",
     "latest": "ULTIMO",
     "playerProfile": "Profilo giocatore",
     "checklistFeedback": "Feedback per modificare la versione della checklist del giocatore...",

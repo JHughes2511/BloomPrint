@@ -884,6 +884,7 @@
     "synthesizingOverlay": "正在综合生成总结…",
     "generateTraining": "生成训练计划",
     "regenTrainingFeedback": "结合反馈生成训练",
+    "trainingFeedbackPlaceholder": "例如：多练三分球和无球跑动…",
     "latest": "最新",
     "playerProfile": "球员资料",
     "checklistFeedback": "用于调整球员清单版本的反馈...",

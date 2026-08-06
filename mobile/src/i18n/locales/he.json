@@ -884,6 +884,7 @@
     "synthesizingOverlay": "מרכיב את הסיכום…",
     "generateTraining": "צור תוכנית אימונים",
     "regenTrainingFeedback": "צור אימון עם משוב",
+    "trainingFeedbackPlaceholder": "לדוגמה: יותר קליעות לשלוש ותנועה בלי הכדור…",
     "latest": "האחרון",
     "playerProfile": "פרופיל שחקן",
     "checklistFeedback": "משוב לעדכון גרסת הצ'קליסט של השחקן...",

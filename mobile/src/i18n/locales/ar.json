@@ -884,6 +884,7 @@
     "synthesizingOverlay": "جارٍ تركيب الملخص…",
     "generateTraining": "إنشاء برنامج تدريبي",
     "regenTrainingFeedback": "إنشاء تدريب مع ملاحظات",
+    "trainingFeedbackPlaceholder": "مثال: تركيز أكبر على الثلاثيات والتحرك بدون كرة…",
     "latest": "الأحدث",
     "playerProfile": "ملف اللاعب",
     "checklistFeedback": "ملاحظات لتعديل نسخة قائمة اللاعب...",

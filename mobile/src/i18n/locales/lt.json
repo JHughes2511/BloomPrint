@@ -884,6 +884,7 @@
     "synthesizingOverlay": "Sudaroma santrauka…",
     "generateTraining": "Sukurti treniruočių programą",
     "regenTrainingFeedback": "Sukurti treniruotę su atsiliepimu",
+    "trainingFeedbackPlaceholder": "pvz. Daugiau tritaškių ir judėjimo be kamuolio…",
     "latest": "NAUJAUSIA",
     "playerProfile": "Žaidėjo profilis",
     "checklistFeedback": "Atsiliepimas žaidėjo kontrolinio sąrašo versijai pakoreguoti...",

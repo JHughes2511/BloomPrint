@@ -884,6 +884,7 @@
     "synthesizingOverlay": "요약을 정리하는 중…",
     "generateTraining": "훈련 프로그램 생성",
     "regenTrainingFeedback": "피드백으로 훈련 생성",
+    "trainingFeedbackPlaceholder": "예: 3점슛과 오프볼 움직임에 더 집중…",
     "latest": "최신",
     "playerProfile": "선수 프로필",
     "checklistFeedback": "선수 체크리스트 버전을 조정하기 위한 피드백...",

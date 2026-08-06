@@ -20,7 +20,7 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
-import { sheetCap, desktopOnly } from '../responsive/modalSizes';
+import { sheetCap, desktopOnly, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
 
 // Maps staff-share report_type keys to i18n label keys.
 const REPORT_TYPE_LABEL_KEYS: Record<string, string> = {
@@ -875,7 +875,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   teamChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600], flexShrink: 1 },
   teamChipTextActive: { color: t.ctaText },
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, ...sheetCap(560)},
+  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, ...sheetCap(REPORT_MODAL_WIDTH)},
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
   modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   modalSub: { color: t.muted, fontSize: 12, marginTop: 2 },

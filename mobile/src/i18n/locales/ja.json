@@ -884,6 +884,7 @@
     "synthesizingOverlay": "要約を統合中…",
     "generateTraining": "トレーニングプログラムを作成",
     "regenTrainingFeedback": "フィードバックでトレーニングを作成",
+    "trainingFeedbackPlaceholder": "例：3ポイントとオフボールの動きを重点的に…",
     "latest": "最新",
     "playerProfile": "選手プロフィール",
     "checklistFeedback": "選手のチェックリスト版を調整するためのフィードバック...",

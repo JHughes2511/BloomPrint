@@ -31,7 +31,7 @@ import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
 import ChipRow from '../responsive/ChipRow';
-import { sheetCap } from '../responsive/modalSizes';
+import { sheetCap, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
 
 // Labels come from the `reportTypes.*` translation keys at render time.
 // Quick Report is roster-scoped, so training here is TEAM training. It was
@@ -953,7 +953,7 @@ export default function TeamReportScreen() {
       {/* Previous Report Detail Modal */}
       <Sheet visible={!!selectedPrevReport} animationType="slide" transparent onRequestClose={() => setSelectedPrevReport(null)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60, ...sheetCap(560) }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60, ...sheetCap(REPORT_MODAL_WIDTH) }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
                 <Text style={{ color: t.ink, fontSize: 18, fontFamily: fonts[800] }} numberOfLines={1}>

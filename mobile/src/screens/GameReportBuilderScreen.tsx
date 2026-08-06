@@ -29,7 +29,7 @@ import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import { mdToHtml, safeFileName, wrapPrintDocument } from '../utils/mdToHtml';
 import { useAuth } from '../context/AuthContext';
-import { CONTENT_MAX_WIDTH, sheetCap } from '../responsive/modalSizes';
+import { CONTENT_MAX_WIDTH, sheetCap, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
 import ChipRow from '../responsive/ChipRow';
 import { useSheetScrollHeight } from '../responsive/modalSizes';
 
@@ -1125,7 +1125,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   correctionBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
   // Modals
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
-  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(CONTENT_MAX_WIDTH)},
+  modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '88%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(REPORT_MODAL_WIDTH)},
   modalHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },
   modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800], flex: 1 },
   searchInput: { backgroundColor: t.chip, borderRadius: 14, padding: 14, color: t.ink, fontSize: 15, borderWidth: 1, borderColor: t.line },
