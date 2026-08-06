@@ -268,6 +268,47 @@ def all_report_versions(
     return out
 
 
+# Registered before the "/{report_id}" routes on purpose. FastAPI matches in
+# registration order, so with this below them the path "/game-reports/videos"
+# was matched by "/game-reports/{report_id}" first, "videos" was parsed as an
+# int, and the film catalog answered 422 to every request it ever made.
+@router.get("/videos")
+def game_report_videos(
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Video catalog for the coach's game report packets — every film clip, with
+    the report it's attached to and a stream url, like the player video catalog."""
+    from ..storage import playback_url, exists
+    reports = db.query(models.GameReport).filter_by(coach_id=coach.id).all()
+    by_id = {r.id: r for r in reports}
+    clips = (
+        db.query(models.GameReportClip)
+        .filter(models.GameReportClip.game_report_id.in_(list(by_id.keys()) or [0]))
+        .order_by(models.GameReportClip.id.desc())
+        .all()
+    )
+    out = []
+    for c in clips:
+        if not c.video_path or not exists(c.video_path):
+            continue
+        gr = by_id.get(c.game_report_id)
+        title = (gr.title if gr and gr.title else None) or (
+            (f"{gr.my_team.name if gr and gr.my_team else 'My Team'} vs "
+             f"{(gr.opponent_team.name if gr and gr.opponent_team else (gr.opponent_name if gr else None)) or 'Opponent'}")
+            if gr else "Game Report"
+        )
+        out.append({
+            "id": c.id,
+            "report_id": c.game_report_id,
+            "report_title": title,
+            "label": "My Team" if c.label == "my_team" else "Opponent",
+            "created_at": c.created_at,
+            "stream_url": playback_url(c.video_path, f"/game-reports/{c.game_report_id}/clips/{c.id}/stream"),
+        })
+    return out
+
+
 @router.get("/{report_id}/versions")
 def report_versions(
     report_id: int,
@@ -400,43 +441,6 @@ def delete_clip(
     db.delete(clip)
     db.commit()
     return {"ok": True}
-
-
-@router.get("/videos")
-def game_report_videos(
-    db: Session = Depends(get_db),
-    coach: models.Coach = Depends(get_current_coach),
-):
-    """Video catalog for the coach's game report packets — every film clip, with
-    the report it's attached to and a stream url, like the player video catalog."""
-    from ..storage import playback_url, exists
-    reports = db.query(models.GameReport).filter_by(coach_id=coach.id).all()
-    by_id = {r.id: r for r in reports}
-    clips = (
-        db.query(models.GameReportClip)
-        .filter(models.GameReportClip.game_report_id.in_(list(by_id.keys()) or [0]))
-        .order_by(models.GameReportClip.id.desc())
-        .all()
-    )
-    out = []
-    for c in clips:
-        if not c.video_path or not exists(c.video_path):
-            continue
-        gr = by_id.get(c.game_report_id)
-        title = (gr.title if gr and gr.title else None) or (
-            (f"{gr.my_team.name if gr and gr.my_team else 'My Team'} vs "
-             f"{(gr.opponent_team.name if gr and gr.opponent_team else (gr.opponent_name if gr else None)) or 'Opponent'}")
-            if gr else "Game Report"
-        )
-        out.append({
-            "id": c.id,
-            "report_id": c.game_report_id,
-            "report_title": title,
-            "label": "My Team" if c.label == "my_team" else "Opponent",
-            "created_at": c.created_at,
-            "stream_url": playback_url(c.video_path, f"/game-reports/{c.game_report_id}/clips/{c.id}/stream"),
-        })
-    return out
 
 
 @router.get("/{report_id}/clips/{clip_id}/stream")

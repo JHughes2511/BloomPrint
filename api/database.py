@@ -113,6 +113,7 @@ def init_db():
         _relax_not_null()
 
     # Backend-independent: operates on rows, not schema.
+    _fail_orphaned_jobs()
     _reparse_eval_sections()
     _backfill_training_titles()
     _claim_linked_players()
@@ -1135,3 +1136,36 @@ def _run_migrations():
                     conn.commit()
         except Exception as exc:
             log.warning("Could not apply additive columns on SQLite: %s", exc)
+
+
+def _fail_orphaned_jobs():
+    """Close out jobs whose process is gone.
+
+    Film analysis runs in a background thread and can take twenty minutes. If
+    the container stops in the middle — a deploy, a restart, the platform
+    reclaiming it — the thread dies with it and the row is left saying
+    "processing" forever. The app polls that row, so the coach watches a
+    progress bar that will never move again and has no way to tell it apart
+    from work still going on.
+
+    Any job still marked processing when the server starts belongs to a
+    process that no longer exists: this one has only just begun. Mark them
+    errored with a reason a coach can act on.
+    """
+    try:
+        from sqlalchemy.orm import Session as _Session
+        from . import models
+
+        with _Session(engine) as sess:
+            stale = sess.query(models.GenerationJob).filter_by(status="processing").all()
+            for job in stale:
+                job.status = "error"
+                job.error = (
+                    "The server restarted while this was running, so the analysis "
+                    "stopped part-way. Nothing was saved — run it again."
+                )
+            if stale:
+                sess.commit()
+                log.info("Closed %d job(s) orphaned by a restart", len(stale))
+    except Exception as exc:
+        log.warning("Could not close orphaned jobs: %s", exc)
