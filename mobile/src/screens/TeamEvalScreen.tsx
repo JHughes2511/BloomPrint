@@ -1150,7 +1150,18 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </ScrollView>
           </View>
           {isWide && activeView === 'games' && (
-            <TouchableOpacity style={[s.newGameBtn, { marginBottom: 0, marginLeft: 16 }]} onPress={() => setShowNewGame(true)}>
+            <TouchableOpacity
+              style={[
+                s.newGameBtn,
+                // alignSelf beats the row's alignItems, and the shared style
+                // sets flex-start for the other two places this button is
+                // used — which pinned it to the top of the header, level with
+                // the title, however the row was aligned. Stated here so it
+                // sits on the chip row's line.
+                { marginBottom: 0, marginLeft: 16, alignSelf: 'flex-end' },
+              ]}
+              onPress={() => setShowNewGame(true)}
+            >
               <Ionicons name="add-circle-outline" size={18} color={t.ctaText} />
               <Text style={s.newGameBtnText}>{tr('teamGrade.newGame')}</Text>
             </TouchableOpacity>
