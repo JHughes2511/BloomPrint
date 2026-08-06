@@ -175,7 +175,11 @@ export default function NewEvalScreen() {
 
   return (
     <ScreenBackground>
-    <PageContainer maxWidth={900}>
+    {/* Same shell as the game packet page: full pane, no container gutter, a
+        20 inset of this screen's own. It sat in a 900px centred column, so
+        opening a new evaluation from a page that runs to the pane edge
+        narrowed everything by a third and re-centred it. */}
+    <PageContainer padded={false} maxWidth={1280}>
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={undefined}
@@ -202,7 +206,7 @@ export default function NewEvalScreen() {
       <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
         {tr('newEval.reportTypeHint')}
       </Text>
-      <ChipRow style={{ marginBottom: 20 }} bleed={16}>
+      <ChipRow style={{ marginBottom: 20 }} bleed={20}>
         {OUTPUT_TYPES.map(key => {
           const selected = outputType.split(',').filter(Boolean);
           const isOn = selected.includes(key);
@@ -239,7 +243,7 @@ export default function NewEvalScreen() {
           ) : (
             <>
               {/* Season filter */}
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8, ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
                 {seasonYears.map(y => (
                   <TouchableOpacity key={y} style={[styles.typeChip, seasonYear === y && styles.typeChipActive]} onPress={() => setSeasonYear(y)}>
                     <Text style={[styles.typeLabel, seasonYear === y && styles.typeLabelActive]}>{y === 'all' ? tr('newEval.allSeasons') : y}</Text>
@@ -247,7 +251,7 @@ export default function NewEvalScreen() {
                 ))}
               </ScrollView>
               {/* Season type filter */}
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10, ...bleedRow(16) }} contentContainerStyle={bleedContent(16, 0)}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
                 {seasonPhases.map(p => (
                   <TouchableOpacity key={p} style={[styles.typeChip, seasonPhase === p && styles.typeChipActive]} onPress={() => setSeasonPhase(p)}>
                     <Text style={[styles.typeLabel, seasonPhase === p && styles.typeLabelActive]}>{p === 'all' ? tr('newEval.allTypes') : p.charAt(0).toUpperCase() + p.slice(1)}</Text>
@@ -432,7 +436,7 @@ export default function NewEvalScreen() {
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   // 16 across and the title inset the other tab screens use, so moving into
   // this screen does not shift everything sideways and down.
-  container: { flex: 1, paddingHorizontal: 16, paddingBottom: 20, paddingTop: titleTopPad(56) },
+  container: { flex: 1, paddingHorizontal: 20, paddingBottom: 20, paddingTop: titleTopPad(56) },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 28 },
   title: { color: t.ink, fontSize: 30, fontFamily: fonts[800], letterSpacing: -0.6 },
   sub: { color: t.muted, fontSize: 12, marginTop: 2 },
