@@ -5,13 +5,21 @@
  * is a no-op on iOS and Android.
  */
 import { Alert, Platform } from 'react-native';
+import { pushAlert } from './alertQueue';
 
 /**
  * react-native-web ships `class Alert { static alert() {} }` — a function that
  * does nothing at all. Every error message, every delete confirmation, every
- * "are you sure" in this app goes through Alert.alert, so on web all 291 of
+ * "are you sure" in this app goes through Alert.alert, so on web all 299 of
  * them were silent: a failed login looked like a dead button, and a destructive
  * confirm looked like nothing happened.
+ *
+ * This used to hand them to window.alert and window.confirm. That worked, at
+ * two costs a browser will not let you avoid: it labels its dialogs with the
+ * site's own name — "bloomprint.org says" above "Remove Brady Smith from the
+ * roster?" — and window.confirm offers exactly two answers, so a three-button
+ * alert lost one without saying so. Alerts are queued for AppAlert to draw
+ * instead; see src/components/AppAlert.tsx.
  *
  * Patching Alert itself rather than introducing a wrapper means every existing
  * call site is fixed without touching it, and native is untouched.
@@ -24,26 +32,7 @@ function installAlert() {
     message?: string,
     buttons?: Btn[],
     _options?: unknown,
-  ) => {
-    const body = [title, message].filter(Boolean).join('\n\n');
-    const list = buttons ?? [];
-
-    // No choice to make — just tell them.
-    if (list.length <= 1) {
-      window.alert(body);
-      list[0]?.onPress?.();
-      return;
-    }
-
-    // A choice. The cancel button is whichever is marked as such (RN convention
-    // puts it first); the action is the last one that isn't cancel, which is
-    // where RN puts the confirm on both platforms.
-    const cancel = list.find(b => b.style === 'cancel');
-    const action = [...list].reverse().find(b => b.style !== 'cancel') ?? list[list.length - 1];
-
-    if (window.confirm(body)) action?.onPress?.();
-    else cancel?.onPress?.();
-  };
+  ) => pushAlert(title, message, buttons);
 }
 
 /**

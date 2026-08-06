@@ -95,6 +95,7 @@ import {
   HankenGrotesk_700Bold, HankenGrotesk_800ExtraBold, HankenGrotesk_900Black,
 } from '@expo-google-fonts/hanken-grotesk';
 import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
+import AppAlert from './src/components/AppAlert';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -511,6 +512,11 @@ export default function App() {
           <ErrorBoundary>
             <Root />
           </ErrorBoundary>
+          {/* Outside the boundary's child but inside the theme: an alert has to
+              be able to appear over any screen, including one that has just
+              failed. Renders nothing on iOS and Android, which have a real
+              Alert of their own. */}
+          <AppAlert />
         </TeamProvider>
         </PlayerAuthProvider>
       </AuthProvider>
