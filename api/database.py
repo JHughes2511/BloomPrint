@@ -236,6 +236,9 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     ("staff_shared_reports", "request_status", "VARCHAR"),
     ("feedback", "images", "TEXT"),
     ("coaches", "job_title", "VARCHAR"),
+    ("generation_jobs", "payload", "TEXT"),
+    ("generation_jobs", "partial", "TEXT"),
+    ("generation_jobs", "attempts", "INTEGER DEFAULT 0"),
 ]
 
 
@@ -1139,33 +1142,85 @@ def _run_migrations():
 
 
 def _fail_orphaned_jobs():
-    """Close out jobs whose process is gone.
+    """Pick up, or close out, jobs whose process is gone.
 
     Film analysis runs in a background thread and can take twenty minutes. If
     the container stops in the middle — a deploy, a restart, the platform
     reclaiming it — the thread dies with it and the row is left saying
     "processing" forever. The app polls that row, so the coach watches a
-    progress bar that will never move again and has no way to tell it apart
-    from work still going on.
+    progress bar that will never move again.
 
-    Any job still marked processing when the server starts belongs to a
-    process that no longer exists: this one has only just begun. Mark them
-    errored with a reason a coach can act on.
+    Any job still marked processing when the server starts belongs to a process
+    that no longer exists: this one has only just begun. Where the row carries
+    the arguments it was called with, run it again — the segments it already
+    finished are on the row too, so it resumes rather than restarting the film.
+    Where it does not, or where it has already been tried too many times, mark
+    it errored with a reason a coach can act on.
+
+    ATTEMPT_CAP is what stops a job that crashes for its own reasons from being
+    retried forever across every future boot.
     """
+    ATTEMPT_CAP = 3
     try:
         from sqlalchemy.orm import Session as _Session
         from . import models
 
+        resumable = []
         with _Session(engine) as sess:
             stale = sess.query(models.GenerationJob).filter_by(status="processing").all()
             for job in stale:
+                attempts = (job.attempts or 0) + 1
+                if job.payload and attempts <= ATTEMPT_CAP:
+                    job.attempts = attempts
+                    resumable.append((job.id, job.kind, job.payload))
+                    continue
                 job.status = "error"
                 job.error = (
                     "The server restarted while this was running, so the analysis "
                     "stopped part-way. Nothing was saved — run it again."
+                    if not job.payload else
+                    f"Gave up after {ATTEMPT_CAP} attempts. Try running it again."
                 )
             if stale:
                 sess.commit()
-                log.info("Closed %d job(s) orphaned by a restart", len(stale))
+
+        for job_id, kind, payload in resumable:
+            _resume_job(job_id, kind, payload)
+        if stale:
+            log.info("Restart: resumed %d job(s), closed %d",
+                     len(resumable), len(stale) - len(resumable))
     except Exception as exc:
-        log.warning("Could not close orphaned jobs: %s", exc)
+        log.warning("Could not settle orphaned jobs: %s", exc)
+
+
+def _resume_job(job_id: int, kind: str, payload: str):
+    """Run an interrupted job again, on its own thread.
+
+    A thread rather than the request's BackgroundTasks because there is no
+    request here — this is startup. Failures are logged and left on the job
+    row; nothing about a resumed job may stop the server from coming up.
+    """
+    import json
+    import threading
+
+    try:
+        call = json.loads(payload)
+    except Exception:
+        return
+
+    def run():
+        try:
+            if kind == "clip":
+                from .routes.game_reports import _run_clip_analysis
+
+                _run_clip_analysis(
+                    call["clip_id"], job_id, call["video_path"], call["output_type"],
+                    call["program_name"], call["opp_name"], call["label_text"],
+                    call["coach_weight"], call["focus_prompt"], call.get("level", "HS Varsity"),
+                )
+            else:
+                log.warning("No resume handler for job kind %r", kind)
+        except Exception as exc:
+            log.warning("Resumed job %s failed: %s", job_id, exc)
+
+    threading.Thread(target=run, name=f"resume-job-{job_id}", daemon=True).start()

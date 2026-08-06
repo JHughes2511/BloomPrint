@@ -178,6 +178,17 @@ class GenerationJob(Base):
     result_id   = Column(Integer, nullable=True)          # created eval/team_report id
     error       = Column(Text, nullable=True)
     progress    = Column(String, nullable=True)           # human-readable progress
+    # Everything needed to run this job again from scratch. A film analysis
+    # takes twenty minutes and the container it runs in can be replaced by a
+    # deploy at any point; without the inputs recorded, a restart has no way to
+    # pick the work back up and the coach simply loses it.
+    payload     = Column(Text, nullable=True)             # JSON: the call's arguments
+    # Work already finished, so a resumed run pays for the segments it has not
+    # done rather than starting the film over. JSON: {"segments": {"3": "..."}}.
+    partial     = Column(Text, nullable=True)
+    # Guards the loop: a job that dies three times is failing for its own
+    # reasons, not because of bad luck with deploys.
+    attempts    = Column(Integer, default=0)
     created_at  = Column(DateTime, default=datetime.utcnow)
     updated_at  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

@@ -751,6 +751,14 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     CHUNK = 40
     TOTAL_CAP = 900          # absolute safety ceiling across all films
     progress = args.get("_progress")   # optional callable(done, total, label)
+    # Segments finished by an earlier attempt, and the hook that records each
+    # one as it lands. A film analysis is twenty Opus calls over twenty minutes,
+    # and the process running it can be replaced by a deploy at any point; with
+    # these the next attempt pays only for what is left instead of starting the
+    # film again. Sampling is deterministic for a given file, so segment i means
+    # the same frames on every run.
+    resume_notes: dict = args.get("_resume_notes") or {}
+    on_segment = args.get("_on_segment")   # optional callable(index, text)
     # Progress labels are stable machine codes ("job:scanning", "job:segment:i:n",
     # "job:synthesizing"), not prose — the client renders them in the coach's
     # language. Changing a code without updating jobProgressLabel() in the app
@@ -826,6 +834,10 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                 except Exception:
                     pass
             t0, t1 = ch[0][0], ch[-1][0]
+            done_already = resume_notes.get(i) or resume_notes.get(str(i))
+            if done_already:
+                seg_notes.append(done_already)
+                continue
             seg_prompt = (
                 f"You are analyzing SEGMENT {i} of {len(chunks)} of game film ({_fmt_ts(t0)}–{_fmt_ts(t1)}) for a "
                 f"{output_type.replace('_', ' ')}. From the frames, note the key basketball observations: what "
@@ -837,7 +849,15 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
             try:
                 r = _client().messages.create(model=OPUS, max_tokens=2000,
                                               messages=[{"role": "user", "content": seg_content}])
-                seg_notes.append(f"SEGMENT {i} ({t0:.0f}s–{t1:.0f}s):\n{text_of(r)}")
+                note = f"SEGMENT {i} ({t0:.0f}s–{t1:.0f}s):\n{text_of(r)}"
+                seg_notes.append(note)
+                if on_segment:
+                    # Persisted before the next call is made, so whatever kills
+                    # the process cannot take this segment with it.
+                    try:
+                        on_segment(i, note)
+                    except Exception:
+                        pass
             except Exception as exc:
                 seg_notes.append(f"SEGMENT {i}: (analysis unavailable: {exc})")
                 failed_segments += 1

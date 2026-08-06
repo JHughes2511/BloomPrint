@@ -1,5 +1,6 @@
 """Game Report Packet routes — persistent multi-source report builder."""
 
+import json
 import shutil
 import tempfile
 from pathlib import Path
@@ -41,6 +42,32 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             finally:
                 pdb.close()
 
+        # Segments already finished by an earlier attempt, and the hook that
+        # records each new one. See _resume_orphaned_jobs: a deploy in the
+        # middle of a twenty-minute film used to cost the whole analysis.
+        def _save_segment(index, text):
+            sdb = SessionLocal()
+            try:
+                j = sdb.get(models.GenerationJob, job_id)
+                if not j:
+                    return
+                data = json.loads(j.partial or "{}")
+                data.setdefault("segments", {})[str(index)] = text
+                j.partial = json.dumps(data)
+                sdb.commit()
+            except Exception:
+                sdb.rollback()
+            finally:
+                sdb.close()
+
+        done_segments = {}
+        j0 = db.get(models.GenerationJob, job_id)
+        if j0 and j0.partial:
+            try:
+                done_segments = json.loads(j0.partial).get("segments", {})
+            except Exception:
+                done_segments = {}
+
         from ..storage import ensure_local
         result = asyncio.run(_handle_analyze_basketball_video({
             "video_path": ensure_local(video_path),
@@ -52,6 +79,8 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             "focus_prompt": f"This film is of {label_text}. My team: {program_name}. Opponent: {opp_name}.\n{focus_prompt or ''}",
             "audio_auto": True,         # gauge whether the film's audio is worth transcribing
             "_progress": _prog,
+            "_resume_notes": done_segments,
+            "_on_segment": _save_segment,
         }))
         text = result[0].text
         clip = db.get(models.GameReportClip, clip_id)
@@ -408,7 +437,16 @@ async def add_clip(
 
     # A GenerationJob carries per-segment progress so the app shows the same
     # progress bar as the player-eval flow.
-    job = models.GenerationJob(coach_id=coach.id, kind="clip", status="processing")
+    call = {
+        "clip_id": clip.id, "video_path": str(dest), "output_type": gr.output_type,
+        "program_name": my_team_name, "opp_name": opp_name, "label_text": label_text,
+        "coach_weight": coach.weight, "focus_prompt": gr.focus_prompt or "",
+        "level": _packet_level(db, gr, coach),
+    }
+    # payload is what makes this job survivable: with the arguments on the row,
+    # a server that comes back up can run it again itself.
+    job = models.GenerationJob(coach_id=coach.id, kind="clip", status="processing",
+                               payload=json.dumps(call), attempts=1)
     db.add(job)
     db.commit()
     db.refresh(job)
@@ -416,7 +454,7 @@ async def add_clip(
     background_tasks.add_task(
         _run_clip_analysis, clip.id, job.id, str(dest), gr.output_type,
         my_team_name, opp_name, label_text, coach.weight, gr.focus_prompt or "",
-        _packet_level(db, gr, coach),
+        call["level"],
     )
     return {"job_id": job.id, "clip_id": clip.id}
 
