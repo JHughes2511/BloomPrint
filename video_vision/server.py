@@ -7,6 +7,7 @@ Basketball Intelligence Model (BIM).
 
 import base64
 import os
+import pathlib
 import subprocess
 import tempfile
 from pathlib import Path
@@ -38,23 +39,60 @@ def _client() -> anthropic.Anthropic:
 
 
 
-def _frame_to_base64(frame: np.ndarray) -> str:
-    img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
-        img.save(tmp.name, format="JPEG", quality=85)
-        tmp_path = tmp.name
-    try:
-        with open(tmp_path, "rb") as f:
-            return base64.standard_b64encode(f.read()).decode("utf-8")
-    finally:
-        os.unlink(tmp_path)
+# The longest edge we keep on a sampled frame.
+#
+# Vision models downsample anything larger before they look at it, so a 4K
+# frame costs memory and upload time to deliver detail that is thrown away.
+# 1280 keeps a 16:9 frame just under a megapixel, which is inside that budget
+# and still shows jersey numbers on a wide shot.
+FRAME_MAX_EDGE = 1280
+
+# JPEG quality for a sampled frame. 80 is visually indistinguishable from 85 on
+# film stills and about 20% smaller across 800 of them.
+FRAME_JPEG_QUALITY = 80
+
+
+def _encode_frame(frame: np.ndarray) -> bytes:
+    """A decoded frame as compressed JPEG bytes, downscaled to what the model uses.
+
+    Extraction used to hand back raw BGR arrays and the whole sample was held
+    until the report was written. A 1080p frame is 6 MB decoded and a full game
+    samples 800 of them: about 5 GB, which the container does not have. The
+    process was killed part-way through the segment loop, which is what a long
+    film failing at 14% looks like from outside. The same frames as JPEG are
+    roughly 100 KB each — the sample fits in a hundred megabytes and the upload
+    for each segment shrinks with it.
+    """
+    h, w = frame.shape[:2]
+    longest = max(h, w)
+    if longest > FRAME_MAX_EDGE:
+        scale = FRAME_MAX_EDGE / longest
+        frame = cv2.resize(frame, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
+    ok, buf = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), FRAME_JPEG_QUALITY])
+    if not ok:
+        # Fall back to the Pillow path rather than lose the frame.
+        img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+            img.save(tmp.name, format="JPEG", quality=FRAME_JPEG_QUALITY)
+            tmp_path = tmp.name
+        try:
+            return pathlib.Path(tmp_path).read_bytes()
+        finally:
+            os.unlink(tmp_path)
+    return buf.tobytes()
+
+
+def _frame_to_base64(frame) -> str:
+    """Base64 for the API. Accepts an already-encoded frame or a raw array."""
+    data = frame if isinstance(frame, (bytes, bytearray)) else _encode_frame(frame)
+    return base64.standard_b64encode(data).decode("utf-8")
 
 
 def _extract_frames(
     video_path: str,
     interval_seconds: float = 1.0,
     max_frames: int = 16,
-) -> list[tuple[float, np.ndarray]]:
+) -> list[tuple[float, bytes]]:
     """Return (timestamp_seconds, frame) pairs sampled from the video."""
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -71,12 +109,12 @@ def _extract_frames(
         timestamps.append(t)
         t += step
 
-    results: list[tuple[float, np.ndarray]] = []
+    results: list[tuple[float, bytes]] = []
     for ts in timestamps:
         cap.set(cv2.CAP_PROP_POS_MSEC, ts * 1000)
         ret, frame = cap.read()
         if ret:
-            results.append((ts, frame))
+            results.append((ts, _encode_frame(frame)))
 
     cap.release()
     return results
@@ -86,7 +124,7 @@ def _extract_frames_interval(
     video_path: str,
     interval_seconds: float,
     total_cap: int,
-) -> list[tuple[float, np.ndarray]]:
+) -> list[tuple[float, bytes]]:
     """Sample one frame every `interval_seconds` across the WHOLE video (so
     coverage is proportional to length), capped at `total_cap` frames."""
     cap = cv2.VideoCapture(video_path)
@@ -103,13 +141,13 @@ def _extract_frames_interval(
     if n > total_cap:                       # too many — widen the interval to fit
         interval_seconds = duration / total_cap
         n = total_cap
-    results: list[tuple[float, np.ndarray]] = []
+    results: list[tuple[float, bytes]] = []
     t = 0.0
     while t <= duration and len(results) < total_cap:
         cap.set(cv2.CAP_PROP_POS_MSEC, t * 1000)
         ret, frame = cap.read()
         if ret:
-            results.append((t, frame))
+            results.append((t, _encode_frame(frame)))
         t += interval_seconds
     cap.release()
     return results
@@ -199,7 +237,7 @@ def _select_adaptive_timestamps(duration: float, scores: list[tuple[float, float
     return sorted(chosen)[:budget]
 
 
-def _extract_frames_adaptive(video_path: str, budget_cap: int | None = None) -> list[tuple[float, np.ndarray]]:
+def _extract_frames_adaptive(video_path: str, budget_cap: int | None = None) -> list[tuple[float, bytes]]:
     """Motion-aware frame extraction: pre-scan for motion, then grab full-res
     frames at the selected timestamps."""
     duration, scores = _motion_profile(video_path)
@@ -210,12 +248,12 @@ def _extract_frames_adaptive(video_path: str, budget_cap: int | None = None) -> 
         budget = min(budget, budget_cap)
     stamps = _select_adaptive_timestamps(duration, scores, budget)
     cap = cv2.VideoCapture(video_path)
-    out: list[tuple[float, np.ndarray]] = []
+    out: list[tuple[float, bytes]] = []
     for ts in stamps:
         cap.set(cv2.CAP_PROP_POS_MSEC, ts * 1000)
         ret, frame = cap.read()
         if ret:
-            out.append((ts, frame))
+            out.append((ts, _encode_frame(frame)))
     cap.release()
     return out
 
@@ -780,6 +818,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
         # ── Multi-pass: map each chunk to observations, then synthesize ──
         chunks = [frames[i:i + CHUNK] for i in range(0, len(frames), CHUNK)]
         seg_notes = []
+        failed_segments = 0
         for i, ch in enumerate(chunks, 1):
             if progress:
                 try:
@@ -801,6 +840,14 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                 seg_notes.append(f"SEGMENT {i} ({t0:.0f}s–{t1:.0f}s):\n{text_of(r)}")
             except Exception as exc:
                 seg_notes.append(f"SEGMENT {i}: (analysis unavailable: {exc})")
+                failed_segments += 1
+        # A report synthesized from nothing reads like a real one. If the film
+        # was never actually seen, say so rather than hand back an invention.
+        if failed_segments == len(chunks):
+            raise RuntimeError(
+                f"None of the {len(chunks)} film segments could be analyzed. "
+                f"Last error: {seg_notes[-1] if seg_notes else 'unknown'}"
+            )
         if progress:
             try:
                 progress(len(chunks), len(chunks), "job:synthesizing")
