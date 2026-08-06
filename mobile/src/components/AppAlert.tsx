@@ -22,6 +22,13 @@ import { fonts } from '../theme/typography';
 import { sheetCap } from '../responsive/modalSizes';
 import { subscribeToAlerts, resolveAlert, AlertRequest, AlertButton } from '../web/alertQueue';
 
+/** Whatever it is, render it as a line of text. */
+function asText(v: unknown): string {
+  if (typeof v === 'string') return v;
+  if (v == null) return '';
+  try { return JSON.stringify(v); } catch { return String(v); }
+}
+
 export default function AppAlert() {
   const { t } = useTheme();
   const styles = makeStyles(t);
@@ -54,8 +61,14 @@ export default function AppAlert() {
       <Pressable style={styles.backdrop} onPress={dismiss}>
         {/* Stops a press inside the card from counting as a dismissal. */}
         <Pressable style={styles.card} onPress={() => {}}>
-          {!!current.title && <Text style={styles.title}>{current.title}</Text>}
-          {!!current.message && <Text style={styles.message}>{current.message}</Text>}
+          {/* Coerced, not trusted. Alert.alert is handed whatever a caller
+              pulled off an error, and React takes the whole screen down rather
+              than render an object — a failed import used to blank the page
+              this way. A dialog is the last thing that should be able to
+              crash: it is what the app falls back to when something else
+              already went wrong. */}
+          {!!current.title && <Text style={styles.title}>{asText(current.title)}</Text>}
+          {!!current.message && <Text style={styles.message}>{asText(current.message)}</Text>}
 
           <View style={[styles.row, stacked && styles.stack]}>
             {current.buttons.map((b, i) => {

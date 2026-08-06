@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "Nije moguće obrisati igrača",
     "emptyCreateTeamFirst": "Prvo kreiraj tim, zatim dodaj igrače.",
     "emptyNoPlayersInTeam": "Još nema igrača u ovom timu.",
-    "importFromExcel": "Uvezi sastav iz Excel-a",
     "importOneByOneHint": "ili dodirni + da dodaš igrače jednog po jednog",
     "emptyNoPlayers": "Još nema igrača. Kreiraj tim i dodaj igrače.",
     "teams": "Timovi"

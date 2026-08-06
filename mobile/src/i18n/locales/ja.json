@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "選手を削除できませんでした",
     "emptyCreateTeamFirst": "先にチームを作成してから選手を追加してください。",
     "emptyNoPlayersInTeam": "このチームにはまだ選手がいません。",
-    "importFromExcel": "Excelから名簿をインポート",
     "importOneByOneHint": "または + をタップして選手を1人ずつ追加",
     "emptyNoPlayers": "まだ選手がいません。チームを作成して選手を追加してください。",
     "teams": "チーム"

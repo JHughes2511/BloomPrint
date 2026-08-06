@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "تعذّر حذف اللاعب",
     "emptyCreateTeamFirst": "أنشئ فريقًا أولًا، ثم أضف اللاعبين.",
     "emptyNoPlayersInTeam": "لا يوجد لاعبون في هذا الفريق بعد.",
-    "importFromExcel": "استيراد القائمة من Excel",
     "importOneByOneHint": "أو اضغط + لإضافة اللاعبين واحدًا تلو الآخر",
     "emptyNoPlayers": "لا يوجد لاعبون بعد. أنشئ فريقًا وأضف اللاعبين.",
     "teams": "الفرق"

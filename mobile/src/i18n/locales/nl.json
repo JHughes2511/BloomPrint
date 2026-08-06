@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "Kon speler niet verwijderen",
     "emptyCreateTeamFirst": "Maak eerst een team aan en voeg daarna spelers toe.",
     "emptyNoPlayersInTeam": "Nog geen spelers in dit team.",
-    "importFromExcel": "Selectie importeren uit Excel",
     "importOneByOneHint": "of tik op + om spelers één voor één toe te voegen",
     "emptyNoPlayers": "Nog geen spelers. Maak een team aan en voeg spelers toe.",
     "teams": "Teams"

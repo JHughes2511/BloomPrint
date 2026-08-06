@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { describeError } from '../utils/describeError';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
@@ -108,7 +109,7 @@ export default function ImportScreen() {
       }
       setPreview(players);
     } catch (e: any) {
-      Alert.alert(tr('importScreen.importErrorTitle'), e?.response?.data?.detail ?? tr('importScreen.couldNotReadFile'));
+      Alert.alert(tr('importScreen.importErrorTitle'), describeError(e, tr('importScreen.couldNotReadFile')));
     } finally {
       setAnalyzing(false);
     }
@@ -129,7 +130,7 @@ export default function ImportScreen() {
       setResult({ players_created: res.created, players_found: res.updated, evaluations_created: 0, rows_processed: players.length, errors: [] });
       setPreview(null);
     } catch (e: any) {
-      Alert.alert(tr('importScreen.importErrorTitle'), e?.response?.data?.detail ?? tr('importScreen.couldNotImportPlayers'));
+      Alert.alert(tr('importScreen.importErrorTitle'), describeError(e, tr('importScreen.couldNotImportPlayers')));
     } finally {
       setUploading(false);
     }

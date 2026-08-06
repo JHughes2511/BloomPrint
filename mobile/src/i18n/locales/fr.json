@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "Impossible de supprimer le joueur",
     "emptyCreateTeamFirst": "Créez d'abord une équipe, puis ajoutez des joueurs.",
     "emptyNoPlayersInTeam": "Aucun joueur dans cette équipe pour l'instant.",
-    "importFromExcel": "Importer l'effectif depuis Excel",
     "importOneByOneHint": "ou appuyez sur + pour ajouter les joueurs un par un",
     "emptyNoPlayers": "Aucun joueur pour l'instant. Créez une équipe et ajoutez des joueurs.",
     "teams": "Équipes"

@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "Oyuncu silinemedi",
     "emptyCreateTeamFirst": "Önce bir takım oluşturun, ardından oyuncu ekleyin.",
     "emptyNoPlayersInTeam": "Bu takımda henüz oyuncu yok.",
-    "importFromExcel": "Excel'den Kadro İçe Aktar",
     "importOneByOneHint": "veya oyuncuları tek tek eklemek için +'ya dokunun",
     "emptyNoPlayers": "Henüz oyuncu yok. Bir takım oluşturun ve oyuncu ekleyin.",
     "teams": "Takımlar"

@@ -440,7 +440,7 @@ export default function RosterScreen() {
                 <Text style={styles.emptyText}>{tr('roster.emptyNoPlayersInTeam')}</Text>
                 <TouchableOpacity style={styles.importRosterBtn} onPress={() => navigation.navigate('Import', { mode: 'roster' })}>
                   <Ionicons name="cloud-upload-outline" size={16} color={t.ctaText} />
-                  <Text style={styles.importRosterBtnText}>{tr('roster.importFromExcel')}</Text>
+                  <Text style={styles.importRosterBtnText}>{tr('roster.importRoster')}</Text>
                 </TouchableOpacity>
                 <Text style={styles.importRosterHint}>{tr('roster.importOneByOneHint')}</Text>
               </>

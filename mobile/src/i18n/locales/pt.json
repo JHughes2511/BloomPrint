@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "Não foi possível excluir o jogador",
     "emptyCreateTeamFirst": "Crie uma equipe primeiro, depois adicione jogadores.",
     "emptyNoPlayersInTeam": "Nenhum jogador nesta equipe ainda.",
-    "importFromExcel": "Importar Elenco do Excel",
     "importOneByOneHint": "ou toque em + para adicionar jogadores um por um",
     "emptyNoPlayers": "Nenhum jogador ainda. Crie uma equipe e adicione jogadores.",
     "teams": "Equipes"

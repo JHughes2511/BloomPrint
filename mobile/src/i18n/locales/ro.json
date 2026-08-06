@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "Jucătorul nu a putut fi șters",
     "emptyCreateTeamFirst": "Creează mai întâi o echipă, apoi adaugă jucători.",
     "emptyNoPlayersInTeam": "Niciun jucător în această echipă încă.",
-    "importFromExcel": "Importă lot din Excel",
     "importOneByOneHint": "sau apasă + pentru a adăuga jucători unul câte unul",
     "emptyNoPlayers": "Niciun jucător încă. Creează o echipă și adaugă jucători.",
     "teams": "Echipe"

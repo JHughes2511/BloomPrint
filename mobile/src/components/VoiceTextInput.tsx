@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { describeError } from '../utils/describeError';
 import { View, TextInput, TouchableOpacity, Pressable, TextInputProps, Alert, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -10,32 +11,6 @@ type Props = TextInputProps & {
   value?: string;
   onChangeText?: (text: string) => void;
 };
-
-/**
- * A server error as a sentence, not as "[object Object]".
- *
- * FastAPI answers a validation failure with a LIST of objects under `detail`,
- * so interpolating it into a string produced "[object Object]" — a message that
- * told a coach something broke while hiding the one fact that would explain it.
- */
-function describeError(e: any): string {
-  const detail = e?.response?.data?.detail;
-  if (typeof detail === 'string' && detail) return detail;
-  if (Array.isArray(detail)) {
-    const parts = detail
-      .map((d: any) => {
-        const where = Array.isArray(d?.loc) ? d.loc.filter((x: any) => x !== 'body').join('.') : '';
-        return [where, d?.msg].filter(Boolean).join(': ');
-      })
-      .filter(Boolean);
-    if (parts.length) return parts.join('\n');
-  }
-  if (detail && typeof detail === 'object') {
-    try { return JSON.stringify(detail); } catch { /* fall through */ }
-  }
-  const status = e?.response?.status;
-  return e?.message || (status ? `Request failed (${status})` : 'Unknown error');
-}
 
 const CHUNK_MS = 2500; // recording chunk length — shorter = words appear sooner
 

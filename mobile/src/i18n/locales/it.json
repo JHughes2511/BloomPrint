@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "Impossibile eliminare il giocatore",
     "emptyCreateTeamFirst": "Crea prima una squadra, poi aggiungi i giocatori.",
     "emptyNoPlayersInTeam": "Ancora nessun giocatore in questa squadra.",
-    "importFromExcel": "Importa Rosa da Excel",
     "importOneByOneHint": "oppure tocca + per aggiungere i giocatori uno alla volta",
     "emptyNoPlayers": "Ancora nessun giocatore. Crea una squadra e aggiungi giocatori.",
     "teams": "Squadre"

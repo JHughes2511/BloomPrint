@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "Nie udało się usunąć zawodnika",
     "emptyCreateTeamFirst": "Najpierw utwórz zespół, a następnie dodaj zawodników.",
     "emptyNoPlayersInTeam": "Brak zawodników w tym zespole.",
-    "importFromExcel": "Importuj skład z Excela",
     "importOneByOneHint": "lub dotknij +, aby dodać zawodników pojedynczo",
     "emptyNoPlayers": "Brak zawodników. Utwórz zespół i dodaj zawodników.",
     "teams": "Zespoły"

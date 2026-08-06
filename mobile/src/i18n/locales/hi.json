@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "खिलाड़ी नहीं हटाया जा सका",
     "emptyCreateTeamFirst": "पहले टीम बनाएँ, फिर खिलाड़ी जोड़ें।",
     "emptyNoPlayersInTeam": "इस टीम में अभी कोई खिलाड़ी नहीं है।",
-    "importFromExcel": "Excel से रोस्टर इम्पोर्ट करें",
     "importOneByOneHint": "या एक-एक करके खिलाड़ी जोड़ने के लिए + पर टैप करें",
     "emptyNoPlayers": "अभी कोई खिलाड़ी नहीं। टीम बनाएँ और खिलाड़ी जोड़ें।",
     "teams": "टीमें"

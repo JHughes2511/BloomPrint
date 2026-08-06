@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "Spieler konnte nicht gelöscht werden",
     "emptyCreateTeamFirst": "Erstelle zuerst ein Team und füge dann Spieler hinzu.",
     "emptyNoPlayersInTeam": "Noch keine Spieler in diesem Team.",
-    "importFromExcel": "Kader aus Excel importieren",
     "importOneByOneHint": "oder tippe auf +, um Spieler einzeln hinzuzufügen",
     "emptyNoPlayers": "Noch keine Spieler. Erstelle ein Team und füge Spieler hinzu.",
     "teams": "Teams"

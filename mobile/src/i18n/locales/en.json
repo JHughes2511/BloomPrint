@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "Could not delete player",
     "emptyCreateTeamFirst": "Create a team first, then add players.",
     "emptyNoPlayersInTeam": "No players in this team yet.",
-    "importFromExcel": "Import Roster from Excel",
     "importOneByOneHint": "or tap + to add players one by one",
     "emptyNoPlayers": "No players yet. Create a team and add players.",
     "teams": "Teams"

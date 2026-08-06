@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "Не удалось удалить игрока",
     "emptyCreateTeamFirst": "Сначала создайте команду, затем добавьте игроков.",
     "emptyNoPlayersInTeam": "В этой команде пока нет игроков.",
-    "importFromExcel": "Импортировать состав из Excel",
     "importOneByOneHint": "или нажмите +, чтобы добавлять игроков по одному",
     "emptyNoPlayers": "Пока нет игроков. Создайте команду и добавьте игроков.",
     "teams": "Команды"

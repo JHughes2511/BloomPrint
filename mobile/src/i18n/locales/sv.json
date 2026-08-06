@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "Kunde inte ta bort spelare",
     "emptyCreateTeamFirst": "Skapa ett lag först, lägg sedan till spelare.",
     "emptyNoPlayersInTeam": "Inga spelare i det här laget ännu.",
-    "importFromExcel": "Importera trupp från Excel",
     "importOneByOneHint": "eller tryck på + för att lägga till spelare en och en",
     "emptyNoPlayers": "Inga spelare ännu. Skapa ett lag och lägg till spelare.",
     "teams": "Lag"

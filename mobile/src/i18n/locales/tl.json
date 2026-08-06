@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "Hindi mabura ang player",
     "emptyCreateTeamFirst": "Gumawa muna ng team, tapos magdagdag ng mga player.",
     "emptyNoPlayersInTeam": "Wala pang player sa team na ito.",
-    "importFromExcel": "Mag-import ng Roster mula sa Excel",
     "importOneByOneHint": "o i-tap ang + para magdagdag ng player nang isa-isa",
     "emptyNoPlayers": "Wala pang player. Gumawa ng team at magdagdag ng mga player.",
     "teams": "Mga Team"

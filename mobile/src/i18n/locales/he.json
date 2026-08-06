@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "לא ניתן למחוק את השחקן",
     "emptyCreateTeamFirst": "צור קודם קבוצה, ואז הוסף שחקנים.",
     "emptyNoPlayersInTeam": "עדיין אין שחקנים בקבוצה הזו.",
-    "importFromExcel": "ייבא סגל מ-Excel",
     "importOneByOneHint": "או הקש + כדי להוסיף שחקנים אחד-אחד",
     "emptyNoPlayers": "עדיין אין שחקנים. צור קבוצה והוסף שחקנים.",
     "teams": "קבוצות"

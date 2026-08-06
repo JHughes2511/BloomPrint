@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "Nepavyko ištrinti žaidėjo",
     "emptyCreateTeamFirst": "Pirmiausia sukurkite komandą, tada pridėkite žaidėjų.",
     "emptyNoPlayersInTeam": "Šioje komandoje dar nėra žaidėjų.",
-    "importFromExcel": "Importuoti sąrašą iš Excel",
     "importOneByOneHint": "arba palieskite +, kad pridėtumėte žaidėjus po vieną",
     "emptyNoPlayers": "Kol kas žaidėjų nėra. Sukurkite komandą ir pridėkite žaidėjų.",
     "teams": "Komandos"

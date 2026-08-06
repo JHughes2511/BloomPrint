@@ -1625,7 +1625,6 @@
     "couldNotDeletePlayer": "无法删除球员",
     "emptyCreateTeamFirst": "请先创建球队，再添加球员。",
     "emptyNoPlayersInTeam": "此球队还没有球员。",
-    "importFromExcel": "从 Excel 导入阵容",
     "importOneByOneHint": "或点击 + 逐个添加球员",
     "emptyNoPlayers": "还没有球员。创建球队并添加球员。",
     "teams": "球队"

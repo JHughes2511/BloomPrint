@@ -257,23 +257,38 @@ export const evalsAPI = {
 
 // ── Unified AI imports (any file → preview → commit) ──────────────────────────
 type PickedFile = { uri: string; name: string; type: string };
-const _importForm = (file: PickedFile, extra: Record<string, string> = {}) => {
+/**
+ * The multipart body for an import, built the way each platform needs.
+ *
+ * `{uri, name, type}` is React Native's file descriptor and means nothing to a
+ * browser: the DOM's FormData stringifies it, so the server received the text
+ * "[object Object]" where a file should have been and answered 422. On web the
+ * uri is a blob:/data: URL, and fetching it gives back the Blob the browser
+ * wanted in the first place.
+ */
+const _importForm = async (file: PickedFile, extra: Record<string, string> = {}) => {
   const form = new FormData();
-  form.append('file', file as any);
+  if (Platform.OS === 'web') {
+    const blob = await (await fetch(file.uri)).blob();
+    // Three-argument append is the DOM signature; RN's typing declares two.
+    (form.append as any)('file', blob, file.name || 'upload');
+  } else {
+    form.append('file', file as any);
+  }
   Object.entries(extra).forEach(([k, v]) => form.append(k, v));
   return form;
 };
 export const importsAPI = {
-  rosterPreview: (file: PickedFile) =>
-    api.post('/imports/roster/preview', _importForm(file), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),
+  rosterPreview: async (file: PickedFile) =>
+    api.post('/imports/roster/preview', await _importForm(file), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),
   rosterCommit: (data: { team_id?: number | null; competition_level?: string; players: any[] }) =>
     api.post('/imports/roster/commit', data).then(r => r.data),
-  gameStatsPreview: (file: PickedFile) =>
-    api.post('/imports/game-stats/preview', _importForm(file), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),
+  gameStatsPreview: async (file: PickedFile) =>
+    api.post('/imports/game-stats/preview', await _importForm(file), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),
   gameStatsCommit: (data: { game_id: number; players: any[] }) =>
     api.post('/imports/game-stats/commit', data).then(r => r.data),
-  text: (file: PickedFile, purpose = 'coaching notes') =>
-    api.post('/imports/text', _importForm(file, { purpose }), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),
+  text: async (file: PickedFile, purpose = 'coaching notes') =>
+    api.post('/imports/text', await _importForm(file, { purpose }), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),
 };
 
 // ── AI Copilot (command bar) ──────────────────────────────────────────────────
