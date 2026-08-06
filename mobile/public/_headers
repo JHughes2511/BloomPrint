@@ -1,0 +1,25 @@
+# Cache rules for Cloudflare Pages.
+#
+# The one rule that matters: index.html must never be reused from cache.
+# Everything under _expo/ and assets/ is content-hashed, so a new build produces
+# new filenames — but the HTML that names them keeps the same URL. If a browser
+# holds an old index.html after a deploy, it asks for a bundle that no longer
+# exists, the script 404s, and the page sits there with nothing on it. Reloading
+# fetches the same cached HTML and fails the same way, which is why the only way
+# out was closing the browser.
+#
+# So: HTML revalidates every time, hashed assets are immutable and cached for a
+# year. That is the standard pairing and it is what makes a deploy take effect
+# on the next navigation rather than whenever a cache happens to expire.
+
+/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/_expo/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
