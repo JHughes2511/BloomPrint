@@ -836,6 +836,7 @@
     "saveForLater": "बाद के लिए सहेजें",
     "applyRegenerate": "लागू करें और दोबारा बनाएँ",
     "regeneratingOverlay": "ट्रेनिंग दोबारा बन रही है…",
+    "generatingTrainingOverlay": "ट्रेनिंग बनाई जा रही है…",
     "applied": "लागू",
     "pending": "लंबित",
     "playersVersion": "खिलाड़ी का संस्करण",

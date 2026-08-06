@@ -836,6 +836,7 @@
     "saveForLater": "Sonrası İçin Kaydet",
     "applyRegenerate": "Uygula ve Yeniden Oluştur",
     "regeneratingOverlay": "Antrenman yeniden oluşturuluyor…",
+    "generatingTrainingOverlay": "Antrenman oluşturuluyor…",
     "applied": "UYGULANDI",
     "pending": "BEKLİYOR",
     "playersVersion": "OYUNCU SÜRÜMÜ",

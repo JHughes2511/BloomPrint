@@ -836,6 +836,7 @@
     "saveForLater": "შენახვა მოგვიანებისთვის",
     "applyRegenerate": "გამოყენება და ხელახლა გენერაცია",
     "regeneratingOverlay": "მიმდინარეობს ვარჯიშის ხელახლა გენერაცია…",
+    "generatingTrainingOverlay": "ვარჯიშის შექმნა…",
     "applied": "გამოყენებულია",
     "pending": "მოლოდინში",
     "playersVersion": "მოთამაშის ვერსია",

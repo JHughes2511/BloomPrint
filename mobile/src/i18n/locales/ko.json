@@ -836,6 +836,7 @@
     "saveForLater": "나중을 위해 저장",
     "applyRegenerate": "적용 후 재생성",
     "regeneratingOverlay": "훈련을 재생성하는 중…",
+    "generatingTrainingOverlay": "훈련 생성 중…",
     "applied": "적용됨",
     "pending": "대기 중",
     "playersVersion": "선수용 버전",

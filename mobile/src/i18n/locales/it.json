@@ -836,6 +836,7 @@
     "saveForLater": "Salva per Dopo",
     "applyRegenerate": "Applica e Rigenera",
     "regeneratingOverlay": "Rigenerazione dell'allenamento…",
+    "generatingTrainingOverlay": "Generazione allenamento…",
     "applied": "APPLICATA",
     "pending": "IN SOSPESO",
     "playersVersion": "VERSIONE DEL GIOCATORE",

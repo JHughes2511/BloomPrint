@@ -1758,6 +1758,15 @@ export default function PlayerProfileScreen() {
         />
       )}
     </KeyboardAwareScrollView>
+
+    {/* Generating with feedback took as long as any other generation and said
+        so with a spinner inside its own button — off screen the moment you
+        scrolled. Every other generation on this screen puts up the progress
+        bar; this one now does too. */}
+    <GeneratingOverlay
+      visible={regeneratingTraining}
+      label={tr('playerProfile.generatingTrainingOverlay')}
+    />
     </PageContainer>
     </ScreenBackground>
   );

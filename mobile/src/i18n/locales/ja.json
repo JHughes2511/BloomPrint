@@ -836,6 +836,7 @@
     "saveForLater": "後で使うために保存",
     "applyRegenerate": "適用して再生成",
     "regeneratingOverlay": "トレーニングを再生成中…",
+    "generatingTrainingOverlay": "トレーニングを作成中…",
     "applied": "適用済み",
     "pending": "保留中",
     "playersVersion": "選手向けバージョン",

@@ -836,6 +836,7 @@
     "saveForLater": "حفظ لوقت لاحق",
     "applyRegenerate": "تطبيق وإعادة الإنشاء",
     "regeneratingOverlay": "جارٍ إعادة إنشاء التدريب…",
+    "generatingTrainingOverlay": "جارٍ إنشاء التدريب…",
     "applied": "تم التطبيق",
     "pending": "معلّق",
     "playersVersion": "نسخة اللاعب",

@@ -836,6 +836,7 @@
     "saveForLater": "שמור למועד מאוחר יותר",
     "applyRegenerate": "החל וצור מחדש",
     "regeneratingOverlay": "יוצר מחדש את האימון…",
+    "generatingTrainingOverlay": "יוצר אימון…",
     "applied": "הוחל",
     "pending": "ממתין",
     "playersVersion": "גרסת השחקן",

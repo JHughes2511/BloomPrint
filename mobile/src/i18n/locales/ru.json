@@ -836,6 +836,7 @@
     "saveForLater": "Сохранить на потом",
     "applyRegenerate": "Применить и перегенерировать",
     "regeneratingOverlay": "Перегенерируем тренировку…",
+    "generatingTrainingOverlay": "Создание тренировки…",
     "applied": "ПРИМЕНЕНО",
     "pending": "ОЖИДАЕТ",
     "playersVersion": "ВЕРСИЯ ДЛЯ ИГРОКА",

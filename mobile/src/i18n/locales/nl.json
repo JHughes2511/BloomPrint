@@ -836,6 +836,7 @@
     "saveForLater": "Bewaren voor later",
     "applyRegenerate": "Toepassen & opnieuw genereren",
     "regeneratingOverlay": "Training wordt opnieuw gegenereerd…",
+    "generatingTrainingOverlay": "Training genereren…",
     "applied": "TOEGEPAST",
     "pending": "IN AFWACHTING",
     "playersVersion": "SPELERSVERSIE",

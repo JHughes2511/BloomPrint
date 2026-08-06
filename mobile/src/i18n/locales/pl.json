@@ -836,6 +836,7 @@
     "saveForLater": "Zapisz na później",
     "applyRegenerate": "Zastosuj i wygeneruj ponownie",
     "regeneratingOverlay": "Ponowne generowanie treningu…",
+    "generatingTrainingOverlay": "Generowanie treningu…",
     "applied": "ZASTOSOWANO",
     "pending": "OCZEKUJE",
     "playersVersion": "WERSJA ZAWODNIKA",

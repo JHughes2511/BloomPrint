@@ -836,6 +836,7 @@
     "saveForLater": "稍后保存",
     "applyRegenerate": "应用并重新生成",
     "regeneratingOverlay": "正在重新生成训练…",
+    "generatingTrainingOverlay": "正在生成训练…",
     "applied": "已应用",
     "pending": "待处理",
     "playersVersion": "球员版本",

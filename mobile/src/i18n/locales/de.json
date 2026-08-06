@@ -836,6 +836,7 @@
     "saveForLater": "Für später speichern",
     "applyRegenerate": "Anwenden & neu generieren",
     "regeneratingOverlay": "Training wird neu generiert…",
+    "generatingTrainingOverlay": "Training wird erstellt…",
     "applied": "ANGEWENDET",
     "pending": "AUSSTEHEND",
     "playersVersion": "SPIELERVERSION",

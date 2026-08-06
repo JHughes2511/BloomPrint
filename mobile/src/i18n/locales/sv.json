@@ -836,6 +836,7 @@
     "saveForLater": "Spara till senare",
     "applyRegenerate": "Tillämpa & Generera om",
     "regeneratingOverlay": "Genererar om träning…",
+    "generatingTrainingOverlay": "Skapar träning…",
     "applied": "TILLÄMPAD",
     "pending": "VÄNTANDE",
     "playersVersion": "SPELARENS VERSION",
