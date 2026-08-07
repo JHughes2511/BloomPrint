@@ -28,7 +28,7 @@ missing ownership filter leaks quietly — it returns other people's rows as
 excluded automatically by the global filter in api/softdelete.py.
 """
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import or_
+from sqlalchemy import or_, false
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -97,14 +97,17 @@ def search(
     coach: models.Coach = Depends(get_current_coach),
 ):
     term = (q or "").strip()
-    # One character matches most of the database and is never what someone
-    # meant; it's a keystroke on the way to a real query.
-    if len(term) < 2:
+    if not term:
         return {"query": term, "players": [], "teams": [], "reports": [],
                 "training": [], "team_reports": [], "games": [], "scouting": [],
                 "totals": {}}
 
+    # One letter answers from names only. It is the first keystroke of a name
+    # far more often than a search for a letter, and matching it against the
+    # body of every report would scan the coach's whole library to answer
+    # something they are still in the middle of typing.
     pattern = _like(term)
+    deep = len(term) >= 2
     team_ids = _accessible_team_ids(db, coach)
     granted = {a.player_id for a in db.query(models.PlayerAccess).filter_by(coach_id=coach.id).all()}
 
@@ -120,10 +123,10 @@ def search(
         db.query(models.Player)
         .filter(or_(*player_scope))
         .filter(or_(
-            models.Player.name.like(pattern, escape="\\"),
-            models.Player.position.like(pattern, escape="\\"),
-            models.Player.school_name.like(pattern, escape="\\"),
-            models.Player.program_name.like(pattern, escape="\\"),
+            models.Player.name.ilike(pattern, escape="\\"),
+            models.Player.position.ilike(pattern, escape="\\"),
+            models.Player.school_name.ilike(pattern, escape="\\"),
+            models.Player.program_name.ilike(pattern, escape="\\"),
         ))
         .order_by(models.Player.name)
     )
@@ -133,8 +136,8 @@ def search(
         db.query(models.Team)
         .filter(or_(models.Team.coach_id == coach.id,
                     models.Team.id.in_(team_ids) if team_ids else models.Team.id.is_(None)))
-        .filter(or_(models.Team.name.like(pattern, escape="\\"),
-                    models.Team.competition_level.like(pattern, escape="\\")))
+        .filter(or_(models.Team.name.ilike(pattern, escape="\\"),
+                    models.Team.competition_level.ilike(pattern, escape="\\")))
         .order_by(models.Team.name)
     )
     teams, teams_n = _page(teams_q, limit)
@@ -151,10 +154,10 @@ def search(
                     models.Evaluation.id.in_(shared_evals) if shared_evals
                     else models.Evaluation.id.is_(None)))
         .filter(or_(
-            models.Evaluation.title.like(pattern, escape="\\"),
-            models.Evaluation.output_type.like(pattern, escape="\\"),
-            models.Evaluation.report_text.like(pattern, escape="\\"),
-            models.Player.name.like(pattern, escape="\\"),
+            models.Evaluation.title.ilike(pattern, escape="\\"),
+            models.Evaluation.output_type.ilike(pattern, escape="\\"),
+            models.Evaluation.report_text.ilike(pattern, escape="\\") if deep else false(),
+            models.Player.name.ilike(pattern, escape="\\"),
         ))
         .order_by(models.Evaluation.id.desc())
     )
@@ -168,9 +171,9 @@ def search(
                     models.TrainingSession.id.in_(shared_training) if shared_training
                     else models.TrainingSession.id.is_(None)))
         .filter(or_(
-            models.TrainingSession.title.like(pattern, escape="\\"),
-            models.TrainingSession.program_text.like(pattern, escape="\\"),
-            models.Player.name.like(pattern, escape="\\"),
+            models.TrainingSession.title.ilike(pattern, escape="\\"),
+            models.TrainingSession.program_text.ilike(pattern, escape="\\") if deep else false(),
+            models.Player.name.ilike(pattern, escape="\\"),
         ))
         .order_by(models.TrainingSession.id.desc())
     )
@@ -183,9 +186,9 @@ def search(
                     models.TeamReport.id.in_(shared_team_reports) if shared_team_reports
                     else models.TeamReport.id.is_(None)))
         .filter(or_(
-            models.TeamReport.output_type.like(pattern, escape="\\"),
-            models.TeamReport.focus_prompt.like(pattern, escape="\\"),
-            models.TeamReport.report_text.like(pattern, escape="\\"),
+            models.TeamReport.output_type.ilike(pattern, escape="\\"),
+            models.TeamReport.focus_prompt.ilike(pattern, escape="\\") if deep else false(),
+            models.TeamReport.report_text.ilike(pattern, escape="\\") if deep else false(),
         ))
         .order_by(models.TeamReport.id.desc())
     )
@@ -198,13 +201,13 @@ def search(
                     models.GameReport.id.in_(shared_packets) if shared_packets
                     else models.GameReport.id.is_(None)))
         .filter(or_(
-            models.GameReport.title.like(pattern, escape="\\"),
-            models.GameReport.opponent_name.like(pattern, escape="\\"),
-            models.GameReport.opponent_a_name.like(pattern, escape="\\"),
-            models.GameReport.focus_prompt.like(pattern, escape="\\"),
-            models.GameReport.scouting_notes.like(pattern, escape="\\"),
-            models.GameReport.box_score.like(pattern, escape="\\"),
-            models.GameReport.report_text.like(pattern, escape="\\"),
+            models.GameReport.title.ilike(pattern, escape="\\"),
+            models.GameReport.opponent_name.ilike(pattern, escape="\\"),
+            models.GameReport.opponent_a_name.ilike(pattern, escape="\\"),
+            models.GameReport.focus_prompt.ilike(pattern, escape="\\") if deep else false(),
+            models.GameReport.scouting_notes.ilike(pattern, escape="\\") if deep else false(),
+            models.GameReport.box_score.ilike(pattern, escape="\\") if deep else false(),
+            models.GameReport.report_text.ilike(pattern, escape="\\") if deep else false(),
         ))
         .order_by(models.GameReport.id.desc())
     )
@@ -213,10 +216,10 @@ def search(
     # Tracked games and the scouting reports written off them. The report is
     # per-coach, so a match on someone else's report must not surface here —
     # only this coach's own, alongside the game's own legacy report.
-    mine_scouted = {
+    mine_scouted = set() if not deep else {
         r.game_id for r in db.query(models.GameScoutingReport)
         .filter(models.GameScoutingReport.coach_id == coach.id,
-                models.GameScoutingReport.report_text.like(pattern, escape="\\"))
+                models.GameScoutingReport.report_text.ilike(pattern, escape="\\"))
         .all()
     }
     scouting_q = (
@@ -225,9 +228,9 @@ def search(
                     models.GameSession.team_id.in_(team_ids) if team_ids
                     else models.GameSession.id.is_(None)))
         .filter(or_(
-            models.GameSession.opponent_name.like(pattern, escape="\\"),
-            models.GameSession.location.like(pattern, escape="\\"),
-            models.GameSession.ai_scouting_report.like(pattern, escape="\\"),
+            models.GameSession.opponent_name.ilike(pattern, escape="\\"),
+            models.GameSession.location.ilike(pattern, escape="\\"),
+            models.GameSession.ai_scouting_report.ilike(pattern, escape="\\") if deep else false(),
             models.GameSession.id.in_(mine_scouted) if mine_scouted
             else models.GameSession.id.is_(None),
         ))

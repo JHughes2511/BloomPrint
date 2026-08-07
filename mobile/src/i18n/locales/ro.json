@@ -2522,7 +2522,7 @@
     "joiningBanner": "Intri în {{team}}"
   },
   "search": {
-    "placeholder": "Caută în tot",
+    "placeholder": "Caută",
     "seeAll": "Vezi toate ({{count}})",
     "title": "Căutare",
     "typeToSearch": "Scrie pentru a căuta în tot"

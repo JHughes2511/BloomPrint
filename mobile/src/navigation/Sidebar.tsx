@@ -48,6 +48,11 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
   const [askOpen, setAskOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResults | null>(null);
+  // The term whose answer we actually have. "No matches" is a statement about a
+  // finished search, so it must not be said about one still in flight — on the
+  // first letter typed there is nothing to show yet, and claiming there are no
+  // matches for a quarter of a second is worse than showing nothing.
+  const [settled, setSettled] = useState<string | null>(null);
   const [unread, setUnread] = useState(0);
 
   const countUnread = useCallback(() => {
@@ -65,16 +70,22 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
   // ignoring what you typed.
   useEffect(() => {
     const term = query.trim();
-    if (term.length < 2) {
+    if (!term) {
       setResults(null);
+      setSettled(null);
       return;
     }
     let cancelled = false;
+    // Short enough to feel like it is keeping up with typing. The out-of-order
+    // guard above is what makes a delay this small safe.
     const timer = setTimeout(() => {
       searchAPI.all(term)
-        .then((r: SearchResults) => { if (!cancelled) setResults(r); })
-        .catch(() => { if (!cancelled) setResults(null); });
-    }, 220);
+        .then((r: SearchResults) => { if (!cancelled) { setResults(r); setSettled(term); } })
+        // The previous results stay on screen rather than being wiped: emptying
+        // the list on every keystroke makes a list that is actually updating
+        // look like one that keeps losing its mind.
+        .catch(() => {});
+    }, 90);
     return () => { cancelled = true; clearTimeout(timer); };
   }, [query]);
 
@@ -143,7 +154,7 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
         )}
       </View>
 
-      {query.trim().length >= 2 && (
+      {query.trim().length >= 1 && (groups.length > 0 || settled === query.trim()) && (
         <View style={s.results}>
           {groups.length === 0 ? (
             <Text style={s.noResults}>{tr('common.noResults', { defaultValue: 'No matches' })}</Text>

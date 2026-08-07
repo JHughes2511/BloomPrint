@@ -2522,7 +2522,7 @@
     "joiningBanner": "{{team}} takımına katılıyorsun"
   },
   "search": {
-    "placeholder": "Her şeyde ara",
+    "placeholder": "Ara",
     "seeAll": "Tümünü gör ({{count}})",
     "title": "Arama",
     "typeToSearch": "Her şeyde aramak için yazın"

@@ -2522,7 +2522,7 @@
     "joiningBanner": "{{team}} से जुड़ रहे हैं"
   },
   "search": {
-    "placeholder": "सब कुछ खोजें",
+    "placeholder": "खोजें",
     "seeAll": "सभी {{count}} देखें",
     "title": "खोज",
     "typeToSearch": "सब कुछ खोजने के लिए टाइप करें"

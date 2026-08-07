@@ -2522,7 +2522,7 @@
     "joiningBanner": "Prisijungi prie {{team}}"
   },
   "search": {
-    "placeholder": "Ieškoti visur",
+    "placeholder": "Ieškoti",
     "seeAll": "Rodyti visus ({{count}})",
     "title": "Paieška",
     "typeToSearch": "Rašykite, kad ieškotumėte visur"

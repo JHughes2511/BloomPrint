@@ -2522,7 +2522,7 @@
     "joiningBanner": "Придружујеш се екипи {{team}}"
   },
   "search": {
-    "placeholder": "Претражи све",
+    "placeholder": "Претражи",
     "seeAll": "Прикажи све ({{count}})",
     "title": "Претрага",
     "typeToSearch": "Унесите за претрагу свега"

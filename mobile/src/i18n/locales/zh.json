@@ -2522,7 +2522,7 @@
     "joiningBanner": "正在加入 {{team}}"
   },
   "search": {
-    "placeholder": "搜索全部",
+    "placeholder": "搜索",
     "seeAll": "查看全部 {{count}} 条",
     "title": "搜索",
     "typeToSearch": "输入以搜索全部内容"

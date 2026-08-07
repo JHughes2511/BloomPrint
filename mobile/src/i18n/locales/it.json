@@ -2522,7 +2522,7 @@
     "joiningBanner": "Entri in {{team}}"
   },
   "search": {
-    "placeholder": "Cerca in tutto",
+    "placeholder": "Cerca",
     "seeAll": "Vedi tutti ({{count}})",
     "title": "Cerca",
     "typeToSearch": "Digita per cercare in tutto"

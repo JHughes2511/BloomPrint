@@ -2522,7 +2522,7 @@
     "joiningBanner": "Går med i {{team}}"
   },
   "search": {
-    "placeholder": "Sök i allt",
+    "placeholder": "Sök",
     "seeAll": "Visa alla {{count}}",
     "title": "Sök",
     "typeToSearch": "Skriv för att söka i allt"

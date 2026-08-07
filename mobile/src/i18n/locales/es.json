@@ -2522,7 +2522,7 @@
     "joiningBanner": "Te unes a {{team}}"
   },
   "search": {
-    "placeholder": "Buscar en todo",
+    "placeholder": "Buscar",
     "seeAll": "Ver los {{count}}",
     "title": "Buscar",
     "typeToSearch": "Escribe para buscar en todo"

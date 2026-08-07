@@ -2522,7 +2522,7 @@
     "joiningBanner": "Μπαίνεις στην {{team}}"
   },
   "search": {
-    "placeholder": "Αναζήτηση σε όλα",
+    "placeholder": "Αναζήτηση",
     "seeAll": "Δείτε και τα {{count}}",
     "title": "Αναζήτηση",
     "typeToSearch": "Πληκτρολογήστε για αναζήτηση σε όλα"

@@ -2522,7 +2522,7 @@
     "joiningBanner": "Sumasali sa {{team}}"
   },
   "search": {
-    "placeholder": "Hanapin ang lahat",
+    "placeholder": "Maghanap",
     "seeAll": "Tingnan lahat ({{count}})",
     "title": "Maghanap",
     "typeToSearch": "Mag-type para maghanap sa lahat"

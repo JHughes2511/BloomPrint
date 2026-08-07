@@ -2522,7 +2522,7 @@
     "joiningBanner": "Ви приєднуєтесь до {{team}}"
   },
   "search": {
-    "placeholder": "Шукати всюди",
+    "placeholder": "Пошук",
     "seeAll": "Показати всі ({{count}})",
     "title": "Пошук",
     "typeToSearch": "Введіть запит для пошуку всюди"

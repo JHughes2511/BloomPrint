@@ -2522,7 +2522,7 @@
     "joiningBanner": "{{team}} に参加します"
   },
   "search": {
-    "placeholder": "すべてを検索",
+    "placeholder": "検索",
     "seeAll": "すべて表示（{{count}}件）",
     "title": "検索",
     "typeToSearch": "入力してすべてを検索"

@@ -2522,7 +2522,7 @@
     "joiningBanner": "מצטרף ל־{{team}}"
   },
   "search": {
-    "placeholder": "חיפוש בכל",
+    "placeholder": "חיפוש",
     "seeAll": "הצג את כל {{count}}",
     "title": "חיפוש",
     "typeToSearch": "הקלד כדי לחפש בכל"

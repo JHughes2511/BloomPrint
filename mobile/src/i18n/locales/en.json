@@ -2522,7 +2522,7 @@
     "joiningBanner": "Joining {{team}}"
   },
   "search": {
-    "placeholder": "Search everything",
+    "placeholder": "Search",
     "seeAll": "See all {{count}}",
     "title": "Search",
     "typeToSearch": "Type to search across everything"

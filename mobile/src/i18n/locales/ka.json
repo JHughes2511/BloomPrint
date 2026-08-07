@@ -2522,7 +2522,7 @@
     "joiningBanner": "უერთდები გუნდს {{team}}"
   },
   "search": {
-    "placeholder": "ყველგან ძებნა",
+    "placeholder": "ძებნა",
     "seeAll": "ყველას ნახვა ({{count}})",
     "title": "ძებნა",
     "typeToSearch": "აკრიფეთ ყველგან საძებნად"

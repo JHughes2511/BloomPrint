@@ -2522,7 +2522,7 @@
     "joiningBanner": "Вы вступаете в {{team}}"
   },
   "search": {
-    "placeholder": "Искать везде",
+    "placeholder": "Поиск",
     "seeAll": "Показать все ({{count}})",
     "title": "Поиск",
     "typeToSearch": "Введите запрос для поиска везде"

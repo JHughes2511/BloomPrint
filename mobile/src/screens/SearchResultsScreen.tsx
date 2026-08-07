@@ -33,19 +33,25 @@ export default function SearchResultsScreen() {
 
   const [query, setQuery] = useState<string>(route.params?.q ?? '');
   const [results, setResults] = useState<SearchResults | null>(null);
+  // The term we actually have an answer for — see the sidebar: "no results" is
+  // a claim about a finished search, not a pending one.
+  const [settled, setSettled] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const term = query.trim();
-    if (term.length < 2) { setResults(null); return; }
+    if (!term) { setResults(null); setSettled(null); return; }
     let cancelled = false;
     setLoading(true);
+    // Same pacing as the sidebar, and the same reason: results that arrive a
+    // keystroke behind read as live; results that arrive a beat later read as
+    // a page load.
     const timer = setTimeout(() => {
       searchAPI.all(term, 50)
-        .then((r: SearchResults) => { if (!cancelled) setResults(r); })
-        .catch(() => { if (!cancelled) setResults(null); })
+        .then((r: SearchResults) => { if (!cancelled) { setResults(r); setSettled(term); } })
+        .catch(() => {})
         .finally(() => { if (!cancelled) setLoading(false); });
-    }, 220);
+    }, 90);
     return () => { cancelled = true; clearTimeout(timer); };
   }, [query]);
 
@@ -90,7 +96,8 @@ export default function SearchResultsScreen() {
             <ActivityIndicator color={t.accent} style={{ marginTop: 40 }} />
           ) : groups.length === 0 ? (
             <Text style={s.empty}>
-              {query.trim().length >= 2 ? tr('common.noResults') : tr('search.typeToSearch')}
+              {!query.trim() ? tr('search.typeToSearch')
+                : settled === query.trim() ? tr('common.noResults') : ' '}
             </Text>
           ) : (
             groups.map(g => (
