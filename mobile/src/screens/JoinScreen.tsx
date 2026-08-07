@@ -186,6 +186,7 @@ export default function JoinScreen() {
                   joinTeam: info?.team_name,
                   joinProgram: info?.program,
                   joinLevel: info?.competition_level,
+                  joinConference: info?.conference,
                 })}
               >
                 <Ionicons name="people-outline" size={20} color={t.accent} />

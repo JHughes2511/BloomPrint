@@ -56,6 +56,11 @@ def peek(code: str, request: Request, db: Session = Depends(get_db)):
         "program": (link.creator.program_name if link.creator else "") or (link.team.name if link.team else ""),
         "competition_level": (link.team.competition_level if link.team else None)
                              or (link.creator.competition_level if link.creator else None),
+        # Carried for the same reason as the level: preselecting College without
+        # it drops an invited coach onto a required Conference field, outlined
+        # in red, asking a question the invitation already answers. Doubles as
+        # the league/association for every other level.
+        "conference": link.creator.conference if link.creator else None,
     }
 
 

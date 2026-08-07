@@ -216,6 +216,9 @@ export default function LoginScreen() {
     // Editable, not locked: a scout from another club types over it.
     if (p.joinProgram) setProgram(String(p.joinProgram));
     if (p.joinLevel) setCompetitionLevel(String(p.joinLevel));
+    // Without this, preselecting College lands them on a required Conference
+    // field they were never asked about — red before they have typed anything.
+    if (p.joinConference) setConference(String(p.joinConference));
   }, [joinRoute?.params?.joinCode]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   const [showLevelPicker, setShowLevelPicker] = useState(false);
