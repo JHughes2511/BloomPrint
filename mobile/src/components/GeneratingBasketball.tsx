@@ -38,12 +38,19 @@ export function parseGenProgress(label?: string): number | undefined {
   // estimated curve the bar crawled to 99% within a minute and then sat there
   // for the rest of a long film — a number that says "done" while the work has
   // barely started is worse than no number. Pin it low; the segments take over.
+  // The pre-scan reports its own percentage on a long film. It is a real
+  // measurement of a phase that can run for minutes, so it drives the bar —
+  // over the first tenth of it, because the analysis proper follows.
+  const scan = label.match(/^job:scanning:(\d+)$/);
+  if (scan) return Math.min(9, Math.round(parseInt(scan[1], 10) / 11));
   if (label === 'job:scanning') return 3;
+  // Segments start where the scan left off (it tops out at 9) and run to 92, so
+  // the bar never steps backwards between the two phases.
   const c = label.match(/^job:segment:(\d+):(\d+)$/);
-  if (c) return Math.min(92, Math.round((parseInt(c[1], 10) / parseInt(c[2], 10)) * 90));
+  if (c) return Math.min(92, 10 + Math.round((parseInt(c[1], 10) / parseInt(c[2], 10)) * 82));
   if (label === 'job:synthesizing') return 95;
   const m = label.match(/segment\s+(\d+)\s+of\s+(\d+)/i);
-  if (m) return Math.min(92, Math.round((parseInt(m[1], 10) / parseInt(m[2], 10)) * 90));
+  if (m) return Math.min(92, 10 + Math.round((parseInt(m[1], 10) / parseInt(m[2], 10)) * 82));
   if (/synthesiz/i.test(label)) return 95;
   return undefined;
 }
@@ -59,7 +66,7 @@ export function jobProgressLabel(label: string | undefined, tr: (k: string, o?: 
       ? tr('jobProgress.uploadingOf', { ...o, i: up[4], n: up[5] })
       : tr('jobProgress.uploading', o);
   }
-  if (label === 'job:scanning') return tr('jobProgress.scanning');
+  if (label === 'job:scanning' || /^job:scanning:\d+$/.test(label)) return tr('jobProgress.scanning');
   if (label === 'job:synthesizing') return tr('jobProgress.synthesizing');
   const c = label.match(/^job:segment:(\d+):(\d+)$/);
   if (c) return tr('jobProgress.segment', { i: c[1], n: c[2] });

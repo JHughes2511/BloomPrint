@@ -253,15 +253,41 @@ export const evalsAPI = {
   teamReports: (limit = 30) =>
     api.get('/evaluations/team-reports/recent', { params: { limit } }).then(r => r.data),
   // Poll a job until it finishes, returning the result object. Throws on error.
+  /**
+   * Follow a background job to completion.
+   *
+   * There is no wall-clock limit, because there is no honest one to pick: a
+   * three-hour film takes as long as it takes, and a thirty-minute cap told the
+   * coach "Generation timed out" while the server was still working — the job
+   * then finished and appeared later, contradicting the error they had just
+   * been shown.
+   *
+   * What is worth giving up on is a job that has stopped moving. Progress that
+   * hasn't changed in STALL_MINUTES means nothing is happening; anything else
+   * is just work. Even then the job is not cancelled — it is still running, and
+   * the caller is told exactly that.
+   */
   awaitJob: async (jobId: number, onTick?: (status: string) => void) => {
-    for (let i = 0; i < 450; i++) {           // ~30 min cap at 4s intervals
+    const EVERY_MS = 4000;
+    const STALL_MINUTES = 25;
+    const stallLimit = (STALL_MINUTES * 60_000) / EVERY_MS;
+    let last = '';
+    let same = 0;
+    for (;;) {
       const j = await api.get(`/evaluations/jobs/${jobId}`).then(r => r.data);
       if (j.status === 'done') return j.result;
       if (j.status === 'error') throw new Error(j.error || 'Generation failed');
-      onTick?.(j.progress || j.status);
-      await new Promise(res => setTimeout(res, 4000));
+      const p = j.progress || j.status || '';
+      if (p !== last) { last = p; same = 0; } else { same++; }
+      if (same >= stallLimit) {
+        throw new Error(
+          'This is taking longer than expected. It’s still running on the server — ' +
+          'you can leave this screen and it will appear when it’s done.',
+        );
+      }
+      onTick?.(p);
+      await new Promise(res => setTimeout(res, EVERY_MS));
     }
-    throw new Error('Generation timed out');
   },
   deleteTeamReport: (id: number) =>
     api.delete(`/evaluations/team-reports/${id}`).then(r => r.data),

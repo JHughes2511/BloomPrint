@@ -221,9 +221,15 @@ def _floor_interval(duration: float) -> float:
     return 15.0
 
 
-def _motion_profile(video_path: str) -> tuple[float, list[tuple[float, float]]]:
+def _motion_profile(video_path: str, on_progress=None) -> tuple[float, list[tuple[float, float]]]:
     """Cheap pass: return (duration, [(timestamp, motion_score)]). Motion score is
-    the mean abs frame-to-frame difference on a tiny grayscale thumbnail."""
+    the mean abs frame-to-frame difference on a tiny grayscale thumbnail.
+
+    "Cheap" is relative to analysing the film, not to nothing: every step is a
+    seek and a decode, so the count is what matters. A three-hour film at a
+    two-second step is 5,400 of them, which is minutes of work on a small
+    container with no sign of life for the coach watching — see on_progress.
+    """
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         raise ValueError(f"Cannot open video: {video_path}")
@@ -233,12 +239,31 @@ def _motion_profile(video_path: str) -> tuple[float, list[tuple[float, float]]]:
     if duration <= 0:
         cap.release()
         return 0.0, []
-    # Coarser scan for longer film so the scan itself stays fast.
-    scan_step = 0.5 if duration <= 300 else 1.0 if duration <= 1800 else 2.0
+    # Coarser scan for longer film so the scan itself stays fast. Beyond an hour
+    # the step widens again: past that length the pre-scan, not the analysis,
+    # becomes the longest part of the job, and the sampling it feeds is picking
+    # a few hundred frames out of hours — a four-second grid is ample for that.
+    scan_step = (
+        0.5 if duration <= 300
+        else 1.0 if duration <= 1800
+        else 2.0 if duration <= 3600
+        else 4.0
+    )
     scores: list[tuple[float, float]] = []
     prev = None
     t = 0.0
+    last_pct = -1
     while t <= duration:
+        if on_progress:
+            pct = int(t / duration * 100)
+            # Only on change: this loop runs thousands of times and each report
+            # is a database write.
+            if pct != last_pct:
+                last_pct = pct
+                try:
+                    on_progress(pct)
+                except Exception:
+                    pass
         cap.set(cv2.CAP_PROP_POS_MSEC, t * 1000)
         ret, frame = cap.read()
         if not ret:
@@ -279,10 +304,11 @@ def _select_adaptive_timestamps(duration: float, scores: list[tuple[float, float
     return sorted(chosen)[:budget]
 
 
-def _extract_frames_adaptive(video_path: str, budget_cap: int | None = None) -> list[tuple[float, bytes]]:
+def _extract_frames_adaptive(video_path: str, budget_cap: int | None = None,
+                             on_progress=None) -> list[tuple[float, bytes]]:
     """Motion-aware frame extraction: pre-scan for motion, then grab full-res
     frames at the selected timestamps."""
-    duration, scores = _motion_profile(video_path)
+    duration, scores = _motion_profile(video_path, on_progress=on_progress)
     if duration <= 0 or not scores:
         return _extract_frames_interval(video_path, 4.0, budget_cap or 200)
     budget = _frame_budget(duration)
@@ -815,7 +841,16 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
             pass
     frames = []
     for p in video_paths:
-        frames += _extract_frames_adaptive(p, budget_cap=per_cap)
+        # A long film spends minutes here before the first segment. Reporting
+        # the scan's own percentage is what tells the coach it is working, and
+        # what tells the app the job is alive rather than wedged.
+        def _scan_progress(pct: int, _p=p):
+            if progress:
+                try:
+                    progress(0, 1, f"job:scanning:{pct}")
+                except Exception:
+                    pass
+        frames += _extract_frames_adaptive(p, budget_cap=per_cap, on_progress=_scan_progress)
     frames = frames[:TOTAL_CAP]
     if not frames:
         return [types.TextContent(type="text", text="Error: no frames could be extracted.")]
