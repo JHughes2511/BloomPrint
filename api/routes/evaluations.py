@@ -12,7 +12,7 @@ from ..auth import get_current_coach
 from .. import models, schemas
 from ..softdelete import soft_delete
 from ..ownership import get_owned
-from ..ai_models import OPUS, text_of
+from ..ai_models import OPUS, text_of, long_text
 from ..uploadguard import read_upload
 
 UPLOAD_DIR = Path("uploads")
@@ -346,14 +346,7 @@ async def submit_evaluation(
     bim_prompt = build_prompt(output_type, coach.program_name, competition_level, coach.weight, player.name)
     bim_prompt += additional_focus_directive(combined_focus)
 
-    import anthropic
-    client = anthropic.AsyncAnthropic()
-    response = await client.messages.create(
-        model=OPUS,
-        max_tokens=16000,
-        messages=[{"role": "user", "content": bim_prompt}],
-    )
-    report_text = text_of(response)
+    report_text = await long_text(bim_prompt)
     eval_record = _finalize_eval(
         db, player_id=player_id, coach=coach, output_type=output_type,
         competition_level=competition_level, coach_notes=coach_notes,

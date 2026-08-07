@@ -2314,7 +2314,8 @@
     "segment": "正在分析第 {{i}} 段，共 {{n}} 段",
     "synthesizing": "正在汇总报告",
     "uploading": "正在上传影片 — {{pct}}%（{{total}} 中已上传 {{sent}}）",
-    "uploadingOf": "正在上传第 {{i}} 段影片，共 {{n}} 段 — {{pct}}%（{{total}} 中已上传 {{sent}}）"
+    "uploadingOf": "正在上传第 {{i}} 段影片，共 {{n}} 段 — {{pct}}%（{{total}} 中已上传 {{sent}}）",
+    "writing": "正在撰写报告 — {{words}} 字"
   },
   "notifs": {
     "seasonNew": {

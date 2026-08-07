@@ -79,6 +79,55 @@ def _client() -> anthropic.Anthropic:
     return _anthropic_client
 
 
+def _writing_hook(progress):
+    """Turn a job's progress callback into the word counter `_long_answer` wants."""
+    if not progress:
+        return None
+
+    def report(words: int) -> None:
+        try:
+            progress(1, 1, f"job:writing:{words}")
+        except Exception:
+            pass
+
+    return report
+
+
+def _long_answer(messages: list[dict], max_tokens: int, on_words=None) -> str:
+    """One long completion, streamed.
+
+    A non-streaming request carries a ten-minute ceiling: the SDK abandons it at
+    600s and silently retries twice, so a synthesis that ran long showed the
+    same frozen progress label for half an hour and then failed — after paying
+    for the work three times. Writing a full game report from thirty segments
+    of notes is exactly the call that runs long. Streaming has no such ceiling.
+
+    It also makes the phase visible. The old code sent "job:synthesizing" once
+    and then said nothing for however long the report took, which is
+    indistinguishable from a dead process — to the coach watching it, and to
+    the client's stall detector, which gives up after 25 minutes of a progress
+    label that has not changed. `on_words` is called as the text arrives, so
+    the last phase of a long film reports itself like every other phase.
+    """
+    out: list[str] = []
+    words = 0
+    told = 0
+    with _client().messages.stream(model=OPUS, max_tokens=max_tokens, messages=messages) as stream:
+        for chunk in stream.text_stream:
+            out.append(chunk)
+            if on_words is None:
+                continue
+            words += chunk.count(" ")
+            # Every ~100 words, not every token: this writes a database row.
+            if words - told >= 100:
+                told = words
+                try:
+                    on_words(words)
+                except Exception:
+                    pass
+    return "".join(out)
+
+
 
 
 # The longest edge we keep on a sampled frame.
@@ -927,11 +976,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
         if transcript_text:
             content.append({"type": "text", "text": f"\nAUDIO TRANSCRIPT FROM VIDEO:\n{transcript_text}\n"})
         content += _frames_content(frames)
-        response = _client().messages.create(
-            model=OPUS, max_tokens=16000,
-            messages=[{"role": "user", "content": content}],
-        )
-        answer = text_of(response)
+        answer = _long_answer([{"role": "user", "content": content}], 16000, _writing_hook(progress))
     else:
         # ── Multi-pass: map each chunk to observations, then synthesize ──
         chunks = [frames[i:i + CHUNK] for i in range(0, len(frames), CHUNK)]
@@ -987,9 +1032,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
         if transcript_text:
             synth += f"AUDIO TRANSCRIPT:\n{transcript_text[:2000]}\n\n"
         synth += "\n\n".join(seg_notes)
-        response = _client().messages.create(model=OPUS, max_tokens=16000,
-                                             messages=[{"role": "user", "content": synth}])
-        answer = text_of(response)
+        answer = _long_answer([{"role": "user", "content": synth}], 16000, _writing_hook(progress))
 
     header = f"BIM {output_type.upper().replace('_', ' ')} — {program} | {level}\n\n"
     return [types.TextContent(type="text", text=header + answer)]

@@ -2314,7 +2314,8 @@
     "segment": "Аналіз сегмента {{i}} з {{n}}",
     "synthesizing": "Формування звіту",
     "uploading": "Завантаження запису — {{pct}} % ({{sent}} із {{total}})",
-    "uploadingOf": "Завантаження запису {{i}} із {{n}} — {{pct}} % ({{sent}} із {{total}})"
+    "uploadingOf": "Завантаження запису {{i}} із {{n}} — {{pct}} % ({{sent}} із {{total}})",
+    "writing": "Готується звіт — {{words}} слів"
   },
   "notifs": {
     "seasonNew": {

@@ -2314,7 +2314,8 @@
     "segment": "Segment {{i}} van {{n}} analyseren",
     "synthesizing": "Rapport samenstellen",
     "uploading": "Video uploaden — {{pct}}% ({{sent}} van {{total}})",
-    "uploadingOf": "Video {{i}} van {{n}} uploaden — {{pct}}% ({{sent}} van {{total}})"
+    "uploadingOf": "Video {{i}} van {{n}} uploaden — {{pct}}% ({{sent}} van {{total}})",
+    "writing": "Rapport wordt geschreven — {{words}} woorden"
   },
   "notifs": {
     "seasonNew": {

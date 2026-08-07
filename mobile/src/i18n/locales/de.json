@@ -2314,7 +2314,8 @@
     "segment": "Abschnitt {{i}} von {{n}} wird analysiert",
     "synthesizing": "Bericht wird zusammengestellt",
     "uploading": "Video wird hochgeladen – {{pct}} % ({{sent}} von {{total}})",
-    "uploadingOf": "Video {{i}} von {{n}} wird hochgeladen – {{pct}} % ({{sent}} von {{total}})"
+    "uploadingOf": "Video {{i}} von {{n}} wird hochgeladen – {{pct}} % ({{sent}} von {{total}})",
+    "writing": "Bericht wird geschrieben – {{words}} Wörter"
   },
   "notifs": {
     "seasonNew": {

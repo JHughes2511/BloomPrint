@@ -15,7 +15,7 @@ from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
 from ..softdelete import soft_delete
 from ..ownership import owns
-from ..ai_models import OPUS, text_of
+from ..ai_models import long_text
 from ..uploadguard import read_upload
 
 
@@ -861,22 +861,15 @@ async def generate_game_report(
         raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY is not configured on the server.")
 
     try:
-        import anthropic
-        client = anthropic.AsyncAnthropic()
-        response = await client.messages.create(
-            model=OPUS,
-            max_tokens=16000,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text_blocks = [b for b in response.content if hasattr(b, "text")]
-        if not text_blocks:
+        report = await long_text(prompt)
+        if not report.strip():
             raise HTTPException(status_code=500, detail="AI returned no content")
     except HTTPException:
         raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
 
-    _save_version(db, gr, text_blocks[0].text)
+    _save_version(db, gr, report)
     db.commit()
     db.refresh(gr)
     return _build_out(gr, db)
@@ -954,15 +947,8 @@ async def generate_team_training(
     prompt = "\n".join(sections)
 
     try:
-        import anthropic
-        client = anthropic.AsyncAnthropic()
-        response = await client.messages.create(
-            model=OPUS,
-            max_tokens=16000,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text_blocks = [b for b in response.content if hasattr(b, "text")]
-        if not text_blocks:
+        program = await long_text(prompt)
+        if not program.strip():
             raise HTTPException(status_code=500, detail="AI returned no content")
     except HTTPException:
         raise
@@ -970,7 +956,7 @@ async def generate_team_training(
         raise HTTPException(status_code=500, detail=f"AI generation failed: {exc}")
 
     gr.output_type = "team_training"
-    _save_version(db, gr, text_blocks[0].text)
+    _save_version(db, gr, program)
     db.commit()
     db.refresh(gr)
     return _build_out(gr, db)
@@ -1045,14 +1031,7 @@ async def correct_game_report(
         f"CORRECTION:\n{body.correction}\n\nUPDATED REPORT:"
     )
     try:
-        import anthropic
-        client = anthropic.AsyncAnthropic()
-        response = await client.messages.create(
-            model=OPUS,
-            max_tokens=16000,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        _save_version(db, gr, text_of(response).strip())
+        _save_version(db, gr, (await long_text(prompt)).strip())
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Correction failed: {exc}")
 
@@ -1128,14 +1107,7 @@ async def regenerate_game_report(
         f"CORRECTIONS:\n{corrections_text}\n\nUPDATED REPORT:"
     )
     try:
-        import anthropic
-        client = anthropic.AsyncAnthropic()
-        response = await client.messages.create(
-            model=OPUS,
-            max_tokens=16000,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        _save_version(db, gr, text_of(response).strip())
+        _save_version(db, gr, (await long_text(prompt)).strip())
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Correction failed: {exc}")
     for c in pending:

@@ -2314,7 +2314,8 @@
     "segment": "Analizuojamas {{i}} segmentas iš {{n}}",
     "synthesizing": "Rengiama ataskaita",
     "uploading": "Įrašas įkeliamas — {{pct}} % ({{sent}} iš {{total}})",
-    "uploadingOf": "Įkeliamas {{i}} įrašas iš {{n}} — {{pct}} % ({{sent}} iš {{total}})"
+    "uploadingOf": "Įkeliamas {{i}} įrašas iš {{n}} — {{pct}} % ({{sent}} iš {{total}})",
+    "writing": "Rašoma ataskaita — {{words}} žodžių"
   },
   "notifs": {
     "seasonNew": {

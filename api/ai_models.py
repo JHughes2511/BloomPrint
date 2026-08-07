@@ -64,3 +64,27 @@ def text_of(resp) -> str:
     if getattr(resp, "stop_reason", None) == "refusal":
         raise Refusal("The model declined to answer this request.")
     return "".join(b.text for b in resp.content if hasattr(b, "text"))
+
+
+async def long_text(prompt: str, *, model: str = OPUS, max_tokens: int = 16000) -> str:
+    """A full-length report, streamed.
+
+    Non-streaming requests carry a ten-minute ceiling: the SDK abandons the call
+    at 600s and silently retries it twice, so a report that ran long left the
+    coach watching a frozen screen for half an hour and then failed — having
+    paid for the work three times over. A full game report against a packet's
+    worth of film notes is exactly the call that runs long.
+
+    Streaming has no such ceiling. Nothing about the result changes; the text is
+    collected and returned whole.
+    """
+    import anthropic
+
+    client = anthropic.AsyncAnthropic()
+    async with client.messages.stream(
+        model=model,
+        max_tokens=max(max_tokens, MIN_MAX_TOKENS),
+        messages=[{"role": "user", "content": prompt}],
+    ) as stream:
+        message = await stream.get_final_message()
+    return text_of(message)
