@@ -15,6 +15,7 @@ import {
 import Sheet from '../components/Sheet';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useGoUp } from '../navigation/goUp';
+import TeamInviteSheet from '../components/TeamInviteSheet';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { teamStaffAPI, staffMessagesAPI, coachesAPI } from '../api/client';
@@ -56,6 +57,7 @@ export default function TeamDetailScreen() {
   const [creatingSub, setCreatingSub] = useState(false);
 
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [linkOpen, setLinkOpen] = useState(false);
   const [inviteSearch, setInviteSearch] = useState('');
   const [inviteResults, setInviteResults] = useState<any[]>([]);
   const [inviteSearching, setInviteSearching] = useState(false);
@@ -255,6 +257,11 @@ export default function TeamDetailScreen() {
                 <Ionicons name="add" size={14} color={t.accent} />
                 <Text style={styles.actText} numberOfLines={1}>{tr('staffHub.subTeam')}</Text>
               </TouchableOpacity>
+              {/* The link/QR anyone can join with — see TeamInviteSheet. */}
+              <TouchableOpacity style={styles.actBtn} onPress={() => setLinkOpen(true)}>
+                <Ionicons name="qr-code-outline" size={14} color={t.accent} />
+                <Text style={styles.actText} numberOfLines={1}>{tr('teamInvite.button')}</Text>
+              </TouchableOpacity>
               <TouchableOpacity style={styles.actBtn} onPress={() => { setInviteSearch(''); setInviteResults([]); setInviteSearchedFor(''); setInviteOpen(true); }}>
                 <Ionicons name="person-add-outline" size={14} color={t.accent} />
                 <Text style={styles.actText} numberOfLines={1}>{tr('staffHub.invite')}</Text>
@@ -394,6 +401,13 @@ export default function TeamDetailScreen() {
             </View>
           </View>
         </Sheet>
+
+        <TeamInviteSheet
+          visible={linkOpen}
+          teamId={teamId}
+          teamName={team?.name}
+          onClose={() => setLinkOpen(false)}
+        />
 
         {/* Invite */}
         <Sheet visible={inviteOpen} transparent animationType="slide" onRequestClose={() => setInviteOpen(false)}>

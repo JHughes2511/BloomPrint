@@ -1637,7 +1637,9 @@
     "emptyNoPlayersInTeam": "이 팀에 아직 선수가 없습니다.",
     "importOneByOneHint": "또는 +를 눌러 선수를 한 명씩 추가하세요",
     "emptyNoPlayers": "아직 선수가 없습니다. 팀을 만들고 선수를 추가하세요.",
-    "teams": "팀"
+    "teams": "팀",
+    "removeFromMyRoster": "Remove from my roster",
+    "couldNotRemoveShared": "Could not remove that player from your roster."
   },
   "importScreen": {
     "titleRoster": "로스터 가져오기",
@@ -2478,6 +2480,44 @@
     "teamOwnerChanged": {
       "title": "팀 소유자 변경됨",
       "body": "{{coach}} 님이 이제 {{team}}의 소유자입니다."
-    }
+    },
+    "joinedViaLink": "{{name}} joined {{team}} through your invite link."
+  },
+  "teamInvite": {
+    "button": "Invite link",
+    "title": "Invite to team",
+    "sub": "Anyone who opens this joins {{team}} — players onto the roster, staff onto the team.",
+    "share": "Share",
+    "download": "Save QR",
+    "copied": "Link copied",
+    "hint": "Hold the code up to be scanned, or send the link. It keeps working until you revoke it.",
+    "joinedLabel": "Joined through this link ({{count}})",
+    "asPlayer": "Player",
+    "asStaff": "Staff",
+    "revokeAndNew": "Revoke & make a new link",
+    "revokeTitle": "Revoke this link?",
+    "revokeMessage": "The old link stops working straight away. Anyone who already joined stays on the team.",
+    "revoke": "Revoke",
+    "couldNotCreate": "Could not create an invite link.",
+    "couldNotRevoke": "Could not revoke that link.",
+    "shareMessage": "Join {{team}} on BloomPrint: {{url}}"
+  },
+  "join": {
+    "invitedBy": "{{name}} invited you to",
+    "whoAreYou": "Which are you?",
+    "iAmPlayer": "I'm a player",
+    "iAmPlayerSub": "Get your reports and training from your coach.",
+    "iAmStaff": "I'm a coach, scout or trainer",
+    "iAmStaffSub": "Join the team's staff.",
+    "whichOne": "Which one are you?",
+    "notListed": "Not listed?",
+    "yourName": "Your name",
+    "addMe": "Add me to the roster",
+    "joinAsStaffNow": "Join {{team}}",
+    "welcomeTitle": "You're in",
+    "joinedTeam": "You've joined {{team}}.",
+    "couldNotJoin": "Could not join with that link.",
+    "badLink": "This invite link is not valid or has been revoked.",
+    "goToApp": "Go to BloomPrint"
   }
 }

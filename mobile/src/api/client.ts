@@ -177,6 +177,9 @@ export const authAPI = {
 
 // ── Players ───────────────────────────────────────────────────────────────────
 export const playersAPI = {
+  /** Take a player off MY roster that a shared report put there. */
+  dropShared: (playerId: number) =>
+    api.delete(`/players/${playerId}/access`).then(r => r.data),
   list: (teamId?: number) =>
     api.get('/players', { params: teamId != null ? { team_id: teamId } : {} }).then(r => r.data),
 
@@ -681,6 +684,44 @@ export const transcribeAPI = {
     }).then(r => r.data.text as string);
   },
 };
+
+/**
+ * Team signup links — the QR a coach holds up, or texts.
+ *
+ * `join*` calls are the newcomer's side: `peek` needs no account at all, the
+ * rest need whichever session they just created.
+ */
+export const teamInviteAPI = {
+  mine: (teamId: number) =>
+    api.get(`/team-invites/${teamId}`).then(r => r.data),
+  create: (teamId: number) =>
+    api.post(`/team-invites/${teamId}`).then(r => r.data),
+  revoke: (linkId: number) =>
+    api.post(`/team-invites/link/${linkId}/revoke`).then(r => r.data),
+
+  peek: (code: string) =>
+    api.get(`/join/${encodeURIComponent(code)}`).then(r => r.data),
+  joinAsStaff: (code: string) =>
+    api.post(`/join/${encodeURIComponent(code)}/staff`).then(r => r.data),
+  unclaimedRoster: (code: string) =>
+    api.get(`/join/${encodeURIComponent(code)}/roster`).then(r => r.data),
+  joinAsPlayer: (code: string, body: { player_id?: number; name?: string }) =>
+    api.post(`/join/${encodeURIComponent(code)}/player`, body).then(r => r.data),
+};
+
+/** The address a QR encodes, so a phone's own camera can open it. */
+export function joinUrl(code: string): string {
+  const base = (typeof window !== 'undefined' && window.location?.origin)
+    ? window.location.origin
+    : 'https://bloomprint.org';
+  return `${base}/join/${code}`;
+}
+
+/** Pull the code out of whatever was scanned: our URL, or a bare code. */
+export function codeFromScan(value: string): string {
+  const m = String(value || '').trim().match(/\/join\/([^/?#\s]+)/);
+  return m ? decodeURIComponent(m[1]) : String(value || '').trim();
+}
 
 export const teamStaffAPI = {
   search: (q: string) =>

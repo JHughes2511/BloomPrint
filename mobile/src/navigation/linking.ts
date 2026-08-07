@@ -46,6 +46,10 @@ export const linking: LinkingOptions<any> = {
     screens: {
       // ── Signed out ────────────────────────────────────────────────────────
       RoleSelect: '',
+      // An invite link, openable with no account. Registered in all three
+      // navigators, so the same address works signed out, as a coach, or as a
+      // player — only one of them is ever mounted.
+      Join: 'join/:code',
       CoachLogin: 'login',
       PlayerLogin: 'player/login',
       PlayerRegister: 'player/register',
@@ -55,6 +59,7 @@ export const linking: LinkingOptions<any> = {
         path: 'home',
         screens: {
           Home: '',
+          Join: '/join/:code',
           CoachNotifications: 'notifications',
           CoachTrainingDetail: { path: 'training/:trainingId', ...id },
           StaffInbox: 'staff',
@@ -109,6 +114,7 @@ export const linking: LinkingOptions<any> = {
         path: 'my',
         screens: {
           PlayerHome: '',
+          Join: '/join/:code',
           PlayerReportDetail: { path: 'report/:reportId', ...id },
           PlayerTeamReportDetail: { path: 'team-report/:reportId', ...id },
         },

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../../components/KeyboardAwareScrollView';
@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { playerNotificationsAPI, playerProfileAPI, playerReportsAPI, playerLinkAPI } from '../../api/playerClient';
+import { takePendingJoin } from '../../navigation/pendingJoin';
 import { useTheme } from '../../theme/ThemeProvider';
 import { topPad } from '../../responsive/screenPadding';
 import { outputTypeLabel } from '../../utils/reportType';
@@ -37,6 +38,14 @@ export default function PlayerHomeScreen() {
   const styles = makeStyles(t);
   const { playerUser, logout, refreshUser } = usePlayerAuth();
   const navigation = useNavigation<any>();
+
+  // Finish a join that started before this account existed — signing up swaps
+  // the navigator, so the invite code was parked rather than carried.
+  useEffect(() => {
+    takePendingJoin().then(code => {
+      if (code) navigation.navigate('Join', { code });
+    });
+  }, []);   // eslint-disable-line react-hooks/exhaustive-deps
   const isLinked = !!playerUser?.player_id;
   const [unreadCount, setUnreadCount] = useState(0);
   const [reports, setReports] = useState<any[]>([]);

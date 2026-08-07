@@ -75,6 +75,7 @@ import TeamEvalScreen from './src/screens/TeamEvalScreen';
 
 // Role select
 import RoleSelectScreen from './src/screens/RoleSelectScreen';
+import JoinScreen from './src/screens/JoinScreen';
 
 // Player screens
 import PlayerLoginScreen from './src/screens/player/PlayerLoginScreen';
@@ -141,6 +142,8 @@ function HomeStack() {
       <Stack.Screen name="TeamDetail" component={TeamDetailScreen} />
       <Stack.Screen name="Conversation" component={ConversationScreen} />
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+      {/* Same link, already signed in: joins on the spot. */}
+      <Stack.Screen name="Join" component={JoinScreen} />
     </Stack.Navigator>
   );
 }
@@ -301,6 +304,7 @@ function PlayerHomeStack() {
       <Stack.Screen name="PlayerHome" component={PlayerHomeScreen} />
       <Stack.Screen name="PlayerReportDetail" component={PlayerReportDetailScreen} />
       <Stack.Screen name="PlayerTeamReportDetail" component={PlayerTeamReportDetailScreen} />
+      <Stack.Screen name="Join" component={JoinScreen} />
     </Stack.Navigator>
   );
 }
@@ -422,6 +426,8 @@ function PlayerTabs() {
 function AuthStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {/* An invite link has to open for someone with no account at all. */}
+      <Stack.Screen name="Join"           component={JoinScreen} />
       <Stack.Screen name="RoleSelect"     component={RoleSelectScreen} />
       <Stack.Screen name="CoachLogin"     component={LoginScreen} />
       <Stack.Screen name="PlayerLogin"    component={PlayerLoginScreen} />

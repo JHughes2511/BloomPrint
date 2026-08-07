@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, Switch } from 'react-native';
 import Sheet from '../components/Sheet';
@@ -8,6 +8,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { takePendingJoin } from '../navigation/pendingJoin';
 import { playerAPI, feedbackAPI, authAPI } from '../api/client';
 // Read straight from app.json rather than pulling in expo-application just to
 // stamp a version on a feedback row.
@@ -220,6 +221,15 @@ export default function HomeScreen() {
     setShowProfile(false);
     setShowSystem(true);
   };
+
+  // Finish a join that started before this account existed. Signing up swaps
+  // the navigator, so the code was parked rather than carried — see
+  // navigation/pendingJoin.ts.
+  useEffect(() => {
+    takePendingJoin().then(code => {
+      if (code) navigation.navigate('Join', { code });
+    });
+  }, []);
 
   // Deep link from Ask BloomPrint: open the exact modal it promised.
   const route = useRoute<any>();

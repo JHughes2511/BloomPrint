@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../../components/KeyboardAwareScrollView';
@@ -10,6 +10,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { playerLinkAPI, playerAuthAPI } from '../../api/playerClient';
+import { setPendingJoin } from '../../navigation/pendingJoin';
 import { useTheme } from '../../theme/ThemeProvider';
 import { topPad } from '../../responsive/screenPadding';
 import { ThemeTokens } from '../../theme/tokens';
@@ -61,6 +62,11 @@ export default function PlayerRegisterScreen() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [linkLoading, setLinkLoading] = useState(false);
   const [inviteLoading, setInviteLoading] = useState(false);
+
+  // An invite code this signup arrived with. Parked before the account is
+  // made, because creating one swaps the navigator out from under this screen.
+  const joinCode: string | undefined = route?.params?.joinCode;
+  useEffect(() => { if (joinCode) setPendingJoin(joinCode); }, [joinCode]);
 
   const submit = async () => {
     if (googleIdToken) {

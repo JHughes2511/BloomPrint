@@ -13,6 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import QrScanner from '../../components/QrScanner';
+import { codeFromScan, teamInviteAPI } from '../../api/client';
 import { roleLabel } from '../../utils/roleLabel';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { playerLinkAPI, playerProfileAPI, playerApi, playerAuthAPI } from '../../api/playerClient';
@@ -193,10 +194,27 @@ export default function PlayerLinkScreen() {
     finally { setSaving(false); }
   };
 
-  const onScan = useCallback((code: string) => {
+  /** A team invite QR: claim a roster spot on the team it points at. */
+  const joinTeamByCode = async (code: string) => {
+    try {
+      const r = await teamInviteAPI.joinAsPlayer(code, {});
+      Alert.alert(tr('join.welcomeTitle'), tr('join.joinedTeam', { team: r.team_name }));
+      load();
+    } catch (e: any) {
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('join.couldNotJoin'));
+    }
+  };
+
+  const onScan = useCallback((scanned: string) => {
     setShowScanner(false);
+    // A team QR encodes a URL so a phone's own camera can open it; scanned
+    // in-app it arrives here as that whole address. Take the code out of it —
+    // otherwise the link a coach held up is submitted as an invite code and
+    // rejected. A bare code still passes through untouched.
+    const code = codeFromScan(scanned);
+    if (/\/join\//.test(scanned)) { joinTeamByCode(code); return; }
     submitInvite(code);
-  }, []);
+  }, []);   // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <ScreenBackground>

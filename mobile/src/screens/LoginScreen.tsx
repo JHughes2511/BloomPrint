@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
@@ -7,13 +7,14 @@ import {
   Modal, FlatList, SafeAreaView,
 } from 'react-native';
 import Sheet from '../components/Sheet';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import LanguagePicker from '../components/LanguagePicker';
 import { currentLanguage } from '../i18n';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../api/client';
+import { setPendingJoin } from '../navigation/pendingJoin';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -184,6 +185,14 @@ function PickerModal({
 }
 
 export default function LoginScreen() {
+  // Arrived from an invite link: hold the code across signup, since creating an
+  // account replaces this navigator entirely. See navigation/pendingJoin.ts.
+  const joinRoute = useRoute<any>();
+  useEffect(() => {
+    const c = joinRoute?.params?.joinCode;
+    if (c) setPendingJoin(c);
+  }, [joinRoute?.params?.joinCode]);
+
   const { login, register, applyAuth } = useAuth();
   const navigation = useNavigation<any>();
   const { t: tr } = useTranslation();

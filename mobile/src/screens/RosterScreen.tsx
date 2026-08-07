@@ -408,8 +408,18 @@ export default function RosterScreen() {
                     gridColumns > 1 && cardWidth ? { width: cardWidth, maxWidth: cardWidth } : null]}
             onPress={() => navigation.push('PlayerProfile', { playerId: item.id })}
             onLongPress={() => {
+              // Deleting is for players you own. One that arrived with a shared
+              // report belongs to the coach who sent it — the most you can do
+              // is take it off your own roster, so that is what is offered.
+              const removeShared = async () => {
+                try { await playersAPI.dropShared(item.id); load(); }
+                catch (e: any) {
+                  Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('roster.couldNotRemoveShared'));
+                }
+              };
               Alert.alert(tr('roster.deletePlayerTitle'), tr('roster.deletePlayerMsg', { name: item.name }), [
                 { text: tr('common.cancel'), style: 'cancel' },
+                { text: tr('roster.removeFromMyRoster'), onPress: removeShared },
                 { text: tr('common.delete'), style: 'destructive', onPress: async () => {
                   try {
                     await playersAPI.delete(item.id);
