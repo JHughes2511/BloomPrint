@@ -49,11 +49,10 @@ export function parseGenProgress(label?: string): number | undefined {
   const c = label.match(/^job:segment:(\d+):(\d+)$/);
   if (c) return Math.min(92, 10 + Math.round((parseInt(c[1], 10) / parseInt(c[2], 10)) * 82));
   if (label === 'job:synthesizing') return 95;
-  // The report being written, word by word. It starts where synthesis did and
-  // creeps — a full report runs a couple of thousand words, so this moves for
-  // the whole of the last phase instead of sitting on one number.
+  // The report being written. Its own 0-99 spans the last four points of the
+  // bar, so the final phase keeps moving instead of sitting on 95.
   const w = label.match(/^job:writing:(\d+)$/);
-  if (w) return Math.min(99, 95 + Math.floor(parseInt(w[1], 10) / 500));
+  if (w) return Math.min(99, 95 + Math.round(parseInt(w[1], 10) / 25));
   const m = label.match(/segment\s+(\d+)\s+of\s+(\d+)/i);
   if (m) return Math.min(92, 10 + Math.round((parseInt(m[1], 10) / parseInt(m[2], 10)) * 82));
   if (/synthesiz/i.test(label)) return 95;
@@ -78,8 +77,10 @@ export function jobProgressLabel(label: string | undefined, tr: (k: string, o?: 
   if (scanPct) return `${tr('jobProgress.scanning')} ${scanPct[1]}%`;
   if (label === 'job:scanning') return tr('jobProgress.scanning');
   if (label === 'job:synthesizing') return tr('jobProgress.synthesizing');
+  // Same phase, same words as before it started reporting itself — with the
+  // percentage appended, exactly as the scan does.
   const w = label.match(/^job:writing:(\d+)$/);
-  if (w) return tr('jobProgress.writing', { words: w[1] });
+  if (w) return `${tr('jobProgress.synthesizing')} ${w[1]}%`;
   const c = label.match(/^job:segment:(\d+):(\d+)$/);
   if (c) return tr('jobProgress.segment', { i: c[1], n: c[2] });
   return label;

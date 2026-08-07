@@ -2314,8 +2314,7 @@
     "segment": "تحليل المقطع {{i}} من {{n}}",
     "synthesizing": "تجميع التقرير",
     "uploading": "جارٍ رفع الفيديو — {{pct}}٪ ({{sent}} من {{total}})",
-    "uploadingOf": "جارٍ رفع الفيديو {{i}} من {{n}} — {{pct}}٪ ({{sent}} من {{total}})",
-    "writing": "جارٍ كتابة التقرير — {{words}} كلمة"
+    "uploadingOf": "جارٍ رفع الفيديو {{i}} من {{n}} — {{pct}}٪ ({{sent}} من {{total}})"
   },
   "notifs": {
     "seasonNew": {

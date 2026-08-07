@@ -2314,8 +2314,7 @@
     "segment": "Analisi del segmento {{i}} di {{n}}",
     "synthesizing": "Sintesi del report",
     "uploading": "Caricamento del video — {{pct}}% ({{sent}} di {{total}})",
-    "uploadingOf": "Caricamento del video {{i}} di {{n}} — {{pct}}% ({{sent}} di {{total}})",
-    "writing": "Stesura del report — {{words}} parole"
+    "uploadingOf": "Caricamento del video {{i}} di {{n}} — {{pct}}% ({{sent}} di {{total}})"
   },
   "notifs": {
     "seasonNew": {

@@ -2314,8 +2314,7 @@
     "segment": "Ανάλυση τμήματος {{i}} από {{n}}",
     "synthesizing": "Σύνθεση αναφοράς",
     "uploading": "Μεταφόρτωση βίντεο — {{pct}}% ({{sent}} από {{total}})",
-    "uploadingOf": "Μεταφόρτωση βίντεο {{i}} από {{n}} — {{pct}}% ({{sent}} από {{total}})",
-    "writing": "Σύνταξη αναφοράς — {{words}} λέξεις"
+    "uploadingOf": "Μεταφόρτωση βίντεο {{i}} από {{n}} — {{pct}}% ({{sent}} από {{total}})"
   },
   "notifs": {
     "seasonNew": {

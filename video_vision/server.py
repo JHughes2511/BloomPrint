@@ -80,13 +80,24 @@ def _client() -> anthropic.Anthropic:
 
 
 def _writing_hook(progress):
-    """Turn a job's progress callback into the word counter `_long_answer` wants."""
+    """Turn a job's progress callback into the one `_long_answer` wants.
+
+    Reported as a percentage, the same as the pre-scan — a word count is a
+    number the coach has no yardstick for ("is 1,200 nearly done?").
+
+    There is no true total to divide by: the report ends when it ends. So the
+    percentage saturates rather than counting toward a guess — it climbs
+    quickly while the report is short and slows as it lengthens, which keeps it
+    honest (it never claims to be finished) and keeps it moving (it never
+    parks). A typical full report lands in the eighties before it completes.
+    """
     if not progress:
         return None
 
     def report(words: int) -> None:
+        pct = min(99, round(100 * words / (words + 400)))
         try:
-            progress(1, 1, f"job:writing:{words}")
+            progress(1, 1, f"job:writing:{pct}")
         except Exception:
             pass
 

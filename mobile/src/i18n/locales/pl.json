@@ -2314,8 +2314,7 @@
     "segment": "Analiza fragmentu {{i}} z {{n}}",
     "synthesizing": "Tworzenie raportu",
     "uploading": "Przesyłanie nagrania — {{pct}}% ({{sent}} z {{total}})",
-    "uploadingOf": "Przesyłanie nagrania {{i}} z {{n}} — {{pct}}% ({{sent}} z {{total}})",
-    "writing": "Tworzenie raportu — {{words}} słów"
+    "uploadingOf": "Przesyłanie nagrania {{i}} z {{n}} — {{pct}}% ({{sent}} z {{total}})"
   },
   "notifs": {
     "seasonNew": {
