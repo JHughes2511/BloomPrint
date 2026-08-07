@@ -35,6 +35,7 @@ import CommandBar from '../components/CommandBar';
 export const SIDEBAR_WIDTH = 248;
 
 import { buildSearchGroups, hasMore, totalFound, SearchResults } from './searchGroups';
+import { cached, remember } from './searchCache';
 
 export default function Sidebar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { t, mode, toggle } = useTheme();
@@ -75,17 +76,29 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
       setSettled(null);
       return;
     }
+    // A term already answered this session paints immediately — backspacing
+    // through a name shows each previous list with no wait at all. The request
+    // still goes out below, so what is on screen is corrected within a frame or
+    // two if anything has changed.
+    const hit = cached(term);
+    if (hit) { setResults(hit); setSettled(term); }
+
     let cancelled = false;
-    // Short enough to feel like it is keeping up with typing. The out-of-order
-    // guard above is what makes a delay this small safe.
+    // Effectively per-keystroke: enough to coalesce the two events a single
+    // key press can produce, not enough to feel like waiting. The out-of-order
+    // guard above is what makes a delay this small safe — without it, fast
+    // typing would race responses and show the answer to a half-typed word.
     const timer = setTimeout(() => {
       searchAPI.all(term)
-        .then((r: SearchResults) => { if (!cancelled) { setResults(r); setSettled(term); } })
+        .then((r: SearchResults) => {
+          remember(term, r);
+          if (!cancelled) { setResults(r); setSettled(term); }
+        })
         // The previous results stay on screen rather than being wiped: emptying
         // the list on every keystroke makes a list that is actually updating
         // look like one that keeps losing its mind.
         .catch(() => {});
-    }, 90);
+    }, 10);
     return () => { cancelled = true; clearTimeout(timer); };
   }, [query]);
 

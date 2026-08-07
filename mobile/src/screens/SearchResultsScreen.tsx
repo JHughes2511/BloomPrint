@@ -15,6 +15,7 @@ import PageContainer from '../responsive/PageContainer';
 import { topPad } from '../responsive/screenPadding';
 import { useGoUp } from '../navigation/goUp';
 import { buildSearchGroups, SearchResults } from '../navigation/searchGroups';
+import { cached, remember } from '../navigation/searchCache';
 
 /**
  * Everything a search found, when six per group in the sidebar isn't enough.
@@ -41,6 +42,9 @@ export default function SearchResultsScreen() {
   useEffect(() => {
     const term = query.trim();
     if (!term) { setResults(null); setSettled(null); return; }
+    const hit = cached(term, 50);
+    if (hit) { setResults(hit); setSettled(term); }
+
     let cancelled = false;
     setLoading(true);
     // Same pacing as the sidebar, and the same reason: results that arrive a
@@ -48,10 +52,13 @@ export default function SearchResultsScreen() {
     // a page load.
     const timer = setTimeout(() => {
       searchAPI.all(term, 50)
-        .then((r: SearchResults) => { if (!cancelled) { setResults(r); setSettled(term); } })
+        .then((r: SearchResults) => {
+          remember(term, r, 50);
+          if (!cancelled) { setResults(r); setSettled(term); }
+        })
         .catch(() => {})
         .finally(() => { if (!cancelled) setLoading(false); });
-    }, 90);
+    }, 10);
     return () => { cancelled = true; clearTimeout(timer); };
   }, [query]);
 

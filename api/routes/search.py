@@ -85,8 +85,18 @@ def _shared_ids(db: Session, coach: models.Coach, *kinds: str) -> set[int]:
 
 
 def _page(query, limit: int):
-    """A group's rows plus how many there are in total, for "see all N"."""
-    return query.limit(limit).all(), query.count()
+    """A group's rows plus how many there are in total, for "see all N".
+
+    Asking for one row more than will be shown answers "is there more?" for
+    free. Only when the answer is yes does the total need counting — and now
+    that every keystroke is a request, a COUNT per group per letter is a cost
+    paid on almost every search to learn a number that is usually just the
+    length of the list already in hand.
+    """
+    rows = query.limit(limit + 1).all()
+    if len(rows) <= limit:
+        return rows, len(rows)
+    return rows[:limit], query.count()
 
 
 @router.get("")
