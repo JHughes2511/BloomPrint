@@ -34,7 +34,7 @@ export default function JoinScreen() {
   const { t: tr } = useTranslation();
   const s = makeStyles(t);
   const { coach } = useAuth();
-  const { playerUser } = usePlayerAuth();
+  const { playerUser, refreshUser } = usePlayerAuth();
 
   const code: string = route.params?.code ?? '';
   const [info, setInfo] = useState<any | null>(null);
@@ -83,6 +83,10 @@ export default function JoinScreen() {
     setBusy(true);
     try {
       const r = await teamInviteAPI.joinAsPlayer(code, playerId ? { player_id: playerId } : { name: newName.trim() });
+      // The account in memory still says "no player" — it was read at signup,
+      // before this claim existed. Without refreshing it the player lands on a
+      // home screen telling them they are not linked to anyone.
+      await refreshUser().catch(() => {});
       Alert.alert(tr('join.welcomeTitle'), tr('join.joinedTeam', { team: r.team_name }));
       navigation.reset({ index: 0, routes: [{ name: 'PlayerHomeTab' }] });
     } catch (e: any) {

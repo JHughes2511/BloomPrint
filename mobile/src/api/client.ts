@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import * as SecureStore from '../storage/secureStore';
 import * as FileSystem from 'expo-file-system/legacy';
 import { emitCoachUnauthorized } from './authFailure';
+import { playerApi } from './playerClient';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000';
 
@@ -699,14 +700,19 @@ export const teamInviteAPI = {
   revoke: (linkId: number) =>
     api.post(`/team-invites/link/${linkId}/revoke`).then(r => r.data),
 
+  // `peek` needs no session at all; joinAsStaff is a coach.
   peek: (code: string) =>
     api.get(`/join/${encodeURIComponent(code)}`).then(r => r.data),
   joinAsStaff: (code: string) =>
     api.post(`/join/${encodeURIComponent(code)}/staff`).then(r => r.data),
+  // These two are the PLAYER's, and a player's token lives on its own client
+  // under its own key — sent through the coach client they arrive with either
+  // the wrong token or none, and the roster comes back empty with no error
+  // anyone would notice.
   unclaimedRoster: (code: string) =>
-    api.get(`/join/${encodeURIComponent(code)}/roster`).then(r => r.data),
+    playerApi.get(`/join/${encodeURIComponent(code)}/roster`).then(r => r.data),
   joinAsPlayer: (code: string, body: { player_id?: number; name?: string }) =>
-    api.post(`/join/${encodeURIComponent(code)}/player`, body).then(r => r.data),
+    playerApi.post(`/join/${encodeURIComponent(code)}/player`, body).then(r => r.data),
 };
 
 /** The address a QR encodes, so a phone's own camera can open it. */
