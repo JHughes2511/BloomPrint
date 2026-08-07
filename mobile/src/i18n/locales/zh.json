@@ -1957,7 +1957,8 @@
     "noPlayersFound": "未找到球员。",
     "myTeamFilm": "本队录像",
     "opponentFilm": "对手录像",
-    "teamFilm": "{{team}} 影片"
+    "teamFilm": "{{team}} 影片",
+    "bothTeams": "两队"
   },
   "teamGrade": {
     "views": {

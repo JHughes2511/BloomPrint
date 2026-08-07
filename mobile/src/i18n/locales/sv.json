@@ -1957,7 +1957,8 @@
     "noPlayersFound": "Inga spelare hittades.",
     "myTeamFilm": "Film på mitt lag",
     "opponentFilm": "Film på motståndaren",
-    "teamFilm": "Film på {{team}}"
+    "teamFilm": "Film på {{team}}",
+    "bothTeams": "Båda"
   },
   "teamGrade": {
     "views": {

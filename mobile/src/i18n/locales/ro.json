@@ -1957,7 +1957,8 @@
     "noPlayersFound": "Niciun jucător găsit.",
     "myTeamFilm": "Filmarea echipei mele",
     "opponentFilm": "Filmarea adversarului",
-    "teamFilm": "Filmare {{team}}"
+    "teamFilm": "Filmare {{team}}",
+    "bothTeams": "Ambele"
   },
   "teamGrade": {
     "views": {

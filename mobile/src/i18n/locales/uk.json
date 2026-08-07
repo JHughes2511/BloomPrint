@@ -1957,7 +1957,8 @@
     "noPlayersFound": "Гравців не знайдено.",
     "myTeamFilm": "Відео моєї команди",
     "opponentFilm": "Відео суперника",
-    "teamFilm": "Запис: {{team}}"
+    "teamFilm": "Запис: {{team}}",
+    "bothTeams": "Обидві"
   },
   "teamGrade": {
     "views": {

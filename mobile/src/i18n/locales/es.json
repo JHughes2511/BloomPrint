@@ -1957,7 +1957,8 @@
     "noPlayersFound": "No se encontraron jugadores.",
     "myTeamFilm": "Vídeo de mi equipo",
     "opponentFilm": "Vídeo del rival",
-    "teamFilm": "Vídeo de {{team}}"
+    "teamFilm": "Vídeo de {{team}}",
+    "bothTeams": "Ambos"
   },
   "teamGrade": {
     "views": {

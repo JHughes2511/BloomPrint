@@ -1957,7 +1957,8 @@
     "noPlayersFound": "Nessun giocatore trovato.",
     "myTeamFilm": "Video della mia squadra",
     "opponentFilm": "Video dell'avversario",
-    "teamFilm": "Video di {{team}}"
+    "teamFilm": "Video di {{team}}",
+    "bothTeams": "Entrambe"
   },
   "teamGrade": {
     "views": {

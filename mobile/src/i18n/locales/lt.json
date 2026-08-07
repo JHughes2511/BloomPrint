@@ -1957,7 +1957,8 @@
     "noPlayersFound": "Žaidėjų nerasta.",
     "myTeamFilm": "Mano komandos vaizdo įrašas",
     "opponentFilm": "Varžovų vaizdo įrašas",
-    "teamFilm": "{{team}} įrašas"
+    "teamFilm": "{{team}} įrašas",
+    "bothTeams": "Abi"
   },
   "teamGrade": {
     "views": {

@@ -1957,7 +1957,8 @@
     "noPlayersFound": "कोई खिलाड़ी नहीं मिला।",
     "myTeamFilm": "मेरी टीम की फ़िल्म",
     "opponentFilm": "प्रतिद्वंद्वी की फ़िल्म",
-    "teamFilm": "{{team}} की फ़िल्म"
+    "teamFilm": "{{team}} की फ़िल्म",
+    "bothTeams": "दोनों"
   },
   "teamGrade": {
     "views": {

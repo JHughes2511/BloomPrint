@@ -1957,7 +1957,8 @@
     "noPlayersFound": "Игроки не найдены.",
     "myTeamFilm": "Видео моей команды",
     "opponentFilm": "Видео соперника",
-    "teamFilm": "Запись: {{team}}"
+    "teamFilm": "Запись: {{team}}",
+    "bothTeams": "Обе"
   },
   "teamGrade": {
     "views": {

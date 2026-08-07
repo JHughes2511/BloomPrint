@@ -1957,7 +1957,8 @@
     "noPlayersFound": "לא נמצאו שחקנים.",
     "myTeamFilm": "וידאו הקבוצה שלי",
     "opponentFilm": "וידאו היריבה",
-    "teamFilm": "וידאו של {{team}}"
+    "teamFilm": "וידאו של {{team}}",
+    "bothTeams": "שתיהן"
   },
   "teamGrade": {
     "views": {

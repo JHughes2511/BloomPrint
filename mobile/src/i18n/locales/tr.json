@@ -1957,7 +1957,8 @@
     "noPlayersFound": "Oyuncu bulunamadı.",
     "myTeamFilm": "Kendi takım videom",
     "opponentFilm": "Rakip videosu",
-    "teamFilm": "{{team}} videosu"
+    "teamFilm": "{{team}} videosu",
+    "bothTeams": "İkisi de"
   },
   "teamGrade": {
     "views": {

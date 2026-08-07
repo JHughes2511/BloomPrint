@@ -1957,7 +1957,8 @@
     "noPlayersFound": "Geen spelers gevonden.",
     "myTeamFilm": "Beelden eigen team",
     "opponentFilm": "Beelden tegenstander",
-    "teamFilm": "Beelden van {{team}}"
+    "teamFilm": "Beelden van {{team}}",
+    "bothTeams": "Beide"
   },
   "teamGrade": {
     "views": {

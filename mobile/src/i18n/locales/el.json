@@ -1957,7 +1957,8 @@
     "noPlayersFound": "Δεν βρέθηκαν παίκτες.",
     "myTeamFilm": "Βίντεο ομάδας μου",
     "opponentFilm": "Βίντεο αντιπάλου",
-    "teamFilm": "Βίντεο {{team}}"
+    "teamFilm": "Βίντεο {{team}}",
+    "bothTeams": "Και οι δύο"
   },
   "teamGrade": {
     "views": {

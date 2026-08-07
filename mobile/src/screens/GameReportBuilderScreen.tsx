@@ -281,6 +281,18 @@ export default function GameReportBuilderScreen() {
     return [{ name: myName, label: 'my_team' }, { name: oppLabel, label: 'opponent' }];
   };
 
+  /**
+   * The sides plus "Both", because most game film IS both teams playing each
+   * other — one clip that belongs to neither side on its own. It carries every
+   * team's name so the breakdown knows which two teams it is watching.
+   */
+  const filmChoices = () => {
+    const sides = filmSides();
+    if (sides.length < 2) return sides;
+    return [...sides, { name: tr('gameBuilder.bothTeams'), label: 'both',
+                        teamName: sides.map(s => s.name).join(' vs ') }];
+  };
+
   const pickClip = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Videos,
@@ -289,11 +301,14 @@ export default function GameReportBuilderScreen() {
     });
     if (result.canceled || !result.assets[0]) return;
     const asset = result.assets[0];
-    const sides = filmSides();
+    const choices = filmChoices();
     // One possible team means there is nothing to ask.
-    if (sides.length === 1) { uploadClip(asset, sides[0].label, sides[0].name); return; }
+    if (choices.length === 1) { uploadClip(asset, choices[0].label, choices[0].name); return; }
     Alert.alert(tr('gameBuilder.whoseFilm'), '', [
-      ...sides.map(s => ({ text: s.name, onPress: () => uploadClip(asset, s.label, s.name) })),
+      ...choices.map(c => ({
+        text: c.name,
+        onPress: () => uploadClip(asset, c.label, (c as any).teamName ?? c.name),
+      })),
       { text: tr('common.cancel'), style: 'cancel' as const },
     ]);
   };
@@ -726,7 +741,10 @@ export default function GameReportBuilderScreen() {
                 { text: tr('common.delete'), style: 'destructive', onPress: () => deleteClip(clip.id) },
               ])}
             >
-              <View style={[styles.clipLabel, clip.label === 'my_team' ? styles.clipLabelMy : styles.clipLabelOpp]}>
+              {/* A film of both teams belongs to neither side, so it gets its
+                  own neutral badge rather than being coloured as the opponent. */}
+              <View style={[styles.clipLabel, clip.label === 'both' ? styles.clipLabelBoth
+                : clip.label === 'my_team' ? styles.clipLabelMy : styles.clipLabelOpp]}>
                 {/* The team the coach picked, when there is one — in an
                     opponent-vs-opponent packet "Opponent" describes both films. */}
                 <Text style={styles.clipLabelText}>{clip.team_name || (clip.label === 'my_team' ? tr('gameBuilder.myTeam') : tr('gameBuilder.opponent'))}</Text>
@@ -960,7 +978,8 @@ export default function GameReportBuilderScreen() {
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
-              <View style={[styles.clipLabel, clipModal?.label === 'my_team' ? styles.clipLabelMy : styles.clipLabelOpp]}>
+              <View style={[styles.clipLabel, clipModal?.label === 'both' ? styles.clipLabelBoth
+                : clipModal?.label === 'my_team' ? styles.clipLabelMy : styles.clipLabelOpp]}>
                 <Text style={styles.clipLabelText}>{clipModal?.team_name
                   ? tr('gameBuilder.teamFilm', { team: clipModal.team_name })
                   : (clipModal?.label === 'my_team' ? tr('gameBuilder.myTeamFilm') : tr('gameBuilder.opponentFilm'))}</Text>
@@ -1149,6 +1168,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   clipLabel: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3, alignSelf: 'flex-start' },
   clipLabelMy: { backgroundColor: t.accentSoft },
   clipLabelOpp: { backgroundColor: t.negativeSoft },
+  clipLabelBoth: { backgroundColor: t.chip },
   clipLabelText: { color: t.inkSoft, fontSize: 10, fontFamily: fonts[700] },
   clipAnalysis: { flex: 1, color: t.muted, fontSize: 11, lineHeight: 16 },
   textArea: { backgroundColor: t.card, borderRadius: 14, padding: 14, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 100, marginBottom: 16 },

@@ -1957,7 +1957,8 @@
     "noPlayersFound": "Walang nahanap na manlalaro.",
     "myTeamFilm": "Film ng aking koponan",
     "opponentFilm": "Film ng kalaban",
-    "teamFilm": "Film ng {{team}}"
+    "teamFilm": "Film ng {{team}}",
+    "bothTeams": "Pareho"
   },
   "teamGrade": {
     "views": {

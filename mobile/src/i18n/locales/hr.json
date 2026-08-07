@@ -1957,7 +1957,8 @@
     "noPlayersFound": "Nema pronađenih igrača.",
     "myTeamFilm": "Snimka moje momčadi",
     "opponentFilm": "Snimka protivnika",
-    "teamFilm": "Snimka: {{team}}"
+    "teamFilm": "Snimka: {{team}}",
+    "bothTeams": "Obje"
   },
   "teamGrade": {
     "views": {

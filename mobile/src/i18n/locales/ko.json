@@ -1957,7 +1957,8 @@
     "noPlayersFound": "선수를 찾을 수 없습니다.",
     "myTeamFilm": "우리 팀 영상",
     "opponentFilm": "상대 팀 영상",
-    "teamFilm": "{{team}} 영상"
+    "teamFilm": "{{team}} 영상",
+    "bothTeams": "양 팀"
   },
   "teamGrade": {
     "views": {

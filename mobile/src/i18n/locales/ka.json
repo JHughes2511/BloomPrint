@@ -1957,7 +1957,8 @@
     "noPlayersFound": "მოთამაშეები ვერ მოიძებნა.",
     "myTeamFilm": "ჩემი გუნდის ვიდეო",
     "opponentFilm": "მოწინააღმდეგის ვიდეო",
-    "teamFilm": "{{team}}-ის ვიდეო"
+    "teamFilm": "{{team}}-ის ვიდეო",
+    "bothTeams": "ორივე"
   },
   "teamGrade": {
     "views": {

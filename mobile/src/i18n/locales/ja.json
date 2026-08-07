@@ -1957,7 +1957,8 @@
     "noPlayersFound": "選手が見つかりません。",
     "myTeamFilm": "自チームの映像",
     "opponentFilm": "相手チームの映像",
-    "teamFilm": "{{team}} の映像"
+    "teamFilm": "{{team}} の映像",
+    "bothTeams": "両チーム"
   },
   "teamGrade": {
     "views": {

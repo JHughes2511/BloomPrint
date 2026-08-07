@@ -1957,7 +1957,8 @@
     "noPlayersFound": "No players found.",
     "myTeamFilm": "My Team Film",
     "opponentFilm": "Opponent Film",
-    "teamFilm": "{{team}} Film"
+    "teamFilm": "{{team}} Film",
+    "bothTeams": "Both"
   },
   "teamGrade": {
     "views": {
