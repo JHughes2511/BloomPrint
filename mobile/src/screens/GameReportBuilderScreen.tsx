@@ -5,7 +5,7 @@ import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform, Modal,
-  findNodeHandle,
+  findNodeHandle, RefreshControl,
 } from 'react-native';
 import Sheet from '../components/Sheet';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -198,6 +198,20 @@ export default function GameReportBuilderScreen() {
    * you. Polls only while something is actually pending, and stops the moment
    * every clip has its analysis.
    */
+  const [refreshing, setRefreshing] = useState(false);
+  /** Re-read the packet. Keeps the form the coach is editing; only the parts
+   *  the server owns — the films and their analysis — are replaced. */
+  const refreshPacket = async () => {
+    if (!reportId) return;
+    setRefreshing(true);
+    try {
+      const fresh = await gameReportsAPI.get(reportId);
+      setReport((prev: any) => (prev ? { ...prev, clips: fresh.clips, report_text: fresh.report_text } : fresh));
+      loadVersions(reportId);
+    } catch {}
+    setRefreshing(false);
+  };
+
   const pendingClips = (report?.clips ?? []).filter((c: any) => !c.analysis_text).length;
   useEffect(() => {
     if (!reportId || pendingClips === 0) return;
@@ -573,6 +587,9 @@ export default function GameReportBuilderScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={refreshPacket} tintColor={t.accent} colors={[t.accent]} />
+        }
       >
         {/* Header */}
         <View style={styles.header}>
