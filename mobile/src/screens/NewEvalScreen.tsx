@@ -43,7 +43,10 @@ export default function NewEvalScreen() {
   const [outputType, setOutputType] = useState<string>('player_eval');
   const [coachNotes, setCoachNotes] = useState('');
   const [focusPrompt, setFocusPrompt] = useState('');
-  const [videos, setVideos] = useState<{ uri: string; name: string }[]>([]);
+  // `file` is web only: the picker hands back the File alongside its blob: URL,
+  // and uploading the File avoids asking the browser to rebuild a gigabyte of
+  // bytes it is already holding.
+  const [videos, setVideos] = useState<{ uri: string; name: string; file?: any }[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState('');
   const [importingNotes, setImportingNotes] = useState(false);
@@ -101,7 +104,9 @@ export default function NewEvalScreen() {
       quality: 1,
     });
     if (!res.canceled && res.assets?.length) {
-      const picked = res.assets.map((a, i) => ({ uri: a.uri, name: a.fileName ?? `film_${Date.now()}_${i}.mp4` }));
+      const picked = res.assets.map((a, i) => ({
+        uri: a.uri, name: a.fileName ?? `film_${Date.now()}_${i}.mp4`, file: (a as any).file,
+      }));
       setVideos(prev => [...prev, ...picked]);
     }
   };
@@ -156,7 +161,7 @@ export default function NewEvalScreen() {
       for (let i = 0; i < videos.length; i++) {
         setProgress(tr('newEval.uploadingFilm', { current: i + 1, total: videos.length }));
         const up = await uploadFileStreamed(
-          '/evaluations/upload-video', videos[i].uri, {}, 'video', 'video/mp4',
+          '/evaluations/upload-video', videos[i].file ?? videos[i].uri, {}, 'video', 'video/mp4',
           (p) => setProgress(uploadProgressCode(p.sent, p.total, i + 1, videos.length)),
         );
         if (up?.token) tokens.push(up.token);

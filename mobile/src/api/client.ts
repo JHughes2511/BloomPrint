@@ -23,9 +23,24 @@ export const api = axios.create({ baseURL: BASE_URL, timeout: 120000 });
  */
 export type UploadProgress = { sent: number; total: number; fraction: number };
 
+/**
+ * A blob: or data: URL read back as a Blob, for callers that only kept the URL.
+ *
+ * Prefer passing the File itself where one exists. This path is the fallback,
+ * and it fails on very large files — so it says which file and why, instead of
+ * surfacing the browser's bare "Failed to fetch".
+ */
+async function blobFromUrl(url: string): Promise<Blob> {
+  try {
+    return await (await fetch(url)).blob();
+  } catch {
+    throw new Error("The browser could not read the selected file. Try picking it again, or move it out of a cloud folder (iCloud, OneDrive, Google Drive) onto this computer first.");
+  }
+}
+
 export async function uploadFileStreamed(
   path: string,
-  fileUri: string,
+  file: string | Blob,
   parameters: Record<string, string> = {},
   fieldName = 'video',
   mimeType = 'video/mp4',
@@ -35,14 +50,19 @@ export async function uploadFileStreamed(
   const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
 
   if (Platform.OS === 'web') {
-    // On web a picked file's uri is a blob:/data: URL; fetch turns it back into
-    // the Blob without ever materialising the bytes as a JS string.
-    const blob = await (await fetch(fileUri)).blob();
+    // Web pickers hand back the File itself alongside a blob: URL for it, and
+    // the File is what should be uploaded. Reading the URL back with fetch()
+    // asks the browser to produce a second Blob for bytes it is already holding
+    // — on a multi-gigabyte game film that is where it gives up, with nothing
+    // but "Failed to fetch" to say so. A File is already a disk-backed Blob, so
+    // handing it to FormData streams it without copying anything.
+    const blob = typeof file === 'string' ? await blobFromUrl(file) : file;
     const form = new FormData();
     // The three-argument append (value + filename) is the DOM signature; React
     // Native's FormData typing only declares two, so this is cast rather than
     // restructured — at runtime on web this is the browser's FormData.
-    (form.append as any)(fieldName, blob, `upload.${mimeType.split('/')[1] || 'mp4'}`);
+    const name = (blob as File)?.name || `upload.${mimeType.split('/')[1] || 'mp4'}`;
+    (form.append as any)(fieldName, blob, name);
     for (const [k, v] of Object.entries(parameters)) form.append(k, v);
 
     // XHR rather than fetch, for one reason: fetch cannot report how much of a
@@ -75,6 +95,9 @@ export async function uploadFileStreamed(
     });
   }
 
+  // Native never has a Blob to hand — the pickers there give a file:// uri, and
+  // uploadAsync streams from that path.
+  const fileUri = typeof file === 'string' ? file : '';
   const options = {
     httpMethod: 'POST' as const,
     uploadType: FileSystem.FileSystemUploadType.MULTIPART,

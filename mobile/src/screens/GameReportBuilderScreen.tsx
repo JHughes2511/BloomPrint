@@ -365,7 +365,9 @@ export default function GameReportBuilderScreen() {
       // the coach watches an invented curve for the better part of an hour and
       // cannot tell an upload in progress from one that has stalled.
       const created = await uploadFileStreamed(
-        `/game-reports/${reportId}/clips`, asset.uri, { label, team_name: teamName }, 'video', 'video/mp4',
+        // On web the picker hands back the File itself; upload that rather than
+        // asking the browser to rebuild it from the blob: URL.
+        `/game-reports/${reportId}/clips`, asset.file ?? asset.uri, { label, team_name: teamName }, 'video', 'video/mp4',
         (p) => setClipProgress(uploadProgressCode(p.sent, p.total)),
       );
       if (created?.job_id) {
