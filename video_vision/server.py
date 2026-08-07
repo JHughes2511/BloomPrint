@@ -305,10 +305,26 @@ def _select_adaptive_timestamps(duration: float, scores: list[tuple[float, float
 
 
 def _extract_frames_adaptive(video_path: str, budget_cap: int | None = None,
-                             on_progress=None) -> list[tuple[float, bytes]]:
+                             on_progress=None, profile=None,
+                             on_profile=None) -> list[tuple[float, bytes]]:
     """Motion-aware frame extraction: pre-scan for motion, then grab full-res
-    frames at the selected timestamps."""
-    duration, scores = _motion_profile(video_path, on_progress=on_progress)
+    frames at the selected timestamps.
+
+    `profile` is a pre-scan from an earlier attempt. The scan is thousands of
+    seeks and by far the longest part of a long film — and it produces a few
+    hundred numbers. Keeping those meant a server restart at 99% did not throw
+    away the hour it took to read the film.
+    """
+    if profile and profile.get("scores"):
+        duration = float(profile.get("duration") or 0.0)
+        scores = [(float(t), float(v)) for t, v in profile["scores"]]
+    else:
+        duration, scores = _motion_profile(video_path, on_progress=on_progress)
+        if on_profile and duration > 0 and scores:
+            try:
+                on_profile({"duration": duration, "scores": [[t, v] for t, v in scores]})
+            except Exception:
+                pass
     if duration <= 0 or not scores:
         return _extract_frames_interval(video_path, 4.0, budget_cap or 200)
     budget = _frame_budget(duration)
@@ -839,8 +855,13 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
             progress(0, 1, "job:scanning")
         except Exception:
             pass
+    # A pre-scan kept from an earlier attempt, and the hook that saves a new
+    # one. Keyed by position, because sampling is deterministic per file.
+    resume_profiles: dict = args.get("_resume_profiles") or {}
+    on_profile = args.get("_on_profile")
+
     frames = []
-    for p in video_paths:
+    for i, p in enumerate(video_paths):
         # A long film spends minutes here before the first segment. Reporting
         # the scan's own percentage is what tells the coach it is working, and
         # what tells the app the job is alive rather than wedged.
@@ -850,7 +871,19 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                     progress(0, 1, f"job:scanning:{pct}")
                 except Exception:
                     pass
-        frames += _extract_frames_adaptive(p, budget_cap=per_cap, on_progress=_scan_progress)
+
+        def _save_profile(prof, _i=i):
+            if on_profile:
+                try:
+                    on_profile(_i, prof)
+                except Exception:
+                    pass
+
+        frames += _extract_frames_adaptive(
+            p, budget_cap=per_cap, on_progress=_scan_progress,
+            profile=resume_profiles.get(i) or resume_profiles.get(str(i)),
+            on_profile=_save_profile,
+        )
     frames = frames[:TOTAL_CAP]
     if not frames:
         return [types.TextContent(type="text", text="Error: no frames could be extracted.")]

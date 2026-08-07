@@ -189,6 +189,28 @@ export default function GameReportBuilderScreen() {
     }
   }, []);
 
+  /**
+   * Keep a film's status live while it is being analyzed.
+   *
+   * The packet loaded once, so a breakdown that finished — or a scan counting
+   * up — only appeared if the coach left the screen and came back. Watching a
+   * three-hour film is exactly when you want the number to move in front of
+   * you. Polls only while something is actually pending, and stops the moment
+   * every clip has its analysis.
+   */
+  const pendingClips = (report?.clips ?? []).filter((c: any) => !c.analysis_text).length;
+  useEffect(() => {
+    if (!reportId || pendingClips === 0) return;
+    let cancelled = false;
+    const tick = setInterval(async () => {
+      try {
+        const fresh = await gameReportsAPI.get(reportId);
+        if (!cancelled) setReport((prev: any) => (prev ? { ...prev, clips: fresh.clips } : fresh));
+      } catch {}
+    }, 5000);
+    return () => { cancelled = true; clearInterval(tick); };
+  }, [reportId, pendingClips]);
+
   // Share search debounce
   useEffect(() => {
     if (!showShare) return;

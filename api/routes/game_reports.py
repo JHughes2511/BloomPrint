@@ -60,13 +60,40 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             finally:
                 sdb.close()
 
+        # The pre-scan from an earlier attempt, alongside the finished segments.
+        # Reading a three-hour film is thousands of seeks and produces a few
+        # hundred numbers; keeping them is what stops a restart at 99% throwing
+        # away the hour it took.
+        def _save_profile(index, profile):
+            pdb = SessionLocal()
+            try:
+                j = pdb.get(models.GenerationJob, job_id)
+                if not j:
+                    return
+                data = json.loads(j.partial or "{}")
+                profiles = data.setdefault("profiles", {})
+                blob = json.dumps(profile)
+                # A guard, not a policy: a pre-scan is tens of kilobytes, and a
+                # runaway one should not become the reason a job row cannot save.
+                if len(blob) <= 400_000:
+                    profiles[str(index)] = profile
+                    j.partial = json.dumps(data)
+                    pdb.commit()
+            except Exception:
+                pdb.rollback()
+            finally:
+                pdb.close()
+
         done_segments = {}
+        done_profiles = {}
         j0 = db.get(models.GenerationJob, job_id)
         if j0 and j0.partial:
             try:
-                done_segments = json.loads(j0.partial).get("segments", {})
+                _p = json.loads(j0.partial)
+                done_segments = _p.get("segments", {})
+                done_profiles = _p.get("profiles", {})
             except Exception:
-                done_segments = {}
+                done_segments, done_profiles = {}, {}
 
         from ..storage import ensure_local
         result = asyncio.run(_handle_analyze_basketball_video({
@@ -81,6 +108,8 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             "_progress": _prog,
             "_resume_notes": done_segments,
             "_on_segment": _save_segment,
+            "_resume_profiles": done_profiles,
+            "_on_profile": _save_profile,
         }))
         text = result[0].text
         clip = db.get(models.GameReportClip, clip_id)
