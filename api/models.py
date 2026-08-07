@@ -330,6 +330,10 @@ class SharedReport(Base):
     share_grades      = Column(Boolean, default=False)
     share_flags       = Column(Boolean, default=False)
     share_questions   = Column(Boolean, default=False)
+    # Section headings the coach switched off when sharing. An eval is shared by
+    # reference — its text is read from the evaluation at view time — so the
+    # choice has to live here or it is lost the moment the share is saved.
+    hidden_sections   = Column(Text, nullable=True)   # JSON list of headings
     message           = Column(Text, nullable=True)
     created_at        = Column(DateTime, default=datetime.utcnow)
 
@@ -450,6 +454,7 @@ class ShareApproval(Base):
     share_grades             = Column(Boolean, default=True)
     share_flags              = Column(Boolean, default=True)
     share_questions          = Column(Boolean, default=True)
+    hidden_sections          = Column(Text, nullable=True)        # JSON list of withheld headings
     status                   = Column(String, default="pending")  # pending / approved / rejected
     created_at               = Column(DateTime, default=datetime.utcnow)
 

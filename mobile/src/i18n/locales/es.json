@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Regenerando el informe…",
     "correctionsCount": "Correcciones ({{count}})",
     "applied": "APLICADO",
-    "pending": "PENDIENTE"
+    "pending": "PENDIENTE",
+    "sectionsLabel": "Secciones"
   },
   "staffHub": {
     "title": "Centro del Cuerpo Técnico",

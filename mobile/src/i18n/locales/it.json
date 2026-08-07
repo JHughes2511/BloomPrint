@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Rigenerazione del report…",
     "correctionsCount": "Correzioni ({{count}})",
     "applied": "APPLICATA",
-    "pending": "IN SOSPESO"
+    "pending": "IN SOSPESO",
+    "sectionsLabel": "Sezioni"
   },
   "staffHub": {
     "title": "Area staff",

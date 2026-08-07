@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "レポートを再生成中…",
     "correctionsCount": "修正 ({{count}})",
     "applied": "適用済み",
-    "pending": "保留中"
+    "pending": "保留中",
+    "sectionsLabel": "セクション"
   },
   "staffHub": {
     "title": "スタッフハブ",

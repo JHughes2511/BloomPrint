@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "יוצר מחדש את הדוח…",
     "correctionsCount": "תיקונים ({{count}})",
     "applied": "הוחל",
-    "pending": "ממתין"
+    "pending": "ממתין",
+    "sectionsLabel": "חלקים"
   },
   "staffHub": {
     "title": "מרכז הצוות",

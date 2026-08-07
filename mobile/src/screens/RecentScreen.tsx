@@ -201,6 +201,17 @@ export default function RecentScreen() {
     share_report_text: true, share_overall_grade: false, share_pillar_grades: false,
     share_green_flags: false, share_watch_flags: false, share_key_questions: false,
   });
+  // Which of the report's own sections go to the player. Keyed by heading;
+  // absent means on, so a report opened for sending starts with everything
+  // included, exactly as before this was switchable.
+  const [sectionToggles, setSectionToggles] = useState<Record<string, boolean>>({});
+  const sendSections = splitReportSections(activeModal?.text ?? '');
+  const sendToggleSections = sendSections.filter(sec => !sec.pinned);
+  const hiddenSendSections = () =>
+    sendToggleSections.filter(sec => sectionToggles[sec.heading] === false).map(sec => sec.heading);
+  /** The report text with the coach's withheld sections removed. */
+  const sendTextFiltered = () =>
+    (hiddenSendSections().length ? joinReportSections(sendSections, sectionToggles) : activeModal?.text) || '';
 
   const openStaffShareModal = (ctx: StaffShareContext, previewText?: string, fullText?: string) => {
     setStaffShareCtx(ctx);
@@ -644,22 +655,20 @@ export default function RecentScreen() {
       if (activeModal.kind === 'eval' && activeModal.evalId) {
         await playerAPI.share(activeModal.evalId, {
           player_user_id: target.id,
+          // An eval is shared by reference, so the withheld headings travel with
+          // the share and the server filters the text when the player reads it.
+          hide_sections: hiddenSendSections(),
           share_report_text: playerShareToggles.share_report_text,
           share_grades: playerShareToggles.share_overall_grade || playerShareToggles.share_pillar_grades,
           share_flags: playerShareToggles.share_green_flags || playerShareToggles.share_watch_flags,
           share_questions: playerShareToggles.share_key_questions,
         });
-      } else if (activeModal.kind === 'training') {
-        await playerAPI.shareTeamReport({
-          output_type: activeModal.outputType,
-          report_text: playerShareToggles.share_report_text ? activeModal.text : '',
-          target_type: 'player',
-          player_user_id: target.id,
-        });
       } else {
+        // Training and team reports send their text outright, so the sections
+        // are filtered here — the player is never sent what was switched off.
         await playerAPI.shareTeamReport({
           output_type: activeModal.outputType,
-          report_text: playerShareToggles.share_report_text ? activeModal.text : '',
+          report_text: playerShareToggles.share_report_text ? sendTextFiltered() : '',
           target_type: 'player',
           player_user_id: target.id,
         });
@@ -919,6 +928,7 @@ export default function RecentScreen() {
                           playerName: item.player_name,
                           evalId: item.kind === 'eval' ? item.id : undefined,
                         });
+                        setSectionToggles({});
                         setTimeout(() => setModalView('send'), 50);
                       }}
                     >
@@ -1274,7 +1284,7 @@ export default function RecentScreen() {
                     <Text style={styles.actionText} numberOfLines={1}>{tr('recent.exportPrint')}</Text>
                   </TouchableOpacity>
                   {/* Send to Player */}
-                  <TouchableOpacity style={[styles.actionBtn, { borderColor: t.positiveSoft }]} onPress={() => { setSendSearch(''); setSendResults([]); setModalView('send'); }}>
+                  <TouchableOpacity style={[styles.actionBtn, { borderColor: t.positiveSoft }]} onPress={() => { setSendSearch(''); setSendResults([]); setSectionToggles({}); setModalView('send'); }}>
                     <Ionicons name="person-outline" size={18} color={t.positive} />
                     <Text style={[styles.actionText, { color: t.positive }]} numberOfLines={1}>{tr('recent.playerBtn')}</Text>
                   </TouchableOpacity>
@@ -1335,6 +1345,27 @@ export default function RecentScreen() {
                       <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: t.divider }}>
                         <Text style={{ color: t.inkSoft, fontSize: 13, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }} numberOfLines={2}>{tog.label}</Text>
                         <Switch value={playerShareToggles[tog.key as keyof typeof playerShareToggles]} onValueChange={v => setPlayerShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: t.line, true: t.positive }} thumbColor="#fff" />
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {/* The report's own sections. Toggling the text off above hides
+                    the whole document, so the per-section list only applies
+                    while the text is being sent at all. */}
+                {playerShareToggles.share_report_text && sendToggleSections.length > 1 && (
+                  <View style={{ marginBottom: 12 }}>
+                    <Text style={{ color: t.muted2, fontSize: 11, fontFamily: fonts[700], letterSpacing: 0.5, marginBottom: 4 }}>
+                      {tr('recent.sectionsLabel')}
+                    </Text>
+                    {sendToggleSections.map((sec, i) => (
+                      <View key={`${sec.heading}-${i}`} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: t.divider }}>
+                        <Text style={{ color: t.inkSoft, fontSize: 13, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }} numberOfLines={2}>{sec.heading}</Text>
+                        <Switch
+                          value={sectionToggles[sec.heading] !== false}
+                          onValueChange={v => setSectionToggles(prev => ({ ...prev, [sec.heading]: v }))}
+                          trackColor={{ false: t.line, true: t.positive }} thumbColor="#fff"
+                        />
                       </View>
                     ))}
                   </View>

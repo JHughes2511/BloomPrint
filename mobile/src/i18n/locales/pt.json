@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Regenerando o relatório…",
     "correctionsCount": "Correções ({{count}})",
     "applied": "APLICADO",
-    "pending": "PENDENTE"
+    "pending": "PENDENTE",
+    "sectionsLabel": "Secções"
   },
   "staffHub": {
     "title": "Central da Comissão",

@@ -338,6 +338,8 @@ class LinkRequestOut(BaseModel):
 class ShareReportRequest(BaseModel):
     player_user_id: int
     share_report_text: bool = True
+    # Section headings the coach switched off in the send sheet.
+    hide_sections: list[str] = []
     share_grades: bool = False
     share_flags: bool = False
     share_questions: bool = False

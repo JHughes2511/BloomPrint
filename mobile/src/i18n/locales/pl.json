@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Ponowne generowanie raportu…",
     "correctionsCount": "Poprawki ({{count}})",
     "applied": "ZASTOSOWANO",
-    "pending": "OCZEKUJE"
+    "pending": "OCZEKUJE",
+    "sectionsLabel": "Sekcje"
   },
   "staffHub": {
     "title": "Centrum sztabu",

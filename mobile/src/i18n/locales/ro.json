@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Se regenerează raportul…",
     "correctionsCount": "Corecturi ({{count}})",
     "applied": "APLICAT",
-    "pending": "ÎN AȘTEPTARE"
+    "pending": "ÎN AȘTEPTARE",
+    "sectionsLabel": "Secțiuni"
   },
   "staffHub": {
     "title": "Zona staff",

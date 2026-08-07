@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Αναδημιουργία της αναφοράς…",
     "correctionsCount": "Διορθώσεις ({{count}})",
     "applied": "ΕΦΑΡΜΟΣΤΗΚΕ",
-    "pending": "ΕΚΚΡΕΜΕΙ"
+    "pending": "ΕΚΚΡΕΜΕΙ",
+    "sectionsLabel": "Ενότητες"
   },
   "staffHub": {
     "title": "Κόμβος Επιτελείου",

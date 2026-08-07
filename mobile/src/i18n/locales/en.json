@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Regenerating the report…",
     "correctionsCount": "Corrections ({{count}})",
     "applied": "APPLIED",
-    "pending": "PENDING"
+    "pending": "PENDING",
+    "sectionsLabel": "Sections"
   },
   "staffHub": {
     "title": "Staff Hub",

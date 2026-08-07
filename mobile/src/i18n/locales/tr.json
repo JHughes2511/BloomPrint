@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Rapor yeniden oluşturuluyor…",
     "correctionsCount": "Düzeltmeler ({{count}})",
     "applied": "UYGULANDI",
-    "pending": "BEKLİYOR"
+    "pending": "BEKLİYOR",
+    "sectionsLabel": "Bölümler"
   },
   "staffHub": {
     "title": "Ekip Merkezi",

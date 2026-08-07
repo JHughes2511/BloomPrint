@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Ponovno generiram izvještaj…",
     "correctionsCount": "Ispravci ({{count}})",
     "applied": "PRIMIJENJENO",
-    "pending": "NA ČEKANJU"
+    "pending": "NA ČEKANJU",
+    "sectionsLabel": "Odjeljci"
   },
   "staffHub": {
     "title": "Središte stožera",

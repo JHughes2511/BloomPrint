@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Pergeneruojama ataskaita…",
     "correctionsCount": "Pataisymai ({{count}})",
     "applied": "PRITAIKYTA",
-    "pending": "LAUKIAMA"
+    "pending": "LAUKIAMA",
+    "sectionsLabel": "Skyriai"
   },
   "staffHub": {
     "title": "Personalo centras",

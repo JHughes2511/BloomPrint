@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Перегенеровуємо звіт…",
     "correctionsCount": "Виправлення ({{count}})",
     "applied": "ЗАСТОСОВАНО",
-    "pending": "ОЧІКУЄ"
+    "pending": "ОЧІКУЄ",
+    "sectionsLabel": "Розділи"
   },
   "staffHub": {
     "title": "Хаб персоналу",

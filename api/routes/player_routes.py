@@ -1,4 +1,5 @@
 """Player-facing routes: invites, link requests, shared reports, training, comments, notifications."""
+import json
 
 import os
 import secrets
@@ -9,6 +10,7 @@ from ..auth import get_current_coach
 from .. import models, notify, schemas
 from ..softdelete import soft_delete
 from ..ownership import get_owned
+from ..report_sections import _without_sections
 from .player_auth import get_current_player_user
 from ..ai_models import OPUS, text_of
 
@@ -408,6 +410,7 @@ def share_report(
                 share_grades=body.share_grades,
                 share_flags=body.share_flags,
                 share_questions=body.share_questions,
+                hidden_sections=json.dumps(body.hide_sections) if body.hide_sections else None,
                 status="pending",
             )
             db.add(approval)
@@ -438,6 +441,7 @@ def share_report(
         share_grades=body.share_grades,
         share_flags=body.share_flags,
         share_questions=body.share_questions,
+        hidden_sections=json.dumps(body.hide_sections) if body.hide_sections else None,
         message=body.message,
     )
     db.add(shared)
@@ -1647,6 +1651,9 @@ def approve_share(
             share_grades=bool(a.share_grades),
             share_flags=bool(a.share_flags),
             share_questions=bool(a.share_questions),
+            # Carry the coach's choice through approval — the withheld sections
+            # were chosen when the share was requested, not when it was approved.
+            hidden_sections=a.hidden_sections,
             message=a.message,
         )
         db.add(shared)
@@ -1765,7 +1772,15 @@ def _build_shared_report_out(shared: models.SharedReport) -> schemas.SharedRepor
     out.shared_by_name = shared.shared_by.name if shared.shared_by else ""
     if ev:
         if shared.share_report_text:
-            out.report_text = ev.report_text
+            # An eval is shared by reference, so the sections the coach switched
+            # off are removed here, on the way out — not at share time.
+            hidden = []
+            if getattr(shared, "hidden_sections", None):
+                try:
+                    hidden = json.loads(shared.hidden_sections) or []
+                except Exception:
+                    hidden = []
+            out.report_text = _without_sections(ev.report_text or "", hidden) if hidden else ev.report_text
         if shared.share_grades:
             out.overall_grade = ev.overall_grade
             out.pillar_grades = ev.pillar_grades

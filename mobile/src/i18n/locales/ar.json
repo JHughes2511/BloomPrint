@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "جارٍ إعادة إنشاء التقرير…",
     "correctionsCount": "التصحيحات ({{count}})",
     "applied": "تم التطبيق",
-    "pending": "معلّق"
+    "pending": "معلّق",
+    "sectionsLabel": "الأقسام"
   },
   "staffHub": {
     "title": "مركز الطاقم",

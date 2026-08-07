@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Regenerisanje izveštaja…",
     "correctionsCount": "Ispravke ({{count}})",
     "applied": "PRIMENJENO",
-    "pending": "NA ČEKANJU"
+    "pending": "NA ČEKANJU",
+    "sectionsLabel": "Одељци"
   },
   "staffHub": {
     "title": "Centar štaba",

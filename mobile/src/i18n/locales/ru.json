@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Перегенерируем отчёт…",
     "correctionsCount": "Правки ({{count}})",
     "applied": "ПРИМЕНЕНО",
-    "pending": "ОЖИДАЕТ"
+    "pending": "ОЖИДАЕТ",
+    "sectionsLabel": "Разделы"
   },
   "staffHub": {
     "title": "Штаб",

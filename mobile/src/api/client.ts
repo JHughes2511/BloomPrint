@@ -413,6 +413,8 @@ export const trainingAPI = {
 // ── Player (coach-side) ────────────────────────────────────────────────────────
 export interface ShareReportRequest {
   player_user_id: number;
+  /** Section headings the coach switched off; the server filters them out. */
+  hide_sections?: string[];
   share_report_text?: boolean;
   share_grades?: boolean;
   share_flags?: boolean;

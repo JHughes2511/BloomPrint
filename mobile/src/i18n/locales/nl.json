@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Het rapport wordt opnieuw gegenereerd…",
     "correctionsCount": "Correcties ({{count}})",
     "applied": "TOEGEPAST",
-    "pending": "IN AFWACHTING"
+    "pending": "IN AFWACHTING",
+    "sectionsLabel": "Secties"
   },
   "staffHub": {
     "title": "Staf-hub",

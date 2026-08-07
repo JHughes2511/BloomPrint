@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "रिपोर्ट दोबारा बन रही है…",
     "correctionsCount": "सुधार ({{count}})",
     "applied": "लागू",
-    "pending": "लंबित"
+    "pending": "लंबित",
+    "sectionsLabel": "अनुभाग"
   },
   "staffHub": {
     "title": "स्टाफ़ हब",

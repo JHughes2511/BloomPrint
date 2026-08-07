@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Der Bericht wird neu generiert…",
     "correctionsCount": "Korrekturen ({{count}})",
     "applied": "ANGEWENDET",
-    "pending": "AUSSTEHEND"
+    "pending": "AUSSTEHEND",
+    "sectionsLabel": "Abschnitte"
   },
   "staffHub": {
     "title": "Staff-Hub",

@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Genererar om rapporten…",
     "correctionsCount": "Rättelser ({{count}})",
     "applied": "TILLÄMPAD",
-    "pending": "VÄNTANDE"
+    "pending": "VÄNTANDE",
+    "sectionsLabel": "Avsnitt"
   },
   "staffHub": {
     "title": "Stabscentral",

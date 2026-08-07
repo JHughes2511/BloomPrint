@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "리포트를 다시 생성하는 중…",
     "correctionsCount": "수정 사항 ({{count}})",
     "applied": "적용됨",
-    "pending": "대기 중"
+    "pending": "대기 중",
+    "sectionsLabel": "섹션"
   },
   "staffHub": {
     "title": "스태프 허브",

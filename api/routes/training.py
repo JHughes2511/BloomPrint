@@ -9,6 +9,7 @@ from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, notify, schemas
 from ..ownership import get_owned
+from ..report_sections import _without_sections
 from ..ai_models import OPUS, SONNET, text_of
 
 router = APIRouter(prefix="/training", tags=["training"])
@@ -187,38 +188,6 @@ def build_player_training_prompt(player_name: str, original_text: str, feedback:
     )
     return prompt
 
-
-
-def _without_sections(text: str, hide: list[str]) -> str:
-    """Drop the named sections from a report.
-
-    The headings are the ones the app showed the coach, produced by the same
-    two rules the client's splitter uses: a markdown heading, or an ALL-CAPS
-    line. Anything not recognised as a heading stays with the section above it,
-    so a section that is switched off takes its whole body with it.
-    """
-    wanted = {h.strip().lower() for h in hide if h and h.strip()}
-    if not wanted or not text:
-        return text
-
-    def heading_of(line: str) -> str | None:
-        t = line.strip()
-        if re.match(r"^#{1,6}\s+", t):
-            return re.sub(r"^#{1,6}\s+", "", t).replace("**", "").strip()
-        if re.search(r":\s*-?\d", t):
-            return None
-        if len(t) < 70 and re.match(r"^[A-Z][A-Z0-9\s/&()\-:'.]{2,}$", t) and not re.search(r"[.!?]$", t):
-            return t.rstrip(":").strip()
-        return None
-
-    out, dropping = [], False
-    for line in text.split("\n"):
-        h = heading_of(line)
-        if h is not None:
-            dropping = h.strip().lower() in wanted
-        if not dropping:
-            out.append(line)
-    return "\n".join(out).strip()
 
 
 def reformat_training_for_player(training_id: int, hide_sections: list[str] | None = None) -> None:

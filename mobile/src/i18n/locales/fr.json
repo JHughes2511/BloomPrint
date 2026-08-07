@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Régénération du rapport…",
     "correctionsCount": "Corrections ({{count}})",
     "applied": "APPLIQUÉ",
-    "pending": "EN ATTENTE"
+    "pending": "EN ATTENTE",
+    "sectionsLabel": "Sections"
   },
   "staffHub": {
     "title": "Espace staff",

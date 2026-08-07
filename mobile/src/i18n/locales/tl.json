@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "Muling binubuo ang ulat…",
     "correctionsCount": "Mga pagwawasto ({{count}})",
     "applied": "NA-APPLY",
-    "pending": "NAKABINBIN"
+    "pending": "NAKABINBIN",
+    "sectionsLabel": "Mga seksyon"
   },
   "staffHub": {
     "title": "Staff hub",

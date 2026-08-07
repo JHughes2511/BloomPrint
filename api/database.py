@@ -240,6 +240,8 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     ("generation_jobs", "partial", "TEXT"),
     ("generation_jobs", "attempts", "INTEGER DEFAULT 0"),
     ("game_report_clips", "team_name", "VARCHAR"),
+    ("shared_reports", "hidden_sections", "TEXT"),
+    ("share_approvals", "hidden_sections", "TEXT"),
 ]
 
 

@@ -1354,7 +1354,8 @@
     "regeneratingLabel": "მიმდინარეობს ანგარიშის ხელახლა გენერაცია…",
     "correctionsCount": "შესწორებები ({{count}})",
     "applied": "გამოყენებულია",
-    "pending": "მოლოდინში"
+    "pending": "მოლოდინში",
+    "sectionsLabel": "სექციები"
   },
   "staffHub": {
     "title": "პერსონალის ცენტრი",
