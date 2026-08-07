@@ -85,19 +85,36 @@ def _writing_hook(progress):
     Reported as a percentage, the same as the pre-scan — a word count is a
     number the coach has no yardstick for ("is 1,200 nearly done?").
 
-    There is no true total to divide by: the report ends when it ends. So the
-    percentage saturates rather than counting toward a guess — it climbs
-    quickly while the report is short and slows as it lengthens, which keeps it
-    honest (it never claims to be finished) and keeps it moving (it never
-    parks). A typical full report lands in the eighties before it completes.
+    There is no true total to divide by: the report ends when it ends. The first
+    attempt at this saturated from the very first word, which put 90% at 3,600
+    words and then needed another 450 to reach 91 — so the number sat still for
+    the whole tail of a long report and looked stuck. It climbs steadily to 90%
+    across a full-length report instead, and only then eases off, so a report
+    that runs long keeps moving rather than parking.
+
+    The tick is not shown to anyone. It exists so the label CHANGES on every
+    heartbeat: a job whose process has died leaves its label frozen, and that is
+    the only way anything downstream can tell a slow phase from a dead one.
     """
     if not progress:
         return None
 
+    beat = {"n": 0}
+    FULL = 3000   # words in a full report; most finish around here
+    TAIL = 300    # words per point beyond that — a tick every few seconds
+
     def report(words: int) -> None:
-        pct = min(99, round(100 * words / (words + 400)))
+        if words <= FULL:
+            pct = round(90 * words / FULL)
+        else:
+            # Past a full report we are guessing, so move at a fixed, visible
+            # rate rather than an ever-slowing one. Holding at 99 for the last
+            # of a very long report is a far smaller lie than sitting on 90 for
+            # all of it.
+            pct = min(99, 90 + (words - FULL) // TAIL)
+        beat["n"] += 1
         try:
-            progress(1, 1, f"job:writing:{pct}")
+            progress(1, 1, f"job:writing:{pct}:{beat['n']}")
         except Exception:
             pass
 
@@ -123,7 +140,12 @@ def _long_answer(messages: list[dict], max_tokens: int, on_words=None) -> str:
     out: list[str] = []
     words = 0
     told = 0
-    with _client().messages.stream(model=OPUS, max_tokens=max_tokens, messages=messages) as stream:
+    # A ceiling on SILENCE, not on the call: each read may wait this long, so a
+    # report that legitimately takes half an hour is fine, while a connection
+    # that dies mid-stream raises instead of holding the job open forever with
+    # a progress bar that will never move again.
+    with _client().messages.stream(model=OPUS, max_tokens=max_tokens, messages=messages,
+                                   timeout=300.0) as stream:
         for chunk in stream.text_stream:
             out.append(chunk)
             if on_words is None:

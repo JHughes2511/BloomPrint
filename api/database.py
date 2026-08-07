@@ -1177,8 +1177,8 @@ def _fail_orphaned_jobs():
         with _Session(engine) as sess:
             stale = sess.query(models.GenerationJob).filter_by(status="processing").all()
             for job in stale:
-                done_now, done_before = _segments_done(job)
-                progressed = done_now > done_before
+                done_now, _ = _segments_done(job)
+                progressed = _made_progress(job)
                 attempts = 0 if progressed else (job.attempts or 0) + 1
                 if job.payload and attempts <= ATTEMPT_CAP:
                     job.attempts = attempts
@@ -1217,9 +1217,35 @@ def _segments_done(job) -> tuple[int, int]:
     return len(data.get("segments") or {}), int(data.get("seen_at_resume") or 0)
 
 
+def _made_progress(job) -> bool:
+    """Did this attempt achieve anything, by any measure?
+
+    Segments are not the only work a job does. The last phase — writing the
+    report — records no segments at all, because they were all finished before
+    it started. Judging progress by segment count alone meant a job killed
+    while writing looked identical to one that crashed on startup, so a run of
+    deploys during that phase would abandon a nearly-finished report and blame
+    it for making no progress.
+
+    The progress label moves throughout, whatever the phase, so a label that has
+    changed since the last attempt is proof the job was alive and working.
+    """
+    import json
+
+    done_now, done_before = _segments_done(job)
+    if done_now > done_before:
+        return True
+    try:
+        data = json.loads(job.partial or "{}")
+    except Exception:
+        return False
+    seen = data.get("seen_progress")
+    return bool(job.progress) and job.progress != seen
+
+
 def _remember_segment_count(job, done: int) -> str:
-    """Stamp how much was finished, so the next restart can tell progress from
-    a job that is simply crashing on start."""
+    """Stamp what had been achieved, so the next restart can tell real progress
+    from a job that is simply crashing on start."""
     import json
 
     try:
@@ -1227,6 +1253,7 @@ def _remember_segment_count(job, done: int) -> str:
     except Exception:
         data = {}
     data["seen_at_resume"] = done
+    data["seen_progress"] = job.progress
     return json.dumps(data)
 
 
