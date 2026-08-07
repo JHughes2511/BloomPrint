@@ -15,17 +15,59 @@ from typing import Any
 
 import anthropic
 import cv2
-import mcp.server.stdio
-import mcp.types as types
 import numpy as np
-from mcp.server import Server
 from PIL import Image
+
+# The MCP surface is OPTIONAL.
+#
+# This module is two things: the analysis itself, which the API calls directly,
+# and a thin MCP server that exposes the same functions to an MCP client. Only
+# the second needs the mcp package — but importing it at the top made the whole
+# module unimportable when the installed mcp exposes a different Server API, and
+# the coach saw "'Server' object has no attribute 'list_tools'" the moment they
+# analyzed a film. The API must not be able to fail on a dependency it does not
+# use, so the MCP pieces degrade to no-ops instead.
+try:                                                   # pragma: no cover
+    import mcp.server.stdio                            # noqa: F401
+    import mcp.types as types
+    from mcp.server import Server
+
+    app = Server("video-vision")
+    _MCP_ERROR: Exception | None = None
+    if not hasattr(app, "list_tools") or not hasattr(app, "call_tool"):
+        raise AttributeError("installed mcp Server has no list_tools/call_tool")
+except Exception as _exc:                              # pragma: no cover
+    _MCP_ERROR = _exc
+
+    class _TextContent:
+        """Stands in for mcp.types.TextContent — the analysis returns these."""
+
+        def __init__(self, type: str = "text", text: str = "") -> None:
+            self.type, self.text = type, text
+
+    class _Types:
+        TextContent = _TextContent
+        Tool = dict
+
+    types = _Types()                                   # type: ignore[assignment]
+
+    class _NoServer:
+        """Accepts the decorators and registers nothing."""
+
+        def __init__(self, *a: Any, **k: Any) -> None:
+            pass
+
+        def list_tools(self):
+            return lambda fn: fn
+
+        def call_tool(self):
+            return lambda fn: fn
+
+    app = _NoServer("video-vision")                    # type: ignore[assignment]
 
 from .bim import build_prompt, OUTPUT_TYPES, COACH_WEIGHTS, COMPETITION_LEVELS
 from api.ai_models import OPUS, text_of
 from api import speech
-
-app = Server("video-vision")
 
 _anthropic_client: anthropic.Anthropic | None = None
 
@@ -887,6 +929,13 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
 
 def main() -> None:
     import asyncio
+
+    if _MCP_ERROR is not None:
+        raise SystemExit(
+            f"The MCP server cannot start with the installed mcp package: {_MCP_ERROR}. "
+            "Film analysis inside BloomPrint does not use it and is unaffected."
+        )
+    import mcp.server.stdio
 
     asyncio.run(mcp.server.stdio.run(app))
 
