@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import Sheet from '../components/Sheet';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useGoUp } from '../navigation/goUp';
 import { Ionicons } from '@expo/vector-icons';
 import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay, parseGenProgress, jobProgressLabel, uploadProgressCode } from '../components/GeneratingBasketball';
@@ -68,6 +69,8 @@ function stripMarkdownForPreview(text: string): string {
 export default function GameReportBuilderScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
   const { coach } = useAuth();
   const { t } = useTheme();
   // Scales with the window on desktop; unchanged on phones.
@@ -551,7 +554,7 @@ export default function GameReportBuilderScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => goUp()}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{tr('gameBuilder.headerTitle')}</Text>

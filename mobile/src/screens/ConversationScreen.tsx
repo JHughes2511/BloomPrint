@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import Sheet from '../components/Sheet';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useGoUp } from '../navigation/goUp';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -29,6 +30,8 @@ import { sheetCap, desktopOnly } from '../responsive/modalSizes';
 export default function ConversationScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
   const { coach } = useAuth();
   const { t } = useTheme();
   const { t: tr } = useTranslation();
@@ -236,7 +239,7 @@ export default function ConversationScreen() {
     <ScreenBackground>
     <PageContainer maxWidth={900}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
+        <TouchableOpacity onPress={() => goUp()} style={{ flexShrink: 0 }}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
         {/* Translated titles run 20-40% longer than English. Wrap to a second

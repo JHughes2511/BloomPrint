@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Sheet from '../components/Sheet';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useGoUp } from '../navigation/goUp';
 import { Ionicons } from '@expo/vector-icons';
 import { staffSharingAPI, teamStaffAPI, staffMessagesAPI, coachesAPI, teamsAPI } from '../api/client';
 import { renderReport } from '../utils/renderReport';
@@ -44,6 +45,8 @@ export default function StaffInboxScreen() {
   // Pixels the phone keyboard is covering, so bottom-anchored sheets clear it.
   const kbInset = useKeyboardInset();
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
 
   // Themed report-type badge colors (adapt to light/dark instead of fixed hex).
   const badgeFor = (type: string): { bg: string; text: string } => {
@@ -622,7 +625,7 @@ export default function StaffInboxScreen() {
     <PageContainer padded={false} maxWidth={1280}>
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
+        <TouchableOpacity onPress={() => goUp()} style={{ flexShrink: 0 }}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
         {/* Translated titles run 20-40% longer than English. Wrap to a second

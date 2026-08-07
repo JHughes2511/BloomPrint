@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useGoUp } from '../../navigation/goUp';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
@@ -33,6 +34,8 @@ export default function PlayerTeamReportDetailScreen() {
   const markdownStyles = makeMarkdownStyles(t);
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
   const { reportId } = route.params;
   const [report, setReport] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -71,7 +74,7 @@ export default function PlayerTeamReportDetailScreen() {
     <PageContainer maxWidth={REPORT_MAX_WIDTH}>
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
+          <TouchableOpacity onPress={() => goUp()} style={{ flexShrink: 0 }}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
           {/* Long translated report types clip instead of wrapping the header. */}

@@ -5,6 +5,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Alert,
 } from 'react-native';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useGoUp } from '../../navigation/goUp';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
@@ -40,6 +41,8 @@ interface CoachTraining {
 export default function PlayerCoachTrainingDetailScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
   const { trainingId } = route.params;
   const { playerUser } = usePlayerAuth();
   const { t: tr } = useTranslation();
@@ -204,7 +207,7 @@ export default function PlayerCoachTrainingDetailScreen() {
     return (
       <ScreenBackground>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => goUp()}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
         </View>
@@ -220,7 +223,7 @@ export default function PlayerCoachTrainingDetailScreen() {
     <PageContainer maxWidth={REPORT_MAX_WIDTH}>
       <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
+          <TouchableOpacity onPress={() => goUp()} style={{ flexShrink: 0 }}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
           {/* Long translated titles and the coach tag both shrink instead of overflowing. */}

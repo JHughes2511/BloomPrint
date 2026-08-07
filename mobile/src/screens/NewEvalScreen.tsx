@@ -7,6 +7,7 @@ import {
   StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useGoUp } from '../navigation/goUp';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,6 +32,8 @@ const OUTPUT_TYPES: OutputType[] = [
 export default function NewEvalScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
   const { playerId, playerName } = route.params;
   const { t } = useTheme();
   const { t: tr } = useTranslation();
@@ -195,7 +198,7 @@ export default function NewEvalScreen() {
       keyboardDismissMode="on-drag"
     >
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => goUp()}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 12 }}>

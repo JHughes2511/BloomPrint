@@ -6,6 +6,7 @@ import {
   ActivityIndicator, RefreshControl, Alert, TextInput,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useGoUp } from '../navigation/goUp';
 import { useTranslation } from 'react-i18next';
 import { notificationTitle, notificationBody } from '../utils/notificationText';
 import { Ionicons } from '@expo/vector-icons';
@@ -37,6 +38,8 @@ const NOTIF_ICONS: Record<string, string> = {
 
 export default function CoachNotificationsScreen() {
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
   const { coach } = useAuth();
   const { t } = useTheme();
   const { t: tr } = useTranslation();
@@ -219,7 +222,7 @@ export default function CoachNotificationsScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={t.accent} />}
     >
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => goUp()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
         {/* Translated titles run 20-40% longer than English. Wrap to a second

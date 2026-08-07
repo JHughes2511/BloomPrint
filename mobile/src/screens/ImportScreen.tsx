@@ -9,6 +9,7 @@ import {
   ActivityIndicator, Alert, KeyboardAvoidingView, Platform, TextInput,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useGoUp } from '../navigation/goUp';
 import * as DocumentPicker from 'expo-document-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { api, teamsAPI, importsAPI } from '../api/client';
@@ -44,6 +45,8 @@ interface ImportResult {
 
 export default function ImportScreen() {
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
   const route = useRoute<any>();
   const { t } = useTheme();
   const { t: tr } = useTranslation();
@@ -153,7 +156,7 @@ export default function ImportScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <TouchableOpacity onPress={() => goUp()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
           {/* Translated titles run 20-40% longer than English. Wrap to a second
@@ -384,7 +387,7 @@ export default function ImportScreen() {
                 ))}
               </View>
             )}
-            <TouchableOpacity style={styles.doneBtn} onPress={() => navigation.goBack()}>
+            <TouchableOpacity style={styles.doneBtn} onPress={() => goUp()}>
               <Text style={styles.doneBtnText} numberOfLines={1}>{isRosterMode ? tr('importScreen.backToRoster') : tr('importScreen.goToRoster')}</Text>
             </TouchableOpacity>
           </View>

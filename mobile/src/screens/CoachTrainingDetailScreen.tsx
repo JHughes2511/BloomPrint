@@ -6,6 +6,7 @@ import {
   ActivityIndicator, TextInput, Alert,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useGoUp } from '../navigation/goUp';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
@@ -34,6 +35,8 @@ function cleanMarkdown(text: string): string {
 export default function CoachTrainingDetailScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
   const { trainingId } = route.params;
   const { t } = useTheme();
   const { t: tr } = useTranslation();
@@ -141,7 +144,7 @@ export default function CoachTrainingDetailScreen() {
        
       >
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <TouchableOpacity onPress={() => goUp()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
           {/* Translated titles run 20-40% longer than English. Wrap to a second

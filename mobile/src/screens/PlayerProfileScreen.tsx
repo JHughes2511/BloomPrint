@@ -7,6 +7,7 @@ import {
   Modal, Alert, KeyboardAvoidingView, Platform, TextInput, RefreshControl, useWindowDimensions } from 'react-native';
 import Sheet from '../components/Sheet';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useGoUp } from '../navigation/goUp';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
@@ -56,6 +57,8 @@ export default function PlayerProfileScreen() {
   const { isWide } = useBreakpoint();
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
   const { playerId } = route.params;
   const { t } = useTheme();
   const win = useWindowDimensions();
@@ -578,7 +581,7 @@ export default function PlayerProfileScreen() {
           one row. Back on its own line lined the name up with the tab screens
           but cost a row of height and read as a gap rather than a heading. */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={8}>
+        <TouchableOpacity onPress={() => goUp()} style={styles.backBtn} hitSlop={8}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.headerCenter} onPress={() => setShowProfileDetail(true)} activeOpacity={0.75}>

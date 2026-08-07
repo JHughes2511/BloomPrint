@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Sheet from '../components/Sheet';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useGoUp } from '../navigation/goUp';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -48,6 +49,8 @@ export default function EvalReportScreen() {
   const { isWide } = useBreakpoint();
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
   const { evalId, openShare } = route.params;
   const { t, mode } = useTheme();
   // Scales with the window on desktop; unchanged on phones.
@@ -472,7 +475,7 @@ export default function EvalReportScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => goUp()}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 12 }}>

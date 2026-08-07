@@ -6,6 +6,7 @@ import {
   ActivityIndicator, TextInput, Alert,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useGoUp } from '../../navigation/goUp';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
@@ -29,6 +30,8 @@ import { usePlayerAuth } from '../../context/PlayerAuthContext';
 export default function PlayerTrainingDetailScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
   const { trainingId } = route.params;
   const { playerUser } = usePlayerAuth();
   const { t: tr } = useTranslation();
@@ -199,7 +202,7 @@ export default function PlayerTrainingDetailScreen() {
     <PageContainer maxWidth={REPORT_MAX_WIDTH}>
       <KeyboardAwareScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
+          <TouchableOpacity onPress={() => goUp()} style={{ flexShrink: 0 }}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
           {/* Long translated titles clip instead of wrapping under the back button. */}

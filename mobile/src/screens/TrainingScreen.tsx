@@ -6,6 +6,7 @@ import {
   ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useGoUp } from '../navigation/goUp';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
@@ -23,6 +24,8 @@ import { renderReport } from '../utils/renderReport';
 export default function TrainingScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
   const { playerId, evalId } = route.params;
   const { t } = useTheme();
   const { t: tr } = useTranslation();
@@ -82,7 +85,7 @@ export default function TrainingScreen() {
     >
     <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => goUp()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
         </TouchableOpacity>
         {/* Translated titles run 20-40% longer than English. Wrap to a second

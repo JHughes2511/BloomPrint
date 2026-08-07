@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import Sheet from '../components/Sheet';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useGoUp } from '../navigation/goUp';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { teamStaffAPI, staffMessagesAPI, coachesAPI } from '../api/client';
@@ -36,6 +37,8 @@ type Team = {
 export default function TeamDetailScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
   const { coach } = useAuth();
   const { t } = useTheme();
   const { t: tr } = useTranslation();
@@ -208,7 +211,7 @@ export default function TeamDetailScreen() {
       { text: tr('common.cancel'), style: 'cancel' },
       {
         text: tr('staffHub.leave'), style: 'destructive', onPress: async () => {
-          try { await teamStaffAPI.leave(teamId); navigation.goBack(); }
+          try { await teamStaffAPI.leave(teamId); goUp(); }
           catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('staffHub.joinTeamError')); }
         },
       },
@@ -225,7 +228,7 @@ export default function TeamDetailScreen() {
       <PageContainer padded={false} maxWidth={1280}>
         <View style={styles.container}>
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexShrink: 0 }}>
+            <TouchableOpacity onPress={() => goUp()} style={{ flexShrink: 0 }}>
               <Ionicons name="chevron-back" size={24} color={t.ink} />
             </TouchableOpacity>
             <Text style={styles.title} numberOfLines={2}>{team?.name ?? route.params?.teamName ?? tr('teamDetail.title')}</Text>

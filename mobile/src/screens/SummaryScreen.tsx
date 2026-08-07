@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { topPad } from '../responsive/screenPadding';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useGoUp } from '../navigation/goUp';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
@@ -22,6 +23,8 @@ export default function SummaryScreen() {
   const markdownStyles = makeMarkdownStyles(t);
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  // Back means up a level — see navigation/goUp.ts.
+  const goUp = useGoUp();
   const { title, reportText, fileName: fileNameParam } = route.params as {
     title: string; reportText: string; fileName?: string;
   };
@@ -63,7 +66,7 @@ export default function SummaryScreen() {
     <PageContainer maxWidth={REPORT_MAX_WIDTH}>
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <TouchableOpacity onPress={() => goUp()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
           </TouchableOpacity>
           {/* Long translated report titles wrap to a second line rather than
