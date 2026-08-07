@@ -324,11 +324,19 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderColor: t.cardBorder,
     maxHeight: 100,
   },
+  // One control in two pieces: the field and Send share a height rather than
+  // each arriving at one through its own padding. Padding alone made the button
+  // grow with the multiline field beside it — on web that field is a textarea
+  // whose height comes from its row count — so it stood up as a tall block next
+  // to the box instead of sitting on its bottom edge.
   sendBtn: {
     backgroundColor: t.positive,
     borderRadius: 10,
-    padding: 12,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
+    alignSelf: 'flex-end',
+    flexShrink: 0,
   },
 });

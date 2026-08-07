@@ -268,6 +268,14 @@
     "country": {
       "selectCountry": "Pumili ng bansa",
       "searchCountries": "Maghanap ng bansa..."
+    },
+    "sendTraining": {
+      "title": "Ipadala sa player",
+      "subWithName": "Piliin kung ano ang makikita ni {{name}}.",
+      "sub": "Piliin kung ano ang makikita ng player.",
+      "oneSection": "Isang seksyon lang ang program na ito — ipapadala nang buo.",
+      "send": "Ipadala",
+      "couldNotSend": "Hindi naipadala ang program."
     }
   },
   "newEval": {

@@ -268,6 +268,14 @@
     "country": {
       "selectCountry": "Ülke seç",
       "searchCountries": "Ülke ara..."
+    },
+    "sendTraining": {
+      "title": "Oyuncuya gönder",
+      "subWithName": "{{name}} neyi göreceğini seç.",
+      "sub": "Oyuncunun neyi göreceğini seç.",
+      "oneSection": "Bu programda tek bölüm var — tamamı gönderilecek.",
+      "send": "Gönder",
+      "couldNotSend": "Program gönderilemedi."
     }
   },
   "newEval": {

@@ -268,6 +268,14 @@
     "country": {
       "selectCountry": "Selectează țara",
       "searchCountries": "Caută țări..."
+    },
+    "sendTraining": {
+      "title": "Trimite jucătorului",
+      "subWithName": "Alege ce va vedea {{name}}.",
+      "sub": "Alege ce va vedea jucătorul.",
+      "oneSection": "Programul are o singură secțiune — se trimite integral.",
+      "send": "Trimite",
+      "couldNotSend": "Programul nu a putut fi trimis."
     }
   },
   "newEval": {

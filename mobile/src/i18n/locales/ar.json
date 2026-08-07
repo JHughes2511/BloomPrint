@@ -268,6 +268,14 @@
     "country": {
       "selectCountry": "اختر الدولة",
       "searchCountries": "البحث عن الدول..."
+    },
+    "sendTraining": {
+      "title": "إرسال إلى اللاعب",
+      "subWithName": "اختر ما سيراه {{name}}.",
+      "sub": "اختر ما سيراه اللاعب.",
+      "oneSection": "يحتوي البرنامج على قسم واحد — سيُرسل بالكامل.",
+      "send": "إرسال",
+      "couldNotSend": "تعذّر إرسال البرنامج."
     }
   },
   "newEval": {

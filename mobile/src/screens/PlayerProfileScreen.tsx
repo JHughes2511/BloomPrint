@@ -25,6 +25,7 @@ import { splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import ShareModal from '../components/ShareModal';
 import { outputTypeLabel } from '../utils/reportType';
 import { useAuth } from '../context/AuthContext';
+import SendTrainingModal from '../components/SendTrainingModal';
 import { useTheme } from '../theme/ThemeProvider';
 import { topPad } from '../responsive/screenPadding';
 import { useBreakpoint } from '../responsive/useBreakpoint';
@@ -79,6 +80,8 @@ export default function PlayerProfileScreen() {
   const [latestTraining, setLatestTraining] = useState<any | null>(null);
   const [allTraining, setAllTraining] = useState<any[]>([]);
   const [trainingModalItem, setTrainingModalItem] = useState<any | null>(null);
+  // The training whose sections the coach is choosing before it is sent.
+  const [sendTraining, setSendTraining] = useState<{ id: number; text: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [sendingTraining, setSendingTraining] = useState(false);
   // Training picker for send flows
@@ -387,27 +390,24 @@ export default function PlayerProfileScreen() {
     setShowTrainingPicker(true);
   };
 
-  const sendTrainingToPlayer = async (trainingId?: number) => {
+  /** Open the section picker; the send itself happens in the modal. Sending
+   *  straight from here gave the coach no say in what the player would see. */
+  const sendTrainingToPlayer = (trainingId?: number) => {
     const id = trainingId ?? latestTraining?.id;
     if (!id) {
       Alert.alert(tr('playerProfile.noTrainingTitle'), tr('playerProfile.noTrainingMsg'));
       return;
     }
-    setSendingTraining(true);
-    try {
-      const result = await trainingAPI.sendToPlayer(id);
-      setAllTraining(prev => prev.map(s => s.id === id ? { ...s, sent_to_player: true, reformatting: true } : s));
-      Alert.alert(tr('playerProfile.sentTitle'), tr('playerProfile.trainingSentMsg', { name: result.player_name ?? tr('playerProfile.thePlayer') }));
-    } catch (e: any) {
-      const msg = e?.response?.data?.detail ?? tr('playerProfile.couldNotSendTraining');
-      if (msg.includes('not linked')) {
-        Alert.alert(tr('playerProfile.notLinkedTitle'), tr('playerProfile.notLinkedMsg'));
-      } else {
-        Alert.alert(tr('common.error'), msg);
-      }
-    } finally {
-      setSendingTraining(false);
-    }
+    const session = allTraining.find(s2 => s2.id === id) ?? latestTraining;
+    setSendTraining({ id, text: session?.program_text ?? '' });
+  };
+
+  const onTrainingSent = (name?: string) => {
+    const id = sendTraining?.id;
+    if (id) setAllTraining(prev => prev.map(s2 => s2.id === id ? { ...s2, sent_to_player: true, reformatting: true } : s2));
+    setSendTraining(null);
+    Alert.alert(tr('playerProfile.sentTitle'),
+      tr('playerProfile.trainingSentMsg', { name: name ?? tr('playerProfile.thePlayer') }));
   };
 
   // NOTE: the backend regenerates from the player's latest program + feedback;
@@ -1733,6 +1733,16 @@ export default function PlayerProfileScreen() {
           </View>
         </KeyboardAvoidingView>
       </Sheet>
+
+      {/* Pick what the player sees before the training goes out. */}
+      <SendTrainingModal
+        visible={!!sendTraining}
+        trainingId={sendTraining?.id ?? null}
+        playerName={player?.name}
+        programText={sendTraining?.text}
+        onClose={() => setSendTraining(null)}
+        onSent={onTrainingSent}
+      />
 
       {/* Unified Share modal — player / team / staff */}
       {shareCtx && (

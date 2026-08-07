@@ -268,6 +268,14 @@
     "country": {
       "selectCountry": "选择国家",
       "searchCountries": "搜索国家..."
+    },
+    "sendTraining": {
+      "title": "发送给球员",
+      "subWithName": "选择 {{name}} 能看到的内容。",
+      "sub": "选择球员能看到的内容。",
+      "oneSection": "此计划只有一个部分，将整体发送。",
+      "send": "发送",
+      "couldNotSend": "无法发送训练计划。"
     }
   },
   "newEval": {

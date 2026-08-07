@@ -1,4 +1,5 @@
 import os
+import re
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -187,9 +188,46 @@ def build_player_training_prompt(player_name: str, original_text: str, feedback:
     return prompt
 
 
-def reformat_training_for_player(training_id: int) -> None:
+
+def _without_sections(text: str, hide: list[str]) -> str:
+    """Drop the named sections from a report.
+
+    The headings are the ones the app showed the coach, produced by the same
+    two rules the client's splitter uses: a markdown heading, or an ALL-CAPS
+    line. Anything not recognised as a heading stays with the section above it,
+    so a section that is switched off takes its whole body with it.
+    """
+    wanted = {h.strip().lower() for h in hide if h and h.strip()}
+    if not wanted or not text:
+        return text
+
+    def heading_of(line: str) -> str | None:
+        t = line.strip()
+        if re.match(r"^#{1,6}\s+", t):
+            return re.sub(r"^#{1,6}\s+", "", t).replace("**", "").strip()
+        if re.search(r":\s*-?\d", t):
+            return None
+        if len(t) < 70 and re.match(r"^[A-Z][A-Z0-9\s/&()\-:'.]{2,}$", t) and not re.search(r"[.!?]$", t):
+            return t.rstrip(":").strip()
+        return None
+
+    out, dropping = [], False
+    for line in text.split("\n"):
+        h = heading_of(line)
+        if h is not None:
+            dropping = h.strip().lower() in wanted
+        if not dropping:
+            out.append(line)
+    return "\n".join(out).strip()
+
+
+def reformat_training_for_player(training_id: int, hide_sections: list[str] | None = None) -> None:
     """Background task: AI-restructure a coach's training into the player's
-    checklist format. Runs after the send-to-player response is returned."""
+    checklist format. Runs after the send-to-player response is returned.
+
+    `hide_sections` are headings the coach switched off when sending. They are
+    dropped BEFORE the model sees the program, so a section the coach withheld
+    cannot come back paraphrased in the player's copy."""
     db = SessionLocal()
     try:
         session = db.get(models.TrainingSession, training_id)
@@ -197,7 +235,8 @@ def reformat_training_for_player(training_id: int) -> None:
             return
         try:
             player_name = session.player.name if session.player else "the player"
-            prompt = build_player_training_prompt(player_name, session.program_text or "")
+            source = _without_sections(session.program_text or "", hide_sections or [])
+            prompt = build_player_training_prompt(player_name, source)
             import anthropic
             client = anthropic.Anthropic()
             response = client.messages.create(
@@ -311,7 +350,13 @@ async def generate_training(
         )
     prompt += (
         f"\n\nAlways refer to the player by their name ({player.name}), not as 'the player' or a jersey number. "
-        "Under each day of the WEEKLY SESSION PLAN, list every session item as its own bullet line."
+        "Under each day of the WEEKLY SESSION PLAN, list every session item as its own bullet line. "
+        # The player's app turns each day into a checkable row with the day as
+        # the title and this focus as the line under it; a day written as the
+        # bare word printed the day twice and told the player nothing.
+        "Every day heading MUST carry its own short focus after the day name "
+        "(e.g. 'MONDAY — Ball-handling under pressure + catch-and-shoot (45 min)'), "
+        "never the day name alone."
         f"{REPORT_FORMAT}"
     )
 
@@ -342,10 +387,16 @@ async def generate_training(
     return session
 
 
+class SendTrainingIn(BaseModel):
+    # Section headings the coach switched off in the send sheet.
+    hide_sections: list[str] = []
+
+
 @router.post("/{training_id}/send-to-player")
 def send_training_to_player(
     training_id: int,
     background_tasks: BackgroundTasks,
+    body: SendTrainingIn | None = None,
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
@@ -373,7 +424,8 @@ def send_training_to_player(
     notify.player_event(player.player_user, "training_assigned",
                         {"coach": coach.name,
                          "title": session.title or "Training program"})
-    background_tasks.add_task(reformat_training_for_player, training_id)
+    background_tasks.add_task(reformat_training_for_player, training_id,
+                              list(body.hide_sections) if body else [])
     return {"ok": True, "player_name": player.name}
 
 

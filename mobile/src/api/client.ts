@@ -389,8 +389,9 @@ export const trainingAPI = {
   regenerate: (playerId: number, feedback: string) =>
     api.post(`/training/players/${playerId}/regenerate`, { feedback }).then(r => r.data),
 
-  sendToPlayer: (trainingId: number) =>
-    api.post(`/training/${trainingId}/send-to-player`).then(r => r.data),
+  /** `hideSections` are headings the coach switched off; the player never sees them. */
+  sendToPlayer: (trainingId: number, hideSections: string[] = []) =>
+    api.post(`/training/${trainingId}/send-to-player`, { hide_sections: hideSections }).then(r => r.data),
 
   recent: (limit = 30) =>
     api.get('/training/recent', { params: { limit } }).then(r => r.data),

@@ -268,6 +268,14 @@
     "country": {
       "selectCountry": "Odaberi državu",
       "searchCountries": "Pretraži države..."
+    },
+    "sendTraining": {
+      "title": "Pošalji igraču",
+      "subWithName": "Odaberi što će {{name}} vidjeti.",
+      "sub": "Odaberi što će igrač vidjeti.",
+      "oneSection": "Program ima jedan odjeljak — šalje se u cijelosti.",
+      "send": "Pošalji",
+      "couldNotSend": "Program nije poslan."
     }
   },
   "newEval": {

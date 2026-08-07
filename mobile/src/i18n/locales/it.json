@@ -268,6 +268,14 @@
     "country": {
       "selectCountry": "Seleziona il paese",
       "searchCountries": "Cerca paesi..."
+    },
+    "sendTraining": {
+      "title": "Invia al giocatore",
+      "subWithName": "Scegli cosa vedrà {{name}}.",
+      "sub": "Scegli cosa vedrà il giocatore.",
+      "oneSection": "Questo programma ha una sola sezione: verrà inviato per intero.",
+      "send": "Invia",
+      "couldNotSend": "Impossibile inviare il programma."
     }
   },
   "newEval": {

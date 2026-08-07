@@ -30,6 +30,29 @@ const findDuration = (s: string) => {
   return m ? m[0].replace(/[()]/g, '').replace(/\s+/g, ' ').trim() : '';
 };
 
+/**
+ * A one-line summary of a day's session, built from the bullets under it.
+ *
+ * Programs vary: some name the day's focus on the heading line, some just write
+ * "MONDAY" and list the work beneath. This covers the second kind — it reads
+ * forward until the next day or section and joins what it finds, so the row
+ * says what the player is actually doing.
+ */
+function describeFrom(lines: string[], from: number): string {
+  const parts: string[] = [];
+  for (let i = from; i < lines.length && parts.length < 3; i++) {
+    const line = clean(lines[i]);
+    if (!line) continue;
+    if (DAY_AT_START.test(line) || END_SECTION.test(line) || WEEKLY_HEADING.test(line)) break;
+    // Bullets and numbered items are the session; prose headings are not.
+    const item = line.replace(/^[-•*\d.)\s]+/, '').trim();
+    if (!item || item.length > 80) continue;
+    // Drop a trailing duration — it is shown separately.
+    parts.push(item.replace(/\s*[—–-]?\s*\(?\d+\s*(?:min|hr|hour)s?\)?\s*$/i, '').trim());
+  }
+  return parts.filter(Boolean).join(' · ');
+}
+
 export function parseDrills(text?: string | null): { sections: DrillSection[]; total: number } {
   if (!text) return { sections: [], total: 0 };
   const lines = text.split('\n');
@@ -73,11 +96,18 @@ export function parseDrills(text?: string | null): { sections: DrillSection[]; t
     if (seen.has(dayCap)) continue;
     seen.add(dayCap);
 
-    const label = focus || dayCap;
+    // A day with no focus text of its own: describe it from the lines that
+    // follow, which is where the drills live. Without this the row read
+    // "Monday" over "Monday" — the day printed twice and nothing said.
+    if (!focus) focus = describeFrom(lines, i + 1);
+
+    // The day is the title and the session is the description under it. The
+    // other way round put the day in small grey type under a heading that was
+    // sometimes the day again.
     drills.push({
-      key: slug(`${dayCap}-${label}`),
-      label,
-      meta: [dayCap, duration].filter(Boolean).join(' · '),
+      key: slug(`${dayCap}-${focus || 'day'}`),
+      label: dayCap,
+      meta: [focus, duration].filter(Boolean).join(' · ') || undefined,
     });
   }
 

@@ -472,15 +472,23 @@ export default function PlayerHomeScreen() {
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => { Keyboard.dismiss(); closeModal(); }}>
           <Animated.View
             style={[styles.modalBox, { transform: [{ translateY: slideY }] }]}
-            {...swipePan.panHandlers}
           >
-            <TouchableOpacity activeOpacity={1}>
-              <View style={styles.dragHandle} />
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle} numberOfLines={1}>{tr('playerApp.home.editMyProfile')}</Text>
-                <TouchableOpacity onPress={() => { Keyboard.dismiss(); closeModal(); }}>
-                  <Ionicons name="close" size={22} color={t.muted} />
-                </TouchableOpacity>
+            {/* flexShrink lets this shrink inside the sheet's max height. Without
+                it the scroll view was laid out at its full content height and
+                simply clipped, so the fields under Standing Reach could not be
+                reached and the form could not be scrolled back up. */}
+            <TouchableOpacity activeOpacity={1} style={{ flexShrink: 1 }}>
+              {/* The swipe-to-dismiss gesture lives on the grab area only. On the
+                  whole sheet it claimed every downward drag — including the one
+                  that scrolls the form up. */}
+              <View {...swipePan.panHandlers}>
+                <View style={styles.dragHandle} />
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle} numberOfLines={1}>{tr('playerApp.home.editMyProfile')}</Text>
+                  <TouchableOpacity onPress={() => { Keyboard.dismiss(); closeModal(); }}>
+                    <Ionicons name="close" size={22} color={t.muted} />
+                  </TouchableOpacity>
+                </View>
               </View>
               <KeyboardAwareScrollView
                 ref={modalScrollRef}

@@ -317,7 +317,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.chip, borderRadius: 10, padding: 12, color: t.ink,
     fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 80,
   },
-  sendBtn: { backgroundColor: t.ctaBg, borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  // Matches the field beside it rather than growing with it — see the note
+  // on the player-side composer.
+  sendBtn: { backgroundColor: t.ctaBg, borderRadius: 10, width: 44, height: 44, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end', flexShrink: 0 },
   btn: { backgroundColor: t.ctaBg, borderRadius: 10, padding: 12, alignItems: 'center' },
   btnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14, flexShrink: 1 },
 });

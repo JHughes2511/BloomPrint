@@ -268,6 +268,14 @@
     "country": {
       "selectCountry": "Välj land",
       "searchCountries": "Sök länder..."
+    },
+    "sendTraining": {
+      "title": "Skicka till spelaren",
+      "subWithName": "Välj vad {{name}} ska se.",
+      "sub": "Välj vad spelaren ska se.",
+      "oneSection": "Programmet har bara ett avsnitt – allt skickas.",
+      "send": "Skicka",
+      "couldNotSend": "Kunde inte skicka programmet."
     }
   },
   "newEval": {
