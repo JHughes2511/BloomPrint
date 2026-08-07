@@ -46,11 +46,16 @@ def peek(code: str, request: Request, db: Session = Depends(get_db)):
     """Public: just enough to show "X invited you to Y" before signing up."""
     ratelimit.check(request, "join-peek")
     link = _live_link(db, code)
+    # Enough to fill in a signup form for them, and nothing that is not already
+    # on the invitation itself: the team, who sent it, and the level that team
+    # plays at. No roster, no members, no contact details.
     return {
         "team_id": link.team_id,
         "team_name": link.team.name if link.team else "",
         "invited_by": link.creator.name if link.creator else "",
-        "program": link.creator.program_name if link.creator else "",
+        "program": (link.creator.program_name if link.creator else "") or (link.team.name if link.team else ""),
+        "competition_level": (link.team.competition_level if link.team else None)
+                             or (link.creator.competition_level if link.creator else None),
     }
 
 

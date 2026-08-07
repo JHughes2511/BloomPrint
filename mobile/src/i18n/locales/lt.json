@@ -2518,6 +2518,7 @@
     "joinedTeam": "Prisijungei prie {{team}}.",
     "couldNotJoin": "Nepavyko prisijungti su šia nuoroda.",
     "badLink": "Ši pakvietimo nuoroda negalioja arba buvo panaikinta.",
-    "goToApp": "Eiti į BloomPrint"
+    "goToApp": "Eiti į BloomPrint",
+    "joiningBanner": "Prisijungi prie {{team}}"
   }
 }

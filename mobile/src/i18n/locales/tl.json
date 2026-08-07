@@ -2518,6 +2518,7 @@
     "joinedTeam": "Sumali ka sa {{team}}.",
     "couldNotJoin": "Hindi makasali gamit ang link na iyon.",
     "badLink": "Hindi valid o binawi na ang link na ito.",
-    "goToApp": "Pumunta sa BloomPrint"
+    "goToApp": "Pumunta sa BloomPrint",
+    "joiningBanner": "Sumasali sa {{team}}"
   }
 }

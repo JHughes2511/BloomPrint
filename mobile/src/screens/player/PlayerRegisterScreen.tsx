@@ -66,6 +66,7 @@ export default function PlayerRegisterScreen() {
   // An invite code this signup arrived with. Parked before the account is
   // made, because creating one swaps the navigator out from under this screen.
   const joinCode: string | undefined = route?.params?.joinCode;
+  const joinTeam: string | undefined = route?.params?.joinTeam;
   useEffect(() => { if (joinCode) setPendingJoin(joinCode); }, [joinCode]);
 
   const submit = async () => {
@@ -215,6 +216,16 @@ export default function PlayerRegisterScreen() {
       >
         <Text style={styles.logo} numberOfLines={1}>BloomPrint</Text>
         <Text style={styles.sub} numberOfLines={1}>{tr('playerApp.register.createPlayerAccount')}</Text>
+        {/* Same banner as the coach form: the invite has to stay visible, or
+            the signup looks like any other account. */}
+        {!!joinTeam && (
+          <View style={styles.joinBanner}>
+            <Ionicons name="people-outline" size={15} color={t.positive} />
+            <Text style={styles.joinBannerText} numberOfLines={2}>
+              {tr('join.joiningBanner', { team: joinTeam })}
+            </Text>
+          </View>
+        )}
 
         {!!googleIdToken && (
           <View style={styles.googleBanner}>
@@ -281,7 +292,7 @@ export default function PlayerRegisterScreen() {
           </>
         )}
 
-        <TouchableOpacity onPress={() => navigation.navigate('PlayerLogin')}>
+        <TouchableOpacity onPress={() => navigation.navigate('PlayerLogin', { joinCode, joinTeam })}>
           <Text style={styles.toggle} numberOfLines={2}>{tr('auth.haveAccountSignIn')}</Text>
         </TouchableOpacity>
 
@@ -306,6 +317,12 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   logo: { fontSize: 32, fontFamily: fonts[900], color: t.ink, letterSpacing: 1, marginBottom: 4, flexShrink: 1, textAlign: 'center' },
   sub: { fontSize: 13, color: t.positive, marginBottom: 32, fontFamily: fonts[600], flexShrink: 1 },
+  joinBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'center',
+    backgroundColor: t.positiveSoft, borderRadius: 999,
+    paddingHorizontal: 14, paddingVertical: 8, marginTop: 10, maxWidth: 420,
+  },
+  joinBannerText: { color: t.positive, fontSize: 13, fontFamily: fonts[700], flexShrink: 1 },
   input: {
     width: '100%',
     backgroundColor: t.card,

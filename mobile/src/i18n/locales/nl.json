@@ -2518,6 +2518,7 @@
     "joinedTeam": "Je bent bij {{team}} gekomen.",
     "couldNotJoin": "Kon niet toetreden met die link.",
     "badLink": "Deze uitnodigingslink is ongeldig of ingetrokken.",
-    "goToApp": "Naar BloomPrint"
+    "goToApp": "Naar BloomPrint",
+    "joiningBanner": "Je komt bij {{team}}"
   }
 }

@@ -2518,6 +2518,7 @@
     "joinedTeam": "Vous avez rejoint {{team}}.",
     "couldNotJoin": "Impossible de rejoindre avec ce lien.",
     "badLink": "Ce lien d'invitation n'est pas valide ou a été révoqué.",
-    "goToApp": "Aller à BloomPrint"
+    "goToApp": "Aller à BloomPrint",
+    "joiningBanner": "Vous rejoignez {{team}}"
   }
 }

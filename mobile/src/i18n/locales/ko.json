@@ -2518,6 +2518,7 @@
     "joinedTeam": "{{team}}에 합류했습니다.",
     "couldNotJoin": "이 링크로 합류하지 못했습니다.",
     "badLink": "이 초대 링크는 유효하지 않거나 취소되었습니다.",
-    "goToApp": "BloomPrint로 이동"
+    "goToApp": "BloomPrint로 이동",
+    "joiningBanner": "{{team}}에 합류"
   }
 }

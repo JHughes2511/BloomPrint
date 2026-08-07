@@ -2518,6 +2518,7 @@
     "joinedTeam": "Μπήκες στην {{team}}.",
     "couldNotJoin": "Δεν ήταν δυνατή η είσοδος με αυτόν τον σύνδεσμο.",
     "badLink": "Αυτός ο σύνδεσμος δεν είναι έγκυρος ή ανακλήθηκε.",
-    "goToApp": "Μετάβαση στο BloomPrint"
+    "goToApp": "Μετάβαση στο BloomPrint",
+    "joiningBanner": "Μπαίνεις στην {{team}}"
   }
 }

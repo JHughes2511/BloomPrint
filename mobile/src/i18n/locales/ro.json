@@ -2518,6 +2518,7 @@
     "joinedTeam": "Ai intrat în {{team}}.",
     "couldNotJoin": "Nu s-a putut intra cu acest link.",
     "badLink": "Acest link de invitație nu este valid sau a fost revocat.",
-    "goToApp": "Mergi la BloomPrint"
+    "goToApp": "Mergi la BloomPrint",
+    "joiningBanner": "Intri în {{team}}"
   }
 }

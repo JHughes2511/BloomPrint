@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../../components/VoiceTextInput';
 import LanguagePicker from '../../components/LanguagePicker';
@@ -7,9 +7,10 @@ import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { playerAuthAPI } from '../../api/playerClient';
+import { setPendingJoin } from '../../navigation/pendingJoin';
 import { useTheme } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { fonts } from '../../theme/typography';
@@ -18,6 +19,14 @@ import AuthLayout from '../../responsive/AuthLayout';
 import GoogleSignInButton from '../../components/GoogleSignInButton';
 
 export default function PlayerLoginScreen() {
+  // Arrived from an invite and already has an account: park the code so the
+  // join finishes after sign-in, exactly as it does after signing up.
+  const joinRoute = useRoute<any>();
+  useEffect(() => {
+    const c = joinRoute?.params?.joinCode;
+    if (c) setPendingJoin(c);
+  }, [joinRoute?.params?.joinCode]);
+
   const { login, applyAuth } = usePlayerAuth();
   const navigation = useNavigation<any>();
   const { t: tr } = useTranslation();
@@ -106,7 +115,7 @@ export default function PlayerLoginScreen() {
           </View>
           <GoogleSignInButton onIdToken={handleGoogleIdToken} busy={googleBusy} color={t.positive} />
 
-          <TouchableOpacity onPress={() => navigation.navigate('PlayerRegister')}>
+          <TouchableOpacity onPress={() => navigation.navigate('PlayerRegister', joinRoute?.params ?? {})}>
             <Text style={styles.toggle} numberOfLines={2}>{tr('auth.noAccountRegister')}</Text>
           </TouchableOpacity>
 

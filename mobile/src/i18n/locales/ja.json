@@ -2518,6 +2518,7 @@
     "joinedTeam": "{{team}} に参加しました。",
     "couldNotJoin": "このリンクでは参加できませんでした。",
     "badLink": "この招待リンクは無効か、取り消されています。",
-    "goToApp": "BloomPrint へ"
+    "goToApp": "BloomPrint へ",
+    "joiningBanner": "{{team}} に参加します"
   }
 }

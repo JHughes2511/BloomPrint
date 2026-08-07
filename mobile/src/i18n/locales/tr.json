@@ -2518,6 +2518,7 @@
     "joinedTeam": "{{team}} takımına katıldın.",
     "couldNotJoin": "Bu bağlantıyla katılınamadı.",
     "badLink": "Bu davet bağlantısı geçersiz veya iptal edilmiş.",
-    "goToApp": "BloomPrint'e git"
+    "goToApp": "BloomPrint'e git",
+    "joiningBanner": "{{team}} takımına katılıyorsun"
   }
 }

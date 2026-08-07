@@ -2518,6 +2518,7 @@
     "joinedTeam": "你已加入 {{team}}。",
     "couldNotJoin": "无法通过该链接加入。",
     "badLink": "此邀请链接无效或已被撤销。",
-    "goToApp": "前往 BloomPrint"
+    "goToApp": "前往 BloomPrint",
+    "joiningBanner": "正在加入 {{team}}"
   }
 }

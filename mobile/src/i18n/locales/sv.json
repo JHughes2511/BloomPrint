@@ -2518,6 +2518,7 @@
     "joinedTeam": "Du har gått med i {{team}}.",
     "couldNotJoin": "Kunde inte gå med via den länken.",
     "badLink": "Inbjudningslänken är ogiltig eller återkallad.",
-    "goToApp": "Till BloomPrint"
+    "goToApp": "Till BloomPrint",
+    "joiningBanner": "Går med i {{team}}"
   }
 }

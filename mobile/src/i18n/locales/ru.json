@@ -2518,6 +2518,7 @@
     "joinedTeam": "Вы присоединились к {{team}}.",
     "couldNotJoin": "Не удалось присоединиться по этой ссылке.",
     "badLink": "Эта ссылка недействительна или была отозвана.",
-    "goToApp": "Перейти в BloomPrint"
+    "goToApp": "Перейти в BloomPrint",
+    "joiningBanner": "Вы вступаете в {{team}}"
   }
 }

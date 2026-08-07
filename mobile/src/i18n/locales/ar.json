@@ -2518,6 +2518,7 @@
     "joinedTeam": "انضممت إلى {{team}}.",
     "couldNotJoin": "تعذّر الانضمام بهذا الرابط.",
     "badLink": "رابط الدعوة غير صالح أو تم إلغاؤه.",
-    "goToApp": "اذهب إلى BloomPrint"
+    "goToApp": "اذهب إلى BloomPrint",
+    "joiningBanner": "تنضم إلى {{team}}"
   }
 }

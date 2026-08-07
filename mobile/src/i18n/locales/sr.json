@@ -2518,6 +2518,7 @@
     "joinedTeam": "Придружио си се екипи {{team}}.",
     "couldNotJoin": "Придруживање овим линком није успело.",
     "badLink": "Ова позивница није важећа или је опозвана.",
-    "goToApp": "Иди на BloomPrint"
+    "goToApp": "Иди на BloomPrint",
+    "joiningBanner": "Придружујеш се екипи {{team}}"
   }
 }

@@ -185,13 +185,6 @@ function PickerModal({
 }
 
 export default function LoginScreen() {
-  // Arrived from an invite link: hold the code across signup, since creating an
-  // account replaces this navigator entirely. See navigation/pendingJoin.ts.
-  const joinRoute = useRoute<any>();
-  useEffect(() => {
-    const c = joinRoute?.params?.joinCode;
-    if (c) setPendingJoin(c);
-  }, [joinRoute?.params?.joinCode]);
 
   const { login, register, applyAuth } = useAuth();
   const navigation = useNavigation<any>();
@@ -208,6 +201,23 @@ export default function LoginScreen() {
   const [conference, setConference] = useState('');
   const [country, setCountry] = useState('');
   const [city, setCity] = useState('');
+  // Arrived from an invite link. The code is parked because creating an account
+  // replaces this navigator entirely (see navigation/pendingJoin.ts), and the
+  // form opens on REGISTER already filled in with what the invitation knows —
+  // someone sent here to join a team should not have to find the register link
+  // and then retype their program and level.
+  const joinRoute = useRoute<any>();
+  const joinTeam: string | undefined = joinRoute?.params?.joinTeam;
+  useEffect(() => {
+    const p = joinRoute?.params ?? {};
+    if (!p.joinCode) return;
+    setPendingJoin(p.joinCode);
+    if (p.mode === 'register') setMode('register');
+    // Editable, not locked: a scout from another club types over it.
+    if (p.joinProgram) setProgram(String(p.joinProgram));
+    if (p.joinLevel) setCompetitionLevel(String(p.joinLevel));
+  }, [joinRoute?.params?.joinCode]);   // eslint-disable-line react-hooks/exhaustive-deps
+
   const [showLevelPicker, setShowLevelPicker] = useState(false);
   const [showConferencePicker, setShowConferencePicker] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -303,6 +313,16 @@ export default function LoginScreen() {
 
         <Text style={styles.logo}>BloomPrint</Text>
         <Text style={styles.sub}>{tr('auth.coachScoutTrainer')}</Text>
+        {/* Says what this signup is FOR. Without it the invite disappears the
+            moment the form opens, and the account looks like any other. */}
+        {!!joinTeam && (
+          <View style={styles.joinBanner}>
+            <Ionicons name="people-outline" size={15} color={t.accent} />
+            <Text style={styles.joinBannerText} numberOfLines={2}>
+              {tr('join.joiningBanner', { team: joinTeam })}
+            </Text>
+          </View>
+        )}
 
         {mode === 'register' && (
           <>
@@ -425,7 +445,9 @@ export default function LoginScreen() {
         {/* Back link above the language picker, matching Role Select and the
             player login. The three auth screens had two different orders, so
             moving between them shuffled the last two controls. */}
-        {mode === 'login' && (
+        {/* In BOTH modes, matching the player screens — the register form used
+            to drop this link, so the footer changed shape between them. */}
+        {(
           <TouchableOpacity style={styles.roleSelectBtn} onPress={() => navigation.navigate('RoleSelect')}>
             <Text style={styles.roleSelectText}>{tr('auth.backToRoleSelect')}</Text>
           </TouchableOpacity>
@@ -507,6 +529,12 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   backText: { color: t.muted, fontSize: 14 },
   logo: { fontSize: 36, fontFamily: fonts[900], color: t.ink, letterSpacing: 1 },
   sub: { fontSize: 13, color: t.muted, marginBottom: 40, marginTop: 4 },
+  joinBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'center',
+    backgroundColor: t.accentSoft, borderRadius: 999,
+    paddingHorizontal: 14, paddingVertical: 8, marginTop: 10, maxWidth: 420,
+  },
+  joinBannerText: { color: t.accent, fontSize: 13, fontFamily: fonts[700], flexShrink: 1 },
   sectionLabel: {
     alignSelf: 'flex-start', color: t.label, fontSize: 11,
     fontFamily: fonts[700], letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8,

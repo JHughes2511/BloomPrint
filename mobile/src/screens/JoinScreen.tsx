@@ -163,7 +163,9 @@ export default function JoinScreen() {
               <Text style={s.question}>{tr('join.whoAreYou')}</Text>
               <TouchableOpacity
                 style={s.choice}
-                onPress={() => navigation.navigate('PlayerRegister', { joinCode: code })}
+                onPress={() => navigation.navigate('PlayerRegister', {
+                  joinCode: code, joinTeam: info?.team_name,
+                })}
               >
                 <Ionicons name="person-outline" size={20} color={t.accent} />
                 <View style={{ flex: 1, minWidth: 0 }}>
@@ -175,7 +177,16 @@ export default function JoinScreen() {
 
               <TouchableOpacity
                 style={s.choice}
-                onPress={() => navigation.navigate('CoachLogin', { joinCode: code, mode: 'register' })}
+                // Straight to the REGISTER form, not the sign-in one: someone
+                // arriving from an invite has, by definition, been sent here to
+                // create an account. Signing in is one tap away underneath it.
+                onPress={() => navigation.navigate('CoachLogin', {
+                  joinCode: code,
+                  mode: 'register',
+                  joinTeam: info?.team_name,
+                  joinProgram: info?.program,
+                  joinLevel: info?.competition_level,
+                })}
               >
                 <Ionicons name="people-outline" size={20} color={t.accent} />
                 <View style={{ flex: 1, minWidth: 0 }}>

@@ -2518,6 +2518,7 @@
     "joinedTeam": "შემოუერთდი გუნდს {{team}}.",
     "couldNotJoin": "ამ ბმულით შემოერთება ვერ მოხერხდა.",
     "badLink": "ეს მოწვევის ბმული არასწორია ან გაუქმებულია.",
-    "goToApp": "გადადი BloomPrint-ზე"
+    "goToApp": "გადადი BloomPrint-ზე",
+    "joiningBanner": "უერთდები გუნდს {{team}}"
   }
 }
