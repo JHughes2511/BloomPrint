@@ -1280,7 +1280,12 @@ export default function PlayerProfileScreen() {
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <TouchableOpacity
                   style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: t.positive, borderRadius: 10, paddingVertical: 12 }}
-                  onPress={() => { setTrainingModalItem(null); sendTrainingToPlayer(); }}
+                  // Keep the report open behind the picker: the coach is choosing
+                  // which of ITS sections to send, and closing it takes away the
+                  // thing they are choosing from. Send the training they are
+                  // LOOKING AT, too — this passed no id, so an older program's
+                  // Send button quietly sent the newest one instead.
+                  onPress={() => sendTrainingToPlayer(trainingModalItem?.id)}
                   disabled={sendingTraining}
                 >
                   {sendingTraining
@@ -1325,6 +1330,19 @@ export default function PlayerProfileScreen() {
               </View>
             </View>
           </View>
+
+          {/* The section picker, rendered INSIDE this report rather than as a
+              modal on top of it: react-native-web keeps one modal stack, so
+              closing a modal opened over another closed the report too. */}
+          <SendTrainingModal
+            inline
+            visible={!!sendTraining}
+            trainingId={sendTraining?.id ?? null}
+            playerName={player?.name}
+            programText={sendTraining?.text}
+            onClose={() => setSendTraining(null)}
+            onSent={onTrainingSent}
+          />
         </View>
       </Sheet>
 
@@ -1706,8 +1724,9 @@ export default function PlayerProfileScreen() {
       </Sheet>
 
       {/* Pick what the player sees before the training goes out. */}
+      {/* Opened from the training list rather than from an open report. */}
       <SendTrainingModal
-        visible={!!sendTraining}
+        visible={!!sendTraining && !trainingModalItem}
         trainingId={sendTraining?.id ?? null}
         playerName={player?.name}
         programText={sendTraining?.text}

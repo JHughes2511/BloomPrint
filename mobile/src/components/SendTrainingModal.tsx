@@ -19,7 +19,7 @@ import { sheetCap } from '../responsive/modalSizes';
  * sheets use, so the list always matches the document in front of the coach.
  */
 export default function SendTrainingModal({
-  visible, trainingId, playerName, programText, onClose, onSent,
+  visible, trainingId, playerName, programText, onClose, onSent, inline,
 }: {
   visible: boolean;
   trainingId: number | null;
@@ -27,6 +27,16 @@ export default function SendTrainingModal({
   programText?: string | null;
   onClose: () => void;
   onSent?: (playerName?: string) => void;
+  /**
+   * Render as an overlay inside whatever is already on screen, rather than as
+   * a modal of its own.
+   *
+   * Needed when this opens from a report the coach is reading: react-native-web
+   * keeps one modal stack, and closing a modal that was opened on top of
+   * another takes BOTH down — cancelling the picker dropped the coach back to
+   * the profile, losing the report whose sections they were choosing.
+   */
+  inline?: boolean;
 }) {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
@@ -57,9 +67,8 @@ export default function SendTrainingModal({
     }
   };
 
-  return (
-    <Sheet visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={s.overlay}>
+  const body = (
+    <View style={[s.overlay, inline && s.inlineOverlay]}>
         <View style={s.box}>
           <View style={s.header}>
             <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
@@ -104,14 +113,23 @@ export default function SendTrainingModal({
               )}
             </TouchableOpacity>
           </View>
-        </View>
       </View>
+    </View>
+  );
+
+  if (!visible) return null;
+  if (inline) return body;
+  return (
+    <Sheet visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      {body}
     </Sheet>
   );
 }
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
+  // Covers the screen it is rendered into, instead of being its own modal.
+  inlineOverlay: { ...StyleSheet.absoluteFillObject, zIndex: 50 },
   box: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, paddingBottom: 30, ...sheetCap(560) },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
   title: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
