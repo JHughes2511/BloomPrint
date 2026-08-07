@@ -6,6 +6,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
   Modal, Alert, KeyboardAvoidingView, Platform, TextInput, RefreshControl, useWindowDimensions } from 'react-native';
 import Sheet from '../components/Sheet';
+import FilmPlayer from '../components/FilmPlayer';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useGoUp } from '../navigation/goUp';
 import { useTranslation } from 'react-i18next';
@@ -947,44 +948,11 @@ export default function PlayerProfileScreen() {
       </View>
 
       {/* Video player modal */}
-      <Sheet visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
-        <View style={{ flex: 1, backgroundColor: '#000000EE', ...(isWide ? null : { justifyContent: 'center' as const }) }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: topPad(48) }}>
-            <Text style={{ color: '#fff', fontSize: 15, fontFamily: fonts[700], flex: 1 }} numberOfLines={1}>
-              {videoMeta?.report_label || 'Film'}
-            </Text>
-            <TouchableOpacity onPress={() => setVideoSource(null)}>
-              <Ionicons name="close" size={28} color="#fff" />
-            </TouchableOpacity>
-          </View>
-          {videoSource && (
-            // Fills the space between the header and the bottom of the sheet
-            // rather than a fixed 260px strip. That height was chosen for a
-            // phone; on a desktop it left film playing in a band across the
-            // top of an otherwise black screen. CONTAIN means letterboxing,
-            // not cropping, so no aspect ratio gets cut off.
-            // Measured, then passed in pixels: on web expo-av renders a real
-            // <video>, and a percentage height there has no containing block to
-            // resolve against, so it falls back to the file's intrinsic size and
-            // sits at 360x180 in the corner of a full-screen black sheet.
-            <View
-              style={Platform.OS === 'web'
-                ? { flex: 1, paddingHorizontal: 24, paddingBottom: 32, alignItems: 'center', justifyContent: 'center' }
-                : undefined}
-            >
-              <Video
-                source={videoSource as any}
-                style={Platform.OS === 'web'
-                  ? { ...StyleSheet.absoluteFillObject, backgroundColor: '#000' }
-                  : { width: '100%', height: 260, backgroundColor: '#000' }}
-                useNativeControls
-                resizeMode={ResizeMode.CONTAIN}
-                shouldPlay
-              />
-            </View>
-          )}
-        </View>
-      </Sheet>
+      <FilmPlayer
+        source={videoSource as any}
+        title={videoMeta?.label || videoMeta?.source_kind || player?.name}
+        onClose={() => setVideoSource(null)}
+      />
 
       {/* Training picker modal — choose which training to send */}
       <Sheet visible={showTrainingPicker} transparent animationType="slide" onRequestClose={() => setShowTrainingPicker(false)}>

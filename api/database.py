@@ -1160,8 +1160,13 @@ def _fail_orphaned_jobs():
     Where it does not, or where it has already been tried too many times, mark
     it errored with a reason a coach can act on.
 
-    ATTEMPT_CAP is what stops a job that crashes for its own reasons from being
-    retried forever across every future boot.
+    ATTEMPT_CAP counts attempts that achieved NOTHING, not restarts. A film
+    analysis is many segments over many minutes, and a busy day of deploys can
+    restart the server more times than that — counting restarts meant the
+    coach's three-hour film was abandoned because of OUR releases, not because
+    anything was wrong with it. A job that recorded new segments since its last
+    attempt is making progress and starts its count again; only a job that
+    comes back with nothing to show for an attempt burns one.
     """
     ATTEMPT_CAP = 3
     try:
@@ -1172,9 +1177,12 @@ def _fail_orphaned_jobs():
         with _Session(engine) as sess:
             stale = sess.query(models.GenerationJob).filter_by(status="processing").all()
             for job in stale:
-                attempts = (job.attempts or 0) + 1
+                done_now, done_before = _segments_done(job)
+                progressed = done_now > done_before
+                attempts = 0 if progressed else (job.attempts or 0) + 1
                 if job.payload and attempts <= ATTEMPT_CAP:
                     job.attempts = attempts
+                    job.partial = _remember_segment_count(job, done_now)
                     resumable.append((job.id, job.kind, job.payload))
                     continue
                 job.status = "error"
@@ -1182,8 +1190,10 @@ def _fail_orphaned_jobs():
                     "The server restarted while this was running, so the analysis "
                     "stopped part-way. Nothing was saved — run it again."
                     if not job.payload else
-                    f"Gave up after {ATTEMPT_CAP} attempts. Try running it again."
+                    f"Stopped after {ATTEMPT_CAP} attempts that made no progress. "
+                    "Try running it again."
                 )
+                _mark_subject_failed(sess, job)
             if stale:
                 sess.commit()
 
@@ -1194,6 +1204,57 @@ def _fail_orphaned_jobs():
                      len(resumable), len(stale) - len(resumable))
     except Exception as exc:
         log.warning("Could not settle orphaned jobs: %s", exc)
+
+
+def _segments_done(job) -> tuple[int, int]:
+    """(segments recorded now, segments recorded at the previous attempt)."""
+    import json
+
+    try:
+        data = json.loads(job.partial or "{}")
+    except Exception:
+        return 0, 0
+    return len(data.get("segments") or {}), int(data.get("seen_at_resume") or 0)
+
+
+def _remember_segment_count(job, done: int) -> str:
+    """Stamp how much was finished, so the next restart can tell progress from
+    a job that is simply crashing on start."""
+    import json
+
+    try:
+        data = json.loads(job.partial or "{}")
+    except Exception:
+        data = {}
+    data["seen_at_resume"] = done
+    return json.dumps(data)
+
+
+def _mark_subject_failed(sess, job):
+    """Put the reason where the coach will actually see it.
+
+    A job that dies with its container runs no exception handler, so the thing
+    it was filling in — a packet's film breakdown — was left blank with no
+    explanation. The packet then shows a clip that is forever "analyzing", and
+    the coach is left waiting for a report that is never coming.
+    """
+    import json
+
+    try:
+        from . import models
+
+        call = json.loads(job.payload or "{}")
+        clip_id = call.get("clip_id")
+        if job.kind == "clip" and clip_id:
+            clip = sess.get(models.GameReportClip, clip_id)
+            if clip and not clip.analysis_text:
+                clip.analysis_text = (
+                    "Analysis stopped before it finished — the server restarted while this "
+                    "film was being watched. The film is still attached; delete this clip "
+                    "and add it again to retry."
+                )
+    except Exception:
+        pass
 
 
 def _resume_job(job_id: int, kind: str, payload: str):

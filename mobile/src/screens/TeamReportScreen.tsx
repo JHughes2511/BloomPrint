@@ -7,6 +7,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
   StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal, Switch, useWindowDimensions } from 'react-native';
 import Sheet from '../components/Sheet';
+import FilmPlayer from '../components/FilmPlayer';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -915,40 +916,8 @@ export default function TeamReportScreen() {
         </View>
       </KeyboardAwareScrollView>
 
-      {/* Report film player modal */}
-      <Sheet visible={!!videoSource} transparent animationType="fade" onRequestClose={() => setVideoSource(null)}>
-        <View style={{ flex: 1, backgroundColor: '#000000EE', ...(isWide ? null : { justifyContent: 'center' as const }) }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: topPad(48) }}>
-            <Text style={{ color: '#fff', fontSize: 15, fontFamily: fonts[700], flex: 1 }} numberOfLines={1}>{videoTitle}</Text>
-            <TouchableOpacity onPress={() => setVideoSource(null)}>
-              <Ionicons name="close" size={26} color="#fff" />
-            </TouchableOpacity>
-          </View>
-          {videoSource && (
-            // Same as the roster film player: fill the sheet rather than a
-            // fixed strip sized for a phone.
-            // Measured, then passed in pixels: on web expo-av renders a real
-            // <video>, and a percentage height there has no containing block to
-            // resolve against, so it falls back to the file's intrinsic size and
-            // sits at 360x180 in the corner of a full-screen black sheet.
-            <View
-              style={Platform.OS === 'web'
-                ? { flex: 1, paddingHorizontal: 24, paddingBottom: 32, alignItems: 'center', justifyContent: 'center' }
-                : undefined}
-            >
-              <Video
-                source={videoSource}
-                style={Platform.OS === 'web'
-                  ? { ...StyleSheet.absoluteFillObject }
-                  : { width: '100%', height: 300 }}
-                useNativeControls
-                resizeMode={ResizeMode.CONTAIN}
-                shouldPlay
-              />
-            </View>
-          )}
-        </View>
-      </Sheet>
+      {/* Report film player — see components/FilmPlayer.tsx */}
+      <FilmPlayer source={videoSource as any} title={videoTitle} onClose={() => setVideoSource(null)} />
 
       {/* Previous Report Detail Modal */}
       <Sheet visible={!!selectedPrevReport} animationType="slide" transparent onRequestClose={() => setSelectedPrevReport(null)}>
