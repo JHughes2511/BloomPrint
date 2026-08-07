@@ -1958,7 +1958,8 @@
     "myTeamFilm": "Відео моєї команди",
     "opponentFilm": "Відео суперника",
     "teamFilm": "Запис: {{team}}",
-    "bothTeams": "Обидві"
+    "bothTeams": "Обидві",
+    "analysisStopped": "Аналіз перервано. Видаліть запис і додайте його знову."
   },
   "teamGrade": {
     "views": {

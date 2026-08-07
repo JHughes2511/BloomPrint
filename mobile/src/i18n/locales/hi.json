@@ -1958,7 +1958,8 @@
     "myTeamFilm": "मेरी टीम की फ़िल्म",
     "opponentFilm": "प्रतिद्वंद्वी की फ़िल्म",
     "teamFilm": "{{team}} की फ़िल्म",
-    "bothTeams": "दोनों"
+    "bothTeams": "दोनों",
+    "analysisStopped": "विश्लेषण पूरा होने से पहले रुक गया। वीडियो हटाकर दोबारा जोड़ें।"
   },
   "teamGrade": {
     "views": {

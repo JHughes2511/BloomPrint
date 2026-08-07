@@ -1958,7 +1958,8 @@
     "myTeamFilm": "Снимак мог тима",
     "opponentFilm": "Снимак противника",
     "teamFilm": "Снимак: {{team}}",
-    "bothTeams": "Обе"
+    "bothTeams": "Обе",
+    "analysisStopped": "Анализа је прекинута. Обриши снимак и додај га поново."
   },
   "teamGrade": {
     "views": {

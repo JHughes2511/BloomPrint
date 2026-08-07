@@ -1958,7 +1958,8 @@
     "myTeamFilm": "本队录像",
     "opponentFilm": "对手录像",
     "teamFilm": "{{team}} 影片",
-    "bothTeams": "两队"
+    "bothTeams": "两队",
+    "analysisStopped": "分析未完成便中断。请删除该影片后重新添加。"
   },
   "teamGrade": {
     "views": {

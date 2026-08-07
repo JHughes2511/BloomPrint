@@ -1958,7 +1958,8 @@
     "myTeamFilm": "Kendi takım videom",
     "opponentFilm": "Rakip videosu",
     "teamFilm": "{{team}} videosu",
-    "bothTeams": "İkisi de"
+    "bothTeams": "İkisi de",
+    "analysisStopped": "Analiz tamamlanmadan durdu. Videoyu silip yeniden ekleyin."
   },
   "teamGrade": {
     "views": {

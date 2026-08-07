@@ -1958,7 +1958,8 @@
     "myTeamFilm": "וידאו הקבוצה שלי",
     "opponentFilm": "וידאו היריבה",
     "teamFilm": "וידאו של {{team}}",
-    "bothTeams": "שתיהן"
+    "bothTeams": "שתיהן",
+    "analysisStopped": "הניתוח נעצר לפני שהסתיים. מחק את הווידאו והוסף אותו שוב."
   },
   "teamGrade": {
     "views": {

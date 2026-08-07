@@ -1958,7 +1958,8 @@
     "myTeamFilm": "ჩემი გუნდის ვიდეო",
     "opponentFilm": "მოწინააღმდეგის ვიდეო",
     "teamFilm": "{{team}}-ის ვიდეო",
-    "bothTeams": "ორივე"
+    "bothTeams": "ორივე",
+    "analysisStopped": "ანალიზი შეწყდა. წაშალეთ ვიდეო და თავიდან დაამატეთ."
   },
   "teamGrade": {
     "views": {

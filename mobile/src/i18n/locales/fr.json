@@ -1958,7 +1958,8 @@
     "myTeamFilm": "Vidéo de mon équipe",
     "opponentFilm": "Vidéo de l'adversaire",
     "teamFilm": "Vidéo de {{team}}",
-    "bothTeams": "Les deux"
+    "bothTeams": "Les deux",
+    "analysisStopped": "L'analyse s'est arrêtée avant la fin. Supprimez la vidéo et rajoutez-la."
   },
   "teamGrade": {
     "views": {

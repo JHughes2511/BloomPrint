@@ -1958,7 +1958,8 @@
     "myTeamFilm": "Video della mia squadra",
     "opponentFilm": "Video dell'avversario",
     "teamFilm": "Video di {{team}}",
-    "bothTeams": "Entrambe"
+    "bothTeams": "Entrambe",
+    "analysisStopped": "L'analisi si è interrotta. Elimina il video e aggiungilo di nuovo."
   },
   "teamGrade": {
     "views": {

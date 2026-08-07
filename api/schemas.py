@@ -509,6 +509,11 @@ class GameReportClipOut(BaseModel):
     game_report_id: int
     label: str
     team_name: str | None = None
+    # What the analysis is doing right now, for a clip that has none yet:
+    # "processing" with a progress code, "error", or absent when it finished.
+    job_status: str | None = None
+    job_progress: str | None = None
+    job_error: str | None = None
     analysis_text: str | None
     created_at: datetime
     model_config = {"from_attributes": True}

@@ -1958,7 +1958,8 @@
     "myTeamFilm": "Filmarea echipei mele",
     "opponentFilm": "Filmarea adversarului",
     "teamFilm": "Filmare {{team}}",
-    "bothTeams": "Ambele"
+    "bothTeams": "Ambele",
+    "analysisStopped": "Analiza s-a oprit înainte de final. Șterge filmarea și adaug-o din nou."
   },
   "teamGrade": {
     "views": {

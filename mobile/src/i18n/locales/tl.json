@@ -1958,7 +1958,8 @@
     "myTeamFilm": "Film ng aking koponan",
     "opponentFilm": "Film ng kalaban",
     "teamFilm": "Film ng {{team}}",
-    "bothTeams": "Pareho"
+    "bothTeams": "Pareho",
+    "analysisStopped": "Huminto ang pagsusuri bago matapos. Burahin ang film at idagdag muli."
   },
   "teamGrade": {
     "views": {

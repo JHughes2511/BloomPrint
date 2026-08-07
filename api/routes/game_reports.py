@@ -176,11 +176,56 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 router = APIRouter(prefix="/game-reports", tags=["game-reports"])
 
 
-def _build_out(gr: models.GameReport) -> schemas.GameReportOut:
+def _build_out(gr: models.GameReport, db: Session | None = None) -> schemas.GameReportOut:
     out = schemas.GameReportOut.model_validate(gr)
     out.my_team_name = gr.my_team.name if gr.my_team else None
     out.opponent_team_name = gr.opponent_team.name if gr.opponent_team else None
+    if db is not None:
+        _attach_clip_jobs(db, out)
     return out
+
+
+def _attach_clip_jobs(db: Session, out: schemas.GameReportOut) -> None:
+    """Say what a still-blank clip is actually doing.
+
+    A clip with no breakdown yet reads "Analyzing…" forever, whether the film is
+    being watched right now or the job died hours ago. The job row knows which,
+    and the coach has no way to see it — so it travels with the clip.
+    """
+    pending = [c for c in out.clips if not c.analysis_text]
+    if not pending:
+        return
+    jobs = (
+        db.query(models.GenerationJob)
+        .filter(models.GenerationJob.kind == "clip",
+                models.GenerationJob.result_id.in_([c.id for c in pending]))
+        .all()
+    )
+    by_clip = {j.result_id: j for j in jobs}
+    # A job only records result_id when it finishes, so a running one is found
+    # through its payload instead.
+    running = (
+        db.query(models.GenerationJob)
+        .filter(models.GenerationJob.kind == "clip",
+                models.GenerationJob.status.in_(["processing", "error"]))
+        .order_by(models.GenerationJob.id.desc())
+        .limit(50)
+        .all()
+    )
+    for j in running:
+        try:
+            cid = json.loads(j.payload or "{}").get("clip_id")
+        except Exception:
+            cid = None
+        if cid and cid not in by_clip:
+            by_clip[cid] = j
+    for c in out.clips:
+        j = by_clip.get(c.id)
+        if not j:
+            continue
+        c.job_status = j.status
+        c.job_progress = j.progress
+        c.job_error = j.error
 
 
 def _packet_level(db: Session, gr: models.GameReport, coach: models.Coach) -> str:
@@ -234,7 +279,7 @@ def create_game_report(
     db.add(gr)
     db.commit()
     db.refresh(gr)
-    return _build_out(gr)
+    return _build_out(gr, db)
 
 
 def _packet_title(gr: models.GameReport) -> str:
@@ -359,7 +404,7 @@ def get_game_report(
     gr = db.get(models.GameReport, report_id)
     if not gr or gr.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Game report not found")
-    return _build_out(gr)
+    return _build_out(gr, db)
 
 
 @router.patch("/{report_id}", response_model=schemas.GameReportOut)
@@ -376,7 +421,7 @@ def update_game_report(
         setattr(gr, field, value)
     db.commit()
     db.refresh(gr)
-    return _build_out(gr)
+    return _build_out(gr, db)
 
 
 @router.delete("/{report_id}")
@@ -543,7 +588,7 @@ async def upload_doc(
 
     db.commit()
     db.refresh(gr)
-    return _build_out(gr)
+    return _build_out(gr, db)
 
 
 @router.post("/{report_id}/generate", response_model=schemas.GameReportOut)
@@ -805,7 +850,7 @@ async def generate_game_report(
     _save_version(db, gr, text_blocks[0].text)
     db.commit()
     db.refresh(gr)
-    return _build_out(gr)
+    return _build_out(gr, db)
 
 
 class TeamTrainingBody(BaseModel):
@@ -899,7 +944,7 @@ async def generate_team_training(
     _save_version(db, gr, text_blocks[0].text)
     db.commit()
     db.refresh(gr)
-    return _build_out(gr)
+    return _build_out(gr, db)
 
 
 class GameReportCorrectBody(BaseModel):
@@ -984,7 +1029,7 @@ async def correct_game_report(
 
     db.commit()
     db.refresh(gr)
-    return _build_out(gr)
+    return _build_out(gr, db)
 
 
 @router.get("/{report_id}/corrections")
@@ -1068,4 +1113,4 @@ async def regenerate_game_report(
         c.applied = True
     db.commit()
     db.refresh(gr)
-    return _build_out(gr)
+    return _build_out(gr, db)

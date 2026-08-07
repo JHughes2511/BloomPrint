@@ -1958,7 +1958,8 @@
     "myTeamFilm": "自チームの映像",
     "opponentFilm": "相手チームの映像",
     "teamFilm": "{{team}} の映像",
-    "bothTeams": "両チーム"
+    "bothTeams": "両チーム",
+    "analysisStopped": "解析が完了前に停止しました。映像を削除して追加し直してください。"
   },
   "teamGrade": {
     "views": {

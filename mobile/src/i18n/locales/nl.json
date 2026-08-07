@@ -1958,7 +1958,8 @@
     "myTeamFilm": "Beelden eigen team",
     "opponentFilm": "Beelden tegenstander",
     "teamFilm": "Beelden van {{team}}",
-    "bothTeams": "Beide"
+    "bothTeams": "Beide",
+    "analysisStopped": "De analyse stopte voortijdig. Verwijder de video en voeg hem opnieuw toe."
   },
   "teamGrade": {
     "views": {

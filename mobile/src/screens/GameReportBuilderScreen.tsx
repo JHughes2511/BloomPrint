@@ -752,8 +752,16 @@ export default function GameReportBuilderScreen() {
                     opponent-vs-opponent packet "Opponent" describes both films. */}
                 <Text style={styles.clipLabelText}>{clip.team_name || (clip.label === 'my_team' ? tr('gameBuilder.myTeam') : tr('gameBuilder.opponent'))}</Text>
               </View>
-              <Text style={styles.clipAnalysis} numberOfLines={2}>
-                {clip.analysis_text ? stripMarkdownForPreview(clip.analysis_text).slice(0, 120) + '...' : tr('gameBuilder.analyzing')}
+              {/* "Analyzing…" said the same thing whether the film was being
+                  watched right now or the job had died hours ago. The job's own
+                  progress and errors travel with the clip, so the row can say
+                  which — "Analyzing segment 3 of 12", or why it stopped. */}
+              <Text style={[styles.clipAnalysis, clip.job_status === 'error' && { color: t.negative }]} numberOfLines={2}>
+                {clip.analysis_text
+                  ? stripMarkdownForPreview(clip.analysis_text).slice(0, 120) + '...'
+                  : clip.job_status === 'error'
+                    ? (clip.job_error || tr('gameBuilder.analysisStopped'))
+                    : (jobProgressLabel(clip.job_progress, tr) || tr('gameBuilder.analyzing'))}
               </Text>
               <Ionicons name="chevron-forward" size={14} color={t.muted2} />
             </TouchableOpacity>

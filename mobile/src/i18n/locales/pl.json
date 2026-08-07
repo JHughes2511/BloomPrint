@@ -1958,7 +1958,8 @@
     "myTeamFilm": "Nagranie mojej drużyny",
     "opponentFilm": "Nagranie przeciwnika",
     "teamFilm": "Nagranie: {{team}}",
-    "bothTeams": "Obie"
+    "bothTeams": "Obie",
+    "analysisStopped": "Analiza przerwana. Usuń nagranie i dodaj je ponownie."
   },
   "teamGrade": {
     "views": {

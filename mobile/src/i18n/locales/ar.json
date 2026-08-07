@@ -1958,7 +1958,8 @@
     "myTeamFilm": "فيديو فريقي",
     "opponentFilm": "فيديو الخصم",
     "teamFilm": "فيديو {{team}}",
-    "bothTeams": "كلاهما"
+    "bothTeams": "كلاهما",
+    "analysisStopped": "توقّف التحليل قبل اكتماله. احذف الفيديو وأضفه من جديد."
   },
   "teamGrade": {
     "views": {

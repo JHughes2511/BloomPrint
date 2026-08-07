@@ -1958,7 +1958,8 @@
     "myTeamFilm": "우리 팀 영상",
     "opponentFilm": "상대 팀 영상",
     "teamFilm": "{{team}} 영상",
-    "bothTeams": "양 팀"
+    "bothTeams": "양 팀",
+    "analysisStopped": "분석이 완료되기 전에 중단되었습니다. 영상을 삭제하고 다시 추가하세요."
   },
   "teamGrade": {
     "views": {

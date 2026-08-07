@@ -60,6 +60,22 @@ type ReportItem = {
   updated_from?: string;      // set on MY copy that was regenerated from X's share
 };
 
+/**
+ * A one-line stand-in for a report with no title of its own.
+ *
+ * Drops the document's opening heading when it only repeats the report type —
+ * "TRAINING PROGRAM: MAJOR CASH" under a card already labelled TRAINING
+ * PROGRAM says the same thing twice.
+ */
+function previewLine(text?: string, outputType?: string): string {
+  const lines = (text ?? '').replace(/[#*_]/g, '').split('\n').map(l => l.trim()).filter(Boolean);
+  const kind = (outputType ?? '').replace(/_/g, ' ').toLowerCase();
+  const first = lines[0] ?? '';
+  const repeatsType = kind && first.toLowerCase().startsWith(kind);
+  const line = (repeatsType ? (lines[1] ?? first) : first);
+  return line.length > 90 ? line.slice(0, 90) + '…' : line;
+}
+
 type ModalReport = {
   id: number;
   kind: 'eval' | 'team' | 'training';
@@ -67,6 +83,9 @@ type ModalReport = {
   outputType: string;
   playerName?: string;
   evalId?: number;
+  /** The report's own title, so the preview can lead with it. */
+  title?: string;
+  createdAt?: string;
 };
 
 const FILTER_CATS = ['all', 'eval', 'matchup', 'team', 'game', 'scout', 'training'];
@@ -927,6 +946,8 @@ export default function RecentScreen() {
                           outputType: item.output_type,
                           playerName: item.player_name,
                           evalId: item.kind === 'eval' ? item.id : undefined,
+                          title: item.title,
+                          createdAt: item.created_at,
                         });
                         setSectionToggles({});
                         setTimeout(() => setModalView('send'), 50);
@@ -1315,9 +1336,19 @@ export default function RecentScreen() {
             {modalView === 'send' && (
               <>
                 {/* Report preview */}
+                {/* Title, then type and date. The old card led with the type
+                    and then quoted the document, whose first line is the type
+                    again — "TRAINING PROGRAM" over "TRAINING PROGRAM: MAJOR
+                    CASH". A report with no title of its own still falls back to
+                    its opening line, minus that repeated heading. */}
                 <View style={sendStyles.reportPreview}>
-                  <Text style={sendStyles.reportPreviewTitle}>{outputTypeLabel(activeModal?.outputType)}</Text>
-                  <Text style={sendStyles.reportPreviewText} numberOfLines={2}>{activeModal?.text?.replace(/[#*_]/g, '').trim().slice(0, 120)}...</Text>
+                  <Text style={sendStyles.reportPreviewName} numberOfLines={2}>
+                    {activeModal?.title || previewLine(activeModal?.text, activeModal?.outputType)}
+                  </Text>
+                  <Text style={sendStyles.reportPreviewTitle}>
+                    {outputTypeLabel(activeModal?.outputType)}
+                    {activeModal?.createdAt ? ` · ${new Date(activeModal.createdAt).toLocaleDateString()}` : ''}
+                  </Text>
                 </View>
 
                 {/* Content toggles */}
@@ -1407,9 +1438,19 @@ export default function RecentScreen() {
             {/* CORRECT VIEW */}
             {modalView === 'correct' && (
               <>
+                {/* Title, then type and date. The old card led with the type
+                    and then quoted the document, whose first line is the type
+                    again — "TRAINING PROGRAM" over "TRAINING PROGRAM: MAJOR
+                    CASH". A report with no title of its own still falls back to
+                    its opening line, minus that repeated heading. */}
                 <View style={sendStyles.reportPreview}>
-                  <Text style={sendStyles.reportPreviewTitle}>{outputTypeLabel(activeModal?.outputType)}</Text>
-                  <Text style={sendStyles.reportPreviewText} numberOfLines={2}>{activeModal?.text?.replace(/[#*_]/g, '').trim().slice(0, 120)}...</Text>
+                  <Text style={sendStyles.reportPreviewName} numberOfLines={2}>
+                    {activeModal?.title || previewLine(activeModal?.text, activeModal?.outputType)}
+                  </Text>
+                  <Text style={sendStyles.reportPreviewTitle}>
+                    {outputTypeLabel(activeModal?.outputType)}
+                    {activeModal?.createdAt ? ` · ${new Date(activeModal.createdAt).toLocaleDateString()}` : ''}
+                  </Text>
                 </View>
                 <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>{tr('recent.correctHint')}</Text>
                 <VoiceTextInput
@@ -1501,7 +1542,10 @@ const makeSendStyles = (t: ThemeTokens) => StyleSheet.create({
     backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 14,
     borderWidth: 1, borderColor: t.line,
   },
-  reportPreviewTitle: { color: t.label, fontSize: 11, fontFamily: fonts[700], textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 },
+  // The report's own name leads; the type and date sit under it in the same
+  // small caps the training list uses.
+  reportPreviewName: { color: t.ink, fontSize: 14, fontFamily: fonts[700], marginBottom: 3 },
+  reportPreviewTitle: { color: t.label, fontSize: 11, fontFamily: fonts[700], textTransform: 'uppercase', letterSpacing: 1 },
   reportPreviewText: { color: t.muted2, fontSize: 12, lineHeight: 18 },
   cancelBtn: { flex: 1, padding: 14, borderRadius: 10, borderWidth: 1, borderColor: t.line, alignItems: 'center' },
   applyBtn: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: t.ctaBg, alignItems: 'center' },

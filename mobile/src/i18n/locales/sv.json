@@ -1958,7 +1958,8 @@
     "myTeamFilm": "Film på mitt lag",
     "opponentFilm": "Film på motståndaren",
     "teamFilm": "Film på {{team}}",
-    "bothTeams": "Båda"
+    "bothTeams": "Båda",
+    "analysisStopped": "Analysen avbröts. Ta bort filmen och lägg till den igen."
   },
   "teamGrade": {
     "views": {
