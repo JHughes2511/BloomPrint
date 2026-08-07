@@ -8,6 +8,7 @@ import {
   StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { playerAuthAPI } from '../../api/playerClient';
 import { setPendingJoin } from '../../navigation/pendingJoin';
@@ -22,6 +23,7 @@ export default function PlayerLoginScreen() {
   // Arrived from an invite and already has an account: park the code so the
   // join finishes after sign-in, exactly as it does after signing up.
   const joinRoute = useRoute<any>();
+  const joinTeam: string | undefined = joinRoute?.params?.joinTeam;
   useEffect(() => {
     const c = joinRoute?.params?.joinCode;
     if (c) setPendingJoin(c);
@@ -82,7 +84,18 @@ export default function PlayerLoginScreen() {
           showsVerticalScrollIndicator={false}
         >
           <Text style={styles.logo} numberOfLines={1}>BloomPrint</Text>
-          <Text style={styles.sub} numberOfLines={1}>{tr('playerApp.login.playerPortal')}</Text>
+          <Text style={[styles.sub, !!joinTeam && styles.subWithBanner]} numberOfLines={1}>{tr('playerApp.login.playerPortal')}</Text>
+          {/* Someone who already has an account still arrived here from an
+              invite. Without this the sign-in form gives no sign the team is
+              still waiting on the other side of it. */}
+          {!!joinTeam && (
+            <View style={styles.joinBanner}>
+              <Ionicons name="people-outline" size={15} color={t.positive} />
+              <Text style={styles.joinBannerText} numberOfLines={2}>
+                {tr('join.joiningBanner', { team: joinTeam })}
+              </Text>
+            </View>
+          )}
 
           <VoiceTextInput
             style={styles.input}
@@ -145,6 +158,13 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   logo: { fontSize: 36, fontFamily: fonts[900], color: t.ink, letterSpacing: 1 },
   sub: { fontSize: 13, color: t.positive, marginBottom: 40, marginTop: 4, fontFamily: fonts[600], flexShrink: 1 },
+  subWithBanner: { marginBottom: 12 },
+  joinBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'center',
+    backgroundColor: t.positiveSoft, borderRadius: 999,
+    paddingHorizontal: 14, paddingVertical: 8, marginBottom: 24, maxWidth: 420,
+  },
+  joinBannerText: { color: t.positive, fontSize: 13, fontFamily: fonts[700], flexShrink: 1 },
   input: {
     width: '100%',
     backgroundColor: t.card,

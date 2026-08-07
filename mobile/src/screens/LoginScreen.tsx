@@ -315,7 +315,10 @@ export default function LoginScreen() {
         )}
 
         <Text style={styles.logo}>BloomPrint</Text>
-        <Text style={styles.sub}>{tr('auth.coachScoutTrainer')}</Text>
+        {/* The subtitle's usual breathing room is the gap before the form. With
+            a banner underneath it that gap belongs below the banner instead,
+            not stacked on top of it. */}
+        <Text style={[styles.sub, !!joinTeam && styles.subWithBanner]}>{tr('auth.coachScoutTrainer')}</Text>
         {/* Says what this signup is FOR. Without it the invite disappears the
             moment the form opens, and the account looks like any other. */}
         {!!joinTeam && (
@@ -532,10 +535,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   backText: { color: t.muted, fontSize: 14 },
   logo: { fontSize: 36, fontFamily: fonts[900], color: t.ink, letterSpacing: 1 },
   sub: { fontSize: 13, color: t.muted, marginBottom: 40, marginTop: 4 },
+  subWithBanner: { marginBottom: 12 },
   joinBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'center',
     backgroundColor: t.accentSoft, borderRadius: 999,
-    paddingHorizontal: 14, paddingVertical: 8, marginTop: 10, maxWidth: 420,
+    paddingHorizontal: 14, paddingVertical: 8, marginBottom: 28, maxWidth: 420,
   },
   joinBannerText: { color: t.accent, fontSize: 13, fontFamily: fonts[700], flexShrink: 1 },
   sectionLabel: {

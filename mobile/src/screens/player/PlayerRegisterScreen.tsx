@@ -215,7 +215,7 @@ export default function PlayerRegisterScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.logo} numberOfLines={1}>BloomPrint</Text>
-        <Text style={styles.sub} numberOfLines={1}>{tr('playerApp.register.createPlayerAccount')}</Text>
+        <Text style={[styles.sub, !!joinTeam && styles.subWithBanner]} numberOfLines={1}>{tr('playerApp.register.createPlayerAccount')}</Text>
         {/* Same banner as the coach form: the invite has to stay visible, or
             the signup looks like any other account. */}
         {!!joinTeam && (
@@ -317,10 +317,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   logo: { fontSize: 32, fontFamily: fonts[900], color: t.ink, letterSpacing: 1, marginBottom: 4, flexShrink: 1, textAlign: 'center' },
   sub: { fontSize: 13, color: t.positive, marginBottom: 32, fontFamily: fonts[600], flexShrink: 1 },
+  subWithBanner: { marginBottom: 12 },
   joinBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'center',
     backgroundColor: t.positiveSoft, borderRadius: 999,
-    paddingHorizontal: 14, paddingVertical: 8, marginTop: 10, maxWidth: 420,
+    paddingHorizontal: 14, paddingVertical: 8, marginBottom: 24, maxWidth: 420,
   },
   joinBannerText: { color: t.positive, fontSize: 13, fontFamily: fonts[700], flexShrink: 1 },
   input: {
