@@ -76,19 +76,21 @@ const CONFERENCES_BY_LEVEL: Record<string, string[]> = {
     'D3',
     'Independent',
   ],
+  // One entry per competition. "G League" and "Pro A (France)" were duplicates
+  // of "NBA G League" and "LNB Pro A" — a coach picking between two names for
+  // the same league splits the same programs across two levels.
   Pro: [
     'NBA',
-    'G League',
     'NBA G League',
     'EuroLeague',
     'EuroCup',
     'Liga ACB (Spain)',
     'Lega Basket (Italy)',
     'Bundesliga (Germany)',
-    'Pro A (France)',
-    'Turkish BSL',
-    'VTB United League',
     'LNB Pro A',
+    'Turkish BSL',
+    'VTB United League (Russia)',
+    'Russian Superleague',
     'NBL (Australia)',
     'CBA (China)',
     'KBL (South Korea)',
@@ -96,6 +98,9 @@ const CONFERENCES_BY_LEVEL: Record<string, string[]> = {
     'Adriatic League (ABA)',
     'FIBA Champions League',
     'FIBA Europe Cup',
+    'FIBA AfroBasket',
+    'Basketball Africa League (BAL)',
+    'FIBA Africa qualifiers',
   ],
   AAU: [
     'Nike EYBL',

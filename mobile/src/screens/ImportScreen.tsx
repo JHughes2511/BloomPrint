@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { describeError } from '../utils/describeError';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { api, teamsAPI, importsAPI } from '../api/client';
 import { Team } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { useTeam } from '../context/TeamContext';
 import { useTheme } from '../theme/ThemeProvider';
 import { topPad, bleedRow, bleedContent } from '../responsive/screenPadding';
 import { ThemeTokens } from '../theme/tokens';
@@ -59,7 +60,11 @@ export default function ImportScreen() {
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+  // Start on the team the coach is already working in — the picker at the top
+  // of the app. Importing a roster "under a team" and then having to name that
+  // team again is a question the app can already answer. Still changeable here.
+  const { currentTeamId, currentTeam } = useTeam();
+  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(currentTeamId);
   // AI preview flow: extracted players the coach confirms before committing.
   const [preview, setPreview] = useState<any[] | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -72,6 +77,26 @@ export default function ImportScreen() {
   useEffect(() => {
     teamsAPI.list().then(setTeams).catch(() => {});
   }, []);
+
+  // The picker loads asynchronously, so adopt its team when it arrives — but
+  // never overwrite a choice the coach has made on this screen.
+  const touchedTeam = useRef(false);
+  useEffect(() => {
+    if (!touchedTeam.current && currentTeamId != null && selectedTeamId == null) {
+      setSelectedTeamId(currentTeamId);
+    }
+  }, [currentTeamId]);   // eslint-disable-line react-hooks/exhaustive-deps
+
+  const chooseTeam = (id: number | null) => {
+    touchedTeam.current = true;
+    setSelectedTeamId(id);
+  };
+
+  // Also default the level to that team's, so an import under a team inherits
+  // the level the coach set on it rather than their own profile default.
+  useEffect(() => {
+    if (currentTeam?.competition_level) setLevel(currentTeam.competition_level);
+  }, [currentTeam?.id]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   const pickFile = async () => {
     const res = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
@@ -89,7 +114,7 @@ export default function ImportScreen() {
     try {
       const team = await teamsAPI.create({ name: newTeamName.trim(), competition_level: level });
       setTeams(prev => [...prev, team]);
-      setSelectedTeamId(team.id);
+      chooseTeam(team.id);
       setNewTeamName('');
     } catch {
       Alert.alert(tr('common.error'), tr('importScreen.couldNotCreateTeam'));
@@ -183,7 +208,7 @@ export default function ImportScreen() {
               <View style={styles.selectedTeamBadge}>
                 <Ionicons name="checkmark-circle" size={16} color={t.positive} />
                 <Text style={styles.selectedTeamText} numberOfLines={1}>{selectedTeam.name}</Text>
-                <TouchableOpacity onPress={() => setSelectedTeamId(null)} style={styles.badgeClearBtn}>
+                <TouchableOpacity onPress={() => chooseTeam(null)} style={styles.badgeClearBtn}>
                   <Ionicons name="close-circle" size={16} color={t.muted} />
                 </TouchableOpacity>
               </View>
@@ -224,7 +249,7 @@ export default function ImportScreen() {
                       <TouchableOpacity
                         key={tm.id}
                         style={[styles.teamPickerItem, selectedTeamId === tm.id && styles.teamPickerItemActive]}
-                        onPress={() => { setSelectedTeamId(tm.id); setShowTeamPicker(false); }}
+                        onPress={() => { chooseTeam(tm.id); setShowTeamPicker(false); }}
                       >
                         <Text style={[styles.teamPickerItemText, selectedTeamId === tm.id && { color: t.ink }]} numberOfLines={1}>{tm.name}</Text>
                         {selectedTeamId === tm.id && <Ionicons name="checkmark" size={14} color={t.positive} />}
@@ -281,7 +306,7 @@ export default function ImportScreen() {
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24, ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
                   <TouchableOpacity
                     style={[styles.chip, selectedTeamId == null && styles.chipActive]}
-                    onPress={() => setSelectedTeamId(null)}
+                    onPress={() => chooseTeam(null)}
                   >
                     <Text style={[styles.chipText, selectedTeamId == null && styles.chipTextActive]} numberOfLines={1}>{tr('importScreen.noTeamChip')}</Text>
                   </TouchableOpacity>
@@ -289,7 +314,7 @@ export default function ImportScreen() {
                     <TouchableOpacity
                       key={t.id}
                       style={[styles.chip, selectedTeamId === t.id && styles.chipActive]}
-                      onPress={() => setSelectedTeamId(t.id)}
+                      onPress={() => chooseTeam(t.id)}
                     >
                       <Text style={[styles.chipText, selectedTeamId === t.id && styles.chipTextActive]} numberOfLines={1}>{t.name}</Text>
                     </TouchableOpacity>

@@ -34,6 +34,11 @@ export function parseGenProgress(label?: string): number | undefined {
   if (up) return Math.min(100, parseInt(up[1], 10));
   // Current backend codes ("job:segment:3:8"), then the older English prose so
   // jobs already in flight during an update keep reporting real progress.
+  // Scanning is a real, known phase and it is the FIRST one. Left to the
+  // estimated curve the bar crawled to 99% within a minute and then sat there
+  // for the rest of a long film — a number that says "done" while the work has
+  // barely started is worse than no number. Pin it low; the segments take over.
+  if (label === 'job:scanning') return 3;
   const c = label.match(/^job:segment:(\d+):(\d+)$/);
   if (c) return Math.min(92, Math.round((parseInt(c[1], 10) / parseInt(c[2], 10)) * 90));
   if (label === 'job:synthesizing') return 95;
@@ -117,9 +122,15 @@ function GeneratingBar({
   useEffect(() => {
     if (hasReal || done) return;
     fill.setValue(0);
+    // Paced for the work, not for the wait. The old curve reached 99% in 45
+    // seconds, so anything that takes minutes — which is most film work — spent
+    // almost all of it pinned at 99%. It now moves quickly through the early
+    // stretch, where something usually IS finishing, and then creeps, so the
+    // number keeps meaning something on a long job instead of maxing out.
     Animated.sequence([
-      Animated.timing(fill, { toValue: 0.55, duration: 3500, easing: Easing.out(Easing.quad), useNativeDriver: false }),
-      Animated.timing(fill, { toValue: 0.99, duration: 42000, easing: Easing.linear, useNativeDriver: false }),
+      Animated.timing(fill, { toValue: 0.35, duration: 4000, easing: Easing.out(Easing.quad), useNativeDriver: false }),
+      Animated.timing(fill, { toValue: 0.75, duration: 90000, easing: Easing.linear, useNativeDriver: false }),
+      Animated.timing(fill, { toValue: 0.95, duration: 300000, easing: Easing.linear, useNativeDriver: false }),
     ]).start();
   }, [hasReal, done]);
 
