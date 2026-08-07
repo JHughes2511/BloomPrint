@@ -46,6 +46,8 @@ type ReportItem = {
   output_type: string;
   overall_grade?: number | null;
   created_at: string;
+  /** The report's own name, when it has one (training programs, evals). */
+  title?: string;
   program_text?: string;
   report_text?: string;
   // Set when this row is a report another coach SHARED with me (surfaced in
@@ -347,6 +349,8 @@ export default function RecentScreen() {
         overall_grade: null,
         created_at: ts.created_at,
         program_text: ts.program_text,
+        // The program's own name — the same one the player's profile shows.
+        title: ts.title,
       }));
       // Scout reports: games where I have MY OWN scouting report. The backend
       // scopes ai_scouting_report to the requesting coach's own report (per
@@ -514,7 +518,8 @@ export default function RecentScreen() {
       return;
     }
     if (item.kind === 'training') {
-      openModal({ id: item.id, kind: 'training', text: item.program_text ?? '', outputType: 'training_program', playerName: item.player_name });
+      openModal({ id: item.id, kind: 'training', text: item.program_text ?? '', outputType: 'training_program',
+                  playerName: item.player_name, title: item.title, createdAt: item.created_at });
       return;
     }
     if (item.kind === 'team') {
@@ -1345,9 +1350,11 @@ export default function RecentScreen() {
                   <Text style={sendStyles.reportPreviewName} numberOfLines={2}>
                     {activeModal?.title || previewLine(activeModal?.text, activeModal?.outputType)}
                   </Text>
-                  <Text style={sendStyles.reportPreviewTitle}>
-                    {outputTypeLabel(activeModal?.outputType)}
-                    {activeModal?.createdAt ? ` · ${new Date(activeModal.createdAt).toLocaleDateString()}` : ''}
+                  <Text style={sendStyles.reportPreviewMeta} numberOfLines={1}>
+                    {[outputTypeLabel(activeModal?.outputType),
+                      activeModal?.playerName,
+                      activeModal?.createdAt ? new Date(activeModal.createdAt).toLocaleDateString() : null,
+                    ].filter(Boolean).join(' · ')}
                   </Text>
                 </View>
 
@@ -1447,9 +1454,11 @@ export default function RecentScreen() {
                   <Text style={sendStyles.reportPreviewName} numberOfLines={2}>
                     {activeModal?.title || previewLine(activeModal?.text, activeModal?.outputType)}
                   </Text>
-                  <Text style={sendStyles.reportPreviewTitle}>
-                    {outputTypeLabel(activeModal?.outputType)}
-                    {activeModal?.createdAt ? ` · ${new Date(activeModal.createdAt).toLocaleDateString()}` : ''}
+                  <Text style={sendStyles.reportPreviewMeta} numberOfLines={1}>
+                    {[outputTypeLabel(activeModal?.outputType),
+                      activeModal?.playerName,
+                      activeModal?.createdAt ? new Date(activeModal.createdAt).toLocaleDateString() : null,
+                    ].filter(Boolean).join(' · ')}
                   </Text>
                 </View>
                 <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>{tr('recent.correctHint')}</Text>
@@ -1546,6 +1555,9 @@ const makeSendStyles = (t: ThemeTokens) => StyleSheet.create({
   // small caps the training list uses.
   reportPreviewName: { color: t.ink, fontSize: 14, fontFamily: fonts[700], marginBottom: 3 },
   reportPreviewTitle: { color: t.label, fontSize: 11, fontFamily: fonts[700], textTransform: 'uppercase', letterSpacing: 1 },
+  // Sentence case, muted, under the name — the same line the player's profile
+  // puts under a training program, plus who it is for.
+  reportPreviewMeta: { color: t.muted2, fontSize: 12 },
   reportPreviewText: { color: t.muted2, fontSize: 12, lineHeight: 18 },
   cancelBtn: { flex: 1, padding: 14, borderRadius: 10, borderWidth: 1, borderColor: t.line, alignItems: 'center' },
   applyBtn: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: t.ctaBg, alignItems: 'center' },

@@ -66,7 +66,12 @@ export function jobProgressLabel(label: string | undefined, tr: (k: string, o?: 
       ? tr('jobProgress.uploadingOf', { ...o, i: up[4], n: up[5] })
       : tr('jobProgress.uploading', o);
   }
-  if (label === 'job:scanning' || /^job:scanning:\d+$/.test(label)) return tr('jobProgress.scanning');
+  // The pre-scan is the longest silent stretch of a long film, so when it
+  // reports a percentage, show it — that number is the difference between
+  // "it is working" and "it might be stuck".
+  const scanPct = label.match(/^job:scanning:(\d+)$/);
+  if (scanPct) return `${tr('jobProgress.scanning')} ${scanPct[1]}%`;
+  if (label === 'job:scanning') return tr('jobProgress.scanning');
   if (label === 'job:synthesizing') return tr('jobProgress.synthesizing');
   const c = label.match(/^job:segment:(\d+):(\d+)$/);
   if (c) return tr('jobProgress.segment', { i: c[1], n: c[2] });
