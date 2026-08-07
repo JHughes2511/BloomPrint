@@ -388,9 +388,14 @@ def delete_game_report(
     gr = db.get(models.GameReport, report_id)
     if not gr or gr.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Game report not found")
+    # The packet is hidden rather than destroyed, but its film is not: a deleted
+    # packet used to leave gigabytes in the bucket for good. Each clip keeps the
+    # breakdown it produced and stops pointing at a file.
+    from ..film_storage import release_for_game_report
+    freed = release_for_game_report(db, gr)
     soft_delete(db, gr)
     db.commit()
-    return {"ok": True}
+    return {"ok": True, "film_deleted": freed}
 
 
 @router.post("/{report_id}/clips")
@@ -478,11 +483,13 @@ def delete_clip(
     gr = db.get(models.GameReport, report_id)
     if not gr or gr.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Game report not found")
-    # Free the actual film file from storage, not just the DB row.
-    if clip.video_path:
-        from ..storage import delete as storage_delete
-        storage_delete(clip.video_path)
+    # Free the actual film file, not just the DB row — but only once nothing
+    # else points at it (the same upload can also sit in a player's catalog).
+    ref = clip.video_path
     db.delete(clip)
+    db.flush()
+    from ..film_storage import release
+    release(db, [ref] if ref else [])
     db.commit()
     return {"ok": True}
 
@@ -919,6 +926,14 @@ async def correct_clip(
         raise HTTPException(status_code=404, detail="Game report not found")
     if not clip.analysis_text:
         raise HTTPException(status_code=400, detail="No analysis to correct")
+    # Re-watching needs the film. It is gone once the packet it belonged to was
+    # deleted, and saying so beats a job that fails ten minutes later.
+    if not clip.video_path:
+        raise HTTPException(
+            status_code=400,
+            detail="The film for this clip has been deleted, so it can't be re-analyzed. "
+                   "Upload it again to change the breakdown.",
+        )
 
     label_text = "my team" if clip.label == "my_team" else "the opponent"
     my_team_name = gr.my_team.name if gr.my_team else coach.program_name

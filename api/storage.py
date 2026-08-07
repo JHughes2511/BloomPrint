@@ -10,10 +10,13 @@ Configure S3 (works with AWS S3, Cloudflare R2, MinIO, etc.) via env:
   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION
   S3_ENDPOINT_URL        (optional — for R2/MinIO/custom endpoints)
 """
+import logging
 import os
 import shutil
 import tempfile
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -126,12 +129,25 @@ def playback_url(ref: str, stream_fallback: str) -> str:
     return stream_fallback
 
 
-def delete(ref: str):
+def delete(ref: str) -> bool:
+    """Remove a stored file. Returns whether it is now gone.
+
+    A failure here is not cosmetic: film is the only thing in this app measured
+    in gigabytes, and a delete that quietly does nothing bills the coach for
+    storage they believe they released. Swallowing the exception hid exactly
+    that — the app reported success whatever the bucket did. It is still never
+    raised (a delete that fails must not fail the request that asked for it),
+    but it is logged, and the caller can see it.
+    """
+    if not ref:
+        return True
     try:
-        if ref and ref.startswith("s3://"):
+        if ref.startswith("s3://"):
             b, k = _parse(ref)
             _client().delete_object(Bucket=b, Key=k)
-        elif ref and os.path.exists(ref):
+        elif os.path.exists(ref):
             os.remove(ref)
-    except Exception:
-        pass
+        return True
+    except Exception as exc:
+        log.warning("Could not delete stored file %s: %s", ref, exc)
+        return False

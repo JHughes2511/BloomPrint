@@ -263,10 +263,13 @@ def delete_player_video(
         raise HTTPException(status_code=404, detail="Video not found")
     if v.coach_id != coach.id:
         raise HTTPException(status_code=403, detail="Not your video to delete")
-    if v.video_path:
-        from ..storage import delete as storage_delete
-        storage_delete(v.video_path)
+    ref = v.video_path
     db.delete(v)
+    db.flush()
+    # Only once nothing else points at the same upload — an evaluation and the
+    # player's film catalog can reference one file.
+    from ..film_storage import release
+    release(db, [ref] if ref else [])
     db.commit()
     return {"ok": True}
 

@@ -685,9 +685,12 @@ def delete_evaluation(
     coach: models.Coach = Depends(get_current_coach),
 ):
     ev = get_owned(db, models.Evaluation, eval_id, coach.id, "Evaluation")
+    # Hide the evaluation, but release its film — see api/film_storage.py.
+    from ..film_storage import release_for_evaluation
+    freed = release_for_evaluation(db, ev)
     soft_delete(db, ev)
     db.commit()
-    return {"ok": True}
+    return {"ok": True, "film_deleted": freed}
 
 
 @router.delete("/team-reports/{report_id}")
