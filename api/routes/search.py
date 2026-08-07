@@ -314,3 +314,131 @@ def search(
             "games": games_n, "scouting": scouting_n,
         },
     }
+
+
+# Everything the coach could search, by name, small enough to hold in memory.
+# Larger than any real coach's library; a cap only so a pathological account
+# cannot ask the browser to hold a hundred megabytes.
+INDEX_CAP = 2000
+
+
+@router.get("/index")
+def search_index(
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Names and titles only, for matching without a round trip.
+
+    Typing is faster than a network. Waiting for a server to answer "does
+    anything start with 'ma'" is a quarter of a second the coach spends looking
+    at a stale list, and no amount of tuning the delay before the request fixes
+    a delay that IS the request.
+
+    So the app keeps this in memory and answers name searches itself, instantly,
+    while the full search runs behind it and fills in what only the server can
+    know — matches inside the text of a report. Deliberately no report bodies
+    here: those are what make the payload big, and they are exactly the part
+    that can wait.
+    """
+    team_ids = _accessible_team_ids(db, coach)
+    granted = {a.player_id for a in db.query(models.PlayerAccess).filter_by(coach_id=coach.id).all()}
+
+    player_scope = [models.Player.coach_id == coach.id]
+    if team_ids:
+        player_scope.append(models.Player.team_id.in_(team_ids))
+    if granted:
+        player_scope.append(models.Player.id.in_(granted))
+    players = (db.query(models.Player).filter(or_(*player_scope))
+               .order_by(models.Player.name).limit(INDEX_CAP).all())
+
+    teams = (db.query(models.Team)
+             .filter(or_(models.Team.coach_id == coach.id,
+                         models.Team.id.in_(team_ids) if team_ids else models.Team.id.is_(None)))
+             .order_by(models.Team.name).limit(INDEX_CAP).all())
+
+    # One lookup for every player named anywhere below, instead of one query per
+    # row: this endpoint is a list of names, and fetching each one individually
+    # is what turns "small payload" into "slow payload".
+    def _named(rows, attr="player_id"):
+        ids = {getattr(r, attr) for r in rows if getattr(r, attr)}
+        if not ids:
+            return {}
+        return {p.id: p.name for p in db.query(models.Player)
+                .filter(models.Player.id.in_(ids)).all()}
+
+    shared_evals = _shared_ids(db, coach, "eval")
+    evals = (db.query(models.Evaluation)
+             .filter(or_(models.Evaluation.coach_id == coach.id,
+                         models.Evaluation.id.in_(shared_evals) if shared_evals
+                         else models.Evaluation.id.is_(None)))
+             .order_by(models.Evaluation.id.desc()).limit(INDEX_CAP).all())
+    eval_names = _named(evals)
+
+    shared_training = _shared_ids(db, coach, "training")
+    training = (db.query(models.TrainingSession)
+                .filter(or_(models.TrainingSession.coach_id == coach.id,
+                            models.TrainingSession.id.in_(shared_training) if shared_training
+                            else models.TrainingSession.id.is_(None)))
+                .order_by(models.TrainingSession.id.desc()).limit(INDEX_CAP).all())
+    training_names = _named(training)
+
+    shared_team_reports = _shared_ids(db, coach, "team_report", "team_training")
+    team_reports = (db.query(models.TeamReport)
+                    .filter(or_(models.TeamReport.coach_id == coach.id,
+                                models.TeamReport.id.in_(shared_team_reports) if shared_team_reports
+                                else models.TeamReport.id.is_(None)))
+                    .order_by(models.TeamReport.id.desc()).limit(INDEX_CAP).all())
+
+    shared_packets = _shared_ids(db, coach, "game")
+    games = (db.query(models.GameReport)
+             .filter(or_(models.GameReport.coach_id == coach.id,
+                         models.GameReport.id.in_(shared_packets) if shared_packets
+                         else models.GameReport.id.is_(None)))
+             .order_by(models.GameReport.id.desc()).limit(INDEX_CAP).all())
+
+    scouting = (db.query(models.GameSession)
+                .filter(or_(models.GameSession.coach_id == coach.id,
+                            models.GameSession.team_id.in_(team_ids) if team_ids
+                            else models.GameSession.id.is_(None)))
+                .order_by(models.GameSession.id.desc()).limit(INDEX_CAP).all())
+
+    return {
+        "players": [
+            {"id": p.id, "name": p.name, "position": p.position,
+             "team_name": p.team.name if p.team else None,
+             "school_name": p.school_name, "program_name": p.program_name}
+            for p in players
+        ],
+        "teams": [
+            {"id": t.id, "name": t.name, "competition_level": t.competition_level}
+            for t in teams
+        ],
+        "reports": [
+            {"id": e.id, "title": e.title or eval_names.get(e.player_id) or e.output_type,
+             "output_type": e.output_type, "player_id": e.player_id,
+             "player_name": eval_names.get(e.player_id), "created_at": e.created_at}
+            for e in evals
+        ],
+        "training": [
+            {"id": ts.id, "title": ts.title or training_names.get(ts.player_id) or "Training Program",
+             "player_id": ts.player_id, "player_name": training_names.get(ts.player_id),
+             "created_at": ts.created_at}
+            for ts in training
+        ],
+        "team_reports": [
+            {"id": tr.id, "title": tr.output_type, "output_type": tr.output_type,
+             "created_at": tr.created_at}
+            for tr in team_reports
+        ],
+        "games": [
+            {"id": g.id, "title": g.title, "opponent_name": g.opponent_name,
+             "opponent_a_name": g.opponent_a_name, "output_type": g.output_type,
+             "created_at": g.created_at}
+            for g in games
+        ],
+        "scouting": [
+            {"id": s.id, "opponent_name": s.opponent_name, "location": s.location,
+             "created_at": s.created_at}
+            for s in scouting
+        ],
+    }

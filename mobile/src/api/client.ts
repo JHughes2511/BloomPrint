@@ -407,6 +407,13 @@ export const searchAPI = {
    */
   all: (q: string, limit?: number) =>
     api.get('/search', { params: limit ? { q, limit } : { q } }).then(r => r.data),
+
+  /**
+   * Every name the coach can search, without report bodies — small enough to
+   * hold in memory and match against locally, so typing doesn't wait on a
+   * round trip. See navigation/searchIndex.ts.
+   */
+  index: () => api.get('/search/index').then(r => r.data),
 };
 
 export const teamsAPI = {

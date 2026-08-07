@@ -16,6 +16,7 @@ import { topPad } from '../responsive/screenPadding';
 import { useGoUp } from '../navigation/goUp';
 import { buildSearchGroups, SearchResults } from '../navigation/searchGroups';
 import { cached, remember } from '../navigation/searchCache';
+import { ensureIndex, matchIndex } from '../navigation/searchIndex';
 
 /**
  * Everything a search found, when six per group in the sidebar isn't enough.
@@ -42,8 +43,11 @@ export default function SearchResultsScreen() {
   useEffect(() => {
     const term = query.trim();
     if (!term) { setResults(null); setSettled(null); return; }
-    const hit = cached(term, 50);
-    if (hit) { setResults(hit); setSettled(term); }
+    // Names from memory first — see navigation/searchIndex.ts. The request
+    // below adds what only the server knows: matches inside report text.
+    ensureIndex();
+    const known = cached(term, 50) ?? matchIndex(term, 50);
+    if (known) { setResults(known); setSettled(term); }
 
     let cancelled = false;
     setLoading(true);

@@ -36,6 +36,7 @@ export const SIDEBAR_WIDTH = 248;
 
 import { buildSearchGroups, hasMore, totalFound, SearchResults } from './searchGroups';
 import { cached, remember } from './searchCache';
+import { ensureIndex, matchIndex } from './searchIndex';
 
 export default function Sidebar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { t, mode, toggle } = useTheme();
@@ -64,6 +65,10 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
 
   useFocusEffect(countUnread);
 
+  // Fetched once, up front: a coach who opens the app and immediately searches
+  // should not be the one person who waits for it.
+  useEffect(() => { ensureIndex(); }, []);
+
   // Debounced, and every in-flight response is checked against the query that
   // is current when it lands. Without that check a slow request for "mar" can
   // resolve after a fast one for "marcus" and overwrite the newer results with
@@ -76,18 +81,20 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
       setSettled(null);
       return;
     }
-    // A term already answered this session paints immediately — backspacing
-    // through a name shows each previous list with no wait at all. The request
-    // still goes out below, so what is on screen is corrected within a frame or
-    // two if anything has changed.
-    const hit = cached(term);
-    if (hit) { setResults(hit); setSettled(term); }
+    // Answer NOW, from names held in memory. This is the whole difference
+    // between a list that keeps up with typing and one that trails it: the
+    // round trip is ~300ms on a real connection, and no amount of tuning the
+    // delay before a request fixes a delay that is the request. A term already
+    // answered this session is better still — it has the deep matches too.
+    ensureIndex();
+    const known = cached(term) ?? matchIndex(term);
+    if (known) { setResults(known); setSettled(term); }
 
     let cancelled = false;
-    // Effectively per-keystroke: enough to coalesce the two events a single
-    // key press can produce, not enough to feel like waiting. The out-of-order
-    // guard above is what makes a delay this small safe — without it, fast
-    // typing would race responses and show the answer to a half-typed word.
+    // The full search runs behind that and replaces it when it lands, because
+    // it knows what the index cannot: matches inside the text of a report.
+    // Enough delay to coalesce the pair of events one key press can produce,
+    // and no more — the out-of-order guard above is what makes it safe.
     const timer = setTimeout(() => {
       searchAPI.all(term)
         .then((r: SearchResults) => {
