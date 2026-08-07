@@ -70,17 +70,33 @@ def _can_see_player(db: Session, coach: models.Coach, player: models.Player) -> 
     return player.team_id is not None and player.team_id in _accessible_team_ids(db, coach)
 
 
-def _bim_evals(coach: models.Coach, player: models.Player) -> list:
-    """The evals that back a coach's BIM view of a player: their OWN evals, so
-    each coach sees their personal score. But when a coach is viewing a player
-    through a shared team and has run none of their own, fall back to the
-    aggregate of ALL evals so the profile detail isn't blank."""
+def _bim_evals(db: Session, coach: models.Coach, player: models.Player) -> list:
+    """The evals that back a coach's BIM view of a player.
+
+    A BIM score belongs to the coach who produced it. It is their read of the
+    player, and it stays theirs until they choose to share that evaluation —
+    which is the whole point of the score being per-coach rather than global.
+
+    So: the coach's OWN evaluations, plus any evaluation of this player that
+    another coach has explicitly SHARED with them. Nothing else.
+
+    This used to fall back to the aggregate of EVERY eval when the viewer had
+    none of their own, so that a player reached through a shared team did not
+    look blank. The cost was the thing the design exists to prevent: joining a
+    team handed you a number built out of another coach's work, with no share
+    and no say. Blank is the correct answer there — it says "you have not
+    evaluated this player", which is true.
+    """
     own = [e for e in player.evaluations if e.coach_id == coach.id]
-    if own:
+    others = [e for e in player.evaluations if e.coach_id != coach.id]
+    if not others:
         return own
-    if player.coach_id != coach.id and player.evaluations:
-        return list(player.evaluations)
-    return own
+    shared_ids = {
+        r.report_id for r in db.query(models.StaffSharedReport)
+        .filter_by(recipient_id=coach.id, report_type="eval")
+        .all()
+    }
+    return own + [e for e in others if e.id in shared_ids]
 
 
 @router.get("", response_model=list[schemas.PlayerOut])
@@ -97,7 +113,7 @@ def list_players(
     q = db.query(models.Player).filter(or_(*conds))
     if team_id is not None:
         q = q.filter(models.Player.team_id == team_id)
-    return [_with_grade(p, _bim_evals(coach, p)) for p in q.all()]
+    return [_with_grade(p, _bim_evals(db, coach, p)) for p in q.all()]
 
 
 @router.get("/{player_id}", response_model=schemas.PlayerOut)
@@ -111,7 +127,7 @@ def get_player(
         raise HTTPException(status_code=404, detail="Player not found")
     if not _can_see_player(db, coach, player):
         raise HTTPException(status_code=403, detail="You don't have access to this player")
-    return _with_grade(player, _bim_evals(coach, player))
+    return _with_grade(player, _bim_evals(db, coach, player))
 
 
 @router.patch("/{player_id}", response_model=schemas.PlayerOut)

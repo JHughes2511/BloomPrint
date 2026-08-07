@@ -81,14 +81,15 @@ def _find_player(db, coach, ref):
 # ── Tool implementations (return compact dicts) ───────────────────────────────
 
 def t_search_players(db, coach, query: str = "") -> dict:
-    from .players import _composite_bim
+    from .players import _composite_bim, _bim_evals
     q = (query or "").strip().lower()
     out = []
     for p in _coach_players(db, coach):
         if q and q not in p.name.lower() and q not in (p.position or "").lower() and q not in (p.program_name or "").lower():
             continue
-        own = [e for e in p.evaluations if e.coach_id == coach.id]
-        grade, _pil, cnt = _composite_bim(p, own or list(p.evaluations))
+        # Own and shared only — a BIM score belongs to the coach who produced
+        # it. See players._bim_evals; the assistant must not be a way around it.
+        grade, _pil, cnt = _composite_bim(p, _bim_evals(db, coach, p))
         out.append({"id": p.id, "name": p.name, "position": p.position,
                     "team": p.program_name, "level": p.competition_level,
                     "bim_grade": grade, "reports": cnt})
@@ -96,11 +97,12 @@ def t_search_players(db, coach, query: str = "") -> dict:
 
 
 def t_player_detail(db, coach, player: str) -> dict:
-    from .players import _composite_bim
+    from .players import _composite_bim, _bim_evals
     p = _find_player(db, coach, player)
     if not p:
         return {"error": f"No player found matching '{player}'."}
-    own = [e for e in p.evaluations if e.coach_id == coach.id] or list(p.evaluations)
+    # Own and shared only — the same rule the roster applies.
+    own = _bim_evals(db, coach, p)
     grade, pillars, cnt = _composite_bim(p, own)
     evs = sorted(own, key=lambda e: e.created_at or datetime.min)
     latest = evs[-1] if evs else None
