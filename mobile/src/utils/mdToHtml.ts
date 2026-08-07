@@ -148,9 +148,27 @@ export function splitReportSections(text: string): ReportSection[] {
     if (/^#{1,6}\s+/.test(t)) return t.replace(/^#{1,6}\s+/, '').replace(/\*\*/g, '').trim();
     // A "LABEL: value" line whose value is a number/grade (e.g. "GRADE: 6.4 / 10")
     // is a sub-field of the section above it, NOT its own toggleable section.
-    if (/:\s*-?\d/.test(t)) return null;
-    // ALL CAPS heading line (no sentence punctuation)
-    if (/^[A-Z][A-Z0-9\s/&()\-:'.]{2,}$/.test(t) && t.length < 70 && !/[.!?]$/.test(t)) {
+    // The colon must come late enough to be a label: "3-POINT SHOOTING DETAIL:"
+    // has a digit but no value after the colon.
+    if (/:\s*-?\d/.test(t) && !/:\s*$/.test(t)) return null;
+    // An ALL-CAPS line is a heading.
+    //
+    // This has to be GENEROUS, because a heading it fails to recognise does not
+    // simply go unlisted — the section and everything under it is absorbed into
+    // the section ABOVE, so switching that one off silently takes this one with
+    // it. A coach hid FOCUS AREAS and lost the entire weekly plan.
+    //
+    // Two shapes it used to miss, both from real programs:
+    //   "WEEKLY PLAN — TWO-A-DAYS"   an em dash, absent from the old class
+    //   "3-POINT SHOOTING DETAIL"    starts with a digit, and the old rule
+    //                                required a letter first
+    const CAPS = /^[A-Z0-9][A-Z0-9\s/&()\-—–:'.,%+#]*$/;
+    if (
+      CAPS.test(t) &&
+      /[A-Z]{2}/.test(t) &&        // real words, not "3-2" or a date
+      t.length >= 3 && t.length < 70 &&
+      !/[.!?]$/.test(t)
+    ) {
       return t.replace(/:$/, '').trim();
     }
     return null;

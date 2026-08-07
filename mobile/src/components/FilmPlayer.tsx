@@ -35,19 +35,24 @@ export default function FilmPlayer({
   const { width, height } = useWindowDimensions();
   const [ready, setReady] = useState(false);
 
-  const HEADER = 64;              // the title row above
-  const BOTTOM = 28;              // clearance under the control bar
+  // Everything the film has to share the window with. The title row and the
+  // close button sit ABOVE it (they used to overlap it), and the browser draws
+  // play/pause and the scrubber along the film's own bottom edge — so that edge
+  // has to stop short of the window, or the controls are simply off-screen.
+  const TOP = topPad(0);          // status bar / browser chrome
+  const HEADER = 56;              // the title row and close button
+  const BOTTOM = 32;              // clearance below the control bar
   const SIDE = 24;
   const box = {
     width: Math.max(240, width - SIDE * 2),
-    height: Math.max(180, height - HEADER - BOTTOM - topPad(0)),
+    height: Math.max(180, height - TOP - HEADER - BOTTOM),
   };
 
   return (
     <Sheet visible={!!source} transparent animationType="fade" onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: '#000000EE' }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-                       paddingHorizontal: 16, height: HEADER, paddingTop: topPad(0) }}>
+                       paddingHorizontal: 16, height: HEADER, marginTop: TOP }}>
           <Text style={{ color: '#fff', fontSize: 15, fontFamily: fonts[700], flex: 1 }} numberOfLines={1}>
             {title}
           </Text>
@@ -66,11 +71,21 @@ export default function FilmPlayer({
                 <ActivityIndicator color="#fff" size="large" />
               </View>
             )}
+            {/* videoStyle, not just style.
+                expo-av puts `style` on a wrapper View and gives the actual
+                <video> `position:absolute; inset:0` — then overrides
+                `position: undefined` on the same element. Static positioning
+                ignores those offsets, so the element falls back to its
+                intrinsic 300x150 in the wrapper's top-left corner and stays
+                there until the browser has metadata. That is the film loading
+                in the corner before it jumps; sizing the wrapper cannot fix it,
+                because the wrapper was never the element with the problem.
+                videoStyle lands on the <video> itself, ahead of that override,
+                so it has real dimensions from the first paint. */}
             <Video
               source={source as any}
-              style={Platform.OS === 'web'
-                ? { width: box.width, height: box.height, backgroundColor: '#000' }
-                : { width: '100%', height: box.height, backgroundColor: '#000' }}
+              style={{ width: box.width, height: box.height, backgroundColor: '#000' }}
+              videoStyle={{ width: box.width, height: box.height }}
               useNativeControls
               resizeMode={ResizeMode.CONTAIN}
               shouldPlay
