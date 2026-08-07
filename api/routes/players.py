@@ -64,10 +64,18 @@ def _accessible_team_ids(db: Session, coach: models.Coach) -> set[int]:
     return ids
 
 
+def _granted_player_ids(db: Session, coach: models.Coach) -> set[int]:
+    """Players handed to this coach with a shared report — see PlayerAccess."""
+    return {a.player_id for a in db.query(models.PlayerAccess).filter_by(coach_id=coach.id).all()}
+
+
 def _can_see_player(db: Session, coach: models.Coach, player: models.Player) -> bool:
     if player.coach_id == coach.id:
         return True
-    return player.team_id is not None and player.team_id in _accessible_team_ids(db, coach)
+    if player.team_id is not None and player.team_id in _accessible_team_ids(db, coach):
+        return True
+    return db.query(models.PlayerAccess).filter_by(
+        player_id=player.id, coach_id=coach.id).first() is not None
 
 
 def _bim_evals(db: Session, coach: models.Coach, player: models.Player) -> list:
@@ -107,13 +115,39 @@ def list_players(
 ):
     from sqlalchemy import or_
     team_ids = _accessible_team_ids(db, coach)
+    granted = _granted_player_ids(db, coach)
     conds = [models.Player.coach_id == coach.id]
     if team_ids:
         conds.append(models.Player.team_id.in_(team_ids))
+    if granted:
+        # Shared with me: the report about them came with the person.
+        conds.append(models.Player.id.in_(granted))
     q = db.query(models.Player).filter(or_(*conds))
     if team_id is not None:
         q = q.filter(models.Player.team_id == team_id)
     return [_with_grade(p, _bim_evals(db, coach, p)) for p in q.all()]
+
+
+@router.delete("/{player_id}/access")
+def drop_shared_player(
+    player_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Take a player off MY roster that a shared report put there.
+
+    Only ever removes my own access. The player, their history and the owner's
+    roster are untouched — this is "I do not need this one", not a delete.
+    """
+    row = db.query(models.PlayerAccess).filter_by(player_id=player_id, coach_id=coach.id).first()
+    if not row:
+        raise HTTPException(
+            status_code=404,
+            detail="This player is not on your roster through a share.",
+        )
+    db.delete(row)
+    db.commit()
+    return {"ok": True}
 
 
 @router.get("/{player_id}", response_model=schemas.PlayerOut)

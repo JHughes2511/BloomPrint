@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ..database import get_db
+from ..player_grants import grant_players_for_share
 from ..auth import get_current_coach
 from .. import models, notify, schemas
 from ..ai_models import OPUS
@@ -201,6 +202,10 @@ def share_with_staff(
     sr, _ = _upsert_share(db, body.report_type, body.report_id, coach.id,
                           body.recipient_id, body.allow_regenerate, frozen)
 
+    # The report is about people. Hand them over with it, or the recipient
+    # reads an evaluation of a player they cannot look up anywhere.
+    grant_players_for_share(db, body.report_type, body.report_id, coach, body.recipient_id)
+
     # Notify recipient via CoachNotification
     _coach_notify(
         db, body.recipient_id,
@@ -341,6 +346,7 @@ def share_with_staff_group(
             continue
         sr, _ = _upsert_share(db, body.report_type, body.report_id, coach.id,
                               rid, body.allow_regenerate, frozen)
+        grant_players_for_share(db, body.report_type, body.report_id, coach, rid)
         _coach_notify(
             db, rid,
             f"Report Shared by {coach.name}",
@@ -380,6 +386,7 @@ def share_with_team(
     for rid in ids:
         sr, _ = _upsert_share(db, report_type, report_id, coach.id, rid,
                               allow_regenerate, frozen)
+        grant_players_for_share(db, report_type, report_id, coach, rid)
         _coach_notify(
             db, rid,
             f"Report shared by {coach.name}",

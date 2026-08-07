@@ -956,3 +956,65 @@ class EmailPreference(Base):
     __table_args__ = (
         UniqueConstraint("audience", "user_id", name="uq_email_pref_audience_user"),
     )
+
+class TeamJoinLink(Base):
+    """A standing signup link for a team.
+
+    One per coach per team, not one per team: a link belongs to whoever made
+    it, so revoking yours cannot silently kill an assistant's. Anyone who
+    already joined stays — revoking closes the door, it does not undo who is
+    already inside.
+    """
+    __tablename__ = "team_join_links"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    team_id    = Column(Integer, ForeignKey("teams.id"), nullable=False, index=True)
+    created_by = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    code       = Column(String, nullable=False, unique=True, index=True)
+    revoked_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    team    = relationship("Team")
+    creator = relationship("Coach")
+    joins   = relationship("TeamJoinEvent", back_populates="link", cascade="all, delete-orphan")
+
+    @property
+    def is_live(self) -> bool:
+        return self.revoked_at is None
+
+
+class TeamJoinEvent(Base):
+    """Who came in through a link — so the coach who shared it can see."""
+    __tablename__ = "team_join_events"
+
+    id             = Column(Integer, primary_key=True, index=True)
+    link_id        = Column(Integer, ForeignKey("team_join_links.id"), nullable=False, index=True)
+    coach_id       = Column(Integer, ForeignKey("coaches.id"), nullable=True)       # staff
+    player_user_id = Column(Integer, ForeignKey("player_users.id"), nullable=True)  # player
+    player_id      = Column(Integer, ForeignKey("players.id"), nullable=True)       # roster entry
+    display_name   = Column(String, nullable=True)
+    kind           = Column(String, nullable=False)   # "staff" | "player"
+    created_at     = Column(DateTime, default=datetime.utcnow)
+
+    link = relationship("TeamJoinLink", back_populates="joins")
+
+
+class PlayerAccess(Base):
+    """A coach who can see a player they do not own.
+
+    Sharing a report about someone hands the person over with it — otherwise
+    the recipient reads an evaluation of a player they cannot look up. It is
+    the SAME player record, not a copy: one history, and each coach keeps their
+    own BIM grade because that is scoped per coach elsewhere.
+    """
+    __tablename__ = "player_access"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    player_id  = Column(Integer, ForeignKey("players.id"), nullable=False, index=True)
+    coach_id   = Column(Integer, ForeignKey("coaches.id"), nullable=False, index=True)
+    granted_by = Column(Integer, ForeignKey("coaches.id"), nullable=True)
+    source     = Column(String, nullable=True)   # "shared_report" | "join_link"
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    player = relationship("Player")
+
