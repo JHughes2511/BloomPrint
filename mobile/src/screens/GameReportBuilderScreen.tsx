@@ -585,8 +585,8 @@ export default function GameReportBuilderScreen() {
     >
       <KeyboardAwareScrollView
         ref={scrollRef}
-        style={styles.container}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
         refreshControl={
@@ -1172,9 +1172,17 @@ export default function GameReportBuilderScreen() {
 
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
-  // Top padding on the scroller, matching the other detail screens; the
-  // header adds its own 8 on top of it and the body keeps the 20 inset.
-  container: { flex: 1, paddingHorizontal: 20, paddingBottom: 20, paddingTop: topPad(56) },
+  // The page's inset, matching the other detail screens: the header adds its
+  // own 8 on top of the 56, and the body keeps the 20 either side.
+  //
+  // It lives on the CONTENT, not on the scroller. react-native-web renders a
+  // scroll view that has a refreshControl by cloning the control with the
+  // scroller's own style wrapped around it — so any padding written here would
+  // be applied twice, once by the wrapper and again by the scroller inside it.
+  // Adding pull-to-refresh to this page silently turned its 20pt gutter into
+  // 40 and its 56 of head room into 112, which is why it stopped matching
+  // every other screen on a phone.
+  content: { paddingHorizontal: 20, paddingTop: topPad(56), paddingBottom: 100 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   // titleTopPad and a 20px inset, the same as Roster, Recent, Team Eval and
   // Team Grade. This page used the plain topPad, which is 12px lower on web —
