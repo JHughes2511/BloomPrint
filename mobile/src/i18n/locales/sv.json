@@ -2520,5 +2520,11 @@
     "badLink": "Inbjudningslänken är ogiltig eller återkallad.",
     "goToApp": "Till BloomPrint",
     "joiningBanner": "Går med i {{team}}"
+  },
+  "search": {
+    "placeholder": "Sök i allt",
+    "seeAll": "Visa alla {{count}}",
+    "title": "Sök",
+    "typeToSearch": "Skriv för att söka i allt"
   }
 }

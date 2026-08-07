@@ -97,6 +97,7 @@ export const linking: LinkingOptions<any> = {
         path: 'recent',
         screens: {
           Recent: '',
+          SearchResults: 'search',
           EvalReport: { path: 'eval/:evalId', ...id },
           PlayerProfile: { path: 'player/:playerId', ...id },
           NewEval: { path: 'player/:playerId/new-eval', ...id },

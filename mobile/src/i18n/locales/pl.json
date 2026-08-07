@@ -2520,5 +2520,11 @@
     "badLink": "Ten link zaproszenia jest nieprawidłowy lub został unieważniony.",
     "goToApp": "Przejdź do BloomPrint",
     "joiningBanner": "Dołączasz do {{team}}"
+  },
+  "search": {
+    "placeholder": "Szukaj we wszystkim",
+    "seeAll": "Zobacz wszystkie ({{count}})",
+    "title": "Szukaj",
+    "typeToSearch": "Wpisz, aby przeszukać wszystko"
   }
 }

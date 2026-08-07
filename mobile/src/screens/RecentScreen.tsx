@@ -10,7 +10,7 @@ import {
   ActivityIndicator, Alert, ScrollView, Modal, TextInput, KeyboardAvoidingView, Platform, Switch, RefreshControl,
 } from 'react-native';
 import Sheet from '../components/Sheet';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -111,6 +111,7 @@ export default function RecentScreen() {
   const styles = makeStyles(t);
   const sendStyles = makeSendStyles(t);
   const navigation = useNavigation<any>();
+  const route = useRoute<any>();
   const [items, setItems] = useState<ReportItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -544,6 +545,23 @@ export default function RecentScreen() {
       });
     }
   };
+
+  // Arriving from search with a specific report in mind. Team reports and
+  // scouting reports have no screen of their own — they open in a sheet on this
+  // screen — so a search hit lands here and opens itself, rather than dropping
+  // the coach on a list and making them find the row again.
+  const openedFromSearch = useRef('');
+  useEffect(() => {
+    const kind = route.params?.openKind;
+    const id = Number(route.params?.openId);
+    if (!kind || !id || !items.length) return;
+    const key = `${kind}:${id}`;
+    if (openedFromSearch.current === key) return;
+    const hit = items.find(i => i.kind === kind && i.id === id);
+    if (!hit) return;
+    openedFromSearch.current = key;
+    handlePress(hit);
+  }, [route.params?.openKind, route.params?.openId, items]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   const openViewer = (item: ReportItem) => {
     // Prefer the full shared payload; fall back to a minimal shape.

@@ -2520,5 +2520,11 @@
     "badLink": "ეს მოწვევის ბმული არასწორია ან გაუქმებულია.",
     "goToApp": "გადადი BloomPrint-ზე",
     "joiningBanner": "უერთდები გუნდს {{team}}"
+  },
+  "search": {
+    "placeholder": "ყველგან ძებნა",
+    "seeAll": "ყველას ნახვა ({{count}})",
+    "title": "ძებნა",
+    "typeToSearch": "აკრიფეთ ყველგან საძებნად"
   }
 }

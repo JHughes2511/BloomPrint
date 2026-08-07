@@ -397,8 +397,16 @@ export const assistantAPI = {
 
 // ── Teams ─────────────────────────────────────────────────────────────────────
 export const searchAPI = {
-  /** Global search across the coach's players, reports, teams and games. */
-  all: (q: string) => api.get('/search', { params: { q } }).then(r => r.data),
+  /**
+   * Global search across everything the coach can see — players, teams, evals,
+   * training programs, team reports, packets and scouting reports, matched on
+   * names and on the text of the reports themselves.
+   *
+   * `limit` is per group: the sidebar wants a handful, the full-results screen
+   * wants the lot.
+   */
+  all: (q: string, limit?: number) =>
+    api.get('/search', { params: limit ? { q, limit } : { q } }).then(r => r.data),
 };
 
 export const teamsAPI = {

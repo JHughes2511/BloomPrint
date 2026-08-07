@@ -34,13 +34,7 @@ import CommandBar from '../components/CommandBar';
 
 export const SIDEBAR_WIDTH = 248;
 
-type SearchRow = { id: number; title: string; meta: string; onPress: () => void };
-type SearchResults = {
-  players?: { id: number; name: string; position?: string; team_name?: string }[];
-  reports?: { id: number; title: string; output_type?: string; player_name?: string }[];
-  games?: { id: number; title?: string; opponent_name?: string }[];
-  teams?: { id: number; name: string; competition_level?: string }[];
-};
+import { buildSearchGroups, hasMore, totalFound, SearchResults } from './searchGroups';
 
 export default function Sidebar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { t, mode, toggle } = useTheme();
@@ -118,52 +112,7 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
     (navigation as any).navigate(tab, { screen, params });
   };
 
-  const groups: { key: string; label: string; rows: SearchRow[] }[] = results
-    ? [
-        {
-          key: 'players',
-          label: tr('common.tabs.roster'),
-          rows: (results.players ?? []).map(p => ({
-            id: p.id,
-            title: p.name,
-            meta: [p.position, p.team_name].filter(Boolean).join(' · '),
-            onPress: () => go('RosterTab', 'PlayerProfile', { playerId: p.id }),
-          })),
-        },
-        {
-          key: 'reports',
-          label: tr('home.reportTypesHeader'),
-          rows: (results.reports ?? []).map(r => ({
-            id: r.id,
-            title: r.title,
-            meta: [r.player_name, r.output_type].filter(Boolean).join(' · '),
-            onPress: () => go('RecentTab', 'EvalReport', { evalId: r.id }),
-          })),
-        },
-        {
-          key: 'games',
-          label: tr('common.tabs.teamEval'),
-          rows: (results.games ?? []).map(g => ({
-            id: g.id,
-            title: g.title || g.opponent_name || '—',
-            meta: g.opponent_name ?? '',
-            onPress: () => go('TeamTab', 'GameReportBuilder', { reportId: g.id }),
-          })),
-        },
-        {
-          key: 'teams',
-          label: tr('roster.teams', { defaultValue: 'Teams' }),
-          rows: (results.teams ?? []).map(tm => ({
-            id: tm.id,
-            title: tm.name,
-            meta: tm.competition_level ?? '',
-            // Selecting a team from search sets the app-wide scope, which is
-            // what picking a team means everywhere else.
-            onPress: () => { setCurrentTeamId(tm.id); go('RosterTab', 'Roster', {}); },
-          })),
-        },
-      ].filter(g => g.rows.length > 0)
-    : [];
+  const groups = buildSearchGroups(results, tr, go, setCurrentTeamId);
 
   return (
     <View style={s.rail}>
@@ -183,7 +132,7 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder={tr('roster.searchPlaceholder', { defaultValue: 'Search players' })}
+          placeholder={tr('search.placeholder')}
           placeholderTextColor={t.muted2}
           style={s.searchInput}
         />
@@ -205,16 +154,35 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
                   <Text style={s.resultGroup}>{g.label}</Text>
                   {g.rows.map(row => (
                     <Pressable
-                      key={`${g.key}-${row.id}`}
+                      key={row.key}
                       style={({ hovered }: any) => [s.result, hovered && s.itemHover]}
                       onPress={row.onPress}
                     >
                       <Text numberOfLines={1} style={s.resultName}>{row.title}</Text>
                       {!!row.meta && <Text numberOfLines={1} style={s.resultMeta}>{row.meta}</Text>}
+                      {/* Why this matched, when the words are in the report
+                          rather than its name. */}
+                      {!!row.snippet && (
+                        <Text numberOfLines={2} style={s.resultSnippet}>{row.snippet}</Text>
+                      )}
                     </Pressable>
                   ))}
                 </View>
               ))}
+              {/* Six per group keeps the dropdown a dropdown. When there is
+                  more, say so — silently showing the first few reads as "that
+                  is everything". */}
+              {hasMore(groups) && (
+                <Pressable
+                  style={({ hovered }: any) => [s.seeAll, hovered && s.itemHover]}
+                  onPress={() => go('RecentTab', 'SearchResults', { q: query.trim() })}
+                >
+                  <Text style={s.seeAllText}>
+                    {tr('search.seeAll', { count: totalFound(groups) })}
+                  </Text>
+                  <Ionicons name="arrow-forward" size={13} color={t.accent} />
+                </Pressable>
+              )}
             </ScrollView>
           )}
         </View>
@@ -447,6 +415,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   noResults: { color: t.muted2, fontSize: 12, padding: 12 },
   resultName: { color: t.ink, fontSize: 13, fontFamily: fonts[600] },
   resultMeta: { color: t.muted2, fontSize: 11 },
+  resultSnippet: { color: t.muted, fontSize: 11, lineHeight: 15, marginTop: 3, fontStyle: 'italic' },
+  seeAll: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10 },
+  seeAllText: { color: t.accent, fontSize: 12, fontFamily: fonts[700] },
 
   items: { flex: 1 },
   item: {

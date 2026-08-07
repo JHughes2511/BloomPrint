@@ -2520,5 +2520,11 @@
     "badLink": "此邀请链接无效或已被撤销。",
     "goToApp": "前往 BloomPrint",
     "joiningBanner": "正在加入 {{team}}"
+  },
+  "search": {
+    "placeholder": "搜索全部",
+    "seeAll": "查看全部 {{count}} 条",
+    "title": "搜索",
+    "typeToSearch": "输入以搜索全部内容"
   }
 }

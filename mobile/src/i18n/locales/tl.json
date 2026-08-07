@@ -2520,5 +2520,11 @@
     "badLink": "Hindi valid o binawi na ang link na ito.",
     "goToApp": "Pumunta sa BloomPrint",
     "joiningBanner": "Sumasali sa {{team}}"
+  },
+  "search": {
+    "placeholder": "Hanapin ang lahat",
+    "seeAll": "Tingnan lahat ({{count}})",
+    "title": "Maghanap",
+    "typeToSearch": "Mag-type para maghanap sa lahat"
   }
 }

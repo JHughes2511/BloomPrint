@@ -2520,5 +2520,11 @@
     "badLink": "यह आमंत्रण लिंक अमान्य है या रद्द कर दिया गया है।",
     "goToApp": "BloomPrint पर जाएँ",
     "joiningBanner": "{{team}} से जुड़ रहे हैं"
+  },
+  "search": {
+    "placeholder": "सब कुछ खोजें",
+    "seeAll": "सभी {{count}} देखें",
+    "title": "खोज",
+    "typeToSearch": "सब कुछ खोजने के लिए टाइप करें"
   }
 }

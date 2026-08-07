@@ -2520,5 +2520,11 @@
     "badLink": "Deze uitnodigingslink is ongeldig of ingetrokken.",
     "goToApp": "Naar BloomPrint",
     "joiningBanner": "Je komt bij {{team}}"
+  },
+  "search": {
+    "placeholder": "Alles doorzoeken",
+    "seeAll": "Bekijk alle {{count}}",
+    "title": "Zoeken",
+    "typeToSearch": "Typ om alles te doorzoeken"
   }
 }

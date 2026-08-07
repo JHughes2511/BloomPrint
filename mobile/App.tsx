@@ -59,6 +59,7 @@ import RosterScreen from './src/screens/RosterScreen';
 import PlayerProfileScreen from './src/screens/PlayerProfileScreen';
 import NewEvalScreen from './src/screens/NewEvalScreen';
 import EvalReportScreen from './src/screens/EvalReportScreen';
+import SearchResultsScreen from './src/screens/SearchResultsScreen';
 import TrainingScreen from './src/screens/TrainingScreen';
 import TeamReportScreen from './src/screens/TeamReportScreen';
 import RecentScreen from './src/screens/RecentScreen';
@@ -193,6 +194,8 @@ function RecentStack() {
   return (
     <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
       <Stack.Screen name="Recent" component={RecentScreen} />
+      {/* The sidebar's "see all" — everything a search found, not the first six */}
+      <Stack.Screen name="SearchResults" component={SearchResultsScreen} />
       <Stack.Screen name="EvalReport" component={EvalReportScreen} />
       <Stack.Screen name="PlayerProfile" component={PlayerProfileScreen} />
       {/* Reachable from PlayerProfile, which lives in this stack too */}

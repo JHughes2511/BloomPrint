@@ -2520,5 +2520,11 @@
     "badLink": "Ова позивница није важећа или је опозвана.",
     "goToApp": "Иди на BloomPrint",
     "joiningBanner": "Придружујеш се екипи {{team}}"
+  },
+  "search": {
+    "placeholder": "Претражи све",
+    "seeAll": "Прикажи све ({{count}})",
+    "title": "Претрага",
+    "typeToSearch": "Унесите за претрагу свега"
   }
 }

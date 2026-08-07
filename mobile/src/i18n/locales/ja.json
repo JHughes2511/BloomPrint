@@ -2520,5 +2520,11 @@
     "badLink": "この招待リンクは無効か、取り消されています。",
     "goToApp": "BloomPrint へ",
     "joiningBanner": "{{team}} に参加します"
+  },
+  "search": {
+    "placeholder": "すべてを検索",
+    "seeAll": "すべて表示（{{count}}件）",
+    "title": "検索",
+    "typeToSearch": "入力してすべてを検索"
   }
 }

@@ -2520,5 +2520,11 @@
     "badLink": "Ši pakvietimo nuoroda negalioja arba buvo panaikinta.",
     "goToApp": "Eiti į BloomPrint",
     "joiningBanner": "Prisijungi prie {{team}}"
+  },
+  "search": {
+    "placeholder": "Ieškoti visur",
+    "seeAll": "Rodyti visus ({{count}})",
+    "title": "Paieška",
+    "typeToSearch": "Rašykite, kad ieškotumėte visur"
   }
 }

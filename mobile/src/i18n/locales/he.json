@@ -2520,5 +2520,11 @@
     "badLink": "קישור ההזמנה אינו תקף או בוטל.",
     "goToApp": "מעבר ל־BloomPrint",
     "joiningBanner": "מצטרף ל־{{team}}"
+  },
+  "search": {
+    "placeholder": "חיפוש בכל",
+    "seeAll": "הצג את כל {{count}}",
+    "title": "חיפוש",
+    "typeToSearch": "הקלד כדי לחפש בכל"
   }
 }

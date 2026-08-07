@@ -2520,5 +2520,11 @@
     "badLink": "Эта ссылка недействительна или была отозвана.",
     "goToApp": "Перейти в BloomPrint",
     "joiningBanner": "Вы вступаете в {{team}}"
+  },
+  "search": {
+    "placeholder": "Искать везде",
+    "seeAll": "Показать все ({{count}})",
+    "title": "Поиск",
+    "typeToSearch": "Введите запрос для поиска везде"
   }
 }

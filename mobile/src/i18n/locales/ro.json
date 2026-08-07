@@ -2520,5 +2520,11 @@
     "badLink": "Acest link de invitație nu este valid sau a fost revocat.",
     "goToApp": "Mergi la BloomPrint",
     "joiningBanner": "Intri în {{team}}"
+  },
+  "search": {
+    "placeholder": "Caută în tot",
+    "seeAll": "Vezi toate ({{count}})",
+    "title": "Căutare",
+    "typeToSearch": "Scrie pentru a căuta în tot"
   }
 }

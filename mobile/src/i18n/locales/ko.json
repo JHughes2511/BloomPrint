@@ -2520,5 +2520,11 @@
     "badLink": "이 초대 링크는 유효하지 않거나 취소되었습니다.",
     "goToApp": "BloomPrint로 이동",
     "joiningBanner": "{{team}}에 합류"
+  },
+  "search": {
+    "placeholder": "전체 검색",
+    "seeAll": "전체 보기 ({{count}})",
+    "title": "검색",
+    "typeToSearch": "입력하여 전체 검색"
   }
 }

@@ -2520,5 +2520,11 @@
     "badLink": "Dieser Einladungslink ist ungültig oder wurde widerrufen.",
     "goToApp": "Zu BloomPrint",
     "joiningBanner": "Du trittst {{team}} bei"
+  },
+  "search": {
+    "placeholder": "Alles durchsuchen",
+    "seeAll": "Alle {{count}} anzeigen",
+    "title": "Suche",
+    "typeToSearch": "Tippen, um alles zu durchsuchen"
   }
 }

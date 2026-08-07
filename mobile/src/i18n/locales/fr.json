@@ -2520,5 +2520,11 @@
     "badLink": "Ce lien d'invitation n'est pas valide ou a été révoqué.",
     "goToApp": "Aller à BloomPrint",
     "joiningBanner": "Vous rejoignez {{team}}"
+  },
+  "search": {
+    "placeholder": "Tout rechercher",
+    "seeAll": "Voir les {{count}}",
+    "title": "Recherche",
+    "typeToSearch": "Tapez pour tout rechercher"
   }
 }
