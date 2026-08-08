@@ -2222,7 +2222,8 @@
     "playersFound": "Прочитано игроков: {{count}}",
     "finalScore": "Итоговый счёт",
     "couldNotSaveScore": "Не удалось сохранить счёт.",
-    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record."
+    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
+    "readingFiles": "Чтение файла {{done}} из {{total}}…"
   },
   "whiteboard": {
     "title": "Тактическая доска",
@@ -2592,6 +2593,7 @@
       "second_chance_points": "Очки со второго шанса",
       "points_in_paint": "Очки в краске",
       "bench_points": "Очки со скамейки"
-    }
+    },
+    "editHint": "Коснитесь числа, чтобы исправить. Очки и подборы считаются из них."
   }
 }

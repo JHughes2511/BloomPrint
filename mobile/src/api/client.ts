@@ -386,9 +386,51 @@ export const importsAPI = {
     api.post('/imports/roster/preview', await _importForm(file), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),
   rosterCommit: (data: { team_id?: number | null; competition_level?: string; players: any[] }) =>
     api.post('/imports/roster/commit', data).then(r => r.data),
-  /** A box score read from any number of files, of any type. */
-  gameStatsPreview: async (files: PickedFile[]) =>
-    api.post('/imports/game-stats/preview', await _importFormMulti(files), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 180000 }).then(r => r.data),
+  /**
+   * A game read from any number of files, of any type.
+   *
+   * One request per file rather than one for all of them, for a reason that is
+   * only about the coach: reading a stat sheet takes the better part of a
+   * minute, and a single request can only spin. File by file, the screen can
+   * say "2 of 3" and move a bar that means something. Results are merged here;
+   * the server merges again when they are committed, so nothing depends on this
+   * getting it right.
+   */
+  gameStatsPreview: async (files: PickedFile[], onProgress?: (done: number, total: number) => void) => {
+    const players: any[] = [], events: any[] = [], shots: any[] = [], team_stats: any[] = [];
+    const errors: string[] = [];
+    for (let i = 0; i < files.length; i++) {
+      onProgress?.(i, files.length);
+      try {
+        const r = await api.post('/imports/game-stats/preview', await _importFormMulti([files[i]]),
+          { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 180000 }).then(x => x.data);
+        players.push(...(r.players ?? []));
+        events.push(...(r.events ?? []));
+        shots.push(...(r.shots ?? []));
+        team_stats.push(...(r.team_stats ?? []));
+        if (r.errors?.length) errors.push(...r.errors);
+      } catch (e: any) {
+        // One unreadable file must not lose the ones that read fine.
+        errors.push(`${files[i].name}: ${e?.response?.data?.detail ?? e?.message ?? 'could not be read'}`);
+      }
+    }
+    onProgress?.(files.length, files.length);
+    if (!players.length && !events.length && !shots.length && !team_stats.length) {
+      throw new Error(errors.join('; ') || 'Nothing could be read from those files.');
+    }
+    // Same rule the server uses: the larger count per stat, not the sum. Two
+    // photos of one sheet are the same numbers twice.
+    const merged = new Map<string, any>();
+    for (const p of players) {
+      const key = `${String(p.player_name).toLowerCase()}|${String(p.team_name ?? '').toLowerCase()}`;
+      const at = merged.get(key);
+      if (!at) { merged.set(key, p); continue; }
+      for (const [k, v] of Object.entries(p.stats ?? {})) {
+        at.stats[k] = Math.max(at.stats[k] ?? 0, v as number);
+      }
+    }
+    return { players: [...merged.values()], events, shots, team_stats, errors };
+  },
   gameStatsCommit: (data: { game_id: number; players: any[] }) =>
     api.post('/imports/game-stats/commit', data).then(r => r.data),
   text: async (file: PickedFile, purpose = 'coaching notes') =>
@@ -619,6 +661,9 @@ export const gameEvalAPI = {
   getSession: (id: number) => api.get(`/game-eval/sessions/${id}`).then(r => r.data),
   updateSession: (id: number, data: any) => api.patch(`/game-eval/sessions/${id}`, data).then(r => r.data),
   deleteSession: (id: number) => api.delete(`/game-eval/sessions/${id}`).then(r => r.data),
+  /** Correct one player's line after an import misread it. */
+  editPlayerLine: (gameId: number, body: { player_name: string; is_opponent: boolean; line: Record<string, number> }) =>
+    api.put(`/game-eval/sessions/${gameId}/box-score/player`, body).then(r => r.data),
   /** The game's numbers plus what can honestly be charted from them. */
   boxScore: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/box-score`).then(r => r.data),
   listStats: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/stats`).then(r => r.data),

@@ -176,6 +176,11 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [finalOurs, setFinalOurs] = useState('');
   const [finalTheirs, setFinalTheirs] = useState('');
   const [savingScore, setSavingScore] = useState(false);
+  const [importProgress, setImportProgress] = useState<{ done: number; total: number } | null>(null);
+  const [importedExtras, setImportedExtras] = useState<{ events: any[]; shots: any[]; team_stats: any[] }>(
+    { events: [], shots: [], team_stats: [] });
+  // Bumped when an import lands, so the stats panel re-reads the game.
+  const [statsVersion, setStatsVersion] = useState(0);
   const opponentOutside = useCloseOnOutside(showOpponentDropdown, () => setShowOpponentDropdown(false));
   const newTeamOutside = useCloseOnOutside(showTeamDropdown, () => setShowTeamDropdown(false));
   /**
@@ -441,13 +446,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       });
       if (res.canceled || !res.assets?.length) return;
       setImporting(true);
+      setImportProgress({ done: 0, total: res.assets.length });
       const result = await importsAPI.gameStatsPreview(
         res.assets.map(f => ({
           uri: f.uri,
           name: f.name ?? 'boxscore',
           type: f.mimeType ?? 'application/octet-stream',
         })),
+        (done, total) => setImportProgress({ done, total }),
       );
+      setImportedExtras({ events: result.events ?? [], shots: result.shots ?? [],
+                          team_stats: result.team_stats ?? [] });
       const players = (result?.players ?? []).map((p: any) => ({ ...p, _include: true }));
       if (!players.length) {
         Alert.alert(tr('teamGrade.nothingFoundTitle'), tr('teamGrade.nothingFoundMsg'));
@@ -458,6 +467,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       Alert.alert(tr('teamGrade.importErrorTitle'), e?.response?.data?.detail ?? tr('teamGrade.couldNotReadFile'));
     } finally {
       setImporting(false);
+      setImportProgress(null);
     }
   };
 
@@ -467,10 +477,19 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     if (!players.length) { Alert.alert(tr('teamGrade.nothingSelectedTitle'), tr('teamGrade.nothingSelectedMsg')); return; }
     setImporting(true);
     try {
-      const result = await importsAPI.gameStatsCommit({ game_id: activeGame.id, players });
+      const result = await importsAPI.gameStatsCommit({
+        game_id: activeGame.id, players, ...importedExtras,
+      });
       const stats = await gameEvalAPI.listStats(activeGame.id);
       setGameStats(stats);
       setStatPreview(null);
+      setImportedExtras({ events: [], shots: [], team_stats: [] });
+      // The panel below reads its own data, so it has to be told the game
+      // changed — an import you cannot see the result of is an import you have
+      // to take on trust.
+      setStatsVersion(v => v + 1);
+      const fresh = await gameEvalAPI.getSession(activeGame.id);
+      setActiveGame(fresh);
       Alert.alert(tr('teamGrade.importedTitle'), tr('teamGrade.importedMsg', { count: result?.imported ?? 0 }));
     } catch (e: any) {
       Alert.alert(tr('teamGrade.importErrorTitle'), e?.response?.data?.detail ?? tr('teamGrade.couldNotImportStats'));
@@ -1825,6 +1844,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     ? <ActivityIndicator color={t.accent} />
                     : <><Ionicons name="cloud-upload-outline" size={18} color={t.accent} /><Text style={{ color: t.accent, fontFamily: fonts[800], fontSize: 14 }}>{tr('teamGrade.importStatsBtn')}</Text></>}
                 </TouchableOpacity>
+                {importProgress && importProgress.total > 0 && (
+                  <View style={{ marginTop: 10 }}>
+                    <View style={{ height: 6, borderRadius: 3, backgroundColor: t.chip, overflow: 'hidden' }}>
+                      <View style={{ height: '100%', backgroundColor: t.accent,
+                                     width: `${(importProgress.done / importProgress.total) * 100}%` }} />
+                    </View>
+                    <Text style={{ color: t.muted2, fontSize: 11, marginTop: 6 }}>
+                      {tr('teamGrade.readingFiles', { done: Math.min(importProgress.done + 1, importProgress.total), total: importProgress.total })}
+                    </Text>
+                  </View>
+                )}
                 {/* What is worth going to find, and what each one buys — said
                     before the upload rather than discovered by its absence. */}
                 <View style={{ marginTop: 10, gap: 4 }}>
@@ -1841,7 +1871,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 imported instead of a stat pad that would file everything under
                 whatever quarter the picker happened to be on. */}
             {activeGame.tracking_mode === 'post' ? (
-              <GameStatsPanel gameId={activeGame.id} />
+              <GameStatsPanel gameId={activeGame.id} refreshKey={statsVersion} />
             ) : (
             <>
             {/* Player grid */}
@@ -2367,7 +2397,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
           {/* No wrapper padding: these cards are siblings of the grades card
               above and have to start and end on the same lines as it. */}
-          <GameStatsPanel gameId={detailGame.id} />
+          <GameStatsPanel gameId={detailGame.id} refreshKey={statsVersion} />
 
           {/* Action buttons */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, marginBottom: 16 }}>

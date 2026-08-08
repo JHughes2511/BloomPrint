@@ -8,6 +8,7 @@ from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, File
 from sqlalchemy import func
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..database import get_db, SessionLocal
@@ -753,6 +754,54 @@ def _shot_chart(db: Session, game: models.GameSession) -> list[dict] | None:
     return [{"is_opponent": bool(sh.is_opponent), "player": sh.player_name,
              "period": sh.period, "x": sh.x, "y": sh.y,
              "made": bool(sh.made), "points": sh.points} for sh in shots]
+
+
+class PlayerLineIn(BaseModel):
+    player_name: str
+    is_opponent: bool = False
+    # The same canonical fields the box score prints.
+    line: dict
+
+
+@router.put("/sessions/{game_id}/box-score/player")
+def edit_player_line(
+    game_id: int,
+    body: PlayerLineIn,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Correct one player's line.
+
+    A reader looking at a photograph of a stat sheet will occasionally put a 6
+    where a 5 was, and there was nothing a coach could do about it but import
+    the file again and hope. This replaces that player's imported rows with what
+    the coach says they should be — only rows marked source="import", so
+    anything tapped in live during the game is left alone.
+    """
+    game = _get_game(db, game_id, coach.id)
+    name = (body.player_name or "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Which player?")
+
+    (db.query(models.GamePlayerStat)
+       .filter(models.GamePlayerStat.game_id == game.id,
+               models.GamePlayerStat.player_name == name,
+               models.GamePlayerStat.is_opponent == bool(body.is_opponent),
+               models.GamePlayerStat.source == "import")
+       .delete(synchronize_session=False))
+
+    line = {k: int(v) for k, v in (body.line or {}).items()
+            if isinstance(v, (int, float)) and int(v) >= 0}
+    for stat, count in _stats_from_canonical(line).items():
+        raw = _import_raw(stat, count)
+        db.add(models.GamePlayerStat(
+            game_id=game.id, player_name=name, is_opponent=bool(body.is_opponent),
+            quarter=IMPORT_QUARTER, stat_name=stat, stat_category=stat_category(stat),
+            raw_points=raw, quarter_multiplier=IMPORT_MULTIPLIER,
+            weighted_points=raw * IMPORT_MULTIPLIER, count=count, source="import",
+        ))
+    db.commit()
+    return {"ok": True}
 
 
 @router.get("/sessions/{game_id}/box-score")

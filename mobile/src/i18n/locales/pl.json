@@ -2222,7 +2222,8 @@
     "playersFound": "Odczytano {{count}} zawodników",
     "finalScore": "Wynik końcowy",
     "couldNotSaveScore": "Nie udało się zapisać wyniku.",
-    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record."
+    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
+    "readingFiles": "Odczyt pliku {{done}} z {{total}}…"
   },
   "whiteboard": {
     "title": "Tablica",
@@ -2592,6 +2593,7 @@
       "second_chance_points": "Second Chance Points",
       "points_in_paint": "Points in the Paint",
       "bench_points": "Points from the Bench"
-    }
+    },
+    "editHint": "Dotknij liczby, aby ją poprawić. Punkty i zbiórki wynikają z tych wartości."
   }
 }

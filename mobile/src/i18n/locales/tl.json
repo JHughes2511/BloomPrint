@@ -2222,7 +2222,8 @@
     "playersFound": "{{count}} manlalaro ang nabasa",
     "finalScore": "Final na iskor",
     "couldNotSaveScore": "Hindi na-save ang iskor.",
-    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record."
+    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
+    "readingFiles": "Binabasa ang file {{done}} ng {{total}}…"
   },
   "whiteboard": {
     "title": "Whiteboard",
@@ -2592,6 +2593,7 @@
       "second_chance_points": "Second Chance Points",
       "points_in_paint": "Points in the Paint",
       "bench_points": "Points from the Bench"
-    }
+    },
+    "editHint": "Tap any number to correct it. Points and rebounds are worked out from these, so they are not editable."
   }
 }

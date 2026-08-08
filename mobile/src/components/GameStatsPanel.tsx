@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Modal } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Svg, { Rect, Line, Circle, Path, G } from 'react-native-svg';
 import { gameEvalAPI } from '../api/client';
@@ -150,6 +150,12 @@ const KEY_STATS: { key: string; label: string }[] = [
   { key: 'PF', label: 'PF' },
 ];
 
+// What a coach can correct. PTS and REB are absent on purpose: they are worked
+// out from the makes and the rebounds, so offering them would let a line be
+// saved that contradicts itself.
+const EDIT_FIELDS = ['2PM', '2PA', '3PM', '3PA', 'FTM', 'FTA',
+                     'OREB', 'DREB', 'AST', 'STL', 'BLK', 'TO', 'PF'];
+
 // Column order of the box score, matching how a printed one reads.
 const BOX_COLS = ['PTS', 'FGM', 'FGA', '3PM', '3PA', 'FTM', 'FTA',
                   'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF'];
@@ -162,6 +168,11 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [leaderTab, setLeaderTab] = useState<LeaderKey>('efficiency');
+  // The row being corrected, and the numbers as typed.
+  const [editing, setEditing] = useState<any>(null);
+  const [draft, setDraft] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [bump, setBump] = useState(0);
 
   useEffect(() => {
     let live = true;
@@ -173,7 +184,7 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
     return () => { live = false; };
     // refreshKey: an import that just committed has to show up here
     // without the coach leaving the screen and coming back.
-  }, [gameId, refreshKey]);
+  }, [gameId, refreshKey, bump]);
 
   if (loading) return <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />;
   if (!data?.available?.box_score) {
@@ -337,6 +348,64 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
                      ourColor={ourColor} theirColor={theirColor} t={t} s={s} tr={tr} />
         : <Missing title={tr('gameStats.shotChart')} need={data.needs.shot_chart} />}
 
+      {/* A misread number, corrected. A reader looking at a photograph of a
+          stat sheet will occasionally put a 6 where a 5 was, and until now the
+          only recourse was to import the file again and hope. */}
+      <Modal visible={!!editing} transparent animationType="fade" onRequestClose={() => setEditing(null)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'center', padding: 20 }}>
+          <View style={[s.card, { marginBottom: 0 }]}>
+            <Text style={{ color: t.ink, fontSize: 16, fontFamily: fonts[800], marginBottom: 2 }} numberOfLines={1}>
+              {editing?.player}
+            </Text>
+            <Text style={[s.empty, { marginBottom: 12 }]}>{tr('gameStats.editHint')}</Text>
+            <ScrollView style={{ maxHeight: 340 }}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {EDIT_FIELDS.map(f => (
+                  <View key={f} style={{ width: 78 }}>
+                    <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[700], marginBottom: 3 }}>{f}</Text>
+                    <TextInput
+                      style={{ backgroundColor: t.chip, color: t.ink, borderRadius: 8, paddingVertical: 8,
+                               paddingHorizontal: 10, fontSize: 14, borderWidth: 1, borderColor: t.line,
+                               textAlign: 'center' }}
+                      keyboardType="number-pad" value={draft[f] ?? '0'}
+                      onChangeText={v => setDraft(d => ({ ...d, [f]: v.replace(/[^0-9]/g, '') }))}
+                    />
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+              <TouchableOpacity
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1, borderColor: t.line, alignItems: 'center' }}
+                onPress={() => setEditing(null)}
+              >
+                <Text style={{ color: t.muted, fontFamily: fonts[700] }}>{tr('common.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: t.ctaBg, alignItems: 'center' }}
+                disabled={saving}
+                onPress={async () => {
+                  setSaving(true);
+                  try {
+                    await gameEvalAPI.editPlayerLine(gameId, {
+                      player_name: editing.player, is_opponent: !!editing.is_opponent,
+                      line: Object.fromEntries(EDIT_FIELDS.map(f => [f, parseInt(draft[f] ?? '0', 10) || 0])),
+                    });
+                    setEditing(null);
+                    setBump(b => b + 1);
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+              >
+                {saving ? <ActivityIndicator color={t.ctaText} size="small" />
+                        : <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('common.save')}</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* ── Box score ── */}
       {data.sides.filter((side: any) => side.players.length > 0).map((side: any) => (
         <View key={String(side.is_opponent)} style={s.card}>
@@ -352,10 +421,16 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
                 ))}
               </View>
               {side.players.map((p: any) => (
-                <View key={p.player} style={s.tRow}>
+                <TouchableOpacity
+                  key={p.player} style={s.tRow}
+                  onPress={() => {
+                    setEditing({ ...p, is_opponent: side.is_opponent });
+                    setDraft(Object.fromEntries(EDIT_FIELDS.map(f => [f, String(p[f] ?? 0)])));
+                  }}
+                >
                   <Text style={[s.tCell, s.tName]} numberOfLines={1}>{p.player}</Text>
                   {BOX_COLS.map(c => <Text key={c} style={s.tCell}>{p[c] ?? 0}</Text>)}
-                </View>
+                </TouchableOpacity>
               ))}
               <View style={[s.tRow, s.tTotals]}>
                 <Text style={[s.tCell, s.tName, s.tHeadText]} numberOfLines={1}>

@@ -2222,7 +2222,8 @@
     "playersFound": "{{count}} 選手を読み取りました",
     "finalScore": "最終スコア",
     "couldNotSaveScore": "スコアを保存できませんでした。",
-    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record."
+    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
+    "readingFiles": "ファイル {{done}}/{{total}} を読み取り中…"
   },
   "whiteboard": {
     "title": "ホワイトボード",
@@ -2592,6 +2593,7 @@
       "second_chance_points": "セカンドチャンス得点",
       "points_in_paint": "ペイント内得点",
       "bench_points": "ベンチ得点"
-    }
+    },
+    "editHint": "数字をタップして修正します。得点とリバウンドはここから算出されます。"
   }
 }

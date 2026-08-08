@@ -2222,7 +2222,8 @@
     "playersFound": "{{count}} jugadores leídos",
     "finalScore": "Resultado final",
     "couldNotSaveScore": "No se pudo guardar el resultado.",
-    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record."
+    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
+    "readingFiles": "Leyendo archivo {{done}} de {{total}}…"
   },
   "whiteboard": {
     "title": "Pizarra",
@@ -2592,6 +2593,7 @@
       "second_chance_points": "Puntos de segunda oportunidad",
       "points_in_paint": "Puntos en la pintura",
       "bench_points": "Puntos del banquillo"
-    }
+    },
+    "editHint": "Toca cualquier número para corregirlo. Los puntos y rebotes se calculan a partir de estos."
   }
 }

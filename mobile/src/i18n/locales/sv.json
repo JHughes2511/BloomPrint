@@ -2222,7 +2222,8 @@
     "playersFound": "{{count}} spelare inlästa",
     "finalScore": "Slutresultat",
     "couldNotSaveScore": "Kunde inte spara resultatet.",
-    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record."
+    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
+    "readingFiles": "Läser fil {{done}} av {{total}}…"
   },
   "whiteboard": {
     "title": "Taktiktavla",
@@ -2592,6 +2593,7 @@
       "second_chance_points": "Second Chance Points",
       "points_in_paint": "Points in the Paint",
       "bench_points": "Points from the Bench"
-    }
+    },
+    "editHint": "Tryck på en siffra för att rätta den. Poäng och returer räknas ut från dessa."
   }
 }

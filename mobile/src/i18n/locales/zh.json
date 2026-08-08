@@ -2222,7 +2222,8 @@
     "playersFound": "已读取 {{count}} 名球员",
     "finalScore": "最终比分",
     "couldNotSaveScore": "无法保存比分。",
-    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record."
+    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
+    "readingFiles": "正在读取第 {{done}} / {{total}} 个文件…"
   },
   "whiteboard": {
     "title": "战术板",
@@ -2592,6 +2593,7 @@
       "second_chance_points": "二次进攻得分",
       "points_in_paint": "禁区得分",
       "bench_points": "替补得分"
-    }
+    },
+    "editHint": "点按任一数字进行修正。得分和篮板由这些数据推算。"
   }
 }

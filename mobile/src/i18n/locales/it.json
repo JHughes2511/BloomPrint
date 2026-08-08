@@ -2222,7 +2222,8 @@
     "playersFound": "{{count}} giocatori letti",
     "finalScore": "Punteggio finale",
     "couldNotSaveScore": "Impossibile salvare il punteggio.",
-    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record."
+    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
+    "readingFiles": "Lettura file {{done}} di {{total}}…"
   },
   "whiteboard": {
     "title": "Lavagna",
@@ -2592,6 +2593,7 @@
       "second_chance_points": "Punti da seconda chance",
       "points_in_paint": "Punti in area",
       "bench_points": "Punti dalla panchina"
-    }
+    },
+    "editHint": "Tocca un numero per correggerlo. Punti e rimbalzi derivano da questi."
   }
 }
