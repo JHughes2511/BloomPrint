@@ -18,6 +18,7 @@ import { outputTypeLabel } from '../utils/reportType';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
+import { converter, convertStroke, bakedScale, canvasStamp } from './whiteboardGeometry';
 import { ScreenBackground } from '../theme/components';
 import { GeneratingOverlay } from './GeneratingBasketball';
 import { sheetCap } from '../responsive/modalSizes';
@@ -44,6 +45,8 @@ const topPadFt = (visFt: number) => (COURT_FT_L - visFt === 0 ? OOB_BASE_FT : 0)
 const vTotalFt = (visFt: number) => visFt + topPadFt(visFt) + OOB_BASE_FT;
 
 type CourtType = 'full' | 'half' | 'three_quarter';
+// Geometry lives in its own module so the conversion can be reasoned about —
+// and tested — without a React tree around it.
 type Tool = 'pen' | 'circle' | 'xmark' | 'arrow' | 'arrow_dash' | 'text' | 'move';
 
 interface Stroke {
@@ -1204,33 +1207,42 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
 
   // Re-map all strokes from one court view's pixel space into another so a play
   // drawn on (say) half court stays in the same real court location on full/¾.
-  const remapStrokes = (strokes: Stroke[], from: CourtType, to: CourtType): Stroke[] => {
-    if (from === to) return strokes;
-    const sA = scaleForType(from), sB = scaleForType(to);
+  // `fromScale` is the scale the pixels are actually baked at — see
+  // whiteboardGeometry: deriving it from the current layout is what let rapid
+  // switching compound an error until the drawing left the floor.
+  const remapStrokes = (strokes: Stroke[], from: CourtType, to: CourtType,
+                        fromScale?: number, toScale?: number): Stroke[] => {
+    const c = converter(fromScale ?? scaleForType(from), from,
+                        toScale ?? scaleForType(to), to);
     // Before the first layout there is no scale to convert between; moving the
     // marks by a guess is worse than leaving them where they are.
-    if (!sA || !sB) return strokes;
-    const offA = offsetFtForType(from), offB = offsetFtForType(to);
-    const mapX = (px?: number) => px == null ? px : (px / sA) * sB;
-    const mapY = (px?: number) => px == null ? px : ((px / sA + offA) - offB) * sB;
-    const mapSize = (v?: number) => v == null ? v : v * (sB / sA);
-    const mapPath = (d?: string) => !d ? d : d.replace(/([-\d.]+)\s+([-\d.]+)/g,
-      (_m, a, b) => `${mapX(parseFloat(a))!.toFixed(2)} ${mapY(parseFloat(b))!.toFixed(2)}`);
-    return strokes.map(s => ({
-      ...s,
-      d: mapPath(s.d),
-      cx: mapX(s.cx), cy: mapY(s.cy), r: mapSize(s.r), size: mapSize(s.size),
-      x1: mapX(s.x1), y1: mapY(s.y1), x2: mapX(s.x2), y2: mapY(s.y2),
-      x: mapX(s.x), y: mapY(s.y),
-    }));
+    if (!c || from === to) return strokes;
+    return strokes.map(s => convertStroke(s, c));
   };
 
   const setCourtType = (ct: CourtType) => {
     setBoards(prev => {
       const next    = [...prev];
       const cur     = next[activeBoardIdx];
-      const remapped = remapStrokes(cur.strokes, cur.court_type, ct);
-      const updated = { ...cur, court_type: ct, strokes: remapped };
+      // Convert FROM what the marks are recorded as being baked at, not from
+      // whatever the layout says right now — after an orientation change those
+      // are different numbers for a frame, and this used to store the
+      // difference as a permanent shift.
+      const fromScale = bakedScale(cur.canvas) || scaleForType(cur.court_type);
+      const fromType = (cur.canvas?.type as CourtType) || cur.court_type;
+      const toScale = scaleForType(ct);
+      const remapped = fromScale && toScale
+        ? remapStrokes(cur.strokes, fromType, ct, fromScale, toScale)
+        : cur.strokes;
+      // Stamped in the SAME update as the coordinates it describes. Leaving the
+      // stamp for a later effect left a window where the record and the marks
+      // disagreed, and a switch landing in that window converted from a lie.
+      const updated = {
+        ...cur,
+        court_type: ct,
+        strokes: remapped,
+        canvas: (fromScale && toScale) ? canvasStamp(ct, toScale) : cur.canvas,
+      };
       next[activeBoardIdx] = updated;
       saveBoard(activeBoardIdx, updated);
       return next;
@@ -1286,27 +1298,31 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
     // Treating that as a display resize scaled every mark a second time, which
     // is why players moved after switching court size. Only a scale change with
     // the SAME court type is a real resize.
-    const sameBoard = p.idx === activeBoardIdx && p.scale > 0 && p.courtType === ct;
-    const ratio = sameBoard ? scale / p.scale : 1;
+    // The ratio comes from what the marks are RECORDED as being baked at, not
+    // from a scale remembered in a ref. The two agree in the steady state and
+    // disagree exactly when it matters — a switch that landed while the layout
+    // was a frame behind. Anchoring to the record makes that self-correcting:
+    // the next render fixes it with one exact ratio instead of compounding.
+    const baked = bakedScale(curBoard.canvas);
+    const sameBoard = p.idx === activeBoardIdx && p.courtType === ct;
+    const ratio = baked > 0 ? scale / baked : 1;
     if (sameBoard && Math.abs(ratio - 1) < 0.002) {
       prevScaleRef.current = { idx: activeBoardIdx, scale, courtType: ct };
       return;
     }
-    const courtTypeChanged = p.idx === activeBoardIdx && p.courtType && p.courtType !== ct;
     prevScaleRef.current = { idx: activeBoardIdx, scale, courtType: ct };
 
-    if (courtTypeChanged) {
-      // Coordinates are already correct for the new court; just re-baseline the
-      // canvas stamp so the next load doesn't think they need rescaling.
-      setBoards(prev => {
-        const b = prev[activeBoardIdx];
-        if (!b) return prev;
-        const n = [...prev];
-        n[activeBoardIdx] = { ...b, canvas: { w: courtW, h: courtH, type: b.court_type } };
-        return n;
-      });
-      return;
-    }
+    // A court-type change used to be special-cased here: re-stamp the canvas,
+    // rescale nothing, on the grounds that the switch had already converted the
+    // coordinates. That is true only if the switch converted at the scale being
+    // stamped — and when the layout is a frame behind, it did not. The stamp
+    // then described marks that were baked at a different scale, and the next
+    // switch converted from that false record. Five quick switches and the
+    // drawing was off the floor.
+    //
+    // There is no special case now. Everything corrects the same way: compare
+    // the marks' recorded bake to the scale actually showing, and fix the
+    // difference exactly once.
     setBoards(prev => {
       const b = prev[activeBoardIdx];
       if (!b) return prev;
@@ -1324,13 +1340,18 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
           canvas: { w: courtW, h: courtH, type: b.court_type },
           strokes: b.ai ? [...hand, ...buildAllStrokes(b.ai, b.court_type)] : hand,
         };
+        // Persisted, not just shown. A correction that lives only in memory
+        // leaves the stored board describing marks at a scale they are no
+        // longer at, so the next session loads the uncorrected drawing and
+        // corrects it a second time.
+        saveBoardRef.current(activeBoardIdx, n[activeBoardIdx]);
       } else {
         // Board switch / first render (e.g. reopening the board later). Hand-drawn
         // strokes were baked at the canvas size they were drawn on; if that size
         // differs from the current court, rescale them so they keep their court
         // location instead of drifting. AI marks rebuild crisp from feet-data.
-        const bakedScale = b.canvas && b.canvas.w > 0 ? b.canvas.w / PADDED_FT_W : 0;
-        const loadRatio = bakedScale > 0 ? scale / bakedScale : 1;
+        const bakedAt = bakedScale(b.canvas);
+        const loadRatio = bakedAt > 0 ? scale / bakedAt : 1;
         const needsHandRescale = Math.abs(loadRatio - 1) > 0.002;
         if (!b.ai && !needsHandRescale) return prev;
         const hand = needsHandRescale
@@ -1342,6 +1363,7 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
           canvas: { w: courtW, h: courtH, type: b.court_type },
           strokes: b.ai ? [...hand, ...buildAllStrokes(b.ai, b.court_type)] : hand,
         };
+        if (needsHandRescale) saveBoardRef.current(activeBoardIdx, n[activeBoardIdx]);
       }
       return n;
     });
