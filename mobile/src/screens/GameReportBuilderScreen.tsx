@@ -1073,9 +1073,9 @@ export default function GameReportBuilderScreen() {
                 multiline
                 textAlignVertical="top"
               />
-              <View style={{ flexDirection: 'row', gap: 10 }}>
+              <View style={styles.btnRow}>
                 <TouchableOpacity
-                  style={[styles.correctionBtn, { flex: 1, backgroundColor: t.chip }, (!correctionText.trim() || savingCorrection) && { opacity: 0.5 }]}
+                  style={[styles.correctionBtn, styles.btnInRow, { backgroundColor: t.chip }, (!correctionText.trim() || savingCorrection) && { opacity: 0.5 }]}
                   onPress={saveCorrectionForLater}
                   disabled={!correctionText.trim() || savingCorrection}
                 >
@@ -1084,7 +1084,7 @@ export default function GameReportBuilderScreen() {
                     : <Text style={[styles.correctionBtnText, { color: t.ink }]}>{tr('gameBuilder.saveForLater')}</Text>}
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.correctionBtn, { flex: 1 }, correcting && { opacity: 0.5 }]}
+                  style={[styles.correctionBtn, styles.btnInRow, correcting && { opacity: 0.5 }]}
                   onPress={applyCorrection}
                   disabled={correcting}
                 >
@@ -1424,6 +1424,18 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   correctionSection: { backgroundColor: t.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: t.cardBorder },
   correctionLabel: { color: t.label, fontSize: 11.5, fontFamily: fonts[700], letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 },
   correctionInput: { backgroundColor: t.chip, borderRadius: 14, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 80, marginBottom: 12, textAlignVertical: 'top' },
+  /**
+   * A row of buttons that becomes a column when its labels stop fitting.
+   *
+   * Two equal halves of a phone screen is 166px each, and "Apply & Regenerate"
+   * needs about 176 — so the label wrapped onto a second line and both pills
+   * grew to 64px tall, which is what a broken button looks like. flexBasis is
+   * the width each button asks for; when two of them plus the gap no longer fit,
+   * they wrap to full width instead of squeezing. Measured, not guessed: 176
+   * stacks at 390px and stays side by side from 430px up.
+   */
+  btnRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  btnInRow: { flexGrow: 1, flexBasis: 176, minWidth: 176 },
   correctionBtn: { backgroundColor: t.ctaBg, borderRadius: 999, padding: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   correctionBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 14 },
   // Modals

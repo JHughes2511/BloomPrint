@@ -121,7 +121,7 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
         </View>
       )}
 
-      <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, alignItems: 'stretch' }}>
+      <View style={s.btnRow}>
         <TouchableOpacity style={[s.secondaryBtn, (!text.trim() || busy) && { opacity: 0.5 }]} onPress={add} disabled={!text.trim() || busy}>
           <Text style={s.secondaryText} numberOfLines={1}>{tr('common.save')}</Text>
         </TouchableOpacity>
@@ -190,7 +190,15 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   rememberSub: { color: t.muted2, fontSize: 11, marginTop: 2 },
   secondaryBtn: { paddingHorizontal: 18, borderRadius: 10, paddingVertical: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.accent, backgroundColor: t.accentSoft },
   secondaryText: { color: t.accent, fontFamily: fonts[700], fontSize: 13 },
-  primaryBtn: { flex: 1, flexDirection: 'row', gap: 5, borderRadius: 10, paddingVertical: 12, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: t.ctaBg },
+  /**
+   * Wraps rather than squeezes. On a phone the primary label — "Generate
+   * Scouting Report", or "Apply & Regenerate" — cannot fit beside the other
+   * buttons, and squeezing it wrapped the text onto a second line and left the
+   * pills different heights. flexBasis is the width it asks for; when it no
+   * longer fits it takes a line of its own at full width instead.
+   */
+  btnRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10, alignItems: 'stretch' },
+  primaryBtn: { flexGrow: 1, flexBasis: 200, minWidth: 200, flexDirection: 'row', gap: 5, borderRadius: 10, paddingVertical: 12, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: t.ctaBg },
   primaryText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 13 },
   section: { color: t.label, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1, marginBottom: 6 },
   empty: { color: t.muted2, fontSize: 12, marginBottom: 6 },
