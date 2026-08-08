@@ -1204,6 +1204,32 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const uniqueOpponents = [...new Set(sessions.map((s: any) => s.opponent_name))];
 
   /**
+   * The imported players, grouped by the team heading their file used.
+   *
+   * The side is a property of the GROUP, not of each player: a file's roster
+   * belongs to one team, and asking per player would be a dozen questions where
+   * one will do.
+   */
+  const previewGroups = React.useMemo(() => {
+    const out: { key: string; name: string; side: boolean; rows: { p: any; i: number }[] }[] = [];
+    const byName = new Map<string, number>();
+    (statPreview ?? []).forEach((p: any, i: number) => {
+      const name = (p.team_name ?? '').trim();
+      const key = name.toLowerCase();
+      let at = byName.get(key);
+      if (at === undefined) {
+        at = out.length;
+        byName.set(key, at);
+        out.push({ key: key || `g${at}`, name, side: !!p.is_opponent, rows: [] });
+      }
+      out[at].rows.push({ p, i });
+      // The buttons show one state for the group, so it follows the rows.
+      out[at].side = !!p.is_opponent;
+    });
+    return out;
+  }, [statPreview]);
+
+  /**
    * Which teams Team Grade is showing. Ticking none means all of them, which is
    * what this page did unconditionally before it had a picker.
    */
@@ -1755,17 +1781,31 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               </View>
             )}
 
-            {/* Post-game import */}
+            {/* One import for the game, not one per side. The label used to
+                follow the Our Team / Opponent toggle, which asked the coach to
+                declare a side before anything had been read — and a stat sheet
+                usually carries both. Which side each set belongs to is settled
+                afterwards, from the team names the files actually used. */}
             {activeGame.tracking_mode === 'post' && (
-              <TouchableOpacity
-                style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.accentSoft, borderWidth: 1, borderColor: t.accent, borderRadius: 12, paddingVertical: 13, marginBottom: 16 }}
-                onPress={importGameStats}
-                disabled={importing}
-              >
-                {importing
-                  ? <ActivityIndicator color={t.accent} />
-                  : <><Ionicons name="cloud-upload-outline" size={18} color={t.accent} /><Text style={{ color: t.accent, fontFamily: fonts[800], fontSize: 14 }}>{entryMode === 'opponent' ? tr('teamGrade.importOpponentBoxScore') : tr('teamGrade.importBoxScore')}</Text></>}
-              </TouchableOpacity>
+              <View style={{ marginBottom: 16 }}>
+                <TouchableOpacity
+                  style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.accentSoft, borderWidth: 1, borderColor: t.accent, borderRadius: 12, paddingVertical: 13 }}
+                  onPress={importGameStats}
+                  disabled={importing}
+                >
+                  {importing
+                    ? <ActivityIndicator color={t.accent} />
+                    : <><Ionicons name="cloud-upload-outline" size={18} color={t.accent} /><Text style={{ color: t.accent, fontFamily: fonts[800], fontSize: 14 }}>{tr('teamGrade.importStatsBtn')}</Text></>}
+                </TouchableOpacity>
+                {/* What is worth going to find, and what each one buys — said
+                    before the upload rather than discovered by its absence. */}
+                <View style={{ marginTop: 10, gap: 4 }}>
+                  <Text style={{ color: t.muted2, fontSize: 11, lineHeight: 17 }}>{tr('teamGrade.importAny')}</Text>
+                  <Text style={{ color: t.muted2, fontSize: 11, lineHeight: 17 }}>{tr('teamGrade.unlockBox')}</Text>
+                  <Text style={{ color: t.muted2, fontSize: 11, lineHeight: 17 }}>{tr('teamGrade.unlockPbp')}</Text>
+                  <Text style={{ color: t.muted2, fontSize: 11, lineHeight: 17 }}>{tr('teamGrade.unlockShots')}</Text>
+                </View>
+              </View>
             )}
 
             {/* A game tracked after the fact has nothing to tap: no clock is
@@ -2602,8 +2642,46 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 10 }}>
               {tr('teamGrade.importPreviewHint')}
             </Text>
+            {/* Which side each group belongs to, asked once per team the files
+                named rather than assumed before the upload. A sheet usually
+                carries both teams, so choosing a side first was a guess made
+                before anything had been read. */}
             <ScrollView style={{ maxHeight: 380 }}>
-              {(statPreview ?? []).map((p: any, i: number) => (
+              {previewGroups.map(group => (
+                <View key={group.key} style={{ marginBottom: 10 }}>
+                  <View style={{ backgroundColor: t.chip, borderRadius: 10, padding: 10, marginBottom: 6 }}>
+                    <Text style={{ color: t.ink, fontSize: 13, fontFamily: fonts[800] }} numberOfLines={1}>
+                      {group.name || tr('teamGrade.unnamedTeam')}
+                    </Text>
+                    <Text style={{ color: t.muted2, fontSize: 11, marginTop: 2, marginBottom: 8 }}>
+                      {tr('teamGrade.playersFound', { count: group.rows.length })}
+                    </Text>
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      {[false, true].map(side => {
+                        const on = group.side === side;
+                        const label = side
+                          ? (activeGame?.opponent_name || tr('teamGrade.opponent'))
+                          : ((teams as any[]).find(tm => tm.id === activeGame?.team_id)?.name
+                             ?? coach?.program_name ?? tr('teamGrade.ourTeam'));
+                        return (
+                          <TouchableOpacity
+                            key={String(side)}
+                            style={{ flex: 1, paddingVertical: 9, borderRadius: 8, alignItems: 'center',
+                                     borderWidth: 1,
+                                     borderColor: on ? t.accent : t.line,
+                                     backgroundColor: on ? t.accentSoft : 'transparent' }}
+                            onPress={() => setStatPreview(prev => prev!.map(x =>
+                              (x.team_name ?? '') === group.name ? { ...x, is_opponent: side } : x))}
+                          >
+                            <Text style={{ color: on ? t.accent : t.muted, fontSize: 12, fontFamily: fonts[700] }} numberOfLines={1}>
+                              {label}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
+                  {group.rows.map(({ p, i }: any) => (
                 <TouchableOpacity
                   key={i}
                   style={{ backgroundColor: t.card, borderRadius: 10, padding: 12, marginBottom: 6, borderWidth: 1, borderColor: p._include ? t.accent : t.line, opacity: p._include ? 1 : 0.5 }}
@@ -2612,12 +2690,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                     <Ionicons name={p._include ? 'checkmark-circle' : 'ellipse-outline'} size={18} color={p._include ? t.accent : t.muted} />
                     <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[700], flex: 1 }}>{p.player_name}</Text>
-                    {p.is_opponent && <Text style={{ color: t.negative, fontSize: 10, fontFamily: fonts[700] }}>{tr('teamGrade.opp')}</Text>}
+
                   </View>
                   <Text style={{ color: t.muted2, fontSize: 11, marginTop: 4 }}>
                     {Object.entries(p.stats ?? {}).map(([k, v]) => `${k}: ${v}`).join('  ·  ') || tr('teamGrade.noStatsRead')}
                   </Text>
                 </TouchableOpacity>
+                  ))}
+                </View>
               ))}
             </ScrollView>
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>

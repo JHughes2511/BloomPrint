@@ -165,14 +165,18 @@ async def game_stats_preview(
                     continue
                 if n > 0:
                     norm[k] = n
-        clean.append({"player_name": name, "is_opponent": bool(p.get("is_opponent")), "stats": norm})
+        clean.append({"player_name": name, "team_name": str(p.get("team_name") or "").strip(),
+                      "is_opponent": bool(p.get("is_opponent")), "stats": norm})
 
     # The same player read from two files is one player. Merged by taking the
     # larger count per stat rather than adding: two photos of the same sheet are
     # the same numbers twice, and summing them would double the game.
-    merged: dict[tuple[str, bool], dict] = {}
+    merged: dict[tuple[str, str], dict] = {}
     for row in clean:
-        key = (row["player_name"].lower(), row["is_opponent"])
+        # Keyed by team as well as name, so two rosters with a Chris on each stay
+        # two players — and NOT by is_opponent, which is the model's guess and
+        # the very thing the coach is about to correct.
+        key = (row["player_name"].lower(), row["team_name"].lower())
         if key not in merged:
             merged[key] = row
             continue

@@ -148,7 +148,7 @@ ROSTER_INSTRUCTION = (
 GAME_STATS_INSTRUCTION = (
     "You are extracting a basketball BOX SCORE / stat sheet from the attached file "
     "(spreadsheet, PDF, photo, or text). Return ONLY a JSON object of this shape:\n"
-    '{"players": [{"player_name": "", "is_opponent": false, '
+    '{"players": [{"player_name": "", "team_name": "", "is_opponent": false, '
     '"stats": {"2 FG Made": 0, "2 FG Missed": 0, "3 FG Made": 0, "3 FG Missed": 0, '
     '"FT Made": 0, "FT Missed": 0, "Off. Reb": 0, '
     '"Def. Reb": 0, "Assists": 0, "Steal": 0, "Blocked Shot": 0, "Turnover": 0, '
@@ -164,6 +164,10 @@ GAME_STATS_INSTRUCTION = (
     "FG/FGM/FGA COVER ALL FIELD GOALS, THREES INCLUDED. '2 FG Made' must be the "
     "TWO-POINT makes only: subtract the threes. A 9-of-18 line containing three "
     "threes is 6 two-point makes and 3 three-point makes, not 9 and 3.\n"
+    "TEAM_NAME IS THE HEADING THE FILE PUTS THE PLAYER UNDER — copy it exactly, "
+    "even if you are unsure which side it is. A sheet almost always names both "
+    "teams, and that name is what lets a coach say which side it belongs to; "
+    "guessing wrong is recoverable, leaving it blank is not.\n"
     "Set is_opponent true for players clearly on the opposing team. Omit any stat "
     "the file does not state rather than guessing it — a zero here reads as a "
     "real zero. Skip team-total rows. Return JSON only, no prose."

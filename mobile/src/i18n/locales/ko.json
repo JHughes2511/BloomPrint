@@ -2212,7 +2212,14 @@
     "allTeams": "모든 팀",
     "nTeams": "{{count}}개 팀",
     "reimportNeeded": "이 경기 기록은 슛 시도를 읽기 전에 가져왔기 때문에 슛 성공률이 없고 3점슛이 두 번 계산됩니다. 박스 스코어를 다시 가져오세요.",
-    "opponentNewHeading": "또는 새 상대 입력"
+    "opponentNewHeading": "또는 새 상대 입력",
+    "importStatsBtn": "기록 가져오기",
+    "importAny": "Any file, any number — photo, screenshot, PDF, spreadsheet. Both teams on one sheet is fine.",
+    "unlockBox": "Box score → game leaders, key stats and shooting percentages (needs attempts, not just makes).",
+    "unlockPbp": "Play-by-play → lead tracker and advanced stats.",
+    "unlockShots": "Shot locations → shot chart.",
+    "unnamedTeam": "이름 없는 팀",
+    "playersFound": "{{count}}명 읽음"
   },
   "whiteboard": {
     "title": "작전판",

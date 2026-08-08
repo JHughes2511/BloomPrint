@@ -2212,7 +2212,14 @@
     "allTeams": "Tutte le squadre",
     "nTeams": "{{count}} squadre",
     "reimportNeeded": "Le statistiche di questa partita sono state importate prima della lettura dei tentativi: nessuna percentuale al tiro e ogni tripla è contata due volte. Reimporta il tabellino.",
-    "opponentNewHeading": "Oppure scrivi un nuovo avversario"
+    "opponentNewHeading": "Oppure scrivi un nuovo avversario",
+    "importStatsBtn": "Importa statistiche",
+    "importAny": "Any file, any number — photo, screenshot, PDF, spreadsheet. Both teams on one sheet is fine.",
+    "unlockBox": "Box score → game leaders, key stats and shooting percentages (needs attempts, not just makes).",
+    "unlockPbp": "Play-by-play → lead tracker and advanced stats.",
+    "unlockShots": "Shot locations → shot chart.",
+    "unnamedTeam": "Squadra senza nome",
+    "playersFound": "{{count}} giocatori letti"
   },
   "whiteboard": {
     "title": "Lavagna",

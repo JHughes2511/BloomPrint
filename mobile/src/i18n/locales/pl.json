@@ -2212,7 +2212,14 @@
     "allTeams": "Wszystkie zespoły",
     "nTeams": "{{count}} zespoły",
     "reimportNeeded": "Statystyki tego meczu zaimportowano przed odczytem prób, więc brak skuteczności rzutów, a każda trójka liczona jest podwójnie. Zaimportuj ponownie.",
-    "opponentNewHeading": "Lub wpisz nowego rywala"
+    "opponentNewHeading": "Lub wpisz nowego rywala",
+    "importStatsBtn": "Importuj statystyki",
+    "importAny": "Any file, any number — photo, screenshot, PDF, spreadsheet. Both teams on one sheet is fine.",
+    "unlockBox": "Box score → game leaders, key stats and shooting percentages (needs attempts, not just makes).",
+    "unlockPbp": "Play-by-play → lead tracker and advanced stats.",
+    "unlockShots": "Shot locations → shot chart.",
+    "unnamedTeam": "Zespół bez nazwy",
+    "playersFound": "Odczytano {{count}} zawodników"
   },
   "whiteboard": {
     "title": "Tablica",

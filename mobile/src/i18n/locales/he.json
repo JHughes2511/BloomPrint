@@ -2212,7 +2212,14 @@
     "allTeams": "כל הקבוצות",
     "nTeams": "{{count}} קבוצות",
     "reimportNeeded": "הסטטיסטיקות של המשחק יובאו לפני קריאת הניסיונות, ולכן אין אחוזי קליעה וכל שלשה נספרת פעמיים. ייבא שוב את גיליון הסטטיסטיקה.",
-    "opponentNewHeading": "או הקלד יריב חדש"
+    "opponentNewHeading": "או הקלד יריב חדש",
+    "importStatsBtn": "ייבוא סטטיסטיקה",
+    "importAny": "Any file, any number — photo, screenshot, PDF, spreadsheet. Both teams on one sheet is fine.",
+    "unlockBox": "Box score → game leaders, key stats and shooting percentages (needs attempts, not just makes).",
+    "unlockPbp": "Play-by-play → lead tracker and advanced stats.",
+    "unlockShots": "Shot locations → shot chart.",
+    "unnamedTeam": "קבוצה ללא שם",
+    "playersFound": "{{count}} שחקנים נקראו"
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

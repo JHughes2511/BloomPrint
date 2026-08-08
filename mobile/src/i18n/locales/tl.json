@@ -2212,7 +2212,14 @@
     "allTeams": "Lahat ng koponan",
     "nTeams": "{{count}} koponan",
     "reimportNeeded": "Na-import ang stats ng laro bago pa mabasa ang shot attempts, kaya walang shooting percentage at doble ang bilang ng bawat tres. I-import muli ang box score.",
-    "opponentNewHeading": "O mag-type ng bagong kalaban"
+    "opponentNewHeading": "O mag-type ng bagong kalaban",
+    "importStatsBtn": "Mag-import ng stats",
+    "importAny": "Any file, any number — photo, screenshot, PDF, spreadsheet. Both teams on one sheet is fine.",
+    "unlockBox": "Box score → game leaders, key stats and shooting percentages (needs attempts, not just makes).",
+    "unlockPbp": "Play-by-play → lead tracker and advanced stats.",
+    "unlockShots": "Shot locations → shot chart.",
+    "unnamedTeam": "Walang pangalang koponan",
+    "playersFound": "{{count}} manlalaro ang nabasa"
   },
   "whiteboard": {
     "title": "Whiteboard",
