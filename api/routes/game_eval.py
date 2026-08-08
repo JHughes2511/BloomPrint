@@ -652,6 +652,109 @@ def _efficiency(r: dict) -> int:
             - (r["FGA"] - r["FGM"]) - (r["FTA"] - r["FTM"]) - r["TO"])
 
 
+def _lead_tracker(db: Session, game: models.GameSession) -> dict | None:
+    """The game in order: who led, by how much, for how long.
+
+    None of this is reachable from a box score. A total says the game finished
+    80-71; only the sequence says one team led wire to wire, or that the lead
+    changed nine times, or that an 11-point cushion evaporated in ninety
+    seconds — which is the part a coach actually watches for.
+    """
+    events = (db.query(models.GamePlayEvent)
+                .filter_by(game_id=game.id)
+                .order_by(models.GamePlayEvent.sequence).all())
+    if not events:
+        return None
+
+    ours = theirs = 0
+    points: list[dict] = []
+    biggest_us = biggest_them = 0
+    lead_changes = 0
+    prev_leader = 0                 # -1 them, 0 tied, 1 us
+    time_us = time_them = 0.0
+    run_us = run_them = 0
+    best_run_us = best_run_them = 0
+    last_clock: float | None = None
+    last_period: int | None = None
+
+    for e in events:
+        # A file that prints a running score is believed; otherwise it is added
+        # up from the points on each event.
+        if e.our_score is not None and e.opponent_score is not None:
+            ours, theirs = e.our_score, e.opponent_score
+        elif e.points:
+            if e.is_opponent:
+                theirs += e.points
+            else:
+                ours += e.points
+
+        # Time spent in front, from the gap between consecutive clock readings.
+        if e.clock_seconds is not None:
+            if last_clock is not None and last_period == e.period:
+                elapsed = max(last_clock - e.clock_seconds, 0.0)
+                if prev_leader > 0:
+                    time_us += elapsed
+                elif prev_leader < 0:
+                    time_them += elapsed
+            last_clock, last_period = e.clock_seconds, e.period
+
+        if e.points:
+            if e.is_opponent:
+                run_them += e.points
+                run_us = 0
+            else:
+                run_us += e.points
+                run_them = 0
+            best_run_us = max(best_run_us, run_us)
+            best_run_them = max(best_run_them, run_them)
+
+        margin = ours - theirs
+        biggest_us = max(biggest_us, margin)
+        biggest_them = max(biggest_them, -margin)
+        leader = 1 if margin > 0 else -1 if margin < 0 else 0
+        # A tie is not a lead change; going from in front to behind is.
+        if leader != 0 and prev_leader != 0 and leader != prev_leader:
+            lead_changes += 1
+        if leader != 0:
+            prev_leader = leader
+
+        points.append({"period": e.period, "clock": e.clock_seconds,
+                       "our_score": ours, "opponent_score": theirs, "margin": margin})
+
+    return {
+        "points": points,
+        "biggest_lead": {"us": biggest_us, "them": biggest_them},
+        "biggest_run": {"us": best_run_us, "them": best_run_them},
+        "time_leading": {"us": round(time_us), "them": round(time_them)},
+        "lead_changes": lead_changes,
+    }
+
+
+def _advanced_stats(db: Session, game: models.GameSession) -> list[dict] | None:
+    """The team-totals panel, as stated by whatever was imported.
+
+    Never computed. Points off turnovers and the rest need possession context a
+    box score does not carry, and a plausible guess at them is indistinguishable
+    from the real number once it is drawn as a bar.
+    """
+    rows = db.query(models.GameTeamAdvanced).filter_by(game_id=game.id).all()
+    if not rows:
+        return None
+    fields = ("points_off_turnovers", "fast_break_points", "second_chance_points",
+              "points_in_paint", "bench_points")
+    return [{"is_opponent": bool(r.is_opponent),
+             **{f: getattr(r, f) for f in fields}} for r in rows]
+
+
+def _shot_chart(db: Session, game: models.GameSession) -> list[dict] | None:
+    shots = db.query(models.GameShot).filter_by(game_id=game.id).all()
+    if not shots:
+        return None
+    return [{"is_opponent": bool(sh.is_opponent), "player": sh.player_name,
+             "period": sh.period, "x": sh.x, "y": sh.y,
+             "made": bool(sh.made), "points": sh.points} for sh in shots]
+
+
 @router.get("/sessions/{game_id}/box-score")
 def game_box_score(
     game_id: int,
@@ -700,7 +803,13 @@ def game_box_score(
     } for side in sides]
 
     has_attempts = any(s["totals"]["FGA"] or s["totals"]["FTA"] for s in sides)
+    lead = _lead_tracker(db, game)
+    advanced = _advanced_stats(db, game)
+    shots = _shot_chart(db, game)
     return {
+        "lead_tracker": lead,
+        "advanced": advanced,
+        "shot_chart": shots,
         "team_name": our_name,
         "opponent_name": game.opponent_name,
         "sides": sides,
@@ -713,15 +822,15 @@ def game_box_score(
             "leaders": bool(everyone),
             "key_stats": bool(everyone),
             "shooting": has_attempts,
-            "lead_tracker": False,
-            "advanced": False,
-            "shot_chart": False,
+            "lead_tracker": lead is not None,
+            "advanced": advanced is not None,
+            "shot_chart": shots is not None,
         },
         "needs": {
             "shooting": None if has_attempts else "attempts",
-            "lead_tracker": "play_by_play",
-            "advanced": "play_by_play",
-            "shot_chart": "shot_coordinates",
+            "lead_tracker": None if lead else "play_by_play",
+            "advanced": None if advanced else "team_stats",
+            "shot_chart": None if shots else "shot_coordinates",
         },
     }
 

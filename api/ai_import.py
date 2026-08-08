@@ -172,3 +172,59 @@ GAME_STATS_INSTRUCTION = (
     "the file does not state rather than guessing it — a zero here reads as a "
     "real zero. Skip team-total rows. Return JSON only, no prose."
 )
+
+
+# One pass per file, for everything a game file might hold.
+#
+# Asking three times — "is this a box score", "is this a play-by-play", "are
+# there shot locations" — costs three reads of the same page and still misses
+# the common case, which is one export carrying several of them. This asks once
+# and takes whatever is there.
+#
+# The rule throughout is the same one the rest of the app follows: state what
+# the file states, omit what it does not. An invented coordinate or an estimated
+# fast-break total reads as measurement, and a coach has no way to tell it from
+# the real thing.
+GAME_FILE_INSTRUCTION = (
+    "You are reading a basketball game file: a box score, a play-by-play, a shot "
+    "chart, a team-stats panel, or several of those together. It may be a "
+    "spreadsheet, a PDF, a photo of a printed sheet, or a screenshot.\n\n"
+    "Return ONLY this JSON, including whichever sections the file actually "
+    "contains and omitting the rest:\n"
+    '{\n'
+    '  "players": [{"player_name": "", "team_name": "", "is_opponent": false, '
+    '"stats": {"2 FG Made": 0, "2 FG Missed": 0, "3 FG Made": 0, "3 FG Missed": 0, '
+    '"FT Made": 0, "FT Missed": 0, "Off. Reb": 0, "Def. Reb": 0, "Assists": 0, '
+    '"Steal": 0, "Blocked Shot": 0, "Turnover": 0, "Foul Against": 0}}],\n'
+    '  "events": [{"period": 1, "clock": "8:32", "team_name": "", "player_name": "", '
+    '"description": "", "points": 0, "home_score": 0, "away_score": 0}],\n'
+    '  "shots": [{"team_name": "", "player_name": "", "period": 1, "x": 0.0, "y": 0.0, '
+    '"made": true, "points": 2}],\n'
+    '  "team_stats": [{"team_name": "", "points_off_turnovers": 0, "fast_break_points": 0, '
+    '"second_chance_points": 0, "points_in_paint": 0, "bench_points": 0}]\n'
+    '}\n\n'
+    "PLAYERS — the box score. FG/FGM/FGA cover ALL field goals, threes included, so "
+    "'2 FG Made' must have the threes subtracted: a 9-of-18 line containing three "
+    "threes is 6 two-point makes and 3 three-point makes. Misses matter as much as "
+    "makes — a miss is an attempt that was not a make, so subtract. Without them no "
+    "shooting percentage can be worked out at all.\n\n"
+    "EVENTS — the play-by-play, in the order the file lists them. 'clock' is the game "
+    "clock as printed (MM:SS remaining in the period). 'points' is how many this event "
+    "scored, 0 for anything that did not score. home_score/away_score are the running "
+    "score AFTER the event, when the file prints them. Include every row, not just the "
+    "scoring ones: turnovers, rebounds and fouls are what make the rest readable.\n\n"
+    "SHOTS — only when the file gives a LOCATION for each shot. x and y are "
+    "percentages of the full court, 0-100, with x running along the length of the "
+    "court and y across it. If the file gives coordinates in feet or in its own units, "
+    "convert to percentages. If it shows shots on a chart image, read the positions as "
+    "accurately as you can from the image. Never invent a location for a shot the file "
+    "only counts.\n\n"
+    "TEAM_STATS — the team-totals panel, when one is printed. These CANNOT be worked "
+    "out from a box score, so give them only when the file states them.\n\n"
+    "TEAM_NAME everywhere is the heading the file puts that row under — copy it "
+    "exactly even if unsure which side it is. Set is_opponent when the file makes the "
+    "sides clear; when it does not, leave it false and let the team name speak.\n\n"
+    "Omit any field the file does not state rather than guessing it: a zero reads as a "
+    "real zero, and an invented shot location reads as a measurement. Skip team-total "
+    "rows in players. Return JSON only, no prose."
+)

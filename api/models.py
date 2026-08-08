@@ -814,6 +814,74 @@ class LineupEvent(Base):
     game = relationship("GameSession", back_populates="lineup_events")
 
 
+class GamePlayEvent(Base):
+    """One line of a play-by-play: what happened, when, and the score after it.
+
+    A box score is a total; this is the game in order. It is the only thing that
+    can answer when a lead was biggest, how long a team led, how many times the
+    lead changed, or how many points came off turnovers — questions a coach asks
+    constantly and which no amount of totals can reach.
+    """
+    __tablename__ = "game_play_events"
+    id = Column(Integer, primary_key=True, index=True)
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False, index=True)
+    # Order within the game. Kept explicitly: a file may give a clock, a
+    # sequence number, or only the order of its rows.
+    sequence = Column(Integer, nullable=False, default=0)
+    period = Column(Integer, nullable=True)
+    # Seconds REMAINING in the period, as a game clock reads.
+    clock_seconds = Column(Float, nullable=True)
+    is_opponent = Column(Boolean, nullable=True)
+    player_name = Column(String, nullable=True)
+    # The event as the file described it, kept verbatim so nothing is lost in
+    # translation to our vocabulary.
+    description = Column(Text, nullable=True)
+    points = Column(Integer, nullable=False, default=0)
+    # The running score AFTER this event, when the file states it.
+    our_score = Column(Integer, nullable=True)
+    opponent_score = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class GameShot(Base):
+    """Where a shot was taken from.
+
+    x and y are percentages of the full court, 0-100, origin at the top-left of
+    the half the shot was taken in — a fraction rather than feet, because files
+    disagree about court dimensions and every renderer wants a fraction anyway.
+    """
+    __tablename__ = "game_shots"
+    id = Column(Integer, primary_key=True, index=True)
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False, index=True)
+    is_opponent = Column(Boolean, nullable=False, default=False)
+    player_name = Column(String, nullable=True)
+    period = Column(Integer, nullable=True)
+    x = Column(Float, nullable=False)
+    y = Column(Float, nullable=False)
+    made = Column(Boolean, nullable=False, default=False)
+    points = Column(Integer, nullable=True)      # 2 or 3, when the file says
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class GameTeamAdvanced(Base):
+    """The team-totals panel a box score often prints beside the player rows.
+
+    Points off turnovers, fast-break points and the rest cannot be worked out
+    from a box score — they need possession context — but sheets frequently
+    state them outright. Stored when stated, absent when not; never inferred.
+    """
+    __tablename__ = "game_team_advanced"
+    id = Column(Integer, primary_key=True, index=True)
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False, index=True)
+    is_opponent = Column(Boolean, nullable=False, default=False)
+    points_off_turnovers = Column(Integer, nullable=True)
+    fast_break_points = Column(Integer, nullable=True)
+    second_chance_points = Column(Integer, nullable=True)
+    points_in_paint = Column(Integer, nullable=True)
+    bench_points = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class GameMinutesPlayed(Base):
     __tablename__ = "game_minutes_played"
     id = Column(Integer, primary_key=True, index=True)

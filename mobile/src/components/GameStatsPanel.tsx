@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import Svg, { Rect, Line, Circle, Path, G } from 'react-native-svg';
 import { gameEvalAPI } from '../api/client';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -19,6 +20,126 @@ import { fonts } from '../theme/typography';
  */
 
 const LEADER_KEYS = ['efficiency', 'points', 'rebounds', 'assists', 'blocks', 'steals'] as const;
+
+const ADVANCED_FIELDS = [
+  { key: 'points_off_turnovers' }, { key: 'fast_break_points' },
+  { key: 'second_chance_points' }, { key: 'points_in_paint' }, { key: 'bench_points' },
+] as const;
+
+const mmss = (seconds: number) => {
+  const s = Math.max(0, Math.round(seconds));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+};
+
+/**
+ * The margin through the game, one bar per scoring event: above the line when
+ * we are ahead, below when we are not. A box score says the game finished
+ * 80-71; only this says whether it was ever close.
+ */
+function LeadTracker({ data, ours, theirs, ourColor, theirColor, t, s, tr }: any) {
+  const pts = data.points ?? [];
+  const peak = Math.max(1, ...pts.map((p: any) => Math.abs(p.margin)));
+  const H = 150, mid = H / 2;
+  const barW = Math.max(2, Math.min(10, 900 / Math.max(pts.length, 1)));
+  const W = Math.max(pts.length * (barW + 1), 10);
+  const rows: [string, any, any][] = [
+    [tr('gameStats.biggestLead'), data.biggest_lead.us, data.biggest_lead.them],
+    [tr('gameStats.biggestRun'), data.biggest_run.us, data.biggest_run.them],
+    [tr('gameStats.timeLeading'), mmss(data.time_leading.us), mmss(data.time_leading.them)],
+  ];
+  return (
+    <View style={s.card}>
+      <Text style={s.cardLabel}>{tr('gameStats.leadTracker')}</Text>
+      <View style={s.legend}>
+        <Text style={[s.legendText, { color: ourColor }]} numberOfLines={1}>{ours.team_name}</Text>
+        <Text style={[s.legendText, { color: theirColor, textAlign: 'right' }]} numberOfLines={1}>{theirs.team_name}</Text>
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <Svg width={W} height={H}>
+          <Line x1={0} y1={mid} x2={W} y2={mid} stroke={t.line} strokeWidth={1} />
+          {pts.map((p: any, i: number) => {
+            const h = (Math.abs(p.margin) / peak) * (mid - 6);
+            const up = p.margin >= 0;
+            return (
+              <Rect key={i} x={i * (barW + 1)} width={barW}
+                    y={up ? mid - h : mid} height={Math.max(h, 0.5)}
+                    fill={up ? ourColor : theirColor} />
+            );
+          })}
+        </Svg>
+      </ScrollView>
+      {rows.map(([label, a, b]) => (
+        <View key={label} style={s.leaderRow}>
+          <Text style={[s.compareValue, { color: ourColor, flex: 1 }]}>{a}</Text>
+          <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[700] }}>{label}</Text>
+          <Text style={[s.compareValue, { color: theirColor, flex: 1, textAlign: 'right' }]}>{b}</Text>
+        </View>
+      ))}
+      <View style={[s.leaderRow, { justifyContent: 'center' }]}>
+        <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[800] }}>{data.lead_changes}</Text>
+        <Text style={{ color: t.muted, fontSize: 11, fontFamily: fonts[700] }}>{tr('gameStats.leadChanges')}</Text>
+      </View>
+    </View>
+  );
+}
+
+/**
+ * Where the shots came from. Made is a filled dot, missed an open cross —
+ * distinguishable without relying on colour, which is doing team duty here.
+ */
+function ShotChart({ shots, ours, theirs, ourColor, theirColor, t, s, tr }: any) {
+  const W = 560, H = W * 0.53;   // a basketball court is roughly 94 x 50
+  const px = (x: number) => (Math.max(0, Math.min(100, x)) / 100) * W;
+  const py = (y: number) => (Math.max(0, Math.min(100, y)) / 100) * H;
+  const line = t.line;
+  return (
+    <View style={s.card}>
+      <Text style={s.cardLabel}>{tr('gameStats.shotChart')}</Text>
+      <View style={s.legend}>
+        <Text style={[s.legendText, { color: ourColor }]} numberOfLines={1}>{ours.team_name}</Text>
+        <Text style={[s.legendText, { color: theirColor, textAlign: 'right' }]} numberOfLines={1}>{theirs.team_name}</Text>
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <Svg width={W} height={H}>
+          <Rect x={1} y={1} width={W - 2} height={H - 2} fill="none" stroke={line} strokeWidth={1.5} rx={4} />
+          <Line x1={W / 2} y1={0} x2={W / 2} y2={H} stroke={line} strokeWidth={1.5} />
+          <Circle cx={W / 2} cy={H / 2} r={H * 0.12} fill="none" stroke={line} strokeWidth={1.5} />
+          {/* Keys and arcs, one per end. */}
+          {[0, 1].map(side => {
+            const flip = side === 1;
+            const keyW = W * 0.19, keyH = H * 0.32;
+            const kx = flip ? W - keyW : 0;
+            const hoopX = flip ? W - W * 0.06 : W * 0.06;
+            const r = H * 0.42;
+            return (
+              <G key={side}>
+                <Rect x={kx} y={(H - keyH) / 2} width={keyW} height={keyH} fill="none" stroke={line} strokeWidth={1.5} />
+                <Circle cx={hoopX} cy={H / 2} r={H * 0.022} fill="none" stroke={line} strokeWidth={1.5} />
+                <Path
+                  d={`M ${hoopX} ${H / 2 - r} A ${r} ${r} 0 0 ${flip ? 0 : 1} ${hoopX} ${H / 2 + r}`}
+                  fill="none" stroke={line} strokeWidth={1.5}
+                />
+              </G>
+            );
+          })}
+          {shots.map((sh: any, i: number) => {
+            const c = sh.is_opponent ? theirColor : ourColor;
+            const x = px(sh.x), y = py(sh.y);
+            return sh.made
+              ? <Circle key={i} cx={x} cy={y} r={4.5} fill={c} />
+              : (
+                <G key={i}>
+                  <Line x1={x - 4} y1={y - 4} x2={x + 4} y2={y + 4} stroke={c} strokeWidth={2} />
+                  <Line x1={x - 4} y1={y + 4} x2={x + 4} y2={y - 4} stroke={c} strokeWidth={2} />
+                </G>
+              );
+          })}
+        </Svg>
+      </ScrollView>
+      <Text style={[s.empty, { marginTop: 8 }]}>{tr('gameStats.shotLegend')}</Text>
+    </View>
+  );
+}
 type LeaderKey = typeof LEADER_KEYS[number];
 
 const KEY_STATS: { key: string; label: string }[] = [
@@ -180,10 +301,38 @@ export default function GameStatsPanel({ gameId }: { gameId: number }) {
         ))}
       </View>
 
-      {/* ── The three that need a file we don't have ── */}
-      <Missing title={tr('gameStats.leadTracker')} need="play_by_play" />
-      <Missing title={tr('gameStats.advanced')} need="play_by_play" />
-      <Missing title={tr('gameStats.shotChart')} need="shot_coordinates" />
+      {/* ── Lead Tracker ── */}
+      {data.available.lead_tracker
+        ? <LeadTracker data={data.lead_tracker} ours={ours} theirs={theirs}
+                       ourColor={ourColor} theirColor={theirColor} t={t} s={s} tr={tr} />
+        : <Missing title={tr('gameStats.leadTracker')} need={data.needs.lead_tracker} />}
+
+      {/* ── Advanced Stats ── */}
+      {data.available.advanced ? (
+        <View style={s.card}>
+          <Text style={s.cardLabel}>{tr('gameStats.advanced')}</Text>
+          <View style={s.legend}>
+            <Text style={[s.legendText, { color: ourColor }]} numberOfLines={1}>{ours.team_name}</Text>
+            <Text style={[s.legendText, { color: theirColor, textAlign: 'right' }]} numberOfLines={1}>{theirs.team_name}</Text>
+          </View>
+          {ADVANCED_FIELDS.map(f => {
+            const a = data.advanced.find((r: any) => !r.is_opponent)?.[f.key];
+            const b = data.advanced.find((r: any) => r.is_opponent)?.[f.key];
+            // A panel that did not state this row leaves it out entirely rather
+            // than drawing two empty bars that read as nil-all.
+            if (a == null && b == null) return null;
+            return <CompareRow key={f.key} label={tr(`gameStats.adv.${f.key}`)} a={a ?? 0} b={b ?? 0} />;
+          })}
+        </View>
+      ) : (
+        <Missing title={tr('gameStats.advanced')} need={data.needs.advanced} />
+      )}
+
+      {/* ── Shot Chart ── */}
+      {data.available.shot_chart
+        ? <ShotChart shots={data.shot_chart} ours={ours} theirs={theirs}
+                     ourColor={ourColor} theirColor={theirColor} t={t} s={s} tr={tr} />
+        : <Missing title={tr('gameStats.shotChart')} need={data.needs.shot_chart} />}
 
       {/* ── Box score ── */}
       {data.sides.filter((side: any) => side.players.length > 0).map((side: any) => (

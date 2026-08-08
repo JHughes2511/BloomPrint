@@ -128,22 +128,34 @@ async def game_stats_preview(
     merged, so what comes back is the game rather than one document of it.
     """
     players: list = []
+    events: list = []
+    shots: list = []
+    team_stats: list = []
     errors: list[str] = []
     for f in files:
         data = await read_upload(f, what='file')
         try:
             parsed = ai_import.ai_extract_json(data, f.filename or "", f.content_type,
-                                               ai_import.GAME_STATS_INSTRUCTION)
+                                               ai_import.GAME_FILE_INSTRUCTION)
         except RuntimeError as e:
             errors.append(f"{f.filename}: {e}")
             continue
-        got = (parsed or {}).get("players") if isinstance(parsed, dict) else parsed
-        if isinstance(got, list):
-            players.extend(got)
-    if not players:
+        if not isinstance(parsed, dict):
+            # An older shape: a bare list of players.
+            if isinstance(parsed, list):
+                players.extend(parsed)
+            continue
+        # One read per file, taking whatever it turned out to hold — a box score,
+        # a play-by-play, shot locations, a team-totals panel, or several at once.
+        for key, sink in (("players", players), ("events", events),
+                          ("shots", shots), ("team_stats", team_stats)):
+            got = parsed.get(key)
+            if isinstance(got, list):
+                sink.extend(got)
+    if not (players or events or shots or team_stats):
         raise HTTPException(
             status_code=422,
-            detail="Couldn't read any stats from " +
+            detail="Couldn't read anything usable from " +
                    ("those files." if len(files) > 1 else "that file.") +
                    (" " + "; ".join(errors) if errors else ""))
     from .game_eval import _IMPORT_STAT_POINTS
@@ -183,12 +195,25 @@ async def game_stats_preview(
         into = merged[key]["stats"]
         for k, v in row["stats"].items():
             into[k] = max(into.get(k, 0), v)
-    return {"players": list(merged.values()), "errors": errors}
+    # Events, shots and team totals are not reviewed row by row — a coach is not
+    # going to tick four hundred play-by-play lines — so they travel with the
+    # preview and are counted for them instead.
+    return {
+        "players": list(merged.values()),
+        "events": events, "shots": shots, "team_stats": team_stats,
+        "found": {"players": len(merged), "events": len(events),
+                  "shots": len(shots), "team_stats": len(team_stats)},
+        "errors": errors,
+    }
 
 
 class GameStatsCommit(BaseModel):
     game_id: int
-    players: list[dict]
+    players: list[dict] = []
+    # Everything else the files held, passed back untouched from the preview.
+    events: list[dict] = []
+    shots: list[dict] = []
+    team_stats: list[dict] = []
 
 
 @router.post("/game-stats/commit")
@@ -227,8 +252,100 @@ def game_stats_commit(
                 source="import",
             ))
             imported += 1
+
+    # The side each team name landed on, decided by the coach in the preview.
+    # Events and shots carry a team name, not a side, so this is how they are
+    # placed — the same answer, applied to every row from that team.
+    side_of: dict[str, bool] = {}
+    for p in body.players:
+        tn = str(p.get("team_name") or "").strip().lower()
+        if tn:
+            side_of[tn] = bool(p.get("is_opponent"))
+
+    def side_for(team_name) -> bool:
+        return side_of.get(str(team_name or "").strip().lower(), False)
+
+    def clock_seconds(raw) -> float | None:
+        """A game clock as printed — "8:32", "0:04.5", or already a number."""
+        if raw is None:
+            return None
+        if isinstance(raw, (int, float)):
+            return float(raw)
+        text = str(raw).strip()
+        if not text:
+            return None
+        try:
+            if ":" in text:
+                mins, _, secs = text.partition(":")
+                return int(mins) * 60 + float(secs)
+            return float(text)
+        except ValueError:
+            return None
+
+    events_in = shots_in = advanced_in = 0
+    if body.events:
+        db.query(models.GamePlayEvent).filter_by(game_id=game.id).delete()
+        for i, e in enumerate(body.events):
+            if not isinstance(e, dict):
+                continue
+            opp = side_for(e.get("team_name"))
+            # home/away as the file labelled them is not ours/theirs; the score
+            # is stored on our terms so nothing downstream has to guess.
+            hs, as_ = e.get("home_score"), e.get("away_score")
+            ours = as_ if opp else hs
+            theirs = hs if opp else as_
+            db.add(models.GamePlayEvent(
+                game_id=game.id, sequence=i,
+                period=_as_int(e.get("period")),
+                clock_seconds=clock_seconds(e.get("clock")),
+                is_opponent=opp,
+                player_name=str(e.get("player_name") or "").strip() or None,
+                description=str(e.get("description") or "").strip() or None,
+                points=_as_int(e.get("points")) or 0,
+                our_score=_as_int(ours), opponent_score=_as_int(theirs),
+            ))
+            events_in += 1
+    if body.shots:
+        db.query(models.GameShot).filter_by(game_id=game.id).delete()
+        for sh in body.shots:
+            if not isinstance(sh, dict):
+                continue
+            x, y = sh.get("x"), sh.get("y")
+            if not isinstance(x, (int, float)) or not isinstance(y, (int, float)):
+                continue
+            db.add(models.GameShot(
+                game_id=game.id, is_opponent=side_for(sh.get("team_name")),
+                player_name=str(sh.get("player_name") or "").strip() or None,
+                period=_as_int(sh.get("period")),
+                x=float(x), y=float(y), made=bool(sh.get("made")),
+                points=_as_int(sh.get("points")),
+            ))
+            shots_in += 1
+    if body.team_stats:
+        db.query(models.GameTeamAdvanced).filter_by(game_id=game.id).delete()
+        for ts in body.team_stats:
+            if not isinstance(ts, dict):
+                continue
+            db.add(models.GameTeamAdvanced(
+                game_id=game.id, is_opponent=side_for(ts.get("team_name")),
+                points_off_turnovers=_as_int(ts.get("points_off_turnovers")),
+                fast_break_points=_as_int(ts.get("fast_break_points")),
+                second_chance_points=_as_int(ts.get("second_chance_points")),
+                points_in_paint=_as_int(ts.get("points_in_paint")),
+                bench_points=_as_int(ts.get("bench_points")),
+            ))
+            advanced_in += 1
+
     db.commit()
-    return {"imported": imported}
+    return {"imported": imported, "events": events_in, "shots": shots_in,
+            "team_stats": advanced_in}
+
+
+def _as_int(v) -> int | None:
+    try:
+        return int(float(v))
+    except (TypeError, ValueError):
+        return None
 
 
 # ── Free-text extraction (notes, focus, box-score text, scouting notes) ───────

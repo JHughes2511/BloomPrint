@@ -2575,7 +2575,20 @@
     "needs": {
       "attempts": "Shooting percentages need shot attempts, and this game has makes only. Import a box score that includes attempts (FGA / 3PA / FTA) to see them.",
       "play_by_play": "This needs a play-by-play file — every event with a game clock and a running score. Import one and this will appear.",
-      "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear."
+      "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear.",
+      "team_stats": "This needs the team-totals panel a stat sheet often prints beside the player rows. It cannot be worked out from a box score. Import a file that states these and they will appear."
+    },
+    "biggestLead": "最大领先",
+    "biggestRun": "最长得分潮",
+    "timeLeading": "领先时间",
+    "leadChanges": "领先易手",
+    "shotLegend": "实心＝命中，叉＝未中",
+    "adv": {
+      "points_off_turnovers": "失误转化得分",
+      "fast_break_points": "快攻得分",
+      "second_chance_points": "二次进攻得分",
+      "points_in_paint": "禁区得分",
+      "bench_points": "替补得分"
     }
   }
 }
