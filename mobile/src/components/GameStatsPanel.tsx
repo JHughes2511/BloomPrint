@@ -377,8 +377,8 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
           stat sheet will occasionally put a 6 where a 5 was, and until now the
           only recourse was to import the file again and hope. */}
       <Modal visible={!!editing} transparent animationType="fade" onRequestClose={() => setEditing(null)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'center', padding: 20 }}>
-          <View style={[s.card, { marginBottom: 0 }]}>
+        <View style={s.dialogScrim}>
+          <View style={s.dialog}>
             <Text style={{ color: t.ink, fontSize: 16, fontFamily: fonts[800], marginBottom: 2 }} numberOfLines={1}>
               {editing?.player}
             </Text>
@@ -432,8 +432,8 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
       </Modal>
 
       <Modal visible={!!fixing} transparent animationType="fade" onRequestClose={() => setFixing(null)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'center', padding: 20 }}>
-          <View style={[s.card, { marginBottom: 0 }]}>
+        <View style={s.dialogScrim}>
+          <View style={s.dialog}>
             <Text style={{ color: t.ink, fontSize: 16, fontFamily: fonts[800] }}>{fixing?.title}</Text>
             <Text style={[s.empty, { marginTop: 4, marginBottom: 12 }]}>{tr('gameStats.fixHint')}</Text>
             <TextInput
@@ -529,6 +529,15 @@ const makeStyles = (t: ThemeTokens) => ({
   cardLabel: { color: t.label, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1,
                textTransform: 'uppercase', marginBottom: 10 } as const,
   empty: { color: t.muted2, fontSize: 12, lineHeight: 18 } as const,
+
+  // A dialog is not a card. `card` is a translucent surface designed to sit ON
+  // the page — rgba(255,255,255,0.07) in dark mode — so a dialog built from it
+  // showed the charts straight through its own text, and with no width cap it
+  // stretched the full 1950px of a desktop window.
+  dialogScrim: { flex: 1, backgroundColor: t.scrim, justifyContent: 'center',
+                 alignItems: 'center', padding: 20 } as const,
+  dialog: { width: '100%', maxWidth: 520, backgroundColor: t.sheet, borderRadius: 18,
+            padding: 16, borderWidth: 1, borderColor: t.cardBorder } as const,
 
   chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, borderWidth: 1,
           borderColor: t.line } as const,
