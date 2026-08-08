@@ -66,7 +66,8 @@ def text_of(resp) -> str:
     return "".join(b.text for b in resp.content if hasattr(b, "text"))
 
 
-async def long_text(prompt: str, *, model: str = OPUS, max_tokens: int = 16000) -> str:
+async def long_text(prompt: str, *, model: str = OPUS, max_tokens: int = 16000,
+                    on_words=None) -> str:
     """A full-length report, streamed.
 
     Non-streaming requests carry a ten-minute ceiling: the SDK abandons the call
@@ -86,5 +87,16 @@ async def long_text(prompt: str, *, model: str = OPUS, max_tokens: int = 16000) 
         max_tokens=max(max_tokens, MIN_MAX_TOKENS),
         messages=[{"role": "user", "content": prompt}],
     ) as stream:
+        if on_words is not None:
+            # A report takes minutes to write and says nothing while it does.
+            # When a caller is showing a coach a progress bar, the only honest
+            # signal available is how much has been written so far.
+            words = 0
+            async for chunk in stream.text_stream:
+                words += chunk.count(" ")
+                try:
+                    on_words(words)
+                except Exception:
+                    pass
         message = await stream.get_final_message()
     return text_of(message)

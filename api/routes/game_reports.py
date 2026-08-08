@@ -748,16 +748,13 @@ async def upload_doc(
     return _build_out(gr, db)
 
 
-@router.post("/{report_id}/generate", response_model=schemas.GameReportOut)
-async def generate_game_report(
-    report_id: int,
-    db: Session = Depends(get_db),
-    coach: models.Coach = Depends(get_current_coach),
-):
-    gr = db.get(models.GameReport, report_id)
-    if not gr or gr.coach_id != coach.id:
-        raise HTTPException(status_code=404, detail="Game report not found")
+def _packet_prompt(db: Session, gr: models.GameReport, coach: models.Coach) -> str:
+    """Everything the packet knows, assembled into one prompt.
 
+    Pulled out of the endpoint so the same prompt is built whether the report is
+    generated inline or by the background worker — there is one packet prompt,
+    not two that drift.
+    """
     my_team_name = gr.my_team.name if gr.my_team else coach.program_name
     opp_name = gr.opponent_team.name if gr.opponent_team else (gr.opponent_name or None)
 
@@ -982,14 +979,140 @@ async def generate_game_report(
     if lang:
         sections.append(lang)
 
-    prompt = "\n".join(sections)
+    return "\n".join(sections)
+
+
+def _run_packet_generation(report_id: int, job_id: int, coach_id: int):
+    """Background task: write the packet's report.
+
+    THIS USED TO BE THE HTTP REQUEST ITSELF
+
+    A packet report is the longest single call in the app — two report lenses,
+    two films' worth of analysis, rosters, box score and notes, answered at up
+    to sixteen thousand tokens. It routinely runs past the app's two-minute
+    request timeout. When it did, the browser gave up on a request the server
+    was still working on, the coach saw "Could not generate report" (the generic
+    message, because a timeout has no response body to read a reason from), and
+    the report finished and saved a minute later with nobody watching.
+
+    Nothing was broken except where the waiting happened. The work now runs on a
+    job, exactly as film analysis does, so the request returns immediately and
+    the app follows the job — which also means a deploy mid-report no longer
+    throws it away, and the coach can leave the screen.
+    """
+    import asyncio
+
+    # No session is held across the generation, for the same reason the film
+    # workers hold none: a call that takes minutes leaves an idle transaction
+    # open for all of them, and PostgreSQL closes those out from under us.
+    try:
+        rdb = SessionLocal()
+        try:
+            gr = rdb.get(models.GameReport, report_id)
+            coach = rdb.get(models.Coach, coach_id)
+            if not gr or not coach:
+                raise RuntimeError("Game report not found")
+            prompt = _packet_prompt(rdb, gr, coach)
+        finally:
+            rdb.close()
+
+        import os
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            raise RuntimeError("ANTHROPIC_API_KEY is not configured on the server.")
+
+        def _words(n: int):
+            # Same progress code the film synthesis uses, so the app already
+            # knows how to render it in the coach's language.
+            pct = min(99, round(90 * n / 3000)) if n <= 3000 else min(99, 90 + (n - 3000) // 300)
+            pdb = SessionLocal()
+            try:
+                j = pdb.get(models.GenerationJob, job_id)
+                if j:
+                    j.progress = f"job:writing:{pct}"
+                    pdb.commit()
+            except Exception:
+                pdb.rollback()
+            finally:
+                pdb.close()
+
+        report = asyncio.run(long_text(prompt, on_words=_words))
+        if not report.strip():
+            raise RuntimeError("AI returned no content")
+
+        wdb = SessionLocal()
+        try:
+            gr = wdb.get(models.GameReport, report_id)
+            if gr:
+                _save_version(wdb, gr, report)
+            job = wdb.get(models.GenerationJob, job_id)
+            if job:
+                job.status = "done"
+                job.result_id = report_id
+            wdb.commit()
+        finally:
+            wdb.close()
+    except Exception as exc:
+        edb = SessionLocal()
+        try:
+            job = edb.get(models.GenerationJob, job_id)
+            if job:
+                job.status = "error"
+                job.error = str(exc)[:500]
+            edb.commit()
+        finally:
+            edb.close()
+
+
+@router.post("/{report_id}/generate-job")
+def start_game_report_generation(
+    report_id: int,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Start writing the packet's report, and hand back a job to follow.
+
+    The synchronous /generate below still works and is what an already-open
+    browser tab will call; this is the one the app uses.
+    """
+    gr = db.get(models.GameReport, report_id)
+    if not gr or gr.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Game report not found")
+
+    job = models.GenerationJob(
+        coach_id=coach.id, kind="packet", status="processing",
+        progress="job:writing:0",
+        payload=json.dumps({"report_id": report_id, "coach_id": coach.id}),
+        attempts=1,
+    )
+    db.add(job)
+    db.commit()
+    db.refresh(job)
+    background_tasks.add_task(_run_packet_generation, report_id, job.id, coach.id)
+    return {"job_id": job.id}
+
+
+@router.post("/{report_id}/generate", response_model=schemas.GameReportOut)
+async def generate_game_report(
+    report_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Generate inline and wait for it.
+
+    Kept for browser tabs loaded before /generate-job existed. New callers
+    should use that instead — this one can outlive the request that asked for it.
+    """
+    gr = db.get(models.GameReport, report_id)
+    if not gr or gr.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Game report not found")
 
     import os
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY is not configured on the server.")
 
     try:
-        report = await long_text(prompt)
+        report = await long_text(_packet_prompt(db, gr, coach))
         if not report.strip():
             raise HTTPException(status_code=500, detail="AI returned no content")
     except HTTPException:

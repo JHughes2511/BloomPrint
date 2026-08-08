@@ -685,7 +685,20 @@ export const gameReportsAPI = {
   allVersions: () => api.get('/game-reports/versions').then(r => r.data),
   uploadDoc: (id: number, formData: FormData) =>
     api.post(`/game-reports/${id}/upload-doc`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
-  generate: (id: number) => api.post(`/game-reports/${id}/generate`).then(r => r.data),
+  /**
+   * Write the packet's report, following it as a job.
+   *
+   * It used to be one POST that the browser waited on. A packet report is the
+   * longest call in the app — two report lenses over two films' worth of
+   * analysis — and it routinely ran past this client's two-minute timeout. The
+   * browser then gave up on a request the server was still working on: the
+   * coach saw "Could not generate report" while the report finished and saved a
+   * minute later. Nothing had failed except the waiting.
+   */
+  generate: async (id: number, onTick?: (status: string) => void) => {
+    const { job_id } = await api.post(`/game-reports/${id}/generate-job`).then(r => r.data);
+    return evalsAPI.awaitJob(job_id, onTick);
+  },
   teamTraining: (id: number, focusPrompt?: string) =>
     api.post(`/game-reports/${id}/team-training`, { focus_prompt: focusPrompt ?? null }).then(r => r.data),
   correct: (id: number, correction: string) =>

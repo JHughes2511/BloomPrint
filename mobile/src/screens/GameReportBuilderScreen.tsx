@@ -113,6 +113,8 @@ export default function GameReportBuilderScreen() {
   const [teams, setTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  // How far into writing the report the server is. Blank until the job reports.
+  const [genProgress, setGenProgress] = useState('');
   const [uploadingClip, setUploadingClip] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState<'box_score' | 'scouting_notes' | null>(null);
 
@@ -479,20 +481,27 @@ export default function GameReportBuilderScreen() {
   const generate = async () => {
     if (!reportId) return;
     setGenerating(true);
+    setGenProgress('');
     try {
       let updated;
       if (outputType === 'team_training') {
         updated = await gameReportsAPI.teamTraining(reportId, focusPrompt || undefined);
       } else {
-        updated = await gameReportsAPI.generate(reportId);
+        updated = await gameReportsAPI.generate(reportId, setGenProgress);
       }
       setReport(updated);
       loadVersions(reportId);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300);
     } catch (e: any) {
-      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('gameBuilder.couldNotGenerate'));
+      // A failed job reports why it failed as a plain Error, which has no
+      // `response` — reading only that is how "Could not generate report" came
+      // to stand in for "your credit balance is too low" and for a request that
+      // had merely outlived its timeout.
+      Alert.alert(tr('common.error'),
+        e?.response?.data?.detail ?? e?.message ?? tr('gameBuilder.couldNotGenerate'));
     } finally {
       setGenerating(false);
+      setGenProgress('');
     }
   };
 
@@ -927,7 +936,11 @@ export default function GameReportBuilderScreen() {
         {generating && (
           <Text style={styles.hint}>{tr('gameBuilder.generatingHint')}</Text>
         )}
-        <GeneratingOverlay visible={generating} label={tr('gameBuilder.generatingOverlay')} />
+        <GeneratingOverlay
+          visible={generating}
+          label={jobProgressLabel(genProgress, tr) || tr('gameBuilder.generatingOverlay')}
+          realProgress={parseGenProgress(genProgress)}
+        />
         <GeneratingOverlay
           visible={uploadingClip}
           realProgress={parseGenProgress(clipProgress)}

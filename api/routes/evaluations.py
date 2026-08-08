@@ -405,6 +405,11 @@ def get_generation_job(
             tr = db.get(models.TeamReport, job.result_id)
             if tr:
                 out["result"] = schemas.TeamReportOut.model_validate(tr).model_dump(mode="json")
+        elif job.kind == "packet":
+            from .game_reports import _build_out
+            gr = db.get(models.GameReport, job.result_id)
+            if gr and gr.coach_id == coach.id:
+                out["result"] = _build_out(gr, db).model_dump(mode="json")
     return out
 
 

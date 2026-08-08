@@ -1376,6 +1376,10 @@ def _resume_job(job_id: int, kind: str, payload: str):
                     call.get("report_subject", ""), call.get("report_context", ""),
                     call.get("report_segment_note", ""),
                 )
+            elif kind == "packet":
+                from .routes.game_reports import _run_packet_generation
+
+                _run_packet_generation(call["report_id"], job_id, call["coach_id"])
             else:
                 log.warning("No resume handler for job kind %r", kind)
         except Exception as exc:
