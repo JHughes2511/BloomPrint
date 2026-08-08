@@ -2210,7 +2210,8 @@
     "opponentPlayedBefore": "対戦済み",
     "matchup": "{{us}} 対 {{them}}",
     "allTeams": "すべてのチーム",
-    "nTeams": "{{count}} チーム"
+    "nTeams": "{{count}} チーム",
+    "reimportNeeded": "この試合のスタッツは試投数を読み取る前に取り込まれたため、シュート成功率が出せず、3ポイントが二重に加算されています。ボックススコアを取り込み直してください。"
   },
   "whiteboard": {
     "title": "ホワイトボード",

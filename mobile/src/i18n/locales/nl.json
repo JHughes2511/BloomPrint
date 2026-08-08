@@ -2210,7 +2210,8 @@
     "opponentPlayedBefore": "Eerder gespeeld",
     "matchup": "{{us}} tegen {{them}}",
     "allTeams": "Alle teams",
-    "nTeams": "{{count}} teams"
+    "nTeams": "{{count}} teams",
+    "reimportNeeded": "De statistieken van deze wedstrijd zijn geïmporteerd voordat pogingen werden gelezen: geen schotpercentages en elke driepunter telt dubbel. Importeer de boxscore opnieuw."
   },
   "whiteboard": {
     "title": "Tactiekbord",

@@ -705,6 +705,12 @@ class GameSessionOut(BaseModel):
     scouting_updated_at: datetime | None = None  # when THIS coach's scout was last generated
     ai_game_report: str | None = None            # THIS coach's full game report (our team + opp)
     game_report_updated_at: datetime | None = None
+    # True when this game's box score was imported before attempts were read —
+    # makes only, so no shooting percentage can be worked out and its points are
+    # inflated by every three (FGM was stored as two-pointers). Re-importing the
+    # same file fixes both. Said out loud rather than left as quietly wrong
+    # numbers a coach has no way to spot.
+    stats_need_reimport: bool = False
     model_config = {"from_attributes": True}
 
 

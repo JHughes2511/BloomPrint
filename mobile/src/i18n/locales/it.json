@@ -2210,7 +2210,8 @@
     "opponentPlayedBefore": "Già affrontata",
     "matchup": "{{us}} vs {{them}}",
     "allTeams": "Tutte le squadre",
-    "nTeams": "{{count}} squadre"
+    "nTeams": "{{count}} squadre",
+    "reimportNeeded": "Le statistiche di questa partita sono state importate prima della lettura dei tentativi: nessuna percentuale al tiro e ogni tripla è contata due volte. Reimporta il tabellino."
   },
   "whiteboard": {
     "title": "Lavagna",

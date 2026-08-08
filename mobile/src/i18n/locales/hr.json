@@ -2210,7 +2210,8 @@
     "opponentPlayedBefore": "Već igrano",
     "matchup": "{{us}} protiv {{them}}",
     "allTeams": "Sve ekipe",
-    "nTeams": "{{count}} ekipa"
+    "nTeams": "{{count}} ekipa",
+    "reimportNeeded": "Statistika ove utakmice uvezena je prije čitanja pokušaja, pa nema postotaka šuta i svaka trica se broji dvaput. Ponovno uvezi statistiku."
   },
   "whiteboard": {
     "title": "Ploča",

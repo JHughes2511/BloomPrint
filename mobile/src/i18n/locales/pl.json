@@ -2210,7 +2210,8 @@
     "opponentPlayedBefore": "Już rozegrane",
     "matchup": "{{us}} vs {{them}}",
     "allTeams": "Wszystkie zespoły",
-    "nTeams": "{{count}} zespoły"
+    "nTeams": "{{count}} zespoły",
+    "reimportNeeded": "Statystyki tego meczu zaimportowano przed odczytem prób, więc brak skuteczności rzutów, a każda trójka liczona jest podwójnie. Zaimportuj ponownie."
   },
   "whiteboard": {
     "title": "Tablica",

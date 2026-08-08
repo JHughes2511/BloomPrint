@@ -2210,7 +2210,8 @@
     "opponentPlayedBefore": "Redan mött",
     "matchup": "{{us}} mot {{them}}",
     "allTeams": "Alla lag",
-    "nTeams": "{{count}} lag"
+    "nTeams": "{{count}} lag",
+    "reimportNeeded": "Matchens statistik importerades innan skottförsök lästes in — inga skottprocent, och varje trepoängare räknas dubbelt. Importera matchprotokollet igen."
   },
   "whiteboard": {
     "title": "Taktiktavla",

@@ -2210,7 +2210,8 @@
     "opponentPlayedBefore": "이전 상대",
     "matchup": "{{us}} 대 {{them}}",
     "allTeams": "모든 팀",
-    "nTeams": "{{count}}개 팀"
+    "nTeams": "{{count}}개 팀",
+    "reimportNeeded": "이 경기 기록은 슛 시도를 읽기 전에 가져왔기 때문에 슛 성공률이 없고 3점슛이 두 번 계산됩니다. 박스 스코어를 다시 가져오세요."
   },
   "whiteboard": {
     "title": "작전판",

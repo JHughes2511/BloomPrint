@@ -2210,7 +2210,8 @@
     "opponentPlayedBefore": "Deja jucat",
     "matchup": "{{us}} vs {{them}}",
     "allTeams": "Toate echipele",
-    "nTeams": "{{count}} echipe"
+    "nTeams": "{{count}} echipe",
+    "reimportNeeded": "Statisticile acestui meci au fost importate înainte de citirea încercărilor, deci nu există procentaje la aruncări și fiecare trei puncte e numărat de două ori. Reimportă."
   },
   "whiteboard": {
     "title": "Tablă tactică",

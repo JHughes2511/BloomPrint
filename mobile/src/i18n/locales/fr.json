@@ -2210,7 +2210,8 @@
     "opponentPlayedBefore": "Déjà affronté",
     "matchup": "{{us}} vs {{them}}",
     "allTeams": "Toutes les équipes",
-    "nTeams": "{{count}} équipes"
+    "nTeams": "{{count}} équipes",
+    "reimportNeeded": "Les stats de ce match ont été importées avant la lecture des tentatives : aucun pourcentage n'est disponible et chaque tir à 3 points est compté deux fois. Réimporte la feuille."
   },
   "whiteboard": {
     "title": "Tableau blanc",

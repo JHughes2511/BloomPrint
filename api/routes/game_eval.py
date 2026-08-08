@@ -16,6 +16,7 @@ from .. import models, schemas
 from ..softdelete import soft_delete
 from ..ai_models import OPUS, long_text
 from ..uploadguard import read_upload
+from .. import ai_import
 from .. import genjob
 
 router = APIRouter(prefix="/game-eval", tags=["game-eval"])
@@ -83,40 +84,13 @@ _IMPORT_STAT_POINTS: dict[str, tuple[int, int, int]] = {
     "Off. Reb": (3, 4, 4), "Def. Reb": (3, 4, 4), "Assists": (3, 4, 4),
     "Steal": (3, 4, 4), "Blocked Shot": (2, 2, 4), "Turnover": (-2, -2, 4),
     "Foul Against": (-1, -1, 4),
+    # Misses. Absent from this table, an imported miss scored zero AND was
+    # filtered out of the preview as an unknown stat — so a box score's
+    # attempts had nowhere to land and no shooting percentage could be stated.
+    # Same values live tracking uses, so an imported game and a tracked one
+    # grade alike.
+    "2 FG Missed": (-1, -2, 4), "3 FG Missed": (-1, -2, 4), "FT Missed": (-1, -2, 4),
 }
-# Header keyword -> stat_name (checked in order; first match wins).
-# Columns that give an ATTEMPT count rather than a made count. A box score
-# states makes and attempts ("9/18"), and only the makes were ever read — so
-# BloomPrint knew a player made nine field goals and had no idea he took
-# eighteen. Every shooting percentage in the app was therefore uncomputable,
-# which is why film reports kept answering "REQUIRES ADDITIONAL DATA" for
-# splits. Misses are derived from attempts minus makes, below.
-_IMPORT_ATTEMPT_MAP: list[tuple[str, str]] = [
-    (r"^(3pa|3 ?fga|3 ?pt ?att|3s ?att|threes ?att)", "3 FG"),
-    (r"^(fta|ft ?att|free ?throws? ?att)", "FT"),
-    (r"^(2pa|2 ?fga)", "2 FG"),
-    (r"^(fga|fg ?att)", "FG"),      # all field goals, twos and threes together
-]
-
-_IMPORT_COL_MAP: list[tuple[str, str]] = [
-    (r"^(3pm|3 ?fg ?made|3 ?pt ?made|3s ?made|threes ?made)", "3 FG Made"),
-    (r"^(ftm|ft ?made|free ?throws? ?made)", "FT Made"),
-    (r"^(2pm|2 ?fg ?made)", "2 FG Made"),
-    # All field goals, twos and threes together. Kept separate from 2PM because
-    # it is NOT a two-point count: stored as one, every imported three was also
-    # counted as a two and the player's points came out inflated.
-    (r"^(fgm|fg ?made)", "FG Made (all)"),
-    (r"^(oreb|o\.? ?reb|off\.? ?reb|offensive ?reb)", "Off. Reb"),
-    (r"^(dreb|d\.? ?reb|def\.? ?reb|defensive ?reb)", "Def. Reb"),
-    (r"^(reb|rebounds?|trb)", "Def. Reb"),
-    (r"^(ast|assists?)", "Assists"),
-    (r"^(stl|steals?)", "Steal"),
-    (r"^(blk|blocks?)", "Blocked Shot"),
-    (r"^(to|tov|turnovers?)", "Turnover"),
-    (r"^(pf|fouls?)", "Foul Against"),
-]
-
-
 # A box score covers the whole game, so it is stored under a neutral quarter
 # with no clutch multiplier rather than being attributed to any one quarter.
 IMPORT_QUARTER = 1
@@ -147,102 +121,235 @@ def _import_raw(stat: str, count: int) -> float:
     return float((high if count >= thr else low) * count)
 
 
+BOX_SCORE_FIELDS = ("FGM", "FGA", "2PM", "2PA", "3PM", "3PA", "FTM", "FTA",
+                    "OREB", "DREB", "REB", "AST", "STL", "BLK", "TO", "PF")
+
+_AI_BOX_SCORE_INSTRUCTION = (
+    "This is a basketball box score. Return JSON only:\n"
+    '{"teams": [{"team_name": "...", "players": [{"name": "...", '
+    '"FGM": 0, "FGA": 0, "2PM": 0, "2PA": 0, "3PM": 0, "3PA": 0, "FTM": 0, "FTA": 0, '
+    '"OREB": 0, "DREB": 0, "REB": 0, "AST": 0, "STL": 0, "BLK": 0, "TO": 0, "PF": 0}]}]}\n'
+    "Include every team and every player listed. Use the numbers exactly as printed — "
+    "do NOT compute, estimate or fill in a stat that is not shown; omit the key instead. "
+    "FGM/FGA are ALL field goals including threes. If the sheet shows a combined line "
+    "like '9-18', FGM is 9 and FGA is 18. Skip team-total rows."
+)
+
+
+def _canonical_rows_from_sheet(rows: list[list]) -> list[tuple[str, dict]]:
+    """A spreadsheet's rows as (player, {FIELD: count}) — read exactly, no model."""
+    import re as _re
+    header = [str(c).strip().lower() if c is not None else "" for c in rows[0]]
+    name_idx = next((i for i, h in enumerate(header)
+                     if h in ("name", "player", "player name", "athlete", "#")), 0)
+    cols: dict[int, str] = {}
+    for i, h in enumerate(header):
+        for pat, field in _SHEET_COL_MAP:
+            if _re.match(pat, h):
+                cols[i] = field
+                break
+    out: list[tuple[str, dict]] = []
+    for row in rows[1:]:
+        if name_idx >= len(row) or not row[name_idx] or not str(row[name_idx]).strip():
+            continue
+        vals: dict[str, int] = {}
+        for i, field in cols.items():
+            if i >= len(row):
+                continue
+            try:
+                n = int(float(row[i]))
+            except (TypeError, ValueError):
+                continue
+            if n >= 0:
+                vals[field] = n
+        out.append((str(row[name_idx]).strip(), vals))
+    return out
+
+
+# Header patterns → the canonical field names above. Kept in one table so the
+# spreadsheet reader and the model's output end up in the same shape.
+_SHEET_COL_MAP: list[tuple[str, str]] = [
+    (r"^(3pm|3 ?fg ?made|3 ?pt ?made|3s ?made|threes ?made)", "3PM"),
+    (r"^(3pa|3 ?fga|3 ?pt ?att|3s ?att|threes ?att)", "3PA"),
+    (r"^(ftm|ft ?made|free ?throws? ?made)", "FTM"),
+    (r"^(fta|ft ?att|free ?throws? ?att)", "FTA"),
+    (r"^(2pm|2 ?fg ?made)", "2PM"),
+    (r"^(2pa|2 ?fga)", "2PA"),
+    (r"^(fgm|fg ?made)", "FGM"),
+    (r"^(fga|fg ?att)", "FGA"),
+    (r"^(oreb|o\.? ?reb|off\.? ?reb|offensive ?reb)", "OREB"),
+    (r"^(dreb|d\.? ?reb|def\.? ?reb|defensive ?reb)", "DREB"),
+    (r"^(reb|rebounds?|trb)", "REB"),
+    (r"^(ast|assists?)", "AST"),
+    (r"^(stl|steals?)", "STL"),
+    (r"^(blk|blocks?)", "BLK"),
+    (r"^(to|tov|turnovers?)", "TO"),
+    (r"^(pf|fouls?)", "PF"),
+]
+
+
+def _stats_from_canonical(v: dict) -> dict[str, int]:
+    """Canonical box-score fields turned into BloomPrint's stat vocabulary.
+
+    Two things this has to get right, both of which it used to get wrong:
+
+    FGM is ALL field goals. Stored as "2 FG Made" it counted every three twice,
+    so an imported 9-for-18 with three threes came out as 27 points, not 25.
+
+    A miss is an attempt that was not a make. Attempts were never read at all,
+    so the app knew the makes and could not state a single shooting percentage.
+    Where a sheet gives no attempts the miss stays unrecorded rather than zero —
+    zero would read as perfect shooting.
+    """
+    g = lambda k: max(int(v.get(k, 0) or 0), 0)
+    threes, three_att = g("3PM"), g("3PA")
+    twos = g("2PM") or max(g("FGM") - threes, 0)
+    two_att = g("2PA") or max(g("FGA") - three_att, 0) if (g("2PA") or g("FGA")) else 0
+    fts, ft_att = g("FTM"), g("FTA")
+
+    out: dict[str, int] = {}
+    def put(stat: str, n: int) -> None:
+        if n > 0:
+            out[stat] = out.get(stat, 0) + n
+
+    put("2 FG Made", twos)
+    put("3 FG Made", threes)
+    put("FT Made", fts)
+    if two_att:   put("2 FG Missed", max(two_att - twos, 0))
+    if three_att: put("3 FG Missed", max(three_att - threes, 0))
+    if ft_att:    put("FT Missed", max(ft_att - fts, 0))
+
+    oreb, dreb, reb = g("OREB"), g("DREB"), g("REB")
+    put("Off. Reb", oreb)
+    # A sheet giving only a total: the offensive ones are already counted, so
+    # the remainder is defensive rather than the total being double counted.
+    put("Def. Reb", dreb or max(reb - oreb, 0))
+    put("Assists", g("AST"))
+    put("Steal", g("STL"))
+    put("Blocked Shot", g("BLK"))
+    put("Turnover", g("TO"))
+    put("Foul Against", g("PF"))
+    return out
+
+
+def stats_need_reimport(db: Session, game_id: int) -> bool:
+    """Was this game's box score imported before attempts were captured?
+
+    An import that produced makes and no misses came from the old reader, which
+    read no attempt columns at all. Two things follow and neither is visible:
+    no shooting percentage is computable, and the points are inflated because
+    FGM — all field goals — was stored as two-pointers, counting every three
+    twice. Re-importing the same file corrects both.
+    """
+    rows = (db.query(models.GamePlayerStat)
+              .filter(models.GamePlayerStat.game_id == game_id,
+                      models.GamePlayerStat.source == "import").all())
+    if not rows:
+        return False
+    return not any(r.stat_name.endswith("Missed") for r in rows)
+
+
+def _side_for(team_name: str, ours: str, theirs: str) -> bool | None:
+    """Which side a box score's team heading refers to — True for the opponent."""
+    def norm(x: str) -> str:
+        return "".join(ch for ch in (x or "").lower() if ch.isalnum())
+    n, o, t = norm(team_name), norm(ours), norm(theirs)
+    if not n:
+        return None
+    if o and (n in o or o in n):
+        return False
+    if t and (n in t or t in n):
+        return True
+    return None
+
+
 @router.post("/sessions/{game_id}/import")
 async def import_game_stats(
     game_id: int,
-    file: UploadFile = File(...),
+    files: list[UploadFile] = File(...),
     is_opponent: bool = False,
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    """Import a post-game box score (Excel/CSV): one row per player, stat columns
-    mapped to the BIM stat vocabulary and recorded as full-game (Q4) entries."""
-    import re
+    """Import a post-game box score from any number of files, of any type.
+
+    It used to take one .xlsx and reject everything else. A box score is far
+    more often a PDF, a photo of the sheet taped to the scorer's table, or a
+    screenshot — and a game's numbers are often spread over more than one of
+    them. Anything readable goes now: spreadsheets are parsed exactly, and
+    everything else is read by the same model that already reads roster photos.
+    """
+    import io as _io
     import openpyxl
 
     game = _get_game(db, game_id, coach.id)
-    content = await read_upload(file, what='spreadsheet')
-    try:
-        wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
-        rows = [list(r) for r in wb.active.iter_rows(values_only=True)]
-    except Exception:
-        raise HTTPException(status_code=400, detail="Could not read spreadsheet. Use .xlsx.")
-    if not rows:
-        raise HTTPException(status_code=400, detail="The file is empty.")
+    team_row = db.get(models.Team, game.team_id) if game.team_id else None
+    our_name = (team_row.name if team_row else None) or coach.program_name or ""
 
-    header = [str(c).strip().lower() if c is not None else "" for c in rows[0]]
-    name_idx = next((i for i, h in enumerate(header) if h in ("name", "player", "player name", "athlete", "#")), 0)
-    col_stats: dict[int, str] = {}
-    for i, h in enumerate(header):
-        for pat, stat in _IMPORT_COL_MAP:
-            if re.match(pat, h):
-                col_stats[i] = stat
-                break
-    col_attempts: dict[int, str] = {}
-    for i, h in enumerate(header):
-        if i in col_stats:
-            continue
-        for pat, kind in _IMPORT_ATTEMPT_MAP:
-            if re.match(pat, h):
-                col_attempts[i] = kind
-                break
-    if not col_stats:
-        raise HTTPException(status_code=400, detail="No recognizable stat columns (PTS/REB/AST/…) found.")
+    # (is_opponent, player, canonical stats) gathered across every file.
+    collected: list[tuple[bool, str, dict]] = []
+    read_errors: list[str] = []
+
+    for f in files:
+        content = await read_upload(f, what='document')
+        name = (f.filename or "").lower()
+        try:
+            if name.endswith((".xlsx", ".xls")):
+                wb = openpyxl.load_workbook(_io.BytesIO(content), data_only=True)
+                rows = [list(r) for r in wb.active.iter_rows(values_only=True)]
+                if rows:
+                    for player, vals in _canonical_rows_from_sheet(rows):
+                        if vals:
+                            collected.append((is_opponent, player, vals))
+                    continue
+            # Anything else — PDF, photo, screenshot, csv, Word — is read.
+            data = ai_import.ai_extract_json(content, f.filename or "", f.content_type,
+                                             _AI_BOX_SCORE_INSTRUCTION) or {}
+            teams = data.get("teams") if isinstance(data, dict) else None
+            for team in (teams or []):
+                side = _side_for(str(team.get("team_name") or ""), our_name, game.opponent_name or "")
+                for pl in (team.get("players") or []):
+                    pname = str(pl.get("name") or "").strip()
+                    if not pname:
+                        continue
+                    vals = {k: pl[k] for k in BOX_SCORE_FIELDS if isinstance(pl.get(k), (int, float))}
+                    if vals:
+                        # A sheet naming neither team falls back to what the
+                        # coach pressed, which is all the old importer ever had.
+                        collected.append((is_opponent if side is None else side, pname, vals))
+        except HTTPException:
+            raise
+        except Exception as exc:
+            read_errors.append(f"{f.filename}: {exc}")
+
+    if not collected:
+        raise HTTPException(
+            status_code=400,
+            detail="No box score could be read from " +
+                   ("those files." if len(files) > 1 else "that file.") +
+                   (" " + "; ".join(read_errors) if read_errors else ""),
+        )
 
     # A box score is whole-game totals, not a Q4 performance: recording it under
     # quarter 4 would apply the 1.5x clutch multiplier to the entire game and
     # inflate every imported game against live-tracked ones.
     q, mult = IMPORT_QUARTER, IMPORT_MULTIPLIER
-    _clear_prior_import(db, game.id, is_opponent)
+    for side in {c[0] for c in collected}:
+        _clear_prior_import(db, game.id, side)
+
     imported = 0
-    for row in rows[1:]:
-        if name_idx >= len(row) or not row[name_idx] or not str(row[name_idx]).strip():
-            continue
-        pname = str(row[name_idx]).strip()
-
-        def num(idx: int) -> int:
-            if idx >= len(row):
-                return 0
-            try:
-                return max(int(float(row[idx])), 0)
-            except (TypeError, ValueError):
-                return 0
-
-        made = {stat: num(i) for i, stat in col_stats.items()}
-        att = {kind: num(i) for i, kind in col_attempts.items()}
-
-        # A sheet gives either twos and threes separately, or all field goals
-        # together with threes broken out. Both end up as the same two numbers.
-        threes = made.get("3 FG Made", 0)
-        if "FG Made (all)" in made:
-            twos = max(made.pop("FG Made (all)") - threes, 0)
-            made["2 FG Made"] = made.get("2 FG Made", 0) + twos
-        fts = made.get("FT Made", 0)
-
-        # Attempts minus makes is what was missed. A missing attempts column
-        # leaves the miss unrecorded rather than guessed at — a zero there would
-        # read as perfect shooting.
-        three_att = att.get("3 FG", 0)
-        two_att = att.get("2 FG", 0) or max(att.get("FG", 0) - three_att, 0)
-        for stat, m, a in (("3 FG Missed", threes, three_att),
-                           ("2 FG Missed", made.get("2 FG Made", 0), two_att),
-                           ("FT Missed", fts, att.get("FT", 0))):
-            if a > 0:
-                made[stat] = max(a - m, 0)
-
-        for stat, count in made.items():
-            if count <= 0:
-                continue
+    for side, pname, vals in collected:
+        for stat, count in _stats_from_canonical(vals).items():
             raw = _import_raw(stat, count)
             db.add(models.GamePlayerStat(
-                game_id=game.id, player_name=pname, is_opponent=is_opponent,
+                game_id=game.id, player_name=pname, is_opponent=side,
                 quarter=q, stat_name=stat, stat_category=stat_category(stat),
                 raw_points=raw, quarter_multiplier=mult, weighted_points=raw * mult, count=count,
                 source="import",
             ))
             imported += 1
     db.commit()
-    return {"imported": imported}
+    return {"imported": imported, "players": len(collected), "errors": read_errors}
 
 
 def _compute_raw_points(stat_name: str, count: int) -> tuple[float, str]:
@@ -564,6 +671,7 @@ def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession) -
     the game's stats/grades but only their own scouting write-up (empty until
     they generate one); scouting shared to them surfaces via Recent/Staff Hub."""
     out = schemas.GameSessionOut.model_validate(game)
+    out.stats_need_reimport = stats_need_reimport(db, game.id)
     out.ai_scouting_report = _coach_scouting(db, coach, game)
     if out.ai_scouting_report:
         row = (

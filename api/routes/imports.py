@@ -117,17 +117,35 @@ def roster_commit(
 
 @router.post("/game-stats/preview")
 async def game_stats_preview(
-    file: UploadFile = File(...),
+    files: list[UploadFile] = File(...),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    data = await read_upload(file, what='file')
-    try:
-        parsed = ai_import.ai_extract_json(data, file.filename or "", file.content_type, ai_import.GAME_STATS_INSTRUCTION)
-    except RuntimeError as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    players = (parsed or {}).get("players") if isinstance(parsed, dict) else parsed
-    if not isinstance(players, list) or not players:
-        raise HTTPException(status_code=422, detail="Couldn't read any stats from that file.")
+    """Read a box score out of any number of files, of any type.
+
+    One file at a time was the wrong shape for a real game: the numbers arrive
+    as a stat sheet plus a shooting breakdown, or two photos of one page, or a
+    PDF for us and a screenshot for them. Every file is read and the players
+    merged, so what comes back is the game rather than one document of it.
+    """
+    players: list = []
+    errors: list[str] = []
+    for f in files:
+        data = await read_upload(f, what='file')
+        try:
+            parsed = ai_import.ai_extract_json(data, f.filename or "", f.content_type,
+                                               ai_import.GAME_STATS_INSTRUCTION)
+        except RuntimeError as e:
+            errors.append(f"{f.filename}: {e}")
+            continue
+        got = (parsed or {}).get("players") if isinstance(parsed, dict) else parsed
+        if isinstance(got, list):
+            players.extend(got)
+    if not players:
+        raise HTTPException(
+            status_code=422,
+            detail="Couldn't read any stats from " +
+                   ("those files." if len(files) > 1 else "that file.") +
+                   (" " + "; ".join(errors) if errors else ""))
     from .game_eval import _IMPORT_STAT_POINTS
     valid = set(_IMPORT_STAT_POINTS.keys())
     clean = []
@@ -148,7 +166,20 @@ async def game_stats_preview(
                 if n > 0:
                     norm[k] = n
         clean.append({"player_name": name, "is_opponent": bool(p.get("is_opponent")), "stats": norm})
-    return {"players": clean}
+
+    # The same player read from two files is one player. Merged by taking the
+    # larger count per stat rather than adding: two photos of the same sheet are
+    # the same numbers twice, and summing them would double the game.
+    merged: dict[tuple[str, bool], dict] = {}
+    for row in clean:
+        key = (row["player_name"].lower(), row["is_opponent"])
+        if key not in merged:
+            merged[key] = row
+            continue
+        into = merged[key]["stats"]
+        for k, v in row["stats"].items():
+            into[k] = max(into.get(k, 0), v)
+    return {"players": list(merged.values()), "errors": errors}
 
 
 class GameStatsCommit(BaseModel):

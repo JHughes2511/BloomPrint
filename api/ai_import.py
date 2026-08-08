@@ -149,13 +149,22 @@ GAME_STATS_INSTRUCTION = (
     "You are extracting a basketball BOX SCORE / stat sheet from the attached file "
     "(spreadsheet, PDF, photo, or text). Return ONLY a JSON object of this shape:\n"
     '{"players": [{"player_name": "", "is_opponent": false, '
-    '"stats": {"2 FG Made": 0, "3 FG Made": 0, "FT Made": 0, "Off. Reb": 0, '
+    '"stats": {"2 FG Made": 0, "2 FG Missed": 0, "3 FG Made": 0, "3 FG Missed": 0, '
+    '"FT Made": 0, "FT Missed": 0, "Off. Reb": 0, '
     '"Def. Reb": 0, "Assists": 0, "Steal": 0, "Blocked Shot": 0, "Turnover": 0, '
     '"Foul Against": 0}}]}\n'
     "Rules: one entry per player. Map the file's columns to these stat names (e.g. "
-    "PTS/REB/AST/STL/BLK/TO/PF, made field goals, threes, free throws). If only "
-    "totals like points and rebounds are given, infer made-shot counts only when "
-    "the file states them explicitly — otherwise leave those stats at 0. Set "
-    "is_opponent true for players clearly on the opposing team. Omit any stat you "
-    "can't determine (leave at 0). Return JSON only, no prose."
+    "PTS/REB/AST/STL/BLK/TO/PF, made field goals, threes, free throws).\n"
+    "MISSES MATTER AS MUCH AS MAKES. A box score states attempts as well as makes "
+    "— '9-18', or an FGA column beside FGM. A miss is an attempt that was not a "
+    "make, so subtract: 18 attempted and 9 made is 9 missed. Do this for field "
+    "goals, threes and free throws. Without them no shooting percentage can be "
+    "worked out at all, which is the single most common thing a coach asks of a "
+    "box score.\n"
+    "FG/FGM/FGA COVER ALL FIELD GOALS, THREES INCLUDED. '2 FG Made' must be the "
+    "TWO-POINT makes only: subtract the threes. A 9-of-18 line containing three "
+    "threes is 6 two-point makes and 3 three-point makes, not 9 and 3.\n"
+    "Set is_opponent true for players clearly on the opposing team. Omit any stat "
+    "the file does not state rather than guessing it — a zero here reads as a "
+    "real zero. Skip team-total rows. Return JSON only, no prose."
 )

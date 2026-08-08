@@ -426,12 +426,20 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const importGameStats = async () => {
     if (!activeGame) return;
     try {
-      const res = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
-      if (res.canceled || !res.assets?.[0]) return;
-      const f = res.assets[0];
+      // Any type, any number: a game's numbers arrive as a stat sheet plus a
+      // shooting breakdown, or two photos of one page, or a PDF for us and a
+      // screenshot for them.
+      const res = await DocumentPicker.getDocumentAsync({
+        type: '*/*', copyToCacheDirectory: true, multiple: true,
+      });
+      if (res.canceled || !res.assets?.length) return;
       setImporting(true);
       const result = await importsAPI.gameStatsPreview(
-        { uri: f.uri, name: f.name ?? 'boxscore', type: f.mimeType ?? 'application/octet-stream' },
+        res.assets.map(f => ({
+          uri: f.uri,
+          name: f.name ?? 'boxscore',
+          type: f.mimeType ?? 'application/octet-stream',
+        })),
       );
       const players = (result?.players ?? []).map((p: any) => ({ ...p, _include: true }));
       if (!players.length) {
@@ -1195,13 +1203,19 @@ export default function TeamEvalScreen({ route, navigation }: any) {
    * Which teams Team Grade is showing. Ticking none means all of them, which is
    * what this page did unconditionally before it had a picker.
    */
-  const TeamFilterBar = () => {
+  const TeamFilterBar = ({ inline = false }: { inline?: boolean } = {}) => {
     const picked = (teams as any[]).filter(tm => gradeTeamIds.includes(tm.id));
     const label = picked.length === 0 ? tr('teamGrade.allTeams')
       : picked.length === 1 ? picked[0].name
       : tr('teamGrade.nTeams', { count: picked.length });
     return (
-      <View style={{ paddingHorizontal: 16, marginBottom: 12 }}>
+      // Inline it sits at the end of the view-chip row, so the filter and the
+      // thing it filters read as one control rather than two stacked bars. Its
+      // menu is absolute there: pushing the page down every time the picker
+      // opened would move the content the coach is looking at.
+      <View style={inline
+        ? { width: 260, marginLeft: 'auto', position: 'relative', zIndex: 20 }
+        : { paddingHorizontal: 16, marginBottom: 12 }}>
         <TouchableOpacity
           style={[s.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0 }]}
           onPress={() => setShowGradeTeams(v => !v)}
@@ -1211,7 +1225,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           <Text style={{ color: t.muted, fontSize: 12 }}>{showGradeTeams ? '▲' : '▼'}</Text>
         </TouchableOpacity>
         {showGradeTeams && (
-          <View style={{ borderWidth: 1, borderColor: t.line, borderRadius: 10, marginTop: 6, overflow: 'hidden' }}>
+          <View style={[{ borderWidth: 1, borderColor: t.line, borderRadius: 10, marginTop: 6, overflow: 'hidden', backgroundColor: t.sheet },
+                        inline && { position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 30 }]}>
             <TouchableOpacity
               style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: t.line,
                        backgroundColor: gradeTeamIds.length === 0 ? t.accentSoft : 'transparent' }}
@@ -1300,9 +1315,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       {/* Dashboard */}
       {activeView === 'dashboard' && (
         <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
-          <TeamFilterBar />
+          {/* Phone keeps the picker on its own line above; there is no room
+              beside the chips, and a 260px control in a 342px row is not a row. */}
+          {!isWide && <TeamFilterBar />}
           {/* Phase filter */}
-          <View style={{ marginBottom: 16 }}>
+          <View style={{ marginBottom: 16, zIndex: 20 }}>
+            <View style={desktopOnly({ flexDirection: 'row', alignItems: 'flex-end', gap: 12, paddingRight: 16 })}>
+              <View style={desktopOnly({ flex: 1, minWidth: 0 })}>
             <Text style={[s.cardLabel, { marginBottom: 8 }]}>{tr('teamGrade.gradeView')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
               {/* No gap here: s.chip carries marginRight: 8, and adding a gap
@@ -1343,6 +1362,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 {tr('teamGrade.showing', { phases: dashPhases.map(phaseLabel).join(' + ') })}
               </Text>
             )}
+              </View>
+              {isWide && <TeamFilterBar inline />}
+            </View>
           </View>
           {loadingDash ? (
             <ActivityIndicator color={t.accent} style={{ marginTop: 40 }} />
@@ -1451,7 +1473,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* Phase filter. Same shape as the dashboard's: a label, then the row.
               Without the label the chips sat tight under the divider while the
               dashboard's started lower, so switching tabs shifted everything. */}
-          <View style={{ marginBottom: 16 }}>
+          <View style={{ marginBottom: 16, zIndex: 20 }}>
+          <View style={desktopOnly({ flexDirection: 'row', alignItems: 'flex-end', gap: 12, paddingRight: 16 })}>
+          <View style={desktopOnly({ flex: 1, minWidth: 0 })}>
           <Text style={[s.cardLabel, { marginBottom: 8 }]}>{tr('teamGrade.gameView')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
             {['all', ...orderedPhases].map(p => (
@@ -1467,6 +1491,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             ))}
           </ScrollView>
           </View>
+          {isWide && <TeamFilterBar inline />}
+          </View>
+          </View>
 
           {/* New game button */}
           <TouchableOpacity style={[s.newGameBtn, desktopOnly({ display: 'none' })]} onPress={() => setShowNewGame(true)}>
@@ -1474,7 +1501,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             <Text style={s.newGameBtnText}>{tr('teamGrade.newGame')}</Text>
           </TouchableOpacity>
 
-          <TeamFilterBar />
+          {!isWide && <TeamFilterBar />}
 
           {loading ? (
             <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />
@@ -1691,6 +1718,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           </View>
 
           <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
+            {/* An import from before attempts were read: makes only, so no
+                shooting percentage, and points inflated by every three. Said
+                out loud — the numbers look fine and are quietly wrong. */}
+            {activeGame.stats_need_reimport && (
+              <View style={{ backgroundColor: t.negativeSoft, borderRadius: 10, padding: 12, marginBottom: 12 }}>
+                <Text style={{ color: t.negative, fontSize: 12, lineHeight: 18 }}>
+                  {tr('teamGrade.reimportNeeded')}
+                </Text>
+              </View>
+            )}
+
             {/* Post-game import */}
             {activeGame.tracking_mode === 'post' && (
               <TouchableOpacity

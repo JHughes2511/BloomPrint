@@ -2210,7 +2210,8 @@
     "opponentPlayedBefore": "Daha önce oynandı",
     "matchup": "{{us}} - {{them}}",
     "allTeams": "Tüm takımlar",
-    "nTeams": "{{count}} takım"
+    "nTeams": "{{count}} takım",
+    "reimportNeeded": "Bu maçın istatistikleri şut denemeleri okunmadan önce içe aktarıldı; isabet yüzdesi yok ve her üçlük iki kez sayılıyor. İstatistik cetvelini yeniden içe aktar."
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

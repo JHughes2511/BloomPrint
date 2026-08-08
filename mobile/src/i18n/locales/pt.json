@@ -2210,7 +2210,8 @@
     "opponentPlayedBefore": "Já defrontado",
     "matchup": "{{us}} vs {{them}}",
     "allTeams": "Todas as equipas",
-    "nTeams": "{{count}} equipas"
+    "nTeams": "{{count}} equipas",
+    "reimportNeeded": "As estatísticas deste jogo foram importadas antes de se lerem as tentativas, por isso não há percentagens de lançamento e cada triplo conta duas vezes. Importa de novo."
   },
   "whiteboard": {
     "title": "Quadro Tático",

@@ -2210,7 +2210,8 @@
     "opponentPlayedBefore": "Već igrano",
     "matchup": "{{us}} protiv {{them}}",
     "allTeams": "Svi timovi",
-    "nTeams": "{{count}} tima"
+    "nTeams": "{{count}} tima",
+    "reimportNeeded": "Statistika ove utakmice uvezena je pre čitanja pokušaja, pa nema procenata šuta i svaka trojka se broji dvaput. Ponovo uvezi statistiku."
   },
   "whiteboard": {
     "title": "Tabla",

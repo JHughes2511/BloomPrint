@@ -2210,7 +2210,8 @@
     "opponentPlayedBefore": "Ya jugado",
     "matchup": "{{us}} vs {{them}}",
     "allTeams": "Todos los equipos",
-    "nTeams": "{{count}} equipos"
+    "nTeams": "{{count}} equipos",
+    "reimportNeeded": "Las estadísticas de este partido se importaron antes de leer los intentos, así que no hay porcentajes de tiro y cada triple cuenta dos veces. Vuelve a importar el acta."
   },
   "whiteboard": {
     "title": "Pizarra",

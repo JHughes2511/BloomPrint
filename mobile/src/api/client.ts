@@ -367,13 +367,28 @@ const _importForm = async (file: PickedFile, extra: Record<string, string> = {})
   Object.entries(extra).forEach(([k, v]) => form.append(k, v));
   return form;
 };
+/** The same body, for any number of files, under the field name `files`. */
+const _importFormMulti = async (files: PickedFile[]) => {
+  const form = new FormData();
+  for (const f of files) {
+    if (Platform.OS === 'web') {
+      const blob = await (await fetch(f.uri)).blob();
+      (form.append as any)('files', blob, f.name || 'upload');
+    } else {
+      form.append('files', f as any);
+    }
+  }
+  return form;
+};
+
 export const importsAPI = {
   rosterPreview: async (file: PickedFile) =>
     api.post('/imports/roster/preview', await _importForm(file), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),
   rosterCommit: (data: { team_id?: number | null; competition_level?: string; players: any[] }) =>
     api.post('/imports/roster/commit', data).then(r => r.data),
-  gameStatsPreview: async (file: PickedFile) =>
-    api.post('/imports/game-stats/preview', await _importForm(file), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),
+  /** A box score read from any number of files, of any type. */
+  gameStatsPreview: async (files: PickedFile[]) =>
+    api.post('/imports/game-stats/preview', await _importFormMulti(files), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 180000 }).then(r => r.data),
   gameStatsCommit: (data: { game_id: number; players: any[] }) =>
     api.post('/imports/game-stats/commit', data).then(r => r.data),
   text: async (file: PickedFile, purpose = 'coaching notes') =>
@@ -606,9 +621,11 @@ export const gameEvalAPI = {
   deleteSession: (id: number) => api.delete(`/game-eval/sessions/${id}`).then(r => r.data),
   listStats: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/stats`).then(r => r.data),
   logStat: (gameId: number, data: any) => api.post(`/game-eval/sessions/${gameId}/stats`, data).then(r => r.data),
-  importStats: (gameId: number, file: { uri: string; name: string; type: string }, isOpponent = false) => {
+  /** Direct import, no preview. Field name `files`: the endpoint takes any
+   *  number of files of any type. */
+  importStats: (gameId: number, files: { uri: string; name: string; type: string }[], isOpponent = false) => {
     const form = new FormData();
-    form.append('file', file as any);
+    for (const f of files) form.append('files', f as any);
     return api.post(`/game-eval/sessions/${gameId}/import`, form, {
       params: { is_opponent: isOpponent },
       headers: { 'Content-Type': 'multipart/form-data' },

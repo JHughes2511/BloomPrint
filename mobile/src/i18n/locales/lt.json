@@ -2210,7 +2210,8 @@
     "opponentPlayedBefore": "Jau žaista",
     "matchup": "{{us}} prieš {{them}}",
     "allTeams": "Visos komandos",
-    "nTeams": "{{count}} komandos"
+    "nTeams": "{{count}} komandos",
+    "reimportNeeded": "Šių rungtynių statistika importuota prieš nuskaitant metimų bandymus, todėl nėra taiklumo procentų, o kiekvienas tritaškis skaičiuojamas dukart. Importuok iš naujo."
   },
   "whiteboard": {
     "title": "Lenta",
