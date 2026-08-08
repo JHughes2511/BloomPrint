@@ -619,6 +619,8 @@ export const gameEvalAPI = {
   getSession: (id: number) => api.get(`/game-eval/sessions/${id}`).then(r => r.data),
   updateSession: (id: number, data: any) => api.patch(`/game-eval/sessions/${id}`, data).then(r => r.data),
   deleteSession: (id: number) => api.delete(`/game-eval/sessions/${id}`).then(r => r.data),
+  /** The game's numbers plus what can honestly be charted from them. */
+  boxScore: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/box-score`).then(r => r.data),
   listStats: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/stats`).then(r => r.data),
   logStat: (gameId: number, data: any) => api.post(`/game-eval/sessions/${gameId}/stats`, data).then(r => r.data),
   /** Direct import, no preview. Field name `files`: the endpoint takes any

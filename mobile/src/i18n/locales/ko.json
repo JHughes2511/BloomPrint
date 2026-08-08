@@ -2544,5 +2544,30 @@
     "seeAll": "전체 보기 ({{count}})",
     "title": "검색",
     "typeToSearch": "입력하여 전체 검색"
+  },
+  "gameStats": {
+    "gameLeaders": "경기 리더",
+    "keyStats": "주요 기록",
+    "shooting": "슛",
+    "leadTracker": "리드 추이",
+    "advanced": "고급 기록",
+    "shotChart": "슛 차트",
+    "player": "선수",
+    "total": "합계",
+    "noStatsYet": "No stats recorded for this game yet. Track it live, or import a box score.",
+    "noneRecorded": "Nothing recorded for this yet.",
+    "leaders": {
+      "efficiency": "Efficiency",
+      "points": "Points",
+      "rebounds": "Rebounds",
+      "assists": "Assists",
+      "blocks": "Blocks",
+      "steals": "Steals"
+    },
+    "needs": {
+      "attempts": "Shooting percentages need shot attempts, and this game has makes only. Import a box score that includes attempts (FGA / 3PA / FTA) to see them.",
+      "play_by_play": "This needs a play-by-play file — every event with a game clock and a running score. Import one and this will appear.",
+      "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear."
+    }
   }
 }

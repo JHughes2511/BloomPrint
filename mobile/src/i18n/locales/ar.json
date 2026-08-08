@@ -2544,5 +2544,30 @@
     "seeAll": "عرض الكل ({{count}})",
     "title": "بحث",
     "typeToSearch": "اكتب للبحث في كل شيء"
+  },
+  "gameStats": {
+    "gameLeaders": "أبرز اللاعبين",
+    "keyStats": "إحصائيات رئيسية",
+    "shooting": "التسديد",
+    "leadTracker": "متتبع التقدّم",
+    "advanced": "إحصائيات متقدمة",
+    "shotChart": "خريطة التسديد",
+    "player": "اللاعب",
+    "total": "الإجمالي",
+    "noStatsYet": "No stats recorded for this game yet. Track it live, or import a box score.",
+    "noneRecorded": "Nothing recorded for this yet.",
+    "leaders": {
+      "efficiency": "Efficiency",
+      "points": "Points",
+      "rebounds": "Rebounds",
+      "assists": "Assists",
+      "blocks": "Blocks",
+      "steals": "Steals"
+    },
+    "needs": {
+      "attempts": "Shooting percentages need shot attempts, and this game has makes only. Import a box score that includes attempts (FGA / 3PA / FTA) to see them.",
+      "play_by_play": "This needs a play-by-play file — every event with a game clock and a running score. Import one and this will appear.",
+      "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear."
+    }
   }
 }

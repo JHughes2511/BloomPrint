@@ -567,6 +567,130 @@ def box_score_text(db: Session, game: models.GameSession) -> str:
     )
 
 
+# ── The box score, and what can honestly be drawn from it ─────────────────────
+#
+# Everything here is derived from the stat events already recorded — tapped live
+# or read out of an imported sheet. Nothing is estimated. Where the numbers to
+# answer a question were never captured, the answer is absent rather than zero:
+# a shooting percentage of 0% and "we never recorded the attempts" look nothing
+# alike to a coach, and only one of them is true.
+
+def _player_line(counts: dict[str, int]) -> dict:
+    """One player's row: makes, attempts and the totals a box score prints."""
+    g = lambda k: int(counts.get(k, 0) or 0)
+    twos, threes, fts = g("2 FG Made"), g("3 FG Made"), g("FT Made")
+    two_miss, three_miss, ft_miss = g("2 FG Missed"), g("3 FG Missed"), g("FT Missed")
+    fgm, fga = twos + threes, twos + threes + two_miss + three_miss
+    oreb, dreb = g("Off. Reb"), g("Def. Reb")
+    return {
+        "PTS": twos * 2 + threes * 3 + fts,
+        "FGM": fgm, "FGA": fga,
+        "2PM": twos, "2PA": twos + two_miss,
+        "3PM": threes, "3PA": threes + three_miss,
+        "FTM": fts, "FTA": fts + ft_miss,
+        "OREB": oreb, "DREB": dreb, "REB": oreb + dreb,
+        "AST": g("Assists"), "STL": g("Steal"), "BLK": g("Blocked Shot"),
+        "TO": g("Turnover"), "PF": g("Foul Against"),
+    }
+
+
+_TOTALLED = ("PTS", "FGM", "FGA", "2PM", "2PA", "3PM", "3PA", "FTM", "FTA",
+             "OREB", "DREB", "REB", "AST", "STL", "BLK", "TO", "PF")
+
+
+def _side_rows(stats: list, is_opp: bool) -> tuple[list[dict], dict]:
+    by_player: dict[str, dict[str, int]] = {}
+    for st in stats:
+        if bool(st.is_opponent) != is_opp:
+            continue
+        d = by_player.setdefault(st.player_name, {})
+        d[st.stat_name] = d.get(st.stat_name, 0) + (st.count or 0)
+    rows = [{"player": name, **_player_line(c)} for name, c in sorted(by_player.items())]
+    rows.sort(key=lambda r: r["PTS"], reverse=True)
+    totals = {k: sum(r[k] for r in rows) for k in _TOTALLED}
+    return rows, totals
+
+
+def _efficiency(r: dict) -> int:
+    """The standard efficiency line: what a player added minus what they cost."""
+    return (r["PTS"] + r["REB"] + r["AST"] + r["STL"] + r["BLK"]
+            - (r["FGA"] - r["FGM"]) - (r["FTA"] - r["FTM"]) - r["TO"])
+
+
+@router.get("/sessions/{game_id}/box-score")
+def game_box_score(
+    game_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """The game's numbers, and an honest statement of what is missing."""
+    game = _get_game_readable(db, game_id, coach)
+    team_row = db.get(models.Team, game.team_id) if game.team_id else None
+    our_name = (team_row.name if team_row else None) or coach.program_name or "Us"
+    stats = list(game.player_stats)
+
+    sides = []
+    for is_opp, name in ((False, our_name), (True, game.opponent_name or "Opponent")):
+        rows, totals = _side_rows(stats, is_opp)
+        sides.append({"is_opponent": is_opp, "team_name": name,
+                      "players": rows, "totals": totals})
+
+    # Leaders, over both teams, so the board reads like a broadcast's.
+    everyone = [{**r, "team_name": side["team_name"], "is_opponent": side["is_opponent"]}
+                for side in sides for r in side["players"]]
+    def top(metric) -> list[dict]:
+        ranked = sorted(everyone, key=metric, reverse=True)[:5]
+        return [{"player": r["player"], "team_name": r["team_name"], "value": metric(r)}
+                for r in ranked if metric(r) > 0]
+    leaders = {
+        "efficiency": top(_efficiency),
+        "points": top(lambda r: r["PTS"]),
+        "rebounds": top(lambda r: r["REB"]),
+        "assists": top(lambda r: r["AST"]),
+        "blocks": top(lambda r: r["BLK"]),
+        "steals": top(lambda r: r["STL"]),
+    }
+
+    # A percentage needs attempts. Where none were recorded there is no answer,
+    # and saying 0% would be a lie the coach cannot see through.
+    def pct(made: int, att: int):
+        return round(100 * made / att, 1) if att > 0 else None
+    shooting = [{
+        "team_name": side["team_name"], "is_opponent": side["is_opponent"],
+        "fg": pct(side["totals"]["FGM"], side["totals"]["FGA"]),
+        "two": pct(side["totals"]["2PM"], side["totals"]["2PA"]),
+        "three": pct(side["totals"]["3PM"], side["totals"]["3PA"]),
+        "ft": pct(side["totals"]["FTM"], side["totals"]["FTA"]),
+        "made": {k: side["totals"][k] for k in ("FGM", "FGA", "2PM", "2PA", "3PM", "3PA", "FTM", "FTA")},
+    } for side in sides]
+
+    has_attempts = any(s["totals"]["FGA"] or s["totals"]["FTA"] for s in sides)
+    return {
+        "team_name": our_name,
+        "opponent_name": game.opponent_name,
+        "sides": sides,
+        "leaders": leaders,
+        "shooting": shooting,
+        "key_stats": [k for k in ("PTS", "REB", "OREB", "DREB", "AST", "STL", "BLK", "TO", "PF")],
+        # What can be drawn, and for what is missing, which file would supply it.
+        "available": {
+            "box_score": any(s["players"] for s in sides),
+            "leaders": bool(everyone),
+            "key_stats": bool(everyone),
+            "shooting": has_attempts,
+            "lead_tracker": False,
+            "advanced": False,
+            "shot_chart": False,
+        },
+        "needs": {
+            "shooting": None if has_attempts else "attempts",
+            "lead_tracker": "play_by_play",
+            "advanced": "play_by_play",
+            "shot_chart": "shot_coordinates",
+        },
+    }
+
+
 @router.get("/sessions/{game_id}/box-score-text")
 def get_box_score_text(
     game_id: int,

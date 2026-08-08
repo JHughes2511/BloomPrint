@@ -23,6 +23,7 @@ import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { formatForLevel, periodLabel, weightBucket, periodForBucket, formatClock, type GameFormat } from '../utils/gameClock';
 import WhiteboardModal from '../components/WhiteboardModal';
 import ScoutContextPanel from '../components/ScoutContextPanel';
+import GameStatsPanel from '../components/GameStatsPanel';
 import GameReportPanel from '../components/GameReportPanel';
 import ReportCorrectionsPanel from '../components/ReportCorrectionsPanel';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
@@ -1638,7 +1639,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </View>
           )}
 
-          {/* Game clock + period controls */}
+          {/* Game clock + period controls. A game tracked after the fact has no
+              clock to run and no quarter to be in — the events already happened
+              and carry their own. */}
+          {activeGame.tracking_mode !== 'post' && (
           <View style={s.clockBar}>
             <TouchableOpacity style={s.clockPeriodBtn} onPress={advancePeriod}>
               <Text style={s.clockPeriodLabel}>{periodLabel(gameFmt, periodIndex)}</Text>
@@ -1657,8 +1661,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               </Text>
             </TouchableOpacity>
           </View>
+          )}
 
           {/* Period bucket — auto-follows the clock; tap to override */}
+          {activeGame.tracking_mode !== 'post' && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.quarterRow} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 6, gap: 8, alignItems: 'center' }}>
             {[1, 2, 3, 4, 5].map(q => (
               <TouchableOpacity
@@ -1672,6 +1678,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               </TouchableOpacity>
             ))}
           </ScrollView>
+          )}
 
           {/* Clock edit modal */}
           <Sheet visible={showClockEdit} transparent animationType="fade" onRequestClose={() => setShowClockEdit(false)}>
@@ -1742,6 +1749,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               </TouchableOpacity>
             )}
 
+            {/* A game tracked after the fact has nothing to tap: no clock is
+                running and the events already happened. It shows what was
+                imported instead of a stat pad that would file everything under
+                whatever quarter the picker happened to be on. */}
+            {activeGame.tracking_mode === 'post' ? (
+              <GameStatsPanel gameId={activeGame.id} />
+            ) : (
+            <>
             {/* Player grid */}
             <Text style={s.sectionLabel}>{tr('teamGrade.selectPlayer')}</Text>
             <View style={s.playerGrid}>
@@ -1846,14 +1861,19 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               })}
             </View>
 
+            </>
+            )}
+
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 24 }}>
-              <TouchableOpacity
-                style={[s.actionBtnLive, { flex: 1, borderColor: t.line }]}
-                onPress={() => setShowLineupModal(true)}
-              >
-                <Ionicons name="people-outline" size={16} color={t.muted} />
-                <Text style={{ color: t.muted, fontFamily: fonts[600], fontSize: 13 }}>{tr('teamGrade.lineup')}</Text>
-              </TouchableOpacity>
+              {activeGame.tracking_mode !== 'post' && (
+                <TouchableOpacity
+                  style={[s.actionBtnLive, { flex: 1, borderColor: t.line }]}
+                  onPress={() => setShowLineupModal(true)}
+                >
+                  <Ionicons name="people-outline" size={16} color={t.muted} />
+                  <Text style={{ color: t.muted, fontFamily: fonts[600], fontSize: 13 }}>{tr('teamGrade.lineup')}</Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 style={[s.actionBtnLive, { flex: 1, borderColor: t.negative }]}
                 onPress={endGame}
@@ -2215,6 +2235,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 )}
             </View>
           ) : null}
+
+          {/* The game's numbers, under the grades. Everything here is derived
+              from what was actually recorded; the panels that need a file we
+              don't have say which one rather than drawing an empty chart. */}
+          <View style={{ paddingHorizontal: 16 }}>
+            <GameStatsPanel gameId={detailGame.id} />
+          </View>
 
           {/* Action buttons */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, marginBottom: 16 }}>
