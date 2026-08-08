@@ -153,6 +153,38 @@ def cors_is_current(existing: list[dict] | None, want: dict) -> bool:
     return False
 
 
+# Whether the bucket really accepts browser uploads. Cached because it is asked
+# on the upload path, and re-checked periodically so granting the permission
+# later starts working without a restart.
+_cors_ok: dict = {"at": 0.0, "value": False}
+
+
+def browser_uploads_allowed() -> bool:
+    """Is a direct browser upload actually going to work?
+
+    Not the same question as "is a bucket configured". The bucket also has to
+    allow the app's origin, and if the token cannot set that policy — which is
+    what happens when the R2 key lacks PutBucketCors — then every part would
+    fail in the browser with a CORS error and the coach would watch an upload
+    die for a reason nothing reports. Better to answer honestly and let the app
+    use the path that works.
+    """
+    import time
+
+    if not use_s3():
+        return False
+    now = time.time()
+    if now - _cors_ok["at"] < 300:
+        return _cors_ok["value"]
+    try:
+        existing = _client().get_bucket_cors(Bucket=_BUCKET).get("CORSRules")
+        ok = cors_is_current(existing, desired_cors())
+    except Exception:
+        ok = False
+    _cors_ok.update({"at": now, "value": ok})
+    return ok
+
+
 def ensure_bucket_cors() -> str:
     """Make sure the bucket accepts uploads from the app. Never raises.
 
@@ -170,8 +202,10 @@ def ensure_bucket_cors() -> str:
         except Exception:
             existing = None
         if cors_is_current(existing, want):
+            _cors_ok.update({"at": __import__("time").time(), "value": True})
             return "already allows browser uploads"
         client.put_bucket_cors(Bucket=_BUCKET, CORSConfiguration=want)
+        _cors_ok.update({"at": __import__("time").time(), "value": True})
         return f"updated to allow {len(want['CORSRules'][0]['AllowedOrigins'])} origin(s)"
     except Exception as exc:
         return f"COULD NOT SET — browser uploads will fail until this is fixed: {exc}"

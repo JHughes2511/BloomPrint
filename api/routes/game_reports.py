@@ -26,7 +26,15 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
     Reports per-segment progress on the GenerationJob so the app shows the same
     "Analyzing segment i of N" bar as the player-eval flow."""
     import asyncio
-    db = SessionLocal()
+
+    # No session is held across the analysis. Reading a film takes the better
+    # part of an hour, and a session opened at the start of that is a
+    # transaction left open for the whole of it — PostgreSQL closes those
+    # ("terminating connection due to idle-in-transaction timeout"), so the
+    # write at the END failed on a connection that had been dead for forty
+    # minutes. The error handler then failed the same way, and the job was left
+    # saying "Synthesizing report" with nothing coming. Every touch of the
+    # database here is its own short-lived session instead.
     try:
         import sys
         sys.path.insert(0, ".")
@@ -86,14 +94,18 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
 
         done_segments = {}
         done_profiles = {}
-        j0 = db.get(models.GenerationJob, job_id)
-        if j0 and j0.partial:
-            try:
-                _p = json.loads(j0.partial)
-                done_segments = _p.get("segments", {})
-                done_profiles = _p.get("profiles", {})
-            except Exception:
-                done_segments, done_profiles = {}, {}
+        rdb = SessionLocal()
+        try:
+            j0 = rdb.get(models.GenerationJob, job_id)
+            if j0 and j0.partial:
+                try:
+                    _p = json.loads(j0.partial)
+                    done_segments = _p.get("segments", {})
+                    done_profiles = _p.get("profiles", {})
+                except Exception:
+                    done_segments, done_profiles = {}, {}
+        finally:
+            rdb.close()
 
         from ..storage import ensure_local
         result = asyncio.run(_handle_analyze_basketball_video({
@@ -112,23 +124,36 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             "_on_profile": _save_profile,
         }))
         text = result[0].text
-        clip = db.get(models.GameReportClip, clip_id)
-        if clip:
-            clip.analysis_text = text
-        job = db.get(models.GenerationJob, job_id)
-        if job:
-            job.status = "done"
-            job.result_id = clip_id
-        db.commit()
+        wdb = SessionLocal()
+        try:
+            clip = wdb.get(models.GameReportClip, clip_id)
+            if clip:
+                clip.analysis_text = text
+            job = wdb.get(models.GenerationJob, job_id)
+            if job:
+                job.status = "done"
+                job.result_id = clip_id
+            wdb.commit()
+        finally:
+            wdb.close()
     except Exception as exc:
-        clip = db.get(models.GameReportClip, clip_id)
-        if clip:
-            clip.analysis_text = f"Analysis failed — {str(exc)[:300]}"
-        job = db.get(models.GenerationJob, job_id)
-        if job:
-            job.status = "error"
-            job.error = str(exc)[:500]
-        db.commit()
+        # A fresh session for the failure too: the one that failed may be the
+        # reason we are here, and recording "this went wrong" through a broken
+        # connection is how a job ends up stuck rather than errored.
+        edb = SessionLocal()
+        try:
+            clip = edb.get(models.GameReportClip, clip_id)
+            if clip:
+                clip.analysis_text = f"Analysis failed — {str(exc)[:300]}"
+            job = edb.get(models.GenerationJob, job_id)
+            if job:
+                job.status = "error"
+                job.error = str(exc)[:500]
+            edb.commit()
+        except Exception:
+            edb.rollback()
+        finally:
+            edb.close()
     finally:
         # The job has reached an end either way, so the gigabytes downloaded to
         # read it are no longer needed. Reaching here at all means we were not
@@ -139,7 +164,6 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             release_local(video_path)
         except Exception:
             pass
-        db.close()
 
 
 def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_type: str,
@@ -150,7 +174,9 @@ def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_ty
     action the coach described so the model can LOCATE and VERIFY it in the film
     and fold the verified observation into a corrected analysis."""
     import asyncio
-    db = SessionLocal()
+
+    # As in _run_clip_analysis: no session is held across the re-watch, which
+    # takes as long as the first pass. See the note there.
     try:
         import sys
         sys.path.insert(0, ".")
@@ -191,22 +217,36 @@ def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_ty
             "audio_auto": True,        # gauge whether the film's audio is worth transcribing
             "_progress": _prog,
         }))
-        clip = db.get(models.GameReportClip, clip_id)
-        if clip:
-            clip.analysis_text = result[0].text
-        job = db.get(models.GenerationJob, job_id)
-        if job:
-            job.status = "done"
-            job.result_id = clip_id
-        db.commit()
+        wdb = SessionLocal()
+        try:
+            clip = wdb.get(models.GameReportClip, clip_id)
+            if clip:
+                clip.analysis_text = result[0].text
+            job = wdb.get(models.GenerationJob, job_id)
+            if job:
+                job.status = "done"
+                job.result_id = clip_id
+            wdb.commit()
+        finally:
+            wdb.close()
     except Exception as exc:
-        job = db.get(models.GenerationJob, job_id)
-        if job:
-            job.status = "error"
-            job.error = str(exc)[:500]
-        db.commit()
+        edb = SessionLocal()
+        try:
+            job = edb.get(models.GenerationJob, job_id)
+            if job:
+                job.status = "error"
+                job.error = str(exc)[:500]
+            edb.commit()
+        except Exception:
+            edb.rollback()
+        finally:
+            edb.close()
     finally:
-        db.close()
+        try:
+            from ..storage import release_local
+            release_local(video_path)
+        except Exception:
+            pass
 
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)

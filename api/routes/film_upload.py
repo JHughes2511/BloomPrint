@@ -66,7 +66,10 @@ def available(coach: models.Coach = Depends(get_current_coach)):
     False on a local dev box with no bucket configured, where the old path is
     correct. The app asks rather than assuming, so one build works on both.
     """
-    return {"direct": storage.use_s3(), "part_size": PART_SIZE}
+    # Both must hold: somewhere to put it, and a bucket that will accept it
+    # from a browser. See storage.browser_uploads_allowed — a bucket whose CORS
+    # policy could not be set would fail every part with nothing to show for it.
+    return {"direct": storage.browser_uploads_allowed(), "part_size": PART_SIZE}
 
 
 @router.post("/start")

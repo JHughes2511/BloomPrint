@@ -1060,7 +1060,27 @@ export default function GameReportBuilderScreen() {
             <KeyboardAwareScrollView style={{ maxHeight: sheetScroll280 }} contentContainerStyle={{ paddingBottom: 8 }}>
               {clipModal?.analysis_text
                 ? renderReport(clipModal.analysis_text, { heading: t.ink, body: t.inkSoft })
-                : <Text style={{ color: t.muted }}>{tr('gameBuilder.noAnalysisYet')}</Text>
+                : (() => {
+                    // "No analysis yet" is true of a film being watched right
+                    // now and of one whose job died an hour ago, and a coach
+                    // opening this while it runs wants to see it moving. The
+                    // live clip carries the job's progress, so show the same
+                    // bar the packet does — or why it stopped.
+                    const live = (report?.clips ?? []).find((c: any) => c.id === clipModal?.id) ?? clipModal;
+                    if (live?.job_status === 'error') {
+                      return <Text style={{ color: t.negative }}>{live.job_error || tr('gameBuilder.analysisStopped')}</Text>;
+                    }
+                    if (live?.job_progress || live?.job_status === 'processing') {
+                      return (
+                        <GeneratingOverlay
+                          visible
+                          label={jobProgressLabel(live.job_progress, tr) || tr('gameBuilder.analyzing')}
+                          realProgress={parseGenProgress(live.job_progress)}
+                        />
+                      );
+                    }
+                    return <Text style={{ color: t.muted }}>{tr('gameBuilder.noAnalysisYet')}</Text>;
+                  })()
               }
             </KeyboardAwareScrollView>
             <Text style={[styles.correctionLabel, { marginTop: 16 }]}>{tr('gameBuilder.correctThisAnalysis')}</Text>

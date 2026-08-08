@@ -54,7 +54,12 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
     """Background task: analyze one or more films and create ONE evaluation. The
     client polls the job for completion, so nothing times out."""
     import asyncio
-    db = SessionLocal()
+
+    # No session is held across the analysis — a film takes the better part of
+    # an hour, and a transaction left open that long is closed by PostgreSQL
+    # ("idle-in-transaction timeout"), so the write at the end failed on a dead
+    # connection and the job was left saying it was still working. Sessions are
+    # opened where they are used and closed immediately.
     try:
         import sys
         sys.path.insert(0, ".")
@@ -87,28 +92,39 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
             "_progress": _prog,
         }))
         report_text = result[0].text
-        coach = db.get(models.Coach, coach_id)
-        eval_record = _finalize_eval(
-            db, player_id=player_id, coach=coach, output_type=output_type,
-            competition_level=competition_level, coach_notes=coach_notes,
-            video_path=video_paths[0] if video_paths else None, report_text=report_text,
-            title=title,
-        )
-        # Keep every film in the player's video catalog, linked to this eval.
-        for vp in video_paths:
-            db.add(models.PlayerVideo(player_id=player_id, coach_id=coach_id,
-                                      video_path=vp, source_kind="eval", source_id=eval_record.id))
-        job = db.get(models.GenerationJob, job_id)
-        if job:
-            job.status = "done"
-            job.result_id = eval_record.id
+        db = SessionLocal()
+        try:
+            coach = db.get(models.Coach, coach_id)
+            eval_record = _finalize_eval(
+                db, player_id=player_id, coach=coach, output_type=output_type,
+                competition_level=competition_level, coach_notes=coach_notes,
+                video_path=video_paths[0] if video_paths else None, report_text=report_text,
+                title=title,
+            )
+            # Keep every film in the player's video catalog, linked to this eval.
+            for vp in video_paths:
+                db.add(models.PlayerVideo(player_id=player_id, coach_id=coach_id,
+                                          video_path=vp, source_kind="eval", source_id=eval_record.id))
+            job = db.get(models.GenerationJob, job_id)
+            if job:
+                job.status = "done"
+                job.result_id = eval_record.id
             db.commit()
+        finally:
+            db.close()
     except Exception as exc:
-        job = db.get(models.GenerationJob, job_id)
-        if job:
-            job.status = "error"
-            job.error = str(exc)[:500]
-            db.commit()
+        # A fresh session: the one that failed may be why we are here.
+        edb = SessionLocal()
+        try:
+            job = edb.get(models.GenerationJob, job_id)
+            if job:
+                job.status = "error"
+                job.error = str(exc)[:500]
+            edb.commit()
+        except Exception:
+            edb.rollback()
+        finally:
+            edb.close()
     finally:
         # Finished with the film, either way — free the gigabytes it was
         # downloaded into. An attempt that is KILLED never reaches here, which
@@ -119,7 +135,6 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
                 release_local(_ref)
         except Exception:
             pass
-        db.close()
 
 
 @router.post("/upload-video")
@@ -473,7 +488,8 @@ def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_
     """Background task: analyze a (potentially long) film for a team report and
     generate the report. The client polls the job."""
     import asyncio
-    db = SessionLocal()
+
+    # Same rule as the other film workers: no session held across the analysis.
     try:
         video_context = ""
         try:
@@ -522,22 +538,29 @@ def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_
         report_text = text_blocks[0].text if text_blocks else ""
         rec = models.TeamReport(coach_id=coach_id, output_type=output_type,
                                 focus_prompt=focus_prompt, report_text=report_text)
-        db.add(rec)
-        db.commit()
-        db.refresh(rec)
-        job = db.get(models.GenerationJob, job_id)
-        if job:
-            job.status = "done"
-            job.result_id = rec.id
+        db = SessionLocal()
+        try:
+            db.add(rec)
+            db.flush()
+            job = db.get(models.GenerationJob, job_id)
+            if job:
+                job.status = "done"
+                job.result_id = rec.id
             db.commit()
+        finally:
+            db.close()
     except Exception as exc:
-        job = db.get(models.GenerationJob, job_id)
-        if job:
-            job.status = "error"
-            job.error = str(exc)[:500]
-            db.commit()
-    finally:
-        db.close()
+        edb = SessionLocal()
+        try:
+            job = edb.get(models.GenerationJob, job_id)
+            if job:
+                job.status = "error"
+                job.error = str(exc)[:500]
+            edb.commit()
+        except Exception:
+            edb.rollback()
+        finally:
+            edb.close()
 
 
 @router.post("/team-report")
