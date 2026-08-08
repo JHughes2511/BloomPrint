@@ -491,7 +491,12 @@ async def add_clip(
     background_tasks: BackgroundTasks,
     label: str = Form(...),
     team_name: str = Form(""),
-    video: UploadFile = File(...),
+    # Either the film itself, or — for anything long enough to be worth it —
+    # a ref to film the browser has already put in storage directly. See
+    # routes/film_upload.py: a three-hour game does not survive being sent
+    # through this server as one request.
+    video: UploadFile | None = File(None),
+    video_ref: str = Form(""),
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
@@ -499,16 +504,27 @@ async def add_clip(
     if not gr or gr.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Game report not found")
 
-    from ..storage import save_fileobj, StorageFullError
+    from ..storage import save_fileobj, StorageFullError, exists as storage_exists
     from uuid import uuid4
-    suffix = Path(video.filename or "clip.mp4").suffix
-    try:
-        dest = save_fileobj(video.file, f"gr_{report_id}_clip_{uuid4().hex}{suffix}")
-    except StorageFullError:
-        raise HTTPException(
-            status_code=507,
-            detail="The server is out of storage space. Free up disk space (or configure S3 storage) and try again.",
-        )
+    if video_ref:
+        # Signed for this coach and just written by them; confirm it is really
+        # there before building a job around it.
+        if not video_ref.startswith("s3://") or f"_{coach.id}_" not in video_ref:
+            raise HTTPException(status_code=400, detail="That film reference is not valid.")
+        if not storage_exists(video_ref):
+            raise HTTPException(status_code=400, detail="That film is not in storage — upload it again.")
+        dest = video_ref
+    elif video is not None:
+        suffix = Path(video.filename or "clip.mp4").suffix
+        try:
+            dest = save_fileobj(video.file, f"gr_{report_id}_clip_{uuid4().hex}{suffix}")
+        except StorageFullError:
+            raise HTTPException(
+                status_code=507,
+                detail="The server is out of storage space. Free up disk space (or configure S3 storage) and try again.",
+            )
+    else:
+        raise HTTPException(status_code=400, detail="No film was sent.")
 
     my_team_name = gr.my_team.name if gr.my_team else coach.program_name
     opp_name = gr.opponent_team.name if gr.opponent_team else (gr.opponent_name or "Opponent")

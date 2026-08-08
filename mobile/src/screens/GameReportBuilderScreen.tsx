@@ -19,6 +19,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI, uploadFileStreamed, evalsAPI } from '../api/client';
+import { directUploadAvailable, uploadFilmDirect } from '../api/directUpload';
 import ShareModal from '../components/ShareModal';
 import ExportSectionsModal from '../components/ExportSectionsModal';
 import { outputTypeLabel } from '../utils/reportType';
@@ -364,12 +365,28 @@ export default function GameReportBuilderScreen() {
       // Report bytes actually sent. A two-hour film is gigabytes; without this
       // the coach watches an invented curve for the better part of an hour and
       // cannot tell an upload in progress from one that has stalled.
-      const created = await uploadFileStreamed(
-        // On web the picker hands back the File itself; upload that rather than
-        // asking the browser to rebuild it from the blob: URL.
-        `/game-reports/${reportId}/clips`, asset.file ?? asset.uri, { label, team_name: teamName }, 'video', 'video/mp4',
-        (p) => setClipProgress(uploadProgressCode(p.sent, p.total)),
-      );
+      // A three-hour game is gigabytes. Where storage allows it, the browser
+      // sends the film there itself in retryable pieces and hands us a ref —
+      // one dropped connection then costs a 32 MB part instead of the hour.
+      // See api/directUpload.ts.
+      const { direct } = await directUploadAvailable();
+      const onProg = (p: any) => setClipProgress(uploadProgressCode(p.sent, p.total));
+      let created: any;
+      if (direct && asset.file) {
+        const { ref } = await uploadFilmDirect(asset.file, {
+          purpose: `gr${reportId}clip`, onProgress: onProg,
+        });
+        created = await gameReportsAPI.addClipRef(reportId, {
+          label, team_name: teamName, video_ref: ref,
+        });
+      } else {
+        created = await uploadFileStreamed(
+          // On web the picker hands back the File itself; upload that rather than
+          // asking the browser to rebuild it from the blob: URL.
+          `/game-reports/${reportId}/clips`, asset.file ?? asset.uri, { label, team_name: teamName }, 'video', 'video/mp4',
+          onProg,
+        );
+      }
       if (created?.job_id) {
         setClipProgress(tr('gameBuilder.analyzingFilm'));
         await evalsAPI.awaitJob(created.job_id, setClipProgress);

@@ -671,6 +671,14 @@ export const gameReportsAPI = {
   delete: (id: number) => api.delete(`/game-reports/${id}`).then(r => r.data),
   addClip: (id: number, formData: FormData) =>
     api.post(`/game-reports/${id}/clips`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
+  /** Film already in storage (uploaded straight there) — just register it. */
+  addClipRef: (id: number, data: { label: string; team_name?: string; video_ref: string }) => {
+    const form = new FormData();
+    form.append('label', data.label);
+    form.append('team_name', data.team_name ?? '');
+    form.append('video_ref', data.video_ref);
+    return api.post(`/game-reports/${id}/clips`, form).then(r => r.data);
+  },
   deleteClip: (id: number, clipId: number) => api.delete(`/game-reports/${id}/clips/${clipId}`).then(r => r.data),
   videos: () => api.get('/game-reports/videos').then(r => r.data),
   versions: (id: number) => api.get(`/game-reports/${id}/versions`).then(r => r.data),
