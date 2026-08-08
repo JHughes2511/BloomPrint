@@ -1411,10 +1411,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                           const x = gap + i * (barW + gap);
                           const h = Math.max((pt.team_grade / maxGrade) * (chartH - topPad), 6);
                           const y = chartH - h;
-                          const won = pt.our_score != null && pt.opponent_score != null && pt.our_score > pt.opponent_score;
+                          const known = pt.our_score != null && pt.opponent_score != null;
+                          const won = known && pt.our_score > pt.opponent_score;
                           // Loss bars: fixed soft clay red (identical in light + dark),
                           // clearly visible but a notch less intense than the win green.
-                          const barColor = won ? t.pistachio : '#D9987F';
+                          // A game with no score is neither — it used to be drawn
+                          // as a loss, because "we don't know" and "we lost" look
+                          // the same to `our_score > opponent_score`.
+                          const barColor = !known ? t.muted2 : won ? t.pistachio : '#D9987F';
                           const onTap = () => { const game = sessions.find(x => x.id === pt.game_id); if (game) openDetail(game); };
                           return (
                             <React.Fragment key={pt.game_id}>
@@ -1721,13 +1725,21 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               style={[s.teamToggleBtn, entryMode === 'our' && s.teamToggleBtnActive]}
               onPress={() => { setEntryMode('our'); setSelectedPlayer(null); }}
             >
-              <Text style={[s.teamToggleText, entryMode === 'our' && s.teamToggleTextActive]}>{tr('teamGrade.ourTeam')}</Text>
+              {/* The team's name, not "Our Team". The coach knows which side is
+                  theirs; what they need on a stat pad is which of their teams
+                  this is and who it is against. */}
+              <Text style={[s.teamToggleText, entryMode === 'our' && s.teamToggleTextActive]} numberOfLines={1}>
+                {(teams as any[]).find(tm => tm.id === activeGame.team_id)?.name
+                  ?? coach?.program_name ?? tr('teamGrade.ourTeam')}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[s.teamToggleBtn, entryMode === 'opponent' && s.teamToggleBtnActive]}
               onPress={() => { setEntryMode('opponent'); setSelectedPlayer(null); }}
             >
-              <Text style={[s.teamToggleText, entryMode === 'opponent' && s.teamToggleTextActive]}>{tr('teamGrade.opponent')}</Text>
+              <Text style={[s.teamToggleText, entryMode === 'opponent' && s.teamToggleTextActive]} numberOfLines={1}>
+                {activeGame.opponent_name || tr('teamGrade.opponent')}
+              </Text>
             </TouchableOpacity>
           </View>
 

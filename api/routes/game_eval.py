@@ -233,6 +233,40 @@ def _stats_from_canonical(v: dict) -> dict[str, int]:
     return out
 
 
+def derived_scores(game: models.GameSession) -> tuple[int | None, int | None]:
+    """The final score worked out from the stats, when nobody typed one in.
+
+    A game imported from a box score knows exactly what both teams scored — it
+    is the sum of the made shots — but the score fields stay empty unless a
+    coach fills them by hand. So the season record read 0W-0L with games in it,
+    and the grade trend drew those games as losses, because "no score recorded"
+    and "lost" look identical to code that only checks our_score > their_score.
+
+    Both sides must have scoring stats. With numbers for one team only the
+    honest answer is "unknown", not a shutout.
+    """
+    made = {False: 0, True: 0}
+    scored = {False: False, True: False}
+    per_point = {"2 FG Made": 2, "3 FG Made": 3, "FT Made": 1}
+    for st in game.player_stats:
+        pts = per_point.get(st.stat_name)
+        if pts is None:
+            continue
+        side = bool(st.is_opponent)
+        made[side] += pts * (st.count or 0)
+        scored[side] = True
+    if not (scored[False] and scored[True]):
+        return None, None
+    return made[False], made[True]
+
+
+def effective_scores(game: models.GameSession) -> tuple[int | None, int | None]:
+    """What was typed in, or failing that what the stats say."""
+    if game.our_score is not None and game.opponent_score is not None:
+        return game.our_score, game.opponent_score
+    return derived_scores(game)
+
+
 def stats_need_reimport(db: Session, game_id: int) -> bool:
     """Was this game's box score imported before attempts were captured?
 
@@ -797,6 +831,8 @@ def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession) -
     they generate one); scouting shared to them surfaces via Recent/Staff Hub."""
     out = schemas.GameSessionOut.model_validate(game)
     out.stats_need_reimport = stats_need_reimport(db, game.id)
+    if out.our_score is None or out.opponent_score is None:
+        out.our_score, out.opponent_score = effective_scores(game)
     out.ai_scouting_report = _coach_scouting(db, coach, game)
     if out.ai_scouting_report:
         row = (
@@ -2004,11 +2040,12 @@ def season_dashboard(
     team_names = {t.id: t.name for t in db.query(models.Team).all()}
 
     for game in games:
-        if game.our_score is not None and game.opponent_score is not None:
-            if game.our_score > game.opponent_score:
+        our_pts, opp_pts = effective_scores(game)
+        if our_pts is not None and opp_pts is not None:
+            if our_pts > opp_pts:
                 wins += 1
                 win_loss_factor = 10.0
-            elif abs(game.our_score - game.opponent_score) <= 5:
+            elif abs(our_pts - opp_pts) <= 5:
                 losses += 1
                 win_loss_factor = 7.0
             else:
@@ -2036,8 +2073,8 @@ def season_dashboard(
             "team_name": team_names.get(game.team_id),
             "date": game.date.isoformat() if game.date else None,
             "team_grade": team_grade,
-            "our_score": game.our_score,
-            "opponent_score": game.opponent_score,
+            "our_score": our_pts,
+            "opponent_score": opp_pts,
         })
 
         for pg in player_grades:
