@@ -726,6 +726,28 @@ class GameScoutingCorrection(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class GameSessionReportVersion(Base):
+    """A previous wording of a coach's scouting or game report for a game.
+
+    Regenerating used to overwrite. That was survivable while every
+    regeneration was rebuilt from the box score — the report could always be
+    made again from its sources. It is not survivable now that a regeneration
+    EDITS the report: an edit that goes wrong takes the report with it, and
+    there is nothing to rebuild from because the wording was the work.
+
+    One row per generation, newest kept; the packet has had this for its own
+    reports all along.
+    """
+    __tablename__ = "game_session_report_versions"
+    id = Column(Integer, primary_key=True, index=True)
+    game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    # "scouting" or "game_report" — the two reports a game carries.
+    kind = Column(String, nullable=False)
+    report_text = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class GameFullReport(Base):
     """A coach's OWN full GAME REPORT for a game (our team + opponent combined),
     distinct from the opponent-only scouting report. Per (game, coach); the coach

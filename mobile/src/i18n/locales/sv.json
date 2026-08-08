@@ -210,7 +210,10 @@
       "couldNotSave": "Kunde inte spara",
       "couldNotDelete": "Kunde inte ta bort",
       "couldNotRegenerate": "Kunde inte generera om",
-      "rebuilding": "Bygger om scoutingrapporten…"
+      "rebuilding": "Bygger om scoutingrapporten…",
+      "generateReport": "Generera scoutingrapport",
+      "previousVersions": "TIDIGARE VERSIONER",
+      "restore": "Återställ"
     },
     "gameReport": {
       "hint": "Lägg till kontext som statistiken inte fångar — system, spelare, skador, vad som faktiskt hände. Den bygger matchrapporten på nytt från statistiken plus allt här, och matar framtida matchpaket.",
@@ -228,7 +231,9 @@
       "couldNotSave": "Kunde inte spara",
       "couldNotDelete": "Kunde inte ta bort",
       "couldNotGenerate": "Kunde inte generera",
-      "building": "Bygger den fullständiga matchrapporten…"
+      "building": "Bygger den fullständiga matchrapporten…",
+      "previousVersions": "TIDIGARE VERSIONER",
+      "restore": "Återställ"
     },
     "commentThread": {
       "replyPlaceholder": "Svara {{name}}…",

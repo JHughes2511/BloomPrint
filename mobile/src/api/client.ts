@@ -632,20 +632,38 @@ export const gameEvalAPI = {
   gameReportCorrections: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/game-report-corrections`).then(r => r.data),
   addGameReportCorrection: (gameId: number, text: string) => api.post(`/game-eval/sessions/${gameId}/game-report-corrections`, { text }).then(r => r.data),
   deleteGameReportCorrection: (id: number) => api.delete(`/game-eval/game-report-corrections/${id}`).then(r => r.data),
-  /** Apply the coach's added context and rewrite the game report, as a job. */
-  applyGameReportCorrections: async (gameId: number, onTick?: (s: string) => void) => {
-    const { job_id } = await api.post(`/game-eval/sessions/${gameId}/game-report-job`, {}).then(r => r.data);
+  /**
+   * Generate the game report, or apply what the coach just typed to the one
+   * they already have. The text goes through explicitly so it is applied
+   * whether it is being remembered for the opponent or kept to this report.
+   */
+  applyGameReportCorrections: async (
+    gameId: number,
+    body: { text?: string; remember?: boolean } = {},
+    onTick?: (s: string) => void,
+  ) => {
+    const { job_id } = await api.post(`/game-eval/sessions/${gameId}/game-report-job`, body).then(r => r.data);
     return evalsAPI.awaitJob(job_id, onTick);
   },
   scoutingCorrections: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/scouting-corrections`).then(r => r.data),
   addScoutingCorrection: (gameId: number, text: string) => api.post(`/game-eval/sessions/${gameId}/scouting-corrections`, { text }).then(r => r.data),
   editScoutingCorrection: (id: number, text: string) => api.patch(`/game-eval/scouting-corrections/${id}`, { text }).then(r => r.data),
   deleteScoutingCorrection: (id: number) => api.delete(`/game-eval/scouting-corrections/${id}`).then(r => r.data),
-  /** Apply the coach's added context and rewrite the scouting report, as a job. */
-  applyScoutingCorrections: async (gameId: number, onTick?: (s: string) => void) => {
-    const { job_id } = await api.post(`/game-eval/sessions/${gameId}/ai-scouting-job`, {}).then(r => r.data);
+  /** Generate the scouting report, or apply what the coach just typed to it. */
+  applyScoutingCorrections: async (
+    gameId: number,
+    body: { text?: string; remember?: boolean } = {},
+    onTick?: (s: string) => void,
+  ) => {
+    const { job_id } = await api.post(`/game-eval/sessions/${gameId}/ai-scouting-job`, body).then(r => r.data);
     return evalsAPI.awaitJob(job_id, onTick);
   },
+
+  /** Previous wordings of a report, and putting one back. */
+  reportVersions: (gameId: number, kind: 'scouting' | 'game_report') =>
+    api.get(`/game-eval/sessions/${gameId}/report-versions`, { params: { kind } }).then(r => r.data),
+  restoreReportVersion: (gameId: number, versionId: number) =>
+    api.post(`/game-eval/sessions/${gameId}/report-versions/${versionId}/restore`).then(r => r.data),
   getSeasonDashboard: (params?: any) => api.get('/game-eval/season-dashboard', { params }).then(r => r.data),
   getOpponentProfile: (name: string) => api.get(`/game-eval/opponents/${encodeURIComponent(name)}`).then(r => r.data),
   compareGames: (game1Id: number, game2Id: number) => api.get('/game-eval/compare', { params: { game1_id: game1Id, game2_id: game2Id } }).then(r => r.data),

@@ -210,7 +210,10 @@
       "couldNotSave": "Konnte nicht gespeichert werden",
       "couldNotDelete": "Konnte nicht gelöscht werden",
       "couldNotRegenerate": "Neu generieren nicht möglich",
-      "rebuilding": "Der Scouting-Bericht wird neu erstellt…"
+      "rebuilding": "Der Scouting-Bericht wird neu erstellt…",
+      "generateReport": "Scouting-Bericht erstellen",
+      "previousVersions": "FRÜHERE VERSIONEN",
+      "restore": "Wiederherstellen"
     },
     "gameReport": {
       "hint": "Ergänze Kontext, den der Box Score nicht erfassen kann — Systeme, Personal, Verletzungen, was tatsächlich passiert ist. Der Spielbericht wird aus den Statistiken plus allem hier neu aufgebaut und fließt in künftige Spielpakete ein.",
@@ -228,7 +231,9 @@
       "couldNotSave": "Konnte nicht gespeichert werden",
       "couldNotDelete": "Konnte nicht gelöscht werden",
       "couldNotGenerate": "Erstellen nicht möglich",
-      "building": "Der vollständige Spielbericht wird erstellt…"
+      "building": "Der vollständige Spielbericht wird erstellt…",
+      "previousVersions": "FRÜHERE VERSIONEN",
+      "restore": "Wiederherstellen"
     },
     "commentThread": {
       "replyPlaceholder": "Auf {{name}} antworten…",

@@ -210,7 +210,10 @@
       "couldNotSave": "Não foi possível salvar",
       "couldNotDelete": "Não foi possível excluir",
       "couldNotRegenerate": "Não foi possível regenerar",
-      "rebuilding": "Refazendo o relatório de scouting…"
+      "rebuilding": "Refazendo o relatório de scouting…",
+      "generateReport": "Gerar Relatório de Scouting",
+      "previousVersions": "VERSÕES ANTERIORES",
+      "restore": "Restaurar"
     },
     "gameReport": {
       "hint": "Adicione contexto que o boletim não capta — esquemas, elenco, lesões, o que realmente aconteceu. Refaz o relatório de jogo a partir das estatísticas mais tudo isto, e alimenta os pacotes de jogos futuros.",
@@ -228,7 +231,9 @@
       "couldNotSave": "Não foi possível salvar",
       "couldNotDelete": "Não foi possível excluir",
       "couldNotGenerate": "Não foi possível gerar",
-      "building": "Criando o relatório de jogo completo…"
+      "building": "Criando o relatório de jogo completo…",
+      "previousVersions": "VERSÕES ANTERIORES",
+      "restore": "Restaurar"
     },
     "commentThread": {
       "replyPlaceholder": "Responder a {{name}}…",

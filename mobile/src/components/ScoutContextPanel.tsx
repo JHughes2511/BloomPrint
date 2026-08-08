@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from './VoiceTextInput';
 import { gameEvalAPI } from '../api/client';
-import { GeneratingOverlay } from './GeneratingBasketball';
+import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from './GeneratingBasketball';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -19,11 +19,14 @@ import { fonts } from '../theme/typography';
 export type ScoutContextPanelProps = {
   gameId: number;
   opponentName?: string;
+  /** Whether a report already exists. The button said "Apply & Regenerate"
+   *  before there was anything to regenerate — the first press generates. */
+  hasReport?: boolean;
   onRegenerated?: (newText: string) => void;
   onBack?: () => void;
 };
 
-export default function ScoutContextPanel({ gameId, opponentName, onRegenerated, onBack }: ScoutContextPanelProps) {
+export default function ScoutContextPanel({ gameId, opponentName, hasReport, onRegenerated, onBack }: ScoutContextPanelProps) {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
   const s = makeStyles(t);
@@ -33,6 +36,20 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
   const [remember, setRemember] = useState(true);
   const [busy, setBusy] = useState(false);
   const [applying, setApplying] = useState(false);
+  const [progress, setProgress] = useState('');
+  const [versions, setVersions] = useState<any[]>([]);
+
+  const loadVersions = async () => {
+    try { setVersions(await gameEvalAPI.reportVersions(gameId, 'scouting')); } catch { setVersions([]); }
+  };
+
+  const restore = async (versionId: number) => {
+    try {
+      const res = await gameEvalAPI.restoreReportVersion(gameId, versionId);
+      await loadVersions();
+      onRegenerated?.(res.ai_scouting_report ?? '');
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('components.scoutContext.couldNotRegenerate')); }
+  };
 
   const reload = async () => {
     try { setCorrections(await gameEvalAPI.scoutingCorrections(gameId)); } catch { setCorrections([]); }
@@ -40,7 +57,7 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
       try { setNotes(await gameEvalAPI.getOpponentNotes(opponentName)); } catch { setNotes([]); }
     }
   };
-  useEffect(() => { reload(); }, [gameId, opponentName]);
+  useEffect(() => { reload(); loadVersions(); }, [gameId, opponentName]);
 
   const add = async () => {
     if (!text.trim()) return;
@@ -66,14 +83,18 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
 
   const applyRegen = async () => {
     setApplying(true);
+    setProgress('');
     try {
-      if (text.trim()) {
-        if (remember && opponentName) await gameEvalAPI.addOpponentNote(opponentName, text.trim());
-        else await gameEvalAPI.addScoutingCorrection(gameId, text.trim());
-        setText('');
-      }
-      const res = await gameEvalAPI.applyScoutingCorrections(gameId);
+      const typed = text.trim();
+      // The text and the toggle both go to the server, which files it —
+      // durable opponent note or one-off correction — and applies it to the
+      // report either way. Where it is KEPT used to decide whether the report
+      // heard about it at all.
+      if (typed) setText('');
+      const res = await gameEvalAPI.applyScoutingCorrections(
+        gameId, { text: typed || undefined, remember: !!(remember && opponentName) }, setProgress);
       await reload();
+      await loadVersions();
       onRegenerated?.(res.ai_scouting_report ?? '');
     } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('components.scoutContext.couldNotRegenerate')); }
     setApplying(false);
@@ -116,7 +137,10 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
           {applying ? <ActivityIndicator color={t.ctaText} size="small" /> : (
             <>
               <Ionicons name="sparkles-outline" size={14} color={t.ctaText} />
-              <Text style={s.primaryText} numberOfLines={1}>{tr('components.scoutContext.applyRegenerate')}</Text>
+              <Text style={s.primaryText} numberOfLines={1}>
+                {hasReport ? tr('components.scoutContext.applyRegenerate')
+                           : tr('components.scoutContext.generateReport')}
+              </Text>
             </>
           )}
         </TouchableOpacity>
@@ -145,12 +169,33 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
         ))}
       </ScrollView>
 
-      <GeneratingOverlay visible={applying} label={tr('components.scoutContext.rebuilding')} />
+      {versions.length > 0 && (
+        <View style={{ marginTop: 12 }}>
+          <Text style={s.section}>{tr('components.scoutContext.previousVersions')}</Text>
+          {versions.slice(0, 5).map((v: any) => (
+            <View key={v.id} style={s.row}>
+              <Text style={s.rowText} numberOfLines={1}>
+                {new Date(v.created_at).toLocaleString()}
+              </Text>
+              <TouchableOpacity onPress={() => restore(v.id)}>
+                <Text style={s.restoreText}>{tr('components.scoutContext.restore')}</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      )}
+
+      <GeneratingOverlay
+        visible={applying}
+        label={jobProgressLabel(progress, tr) || tr('components.scoutContext.rebuilding')}
+        realProgress={parseGenProgress(progress)}
+      />
     </View>
   );
 }
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  restoreText: { color: t.accent, fontSize: 11, fontFamily: fonts[600] },
   hint: { color: t.muted2, fontSize: 12, marginBottom: 10, lineHeight: 18 },
   input: { backgroundColor: t.card, borderRadius: 10, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 60, textAlignVertical: 'top' },
   rememberRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10, backgroundColor: t.chip, borderRadius: 10, padding: 12 },

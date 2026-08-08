@@ -210,7 +210,10 @@
       "couldNotSave": "Hindi ma-save",
       "couldNotDelete": "Hindi mabura",
       "couldNotRegenerate": "Hindi ma-regenerate",
-      "rebuilding": "Muling binubuo ang scouting report…"
+      "rebuilding": "Muling binubuo ang scouting report…",
+      "generateReport": "Bumuo ng Scouting Report",
+      "previousVersions": "MGA NAKARAANG BERSYON",
+      "restore": "Ibalik"
     },
     "gameReport": {
       "hint": "Magdagdag ng konteksto na hindi kayang ipakita ng box score — mga scheme, personnel, injury, kung ano talaga ang nangyari. Muling bubuuin nito ang ulat ng laro mula sa stats kasama ang lahat ng nandito, at gagamitin sa mga susunod na game packet.",
@@ -228,7 +231,9 @@
       "couldNotSave": "Hindi ma-save",
       "couldNotDelete": "Hindi mabura",
       "couldNotGenerate": "Hindi makabuo",
-      "building": "Binubuo ang buong ulat ng laro…"
+      "building": "Binubuo ang buong ulat ng laro…",
+      "previousVersions": "MGA NAKARAANG BERSYON",
+      "restore": "Ibalik"
     },
     "commentThread": {
       "replyPlaceholder": "Sagutin si {{name}}…",

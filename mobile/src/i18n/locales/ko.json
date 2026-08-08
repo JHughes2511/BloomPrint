@@ -210,7 +210,10 @@
       "couldNotSave": "저장할 수 없습니다",
       "couldNotDelete": "삭제할 수 없습니다",
       "couldNotRegenerate": "재생성할 수 없습니다",
-      "rebuilding": "스카우팅 리포트를 다시 만드는 중…"
+      "rebuilding": "스카우팅 리포트를 다시 만드는 중…",
+      "generateReport": "스카우팅 리포트 생성",
+      "previousVersions": "이전 버전",
+      "restore": "복원"
     },
     "gameReport": {
       "hint": "박스 스코어로는 담을 수 없는 정보를 추가하세요 — 전술, 선수 구성, 부상, 실제 경기 상황 등. 기록과 여기에 입력한 내용을 모두 반영해 경기 리포트를 다시 만들고, 이후 경기 자료에도 활용됩니다.",
@@ -228,7 +231,9 @@
       "couldNotSave": "저장할 수 없습니다",
       "couldNotDelete": "삭제할 수 없습니다",
       "couldNotGenerate": "생성할 수 없습니다",
-      "building": "전체 경기 리포트를 만드는 중…"
+      "building": "전체 경기 리포트를 만드는 중…",
+      "previousVersions": "이전 버전",
+      "restore": "복원"
     },
     "commentThread": {
       "replyPlaceholder": "{{name}}에게 답글…",

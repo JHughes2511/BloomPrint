@@ -210,7 +210,10 @@
       "couldNotSave": "Nie udało się zapisać",
       "couldNotDelete": "Nie udało się usunąć",
       "couldNotRegenerate": "Nie udało się wygenerować ponownie",
-      "rebuilding": "Odbudowa raportu skautingowego…"
+      "rebuilding": "Odbudowa raportu skautingowego…",
+      "generateReport": "Generuj raport skautingowy",
+      "previousVersions": "POPRZEDNIE WERSJE",
+      "restore": "Przywróć"
     },
     "gameReport": {
       "hint": "Dodaj kontekst, którego nie ujmuje box score — schematy, personel, kontuzje, to, co faktycznie się wydarzyło. Odbuduje raport meczowy na podstawie statystyk oraz wszystkiego, co tu dodasz, i zasili przyszłe pakiety meczowe.",
@@ -228,7 +231,9 @@
       "couldNotSave": "Nie udało się zapisać",
       "couldNotDelete": "Nie udało się usunąć",
       "couldNotGenerate": "Nie udało się wygenerować",
-      "building": "Tworzenie pełnego raportu meczowego…"
+      "building": "Tworzenie pełnego raportu meczowego…",
+      "previousVersions": "POPRZEDNIE WERSJE",
+      "restore": "Przywróć"
     },
     "commentThread": {
       "replyPlaceholder": "Odpowiedz {{name}}…",

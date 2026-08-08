@@ -210,7 +210,10 @@
       "couldNotSave": "No se pudo guardar",
       "couldNotDelete": "No se pudo eliminar",
       "couldNotRegenerate": "No se pudo regenerar",
-      "rebuilding": "Reconstruyendo el informe de ojeo…"
+      "rebuilding": "Reconstruyendo el informe de ojeo…",
+      "generateReport": "Generar Informe de Scouting",
+      "previousVersions": "VERSIONES ANTERIORES",
+      "restore": "Restaurar"
     },
     "gameReport": {
       "hint": "Añade contexto que las estadísticas no captan — esquemas, personal, lesiones, lo que de verdad pasó. Reconstruye el informe de partido a partir de las estadísticas más todo lo de aquí, y alimenta los futuros dossiers de partido.",
@@ -228,7 +231,9 @@
       "couldNotSave": "No se pudo guardar",
       "couldNotDelete": "No se pudo eliminar",
       "couldNotGenerate": "No se pudo generar",
-      "building": "Creando el informe completo del partido…"
+      "building": "Creando el informe completo del partido…",
+      "previousVersions": "VERSIONES ANTERIORES",
+      "restore": "Restaurar"
     },
     "commentThread": {
       "replyPlaceholder": "Responder a {{name}}…",

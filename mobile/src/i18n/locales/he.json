@@ -210,7 +210,10 @@
       "couldNotSave": "לא ניתן לשמור",
       "couldNotDelete": "לא ניתן למחוק",
       "couldNotRegenerate": "לא ניתן ליצור מחדש",
-      "rebuilding": "בונה מחדש את דוח הסקאוטינג…"
+      "rebuilding": "בונה מחדש את דוח הסקאוטינג…",
+      "generateReport": "צור דוח סקאוטינג",
+      "previousVersions": "גרסאות קודמות",
+      "restore": "שחזר"
     },
     "gameReport": {
       "hint": "הוסף הקשר שגיליון הסטטיסטיקות לא יכול לתפוס — מערכים, סגל, פציעות, מה שבאמת קרה. זה בונה מחדש את דוח המשחק מהסטטיסטיקות ומכל מה שכאן, ומזין חבילות משחק עתידיות.",
@@ -228,7 +231,9 @@
       "couldNotSave": "לא ניתן לשמור",
       "couldNotDelete": "לא ניתן למחוק",
       "couldNotGenerate": "לא ניתן ליצור",
-      "building": "בונה את דוח המשחק המלא…"
+      "building": "בונה את דוח המשחק המלא…",
+      "previousVersions": "גרסאות קודמות",
+      "restore": "שחזר"
     },
     "commentThread": {
       "replyPlaceholder": "השב ל-{{name}}…",

@@ -210,7 +210,10 @@
       "couldNotSave": "Could not save",
       "couldNotDelete": "Could not delete",
       "couldNotRegenerate": "Could not regenerate",
-      "rebuilding": "Rebuilding the scouting report…"
+      "rebuilding": "Rebuilding the scouting report…",
+      "generateReport": "Generate Scouting Report",
+      "previousVersions": "PREVIOUS VERSIONS",
+      "restore": "Restore"
     },
     "gameReport": {
       "hint": "Add context the box score can't capture — schemes, personnel, injuries, what actually happened. It rebuilds the game report from the stats plus everything here, and feeds future game packets.",
@@ -228,7 +231,9 @@
       "couldNotSave": "Could not save",
       "couldNotDelete": "Could not delete",
       "couldNotGenerate": "Could not generate",
-      "building": "Building the full game report…"
+      "building": "Building the full game report…",
+      "previousVersions": "PREVIOUS VERSIONS",
+      "restore": "Restore"
     },
     "commentThread": {
       "replyPlaceholder": "Reply to {{name}}…",

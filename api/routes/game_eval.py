@@ -322,6 +322,85 @@ def _upsert_game_report(db: Session, coach: models.Coach, game: models.GameSessi
         db.add(models.GameFullReport(game_id=game.id, coach_id=coach.id, report_text=text))
 
 
+VERSIONS_KEPT = 20
+
+
+def _file_edits(db: Session, game, coach: models.Coach, edits: list[str],
+                remember: bool, correction_model) -> None:
+    """Keep what the coach typed, in whichever drawer they chose.
+
+    The endpoint does this rather than the screen. When the screen owned it, a
+    caller that did not happen to save the note first would have the text
+    applied to the report and stored nowhere — it would shape this one
+    regeneration and then be gone.
+    """
+    for text in edits:
+        if remember and game.opponent_name:
+            db.add(models.OpponentNote(coach_id=coach.id,
+                                       opponent_name=game.opponent_name, note_text=text))
+        else:
+            db.add(correction_model(game_id=game.id, coach_id=coach.id, correction=text))
+    if edits:
+        db.commit()
+
+
+def _edits_from_body(body: dict | None) -> list[str]:
+    """The change the coach typed alongside the button they pressed."""
+    if not body:
+        return []
+    text = (body.get("feedback") or body.get("text") or "").strip()
+    return [text] if text else []
+
+
+def _snapshot_report(db: Session, game_id: int, coach_id: int, kind: str, text: str) -> None:
+    """Keep the wording about to be replaced.
+
+    Only worth doing because regeneration now EDITS rather than rebuilds: while
+    every regeneration was written fresh from the box score, a lost report could
+    always be made again. An edited one cannot — the wording was the work.
+    """
+    if not (text or "").strip():
+        return
+    db.add(models.GameSessionReportVersion(
+        game_id=game_id, coach_id=coach_id, kind=kind, report_text=text))
+    db.flush()
+    old = (db.query(models.GameSessionReportVersion)
+             .filter_by(game_id=game_id, coach_id=coach_id, kind=kind)
+             .order_by(models.GameSessionReportVersion.id.desc())
+             .offset(VERSIONS_KEPT).all())
+    for row in old:
+        db.delete(row)
+
+
+async def _apply_edits(prior_text: str, edits: list[str], coach: models.Coach,
+                       on_words=None) -> str:
+    """The report the coach already has, with the changes they asked for.
+
+    The alternative — and what this replaced — was to write the report again
+    from the box score and all accumulated context. That kept the report
+    perfectly consistent with the numbers, and threw away everything about the
+    existing one: a coach asking for one line to be corrected got a wholly
+    different report back, with every observation reworded. Their context was
+    never lost, but the report was.
+    """
+    from ..coach_context import language_directive
+
+    prompt = (
+        "Below is a basketball report, followed by changes the coach has asked for. "
+        "Apply ALL of the changes.\n\n"
+        "EDIT the report — do not rewrite it. Everything the changes do not touch must come "
+        "back exactly as it is: same sections in the same order, same wording, same tables. "
+        "Add what they ask to be added, remove what they ask to be removed, and correct what "
+        "they say is wrong. Where a change contradicts the report, the coach saw the game and "
+        "is right.\n\n"
+        "Return ONLY the updated report, in the same format, with no preamble.\n\n"
+        f"REPORT:\n{prior_text}\n\nCHANGES REQUESTED:\n"
+        + "\n".join(f"- {e}" for e in edits)
+        + f"{language_directive(coach)}"
+    )
+    return await long_text(prompt, max_tokens=12000, on_words=on_words)
+
+
 def _scouting_text_for(db: Session, game_id: int, coach_id: int) -> str:
     """The scouting report this coach has on this game, for a finished job to
     hand back in the shape the screen already reads."""
@@ -978,7 +1057,8 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
     return report_text
 
 
-def _run_scouting_job(game_id: int, coach_id: int, job_id: int) -> None:
+def _run_scouting_job(game_id: int, coach_id: int, job_id: int,
+                      extra_edits: list[str] | None = None) -> None:
     """The scouting report, off the request that asked for it. See api/genjob.py.
 
     Always written from ALL of the coach's added context, and marks whatever was
@@ -997,8 +1077,18 @@ def _run_scouting_job(game_id: int, coach_id: int, job_id: int) -> None:
             rows = (db.query(models.GameScoutingCorrection)
                       .filter_by(game_id=game_id, coach_id=coach_id)
                       .order_by(models.GameScoutingCorrection.id).all())
-            asyncio.run(_run_scouting(db, coach, game, [c.correction for c in rows],
-                                      on_words=genjob.words_reporter(job_id)))
+            prior = _scouting_text_for(db, game_id, coach_id)
+            _snapshot_report(db, game_id, coach_id, "scouting", prior)
+            edits = list(extra_edits or []) + [c.correction for c in rows if not c.applied]
+            if prior and edits:
+                text = asyncio.run(_apply_edits(prior, edits, coach,
+                                                on_words=genjob.words_reporter(job_id)))
+                _upsert_scouting(db, coach, game, text.strip())
+            else:
+                # No report to edit, or nothing new to apply — write it from the
+                # box score and every piece of context on file.
+                asyncio.run(_run_scouting(db, coach, game, [c.correction for c in rows],
+                                          on_words=genjob.words_reporter(job_id)))
             for r in rows:
                 r.applied = True
             db.commit()
@@ -1007,6 +1097,47 @@ def _run_scouting_job(game_id: int, coach_id: int, job_id: int) -> None:
         return game_id
 
     genjob.run(job_id, work)
+
+
+@router.get("/sessions/{game_id}/report-versions")
+def list_report_versions(
+    game_id: int,
+    kind: str = "scouting",
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Previous wordings of this coach's report for this game, newest first."""
+    _get_game_readable(db, game_id, coach)
+    rows = (db.query(models.GameSessionReportVersion)
+              .filter_by(game_id=game_id, coach_id=coach.id, kind=kind)
+              .order_by(models.GameSessionReportVersion.id.desc()).all())
+    return [{"id": r.id, "created_at": r.created_at, "report_text": r.report_text}
+            for r in rows]
+
+
+@router.post("/sessions/{game_id}/report-versions/{version_id}/restore")
+def restore_report_version(
+    game_id: int,
+    version_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Put a previous wording back, keeping the current one as a version so
+    restoring is itself reversible."""
+    game = _get_game_readable(db, game_id, coach)
+    row = db.get(models.GameSessionReportVersion, version_id)
+    if not row or row.game_id != game_id or row.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="That version was not found.")
+    current = (_scouting_text_for if row.kind == "scouting" else _game_report_text_for)(
+        db, game_id, coach.id)
+    _snapshot_report(db, game_id, coach.id, row.kind, current)
+    if row.kind == "scouting":
+        _upsert_scouting(db, coach, game, row.report_text or "")
+        db.commit()
+        return {"ai_scouting_report": row.report_text}
+    _upsert_game_report(db, coach, game, row.report_text or "")
+    db.commit()
+    return {"report_text": row.report_text, "ai_game_report": row.report_text}
 
 
 @router.post("/sessions/{game_id}/ai-scouting-job")
@@ -1022,15 +1153,21 @@ def start_ai_scouting(
     Serves both the first generation and "Apply & Regenerate": an optional
     feedback body is recorded as context before the report is written.
     """
-    _get_game_readable(db, game_id, coach)
-    if body:
-        feedback = (body.get("feedback") or body.get("text") or "").strip()
-        if feedback:
-            db.add(models.GameScoutingCorrection(
-                game_id=game_id, coach_id=coach.id, correction=feedback))
-            db.commit()
-    job = genjob.start(db, coach.id, "scouting", {"game_id": game_id, "coach_id": coach.id})
-    background_tasks.add_task(_run_scouting_job, game_id, coach.id, job.id)
+    game = _get_game_readable(db, game_id, coach)
+    # What the coach just typed is applied to the report whichever drawer it is
+    # filed in. "Remember for this opponent" decides where the text is KEPT —
+    # durable opponent note or one-off correction for this report — and used to
+    # decide, as a side effect, whether it reached the report at all: a
+    # remembered note was not a correction, so nothing was pending, so the
+    # report was rebuilt and the note only landed because a rebuild reads notes
+    # too. Once regeneration edits rather than rebuilds, that accident stops
+    # working. The text is passed through explicitly instead.
+    edits = _edits_from_body(body)
+    _file_edits(db, game, coach, edits, bool((body or {}).get("remember")),
+                models.GameScoutingCorrection)
+    job = genjob.start(db, coach.id, "scouting",
+                       {"game_id": game_id, "coach_id": coach.id, "edits": edits})
+    background_tasks.add_task(_run_scouting_job, game_id, coach.id, job.id, edits)
     return {"job_id": job.id}
 
 
@@ -1132,7 +1269,8 @@ def _game_report_corrections(db: Session, game_id: int, coach_id: int) -> list[s
     return [c.correction for c in rows]
 
 
-def _run_game_report_job(game_id: int, coach_id: int, job_id: int) -> None:
+def _run_game_report_job(game_id: int, coach_id: int, job_id: int,
+                         extra_edits: list[str] | None = None) -> None:
     """The full game report, off the request that asked for it. See api/genjob.py."""
     import asyncio
 
@@ -1146,8 +1284,16 @@ def _run_game_report_job(game_id: int, coach_id: int, job_id: int) -> None:
             rows = (db.query(models.GameSessionReportCorrection)
                       .filter_by(game_id=game_id, coach_id=coach_id)
                       .order_by(models.GameSessionReportCorrection.id).all())
-            asyncio.run(_run_game_report(db, coach, game, [c.correction for c in rows],
-                                         on_words=genjob.words_reporter(job_id)))
+            prior = _game_report_text_for(db, game_id, coach_id)
+            _snapshot_report(db, game_id, coach_id, "game_report", prior)
+            edits = list(extra_edits or []) + [c.correction for c in rows if not c.applied]
+            if prior and edits:
+                text = asyncio.run(_apply_edits(prior, edits, coach,
+                                                on_words=genjob.words_reporter(job_id)))
+                _upsert_game_report(db, coach, game, text.strip())
+            else:
+                asyncio.run(_run_game_report(db, coach, game, [c.correction for c in rows],
+                                             on_words=genjob.words_reporter(job_id)))
             for r in rows:
                 r.applied = True
             db.commit()
@@ -1171,16 +1317,13 @@ def start_full_game_report(
     Serves both the first generation and "Apply & Regenerate"; see the scouting
     equivalent above.
     """
-    _get_game_readable(db, game_id, coach)
-    if body:
-        feedback = (body.get("feedback") or body.get("text") or "").strip()
-        if feedback:
-            db.add(models.GameSessionReportCorrection(
-                game_id=game_id, coach_id=coach.id, correction=feedback))
-            db.commit()
+    game = _get_game_readable(db, game_id, coach)
+    edits = _edits_from_body(body)
+    _file_edits(db, game, coach, edits, bool((body or {}).get("remember")),
+                models.GameSessionReportCorrection)
     job = genjob.start(db, coach.id, "game_report_full",
-                       {"game_id": game_id, "coach_id": coach.id})
-    background_tasks.add_task(_run_game_report_job, game_id, coach.id, job.id)
+                       {"game_id": game_id, "coach_id": coach.id, "edits": edits})
+    background_tasks.add_task(_run_game_report_job, game_id, coach.id, job.id, edits)
     return {"job_id": job.id}
 
 

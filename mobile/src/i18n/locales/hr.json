@@ -210,7 +210,10 @@
       "couldNotSave": "Nije moguće spremiti",
       "couldNotDelete": "Nije moguće izbrisati",
       "couldNotRegenerate": "Nije moguće ponovno generirati",
-      "rebuilding": "Ponovno izrađujem skautski izvještaj…"
+      "rebuilding": "Ponovno izrađujem skautski izvještaj…",
+      "generateReport": "Generiraj skautski izvještaj",
+      "previousVersions": "PRETHODNE VERZIJE",
+      "restore": "Vrati"
     },
     "gameReport": {
       "hint": "Dodaj kontekst koji statistika ne može obuhvatiti — sheme, sastav, ozljede, što se stvarno dogodilo. Ponovno izrađuje izvještaj s utakmice iz statistike i svega ovdje navedenog te dopunjuje buduće pakete utakmica.",
@@ -228,7 +231,9 @@
       "couldNotSave": "Nije moguće spremiti",
       "couldNotDelete": "Nije moguće izbrisati",
       "couldNotGenerate": "Nije moguće generirati",
-      "building": "Izrađujem cjeloviti izvještaj s utakmice…"
+      "building": "Izrađujem cjeloviti izvještaj s utakmice…",
+      "previousVersions": "PRETHODNE VERZIJE",
+      "restore": "Vrati"
     },
     "commentThread": {
       "replyPlaceholder": "Odgovori {{name}}…",

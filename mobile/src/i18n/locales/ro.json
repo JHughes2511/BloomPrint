@@ -210,7 +210,10 @@
       "couldNotSave": "Nu s-a putut salva",
       "couldNotDelete": "Nu s-a putut șterge",
       "couldNotRegenerate": "Nu s-a putut regenera",
-      "rebuilding": "Se reconstruiește raportul de scouting…"
+      "rebuilding": "Se reconstruiește raportul de scouting…",
+      "generateReport": "Generează raport de scouting",
+      "previousVersions": "VERSIUNI ANTERIOARE",
+      "restore": "Restaurează"
     },
     "gameReport": {
       "hint": "Adaugă context pe care box score-ul nu îl poate surprinde — scheme, personal, accidentări, ce s-a întâmplat de fapt. Reconstruiește raportul de meci din statistici plus tot ce este aici și alimentează pachetele viitoare de meci.",
@@ -228,7 +231,9 @@
       "couldNotSave": "Nu s-a putut salva",
       "couldNotDelete": "Nu s-a putut șterge",
       "couldNotGenerate": "Nu s-a putut genera",
-      "building": "Se construiește raportul complet de meci…"
+      "building": "Se construiește raportul complet de meci…",
+      "previousVersions": "VERSIUNI ANTERIOARE",
+      "restore": "Restaurează"
     },
     "commentThread": {
       "replyPlaceholder": "Răspunde lui {{name}}…",

@@ -210,7 +210,10 @@
       "couldNotSave": "Impossibile salvare",
       "couldNotDelete": "Impossibile eliminare",
       "couldNotRegenerate": "Impossibile rigenerare",
-      "rebuilding": "Ricostruzione del report di scouting…"
+      "rebuilding": "Ricostruzione del report di scouting…",
+      "generateReport": "Genera Report di Scouting",
+      "previousVersions": "VERSIONI PRECEDENTI",
+      "restore": "Ripristina"
     },
     "gameReport": {
       "hint": "Aggiungi il contesto che il tabellino non può catturare — schemi, effettivi, infortuni, cosa è successo davvero. Ricostruisce il report della partita a partire dalle statistiche più tutto ciò che aggiungi qui, e alimenta i futuri dossier partita.",
@@ -228,7 +231,9 @@
       "couldNotSave": "Impossibile salvare",
       "couldNotDelete": "Impossibile eliminare",
       "couldNotGenerate": "Impossibile generare",
-      "building": "Creazione del report completo della partita…"
+      "building": "Creazione del report completo della partita…",
+      "previousVersions": "VERSIONI PRECEDENTI",
+      "restore": "Ripristina"
     },
     "commentThread": {
       "replyPlaceholder": "Rispondi a {{name}}…",

@@ -1383,11 +1383,13 @@ def _resume_job(job_id: int, kind: str, payload: str):
             elif kind == "scouting":
                 from .routes.game_eval import _run_scouting_job
 
-                _run_scouting_job(call["game_id"], call["coach_id"], job_id)
+                _run_scouting_job(call["game_id"], call["coach_id"], job_id,
+                                  call.get("edits"))
             elif kind == "game_report_full":
                 from .routes.game_eval import _run_game_report_job
 
-                _run_game_report_job(call["game_id"], call["coach_id"], job_id)
+                _run_game_report_job(call["game_id"], call["coach_id"], job_id,
+                                     call.get("edits"))
             elif kind == "training":
                 from .routes.training import _run_training_job
 

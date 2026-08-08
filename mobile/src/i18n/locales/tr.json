@@ -210,7 +210,10 @@
       "couldNotSave": "Kaydedilemedi",
       "couldNotDelete": "Silinemedi",
       "couldNotRegenerate": "Yeniden oluşturulamadı",
-      "rebuilding": "Skaut raporu yeniden oluşturuluyor…"
+      "rebuilding": "Skaut raporu yeniden oluşturuluyor…",
+      "generateReport": "Scouting Raporu Oluştur",
+      "previousVersions": "ÖNCEKİ SÜRÜMLER",
+      "restore": "Geri yükle"
     },
     "gameReport": {
       "hint": "İstatistik cetvelinin yakalayamadığı bağlamı ekleyin — sistemler, kadro, sakatlıklar, gerçekte ne olduğu. Maç raporunu istatistiklerin ve buradaki her şeyin üzerine yeniden kurar ve gelecekteki maç dosyalarını besler.",
@@ -228,7 +231,9 @@
       "couldNotSave": "Kaydedilemedi",
       "couldNotDelete": "Silinemedi",
       "couldNotGenerate": "Oluşturulamadı",
-      "building": "Tam maç raporu oluşturuluyor…"
+      "building": "Tam maç raporu oluşturuluyor…",
+      "previousVersions": "ÖNCEKİ SÜRÜMLER",
+      "restore": "Geri yükle"
     },
     "commentThread": {
       "replyPlaceholder": "{{name}} kişisine yanıt ver…",

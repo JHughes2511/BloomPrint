@@ -210,7 +210,10 @@
       "couldNotSave": "无法保存",
       "couldNotDelete": "无法删除",
       "couldNotRegenerate": "无法重新生成",
-      "rebuilding": "正在重建球探报告…"
+      "rebuilding": "正在重建球探报告…",
+      "generateReport": "生成球探报告",
+      "previousVersions": "历史版本",
+      "restore": "恢复"
     },
     "gameReport": {
       "hint": "补充技术统计无法体现的背景 — 战术、人员、伤病、实际发生的情况。它会根据统计数据加上这里的一切重建比赛报告，并用于未来的比赛资料包。",
@@ -228,7 +231,9 @@
       "couldNotSave": "无法保存",
       "couldNotDelete": "无法删除",
       "couldNotGenerate": "无法生成",
-      "building": "正在生成完整比赛报告…"
+      "building": "正在生成完整比赛报告…",
+      "previousVersions": "历史版本",
+      "restore": "恢复"
     },
     "commentThread": {
       "replyPlaceholder": "回复 {{name}}…",

@@ -2217,6 +2217,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                         <ScoutContextPanel
                           gameId={scoutGameId}
                           opponentName={scoutOpponent ?? undefined}
+                          hasReport={!!scoutData?.ai_scouting_report}
                           onRegenerated={(text) => setScoutData((prev: any) => ({ ...prev, ai_scouting_report: text }))}
                         />
                       ) : (

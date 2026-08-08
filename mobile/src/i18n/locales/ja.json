@@ -210,7 +210,10 @@
       "couldNotSave": "保存できませんでした",
       "couldNotDelete": "削除できませんでした",
       "couldNotRegenerate": "再生成できませんでした",
-      "rebuilding": "スカウティングレポートを作り直しています…"
+      "rebuilding": "スカウティングレポートを作り直しています…",
+      "generateReport": "スカウティングレポートを生成",
+      "previousVersions": "以前のバージョン",
+      "restore": "復元"
     },
     "gameReport": {
       "hint": "ボックススコアでは捉えられない情報を追加できます — 戦術、選手構成、負傷、実際に起きたことなど。スタッツとここに記載したすべてから試合レポートを作り直し、今後の試合資料にも反映されます。",
@@ -228,7 +231,9 @@
       "couldNotSave": "保存できませんでした",
       "couldNotDelete": "削除できませんでした",
       "couldNotGenerate": "生成できませんでした",
-      "building": "完全な試合レポートを作成中…"
+      "building": "完全な試合レポートを作成中…",
+      "previousVersions": "以前のバージョン",
+      "restore": "復元"
     },
     "commentThread": {
       "replyPlaceholder": "{{name}}に返信…",

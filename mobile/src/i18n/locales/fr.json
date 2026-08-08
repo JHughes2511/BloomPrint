@@ -210,7 +210,10 @@
       "couldNotSave": "Impossible d'enregistrer",
       "couldNotDelete": "Impossible de supprimer",
       "couldNotRegenerate": "Impossible de régénérer",
-      "rebuilding": "Reconstruction du rapport de détection…"
+      "rebuilding": "Reconstruction du rapport de détection…",
+      "generateReport": "Générer le rapport de scouting",
+      "previousVersions": "VERSIONS PRÉCÉDENTES",
+      "restore": "Restaurer"
     },
     "gameReport": {
       "hint": "Ajoutez le contexte que la feuille de match ne capte pas — systèmes, effectif, blessures, ce qui s'est réellement passé. Le rapport de match est reconstruit à partir des stats et de tout ce qui figure ici, et alimente les futurs dossiers de match.",
@@ -228,7 +231,9 @@
       "couldNotSave": "Impossible d'enregistrer",
       "couldNotDelete": "Impossible de supprimer",
       "couldNotGenerate": "Impossible de générer",
-      "building": "Création du rapport de match complet…"
+      "building": "Création du rapport de match complet…",
+      "previousVersions": "VERSIONS PRÉCÉDENTES",
+      "restore": "Restaurer"
     },
     "commentThread": {
       "replyPlaceholder": "Répondre à {{name}}…",

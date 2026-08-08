@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from './VoiceTextInput';
 import { gameEvalAPI } from '../api/client';
-import { GeneratingOverlay } from './GeneratingBasketball';
+import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from './GeneratingBasketball';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -36,6 +36,20 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
   const [remember, setRemember] = useState(false);
   const [busy, setBusy] = useState(false);
   const [applying, setApplying] = useState(false);
+  const [progress, setProgress] = useState('');
+  const [versions, setVersions] = useState<any[]>([]);
+
+  const loadVersions = async () => {
+    try { setVersions(await gameEvalAPI.reportVersions(gameId, 'game_report')); } catch { setVersions([]); }
+  };
+
+  const restore = async (versionId: number) => {
+    try {
+      const res = await gameEvalAPI.restoreReportVersion(gameId, versionId);
+      await loadVersions();
+      onRegenerated?.(res.ai_game_report ?? '');
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('components.gameReport.couldNotGenerate')); }
+  };
 
   const reload = async () => {
     try { setCorrections(await gameEvalAPI.gameReportCorrections(gameId)); } catch { setCorrections([]); }
@@ -43,7 +57,7 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
       try { setNotes(await gameEvalAPI.getOpponentNotes(opponentName)); } catch { setNotes([]); }
     }
   };
-  useEffect(() => { reload(); }, [gameId, opponentName]);
+  useEffect(() => { reload(); loadVersions(); }, [gameId, opponentName]);
 
   const add = async () => {
     if (!text.trim()) return;
@@ -69,14 +83,15 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
 
   const applyRegen = async () => {
     setApplying(true);
+    setProgress('');
     try {
-      if (text.trim()) {
-        if (remember && opponentName) await gameEvalAPI.addOpponentNote(opponentName, text.trim());
-        else await gameEvalAPI.addGameReportCorrection(gameId, text.trim());
-        setText('');
-      }
-      const res = await gameEvalAPI.applyGameReportCorrections(gameId);
+      const typed = text.trim();
+      // See ScoutContextPanel: the server files the text and applies it.
+      if (typed) setText('');
+      const res = await gameEvalAPI.applyGameReportCorrections(
+        gameId, { text: typed || undefined, remember: !!(remember && opponentName) }, setProgress);
       await reload();
+      await loadVersions();
       onRegenerated?.(res.ai_game_report ?? '');
     } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('components.gameReport.couldNotGenerate')); }
     setApplying(false);
@@ -143,12 +158,31 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
         ))}
       </ScrollView>
 
-      <GeneratingOverlay visible={applying} label={tr('components.gameReport.building')} />
+      {versions.length > 0 && (
+        <View style={{ marginTop: 12 }}>
+          <Text style={s.section}>{tr('components.gameReport.previousVersions')}</Text>
+          {versions.slice(0, 5).map((v: any) => (
+            <View key={v.id} style={s.row}>
+              <Text style={s.rowText} numberOfLines={1}>{new Date(v.created_at).toLocaleString()}</Text>
+              <TouchableOpacity onPress={() => restore(v.id)}>
+                <Text style={s.restoreText}>{tr('components.gameReport.restore')}</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      )}
+
+      <GeneratingOverlay
+        visible={applying}
+        label={jobProgressLabel(progress, tr) || tr('components.gameReport.building')}
+        realProgress={parseGenProgress(progress)}
+      />
     </View>
   );
 }
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  restoreText: { color: t.accent, fontSize: 11, fontFamily: fonts[600] },
   hint: { color: t.muted2, fontSize: 12, marginBottom: 10, lineHeight: 18 },
   input: { backgroundColor: t.card, borderRadius: 10, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 60, textAlignVertical: 'top' },
   rememberRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10, backgroundColor: t.chip, borderRadius: 10, padding: 12 },

@@ -210,7 +210,10 @@
       "couldNotSave": "Nepavyko išsaugoti",
       "couldNotDelete": "Nepavyko ištrinti",
       "couldNotRegenerate": "Nepavyko pergeneruoti",
-      "rebuilding": "Perkuriama skautų ataskaita…"
+      "rebuilding": "Perkuriama skautų ataskaita…",
+      "generateReport": "Generuoti žvalgybos ataskaitą",
+      "previousVersions": "ANKSTESNĖS VERSIJOS",
+      "restore": "Atkurti"
     },
     "gameReport": {
       "hint": "Pridėkite kontekstą, kurio statistikos suvestinė negali užfiksuoti — schemas, sudėtį, traumas, kas iš tikrųjų įvyko. Ji perkuria rungtynių ataskaitą iš statistikos ir viso to, kas čia yra, bei papildo būsimus rungtynių paketus.",
@@ -228,7 +231,9 @@
       "couldNotSave": "Nepavyko išsaugoti",
       "couldNotDelete": "Nepavyko ištrinti",
       "couldNotGenerate": "Nepavyko generuoti",
-      "building": "Kuriama pilna rungtynių ataskaita…"
+      "building": "Kuriama pilna rungtynių ataskaita…",
+      "previousVersions": "ANKSTESNĖS VERSIJOS",
+      "restore": "Atkurti"
     },
     "commentThread": {
       "replyPlaceholder": "Atsakyti {{name}}…",

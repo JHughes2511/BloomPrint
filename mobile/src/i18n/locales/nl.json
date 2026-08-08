@@ -210,7 +210,10 @@
       "couldNotSave": "Kon niet opslaan",
       "couldNotDelete": "Kon niet verwijderen",
       "couldNotRegenerate": "Kon niet opnieuw genereren",
-      "rebuilding": "Het scoutingrapport wordt opnieuw opgebouwd…"
+      "rebuilding": "Het scoutingrapport wordt opnieuw opgebouwd…",
+      "generateReport": "Scoutingrapport genereren",
+      "previousVersions": "VORIGE VERSIES",
+      "restore": "Herstellen"
     },
     "gameReport": {
       "hint": "Voeg context toe die de boxscore niet vastlegt — schema's, personeel, blessures, wat er echt gebeurde. Het bouwt het wedstrijdrapport opnieuw op uit de statistieken plus alles hier, en voedt toekomstige wedstrijdpakketten.",
@@ -228,7 +231,9 @@
       "couldNotSave": "Kon niet opslaan",
       "couldNotDelete": "Kon niet verwijderen",
       "couldNotGenerate": "Kon niet genereren",
-      "building": "Het volledige wedstrijdrapport wordt opgebouwd…"
+      "building": "Het volledige wedstrijdrapport wordt opgebouwd…",
+      "previousVersions": "VORIGE VERSIES",
+      "restore": "Herstellen"
     },
     "commentThread": {
       "replyPlaceholder": "Antwoord {{name}}…",
