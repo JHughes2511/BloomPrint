@@ -483,6 +483,19 @@ export default function GameReportBuilderScreen() {
     setGenerating(true);
     setGenProgress('');
     try {
+      // Write what is on screen before asking the server to read it. The three
+      // text boxes save on blur, fire-and-forget — so typing a scouting note and
+      // going straight to this button raced its own PATCH, and the report could
+      // be written from the previous contents of the box the coach was looking
+      // at. Awaiting one save makes the report use what they can see.
+      await gameReportsAPI.update(reportId, {
+        // Empty string, not null: the server ignores nulls (exclude_none), so
+        // sending null for a box the coach just emptied left the old text in
+        // the database — still feeding the report, and reappearing on reload.
+        box_score: boxScore.trim(),
+        scouting_notes: scoutingNotes.trim(),
+        focus_prompt: focusPrompt.trim(),
+      });
       let updated;
       if (outputType === 'team_training') {
         updated = await gameReportsAPI.teamTraining(reportId, focusPrompt || undefined);
@@ -880,7 +893,7 @@ export default function GameReportBuilderScreen() {
             value={boxScore}
             onChangeText={setBoxScore}
 
-            onBlur={() => save({ box_score: boxScore.trim() || null })}
+            onBlur={() => save({ box_score: boxScore.trim() })}
             multiline
             textAlignVertical="top"
           />
@@ -904,7 +917,7 @@ export default function GameReportBuilderScreen() {
             value={scoutingNotes}
             onChangeText={setScoutingNotes}
 
-            onBlur={() => save({ scouting_notes: scoutingNotes.trim() || null })}
+            onBlur={() => save({ scouting_notes: scoutingNotes.trim() })}
             multiline
             textAlignVertical="top"
           />
@@ -920,7 +933,7 @@ export default function GameReportBuilderScreen() {
             value={focusPrompt}
             onChangeText={setFocusPrompt}
 
-            onBlur={() => save({ focus_prompt: focusPrompt.trim() || null })}
+            onBlur={() => save({ focus_prompt: focusPrompt.trim() })}
             multiline
             textAlignVertical="top"
           />
