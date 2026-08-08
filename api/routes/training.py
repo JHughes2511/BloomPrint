@@ -6,11 +6,12 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
+from .. import genjob
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, notify, schemas
 from ..ownership import get_owned
 from ..report_sections import _without_sections
-from ..ai_models import OPUS, SONNET, text_of
+from ..ai_models import OPUS, SONNET, text_of, long_text
 
 router = APIRouter(prefix="/training", tags=["training"])
 
@@ -223,12 +224,13 @@ def reformat_training_for_player(training_id: int, hide_sections: list[str] | No
         db.close()
 
 
-@router.post("", response_model=schemas.TrainingOut)
-async def generate_training(
+@router.post("")
+def generate_training(
     player_id: int = Form(...),
     evaluation_id: int | None = Form(None),
     focus_prompt: str | None = Form(None),
     reference: UploadFile | None = File(None),
+    background_tasks: BackgroundTasks = None,
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
@@ -333,27 +335,61 @@ async def generate_training(
     content: list[dict] = [{"type": "text", "text": prompt}]
     content.extend(ref_media)
 
-    client = anthropic.Anthropic()
-    response = client.messages.create(
-        model=OPUS,
-        max_tokens=3000,
-        messages=[{"role": "user", "content": content}],
-    )
-    program_text = text_of(response)
-    priorities = _extract_priorities(program_text)
+    # Written on a job rather than on this request. Two reasons, and the second
+    # is the worse one: a program takes longer than the app's request timeout, so
+    # the coach was shown a failure for a program that was about to save — and
+    # the call was made with the SYNCHRONOUS client inside an async endpoint,
+    # which blocks the whole event loop while it runs. Every other coach's
+    # request queued behind one training program being written.
+    job = genjob.start(db, coach.id, "training", _training_payload(
+        coach.id, player_id, evaluation_id, content, ref_media))
+    background_tasks.add_task(
+        _run_training_job, job.id, coach.id, player_id, evaluation_id, content)
+    return {"job_id": job.id}
 
-    session = models.TrainingSession(
-        player_id=player_id,
-        coach_id=coach.id,
-        evaluation_id=evaluation_id,
-        program_text=program_text,
-        priorities=priorities[:6],
-        title=_title_for(program_text, priorities),
-    )
-    db.add(session)
-    db.commit()
-    db.refresh(session)
-    return session
+
+def _training_payload(coach_id, player_id, evaluation_id, content, ref_media) -> dict | None:
+    """What a restarted server would need to write this program again.
+
+    None when the coach attached a reference file: the attachment lives in the
+    request, not in the database, and a resumed run without it would quietly be
+    a different program from the one that was asked for. A job with no payload
+    is closed with a reason the coach can act on instead — see revive_if_stalled.
+    """
+    if ref_media:
+        return None
+    return {"coach_id": coach_id, "player_id": player_id,
+            "evaluation_id": evaluation_id, "content": content}
+
+
+def _run_training_job(job_id: int, coach_id: int, player_id: int,
+                      evaluation_id: int | None, content: list[dict]) -> None:
+    import asyncio
+
+    def work():
+        program_text = asyncio.run(long_text(
+            content, max_tokens=3000, on_words=genjob.words_reporter(job_id)))
+        if not program_text.strip():
+            raise RuntimeError("AI returned no content")
+        priorities = _extract_priorities(program_text)
+        db = SessionLocal()
+        try:
+            session = models.TrainingSession(
+                player_id=player_id,
+                coach_id=coach_id,
+                evaluation_id=evaluation_id,
+                program_text=program_text,
+                priorities=priorities[:6],
+                title=_title_for(program_text, priorities),
+            )
+            db.add(session)
+            db.commit()
+            db.refresh(session)
+            return session.id
+        finally:
+            db.close()
+
+    genjob.run(job_id, work)
 
 
 class SendTrainingIn(BaseModel):

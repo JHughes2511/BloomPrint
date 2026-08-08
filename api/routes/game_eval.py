@@ -6,16 +6,17 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
-from ..database import get_db
+from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
 from ..softdelete import soft_delete
-from ..ai_models import OPUS
+from ..ai_models import OPUS, long_text
 from ..uploadguard import read_upload
+from .. import genjob
 
 router = APIRouter(prefix="/game-eval", tags=["game-eval"])
 
@@ -319,6 +320,18 @@ def _upsert_game_report(db: Session, coach: models.Coach, game: models.GameSessi
         row.report_text = text
     else:
         db.add(models.GameFullReport(game_id=game.id, coach_id=coach.id, report_text=text))
+
+
+def _scouting_text_for(db: Session, game_id: int, coach_id: int) -> str:
+    """The scouting report this coach has on this game, for a finished job to
+    hand back in the shape the screen already reads."""
+    row = db.query(models.GameScoutingReport).filter_by(game_id=game_id, coach_id=coach_id).first()
+    return row.report_text if row else ""
+
+
+def _game_report_text_for(db: Session, game_id: int, coach_id: int) -> str:
+    row = db.query(models.GameFullReport).filter_by(game_id=game_id, coach_id=coach_id).first()
+    return row.report_text if row else ""
 
 
 def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession) -> schemas.GameSessionOut:
@@ -885,7 +898,8 @@ async def upload_excel(
 
 # ── AI Scouting Report ────────────────────────────────────────────────────────
 
-async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSession, corrections: list[str]) -> str:
+async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSession,
+                        corrections: list[str], on_words=None) -> str:
     """Build + run the scouting report from the box score plus any coach-added
     context ('corrections'), upsert it for this coach, and return the text."""
     import os
@@ -946,17 +960,12 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
     )
 
     try:
-        import anthropic
-        client = anthropic.AsyncAnthropic()
-        response = await client.messages.create(
-            model=OPUS,
-            max_tokens=8000,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text_blocks = [b for b in response.content if hasattr(b, "text")]
-        if not text_blocks:
+        # Streamed. A non-streaming request carries a ten-minute SDK ceiling and
+        # two silent retries behind it, so a report that ran long was abandoned
+        # and paid for three times — see ai_models.long_text.
+        report_text = await long_text(prompt, max_tokens=8000, on_words=on_words)
+        if not report_text.strip():
             raise HTTPException(status_code=500, detail="AI returned no content")
-        report_text = text_blocks[0].text
     except HTTPException:
         raise
     except Exception as exc:
@@ -969,12 +978,70 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
     return report_text
 
 
+def _run_scouting_job(game_id: int, coach_id: int, job_id: int) -> None:
+    """The scouting report, off the request that asked for it. See api/genjob.py.
+
+    Always written from ALL of the coach's added context, and marks whatever was
+    still pending as applied — which is what the "Apply & Regenerate" button did
+    and what the first generation does with an empty list.
+    """
+    import asyncio
+
+    def work():
+        db = SessionLocal()
+        try:
+            game = db.get(models.GameSession, game_id)
+            coach = db.get(models.Coach, coach_id)
+            if not game or not coach:
+                raise RuntimeError("Game not found")
+            rows = (db.query(models.GameScoutingCorrection)
+                      .filter_by(game_id=game_id, coach_id=coach_id)
+                      .order_by(models.GameScoutingCorrection.id).all())
+            asyncio.run(_run_scouting(db, coach, game, [c.correction for c in rows],
+                                      on_words=genjob.words_reporter(job_id)))
+            for r in rows:
+                r.applied = True
+            db.commit()
+        finally:
+            db.close()
+        return game_id
+
+    genjob.run(job_id, work)
+
+
+@router.post("/sessions/{game_id}/ai-scouting-job")
+def start_ai_scouting(
+    game_id: int,
+    background_tasks: BackgroundTasks,
+    body: dict | None = None,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Start the scouting report and hand back a job to follow.
+
+    Serves both the first generation and "Apply & Regenerate": an optional
+    feedback body is recorded as context before the report is written.
+    """
+    _get_game_readable(db, game_id, coach)
+    if body:
+        feedback = (body.get("feedback") or body.get("text") or "").strip()
+        if feedback:
+            db.add(models.GameScoutingCorrection(
+                game_id=game_id, coach_id=coach.id, correction=feedback))
+            db.commit()
+    job = genjob.start(db, coach.id, "scouting", {"game_id": game_id, "coach_id": coach.id})
+    background_tasks.add_task(_run_scouting_job, game_id, coach.id, job.id)
+    return {"job_id": job.id}
+
+
 @router.post("/sessions/{game_id}/ai-scouting")
 async def generate_ai_scouting(
     game_id: int,
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
+    """Generate inline and wait. Kept for browser tabs loaded before the job
+    endpoint above existed; new callers should use that one."""
     # Any coach who can access the game (owner or team staff) can generate their
     # OWN scouting report for it. Reports are per-coach and private until shared.
     game = _get_game_readable(db, game_id, coach)
@@ -982,7 +1049,8 @@ async def generate_ai_scouting(
     return {"ai_scouting_report": text}
 
 
-async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSession, corrections: list[str]) -> str:
+async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSession,
+                           corrections: list[str], on_words=None) -> str:
     """Build + run the full GAME REPORT (our team + opponent) from the box score
     plus opponent notes and any coach-added context, persist it for this coach,
     and return the text. Mirrors _run_scouting but covers both sides."""
@@ -1039,15 +1107,12 @@ async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSe
         f"{language_directive(coach)}"
     )
     try:
-        import anthropic
-        client = anthropic.AsyncAnthropic()
-        response = await client.messages.create(model=OPUS, max_tokens=12000,
-                                                 messages=[{"role": "user", "content": prompt}])
-        blocks = [b for b in response.content if hasattr(b, "text")]
-        if not blocks:
+        # Streamed, for the reason given in _run_scouting.
+        raw = await long_text(prompt, max_tokens=12000, on_words=on_words)
+        if not raw.strip():
             raise HTTPException(status_code=500, detail="AI returned no content")
         import re as _re
-        text = _re.sub(r"\s*END OF REPORT\.?\s*$", "", blocks[0].text.strip(), flags=_re.IGNORECASE).rstrip()
+        text = _re.sub(r"\s*END OF REPORT\.?\s*$", "", raw.strip(), flags=_re.IGNORECASE).rstrip()
     except HTTPException:
         raise
     except Exception as exc:
@@ -1055,6 +1120,68 @@ async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSe
     _upsert_game_report(db, coach, game, text)
     db.commit()
     return text
+
+
+def _game_report_corrections(db: Session, game_id: int, coach_id: int) -> list[str]:
+    rows = (
+        db.query(models.GameSessionReportCorrection)
+        .filter_by(game_id=game_id, coach_id=coach_id)
+        .order_by(models.GameSessionReportCorrection.id)
+        .all()
+    )
+    return [c.correction for c in rows]
+
+
+def _run_game_report_job(game_id: int, coach_id: int, job_id: int) -> None:
+    """The full game report, off the request that asked for it. See api/genjob.py."""
+    import asyncio
+
+    def work():
+        db = SessionLocal()
+        try:
+            game = db.get(models.GameSession, game_id)
+            coach = db.get(models.Coach, coach_id)
+            if not game or not coach:
+                raise RuntimeError("Game not found")
+            rows = (db.query(models.GameSessionReportCorrection)
+                      .filter_by(game_id=game_id, coach_id=coach_id)
+                      .order_by(models.GameSessionReportCorrection.id).all())
+            asyncio.run(_run_game_report(db, coach, game, [c.correction for c in rows],
+                                         on_words=genjob.words_reporter(job_id)))
+            for r in rows:
+                r.applied = True
+            db.commit()
+        finally:
+            db.close()
+        return game_id
+
+    genjob.run(job_id, work)
+
+
+@router.post("/sessions/{game_id}/game-report-job")
+def start_full_game_report(
+    game_id: int,
+    background_tasks: BackgroundTasks,
+    body: dict | None = None,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Start the full game report and hand back a job to follow.
+
+    Serves both the first generation and "Apply & Regenerate"; see the scouting
+    equivalent above.
+    """
+    _get_game_readable(db, game_id, coach)
+    if body:
+        feedback = (body.get("feedback") or body.get("text") or "").strip()
+        if feedback:
+            db.add(models.GameSessionReportCorrection(
+                game_id=game_id, coach_id=coach.id, correction=feedback))
+            db.commit()
+    job = genjob.start(db, coach.id, "game_report_full",
+                       {"game_id": game_id, "coach_id": coach.id})
+    background_tasks.add_task(_run_game_report_job, game_id, coach.id, job.id)
+    return {"job_id": job.id}
 
 
 @router.post("/sessions/{game_id}/game-report")
@@ -1065,7 +1192,10 @@ async def generate_game_report(
 ):
     """A full GAME REPORT — our team's performance AND the opponent, combined
     (vs the Scout Opponent report which is opponent-only). Persisted per-coach so
-    it appears in Recents and feeds game packets."""
+    it appears in Recents and feeds game packets.
+
+    Generates inline and waits; kept for browser tabs loaded before the job
+    endpoint above existed."""
     game = _get_game_readable(db, game_id, coach)
     all_corr = (
         db.query(models.GameSessionReportCorrection)

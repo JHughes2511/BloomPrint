@@ -66,7 +66,7 @@ def text_of(resp) -> str:
     return "".join(b.text for b in resp.content if hasattr(b, "text"))
 
 
-async def long_text(prompt: str, *, model: str = OPUS, max_tokens: int = 16000,
+async def long_text(prompt: "str | list", *, model: str = OPUS, max_tokens: int = 16000,
                     on_words=None) -> str:
     """A full-length report, streamed.
 
@@ -85,6 +85,8 @@ async def long_text(prompt: str, *, model: str = OPUS, max_tokens: int = 16000,
     async with client.messages.stream(
         model=model,
         max_tokens=max(max_tokens, MIN_MAX_TOKENS),
+        # A list is already message content — text plus any attached image or
+        # PDF blocks — and is passed through as-is.
         messages=[{"role": "user", "content": prompt}],
     ) as stream:
         if on_words is not None:

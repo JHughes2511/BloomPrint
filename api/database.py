@@ -1380,6 +1380,27 @@ def _resume_job(job_id: int, kind: str, payload: str):
                 from .routes.game_reports import _run_packet_generation
 
                 _run_packet_generation(call["report_id"], job_id, call["coach_id"])
+            elif kind == "scouting":
+                from .routes.game_eval import _run_scouting_job
+
+                _run_scouting_job(call["game_id"], call["coach_id"], job_id)
+            elif kind == "game_report_full":
+                from .routes.game_eval import _run_game_report_job
+
+                _run_game_report_job(call["game_id"], call["coach_id"], job_id)
+            elif kind == "training":
+                from .routes.training import _run_training_job
+
+                _run_training_job(job_id, call["coach_id"], call["player_id"],
+                                  call.get("evaluation_id"), call["content"])
+            elif kind == "eval_text":
+                from .routes.evaluations import _run_eval_text_job
+
+                _run_eval_text_job(
+                    job_id, call["player_id"], call["coach_id"], call["output_type"],
+                    call["competition_level"], call["coach_notes"],
+                    call["combined_focus"], call.get("title"),
+                )
             else:
                 log.warning("No resume handler for job kind %r", kind)
         except Exception as exc:

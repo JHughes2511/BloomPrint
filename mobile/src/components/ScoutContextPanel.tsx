@@ -51,17 +51,17 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
       setText('');
       await reload();
       Alert.alert(tr('components.scoutContext.saved'), tr('components.scoutContext.contextSaved'));
-    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.scoutContext.couldNotSave')); }
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('components.scoutContext.couldNotSave')); }
     setBusy(false);
   };
 
   const delNote = async (id: number) => {
     try { await gameEvalAPI.deleteOpponentNote(id); await reload(); }
-    catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.scoutContext.couldNotDelete')); }
+    catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('components.scoutContext.couldNotDelete')); }
   };
   const delCorrection = async (id: number) => {
     try { await gameEvalAPI.deleteScoutingCorrection(id); await reload(); }
-    catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.scoutContext.couldNotDelete')); }
+    catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('components.scoutContext.couldNotDelete')); }
   };
 
   const applyRegen = async () => {
@@ -75,7 +75,7 @@ export default function ScoutContextPanel({ gameId, opponentName, onRegenerated,
       const res = await gameEvalAPI.applyScoutingCorrections(gameId);
       await reload();
       onRegenerated?.(res.ai_scouting_report ?? '');
-    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.scoutContext.couldNotRegenerate')); }
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('components.scoutContext.couldNotRegenerate')); }
     setApplying(false);
   };
 

@@ -737,7 +737,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       setDetailGame((prev: any) => ({ ...prev, ai_scouting_report: result.ai_scouting_report }));
       setShowScoutingReport(true);
     } catch (e: any) {
-      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamGrade.couldNotGenerateReport'));
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('teamGrade.couldNotGenerateReport'));
     }
     setGeneratingReport(false);
   };
@@ -1106,7 +1106,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       const data = await gameEvalAPI.getOpponentProfile(scoutOpponent);
       setScoutData(data);
     } catch (e: any) {
-      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamGrade.couldNotRegenerate'));
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('teamGrade.couldNotRegenerate'));
     }
     setRegeneratingScout(false);
   };

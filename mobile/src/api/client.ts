@@ -439,16 +439,19 @@ export const uploadsAPI = {
 
 // ── Training ──────────────────────────────────────────────────────────────────
 export const trainingAPI = {
-  generate: (data: {
+  generate: async (data: {
     player_id: number; evaluation_id?: number; focus_prompt?: string;
     reference?: { uri: string; name: string; type: string };
-  }) => {
+  }, onTick?: (s: string) => void) => {
     const form = new FormData();
     form.append('player_id', String(data.player_id));
     if (data.evaluation_id != null) form.append('evaluation_id', String(data.evaluation_id));
     if (data.focus_prompt) form.append('focus_prompt', data.focus_prompt);
     if (data.reference) form.append('reference', { uri: data.reference.uri, name: data.reference.name, type: data.reference.type } as any);
-    return api.post('/training', form, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data);
+    // Followed as a job: a program is written at length, and the request used to
+    // outlive the client's timeout while the server carried on writing it.
+    const res = await api.post('/training', form, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data);
+    return res?.job_id ? evalsAPI.awaitJob(res.job_id, onTick) : res;
   },
 
   forPlayer: (playerId: number) =>
@@ -616,17 +619,33 @@ export const gameEvalAPI = {
   getLineup: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/lineup`).then(r => r.data),
   getGameSummary: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/summary`).then(r => r.data),
   uploadFile: (gameId: number, formData: FormData) => api.post(`/game-eval/sessions/${gameId}/upload`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
-  getScoutingReport: (gameId: number) => api.post(`/game-eval/sessions/${gameId}/ai-scouting`).then(r => r.data),
-  generateGameReport: (gameId: number) => api.post(`/game-eval/sessions/${gameId}/game-report`).then(r => r.data),
+  /** Scouting report, followed as a job — see gameReportsAPI.generate. */
+  getScoutingReport: async (gameId: number, onTick?: (s: string) => void) => {
+    const { job_id } = await api.post(`/game-eval/sessions/${gameId}/ai-scouting-job`).then(r => r.data);
+    return evalsAPI.awaitJob(job_id, onTick);
+  },
+  /** Full game report, followed as a job. */
+  generateGameReport: async (gameId: number, onTick?: (s: string) => void) => {
+    const { job_id } = await api.post(`/game-eval/sessions/${gameId}/game-report-job`).then(r => r.data);
+    return evalsAPI.awaitJob(job_id, onTick);
+  },
   gameReportCorrections: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/game-report-corrections`).then(r => r.data),
   addGameReportCorrection: (gameId: number, text: string) => api.post(`/game-eval/sessions/${gameId}/game-report-corrections`, { text }).then(r => r.data),
   deleteGameReportCorrection: (id: number) => api.delete(`/game-eval/game-report-corrections/${id}`).then(r => r.data),
-  applyGameReportCorrections: (gameId: number) => api.post(`/game-eval/sessions/${gameId}/apply-game-report-corrections`, {}).then(r => r.data),
+  /** Apply the coach's added context and rewrite the game report, as a job. */
+  applyGameReportCorrections: async (gameId: number, onTick?: (s: string) => void) => {
+    const { job_id } = await api.post(`/game-eval/sessions/${gameId}/game-report-job`, {}).then(r => r.data);
+    return evalsAPI.awaitJob(job_id, onTick);
+  },
   scoutingCorrections: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/scouting-corrections`).then(r => r.data),
   addScoutingCorrection: (gameId: number, text: string) => api.post(`/game-eval/sessions/${gameId}/scouting-corrections`, { text }).then(r => r.data),
   editScoutingCorrection: (id: number, text: string) => api.patch(`/game-eval/scouting-corrections/${id}`, { text }).then(r => r.data),
   deleteScoutingCorrection: (id: number) => api.delete(`/game-eval/scouting-corrections/${id}`).then(r => r.data),
-  applyScoutingCorrections: (gameId: number) => api.post(`/game-eval/sessions/${gameId}/apply-scouting-corrections`, {}).then(r => r.data),
+  /** Apply the coach's added context and rewrite the scouting report, as a job. */
+  applyScoutingCorrections: async (gameId: number, onTick?: (s: string) => void) => {
+    const { job_id } = await api.post(`/game-eval/sessions/${gameId}/ai-scouting-job`, {}).then(r => r.data);
+    return evalsAPI.awaitJob(job_id, onTick);
+  },
   getSeasonDashboard: (params?: any) => api.get('/game-eval/season-dashboard', { params }).then(r => r.data),
   getOpponentProfile: (name: string) => api.get(`/game-eval/opponents/${encodeURIComponent(name)}`).then(r => r.data),
   compareGames: (game1Id: number, game2Id: number) => api.get('/game-eval/compare', { params: { game1_id: game1Id, game2_id: game2Id } }).then(r => r.data),

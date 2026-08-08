@@ -78,7 +78,7 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
       const res = await gameEvalAPI.applyGameReportCorrections(gameId);
       await reload();
       onRegenerated?.(res.ai_game_report ?? '');
-    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.gameReport.couldNotGenerate')); }
+    } catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('components.gameReport.couldNotGenerate')); }
     setApplying(false);
   };
 

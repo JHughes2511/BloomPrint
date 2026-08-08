@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db, revive_if_stalled, SessionLocal
 from ..auth import get_current_coach
+from .. import genjob
 from .. import models, schemas
 from ..softdelete import soft_delete
 from ..ownership import get_owned
@@ -358,25 +359,67 @@ async def submit_evaluation(
         )
         return {"job_id": job.id, "status": "processing"}
 
-    # No video provided — generate a text-only evaluation from coach notes (fast, synchronous).
+    # No video — the evaluation is written from the coach's notes. This was
+    # called "fast, synchronous", and it is faster than watching film, but it is
+    # still a full report written at length: comfortably past the app's request
+    # timeout on a bad day, and the coach would be shown a failure for an
+    # evaluation that then saved with nobody watching. It runs on a job like
+    # every other report; the app already follows one here.
     import os
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise HTTPException(
             status_code=500,
             detail="ANTHROPIC_API_KEY is not set on the server. Ask the server admin to configure it."
         )
-    from video_vision.bim import build_prompt
-    from video_vision.bim import additional_focus_directive
-    bim_prompt = build_prompt(output_type, coach.program_name, competition_level, coach.weight, player.name)
-    bim_prompt += additional_focus_directive(combined_focus)
-
-    report_text = await long_text(bim_prompt)
-    eval_record = _finalize_eval(
-        db, player_id=player_id, coach=coach, output_type=output_type,
-        competition_level=competition_level, coach_notes=coach_notes,
-        video_path=None, report_text=report_text, title=matchup_title,
+    job = genjob.start(db, coach.id, "eval_text", {
+        "player_id": player_id, "coach_id": coach.id, "output_type": output_type,
+        "competition_level": competition_level, "coach_notes": coach_notes,
+        "combined_focus": combined_focus, "title": matchup_title,
+    })
+    background_tasks.add_task(
+        _run_eval_text_job, job.id, player_id, coach.id, output_type,
+        competition_level, coach_notes, combined_focus, matchup_title,
     )
-    return schemas.EvalOut.model_validate(eval_record)
+    return {"job_id": job.id, "status": "processing"}
+
+
+def _run_eval_text_job(job_id: int, player_id: int, coach_id: int, output_type: str,
+                       competition_level: str, coach_notes: str,
+                       combined_focus: str, title: str | None) -> None:
+    """A text-only evaluation, off the request that asked for it. See api/genjob.py."""
+    import asyncio
+
+    def work():
+        from video_vision.bim import build_prompt, additional_focus_directive
+        rdb = SessionLocal()
+        try:
+            player = rdb.get(models.Player, player_id)
+            coach = rdb.get(models.Coach, coach_id)
+            if not player or not coach:
+                raise RuntimeError("Player not found")
+            prompt = build_prompt(output_type, coach.program_name, competition_level,
+                                  coach.weight, player.name)
+            prompt += additional_focus_directive(combined_focus)
+        finally:
+            rdb.close()
+
+        report_text = asyncio.run(long_text(prompt, on_words=genjob.words_reporter(job_id)))
+        if not report_text.strip():
+            raise RuntimeError("AI returned no content")
+
+        wdb = SessionLocal()
+        try:
+            coach = wdb.get(models.Coach, coach_id)
+            rec = _finalize_eval(
+                wdb, player_id=player_id, coach=coach, output_type=output_type,
+                competition_level=competition_level, coach_notes=coach_notes,
+                video_path=None, report_text=report_text, title=title,
+            )
+            return rec.id
+        finally:
+            wdb.close()
+
+    genjob.run(job_id, work)
 
 
 @router.get("/jobs/{job_id}")
@@ -405,11 +448,27 @@ def get_generation_job(
             tr = db.get(models.TeamReport, job.result_id)
             if tr:
                 out["result"] = schemas.TeamReportOut.model_validate(tr).model_dump(mode="json")
+        elif job.kind == "eval_text":
+            ev = db.get(models.Evaluation, job.result_id)
+            if ev:
+                out["result"] = schemas.EvalOut.model_validate(ev).model_dump(mode="json")
         elif job.kind == "packet":
             from .game_reports import _build_out
             gr = db.get(models.GameReport, job.result_id)
             if gr and gr.coach_id == coach.id:
                 out["result"] = _build_out(gr, db).model_dump(mode="json")
+        elif job.kind == "training":
+            ts = db.get(models.TrainingSession, job.result_id)
+            if ts and ts.coach_id == coach.id:
+                out["result"] = schemas.TrainingOut.model_validate(ts).model_dump(mode="json")
+        elif job.kind in ("scouting", "game_report_full"):
+            # These report types are stored per coach against the game, and the
+            # screens read them back in the shape their old endpoint returned.
+            from .game_eval import _scouting_text_for, _game_report_text_for
+            text = (_scouting_text_for if job.kind == "scouting"
+                    else _game_report_text_for)(db, job.result_id, coach.id)
+            out["result"] = ({"ai_scouting_report": text} if job.kind == "scouting"
+                             else {"report_text": text, "ai_game_report": text})
     return out
 
 

@@ -18,7 +18,7 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer, { REPORT_MAX_WIDTH } from '../responsive/PageContainer';
-import { GeneratingOverlay } from '../components/GeneratingBasketball';
+import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
 import { renderReport } from '../utils/renderReport';
 
 export default function TrainingScreen() {
@@ -36,6 +36,8 @@ export default function TrainingScreen() {
   const [focusPrompt, setFocusPrompt] = useState('');
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  // How far into writing the program the server is, from the job it runs on.
+  const [genProgress, setGenProgress] = useState('');
   const [reference, setReference] = useState<{ uri: string; name: string; type: string } | null>(null);
 
   useEffect(() => {
@@ -61,16 +63,21 @@ export default function TrainingScreen() {
 
   const generate = async () => {
     setGenerating(true);
+    setGenProgress('');
     try {
-      const s = await trainingAPI.generate({ player_id: playerId, evaluation_id: evalId, focus_prompt: focusPrompt, reference: reference ?? undefined });
+      const s = await trainingAPI.generate(
+        { player_id: playerId, evaluation_id: evalId, focus_prompt: focusPrompt, reference: reference ?? undefined },
+        setGenProgress,
+      );
       setSessions(prev => [...prev, s]);
       setCurrent(s);
       setFocusPrompt('');
       setReference(null);
     } catch (e: any) {
-      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('training.couldNotGenerateProgram'));
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('training.couldNotGenerateProgram'));
     } finally {
       setGenerating(false);
+      setGenProgress('');
     }
   };
 
@@ -130,7 +137,11 @@ export default function TrainingScreen() {
             : <><Ionicons name="barbell" size={16} color={t.ctaText} /><Text style={styles.generateText} numberOfLines={1}>{tr('training.generateProgram')}</Text></>
           }
         </TouchableOpacity>
-        <GeneratingOverlay visible={generating} label={tr('training.buildingOverlay')} />
+        <GeneratingOverlay
+          visible={generating}
+          label={jobProgressLabel(genProgress, tr) || tr('training.buildingOverlay')}
+          realProgress={parseGenProgress(genProgress)}
+        />
       </View>
 
       {/* Priority stack */}
