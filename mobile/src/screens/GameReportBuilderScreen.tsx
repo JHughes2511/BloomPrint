@@ -67,6 +67,26 @@ function stripMarkdownForPreview(text: string): string {
     .trim();
 }
 
+/**
+ * The two lines under a finished film: what the report is, and when the film
+ * was added.
+ *
+ * This used to be the report's first 120 characters with an ellipsis stuck on
+ * the end. Since every report opens with its own title line, the second line
+ * was always just "..." — a truncation mark with nothing after it. The title is
+ * worth keeping; the date is what a coach with several films actually needs to
+ * tell them apart.
+ */
+function clipSummaryLine(clip: any): string {
+  const title = stripMarkdownForPreview(clip.analysis_text || '')
+    .split('\n')[0].trim().slice(0, 120);
+  const when = clip.created_at
+    ? new Date(clip.created_at).toLocaleDateString(undefined,
+        { month: 'long', day: 'numeric', year: 'numeric' })
+    : '';
+  return when ? `${title}\n${when}` : title;
+}
+
 export default function GameReportBuilderScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
@@ -816,7 +836,7 @@ export default function GameReportBuilderScreen() {
                   which — "Analyzing segment 3 of 12", or why it stopped. */}
               <Text style={[styles.clipAnalysis, clip.job_status === 'error' && { color: t.negative }]} numberOfLines={2}>
                 {clip.analysis_text
-                  ? stripMarkdownForPreview(clip.analysis_text).slice(0, 120) + '...'
+                  ? clipSummaryLine(clip)
                   : clip.job_status === 'error'
                     ? (clip.job_error || tr('gameBuilder.analysisStopped'))
                     : (jobProgressLabel(clip.job_progress, tr) || tr('gameBuilder.analyzing'))}

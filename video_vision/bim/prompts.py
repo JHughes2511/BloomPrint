@@ -33,13 +33,103 @@ def _brief_directive(output_type: str) -> str:
     )
 
 # Appended to every prompt — enforces plain-text output for clean mobile rendering
-_NO_MARKDOWN = (
-    "\n\nFORMATTING RULES: Do NOT use any markdown formatting. "
-    "No ## headers, no ** bold, no -- or === or ——— dividers, no backticks. "
-    "Use plain text only. For section headers write the header in ALL CAPS on its own line "
-    "followed by a colon, then a blank line before the content. "
-    "Example:\n\nOFFENSIVE SKILLS:\n\nContent here..."
-)
+# The house style, from the one place it is defined. api/report_format.py names
+# clip analysis as one of the report types it governs and says in as many words
+# not to hand-roll per-endpoint formatting rules — but film reports had their own
+# copy, which banned all markdown and therefore banned tables. Every other report
+# in the app draws real tables for splits and grades; a film report could only
+# ever write them out as prose, which is what a three-hour game analysis of
+# shooting splits and quarter scores looked like.
+from api.report_format import REPORT_FORMAT_WITH_TABLES as _NO_MARKDOWN
+
+
+# ── Who the film is of ────────────────────────────────────────────────────────
+# A report's subject is not something the model can work out from the frames. It
+# is a choice the coach already made on the packet — "my program", "the opponent",
+# "these two teams I am about to play" — and it decides what the report is FOR.
+#
+# It used to be smuggled across as one line of free text, "My team: Angola.
+# Opponent: Egypt.", built from fields that mean different things in different
+# modes. On an opponent-vs-opponent packet Opponent A is stored in the my_team
+# slot, so that line told the model Angola was the coach's own program. It then
+# wrote a competent report of the wrong thing: Angola-only, titled with Angola's
+# name, ending in adjustments addressed to Angola's staff — for a coach who had
+# asked to scout two teams they will play.
+
+def matchup_directive(mode: str, team_a: str, team_b: str, program: str) -> tuple[str, str]:
+    """The report's subject, stated plainly.
+
+    Returns (directive, segment_note): the block appended to the report prompt,
+    and the one line each per-segment pass needs so the notes it takes are about
+    the right teams in the first place. A directive added only at synthesis
+    cannot recover observations that were never made.
+    """
+    a = (team_a or "").strip() or "Team A"
+    b = (team_b or "").strip() or "Team B"
+    prog = (program or "").strip() or "the coach's program"
+
+    if mode == "opp_vs_opp":
+        return (
+            f"\n\nWHO THIS FILM IS OF:\n\n"
+            f"Neither team on this film is the coach's own program. {prog} is scouting BOTH "
+            f"of them ahead of playing them.\n\n"
+            f"  TEAM A: {a}\n"
+            f"  TEAM B: {b}\n\n"
+            f"Cover BOTH teams in equal depth. Every part of the report that describes a team "
+            f"— offensive tendencies, defensive scheme, personnel, rebounding, transition, KPI "
+            f"readings, adjustments — must appear TWICE: once under a heading \"{a}:\" and once "
+            f"under \"{b}:\". A section written for one team and not the other is an incomplete "
+            f"report. Do not let the team that won, or the team that scored more, take over the "
+            f"report; the losing team is being scouted just as seriously as the winning one.\n\n"
+            f"Give each team's section two parts, in this order:\n"
+            f"  SCOUTING — how {prog} should attack and defend this team: what to take away, "
+            f"what to force them into, which matchups to hunt, what they have no answer for.\n"
+            f"  COACHING READ — a short, honest read on how the team is built and coached: what "
+            f"they run well, what they have not installed, where they are fragile.\n\n"
+            f"Where the two teams can be compared directly — scoring by quarter, shooting "
+            f"splits, pace, rebounding — put them side by side in one table rather than "
+            f"describing each separately.\n\n"
+            f"Never address either team as \"your program\", \"we\", or \"our\", and never write "
+            f"adjustments as advice TO either team. The coach reading this is preparing to play "
+            f"both of them, not coaching either one.",
+            f"This film is {a} vs {b}, and NEITHER is the coach's team. Take observations on "
+            f"BOTH teams in roughly equal measure — do not follow only the team in possession "
+            f"or only the team that is winning. Name which team each observation is about.",
+        )
+
+    if mode == "opponent_only":
+        return (
+            f"\n\nWHO THIS FILM IS OF:\n\n"
+            f"This film is of {b}, who are NOT the coach's team. {prog} is scouting them ahead "
+            f"of playing them.\n\n"
+            f"Write the body of the report as SCOUTING — how {prog} should attack and defend "
+            f"{b} — and end with a short COACHING READ on how {b} are built and coached. Never "
+            f"address {b} as \"your program\" or write adjustments as advice to them.",
+            f"This film is of {b}, a team the coach is scouting. Note their tendencies, "
+            f"personnel and weaknesses as an opponent to be beaten.",
+        )
+
+    if mode == "my_program":
+        return (
+            f"\n\nWHO THIS FILM IS OF:\n\n"
+            f"This film is of {prog} — the coach's own program. Write it as a coaching and "
+            f"development report: what is working, what is not installed, what to fix, and what "
+            f"to keep. Adjustments are addressed to this coaching staff.",
+            f"This film is of {prog}, the coach's own team. Note what they run, what breaks "
+            f"down, and where the coaching opportunities are.",
+        )
+
+    # vs_opponent, and anything unrecognised — the coach's program against an opponent.
+    return (
+        f"\n\nWHO THIS FILM IS OF:\n\n"
+        f"{prog} is the coach's own program. {b} are the opponent.\n\n"
+        f"Write about {prog} as the coach's own team — what to fix, what to keep, adjustments "
+        f"addressed to this staff. Write about {b} as an opponent to be beaten — tendencies, "
+        f"personnel, what to take away. Keep the two clearly separated; do not give {b} "
+        f"coaching advice, and do not scout {prog} as though they were the opposition.",
+        f"This film is {prog} (the coach's own team) against {b} (the opponent). Note "
+        f"observations on both, and name which team each observation is about.",
+    )
 
 from .vocabulary import (
     FILM_VOCABULARY, KPIS, SIX_PILLARS, NBA_INTANGIBLES,

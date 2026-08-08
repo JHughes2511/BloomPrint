@@ -1370,6 +1370,11 @@ def _resume_job(job_id: int, kind: str, payload: str):
                     call["clip_id"], job_id, call["video_path"], call["output_type"],
                     call["program_name"], call["opp_name"], call["label_text"],
                     call["coach_weight"], call["focus_prompt"], call.get("level", "HS Varsity"),
+                    # Absent on a job queued before the packet's report context
+                    # was carried through — those resume with the old behaviour
+                    # rather than failing.
+                    call.get("report_subject", ""), call.get("report_context", ""),
+                    call.get("report_segment_note", ""),
                 )
             else:
                 log.warning("No resume handler for job kind %r", kind)

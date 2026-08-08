@@ -992,6 +992,14 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     coach_weight = int(args.get("coach_weight", 45))
     player_name = args.get("player_name", "")
     focus_prompt = args.get("focus_prompt", "")
+    # What this film is of, and what the report is therefore for. Absent on a
+    # player eval, where the subject is the player named above; supplied by the
+    # game packet, which is the only place that knows whether the two teams on
+    # screen are the coach's own, an opponent, or two teams they are about to
+    # play. See bim.matchup_directive.
+    report_subject = (args.get("report_subject") or "").strip()
+    report_context = args.get("report_context", "")
+    segment_note = args.get("report_segment_note", "")
     interval = float(args.get("interval_seconds", 2.0))
     max_frames = min(int(args.get("max_frames", 10)), 20)
     include_audio = bool(args.get("include_audio", True))
@@ -1003,6 +1011,11 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
         bim_prompt = build_prompt(output_type, program, level, coach_weight, player_name)
     except ValueError as e:
         return [types.TextContent(type="text", text=f"Error: {e}")]
+
+    # Who the film is of comes before the coach's own focus notes: it decides
+    # what the report is, where the focus only colours it.
+    if report_context:
+        bim_prompt += report_context
 
     # Player evals request a tailored ADDITIONAL FOCUS output section; clip
     # analyses just get the focus as plain context.
@@ -1139,7 +1152,13 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
             seg_prompt = (
                 f"You are analyzing SEGMENT {i} of {len(chunks)} of game film ({_fmt_ts(t0)}–{_fmt_ts(t1)}) for a "
                 f"{output_type.replace('_', ' ')}. From the frames, note the key basketball observations: what "
-                f"actions/sets are run, tendencies, notable plays, and visible strengths/weaknesses for {player_name or 'the team'}. "
+                f"actions/sets are run, tendencies, notable plays, and visible strengths/weaknesses for "
+                f"{report_subject or player_name or 'the team'}. "
+                # The segments are where the film is actually watched; the
+                # synthesis only reads their notes. Telling it at the end that
+                # both teams mattered cannot recover observations no segment
+                # ever took, so who the film is of has to be said here too.
+                + (f"{segment_note} " if segment_note else "") +
                 "Cite specific moments by their film timestamp [MM:SS] (e.g. (12:34)), never frame numbers or raw seconds. "
                 "Be concise and specific — these notes will be synthesized into one full report. Do NOT grade yet."
             )
@@ -1214,7 +1233,10 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
         synth += "\n\n".join(seg_notes)
         answer = _long_answer([{"role": "user", "content": synth}], 16000, _writing_hook(progress))
 
-    header = f"BIM {output_type.upper().replace('_', ' ')} — {program} | {level}\n\n"
+    # Titled by what the report is OF, not by whose program the model belongs
+    # to. On an opponent-vs-opponent packet those are different things, and the
+    # title said "Angola" on a report the coach had asked to cover two teams.
+    header = f"BIM {output_type.upper().replace('_', ' ')} — {report_subject or program} | {level}\n\n"
     return [types.TextContent(type="text", text=header + answer)]
 
 

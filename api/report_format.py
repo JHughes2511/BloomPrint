@@ -39,7 +39,14 @@ REPORT_FORMAT = (
 # breakdowns (box scores, pillar grades). Both renderers draw these as real
 # tables, so use this variant wherever tabular stats belong.
 REPORT_FORMAT_WITH_TABLES = REPORT_FORMAT + (
-    "\n- For numeric breakdowns (box scores, per-player grades), you MAY use a "
-    "markdown pipe table with a header row and a |---| separator row; it will be "
-    "rendered as a real table."
+    "\n- USE TABLES for anything genuinely tabular — shooting splits, "
+    "quarter-by-quarter scoring, per-player grades, action frequencies, KPI "
+    "readings, or any side-by-side comparison of two teams or players. A run of "
+    "prose listing numbers is harder to read than the table it should have been. "
+    "Write one as a header row, a separator row, then one row per line:\n\n"
+    "| Player | PTS | FG | 3PT | FT |\n"
+    "| --- | --- | --- | --- | --- |\n"
+    "| C. Dundao | 25 | 6/13 | 6/10 | 7/8 |\n\n"
+    "Keep tables to six columns or fewer so they fit on a phone. Use prose for "
+    "reads and reasoning; use tables for numbers."
 )

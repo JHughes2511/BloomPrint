@@ -19,9 +19,51 @@ from ..ai_models import long_text
 from ..uploadguard import read_upload
 
 
+def _film_context(gr: models.GameReport, coach: models.Coach) -> tuple[str, str, str]:
+    """What this packet's film is of: (subject, directive, segment note).
+
+    The packet already knows — the coach chose a report context when they made
+    it. The film analysis never asked. It was handed `program_name` and
+    `opp_name` and made its own guess, which is wrong in exactly the case the
+    coach was most explicit about: on an opponent-vs-opponent packet Opponent A
+    lives in the `my_team` slot, so the analyzer was told the first opponent was
+    the coach's own program and wrote the whole report about them.
+    """
+    from video_vision.bim import matchup_directive
+
+    program = (coach.program_name or "").strip() or "the coach's program"
+    a_name = (gr.my_team.name if gr.my_team else None) or getattr(gr, "opponent_a_name", None)
+    b_name = (gr.opponent_team.name if gr.opponent_team else None) or gr.opponent_name
+
+    if gr.mode == "opp_vs_opp":
+        # Neither side is the coach's. my_team holds Opponent A here.
+        a = a_name or "Opponent A"
+        b = b_name or "Opponent B"
+        subject = f"{a} vs {b}"
+    elif gr.mode == "opponent_only":
+        a = program
+        b = b_name or "the opponent"
+        subject = b
+    elif gr.mode == "my_program":
+        a = a_name or program
+        b = ""
+        subject = a
+        program = a
+    else:                                    # vs_opponent
+        a = a_name or program
+        b = b_name or "the opponent"
+        subject = f"{a} vs {b}"
+        program = a
+
+    directive, note = matchup_directive(gr.mode or "vs_opponent", a, b, program)
+    return subject, directive, note
+
+
 def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: str,
                        program_name: str, opp_name: str, label_text: str,
-                       coach_weight: int, focus_prompt: str, level: str = "HS Varsity"):
+                       coach_weight: int, focus_prompt: str, level: str = "HS Varsity",
+                       report_subject: str = "", report_context: str = "",
+                       report_segment_note: str = ""):
     """Background task: analyze a (possibly hour-long) film and fill in the clip.
     Reports per-segment progress on the GenerationJob so the app shows the same
     "Analyzing segment i of N" bar as the player-eval flow."""
@@ -114,8 +156,15 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             "program_name": program_name,
             "competition_level": level,
             "coach_weight": coach_weight,
-            "player_name": label_text,
-            "focus_prompt": f"This film is of {label_text}. My team: {program_name}. Opponent: {opp_name}.\n{focus_prompt or ''}",
+            # A team is not a player. This used to carry the film's team label
+            # ("Angola vs Egypt") in the player-focus slot, so every segment was
+            # asked for "strengths and weaknesses for Angola vs Egypt" as though
+            # that were somebody on the roster.
+            "player_name": "",
+            "report_subject": report_subject or label_text,
+            "report_context": report_context,
+            "report_segment_note": report_segment_note,
+            "focus_prompt": focus_prompt or "",
             "audio_auto": True,         # gauge whether the film's audio is worth transcribing
             "_progress": _prog,
             "_resume_notes": done_segments,
@@ -168,7 +217,9 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
 
 def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_type: str,
                            program_name: str, opp_name: str, label_text: str,
-                           coach_weight: int, prior_text: str, correction: str, level: str = "HS Varsity"):
+                           coach_weight: int, prior_text: str, correction: str, level: str = "HS Varsity",
+                           report_subject: str = "", report_context: str = "",
+                           report_segment_note: str = ""):
     """Background task: RE-WATCH the film guided by a coach correction. Instead of
     just rephrasing the old text, we re-run the vision analysis focused on the
     action the coach described so the model can LOCATE and VERIFY it in the film
@@ -193,7 +244,6 @@ def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_ty
                 pdb.close()
 
         focus = (
-            f"This film is of {label_text}. My team: {program_name}. Opponent: {opp_name}.\n\n"
             "A coach reviewed your PRIOR analysis of this exact film and made a correction. "
             "Re-watch the film and LOCATE the specific action, play, or moment the coach is "
             "describing. VERIFY it visually in the frames — identify the concept/action they "
@@ -212,7 +262,10 @@ def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_ty
             "program_name": program_name,
             "competition_level": level,
             "coach_weight": coach_weight,
-            "player_name": label_text,
+            "player_name": "",
+            "report_subject": report_subject or label_text,
+            "report_context": report_context,
+            "report_segment_note": report_segment_note,
             "focus_prompt": focus,
             "audio_auto": True,        # gauge whether the film's audio is worth transcribing
             "_progress": _prog,
@@ -591,11 +644,17 @@ async def add_clip(
 
     # A GenerationJob carries per-segment progress so the app shows the same
     # progress bar as the player-eval flow.
+    subject, directive, seg_note = _film_context(gr, coach)
     call = {
         "clip_id": clip.id, "video_path": str(dest), "output_type": gr.output_type,
         "program_name": my_team_name, "opp_name": opp_name, "label_text": label_text,
         "coach_weight": coach.weight, "focus_prompt": gr.focus_prompt or "",
         "level": _packet_level(db, gr, coach),
+        # On the payload, not re-derived on resume: the packet's context can be
+        # edited while a film is being watched, and the report that comes back
+        # should be the one that was asked for.
+        "report_subject": subject, "report_context": directive,
+        "report_segment_note": seg_note,
     }
     # payload is what makes this job survivable: with the arguments on the row,
     # a server that comes back up can run it again itself.
@@ -608,7 +667,7 @@ async def add_clip(
     background_tasks.add_task(
         _run_clip_analysis, clip.id, job.id, str(dest), gr.output_type,
         my_team_name, opp_name, label_text, coach.weight, gr.focus_prompt or "",
-        call["level"],
+        call["level"], subject, directive, seg_note,
     )
     return {"job_id": job.id, "clip_id": clip.id}
 
@@ -1064,9 +1123,12 @@ async def correct_clip(
                    "Upload it again to change the breakdown.",
         )
 
-    label_text = "my team" if clip.label == "my_team" else "the opponent"
+    # The team the coach named on the film, when there is one — "the opponent"
+    # describes both films in an opponent-vs-opponent packet.
+    label_text = clip.team_name or ("my team" if clip.label == "my_team" else "the opponent")
     my_team_name = gr.my_team.name if gr.my_team else coach.program_name
     opp_name = gr.opponent_team.name if gr.opponent_team else (gr.opponent_name or "Opponent")
+    subject, directive, seg_note = _film_context(gr, coach)
 
     job = models.GenerationJob(coach_id=coach.id, kind="clip", status="processing")
     db.add(job)
@@ -1076,7 +1138,7 @@ async def correct_clip(
     background_tasks.add_task(
         _run_clip_recorrection, clip.id, job.id, clip.video_path, gr.output_type,
         my_team_name, opp_name, label_text, coach.weight, clip.analysis_text, body.correction,
-        _packet_level(db, gr, coach),
+        _packet_level(db, gr, coach), subject, directive, seg_note,
     )
     return {"job_id": job.id, "clip_id": clip.id}
 
