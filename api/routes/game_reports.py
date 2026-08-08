@@ -130,6 +130,15 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             job.error = str(exc)[:500]
         db.commit()
     finally:
+        # The job has reached an end either way, so the gigabytes downloaded to
+        # read it are no longer needed. Reaching here at all means we were not
+        # killed — an interrupted attempt deliberately leaves the file, because
+        # the attempt that follows it wants exactly that copy.
+        try:
+            from ..storage import release_local
+            release_local(video_path)
+        except Exception:
+            pass
         db.close()
 
 

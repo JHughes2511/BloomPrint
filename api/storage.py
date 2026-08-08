@@ -102,17 +102,75 @@ def exists(ref: str) -> bool:
     return os.path.exists(ref)
 
 
+# Downloaded film, kept where a second attempt can find it.
+FILM_CACHE = Path(tempfile.gettempdir()) / "bloomprint-film"
+
+
+def _cache_path(ref: str) -> Path:
+    import hashlib
+
+    b, k = _parse(ref)
+    suffix = os.path.splitext(k)[1] or ".mp4"
+    return FILM_CACHE / (hashlib.sha1(ref.encode()).hexdigest() + suffix)
+
+
 def ensure_local(ref: str) -> str:
-    """A readable local path (downloads from S3 to a temp file if needed).
-    Used before frame extraction / transcription, which need a real file."""
-    if ref and ref.startswith("s3://"):
-        b, k = _parse(ref)
-        suffix = os.path.splitext(k)[1] or ".mp4"
-        fd, tmp = tempfile.mkstemp(suffix=suffix)
-        os.close(fd)
-        _client().download_file(b, k, tmp)
-        return tmp
-    return ref
+    """A readable local path (downloads from S3 when needed).
+
+    Two things this must not do on a three-hour film, both of which it used to.
+
+    It must not leave the download behind. A game film is gigabytes, the old
+    path wrote each one to a fresh mkstemp file and nothing ever deleted it, so
+    every attempt at the same film added another copy to the container's disk.
+    A few resumes of one long film is enough to fill it, and a full disk kills
+    the process — which orphans the job, which triggers a resume, which
+    downloads it again.
+
+    And it must not re-download what is already here. A resumed analysis skips
+    the segments it finished; making it re-fetch several gigabytes first throws
+    that saving away. The copy is keyed by ref and reused when it is complete —
+    verified against the object's size, because a download interrupted by the
+    very restart we are recovering from would otherwise be reused as though it
+    were the film.
+    """
+    if not (ref and ref.startswith("s3://")):
+        return ref
+
+    b, k = _parse(ref)
+    dest = _cache_path(ref)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+
+    want = None
+    try:
+        want = _client().head_object(Bucket=b, Key=k).get("ContentLength")
+    except Exception:
+        pass
+
+    if dest.exists() and (want is None or dest.stat().st_size == want):
+        log.info("Film already on disk, reusing %s", dest)
+        return str(dest)
+
+    # Downloaded beside the target and moved into place, so a half-finished
+    # download is never mistaken for the film.
+    part = dest.with_suffix(dest.suffix + ".part")
+    _client().download_file(b, k, str(part))
+    os.replace(part, dest)
+    return str(dest)
+
+
+def release_local(ref: str) -> None:
+    """Drop the downloaded copy of a film. Call when a job is finished with it —
+    not when it is merely interrupted, since the next attempt wants it."""
+    if not (ref and ref.startswith("s3://")):
+        return
+    try:
+        p = _cache_path(ref)
+        if p.exists():
+            size = p.stat().st_size
+            p.unlink()
+            log.info("Released %s MB of downloaded film", round(size / 1e6))
+    except Exception:
+        pass
 
 
 def playback_url(ref: str, stream_fallback: str) -> str:

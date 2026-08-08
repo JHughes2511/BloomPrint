@@ -110,6 +110,15 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
             job.error = str(exc)[:500]
             db.commit()
     finally:
+        # Finished with the film, either way — free the gigabytes it was
+        # downloaded into. An attempt that is KILLED never reaches here, which
+        # is deliberate: the attempt that follows wants that copy.
+        try:
+            from ..storage import release_local
+            for _ref in (video_paths or []):
+                release_local(_ref)
+        except Exception:
+            pass
         db.close()
 
 

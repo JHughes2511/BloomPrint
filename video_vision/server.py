@@ -7,6 +7,7 @@ Basketball Intelligence Model (BIM).
 
 import base64
 import os
+import time
 import pathlib
 import subprocess
 import tempfile
@@ -164,6 +165,18 @@ def _long_answer(messages: list[dict], max_tokens: int, on_words=None) -> str:
 
 
 
+
+# A segment that fails gets another go before it is written off. A film's worth
+# of segment calls runs for the best part of an hour, so a rate limit or a
+# dropped connection somewhere in the middle is ordinary, not exceptional.
+SEGMENT_TRIES = 3
+SEGMENT_BACKOFF = 4.0   # seconds, doubled each retry
+
+# How much of a film may go unwatched before the report stops being worth
+# writing. Below this the report is honest about what it covers; above it, a
+# confident summary of a game the model mostly did not see is worse than an
+# error a coach can act on.
+MAX_MISSING_FRACTION = 0.25
 
 # The longest edge we keep on a sampled frame.
 #
@@ -1036,10 +1049,26 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                 "Be concise and specific — these notes will be synthesized into one full report. Do NOT grade yet."
             )
             seg_content = [{"type": "text", "text": seg_prompt}] + _frames_content(ch)
-            try:
-                r = _client().messages.create(model=OPUS, max_tokens=2000,
-                                              messages=[{"role": "user", "content": seg_content}])
-                note = f"SEGMENT {i} ({t0:.0f}s–{t1:.0f}s):\n{text_of(r)}"
+            note = None
+            last_error = None
+            # A three-hour film is twenty-odd of these calls over the best part
+            # of an hour, so a transient failure somewhere in the middle is
+            # likely rather than exceptional. One used to cost the segment
+            # outright: the minutes of film it covered were replaced by the text
+            # "(analysis unavailable)" and the report was written as though that
+            # stretch of the game had been watched. Retry the segment instead —
+            # it is minutes of film, and re-asking costs seconds.
+            for attempt in range(SEGMENT_TRIES):
+                try:
+                    r = _client().messages.create(model=OPUS, max_tokens=2000,
+                                                  messages=[{"role": "user", "content": seg_content}])
+                    note = f"SEGMENT {i} ({t0:.0f}s–{t1:.0f}s):\n{text_of(r)}"
+                    break
+                except Exception as exc:
+                    last_error = exc
+                    if attempt + 1 < SEGMENT_TRIES:
+                        time.sleep(SEGMENT_BACKOFF * (2 ** attempt))
+            if note is not None:
                 seg_notes.append(note)
                 if on_segment:
                     # Persisted before the next call is made, so whatever kills
@@ -1048,14 +1077,19 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                         on_segment(i, note)
                     except Exception:
                         pass
-            except Exception as exc:
-                seg_notes.append(f"SEGMENT {i}: (analysis unavailable: {exc})")
+            else:
+                seg_notes.append(f"SEGMENT {i}: (analysis unavailable: {last_error})")
                 failed_segments += 1
-        # A report synthesized from nothing reads like a real one. If the film
-        # was never actually seen, say so rather than hand back an invention.
-        if failed_segments == len(chunks):
+        # A report synthesized from holes reads exactly like one synthesized from
+        # film. If enough of the game could not be watched, the honest outcome is
+        # an error the coach can retry — the job's own resume machinery will pick
+        # it up and the segments that DID succeed are already saved, so trying
+        # again is cheap. Handing back a confident report on a game the model
+        # mostly did not see is the one outcome with no way to notice.
+        if failed_segments and failed_segments >= max(1, round(len(chunks) * MAX_MISSING_FRACTION)):
             raise RuntimeError(
-                f"None of the {len(chunks)} film segments could be analyzed. "
+                f"{failed_segments} of {len(chunks)} film segments could not be analyzed, "
+                f"so the report would have covered only part of the game. "
                 f"Last error: {seg_notes[-1] if seg_notes else 'unknown'}"
             )
         if progress:
