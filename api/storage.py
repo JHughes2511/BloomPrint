@@ -220,20 +220,41 @@ def ensure_bucket_cors() -> str:
     if not use_s3():
         return "skipped (no bucket configured)"
     want = desired_cors()
+    configured = [o.strip() for o in os.environ.get("BLOOMPRINT_CORS_ORIGINS", "").split(",") if o.strip()]
     try:
         client = _client()
         try:
             existing = client.get_bucket_cors(Bucket=_BUCKET).get("CORSRules")
         except Exception:
             existing = None
-        if cors_is_current(existing, want):
-            _cors_ok.update({"at": __import__("time").time(), "value": True})
-            return "already allows browser uploads"
+        # Already fine if it matches what we would write, OR if it simply allows
+        # every origin this app is served from. The second is what a policy set
+        # by hand in the Cloudflare dashboard looks like, and reporting that as
+        # a failure — then trying to overwrite it — would be both wrong and rude.
+        by_hand = bool(configured) and all(cors_allows(existing, o) for o in configured)
+        if cors_is_current(existing, want) or by_hand:
+            _cors_ok.update({"at": __import__("time").time(), "value": True, "origin": None})
+            return ("already allows browser uploads"
+                    + (" (policy set outside this app — leaving it alone)" if by_hand
+                       and not cors_is_current(existing, want) else ""))
         client.put_bucket_cors(Bucket=_BUCKET, CORSConfiguration=want)
         _cors_ok.update({"at": __import__("time").time(), "value": True})
         return f"updated to allow {len(want['CORSRules'][0]['AllowedOrigins'])} origin(s)"
     except Exception as exc:
-        return f"COULD NOT SET — browser uploads will fail until this is fixed: {exc}"
+        missing = []
+        try:
+            rules = _client().get_bucket_cors(Bucket=_BUCKET).get("CORSRules") or []
+        except Exception:
+            rules = []
+        if not rules:
+            missing.append("no CORS policy on the bucket")
+        else:
+            for o in (configured or ["the app's origin"]):
+                if not cors_allows(rules, o):
+                    missing.append(f"{o} is not allowed to PUT with ETag exposed")
+        return ("COULD NOT SET and the bucket does not already allow it "
+                f"({'; '.join(missing)}). Browser uploads stay off; film uploads "
+                f"the old way. Underlying error: {exc}")
 
 
 # Downloaded film, kept where a second attempt can find it.
