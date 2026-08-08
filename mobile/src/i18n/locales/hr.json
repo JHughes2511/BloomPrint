@@ -2314,7 +2314,8 @@
     "segment": "Analiziram segment {{i}} od {{n}}",
     "synthesizing": "Sastavljam izvještaj",
     "uploading": "Prijenos snimke — {{pct}}% ({{sent}} od {{total}})",
-    "uploadingOf": "Prijenos snimke {{i}} od {{n}} — {{pct}}% ({{sent}} od {{total}})"
+    "uploadingOf": "Prijenos snimke {{i}} od {{n}} — {{pct}}% ({{sent}} od {{total}})",
+    "working": "U tijeku…"
   },
   "notifs": {
     "seasonNew": {

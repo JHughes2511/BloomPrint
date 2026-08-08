@@ -85,6 +85,13 @@ export function jobProgressLabel(label: string | undefined, tr: (k: string, o?: 
   if (w) return `${tr('jobProgress.synthesizing')} ${w[1]}%`;
   const c = label.match(/^job:segment:(\d+):(\d+)$/);
   if (c) return tr('jobProgress.segment', { i: c[1], n: c[2] });
+  // A code this build doesn't know. These are a wire format, and the app
+  // reading them is a browser tab that may predate the server sending them —
+  // so an unrecognised one is not a bug to surface, it is a newer server
+  // talking to an older page. Say something true and generic rather than
+  // printing "job:writing:90:28" at a coach, which is what happens when a
+  // fall-through returns the raw label.
+  if (/^job:/.test(label)) return tr('jobProgress.working');
   return label;
 }
 

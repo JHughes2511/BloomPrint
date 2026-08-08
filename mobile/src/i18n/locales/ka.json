@@ -2314,7 +2314,8 @@
     "segment": "სეგმენტის {{i}} ანალიზი {{n}}-დან",
     "synthesizing": "ანგარიშის შედგენა",
     "uploading": "ვიდეო იტვირთება — {{pct}}% ({{sent}} / {{total}})",
-    "uploadingOf": "იტვირთება ვიდეო {{i}} / {{n}} — {{pct}}% ({{sent}} / {{total}})"
+    "uploadingOf": "იტვირთება ვიდეო {{i}} / {{n}} — {{pct}}% ({{sent}} / {{total}})",
+    "working": "მიმდინარეობს…"
   },
   "notifs": {
     "seasonNew": {

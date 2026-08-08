@@ -2314,7 +2314,8 @@
     "segment": "Analyserar segment {{i}} av {{n}}",
     "synthesizing": "Sammanställer rapport",
     "uploading": "Laddar upp filmen — {{pct}} % ({{sent}} av {{total}})",
-    "uploadingOf": "Laddar upp film {{i}} av {{n}} — {{pct}} % ({{sent}} av {{total}})"
+    "uploadingOf": "Laddar upp film {{i}} av {{n}} — {{pct}} % ({{sent}} av {{total}})",
+    "working": "Arbetar…"
   },
   "notifs": {
     "seasonNew": {

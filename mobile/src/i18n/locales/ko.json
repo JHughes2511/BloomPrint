@@ -2314,7 +2314,8 @@
     "segment": "{{n}}개 중 {{i}}번째 구간 분석 중",
     "synthesizing": "리포트 종합 중",
     "uploading": "영상 업로드 중 — {{pct}}%({{total}} 중 {{sent}})",
-    "uploadingOf": "{{n}}개 중 {{i}}번째 영상 업로드 중 — {{pct}}%({{total}} 중 {{sent}})"
+    "uploadingOf": "{{n}}개 중 {{i}}번째 영상 업로드 중 — {{pct}}%({{total}} 중 {{sent}})",
+    "working": "처리 중…"
   },
   "notifs": {
     "seasonNew": {

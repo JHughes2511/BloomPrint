@@ -2314,7 +2314,8 @@
     "segment": "Analyzing segment {{i}} of {{n}}",
     "synthesizing": "Synthesizing report",
     "uploading": "Uploading film — {{pct}}% ({{sent}} of {{total}})",
-    "uploadingOf": "Uploading film {{i}} of {{n}} — {{pct}}% ({{sent}} of {{total}})"
+    "uploadingOf": "Uploading film {{i}} of {{n}} — {{pct}}% ({{sent}} of {{total}})",
+    "working": "Working…"
   },
   "notifs": {
     "seasonNew": {

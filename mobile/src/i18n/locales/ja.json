@@ -2314,7 +2314,8 @@
     "segment": "セグメント {{i}} / {{n}} を分析中",
     "synthesizing": "レポートを統合中",
     "uploading": "映像をアップロード中 — {{pct}}%（{{total}} 中 {{sent}}）",
-    "uploadingOf": "映像 {{i}} / {{n}} をアップロード中 — {{pct}}%（{{total}} 中 {{sent}}）"
+    "uploadingOf": "映像 {{i}} / {{n}} をアップロード中 — {{pct}}%（{{total}} 中 {{sent}}）",
+    "working": "処理中…"
   },
   "notifs": {
     "seasonNew": {

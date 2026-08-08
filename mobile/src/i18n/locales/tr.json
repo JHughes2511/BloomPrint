@@ -2314,7 +2314,8 @@
     "segment": "{{n}} bölümden {{i}}. bölüm analiz ediliyor",
     "synthesizing": "Rapor derleniyor",
     "uploading": "Video yükleniyor — %{{pct}} ({{total}} içinden {{sent}})",
-    "uploadingOf": "{{n}} videodan {{i}}. yükleniyor — %{{pct}} ({{total}} içinden {{sent}})"
+    "uploadingOf": "{{n}} videodan {{i}}. yükleniyor — %{{pct}} ({{total}} içinden {{sent}})",
+    "working": "İşleniyor…"
   },
   "notifs": {
     "seasonNew": {

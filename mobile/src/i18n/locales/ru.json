@@ -2314,7 +2314,8 @@
     "segment": "Анализ сегмента {{i}} из {{n}}",
     "synthesizing": "Формирование отчёта",
     "uploading": "Загрузка записи — {{pct}} % ({{sent}} из {{total}})",
-    "uploadingOf": "Загрузка записи {{i}} из {{n}} — {{pct}} % ({{sent}} из {{total}})"
+    "uploadingOf": "Загрузка записи {{i}} из {{n}} — {{pct}} % ({{sent}} из {{total}})",
+    "working": "Обработка…"
   },
   "notifs": {
     "seasonNew": {

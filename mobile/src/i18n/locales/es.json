@@ -2314,7 +2314,8 @@
     "segment": "Analizando el segmento {{i}} de {{n}}",
     "synthesizing": "Sintetizando el informe",
     "uploading": "Subiendo el vídeo: {{pct}} % ({{sent}} de {{total}})",
-    "uploadingOf": "Subiendo el vídeo {{i}} de {{n}}: {{pct}} % ({{sent}} de {{total}})"
+    "uploadingOf": "Subiendo el vídeo {{i}} de {{n}}: {{pct}} % ({{sent}} de {{total}})",
+    "working": "Procesando…"
   },
   "notifs": {
     "seasonNew": {

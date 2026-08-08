@@ -2314,7 +2314,8 @@
     "segment": "Se analizează segmentul {{i}} din {{n}}",
     "synthesizing": "Se sintetizează raportul",
     "uploading": "Se încarcă filmarea — {{pct}}% ({{sent}} din {{total}})",
-    "uploadingOf": "Se încarcă filmarea {{i}} din {{n}} — {{pct}}% ({{sent}} din {{total}})"
+    "uploadingOf": "Se încarcă filmarea {{i}} din {{n}} — {{pct}}% ({{sent}} din {{total}})",
+    "working": "Se lucrează…"
   },
   "notifs": {
     "seasonNew": {

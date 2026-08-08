@@ -2314,7 +2314,8 @@
     "segment": "Sinusuri ang segment {{i}} ng {{n}}",
     "synthesizing": "Binubuo ang ulat",
     "uploading": "Ina-upload ang film — {{pct}}% ({{sent}} sa {{total}})",
-    "uploadingOf": "Ina-upload ang film {{i}} sa {{n}} — {{pct}}% ({{sent}} sa {{total}})"
+    "uploadingOf": "Ina-upload ang film {{i}} sa {{n}} — {{pct}}% ({{sent}} sa {{total}})",
+    "working": "Ginagawa…"
   },
   "notifs": {
     "seasonNew": {

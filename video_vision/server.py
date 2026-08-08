@@ -92,14 +92,17 @@ def _writing_hook(progress):
     across a full-length report instead, and only then eases off, so a report
     that runs long keeps moving rather than parking.
 
-    The tick is not shown to anyone. It exists so the label CHANGES on every
-    heartbeat: a job whose process has died leaves its label frozen, and that is
-    the only way anything downstream can tell a slow phase from a dead one.
+    The shape of this code is a wire format, and the app that reads it is a
+    browser tab that may have been loaded before this deploy. A heartbeat was
+    briefly appended here as a third field, and the already-loaded app — which
+    only knew two — fell through to printing the raw "job:writing:90:28" at a
+    coach. Anything added here has to be readable by the version already out
+    there, so the percentage alone it stays: it moves at least every few
+    seconds, which is the same liveness signal the heartbeat was for.
     """
     if not progress:
         return None
 
-    beat = {"n": 0}
     FULL = 3000   # words in a full report; most finish around here
     TAIL = 300    # words per point beyond that — a tick every few seconds
 
@@ -112,9 +115,8 @@ def _writing_hook(progress):
             # of a very long report is a far smaller lie than sitting on 90 for
             # all of it.
             pct = min(99, 90 + (words - FULL) // TAIL)
-        beat["n"] += 1
         try:
-            progress(1, 1, f"job:writing:{pct}:{beat['n']}")
+            progress(1, 1, f"job:writing:{pct}")
         except Exception:
             pass
 
