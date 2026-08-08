@@ -1782,7 +1782,8 @@
         "name": "Livello di Competizione",
         "desc": "HS Varsity, College, Pro, ecc."
       }
-    }
+    },
+    "backTo": "Torna a {{where}}"
   },
   "teamReport": {
     "title": "Report Squadra",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "Nessun membro dello staff trovato.",
     "gameView": "VISTA PARTITE",
     "opponentFromTeams": "Dalle tue squadre",
-    "opponentPlayedBefore": "Già affrontata"
+    "opponentPlayedBefore": "Già affrontata",
+    "matchup": "{{us}} vs {{them}}"
   },
   "whiteboard": {
     "title": "Lavagna",

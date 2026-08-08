@@ -1782,7 +1782,8 @@
         "name": "Nivo takmičenja",
         "desc": "HS Varsity, koledž, profesionalni itd."
       }
-    }
+    },
+    "backTo": "Nazad na {{where}}"
   },
   "teamReport": {
     "title": "Izveštaji o timu",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "Nije pronađen štab.",
     "gameView": "PRIKAZ UTAKMICA",
     "opponentFromTeams": "Iz tvojih timova",
-    "opponentPlayedBefore": "Već igrano"
+    "opponentPlayedBefore": "Već igrano",
+    "matchup": "{{us}} protiv {{them}}"
   },
   "whiteboard": {
     "title": "Tabla",

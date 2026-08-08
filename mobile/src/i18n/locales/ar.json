@@ -1782,7 +1782,8 @@
         "name": "مستوى المنافسة",
         "desc": "ثانوي، جامعي، محترف، إلخ."
       }
-    }
+    },
+    "backTo": "العودة إلى {{where}}"
   },
   "teamReport": {
     "title": "تقارير الفرق",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "لم يُعثر على أي طاقم.",
     "gameView": "عرض المباريات",
     "opponentFromTeams": "من فرقك",
-    "opponentPlayedBefore": "لعبت ضدهم سابقًا"
+    "opponentPlayedBefore": "لعبت ضدهم سابقًا",
+    "matchup": "{{us}} ضد {{them}}"
   },
   "whiteboard": {
     "title": "السبورة",

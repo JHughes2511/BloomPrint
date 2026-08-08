@@ -1782,7 +1782,8 @@
         "name": "Varžybų lygis",
         "desc": "VM Varsity, koledžas, profesionalai ir kt."
       }
-    }
+    },
+    "backTo": "Atgal į {{where}}"
   },
   "teamReport": {
     "title": "Komandos ataskaitos",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "Personalo nerasta.",
     "gameView": "RUNGTYNIŲ RODINYS",
     "opponentFromTeams": "Iš tavo komandų",
-    "opponentPlayedBefore": "Jau žaista"
+    "opponentPlayedBefore": "Jau žaista",
+    "matchup": "{{us}} prieš {{them}}"
   },
   "whiteboard": {
     "title": "Lenta",

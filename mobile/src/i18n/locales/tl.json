@@ -1782,7 +1782,8 @@
         "name": "Antas ng kompetisyon",
         "desc": "HS Varsity, Kolehiyo, Pro, atbp."
       }
-    }
+    },
+    "backTo": "Bumalik sa {{where}}"
   },
   "teamReport": {
     "title": "Mga Ulat ng Team",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "Walang nakitang staff.",
     "gameView": "VIEW NG LARO",
     "opponentFromTeams": "Mula sa iyong mga koponan",
-    "opponentPlayedBefore": "Nalaro na"
+    "opponentPlayedBefore": "Nalaro na",
+    "matchup": "{{us}} laban sa {{them}}"
   },
   "whiteboard": {
     "title": "Whiteboard",

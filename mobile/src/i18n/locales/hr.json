@@ -1782,7 +1782,8 @@
         "name": "Razina natjecanja",
         "desc": "HS Varsity, fakultet, profesionalno itd."
       }
-    }
+    },
+    "backTo": "Natrag na {{where}}"
   },
   "teamReport": {
     "title": "Timski izvještaji",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "Nije pronađen stožer.",
     "gameView": "PRIKAZ UTAKMICA",
     "opponentFromTeams": "Iz tvojih ekipa",
-    "opponentPlayedBefore": "Već igrano"
+    "opponentPlayedBefore": "Već igrano",
+    "matchup": "{{us}} protiv {{them}}"
   },
   "whiteboard": {
     "title": "Ploča",

@@ -1782,7 +1782,8 @@
         "name": "Nível de Competição",
         "desc": "HS Varsity, Universitário, Profissional, etc."
       }
-    }
+    },
+    "backTo": "Voltar a {{where}}"
   },
   "teamReport": {
     "title": "Relatórios de Equipe",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "Nenhum membro da comissão encontrado.",
     "gameView": "VISÃO DE JOGOS",
     "opponentFromTeams": "Das tuas equipas",
-    "opponentPlayedBefore": "Já defrontado"
+    "opponentPlayedBefore": "Já defrontado",
+    "matchup": "{{us}} vs {{them}}"
   },
   "whiteboard": {
     "title": "Quadro Tático",

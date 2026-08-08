@@ -1782,7 +1782,8 @@
         "name": "Poziom rozgrywek",
         "desc": "HS Varsity, College, Pro itp."
       }
-    }
+    },
+    "backTo": "Powrót do {{where}}"
   },
   "teamReport": {
     "title": "Raporty zespołowe",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "Nie znaleziono sztabu.",
     "gameView": "WIDOK MECZÓW",
     "opponentFromTeams": "Z twoich zespołów",
-    "opponentPlayedBefore": "Już rozegrane"
+    "opponentPlayedBefore": "Już rozegrane",
+    "matchup": "{{us}} vs {{them}}"
   },
   "whiteboard": {
     "title": "Tablica",

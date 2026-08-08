@@ -1782,7 +1782,8 @@
         "name": "Nivel de Competición",
         "desc": "HS Varsity, Universidad, Profesional, etc."
       }
-    }
+    },
+    "backTo": "Volver a {{where}}"
   },
   "teamReport": {
     "title": "Informes de Equipo",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "No se encontró cuerpo técnico.",
     "gameView": "VISTA DE PARTIDOS",
     "opponentFromTeams": "De tus equipos",
-    "opponentPlayedBefore": "Ya jugado"
+    "opponentPlayedBefore": "Ya jugado",
+    "matchup": "{{us}} vs {{them}}"
   },
   "whiteboard": {
     "title": "Pizarra",

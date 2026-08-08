@@ -1782,7 +1782,8 @@
         "name": "შეჯიბრის დონე",
         "desc": "HS Varsity, College, Pro და ა.შ."
       }
-    }
+    },
+    "backTo": "უკან {{where}}-ზე"
   },
   "teamReport": {
     "title": "გუნდის ანგარიშები",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "პერსონალი ვერ მოიძებნა.",
     "gameView": "თამაშების ხედი",
     "opponentFromTeams": "შენი გუნდებიდან",
-    "opponentPlayedBefore": "უკვე ნათამაშები"
+    "opponentPlayedBefore": "უკვე ნათამაშები",
+    "matchup": "{{us}} vs {{them}}"
   },
   "whiteboard": {
     "title": "დაფა",

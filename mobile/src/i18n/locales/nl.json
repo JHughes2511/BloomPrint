@@ -1782,7 +1782,8 @@
         "name": "Competitieniveau",
         "desc": "HS Varsity, College, Pro, enz."
       }
-    }
+    },
+    "backTo": "Terug naar {{where}}"
   },
   "teamReport": {
     "title": "Teamrapporten",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "Geen staf gevonden.",
     "gameView": "WEDSTRIJDWEERGAVE",
     "opponentFromTeams": "Uit je teams",
-    "opponentPlayedBefore": "Eerder gespeeld"
+    "opponentPlayedBefore": "Eerder gespeeld",
+    "matchup": "{{us}} tegen {{them}}"
   },
   "whiteboard": {
     "title": "Tactiekbord",

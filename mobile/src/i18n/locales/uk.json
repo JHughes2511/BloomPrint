@@ -1782,7 +1782,8 @@
         "name": "Рівень змагань",
         "desc": "HS Varsity, College, Pro тощо."
       }
-    }
+    },
+    "backTo": "Назад до {{where}}"
   },
   "teamReport": {
     "title": "Командні звіти",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "Персонал не знайдено.",
     "gameView": "ПЕРЕГЛЯД ІГОР",
     "opponentFromTeams": "З ваших команд",
-    "opponentPlayedBefore": "Уже грали"
+    "opponentPlayedBefore": "Уже грали",
+    "matchup": "{{us}} проти {{them}}"
   },
   "whiteboard": {
     "title": "Тактична дошка",

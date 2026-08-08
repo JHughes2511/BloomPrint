@@ -1782,7 +1782,8 @@
         "name": "Niveau de compétition",
         "desc": "HS Varsity, Université, Pro, etc."
       }
-    }
+    },
+    "backTo": "Retour à {{where}}"
   },
   "teamReport": {
     "title": "Rapports d'équipe",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "Aucun membre du staff trouvé.",
     "gameView": "VUE MATCHS",
     "opponentFromTeams": "Parmi vos équipes",
-    "opponentPlayedBefore": "Déjà affronté"
+    "opponentPlayedBefore": "Déjà affronté",
+    "matchup": "{{us}} vs {{them}}"
   },
   "whiteboard": {
     "title": "Tableau blanc",

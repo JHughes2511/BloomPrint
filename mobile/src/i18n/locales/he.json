@@ -1782,7 +1782,8 @@
         "name": "רמת תחרות",
         "desc": "תיכון בכירה, קולג', מקצוענים וכו'"
       }
-    }
+    },
+    "backTo": "חזרה אל {{where}}"
   },
   "teamReport": {
     "title": "דוחות קבוצה",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "לא נמצאו אנשי צוות.",
     "gameView": "תצוגת משחקים",
     "opponentFromTeams": "מהקבוצות שלך",
-    "opponentPlayedBefore": "שיחקתם בעבר"
+    "opponentPlayedBefore": "שיחקתם בעבר",
+    "matchup": "{{us}} נגד {{them}}"
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

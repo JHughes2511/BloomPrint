@@ -233,6 +233,21 @@ export default function TeamEvalScreen({ route, navigation }: any) {
    * are the same opponent and every note and scouting report on them is keyed
    * by that string.
    */
+  /**
+   * Who played whom — "SEED Academy vs Senegal Lions", not "vs Senegal Lions".
+   *
+   * A coach with several teams reading a list of games could see the opponent
+   * and not which of their own sides played them. The game already records the
+   * team; only the label was leaving it out.
+   */
+  const matchupLabel = React.useCallback((game: any) => {
+    const ours = (teams as any[]).find(tm => tm.id === game?.team_id)?.name
+      ?? coach?.program_name;
+    return ours
+      ? tr('teamGrade.matchup', { us: ours, them: game?.opponent_name })
+      : tr('teamGrade.vsOpponent', { opponent: game?.opponent_name });
+  }, [teams, coach, tr]);
+
   const opponentChoices = React.useMemo(() => {
     const out: { name: string; kind: 'team' | 'played' }[] = [];
     const seen = new Set<string>();
@@ -1492,7 +1507,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </View>
             <View style={{ alignItems: 'center' }}>
               <Text style={{ color: t.ink, fontSize: 13, fontFamily: fonts[700] }} numberOfLines={1}>
-                {tr('teamGrade.vsOpponent', { opponent: activeGame.opponent_name })}
+                {matchupLabel(activeGame)}
               </Text>
               <Text style={{ color: t.muted, fontSize: 11 }}>{periodLabel(gameFmt, periodIndex)}</Text>
             </View>
@@ -1741,7 +1756,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           <View style={s.card}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900] }}>{tr('teamGrade.vsOpponent', { opponent: detailGame.opponent_name })}</Text>
+                <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900] }}>{matchupLabel(detailGame)}</Text>
                 <TouchableOpacity
                   style={{ backgroundColor: t.chip, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 }}
                   onPress={() => { setShareGameId(detailGame?.id); setShareGameModalVisible(true); setStaffSearch(''); setStaffResults([]); }}
@@ -2324,7 +2339,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 return (
                   <TouchableOpacity key={g.id} style={[s.gameCard, reportGrid.cardWidth ? { width: reportGrid.cardWidth } : null]} onPress={() => openGameReport(g)}>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[700] }}>{tr('teamGrade.vsOpponent', { opponent: g.opponent_name })}</Text>
+                      <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[700] }}>{matchupLabel(g)}</Text>
                       <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>
                         {g.date ? new Date(g.date).toLocaleDateString() : ''}
                         {g.our_score != null ? `  ·  ${g.our_score}-${g.opponent_score}` : ''}
@@ -3113,7 +3128,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     <View key={g.game_id} style={{ backgroundColor: t.chip, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: t.line }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                         <View style={{ flex: 1 }}>
-                          <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[700] }}>{tr('teamGrade.vsOpponent', { opponent: g.opponent_name })}</Text>
+                          <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[700] }}>{matchupLabel(g)}</Text>
                           <Text style={{ color: t.muted, fontSize: 11, marginTop: 1 }}>
                             {g.date ?? ''}{g.our_score != null ? `  ·  ${won ? tr('teamGrade.winShort') : lost ? tr('teamGrade.lossShort') : tr('teamGrade.tieShort')} ${g.our_score}-${g.opponent_score}` : ''}  ·  {g.minutes}{tr('teamGrade.mAbbr')}
                           </Text>

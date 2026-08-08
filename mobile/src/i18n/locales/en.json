@@ -1782,7 +1782,8 @@
         "name": "Competition Level",
         "desc": "HS Varsity, College, Pro, etc."
       }
-    }
+    },
+    "backTo": "Back to {{where}}"
   },
   "teamReport": {
     "title": "Team Reports",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "No staff found.",
     "gameView": "GAME VIEW",
     "opponentFromTeams": "From your teams",
-    "opponentPlayedBefore": "Played before"
+    "opponentPlayedBefore": "Played before",
+    "matchup": "{{us}} vs {{them}}"
   },
   "whiteboard": {
     "title": "Whiteboard",

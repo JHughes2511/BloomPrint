@@ -1782,7 +1782,8 @@
         "name": "Rekabet Düzeyi",
         "desc": "Lise Birinci Takım, Üniversite, Profesyonel, vb."
       }
-    }
+    },
+    "backTo": "{{where}} sayfasına dön"
   },
   "teamReport": {
     "title": "Takım Raporları",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "Ekip üyesi bulunamadı.",
     "gameView": "MAÇ GÖRÜNÜMÜ",
     "opponentFromTeams": "Takımlarından",
-    "opponentPlayedBefore": "Daha önce oynandı"
+    "opponentPlayedBefore": "Daha önce oynandı",
+    "matchup": "{{us}} - {{them}}"
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

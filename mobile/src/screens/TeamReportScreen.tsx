@@ -539,7 +539,7 @@ export default function TeamReportScreen() {
               depending on which page you pressed them from, and a coach who
               came here to get a roster in had no way to say which team it was
               for. */}
-          <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import', { mode: 'roster' })}>
+          <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import', { mode: 'roster', fromLabel: tr('teamReport.title') })}>
             <Ionicons name="cloud-upload-outline" size={18} color={t.muted} />
             <Text style={styles.importText} numberOfLines={1}>{tr('teamReport.importRoster')}</Text>
           </TouchableOpacity>

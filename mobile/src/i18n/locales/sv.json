@@ -1782,7 +1782,8 @@
         "name": "Tävlingsnivå",
         "desc": "HS Varsity, College, Pro, osv."
       }
-    }
+    },
+    "backTo": "Tillbaka till {{where}}"
   },
   "teamReport": {
     "title": "Lagrapporter",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "Ingen personal hittad.",
     "gameView": "MATCHVY",
     "opponentFromTeams": "Från dina lag",
-    "opponentPlayedBefore": "Redan mött"
+    "opponentPlayedBefore": "Redan mött",
+    "matchup": "{{us}} mot {{them}}"
   },
   "whiteboard": {
     "title": "Taktiktavla",

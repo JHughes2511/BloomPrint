@@ -412,8 +412,17 @@ export default function ImportScreen() {
                 ))}
               </View>
             )}
+            {/* Named after where it actually goes. It said "Back to Roster"
+                however you arrived, so a coach who came from Team Reports was
+                offered a way back to a page they had not been on — and goUp()
+                returned them to Team Reports anyway, so the button and the
+                button's behaviour disagreed. */}
             <TouchableOpacity style={styles.doneBtn} onPress={() => goUp()}>
-              <Text style={styles.doneBtnText} numberOfLines={1}>{isRosterMode ? tr('importScreen.backToRoster') : tr('importScreen.goToRoster')}</Text>
+              <Text style={styles.doneBtnText} numberOfLines={1}>
+                {route.params?.fromLabel
+                  ? tr('importScreen.backTo', { where: route.params.fromLabel })
+                  : isRosterMode ? tr('importScreen.backToRoster') : tr('importScreen.goToRoster')}
+              </Text>
             </TouchableOpacity>
           </View>
         )}

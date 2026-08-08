@@ -11,7 +11,7 @@
  * native apps changes.
  */
 import React from 'react';
-import { View, ViewStyle, StyleProp } from 'react-native';
+import { Platform, View, ViewStyle, StyleProp } from 'react-native';
 import { useBreakpoint, CONTENT_MAX_WIDTH } from './useBreakpoint';
 
 type Props = {
@@ -32,7 +32,10 @@ export default function PageContainer({ children, maxWidth, padded = true, style
   // edge of a wide window — a phone has no centred column and no spare edge.
   const pad = padded && !isPhone ? gutter : 0;
   return (
-    <View style={[{ flex: 1, width: '100%', alignItems: 'center' }, style]}>
+    <View
+      style={[{ flex: 1, width: '100%', alignItems: 'center' }, style]}
+      {...wheelForwarding}
+    >
       <View
         style={{
           flex: 1,
@@ -46,6 +49,37 @@ export default function PageContainer({ children, maxWidth, padded = true, style
     </View>
   );
 }
+
+/**
+ * Make the empty space beside the content column scroll the page.
+ *
+ * The column is capped, and every screen puts its scroller INSIDE that cap — so
+ * on a window wider than the cap, the strip down each side belongs to this
+ * outer view, which scrolls nothing. Put the pointer there and the wheel did
+ * nothing at all: on a wide monitor the only place a coach could scroll was the
+ * middle of the screen, which reads as the page being frozen.
+ *
+ * The alternative was moving the scroller outside the cap on all twenty screens
+ * that use this. This is one place instead: a wheel out here is handed to the
+ * scroller in there.
+ */
+const wheelForwarding = Platform.OS !== 'web' ? {} : {
+  onWheel: (e: any) => {
+    const host = e.currentTarget as HTMLElement;
+    if (!host) return;
+    // The event already landed on something that scrolls — leave it alone.
+    for (let n = e.target as HTMLElement | null; n && n !== host; n = n.parentElement) {
+      if (n.scrollHeight > n.clientHeight + 1) return;
+    }
+    const scroller = Array.from(host.querySelectorAll<HTMLElement>('*')).find(el => {
+      if (el.scrollHeight <= el.clientHeight + 1) return false;
+      const oy = getComputedStyle(el).overflowY;
+      return oy === 'auto' || oy === 'scroll';
+    });
+    if (!scroller) return;
+    scroller.scrollTop += e.deltaY;
+  },
+};
 
 /**
  * Reading width for long prose — reports, evaluations, training programs.

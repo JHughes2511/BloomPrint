@@ -1782,7 +1782,8 @@
         "name": "竞赛级别",
         "desc": "HS Varsity、College、Pro 等"
       }
-    }
+    },
+    "backTo": "返回{{where}}"
   },
   "teamReport": {
     "title": "球队报告",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "未找到工作人员。",
     "gameView": "比赛视图",
     "opponentFromTeams": "来自你的球队",
-    "opponentPlayedBefore": "曾经交手"
+    "opponentPlayedBefore": "曾经交手",
+    "matchup": "{{us}} 对阵 {{them}}"
   },
   "whiteboard": {
     "title": "战术板",

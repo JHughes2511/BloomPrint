@@ -1782,7 +1782,8 @@
         "name": "प्रतियोगिता स्तर",
         "desc": "HS Varsity, College, Pro, आदि।"
       }
-    }
+    },
+    "backTo": "{{where}} पर वापस"
   },
   "teamReport": {
     "title": "टीम रिपोर्ट",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "कोई स्टाफ़ नहीं मिला।",
     "gameView": "गेम व्यू",
     "opponentFromTeams": "आपकी टीमों से",
-    "opponentPlayedBefore": "पहले खेला"
+    "opponentPlayedBefore": "पहले खेला",
+    "matchup": "{{us}} बनाम {{them}}"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",

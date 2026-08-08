@@ -1782,7 +1782,8 @@
         "name": "Nivel de competiție",
         "desc": "HS Varsity, Facultate, Profesionist etc."
       }
-    }
+    },
+    "backTo": "Înapoi la {{where}}"
   },
   "teamReport": {
     "title": "Rapoarte echipă",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "Niciun membru staff găsit.",
     "gameView": "VIZUALIZARE MECIURI",
     "opponentFromTeams": "Din echipele tale",
-    "opponentPlayedBefore": "Deja jucat"
+    "opponentPlayedBefore": "Deja jucat",
+    "matchup": "{{us}} vs {{them}}"
   },
   "whiteboard": {
     "title": "Tablă tactică",

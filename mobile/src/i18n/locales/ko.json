@@ -1782,7 +1782,8 @@
         "name": "경기 수준",
         "desc": "고교 1군, 대학, 프로 등"
       }
-    }
+    },
+    "backTo": "{{where}}(으)로 돌아가기"
   },
   "teamReport": {
     "title": "팀 리포트",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "스태프를 찾을 수 없습니다.",
     "gameView": "경기 보기",
     "opponentFromTeams": "내 팀에서",
-    "opponentPlayedBefore": "이전 상대"
+    "opponentPlayedBefore": "이전 상대",
+    "matchup": "{{us}} 대 {{them}}"
   },
   "whiteboard": {
     "title": "작전판",

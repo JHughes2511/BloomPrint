@@ -1782,7 +1782,8 @@
         "name": "Επίπεδο Ανταγωνισμού",
         "desc": "HS Varsity, College, Pro, κ.λπ."
       }
-    }
+    },
+    "backTo": "Πίσω σε {{where}}"
   },
   "teamReport": {
     "title": "Ομαδικές Αναφορές",
@@ -2206,7 +2207,8 @@
     "noStaffFound": "Δεν βρέθηκε επιτελείο.",
     "gameView": "ΠΡΟΒΟΛΗ ΑΓΩΝΩΝ",
     "opponentFromTeams": "Από τις ομάδες σου",
-    "opponentPlayedBefore": "Έχετε ξαναπαίξει"
+    "opponentPlayedBefore": "Έχετε ξαναπαίξει",
+    "matchup": "{{us}} εναντίον {{them}}"
   },
   "whiteboard": {
     "title": "Πίνακας",
