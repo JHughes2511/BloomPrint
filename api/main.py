@@ -86,6 +86,21 @@ def on_startup():
             "sent. Set RESEND_API_KEY (or SMTP_HOST) to turn it on."
         )
 
+    # Film uploads go from the coach's browser straight to the bucket, which
+    # only works if the bucket allows that origin. Stated at boot for the same
+    # reason as the mail line above: it is invisible until it is the only thing
+    # wrong, and then it looks like a broken upload rather than a setting.
+    from .storage import ensure_bucket_cors
+
+    _cors = ensure_bucket_cors()
+    # Warned rather than noted when it fails, because INFO is filtered out of
+    # most production logs and this is the difference between film uploading
+    # and film silently not uploading.
+    if _cors.startswith("COULD NOT SET"):
+        log.warning("Film upload (browser → storage): %s", _cors)
+    else:
+        log.info("Film upload (browser → storage): %s", _cors)
+
 
 @app.get("/health")
 def health():

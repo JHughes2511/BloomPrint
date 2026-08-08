@@ -102,6 +102,81 @@ def exists(ref: str) -> bool:
     return os.path.exists(ref)
 
 
+# ── Letting the browser upload straight here ────────────────────────────────
+#
+# Film goes to the bucket from the coach's browser, in parts (see
+# routes/film_upload.py). That is a cross-origin PUT, so the bucket has to name
+# the sites allowed to make one — and until it does, every part fails in the
+# browser with a CORS error while the server logs stay clean, because the server
+# never sees the request. It is the kind of configuration that is invisible
+# right up to the moment it is the only thing wrong, so the app sets it itself
+# at boot rather than leaving it to a step someone has to remember.
+
+# The same origins the API already trusts to call it. One list: an origin
+# allowed to use the app is exactly the origin allowed to upload film for it.
+def web_origins() -> list[str]:
+    configured = [o.strip() for o in os.environ.get("BLOOMPRINT_CORS_ORIGINS", "").split(",") if o.strip()]
+    # Development, where the API's own CORS uses a regex the bucket cannot
+    # express — so the ports a dev server actually picks are listed instead.
+    dev = [f"http://localhost:{p}" for p in (8081, 19006, 8412, 3000)]
+    dev += [f"http://127.0.0.1:{p}" for p in (8081, 19006, 8412, 3000)]
+    return configured + dev
+
+
+def desired_cors(origins: list[str] | None = None) -> dict:
+    return {
+        "CORSRules": [
+            {
+                "AllowedOrigins": origins or web_origins(),
+                "AllowedMethods": ["PUT", "POST", "GET", "HEAD"],
+                "AllowedHeaders": ["*"],
+                # A multipart upload is assembled from the ETag of each part,
+                # and a browser cannot read a header the bucket has not exposed.
+                # Without this every part uploads fine and the upload can never
+                # be completed.
+                "ExposeHeaders": ["ETag"],
+                "MaxAgeSeconds": 3600,
+            }
+        ]
+    }
+
+
+def cors_is_current(existing: list[dict] | None, want: dict) -> bool:
+    """Does the bucket already allow what we need? Compared rather than assumed,
+    so boot does not write a policy that is already there."""
+    rule = want["CORSRules"][0]
+    for got in existing or []:
+        if (set(rule["AllowedOrigins"]) <= set(got.get("AllowedOrigins") or [])
+                and set(rule["AllowedMethods"]) <= set(got.get("AllowedMethods") or [])
+                and "ETag" in (got.get("ExposeHeaders") or [])):
+            return True
+    return False
+
+
+def ensure_bucket_cors() -> str:
+    """Make sure the bucket accepts uploads from the app. Never raises.
+
+    Returns a short word on what happened, for the boot log: nothing here may
+    stop the API from starting, and a bucket that refuses to be configured is a
+    thing to report, not to crash on.
+    """
+    if not use_s3():
+        return "skipped (no bucket configured)"
+    want = desired_cors()
+    try:
+        client = _client()
+        try:
+            existing = client.get_bucket_cors(Bucket=_BUCKET).get("CORSRules")
+        except Exception:
+            existing = None
+        if cors_is_current(existing, want):
+            return "already allows browser uploads"
+        client.put_bucket_cors(Bucket=_BUCKET, CORSConfiguration=want)
+        return f"updated to allow {len(want['CORSRules'][0]['AllowedOrigins'])} origin(s)"
+    except Exception as exc:
+        return f"COULD NOT SET — browser uploads will fail until this is fixed: {exc}"
+
+
 # Downloaded film, kept where a second attempt can find it.
 FILM_CACHE = Path(tempfile.gettempdir()) / "bloomprint-film"
 
