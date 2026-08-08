@@ -23,13 +23,39 @@ export type DirectUploadResult = { ref: string };
 
 const RETRIES = 4;
 
-/** Is the browser allowed to upload straight to storage? Asked once. */
-let availability: Promise<{ direct: boolean; part_size: number }> | null = null;
-export function directUploadAvailable() {
-  if (!availability) {
-    availability = api.get('/film-upload/available').then(r => r.data)
-      .catch(() => ({ direct: false, part_size: 0 }));
-  }
+/**
+ * Is the browser allowed to upload straight to storage?
+ *
+ * Asked again periodically rather than once. The answer depends on a bucket
+ * policy that someone may fix while the app is open — and asked once, a tab
+ * loaded before that fix keeps using the slow path for as long as it stays
+ * open. That is exactly what happened the first time this shipped: the policy
+ * was corrected, and the next upload still went the old way because the app
+ * had already made up its mind.
+ *
+ * A "no" is re-checked in a minute; a "yes" is kept for ten, since the thing
+ * that would change it is rare and the cost of asking is a round trip before
+ * an upload that takes an hour.
+ */
+type Availability = { direct: boolean; part_size: number };
+let availability: Promise<Availability> | null = null;
+let askedAt = 0;
+let lastAnswer: Availability | null = null;
+
+export function directUploadAvailable(): Promise<Availability> {
+  const age = Date.now() - askedAt;
+  const ttl = lastAnswer?.direct ? 10 * 60_000 : 60_000;
+  if (availability && age < ttl) return availability;
+  askedAt = Date.now();
+  availability = api.get('/film-upload/available').then(r => {
+    lastAnswer = r.data;
+    return r.data as Availability;
+  }).catch(() => {
+    // Unknown is not the same as "no", but it has to behave like one — and it
+    // must not be remembered as a yes.
+    lastAnswer = null;
+    return { direct: false, part_size: 0 };
+  });
   return availability;
 }
 

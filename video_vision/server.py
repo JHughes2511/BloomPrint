@@ -172,6 +172,25 @@ def _long_answer(messages: list[dict], max_tokens: int, on_words=None) -> str:
 SEGMENT_TRIES = 3
 SEGMENT_BACKOFF = 4.0   # seconds, doubled each retry
 
+
+def _permanent(exc: Exception) -> bool:
+    """Is this a failure that trying again cannot fix?
+
+    A rate limit or a dropped connection clears on its own; an exhausted
+    credit balance, a bad key or a revoked permission does not. Treating them
+    alike meant a billing problem was retried three times per segment across
+    twenty segments — sixty doomed calls and minutes of backoff — before the
+    coach was told the one thing they needed to know.
+    """
+    code = getattr(exc, "status_code", None)
+    if code in (400, 401, 403, 404):
+        return True
+    text = str(exc).lower()
+    return any(s in text for s in (
+        "credit balance", "invalid_request_error", "authentication_error",
+        "permission_error", "invalid x-api-key",
+    ))
+
 # How much of a film may go unwatched before the report stops being worth
 # writing. Below this the report is honest about what it covers; above it, a
 # confident summary of a game the model mostly did not see is worse than an
@@ -1066,6 +1085,8 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
                     break
                 except Exception as exc:
                     last_error = exc
+                    if _permanent(exc):
+                        break        # retrying cannot help
                     if attempt + 1 < SEGMENT_TRIES:
                         time.sleep(SEGMENT_BACKOFF * (2 ** attempt))
             if note is not None:
@@ -1080,6 +1101,13 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
             else:
                 seg_notes.append(f"SEGMENT {i}: (analysis unavailable: {last_error})")
                 failed_segments += 1
+                # Nothing about the next segment will go differently. Stop here
+                # and say why, rather than working through the rest of the film
+                # to arrive at the same answer twenty segments later.
+                if _permanent(last_error):
+                    raise RuntimeError(
+                        f"The film could not be analyzed: {last_error}"
+                    ) from last_error
         # A report synthesized from holes reads exactly like one synthesized from
         # film. If enough of the game could not be watched, the honest outcome is
         # an error the coach can retry — the job's own resume machinery will pick
