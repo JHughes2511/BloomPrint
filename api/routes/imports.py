@@ -372,7 +372,14 @@ def game_stats_commit(
             ))
             advanced_in += 1
 
-    db.commit()
+    try:
+        db.commit()
+    except Exception as exc:
+        # A schema that is behind the code fails here and nowhere else, and the
+        # generic 500 that followed told the coach nothing they could act on or
+        # repeat back. The reason travels.
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Could not save the imported stats: {exc}")
     return {"imported": imported, "events": events_in, "shots": shots_in,
             "team_stats": advanced_in}
 

@@ -242,6 +242,20 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     ("game_report_clips", "team_name", "VARCHAR"),
     ("shared_reports", "hidden_sections", "TEXT"),
     ("share_approvals", "hidden_sections", "TEXT"),
+    # The team-totals panel gained the basic totals after its table had already
+    # shipped. create_all() adds missing TABLES and not missing COLUMNS, so
+    # without these an import committed fine everywhere it was tested — on a
+    # database created from scratch — and failed on the one that mattered, with
+    # the coach told only "Could not import stats".
+    ("game_team_advanced", "pts", "INTEGER"),
+    ("game_team_advanced", "reb", "INTEGER"),
+    ("game_team_advanced", "oreb", "INTEGER"),
+    ("game_team_advanced", "dreb", "INTEGER"),
+    ("game_team_advanced", "ast", "INTEGER"),
+    ("game_team_advanced", "stl", "INTEGER"),
+    ("game_team_advanced", "blk", "INTEGER"),
+    ("game_team_advanced", "tov", "INTEGER"),
+    ("game_team_advanced", "pf", "INTEGER"),
 ]
 
 
