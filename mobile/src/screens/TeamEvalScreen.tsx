@@ -453,6 +453,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           name: f.name ?? 'boxscore',
           type: f.mimeType ?? 'application/octet-stream',
         })),
+        activeGame.id,
         (done, total) => setImportProgress({ done, total }),
       );
       setImportedExtras({ events: result.events ?? [], shots: result.shots ?? [],
@@ -1796,7 +1797,11 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </View>
           </Sheet>
 
-          {/* Team toggle */}
+          {/* Team toggle — for tapping stats in live. A game tracked after the
+              fact has nothing to tap, and a selected team sitting above the
+              Import button read as though it scoped the import, which it has
+              not done since importing stopped being per-side. */}
+          {activeGame.tracking_mode !== 'post' && (
           <View style={s.teamToggle}>
             <TouchableOpacity
               style={[s.teamToggleBtn, entryMode === 'our' && s.teamToggleBtnActive]}
@@ -1819,6 +1824,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               </Text>
             </TouchableOpacity>
           </View>
+          )}
 
           <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
             {/* An import from before attempts were read: makes only, so no
@@ -2391,23 +2397,29 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {detailGame.our_score == null && (
             <View style={s.card}>
               <Text style={s.cardLabel}>{tr('teamGrade.finalScore')}</Text>
-              <Text style={{ color: t.muted2, fontSize: 12, lineHeight: 18, marginBottom: 10 }}>
-                {tr('teamGrade.finalScoreWhy')}
-              </Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <TextInput
-                  style={[s.input, { flex: 1, marginBottom: 0, textAlign: 'center' }]}
-                  keyboardType="number-pad" placeholder="0" placeholderTextColor={t.muted2}
-                  value={finalOurs} onChangeText={setFinalOurs}
-                />
-                <Text style={{ color: t.muted, fontSize: 16, fontFamily: fonts[800] }}>–</Text>
-                <TextInput
-                  style={[s.input, { flex: 1, marginBottom: 0, textAlign: 'center' }]}
-                  keyboardType="number-pad" placeholder="0" placeholderTextColor={t.muted2}
-                  value={finalTheirs} onChangeText={setFinalTheirs}
-                />
+              {/* The title, two boxes and Save. The paragraph that used to
+                  explain why the score was empty was four lines of reading on a
+                  phone to introduce a control that explains itself. */}
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 10 }}>
+                {/* minWidth: 0 on every flex child. A text input carries an
+                    intrinsic width on web — roughly twenty characters — and
+                    without this it refuses to shrink below it, so two of them
+                    plus the dash ran off the side of a phone. */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexGrow: 1, flexBasis: 180, minWidth: 0 }}>
+                  <TextInput
+                    style={[s.input, { flex: 1, minWidth: 0, marginBottom: 0, textAlign: 'center' }]}
+                    keyboardType="number-pad" placeholder="0" placeholderTextColor={t.muted2}
+                    value={finalOurs} onChangeText={setFinalOurs}
+                  />
+                  <Text style={{ color: t.muted, fontSize: 16, fontFamily: fonts[800] }}>–</Text>
+                  <TextInput
+                    style={[s.input, { flex: 1, minWidth: 0, marginBottom: 0, textAlign: 'center' }]}
+                    keyboardType="number-pad" placeholder="0" placeholderTextColor={t.muted2}
+                    value={finalTheirs} onChangeText={setFinalTheirs}
+                  />
+                </View>
                 <TouchableOpacity
-                  style={[s.modalBtn, { backgroundColor: t.ctaBg, paddingHorizontal: 18 }]}
+                  style={[s.modalBtn, { backgroundColor: t.ctaBg, paddingHorizontal: 22, flexGrow: 1, flexBasis: 110 }]}
                   onPress={saveFinalScore}
                   disabled={savingScore || !finalOurs.trim() || !finalTheirs.trim()}
                 >
@@ -3772,12 +3784,17 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   quarterBtnActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   quarterBtnText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
   quarterBtnTextActive: { color: t.ctaText },
+  // Wraps rather than squeezes. Four chips split across a phone leave about
+  // 78px each, which is not enough for "Game Insights" or a team called Senegal
+  // Lions — the labels came out as "Game Insig…" and the row stopped saying
+  // what any of the tabs were.
   teamToggle: {
-    flexDirection: 'row', padding: 12, gap: 8,
+    flexDirection: 'row', flexWrap: 'wrap', padding: 12, gap: 8,
     borderBottomWidth: 1, borderBottomColor: t.divider,
   },
   teamToggleBtn: {
-    flex: 1, paddingVertical: 9, borderRadius: 999,
+    flexGrow: 1, flexBasis: 130, minWidth: 130,
+    paddingVertical: 9, paddingHorizontal: 10, borderRadius: 999,
     borderWidth: 1, borderColor: t.line, alignItems: 'center',
   },
   teamToggleBtnActive: { backgroundColor: t.accentSoft, borderColor: t.accent },

@@ -396,13 +396,17 @@ export const importsAPI = {
    * the server merges again when they are committed, so nothing depends on this
    * getting it right.
    */
-  gameStatsPreview: async (files: PickedFile[], onProgress?: (done: number, total: number) => void) => {
+  gameStatsPreview: async (files: PickedFile[], gameId?: number, onProgress?: (done: number, total: number) => void) => {
     const players: any[] = [], events: any[] = [], shots: any[] = [], team_stats: any[] = [];
     const errors: string[] = [];
     for (let i = 0; i < files.length; i++) {
       onProgress?.(i, files.length);
       try {
-        const r = await api.post('/imports/game-stats/preview', await _importFormMulti([files[i]]),
+        const form = await _importFormMulti([files[i]]);
+        // The game the file belongs to, so the server can place each team by
+        // name instead of guessing which one is the opponent.
+        if (gameId != null) form.append('game_id', String(gameId));
+        const r = await api.post('/imports/game-stats/preview', form,
           { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 180000 }).then(x => x.data);
         players.push(...(r.players ?? []));
         events.push(...(r.events ?? []));

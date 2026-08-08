@@ -2222,7 +2222,6 @@
     "playersFound": "{{count}} oyuncu okundu",
     "finalScore": "Final skoru",
     "couldNotSaveScore": "Skor kaydedilemedi.",
-    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
     "readingFiles": "{{total}} dosyadan {{done}}. okunuyor…",
     "gameInsights": "Maç analizi"
   },

@@ -2222,7 +2222,6 @@
     "playersFound": "{{count}} giocatori letti",
     "finalScore": "Punteggio finale",
     "couldNotSaveScore": "Impossibile salvare il punteggio.",
-    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
     "readingFiles": "Lettura file {{done}} di {{total}}…",
     "gameInsights": "Analisi partita"
   },

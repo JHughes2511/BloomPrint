@@ -2,7 +2,7 @@
 model extracts structured rows, the app shows a preview, and a separate commit
 endpoint writes the confirmed data. Deterministic writes stay server-side; only
 the messy file → rows step is AI."""
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -118,6 +118,8 @@ def roster_commit(
 @router.post("/game-stats/preview")
 async def game_stats_preview(
     files: list[UploadFile] = File(...),
+    game_id: int | None = Form(None),
+    db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
     """Read a box score out of any number of files, of any type.
@@ -179,6 +181,23 @@ async def game_stats_preview(
                     norm[k] = n
         clean.append({"player_name": name, "team_name": str(p.get("team_name") or "").strip(),
                       "is_opponent": bool(p.get("is_opponent")), "stats": norm})
+
+    # The game knows who is playing; the file knows what it called them. Matching
+    # the two is far better than the model's guess at which side is "the
+    # opponent" — a sheet says "Angola" and "Egypt", not "us" and "them", so
+    # without this every team on it defaulted to our side, both teams' players
+    # landed under one, and the game had no opponent score to work a result out
+    # from. The coach can still change it; this is only what it opens on.
+    if game_id is not None:
+        from .game_eval import _side_for
+        game = db.get(models.GameSession, game_id)
+        if game is not None:
+            team_row = db.get(models.Team, game.team_id) if game.team_id else None
+            ours = (team_row.name if team_row else None) or coach.program_name or ""
+            for row in clean:
+                side = _side_for(row["team_name"], ours, game.opponent_name or "")
+                if side is not None:
+                    row["is_opponent"] = side
 
     # The same player read from two files is one player. Merged by taking the
     # larger count per stat rather than adding: two photos of the same sheet are

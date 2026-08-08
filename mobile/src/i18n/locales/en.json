@@ -2222,7 +2222,6 @@
     "playersFound": "{{count}} players read",
     "finalScore": "Final score",
     "couldNotSaveScore": "Could not save the score.",
-    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
     "readingFiles": "Reading file {{done}} of {{total}}…",
     "gameInsights": "Game Insights"
   },

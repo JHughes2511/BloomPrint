@@ -2222,7 +2222,6 @@
     "playersFound": "{{count}} खिलाड़ी पढ़े गए",
     "finalScore": "अंतिम स्कोर",
     "couldNotSaveScore": "स्कोर सहेजा नहीं जा सका।",
-    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
     "readingFiles": "{{total}} में से फ़ाइल {{done}} पढ़ी जा रही है…",
     "gameInsights": "मैच विश्लेषण"
   },
