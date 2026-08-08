@@ -2141,7 +2141,7 @@
     "opp": "OPP",
     "noStatsRead": "სტატისტიკა ვერ წაიკითხა",
     "importStats": "სტატისტიკის იმპორტი",
-    "teamOptional": "გუნდი (არასავალდებულო)",
+    "teamOptional": "გუნდი",
     "noneNoTeam": "არცერთი (გუნდის გარეშე)",
     "selectTeam": "აირჩიეთ გუნდი",
     "none": "არცერთი",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "თამაშის სესია გაზიარდა {{count}} პერსონალის წევრთან.",
     "couldNotShare": "გაზიარება ვერ მოხერხდა",
     "noStaffFound": "პერსონალი ვერ მოიძებნა.",
-    "gameView": "თამაშების ხედი"
+    "gameView": "თამაშების ხედი",
+    "opponentFromTeams": "შენი გუნდებიდან",
+    "opponentPlayedBefore": "უკვე ნათამაშები"
   },
   "whiteboard": {
     "title": "დაფა",

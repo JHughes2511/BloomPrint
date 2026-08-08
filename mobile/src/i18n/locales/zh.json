@@ -2141,7 +2141,7 @@
     "opp": "对手",
     "noStatsRead": "未读取到数据",
     "importStats": "导入数据",
-    "teamOptional": "球队（选填）",
+    "teamOptional": "球队",
     "noneNoTeam": "无（无球队）",
     "selectTeam": "选择球队",
     "none": "无",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "比赛记录已分享给 {{count}} 名工作人员。",
     "couldNotShare": "无法分享",
     "noStaffFound": "未找到工作人员。",
-    "gameView": "比赛视图"
+    "gameView": "比赛视图",
+    "opponentFromTeams": "来自你的球队",
+    "opponentPlayedBefore": "曾经交手"
   },
   "whiteboard": {
     "title": "战术板",

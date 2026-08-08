@@ -2141,7 +2141,7 @@
     "opp": "ADV",
     "noStatsRead": "Nenhuma estatística lida",
     "importStats": "Importar Estatísticas",
-    "teamOptional": "EQUIPE (opcional)",
+    "teamOptional": "EQUIPE",
     "noneNoTeam": "Nenhuma (sem equipe)",
     "selectTeam": "Selecionar equipe",
     "none": "Nenhuma",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Sessão de jogo compartilhada com {{count}} membros da comissão.",
     "couldNotShare": "Não foi possível compartilhar",
     "noStaffFound": "Nenhum membro da comissão encontrado.",
-    "gameView": "VISÃO DE JOGOS"
+    "gameView": "VISÃO DE JOGOS",
+    "opponentFromTeams": "Das tuas equipas",
+    "opponentPlayedBefore": "Já defrontado"
   },
   "whiteboard": {
     "title": "Quadro Tático",

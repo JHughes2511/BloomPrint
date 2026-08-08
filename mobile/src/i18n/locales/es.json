@@ -2141,7 +2141,7 @@
     "opp": "RIV",
     "noStatsRead": "No se leyeron estadísticas",
     "importStats": "Importar Estadísticas",
-    "teamOptional": "EQUIPO (opcional)",
+    "teamOptional": "EQUIPO",
     "noneNoTeam": "Ninguno (sin equipo)",
     "selectTeam": "Seleccionar equipo",
     "none": "Ninguno",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Sesión de partido compartida con {{count}} miembros del cuerpo técnico.",
     "couldNotShare": "No se pudo compartir",
     "noStaffFound": "No se encontró cuerpo técnico.",
-    "gameView": "VISTA DE PARTIDOS"
+    "gameView": "VISTA DE PARTIDOS",
+    "opponentFromTeams": "De tus equipos",
+    "opponentPlayedBefore": "Ya jugado"
   },
   "whiteboard": {
     "title": "Pizarra",

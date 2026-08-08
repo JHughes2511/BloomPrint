@@ -2141,7 +2141,7 @@
     "opp": "OPP",
     "noStatsRead": "Walang nabasang stats",
     "importStats": "Mag-import ng Stats",
-    "teamOptional": "KOPONAN (opsyonal)",
+    "teamOptional": "KOPONAN",
     "noneNoTeam": "Wala (walang team)",
     "selectTeam": "Pumili ng team",
     "none": "Wala",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Naibahagi ang game session sa {{count}} miyembro ng staff.",
     "couldNotShare": "Hindi maibahagi",
     "noStaffFound": "Walang nakitang staff.",
-    "gameView": "VIEW NG LARO"
+    "gameView": "VIEW NG LARO",
+    "opponentFromTeams": "Mula sa iyong mga koponan",
+    "opponentPlayedBefore": "Nalaro na"
   },
   "whiteboard": {
     "title": "Whiteboard",

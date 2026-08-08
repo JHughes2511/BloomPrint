@@ -2141,7 +2141,7 @@
     "opp": "विप",
     "noStatsRead": "कोई आँकड़े नहीं पढ़े गए",
     "importStats": "आँकड़े इम्पोर्ट करें",
-    "teamOptional": "टीम (वैकल्पिक)",
+    "teamOptional": "टीम",
     "noneNoTeam": "कोई नहीं (टीम रहित)",
     "selectTeam": "टीम चुनें",
     "none": "कोई नहीं",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "गेम सेशन {{count}} स्टाफ़ सदस्यों के साथ साझा किया गया।",
     "couldNotShare": "साझा नहीं हो सका",
     "noStaffFound": "कोई स्टाफ़ नहीं मिला।",
-    "gameView": "गेम व्यू"
+    "gameView": "गेम व्यू",
+    "opponentFromTeams": "आपकी टीमों से",
+    "opponentPlayedBefore": "पहले खेला"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",

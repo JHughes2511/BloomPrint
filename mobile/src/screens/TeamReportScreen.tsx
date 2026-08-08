@@ -533,7 +533,13 @@ export default function TeamReportScreen() {
           <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
             <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>{tr('teamReport.title')}</Text>
           </View>
-          <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import')}>
+          {/* Same import as the Roster page's button. Without mode:'roster' the
+              screen drops the "create or pick a team" block and shows the eval
+              variant instead — so the same words led to a different screen
+              depending on which page you pressed them from, and a coach who
+              came here to get a roster in had no way to say which team it was
+              for. */}
+          <TouchableOpacity style={styles.importBtn} onPress={() => navigation.navigate('Import', { mode: 'roster' })}>
             <Ionicons name="cloud-upload-outline" size={18} color={t.muted} />
             <Text style={styles.importText} numberOfLines={1}>{tr('teamReport.importRoster')}</Text>
           </TouchableOpacity>

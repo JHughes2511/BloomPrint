@@ -2141,7 +2141,7 @@
     "opp": "OPP",
     "noStatsRead": "No stats read",
     "importStats": "Import Stats",
-    "teamOptional": "TEAM (optional)",
+    "teamOptional": "TEAM",
     "noneNoTeam": "None (no team)",
     "selectTeam": "Select team",
     "none": "None",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Game session shared with {{count}} staff members.",
     "couldNotShare": "Could not share",
     "noStaffFound": "No staff found.",
-    "gameView": "GAME VIEW"
+    "gameView": "GAME VIEW",
+    "opponentFromTeams": "From your teams",
+    "opponentPlayedBefore": "Played before"
   },
   "whiteboard": {
     "title": "Whiteboard",

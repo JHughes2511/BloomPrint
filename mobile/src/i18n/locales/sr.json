@@ -2141,7 +2141,7 @@
     "opp": "PRO",
     "noStatsRead": "Nije pročitana statistika",
     "importStats": "Uvezi statistiku",
-    "teamOptional": "TIM (opciono)",
+    "teamOptional": "TIM",
     "noneNoTeam": "Nijedan (bez tima)",
     "selectTeam": "Izaberi tim",
     "none": "Nijedan",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Sesija utakmice podeljena sa {{count}} članova štaba.",
     "couldNotShare": "Nije moguće podeliti",
     "noStaffFound": "Nije pronađen štab.",
-    "gameView": "PRIKAZ UTAKMICA"
+    "gameView": "PRIKAZ UTAKMICA",
+    "opponentFromTeams": "Iz tvojih timova",
+    "opponentPlayedBefore": "Već igrano"
   },
   "whiteboard": {
     "title": "Tabla",

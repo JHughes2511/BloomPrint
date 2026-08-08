@@ -2141,7 +2141,7 @@
     "opp": "AVV",
     "noStatsRead": "Nessuna statistica letta",
     "importStats": "Importa Statistiche",
-    "teamOptional": "SQUADRA (facoltativo)",
+    "teamOptional": "SQUADRA",
     "noneNoTeam": "Nessuna (senza squadra)",
     "selectTeam": "Seleziona squadra",
     "none": "Nessuna",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Sessione di gioco condivisa con {{count}} membri dello staff.",
     "couldNotShare": "Impossibile condividere",
     "noStaffFound": "Nessun membro dello staff trovato.",
-    "gameView": "VISTA PARTITE"
+    "gameView": "VISTA PARTITE",
+    "opponentFromTeams": "Dalle tue squadre",
+    "opponentPlayedBefore": "Già affrontata"
   },
   "whiteboard": {
     "title": "Lavagna",

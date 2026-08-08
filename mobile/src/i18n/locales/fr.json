@@ -2141,7 +2141,7 @@
     "opp": "ADV",
     "noStatsRead": "Aucune stat lue",
     "importStats": "Importer les stats",
-    "teamOptional": "ÉQUIPE (facultatif)",
+    "teamOptional": "ÉQUIPE",
     "noneNoTeam": "Aucune (sans équipe)",
     "selectTeam": "Choisir une équipe",
     "none": "Aucune",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Session de match partagée avec {{count}} membres du staff.",
     "couldNotShare": "Impossible de partager",
     "noStaffFound": "Aucun membre du staff trouvé.",
-    "gameView": "VUE MATCHS"
+    "gameView": "VUE MATCHS",
+    "opponentFromTeams": "Parmi vos équipes",
+    "opponentPlayedBefore": "Déjà affronté"
   },
   "whiteboard": {
     "title": "Tableau blanc",

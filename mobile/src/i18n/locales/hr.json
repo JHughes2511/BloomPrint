@@ -2141,7 +2141,7 @@
     "opp": "PRO",
     "noStatsRead": "Statistika nije pročitana",
     "importStats": "Uvezi statistiku",
-    "teamOptional": "EKIPA (neobavezno)",
+    "teamOptional": "EKIPA",
     "noneNoTeam": "Nijedna (bez ekipe)",
     "selectTeam": "Odaberi ekipu",
     "none": "Nijedna",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Utakmica podijeljena s {{count}} članova stožera.",
     "couldNotShare": "Nije moguće podijeliti",
     "noStaffFound": "Nije pronađen stožer.",
-    "gameView": "PRIKAZ UTAKMICA"
+    "gameView": "PRIKAZ UTAKMICA",
+    "opponentFromTeams": "Iz tvojih ekipa",
+    "opponentPlayedBefore": "Već igrano"
   },
   "whiteboard": {
     "title": "Ploča",

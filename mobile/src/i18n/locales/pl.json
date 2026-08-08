@@ -2141,7 +2141,7 @@
     "opp": "RYW",
     "noStatsRead": "Nie odczytano statystyk",
     "importStats": "Importuj statystyki",
-    "teamOptional": "ZESPÓŁ (opcjonalnie)",
+    "teamOptional": "ZESPÓŁ",
     "noneNoTeam": "Brak (bez zespołu)",
     "selectTeam": "Wybierz zespół",
     "none": "Brak",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Sesję meczową udostępniono {{count}} członkom sztabu.",
     "couldNotShare": "Nie udało się udostępnić",
     "noStaffFound": "Nie znaleziono sztabu.",
-    "gameView": "WIDOK MECZÓW"
+    "gameView": "WIDOK MECZÓW",
+    "opponentFromTeams": "Z twoich zespołów",
+    "opponentPlayedBefore": "Już rozegrane"
   },
   "whiteboard": {
     "title": "Tablica",

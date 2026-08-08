@@ -2141,7 +2141,7 @@
     "opp": "相手",
     "noStatsRead": "スタッツを読み取れませんでした",
     "importStats": "スタッツをインポート",
-    "teamOptional": "チーム（任意）",
+    "teamOptional": "チーム",
     "noneNoTeam": "なし（チームなし）",
     "selectTeam": "チームを選択",
     "none": "なし",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "スタッフ{{count}}名に試合セッションを共有しました。",
     "couldNotShare": "共有できませんでした",
     "noStaffFound": "スタッフが見つかりません。",
-    "gameView": "試合表示"
+    "gameView": "試合表示",
+    "opponentFromTeams": "自分のチームから",
+    "opponentPlayedBefore": "対戦済み"
   },
   "whiteboard": {
     "title": "ホワイトボード",

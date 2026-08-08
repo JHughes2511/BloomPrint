@@ -2141,7 +2141,7 @@
     "opp": "ΑΝΤ",
     "noStatsRead": "Δεν διαβάστηκαν στατιστικά",
     "importStats": "Εισαγωγή Στατιστικών",
-    "teamOptional": "ΟΜΑΔΑ (προαιρετικό)",
+    "teamOptional": "ΟΜΑΔΑ",
     "noneNoTeam": "Καμία (χωρίς ομάδα)",
     "selectTeam": "Επίλεξε ομάδα",
     "none": "Καμία",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Ο αγώνας κοινοποιήθηκε σε {{count}} μέλη επιτελείου.",
     "couldNotShare": "Δεν ήταν δυνατή η κοινοποίηση",
     "noStaffFound": "Δεν βρέθηκε επιτελείο.",
-    "gameView": "ΠΡΟΒΟΛΗ ΑΓΩΝΩΝ"
+    "gameView": "ΠΡΟΒΟΛΗ ΑΓΩΝΩΝ",
+    "opponentFromTeams": "Από τις ομάδες σου",
+    "opponentPlayedBefore": "Έχετε ξαναπαίξει"
   },
   "whiteboard": {
     "title": "Πίνακας",

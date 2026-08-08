@@ -20,7 +20,7 @@ import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
-import { formatForLevel, periodLabel, weightBucket, formatClock, type GameFormat } from '../utils/gameClock';
+import { formatForLevel, periodLabel, weightBucket, periodForBucket, formatClock, type GameFormat } from '../utils/gameClock';
 import WhiteboardModal from '../components/WhiteboardModal';
 import ScoutContextPanel from '../components/ScoutContextPanel';
 import GameReportPanel from '../components/GameReportPanel';
@@ -168,6 +168,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [newGamePhase, setNewGamePhase] = useState('regular');
   const [newGameYear, setNewGameYear] = useState('');
   const [newGameTeamId, setNewGameTeamId] = useState<number | null>(null);
+  const [showOpponentDropdown, setShowOpponentDropdown] = useState(false);
   const [newGameDate, setNewGameDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -225,6 +226,27 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [summary, setSummary] = useState<any | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [detailTab, setDetailTab] = useState<'our' | 'opponent' | 'byquarter'>('our');
+
+  /**
+   * Everyone this game could be against: the teams on file, and everyone
+   * already played. De-duplicated case-insensitively, because "Duke" and "duke"
+   * are the same opponent and every note and scouting report on them is keyed
+   * by that string.
+   */
+  const opponentChoices = React.useMemo(() => {
+    const out: { name: string; kind: 'team' | 'played' }[] = [];
+    const seen = new Set<string>();
+    const add = (name: string, kind: 'team' | 'played') => {
+      const clean = (name ?? '').trim();
+      if (!clean || seen.has(clean.toLowerCase())) return;
+      seen.add(clean.toLowerCase());
+      out.push({ name: clean, kind });
+    };
+    for (const tm of teams as any[]) if (!tm.parent_team_id) add(tm.name, 'team');
+    for (const g of [...(sessions as any[])].sort((a, b) =>
+      new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime())) add(g.opponent_name, 'played');
+    return out;
+  }, [teams, sessions]);
   const [expandedPlayer, setExpandedPlayer] = useState<string | null>(null);
   const [expandedQuarterPlayer, setExpandedQuarterPlayer] = useState<string | null>(null);
   // Team Grade player-grades list search
@@ -462,6 +484,24 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   useEffect(() => {
     if (activeView === 'live') setActiveQuarter(derivedBucket);
   }, [derivedBucket, activeView]);
+
+  /**
+   * Move the whole game to a period — clock, header and stat tagging together.
+   *
+   * These used to be two controls that looked like one. The row below the clock
+   * set only which bucket a stat was filed under, so tapping Q3 left the header
+   * and the clock in Q2 — and because the bucket re-derives from the clock, the
+   * next boundary crossing silently undid the tap. A coach who moved to Q3 and
+   * kept tapping stats was filing them under a quarter they thought they had
+   * left, which is the one thing a tracker must not do quietly.
+   */
+  const goToBucket = (bucket: number) => {
+    const { periodIndex: pi, remaining } = periodForBucket(gameFmt, bucket);
+    setPeriodIndex(pi);
+    setClockRemaining(remaining);
+    setClockRunning(false);
+    setActiveQuarter(bucket);
+  };
 
   const advancePeriod = () => {
     setPeriodIndex(pi => pi + 1);
@@ -1503,7 +1543,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               <TouchableOpacity
                 key={q}
                 style={[s.quarterBtn, activeQuarter === q && s.quarterBtnActive]}
-                onPress={() => setActiveQuarter(q)}
+                onPress={() => goToBucket(q)}
               >
                 <Text style={[s.quarterBtnText, activeQuarter === q && s.quarterBtnTextActive]}>
                   {qLabel(q)}
@@ -2491,14 +2531,55 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   </View>
                 )}
               </>
+              {/* Opponent: pick one, or type one.
+                  This was a bare text box, so the same opponent arrived as
+                  "Duke", "duke" and "Duke University" across three games — and
+                  opponent notes, scouting reports and the knowledge base are
+                  all keyed on that name, so each spelling started its own empty
+                  history. The list holds both the teams on file and everyone
+                  already played; typing is still there for the first meeting. */}
               <Text style={s.fieldLabel}>{tr('teamGrade.opponentName')}</Text>
-              <VoiceTextInput
-                style={s.input}
-                placeholder={tr('teamGrade.opponentPlaceholder')}
-                placeholderTextColor={t.muted2}
-                value={newGameOpponent}
-                onChangeText={setNewGameOpponent}
-              />
+              <TouchableOpacity
+                style={[s.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: showOpponentDropdown ? 0 : 16 }]}
+                onPress={() => setShowOpponentDropdown(v => !v)}
+                activeOpacity={0.7}
+              >
+                <Text style={{ color: newGameOpponent ? t.ink : t.muted2, fontSize: 15 }} numberOfLines={1}>
+                  {newGameOpponent || tr('teamGrade.opponentPlaceholder')}
+                </Text>
+                <Text style={{ color: t.muted, fontSize: 12 }}>{showOpponentDropdown ? '▲' : '▼'}</Text>
+              </TouchableOpacity>
+              {showOpponentDropdown && (
+                <View style={{ borderWidth: 1, borderColor: t.line, borderRadius: 10, marginBottom: 16, overflow: 'hidden' }}>
+                  <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled style={{ maxHeight: 220 }}>
+                    <View style={{ padding: 12, gap: 8, borderBottomWidth: 1, borderBottomColor: t.line }}>
+                      <VoiceTextInput
+                        style={[s.input, { marginBottom: 0 }]}
+                        placeholder={tr('teamGrade.opponentPlaceholder')}
+                        placeholderTextColor={t.muted2}
+                        value={newGameOpponent}
+                        onChangeText={setNewGameOpponent}
+                      />
+                    </View>
+                    {opponentChoices.map(o => (
+                      <TouchableOpacity
+                        key={`${o.kind}-${o.name}`}
+                        style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: t.line,
+                                 backgroundColor: newGameOpponent === o.name ? t.accentSoft : 'transparent',
+                                 flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}
+                        onPress={() => { setNewGameOpponent(o.name); setShowOpponentDropdown(false); }}
+                      >
+                        <Text style={{ color: newGameOpponent === o.name ? t.accent : t.inkSoft, fontSize: 14, flex: 1 }} numberOfLines={1}>
+                          {o.name}
+                        </Text>
+                        <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[700] }}>
+                          {o.kind === 'team' ? tr('teamGrade.opponentFromTeams') : tr('teamGrade.opponentPlayedBefore')}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
               <Text style={s.fieldLabel}>{tr('teamGrade.locationOptional')}</Text>
               <VoiceTextInput
                 style={s.input}

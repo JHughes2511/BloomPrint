@@ -2141,7 +2141,7 @@
     "opp": "الخصم",
     "noStatsRead": "لم تُقرأ أي إحصائيات",
     "importStats": "استيراد الإحصائيات",
-    "teamOptional": "الفريق (اختياري)",
+    "teamOptional": "الفريق",
     "noneNoTeam": "بلا (بدون فريق)",
     "selectTeam": "اختر فريقًا",
     "none": "بلا",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "تمت مشاركة جلسة المباراة مع {{count}} أعضاء في الطاقم.",
     "couldNotShare": "تعذّرت المشاركة",
     "noStaffFound": "لم يُعثر على أي طاقم.",
-    "gameView": "عرض المباريات"
+    "gameView": "عرض المباريات",
+    "opponentFromTeams": "من فرقك",
+    "opponentPlayedBefore": "لعبت ضدهم سابقًا"
   },
   "whiteboard": {
     "title": "السبورة",

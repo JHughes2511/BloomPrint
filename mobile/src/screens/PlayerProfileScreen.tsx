@@ -974,7 +974,14 @@ export default function PlayerProfileScreen() {
                 : 'Select which training program to send:'}
             </Text>
             <ScrollView contentContainerStyle={{ padding: 12 }} keyboardShouldPersistTaps="handled">
-              {[...allTraining].reverse().map((ts: any, idx: number) => (
+              {/* Newest first — and "Latest" is the newest, which is this list's
+                  FIRST row. The check was `idx === allTraining.length - 1`,
+                  written for the unreversed order, so the badge sat on the
+                  oldest program and the newest had none. Sorted by date rather
+                  than trusting array order, so it cannot drift again. */}
+              {[...allTraining]
+                .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                .map((ts: any, idx: number) => (
                 <TouchableOpacity
                   key={ts.id}
                   style={{ backgroundColor: t.chip, borderRadius: 10, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: t.line }}
@@ -996,20 +1003,23 @@ export default function PlayerProfileScreen() {
                   }}
                 >
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 13 }}>
-                      {idx === allTraining.length - 1 ? 'Latest — ' : ''}{new Date(ts.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 13 }} numberOfLines={1}>
+                      {ts.title || tr('reportTypes.training_program')}
                     </Text>
-                    {idx === allTraining.length - 1 && (
+                    {idx === 0 && (
                       <View style={{ backgroundColor: t.accent, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
                         <Text style={{ color: t.ink, fontSize: 10, fontFamily: fonts[700] }}>{tr('playerProfile.latest')}</Text>
                       </View>
                     )}
                   </View>
-                  {ts.program_text ? (
-                    <Text style={{ color: t.muted, fontSize: 12, marginTop: 4 }} numberOfLines={2}>
-                      {ts.program_text.replace(/[#*_\-=]/g, '').trim().slice(0, 100)}...
-                    </Text>
-                  ) : null}
+                  {/* Title above, "Training Program · date" below — the same two
+                      lines as the cards on the page behind this sheet. What was
+                      here was the report's first hundred characters and an
+                      ellipsis, which came out as the player's own name and no
+                      content. */}
+                  <Text style={{ color: t.muted, fontSize: 12, marginTop: 4 }}>
+                    {`${tr('reportTypes.training_program')} · ${new Date(ts.created_at).toLocaleDateString()}`}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>

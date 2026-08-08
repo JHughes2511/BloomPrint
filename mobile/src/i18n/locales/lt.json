@@ -2141,7 +2141,7 @@
     "opp": "VARŽ",
     "noStatsRead": "Statistika neperskaityta",
     "importStats": "Importuoti statistiką",
-    "teamOptional": "KOMANDA (neprivaloma)",
+    "teamOptional": "KOMANDA",
     "noneNoTeam": "Nėra (be komandos)",
     "selectTeam": "Pasirinkite komandą",
     "none": "Nėra",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Rungtynių sesija bendrinama su {{count}} personalo nariais.",
     "couldNotShare": "Nepavyko pasidalinti",
     "noStaffFound": "Personalo nerasta.",
-    "gameView": "RUNGTYNIŲ RODINYS"
+    "gameView": "RUNGTYNIŲ RODINYS",
+    "opponentFromTeams": "Iš tavo komandų",
+    "opponentPlayedBefore": "Jau žaista"
   },
   "whiteboard": {
     "title": "Lenta",

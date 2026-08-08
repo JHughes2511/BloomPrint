@@ -2141,7 +2141,7 @@
     "opp": "СУП",
     "noStatsRead": "Статистику не прочитано",
     "importStats": "Імпортувати статистику",
-    "teamOptional": "КОМАНДА (необовʼязково)",
+    "teamOptional": "КОМАНДА",
     "noneNoTeam": "Немає (без команди)",
     "selectTeam": "Оберіть команду",
     "none": "Немає",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Ігрову сесію надіслано {{count}} членам персоналу.",
     "couldNotShare": "Не вдалося поділитися",
     "noStaffFound": "Персонал не знайдено.",
-    "gameView": "ПЕРЕГЛЯД ІГОР"
+    "gameView": "ПЕРЕГЛЯД ІГОР",
+    "opponentFromTeams": "З ваших команд",
+    "opponentPlayedBefore": "Уже грали"
   },
   "whiteboard": {
     "title": "Тактична дошка",

@@ -2141,7 +2141,7 @@
     "opp": "OPP",
     "noStatsRead": "לא נקראו סטטיסטיקות",
     "importStats": "ייבא סטטיסטיקות",
-    "teamOptional": "קבוצה (אופציונלי)",
+    "teamOptional": "קבוצה",
     "noneNoTeam": "ללא (בלי קבוצה)",
     "selectTeam": "בחר קבוצה",
     "none": "ללא",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "מפגש המשחק שותף עם {{count}} אנשי צוות.",
     "couldNotShare": "לא ניתן לשתף",
     "noStaffFound": "לא נמצאו אנשי צוות.",
-    "gameView": "תצוגת משחקים"
+    "gameView": "תצוגת משחקים",
+    "opponentFromTeams": "מהקבוצות שלך",
+    "opponentPlayedBefore": "שיחקתם בעבר"
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

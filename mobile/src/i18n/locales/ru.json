@@ -2141,7 +2141,7 @@
     "opp": "СОП",
     "noStatsRead": "Статистика не прочитана",
     "importStats": "Импортировать статистику",
-    "teamOptional": "КОМАНДА (необязательно)",
+    "teamOptional": "КОМАНДА",
     "noneNoTeam": "Нет (без команды)",
     "selectTeam": "Выберите команду",
     "none": "Нет",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Игровая сессия отправлена {{count}} сотрудникам.",
     "couldNotShare": "Не удалось поделиться",
     "noStaffFound": "Персонал не найден.",
-    "gameView": "ПРОСМОТР ИГР"
+    "gameView": "ПРОСМОТР ИГР",
+    "opponentFromTeams": "Из ваших команд",
+    "opponentPlayedBefore": "Уже играли"
   },
   "whiteboard": {
     "title": "Тактическая доска",

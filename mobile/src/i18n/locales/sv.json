@@ -2141,7 +2141,7 @@
     "opp": "MOTST.",
     "noStatsRead": "Ingen statistik läst",
     "importStats": "Importera statistik",
-    "teamOptional": "LAG (valfritt)",
+    "teamOptional": "LAG",
     "noneNoTeam": "Inget (inget lag)",
     "selectTeam": "Välj lag",
     "none": "Inget",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Matchsession delad med {{count}} i staben.",
     "couldNotShare": "Kunde inte dela",
     "noStaffFound": "Ingen personal hittad.",
-    "gameView": "MATCHVY"
+    "gameView": "MATCHVY",
+    "opponentFromTeams": "Från dina lag",
+    "opponentPlayedBefore": "Redan mött"
   },
   "whiteboard": {
     "title": "Taktiktavla",

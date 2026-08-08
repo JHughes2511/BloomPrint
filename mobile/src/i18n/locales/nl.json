@@ -2141,7 +2141,7 @@
     "opp": "TEG",
     "noStatsRead": "Geen statistieken gelezen",
     "importStats": "Statistieken importeren",
-    "teamOptional": "TEAM (optioneel)",
+    "teamOptional": "TEAM",
     "noneNoTeam": "Geen (geen team)",
     "selectTeam": "Selecteer team",
     "none": "Geen",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Wedstrijdsessie gedeeld met {{count}} stafleden.",
     "couldNotShare": "Kon niet delen",
     "noStaffFound": "Geen staf gevonden.",
-    "gameView": "WEDSTRIJDWEERGAVE"
+    "gameView": "WEDSTRIJDWEERGAVE",
+    "opponentFromTeams": "Uit je teams",
+    "opponentPlayedBefore": "Eerder gespeeld"
   },
   "whiteboard": {
     "title": "Tactiekbord",

@@ -2141,7 +2141,7 @@
     "opp": "RAK",
     "noStatsRead": "İstatistik okunmadı",
     "importStats": "İstatistikleri İçe Aktar",
-    "teamOptional": "TAKIM (isteğe bağlı)",
+    "teamOptional": "TAKIM",
     "noneNoTeam": "Yok (takım yok)",
     "selectTeam": "Takım seç",
     "none": "Yok",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Maç oturumu {{count}} ekip üyesiyle paylaşıldı.",
     "couldNotShare": "Paylaşılamadı",
     "noStaffFound": "Ekip üyesi bulunamadı.",
-    "gameView": "MAÇ GÖRÜNÜMÜ"
+    "gameView": "MAÇ GÖRÜNÜMÜ",
+    "opponentFromTeams": "Takımlarından",
+    "opponentPlayedBefore": "Daha önce oynandı"
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

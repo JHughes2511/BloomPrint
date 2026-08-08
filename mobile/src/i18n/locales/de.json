@@ -2141,7 +2141,7 @@
     "opp": "GEG",
     "noStatsRead": "Keine Statistiken gelesen",
     "importStats": "Statistiken importieren",
-    "teamOptional": "TEAM (optional)",
+    "teamOptional": "TEAM",
     "noneNoTeam": "Keines (kein Team)",
     "selectTeam": "Team auswählen",
     "none": "Keines",
@@ -2204,7 +2204,9 @@
     "sharedGameMsg_plural": "Spielsitzung mit {{count}} Staff-Mitgliedern geteilt.",
     "couldNotShare": "Teilen nicht möglich",
     "noStaffFound": "Kein Staff gefunden.",
-    "gameView": "SPIELANSICHT"
+    "gameView": "SPIELANSICHT",
+    "opponentFromTeams": "Aus deinen Teams",
+    "opponentPlayedBefore": "Schon gespielt"
   },
   "whiteboard": {
     "title": "Taktiktafel",

@@ -68,6 +68,27 @@ export function weightBucket(fmt: GameFormat, periodIndex: number, remainingSeco
   return (periodIndex - 1) * 2 + secondHalf + 1; // H1→1/2, H2→3/4
 }
 
+// Where the clock has to be for a stat to land in a given bucket — the inverse
+// of weightBucket.
+//
+// The live tracker used to have two controls that looked like one: the period
+// on the clock bar, and the Q1..Q4 row underneath it. Tapping Q3 moved only the
+// second, so the header still said Q2, the clock still ran Q2, and the next
+// time the clock crossed a boundary the tap was silently undone — stats went in
+// under a quarter the coach thought they had left. The row sets the period now,
+// and this is what it sets it to.
+export function periodForBucket(fmt: GameFormat, bucket: number): { periodIndex: number; remaining: number } {
+  if (bucket >= 5) return { periodIndex: fmt.numPeriods + 1, remaining: fmt.periodSeconds };
+  if (fmt.format === 'quarters') {
+    return { periodIndex: Math.min(bucket, fmt.numPeriods), remaining: fmt.periodSeconds };
+  }
+  // Halves: each half is two buckets, so an odd bucket starts the half and an
+  // even one starts at its midpoint.
+  const periodIndex = Math.min(Math.floor((bucket - 1) / 2) + 1, fmt.numPeriods);
+  const secondHalf = (bucket - 1) % 2 === 1;
+  return { periodIndex, remaining: secondHalf ? fmt.periodSeconds / 2 : fmt.periodSeconds };
+}
+
 // The multiplier for a bucket (mirror of backend _quarter_multiplier).
 export function bucketMultiplier(bucket: number): number {
   if (bucket <= 2) return 1.0;
