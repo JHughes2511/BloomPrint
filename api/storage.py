@@ -241,20 +241,25 @@ def ensure_bucket_cors() -> str:
         _cors_ok.update({"at": __import__("time").time(), "value": True})
         return f"updated to allow {len(want['CORSRules'][0]['AllowedOrigins'])} origin(s)"
     except Exception as exc:
-        missing = []
         try:
             rules = _client().get_bucket_cors(Bucket=_BUCKET).get("CORSRules") or []
         except Exception:
             rules = []
+        # Which origins the bucket WILL take an upload from, whoever set the
+        # policy. Reported instead of a bare failure: not being allowed to
+        # change a policy says nothing about whether the policy is right, and a
+        # correct bucket should not be described as broken.
+        ready = sorted({o for r in rules for o in (r.get("AllowedOrigins") or [])
+                        if cors_allows(rules, o)})
+        if ready:
+            return ("cannot change the bucket's policy (no permission), but it already "
+                    f"accepts uploads from: {', '.join(ready)}")
         if not rules:
-            missing.append("no CORS policy on the bucket")
+            why = "the bucket has no CORS policy"
         else:
-            for o in (configured or ["the app's origin"]):
-                if not cors_allows(rules, o):
-                    missing.append(f"{o} is not allowed to PUT with ETag exposed")
-        return ("COULD NOT SET and the bucket does not already allow it "
-                f"({'; '.join(missing)}). Browser uploads stay off; film uploads "
-                f"the old way. Underlying error: {exc}")
+            why = "no origin in the bucket's policy allows PUT with ETag exposed"
+        return (f"NOT READY — {why}, and this server cannot set it ({exc}). "
+                "Film uploads the old way until that is fixed.")
 
 
 # Downloaded film, kept where a second attempt can find it.
