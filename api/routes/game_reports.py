@@ -9,7 +9,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFi
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ..database import get_db, SessionLocal
+from ..database import get_db, SessionLocal, revive_if_stalled
 from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
@@ -252,6 +252,10 @@ def _attach_clip_jobs(db: Session, out: schemas.GameReportOut) -> None:
         j = by_clip.get(c.id)
         if not j:
             continue
+        # The packet page polls this too, and a clip stuck "analyzing" forever
+        # is exactly the thing a coach stares at — see revive_if_stalled.
+        if revive_if_stalled(db, j):
+            db.refresh(j)
         c.job_status = j.status
         c.job_progress = j.progress
         c.job_error = j.error

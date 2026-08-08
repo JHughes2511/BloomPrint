@@ -1144,6 +1144,69 @@ def _run_migrations():
             log.warning("Could not apply additive columns on SQLite: %s", exc)
 
 
+# A job that dies three times is failing for its own reasons, not because of
+# bad luck with deploys. Counted only for attempts that achieved nothing.
+ATTEMPT_CAP = 3
+
+# The longest a running job may legitimately go without saying anything. Every
+# phase reports itself far more often than this — the pre-scan in percentages,
+# segments one by one, the report every hundred words — so silence for this
+# long means the thread doing the work is gone.
+STALLED_AFTER_MINUTES = 15
+
+
+def revive_if_stalled(sess, job) -> bool:
+    """Notice a job nobody is working on any more, from wherever we happen to be.
+
+    The startup sweep below only runs when the server starts. A worker that dies
+    while the process keeps running — or a container replaced without the
+    replacement ever seeing the row — leaves a job saying "processing" with a
+    progress label frozen at whatever it last reported. Nothing then looks at it
+    again, so the coach watches a bar that will never move for as long as they
+    are willing to wait.
+
+    This runs on the polling path instead: every time the app asks how a job is
+    doing, a job that has said nothing for a quarter of an hour is picked back
+    up, or closed with a reason. Cheap enough to do on every poll — it is one
+    timestamp comparison — and it needs no scheduler to be running.
+
+    Returns True if something was done to the job.
+    """
+    from datetime import datetime, timedelta
+
+    if job is None or job.status != "processing" or not job.updated_at:
+        return False
+    if datetime.utcnow() - job.updated_at < timedelta(minutes=STALLED_AFTER_MINUTES):
+        return False
+
+    progressed = _made_progress(job)
+    attempts = 0 if progressed else (job.attempts or 0) + 1
+    done_now, _ = _segments_done(job)
+    if job.payload and attempts <= ATTEMPT_CAP:
+        job.attempts = attempts
+        job.partial = _remember_segment_count(job, done_now)
+        # Stamped so the next poll, seconds later, sees a fresh row and does not
+        # start a second copy of the same work.
+        job.updated_at = datetime.utcnow()
+        sess.commit()
+        _resume_job(job.id, job.kind, job.payload)
+        log.info("Stalled job %s picked back up (attempt %s)", job.id, attempts)
+        return True
+
+    job.status = "error"
+    job.error = (
+        "This stopped part-way and could not be picked back up — nothing was "
+        "saved. Run it again."
+        if not job.payload else
+        f"Stopped after {ATTEMPT_CAP} attempts that made no progress. "
+        "Try running it again."
+    )
+    _mark_subject_failed(sess, job)
+    sess.commit()
+    log.info("Stalled job %s closed as errored", job.id)
+    return True
+
+
 def _fail_orphaned_jobs():
     """Pick up, or close out, jobs whose process is gone.
 
@@ -1168,7 +1231,6 @@ def _fail_orphaned_jobs():
     attempt is making progress and starts its count again; only a job that
     comes back with nothing to show for an attempt burns one.
     """
-    ATTEMPT_CAP = 3
     try:
         from sqlalchemy.orm import Session as _Session
         from . import models

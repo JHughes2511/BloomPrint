@@ -7,7 +7,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFi
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ..database import get_db, SessionLocal
+from ..database import get_db, revive_if_stalled, SessionLocal
 from ..auth import get_current_coach
 from .. import models, schemas
 from ..softdelete import soft_delete
@@ -365,6 +365,11 @@ def get_generation_job(
     job = db.get(models.GenerationJob, job_id)
     if not job or job.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Job not found")
+    # Asking how a job is doing is the one moment we are guaranteed to be
+    # looking at it. A job whose worker died says "processing" forever
+    # otherwise — see revive_if_stalled.
+    if revive_if_stalled(db, job):
+        db.refresh(job)
     out = {"id": job.id, "kind": job.kind, "status": job.status,
            "result_id": job.result_id, "error": job.error, "progress": job.progress, "result": None}
     if job.status == "done" and job.result_id:
