@@ -153,13 +153,34 @@ def cors_is_current(existing: list[dict] | None, want: dict) -> bool:
     return False
 
 
+def cors_allows(existing: list[dict] | None, origin: str | None) -> bool:
+    """Would the bucket accept an upload from THIS origin?
+
+    The question that actually matters, and a narrower one than "does the policy
+    match the one we would write". A policy set by hand in the Cloudflare
+    dashboard will list the production origins and nothing else — entirely
+    correct, and not equal to ours. Judging it by equality would report browser
+    uploads as unavailable while the bucket was perfectly willing.
+    """
+    if not origin:
+        return False
+    for got in existing or []:
+        origins = got.get("AllowedOrigins") or []
+        methods = {m.upper() for m in (got.get("AllowedMethods") or [])}
+        if ((origin in origins or "*" in origins)
+                and "PUT" in methods
+                and "ETag" in (got.get("ExposeHeaders") or [])):
+            return True
+    return False
+
+
 # Whether the bucket really accepts browser uploads. Cached because it is asked
 # on the upload path, and re-checked periodically so granting the permission
 # later starts working without a restart.
-_cors_ok: dict = {"at": 0.0, "value": False}
+_cors_ok: dict = {"at": 0.0, "value": False, "origin": None}
 
 
-def browser_uploads_allowed() -> bool:
+def browser_uploads_allowed(origin: str | None = None) -> bool:
     """Is a direct browser upload actually going to work?
 
     Not the same question as "is a bucket configured". The bucket also has to
@@ -174,14 +195,18 @@ def browser_uploads_allowed() -> bool:
     if not use_s3():
         return False
     now = time.time()
-    if now - _cors_ok["at"] < 300:
+    key = origin or ""
+    if now - _cors_ok["at"] < 300 and _cors_ok.get("origin") == key:
         return _cors_ok["value"]
     try:
         existing = _client().get_bucket_cors(Bucket=_BUCKET).get("CORSRules")
-        ok = cors_is_current(existing, desired_cors())
+        # Either the policy we would write, or any policy that happens to allow
+        # the origin actually asking. The second is what a hand-written rule in
+        # the Cloudflare dashboard looks like.
+        ok = cors_allows(existing, origin) or cors_is_current(existing, desired_cors())
     except Exception:
         ok = False
-    _cors_ok.update({"at": now, "value": ok})
+    _cors_ok.update({"at": now, "value": ok, "origin": key})
     return ok
 
 

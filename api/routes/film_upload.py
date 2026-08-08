@@ -33,7 +33,7 @@ reaches storage.
 import os
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -60,7 +60,7 @@ class StartIn(BaseModel):
 
 
 @router.get("/available")
-def available(coach: models.Coach = Depends(get_current_coach)):
+def available(request: Request, coach: models.Coach = Depends(get_current_coach)):
     """Can the browser upload straight to storage, or must it go through here?
 
     False on a local dev box with no bucket configured, where the old path is
@@ -69,7 +69,11 @@ def available(coach: models.Coach = Depends(get_current_coach)):
     # Both must hold: somewhere to put it, and a bucket that will accept it
     # from a browser. See storage.browser_uploads_allowed — a bucket whose CORS
     # policy could not be set would fail every part with nothing to show for it.
-    return {"direct": storage.browser_uploads_allowed(), "part_size": PART_SIZE}
+    # Asked about the origin the browser is actually on, since that is the one
+    # the bucket has to allow — a hand-written policy naming only the
+    # production site is correct, and would not match ours.
+    return {"direct": storage.browser_uploads_allowed(request.headers.get("origin")),
+            "part_size": PART_SIZE}
 
 
 @router.post("/start")
