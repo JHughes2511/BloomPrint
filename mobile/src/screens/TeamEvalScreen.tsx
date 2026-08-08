@@ -173,6 +173,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [newGameYear, setNewGameYear] = useState('');
   const [newGameTeamId, setNewGameTeamId] = useState<number | null>(null);
   const [showOpponentDropdown, setShowOpponentDropdown] = useState(false);
+  const [finalOurs, setFinalOurs] = useState('');
+  const [finalTheirs, setFinalTheirs] = useState('');
+  const [savingScore, setSavingScore] = useState(false);
   const opponentOutside = useCloseOnOutside(showOpponentDropdown, () => setShowOpponentDropdown(false));
   const newTeamOutside = useCloseOnOutside(showTeamDropdown, () => setShowTeamDropdown(false));
   /**
@@ -845,6 +848,24 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setLoadingGameReport(false);
   };
 
+  const saveFinalScore = async () => {
+    if (!detailGame) return;
+    setSavingScore(true);
+    try {
+      const updated = await gameEvalAPI.updateSession(detailGame.id, {
+        our_score: parseInt(finalOurs, 10) || 0,
+        opponent_score: parseInt(finalTheirs, 10) || 0,
+      });
+      setDetailGame(updated);
+      setFinalOurs(''); setFinalTheirs('');
+      loadData();
+    } catch (e: any) {
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('teamGrade.couldNotSaveScore'));
+    } finally {
+      setSavingScore(false);
+    }
+  };
+
   const exportDetailPdf = async () => {
     if (!summary || !detailGame) return;
     setExportingPdf(true);
@@ -1453,7 +1474,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                                   and hijacked every attempt to scroll the chart. */}
                               <Rect x={x} y={y} width={barW} height={h} rx={6} fill={barColor} onPress={onTap} />
                               <SvgText x={x + barW / 2} y={chartH + 16} fill={t.muted} fontSize={9} textAnchor="middle">{(pt.opponent ?? '').slice(0, 7)}</SvgText>
-                              <SvgText x={x + barW / 2} y={chartH + 32} fill={won ? t.positive : t.negative} fontSize={10} fontWeight="800" textAnchor="middle">{won ? tr('teamGrade.winShort') : tr('teamGrade.lossShort')}</SvgText>
+                              {/* No letter when the score is unknown. The bar
+                                  went neutral for those games but this still
+                                  said L, so a game nobody had scored was
+                                  labelled a loss in the one place a coach reads
+                                  fastest. */}
+                              {known && (
+                                <SvgText x={x + barW / 2} y={chartH + 32} fill={won ? t.positive : t.negative} fontSize={10} fontWeight="800" textAnchor="middle">{won ? tr('teamGrade.winShort') : tr('teamGrade.lossShort')}</SvgText>
+                              )}
                             </React.Fragment>
                           );
                         })}
@@ -2298,9 +2326,48 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* The game's numbers, under the grades. Everything here is derived
               from what was actually recorded; the panels that need a file we
               don't have say which one rather than drawing an empty chart. */}
-          <View style={{ paddingHorizontal: 16 }}>
-            <GameStatsPanel gameId={detailGame.id} />
-          </View>
+          {/* The final score, when nothing has supplied one.
+
+              A game's score is worked out from the stats, but only when BOTH
+              sides' numbers are in — with one team's box score imported there is
+              genuinely no way to know what the other team scored, and a season
+              record cannot be built from half a result. Rather than leave the
+              record reading 0W-0L with no explanation, the game says what is
+              missing and takes the two numbers. */}
+          {detailGame.our_score == null && (
+            <View style={s.card}>
+              <Text style={s.cardLabel}>{tr('teamGrade.finalScore')}</Text>
+              <Text style={{ color: t.muted2, fontSize: 12, lineHeight: 18, marginBottom: 10 }}>
+                {tr('teamGrade.finalScoreWhy')}
+              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <TextInput
+                  style={[s.input, { flex: 1, marginBottom: 0, textAlign: 'center' }]}
+                  keyboardType="number-pad" placeholder="0" placeholderTextColor={t.muted2}
+                  value={finalOurs} onChangeText={setFinalOurs}
+                />
+                <Text style={{ color: t.muted, fontSize: 16, fontFamily: fonts[800] }}>–</Text>
+                <TextInput
+                  style={[s.input, { flex: 1, marginBottom: 0, textAlign: 'center' }]}
+                  keyboardType="number-pad" placeholder="0" placeholderTextColor={t.muted2}
+                  value={finalTheirs} onChangeText={setFinalTheirs}
+                />
+                <TouchableOpacity
+                  style={[s.modalBtn, { backgroundColor: t.ctaBg, paddingHorizontal: 18 }]}
+                  onPress={saveFinalScore}
+                  disabled={savingScore || !finalOurs.trim() || !finalTheirs.trim()}
+                >
+                  {savingScore
+                    ? <ActivityIndicator color={t.ctaText} size="small" />
+                    : <Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>{tr('common.save')}</Text>}
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {/* No wrapper padding: these cards are siblings of the grades card
+              above and have to start and end on the same lines as it. */}
+          <GameStatsPanel gameId={detailGame.id} />
 
           {/* Action buttons */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, marginBottom: 16 }}>

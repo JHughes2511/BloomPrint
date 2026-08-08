@@ -154,7 +154,8 @@ const KEY_STATS: { key: string; label: string }[] = [
 const BOX_COLS = ['PTS', 'FGM', 'FGA', '3PM', '3PA', 'FTM', 'FTA',
                   'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF'];
 
-export default function GameStatsPanel({ gameId }: { gameId: number }) {
+export default function GameStatsPanel({ gameId, refreshKey = 0 }:
+  { gameId: number; refreshKey?: number }) {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
   const s = makeStyles(t);
@@ -170,7 +171,9 @@ export default function GameStatsPanel({ gameId }: { gameId: number }) {
       .catch(() => { if (live) setData(null); })
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [gameId]);
+    // refreshKey: an import that just committed has to show up here
+    // without the coach leaving the screen and coming back.
+  }, [gameId, refreshKey]);
 
   if (loading) return <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />;
   if (!data?.available?.box_score) {
@@ -371,7 +374,9 @@ export default function GameStatsPanel({ gameId }: { gameId: number }) {
 }
 
 const makeStyles = (t: ThemeTokens) => ({
-  card: { backgroundColor: t.card, borderRadius: 14, padding: 14, marginBottom: 12,
+  // Same geometry as the screen's own cards, so a panel dropped beneath them
+  // lines up rather than sitting inset by a few pixels.
+  card: { backgroundColor: t.card, borderRadius: 18, padding: 16, marginBottom: 14,
           borderWidth: 1, borderColor: t.cardBorder } as const,
   cardLabel: { color: t.label, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1,
                textTransform: 'uppercase', marginBottom: 10 } as const,

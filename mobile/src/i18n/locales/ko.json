@@ -2219,7 +2219,10 @@
     "unlockPbp": "Play-by-play → lead tracker and advanced stats.",
     "unlockShots": "Shot locations → shot chart.",
     "unnamedTeam": "이름 없는 팀",
-    "playersFound": "{{count}}명 읽음"
+    "playersFound": "{{count}}명 읽음",
+    "finalScore": "최종 점수",
+    "couldNotSaveScore": "점수를 저장하지 못했습니다.",
+    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record."
   },
   "whiteboard": {
     "title": "작전판",

@@ -2219,7 +2219,10 @@
     "unlockPbp": "Play-by-play → lead tracker and advanced stats.",
     "unlockShots": "Shot locations → shot chart.",
     "unnamedTeam": "فريق بلا اسم",
-    "playersFound": "تمت قراءة {{count}} لاعبين"
+    "playersFound": "تمت قراءة {{count}} لاعبين",
+    "finalScore": "النتيجة النهائية",
+    "couldNotSaveScore": "تعذّر حفظ النتيجة.",
+    "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record."
   },
   "whiteboard": {
     "title": "السبورة",
