@@ -2211,7 +2211,8 @@
     "matchup": "{{us}} vs {{them}}",
     "allTeams": "Todos los equipos",
     "nTeams": "{{count}} equipos",
-    "reimportNeeded": "Las estadísticas de este partido se importaron antes de leer los intentos, así que no hay porcentajes de tiro y cada triple cuenta dos veces. Vuelve a importar el acta."
+    "reimportNeeded": "Las estadísticas de este partido se importaron antes de leer los intentos, así que no hay porcentajes de tiro y cada triple cuenta dos veces. Vuelve a importar el acta.",
+    "opponentNewHeading": "O escribe un nuevo rival"
   },
   "whiteboard": {
     "title": "Pizarra",

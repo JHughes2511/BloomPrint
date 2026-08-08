@@ -2211,7 +2211,8 @@
     "matchup": "{{us}} tegen {{them}}",
     "allTeams": "Alle teams",
     "nTeams": "{{count}} teams",
-    "reimportNeeded": "De statistieken van deze wedstrijd zijn geïmporteerd voordat pogingen werden gelezen: geen schotpercentages en elke driepunter telt dubbel. Importeer de boxscore opnieuw."
+    "reimportNeeded": "De statistieken van deze wedstrijd zijn geïmporteerd voordat pogingen werden gelezen: geen schotpercentages en elke driepunter telt dubbel. Importeer de boxscore opnieuw.",
+    "opponentNewHeading": "Of typ een nieuwe tegenstander"
   },
   "whiteboard": {
     "title": "Tactiekbord",

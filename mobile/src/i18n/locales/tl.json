@@ -2211,7 +2211,8 @@
     "matchup": "{{us}} laban sa {{them}}",
     "allTeams": "Lahat ng koponan",
     "nTeams": "{{count}} koponan",
-    "reimportNeeded": "Na-import ang stats ng laro bago pa mabasa ang shot attempts, kaya walang shooting percentage at doble ang bilang ng bawat tres. I-import muli ang box score."
+    "reimportNeeded": "Na-import ang stats ng laro bago pa mabasa ang shot attempts, kaya walang shooting percentage at doble ang bilang ng bawat tres. I-import muli ang box score.",
+    "opponentNewHeading": "O mag-type ng bagong kalaban"
   },
   "whiteboard": {
     "title": "Whiteboard",

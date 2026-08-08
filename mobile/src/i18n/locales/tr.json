@@ -2211,7 +2211,8 @@
     "matchup": "{{us}} - {{them}}",
     "allTeams": "Tüm takımlar",
     "nTeams": "{{count}} takım",
-    "reimportNeeded": "Bu maçın istatistikleri şut denemeleri okunmadan önce içe aktarıldı; isabet yüzdesi yok ve her üçlük iki kez sayılıyor. İstatistik cetvelini yeniden içe aktar."
+    "reimportNeeded": "Bu maçın istatistikleri şut denemeleri okunmadan önce içe aktarıldı; isabet yüzdesi yok ve her üçlük iki kez sayılıyor. İstatistik cetvelini yeniden içe aktar.",
+    "opponentNewHeading": "Ya da yeni rakip yaz"
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

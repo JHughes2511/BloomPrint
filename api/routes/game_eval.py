@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, File
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..database import get_db, SessionLocal
@@ -887,9 +888,9 @@ def list_sessions(
     if accessible_ids:
         conds.append(models.GameSession.team_id.in_(accessible_ids))
     q = db.query(models.GameSession).filter(or_(*conds))
-    picked = _selected_team_ids(team_ids)
-    if picked:
-        q = q.filter(models.GameSession.team_id.in_(picked))
+    picked = _team_filter(db, team_ids)
+    if picked is not None:
+        q = q.filter(picked)
     if season_phase:
         q = q.filter(models.GameSession.season_phase == season_phase)
     if season_year:
@@ -1925,6 +1926,27 @@ async def apply_scouting_corrections(
     return {"ai_scouting_report": text}
 
 
+def _team_filter(db: Session, param: str | None):
+    """A SQL condition matching games the chosen teams were in — EITHER side.
+
+    Filtering on team_id alone asked "games my Senegal Lions side played", and a
+    team the coach has only ever faced answered with nothing at all. Teams here
+    are used both ways — your own sides and the opponents you keep records on —
+    so picking one means the team, not the column it happened to sit in.
+    """
+    from sqlalchemy import or_ as _or
+    picked = _selected_team_ids(param)
+    if not picked:
+        return None
+    names = [t.name for t in db.query(models.Team).filter(models.Team.id.in_(picked)).all() if t.name]
+    conds = [models.GameSession.team_id.in_(picked)]
+    if names:
+        # Opponents are free text, so matched by name and case-insensitively —
+        # "Duke" and "duke" are one opponent, as the New Game picker enforces.
+        conds.append(func.lower(models.GameSession.opponent_name).in_([n.lower() for n in names]))
+    return _or(*conds)
+
+
 def _selected_team_ids(param: str | None) -> list[int] | None:
     """The teams a screen is asking about, or None for "all of them".
 
@@ -1961,9 +1983,9 @@ def season_dashboard(
     if accessible_ids:
         conds.append(models.GameSession.team_id.in_(accessible_ids))
     q = db.query(models.GameSession).filter(or_(*conds)).filter(models.GameSession.status == "completed")
-    picked = _selected_team_ids(team_ids)
-    if picked:
-        q = q.filter(models.GameSession.team_id.in_(picked))
+    picked = _team_filter(db, team_ids)
+    if picked is not None:
+        q = q.filter(picked)
     if phases:
         phase_list = [p.strip() for p in phases.split(",") if p.strip()]
         if phase_list:

@@ -2211,7 +2211,8 @@
     "matchup": "{{us}} vs {{them}}",
     "allTeams": "All teams",
     "nTeams": "{{count}} teams",
-    "reimportNeeded": "This game's stats were imported before shot attempts were read, so no shooting percentages are available and its points count every three twice. Import the box score again to fix both."
+    "reimportNeeded": "This game's stats were imported before shot attempts were read, so no shooting percentages are available and its points count every three twice. Import the box score again to fix both.",
+    "opponentNewHeading": "Or type a new opponent"
   },
   "whiteboard": {
     "title": "Whiteboard",

@@ -2211,7 +2211,8 @@
     "matchup": "{{us}} vs {{them}}",
     "allTeams": "Toutes les équipes",
     "nTeams": "{{count}} équipes",
-    "reimportNeeded": "Les stats de ce match ont été importées avant la lecture des tentatives : aucun pourcentage n'est disponible et chaque tir à 3 points est compté deux fois. Réimporte la feuille."
+    "reimportNeeded": "Les stats de ce match ont été importées avant la lecture des tentatives : aucun pourcentage n'est disponible et chaque tir à 3 points est compté deux fois. Réimporte la feuille.",
+    "opponentNewHeading": "Ou saisir un nouvel adversaire"
   },
   "whiteboard": {
     "title": "Tableau blanc",

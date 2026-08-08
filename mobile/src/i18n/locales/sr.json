@@ -2211,7 +2211,8 @@
     "matchup": "{{us}} protiv {{them}}",
     "allTeams": "Svi timovi",
     "nTeams": "{{count}} tima",
-    "reimportNeeded": "Statistika ove utakmice uvezena je pre čitanja pokušaja, pa nema procenata šuta i svaka trojka se broji dvaput. Ponovo uvezi statistiku."
+    "reimportNeeded": "Statistika ove utakmice uvezena je pre čitanja pokušaja, pa nema procenata šuta i svaka trojka se broji dvaput. Ponovo uvezi statistiku.",
+    "opponentNewHeading": "Ili upiši novog protivnika"
   },
   "whiteboard": {
     "title": "Tabla",

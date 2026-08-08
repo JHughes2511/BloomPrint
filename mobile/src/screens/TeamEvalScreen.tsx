@@ -36,6 +36,7 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import { useTeam } from '../context/TeamContext';
+import { useCloseOnOutside } from '../hooks/useCloseOnOutside';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
 import { useSheetScrollHeight, sheetCap, desktopOnly, CONTENT_MAX_WIDTH, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
 import { useGridColumns } from '../responsive/useGridColumns';
@@ -172,6 +173,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [newGameYear, setNewGameYear] = useState('');
   const [newGameTeamId, setNewGameTeamId] = useState<number | null>(null);
   const [showOpponentDropdown, setShowOpponentDropdown] = useState(false);
+  const opponentOutside = useCloseOnOutside(showOpponentDropdown, () => setShowOpponentDropdown(false));
+  const newTeamOutside = useCloseOnOutside(showTeamDropdown, () => setShowTeamDropdown(false));
   /**
    * Which teams this page is about. Empty means all of them.
    *
@@ -1205,6 +1208,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
    * what this page did unconditionally before it had a picker.
    */
   const TeamFilterBar = ({ inline = false }: { inline?: boolean } = {}) => {
+    const outside = useCloseOnOutside(showGradeTeams, () => setShowGradeTeams(false));
     const picked = (teams as any[]).filter(tm => gradeTeamIds.includes(tm.id));
     const label = picked.length === 0 ? tr('teamGrade.allTeams')
       : picked.length === 1 ? picked[0].name
@@ -1214,9 +1218,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       // thing it filters read as one control rather than two stacked bars. Its
       // menu is absolute there: pushing the page down every time the picker
       // opened would move the content the coach is looking at.
-      <View style={inline
-        ? { width: 260, marginLeft: 'auto', position: 'relative', zIndex: 20 }
-        : { paddingHorizontal: 16, marginBottom: 12 }}>
+      <View
+        ref={outside}
+        style={inline
+          ? { width: 260, marginLeft: 'auto', position: 'relative', zIndex: 20 }
+          : { paddingHorizontal: 16, marginBottom: 12 }}
+      >
         <TouchableOpacity
           style={[s.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0 }]}
           onPress={() => setShowGradeTeams(v => !v)}
@@ -2621,6 +2628,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             <KeyboardAwareScrollView>
               <>
                 <Text style={s.fieldLabel}>{tr('teamGrade.teamOptional')}</Text>
+                <View ref={newTeamOutside}>
                 <TouchableOpacity
                   style={[s.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: showTeamDropdown ? 0 : 16 }]}
                   onPress={() => { setShowTeamDropdown(v => !v); setShowCreateTeam(false); }}
@@ -2689,6 +2697,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     </ScrollView>
                   </View>
                 )}
+                </View>
               </>
               {/* Opponent: pick one, or type one.
                   This was a bare text box, so the same opponent arrived as
@@ -2698,20 +2707,46 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   history. The list holds both the teams on file and everyone
                   already played; typing is still there for the first meeting. */}
               <Text style={s.fieldLabel}>{tr('teamGrade.opponentName')}</Text>
-              <TouchableOpacity
-                style={[s.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: showOpponentDropdown ? 0 : 16 }]}
-                onPress={() => setShowOpponentDropdown(v => !v)}
-                activeOpacity={0.7}
-              >
-                <Text style={{ color: newGameOpponent ? t.ink : t.muted2, fontSize: 15 }} numberOfLines={1}>
-                  {newGameOpponent || tr('teamGrade.opponentPlaceholder')}
-                </Text>
-                <Text style={{ color: t.muted, fontSize: 12 }}>{showOpponentDropdown ? '▲' : '▼'}</Text>
-              </TouchableOpacity>
-              {showOpponentDropdown && (
-                <View style={{ borderWidth: 1, borderColor: t.line, borderRadius: 10, marginBottom: 16, overflow: 'hidden' }}>
-                  <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled style={{ maxHeight: 220 }}>
-                    <View style={{ padding: 12, gap: 8, borderBottomWidth: 1, borderBottomColor: t.line }}>
+              <View ref={opponentOutside} style={{ marginBottom: 16 }}>
+                <TouchableOpacity
+                  style={[s.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0 }]}
+                  onPress={() => setShowOpponentDropdown(v => !v)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={{ color: newGameOpponent ? t.ink : t.muted2, fontSize: 15 }} numberOfLines={1}>
+                    {newGameOpponent || tr('teamGrade.opponentPlaceholder')}
+                  </Text>
+                  <Text style={{ color: t.muted, fontSize: 12 }}>{showOpponentDropdown ? '▲' : '▼'}</Text>
+                </TouchableOpacity>
+                {showOpponentDropdown && (
+                  <View style={{ borderWidth: 1, borderColor: t.line, borderRadius: 10, marginTop: 6, overflow: 'hidden' }}>
+                    {/* Known opponents first — the list is the point of the
+                        control. Typing a new one sits underneath it, past a
+                        divider and under its own heading: as a box at the top it
+                        crowded the field's label and read like a second copy of
+                        the thing just tapped. */}
+                    <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled style={{ maxHeight: 200 }}>
+                      {opponentChoices.map(o => (
+                        <TouchableOpacity
+                          key={`${o.kind}-${o.name}`}
+                          style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: t.line,
+                                   backgroundColor: newGameOpponent === o.name ? t.accentSoft : 'transparent',
+                                   flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}
+                          onPress={() => { setNewGameOpponent(o.name); setShowOpponentDropdown(false); }}
+                        >
+                          <Text style={{ color: newGameOpponent === o.name ? t.accent : t.inkSoft, fontSize: 14, flex: 1 }} numberOfLines={1}>
+                            {o.name}
+                          </Text>
+                          <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[700] }}>
+                            {o.kind === 'team' ? tr('teamGrade.opponentFromTeams') : tr('teamGrade.opponentPlayedBefore')}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                    <View style={{ padding: 12, gap: 8, borderTopWidth: 1, borderTopColor: t.line, backgroundColor: t.chip }}>
+                      <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[800], letterSpacing: 0.8 }}>
+                        {tr('teamGrade.opponentNewHeading')}
+                      </Text>
                       <VoiceTextInput
                         style={[s.input, { marginBottom: 0 }]}
                         placeholder={tr('teamGrade.opponentPlaceholder')}
@@ -2720,25 +2755,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                         onChangeText={setNewGameOpponent}
                       />
                     </View>
-                    {opponentChoices.map(o => (
-                      <TouchableOpacity
-                        key={`${o.kind}-${o.name}`}
-                        style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: t.line,
-                                 backgroundColor: newGameOpponent === o.name ? t.accentSoft : 'transparent',
-                                 flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}
-                        onPress={() => { setNewGameOpponent(o.name); setShowOpponentDropdown(false); }}
-                      >
-                        <Text style={{ color: newGameOpponent === o.name ? t.accent : t.inkSoft, fontSize: 14, flex: 1 }} numberOfLines={1}>
-                          {o.name}
-                        </Text>
-                        <Text style={{ color: t.muted2, fontSize: 10, fontFamily: fonts[700] }}>
-                          {o.kind === 'team' ? tr('teamGrade.opponentFromTeams') : tr('teamGrade.opponentPlayedBefore')}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
-              )}
+                  </View>
+                )}
+              </View>
               <Text style={s.fieldLabel}>{tr('teamGrade.locationOptional')}</Text>
               <VoiceTextInput
                 style={s.input}

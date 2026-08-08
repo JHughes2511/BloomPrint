@@ -2211,7 +2211,8 @@
     "matchup": "{{us}} mot {{them}}",
     "allTeams": "Alla lag",
     "nTeams": "{{count}} lag",
-    "reimportNeeded": "Matchens statistik importerades innan skottförsök lästes in — inga skottprocent, och varje trepoängare räknas dubbelt. Importera matchprotokollet igen."
+    "reimportNeeded": "Matchens statistik importerades innan skottförsök lästes in — inga skottprocent, och varje trepoängare räknas dubbelt. Importera matchprotokollet igen.",
+    "opponentNewHeading": "Eller skriv en ny motståndare"
   },
   "whiteboard": {
     "title": "Taktiktavla",

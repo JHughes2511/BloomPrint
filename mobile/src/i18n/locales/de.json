@@ -2211,7 +2211,8 @@
     "matchup": "{{us}} vs. {{them}}",
     "allTeams": "Alle Teams",
     "nTeams": "{{count}} Teams",
-    "reimportNeeded": "Die Statistiken dieses Spiels wurden importiert, bevor Wurfversuche gelesen wurden — es gibt keine Wurfquoten und jeder Dreier zählt doppelt. Importiere den Boxscore erneut."
+    "reimportNeeded": "Die Statistiken dieses Spiels wurden importiert, bevor Wurfversuche gelesen wurden — es gibt keine Wurfquoten und jeder Dreier zählt doppelt. Importiere den Boxscore erneut.",
+    "opponentNewHeading": "Oder neuen Gegner eingeben"
   },
   "whiteboard": {
     "title": "Taktiktafel",
