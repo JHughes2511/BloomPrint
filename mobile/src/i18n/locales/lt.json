@@ -2208,7 +2208,9 @@
     "gameView": "RUNGTYNIŲ RODINYS",
     "opponentFromTeams": "Iš tavo komandų",
     "opponentPlayedBefore": "Jau žaista",
-    "matchup": "{{us}} prieš {{them}}"
+    "matchup": "{{us}} prieš {{them}}",
+    "allTeams": "Visos komandos",
+    "nTeams": "{{count}} komandos"
   },
   "whiteboard": {
     "title": "Lenta",

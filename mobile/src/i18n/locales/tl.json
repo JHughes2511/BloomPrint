@@ -2208,7 +2208,9 @@
     "gameView": "VIEW NG LARO",
     "opponentFromTeams": "Mula sa iyong mga koponan",
     "opponentPlayedBefore": "Nalaro na",
-    "matchup": "{{us}} laban sa {{them}}"
+    "matchup": "{{us}} laban sa {{them}}",
+    "allTeams": "Lahat ng koponan",
+    "nTeams": "{{count}} koponan"
   },
   "whiteboard": {
     "title": "Whiteboard",

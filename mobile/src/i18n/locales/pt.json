@@ -2208,7 +2208,9 @@
     "gameView": "VISÃO DE JOGOS",
     "opponentFromTeams": "Das tuas equipas",
     "opponentPlayedBefore": "Já defrontado",
-    "matchup": "{{us}} vs {{them}}"
+    "matchup": "{{us}} vs {{them}}",
+    "allTeams": "Todas as equipas",
+    "nTeams": "{{count}} equipas"
   },
   "whiteboard": {
     "title": "Quadro Tático",

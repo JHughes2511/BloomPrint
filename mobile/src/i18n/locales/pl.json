@@ -2208,7 +2208,9 @@
     "gameView": "WIDOK MECZÓW",
     "opponentFromTeams": "Z twoich zespołów",
     "opponentPlayedBefore": "Już rozegrane",
-    "matchup": "{{us}} vs {{them}}"
+    "matchup": "{{us}} vs {{them}}",
+    "allTeams": "Wszystkie zespoły",
+    "nTeams": "{{count}} zespoły"
   },
   "whiteboard": {
     "title": "Tablica",

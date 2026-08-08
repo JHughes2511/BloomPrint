@@ -2208,7 +2208,9 @@
     "gameView": "VISTA PARTITE",
     "opponentFromTeams": "Dalle tue squadre",
     "opponentPlayedBefore": "Già affrontata",
-    "matchup": "{{us}} vs {{them}}"
+    "matchup": "{{us}} vs {{them}}",
+    "allTeams": "Tutte le squadre",
+    "nTeams": "{{count}} squadre"
   },
   "whiteboard": {
     "title": "Lavagna",

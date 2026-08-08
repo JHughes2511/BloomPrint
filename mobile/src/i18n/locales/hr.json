@@ -2208,7 +2208,9 @@
     "gameView": "PRIKAZ UTAKMICA",
     "opponentFromTeams": "Iz tvojih ekipa",
     "opponentPlayedBefore": "Već igrano",
-    "matchup": "{{us}} protiv {{them}}"
+    "matchup": "{{us}} protiv {{them}}",
+    "allTeams": "Sve ekipe",
+    "nTeams": "{{count}} ekipa"
   },
   "whiteboard": {
     "title": "Ploča",

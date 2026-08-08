@@ -2208,7 +2208,9 @@
     "gameView": "गेम व्यू",
     "opponentFromTeams": "आपकी टीमों से",
     "opponentPlayedBefore": "पहले खेला",
-    "matchup": "{{us}} बनाम {{them}}"
+    "matchup": "{{us}} बनाम {{them}}",
+    "allTeams": "सभी टीमें",
+    "nTeams": "{{count}} टीमें"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",

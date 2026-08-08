@@ -2208,7 +2208,9 @@
     "gameView": "경기 보기",
     "opponentFromTeams": "내 팀에서",
     "opponentPlayedBefore": "이전 상대",
-    "matchup": "{{us}} 대 {{them}}"
+    "matchup": "{{us}} 대 {{them}}",
+    "allTeams": "모든 팀",
+    "nTeams": "{{count}}개 팀"
   },
   "whiteboard": {
     "title": "작전판",

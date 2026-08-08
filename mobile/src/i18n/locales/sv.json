@@ -2208,7 +2208,9 @@
     "gameView": "MATCHVY",
     "opponentFromTeams": "Från dina lag",
     "opponentPlayedBefore": "Redan mött",
-    "matchup": "{{us}} mot {{them}}"
+    "matchup": "{{us}} mot {{them}}",
+    "allTeams": "Alla lag",
+    "nTeams": "{{count}} lag"
   },
   "whiteboard": {
     "title": "Taktiktavla",

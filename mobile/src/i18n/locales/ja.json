@@ -2208,7 +2208,9 @@
     "gameView": "試合表示",
     "opponentFromTeams": "自分のチームから",
     "opponentPlayedBefore": "対戦済み",
-    "matchup": "{{us}} 対 {{them}}"
+    "matchup": "{{us}} 対 {{them}}",
+    "allTeams": "すべてのチーム",
+    "nTeams": "{{count}} チーム"
   },
   "whiteboard": {
     "title": "ホワイトボード",

@@ -2208,7 +2208,9 @@
     "gameView": "عرض المباريات",
     "opponentFromTeams": "من فرقك",
     "opponentPlayedBefore": "لعبت ضدهم سابقًا",
-    "matchup": "{{us}} ضد {{them}}"
+    "matchup": "{{us}} ضد {{them}}",
+    "allTeams": "كل الفرق",
+    "nTeams": "{{count}} فرق"
   },
   "whiteboard": {
     "title": "السبورة",

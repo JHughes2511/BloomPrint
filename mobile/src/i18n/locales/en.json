@@ -2208,7 +2208,9 @@
     "gameView": "GAME VIEW",
     "opponentFromTeams": "From your teams",
     "opponentPlayedBefore": "Played before",
-    "matchup": "{{us}} vs {{them}}"
+    "matchup": "{{us}} vs {{them}}",
+    "allTeams": "All teams",
+    "nTeams": "{{count}} teams"
   },
   "whiteboard": {
     "title": "Whiteboard",

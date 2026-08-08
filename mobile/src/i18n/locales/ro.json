@@ -2208,7 +2208,9 @@
     "gameView": "VIZUALIZARE MECIURI",
     "opponentFromTeams": "Din echipele tale",
     "opponentPlayedBefore": "Deja jucat",
-    "matchup": "{{us}} vs {{them}}"
+    "matchup": "{{us}} vs {{them}}",
+    "allTeams": "Toate echipele",
+    "nTeams": "{{count}} echipe"
   },
   "whiteboard": {
     "title": "Tablă tactică",

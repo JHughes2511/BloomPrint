@@ -85,10 +85,27 @@ _IMPORT_STAT_POINTS: dict[str, tuple[int, int, int]] = {
     "Foul Against": (-1, -1, 4),
 }
 # Header keyword -> stat_name (checked in order; first match wins).
+# Columns that give an ATTEMPT count rather than a made count. A box score
+# states makes and attempts ("9/18"), and only the makes were ever read — so
+# BloomPrint knew a player made nine field goals and had no idea he took
+# eighteen. Every shooting percentage in the app was therefore uncomputable,
+# which is why film reports kept answering "REQUIRES ADDITIONAL DATA" for
+# splits. Misses are derived from attempts minus makes, below.
+_IMPORT_ATTEMPT_MAP: list[tuple[str, str]] = [
+    (r"^(3pa|3 ?fga|3 ?pt ?att|3s ?att|threes ?att)", "3 FG"),
+    (r"^(fta|ft ?att|free ?throws? ?att)", "FT"),
+    (r"^(2pa|2 ?fga)", "2 FG"),
+    (r"^(fga|fg ?att)", "FG"),      # all field goals, twos and threes together
+]
+
 _IMPORT_COL_MAP: list[tuple[str, str]] = [
     (r"^(3pm|3 ?fg ?made|3 ?pt ?made|3s ?made|threes ?made)", "3 FG Made"),
     (r"^(ftm|ft ?made|free ?throws? ?made)", "FT Made"),
-    (r"^(2pm|2 ?fg ?made|fgm|fg ?made)", "2 FG Made"),
+    (r"^(2pm|2 ?fg ?made)", "2 FG Made"),
+    # All field goals, twos and threes together. Kept separate from 2PM because
+    # it is NOT a two-point count: stored as one, every imported three was also
+    # counted as a two and the player's points came out inflated.
+    (r"^(fgm|fg ?made)", "FG Made (all)"),
     (r"^(oreb|o\.? ?reb|off\.? ?reb|offensive ?reb)", "Off. Reb"),
     (r"^(dreb|d\.? ?reb|def\.? ?reb|defensive ?reb)", "Def. Reb"),
     (r"^(reb|rebounds?|trb)", "Def. Reb"),
@@ -161,6 +178,14 @@ async def import_game_stats(
             if re.match(pat, h):
                 col_stats[i] = stat
                 break
+    col_attempts: dict[int, str] = {}
+    for i, h in enumerate(header):
+        if i in col_stats:
+            continue
+        for pat, kind in _IMPORT_ATTEMPT_MAP:
+            if re.match(pat, h):
+                col_attempts[i] = kind
+                break
     if not col_stats:
         raise HTTPException(status_code=400, detail="No recognizable stat columns (PTS/REB/AST/…) found.")
 
@@ -174,13 +199,38 @@ async def import_game_stats(
         if name_idx >= len(row) or not row[name_idx] or not str(row[name_idx]).strip():
             continue
         pname = str(row[name_idx]).strip()
-        for i, stat in col_stats.items():
-            if i >= len(row):
-                continue
+
+        def num(idx: int) -> int:
+            if idx >= len(row):
+                return 0
             try:
-                count = int(float(row[i]))
+                return max(int(float(row[idx])), 0)
             except (TypeError, ValueError):
-                continue
+                return 0
+
+        made = {stat: num(i) for i, stat in col_stats.items()}
+        att = {kind: num(i) for i, kind in col_attempts.items()}
+
+        # A sheet gives either twos and threes separately, or all field goals
+        # together with threes broken out. Both end up as the same two numbers.
+        threes = made.get("3 FG Made", 0)
+        if "FG Made (all)" in made:
+            twos = max(made.pop("FG Made (all)") - threes, 0)
+            made["2 FG Made"] = made.get("2 FG Made", 0) + twos
+        fts = made.get("FT Made", 0)
+
+        # Attempts minus makes is what was missed. A missing attempts column
+        # leaves the miss unrecorded rather than guessed at — a zero there would
+        # read as perfect shooting.
+        three_att = att.get("3 FG", 0)
+        two_att = att.get("2 FG", 0) or max(att.get("FG", 0) - three_att, 0)
+        for stat, m, a in (("3 FG Missed", threes, three_att),
+                           ("2 FG Missed", made.get("2 FG Made", 0), two_att),
+                           ("FT Missed", fts, att.get("FT", 0))):
+            if a > 0:
+                made[stat] = max(a - m, 0)
+
+        for stat, count in made.items():
             if count <= 0:
                 continue
             raw = _import_raw(stat, count)
@@ -589,17 +639,25 @@ def create_session(
 def list_sessions(
     season_phase: str | None = None,
     season_year: str | None = None,
+    team_ids: str | None = None,  # comma-separated; omitted means every team
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
     # A coach sees their own games plus games on any team they're linked to as
     # staff, so a team's schedule shows up in the Team Grade tab for all staff.
     from sqlalchemy import or_
-    team_ids = _accessible_team_ids(db, coach)
+    # Named apart from the team_ids QUERY PARAMETER above. When both were
+    # called team_ids the local won, the filter was handed a list of ints, and
+    # it silently parsed to "no selection" — the picker appeared to work and
+    # changed nothing.
+    accessible_ids = _accessible_team_ids(db, coach)
     conds = [models.GameSession.coach_id == coach.id]
-    if team_ids:
-        conds.append(models.GameSession.team_id.in_(team_ids))
+    if accessible_ids:
+        conds.append(models.GameSession.team_id.in_(accessible_ids))
     q = db.query(models.GameSession).filter(or_(*conds))
+    picked = _selected_team_ids(team_ids)
+    if picked:
+        q = q.filter(models.GameSession.team_id.in_(picked))
     if season_phase:
         q = q.filter(models.GameSession.season_phase == season_phase)
     if season_year:
@@ -1635,23 +1693,45 @@ async def apply_scouting_corrections(
     return {"ai_scouting_report": text}
 
 
+def _selected_team_ids(param: str | None) -> list[int] | None:
+    """The teams a screen is asking about, or None for "all of them".
+
+    Team Grade showed every game on every team a coach could reach, whatever the
+    team picker said — the endpoints had no way to be asked for less. A coach
+    with two teams saw one pooled season and a leaderboard mixing both rosters,
+    with nothing on the row to say who belonged where.
+    """
+    if not param:
+        return None
+    ids = [int(x) for x in str(param).split(",") if str(x).strip().lstrip("-").isdigit()]
+    return ids or None
+
+
 # ── Season Dashboard ──────────────────────────────────────────────────────────
 
 @router.get("/season-dashboard")
 def season_dashboard(
     phases: str | None = None,   # comma-separated, e.g. "playoff,tournament"
     season_year: str | None = None,
+    team_ids: str | None = None,  # comma-separated; omitted means every team
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
     # Include games on teams the coach is linked to as staff, so a team's season
     # shows in the Team Grade dashboard for all its staff, not just the owner.
     from sqlalchemy import or_
-    team_ids = _accessible_team_ids(db, coach)
+    # Named apart from the team_ids QUERY PARAMETER above. When both were
+    # called team_ids the local won, the filter was handed a list of ints, and
+    # it silently parsed to "no selection" — the picker appeared to work and
+    # changed nothing.
+    accessible_ids = _accessible_team_ids(db, coach)
     conds = [models.GameSession.coach_id == coach.id]
-    if team_ids:
-        conds.append(models.GameSession.team_id.in_(team_ids))
+    if accessible_ids:
+        conds.append(models.GameSession.team_id.in_(accessible_ids))
     q = db.query(models.GameSession).filter(or_(*conds)).filter(models.GameSession.status == "completed")
+    picked = _selected_team_ids(team_ids)
+    if picked:
+        q = q.filter(models.GameSession.team_id.in_(picked))
     if phases:
         phase_list = [p.strip() for p in phases.split(",") if p.strip()]
         if phase_list:
@@ -1663,7 +1743,11 @@ def season_dashboard(
     wins = 0
     losses = 0
     team_grade_trend = []
-    player_totals: dict[str, dict] = {}
+    # Keyed by (team, player), not by player. Two teams with a Chris on each had
+    # their games pooled into one leaderboard row — and with several teams shown
+    # together, a row with no team on it is unreadable anyway.
+    player_totals: dict[tuple[int | None, str], dict] = {}
+    team_names = {t.id: t.name for t in db.query(models.Team).all()}
 
     for game in games:
         if game.our_score is not None and game.opponent_score is not None:
@@ -1694,6 +1778,8 @@ def season_dashboard(
         team_grade_trend.append({
             "game_id": game.id,
             "opponent": game.opponent_name,
+            "team_id": game.team_id,
+            "team_name": team_names.get(game.team_id),
             "date": game.date.isoformat() if game.date else None,
             "team_grade": team_grade,
             "our_score": game.our_score,
@@ -1701,19 +1787,21 @@ def season_dashboard(
         })
 
         for pg in player_grades:
-            name = pg["player_name"]
-            if name not in player_totals:
-                player_totals[name] = {"games": 0, "total_grade": 0.0, "total_off": 0.0, "total_def": 0.0}
-            player_totals[name]["games"] += 1
-            player_totals[name]["total_grade"] += pg["game_grade"]
-            player_totals[name]["total_off"] += pg["offensive_grade"]
-            player_totals[name]["total_def"] += pg["defensive_grade"]
+            key = (game.team_id, pg["player_name"])
+            if key not in player_totals:
+                player_totals[key] = {"games": 0, "total_grade": 0.0, "total_off": 0.0, "total_def": 0.0}
+            player_totals[key]["games"] += 1
+            player_totals[key]["total_grade"] += pg["game_grade"]
+            player_totals[key]["total_off"] += pg["offensive_grade"]
+            player_totals[key]["total_def"] += pg["defensive_grade"]
 
     player_leaderboard = []
-    for name, data in player_totals.items():
+    for (tid, name), data in player_totals.items():
         g = max(data["games"], 1)
         player_leaderboard.append({
             "player_name": name,
+            "team_id": tid,
+            "team_name": team_names.get(tid),
             "avg_game_grade": round(data["total_grade"] / g, 2),
             "games_played": data["games"],
             "avg_offensive": round(data["total_off"] / g, 2),
@@ -1751,10 +1839,14 @@ def opponent_profile(
     # Opponent intel is built from every game against them that the coach can
     # see — their own games plus games on teams they're staff on.
     from sqlalchemy import or_
-    team_ids = _accessible_team_ids(db, coach)
+    # Named apart from the team_ids QUERY PARAMETER above. When both were
+    # called team_ids the local won, the filter was handed a list of ints, and
+    # it silently parsed to "no selection" — the picker appeared to work and
+    # changed nothing.
+    accessible_ids = _accessible_team_ids(db, coach)
     conds = [models.GameSession.coach_id == coach.id]
-    if team_ids:
-        conds.append(models.GameSession.team_id.in_(team_ids))
+    if accessible_ids:
+        conds.append(models.GameSession.team_id.in_(accessible_ids))
     games = (
         db.query(models.GameSession)
         .filter(or_(*conds), models.GameSession.opponent_name == opponent_name)

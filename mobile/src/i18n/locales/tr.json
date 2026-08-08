@@ -2208,7 +2208,9 @@
     "gameView": "MAÇ GÖRÜNÜMÜ",
     "opponentFromTeams": "Takımlarından",
     "opponentPlayedBefore": "Daha önce oynandı",
-    "matchup": "{{us}} - {{them}}"
+    "matchup": "{{us}} - {{them}}",
+    "allTeams": "Tüm takımlar",
+    "nTeams": "{{count}} takım"
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

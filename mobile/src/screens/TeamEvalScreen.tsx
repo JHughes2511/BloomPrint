@@ -34,6 +34,7 @@ import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
+import { useTeam } from '../context/TeamContext';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
 import { useSheetScrollHeight, sheetCap, desktopOnly, CONTENT_MAX_WIDTH, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
 import { useGridColumns } from '../responsive/useGridColumns';
@@ -135,6 +136,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // desktop layout on platform put it on every phone that opened the site.
   const { isWide } = useBreakpoint();
   const { coach } = useAuth();
+  const { currentTeamId } = useTeam();
   const { t, mode } = useTheme();
   // Scales with the window on desktop; unchanged on phones.
   const sheetScroll300 = useSheetScrollHeight(300);
@@ -169,6 +171,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [newGameYear, setNewGameYear] = useState('');
   const [newGameTeamId, setNewGameTeamId] = useState<number | null>(null);
   const [showOpponentDropdown, setShowOpponentDropdown] = useState(false);
+  /**
+   * Which teams this page is about. Empty means all of them.
+   *
+   * Team Grade never read the team picker at all — every game on every team a
+   * coach could reach went into one season record and one leaderboard, so
+   * selecting SEED at the top of the app left another team's players on the
+   * board with nothing on the row to say so. It starts from the app-wide
+   * selection and can be widened here without changing the rest of the app.
+   */
+  const [gradeTeamIds, setGradeTeamIds] = useState<number[]>([]);
+  const [showGradeTeams, setShowGradeTeams] = useState(false);
   const [newGameDate, setNewGameDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -318,9 +331,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setLoading(true);
     setLoadingDash(true);
     try {
+      const teamParam = gradeTeamIds.length ? { team_ids: gradeTeamIds.join(',') } : {};
       const [s, d, t] = await Promise.all([
-        gameEvalAPI.listSessions(),
-        gameEvalAPI.getSeasonDashboard(),
+        gameEvalAPI.listSessions(teamParam),
+        gameEvalAPI.getSeasonDashboard(teamParam),
         teamsAPI.list(),
       ]);
       setSessions(s);
@@ -329,17 +343,24 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     } catch {}
     setLoading(false);
     setLoadingDash(false);
-  }, []);
+  }, [gradeTeamIds]);
 
   const loadDashboard = useCallback(async (phases: string[]) => {
     setLoadingDash(true);
     try {
-      const params = phases.length > 0 ? { phases: phases.join(',') } : {};
+      const params: any = {};
+      if (phases.length > 0) params.phases = phases.join(',');
+      if (gradeTeamIds.length) params.team_ids = gradeTeamIds.join(',');
       const d = await gameEvalAPI.getSeasonDashboard(params);
       setDashboard(d);
     } catch {}
     setLoadingDash(false);
-  }, []);
+  }, [gradeTeamIds]);
+
+  // Follow the app-wide picker when it moves; still free to widen here.
+  useEffect(() => {
+    setGradeTeamIds(currentTeamId ? [currentTeamId] : []);
+  }, [currentTeamId]);
 
   useFocusEffect(useCallback(() => { loadData(); }, [loadData]));
 
@@ -1170,6 +1191,58 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
   const uniqueOpponents = [...new Set(sessions.map((s: any) => s.opponent_name))];
 
+  /**
+   * Which teams Team Grade is showing. Ticking none means all of them, which is
+   * what this page did unconditionally before it had a picker.
+   */
+  const TeamFilterBar = () => {
+    const picked = (teams as any[]).filter(tm => gradeTeamIds.includes(tm.id));
+    const label = picked.length === 0 ? tr('teamGrade.allTeams')
+      : picked.length === 1 ? picked[0].name
+      : tr('teamGrade.nTeams', { count: picked.length });
+    return (
+      <View style={{ paddingHorizontal: 16, marginBottom: 12 }}>
+        <TouchableOpacity
+          style={[s.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0 }]}
+          onPress={() => setShowGradeTeams(v => !v)}
+          activeOpacity={0.7}
+        >
+          <Text style={{ color: t.ink, fontSize: 14 }} numberOfLines={1}>{label}</Text>
+          <Text style={{ color: t.muted, fontSize: 12 }}>{showGradeTeams ? '▲' : '▼'}</Text>
+        </TouchableOpacity>
+        {showGradeTeams && (
+          <View style={{ borderWidth: 1, borderColor: t.line, borderRadius: 10, marginTop: 6, overflow: 'hidden' }}>
+            <TouchableOpacity
+              style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: t.line,
+                       backgroundColor: gradeTeamIds.length === 0 ? t.accentSoft : 'transparent' }}
+              onPress={() => setGradeTeamIds([])}
+            >
+              <Text style={{ color: gradeTeamIds.length === 0 ? t.accent : t.inkSoft, fontSize: 14 }}>
+                {tr('teamGrade.allTeams')}
+              </Text>
+            </TouchableOpacity>
+            {(teams as any[]).filter(tm => !tm.parent_team_id).map(tm => {
+              const on = gradeTeamIds.includes(tm.id);
+              return (
+                <TouchableOpacity
+                  key={tm.id}
+                  style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: t.line,
+                           flexDirection: 'row', alignItems: 'center', gap: 8,
+                           backgroundColor: on ? t.accentSoft : 'transparent' }}
+                  onPress={() => setGradeTeamIds(prev =>
+                    prev.includes(tm.id) ? prev.filter(x => x !== tm.id) : [...prev, tm.id])}
+                >
+                  <Ionicons name={on ? 'checkbox' : 'square-outline'} size={16} color={on ? t.accent : t.muted2} />
+                  <Text style={{ color: on ? t.accent : t.inkSoft, fontSize: 14, flex: 1 }} numberOfLines={1}>{tm.name}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+      </View>
+    );
+  };
+
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
@@ -1227,6 +1300,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       {/* Dashboard */}
       {activeView === 'dashboard' && (
         <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
+          <TeamFilterBar />
           {/* Phase filter */}
           <View style={{ marginBottom: 16 }}>
             <Text style={[s.cardLabel, { marginBottom: 8 }]}>{tr('teamGrade.gradeView')}</Text>
@@ -1334,11 +1408,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 <View style={s.card}>
                   <Text style={s.cardLabel}>{tr('teamGrade.playerLeaderboard')}</Text>
                   {dashboard.player_leaderboard.slice(0, 8).map((p: any, i: number) => (
-                    <TouchableOpacity key={p.player_name} style={s.leaderRow} onPress={() => openGradeDetail(p.player_name)}>
+                    <TouchableOpacity key={`${p.team_id ?? 0}-${p.player_name}`} style={s.leaderRow} onPress={() => openGradeDetail(p.player_name)}>
                       <Text style={s.leaderRank}>{i + 1}</Text>
                       <View style={{ flex: 1 }}>
                         <Text style={s.leaderName}>{p.player_name}</Text>
+                        {/* With several teams on one board, a row that doesn't
+                            say whose player it is cannot be read. */}
                         <Text style={{ color: t.muted, fontSize: 11 }}>
+                          {(p.team_name ? `${p.team_name} · ` : '')}
                           {tr('teamGrade.leaderboardMeta', { games: p.games_played, off: p.avg_offensive.toFixed(1), def: p.avg_defensive.toFixed(1) })}
                         </Text>
                       </View>
@@ -1397,6 +1474,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             <Text style={s.newGameBtnText}>{tr('teamGrade.newGame')}</Text>
           </TouchableOpacity>
 
+          <TeamFilterBar />
+
           {loading ? (
             <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />
           ) : filteredSessions.length === 0 ? (
@@ -1417,7 +1496,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   onPress={() => (game.status === 'in_progress' && isOwnedGame(game)) ? openLiveEntry(game) : openDetail(game)}
                 >
                   <View style={{ flex: 1 }}>
-                    <Text style={s.gameCardOpponent}>{game.opponent_name}</Text>
+                    <Text style={s.gameCardOpponent} numberOfLines={1}>{matchupLabel(game)}</Text>
                     <Text style={{ color: t.muted, fontSize: 11, marginTop: 2 }}>
                       {new Date(game.date).toLocaleDateString()} · {phaseLabel(game.season_phase)}
                       {game.location ? ` · ${game.location}` : ''}

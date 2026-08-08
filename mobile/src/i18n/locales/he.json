@@ -2208,7 +2208,9 @@
     "gameView": "תצוגת משחקים",
     "opponentFromTeams": "מהקבוצות שלך",
     "opponentPlayedBefore": "שיחקתם בעבר",
-    "matchup": "{{us}} נגד {{them}}"
+    "matchup": "{{us}} נגד {{them}}",
+    "allTeams": "כל הקבוצות",
+    "nTeams": "{{count}} קבוצות"
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

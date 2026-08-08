@@ -2208,7 +2208,9 @@
     "gameView": "WEDSTRIJDWEERGAVE",
     "opponentFromTeams": "Uit je teams",
     "opponentPlayedBefore": "Eerder gespeeld",
-    "matchup": "{{us}} tegen {{them}}"
+    "matchup": "{{us}} tegen {{them}}",
+    "allTeams": "Alle teams",
+    "nTeams": "{{count}} teams"
   },
   "whiteboard": {
     "title": "Tactiekbord",

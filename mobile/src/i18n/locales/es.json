@@ -2208,7 +2208,9 @@
     "gameView": "VISTA DE PARTIDOS",
     "opponentFromTeams": "De tus equipos",
     "opponentPlayedBefore": "Ya jugado",
-    "matchup": "{{us}} vs {{them}}"
+    "matchup": "{{us}} vs {{them}}",
+    "allTeams": "Todos los equipos",
+    "nTeams": "{{count}} equipos"
   },
   "whiteboard": {
     "title": "Pizarra",

@@ -2208,7 +2208,9 @@
     "gameView": "თამაშების ხედი",
     "opponentFromTeams": "შენი გუნდებიდან",
     "opponentPlayedBefore": "უკვე ნათამაშები",
-    "matchup": "{{us}} vs {{them}}"
+    "matchup": "{{us}} vs {{them}}",
+    "allTeams": "ყველა გუნდი",
+    "nTeams": "{{count}} გუნდი"
   },
   "whiteboard": {
     "title": "დაფა",

@@ -2208,7 +2208,9 @@
     "gameView": "比赛视图",
     "opponentFromTeams": "来自你的球队",
     "opponentPlayedBefore": "曾经交手",
-    "matchup": "{{us}} 对阵 {{them}}"
+    "matchup": "{{us}} 对阵 {{them}}",
+    "allTeams": "全部球队",
+    "nTeams": "{{count}} 支球队"
   },
   "whiteboard": {
     "title": "战术板",

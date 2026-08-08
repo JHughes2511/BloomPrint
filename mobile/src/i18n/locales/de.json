@@ -2208,7 +2208,9 @@
     "gameView": "SPIELANSICHT",
     "opponentFromTeams": "Aus deinen Teams",
     "opponentPlayedBefore": "Schon gespielt",
-    "matchup": "{{us}} vs. {{them}}"
+    "matchup": "{{us}} vs. {{them}}",
+    "allTeams": "Alle Teams",
+    "nTeams": "{{count}} Teams"
   },
   "whiteboard": {
     "title": "Taktiktafel",

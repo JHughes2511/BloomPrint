@@ -2208,7 +2208,9 @@
     "gameView": "ПЕРЕГЛЯД ІГОР",
     "opponentFromTeams": "З ваших команд",
     "opponentPlayedBefore": "Уже грали",
-    "matchup": "{{us}} проти {{them}}"
+    "matchup": "{{us}} проти {{them}}",
+    "allTeams": "Усі команди",
+    "nTeams": "{{count}} команди"
   },
   "whiteboard": {
     "title": "Тактична дошка",

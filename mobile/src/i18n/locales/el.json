@@ -2208,7 +2208,9 @@
     "gameView": "ΠΡΟΒΟΛΗ ΑΓΩΝΩΝ",
     "opponentFromTeams": "Από τις ομάδες σου",
     "opponentPlayedBefore": "Έχετε ξαναπαίξει",
-    "matchup": "{{us}} εναντίον {{them}}"
+    "matchup": "{{us}} εναντίον {{them}}",
+    "allTeams": "Όλες οι ομάδες",
+    "nTeams": "{{count}} ομάδες"
   },
   "whiteboard": {
     "title": "Πίνακας",
