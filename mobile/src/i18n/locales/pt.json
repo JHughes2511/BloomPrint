@@ -1966,7 +1966,12 @@
     "opponentFilm": "Vídeo do adversário",
     "teamFilm": "Vídeo de {{team}}",
     "bothTeams": "Ambas",
-    "analysisStopped": "A análise parou antes de terminar. Elimina o vídeo e volta a adicioná-lo."
+    "analysisStopped": "A análise parou antes de terminar. Elimina o vídeo e volta a adicioná-lo.",
+    "importBoxScoreTitle": "Importar estatísticas",
+    "importBoxScoreMessage": "De onde devem vir as estatísticas?",
+    "importFromGame": "De um jogo registado",
+    "importFromFile": "De um ficheiro",
+    "noRecordedGames": "Ainda não há jogos registados. Regista um jogo em Jogos e aparecerá aqui."
   },
   "teamGrade": {
     "views": {

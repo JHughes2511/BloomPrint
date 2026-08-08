@@ -1966,7 +1966,12 @@
     "opponentFilm": "فيديو الخصم",
     "teamFilm": "فيديو {{team}}",
     "bothTeams": "كلاهما",
-    "analysisStopped": "توقّف التحليل قبل اكتماله. احذف الفيديو وأضفه من جديد."
+    "analysisStopped": "توقّف التحليل قبل اكتماله. احذف الفيديو وأضفه من جديد.",
+    "importBoxScoreTitle": "استيراد ورقة الإحصائيات",
+    "importBoxScoreMessage": "من أين يجب أن تأتي ورقة الإحصائيات؟",
+    "importFromGame": "من مباراة مسجَّلة",
+    "importFromFile": "من ملف",
+    "noRecordedGames": "لا توجد مباريات مسجَّلة بعد. سجِّل مباراة ضمن المباريات وستظهر هنا."
   },
   "teamGrade": {
     "views": {

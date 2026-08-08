@@ -18,7 +18,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI, uploadFileStreamed, evalsAPI } from '../api/client';
+import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI, uploadFileStreamed, evalsAPI, gameEvalAPI } from '../api/client';
 import { directUploadAvailable, uploadFilmDirect } from '../api/directUpload';
 import ShareModal from '../components/ShareModal';
 import ExportSectionsModal from '../components/ExportSectionsModal';
@@ -117,6 +117,12 @@ export default function GameReportBuilderScreen() {
   const [genProgress, setGenProgress] = useState('');
   const [uploadingClip, setUploadingClip] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState<'box_score' | 'scouting_notes' | null>(null);
+  // Importing a box score from a game already recorded in Games, rather than
+  // from a file. The numbers are already in BloomPrint; exporting them and
+  // importing the export back is work nobody should have to do.
+  const [gamePickerOpen, setGamePickerOpen] = useState(false);
+  const [recordedGames, setRecordedGames] = useState<any[]>([]);
+  const [importingGameId, setImportingGameId] = useState<number | null>(null);
 
   const [title, setTitle] = useState('');
   const [mode, setMode] = useState('vs_opponent');
@@ -452,6 +458,56 @@ export default function GameReportBuilderScreen() {
       setClipCorrecting(false);
       setClipProgress('');
     }
+  };
+
+  /**
+   * Games to offer, newest first — with any game involving a team named on this
+   * packet lifted to the top. An opponent-vs-opponent packet names two teams
+   * that are not ours, so none of our games will match and the list is simply
+   * chronological; that is the common case and it still has to work.
+   */
+  const gamesForPicker = (games: any[]) => {
+    const named = [report?.my_team_name, report?.opponent_team_name, report?.opponent_name]
+      .filter(Boolean).map((n: string) => n.toLowerCase());
+    const involves = (g: any) => named.includes(String(g.opponent_name ?? '').toLowerCase());
+    const byDate = [...games].sort((a, b) =>
+      new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime());
+    return [...byDate.filter(involves), ...byDate.filter(g => !involves(g))];
+  };
+
+  const openGamePicker = async () => {
+    setGamePickerOpen(true);
+    try { setRecordedGames(gamesForPicker(await gameEvalAPI.listSessions())); }
+    catch { setRecordedGames([]); }
+  };
+
+  const importGame = async (gameId: number) => {
+    if (!reportId) return;
+    setImportingGameId(gameId);
+    try {
+      const updated = await gameReportsAPI.importGame(reportId, gameId);
+      setReport(updated);
+      setBoxScore(updated.box_score ?? '');
+      setGamePickerOpen(false);
+    } catch (e: any) {
+      Alert.alert(tr('common.error'),
+        e?.response?.data?.detail ?? e?.message ?? tr('gameBuilder.couldNotReadDocument'));
+    } finally {
+      setImportingGameId(null);
+    }
+  };
+
+  /** Box score can come from a file, or from a game already recorded in Games. */
+  const importBoxScore = () => {
+    Alert.alert(
+      tr('gameBuilder.importBoxScoreTitle'),
+      tr('gameBuilder.importBoxScoreMessage'),
+      [
+        { text: tr('gameBuilder.importFromGame'), onPress: openGamePicker },
+        { text: tr('gameBuilder.importFromFile'), onPress: () => pickDoc('box_score') },
+        { text: tr('common.cancel'), style: 'cancel' },
+      ],
+    );
   };
 
   const pickDoc = async (docType: 'box_score' | 'scouting_notes') => {
@@ -879,7 +935,7 @@ export default function GameReportBuilderScreen() {
         <View onLayout={e => { boxScoreY.current = e.nativeEvent.layout.y; }}>
           <View style={styles.sectionHeader}>
             <Text style={styles.label}>{tr('gameBuilder.boxScoreStats')}</Text>
-            <TouchableOpacity style={styles.importBtn} onPress={() => pickDoc('box_score')} disabled={uploadingDoc === 'box_score'}>
+            <TouchableOpacity style={styles.importBtn} onPress={importBoxScore} disabled={uploadingDoc === 'box_score'}>
               {uploadingDoc === 'box_score'
                 ? <ActivityIndicator color={t.muted} size="small" />
                 : <><Ionicons name="document-outline" size={14} color={t.muted} /><Text style={styles.importBtnText}>{tr('gameBuilder.import')}</Text></>
@@ -1066,6 +1122,49 @@ export default function GameReportBuilderScreen() {
 
       {/* Clip analysis modal */}
       {/* Saved report version viewer */}
+      {/* Games already recorded in BloomPrint, offered as a box-score source. */}
+      <Sheet visible={gamePickerOpen} animationType="slide" transparent onRequestClose={() => setGamePickerOpen(false)}>
+        <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60, ...sheetCap(560) }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <Text style={{ color: t.ink, fontSize: 17, fontFamily: fonts[800] }}>
+                {tr('gameBuilder.importFromGame')}
+              </Text>
+              <TouchableOpacity onPress={() => setGamePickerOpen(false)}>
+                <Ionicons name="close" size={22} color={t.muted} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView>
+              {recordedGames.length === 0 && (
+                <Text style={{ color: t.muted2, fontSize: 13 }}>{tr('gameBuilder.noRecordedGames')}</Text>
+              )}
+              {recordedGames.map((g: any) => (
+                <TouchableOpacity
+                  key={g.id}
+                  style={styles.clipCard}
+                  onPress={() => importGame(g.id)}
+                  disabled={importingGameId != null}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: t.ink, fontSize: 14, fontFamily: fonts[600] }} numberOfLines={1}>
+                      vs {g.opponent_name}
+                    </Text>
+                    <Text style={{ color: t.muted, fontSize: 11 }} numberOfLines={1}>
+                      {g.date ? new Date(g.date).toLocaleDateString() : ''}
+                      {g.our_score != null && g.opponent_score != null
+                        ? `  ·  ${g.our_score}-${g.opponent_score}` : ''}
+                    </Text>
+                  </View>
+                  {importingGameId === g.id
+                    ? <ActivityIndicator size="small" color={t.muted} />
+                    : <Ionicons name="chevron-forward" size={14} color={t.muted2} />}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Sheet>
+
       <Sheet visible={!!versionView} animationType="slide" transparent onRequestClose={() => setVersionView(null)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60, ...sheetCap(560) }}>

@@ -1966,7 +1966,12 @@
     "opponentFilm": "Видео соперника",
     "teamFilm": "Запись: {{team}}",
     "bothTeams": "Обе",
-    "analysisStopped": "Анализ прервался. Удалите запись и добавьте её снова."
+    "analysisStopped": "Анализ прервался. Удалите запись и добавьте её снова.",
+    "importBoxScoreTitle": "Импорт статистики",
+    "importBoxScoreMessage": "Откуда взять статистику?",
+    "importFromGame": "Из записанной игры",
+    "importFromFile": "Из файла",
+    "noRecordedGames": "Записанных игр пока нет. Запишите игру в разделе «Игры», и она появится здесь."
   },
   "teamGrade": {
     "views": {

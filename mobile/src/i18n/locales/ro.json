@@ -1966,7 +1966,12 @@
     "opponentFilm": "Filmarea adversarului",
     "teamFilm": "Filmare {{team}}",
     "bothTeams": "Ambele",
-    "analysisStopped": "Analiza s-a oprit înainte de final. Șterge filmarea și adaug-o din nou."
+    "analysisStopped": "Analiza s-a oprit înainte de final. Șterge filmarea și adaug-o din nou.",
+    "importBoxScoreTitle": "Importă statisticile",
+    "importBoxScoreMessage": "De unde să vină statisticile?",
+    "importFromGame": "Dintr-un meci înregistrat",
+    "importFromFile": "Dintr-un fișier",
+    "noRecordedGames": "Niciun meci înregistrat încă. Înregistrează un meci la Meciuri și va apărea aici."
   },
   "teamGrade": {
     "views": {

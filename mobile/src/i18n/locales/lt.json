@@ -1966,7 +1966,12 @@
     "opponentFilm": "Varžovų vaizdo įrašas",
     "teamFilm": "{{team}} įrašas",
     "bothTeams": "Abi",
-    "analysisStopped": "Analizė nutrūko. Ištrink įrašą ir pridėk jį iš naujo."
+    "analysisStopped": "Analizė nutrūko. Ištrink įrašą ir pridėk jį iš naujo.",
+    "importBoxScoreTitle": "Importuoti statistiką",
+    "importBoxScoreMessage": "Iš kur paimti statistiką?",
+    "importFromGame": "Iš įrašytų rungtynių",
+    "importFromFile": "Iš failo",
+    "noRecordedGames": "Įrašytų rungtynių dar nėra. Įrašyk rungtynes skiltyje Rungtynės ir jos atsiras čia."
   },
   "teamGrade": {
     "views": {

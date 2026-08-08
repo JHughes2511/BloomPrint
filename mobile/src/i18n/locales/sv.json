@@ -1966,7 +1966,12 @@
     "opponentFilm": "Film på motståndaren",
     "teamFilm": "Film på {{team}}",
     "bothTeams": "Båda",
-    "analysisStopped": "Analysen avbröts. Ta bort filmen och lägg till den igen."
+    "analysisStopped": "Analysen avbröts. Ta bort filmen och lägg till den igen.",
+    "importBoxScoreTitle": "Importera matchstatistik",
+    "importBoxScoreMessage": "Varifrån ska statistiken hämtas?",
+    "importFromGame": "Från en registrerad match",
+    "importFromFile": "Från en fil",
+    "noRecordedGames": "Inga matcher registrerade än. Registrera en match under Matcher så dyker den upp här."
   },
   "teamGrade": {
     "views": {

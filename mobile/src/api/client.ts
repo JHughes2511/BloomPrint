@@ -720,6 +720,9 @@ export const gameReportsAPI = {
   videos: () => api.get('/game-reports/videos').then(r => r.data),
   versions: (id: number) => api.get(`/game-reports/${id}/versions`).then(r => r.data),
   allVersions: () => api.get('/game-reports/versions').then(r => r.data),
+  /** Pull a recorded game's box score into the packet, appended to what's there. */
+  importGame: (id: number, gameId: number) =>
+    api.post(`/game-reports/${id}/import-game`, { game_id: gameId }).then(r => r.data),
   uploadDoc: (id: number, formData: FormData) =>
     api.post(`/game-reports/${id}/upload-doc`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
   /**

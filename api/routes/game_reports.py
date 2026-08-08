@@ -716,6 +716,40 @@ def stream_clip(
     return FileResponse(ensure_local(clip.video_path), media_type="video/mp4")
 
 
+class ImportGameIn(BaseModel):
+    game_id: int
+
+
+@router.post("/{report_id}/import-game", response_model=schemas.GameReportOut)
+def import_game_box_score(
+    report_id: int,
+    body: ImportGameIn,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Pull the box score out of a game already recorded in Games.
+
+    A coach who has tracked a game in BloomPrint should not have to export it
+    and import the file back to use it in a packet — the numbers are already
+    here. Appended rather than substituted: a packet often wants two or three
+    games, and the file import's replace-everything behaviour would make the
+    second one erase the first.
+    """
+    gr = db.get(models.GameReport, report_id)
+    if not gr or gr.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Game report not found")
+
+    from .game_eval import _get_game_readable, box_score_text
+    game = _get_game_readable(db, body.game_id, coach)
+    text = box_score_text(db, game)
+
+    existing = (gr.box_score or "").strip()
+    gr.box_score = f"{existing}\n\n{text}".strip() if existing else text
+    db.commit()
+    db.refresh(gr)
+    return _build_out(gr, db)
+
+
 @router.post("/{report_id}/upload-doc", response_model=schemas.GameReportOut)
 async def upload_doc(
     report_id: int,

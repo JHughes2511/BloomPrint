@@ -1966,7 +1966,12 @@
     "opponentFilm": "Gegner-Film",
     "teamFilm": "Video von {{team}}",
     "bothTeams": "Beide",
-    "analysisStopped": "Die Analyse wurde vorzeitig gestoppt. Lösche das Video und füge es erneut hinzu."
+    "analysisStopped": "Die Analyse wurde vorzeitig gestoppt. Lösche das Video und füge es erneut hinzu.",
+    "importBoxScoreTitle": "Boxscore importieren",
+    "importBoxScoreMessage": "Woher soll der Boxscore kommen?",
+    "importFromGame": "Aus einem aufgezeichneten Spiel",
+    "importFromFile": "Aus einer Datei",
+    "noRecordedGames": "Noch keine Spiele aufgezeichnet. Zeichne ein Spiel unter Spiele auf, dann erscheint es hier."
   },
   "teamGrade": {
     "views": {

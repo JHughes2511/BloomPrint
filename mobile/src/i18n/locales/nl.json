@@ -1966,7 +1966,12 @@
     "opponentFilm": "Beelden tegenstander",
     "teamFilm": "Beelden van {{team}}",
     "bothTeams": "Beide",
-    "analysisStopped": "De analyse stopte voortijdig. Verwijder de video en voeg hem opnieuw toe."
+    "analysisStopped": "De analyse stopte voortijdig. Verwijder de video en voeg hem opnieuw toe.",
+    "importBoxScoreTitle": "Boxscore importeren",
+    "importBoxScoreMessage": "Waar moet de boxscore vandaan komen?",
+    "importFromGame": "Uit een vastgelegde wedstrijd",
+    "importFromFile": "Uit een bestand",
+    "noRecordedGames": "Nog geen wedstrijden vastgelegd. Leg een wedstrijd vast bij Wedstrijden en hij verschijnt hier."
   },
   "teamGrade": {
     "views": {

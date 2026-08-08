@@ -1966,7 +1966,12 @@
     "opponentFilm": "对手录像",
     "teamFilm": "{{team}} 影片",
     "bothTeams": "两队",
-    "analysisStopped": "分析未完成便中断。请删除该影片后重新添加。"
+    "analysisStopped": "分析未完成便中断。请删除该影片后重新添加。",
+    "importBoxScoreTitle": "导入技术统计",
+    "importBoxScoreMessage": "技术统计从哪里获取？",
+    "importFromGame": "从已记录的比赛",
+    "importFromFile": "从文件",
+    "noRecordedGames": "还没有记录的比赛。在“比赛”中记录一场比赛，它就会出现在这里。"
   },
   "teamGrade": {
     "views": {

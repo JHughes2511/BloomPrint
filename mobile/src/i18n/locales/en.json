@@ -1966,7 +1966,12 @@
     "opponentFilm": "Opponent Film",
     "teamFilm": "{{team}} Film",
     "bothTeams": "Both",
-    "analysisStopped": "Analysis stopped before it finished. Delete this film and add it again to retry."
+    "analysisStopped": "Analysis stopped before it finished. Delete this film and add it again to retry.",
+    "importBoxScoreTitle": "Import box score",
+    "importBoxScoreMessage": "Where should the box score come from?",
+    "importFromGame": "From a recorded game",
+    "importFromFile": "From a file",
+    "noRecordedGames": "No games recorded yet. Track a game under Games and it will appear here."
   },
   "teamGrade": {
     "views": {

@@ -1966,7 +1966,12 @@
     "opponentFilm": "Film ng kalaban",
     "teamFilm": "Film ng {{team}}",
     "bothTeams": "Pareho",
-    "analysisStopped": "Huminto ang pagsusuri bago matapos. Burahin ang film at idagdag muli."
+    "analysisStopped": "Huminto ang pagsusuri bago matapos. Burahin ang film at idagdag muli.",
+    "importBoxScoreTitle": "Mag-import ng box score",
+    "importBoxScoreMessage": "Saan manggagaling ang box score?",
+    "importFromGame": "Mula sa naitalang laro",
+    "importFromFile": "Mula sa file",
+    "noRecordedGames": "Wala pang naitalang laro. Magtala ng laro sa Mga Laro at lilitaw ito rito."
   },
   "teamGrade": {
     "views": {

@@ -1966,7 +1966,12 @@
     "opponentFilm": "相手チームの映像",
     "teamFilm": "{{team}} の映像",
     "bothTeams": "両チーム",
-    "analysisStopped": "解析が完了前に停止しました。映像を削除して追加し直してください。"
+    "analysisStopped": "解析が完了前に停止しました。映像を削除して追加し直してください。",
+    "importBoxScoreTitle": "ボックススコアを読み込む",
+    "importBoxScoreMessage": "ボックススコアの取得元は？",
+    "importFromGame": "記録済みの試合から",
+    "importFromFile": "ファイルから",
+    "noRecordedGames": "まだ記録された試合がありません。「試合」で記録するとここに表示されます。"
   },
   "teamGrade": {
     "views": {

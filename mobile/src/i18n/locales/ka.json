@@ -1966,7 +1966,12 @@
     "opponentFilm": "მოწინააღმდეგის ვიდეო",
     "teamFilm": "{{team}}-ის ვიდეო",
     "bothTeams": "ორივე",
-    "analysisStopped": "ანალიზი შეწყდა. წაშალეთ ვიდეო და თავიდან დაამატეთ."
+    "analysisStopped": "ანალიზი შეწყდა. წაშალეთ ვიდეო და თავიდან დაამატეთ.",
+    "importBoxScoreTitle": "სტატისტიკის იმპორტი",
+    "importBoxScoreMessage": "საიდან უნდა მოვიდეს სტატისტიკა?",
+    "importFromGame": "ჩაწერილი თამაშიდან",
+    "importFromFile": "ფაილიდან",
+    "noRecordedGames": "ჯერ თამაშები არ არის ჩაწერილი. ჩაწერე თამაში განყოფილებაში თამაშები და აქ გამოჩნდება."
   },
   "teamGrade": {
     "views": {

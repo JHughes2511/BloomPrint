@@ -1966,7 +1966,12 @@
     "opponentFilm": "Snimka protivnika",
     "teamFilm": "Snimka: {{team}}",
     "bothTeams": "Obje",
-    "analysisStopped": "Analiza je prekinuta. Obriši snimku i dodaj je ponovno."
+    "analysisStopped": "Analiza je prekinuta. Obriši snimku i dodaj je ponovno.",
+    "importBoxScoreTitle": "Uvezi statistiku",
+    "importBoxScoreMessage": "Odakle dohvatiti statistiku?",
+    "importFromGame": "Iz zabilježene utakmice",
+    "importFromFile": "Iz datoteke",
+    "noRecordedGames": "Još nema zabilježenih utakmica. Zabilježi utakmicu pod Utakmice i pojavit će se ovdje."
   },
   "teamGrade": {
     "views": {

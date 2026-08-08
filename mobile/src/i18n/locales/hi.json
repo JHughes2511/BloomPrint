@@ -1966,7 +1966,12 @@
     "opponentFilm": "प्रतिद्वंद्वी की फ़िल्म",
     "teamFilm": "{{team}} की फ़िल्म",
     "bothTeams": "दोनों",
-    "analysisStopped": "विश्लेषण पूरा होने से पहले रुक गया। वीडियो हटाकर दोबारा जोड़ें।"
+    "analysisStopped": "विश्लेषण पूरा होने से पहले रुक गया। वीडियो हटाकर दोबारा जोड़ें।",
+    "importBoxScoreTitle": "बॉक्स स्कोर आयात करें",
+    "importBoxScoreMessage": "बॉक्स स्कोर कहाँ से आए?",
+    "importFromGame": "रिकॉर्ड किए गए मैच से",
+    "importFromFile": "फ़ाइल से",
+    "noRecordedGames": "अभी कोई मैच रिकॉर्ड नहीं है। मैच में एक मैच ट्रैक करें और वह यहाँ दिखेगा।"
   },
   "teamGrade": {
     "views": {

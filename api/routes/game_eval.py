@@ -325,6 +325,102 @@ def _upsert_game_report(db: Session, coach: models.Coach, game: models.GameSessi
 VERSIONS_KEPT = 20
 
 
+# ── A recorded game, written out as a box score ────────────────────────────────
+# The live tracker records events ("3 FG Made", "Def. Reb", "Charge"), not a box
+# score. Those events ARE a box score once they are added up, which is what a
+# coach means when they say "import the box score from that game" — they do not
+# want the event log, they want PTS/FG/REB/AST the way it appears on a stat
+# sheet. Anything BloomPrint tracks that a normal box score has no column for
+# (deflections, defensive stops, charges, jog-backs) is kept underneath rather
+# than dropped: it is often the most useful part, and it is why the game was
+# tracked here rather than on paper.
+
+def _pct(made: int, attempted: int) -> str:
+    return f"{made}/{attempted}" + (f" ({round(100 * made / attempted)}%)" if attempted else "")
+
+
+_BOX_SCORE_STATS = {
+    "2 FG Made", "2 FG Missed", "3 FG Made", "3 FG Missed", "FT Made", "FT Missed",
+    "Off. Reb", "Def. Reb", "Assists", "Steal", "Blocked Shot", "Turnover", "Foul Against",
+}
+
+
+def _side_box_score(stats: list, is_opp: bool) -> str:
+    """One side of a game as a box-score table, plus whatever else was tracked."""
+    counts: dict[str, dict[str, int]] = {}
+    for s in stats:
+        if bool(s.is_opponent) != is_opp:
+            continue
+        counts.setdefault(s.player_name, {})
+        counts[s.player_name][s.stat_name] = (
+            counts[s.player_name].get(s.stat_name, 0) + (s.count or 0))
+    if not counts:
+        return "(no tracked stats)\n"
+
+    rows = []
+    extras = []
+    for name, c in sorted(counts.items()):
+        g = c.get
+        two_m, three_m, ft_m = g("2 FG Made", 0), g("3 FG Made", 0), g("FT Made", 0)
+        fg_m = two_m + three_m
+        fg_a = fg_m + g("2 FG Missed", 0) + g("3 FG Missed", 0)
+        pts = two_m * 2 + three_m * 3 + ft_m
+        rows.append([
+            name, str(pts), _pct(fg_m, fg_a),
+            _pct(three_m, three_m + g("3 FG Missed", 0)),
+            _pct(ft_m, ft_m + g("FT Missed", 0)),
+            str(g("Off. Reb", 0) + g("Def. Reb", 0)),
+            str(g("Assists", 0)), str(g("Steal", 0)),
+            str(g("Blocked Shot", 0)), str(g("Turnover", 0)),
+            str(g("Foul Against", 0)),
+        ])
+        other = {k: v for k, v in c.items() if k not in _BOX_SCORE_STATS and v}
+        if other:
+            extras.append(f"- {name}: " + ", ".join(f"{k} {v}" for k, v in sorted(other.items())))
+
+    head = ["Player", "PTS", "FG", "3PT", "FT", "REB", "AST", "STL", "BLK", "TO", "PF"]
+    out = ("| " + " | ".join(head) + " |\n"
+           + "| " + " | ".join("---" for _ in head) + " |\n"
+           + "".join("| " + " | ".join(r) + " |\n" for r in rows))
+    if extras:
+        out += "\nAlso tracked:\n" + "\n".join(extras) + "\n"
+    return out
+
+
+def box_score_text(db: Session, game: models.GameSession) -> str:
+    """A recorded game as text a coach can read and a report can be built from."""
+    team = db.get(models.Team, game.team_id) if game.team_id else None
+    coach = db.get(models.Coach, game.coach_id)
+    our = (team.name if team else None) or (coach.program_name if coach else "My Team")
+    when = game.date.strftime("%B %-d, %Y") if game.date else ""
+
+    header = f"{our} vs {game.opponent_name}"
+    if when:
+        header += f" — {when}"
+    if game.our_score is not None and game.opponent_score is not None:
+        result = ("WIN" if game.our_score > game.opponent_score
+                  else "LOSS" if game.our_score < game.opponent_score else "TIE")
+        header += f"\nFinal: {our} {game.our_score}, {game.opponent_name} {game.opponent_score} ({result})"
+
+    stats = list(game.player_stats)
+    return (
+        f"{header}\n\n"
+        f"{our.upper()}:\n{_side_box_score(stats, False)}\n"
+        f"{str(game.opponent_name).upper()}:\n{_side_box_score(stats, True)}"
+    )
+
+
+@router.get("/sessions/{game_id}/box-score-text")
+def get_box_score_text(
+    game_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """The recorded game, written out as a box score."""
+    game = _get_game_readable(db, game_id, coach)
+    return {"text": box_score_text(db, game)}
+
+
 def _file_edits(db: Session, game, coach: models.Coach, edits: list[str],
                 remember: bool, correction_model) -> None:
     """Keep what the coach typed, in whichever drawer they chose.

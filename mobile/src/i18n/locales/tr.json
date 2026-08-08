@@ -1966,7 +1966,12 @@
     "opponentFilm": "Rakip videosu",
     "teamFilm": "{{team}} videosu",
     "bothTeams": "İkisi de",
-    "analysisStopped": "Analiz tamamlanmadan durdu. Videoyu silip yeniden ekleyin."
+    "analysisStopped": "Analiz tamamlanmadan durdu. Videoyu silip yeniden ekleyin.",
+    "importBoxScoreTitle": "İstatistik cetvelini içe aktar",
+    "importBoxScoreMessage": "İstatistikler nereden gelsin?",
+    "importFromGame": "Kaydedilmiş bir maçtan",
+    "importFromFile": "Bir dosyadan",
+    "noRecordedGames": "Henüz kaydedilmiş maç yok. Maçlar bölümünde bir maç kaydet, burada görünecek."
   },
   "teamGrade": {
     "views": {

@@ -1966,7 +1966,12 @@
     "opponentFilm": "Video dell'avversario",
     "teamFilm": "Video di {{team}}",
     "bothTeams": "Entrambe",
-    "analysisStopped": "L'analisi si è interrotta. Elimina il video e aggiungilo di nuovo."
+    "analysisStopped": "L'analisi si è interrotta. Elimina il video e aggiungilo di nuovo.",
+    "importBoxScoreTitle": "Importa tabellino",
+    "importBoxScoreMessage": "Da dove deve arrivare il tabellino?",
+    "importFromGame": "Da una partita registrata",
+    "importFromFile": "Da un file",
+    "noRecordedGames": "Nessuna partita registrata. Registra una partita in Partite e comparirà qui."
   },
   "teamGrade": {
     "views": {

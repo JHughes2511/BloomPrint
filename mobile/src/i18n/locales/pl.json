@@ -1966,7 +1966,12 @@
     "opponentFilm": "Nagranie przeciwnika",
     "teamFilm": "Nagranie: {{team}}",
     "bothTeams": "Obie",
-    "analysisStopped": "Analiza przerwana. Usuń nagranie i dodaj je ponownie."
+    "analysisStopped": "Analiza przerwana. Usuń nagranie i dodaj je ponownie.",
+    "importBoxScoreTitle": "Importuj statystyki",
+    "importBoxScoreMessage": "Skąd pobrać statystyki?",
+    "importFromGame": "Z zapisanego meczu",
+    "importFromFile": "Z pliku",
+    "noRecordedGames": "Brak zapisanych meczów. Zapisz mecz w sekcji Mecze, a pojawi się tutaj."
   },
   "teamGrade": {
     "views": {
