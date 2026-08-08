@@ -747,6 +747,27 @@ def _advanced_stats(db: Session, game: models.GameSession) -> list[dict] | None:
              **{f: getattr(r, f) for f in fields}} for r in rows]
 
 
+_PANEL_TO_BOX = {"PTS": "pts", "REB": "reb", "OREB": "oreb", "DREB": "dreb",
+                 "AST": "ast", "STL": "stl", "BLK": "blk", "TO": "tov", "PF": "pf"}
+
+
+def _official_totals(db: Session, game_id: int) -> dict[bool, dict]:
+    """The team totals a sheet printed, by side.
+
+    Preferred over the sum of the player rows wherever a sheet stated them: a
+    box score credits team rebounds and team turnovers to the team, so its
+    official REB and TO are legitimately higher than any set of named players
+    adds up to. Summing the players left every team comparison a few short of
+    the sheet the coach was holding.
+    """
+    out: dict[bool, dict] = {}
+    for r in db.query(models.GameTeamAdvanced).filter_by(game_id=game_id).all():
+        vals = {k: getattr(r, col) for k, col in _PANEL_TO_BOX.items() if getattr(r, col) is not None}
+        if vals:
+            out[bool(r.is_opponent)] = vals
+    return out
+
+
 def _shot_chart(db: Session, game: models.GameSession) -> list[dict] | None:
     shots = db.query(models.GameShot).filter_by(game_id=game.id).all()
     if not shots:
@@ -816,11 +837,17 @@ def game_box_score(
     our_name = (team_row.name if team_row else None) or coach.program_name or "Us"
     stats = list(game.player_stats)
 
+    official = _official_totals(db, game.id)
     sides = []
     for is_opp, name in ((False, our_name), (True, game.opponent_name or "Opponent")):
         rows, totals = _side_rows(stats, is_opp)
+        # The sheet's own totals win where it stated them; the player table
+        # still shows what the players themselves did.
+        team_totals = {**totals, **official.get(is_opp, {})}
         sides.append({"is_opponent": is_opp, "team_name": name,
-                      "players": rows, "totals": totals})
+                      "players": rows, "totals": team_totals,
+                      "player_totals": totals,
+                      "official_totals": bool(official.get(is_opp))})
 
     # Leaders, over both teams, so the board reads like a broadcast's.
     everyone = [{**r, "team_name": side["team_name"], "is_opponent": side["is_opponent"]}

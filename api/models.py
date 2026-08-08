@@ -874,6 +874,22 @@ class GameTeamAdvanced(Base):
     id = Column(Integer, primary_key=True, index=True)
     game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False, index=True)
     is_opponent = Column(Boolean, nullable=False, default=False)
+    # The basic totals as the sheet prints them. These are NOT the sum of the
+    # player rows and are not meant to be: a box score credits team rebounds and
+    # team turnovers to the team, so the official total is legitimately higher
+    # than anything the named players add up to. Summing the players left the
+    # team comparison a few rebounds and turnovers short of the sheet every
+    # time, which reads as the import having got it wrong.
+    pts = Column(Integer, nullable=True)
+    reb = Column(Integer, nullable=True)
+    oreb = Column(Integer, nullable=True)
+    dreb = Column(Integer, nullable=True)
+    ast = Column(Integer, nullable=True)
+    stl = Column(Integer, nullable=True)
+    blk = Column(Integer, nullable=True)
+    tov = Column(Integer, nullable=True)
+    pf = Column(Integer, nullable=True)
+
     points_off_turnovers = Column(Integer, nullable=True)
     fast_break_points = Column(Integer, nullable=True)
     second_chance_points = Column(Integer, nullable=True)

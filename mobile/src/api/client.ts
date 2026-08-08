@@ -435,7 +435,16 @@ export const importsAPI = {
     }
     return { players: [...merged.values()], events, shots, team_stats, errors };
   },
-  gameStatsCommit: (data: { game_id: number; players: any[] }) =>
+  /** Read ONE section again, with the coach saying what the reader got wrong. */
+  regenerateSection: async (files: PickedFile[], body: { game_id: number; section: string; note: string }) => {
+    const form = await _importFormMulti(files);
+    form.append('game_id', String(body.game_id));
+    form.append('section', body.section);
+    form.append('note', body.note);
+    return api.post('/imports/game-stats/resection', form,
+      { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 180000 }).then(r => r.data);
+  },
+  gameStatsCommit: (data: { game_id: number; players?: any[]; events?: any[]; shots?: any[]; team_stats?: any[] }) =>
     api.post('/imports/game-stats/commit', data).then(r => r.data),
   text: async (file: PickedFile, purpose = 'coaching notes') =>
     api.post('/imports/text', await _importForm(file, { purpose }), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),

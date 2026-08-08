@@ -2223,7 +2223,10 @@
     "finalScore": "Galutinis rezultatas",
     "couldNotSaveScore": "Nepavyko išsaugoti rezultato.",
     "readingFiles": "Skaitomas failas {{done}} iš {{total}}…",
-    "gameInsights": "Rungtynių analizė"
+    "gameInsights": "Rungtynių analizė",
+    "home": "Namuose",
+    "away": "Išvykoje",
+    "finalLabel": "Pabaiga"
   },
   "whiteboard": {
     "title": "Lenta",
@@ -2594,6 +2597,10 @@
       "points_in_paint": "Points in the Paint",
       "bench_points": "Points from the Bench"
     },
-    "editHint": "Tap any number to correct it. Points and rebounds are worked out from these, so they are not editable."
+    "editHint": "Tap any number to correct it. Points and rebounds are worked out from these, so they are not editable.",
+    "notRight": "Neteisinga?",
+    "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
+    "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
+    "attachAndRedo": "Pridėti ir kartoti"
   }
 }

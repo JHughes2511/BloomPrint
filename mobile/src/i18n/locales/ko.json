@@ -2223,7 +2223,10 @@
     "finalScore": "최종 점수",
     "couldNotSaveScore": "점수를 저장하지 못했습니다.",
     "readingFiles": "{{total}}개 중 {{done}}번째 파일 읽는 중…",
-    "gameInsights": "경기 인사이트"
+    "gameInsights": "경기 인사이트",
+    "home": "홈",
+    "away": "원정",
+    "finalLabel": "종료"
   },
   "whiteboard": {
     "title": "작전판",
@@ -2594,6 +2597,10 @@
       "points_in_paint": "Points in the Paint",
       "bench_points": "Points from the Bench"
     },
-    "editHint": "숫자를 눌러 수정하세요. 득점과 리바운드는 이 값에서 계산됩니다."
+    "editHint": "숫자를 눌러 수정하세요. 득점과 리바운드는 이 값에서 계산됩니다.",
+    "notRight": "잘못됐나요?",
+    "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
+    "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
+    "attachAndRedo": "파일 첨부 후 다시 읽기"
   }
 }

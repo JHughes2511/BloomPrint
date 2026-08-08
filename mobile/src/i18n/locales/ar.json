@@ -2223,7 +2223,10 @@
     "finalScore": "النتيجة النهائية",
     "couldNotSaveScore": "تعذّر حفظ النتيجة.",
     "readingFiles": "قراءة الملف {{done}} من {{total}}…",
-    "gameInsights": "تحليلات المباراة"
+    "gameInsights": "تحليلات المباراة",
+    "home": "أرضه",
+    "away": "خارج أرضه",
+    "finalLabel": "النهائي"
   },
   "whiteboard": {
     "title": "السبورة",
@@ -2594,6 +2597,10 @@
       "points_in_paint": "Points in the Paint",
       "bench_points": "Points from the Bench"
     },
-    "editHint": "اضغط على أي رقم لتصحيحه. النقاط والمرتدات تُحسب منها."
+    "editHint": "اضغط على أي رقم لتصحيحه. النقاط والمرتدات تُحسب منها.",
+    "notRight": "غير صحيح؟",
+    "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
+    "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
+    "attachAndRedo": "أرفق الملف وأعد القراءة"
   }
 }

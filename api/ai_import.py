@@ -200,7 +200,8 @@ GAME_FILE_INSTRUCTION = (
     '"description": "", "points": 0, "home_score": 0, "away_score": 0}],\n'
     '  "shots": [{"team_name": "", "player_name": "", "period": 1, "x": 0.0, "y": 0.0, '
     '"made": true, "points": 2}],\n'
-    '  "team_stats": [{"team_name": "", "points_off_turnovers": 0, "fast_break_points": 0, '
+    '  "team_stats": [{"team_name": "", "PTS": 0, "REB": 0, "OREB": 0, "DREB": 0, "AST": 0, '
+    '"STL": 0, "BLK": 0, "TO": 0, "PF": 0, "points_off_turnovers": 0, "fast_break_points": 0, '
     '"second_chance_points": 0, "points_in_paint": 0, "bench_points": 0}]\n'
     '}\n\n'
     "PLAYERS — the box score. FG/FGM/FGA cover ALL field goals, threes included, so "
@@ -219,8 +220,13 @@ GAME_FILE_INSTRUCTION = (
     "convert to percentages. If it shows shots on a chart image, read the positions as "
     "accurately as you can from the image. Never invent a location for a shot the file "
     "only counts.\n\n"
-    "TEAM_STATS — the team-totals panel, when one is printed. These CANNOT be worked "
-    "out from a box score, so give them only when the file states them.\n\n"
+    "TEAM_STATS — the TEAM TOTALS row or panel, when the sheet prints one. Give the "
+    "totals EXACTLY as printed; do NOT add the player rows up yourself. They are "
+    "often higher than the players sum to, because team rebounds and team turnovers "
+    "belong to the team rather than to any player, and that difference is the whole "
+    "reason this section exists. Points off turnovers, fast-break, second-chance, "
+    "paint and bench points cannot be worked out from a box score at all, so give "
+    "them only when the file states them.\n\n"
     "TEAM_NAME everywhere is the heading the file puts that row under — copy it "
     "exactly even if unsure which side it is. Set is_opponent when the file makes the "
     "sides clear; when it does not, leave it false and let the team name speak.\n\n"

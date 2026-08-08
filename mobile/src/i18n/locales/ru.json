@@ -2223,7 +2223,10 @@
     "finalScore": "Итоговый счёт",
     "couldNotSaveScore": "Не удалось сохранить счёт.",
     "readingFiles": "Чтение файла {{done}} из {{total}}…",
-    "gameInsights": "Аналитика матча"
+    "gameInsights": "Аналитика матча",
+    "home": "Дома",
+    "away": "В гостях",
+    "finalLabel": "Итог"
   },
   "whiteboard": {
     "title": "Тактическая доска",
@@ -2594,6 +2597,10 @@
       "points_in_paint": "Очки в краске",
       "bench_points": "Очки со скамейки"
     },
-    "editHint": "Коснитесь числа, чтобы исправить. Очки и подборы считаются из них."
+    "editHint": "Коснитесь числа, чтобы исправить. Очки и подборы считаются из них.",
+    "notRight": "Неверно?",
+    "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
+    "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
+    "attachAndRedo": "Приложить и повторить"
   }
 }

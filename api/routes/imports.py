@@ -281,8 +281,20 @@ def game_stats_commit(
         if tn:
             side_of[tn] = bool(p.get("is_opponent"))
 
+    # Events, shots and team totals name a team; the game knows who is playing.
+    # Looking the name up ONLY among the players' teams put anything the players
+    # did not mention on our side by default — which is how the opponent's
+    # team-totals panel ended up filed under our team and theirs came out empty.
+    from .game_eval import _side_for
+    team_row = db.get(models.Team, game.team_id) if game.team_id else None
+    ours_name = (team_row.name if team_row else None) or coach.program_name or ""
+
     def side_for(team_name) -> bool:
-        return side_of.get(str(team_name or "").strip().lower(), False)
+        key = str(team_name or "").strip().lower()
+        if key in side_of:
+            return side_of[key]
+        matched = _side_for(str(team_name or ""), ours_name, game.opponent_name or "")
+        return bool(matched) if matched is not None else False
 
     def clock_seconds(raw) -> float | None:
         """A game clock as printed — "8:32", "0:04.5", or already a number."""
@@ -347,6 +359,11 @@ def game_stats_commit(
                 continue
             db.add(models.GameTeamAdvanced(
                 game_id=game.id, is_opponent=side_for(ts.get("team_name")),
+                pts=_as_int(ts.get("PTS")), reb=_as_int(ts.get("REB")),
+                oreb=_as_int(ts.get("OREB")), dreb=_as_int(ts.get("DREB")),
+                ast=_as_int(ts.get("AST")), stl=_as_int(ts.get("STL")),
+                blk=_as_int(ts.get("BLK")), tov=_as_int(ts.get("TO")),
+                pf=_as_int(ts.get("PF")),
                 points_off_turnovers=_as_int(ts.get("points_off_turnovers")),
                 fast_break_points=_as_int(ts.get("fast_break_points")),
                 second_chance_points=_as_int(ts.get("second_chance_points")),
@@ -385,3 +402,81 @@ async def import_text(
     if not text:
         raise HTTPException(status_code=422, detail="No readable text was found in that file.")
     return {"text": text}
+
+
+# ── Re-reading one section, with the coach saying what was wrong ─────────────
+
+SECTIONS = {
+    "players": "the per-player box score",
+    "team_stats": "the team totals panel (including points off turnovers, fast break, "
+                  "second chance, points in the paint and bench points)",
+    "events": "the play-by-play",
+    "shots": "the shot locations",
+}
+
+
+@router.post("/game-stats/resection")
+async def regenerate_section(
+    files: list[UploadFile] = File(...),
+    game_id: int = Form(...),
+    section: str = Form(...),
+    note: str = Form(""),
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Read one section again, guided by what the coach says went wrong.
+
+    A reader misses things — a 7 read as an 8, a team's panel filed under the
+    other side — and until now the only recourse was to import everything again
+    and hope it landed differently. This re-reads the file for ONE section, with
+    the coach's correction in the prompt, and replaces only that section. What
+    was right, and anything edited by hand, is left alone.
+    """
+    from .game_eval import _get_game, _side_for
+    if section not in SECTIONS:
+        raise HTTPException(status_code=400, detail=f"Unknown section: {section}")
+    game = _get_game(db, game_id, coach.id)
+    team_row = db.get(models.Team, game.team_id) if game.team_id else None
+    ours_name = (team_row.name if team_row else None) or coach.program_name or ""
+
+    instruction = (
+        ai_import.GAME_FILE_INSTRUCTION
+        + f"\n\nTHIS PASS IS ONLY ABOUT {SECTIONS[section].upper()}. Return that section "
+        "and omit the others.\n"
+        f"The two teams in this game are {ours_name!r} and {game.opponent_name!r}; use "
+        "those names for team_name where the file's headings match them.\n"
+    )
+    if note.strip():
+        instruction += (
+            "\nTHE COACH HAS READ YOUR PREVIOUS ATTEMPT AND SAYS THIS WAS WRONG:\n"
+            f"{note.strip()}\n"
+            "They were looking at the same file you are. Take the correction as fact, "
+            "find what they are pointing at, and read that part again carefully.\n"
+        )
+
+    collected: list = []
+    errors: list[str] = []
+    for f in files:
+        data = await read_upload(f, what='file')
+        try:
+            parsed = ai_import.ai_extract_json(data, f.filename or "", f.content_type, instruction)
+        except RuntimeError as e:
+            errors.append(f"{f.filename}: {e}")
+            continue
+        got = (parsed or {}).get(section) if isinstance(parsed, dict) else None
+        if isinstance(got, list):
+            collected.extend(got)
+    if not collected:
+        raise HTTPException(
+            status_code=422,
+            detail="That section could not be read from those files."
+                   + (" " + "; ".join(errors) if errors else ""))
+
+    def side_for(name) -> bool:
+        matched = _side_for(str(name or ""), ours_name, game.opponent_name or "")
+        return bool(matched) if matched is not None else False
+
+    return {"section": section, "count": len(collected), "rows": collected,
+            "sides": {str(r.get("team_name") or ""): side_for(r.get("team_name"))
+                      for r in collected if isinstance(r, dict)},
+            "errors": errors}

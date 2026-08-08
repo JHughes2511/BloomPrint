@@ -2223,7 +2223,10 @@
     "finalScore": "Підсумковий рахунок",
     "couldNotSaveScore": "Не вдалося зберегти рахунок.",
     "readingFiles": "Читання файлу {{done}} з {{total}}…",
-    "gameInsights": "Аналітика матчу"
+    "gameInsights": "Аналітика матчу",
+    "home": "Удома",
+    "away": "У гостях",
+    "finalLabel": "Кінець"
   },
   "whiteboard": {
     "title": "Тактична дошка",
@@ -2594,6 +2597,10 @@
       "points_in_paint": "Points in the Paint",
       "bench_points": "Points from the Bench"
     },
-    "editHint": "Торкніться числа, щоб виправити. Очки та підбирання рахуються з них."
+    "editHint": "Торкніться числа, щоб виправити. Очки та підбирання рахуються з них.",
+    "notRight": "Не так?",
+    "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
+    "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
+    "attachAndRedo": "Долучити файл і повторити"
   }
 }

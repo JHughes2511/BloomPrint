@@ -2223,7 +2223,10 @@
     "finalScore": "Resultado final",
     "couldNotSaveScore": "No se pudo guardar el resultado.",
     "readingFiles": "Leyendo archivo {{done}} de {{total}}…",
-    "gameInsights": "Análisis del partido"
+    "gameInsights": "Análisis del partido",
+    "home": "Local",
+    "away": "Visitante",
+    "finalLabel": "Final"
   },
   "whiteboard": {
     "title": "Pizarra",
@@ -2594,6 +2597,10 @@
       "points_in_paint": "Puntos en la pintura",
       "bench_points": "Puntos del banquillo"
     },
-    "editHint": "Toca cualquier número para corregirlo. Los puntos y rebotes se calculan a partir de estos."
+    "editHint": "Toca cualquier número para corregirlo. Los puntos y rebotes se calculan a partir de estos.",
+    "notRight": "¿No es correcto?",
+    "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
+    "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
+    "attachAndRedo": "Adjuntar y rehacer"
   }
 }

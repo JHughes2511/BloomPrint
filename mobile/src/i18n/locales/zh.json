@@ -2223,7 +2223,10 @@
     "finalScore": "最终比分",
     "couldNotSaveScore": "无法保存比分。",
     "readingFiles": "正在读取第 {{done}} / {{total}} 个文件…",
-    "gameInsights": "比赛洞察"
+    "gameInsights": "比赛洞察",
+    "home": "主场",
+    "away": "客场",
+    "finalLabel": "终场"
   },
   "whiteboard": {
     "title": "战术板",
@@ -2594,6 +2597,10 @@
       "points_in_paint": "禁区得分",
       "bench_points": "替补得分"
     },
-    "editHint": "点按任一数字进行修正。得分和篮板由这些数据推算。"
+    "editHint": "点按任一数字进行修正。得分和篮板由这些数据推算。",
+    "notRight": "不正确？",
+    "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
+    "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
+    "attachAndRedo": "重新附件并重读"
   }
 }

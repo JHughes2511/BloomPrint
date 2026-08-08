@@ -2223,7 +2223,10 @@
     "finalScore": "Slutresultat",
     "couldNotSaveScore": "Kunde inte spara resultatet.",
     "readingFiles": "Läser fil {{done}} av {{total}}…",
-    "gameInsights": "Matchanalys"
+    "gameInsights": "Matchanalys",
+    "home": "Hemma",
+    "away": "Borta",
+    "finalLabel": "Slut"
   },
   "whiteboard": {
     "title": "Taktiktavla",
@@ -2594,6 +2597,10 @@
       "points_in_paint": "Points in the Paint",
       "bench_points": "Points from the Bench"
     },
-    "editHint": "Tryck på en siffra för att rätta den. Poäng och returer räknas ut från dessa."
+    "editHint": "Tryck på en siffra för att rätta den. Poäng och returer räknas ut från dessa.",
+    "notRight": "Inte rätt?",
+    "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
+    "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
+    "attachAndRedo": "Bifoga och gör om"
   }
 }

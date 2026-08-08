@@ -2223,7 +2223,10 @@
     "finalScore": "Wynik końcowy",
     "couldNotSaveScore": "Nie udało się zapisać wyniku.",
     "readingFiles": "Odczyt pliku {{done}} z {{total}}…",
-    "gameInsights": "Analiza meczu"
+    "gameInsights": "Analiza meczu",
+    "home": "Gospodarz",
+    "away": "Gość",
+    "finalLabel": "Koniec"
   },
   "whiteboard": {
     "title": "Tablica",
@@ -2594,6 +2597,10 @@
       "points_in_paint": "Points in the Paint",
       "bench_points": "Points from the Bench"
     },
-    "editHint": "Dotknij liczby, aby ją poprawić. Punkty i zbiórki wynikają z tych wartości."
+    "editHint": "Dotknij liczby, aby ją poprawić. Punkty i zbiórki wynikają z tych wartości.",
+    "notRight": "Coś nie tak?",
+    "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
+    "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
+    "attachAndRedo": "Dołącz plik i powtórz"
   }
 }

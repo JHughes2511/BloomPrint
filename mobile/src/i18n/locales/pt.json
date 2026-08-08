@@ -2223,7 +2223,10 @@
     "finalScore": "Resultado final",
     "couldNotSaveScore": "Não foi possível guardar o resultado.",
     "readingFiles": "A ler ficheiro {{done}} de {{total}}…",
-    "gameInsights": "Análise do jogo"
+    "gameInsights": "Análise do jogo",
+    "home": "Casa",
+    "away": "Fora",
+    "finalLabel": "Final"
   },
   "whiteboard": {
     "title": "Quadro Tático",
@@ -2594,6 +2597,10 @@
       "points_in_paint": "Pontos no garrafão",
       "bench_points": "Pontos do banco"
     },
-    "editHint": "Toca num número para o corrigir. Pontos e ressaltos derivam destes."
+    "editHint": "Toca num número para o corrigir. Pontos e ressaltos derivam destes.",
+    "notRight": "Não está certo?",
+    "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
+    "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
+    "attachAndRedo": "Anexar e refazer"
   }
 }

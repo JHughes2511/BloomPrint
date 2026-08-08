@@ -503,6 +503,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
   const openLiveEntry = async (game: any) => {
     setActiveGame(game);
+    // The game's score, which is the derived one when nobody typed a score in
+    // — so a game whose box score is imported shows its result rather than 0-0.
     setOurScore(game.our_score ?? 0);
     setOppScore(game.opponent_score ?? 0);
     setActiveQuarter(1);
@@ -867,6 +869,22 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     }
     setLoadingGameReport(false);
   };
+
+  /**
+   * HOME / AWAY for the two scores, decided by where the game was played.
+   *
+   * "US" and "THEM" told the coach what they already knew. Location is on the
+   * game and is the only thing that says which side of a printed box score our
+   * team is; on a neutral court neither label is true, so the names stand in.
+   */
+  const sideLabels = React.useMemo(() => {
+    const where = String(activeGame?.location ?? '').trim().toLowerCase();
+    const ourName = (teams as any[]).find(tm => tm.id === activeGame?.team_id)?.name
+      ?? coach?.program_name ?? tr('teamGrade.ourTeam');
+    if (where.startsWith('home')) return { ours: tr('teamGrade.home'), theirs: tr('teamGrade.away') };
+    if (where.startsWith('away')) return { ours: tr('teamGrade.away'), theirs: tr('teamGrade.home') };
+    return { ours: ourName, theirs: activeGame?.opponent_name ?? tr('teamGrade.opponent') };
+  }, [activeGame, teams, coach, tr]);
 
   const saveFinalScore = async () => {
     if (!detailGame) return;
@@ -1690,7 +1708,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* Score bar */}
           <View style={s.scoreBar}>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }}>{tr('teamGrade.us')}</Text>
+              {/* HOME / AWAY, from the Location already set on the game — an
+                  "Away" game means our score belongs under AWAY. On a neutral
+                  court neither label is true, so the team names stand in. */}
+              <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }} numberOfLines={1}>{sideLabels.ours}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <TouchableOpacity onPress={() => updateScore('our', -1)}>
                   <Ionicons name="remove-circle-outline" size={20} color={t.muted} />
@@ -1705,10 +1726,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               <Text style={{ color: t.ink, fontSize: 13, fontFamily: fonts[700] }} numberOfLines={1}>
                 {matchupLabel(activeGame)}
               </Text>
-              <Text style={{ color: t.muted, fontSize: 11 }}>{periodLabel(gameFmt, periodIndex)}</Text>
+              {/* A game tracked after the fact is over. "Q1" under the
+                  matchup said a game that had already been played was about to
+                  tip off. */}
+              <Text style={{ color: t.muted, fontSize: 11 }}>
+                {activeGame.tracking_mode === 'post' || activeGame.status === 'completed'
+                  ? tr('teamGrade.finalLabel')
+                  : periodLabel(gameFmt, periodIndex)}
+              </Text>
             </View>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }}>{tr('teamGrade.them')}</Text>
+              <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700] }} numberOfLines={1}>{sideLabels.theirs}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <TouchableOpacity onPress={() => updateScore('opp', -1)}>
                   <Ionicons name="remove-circle-outline" size={20} color={t.muted} />

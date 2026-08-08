@@ -2223,7 +2223,10 @@
     "finalScore": "Score final",
     "couldNotSaveScore": "Le score n'a pas pu être enregistré.",
     "readingFiles": "Lecture du fichier {{done}} sur {{total}}…",
-    "gameInsights": "Analyse du match"
+    "gameInsights": "Analyse du match",
+    "home": "Domicile",
+    "away": "Extérieur",
+    "finalLabel": "Final"
   },
   "whiteboard": {
     "title": "Tableau blanc",
@@ -2594,6 +2597,10 @@
       "points_in_paint": "Points dans la raquette",
       "bench_points": "Points du banc"
     },
-    "editHint": "Touchez un nombre pour le corriger. Les points et rebonds en découlent."
+    "editHint": "Touchez un nombre pour le corriger. Les points et rebonds en découlent.",
+    "notRight": "Pas correct ?",
+    "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
+    "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
+    "attachAndRedo": "Joindre et refaire"
   }
 }

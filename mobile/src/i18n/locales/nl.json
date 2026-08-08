@@ -2223,7 +2223,10 @@
     "finalScore": "Eindstand",
     "couldNotSaveScore": "Kon de stand niet opslaan.",
     "readingFiles": "Bestand {{done}} van {{total}} lezen…",
-    "gameInsights": "Wedstrijdinzichten"
+    "gameInsights": "Wedstrijdinzichten",
+    "home": "Thuis",
+    "away": "Uit",
+    "finalLabel": "Eindstand"
   },
   "whiteboard": {
     "title": "Tactiekbord",
@@ -2594,6 +2597,10 @@
       "points_in_paint": "Points in the Paint",
       "bench_points": "Points from the Bench"
     },
-    "editHint": "Tik op een getal om het te corrigeren. Punten en rebounds volgen hieruit."
+    "editHint": "Tik op een getal om het te corrigeren. Punten en rebounds volgen hieruit.",
+    "notRight": "Niet juist?",
+    "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
+    "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
+    "attachAndRedo": "Bijvoegen en opnieuw"
   }
 }
