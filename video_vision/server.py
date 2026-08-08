@@ -346,23 +346,44 @@ def _extract_frames_interval(
 
 def _frame_budget(duration: float) -> int:
     """Frames to spend on a film, scaled by length with a sane max. Short clips
-    get near-1fps; full games are capped and rely on motion-gating."""
+    get near-1fps; full games are capped and rely on motion-gating.
+
+    A full game used to get 800. It was not buying what it looked like it was
+    buying: paired with the old fifteen-second floor below, 721 of those 800
+    frames on a three-hour film were a flat grid laid over the whole broadcast —
+    halftime, timeouts, huddles, the crowd — leaving seventy-nine for the motion
+    pre-scan to actually spend on basketball. Widening the floor frees most of
+    the budget for action, so a smaller budget now buys roughly three times the
+    action coverage of the larger one, at a little over half the cost.
+    """
     if duration <= 0:
         return 60
     if duration <= 120:          # short clip / single possession → near-exhaustive
         return min(int(duration) + 12, 160)
     if duration <= 900:          # up to 15 min → dense on action
         return min(int(duration * 0.55), 460)
-    return 800                   # full game / half → sane max, motion-gated
+    if duration <= 3600:         # up to an hour → the floor is a modest share
+        return 800
+    # Past an hour the floor widens (below) and the budget tapers with it,
+    # meeting 500 at around two hours. Tapered rather than stepped so a film a
+    # minute over the hour is not sampled less densely than one a minute under.
+    return max(500, int(800 - (duration - 3600) * 0.1))
 
 
 def _floor_interval(duration: float) -> float:
-    """Guaranteed baseline: at least one frame every N seconds even in dead time."""
+    """Guaranteed baseline: at least one frame every N seconds even in dead time.
+
+    The floor exists to prove nothing was happening, not to watch — anything
+    with real motion is pulled in by the pass that follows regardless of this
+    interval. So it widens with the film: on a three-hour game a frame every
+    forty seconds confirms the dead stretches while leaving the budget to the
+    play. At fifteen seconds it consumed nearly the whole budget by itself.
+    """
     if duration <= 120:
         return 4.0
-    if duration <= 900:
-        return 8.0
-    return 15.0
+    if duration <= 3600:
+        return 8.0 if duration <= 900 else 15.0
+    return 40.0
 
 
 def _motion_profile(video_path: str, on_progress=None) -> tuple[float, list[tuple[float, float]]]:
@@ -423,29 +444,47 @@ def _motion_profile(video_path: str, on_progress=None) -> tuple[float, list[tupl
 
 
 def _select_adaptive_timestamps(duration: float, scores: list[tuple[float, float]], budget: int) -> list[float]:
-    """Pick which timestamps to actually analyze: a baseline floor everywhere,
-    every scene cut / motion burst, then the highest-motion moments until the
-    budget is spent."""
+    """Pick which timestamps to actually analyze: a baseline floor across the
+    whole film, then the highest-motion moments until the budget is spent.
+
+    THE END OF THE FILM IS NOT THE CHEAPEST THING TO GIVE UP
+
+    This used to finish with `sorted(chosen)[:budget]`. Sorted by timestamp —
+    so whenever the floor plus the scene cuts came to more than the budget, the
+    frames it dropped were the last ones, and the film stopped being watched
+    part-way through. On a busy game that was the fourth quarter: at a scene-cut
+    rate of one frame in ten the sample ended at 83% of the film, at one in five
+    around 72%, and nothing downstream could tell. Every segment still reported
+    in, and the report was written as though the whole game had been seen.
+
+    Budget is enforced here by rank instead — the frames that do not fit are the
+    least eventful ones, wherever in the film they fall — and the floor is
+    widened rather than clipped if it alone would not fit. Coverage of the whole
+    film is now a property of the function, not something that holds as long as
+    the numbers happen to work out.
+    """
     if not scores:
         return []
-    vals = sorted(s for _, s in scores)
-    median = vals[len(vals) // 2] if vals else 0.0
-    cut_threshold = max(median * 3.0, 8.0)   # a spike vs the film's own baseline
     floor_int = _floor_interval(duration)
+    # A floor that cannot fit inside the budget is spread thinner, never cut
+    # short: the guarantee it exists to make is about the whole film.
+    if duration > 0 and (duration // floor_int) + 1 > budget:
+        floor_int = duration / max(budget - 1, 1)
 
     chosen: set[float] = set()
     t = 0.0
     while t <= duration:                     # guaranteed baseline coverage
         chosen.add(round(t, 1))
         t += floor_int
-    for ts, s in scores:                     # every scene cut / motion burst
-        if s >= cut_threshold:
-            chosen.add(round(ts, 1))
-    for ts, s in sorted(scores, key=lambda x: x[1], reverse=True):  # spend rest on action
+
+    # Scene cuts and motion bursts are simply the top of this ranking, so they
+    # come first without needing a threshold of their own — and, unlike a
+    # threshold, a ranking cannot overrun the budget however busy the film is.
+    for ts, _s in sorted(scores, key=lambda x: (-x[1], x[0])):
         if len(chosen) >= budget:
             break
         chosen.add(round(ts, 1))
-    return sorted(chosen)[:budget]
+    return sorted(chosen)
 
 
 def _extract_frames_adaptive(video_path: str, budget_cap: int | None = None,
@@ -1030,7 +1069,13 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
             profile=resume_profiles.get(i) or resume_profiles.get(str(i)),
             on_profile=_save_profile,
         )
-    frames = frames[:TOTAL_CAP]
+    if len(frames) > TOTAL_CAP:
+        # Thin evenly rather than slice. `frames[:TOTAL_CAP]` kept the earliest
+        # ones, and with several films concatenated that meant the last films
+        # were never looked at at all — the same way the sampler used to drop
+        # the end of a single film. Every film keeps its share instead.
+        step = len(frames) / TOTAL_CAP
+        frames = [frames[int(i * step)] for i in range(TOTAL_CAP)]
     if not frames:
         return [types.TextContent(type="text", text="Error: no frames could be extracted.")]
 
