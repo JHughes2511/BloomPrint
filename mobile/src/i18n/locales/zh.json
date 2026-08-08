@@ -2223,7 +2223,8 @@
     "finalScore": "最终比分",
     "couldNotSaveScore": "无法保存比分。",
     "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
-    "readingFiles": "正在读取第 {{done}} / {{total}} 个文件…"
+    "readingFiles": "正在读取第 {{done}} / {{total}} 个文件…",
+    "gameInsights": "比赛洞察"
   },
   "whiteboard": {
     "title": "战术板",

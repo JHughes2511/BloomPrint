@@ -2223,7 +2223,8 @@
     "finalScore": "Endstand",
     "couldNotSaveScore": "Der Stand konnte nicht gespeichert werden.",
     "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
-    "readingFiles": "Datei {{done}} von {{total}} wird gelesen…"
+    "readingFiles": "Datei {{done}} von {{total}} wird gelesen…",
+    "gameInsights": "Spielanalyse"
   },
   "whiteboard": {
     "title": "Taktiktafel",

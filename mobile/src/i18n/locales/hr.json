@@ -2223,7 +2223,8 @@
     "finalScore": "Konačni rezultat",
     "couldNotSaveScore": "Rezultat nije spremljen.",
     "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
-    "readingFiles": "Čitanje datoteke {{done}} od {{total}}…"
+    "readingFiles": "Čitanje datoteke {{done}} od {{total}}…",
+    "gameInsights": "Analiza utakmice"
   },
   "whiteboard": {
     "title": "Ploča",

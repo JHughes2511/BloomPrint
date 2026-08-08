@@ -2223,7 +2223,8 @@
     "finalScore": "Eindstand",
     "couldNotSaveScore": "Kon de stand niet opslaan.",
     "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
-    "readingFiles": "Bestand {{done}} van {{total}} lezen…"
+    "readingFiles": "Bestand {{done}} van {{total}} lezen…",
+    "gameInsights": "Wedstrijdinzichten"
   },
   "whiteboard": {
     "title": "Tactiekbord",

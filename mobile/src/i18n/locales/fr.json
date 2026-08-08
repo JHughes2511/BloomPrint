@@ -2223,7 +2223,8 @@
     "finalScore": "Score final",
     "couldNotSaveScore": "Le score n'a pas pu être enregistré.",
     "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
-    "readingFiles": "Lecture du fichier {{done}} sur {{total}}…"
+    "readingFiles": "Lecture du fichier {{done}} sur {{total}}…",
+    "gameInsights": "Analyse du match"
   },
   "whiteboard": {
     "title": "Tableau blanc",

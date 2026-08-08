@@ -2223,7 +2223,8 @@
     "finalScore": "Resultado final",
     "couldNotSaveScore": "Não foi possível guardar o resultado.",
     "finalScoreWhy": "This game has no score yet. It is worked out from the stats when both teams' numbers are in — with only one side imported there is no way to know what the other team scored. Enter it here and it counts toward the season record.",
-    "readingFiles": "A ler ficheiro {{done}} de {{total}}…"
+    "readingFiles": "A ler ficheiro {{done}} de {{total}}…",
+    "gameInsights": "Análise do jogo"
   },
   "whiteboard": {
     "title": "Quadro Tático",
