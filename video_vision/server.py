@@ -172,6 +172,34 @@ def _long_answer(messages: list[dict], max_tokens: int, on_words=None) -> str:
 SEGMENT_TRIES = 3
 SEGMENT_BACKOFF = 4.0   # seconds, doubled each retry
 
+# The most model calls one film may ever cost, counting retries. A film is
+# already bounded — TOTAL_CAP frames in chunks of CHUNK — but "bounded by the
+# shape of the code" is not the same as "cannot run away", and the thing being
+# spent here is the coach's money. Whatever goes wrong, a single analysis stops
+# at a number that can be reasoned about instead of finding out afterwards.
+MAX_CALLS_PER_FILM = 60
+
+
+def _preflight() -> None:
+    """One trivial call before any expensive one.
+
+    A film analysis is twenty-odd Opus calls carrying forty images each. If the
+    account cannot pay, or the key is wrong, every one of them is refused — and
+    the coach finds out at the end, after the film has been read and the work
+    queued. Asking first costs a single token and turns "it ran for ten minutes
+    and failed" into "it stopped immediately, and here is why".
+
+    Only a permanent problem stops the run. A rate limit or a blip here means
+    nothing about the next twenty minutes, and the real work has its own
+    retries.
+    """
+    try:
+        _client().messages.create(model=OPUS, max_tokens=1,
+                                  messages=[{"role": "user", "content": "ok"}])
+    except Exception as exc:
+        if _permanent(exc):
+            raise RuntimeError(f"The film could not be analyzed: {exc}") from exc
+
 
 def _permanent(exc: Exception) -> bool:
     """Is this a failure that trying again cannot fix?
@@ -966,6 +994,8 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
     # Motion-aware sampling: dense on action, sparse on dead time, budget scaled
     # by each film's length. Split the absolute ceiling across multiple films.
     per_cap = max(60, TOTAL_CAP // max(len(video_paths), 1))
+    # Before the film is read and the segments are queued — not after.
+    _preflight()
     if progress:
         try:
             progress(0, 1, "job:scanning")
@@ -1049,6 +1079,7 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
         chunks = [frames[i:i + CHUNK] for i in range(0, len(frames), CHUNK)]
         seg_notes = []
         failed_segments = 0
+        calls_made = 0
         for i, ch in enumerate(chunks, 1):
             if progress:
                 try:
@@ -1078,7 +1109,14 @@ async def _handle_analyze_basketball_video(args: dict[str, Any]) -> list[types.T
             # stretch of the game had been watched. Retry the segment instead —
             # it is minutes of film, and re-asking costs seconds.
             for attempt in range(SEGMENT_TRIES):
+                if calls_made >= MAX_CALLS_PER_FILM:
+                    raise RuntimeError(
+                        f"Stopped after {calls_made} attempts on this film — further "
+                        "tries would keep costing without getting anywhere. "
+                        f"Last error: {last_error}"
+                    )
                 try:
+                    calls_made += 1
                     r = _client().messages.create(model=OPUS, max_tokens=2000,
                                                   messages=[{"role": "user", "content": seg_content}])
                     note = f"SEGMENT {i} ({t0:.0f}s–{t1:.0f}s):\n{text_of(r)}"
