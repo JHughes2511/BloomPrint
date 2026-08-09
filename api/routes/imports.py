@@ -504,15 +504,30 @@ def _sync_roster(db: Session, game, coach, players: list[dict]) -> dict:
         if opp_row is None:
             # Not the coach's own side: made because the file held their squad,
             # so it should not silently join the coach's own season record.
-            opp_row = models.Team(name=game.opponent_name.strip(), coach_id=coach.id,
-                                  is_mine=False)
+            #
+            # The level comes from the game they were in, then the coach's own,
+            # rather than the model's "HS Varsity" default — two teams in the
+            # same fixture play at the same level, and that level is what every
+            # report about them is framed at.
+            opp_row = models.Team(
+                name=game.opponent_name.strip(), coach_id=coach.id, is_mine=False,
+                competition_level=(game.competition_level
+                                   or coach.competition_level or "HS Varsity"))
             db.add(opp_row)
             db.flush()      # an id, so the players below can point at it
             created_team = opp_row.name
-    added = numbered = 0
+    from ..coach_context import resolve_level
+    added = numbered = repaired = 0
     for side_is_opp, team_id in ((False, ours_id), (True, opp_row.id if opp_row else None)):
         if not team_id:
             continue
+        team_row = db.get(models.Team, team_id)
+        # A player belongs to a team, so they are created AT that team's level
+        # and under its name. Left to the model's defaults they arrived as
+        # "HS Varsity" at "SEED Academy" whoever they actually played for —
+        # and competition level is what frames every report written about them.
+        level = resolve_level(coach, team=team_row)
+        program = (team_row.name if team_row else None) or coach.program_name
         existing = db.query(models.Player).filter_by(team_id=team_id).all()
         by_name = {_norm_name(p.name): p for p in existing}
         for p in players:
@@ -525,16 +540,31 @@ def _sync_roster(db: Session, game, coach, players: list[dict]) -> dict:
             at = by_name.get(_norm_name(name))
             if at is None:
                 at = models.Player(name=name, team_id=team_id, coach_id=coach.id,
-                                   jersey_number=jersey)
+                                   jersey_number=jersey, competition_level=level,
+                                   program_name=program)
                 db.add(at)
                 by_name[_norm_name(name)] = at
                 added += 1
                 numbered += 1 if jersey else 0
-            elif jersey and at.jersey_number != jersey:
-                # The sheet is the most recent statement of who wore what.
-                at.jersey_number = jersey
-                numbered += 1
-    if added or numbered or created_team:
+            else:
+                if jersey and at.jersey_number != jersey:
+                    # The sheet is the most recent statement of who wore what.
+                    at.jersey_number = jersey
+                    numbered += 1
+                # Repair, not overwrite: a player left on the model's default
+                # gets their team's level, and anything the coach set by hand
+                # is kept.
+                if not at.competition_level or at.competition_level == "HS Varsity":
+                    if at.competition_level != level:
+                        at.competition_level = level
+                        repaired += 1
+                if not at.program_name or at.program_name == "SEED Academy":
+                    if at.program_name != program:
+                        at.program_name = program
+                        repaired += 1
+    # `repaired` counts too. Committing only when something was ADDED meant a
+    # pass that fixed a level and added nobody was rolled back on the way out.
+    if added or numbered or repaired or created_team:
         try:
             db.commit()
         except Exception:
