@@ -227,6 +227,15 @@ async def game_stats_preview(
 
 
 class GameStatsCommit(BaseModel):
+    """One import's worth of a game.
+
+    A section that arrives with rows REPLACES what was there; a section that
+    arrives empty is left exactly as it is. That is what lets a coach keep
+    adding to a post-game — the stat sheet today, the play-by-play tomorrow,
+    one panel re-read because the model misread it — without each import
+    wiping the ones before it. Nothing here can delete a section; that is the
+    coach's job, by hand.
+    """
     game_id: int
     players: list[dict] = []
     # Everything else the files held, passed back untouched from the preview.
@@ -248,8 +257,13 @@ def game_stats_commit(
     game = _get_game(db, body.game_id, coach.id)
     # Whole-game totals: neutral quarter, no clutch multiplier. See game_eval.
     q, mult = IMPORT_QUARTER, IMPORT_MULTIPLIER
-    _clear_prior_import(db, game.id)
     imported = 0
+    # Only clear the box score when a new one is being written. Committing a
+    # re-read of the team-totals panel used to arrive here with no players and
+    # wipe the box score on its way past — the coach fixed one panel and lost
+    # everything else.
+    if body.players:
+        _clear_prior_import(db, game.id)
     for p in body.players:
         name = str(p.get("player_name") or "").strip()
         if not name:

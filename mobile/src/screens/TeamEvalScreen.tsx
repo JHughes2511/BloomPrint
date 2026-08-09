@@ -456,11 +456,24 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         activeGame.id,
         (done, total) => setImportProgress({ done, total }),
       );
-      setImportedExtras({ events: result.events ?? [], shots: result.shots ?? [],
-                          team_stats: result.team_stats ?? [] });
+      const extras = { events: result.events ?? [], shots: result.shots ?? [],
+                       team_stats: result.team_stats ?? [] };
+      setImportedExtras(extras);
       const players = (result?.players ?? []).map((p: any) => ({ ...p, _include: true }));
       if (!players.length) {
-        Alert.alert(tr('teamGrade.nothingFoundTitle'), tr('teamGrade.nothingFoundMsg'));
+        // A play-by-play export or a shot chart on its own has no box score to
+        // review — there is nothing to tick, so there is nothing to stop for.
+        // Refusing it meant a coach could only ever add stats in one shape.
+        const extraRows = extras.events.length + extras.shots.length + extras.team_stats.length;
+        if (!extraRows) {
+          Alert.alert(tr('teamGrade.nothingFoundTitle'), tr('teamGrade.nothingFoundMsg'));
+          return;
+        }
+        await importsAPI.gameStatsCommit({ game_id: activeGame.id, ...extras });
+        setImportedExtras({ events: [], shots: [], team_stats: [] });
+        setStatsVersion(v => v + 1);
+        setActiveGame(await gameEvalAPI.getSession(activeGame.id));
+        Alert.alert(tr('teamGrade.importedTitle'), tr('teamGrade.importedMsg', { count: extraRows }));
         return;
       }
       setStatPreview(players);
