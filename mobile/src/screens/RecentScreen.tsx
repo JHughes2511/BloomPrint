@@ -1356,7 +1356,7 @@ export default function RecentScreen() {
                 <Text style={styles.modalTitle} numberOfLines={1}>
                   {outputTypeLabel(activeModal?.outputType) ?? tr('reportTypes.report')}
                 </Text>
-                {modalView === 'report' && activeModal?.playerName && (
+                {!!activeModal?.playerName && (
                   <Text style={styles.modalSub} numberOfLines={1}>{activeModal.playerName}</Text>
                 )}
               </View>
@@ -1365,9 +1365,10 @@ export default function RecentScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* REPORT VIEW */}
-            {modalView === 'report' && (
-              <>
+            {/* The report itself. Always rendered while this sheet is open: the
+                sub-views live in their own sheet on top now, and gating this on
+                modalView collapsed the card to its header bar when one opened. */}
+            <>
                 <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
                   {activeModal?.text
                     ? (
@@ -1425,8 +1426,7 @@ export default function RecentScreen() {
                     <Text style={[styles.actionText, { color: t.brown }]} numberOfLines={1}>{tr('common.share')}</Text>
                   </TouchableOpacity>
                 </View>
-              </>
-            )}
+            </>
 
           </View>
         </KeyboardAvoidingView>
