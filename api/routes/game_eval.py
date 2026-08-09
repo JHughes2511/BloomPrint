@@ -744,10 +744,15 @@ def _advanced_stats(db: Session, game: models.GameSession) -> list[dict] | None:
     from the real number once it is drawn as a bar.
     """
     rows = db.query(models.GameTeamAdvanced).filter_by(game_id=game.id).all()
-    if not rows:
-        return None
     fields = ("points_off_turnovers", "fast_break_points", "second_chance_points",
               "points_in_paint", "bench_points")
+    # A totals panel that states PTS and REB but none of these is a Key Stats
+    # panel, not this one. It used to count as "advanced stats exist", and since
+    # every row draws nothing when neither side states it, the card came out as
+    # two team names over empty space — which reads as a game where nobody did
+    # any of it. Saying which file would fill it is the honest answer.
+    if not any(getattr(r, f) is not None for r in rows for f in fields):
+        return None
     return [{"is_opponent": bool(r.is_opponent),
              **{f: getattr(r, f) for f in fields}} for r in rows]
 

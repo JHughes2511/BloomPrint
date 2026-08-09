@@ -251,9 +251,9 @@ async def game_stats_preview(
     }
 
 
-_PANEL_KEYS = ("PTS", "REB", "OREB", "DREB", "AST", "STL", "BLK", "TO", "PF",
-               "points_off_turnovers", "fast_break_points", "second_chance_points",
-               "points_in_paint", "bench_points")
+_ADVANCED_KEYS = ("points_off_turnovers", "fast_break_points", "second_chance_points",
+                  "points_in_paint", "bench_points")
+_PANEL_KEYS = ("PTS", "REB", "OREB", "DREB", "AST", "STL", "BLK", "TO", "PF") + _ADVANCED_KEYS
 
 
 class GameStatsCommit(BaseModel):
@@ -503,6 +503,33 @@ SECTIONS = {
                   "second chance, points in the paint and bench points)",
     "events": "the play-by-play",
     "shots": "the shot locations",
+    # Advanced Stats is fed by team_stats but is only about five of its fields,
+    # and asking for the whole panel got the whole panel read loosely — the five
+    # came back missing from a file that plainly showed them. Naming exactly what
+    # is wanted, and the shape it is usually drawn in, is the difference.
+    "advanced": "the five possession stats: points off turnovers, fast-break points, "
+                "second-chance points, points in the paint, and bench points",
+}
+
+# Which key in the returned JSON each section is read out of.
+SECTION_OUTPUT = {**{k: k for k in ("players", "team_stats", "events", "shots")},
+                  "advanced": "team_stats"}
+
+SECTION_FOCUS = {
+    "advanced": (
+        "\nTHESE FIVE NUMBERS ARE THE ENTIRE POINT OF THIS PASS. Put them in "
+        "team_stats as points_off_turnovers, fast_break_points, "
+        "second_chance_points, points_in_paint and bench_points, one row per team.\n"
+        "They are very often drawn as a comparison chart rather than printed in a "
+        "table: the stat's name down the middle — 'Points off Turnovers', 'Fast "
+        "Break Points', 'Second Chance Points', 'Points in the Paint', 'Points from "
+        "the Bench' — with one team's number and bar to the LEFT of the label and "
+        "the other team's to the RIGHT. Read BOTH ends of every row. A small "
+        "triangle or arrow beside a number only marks which side is higher; it is "
+        "not part of the number.\n"
+        "Give PTS, REB and the rest too if the file shows them, but never at the "
+        "cost of these five.\n"
+    ),
 }
 
 
@@ -530,11 +557,13 @@ async def regenerate_section(
     team_row = db.get(models.Team, game.team_id) if game.team_id else None
     ours_name = (team_row.name if team_row else None) or coach.program_name or ""
 
+    out_key = SECTION_OUTPUT[section]
     instruction = (
         ai_import.GAME_FILE_INSTRUCTION
         + f"\n\nTHIS PASS IS ONLY ABOUT {SECTIONS[section].upper()}. Return that section "
         "and omit the others.\n"
-        f"The two teams in this game are {ours_name!r} and {game.opponent_name!r}; use "
+        + SECTION_FOCUS.get(section, "")
+        + f"The two teams in this game are {ours_name!r} and {game.opponent_name!r}; use "
         "those names for team_name where the file's headings match them.\n"
     )
     if note.strip():
@@ -554,14 +583,27 @@ async def regenerate_section(
         except RuntimeError as e:
             errors.append(f"{f.filename}: {e}")
             continue
-        got = (parsed or {}).get(section) if isinstance(parsed, dict) else None
+        got = (parsed or {}).get(out_key) if isinstance(parsed, dict) else None
         if isinstance(got, list):
             collected.extend(got)
-    if section == "team_stats":
+    if out_key == "team_stats":
         # A panel of Nones would replace the one on screen with two team names
         # and no bars — the coach asked for a re-read and got an emptier chart.
         collected = [r for r in collected if isinstance(r, dict)
                      and any(_as_int(r.get(k)) is not None for k in _PANEL_KEYS)]
+    if section == "advanced":
+        # Saving a row that states PTS and REB and none of the five would leave
+        # the card exactly as blank as it was, and say nothing about why.
+        collected = [r for r in collected
+                     if any(_as_int(r.get(k)) is not None for k in _ADVANCED_KEYS)]
+        if not collected:
+            raise HTTPException(
+                status_code=422,
+                detail="Those five numbers — points off turnovers, fast break, second "
+                       "chance, points in the paint and bench points — were not found "
+                       "in that file. They cannot be worked out from a box score. "
+                       "Nothing was changed."
+                       + (" " + "; ".join(errors) if errors else ""))
     if not collected:
         raise HTTPException(
             status_code=422,
@@ -582,5 +624,8 @@ async def regenerate_section(
                 unresolved.append(label or "(no heading)")
         else:
             sides[label] = matched
-    return {"section": section, "count": len(collected), "rows": collected,
+    # The OUTPUT key, not the one that was asked for: 'advanced' is a narrower
+    # read of the same team-totals panel, and it is that panel it must be saved
+    # back into.
+    return {"section": out_key, "count": len(collected), "rows": collected,
             "sides": sides, "unresolved": unresolved, "errors": errors}

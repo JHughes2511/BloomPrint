@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Modal, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Svg, { Rect, Line, Circle, Path, G } from 'react-native-svg';
 import * as DocumentPicker from 'expo-document-picker';
@@ -177,7 +177,7 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
   const [saving, setSaving] = useState(false);
   const [bump, setBump] = useState(0);
   // The panel the coach says is wrong, and what they say about it.
-  const [fixing, setFixing] = useState<{ section: string; title: string } | null>(null);
+  const [fixing, setFixing] = useState<{ section: string; title: string; wantAdvanced?: boolean } | null>(null);
   const [fixNote, setFixNote] = useState('');
   const [fixBusy, setFixBusy] = useState(false);
   // A re-read whose team labels matched neither team: held here, unsaved, until
@@ -260,11 +260,15 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
    * other side — and until now the only recourse was to import everything again
    * and hope it landed differently.
    */
-  const Header = ({ title, section }: { title: string; section?: string }) => (
+  // `wantAdvanced` marks the two cards that are fed by the same team-totals
+  // read but only one of which needs the five possession stats — so a file that
+  // has team totals and none of those can be called out where it matters
+  // instead of leaving a card silently empty.
+  const Header = ({ title, section, wantAdvanced }: { title: string; section?: string; wantAdvanced?: boolean }) => (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
       <Text style={s.cardLabel}>{title}</Text>
       {section && (
-        <TouchableOpacity onPress={() => { setFixing({ section, title }); setFixNote(''); }}>
+        <TouchableOpacity onPress={() => { setFixing({ section, title, wantAdvanced }); setFixNote(''); }}>
           <Text style={{ color: t.accent, fontSize: 11, fontFamily: fonts[700], marginBottom: 10 }}>
             {tr('gameStats.notRight')}
           </Text>
@@ -376,7 +380,7 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
       {/* ── Advanced Stats ── */}
       {data.available.advanced ? (
         <View style={s.card}>
-          <Header title={tr('gameStats.advanced')} section="team_stats" />
+          <Header title={tr('gameStats.advanced')} section="advanced" />
           <View style={s.legend}>
             <Text style={[s.legendText, { color: ourColor }]} numberOfLines={1}>{ours.team_name}</Text>
             <Text style={[s.legendText, { color: theirColor, textAlign: 'right' }]} numberOfLines={1}>{theirs.team_name}</Text>
@@ -493,11 +497,17 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
                     if (res.unresolved?.length) {
                       // The file named nobody. Ask rather than file it somewhere
                       // and let a bar chart present the guess as fact.
-                      setAsking({ section: fixing!.section, rows: res.rows,
+                      setAsking({ section: res.section ?? fixing!.section, rows: res.rows,
                                   labels: res.unresolved.map((l: string) => ({ label: l })) });
                       return;
                     }
-                    await commitSection(fixing!.section, res.rows, res.sides ?? {});
+                    await commitSection(res.section ?? fixing!.section, res.rows, res.sides ?? {});
+                  } catch (e: any) {
+                    // The server says which numbers it could not find and why
+                    // they cannot be derived. Losing that to an unhandled
+                    // rejection left the coach with a dialog that did nothing.
+                    Alert.alert(fixing!.title,
+                                e?.response?.data?.detail ?? tr('common.somethingWentWrong'));
                   } finally {
                     setFixBusy(false);
                   }
@@ -521,6 +531,9 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
             setFixBusy(true);
             try {
               await commitSection(asking.section, asking.rows, sides);
+            } catch (e: any) {
+              Alert.alert(tr('common.error'),
+                          e?.response?.data?.detail ?? tr('common.somethingWentWrong'));
             } finally {
               setFixBusy(false);
             }
