@@ -39,6 +39,7 @@ import PageContainer from '../responsive/PageContainer';
 import { useTeam } from '../context/TeamContext';
 import { useCloseOnOutside } from '../hooks/useCloseOnOutside';
 import { useStaleWhileRefreshing } from '../hooks/useStaleWhileRefreshing';
+import { readPage, writePage } from '../storage/pageCache';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
 import { useSheetScrollHeight, sheetCap, desktopOnly, CONTENT_MAX_WIDTH, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
 import { useGridColumns } from '../responsive/useGridColumns';
@@ -363,20 +364,42 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // the last data stays up and a quiet line says it is checking.
   const { firstLoad, refreshing, run } = useStaleWhileRefreshing();
 
+  const cacheKey = `teamgrade.${coach?.id ?? 0}.${gradeTeamIds.join('-') || 'all'}`;
+
   const loadData = useCallback(async () => {
     await run(async () => {
       const teamParam = gradeTeamIds.length ? { team_ids: gradeTeamIds.join(',') } : {};
-      const [s, d, t] = await Promise.all([
-        gameEvalAPI.listSessions(teamParam),
-        gameEvalAPI.getSeasonDashboard(teamParam),
-        teamsAPI.list(),
-      ]);
-      setSessions(s);
-      setDashboard(d);
-      setTeams(t);
-      setLoadingDash(false);
+      // Each request lands on its own rather than behind Promise.all. The games
+      // list answers in a fraction of the time the dashboard takes, and waiting
+      // for the slower one held back a section that was already in hand.
+      const games = gameEvalAPI.listSessions(teamParam).then(x => { setSessions(x); return x; });
+      const dash = gameEvalAPI.getSeasonDashboard(teamParam)
+        .then(x => { setDashboard(x); setLoadingDash(false); return x; });
+      const tms = teamsAPI.list().then(x => { setTeams(x); return x; });
+      const [s, d, t] = await Promise.all([games, dash, tms]);
+      // Kept for the next cold open. Written after everything is in, so a
+      // half-finished load never becomes what the app starts with.
+      void writePage(cacheKey, { sessions: s, dashboard: d, teams: t });
     });
-  }, [gradeTeamIds, run]);
+  }, [gradeTeamIds, run, cacheKey]);
+
+  /**
+   * Last session's answer, on screen before the first request returns.
+   *
+   * Only ever fills EMPTY state: if the live data has already arrived it is
+   * not overwritten by something older, which is the whole risk with a cache
+   * that races the network.
+   */
+  useEffect(() => {
+    let live = true;
+    readPage<any>(cacheKey).then(kept => {
+      if (!live || !kept) return;
+      setSessions(prev => (prev.length ? prev : kept.sessions ?? []));
+      setDashboard((prev: any) => prev ?? kept.dashboard ?? null);
+      setTeams(prev => (prev.length ? prev : kept.teams ?? []));
+    });
+    return () => { live = false; };
+  }, [cacheKey]);
 
   const loadDashboard = useCallback(async (phases: string[]) => {
     setLoadingDash(true);
@@ -1877,7 +1900,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </View>
           )}
 
-          {firstLoad ? (
+          {/* Cached games count as having something to show — otherwise the
+              page would hydrate from disk and still sit behind a spinner. */}
+          {firstLoad && sessions.length === 0 ? (
             <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />
           ) : filteredSessions.length === 0 ? (
             <View style={[s.card, { alignItems: 'center' }]}>

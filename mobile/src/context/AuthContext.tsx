@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as SecureStore from '../storage/secureStore';
+import { clearPages } from '../storage/pageCache';
 import { setAppLanguage } from '../i18n';
 import { authAPI } from '../api/client';
 import { isAuthRejection, onCoachUnauthorized } from '../api/authFailure';
@@ -100,6 +101,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     await SecureStore.deleteItemAsync('auth_token');
+    // Cached pages belong to the account that fetched them. Left behind, the
+    // next person to sign in on this device would open the app to somebody
+    // else's roster for the moment before the server answered.
+    await clearPages();
     setToken(null);
     setCoach(null);
   };
