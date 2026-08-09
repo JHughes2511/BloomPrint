@@ -172,14 +172,25 @@ def update_player(
     coach: models.Coach = Depends(get_current_coach),
 ):
     player = get_owned(db, models.Player, player_id, coach.id, "Player")
-    if body.name is not None:
-        player.name = body.name
+
+    def cleared(v):
+        """An emptied box is a value, not an omission.
+
+        A field left out of the request means "don't touch this" and must keep
+        what is there. A field sent as "" means the coach emptied it, and is
+        stored as NULL so nothing downstream has to tell an empty string from a
+        missing one.
+        """
+        return None if isinstance(v, str) and not v.strip() else v
+
+    if body.name is not None and body.name.strip():
+        player.name = body.name.strip()
     if body.position is not None:
-        player.position = body.position
+        player.position = cleared(body.position)
     if body.jersey_number is not None:
-        player.jersey_number = body.jersey_number
+        player.jersey_number = cleared(body.jersey_number)
     if body.competition_level is not None:
-        player.competition_level = body.competition_level
+        player.competition_level = cleared(body.competition_level)
     # 0 means "no team", and it has to be tested FIRST. The old order asked
     # `is not None` before `== 0`, and 0 is not None — so the clear-the-team
     # branch could never run, and every edit of a player without a team looked
@@ -195,13 +206,13 @@ def update_player(
         if team:
             player.program_name = team.name
     if body.height is not None:
-        player.height = body.height
+        player.height = cleared(body.height)
     if body.wingspan is not None:
-        player.wingspan = body.wingspan
+        player.wingspan = cleared(body.wingspan)
     for field in ("weight", "standing_reach", "country", "state", "city", "school_name"):
         val = getattr(body, field)
         if val is not None:
-            setattr(player, field, val)
+            setattr(player, field, cleared(val))
     db.commit()
     db.refresh(player)
     return _with_grade(player, [e for e in player.evaluations if e.coach_id == coach.id])

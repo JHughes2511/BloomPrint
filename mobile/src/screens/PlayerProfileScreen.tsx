@@ -188,18 +188,23 @@ export default function PlayerProfileScreen() {
     if (!editName.trim()) return;
     setSaving(true);
     try {
+      // The trimmed value, empty string and all — NOT `|| undefined`. An
+      // undefined field is dropped from the JSON, so the server saw "not
+      // mentioned" and left the old value alone: a jersey number, a height, a
+      // school could be changed but never cleared. Emptying a box is an edit,
+      // and the server turns "" into null.
       const updated = await playersAPI.update(playerId, {
         name: editName.trim(),
-        position: editPos.trim() || undefined,
-        jersey_number: editJersey.trim() || undefined,
-        height: editHeight.trim() || undefined,
-        wingspan: editWingspan.trim() || undefined,
-        weight: editWeight.trim() || undefined,
-        standing_reach: editStandingReach.trim() || undefined,
-        country: editCountry.trim() || undefined,
-        state: editState.trim() || undefined,
-        city: editCity.trim() || undefined,
-        school_name: editSchool.trim() || undefined,
+        position: editPos.trim(),
+        jersey_number: editJersey.trim(),
+        height: editHeight.trim(),
+        wingspan: editWingspan.trim(),
+        weight: editWeight.trim(),
+        standing_reach: editStandingReach.trim(),
+        country: editCountry.trim(),
+        state: editState.trim(),
+        city: editCity.trim(),
+        school_name: editSchool.trim(),
         competition_level: editLevel,
         team_id: editTeamId ?? 0,
       });
