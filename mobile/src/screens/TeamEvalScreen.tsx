@@ -916,6 +916,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setGameStats([]);
     setGameLineup([]);
     setLoadingSummary(true);
+    const detailKey = `game.${coach?.id ?? 0}.${game.id}`;
+    readPage<any>(detailKey).then(kept => {
+      if (!kept?.summary) return;
+      setSummary((prev: any) => prev ?? kept.summary);
+      setLoadingSummary(false);
+    });
     try {
       const [s, stats, lineup, fresh] = await Promise.all([
         gameEvalAPI.getGameSummary(game.id),
@@ -930,6 +936,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       setGameStats(stats);
       setGameLineup(lineup);
       if (fresh) setDetailGame(fresh);
+      void writePage(detailKey, { summary: s });
     } catch {}
     setLoadingSummary(false);
   };
@@ -1448,6 +1455,16 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setInsightBusy({});
     setLoadingScout(true);
     setLoadingNotes(true);
+    // Last time's page for this team, so the wait is spent looking at their
+    // numbers rather than at a spinner. Overwritten the moment the live
+    // profile lands a few lines below.
+    const scoutKey = `scout.${coach?.id ?? 0}.${opponentName}`;
+    readPage<any>(scoutKey).then(kept => {
+      if (!kept) return;
+      setScoutData((prev: any) => prev ?? kept.data ?? null);
+      setInsights(prev => (Object.keys(prev).length ? prev : kept.insights ?? {}));
+      setLoadingScout(false);
+    });
     try {
       const [data, notes, kept] = await Promise.all([
         gameEvalAPI.getOpponentProfile(opponentName),
@@ -1458,6 +1475,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       setScoutNotes(notes);
       setInsights(kept as any);
       setLoadingScout(false);
+      void writePage(scoutKey, { data, insights: kept });
       // Written sentences are NOT awaited. Three of them are three calls to
       // the model, and awaiting them here held the whole page on a spinner for
       // as long as they took — the games, the players and the numbers were all

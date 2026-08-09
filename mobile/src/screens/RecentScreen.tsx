@@ -16,6 +16,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { evalsAPI, playerAPI, gameReportsAPI, trainingAPI, staffSharingAPI, coachesAPI, gameEvalAPI } from '../api/client';
+import { readPage, writePage } from '../storage/pageCache';
 import { GradeBadge } from '../components/GradeBadge';
 import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import ShareModal from '../components/ShareModal';
@@ -117,6 +118,7 @@ export default function RecentScreen() {
   // screen keeps the list — see useStaleWhileRefreshing for the reasoning.
   const [loading, setLoading] = useState(true);
   const loadedOnce = useRef(false);
+  const cacheKey = `recent.${coach?.id ?? 0}`;
   const [filter, setFilter] = useState('all');
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -445,11 +447,28 @@ export default function RecentScreen() {
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       setItems(combined);
+      // Kept for the next cold open. Recent merges six sources into one sorted
+      // list, so unlike other screens there is nothing to show early — the
+      // whole list is the unit, and last session's copy of it is what makes
+      // opening this tab instant.
+      void writePage(cacheKey, { items: combined });
     } finally {
       setLoading(false);
       loadedOnce.current = true;
     }
   };
+
+  // Fills empty state only: a cache that loses the race to the network must
+  // never replace fresher data with older.
+  useEffect(() => {
+    let live = true;
+    readPage<any>(cacheKey).then(kept => {
+      if (!live || !kept?.items?.length) return;
+      setItems(prev => (prev.length ? prev : kept.items));
+      setLoading(false);
+    });
+    return () => { live = false; };
+  }, [cacheKey]);
 
   useFocusEffect(useCallback(() => { load(); }, []));
 

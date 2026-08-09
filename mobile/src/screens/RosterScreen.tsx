@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
@@ -65,6 +65,7 @@ const makeDdStyles = (t: ThemeTokens) => StyleSheet.create({
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { playersAPI, teamsAPI } from '../api/client';
+import { readPage, writePage } from '../storage/pageCache';
 import { Player, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { useAuth } from '../context/AuthContext';
@@ -155,14 +156,32 @@ export default function RosterScreen() {
   const [creatingTeam, setCreatingTeam] = useState(false);
 
   const [refreshing, setRefreshing] = useState(false);
+  const cacheKey = `roster.${coach?.id ?? 0}`;
+
   const load = async () => {
     try {
-      const [, p] = await Promise.all([reloadTeams(), playersAPI.list()]);
-      setPlayers(p);
+      // Teams and players land separately: the team chips are a handful of
+      // rows and were waiting behind a whole roster to draw.
+      const teams$ = reloadTeams();
+      const players$ = playersAPI.list().then(p => { setPlayers(p); return p; });
+      const [, p] = await Promise.all([teams$, players$]);
+      void writePage(cacheKey, { players: p });
     } finally {
       setLoading(false);
     }
   };
+
+  // Last session's roster, on screen before the first request returns. Fills
+  // empty state only — live data already in hand is never replaced by older.
+  useEffect(() => {
+    let live = true;
+    readPage<any>(cacheKey).then(kept => {
+      if (!live || !kept?.players?.length) return;
+      setPlayers(prev => (prev.length ? prev : kept.players));
+      setLoading(false);
+    });
+    return () => { live = false; };
+  }, [cacheKey]);
 
   // Refetch on arrival, then every 10s while the screen is up. A linked player
   // can change their own height or school from their phone, and a coach sitting
