@@ -36,7 +36,8 @@
     "rename": "Zmień nazwę",
     "gotIt": "Rozumiem",
     "noResults": "Brak wyników",
-    "continue": "Dalej"
+    "continue": "Dalej",
+    "checking": "Sprawdzanie aktualizacji…"
   },
   "reportTypes": {
     "report": "Raport",

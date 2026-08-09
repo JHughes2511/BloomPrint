@@ -36,7 +36,8 @@
     "rename": "إعادة تسمية",
     "gotIt": "فهمت",
     "noResults": "لا توجد نتائج",
-    "continue": "متابعة"
+    "continue": "متابعة",
+    "checking": "جارٍ التحقق من التحديثات…"
   },
   "reportTypes": {
     "report": "تقرير",

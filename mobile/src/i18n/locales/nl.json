@@ -36,7 +36,8 @@
     "rename": "Hernoemen",
     "gotIt": "Begrepen",
     "noResults": "Geen resultaten",
-    "continue": "Doorgaan"
+    "continue": "Doorgaan",
+    "checking": "Zoeken naar updates…"
   },
   "reportTypes": {
     "report": "Rapport",

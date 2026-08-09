@@ -36,7 +36,8 @@
     "rename": "שינוי שם",
     "gotIt": "הבנתי",
     "noResults": "אין תוצאות",
-    "continue": "המשך"
+    "continue": "המשך",
+    "checking": "בודקים עדכונים…"
   },
   "reportTypes": {
     "report": "דוח",

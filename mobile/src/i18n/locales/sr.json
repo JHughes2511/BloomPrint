@@ -36,7 +36,8 @@
     "rename": "Preimenuj",
     "gotIt": "Razumem",
     "noResults": "Nema rezultata",
-    "continue": "Настави"
+    "continue": "Настави",
+    "checking": "Провера новости…"
   },
   "reportTypes": {
     "report": "Izveštaj",

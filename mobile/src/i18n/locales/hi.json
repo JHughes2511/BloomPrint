@@ -36,7 +36,8 @@
     "rename": "नाम बदलें",
     "gotIt": "समझ गया",
     "noResults": "कोई परिणाम नहीं",
-    "continue": "जारी रखें"
+    "continue": "जारी रखें",
+    "checking": "अपडेट देखे जा रहे हैं…"
   },
   "reportTypes": {
     "report": "रिपोर्ट",

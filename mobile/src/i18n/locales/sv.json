@@ -36,7 +36,8 @@
     "rename": "Byt namn",
     "gotIt": "Uppfattat",
     "noResults": "Inga träffar",
-    "continue": "Fortsätt"
+    "continue": "Fortsätt",
+    "checking": "Söker uppdateringar…"
   },
   "reportTypes": {
     "report": "Rapport",

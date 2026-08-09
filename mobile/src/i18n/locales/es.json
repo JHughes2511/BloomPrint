@@ -36,7 +36,8 @@
     "rename": "Renombrar",
     "gotIt": "Entendido",
     "noResults": "Sin resultados",
-    "continue": "Continuar"
+    "continue": "Continuar",
+    "checking": "Buscando novedades…"
   },
   "reportTypes": {
     "report": "Informe",

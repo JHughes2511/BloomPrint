@@ -234,6 +234,11 @@ def _stats_from_canonical(v: dict) -> dict[str, int]:
     return out
 
 
+# What a made shot is worth. Named once so the per-game path and the batched
+# one cannot drift into scoring the same game differently.
+_PER_POINT = {"2 FG Made": 2, "3 FG Made": 3, "FT Made": 1}
+
+
 def derived_scores(game: models.GameSession) -> tuple[int | None, int | None]:
     """The final score worked out from the stats, when nobody typed one in.
 
@@ -246,11 +251,20 @@ def derived_scores(game: models.GameSession) -> tuple[int | None, int | None]:
     Both sides must have scoring stats. With numbers for one team only the
     honest answer is "unknown", not a shutout.
     """
+    return scores_from_stats(game.player_stats)
+
+
+def scores_from_stats(stats) -> tuple[int | None, int | None]:
+    """The same sum, from stat rows already in hand.
+
+    game.player_stats is a lazy relationship, so calling derived_scores() inside
+    a loop over a season is one query per game to re-read rows the caller has
+    usually just fetched.
+    """
     made = {False: 0, True: 0}
     scored = {False: False, True: False}
-    per_point = {"2 FG Made": 2, "3 FG Made": 3, "FT Made": 1}
-    for st in game.player_stats:
-        pts = per_point.get(st.stat_name)
+    for st in stats:
+        pts = _PER_POINT.get(st.stat_name)
         if pts is None:
             continue
         side = bool(st.is_opponent)
@@ -1117,29 +1131,96 @@ def _game_report_text_for(db: Session, game_id: int, coach_id: int) -> str:
     return row.report_text if row else ""
 
 
-def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession) -> schemas.GameSessionOut:
+def _gate_context(db: Session, coach: models.Coach, games: list) -> dict:
+    """Everything a list of games needs, in four queries instead of six per game.
+
+    Serializing one game is cheap; serializing a season one game at a time is
+    not. Each one asked for its own scouting row, its own full report, its own
+    stat rows to work a score out of, and its own answer to "was this imported
+    before attempts were captured" — which on a 24-game season is 76 round
+    trips. Against a database on the other side of a network that is most of
+    the wait before the Games page appears.
+    """
+    ids = [g.id for g in games]
+    if not ids:
+        return {"scouting": {}, "full": {}, "misses": set(), "imported": set(), "scores": {}}
+
+    scouting = {r.game_id: r for r in db.query(models.GameScoutingReport)
+                .filter(models.GameScoutingReport.game_id.in_(ids),
+                        models.GameScoutingReport.coach_id == coach.id).all()}
+    full = {r.game_id: r for r in db.query(models.GameFullReport)
+            .filter(models.GameFullReport.game_id.in_(ids),
+                    models.GameFullReport.coach_id == coach.id).all()}
+
+    # Which games have imported rows at all, and which of those recorded a miss.
+    # An import with makes and no misses came from the old reader — see
+    # stats_need_reimport, which this replaces for the list case.
+    imported, misses = set(), set()
+    for gid, stat_name in (db.query(models.GamePlayerStat.game_id,
+                                    models.GamePlayerStat.stat_name)
+                             .filter(models.GamePlayerStat.game_id.in_(ids),
+                                     models.GamePlayerStat.source == "import")
+                             .distinct().all()):
+        imported.add(gid)
+        if str(stat_name).endswith("Missed"):
+            misses.add(gid)
+
+    # The score worked out from the made shots, for games nobody typed one on.
+    made: dict[tuple[int, bool], int] = {}
+    for gid, is_opp, stat_name, total in (
+            db.query(models.GamePlayerStat.game_id, models.GamePlayerStat.is_opponent,
+                     models.GamePlayerStat.stat_name, func.sum(models.GamePlayerStat.count))
+              .filter(models.GamePlayerStat.game_id.in_(ids),
+                      models.GamePlayerStat.stat_name.in_(_PER_POINT.keys()))
+              .group_by(models.GamePlayerStat.game_id, models.GamePlayerStat.is_opponent,
+                        models.GamePlayerStat.stat_name).all()):
+        made[(gid, bool(is_opp))] = made.get((gid, bool(is_opp)), 0) \
+            + _PER_POINT[stat_name] * int(total or 0)
+    scores = {}
+    for gid in ids:
+        ours, theirs = made.get((gid, False)), made.get((gid, True))
+        # Both sides or nothing: with numbers for one team only the honest
+        # answer is "unknown", not a shutout. Same rule as derived_scores().
+        scores[gid] = (ours, theirs) if ours is not None and theirs is not None else (None, None)
+    return {"scouting": scouting, "full": full, "misses": misses,
+            "imported": imported, "scores": scores}
+
+
+def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession,
+                   ctx: dict | None = None) -> schemas.GameSessionOut:
     """Serialize a game with the CURRENT coach's own scouting report. Staff see
     the game's stats/grades but only their own scouting write-up (empty until
-    they generate one); scouting shared to them surfaces via Recent/Staff Hub."""
+    they generate one); scouting shared to them surfaces via Recent/Staff Hub.
+
+    `ctx` is what _gate_context() prefetched for a whole list. Without it this
+    answers every question itself, which is right for a single game.
+    """
     out = schemas.GameSessionOut.model_validate(game)
-    out.stats_need_reimport = stats_need_reimport(db, game.id)
+    if ctx is not None:
+        out.stats_need_reimport = game.id in ctx["imported"] and game.id not in ctx["misses"]
+    else:
+        out.stats_need_reimport = stats_need_reimport(db, game.id)
     if out.our_score is None or out.opponent_score is None:
-        out.our_score, out.opponent_score = effective_scores(game)
-    out.ai_scouting_report = _coach_scouting(db, coach, game)
+        out.our_score, out.opponent_score = (
+            ctx["scores"].get(game.id, (None, None)) if ctx is not None
+            else effective_scores(game))
+
+    row = ctx["scouting"].get(game.id) if ctx is not None else (
+        db.query(models.GameScoutingReport)
+          .filter_by(game_id=game.id, coach_id=coach.id).first())
+    out.ai_scouting_report = (
+        (row.report_text if row and row.report_text else None)
+        or (game.ai_scouting_report if game.coach_id == coach.id else None))
     if out.ai_scouting_report:
-        row = (
-            db.query(models.GameScoutingReport)
-            .filter_by(game_id=game.id, coach_id=coach.id)
-            .first()
-        )
         out.scouting_updated_at = (row.updated_at or row.created_at) if row else game.date
-    out.ai_game_report = _coach_game_report(db, coach, game)
+
+    grow = ctx["full"].get(game.id) if ctx is not None else (
+        db.query(models.GameFullReport)
+          .filter_by(game_id=game.id, coach_id=coach.id).first())
+    # No legacy fallback here, unlike scouting: the full game report has always
+    # been per-coach, so the row is the only place it lives.
+    out.ai_game_report = grow.report_text if grow and grow.report_text else None
     if out.ai_game_report:
-        grow = (
-            db.query(models.GameFullReport)
-            .filter_by(game_id=game.id, coach_id=coach.id)
-            .first()
-        )
         out.game_report_updated_at = (grow.updated_at or grow.created_at) if grow else game.date
     return out
 
@@ -1226,7 +1307,8 @@ def list_sessions(
     games = q.order_by(models.GameSession.date.desc()).all()
     # Gate each game's written scouting report: staff see the game's stats but
     # only see the AI scouting write-up if it was shared to them.
-    return [_gate_scouting(db, coach, g) for g in games]
+    ctx = _gate_context(db, coach, games)
+    return [_gate_scouting(db, coach, g, ctx) for g in games]
 
 
 @router.get("/sessions/{game_id}", response_model=schemas.GameSessionOut)
@@ -2375,6 +2457,32 @@ def season_dashboard(
         subject_ids = {t.id for t in mine}
         subject_names = {(t.name or "").strip().lower() for t in mine}
 
+    # Minutes for every game at once. Asked per game, this was one round trip
+    # per row of the trend chart — and most games have no minutes recorded at
+    # all, so it was a query to learn nothing.
+    minutes_by: dict[tuple[int, bool], dict[str, float]] = {}
+    if games:
+        for r in (db.query(models.GameMinutesPlayed)
+                    .filter(models.GameMinutesPlayed.game_id.in_([g.id for g in games])).all()):
+            minutes_by.setdefault((r.game_id, bool(r.is_opponent)), {})[r.player_name] = r.minutes_played
+    # Stats too: game.player_stats is a lazy relationship, so touching it inside
+    # the loop is another query per game.
+    #
+    # Columns, not entities. A season is thousands of stat rows and this needs
+    # six fields off each — building full ORM objects for them costs more than
+    # the queries it saves. A SQLAlchemy Row exposes the same attribute names,
+    # so _compute_grades cannot tell the difference.
+    stats_by: dict[int, list] = {}
+    if games:
+        cols = (models.GamePlayerStat.game_id, models.GamePlayerStat.player_name,
+                models.GamePlayerStat.jersey_number, models.GamePlayerStat.is_opponent,
+                models.GamePlayerStat.stat_name, models.GamePlayerStat.stat_category,
+                models.GamePlayerStat.weighted_points, models.GamePlayerStat.quarter,
+                models.GamePlayerStat.count)
+        for st in (db.query(*cols)
+                     .filter(models.GamePlayerStat.game_id.in_([g.id for g in games])).all()):
+            stats_by.setdefault(st.game_id, []).append(st)
+
     for game in games:
         # Which side of this game the answer is about. A game whose own team is
         # not the subject, but whose opponent is, is read from the opponent's
@@ -2383,7 +2491,10 @@ def season_dashboard(
             (game.opponent_name or "").strip().lower() in subject_names
         if game.team_id not in subject_ids and not from_theirs:
             continue    # neither side is what was asked about
-        our_pts, opp_pts = effective_scores(game)
+        if game.our_score is not None and game.opponent_score is not None:
+            our_pts, opp_pts = game.our_score, game.opponent_score
+        else:
+            our_pts, opp_pts = scores_from_stats(stats_by.get(game.id, []))
         if from_theirs:
             our_pts, opp_pts = opp_pts, our_pts
         if our_pts is not None and opp_pts is not None:
@@ -2393,10 +2504,8 @@ def season_dashboard(
                 losses += 1
         win_loss_factor = _win_loss_factor(our_pts, opp_pts)
 
-        our_stats = [s for s in game.player_stats if bool(s.is_opponent) == from_theirs]
-        mp_records = db.query(models.GameMinutesPlayed).filter_by(
-            game_id=game.id, is_opponent=from_theirs).all()
-        our_minutes = {r.player_name: r.minutes_played for r in mp_records}
+        our_stats = [s for s in stats_by.get(game.id, []) if bool(s.is_opponent) == from_theirs]
+        our_minutes = minutes_by.get((game.id, from_theirs), {})
         player_grades = _compute_grades(our_stats, our_minutes)
 
         team_grade = _team_grade(player_grades, our_pts, opp_pts)
@@ -2617,16 +2726,38 @@ def opponent_profile(
     defense_tendencies: dict[str, int] = defaultdict(int)
     latest_report = None
 
+    # One pass for the stats and one for the minutes, rather than two per game.
+    # See the season dashboard: columns rather than entities, because this reads
+    # a handful of fields off thousands of rows.
+    ids = [g.id for g in games]
+    cols = (models.GamePlayerStat.game_id, models.GamePlayerStat.player_name,
+            models.GamePlayerStat.jersey_number, models.GamePlayerStat.is_opponent,
+            models.GamePlayerStat.stat_name, models.GamePlayerStat.stat_category,
+            models.GamePlayerStat.weighted_points, models.GamePlayerStat.quarter,
+            models.GamePlayerStat.count)
+    stats_by: dict[int, list] = {}
+    for st in db.query(*cols).filter(models.GamePlayerStat.game_id.in_(ids)).all():
+        stats_by.setdefault(st.game_id, []).append(st)
+    minutes_by: dict[tuple[int, bool], dict[str, float]] = {}
+    for r in (db.query(models.GameMinutesPlayed)
+                .filter(models.GameMinutesPlayed.game_id.in_(ids)).all()):
+        minutes_by.setdefault((r.game_id, bool(r.is_opponent)), {})[r.player_name] = r.minutes_played
+    scouting_by = {r.game_id: r for r in db.query(models.GameScoutingReport)
+                   .filter(models.GameScoutingReport.game_id.in_(ids),
+                           models.GameScoutingReport.coach_id == coach.id).all()}
+
     for game in games:
         # The coach's own scouting report for that game (not another coach's).
-        own_scout = _coach_scouting(db, coach, game)
+        row = scouting_by.get(game.id)
+        own_scout = ((row.report_text if row and row.report_text else None)
+                     or (game.ai_scouting_report if game.coach_id == coach.id else None))
         if own_scout:
             latest_report = own_scout
         # Which bench this team was on in THIS game. A team can be the game's
         # own team in one and the opponent in the next; reading is_opponent
         # blindly would scout whoever they happened to be playing.
         theirs = game.team_id not in same if same else True
-        opp_stats = [s for s in game.player_stats if bool(s.is_opponent) == theirs]
+        opp_stats = [s for s in stats_by.get(game.id, []) if bool(s.is_opponent) == theirs]
         for s in opp_stats:
             if s.player_name not in player_totals:
                 player_totals[s.player_name] = {"games": 0, "counts": defaultdict(int)}
@@ -2637,9 +2768,7 @@ def opponent_profile(
                 defense_tendencies[s.stat_name] += s.count
         # The 0-5 game grade, per player, the same way every other screen
         # computes it — so a number on this page means what it means elsewhere.
-        mp = {r.player_name: r.minutes_played for r in
-              db.query(models.GameMinutesPlayed).filter_by(game_id=game.id, is_opponent=theirs).all()}
-        for g in _compute_grades(opp_stats, mp):
+        for g in _compute_grades(opp_stats, minutes_by.get((game.id, theirs), {})):
             at = player_totals.setdefault(g["player_name"], {"games": 0, "counts": defaultdict(int)})
             at["games"] = at.get("games", 0) + 1
             at["grade_total"] = at.get("grade_total", 0.0) + g["game_grade"]
@@ -2692,7 +2821,7 @@ def opponent_profile(
     all_stat_counts: dict[str, int] = defaultdict(int)
     for game in games:
         theirs = game.team_id not in same if same else True
-        for s in game.player_stats:
+        for s in stats_by.get(game.id, []):
             if bool(s.is_opponent) == theirs:
                 all_stat_scores[s.stat_name] += s.weighted_points
                 all_stat_counts[s.stat_name] += (s.count or 0)

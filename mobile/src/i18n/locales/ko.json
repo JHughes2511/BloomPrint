@@ -36,7 +36,8 @@
     "rename": "이름 변경",
     "gotIt": "확인했어요",
     "noResults": "결과 없음",
-    "continue": "계속"
+    "continue": "계속",
+    "checking": "업데이트 확인 중…"
   },
   "reportTypes": {
     "report": "리포트",

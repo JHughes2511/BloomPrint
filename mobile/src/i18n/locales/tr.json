@@ -36,7 +36,8 @@
     "rename": "Yeniden Adlandır",
     "gotIt": "Anladım",
     "noResults": "Sonuç yok",
-    "continue": "Devam"
+    "continue": "Devam",
+    "checking": "Güncellemeler kontrol ediliyor…"
   },
   "reportTypes": {
     "report": "Rapor",

@@ -36,7 +36,8 @@
     "rename": "Pervadinti",
     "gotIt": "Supratau",
     "noResults": "Nėra atitikmenų",
-    "continue": "Tęsti"
+    "continue": "Tęsti",
+    "checking": "Tikrinami atnaujinimai…"
   },
   "reportTypes": {
     "report": "Ataskaita",

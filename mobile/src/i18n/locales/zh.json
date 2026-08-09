@@ -36,7 +36,8 @@
     "rename": "重命名",
     "gotIt": "知道了",
     "noResults": "无匹配结果",
-    "continue": "继续"
+    "continue": "继续",
+    "checking": "正在检查更新…"
   },
   "reportTypes": {
     "report": "报告",

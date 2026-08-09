@@ -36,7 +36,8 @@
     "rename": "Umbenennen",
     "gotIt": "Verstanden",
     "noResults": "Keine Treffer",
-    "continue": "Weiter"
+    "continue": "Weiter",
+    "checking": "Suche nach Neuem…"
   },
   "reportTypes": {
     "report": "Bericht",

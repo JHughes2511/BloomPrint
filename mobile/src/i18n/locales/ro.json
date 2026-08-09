@@ -36,7 +36,8 @@
     "rename": "Redenumește",
     "gotIt": "Am înțeles",
     "noResults": "Niciun rezultat",
-    "continue": "Continuă"
+    "continue": "Continuă",
+    "checking": "Se caută actualizări…"
   },
   "reportTypes": {
     "report": "Raport",

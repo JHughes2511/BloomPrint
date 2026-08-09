@@ -36,7 +36,8 @@
     "rename": "名前を変更",
     "gotIt": "了解",
     "noResults": "該当なし",
-    "continue": "続ける"
+    "continue": "続ける",
+    "checking": "更新を確認しています…"
   },
   "reportTypes": {
     "report": "レポート",

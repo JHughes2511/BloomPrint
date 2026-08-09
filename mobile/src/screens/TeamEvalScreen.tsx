@@ -38,6 +38,7 @@ import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import { useTeam } from '../context/TeamContext';
 import { useCloseOnOutside } from '../hooks/useCloseOnOutside';
+import { useStaleWhileRefreshing } from '../hooks/useStaleWhileRefreshing';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
 import { useSheetScrollHeight, sheetCap, desktopOnly, CONTENT_MAX_WIDTH, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
 import { useGridColumns } from '../responsive/useGridColumns';
@@ -160,7 +161,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [whiteboardPlaybook, setWhiteboardPlaybook] = useState(false);
   const [activeView, setActiveView] = useState<ViewKey>('dashboard');
   const [sessions, setSessions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+
   const [phaseFilter, setPhaseFilter] = useState<string>('all');
   const [dashboard, setDashboard] = useState<any>(null);
   const [loadingDash, setLoadingDash] = useState(true);
@@ -357,10 +358,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [staffSearching, setStaffSearching] = useState(false);
 
   const [gamesRefreshing, setGamesRefreshing] = useState(false);
+  // The screen reloads on every focus. Blanking it each time meant stepping
+  // back from a game redrew the same list from scratch behind a spinner — so
+  // the last data stays up and a quiet line says it is checking.
+  const { firstLoad, refreshing, run } = useStaleWhileRefreshing();
+
   const loadData = useCallback(async () => {
-    setLoading(true);
-    setLoadingDash(true);
-    try {
+    await run(async () => {
       const teamParam = gradeTeamIds.length ? { team_ids: gradeTeamIds.join(',') } : {};
       const [s, d, t] = await Promise.all([
         gameEvalAPI.listSessions(teamParam),
@@ -370,10 +374,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       setSessions(s);
       setDashboard(d);
       setTeams(t);
-    } catch {}
-    setLoading(false);
-    setLoadingDash(false);
-  }, [gradeTeamIds]);
+      setLoadingDash(false);
+    });
+  }, [gradeTeamIds, run]);
 
   const loadDashboard = useCallback(async (phases: string[]) => {
     setLoadingDash(true);
@@ -1863,7 +1866,18 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
           {!isWide && <TeamFilterBar />}
 
-          {loading ? (
+          {/* What is on screen is the last answer, and this says so while a new
+              one is on its way. Silence would be a page claiming to be current
+              when it is a few seconds old. */}
+          {refreshing && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6,
+                           paddingHorizontal: 16, paddingBottom: 6 }}>
+              <ActivityIndicator color={t.muted2} size="small" />
+              <Text style={{ color: t.muted2, fontSize: 11 }}>{tr('common.checking')}</Text>
+            </View>
+          )}
+
+          {firstLoad ? (
             <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />
           ) : filteredSessions.length === 0 ? (
             <View style={[s.card, { alignItems: 'center' }]}>

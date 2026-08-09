@@ -113,7 +113,10 @@ export default function RecentScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const [items, setItems] = useState<ReportItem[]>([]);
+  // True only until something has arrived. A reload with a list already on
+  // screen keeps the list — see useStaleWhileRefreshing for the reasoning.
   const [loading, setLoading] = useState(true);
+  const loadedOnce = useRef(false);
   const [filter, setFilter] = useState('all');
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -292,7 +295,7 @@ export default function RecentScreen() {
 
   const [refreshing, setRefreshing] = useState(false);
   const load = async () => {
-    setLoading(true);
+    if (!loadedOnce.current) setLoading(true);
     try {
       const [evals, teamReports, gameReports, trainingSessions, gameSessions, sharedInbox] = await Promise.all([
         evalsAPI.recent(),
@@ -444,6 +447,7 @@ export default function RecentScreen() {
       setItems(combined);
     } finally {
       setLoading(false);
+      loadedOnce.current = true;
     }
   };
 

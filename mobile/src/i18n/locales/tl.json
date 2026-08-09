@@ -36,7 +36,8 @@
     "rename": "Palitan ang Pangalan",
     "gotIt": "Nakuha ko",
     "noResults": "Walang resulta",
-    "continue": "Magpatuloy"
+    "continue": "Magpatuloy",
+    "checking": "Tinitingnan ang mga update…"
   },
   "reportTypes": {
     "report": "Ulat",
