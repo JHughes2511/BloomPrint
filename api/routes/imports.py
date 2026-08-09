@@ -188,16 +188,40 @@ async def game_stats_preview(
     # without this every team on it defaulted to our side, both teams' players
     # landed under one, and the game had no opponent score to work a result out
     # from. The coach can still change it; this is only what it opens on.
+    # Labels the file used that are NOT either team in this game. A stat chart
+    # with two coloured columns and no names is not a thing to guess at: the
+    # guess reads exactly like knowledge once it is drawn as a bar, and it put a
+    # whole team's totals on the other side. These come back with the preview so
+    # the coach can say which is which — and only these, because a sheet headed
+    # "Angola" and "Egypt" needs no question asked.
+    unresolved: dict[str, dict] = {}
     if game_id is not None:
         from .game_eval import _side_for
         game = db.get(models.GameSession, game_id)
         if game is not None:
             team_row = db.get(models.Team, game.team_id) if game.team_id else None
             ours = (team_row.name if team_row else None) or coach.program_name or ""
+            theirs = game.opponent_name or ""
+
+            def note(label: str, section: str) -> None:
+                if _side_for(label, ours, theirs) is not None:
+                    return
+                at = unresolved.setdefault(
+                    str(label or "").strip() or "(no heading)",
+                    {"label": str(label or "").strip() or "(no heading)", "sections": {}})
+                at["sections"][section] = at["sections"].get(section, 0) + 1
+
             for row in clean:
-                side = _side_for(row["team_name"], ours, game.opponent_name or "")
+                side = _side_for(row["team_name"], ours, theirs)
                 if side is not None:
                     row["is_opponent"] = side
+                else:
+                    note(row["team_name"], "players")
+            for section, rows in (("events", events), ("shots", shots),
+                                  ("team_stats", team_stats)):
+                for r in rows:
+                    if isinstance(r, dict):
+                        note(r.get("team_name"), section)
 
     # The same player read from two files is one player. Merged by taking the
     # larger count per stat rather than adding: two photos of the same sheet are
@@ -222,8 +246,14 @@ async def game_stats_preview(
         "events": events, "shots": shots, "team_stats": team_stats,
         "found": {"players": len(merged), "events": len(events),
                   "shots": len(shots), "team_stats": len(team_stats)},
+        "unresolved": sorted(unresolved.values(), key=lambda u: u["label"]),
         "errors": errors,
     }
+
+
+_PANEL_KEYS = ("PTS", "REB", "OREB", "DREB", "AST", "STL", "BLK", "TO", "PF",
+               "points_off_turnovers", "fast_break_points", "second_chance_points",
+               "points_in_paint", "bench_points")
 
 
 class GameStatsCommit(BaseModel):
@@ -242,6 +272,9 @@ class GameStatsCommit(BaseModel):
     events: list[dict] = []
     shots: list[dict] = []
     team_stats: list[dict] = []
+    # {"red, left": true} — the coach's answer for a label the file used that is
+    # not either team's name. Beats every other way of deciding a side.
+    label_sides: dict[str, bool] = {}
 
 
 @router.post("/game-stats/commit")
@@ -311,8 +344,14 @@ def game_stats_commit(
     team_row = db.get(models.Team, game.team_id) if game.team_id else None
     ours_name = (team_row.name if team_row else None) or coach.program_name or ""
 
+    answered = {str(k or "").strip().lower(): bool(v) for k, v in (body.label_sides or {}).items()}
+
     def side_for(team_name) -> bool:
         key = str(team_name or "").strip().lower()
+        # The coach was asked outright, so their answer outranks both the name
+        # match and the players' own sides.
+        if key in answered:
+            return answered[key]
         if key in side_of:
             return side_of[key]
         matched = _side_for(str(team_name or ""), ours_name, game.opponent_name or "")
@@ -388,6 +427,12 @@ def game_stats_commit(
                 points=_as_int(sh.get("points")),
             ))
             shots_in += 1
+    if body.team_stats:
+        # A row that states nothing is not a totals panel. Keeping them drew two
+        # named teams with no bars under them, which looks like a game where
+        # neither side did anything rather than a read that came back empty.
+        body.team_stats = [ts for ts in body.team_stats if isinstance(ts, dict)
+                           and any(_as_int(ts.get(k)) is not None for k in _PANEL_KEYS)]
     if body.team_stats:
         # The totals panel is printed per team, so it replaces per team.
         for side in {side_for(ts.get("team_name")) for ts in body.team_stats
@@ -512,17 +557,30 @@ async def regenerate_section(
         got = (parsed or {}).get(section) if isinstance(parsed, dict) else None
         if isinstance(got, list):
             collected.extend(got)
+    if section == "team_stats":
+        # A panel of Nones would replace the one on screen with two team names
+        # and no bars — the coach asked for a re-read and got an emptier chart.
+        collected = [r for r in collected if isinstance(r, dict)
+                     and any(_as_int(r.get(k)) is not None for k in _PANEL_KEYS)]
     if not collected:
         raise HTTPException(
             status_code=422,
             detail="That section could not be read from those files."
                    + (" " + "; ".join(errors) if errors else ""))
 
-    def side_for(name) -> bool:
-        matched = _side_for(str(name or ""), ours_name, game.opponent_name or "")
-        return bool(matched) if matched is not None else False
-
+    sides: dict[str, bool] = {}
+    unresolved: list[str] = []
+    for r in collected:
+        if not isinstance(r, dict):
+            continue
+        label = str(r.get("team_name") or "").strip()
+        matched = _side_for(label, ours_name, game.opponent_name or "")
+        if matched is None:
+            # Unmatched used to fall through to our side, which is how a re-read
+            # of one panel could quietly move the other team's numbers onto ours.
+            if (label or "(no heading)") not in unresolved:
+                unresolved.append(label or "(no heading)")
+        else:
+            sides[label] = matched
     return {"section": section, "count": len(collected), "rows": collected,
-            "sides": {str(r.get("team_name") or ""): side_for(r.get("team_name"))
-                      for r in collected if isinstance(r, dict)},
-            "errors": errors}
+            "sides": sides, "unresolved": unresolved, "errors": errors}

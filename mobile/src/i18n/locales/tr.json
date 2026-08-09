@@ -35,7 +35,8 @@
     "add": "Ekle",
     "rename": "Yeniden Adlandır",
     "gotIt": "Anladım",
-    "noResults": "Sonuç yok"
+    "noResults": "Sonuç yok",
+    "continue": "Devam"
   },
   "reportTypes": {
     "report": "Rapor",
@@ -2601,6 +2602,14 @@
     "notRight": "Doğru değil mi?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "Dosya ekle ve yeniden oku"
+    "attachAndRedo": "Dosya ekle ve yeniden oku",
+    "whichTeamTitle": "Bu hangi takım?",
+    "whichTeamHint": "Bu dosya takımları adlandırmıyor ve taraflar tahmin edilecek bir şey değil. Hangisinin hangisi olduğunu söyleyin, sayılar doğru yere işlensin.",
+    "section": {
+      "players": "{{count}} oyuncu",
+      "events": "{{count}} pozisyon",
+      "shots": "{{count}} şut",
+      "team_stats": "takım toplamları"
+    }
   }
 }

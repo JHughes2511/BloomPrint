@@ -35,7 +35,8 @@
     "add": "הוספה",
     "rename": "שינוי שם",
     "gotIt": "הבנתי",
-    "noResults": "אין תוצאות"
+    "noResults": "אין תוצאות",
+    "continue": "המשך"
   },
   "reportTypes": {
     "report": "דוח",
@@ -2601,6 +2602,14 @@
     "notRight": "לא נכון?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "צרף קובץ ובצע שוב"
+    "attachAndRedo": "צרף קובץ ובצע שוב",
+    "whichTeamTitle": "איזו קבוצה זו?",
+    "whichTeamHint": "הקובץ הזה לא מציין את שמות הקבוצות, והצדדים אינם עניין לניחוש. ציינו מי מי והמספרים יירשמו במקום הנכון.",
+    "section": {
+      "players": "{{count}} שחקנים",
+      "events": "{{count}} מהלכים",
+      "shots": "{{count}} זריקות",
+      "team_stats": "סיכומי קבוצה"
+    }
   }
 }

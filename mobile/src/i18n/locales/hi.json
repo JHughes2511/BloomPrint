@@ -35,7 +35,8 @@
     "add": "जोड़ें",
     "rename": "नाम बदलें",
     "gotIt": "समझ गया",
-    "noResults": "कोई परिणाम नहीं"
+    "noResults": "कोई परिणाम नहीं",
+    "continue": "जारी रखें"
   },
   "reportTypes": {
     "report": "रिपोर्ट",
@@ -2601,6 +2602,14 @@
     "notRight": "सही नहीं?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "फ़ाइल जोड़ें और दोबारा पढ़ें"
+    "attachAndRedo": "फ़ाइल जोड़ें और दोबारा पढ़ें",
+    "whichTeamTitle": "यह कौन सी टीम है?",
+    "whichTeamHint": "इस फ़ाइल में टीमों के नाम नहीं हैं, और पक्ष अनुमान लगाने की चीज़ नहीं हैं। बताइए कौन सी कौन है, ताकि आँकड़े सही जगह दर्ज हों।",
+    "section": {
+      "players": "{{count}} खिलाड़ी",
+      "events": "{{count}} घटनाएँ",
+      "shots": "{{count}} शॉट",
+      "team_stats": "टीम कुल"
+    }
   }
 }

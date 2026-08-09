@@ -35,7 +35,8 @@
     "add": "Додати",
     "rename": "Перейменувати",
     "gotIt": "Зрозуміло",
-    "noResults": "Немає результатів"
+    "noResults": "Немає результатів",
+    "continue": "Продовжити"
   },
   "reportTypes": {
     "report": "Звіт",
@@ -2601,6 +2602,14 @@
     "notRight": "Не так?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "Долучити файл і повторити"
+    "attachAndRedo": "Долучити файл і повторити",
+    "whichTeamTitle": "Яка це команда?",
+    "whichTeamHint": "У цьому файлі команди не названі, а сторони — не те, що варто вгадувати. Вкажіть, де яка, і цифри стануть на свої місця.",
+    "section": {
+      "players": "{{count}} гравців",
+      "events": "{{count}} епізодів",
+      "shots": "{{count}} кидків",
+      "team_stats": "підсумки команди"
+    }
   }
 }

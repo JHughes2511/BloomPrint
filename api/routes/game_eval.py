@@ -846,9 +846,21 @@ def game_box_score(
     sides = []
     for is_opp, name in ((False, our_name), (True, game.opponent_name or "Opponent")):
         rows, totals = _side_rows(stats, is_opp)
-        # The sheet's own totals win where it stated them; the player table
-        # still shows what the players themselves did.
-        team_totals = {**totals, **official.get(is_opp, {})}
+        # The box score is the base, and the printed panel only fills in what the
+        # player rows say nothing about.
+        #
+        # It used to be the other way round, to pick up team rebounds and team
+        # turnovers, which belong to the team rather than to any player. But the
+        # panel is a separate block on the sheet, often unlabelled, and when it
+        # lands on the wrong side the coach is shown a Key Stats chart that flatly
+        # contradicts the box score directly beneath it — 72 points above a column
+        # of players adding to 83. A few team rebounds are not worth a total that
+        # argues with the table it sits on. What the panel alone can say — points
+        # off turnovers, fast break, second chance, paint, bench — is untouched.
+        team_totals = dict(totals)
+        for k, v in official.get(is_opp, {}).items():
+            if not totals.get(k):
+                team_totals[k] = v
         sides.append({"is_opponent": is_opp, "team_name": name,
                       "players": rows, "totals": team_totals,
                       "player_totals": totals,

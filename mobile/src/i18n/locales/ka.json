@@ -35,7 +35,8 @@
     "add": "დამატება",
     "rename": "გადარქმევა",
     "gotIt": "გასაგებია",
-    "noResults": "შედეგები არ არის"
+    "noResults": "შედეგები არ არის",
+    "continue": "გაგრძელება"
   },
   "reportTypes": {
     "report": "ანგარიში",
@@ -2601,6 +2602,14 @@
     "notRight": "არასწორია?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "ფაილის მიმაგრება და გამეორება"
+    "attachAndRedo": "ფაილის მიმაგრება და გამეორება",
+    "whichTeamTitle": "რომელი გუნდია ეს?",
+    "whichTeamHint": "ამ ფაილში გუნდები დასახელებული არ არის, მხარეების გამოცნობა კი არ ღირს. მიუთითეთ რომელია რომელი და რიცხვები სწორ ადგილას დაჯდება.",
+    "section": {
+      "players": "{{count}} მოთამაშე",
+      "events": "{{count}} ეპიზოდი",
+      "shots": "{{count}} სროლა",
+      "team_stats": "გუნდის ჯამები"
+    }
   }
 }

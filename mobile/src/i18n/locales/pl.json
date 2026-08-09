@@ -35,7 +35,8 @@
     "add": "Dodaj",
     "rename": "Zmień nazwę",
     "gotIt": "Rozumiem",
-    "noResults": "Brak wyników"
+    "noResults": "Brak wyników",
+    "continue": "Dalej"
   },
   "reportTypes": {
     "report": "Raport",
@@ -2601,6 +2602,14 @@
     "notRight": "Coś nie tak?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "Dołącz plik i powtórz"
+    "attachAndRedo": "Dołącz plik i powtórz",
+    "whichTeamTitle": "Która to drużyna?",
+    "whichTeamHint": "Ten plik nie podaje nazw drużyn, a stron nie należy zgadywać. Wskaż, która jest która, a liczby trafią we właściwe miejsce.",
+    "section": {
+      "players": "{{count}} zawodników",
+      "events": "{{count}} akcji",
+      "shots": "{{count}} rzutów",
+      "team_stats": "sumy drużyny"
+    }
   }
 }

@@ -35,7 +35,8 @@
     "add": "Add",
     "rename": "Rename",
     "gotIt": "Got it",
-    "noResults": "No matches"
+    "noResults": "No matches",
+    "continue": "Continue"
   },
   "reportTypes": {
     "report": "Report",
@@ -2601,6 +2602,14 @@
     "notRight": "Not right?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "Attach file & redo"
+    "attachAndRedo": "Attach file & redo",
+    "whichTeamTitle": "Which team is this?",
+    "whichTeamHint": "This file did not name the teams, so the sides are not something to guess at. Say which is which and the numbers will be filed correctly.",
+    "section": {
+      "players": "{{count}} players",
+      "events": "{{count}} plays",
+      "shots": "{{count}} shots",
+      "team_stats": "team totals"
+    }
   }
 }

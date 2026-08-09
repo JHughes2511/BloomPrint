@@ -35,7 +35,8 @@
     "add": "Idagdag",
     "rename": "Palitan ang Pangalan",
     "gotIt": "Nakuha ko",
-    "noResults": "Walang resulta"
+    "noResults": "Walang resulta",
+    "continue": "Magpatuloy"
   },
   "reportTypes": {
     "report": "Ulat",
@@ -2601,6 +2602,14 @@
     "notRight": "Mali ba?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "Ilakip at ulitin"
+    "attachAndRedo": "Ilakip at ulitin",
+    "whichTeamTitle": "Aling koponan ito?",
+    "whichTeamHint": "Hindi pinangalanan ng file na ito ang mga koponan, at hindi dapat hulaan kung alin ang alin. Sabihin kung alin ang alin para tama ang pagkakatala ng mga bilang.",
+    "section": {
+      "players": "{{count}} manlalaro",
+      "events": "{{count}} laro",
+      "shots": "{{count}} tira",
+      "team_stats": "kabuuan ng koponan"
+    }
   }
 }

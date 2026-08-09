@@ -35,7 +35,8 @@
     "add": "Dodaj",
     "rename": "Preimenuj",
     "gotIt": "Razumem",
-    "noResults": "Nema rezultata"
+    "noResults": "Nema rezultata",
+    "continue": "Настави"
   },
   "reportTypes": {
     "report": "Izveštaj",
@@ -2601,6 +2602,14 @@
     "notRight": "Nije tačno?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "Priloži i ponovi"
+    "attachAndRedo": "Priloži i ponovi",
+    "whichTeamTitle": "Који је ово тим?",
+    "whichTeamHint": "Овај фајл не именује тимове, а стране се не погађају. Реците који је који и бројеви ће отићи на право место.",
+    "section": {
+      "players": "{{count}} играча",
+      "events": "{{count}} акција",
+      "shots": "{{count}} шутева",
+      "team_stats": "укупно за тим"
+    }
   }
 }

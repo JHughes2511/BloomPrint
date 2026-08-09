@@ -35,7 +35,8 @@
     "add": "Hinzufügen",
     "rename": "Umbenennen",
     "gotIt": "Verstanden",
-    "noResults": "Keine Treffer"
+    "noResults": "Keine Treffer",
+    "continue": "Weiter"
   },
   "reportTypes": {
     "report": "Bericht",
@@ -2601,6 +2602,14 @@
     "notRight": "Stimmt nicht?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "Datei erneut anhängen & neu lesen"
+    "attachAndRedo": "Datei erneut anhängen & neu lesen",
+    "whichTeamTitle": "Welches Team ist das?",
+    "whichTeamHint": "Diese Datei nennt die Teams nicht, und die Seiten sind nichts zum Raten. Sagen Sie, welches welches ist, und die Zahlen werden richtig zugeordnet.",
+    "section": {
+      "players": "{{count}} Spieler",
+      "events": "{{count}} Aktionen",
+      "shots": "{{count}} Würfe",
+      "team_stats": "Teamwerte"
+    }
   }
 }

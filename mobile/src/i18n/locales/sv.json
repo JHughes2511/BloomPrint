@@ -35,7 +35,8 @@
     "add": "Lägg till",
     "rename": "Byt namn",
     "gotIt": "Uppfattat",
-    "noResults": "Inga träffar"
+    "noResults": "Inga träffar",
+    "continue": "Fortsätt"
   },
   "reportTypes": {
     "report": "Rapport",
@@ -2601,6 +2602,14 @@
     "notRight": "Inte rätt?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "Bifoga och gör om"
+    "attachAndRedo": "Bifoga och gör om",
+    "whichTeamTitle": "Vilket lag är detta?",
+    "whichTeamHint": "Filen namnger inte lagen, och sidorna är inget att gissa sig till. Säg vilket som är vilket så hamnar siffrorna rätt.",
+    "section": {
+      "players": "{{count}} spelare",
+      "events": "{{count}} händelser",
+      "shots": "{{count}} skott",
+      "team_stats": "lagtotaler"
+    }
   }
 }

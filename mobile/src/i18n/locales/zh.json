@@ -35,7 +35,8 @@
     "add": "添加",
     "rename": "重命名",
     "gotIt": "知道了",
-    "noResults": "无匹配结果"
+    "noResults": "无匹配结果",
+    "continue": "继续"
   },
   "reportTypes": {
     "report": "报告",
@@ -2601,6 +2602,14 @@
     "notRight": "不正确？",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "重新附件并重读"
+    "attachAndRedo": "重新附件并重读",
+    "whichTeamTitle": "这是哪支球队？",
+    "whichTeamHint": "这个文件没有写明球队名称，而哪一侧是哪队不该靠猜。请指明谁是谁，数据才会记到正确的一边。",
+    "section": {
+      "players": "{{count}} 名球员",
+      "events": "{{count}} 个回合",
+      "shots": "{{count}} 次出手",
+      "team_stats": "球队总计"
+    }
   }
 }

@@ -24,6 +24,7 @@ import { formatForLevel, periodLabel, weightBucket, periodForBucket, formatClock
 import WhiteboardModal from '../components/WhiteboardModal';
 import ScoutContextPanel from '../components/ScoutContextPanel';
 import GameStatsPanel from '../components/GameStatsPanel';
+import TeamLabelPrompt from '../components/TeamLabelPrompt';
 import GameReportPanel from '../components/GameReportPanel';
 import ReportCorrectionsPanel from '../components/ReportCorrectionsPanel';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
@@ -179,6 +180,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [importProgress, setImportProgress] = useState<{ done: number; total: number } | null>(null);
   const [importedExtras, setImportedExtras] = useState<{ events: any[]; shots: any[]; team_stats: any[] }>(
     { events: [], shots: [], team_stats: [] });
+  // Team labels the imported file used that match neither team in this game — a
+  // chart with a red column and a blue one. Asked before anything is saved.
+  const [askLabels, setAskLabels] = useState<any[]>([]);
+  const [labelSides, setLabelSides] = useState<Record<string, boolean>>({});
   // Bumped when an import lands, so the stats panel re-reads the game.
   const [statsVersion, setStatsVersion] = useState(0);
   const opponentOutside = useCloseOnOutside(showOpponentDropdown, () => setShowOpponentDropdown(false));
@@ -434,6 +439,47 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
   // ── Post-game import ─────────────────────────────────────────────────────────
 
+  /**
+   * Save a file that carried no box score — a play-by-play export, a shot
+   * chart, a team-totals panel. There is nothing to tick row by row, so there
+   * is nothing to stop for; refusing these meant a coach could only ever add
+   * stats in one shape.
+   */
+  const commitExtrasOnly = async (extras: any, sides: Record<string, boolean>) => {
+    if (!activeGame) return;
+    const rows = (extras.events?.length ?? 0) + (extras.shots?.length ?? 0)
+               + (extras.team_stats?.length ?? 0);
+    setImporting(true);
+    try {
+      await importsAPI.gameStatsCommit({ game_id: activeGame.id, ...extras, label_sides: sides });
+      setImportedExtras({ events: [], shots: [], team_stats: [] });
+      setStatsVersion(v => v + 1);
+      setActiveGame(await gameEvalAPI.getSession(activeGame.id));
+      Alert.alert(tr('teamGrade.importedTitle'), tr('teamGrade.importedMsg', { count: rows }));
+    } catch (e: any) {
+      Alert.alert(tr('teamGrade.importErrorTitle'),
+                  e?.response?.data?.detail ?? tr('teamGrade.couldNotImportStats'));
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  /** The coach has said which team each unnamed label is. */
+  const applyLabelSides = async (sides: Record<string, boolean>) => {
+    setLabelSides(sides);
+    setAskLabels([]);
+    if (statPreview) {
+      // The answer decides the side for the players under that heading too, so
+      // the review list opens with them already on the right team.
+      setStatPreview(rows => (rows ?? []).map((p: any) => {
+        const answer = sides[String(p.team_name ?? '').trim()];
+        return answer === undefined ? p : { ...p, is_opponent: answer };
+      }));
+      return;
+    }
+    await commitExtrasOnly(importedExtras, sides);
+  };
+
   // AI stat import: any file → preview → confirm → commit.
   const importGameStats = async () => {
     if (!activeGame) return;
@@ -460,22 +506,25 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                        team_stats: result.team_stats ?? [] };
       setImportedExtras(extras);
       const players = (result?.players ?? []).map((p: any) => ({ ...p, _include: true }));
+      if (result.unresolved?.length) {
+        // The file did not name the teams. Hold everything and ask — a guess at
+        // which column is which reads as knowledge once it is a bar on a chart,
+        // and it files a whole team's totals under the other team's name.
+        setLabelSides({});
+        setAskLabels(result.unresolved);
+        setStatPreview(players.length ? players : null);
+        return;
+      }
       if (!players.length) {
-        // A play-by-play export or a shot chart on its own has no box score to
-        // review — there is nothing to tick, so there is nothing to stop for.
-        // Refusing it meant a coach could only ever add stats in one shape.
         const extraRows = extras.events.length + extras.shots.length + extras.team_stats.length;
         if (!extraRows) {
           Alert.alert(tr('teamGrade.nothingFoundTitle'), tr('teamGrade.nothingFoundMsg'));
           return;
         }
-        await importsAPI.gameStatsCommit({ game_id: activeGame.id, ...extras });
-        setImportedExtras({ events: [], shots: [], team_stats: [] });
-        setStatsVersion(v => v + 1);
-        setActiveGame(await gameEvalAPI.getSession(activeGame.id));
-        Alert.alert(tr('teamGrade.importedTitle'), tr('teamGrade.importedMsg', { count: extraRows }));
+        await commitExtrasOnly(extras, {});
         return;
       }
+      setLabelSides({});
       setStatPreview(players);
     } catch (e: any) {
       Alert.alert(tr('teamGrade.importErrorTitle'), e?.response?.data?.detail ?? tr('teamGrade.couldNotReadFile'));
@@ -492,7 +541,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setImporting(true);
     try {
       const result = await importsAPI.gameStatsCommit({
-        game_id: activeGame.id, players, ...importedExtras,
+        game_id: activeGame.id, players, ...importedExtras, label_sides: labelSides,
       });
       const stats = await gameEvalAPI.listStats(activeGame.id);
       setGameStats(stats);
@@ -2805,8 +2854,22 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         </KeyboardAwareScrollView>
       )}
 
+      {/* Asked before the review list, because the answer decides which side
+          every row from that heading belongs to. */}
+      {askLabels.length > 0 && !!activeGame && (
+        <TeamLabelPrompt
+          labels={askLabels}
+          ourName={activeGame.team_name || tr('teamGrade.ourTeam')}
+          theirName={activeGame.opponent_name || tr('teamGrade.opponent')}
+          busy={importing}
+          onCancel={() => { setAskLabels([]); setStatPreview(null);
+                            setImportedExtras({ events: [], shots: [], team_stats: [] }); }}
+          onDone={applyLabelSides}
+        />
+      )}
+
       {/* Imported stats preview — confirm before committing */}
-      <Sheet visible={!!statPreview} transparent animationType="slide" onRequestClose={() => setStatPreview(null)}>
+      <Sheet visible={!!statPreview && askLabels.length === 0} transparent animationType="slide" onRequestClose={() => setStatPreview(null)}>
         <View style={s.modalOverlay}>
           <View style={[s.modalBox, { maxHeight: '85%' }]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>

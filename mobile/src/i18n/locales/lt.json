@@ -35,7 +35,8 @@
     "add": "Pridėti",
     "rename": "Pervadinti",
     "gotIt": "Supratau",
-    "noResults": "Nėra atitikmenų"
+    "noResults": "Nėra atitikmenų",
+    "continue": "Tęsti"
   },
   "reportTypes": {
     "report": "Ataskaita",
@@ -2601,6 +2602,14 @@
     "notRight": "Neteisinga?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "Pridėti ir kartoti"
+    "attachAndRedo": "Pridėti ir kartoti",
+    "whichTeamTitle": "Kuri tai komanda?",
+    "whichTeamHint": "Šiame faile komandos neįvardytos, o pusių spėlioti nedera. Nurodykite, kuri yra kuri, ir skaičiai atsidurs savo vietose.",
+    "section": {
+      "players": "{{count}} žaidėjų",
+      "events": "{{count}} epizodų",
+      "shots": "{{count}} metimų",
+      "team_stats": "komandos sumos"
+    }
   }
 }

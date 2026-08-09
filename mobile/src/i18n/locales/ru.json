@@ -35,7 +35,8 @@
     "add": "Добавить",
     "rename": "Переименовать",
     "gotIt": "Понятно",
-    "noResults": "Нет результатов"
+    "noResults": "Нет результатов",
+    "continue": "Продолжить"
   },
   "reportTypes": {
     "report": "Отчёт",
@@ -2601,6 +2602,14 @@
     "notRight": "Неверно?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "Приложить и повторить"
+    "attachAndRedo": "Приложить и повторить",
+    "whichTeamTitle": "Какая это команда?",
+    "whichTeamHint": "В этом файле команды не названы, а стороны — не то, о чём стоит гадать. Укажите, где какая, и цифры встанут на свои места.",
+    "section": {
+      "players": "{{count}} игроков",
+      "events": "{{count}} эпизодов",
+      "shots": "{{count}} бросков",
+      "team_stats": "итоги команды"
+    }
   }
 }

@@ -35,7 +35,8 @@
     "add": "추가",
     "rename": "이름 변경",
     "gotIt": "확인했어요",
-    "noResults": "결과 없음"
+    "noResults": "결과 없음",
+    "continue": "계속"
   },
   "reportTypes": {
     "report": "리포트",
@@ -2601,6 +2602,14 @@
     "notRight": "잘못됐나요?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "파일 첨부 후 다시 읽기"
+    "attachAndRedo": "파일 첨부 후 다시 읽기",
+    "whichTeamTitle": "어느 팀인가요?",
+    "whichTeamHint": "이 파일에는 팀 이름이 없고, 어느 쪽인지는 추측할 일이 아닙니다. 어느 쪽이 어느 팀인지 알려주시면 기록이 제자리에 들어갑니다.",
+    "section": {
+      "players": "선수 {{count}}명",
+      "events": "플레이 {{count}}개",
+      "shots": "슛 {{count}}개",
+      "team_stats": "팀 합계"
+    }
   }
 }

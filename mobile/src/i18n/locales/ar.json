@@ -35,7 +35,8 @@
     "add": "إضافة",
     "rename": "إعادة تسمية",
     "gotIt": "فهمت",
-    "noResults": "لا توجد نتائج"
+    "noResults": "لا توجد نتائج",
+    "continue": "متابعة"
   },
   "reportTypes": {
     "report": "تقرير",
@@ -2601,6 +2602,14 @@
     "notRight": "غير صحيح؟",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "أرفق الملف وأعد القراءة"
+    "attachAndRedo": "أرفق الملف وأعد القراءة",
+    "whichTeamTitle": "أي فريق هذا؟",
+    "whichTeamHint": "هذا الملف لا يذكر أسماء الفرق، والجانبان ليسا مما يُخمَّن. حدِّد أيهما أيّ لتُسجَّل الأرقام في مكانها الصحيح.",
+    "section": {
+      "players": "{{count}} لاعبين",
+      "events": "{{count}} لقطات",
+      "shots": "{{count}} تسديدات",
+      "team_stats": "مجاميع الفريق"
+    }
   }
 }

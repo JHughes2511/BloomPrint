@@ -35,7 +35,8 @@
     "add": "追加",
     "rename": "名前を変更",
     "gotIt": "了解",
-    "noResults": "該当なし"
+    "noResults": "該当なし",
+    "continue": "続ける"
   },
   "reportTypes": {
     "report": "レポート",
@@ -2601,6 +2602,14 @@
     "notRight": "内容が違う？",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "ファイルを添付してやり直す"
+    "attachAndRedo": "ファイルを添付してやり直す",
+    "whichTeamTitle": "これはどちらのチームですか？",
+    "whichTeamHint": "このファイルにはチーム名がなく、どちらの側かは推測すべきものではありません。どちらがどちらかを指定すれば、数字は正しく記録されます。",
+    "section": {
+      "players": "{{count}}人の選手",
+      "events": "{{count}}件のプレー",
+      "shots": "{{count}}本のシュート",
+      "team_stats": "チーム合計"
+    }
   }
 }

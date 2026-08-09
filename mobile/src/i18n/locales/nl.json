@@ -35,7 +35,8 @@
     "add": "Toevoegen",
     "rename": "Hernoemen",
     "gotIt": "Begrepen",
-    "noResults": "Geen resultaten"
+    "noResults": "Geen resultaten",
+    "continue": "Doorgaan"
   },
   "reportTypes": {
     "report": "Rapport",
@@ -2601,6 +2602,14 @@
     "notRight": "Niet juist?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "Bijvoegen en opnieuw"
+    "attachAndRedo": "Bijvoegen en opnieuw",
+    "whichTeamTitle": "Welk team is dit?",
+    "whichTeamHint": "Dit bestand noemt de teams niet, en naar de kanten raden is geen optie. Geef aan welke welke is, dan komen de cijfers goed te staan.",
+    "section": {
+      "players": "{{count}} spelers",
+      "events": "{{count}} acties",
+      "shots": "{{count}} schoten",
+      "team_stats": "teamtotalen"
+    }
   }
 }

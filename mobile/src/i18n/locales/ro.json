@@ -35,7 +35,8 @@
     "add": "Adaugă",
     "rename": "Redenumește",
     "gotIt": "Am înțeles",
-    "noResults": "Niciun rezultat"
+    "noResults": "Niciun rezultat",
+    "continue": "Continuă"
   },
   "reportTypes": {
     "report": "Raport",
@@ -2601,6 +2602,14 @@
     "notRight": "Nu e corect?",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "Atașează și reia"
+    "attachAndRedo": "Atașează și reia",
+    "whichTeamTitle": "Ce echipă este aceasta?",
+    "whichTeamHint": "Acest fișier nu numește echipele, iar părțile nu se ghicesc. Spuneți care este care și cifrele vor ajunge unde trebuie.",
+    "section": {
+      "players": "{{count}} jucători",
+      "events": "{{count}} faze",
+      "shots": "{{count}} aruncări",
+      "team_stats": "totaluri de echipă"
+    }
   }
 }

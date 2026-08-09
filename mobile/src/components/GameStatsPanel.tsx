@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import Svg, { Rect, Line, Circle, Path, G } from 'react-native-svg';
 import * as DocumentPicker from 'expo-document-picker';
 import { gameEvalAPI, importsAPI } from '../api/client';
+import VoiceTextInput from './VoiceTextInput';
+import TeamLabelPrompt from './TeamLabelPrompt';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -178,6 +180,9 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
   const [fixing, setFixing] = useState<{ section: string; title: string } | null>(null);
   const [fixNote, setFixNote] = useState('');
   const [fixBusy, setFixBusy] = useState(false);
+  // A re-read whose team labels matched neither team: held here, unsaved, until
+  // the coach says which side each label is.
+  const [asking, setAsking] = useState<{ section: string; rows: any[]; labels: any[] } | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -203,6 +208,28 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
   const [ours, theirs] = data.sides;
   const ourColor = t.accent;
   const theirColor = t.negative;
+
+  /**
+   * Save one re-read section.
+   *
+   * Player rows name a team, not a side, and the commit reads the side straight
+   * off the row — without applying the map here, every re-read player would be
+   * filed under our team and take the box score with it. Events, shots and the
+   * totals panel are placed server-side, so they only need the map passed on.
+   */
+  const commitSection = async (section: string, rows: any[], sides: Record<string, boolean>) => {
+    const placed = section === 'players'
+      ? rows.map((r: any) => ({ ...r, is_opponent: !!sides[String(r.team_name ?? '').trim()] }))
+      : rows;
+    // Only this section is committed, so the rest of the game — including
+    // anything corrected by hand — is untouched.
+    await importsAPI.gameStatsCommit({ game_id: gameId, [section]: placed,
+                                       label_sides: sides } as any);
+    setAsking(null);
+    setFixing(null);
+    setFixNote('');
+    setBump(b => b + 1);
+  };
 
   /** A two-sided bar: our number against theirs, each scaled to the larger. */
   const CompareRow = ({ label, a, b, wide = false }: { label: string; a: number; b: number; wide?: boolean }) => {
@@ -436,7 +463,9 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
           <View style={s.dialog}>
             <Text style={{ color: t.ink, fontSize: 16, fontFamily: fonts[800] }}>{fixing?.title}</Text>
             <Text style={[s.empty, { marginTop: 4, marginBottom: 12 }]}>{tr('gameStats.fixHint')}</Text>
-            <TextInput
+            {/* Spoken, like every other note field in the app — a coach looking
+                at a wrong number is describing it out loud anyway. */}
+            <VoiceTextInput
               style={{ backgroundColor: t.chip, color: t.ink, borderRadius: 10, padding: 12, fontSize: 14,
                        borderWidth: 1, borderColor: t.line, minHeight: 80, textAlignVertical: 'top' }}
               multiline placeholder={tr('gameStats.fixPlaceholder')} placeholderTextColor={t.muted2}
@@ -461,19 +490,14 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
                       picked.assets.map(f => ({ uri: f.uri, name: f.name ?? 'file',
                                                 type: f.mimeType ?? 'application/octet-stream' })),
                       { game_id: gameId, section: fixing!.section, note: fixNote });
-                    // Player rows name a team, not a side, and the commit reads
-                    // the side straight off the row — without this every re-read
-                    // player would be filed under our team, taking the box score
-                    // with it. Events, shots and totals are placed server-side.
-                    const rows = fixing!.section === 'players'
-                      ? res.rows.map((r: any) => ({
-                          ...r, is_opponent: !!res.sides?.[String(r.team_name ?? '')] }))
-                      : res.rows;
-                    // Only this section is committed, so the rest of the game —
-                    // including anything corrected by hand — is untouched.
-                    await importsAPI.gameStatsCommit({ game_id: gameId, [fixing!.section]: rows } as any);
-                    setFixing(null);
-                    setBump(b => b + 1);
+                    if (res.unresolved?.length) {
+                      // The file named nobody. Ask rather than file it somewhere
+                      // and let a bar chart present the guess as fact.
+                      setAsking({ section: fixing!.section, rows: res.rows,
+                                  labels: res.unresolved.map((l: string) => ({ label: l })) });
+                      return;
+                    }
+                    await commitSection(fixing!.section, res.rows, res.sides ?? {});
                   } finally {
                     setFixBusy(false);
                   }
@@ -486,6 +510,23 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
           </View>
         </View>
       </Modal>
+
+      {!!asking && (
+        <TeamLabelPrompt
+          labels={asking.labels}
+          ourName={ours.team_name} theirName={theirs.team_name}
+          busy={fixBusy}
+          onCancel={() => setAsking(null)}
+          onDone={async sides => {
+            setFixBusy(true);
+            try {
+              await commitSection(asking.section, asking.rows, sides);
+            } finally {
+              setFixBusy(false);
+            }
+          }}
+        />
+      )}
 
       {/* ── Box score ── */}
       {data.sides.filter((side: any) => side.players.length > 0).map((side: any) => (

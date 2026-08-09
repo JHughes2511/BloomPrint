@@ -35,7 +35,8 @@
     "add": "Προσθήκη",
     "rename": "Μετονομασία",
     "gotIt": "Το κατάλαβα",
-    "noResults": "Κανένα αποτέλεσμα"
+    "noResults": "Κανένα αποτέλεσμα",
+    "continue": "Συνέχεια"
   },
   "reportTypes": {
     "report": "Αναφορά",
@@ -2601,6 +2602,14 @@
     "notRight": "Λάθος;",
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
-    "attachAndRedo": "Επισύναψη & επανάληψη"
+    "attachAndRedo": "Επισύναψη & επανάληψη",
+    "whichTeamTitle": "Ποια ομάδα είναι αυτή;",
+    "whichTeamHint": "Αυτό το αρχείο δεν κατονομάζει τις ομάδες, και οι πλευρές δεν είναι κάτι που μαντεύεται. Πείτε ποια είναι ποια και οι αριθμοί θα μπουν σωστά.",
+    "section": {
+      "players": "{{count}} παίκτες",
+      "events": "{{count}} φάσεις",
+      "shots": "{{count}} σουτ",
+      "team_stats": "σύνολα ομάδας"
+    }
   }
 }

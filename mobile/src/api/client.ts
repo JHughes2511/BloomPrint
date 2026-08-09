@@ -399,6 +399,9 @@ export const importsAPI = {
   gameStatsPreview: async (files: PickedFile[], gameId?: number, onProgress?: (done: number, total: number) => void) => {
     const players: any[] = [], events: any[] = [], shots: any[] = [], team_stats: any[] = [];
     const errors: string[] = [];
+    // Team headings the files used that are neither team in this game, merged
+    // across files: two photos of the same unnamed chart raise one question.
+    const unresolved = new Map<string, { label: string; sections: Record<string, number> }>();
     for (let i = 0; i < files.length; i++) {
       onProgress?.(i, files.length);
       try {
@@ -412,6 +415,13 @@ export const importsAPI = {
         events.push(...(r.events ?? []));
         shots.push(...(r.shots ?? []));
         team_stats.push(...(r.team_stats ?? []));
+        for (const u of (r.unresolved ?? []) as any[]) {
+          const at = unresolved.get(u.label) ?? { label: u.label, sections: {} as Record<string, number> };
+          for (const [k, n] of Object.entries(u.sections ?? {})) {
+            at.sections[k] = (at.sections[k] ?? 0) + (n as number);
+          }
+          unresolved.set(u.label, at);
+        }
         if (r.errors?.length) errors.push(...r.errors);
       } catch (e: any) {
         // One unreadable file must not lose the ones that read fine.
@@ -433,7 +443,8 @@ export const importsAPI = {
         at.stats[k] = Math.max(at.stats[k] ?? 0, v as number);
       }
     }
-    return { players: [...merged.values()], events, shots, team_stats, errors };
+    return { players: [...merged.values()], events, shots, team_stats,
+             unresolved: [...unresolved.values()], errors };
   },
   /** Read ONE section again, with the coach saying what the reader got wrong. */
   regenerateSection: async (files: PickedFile[], body: { game_id: number; section: string; note: string }) => {
@@ -444,7 +455,8 @@ export const importsAPI = {
     return api.post('/imports/game-stats/resection', form,
       { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 180000 }).then(r => r.data);
   },
-  gameStatsCommit: (data: { game_id: number; players?: any[]; events?: any[]; shots?: any[]; team_stats?: any[] }) =>
+  gameStatsCommit: (data: { game_id: number; players?: any[]; events?: any[]; shots?: any[];
+                            team_stats?: any[]; label_sides?: Record<string, boolean> }) =>
     api.post('/imports/game-stats/commit', data).then(r => r.data),
   text: async (file: PickedFile, purpose = 'coaching notes') =>
     api.post('/imports/text', await _importForm(file, { purpose }), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),
