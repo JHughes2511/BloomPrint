@@ -2584,7 +2584,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     style={[s.playerGradeRow, expandedPlayer === g.player_name && { borderBottomWidth: 0 }]}
                     onPress={() => setExpandedPlayer(expandedPlayer === g.player_name ? null : g.player_name)}
                   >
-                    <Text style={s.playerGradeName} numberOfLines={1}>{g.player_name}</Text>
+                    {/* The squad number leads, as it does on the box score and
+                        the scouting page — it is how a coach knows who this is
+                        on the floor. */}
+                    <Text style={s.playerGradeName} numberOfLines={1}>
+                      {g.jersey_number ? `#${g.jersey_number}  ` : ''}{g.player_name}
+                    </Text>
                     <Text style={{ color: t.muted, fontSize: 11 }}>{tr('teamGrade.offLabel')} {g.offensive_grade.toFixed(1)}</Text>
                     <Text style={{ color: t.muted, fontSize: 11 }}>{tr('teamGrade.defLabel')} {g.defensive_grade.toFixed(1)}</Text>
                     <Text style={{ color: t.muted, fontSize: 11 }}>{g.minutes_played.toFixed(0)}{tr('teamGrade.mAbbr')}</Text>

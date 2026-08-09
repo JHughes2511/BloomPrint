@@ -634,7 +634,7 @@ _TOTALLED = ("PTS", "FGM", "FGA", "2PM", "2PA", "3PM", "3PA", "FTM", "FTA",
              "OREB", "DREB", "REB", "AST", "STL", "BLK", "TO", "PF")
 
 
-def _side_rows(stats: list, is_opp: bool) -> tuple[list[dict], dict]:
+def _side_rows(stats: list, is_opp: bool, roster: dict[str, str] | None = None) -> tuple[list[dict], dict]:
     by_player: dict[str, dict[str, int]] = {}
     jerseys: dict[str, str] = {}
     for st in stats:
@@ -645,11 +645,49 @@ def _side_rows(stats: list, is_opp: bool) -> tuple[list[dict], dict]:
         # Any row that carries one will do; they all came off the same sheet.
         if getattr(st, "jersey_number", None) and st.player_name not in jerseys:
             jerseys[st.player_name] = str(st.jersey_number)
-    rows = [{"player": name, "jersey": jerseys.get(name), **_player_line(c)}
+    rows = [{"player": name, "jersey": _jersey_for(name, jerseys, roster), **_player_line(c)}
             for name, c in sorted(by_player.items())]
     rows.sort(key=lambda r: r["PTS"], reverse=True)
     totals = {k: sum(r[k] for r in rows) for k in _TOTALLED}
     return rows, totals
+
+
+def _roster_jerseys(db: Session, team_id: int | None) -> dict[str, str]:
+    """Squad numbers as the ROSTER has them, keyed by name.
+
+    A number can arrive two ways — read off a stat sheet, or typed on the
+    roster page — and only the first was ever displayed. A coach who filled one
+    in by hand saw it on Roster and nowhere else in the app.
+    """
+    if not team_id:
+        return {}
+    return {_norm_team(p.name): str(p.jersey_number)
+            for p in db.query(models.Player).filter_by(team_id=team_id).all()
+            if p.jersey_number}
+
+
+def _jersey_for(name: str, from_stats: dict[str, str], roster: dict[str, str] | None) -> str | None:
+    """The roster first, then whatever the sheet said.
+
+    The roster wins because it is the one a coach can edit: if they have typed a
+    number against a name, that is the answer, and an import that disagrees has
+    already written its own number there anyway.
+    """
+    if roster:
+        at = roster.get(_norm_team(name))
+        if at:
+            return at
+    return from_stats.get(name)
+
+
+def _opponent_team_id(db: Session, game) -> int | None:
+    """The team row for a game's opponent, when the coach keeps one."""
+    if not game.opponent_name:
+        return None
+    row = next((tm for tm in db.query(models.Team).filter_by(coach_id=game.coach_id).all()
+                if _norm_team(tm.name) == _norm_team(game.opponent_name)
+                and tm.id != game.team_id), None)
+    return row.id if row else None
 
 
 def _efficiency(r: dict) -> int:
@@ -853,9 +891,12 @@ def game_box_score(
     stats = list(game.player_stats)
 
     official = _official_totals(db, game.id)
+    # Both rosters, so a number typed on the Roster page shows up on the sheet.
+    rosters = {False: _roster_jerseys(db, game.team_id),
+               True: _roster_jerseys(db, _opponent_team_id(db, game))}
     sides = []
     for is_opp, name in ((False, our_name), (True, game.opponent_name or "Opponent")):
-        rows, totals = _side_rows(stats, is_opp)
+        rows, totals = _side_rows(stats, is_opp, rosters[is_opp])
         # The box score is the base, and the printed panel only fills in what the
         # player rows say nothing about.
         #
@@ -1461,6 +1502,16 @@ def get_summary(
 
     player_grades = _compute_grades(our_stats, our_minutes)
     opponent_grades = _compute_grades(opp_stats, opp_minutes)
+    # A squad number belongs to the player, not to the sheet they were read
+    # from — so the roster answers first wherever a grade is shown.
+    for grades, team_id in ((player_grades, game.team_id),
+                            (opponent_grades, _opponent_team_id(db, game))):
+        roster = _roster_jerseys(db, team_id)
+        for g in grades:
+            g["jersey_number"] = _jersey_for(
+                g["player_name"],
+                {g["player_name"]: g["jersey_number"]} if g.get("jersey_number") else {},
+                roster)
 
     ours, theirs = effective_scores(game)
     team_grade = _team_grade(player_grades, ours, theirs)
@@ -2604,9 +2655,15 @@ def opponent_profile(
         per["THREE_PCT"] = round(100 * line["3PM"] / line["3PA"], 1) if line["3PA"] else None
         return per
 
+    # The scouted team's roster, so a number typed by hand shows here too.
+    scout_roster: dict[str, str] = {}
+    for tid in (same or []):
+        scout_roster.update(_roster_jerseys(db, tid))
+
     best_players = sorted(
         [{"player_name": n,
-          "jersey_number": d.get("jersey"),
+          "jersey_number": _jersey_for(n, {n: d.get("jersey")} if d.get("jersey") else {},
+                                       scout_roster),
           "avg_grade": round(d.get("grade_total", 0.0) / max(d["games"], 1), 2),
           "games": d["games"],
           "averages": _averages(d["counts"], d["games"])}
