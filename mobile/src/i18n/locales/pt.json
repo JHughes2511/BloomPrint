@@ -2229,7 +2229,8 @@
     "away": "Fora",
     "finalLabel": "Final",
     "ourPlayerNamePlaceholder": "Nome do jogador...",
-    "couldNotAddPlayer": "Não foi possível adicionar esse jogador."
+    "couldNotAddPlayer": "Não foi possível adicionar esse jogador.",
+    "setScore": "Definir resultado"
   },
   "whiteboard": {
     "title": "Quadro Tático",

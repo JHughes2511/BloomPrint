@@ -2229,7 +2229,8 @@
     "away": "Deplasman",
     "finalLabel": "Bitiş",
     "ourPlayerNamePlaceholder": "Oyuncu adı...",
-    "couldNotAddPlayer": "Bu oyuncu eklenemedi."
+    "couldNotAddPlayer": "Bu oyuncu eklenemedi.",
+    "setScore": "Skoru gir"
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

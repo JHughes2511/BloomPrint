@@ -180,6 +180,7 @@ async def game_stats_preview(
                 if n > 0:
                     norm[k] = n
         clean.append({"player_name": name, "team_name": str(p.get("team_name") or "").strip(),
+                      "jersey_number": str(p.get("jersey_number") or "").strip() or None,
                       "is_opponent": bool(p.get("is_opponent")), "stats": norm})
 
     # The game knows who is playing; the file knows what it called them. Matching
@@ -238,6 +239,9 @@ async def game_stats_preview(
         into = merged[key]["stats"]
         for k, v in row["stats"].items():
             into[k] = max(into.get(k, 0), v)
+        # A number printed on one of the two files is a number for this player.
+        if row.get("jersey_number") and not merged[key].get("jersey_number"):
+            merged[key]["jersey_number"] = row["jersey_number"]
     # Events, shots and team totals are not reviewed row by row — a coach is not
     # going to tick four hundred play-by-play lines — so they travel with the
     # preview and are counted for them instead.
@@ -310,6 +314,7 @@ def game_stats_commit(
         if not name:
             continue
         is_opp = bool(p.get("is_opponent"))
+        jersey = str(p.get("jersey_number") or "").strip() or None
         stats = p.get("stats") if isinstance(p.get("stats"), dict) else {}
         for stat, count in stats.items():
             try:
@@ -321,6 +326,7 @@ def game_stats_commit(
             raw = _import_raw(stat, count)
             db.add(models.GamePlayerStat(
                 game_id=game.id, player_name=name, is_opponent=is_opp,
+                jersey_number=jersey,
                 quarter=q, stat_name=stat, stat_category=stat_category(stat),
                 raw_points=raw, quarter_multiplier=mult, weighted_points=raw * mult, count=count,
                 source="import",
@@ -464,8 +470,72 @@ def game_stats_commit(
         # repeat back. The reason travels.
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Could not save the imported stats: {exc}")
+
+    roster = _sync_roster(db, game, coach, body.players)
     return {"imported": imported, "events": events_in, "shots": shots_in,
-            "team_stats": advanced_in}
+            "team_stats": advanced_in, "roster": roster}
+
+
+def _norm_name(x) -> str:
+    return "".join(ch for ch in str(x or "").lower() if ch.isalnum())
+
+
+def _sync_roster(db: Session, game, coach, players: list[dict]) -> dict:
+    """Put what the sheet said about the players onto the teams themselves.
+
+    A box score is often the only place a squad number is ever written down,
+    and it was being read and dropped — the coach then typed the same numbers
+    into Roster by hand off the same sheet. Anyone the sheet names who is not
+    on the team is added, and anyone already there has their number brought up
+    to what the sheet printed.
+
+    Our side goes to the game's team. The opponent's side goes to the opponent
+    only if the coach has actually built them as a team; an opponent that is
+    just a name on a game does not quietly become a team in Roster, or a season
+    of one-off fixtures would fill it.
+    """
+    ours_id = game.team_id
+    opp_row = None
+    if game.opponent_name:
+        opp_row = next(
+            (tm for tm in db.query(models.Team).filter_by(coach_id=coach.id).all()
+             if _norm_name(tm.name) == _norm_name(game.opponent_name) and tm.id != ours_id),
+            None)
+    added = numbered = 0
+    for side_is_opp, team_id in ((False, ours_id), (True, opp_row.id if opp_row else None)):
+        if not team_id:
+            continue
+        existing = db.query(models.Player).filter_by(team_id=team_id).all()
+        by_name = {_norm_name(p.name): p for p in existing}
+        for p in players:
+            if bool(p.get("is_opponent")) != side_is_opp:
+                continue
+            name = str(p.get("player_name") or "").strip()
+            if not name:
+                continue
+            jersey = str(p.get("jersey_number") or "").strip() or None
+            at = by_name.get(_norm_name(name))
+            if at is None:
+                at = models.Player(name=name, team_id=team_id, coach_id=coach.id,
+                                   jersey_number=jersey)
+                db.add(at)
+                by_name[_norm_name(name)] = at
+                added += 1
+                numbered += 1 if jersey else 0
+            elif jersey and at.jersey_number != jersey:
+                # The sheet is the most recent statement of who wore what.
+                at.jersey_number = jersey
+                numbered += 1
+    if added or numbered:
+        try:
+            db.commit()
+        except Exception:
+            # The game is saved and that is what was asked for. A roster that
+            # did not take can be fixed on the Roster page; failing the import
+            # over it would throw away the numbers as well.
+            db.rollback()
+            return {"added": 0, "numbered": 0}
+    return {"added": added, "numbered": numbered}
 
 
 def _as_int(v) -> int | None:

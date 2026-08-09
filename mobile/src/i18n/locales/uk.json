@@ -2229,7 +2229,8 @@
     "away": "У гостях",
     "finalLabel": "Кінець",
     "ourPlayerNamePlaceholder": "Ім'я гравця...",
-    "couldNotAddPlayer": "Не вдалося додати гравця."
+    "couldNotAddPlayer": "Не вдалося додати гравця.",
+    "setScore": "Вказати рахунок"
   },
   "whiteboard": {
     "title": "Тактична дошка",

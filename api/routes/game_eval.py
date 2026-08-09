@@ -636,12 +636,17 @@ _TOTALLED = ("PTS", "FGM", "FGA", "2PM", "2PA", "3PM", "3PA", "FTM", "FTA",
 
 def _side_rows(stats: list, is_opp: bool) -> tuple[list[dict], dict]:
     by_player: dict[str, dict[str, int]] = {}
+    jerseys: dict[str, str] = {}
     for st in stats:
         if bool(st.is_opponent) != is_opp:
             continue
         d = by_player.setdefault(st.player_name, {})
         d[st.stat_name] = d.get(st.stat_name, 0) + (st.count or 0)
-    rows = [{"player": name, **_player_line(c)} for name, c in sorted(by_player.items())]
+        # Any row that carries one will do; they all came off the same sheet.
+        if getattr(st, "jersey_number", None) and st.player_name not in jerseys:
+            jerseys[st.player_name] = str(st.jersey_number)
+    rows = [{"player": name, "jersey": jerseys.get(name), **_player_line(c)}
+            for name, c in sorted(by_player.items())]
     rows.sort(key=lambda r: r["PTS"], reverse=True)
     totals = {k: sum(r[k] for r in rows) for k in _TOTALLED}
     return rows, totals

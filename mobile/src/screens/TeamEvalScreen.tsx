@@ -23,7 +23,7 @@ import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { formatForLevel, periodLabel, weightBucket, periodForBucket, formatClock, type GameFormat } from '../utils/gameClock';
 import WhiteboardModal from '../components/WhiteboardModal';
 import ScoutContextPanel from '../components/ScoutContextPanel';
-import GameStatsPanel from '../components/GameStatsPanel';
+import GameStatsPanel, { TeamBoxScore } from '../components/GameStatsPanel';
 import TeamLabelPrompt from '../components/TeamLabelPrompt';
 import GameReportPanel from '../components/GameReportPanel';
 import ReportCorrectionsPanel from '../components/ReportCorrectionsPanel';
@@ -181,6 +181,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [finalOurs, setFinalOurs] = useState('');
   const [finalTheirs, setFinalTheirs] = useState('');
   const [savingScore, setSavingScore] = useState(false);
+  // Only opened from the dash where a score would be. A game whose box
+  // score is in already knows its result; this is for the ones that cannot.
+  const [showScoreEdit, setShowScoreEdit] = useState(false);
   const [importProgress, setImportProgress] = useState<{ done: number; total: number } | null>(null);
   const [importedExtras, setImportedExtras] = useState<{ events: any[]; shots: any[]; team_stats: any[] }>(
     { events: [], shots: [], team_stats: [] });
@@ -877,14 +880,19 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setGameLineup([]);
     setLoadingSummary(true);
     try {
-      const [s, stats, lineup] = await Promise.all([
+      const [s, stats, lineup, fresh] = await Promise.all([
         gameEvalAPI.getGameSummary(game.id),
         gameEvalAPI.listStats(game.id),
         gameEvalAPI.getLineup(game.id),
+        // The game as the server sees it, which is where the score worked out
+        // from the box score comes from. Whichever list this game was tapped
+        // from may predate the import that gave it a result.
+        gameEvalAPI.getSession(game.id).catch(() => null),
       ]);
       setSummary(s);
       setGameStats(stats);
       setGameLineup(lineup);
+      if (fresh) setDetailGame(fresh);
     } catch {}
     setLoadingSummary(false);
   };
@@ -1058,6 +1066,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       });
       setDetailGame(updated);
       setFinalOurs(''); setFinalTheirs('');
+      setShowScoreEdit(false);
       loadData();
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('teamGrade.couldNotSaveScore'));
@@ -2229,7 +2238,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   {' · '}{phaseLabel(detailGame.season_phase)}
                 </Text>
               </View>
-              {detailGame.our_score != null && (
+              {/* The result, where a result belongs. It is worked out from the
+                  box score, so an imported game already knows it and asking the
+                  coach to type it in was asking them to copy a number the app
+                  had. When both sides' numbers are not in there is genuinely no
+                  way to know it — that reads as a dash, and tapping the dash
+                  takes it, so a game with a real result is never stuck without
+                  one in the season record. */}
+              {detailGame.our_score != null ? (
                 <View style={{ alignItems: 'flex-end' }}>
                   <Text style={{ color: t.ink, fontSize: 28, fontFamily: fonts[900] }}>
                     {detailGame.our_score} - {detailGame.opponent_score}
@@ -2242,6 +2258,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     </Text>
                   </View>
                 </View>
+              ) : (
+                <TouchableOpacity style={{ alignItems: 'flex-end' }}
+                                  onPress={() => { setFinalOurs(''); setFinalTheirs(''); setShowScoreEdit(true); }}>
+                  <Text style={{ color: t.muted2, fontSize: 28, fontFamily: fonts[900] }}>–</Text>
+                  <Text style={{ color: t.accent, fontSize: 11, fontFamily: fonts[700] }}>
+                    {tr('teamGrade.setScore')}
+                  </Text>
+                </TouchableOpacity>
               )}
             </View>
             {summary && (
@@ -2581,53 +2605,18 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* The game's numbers, under the grades. Everything here is derived
               from what was actually recorded; the panels that need a file we
               don't have say which one rather than drawing an empty chart. */}
-          {/* The final score, when nothing has supplied one.
-
-              A game's score is worked out from the stats, but only when BOTH
-              sides' numbers are in — with one team's box score imported there is
-              genuinely no way to know what the other team scored, and a season
-              record cannot be built from half a result. Rather than leave the
-              record reading 0W-0L with no explanation, the game says what is
-              missing and takes the two numbers. */}
-          {detailGame.our_score == null && (
-            <View style={s.card}>
-              <Text style={s.cardLabel}>{tr('teamGrade.finalScore')}</Text>
-              {/* The title, two boxes and Save. The paragraph that used to
-                  explain why the score was empty was four lines of reading on a
-                  phone to introduce a control that explains itself. */}
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 10 }}>
-                {/* minWidth: 0 on every flex child. A text input carries an
-                    intrinsic width on web — roughly twenty characters — and
-                    without this it refuses to shrink below it, so two of them
-                    plus the dash ran off the side of a phone. */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexGrow: 1, flexBasis: 180, minWidth: 0 }}>
-                  <TextInput
-                    style={[s.input, { flex: 1, minWidth: 0, marginBottom: 0, textAlign: 'center' }]}
-                    keyboardType="number-pad" placeholder="0" placeholderTextColor={t.muted2}
-                    value={finalOurs} onChangeText={setFinalOurs}
-                  />
-                  <Text style={{ color: t.muted, fontSize: 16, fontFamily: fonts[800] }}>–</Text>
-                  <TextInput
-                    style={[s.input, { flex: 1, minWidth: 0, marginBottom: 0, textAlign: 'center' }]}
-                    keyboardType="number-pad" placeholder="0" placeholderTextColor={t.muted2}
-                    value={finalTheirs} onChangeText={setFinalTheirs}
-                  />
-                </View>
-                <TouchableOpacity
-                  style={[s.modalBtn, { backgroundColor: t.ctaBg, paddingHorizontal: 22, flexGrow: 1, flexBasis: 110 }]}
-                  onPress={saveFinalScore}
-                  disabled={savingScore || !finalOurs.trim() || !finalTheirs.trim()}
-                >
-                  {savingScore
-                    ? <ActivityIndicator color={t.ctaText} size="small" />
-                    : <Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>{tr('common.save')}</Text>}
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-
           {detailTab === 'insights' && (
             <GameStatsPanel gameId={detailGame.id} refreshKey={statsVersion} />
+          )}
+
+          {/* This team's box score, under this team's grades. A grade is an
+              argument about a player; the line beside their name is the
+              evidence for it, and it was a tab away. */}
+          {(detailTab === 'our' || detailTab === 'opponent') && (
+            <View style={{ paddingHorizontal: 16 }}>
+              <TeamBoxScore gameId={detailGame.id} isOpponent={detailTab === 'opponent'}
+                            refreshKey={statsVersion} />
+            </View>
           )}
 
           {/* Action buttons */}
@@ -2958,6 +2947,50 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           )}
         </KeyboardAwareScrollView>
       )}
+
+      {/* The two numbers, only when they are asked for. */}
+      <Sheet visible={showScoreEdit} transparent animationType="fade"
+             onRequestClose={() => setShowScoreEdit(false)}>
+        <View style={s.modalOverlay}>
+          <View style={[s.modalBox, { maxWidth: 420 }]}>
+            <Text style={s.modalTitle}>{tr('teamGrade.finalScore')}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 }}>
+              {/* minWidth: 0 on every flex child. A text input carries an
+                  intrinsic width on web — roughly twenty characters — and
+                  without this it refuses to shrink below it, so two of them
+                  plus the dash ran off the side of a phone. */}
+              <TextInput
+                style={[s.input, { flex: 1, minWidth: 0, marginBottom: 0, textAlign: 'center' }]}
+                keyboardType="number-pad" placeholder="0" placeholderTextColor={t.muted2}
+                value={finalOurs} onChangeText={setFinalOurs}
+              />
+              <Text style={{ color: t.muted, fontSize: 16, fontFamily: fonts[800] }}>–</Text>
+              <TextInput
+                style={[s.input, { flex: 1, minWidth: 0, marginBottom: 0, textAlign: 'center' }]}
+                keyboardType="number-pad" placeholder="0" placeholderTextColor={t.muted2}
+                value={finalTheirs} onChangeText={setFinalTheirs}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 }}>
+              <TouchableOpacity
+                style={[s.modalBtn, { flexGrow: 1, flexBasis: 110, borderWidth: 1, borderColor: t.line }]}
+                onPress={() => setShowScoreEdit(false)}
+              >
+                <Text style={{ color: t.muted, fontFamily: fonts[700], fontSize: 13 }}>{tr('common.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[s.modalBtn, { backgroundColor: t.ctaBg, flexGrow: 1, flexBasis: 140 }]}
+                onPress={saveFinalScore}
+                disabled={savingScore || !finalOurs.trim() || !finalTheirs.trim()}
+              >
+                {savingScore
+                  ? <ActivityIndicator color={t.ctaText} size="small" />
+                  : <Text style={{ color: t.ctaText, fontFamily: fonts[700], fontSize: 13 }}>{tr('common.save')}</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Sheet>
 
       {/* Asked before the review list, because the answer decides which side
           every row from that heading belongs to.

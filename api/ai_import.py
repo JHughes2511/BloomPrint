@@ -192,7 +192,7 @@ GAME_FILE_INSTRUCTION = (
     "Return ONLY this JSON, including whichever sections the file actually "
     "contains and omitting the rest:\n"
     '{\n'
-    '  "players": [{"player_name": "", "team_name": "", "is_opponent": false, '
+    '  "players": [{"player_name": "", "jersey_number": "", "team_name": "", "is_opponent": false, '
     '"stats": {"2 FG Made": 0, "2 FG Missed": 0, "3 FG Made": 0, "3 FG Missed": 0, '
     '"FT Made": 0, "FT Missed": 0, "Off. Reb": 0, "Def. Reb": 0, "Assists": 0, '
     '"Steal": 0, "Blocked Shot": 0, "Turnover": 0, "Foul Against": 0}}],\n'
@@ -204,7 +204,9 @@ GAME_FILE_INSTRUCTION = (
     '"STL": 0, "BLK": 0, "TO": 0, "PF": 0, "points_off_turnovers": 0, "fast_break_points": 0, '
     '"second_chance_points": 0, "points_in_paint": 0, "bench_points": 0}]\n'
     '}\n\n'
-    "PLAYERS — the box score. FG/FGM/FGA cover ALL field goals, threes included, so "
+    "PLAYERS — the box score. jersey_number is the squad number printed beside the "
+    "name, as text ('00' is not 0); omit it when the sheet does not print one. "
+    "FG/FGM/FGA cover ALL field goals, threes included, so "
     "'2 FG Made' must have the threes subtracted: a 9-of-18 line containing three "
     "threes is 6 two-point makes and 3 three-point makes. Misses matter as much as "
     "makes — a miss is an attempt that was not a make, so subtract. Without them no "

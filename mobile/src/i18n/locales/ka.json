@@ -2229,7 +2229,8 @@
     "away": "გასვლით",
     "finalLabel": "დასრულდა",
     "ourPlayerNamePlaceholder": "მოთამაშის სახელი...",
-    "couldNotAddPlayer": "ამ მოთამაშის დამატება ვერ მოხერხდა."
+    "couldNotAddPlayer": "ამ მოთამაშის დამატება ვერ მოხერხდა.",
+    "setScore": "ანგარიშის მითითება"
   },
   "whiteboard": {
     "title": "დაფა",

@@ -2229,7 +2229,8 @@
     "away": "客场",
     "finalLabel": "终场",
     "ourPlayerNamePlaceholder": "球员姓名...",
-    "couldNotAddPlayer": "无法添加该球员。"
+    "couldNotAddPlayer": "无法添加该球员。",
+    "setScore": "填写比分"
   },
   "whiteboard": {
     "title": "战术板",

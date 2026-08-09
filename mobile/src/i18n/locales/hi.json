@@ -2229,7 +2229,8 @@
     "away": "बाहरी",
     "finalLabel": "अंतिम",
     "ourPlayerNamePlaceholder": "खिलाड़ी का नाम...",
-    "couldNotAddPlayer": "उस खिलाड़ी को जोड़ा नहीं जा सका।"
+    "couldNotAddPlayer": "उस खिलाड़ी को जोड़ा नहीं जा सका।",
+    "setScore": "स्कोर दर्ज करें"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",

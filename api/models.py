@@ -781,6 +781,10 @@ class GamePlayerStat(Base):
     game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False)
     player_id = Column(Integer, ForeignKey("players.id"), nullable=True)
     player_name = Column(String, nullable=False)
+    # As the sheet printed it. Kept on the stat row rather than looked up from
+    # the roster, because a box score is often the only place an opponent's
+    # number is ever written down.
+    jersey_number = Column(String, nullable=True)
     is_opponent = Column(Boolean, default=False)
     quarter = Column(Integer, nullable=False)
     stat_name = Column(String, nullable=False)

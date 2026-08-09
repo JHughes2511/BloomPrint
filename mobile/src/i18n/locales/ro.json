@@ -2229,7 +2229,8 @@
     "away": "Deplasare",
     "finalLabel": "Final",
     "ourPlayerNamePlaceholder": "Numele jucătorului...",
-    "couldNotAddPlayer": "Jucătorul nu a putut fi adăugat."
+    "couldNotAddPlayer": "Jucătorul nu a putut fi adăugat.",
+    "setScore": "Adaugă scorul"
   },
   "whiteboard": {
     "title": "Tablă tactică",

@@ -545,40 +545,88 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
       {data.sides.filter((side: any) => side.players.length > 0).map((side: any) => (
         <View key={String(side.is_opponent)} style={s.card}>
           <Header title={side.team_name} section="players" />
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View>
-              <View style={[s.tRow, s.tHead]}>
-                <Text style={[s.tCell, s.tName, s.tHeadText]} numberOfLines={1}>
-                  {tr('gameStats.player')}
-                </Text>
-                {BOX_COLS.map(c => (
-                  <Text key={c} style={[s.tCell, s.tHeadText]}>{c}</Text>
-                ))}
-              </View>
-              {side.players.map((p: any) => (
-                <TouchableOpacity
-                  key={p.player} style={s.tRow}
-                  onPress={() => {
-                    setEditing({ ...p, is_opponent: side.is_opponent });
-                    setDraft(Object.fromEntries(EDIT_FIELDS.map(f => [f, String(p[f] ?? 0)])));
-                  }}
-                >
-                  <Text style={[s.tCell, s.tName]} numberOfLines={1}>{p.player}</Text>
-                  {BOX_COLS.map(c => <Text key={c} style={s.tCell}>{p[c] ?? 0}</Text>)}
-                </TouchableOpacity>
-              ))}
-              <View style={[s.tRow, s.tTotals]}>
-                <Text style={[s.tCell, s.tName, s.tHeadText]} numberOfLines={1}>
-                  {tr('gameStats.total')}
-                </Text>
-                {BOX_COLS.map(c => (
-                  <Text key={c} style={[s.tCell, s.tHeadText]}>{side.totals[c] ?? 0}</Text>
-                ))}
-              </View>
-            </View>
-          </ScrollView>
+          <BoxScoreRows
+            side={side} t={t} s={s} tr={tr}
+            onEditRow={(p: any) => {
+              setEditing({ ...p, is_opponent: side.is_opponent });
+              setDraft(Object.fromEntries(EDIT_FIELDS.map(f => [f, String(p[f] ?? 0)])));
+            }}
+          />
         </View>
       ))}
+    </View>
+  );
+}
+
+/**
+ * One team's box score, as a sheet prints it.
+ *
+ * The squad number leads the row because that is how a coach reads a stat
+ * sheet — the number is what they saw on the floor. It is left out of the
+ * totals line, where a jersey number would mean nothing.
+ */
+function BoxScoreRows({ side, t, s, tr, onEditRow }: any) {
+  const anyJersey = side.players.some((p: any) => p.jersey);
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <View>
+        <View style={[s.tRow, s.tHead]}>
+          {anyJersey && <Text style={[s.tJersey, s.tHeadText]}>#</Text>}
+          <Text style={[s.tCell, s.tName, s.tHeadText]} numberOfLines={1}>
+            {tr('gameStats.player')}
+          </Text>
+          {BOX_COLS.map(c => <Text key={c} style={[s.tCell, s.tHeadText]}>{c}</Text>)}
+        </View>
+        {side.players.map((p: any) => (
+          <TouchableOpacity key={p.player} style={s.tRow} disabled={!onEditRow}
+                            onPress={() => onEditRow?.(p)}>
+            {anyJersey && <Text style={s.tJersey}>{p.jersey ?? ''}</Text>}
+            <Text style={[s.tCell, s.tName]} numberOfLines={1}>{p.player}</Text>
+            {BOX_COLS.map(c => <Text key={c} style={s.tCell}>{p[c] ?? 0}</Text>)}
+          </TouchableOpacity>
+        ))}
+        <View style={[s.tRow, s.tTotals]}>
+          {anyJersey && <Text style={s.tJersey} />}
+          <Text style={[s.tCell, s.tName, s.tHeadText]} numberOfLines={1}>
+            {tr('gameStats.total')}
+          </Text>
+          {BOX_COLS.map(c => (
+            <Text key={c} style={[s.tCell, s.tHeadText]}>{side.totals[c] ?? 0}</Text>
+          ))}
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+/**
+ * One side's box score on its own, for the tab that is already about that team.
+ *
+ * Reading it under the player grades is how a coach checks a grade: the number
+ * beside the name is the argument for it. Sending them to another tab to see
+ * the line that produced the grade they are looking at is a detour.
+ */
+export function TeamBoxScore({ gameId, isOpponent, refreshKey = 0 }:
+  { gameId: number; isOpponent: boolean; refreshKey?: number }) {
+  const { t } = useTheme();
+  const { t: tr } = useTranslation();
+  const s = React.useMemo(() => makeStyles(t), [t]);
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    let live = true;
+    gameEvalAPI.boxScore(gameId)
+      .then(d => { if (live) setData(d); })
+      .catch(() => { if (live) setData(null); });
+    return () => { live = false; };
+  }, [gameId, refreshKey]);
+
+  const side = data?.sides?.find((x: any) => !!x.is_opponent === !!isOpponent);
+  if (!side?.players?.length) return null;
+  return (
+    <View style={s.card}>
+      <Text style={s.cardLabel}>{side.team_name}</Text>
+      <BoxScoreRows side={side} t={t} s={s} tr={tr} />
     </View>
   );
 }
@@ -636,5 +684,7 @@ const makeStyles = (t: ThemeTokens) => ({
   tTotals: { borderTopWidth: 2, borderTopColor: t.line } as const,
   tCell: { width: 46, paddingVertical: 7, color: t.inkSoft, fontSize: 12, textAlign: 'center' } as const,
   tName: { width: 150, textAlign: 'left', color: t.ink, paddingRight: 8 } as const,
+  tJersey: { width: 34, paddingVertical: 7, color: t.muted, fontSize: 12,
+             textAlign: 'center' } as const,
   tHeadText: { color: t.label, fontFamily: fonts[800], fontSize: 11 } as const,
 });

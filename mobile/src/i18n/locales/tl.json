@@ -2229,7 +2229,8 @@
     "away": "Away",
     "finalLabel": "Tapos",
     "ourPlayerNamePlaceholder": "Pangalan ng manlalaro...",
-    "couldNotAddPlayer": "Hindi naidagdag ang manlalarong iyon."
+    "couldNotAddPlayer": "Hindi naidagdag ang manlalarong iyon.",
+    "setScore": "Ilagay ang iskor"
   },
   "whiteboard": {
     "title": "Whiteboard",

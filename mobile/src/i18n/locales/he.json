@@ -2229,7 +2229,8 @@
     "away": "חוץ",
     "finalLabel": "סיום",
     "ourPlayerNamePlaceholder": "שם השחקן...",
-    "couldNotAddPlayer": "לא ניתן היה להוסיף את השחקן."
+    "couldNotAddPlayer": "לא ניתן היה להוסיף את השחקן.",
+    "setScore": "הזנת תוצאה"
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

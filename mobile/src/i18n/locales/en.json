@@ -2229,7 +2229,8 @@
     "away": "Away",
     "finalLabel": "Final",
     "ourPlayerNamePlaceholder": "Player name...",
-    "couldNotAddPlayer": "That player could not be added."
+    "couldNotAddPlayer": "That player could not be added.",
+    "setScore": "Set score"
   },
   "whiteboard": {
     "title": "Whiteboard",

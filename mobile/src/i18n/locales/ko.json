@@ -2229,7 +2229,8 @@
     "away": "원정",
     "finalLabel": "종료",
     "ourPlayerNamePlaceholder": "선수 이름...",
-    "couldNotAddPlayer": "해당 선수를 추가하지 못했습니다."
+    "couldNotAddPlayer": "해당 선수를 추가하지 못했습니다.",
+    "setScore": "점수 입력"
   },
   "whiteboard": {
     "title": "작전판",

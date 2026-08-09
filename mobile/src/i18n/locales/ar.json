@@ -2229,7 +2229,8 @@
     "away": "خارج أرضه",
     "finalLabel": "النهائي",
     "ourPlayerNamePlaceholder": "اسم اللاعب...",
-    "couldNotAddPlayer": "تعذّرت إضافة هذا اللاعب."
+    "couldNotAddPlayer": "تعذّرت إضافة هذا اللاعب.",
+    "setScore": "تسجيل النتيجة"
   },
   "whiteboard": {
     "title": "السبورة",

@@ -2229,7 +2229,8 @@
     "away": "Gość",
     "finalLabel": "Koniec",
     "ourPlayerNamePlaceholder": "Imię i nazwisko zawodnika...",
-    "couldNotAddPlayer": "Nie udało się dodać tego zawodnika."
+    "couldNotAddPlayer": "Nie udało się dodać tego zawodnika.",
+    "setScore": "Wpisz wynik"
   },
   "whiteboard": {
     "title": "Tablica",

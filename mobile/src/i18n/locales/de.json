@@ -2229,7 +2229,8 @@
     "away": "Auswärts",
     "finalLabel": "Endstand",
     "ourPlayerNamePlaceholder": "Name des Spielers...",
-    "couldNotAddPlayer": "Dieser Spieler konnte nicht hinzugefügt werden."
+    "couldNotAddPlayer": "Dieser Spieler konnte nicht hinzugefügt werden.",
+    "setScore": "Ergebnis eintragen"
   },
   "whiteboard": {
     "title": "Taktiktafel",

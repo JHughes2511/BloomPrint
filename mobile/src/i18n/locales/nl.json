@@ -2229,7 +2229,8 @@
     "away": "Uit",
     "finalLabel": "Eindstand",
     "ourPlayerNamePlaceholder": "Naam van de speler...",
-    "couldNotAddPlayer": "Deze speler kon niet worden toegevoegd."
+    "couldNotAddPlayer": "Deze speler kon niet worden toegevoegd.",
+    "setScore": "Score invullen"
   },
   "whiteboard": {
     "title": "Tactiekbord",

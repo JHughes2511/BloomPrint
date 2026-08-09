@@ -2229,7 +2229,8 @@
     "away": "Trasferta",
     "finalLabel": "Finale",
     "ourPlayerNamePlaceholder": "Nome del giocatore...",
-    "couldNotAddPlayer": "Non è stato possibile aggiungere il giocatore."
+    "couldNotAddPlayer": "Non è stato possibile aggiungere il giocatore.",
+    "setScore": "Inserisci punteggio"
   },
   "whiteboard": {
     "title": "Lavagna",

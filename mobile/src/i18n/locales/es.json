@@ -2229,7 +2229,8 @@
     "away": "Visitante",
     "finalLabel": "Final",
     "ourPlayerNamePlaceholder": "Nombre del jugador...",
-    "couldNotAddPlayer": "No se pudo añadir ese jugador."
+    "couldNotAddPlayer": "No se pudo añadir ese jugador.",
+    "setScore": "Poner marcador"
   },
   "whiteboard": {
     "title": "Pizarra",

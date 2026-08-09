@@ -2229,7 +2229,8 @@
     "away": "Išvykoje",
     "finalLabel": "Pabaiga",
     "ourPlayerNamePlaceholder": "Žaidėjo vardas...",
-    "couldNotAddPlayer": "Nepavyko pridėti šio žaidėjo."
+    "couldNotAddPlayer": "Nepavyko pridėti šio žaidėjo.",
+    "setScore": "Įrašyti rezultatą"
   },
   "whiteboard": {
     "title": "Lenta",

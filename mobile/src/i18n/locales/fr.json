@@ -2229,7 +2229,8 @@
     "away": "Extérieur",
     "finalLabel": "Final",
     "ourPlayerNamePlaceholder": "Nom du joueur...",
-    "couldNotAddPlayer": "Impossible d'ajouter ce joueur."
+    "couldNotAddPlayer": "Impossible d'ajouter ce joueur.",
+    "setScore": "Saisir le score"
   },
   "whiteboard": {
     "title": "Tableau blanc",

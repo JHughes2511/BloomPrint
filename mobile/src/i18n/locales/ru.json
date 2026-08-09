@@ -2229,7 +2229,8 @@
     "away": "В гостях",
     "finalLabel": "Итог",
     "ourPlayerNamePlaceholder": "Имя игрока...",
-    "couldNotAddPlayer": "Не удалось добавить игрока."
+    "couldNotAddPlayer": "Не удалось добавить игрока.",
+    "setScore": "Указать счёт"
   },
   "whiteboard": {
     "title": "Тактическая доска",

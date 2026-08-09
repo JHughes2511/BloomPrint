@@ -2229,7 +2229,8 @@
     "away": "Borta",
     "finalLabel": "Slut",
     "ourPlayerNamePlaceholder": "Spelarens namn...",
-    "couldNotAddPlayer": "Spelaren kunde inte läggas till."
+    "couldNotAddPlayer": "Spelaren kunde inte läggas till.",
+    "setScore": "Ange resultat"
   },
   "whiteboard": {
     "title": "Taktiktavla",

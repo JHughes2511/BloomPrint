@@ -2229,7 +2229,8 @@
     "away": "Εκτός",
     "finalLabel": "Τελικό",
     "ourPlayerNamePlaceholder": "Όνομα παίκτη...",
-    "couldNotAddPlayer": "Δεν ήταν δυνατή η προσθήκη του παίκτη."
+    "couldNotAddPlayer": "Δεν ήταν δυνατή η προσθήκη του παίκτη.",
+    "setScore": "Ορισμός σκορ"
   },
   "whiteboard": {
     "title": "Πίνακας",

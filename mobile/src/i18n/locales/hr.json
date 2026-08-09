@@ -2229,7 +2229,8 @@
     "away": "Gosti",
     "finalLabel": "Kraj",
     "ourPlayerNamePlaceholder": "Ime igrača...",
-    "couldNotAddPlayer": "Tog igrača nije bilo moguće dodati."
+    "couldNotAddPlayer": "Tog igrača nije bilo moguće dodati.",
+    "setScore": "Unesi rezultat"
   },
   "whiteboard": {
     "title": "Ploča",

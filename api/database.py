@@ -256,6 +256,9 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     ("game_team_advanced", "blk", "INTEGER"),
     ("game_team_advanced", "tov", "INTEGER"),
     ("game_team_advanced", "pf", "INTEGER"),
+    # A box score prints a number beside every name; it was being read and
+    # thrown away. Same lesson as the nine above — the table shipped first.
+    ("game_player_stats", "jersey_number", "VARCHAR"),
 ]
 
 

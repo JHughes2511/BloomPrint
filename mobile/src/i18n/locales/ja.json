@@ -2229,7 +2229,8 @@
     "away": "アウェイ",
     "finalLabel": "試合終了",
     "ourPlayerNamePlaceholder": "選手名...",
-    "couldNotAddPlayer": "その選手を追加できませんでした。"
+    "couldNotAddPlayer": "その選手を追加できませんでした。",
+    "setScore": "スコアを入力"
   },
   "whiteboard": {
     "title": "ホワイトボード",

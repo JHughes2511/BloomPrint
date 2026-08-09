@@ -2229,7 +2229,8 @@
     "away": "Gosti",
     "finalLabel": "Kraj",
     "ourPlayerNamePlaceholder": "Име играча...",
-    "couldNotAddPlayer": "Тај играч није могао бити додат."
+    "couldNotAddPlayer": "Тај играч није могао бити додат.",
+    "setScore": "Унеси резултат"
   },
   "whiteboard": {
     "title": "Tabla",
