@@ -2586,7 +2586,7 @@
       "attempts": "Shooting percentages need shot attempts, and this game has makes only. Import a box score that includes attempts (FGA / 3PA / FTA) to see them.",
       "play_by_play": "This needs a play-by-play file — every event with a game clock and a running score. Import one and this will appear.",
       "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear.",
-      "team_stats": "Potrzeba pięciu liczb: punkty ze strat, punkty z kontr, punkty z drugiej szansy, punkty spod kosza i punkty z ławki. Box score ich nie da — nic w wierszu zawodnika nie mówi, z której akcji padł kosz. Zaimportuj plik, który je podaje, a się pojawią."
+      "team_stats": "Potrzeba pięciu liczb: punkty ze strat, punkty z kontr, punkty z drugiej szansy, punkty spod kosza i punkty z ławki."
     },
     "biggestLead": "Największa przewaga",
     "biggestRun": "Największa seria",

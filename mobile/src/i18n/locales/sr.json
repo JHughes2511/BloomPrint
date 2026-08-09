@@ -2586,7 +2586,7 @@
       "attempts": "Shooting percentages need shot attempts, and this game has makes only. Import a box score that includes attempts (FGA / 3PA / FTA) to see them.",
       "play_by_play": "This needs a play-by-play file — every event with a game clock and a running score. Import one and this will appear.",
       "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear.",
-      "team_stats": "За ово треба пет бројки: поени из изгубљених лопти, поени из контри, поени из друге шансе, поени из рекета и поени са клупе. Статистика играча их не може дати — ништа у играчевом реду не каже из ког је напада кош пао. Увезите фајл који их наводи и појавиће се."
+      "team_stats": "За ово треба пет бројки: поени из изгубљених лопти, поени из контри, поени из друге шансе, поени из рекета и поени са клупе."
     },
     "biggestLead": "Najveće vođstvo",
     "biggestRun": "Najveća serija",

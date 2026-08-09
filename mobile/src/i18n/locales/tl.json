@@ -2586,7 +2586,7 @@
       "attempts": "Shooting percentages need shot attempts, and this game has makes only. Import a box score that includes attempts (FGA / 3PA / FTA) to see them.",
       "play_by_play": "This needs a play-by-play file — every event with a game clock and a running score. Import one and this will appear.",
       "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear.",
-      "team_stats": "Kailangan nito ng limang bilang: puntos mula sa turnover, fast break points, second chance points, puntos sa paint, at puntos mula sa bench. Hindi ito makukuha sa box score — walang sinasabi ang linya ng manlalaro kung saang possession nanggaling ang isang shot. Mag-import ng file na nagsasaad ng mga ito at lilitaw ang mga ito."
+      "team_stats": "Kailangan nito ng limang bilang: puntos mula sa turnover, fast break points, second chance points, puntos sa paint, at puntos mula sa bench."
     },
     "biggestLead": "Pinakamalaking lamang",
     "biggestRun": "Pinakamahabang run",

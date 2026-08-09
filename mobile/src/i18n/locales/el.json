@@ -2586,7 +2586,7 @@
       "attempts": "Shooting percentages need shot attempts, and this game has makes only. Import a box score that includes attempts (FGA / 3PA / FTA) to see them.",
       "play_by_play": "This needs a play-by-play file — every event with a game clock and a running score. Import one and this will appear.",
       "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear.",
-      "team_stats": "Χρειάζονται πέντε νούμερα: πόντοι από λάθη, πόντοι από αιφνιδιασμούς, πόντοι δεύτερης ευκαιρίας, πόντοι εντός ρακέτας και πόντοι από τον πάγκο. Ένα box score δεν μπορεί να τα βγάλει — τίποτα στη γραμμή ενός παίκτη δεν λέει από ποια επίθεση ήρθε ένα καλάθι. Εισαγάγετε αρχείο που τα αναφέρει και θα εμφανιστούν."
+      "team_stats": "Χρειάζονται πέντε νούμερα: πόντοι από λάθη, πόντοι από αιφνιδιασμούς, πόντοι δεύτερης ευκαιρίας, πόντοι εντός ρακέτας και πόντοι από τον πάγκο."
     },
     "biggestLead": "Μεγαλύτερο προβάδισμα",
     "biggestRun": "Μεγαλύτερο σερί",

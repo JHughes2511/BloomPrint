@@ -2586,7 +2586,7 @@
       "attempts": "Shooting percentages need shot attempts, and this game has makes only. Import a box score that includes attempts (FGA / 3PA / FTA) to see them.",
       "play_by_play": "This needs a play-by-play file — every event with a game clock and a running score. Import one and this will appear.",
       "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear.",
-      "team_stats": "これには5つの数値が必要です。ターンオーバーからの得点、速攻での得点、セカンドチャンスの得点、ペイント内の得点、ベンチからの得点です。ボックススコアからは算出できません。選手ごとの行には、その得点がどの攻撃から生まれたかが書かれていないからです。これらを記載したファイルを読み込むと表示されます。"
+      "team_stats": "これには5つの数値が必要です。ターンオーバーからの得点、速攻での得点、セカンドチャンスの得点、ペイント内の得点、ベンチからの得点です。"
     },
     "biggestLead": "最大リード",
     "biggestRun": "最大連続得点",
