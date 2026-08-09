@@ -2586,7 +2586,7 @@
       "attempts": "Shooting percentages need shot attempts, and this game has makes only. Import a box score that includes attempts (FGA / 3PA / FTA) to see them.",
       "play_by_play": "This needs a play-by-play file — every event with a game clock and a running score. Import one and this will appear.",
       "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear.",
-      "team_stats": "This needs the team-totals panel a stat sheet often prints beside the player rows. It cannot be worked out from a box score. Import a file that states these and they will appear."
+      "team_stats": "Il faut cinq chiffres : points sur balles perdues, points en contre-attaque, points de seconde chance, points dans la raquette et points du banc. Une feuille de match ne peut pas les produire — rien dans la ligne d'un joueur ne dit de quelle possession vient un panier. Importez un fichier qui les indique et ils apparaîtront."
     },
     "biggestLead": "Plus grand écart",
     "biggestRun": "Plus gros run",

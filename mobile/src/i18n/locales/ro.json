@@ -2586,7 +2586,7 @@
       "attempts": "Shooting percentages need shot attempts, and this game has makes only. Import a box score that includes attempts (FGA / 3PA / FTA) to see them.",
       "play_by_play": "This needs a play-by-play file — every event with a game clock and a running score. Import one and this will appear.",
       "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear.",
-      "team_stats": "This needs the team-totals panel a stat sheet often prints beside the player rows. It cannot be worked out from a box score. Import a file that states these and they will appear."
+      "team_stats": "Sunt necesare cinci cifre: puncte din pierderi de minge, puncte din contraatac, puncte din a doua șansă, puncte în vopsea și puncte de pe bancă. Un box score nu le poate produce — nimic din linia unui jucător nu spune din ce posesie a venit un coș. Importă un fișier care le indică și vor apărea."
     },
     "biggestLead": "Cel mai mare avans",
     "biggestRun": "Cea mai mare serie",

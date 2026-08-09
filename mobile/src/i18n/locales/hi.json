@@ -2586,7 +2586,7 @@
       "attempts": "Shooting percentages need shot attempts, and this game has makes only. Import a box score that includes attempts (FGA / 3PA / FTA) to see them.",
       "play_by_play": "This needs a play-by-play file — every event with a game clock and a running score. Import one and this will appear.",
       "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear.",
-      "team_stats": "This needs the team-totals panel a stat sheet often prints beside the player rows. It cannot be worked out from a box score. Import a file that states these and they will appear."
+      "team_stats": "इसके लिए पाँच आँकड़े चाहिए: टर्नओवर से मिले अंक, फ़ास्ट ब्रेक अंक, सेकंड चांस अंक, पेंट में बने अंक और बेंच से आए अंक। बॉक्स स्कोर इन्हें नहीं बना सकता — खिलाड़ी की लाइन में कहीं नहीं लिखा कि बास्केट किस पज़ेशन से आई। इन्हें बताने वाली फ़ाइल आयात करें और ये दिख जाएँगे।"
     },
     "biggestLead": "सबसे बड़ी बढ़त",
     "biggestRun": "सबसे बड़ा स्कोरिंग रन",

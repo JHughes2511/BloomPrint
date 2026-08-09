@@ -2586,7 +2586,7 @@
       "attempts": "Shooting percentages need shot attempts, and this game has makes only. Import a box score that includes attempts (FGA / 3PA / FTA) to see them.",
       "play_by_play": "This needs a play-by-play file — every event with a game clock and a running score. Import one and this will appear.",
       "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear.",
-      "team_stats": "This needs the team-totals panel a stat sheet often prints beside the player rows. It cannot be worked out from a box score. Import a file that states these and they will appear."
+      "team_stats": "이 항목에는 다섯 가지 수치가 필요합니다. 턴오버 득점, 속공 득점, 세컨드 찬스 득점, 페인트존 득점, 벤치 득점입니다. 박스스코어로는 만들 수 없습니다. 선수 기록에는 그 득점이 어느 공격에서 나왔는지가 남지 않기 때문입니다. 이 수치가 적힌 파일을 가져오면 표시됩니다."
     },
     "biggestLead": "최대 리드",
     "biggestRun": "최다 연속 득점",

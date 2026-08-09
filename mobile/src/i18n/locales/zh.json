@@ -2586,7 +2586,7 @@
       "attempts": "Shooting percentages need shot attempts, and this game has makes only. Import a box score that includes attempts (FGA / 3PA / FTA) to see them.",
       "play_by_play": "This needs a play-by-play file — every event with a game clock and a running score. Import one and this will appear.",
       "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear.",
-      "team_stats": "This needs the team-totals panel a stat sheet often prints beside the player rows. It cannot be worked out from a box score. Import a file that states these and they will appear."
+      "team_stats": "这里需要五个数字：失误得分、快攻得分、二次进攻得分、禁区得分和替补得分。球员数据算不出来——球员那一行不会写明这一球来自哪一次进攻。导入写明这些数字的文件，它们就会出现。"
     },
     "biggestLead": "最大领先",
     "biggestRun": "最长得分潮",
