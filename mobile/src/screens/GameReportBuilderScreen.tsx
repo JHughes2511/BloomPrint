@@ -22,7 +22,7 @@ import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI, uploa
 import { directUploadAvailable, uploadFilmDirect } from '../api/directUpload';
 import ShareModal from '../components/ShareModal';
 import ExportSectionsModal from '../components/ExportSectionsModal';
-import { outputTypeLabel } from '../utils/reportType';
+import { outputTypeLabel, outputTypeNames } from '../utils/reportType';
 import { useTheme } from '../theme/ThemeProvider';
 import { topPad } from '../responsive/screenPadding';
 import { ThemeTokens } from '../theme/tokens';
@@ -1257,27 +1257,6 @@ export default function GameReportBuilderScreen() {
         </KeyboardAvoidingView>
       </Sheet>
 
-      {/* Unified Share modal — player / team / staff */}
-      {report && showShareModal && (
-        <ShareModal
-          visible={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          reportType="game"
-          reportId={reportId ?? 0}
-          outputType={report.output_type ?? 'coaching_report'}
-          reportText={report.report_text ?? ''}
-          title={report.title || matchupLabel()}
-        />
-      )}
-
-      <ExportSectionsModal
-        visible={showExport && !!report}
-        title={report?.title || matchupLabel()}
-        subject={coach?.program_name ?? undefined}
-        reportText={report?.report_text ?? ''}
-        onClose={() => setShowExport(false)}
-      />
-
       {/* Share modal */}
       <Sheet visible={showShare} animationType="slide" transparent onRequestClose={() => setShowShare(false)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -1347,6 +1326,28 @@ export default function GameReportBuilderScreen() {
         </KeyboardAvoidingView>
       </Sheet>
     </KeyboardAvoidingView>
+
+    {/* Last in the tree on purpose: a modal stacks in tree order on web, so
+        anything that opens OVER a sheet has to be rendered after it. */}
+    {report && showShareModal && (
+      <ShareModal
+        visible={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        reportType="game"
+        reportId={reportId ?? 0}
+        outputType={report.output_type ?? 'coaching_report'}
+        reportText={report.report_text ?? ''}
+        title={outputTypeNames(report.output_type)}
+        subject={report.title || matchupLabel()}
+      />
+    )}
+    <ExportSectionsModal
+      visible={showExport && !!report}
+      title={report?.title || matchupLabel()}
+      subject={coach?.program_name ?? undefined}
+      reportText={report?.report_text ?? ''}
+      onClose={() => setShowExport(false)}
+    />
     </PageContainer>
     </ScreenBackground>
   );

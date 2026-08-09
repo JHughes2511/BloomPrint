@@ -1036,8 +1036,11 @@ export default function RecentScreen() {
                     </TouchableOpacity>
                   )}
 
-                  {/* Send to Player — available for eval, team, training; hidden for game/scout/gamereport */}
-                  {item.kind !== 'game' && item.kind !== 'scout' && item.kind !== 'gamereport' && (
+                  {/* Send to Player is for reports ABOUT a player: an
+                      evaluation or a training program. A team report, a packet,
+                      a film breakdown or a scouting write-up is about a team,
+                      and Share already reaches a player for those. */}
+                  {(item.kind === 'eval' || item.kind === 'training') && (
                     <TouchableOpacity
                       style={[styles.gameActionBtn, { borderColor: t.positiveSoft }]}
                       onPress={() => {
@@ -1209,15 +1212,6 @@ export default function RecentScreen() {
         visible={!!viewerShared}
         onClose={() => setViewerShared(null)}
         onChanged={load}
-      />
-
-      {/* Section-selectable export / print */}
-      <ExportSectionsModal
-        visible={!!exportCtx}
-        title={exportCtx?.title ?? tr('reportTypes.report')}
-        subject={exportCtx?.subject}
-        reportText={exportCtx?.text ?? ''}
-        onClose={() => setExportCtx(null)}
       />
 
       {/* Generic Send to Staff Modal */}
@@ -1414,11 +1408,14 @@ export default function RecentScreen() {
                     <Ionicons name="download-outline" size={18} color={t.ink} />
                     <Text style={styles.actionText} numberOfLines={1}>{tr('recent.exportPrint')}</Text>
                   </TouchableOpacity>
-                  {/* Send to Player */}
-                  <TouchableOpacity style={[styles.actionBtn, { borderColor: t.positiveSoft }]} onPress={() => { setSendSearch(''); setSendResults([]); setSectionToggles({}); setModalView('send'); }}>
-                    <Ionicons name="person-outline" size={18} color={t.positive} />
-                    <Text style={[styles.actionText, { color: t.positive }]} numberOfLines={1}>{tr('recent.playerBtn')}</Text>
-                  </TouchableOpacity>
+                  {/* Send to Player — reports ABOUT a player only, as on the
+                      cards. Share reaches a player for everything else. */}
+                  {(activeModal?.kind === 'eval' || activeModal?.kind === 'training') && (
+                    <TouchableOpacity style={[styles.actionBtn, { borderColor: t.positiveSoft }]} onPress={() => { setSendSearch(''); setSendResults([]); setSectionToggles({}); setModalView('send'); }}>
+                      <Ionicons name="person-outline" size={18} color={t.positive} />
+                      <Text style={[styles.actionText, { color: t.positive }]} numberOfLines={1}>{tr('recent.playerBtn')}</Text>
+                    </TouchableOpacity>
+                  )}
                   {/* Share — player / team / staff */}
                   <TouchableOpacity
                     style={[styles.actionBtn, { borderColor: t.brownSoft }]}
@@ -1617,6 +1614,18 @@ export default function RecentScreen() {
       </Sheet>
 
       {/* Unified Share modal — player / team / staff */}
+      {/* These two open FROM a report and must sit on top of it. On web a
+          modal stacks in tree order, so rendering the export sheet earlier put
+          it behind the very report it was exporting. Everything that opens over
+          a report belongs here, last. */}
+      <ExportSectionsModal
+        visible={!!exportCtx}
+        title={exportCtx?.title ?? tr('reportTypes.report')}
+        subject={exportCtx?.subject}
+        reportText={exportCtx?.text ?? ''}
+        onClose={() => setExportCtx(null)}
+      />
+
       {shareCtx && (
         <ShareModal
           visible={!!shareCtx}

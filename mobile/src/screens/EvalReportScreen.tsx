@@ -831,21 +831,6 @@ export default function EvalReportScreen() {
       </View>
       )}
 
-      {/* Unified Share modal — player / team / staff */}
-      {ev && showShareModal && (
-        <ShareModal
-          visible={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          reportType="eval"
-          reportId={evalId}
-          outputType={ev.output_type ?? 'player_eval'}
-          reportText={ev.report_text ?? ''}
-          title={ev.output_type ? outputTypeLabel(ev.output_type) : tr('reportTypes.player_eval')}
-          subjectPlayerId={player?.id}
-          subjectPlayerName={player?.name}
-        />
-      )}
-
       {/* Share with Staff modal */}
       <Sheet visible={showStaffShare} transparent animationType="slide" onRequestClose={() => setShowStaffShare(false)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -1136,6 +1121,22 @@ export default function EvalReportScreen() {
           </TouchableOpacity>
         </View>
       </View>
+    )}
+    {/* Last in the tree on purpose: a modal stacks in tree order on web, so
+        anything that opens OVER a sheet has to be rendered after it. */}
+    {ev && showShareModal && (
+      <ShareModal
+        visible={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        reportType="eval"
+        reportId={evalId}
+        outputType={ev.output_type ?? 'player_eval'}
+        reportText={ev.report_text ?? ''}
+        title={ev.output_type ? outputTypeLabel(ev.output_type) : tr('reportTypes.player_eval')}
+        subject={player?.name}
+        subjectPlayerId={player?.id}
+        subjectPlayerName={player?.name}
+      />
     )}
     </PageContainer>
     </ScreenBackground>

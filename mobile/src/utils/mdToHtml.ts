@@ -216,13 +216,29 @@ export function splitReportSections(text: string): ReportSection[] {
   // is a new section, not a member of one. The second test carries a name that
   // was already a member of an earlier group, which is how these reports repeat
   // the same teams under each heading.
+  //
+  // A bare heading at the TOP of a document is its title, not a group. A
+  // training program opens "BLOOMPRINT PROGRAM UPDATE — BLOOM (6'2 GUARD)" and
+  // then every section under it, so treating it as a group stamped that name
+  // onto all nine rows — the report's own title, repeated down a list that is
+  // already inside that report, pushing the section names off the edge. A group
+  // only exists once real content has been seen above it.
   const isBare = (i: number) =>
     !result[i].body.replace(/\s+/g, ' ').trim() && i < result.length - 1;
   const grouped: typeof result = [];
   const seenChildren = new Set<string>();
   let groupName = '';
+  let seenBody = false;
   for (let i = 0; i < result.length; i++) {
-    if (isBare(i) && !result[i].pinned) { groupName = result[i].heading; continue; }
+    if (isBare(i) && !result[i].pinned) {
+      if (seenBody) { groupName = result[i].heading; continue; }
+      // The title block: kept in the document and always sent, but pinned so it
+      // is not offered as a row. Dropping it here would delete the report's
+      // own title from what the recipient reads.
+      grouped.push({ ...result[i], pinned: true });
+      continue;
+    }
+    if (result[i].body.replace(/\s+/g, ' ').trim().length >= 60) seenBody = true;
     const h = result[i].heading;
     const belongs = !!groupName && !result[i].pinned
       && (h.length < groupName.length || seenChildren.has(h));
