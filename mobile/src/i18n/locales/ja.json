@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "まだ選手がいません。チームを作成して選手を追加してください。",
     "teams": "チーム",
     "removeFromMyRoster": "自分のロースターから外す",
-    "couldNotRemoveShared": "その選手をロースターから外せませんでした。"
+    "couldNotRemoveShared": "その選手をロースターから外せませんでした。",
+    "myTeamLabel": "自分のチーム",
+    "myTeamOn": "自分のシーズン成績に含めます。",
+    "myTeamOff": "記録を取っているチームです。試合と評価はここにありますが、自分の成績には含めません。"
   },
   "importScreen": {
     "titleRoster": "名簿をインポート",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "ライブ入力を続ける",
     "scoutingReport": "スカウティングレポート",
     "selectOpponent": "対戦相手を選択",
-    "noOpponents": "まだ対戦相手がいません。先に試合を記録してください。",
+    "noOpponents": "まだチームがありません。先に試合を記録してください。",
     "gamesCount": "{{count}}試合",
     "gamesCount_plural": "{{count}}試合",
-    "allOpponents": "全対戦相手",
+    "allOpponents": "すべてのチーム",
     "gamesAgainst": "対戦履歴",
     "na": "該当なし",
     "noScore": "スコアなし",

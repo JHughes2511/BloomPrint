@@ -2236,6 +2236,11 @@ def _team_filter(db: Session, param: str | None):
     return _or(*conds)
 
 
+def _norm_team(x) -> str:
+    """A team name reduced to letters and digits, for matching what was typed."""
+    return "".join(ch for ch in str(x or "").lower() if ch.isalnum())
+
+
 def _selected_team_ids(param: str | None) -> list[int] | None:
     """The teams a screen is asking about, or None for "all of them".
 
@@ -2302,14 +2307,28 @@ def season_dashboard(
     # With nothing picked this stays our side: "all teams" means the coach's own
     # season, and counting each game twice would make the record meaningless.
     picked_ids = _selected_team_ids(team_ids)
-    picked_names = set()
     if picked_ids:
-        picked_names = {(t.name or "").strip().lower() for t in
-                        db.query(models.Team).filter(models.Team.id.in_(picked_ids)).all()}
+        subject_ids = set(picked_ids)
+        subject_names = {(t.name or "").strip().lower() for t in
+                         db.query(models.Team).filter(models.Team.id.in_(picked_ids)).all()}
+    else:
+        # "All teams" means all of the COACH'S teams, not every team on file.
+        # Once a team the coach only keeps records on can be either side of a
+        # game, a scouted Egypt-vs-Senegal would otherwise walk into their own
+        # win-loss record.
+        mine = [t for t in db.query(models.Team).filter_by(coach_id=coach.id).all()
+                if t.is_mine is not False]
+        subject_ids = {t.id for t in mine}
+        subject_names = {(t.name or "").strip().lower() for t in mine}
 
     for game in games:
-        from_theirs = bool(picked_ids) and game.team_id not in picked_ids and \
-            (game.opponent_name or "").strip().lower() in picked_names
+        # Which side of this game the answer is about. A game whose own team is
+        # not the subject, but whose opponent is, is read from the opponent's
+        # bench — that is what makes a season for a team the coach only tracks.
+        from_theirs = game.team_id not in subject_ids and \
+            (game.opponent_name or "").strip().lower() in subject_names
+        if game.team_id not in subject_ids and not from_theirs:
+            continue    # neither side is what was asked about
         our_pts, opp_pts = effective_scores(game)
         if from_theirs:
             our_pts, opp_pts = opp_pts, our_pts
@@ -2411,14 +2430,23 @@ def opponent_profile(
     conds = [models.GameSession.coach_id == coach.id]
     if accessible_ids:
         conds.append(models.GameSession.team_id.in_(accessible_ids))
+    # Either side of the scoreboard. Matching only opponent_name meant a team
+    # could have three games on file and no scouting page, because it happened
+    # to be stored as the game's own team every time — which is a detail of how
+    # the row is written, not something a coach knows or should have to.
+    same = [tm.id for tm in db.query(models.Team).filter_by(coach_id=coach.id).all()
+            if _norm_team(tm.name) == _norm_team(opponent_name)]
+    side = [func.lower(models.GameSession.opponent_name) == opponent_name.strip().lower()]
+    if same:
+        side.append(models.GameSession.team_id.in_(same))
     games = (
         db.query(models.GameSession)
-        .filter(or_(*conds), models.GameSession.opponent_name == opponent_name)
+        .filter(or_(*conds), or_(*side))
         .order_by(models.GameSession.date.desc())
         .all()
     )
     if not games:
-        raise HTTPException(status_code=404, detail="No games found for this opponent")
+        raise HTTPException(status_code=404, detail="No games found for this team")
 
     player_totals: dict[str, dict] = {}
     offense_tendencies: dict[str, int] = defaultdict(int)
@@ -2430,7 +2458,11 @@ def opponent_profile(
         own_scout = _coach_scouting(db, coach, game)
         if own_scout:
             latest_report = own_scout
-        opp_stats = [s for s in game.player_stats if s.is_opponent]
+        # Which bench this team was on in THIS game. A team can be the game's
+        # own team in one and the opponent in the next; reading is_opponent
+        # blindly would scout whoever they happened to be playing.
+        theirs = game.team_id not in same if same else True
+        opp_stats = [s for s in game.player_stats if bool(s.is_opponent) == theirs]
         for s in opp_stats:
             if s.player_name not in player_totals:
                 player_totals[s.player_name] = {"games": 0, "total_grade": 0.0}
@@ -2464,11 +2496,18 @@ def opponent_profile(
                 all_stat_scores[s.stat_name] += s.weighted_points
     weak_spots = sorted(all_stat_scores.items(), key=lambda x: x[1])[:3]
 
-    games_list = [
-        {"id": g.id, "date": g.date.isoformat() if g.date else None,
-         "our_score": g.our_score, "opponent_score": g.opponent_score, "status": g.status}
-        for g in games
-    ]
+    def _seen_from(g):
+        ours, theirs_pts = effective_scores(g)
+        # Printed from the READER's side, so a team's own scouting page never
+        # shows their score in the other column. effective_scores() answers
+        # from the game's own team's bench, which is this team only sometimes.
+        return (ours, theirs_pts) if (same and g.team_id in same) else (theirs_pts, ours)
+
+    games_list = []
+    for g in games:
+        a, b = _seen_from(g)
+        games_list.append({"id": g.id, "date": g.date.isoformat() if g.date else None,
+                           "our_score": a, "opponent_score": b, "status": g.status})
 
     return {
         "opponent_name": opponent_name,

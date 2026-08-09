@@ -500,9 +500,9 @@ export const searchAPI = {
 
 export const teamsAPI = {
   list: () => api.get('/teams').then(r => r.data),
-  create: (data: { name: string; competition_level?: string }) =>
+  create: (data: { name: string; competition_level?: string; is_mine?: boolean }) =>
     api.post('/teams', data).then(r => r.data),
-  update: (id: number, data: { name?: string; competition_level?: string }) =>
+  update: (id: number, data: { name?: string; competition_level?: string; is_mine?: boolean }) =>
     api.patch(`/teams/${id}`, data).then(r => r.data),
   delete: (id: number) => api.delete(`/teams/${id}`).then(r => r.data),
 };

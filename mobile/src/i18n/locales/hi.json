@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "अभी कोई खिलाड़ी नहीं। टीम बनाएँ और खिलाड़ी जोड़ें।",
     "teams": "टीमें",
     "removeFromMyRoster": "मेरे रोस्टर से हटाएँ",
-    "couldNotRemoveShared": "उस खिलाड़ी को आपके रोस्टर से नहीं हटाया जा सका।"
+    "couldNotRemoveShared": "उस खिलाड़ी को आपके रोस्टर से नहीं हटाया जा सका।",
+    "myTeamLabel": "मेरी एक टीम",
+    "myTeamOn": "मेरे सीज़न रिकॉर्ड में गिनी जाती है।",
+    "myTeamOff": "एक टीम जिसका मैं रिकॉर्ड रखता हूँ। इसके मैच और ग्रेड यहाँ हैं, पर मेरे रिकॉर्ड से बाहर।"
   },
   "importScreen": {
     "titleRoster": "रोस्टर इम्पोर्ट करें",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "लाइव एंट्री जारी रखें",
     "scoutingReport": "स्काउटिंग रिपोर्ट",
     "selectOpponent": "विपक्षी चुनें",
-    "noOpponents": "अभी कोई विपक्षी नहीं। पहले मैच दर्ज करें।",
+    "noOpponents": "अभी कोई टीम नहीं। पहले एक गेम दर्ज करें।",
     "gamesCount": "{{count}} मैच",
     "gamesCount_plural": "{{count}} मैच",
-    "allOpponents": "सभी विपक्षी",
+    "allOpponents": "सभी टीमें",
     "gamesAgainst": "इनके खिलाफ़ मैच",
     "na": "लागू नहीं",
     "noScore": "कोई स्कोर नहीं",

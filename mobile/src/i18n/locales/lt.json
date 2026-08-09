@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "Kol kas žaidėjų nėra. Sukurkite komandą ir pridėkite žaidėjų.",
     "teams": "Komandos",
     "removeFromMyRoster": "Pašalinti iš mano sudėties",
-    "couldNotRemoveShared": "Nepavyko pašalinti žaidėjo iš tavo sudėties."
+    "couldNotRemoveShared": "Nepavyko pašalinti žaidėjo iš tavo sudėties.",
+    "myTeamLabel": "Viena iš mano komandų",
+    "myTeamOn": "Įskaitoma į mano sezono rekordą.",
+    "myTeamOff": "Komanda, kurios duomenis kaupiu. Rungtynės ir vertinimai čia, bet į mano rekordą neįeina."
   },
   "importScreen": {
     "titleRoster": "Importuoti sąrašą",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "Tęsti tiesioginį įvedimą",
     "scoutingReport": "SKAUTŲ ATASKAITA",
     "selectOpponent": "PASIRINKITE VARŽOVĄ",
-    "noOpponents": "Kol kas varžovų nėra. Pirmiausia užfiksuokite rungtynes.",
+    "noOpponents": "Komandų dar nėra. Pirma įrašykite rungtynes.",
     "gamesCount": "{{count}} rungtynės",
     "gamesCount_plural": "{{count}} rungtynių",
-    "allOpponents": "Visi varžovai",
+    "allOpponents": "Visos komandos",
     "gamesAgainst": "RUNGTYNĖS PRIEŠ",
     "na": "N/A",
     "noScore": "Nėra rezultato",
@@ -2145,7 +2148,7 @@
     "importStats": "Importuoti statistiką",
     "teamOptional": "KOMANDA",
     "noneNoTeam": "Nėra (be komandos)",
-    "selectTeam": "Pasirinkite komandą",
+    "selectTeam": "Pasirinkti komandą",
     "none": "Nėra",
     "createNewTeam": "+ Sukurti naują komandą",
     "teamNamePlaceholder": "Komandos pavadinimas",

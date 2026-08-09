@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "Wala pang player. Gumawa ng team at magdagdag ng mga player.",
     "teams": "Mga Team",
     "removeFromMyRoster": "Alisin sa aking roster",
-    "couldNotRemoveShared": "Hindi maalis ang player sa iyong roster."
+    "couldNotRemoveShared": "Hindi maalis ang player sa iyong roster.",
+    "myTeamLabel": "Isa sa mga koponan ko",
+    "myTeamOn": "Kabilang sa season record ko.",
+    "myTeamOff": "Koponang tinatala ko lang. Nandito ang mga laro at grado, pero wala sa record ko."
   },
   "importScreen": {
     "titleRoster": "Mag-import ng Roster",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "Ipagpatuloy ang Live Entry",
     "scoutingReport": "ULAT NG SCOUTING",
     "selectOpponent": "PUMILI NG KALABAN",
-    "noOpponents": "Wala pang kalaban. Mag-log muna ng mga laro.",
+    "noOpponents": "Wala pang koponan. Mag-log muna ng laro.",
     "gamesCount": "{{count}} laro",
     "gamesCount_plural": "{{count}} na laro",
-    "allOpponents": "Lahat ng Kalaban",
+    "allOpponents": "Lahat ng koponan",
     "gamesAgainst": "MGA LARO LABAN SA",
     "na": "N/A",
     "noScore": "Walang iskor",
@@ -2145,7 +2148,7 @@
     "importStats": "Mag-import ng Stats",
     "teamOptional": "KOPONAN",
     "noneNoTeam": "Wala (walang team)",
-    "selectTeam": "Pumili ng team",
+    "selectTeam": "Pumili ng koponan",
     "none": "Wala",
     "createNewTeam": "+ Gumawa ng Bagong Team",
     "teamNamePlaceholder": "Pangalan ng team",

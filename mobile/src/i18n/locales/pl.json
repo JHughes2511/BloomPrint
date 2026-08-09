@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "Brak zawodników. Utwórz zespół i dodaj zawodników.",
     "teams": "Zespoły",
     "removeFromMyRoster": "Usuń z mojego składu",
-    "couldNotRemoveShared": "Nie udało się usunąć zawodnika z Twojego składu."
+    "couldNotRemoveShared": "Nie udało się usunąć zawodnika z Twojego składu.",
+    "myTeamLabel": "Jedna z moich drużyn",
+    "myTeamOn": "Liczy się do mojego bilansu sezonu.",
+    "myTeamOff": "Drużyna, którą obserwuję. Jej mecze i oceny są tutaj, ale poza moim bilansem."
   },
   "importScreen": {
     "titleRoster": "Importuj skład",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "Kontynuuj wprowadzanie na żywo",
     "scoutingReport": "RAPORT SKAUTINGOWY",
     "selectOpponent": "WYBIERZ RYWALA",
-    "noOpponents": "Brak rywali. Najpierw zaloguj mecze.",
+    "noOpponents": "Brak drużyn. Najpierw zapisz mecz.",
     "gamesCount": "{{count}} mecz",
     "gamesCount_plural": "{{count}} meczów",
-    "allOpponents": "Wszyscy rywale",
+    "allOpponents": "Wszystkie drużyny",
     "gamesAgainst": "MECZE PRZECIWKO",
     "na": "N/D",
     "noScore": "Brak wyniku",
@@ -2145,7 +2148,7 @@
     "importStats": "Importuj statystyki",
     "teamOptional": "ZESPÓŁ",
     "noneNoTeam": "Brak (bez zespołu)",
-    "selectTeam": "Wybierz zespół",
+    "selectTeam": "Wybierz drużynę",
     "none": "Brak",
     "createNewTeam": "+ Utwórz nowy zespół",
     "teamNamePlaceholder": "Nazwa zespołu",

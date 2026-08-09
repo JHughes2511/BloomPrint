@@ -502,7 +502,10 @@ def _sync_roster(db: Session, game, coach, players: list[dict]) -> dict:
              if _norm_name(tm.name) == _norm_name(game.opponent_name) and tm.id != ours_id),
             None)
         if opp_row is None:
-            opp_row = models.Team(name=game.opponent_name.strip(), coach_id=coach.id)
+            # Not the coach's own side: made because the file held their squad,
+            # so it should not silently join the coach's own season record.
+            opp_row = models.Team(name=game.opponent_name.strip(), coach_id=coach.id,
+                                  is_mine=False)
             db.add(opp_row)
             db.flush()      # an id, so the players below can point at it
             created_team = opp_row.name

@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "עדיין אין שחקנים. צור קבוצה והוסף שחקנים.",
     "teams": "קבוצות",
     "removeFromMyRoster": "הסר מהסגל שלי",
-    "couldNotRemoveShared": "לא ניתן להסיר את השחקן מהסגל שלך."
+    "couldNotRemoveShared": "לא ניתן להסיר את השחקן מהסגל שלך.",
+    "myTeamLabel": "אחת מהקבוצות שלי",
+    "myTeamOn": "נספרת במאזן העונה שלי.",
+    "myTeamOff": "קבוצה שאני מתעד. המשחקים והציונים כאן, אך מחוץ למאזן שלי."
   },
   "importScreen": {
     "titleRoster": "ייבוא סגל",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "המשך רישום חי",
     "scoutingReport": "דוח סקאוטינג",
     "selectOpponent": "בחר יריבה",
-    "noOpponents": "עדיין אין יריבות. רשום קודם משחקים.",
+    "noOpponents": "אין עדיין קבוצות. תעדו קודם משחק.",
     "gamesCount": "{{count}} משחק",
     "gamesCount_plural": "{{count}} משחקים",
-    "allOpponents": "כל היריבות",
+    "allOpponents": "כל הקבוצות",
     "gamesAgainst": "משחקים נגד",
     "na": "לא רלוונטי",
     "noScore": "אין תוצאה",
@@ -2145,7 +2148,7 @@
     "importStats": "ייבא סטטיסטיקות",
     "teamOptional": "קבוצה",
     "noneNoTeam": "ללא (בלי קבוצה)",
-    "selectTeam": "בחר קבוצה",
+    "selectTeam": "בחירת קבוצה",
     "none": "ללא",
     "createNewTeam": "+ צור קבוצה חדשה",
     "teamNamePlaceholder": "שם הקבוצה",

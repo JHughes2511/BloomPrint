@@ -18,7 +18,8 @@ def create_team(
     # nothing else, and was landing every one of them on the schema's old
     # hard-coded HS Varsity.
     level = body.competition_level or coach.competition_level or "HS Varsity"
-    team = models.Team(name=body.name, coach_id=coach.id, competition_level=level)
+    team = models.Team(name=body.name, coach_id=coach.id, competition_level=level,
+                       is_mine=body.is_mine)
     db.add(team)
     db.commit()
     db.refresh(team)
@@ -53,6 +54,8 @@ def update_team(
                 p.program_name = name
     if body.competition_level is not None:
         team.competition_level = body.competition_level
+    if body.is_mine is not None:
+        team.is_mine = body.is_mine
     db.commit()
     db.refresh(team)
     return team

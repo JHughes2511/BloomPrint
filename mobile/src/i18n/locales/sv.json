@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "Inga spelare ännu. Skapa ett lag och lägg till spelare.",
     "teams": "Lag",
     "removeFromMyRoster": "Ta bort från min trupp",
-    "couldNotRemoveShared": "Kunde inte ta bort spelaren från din trupp."
+    "couldNotRemoveShared": "Kunde inte ta bort spelaren från din trupp.",
+    "myTeamLabel": "Ett av mina lag",
+    "myTeamOn": "Räknas i mitt säsongsfacit.",
+    "myTeamOff": "Ett lag jag för anteckningar om. Matcher och betyg finns här, men utanför mitt facit."
   },
   "importScreen": {
     "titleRoster": "Importera trupp",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "Fortsätt liveinmatning",
     "scoutingReport": "SCOUTINGRAPPORT",
     "selectOpponent": "VÄLJ MOTSTÅNDARE",
-    "noOpponents": "Inga motståndare ännu. Logga matcher först.",
+    "noOpponents": "Inga lag ännu. Registrera en match först.",
     "gamesCount": "{{count}} match",
     "gamesCount_plural": "{{count}} matcher",
-    "allOpponents": "Alla motståndare",
+    "allOpponents": "Alla lag",
     "gamesAgainst": "MATCHER MOT",
     "na": "Ej tillg.",
     "noScore": "Inget resultat",

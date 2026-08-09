@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "No players yet. Create a team and add players.",
     "teams": "Teams",
     "removeFromMyRoster": "Remove from my roster",
-    "couldNotRemoveShared": "Could not remove that player from your roster."
+    "couldNotRemoveShared": "Could not remove that player from your roster.",
+    "myTeamLabel": "One of my teams",
+    "myTeamOn": "Counts toward my season record.",
+    "myTeamOff": "A team I keep records on. Its games and grades are here, but they stay out of my record."
   },
   "importScreen": {
     "titleRoster": "Import Roster",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "Continue Live Entry",
     "scoutingReport": "SCOUTING REPORT",
     "selectOpponent": "SELECT OPPONENT",
-    "noOpponents": "No opponents yet. Log games first.",
+    "noOpponents": "No teams yet. Log a game first.",
     "gamesCount": "{{count}} game",
     "gamesCount_plural": "{{count}} games",
-    "allOpponents": "All Opponents",
+    "allOpponents": "All teams",
     "gamesAgainst": "GAMES AGAINST",
     "na": "N/A",
     "noScore": "No score",

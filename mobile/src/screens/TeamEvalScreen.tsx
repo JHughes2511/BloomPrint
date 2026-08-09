@@ -1438,9 +1438,35 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setRegeneratingScout(false);
   };
 
-  // ── Unique opponents ──────────────────────────────────────────────────────────
+  // ── Every team on file ───────────────────────────────────────────────────────
 
-  const uniqueOpponents = [...new Set(sessions.map((s: any) => s.opponent_name))];
+  /**
+   * Everyone there is to scout: both sides of every game, plus every team.
+   *
+   * This read only `opponent_name`, so a team was scoutable only if it had been
+   * somebody's opponent. Angola could have three games on file and not appear
+   * here, because Angola was always the side stored as the game's own team —
+   * and "the side stored as the game's own team" is not a thing a coach thinks
+   * about. A game has two teams and either can be the one you want to read.
+   */
+  const scoutableTeams = React.useMemo(() => {
+    const names = new Map<string, string>();   // normalised → as first written
+    const add = (n?: string | null) => {
+      const name = String(n ?? '').trim();
+      if (name && !names.has(norm(name))) names.set(norm(name), name);
+    };
+    for (const g of sessions as any[]) {
+      add(g.opponent_name);
+      add((teams as any[]).find(tm => tm.id === g.team_id)?.name);
+    }
+    for (const tm of teams as any[]) add(tm.name);
+    return [...names.values()].sort((a, b) => a.localeCompare(b));
+  }, [sessions, teams]);
+
+  /** Games this team played, on either side of the scoreboard. */
+  const gamesInvolving = (name: string) => (sessions as any[]).filter((g: any) =>
+    norm(g.opponent_name) === norm(name)
+    || norm((teams as any[]).find(tm => tm.id === g.team_id)?.name ?? '') === norm(name));
 
   /**
    * The imported players, grouped by the team heading their file used.
@@ -2709,19 +2735,19 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* Opponent selector */}
           {!scoutOpponent ? (
             <>
-              <Text style={[s.cardLabel, { marginBottom: 10 }]}>{tr('teamGrade.selectOpponent')}</Text>
-              {uniqueOpponents.length === 0 ? (
+              <Text style={[s.cardLabel, { marginBottom: 10 }]}>{tr('teamGrade.selectTeam')}</Text>
+              {scoutableTeams.length === 0 ? (
             <View style={[s.card, { alignItems: 'center' }]}>
                   <Text style={{ color: t.muted, fontSize: 13 }}>{tr('teamGrade.noOpponents')}</Text>
                 </View>
               ) : (
                 <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: scoutGrid.gap, paddingHorizontal: 16 })}
                       onLayout={scoutGrid.onLayout}>
-                {uniqueOpponents.map(opp => (
+                {scoutableTeams.map(opp => (
                   <TouchableOpacity key={opp} style={[s.gameCard, scoutGrid.cardWidth ? { width: scoutGrid.cardWidth } : null]} onPress={() => openScout(opp)}>
                     <Text style={s.gameCardOpponent}>{opp}</Text>
                     <Text style={{ color: t.muted, fontSize: 12 }}>
-                      {tr('teamGrade.gamesCount', { count: sessions.filter((x: any) => x.opponent_name === opp).length })}
+                      {tr('teamGrade.gamesCount', { count: gamesInvolving(opp).length })}
                     </Text>
                     <Ionicons name="chevron-forward" size={16} color={t.line} />
                   </TouchableOpacity>
@@ -2748,24 +2774,20 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   {/* Record vs this opponent */}
                   <View style={s.card}>
                     <Text style={s.cardLabel}>{tr('teamGrade.gamesAgainst')}</Text>
-                    {scoutData.games_played_against.map((g: any) => {
-                      const won = g.our_score != null && g.opponent_score != null && g.our_score > g.opponent_score;
-                      return (
-                        <View key={g.id} style={s.leaderRow}>
-                          <Text style={{ color: t.muted, fontSize: 12, width: 80 }}>
-                            {g.date ? new Date(g.date).toLocaleDateString() : tr('teamGrade.na')}
-                          </Text>
-                          <Text style={{ flex: 1, color: t.inkSoft, fontSize: 13 }}>
-                            {g.our_score != null ? `${g.our_score} - ${g.opponent_score}` : tr('teamGrade.noScore')}
-                          </Text>
-                          {g.our_score != null && (
-                            <View style={[s.wlBadge, { backgroundColor: won ? t.positiveSoft : t.negativeSoft }]}>
-                              <Text style={[s.wlText, { color: won ? t.positive : t.negative }]}>{won ? tr('teamGrade.winShort') : tr('teamGrade.lossShort')}</Text>
-                            </View>
-                          )}
-                        </View>
-                      );
-                    })}
+                    {/* Scores are printed from THIS team's side, and without a
+                        W/L pill: the pill restated the two numbers, and on a
+                        page that can be about either bench it was the easiest
+                        thing in the app to read backwards. */}
+                    {scoutData.games_played_against.map((g: any) => (
+                      <View key={g.id} style={s.leaderRow}>
+                        <Text style={{ color: t.muted, fontSize: 12, width: 80 }}>
+                          {g.date ? new Date(g.date).toLocaleDateString() : tr('teamGrade.na')}
+                        </Text>
+                        <Text style={{ flex: 1, color: t.inkSoft, fontSize: 13 }}>
+                          {g.our_score != null ? `${g.our_score} - ${g.opponent_score}` : tr('teamGrade.noScore')}
+                        </Text>
+                      </View>
+                    ))}
                   </View>
 
                   {/* Best players */}

@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "Niciun jucător încă. Creează o echipă și adaugă jucători.",
     "teams": "Echipe",
     "removeFromMyRoster": "Scoate din lotul meu",
-    "couldNotRemoveShared": "Nu s-a putut scoate jucătorul din lotul tău."
+    "couldNotRemoveShared": "Nu s-a putut scoate jucătorul din lotul tău.",
+    "myTeamLabel": "Una dintre echipele mele",
+    "myTeamOn": "Contează în bilanțul meu de sezon.",
+    "myTeamOff": "O echipă despre care țin evidență. Meciurile și notele sunt aici, dar rămân în afara bilanțului meu."
   },
   "importScreen": {
     "titleRoster": "Importă lot",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "Continuă înregistrarea live",
     "scoutingReport": "RAPORT DE SCOUTING",
     "selectOpponent": "SELECTEAZĂ ADVERSARUL",
-    "noOpponents": "Niciun adversar încă. Înregistrează mai întâi meciuri.",
+    "noOpponents": "Încă nicio echipă. Înregistrează întâi un meci.",
     "gamesCount": "{{count}} meci",
     "gamesCount_plural": "{{count}} meciuri",
-    "allOpponents": "Toți adversarii",
+    "allOpponents": "Toate echipele",
     "gamesAgainst": "MECIURI CU",
     "na": "N/A",
     "noScore": "Fără scor",
@@ -2145,7 +2148,7 @@
     "importStats": "Importă statistici",
     "teamOptional": "ECHIPĂ",
     "noneNoTeam": "Niciuna (fără echipă)",
-    "selectTeam": "Alege echipa",
+    "selectTeam": "Selectează echipa",
     "none": "Niciuna",
     "createNewTeam": "+ Creează echipă nouă",
     "teamNamePlaceholder": "Numele echipei",

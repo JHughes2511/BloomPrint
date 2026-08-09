@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "Noch keine Spieler. Erstelle ein Team und füge Spieler hinzu.",
     "teams": "Teams",
     "removeFromMyRoster": "Aus meinem Kader entfernen",
-    "couldNotRemoveShared": "Spieler konnte nicht aus deinem Kader entfernt werden."
+    "couldNotRemoveShared": "Spieler konnte nicht aus deinem Kader entfernt werden.",
+    "myTeamLabel": "Eines meiner Teams",
+    "myTeamOn": "Zählt für meine Saisonbilanz.",
+    "myTeamOff": "Ein Team, über das ich Aufzeichnungen führe. Spiele und Noten sind hier, bleiben aber außerhalb meiner Bilanz."
   },
   "importScreen": {
     "titleRoster": "Kader importieren",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "Live-Erfassung fortsetzen",
     "scoutingReport": "SCOUTING-BERICHT",
     "selectOpponent": "GEGNER AUSWÄHLEN",
-    "noOpponents": "Noch keine Gegner. Erfasse zuerst Spiele.",
+    "noOpponents": "Noch keine Teams. Erfassen Sie zuerst ein Spiel.",
     "gamesCount": "{{count}} Spiel",
     "gamesCount_plural": "{{count}} Spiele",
-    "allOpponents": "Alle Gegner",
+    "allOpponents": "Alle Teams",
     "gamesAgainst": "SPIELE GEGEN",
     "na": "K/A",
     "noScore": "Kein Ergebnis",

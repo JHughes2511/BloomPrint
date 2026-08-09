@@ -259,6 +259,11 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     # A box score prints a number beside every name; it was being read and
     # thrown away. Same lesson as the nine above — the table shipped first.
     ("game_player_stats", "jersey_number", "VARCHAR"),
+    # Teams predate the distinction between a coach's own sides and the teams
+    # they only keep records on. Everything already in the table was built by
+    # hand, so it defaults to theirs; only the ones created automatically from
+    # an opponent's box score start out as not.
+    ("teams", "is_mine", "BOOLEAN DEFAULT TRUE"),
 ]
 
 

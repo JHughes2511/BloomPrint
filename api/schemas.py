@@ -145,17 +145,21 @@ class TeamCreate(BaseModel):
     # HS Varsity regardless of who made it.
     name: str
     competition_level: str | None = None
+    # A team made by hand is the coach's own unless they say otherwise.
+    is_mine: bool = True
 
 
 class TeamUpdate(BaseModel):
     name: str | None = None
     competition_level: str | None = None
+    is_mine: bool | None = None
 
 
 class TeamOut(BaseModel):
     id: int
     name: str
     coach_id: int
+    is_mine: bool = True
     competition_level: str
     parent_team_id: int | None = None
     created_at: datetime

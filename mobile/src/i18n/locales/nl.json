@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "Nog geen spelers. Maak een team aan en voeg spelers toe.",
     "teams": "Teams",
     "removeFromMyRoster": "Uit mijn selectie halen",
-    "couldNotRemoveShared": "Kon die speler niet uit je selectie halen."
+    "couldNotRemoveShared": "Kon die speler niet uit je selectie halen.",
+    "myTeamLabel": "Een van mijn teams",
+    "myTeamOn": "Telt mee voor mijn seizoensbalans.",
+    "myTeamOff": "Een team dat ik bijhoud. De wedstrijden en cijfers staan hier, maar tellen niet mee."
   },
   "importScreen": {
     "titleRoster": "Selectie importeren",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "Live invoer voortzetten",
     "scoutingReport": "SCOUTINGRAPPORT",
     "selectOpponent": "SELECTEER TEGENSTANDER",
-    "noOpponents": "Nog geen tegenstanders. Registreer eerst wedstrijden.",
+    "noOpponents": "Nog geen teams. Leg eerst een wedstrijd vast.",
     "gamesCount": "{{count}} wedstrijd",
     "gamesCount_plural": "{{count}} wedstrijden",
-    "allOpponents": "Alle tegenstanders",
+    "allOpponents": "Alle teams",
     "gamesAgainst": "WEDSTRIJDEN TEGEN",
     "na": "N.v.t.",
     "noScore": "Geen score",
@@ -2145,7 +2148,7 @@
     "importStats": "Statistieken importeren",
     "teamOptional": "TEAM",
     "noneNoTeam": "Geen (geen team)",
-    "selectTeam": "Selecteer team",
+    "selectTeam": "Team kiezen",
     "none": "Geen",
     "createNewTeam": "+ Nieuw team aanmaken",
     "teamNamePlaceholder": "Teamnaam",

@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "Aún no hay jugadores. Crea un equipo y añade jugadores.",
     "teams": "Equipos",
     "removeFromMyRoster": "Quitar de mi plantel",
-    "couldNotRemoveShared": "No se pudo quitar a ese jugador de tu plantel."
+    "couldNotRemoveShared": "No se pudo quitar a ese jugador de tu plantel.",
+    "myTeamLabel": "Uno de mis equipos",
+    "myTeamOn": "Cuenta para mi balance de temporada.",
+    "myTeamOff": "Un equipo del que llevo registro. Sus partidos y notas están aquí, pero no entran en mi balance."
   },
   "importScreen": {
     "titleRoster": "Importar Plantilla",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "Continuar Entrada en Vivo",
     "scoutingReport": "INFORME DE OJEO",
     "selectOpponent": "SELECCIONAR RIVAL",
-    "noOpponents": "Aún no hay rivales. Registra partidos primero.",
+    "noOpponents": "Aún no hay equipos. Registra un partido primero.",
     "gamesCount": "{{count}} partido",
     "gamesCount_plural": "{{count}} partidos",
-    "allOpponents": "Todos los Rivales",
+    "allOpponents": "Todos los equipos",
     "gamesAgainst": "PARTIDOS CONTRA",
     "na": "N/D",
     "noScore": "Sin marcador",

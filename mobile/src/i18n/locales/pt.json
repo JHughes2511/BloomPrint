@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "Nenhum jogador ainda. Crie uma equipe e adicione jogadores.",
     "teams": "Equipes",
     "removeFromMyRoster": "Remover do meu plantel",
-    "couldNotRemoveShared": "Não foi possível remover esse jogador do teu plantel."
+    "couldNotRemoveShared": "Não foi possível remover esse jogador do teu plantel.",
+    "myTeamLabel": "Uma das minhas equipas",
+    "myTeamOn": "Conta para o meu registo da época.",
+    "myTeamOff": "Uma equipa sobre a qual mantenho registos. Os jogos e notas estão aqui, mas ficam fora do meu registo."
   },
   "importScreen": {
     "titleRoster": "Importar Elenco",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "Continuar Entrada ao Vivo",
     "scoutingReport": "RELATÓRIO DE SCOUTING",
     "selectOpponent": "SELECIONAR ADVERSÁRIO",
-    "noOpponents": "Nenhum adversário ainda. Registre jogos primeiro.",
+    "noOpponents": "Ainda não há equipas. Registe primeiro um jogo.",
     "gamesCount": "{{count}} jogo",
     "gamesCount_plural": "{{count}} jogos",
-    "allOpponents": "Todos os Adversários",
+    "allOpponents": "Todas as equipas",
     "gamesAgainst": "JOGOS CONTRA",
     "na": "N/D",
     "noScore": "Sem placar",
@@ -2145,7 +2148,7 @@
     "importStats": "Importar Estatísticas",
     "teamOptional": "EQUIPE",
     "noneNoTeam": "Nenhuma (sem equipe)",
-    "selectTeam": "Selecionar equipe",
+    "selectTeam": "Selecionar equipa",
     "none": "Nenhuma",
     "createNewTeam": "+ Criar Nova Equipe",
     "teamNamePlaceholder": "Nome da equipe",

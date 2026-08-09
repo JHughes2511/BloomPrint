@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "还没有球员。创建球队并添加球员。",
     "teams": "球队",
     "removeFromMyRoster": "从我的名单移除",
-    "couldNotRemoveShared": "无法将该球员从你的名单中移除。"
+    "couldNotRemoveShared": "无法将该球员从你的名单中移除。",
+    "myTeamLabel": "我的球队之一",
+    "myTeamOn": "计入我的赛季战绩。",
+    "myTeamOff": "我只做记录的球队。比赛和评分都在这里，但不计入我的战绩。"
   },
   "importScreen": {
     "titleRoster": "导入阵容",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "继续实时录入",
     "scoutingReport": "球探报告",
     "selectOpponent": "选择对手",
-    "noOpponents": "还没有对手。请先记录比赛。",
+    "noOpponents": "还没有球队。请先记录一场比赛。",
     "gamesCount": "{{count}} 场比赛",
     "gamesCount_plural": "{{count}} 场比赛",
-    "allOpponents": "所有对手",
+    "allOpponents": "所有球队",
     "gamesAgainst": "对阵场次",
     "na": "无",
     "noScore": "无比分",

@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "Пока нет игроков. Создайте команду и добавьте игроков.",
     "teams": "Команды",
     "removeFromMyRoster": "Убрать из моего состава",
-    "couldNotRemoveShared": "Не удалось убрать игрока из вашего состава."
+    "couldNotRemoveShared": "Не удалось убрать игрока из вашего состава.",
+    "myTeamLabel": "Одна из моих команд",
+    "myTeamOn": "Учитывается в моём сезонном балансе.",
+    "myTeamOff": "Команда, по которой я веду записи. Матчи и оценки здесь, но в мой баланс не входят."
   },
   "importScreen": {
     "titleRoster": "Импортировать состав",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "Продолжить ввод вживую",
     "scoutingReport": "СКАУТИНГ-ОТЧЁТ",
     "selectOpponent": "ВЫБЕРИТЕ СОПЕРНИКА",
-    "noOpponents": "Пока нет соперников. Сначала зафиксируйте игры.",
+    "noOpponents": "Пока нет команд. Сначала запишите игру.",
     "gamesCount": "{{count}} игра",
     "gamesCount_plural": "{{count}} игр",
-    "allOpponents": "Все соперники",
+    "allOpponents": "Все команды",
     "gamesAgainst": "ИГРЫ ПРОТИВ",
     "na": "Н/Д",
     "noScore": "Нет счёта",
@@ -2145,7 +2148,7 @@
     "importStats": "Импортировать статистику",
     "teamOptional": "КОМАНДА",
     "noneNoTeam": "Нет (без команды)",
-    "selectTeam": "Выберите команду",
+    "selectTeam": "Выбрать команду",
     "none": "Нет",
     "createNewTeam": "+ Создать новую команду",
     "teamNamePlaceholder": "Название команды",

@@ -70,6 +70,11 @@ class Team(SoftDeleteMixin, Base):
     id               = Column(Integer, primary_key=True, index=True)
     name             = Column(String, nullable=False)
     coach_id         = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    # Whether this is one of the coach's OWN sides, or a team they only keep
+    # records on. Both live here and are used the same way — a game is between
+    # two named teams, not between "us" and "them" — but a season record has to
+    # be about somebody, so the ones that are theirs are marked.
+    is_mine          = Column(Boolean, default=True)
     competition_level = Column(String, default="HS Varsity")
     parent_team_id   = Column(Integer, ForeignKey("teams.id"), nullable=True)  # nested sub-team
     created_at       = Column(DateTime, default=datetime.utcnow)

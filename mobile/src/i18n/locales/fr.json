@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "Aucun joueur pour l'instant. Créez une équipe et ajoutez des joueurs.",
     "teams": "Équipes",
     "removeFromMyRoster": "Retirer de mon effectif",
-    "couldNotRemoveShared": "Impossible de retirer ce joueur de votre effectif."
+    "couldNotRemoveShared": "Impossible de retirer ce joueur de votre effectif.",
+    "myTeamLabel": "Une de mes équipes",
+    "myTeamOn": "Compte dans mon bilan de la saison.",
+    "myTeamOff": "Une équipe que je suis. Ses matchs et ses notes sont ici, mais hors de mon bilan."
   },
   "importScreen": {
     "titleRoster": "Importer l'effectif",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "Continuer la saisie en direct",
     "scoutingReport": "RAPPORT DE DÉTECTION",
     "selectOpponent": "SÉLECTIONNER L'ADVERSAIRE",
-    "noOpponents": "Aucun adversaire pour l'instant. Enregistrez d'abord des matchs.",
+    "noOpponents": "Aucune équipe pour l'instant. Enregistrez d'abord un match.",
     "gamesCount": "{{count}} match",
     "gamesCount_plural": "{{count}} matchs",
-    "allOpponents": "Tous les adversaires",
+    "allOpponents": "Toutes les équipes",
     "gamesAgainst": "MATCHS CONTRE",
     "na": "N/D",
     "noScore": "Aucun score",

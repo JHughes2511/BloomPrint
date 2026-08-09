@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "Henüz oyuncu yok. Bir takım oluşturun ve oyuncu ekleyin.",
     "teams": "Takımlar",
     "removeFromMyRoster": "Kadromdan çıkar",
-    "couldNotRemoveShared": "Oyuncu kadrondan çıkarılamadı."
+    "couldNotRemoveShared": "Oyuncu kadrondan çıkarılamadı.",
+    "myTeamLabel": "Kendi takımlarımdan biri",
+    "myTeamOn": "Sezon karneme sayılır.",
+    "myTeamOff": "Kayıt tuttuğum bir takım. Maçları ve notları burada, ama karneme girmez."
   },
   "importScreen": {
     "titleRoster": "Kadro İçe Aktar",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "Canlı Girişe Devam Et",
     "scoutingReport": "SKAUT RAPORU",
     "selectOpponent": "RAKİP SEÇ",
-    "noOpponents": "Henüz rakip yok. Önce maç kaydedin.",
+    "noOpponents": "Henüz takım yok. Önce bir maç kaydedin.",
     "gamesCount": "{{count}} maç",
     "gamesCount_plural": "{{count}} maç",
-    "allOpponents": "Tüm Rakipler",
+    "allOpponents": "Tüm takımlar",
     "gamesAgainst": "KARŞI OYNANAN MAÇLAR",
     "na": "Yok",
     "noScore": "Skor yok",

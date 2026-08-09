@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "لا يوجد لاعبون بعد. أنشئ فريقًا وأضف اللاعبين.",
     "teams": "الفرق",
     "removeFromMyRoster": "إزالة من قائمتي",
-    "couldNotRemoveShared": "تعذّرت إزالة اللاعب من قائمتك."
+    "couldNotRemoveShared": "تعذّرت إزالة اللاعب من قائمتك.",
+    "myTeamLabel": "أحد فرقي",
+    "myTeamOn": "يُحتسب ضمن سجلّي في الموسم.",
+    "myTeamOff": "فريق أحتفظ بسجلّاته. مبارياته ودرجاته هنا، لكنها خارج سجلّي."
   },
   "importScreen": {
     "titleRoster": "استيراد القائمة",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "متابعة الإدخال المباشر",
     "scoutingReport": "تقرير الاستكشاف",
     "selectOpponent": "اختر الخصم",
-    "noOpponents": "لا يوجد خصوم بعد. سجّل المباريات أولًا.",
+    "noOpponents": "لا توجد فرق بعد. سجّل مباراة أولاً.",
     "gamesCount": "{{count}} مباراة",
     "gamesCount_plural": "{{count}} مباريات",
-    "allOpponents": "كل الخصوم",
+    "allOpponents": "كل الفرق",
     "gamesAgainst": "المباريات ضد",
     "na": "غير متاح",
     "noScore": "لا توجد نتيجة",
@@ -2145,7 +2148,7 @@
     "importStats": "استيراد الإحصائيات",
     "teamOptional": "الفريق",
     "noneNoTeam": "بلا (بدون فريق)",
-    "selectTeam": "اختر فريقًا",
+    "selectTeam": "اختيار فريق",
     "none": "بلا",
     "createNewTeam": "+ إنشاء فريق جديد",
     "teamNamePlaceholder": "اسم الفريق",

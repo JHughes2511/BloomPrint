@@ -4,7 +4,7 @@ import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, TextInput, Modal, Alert, KeyboardAvoidingView, Platform, ScrollView, RefreshControl,
+  ActivityIndicator, TextInput, Modal, Alert, KeyboardAvoidingView, Platform, ScrollView, RefreshControl, Switch,
 } from 'react-native';
 import Sheet from '../components/Sheet';
 
@@ -143,6 +143,7 @@ export default function RosterScreen() {
   const [editTeam, setEditTeam] = useState<Team | null>(null);
   const [editTeamName, setEditTeamName] = useState('');
   const [editTeamLevel, setEditTeamLevel] = useState('');
+  const [editTeamMine, setEditTeamMine] = useState(true);
   const [savingTeam, setSavingTeam] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -268,6 +269,7 @@ export default function RosterScreen() {
     setEditTeam(team);
     setEditTeamName(team.name);
     setEditTeamLevel(team.competition_level ?? COMPETITION_LEVELS[0]);
+    setEditTeamMine((team as any).is_mine !== false);
   };
 
   const closeManage = () => { setEditTeam(null); setEditTeamName(''); setEditTeamLevel(''); };
@@ -279,6 +281,7 @@ export default function RosterScreen() {
       await teamsAPI.update(editTeam.id, {
         name: editTeamName.trim(),
         competition_level: editTeamLevel || undefined,
+        is_mine: editTeamMine,
       });
       await reloadTeams();
       closeManage();
@@ -639,6 +642,21 @@ export default function RosterScreen() {
             <Text style={styles.fieldLabel}>{tr('roster.competitionLevel')}</Text>
             <LevelDropdown value={editTeamLevel || COMPETITION_LEVELS[0]} onChange={setEditTeamLevel} />
 
+            {/* Whose team this is. Both kinds live here and work the same way —
+                a game is between two named teams — but a season record has to
+                be about somebody, so only these count toward yours. Teams built
+                automatically from an opponent's box score arrive switched off. */}
+            <View style={styles.mineRow}>
+              <View style={{ flex: 1, paddingRight: 12 }}>
+                <Text style={styles.mineLabel}>{tr('roster.myTeamLabel')}</Text>
+                <Text style={styles.mineSub}>
+                  {editTeamMine ? tr('roster.myTeamOn') : tr('roster.myTeamOff')}
+                </Text>
+              </View>
+              <Switch value={editTeamMine} onValueChange={setEditTeamMine}
+                      trackColor={{ false: t.line, true: t.accent }} thumbColor="#fff" />
+            </View>
+
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={closeManage}>
                 <Text style={styles.cancelText}>{tr('common.cancel')}</Text>
@@ -736,6 +754,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     color: t.muted2, fontSize: 10.5, fontFamily: fonts[700], letterSpacing: 1.5,
     textTransform: 'uppercase', marginTop: 12, marginBottom: 6,
   },
+  mineRow: { flexDirection: 'row', alignItems: 'center', marginTop: 14, marginBottom: 4 },
+  mineLabel: { color: t.ink, fontSize: 14, fontFamily: fonts[700] },
+  mineSub: { color: t.muted2, fontSize: 12, marginTop: 2 },
   deleteTeamBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
     marginTop: 12, paddingVertical: 12, borderRadius: 999,

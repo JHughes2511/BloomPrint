@@ -1645,7 +1645,10 @@
     "emptyNoPlayers": "Još nema igrača. Kreiraj tim i dodaj igrače.",
     "teams": "Timovi",
     "removeFromMyRoster": "Уклони са мог списка",
-    "couldNotRemoveShared": "Није могуће уклонити играча са твог списка."
+    "couldNotRemoveShared": "Није могуће уклонити играча са твог списка.",
+    "myTeamLabel": "Један од мојих тимова",
+    "myTeamOn": "Улази у мој сезонски учинак.",
+    "myTeamOff": "Тим који пратим. Утакмице и оцене су овде, али ван мог учинка."
   },
   "importScreen": {
     "titleRoster": "Uvezi sastav",
@@ -2114,10 +2117,10 @@
     "continueLiveEntry": "Nastavi unos uživo",
     "scoutingReport": "SKAUT IZVEŠTAJ",
     "selectOpponent": "IZABERI PROTIVNIKA",
-    "noOpponents": "Još nema protivnika. Prvo zabeleži utakmice.",
+    "noOpponents": "Још нема тимова. Прво забележите утакмицу.",
     "gamesCount": "{{count}} utakmica",
     "gamesCount_plural": "{{count}} utakmica",
-    "allOpponents": "Svi protivnici",
+    "allOpponents": "Сви тимови",
     "gamesAgainst": "UTAKMICE PROTIV",
     "na": "N/D",
     "noScore": "Nema rezultata",
@@ -2145,7 +2148,7 @@
     "importStats": "Uvezi statistiku",
     "teamOptional": "TIM",
     "noneNoTeam": "Nijedan (bez tima)",
-    "selectTeam": "Izaberi tim",
+    "selectTeam": "Изабери тим",
     "none": "Nijedan",
     "createNewTeam": "+ Kreiraj novi tim",
     "teamNamePlaceholder": "Naziv tima",
