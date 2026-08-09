@@ -2227,7 +2227,9 @@
     "gameInsights": "Analiza utakmice",
     "home": "Domaći",
     "away": "Gosti",
-    "finalLabel": "Kraj"
+    "finalLabel": "Kraj",
+    "ourPlayerNamePlaceholder": "Име играча...",
+    "couldNotAddPlayer": "Тај играч није могао бити додат."
   },
   "whiteboard": {
     "title": "Tabla",

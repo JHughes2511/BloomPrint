@@ -2227,7 +2227,9 @@
     "gameInsights": "Maç analizi",
     "home": "Ev",
     "away": "Deplasman",
-    "finalLabel": "Bitiş"
+    "finalLabel": "Bitiş",
+    "ourPlayerNamePlaceholder": "Oyuncu adı...",
+    "couldNotAddPlayer": "Bu oyuncu eklenemedi."
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

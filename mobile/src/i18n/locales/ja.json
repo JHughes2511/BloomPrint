@@ -2227,7 +2227,9 @@
     "gameInsights": "ゲーム分析",
     "home": "ホーム",
     "away": "アウェイ",
-    "finalLabel": "試合終了"
+    "finalLabel": "試合終了",
+    "ourPlayerNamePlaceholder": "選手名...",
+    "couldNotAddPlayer": "その選手を追加できませんでした。"
   },
   "whiteboard": {
     "title": "ホワイトボード",

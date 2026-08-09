@@ -2227,7 +2227,9 @@
     "gameInsights": "Pagsusuri ng laro",
     "home": "Home",
     "away": "Away",
-    "finalLabel": "Tapos"
+    "finalLabel": "Tapos",
+    "ourPlayerNamePlaceholder": "Pangalan ng manlalaro...",
+    "couldNotAddPlayer": "Hindi naidagdag ang manlalarong iyon."
   },
   "whiteboard": {
     "title": "Whiteboard",

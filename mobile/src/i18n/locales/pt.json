@@ -2227,7 +2227,9 @@
     "gameInsights": "Análise do jogo",
     "home": "Casa",
     "away": "Fora",
-    "finalLabel": "Final"
+    "finalLabel": "Final",
+    "ourPlayerNamePlaceholder": "Nome do jogador...",
+    "couldNotAddPlayer": "Não foi possível adicionar esse jogador."
   },
   "whiteboard": {
     "title": "Quadro Tático",

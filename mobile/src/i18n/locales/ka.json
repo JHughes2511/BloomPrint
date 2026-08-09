@@ -2227,7 +2227,9 @@
     "gameInsights": "თამაშის ანალიზი",
     "home": "სახლში",
     "away": "გასვლით",
-    "finalLabel": "დასრულდა"
+    "finalLabel": "დასრულდა",
+    "ourPlayerNamePlaceholder": "მოთამაშის სახელი...",
+    "couldNotAddPlayer": "ამ მოთამაშის დამატება ვერ მოხერხდა."
   },
   "whiteboard": {
     "title": "დაფა",

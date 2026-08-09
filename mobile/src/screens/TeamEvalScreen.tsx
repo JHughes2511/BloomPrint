@@ -51,6 +51,10 @@ const COMPETITION_LEVELS = [
   'Youth (5-13)',
 ];
 
+// Team names are typed twice — once on the team, once as an opponent — so they
+// are matched on letters and digits alone: "SEED Academy" and "seed academy".
+const norm = (x: string) => (x || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
 // A basketball season spans Aug–Jul, so a game's season year is derived from
 // its calendar date: Aug–Dec → "YYYY-YY+1", Jan–Jul → "YYYY-1-YY".
 const seasonForDate = (d: Date): string => {
@@ -585,15 +589,53 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     } else {
       setRoster([]);
     }
-    // Load this opponent's saved roster (persisted by opponent name)
+    await loadOpponentRoster(game);
+  };
+
+  /**
+   * Everyone it is possible to tap on the opponent's side.
+   *
+   * Two places hold opponent players and only one of them was being read. Names
+   * typed into this pad during a game are saved against the opponent's name; a
+   * team the coach has actually built in Roster — with numbers and positions
+   * already entered — lives with the rest of their teams. So a coach who had
+   * set Duke up properly still opened the pad to an empty list and a text box,
+   * and ended up typing the same twelve names in again mid-game.
+   *
+   * Both are shown. Where the same player is in both, the one saved against
+   * this opponent wins: it is the more recently corrected of the two.
+   */
+  const loadOpponentRoster = async (game: any) => {
+    const merged: any[] = [];
+    const seen = new Set<string>();
+    const push = (p: any) => {
+      const key = String(p.player_name ?? '').trim().toLowerCase();
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      merged.push(p);
+    };
     try {
-      const saved = await gameEvalAPI.listOpponentPlayers(game.opponent_name);
-      setOpponentRoster(saved);
-      setOpponentPlayers(saved.map((p: any) => p.player_name));
-    } catch {
-      setOpponentRoster([]);
-      setOpponentPlayers([]);
+      (await gameEvalAPI.listOpponentPlayers(game.opponent_name)).forEach(push);
+    } catch { /* an opponent with nothing saved is not an error */ }
+    // Opening a game straight from a link can beat the team list to the screen,
+    // and a roster that is missing because of a race is indistinguishable from
+    // one that was never built.
+    let known = teams;
+    if (!known.length) {
+      try { known = await teamsAPI.list(); } catch { known = []; }
     }
+    const theirTeam = known.find(
+      (tm: any) => norm(tm.name) === norm(game.opponent_name) && tm.id !== game.team_id);
+    if (theirTeam) {
+      try {
+        (await playersAPI.list(theirTeam.id)).forEach((p: any) => push({
+          id: `team-${p.id}`, player_name: p.name,
+          jersey_number: p.jersey_number, position: p.position,
+        }));
+      } catch { /* as above */ }
+    }
+    setOpponentRoster(merged);
+    setOpponentPlayers(merged.map((p: any) => p.player_name));
   };
 
   // Game clock tick — decrement once per second while running.
@@ -668,6 +710,37 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       // Don't block stat entry if the save fails — keep the name locally.
       setOpponentPlayers(prev => prev.includes(name) ? prev : [...prev, name]);
       setSelectedPlayer(name);
+    }
+    setNewOppPlayer('');
+    setNewOppJersey('');
+    setNewOppPosition('');
+  };
+
+  /**
+   * Add someone to our own bench mid-game.
+   *
+   * A walk-on, a call-up, a player whose name never made it onto the roster —
+   * they were tappable on the opponent's side and nowhere on ours, so the only
+   * way to record what our own twelfth player did was to leave the game, go to
+   * Roster, add them, and come back. This puts them on the team properly, so
+   * they are there next game too.
+   */
+  const addOurPlayer = async () => {
+    const name = newOppPlayer.trim();
+    if (!name || !activeGame?.team_id) return;
+    try {
+      const saved = await playersAPI.create({
+        name, team_id: activeGame.team_id,
+        jersey_number: newOppJersey.trim() || undefined,
+        position: newOppPosition.trim() || undefined,
+      });
+      setRoster(prev => prev.some((p: any) => norm(p.name) === norm(saved.name))
+        ? prev : [...prev, saved]);
+      setSelectedPlayer(saved.name);
+    } catch (e: any) {
+      Alert.alert(tr('common.error'),
+                  e?.response?.data?.detail ?? tr('teamGrade.couldNotAddPlayer'));
+      return;
     }
     setNewOppPlayer('');
     setNewOppJersey('');
@@ -1977,65 +2050,70 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             {/* Player grid */}
             <Text style={s.sectionLabel}>{tr('teamGrade.selectPlayer')}</Text>
             <View style={s.playerGrid}>
-              {entryMode === 'our' ? (
-                roster.length > 0 ? roster.map((p: any) => (
+              {/* Both sides read the same way: everyone already known, then a
+                  row to add whoever is not. Adding used to exist on the
+                  opponent's side only, so our own late addition meant leaving
+                  the game for the Roster page and coming back. */}
+              {entryMode === 'our'
+                ? roster.map((p: any) => (
                   <TouchableOpacity
                     key={p.id}
                     style={[s.playerBtn, selectedPlayer === p.name && s.playerBtnActive]}
                     onPress={() => setSelectedPlayer(p.name)}
                   >
                     <Text style={[s.playerBtnText, selectedPlayer === p.name && s.playerBtnTextActive]} numberOfLines={1}>
-                      {p.name}
+                      {p.jersey_number ? `#${p.jersey_number} ` : ''}{p.name}{p.position ? ` · ${p.position}` : ''}
                     </Text>
                   </TouchableOpacity>
-                )) : (
-                  <Text style={{ color: t.muted, fontSize: 12, padding: 8 }}>{tr('teamGrade.noRoster')}</Text>
-                )
-              ) : (
-                <>
-                  {opponentRoster.map((p: any) => (
-                    <TouchableOpacity
-                      key={p.id ?? p.player_name}
-                      style={[s.playerBtn, selectedPlayer === p.player_name && s.playerBtnActive]}
-                      onPress={() => setSelectedPlayer(p.player_name)}
-                    >
-                      <Text style={[s.playerBtnText, selectedPlayer === p.player_name && s.playerBtnTextActive]} numberOfLines={1}>
-                        {p.jersey_number ? `#${p.jersey_number} ` : ''}{p.player_name}{p.position ? ` · ${p.position}` : ''}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                  <View style={{ width: '100%', flexDirection: 'row', gap: 6, marginTop: 4 }}>
-                    <VoiceTextInput
-                      style={[s.smallInput, { flex: 1 }]}
-                      placeholder={tr('teamGrade.opponentPlayerNamePlaceholder')}
-                      placeholderTextColor={t.muted2}
-                      value={newOppPlayer}
-                      onChangeText={setNewOppPlayer}
-                    />
-                    <TextInput
-                      style={[s.smallInput, { width: 48, textAlign: 'center' }]}
-                      placeholder="#"
-                      placeholderTextColor={t.muted2}
-                      value={newOppJersey}
-                      onChangeText={setNewOppJersey}
-                      keyboardType="number-pad"
-                    />
-                    <TextInput
-                      style={[s.smallInput, { width: 56, textAlign: 'center' }]}
-                      placeholder={tr('teamGrade.posPlaceholder')}
-                      placeholderTextColor={t.muted2}
-                      value={newOppPosition}
-                      onChangeText={setNewOppPosition}
-                      autoCapitalize="characters"
-                    />
-                    <TouchableOpacity
-                      style={{ backgroundColor: t.line, borderRadius: 8, paddingHorizontal: 10, justifyContent: 'center' }}
-                      onPress={addOpponentPlayer}
-                    >
-                      <Ionicons name="add" size={16} color={t.muted} />
-                    </TouchableOpacity>
-                  </View>
-                </>
+                ))
+                : opponentRoster.map((p: any) => (
+                  <TouchableOpacity
+                    key={p.id ?? p.player_name}
+                    style={[s.playerBtn, selectedPlayer === p.player_name && s.playerBtnActive]}
+                    onPress={() => setSelectedPlayer(p.player_name)}
+                  >
+                    <Text style={[s.playerBtnText, selectedPlayer === p.player_name && s.playerBtnTextActive]} numberOfLines={1}>
+                      {p.jersey_number ? `#${p.jersey_number} ` : ''}{p.player_name}{p.position ? ` · ${p.position}` : ''}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              {entryMode === 'our' && !roster.length && !activeGame.team_id && (
+                <Text style={{ color: t.muted, fontSize: 12, padding: 8 }}>{tr('teamGrade.noRoster')}</Text>
+              )}
+              {(entryMode === 'opponent' || !!activeGame.team_id) && (
+                <View style={{ width: '100%', flexDirection: 'row', gap: 6, marginTop: 4 }}>
+                  <VoiceTextInput
+                    style={[s.smallInput, { flex: 1 }]}
+                    placeholder={entryMode === 'our'
+                      ? tr('teamGrade.ourPlayerNamePlaceholder')
+                      : tr('teamGrade.opponentPlayerNamePlaceholder')}
+                    placeholderTextColor={t.muted2}
+                    value={newOppPlayer}
+                    onChangeText={setNewOppPlayer}
+                  />
+                  <TextInput
+                    style={[s.smallInput, { width: 48, textAlign: 'center' }]}
+                    placeholder="#"
+                    placeholderTextColor={t.muted2}
+                    value={newOppJersey}
+                    onChangeText={setNewOppJersey}
+                    keyboardType="number-pad"
+                  />
+                  <TextInput
+                    style={[s.smallInput, { width: 56, textAlign: 'center' }]}
+                    placeholder={tr('teamGrade.posPlaceholder')}
+                    placeholderTextColor={t.muted2}
+                    value={newOppPosition}
+                    onChangeText={setNewOppPosition}
+                    autoCapitalize="characters"
+                  />
+                  <TouchableOpacity
+                    style={{ backgroundColor: t.line, borderRadius: 8, paddingHorizontal: 10, justifyContent: 'center' }}
+                    onPress={entryMode === 'our' ? addOurPlayer : addOpponentPlayer}
+                  >
+                    <Ionicons name="add" size={16} color={t.muted} />
+                  </TouchableOpacity>
+                </View>
               )}
             </View>
 

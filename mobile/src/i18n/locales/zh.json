@@ -2227,7 +2227,9 @@
     "gameInsights": "比赛洞察",
     "home": "主场",
     "away": "客场",
-    "finalLabel": "终场"
+    "finalLabel": "终场",
+    "ourPlayerNamePlaceholder": "球员姓名...",
+    "couldNotAddPlayer": "无法添加该球员。"
   },
   "whiteboard": {
     "title": "战术板",

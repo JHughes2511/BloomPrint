@@ -2227,7 +2227,9 @@
     "gameInsights": "Аналітика матчу",
     "home": "Удома",
     "away": "У гостях",
-    "finalLabel": "Кінець"
+    "finalLabel": "Кінець",
+    "ourPlayerNamePlaceholder": "Ім'я гравця...",
+    "couldNotAddPlayer": "Не вдалося додати гравця."
   },
   "whiteboard": {
     "title": "Тактична дошка",

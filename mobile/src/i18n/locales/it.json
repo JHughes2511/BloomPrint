@@ -2227,7 +2227,9 @@
     "gameInsights": "Analisi partita",
     "home": "Casa",
     "away": "Trasferta",
-    "finalLabel": "Finale"
+    "finalLabel": "Finale",
+    "ourPlayerNamePlaceholder": "Nome del giocatore...",
+    "couldNotAddPlayer": "Non è stato possibile aggiungere il giocatore."
   },
   "whiteboard": {
     "title": "Lavagna",

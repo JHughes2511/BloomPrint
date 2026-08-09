@@ -2227,7 +2227,9 @@
     "gameInsights": "Analiza meciului",
     "home": "Acasă",
     "away": "Deplasare",
-    "finalLabel": "Final"
+    "finalLabel": "Final",
+    "ourPlayerNamePlaceholder": "Numele jucătorului...",
+    "couldNotAddPlayer": "Jucătorul nu a putut fi adăugat."
   },
   "whiteboard": {
     "title": "Tablă tactică",

@@ -2227,7 +2227,9 @@
     "gameInsights": "Analyse du match",
     "home": "Domicile",
     "away": "Extérieur",
-    "finalLabel": "Final"
+    "finalLabel": "Final",
+    "ourPlayerNamePlaceholder": "Nom du joueur...",
+    "couldNotAddPlayer": "Impossible d'ajouter ce joueur."
   },
   "whiteboard": {
     "title": "Tableau blanc",

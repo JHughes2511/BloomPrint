@@ -2227,7 +2227,9 @@
     "gameInsights": "Ανάλυση αγώνα",
     "home": "Έδρα",
     "away": "Εκτός",
-    "finalLabel": "Τελικό"
+    "finalLabel": "Τελικό",
+    "ourPlayerNamePlaceholder": "Όνομα παίκτη...",
+    "couldNotAddPlayer": "Δεν ήταν δυνατή η προσθήκη του παίκτη."
   },
   "whiteboard": {
     "title": "Πίνακας",

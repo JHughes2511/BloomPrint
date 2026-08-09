@@ -2227,7 +2227,9 @@
     "gameInsights": "Matchanalys",
     "home": "Hemma",
     "away": "Borta",
-    "finalLabel": "Slut"
+    "finalLabel": "Slut",
+    "ourPlayerNamePlaceholder": "Spelarens namn...",
+    "couldNotAddPlayer": "Spelaren kunde inte läggas till."
   },
   "whiteboard": {
     "title": "Taktiktavla",

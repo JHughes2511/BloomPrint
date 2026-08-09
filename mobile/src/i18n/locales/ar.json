@@ -2227,7 +2227,9 @@
     "gameInsights": "تحليلات المباراة",
     "home": "أرضه",
     "away": "خارج أرضه",
-    "finalLabel": "النهائي"
+    "finalLabel": "النهائي",
+    "ourPlayerNamePlaceholder": "اسم اللاعب...",
+    "couldNotAddPlayer": "تعذّرت إضافة هذا اللاعب."
   },
   "whiteboard": {
     "title": "السبورة",

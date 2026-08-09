@@ -2227,7 +2227,9 @@
     "gameInsights": "Spielanalyse",
     "home": "Heim",
     "away": "Auswärts",
-    "finalLabel": "Endstand"
+    "finalLabel": "Endstand",
+    "ourPlayerNamePlaceholder": "Name des Spielers...",
+    "couldNotAddPlayer": "Dieser Spieler konnte nicht hinzugefügt werden."
   },
   "whiteboard": {
     "title": "Taktiktafel",

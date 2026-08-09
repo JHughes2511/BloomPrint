@@ -2227,7 +2227,9 @@
     "gameInsights": "Rungtynių analizė",
     "home": "Namuose",
     "away": "Išvykoje",
-    "finalLabel": "Pabaiga"
+    "finalLabel": "Pabaiga",
+    "ourPlayerNamePlaceholder": "Žaidėjo vardas...",
+    "couldNotAddPlayer": "Nepavyko pridėti šio žaidėjo."
   },
   "whiteboard": {
     "title": "Lenta",

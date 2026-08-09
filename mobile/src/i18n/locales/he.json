@@ -2227,7 +2227,9 @@
     "gameInsights": "תובנות המשחק",
     "home": "בית",
     "away": "חוץ",
-    "finalLabel": "סיום"
+    "finalLabel": "סיום",
+    "ourPlayerNamePlaceholder": "שם השחקן...",
+    "couldNotAddPlayer": "לא ניתן היה להוסיף את השחקן."
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

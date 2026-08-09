@@ -2227,7 +2227,9 @@
     "gameInsights": "Analiza meczu",
     "home": "Gospodarz",
     "away": "Gość",
-    "finalLabel": "Koniec"
+    "finalLabel": "Koniec",
+    "ourPlayerNamePlaceholder": "Imię i nazwisko zawodnika...",
+    "couldNotAddPlayer": "Nie udało się dodać tego zawodnika."
   },
   "whiteboard": {
     "title": "Tablica",

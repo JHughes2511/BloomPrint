@@ -2227,7 +2227,9 @@
     "gameInsights": "Análisis del partido",
     "home": "Local",
     "away": "Visitante",
-    "finalLabel": "Final"
+    "finalLabel": "Final",
+    "ourPlayerNamePlaceholder": "Nombre del jugador...",
+    "couldNotAddPlayer": "No se pudo añadir ese jugador."
   },
   "whiteboard": {
     "title": "Pizarra",

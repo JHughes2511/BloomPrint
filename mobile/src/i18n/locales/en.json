@@ -2227,7 +2227,9 @@
     "gameInsights": "Game Insights",
     "home": "Home",
     "away": "Away",
-    "finalLabel": "Final"
+    "finalLabel": "Final",
+    "ourPlayerNamePlaceholder": "Player name...",
+    "couldNotAddPlayer": "That player could not be added."
   },
   "whiteboard": {
     "title": "Whiteboard",

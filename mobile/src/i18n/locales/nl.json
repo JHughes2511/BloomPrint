@@ -2227,7 +2227,9 @@
     "gameInsights": "Wedstrijdinzichten",
     "home": "Thuis",
     "away": "Uit",
-    "finalLabel": "Eindstand"
+    "finalLabel": "Eindstand",
+    "ourPlayerNamePlaceholder": "Naam van de speler...",
+    "couldNotAddPlayer": "Deze speler kon niet worden toegevoegd."
   },
   "whiteboard": {
     "title": "Tactiekbord",

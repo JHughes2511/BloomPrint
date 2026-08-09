@@ -2227,7 +2227,9 @@
     "gameInsights": "मैच विश्लेषण",
     "home": "घरेलू",
     "away": "बाहरी",
-    "finalLabel": "अंतिम"
+    "finalLabel": "अंतिम",
+    "ourPlayerNamePlaceholder": "खिलाड़ी का नाम...",
+    "couldNotAddPlayer": "उस खिलाड़ी को जोड़ा नहीं जा सका।"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",
