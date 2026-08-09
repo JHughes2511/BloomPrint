@@ -192,7 +192,47 @@ export function splitReportSections(text: string): ReportSection[] {
     return body ? [{ heading: 'Report', body }] : [];
   }
   // Trim trailing blank lines from each body
-  const result = sections.map(s => ({ heading: s.heading, body: s.body.replace(/\n+$/, ''), pinned: false }));
+  let result = sections.map(s => ({ heading: s.heading, body: s.body.replace(/\n+$/, ''), pinned: false }));
+
+  // Fold a bare group heading into the sections underneath it.
+  //
+  // A report writes "OFFENSIVE TENDENCIES:" and then "ANGOLA:" and "EGYPT:"
+  // beneath it, and does the same again under "DEFENSIVE SCHEME:". Read flat,
+  // that is a toggle list containing ANGOLA twice and EGYPT twice, with no way
+  // to tell which one is which — and an OFFENSIVE TENDENCIES row that holds no
+  // text, so switching it off does nothing at all.
+  //
+  // A heading with no body of its own, followed by more sections, is a group
+  // rather than content. It stops being a row and its name is carried onto its
+  // children: "Offensive Tendencies · Angola" — the same separator the report
+  // cards use, so one list does not read differently from the other.
+  // Where a group ENDS matters as much as where it starts. The run of
+  // sub-headings is followed by the next top-level section, and without a rule
+  // for that the prefix ran on: "DEFENSIVE SCHEME · SCHEME TENDENCIES — WHAT
+  // TO SCOUT AGAINST", a heading that belongs to nobody.
+  //
+  // A sub-heading is MORE specific than the group above it, so it is shorter —
+  // "ANGOLA" under "OFFENSIVE TENDENCIES". A heading longer than its group name
+  // is a new section, not a member of one. The second test carries a name that
+  // was already a member of an earlier group, which is how these reports repeat
+  // the same teams under each heading.
+  const isBare = (i: number) =>
+    !result[i].body.replace(/\s+/g, ' ').trim() && i < result.length - 1;
+  const grouped: typeof result = [];
+  const seenChildren = new Set<string>();
+  let groupName = '';
+  for (let i = 0; i < result.length; i++) {
+    if (isBare(i) && !result[i].pinned) { groupName = result[i].heading; continue; }
+    const h = result[i].heading;
+    const belongs = !!groupName && !result[i].pinned
+      && (h.length < groupName.length || seenChildren.has(h));
+    if (!belongs) groupName = '';
+    if (belongs) seenChildren.add(h);
+    grouped.push(belongs ? { ...result[i], heading: `${groupName} · ${h}` } : result[i]);
+  }
+  // Only if it actually helped. A document with one bare heading and nothing
+  // to attach it to keeps its original shape.
+  if (grouped.length) result = grouped;
   // The document header (model banner, report type, opponent/metadata lines) is
   // NOT toggleable content — it's the title block. Pin every leading section up
   // to the first one that has a real prose body so it's always included and not

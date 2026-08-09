@@ -24,13 +24,14 @@ export type ShareModalProps = {
   reportId: number;
   outputType: string;   // label for player-facing copy, e.g. coaching_report
   reportText: string;   // full report text (section filtering + player payload)
-  title?: string;       // optional heading label shown in the modal subtitle
+  title?: string;       // the report's type label, e.g. "Coaching Report · Film"
+  subject?: string;     // what the report is ABOUT, e.g. "Angola vs. Egypt"
   subjectPlayerId?: number;    // the player this report is ABOUT (enables consent flow)
   subjectPlayerName?: string;  // shown first + used in consent messaging
 };
 
 export default function ShareModal({
-  visible, onClose, reportType, reportId, outputType, reportText, title,
+  visible, onClose, reportType, reportId, outputType, reportText, title, subject,
   subjectPlayerId, subjectPlayerName,
 }: ShareModalProps) {
   const { t } = useTheme();
@@ -208,7 +209,11 @@ export default function ShareModal({
           <View style={styles.header}>
             <View style={{ flex: 1 }}>
               <Text style={styles.headerTitle}>{tr('components.shareModal.shareReport')}</Text>
-              {!!title && <Text style={styles.headerSub} numberOfLines={1}>{title}</Text>}
+              {/* Both lines. The type on its own — "Coaching Report · Scouting
+                  Report · Film" — never said WHICH game this was about, which
+                  is the thing you check before sending it to somebody. */}
+              {!!subject && <Text style={styles.headerSub} numberOfLines={1}>{subject}</Text>}
+              {!!title && <Text style={styles.headerType} numberOfLines={1}>{title}</Text>}
             </View>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color={t.muted} />
@@ -413,6 +418,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   box: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560)},
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
   headerTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
+  headerType: { color: t.muted2, fontSize: 12, marginTop: 1 },
   headerSub: { color: t.muted, fontSize: 12, marginTop: 4 },
   targetRow: { flexDirection: 'row', gap: 6, marginBottom: 14 },
   targetChip: { flex: 1, paddingVertical: 10, borderRadius: 999, backgroundColor: t.chip, alignItems: 'center', borderWidth: 1, borderColor: t.line },

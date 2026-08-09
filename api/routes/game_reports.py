@@ -482,15 +482,13 @@ def all_film_analyses(
         if not (clip.analysis_text or "").strip():
             continue
         gr = reports[clip.game_report_id]
-        # The report types this packet was generated with. A film breakdown is
-        # not a report type a coach ever picked — it is the film feeding
-        # whatever they DID pick — so the card names those and adds "Film".
-        sig = next((v.output_type for v in sorted(gr.versions, key=lambda x: x.id, reverse=True)
-                    if v.report_text), None) or gr.output_type
         out.append({
             "id": clip.id,
             "report_id": gr.id,
-            "output_type": sig,
+            # What the film analysis IS. A film is read as a game analysis
+            # whatever else the packet was set to produce, so this is the film's
+            # own type rather than the packet's selection.
+            "output_type": "game_analysis",
             # Whose film it is, which is not the same as which side it was
             # filed under — see GameReportClip.team_name.
             "team_name": clip.team_name,

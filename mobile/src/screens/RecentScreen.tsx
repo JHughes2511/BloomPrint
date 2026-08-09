@@ -198,7 +198,7 @@ export default function RecentScreen() {
   };
 
   // Unified share modal (player / team / staff)
-  const [shareCtx, setShareCtx] = useState<{ reportType: string; reportId: number; outputType: string; reportText: string; title: string } | null>(null);
+  const [shareCtx, setShareCtx] = useState<{ reportType: string; reportId: number; outputType: string; reportText: string; title: string; subject?: string } | null>(null);
 
   // Unified shared-report viewer (correct / regenerate / comment / notes)
   const [viewerShared, setViewerShared] = useState<any | null>(null);
@@ -1084,11 +1084,13 @@ export default function RecentScreen() {
                                          item.kind === 'scout' ? 'game_session' :
                                          item.kind === 'gamereport' ? 'game_report' :
                                          item.kind === 'game' ? 'game' :
+                                         item.kind === 'film' ? 'film' :
                                          'training';
                       const label = item.kind === 'training' ? tr('reportTypes.training_program') :
                                     item.kind === 'scout' ? tr('recent.scoutReport') :
                                     item.kind === 'gamereport' ? tr('recent.gameReport') :
                                     item.kind === 'game' ? tr('recent.gameReport') :
+                                    item.kind === 'film' ? tr('recent.fromFilm', { types: outputTypeNames(item.output_type) }) :
                                     item.kind === 'team' ? tr('recent.teamReport') : tr('reportTypes.player_eval');
                       const fullText = item.program_text ?? item.report_text ?? (teamReportTexts[item.id as number] ?? '');
                       setShareCtx({
@@ -1097,6 +1099,8 @@ export default function RecentScreen() {
                         outputType: item.output_type ?? (item.kind === 'training' ? 'training_program' : 'coaching_report'),
                         reportText: fullText,
                         title: label,
+                        // What it is ABOUT, beside what kind it is.
+                        subject: item.player_name,
                       });
                     }}
                   >
@@ -1166,9 +1170,11 @@ export default function RecentScreen() {
                         <TouchableOpacity
                           style={[styles.actionBtn, { borderColor: t.positiveSoft }]}
                           onPress={() => {
+                            // The report stays open behind the share sheet.
+                            // Closing it meant coming back from a cancelled
+                            // share to the list, having lost your place.
                             const g = gameReportModal;
-                            setGameReportModal(null);
-                            setShareCtx({ reportType: g.reportType!, reportId: g.reportId!, outputType: g.outputType ?? 'scouting_report', reportText: g.text, title: g.title });
+                            setShareCtx({ reportType: g.reportType!, reportId: g.reportId!, outputType: g.outputType ?? 'scouting_report', reportText: g.text, title: g.title, subject: g.subject });
                           }}
                         >
                           <Ionicons name="person-outline" size={18} color={t.positive} />
@@ -1177,9 +1183,11 @@ export default function RecentScreen() {
                         <TouchableOpacity
                           style={[styles.actionBtn, { borderColor: t.brownSoft }]}
                           onPress={() => {
+                            // The report stays open behind the share sheet.
+                            // Closing it meant coming back from a cancelled
+                            // share to the list, having lost your place.
                             const g = gameReportModal;
-                            setGameReportModal(null);
-                            setShareCtx({ reportType: g.reportType!, reportId: g.reportId!, outputType: g.outputType ?? 'scouting_report', reportText: g.text, title: g.title });
+                            setShareCtx({ reportType: g.reportType!, reportId: g.reportId!, outputType: g.outputType ?? 'scouting_report', reportText: g.text, title: g.title, subject: g.subject });
                           }}
                         >
                           <Ionicons name="share-social-outline" size={18} color={t.brown} />
@@ -1423,8 +1431,9 @@ export default function RecentScreen() {
                       const fullText = activeModal.text ?? '';
                       const reportId = activeModal.id;
                       const outputType = activeModal.outputType ?? (activeModal.kind === 'training' ? 'training_program' : 'coaching_report');
-                      setActiveModal(null);
-                      setShareCtx({ reportType, reportId, outputType, reportText: fullText, title: label });
+                      // The report stays open behind the share sheet.
+                      setShareCtx({ reportType, reportId, outputType, reportText: fullText,
+                                    title: label, subject: activeModal.playerName });
                     }}
                   >
                     <Ionicons name="share-social-outline" size={18} color={t.brown} />
@@ -1617,6 +1626,7 @@ export default function RecentScreen() {
           outputType={shareCtx.outputType}
           reportText={shareCtx.reportText}
           title={shareCtx.title}
+          subject={shareCtx.subject}
         />
       )}
     </View>
