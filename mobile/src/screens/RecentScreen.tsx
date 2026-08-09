@@ -1702,8 +1702,12 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     marginHorizontal: 16, marginBottom: 12, paddingHorizontal: 12, height: 44,
   },
   searchBarInput: { flex: 1, color: t.ink, fontSize: 15, paddingVertical: 0 },
-  filterRow: { marginBottom: 12, flexGrow: 0, height: 52,
-    ...desktopOnly({ height: undefined, paddingHorizontal: 16, paddingRight: 24, paddingBottom: 4 }) },
+  // minHeight, not height. A horizontal scroller clips what overflows it
+  // vertically, so a fixed 52 sliced the top and bottom off every pill as soon
+  // as the text was rendered any larger than the design size — a phone with a
+  // bigger text setting, or a browser that inflates text.
+  filterRow: { marginBottom: 12, flexGrow: 0, minHeight: 52, paddingVertical: 2,
+    ...desktopOnly({ minHeight: undefined, paddingVertical: 0, paddingHorizontal: 16, paddingRight: 24, paddingBottom: 4 }) },
   // Same shape as every other chip: pill, 16 across, 8 down. This one was a
   // squarer 18-radius box at 14/34, which read as a different control for the
   // same kind of choice. flexShrink/maxWidth stay — these labels are the

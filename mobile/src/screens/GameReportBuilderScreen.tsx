@@ -859,7 +859,9 @@ export default function GameReportBuilderScreen() {
         <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8, marginLeft: 2 }}>
           {tr('gameBuilder.reportTypeHint')}
         </Text>
-        <ChipRow style={{ marginBottom: 20 }} bleed={20}>
+        {/* paddingVertical so a pill cannot be sliced by the scroller when the
+            text renders taller than the design size — see Recent's filterRow. */}
+        <ChipRow style={{ marginBottom: 20, paddingVertical: 2 }} bleed={20}>
           {OUTPUT_TYPES.map(t => {
             const selected = outputType.split(',').filter(Boolean);
             const isOn = selected.includes(t.key);
