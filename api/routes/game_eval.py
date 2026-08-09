@@ -1382,6 +1382,25 @@ def _compute_grades(stats: list[models.GamePlayerStat], minutes_map: dict[str, f
     return grades
 
 
+def _win_loss_factor(for_score: int | None, against_score: int | None) -> float:
+    """The 40% of a team grade that is about the result, from one side's view.
+
+    Written from a point of view rather than hard-coded to "us" so the same
+    scale can be applied to the opponent: a team that won by twenty and a team
+    that lost by twenty must not both come out at 5.0.
+    """
+    if for_score is None or against_score is None:
+        return 5.0
+    if for_score > against_score:
+        return 10.0
+    return 7.0 if abs(for_score - against_score) <= 5 else 5.0
+
+
+def _team_grade(grades: list[dict], for_score, against_score) -> float:
+    avg = sum(g["game_grade"] for g in grades) / len(grades) if grades else 0.0
+    return round((avg * 0.6) + (_win_loss_factor(for_score, against_score) * 0.4), 2)
+
+
 @router.get("/sessions/{game_id}/summary")
 def get_summary(
     game_id: int,
@@ -1401,22 +1420,13 @@ def get_summary(
     player_grades = _compute_grades(our_stats, our_minutes)
     opponent_grades = _compute_grades(opp_stats, opp_minutes)
 
-    # Team grade
-    if player_grades:
-        avg_player_grade = sum(g["game_grade"] for g in player_grades) / len(player_grades)
-    else:
-        avg_player_grade = 0.0
-
-    win_loss_factor = 5.0
-    if game.our_score is not None and game.opponent_score is not None:
-        if game.our_score > game.opponent_score:
-            win_loss_factor = 10.0
-        elif abs(game.our_score - game.opponent_score) <= 5:
-            win_loss_factor = 7.0
-        else:
-            win_loss_factor = 5.0
-
-    team_grade = round((avg_player_grade * 0.6) + (win_loss_factor * 0.4), 2)
+    ours, theirs = effective_scores(game)
+    team_grade = _team_grade(player_grades, ours, theirs)
+    # The same grade from the other bench. With both teams' stats in there is
+    # no reason to grade one of them: the opponent's number is what a scouting
+    # report is arguing with, and one grade on a page about two teams reads as
+    # if the other side did not play.
+    opponent_grade = _team_grade(opponent_grades, theirs, ours) if opponent_grades else None
 
     game_out = _gate_scouting(db, coach, game)
     return {
@@ -1424,6 +1434,7 @@ def get_summary(
         "player_grades": player_grades,
         "team_grade": team_grade,
         "opponent_grades": opponent_grades,
+        "opponent_team_grade": opponent_grade,
     }
 
 
@@ -2251,38 +2262,58 @@ def season_dashboard(
     player_totals: dict[tuple[int | None, str], dict] = {}
     team_names = {t.id: t.name for t in db.query(models.Team).all()}
 
+    # Which side of each game the selection is actually asking about.
+    #
+    # The picker matches games a team was in on EITHER side, so choosing a team
+    # you have only ever played brought their games back — graded from your
+    # bench, with your players on the leaderboard, under their name. A season
+    # for that team has to be read from their side of the same games.
+    #
+    # With nothing picked this stays our side: "all teams" means the coach's own
+    # season, and counting each game twice would make the record meaningless.
+    picked_ids = _selected_team_ids(team_ids)
+    picked_names = set()
+    if picked_ids:
+        picked_names = {(t.name or "").strip().lower() for t in
+                        db.query(models.Team).filter(models.Team.id.in_(picked_ids)).all()}
+
     for game in games:
+        from_theirs = bool(picked_ids) and game.team_id not in picked_ids and \
+            (game.opponent_name or "").strip().lower() in picked_names
         our_pts, opp_pts = effective_scores(game)
+        if from_theirs:
+            our_pts, opp_pts = opp_pts, our_pts
         if our_pts is not None and opp_pts is not None:
             if our_pts > opp_pts:
                 wins += 1
-                win_loss_factor = 10.0
-            elif abs(our_pts - opp_pts) <= 5:
-                losses += 1
-                win_loss_factor = 7.0
             else:
                 losses += 1
-                win_loss_factor = 5.0
-        else:
-            win_loss_factor = 5.0
+        win_loss_factor = _win_loss_factor(our_pts, opp_pts)
 
-        our_stats = [s for s in game.player_stats if not s.is_opponent]
-        mp_records = db.query(models.GameMinutesPlayed).filter_by(game_id=game.id, is_opponent=False).all()
+        our_stats = [s for s in game.player_stats if bool(s.is_opponent) == from_theirs]
+        mp_records = db.query(models.GameMinutesPlayed).filter_by(
+            game_id=game.id, is_opponent=from_theirs).all()
         our_minutes = {r.player_name: r.minutes_played for r in mp_records}
         player_grades = _compute_grades(our_stats, our_minutes)
 
-        if player_grades:
-            avg_pg = sum(g["game_grade"] for g in player_grades) / len(player_grades)
-        else:
-            avg_pg = 0.0
-
-        team_grade = round((avg_pg * 0.6) + (win_loss_factor * 0.4), 2)
+        team_grade = _team_grade(player_grades, our_pts, opp_pts)
+        # Whose season this row belongs to, and who they played — both flip when
+        # the game is being read from the other bench.
+        row_team_id = game.team_id
+        row_team_name = team_names.get(game.team_id)
+        row_opponent = game.opponent_name
+        if from_theirs:
+            row_team_name = game.opponent_name
+            row_team_id = next((tid for tid, nm in team_names.items()
+                                if (nm or "").strip().lower() == (game.opponent_name or "").strip().lower()),
+                               None)
+            row_opponent = team_names.get(game.team_id)
 
         team_grade_trend.append({
             "game_id": game.id,
-            "opponent": game.opponent_name,
-            "team_id": game.team_id,
-            "team_name": team_names.get(game.team_id),
+            "opponent": row_opponent,
+            "team_id": row_team_id,
+            "team_name": row_team_name,
             "date": game.date.isoformat() if game.date else None,
             "team_grade": team_grade,
             "our_score": our_pts,
@@ -2290,7 +2321,7 @@ def season_dashboard(
         })
 
         for pg in player_grades:
-            key = (game.team_id, pg["player_name"])
+            key = (row_team_id, pg["player_name"])
             if key not in player_totals:
                 player_totals[key] = {"games": 0, "total_grade": 0.0, "total_off": 0.0, "total_def": 0.0}
             player_totals[key]["games"] += 1

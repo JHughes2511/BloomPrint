@@ -2273,13 +2273,35 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 </TouchableOpacity>
               )}
             </View>
+            {/* Both teams' grades when both teams' stats are in. One grade on a
+                page about two teams read as though the other side had not
+                played — and the opponent's number is the thing a scouting
+                report is arguing with. */}
             {summary && (
-              <View style={{ marginTop: 16, alignItems: 'center' }}>
-                <Text style={s.cardLabel}>{tr('teamGrade.teamGradeLabel')}</Text>
-                <Text style={{ color: t.accent, fontSize: 40, fontFamily: fonts[900], marginTop: 4 }}>
-                  {summary.team_grade.toFixed(2)}
-                </Text>
-              </View>
+              summary.opponent_team_grade == null ? (
+                <View style={{ marginTop: 16, alignItems: 'center' }}>
+                  <Text style={s.cardLabel}>{tr('teamGrade.teamGradeLabel')}</Text>
+                  <Text style={{ color: t.accent, fontSize: 40, fontFamily: fonts[900], marginTop: 4 }}>
+                    {summary.team_grade.toFixed(2)}
+                  </Text>
+                </View>
+              ) : (
+                <View style={{ marginTop: 16, flexDirection: 'row', alignItems: 'flex-start' }}>
+                  {([
+                    [(teams as any[]).find(tm => tm.id === detailGame.team_id)?.name
+                      ?? coach?.program_name ?? tr('teamGrade.ourTeam'), summary.team_grade, t.accent],
+                    [detailGame.opponent_name || tr('teamGrade.opponent'),
+                      summary.opponent_team_grade, t.negative],
+                  ] as [string, number, string][]).map(([name, grade, color]) => (
+                    <View key={name} style={{ flex: 1, alignItems: 'center' }}>
+                      <Text style={[s.cardLabel, { marginBottom: 4 }]} numberOfLines={1}>{name}</Text>
+                      <Text style={{ color, fontSize: 34, fontFamily: fonts[900] }}>
+                        {grade.toFixed(2)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )
             )}
           </View>
 
@@ -2617,11 +2639,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* This team's box score, under this team's grades. A grade is an
               argument about a player; the line beside their name is the
               evidence for it, and it was a tab away. */}
+          {/* No wrapper padding: the card sits at the same width as the player
+              grades above it and the Game Insights panels, rather than inset by
+              sixteen pixels from everything else on the page. */}
           {(detailTab === 'our' || detailTab === 'opponent') && (
-            <View style={{ paddingHorizontal: 16 }}>
-              <TeamBoxScore gameId={detailGame.id} isOpponent={detailTab === 'opponent'}
-                            refreshKey={statsVersion} />
-            </View>
+            <TeamBoxScore gameId={detailGame.id} isOpponent={detailTab === 'opponent'}
+                          refreshKey={statsVersion} />
           )}
 
           {/* Action buttons */}
