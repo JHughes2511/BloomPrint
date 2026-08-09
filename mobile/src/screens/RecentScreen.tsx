@@ -1345,7 +1345,10 @@ export default function RecentScreen() {
           it — those used to replace this view inside the same sheet, so
           pressing Send to Player looked exactly like the report closing. */}
       <Sheet visible={!!activeModal} animationType="slide" transparent onRequestClose={() => setActiveModal(null)}>
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        {/* Matches ShareModal exactly. behavior="height" asks this container to
+            resize with the viewport, and on web that pushed the report sheet
+            down the page as soon as a second sheet opened over it. */}
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'android' ? 'height' : undefined}>
           <View style={styles.modalBox}>
 
             <View style={styles.modalHeader}>
@@ -1433,7 +1436,10 @@ export default function RecentScreen() {
           after it, because a modal stacks in tree order on web. */}
       <Sheet visible={!!activeModal && modalView !== 'report'} animationType="slide" transparent
              onRequestClose={() => setModalView('report')}>
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        {/* Matches ShareModal exactly. behavior="height" asks this container to
+            resize with the viewport, and on web that pushed the report sheet
+            down the page as soon as a second sheet opened over it. */}
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'android' ? 'height' : undefined}>
           <View style={styles.subSheet}>
             <View style={styles.modalHeader}>
               <TouchableOpacity onPress={() => setModalView('report')} style={{ marginRight: 10 }}>
@@ -1711,10 +1717,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   card: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: t.card, marginHorizontal: 16, marginBottom: 8,
-    // A fixed height, not a minimum. In a grid, cards carrying a different
-    // number of lines — a packet names its report types, a film does not —
-    // came out different heights side by side, so the row read as a mistake.
-    ...desktopOnly({ height: 156, marginBottom: 0 }),
+    // A fixed height, not a minimum, and the height the cards already had. A
+    // packet card carries a third line naming its report types where a film
+    // card does not, so on a minimum they came out different heights side by
+    // side; the packet's lines are tightened to fit rather than the row grown.
+    ...desktopOnly({ height: 132, marginBottom: 0, overflow: 'hidden' }),
     borderRadius: 12, padding: 14, gap: 10,
     borderWidth: 1, borderColor: t.cardBorder,
   },
@@ -1725,9 +1732,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     width: 28, height: 28, borderRadius: 8,
     backgroundColor: t.chip, alignItems: 'center', justifyContent: 'center',
   },
-  typeName: { color: t.accent, fontSize: 12, fontFamily: fonts[600], marginTop: 2, lineHeight: 20, paddingBottom: 2 },
+  typeName: { color: t.accent, fontSize: 12, fontFamily: fonts[600], marginTop: 2, lineHeight: 16, paddingBottom: 0 },
   playerName: { color: t.ink, fontSize: 15, fontFamily: fonts[700], lineHeight: 22 },
-  sharedByLabel: { color: t.muted2, fontSize: 11, fontFamily: fonts[600], marginTop: 1, fontStyle: 'italic' },
+  sharedByLabel: { color: t.muted2, fontSize: 11, fontFamily: fonts[600], marginTop: 1, lineHeight: 14, fontStyle: 'italic' },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject, backgroundColor: t.scrim,
     alignItems: 'center', justifyContent: 'center',
