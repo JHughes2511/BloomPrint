@@ -258,12 +258,20 @@ def game_stats_commit(
     # Whole-game totals: neutral quarter, no clutch multiplier. See game_eval.
     q, mult = IMPORT_QUARTER, IMPORT_MULTIPLIER
     imported = 0
-    # Only clear the box score when a new one is being written. Committing a
-    # re-read of the team-totals panel used to arrive here with no players and
-    # wipe the box score on its way past — the coach fixed one panel and lost
-    # everything else.
-    if body.players:
-        _clear_prior_import(db, game.id)
+    # Clear only the sides this file actually covers.
+    #
+    # Clearing the whole game meant the second file replaced the first: import
+    # our stat sheet, then theirs, and ours was gone. Clearing nothing would be
+    # worse in the other direction — re-importing a corrected sheet could only
+    # ever raise a number, never lower one, and a player struck off the sheet
+    # would live on forever.
+    #
+    # So a file is authoritative for the teams it names and silent about the
+    # rest: the newest sheet for a side wins outright, and a side the file does
+    # not mention is not touched. A commit carrying no players at all (a re-read
+    # of one panel) clears nothing.
+    for side in {bool(p.get("is_opponent")) for p in body.players}:
+        _clear_prior_import(db, game.id, is_opponent=side)
     for p in body.players:
         name = str(p.get("player_name") or "").strip()
         if not name:
@@ -329,7 +337,18 @@ def game_stats_commit(
 
     events_in = shots_in = advanced_in = 0
     if body.events:
-        db.query(models.GamePlayEvent).filter_by(game_id=game.id).delete()
+        # By period, not by side. A play-by-play is one running account of both
+        # teams, so splicing half of a new one into half of an old one would
+        # give the lead tracker a scoreline that never happened — but a coach
+        # who has the first half today and the second half tomorrow should end
+        # up with a whole game, not the second half.
+        periods = {_as_int(e.get("period")) for e in body.events if isinstance(e, dict)}
+        q = db.query(models.GamePlayEvent).filter_by(game_id=game.id)
+        if None not in periods:
+            # An unlabelled event cannot be placed, so a file with any of them
+            # is taken as the whole account.
+            q = q.filter(models.GamePlayEvent.period.in_(periods))
+        q.delete(synchronize_session=False)
         for i, e in enumerate(body.events):
             if not isinstance(e, dict):
                 continue
@@ -351,7 +370,10 @@ def game_stats_commit(
             ))
             events_in += 1
     if body.shots:
-        db.query(models.GameShot).filter_by(game_id=game.id).delete()
+        # Per side, like the box score: a shot chart is usually one team's.
+        for side in {side_for(sh.get("team_name")) for sh in body.shots
+                     if isinstance(sh, dict)}:
+            db.query(models.GameShot).filter_by(game_id=game.id, is_opponent=side).delete()
         for sh in body.shots:
             if not isinstance(sh, dict):
                 continue
@@ -367,7 +389,10 @@ def game_stats_commit(
             ))
             shots_in += 1
     if body.team_stats:
-        db.query(models.GameTeamAdvanced).filter_by(game_id=game.id).delete()
+        # The totals panel is printed per team, so it replaces per team.
+        for side in {side_for(ts.get("team_name")) for ts in body.team_stats
+                     if isinstance(ts, dict)}:
+            db.query(models.GameTeamAdvanced).filter_by(game_id=game.id, is_opponent=side).delete()
         for ts in body.team_stats:
             if not isinstance(ts, dict):
                 continue

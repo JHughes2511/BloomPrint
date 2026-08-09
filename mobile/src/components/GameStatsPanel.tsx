@@ -461,9 +461,17 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
                       picked.assets.map(f => ({ uri: f.uri, name: f.name ?? 'file',
                                                 type: f.mimeType ?? 'application/octet-stream' })),
                       { game_id: gameId, section: fixing!.section, note: fixNote });
+                    // Player rows name a team, not a side, and the commit reads
+                    // the side straight off the row — without this every re-read
+                    // player would be filed under our team, taking the box score
+                    // with it. Events, shots and totals are placed server-side.
+                    const rows = fixing!.section === 'players'
+                      ? res.rows.map((r: any) => ({
+                          ...r, is_opponent: !!res.sides?.[String(r.team_name ?? '')] }))
+                      : res.rows;
                     // Only this section is committed, so the rest of the game —
                     // including anything corrected by hand — is untouched.
-                    await importsAPI.gameStatsCommit({ game_id: gameId, [fixing!.section]: res.rows } as any);
+                    await importsAPI.gameStatsCommit({ game_id: gameId, [fixing!.section]: rows } as any);
                     setFixing(null);
                     setBump(b => b + 1);
                   } finally {

@@ -661,9 +661,14 @@ def _lead_tracker(db: Session, game: models.GameSession) -> dict | None:
     changed nine times, or that an 11-point cushion evaporated in ninety
     seconds — which is the part a coach actually watches for.
     """
+    # Period first: the sequence is only meaningful within the file it came
+    # from, and halves can be imported on different days. An unlabelled event
+    # has no place in the order, so it goes last rather than at the tip-off.
     events = (db.query(models.GamePlayEvent)
                 .filter_by(game_id=game.id)
-                .order_by(models.GamePlayEvent.sequence).all())
+                .order_by(models.GamePlayEvent.period.is_(None),
+                          models.GamePlayEvent.period,
+                          models.GamePlayEvent.sequence).all())
     if not events:
         return None
 
