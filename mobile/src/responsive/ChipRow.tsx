@@ -61,7 +61,14 @@ export default function ChipRow({ children, style, gap = 8, contentContainerStyl
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      style={[style, bleed != null && bleedRow(bleed)]}
+      // flexShrink: 0 first, so a screen can still override it. react-native-web
+      // gives every ScrollView `flexGrow: 1, flexShrink: 1`, which makes a chip
+      // row a shrinkable item in the screen's column. When the content below is
+      // long enough to over-fill that column, the row is what gives: it squeezes
+      // under the pill's height, and a horizontal scroller clips what overflows
+      // it, so the pill loses its top and bottom edge. It only showed up on the
+      // filter that lists the most cards, which is why it read as a chip bug.
+      style={[{ flexShrink: 0 }, style, bleed != null && bleedRow(bleed)]}
       // gap 0: these chips space themselves with marginRight, and adding the
       // wrap gap on top would double it.
       contentContainerStyle={[bleed != null && bleedContent(bleed, 0), contentContainerStyle]}
