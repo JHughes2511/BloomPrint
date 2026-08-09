@@ -1239,19 +1239,9 @@ export default function RecentScreen() {
                 </View>
               )}
 
-              {/* Content toggles */}
-              {staffShareCtx?.report_type === 'training' ? (
-                <>
-                  {[
-                    { key: 'share_report_text', label: tr('recent.toggles.programText') },
-                  ].map(tog => (
-                    <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider }}>
-                      <Text style={{ color: t.inkSoft, fontSize: 13, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }} numberOfLines={2}>{tog.label}</Text>
-                      <Switch value={staffShareToggles[tog.key as keyof typeof staffShareToggles]} onValueChange={v => setStaffShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: t.line, true: t.brown }} thumbColor="#fff" />
-                    </View>
-                  ))}
-                </>
-              ) : (
+              {/* A training program's text IS what is being sent — the section
+                  switches decide how much of it goes. See the player send sheet. */}
+              {staffShareCtx?.report_type === 'training' ? null : (
                 <>
                   {[
                     { key: 'share_report_text', label: tr('recent.toggles.reportText') },
@@ -1351,22 +1341,17 @@ export default function RecentScreen() {
       </Sheet>
 
       {/* Single modal — swaps between report / send / correct views */}
+      {/* The report. It stays on screen while Send or Correct opens OVER
+          it — those used to replace this view inside the same sheet, so
+          pressing Send to Player looked exactly like the report closing. */}
       <Sheet visible={!!activeModal} animationType="slide" transparent onRequestClose={() => setActiveModal(null)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
 
-            {/* Header — back arrow when in sub-view */}
             <View style={styles.modalHeader}>
-              {modalView !== 'report' ? (
-                <TouchableOpacity onPress={() => setModalView('report')} style={{ marginRight: 10 }}>
-                  <Ionicons name="arrow-back" size={22} color={t.muted} />
-                </TouchableOpacity>
-              ) : null}
               <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
                 <Text style={styles.modalTitle} numberOfLines={1}>
-                  {modalView === 'send' ? tr('recent.sendReport') :
-                   modalView === 'correct' ? tr('recent.correctReport') :
-                   (outputTypeLabel(activeModal?.outputType) ?? tr('reportTypes.report'))}
+                  {outputTypeLabel(activeModal?.outputType) ?? tr('reportTypes.report')}
                 </Text>
                 {modalView === 'report' && activeModal?.playerName && (
                   <Text style={styles.modalSub} numberOfLines={1}>{activeModal.playerName}</Text>
@@ -1440,6 +1425,29 @@ export default function RecentScreen() {
               </>
             )}
 
+          </View>
+        </KeyboardAvoidingView>
+      </Sheet>
+
+      {/* Send / Correct, in their own sheet ON TOP of the report. Rendered
+          after it, because a modal stacks in tree order on web. */}
+      <Sheet visible={!!activeModal && modalView !== 'report'} animationType="slide" transparent
+             onRequestClose={() => setModalView('report')}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={styles.subSheet}>
+            <View style={styles.modalHeader}>
+              <TouchableOpacity onPress={() => setModalView('report')} style={{ marginRight: 10 }}>
+                <Ionicons name="arrow-back" size={22} color={t.muted} />
+              </TouchableOpacity>
+              <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+                <Text style={styles.modalTitle} numberOfLines={1}>
+                  {modalView === 'send' ? tr('recent.sendReport') : tr('recent.correctReport')}
+                </Text>
+              </View>
+              <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setModalView('report')}>
+                <Ionicons name="close" size={24} color={t.muted} />
+              </TouchableOpacity>
+            </View>
             {/* SEND VIEW */}
             {modalView === 'send' && (
               <>
@@ -1462,18 +1470,11 @@ export default function RecentScreen() {
                 </View>
 
                 {/* Content toggles */}
-                {activeModal?.kind === 'training' ? (
-                  <View style={{ marginBottom: 10 }}>
-                    {[
-                      { key: 'share_report_text', label: tr('recent.toggles.programText') },
-                    ].map(tog => (
-                      <View key={tog.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: t.divider }}>
-                        <Text style={{ color: t.inkSoft, fontSize: 13, flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }} numberOfLines={2}>{tog.label}</Text>
-                        <Switch value={playerShareToggles[tog.key as keyof typeof playerShareToggles]} onValueChange={v => setPlayerShareToggles(prev => ({ ...prev, [tog.key]: v }))} trackColor={{ false: t.line, true: t.positive }} thumbColor="#fff" />
-                      </View>
-                    ))}
-                  </View>
-                ) : (
+                {/* A training program has no separate payloads to pick from —
+                    the program text is the thing being sent, and the section
+                    switches below decide how much of it goes. A master "Share
+                    Program Text" row could only ever send nothing. */}
+                {activeModal?.kind === 'training' ? null : (
                   <View style={{ marginBottom: 10 }}>
                     {[
                       { key: 'share_report_text', label: tr('recent.toggles.reportText') },
@@ -1608,7 +1609,6 @@ export default function RecentScreen() {
                 )}
               </>
             )}
-
           </View>
         </KeyboardAvoidingView>
       </Sheet>
@@ -1711,7 +1711,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   card: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: t.card, marginHorizontal: 16, marginBottom: 8,
-    ...desktopOnly({ minHeight: 132, marginBottom: 0 }),
+    // A fixed height, not a minimum. In a grid, cards carrying a different
+    // number of lines — a packet names its report types, a film does not —
+    // came out different heights side by side, so the row read as a mistake.
+    ...desktopOnly({ height: 156, marginBottom: 0 }),
     borderRadius: 12, padding: 14, gap: 10,
     borderWidth: 1, borderColor: t.cardBorder,
   },
@@ -1731,6 +1734,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   modalBox: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, ...sheetCap(REPORT_MODAL_WIDTH)},
+  // Send and Correct are forms, not documents: they take the same width as the
+  // share sheet rather than the full reading width a report needs.
+  subSheet: { backgroundColor: t.sheet, borderRadius: 20, padding: 20, maxHeight: '90%', margin: 8, ...sheetCap(560) },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
   modalTitle: { color: t.ink, fontSize: 18, fontFamily: fonts[800] },
   modalSub: { color: t.muted2, fontSize: 12, marginTop: 4, lineHeight: 18 },
