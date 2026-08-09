@@ -995,6 +995,18 @@ export default function RecentScreen() {
                         {outputTypeNames(item.output_type)}
                       </Text>
                     )}
+                    {/* The program's own name, in the same slot and the same
+                        style the packet uses for its contents — the profile
+                        names a training program by its title, and a list of
+                        "Training Program" rows under the same player never
+                        said which one. No date: the card already sits under a
+                        day header. Programs saved before titles existed simply
+                        don't get the line. */}
+                    {item.kind === 'training' && !!item.title && (
+                      <Text numberOfLines={1} style={styles.sharedByLabel}>
+                        {item.title}
+                      </Text>
+                    )}
                     {item.shared && (
                       <Text numberOfLines={1} style={styles.sharedByLabel}>
                         {tr('recent.sharedBy', { name: item.sender_name })}
