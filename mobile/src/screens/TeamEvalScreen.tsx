@@ -337,7 +337,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [scoutData, setScoutData] = useState<any | null>(null);
   // Written sentences by subject: 'offense' | 'defense' | 'weak' | a player's name.
   const [insights, setInsights] = useState<Record<string, { insight: string; games: number }>>({});
-  const [insightBusy, setInsightBusy] = useState<string | null>(null);
+  // Keyed, not a single value: the three team sections are written at the
+  // same time, and one flag meant two of the three spinners went missing.
+  const [insightBusy, setInsightBusy] = useState<Record<string, boolean>>({});
   const [scoutPlayer, setScoutPlayer] = useState<string | null>(null);
   const [loadingScout, setLoadingScout] = useState(false);
   const [regeneratingScout, setRegeneratingScout] = useState(false);
@@ -1391,14 +1393,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
    * same page twice costs nothing.
    */
   const loadInsight = async (team: string, subject: string, refresh = false) => {
-    setInsightBusy(subject);
+    setInsightBusy(prev => ({ ...prev, [subject]: true }));
     try {
       const res = await gameEvalAPI.scoutInsight(team, subject, refresh);
       setInsights(prev => ({ ...prev, [subject]: res }));
     } catch {
       // A sentence that could not be written must not take the numbers with it.
     } finally {
-      setInsightBusy(null);
+      setInsightBusy(prev => ({ ...prev, [subject]: false }));
     }
   };
 
@@ -1417,6 +1419,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setNewNoteText('');
     setScoutPlayer(null);
     setInsights({});
+    setInsightBusy({});
     setLoadingScout(true);
     setLoadingNotes(true);
     try {
@@ -1428,12 +1431,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       setScoutData(data);
       setScoutNotes(notes);
       setInsights(kept as any);
-      // Write only what is missing or was written from fewer games than the
-      // page is now showing.
+      setLoadingScout(false);
+      // Written sentences are NOT awaited. Three of them are three calls to
+      // the model, and awaiting them here held the whole page on a spinner for
+      // as long as they took — the games, the players and the numbers were all
+      // sitting in `data`, ready, behind a wait for prose. They fill in where
+      // they belong instead, and only when missing or written from fewer games
+      // than the page is now showing.
       const n = data?.games_count ?? 0;
       for (const key of ['offense', 'defense', 'weak']) {
         const at = (kept as any)[key];
-        if (!at || at.games !== n) await loadInsight(opponentName, key, true);
+        if (!at || at.games !== n) void loadInsight(opponentName, key, true);
       }
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamGrade.couldNotLoadScout'));
@@ -2800,14 +2808,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           ) : (
             <>
               <TouchableOpacity
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 }}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}
                 onPress={() => { setScoutOpponent(null); setScoutData(null); }}
               >
                 <Ionicons name="arrow-back" size={18} color={t.muted} />
                 <Text style={{ color: t.muted, fontSize: 14 }}>{tr('teamGrade.allOpponents')}</Text>
               </TouchableOpacity>
 
-              <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900], marginBottom: 4 }}>{scoutOpponent}</Text>
+              {/* Sits closer to the back link and further from the first card,
+                  so the name reads as this page's title rather than as a label
+                  attached to the box under it. */}
+              <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900], marginBottom: 14 }}>{scoutOpponent}</Text>
 
               {loadingScout ? (
                 <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />
@@ -2886,7 +2897,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                             </TouchableOpacity>
                             {open && (
                               <View style={{ paddingBottom: 10, paddingRight: 8 }}>
-                                {insightBusy === p.player_name
+                                {insightBusy[p.player_name]
                                   ? <ActivityIndicator color={t.accent} size="small" style={{ alignSelf: 'flex-start' }} />
                                   : <Text style={{ color: t.inkSoft, fontSize: 13, lineHeight: 19 }}>
                                       {insights[p.player_name]?.insight ?? tr('teamGrade.noInsight')}
@@ -2911,7 +2922,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                       .map(([key, label, rows], i) => (
                         <View key={key} style={{ marginTop: i === 0 ? 0 : 16 }}>
                           <Text style={s.cardLabel}>{label}</Text>
-                          {insightBusy === key
+                          {insightBusy[key]
                             ? <ActivityIndicator color={t.accent} size="small" style={{ alignSelf: 'flex-start', marginBottom: 6 }} />
                             : !!insights[key] && (
                                 <Text style={{ color: t.ink, fontSize: 14, lineHeight: 20, marginBottom: 8 }}>

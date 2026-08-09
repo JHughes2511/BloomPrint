@@ -117,6 +117,7 @@ def init_db():
     _reparse_eval_sections()
     _backfill_training_titles()
     _claim_linked_players()
+    _backfill_rosters_from_games()
 
 
 def _claim_linked_players():
@@ -150,6 +151,52 @@ def _claim_linked_players():
             if claimed:
                 sess.commit()
                 log.info("Claimed %s linked player(s) onto their coach's roster", claimed)
+    except Exception:
+        # A repair that cannot run must not stop the app from starting.
+        pass
+
+
+def _backfill_rosters_from_games():
+    """Put players already recorded in games onto their teams' rosters.
+
+    Roster push-back arrived after games had been imported, so a coach could
+    have a full box score for a team and an empty roster page for it — the
+    names were in the database the whole time, as stat rows, just never turned
+    into players. This walks the games once and does what an import does now.
+
+    Idempotent: it adds only names a team does not already have, so running it
+    on every boot changes nothing after the first. Jersey numbers are NOT
+    invented — the old reader never captured them, and a squad number is not
+    something to guess. Re-importing the file is what fills those in.
+    """
+    try:
+        from sqlalchemy.orm import Session as _Session
+        from . import models
+        from .routes.imports import _sync_roster
+
+        with _Session(engine) as sess:
+            games = sess.query(models.GameSession).all()
+            added = 0
+            for game in games:
+                stats = sess.query(models.GamePlayerStat).filter_by(game_id=game.id).all()
+                if not stats:
+                    continue
+                coach = sess.get(models.Coach, game.coach_id)
+                if coach is None:
+                    continue
+                seen: dict[tuple[str, bool], dict] = {}
+                for st in stats:
+                    key = (st.player_name, bool(st.is_opponent))
+                    if key not in seen:
+                        seen[key] = {"player_name": st.player_name,
+                                     "is_opponent": bool(st.is_opponent),
+                                     "jersey_number": getattr(st, "jersey_number", None)}
+                    elif not seen[key]["jersey_number"]:
+                        seen[key]["jersey_number"] = getattr(st, "jersey_number", None)
+                result = _sync_roster(sess, game, coach, list(seen.values()))
+                added += result.get("added", 0)
+            if added:
+                log.info("Backfilled %s player(s) onto rosters from recorded games", added)
     except Exception:
         # A repair that cannot run must not stop the app from starting.
         pass
