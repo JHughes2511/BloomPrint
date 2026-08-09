@@ -1798,7 +1798,6 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: gamesGrid.gap, paddingHorizontal: 16 })}
                   onLayout={gamesGrid.onLayout}>
             {filteredSessions.map((game: any) => {
-              const won = game.our_score != null && game.opponent_score != null && game.our_score > game.opponent_score;
               const hasScore = game.our_score != null;
               return (
                 <TouchableOpacity
@@ -1808,21 +1807,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 >
                   <View style={{ flex: 1 }}>
                     <Text style={s.gameCardOpponent} numberOfLines={1}>{matchupLabel(game)}</Text>
+                    {/* The score, plainly. It used to sit inside a green or red
+                        W/L pill, which restated what the two numbers already
+                        say — and with the matchup written as "Angola vs Egypt",
+                        a bare W left it open whose W it was. */}
                     <Text style={{ color: t.muted, fontSize: 11, marginTop: 2 }}>
                       {new Date(game.date).toLocaleDateString()} · {phaseLabel(game.season_phase)}
                       {game.location ? ` · ${game.location}` : ''}
+                      {hasScore ? ` · ${game.our_score}-${game.opponent_score}` : ''}
                     </Text>
                   </View>
                   <View style={{ alignItems: 'flex-end', gap: 4 }}>
-                    {hasScore ? (
-                      <>
-                        <View style={[s.wlBadge, { backgroundColor: won ? t.positiveSoft : t.negativeSoft }]}>
-                          <Text style={[s.wlText, { color: won ? t.positive : t.negative }]}>
-                            {won ? tr('teamGrade.winShort') : tr('teamGrade.lossShort')} {game.our_score}-{game.opponent_score}
-                          </Text>
-                        </View>
-                      </>
-                    ) : null}
                     <View style={[s.statusBadge, game.status === 'in_progress' && { backgroundColor: t.accentSoft }]}>
                       <Text style={[s.statusText, game.status === 'in_progress' && { color: t.accent }]}>
                         {game.status === 'in_progress' ? tr('teamGrade.statusInProgress') : tr('teamGrade.statusDone')}
@@ -2882,27 +2877,23 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               )}
               <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap, paddingHorizontal: 16 })}
                     onLayout={reportGrid.onLayout}>
-              {sessions.map((g: any) => {
-                const won = g.our_score != null && g.opponent_score != null && g.our_score > g.opponent_score;
-                return (
-                  <TouchableOpacity key={g.id} style={[s.gameCard, reportGrid.cardWidth ? { width: reportGrid.cardWidth } : null]} onPress={() => openGameReport(g)}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[700] }}>{matchupLabel(g)}</Text>
-                      <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>
-                        {g.date ? new Date(g.date).toLocaleDateString() : ''}
-                        {g.our_score != null ? `  ·  ${g.our_score}-${g.opponent_score}` : ''}
-                        {g.ai_game_report ? `  ·  ${tr('teamGrade.reportReady')}` : ''}
-                      </Text>
-                    </View>
-                    {g.our_score != null && (
-                      <View style={[s.wlBadge, { backgroundColor: won ? t.positiveSoft : t.negativeSoft }]}>
-                        <Text style={[s.wlText, { color: won ? t.positive : t.negative }]}>{won ? 'W' : 'L'}</Text>
-                      </View>
-                    )}
-                    <Ionicons name="chevron-forward" size={18} color={t.muted} />
-                  </TouchableOpacity>
-                );
-              })}
+              {/* No W/L badge. The card already carries "Angola vs Egypt" and
+                  "83-72"; a bare W beside them says nothing the two numbers do
+                  not, and without a team on it there was no way to tell whose
+                  W it was. */}
+              {sessions.map((g: any) => (
+                <TouchableOpacity key={g.id} style={[s.gameCard, reportGrid.cardWidth ? { width: reportGrid.cardWidth } : null]} onPress={() => openGameReport(g)}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[700] }}>{matchupLabel(g)}</Text>
+                    <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>
+                      {g.date ? new Date(g.date).toLocaleDateString() : ''}
+                      {g.our_score != null ? `  ·  ${g.our_score}-${g.opponent_score}` : ''}
+                      {g.ai_game_report ? `  ·  ${tr('teamGrade.reportReady')}` : ''}
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={t.muted} />
+                </TouchableOpacity>
+              ))}
               </View>
             </>
           ) : (
@@ -2915,8 +2906,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 <Text style={{ color: t.muted, fontSize: 14 }}>{tr('teamGrade.allGames')}</Text>
               </TouchableOpacity>
 
+              {/* Both teams. A game report is about the two of them and this
+                  page named one, so it read as a report on the opponent. */}
               <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900], marginBottom: 2 }}>
-                {tr('teamGrade.vsOpponent', { opponent: gameReportGame.opponent_name })}
+                {matchupLabel(gameReportGame)}
               </Text>
               <Text style={{ color: t.muted2, fontSize: 13, marginBottom: 12 }}>
                 {gameReportGame.date ? new Date(gameReportGame.date).toLocaleDateString() : ''}
@@ -2934,6 +2927,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                       <GameReportPanel
                         gameId={gameReportGame.id}
                         opponentName={gameReportGame.opponent_name}
+                        ourTeamName={(teams as any[]).find(tm => tm.id === gameReportGame.team_id)?.name
+                                     ?? coach?.program_name}
                         hasReport={!!gameReportGame.ai_game_report}
                         onRegenerated={(text) => setGameReportGame((prev: any) => ({ ...prev, ai_game_report: text }))}
                       />

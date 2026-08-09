@@ -949,20 +949,59 @@ def get_box_score_text(
     return {"text": box_score_text(db, game)}
 
 
+def _team_notes_text(db: Session, coach: models.Coach, game) -> str:
+    """Everything the coach has asked to be remembered about EITHER team here.
+
+    Notes are kept against a team's name, so a game between two named teams has
+    two drawers to read. Reading only the opponent's meant a note a coach wrote
+    about their own side went into the store and never came back out of it.
+    """
+    names: list[tuple[str, bool]] = []
+    team_row = db.get(models.Team, game.team_id) if game.team_id else None
+    ours = (team_row.name if team_row else None) or coach.program_name
+    if ours:
+        names.append((ours, False))
+    if game.opponent_name and (not ours or ours.strip().lower() != game.opponent_name.strip().lower()):
+        names.append((game.opponent_name, True))
+
+    out = ""
+    for name, is_opp in names:
+        rows = (db.query(models.OpponentNote)
+                  .filter_by(coach_id=coach.id, opponent_name=name)
+                  .order_by(models.OpponentNote.created_at).all())
+        if not rows:
+            continue
+        heading = f"COACH NOTES ON {name.upper()}" + (" (the opponent)" if is_opp else " (our team)")
+        out += f"\n\n{heading}:\n" + "\n".join(f"- {n.note_text}" for n in rows)
+    return out
+
+
 def _file_edits(db: Session, game, coach: models.Coach, edits: list[str],
-                remember: bool, correction_model) -> None:
+                remember: bool, correction_model, remember_team: str | None = None) -> None:
     """Keep what the coach typed, in whichever drawer they chose.
 
     The endpoint does this rather than the screen. When the screen owned it, a
     caller that did not happen to save the note first would have the text
     applied to the report and stored nowhere — it would shape this one
     regeneration and then be gone.
+
+    A game has two teams and either can be the subject. `remember` files the
+    note against the opponent; `remember_team` files it against a named team,
+    which is how something worth keeping about the coach's own side is kept.
+    Both may be on: notes are stored per team name, so the same sentence lands
+    once for each.
     """
     for text in edits:
+        kept = False
         if remember and game.opponent_name:
             db.add(models.OpponentNote(coach_id=coach.id,
                                        opponent_name=game.opponent_name, note_text=text))
-        else:
+            kept = True
+        if remember_team:
+            db.add(models.OpponentNote(coach_id=coach.id,
+                                       opponent_name=remember_team, note_text=text))
+            kept = True
+        if not kept:
             db.add(correction_model(game_id=game.id, coach_id=coach.id, correction=text))
     if edits:
         db.commit()
@@ -1649,15 +1688,7 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
         result = "WIN" if game.our_score > game.opponent_score else "LOSS"
         score_info = f"Final score: {game.our_score}-{game.opponent_score} ({result})"
 
-    notes = (
-        db.query(models.OpponentNote)
-        .filter_by(coach_id=coach.id, opponent_name=game.opponent_name)
-        .order_by(models.OpponentNote.created_at)
-        .all()
-    )
-    notes_text = ""
-    if notes:
-        notes_text = "\n\nCOACH NOTES (observed by coaching staff):\n" + "\n".join(f"- {n.note_text}" for n in notes)
+    notes_text = _team_notes_text(db, coach, game)
 
     corr_text = ""
     if corrections:
@@ -1810,7 +1841,8 @@ def start_ai_scouting(
     # working. The text is passed through explicitly instead.
     edits = _edits_from_body(body)
     _file_edits(db, game, coach, edits, bool((body or {}).get("remember")),
-                models.GameScoutingCorrection)
+                models.GameScoutingCorrection,
+                remember_team=((body or {}).get("remember_team") or None))
     job = genjob.start(db, coach.id, "scouting",
                        {"game_id": game_id, "coach_id": coach.id, "edits": edits})
     background_tasks.add_task(_run_scouting_job, game_id, coach.id, job.id, edits)
@@ -1862,10 +1894,7 @@ async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSe
         res = "WIN" if game.our_score > game.opponent_score else ("LOSS" if game.our_score < game.opponent_score else "TIE")
         score_info = f"Final: {game.our_score}-{game.opponent_score} ({res})"
 
-    notes = db.query(models.OpponentNote).filter_by(coach_id=coach.id, opponent_name=game.opponent_name).all()
-    context = ""
-    if notes:
-        context += "\n\nCOACH NOTES ON THE OPPONENT:\n" + "\n".join(f"- {n.note_text}" for n in notes)
+    context = _team_notes_text(db, coach, game)
     if corrections:
         context += (
             "\n\nCOACH CONTEXT & ADJUSTMENTS (qualitative detail the box score can't capture — "
@@ -1966,7 +1995,8 @@ def start_full_game_report(
     game = _get_game_readable(db, game_id, coach)
     edits = _edits_from_body(body)
     _file_edits(db, game, coach, edits, bool((body or {}).get("remember")),
-                models.GameSessionReportCorrection)
+                models.GameSessionReportCorrection,
+                remember_team=((body or {}).get("remember_team") or None))
     job = genjob.start(db, coach.id, "game_report_full",
                        {"game_id": game_id, "coach_id": coach.id, "edits": edits})
     background_tasks.add_task(_run_game_report_job, game_id, coach.id, job.id, edits)

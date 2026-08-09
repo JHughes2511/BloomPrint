@@ -22,18 +22,23 @@ import { fonts } from '../theme/typography';
 export type GameReportPanelProps = {
   gameId: number;
   opponentName?: string;
+  ourTeamName?: string;
   hasReport?: boolean;
   onRegenerated?: (newText: string) => void;
 };
 
-export default function GameReportPanel({ gameId, opponentName, hasReport, onRegenerated }: GameReportPanelProps) {
+export default function GameReportPanel({ gameId, opponentName, ourTeamName, hasReport, onRegenerated }: GameReportPanelProps) {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
   const s = makeStyles(t);
   const [notes, setNotes] = useState<any[]>([]);
+  const [ourNotes, setOurNotes] = useState<any[]>([]);
   const [corrections, setCorrections] = useState<any[]>([]);
   const [text, setText] = useState('');
+  // Which team the typed note is about. Both off means it belongs to this
+  // report alone, which is what it always used to mean.
   const [remember, setRemember] = useState(false);
+  const [rememberOurs, setRememberOurs] = useState(false);
   const [busy, setBusy] = useState(false);
   const [applying, setApplying] = useState(false);
   const [progress, setProgress] = useState('');
@@ -56,15 +61,23 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
     if (opponentName) {
       try { setNotes(await gameEvalAPI.getOpponentNotes(opponentName)); } catch { setNotes([]); }
     }
+    // Notes are kept against a team's NAME, so our own team reads from the same
+    // store — a note about Angola is a note about Angola whichever bench the
+    // coach was on when they wrote it.
+    if (ourTeamName) {
+      try { setOurNotes(await gameEvalAPI.getOpponentNotes(ourTeamName)); } catch { setOurNotes([]); }
+    }
   };
-  useEffect(() => { reload(); loadVersions(); }, [gameId, opponentName]);
+  useEffect(() => { reload(); loadVersions(); }, [gameId, opponentName, ourTeamName]);
 
   const add = async () => {
     if (!text.trim()) return;
     setBusy(true);
     try {
-      if (remember && opponentName) await gameEvalAPI.addOpponentNote(opponentName, text.trim());
-      else await gameEvalAPI.addGameReportCorrection(gameId, text.trim());
+      let filed = false;
+      if (remember && opponentName) { await gameEvalAPI.addOpponentNote(opponentName, text.trim()); filed = true; }
+      if (rememberOurs && ourTeamName) { await gameEvalAPI.addOpponentNote(ourTeamName, text.trim()); filed = true; }
+      if (!filed) await gameEvalAPI.addGameReportCorrection(gameId, text.trim());
       setText('');
       await reload();
       Alert.alert(tr('components.gameReport.saved'), tr('components.gameReport.contextSaved'));
@@ -89,7 +102,8 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
       // See ScoutContextPanel: the server files the text and applies it.
       if (typed) setText('');
       const res = await gameEvalAPI.applyGameReportCorrections(
-        gameId, { text: typed || undefined, remember: !!(remember && opponentName) }, setProgress);
+        gameId, { text: typed || undefined, remember: !!(remember && opponentName),
+                  remember_team: rememberOurs && ourTeamName ? ourTeamName : undefined }, setProgress);
       await reload();
       await loadVersions();
       onRegenerated?.(res.ai_game_report ?? '');
@@ -111,15 +125,18 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
         onChangeText={setText}
         multiline
       />
-      {!!opponentName && (
-        <View style={s.rememberRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={s.rememberLabel}>{tr('components.gameReport.rememberFor', { opponent: opponentName })}</Text>
-            <Text style={s.rememberSub}>{remember ? tr('components.gameReport.rememberOn') : tr('components.gameReport.rememberOff')}</Text>
+      {([[ourTeamName, rememberOurs, setRememberOurs] as const,
+         [opponentName, remember, setRemember] as const])
+        .filter(([name]) => !!name)
+        .map(([name, on, set]) => (
+          <View key={name} style={s.rememberRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={s.rememberLabel}>{tr('components.gameReport.rememberFor', { opponent: name })}</Text>
+              <Text style={s.rememberSub}>{on ? tr('components.gameReport.rememberOn') : tr('components.gameReport.rememberOff')}</Text>
+            </View>
+            <Switch value={on} onValueChange={set} trackColor={{ false: t.line, true: t.accent }} thumbColor="#fff" />
           </View>
-          <Switch value={remember} onValueChange={setRemember} trackColor={{ false: t.line, true: t.accent }} thumbColor="#fff" />
-        </View>
-      )}
+        ))}
 
       <View style={s.btnRow}>
         <TouchableOpacity style={[s.secondaryBtn, (!text.trim() || busy) && { opacity: 0.5 }]} onPress={add} disabled={!text.trim() || busy}>
@@ -136,18 +153,20 @@ export default function GameReportPanel({ gameId, opponentName, hasReport, onReg
       </View>
 
       <ScrollView style={{ maxHeight: 200, marginTop: 12 }}>
-        {!!opponentName && (
-          <>
-            <Text style={s.section}>{tr('components.gameReport.rememberedAbout', { opponent: String(opponentName).toUpperCase() })}</Text>
-            {notes.length === 0 && <Text style={s.empty}>{tr('components.gameReport.noneYet')}</Text>}
-            {notes.map((n: any) => (
-              <View key={`note-${n.id}`} style={s.row}>
-                <Text style={s.rowText}>{n.note_text ?? n.text}</Text>
-                <TouchableOpacity onPress={() => delNote(n.id)}><Ionicons name="trash-outline" size={16} color={t.negative} /></TouchableOpacity>
-              </View>
-            ))}
-          </>
-        )}
+        {([[ourTeamName, ourNotes] as const, [opponentName, notes] as const])
+          .filter(([name]) => !!name)
+          .map(([name, list]) => (
+            <React.Fragment key={`kept-${name}`}>
+              <Text style={s.section}>{tr('components.gameReport.rememberedAbout', { opponent: String(name).toUpperCase() })}</Text>
+              {list.length === 0 && <Text style={s.empty}>{tr('components.gameReport.noneYet')}</Text>}
+              {list.map((n: any) => (
+                <View key={`note-${n.id}`} style={s.row}>
+                  <Text style={s.rowText}>{n.note_text ?? n.text}</Text>
+                  <TouchableOpacity onPress={() => delNote(n.id)}><Ionicons name="trash-outline" size={16} color={t.negative} /></TouchableOpacity>
+                </View>
+              ))}
+            </React.Fragment>
+          ))}
         <Text style={[s.section, { marginTop: 10 }]}>{tr('components.gameReport.thisReport')}</Text>
         {corrections.length === 0 && <Text style={s.empty}>{tr('components.gameReport.noneYet')}</Text>}
         {corrections.map((c: any) => (

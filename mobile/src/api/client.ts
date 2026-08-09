@@ -728,7 +728,7 @@ export const gameEvalAPI = {
    */
   applyGameReportCorrections: async (
     gameId: number,
-    body: { text?: string; remember?: boolean } = {},
+    body: { text?: string; remember?: boolean; remember_team?: string } = {},
     onTick?: (s: string) => void,
   ) => {
     const { job_id } = await api.post(`/game-eval/sessions/${gameId}/game-report-job`, body).then(r => r.data);
