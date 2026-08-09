@@ -605,6 +605,22 @@ export default function TeamEvalScreen({ route, navigation }: any) {
    * Both are shown. Where the same player is in both, the one saved against
    * this opponent wins: it is the more recently corrected of the two.
    */
+  /**
+   * The team in this coach's system that IS the opponent, if they built one.
+   *
+   * Opening a game straight from a link can beat the team list to the screen,
+   * and a roster missing because of a race is indistinguishable from one that
+   * was never built — so the list is fetched rather than assumed.
+   */
+  const findOpponentTeam = async (game: any) => {
+    let known = teams;
+    if (!known.length) {
+      try { known = await teamsAPI.list(); } catch { known = []; }
+    }
+    return known.find((tm: any) => norm(tm.name) === norm(game.opponent_name)
+                                && tm.id !== game.team_id);
+  };
+
   const loadOpponentRoster = async (game: any) => {
     const merged: any[] = [];
     const seen = new Set<string>();
@@ -617,15 +633,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     try {
       (await gameEvalAPI.listOpponentPlayers(game.opponent_name)).forEach(push);
     } catch { /* an opponent with nothing saved is not an error */ }
-    // Opening a game straight from a link can beat the team list to the screen,
-    // and a roster that is missing because of a race is indistinguishable from
-    // one that was never built.
-    let known = teams;
-    if (!known.length) {
-      try { known = await teamsAPI.list(); } catch { known = []; }
-    }
-    const theirTeam = known.find(
-      (tm: any) => norm(tm.name) === norm(game.opponent_name) && tm.id !== game.team_id);
+    const theirTeam = await findOpponentTeam(game);
     if (theirTeam) {
       try {
         (await playersAPI.list(theirTeam.id)).forEach((p: any) => push({
@@ -706,6 +714,25 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         : [...prev, saved]);
       setOpponentPlayers(prev => prev.includes(saved.player_name) ? prev : [...prev, saved.player_name]);
       setSelectedPlayer(saved.player_name);
+      // If the coach has built this opponent as a team, the player belongs on
+      // it — someone added during a game was previously only ever known to that
+      // game, so the same name had to be typed again next time they played.
+      const theirTeam = await findOpponentTeam(activeGame);
+      if (theirTeam) {
+        try {
+          const existing = await playersAPI.list(theirTeam.id);
+          if (!existing.some((p: any) => norm(p.name) === norm(name))) {
+            await playersAPI.create({
+              name, team_id: theirTeam.id,
+              jersey_number: newOppJersey.trim() || undefined,
+              position: newOppPosition.trim() || undefined,
+            });
+          }
+        } catch {
+          // The game is what matters here. A roster that did not take can be
+          // fixed on the Roster page; a stat that cannot be tapped cannot.
+        }
+      }
     } catch {
       // Don't block stat entry if the save fails — keep the name locally.
       setOpponentPlayers(prev => prev.includes(name) ? prev : [...prev, name]);
