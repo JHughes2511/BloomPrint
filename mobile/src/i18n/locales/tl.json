@@ -2233,7 +2233,10 @@
     "finalLabel": "Tapos",
     "ourPlayerNamePlaceholder": "Pangalan ng manlalaro...",
     "couldNotAddPlayer": "Hindi naidagdag ang manlalarong iyon.",
-    "setScore": "Ilagay ang iskor"
+    "setScore": "Ilagay ang iskor",
+    "perGameLine": "{{pts}} puntos · {{reb}} reb · {{ast}} ast · {{stl}} steal · {{blk}} block · {{to}} turnover",
+    "perGameStat": "{{stat}} — {{n}} kada laro",
+    "noInsight": "Wala pang pagsusuri."
   },
   "whiteboard": {
     "title": "Whiteboard",

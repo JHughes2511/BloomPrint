@@ -2233,7 +2233,10 @@
     "finalLabel": "Final",
     "ourPlayerNamePlaceholder": "Nombre del jugador...",
     "couldNotAddPlayer": "No se pudo añadir ese jugador.",
-    "setScore": "Poner marcador"
+    "setScore": "Poner marcador",
+    "perGameLine": "{{pts}} pts · {{reb}} reb · {{ast}} ast · {{stl}} rob · {{blk}} tap · {{to}} pér",
+    "perGameStat": "{{stat}} — {{n}} por partido",
+    "noInsight": "Aún no hay análisis."
   },
   "whiteboard": {
     "title": "Pizarra",

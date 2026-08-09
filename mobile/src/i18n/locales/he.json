@@ -2233,7 +2233,10 @@
     "finalLabel": "סיום",
     "ourPlayerNamePlaceholder": "שם השחקן...",
     "couldNotAddPlayer": "לא ניתן היה להוסיף את השחקן.",
-    "setScore": "הזנת תוצאה"
+    "setScore": "הזנת תוצאה",
+    "perGameLine": "{{pts}} נק' · {{reb}} ריב' · {{ast}} אס' · {{stl}} חט' · {{blk}} חס' · {{to}} איב'",
+    "perGameStat": "{{stat}} — {{n}} למשחק",
+    "noInsight": "אין עדיין תובנה."
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

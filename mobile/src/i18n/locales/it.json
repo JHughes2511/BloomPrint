@@ -2233,7 +2233,10 @@
     "finalLabel": "Finale",
     "ourPlayerNamePlaceholder": "Nome del giocatore...",
     "couldNotAddPlayer": "Non è stato possibile aggiungere il giocatore.",
-    "setScore": "Inserisci punteggio"
+    "setScore": "Inserisci punteggio",
+    "perGameLine": "{{pts}} pti · {{reb}} rimb · {{ast}} ass · {{stl}} rec · {{blk}} stop · {{to}} perse",
+    "perGameStat": "{{stat}} — {{n}} a partita",
+    "noInsight": "Ancora nessuna analisi."
   },
   "whiteboard": {
     "title": "Lavagna",

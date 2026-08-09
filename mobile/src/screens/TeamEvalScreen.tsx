@@ -335,6 +335,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // Opponent scout
   const [scoutOpponent, setScoutOpponent] = useState<string | null>(null);
   const [scoutData, setScoutData] = useState<any | null>(null);
+  // Written sentences by subject: 'offense' | 'defense' | 'weak' | a player's name.
+  const [insights, setInsights] = useState<Record<string, { insight: string; games: number }>>({});
+  const [insightBusy, setInsightBusy] = useState<string | null>(null);
+  const [scoutPlayer, setScoutPlayer] = useState<string | null>(null);
   const [loadingScout, setLoadingScout] = useState(false);
   const [regeneratingScout, setRegeneratingScout] = useState(false);
   const [scoutNotes, setScoutNotes] = useState<any[]>([]);
@@ -1378,21 +1382,59 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
   // ── Opponent scout ────────────────────────────────────────────────────────────
 
+  /**
+   * One written sentence, fetched once and kept.
+   *
+   * Nothing here is written speculatively: the three team sections are asked
+   * for when the page opens, and a player's only when that player is tapped.
+   * Anything already stored comes back from /insights for free, so opening the
+   * same page twice costs nothing.
+   */
+  const loadInsight = async (team: string, subject: string, refresh = false) => {
+    setInsightBusy(subject);
+    try {
+      const res = await gameEvalAPI.scoutInsight(team, subject, refresh);
+      setInsights(prev => ({ ...prev, [subject]: res }));
+    } catch {
+      // A sentence that could not be written must not take the numbers with it.
+    } finally {
+      setInsightBusy(null);
+    }
+  };
+
+  /** Tapping a player opens their line, and writes the sentence if there is none. */
+  const openScoutPlayer = async (name: string) => {
+    if (scoutPlayer === name) { setScoutPlayer(null); return; }
+    setScoutPlayer(name);
+    if (!insights[name] && scoutOpponent) await loadInsight(scoutOpponent, name);
+  };
+
   const openScout = async (opponentName: string) => {
     setScoutOpponent(opponentName);
     setActiveView('scout');
     setScoutData(null);
     setScoutNotes([]);
     setNewNoteText('');
+    setScoutPlayer(null);
+    setInsights({});
     setLoadingScout(true);
     setLoadingNotes(true);
     try {
-      const [data, notes] = await Promise.all([
+      const [data, notes, kept] = await Promise.all([
         gameEvalAPI.getOpponentProfile(opponentName),
         gameEvalAPI.getOpponentNotes(opponentName),
+        gameEvalAPI.scoutInsights(opponentName).catch(() => ({})),
       ]);
       setScoutData(data);
       setScoutNotes(notes);
+      setInsights(kept as any);
+      // Write only what is missing or was written from fewer games than the
+      // page is now showing.
+      const n = data?.games_count ?? 0;
+      for (const key of ['offense', 'defense', 'weak']) {
+        const at = (kept as any)[key];
+        if (!at || at.games !== n) await loadInsight(opponentName, key, true);
+      }
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamGrade.couldNotLoadScout'));
     }
@@ -2774,65 +2816,127 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   {/* Record vs this opponent */}
                   <View style={s.card}>
                     <Text style={s.cardLabel}>{tr('teamGrade.gamesAgainst')}</Text>
-                    {/* Scores are printed from THIS team's side, and without a
-                        W/L pill: the pill restated the two numbers, and on a
-                        page that can be about either bench it was the easiest
-                        thing in the app to read backwards. */}
-                    {scoutData.games_played_against.map((g: any) => (
-                      <View key={g.id} style={s.leaderRow}>
-                        <Text style={{ color: t.muted, fontSize: 12, width: 80 }}>
-                          {g.date ? new Date(g.date).toLocaleDateString() : tr('teamGrade.na')}
-                        </Text>
-                        <Text style={{ flex: 1, color: t.inkSoft, fontSize: 13 }}>
-                          {g.our_score != null ? `${g.our_score} - ${g.opponent_score}` : tr('teamGrade.noScore')}
-                        </Text>
-                      </View>
-                    ))}
+                    {/* Who they played, and how it went. Everything reads from
+                        THIS team's bench, so the first score and the W/L tag
+                        always agree — which is the only reason a W/L tag is
+                        safe here and nowhere else: the page names whose it is. */}
+                    {scoutData.games_played_against.map((g: any) => {
+                      const known = g.our_score != null && g.opponent_score != null;
+                      const won = known && g.our_score > g.opponent_score;
+                      return (
+                        <TouchableOpacity
+                          key={g.id} style={s.leaderRow}
+                          onPress={() => { const game = sessions.find((x: any) => x.id === g.id); if (game) openDetail(game); }}
+                        >
+                          <Text style={{ color: t.muted, fontSize: 12, width: 80 }}>
+                            {g.date ? new Date(g.date).toLocaleDateString() : tr('teamGrade.na')}
+                          </Text>
+                          <Text style={{ flex: 1, color: t.inkSoft, fontSize: 13 }} numberOfLines={1}>
+                            {tr('teamGrade.vsOpponent', { opponent: g.opponent ?? tr('teamGrade.opponent') })}
+                          </Text>
+                          <Text style={{ color: t.ink, fontSize: 13, fontFamily: fonts[700] }}>
+                            {known ? `${g.our_score} - ${g.opponent_score}` : tr('teamGrade.noScore')}
+                          </Text>
+                          {known && (
+                            <View style={[s.wlBadge, { backgroundColor: won ? t.positiveSoft : t.negativeSoft }]}>
+                              <Text style={[s.wlText, { color: won ? t.positive : t.negative }]}>
+                                {won ? tr('teamGrade.winShort') : tr('teamGrade.lossShort')}
+                              </Text>
+                            </View>
+                          )}
+                          <Ionicons name="chevron-forward" size={14} color={t.line} />
+                        </TouchableOpacity>
+                      );
+                    })}
                   </View>
 
-                  {/* Best players */}
+                  {/* Their players: the averages a coach would quote, the same
+                      0-5 grade every other screen uses, and — on tap — one
+                      sentence on what to do about them. The badge used to be a
+                      raw weighted-points total, which grows with minutes and
+                      matched no other number in the app. */}
                   {scoutData.best_players.length > 0 && (
                     <View style={s.card}>
                       <Text style={s.cardLabel}>{tr('teamGrade.theirTopPlayers')}</Text>
-                      {scoutData.best_players.map((p: any) => (
-                        <View key={p.player_name} style={s.leaderRow}>
-                          <Text style={{ flex: 1, color: t.inkSoft, fontSize: 13 }}>{p.player_name}</Text>
-                          <Text style={{ color: t.muted, fontSize: 11 }}>{tr('teamGrade.gamesG', { count: p.games })}</Text>
-                          <View style={s.gradeBadge}>
-                            <Text style={s.gradeBadgeText}>{p.avg_grade.toFixed(2)}</Text>
+                      {scoutData.best_players.map((p: any) => {
+                        const a = p.averages ?? {};
+                        const open = scoutPlayer === p.player_name;
+                        return (
+                          <View key={p.player_name}>
+                            <TouchableOpacity style={s.leaderRow}
+                                              onPress={() => openScoutPlayer(p.player_name)}>
+                              <View style={{ flex: 1 }}>
+                                <Text style={{ color: t.inkSoft, fontSize: 13, fontFamily: fonts[700] }}>
+                                  {p.jersey_number ? `#${p.jersey_number}  ` : ''}{p.player_name}
+                                </Text>
+                                <Text style={{ color: t.muted2, fontSize: 11, marginTop: 2 }}>
+                                  {tr('teamGrade.perGameLine', {
+                                    pts: a.PTS ?? 0, reb: a.REB ?? 0, ast: a.AST ?? 0,
+                                    stl: a.STL ?? 0, blk: a.BLK ?? 0, to: a.TO ?? 0,
+                                  })}
+                                  {a.FG_PCT != null ? `  ·  FG ${a.FG_PCT}%` : ''}
+                                  {a.THREE_PCT != null ? `  ·  3PT ${a.THREE_PCT}%` : ''}
+                                </Text>
+                              </View>
+                              <Text style={{ color: t.muted, fontSize: 11 }}>{tr('teamGrade.gamesG', { count: p.games })}</Text>
+                              <View style={s.gradeBadge}>
+                                <Text style={s.gradeBadgeText}>{p.avg_grade.toFixed(2)}</Text>
+                              </View>
+                              <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={14} color={t.line} />
+                            </TouchableOpacity>
+                            {open && (
+                              <View style={{ paddingBottom: 10, paddingRight: 8 }}>
+                                {insightBusy === p.player_name
+                                  ? <ActivityIndicator color={t.accent} size="small" style={{ alignSelf: 'flex-start' }} />
+                                  : <Text style={{ color: t.inkSoft, fontSize: 13, lineHeight: 19 }}>
+                                      {insights[p.player_name]?.insight ?? tr('teamGrade.noInsight')}
+                                    </Text>}
+                              </View>
+                            )}
                           </View>
-                        </View>
-                      ))}
+                        );
+                      })}
                     </View>
                   )}
 
-                  {/* Tendencies */}
+                  {/* Tendencies, as a read rather than a tally. A list of raw
+                      counts ("2 FG Missed 24x") is arithmetic a coach has to do
+                      in their head — over how many games, and so what? The
+                      sentence leads; the per-game figures it rests on sit under
+                      it so the claim can be checked and quoted. */}
                   <View style={s.card}>
-                    <Text style={s.cardLabel}>{tr('teamGrade.offensiveTendencies')}</Text>
-                    {scoutData.offensive_tendencies.map((td: any) => (
-                      <Text key={td.stat} style={{ color: t.inkSoft, fontSize: 13, marginBottom: 4 }}>
-                        {tr('teamGrade.tendencyItem', { stat: td.stat, count: td.count })}
-                      </Text>
-                    ))}
-                    <Text style={[s.cardLabel, { marginTop: 12 }]}>{tr('teamGrade.defensiveTendencies')}</Text>
-                    {scoutData.defensive_tendencies.map((td: any) => (
-                      <Text key={td.stat} style={{ color: t.inkSoft, fontSize: 13, marginBottom: 4 }}>
-                        {tr('teamGrade.tendencyItem', { stat: td.stat, count: td.count })}
-                      </Text>
-                    ))}
-                    <Text style={[s.cardLabel, { marginTop: 12 }]}>{tr('teamGrade.weakSpots')}</Text>
-                    {scoutData.weak_spots.map((td: any) => (
-                      <Text key={td.stat} style={{ color: t.inkSoft, fontSize: 13, marginBottom: 4 }}>
-                        {tr('teamGrade.weakSpotItem', { stat: td.stat, score: td.score.toFixed(1) })}
-                      </Text>
-                    ))}
+                    {([['offense', tr('teamGrade.offensiveTendencies'), scoutData.offensive_tendencies],
+                       ['defense', tr('teamGrade.defensiveTendencies'), scoutData.defensive_tendencies],
+                       ['weak', tr('teamGrade.weakSpots'), scoutData.weak_spots]] as const)
+                      .map(([key, label, rows], i) => (
+                        <View key={key} style={{ marginTop: i === 0 ? 0 : 16 }}>
+                          <Text style={s.cardLabel}>{label}</Text>
+                          {insightBusy === key
+                            ? <ActivityIndicator color={t.accent} size="small" style={{ alignSelf: 'flex-start', marginBottom: 6 }} />
+                            : !!insights[key] && (
+                                <Text style={{ color: t.ink, fontSize: 14, lineHeight: 20, marginBottom: 8 }}>
+                                  {insights[key].insight}
+                                </Text>
+                              )}
+                          {(rows ?? []).map((td: any) => (
+                            <Text key={td.stat} style={{ color: t.muted2, fontSize: 12, marginBottom: 3 }}>
+                              {tr('teamGrade.perGameStat', { stat: td.stat, n: td.per_game ?? 0 })}
+                            </Text>
+                          ))}
+                        </View>
+                      ))}
                   </View>
 
                   {/* Scouting context — add context + generate/regenerate */}
                   <View style={s.card} onLayout={e => { noteInputY.current = e.nativeEvent.layout.y; }}>
                     <Text style={s.cardLabel}>{tr('teamGrade.scoutingContext')}</Text>
                     {(() => {
-                      const scoutGameId = sessions.find((x: any) => x.opponent_name === scoutOpponent)?.id;
+                      // Either bench, same as the list this page was opened
+                      // from. Matching opponent_name alone meant a team with
+                      // three games on file was told to "track a game against
+                      // this opponent" — because in all three it was stored as
+                      // the game's own team.
+                      const scoutGameId = gamesInvolving(scoutOpponent ?? '')[0]?.id;
                       return scoutGameId ? (
                         <ScoutContextPanel
                           gameId={scoutGameId}
@@ -2859,7 +2963,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
                       {/* Corrections — a separate pass to fix things in the finished report. */}
                       {(() => {
-                        const scoutGameId = sessions.find((x: any) => x.opponent_name === scoutOpponent)?.id;
+                        const scoutGameId = gamesInvolving(scoutOpponent ?? '')[0]?.id;
                         return scoutGameId ? (
                           <View style={s.card}>
                             <Text style={s.cardLabel}>{tr('teamGrade.corrections')}</Text>

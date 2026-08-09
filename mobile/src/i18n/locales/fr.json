@@ -2233,7 +2233,10 @@
     "finalLabel": "Final",
     "ourPlayerNamePlaceholder": "Nom du joueur...",
     "couldNotAddPlayer": "Impossible d'ajouter ce joueur.",
-    "setScore": "Saisir le score"
+    "setScore": "Saisir le score",
+    "perGameLine": "{{pts}} pts · {{reb}} reb · {{ast}} pd · {{stl}} int · {{blk}} ctr · {{to}} bp",
+    "perGameStat": "{{stat}} — {{n}} par match",
+    "noInsight": "Pas encore d'analyse."
   },
   "whiteboard": {
     "title": "Tableau blanc",

@@ -930,6 +930,31 @@ class OpponentNote(Base):
     coach = relationship("Coach")
 
 
+class ScoutInsight(Base):
+    """One sentence about what a team's numbers actually mean.
+
+    Written on demand — when a coach opens a scouting page, or taps a player on
+    it — and kept. The averages say what somebody did; this says what to do
+    about it. `subject` is a player's name, or one of "offense" / "defense" /
+    "weak" for the three team sections.
+
+    `games` records how many were behind the sentence, so a stored one written
+    from two games can be replaced once there are four rather than quietly
+    describing a smaller sample than the page beside it shows.
+    """
+    __tablename__ = "scout_insights"
+
+    id          = Column(Integer, primary_key=True, index=True)
+    coach_id    = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    team_name   = Column(String, nullable=False, index=True)
+    subject     = Column(String, nullable=False, index=True)
+    insight     = Column(Text, nullable=False)
+    games       = Column(Integer, default=0)
+    created_at  = Column(DateTime, default=datetime.utcnow)
+
+    coach = relationship("Coach")
+
+
 class OpponentPlayer(Base):
     __tablename__ = "opponent_players"
     id = Column(Integer, primary_key=True, index=True)

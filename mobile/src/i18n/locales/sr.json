@@ -2233,7 +2233,10 @@
     "finalLabel": "Kraj",
     "ourPlayerNamePlaceholder": "Име играча...",
     "couldNotAddPlayer": "Тај играч није могао бити додат.",
-    "setScore": "Унеси резултат"
+    "setScore": "Унеси резултат",
+    "perGameLine": "{{pts}} поена · {{reb}} ск · {{ast}} ас · {{stl}} укр · {{blk}} бл · {{to}} изг",
+    "perGameStat": "{{stat}} — {{n}} по утакмици",
+    "noInsight": "Још нема анализе."
   },
   "whiteboard": {
     "title": "Tabla",

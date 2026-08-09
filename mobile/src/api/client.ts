@@ -734,6 +734,15 @@ export const gameEvalAPI = {
     const { job_id } = await api.post(`/game-eval/sessions/${gameId}/game-report-job`, body).then(r => r.data);
     return evalsAPI.awaitJob(job_id, onTick);
   },
+  /** One written sentence about a team or one of its players. */
+  scoutInsight: (team: string, subject: string, refresh = false) =>
+    api.post(`/game-eval/opponents/${encodeURIComponent(team)}/insight`,
+             { subject, refresh }, { timeout: 120000 })
+       .then(r => r.data as { insight: string; games: number; cached: boolean }),
+  /** Everything already written about a team, so nothing is paid for twice. */
+  scoutInsights: (team: string) =>
+    api.get(`/game-eval/opponents/${encodeURIComponent(team)}/insights`)
+       .then(r => r.data as Record<string, { insight: string; games: number }>),
   scoutingCorrections: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/scouting-corrections`).then(r => r.data),
   addScoutingCorrection: (gameId: number, text: string) => api.post(`/game-eval/sessions/${gameId}/scouting-corrections`, { text }).then(r => r.data),
   editScoutingCorrection: (id: number, text: string) => api.patch(`/game-eval/scouting-corrections/${id}`, { text }).then(r => r.data),

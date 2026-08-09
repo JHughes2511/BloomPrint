@@ -2233,7 +2233,10 @@
     "finalLabel": "终场",
     "ourPlayerNamePlaceholder": "球员姓名...",
     "couldNotAddPlayer": "无法添加该球员。",
-    "setScore": "填写比分"
+    "setScore": "填写比分",
+    "perGameLine": "{{pts}} 分 · {{reb}} 篮板 · {{ast}} 助攻 · {{stl}} 抢断 · {{blk}} 盖帽 · {{to}} 失误",
+    "perGameStat": "{{stat}} — 场均 {{n}}",
+    "noInsight": "暂无解读。"
   },
   "whiteboard": {
     "title": "战术板",

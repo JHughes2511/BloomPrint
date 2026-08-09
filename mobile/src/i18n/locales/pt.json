@@ -2233,7 +2233,10 @@
     "finalLabel": "Final",
     "ourPlayerNamePlaceholder": "Nome do jogador...",
     "couldNotAddPlayer": "Não foi possível adicionar esse jogador.",
-    "setScore": "Definir resultado"
+    "setScore": "Definir resultado",
+    "perGameLine": "{{pts}} pts · {{reb}} ress · {{ast}} ass · {{stl}} roub · {{blk}} desar · {{to}} perdas",
+    "perGameStat": "{{stat}} — {{n}} por jogo",
+    "noInsight": "Ainda sem análise."
   },
   "whiteboard": {
     "title": "Quadro Tático",

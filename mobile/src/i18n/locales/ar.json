@@ -2233,7 +2233,10 @@
     "finalLabel": "النهائي",
     "ourPlayerNamePlaceholder": "اسم اللاعب...",
     "couldNotAddPlayer": "تعذّرت إضافة هذا اللاعب.",
-    "setScore": "تسجيل النتيجة"
+    "setScore": "تسجيل النتيجة",
+    "perGameLine": "{{pts}} نقطة · {{reb}} متابعة · {{ast}} تمريرة · {{stl}} استخلاص · {{blk}} صدّ · {{to}} كرة ضائعة",
+    "perGameStat": "{{stat}} — {{n}} لكل مباراة",
+    "noInsight": "لا توجد ملاحظة بعد."
   },
   "whiteboard": {
     "title": "السبورة",

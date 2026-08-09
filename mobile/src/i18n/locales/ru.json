@@ -2233,7 +2233,10 @@
     "finalLabel": "Итог",
     "ourPlayerNamePlaceholder": "Имя игрока...",
     "couldNotAddPlayer": "Не удалось добавить игрока.",
-    "setScore": "Указать счёт"
+    "setScore": "Указать счёт",
+    "perGameLine": "{{pts}} очк · {{reb}} подб · {{ast}} пас · {{stl}} перехв · {{blk}} блок · {{to}} потери",
+    "perGameStat": "{{stat}} — {{n}} за игру",
+    "noInsight": "Пока нет разбора."
   },
   "whiteboard": {
     "title": "Тактическая доска",

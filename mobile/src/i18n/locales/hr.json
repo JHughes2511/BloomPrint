@@ -2233,7 +2233,10 @@
     "finalLabel": "Kraj",
     "ourPlayerNamePlaceholder": "Ime igrača...",
     "couldNotAddPlayer": "Tog igrača nije bilo moguće dodati.",
-    "setScore": "Unesi rezultat"
+    "setScore": "Unesi rezultat",
+    "perGameLine": "{{pts}} poena · {{reb}} sk · {{ast}} as · {{stl}} ukr · {{blk}} bl · {{to}} izg",
+    "perGameStat": "{{stat}} — {{n}} po utakmici",
+    "noInsight": "Još nema analize."
   },
   "whiteboard": {
     "title": "Ploča",

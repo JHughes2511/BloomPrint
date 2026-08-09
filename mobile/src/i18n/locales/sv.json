@@ -2233,7 +2233,10 @@
     "finalLabel": "Slut",
     "ourPlayerNamePlaceholder": "Spelarens namn...",
     "couldNotAddPlayer": "Spelaren kunde inte läggas till.",
-    "setScore": "Ange resultat"
+    "setScore": "Ange resultat",
+    "perGameLine": "{{pts}} poäng · {{reb}} reb · {{ast}} ass · {{stl}} steals · {{blk}} blocks · {{to}} tapp",
+    "perGameStat": "{{stat}} — {{n}} per match",
+    "noInsight": "Ingen analys ännu."
   },
   "whiteboard": {
     "title": "Taktiktavla",

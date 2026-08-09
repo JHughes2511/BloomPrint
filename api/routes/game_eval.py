@@ -1393,9 +1393,11 @@ def _compute_grades(stats: list[models.GamePlayerStat], minutes_map: dict[str, f
             player_data[s.player_name] = {
                 "offensive_weighted": 0.0,
                 "defensive_weighted": 0.0,
+                "jersey_number": None,
                 "quarters": defaultdict(lambda: {"offense": 0.0, "defense": 0.0}),
             }
         pd = player_data[s.player_name]
+        pd["jersey_number"] = pd["jersey_number"] or getattr(s, "jersey_number", None)
         if s.stat_category == "offense":
             pd["offensive_weighted"] += s.weighted_points
         else:
@@ -1409,6 +1411,7 @@ def _compute_grades(stats: list[models.GamePlayerStat], minutes_map: dict[str, f
         game_grade = round(total / max(mins, 1.0), 2)
         grades.append({
             "player_name": name,
+            "jersey_number": data.get("jersey_number"),
             "offensive_grade": round(data["offensive_weighted"], 2),
             "defensive_grade": round(data["defensive_weighted"], 2),
             "total_grade": round(total, 2),
@@ -2413,6 +2416,116 @@ def season_dashboard(
 
 # ── Opponent Profile ──────────────────────────────────────────────────────────
 
+SCOUT_SUBJECTS = {
+    "offense": "what this team does on offense",
+    "defense": "what this team does on defense",
+    "weak": "where this team is vulnerable",
+}
+
+
+class ScoutInsightIn(BaseModel):
+    # A player's name, or one of offense / defense / weak.
+    subject: str
+    refresh: bool = False
+
+
+@router.post("/opponents/{opponent_name}/insight")
+async def scout_insight(
+    opponent_name: str,
+    body: ScoutInsightIn,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """One sentence about a team, or about one of its players.
+
+    Averages say what somebody did; a coach still has to decide what to do
+    about it. This is that, in a sentence, from the numbers already on the
+    page — and it is kept, so opening the same player twice costs one call,
+    not two. It is rewritten when the game count behind it changes, because a
+    line written from two games should not be presented beside four.
+    """
+    subject = (body.subject or "").strip()
+    if not subject:
+        raise HTTPException(status_code=400, detail="Which player or section?")
+
+    profile = opponent_profile(opponent_name, db, coach)
+    games_n = profile.get("games_count") or 0
+
+    row = (db.query(models.ScoutInsight)
+             .filter_by(coach_id=coach.id, team_name=opponent_name, subject=subject)
+             .order_by(models.ScoutInsight.id.desc()).first())
+    if row and not body.refresh and row.games == games_n:
+        return {"insight": row.insight, "games": row.games, "cached": True}
+
+    def _lines(rows, key):
+        return "; ".join(f"{r['stat']} {r[key]} per game" for r in rows) or "none recorded"
+
+    if subject in SCOUT_SUBJECTS:
+        section = {"offense": profile["offensive_tendencies"],
+                   "defense": profile["defensive_tendencies"],
+                   "weak": profile["weak_spots"]}[subject]
+        facts = _lines(section, "per_game")
+        ask = (f"{opponent_name} across {games_n} tracked game(s). "
+               f"{SCOUT_SUBJECTS[subject].capitalize()}, by the numbers: {facts}.")
+    else:
+        who = next((p for p in profile["best_players"]
+                    if p["player_name"].strip().lower() == subject.lower()), None)
+        if not who:
+            raise HTTPException(status_code=404, detail=f"No record of {subject} on this team.")
+        a = who["averages"]
+        facts = (f"{a['PTS']} pts, {a['REB']} reb, {a['AST']} ast, {a['STL']} stl, "
+                 f"{a['BLK']} blk, {a['TO']} to per game; "
+                 f"FG {a['FG_PCT'] if a['FG_PCT'] is not None else 'n/a'}%, "
+                 f"3PT {a['THREE_PCT'] if a['THREE_PCT'] is not None else 'n/a'}%; "
+                 f"grade {who['avg_grade']} out of 5")
+        ask = (f"{subject} of {opponent_name}, across {who['games']} tracked game(s): {facts}.")
+
+    prompt = (
+        "You are a basketball scout briefing a head coach before they play this team.\n\n"
+        f"{ask}\n\n"
+        "Write ONE sentence, under 200 characters, saying what this MEANS for the game plan "
+        "— the thing a coach would say to their staff. Lead with the read, not the numbers; "
+        "quote at most one figure, and only if it carries the point. No preamble, no "
+        "markdown, no quotation marks. If the sample is one game, do not write as though it "
+        "is a pattern."
+    )
+    try:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+        resp = await client.messages.create(
+            model=OPUS, max_tokens=300,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        blocks = [b for b in resp.content if hasattr(b, "text")]
+        text = (blocks[0].text if blocks else "").strip().strip('"')
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Could not write that insight: {exc}")
+    if not text:
+        raise HTTPException(status_code=500, detail="The insight came back empty.")
+
+    if row:
+        row.insight, row.games, row.created_at = text, games_n, datetime.utcnow()
+    else:
+        db.add(models.ScoutInsight(coach_id=coach.id, team_name=opponent_name,
+                                   subject=subject, insight=text, games=games_n))
+    db.commit()
+    return {"insight": text, "games": games_n, "cached": False}
+
+
+@router.get("/opponents/{opponent_name}/insights")
+def scout_insights(
+    opponent_name: str,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Everything already written about this team, so the page can show what it
+    has without paying for anything it does not need."""
+    rows = (db.query(models.ScoutInsight)
+              .filter_by(coach_id=coach.id, team_name=opponent_name)
+              .order_by(models.ScoutInsight.id).all())
+    return {r.subject: {"insight": r.insight, "games": r.games} for r in rows}
+
+
 @router.get("/opponents/{opponent_name}")
 def opponent_profile(
     opponent_name: str,
@@ -2465,35 +2578,67 @@ def opponent_profile(
         opp_stats = [s for s in game.player_stats if bool(s.is_opponent) == theirs]
         for s in opp_stats:
             if s.player_name not in player_totals:
-                player_totals[s.player_name] = {"games": 0, "total_grade": 0.0}
-            player_totals[s.player_name]["total_grade"] += s.weighted_points
+                player_totals[s.player_name] = {"games": 0, "counts": defaultdict(int)}
+            player_totals[s.player_name]["counts"][s.stat_name] += (s.count or 0)
             if s.stat_category == "offense":
                 offense_tendencies[s.stat_name] += s.count
             else:
                 defense_tendencies[s.stat_name] += s.count
-        # update game count per player
-        seen = set()
-        for s in opp_stats:
-            if s.player_name not in seen:
-                player_totals[s.player_name]["games"] = player_totals[s.player_name].get("games", 0) + 1
-                seen.add(s.player_name)
+        # The 0-5 game grade, per player, the same way every other screen
+        # computes it — so a number on this page means what it means elsewhere.
+        mp = {r.player_name: r.minutes_played for r in
+              db.query(models.GameMinutesPlayed).filter_by(game_id=game.id, is_opponent=theirs).all()}
+        for g in _compute_grades(opp_stats, mp):
+            at = player_totals.setdefault(g["player_name"], {"games": 0, "counts": defaultdict(int)})
+            at["games"] = at.get("games", 0) + 1
+            at["grade_total"] = at.get("grade_total", 0.0) + g["game_grade"]
+            at["jersey"] = at.get("jersey") or g.get("jersey_number")
+
+    def _averages(counts: dict, games: int) -> dict:
+        """Per game, from the same canonical line the box score prints."""
+        line = _player_line(counts)
+        n = max(games, 1)
+        per = {k: round(line[k] / n, 1) for k in
+               ("PTS", "REB", "AST", "STL", "BLK", "TO")}
+        per["FG_PCT"] = round(100 * line["FGM"] / line["FGA"], 1) if line["FGA"] else None
+        per["THREE_PCT"] = round(100 * line["3PM"] / line["3PA"], 1) if line["3PA"] else None
+        return per
 
     best_players = sorted(
-        [{"player_name": n, "avg_grade": round(d["total_grade"] / max(d["games"], 1), 2), "games": d["games"]}
+        [{"player_name": n,
+          "jersey_number": d.get("jersey"),
+          "avg_grade": round(d.get("grade_total", 0.0) / max(d["games"], 1), 2),
+          "games": d["games"],
+          "averages": _averages(d["counts"], d["games"])}
          for n, d in player_totals.items()],
         key=lambda x: x["avg_grade"],
         reverse=True,
     )[:5]
 
+    n_games = max(len(games), 1)
+
+    def _rate(pairs):
+        """Counts as per-game numbers. A raw total says nothing without
+        knowing how many games it took to reach."""
+        return [{"stat": st, "count": ct, "per_game": round(ct / n_games, 1)}
+                for st, ct in pairs]
+
     top_offense = sorted(offense_tendencies.items(), key=lambda x: x[1], reverse=True)[:3]
     top_defense = sorted(defense_tendencies.items(), key=lambda x: x[1], reverse=True)[:3]
 
-    # Weak spots: lowest-scoring offense/defense stats
+    # Weak spots: the stats costing this team the most.
+    #
+    # Read from the same bench as everything else on the page. This block took
+    # is_opponent at face value, so on a team that was the game's OWN team it
+    # was quietly listing the other side's weaknesses under their name.
     all_stat_scores: dict[str, float] = defaultdict(float)
+    all_stat_counts: dict[str, int] = defaultdict(int)
     for game in games:
+        theirs = game.team_id not in same if same else True
         for s in game.player_stats:
-            if s.is_opponent:
+            if bool(s.is_opponent) == theirs:
                 all_stat_scores[s.stat_name] += s.weighted_points
+                all_stat_counts[s.stat_name] += (s.count or 0)
     weak_spots = sorted(all_stat_scores.items(), key=lambda x: x[1])[:3]
 
     def _seen_from(g):
@@ -2503,19 +2648,28 @@ def opponent_profile(
         # from the game's own team's bench, which is this team only sometimes.
         return (ours, theirs_pts) if (same and g.team_id in same) else (theirs_pts, ours)
 
+    team_names = {tm.id: tm.name for tm in db.query(models.Team).all()}
     games_list = []
     for g in games:
         a, b = _seen_from(g)
+        # Who they played. A list of dates and scores with no names on it made a
+        # scouting page unreadable the moment a team had more than one game.
+        other = (g.opponent_name if (same and g.team_id in same)
+                 else team_names.get(g.team_id) or g.opponent_name)
         games_list.append({"id": g.id, "date": g.date.isoformat() if g.date else None,
+                           "opponent": other,
                            "our_score": a, "opponent_score": b, "status": g.status})
 
     return {
         "opponent_name": opponent_name,
         "games_played_against": games_list,
         "best_players": best_players,
-        "offensive_tendencies": [{"stat": s, "count": c} for s, c in top_offense],
-        "defensive_tendencies": [{"stat": s, "count": c} for s, c in top_defense],
-        "weak_spots": [{"stat": s, "score": round(sc, 2)} for s, sc in weak_spots],
+        "games_count": len(games),
+        "offensive_tendencies": _rate(top_offense),
+        "defensive_tendencies": _rate(top_defense),
+        "weak_spots": [{"stat": st, "score": round(sc, 2),
+                        "per_game": round(all_stat_counts.get(st, 0) / n_games, 1)}
+                       for st, sc in weak_spots],
         "ai_scouting_report": latest_report,
     }
 

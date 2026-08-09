@@ -2233,7 +2233,10 @@
     "finalLabel": "დასრულდა",
     "ourPlayerNamePlaceholder": "მოთამაშის სახელი...",
     "couldNotAddPlayer": "ამ მოთამაშის დამატება ვერ მოხერხდა.",
-    "setScore": "ანგარიშის მითითება"
+    "setScore": "ანგარიშის მითითება",
+    "perGameLine": "{{pts}} ქულა · {{reb}} მოხს · {{ast}} პას · {{stl}} მოპარ · {{blk}} ბლოკ · {{to}} დაკარგ",
+    "perGameStat": "{{stat}} — {{n}} თამაშზე",
+    "noInsight": "შეფასება ჯერ არ არის."
   },
   "whiteboard": {
     "title": "დაფა",

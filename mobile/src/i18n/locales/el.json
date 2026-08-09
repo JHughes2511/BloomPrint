@@ -2233,7 +2233,10 @@
     "finalLabel": "Τελικό",
     "ourPlayerNamePlaceholder": "Όνομα παίκτη...",
     "couldNotAddPlayer": "Δεν ήταν δυνατή η προσθήκη του παίκτη.",
-    "setScore": "Ορισμός σκορ"
+    "setScore": "Ορισμός σκορ",
+    "perGameLine": "{{pts}} πόν · {{reb}} ριμπ · {{ast}} ασίστ · {{stl}} κλεψ · {{blk}} κοψ · {{to}} λάθη",
+    "perGameStat": "{{stat}} — {{n}} ανά αγώνα",
+    "noInsight": "Δεν υπάρχει ακόμη ανάλυση."
   },
   "whiteboard": {
     "title": "Πίνακας",

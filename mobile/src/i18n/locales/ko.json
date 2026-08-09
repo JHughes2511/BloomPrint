@@ -2233,7 +2233,10 @@
     "finalLabel": "종료",
     "ourPlayerNamePlaceholder": "선수 이름...",
     "couldNotAddPlayer": "해당 선수를 추가하지 못했습니다.",
-    "setScore": "점수 입력"
+    "setScore": "점수 입력",
+    "perGameLine": "{{pts}}득점 · {{reb}}리바운드 · {{ast}}어시스트 · {{stl}}스틸 · {{blk}}블록 · {{to}}턴오버",
+    "perGameStat": "{{stat}} — 경기당 {{n}}",
+    "noInsight": "아직 코멘트가 없습니다."
   },
   "whiteboard": {
     "title": "작전판",

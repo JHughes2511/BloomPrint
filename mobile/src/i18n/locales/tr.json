@@ -2233,7 +2233,10 @@
     "finalLabel": "Bitiş",
     "ourPlayerNamePlaceholder": "Oyuncu adı...",
     "couldNotAddPlayer": "Bu oyuncu eklenemedi.",
-    "setScore": "Skoru gir"
+    "setScore": "Skoru gir",
+    "perGameLine": "{{pts}} sayı · {{reb}} rib · {{ast}} asist · {{stl}} top çalma · {{blk}} blok · {{to}} kayıp",
+    "perGameStat": "{{stat}} — maç başına {{n}}",
+    "noInsight": "Henüz analiz yok."
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

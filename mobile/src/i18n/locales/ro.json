@@ -2233,7 +2233,10 @@
     "finalLabel": "Final",
     "ourPlayerNamePlaceholder": "Numele jucătorului...",
     "couldNotAddPlayer": "Jucătorul nu a putut fi adăugat.",
-    "setScore": "Adaugă scorul"
+    "setScore": "Adaugă scorul",
+    "perGameLine": "{{pts}} pct · {{reb}} rec · {{ast}} pas · {{stl}} int · {{blk}} bloc · {{to}} pierderi",
+    "perGameStat": "{{stat}} — {{n}} pe meci",
+    "noInsight": "Încă fără analiză."
   },
   "whiteboard": {
     "title": "Tablă tactică",

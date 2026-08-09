@@ -2233,7 +2233,10 @@
     "finalLabel": "Pabaiga",
     "ourPlayerNamePlaceholder": "Žaidėjo vardas...",
     "couldNotAddPlayer": "Nepavyko pridėti šio žaidėjo.",
-    "setScore": "Įrašyti rezultatą"
+    "setScore": "Įrašyti rezultatą",
+    "perGameLine": "{{pts}} tšk · {{reb}} atk · {{ast}} rez · {{stl}} perim · {{blk}} blok · {{to}} klaid",
+    "perGameStat": "{{stat}} — {{n}} per rungtynes",
+    "noInsight": "Analizės kol kas nėra."
   },
   "whiteboard": {
     "title": "Lenta",

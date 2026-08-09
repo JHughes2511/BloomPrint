@@ -2233,7 +2233,10 @@
     "finalLabel": "Koniec",
     "ourPlayerNamePlaceholder": "Imię i nazwisko zawodnika...",
     "couldNotAddPlayer": "Nie udało się dodać tego zawodnika.",
-    "setScore": "Wpisz wynik"
+    "setScore": "Wpisz wynik",
+    "perGameLine": "{{pts}} pkt · {{reb}} zb · {{ast}} as · {{stl}} prz · {{blk}} bl · {{to}} str",
+    "perGameStat": "{{stat}} — {{n}} na mecz",
+    "noInsight": "Brak analizy."
   },
   "whiteboard": {
     "title": "Tablica",

@@ -2233,7 +2233,10 @@
     "finalLabel": "अंतिम",
     "ourPlayerNamePlaceholder": "खिलाड़ी का नाम...",
     "couldNotAddPlayer": "उस खिलाड़ी को जोड़ा नहीं जा सका।",
-    "setScore": "स्कोर दर्ज करें"
+    "setScore": "स्कोर दर्ज करें",
+    "perGameLine": "{{pts}} अंक · {{reb}} रिब · {{ast}} अस्सिस्ट · {{stl}} स्टील · {{blk}} ब्लॉक · {{to}} टर्नओवर",
+    "perGameStat": "{{stat}} — {{n}} प्रति गेम",
+    "noInsight": "अभी कोई विश्लेषण नहीं।"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",

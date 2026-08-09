@@ -2233,7 +2233,10 @@
     "finalLabel": "Endstand",
     "ourPlayerNamePlaceholder": "Name des Spielers...",
     "couldNotAddPlayer": "Dieser Spieler konnte nicht hinzugefügt werden.",
-    "setScore": "Ergebnis eintragen"
+    "setScore": "Ergebnis eintragen",
+    "perGameLine": "{{pts}} Pkt · {{reb}} Reb · {{ast}} Ass · {{stl}} Steals · {{blk}} Blocks · {{to}} TO",
+    "perGameStat": "{{stat}} — {{n}} pro Spiel",
+    "noInsight": "Noch keine Einschätzung."
   },
   "whiteboard": {
     "title": "Taktiktafel",

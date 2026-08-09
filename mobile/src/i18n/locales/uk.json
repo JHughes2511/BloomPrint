@@ -2233,7 +2233,10 @@
     "finalLabel": "Кінець",
     "ourPlayerNamePlaceholder": "Ім'я гравця...",
     "couldNotAddPlayer": "Не вдалося додати гравця.",
-    "setScore": "Вказати рахунок"
+    "setScore": "Вказати рахунок",
+    "perGameLine": "{{pts}} очк · {{reb}} підб · {{ast}} пас · {{stl}} перехв · {{blk}} блок · {{to}} втрати",
+    "perGameStat": "{{stat}} — {{n}} за гру",
+    "noInsight": "Поки немає розбору."
   },
   "whiteboard": {
     "title": "Тактична дошка",

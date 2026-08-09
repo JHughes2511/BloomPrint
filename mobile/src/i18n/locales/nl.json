@@ -2233,7 +2233,10 @@
     "finalLabel": "Eindstand",
     "ourPlayerNamePlaceholder": "Naam van de speler...",
     "couldNotAddPlayer": "Deze speler kon niet worden toegevoegd.",
-    "setScore": "Score invullen"
+    "setScore": "Score invullen",
+    "perGameLine": "{{pts}} pnt · {{reb}} reb · {{ast}} ass · {{stl}} steals · {{blk}} blocks · {{to}} balverlies",
+    "perGameStat": "{{stat}} — {{n}} per wedstrijd",
+    "noInsight": "Nog geen analyse."
   },
   "whiteboard": {
     "title": "Tactiekbord",

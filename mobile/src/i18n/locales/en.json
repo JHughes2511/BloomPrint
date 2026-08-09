@@ -2233,7 +2233,10 @@
     "finalLabel": "Final",
     "ourPlayerNamePlaceholder": "Player name...",
     "couldNotAddPlayer": "That player could not be added.",
-    "setScore": "Set score"
+    "setScore": "Set score",
+    "perGameLine": "{{pts}} pts · {{reb}} reb · {{ast}} ast · {{stl}} stl · {{blk}} blk · {{to}} to",
+    "perGameStat": "{{stat}} — {{n}} per game",
+    "noInsight": "No insight yet."
   },
   "whiteboard": {
     "title": "Whiteboard",
