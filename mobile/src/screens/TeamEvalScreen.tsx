@@ -2383,13 +2383,6 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   <Text style={{ color: t.ink, fontSize: 28, fontFamily: fonts[900] }}>
                     {detailGame.our_score} - {detailGame.opponent_score}
                   </Text>
-                  <View style={[s.wlBadge, {
-                    backgroundColor: detailGame.our_score > detailGame.opponent_score ? t.positiveSoft : t.negativeSoft
-                  }]}>
-                    <Text style={[s.wlText, { color: detailGame.our_score > detailGame.opponent_score ? t.positive : t.negative }]}>
-                      {detailGame.our_score > detailGame.opponent_score ? tr('teamGrade.win') : tr('teamGrade.loss')}
-                    </Text>
-                  </View>
                 </View>
               ) : (
                 <TouchableOpacity style={{ alignItems: 'flex-end' }}

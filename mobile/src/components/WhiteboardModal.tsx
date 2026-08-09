@@ -223,14 +223,34 @@ function HardwoodCourt({ width, height, scale }: { width: number; height: number
 interface Props { visible: boolean; gameId: number; playbook?: boolean; onClose: () => void; }
 
 /**
+ * A phone in a browser — not a tablet, and not a laptop with a touchscreen.
+ *
+ * The pointer alone cannot tell a phone from an iPad: both answer coarse. The
+ * SHORTER side of the screen can — a phone is around 430px at its widest, an
+ * iPad mini 744 — and it does not change when the device is turned, which a
+ * window measurement does.
+ */
+function webIsPhone(): boolean {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return false;
+  if (!window.matchMedia?.('(pointer: coarse)')?.matches) return false;
+  const shortest = Math.min(window.screen?.width ?? 0, window.screen?.height ?? 0);
+  return shortest > 0 && shortest < 600;
+}
+
+/**
  * The orientation a browser should open a new board in, or null off the web.
  *
  * Desktop opens portrait, a tablet opens landscape. Window size cannot make
  * that call — an iPad held sideways and a laptop window are the same shape —
  * so this asks what is pointing at the screen instead.
+ *
+ * A phone opens PORTRAIT. It answers coarse like a tablet does, so it used to
+ * be handed the tablet's answer and open a court turned on its side on the one
+ * screen with no room to turn anything.
  */
 function webPointerOrientation(): 'portrait' | 'landscape' | null {
   if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
+  if (webIsPhone()) return 'portrait';
   const coarse = window.matchMedia?.('(pointer: coarse)')?.matches;
   return coarse ? 'landscape' : 'portrait';
 }
@@ -2262,7 +2282,12 @@ export default function WhiteboardModal({ visible, gameId, playbook = false, onC
                   // the space, which is what it was choosing well before the
                   // orientation default changed. A desktop window has room for
                   // the full floor whichever way the board is turned.
-                  if (untouched && !wide && b.court_type !== 'half') {
+                  // A phone gets the half court whichever way it is being
+                  // held: turned sideways the window measures "wide", and the
+                  // full 94 feet on a five-inch screen is a diagram nobody can
+                  // read. On anything larger this still follows the shape of
+                  // the space, which it was already choosing well.
+                  if (untouched && (!wide || webIsPhone()) && b.court_type !== 'half') {
                     setBoards(prev => {
                       const n = [...prev];
                       if (n[activeBoardIdx]) n[activeBoardIdx] = { ...n[activeBoardIdx], court_type: 'half' };
