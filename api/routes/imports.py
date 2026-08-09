@@ -489,18 +489,23 @@ def _sync_roster(db: Session, game, coach, players: list[dict]) -> dict:
     on the team is added, and anyone already there has their number brought up
     to what the sheet printed.
 
-    Our side goes to the game's team. The opponent's side goes to the opponent
-    only if the coach has actually built them as a team; an opponent that is
-    just a name on a game does not quietly become a team in Roster, or a season
-    of one-off fixtures would fill it.
+    Our side goes to the game's team. The opponent's side goes to the opponent's
+    team — created here if the coach never built one, because at that point the
+    app is holding a full squad list with numbers and refusing to keep it.
     """
     ours_id = game.team_id
     opp_row = None
-    if game.opponent_name:
+    created_team: str | None = None
+    if game.opponent_name and any(p.get("is_opponent") for p in players):
         opp_row = next(
             (tm for tm in db.query(models.Team).filter_by(coach_id=coach.id).all()
              if _norm_name(tm.name) == _norm_name(game.opponent_name) and tm.id != ours_id),
             None)
+        if opp_row is None:
+            opp_row = models.Team(name=game.opponent_name.strip(), coach_id=coach.id)
+            db.add(opp_row)
+            db.flush()      # an id, so the players below can point at it
+            created_team = opp_row.name
     added = numbered = 0
     for side_is_opp, team_id in ((False, ours_id), (True, opp_row.id if opp_row else None)):
         if not team_id:
@@ -526,7 +531,7 @@ def _sync_roster(db: Session, game, coach, players: list[dict]) -> dict:
                 # The sheet is the most recent statement of who wore what.
                 at.jersey_number = jersey
                 numbered += 1
-    if added or numbered:
+    if added or numbered or created_team:
         try:
             db.commit()
         except Exception:
@@ -534,8 +539,8 @@ def _sync_roster(db: Session, game, coach, players: list[dict]) -> dict:
             # did not take can be fixed on the Roster page; failing the import
             # over it would throw away the numbers as well.
             db.rollback()
-            return {"added": 0, "numbered": 0}
-    return {"added": added, "numbered": numbered}
+            return {"added": 0, "numbered": 0, "created_team": None}
+    return {"added": added, "numbered": numbered, "created_team": created_team}
 
 
 def _as_int(v) -> int | None:

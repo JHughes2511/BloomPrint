@@ -717,12 +717,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         : [...prev, saved]);
       setOpponentPlayers(prev => prev.includes(saved.player_name) ? prev : [...prev, saved.player_name]);
       setSelectedPlayer(saved.player_name);
-      // If the coach has built this opponent as a team, the player belongs on
-      // it — someone added during a game was previously only ever known to that
-      // game, so the same name had to be typed again next time they played.
-      const theirTeam = await findOpponentTeam(activeGame);
-      if (theirTeam) {
-        try {
+      // The player belongs on the opponent's team, and if that team does not
+      // exist yet it is made — the same rule the box-score import follows.
+      // Someone added during a game was previously known only to that game, so
+      // the same names had to be typed in again next time they played.
+      try {
+        let theirTeam = await findOpponentTeam(activeGame);
+        if (!theirTeam && activeGame.opponent_name) {
+          theirTeam = await teamsAPI.create({ name: activeGame.opponent_name });
+          setTeams(prev => [...prev, theirTeam]);
+        }
+        if (theirTeam) {
           const existing = await playersAPI.list(theirTeam.id);
           if (!existing.some((p: any) => norm(p.name) === norm(name))) {
             await playersAPI.create({
@@ -731,10 +736,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               position: newOppPosition.trim() || undefined,
             });
           }
-        } catch {
-          // The game is what matters here. A roster that did not take can be
-          // fixed on the Roster page; a stat that cannot be tapped cannot.
         }
+      } catch {
+        // The game is what matters here. A roster that did not take can be
+        // fixed on the Roster page; a stat that cannot be tapped cannot.
       }
     } catch {
       // Don't block stat entry if the save fails — keep the name locally.
