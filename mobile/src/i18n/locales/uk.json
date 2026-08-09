@@ -1362,7 +1362,8 @@
     "correctionsCount": "Виправлення ({{count}})",
     "applied": "ЗАСТОСОВАНО",
     "pending": "ОЧІКУЄ",
-    "sectionsLabel": "Розділи"
+    "sectionsLabel": "Розділи",
+    "filmFromPacket": "{{team}} · з {{packet}}"
   },
   "staffHub": {
     "title": "Хаб персоналу",

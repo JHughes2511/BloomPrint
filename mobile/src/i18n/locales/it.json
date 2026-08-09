@@ -1362,7 +1362,8 @@
     "correctionsCount": "Correzioni ({{count}})",
     "applied": "APPLICATA",
     "pending": "IN SOSPESO",
-    "sectionsLabel": "Sezioni"
+    "sectionsLabel": "Sezioni",
+    "filmFromPacket": "{{team}} · da {{packet}}"
   },
   "staffHub": {
     "title": "Area staff",

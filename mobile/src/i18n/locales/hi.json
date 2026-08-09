@@ -1362,7 +1362,8 @@
     "correctionsCount": "सुधार ({{count}})",
     "applied": "लागू",
     "pending": "लंबित",
-    "sectionsLabel": "अनुभाग"
+    "sectionsLabel": "अनुभाग",
+    "filmFromPacket": "{{team}} · {{packet}} से"
   },
   "staffHub": {
     "title": "स्टाफ़ हब",

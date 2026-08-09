@@ -1362,7 +1362,8 @@
     "correctionsCount": "التصحيحات ({{count}})",
     "applied": "تم التطبيق",
     "pending": "معلّق",
-    "sectionsLabel": "الأقسام"
+    "sectionsLabel": "الأقسام",
+    "filmFromPacket": "{{team}} · من {{packet}}"
   },
   "staffHub": {
     "title": "مركز الطاقم",

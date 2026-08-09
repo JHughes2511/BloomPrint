@@ -1362,7 +1362,8 @@
     "correctionsCount": "更正（{{count}}）",
     "applied": "已应用",
     "pending": "待处理",
-    "sectionsLabel": "章节"
+    "sectionsLabel": "章节",
+    "filmFromPacket": "{{team}} · 来自 {{packet}}"
   },
   "staffHub": {
     "title": "工作人员中心",

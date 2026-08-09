@@ -1362,7 +1362,8 @@
     "correctionsCount": "Correções ({{count}})",
     "applied": "APLICADO",
     "pending": "PENDENTE",
-    "sectionsLabel": "Secções"
+    "sectionsLabel": "Secções",
+    "filmFromPacket": "{{team}} · de {{packet}}"
   },
   "staffHub": {
     "title": "Central da Comissão",

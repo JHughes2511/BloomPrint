@@ -1362,7 +1362,8 @@
     "correctionsCount": "תיקונים ({{count}})",
     "applied": "הוחל",
     "pending": "ממתין",
-    "sectionsLabel": "חלקים"
+    "sectionsLabel": "חלקים",
+    "filmFromPacket": "{{team}} · מתוך {{packet}}"
   },
   "staffHub": {
     "title": "מרכז הצוות",

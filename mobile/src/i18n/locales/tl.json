@@ -1362,7 +1362,8 @@
     "correctionsCount": "Mga pagwawasto ({{count}})",
     "applied": "NA-APPLY",
     "pending": "NAKABINBIN",
-    "sectionsLabel": "Mga seksyon"
+    "sectionsLabel": "Mga seksyon",
+    "filmFromPacket": "{{team}} · mula sa {{packet}}"
   },
   "staffHub": {
     "title": "Staff hub",

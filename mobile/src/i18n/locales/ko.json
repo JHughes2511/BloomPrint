@@ -1362,7 +1362,8 @@
     "correctionsCount": "수정 사항 ({{count}})",
     "applied": "적용됨",
     "pending": "대기 중",
-    "sectionsLabel": "섹션"
+    "sectionsLabel": "섹션",
+    "filmFromPacket": "{{team}} · {{packet}}에서"
   },
   "staffHub": {
     "title": "스태프 허브",

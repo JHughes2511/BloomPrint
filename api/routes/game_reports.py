@@ -460,6 +460,43 @@ def _version_out(v: models.GameReportVersion, gr: models.GameReport) -> dict:
     }
 
 
+@router.get("/film-analyses")
+def all_film_analyses(
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Every film analysis the coach has, across all their packets.
+
+    A film's breakdown is written once, stored on the clip, and until now was
+    readable only by opening the packet it was attached to and finding the
+    film. It is a report — often the longest one in the app — and it belongs in
+    Recent with the rest of them.
+    """
+    reports = {r.id: r for r in db.query(models.GameReport).filter_by(coach_id=coach.id).all()}
+    if not reports:
+        return []
+    out = []
+    for clip in (db.query(models.GameReportClip)
+                   .filter(models.GameReportClip.game_report_id.in_(reports.keys()))
+                   .order_by(models.GameReportClip.id.desc()).all()):
+        if not (clip.analysis_text or "").strip():
+            continue
+        gr = reports[clip.game_report_id]
+        out.append({
+            "id": clip.id,
+            "report_id": gr.id,
+            # Whose film it is, which is not the same as which side it was
+            # filed under — see GameReportClip.team_name.
+            "team_name": clip.team_name,
+            "label": clip.label,
+            "packet_title": _packet_title(gr),
+            "report_text": clip.analysis_text,
+            "created_at": clip.created_at,
+        })
+    out.sort(key=lambda x: str(x["created_at"] or ""), reverse=True)
+    return out
+
+
 @router.get("/versions")
 def all_report_versions(
     db: Session = Depends(get_db),

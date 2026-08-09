@@ -1362,7 +1362,8 @@
     "correctionsCount": "Правки ({{count}})",
     "applied": "ПРИМЕНЕНО",
     "pending": "ОЖИДАЕТ",
-    "sectionsLabel": "Разделы"
+    "sectionsLabel": "Разделы",
+    "filmFromPacket": "{{team}} · из {{packet}}"
   },
   "staffHub": {
     "title": "Штаб",

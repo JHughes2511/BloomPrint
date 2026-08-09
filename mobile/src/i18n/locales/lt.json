@@ -1362,7 +1362,8 @@
     "correctionsCount": "Pataisymai ({{count}})",
     "applied": "PRITAIKYTA",
     "pending": "LAUKIAMA",
-    "sectionsLabel": "Skyriai"
+    "sectionsLabel": "Skyriai",
+    "filmFromPacket": "{{team}} · iš {{packet}}"
   },
   "staffHub": {
     "title": "Personalo centras",

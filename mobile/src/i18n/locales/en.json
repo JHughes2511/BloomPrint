@@ -1362,7 +1362,8 @@
     "correctionsCount": "Corrections ({{count}})",
     "applied": "APPLIED",
     "pending": "PENDING",
-    "sectionsLabel": "Sections"
+    "sectionsLabel": "Sections",
+    "filmFromPacket": "{{team}} · from {{packet}}"
   },
   "staffHub": {
     "title": "Staff Hub",

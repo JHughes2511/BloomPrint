@@ -1362,7 +1362,8 @@
     "correctionsCount": "შესწორებები ({{count}})",
     "applied": "გამოყენებულია",
     "pending": "მოლოდინში",
-    "sectionsLabel": "სექციები"
+    "sectionsLabel": "სექციები",
+    "filmFromPacket": "{{team}} · {{packet}}-დან"
   },
   "staffHub": {
     "title": "პერსონალის ცენტრი",

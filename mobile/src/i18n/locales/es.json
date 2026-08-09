@@ -1362,7 +1362,8 @@
     "correctionsCount": "Correcciones ({{count}})",
     "applied": "APLICADO",
     "pending": "PENDIENTE",
-    "sectionsLabel": "Secciones"
+    "sectionsLabel": "Secciones",
+    "filmFromPacket": "{{team}} · de {{packet}}"
   },
   "staffHub": {
     "title": "Centro del Cuerpo Técnico",

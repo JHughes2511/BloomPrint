@@ -1362,7 +1362,8 @@
     "correctionsCount": "Corecturi ({{count}})",
     "applied": "APLICAT",
     "pending": "ÎN AȘTEPTARE",
-    "sectionsLabel": "Secțiuni"
+    "sectionsLabel": "Secțiuni",
+    "filmFromPacket": "{{team}} · din {{packet}}"
   },
   "staffHub": {
     "title": "Zona staff",

@@ -1362,7 +1362,8 @@
     "correctionsCount": "Ispravci ({{count}})",
     "applied": "PRIMIJENJENO",
     "pending": "NA ČEKANJU",
-    "sectionsLabel": "Odjeljci"
+    "sectionsLabel": "Odjeljci",
+    "filmFromPacket": "{{team}} · iz {{packet}}"
   },
   "staffHub": {
     "title": "Središte stožera",

@@ -1362,7 +1362,8 @@
     "correctionsCount": "Rättelser ({{count}})",
     "applied": "TILLÄMPAD",
     "pending": "VÄNTANDE",
-    "sectionsLabel": "Avsnitt"
+    "sectionsLabel": "Avsnitt",
+    "filmFromPacket": "{{team}} · från {{packet}}"
   },
   "staffHub": {
     "title": "Stabscentral",

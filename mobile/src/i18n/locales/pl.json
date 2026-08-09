@@ -1362,7 +1362,8 @@
     "correctionsCount": "Poprawki ({{count}})",
     "applied": "ZASTOSOWANO",
     "pending": "OCZEKUJE",
-    "sectionsLabel": "Sekcje"
+    "sectionsLabel": "Sekcje",
+    "filmFromPacket": "{{team}} · z {{packet}}"
   },
   "staffHub": {
     "title": "Centrum sztabu",

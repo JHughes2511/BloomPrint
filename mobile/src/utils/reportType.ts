@@ -29,6 +29,20 @@ export function outputTypeSubtitle(outputType?: string | null): string {
   return types.map(typeName).join(' + ');
 }
 
+/**
+ * Every type in the combination, named: "Coaching Report · Scouting Report".
+ *
+ * outputTypeLabel() collapses a combination to "Comprehensive Report", which is
+ * right where space is tight but useless in a list — every packet report a
+ * coach had generated read the same line, so nothing in Recent said which of
+ * them was the scouting one.
+ */
+export function outputTypeNames(outputType?: string | null): string {
+  const types = parseOutputTypes(outputType);
+  if (types.length === 0) return i18n.t('reportTypes.report', { defaultValue: 'Report' });
+  return types.map(typeName).join(' · ');
+}
+
 export function isComboReport(outputType?: string | null): boolean {
   return parseOutputTypes(outputType).length > 1;
 }

@@ -1362,7 +1362,8 @@
     "correctionsCount": "Correcties ({{count}})",
     "applied": "TOEGEPAST",
     "pending": "IN AFWACHTING",
-    "sectionsLabel": "Secties"
+    "sectionsLabel": "Secties",
+    "filmFromPacket": "{{team}} · uit {{packet}}"
   },
   "staffHub": {
     "title": "Staf-hub",

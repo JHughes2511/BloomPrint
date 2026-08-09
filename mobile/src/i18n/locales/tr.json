@@ -1362,7 +1362,8 @@
     "correctionsCount": "Düzeltmeler ({{count}})",
     "applied": "UYGULANDI",
     "pending": "BEKLİYOR",
-    "sectionsLabel": "Bölümler"
+    "sectionsLabel": "Bölümler",
+    "filmFromPacket": "{{team}} · {{packet}} paketinden"
   },
   "staffHub": {
     "title": "Ekip Merkezi",

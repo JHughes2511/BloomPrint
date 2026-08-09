@@ -1362,7 +1362,8 @@
     "correctionsCount": "Διορθώσεις ({{count}})",
     "applied": "ΕΦΑΡΜΟΣΤΗΚΕ",
     "pending": "ΕΚΚΡΕΜΕΙ",
-    "sectionsLabel": "Ενότητες"
+    "sectionsLabel": "Ενότητες",
+    "filmFromPacket": "{{team}} · από {{packet}}"
   },
   "staffHub": {
     "title": "Κόμβος Επιτελείου",

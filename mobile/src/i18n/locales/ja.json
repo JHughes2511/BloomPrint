@@ -1362,7 +1362,8 @@
     "correctionsCount": "修正 ({{count}})",
     "applied": "適用済み",
     "pending": "保留中",
-    "sectionsLabel": "セクション"
+    "sectionsLabel": "セクション",
+    "filmFromPacket": "{{team}} · {{packet}} より"
   },
   "staffHub": {
     "title": "スタッフハブ",

@@ -1362,7 +1362,8 @@
     "correctionsCount": "Ispravke ({{count}})",
     "applied": "PRIMENJENO",
     "pending": "NA ČEKANJU",
-    "sectionsLabel": "Одељци"
+    "sectionsLabel": "Одељци",
+    "filmFromPacket": "{{team}} · из {{packet}}"
   },
   "staffHub": {
     "title": "Centar štaba",

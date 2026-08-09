@@ -818,6 +818,8 @@ export const gameReportsAPI = {
   videos: () => api.get('/game-reports/videos').then(r => r.data),
   versions: (id: number) => api.get(`/game-reports/${id}/versions`).then(r => r.data),
   allVersions: () => api.get('/game-reports/versions').then(r => r.data),
+  /** Every film breakdown across the coach's packets, for Recent. */
+  allFilmAnalyses: () => api.get('/game-reports/film-analyses').then(r => r.data),
   /** Pull a recorded game's box score into the packet, appended to what's there. */
   importGame: (id: number, gameId: number) =>
     api.post(`/game-reports/${id}/import-game`, { game_id: gameId }).then(r => r.data),

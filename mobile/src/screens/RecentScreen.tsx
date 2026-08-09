@@ -20,7 +20,7 @@ import { readPage, writePage } from '../storage/pageCache';
 import { GradeBadge } from '../components/GradeBadge';
 import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import ShareModal from '../components/ShareModal';
-import { outputTypeLabel } from '../utils/reportType';
+import { outputTypeLabel, outputTypeNames } from '../utils/reportType';
 import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import SharedReportViewer from '../components/SharedReportViewer';
@@ -42,7 +42,7 @@ import { useGridColumns } from '../responsive/useGridColumns';
 type ReportItem = {
   id: number;
   report_id?: number;   // for packet report versions: the owning packet id
-  kind: 'eval' | 'team' | 'game' | 'training' | 'scout' | 'gamereport';
+  kind: 'eval' | 'team' | 'game' | 'training' | 'scout' | 'gamereport' | 'film';
   player_name?: string;
   output_type: string;
   overall_grade?: number | null;
@@ -299,10 +299,11 @@ export default function RecentScreen() {
   const load = async () => {
     if (!loadedOnce.current) setLoading(true);
     try {
-      const [evals, teamReports, gameReports, trainingSessions, gameSessions, sharedInbox] = await Promise.all([
+      const [evals, teamReports, gameReports, filmAnalyses, trainingSessions, gameSessions, sharedInbox] = await Promise.all([
         evalsAPI.recent(),
         evalsAPI.teamReports(),
         gameReportsAPI.allVersions().catch(() => []),
+        gameReportsAPI.allFilmAnalyses().catch(() => []),
         trainingAPI.recent().catch(() => []),
         gameEvalAPI.listSessions().catch(() => []),
         staffSharingAPI.inbox().catch(() => []),
@@ -378,6 +379,21 @@ export default function RecentScreen() {
         }));
       // Full game reports: games where I have MY OWN persisted game report
       // (our team + opponent). Per-coach scoped by the backend like scouting.
+      // A film's breakdown, as its own card. It says which packet it came from
+      // so two packets analysing the same team are not two identical rows.
+      const filmItems: ReportItem[] = (filmAnalyses ?? []).map((f: any) => ({
+        id: f.id,
+        report_id: f.report_id,
+        kind: 'film' as const,
+        player_name: f.team_name
+          ? tr('recent.filmFromPacket', { team: f.team_name, packet: f.packet_title })
+          : f.packet_title,
+        output_type: 'film_breakdown',
+        overall_grade: null,
+        created_at: f.created_at,
+        report_text: f.report_text,
+      }));
+
       const gameReportItems: ReportItem[] = (gameSessions ?? [])
         .filter((g: any) => g.ai_game_report)
         .map((g: any) => ({
@@ -433,7 +449,7 @@ export default function RecentScreen() {
           updatedFrom[`${k}:${sr.updated_report_id}`] = sr;
         }
       });
-      [...evalItems, ...teamItems, ...gameItems, ...trainingItems, ...scoutItems, ...gameReportItems].forEach((it: ReportItem) => {
+      [...evalItems, ...teamItems, ...gameItems, ...filmItems, ...trainingItems, ...scoutItems, ...gameReportItems].forEach((it: ReportItem) => {
         const sr = updatedFrom[`${it.kind}:${it.id}`];
         if (sr) {
           it.updated_from = sr.sender_name || tr('recent.senderFallbackLower');
@@ -443,7 +459,7 @@ export default function RecentScreen() {
         }
       });
 
-      const combined = [...evalItems, ...teamItems, ...gameItems, ...trainingItems, ...scoutItems, ...gameReportItems, ...sharedItems].sort(
+      const combined = [...evalItems, ...teamItems, ...gameItems, ...filmItems, ...trainingItems, ...scoutItems, ...gameReportItems, ...sharedItems].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       setItems(combined);
@@ -476,13 +492,20 @@ export default function RecentScreen() {
   const filtered = items.filter(item => {
     // The "Game Reports" tab groups packet game reports and per-game reports.
     // "Match Ups" spans any report whose type includes matchup (player or team).
+    // "Team Reports" gathers everything written ABOUT a team: roster-wide
+    // reports, anything generated in a game packet, and a film's breakdown.
+    // "Game Reports" stays what it says — the report built from a tracked
+    // game's own stats.
     const matchesFilter = filter === 'matchup'
       ? (item.output_type ?? '').split(',').map(s => s.trim()).includes('matchup')
-      : (item.kind === filter || (filter === 'game' && item.kind === 'gamereport'));
+      : filter === 'team' ? ['team', 'game', 'film'].includes(item.kind)
+      : filter === 'game' ? item.kind === 'gamereport'
+      : item.kind === filter;
     if (filter !== 'all' && !matchesFilter) return false;
     if (!searchTerm) return true;
     const kindLabel =
-      item.kind === 'game' ? tr('recent.gameReportPacket') :
+      item.kind === 'game' ? outputTypeNames(item.output_type) :
+      item.kind === 'film' ? tr('reportTypes.film_breakdown') :
       item.kind === 'scout' ? tr('recent.scoutReport') :
       item.kind === 'training' ? tr('reportTypes.training_program') :
       outputTypeLabel(item.output_type);
@@ -928,12 +951,18 @@ export default function RecentScreen() {
                         styles.typeName,
                         item.kind === 'team' && { color: t.brown },
                         item.kind === 'game' && { color: t.accent },
+                        item.kind === 'film' && { color: t.accent },
                         item.kind === 'scout' && { color: t.accent },
                         item.kind === 'gamereport' && { color: t.accent },
                         item.kind === 'training' && { color: t.positive },
                       ]}
                     >
-                      {item.kind === 'game' ? tr('recent.gameReportPacket') :
+                      {/* What the report IS, not where it is stored. A packet
+                          version said "Game Report Packet" whatever had been
+                          ticked, so a Coaching + Scouting report and a Box
+                          Score were the same line. */}
+                      {item.kind === 'game' ? outputTypeNames(item.output_type) :
+                       item.kind === 'film' ? tr('reportTypes.film_breakdown') :
                        item.kind === 'scout' ? tr('recent.scoutReport') :
                        item.kind === 'gamereport' ? tr('recent.gameReport') :
                        item.kind === 'training' ? tr('reportTypes.training_program') :
