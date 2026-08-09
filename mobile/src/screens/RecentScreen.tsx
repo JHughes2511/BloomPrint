@@ -1702,16 +1702,18 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     marginHorizontal: 16, marginBottom: 12, paddingHorizontal: 12, height: 44,
   },
   searchBarInput: { flex: 1, color: t.ink, fontSize: 15, paddingVertical: 0 },
-  filterRow: { marginBottom: 12, flexGrow: 0, height: 52,
-    ...desktopOnly({ height: undefined, paddingHorizontal: 16, paddingRight: 24, paddingBottom: 4 }) },
-  // A FIXED height, not vertical padding. This row is 52 tall and a horizontal
-  // scroller clips what overflows it, so a chip sized by its text grows out of
-  // the row and loses its top and bottom edge. It was 34 before the chip styles
-  // were unified across the app, and 34 is what it goes back to; the 999 radius
-  // clamps to half the height, so it is the same pill either way.
-  filterChip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, height: 34, justifyContent: 'center', alignItems: 'center', flexShrink: 1, maxWidth: 180 },
+  // No height on the row. A horizontal scroller clips whatever is taller than
+  // it, so any fixed height here is a guess that slices the top and bottom off
+  // the pill the moment it is wrong. The roster's team chips and Team Grade's
+  // view chips — the two rows that look right — let the row take its height
+  // from the chips, and this is now the same arrangement.
+  filterRow: { marginBottom: 12, flexGrow: 0,
+    ...desktopOnly({ paddingHorizontal: 16, paddingRight: 24, paddingBottom: 4 }) },
+  // Copied from RosterScreen's teamChip, which is the pill the coach called
+  // correct. Fixed 34 high, centred text, no shrinking.
+  filterChip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, height: 34, justifyContent: 'center' },
   filterChipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
-  filterChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[600], flexShrink: 1 },
+  filterChipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
   filterChipTextActive: { color: t.ctaText },
   dateHeader: { color: t.label, fontSize: 11, fontFamily: fonts[700], marginHorizontal: 20, marginTop: 16, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 },
   emptyText: { color: t.muted2, marginTop: 12, fontSize: 14 },

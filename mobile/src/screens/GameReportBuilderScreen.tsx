@@ -1397,7 +1397,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   addTeamChipText: { color: t.muted, fontSize: 13 },
   addTeamBtn: { backgroundColor: t.ctaBg, borderRadius: 10, paddingHorizontal: 16, paddingVertical: 11 },
   addTeamBtnText: { color: t.ctaText, fontSize: 13, fontFamily: fonts[700] },
-  chip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 9, marginRight: 8 },
+  // The roster's team chip and Team Grade's view chip, which are the pills that
+  // look right: a fixed 34 high with the label centred in it, rather than a
+  // height that follows the text and grows out of a scroller that clips it.
+  chip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, height: 34, justifyContent: 'center', marginRight: 8 },
   chipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   chipText: { color: t.muted, fontSize: 13, fontFamily: fonts[700] },
   chipTextActive: { color: t.ctaText },
