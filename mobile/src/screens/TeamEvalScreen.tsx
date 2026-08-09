@@ -2960,11 +2960,18 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       )}
 
       {/* Asked before the review list, because the answer decides which side
-          every row from that heading belongs to. */}
+          every row from that heading belongs to.
+
+          The team is named the way the rest of this screen names it. A game
+          session carries team_id, not team_name, so asking for the field that
+          does not exist meant this question always read "Our Team" — and "Our
+          Team" is no help at all when the point of the question is to tell two
+          unlabelled columns apart. */}
       {askLabels.length > 0 && !!activeGame && (
         <TeamLabelPrompt
           labels={askLabels}
-          ourName={activeGame.team_name || tr('teamGrade.ourTeam')}
+          ourName={(teams as any[]).find(tm => tm.id === activeGame.team_id)?.name
+                   ?? coach?.program_name ?? tr('teamGrade.ourTeam')}
           theirName={activeGame.opponent_name || tr('teamGrade.opponent')}
           busy={importing}
           onCancel={() => { setAskLabels([]); setStatPreview(null);
