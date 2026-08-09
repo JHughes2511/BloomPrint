@@ -1363,7 +1363,8 @@
     "applied": "適用済み",
     "pending": "保留中",
     "sectionsLabel": "セクション",
-    "filmFromPacket": "{{team}} · {{packet}} より"
+    "filmFromPacket": "{{team}} · {{packet}} より",
+    "fromFilm": "{{types}} · 映像"
   },
   "staffHub": {
     "title": "スタッフハブ",

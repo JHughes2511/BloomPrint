@@ -1363,7 +1363,8 @@
     "applied": "적용됨",
     "pending": "대기 중",
     "sectionsLabel": "섹션",
-    "filmFromPacket": "{{team}} · {{packet}}에서"
+    "filmFromPacket": "{{team}} · {{packet}}에서",
+    "fromFilm": "{{types}} · 영상"
   },
   "staffHub": {
     "title": "스태프 허브",

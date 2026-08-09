@@ -1363,7 +1363,8 @@
     "applied": "UYGULANDI",
     "pending": "BEKLİYOR",
     "sectionsLabel": "Bölümler",
-    "filmFromPacket": "{{team}} · {{packet}} paketinden"
+    "filmFromPacket": "{{team}} · {{packet}} paketinden",
+    "fromFilm": "{{types}} · Video"
   },
   "staffHub": {
     "title": "Ekip Merkezi",

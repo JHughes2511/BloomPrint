@@ -1363,7 +1363,8 @@
     "applied": "PRITAIKYTA",
     "pending": "LAUKIAMA",
     "sectionsLabel": "Skyriai",
-    "filmFromPacket": "{{team}} · iš {{packet}}"
+    "filmFromPacket": "{{team}} · iš {{packet}}",
+    "fromFilm": "{{types}} · Vaizdo įrašas"
   },
   "staffHub": {
     "title": "Personalo centras",

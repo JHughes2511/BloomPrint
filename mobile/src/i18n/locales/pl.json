@@ -1363,7 +1363,8 @@
     "applied": "ZASTOSOWANO",
     "pending": "OCZEKUJE",
     "sectionsLabel": "Sekcje",
-    "filmFromPacket": "{{team}} · z {{packet}}"
+    "filmFromPacket": "{{team}} · z {{packet}}",
+    "fromFilm": "{{types}} · Wideo"
   },
   "staffHub": {
     "title": "Centrum sztabu",

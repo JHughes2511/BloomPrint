@@ -56,6 +56,11 @@ def _resolve_report_text(report_type: str, report_id: int, db: Session, sender_i
             lines.append("AI SCOUTING REPORT:")
             lines.append(scout_text)
         return "\n".join(lines)
+    if report_type == "film":
+        # A film breakdown is keyed by the CLIP, not the packet: one packet can
+        # hold several films and each has its own analysis.
+        clip = db.get(models.GameReportClip, report_id)
+        return clip.analysis_text if clip else None
     if report_type == "game_report":
         session = db.get(models.GameSession, report_id)
         if not session:
@@ -98,6 +103,13 @@ def _report_meta(report_type: str, report_id: int, db: Session) -> tuple[str | N
     if report_type == "game_session":
         gs = db.get(models.GameSession, report_id)
         return ((f"vs {gs.opponent_name}" if gs else None), "scouting_report", None)
+    if report_type == "film":
+        clip = db.get(models.GameReportClip, report_id)
+        if not clip:
+            return None, None, None
+        gr = db.get(models.GameReport, clip.game_report_id)
+        subject = clip.team_name or (gr.title if gr else None) or "Film"
+        return subject, "film_breakdown", None
     if report_type == "game_report":
         gs = db.get(models.GameSession, report_id)
         return ((f"vs {gs.opponent_name}" if gs else None), "game_report", None)

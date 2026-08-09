@@ -1363,7 +1363,8 @@
     "applied": "लागू",
     "pending": "लंबित",
     "sectionsLabel": "अनुभाग",
-    "filmFromPacket": "{{team}} · {{packet}} से"
+    "filmFromPacket": "{{team}} · {{packet}} से",
+    "fromFilm": "{{types}} · फ़िल्म"
   },
   "staffHub": {
     "title": "स्टाफ़ हब",

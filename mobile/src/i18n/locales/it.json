@@ -1363,7 +1363,8 @@
     "applied": "APPLICATA",
     "pending": "IN SOSPESO",
     "sectionsLabel": "Sezioni",
-    "filmFromPacket": "{{team}} · da {{packet}}"
+    "filmFromPacket": "{{team}} · da {{packet}}",
+    "fromFilm": "{{types}} · Video"
   },
   "staffHub": {
     "title": "Area staff",

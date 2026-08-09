@@ -1363,7 +1363,8 @@
     "applied": "NA-APPLY",
     "pending": "NAKABINBIN",
     "sectionsLabel": "Mga seksyon",
-    "filmFromPacket": "{{team}} · mula sa {{packet}}"
+    "filmFromPacket": "{{team}} · mula sa {{packet}}",
+    "fromFilm": "{{types}} · Video"
   },
   "staffHub": {
     "title": "Staff hub",

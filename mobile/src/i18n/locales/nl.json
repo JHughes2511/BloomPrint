@@ -1363,7 +1363,8 @@
     "applied": "TOEGEPAST",
     "pending": "IN AFWACHTING",
     "sectionsLabel": "Secties",
-    "filmFromPacket": "{{team}} · uit {{packet}}"
+    "filmFromPacket": "{{team}} · uit {{packet}}",
+    "fromFilm": "{{types}} · Video"
   },
   "staffHub": {
     "title": "Staf-hub",

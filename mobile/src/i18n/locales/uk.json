@@ -1363,7 +1363,8 @@
     "applied": "ЗАСТОСОВАНО",
     "pending": "ОЧІКУЄ",
     "sectionsLabel": "Розділи",
-    "filmFromPacket": "{{team}} · з {{packet}}"
+    "filmFromPacket": "{{team}} · з {{packet}}",
+    "fromFilm": "{{types}} · Відео"
   },
   "staffHub": {
     "title": "Хаб персоналу",

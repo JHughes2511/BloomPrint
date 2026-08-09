@@ -1363,7 +1363,8 @@
     "applied": "已应用",
     "pending": "待处理",
     "sectionsLabel": "章节",
-    "filmFromPacket": "{{team}} · 来自 {{packet}}"
+    "filmFromPacket": "{{team}} · 来自 {{packet}}",
+    "fromFilm": "{{types}} · 影像"
   },
   "staffHub": {
     "title": "工作人员中心",

@@ -1363,7 +1363,8 @@
     "applied": "ANGEWENDET",
     "pending": "AUSSTEHEND",
     "sectionsLabel": "Abschnitte",
-    "filmFromPacket": "{{team}} · aus {{packet}}"
+    "filmFromPacket": "{{team}} · aus {{packet}}",
+    "fromFilm": "{{types}} · Video"
   },
   "staffHub": {
     "title": "Staff-Hub",

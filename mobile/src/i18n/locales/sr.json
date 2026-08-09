@@ -1363,7 +1363,8 @@
     "applied": "PRIMENJENO",
     "pending": "NA ČEKANJU",
     "sectionsLabel": "Одељци",
-    "filmFromPacket": "{{team}} · из {{packet}}"
+    "filmFromPacket": "{{team}} · из {{packet}}",
+    "fromFilm": "{{types}} · Снимак"
   },
   "staffHub": {
     "title": "Centar štaba",

@@ -1363,7 +1363,8 @@
     "applied": "APPLIQUÉ",
     "pending": "EN ATTENTE",
     "sectionsLabel": "Sections",
-    "filmFromPacket": "{{team}} · de {{packet}}"
+    "filmFromPacket": "{{team}} · de {{packet}}",
+    "fromFilm": "{{types}} · Vidéo"
   },
   "staffHub": {
     "title": "Espace staff",

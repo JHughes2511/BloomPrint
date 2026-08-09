@@ -1363,7 +1363,8 @@
     "applied": "APPLIED",
     "pending": "PENDING",
     "sectionsLabel": "Sections",
-    "filmFromPacket": "{{team}} · from {{packet}}"
+    "filmFromPacket": "{{team}} · from {{packet}}",
+    "fromFilm": "{{types}} · Film"
   },
   "staffHub": {
     "title": "Staff Hub",

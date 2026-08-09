@@ -1363,7 +1363,8 @@
     "applied": "გამოყენებულია",
     "pending": "მოლოდინში",
     "sectionsLabel": "სექციები",
-    "filmFromPacket": "{{team}} · {{packet}}-დან"
+    "filmFromPacket": "{{team}} · {{packet}}-დან",
+    "fromFilm": "{{types}} · ვიდეო"
   },
   "staffHub": {
     "title": "პერსონალის ცენტრი",

@@ -1363,7 +1363,8 @@
     "applied": "הוחל",
     "pending": "ממתין",
     "sectionsLabel": "חלקים",
-    "filmFromPacket": "{{team}} · מתוך {{packet}}"
+    "filmFromPacket": "{{team}} · מתוך {{packet}}",
+    "fromFilm": "{{types}} · וידאו"
   },
   "staffHub": {
     "title": "מרכז הצוות",

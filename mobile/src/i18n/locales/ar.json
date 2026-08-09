@@ -1363,7 +1363,8 @@
     "applied": "تم التطبيق",
     "pending": "معلّق",
     "sectionsLabel": "الأقسام",
-    "filmFromPacket": "{{team}} · من {{packet}}"
+    "filmFromPacket": "{{team}} · من {{packet}}",
+    "fromFilm": "{{types}} · فيديو"
   },
   "staffHub": {
     "title": "مركز الطاقم",

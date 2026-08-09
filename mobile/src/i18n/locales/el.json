@@ -1363,7 +1363,8 @@
     "applied": "ΕΦΑΡΜΟΣΤΗΚΕ",
     "pending": "ΕΚΚΡΕΜΕΙ",
     "sectionsLabel": "Ενότητες",
-    "filmFromPacket": "{{team}} · από {{packet}}"
+    "filmFromPacket": "{{team}} · από {{packet}}",
+    "fromFilm": "{{types}} · Βίντεο"
   },
   "staffHub": {
     "title": "Κόμβος Επιτελείου",

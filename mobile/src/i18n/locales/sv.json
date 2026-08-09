@@ -1363,7 +1363,8 @@
     "applied": "TILLÄMPAD",
     "pending": "VÄNTANDE",
     "sectionsLabel": "Avsnitt",
-    "filmFromPacket": "{{team}} · från {{packet}}"
+    "filmFromPacket": "{{team}} · från {{packet}}",
+    "fromFilm": "{{types}} · Video"
   },
   "staffHub": {
     "title": "Stabscentral",

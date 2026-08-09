@@ -381,18 +381,25 @@ export default function RecentScreen() {
       // (our team + opponent). Per-coach scoped by the backend like scouting.
       // A film's breakdown, as its own card. It says which packet it came from
       // so two packets analysing the same team are not two identical rows.
-      const filmItems: ReportItem[] = (filmAnalyses ?? []).map((f: any) => ({
-        id: f.id,
-        report_id: f.report_id,
-        kind: 'film' as const,
-        player_name: f.team_name
-          ? tr('recent.filmFromPacket', { team: f.team_name, packet: f.packet_title })
-          : f.packet_title,
-        output_type: 'film_breakdown',
-        overall_grade: null,
-        created_at: f.created_at,
-        report_text: f.report_text,
-      }));
+      const filmItems: ReportItem[] = (filmAnalyses ?? []).map((f: any) => {
+        // The film is often OF the matchup the packet is about, in which case
+        // "Angola vs Egypt · from Angola vs Egypt" says the same thing twice.
+        const same = (a?: string, b?: string) =>
+          (a ?? '').replace(/[^a-z0-9]/gi, '').toLowerCase() ===
+          (b ?? '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+        return {
+          id: f.id,
+          report_id: f.report_id,
+          kind: 'film' as const,
+          player_name: f.team_name && !same(f.team_name, f.packet_title)
+            ? tr('recent.filmFromPacket', { team: f.team_name, packet: f.packet_title })
+            : f.packet_title,
+          output_type: f.output_type,
+          overall_grade: null,
+          created_at: f.created_at,
+          report_text: f.report_text,
+        };
+      });
 
       const gameReportItems: ReportItem[] = (gameSessions ?? [])
         .filter((g: any) => g.ai_game_report)
@@ -504,8 +511,8 @@ export default function RecentScreen() {
     if (filter !== 'all' && !matchesFilter) return false;
     if (!searchTerm) return true;
     const kindLabel =
-      item.kind === 'game' ? outputTypeNames(item.output_type) :
-      item.kind === 'film' ? tr('reportTypes.film_breakdown') :
+      item.kind === 'game' ? tr('recent.gameReportPacket') :
+      item.kind === 'film' ? tr('recent.fromFilm', { types: outputTypeNames(item.output_type) }) :
       item.kind === 'scout' ? tr('recent.scoutReport') :
       item.kind === 'training' ? tr('reportTypes.training_program') :
       outputTypeLabel(item.output_type);
@@ -561,6 +568,17 @@ export default function RecentScreen() {
       setGameReportModal({
         title: tr('reportTypes.game_report'), subject: item.player_name, text: item.report_text ?? '',
         reportType: 'game_report', reportId: item.id, outputType: 'game_report',
+      });
+      return;
+    }
+    if (item.kind === 'film') {
+      setGameReportModal({
+        title: tr('recent.fromFilm', { types: outputTypeNames(item.output_type) }),
+        subject: item.player_name, text: item.report_text ?? '',
+        // The CLIP's id: sharing resolves a film breakdown from the clip,
+        // since one packet can hold several films.
+        reportType: 'film', reportId: item.id,
+        outputType: item.output_type,
       });
       return;
     }
@@ -961,13 +979,22 @@ export default function RecentScreen() {
                           version said "Game Report Packet" whatever had been
                           ticked, so a Coaching + Scouting report and a Box
                           Score were the same line. */}
-                      {item.kind === 'game' ? outputTypeNames(item.output_type) :
-                       item.kind === 'film' ? tr('reportTypes.film_breakdown') :
+                      {item.kind === 'game' ? tr('recent.gameReportPacket') :
+                       item.kind === 'film' ? tr('recent.fromFilm', { types: outputTypeNames(item.output_type) }) :
                        item.kind === 'scout' ? tr('recent.scoutReport') :
                        item.kind === 'gamereport' ? tr('recent.gameReport') :
                        item.kind === 'training' ? tr('reportTypes.training_program') :
                        outputTypeLabel(item.output_type)}
                     </Text>
+                    {/* What is actually inside the packet. "Game Report
+                        Packet" is the right name for the card — it is what the
+                        three buttons act on — but on its own it never said
+                        whether this was the coaching report or the box score. */}
+                    {item.kind === 'game' && (
+                      <Text numberOfLines={1} style={styles.sharedByLabel}>
+                        {outputTypeNames(item.output_type)}
+                      </Text>
+                    )}
                     {item.shared && (
                       <Text numberOfLines={1} style={styles.sharedByLabel}>
                         {tr('recent.sharedBy', { name: item.sender_name })}

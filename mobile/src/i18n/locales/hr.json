@@ -1363,7 +1363,8 @@
     "applied": "PRIMIJENJENO",
     "pending": "NA ČEKANJU",
     "sectionsLabel": "Odjeljci",
-    "filmFromPacket": "{{team}} · iz {{packet}}"
+    "filmFromPacket": "{{team}} · iz {{packet}}",
+    "fromFilm": "{{types}} · Snimka"
   },
   "staffHub": {
     "title": "Središte stožera",
