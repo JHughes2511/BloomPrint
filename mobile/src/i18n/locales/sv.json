@@ -1987,13 +1987,16 @@
     "importFromFile": "Från en fil",
     "noRecordedGames": "Inga matcher registrerade än. Registrera en match under Matcher så dyker den upp här.",
     "gameDate": "Matchdatum",
-    "gameDateHint": "När spelades matchen? Utan datum kan film inte kopplas till en registrerad match.",
+    "gameDateHint": "När spelades matchen? Det är detta som kopplar filmen till din Matchstatistik.",
     "linkGameTitle": "Vilken match är filmen från?",
-    "linkGameHint": "Välj den registrerade matchen, så analysen kan använda de verkliga siffrorna.",
+    "linkGameHint": "Välj Matchstatistiken filmen kommer från, så analysen kan använda riktiga siffror.",
     "linkNearDate": "Ungefär en dag ifrån",
     "linkNone": "Ingen av dessa",
     "linkImport": "Importera matchen",
-    "linkFailed": "Kunde inte koppla matchen."
+    "linkFailed": "Kunde inte koppla matchen.",
+    "linkSearchTeam": "Sök ett lag",
+    "linkNoGames": "Inga matcher hittades. Prova ett lagnamn eller importera matchen.",
+    "searchAction": "Sök"
   },
   "teamGrade": {
     "views": {

@@ -1987,13 +1987,16 @@
     "importFromFile": "ファイルから",
     "noRecordedGames": "まだ記録された試合がありません。「試合」で記録するとここに表示されます。",
     "gameDate": "試合日",
-    "gameDateHint": "この試合はいつですか？ 日付がないと映像を記録済みの試合に紐づけられません。",
+    "gameDateHint": "この試合はいつですか？ 映像を試合スタッツに紐づけるのはこの日付です。",
     "linkGameTitle": "この映像はどの試合ですか？",
-    "linkGameHint": "記録済みの試合を選ぶと、分析が実際の数字を使えます。",
+    "linkGameHint": "元になった試合スタッツを選ぶと、分析が実際の数字を使えます。",
     "linkNearDate": "1日ほどのずれ",
     "linkNone": "どれでもない",
     "linkImport": "試合を取り込む",
-    "linkFailed": "その試合に紐づけできませんでした。"
+    "linkFailed": "その試合に紐づけできませんでした。",
+    "linkSearchTeam": "チームを検索",
+    "linkNoGames": "試合が見つかりません。チーム名で検索するか、試合を取り込んでください。",
+    "searchAction": "検索"
   },
   "teamGrade": {
     "views": {

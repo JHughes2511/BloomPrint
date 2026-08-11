@@ -1987,13 +1987,16 @@
     "importFromFile": "De um ficheiro",
     "noRecordedGames": "Ainda não há jogos registados. Regista um jogo em Jogos e aparecerá aqui.",
     "gameDate": "Data do jogo",
-    "gameDateHint": "Quando foi jogado? Sem isso, o vídeo não pode ser ligado a um jogo registado.",
+    "gameDateHint": "Quando foi jogado? É isto que liga o vídeo às tuas Estatísticas de jogo.",
     "linkGameTitle": "De que jogo é este vídeo?",
-    "linkGameHint": "Escolhe o jogo registado de onde vem, para a análise usar os números reais.",
+    "linkGameHint": "Escolhe as Estatísticas de jogo de onde vem, para usar os números reais.",
     "linkNearDate": "Cerca de um dia de diferença",
     "linkNone": "Nenhum destes",
     "linkImport": "Importar o jogo",
-    "linkFailed": "Não foi possível ligar esse jogo."
+    "linkFailed": "Não foi possível ligar esse jogo.",
+    "linkSearchTeam": "Procurar uma equipa",
+    "linkNoGames": "Nenhum jogo encontrado. Tenta uma equipa ou importa o jogo.",
+    "searchAction": "Procurar"
   },
   "teamGrade": {
     "views": {

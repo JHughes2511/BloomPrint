@@ -1987,13 +1987,16 @@
     "importFromFile": "From a file",
     "noRecordedGames": "No games recorded yet. Track a game under Games and it will appear here.",
     "gameDate": "Game date",
-    "gameDateHint": "When was this game played? Without it, film can't be tied to a tracked game.",
+    "gameDateHint": "When was this game played? This is what ties the film to your Game Stats.",
     "linkGameTitle": "Which game is this film of?",
-    "linkGameHint": "Pick the tracked game this film is from, so the breakdown can use its real numbers.",
+    "linkGameHint": "Pick the Game Stats this film is from, so the breakdown can use its real numbers.",
     "linkNearDate": "About a day out",
     "linkNone": "Not one of these",
     "linkImport": "Import the game",
-    "linkFailed": "Couldn't link that game."
+    "linkFailed": "Couldn't link that game.",
+    "linkSearchTeam": "Search a team",
+    "linkNoGames": "No games found. Try a team name, or import the game.",
+    "searchAction": "Search"
   },
   "teamGrade": {
     "views": {

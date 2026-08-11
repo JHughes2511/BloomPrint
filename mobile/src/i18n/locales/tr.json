@@ -1987,13 +1987,16 @@
     "importFromFile": "Bir dosyadan",
     "noRecordedGames": "Henüz kaydedilmiş maç yok. Maçlar bölümünde bir maç kaydet, burada görünecek.",
     "gameDate": "Maç tarihi",
-    "gameDateHint": "Maç ne zaman oynandı? Bu olmadan görüntü kayıtlı bir maça bağlanamaz.",
+    "gameDateHint": "Maç ne zaman oynandı? Görüntüyü Maç istatistiklerinize bu bağlar.",
     "linkGameTitle": "Bu görüntü hangi maçtan?",
-    "linkGameHint": "Kayıtlı maçı seçin ki analiz gerçek sayıları kullanabilsin.",
+    "linkGameHint": "Görüntünün geldiği Maç istatistiklerini seçin ki gerçek sayılar kullanılsın.",
     "linkNearDate": "Yaklaşık bir gün fark",
     "linkNone": "Hiçbiri",
     "linkImport": "Maçı içe aktar",
-    "linkFailed": "Maç bağlanamadı."
+    "linkFailed": "Maç bağlanamadı.",
+    "linkSearchTeam": "Takım ara",
+    "linkNoGames": "Maç bulunamadı. Bir takım adı deneyin veya maçı içe aktarın.",
+    "searchAction": "Ara"
   },
   "teamGrade": {
     "views": {

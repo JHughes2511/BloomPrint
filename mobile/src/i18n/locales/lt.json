@@ -1987,13 +1987,16 @@
     "importFromFile": "Iš failo",
     "noRecordedGames": "Įrašytų rungtynių dar nėra. Įrašyk rungtynes skiltyje Rungtynės ir jos atsiras čia.",
     "gameDate": "Rungtynių data",
-    "gameDateHint": "Kada vyko? Be datos vaizdo įrašo negalima susieti su registruotomis rungtynėmis.",
+    "gameDateHint": "Kada vyko? Tai susieja įrašą su jūsų Rungtynių statistika.",
     "linkGameTitle": "Iš kurių rungtynių šis įrašas?",
-    "linkGameHint": "Pasirinkite registruotas rungtynes, kad analizė naudotų tikrus skaičius.",
+    "linkGameHint": "Pasirinkite Rungtynių statistiką, kad analizė naudotų tikrus skaičius.",
     "linkNearDate": "Maždaug diena skirtumo",
     "linkNone": "Nė vienos iš šių",
     "linkImport": "Importuoti rungtynes",
-    "linkFailed": "Nepavyko susieti rungtynių."
+    "linkFailed": "Nepavyko susieti rungtynių.",
+    "linkSearchTeam": "Ieškoti komandos",
+    "linkNoGames": "Rungtynių nerasta. Pabandykite komandos pavadinimą arba importuokite.",
+    "searchAction": "Ieškoti"
   },
   "teamGrade": {
     "views": {

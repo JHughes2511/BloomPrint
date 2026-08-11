@@ -1987,13 +1987,16 @@
     "importFromFile": "De un archivo",
     "noRecordedGames": "Aún no hay partidos registrados. Registra un partido en Partidos y aparecerá aquí.",
     "gameDate": "Fecha del partido",
-    "gameDateHint": "¿Cuándo se jugó? Sin esto no se puede vincular el vídeo a un partido registrado.",
+    "gameDateHint": "¿Cuándo se jugó? Esto vincula el vídeo con tus Estadísticas de partido.",
     "linkGameTitle": "¿De qué partido es este vídeo?",
-    "linkGameHint": "Elige el partido registrado del que procede, para que el análisis use sus números reales.",
+    "linkGameHint": "Elige las Estadísticas de partido de las que procede, para usar sus números reales.",
     "linkNearDate": "Un día de diferencia",
     "linkNone": "Ninguno de estos",
     "linkImport": "Importar el partido",
-    "linkFailed": "No se pudo vincular ese partido."
+    "linkFailed": "No se pudo vincular ese partido.",
+    "linkSearchTeam": "Buscar un equipo",
+    "linkNoGames": "No se encontraron partidos. Prueba con un equipo o importa el partido.",
+    "searchAction": "Buscar"
   },
   "teamGrade": {
     "views": {

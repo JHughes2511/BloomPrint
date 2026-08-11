@@ -409,6 +409,26 @@ def _game_label(db: Session, game: models.GameSession) -> str:
     return f"{ours} vs {theirs}" + (f" · {when}" if when else "") + score
 
 
+def search_games_by_team(db: Session, coach: models.Coach, q: str) -> list[models.GameSession]:
+    """Every game of this coach's involving a team whose name contains `q`.
+
+    Both sides are searched, and the date is deliberately ignored: this runs
+    because the coach typed a name, which means the automatic match did not
+    find what they were after.
+    """
+    needle = _norm_team(q)
+    if not needle:
+        return []
+    out = []
+    for game in db.query(models.GameSession).filter_by(coach_id=coach.id).all():
+        team = db.get(models.Team, game.team_id) if game.team_id else None
+        names = [_norm_team(team.name if team else ""), _norm_team(game.opponent_name)]
+        if any(needle in n for n in names if n):
+            out.append(game)
+    out.sort(key=lambda g: (g.date or g.created_at), reverse=True)
+    return out[:50]
+
+
 def suggest_games_for_packet(db: Session, gr: models.GameReport,
                              coach: models.Coach) -> list[models.GameSession]:
     """Tracked games that could be the one this packet's film is of.
@@ -808,6 +828,7 @@ class LinkClipBody(BaseModel):
 @router.get("/{report_id}/game-suggestions")
 def game_suggestions(
     report_id: int,
+    q: str | None = None,
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
@@ -821,7 +842,12 @@ def game_suggestions(
     gr = db.get(models.GameReport, report_id)
     if not gr or gr.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Game report not found")
-    games = suggest_games_for_packet(db, gr, coach)
+    # A typed team name is the coach looking for a game themselves, so it wins
+    # over the automatic match entirely: every game that team played, whatever
+    # the date says. The suggestion is a convenience; the search is the answer
+    # to "it is not in that list".
+    games = (search_games_by_team(db, coach, q) if (q or "").strip()
+             else suggest_games_for_packet(db, gr, coach))
     clips = list(gr.clips or [])
     unanswered = [c for c in clips if not c.game_id and not c.link_declined]
     return {

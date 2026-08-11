@@ -1987,13 +1987,16 @@
     "importFromFile": "Dintr-un fișier",
     "noRecordedGames": "Niciun meci înregistrat încă. Înregistrează un meci la Meciuri și va apărea aici.",
     "gameDate": "Data meciului",
-    "gameDateHint": "Când s-a jucat? Fără dată, filmul nu poate fi legat de un meci înregistrat.",
+    "gameDateHint": "Când s-a jucat? Asta leagă filmul de Statisticile tale de meci.",
     "linkGameTitle": "Din ce meci este filmul?",
-    "linkGameHint": "Alege meciul înregistrat, ca analiza să folosească cifrele reale.",
+    "linkGameHint": "Alege Statisticile de meci din care provine, ca analiza să folosească cifrele reale.",
     "linkNearDate": "Cam o zi diferență",
     "linkNone": "Niciunul dintre acestea",
     "linkImport": "Importă meciul",
-    "linkFailed": "Nu s-a putut lega meciul."
+    "linkFailed": "Nu s-a putut lega meciul.",
+    "linkSearchTeam": "Caută o echipă",
+    "linkNoGames": "Niciun meci găsit. Încearcă o echipă sau importă meciul.",
+    "searchAction": "Caută"
   },
   "teamGrade": {
     "views": {

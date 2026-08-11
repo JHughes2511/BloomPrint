@@ -1987,13 +1987,16 @@
     "importFromFile": "Z pliku",
     "noRecordedGames": "Brak zapisanych meczów. Zapisz mecz w sekcji Mecze, a pojawi się tutaj.",
     "gameDate": "Data meczu",
-    "gameDateHint": "Kiedy odbył się mecz? Bez daty nie da się powiązać wideo z zapisanym meczem.",
+    "gameDateHint": "Kiedy odbył się mecz? To łączy wideo z Twoimi Statystykami meczowymi.",
     "linkGameTitle": "Z którego meczu jest to wideo?",
-    "linkGameHint": "Wybierz zapisany mecz, aby analiza korzystała z prawdziwych liczb.",
+    "linkGameHint": "Wybierz Statystyki meczowe, aby analiza użyła prawdziwych liczb.",
     "linkNearDate": "Około dnia różnicy",
     "linkNone": "Żaden z nich",
     "linkImport": "Zaimportuj mecz",
-    "linkFailed": "Nie udało się powiązać meczu."
+    "linkFailed": "Nie udało się powiązać meczu.",
+    "linkSearchTeam": "Szukaj zespołu",
+    "linkNoGames": "Nie znaleziono meczów. Spróbuj nazwy zespołu lub zaimportuj mecz.",
+    "searchAction": "Szukaj"
   },
   "teamGrade": {
     "views": {

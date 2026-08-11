@@ -1987,13 +1987,16 @@
     "importFromFile": "Uit een bestand",
     "noRecordedGames": "Nog geen wedstrijden vastgelegd. Leg een wedstrijd vast bij Wedstrijden en hij verschijnt hier.",
     "gameDate": "Wedstrijddatum",
-    "gameDateHint": "Wanneer was deze wedstrijd? Zonder datum kan beeld niet aan een wedstrijd worden gekoppeld.",
+    "gameDateHint": "Wanneer was deze wedstrijd? Dit koppelt het beeld aan je Wedstrijdstatistieken.",
     "linkGameTitle": "Van welke wedstrijd is dit beeld?",
-    "linkGameHint": "Kies de geregistreerde wedstrijd, zodat de analyse de echte cijfers kan gebruiken.",
+    "linkGameHint": "Kies de Wedstrijdstatistieken, zodat de analyse de echte cijfers gebruikt.",
     "linkNearDate": "Ongeveer een dag verschil",
     "linkNone": "Geen van deze",
     "linkImport": "Wedstrijd importeren",
-    "linkFailed": "Kon die wedstrijd niet koppelen."
+    "linkFailed": "Kon die wedstrijd niet koppelen.",
+    "linkSearchTeam": "Zoek een team",
+    "linkNoGames": "Geen wedstrijden gevonden. Probeer een team of importeer de wedstrijd.",
+    "searchAction": "Zoeken"
   },
   "teamGrade": {
     "views": {

@@ -1987,13 +1987,16 @@
     "importFromFile": "Aus einer Datei",
     "noRecordedGames": "Noch keine Spiele aufgezeichnet. Zeichne ein Spiel unter Spiele auf, dann erscheint es hier.",
     "gameDate": "Spieldatum",
-    "gameDateHint": "Wann war dieses Spiel? Ohne Datum lässt sich Film keinem erfassten Spiel zuordnen.",
+    "gameDateHint": "Wann war dieses Spiel? Das verbindet den Film mit deinen Spielstatistiken.",
     "linkGameTitle": "Von welchem Spiel ist dieser Film?",
-    "linkGameHint": "Wähle das erfasste Spiel, damit die Analyse dessen echte Zahlen nutzen kann.",
+    "linkGameHint": "Wähle die Spielstatistiken, damit die Analyse deren echte Zahlen nutzt.",
     "linkNearDate": "Etwa einen Tag daneben",
     "linkNone": "Keines davon",
     "linkImport": "Spiel importieren",
-    "linkFailed": "Spiel konnte nicht verknüpft werden."
+    "linkFailed": "Spiel konnte nicht verknüpft werden.",
+    "linkSearchTeam": "Team suchen",
+    "linkNoGames": "Keine Spiele gefunden. Versuch einen Teamnamen oder importiere das Spiel.",
+    "searchAction": "Suchen"
   },
   "teamGrade": {
     "views": {

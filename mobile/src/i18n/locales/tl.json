@@ -1987,13 +1987,16 @@
     "importFromFile": "Mula sa file",
     "noRecordedGames": "Wala pang naitalang laro. Magtala ng laro sa Mga Laro at lilitaw ito rito.",
     "gameDate": "Petsa ng laro",
-    "gameDateHint": "Kailan nilaro? Kung wala nito, hindi maiuugnay ang film sa naitalang laro.",
+    "gameDateHint": "Kailan nilaro? Ito ang nag-uugnay ng film sa iyong Estadistika ng laro.",
     "linkGameTitle": "Aling laro ang film na ito?",
-    "linkGameHint": "Piliin ang naitalang laro para magamit ng breakdown ang totoong numero.",
+    "linkGameHint": "Piliin ang Estadistika ng laro na pinagmulan nito para magamit ang totoong numero.",
     "linkNearDate": "Mga isang araw ang layo",
     "linkNone": "Wala rito",
     "linkImport": "I-import ang laro",
-    "linkFailed": "Hindi maiugnay ang larong iyon."
+    "linkFailed": "Hindi maiugnay ang larong iyon.",
+    "linkSearchTeam": "Maghanap ng koponan",
+    "linkNoGames": "Walang nahanap na laro. Subukan ang pangalan ng koponan o mag-import.",
+    "searchAction": "Maghanap"
   },
   "teamGrade": {
     "views": {

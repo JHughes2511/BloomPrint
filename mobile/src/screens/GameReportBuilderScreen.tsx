@@ -33,6 +33,7 @@ import { mdToHtml, safeFileName, wrapPrintDocument } from '../utils/mdToHtml';
 import { useAuth } from '../context/AuthContext';
 import { CONTENT_MAX_WIDTH, sheetCap, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
 import ChipRow from '../responsive/ChipRow';
+import { parseGameDate, displayGameDate } from '../utils/gameDate';
 import { useSheetScrollHeight } from '../responsive/modalSizes';
 
 // Labels come from `reportTypes.*` translation keys at render time.
@@ -191,13 +192,26 @@ export default function GameReportBuilderScreen() {
    */
   const [linkAsk, setLinkAsk] = useState<any | null>(null);
   const [linking, setLinking] = useState(false);
+  const [gameQuery, setGameQuery] = useState('');
+  const [searchingGames, setSearchingGames] = useState(false);
 
-  const refreshLinkAsk = async (id: number) => {
+  /**
+   * Ask the server what this film could be of.
+   *
+   * `manual` is the coach pressing Search: the sheet opens whatever comes
+   * back, including nothing, because they asked a question and deserve an
+   * answer. Left alone it only opens when the server says there is something
+   * worth interrupting for.
+   */
+  const refreshLinkAsk = async (id: number, opts?: { manual?: boolean; q?: string }) => {
+    if (opts?.manual) setSearchingGames(true);
     try {
-      const sug = await gameReportsAPI.gameSuggestions(id);
-      setLinkAsk(sug?.ask ? sug : null);
+      const sug = await gameReportsAPI.gameSuggestions(id, opts?.q?.trim() || undefined);
+      setLinkAsk(opts?.manual ? { ...sug, manual: true } : (sug?.ask ? sug : null));
     } catch {
-      setLinkAsk(null);   // nothing to ask is the safe answer
+      if (!opts?.manual) setLinkAsk(null);   // nothing to ask is the safe answer
+    } finally {
+      setSearchingGames(false);
     }
   };
 
@@ -329,7 +343,7 @@ export default function GameReportBuilderScreen() {
     setFocusPrompt(r.focus_prompt ?? '');
     setBoxScore(r.box_score ?? '');
     setScoutingNotes(r.scouting_notes ?? '');
-    setGameDate((r.game_date ?? '').slice(0, 10));
+    setGameDate(displayGameDate(r.game_date));
   };
 
   const save = async (patch: any) => {
@@ -865,23 +879,48 @@ export default function GameReportBuilderScreen() {
           <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8 }}>
             {tr('gameBuilder.gameDateHint')}
           </Text>
-          <VoiceTextInput
-            style={styles.oppNameInput}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={t.muted2}
-            value={gameDate}
-            onChangeText={setGameDate}
-            onBlur={() => {
-              // Sent only when it is a whole date. A half-typed one is not an
-              // answer, and storing it would start suggesting games for it.
-              const clean = gameDate.trim();
-              if (!clean) { void save({ game_date: null }); return; }
-              if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
-                void save({ game_date: `${clean}T12:00:00` }).then(() =>
-                  reportId ? refreshLinkAsk(reportId) : undefined);
-              }
-            }}
-          />
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <VoiceTextInput
+              style={[styles.oppNameInput, { flex: 1, marginBottom: 0 }]}
+              placeholder="MM-DD-YY"
+              placeholderTextColor={t.muted2}
+              value={gameDate}
+              onChangeText={setGameDate}
+              onBlur={() => {
+                // Typed however the coach types. Only a WHOLE date is saved —
+                // a half-finished one is somebody still going, and storing it
+                // would start suggesting games for a date they have not
+                // finished entering. See utils/gameDate.
+                const clean = gameDate.trim();
+                if (!clean) { void save({ game_date: null }); return; }
+                const parsed = parseGameDate(clean);
+                if (!parsed) return;
+                setGameDate(parsed.display);
+                void save({ game_date: `${parsed.iso}T12:00:00` });
+              }}
+            />
+            <TouchableOpacity
+              style={[styles.dateSearchBtn, searchingGames && { opacity: 0.6 }]}
+              onPress={() => {
+                const parsed = parseGameDate(gameDate.trim());
+                if (parsed) {
+                  setGameDate(parsed.display);
+                  void save({ game_date: `${parsed.iso}T12:00:00` })
+                    .then(() => { if (reportId) void refreshLinkAsk(reportId, { manual: true }); });
+                } else if (reportId) {
+                  // No usable date is not a dead end: the sheet can still be
+                  // searched by team, which is the other way in.
+                  void refreshLinkAsk(reportId, { manual: true });
+                }
+              }}
+              disabled={searchingGames}
+            >
+              {searchingGames
+                ? <ActivityIndicator color={t.ctaText} size="small" />
+                : <><Ionicons name="search" size={15} color={t.ctaText} />
+                    <Text style={styles.dateSearchText}>{tr('gameBuilder.searchAction')}</Text></>}
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Multi-team match-up: add a 3rd+ team to compare (only for Match Up) */}
@@ -1276,7 +1315,36 @@ export default function GameReportBuilderScreen() {
               </TouchableOpacity>
             </View>
             <Text style={styles.modalSub}>{tr('gameBuilder.linkGameHint')}</Text>
+            {/* Searching by team is the way out of "it is not in that list".
+                A name overrides the date entirely — every game that team
+                played — because the coach typing one means the automatic
+                match did not find what they were after. */}
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
+              <VoiceTextInput
+                style={[styles.oppNameInput, { flex: 1, marginBottom: 0 }]}
+                placeholder={tr('gameBuilder.linkSearchTeam')}
+                placeholderTextColor={t.muted2}
+                value={gameQuery}
+                onChangeText={setGameQuery}
+              />
+              <TouchableOpacity
+                style={styles.dateSearchBtn}
+                onPress={() => reportId && refreshLinkAsk(reportId, { manual: true, q: gameQuery })}
+                disabled={searchingGames}
+              >
+                {searchingGames
+                  ? <ActivityIndicator color={t.ctaText} size="small" />
+                  : <><Ionicons name="search" size={15} color={t.ctaText} />
+                      <Text style={styles.dateSearchText}>{tr('gameBuilder.searchAction')}</Text></>}
+              </TouchableOpacity>
+            </View>
             <ScrollView style={{ maxHeight: 260 }}>
+              {/* An empty result is an answer, not a blank sheet. */}
+              {(linkAsk?.games ?? []).length === 0 && (
+                <Text style={{ color: t.muted2, fontSize: 12.5, paddingVertical: 12 }}>
+                  {tr('gameBuilder.linkNoGames')}
+                </Text>
+              )}
               {(linkAsk?.games ?? []).map((g: any) => (
                 <TouchableOpacity
                   key={g.id}
@@ -1593,6 +1661,9 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   importBtnText: { color: t.cta2Text, fontSize: 12, fontFamily: fonts[700] },
   emptyHint: { color: t.muted2, fontSize: 12, marginBottom: 14, fontStyle: 'italic' },
   clipCard: { backgroundColor: t.card, borderRadius: 14, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: t.cardBorder, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  dateSearchBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: t.ctaBg,
+                   borderRadius: 10, paddingHorizontal: 14, height: 44, justifyContent: 'center' },
+  dateSearchText: { color: t.ctaText, fontSize: 13, fontFamily: fonts[700] },
   modalSub: { color: t.muted, fontSize: 12, marginBottom: 10, lineHeight: 17 },
   modalBtn: { borderRadius: 12, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
   linkRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12,
