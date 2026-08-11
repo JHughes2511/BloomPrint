@@ -1987,7 +1987,7 @@
     "importFromFile": "Dintr-un fișier",
     "noRecordedGames": "Niciun meci înregistrat încă. Înregistrează un meci la Meciuri și va apărea aici.",
     "gameDate": "Data meciului",
-    "gameDateHint": "Când s-a jucat? Asta leagă filmul de Statisticile de meci. Poți apăsa și Caută, apoi scrie o echipă.",
+    "gameDateHint": "Caută după numele echipei sau data meciului pentru a lega filmul de Statisticile de meci.",
     "linkGameTitle": "Din ce meci este filmul?",
     "linkGameHint": "Alege Statisticile de meci din care provine, ca analiza să folosească cifrele reale.",
     "linkNearDate": "Cam o zi diferență",
