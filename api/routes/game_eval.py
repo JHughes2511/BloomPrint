@@ -1078,6 +1078,30 @@ def team_written_material(db: Session, coach, team_name: str) -> list[tuple[str,
     return out
 
 
+def team_material_block(db: Session, coach, team_name: str,
+                        pieces: int = 3, chars: int = 3000) -> str:
+    """The written material about a team, as prompt text.
+
+    A scouting report was built from the numbers, the coach's notes, and film
+    tied to that one game. The packet reports about the same team — the
+    documents that say WHY those numbers happened — were not in it, so the app
+    could hold a full coaching report on Angola and write a scouting report on
+    Angola without reading a word of it.
+
+    Capped rather than complete: a packet report is thousands of words and the
+    newest ones carry the current picture.
+    """
+    written = team_written_material(db, coach, team_name)
+    if not written:
+        return ""
+    parts = [f"\n\n[{kind}]\n{(text or '')[:chars]}" for kind, text in written[:pieces]]
+    return ("\n\nREPORTS AND FILM ALREADY WRITTEN ABOUT THIS TEAM:"
+            "\nUse what these already establish — schemes, personnel, tendencies — "
+            "rather than working it out again from the numbers alone. Where they "
+            "and the box score disagree, the box score is what happened."
+            + "".join(parts))
+
+
 def team_material_count(db: Session, coach, team_name: str) -> int:
     """How many written pieces exist about a team, for spotting staleness.
 
@@ -1966,6 +1990,7 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
         score_info = f"Final score: {game.our_score}-{game.opponent_score} ({result})"
 
     notes_text = (_team_notes_text(db, coach, game) + film_notes_for_game(db, coach, game)
+                  + team_material_block(db, coach, game.opponent_name or "")
                   + learned_for_game(db, coach, game))
 
     corr_text = ""
@@ -2173,6 +2198,7 @@ async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSe
         score_info = f"Final: {game.our_score}-{game.opponent_score} ({res})"
 
     context = (_team_notes_text(db, coach, game) + film_notes_for_game(db, coach, game)
+               + team_material_block(db, coach, game.opponent_name or "")
                + learned_for_game(db, coach, game))
     if corrections:
         context += (
@@ -2822,12 +2848,12 @@ async def scout_insight(
     try:
         import anthropic
         client = anthropic.AsyncAnthropic()
-        # SONNET, per the tiers in ai_models: this condenses numbers already
-        # computed and reports Opus already wrote into one sentence, which is
-        # the summary case that tier exists for. It is the difference between
-        # a wait and an answer, on the one thing a coach taps repeatedly.
+        # Opus, deliberately. This is one sentence, but it is the sentence a
+        # coach reads off the scouting page and takes into a game plan — the
+        # tier rule is about what the output is FOR, not how long it is. The
+        # speed came from the prompt and from not blanking the page instead.
         resp = await client.messages.create(
-            model=SONNET, max_tokens=200,
+            model=OPUS, max_tokens=200,
             messages=[{"role": "user", "content": prompt}],
         )
         blocks = [b for b in resp.content if hasattr(b, "text")]
