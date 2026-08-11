@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} pti · {{reb}} rimb · {{ast}} ass · {{stl}} rec · {{blk}} stop · {{to}} perse",
     "perGameStat": "{{stat}} — {{n}} a partita",
     "noInsight": "Ancora nessuna analisi.",
-    "isMyTeam": "{{name}} è la mia squadra"
+    "isMyTeam": "{{name}} è la mia squadra",
+    "insightStale": "Nuovi report da allora — riscrivi"
   },
   "whiteboard": {
     "title": "Lavagna",

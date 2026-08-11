@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} pts · {{reb}} reb · {{ast}} ast · {{stl}} rob · {{blk}} tap · {{to}} pér",
     "perGameStat": "{{stat}} — {{n}} por partido",
     "noInsight": "Aún no hay análisis.",
-    "isMyTeam": "{{name}} es mi equipo"
+    "isMyTeam": "{{name}} es mi equipo",
+    "insightStale": "Hay informes nuevos — reescribir"
   },
   "whiteboard": {
     "title": "Pizarra",

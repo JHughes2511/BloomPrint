@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} poäng · {{reb}} reb · {{ast}} ass · {{stl}} steals · {{blk}} blocks · {{to}} tapp",
     "perGameStat": "{{stat}} — {{n}} per match",
     "noInsight": "Ingen analys ännu.",
-    "isMyTeam": "{{name}} är mitt lag"
+    "isMyTeam": "{{name}} är mitt lag",
+    "insightStale": "Nya rapporter sedan dess — skriv om"
   },
   "whiteboard": {
     "title": "Taktiktavla",

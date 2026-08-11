@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} ქულა · {{reb}} მოხს · {{ast}} პას · {{stl}} მოპარ · {{blk}} ბლოკ · {{to}} დაკარგ",
     "perGameStat": "{{stat}} — {{n}} თამაშზე",
     "noInsight": "შეფასება ჯერ არ არის.",
-    "isMyTeam": "{{name}} ჩემი გუნდია"
+    "isMyTeam": "{{name}} ჩემი გუნდია",
+    "insightStale": "მას შემდეგ ახალი ანგარიშებია — თავიდან დაწერე"
   },
   "whiteboard": {
     "title": "დაფა",

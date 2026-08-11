@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} 分 · {{reb}} 篮板 · {{ast}} 助攻 · {{stl}} 抢断 · {{blk}} 盖帽 · {{to}} 失误",
     "perGameStat": "{{stat}} — 场均 {{n}}",
     "noInsight": "暂无解读。",
-    "isMyTeam": "{{name}} 是我的球队"
+    "isMyTeam": "{{name}} 是我的球队",
+    "insightStale": "之后有新报告 — 重新生成"
   },
   "whiteboard": {
     "title": "战术板",

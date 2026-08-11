@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} puntos · {{reb}} reb · {{ast}} ast · {{stl}} steal · {{blk}} block · {{to}} turnover",
     "perGameStat": "{{stat}} — {{n}} kada laro",
     "noInsight": "Wala pang pagsusuri.",
-    "isMyTeam": "Ang {{name}} ay aking koponan"
+    "isMyTeam": "Ang {{name}} ay aking koponan",
+    "insightStale": "May bagong ulat mula noon — isulat muli"
   },
   "whiteboard": {
     "title": "Whiteboard",

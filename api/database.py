@@ -340,6 +340,8 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     ("game_report_clips", "game_id", "INTEGER"),
     ("game_report_clips", "link_declined", "BOOLEAN DEFAULT FALSE"),
     ("game_reports", "game_date", "TIMESTAMP"),
+    # Written material behind a scouting sentence, for spotting a stale one.
+    ("scout_insights", "material", "INTEGER DEFAULT 0"),
 ]
 
 

@@ -16,6 +16,7 @@ import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 
 import { gameEvalAPI, teamsAPI, playersAPI, staffSharingAPI, coachesAPI, importsAPI } from '../api/client';
+import type { ScoutInsightOut } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
@@ -357,7 +358,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [scoutOpponent, setScoutOpponent] = useState<string | null>(null);
   const [scoutData, setScoutData] = useState<any | null>(null);
   // Written sentences by subject: 'offense' | 'defense' | 'weak' | a player's name.
-  const [insights, setInsights] = useState<Record<string, { insight: string; games: number }>>({});
+  const [insights, setInsights] = useState<Record<string, ScoutInsightOut>>({});
   // Keyed, not a single value: the three team sections are written at the
   // same time, and one flag meant two of the three spinners went missing.
   const [insightBusy, setInsightBusy] = useState<Record<string, boolean>>({});
@@ -1461,6 +1462,62 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     } finally {
       setInsightBusy(prev => ({ ...prev, [subject]: false }));
     }
+  };
+
+  /**
+   * Read the team's page again, without taking it off the screen.
+   *
+   * The coach leaves Scout to build a packet about the team and comes back;
+   * the page they return to was drawn before any of that existed. Nothing is
+   * cleared and no spinner appears — what is there stays until better data
+   * replaces it, so a refresh that finds nothing new is invisible.
+   */
+  const refreshScout = useCallback(async (name: string) => {
+    try {
+      const [data, notes, kept] = await Promise.all([
+        gameEvalAPI.getOpponentProfile(name),
+        gameEvalAPI.getOpponentNotes(name).catch(() => []),
+        gameEvalAPI.scoutInsights(name).catch(() => ({})),
+      ]);
+      setScoutData(data);
+      setScoutNotes(notes ?? []);
+      // Merged, not replaced: a sentence written seconds ago in this session
+      // is not in the stored set yet and must not vanish.
+      setInsights(prev => ({ ...prev, ...(kept as any) }));
+      void writePage(`scout.${coach?.id ?? 0}.${name}`, { data, insights: kept });
+    } catch {
+      // Offline, or the team was renamed. What is on screen is still true.
+    }
+  }, [coach?.id]);
+
+  // Every time this screen comes back into view with a team open.
+  useFocusEffect(
+    useCallback(() => {
+      if (activeView === 'scout' && scoutOpponent) void refreshScout(scoutOpponent);
+    }, [activeView, scoutOpponent, refreshScout]),
+  );
+
+  /**
+   * Says a sentence predates material it should have been written from, and
+   * offers to rewrite it.
+   *
+   * Marked rather than rewritten on sight: each rewrite is a call per subject,
+   * and spending a page's worth of them because the coach opened a team is not
+   * something to do on their behalf.
+   */
+  const StaleInsight = ({ subject }: { subject: string }) => {
+    if (!insights[subject]?.stale || insightBusy[subject]) return null;
+    return (
+      <TouchableOpacity
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}
+        onPress={() => scoutOpponent && loadInsight(scoutOpponent, subject, true)}
+      >
+        <Ionicons name="refresh" size={13} color={t.brown} />
+        <Text style={{ color: t.brown, fontSize: 11.5, fontFamily: fonts[700] }}>
+          {tr('teamGrade.insightStale')}
+        </Text>
+      </TouchableOpacity>
+    );
   };
 
   /** Tapping a player opens their line, and writes the sentence if there is none. */
@@ -3044,9 +3101,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                               <View style={{ paddingBottom: 10, paddingRight: 8 }}>
                                 {insightBusy[p.player_name]
                                   ? <ActivityIndicator color={t.accent} size="small" style={{ alignSelf: 'flex-start' }} />
-                                  : <Text style={{ color: t.inkSoft, fontSize: 13, lineHeight: 19 }}>
-                                      {insights[p.player_name]?.insight ?? tr('teamGrade.noInsight')}
-                                    </Text>}
+                                  : <>
+                                      <Text style={{ color: t.inkSoft, fontSize: 13, lineHeight: 19, marginBottom: 6 }}>
+                                        {insights[p.player_name]?.insight ?? tr('teamGrade.noInsight')}
+                                      </Text>
+                                      <StaleInsight subject={p.player_name} />
+                                    </>}
                               </View>
                             )}
                           </View>
@@ -3070,9 +3130,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                           {insightBusy[key]
                             ? <ActivityIndicator color={t.accent} size="small" style={{ alignSelf: 'flex-start', marginBottom: 6 }} />
                             : !!insights[key] && (
-                                <Text style={{ color: t.ink, fontSize: 14, lineHeight: 20, marginBottom: 8 }}>
-                                  {insights[key].insight}
-                                </Text>
+                                <>
+                                  <Text style={{ color: t.ink, fontSize: 14, lineHeight: 20, marginBottom: 8 }}>
+                                    {insights[key].insight}
+                                  </Text>
+                                  <StaleInsight subject={key} />
+                                </>
                               )}
                           {(rows ?? []).map((td: any) => (
                             <Text key={td.stat} style={{ color: t.muted2, fontSize: 12, marginBottom: 3 }}>

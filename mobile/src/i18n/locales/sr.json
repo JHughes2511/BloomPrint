@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} поена · {{reb}} ск · {{ast}} ас · {{stl}} укр · {{blk}} бл · {{to}} изг",
     "perGameStat": "{{stat}} — {{n}} по утакмици",
     "noInsight": "Још нема анализе.",
-    "isMyTeam": "{{name}} je moj tim"
+    "isMyTeam": "{{name}} je moj tim",
+    "insightStale": "Novi izveštaji otad — napiši ponovo"
   },
   "whiteboard": {
     "title": "Tabla",

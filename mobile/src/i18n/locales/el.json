@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} πόν · {{reb}} ριμπ · {{ast}} ασίστ · {{stl}} κλεψ · {{blk}} κοψ · {{to}} λάθη",
     "perGameStat": "{{stat}} — {{n}} ανά αγώνα",
     "noInsight": "Δεν υπάρχει ακόμη ανάλυση.",
-    "isMyTeam": "Η {{name}} είναι η ομάδα μου"
+    "isMyTeam": "Η {{name}} είναι η ομάδα μου",
+    "insightStale": "Νέες αναφορές έκτοτε — ξαναγράψτε το"
   },
   "whiteboard": {
     "title": "Πίνακας",

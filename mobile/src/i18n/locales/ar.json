@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} نقطة · {{reb}} متابعة · {{ast}} تمريرة · {{stl}} استخلاص · {{blk}} صدّ · {{to}} كرة ضائعة",
     "perGameStat": "{{stat}} — {{n}} لكل مباراة",
     "noInsight": "لا توجد ملاحظة بعد.",
-    "isMyTeam": "{{name}} هو فريقي"
+    "isMyTeam": "{{name}} هو فريقي",
+    "insightStale": "توجد تقارير جديدة منذ ذلك الحين — أعد كتابته"
   },
   "whiteboard": {
     "title": "السبورة",

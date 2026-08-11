@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} sayı · {{reb}} rib · {{ast}} asist · {{stl}} top çalma · {{blk}} blok · {{to}} kayıp",
     "perGameStat": "{{stat}} — maç başına {{n}}",
     "noInsight": "Henüz analiz yok.",
-    "isMyTeam": "{{name}} benim takımım"
+    "isMyTeam": "{{name}} benim takımım",
+    "insightStale": "O zamandan beri yeni raporlar var — yeniden yaz"
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

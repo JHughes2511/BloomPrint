@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} очк · {{reb}} підб · {{ast}} пас · {{stl}} перехв · {{blk}} блок · {{to}} втрати",
     "perGameStat": "{{stat}} — {{n}} за гру",
     "noInsight": "Поки немає розбору.",
-    "isMyTeam": "{{name}} — моя команда"
+    "isMyTeam": "{{name}} — моя команда",
+    "insightStale": "Відтоді є нові звіти — переписати"
   },
   "whiteboard": {
     "title": "Тактична дошка",

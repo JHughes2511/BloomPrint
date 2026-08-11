@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} pts · {{reb}} reb · {{ast}} ast · {{stl}} stl · {{blk}} blk · {{to}} to",
     "perGameStat": "{{stat}} — {{n}} per game",
     "noInsight": "No insight yet.",
-    "isMyTeam": "{{name}} is my team"
+    "isMyTeam": "{{name}} is my team",
+    "insightStale": "New reports since this — rewrite it"
   },
   "whiteboard": {
     "title": "Whiteboard",

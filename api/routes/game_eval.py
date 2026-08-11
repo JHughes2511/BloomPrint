@@ -1037,6 +1037,58 @@ def _opponent_team_id_of(db: Session, coach, game) -> int | None:
     return None
 
 
+def team_written_material(db: Session, coach, team_name: str) -> list[tuple[str, str]]:
+    """Everything WRITTEN about a team that Scout should be reading.
+
+    The scouting page was built from games, box scores and per-game scouting
+    reports, which means a coach could produce a full game packet about a team
+    — with a film breakdown and a coaching report in it — and the page that
+    exists to tell them about that team knew nothing about any of it.
+
+    Returns [(what it is, the text)], newest first.
+    """
+    needle = "".join(ch for ch in (team_name or "").lower() if ch.isalnum())
+    if not needle:
+        return []
+
+    def about(*names) -> bool:
+        for n in names:
+            flat = "".join(ch for ch in str(n or "").lower() if ch.isalnum())
+            if flat and needle in flat:
+                return True
+        return False
+
+    out: list[tuple[str, str]] = []
+    packets = (db.query(models.GameReport)
+                 .filter_by(coach_id=coach.id)
+                 .order_by(models.GameReport.id.desc()).limit(40).all())
+    for gr in packets:
+        my_name = gr.my_team.name if gr.my_team else None
+        opp_name = gr.opponent_team.name if gr.opponent_team else None
+        if not about(my_name, opp_name, gr.opponent_name,
+                     getattr(gr, "opponent_a_name", None), gr.title):
+            continue
+        if gr.report_text:
+            out.append(("game packet report", gr.report_text))
+        for clip in (gr.clips or []):
+            # A clip names its own team; when it does not, the packet it sits
+            # in is already known to be about this one.
+            if clip.analysis_text and (not clip.team_name or about(clip.team_name)):
+                out.append(("film breakdown", clip.analysis_text))
+    return out
+
+
+def team_material_count(db: Session, coach, team_name: str) -> int:
+    """How many written pieces exist about a team, for spotting staleness.
+
+    A one-sentence insight used to be rewritten only when the GAME count
+    changed, so a new report or packet about the team never touched it — the
+    page kept showing a line written before the material it should have been
+    written from.
+    """
+    return len(team_written_material(db, coach, team_name))
+
+
 def learned_for_game(db: Session, coach, game) -> str:
     """What this coach's corrections have taught, for either team in this game.
 
@@ -2699,6 +2751,11 @@ async def scout_insight(
     page — and it is kept, so opening the same player twice costs one call,
     not two. It is rewritten when the game count behind it changes, because a
     line written from two games should not be presented beside four.
+
+    A stored one is returned with `stale` when there is material it was not
+    written from — a new packet report or film breakdown about the team. The
+    page says so and offers to rewrite it, rather than either quietly showing
+    an out-of-date line or spending a call per player behind the coach's back.
     """
     subject = (body.subject or "").strip()
     if not subject:
@@ -2706,12 +2763,18 @@ async def scout_insight(
 
     profile = opponent_profile(opponent_name, db, coach)
     games_n = profile.get("games_count") or 0
+    written = team_written_material(db, coach, opponent_name)
+    material_n = len(written)
 
     row = (db.query(models.ScoutInsight)
              .filter_by(coach_id=coach.id, team_name=opponent_name, subject=subject)
              .order_by(models.ScoutInsight.id.desc()).first())
     if row and not body.refresh and row.games == games_n:
-        return {"insight": row.insight, "games": row.games, "cached": True}
+        return {"insight": row.insight, "games": row.games, "cached": True,
+                # Kept, but flagged: there is written material about this team
+                # that this sentence predates.
+                "stale": (row.material or 0) != material_n,
+                "material": row.material or 0, "material_now": material_n}
 
     def _lines(rows, key):
         return "; ".join(f"{r['stat']} {r[key]} per game" for r in rows) or "none recorded"
@@ -2736,9 +2799,17 @@ async def scout_insight(
                  f"grade {who['avg_grade']} out of 5")
         ask = (f"{subject} of {opponent_name}, across {who['games']} tracked game(s): {facts}.")
 
+    # What has been written about them, not only what was counted. A packet
+    # report says why a number happened; the number on its own does not.
+    reading = ""
+    if written:
+        parts = [f"\n[{kind}]\n{(text or '')[:2500]}" for kind, text in written[:4]]
+        reading = ("\n\nWHAT HAS ALREADY BEEN WRITTEN ABOUT THIS TEAM:"
+                   + "".join(parts))
+
     prompt = (
         "You are a basketball scout briefing a head coach before they play this team.\n\n"
-        f"{ask}\n\n"
+        f"{ask}{reading}\n\n"
         "Write ONE sentence, under 200 characters, saying what this MEANS for the game plan "
         "— the thing a coach would say to their staff. Lead with the read, not the numbers; "
         "quote at most one figure, and only if it carries the point. No preamble, no "
@@ -2761,11 +2832,14 @@ async def scout_insight(
 
     if row:
         row.insight, row.games, row.created_at = text, games_n, datetime.utcnow()
+        row.material = material_n
     else:
         db.add(models.ScoutInsight(coach_id=coach.id, team_name=opponent_name,
-                                   subject=subject, insight=text, games=games_n))
+                                   subject=subject, insight=text, games=games_n,
+                                   material=material_n))
     db.commit()
-    return {"insight": text, "games": games_n, "cached": False}
+    return {"insight": text, "games": games_n, "cached": False,
+            "stale": False, "material": material_n, "material_now": material_n}
 
 
 @router.get("/opponents/{opponent_name}/insights")
@@ -2779,7 +2853,13 @@ def scout_insights(
     rows = (db.query(models.ScoutInsight)
               .filter_by(coach_id=coach.id, team_name=opponent_name)
               .order_by(models.ScoutInsight.id).all())
-    return {r.subject: {"insight": r.insight, "games": r.games} for r in rows}
+    # Counted once for the whole page rather than per row: it is the same
+    # question for every sentence on it.
+    material_n = team_material_count(db, coach, opponent_name)
+    return {r.subject: {"insight": r.insight, "games": r.games,
+                        "stale": (r.material or 0) != material_n,
+                        "material": r.material or 0, "material_now": material_n}
+            for r in rows}
 
 
 @router.get("/opponents/{opponent_name}")

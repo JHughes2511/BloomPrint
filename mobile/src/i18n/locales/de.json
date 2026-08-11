@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} Pkt · {{reb}} Reb · {{ast}} Ass · {{stl}} Steals · {{blk}} Blocks · {{to}} TO",
     "perGameStat": "{{stat}} — {{n}} pro Spiel",
     "noInsight": "Noch keine Einschätzung.",
-    "isMyTeam": "{{name}} ist mein Team"
+    "isMyTeam": "{{name}} ist mein Team",
+    "insightStale": "Neue Berichte seitdem — neu schreiben"
   },
   "whiteboard": {
     "title": "Taktiktafel",

@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} נק' · {{reb}} ריב' · {{ast}} אס' · {{stl}} חט' · {{blk}} חס' · {{to}} איב'",
     "perGameStat": "{{stat}} — {{n}} למשחק",
     "noInsight": "אין עדיין תובנה.",
-    "isMyTeam": "{{name}} היא הקבוצה שלי"
+    "isMyTeam": "{{name}} היא הקבוצה שלי",
+    "insightStale": "יש דוחות חדשים מאז — כתוב מחדש"
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

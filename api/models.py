@@ -1002,12 +1002,19 @@ class ScoutInsight(Base):
     `games` records how many were behind the sentence, so a stored one written
     from two games can be replaced once there are four rather than quietly
     describing a smaller sample than the page beside it shows.
+
+    `material` does the same job for everything WRITTEN about the team — the
+    packet reports and film breakdowns. Games alone missed it: a coach could
+    produce a full packet about a team and the sentence beside it would still
+    be the one written before any of it existed, with nothing to say so.
     """
     __tablename__ = "scout_insights"
 
     id          = Column(Integer, primary_key=True, index=True)
     coach_id    = Column(Integer, ForeignKey("coaches.id"), nullable=False)
     team_name   = Column(String, nullable=False, index=True)
+    # How many written pieces about the team the sentence was based on.
+    material    = Column(Integer, default=0)
     subject     = Column(String, nullable=False, index=True)
     insight     = Column(Text, nullable=False)
     games       = Column(Integer, default=0)

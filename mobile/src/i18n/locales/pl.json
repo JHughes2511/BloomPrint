@@ -2259,7 +2259,8 @@
     "perGameLine": "{{pts}} pkt · {{reb}} zb · {{ast}} as · {{stl}} prz · {{blk}} bl · {{to}} str",
     "perGameStat": "{{stat}} — {{n}} na mecz",
     "noInsight": "Brak analizy.",
-    "isMyTeam": "{{name}} to mój zespół"
+    "isMyTeam": "{{name}} to mój zespół",
+    "insightStale": "Od tego czasu są nowe raporty — napisz od nowa"
   },
   "whiteboard": {
     "title": "Tablica",

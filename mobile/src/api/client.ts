@@ -21,6 +21,17 @@ export type CoachPreference = {
   created_at: string;
 };
 
+/** One written sentence on the scouting page, and whether it is out of date. */
+export type ScoutInsightOut = {
+  insight: string;
+  games: number;
+  cached?: boolean;
+  /** There is written material about the team this sentence predates. */
+  stale?: boolean;
+  material?: number;
+  material_now?: number;
+};
+
 /** A long job of this coach's, as the app-wide banner reads it. */
 export type ActiveJob = {
   id: number;
@@ -783,11 +794,11 @@ export const gameEvalAPI = {
   scoutInsight: (team: string, subject: string, refresh = false) =>
     api.post(`/game-eval/opponents/${encodeURIComponent(team)}/insight`,
              { subject, refresh }, { timeout: 120000 })
-       .then(r => r.data as { insight: string; games: number; cached: boolean }),
+       .then(r => r.data as ScoutInsightOut),
   /** Everything already written about a team, so nothing is paid for twice. */
   scoutInsights: (team: string) =>
     api.get(`/game-eval/opponents/${encodeURIComponent(team)}/insights`)
-       .then(r => r.data as Record<string, { insight: string; games: number }>),
+       .then(r => r.data as Record<string, ScoutInsightOut>),
   scoutingCorrections: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/scouting-corrections`).then(r => r.data),
   addScoutingCorrection: (gameId: number, text: string) => api.post(`/game-eval/sessions/${gameId}/scouting-corrections`, { text }).then(r => r.data),
   editScoutingCorrection: (id: number, text: string) => api.patch(`/game-eval/scouting-corrections/${id}`, { text }).then(r => r.data),
