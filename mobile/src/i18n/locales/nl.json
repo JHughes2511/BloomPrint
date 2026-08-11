@@ -1996,7 +1996,9 @@
     "linkFailed": "Kon die wedstrijd niet koppelen.",
     "linkSearchTeam": "Zoek een team",
     "linkNoGames": "Geen wedstrijden gevonden. Probeer een team of importeer de wedstrijd.",
-    "searchAction": "Zoeken"
+    "searchAction": "Zoeken",
+    "tiedTo": "Statistieken gekoppeld",
+    "untie": "Ontkoppelen"
   },
   "teamGrade": {
     "views": {

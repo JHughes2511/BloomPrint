@@ -1996,7 +1996,9 @@
     "linkFailed": "Nije moguće povezati utakmicu.",
     "linkSearchTeam": "Traži momčad",
     "linkNoGames": "Nema utakmica. Pokušajte s imenom momčadi ili uvezite utakmicu.",
-    "searchAction": "Traži"
+    "searchAction": "Traži",
+    "tiedTo": "Statistika povezana",
+    "untie": "Odspoji"
   },
   "teamGrade": {
     "views": {

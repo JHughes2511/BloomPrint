@@ -1996,7 +1996,9 @@
     "linkFailed": "Kunde inte koppla matchen.",
     "linkSearchTeam": "Sök ett lag",
     "linkNoGames": "Inga matcher hittades. Prova ett lagnamn eller importera matchen.",
-    "searchAction": "Sök"
+    "searchAction": "Sök",
+    "tiedTo": "Statistik kopplad",
+    "untie": "Koppla bort"
   },
   "teamGrade": {
     "views": {

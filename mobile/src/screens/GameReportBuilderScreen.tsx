@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
@@ -8,7 +8,7 @@ import {
   findNodeHandle, RefreshControl,
 } from 'react-native';
 import Sheet from '../components/Sheet';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useGoUp } from '../navigation/goUp';
 import { Ionicons } from '@expo/vector-icons';
 import { renderReport } from '../utils/renderReport';
@@ -222,7 +222,24 @@ export default function GameReportBuilderScreen() {
       await gameReportsAPI.linkGame(reportId, gameId == null
         ? { game_id: null, declined: true }
         : { game_id: gameId });
+
+      // Take the game's own details onto the packet, so picking one answers
+      // the fields the coach would otherwise fill in by hand off the same row.
+      const picked = (linkAsk?.games ?? []).find((g: any) => g.id === gameId);
+      if (picked) {
+        const patch: any = {};
+        const iso = (picked.date || '').slice(0, 10);
+        if (iso) { setGameDate(displayGameDate(iso)); patch.game_date = `${iso}T12:00:00`; }
+        // The name only when there is not one. A packet the coach has already
+        // named is not improved by replacing it with the fixture.
+        if (!title.trim()) {
+          const named = String(picked.label || '').split(' · ')[0].trim();
+          if (named) { setTitle(named); patch.title = named; }
+        }
+        if (Object.keys(patch).length) await gameReportsAPI.update(reportId, patch);
+      }
       setLinkAsk(null);
+      setGameQuery('');
       setReport(await gameReportsAPI.get(reportId));
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('gameBuilder.linkFailed'));
@@ -230,6 +247,19 @@ export default function GameReportBuilderScreen() {
       setLinking(false);
     }
   };
+
+  // Coming back from the import screen, look again. The coach went there to
+  // create the very game this packet is asking about, and making them press
+  // Search again to find what they just imported is the app forgetting why it
+  // sent them away.
+  useFocusEffect(
+    useCallback(() => {
+      if (reportId) void refreshLinkAsk(reportId);
+    }, [reportId]),
+  );
+
+  /** The game this packet's film is tied to, once one is confirmed. */
+  const linkedGame = (report?.clips ?? []).find((c: any) => c.game_id)?.game_label ?? null;
   const [clipCorrectionText, setClipCorrectionText] = useState('');
   const [clipCorrecting, setClipCorrecting] = useState(false);
   // Progress label for the film breakdown ("Analyzing segment i of N").
@@ -921,6 +951,23 @@ export default function GameReportBuilderScreen() {
                     <Text style={styles.dateSearchText}>{tr('gameBuilder.searchAction')}</Text></>}
             </TouchableOpacity>
           </View>
+
+          {/* Tied, and said so. A link that only exists in the database is a
+              link the coach has to take on trust — and this is the row that
+              tells them the breakdown is now working from real numbers. */}
+          {!!linkedGame && (
+            <View style={styles.tiedRow}>
+              <Ionicons name="link" size={15} color={t.positive} />
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={styles.tiedLabel}>{tr('gameBuilder.tiedTo')}</Text>
+                <Text style={styles.tiedGame} numberOfLines={1}>{linkedGame}</Text>
+              </View>
+              <TouchableOpacity onPress={() => answerLink(null)} disabled={linking}
+                                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Text style={styles.tiedUntie}>{tr('gameBuilder.untie')}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         {/* Multi-team match-up: add a 3rd+ team to compare (only for Match Up) */}
@@ -1661,6 +1708,13 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   importBtnText: { color: t.cta2Text, fontSize: 12, fontFamily: fonts[700] },
   emptyHint: { color: t.muted2, fontSize: 12, marginBottom: 14, fontStyle: 'italic' },
   clipCard: { backgroundColor: t.card, borderRadius: 14, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: t.cardBorder, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  tiedRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12,
+             backgroundColor: t.positiveSoft, borderRadius: 10, padding: 10,
+             borderWidth: 1, borderColor: t.positive },
+  tiedLabel: { color: t.positive, fontSize: 10.5, fontFamily: fonts[700],
+               textTransform: 'uppercase', letterSpacing: 0.8 },
+  tiedGame: { color: t.ink, fontSize: 13.5, fontFamily: fonts[600], marginTop: 1 },
+  tiedUntie: { color: t.muted, fontSize: 12, fontFamily: fonts[700] },
   dateSearchBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: t.ctaBg,
                    borderRadius: 10, paddingHorizontal: 14, height: 44, justifyContent: 'center' },
   dateSearchText: { color: t.ctaText, fontSize: 13, fontFamily: fonts[700] },

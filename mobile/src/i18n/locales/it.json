@@ -1996,7 +1996,9 @@
     "linkFailed": "Impossibile collegare la partita.",
     "linkSearchTeam": "Cerca una squadra",
     "linkNoGames": "Nessuna partita trovata. Prova una squadra o importa la partita.",
-    "searchAction": "Cerca"
+    "searchAction": "Cerca",
+    "tiedTo": "Statistiche collegate",
+    "untie": "Scollega"
   },
   "teamGrade": {
     "views": {

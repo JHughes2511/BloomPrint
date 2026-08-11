@@ -1996,7 +1996,9 @@
     "linkFailed": "उस गेम से नहीं जोड़ा जा सका।",
     "linkSearchTeam": "टीम खोजें",
     "linkNoGames": "कोई गेम नहीं मिला। टीम का नाम आज़माएँ या गेम इम्पोर्ट करें।",
-    "searchAction": "खोजें"
+    "searchAction": "खोजें",
+    "tiedTo": "गेम स्टैट्स जुड़े",
+    "untie": "अलग करें"
   },
   "teamGrade": {
     "views": {

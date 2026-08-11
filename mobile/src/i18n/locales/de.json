@@ -1996,7 +1996,9 @@
     "linkFailed": "Spiel konnte nicht verknüpft werden.",
     "linkSearchTeam": "Team suchen",
     "linkNoGames": "Keine Spiele gefunden. Versuch einen Teamnamen oder importiere das Spiel.",
-    "searchAction": "Suchen"
+    "searchAction": "Suchen",
+    "tiedTo": "Statistiken verknüpft",
+    "untie": "Trennen"
   },
   "teamGrade": {
     "views": {

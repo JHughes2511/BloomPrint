@@ -1996,7 +1996,9 @@
     "linkFailed": "Nie udało się powiązać meczu.",
     "linkSearchTeam": "Szukaj zespołu",
     "linkNoGames": "Nie znaleziono meczów. Spróbuj nazwy zespołu lub zaimportuj mecz.",
-    "searchAction": "Szukaj"
+    "searchAction": "Szukaj",
+    "tiedTo": "Statystyki powiązane",
+    "untie": "Odłącz"
   },
   "teamGrade": {
     "views": {

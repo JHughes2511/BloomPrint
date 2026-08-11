@@ -1996,7 +1996,9 @@
     "linkFailed": "تعذّر ربط المباراة.",
     "linkSearchTeam": "ابحث عن فريق",
     "linkNoGames": "لا توجد مباريات. جرّب اسم فريق أو استورد المباراة.",
-    "searchAction": "بحث"
+    "searchAction": "بحث",
+    "tiedTo": "تم ربط الإحصائيات",
+    "untie": "إلغاء الربط"
   },
   "teamGrade": {
     "views": {

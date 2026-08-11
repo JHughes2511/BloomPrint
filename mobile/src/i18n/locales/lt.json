@@ -1996,7 +1996,9 @@
     "linkFailed": "Nepavyko susieti rungtynių.",
     "linkSearchTeam": "Ieškoti komandos",
     "linkNoGames": "Rungtynių nerasta. Pabandykite komandos pavadinimą arba importuokite.",
-    "searchAction": "Ieškoti"
+    "searchAction": "Ieškoti",
+    "tiedTo": "Statistika susieta",
+    "untie": "Atsieti"
   },
   "teamGrade": {
     "views": {

@@ -1996,7 +1996,9 @@
     "linkFailed": "Nu s-a putut lega meciul.",
     "linkSearchTeam": "Caută o echipă",
     "linkNoGames": "Niciun meci găsit. Încearcă o echipă sau importă meciul.",
-    "searchAction": "Caută"
+    "searchAction": "Caută",
+    "tiedTo": "Statistici legate",
+    "untie": "Dezleagă"
   },
   "teamGrade": {
     "views": {

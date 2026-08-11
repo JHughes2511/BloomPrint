@@ -1996,7 +1996,9 @@
     "linkFailed": "לא ניתן לקשר את המשחק.",
     "linkSearchTeam": "חפש קבוצה",
     "linkNoGames": "לא נמצאו משחקים. נסה שם קבוצה או ייבא את המשחק.",
-    "searchAction": "חיפוש"
+    "searchAction": "חיפוש",
+    "tiedTo": "הסטטיסטיקות מקושרות",
+    "untie": "בטל קישור"
   },
   "teamGrade": {
     "views": {

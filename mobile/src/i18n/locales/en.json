@@ -1996,7 +1996,9 @@
     "linkFailed": "Couldn't link that game.",
     "linkSearchTeam": "Search a team",
     "linkNoGames": "No games found. Try a team name, or import the game.",
-    "searchAction": "Search"
+    "searchAction": "Search",
+    "tiedTo": "Game Stats tied",
+    "untie": "Untie"
   },
   "teamGrade": {
     "views": {

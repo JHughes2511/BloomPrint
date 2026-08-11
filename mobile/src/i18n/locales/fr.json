@@ -1996,7 +1996,9 @@
     "linkFailed": "Impossible de lier ce match.",
     "linkSearchTeam": "Rechercher une équipe",
     "linkNoGames": "Aucun match trouvé. Essayez une équipe, ou importez le match.",
-    "searchAction": "Rechercher"
+    "searchAction": "Rechercher",
+    "tiedTo": "Stats reliées",
+    "untie": "Délier"
   },
   "teamGrade": {
     "views": {

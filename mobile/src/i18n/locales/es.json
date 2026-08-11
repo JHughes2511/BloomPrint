@@ -1996,7 +1996,9 @@
     "linkFailed": "No se pudo vincular ese partido.",
     "linkSearchTeam": "Buscar un equipo",
     "linkNoGames": "No se encontraron partidos. Prueba con un equipo o importa el partido.",
-    "searchAction": "Buscar"
+    "searchAction": "Buscar",
+    "tiedTo": "Estadísticas vinculadas",
+    "untie": "Desvincular"
   },
   "teamGrade": {
     "views": {

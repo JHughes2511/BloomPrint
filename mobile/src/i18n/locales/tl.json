@@ -1996,7 +1996,9 @@
     "linkFailed": "Hindi maiugnay ang larong iyon.",
     "linkSearchTeam": "Maghanap ng koponan",
     "linkNoGames": "Walang nahanap na laro. Subukan ang pangalan ng koponan o mag-import.",
-    "searchAction": "Maghanap"
+    "searchAction": "Maghanap",
+    "tiedTo": "Nakaugnay ang Estadistika",
+    "untie": "Alisin"
   },
   "teamGrade": {
     "views": {

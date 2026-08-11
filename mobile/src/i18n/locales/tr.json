@@ -1996,7 +1996,9 @@
     "linkFailed": "Maç bağlanamadı.",
     "linkSearchTeam": "Takım ara",
     "linkNoGames": "Maç bulunamadı. Bir takım adı deneyin veya maçı içe aktarın.",
-    "searchAction": "Ara"
+    "searchAction": "Ara",
+    "tiedTo": "İstatistikler bağlandı",
+    "untie": "Bağlantıyı kaldır"
   },
   "teamGrade": {
     "views": {

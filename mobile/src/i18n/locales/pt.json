@@ -1996,7 +1996,9 @@
     "linkFailed": "Não foi possível ligar esse jogo.",
     "linkSearchTeam": "Procurar uma equipa",
     "linkNoGames": "Nenhum jogo encontrado. Tenta uma equipa ou importa o jogo.",
-    "searchAction": "Procurar"
+    "searchAction": "Procurar",
+    "tiedTo": "Estatísticas ligadas",
+    "untie": "Desligar"
   },
   "teamGrade": {
     "views": {

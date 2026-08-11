@@ -1996,7 +1996,9 @@
     "linkFailed": "その試合に紐づけできませんでした。",
     "linkSearchTeam": "チームを検索",
     "linkNoGames": "試合が見つかりません。チーム名で検索するか、試合を取り込んでください。",
-    "searchAction": "検索"
+    "searchAction": "検索",
+    "tiedTo": "試合スタッツを紐づけ済み",
+    "untie": "解除"
   },
   "teamGrade": {
     "views": {

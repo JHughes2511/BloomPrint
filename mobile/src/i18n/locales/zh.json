@@ -1996,7 +1996,9 @@
     "linkFailed": "无法关联该比赛。",
     "linkSearchTeam": "搜索球队",
     "linkNoGames": "没有找到比赛。试试球队名称，或导入比赛。",
-    "searchAction": "搜索"
+    "searchAction": "搜索",
+    "tiedTo": "已关联比赛数据",
+    "untie": "取消关联"
   },
   "teamGrade": {
     "views": {
