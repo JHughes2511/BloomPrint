@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "Waar moet de boxscore vandaan komen?",
     "importFromGame": "Uit een vastgelegde wedstrijd",
     "importFromFile": "Uit een bestand",
-    "noRecordedGames": "Nog geen wedstrijden vastgelegd. Leg een wedstrijd vast bij Wedstrijden en hij verschijnt hier."
+    "noRecordedGames": "Nog geen wedstrijden vastgelegd. Leg een wedstrijd vast bij Wedstrijden en hij verschijnt hier.",
+    "gameDate": "Wedstrijddatum",
+    "gameDateHint": "Wanneer was deze wedstrijd? Zonder datum kan beeld niet aan een wedstrijd worden gekoppeld.",
+    "linkGameTitle": "Van welke wedstrijd is dit beeld?",
+    "linkGameHint": "Kies de geregistreerde wedstrijd, zodat de analyse de echte cijfers kan gebruiken.",
+    "linkNearDate": "Ongeveer een dag verschil",
+    "linkNone": "Geen van deze",
+    "linkImport": "Wedstrijd importeren",
+    "linkFailed": "Kon die wedstrijd niet koppelen."
   },
   "teamGrade": {
     "views": {

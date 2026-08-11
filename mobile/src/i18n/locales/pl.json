@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "Skąd pobrać statystyki?",
     "importFromGame": "Z zapisanego meczu",
     "importFromFile": "Z pliku",
-    "noRecordedGames": "Brak zapisanych meczów. Zapisz mecz w sekcji Mecze, a pojawi się tutaj."
+    "noRecordedGames": "Brak zapisanych meczów. Zapisz mecz w sekcji Mecze, a pojawi się tutaj.",
+    "gameDate": "Data meczu",
+    "gameDateHint": "Kiedy odbył się mecz? Bez daty nie da się powiązać wideo z zapisanym meczem.",
+    "linkGameTitle": "Z którego meczu jest to wideo?",
+    "linkGameHint": "Wybierz zapisany mecz, aby analiza korzystała z prawdziwych liczb.",
+    "linkNearDate": "Około dnia różnicy",
+    "linkNone": "Żaden z nich",
+    "linkImport": "Zaimportuj mecz",
+    "linkFailed": "Nie udało się powiązać meczu."
   },
   "teamGrade": {
     "views": {

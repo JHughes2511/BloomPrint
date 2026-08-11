@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "De unde să vină statisticile?",
     "importFromGame": "Dintr-un meci înregistrat",
     "importFromFile": "Dintr-un fișier",
-    "noRecordedGames": "Niciun meci înregistrat încă. Înregistrează un meci la Meciuri și va apărea aici."
+    "noRecordedGames": "Niciun meci înregistrat încă. Înregistrează un meci la Meciuri și va apărea aici.",
+    "gameDate": "Data meciului",
+    "gameDateHint": "Când s-a jucat? Fără dată, filmul nu poate fi legat de un meci înregistrat.",
+    "linkGameTitle": "Din ce meci este filmul?",
+    "linkGameHint": "Alege meciul înregistrat, ca analiza să folosească cifrele reale.",
+    "linkNearDate": "Cam o zi diferență",
+    "linkNone": "Niciunul dintre acestea",
+    "linkImport": "Importă meciul",
+    "linkFailed": "Nu s-a putut lega meciul."
   },
   "teamGrade": {
     "views": {

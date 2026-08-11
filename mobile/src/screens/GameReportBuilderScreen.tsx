@@ -130,6 +130,15 @@ export default function GameReportBuilderScreen() {
   const [oppTeamId, setOppTeamId] = useState<number | null>(null);
   const [oppName, setOppName] = useState('');
   const [oppAName, setOppAName] = useState(''); // free-text Opponent A (opp-vs-opp)
+  /**
+   * When the game on this film was played, as YYYY-MM-DD.
+   *
+   * Asked, because it cannot be worked out. A packet is built days or weeks
+   * after the game, so its own date says nothing about the fixture — and this
+   * is the only thing that can tell two meetings with the same opponent apart.
+   * Left blank, no tracked game is ever suggested for the film.
+   */
+  const [gameDate, setGameDate] = useState('');
   // Additional teams for a 3+ team match-up. Tokens: "t<id>" (saved team) or a name.
   const [extraTeams, setExtraTeams] = useState<string[]>([]);
   const [extraTeamText, setExtraTeamText] = useState('');
@@ -171,6 +180,42 @@ export default function GameReportBuilderScreen() {
 
   // Clip modal
   const [clipModal, setClipModal] = useState<any | null>(null);
+  /**
+   * Which tracked game this packet's film is of.
+   *
+   * Asked once per packet rather than once per clip — a packet's films are of
+   * one game — and only when there is something to ask about: film present, a
+   * game it could plausibly be, and no answer yet. Suggested from the teams
+   * and the date and always confirmed, because a squad can play the same
+   * opponent twice and a night game logged after midnight is a day out.
+   */
+  const [linkAsk, setLinkAsk] = useState<any | null>(null);
+  const [linking, setLinking] = useState(false);
+
+  const refreshLinkAsk = async (id: number) => {
+    try {
+      const sug = await gameReportsAPI.gameSuggestions(id);
+      setLinkAsk(sug?.ask ? sug : null);
+    } catch {
+      setLinkAsk(null);   // nothing to ask is the safe answer
+    }
+  };
+
+  const answerLink = async (gameId: number | null) => {
+    if (!reportId) return;
+    setLinking(true);
+    try {
+      await gameReportsAPI.linkGame(reportId, gameId == null
+        ? { game_id: null, declined: true }
+        : { game_id: gameId });
+      setLinkAsk(null);
+      setReport(await gameReportsAPI.get(reportId));
+    } catch (e: any) {
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('gameBuilder.linkFailed'));
+    } finally {
+      setLinking(false);
+    }
+  };
   const [clipCorrectionText, setClipCorrectionText] = useState('');
   const [clipCorrecting, setClipCorrecting] = useState(false);
   // Progress label for the film breakdown ("Analyzing segment i of N").
@@ -235,6 +280,7 @@ export default function GameReportBuilderScreen() {
     setRefreshing(true);
     try {
       const fresh = await gameReportsAPI.get(reportId);
+      void refreshLinkAsk(reportId);
       setReport((prev: any) => (prev ? { ...prev, clips: fresh.clips, report_text: fresh.report_text } : fresh));
       loadVersions(reportId);
     } catch {}
@@ -283,6 +329,7 @@ export default function GameReportBuilderScreen() {
     setFocusPrompt(r.focus_prompt ?? '');
     setBoxScore(r.box_score ?? '');
     setScoutingNotes(r.scouting_notes ?? '');
+    setGameDate((r.game_date ?? '').slice(0, 10));
   };
 
   const save = async (patch: any) => {
@@ -810,6 +857,33 @@ export default function GameReportBuilderScreen() {
           </View>
         )}
 
+        {/* When the game was. The one field that makes a film linkable to a
+            tracked game: the packet is built long after the night in question,
+            so nothing else in it knows the date. */}
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>{tr('gameBuilder.gameDate')}</Text>
+          <Text style={{ color: t.muted, fontSize: 11, marginBottom: 8 }}>
+            {tr('gameBuilder.gameDateHint')}
+          </Text>
+          <VoiceTextInput
+            style={styles.oppNameInput}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor={t.muted2}
+            value={gameDate}
+            onChangeText={setGameDate}
+            onBlur={() => {
+              // Sent only when it is a whole date. A half-typed one is not an
+              // answer, and storing it would start suggesting games for it.
+              const clean = gameDate.trim();
+              if (!clean) { void save({ game_date: null }); return; }
+              if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+                void save({ game_date: `${clean}T12:00:00` }).then(() =>
+                  reportId ? refreshLinkAsk(reportId) : undefined);
+              }
+            }}
+          />
+        </View>
+
         {/* Multi-team match-up: add a 3rd+ team to compare (only for Match Up) */}
         {isMatchup && (
           <View style={styles.card}>
@@ -1188,6 +1262,114 @@ export default function GameReportBuilderScreen() {
         </View>
       </Sheet>
 
+      {/* Which tracked game this film is of. Same shape as the picker that
+          asks who is IN the film, and asked right after it: a suggestion the
+          coach confirms, a way to say none of them, and a way to go and import
+          the game if it is not in the app yet. */}
+      <Sheet visible={!!linkAsk} animationType="slide" transparent onRequestClose={() => setLinkAsk(null)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{tr('gameBuilder.linkGameTitle')}</Text>
+              <TouchableOpacity onPress={() => setLinkAsk(null)} style={{ marginLeft: 'auto' }}>
+                <Ionicons name="close" size={22} color={t.muted} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalSub}>{tr('gameBuilder.linkGameHint')}</Text>
+            <ScrollView style={{ maxHeight: 260 }}>
+              {(linkAsk?.games ?? []).map((g: any) => (
+                <TouchableOpacity
+                  key={g.id}
+                  style={styles.linkRow}
+                  onPress={() => answerLink(g.id)}
+                  disabled={linking}
+                >
+                  <Ionicons name="clipboard-outline" size={16} color={t.accent} />
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={styles.linkRowText} numberOfLines={1}>{g.label}</Text>
+                    {/* A near miss says so rather than being offered as though
+                        it were certain — a game logged after midnight is a day
+                        out, and so is a date typed from memory. */}
+                    {!g.exact_date && (
+                      <Text style={styles.linkRowNote}>{tr('gameBuilder.linkNearDate')}</Text>
+                    )}
+                  </View>
+                  <Ionicons name="chevron-forward" size={14} color={t.muted2} />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+              <TouchableOpacity
+                style={[styles.modalBtn, { flex: 1, backgroundColor: t.chip }]}
+                onPress={() => answerLink(null)}
+                disabled={linking}
+              >
+                <Text style={{ color: t.muted, fontFamily: fonts[700] }}>{tr('gameBuilder.linkNone')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalBtn, { flex: 1.2, backgroundColor: t.ctaBg }]}
+                onPress={() => {
+                  setLinkAsk(null);
+                  navigation.navigate('Import' as never);
+                }}
+                disabled={linking}
+              >
+                <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('gameBuilder.linkImport')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Sheet>
+
+      {/* Which tracked game this film is of. Asked right after who is IN the
+          film, and only when the coach has given a game date — without one
+          there is nothing to match on, because a packet is built long after
+          the night it is about. A suggestion, always confirmed. */}
+      <Sheet visible={!!linkAsk} animationType="slide" transparent onRequestClose={() => setLinkAsk(null)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{tr('gameBuilder.linkGameTitle')}</Text>
+              <TouchableOpacity onPress={() => setLinkAsk(null)} style={{ marginLeft: 'auto' }}>
+                <Ionicons name="close" size={22} color={t.muted} />
+              </TouchableOpacity>
+            </View>
+            <Text style={{ color: t.muted, fontSize: 12, marginBottom: 10 }}>
+              {tr('gameBuilder.linkGameHint')}
+            </Text>
+            <ScrollView style={{ maxHeight: 260 }}>
+              {(linkAsk?.games ?? []).map((g: any) => (
+                <TouchableOpacity key={g.id} style={styles.linkRow}
+                                  onPress={() => answerLink(g.id)} disabled={linking}>
+                  <Ionicons name="clipboard-outline" size={16} color={t.accent} />
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={styles.linkRowText} numberOfLines={1}>{g.label}</Text>
+                    {/* A near miss says so rather than being offered as
+                        though it were certain: a game logged after midnight
+                        is a day out, and so is a date typed from memory. */}
+                    {!g.exact_date && (
+                      <Text style={styles.linkRowNote}>{tr('gameBuilder.linkNearDate')}</Text>
+                    )}
+                  </View>
+                  <Ionicons name="chevron-forward" size={14} color={t.muted2} />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+              <TouchableOpacity style={[styles.modalBtn, { flex: 1, backgroundColor: t.chip }]}
+                                onPress={() => answerLink(null)} disabled={linking}>
+                <Text style={{ color: t.muted, fontFamily: fonts[700] }}>{tr('gameBuilder.linkNone')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalBtn, { flex: 1.2, backgroundColor: t.ctaBg }]}
+                                onPress={() => { setLinkAsk(null); navigation.navigate('Import' as never); }}
+                                disabled={linking}>
+                <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('gameBuilder.linkImport')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Sheet>
+
       <Sheet visible={!!clipModal} animationType="slide" transparent onRequestClose={() => setClipModal(null)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalBox}>
@@ -1411,6 +1593,12 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   importBtnText: { color: t.cta2Text, fontSize: 12, fontFamily: fonts[700] },
   emptyHint: { color: t.muted2, fontSize: 12, marginBottom: 14, fontStyle: 'italic' },
   clipCard: { backgroundColor: t.card, borderRadius: 14, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: t.cardBorder, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  modalSub: { color: t.muted, fontSize: 12, marginBottom: 10, lineHeight: 17 },
+  modalBtn: { borderRadius: 12, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
+  linkRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12,
+             borderBottomWidth: 1, borderBottomColor: t.divider },
+  linkRowText: { color: t.ink, fontSize: 14, fontFamily: fonts[600] },
+  linkRowNote: { color: t.brown, fontSize: 11, marginTop: 2 },
   clipLabel: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3, alignSelf: 'flex-start' },
   clipLabelMy: { backgroundColor: t.accentSoft },
   clipLabelOpp: { backgroundColor: t.negativeSoft },

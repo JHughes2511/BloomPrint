@@ -336,6 +336,10 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     ("game_sessions", "roster_backfilled", "BOOLEAN DEFAULT FALSE"),
     # Whether a finished job has already been announced to its coach.
     ("generation_jobs", "announced", "BOOLEAN DEFAULT FALSE"),
+    # A film and the box score of the same game, tied together.
+    ("game_report_clips", "game_id", "INTEGER"),
+    ("game_report_clips", "link_declined", "BOOLEAN DEFAULT FALSE"),
+    ("game_reports", "game_date", "TIMESTAMP"),
 ]
 
 

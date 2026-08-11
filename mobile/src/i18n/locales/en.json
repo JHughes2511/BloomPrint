@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "Where should the box score come from?",
     "importFromGame": "From a recorded game",
     "importFromFile": "From a file",
-    "noRecordedGames": "No games recorded yet. Track a game under Games and it will appear here."
+    "noRecordedGames": "No games recorded yet. Track a game under Games and it will appear here.",
+    "gameDate": "Game date",
+    "gameDateHint": "When was this game played? Without it, film can't be tied to a tracked game.",
+    "linkGameTitle": "Which game is this film of?",
+    "linkGameHint": "Pick the tracked game this film is from, so the breakdown can use its real numbers.",
+    "linkNearDate": "About a day out",
+    "linkNone": "Not one of these",
+    "linkImport": "Import the game",
+    "linkFailed": "Couldn't link that game."
   },
   "teamGrade": {
     "views": {

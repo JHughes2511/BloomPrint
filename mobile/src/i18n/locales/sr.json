@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "Odakle da se preuzme statistika?",
     "importFromGame": "Iz zabeležene utakmice",
     "importFromFile": "Iz fajla",
-    "noRecordedGames": "Još nema zabeleženih utakmica. Zabeleži utakmicu u Utakmice i pojaviće se ovde."
+    "noRecordedGames": "Još nema zabeleženih utakmica. Zabeleži utakmicu u Utakmice i pojaviće se ovde.",
+    "gameDate": "Datum utakmice",
+    "gameDateHint": "Kada je odigrana? Bez toga snimak se ne može povezati sa praćenom utakmicom.",
+    "linkGameTitle": "Sa koje je utakmice ovaj snimak?",
+    "linkGameHint": "Izaberite praćenu utakmicu da analiza koristi stvarne brojke.",
+    "linkNearDate": "Otprilike dan razlike",
+    "linkNone": "Nijedna od ovih",
+    "linkImport": "Uvezi utakmicu",
+    "linkFailed": "Nije moguće povezati utakmicu."
   },
   "teamGrade": {
     "views": {

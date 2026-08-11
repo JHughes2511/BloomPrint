@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "박스 스코어를 어디에서 가져올까요?",
     "importFromGame": "기록된 경기에서",
     "importFromFile": "파일에서",
-    "noRecordedGames": "아직 기록된 경기가 없습니다. 경기에서 기록하면 여기에 표시됩니다."
+    "noRecordedGames": "아직 기록된 경기가 없습니다. 경기에서 기록하면 여기에 표시됩니다.",
+    "gameDate": "경기 날짜",
+    "gameDateHint": "이 경기는 언제였나요? 날짜가 없으면 영상을 기록된 경기에 연결할 수 없습니다.",
+    "linkGameTitle": "이 영상은 어떤 경기인가요?",
+    "linkGameHint": "기록된 경기를 선택하면 분석이 실제 수치를 사용할 수 있습니다.",
+    "linkNearDate": "하루 정도 차이",
+    "linkNone": "해당 없음",
+    "linkImport": "경기 가져오기",
+    "linkFailed": "경기를 연결하지 못했습니다."
   },
   "teamGrade": {
     "views": {

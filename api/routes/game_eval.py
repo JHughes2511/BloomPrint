@@ -1004,6 +1004,38 @@ def get_box_score_text(
     return {"text": box_score_text(db, game)}
 
 
+def film_notes_for_game(db: Session, coach, game) -> str:
+    """Film breakdowns of THIS game, for a scouting or game report about it.
+
+    A packet's film analysis and a tracked box score are two readings of the
+    same night, and until they were linked a scouting report built from the
+    numbers had no idea a film of that game had been watched at all — so it
+    could describe what happened without ever saying what it looked like.
+
+    Only films the coach has confirmed belong to this game. Nothing here is
+    inferred from a name or a date.
+    """
+    clips = (db.query(models.GameReportClip)
+               .filter(models.GameReportClip.game_id == game.id,
+                       models.GameReportClip.analysis_text.isnot(None))
+               .all())
+    mine = []
+    for clip in clips:
+        packet = db.get(models.GameReport, clip.game_report_id)
+        if packet and packet.coach_id == coach.id:
+            mine.append(clip)
+    if not mine:
+        return ""
+    out = ["\n\nFILM BREAKDOWNS OF THIS GAME:",
+           "Analyses of film from this same game. Use what they saw — schemes, "
+           "coverages, who did what — alongside the numbers below; they are "
+           "describing the possessions the box score is counting."]
+    for clip in mine:
+        who = clip.team_name or ("our team" if clip.label == "my_team" else "the opponent")
+        out.append(f"\n[Film — {who}]\n{(clip.analysis_text or '')[:6000]}")
+    return "\n".join(out)
+
+
 def _team_notes_text(db: Session, coach: models.Coach, game) -> str:
     """Everything the coach has asked to be remembered about EITHER team here.
 
@@ -1824,7 +1856,7 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
         result = "WIN" if game.our_score > game.opponent_score else "LOSS"
         score_info = f"Final score: {game.our_score}-{game.opponent_score} ({result})"
 
-    notes_text = _team_notes_text(db, coach, game)
+    notes_text = _team_notes_text(db, coach, game) + film_notes_for_game(db, coach, game)
 
     corr_text = ""
     if corrections:
@@ -2030,7 +2062,7 @@ async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSe
         res = "WIN" if game.our_score > game.opponent_score else ("LOSS" if game.our_score < game.opponent_score else "TIE")
         score_info = f"Final: {game.our_score}-{game.opponent_score} ({res})"
 
-    context = _team_notes_text(db, coach, game)
+    context = _team_notes_text(db, coach, game) + film_notes_for_game(db, coach, game)
     if corrections:
         context += (
             "\n\nCOACH CONTEXT & ADJUSTMENTS (qualitative detail the box score can't capture — "

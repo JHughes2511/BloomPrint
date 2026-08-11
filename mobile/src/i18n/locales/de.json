@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "Woher soll der Boxscore kommen?",
     "importFromGame": "Aus einem aufgezeichneten Spiel",
     "importFromFile": "Aus einer Datei",
-    "noRecordedGames": "Noch keine Spiele aufgezeichnet. Zeichne ein Spiel unter Spiele auf, dann erscheint es hier."
+    "noRecordedGames": "Noch keine Spiele aufgezeichnet. Zeichne ein Spiel unter Spiele auf, dann erscheint es hier.",
+    "gameDate": "Spieldatum",
+    "gameDateHint": "Wann war dieses Spiel? Ohne Datum lässt sich Film keinem erfassten Spiel zuordnen.",
+    "linkGameTitle": "Von welchem Spiel ist dieser Film?",
+    "linkGameHint": "Wähle das erfasste Spiel, damit die Analyse dessen echte Zahlen nutzen kann.",
+    "linkNearDate": "Etwa einen Tag daneben",
+    "linkNone": "Keines davon",
+    "linkImport": "Spiel importieren",
+    "linkFailed": "Spiel konnte nicht verknüpft werden."
   },
   "teamGrade": {
     "views": {

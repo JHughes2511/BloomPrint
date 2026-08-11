@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "Da dove deve arrivare il tabellino?",
     "importFromGame": "Da una partita registrata",
     "importFromFile": "Da un file",
-    "noRecordedGames": "Nessuna partita registrata. Registra una partita in Partite e comparirà qui."
+    "noRecordedGames": "Nessuna partita registrata. Registra una partita in Partite e comparirà qui.",
+    "gameDate": "Data della partita",
+    "gameDateHint": "Quando si è giocata? Senza data il video non può essere collegato a una partita registrata.",
+    "linkGameTitle": "Di quale partita è questo video?",
+    "linkGameHint": "Scegli la partita registrata da cui proviene, così l'analisi userà i numeri reali.",
+    "linkNearDate": "Circa un giorno di scarto",
+    "linkNone": "Nessuna di queste",
+    "linkImport": "Importa la partita",
+    "linkFailed": "Impossibile collegare la partita."
   },
   "teamGrade": {
     "views": {

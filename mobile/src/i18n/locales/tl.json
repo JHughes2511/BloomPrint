@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "Saan manggagaling ang box score?",
     "importFromGame": "Mula sa naitalang laro",
     "importFromFile": "Mula sa file",
-    "noRecordedGames": "Wala pang naitalang laro. Magtala ng laro sa Mga Laro at lilitaw ito rito."
+    "noRecordedGames": "Wala pang naitalang laro. Magtala ng laro sa Mga Laro at lilitaw ito rito.",
+    "gameDate": "Petsa ng laro",
+    "gameDateHint": "Kailan nilaro? Kung wala nito, hindi maiuugnay ang film sa naitalang laro.",
+    "linkGameTitle": "Aling laro ang film na ito?",
+    "linkGameHint": "Piliin ang naitalang laro para magamit ng breakdown ang totoong numero.",
+    "linkNearDate": "Mga isang araw ang layo",
+    "linkNone": "Wala rito",
+    "linkImport": "I-import ang laro",
+    "linkFailed": "Hindi maiugnay ang larong iyon."
   },
   "teamGrade": {
     "views": {

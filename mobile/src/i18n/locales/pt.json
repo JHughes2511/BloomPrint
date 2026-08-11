@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "De onde devem vir as estatísticas?",
     "importFromGame": "De um jogo registado",
     "importFromFile": "De um ficheiro",
-    "noRecordedGames": "Ainda não há jogos registados. Regista um jogo em Jogos e aparecerá aqui."
+    "noRecordedGames": "Ainda não há jogos registados. Regista um jogo em Jogos e aparecerá aqui.",
+    "gameDate": "Data do jogo",
+    "gameDateHint": "Quando foi jogado? Sem isso, o vídeo não pode ser ligado a um jogo registado.",
+    "linkGameTitle": "De que jogo é este vídeo?",
+    "linkGameHint": "Escolhe o jogo registado de onde vem, para a análise usar os números reais.",
+    "linkNearDate": "Cerca de um dia de diferença",
+    "linkNone": "Nenhum destes",
+    "linkImport": "Importar o jogo",
+    "linkFailed": "Não foi possível ligar esse jogo."
   },
   "teamGrade": {
     "views": {

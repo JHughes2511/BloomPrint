@@ -365,12 +365,147 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 router = APIRouter(prefix="/game-reports", tags=["game-reports"])
 
 
+
+# ── Tying a film to the game it is of ─────────────────────────────────────────
+#
+# A film and a box score of the same night are two readings of one game, and
+# neither helps the other while nothing says they belong together: the analysis
+# cannot cite the numbers, and a scouting report built from the numbers cannot
+# say what the film showed.
+#
+# Suggested, never assumed. The teams and the date are enough to propose a
+# match and not enough to be sure of one — a squad can play twice in a weekend,
+# and a night game logged after midnight is a day out — so the coach confirms.
+
+# How far apart a film's date and a game's date can be and still be offered.
+# A day either side covers a game logged after midnight and a date typed from
+# memory; beyond that the app is guessing at which fixture the coach means.
+LINK_DAY_WINDOW = 1
+
+
+def _teams_of_packet(gr: models.GameReport) -> set[str]:
+    """Every team name this packet is about, normalised."""
+    names = {
+        (gr.my_team.name if gr.my_team else None),
+        (gr.opponent_team.name if gr.opponent_team else None),
+        gr.opponent_name,
+        getattr(gr, "opponent_a_name", None),
+    }
+    return {_norm_team(n) for n in names if n and str(n).strip()}
+
+
+def _norm_team(name) -> str:
+    return "".join(ch for ch in str(name or "").lower() if ch.isalnum())
+
+
+def _game_label(db: Session, game: models.GameSession) -> str:
+    """How a game reads in the picker: who played, when, and the score."""
+    team = db.get(models.Team, game.team_id) if game.team_id else None
+    ours = (team.name if team else None) or "Us"
+    theirs = game.opponent_name or "Opponent"
+    when = game.date.strftime("%b %d, %Y") if game.date else ""
+    score = ("" if game.our_score is None or game.opponent_score is None
+             else f" · {game.our_score}-{game.opponent_score}")
+    return f"{ours} vs {theirs}" + (f" · {when}" if when else "") + score
+
+
+def suggest_games_for_packet(db: Session, gr: models.GameReport,
+                             coach: models.Coach) -> list[models.GameSession]:
+    """Tracked games that could be the one this packet's film is of.
+
+    Matched on the teams, and then on the date when the packet has one. A
+    packet with no date offers nothing on date alone — the coach said they did
+    not know when it was, and a list of every game this team ever played is not
+    a suggestion.
+    """
+    wanted = _teams_of_packet(gr)
+    if not wanted:
+        return []
+    # No date, no suggestion. The coach was asked when the game was and left it
+    # blank, and "every game this team has ever played" is a list, not a
+    # suggestion — it puts the work of picking back on them and invites the
+    # wrong answer.
+    if not gr.game_date:
+        return []
+    out = []
+    for game in db.query(models.GameSession).filter_by(coach_id=coach.id).all():
+        if not game.date:
+            continue
+        team = db.get(models.Team, game.team_id) if game.team_id else None
+        names = {_norm_team(team.name if team else ""), _norm_team(game.opponent_name)}
+        names.discard("")
+        if not names:
+            continue
+        # BOTH sides, when the packet knows both. Angola vs Egypt and Angola vs
+        # Senegal share a team and are not the same fixture; matching on one
+        # side offered the coach a different opponent's game with the right
+        # date on it, which is exactly the mistake this confirms against.
+        if len(wanted) >= 2:
+            if not names.issubset(wanted):
+                continue
+        elif not (names & wanted):
+            continue
+        if abs((game.date.date() - gr.game_date.date()).days) > LINK_DAY_WINDOW:
+            continue
+        out.append(game)
+    out.sort(key=lambda g: (g.date or g.created_at), reverse=True)
+    return out
+
+
+def linked_box_score(db: Session, clip: models.GameReportClip) -> str:
+    """The tracked box score for the game this film is of, as prompt text.
+
+    Empty when the film is not linked, which is the normal case and not a
+    problem: a film analysis stands on its own. When it IS linked, the numbers
+    stop the analysis having to estimate what it can simply be told — "they
+    shot poorly from three" becomes "they shot 23.8%".
+    """
+    if not clip or not clip.game_id:
+        return ""
+    game = db.get(models.GameSession, clip.game_id)
+    if not game:
+        return ""
+    rows = (db.query(models.GamePlayerStat)
+              .filter_by(game_id=game.id).all())
+    if not rows:
+        return ""
+    # Totalled per player per side, because a stat row is one event and a
+    # coach reads a box score.
+    totals: dict[tuple[bool, str], dict[str, float]] = {}
+    for r in rows:
+        key = (bool(r.is_opponent), r.player_name)
+        totals.setdefault(key, {})
+        totals[key][r.stat_name] = totals[key].get(r.stat_name, 0) + (r.count or 1)
+    team = db.get(models.Team, game.team_id) if game.team_id else None
+    sides = {False: (team.name if team else "Our team"),
+             True: game.opponent_name or "Opponent"}
+    lines = ["", "TRACKED BOX SCORE FOR THIS GAME:",
+             "These are recorded numbers, not something to read off the film. "
+             "Where they and your count of what you saw disagree, THESE are "
+             "right — cite them rather than estimating."]
+    if game.our_score is not None and game.opponent_score is not None:
+        lines.append(f"Final: {sides[False]} {game.our_score}, {sides[True]} {game.opponent_score}")
+    for is_opp in (False, True):
+        players = [(name, st) for (opp, name), st in totals.items() if opp == is_opp]
+        if not players:
+            continue
+        lines.append(f"\n{sides[is_opp]}:")
+        for name, st in sorted(players):
+            stat_str = ", ".join(f"{k} {int(v)}" for k, v in sorted(st.items()))
+            lines.append(f"  {name}: {stat_str}")
+    return "\n".join(lines)
+
+
 def _build_out(gr: models.GameReport, db: Session | None = None) -> schemas.GameReportOut:
     out = schemas.GameReportOut.model_validate(gr)
     out.my_team_name = gr.my_team.name if gr.my_team else None
     out.opponent_team_name = gr.opponent_team.name if gr.opponent_team else None
     if db is not None:
         _attach_clip_jobs(db, out)
+        for c in out.clips:
+            if c.game_id:
+                game = db.get(models.GameSession, c.game_id)
+                c.game_label = _game_label(db, game) if game else None
     return out
 
 
@@ -658,6 +793,86 @@ def update_game_report(
     return _build_out(gr, db)
 
 
+
+class LinkClipBody(BaseModel):
+    # The tracked game this film is of. None with declined=False means "unlink".
+    game_id: int | None = None
+    # The coach said none of the offered games is the one. Remembered so the
+    # packet stops asking every time it is opened.
+    declined: bool = False
+    # Apply to every film in the packet, which is how the question is asked:
+    # once, about the packet, not once per clip.
+    all_clips: bool = True
+
+
+@router.get("/{report_id}/game-suggestions")
+def game_suggestions(
+    report_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Tracked games this packet's film might be of, and whether to ask.
+
+    `ask` is the screen's cue: there is film, at least one game it could be,
+    and the coach has neither linked nor declined. Everything else is context
+    for the sheet — what the packet thinks the date is, and what each game
+    reads as.
+    """
+    gr = db.get(models.GameReport, report_id)
+    if not gr or gr.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Game report not found")
+    games = suggest_games_for_packet(db, gr, coach)
+    clips = list(gr.clips or [])
+    unanswered = [c for c in clips if not c.game_id and not c.link_declined]
+    return {
+        "ask": bool(games) and bool(unanswered),
+        "game_date": gr.game_date.isoformat() if gr.game_date else None,
+        "linked_game_id": next((c.game_id for c in clips if c.game_id), None),
+        "games": [
+            {"id": g.id, "label": _game_label(db, g),
+             "date": g.date.isoformat() if g.date else None,
+             # Whether the dates agree exactly, so the sheet can show a near
+             # miss as a near miss rather than presenting it as certain.
+             "exact_date": bool(gr.game_date and g.date
+                                and g.date.date() == gr.game_date.date())}
+            for g in games
+        ],
+    }
+
+
+@router.post("/{report_id}/link-game")
+def link_clips_to_game(
+    report_id: int,
+    body: LinkClipBody,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Tie this packet's film to a tracked game, or record that none of them is it.
+
+    The link is not applied to the analysis here. Re-reading a film with the
+    box score in front of it is a fresh watch of an hour-long video, and doing
+    that because a coach answered a question is spending twenty minutes they
+    did not ask for — the packet offers it as a button instead.
+    """
+    gr = db.get(models.GameReport, report_id)
+    if not gr or gr.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Game report not found")
+    if body.game_id is not None:
+        game = db.get(models.GameSession, body.game_id)
+        if not game or game.coach_id != coach.id:
+            raise HTTPException(status_code=404, detail="Game not found")
+    clips = list(gr.clips or [])
+    if not body.all_clips:
+        clips = clips[:1]
+    for clip in clips:
+        clip.game_id = body.game_id
+        # Declining is per packet and sticks; linking clears it, because the
+        # coach has just answered the question properly.
+        clip.link_declined = bool(body.declined) and body.game_id is None
+    db.commit()
+    return {"linked": len([c for c in clips if c.game_id]), "declined": bool(body.declined)}
+
+
 @router.delete("/{report_id}")
 def delete_game_report(
     report_id: int,
@@ -766,7 +981,8 @@ async def add_clip(
     # Everything this coach has taught about this team, read at request time
     # while there is still a session to read it with.
     from . import preferences
-    learned = preferences.for_prompt(db, coach.id, _film_team_id(db, gr, clip, coach))
+    learned = (preferences.for_prompt(db, coach.id, _film_team_id(db, gr, clip, coach))
+               + linked_box_score(db, clip))
 
     background_tasks.add_task(
         _run_clip_analysis, clip.id, job.id, str(dest), gr.output_type,
@@ -1401,7 +1617,7 @@ async def correct_clip(
     team_id = _film_team_id(db, gr, clip, coach)
     preferences.remember(db, coach.id, body.correction, team_id)
     db.flush()
-    learned = preferences.for_prompt(db, coach.id, team_id)
+    learned = preferences.for_prompt(db, coach.id, team_id) + linked_box_score(db, clip)
 
     job = models.GenerationJob(coach_id=coach.id, kind="clip", status="processing")
     db.add(job)

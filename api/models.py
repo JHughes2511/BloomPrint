@@ -646,6 +646,11 @@ class GameReport(SoftDeleteMixin, Base):
     # Free-text name for "Opponent A" in opponent-vs-opponent mode (when A isn't
     # one of the coach's saved teams). Opponent B uses opponent_name.
     opponent_a_name   = Column(String, nullable=True)
+    # When the game on this packet's film was played. Optional, and asked
+    # rather than derived: it is the one thing that can tell two fixtures
+    # against the same team apart, and without it no film is offered a link to
+    # a tracked game at all.
+    game_date         = Column(DateTime, nullable=True)
     # Additional teams for a multi-team (3+) MATCH-UP, comma-separated tokens:
     # "t<id>" for a saved team, or a free-text opponent name.
     extra_teams       = Column(Text, nullable=True)
@@ -710,9 +715,23 @@ class GameReportClip(Base):
     # opponent — and "Opponent Film" is not what a coach called the team.
     team_name      = Column(String, nullable=True)
     analysis_text  = Column(Text, nullable=True)
+    # The tracked game this film is OF, once the coach has confirmed it.
+    #
+    # A film and a box score of the same night are two readings of one game,
+    # and neither is much use to the other while nothing says they belong
+    # together: the analysis cannot cite the numbers, and a scouting report
+    # built from the numbers cannot say what the film showed. Never guessed —
+    # a link is suggested from the teams and the date and then confirmed, and
+    # the coach can answer "not one of these".
+    game_id        = Column(Integer, ForeignKey("game_sessions.id"), nullable=True)
+    # The coach was asked about this packet's films and said none of them
+    # belong to a tracked game. Remembered so the question is asked once a
+    # session rather than every time the packet is opened.
+    link_declined  = Column(Boolean, default=False)
     created_at     = Column(DateTime, default=datetime.utcnow)
 
     game_report = relationship("GameReport", back_populates="clips")
+    game        = relationship("GameSession", foreign_keys=[game_id])
 
 
 class GameSession(SoftDeleteMixin, Base):

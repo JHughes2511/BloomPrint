@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "Iš kur paimti statistiką?",
     "importFromGame": "Iš įrašytų rungtynių",
     "importFromFile": "Iš failo",
-    "noRecordedGames": "Įrašytų rungtynių dar nėra. Įrašyk rungtynes skiltyje Rungtynės ir jos atsiras čia."
+    "noRecordedGames": "Įrašytų rungtynių dar nėra. Įrašyk rungtynes skiltyje Rungtynės ir jos atsiras čia.",
+    "gameDate": "Rungtynių data",
+    "gameDateHint": "Kada vyko? Be datos vaizdo įrašo negalima susieti su registruotomis rungtynėmis.",
+    "linkGameTitle": "Iš kurių rungtynių šis įrašas?",
+    "linkGameHint": "Pasirinkite registruotas rungtynes, kad analizė naudotų tikrus skaičius.",
+    "linkNearDate": "Maždaug diena skirtumo",
+    "linkNone": "Nė vienos iš šių",
+    "linkImport": "Importuoti rungtynes",
+    "linkFailed": "Nepavyko susieti rungtynių."
   },
   "teamGrade": {
     "views": {

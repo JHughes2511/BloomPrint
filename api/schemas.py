@@ -507,6 +507,7 @@ class GameReportUpdate(BaseModel):
     opponent_name: str | None = None
     opponent_a_name: str | None = None
     extra_teams: str | None = None
+    game_date: datetime | None = None
     output_type: str | None = None
     focus_prompt: str | None = None
     box_score: str | None = None
@@ -524,6 +525,10 @@ class GameReportClipOut(BaseModel):
     job_progress: str | None = None
     job_error: str | None = None
     analysis_text: str | None
+    # The tracked game this film is of, once confirmed, and how it reads.
+    game_id: int | None = None
+    game_label: str | None = None
+    link_declined: bool = False
     created_at: datetime
     model_config = {"from_attributes": True}
 

@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "ボックススコアの取得元は？",
     "importFromGame": "記録済みの試合から",
     "importFromFile": "ファイルから",
-    "noRecordedGames": "まだ記録された試合がありません。「試合」で記録するとここに表示されます。"
+    "noRecordedGames": "まだ記録された試合がありません。「試合」で記録するとここに表示されます。",
+    "gameDate": "試合日",
+    "gameDateHint": "この試合はいつですか？ 日付がないと映像を記録済みの試合に紐づけられません。",
+    "linkGameTitle": "この映像はどの試合ですか？",
+    "linkGameHint": "記録済みの試合を選ぶと、分析が実際の数字を使えます。",
+    "linkNearDate": "1日ほどのずれ",
+    "linkNone": "どれでもない",
+    "linkImport": "試合を取り込む",
+    "linkFailed": "その試合に紐づけできませんでした。"
   },
   "teamGrade": {
     "views": {

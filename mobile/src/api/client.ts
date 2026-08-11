@@ -844,6 +844,15 @@ export const whiteboardAPI = {
 };
 
 export const gameReportsAPI = {
+  /** Tracked games this packet's film might be of, and whether to ask. */
+  gameSuggestions: (reportId: number): Promise<{
+    ask: boolean; game_date: string | null; linked_game_id: number | null;
+    games: { id: number; label: string; date: string | null; exact_date: boolean }[];
+  }> => api.get(`/game-reports/${reportId}/game-suggestions`).then(r => r.data),
+  /** Confirm which game the film is of, or that none of them is. */
+  linkGame: (reportId: number, data: { game_id?: number | null; declined?: boolean }) =>
+    api.post(`/game-reports/${reportId}/link-game`, data).then(r => r.data),
+
   list: () => api.get('/game-reports').then(r => r.data),
   get: (id: number) => api.get(`/game-reports/${id}`).then(r => r.data),
   create: (data: any) => api.post('/game-reports', data).then(r => r.data),

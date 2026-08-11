@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "技术统计从哪里获取？",
     "importFromGame": "从已记录的比赛",
     "importFromFile": "从文件",
-    "noRecordedGames": "还没有记录的比赛。在“比赛”中记录一场比赛，它就会出现在这里。"
+    "noRecordedGames": "还没有记录的比赛。在“比赛”中记录一场比赛，它就会出现在这里。",
+    "gameDate": "比赛日期",
+    "gameDateHint": "这场比赛是什么时候？没有日期就无法把影片关联到已记录的比赛。",
+    "linkGameTitle": "这段影片是哪场比赛？",
+    "linkGameHint": "选择已记录的比赛，分析就能使用真实数据。",
+    "linkNearDate": "相差约一天",
+    "linkNone": "都不是",
+    "linkImport": "导入比赛",
+    "linkFailed": "无法关联该比赛。"
   },
   "teamGrade": {
     "views": {

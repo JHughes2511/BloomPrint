@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "İstatistikler nereden gelsin?",
     "importFromGame": "Kaydedilmiş bir maçtan",
     "importFromFile": "Bir dosyadan",
-    "noRecordedGames": "Henüz kaydedilmiş maç yok. Maçlar bölümünde bir maç kaydet, burada görünecek."
+    "noRecordedGames": "Henüz kaydedilmiş maç yok. Maçlar bölümünde bir maç kaydet, burada görünecek.",
+    "gameDate": "Maç tarihi",
+    "gameDateHint": "Maç ne zaman oynandı? Bu olmadan görüntü kayıtlı bir maça bağlanamaz.",
+    "linkGameTitle": "Bu görüntü hangi maçtan?",
+    "linkGameHint": "Kayıtlı maçı seçin ki analiz gerçek sayıları kullanabilsin.",
+    "linkNearDate": "Yaklaşık bir gün fark",
+    "linkNone": "Hiçbiri",
+    "linkImport": "Maçı içe aktar",
+    "linkFailed": "Maç bağlanamadı."
   },
   "teamGrade": {
     "views": {

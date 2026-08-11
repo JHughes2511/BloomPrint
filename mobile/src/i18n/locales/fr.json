@@ -1985,7 +1985,15 @@
     "importBoxScoreMessage": "D'où doivent venir les statistiques ?",
     "importFromGame": "Depuis un match enregistré",
     "importFromFile": "Depuis un fichier",
-    "noRecordedGames": "Aucun match enregistré. Enregistre un match dans Matchs et il apparaîtra ici."
+    "noRecordedGames": "Aucun match enregistré. Enregistre un match dans Matchs et il apparaîtra ici.",
+    "gameDate": "Date du match",
+    "gameDateHint": "Quand ce match a-t-il eu lieu ? Sans cela, la vidéo ne peut être liée à un match suivi.",
+    "linkGameTitle": "De quel match vient cette vidéo ?",
+    "linkGameHint": "Choisissez le match suivi dont elle provient, pour que l'analyse utilise ses vrais chiffres.",
+    "linkNearDate": "À un jour près",
+    "linkNone": "Aucun de ceux-ci",
+    "linkImport": "Importer le match",
+    "linkFailed": "Impossible de lier ce match."
   },
   "teamGrade": {
     "views": {
