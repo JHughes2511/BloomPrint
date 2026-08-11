@@ -1987,7 +1987,7 @@
     "importFromFile": "Iz fajla",
     "noRecordedGames": "Još nema zabeleženih utakmica. Zabeleži utakmicu u Utakmice i pojaviće se ovde.",
     "gameDate": "Datum utakmice",
-    "gameDateHint": "Kada je odigrana? To povezuje snimak sa vašom Statistikom utakmica.",
+    "gameDateHint": "Kada je odigrana? To povezuje snimak sa Statistikom utakmica. Možete i pritisnuti Traži pa upisati tim.",
     "linkGameTitle": "Sa koje je utakmice ovaj snimak?",
     "linkGameHint": "Izaberite Statistiku utakmica da analiza koristi stvarne brojke.",
     "linkNearDate": "Otprilike dan razlike",

@@ -1987,7 +1987,7 @@
     "importFromFile": "파일에서",
     "noRecordedGames": "아직 기록된 경기가 없습니다. 경기에서 기록하면 여기에 표시됩니다.",
     "gameDate": "경기 날짜",
-    "gameDateHint": "이 경기는 언제였나요? 영상을 경기 스탯에 연결하는 것이 이 날짜입니다.",
+    "gameDateHint": "이 경기는 언제였나요? 영상을 경기 스탯에 연결합니다. 검색을 눌러 팀 이름으로 찾을 수도 있습니다.",
     "linkGameTitle": "이 영상은 어떤 경기인가요?",
     "linkGameHint": "출처가 된 경기 스탯을 선택하면 분석이 실제 수치를 사용합니다.",
     "linkNearDate": "하루 정도 차이",
