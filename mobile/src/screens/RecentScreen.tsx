@@ -1042,11 +1042,15 @@ export default function RecentScreen() {
                     every language. The phone keeps wrapping — one card per
                     row there, and its height is not fixed. */}
                 <View style={{ flexDirection: 'row', flexWrap: recentGrid.cardWidth ? 'nowrap' : 'wrap',
-                               // 2, on top of the 10 the card already puts
-                               // between its body and this row. At 10 the pair
-                               // came to 20px of air in the middle of a card
-                               // the coach wanted tighter.
-                               gap: 6, marginTop: 2, width: '100%' }}>
+                               // On the grid the buttons sit at the BOTTOM of
+                               // the card, so every card's row of buttons is on
+                               // one line however many lines of text is above
+                               // it — a film's sat 15px higher than the packet
+                               // beside it. Off the grid, 2 on top of the 10
+                               // the card already puts here: at 10 the pair
+                               // came to 20px of air mid-card.
+                               gap: 6, marginTop: recentGrid.cardWidth ? 'auto' : 2,
+                               width: '100%' }}>
                   {/* Game-specific buttons */}
                   {(item.kind === 'game' || item.kind === 'scout' || item.kind === 'gamereport') && item.report_text ? (
                     <TouchableOpacity
@@ -1771,7 +1775,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     // height because a row of cards at different heights reads as a mistake. A
     // SHARED report carries a fourth line naming who sent it, and is the one
     // card left free to stand taller.
-    ...desktopOnly({ minHeight: 123, marginBottom: 0 }),
+    // height: '100%' so a card fills its cell. The cells in a row already
+    // stretch to the tallest of them; without this the card inside sits at
+    // its own content height and a card with one line fewer — a film names
+    // no report types — comes out visibly shorter than the one beside it.
+    ...desktopOnly({ minHeight: 123, marginBottom: 0, height: '100%' }),
     borderRadius: 12, padding: 14, gap: 10,
     borderWidth: 1, borderColor: t.cardBorder,
   },
