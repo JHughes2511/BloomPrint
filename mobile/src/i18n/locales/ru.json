@@ -2239,7 +2239,8 @@
     "setScore": "Указать счёт",
     "perGameLine": "{{pts}} очк · {{reb}} подб · {{ast}} пас · {{stl}} перехв · {{blk}} блок · {{to}} потери",
     "perGameStat": "{{stat}} — {{n}} за игру",
-    "noInsight": "Пока нет разбора."
+    "noInsight": "Пока нет разбора.",
+    "isMyTeam": "{{name}} — моя команда"
   },
   "whiteboard": {
     "title": "Тактическая доска",

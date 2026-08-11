@@ -2239,7 +2239,8 @@
     "setScore": "Definir resultado",
     "perGameLine": "{{pts}} pts · {{reb}} ress · {{ast}} ass · {{stl}} roub · {{blk}} desar · {{to}} perdas",
     "perGameStat": "{{stat}} — {{n}} por jogo",
-    "noInsight": "Ainda sem análise."
+    "noInsight": "Ainda sem análise.",
+    "isMyTeam": "{{name}} é a minha equipa"
   },
   "whiteboard": {
     "title": "Quadro Tático",

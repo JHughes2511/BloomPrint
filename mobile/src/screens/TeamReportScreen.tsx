@@ -524,7 +524,13 @@ export default function TeamReportScreen() {
       <KeyboardAwareScrollView
         ref={scrollRef}
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        // Room under a finished report so its TOP can reach the top of the
+        // screen. Scrolling to the report's offset was already what this
+        // screen asked for, but a scroller clamps to its own end: with only
+        // 100px under it, a report shorter than the page could not be scrolled
+        // up past the last screenful, so the request landed at the bottom of
+        // the report instead of the top of it.
+        contentContainerStyle={{ paddingBottom: reportText ? Math.round(win.height * 0.9) : 100 }}
       >
         <View style={styles.titleRow}>
           {/* Translated titles run 20-40% longer than English. Wrap to a second

@@ -2239,7 +2239,8 @@
     "setScore": "ანგარიშის მითითება",
     "perGameLine": "{{pts}} ქულა · {{reb}} მოხს · {{ast}} პას · {{stl}} მოპარ · {{blk}} ბლოკ · {{to}} დაკარგ",
     "perGameStat": "{{stat}} — {{n}} თამაშზე",
-    "noInsight": "შეფასება ჯერ არ არის."
+    "noInsight": "შეფასება ჯერ არ არის.",
+    "isMyTeam": "{{name}} ჩემი გუნდია"
   },
   "whiteboard": {
     "title": "დაფა",

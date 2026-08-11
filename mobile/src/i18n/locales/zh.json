@@ -2239,7 +2239,8 @@
     "setScore": "填写比分",
     "perGameLine": "{{pts}} 分 · {{reb}} 篮板 · {{ast}} 助攻 · {{stl}} 抢断 · {{blk}} 盖帽 · {{to}} 失误",
     "perGameStat": "{{stat}} — 场均 {{n}}",
-    "noInsight": "暂无解读。"
+    "noInsight": "暂无解读。",
+    "isMyTeam": "{{name}} 是我的球队"
   },
   "whiteboard": {
     "title": "战术板",

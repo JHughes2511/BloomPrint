@@ -43,6 +43,7 @@ import { readPage, writePage } from '../storage/pageCache';
 import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
 import { useSheetScrollHeight, sheetCap, desktopOnly, CONTENT_MAX_WIDTH, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
 import { useGridColumns } from '../responsive/useGridColumns';
+import { useBackStep } from '../navigation/useBackStep';
 
 // Highest competition level → lowest.
 const COMPETITION_LEVELS = [
@@ -193,6 +194,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // chart with a red column and a blue one. Asked before anything is saved.
   const [askLabels, setAskLabels] = useState<any[]>([]);
   const [labelSides, setLabelSides] = useState<Record<string, boolean>>({});
+  /**
+   * Whose team each team in the file is, keyed by the name the file used.
+   *
+   * Asked here because it cannot be worked out: a coach imports their own box
+   * score as readily as an opponent's, so neither the side of the sheet nor
+   * the fact that a team arrived by import tells you whose it is. A team the
+   * roster already holds starts on whatever it is already set to; a team this
+   * import is about to create starts as NOT the coach's, which keeps a scouted
+   * fixture out of their own win-loss record until they say otherwise.
+   */
+  const [teamMine, setTeamMine] = useState<Record<string, boolean>>({});
   // Bumped when an import lands, so the stats panel re-reads the game.
   const [statsVersion, setStatsVersion] = useState(0);
   const opponentOutside = useCloseOnOutside(showOpponentDropdown, () => setShowOpponentDropdown(false));
@@ -550,6 +562,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         // which column is which reads as knowledge once it is a bar on a chart,
         // and it files a whole team's totals under the other team's name.
         setLabelSides({});
+      setTeamMine({});
         setAskLabels(result.unresolved);
         setStatPreview(players.length ? players : null);
         return;
@@ -564,6 +577,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         return;
       }
       setLabelSides({});
+      setTeamMine({});
       setStatPreview(players);
     } catch (e: any) {
       Alert.alert(tr('teamGrade.importErrorTitle'), e?.response?.data?.detail ?? tr('teamGrade.couldNotReadFile'));
@@ -579,8 +593,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     if (!players.length) { Alert.alert(tr('teamGrade.nothingSelectedTitle'), tr('teamGrade.nothingSelectedMsg')); return; }
     setImporting(true);
     try {
+      // Every team the file named, with the answer showing on screen — the
+      // effective value, not just the ones toggled, so a team left alone is
+      // sent as what the coach was looking at rather than as no answer.
+      const team_mine: Record<string, boolean> = {};
+      for (const g of previewGroups) if (g.name) team_mine[g.name] = mineFor(g.name);
       const result = await importsAPI.gameStatsCommit({
-        game_id: activeGame.id, players, ...importedExtras, label_sides: labelSides,
+        game_id: activeGame.id, players, ...importedExtras, label_sides: labelSides, team_mine,
       });
       const stats = await gameEvalAPI.listStats(activeGame.id);
       setGameStats(stats);
@@ -1557,6 +1576,25 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     return [...names.values()].sort((a, b) => a.localeCompare(b));
   }, [sessions, teams]);
 
+  /**
+   * Which nav chip is lit.
+   *
+   * A game's detail, a live game, and a scouted team are all CHILDREN of a nav
+   * chip rather than views beside them — you got to them from Games or Scout
+   * and that is still where you are. Reading activeView directly lit nothing at
+   * all on those screens, so the row of chips said the coach was nowhere.
+   */
+  const NAV_PARENT: Record<string, string> = { detail: 'games', live: 'games' };
+  const navView = NAV_PARENT[activeView] ?? activeView;
+
+  // Back walks the steps taken inside this screen before it leaves it. Order
+  // matters and is inner-first: a player opened inside a scouted team closes
+  // before the team does. See useBackStep.
+  useBackStep(activeView === 'detail' || activeView === 'live', () => setActiveView('games'));
+  useBackStep(!!scoutOpponent, () => { setScoutOpponent(null); setScoutData(null); });
+  useBackStep(!!scoutPlayer, () => setScoutPlayer(null));
+  useBackStep(!!gameReportGame, () => setGameReportGame(null));
+
   /** Games this team played, on either side of the scoreboard. */
   const gamesInvolving = (name: string) => (sessions as any[]).filter((g: any) =>
     norm(g.opponent_name) === norm(name)
@@ -1587,6 +1625,21 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     });
     return out;
   }, [statPreview]);
+
+  /**
+   * Whether a team named in an import file is one of the coach's.
+   *
+   * The coach's answer wins. Failing that, a team the roster already holds
+   * keeps what it is already set to — an import is not the place to demote a
+   * team that has been the coach's own all season — and a team about to be
+   * created starts as not theirs.
+   */
+  const mineFor = (name: string) => {
+    const answered = teamMine[name];
+    if (answered !== undefined) return answered;
+    const existing = (teams as any[]).find(tm => norm(tm.name) === norm(name));
+    return existing ? existing.is_mine !== false : false;
+  };
 
   /**
    * Which teams Team Grade is showing. Ticking none means all of them, which is
@@ -1675,10 +1728,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               {(['dashboard', 'games', 'scout', 'gamereport'] as const).map(v => (
                 <TouchableOpacity
                   key={v}
-                  style={[s.navBtn, activeView === v && s.navBtnActive]}
+                  style={[s.navBtn, navView === v && s.navBtnActive]}
                   onPress={() => { if (v === 'gamereport') setGameReportGame(null); setActiveView(v); }}
                 >
-                  <Text style={[s.navBtnText, activeView === v && s.navBtnTextActive]}>
+                  <Text style={[s.navBtnText, navView === v && s.navBtnTextActive]}>
                     {v === 'dashboard' ? tr('teamGrade.views.dashboard') : v === 'games' ? tr('teamGrade.views.games') : v === 'scout' ? tr('teamGrade.views.scout') : tr('reportTypes.game_report')}
                   </Text>
                 </TouchableOpacity>
@@ -3277,6 +3330,27 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                         );
                       })}
                     </View>
+                    {/* Whose team this is, asked once here rather than worked
+                        out. A coach imports their own box score as readily as
+                        an opponent's, so nothing about the file answers it —
+                        and a team wrongly kept as the coach's own walks a
+                        fixture they were only scouting into their record. */}
+                    {!!group.name && (
+                      <TouchableOpacity
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 }}
+                        onPress={() => setTeamMine(prev => ({ ...prev, [group.name]: !mineFor(group.name) }))}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons
+                          name={mineFor(group.name) ? 'checkbox' : 'square-outline'}
+                          size={18}
+                          color={mineFor(group.name) ? t.accent : t.muted}
+                        />
+                        <Text style={{ color: t.muted, fontSize: 12, flex: 1 }} numberOfLines={2}>
+                          {tr('teamGrade.isMyTeam', { name: group.name })}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                   {group.rows.map(({ p, i }: any) => (
                 <TouchableOpacity

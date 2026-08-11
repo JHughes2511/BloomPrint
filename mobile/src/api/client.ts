@@ -456,7 +456,8 @@ export const importsAPI = {
       { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 180000 }).then(r => r.data);
   },
   gameStatsCommit: (data: { game_id: number; players?: any[]; events?: any[]; shots?: any[];
-                            team_stats?: any[]; label_sides?: Record<string, boolean> }) =>
+                            team_stats?: any[]; label_sides?: Record<string, boolean>;
+                            team_mine?: Record<string, boolean> }) =>
     api.post('/imports/game-stats/commit', data).then(r => r.data),
   text: async (file: PickedFile, purpose = 'coaching notes') =>
     api.post('/imports/text', await _importForm(file, { purpose }), { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 }).then(r => r.data),

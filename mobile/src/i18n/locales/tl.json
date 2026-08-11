@@ -2239,7 +2239,8 @@
     "setScore": "Ilagay ang iskor",
     "perGameLine": "{{pts}} puntos · {{reb}} reb · {{ast}} ast · {{stl}} steal · {{blk}} block · {{to}} turnover",
     "perGameStat": "{{stat}} — {{n}} kada laro",
-    "noInsight": "Wala pang pagsusuri."
+    "noInsight": "Wala pang pagsusuri.",
+    "isMyTeam": "Ang {{name}} ay aking koponan"
   },
   "whiteboard": {
     "title": "Whiteboard",

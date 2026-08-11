@@ -2239,7 +2239,8 @@
     "setScore": "Ergebnis eintragen",
     "perGameLine": "{{pts}} Pkt · {{reb}} Reb · {{ast}} Ass · {{stl}} Steals · {{blk}} Blocks · {{to}} TO",
     "perGameStat": "{{stat}} — {{n}} pro Spiel",
-    "noInsight": "Noch keine Einschätzung."
+    "noInsight": "Noch keine Einschätzung.",
+    "isMyTeam": "{{name}} ist mein Team"
   },
   "whiteboard": {
     "title": "Taktiktafel",

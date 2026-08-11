@@ -2239,7 +2239,8 @@
     "setScore": "Ορισμός σκορ",
     "perGameLine": "{{pts}} πόν · {{reb}} ριμπ · {{ast}} ασίστ · {{stl}} κλεψ · {{blk}} κοψ · {{to}} λάθη",
     "perGameStat": "{{stat}} — {{n}} ανά αγώνα",
-    "noInsight": "Δεν υπάρχει ακόμη ανάλυση."
+    "noInsight": "Δεν υπάρχει ακόμη ανάλυση.",
+    "isMyTeam": "Η {{name}} είναι η ομάδα μου"
   },
   "whiteboard": {
     "title": "Πίνακας",

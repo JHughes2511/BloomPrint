@@ -2239,7 +2239,8 @@
     "setScore": "점수 입력",
     "perGameLine": "{{pts}}득점 · {{reb}}리바운드 · {{ast}}어시스트 · {{stl}}스틸 · {{blk}}블록 · {{to}}턴오버",
     "perGameStat": "{{stat}} — 경기당 {{n}}",
-    "noInsight": "아직 코멘트가 없습니다."
+    "noInsight": "아직 코멘트가 없습니다.",
+    "isMyTeam": "{{name}}은(는) 내 팀입니다"
   },
   "whiteboard": {
     "title": "작전판",

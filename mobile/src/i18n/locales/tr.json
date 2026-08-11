@@ -2239,7 +2239,8 @@
     "setScore": "Skoru gir",
     "perGameLine": "{{pts}} sayı · {{reb}} rib · {{ast}} asist · {{stl}} top çalma · {{blk}} blok · {{to}} kayıp",
     "perGameStat": "{{stat}} — maç başına {{n}}",
-    "noInsight": "Henüz analiz yok."
+    "noInsight": "Henüz analiz yok.",
+    "isMyTeam": "{{name}} benim takımım"
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

@@ -2239,7 +2239,8 @@
     "setScore": "स्कोर दर्ज करें",
     "perGameLine": "{{pts}} अंक · {{reb}} रिब · {{ast}} अस्सिस्ट · {{stl}} स्टील · {{blk}} ब्लॉक · {{to}} टर्नओवर",
     "perGameStat": "{{stat}} — {{n}} प्रति गेम",
-    "noInsight": "अभी कोई विश्लेषण नहीं।"
+    "noInsight": "अभी कोई विश्लेषण नहीं।",
+    "isMyTeam": "{{name}} मेरी टीम है"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",

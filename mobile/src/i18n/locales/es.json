@@ -2239,7 +2239,8 @@
     "setScore": "Poner marcador",
     "perGameLine": "{{pts}} pts · {{reb}} reb · {{ast}} ast · {{stl}} rob · {{blk}} tap · {{to}} pér",
     "perGameStat": "{{stat}} — {{n}} por partido",
-    "noInsight": "Aún no hay análisis."
+    "noInsight": "Aún no hay análisis.",
+    "isMyTeam": "{{name}} es mi equipo"
   },
   "whiteboard": {
     "title": "Pizarra",

@@ -2239,7 +2239,8 @@
     "setScore": "Унеси резултат",
     "perGameLine": "{{pts}} поена · {{reb}} ск · {{ast}} ас · {{stl}} укр · {{blk}} бл · {{to}} изг",
     "perGameStat": "{{stat}} — {{n}} по утакмици",
-    "noInsight": "Још нема анализе."
+    "noInsight": "Још нема анализе.",
+    "isMyTeam": "{{name}} je moj tim"
   },
   "whiteboard": {
     "title": "Tabla",

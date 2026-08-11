@@ -2239,7 +2239,8 @@
     "setScore": "Adaugă scorul",
     "perGameLine": "{{pts}} pct · {{reb}} rec · {{ast}} pas · {{stl}} int · {{blk}} bloc · {{to}} pierderi",
     "perGameStat": "{{stat}} — {{n}} pe meci",
-    "noInsight": "Încă fără analiză."
+    "noInsight": "Încă fără analiză.",
+    "isMyTeam": "{{name}} este echipa mea"
   },
   "whiteboard": {
     "title": "Tablă tactică",

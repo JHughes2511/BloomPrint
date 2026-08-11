@@ -2239,7 +2239,8 @@
     "setScore": "Score invullen",
     "perGameLine": "{{pts}} pnt · {{reb}} reb · {{ast}} ass · {{stl}} steals · {{blk}} blocks · {{to}} balverlies",
     "perGameStat": "{{stat}} — {{n}} per wedstrijd",
-    "noInsight": "Nog geen analyse."
+    "noInsight": "Nog geen analyse.",
+    "isMyTeam": "{{name}} is mijn team"
   },
   "whiteboard": {
     "title": "Tactiekbord",

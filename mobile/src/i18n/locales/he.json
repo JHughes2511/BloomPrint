@@ -2239,7 +2239,8 @@
     "setScore": "הזנת תוצאה",
     "perGameLine": "{{pts}} נק' · {{reb}} ריב' · {{ast}} אס' · {{stl}} חט' · {{blk}} חס' · {{to}} איב'",
     "perGameStat": "{{stat}} — {{n}} למשחק",
-    "noInsight": "אין עדיין תובנה."
+    "noInsight": "אין עדיין תובנה.",
+    "isMyTeam": "{{name}} היא הקבוצה שלי"
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

@@ -2239,7 +2239,8 @@
     "setScore": "スコアを入力",
     "perGameLine": "{{pts}}得点 · {{reb}}リバウンド · {{ast}}アシスト · {{stl}}スティール · {{blk}}ブロック · {{to}}ターンオーバー",
     "perGameStat": "{{stat}} — 1試合あたり{{n}}",
-    "noInsight": "まだ所見はありません。"
+    "noInsight": "まだ所見はありません。",
+    "isMyTeam": "{{name}} は自分のチームです"
   },
   "whiteboard": {
     "title": "ホワイトボード",

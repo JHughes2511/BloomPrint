@@ -279,6 +279,11 @@ class GameStatsCommit(BaseModel):
     # {"red, left": true} — the coach's answer for a label the file used that is
     # not either team's name. Beats every other way of deciding a side.
     label_sides: dict[str, bool] = {}
+    # {"angola": false} — whether each team in the file is one of the coach's
+    # own. Asked at import because it cannot be derived: a coach imports their
+    # own team's box score as readily as an opponent's, so the side a file sits
+    # on says nothing about whose team it is. Absent means "leave it alone".
+    team_mine: dict[str, bool] = {}
 
 
 @router.post("/game-stats/commit")
@@ -471,7 +476,7 @@ def game_stats_commit(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Could not save the imported stats: {exc}")
 
-    roster = _sync_roster(db, game, coach, body.players)
+    roster = _sync_roster(db, game, coach, body.players, body.team_mine)
     return {"imported": imported, "events": events_in, "shots": shots_in,
             "team_stats": advanced_in, "roster": roster}
 
@@ -480,7 +485,8 @@ def _norm_name(x) -> str:
     return "".join(ch for ch in str(x or "").lower() if ch.isalnum())
 
 
-def _sync_roster(db: Session, game, coach, players: list[dict]) -> dict:
+def _sync_roster(db: Session, game, coach, players: list[dict],
+                 team_mine: dict[str, bool] | None = None) -> dict:
     """Put what the sheet said about the players onto the teams themselves.
 
     A box score is often the only place a squad number is ever written down,
@@ -516,6 +522,23 @@ def _sync_roster(db: Session, game, coach, players: list[dict]) -> dict:
             db.add(opp_row)
             db.flush()      # an id, so the players below can point at it
             created_team = opp_row.name
+    # Whose team is whose, as answered on the import screen.
+    #
+    # Only applied where the coach actually answered. A team already in the
+    # roster keeps whatever it is set to unless they said otherwise on this
+    # screen — an import must not quietly demote the coach's own team because
+    # a control defaulted to off.
+    mine_answers = {_norm_name(k): bool(v) for k, v in (team_mine or {}).items()}
+    reassigned = 0
+    if mine_answers:
+        for tm in (db.get(models.Team, ours_id), opp_row):
+            if tm is None:
+                continue
+            answer = mine_answers.get(_norm_name(tm.name))
+            if answer is not None and (tm.is_mine is not False) != answer:
+                tm.is_mine = answer
+                reassigned += 1
+
     from ..coach_context import resolve_level
     added = numbered = repaired = 0
     for side_is_opp, team_id in ((False, ours_id), (True, opp_row.id if opp_row else None)):
@@ -564,7 +587,10 @@ def _sync_roster(db: Session, game, coach, players: list[dict]) -> dict:
                         repaired += 1
     # `repaired` counts too. Committing only when something was ADDED meant a
     # pass that fixed a level and added nobody was rolled back on the way out.
-    if added or numbered or repaired or created_team:
+    # `reassigned` is the same trap: re-importing the same sheet to correct
+    # whose team it is changes no player at all, so the answer was thrown away
+    # on the way out and the toggle looked like it did nothing.
+    if added or numbered or repaired or created_team or reassigned:
         try:
             db.commit()
         except Exception:

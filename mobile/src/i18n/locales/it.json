@@ -2239,7 +2239,8 @@
     "setScore": "Inserisci punteggio",
     "perGameLine": "{{pts}} pti · {{reb}} rimb · {{ast}} ass · {{stl}} rec · {{blk}} stop · {{to}} perse",
     "perGameStat": "{{stat}} — {{n}} a partita",
-    "noInsight": "Ancora nessuna analisi."
+    "noInsight": "Ancora nessuna analisi.",
+    "isMyTeam": "{{name}} è la mia squadra"
   },
   "whiteboard": {
     "title": "Lavagna",

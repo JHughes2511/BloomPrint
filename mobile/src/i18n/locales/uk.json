@@ -2239,7 +2239,8 @@
     "setScore": "Вказати рахунок",
     "perGameLine": "{{pts}} очк · {{reb}} підб · {{ast}} пас · {{stl}} перехв · {{blk}} блок · {{to}} втрати",
     "perGameStat": "{{stat}} — {{n}} за гру",
-    "noInsight": "Поки немає розбору."
+    "noInsight": "Поки немає розбору.",
+    "isMyTeam": "{{name}} — моя команда"
   },
   "whiteboard": {
     "title": "Тактична дошка",

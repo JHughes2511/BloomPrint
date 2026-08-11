@@ -976,7 +976,10 @@ def _packet_prompt(db: Session, gr: models.GameReport, coach: models.Coach) -> s
             "\nWhen the film shows a jersey number, MAP IT to the matching player in the "
             "rosters below (each player is listed as '#<number> <name>') and refer to them by "
             "name. Do NOT claim a player is absent or unknown if their number appears on a "
-            "roster below — use the roster as the source of truth for who is on the floor."
+            "roster below — the roster settles who is on the floor.\n"
+            "This instruction is for YOU. Never mention the roster, this rule, or how you "
+            "identified anyone in the report itself — write it as a coach who simply knows "
+            "the names."
         )
     if is_opp_vs_opp:
         sections.append(

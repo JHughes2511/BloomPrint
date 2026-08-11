@@ -2239,7 +2239,8 @@
     "setScore": "تسجيل النتيجة",
     "perGameLine": "{{pts}} نقطة · {{reb}} متابعة · {{ast}} تمريرة · {{stl}} استخلاص · {{blk}} صدّ · {{to}} كرة ضائعة",
     "perGameStat": "{{stat}} — {{n}} لكل مباراة",
-    "noInsight": "لا توجد ملاحظة بعد."
+    "noInsight": "لا توجد ملاحظة بعد.",
+    "isMyTeam": "{{name}} هو فريقي"
   },
   "whiteboard": {
     "title": "السبورة",

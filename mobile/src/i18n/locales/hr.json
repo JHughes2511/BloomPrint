@@ -2239,7 +2239,8 @@
     "setScore": "Unesi rezultat",
     "perGameLine": "{{pts}} poena · {{reb}} sk · {{ast}} as · {{stl}} ukr · {{blk}} bl · {{to}} izg",
     "perGameStat": "{{stat}} — {{n}} po utakmici",
-    "noInsight": "Još nema analize."
+    "noInsight": "Još nema analize.",
+    "isMyTeam": "{{name}} je moja momčad"
   },
   "whiteboard": {
     "title": "Ploča",

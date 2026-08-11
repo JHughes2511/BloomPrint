@@ -2239,7 +2239,8 @@
     "setScore": "Wpisz wynik",
     "perGameLine": "{{pts}} pkt · {{reb}} zb · {{ast}} as · {{stl}} prz · {{blk}} bl · {{to}} str",
     "perGameStat": "{{stat}} — {{n}} na mecz",
-    "noInsight": "Brak analizy."
+    "noInsight": "Brak analizy.",
+    "isMyTeam": "{{name}} to mój zespół"
   },
   "whiteboard": {
     "title": "Tablica",

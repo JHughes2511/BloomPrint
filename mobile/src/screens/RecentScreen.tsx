@@ -1021,8 +1021,18 @@ export default function RecentScreen() {
                   {item.overall_grade != null && <GradeBadge grade={item.overall_grade} size="md" />}
                   {item.kind === 'game' && <Ionicons name="chevron-forward" size={14} color={t.muted2} />}
                 </TouchableOpacity>
-                {/* Action buttons row — shown for all card types */}
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10, width: '100%' }}>
+                {/* Action buttons row — shown for all card types.
+                    On the grid the card has a FIXED height, so a row that
+                    wraps is a row that gets cut off — which is what an iPad
+                    does at roughly 265px a column: three buttons do not fit,
+                    flexbox wraps the third onto a second line, and the card
+                    clips it. Wrapping is what has to go, not the height:
+                    without it the buttons shrink to share the row and a long
+                    label ellipsizes, which is legible at any width and in
+                    every language. The phone keeps wrapping — one card per
+                    row there, and its height is not fixed. */}
+                <View style={{ flexDirection: 'row', flexWrap: recentGrid.cardWidth ? 'nowrap' : 'wrap',
+                               gap: 6, marginTop: 10, width: '100%' }}>
                   {/* Game-specific buttons */}
                   {(item.kind === 'game' || item.kind === 'scout' || item.kind === 'gamereport') && item.report_text ? (
                     <TouchableOpacity
@@ -1775,7 +1785,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   gameActionBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: t.chip, borderRadius: 8, paddingVertical: 6, paddingHorizontal: 10,
-    borderWidth: 1, borderColor: t.line, flexShrink: 1, maxWidth: '100%',
+    // minWidth: 0 so the button can actually give ground. A flex item's default
+    // minimum is its content, so three buttons in a row that cannot wrap would
+    // otherwise overflow the card rather than share it — flexShrink alone does
+    // not override that floor.
+    borderWidth: 1, borderColor: t.line, flexShrink: 1, minWidth: 0, maxWidth: '100%',
   },
   gameActionText: { color: t.muted, fontSize: 12, fontFamily: fonts[600], flexShrink: 1 },
   input: {
