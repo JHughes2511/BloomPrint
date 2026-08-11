@@ -302,7 +302,12 @@ export default function ConversationScreen() {
             multiline
           />
           <TouchableOpacity style={styles.sendBtn} onPress={send} disabled={sending || (!text.trim() && pending.length === 0)}>
-            {sending ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="arrow-up" size={20} color={t.ctaText} />}
+            {/* The filled, angled send glyph — Ionicons "send" already points
+                up and to the right, which is the angle asked for. Shape and
+                colours are unchanged: 44 square, radius 10, CTA fill, and the
+                icon in the CTA's own foreground colour rather than a hardcoded
+                white, which is what made it invisible here in the first place. */}
+            {sending ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="send" size={19} color={t.ctaText} />}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
