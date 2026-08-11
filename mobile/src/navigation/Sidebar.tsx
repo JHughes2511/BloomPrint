@@ -238,29 +238,26 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
             // anyway would override that.
             if (event.defaultPrevented) return;
 
-            // Popping to the top is done here rather than left to the screen's
-            // own tabPress listener. That listener reads state through the
-            // screen it is attached to, and a tab screen does not re-render
-            // when the stack nested inside it changes — so from Staff Hub > a
-            // team, pressing Home could find a stale depth of zero, decline to
-            // pop, and do nothing at all. The tab bar re-renders on every
-            // navigation change, so the route object here is always current.
-            const nested: any = (route as any).state;
-            if (tabFocused) {
-              if (nested?.key && (nested.index ?? 0) > 0) {
-                navigation.dispatch({ ...StackActions.popToTop(), target: nested.key });
-              }
-              return;
-            }
-            // The tab's ROOT, said explicitly, rather than route.params.
+            // Say where to land, rather than work out whether to pop.
             //
-            // Params stick to a tab route: opening Staff Hub is a navigate to
-            // HomeTab with {screen: 'StaffInbox'}, and that stays on the tab.
-            // Handing those same params back on the next press sent the coach
-            // to Staff Hub every time they asked for Home — the one screen the
-            // Home button could not reach.
+            // This used to read the nested stack off route.state and pop it,
+            // which fails quietly whenever that state is absent — React
+            // Navigation does not always carry it, and there is no way to tell
+            // the difference between "no nested state" and "nothing to pop".
+            // From a direct message, pressing Home did nothing at all; you had
+            // to press back first, which is the coach doing the navigator's job.
+            //
+            // Navigating to the tab's ROOT screen is the same instruction in a
+            // form that cannot half-happen: a screen already in the stack is
+            // returned to, one that is not is pushed. Naming it also overrides
+            // the params stuck on the tab — opening Staff Hub leaves
+            // {screen: 'StaffInbox'} on HomeTab, and handing those back was a
+            // request for Staff Hub whatever the coach pressed.
             const root = TAB_ROOT[route.name];
             navigation.navigate(route.name, root ? { screen: root } : undefined);
+            // And flatten anything above it, for the case where the root is
+            // already showing but screens are stacked over it.
+            const nested: any = (route as any).state;
             if (nested?.key && (nested.index ?? 0) > 0) {
               navigation.dispatch({ ...StackActions.popToTop(), target: nested.key });
             }
