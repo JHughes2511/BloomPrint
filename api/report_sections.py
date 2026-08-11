@@ -1,17 +1,59 @@
-"""Splitting a report into its sections, and putting one back.
+"""Report sections: dropping the ones a coach switched off, and correcting one.
 
-A coach's correction is about one part of a report. Re-watching the film to
-verify it is right — that is how the model finds out whether the coach is
-describing something that actually happened — but rewriting the whole document
-afterwards is not: everything the coach did NOT question comes back reworded,
-and they have to re-read a report they had already accepted to find out what
-changed.
+Two jobs over the same idea — a report is a series of headed sections, and
+both of them need to act on one section without disturbing the others.
 
-So the model is asked to correct one section, and this module is what makes
-that guarantee real rather than a request. Whatever comes back, every section
-the correction did not name is restored from the original, byte for byte.
+The headings are the ones the app showed the coach, produced by the same two
+rules the client's splitter uses: a markdown heading, or an ALL-CAPS line.
+Both the training send and the eval share filter through here, so what a
+player receives can never contain a section the coach withheld.
 """
 import re
+
+
+def _without_sections(text: str, hide: list[str]) -> str:
+    """Drop the named sections from a report.
+
+    The headings are the ones the app showed the coach, produced by the same
+    two rules the client's splitter uses: a markdown heading, or an ALL-CAPS
+    line. Anything not recognised as a heading stays with the section above it,
+    so a section that is switched off takes its whole body with it.
+    """
+    wanted = {h.strip().lower() for h in hide if h and h.strip()}
+    if not wanted or not text:
+        return text
+
+    def heading_of(line: str) -> str | None:
+        t = line.strip()
+        if re.match(r"^#{1,6}\s+", t):
+            return re.sub(r"^#{1,6}\s+", "", t).replace("**", "").strip()
+        if re.search(r":\s*-?\d", t):
+            return None
+        if len(t) < 70 and re.match(r"^[A-Z][A-Z0-9\s/&()\-:'.]{2,}$", t) and not re.search(r"[.!?]$", t):
+            return t.rstrip(":").strip()
+        return None
+
+    out, dropping = [], False
+    for line in text.split("\n"):
+        h = heading_of(line)
+        if h is not None:
+            dropping = h.strip().lower() in wanted
+        if not dropping:
+            out.append(line)
+    return "\n".join(out).strip()
+
+
+# ── Correcting one section ────────────────────────────────────────────────────
+#
+# A coach's correction is about one part of a report. Re-watching the film to
+# verify it is right — that is how the model finds out whether the coach is
+# describing something that actually happened — but rewriting the whole
+# document afterwards is not: everything the coach did NOT question comes back
+# reworded, and they have to re-read a report they had already accepted to find
+# out what changed.
+#
+# So the model is asked to correct one section, and what follows is what makes
+# that a guarantee rather than a request.
 
 # A heading is a short line in capitals, usually ending in a colon:
 #

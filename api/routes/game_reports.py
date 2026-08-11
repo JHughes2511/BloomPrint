@@ -215,15 +215,58 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             pass
 
 
+def _film_team_id(db: Session, gr: models.GameReport, clip: models.GameReportClip,
+                  coach: models.Coach) -> int | None:
+    """Which team a film is about, for remembering a correction against it.
+
+    The clip carries the name the coach labelled it with, which is the most
+    specific thing available — on an opponent-vs-opponent packet both sides are
+    someone else's and the packet's own my_team slot holds Opponent A. Falling
+    back to the packet's team is right for every other mode.
+    """
+    name = (getattr(clip, "team_name", None) or "").strip().lower()
+    if name:
+        for tm in db.query(models.Team).filter_by(coach_id=coach.id).all():
+            if (tm.name or "").strip().lower() == name:
+                return tm.id
+    return gr.my_team_id
+
+
+def _split_corrected_section(text: str) -> tuple[str | None, str]:
+    """Pull the "CORRECTED SECTION: ..." line off the front of a re-watch.
+
+    Returns (heading, the analysis without that line). A reply that does not
+    carry the line still works — the merge falls back to taking the rewrite's
+    own differences — so a model that forgets the format costs formatting, not
+    the correction.
+    """
+    if not text:
+        return None, ""
+    first, sep, rest = text.partition("\n")
+    label = first.strip()
+    if label.upper().startswith("CORRECTED SECTION:"):
+        heading = label.split(":", 1)[1].strip().strip('"').rstrip(":").strip()
+        return (heading or None), rest.lstrip("\n") if sep else ""
+    return None, text
+
+
 def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_type: str,
                            program_name: str, opp_name: str, label_text: str,
                            coach_weight: int, prior_text: str, correction: str, level: str = "HS Varsity",
                            report_subject: str = "", report_context: str = "",
                            report_segment_note: str = ""):
-    """Background task: RE-WATCH the film guided by a coach correction. Instead of
-    just rephrasing the old text, we re-run the vision analysis focused on the
-    action the coach described so the model can LOCATE and VERIFY it in the film
-    and fold the verified observation into a corrected analysis."""
+    """Background task: RE-WATCH the film guided by a coach correction.
+
+    The re-watch is the point: the model goes back to the frames, finds what
+    the coach is describing and verifies it, rather than taking their word for
+    it and rewording the paragraph.
+
+    What comes back replaces ONE SECTION. Everything the coach did not question
+    is restored from the analysis they already read — see report_sections. A
+    correction about the defensive rotations is not a reason for the executive
+    summary to come back differently worded, and a coach who has to re-read the
+    whole document to find out what changed will stop making corrections.
+    """
     import asyncio
 
     # As in _run_clip_analysis: no session is held across the re-watch, which
@@ -248,10 +291,18 @@ def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_ty
             "Re-watch the film and LOCATE the specific action, play, or moment the coach is "
             "describing. VERIFY it visually in the frames — identify the concept/action they "
             "mean (a screen, a rotation, a coverage, a read, whoever was involved), cite it by "
-            "film timestamp (MM:SS), and produce a CORRECTED analysis that integrates that "
-            "verified observation. Do NOT simply repeat the coach's words — find what they are "
-            "pointing at in the film and describe it accurately. If, after re-watching, you "
+            "film timestamp (MM:SS). Do NOT simply repeat the coach's words — find what they "
+            "are pointing at in the film and describe it accurately. If, after re-watching, you "
             "still cannot see what they describe, say so plainly rather than inventing it.\n\n"
+            "CHANGE ONE SECTION, NOT THE REPORT. The coach has already read and accepted the "
+            "rest of this analysis. Reproduce the prior analysis in full, with ONLY the section "
+            "the correction is about rewritten. Every other section must come back WORD FOR "
+            "WORD as it is below — do not improve, reword, reorder or shorten any of them. If "
+            "the correction is about something no section covers, add one section for it and "
+            "leave the others alone.\n"
+            "Begin your reply with a single line naming that section, exactly:\n"
+            "CORRECTED SECTION: <the heading, as it appears>\n"
+            "then the full analysis.\n\n"
             f"PRIOR ANALYSIS:\n{prior_text}\n\nCOACH CORRECTION:\n{correction}"
         )
 
@@ -270,11 +321,18 @@ def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_ty
             "audio_auto": True,        # gauge whether the film's audio is worth transcribing
             "_progress": _prog,
         }))
+        # The model is asked for one section; this is what makes it so. Its
+        # reply names the section it changed, and everything else is taken back
+        # from the analysis the coach already has.
+        heading, body = _split_corrected_section(result[0].text)
+        from ..report_sections import apply_section_correction
+        merged = apply_section_correction(prior_text, body, heading)
+
         wdb = SessionLocal()
         try:
             clip = wdb.get(models.GameReportClip, clip_id)
             if clip:
-                clip.analysis_text = result[0].text
+                clip.analysis_text = merged
             job = wdb.get(models.GenerationJob, job_id)
             if job:
                 job.status = "done"
@@ -705,9 +763,14 @@ async def add_clip(
     db.commit()
     db.refresh(job)
 
+    # Everything this coach has taught about this team, read at request time
+    # while there is still a session to read it with.
+    from . import preferences
+    learned = preferences.for_prompt(db, coach.id, _film_team_id(db, gr, clip, coach))
+
     background_tasks.add_task(
         _run_clip_analysis, clip.id, job.id, str(dest), gr.output_type,
-        my_team_name, opp_name, label_text, coach.weight, gr.focus_prompt or "",
+        my_team_name, opp_name, label_text, coach.weight, (gr.focus_prompt or "") + learned,
         call["level"], subject, directive, seg_note,
     )
     return {"job_id": job.id, "clip_id": clip.id}
@@ -1331,6 +1394,15 @@ async def correct_clip(
     opp_name = gr.opponent_team.name if gr.opponent_team else (gr.opponent_name or "Opponent")
     subject, directive, seg_note = _film_context(gr, coach)
 
+    # A correction is the coach saying what this report should have been paying
+    # attention to. Verifying it against the film fixes THIS report; keeping it
+    # is what stops them writing the same note again next week.
+    from . import preferences
+    team_id = _film_team_id(db, gr, clip, coach)
+    preferences.remember(db, coach.id, body.correction, team_id)
+    db.flush()
+    learned = preferences.for_prompt(db, coach.id, team_id)
+
     job = models.GenerationJob(coach_id=coach.id, kind="clip", status="processing")
     db.add(job)
     db.commit()
@@ -1338,7 +1410,8 @@ async def correct_clip(
 
     background_tasks.add_task(
         _run_clip_recorrection, clip.id, job.id, clip.video_path, gr.output_type,
-        my_team_name, opp_name, label_text, coach.weight, clip.analysis_text, body.correction,
+        my_team_name, opp_name, label_text, coach.weight, clip.analysis_text,
+        body.correction + learned,
         _packet_level(db, gr, coach), subject, directive, seg_note,
     )
     return {"job_id": job.id, "clip_id": clip.id}

@@ -601,6 +601,38 @@ class StaffReportComment(Base):
     author        = relationship("Coach")
 
 
+class CoachPreference(Base):
+    """Something a coach has taught BloomPrint by correcting a report.
+
+    A correction is a coach saying what this report should have paid attention
+    to. Verifying it against the film fixes one report; remembering it is what
+    stops them writing the same note again next week.
+
+    Scope is the team it was made about, or the whole program when there is no
+    team in view. Both apply together and are not in competition: a coach has a
+    general idea of how they play and a specific plan for a given opponent.
+
+    Kept per COACH. What this one cares about is theirs, not a fact about
+    basketball, and nobody else's reports change because of it.
+    """
+    __tablename__ = "coach_preferences"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    coach_id   = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    # NULL means it applies to everything this coach generates.
+    team_id    = Column(Integer, ForeignKey("teams.id"), nullable=True)
+    text       = Column(Text, nullable=False)
+    # Where it came from, so the list can say. "correction" today.
+    source     = Column(String, default="correction")
+    # Teams evolve across a season; a coach can switch one off without losing
+    # the record of having made it.
+    active     = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    coach = relationship("Coach", foreign_keys=[coach_id])
+    team  = relationship("Team", foreign_keys=[team_id])
+
+
 class GameReport(SoftDeleteMixin, Base):
     __tablename__ = "game_reports"
 
