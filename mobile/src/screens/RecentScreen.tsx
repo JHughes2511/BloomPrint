@@ -1042,19 +1042,11 @@ export default function RecentScreen() {
                     every language. The phone keeps wrapping — one card per
                     row there, and its height is not fixed. */}
                 <View style={{ flexDirection: 'row', flexWrap: recentGrid.cardWidth ? 'nowrap' : 'wrap',
-                               gap: 6,
-                               // The card already puts a 10px gap between its
-                               // body and this row. Adding 10 more on top is
-                               // what pushed a four-line card — a packet
-                               // someone SHARED, which carries a "Shared by"
-                               // line the original does not — past the fixed
-                               // 132 and cut its buttons in half, on the
-                               // desktop as well as the iPad.
-                               marginTop: recentGrid.cardWidth ? 0 : 10, width: '100%' }}>
+                               gap: 6, marginTop: 10, width: '100%' }}>
                   {/* Game-specific buttons */}
                   {(item.kind === 'game' || item.kind === 'scout' || item.kind === 'gamereport') && item.report_text ? (
                     <TouchableOpacity
-                      style={[styles.gameActionBtn, !!recentGrid.cardWidth && styles.gameActionBtnGrid, tightBtns && styles.gameActionBtnTight]}
+                      style={[styles.gameActionBtn, tightBtns && styles.gameActionBtnTight]}
                       onPress={() => setGameReportModal({
                         title: item.kind === 'scout' ? tr('reportTypes.scouting_report') : tr('reportTypes.game_report'),
                         subject: item.player_name, text: item.report_text!,
@@ -1068,7 +1060,7 @@ export default function RecentScreen() {
                   ) : null}
                   {item.kind === 'game' && !item.shared && (
                     <TouchableOpacity
-                      style={[styles.gameActionBtn, !!recentGrid.cardWidth && styles.gameActionBtnGrid, tightBtns && styles.gameActionBtnTight]}
+                      style={[styles.gameActionBtn, tightBtns && styles.gameActionBtnTight]}
                       onPress={() => navigation.push('GameReportBuilder', { reportId: item.report_id ?? item.id })}
                     >
                       {!tightBtns && <Ionicons name="create-outline" size={13} color={t.muted} />}
@@ -1082,7 +1074,7 @@ export default function RecentScreen() {
                       and Share already reaches a player for those. */}
                   {(item.kind === 'eval' || item.kind === 'training') && (
                     <TouchableOpacity
-                      style={[styles.gameActionBtn, !!recentGrid.cardWidth && styles.gameActionBtnGrid, tightBtns && styles.gameActionBtnTight, { borderColor: t.positiveSoft }]}
+                      style={[styles.gameActionBtn, tightBtns && styles.gameActionBtnTight, { borderColor: t.positiveSoft }]}
                       onPress={() => {
                         openModal({
                           id: item.id,
@@ -1107,7 +1099,7 @@ export default function RecentScreen() {
                       On the shared original AND on my Updated copy of it. */}
                   {(item.shared || item.updated_from) && item.allow_regenerate && (
                     <TouchableOpacity
-                      style={[styles.gameActionBtn, !!recentGrid.cardWidth && styles.gameActionBtnGrid, tightBtns && styles.gameActionBtnTight, { borderColor: t.accentSoft }]}
+                      style={[styles.gameActionBtn, tightBtns && styles.gameActionBtnTight, { borderColor: t.accentSoft }]}
                       onPress={() => openViewer(item)}
                     >
                       {!tightBtns && <Ionicons name="create-outline" size={13} color={t.accent} />}
@@ -1117,7 +1109,7 @@ export default function RecentScreen() {
 
                   {/* Share — player / team / staff, available for all types */}
                   <TouchableOpacity
-                    style={[styles.gameActionBtn, !!recentGrid.cardWidth && styles.gameActionBtnGrid, tightBtns && styles.gameActionBtnTight, { borderColor: t.brownSoft }]}
+                    style={[styles.gameActionBtn, tightBtns && styles.gameActionBtnTight, { borderColor: t.brownSoft }]}
                     onPress={() => {
                       // A shared report forwards under its ORIGINAL type/id so
                       // the recipient (or player) gets the author's report.
@@ -1765,16 +1757,21 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   card: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: t.card, marginHorizontal: 16, marginBottom: 8,
-    // A fixed height, not a minimum, and the height the cards already had. A
-    // packet card carries a third line naming its report types where a film
-    // card does not, so on a minimum they came out different heights side by
-    // side; the packet's lines are tightened to fit rather than the row grown.
-    ...desktopOnly({ height: 132, marginBottom: 0, overflow: 'hidden' }),
+    // A minimum, which is what it was before any of this: 132 with no ceiling
+    // and nothing hidden. A fixed height plus overflow: hidden is what cut the
+    // buttons off a card carrying one line more than the rest, and no amount of
+    // tightening elsewhere makes that safe — the next card type with an extra
+    // line breaks it again. A packet has that extra line, so it stands a little
+    // taller than the rest, which is the arrangement asked for.
+    ...desktopOnly({ minHeight: 132, marginBottom: 0 }),
     borderRadius: 12, padding: 14, gap: 10,
     borderWidth: 1, borderColor: t.cardBorder,
   },
   cardTeam: { borderWidth: 1, borderColor: t.brownSoft },
-  cardGame: { borderWidth: 1, borderColor: t.accentSoft },
+  // A packet is the one card that names what is inside it, so it carries a
+  // line the others do not — and one more again when it was shared. It gets a
+  // slightly higher floor rather than the whole grid being raised to suit it.
+  cardGame: { borderWidth: 1, borderColor: t.accentSoft, ...desktopOnly({ minHeight: 148 }) },
   cardTraining: { borderWidth: 1, borderColor: t.positiveSoft },
   kindBadge: {
     width: 28, height: 28, borderRadius: 8,
@@ -1818,11 +1815,6 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   // its own label. Measured at 265px: with these three across, the labels come
   // to 182px and the row has 237, which leaves exactly enough for 6px of
   // padding a side once the icon is gone.
-  // Every card on the grid is a fixed 132 tall, and a shared packet's fourth
-  // line spends the slack. Two pixels a side off the buttons is what buys it
-  // back — measured, not guessed: at the old padding the desktop card cut
-  // them by 4px.
-  gameActionBtnGrid: { paddingVertical: 4 },
   gameActionBtnTight: { paddingVertical: 4, paddingHorizontal: 6, gap: 0 },
   gameActionText: { color: t.muted, fontSize: 12, fontFamily: fonts[600], flexShrink: 1 },
   gameActionTextTight: { fontSize: 11 },
