@@ -215,48 +215,57 @@ export default function GameReportBuilderScreen() {
     }
   };
 
+  /**
+   * Tie this packet's film to a game, or untie it.
+   *
+   * The screen moves first. Linking is three round trips — the link, the
+   * packet's date and name, then re-reading the packet — and waiting for all
+   * three before anything changes made a tap feel like it had missed. What the
+   * coach sees is decided entirely by what they just pressed, so it is applied
+   * immediately and put back only if the server refuses.
+   */
   const answerLink = async (gameId: number | null) => {
     if (!reportId) return;
+    const picked = (linkAsk?.games ?? []).find((g: any) => g.id === gameId) ?? null;
+    const before = { report, title, gameDate };
+
+    // On screen now: the sheet closes, the row appears or goes, and the date
+    // and name are filled from the game that was chosen.
+    setLinkAsk(null);
+    setGameQuery('');
+    setReport((prev: any) => prev && ({
+      ...prev,
+      clips: (prev.clips ?? []).map((c: any) => ({
+        ...c, game_id: gameId, game_label: picked?.label ?? null,
+      })),
+    }));
+    const patch: any = {};
+    if (picked) {
+      const iso = (picked.date || '').slice(0, 10);
+      if (iso) { setGameDate(displayGameDate(iso)); patch.game_date = `${iso}T12:00:00`; }
+      // The name only when there is not one. A packet the coach has already
+      // named is not improved by replacing it with the fixture.
+      if (!title.trim()) {
+        const named = String(picked.label || '').split(' · ')[0].trim();
+        if (named) { setTitle(named); patch.title = named; }
+      }
+    }
+
     setLinking(true);
     try {
       await gameReportsAPI.linkGame(reportId, gameId == null
         ? { game_id: null, declined: true }
         : { game_id: gameId });
-
-      // Take the game's own details onto the packet, so picking one answers
-      // the fields the coach would otherwise fill in by hand off the same row.
-      const picked = (linkAsk?.games ?? []).find((g: any) => g.id === gameId);
-      if (picked) {
-        const patch: any = {};
-        const iso = (picked.date || '').slice(0, 10);
-        if (iso) { setGameDate(displayGameDate(iso)); patch.game_date = `${iso}T12:00:00`; }
-        // The name only when there is not one. A packet the coach has already
-        // named is not improved by replacing it with the fixture.
-        if (!title.trim()) {
-          const named = String(picked.label || '').split(' · ')[0].trim();
-          if (named) { setTitle(named); patch.title = named; }
-        }
-        if (Object.keys(patch).length) await gameReportsAPI.update(reportId, patch);
-      }
-      setLinkAsk(null);
-      setGameQuery('');
+      if (Object.keys(patch).length) await gameReportsAPI.update(reportId, patch);
+      // Re-read quietly, to pick up anything the server decided differently.
       setReport(await gameReportsAPI.get(reportId));
     } catch (e: any) {
+      setReport(before.report); setTitle(before.title); setGameDate(before.gameDate);
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('gameBuilder.linkFailed'));
     } finally {
       setLinking(false);
     }
   };
-
-  // Coming back from the import screen, look again. The coach went there to
-  // create the very game this packet is asking about, and making them press
-  // Search again to find what they just imported is the app forgetting why it
-  // sent them away.
-  useFocusEffect(
-    useCallback(() => {
-      if (reportId) void refreshLinkAsk(reportId);
-    }, [reportId]),
-  );
 
   /** The game this packet's film is tied to, once one is confirmed. */
   const linkedGame = (report?.clips ?? []).find((c: any) => c.game_id)?.game_label ?? null;

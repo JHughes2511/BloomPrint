@@ -1311,6 +1311,17 @@ def _packet_prompt(db: Session, gr: models.GameReport, coach: models.Coach) -> s
         sections.append(f"\nFILM ANALYSIS:{film_context}")
     if gr.box_score:
         sections.append(f"\nBOX SCORE / STATS:\n{gr.box_score}")
+    # The tracked stats for the game the film was tied to. The film analysis
+    # already gets these; the packet's own report is the document the coach
+    # actually reads, and it was being written without the one set of numbers
+    # in the app that is not an estimate.
+    linked = ""
+    for clip in (gr.clips or []):
+        if clip.game_id:
+            linked = linked_box_score(db, clip)
+            break
+    if linked:
+        sections.append(linked)
     if gr.scouting_notes:
         sections.append(f"\nSCOUTING NOTES:\n{gr.scouting_notes}")
     if remembered:
