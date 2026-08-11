@@ -399,9 +399,22 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   pendingRow: { maxHeight: 44, paddingVertical: 6 },
   pendingChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: t.accentSoft, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: t.accent, maxWidth: 200 },
   pendingChipText: { color: t.accent, fontSize: 12, fontFamily: fonts[600], flexShrink: 1 },
-  composer: { flexDirection: 'row', alignItems: 'flex-end', gap: 4, paddingHorizontal: 8, paddingVertical: 8, borderTopWidth: 1, borderTopColor: t.divider },
-  attachBtn: { width: 34, height: 40, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  input: { flex: 1, backgroundColor: t.chip, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 9, color: t.ink, fontSize: 14.5, borderWidth: 1, borderColor: t.line, maxHeight: 110, minHeight: 40 },
+  // Centred, not bottom-aligned: with everything in the row the same height
+  // there is nothing to bottom-align to, and the attachment icons were sitting
+  // low against a box that no longer grows. The wider gap and padding pull the
+  // field in a little so the icons read as belonging to it rather than as a
+  // separate strip pushed against the edge.
+  composer: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12,
+              paddingVertical: 8, borderTopWidth: 1, borderTopColor: t.divider },
+  attachBtn: { width: 32, height: 44, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  // height, not minHeight — the same trap Ask BloomPrint's composer documents.
+  // A multiline TextInput is a <textarea> on web and takes its intrinsic height
+  // from its row count, which is taller than 44, so a minimum never bound and
+  // the field stayed bigger than the button beside it. Stating the height is
+  // what makes the two match.
+  input: { flex: 1, backgroundColor: t.chip, borderRadius: 10, paddingHorizontal: 14,
+           paddingVertical: 10, color: t.ink, fontSize: 14.5, borderWidth: 1,
+           borderColor: t.line, height: 44, maxHeight: 44 },
   // The Ask BloomPrint button, which is the one in the app that reads right:
   // 44 square, radius 10, CTA fill, an up arrow in the CTA's own foreground
   // colour. Spelling the colour as t.ctaText rather than #fff matters — the
