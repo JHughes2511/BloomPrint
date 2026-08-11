@@ -1987,7 +1987,7 @@
     "importFromFile": "De un archivo",
     "noRecordedGames": "Aún no hay partidos registrados. Registra un partido en Partidos y aparecerá aquí.",
     "gameDate": "Fecha del partido",
-    "gameDateHint": "Busca por nombre de equipo o fecha del partido para vincular este vídeo a tus Estadísticas de partido.",
+    "gameDateHint": "Busca por nombre de equipo o fecha para vincular este vídeo a las Estadísticas de ese partido.",
     "linkGameTitle": "¿De qué partido es este vídeo?",
     "linkGameHint": "Elige las Estadísticas de partido de las que procede, para usar sus números reales.",
     "linkNearDate": "Un día de diferencia",

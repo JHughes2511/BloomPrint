@@ -1987,7 +1987,7 @@
     "importFromFile": "From a file",
     "noRecordedGames": "No games recorded yet. Track a game under Games and it will appear here.",
     "gameDate": "Game date",
-    "gameDateHint": "Search by team name or game date to tie this film to your Game Stats.",
+    "gameDateHint": "Search by team name or game date to tie this film to the Game Stats for that game.",
     "linkGameTitle": "Which game is this film of?",
     "linkGameHint": "Pick the Game Stats this film is from, so the breakdown can use its real numbers.",
     "linkNearDate": "About a day out",

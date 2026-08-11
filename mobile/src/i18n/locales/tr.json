@@ -1987,7 +1987,7 @@
     "importFromFile": "Bir dosyadan",
     "noRecordedGames": "Henüz kaydedilmiş maç yok. Maçlar bölümünde bir maç kaydet, burada görünecek.",
     "gameDate": "Maç tarihi",
-    "gameDateHint": "Bu görüntüyü Maç istatistiklerinize bağlamak için takım adı veya maç tarihiyle arayın.",
+    "gameDateHint": "Bu görüntüyü o maçın istatistiklerine bağlamak için takım adı veya tarihle arayın.",
     "linkGameTitle": "Bu görüntü hangi maçtan?",
     "linkGameHint": "Görüntünün geldiği Maç istatistiklerini seçin ki gerçek sayılar kullanılsın.",
     "linkNearDate": "Yaklaşık bir gün fark",

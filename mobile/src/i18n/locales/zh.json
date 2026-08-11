@@ -1987,7 +1987,7 @@
     "importFromFile": "从文件",
     "noRecordedGames": "还没有记录的比赛。在“比赛”中记录一场比赛，它就会出现在这里。",
     "gameDate": "比赛日期",
-    "gameDateHint": "按球队名称或比赛日期搜索，把这段影片关联到你的比赛数据。",
+    "gameDateHint": "按球队名称或日期搜索，把这段影片关联到那场比赛的比赛数据。",
     "linkGameTitle": "这段影片是哪场比赛？",
     "linkGameHint": "选择影片对应的比赛数据，分析就能使用真实数字。",
     "linkNearDate": "相差约一天",

@@ -1987,7 +1987,7 @@
     "importFromFile": "Aus einer Datei",
     "noRecordedGames": "Noch keine Spiele aufgezeichnet. Zeichne ein Spiel unter Spiele auf, dann erscheint es hier.",
     "gameDate": "Spieldatum",
-    "gameDateHint": "Nach Teamname oder Spieldatum suchen, um diesen Film mit deinen Spielstatistiken zu verbinden.",
+    "gameDateHint": "Nach Teamname oder Datum suchen, um diesen Film mit den Spielstatistiken dieses Spiels zu verbinden.",
     "linkGameTitle": "Von welchem Spiel ist dieser Film?",
     "linkGameHint": "Wähle die Spielstatistiken, damit die Analyse deren echte Zahlen nutzt.",
     "linkNearDate": "Etwa einen Tag daneben",

@@ -1987,7 +1987,7 @@
     "importFromFile": "Från en fil",
     "noRecordedGames": "Inga matcher registrerade än. Registrera en match under Matcher så dyker den upp här.",
     "gameDate": "Matchdatum",
-    "gameDateHint": "Sök på lagnamn eller matchdatum för att koppla filmen till din Matchstatistik.",
+    "gameDateHint": "Sök på lagnamn eller datum för att koppla filmen till Matchstatistiken för den matchen.",
     "linkGameTitle": "Vilken match är filmen från?",
     "linkGameHint": "Välj Matchstatistiken filmen kommer från, så analysen kan använda riktiga siffror.",
     "linkNearDate": "Ungefär en dag ifrån",

@@ -1987,7 +1987,7 @@
     "importFromFile": "Depuis un fichier",
     "noRecordedGames": "Aucun match enregistré. Enregistre un match dans Matchs et il apparaîtra ici.",
     "gameDate": "Date du match",
-    "gameDateHint": "Recherchez par nom d'équipe ou date du match pour relier cette vidéo à vos Stats de match.",
+    "gameDateHint": "Recherchez par nom d'équipe ou date pour relier cette vidéo aux Stats de ce match.",
     "linkGameTitle": "De quel match vient cette vidéo ?",
     "linkGameHint": "Choisissez les Stats de match dont elle provient, pour utiliser leurs vrais chiffres.",
     "linkNearDate": "À un jour près",
