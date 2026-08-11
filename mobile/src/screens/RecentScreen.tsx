@@ -435,7 +435,12 @@ export default function RecentScreen() {
         eval: 'eval', team_report: 'team', team_training: 'team',
         game: 'game', game_session: 'scout', game_report: 'gamereport', training: 'training',
       };
-      const sharedItems: ReportItem[] = (sharedInbox ?? []).map((sr: any) => {
+      // Not the ones the coach sent. The shared list now holds both ends of a
+      // conversation so the sender can read the replies — but Recent already
+      // lists the coach's own reports, and a second card saying "shared" would
+      // be the same report twice with two different names on it. Those belong
+      // in Staff Hub, where the conversation is.
+      const sharedItems: ReportItem[] = (sharedInbox ?? []).filter((sr: any) => !sr.is_sender).map((sr: any) => {
         const kind = SHARE_KIND[sr.report_type] ?? 'eval';
         const text = sr.report_text || '';
         return {

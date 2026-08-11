@@ -579,6 +579,12 @@ class StaffSharedReportOut(BaseModel):
     comment_count: int = 0
     note_count: int = 0
     correction_count: int = 0
+    # Everyone this report went to. A report shared with three coaches is three
+    # rows but one conversation, and the card says who is on it.
+    recipient_names: list[str] = []
+    # True when this row is in the list because the coach SENT it, rather than
+    # received it — the same report, read from the other end.
+    is_sender: bool = False
 
     model_config = {"from_attributes": True}
 

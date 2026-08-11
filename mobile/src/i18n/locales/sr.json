@@ -1469,7 +1469,8 @@
     "claimOwnership": "Преузми",
     "claimTitle": "Преузми власништво",
     "claimMsg": "Власник тима {{team}} више нема налог. Желите ли да преузмете тим?",
-    "claimConfirm": "Преузми"
+    "claimConfirm": "Преузми",
+    "sharedWith": "{{type}} · Podeljeno sa {{names}}"
   },
   "teamDetail": {
     "title": "Тим",

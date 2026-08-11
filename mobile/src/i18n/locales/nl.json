@@ -1469,7 +1469,8 @@
     "claimOwnership": "Claimen",
     "claimTitle": "Eigendom claimen",
     "claimMsg": "De eigenaar van {{team}} heeft geen account meer. Wil je eigenaar worden?",
-    "claimConfirm": "Claimen"
+    "claimConfirm": "Claimen",
+    "sharedWith": "{{type}} · Gedeeld met {{names}}"
   },
   "teamDetail": {
     "title": "Team",

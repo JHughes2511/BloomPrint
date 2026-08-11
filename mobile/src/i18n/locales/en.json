@@ -1469,7 +1469,8 @@
     "claimOwnership": "Claim",
     "claimTitle": "Claim ownership",
     "claimMsg": "The owner of {{team}} no longer has an account. Take over as owner?",
-    "claimConfirm": "Claim"
+    "claimConfirm": "Claim",
+    "sharedWith": "{{type}} · Shared with {{names}}"
   },
   "teamDetail": {
     "title": "Team",

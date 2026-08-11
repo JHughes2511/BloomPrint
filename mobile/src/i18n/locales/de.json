@@ -1469,7 +1469,8 @@
     "claimOwnership": "Übernehmen",
     "claimTitle": "Eigentum übernehmen",
     "claimMsg": "Der Eigentümer von {{team}} hat kein Konto mehr. Möchtest du das Team übernehmen?",
-    "claimConfirm": "Übernehmen"
+    "claimConfirm": "Übernehmen",
+    "sharedWith": "{{type}} · Geteilt mit {{names}}"
   },
   "teamDetail": {
     "title": "Team",

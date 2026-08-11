@@ -1469,7 +1469,8 @@
     "claimOwnership": "Reprendre",
     "claimTitle": "Reprendre la propriété",
     "claimMsg": "Le propriétaire de {{team}} n'a plus de compte. Voulez-vous en devenir propriétaire ?",
-    "claimConfirm": "Reprendre"
+    "claimConfirm": "Reprendre",
+    "sharedWith": "{{type}} · Partagé avec {{names}}"
   },
   "teamDetail": {
     "title": "Équipe",

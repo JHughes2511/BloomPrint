@@ -1469,7 +1469,8 @@
     "claimOwnership": "תבע בעלות",
     "claimTitle": "תביעת בעלות",
     "claimMsg": "לבעלים של {{team}} אין יותר חשבון. להפוך לבעלים?",
-    "claimConfirm": "תבע בעלות"
+    "claimConfirm": "תבע בעלות",
+    "sharedWith": "{{type}} · שותף עם {{names}}"
   },
   "teamDetail": {
     "title": "קבוצה",

@@ -1469,7 +1469,8 @@
     "claimOwnership": "Perimti",
     "claimTitle": "Perimti nuosavybę",
     "claimMsg": "Komandos {{team}} savininkas nebeturi paskyros. Norite perimti komandą?",
-    "claimConfirm": "Perimti"
+    "claimConfirm": "Perimti",
+    "sharedWith": "{{type}} · Bendrinta su {{names}}"
   },
   "teamDetail": {
     "title": "Komanda",

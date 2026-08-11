@@ -1469,7 +1469,8 @@
     "claimOwnership": "Sahiplen",
     "claimTitle": "Sahipliği al",
     "claimMsg": "{{team}} takımının sahibinin artık hesabı yok. Sahipliği almak ister misin?",
-    "claimConfirm": "Sahiplen"
+    "claimConfirm": "Sahiplen",
+    "sharedWith": "{{type}} · Paylaşıldı: {{names}}"
   },
   "teamDetail": {
     "title": "Takım",

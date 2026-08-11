@@ -1469,7 +1469,8 @@
     "claimOwnership": "დაბრუნება",
     "claimTitle": "მფლობელობის აღება",
     "claimMsg": "გუნდის {{team}} მფლობელს აღარ აქვს ანგარიში. გსურთ გახდეთ მფლობელი?",
-    "claimConfirm": "დაბრუნება"
+    "claimConfirm": "დაბრუნება",
+    "sharedWith": "{{type}} · გაზიარებულია: {{names}}"
   },
   "teamDetail": {
     "title": "გუნდი",

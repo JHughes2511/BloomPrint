@@ -1469,7 +1469,8 @@
     "claimOwnership": "Assumir",
     "claimTitle": "Assumir a propriedade",
     "claimMsg": "O proprietário de {{team}} já não tem conta. Quer assumir a propriedade?",
-    "claimConfirm": "Assumir"
+    "claimConfirm": "Assumir",
+    "sharedWith": "{{type}} · Partilhado com {{names}}"
   },
   "teamDetail": {
     "title": "Time",

@@ -1469,7 +1469,8 @@
     "claimOwnership": "Angkinin",
     "claimTitle": "Angkinin ang pagmamay-ari",
     "claimMsg": "Wala nang account ang may-ari ng {{team}}. Gusto mo bang maging may-ari?",
-    "claimConfirm": "Angkinin"
+    "claimConfirm": "Angkinin",
+    "sharedWith": "{{type}} · Ibinahagi kay {{names}}"
   },
   "teamDetail": {
     "title": "Team",

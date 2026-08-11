@@ -116,6 +116,28 @@ def _report_meta(report_type: str, report_id: int, db: Session) -> tuple[str | N
     return None, None, None
 
 
+def _conversation_rows(sr: models.StaffSharedReport, db: Session):
+    """Every share of the SAME report by the same sender.
+
+    A report shared with three coaches is three rows, one per recipient — but
+    it is one conversation. Sharing a scouting report with the staff and having
+    each of them reply into a private thread nobody else can see is three
+    conversations that each look like silence to everyone but its two
+    participants.
+    """
+    return (db.query(models.StaffSharedReport)
+              .filter_by(sender_id=sr.sender_id, report_type=sr.report_type,
+                         report_id=sr.report_id)
+              .all())
+
+
+def _in_conversation(sr: models.StaffSharedReport, coach_id: int, db: Session) -> bool:
+    """Is this coach the sender or one of the recipients of this report?"""
+    if sr.sender_id == coach_id:
+        return True
+    return any(r.recipient_id == coach_id for r in _conversation_rows(sr, db))
+
+
 def _build_out(sr: models.StaffSharedReport, db: Session) -> schemas.StaffSharedReportOut:
     out = schemas.StaffSharedReportOut.model_validate(sr)
     out.sender_name = sr.sender.name if sr.sender else ""
@@ -125,9 +147,15 @@ def _build_out(sr: models.StaffSharedReport, db: Session) -> schemas.StaffShared
     out.report_text = sr.frozen_text if sr.frozen_text else _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id)
     out.regenerated_text = sr.regenerated_text
     out.subject_name, out.output_type, out.overall_grade = _report_meta(sr.report_type, sr.report_id, db)
-    comments = db.query(models.StaffReportComment).filter_by(shared_report_id=sr.id).all()
+    # Counted across the whole conversation, so the number on the card matches
+    # the number of replies the coach will actually find when they open it.
+    rows = _conversation_rows(sr, db)
+    ids = [r.id for r in rows]
+    comments = (db.query(models.StaffReportComment)
+                  .filter(models.StaffReportComment.shared_report_id.in_(ids)).all())
     out.note_count = sum(1 for c in comments if (c.text or "").startswith("[Coach Note]"))
     out.comment_count = len(comments) - out.note_count
+    out.recipient_names = [r.recipient.name for r in rows if r.recipient]
     return out
 
 
@@ -417,21 +445,54 @@ def staff_inbox(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    reports = (
+    """Every report this coach is on a conversation about — received OR sent.
+
+    A report the coach shared belongs here too. Sending it used to be the end
+    of it as far as this list was concerned: the replies came back to a thread
+    only the recipient could open, so the person who started the conversation
+    was the one person who could not see it.
+
+    One entry per report, not per recipient. Sharing with three coaches makes
+    three rows underneath, but it is one report and one conversation, and three
+    identical cards is not a better answer than one.
+    """
+    received = (
         db.query(models.StaffSharedReport)
         .filter_by(recipient_id=coach.id)
         .order_by(models.StaffSharedReport.id.desc())
         .all()
     )
+    sent = (
+        db.query(models.StaffSharedReport)
+        .filter_by(sender_id=coach.id)
+        .order_by(models.StaffSharedReport.id.desc())
+        .all()
+    )
     out = []
-    for r in reports:
+    seen_conversations: set[tuple[str, int]] = set()
+    for r in received + sent:
+        key = (r.report_type, r.report_id)
+        if key in seen_conversations:
+            continue
+        seen_conversations.add(key)
         o = _build_out(r, db)
+        o.is_sender = r.sender_id == coach.id
+        if o.is_sender:
+            # The recipient's own updated copy stays theirs until they approve a
+            # request to share it back — the same rule /sent has always applied.
+            o.has_update = any(x.updated_report_id is not None
+                               for x in _conversation_rows(r, db))
+            o.regenerated_text = None
+            o.updated_report_id = None
         o.correction_count = (
             db.query(models.SharedReportCorrection)
             .filter_by(shared_id=r.id, coach_id=coach.id, applied=False)
             .count()
         )
         out.append(o)
+    # By date, in one list, so a conversation sits where it happened rather
+    # than in a separate pile for things the coach happened to start.
+    out.sort(key=lambda o: o.created_at, reverse=True)
     return out
 
 
@@ -466,9 +527,16 @@ def get_comments(
     coach: models.Coach = Depends(get_current_coach),
 ):
     sr = db.get(models.StaffSharedReport, shared_id)
-    if not sr or (sr.sender_id != coach.id and sr.recipient_id != coach.id):
+    if not sr or not _in_conversation(sr, coach.id, db):
         raise HTTPException(status_code=404, detail="Shared report not found")
-    comments = db.query(models.StaffReportComment).filter_by(shared_report_id=shared_id).all()
+    # Everyone's replies, not just the ones on this row. Share a report with
+    # two coaches and each reply landed in its own thread: the sender saw both
+    # and the two recipients saw neither each other's nor, half the time, any
+    # sign that a conversation was happening at all.
+    ids = [r.id for r in _conversation_rows(sr, db)]
+    comments = (db.query(models.StaffReportComment)
+                  .filter(models.StaffReportComment.shared_report_id.in_(ids))
+                  .order_by(models.StaffReportComment.id).all())
     result = []
     for c in comments:
         out = schemas.StaffReportCommentOut.model_validate(c)
@@ -486,7 +554,7 @@ def add_comment(
     coach: models.Coach = Depends(get_current_coach),
 ):
     sr = db.get(models.StaffSharedReport, shared_id)
-    if not sr or (sr.sender_id != coach.id and sr.recipient_id != coach.id):
+    if not sr or not _in_conversation(sr, coach.id, db):
         raise HTTPException(status_code=404, detail="Shared report not found")
     comment = models.StaffReportComment(
         shared_report_id=shared_id,
@@ -497,16 +565,21 @@ def add_comment(
     db.add(comment)
     db.flush()
 
-    # Notify the other party
-    other_id = sr.sender_id if coach.id == sr.recipient_id else sr.recipient_id
-    _coach_notify(
-        db, other_id,
-        f"New comment from {coach.name}",
-        body.text[:120],
-        ref_id=shared_id,
-        ntype="staff_report_comment",
-        key="notifs.staffReportComment", params={"coach": coach.name, "text": body.text[:120]},
-    )
+    # Everyone else on the conversation, not just the other end of this row —
+    # a reply the rest of the staff cannot see is a reply half the room is
+    # having a different meeting about.
+    rows = _conversation_rows(sr, db)
+    others = {r.sender_id for r in rows} | {r.recipient_id for r in rows}
+    others.discard(coach.id)
+    for other_id in others:
+        _coach_notify(
+            db, other_id,
+            f"New comment from {coach.name}",
+            body.text[:120],
+            ref_id=shared_id,
+            ntype="staff_report_comment",
+            key="notifs.staffReportComment", params={"coach": coach.name, "text": body.text[:120]},
+        )
     db.commit()
     db.refresh(comment)
     out = schemas.StaffReportCommentOut.model_validate(comment)

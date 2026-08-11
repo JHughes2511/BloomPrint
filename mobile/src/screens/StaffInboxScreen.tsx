@@ -276,7 +276,8 @@ export default function StaffInboxScreen() {
       (c.title ?? '').toLowerCase().includes(q) || (c.last_text ?? '').toLowerCase().includes(q));
     const itemsFiltered = !q ? items : items.filter((it: any) =>
       (reportTypeLabel(it.report_type ?? '') ?? '').toLowerCase().includes(q) ||
-      (it.sender_name ?? '').toLowerCase().includes(q));
+      (it.sender_name ?? '').toLowerCase().includes(q) ||
+      (it.recipient_names ?? []).join(' ').toLowerCase().includes(q));
     return (
       <FlatList
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await loadInbox(); setRefreshing(false); }} tintColor={t.accent} />}
@@ -354,7 +355,17 @@ export default function StaffInboxScreen() {
               </View>
               <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
                 <Text style={styles.cardTitle} numberOfLines={1}>{title}</Text>
-                <Text style={styles.cardSub} numberOfLines={1}>{tr('staffHub.fromSender', { type: typeLabel, name: item.sender_name })}</Text>
+                {/* A report the coach SENT reads from the other end: who it
+                    went to, not who it came from. Same card, same list, same
+                    place by date — it is the same conversation. */}
+                <Text style={styles.cardSub} numberOfLines={1}>
+                  {item.is_sender
+                    ? tr('staffHub.sharedWith', {
+                        type: typeLabel,
+                        names: (item.recipient_names ?? []).join(', ') || item.recipient_name,
+                      })
+                    : tr('staffHub.fromSender', { type: typeLabel, name: item.sender_name })}
+                </Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3, flexWrap: 'wrap' }}>
                   <Text style={styles.cardDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
                   {chips.map((c, i) => (

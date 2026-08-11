@@ -1469,7 +1469,8 @@
     "claimOwnership": "引き継ぐ",
     "claimTitle": "オーナー権を引き継ぐ",
     "claimMsg": "{{team}} のオーナーのアカウントはもうありません。オーナーになりますか？",
-    "claimConfirm": "引き継ぐ"
+    "claimConfirm": "引き継ぐ",
+    "sharedWith": "{{type}} · {{names}} に共有"
   },
   "teamDetail": {
     "title": "チーム",

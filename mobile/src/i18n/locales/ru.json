@@ -1469,7 +1469,8 @@
     "claimOwnership": "Принять",
     "claimTitle": "Стать владельцем",
     "claimMsg": "У владельца команды {{team}} больше нет аккаунта. Стать владельцем?",
-    "claimConfirm": "Принять"
+    "claimConfirm": "Принять",
+    "sharedWith": "{{type}} · Отправлено: {{names}}"
   },
   "teamDetail": {
     "title": "Команда",

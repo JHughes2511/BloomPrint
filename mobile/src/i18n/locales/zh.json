@@ -1469,7 +1469,8 @@
     "claimOwnership": "接管",
     "claimTitle": "接管所有权",
     "claimMsg": "{{team}} 的所有者账号已不存在。要接管为所有者吗？",
-    "claimConfirm": "接管"
+    "claimConfirm": "接管",
+    "sharedWith": "{{type}} · 已分享给 {{names}}"
   },
   "teamDetail": {
     "title": "球队",

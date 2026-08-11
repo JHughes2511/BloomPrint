@@ -1469,7 +1469,8 @@
     "claimOwnership": "Ανάληψη",
     "claimTitle": "Ανάληψη ιδιοκτησίας",
     "claimMsg": "Ο ιδιοκτήτης της ομάδας {{team}} δεν έχει πια λογαριασμό. Θέλετε να αναλάβετε;",
-    "claimConfirm": "Ανάληψη"
+    "claimConfirm": "Ανάληψη",
+    "sharedWith": "{{type}} · Κοινοποιήθηκε σε {{names}}"
   },
   "teamDetail": {
     "title": "Ομάδα",

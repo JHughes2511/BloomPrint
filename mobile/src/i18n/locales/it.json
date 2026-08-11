@@ -1469,7 +1469,8 @@
     "claimOwnership": "Rivendica",
     "claimTitle": "Rivendica la proprietà",
     "claimMsg": "Il proprietario di {{team}} non ha più un account. Vuoi diventarne proprietario?",
-    "claimConfirm": "Rivendica"
+    "claimConfirm": "Rivendica",
+    "sharedWith": "{{type}} · Condiviso con {{names}}"
   },
   "teamDetail": {
     "title": "Squadra",

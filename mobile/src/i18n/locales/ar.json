@@ -1469,7 +1469,8 @@
     "claimOwnership": "المطالبة",
     "claimTitle": "المطالبة بالملكية",
     "claimMsg": "لم يعد لمالك فريق {{team}} حساب. هل تريد أن تصبح المالك؟",
-    "claimConfirm": "المطالبة"
+    "claimConfirm": "المطالبة",
+    "sharedWith": "{{type}} · تمت المشاركة مع {{names}}"
   },
   "teamDetail": {
     "title": "الفريق",

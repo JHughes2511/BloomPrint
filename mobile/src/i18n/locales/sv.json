@@ -1469,7 +1469,8 @@
     "claimOwnership": "Ta över",
     "claimTitle": "Ta över ägarskapet",
     "claimMsg": "Ägaren av {{team}} har inget konto längre. Vill du ta över som ägare?",
-    "claimConfirm": "Ta över"
+    "claimConfirm": "Ta över",
+    "sharedWith": "{{type}} · Delad med {{names}}"
   },
   "teamDetail": {
     "title": "Lag",

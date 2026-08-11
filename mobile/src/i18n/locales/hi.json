@@ -1469,7 +1469,8 @@
     "claimOwnership": "अपनाएँ",
     "claimTitle": "स्वामित्व लें",
     "claimMsg": "{{team}} के स्वामी का खाता अब नहीं है। क्या आप स्वामी बनना चाहते हैं?",
-    "claimConfirm": "अपनाएँ"
+    "claimConfirm": "अपनाएँ",
+    "sharedWith": "{{type}} · {{names}} के साथ साझा किया गया"
   },
   "teamDetail": {
     "title": "टीम",

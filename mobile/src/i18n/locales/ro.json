@@ -1469,7 +1469,8 @@
     "claimOwnership": "Preia",
     "claimTitle": "Preia proprietatea",
     "claimMsg": "Proprietarul echipei {{team}} nu mai are cont. Vrei să preiei echipa?",
-    "claimConfirm": "Preia"
+    "claimConfirm": "Preia",
+    "sharedWith": "{{type}} · Partajat cu {{names}}"
   },
   "teamDetail": {
     "title": "Echipă",
