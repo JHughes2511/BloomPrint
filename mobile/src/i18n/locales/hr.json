@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "Sažmi povijest",
     "noEvalsYet": "Još nema evaluacija.",
     "updatePlayerProgram": "Ažuriraj igračev program",
-    "createAssign": "Kreiraj i dodijeli"
+    "createAssign": "Kreiraj i dodijeli",
+    "summarizeFrom": "Sažmi iz",
+    "summarizeAs": "Napiši kao",
+    "sourceGameStats": "Statistika utakmica",
+    "sourceShared": "Podijeljeno sa mnom"
   },
   "training": {
     "couldNotOpenFilePicker": "Nije moguće otvoriti odabir datoteka.",

@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "Riepiloga cronologia",
     "noEvalsYet": "Nessuna valutazione ancora.",
     "updatePlayerProgram": "Aggiorna il programma del giocatore",
-    "createAssign": "Crea e assegna"
+    "createAssign": "Crea e assegna",
+    "summarizeFrom": "Riassumi da",
+    "summarizeAs": "Scrivilo come",
+    "sourceGameStats": "Statistiche partita",
+    "sourceShared": "Condiviso con me"
   },
   "training": {
     "couldNotOpenFilePicker": "Impossibile aprire il selettore file.",

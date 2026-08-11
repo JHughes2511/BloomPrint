@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "Sammanfatta historik",
     "noEvalsYet": "Inga utvärderingar ännu.",
     "updatePlayerProgram": "Uppdatera spelarens program",
-    "createAssign": "Skapa och tilldela"
+    "createAssign": "Skapa och tilldela",
+    "summarizeFrom": "Sammanfatta från",
+    "summarizeAs": "Skriv det som",
+    "sourceGameStats": "Matchstatistik",
+    "sourceShared": "Delat med mig"
   },
   "training": {
     "couldNotOpenFilePicker": "Kunde inte öppna filväljaren.",

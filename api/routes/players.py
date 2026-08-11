@@ -335,6 +335,82 @@ def delete_player_video(
     return {"ok": True}
 
 
+# How much of the player's record to put in front of the model, in characters.
+# Roughly three thousand words: enough to carry a season of reports, short of
+# the point where the summary starts reciting rather than synthesizing.
+SUMMARY_BUDGET_CHARS = 12000
+
+# Sources that are not report types. Everything else in the picker is an
+# output_type stored on an evaluation.
+SRC_GAME_STATS = "game_stats"   # tracked box scores AND any box-score report
+SRC_TRAINING = "training"       # the player's training programs
+SRC_SHARED = "shared"           # reports another coach shared about this player
+
+
+def _summary_sources(db: Session, coach: models.Coach, player, picked: list[str],
+                     game_ids: list[int] | None):
+    """The documents a summary should read, and a note of where they came from.
+
+    Returns [(heading, text), ...]. The heading names the date and the kind, so
+    the model can talk about a trajectory rather than a pile of prose.
+
+    An empty `picked` means everything, which is what this endpoint did before
+    it could be asked — a summary generated from an older client must not come
+    back empty.
+    """
+    want = set(picked)
+    everything = not want
+    pieces: list[tuple[str, str]] = []
+    used: set[str] = set()
+
+    def add(when, kind: str, text: str | None, grade=None):
+        if not text:
+            return
+        date_str = when.strftime("%Y-%m-%d") if when else "Unknown"
+        grade_str = f" Overall: {grade:.1f}/10" if grade is not None else ""
+        pieces.append((f"\n[{date_str} — {kind}]{grade_str}\n", text))
+
+    # Evaluations, by the report type each was written as. A report saved from
+    # a combined selection carries both names — "coaching_report,scouting_report"
+    # — and counts for either, because it IS partly each of them.
+    for ev in player.evaluations:
+        kinds = {k.strip() for k in (ev.output_type or "").split(",") if k.strip()}
+        is_box = "box_score" in kinds
+        if everything or (kinds & want) or (is_box and SRC_GAME_STATS in want):
+            add(ev.created_at, ev.output_type or "report", ev.report_text, ev.overall_grade)
+            used.update(kinds)
+
+    if everything or SRC_TRAINING in want:
+        programs = (db.query(models.TrainingSession)
+                      .filter_by(player_id=player.id).all())
+        for ts in programs:
+            add(ts.created_at, ts.title or "training_program", ts.program_text)
+        if programs:
+            used.add(SRC_TRAINING)
+
+    if everything or SRC_SHARED in want:
+        # Reports another coach shared with this one that are ABOUT this player,
+        # including a team report that covers him among others: the coach was
+        # given it, and what it says about him counts.
+        from .staff_sharing import _resolve_report_text, _report_meta
+        shares = (db.query(models.StaffSharedReport)
+                    .filter_by(recipient_id=coach.id).all())
+        for sr in shares:
+            subject, _out, _grade = _report_meta(sr.report_type, sr.report_id, db)
+            text = sr.frozen_text or _resolve_report_text(
+                sr.report_type, sr.report_id, db, sr.sender_id)
+            if not text:
+                continue
+            about_player = (subject or "").strip().lower() == player.name.strip().lower()
+            mentioned = player.name.strip().lower() in text.lower()
+            if about_player or mentioned:
+                sender = sr.sender.name if sr.sender else "another coach"
+                add(sr.created_at, f"shared by {sender}", text)
+                used.add(SRC_SHARED)
+
+    return pieces, used
+
+
 @router.post("/{player_id}/summary", response_model=schemas.SummaryOut)
 async def player_summary(
     player_id: int,
@@ -349,21 +425,34 @@ async def player_summary(
         )
     player = get_owned(db, models.Player, player_id, coach.id, "Player")
 
-    evals = player.evaluations
-    if not evals:
-        raise HTTPException(status_code=400, detail="No evaluations yet for this player")
+    picked = [s for s in (body.sources or []) if s]
+    pieces, used = _summary_sources(db, coach, player, picked, body.game_ids)
 
-    eval_context = ""
-    for ev in evals:
-        grade_str = f"{ev.overall_grade:.1f}/10" if ev.overall_grade is not None else "N/A"
-        date_str = ev.created_at.strftime("%Y-%m-%d") if ev.created_at else "Unknown"
-        eval_context += f"\n[{date_str} — {ev.output_type}] Overall: {grade_str}\n"
-        if ev.report_text:
-            eval_context += ev.report_text[:800] + "\n"
+    # One budget for the whole prompt, shared out between whatever was picked.
+    # A fixed 800 characters a report meant a focused summary — one source, two
+    # documents — was cut to the same first paragraph as a sweep of twenty, so
+    # narrowing the question bought no more depth. Same total either way; the
+    # fewer documents in play, the more of each one is read.
+    per_doc = max(800, min(6000, SUMMARY_BUDGET_CHARS // max(1, len(pieces))))
+    eval_context = "".join(head + (text or "")[:per_doc] + "\n" for head, text in pieces)
 
-    # Tracked game stats from selected games (real box-score data from Team Grade).
-    from .game_eval import player_tracked_stats_block
-    tracked_block = player_tracked_stats_block(db, coach.id, player.name, body.game_ids)
+    # Real stat lines from tracked games, which follow the Game Stats tick.
+    # They used to follow the OUTPUT type — asking for the summary to be
+    # written as a box score was the only way to get the numbers into it, which
+    # is a strange thing to have to know.
+    tracked_block = ""
+    if not picked or SRC_GAME_STATS in picked:
+        from .game_eval import player_tracked_stats_block
+        tracked_block = player_tracked_stats_block(db, coach.id, player.name, body.game_ids)
+
+    # Nothing to read. Checked once, after the stats, because Game Stats on its
+    # own is a perfectly good thing to summarize FROM and produces no documents.
+    if not pieces and not tracked_block.strip():
+        raise HTTPException(
+            status_code=400,
+            detail=("Nothing to summarize from what you picked. Try another source."
+                    if picked else "No evaluations yet for this player"),
+        )
 
     focus = body.focus_prompt or ""
     from video_vision.bim import describe_output_type, comprehensive_directive

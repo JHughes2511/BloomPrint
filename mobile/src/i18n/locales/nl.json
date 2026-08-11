@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "Geschiedenis samenvatten",
     "noEvalsYet": "Nog geen evaluaties.",
     "updatePlayerProgram": "Programma van speler bijwerken",
-    "createAssign": "Aanmaken en toewijzen"
+    "createAssign": "Aanmaken en toewijzen",
+    "summarizeFrom": "Samenvatten uit",
+    "summarizeAs": "Schrijf het als",
+    "sourceGameStats": "Wedstrijdstatistieken",
+    "sourceShared": "Met mij gedeeld"
   },
   "training": {
     "couldNotOpenFilePicker": "Kon bestandskiezer niet openen.",

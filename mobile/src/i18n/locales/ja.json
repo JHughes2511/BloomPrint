@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "履歴を要約",
     "noEvalsYet": "評価はまだありません。",
     "updatePlayerProgram": "選手のプログラムを更新",
-    "createAssign": "作成して割り当て"
+    "createAssign": "作成して割り当て",
+    "summarizeFrom": "要約の対象",
+    "summarizeAs": "書き方",
+    "sourceGameStats": "試合スタッツ",
+    "sourceShared": "共有されたもの"
   },
   "training": {
     "couldNotOpenFilePicker": "ファイル選択を開けませんでした。",

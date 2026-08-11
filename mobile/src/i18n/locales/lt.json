@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "Apibendrinti istoriją",
     "noEvalsYet": "Vertinimų kol kas nėra.",
     "updatePlayerProgram": "Atnaujinti žaidėjo programą",
-    "createAssign": "Sukurti ir priskirti"
+    "createAssign": "Sukurti ir priskirti",
+    "summarizeFrom": "Apibendrinti iš",
+    "summarizeAs": "Rašyti kaip",
+    "sourceGameStats": "Rungtynių statistika",
+    "sourceShared": "Bendrinta su manimi"
   },
   "training": {
     "couldNotOpenFilePicker": "Nepavyko atidaryti failų parinkiklio.",

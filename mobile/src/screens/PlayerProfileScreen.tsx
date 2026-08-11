@@ -31,6 +31,7 @@ import SendTrainingModal from '../components/SendTrainingModal';
 import { useTheme } from '../theme/ThemeProvider';
 import { topPad } from '../responsive/screenPadding';
 import { useBreakpoint } from '../responsive/useBreakpoint';
+import ChipRow from '../responsive/ChipRow';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
@@ -50,6 +51,21 @@ const OUTPUT_TYPES = [
   { key: 'recruitment_profile', labelKey: 'playerProfile.recruitmentShort' },
   { key: 'position_analysis', labelKey: 'reportTypes.position_analysis' },
   { key: 'box_score', labelKey: 'reportTypes.box_score' },
+];
+
+const SUMMARY_SOURCES = [
+  { key: 'player_eval', labelKey: 'reportTypes.player_eval' },
+  { key: 'film_breakdown', labelKey: 'reportTypes.film_breakdown' },
+  { key: 'scouting_report', labelKey: 'reportTypes.scouting_report' },
+  { key: 'coaching_report', labelKey: 'reportTypes.coaching_report' },
+  { key: 'recruitment_profile', labelKey: 'playerProfile.recruitmentShort' },
+  { key: 'position_analysis', labelKey: 'reportTypes.position_analysis' },
+  // Not report types. Game Stats is the tracked box scores AND any box-score
+  // report: they are the same question, and having them as two chips was what
+  // made the picker read as being about output when it was about input.
+  { key: 'game_stats', labelKey: 'playerProfile.sourceGameStats' },
+  { key: 'training', labelKey: 'reportTypes.training_program' },
+  { key: 'shared', labelKey: 'playerProfile.sourceShared' },
 ];
 
 export default function PlayerProfileScreen() {
@@ -122,6 +138,16 @@ export default function PlayerProfileScreen() {
   // Summary state
   const [showSummary, setShowSummary] = useState(false);
   const [summaryType, setSummaryType] = useState('player_eval');
+  /**
+   * WHICH of the player's records the summary reads — a different question from
+   * what it is written as, and previously not asked at all: it read every
+   * evaluation and nothing else, so a coach who wanted "just the film work" or
+   * who expected their training programs to count had no way to say so.
+   *
+   * Starts empty. A default here would be a guess at the question, and the
+   * Generate button says so by staying disabled until something is picked.
+   */
+  const [summarySources, setSummarySources] = useState<string[]>([]);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [selectedGameIds, setSelectedGameIds] = useState<number[]>([]);
   const [sumSeasonYear, setSumSeasonYear] = useState<string>('all');
@@ -221,10 +247,11 @@ export default function PlayerProfileScreen() {
     if (!player) return;
     setSummaryLoading(true);
     try {
-      const wantsBox = summaryType.split(',').includes('box_score');
+      const wantsStats = summarySources.includes('game_stats');
       const result = await playersAPI.summary(playerId, {
         output_type: summaryType,
-        game_ids: wantsBox && selectedGameIds.length ? selectedGameIds : undefined,
+        sources: summarySources,
+        game_ids: wantsStats && selectedGameIds.length ? selectedGameIds : undefined,
       });
       setShowSummary(false);
       const typeLabel = outputTypeLabel(summaryType);
@@ -1639,7 +1666,29 @@ export default function PlayerProfileScreen() {
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>{tr('playerProfile.summarizeHistoryTitle')}</Text>
             <Text style={styles.modalSub}>{tr('playerProfile.summarizeHistorySub', { count: evals.length })}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+            {/* Two questions, asked separately, because they are separate: what
+                to READ and what to WRITE. They were one row of chips that only
+                ever answered the second, and the first was never asked — every
+                evaluation went in and nothing else did. */}
+            <Text style={styles.modalLabel}>{tr('playerProfile.summarizeFrom')}</Text>
+            <ChipRow style={{ marginBottom: 16 }} contentContainerStyle={{ gap: 8, alignItems: 'center' }}>
+              {SUMMARY_SOURCES.map(src => {
+                const isOn = summarySources.includes(src.key);
+                return (
+                  <TouchableOpacity
+                    key={src.key}
+                    style={[styles.chip, isOn && styles.chipActive]}
+                    onPress={() => setSummarySources(prev =>
+                      isOn ? prev.filter(k => k !== src.key) : [...prev, src.key])}
+                  >
+                    <Text style={[styles.chipText, isOn && { color: t.ctaText }]}>{tr(src.labelKey)}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ChipRow>
+
+            <Text style={styles.modalLabel}>{tr('playerProfile.summarizeAs')}</Text>
+            <ChipRow style={{ marginBottom: 20 }} contentContainerStyle={{ gap: 8, alignItems: 'center' }}>
               {OUTPUT_TYPES.map(ot => {
                 const selected = summaryType.split(',').filter(Boolean);
                 const isOn = selected.includes(ot.key);
@@ -1656,10 +1705,13 @@ export default function PlayerProfileScreen() {
                 </TouchableOpacity>
                 );
               })}
-            </ScrollView>
+            </ChipRow>
 
-            {/* Tracked game selector — only for Box Score */}
-            {summaryType.split(',').includes('box_score') && (() => {
+            {/* The game picker belongs to the Game Stats SOURCE. It used to
+                hang off the box-score OUTPUT, so the only way to get real stat
+                lines into a summary was to ask for it to be written as a box
+                score — which is a strange thing to have to know. */}
+            {summarySources.includes('game_stats') && (() => {
               const seasonOf = (g: any) => (g.season_year || (g.year != null ? String(g.year) : '')) || '';
               const years = ['all', ...Array.from(new Set(gameHistory.map(seasonOf).filter(Boolean)))];
               const phases = ['all', ...Array.from(new Set(gameHistory.map((g: any) => g.season_phase).filter(Boolean)))];
@@ -1728,7 +1780,11 @@ export default function PlayerProfileScreen() {
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowSummary(false)}>
                 <Text style={styles.cancelText}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.saveBtn} onPress={generateSummary} disabled={summaryLoading}>
+              <TouchableOpacity
+                style={[styles.saveBtn, !summarySources.length && { opacity: 0.45 }]}
+                onPress={generateSummary}
+                disabled={summaryLoading || !summarySources.length}
+              >
                 {summaryLoading
                   ? <ActivityIndicator color={t.ctaText} />
                   : <Text style={styles.saveText}>{tr('common.generate')}</Text>}
@@ -1826,6 +1882,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   modal: { backgroundColor: t.sheet, borderRadius: 20, padding: 24, margin: 12, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560)},
   modalTitle: { color: t.ink, fontSize: 20, fontFamily: fonts[800], marginBottom: 4 },
+  modalLabel: { color: t.label, fontSize: 11, fontFamily: fonts[700],
+               textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 },
   modalSub: { color: t.muted, fontSize: 12, marginBottom: 16, lineHeight: 18 },
   chip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 8, marginRight: 8 },
   chipActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },

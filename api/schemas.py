@@ -256,6 +256,11 @@ class SummaryRequest(BaseModel):
     output_type: str = "player_eval"
     focus_prompt: str | None = None
     game_ids: list[int] | None = None   # tracked games to pull box-score stats from
+    # WHICH of the player's records to read, as opposed to output_type, which is
+    # what to write. Report types by name, plus "game_stats" (tracked box scores
+    # and any box-score report), "training" and "shared". None means everything,
+    # which is what this endpoint did before it could be asked.
+    sources: list[str] | None = None
 
 
 class SummaryOut(BaseModel):

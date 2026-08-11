@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "تلخيص السجل",
     "noEvalsYet": "لا توجد تقييمات بعد.",
     "updatePlayerProgram": "تحديث برنامج اللاعب",
-    "createAssign": "إنشاء وتعيين"
+    "createAssign": "إنشاء وتعيين",
+    "summarizeFrom": "التلخيص من",
+    "summarizeAs": "اكتبه بصيغة",
+    "sourceGameStats": "إحصائيات المباريات",
+    "sourceShared": "تمت مشاركته معي"
   },
   "training": {
     "couldNotOpenFilePicker": "تعذّر فتح منتقي الملفات.",

@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "Ibuod ang kasaysayan",
     "noEvalsYet": "Wala pang mga ebalwasyon.",
     "updatePlayerProgram": "I-update ang programa ng manlalaro",
-    "createAssign": "Gumawa at italaga"
+    "createAssign": "Gumawa at italaga",
+    "summarizeFrom": "Ibuod mula sa",
+    "summarizeAs": "Isulat bilang",
+    "sourceGameStats": "Estadistika ng laro",
+    "sourceShared": "Ibinahagi sa akin"
   },
   "training": {
     "couldNotOpenFilePicker": "Hindi mabuksan ang file picker.",

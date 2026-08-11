@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "总结历史记录",
     "noEvalsYet": "暂无评估。",
     "updatePlayerProgram": "更新球员训练计划",
-    "createAssign": "创建并分配"
+    "createAssign": "创建并分配",
+    "summarizeFrom": "总结来源",
+    "summarizeAs": "写成",
+    "sourceGameStats": "比赛数据",
+    "sourceShared": "与我共享"
   },
   "training": {
     "couldNotOpenFilePicker": "无法打开文件选择器。",

@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "סכם היסטוריה",
     "noEvalsYet": "אין הערכות עדיין.",
     "updatePlayerProgram": "עדכון תוכנית השחקן",
-    "createAssign": "צור והקצה"
+    "createAssign": "צור והקצה",
+    "summarizeFrom": "סכם מתוך",
+    "summarizeAs": "כתוב כ",
+    "sourceGameStats": "סטטיסטיקות משחק",
+    "sourceShared": "שותף איתי"
   },
   "training": {
     "couldNotOpenFilePicker": "לא ניתן לפתוח את בוחר הקבצים.",

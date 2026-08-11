@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "इतिहास का सारांश बनाएँ",
     "noEvalsYet": "अभी तक कोई मूल्यांकन नहीं।",
     "updatePlayerProgram": "खिलाड़ी का कार्यक्रम अपडेट करें",
-    "createAssign": "बनाएँ और सौंपें"
+    "createAssign": "बनाएँ और सौंपें",
+    "summarizeFrom": "इनसे सारांश बनाएँ",
+    "summarizeAs": "इस रूप में लिखें",
+    "sourceGameStats": "गेम स्टैट्स",
+    "sourceShared": "मेरे साथ साझा"
   },
   "training": {
     "couldNotOpenFilePicker": "फ़ाइल पिकर नहीं खुल सका।",

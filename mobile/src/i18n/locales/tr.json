@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "Geçmişi özetle",
     "noEvalsYet": "Henüz değerlendirme yok.",
     "updatePlayerProgram": "Oyuncunun programını güncelle",
-    "createAssign": "Oluştur ve ata"
+    "createAssign": "Oluştur ve ata",
+    "summarizeFrom": "Şuradan özetle",
+    "summarizeAs": "Şu şekilde yaz",
+    "sourceGameStats": "Maç istatistikleri",
+    "sourceShared": "Benimle paylaşılan"
   },
   "training": {
     "couldNotOpenFilePicker": "Dosya seçici açılamadı.",

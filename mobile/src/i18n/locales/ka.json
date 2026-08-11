@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "ისტორიის შეჯამება",
     "noEvalsYet": "შეფასებები ჯერ არ არის.",
     "updatePlayerProgram": "მოთამაშის პროგრამის განახლება",
-    "createAssign": "შექმნა და მინიჭება"
+    "createAssign": "შექმნა და მინიჭება",
+    "summarizeFrom": "შეჯამება წყაროდან",
+    "summarizeAs": "დაწერე როგორც",
+    "sourceGameStats": "თამაშის სტატისტიკა",
+    "sourceShared": "გაზიარებული ჩემთვის"
   },
   "training": {
     "couldNotOpenFilePicker": "ფაილის ამრჩევის გახსნა ვერ მოხერხდა.",

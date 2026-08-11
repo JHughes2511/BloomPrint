@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "Rezumă istoricul",
     "noEvalsYet": "Încă nicio evaluare.",
     "updatePlayerProgram": "Actualizează programul jucătorului",
-    "createAssign": "Creează și atribuie"
+    "createAssign": "Creează și atribuie",
+    "summarizeFrom": "Rezumă din",
+    "summarizeAs": "Scrie-l ca",
+    "sourceGameStats": "Statistici de meci",
+    "sourceShared": "Partajat cu mine"
   },
   "training": {
     "couldNotOpenFilePicker": "Selectorul de fișiere nu a putut fi deschis.",

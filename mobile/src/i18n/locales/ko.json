@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "기록 요약",
     "noEvalsYet": "아직 평가가 없습니다.",
     "updatePlayerProgram": "선수 프로그램 업데이트",
-    "createAssign": "생성 및 배정"
+    "createAssign": "생성 및 배정",
+    "summarizeFrom": "요약할 자료",
+    "summarizeAs": "작성 형식",
+    "sourceGameStats": "경기 스탯",
+    "sourceShared": "나와 공유됨"
   },
   "training": {
     "couldNotOpenFilePicker": "파일 선택기를 열 수 없습니다.",

@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "Resumir histórico",
     "noEvalsYet": "Ainda sem avaliações.",
     "updatePlayerProgram": "Atualizar programa do jogador",
-    "createAssign": "Criar e atribuir"
+    "createAssign": "Criar e atribuir",
+    "summarizeFrom": "Resumir a partir de",
+    "summarizeAs": "Escrever como",
+    "sourceGameStats": "Estatísticas de jogo",
+    "sourceShared": "Partilhado comigo"
   },
   "training": {
     "couldNotOpenFilePicker": "Não foi possível abrir o seletor de arquivos.",

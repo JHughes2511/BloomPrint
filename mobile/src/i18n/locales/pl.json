@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "Podsumuj historię",
     "noEvalsYet": "Brak ocen.",
     "updatePlayerProgram": "Zaktualizuj program zawodnika",
-    "createAssign": "Utwórz i przypisz"
+    "createAssign": "Utwórz i przypisz",
+    "summarizeFrom": "Podsumuj na podstawie",
+    "summarizeAs": "Zapisz jako",
+    "sourceGameStats": "Statystyki meczowe",
+    "sourceShared": "Udostępnione mnie"
   },
   "training": {
     "couldNotOpenFilePicker": "Nie udało się otworzyć wyboru plików.",

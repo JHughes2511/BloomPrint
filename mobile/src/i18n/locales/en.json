@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "Summarize History",
     "noEvalsYet": "No evaluations yet.",
     "updatePlayerProgram": "Update Player's Program",
-    "createAssign": "Create & Assign"
+    "createAssign": "Create & Assign",
+    "summarizeFrom": "Summarize from",
+    "summarizeAs": "Write it as",
+    "sourceGameStats": "Game Stats",
+    "sourceShared": "Shared with me"
   },
   "training": {
     "couldNotOpenFilePicker": "Could not open file picker.",

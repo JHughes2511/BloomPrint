@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "Кратко изложить историю",
     "noEvalsYet": "Оценок пока нет.",
     "updatePlayerProgram": "Обновить программу игрока",
-    "createAssign": "Создать и назначить"
+    "createAssign": "Создать и назначить",
+    "summarizeFrom": "Обобщить из",
+    "summarizeAs": "Написать как",
+    "sourceGameStats": "Статистика игр",
+    "sourceShared": "Поделились со мной"
   },
   "training": {
     "couldNotOpenFilePicker": "Не удалось открыть выбор файлов.",

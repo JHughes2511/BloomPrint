@@ -913,7 +913,11 @@
     "summarizeHistoryTitle": "Σύνοψη ιστορικού",
     "noEvalsYet": "Καμία αξιολόγηση ακόμη.",
     "updatePlayerProgram": "Ενημέρωση προγράμματος παίκτη",
-    "createAssign": "Δημιουργία & ανάθεση"
+    "createAssign": "Δημιουργία & ανάθεση",
+    "summarizeFrom": "Σύνοψη από",
+    "summarizeAs": "Γράψ' το ως",
+    "sourceGameStats": "Στατιστικά αγώνων",
+    "sourceShared": "Κοινοποιημένα σε εμένα"
   },
   "training": {
     "couldNotOpenFilePicker": "Δεν ήταν δυνατό το άνοιγμα του επιλογέα αρχείων.",
