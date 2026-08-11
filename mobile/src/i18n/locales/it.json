@@ -2656,5 +2656,12 @@
     "tapToOpen": "Tocca per aprire",
     "tapForDetails": "Tocca per i dettagli",
     "nReady": "{{count}} report pronti"
+  },
+  "preferences": {
+    "title": "Cosa hanno insegnato le correzioni",
+    "hint": "Derivano dalle tue correzioni e si applicano ai nuovi report. Disattivane una o eliminala.",
+    "empty": "Ancora nulla: correggi un report e ciò che dirai resterà qui.",
+    "forTeam": "Per {{name}}",
+    "everyTeam": "Tutte le squadre"
   }
 }

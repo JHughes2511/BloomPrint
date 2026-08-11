@@ -10,6 +10,17 @@ const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000';
 
 export const api = axios.create({ baseURL: BASE_URL, timeout: 120000 });
 
+/** Something a coach taught BloomPrint by correcting a report. */
+export type CoachPreference = {
+  id: number;
+  team_id: number | null;
+  team_name: string | null;
+  text: string;
+  source: string;
+  active: boolean;
+  created_at: string;
+};
+
 /** A long job of this coach's, as the app-wide banner reads it. */
 export type ActiveJob = {
   id: number;
@@ -170,6 +181,18 @@ api.interceptors.response.use(
     return Promise.reject(err);
   },
 );
+
+// ── What corrections have taught ──────────────────────────────────────────────
+export const preferencesAPI = {
+  /** Everything learned; with a team, what applies to reports about that team. */
+  list: (teamId?: number): Promise<CoachPreference[]> =>
+    api.get('/preferences', { params: teamId != null ? { team_id: teamId } : undefined })
+       .then(r => r.data),
+  /** Stop applying one without losing the record of having made it. */
+  setActive: (id: number, active: boolean) =>
+    api.patch(`/preferences/${id}`, { active }).then(r => r.data),
+  remove: (id: number) => api.delete(`/preferences/${id}`).then(r => r.data),
+};
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const authAPI = {

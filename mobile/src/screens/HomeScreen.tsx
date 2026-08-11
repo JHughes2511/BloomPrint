@@ -2,6 +2,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, Switch } from 'react-native';
 import Sheet from '../components/Sheet';
+import LearnedPreferences from '../components/LearnedPreferences';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
@@ -616,6 +617,16 @@ export default function HomeScreen() {
               </View>
               <Icon name="chevron-right" size={18} color={t.muted} strokeWidth={2} />
             </TouchableOpacity>
+
+            {/* Everything corrections have taught, across every team. The
+                team's own page shows the subset that applies to it; this is
+                the whole list, and the place to find one the coach has
+                forgotten making. */}
+            {showProfile && (
+              <View style={{ marginTop: 20 }}>
+                <LearnedPreferences title={tr('preferences.title')} />
+              </View>
+            )}
 
             <TouchableOpacity
               style={{ backgroundColor: t.ctaBg, borderRadius: 12, padding: 15, alignItems: 'center', marginTop: 20 }}

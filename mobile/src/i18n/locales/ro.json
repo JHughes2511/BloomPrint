@@ -2656,5 +2656,12 @@
     "tapToOpen": "Atinge pentru a deschide",
     "tapForDetails": "Atinge pentru detalii",
     "nReady": "{{count}} rapoarte gata"
+  },
+  "preferences": {
+    "title": "Ce au învățat corecturile",
+    "hint": "Provin din corecturile tale și se aplică rapoartelor noi. Dezactivează una sau șterge-o.",
+    "empty": "Încă nimic — corectează un raport și ce spui va rămâne aici.",
+    "forTeam": "Pentru {{name}}",
+    "everyTeam": "Toate echipele"
   }
 }

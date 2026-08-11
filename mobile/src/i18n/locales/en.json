@@ -2656,5 +2656,12 @@
     "tapToOpen": "Tap to open",
     "tapForDetails": "Tap for details",
     "nReady": "{{count}} reports ready"
+  },
+  "preferences": {
+    "title": "What corrections have taught",
+    "hint": "These came from your corrections and are applied to new reports. Switch one off to stop using it, or delete it.",
+    "empty": "Nothing learned yet — correct a report and what you say will be kept here.",
+    "forTeam": "For {{name}}",
+    "everyTeam": "Every team"
   }
 }

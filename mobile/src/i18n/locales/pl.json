@@ -2656,5 +2656,12 @@
     "tapToOpen": "Dotknij, aby otworzyć",
     "tapForDetails": "Dotknij, aby zobaczyć szczegóły",
     "nReady": "Gotowe raporty: {{count}}"
+  },
+  "preferences": {
+    "title": "Czego nauczyły poprawki",
+    "hint": "Pochodzą z Twoich poprawek i są stosowane do nowych raportów. Wyłącz lub usuń.",
+    "empty": "Jeszcze nic — popraw raport, a to co powiesz zostanie tutaj.",
+    "forTeam": "Dla {{name}}",
+    "everyTeam": "Wszystkie zespoły"
   }
 }

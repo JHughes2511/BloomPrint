@@ -66,6 +66,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { playersAPI, teamsAPI } from '../api/client';
 import { readPage, writePage } from '../storage/pageCache';
+import LearnedPreferences from '../components/LearnedPreferences';
 import { Player, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { useAuth } from '../context/AuthContext';
@@ -690,6 +691,13 @@ export default function RosterScreen() {
               <Switch value={editTeamMine} onValueChange={setEditTeamMine}
                       trackColor={{ false: t.line, true: t.accent }} thumbColor="#fff" />
             </View>
+
+            {/* What corrections about this team have taught, on the team's own
+                page — everything that will actually be applied to a report
+                about them, including the program-wide ones. */}
+            {!!editTeam && (
+              <LearnedPreferences teamId={editTeam.id} title={tr('preferences.title')} />
+            )}
 
             <View style={styles.modalRow}>
               <TouchableOpacity style={styles.cancelBtn} onPress={closeManage}>

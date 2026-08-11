@@ -2656,5 +2656,12 @@
     "tapToOpen": "Zum Öffnen tippen",
     "tapForDetails": "Für Details tippen",
     "nReady": "{{count}} Berichte fertig"
+  },
+  "preferences": {
+    "title": "Was Korrekturen gelernt haben",
+    "hint": "Stammt aus deinen Korrekturen und wird auf neue Berichte angewendet. Schalte einen aus oder lösche ihn.",
+    "empty": "Noch nichts gelernt — korrigiere einen Bericht, und was du sagst, bleibt hier.",
+    "forTeam": "Für {{name}}",
+    "everyTeam": "Alle Teams"
   }
 }

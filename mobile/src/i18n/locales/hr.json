@@ -2656,5 +2656,12 @@
     "tapToOpen": "Dodirnite za otvaranje",
     "tapForDetails": "Dodirnite za detalje",
     "nReady": "Spremnih izvještaja: {{count}}"
+  },
+  "preferences": {
+    "title": "Što su ispravci naučili",
+    "hint": "Dolaze iz vaših ispravaka i primjenjuju se na nove izvještaje. Isključite ili obrišite.",
+    "empty": "Još ništa — ispravite izvještaj i ono što kažete ostat će ovdje.",
+    "forTeam": "Za {{name}}",
+    "everyTeam": "Sve momčadi"
   }
 }

@@ -2656,5 +2656,12 @@
     "tapToOpen": "Appuyez pour ouvrir",
     "tapForDetails": "Appuyez pour les détails",
     "nReady": "{{count}} rapports prêts"
+  },
+  "preferences": {
+    "title": "Ce que vos corrections ont appris",
+    "hint": "Issues de vos corrections et appliquées aux nouveaux rapports. Désactivez-en une pour l'ignorer, ou supprimez-la.",
+    "empty": "Rien pour l'instant — corrigez un rapport et ce que vous direz sera conservé ici.",
+    "forTeam": "Pour {{name}}",
+    "everyTeam": "Toutes les équipes"
   }
 }

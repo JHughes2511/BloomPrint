@@ -2656,5 +2656,12 @@
     "tapToOpen": "탭하여 열기",
     "tapForDetails": "탭하여 자세히 보기",
     "nReady": "리포트 {{count}}개 완료"
+  },
+  "preferences": {
+    "title": "수정에서 배운 것",
+    "hint": "회원님의 수정에서 가져와 새 리포트에 적용됩니다. 끄거나 삭제할 수 있습니다.",
+    "empty": "아직 없습니다. 리포트를 수정하면 여기에 남습니다.",
+    "forTeam": "{{name}} 대상",
+    "everyTeam": "모든 팀"
   }
 }

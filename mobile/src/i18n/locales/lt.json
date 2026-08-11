@@ -2656,5 +2656,12 @@
     "tapToOpen": "Palieskite, kad atidarytumėte",
     "tapForDetails": "Palieskite, kad pamatytumėte",
     "nReady": "Paruoštų ataskaitų: {{count}}"
+  },
+  "preferences": {
+    "title": "Ko išmokė pataisymai",
+    "hint": "Jie kilę iš jūsų pataisymų ir taikomi naujoms ataskaitoms. Išjunkite arba ištrinkite.",
+    "empty": "Kol kas nieko — pataisykite ataskaitą ir tai, ką pasakysite, liks čia.",
+    "forTeam": "{{name}} komandai",
+    "everyTeam": "Visos komandos"
   }
 }

@@ -2656,5 +2656,12 @@
     "tapToOpen": "Toca para abrir",
     "tapForDetails": "Toca para ver detalles",
     "nReady": "{{count}} informes listos"
+  },
+  "preferences": {
+    "title": "Lo aprendido de tus correcciones",
+    "hint": "Provienen de tus correcciones y se aplican a los informes nuevos. Desactiva uno para dejar de usarlo, o elimínalo.",
+    "empty": "Aún no hay nada aprendido: corrige un informe y lo que digas se guardará aquí.",
+    "forTeam": "Para {{name}}",
+    "everyTeam": "Todos los equipos"
   }
 }

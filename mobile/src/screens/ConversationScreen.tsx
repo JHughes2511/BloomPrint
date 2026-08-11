@@ -310,11 +310,11 @@ export default function ConversationScreen() {
             {sending
               ? <ActivityIndicator color={t.ctaText} size="small" />
               : <Ionicons name="send" size={19} color={t.ctaText}
-                          // The glyph is drawn pointing right; -45 turns it up
-                          // and to the right, which is the angle in the design.
-                          // Rotated rather than swapped for another icon because
-                          // no icon in the set is drawn at this angle.
-                          style={{ transform: [{ rotate: '-45deg' }] }} />}
+                          // The glyph is drawn pointing right; -90 stands it
+                          // straight up. Rotated rather than swapped for
+                          // another icon because nothing in the set is this
+                          // shape at this angle.
+                          style={{ transform: [{ rotate: '-90deg' }] }} />}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

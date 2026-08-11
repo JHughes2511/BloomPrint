@@ -2656,5 +2656,12 @@
     "tapToOpen": "Tik om te openen",
     "tapForDetails": "Tik voor details",
     "nReady": "{{count}} rapporten klaar"
+  },
+  "preferences": {
+    "title": "Wat correcties hebben geleerd",
+    "hint": "Komen uit je correcties en gelden voor nieuwe rapporten. Zet er een uit of verwijder hem.",
+    "empty": "Nog niets geleerd — corrigeer een rapport en wat je zegt blijft hier.",
+    "forTeam": "Voor {{name}}",
+    "everyTeam": "Alle teams"
   }
 }
