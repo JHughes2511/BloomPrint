@@ -21,7 +21,7 @@ import { useNavigation } from '@react-navigation/native';
  */
 
 /** The screen at the top of each tab. */
-const TAB_ROOT: Record<string, string> = {
+export const TAB_ROOT: Record<string, string> = {
   HomeTab: 'Home',
   TeamTab: 'Team',
   TeamEvalTab: 'TeamEval',

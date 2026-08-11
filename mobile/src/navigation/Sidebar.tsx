@@ -21,6 +21,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, ScrollView, TextInput, Modal } from 'react-native';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { TAB_ROOT } from './goUp';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -251,7 +252,18 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
               }
               return;
             }
-            navigation.navigate(route.name, route.params);
+            // The tab's ROOT, said explicitly, rather than route.params.
+            //
+            // Params stick to a tab route: opening Staff Hub is a navigate to
+            // HomeTab with {screen: 'StaffInbox'}, and that stays on the tab.
+            // Handing those same params back on the next press sent the coach
+            // to Staff Hub every time they asked for Home — the one screen the
+            // Home button could not reach.
+            const root = TAB_ROOT[route.name];
+            navigation.navigate(route.name, root ? { screen: root } : undefined);
+            if (nested?.key && (nested.index ?? 0) > 0) {
+              navigation.dispatch({ ...StackActions.popToTop(), target: nested.key });
+            }
           };
 
           const color = focused ? t.accent : t.muted2;
