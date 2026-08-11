@@ -1627,6 +1627,24 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   }, [statPreview]);
 
   /**
+   * Back to the list of games.
+   *
+   * The same link Scout puts above a team, deliberately: both are a page that
+   * opened from a chip in the row above, and the coach has been shown one way
+   * of getting back out. Two different-looking ways would be two things to
+   * learn for one idea.
+   */
+  const BackToGames = () => (
+    <TouchableOpacity
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}
+      onPress={() => setActiveView('games')}
+    >
+      <Ionicons name="arrow-back" size={18} color={t.muted} />
+      <Text style={{ color: t.muted, fontSize: 14 }}>{tr('teamGrade.allGames')}</Text>
+    </TouchableOpacity>
+  );
+
+  /**
    * Whether a team named in an import file is one of the coach's.
    *
    * The coach's answer wins. Failing that, a team the roster already holds
@@ -2062,6 +2080,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       {/* Live Entry */}
       {activeView === 'live' && activeGame && (
         <View style={{ flex: 1 }}>
+          {/* A game in progress is still a page under Games, and leaving it
+              does not end it — the clock and everything logged are on the
+              game, not on this screen. */}
+          <View style={{ paddingHorizontal: 16 }}><BackToGames /></View>
           {/* Score bar */}
           <View style={s.scoreBar}>
             <View style={{ alignItems: 'center' }}>
@@ -2406,6 +2428,11 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       {/* Game Detail */}
       {activeView === 'detail' && detailGame && (
         <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
+          {/* The way back to the list, said on the page rather than left to a
+              swipe. Same link Scout uses above its team, for the same reason:
+              a game opened from Games is a page under Games, and nothing else
+              on the screen says how to get back up. */}
+          <BackToGames />
           {/* Header */}
           <View style={s.card}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>

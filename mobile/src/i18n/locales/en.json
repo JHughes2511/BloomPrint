@@ -1790,7 +1790,8 @@
         "desc": "HS Varsity, College, Pro, etc."
       }
     },
-    "backTo": "Back to {{where}}"
+    "backTo": "Back to {{where}}",
+    "newTeamIsMine": "This is my team"
   },
   "teamReport": {
     "title": "Team Reports",
@@ -2140,7 +2141,7 @@
     "gameReportPickHint": "Pick a game to build its full report — your team's performance and the opponent, combined.",
     "noGamesYet": "No games yet.",
     "reportReady": "Report ready",
-    "allGames": "All Games",
+    "allGames": "All games",
     "gameReportContext": "GAME REPORT CONTEXT",
     "gameReportLabel": "GAME REPORT",
     "noReportYet": "No report yet — add any context above and tap Generate Game Report.",

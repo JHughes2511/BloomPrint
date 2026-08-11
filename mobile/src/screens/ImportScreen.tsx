@@ -71,6 +71,16 @@ export default function ImportScreen() {
 
   // Roster mode: create new team or pick existing
   const [newTeamName, setNewTeamName] = useState('');
+  /**
+   * Whether the team being created here is one of the coach's own.
+   *
+   * Off by default. A roster imported under a new name is usually a team being
+   * kept records on rather than coached, and a team wrongly counted as the
+   * coach's walks its games into their own win-loss record with nothing on
+   * screen to say so. Ticking it is one tap; noticing the other mistake is a
+   * season of numbers that look slightly wrong.
+   */
+  const [newTeamMine, setNewTeamMine] = useState(false);
   const [creatingTeam, setCreatingTeam] = useState(false);
   const [showTeamPicker, setShowTeamPicker] = useState(false);
 
@@ -112,7 +122,8 @@ export default function ImportScreen() {
     if (!newTeamName.trim()) return;
     setCreatingTeam(true);
     try {
-      const team = await teamsAPI.create({ name: newTeamName.trim(), competition_level: level });
+      const team = await teamsAPI.create({ name: newTeamName.trim(), competition_level: level,
+                                           is_mine: newTeamMine });
       setTeams(prev => [...prev, team]);
       chooseTeam(team.id);
       setNewTeamName('');
@@ -235,6 +246,21 @@ export default function ImportScreen() {
                 }
               </TouchableOpacity>
             </View>
+
+            {/* Whose team it is, asked while it is being made rather than
+                worked out afterwards. Nothing about a roster file says who
+                coaches the squad in it. */}
+            <TouchableOpacity
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}
+              onPress={() => setNewTeamMine(v => !v)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name={newTeamMine ? 'checkbox' : 'square-outline'} size={18}
+                        color={newTeamMine ? t.accent : t.muted} />
+              <Text style={{ color: t.muted, fontSize: 12, flex: 1 }}>
+                {tr('importScreen.newTeamIsMine')}
+              </Text>
+            </TouchableOpacity>
 
             {/* Existing team picker */}
             {teams.length > 0 && (

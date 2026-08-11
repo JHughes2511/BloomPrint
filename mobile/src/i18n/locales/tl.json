@@ -1790,7 +1790,8 @@
         "desc": "HS Varsity, Kolehiyo, Pro, atbp."
       }
     },
-    "backTo": "Bumalik sa {{where}}"
+    "backTo": "Bumalik sa {{where}}",
+    "newTeamIsMine": "Ito ang aking koponan"
   },
   "teamReport": {
     "title": "Mga Ulat ng Team",
@@ -2140,7 +2141,7 @@
     "gameReportPickHint": "Pumili ng laro para buuin ang buong ulat nito — ang performance ng team mo at ang kalaban, pinagsama.",
     "noGamesYet": "Wala pang laro.",
     "reportReady": "Handa na ang ulat",
-    "allGames": "Lahat ng Laro",
+    "allGames": "Lahat ng laro",
     "gameReportContext": "KONTEKSTO NG ULAT NG LARO",
     "gameReportLabel": "ULAT NG LARO",
     "noReportYet": "Wala pang ulat — magdagdag ng konteksto sa itaas at i-tap ang Bumuo ng Ulat ng Laro.",

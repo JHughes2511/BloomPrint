@@ -1790,7 +1790,8 @@
         "desc": "HS Varsity, Universitário, Profissional, etc."
       }
     },
-    "backTo": "Voltar a {{where}}"
+    "backTo": "Voltar a {{where}}",
+    "newTeamIsMine": "Esta é a minha equipa"
   },
   "teamReport": {
     "title": "Relatórios de Equipe",
@@ -2140,7 +2141,7 @@
     "gameReportPickHint": "Escolha um jogo para criar seu relatório completo — o desempenho da sua equipe e o adversário, combinados.",
     "noGamesYet": "Nenhum jogo ainda.",
     "reportReady": "Relatório pronto",
-    "allGames": "Todos os Jogos",
+    "allGames": "Todos os jogos",
     "gameReportContext": "CONTEXTO DO RELATÓRIO DE JOGO",
     "gameReportLabel": "RELATÓRIO DE JOGO",
     "noReportYet": "Nenhum relatório ainda — adicione qualquer contexto acima e toque em Gerar Relatório de Jogo.",

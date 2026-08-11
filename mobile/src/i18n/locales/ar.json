@@ -1790,7 +1790,8 @@
         "desc": "ثانوي، جامعي، محترف، إلخ."
       }
     },
-    "backTo": "العودة إلى {{where}}"
+    "backTo": "العودة إلى {{where}}",
+    "newTeamIsMine": "هذا فريقي"
   },
   "teamReport": {
     "title": "تقارير الفرق",

@@ -1790,7 +1790,8 @@
         "desc": "HS Varsity, Facultate, Profesionist etc."
       }
     },
-    "backTo": "Înapoi la {{where}}"
+    "backTo": "Înapoi la {{where}}",
+    "newTeamIsMine": "Aceasta este echipa mea"
   },
   "teamReport": {
     "title": "Rapoarte echipă",

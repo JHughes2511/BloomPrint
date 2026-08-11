@@ -1790,7 +1790,8 @@
         "desc": "HS Varsity, College, Pro და ა.შ."
       }
     },
-    "backTo": "უკან {{where}}-ზე"
+    "backTo": "უკან {{where}}-ზე",
+    "newTeamIsMine": "ეს ჩემი გუნდია"
   },
   "teamReport": {
     "title": "გუნდის ანგარიშები",

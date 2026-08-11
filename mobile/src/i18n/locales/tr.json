@@ -1790,7 +1790,8 @@
         "desc": "Lise Birinci Takım, Üniversite, Profesyonel, vb."
       }
     },
-    "backTo": "{{where}} sayfasına dön"
+    "backTo": "{{where}} sayfasına dön",
+    "newTeamIsMine": "Bu benim takımım"
   },
   "teamReport": {
     "title": "Takım Raporları",
@@ -2140,7 +2141,7 @@
     "gameReportPickHint": "Tam raporunu oluşturmak için bir maç seçin — takımınızın performansı ve rakip, birlikte.",
     "noGamesYet": "Henüz maç yok.",
     "reportReady": "Rapor hazır",
-    "allGames": "Tüm Maçlar",
+    "allGames": "Tüm maçlar",
     "gameReportContext": "MAÇ RAPORU BAĞLAMI",
     "gameReportLabel": "MAÇ RAPORU",
     "noReportYet": "Henüz rapor yok — yukarıya herhangi bir bağlam ekleyin ve Maç Raporu Oluştur'a dokunun.",

@@ -1790,7 +1790,8 @@
         "desc": "HS Varsity, College, Pro, osv."
       }
     },
-    "backTo": "Tillbaka till {{where}}"
+    "backTo": "Tillbaka till {{where}}",
+    "newTeamIsMine": "Det här är mitt lag"
   },
   "teamReport": {
     "title": "Lagrapporter",

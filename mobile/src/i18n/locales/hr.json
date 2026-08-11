@@ -1790,7 +1790,8 @@
         "desc": "HS Varsity, fakultet, profesionalno itd."
       }
     },
-    "backTo": "Natrag na {{where}}"
+    "backTo": "Natrag na {{where}}",
+    "newTeamIsMine": "Ovo je moja momčad"
   },
   "teamReport": {
     "title": "Timski izvještaji",

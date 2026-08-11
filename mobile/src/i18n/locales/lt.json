@@ -1790,7 +1790,8 @@
         "desc": "VM Varsity, koledžas, profesionalai ir kt."
       }
     },
-    "backTo": "Atgal į {{where}}"
+    "backTo": "Atgal į {{where}}",
+    "newTeamIsMine": "Tai mano komanda"
   },
   "teamReport": {
     "title": "Komandos ataskaitos",

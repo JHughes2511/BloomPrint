@@ -1790,7 +1790,8 @@
         "desc": "HS Varsity、College、Proなど"
       }
     },
-    "backTo": "{{where}} に戻る"
+    "backTo": "{{where}} に戻る",
+    "newTeamIsMine": "これは自分のチームです"
   },
   "teamReport": {
     "title": "チームレポート",
@@ -2140,7 +2141,7 @@
     "gameReportPickHint": "試合を選んでその完全なレポートを作成します — 自チームのパフォーマンスと対戦相手を組み合わせます。",
     "noGamesYet": "まだ試合がありません。",
     "reportReady": "レポート完成",
-    "allGames": "全試合",
+    "allGames": "すべての試合",
     "gameReportContext": "試合レポートの背景情報",
     "gameReportLabel": "試合レポート",
     "noReportYet": "まだレポートがありません — 上に背景情報を追加して「試合レポートを生成」をタップしてください。",

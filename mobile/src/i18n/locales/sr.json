@@ -1790,7 +1790,8 @@
         "desc": "HS Varsity, koledž, profesionalni itd."
       }
     },
-    "backTo": "Nazad na {{where}}"
+    "backTo": "Nazad na {{where}}",
+    "newTeamIsMine": "Ovo je moj tim"
   },
   "teamReport": {
     "title": "Izveštaji o timu",

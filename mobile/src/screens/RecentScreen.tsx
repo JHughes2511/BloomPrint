@@ -106,6 +106,16 @@ export default function RecentScreen() {
   // 3 across at ~1900px. Date headers span a full row, so they still break the
   // grid into days rather than landing mid-row.
   const recentGrid = useGridColumns({ columns: 3, inset: 32 });
+  /**
+   * Too narrow for an icon AND the whole label.
+   *
+   * An iPad runs the same three columns a desktop does, at roughly 265px each
+   * rather than 545. Measured at that width, three buttons need about 248px
+   * for their icons, padding and full text and have 237 — so something has to
+   * give, and it is the icon: "View Rep…" tells a coach less than the icon
+   * costs. Above this width both fit and both are kept.
+   */
+  const tightBtns = !!recentGrid.cardWidth && recentGrid.cardWidth < 400;
   const { coach } = useAuth();
   const { t: tr } = useTranslation();
   const { t } = useTheme();
@@ -1032,11 +1042,19 @@ export default function RecentScreen() {
                     every language. The phone keeps wrapping — one card per
                     row there, and its height is not fixed. */}
                 <View style={{ flexDirection: 'row', flexWrap: recentGrid.cardWidth ? 'nowrap' : 'wrap',
-                               gap: 6, marginTop: 10, width: '100%' }}>
+                               gap: 6,
+                               // The card already puts a 10px gap between its
+                               // body and this row. Adding 10 more on top is
+                               // what pushed a four-line card — a packet
+                               // someone SHARED, which carries a "Shared by"
+                               // line the original does not — past the fixed
+                               // 132 and cut its buttons in half, on the
+                               // desktop as well as the iPad.
+                               marginTop: recentGrid.cardWidth ? 0 : 10, width: '100%' }}>
                   {/* Game-specific buttons */}
                   {(item.kind === 'game' || item.kind === 'scout' || item.kind === 'gamereport') && item.report_text ? (
                     <TouchableOpacity
-                      style={styles.gameActionBtn}
+                      style={[styles.gameActionBtn, !!recentGrid.cardWidth && styles.gameActionBtnGrid, tightBtns && styles.gameActionBtnTight]}
                       onPress={() => setGameReportModal({
                         title: item.kind === 'scout' ? tr('reportTypes.scouting_report') : tr('reportTypes.game_report'),
                         subject: item.player_name, text: item.report_text!,
@@ -1044,17 +1062,17 @@ export default function RecentScreen() {
                         reportId: item.kind === 'game' ? (item.report_id ?? item.id) : item.id, outputType: item.kind === 'scout' ? 'scouting_report' : item.kind === 'gamereport' ? 'game_report' : (item.output_type ?? 'coaching_report'),
                       })}
                     >
-                      <Ionicons name="document-text-outline" size={13} color={t.accent} />
-                      <Text style={[styles.gameActionText, { color: t.accent }]} numberOfLines={1}>{tr('recent.viewReport')}</Text>
+                      {!tightBtns && <Ionicons name="document-text-outline" size={13} color={t.accent} />}
+                      <Text style={[styles.gameActionText, tightBtns && styles.gameActionTextTight, { color: t.accent }]} numberOfLines={1}>{tr('recent.viewReport')}</Text>
                     </TouchableOpacity>
                   ) : null}
                   {item.kind === 'game' && !item.shared && (
                     <TouchableOpacity
-                      style={styles.gameActionBtn}
+                      style={[styles.gameActionBtn, !!recentGrid.cardWidth && styles.gameActionBtnGrid, tightBtns && styles.gameActionBtnTight]}
                       onPress={() => navigation.push('GameReportBuilder', { reportId: item.report_id ?? item.id })}
                     >
-                      <Ionicons name="create-outline" size={13} color={t.muted} />
-                      <Text style={styles.gameActionText} numberOfLines={1}>{tr('recent.editPacket')}</Text>
+                      {!tightBtns && <Ionicons name="create-outline" size={13} color={t.muted} />}
+                      <Text style={[styles.gameActionText, tightBtns && styles.gameActionTextTight]} numberOfLines={1}>{tr('recent.editPacket')}</Text>
                     </TouchableOpacity>
                   )}
 
@@ -1064,7 +1082,7 @@ export default function RecentScreen() {
                       and Share already reaches a player for those. */}
                   {(item.kind === 'eval' || item.kind === 'training') && (
                     <TouchableOpacity
-                      style={[styles.gameActionBtn, { borderColor: t.positiveSoft }]}
+                      style={[styles.gameActionBtn, !!recentGrid.cardWidth && styles.gameActionBtnGrid, tightBtns && styles.gameActionBtnTight, { borderColor: t.positiveSoft }]}
                       onPress={() => {
                         openModal({
                           id: item.id,
@@ -1080,8 +1098,8 @@ export default function RecentScreen() {
                         setTimeout(() => setModalView('send'), 50);
                       }}
                     >
-                      <Ionicons name="person-outline" size={13} color={t.positive} />
-                      <Text style={[styles.gameActionText, { color: t.positive }]} numberOfLines={1}>{tr('recent.sendToPlayer')}</Text>
+                      {!tightBtns && <Ionicons name="person-outline" size={13} color={t.positive} />}
+                      <Text style={[styles.gameActionText, tightBtns && styles.gameActionTextTight, { color: t.positive }]} numberOfLines={1}>{tr('recent.sendToPlayer')}</Text>
                     </TouchableOpacity>
                   )}
 
@@ -1089,17 +1107,17 @@ export default function RecentScreen() {
                       On the shared original AND on my Updated copy of it. */}
                   {(item.shared || item.updated_from) && item.allow_regenerate && (
                     <TouchableOpacity
-                      style={[styles.gameActionBtn, { borderColor: t.accentSoft }]}
+                      style={[styles.gameActionBtn, !!recentGrid.cardWidth && styles.gameActionBtnGrid, tightBtns && styles.gameActionBtnTight, { borderColor: t.accentSoft }]}
                       onPress={() => openViewer(item)}
                     >
-                      <Ionicons name="create-outline" size={13} color={t.accent} />
-                      <Text style={[styles.gameActionText, { color: t.accent }]} numberOfLines={1}>{tr('recent.correct')}</Text>
+                      {!tightBtns && <Ionicons name="create-outline" size={13} color={t.accent} />}
+                      <Text style={[styles.gameActionText, tightBtns && styles.gameActionTextTight, { color: t.accent }]} numberOfLines={1}>{tr('recent.correct')}</Text>
                     </TouchableOpacity>
                   )}
 
                   {/* Share — player / team / staff, available for all types */}
                   <TouchableOpacity
-                    style={[styles.gameActionBtn, { borderColor: t.brownSoft }]}
+                    style={[styles.gameActionBtn, !!recentGrid.cardWidth && styles.gameActionBtnGrid, tightBtns && styles.gameActionBtnTight, { borderColor: t.brownSoft }]}
                     onPress={() => {
                       // A shared report forwards under its ORIGINAL type/id so
                       // the recipient (or player) gets the author's report.
@@ -1129,8 +1147,8 @@ export default function RecentScreen() {
                       });
                     }}
                   >
-                    <Ionicons name="share-social-outline" size={13} color={t.brown} />
-                    <Text style={[styles.gameActionText, { color: t.brown }]} numberOfLines={1}>{tr('common.share')}</Text>
+                    {!tightBtns && <Ionicons name="share-social-outline" size={13} color={t.brown} />}
+                    <Text style={[styles.gameActionText, tightBtns && styles.gameActionTextTight, { color: t.brown }]} numberOfLines={1}>{tr('common.share')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1791,7 +1809,18 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     // not override that floor.
     borderWidth: 1, borderColor: t.line, flexShrink: 1, minWidth: 0, maxWidth: '100%',
   },
+  // On a grid card the row cannot wrap, so a button that will not fit steals
+  // its own label. Measured at 265px: with these three across, the labels come
+  // to 182px and the row has 237, which leaves exactly enough for 6px of
+  // padding a side once the icon is gone.
+  // Every card on the grid is a fixed 132 tall, and a shared packet's fourth
+  // line spends the slack. Two pixels a side off the buttons is what buys it
+  // back — measured, not guessed: at the old padding the desktop card cut
+  // them by 4px.
+  gameActionBtnGrid: { paddingVertical: 4 },
+  gameActionBtnTight: { paddingVertical: 4, paddingHorizontal: 6, gap: 0 },
   gameActionText: { color: t.muted, fontSize: 12, fontFamily: fonts[600], flexShrink: 1 },
+  gameActionTextTight: { fontSize: 11 },
   input: {
     backgroundColor: t.card, borderRadius: 10, padding: 12, color: t.ink,
     fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 44, marginBottom: 8,

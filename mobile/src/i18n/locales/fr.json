@@ -1790,7 +1790,8 @@
         "desc": "HS Varsity, Université, Pro, etc."
       }
     },
-    "backTo": "Retour à {{where}}"
+    "backTo": "Retour à {{where}}",
+    "newTeamIsMine": "C'est mon équipe"
   },
   "teamReport": {
     "title": "Rapports d'équipe",

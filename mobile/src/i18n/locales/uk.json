@@ -1790,7 +1790,8 @@
         "desc": "HS Varsity, College, Pro тощо."
       }
     },
-    "backTo": "Назад до {{where}}"
+    "backTo": "Назад до {{where}}",
+    "newTeamIsMine": "Це моя команда"
   },
   "teamReport": {
     "title": "Командні звіти",

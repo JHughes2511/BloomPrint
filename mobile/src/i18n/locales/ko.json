@@ -1790,7 +1790,8 @@
         "desc": "고교 1군, 대학, 프로 등"
       }
     },
-    "backTo": "{{where}}(으)로 돌아가기"
+    "backTo": "{{where}}(으)로 돌아가기",
+    "newTeamIsMine": "내 팀입니다"
   },
   "teamReport": {
     "title": "팀 리포트",

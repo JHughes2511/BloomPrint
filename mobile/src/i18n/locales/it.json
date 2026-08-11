@@ -1790,7 +1790,8 @@
         "desc": "HS Varsity, College, Pro, ecc."
       }
     },
-    "backTo": "Torna a {{where}}"
+    "backTo": "Torna a {{where}}",
+    "newTeamIsMine": "Questa è la mia squadra"
   },
   "teamReport": {
     "title": "Report Squadra",
@@ -2140,7 +2141,7 @@
     "gameReportPickHint": "Scegli una partita per crearne il report completo — la prestazione della tua squadra e l'avversario, insieme.",
     "noGamesYet": "Ancora nessuna partita.",
     "reportReady": "Report pronto",
-    "allGames": "Tutte le Partite",
+    "allGames": "Tutte le partite",
     "gameReportContext": "CONTESTO REPORT PARTITA",
     "gameReportLabel": "REPORT PARTITA",
     "noReportYet": "Ancora nessun report — aggiungi il contesto qui sopra e tocca Genera Report Partita.",

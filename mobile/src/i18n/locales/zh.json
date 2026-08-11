@@ -1790,7 +1790,8 @@
         "desc": "HS Varsity、College、Pro 等"
       }
     },
-    "backTo": "返回{{where}}"
+    "backTo": "返回{{where}}",
+    "newTeamIsMine": "这是我的球队"
   },
   "teamReport": {
     "title": "球队报告",

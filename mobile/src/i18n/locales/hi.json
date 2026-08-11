@@ -1790,7 +1790,8 @@
         "desc": "HS Varsity, College, Pro, आदि।"
       }
     },
-    "backTo": "{{where}} पर वापस"
+    "backTo": "{{where}} पर वापस",
+    "newTeamIsMine": "यह मेरी टीम है"
   },
   "teamReport": {
     "title": "टीम रिपोर्ट",
@@ -2140,7 +2141,7 @@
     "gameReportPickHint": "पूरी रिपोर्ट बनाने के लिए कोई मैच चुनें — आपकी टीम का प्रदर्शन और विपक्षी, दोनों साथ।",
     "noGamesYet": "अभी कोई मैच नहीं।",
     "reportReady": "रिपोर्ट तैयार",
-    "allGames": "सभी मैच",
+    "allGames": "सभी गेम",
     "gameReportContext": "मैच रिपोर्ट संदर्भ",
     "gameReportLabel": "मैच रिपोर्ट",
     "noReportYet": "अभी कोई रिपोर्ट नहीं — ऊपर कोई संदर्भ जोड़ें और मैच रिपोर्ट बनाएँ पर टैप करें।",
