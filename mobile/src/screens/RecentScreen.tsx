@@ -1042,7 +1042,11 @@ export default function RecentScreen() {
                     every language. The phone keeps wrapping — one card per
                     row there, and its height is not fixed. */}
                 <View style={{ flexDirection: 'row', flexWrap: recentGrid.cardWidth ? 'nowrap' : 'wrap',
-                               gap: 6, marginTop: 10, width: '100%' }}>
+                               // 2, on top of the 10 the card already puts
+                               // between its body and this row. At 10 the pair
+                               // came to 20px of air in the middle of a card
+                               // the coach wanted tighter.
+                               gap: 6, marginTop: 2, width: '100%' }}>
                   {/* Game-specific buttons */}
                   {(item.kind === 'game' || item.kind === 'scout' || item.kind === 'gamereport') && item.report_text ? (
                     <TouchableOpacity
@@ -1757,21 +1761,22 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   card: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: t.card, marginHorizontal: 16, marginBottom: 8,
-    // A minimum, which is what it was before any of this: 132 with no ceiling
-    // and nothing hidden. A fixed height plus overflow: hidden is what cut the
-    // buttons off a card carrying one line more than the rest, and no amount of
-    // tightening elsewhere makes that safe — the next card type with an extra
-    // line breaks it again. A packet has that extra line, so it stands a little
-    // taller than the rest, which is the arrangement asked for.
-    ...desktopOnly({ minHeight: 132, marginBottom: 0 }),
+    // A minimum, never a fixed height: a ceiling plus overflow: hidden is what
+    // cut the buttons off a card carrying one line more than the rest, and no
+    // amount of tightening elsewhere makes that safe.
+    //
+    // 123 is measured, not chosen: it is exactly what the busiest ordinary card
+    // needs — three lines and a row of buttons — so those come out level with
+    // nothing spare beneath them. A card with fewer lines sits at the same
+    // height because a row of cards at different heights reads as a mistake. A
+    // SHARED report carries a fourth line naming who sent it, and is the one
+    // card left free to stand taller.
+    ...desktopOnly({ minHeight: 123, marginBottom: 0 }),
     borderRadius: 12, padding: 14, gap: 10,
     borderWidth: 1, borderColor: t.cardBorder,
   },
   cardTeam: { borderWidth: 1, borderColor: t.brownSoft },
-  // A packet is the one card that names what is inside it, so it carries a
-  // line the others do not — and one more again when it was shared. It gets a
-  // slightly higher floor rather than the whole grid being raised to suit it.
-  cardGame: { borderWidth: 1, borderColor: t.accentSoft, ...desktopOnly({ minHeight: 148 }) },
+  cardGame: { borderWidth: 1, borderColor: t.accentSoft },
   cardTraining: { borderWidth: 1, borderColor: t.positiveSoft },
   kindBadge: {
     width: 28, height: 28, borderRadius: 8,

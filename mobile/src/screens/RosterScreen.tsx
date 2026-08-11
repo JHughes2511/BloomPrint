@@ -433,23 +433,38 @@ export default function RosterScreen() {
               // Deleting is for players you own. One that arrived with a shared
               // report belongs to the coach who sent it — the most you can do
               // is take it off your own roster, so that is what is offered.
-              const removeShared = async () => {
-                try { await playersAPI.dropShared(item.id); load(); }
-                catch (e: any) {
-                  Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('roster.couldNotRemoveShared'));
+              /**
+               * Take the player off the list NOW, then tell the server.
+               *
+               * Deleting used to wait for the round trip and then refetch the
+               * whole roster before anything on screen changed, so the row sat
+               * there for a second or two looking as though the tap had missed.
+               * The coach knows what they asked for; the list should show it,
+               * and put the row back if the server disagrees.
+               */
+              const removeNow = async (call: () => Promise<any>, failMsg: string) => {
+                const before = players;
+                const left = before.filter(p => p.id !== item.id);
+                setPlayers(left);
+                // The cache too, or the next visit to this page draws last
+                // session's roster with the player back on it before the
+                // refetch lands — the deletion looking undone.
+                void writePage(cacheKey, { players: left });
+                try {
+                  await call();
+                } catch (e: any) {
+                  setPlayers(before);
+                  void writePage(cacheKey, { players: before });
+                  Alert.alert(tr('common.error'), e?.response?.data?.detail ?? failMsg);
                 }
               };
+              const removeShared = () =>
+                removeNow(() => playersAPI.dropShared(item.id), tr('roster.couldNotRemoveShared'));
               Alert.alert(tr('roster.deletePlayerTitle'), tr('roster.deletePlayerMsg', { name: item.name }), [
                 { text: tr('common.cancel'), style: 'cancel' },
                 { text: tr('roster.removeFromMyRoster'), onPress: removeShared },
-                { text: tr('common.delete'), style: 'destructive', onPress: async () => {
-                  try {
-                    await playersAPI.delete(item.id);
-                    load();
-                  } catch (e: any) {
-                    Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('roster.couldNotDeletePlayer'));
-                  }
-                }},
+                { text: tr('common.delete'), style: 'destructive', onPress: () =>
+                  removeNow(() => playersAPI.delete(item.id), tr('roster.couldNotDeletePlayer')) },
               ]);
             }}
           >
