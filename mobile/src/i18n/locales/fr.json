@@ -2529,7 +2529,15 @@
       "title": "Changement de propriétaire",
       "body": "{{coach}} est désormais propriétaire de {{team}}."
     },
-    "joinedViaLink": "{{name}} a rejoint {{team}} via votre lien d'invitation."
+    "joinedViaLink": "{{name}} a rejoint {{team}} via votre lien d'invitation.",
+    "jobDone": {
+      "title": "{{kind}} prêt",
+      "body": "Votre {{kind}} est terminé et prêt à lire."
+    },
+    "jobFailed": {
+      "title": "{{kind}} a échoué",
+      "body": "Impossible de le terminer. {{reason}}"
+    }
   },
   "teamInvite": {
     "button": "Lien d'invitation",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} tirs",
       "team_stats": "totaux de l'équipe"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "Évaluation de joueur",
+      "team_report": "Rapport d'équipe",
+      "packet": "Dossier de match",
+      "training": "Programme d'entraînement",
+      "scouting": "Rapport de scouting",
+      "game_report_full": "Rapport de match",
+      "clip": "Analyse vidéo",
+      "default": "Rapport",
+      "eval_text": "Évaluation de joueur"
+    },
+    "ready": "{{label}} est prêt",
+    "failed": "{{label}} n'a pas pu être terminé",
+    "tapToOpen": "Appuyez pour ouvrir",
+    "tapForDetails": "Appuyez pour les détails",
+    "nReady": "{{count}} rapports prêts"
   }
 }

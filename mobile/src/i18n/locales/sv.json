@@ -2529,7 +2529,15 @@
       "title": "Lagets ägare ändrad",
       "body": "{{coach}} äger nu {{team}}."
     },
-    "joinedViaLink": "{{name}} gick med i {{team}} via din inbjudningslänk."
+    "joinedViaLink": "{{name}} gick med i {{team}} via din inbjudningslänk.",
+    "jobDone": {
+      "title": "{{kind}} klar",
+      "body": "Din {{kind}} är klar att läsa."
+    },
+    "jobFailed": {
+      "title": "{{kind}} misslyckades",
+      "body": "Den kunde inte slutföras. {{reason}}"
+    }
   },
   "teamInvite": {
     "button": "Inbjudningslänk",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} skott",
       "team_stats": "lagtotaler"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "Spelarutvärdering",
+      "team_report": "Lagrapport",
+      "packet": "Matchrapportpaket",
+      "training": "Träningsprogram",
+      "scouting": "Scoutingrapport",
+      "game_report_full": "Matchrapport",
+      "clip": "Filmanalys",
+      "default": "Rapport",
+      "eval_text": "Spelarutvärdering"
+    },
+    "ready": "{{label}} är klar",
+    "failed": "{{label}} kunde inte slutföras",
+    "tapToOpen": "Tryck för att öppna",
+    "tapForDetails": "Tryck för detaljer",
+    "nReady": "{{count}} rapporter klara"
   }
 }

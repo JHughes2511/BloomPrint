@@ -2529,7 +2529,15 @@
       "title": "בעלות הקבוצה השתנתה",
       "body": "{{coach}} הוא כעת הבעלים של {{team}}."
     },
-    "joinedViaLink": "{{name}} הצטרף ל־{{team}} דרך קישור ההזמנה שלך."
+    "joinedViaLink": "{{name}} הצטרף ל־{{team}} דרך קישור ההזמנה שלך.",
+    "jobDone": {
+      "title": "{{kind}} מוכן",
+      "body": "ה{{kind}} שלך הסתיים ומוכן לקריאה."
+    },
+    "jobFailed": {
+      "title": "{{kind}} נכשל",
+      "body": "לא ניתן היה לסיים. {{reason}}"
+    }
   },
   "teamInvite": {
     "button": "קישור הזמנה",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} זריקות",
       "team_stats": "סיכומי קבוצה"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "הערכת שחקן",
+      "team_report": "דוח קבוצה",
+      "packet": "חבילת דוח משחק",
+      "training": "תוכנית אימונים",
+      "scouting": "דוח סקאוטינג",
+      "game_report_full": "דוח משחק",
+      "clip": "ניתוח וידאו",
+      "default": "דוח",
+      "eval_text": "הערכת שחקן"
+    },
+    "ready": "{{label}} מוכן",
+    "failed": "לא ניתן היה לסיים את {{label}}",
+    "tapToOpen": "הקש לפתיחה",
+    "tapForDetails": "הקש לפרטים",
+    "nReady": "{{count}} דוחות מוכנים"
   }
 }

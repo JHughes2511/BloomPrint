@@ -19,6 +19,8 @@ import './src/web/webShims';
 import { useBreakpoint } from './src/responsive/useBreakpoint';
 import Sidebar from './src/navigation/Sidebar';
 import { linking } from './src/navigation/linking';
+import JobWatcher from './src/jobs/JobWatcher';
+import { setCurrentRoute } from './src/jobs/jobRoutes';
 import { TeamProvider } from './src/context/TeamContext';
 
 // 5 tabs at fontSize 9: translated labels (de/nl/el run 30-40% longer than the
@@ -439,6 +441,17 @@ function AuthStack() {
   );
 }
 
+/** The screen actually in view, however many navigators deep it is. */
+function routeNameOf(state: any): string {
+  let node = state;
+  while (node?.routes?.length) {
+    const route = node.routes[node.index ?? 0];
+    if (!route?.state) return route?.name ?? '';
+    node = route.state;
+  }
+  return '';
+}
+
 // ── Root ───────────────────────────────────────────────────────────────────────
 
 function Root() {
@@ -450,7 +463,13 @@ function Root() {
   return (
     // linking only on web: a phone app has no address bar, and the config
     // would only add a way for a malformed deep link to land somewhere odd.
-    <NavigationContainer linking={Platform.OS === 'web' ? linking : undefined}>
+    <NavigationContainer
+      linking={Platform.OS === 'web' ? linking : undefined}
+      // The visible screen, told to the job registry: a banner about a job
+      // stays quiet while its own screen is still up. See jobRoutes.
+      onStateChange={(state) => setCurrentRoute(routeNameOf(state))}
+      onReady={() => setCurrentRoute('')}
+    >
       <StatusBar style="light" />
       {loading ? (
         <View style={{ flex: 1, backgroundColor: '#0a0a0a', alignItems: 'center', justifyContent: 'center' }}>
@@ -463,6 +482,9 @@ function Root() {
       ) : (
         <AuthStack />
       )}
+      {/* Inside the navigator: a banner has to be able to open the report it
+          is announcing. Renders nothing until something finishes. */}
+      {!!coach && <JobWatcher />}
     </NavigationContainer>
   );
 }

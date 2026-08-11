@@ -2529,7 +2529,15 @@
       "title": "Takım sahibi değişti",
       "body": "{{coach}} artık {{team}} takımının sahibi."
     },
-    "joinedViaLink": "{{name}}, davet bağlantınla {{team}} takımına katıldı."
+    "joinedViaLink": "{{name}}, davet bağlantınla {{team}} takımına katıldı.",
+    "jobDone": {
+      "title": "{{kind}} hazır",
+      "body": "{{kind}} tamamlandı ve okunmaya hazır."
+    },
+    "jobFailed": {
+      "title": "{{kind}} başarısız",
+      "body": "Tamamlanamadı. {{reason}}"
+    }
   },
   "teamInvite": {
     "button": "Davet bağlantısı",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} şut",
       "team_stats": "takım toplamları"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "Oyuncu değerlendirmesi",
+      "team_report": "Takım raporu",
+      "packet": "Maç rapor paketi",
+      "training": "Antrenman programı",
+      "scouting": "Scouting raporu",
+      "game_report_full": "Maç raporu",
+      "clip": "Video analizi",
+      "default": "Rapor",
+      "eval_text": "Oyuncu değerlendirmesi"
+    },
+    "ready": "{{label}} hazır",
+    "failed": "{{label}} tamamlanamadı",
+    "tapToOpen": "Açmak için dokunun",
+    "tapForDetails": "Ayrıntılar için dokunun",
+    "nReady": "{{count}} rapor hazır"
   }
 }

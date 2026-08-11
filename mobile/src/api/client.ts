@@ -4,10 +4,24 @@ import * as SecureStore from '../storage/secureStore';
 import * as FileSystem from 'expo-file-system/legacy';
 import { emitCoachUnauthorized } from './authFailure';
 import { playerApi } from './playerClient';
+import { noteJobStarted } from '../jobs/jobRoutes';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000';
 
 export const api = axios.create({ baseURL: BASE_URL, timeout: 120000 });
+
+/** A long job of this coach's, as the app-wide banner reads it. */
+export type ActiveJob = {
+  id: number;
+  kind: string;
+  status: 'processing' | 'done' | 'error';
+  progress: string | null;
+  result_id: number | null;
+  error: string | null;
+  /** English fallback; the client renders jobs.kinds.<kind> where it has one. */
+  label: string;
+  updated_at: string | null;
+};
 
 /**
  * Upload a video (or any file) without building the multipart body in JS memory.
@@ -295,6 +309,10 @@ export const evalsAPI = {
    * the caller is told exactly that.
    */
   awaitJob: async (jobId: number, onTick?: (status: string) => void) => {
+    // Whoever is watching this one, so the app-wide banner can stay quiet while
+    // the coach is still on the screen that started it. Every long job in the
+    // app funnels through here.
+    noteJobStarted(jobId);
     const EVERY_MS = 4000;
     const STALL_MINUTES = 25;
     const stallLimit = (STALL_MINUTES * 60_000) / EVERY_MS;
@@ -316,6 +334,9 @@ export const evalsAPI = {
       await new Promise(res => setTimeout(res, EVERY_MS));
     }
   },
+  /** Every job of mine still running or just finished — see JobWatcher. */
+  activeJobs: (): Promise<ActiveJob[]> =>
+    api.get('/evaluations/jobs/active').then(r => r.data),
   deleteTeamReport: (id: number) =>
     api.delete(`/evaluations/team-reports/${id}`).then(r => r.data),
 

@@ -2529,7 +2529,15 @@
       "title": "Team ownership changed",
       "body": "{{coach}} is now the owner of {{team}}."
     },
-    "joinedViaLink": "{{name}} joined {{team}} through your invite link."
+    "joinedViaLink": "{{name}} joined {{team}} through your invite link.",
+    "jobDone": {
+      "title": "{{kind}} ready",
+      "body": "Your {{kind}} has finished and is ready to read."
+    },
+    "jobFailed": {
+      "title": "{{kind}} failed",
+      "body": "It could not be finished. {{reason}}"
+    }
   },
   "teamInvite": {
     "button": "Invite link",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} shots",
       "team_stats": "team totals"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "Player evaluation",
+      "team_report": "Team report",
+      "packet": "Game report packet",
+      "training": "Training program",
+      "scouting": "Scouting report",
+      "game_report_full": "Game report",
+      "clip": "Film analysis",
+      "default": "Report",
+      "eval_text": "Player evaluation"
+    },
+    "ready": "{{label}} is ready",
+    "failed": "{{label}} could not be finished",
+    "tapToOpen": "Tap to open",
+    "tapForDetails": "Tap for details",
+    "nReady": "{{count}} reports ready"
   }
 }

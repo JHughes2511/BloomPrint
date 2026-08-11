@@ -2529,7 +2529,15 @@
       "title": "تغيّر مالك الفريق",
       "body": "{{coach}} هو الآن مالك فريق {{team}}."
     },
-    "joinedViaLink": "انضم {{name}} إلى {{team}} عبر رابط دعوتك."
+    "joinedViaLink": "انضم {{name}} إلى {{team}} عبر رابط دعوتك.",
+    "jobDone": {
+      "title": "{{kind}} جاهز",
+      "body": "انتهى {{kind}} وأصبح جاهزًا للقراءة."
+    },
+    "jobFailed": {
+      "title": "فشل {{kind}}",
+      "body": "تعذّر إكماله. {{reason}}"
+    }
   },
   "teamInvite": {
     "button": "رابط الدعوة",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} تسديدات",
       "team_stats": "مجاميع الفريق"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "تقييم لاعب",
+      "team_report": "تقرير الفريق",
+      "packet": "حزمة تقرير المباراة",
+      "training": "برنامج تدريبي",
+      "scouting": "تقرير استكشاف",
+      "game_report_full": "تقرير المباراة",
+      "clip": "تحليل الفيديو",
+      "default": "تقرير",
+      "eval_text": "تقييم لاعب"
+    },
+    "ready": "{{label}} جاهز",
+    "failed": "تعذّر إكمال {{label}}",
+    "tapToOpen": "اضغط للفتح",
+    "tapForDetails": "اضغط للتفاصيل",
+    "nReady": "{{count}} تقارير جاهزة"
   }
 }

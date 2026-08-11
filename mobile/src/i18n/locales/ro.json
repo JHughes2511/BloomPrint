@@ -2529,7 +2529,15 @@
       "title": "Proprietarul echipei s-a schimbat",
       "body": "{{coach}} este acum proprietarul echipei {{team}}."
     },
-    "joinedViaLink": "{{name}} a intrat în {{team}} prin linkul tău de invitație."
+    "joinedViaLink": "{{name}} a intrat în {{team}} prin linkul tău de invitație.",
+    "jobDone": {
+      "title": "{{kind}} gata",
+      "body": "{{kind}} s-a terminat și poate fi citit."
+    },
+    "jobFailed": {
+      "title": "{{kind}} a eșuat",
+      "body": "Nu a putut fi finalizat. {{reason}}"
+    }
   },
   "teamInvite": {
     "button": "Link de invitație",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} aruncări",
       "team_stats": "totaluri de echipă"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "Evaluare jucător",
+      "team_report": "Raport de echipă",
+      "packet": "Pachet raport de meci",
+      "training": "Program de antrenament",
+      "scouting": "Raport de scouting",
+      "game_report_full": "Raport de meci",
+      "clip": "Analiză video",
+      "default": "Raport",
+      "eval_text": "Evaluare jucător"
+    },
+    "ready": "{{label}} este gata",
+    "failed": "{{label}} nu a putut fi finalizat",
+    "tapToOpen": "Atinge pentru a deschide",
+    "tapForDetails": "Atinge pentru detalii",
+    "nReady": "{{count}} rapoarte gata"
   }
 }

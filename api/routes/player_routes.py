@@ -1331,6 +1331,8 @@ def coach_notifications(
             "read": n.read,
             "ref_id": n.ref_id,
             "created_at": n.created_at,
+            "i18n_key": n.i18n_key,
+            "i18n_params": n.i18n_params,
             "source": "player_notif",
             "outcome": _request_outcome(db, n.type, n.ref_id),
         })
@@ -1343,6 +1345,8 @@ def coach_notifications(
             "read": n.read,
             "ref_id": n.ref_id,
             "created_at": n.created_at,
+            "i18n_key": n.i18n_key,
+            "i18n_params": n.i18n_params,
             "source": "coach_notif",
             "coach_notif_id": n.id,
             "outcome": _request_outcome(db, n.type, n.ref_id),

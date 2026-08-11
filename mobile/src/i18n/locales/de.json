@@ -2529,7 +2529,15 @@
       "title": "Team-Eigentümer geändert",
       "body": "{{coach}} ist jetzt Eigentümer von {{team}}."
     },
-    "joinedViaLink": "{{name}} ist über deinen Einladungslink {{team}} beigetreten."
+    "joinedViaLink": "{{name}} ist über deinen Einladungslink {{team}} beigetreten.",
+    "jobDone": {
+      "title": "{{kind}} fertig",
+      "body": "Dein {{kind}} ist fertig und kann gelesen werden."
+    },
+    "jobFailed": {
+      "title": "{{kind}} fehlgeschlagen",
+      "body": "Konnte nicht abgeschlossen werden. {{reason}}"
+    }
   },
   "teamInvite": {
     "button": "Einladungslink",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} Würfe",
       "team_stats": "Teamwerte"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "Spielerbewertung",
+      "team_report": "Teambericht",
+      "packet": "Spielbericht-Paket",
+      "training": "Trainingsprogramm",
+      "scouting": "Scouting-Bericht",
+      "game_report_full": "Spielbericht",
+      "clip": "Videoanalyse",
+      "default": "Bericht",
+      "eval_text": "Spielerbewertung"
+    },
+    "ready": "{{label}} ist fertig",
+    "failed": "{{label}} konnte nicht fertiggestellt werden",
+    "tapToOpen": "Zum Öffnen tippen",
+    "tapForDetails": "Für Details tippen",
+    "nReady": "{{count}} Berichte fertig"
   }
 }

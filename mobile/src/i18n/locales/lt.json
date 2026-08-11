@@ -2529,7 +2529,15 @@
       "title": "Komandos savininkas pakeistas",
       "body": "{{coach}} dabar yra {{team}} savininkas."
     },
-    "joinedViaLink": "{{name}} prisijungė prie {{team}} per tavo pakvietimo nuorodą."
+    "joinedViaLink": "{{name}} prisijungė prie {{team}} per tavo pakvietimo nuorodą.",
+    "jobDone": {
+      "title": "{{kind}} paruoštas",
+      "body": "Jūsų {{kind}} baigtas ir paruoštas skaityti."
+    },
+    "jobFailed": {
+      "title": "{{kind}} nepavyko",
+      "body": "Nepavyko užbaigti. {{reason}}"
+    }
   },
   "teamInvite": {
     "button": "Pakvietimo nuoroda",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} metimų",
       "team_stats": "komandos sumos"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "Žaidėjo vertinimas",
+      "team_report": "Komandos ataskaita",
+      "packet": "Rungtynių ataskaitų rinkinys",
+      "training": "Treniruočių programa",
+      "scouting": "Skautingo ataskaita",
+      "game_report_full": "Rungtynių ataskaita",
+      "clip": "Vaizdo analizė",
+      "default": "Ataskaita",
+      "eval_text": "Žaidėjo vertinimas"
+    },
+    "ready": "{{label}} paruoštas",
+    "failed": "Nepavyko užbaigti: {{label}}",
+    "tapToOpen": "Palieskite, kad atidarytumėte",
+    "tapForDetails": "Palieskite, kad pamatytumėte",
+    "nReady": "Paruoštų ataskaitų: {{count}}"
   }
 }

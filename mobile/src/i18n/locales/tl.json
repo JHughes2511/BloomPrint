@@ -2529,7 +2529,15 @@
       "title": "Nagbago ang may-ari ng koponan",
       "body": "Si {{coach}} na ang may-ari ng {{team}}."
     },
-    "joinedViaLink": "Sumali si {{name}} sa {{team}} gamit ang iyong link."
+    "joinedViaLink": "Sumali si {{name}} sa {{team}} gamit ang iyong link.",
+    "jobDone": {
+      "title": "Handa na ang {{kind}}",
+      "body": "Tapos na ang iyong {{kind}} at handa nang basahin."
+    },
+    "jobFailed": {
+      "title": "Nabigo ang {{kind}}",
+      "body": "Hindi ito natapos. {{reason}}"
+    }
   },
   "teamInvite": {
     "button": "Link ng imbitasyon",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} tira",
       "team_stats": "kabuuan ng koponan"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "Ebalwasyon ng manlalaro",
+      "team_report": "Ulat ng koponan",
+      "packet": "Pakete ng ulat ng laro",
+      "training": "Programa ng pagsasanay",
+      "scouting": "Ulat ng scouting",
+      "game_report_full": "Ulat ng laro",
+      "clip": "Pagsusuri ng film",
+      "default": "Ulat",
+      "eval_text": "Ebalwasyon ng manlalaro"
+    },
+    "ready": "Handa na ang {{label}}",
+    "failed": "Hindi natapos ang {{label}}",
+    "tapToOpen": "I-tap para buksan",
+    "tapForDetails": "I-tap para sa detalye",
+    "nReady": "{{count}} ulat ang handa"
   }
 }

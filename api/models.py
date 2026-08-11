@@ -194,6 +194,11 @@ class GenerationJob(Base):
     # Guards the loop: a job that dies three times is failing for its own
     # reasons, not because of bad luck with deploys.
     attempts    = Column(Integer, default=0)
+    # Whether this job's ending has been turned into a notification. Six
+    # different places mark a job done; asking each of them to also announce it
+    # is five chances to forget. The endpoint that reports on jobs does it
+    # instead, once, whoever finished the work.
+    announced   = Column(Boolean, default=False)
     created_at  = Column(DateTime, default=datetime.utcnow)
     updated_at  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

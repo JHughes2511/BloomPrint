@@ -2529,7 +2529,15 @@
       "title": "球队所有者已变更",
       "body": "{{coach}} 现在是 {{team}} 的所有者。"
     },
-    "joinedViaLink": "{{name}} 通过你的邀请链接加入了 {{team}}。"
+    "joinedViaLink": "{{name}} 通过你的邀请链接加入了 {{team}}。",
+    "jobDone": {
+      "title": "{{kind}}已完成",
+      "body": "你的{{kind}}已生成，可以查看了。"
+    },
+    "jobFailed": {
+      "title": "{{kind}}失败",
+      "body": "无法完成。{{reason}}"
+    }
   },
   "teamInvite": {
     "button": "邀请链接",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} 次出手",
       "team_stats": "球队总计"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "球员评估",
+      "team_report": "球队报告",
+      "packet": "比赛报告包",
+      "training": "训练计划",
+      "scouting": "球探报告",
+      "game_report_full": "比赛报告",
+      "clip": "影片分析",
+      "default": "报告",
+      "eval_text": "球员评估"
+    },
+    "ready": "{{label}}已完成",
+    "failed": "{{label}}未能完成",
+    "tapToOpen": "点按打开",
+    "tapForDetails": "点按查看详情",
+    "nReady": "{{count}} 份报告已完成"
   }
 }

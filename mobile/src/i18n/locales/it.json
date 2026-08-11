@@ -2529,7 +2529,15 @@
       "title": "Proprietà della squadra cambiata",
       "body": "{{coach}} è ora il proprietario di {{team}}."
     },
-    "joinedViaLink": "{{name}} è entrato in {{team}} con il tuo link d'invito."
+    "joinedViaLink": "{{name}} è entrato in {{team}} con il tuo link d'invito.",
+    "jobDone": {
+      "title": "{{kind}} pronto",
+      "body": "Il tuo {{kind}} è terminato ed è pronto da leggere."
+    },
+    "jobFailed": {
+      "title": "{{kind}} non riuscito",
+      "body": "Non è stato possibile completarlo. {{reason}}"
+    }
   },
   "teamInvite": {
     "button": "Link d'invito",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} tiri",
       "team_stats": "totali di squadra"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "Valutazione giocatore",
+      "team_report": "Report squadra",
+      "packet": "Pacchetto report partita",
+      "training": "Programma di allenamento",
+      "scouting": "Report scouting",
+      "game_report_full": "Report partita",
+      "clip": "Analisi video",
+      "default": "Report",
+      "eval_text": "Valutazione giocatore"
+    },
+    "ready": "{{label}} è pronto",
+    "failed": "Non è stato possibile completare {{label}}",
+    "tapToOpen": "Tocca per aprire",
+    "tapForDetails": "Tocca per i dettagli",
+    "nReady": "{{count}} report pronti"
   }
 }

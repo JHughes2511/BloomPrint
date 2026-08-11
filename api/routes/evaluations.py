@@ -422,6 +422,81 @@ def _run_eval_text_job(job_id: int, player_id: int, coach_id: int, output_type: 
     genjob.run(job_id, work)
 
 
+# What a finished job is called, for the banner and the notification. The key
+# is the job's kind; the client renders `jobs.kinds.<name>` in the coach's own
+# language, and the English here is the fallback for the notification row.
+JOB_KIND_LABELS = {
+    "eval": "Player evaluation",
+    "eval_text": "Player evaluation",
+    "team_report": "Team report",
+    "packet": "Game report packet",
+    "training": "Training program",
+    "scouting": "Scouting report",
+    "game_report_full": "Game report",
+    "clip": "Film analysis",
+}
+
+# How far back the banner looks. Long enough that a film analysis started
+# before lunch is still announced, short enough that opening the app after a
+# week does not replay a month of finished work.
+JOB_LOOKBACK_HOURS = 12
+
+
+@router.get("/jobs/active")
+def active_generation_jobs(
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Every job of this coach's that is running or has just finished.
+
+    One endpoint for the whole app, because a job outlives the screen that
+    started it: a film analysis begun in the packet builder finishes whether
+    the coach is still sitting there or has moved on to the roster, and until
+    now nothing outside that one screen knew it had happened.
+
+    Finishing is also announced here rather than at each of the six places that
+    mark a job done — a notification written in one place cannot be forgotten
+    in five.
+    """
+    from datetime import datetime, timedelta
+    since = datetime.utcnow() - timedelta(hours=JOB_LOOKBACK_HOURS)
+    jobs = (db.query(models.GenerationJob)
+              .filter(models.GenerationJob.coach_id == coach.id,
+                      models.GenerationJob.updated_at >= since)
+              .order_by(models.GenerationJob.updated_at.desc())
+              .limit(50).all())
+
+    from .staff_sharing import _coach_notify
+    out = []
+    announced_now = False
+    for job in jobs:
+        label = JOB_KIND_LABELS.get(job.kind, "Report")
+        if job.status in ("done", "error") and not job.announced:
+            _coach_notify(
+                db, coach.id,
+                title=f"{label} {'ready' if job.status == 'done' else 'failed'}",
+                body=(f"Your {label.lower()} is ready to read."
+                      if job.status == "done"
+                      else (job.error or f"Your {label.lower()} could not be finished.")),
+                ref_id=job.result_id,
+                ntype="job_done" if job.status == "done" else "job_error",
+                key="notifs.jobDone" if job.status == "done" else "notifs.jobFailed",
+                params={"kind": job.kind, "label": label,
+                        "reason": (job.error or "")[:200]},
+            )
+            job.announced = True
+            announced_now = True
+        out.append({
+            "id": job.id, "kind": job.kind, "status": job.status,
+            "progress": job.progress, "result_id": job.result_id,
+            "error": job.error, "label": label,
+            "updated_at": job.updated_at.isoformat() if job.updated_at else None,
+        })
+    if announced_now:
+        db.commit()
+    return out
+
+
 @router.get("/jobs/{job_id}")
 def get_generation_job(
     job_id: int,

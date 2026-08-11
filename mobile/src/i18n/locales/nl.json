@@ -2529,7 +2529,15 @@
       "title": "Teameigenaar gewijzigd",
       "body": "{{coach}} is nu de eigenaar van {{team}}."
     },
-    "joinedViaLink": "{{name}} is via jouw uitnodigingslink bij {{team}} gekomen."
+    "joinedViaLink": "{{name}} is via jouw uitnodigingslink bij {{team}} gekomen.",
+    "jobDone": {
+      "title": "{{kind}} klaar",
+      "body": "Je {{kind}} is klaar om te lezen."
+    },
+    "jobFailed": {
+      "title": "{{kind}} mislukt",
+      "body": "Kon niet worden voltooid. {{reason}}"
+    }
   },
   "teamInvite": {
     "button": "Uitnodigingslink",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} schoten",
       "team_stats": "teamtotalen"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "Spelerevaluatie",
+      "team_report": "Teamrapport",
+      "packet": "Wedstrijdrapportpakket",
+      "training": "Trainingsprogramma",
+      "scouting": "Scoutingrapport",
+      "game_report_full": "Wedstrijdrapport",
+      "clip": "Videoanalyse",
+      "default": "Rapport",
+      "eval_text": "Spelerevaluatie"
+    },
+    "ready": "{{label}} is klaar",
+    "failed": "{{label}} kon niet worden voltooid",
+    "tapToOpen": "Tik om te openen",
+    "tapForDetails": "Tik voor details",
+    "nReady": "{{count}} rapporten klaar"
   }
 }

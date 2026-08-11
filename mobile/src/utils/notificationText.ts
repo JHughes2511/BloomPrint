@@ -18,6 +18,10 @@ import type { TFunction } from 'i18next';
 const ENUM_PARAMS: Record<string, string> = {
   // e.g. "scouting_report" -> the coach's word for a scouting report
   type: 'reportTypes',
+  // A finished job's kind — "packet" -> "Game report packet". The server sends
+  // the kind rather than prose for the same reason as everything else here:
+  // it does not know who will read the row or in what language.
+  kind: 'jobs.kinds',
 };
 
 function localizeParams(params: Record<string, any> | null | undefined, tr: TFunction) {

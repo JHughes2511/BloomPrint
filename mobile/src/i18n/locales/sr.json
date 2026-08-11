@@ -2529,7 +2529,15 @@
       "title": "Власник тима промењен",
       "body": "{{coach}} је сада власник тима {{team}}."
     },
-    "joinedViaLink": "{{name}} се придружио екипи {{team}} преко твоје позивнице."
+    "joinedViaLink": "{{name}} се придружио екипи {{team}} преко твоје позивнице.",
+    "jobDone": {
+      "title": "{{kind}} spreman",
+      "body": "Vaš {{kind}} je gotov i spreman za čitanje."
+    },
+    "jobFailed": {
+      "title": "{{kind}} nije uspeo",
+      "body": "Nije moglo da se dovrši. {{reason}}"
+    }
   },
   "teamInvite": {
     "button": "Позивница",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} шутева",
       "team_stats": "укупно за тим"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "Ocena igrača",
+      "team_report": "Izveštaj tima",
+      "packet": "Paket izveštaja sa utakmice",
+      "training": "Program treninga",
+      "scouting": "Skaut izveštaj",
+      "game_report_full": "Izveštaj sa utakmice",
+      "clip": "Analiza snimka",
+      "default": "Izveštaj",
+      "eval_text": "Ocena igrača"
+    },
+    "ready": "{{label}} je spreman",
+    "failed": "{{label}} nije mogao da se dovrši",
+    "tapToOpen": "Dodirnite da otvorite",
+    "tapForDetails": "Dodirnite za detalje",
+    "nReady": "Spremnih izveštaja: {{count}}"
   }
 }

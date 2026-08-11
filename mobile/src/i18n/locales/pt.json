@@ -2529,7 +2529,15 @@
       "title": "Propriedade da equipa alterada",
       "body": "{{coach}} é agora o proprietário de {{team}}."
     },
-    "joinedViaLink": "{{name}} entrou em {{team}} através do teu link de convite."
+    "joinedViaLink": "{{name}} entrou em {{team}} através do teu link de convite.",
+    "jobDone": {
+      "title": "{{kind}} pronto",
+      "body": "O teu {{kind}} terminou e está pronto para ler."
+    },
+    "jobFailed": {
+      "title": "{{kind}} falhou",
+      "body": "Não foi possível terminar. {{reason}}"
+    }
   },
   "teamInvite": {
     "button": "Link de convite",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}} lançamentos",
       "team_stats": "totais da equipa"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "Avaliação de jogador",
+      "team_report": "Relatório de equipa",
+      "packet": "Pacote de relatório de jogo",
+      "training": "Programa de treino",
+      "scouting": "Relatório de scouting",
+      "game_report_full": "Relatório de jogo",
+      "clip": "Análise de vídeo",
+      "default": "Relatório",
+      "eval_text": "Avaliação de jogador"
+    },
+    "ready": "{{label}} está pronto",
+    "failed": "Não foi possível terminar {{label}}",
+    "tapToOpen": "Toca para abrir",
+    "tapForDetails": "Toca para ver detalhes",
+    "nReady": "{{count}} relatórios prontos"
   }
 }

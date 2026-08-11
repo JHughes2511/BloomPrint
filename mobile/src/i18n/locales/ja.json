@@ -2529,7 +2529,15 @@
       "title": "チームのオーナーが変わりました",
       "body": "{{coach}} が {{team}} のオーナーになりました。"
     },
-    "joinedViaLink": "{{name}} さんが招待リンクから {{team}} に参加しました。"
+    "joinedViaLink": "{{name}} さんが招待リンクから {{team}} に参加しました。",
+    "jobDone": {
+      "title": "{{kind}}が完了しました",
+      "body": "{{kind}}が仕上がり、閲覧できます。"
+    },
+    "jobFailed": {
+      "title": "{{kind}}に失敗しました",
+      "body": "完了できませんでした。{{reason}}"
+    }
   },
   "teamInvite": {
     "button": "招待リンク",
@@ -2625,5 +2633,23 @@
       "shots": "{{count}}本のシュート",
       "team_stats": "チーム合計"
     }
+  },
+  "jobs": {
+    "kinds": {
+      "eval": "選手評価",
+      "team_report": "チームレポート",
+      "packet": "試合レポートパケット",
+      "training": "トレーニングプログラム",
+      "scouting": "スカウティングレポート",
+      "game_report_full": "試合レポート",
+      "clip": "フィルム分析",
+      "default": "レポート",
+      "eval_text": "選手評価"
+    },
+    "ready": "{{label}}が完了しました",
+    "failed": "{{label}}を完了できませんでした",
+    "tapToOpen": "タップして開く",
+    "tapForDetails": "タップして詳細を見る",
+    "nReady": "{{count}}件のレポートが完了"
   }
 }

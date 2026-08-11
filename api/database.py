@@ -334,6 +334,8 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     # Marks the one-off roster repair as done for a game. Without it the
     # repair ran on every boot and put back players a coach had deleted.
     ("game_sessions", "roster_backfilled", "BOOLEAN DEFAULT FALSE"),
+    # Whether a finished job has already been announced to its coach.
+    ("generation_jobs", "announced", "BOOLEAN DEFAULT FALSE"),
 ]
 
 
