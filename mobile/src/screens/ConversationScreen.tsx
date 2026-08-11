@@ -307,7 +307,14 @@ export default function ConversationScreen() {
                 colours are unchanged: 44 square, radius 10, CTA fill, and the
                 icon in the CTA's own foreground colour rather than a hardcoded
                 white, which is what made it invisible here in the first place. */}
-            {sending ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="send" size={19} color={t.ctaText} />}
+            {sending
+              ? <ActivityIndicator color={t.ctaText} size="small" />
+              : <Ionicons name="send" size={19} color={t.ctaText}
+                          // The glyph is drawn pointing right; -45 turns it up
+                          // and to the right, which is the angle in the design.
+                          // Rotated rather than swapped for another icon because
+                          // no icon in the set is drawn at this angle.
+                          style={{ transform: [{ rotate: '-45deg' }] }} />}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
