@@ -334,7 +334,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                     multiline
                   />
                   <TouchableOpacity style={styles.sendBtn} onPress={submitComment} disabled={busy || !commentText.trim()}>
-                    {busy ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="send" size={18} color={t.ctaText} />}
+                    {busy ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="arrow-up" size={20} color={t.ctaText} />}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -401,7 +401,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   secondaryBtnText: { color: t.accent, fontFamily: fonts[700], fontSize: 13 },
   primaryBtn: { flex: 1, flexDirection: 'row', gap: 6, borderRadius: 10, paddingVertical: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: t.ctaBg },
   primaryBtnText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 13 },
-  sendBtn: { width: 44, height: 44, borderRadius: 10, backgroundColor: t.ctaBg, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end' },
+  // Stretches to the box beside it rather than sitting 44 tall at the bottom
+  // of a field that has grown past that. Same shape as the send buttons in
+  // Staff Hub and Coach Training — what was out of step was the height.
+  sendBtn: { width: 44, minHeight: 44, borderRadius: 10, backgroundColor: t.ctaBg, alignItems: 'center', justifyContent: 'center', alignSelf: 'stretch' },
   hint: { color: t.muted2, fontSize: 11, marginTop: 8 },
   scopeHint: { color: t.accent, fontSize: 10, fontFamily: fonts[700], letterSpacing: 0.5, marginBottom: 6 },
   corrRow: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: t.chip, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, marginBottom: 6 },

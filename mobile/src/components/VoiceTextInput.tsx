@@ -229,7 +229,11 @@ export default function VoiceTextInput({
         <TouchableOpacity
           onPress={toggleVoice}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 4 }}
-          style={{ paddingLeft: 8, paddingTop: multiline ? 2 : 0 }}
+          // Centred in the box, not pinned to its first line. The row aligns to
+          // the top on a multiline field so the TEXT starts at the top, and the
+          // mic was inheriting that — sitting up against the top edge on a box
+          // several lines tall, which reads as misplaced rather than aligned.
+          style={{ paddingLeft: 8, alignSelf: 'center' }}
         >
           <Ionicons name={micIcon} size={17} color={micColor} />
         </TouchableOpacity>

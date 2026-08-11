@@ -302,7 +302,7 @@ export default function ConversationScreen() {
             multiline
           />
           <TouchableOpacity style={styles.sendBtn} onPress={send} disabled={sending || (!text.trim() && pending.length === 0)}>
-            {sending ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="send" size={18} color="#fff" />}
+            {sending ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="arrow-up" size={20} color={t.ctaText} />}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -402,8 +402,13 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   composer: { flexDirection: 'row', alignItems: 'flex-end', gap: 4, paddingHorizontal: 8, paddingVertical: 8, borderTopWidth: 1, borderTopColor: t.divider },
   attachBtn: { width: 34, height: 40, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   input: { flex: 1, backgroundColor: t.chip, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 9, color: t.ink, fontSize: 14.5, borderWidth: 1, borderColor: t.line, maxHeight: 110, minHeight: 40 },
-  sendBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.accent, alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-    ...desktopOnly({ width: 44, height: 44, borderRadius: 10, backgroundColor: t.ctaBg }) },
+  // The Ask BloomPrint button, which is the one in the app that reads right:
+  // 44 square, radius 10, CTA fill, an up arrow in the CTA's own foreground
+  // colour. Spelling the colour as t.ctaText rather than #fff matters — the
+  // direct-message button was a hardcoded white icon on a CTA background that
+  // IS white in this theme, so it rendered as an empty white square.
+  sendBtn: { width: 44, height: 44, borderRadius: 10, backgroundColor: t.ctaBg,
+             alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' },
   sheet: { backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, maxHeight: '70%', borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560)},
   sheetHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },

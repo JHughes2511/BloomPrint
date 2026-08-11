@@ -94,8 +94,8 @@ export default function CommentThread({
                 autoFocus
                 multiline
               />
-              <TouchableOpacity style={[s.sendBtn, { backgroundColor: acc }]} onPress={() => submit(c.id)} disabled={submitting || !replyText.trim()}>
-                {submitting ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="send" size={16} color="#fff" />}
+              <TouchableOpacity style={s.sendBtn} onPress={() => submit(c.id)} disabled={submitting || !replyText.trim()}>
+                {submitting ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="arrow-up" size={20} color={t.ctaText} />}
               </TouchableOpacity>
             </View>
           )}
@@ -118,5 +118,6 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   replyLink: { fontSize: 12, fontFamily: fonts[700] },
   replyRow: { flexDirection: 'row', gap: 8, marginBottom: 10, alignItems: 'flex-end' },
   input: { flex: 1, backgroundColor: t.chip, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, color: t.ink, fontSize: 13.5, borderWidth: 1, borderColor: t.line, minHeight: 40 },
-  sendBtn: { width: 42, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  sendBtn: { width: 44, height: 44, borderRadius: 10, backgroundColor: t.ctaBg,
+             alignItems: 'center', justifyContent: 'center' },
 });

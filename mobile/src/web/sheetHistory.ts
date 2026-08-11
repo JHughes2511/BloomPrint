@@ -76,6 +76,26 @@ export function registerSheet(close: () => void): () => void {
   };
 }
 
+/**
+ * Give up the entries we are holding WITHOUT walking back through them.
+ *
+ * For closing a sheet by navigating somewhere else. Closing normally schedules
+ * a history.back() to spend the entry the sheet was holding — correct when the
+ * page is staying put, and wrong here: the navigation pushes its own entry
+ * first, so the queued back lands on the sheet's entry instead and the coach is
+ * returned to the screen they just left. That is the "pick a name, end up back
+ * in Staff Hub" bug.
+ *
+ * Forgetting is safe because the stale entry sits UNDERNEATH the one the
+ * navigation pushed, which is exactly where back should go next anyway.
+ *
+ * Call it before closing the sheet, so the reconcile that follows sees nothing
+ * left to spend.
+ */
+export function abandonSheetHistory() {
+  pushed = 0;
+}
+
 /** Test seam: forget everything (no history calls). */
 export function __resetSheetHistory() {
   open = [];

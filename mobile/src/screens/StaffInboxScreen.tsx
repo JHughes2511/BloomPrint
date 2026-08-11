@@ -13,6 +13,7 @@ import Sheet from '../components/Sheet';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useGoUp } from '../navigation/goUp';
 import { Ionicons } from '@expo/vector-icons';
+import { abandonSheetHistory } from '../web/sheetHistory';
 import { staffSharingAPI, teamStaffAPI, staffMessagesAPI, coachesAPI, teamsAPI } from '../api/client';
 import { renderReport } from '../utils/renderReport';
 import SharedReportViewer from '../components/SharedReportViewer';
@@ -145,6 +146,12 @@ export default function StaffInboxScreen() {
     setCreating(true);
     try {
       const conv = await staffMessagesAPI.create({ member_ids: selectedStaff.map(s => s.id), is_group: selectedStaff.length > 1 });
+      // The sheet is closing because we are LEAVING, not because the coach
+      // dismissed it. Closing it normally schedules a history.back() to spend
+      // the entry it was holding, which then lands on that entry instead of on
+      // the conversation we are about to push — back to Staff Hub, having
+      // picked a name and gone nowhere.
+      abandonSheetHistory();
       setShowCompose(false);
       setSelectedStaff([]); setStaffSearch(''); setStaffResults([]);
       navigation.push('Conversation', { conversationId: conv.id, title: conv.title });
@@ -839,7 +846,7 @@ export default function StaffInboxScreen() {
                 }}
                 disabled={submittingGameComment || !gameCommentText.trim()}
               >
-                {submittingGameComment ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="send" size={18} color={t.ctaText} />}
+                {submittingGameComment ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="arrow-up" size={20} color={t.ctaText} />}
               </TouchableOpacity>
             </View>
             {gameComments.map((c: any, i: number) => (

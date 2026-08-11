@@ -206,7 +206,7 @@ export default function CoachTrainingDetailScreen() {
             >
               {submittingComment
                 ? <ActivityIndicator color={t.ctaText} size="small" />
-                : <Ionicons name="send" size={18} color={t.ctaText} />}
+                : <Ionicons name="arrow-up" size={20} color={t.ctaText} />}
             </TouchableOpacity>
           </View>
         </View>
