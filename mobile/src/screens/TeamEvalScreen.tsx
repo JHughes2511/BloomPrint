@@ -335,7 +335,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // Web card grids. Targets land on 4 games across and 3 of the roomier scout
   // and game-report cards at ~1900px; narrower windows drop a column on their
   // own. Native always reports a single column.
-  const gamesGrid  = useGridColumns({ columns: 4, inset: 32 });
+  // A game card carries a matchup, a date, a venue, a status pill and a bin.
+  // An iPad in landscape is past the desktop breakpoint, so it was laying out
+  // three of them at about 342px each and every one was squeezed: "Duke vs
+  // Westview ..." lost the opponent and "83-72" broke across two lines. There
+  // is no tablet to detect here — the only honest question is how much room a
+  // card needs, and 380 is it. An iPad drops to two across; a desktop, with
+  // more than 1500px of content, still fits its four.
+  const gamesGrid  = useGridColumns({ columns: 4, inset: 32, min: 380 });
   const scoutGrid  = useGridColumns({ columns: 3, inset: 32 });
   const reportGrid = useGridColumns({ columns: 3, inset: 32 });
   const [gradeDetailData, setGradeDetailData] = useState<any[]>([]);
@@ -2083,7 +2090,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* A game in progress is still a page under Games, and leaving it
               does not end it — the clock and everything logged are on the
               game, not on this screen. */}
-          <View style={{ paddingHorizontal: 16 }}><BackToGames /></View>
+          {/* 20 and 16 to match the scroller every other view sits in: this
+              one is a plain View, so without them the link sat hard against
+              the divider above it while Scout's had room to breathe. */}
+          <View style={{ paddingHorizontal: 20, paddingTop: 16 }}><BackToGames /></View>
           {/* Score bar */}
           <View style={s.scoreBar}>
             <View style={{ alignItems: 'center' }}>

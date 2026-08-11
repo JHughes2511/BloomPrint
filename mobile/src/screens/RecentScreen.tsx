@@ -1747,8 +1747,13 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   // the pill the moment it is wrong. The roster's team chips and Team Grade's
   // view chips — the two rows that look right — let the row take its height
   // from the chips, and this is now the same arrangement.
+  // 4 below the chips, not 16. The first date header brings its own 16px top
+  // margin, and react-native-web lays every View out as a flex column — which
+  // does not collapse adjacent margins the way a browser's block flow does. So
+  // the row's 12 and the header's 16 stacked instead of overlapping, and with
+  // the desktop's extra 4 the gap measured 32px.
   filterRow: { marginBottom: 12, flexGrow: 0,
-    ...desktopOnly({ paddingHorizontal: 16, paddingRight: 24, paddingBottom: 4 }) },
+    ...desktopOnly({ paddingHorizontal: 16, paddingRight: 24, marginBottom: 4 }) },
   // Copied from RosterScreen's teamChip, which is the pill the coach called
   // correct. Fixed 34 high, centred text, no shrinking.
   filterChip: { borderWidth: 1, borderColor: t.line, borderRadius: 999, paddingHorizontal: 16, height: 34, justifyContent: 'center' },
