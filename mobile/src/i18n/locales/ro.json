@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} pe meci",
     "noInsight": "Încă fără analiză.",
     "isMyTeam": "{{name}} este echipa mea",
-    "insightStale": "Rapoarte noi de atunci — rescrie"
+    "insightStale": "Rapoarte noi de atunci — rescrie",
+    "insightRewriting": "Se rescrie…"
   },
   "whiteboard": {
     "title": "Tablă tactică",

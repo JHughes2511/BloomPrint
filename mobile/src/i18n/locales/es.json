@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} por partido",
     "noInsight": "Aún no hay análisis.",
     "isMyTeam": "{{name}} es mi equipo",
-    "insightStale": "Hay informes nuevos — reescribir"
+    "insightStale": "Hay informes nuevos — reescribir",
+    "insightRewriting": "Reescribiendo…"
   },
   "whiteboard": {
     "title": "Pizarra",

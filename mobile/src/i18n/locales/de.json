@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} pro Spiel",
     "noInsight": "Noch keine Einschätzung.",
     "isMyTeam": "{{name}} ist mein Team",
-    "insightStale": "Neue Berichte seitdem — neu schreiben"
+    "insightStale": "Neue Berichte seitdem — neu schreiben",
+    "insightRewriting": "Wird neu geschrieben…"
   },
   "whiteboard": {
     "title": "Taktiktafel",

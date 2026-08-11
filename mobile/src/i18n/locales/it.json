@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} a partita",
     "noInsight": "Ancora nessuna analisi.",
     "isMyTeam": "{{name}} è la mia squadra",
-    "insightStale": "Nuovi report da allora — riscrivi"
+    "insightStale": "Nuovi report da allora — riscrivi",
+    "insightRewriting": "Riscrittura…"
   },
   "whiteboard": {
     "title": "Lavagna",

@@ -16,7 +16,7 @@ from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
 from .. import models, schemas
 from ..softdelete import soft_delete
-from ..ai_models import OPUS, long_text
+from ..ai_models import OPUS, SONNET, long_text
 from ..uploadguard import read_upload
 from .. import ai_import
 from .. import genjob
@@ -2801,9 +2801,12 @@ async def scout_insight(
 
     # What has been written about them, not only what was counted. A packet
     # report says why a number happened; the number on its own does not.
+    # Two pieces, trimmed. The output is ONE sentence: ten thousand characters
+    # of reading buys nothing it can say and costs seconds the coach spends
+    # watching a spinner. The newest material is the material that matters.
     reading = ""
     if written:
-        parts = [f"\n[{kind}]\n{(text or '')[:2500]}" for kind, text in written[:4]]
+        parts = [f"\n[{kind}]\n{(text or '')[:1200]}" for kind, text in written[:2]]
         reading = ("\n\nWHAT HAS ALREADY BEEN WRITTEN ABOUT THIS TEAM:"
                    + "".join(parts))
 
@@ -2819,8 +2822,12 @@ async def scout_insight(
     try:
         import anthropic
         client = anthropic.AsyncAnthropic()
+        # SONNET, per the tiers in ai_models: this condenses numbers already
+        # computed and reports Opus already wrote into one sentence, which is
+        # the summary case that tier exists for. It is the difference between
+        # a wait and an answer, on the one thing a coach taps repeatedly.
         resp = await client.messages.create(
-            model=OPUS, max_tokens=300,
+            model=SONNET, max_tokens=200,
             messages=[{"role": "user", "content": prompt}],
         )
         blocks = [b for b in resp.content if hasattr(b, "text")]

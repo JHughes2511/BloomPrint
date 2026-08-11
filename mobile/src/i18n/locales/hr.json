@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} po utakmici",
     "noInsight": "Još nema analize.",
     "isMyTeam": "{{name}} je moja momčad",
-    "insightStale": "Novi izvještaji otad — napiši ponovno"
+    "insightStale": "Novi izvještaji otad — napiši ponovno",
+    "insightRewriting": "Ponovno pisanje…"
   },
   "whiteboard": {
     "title": "Ploča",

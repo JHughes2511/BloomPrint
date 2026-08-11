@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} por jogo",
     "noInsight": "Ainda sem análise.",
     "isMyTeam": "{{name}} é a minha equipa",
-    "insightStale": "Relatórios novos desde então — reescrever"
+    "insightStale": "Relatórios novos desde então — reescrever",
+    "insightRewriting": "A reescrever…"
   },
   "whiteboard": {
     "title": "Quadro Tático",

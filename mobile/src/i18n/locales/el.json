@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} ανά αγώνα",
     "noInsight": "Δεν υπάρχει ακόμη ανάλυση.",
     "isMyTeam": "Η {{name}} είναι η ομάδα μου",
-    "insightStale": "Νέες αναφορές έκτοτε — ξαναγράψτε το"
+    "insightStale": "Νέες αναφορές έκτοτε — ξαναγράψτε το",
+    "insightRewriting": "Επανεγγραφή…"
   },
   "whiteboard": {
     "title": "Πίνακας",

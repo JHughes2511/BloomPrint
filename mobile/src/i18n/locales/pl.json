@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} na mecz",
     "noInsight": "Brak analizy.",
     "isMyTeam": "{{name}} to mój zespół",
-    "insightStale": "Od tego czasu są nowe raporty — napisz od nowa"
+    "insightStale": "Od tego czasu są nowe raporty — napisz od nowa",
+    "insightRewriting": "Przepisywanie…"
   },
   "whiteboard": {
     "title": "Tablica",

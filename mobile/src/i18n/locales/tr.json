@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — maç başına {{n}}",
     "noInsight": "Henüz analiz yok.",
     "isMyTeam": "{{name}} benim takımım",
-    "insightStale": "O zamandan beri yeni raporlar var — yeniden yaz"
+    "insightStale": "O zamandan beri yeni raporlar var — yeniden yaz",
+    "insightRewriting": "Yeniden yazılıyor…"
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

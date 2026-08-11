@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} თამაშზე",
     "noInsight": "შეფასება ჯერ არ არის.",
     "isMyTeam": "{{name}} ჩემი გუნდია",
-    "insightStale": "მას შემდეგ ახალი ანგარიშებია — თავიდან დაწერე"
+    "insightStale": "მას შემდეგ ახალი ანგარიშებია — თავიდან დაწერე",
+    "insightRewriting": "გადაიწერება…"
   },
   "whiteboard": {
     "title": "დაფა",

@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} لكل مباراة",
     "noInsight": "لا توجد ملاحظة بعد.",
     "isMyTeam": "{{name}} هو فريقي",
-    "insightStale": "توجد تقارير جديدة منذ ذلك الحين — أعد كتابته"
+    "insightStale": "توجد تقارير جديدة منذ ذلك الحين — أعد كتابته",
+    "insightRewriting": "جارٍ إعادة الكتابة…"
   },
   "whiteboard": {
     "title": "السبورة",

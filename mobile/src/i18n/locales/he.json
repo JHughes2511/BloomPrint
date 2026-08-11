@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} למשחק",
     "noInsight": "אין עדיין תובנה.",
     "isMyTeam": "{{name}} היא הקבוצה שלי",
-    "insightStale": "יש דוחות חדשים מאז — כתוב מחדש"
+    "insightStale": "יש דוחות חדשים מאז — כתוב מחדש",
+    "insightRewriting": "כותב מחדש…"
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

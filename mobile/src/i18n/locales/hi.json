@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} प्रति गेम",
     "noInsight": "अभी कोई विश्लेषण नहीं।",
     "isMyTeam": "{{name}} मेरी टीम है",
-    "insightStale": "इसके बाद नई रिपोर्ट आई हैं — दोबारा लिखें"
+    "insightStale": "इसके बाद नई रिपोर्ट आई हैं — दोबारा लिखें",
+    "insightRewriting": "दोबारा लिखा जा रहा है…"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",

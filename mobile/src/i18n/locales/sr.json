@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} по утакмици",
     "noInsight": "Још нема анализе.",
     "isMyTeam": "{{name}} je moj tim",
-    "insightStale": "Novi izveštaji otad — napiši ponovo"
+    "insightStale": "Novi izveštaji otad — napiši ponovo",
+    "insightRewriting": "Ponovo se piše…"
   },
   "whiteboard": {
     "title": "Tabla",

@@ -1506,7 +1506,20 @@ export default function TeamEvalScreen({ route, navigation }: any) {
    * something to do on their behalf.
    */
   const StaleInsight = ({ subject }: { subject: string }) => {
-    if (!insights[subject]?.stale || insightBusy[subject]) return null;
+    // Rewriting says so HERE, beside the sentence, which stays on screen. The
+    // old line is still true and still worth reading; replacing it with a
+    // spinner spends the wait showing the coach nothing.
+    if (insightBusy[subject]) {
+      return (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+          <ActivityIndicator color={t.brown} size="small" />
+          <Text style={{ color: t.brown, fontSize: 11.5, fontFamily: fonts[700] }}>
+            {tr('teamGrade.insightRewriting')}
+          </Text>
+        </View>
+      );
+    }
+    if (!insights[subject]?.stale) return null;
     return (
       <TouchableOpacity
         style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}
@@ -3099,7 +3112,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                             </TouchableOpacity>
                             {open && (
                               <View style={{ paddingBottom: 10, paddingRight: 8 }}>
-                                {insightBusy[p.player_name]
+                                {!insights[p.player_name] && insightBusy[p.player_name]
                                   ? <ActivityIndicator color={t.accent} size="small" style={{ alignSelf: 'flex-start' }} />
                                   : <>
                                       <Text style={{ color: t.inkSoft, fontSize: 13, lineHeight: 19, marginBottom: 6 }}>
@@ -3127,7 +3140,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                       .map(([key, label, rows], i) => (
                         <View key={key} style={{ marginTop: i === 0 ? 0 : 16 }}>
                           <Text style={s.cardLabel}>{label}</Text>
-                          {insightBusy[key]
+                          {!insights[key] && insightBusy[key]
                             ? <ActivityIndicator color={t.accent} size="small" style={{ alignSelf: 'flex-start', marginBottom: 6 }} />
                             : !!insights[key] && (
                                 <>

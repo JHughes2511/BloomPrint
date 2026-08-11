@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} per wedstrijd",
     "noInsight": "Nog geen analyse.",
     "isMyTeam": "{{name}} is mijn team",
-    "insightStale": "Nieuwe rapporten sindsdien — herschrijven"
+    "insightStale": "Nieuwe rapporten sindsdien — herschrijven",
+    "insightRewriting": "Herschrijven…"
   },
   "whiteboard": {
     "title": "Tactiekbord",

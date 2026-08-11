@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} за гру",
     "noInsight": "Поки немає розбору.",
     "isMyTeam": "{{name}} — моя команда",
-    "insightStale": "Відтоді є нові звіти — переписати"
+    "insightStale": "Відтоді є нові звіти — переписати",
+    "insightRewriting": "Переписується…"
   },
   "whiteboard": {
     "title": "Тактична дошка",

@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} kada laro",
     "noInsight": "Wala pang pagsusuri.",
     "isMyTeam": "Ang {{name}} ay aking koponan",
-    "insightStale": "May bagong ulat mula noon — isulat muli"
+    "insightStale": "May bagong ulat mula noon — isulat muli",
+    "insightRewriting": "Isinusulat muli…"
   },
   "whiteboard": {
     "title": "Whiteboard",

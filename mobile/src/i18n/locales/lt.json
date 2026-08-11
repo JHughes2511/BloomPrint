@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} per rungtynes",
     "noInsight": "Analizės kol kas nėra.",
     "isMyTeam": "{{name}} yra mano komanda",
-    "insightStale": "Nuo tada yra naujų ataskaitų — perrašyti"
+    "insightStale": "Nuo tada yra naujų ataskaitų — perrašyti",
+    "insightRewriting": "Perrašoma…"
   },
   "whiteboard": {
     "title": "Lenta",

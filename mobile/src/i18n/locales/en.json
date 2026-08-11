@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} per game",
     "noInsight": "No insight yet.",
     "isMyTeam": "{{name}} is my team",
-    "insightStale": "New reports since this — rewrite it"
+    "insightStale": "New reports since this — rewrite it",
+    "insightRewriting": "Rewriting…"
   },
   "whiteboard": {
     "title": "Whiteboard",

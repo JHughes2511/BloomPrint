@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — 1試合あたり{{n}}",
     "noInsight": "まだ所見はありません。",
     "isMyTeam": "{{name}} は自分のチームです",
-    "insightStale": "以降に新しいレポートがあります — 書き直す"
+    "insightStale": "以降に新しいレポートがあります — 書き直す",
+    "insightRewriting": "書き直しています…"
   },
   "whiteboard": {
     "title": "ホワイトボード",

@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — 경기당 {{n}}",
     "noInsight": "아직 코멘트가 없습니다.",
     "isMyTeam": "{{name}}은(는) 내 팀입니다",
-    "insightStale": "이후 새 리포트가 있습니다 — 다시 쓰기"
+    "insightStale": "이후 새 리포트가 있습니다 — 다시 쓰기",
+    "insightRewriting": "다시 쓰는 중…"
   },
   "whiteboard": {
     "title": "작전판",

@@ -2260,7 +2260,8 @@
     "perGameStat": "{{stat}} — {{n}} per match",
     "noInsight": "Ingen analys ännu.",
     "isMyTeam": "{{name}} är mitt lag",
-    "insightStale": "Nya rapporter sedan dess — skriv om"
+    "insightStale": "Nya rapporter sedan dess — skriv om",
+    "insightRewriting": "Skriver om…"
   },
   "whiteboard": {
     "title": "Taktiktavla",
