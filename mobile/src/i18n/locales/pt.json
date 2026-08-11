@@ -1986,7 +1986,7 @@
     "importFromGame": "De um jogo registado",
     "importFromFile": "De um ficheiro",
     "noRecordedGames": "Ainda não há jogos registados. Regista um jogo em Jogos e aparecerá aqui.",
-    "gameDate": "Data do jogo",
+    "gameDate": "Data do jogo (opcional)",
     "gameDateHint": "Procura por nome de equipa ou data para ligar este vídeo às Estatísticas desse jogo.",
     "linkGameTitle": "De que jogo é este vídeo?",
     "linkGameHint": "Escolhe as Estatísticas de jogo de onde vem, para usar os números reais.",

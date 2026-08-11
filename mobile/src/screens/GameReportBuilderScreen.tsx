@@ -1449,50 +1449,6 @@ export default function GameReportBuilderScreen() {
           film, and only when the coach has given a game date — without one
           there is nothing to match on, because a packet is built long after
           the night it is about. A suggestion, always confirmed. */}
-      <Sheet visible={!!linkAsk} animationType="slide" transparent onRequestClose={() => setLinkAsk(null)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{tr('gameBuilder.linkGameTitle')}</Text>
-              <TouchableOpacity onPress={() => setLinkAsk(null)} style={{ marginLeft: 'auto' }}>
-                <Ionicons name="close" size={22} color={t.muted} />
-              </TouchableOpacity>
-            </View>
-            <Text style={{ color: t.muted, fontSize: 12, marginBottom: 10 }}>
-              {tr('gameBuilder.linkGameHint')}
-            </Text>
-            <ScrollView style={{ maxHeight: 260 }}>
-              {(linkAsk?.games ?? []).map((g: any) => (
-                <TouchableOpacity key={g.id} style={styles.linkRow}
-                                  onPress={() => answerLink(g.id)} disabled={linking}>
-                  <Ionicons name="clipboard-outline" size={16} color={t.accent} />
-                  <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text style={styles.linkRowText} numberOfLines={1}>{g.label}</Text>
-                    {/* A near miss says so rather than being offered as
-                        though it were certain: a game logged after midnight
-                        is a day out, and so is a date typed from memory. */}
-                    {!g.exact_date && (
-                      <Text style={styles.linkRowNote}>{tr('gameBuilder.linkNearDate')}</Text>
-                    )}
-                  </View>
-                  <Ionicons name="chevron-forward" size={14} color={t.muted2} />
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
-              <TouchableOpacity style={[styles.modalBtn, { flex: 1, backgroundColor: t.chip }]}
-                                onPress={() => answerLink(null)} disabled={linking}>
-                <Text style={{ color: t.muted, fontFamily: fonts[700] }}>{tr('gameBuilder.linkNone')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalBtn, { flex: 1.2, backgroundColor: t.ctaBg }]}
-                                onPress={() => { setLinkAsk(null); navigation.navigate('Import' as never); }}
-                                disabled={linking}>
-                <Text style={{ color: t.ctaText, fontFamily: fonts[700] }}>{tr('gameBuilder.linkImport')}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Sheet>
 
       <Sheet visible={!!clipModal} animationType="slide" transparent onRequestClose={() => setClipModal(null)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>

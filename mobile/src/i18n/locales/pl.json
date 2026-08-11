@@ -1986,7 +1986,7 @@
     "importFromGame": "Z zapisanego meczu",
     "importFromFile": "Z pliku",
     "noRecordedGames": "Brak zapisanych meczów. Zapisz mecz w sekcji Mecze, a pojawi się tutaj.",
-    "gameDate": "Data meczu",
+    "gameDate": "Data meczu (opcjonalnie)",
     "gameDateHint": "Szukaj po nazwie zespołu lub dacie, aby powiązać to wideo ze Statystykami tego meczu.",
     "linkGameTitle": "Z którego meczu jest to wideo?",
     "linkGameHint": "Wybierz Statystyki meczowe, aby analiza użyła prawdziwych liczb.",

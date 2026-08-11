@@ -1986,7 +1986,7 @@
     "importFromGame": "Uit een vastgelegde wedstrijd",
     "importFromFile": "Uit een bestand",
     "noRecordedGames": "Nog geen wedstrijden vastgelegd. Leg een wedstrijd vast bij Wedstrijden en hij verschijnt hier.",
-    "gameDate": "Wedstrijddatum",
+    "gameDate": "Wedstrijddatum (optioneel)",
     "gameDateHint": "Zoek op teamnaam of datum om dit beeld aan de Wedstrijdstatistieken van die wedstrijd te koppelen.",
     "linkGameTitle": "Van welke wedstrijd is dit beeld?",
     "linkGameHint": "Kies de Wedstrijdstatistieken, zodat de analyse de echte cijfers gebruikt.",

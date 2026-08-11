@@ -1986,7 +1986,7 @@
     "importFromGame": "Mula sa naitalang laro",
     "importFromFile": "Mula sa file",
     "noRecordedGames": "Wala pang naitalang laro. Magtala ng laro sa Mga Laro at lilitaw ito rito.",
-    "gameDate": "Petsa ng laro",
+    "gameDate": "Petsa ng laro (opsyonal)",
     "gameDateHint": "Maghanap gamit ang pangalan ng koponan o petsa para maiugnay ang film sa Estadistika ng larong iyon.",
     "linkGameTitle": "Aling laro ang film na ito?",
     "linkGameHint": "Piliin ang Estadistika ng laro na pinagmulan nito para magamit ang totoong numero.",

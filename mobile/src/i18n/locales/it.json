@@ -1986,7 +1986,7 @@
     "importFromGame": "Da una partita registrata",
     "importFromFile": "Da un file",
     "noRecordedGames": "Nessuna partita registrata. Registra una partita in Partite e comparirà qui.",
-    "gameDate": "Data della partita",
+    "gameDate": "Data della partita (facoltativa)",
     "gameDateHint": "Cerca per nome squadra o data per collegare questo video alle Statistiche di quella partita.",
     "linkGameTitle": "Di quale partita è questo video?",
     "linkGameHint": "Scegli le Statistiche partita da cui proviene, per usarne i numeri reali.",

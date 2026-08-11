@@ -1986,7 +1986,7 @@
     "importFromGame": "Iš įrašytų rungtynių",
     "importFromFile": "Iš failo",
     "noRecordedGames": "Įrašytų rungtynių dar nėra. Įrašyk rungtynes skiltyje Rungtynės ir jos atsiras čia.",
-    "gameDate": "Rungtynių data",
+    "gameDate": "Rungtynių data (nebūtina)",
     "gameDateHint": "Ieškokite pagal komandą arba datą, kad susietumėte įrašą su tų rungtynių statistika.",
     "linkGameTitle": "Iš kurių rungtynių šis įrašas?",
     "linkGameHint": "Pasirinkite Rungtynių statistiką, kad analizė naudotų tikrus skaičius.",
