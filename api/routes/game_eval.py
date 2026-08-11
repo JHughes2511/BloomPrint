@@ -1004,6 +1004,63 @@ def get_box_score_text(
     return {"text": box_score_text(db, game)}
 
 
+def _game_team_ids(db: Session, coach, game) -> list[int | None]:
+    """The teams a game is about: the one it was created under, and the
+    opponent when they are a team on the books.
+
+    Both, because a correction on a scouting report is usually about the
+    opponent and a correction on a game report is usually about the coach's own
+    side, and neither is worth guessing between.
+    """
+    ids: list[int | None] = [game.team_id]
+    opp = _opponent_team_id_of(db, coach, game)
+    if opp is not None and opp not in ids:
+        ids.append(opp)
+    # None is the program-wide scope, which applies to everything.
+    ids.append(None)
+    return ids
+
+
+def _opponent_team_id_of(db: Session, coach, game) -> int | None:
+    """The opponent's team row for this game, when they have one.
+
+    A scouting report is about them, so a correction on it is about them too.
+    None when the opponent is only ever a name on a fixture, which scopes the
+    correction to the whole program instead — still true, just broader.
+    """
+    needle = (game.opponent_name or "").strip().lower()
+    if not needle:
+        return None
+    for tm in db.query(models.Team).filter_by(coach_id=coach.id).all():
+        if (tm.name or "").strip().lower() == needle:
+            return tm.id
+    return None
+
+
+def learned_for_game(db: Session, coach, game) -> str:
+    """What this coach's corrections have taught, for either team in this game.
+
+    A correction is the coach saying what a report should be paying attention
+    to, and they said it should hold for everything written about that team —
+    which is this, not only the film breakdown it was made on.
+    """
+    from .preferences import for_prompt
+    seen, out = set(), []
+    for team_id in _game_team_ids(db, coach, game):
+        block = for_prompt(db, coach.id, team_id)
+        for line in block.splitlines():
+            if line.strip().startswith("·") and line not in seen:
+                seen.add(line)
+                out.append(line)
+    if not out:
+        return ""
+    return ("\n\nWHAT THIS COACH HAS ASKED FOR BEFORE:\n"
+            "Corrections they have made to earlier reports. Treat them as standing "
+            "instructions about what to look for and what to say — cover them where "
+            "the evidence supports it, and do not claim them where it does not.\n"
+            + "\n".join(out))
+
+
 def film_notes_for_game(db: Session, coach, game) -> str:
     """Film breakdowns of THIS game, for a scouting or game report about it.
 
@@ -1856,7 +1913,8 @@ async def _run_scouting(db: Session, coach: models.Coach, game: models.GameSessi
         result = "WIN" if game.our_score > game.opponent_score else "LOSS"
         score_info = f"Final score: {game.our_score}-{game.opponent_score} ({result})"
 
-    notes_text = _team_notes_text(db, coach, game) + film_notes_for_game(db, coach, game)
+    notes_text = (_team_notes_text(db, coach, game) + film_notes_for_game(db, coach, game)
+                  + learned_for_game(db, coach, game))
 
     corr_text = ""
     if corrections:
@@ -2062,7 +2120,8 @@ async def _run_game_report(db: Session, coach: models.Coach, game: models.GameSe
         res = "WIN" if game.our_score > game.opponent_score else ("LOSS" if game.our_score < game.opponent_score else "TIE")
         score_info = f"Final: {game.our_score}-{game.opponent_score} ({res})"
 
-    context = _team_notes_text(db, coach, game) + film_notes_for_game(db, coach, game)
+    context = (_team_notes_text(db, coach, game) + film_notes_for_game(db, coach, game)
+               + learned_for_game(db, coach, game))
     if corrections:
         context += (
             "\n\nCOACH CONTEXT & ADJUSTMENTS (qualitative detail the box score can't capture — "
@@ -2258,6 +2317,8 @@ async def apply_game_report_corrections(
         feedback = (body.get("feedback") or body.get("text") or "").strip()
         if feedback:
             db.add(models.GameSessionReportCorrection(game_id=game_id, coach_id=coach.id, correction=feedback))
+            from .preferences import remember
+            remember(db, coach.id, feedback, game.team_id)
             db.commit()
     pending = (
         db.query(models.GameSessionReportCorrection)
@@ -2362,6 +2423,9 @@ async def apply_scouting_corrections(
         feedback = (body.get("feedback") or body.get("text") or "").strip()
         if feedback:
             db.add(models.GameScoutingCorrection(game_id=game_id, coach_id=coach.id, correction=feedback))
+            # Remembered against the opponent, who a scouting report is about.
+            from .preferences import remember
+            remember(db, coach.id, feedback, _opponent_team_id_of(db, coach, game))
             db.commit()
     pending = (
         db.query(models.GameScoutingCorrection)
