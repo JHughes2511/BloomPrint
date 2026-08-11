@@ -2595,7 +2595,8 @@
     "couldNotJoin": "Hindi makasali gamit ang link na iyon.",
     "badLink": "Hindi valid o binawi na ang link na ito.",
     "goToApp": "Pumunta sa BloomPrint",
-    "joiningBanner": "Sumasali sa {{team}}"
+    "joiningBanner": "Sumasali sa {{team}}",
+    "noLink": "Mag-sign in para magpatuloy."
   },
   "search": {
     "placeholder": "Maghanap",

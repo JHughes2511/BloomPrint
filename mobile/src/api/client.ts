@@ -188,7 +188,13 @@ api.interceptors.response.use(
   (err) => {
     const status = err?.response?.status;
     const url = err?.config?.url ?? '';
-    if (status === 401 && !AUTH_EXEMPT.test(url)) emitCoachUnauthorized();
+    // Only when the request actually CARRIED a token. A 401 on a request that
+    // went out without one says the header was missing, not that the session
+    // is over — the token is read from storage per request, and a read that
+    // loses a race would otherwise sign the coach out mid-session for no
+    // reason they could see.
+    const sent = !!err?.config?.headers?.Authorization;
+    if (status === 401 && sent && !AUTH_EXEMPT.test(url)) emitCoachUnauthorized();
     return Promise.reject(err);
   },
 );

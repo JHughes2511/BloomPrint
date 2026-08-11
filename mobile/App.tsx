@@ -428,12 +428,22 @@ function PlayerTabs() {
 
 // ── Auth stack (unauthenticated) ───────────────────────────────────────────────
 
+/**
+ * Signed out.
+ *
+ * RoleSelect is FIRST deliberately: the first screen is where an unmatched URL
+ * lands, and a session that ends while the coach is on /home or /recent
+ * matches nothing in the signed-out routes. With Join first, an expired token
+ * dropped them on an invite page telling them their link had been revoked —
+ * about a link they had never used.
+ */
 function AuthStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {/* An invite link has to open for someone with no account at all. */}
-      <Stack.Screen name="Join"           component={JoinScreen} />
       <Stack.Screen name="RoleSelect"     component={RoleSelectScreen} />
+      {/* An invite link has to open for someone with no account at all. It is
+          reached by its own address, not by being the fallback. */}
+      <Stack.Screen name="Join"           component={JoinScreen} />
       <Stack.Screen name="CoachLogin"     component={LoginScreen} />
       <Stack.Screen name="PlayerLogin"    component={PlayerLoginScreen} />
       <Stack.Screen name="PlayerRegister" component={PlayerRegisterScreen} />

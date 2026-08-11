@@ -2595,7 +2595,8 @@
     "couldNotJoin": "このリンクでは参加できませんでした。",
     "badLink": "この招待リンクは無効か、取り消されています。",
     "goToApp": "BloomPrint へ",
-    "joiningBanner": "{{team}} に参加します"
+    "joiningBanner": "{{team}} に参加します",
+    "noLink": "続けるにはサインインしてください。"
   },
   "search": {
     "placeholder": "検索",

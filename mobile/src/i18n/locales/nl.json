@@ -2595,7 +2595,8 @@
     "couldNotJoin": "Kon niet toetreden met die link.",
     "badLink": "Deze uitnodigingslink is ongeldig of ingetrokken.",
     "goToApp": "Naar BloomPrint",
-    "joiningBanner": "Je komt bij {{team}}"
+    "joiningBanner": "Je komt bij {{team}}",
+    "noLink": "Log in om verder te gaan."
   },
   "search": {
     "placeholder": "Zoeken",

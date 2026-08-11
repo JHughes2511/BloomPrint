@@ -2595,7 +2595,8 @@
     "couldNotJoin": "इस लिंक से नहीं जुड़ सके।",
     "badLink": "यह आमंत्रण लिंक अमान्य है या रद्द कर दिया गया है।",
     "goToApp": "BloomPrint पर जाएँ",
-    "joiningBanner": "{{team}} से जुड़ रहे हैं"
+    "joiningBanner": "{{team}} से जुड़ रहे हैं",
+    "noLink": "जारी रखने के लिए साइन इन करें।"
   },
   "search": {
     "placeholder": "खोजें",

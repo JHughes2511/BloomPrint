@@ -2595,7 +2595,8 @@
     "couldNotJoin": "לא ניתן להצטרף עם הקישור הזה.",
     "badLink": "קישור ההזמנה אינו תקף או בוטל.",
     "goToApp": "מעבר ל־BloomPrint",
-    "joiningBanner": "מצטרף ל־{{team}}"
+    "joiningBanner": "מצטרף ל־{{team}}",
+    "noLink": "התחבר כדי להמשיך."
   },
   "search": {
     "placeholder": "חיפוש",

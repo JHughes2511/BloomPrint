@@ -2595,7 +2595,8 @@
     "couldNotJoin": "Kunde inte gå med via den länken.",
     "badLink": "Inbjudningslänken är ogiltig eller återkallad.",
     "goToApp": "Till BloomPrint",
-    "joiningBanner": "Går med i {{team}}"
+    "joiningBanner": "Går med i {{team}}",
+    "noLink": "Logga in för att fortsätta."
   },
   "search": {
     "placeholder": "Sök",

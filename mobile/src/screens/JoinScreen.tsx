@@ -47,7 +47,10 @@ export default function JoinScreen() {
   const [newName, setNewName] = useState('');
 
   useEffect(() => {
-    if (!code) { setError(tr('join.badLink')); setLoading(false); return; }
+    // No code in the address at all is not a bad invite — it is somebody who
+    // arrived here without one. Saying "revoked" about a link they never had
+    // is a wrong answer to a question they did not ask.
+    if (!code) { setError(tr('join.noLink')); setLoading(false); return; }
     teamInviteAPI.peek(code)
       .then(setInfo)
       .catch((e: any) => setError(e?.response?.data?.detail ?? tr('join.badLink')))

@@ -2595,7 +2595,8 @@
     "couldNotJoin": "Придруживање овим линком није успело.",
     "badLink": "Ова позивница није важећа или је опозвана.",
     "goToApp": "Иди на BloomPrint",
-    "joiningBanner": "Придружујеш се екипи {{team}}"
+    "joiningBanner": "Придружујеш се екипи {{team}}",
+    "noLink": "Prijavite se da nastavite."
   },
   "search": {
     "placeholder": "Претражи",

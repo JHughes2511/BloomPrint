@@ -2595,7 +2595,8 @@
     "couldNotJoin": "Impossibile entrare con questo link.",
     "badLink": "Questo link d'invito non è valido o è stato revocato.",
     "goToApp": "Vai a BloomPrint",
-    "joiningBanner": "Entri in {{team}}"
+    "joiningBanner": "Entri in {{team}}",
+    "noLink": "Accedi per continuare."
   },
   "search": {
     "placeholder": "Cerca",

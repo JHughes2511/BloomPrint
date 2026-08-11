@@ -2595,7 +2595,8 @@
     "couldNotJoin": "Bu bağlantıyla katılınamadı.",
     "badLink": "Bu davet bağlantısı geçersiz veya iptal edilmiş.",
     "goToApp": "BloomPrint'e git",
-    "joiningBanner": "{{team}} takımına katılıyorsun"
+    "joiningBanner": "{{team}} takımına katılıyorsun",
+    "noLink": "Devam etmek için giriş yapın."
   },
   "search": {
     "placeholder": "Ara",

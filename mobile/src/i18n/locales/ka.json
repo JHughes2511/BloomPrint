@@ -2595,7 +2595,8 @@
     "couldNotJoin": "ამ ბმულით შემოერთება ვერ მოხერხდა.",
     "badLink": "ეს მოწვევის ბმული არასწორია ან გაუქმებულია.",
     "goToApp": "გადადი BloomPrint-ზე",
-    "joiningBanner": "უერთდები გუნდს {{team}}"
+    "joiningBanner": "უერთდები გუნდს {{team}}",
+    "noLink": "გასაგრძელებლად შედით სისტემაში."
   },
   "search": {
     "placeholder": "ძებნა",

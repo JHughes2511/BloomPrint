@@ -2595,7 +2595,8 @@
     "couldNotJoin": "Nie udało się dołączyć przez ten link.",
     "badLink": "Ten link zaproszenia jest nieprawidłowy lub został unieważniony.",
     "goToApp": "Przejdź do BloomPrint",
-    "joiningBanner": "Dołączasz do {{team}}"
+    "joiningBanner": "Dołączasz do {{team}}",
+    "noLink": "Zaloguj się, aby kontynuować."
   },
   "search": {
     "placeholder": "Szukaj",

@@ -2595,7 +2595,8 @@
     "couldNotJoin": "Не удалось присоединиться по этой ссылке.",
     "badLink": "Эта ссылка недействительна или была отозвана.",
     "goToApp": "Перейти в BloomPrint",
-    "joiningBanner": "Вы вступаете в {{team}}"
+    "joiningBanner": "Вы вступаете в {{team}}",
+    "noLink": "Войдите, чтобы продолжить."
   },
   "search": {
     "placeholder": "Поиск",
