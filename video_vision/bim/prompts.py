@@ -42,6 +42,29 @@ def _brief_directive(output_type: str) -> str:
 # shooting splits and quarter scores looked like.
 from api.report_format import REPORT_FORMAT_WITH_TABLES as _NO_MARKDOWN
 
+# ── The score comes off the scoreboard ────────────────────────────────────────
+# A score inferred from the possessions that happened to be sampled is a guess
+# dressed as a fact, and it was wrong on a film where the number was on screen
+# the whole time: a late basket fell between frames and the report was three
+# points short. The broadcast prints the answer in the corner. Read it.
+_SCOREBOARD = """
+
+READING THE SCORE:
+The scoreboard graphic is the authority on the score, for every period and for
+the final. Read it directly off the frames. Where the scoreboard and your own
+count of the baskets you saw disagree, THE SCOREBOARD IS RIGHT and your count
+is wrong — you are seeing a sample of the film, not all of it, and a basket
+between two frames is invisible to you but not to the scoreboard.
+Take the final score from the LAST frame in which the scoreboard is legible,
+and each period's score from the last legible frame of that period.
+Never adjust a scoreboard reading to match the play you were able to see, and
+never present a total you arrived at by counting as though it came off the
+scoreboard.
+If no scoreboard appears anywhere in the film — practice footage, a phone clip
+from the stands — say the score plainly as your own best count from the play,
+and say that is what it is."""
+
+
 
 # ── Who the film is of ────────────────────────────────────────────────────────
 # A report's subject is not something the model can work out from the frames. It
@@ -670,9 +693,9 @@ def build_prompt(
         if not blocks:
             valid = ", ".join(PROMPT_MAP.keys())
             raise ValueError(f"Unknown output_type '{output_type}'. Valid: {valid}")
-        return header + "\n".join(blocks) + _brief_directive(output_type) + _NO_MARKDOWN
+        return header + "\n".join(blocks) + _brief_directive(output_type) + _SCOREBOARD + _NO_MARKDOWN
 
     # Single type — fall back to a general coaching report for any unrecognized
     # key rather than raising (unguarded callers would otherwise 500).
     fn = PROMPT_MAP.get(output_type) or PROMPT_MAP.get("coaching_report")
-    return fn(program, level, coach_weight, player_name) + _brief_directive(output_type) + _NO_MARKDOWN
+    return fn(program, level, coach_weight, player_name) + _brief_directive(output_type) + _SCOREBOARD + _NO_MARKDOWN

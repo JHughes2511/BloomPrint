@@ -443,6 +443,38 @@ def _motion_profile(video_path: str, on_progress=None) -> tuple[float, list[tupl
     return duration, scores
 
 
+def _endgame_timestamps(duration: float) -> list[float]:
+    """The closing stretch, sampled densely and never dropped.
+
+    Two things are being bought. The obvious one is the final scoreboard: it
+    has to be in the sample for anyone to read it. The second is the run of
+    play that produces it — a three at the buzzer is a handful of frames, and
+    the difference between an 80-71 and an 83-71 is exactly that handful.
+
+    Short clips get a shorter window because their whole tail is already dense;
+    a full game gets two minutes at three-second steps, which is forty frames
+    out of a budget of several hundred.
+    """
+    if duration <= 0:
+        return []
+    if duration <= 60:
+        window, step = min(duration, 15.0), 1.0
+    elif duration <= 900:
+        window, step = 60.0, 2.0
+    else:
+        window, step = 120.0, 3.0
+    start = max(0.0, duration - window)
+    out: list[float] = []
+    t = start
+    while t <= duration:
+        out.append(round(t, 1))
+        t += step
+    # The very last readable moment, exactly. Stepping from `start` can stop
+    # short of the end, and the end is the point.
+    out.append(round(max(0.0, duration - 0.2), 1))
+    return out
+
+
 def _select_adaptive_timestamps(duration: float, scores: list[tuple[float, float]], budget: int) -> list[float]:
     """Pick which timestamps to actually analyze: a baseline floor across the
     whole film, then the highest-motion moments until the budget is spent.
@@ -476,6 +508,17 @@ def _select_adaptive_timestamps(duration: float, scores: list[tuple[float, float
     while t <= duration:                     # guaranteed baseline coverage
         chosen.add(round(t, 1))
         t += floor_int
+
+    # The closing stretch, densely, whatever the motion says.
+    #
+    # The final score lives on the scoreboard, and the scoreboard is only worth
+    # reading if the LAST state of it was actually looked at. Motion-gating is
+    # exactly wrong here: the end of a game is a made basket and then a lot of
+    # standing around, so the frames that carry the final number score low and
+    # lose to a scramble in the second quarter. A missed basket at the buzzer is
+    # how a report comes back with the wrong score while the number was on
+    # screen the whole time.
+    chosen.update(_endgame_timestamps(duration))
 
     # Scene cuts and motion bursts are simply the top of this ranking, so they
     # come first without needing a threshold of their own — and, unlike a
