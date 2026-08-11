@@ -683,6 +683,11 @@ class GameSession(SoftDeleteMixin, Base):
     id = Column(Integer, primary_key=True, index=True)
     coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False)
     team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
+    # The one-off repair that turned this game's stat rows into roster players
+    # has run. Recorded so it cannot run twice: it files players by side onto
+    # this game's team, which is wrong when the box score is for two teams that
+    # are both somebody else's, and re-running it undid the coach's deletions.
+    roster_backfilled = Column(Boolean, default=False)
     opponent_name = Column(String, nullable=False)
     date = Column(DateTime, default=datetime.utcnow)
     location = Column(String, nullable=True)

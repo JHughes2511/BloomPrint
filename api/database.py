@@ -164,10 +164,20 @@ def _backfill_rosters_from_games():
     names were in the database the whole time, as stat rows, just never turned
     into players. This walks the games once and does what an import does now.
 
-    Idempotent: it adds only names a team does not already have, so running it
-    on every boot changes nothing after the first. Jersey numbers are NOT
-    invented — the old reader never captured them, and a squad number is not
-    something to guess. Re-importing the file is what fills those in.
+    Runs ONCE per game, recorded on the game itself, not on every boot.
+
+    "Idempotent because it only adds names the team does not have" was true of
+    the database and false of the coach. A stat row carries no team name, so
+    this can only file players by side, onto whatever team the game was created
+    under — and for a game holding a box score for two teams that are both
+    someone else's, that is the wrong team. Deleting those players then did
+    nothing: the next restart put every one of them back, with no way to tell
+    that a repair rather than an import was doing it. Running once means a
+    deletion stays deleted.
+
+    Jersey numbers are NOT invented — the old reader never captured them, and a
+    squad number is not something to guess. Re-importing the file fills those
+    in, and an import knows which team each name belongs to.
     """
     try:
         from sqlalchemy.orm import Session as _Session
@@ -176,8 +186,10 @@ def _backfill_rosters_from_games():
 
         with _Session(engine) as sess:
             games = sess.query(models.GameSession).all()
-            added = 0
+            added = marked = 0
             for game in games:
+                if getattr(game, "roster_backfilled", False):
+                    continue
                 stats = sess.query(models.GamePlayerStat).filter_by(game_id=game.id).all()
                 if not stats:
                     continue
@@ -195,8 +207,16 @@ def _backfill_rosters_from_games():
                         seen[key]["jersey_number"] = getattr(st, "jersey_number", None)
                 result = _sync_roster(sess, game, coach, list(seen.values()))
                 added += result.get("added", 0)
-            if added:
-                log.info("Backfilled %s player(s) onto rosters from recorded games", added)
+                game.roster_backfilled = True
+                marked += 1
+            if marked:
+                # _sync_roster commits its own additions; the marks still need
+                # saving, including for a game that added nobody — that game is
+                # done too, and leaving it unmarked means walking it again on
+                # every boot forever.
+                sess.commit()
+                log.info("Backfilled %s player(s) onto rosters from %s recorded game(s)",
+                         added, marked)
     except Exception:
         # A repair that cannot run must not stop the app from starting.
         pass
@@ -311,6 +331,9 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     # hand, so it defaults to theirs; only the ones created automatically from
     # an opponent's box score start out as not.
     ("teams", "is_mine", "BOOLEAN DEFAULT TRUE"),
+    # Marks the one-off roster repair as done for a game. Without it the
+    # repair ran on every boot and put back players a coach had deleted.
+    ("game_sessions", "roster_backfilled", "BOOLEAN DEFAULT FALSE"),
 ]
 
 

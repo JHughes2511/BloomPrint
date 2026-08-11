@@ -495,9 +495,18 @@ def _sync_roster(db: Session, game, coach, players: list[dict],
     on the team is added, and anyone already there has their number brought up
     to what the sheet printed.
 
-    Our side goes to the game's team. The opponent's side goes to the opponent's
-    team — created here if the coach never built one, because at that point the
-    app is holding a full squad list with numbers and refusing to keep it.
+    Players go to the team the FILE named them under, which is not always
+    either of the game's two teams: a coach can read an Angola-vs-Egypt box
+    score into a packet they built under their own side, and neither squad in
+    it is theirs. Filed by side alone, Angola's players joined the roster of
+    whatever team the game happened to be created under — a dozen players a
+    coach never put there, showing up in the live-tracking picker for a
+    different fixture.
+
+    Where the sheet says nothing, the side stands in: our side to the game's
+    team, the opponent's to the opponent's team — created here if the coach
+    never built one, because at that point the app is holding a full squad
+    list with numbers and refusing to keep it.
     """
     ours_id = game.team_id
     opp_row = None
@@ -539,9 +548,47 @@ def _sync_roster(db: Session, game, coach, players: list[dict],
                 tm.is_mine = answer
                 reassigned += 1
 
+    def _team_for(name: str):
+        """The team a file's heading refers to, made if the coach has none.
+
+        A team born this way is not the coach's own unless they said so on the
+        import screen: it arrived because a sheet mentioned it, which is what
+        scouting looks like, and a team wrongly counted as theirs walks its
+        games into their own record.
+        """
+        nonlocal created_team, reassigned
+        clean = name.strip()
+        row = next((tm for tm in db.query(models.Team).filter_by(coach_id=coach.id).all()
+                    if _norm_name(tm.name) == _norm_name(clean)), None)
+        if row is None:
+            row = models.Team(
+                name=clean, coach_id=coach.id,
+                is_mine=mine_answers.get(_norm_name(clean), False),
+                competition_level=(game.competition_level
+                                   or coach.competition_level or "HS Varsity"))
+            db.add(row)
+            db.flush()
+            created_team = created_team or row.name
+        else:
+            answer = mine_answers.get(_norm_name(row.name))
+            if answer is not None and (row.is_mine is not False) != answer:
+                row.is_mine = answer
+                reassigned += 1
+        return row.id
+
+    # Every player, grouped by the team they actually belong to. The file's own
+    # heading wins; the side is the fallback for a sheet that carries none.
+    side_default = {False: ours_id, True: opp_row.id if opp_row else None}
+    by_team: dict[int, list[dict]] = {}
+    for p in players:
+        named = str(p.get("team_name") or "").strip()
+        team_id = _team_for(named) if named else side_default[bool(p.get("is_opponent"))]
+        if team_id:
+            by_team.setdefault(team_id, []).append(p)
+
     from ..coach_context import resolve_level
     added = numbered = repaired = 0
-    for side_is_opp, team_id in ((False, ours_id), (True, opp_row.id if opp_row else None)):
+    for team_id, group in by_team.items():
         if not team_id:
             continue
         team_row = db.get(models.Team, team_id)
@@ -553,9 +600,7 @@ def _sync_roster(db: Session, game, coach, players: list[dict],
         program = (team_row.name if team_row else None) or coach.program_name
         existing = db.query(models.Player).filter_by(team_id=team_id).all()
         by_name = {_norm_name(p.name): p for p in existing}
-        for p in players:
-            if bool(p.get("is_opponent")) != side_is_opp:
-                continue
+        for p in group:
             name = str(p.get("player_name") or "").strip()
             if not name:
                 continue
