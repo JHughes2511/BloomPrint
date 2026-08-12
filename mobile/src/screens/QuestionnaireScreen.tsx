@@ -37,12 +37,18 @@ type Step = 'about' | 'questions' | 'done';
 
 export default function QuestionnaireScreen() {
   const route = useRoute<any>();
-  const { t } = useTheme();
+  const { t, mode, toggle: toggleTheme } = useTheme();
   const s = makeStyles(t);
 
   const [form, setForm] = useState<QuestionnaireForm | null>(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
+  // Switching language mid-form is a different thing from opening the page:
+  // the first language a person has ever asked for has to be translated, which
+  // takes real time. Blanking the screen for it left them looking at a spinner
+  // with their answers apparently gone, so a re-translation keeps the form on
+  // screen and says what it is doing in the corner.
+  const [translating, setTranslating] = useState(false);
 
   const [step, setStep] = useState<Step>('about');
   const [name, setName] = useState('');
@@ -60,19 +66,22 @@ export default function QuestionnaireScreen() {
   // back to the channel it came from without asking the respondent.
   const source: string | undefined = route.params?.from;
 
-  const load = useCallback(async (lang: string) => {
-    setLoading(true);
+  const load = useCallback(async (lang: string, replacing: boolean) => {
+    if (replacing) setTranslating(true); else setLoading(true);
     setFailed(false);
     try {
       setForm(await questionnaireAPI.form(lang));
     } catch {
-      setFailed(true);
+      // Only a first load has nothing to fall back to. A failed switch keeps
+      // the language they already had rather than throwing the page away.
+      if (!replacing) setFailed(true);
     } finally {
       setLoading(false);
+      setTranslating(false);
     }
   }, []);
 
-  useEffect(() => { load(currentLanguage()); }, [load]);
+  useEffect(() => { load(currentLanguage(), false); }, [load]);
 
   // Every visible word comes from the form, so the screen is in the same
   // language as the questions rather than English chrome around translated
@@ -146,7 +155,7 @@ export default function QuestionnaireScreen() {
       <ScreenBackground>
         <View style={s.center}>
           <Text style={s.title}>{u('load_failed', "We can't load the questions right now.")}</Text>
-          <TouchableOpacity style={s.cta} onPress={() => load(currentLanguage())}>
+          <TouchableOpacity style={s.cta} onPress={() => load(currentLanguage(), false)}>
             <Text style={s.ctaText}>{u('retry', 'Try again')}</Text>
           </TouchableOpacity>
         </View>
@@ -164,9 +173,26 @@ export default function QuestionnaireScreen() {
         <PageContainer maxWidth={720}>
           <View style={s.brandbar}>
             <Text style={s.brand}>BLOOMPRINT</Text>
-            {step !== 'done' && (
-              <LanguagePicker compact onChanged={(code) => { load(code); }} />
-            )}
+            <View style={s.tools}>
+              {translating && (
+                <View style={s.translating}>
+                  <ActivityIndicator color={t.muted} size="small" />
+                  <Text style={s.translatingText}>{u('translating', 'Translating…')}</Text>
+                </View>
+              )}
+              <TouchableOpacity
+                style={s.themeBtn}
+                onPress={toggleTheme}
+                accessibilityRole="button"
+                accessibilityLabel={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                <Ionicons name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'}
+                          size={16} color={t.muted} />
+              </TouchableOpacity>
+              {step !== 'done' && (
+                <LanguagePicker compact onChanged={(code) => { load(code, true); }} />
+              )}
+            </View>
           </View>
 
           {step === 'about' && (
@@ -202,7 +228,6 @@ export default function QuestionnaireScreen() {
                     autoCorrect={false}
                     keyboardType="email-address"
                   />
-                  <Text style={s.fieldHint}>{u('email_hint', '')}</Text>
                 </View>
 
                 <View style={s.field}>
@@ -346,6 +371,13 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 16 },
   brandbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 12 },
   brand: { color: t.label, fontFamily: fonts[800], fontSize: 13, letterSpacing: 2.6 },
+  tools: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  themeBtn: {
+    width: 34, height: 34, borderRadius: 999, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: t.cta2Border,
+  },
+  translating: { flexDirection: 'row', alignItems: 'center', gap: 6, marginRight: 2 },
+  translatingText: { color: t.muted, fontFamily: fonts[600], fontSize: 12.5 },
 
   eyebrow: { color: t.label, fontFamily: fonts[700], fontSize: 11.5, letterSpacing: 2, marginBottom: 8 },
   h1: { color: t.ink, fontFamily: fonts[800], fontSize: 30, letterSpacing: -0.6, lineHeight: 36 },
@@ -358,7 +390,6 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   },
   field: { gap: 9 },
   fieldLabel: { color: t.ink, fontFamily: fonts[700], fontSize: 13 },
-  fieldHint: { color: t.muted, fontFamily: fonts[400], fontSize: 12.5, lineHeight: 18 },
   req: { color: t.accent },
   input: {
     backgroundColor: t.chip, borderWidth: 1, borderColor: t.line, borderRadius: 12,

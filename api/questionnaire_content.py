@@ -25,7 +25,19 @@ questions is a bump to VERSION, and the summary counts each version separately
 rather than adding two different questions together.
 """
 
+# The ANSWER SCHEMA: the questions and their options, in order. Answers are
+# stored as indexes into this, so it bumps only when an option is added,
+# removed or reordered — never for a change of wording elsewhere. Bumping it
+# detaches every response collected before the change from the summary, which
+# is right when the question changed and wrong when only the page around it
+# did.
 VERSION = 1
+
+# Anything VISIBLE, including the strings below and the questions themselves.
+# Separate from VERSION because it is the cache key for translations: reword a
+# button and every language needs retranslating, while the stored answers still
+# mean exactly what they meant before.
+CONTENT_REVISION = 2
 
 # Deliberately ranges rather than a number. A range still cuts the results by
 # age, and asking a fourteen-year-old for their date of birth to answer six
@@ -442,13 +454,12 @@ UI_STRINGS = {
     "eyebrow": "Seven questions · about five minutes",
     "title": "Where does your basketball week actually go?",
     "lede": "We're trying to find out where the time really goes — what gets written, "
-            "how games get recorded, and how long it all takes. There are no right "
-            "answers. Answer for a normal week, not your best one.",
+            "how games get recorded, and how long it all takes. Answer for a normal "
+            "week, not your best one.",
     "name_label": "Your name",
     "name_placeholder": "First and last",
     "email_label": "Email",
     "email_placeholder": "you@example.com",
-    "email_hint": "So we can send you the app when it's ready. Nothing else.",
     "age_label": "Age",
     "role_label": "Which one are you?",
     "start": "Start",
@@ -456,7 +467,7 @@ UI_STRINGS = {
     "questions_title": "Your week",
     "questions_lede": "One question lets you pick more than one answer.",
     "question_of": "QUESTION {n} OF {total}",
-    "select_all": "SELECT ALL",
+    "select_all": "SELECT ALL THAT APPLY",
     "comment_label": "Anything else? What would save you the most time?",
     "comment_placeholder": "Optional — but this is the most useful box on the page.",
     "back": "Back",
@@ -469,6 +480,7 @@ UI_STRINGS = {
     "load_failed": "We can't load the questions right now.",
     "retry": "Try again",
     "send_failed": "That did not send. Check your connection and try again.",
+    "translating": "Translating…",
 }
 
 

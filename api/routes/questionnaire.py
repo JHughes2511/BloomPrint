@@ -130,8 +130,11 @@ async def get_form(lang: str | None = None, db: Session = Depends(get_db)):
     if code in ("", "en") or code not in LANGUAGE_NAMES:
         return {**form, "language": "en"}
 
+    # Keyed on the content revision, not the answer schema: rewording a button
+    # must refresh every language, and it must not touch what a stored answer
+    # means.
     cached = (db.query(models.QuestionnaireTranslation)
-                .filter_by(version=content.VERSION, lang=code).first())
+                .filter_by(version=content.CONTENT_REVISION, lang=code).first())
     if cached:
         return {**cached.payload, "language": code}
 
@@ -143,7 +146,7 @@ async def get_form(lang: str | None = None, db: Session = Depends(get_db)):
 
     try:
         db.add(models.QuestionnaireTranslation(
-            version=content.VERSION, lang=code, payload=translated))
+            version=content.CONTENT_REVISION, lang=code, payload=translated))
         db.commit()
     except Exception:
         # Two people opening the Spanish link at once both translate and one

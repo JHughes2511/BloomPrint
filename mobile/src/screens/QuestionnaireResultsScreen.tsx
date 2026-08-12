@@ -31,7 +31,7 @@ type Tab = 'summary' | 'responses' | 'comments' | 'emails';
 
 export default function QuestionnaireResultsScreen() {
   const route = useRoute<any>();
-  const { t } = useTheme();
+  const { t, mode, toggle: toggleTheme } = useTheme();
   const s = makeStyles(t);
 
   // On the web the key is on the address; on a phone it is typed in once.
@@ -135,10 +135,21 @@ export default function QuestionnaireResultsScreen() {
         <PageContainer maxWidth={860}>
           <View style={s.brandbar}>
             <Text style={s.brand}>BLOOMPRINT</Text>
-            <TouchableOpacity style={s.ghostSmall} onPress={() => load(key)}>
-              <Ionicons name="refresh" size={14} color={t.muted} />
-              <Text style={s.ghostSmallText}>Refresh</Text>
-            </TouchableOpacity>
+            <View style={s.tools}>
+              <TouchableOpacity
+                style={s.themeBtn}
+                onPress={toggleTheme}
+                accessibilityRole="button"
+                accessibilityLabel={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                <Ionicons name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'}
+                          size={16} color={t.muted} />
+              </TouchableOpacity>
+              <TouchableOpacity style={s.ghostSmall} onPress={() => load(key)}>
+                <Ionicons name="refresh" size={14} color={t.muted} />
+                <Text style={s.ghostSmallText}>Refresh</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <Text style={s.eyebrow}>Discovery questionnaire</Text>
@@ -311,6 +322,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
   brandbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
   brand: { color: t.label, fontFamily: fonts[800], fontSize: 13, letterSpacing: 2.6 },
+  tools: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  themeBtn: {
+    width: 34, height: 34, borderRadius: 999, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: t.cta2Border,
+  },
   eyebrow: { color: t.label, fontFamily: fonts[700], fontSize: 11.5, letterSpacing: 2 },
   h1: { color: t.ink, fontFamily: fonts[800], fontSize: 30, letterSpacing: -0.6, marginTop: 6 },
   lede: { color: t.inkSoft, fontFamily: fonts[400], fontSize: 15, lineHeight: 22 },
