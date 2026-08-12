@@ -1079,6 +1079,60 @@ class TeamStaff(Base):
     team  = relationship("Team")
 
 
+class QuestionnaireTranslation(Base):
+    """The questionnaire in one language, translated once and kept.
+
+    The whole form is about two hundred short strings, and it never changes
+    between respondents — so translating it per visitor would be paying for the
+    same work every time somebody opened the link. Translated on the first
+    request for a language and read from here forever after, keyed by the
+    question version so a reworded question is retranslated rather than served
+    from a cache of the old one.
+    """
+    __tablename__ = "questionnaire_translations"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    version    = Column(Integer, nullable=False)
+    lang       = Column(String, nullable=False, index=True)
+    payload    = Column(JSON, nullable=False)   # same shape as GET /questionnaire/form
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (UniqueConstraint("version", "lang", name="uq_questionnaire_lang"),)
+
+
+class QuestionnaireResponse(Base):
+    """One filled-in discovery questionnaire, from someone with no account.
+
+    Answers are stored as INDEXES against a version rather than as the option
+    text: the wording is the instrument, and copying it onto every row would
+    mean a later edit leaving the stored text and the live question saying
+    different things with nothing to say which was answered. The version says
+    which list the indexes refer to.
+    """
+    __tablename__ = "questionnaire_responses"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    version    = Column(Integer, nullable=False, default=1)
+    role       = Column(String, nullable=False, index=True)
+    name       = Column(String, nullable=False)
+    # Optional, and asked for one reason: an invite when the app is ready, and
+    # a follow-up call. Optional because a required email on a cold public form
+    # costs responses, and a response with no address is still evidence.
+    email      = Column(String, nullable=True, index=True)
+    age_range  = Column(String, nullable=True)
+    # {"0": [1, 3], "1": 2, ...} — question index to option index, or a list of
+    # them where the question takes more than one.
+    answers    = Column(JSON, nullable=False, default=dict)
+    # Free text, and usually the most useful thing on the row.
+    comment    = Column(Text, nullable=True)
+    # For spotting one person filling it in twenty times, and nothing else. A
+    # hash, because an IP is personal data and the question it answers here is
+    # only "is this the same submitter as that one".
+    submitter  = Column(String, nullable=True, index=True)
+    source     = Column(String, nullable=True)   # ?from= on the link, for tracking a channel
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class RosterProposal(Base):
     """"I have a player you don't" — waiting on the team to say yes or no.
 

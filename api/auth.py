@@ -51,3 +51,17 @@ def get_current_coach(
     if coach is None:
         raise credentials_error
     return coach
+
+
+def coach_from_token(token: str, db: Session) -> models.Coach | None:
+    """Who this token belongs to, or None — for routes where a session is one
+    way in among several rather than the requirement.
+
+    Deliberately not a dependency: a dependency that raises turns "no session"
+    into a 401, and the caller here wants to go on and check something else.
+    """
+    try:
+        payload = jwt.decode(token, coach_key(), algorithms=[ALGORITHM])
+        return db.get(models.Coach, int(payload["sub"]))
+    except (JWTError, KeyError, ValueError):
+        return None

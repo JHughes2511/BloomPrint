@@ -50,6 +50,11 @@ export const linking: LinkingOptions<any> = {
       // navigators, so the same address works signed out, as a coach, or as a
       // player — only one of them is ever mounted.
       Join: 'join/:code',
+      // Public, and registered in all three navigators for the same reason as
+      // Join: the link is handed to people with no account, and to the owner
+      // who is signed in.
+      Questionnaire: 'questionnaire',
+      QuestionnaireResults: 'questionnaire/results',
       CoachLogin: 'login',
       PlayerLogin: 'player/login',
       PlayerRegister: 'player/register',
@@ -60,6 +65,8 @@ export const linking: LinkingOptions<any> = {
         screens: {
           Home: '',
           Join: '/join/:code',
+          Questionnaire: '/questionnaire',
+          QuestionnaireResults: '/questionnaire/results',
           CoachNotifications: 'notifications',
           CoachTrainingDetail: { path: 'training/:trainingId', ...id },
           StaffInbox: 'staff',
@@ -116,6 +123,8 @@ export const linking: LinkingOptions<any> = {
         screens: {
           PlayerHome: '',
           Join: '/join/:code',
+          Questionnaire: '/questionnaire',
+          QuestionnaireResults: '/questionnaire/results',
           PlayerReportDetail: { path: 'report/:reportId', ...id },
           PlayerTeamReportDetail: { path: 'team-report/:reportId', ...id },
         },

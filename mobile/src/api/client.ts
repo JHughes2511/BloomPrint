@@ -211,6 +211,61 @@ api.interceptors.response.use(
   },
 );
 
+// ── The public discovery questionnaire ────────────────────────────────────────
+
+export type QuestionnaireForm = {
+  version: number;
+  language: string;
+  translation_failed?: boolean;
+  age_ranges: string[];
+  /** Every visible word on the form, in the same language as the questions. */
+  ui: Record<string, string>;
+  roles: { id: string; name: string; blurb: string }[];
+  questions: Record<string, { text: string; multi: boolean; options: string[] }[]>;
+};
+
+export type QuestionnaireSummary = {
+  version: number;
+  total: number;
+  roles: {
+    id: string; name: string; count: number;
+    questions: { text: string; multi: boolean; answered: number;
+                 options: { text: string; count: number }[] }[];
+  }[];
+  comments: { id: number; name: string; role_name: string; comment: string; created_at: string }[];
+};
+
+export type QuestionnaireRow = {
+  id: number; role: string; role_name: string; name: string;
+  email: string | null; age_range: string | null; comment: string | null; source: string | null;
+  created_at: string;
+  answers: { question: string; answer: string | string[] | null }[];
+};
+
+export const questionnaireAPI = {
+  /** The questions. No token — whoever opens the link has no account. */
+  form: (lang?: string): Promise<QuestionnaireForm> =>
+    api.get('/questionnaire/form', { params: lang && lang !== 'en' ? { lang } : undefined })
+      .then(r => r.data),
+  submit: (body: {
+    role: string; name: string; email?: string | null; age_range?: string | null;
+    answers: Record<string, number | number[]>;
+    comment?: string | null; source?: string | null;
+  }) => api.post('/questionnaire/responses', body).then(r => r.data),
+
+  // The results carry names, so they carry the key off the link. Sent as a
+  // header rather than a query string so it doesn't end up in a log line.
+  summary: (key: string): Promise<QuestionnaireSummary> =>
+    api.get('/questionnaire/summary', { headers: { 'X-Questionnaire-Key': key } }).then(r => r.data),
+  responses: (key: string, role?: string): Promise<QuestionnaireRow[]> =>
+    api.get('/questionnaire/responses', {
+      headers: { 'X-Questionnaire-Key': key },
+      params: role ? { role } : undefined,
+    }).then(r => r.data),
+  exportCsv: (key: string): Promise<{ csv: string; count: number }> =>
+    api.get('/questionnaire/export', { headers: { 'X-Questionnaire-Key': key } }).then(r => r.data),
+};
+
 // ── What corrections have taught ──────────────────────────────────────────────
 export const preferencesAPI = {
   /** Everything learned; with a team, what applies to reports about that team. */

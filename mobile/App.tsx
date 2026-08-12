@@ -79,6 +79,8 @@ import TeamEvalScreen from './src/screens/TeamEvalScreen';
 // Role select
 import RoleSelectScreen from './src/screens/RoleSelectScreen';
 import JoinScreen from './src/screens/JoinScreen';
+import QuestionnaireScreen from './src/screens/QuestionnaireScreen';
+import QuestionnaireResultsScreen from './src/screens/QuestionnaireResultsScreen';
 
 // Player screens
 import PlayerLoginScreen from './src/screens/player/PlayerLoginScreen';
@@ -147,6 +149,8 @@ function HomeStack() {
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       {/* Same link, already signed in: joins on the spot. */}
       <Stack.Screen name="Join" component={JoinScreen} />
+      <Stack.Screen name="Questionnaire" component={QuestionnaireScreen} />
+      <Stack.Screen name="QuestionnaireResults" component={QuestionnaireResultsScreen} />
     </Stack.Navigator>
   );
 }
@@ -310,6 +314,8 @@ function PlayerHomeStack() {
       <Stack.Screen name="PlayerReportDetail" component={PlayerReportDetailScreen} />
       <Stack.Screen name="PlayerTeamReportDetail" component={PlayerTeamReportDetailScreen} />
       <Stack.Screen name="Join" component={JoinScreen} />
+      <Stack.Screen name="Questionnaire" component={QuestionnaireScreen} />
+      <Stack.Screen name="QuestionnaireResults" component={QuestionnaireResultsScreen} />
     </Stack.Navigator>
   );
 }
@@ -444,6 +450,8 @@ function AuthStack() {
       {/* An invite link has to open for someone with no account at all. It is
           reached by its own address, not by being the fallback. */}
       <Stack.Screen name="Join"           component={JoinScreen} />
+      <Stack.Screen name="Questionnaire"  component={QuestionnaireScreen} />
+      <Stack.Screen name="QuestionnaireResults" component={QuestionnaireResultsScreen} />
       <Stack.Screen name="CoachLogin"     component={LoginScreen} />
       <Stack.Screen name="PlayerLogin"    component={PlayerLoginScreen} />
       <Stack.Screen name="PlayerRegister" component={PlayerRegisterScreen} />
