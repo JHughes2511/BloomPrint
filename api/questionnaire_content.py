@@ -37,7 +37,7 @@ VERSION = 2
 # Separate from VERSION because it is the cache key for translations: reword a
 # button and every language needs retranslating, while the stored answers still
 # mean exactly what they meant before.
-CONTENT_REVISION = 6
+CONTENT_REVISION = 7
 
 # Deliberately ranges rather than a number. A range still cuts the results by
 # age, and asking a fourteen-year-old for their date of birth to answer six
@@ -75,7 +75,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "When your team plays, how does the game end up on record?",
+            "text": "When your team plays, how does the game usually end up on record?",
             "options": [
                 "Someone keeps the book on paper",
                 "A stat or scorekeeping app",
@@ -96,7 +96,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Which of these would change your week the most if it were already done for you?",
+            "text": "Which of these would change your week if they were already done for you?",
             "multi": True,
             "options": [
                 "Film turned into written notes I can hand out",
@@ -118,7 +118,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Think about the software you already use for your team. What do you want from it over time?",
+            "text": "Think about the software you already use for your team. What do you most want from it over time?",
             "options": [
                 "Something new every two or three weeks, with a note saying what changed",
                 "A few improvements a season, at a steady pace",
@@ -136,7 +136,7 @@ QUESTIONS: dict[str, list[dict]] = {
                 "What it produced wasn't good enough to use",
                 "My staff never got in it, so I was the only one",
                 "The part I needed was behind a price I couldn't justify",
-                "I'm still using everything I've started",
+                "Nothing — I'm still using everything I've started",
             ],
         },
     ],
@@ -154,7 +154,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "While you're watching a game — live or on film — where do your notes go?",
+            "text": "While you're watching a game — live or on film — where do your notes usually go?",
             "options": [
                 "A notebook",
                 "A notes app or a Google Doc",
@@ -174,7 +174,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Which part of the job takes up time you'd rather spend somewhere else?",
+            "text": "Which part of the job takes up the most time you'd rather spend somewhere else?",
             "options": [
                 "Finding the possessions that matter inside a full game",
                 "Writing it up once I already know what I think",
@@ -182,6 +182,7 @@ QUESTIONS: dict[str, list[dict]] = {
                 "Finding what I already wrote about this player or team",
                 "Reformatting the same report for different people",
                 "Watching a second game to confirm what I think I saw",
+                "None of it — the time goes where it should",
             ],
         },
         {
@@ -195,7 +196,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Think about the software you already use to scout. What do you want from it over time?",
+            "text": "Think about the software you already use to scout. What do you most want from it over time?",
             "options": [
                 "Something new every two or three weeks, with a note saying what changed",
                 "A few improvements a season, at a steady pace",
@@ -213,7 +214,7 @@ QUESTIONS: dict[str, list[dict]] = {
                 "What it produced didn't sound like me",
                 "I couldn't get my existing work into it",
                 "A season got away from me and I never went back to it",
-                "I'm still using everything I've started",
+                "Nothing — I'm still using everything I've started",
             ],
         },
     ],
@@ -231,7 +232,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "How do you know whether an athlete is improving?",
+            "text": "What do you rely on most to know whether an athlete is improving?",
             "options": [
                 "Measurements and numbers I log myself",
                 "Film from before and after",
@@ -252,7 +253,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Which of these would make the biggest difference to you?",
+            "text": "Which of these would make the biggest difference to your week?",
             "options": [
                 "A session turned into a written plan the athlete keeps",
                 "Showing a parent or a coach real evidence of progress",
@@ -260,6 +261,7 @@ QUESTIONS: dict[str, list[dict]] = {
                 "Every athlete's history in one place instead of scattered",
                 "Athletes doing the work between sessions",
                 "Taking on more athletes without more paperwork",
+                "None of these — my week works as it is",
             ],
         },
         {
@@ -273,7 +275,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Think about the software you already use with your athletes. What do you want from it over time?",
+            "text": "Think about the software you already use with your athletes. What do you most want from it over time?",
             "options": [
                 "Something new every two or three weeks, with a note saying what changed",
                 "A few improvements a season, at a steady pace",
@@ -291,7 +293,7 @@ QUESTIONS: dict[str, list[dict]] = {
                 "It didn't fit the way I train",
                 "The price stopped making sense for the number of athletes I have",
                 "I got busy and never restarted",
-                "I'm still using everything I've started",
+                "Nothing — I'm still using everything I've started",
             ],
         },
     ],
@@ -332,6 +334,7 @@ QUESTIONS: dict[str, list[dict]] = {
                 "Last year's work on this opponent, findable",
                 "Getting one file to five coaches without five versions of it",
                 "Anything that stops me working past midnight before a game",
+                "None of these — my time goes somewhere else",
             ],
         },
         {
@@ -345,7 +348,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Think about the software your staff already uses. What do you want from it over time?",
+            "text": "Think about the software your staff already uses. What do you most want from it over time?",
             "options": [
                 "Something new every two or three weeks, with a note saying what changed",
                 "A few improvements a season, at a steady pace",
@@ -363,7 +366,7 @@ QUESTIONS: dict[str, list[dict]] = {
                 "I inherited it, was never shown how it worked, and gave up",
                 "It broke down at the busiest part of the season",
                 "The head coach didn't trust what came out of it",
-                "We're still using everything we've started",
+                "Nothing — we're still using everything we've started",
             ],
         },
     ],
@@ -381,7 +384,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "How do you know if you're getting better?",
+            "text": "What tells you most that you're getting better?",
             "options": [
                 "My stats",
                 "Watching my own film",
@@ -392,7 +395,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "How long after a game before you get feedback you can use?",
+            "text": "After a game, how long before you get feedback you can use?",
             "options": [
                 "That night",
                 "The next day",
@@ -402,7 +405,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Which of these would you want most?",
+            "text": "If you could have one of these, which would you want most?",
             "options": [
                 "Knowing exactly what to work on this week, in writing",
                 "Seeing my own clips without hunting for them",
@@ -410,6 +413,7 @@ QUESTIONS: dict[str, list[dict]] = {
                 "Seeing whether I'm improving across the season, not just the last game",
                 "A workout that matches what my coach wants from me",
                 "Being able to ask a question and get a real answer",
+                "None of these",
             ],
         },
         {
@@ -437,7 +441,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Think of the last basketball app you stopped opening. Why?",
+            "text": "Think of the last basketball app you stopped opening. What happened?",
             "options": [
                 "Nothing new ever showed up in it",
                 "It felt like work, not something I wanted to open",
@@ -445,7 +449,7 @@ QUESTIONS: dict[str, list[dict]] = {
                 "What it told me I already knew",
                 "I just forgot it existed",
                 "It took too long to set up",
-                "I still use all of them",
+                "Nothing — I still use all of them",
             ],
         },
     ],
