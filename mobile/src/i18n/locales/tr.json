@@ -1581,7 +1581,8 @@
     "denied": "Reddedildi",
     "requestType": "{{type}} İste",
     "viewType": "{{type}} Görüntüle",
-    "markAsRead": "Okundu Olarak İşaretle"
+    "markAsRead": "Okundu Olarak İşaretle",
+    "viewReport": "Raporu görüntüle"
   },
   "coachTraining": {
     "notFound": "Antrenman bulunamadı",

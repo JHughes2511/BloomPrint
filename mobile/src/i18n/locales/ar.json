@@ -1581,7 +1581,8 @@
     "denied": "مرفوض",
     "requestType": "طلب {{type}}",
     "viewType": "عرض {{type}}",
-    "markAsRead": "تحديد كمقروء"
+    "markAsRead": "تحديد كمقروء",
+    "viewReport": "عرض التقرير"
   },
   "coachTraining": {
     "notFound": "لم يُعثر على التدريب",

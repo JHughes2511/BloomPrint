@@ -1581,7 +1581,8 @@
     "denied": "거부됨",
     "requestType": "{{type}} 요청",
     "viewType": "{{type}} 보기",
-    "markAsRead": "읽음으로 표시"
+    "markAsRead": "읽음으로 표시",
+    "viewReport": "리포트 보기"
   },
   "coachTraining": {
     "notFound": "훈련을 찾을 수 없습니다",

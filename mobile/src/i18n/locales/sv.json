@@ -1581,7 +1581,8 @@
     "denied": "Nekad",
     "requestType": "Begär {{type}}",
     "viewType": "Visa {{type}}",
-    "markAsRead": "Markera som läst"
+    "markAsRead": "Markera som läst",
+    "viewReport": "Visa rapport"
   },
   "coachTraining": {
     "notFound": "Träning hittades inte",

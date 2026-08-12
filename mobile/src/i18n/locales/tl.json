@@ -1581,7 +1581,8 @@
     "denied": "Tinanggihan",
     "requestType": "Humiling ng {{type}}",
     "viewType": "Tingnan ang {{type}}",
-    "markAsRead": "Markahan bilang Nabasa"
+    "markAsRead": "Markahan bilang Nabasa",
+    "viewReport": "Tingnan ang ulat"
   },
   "coachTraining": {
     "notFound": "Hindi nahanap ang training",

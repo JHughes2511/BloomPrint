@@ -1581,7 +1581,8 @@
     "denied": "Отказано",
     "requestType": "Запросить {{type}}",
     "viewType": "Смотреть {{type}}",
-    "markAsRead": "Отметить прочитанным"
+    "markAsRead": "Отметить прочитанным",
+    "viewReport": "Открыть отчёт"
   },
   "coachTraining": {
     "notFound": "Тренировка не найдена",

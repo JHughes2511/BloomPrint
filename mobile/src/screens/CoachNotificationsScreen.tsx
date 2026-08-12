@@ -74,6 +74,31 @@ export default function CoachNotificationsScreen() {
   const typeWord = (sharedId?: number | null) =>
     TYPE_WORD[(sharedId != null ? sharedMeta[sharedId] : '') ?? ''] ?? tr('coachNotifs.typeReport');
 
+  /**
+   * Open what a finished job produced.
+   *
+   * The kind travels on the notification because the server put it there for
+   * translation; it is the same answer to "where does this live" that the
+   * banner uses at the moment the job ends.
+   */
+  const openFinishedJob = (n: any) => {
+    const kind = n?.i18n_params?.kind;
+    const id = n?.ref_id;
+    if (kind === 'packet' && id) {
+      navigation.navigate('TeamTab' as never,
+                          { screen: 'GameReportBuilder', params: { reportId: id } } as never);
+    } else if ((kind === 'eval' || kind === 'eval_text') && id) {
+      navigation.navigate('RecentTab' as never,
+                          { screen: 'EvalReport', params: { evalId: id } } as never);
+    } else if (kind === 'training' && id) {
+      navigation.navigate('CoachTrainingDetail' as never, { trainingId: id } as never);
+    } else {
+      // A film breakdown, a scouting report, a team report: Recent is where
+      // every one of them is listed, and it is never the wrong answer.
+      navigation.navigate('RecentTab' as never, { screen: 'Recent' } as never);
+    }
+  };
+
   const openSharedReport = async (sharedId: number) => {
     try {
       const [inbox, sent] = await Promise.all([
@@ -443,6 +468,19 @@ export default function CoachNotificationsScreen() {
                       </TouchableOpacity>
                     </View>
                   )
+                ) : n.type === 'job_done' ? (
+                  /* A finished job. The banner that announced it is long gone
+                     by the time a coach reads this list, and until now the row
+                     said a report was ready without offering to open it —
+                     leaving them to go and find it themselves. */
+                  <TouchableOpacity
+                    style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center' }]}
+                    onPress={() => openFinishedJob(n)}
+                  >
+                    <Text style={[styles.approveBtnText, { color: t.ctaText }]} numberOfLines={1}>
+                      {tr('coachNotifs.viewReport')}
+                    </Text>
+                  </TouchableOpacity>
                 ) : (n.type === 'staff_report_shared' || n.type === 'staff_share' || n.type === 'staff_report_comment') && n.ref_id ? (
                   <TouchableOpacity
                     style={[styles.approveBtn, { backgroundColor: t.ctaBg, alignItems: 'center' }]}

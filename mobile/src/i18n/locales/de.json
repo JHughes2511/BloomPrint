@@ -1581,7 +1581,8 @@
     "denied": "Verweigert",
     "requestType": "{{type}} anfordern",
     "viewType": "{{type}} anzeigen",
-    "markAsRead": "Als gelesen markieren"
+    "markAsRead": "Als gelesen markieren",
+    "viewReport": "Bericht ansehen"
   },
   "coachTraining": {
     "notFound": "Training nicht gefunden",

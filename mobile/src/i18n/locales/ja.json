@@ -1581,7 +1581,8 @@
     "denied": "拒否済み",
     "requestType": "{{type}}をリクエスト",
     "viewType": "{{type}}を見る",
-    "markAsRead": "既読にする"
+    "markAsRead": "既読にする",
+    "viewReport": "レポートを見る"
   },
   "coachTraining": {
     "notFound": "トレーニングが見つかりません",

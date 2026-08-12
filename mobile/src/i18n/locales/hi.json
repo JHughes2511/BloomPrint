@@ -1581,7 +1581,8 @@
     "denied": "अस्वीकृत",
     "requestType": "{{type}} का अनुरोध करें",
     "viewType": "{{type}} देखें",
-    "markAsRead": "पढ़ा हुआ चिह्नित करें"
+    "markAsRead": "पढ़ा हुआ चिह्नित करें",
+    "viewReport": "रिपोर्ट देखें"
   },
   "coachTraining": {
     "notFound": "ट्रेनिंग नहीं मिली",

@@ -1581,7 +1581,8 @@
     "denied": "Odbijeno",
     "requestType": "Zatraži {{type}}",
     "viewType": "Vidi {{type}}",
-    "markAsRead": "Označi kao pročitano"
+    "markAsRead": "Označi kao pročitano",
+    "viewReport": "Prikaži izveštaj"
   },
   "coachTraining": {
     "notFound": "Trening nije pronađen",

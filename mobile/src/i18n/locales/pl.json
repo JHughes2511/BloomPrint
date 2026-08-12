@@ -1581,7 +1581,8 @@
     "denied": "Odmówiono",
     "requestType": "Poproś o {{type}}",
     "viewType": "Zobacz {{type}}",
-    "markAsRead": "Oznacz jako przeczytane"
+    "markAsRead": "Oznacz jako przeczytane",
+    "viewReport": "Zobacz raport"
   },
   "coachTraining": {
     "notFound": "Nie znaleziono treningu",

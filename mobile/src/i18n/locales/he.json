@@ -1581,7 +1581,8 @@
     "denied": "נדחה",
     "requestType": "בקש {{type}}",
     "viewType": "הצג {{type}}",
-    "markAsRead": "סמן כנקרא"
+    "markAsRead": "סמן כנקרא",
+    "viewReport": "הצג דוח"
   },
   "coachTraining": {
     "notFound": "האימון לא נמצא",

@@ -1581,7 +1581,8 @@
     "denied": "已拒绝",
     "requestType": "请求{{type}}",
     "viewType": "查看{{type}}",
-    "markAsRead": "标记为已读"
+    "markAsRead": "标记为已读",
+    "viewReport": "查看报告"
   },
   "coachTraining": {
     "notFound": "未找到训练",

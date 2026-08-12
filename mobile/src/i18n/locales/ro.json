@@ -1581,7 +1581,8 @@
     "denied": "Refuzat",
     "requestType": "Cere {{type}}",
     "viewType": "Vezi {{type}}",
-    "markAsRead": "Marchează ca citit"
+    "markAsRead": "Marchează ca citit",
+    "viewReport": "Vezi raportul"
   },
   "coachTraining": {
     "notFound": "Antrenamentul nu a fost găsit",

@@ -2,6 +2,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, Switch } from 'react-native';
 import Sheet from '../components/Sheet';
+import { abandonSheetHistory } from '../web/sheetHistory';
 import LearnedPreferences from '../components/LearnedPreferences';
 import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
@@ -688,7 +689,15 @@ export default function HomeScreen() {
               )}
               <TouchableOpacity
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.chip, borderRadius: 12, padding: 13, marginBottom: 14, borderWidth: 1, borderColor: t.line }}
-                onPress={() => { setShowSystem(false); navigation.navigate('Onboarding'); }}
+                onPress={() => {
+                  // The sheet is closing because we are LEAVING it. Closing
+                  // normally spends the history entry it holds, and that back
+                  // lands on the screen we just navigated to — so the guided
+                  // setup opened and was immediately walked off again.
+                  abandonSheetHistory();
+                  setShowSystem(false);
+                  navigation.navigate('Onboarding');
+                }}
               >
                 <Icon name="list" size={16} color={t.ink} strokeWidth={2} />
                 <Text style={{ color: t.ink, fontFamily: fonts[700], fontSize: 12.5, flex: 1, flexShrink: 1, minWidth: 0 }} numberOfLines={2}>

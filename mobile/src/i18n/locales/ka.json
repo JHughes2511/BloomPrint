@@ -1581,7 +1581,8 @@
     "denied": "უარყოფილია",
     "requestType": "მოთხოვნა {{type}}",
     "viewType": "ნახვა {{type}}",
-    "markAsRead": "წაკითხულად მონიშვნა"
+    "markAsRead": "წაკითხულად მონიშვნა",
+    "viewReport": "ანგარიშის ნახვა"
   },
   "coachTraining": {
     "notFound": "ვარჯიში ვერ მოიძებნა",

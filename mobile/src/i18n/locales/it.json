@@ -1581,7 +1581,8 @@
     "denied": "Negato",
     "requestType": "Richiedi {{type}}",
     "viewType": "Vedi {{type}}",
-    "markAsRead": "Segna come Letto"
+    "markAsRead": "Segna come Letto",
+    "viewReport": "Vedi report"
   },
   "coachTraining": {
     "notFound": "Allenamento non trovato",

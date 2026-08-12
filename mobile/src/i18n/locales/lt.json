@@ -1581,7 +1581,8 @@
     "denied": "Atmesta",
     "requestType": "Prašyti {{type}}",
     "viewType": "Peržiūrėti {{type}}",
-    "markAsRead": "Žymėti kaip perskaitytą"
+    "markAsRead": "Žymėti kaip perskaitytą",
+    "viewReport": "Peržiūrėti ataskaitą"
   },
   "coachTraining": {
     "notFound": "Treniruotė nerasta",

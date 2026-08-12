@@ -1581,7 +1581,8 @@
     "denied": "Denied",
     "requestType": "Request {{type}}",
     "viewType": "View {{type}}",
-    "markAsRead": "Mark as Read"
+    "markAsRead": "Mark as Read",
+    "viewReport": "View Report"
   },
   "coachTraining": {
     "notFound": "Training not found",

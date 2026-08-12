@@ -1581,7 +1581,8 @@
     "denied": "Απορρίφθηκε",
     "requestType": "Αίτημα {{type}}",
     "viewType": "Δες {{type}}",
-    "markAsRead": "Σήμανση ως Αναγνωσμένο"
+    "markAsRead": "Σήμανση ως Αναγνωσμένο",
+    "viewReport": "Προβολή αναφοράς"
   },
   "coachTraining": {
     "notFound": "Η προπόνηση δεν βρέθηκε",
