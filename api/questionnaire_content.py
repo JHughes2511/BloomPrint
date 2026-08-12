@@ -31,13 +31,13 @@ rather than adding two different questions together.
 # detaches every response collected before the change from the summary, which
 # is right when the question changed and wrong when only the page around it
 # did.
-VERSION = 1
+VERSION = 2
 
 # Anything VISIBLE, including the strings below and the questions themselves.
 # Separate from VERSION because it is the cache key for translations: reword a
 # button and every language needs retranslating, while the stored answers still
 # mean exactly what they meant before.
-CONTENT_REVISION = 2
+CONTENT_REVISION = 3
 
 # Deliberately ranges rather than a number. A range still cuts the results by
 # age, and asking a fourteen-year-old for their date of birth to answer six
@@ -62,13 +62,14 @@ ROLE_IDS = [r["id"] for r in ROLES]
 QUESTIONS: dict[str, list[dict]] = {
     "coach": [
         {
-            "text": "In a normal week during the season, which of these do you actually produce?",
+            "text": "In a normal week during the season, which of these do you produce?",
             "multi": True,
             "options": [
                 "A written report on an upcoming opponent",
                 "A breakdown of our own last game",
                 "Individual player evaluations or grades",
                 "A practice plan built off what the last game showed",
+                "A practice plan aimed at the next opponent",
                 "A development plan for a specific player",
                 "Mostly verbal — very little of it gets written down",
             ],
@@ -85,7 +86,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "From the final buzzer to something you'd actually put in front of your staff or your players, how long?",
+            "text": "After a game, how long does it take before your staff and your players have feedback they can use?",
             "options": [
                 "Under an hour",
                 "One to three hours",
@@ -95,7 +96,8 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "If one of these were already done for you before you sat down, which would change your week the most?",
+            "text": "If these were already done for you before you sat down, which would change your week the most?",
+            "multi": True,
             "options": [
                 "Film turned into written notes I can hand out",
                 "The next opponent's tendencies pulled together",
@@ -116,12 +118,13 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Think about the software you already use for your team. How often should it change?",
+            "text": "Think about the software you already use for your team. What do you want from it over time?",
             "options": [
                 "Something new every two or three weeks, with a note saying what changed",
-                "Once a month",
-                "A few times a season",
-                "Rarely — I'd rather it stay where it is and stay stable",
+                "A few improvements a season, at a steady pace",
+                "It gets better at the job the more I use it",
+                "Everything I have put into it stays in one place and carries forward",
+                "Nothing new — I would rather it stay where it is and stay stable",
                 "I don't notice either way",
             ],
         },
@@ -139,7 +142,7 @@ QUESTIONS: dict[str, list[dict]] = {
     ],
     "scout": [
         {
-            "text": "In a normal week, what do you actually turn in?",
+            "text": "In a normal week, what do you turn in?",
             "multi": True,
             "options": [
                 "Written reports on individual prospects",
@@ -151,7 +154,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "While you're watching, where do the notes live?",
+            "text": "While you are watching a game — live or on film — where do your notes go?",
             "options": [
                 "A notebook",
                 "A notes app or a Google Doc",
@@ -171,7 +174,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Which of these eats the most time you'd rather have back?",
+            "text": "Which part of the job takes up time you would rather spend somewhere else?",
             "options": [
                 "Finding the possessions that matter inside a full game",
                 "Writing it up once I already know what I think",
@@ -182,7 +185,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Away from watching, how much time goes to writing up, filing and organising what you've seen before it starts to feel like admin?",
+            "text": "Once the game is over, how much time goes into writing up and filing what you saw before it starts to feel like admin?",
             "options": [
                 "Under 10 minutes",
                 "10 to 20 minutes",
@@ -192,12 +195,13 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Think about the software you already use to scout. How often should it change?",
+            "text": "Think about the software you already use to scout. What do you want from it over time?",
             "options": [
                 "Something new every two or three weeks, with a note saying what changed",
-                "Once a month",
-                "A few times a season",
-                "Rarely — I'd rather it stay where it is and stay stable",
+                "A few improvements a season, at a steady pace",
+                "It gets better at the job the more I use it",
+                "Everything I have put into it stays in one place and carries forward",
+                "Nothing new — I would rather it stay where it is and stay stable",
                 "I don't notice either way",
             ],
         },
@@ -269,12 +273,13 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Think about the software you already use with your athletes. How often should it change?",
+            "text": "Think about the software you already use with your athletes. What do you want from it over time?",
             "options": [
                 "Something new every two or three weeks, with a note saying what changed",
-                "Once a month",
-                "A few times a year",
-                "Rarely — I'd rather it stay where it is and stay stable",
+                "A few improvements a season, at a steady pace",
+                "It gets better at the job the more I use it",
+                "Everything I have put into it stays in one place and carries forward",
+                "Nothing new — I would rather it stay where it is and stay stable",
                 "I don't notice either way",
             ],
         },
@@ -292,7 +297,7 @@ QUESTIONS: dict[str, list[dict]] = {
     ],
     "ga": [
         {
-            "text": "In a normal week during the season, what lands on you?",
+            "text": "In a normal week during the season, which of these are your responsibility?",
             "multi": True,
             "options": [
                 "Cutting and tagging film",
@@ -319,7 +324,7 @@ QUESTIONS: dict[str, list[dict]] = {
             "options": ["Under 5", "5 to 10", "10 to 20", "More than 20"],
         },
         {
-            "text": "If one of these were already handled before you started, which would give you the most back?",
+            "text": "If one of these were already done before you started, which would save you the most time?",
             "options": [
                 "Film cut down to the possessions worth watching",
                 "Stats entered and checked",
@@ -330,7 +335,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "On a day with no game, how long do you stay on one piece of desk work before you have to get up from it?",
+            "text": "On a day with no game, how long do you usually work at your desk in one sitting?",
             "options": [
                 "Under 10 minutes",
                 "10 to 20 minutes",
@@ -340,12 +345,13 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Think about the software your staff already uses. How often should it change?",
+            "text": "Think about the software your staff already uses. What do you want from it over time?",
             "options": [
                 "Something new every two or three weeks, with a note saying what changed",
-                "Once a month",
-                "A few times a season",
-                "Rarely — I'd rather it stay where it is and stay stable",
+                "A few improvements a season, at a steady pace",
+                "It gets better at the job the more I use it",
+                "Everything I have put into it stays in one place and carries forward",
+                "Nothing new — I would rather it stay where it is and stay stable",
                 "I don't notice either way",
             ],
         },
@@ -410,7 +416,7 @@ QUESTIONS: dict[str, list[dict]] = {
             # The ladder starts lower than the adult versions on purpose:
             # offering "under 10 minutes" as the floor to a teenager compresses
             # every honest answer into one bucket.
-            "text": "On your phone, how long do you spend on anything basketball — your film, your stats, workout stuff — before you lose interest?",
+            "text": "When you pick up your phone, how long do you spend on basketball — watching your film, checking your stats, looking up workouts?",
             "options": [
                 "Under 5 minutes",
                 "5 to 10 minutes",
@@ -420,12 +426,14 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Think about an app you actually keep on your phone. How often should there be something new in it?",
+            "text": "When you want to work on your game on your own, what usually gets in the way?",
             "options": [
-                "Every couple of weeks",
-                "Once a month",
-                "A few times a season",
-                "I don't care, as long as it works",
+                "I don't know what to work on",
+                "No gym or court I can get into",
+                "Nobody to run the workout with me",
+                "No time around school and practice",
+                "I lose interest partway through",
+                "Nothing — I get out there",
             ],
         },
         {
@@ -436,6 +444,7 @@ QUESTIONS: dict[str, list[dict]] = {
                 "Nobody else on my team used it",
                 "What it told me I already knew",
                 "I just forgot it existed",
+                "It took too long to set up",
                 "I'm still using everything I've started",
             ],
         },

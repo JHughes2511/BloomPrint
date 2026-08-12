@@ -198,6 +198,17 @@ export default function QuestionnaireResultsScreen() {
             </TouchableOpacity>
           </View>
 
+          {!!summary.earlier_version_count && (
+            <View style={[s.panel, { marginTop: 14 }]}>
+              <Text style={s.lede}>
+                {summary.earlier_version_count} earlier {summary.earlier_version_count === 1
+                  ? 'response answers' : 'responses answer'} a previous wording of these
+                questions. They are kept, and in the CSV, but counted apart from the
+                numbers here — adding them would be adding up two different questions.
+              </Text>
+            </View>
+          )}
+
           {summary.total === 0 && (
             <View style={s.panel}>
               <Text style={s.lede}>Nothing has come in yet. Share the link and this fills up.</Text>

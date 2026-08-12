@@ -227,6 +227,8 @@ export type QuestionnaireForm = {
 export type QuestionnaireSummary = {
   version: number;
   total: number;
+  /** Answers to an earlier wording of the questions, counted apart from these. */
+  earlier_version_count?: number;
   roles: {
     id: string; name: string; count: number;
     questions: { text: string; multi: boolean; answered: number;

@@ -471,8 +471,15 @@ def summary(
                              "comment": row.comment, "created_at": row.created_at})
 
     comments.sort(key=lambda c: c["id"], reverse=True)
+    # Responses to an older wording are counted separately, never added in —
+    # but they are reported, because a summary that silently drops them looks
+    # exactly like responses that were never received.
+    older = (db.query(models.QuestionnaireResponse)
+               .filter(models.QuestionnaireResponse.version != content.VERSION)
+               .count())
     return {
         "version": content.VERSION,
+        "earlier_version_count": older,
         "total": sum(totals.values()),
         "roles": [
             {"id": r["id"], "name": r["name"], "count": totals[r["id"]],
