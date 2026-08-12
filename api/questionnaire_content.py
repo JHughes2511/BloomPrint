@@ -37,7 +37,7 @@ VERSION = 2
 # Separate from VERSION because it is the cache key for translations: reword a
 # button and every language needs retranslating, while the stored answers still
 # mean exactly what they meant before.
-CONTENT_REVISION = 5
+CONTENT_REVISION = 6
 
 # Deliberately ranges rather than a number. A range still cuts the results by
 # age, and asking a fourteen-year-old for their date of birth to answer six
@@ -185,7 +185,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "After a game, how long do you spend writing up and filing what you saw before it starts to feel like admin?",
+            "text": "After a game, how much time are you willing to spend writing up and filing what you saw?",
             "options": [
                 "Under 10 minutes",
                 "10 to 20 minutes",
@@ -335,7 +335,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "On a day with no game, how long do you usually work at your desk in one sitting?",
+            "text": "On a day with no game, how long can you stay at your desk before you need a break?",
             "options": [
                 "Under 10 minutes",
                 "10 to 20 minutes",
