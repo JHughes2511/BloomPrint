@@ -1582,7 +1582,10 @@
     "requestType": "{{type}} aanvragen",
     "viewType": "{{type}} bekijken",
     "markAsRead": "Markeren als gelezen",
-    "viewReport": "Rapport bekijken"
+    "viewReport": "Rapport bekijken",
+    "addToRoster": "Toevoegen",
+    "rosterAddedTitle": "Toegevoegd",
+    "rosterAddedMsg": "Hij staat nu in de selectie."
   },
   "coachTraining": {
     "notFound": "Training niet gevonden",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} mislukt",
       "body": "Kon niet worden voltooid. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Een speler voor je selectie",
+      "body": "{{coach}} heeft {{player}} in hun versie van {{team}}. Toevoegen aan de selectie?"
     }
   },
   "teamInvite": {

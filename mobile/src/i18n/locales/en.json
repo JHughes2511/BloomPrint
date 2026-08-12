@@ -1582,7 +1582,10 @@
     "requestType": "Request {{type}}",
     "viewType": "View {{type}}",
     "markAsRead": "Mark as Read",
-    "viewReport": "View Report"
+    "viewReport": "View Report",
+    "addToRoster": "Add",
+    "rosterAddedTitle": "Added",
+    "rosterAddedMsg": "They are on the roster now."
   },
   "coachTraining": {
     "notFound": "Training not found",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} failed",
       "body": "It could not be finished. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "A player to add to your roster",
+      "body": "{{coach}} has {{player}} on their copy of {{team}}. Add them to the roster?"
     }
   },
   "teamInvite": {

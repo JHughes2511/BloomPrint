@@ -1582,7 +1582,10 @@
     "requestType": "{{type}} 요청",
     "viewType": "{{type}} 보기",
     "markAsRead": "읽음으로 표시",
-    "viewReport": "리포트 보기"
+    "viewReport": "리포트 보기",
+    "addToRoster": "추가",
+    "rosterAddedTitle": "추가됨",
+    "rosterAddedMsg": "이제 로스터에 있습니다."
   },
   "coachTraining": {
     "notFound": "훈련을 찾을 수 없습니다",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} 실패",
       "body": "완료하지 못했습니다. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "로스터에 추가할 선수",
+      "body": "{{coach}} 님의 {{team}} 명단에 {{player}} 선수가 있습니다. 로스터에 추가할까요?"
     }
   },
   "teamInvite": {

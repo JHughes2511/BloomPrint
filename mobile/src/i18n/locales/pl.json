@@ -1582,7 +1582,10 @@
     "requestType": "Poproś o {{type}}",
     "viewType": "Zobacz {{type}}",
     "markAsRead": "Oznacz jako przeczytane",
-    "viewReport": "Zobacz raport"
+    "viewReport": "Zobacz raport",
+    "addToRoster": "Dodaj",
+    "rosterAddedTitle": "Dodano",
+    "rosterAddedMsg": "Jest już w składzie."
   },
   "coachTraining": {
     "notFound": "Nie znaleziono treningu",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} nie powiódł się",
       "body": "Nie udało się ukończyć. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Zawodnik do dodania do składu",
+      "body": "{{coach}} ma {{player}} w swojej wersji {{team}}. Dodać do składu?"
     }
   },
   "teamInvite": {

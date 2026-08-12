@@ -1582,7 +1582,10 @@
     "requestType": "{{type}} anfordern",
     "viewType": "{{type}} anzeigen",
     "markAsRead": "Als gelesen markieren",
-    "viewReport": "Bericht ansehen"
+    "viewReport": "Bericht ansehen",
+    "addToRoster": "Hinzufügen",
+    "rosterAddedTitle": "Hinzugefügt",
+    "rosterAddedMsg": "Er steht jetzt im Kader."
   },
   "coachTraining": {
     "notFound": "Training nicht gefunden",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} fehlgeschlagen",
       "body": "Konnte nicht abgeschlossen werden. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Ein Spieler für deinen Kader",
+      "body": "{{coach}} hat {{player}} in seiner Fassung von {{team}}. Zum Kader hinzufügen?"
     }
   },
   "teamInvite": {

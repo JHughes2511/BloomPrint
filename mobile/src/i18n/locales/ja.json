@@ -1582,7 +1582,10 @@
     "requestType": "{{type}}をリクエスト",
     "viewType": "{{type}}を見る",
     "markAsRead": "既読にする",
-    "viewReport": "レポートを見る"
+    "viewReport": "レポートを見る",
+    "addToRoster": "追加",
+    "rosterAddedTitle": "追加しました",
+    "rosterAddedMsg": "ロスターに入りました。"
   },
   "coachTraining": {
     "notFound": "トレーニングが見つかりません",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}}に失敗しました",
       "body": "完了できませんでした。{{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "ロスターに追加する選手",
+      "body": "{{coach}} の {{team}} には {{player}} がいます。ロスターに追加しますか？"
     }
   },
   "teamInvite": {

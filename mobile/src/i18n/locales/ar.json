@@ -1582,7 +1582,10 @@
     "requestType": "طلب {{type}}",
     "viewType": "عرض {{type}}",
     "markAsRead": "تحديد كمقروء",
-    "viewReport": "عرض التقرير"
+    "viewReport": "عرض التقرير",
+    "addToRoster": "إضافة",
+    "rosterAddedTitle": "تمت الإضافة",
+    "rosterAddedMsg": "أصبح الآن ضمن القائمة."
   },
   "coachTraining": {
     "notFound": "لم يُعثر على التدريب",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "فشل {{kind}}",
       "body": "تعذّر إكماله. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "لاعب لإضافته إلى قائمتك",
+      "body": "لدى {{coach}} اللاعب {{player}} في نسخته من {{team}}. هل تضيفه إلى القائمة؟"
     }
   },
   "teamInvite": {

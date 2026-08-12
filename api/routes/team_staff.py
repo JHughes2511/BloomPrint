@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import models, notify
+from .. import models, notify, roster_sync
 
 router = APIRouter(prefix="/team-staff", tags=["team-staff"])
 
@@ -178,6 +178,7 @@ def join_team(
     if invited:
         invited.status = "approved"
         db.add(models.TeamStaff(coach_id=coach.id, team_id=team_id))
+        roster_sync.on_staff_joined(db, team, coach)
         _notify_owner_joined(db, team, coach)
         db.commit()
         return {"ok": True, "status": "approved"}
@@ -269,6 +270,7 @@ def approve_join_request(
     if req.status == "pending":
         if not db.query(models.TeamStaff).filter_by(team_id=req.team_id, coach_id=req.invited_coach_id).first():
             db.add(models.TeamStaff(team_id=req.team_id, coach_id=req.invited_coach_id))
+            roster_sync.on_staff_joined(db, team, db.get(models.Coach, req.invited_coach_id))
         req.status = "approved"
         db.add(models.CoachNotification(
             coach_id=req.invited_coach_id,
@@ -307,6 +309,85 @@ def reject_join_request(
     return {"ok": True, "status": req.status}
 
 
+class RosterProposalOut(BaseModel):
+    id: int
+    team_id: int
+    team_name: str
+    player_id: int
+    player_name: str
+    jersey_number: str | None = None
+    position: str | None = None
+    proposed_by_name: str
+
+
+@router.get("/roster-proposals", response_model=list[RosterProposalOut])
+def roster_proposals(
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Players another coach has that this coach's teams do not — awaiting a yes."""
+    team_ids = [t.id for t in db.query(models.Team).filter_by(coach_id=coach.id).all()]
+    if not team_ids:
+        return []
+    rows = (
+        db.query(models.RosterProposal)
+        .filter(models.RosterProposal.team_id.in_(team_ids),
+                models.RosterProposal.status == "pending")
+        .order_by(models.RosterProposal.created_at.desc())
+        .all()
+    )
+    out = []
+    for r in rows:
+        player, team = db.get(models.Player, r.player_id), db.get(models.Team, r.team_id)
+        proposer = db.get(models.Coach, r.proposed_by)
+        if not player or not team:
+            continue
+        out.append(RosterProposalOut(
+            id=r.id, team_id=r.team_id, team_name=team.name,
+            player_id=player.id, player_name=player.name,
+            jersey_number=player.jersey_number, position=player.position,
+            proposed_by_name=proposer.name if proposer else "A coach",
+        ))
+    return out
+
+
+def _my_proposal(db: Session, proposal_id: int, coach_id: int) -> models.RosterProposal:
+    row = db.get(models.RosterProposal, proposal_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Not found")
+    team = db.get(models.Team, row.team_id)
+    if not team or team.coach_id != coach_id:
+        raise HTTPException(status_code=403, detail="Only the team owner can decide this.")
+    return row
+
+
+@router.post("/roster-proposals/{proposal_id}/approve")
+def approve_roster_proposal(
+    proposal_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    row = _my_proposal(db, proposal_id, coach.id)
+    if row.status != "pending":
+        return {"ok": True, "status": row.status}
+    player = roster_sync.accept_proposal(db, row, coach)
+    db.commit()
+    return {"ok": True, "status": "approved", "player_id": player.id if player else None}
+
+
+@router.post("/roster-proposals/{proposal_id}/reject")
+def reject_roster_proposal(
+    proposal_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    row = _my_proposal(db, proposal_id, coach.id)
+    if row.status == "pending":
+        roster_sync.reject_proposal(db, row, coach)
+        db.commit()
+    return {"ok": True, "status": row.status}
+
+
 @router.delete("/{team_id}/leave")
 def leave_team(
     team_id: int,
@@ -321,6 +402,7 @@ def leave_team(
     )
     if not link:
         raise HTTPException(status_code=404, detail="Not a member of this team")
+    roster_sync.on_staff_left(db, db.get(models.Team, team_id), coach)
     db.delete(link)
     db.commit()
     return {"ok": True}
@@ -522,6 +604,7 @@ def add_member(
         raise HTTPException(status_code=403, detail="Invite them to the program first.")
 
     db.add(models.TeamStaff(team_id=team_id, coach_id=coach_id))
+    roster_sync.on_staff_joined(db, team, target)
     db.add(models.CoachNotification(
         coach_id=coach_id,
         title=f"Added to {team.name}",
@@ -553,6 +636,9 @@ def remove_member(
     link = db.query(models.TeamStaff).filter_by(team_id=team_id, coach_id=coach_id).first()
     if not link:
         raise HTTPException(status_code=404, detail="Not a member of this team")
+    # Being removed is the same as leaving as far as their work goes: they keep
+    # a private copy of the players they evaluated, it just stops updating.
+    roster_sync.on_staff_left(db, team, db.get(models.Coach, coach_id))
     db.delete(link)
     db.add(models.CoachNotification(
         coach_id=coach_id,
@@ -664,6 +750,7 @@ def approve_invite(
             db.add(models.TeamStaff(team_id=inv.team_id, coach_id=coach.id))
         inv.status = "approved"
         team = db.get(models.Team, inv.team_id)
+        roster_sync.on_staff_joined(db, team, coach)
         db.add(models.PlayerNotification(
             coach_id=inv.invited_by, type="team_invite_approved", title="Invite accepted",
             body=f"{coach.name} joined {team.name if team else 'your team'}.",

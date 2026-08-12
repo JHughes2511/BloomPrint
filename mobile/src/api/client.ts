@@ -21,6 +21,18 @@ export type CoachPreference = {
   created_at: string;
 };
 
+/** A player another coach on the team has, waiting to be added or turned down. */
+export type RosterProposal = {
+  id: number;
+  team_id: number;
+  team_name: string;
+  player_id: number;
+  player_name: string;
+  jersey_number: string | null;
+  position: string | null;
+  proposed_by_name: string;
+};
+
 /** One written sentence on the scouting page, and whether it is out of date. */
 export type ScoutInsightOut = {
   insight: string;
@@ -1036,6 +1048,13 @@ export const teamStaffAPI = {
     api.post(`/team-staff/join-requests/${id}/approve`).then(r => r.data),
   rejectJoinRequest: (id: number) =>
     api.post(`/team-staff/join-requests/${id}/reject`).then(r => r.data),
+  // A player another coach has and this team's roster does not.
+  rosterProposals: (): Promise<RosterProposal[]> =>
+    api.get('/team-staff/roster-proposals').then(r => r.data),
+  approveRosterProposal: (id: number) =>
+    api.post(`/team-staff/roster-proposals/${id}/approve`).then(r => r.data),
+  rejectRosterProposal: (id: number) =>
+    api.post(`/team-staff/roster-proposals/${id}/reject`).then(r => r.data),
   // Omit coachId to claim a team whose owner has left the app.
   transferOwner: (teamId: number, coachId?: number) =>
     api.post(`/team-staff/${teamId}/transfer-owner`, { coach_id: coachId ?? null }).then(r => r.data),

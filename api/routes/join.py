@@ -26,7 +26,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import models, ratelimit
+from .. import models, ratelimit, roster_sync
 from .player_auth import get_current_player_user
 
 router = APIRouter(prefix="/join", tags=["join"])
@@ -80,6 +80,7 @@ def join_as_staff(
     existing = db.query(models.TeamStaff).filter_by(team_id=team.id, coach_id=coach.id).first()
     if not existing:
         db.add(models.TeamStaff(team_id=team.id, coach_id=coach.id))
+        roster_sync.on_staff_joined(db, team, coach)
         db.add(models.TeamJoinEvent(link_id=link.id, coach_id=coach.id, kind="staff",
                                     display_name=coach.name))
         # The coach who shared the link should know who used it without going

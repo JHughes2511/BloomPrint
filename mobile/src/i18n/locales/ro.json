@@ -1582,7 +1582,10 @@
     "requestType": "Cere {{type}}",
     "viewType": "Vezi {{type}}",
     "markAsRead": "Marchează ca citit",
-    "viewReport": "Vezi raportul"
+    "viewReport": "Vezi raportul",
+    "addToRoster": "Adaugă",
+    "rosterAddedTitle": "Adăugat",
+    "rosterAddedMsg": "Este acum în lot."
   },
   "coachTraining": {
     "notFound": "Antrenamentul nu a fost găsit",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} a eșuat",
       "body": "Nu a putut fi finalizat. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Un jucător de adăugat în lot",
+      "body": "{{coach}} îl are pe {{player}} în versiunea sa a {{team}}. Îl adaugi în lot?"
     }
   },
   "teamInvite": {

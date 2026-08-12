@@ -1582,7 +1582,10 @@
     "requestType": "Richiedi {{type}}",
     "viewType": "Vedi {{type}}",
     "markAsRead": "Segna come Letto",
-    "viewReport": "Vedi report"
+    "viewReport": "Vedi report",
+    "addToRoster": "Aggiungi",
+    "rosterAddedTitle": "Aggiunto",
+    "rosterAddedMsg": "Ora è in rosa."
   },
   "coachTraining": {
     "notFound": "Allenamento non trovato",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} non riuscito",
       "body": "Non è stato possibile completarlo. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Un giocatore da aggiungere alla rosa",
+      "body": "{{coach}} ha {{player}} nella sua versione di {{team}}. Aggiungerlo alla rosa?"
     }
   },
   "teamInvite": {

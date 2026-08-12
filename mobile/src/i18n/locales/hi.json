@@ -1582,7 +1582,10 @@
     "requestType": "{{type}} का अनुरोध करें",
     "viewType": "{{type}} देखें",
     "markAsRead": "पढ़ा हुआ चिह्नित करें",
-    "viewReport": "रिपोर्ट देखें"
+    "viewReport": "रिपोर्ट देखें",
+    "addToRoster": "जोड़ें",
+    "rosterAddedTitle": "जोड़ा गया",
+    "rosterAddedMsg": "वे अब टीम सूची में हैं।"
   },
   "coachTraining": {
     "notFound": "ट्रेनिंग नहीं मिली",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} विफल",
       "body": "इसे पूरा नहीं किया जा सका। {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "आपकी टीम सूची में जोड़ने के लिए एक खिलाड़ी",
+      "body": "{{coach}} के पास {{team}} की उनकी सूची में {{player}} है। क्या उन्हें सूची में जोड़ें?"
     }
   },
   "teamInvite": {

@@ -1582,7 +1582,10 @@
     "requestType": "Запросить {{type}}",
     "viewType": "Смотреть {{type}}",
     "markAsRead": "Отметить прочитанным",
-    "viewReport": "Открыть отчёт"
+    "viewReport": "Открыть отчёт",
+    "addToRoster": "Добавить",
+    "rosterAddedTitle": "Добавлен",
+    "rosterAddedMsg": "Теперь он в составе."
   },
   "coachTraining": {
     "notFound": "Тренировка не найдена",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}}: ошибка",
       "body": "Не удалось завершить. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Игрок для добавления в состав",
+      "body": "У {{coach}} есть {{player}} в своей версии {{team}}. Добавить в состав?"
     }
   },
   "teamInvite": {

@@ -1582,7 +1582,10 @@
     "requestType": "请求{{type}}",
     "viewType": "查看{{type}}",
     "markAsRead": "标记为已读",
-    "viewReport": "查看报告"
+    "viewReport": "查看报告",
+    "addToRoster": "添加",
+    "rosterAddedTitle": "已添加",
+    "rosterAddedMsg": "他已在名单中。"
   },
   "coachTraining": {
     "notFound": "未找到训练",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}}失败",
       "body": "无法完成。{{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "有一名球员可加入你的名单",
+      "body": "{{coach}} 的 {{team}} 名单里有 {{player}}。要加入你的名单吗？"
     }
   },
   "teamInvite": {

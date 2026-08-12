@@ -105,6 +105,10 @@ class Player(SoftDeleteMixin, Base):
     # Parent/guardian consent for minors (under 18). None = not specified.
     parent_permission = Column(Boolean, nullable=True)
     created_at       = Column(DateTime, default=datetime.utcnow)
+    # Which side of a merge wins a disagreement. Two coaches keeping the same
+    # player both being right is the normal case — one of them measured more
+    # recently, and that is the answer the roster should carry.
+    updated_at       = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     team_id          = Column(Integer, ForeignKey("teams.id"), nullable=True)
     coach_id         = Column(Integer, ForeignKey("coaches.id"), nullable=True)  # roster owner
 
@@ -1066,6 +1070,32 @@ class TeamStaff(Base):
 
     coach = relationship("Coach")
     team  = relationship("Team")
+
+
+class RosterProposal(Base):
+    """"I have a player you don't" — waiting on the team to say yes or no.
+
+    When two coaches who each kept the same team join up, most of the roster is
+    the same two people written down twice and merges silently. What is left is
+    the interesting part: a player one of them has and the other has never seen.
+    That is not automatically a new player — it can be a tryout who never made
+    it, or last season's roster — so it is offered, not added.
+    """
+    __tablename__ = "roster_proposals"
+
+    id          = Column(Integer, primary_key=True, index=True)
+    team_id     = Column(Integer, ForeignKey("teams.id"), nullable=False, index=True)
+    # The proposer's own row. Approving moves THIS row onto the team, so the
+    # player's history comes with them rather than being retyped.
+    player_id   = Column(Integer, ForeignKey("players.id"), nullable=False)
+    proposed_by = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    status      = Column(String, nullable=False, default="pending")  # pending/approved/rejected
+    decided_by  = Column(Integer, ForeignKey("coaches.id"), nullable=True)
+    created_at  = Column(DateTime, default=datetime.utcnow)
+
+    team     = relationship("Team")
+    player   = relationship("Player")
+    proposer = relationship("Coach", foreign_keys=[proposed_by])
 
 
 # ── Staff messaging ──────────────────────────────────────────────────────────

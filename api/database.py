@@ -342,6 +342,9 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     ("game_reports", "game_date", "TIMESTAMP"),
     # Written material behind a scouting sentence, for spotting a stale one.
     ("scout_insights", "material", "INTEGER DEFAULT 0"),
+    # Which coach's copy of a player is the more recent one, for merging two
+    # rosters of the same team.
+    ("players", "updated_at", "TIMESTAMP"),
 ]
 
 

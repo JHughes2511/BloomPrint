@@ -1582,7 +1582,10 @@
     "requestType": "Αίτημα {{type}}",
     "viewType": "Δες {{type}}",
     "markAsRead": "Σήμανση ως Αναγνωσμένο",
-    "viewReport": "Προβολή αναφοράς"
+    "viewReport": "Προβολή αναφοράς",
+    "addToRoster": "Προσθήκη",
+    "rosterAddedTitle": "Προστέθηκε",
+    "rosterAddedMsg": "Είναι πλέον στο ρόστερ."
   },
   "coachTraining": {
     "notFound": "Η προπόνηση δεν βρέθηκε",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} απέτυχε",
       "body": "Δεν ήταν δυνατή η ολοκλήρωση. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Ένας παίκτης για το ρόστερ σου",
+      "body": "Ο/Η {{coach}} έχει τον {{player}} στη δική του εκδοχή της {{team}}. Να προστεθεί στο ρόστερ;"
     }
   },
   "teamInvite": {

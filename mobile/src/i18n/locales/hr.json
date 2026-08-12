@@ -1582,7 +1582,10 @@
     "requestType": "Zatraži {{type}}",
     "viewType": "Prikaži {{type}}",
     "markAsRead": "Označi kao pročitano",
-    "viewReport": "Prikaži izvještaj"
+    "viewReport": "Prikaži izvještaj",
+    "addToRoster": "Dodaj",
+    "rosterAddedTitle": "Dodano",
+    "rosterAddedMsg": "Sada je u sastavu."
   },
   "coachTraining": {
     "notFound": "Trening nije pronađen",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} nije uspio",
       "body": "Nije se moglo dovršiti. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Igrač za dodati u sastav",
+      "body": "{{coach}} ima {{player}} u svojoj verziji {{team}}. Dodati ga u sastav?"
     }
   },
   "teamInvite": {

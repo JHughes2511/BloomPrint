@@ -1582,7 +1582,10 @@
     "requestType": "მოთხოვნა {{type}}",
     "viewType": "ნახვა {{type}}",
     "markAsRead": "წაკითხულად მონიშვნა",
-    "viewReport": "ანგარიშის ნახვა"
+    "viewReport": "ანგარიშის ნახვა",
+    "addToRoster": "დამატება",
+    "rosterAddedTitle": "დაემატა",
+    "rosterAddedMsg": "ის უკვე შემადგენლობაშია."
   },
   "coachTraining": {
     "notFound": "ვარჯიში ვერ მოიძებნა",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} ვერ შესრულდა",
       "body": "ვერ დასრულდა. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "მოთამაშე, რომელიც შემადგენლობას უნდა დაემატოს",
+      "body": "{{coach}}-ს {{team}}-ის თავის ვერსიაში ჰყავს {{player}}. დაემატოს შემადგენლობას?"
     }
   },
   "teamInvite": {

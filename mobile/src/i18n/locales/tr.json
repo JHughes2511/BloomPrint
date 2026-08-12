@@ -1582,7 +1582,10 @@
     "requestType": "{{type}} İste",
     "viewType": "{{type}} Görüntüle",
     "markAsRead": "Okundu Olarak İşaretle",
-    "viewReport": "Raporu görüntüle"
+    "viewReport": "Raporu görüntüle",
+    "addToRoster": "Ekle",
+    "rosterAddedTitle": "Eklendi",
+    "rosterAddedMsg": "Artık kadroda."
   },
   "coachTraining": {
     "notFound": "Antrenman bulunamadı",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} başarısız",
       "body": "Tamamlanamadı. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Kadroya eklenecek bir oyuncu",
+      "body": "{{coach}}, {{team}} listesinde {{player}} oyuncusuna sahip. Kadroya eklensin mi?"
     }
   },
   "teamInvite": {

@@ -1582,7 +1582,10 @@
     "requestType": "Запитати {{type}}",
     "viewType": "Переглянути {{type}}",
     "markAsRead": "Позначити як прочитане",
-    "viewReport": "Відкрити звіт"
+    "viewReport": "Відкрити звіт",
+    "addToRoster": "Додати",
+    "rosterAddedTitle": "Додано",
+    "rosterAddedMsg": "Тепер він у складі."
   },
   "coachTraining": {
     "notFound": "Тренування не знайдено",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}}: помилка",
       "body": "Не вдалося завершити. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Гравець для додавання до складу",
+      "body": "У {{coach}} є {{player}} у своїй версії {{team}}. Додати до складу?"
     }
   },
   "teamInvite": {

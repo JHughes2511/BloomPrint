@@ -1582,7 +1582,10 @@
     "requestType": "Solicitar {{type}}",
     "viewType": "Ver {{type}}",
     "markAsRead": "Marcar como Leído",
-    "viewReport": "Ver informe"
+    "viewReport": "Ver informe",
+    "addToRoster": "Añadir",
+    "rosterAddedTitle": "Añadido",
+    "rosterAddedMsg": "Ya está en la plantilla."
   },
   "coachTraining": {
     "notFound": "Entrenamiento no encontrado",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} falló",
       "body": "No se pudo terminar. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Un jugador para añadir a tu plantilla",
+      "body": "{{coach}} tiene a {{player}} en su copia de {{team}}. ¿Añadirlo a la plantilla?"
     }
   },
   "teamInvite": {

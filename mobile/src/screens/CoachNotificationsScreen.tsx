@@ -406,6 +406,29 @@ export default function CoachNotificationsScreen() {
                       <Text style={{ color: t.ctaText, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('coachNotifs.accept')}</Text>
                     </TouchableOpacity>
                   </View>
+                ) : n.type === 'roster_player_proposed' && n.ref_id ? (
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity
+                      style={[styles.approveBtn, { backgroundColor: t.chip, flex: 1, alignItems: 'center' }]}
+                      onPress={async () => {
+                        try { await teamStaffAPI.rejectRosterProposal(n.ref_id!); } catch {}
+                        await playerAPI.coachMarkRead(n.id);
+                        setNotifications(prev => prev.filter(x => x.id !== n.id));
+                      }}>
+                      <Text style={{ color: t.ink, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('coachNotifs.reject')}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.approveBtn, { backgroundColor: t.ctaBg, flex: 1, alignItems: 'center' }]}
+                      onPress={async () => {
+                        try { await teamStaffAPI.approveRosterProposal(n.ref_id!); }
+                        catch (e: any) { Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('coachNotifs.acceptError')); return; }
+                        await playerAPI.coachMarkRead(n.id);
+                        setNotifications(prev => prev.filter(x => x.id !== n.id));
+                        Alert.alert(tr('coachNotifs.rosterAddedTitle'), tr('coachNotifs.rosterAddedMsg'));
+                      }}>
+                      <Text style={{ color: t.ctaText, fontFamily: fonts[700], flexShrink: 1 }} numberOfLines={1}>{tr('coachNotifs.addToRoster')}</Text>
+                    </TouchableOpacity>
+                  </View>
                 ) : (n.type === 'training_generated' || n.type === 'training_refreshed') && n.ref_id ? (
                   <View>
                     <Text style={{ color: t.muted, fontSize: 12, marginBottom: 8 }}>

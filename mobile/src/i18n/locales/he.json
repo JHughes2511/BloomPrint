@@ -1582,7 +1582,10 @@
     "requestType": "בקש {{type}}",
     "viewType": "הצג {{type}}",
     "markAsRead": "סמן כנקרא",
-    "viewReport": "הצג דוח"
+    "viewReport": "הצג דוח",
+    "addToRoster": "הוסף",
+    "rosterAddedTitle": "נוסף",
+    "rosterAddedMsg": "הוא נמצא עכשיו בסגל."
   },
   "coachTraining": {
     "notFound": "האימון לא נמצא",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} נכשל",
       "body": "לא ניתן היה לסיים. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "שחקן להוספה לסגל",
+      "body": "ל{{coach}} יש את {{player}} בעותק שלו של {{team}}. להוסיף אותו לסגל?"
     }
   },
   "teamInvite": {

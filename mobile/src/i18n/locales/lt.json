@@ -1582,7 +1582,10 @@
     "requestType": "Prašyti {{type}}",
     "viewType": "Peržiūrėti {{type}}",
     "markAsRead": "Žymėti kaip perskaitytą",
-    "viewReport": "Peržiūrėti ataskaitą"
+    "viewReport": "Peržiūrėti ataskaitą",
+    "addToRoster": "Įtraukti",
+    "rosterAddedTitle": "Įtrauktas",
+    "rosterAddedMsg": "Dabar jis yra sudėtyje."
   },
   "coachTraining": {
     "notFound": "Treniruotė nerasta",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} nepavyko",
       "body": "Nepavyko užbaigti. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Žaidėjas, kurį galima įtraukti į sudėtį",
+      "body": "{{coach}} savo {{team}} sąraše turi {{player}}. Įtraukti į sudėtį?"
     }
   },
   "teamInvite": {

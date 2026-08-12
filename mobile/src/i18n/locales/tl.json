@@ -1582,7 +1582,10 @@
     "requestType": "Humiling ng {{type}}",
     "viewType": "Tingnan ang {{type}}",
     "markAsRead": "Markahan bilang Nabasa",
-    "viewReport": "Tingnan ang ulat"
+    "viewReport": "Tingnan ang ulat",
+    "addToRoster": "Idagdag",
+    "rosterAddedTitle": "Naidagdag",
+    "rosterAddedMsg": "Nasa roster na siya."
   },
   "coachTraining": {
     "notFound": "Hindi nahanap ang training",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "Nabigo ang {{kind}}",
       "body": "Hindi ito natapos. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Isang manlalaro para idagdag sa roster",
+      "body": "Nasa kopya ni {{coach}} ng {{team}} si {{player}}. Idagdag sa roster?"
     }
   },
   "teamInvite": {

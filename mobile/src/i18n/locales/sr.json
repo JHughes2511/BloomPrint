@@ -1582,7 +1582,10 @@
     "requestType": "Zatraži {{type}}",
     "viewType": "Vidi {{type}}",
     "markAsRead": "Označi kao pročitano",
-    "viewReport": "Prikaži izveštaj"
+    "viewReport": "Prikaži izveštaj",
+    "addToRoster": "Дoдaj",
+    "rosterAddedTitle": "Дoдaтo",
+    "rosterAddedMsg": "Сaдa je у сaстaву."
   },
   "coachTraining": {
     "notFound": "Trening nije pronađen",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} nije uspeo",
       "body": "Nije moglo da se dovrši. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Игрaч зa дoдaвaњe у сaстaв",
+      "body": "{{coach}} имa {{player}} у свojoj вeрзиjи {{team}}. Дoдaти гa у сaстaв?"
     }
   },
   "teamInvite": {

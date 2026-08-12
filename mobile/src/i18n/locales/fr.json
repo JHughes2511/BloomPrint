@@ -1582,7 +1582,10 @@
     "requestType": "Demander {{type}}",
     "viewType": "Voir {{type}}",
     "markAsRead": "Marquer comme lu",
-    "viewReport": "Voir le rapport"
+    "viewReport": "Voir le rapport",
+    "addToRoster": "Ajouter",
+    "rosterAddedTitle": "Ajouté",
+    "rosterAddedMsg": "Il fait maintenant partie de l'effectif."
   },
   "coachTraining": {
     "notFound": "Entraînement introuvable",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} a échoué",
       "body": "Impossible de le terminer. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "Un joueur à ajouter à votre effectif",
+      "body": "{{coach}} a {{player}} dans sa version de {{team}}. L'ajouter à l'effectif ?"
     }
   },
   "teamInvite": {

@@ -1582,7 +1582,10 @@
     "requestType": "Begär {{type}}",
     "viewType": "Visa {{type}}",
     "markAsRead": "Markera som läst",
-    "viewReport": "Visa rapport"
+    "viewReport": "Visa rapport",
+    "addToRoster": "Lägg till",
+    "rosterAddedTitle": "Tillagd",
+    "rosterAddedMsg": "Nu är hen med i truppen."
   },
   "coachTraining": {
     "notFound": "Träning hittades inte",
@@ -2558,6 +2561,10 @@
     "jobFailed": {
       "title": "{{kind}} misslyckades",
       "body": "Den kunde inte slutföras. {{reason}}"
+    },
+    "rosterPlayerProposed": {
+      "title": "En spelare att lägga till i truppen",
+      "body": "{{coach}} har {{player}} i sin version av {{team}}. Lägga till i truppen?"
     }
   },
   "teamInvite": {
