@@ -532,7 +532,7 @@ export default function GameReportBuilderScreen() {
   const deleteClip = async (clipId: number) => {
     if (!reportId) return;
     try {
-      await gameReportsAPI.deleteClip(reportId, clipId);
+      await gameReportsAPI.deleteClip(reportId, clipId, true);
       const refreshed = await gameReportsAPI.get(reportId);
       setReport(refreshed);
     } catch {}

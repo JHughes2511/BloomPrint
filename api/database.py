@@ -118,6 +118,94 @@ def init_db():
     _backfill_training_titles()
     _claim_linked_players()
     _backfill_rosters_from_games()
+    _restore_deleted_clip_analyses()
+
+
+def _restore_deleted_clip_analyses():
+    """Put back film breakdowns that deleting a video threw away.
+
+    Deleting a film out of the catalog used to delete the clip row, and the
+    clip row is where the breakdown lives — so freeing a few gigabytes also
+    destroyed the writing the film was watched to produce. The route no longer
+    does that, which does nothing for the reports already gone.
+
+    What survives is the job that produced them: each segment of the film was
+    written down on the job row as it finished, so a twenty-minute analysis
+    interrupted by a deploy could carry on. Those notes are the substance of
+    the report — everything the model saw, in order — and they are enough to
+    give the coach their breakdown back. What cannot be recovered is the final
+    pass that read the notes and wrote them up, so the restored text says so
+    rather than passing itself off as the report that was lost.
+
+    Idempotent: a restored job is pointed at its new clip, so it is not a
+    candidate the next time this runs.
+    """
+    import json
+    import re
+
+    try:
+        from sqlalchemy.orm import Session as _Session
+        from . import models
+
+        with _Session(engine) as sess:
+            jobs = (
+                sess.query(models.GenerationJob)
+                .filter(models.GenerationJob.kind == "clip",
+                        models.GenerationJob.result_id.isnot(None))
+                .all()
+            )
+            restored = 0
+            for job in jobs:
+                if sess.get(models.GameReportClip, job.result_id) is not None:
+                    continue
+                try:
+                    call = json.loads(job.payload or "{}")
+                    partial = json.loads(job.partial or "{}")
+                except Exception:
+                    continue
+                segments = partial.get("segments") or {}
+                if not segments:
+                    # Nothing was written down: there is nothing to give back,
+                    # and inventing a placeholder report would be worse.
+                    continue
+                # The upload is named gr_<report>_clip_<uuid>, which is the only
+                # surviving link from the job to the packet it belonged to.
+                m = re.search(r"gr_(\d+)_clip_", call.get("video_path") or "")
+                if not m:
+                    continue
+                report = sess.get(models.GameReport, int(m.group(1)))
+                if report is None:
+                    continue
+                label_text = (call.get("label_text") or "").strip()
+                generic = label_text in ("", "my team", "the opponent")
+                body = "\n\n".join(
+                    text for _, text in sorted(segments.items(), key=lambda kv: int(kv[0]))
+                    if (text or "").strip()
+                )
+                if not body.strip():
+                    continue
+                clip = models.GameReportClip(
+                    game_report_id=report.id,
+                    video_path="",          # the film itself is gone
+                    label="my_team" if label_text == "my team" else "opponent",
+                    team_name=None if generic else label_text,
+                    analysis_text=(
+                        "Recovered breakdown — the film was deleted along with the "
+                        "written report. This is what was observed, section by section, "
+                        "as the film was watched; the summary that was written from it "
+                        "could not be recovered.\n\n" + body
+                    ),
+                )
+                sess.add(clip)
+                sess.flush()
+                job.result_id = clip.id
+                restored += 1
+            if restored:
+                sess.commit()
+                log.info("Restored %s film breakdown(s) whose clip had been deleted", restored)
+    except Exception:
+        # A repair that cannot run must not stop the app from starting.
+        pass
 
 
 def _claim_linked_players():

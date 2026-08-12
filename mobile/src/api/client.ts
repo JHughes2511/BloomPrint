@@ -898,7 +898,11 @@ export const gameReportsAPI = {
     form.append('video_ref', data.video_ref);
     return api.post(`/game-reports/${id}/clips`, form).then(r => r.data);
   },
-  deleteClip: (id: number, clipId: number) => api.delete(`/game-reports/${id}/clips/${clipId}`).then(r => r.data),
+  // Default keeps the breakdown and only frees the film — deleting a video
+  // out of the film catalog must not take the report with it. Pass discard to
+  // remove the clip outright, which is what deleting it inside a packet means.
+  deleteClip: (id: number, clipId: number, discard = false) =>
+    api.delete(`/game-reports/${id}/clips/${clipId}${discard ? '?discard=true' : ''}`).then(r => r.data),
   videos: () => api.get('/game-reports/videos').then(r => r.data),
   versions: (id: number) => api.get(`/game-reports/${id}/versions`).then(r => r.data),
   allVersions: () => api.get('/game-reports/versions').then(r => r.data),

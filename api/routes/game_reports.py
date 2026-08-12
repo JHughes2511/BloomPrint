@@ -1024,6 +1024,11 @@ async def add_clip(
 def delete_clip(
     report_id: int,
     clip_id: int,
+    # "Get rid of this clip", as opposed to "free this video". The film catalog
+    # deletes a video and expects to keep the report; deleting a clip inside
+    # the packet means the whole thing, breakdown included — usually because
+    # the wrong film went up.
+    discard: bool = False,
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
@@ -1033,10 +1038,28 @@ def delete_clip(
     gr = db.get(models.GameReport, report_id)
     if not gr or gr.coach_id != coach.id:
         raise HTTPException(status_code=404, detail="Game report not found")
-    # Free the actual film file, not just the DB row — but only once nothing
-    # else points at it (the same upload can also sit in a player's catalog).
+    # The FILE goes, the REPORT stays — the rule the rest of film_storage is
+    # built on, and the one this route used to break. The breakdown lives on
+    # the clip row, so deleting the row to free a video threw away the report
+    # the film was watched to produce: a coach clearing space out of the film
+    # catalog lost the writing, which is the part that took twenty minutes and
+    # is measured in kilobytes.
     ref = clip.video_path
-    db.delete(clip)
+    if not discard and (clip.analysis_text or "").strip():
+        # Empty, not NULL: video_path is NOT NULL and SQLite cannot drop that
+        # without rebuilding the table. Every reader already treats an empty
+        # ref as "no film" — the film catalog stops listing it, and the report
+        # stays wherever reports are read.
+        clip.video_path = ""
+    else:
+        # Deleting on purpose, so the boot-time repair must not put it back:
+        # the job that produced it still holds the segment notes it would be
+        # rebuilt from.
+        (db.query(models.GenerationJob)
+           .filter(models.GenerationJob.kind == "clip",
+                   models.GenerationJob.result_id == clip.id)
+           .update({"result_id": None}, synchronize_session=False))
+        db.delete(clip)
     db.flush()
     from ..film_storage import release
     release(db, [ref] if ref else [])
