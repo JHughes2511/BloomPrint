@@ -433,6 +433,8 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     # Which coach's copy of a player is the more recent one, for merging two
     # rosters of the same team.
     ("players", "updated_at", "TIMESTAMP"),
+    # What a film was analysed as, as opposed to what its packet is set to now.
+    ("game_report_clips", "output_type", "VARCHAR"),
 ]
 
 

@@ -1,5 +1,6 @@
 """Game Report Packet routes — persistent multi-source report builder."""
 
+import re
 import json
 import shutil
 import tempfile
@@ -698,12 +699,11 @@ def all_film_analyses(
         out.append({
             "id": clip.id,
             "report_id": gr.id,
-            # The report type the film was actually analysed AS. This was
-            # hardcoded to "game analysis" on the theory that a film is always
-            # read that way; it is not — _run_clip_analysis is handed the
-            # packet's output_type, so a film in a scouting-report packet is a
-            # scouting report and the card said otherwise.
-            "output_type": gr.output_type,
+            # The report type the film was actually analysed AS — see
+            # _analysed_as. Reading the packet's live output_type here labelled
+            # a Game Analysis as "Coaching Report · Scouting Report", because
+            # that is what the packet had since been retyped to.
+            "output_type": _analysed_as(clip, gr),
             # Whose film it is, which is not the same as which side it was
             # filed under — see GameReportClip.team_name.
             "team_name": clip.team_name,
@@ -737,6 +737,27 @@ def all_report_versions(
 # registration order, so with this below them the path "/game-reports/videos"
 # was matched by "/game-reports/{report_id}" first, "videos" was parsed as an
 # int, and the film catalog answered 422 to every request it ever made.
+_BIM_HEADER = re.compile(r"^\s*BIM ([A-Z][A-Z ,]*?) — ", re.MULTILINE)
+
+
+def _analysed_as(clip: "models.GameReportClip", gr: "models.GameReport") -> str:
+    """The report type this film was watched as.
+
+    Three answers, best first. The clip records it from the moment the analysis
+    is asked for. Films analysed before it did carry the answer in their own
+    first line — every breakdown opens "BIM <TYPE> — <subject> | <level>" — so
+    an old card can still name itself correctly. Only when neither is readable
+    does this fall back to the packet's current setting, which is a guess.
+    """
+    if (clip.output_type or "").strip():
+        return clip.output_type
+    m = _BIM_HEADER.search(clip.analysis_text or "")
+    if m:
+        return ",".join(part.strip().lower().replace(" ", "_")
+                        for part in m.group(1).split(",") if part.strip())
+    return gr.output_type
+
+
 @router.get("/videos")
 def game_report_videos(
     db: Session = Depends(get_db),
@@ -978,6 +999,10 @@ async def add_clip(
         video_path=str(dest),
         label=label,
         team_name=team_name or None,
+        # What this film is being watched AS, recorded now. The packet's
+        # output_type is a live setting the coach changes between generations,
+        # so reading it back later describes the packet, not this analysis.
+        output_type=gr.output_type,
         analysis_text=None,
     )
     db.add(clip)

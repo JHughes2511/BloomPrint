@@ -718,6 +718,13 @@ class GameReportClip(Base):
     # not enough for an opponent-vs-opponent packet where both films are the
     # opponent — and "Opponent Film" is not what a coach called the team.
     team_name      = Column(String, nullable=True)
+    # The report type the film was actually watched AS, recorded when the
+    # analysis was asked for. The packet's own output_type is a live setting a
+    # coach changes between generations, so reading it later says what the
+    # packet is FOR now, not what this film was read as — a Game Analysis
+    # sitting in a packet since retyped to Coaching + Scouting was labelled as
+    # both of those and was neither.
+    output_type    = Column(String, nullable=True)
     analysis_text  = Column(Text, nullable=True)
     # The tracked game this film is OF, once the coach has confirmed it.
     #

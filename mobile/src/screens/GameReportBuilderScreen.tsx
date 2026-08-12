@@ -1336,7 +1336,10 @@ export default function GameReportBuilderScreen() {
 
       <Sheet visible={!!versionView} animationType="slide" transparent onRequestClose={() => setVersionView(null)}>
         <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60, ...sheetCap(560) }}>
+          {/* A saved report is read, not filled in — the same width as every
+              other place a report is read. 560 is the form/picker cap, and it
+              made the same text a much narrower column here than on Recent. */}
+          <View style={{ backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, flex: 1, marginTop: 60, ...sheetCap(REPORT_MODAL_WIDTH) }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: t.ink, fontSize: 17, fontFamily: fonts[800] }} numberOfLines={2}>
