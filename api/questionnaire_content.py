@@ -37,7 +37,7 @@ VERSION = 2
 # Separate from VERSION because it is the cache key for translations: reword a
 # button and every language needs retranslating, while the stored answers still
 # mean exactly what they meant before.
-CONTENT_REVISION = 4
+CONTENT_REVISION = 5
 
 # Deliberately ranges rather than a number. A range still cuts the results by
 # age, and asking a fourteen-year-old for their date of birth to answer six
@@ -474,7 +474,12 @@ UI_STRINGS = {
     "start": "Start",
     "required_hint": "Name and role are required.",
     "questions_title": "Your week",
-    "questions_lede": "One question lets you pick more than one answer.",
+    # Says "some" rather than a number on purpose. A coach has two questions
+    # that take several answers and every other role has one, so any count here
+    # is wrong for somebody — and it would go stale again the next time a
+    # question changed. The badge on each question is what actually tells a
+    # person; this line only sets the expectation.
+    "questions_lede": "Some questions let you pick more than one answer.",
     "question_of": "QUESTION {n} OF {total}",
     "select_all": "SELECT ALL THAT APPLY",
     "comment_label": "Anything else? What would save you the most time?",
