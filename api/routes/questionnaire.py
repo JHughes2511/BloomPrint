@@ -520,6 +520,42 @@ def export_csv(
 
 # ── The email ────────────────────────────────────────────────────────────────
 
+def questionnaire_to() -> str:
+    """Where a new response is announced: the noreply mailbox.
+
+    Deliberately the noreply address rather than FEEDBACK_TO. In-app feedback
+    and a stranger's questionnaire answer are two different streams that want
+    two different inboxes, and tying this to the feedback one would mean
+    changing where bug reports go in order to change where responses go.
+
+    QUESTIONNAIRE_TO overrides it.
+    """
+    return (os.environ.get("QUESTIONNAIRE_TO") or "").strip() or _address(mailer.mail_from())
+
+
+def _address(value: str) -> str:
+    """The bare address out of "BloomPrint <noreply@bloomprint.org>"."""
+    if "<" in value and ">" in value:
+        return value.split("<", 1)[1].split(">", 1)[0].strip()
+    return value.strip()
+
+
+def _notify_from() -> str:
+    """The sender, kept different from the destination where possible.
+
+    A message from noreply@ to noreply@ is a mailbox writing to itself, which
+    some receiving servers treat as spoofing and drop — silently, which is the
+    worst way to find out. FEEDBACK_FROM is used when it is set and different;
+    otherwise this falls back to the normal sender, which works on a provider
+    that signs for the domain and is the best available answer without asking
+    for more configuration.
+    """
+    sender = (os.environ.get("FEEDBACK_FROM") or "").strip()
+    if sender and _address(sender).lower() != questionnaire_to().lower():
+        return sender
+    return mailer.mail_from()
+
+
 def _app_url() -> str:
     return (os.environ.get("APP_URL") or "https://bloomprint.org").rstrip("/")
 
@@ -561,10 +597,13 @@ def _notify(response_id: int) -> None:
         lines.append(f"All responses: {results_link()}")
 
         mailer.send_email(
-            to=mailer.feedback_to(),
+            to=questionnaire_to(),
             subject=f"Questionnaire — {data['role_name']}, {data['name']}",
             text="\n".join(lines),
-            from_addr=mailer.feedback_from(),
+            from_addr=_notify_from(),
+            # Hitting Reply reaches the person who answered, which is the whole
+            # point of having asked them for an address.
+            reply_to=data["email"] or None,
         )
     except Exception:
         # A notification that cannot be sent must not be able to take anything
