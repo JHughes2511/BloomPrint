@@ -37,7 +37,7 @@ VERSION = 2
 # Separate from VERSION because it is the cache key for translations: reword a
 # button and every language needs retranslating, while the stored answers still
 # mean exactly what they meant before.
-CONTENT_REVISION = 3
+CONTENT_REVISION = 4
 
 # Deliberately ranges rather than a number. A range still cuts the results by
 # age, and asking a fourteen-year-old for their date of birth to answer six
@@ -81,8 +81,8 @@ QUESTIONS: dict[str, list[dict]] = {
                 "A stat or scorekeeping app",
                 "Film only — no stats kept",
                 "Film, plus a box score from the league or the other school",
-                "Whoever's available that night does whatever they do",
-                "It doesn't, beyond the final score",
+                "It depends who is there that night",
+                "Nothing is kept beyond the final score",
             ],
         },
         {
@@ -96,19 +96,19 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "If these were already done for you before you sat down, which would change your week the most?",
+            "text": "Which of these would change your week the most if it were already done for you?",
             "multi": True,
             "options": [
                 "Film turned into written notes I can hand out",
                 "The next opponent's tendencies pulled together",
                 "Every player's development kept on record across the season",
                 "My assistants seeing what I see without me repeating it",
-                "Feedback reaching players in a form they'll actually open",
+                "Feedback reaching players in a form they will open",
                 "Last season's notes findable when I need them",
             ],
         },
         {
-            "text": "On a day with no game, how much time goes to team work off the court — notes, stats, planning, messages — before it starts to feel like homework?",
+            "text": "On a day with no game, how long do you spend on work for the team — notes, stats, planning, messages — before it starts to feel like homework?",
             "options": [
                 "Under 10 minutes",
                 "10 to 20 minutes",
@@ -123,15 +123,15 @@ QUESTIONS: dict[str, list[dict]] = {
                 "Something new every two or three weeks, with a note saying what changed",
                 "A few improvements a season, at a steady pace",
                 "It gets better at the job the more I use it",
-                "Everything I have put into it stays in one place and carries forward",
-                "Nothing new — I would rather it stay where it is and stay stable",
+                "Everything I've put into it stays in one place and carries forward",
+                "Nothing new — I'd rather it stayed exactly as it is",
                 "I don't notice either way",
             ],
         },
         {
-            "text": "Think of the last coaching tool you stopped opening. What actually happened?",
+            "text": "Think of the last coaching tool you stopped opening. What happened?",
             "options": [
-                "It cost more time to feed than it gave back",
+                "It took more time to keep up than it saved me",
                 "The season got busy, I fell behind, and I never caught up",
                 "What it produced wasn't good enough to use",
                 "My staff never got in it, so I was the only one",
@@ -149,12 +149,12 @@ QUESTIONS: dict[str, list[dict]] = {
                 "Reports on how a team plays — tendencies, sets, personnel",
                 "A board or ranked list I keep updated",
                 "Clips with notes attached",
-                "Calls and texts — little of it written",
+                "Calls and texts — little of it in writing",
                 "Numbers only — a spreadsheet of grades",
             ],
         },
         {
-            "text": "While you are watching a game — live or on film — where do your notes go?",
+            "text": "While you're watching a game — live or on film — where do your notes go?",
             "options": [
                 "A notebook",
                 "A notes app or a Google Doc",
@@ -164,7 +164,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "From watching a player to a report someone else can act on, how long per prospect?",
+            "text": "How long does one prospect take, from watching them to a report someone else can act on?",
             "options": [
                 "Under 30 minutes",
                 "30 to 90 minutes",
@@ -174,18 +174,18 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Which part of the job takes up time you would rather spend somewhere else?",
+            "text": "Which part of the job takes up time you'd rather spend somewhere else?",
             "options": [
                 "Finding the possessions that matter inside a full game",
                 "Writing it up once I already know what I think",
-                "Keeping my grades consistent between a player I saw in October and one I saw in March",
+                "Keeping my grades consistent across a whole season",
                 "Finding what I already wrote about this player or team",
                 "Reformatting the same report for different people",
                 "Watching a second game to confirm what I think I saw",
             ],
         },
         {
-            "text": "Once the game is over, how much time goes into writing up and filing what you saw before it starts to feel like admin?",
+            "text": "After a game, how long do you spend writing up and filing what you saw before it starts to feel like admin?",
             "options": [
                 "Under 10 minutes",
                 "10 to 20 minutes",
@@ -200,19 +200,19 @@ QUESTIONS: dict[str, list[dict]] = {
                 "Something new every two or three weeks, with a note saying what changed",
                 "A few improvements a season, at a steady pace",
                 "It gets better at the job the more I use it",
-                "Everything I have put into it stays in one place and carries forward",
-                "Nothing new — I would rather it stay where it is and stay stable",
+                "Everything I've put into it stays in one place and carries forward",
+                "Nothing new — I'd rather it stayed exactly as it is",
                 "I don't notice either way",
             ],
         },
         {
-            "text": "Think of the last scouting tool you stopped opening. What actually happened?",
+            "text": "Think of the last scouting tool you stopped opening. What happened?",
             "options": [
-                "It cost more time to feed than it gave back",
+                "It took more time to keep up than it saved me",
                 "My own notes were faster in the format I already had",
                 "What it produced didn't sound like me",
                 "I couldn't get my existing work into it",
-                "I lost a season to something else and never restarted",
+                "A season got away from me and I never went back to it",
                 "I'm still using everything I've started",
             ],
         },
@@ -225,13 +225,13 @@ QUESTIONS: dict[str, list[dict]] = {
                 "Individual workout or skill plans",
                 "Written progress updates for the athlete",
                 "Updates for a parent or for their team coach",
-                "Assessments with actual scores or measurements",
+                "Assessments with scores or measurements",
                 "Session notes only I read",
                 "Nothing written — it lives in the session",
             ],
         },
         {
-            "text": "How do you track whether an athlete is actually getting better?",
+            "text": "How do you know whether an athlete is improving?",
             "options": [
                 "Measurements and numbers I log myself",
                 "Film from before and after",
@@ -242,28 +242,28 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Building the week's individualized plans for everyone you train takes about…",
+            "text": "How long does it take to build a week of individual plans for everyone you train?",
             "options": [
                 "Under 30 minutes",
                 "One to two hours",
                 "Half a day",
                 "More than a day",
-                "I reuse the same plans and adjust inside the session",
+                "I reuse the same plans and adjust during the session",
             ],
         },
         {
-            "text": "Which of these would help you the most?",
+            "text": "Which of these would make the biggest difference to you?",
             "options": [
                 "A session turned into a written plan the athlete keeps",
                 "Showing a parent or a coach real evidence of progress",
                 "Knowing what their team coach is working on so I don't contradict it",
                 "Every athlete's history in one place instead of scattered",
-                "Athletes actually doing the work between sessions",
+                "Athletes doing the work between sessions",
                 "Taking on more athletes without more paperwork",
             ],
         },
         {
-            "text": "On a day you're training athletes back to back, how much time goes to the planning and paperwork around the sessions before it starts cutting into the job?",
+            "text": "On a day of back-to-back sessions, how long do you spend on planning and paperwork before it cuts into the training itself?",
             "options": [
                 "Under 10 minutes",
                 "10 to 20 minutes",
@@ -278,17 +278,17 @@ QUESTIONS: dict[str, list[dict]] = {
                 "Something new every two or three weeks, with a note saying what changed",
                 "A few improvements a season, at a steady pace",
                 "It gets better at the job the more I use it",
-                "Everything I have put into it stays in one place and carries forward",
-                "Nothing new — I would rather it stay where it is and stay stable",
+                "Everything I've put into it stays in one place and carries forward",
+                "Nothing new — I'd rather it stayed exactly as it is",
                 "I don't notice either way",
             ],
         },
         {
-            "text": "Think of the last tool you used with your athletes and stopped opening. What actually happened?",
+            "text": "Think of the last tool you used with your athletes and stopped opening. What happened?",
             "options": [
-                "It cost more time than it gave back",
+                "It took more time to keep up than it saved me",
                 "My athletes never opened what I sent them",
-                "It didn't fit the way I actually train",
+                "It didn't fit the way I train",
                 "The price stopped making sense for the number of athletes I have",
                 "I got busy and never restarted",
                 "I'm still using everything I've started",
@@ -316,11 +316,11 @@ QUESTIONS: dict[str, list[dict]] = {
                 "A spreadsheet I maintain",
                 "Ask another staff member",
                 "The conference or league site",
-                "Rebuild it from scratch — nothing usable was kept",
+                "Build it again from scratch — nothing usable was kept",
             ],
         },
         {
-            "text": "In a normal season week, how many hours go to work that's mostly typing, tagging or copying rather than thinking?",
+            "text": "In a normal week in season, how many hours go into work that's mostly typing, tagging or copying rather than thinking?",
             "options": ["Under 5", "5 to 10", "10 to 20", "More than 20"],
         },
         {
@@ -328,10 +328,10 @@ QUESTIONS: dict[str, list[dict]] = {
             "options": [
                 "Film cut down to the possessions worth watching",
                 "Stats entered and checked",
-                "A first draft of the scout to edit rather than write",
+                "A first draft of the scouting report to edit rather than write",
                 "Last year's work on this opponent, findable",
                 "Getting one file to five coaches without five versions of it",
-                "Anything that means I stop working past midnight before a game",
+                "Anything that stops me working past midnight before a game",
             ],
         },
         {
@@ -350,13 +350,13 @@ QUESTIONS: dict[str, list[dict]] = {
                 "Something new every two or three weeks, with a note saying what changed",
                 "A few improvements a season, at a steady pace",
                 "It gets better at the job the more I use it",
-                "Everything I have put into it stays in one place and carries forward",
-                "Nothing new — I would rather it stay where it is and stay stable",
+                "Everything I've put into it stays in one place and carries forward",
+                "Nothing new — I'd rather it stayed exactly as it is",
                 "I don't notice either way",
             ],
         },
         {
-            "text": "Think of a tool your staff stopped using. What actually happened?",
+            "text": "Think of a tool your staff stopped using. What happened?",
             "options": [
                 "It was slower than the way we already did it",
                 "The staff moved on and nobody kept it alive",
@@ -369,7 +369,7 @@ QUESTIONS: dict[str, list[dict]] = {
     ],
     "player": [
         {
-            "text": "After a game, what do you actually get back?",
+            "text": "After a game, what do you get back?",
             "multi": True,
             "options": [
                 "A stat line",
@@ -381,7 +381,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "How do you know whether you're actually getting better?",
+            "text": "How do you know if you're getting better?",
             "options": [
                 "My stats",
                 "Watching my own film",
@@ -408,7 +408,7 @@ QUESTIONS: dict[str, list[dict]] = {
                 "Seeing my own clips without hunting for them",
                 "Something I could send to a college coach",
                 "Seeing whether I'm improving across the season, not just the last game",
-                "A workout that matches what my coach actually wants from me",
+                "A workout that matches what my coach wants from me",
                 "Being able to ask a question and get a real answer",
             ],
         },
@@ -445,7 +445,7 @@ QUESTIONS: dict[str, list[dict]] = {
                 "What it told me I already knew",
                 "I just forgot it existed",
                 "It took too long to set up",
-                "I'm still using everything I've started",
+                "I still use all of them",
             ],
         },
     ],
@@ -461,7 +461,7 @@ QUESTIONS: dict[str, list[dict]] = {
 # which is what a missing locale key looks like on screen.
 UI_STRINGS = {
     "eyebrow": "Seven questions · about five minutes",
-    "title": "Where does your basketball week actually go?",
+    "title": "Where does your basketball week go?",
     "lede": "We're trying to find out where the time really goes — what gets written, "
             "how games get recorded, and how long it all takes. Answer for a normal "
             "week, not your best one.",
@@ -483,8 +483,8 @@ UI_STRINGS = {
     "submit": "Submit",
     "answered": "{n} of {total} answered",
     "thanks": "Thanks, {name}.",
-    "thanks_body": "That's everything. Seven questions honestly answered is genuinely "
-                   "useful — it tells us where the week actually goes.",
+    "thanks_body": "That's everything. Seven questions answered honestly is genuinely "
+                   "useful — it tells us where the week goes.",
     "again": "Fill in another",
     "load_failed": "We can't load the questions right now.",
     "retry": "Try again",
