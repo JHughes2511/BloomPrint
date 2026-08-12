@@ -13,6 +13,7 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import { topPad } from '../responsive/screenPadding';
+import { useBreakpoint } from '../responsive/useBreakpoint';
 
 /**
  * What came back, for whoever holds the key.
@@ -32,7 +33,9 @@ type Tab = 'summary' | 'responses' | 'comments' | 'emails';
 export default function QuestionnaireResultsScreen() {
   const route = useRoute<any>();
   const { t, mode, toggle: toggleTheme } = useTheme();
-  const s = makeStyles(t);
+  // See QuestionnaireScreen: PageContainer leaves the phone gutter to the screen.
+  const { isPhone, gutter } = useBreakpoint();
+  const s = makeStyles(t, isPhone);
 
   // On the web the key is on the address; on a phone it is typed in once.
   const keyFromUrl: string =
@@ -86,7 +89,7 @@ export default function QuestionnaireResultsScreen() {
     return (
       <ScreenBackground>
         <ScrollView contentContainerStyle={{ paddingTop: topPad(28), paddingBottom: 60 }}>
-          <PageContainer maxWidth={520}>
+          <PageContainer maxWidth={520} style={{ paddingHorizontal: isPhone ? gutter : 0 }}>
             <Text style={s.brand}>BLOOMPRINT</Text>
             <Text style={s.h1}>Questionnaire results</Text>
             <Text style={s.lede}>
@@ -132,7 +135,7 @@ export default function QuestionnaireResultsScreen() {
   return (
     <ScreenBackground>
       <ScrollView contentContainerStyle={{ paddingTop: topPad(28), paddingBottom: 60 }}>
-        <PageContainer maxWidth={860}>
+        <PageContainer maxWidth={860} style={{ paddingHorizontal: isPhone ? gutter : 0 }}>
           <View style={s.brandbar}>
             <Text style={s.brand}>BLOOMPRINT</Text>
             <View style={s.tools}>
@@ -318,7 +321,7 @@ export default function QuestionnaireResultsScreen() {
   );
 }
 
-const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+const makeStyles = (t: ThemeTokens, phone: boolean) => StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
   brandbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
   brand: { color: t.label, fontFamily: fonts[800], fontSize: 13, letterSpacing: 2.6 },
@@ -328,13 +331,14 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     borderWidth: 1, borderColor: t.cta2Border,
   },
   eyebrow: { color: t.label, fontFamily: fonts[700], fontSize: 11.5, letterSpacing: 2 },
-  h1: { color: t.ink, fontFamily: fonts[800], fontSize: 30, letterSpacing: -0.6, marginTop: 6 },
+  h1: { color: t.ink, fontFamily: fonts[800], fontSize: phone ? 25 : 30,
+        letterSpacing: -0.5, marginTop: 6 },
   lede: { color: t.inkSoft, fontFamily: fonts[400], fontSize: 15, lineHeight: 22 },
   sectionTitle: { color: t.ink, fontFamily: fonts[800], fontSize: 18, marginBottom: 10 },
 
   panel: {
     backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder,
-    borderRadius: 18, padding: 20, gap: 12,
+    borderRadius: 18, padding: phone ? 16 : 20, gap: 12,
   },
   input: {
     backgroundColor: t.chip, borderWidth: 1, borderColor: t.line, borderRadius: 12,
@@ -350,7 +354,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   roleRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 },
   roleTab: {
     backgroundColor: t.chip, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 14,
-    borderWidth: 1.5, borderColor: 'transparent', minWidth: 92,
+    borderWidth: 1.5, borderColor: 'transparent',
+    ...(phone ? { flexGrow: 1, flexBasis: 96 } : { minWidth: 92 }),
   },
   roleTabOn: { borderColor: t.accent, backgroundColor: t.accentSoft },
   roleTabCount: { color: t.ink, fontFamily: fonts[900], fontSize: 20, letterSpacing: -0.4 },
@@ -371,7 +376,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
 
   qcard: {
     backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder,
-    borderRadius: 16, padding: 18, marginTop: 10,
+    borderRadius: 16, padding: phone ? 14 : 18, marginTop: 10,
   },
   qnum: { color: t.label, fontFamily: fonts[800], fontSize: 10.5, letterSpacing: 1.6 },
   qtext: { color: t.ink, fontFamily: fonts[700], fontSize: 15.5, lineHeight: 22, marginTop: 5 },

@@ -13,6 +13,7 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import { topPad } from '../responsive/screenPadding';
+import { useBreakpoint } from '../responsive/useBreakpoint';
 
 /**
  * The public questionnaire.
@@ -38,7 +39,12 @@ type Step = 'about' | 'questions' | 'done';
 export default function QuestionnaireScreen() {
   const route = useRoute<any>();
   const { t, mode, toggle: toggleTheme } = useTheme();
-  const s = makeStyles(t);
+  // PageContainer adds no gutter on a phone by design — every screen carries
+  // its own, tuned against a phone. Without one here the heading and the copy
+  // sat flush against the edge of the screen while the card inside them had an
+  // inset, which read as the page being broken rather than tight.
+  const { isPhone, gutter } = useBreakpoint();
+  const s = makeStyles(t, isPhone);
 
   const [form, setForm] = useState<QuestionnaireForm | null>(null);
   const [loading, setLoading] = useState(true);
@@ -170,7 +176,7 @@ export default function QuestionnaireScreen() {
         contentContainerStyle={{ paddingTop: topPad(28), paddingBottom: 60 }}
         keyboardShouldPersistTaps="handled"
       >
-        <PageContainer maxWidth={720}>
+        <PageContainer maxWidth={720} style={{ paddingHorizontal: isPhone ? gutter : 0 }}>
           <View style={s.brandbar}>
             <Text style={s.brand}>BLOOMPRINT</Text>
             <View style={s.tools}>
@@ -367,9 +373,10 @@ export default function QuestionnaireScreen() {
   );
 }
 
-const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+const makeStyles = (t: ThemeTokens, phone: boolean) => StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 16 },
-  brandbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 12 },
+  brandbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+              marginBottom: phone ? 18 : 24, gap: 12, flexWrap: 'wrap' },
   brand: { color: t.label, fontFamily: fonts[800], fontSize: 13, letterSpacing: 2.6 },
   tools: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   themeBtn: {
@@ -380,13 +387,15 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   translatingText: { color: t.muted, fontFamily: fonts[600], fontSize: 12.5 },
 
   eyebrow: { color: t.label, fontFamily: fonts[700], fontSize: 11.5, letterSpacing: 2, marginBottom: 8 },
-  h1: { color: t.ink, fontFamily: fonts[800], fontSize: 30, letterSpacing: -0.6, lineHeight: 36 },
-  lede: { color: t.inkSoft, fontFamily: fonts[400], fontSize: 15.5, lineHeight: 23, marginTop: 10 },
+  h1: { color: t.ink, fontFamily: fonts[800], fontSize: phone ? 25 : 30,
+        letterSpacing: -0.5, lineHeight: phone ? 31 : 36 },
+  lede: { color: t.inkSoft, fontFamily: fonts[400], fontSize: phone ? 14.5 : 15.5,
+          lineHeight: phone ? 21 : 23, marginTop: 10 },
   title: { color: t.ink, fontFamily: fonts[700], fontSize: 17, textAlign: 'center' },
 
   panel: {
     backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder,
-    borderRadius: 18, padding: 20, gap: 18,
+    borderRadius: 18, padding: phone ? 16 : 20, gap: 18,
   },
   field: { gap: 9 },
   fieldLabel: { color: t.ink, fontFamily: fonts[700], fontSize: 13 },
@@ -417,7 +426,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
 
   qcard: {
     backgroundColor: t.card, borderWidth: 1, borderColor: t.cardBorder,
-    borderRadius: 18, padding: 20, gap: 13,
+    borderRadius: 18, padding: phone ? 16 : 20, gap: 13,
   },
   qtop: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
   qnum: { color: t.label, fontFamily: fonts[800], fontSize: 11, letterSpacing: 1.6 },
@@ -426,7 +435,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     fontSize: 10, letterSpacing: 1.2, paddingVertical: 3, paddingHorizontal: 9, borderRadius: 999,
     overflow: 'hidden',
   },
-  qtext: { color: t.ink, fontFamily: fonts[700], fontSize: 16.5, lineHeight: 23 },
+  qtext: { color: t.ink, fontFamily: fonts[700], fontSize: phone ? 15.5 : 16.5,
+           lineHeight: phone ? 22 : 23 },
 
   answer: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 11,
@@ -447,6 +457,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   cta: {
     backgroundColor: t.ctaBg, borderRadius: 999, paddingVertical: 14, paddingHorizontal: 28,
     alignItems: 'center', justifyContent: 'center', minWidth: 120,
+    ...(phone ? { flexGrow: 1 } : null),
   },
   ctaOff: { opacity: 0.4 },
   ctaText: { color: t.ctaText, fontFamily: fonts[700], fontSize: 15 },
