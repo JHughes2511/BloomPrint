@@ -698,10 +698,12 @@ def all_film_analyses(
         out.append({
             "id": clip.id,
             "report_id": gr.id,
-            # What the film analysis IS. A film is read as a game analysis
-            # whatever else the packet was set to produce, so this is the film's
-            # own type rather than the packet's selection.
-            "output_type": "game_analysis",
+            # The report type the film was actually analysed AS. This was
+            # hardcoded to "game analysis" on the theory that a film is always
+            # read that way; it is not — _run_clip_analysis is handed the
+            # packet's output_type, so a film in a scouting-report packet is a
+            # scouting report and the card said otherwise.
+            "output_type": gr.output_type,
             # Whose film it is, which is not the same as which side it was
             # filed under — see GameReportClip.team_name.
             "team_name": clip.team_name,

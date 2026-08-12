@@ -942,7 +942,14 @@ export default function RecentScreen() {
               {showDate && Platform.OS !== 'web' && (
                 <Text style={styles.dateHeader}>{dateStr}</Text>
               )}
-              <View
+              {/* The whole card opens the report. It used to be only the line
+                  of text, so most of a card the size of a business card did
+                  nothing when pressed — and the part that worked was the part
+                  that looks least like a button. */}
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => handlePress(item)}
+                onLongPress={() => handleDelete(item)}
                 style={[
                   styles.card,
                   item.kind === 'team' && styles.cardTeam,
@@ -952,10 +959,8 @@ export default function RecentScreen() {
                   recentGrid.cardWidth ? { width: recentGrid.cardWidth, marginHorizontal: 0 } : null,
                 ]}
               >
-                <TouchableOpacity
+                <View
                   style={{ flexDirection: 'row', alignItems: 'center', gap: 10, width: '100%' }}
-                  onPress={() => handlePress(item)}
-                  onLongPress={() => handleDelete(item)}
                 >
                   <View style={styles.kindBadge}>
                     <Ionicons
@@ -1035,7 +1040,7 @@ export default function RecentScreen() {
                   </View>
                   {item.overall_grade != null && <GradeBadge grade={item.overall_grade} size="md" />}
                   {item.kind === 'game' && <Ionicons name="chevron-forward" size={14} color={t.muted2} />}
-                </TouchableOpacity>
+                </View>
                 {/* Action buttons row — shown for all card types.
                     On the grid the card has a FIXED height, so a row that
                     wraps is a row that gets cut off — which is what an iPad
@@ -1156,7 +1161,7 @@ export default function RecentScreen() {
                     <Text style={[styles.gameActionText, tightBtns && styles.gameActionTextTight, { color: t.brown }]} numberOfLines={1}>{tr('common.share')}</Text>
                   </TouchableOpacity>
                 </View>
-              </View>
+              </TouchableOpacity>
             </>
           );
         }}
