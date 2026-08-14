@@ -725,6 +725,138 @@ def box_score_text(db: Session, game: models.GameSession) -> str:
     )
 
 
+def _md_table(header: list[str], rows: list[list]) -> str:
+    """A markdown pipe table — which the app and the PDF both draw as a grid."""
+    if not rows:
+        return ""
+    line = lambda cells: "| " + " | ".join(str(c) for c in cells) + " |"
+    return "\n".join([line(header), "|" + "|".join(["---"] * len(header)) + "|",
+                       *[line(r) for r in rows]]) + "\n"
+
+
+def _fmt_min(v) -> str:
+    if v is None:
+        return "-"
+    mins = int(v)
+    return f"{mins}:{int(round((v - mins) * 60)):02d}"
+
+
+def _fmt_signed(v) -> str:
+    if v is None:
+        return "-"
+    n = round(float(v), 1)
+    n = int(n) if float(n).is_integer() else n
+    return f"+{n}" if isinstance(n, (int, float)) and n > 0 else str(n)
+
+
+def game_insights_text(db: Session, game: models.GameSession) -> str:
+    """The Game Insights page, written out.
+
+    Sharing a game used to send four lines — the opponent's name, the date, the
+    score if somebody had typed one, and the scouting report if one existed. The
+    numbers the game was actually about went nowhere, and the title named one
+    team, so a staff member opened "vs Mali" with nothing in it.
+
+    Everything here is already on the screen the sender was looking at. It is
+    written as markdown tables because that is what the app and the exported PDF
+    both draw as a grid.
+    """
+    team = db.get(models.Team, game.team_id) if game.team_id else None
+    owner = db.get(models.Coach, game.coach_id)
+    our = (team.name if team else None) or (owner.program_name if owner else "My Team")
+    theirs = game.opponent_name or "Opponent"
+
+    ours_pts, theirs_pts = effective_scores(game)
+    out = [f"{our} vs {theirs}"]
+    if game.date:
+        out.append(game.date.strftime("%B %-d, %Y"))
+    if ours_pts is not None and theirs_pts is not None:
+        verdict = ("WIN" if ours_pts > theirs_pts
+                   else "LOSS" if ours_pts < theirs_pts else "TIE")
+        out.append(f"FINAL: {our} {ours_pts} — {theirs} {theirs_pts} ({verdict})")
+    out.append("")
+
+    stats = list(game.player_stats)
+    extras = _line_extras(db, game.id)
+    rosters = {False: _roster_jerseys(db, game.team_id),
+               True: _roster_jerseys(db, _opponent_team_id(db, game))}
+    sides = []
+    for is_opp, name in ((False, our), (True, theirs)):
+        rows, totals = _side_rows(stats, is_opp, rosters[is_opp], extras)
+        sides.append((name, is_opp, rows, totals))
+
+    # Team grades, the number at the top of the page.
+    mp = db.query(models.GameMinutesPlayed).filter_by(game_id=game.id).all()
+    mins = {False: {r.player_name: r.minutes_played for r in mp if not r.is_opponent},
+            True: {r.player_name: r.minutes_played for r in mp if r.is_opponent}}
+    grades = {}
+    for _, is_opp, _, _ in sides:
+        side_stats = [x for x in stats if bool(x.is_opponent) == is_opp]
+        g = _compute_grades(side_stats, mins[is_opp])
+        for_pts = ours_pts if not is_opp else theirs_pts
+        against = theirs_pts if not is_opp else ours_pts
+        grades[is_opp] = _team_grade(g, for_pts, against) if g else None
+    if any(v is not None for v in grades.values()):
+        out.append("TEAM GRADE")
+        out.append(_md_table(["Team", "Grade"],
+                             [[n, grades[o] if grades[o] is not None else "-"]
+                              for n, o, _, _ in sides]))
+
+    # Game leaders, over both teams, as the board shows them.
+    everyone = [{**r, "team": n} for n, o, rows, _ in sides for r in rows]
+    leader_rows = []
+    for label, metric in (("Efficiency", _efficiency), ("Points", lambda r: r["PTS"]),
+                          ("Rebounds", lambda r: r["REB"]), ("Assists", lambda r: r["AST"]),
+                          ("Blocks", lambda r: r["BLK"]), ("Steals", lambda r: r["STL"])):
+        best = max(everyone, key=metric, default=None)
+        if best is not None and metric(best) > 0:
+            leader_rows.append([label, best["player"], best["team"], metric(best)])
+    if leader_rows:
+        out.append("GAME LEADERS")
+        out.append(_md_table(["", "Player", "Team", ""], leader_rows))
+
+    # Shooting and the key stats, both teams side by side.
+    def pct(m, a):
+        return f"{round(100 * m / a, 1)}%" if a else "-"
+    shoot = [[n, f"{t['FGM']}/{t['FGA']} {pct(t['FGM'], t['FGA'])}",
+              f"{t['2PM']}/{t['2PA']} {pct(t['2PM'], t['2PA'])}",
+              f"{t['3PM']}/{t['3PA']} {pct(t['3PM'], t['3PA'])}",
+              f"{t['FTM']}/{t['FTA']} {pct(t['FTM'], t['FTA'])}"]
+             for n, o, _, t in sides]
+    out.append("SHOOTING")
+    out.append(_md_table(["Team", "FG", "2PT", "3PT", "FT"], shoot))
+
+    keys = ["PTS", "REB", "OREB", "DREB", "AST", "STL", "BLK", "TO", "PF"]
+    out.append("KEY STATS")
+    out.append(_md_table(["Team", *keys],
+                         [[n, *[t.get(k, 0) for k in keys]] for n, o, _, t in sides]))
+
+    # And both box scores in full, which is the part that was missing entirely.
+    cols = ["MIN", "PTS", "FGM", "FGA", "3PM", "3PA", "FTM", "FTA",
+            "OREB", "DREB", "REB", "AST", "STL", "BLK", "TO", "PF", "PM", "EFF"]
+    labels = ["MIN", "PTS", "FGM", "FGA", "3PM", "3PA", "FTM", "FTA",
+              "OREB", "DREB", "REB", "AST", "STL", "BLK", "TO", "PF", "+/-", "EFF"]
+    for name, is_opp, rows, totals in sides:
+        if not rows:
+            continue
+        body = []
+        for r in rows:
+            body.append([r["player"]] + [
+                _fmt_min(r.get(c)) if c == "MIN"
+                else _fmt_signed(r.get(c)) if c == "PM"
+                else (r.get(c) if r.get(c) is not None else "-")
+                for c in cols])
+        body.append(["TOTAL"] + [
+            _fmt_min(totals.get(c)) if c == "MIN"
+            else _fmt_signed(totals.get(c)) if c == "PM"
+            else (totals.get(c) if totals.get(c) is not None else "-")
+            for c in cols])
+        out.append(f"{name.upper()} — BOX SCORE")
+        out.append(_md_table(["Player", *labels], body))
+
+    return "\n".join(out).strip()
+
+
 # ── The box score, and what can honestly be drawn from it ─────────────────────
 #
 # Everything here is derived from the stat events already recorded — tapped live

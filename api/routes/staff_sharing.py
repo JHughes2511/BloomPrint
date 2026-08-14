@@ -43,17 +43,17 @@ def _resolve_report_text(report_type: str, report_id: int, db: Session, sender_i
                 scout_text = row.report_text
         if scout_text is None:
             scout_text = session.ai_scouting_report
-        lines = [f"GAME: vs {session.opponent_name}"]
-        if session.date:
-            lines.append(f"Date: {session.date.strftime('%B %d, %Y')}")
-        if session.our_score is not None and session.opponent_score is not None:
-            result_word = "W" if session.our_score > session.opponent_score else ("L" if session.our_score < session.opponent_score else "T")
-            lines.append(f"Score: {result_word} {session.our_score}-{session.opponent_score}")
+        # The whole Game Insights page, not four lines about it. Sharing a
+        # game used to send the opponent's name, the date, the score if one had
+        # been typed, and the scouting report — so a staff member opened a game
+        # report with none of the game in it.
+        from .game_eval import game_insights_text
+        lines = [game_insights_text(db, session)]
         if session.location:
             lines.append(f"Location: {session.location}")
         if scout_text:
             lines.append("")
-            lines.append("AI SCOUTING REPORT:")
+            lines.append("SCOUTING REPORT")
             lines.append(scout_text)
         return "\n".join(lines)
     if report_type == "film":
@@ -102,7 +102,15 @@ def _report_meta(report_type: str, report_id: int, db: Session) -> tuple[str | N
         return subject, "training_program", None
     if report_type == "game_session":
         gs = db.get(models.GameSession, report_id)
-        return ((f"vs {gs.opponent_name}" if gs else None), "scouting_report", None)
+        if not gs:
+            return None, None, None
+        # Both teams. "vs Mali" named one side of a game between two, so the
+        # receiver could not tell whose game they had been sent.
+        team = db.get(models.Team, gs.team_id) if gs.team_id else None
+        owner = db.get(models.Coach, gs.coach_id)
+        ours = (team.name if team else None) or (owner.program_name if owner else None)
+        theirs = gs.opponent_name or "Opponent"
+        return (f"{ours} vs {theirs}" if ours else f"vs {theirs}"), "game_report", None
     if report_type == "film":
         clip = db.get(models.GameReportClip, report_id)
         if not clip:
