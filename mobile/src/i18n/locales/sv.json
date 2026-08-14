@@ -58,7 +58,8 @@
     "eval": "Spelarutvärdering",
     "game": "Matchrapport",
     "training": "Träningsprogram",
-    "team_report": "Lagrapport"
+    "team_report": "Lagrapport",
+    "game_session": "Matchanalys"
   },
   "auth": {
     "whoAreYou": "Vem är du?",

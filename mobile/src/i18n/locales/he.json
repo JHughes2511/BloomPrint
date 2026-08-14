@@ -58,7 +58,8 @@
     "eval": "הערכת שחקן",
     "game": "דוח משחק",
     "training": "תוכנית אימונים",
-    "team_report": "דוח קבוצה"
+    "team_report": "דוח קבוצה",
+    "game_session": "תובנות המשחק"
   },
   "auth": {
     "whoAreYou": "מי אתה?",

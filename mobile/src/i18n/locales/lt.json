@@ -58,7 +58,8 @@
     "eval": "Žaidėjo vertinimas",
     "game": "Rungtynių ataskaita",
     "training": "Treniruočių programa",
-    "team_report": "Komandos ataskaita"
+    "team_report": "Komandos ataskaita",
+    "game_session": "Rungtynių analizė"
   },
   "auth": {
     "whoAreYou": "Kas jūs esate?",

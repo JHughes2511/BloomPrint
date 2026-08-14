@@ -58,7 +58,8 @@
     "eval": "Éval joueur",
     "game": "Rapport de match",
     "training": "Programme d'entraînement",
-    "team_report": "Rapport d'équipe"
+    "team_report": "Rapport d'équipe",
+    "game_session": "Analyse du match"
   },
   "auth": {
     "whoAreYou": "Qui êtes-vous ?",

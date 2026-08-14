@@ -58,7 +58,8 @@
     "eval": "Spelerevaluatie",
     "game": "Wedstrijdrapport",
     "training": "Trainingsprogramma",
-    "team_report": "Teamrapport"
+    "team_report": "Teamrapport",
+    "game_session": "Wedstrijdinzichten"
   },
   "auth": {
     "whoAreYou": "Wie ben je?",

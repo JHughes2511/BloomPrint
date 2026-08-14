@@ -58,7 +58,8 @@
     "eval": "Eval. jucător",
     "game": "Raport de meci",
     "training": "Program de antrenament",
-    "team_report": "Raport echipă"
+    "team_report": "Raport echipă",
+    "game_session": "Analiza meciului"
   },
   "auth": {
     "whoAreYou": "Cine ești?",

@@ -58,7 +58,8 @@
     "eval": "Player Eval",
     "game": "Game Report",
     "training": "Training Program",
-    "team_report": "Team Report"
+    "team_report": "Team Report",
+    "game_session": "Game Insights"
   },
   "auth": {
     "whoAreYou": "Who are you?",

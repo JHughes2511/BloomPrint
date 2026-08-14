@@ -58,7 +58,8 @@
     "eval": "Eval ng Player",
     "game": "Ulat ng Laro",
     "training": "Programa ng Training",
-    "team_report": "Ulat ng Team"
+    "team_report": "Ulat ng Team",
+    "game_session": "Pagsusuri ng laro"
   },
   "auth": {
     "whoAreYou": "Sino ka?",

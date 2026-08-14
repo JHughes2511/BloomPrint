@@ -58,7 +58,8 @@
     "eval": "Procjena igrača",
     "game": "Izvještaj s utakmice",
     "training": "Program treninga",
-    "team_report": "Timski izvještaj"
+    "team_report": "Timski izvještaj",
+    "game_session": "Analiza utakmice"
   },
   "auth": {
     "whoAreYou": "Tko si ti?",

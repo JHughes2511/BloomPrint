@@ -58,7 +58,8 @@
     "eval": "선수 평가",
     "game": "경기 리포트",
     "training": "훈련 프로그램",
-    "team_report": "팀 리포트"
+    "team_report": "팀 리포트",
+    "game_session": "경기 인사이트"
   },
   "auth": {
     "whoAreYou": "어떤 사용자이신가요?",

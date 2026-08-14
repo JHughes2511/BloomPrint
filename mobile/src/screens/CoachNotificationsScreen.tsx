@@ -59,6 +59,10 @@ export default function CoachNotificationsScreen() {
   const [viewerShared, setViewerShared] = useState<any | null>(null);
   // shared_id -> report_type, so notification buttons can say "…Training"/"…Report".
   const [sharedMeta, setSharedMeta] = useState<Record<number, string>>({});
+  // shared_id -> the share itself. The list is already fetched to build the
+  // labels above, so keeping the rows means tapping View opens the report
+  // straight away instead of fetching the same two lists again first.
+  const [sharedById, setSharedById] = useState<Record<number, any>>({});
   // shared_id -> how I responded to a request (keyed by share so ALL request
   // notifications for the same report update, not just the one I tapped).
   const [requestResponses, setRequestResponses] = useState<Record<number, 'approved' | 'denied'>>({});
@@ -69,7 +73,11 @@ export default function CoachNotificationsScreen() {
 
   const TYPE_WORD: Record<string, string> = {
     training: tr('coachNotifs.typeTraining'), eval: tr('coachNotifs.typeEval'), team_report: tr('coachNotifs.typeTeamReport'),
-    team_training: tr('coachNotifs.typeTeamReport'), game: tr('coachNotifs.typeGameReport'), game_session: tr('coachNotifs.typeScoutReport'),
+    team_training: tr('coachNotifs.typeTeamReport'), game: tr('coachNotifs.typeGameReport'),
+    // A shared game is the Game Insights page — grades, leaders, shooting,
+    // key stats and both box scores. It was labelled a scout report, which is
+    // a different document entirely.
+    game_session: tr('teamGrade.gameInsights'),
   };
   const typeWord = (sharedId?: number | null) =>
     TYPE_WORD[(sharedId != null ? sharedMeta[sharedId] : '') ?? ''] ?? tr('coachNotifs.typeReport');
@@ -101,11 +109,18 @@ export default function CoachNotificationsScreen() {
 
   const openSharedReport = async (sharedId: number) => {
     try {
-      const [inbox, sent] = await Promise.all([
-        staffSharingAPI.inbox().catch(() => []),
-        staffSharingAPI.sent().catch(() => []),
-      ]);
-      const found = [...(inbox ?? []), ...(sent ?? [])].find((s: any) => s.id === sharedId);
+      // The share is almost always already here — the same two lists were read
+      // when this screen loaded. Tapping View used to fetch both again and sit
+      // on a blank screen for as long as that took, for a report the app was
+      // already holding.
+      let found = sharedById[sharedId];
+      if (!found) {
+        const [inbox, sent] = await Promise.all([
+          staffSharingAPI.inbox().catch(() => []),
+          staffSharingAPI.sent().catch(() => []),
+        ]);
+        found = [...(inbox ?? []), ...(sent ?? [])].find((s: any) => s.id === sharedId);
+      }
       if (!found) { Alert.alert(tr('coachNotifs.unavailableTitle'), tr('coachNotifs.unavailableMsg')); return; }
       const amRecipient = found.recipient_id === coach?.id;
       // As the sharer, I can view the original + comments/notes freely. But if
@@ -172,8 +187,13 @@ export default function CoachNotificationsScreen() {
         staffSharingAPI.sent().catch(() => []),
       ]);
       const meta: Record<number, string> = {};
-      [...(inbox ?? []), ...(sent ?? [])].forEach((s: any) => { meta[s.id] = s.report_type; });
+      const rows: Record<number, any> = {};
+      [...(inbox ?? []), ...(sent ?? [])].forEach((s: any) => {
+        meta[s.id] = s.report_type;
+        rows[s.id] = s;
+      });
       setSharedMeta(meta);
+      setSharedById(rows);
     } catch {}
     setLoading(false);
     setRefreshing(false);

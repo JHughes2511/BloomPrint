@@ -58,7 +58,8 @@
     "eval": "球员评估",
     "game": "比赛报告",
     "training": "训练计划",
-    "team_report": "球队报告"
+    "team_report": "球队报告",
+    "game_session": "比赛洞察"
   },
   "auth": {
     "whoAreYou": "你是谁？",

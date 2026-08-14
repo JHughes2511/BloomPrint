@@ -58,7 +58,8 @@
     "eval": "Oyuncu Değerlendirmesi",
     "game": "Maç Raporu",
     "training": "Antrenman Programı",
-    "team_report": "Takım Raporu"
+    "team_report": "Takım Raporu",
+    "game_session": "Maç analizi"
   },
   "auth": {
     "whoAreYou": "Kimsiniz?",

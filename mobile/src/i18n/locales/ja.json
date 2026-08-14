@@ -58,7 +58,8 @@
     "eval": "選手評価",
     "game": "試合レポート",
     "training": "トレーニングプログラム",
-    "team_report": "チームレポート"
+    "team_report": "チームレポート",
+    "game_session": "ゲーム分析"
   },
   "auth": {
     "whoAreYou": "あなたはどなたですか？",

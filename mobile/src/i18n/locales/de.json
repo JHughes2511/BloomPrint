@@ -58,7 +58,8 @@
     "eval": "Spielerbewertung",
     "game": "Spielbericht",
     "training": "Trainingsprogramm",
-    "team_report": "Teambericht"
+    "team_report": "Teambericht",
+    "game_session": "Spielanalyse"
   },
   "auth": {
     "whoAreYou": "Wer bist du?",
