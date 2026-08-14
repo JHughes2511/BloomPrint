@@ -2265,7 +2265,10 @@
     "noInsight": "Ingen analys ännu.",
     "isMyTeam": "{{name}} är mitt lag",
     "insightStale": "Nya rapporter sedan dess — skriv om",
-    "insightRewriting": "Skriver om…"
+    "insightRewriting": "Skriver om…",
+    "editScore": "Redigera resultat",
+    "scoreNeededTitle": "Båda resultaten behövs",
+    "scoreNeededMsg": "Skriv in båda resultaten och spara."
   },
   "whiteboard": {
     "title": "Taktiktavla",

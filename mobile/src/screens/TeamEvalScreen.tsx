@@ -198,6 +198,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // Only opened from the dash where a score would be. A game whose box
   // score is in already knows its result; this is for the ones that cannot.
   const [showScoreEdit, setShowScoreEdit] = useState(false);
+  // Said inside the sheet, not through Alert: an alert raised while a
+  // sheet is open is drawn behind it, so the coach is refused with no
+  // visible reason.
+  const [scoreError, setScoreError] = useState('');
   const [importProgress, setImportProgress] = useState<{ done: number; total: number } | null>(null);
   const [importedExtras, setImportedExtras] = useState<{ events: any[]; shots: any[]; team_stats: any[] }>(
     { events: [], shots: [], team_stats: [] });
@@ -912,12 +916,15 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       setOppScore(prev => (nextOpp = Math.max(0, prev + delta)));
     }
     if (activeGame) {
-      // Persist after the state settles.
+      // ONLY the side that was tapped. Sending both wrote an explicit 0 for the
+      // team nobody had touched — and an explicit score always beats the one
+      // worked out from the box score, so a single tap on a live game replaced
+      // a real result with 0-0 permanently. The untouched side stays as it was,
+      // which for an unscored game means "still unknown".
       setTimeout(() => {
-        gameEvalAPI.updateSession(activeGame.id, {
-          our_score: team === 'our' ? nextOur : ourScore,
-          opponent_score: team === 'opp' ? nextOpp : oppScore,
-        }).catch(() => {});
+        gameEvalAPI.updateSession(activeGame.id,
+          team === 'our' ? { our_score: nextOur } : { opponent_score: nextOpp },
+        ).catch(() => {});
       }, 0);
     }
   };
@@ -1139,11 +1146,21 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
   const saveFinalScore = async () => {
     if (!detailGame) return;
+    // `parseInt('') || 0` is how a game ended up 0-0: opening the sheet and
+    // saving without typing wrote two zeros over a score the box score already
+    // knew. An empty box means "I did not say", so nothing is saved.
+    const ours = parseInt(finalOurs, 10);
+    const theirs = parseInt(finalTheirs, 10);
+    if (!Number.isFinite(ours) || !Number.isFinite(theirs)) {
+      setScoreError(tr('teamGrade.scoreNeededMsg'));
+      return;
+    }
+    setScoreError('');
     setSavingScore(true);
     try {
       const updated = await gameEvalAPI.updateSession(detailGame.id, {
-        our_score: parseInt(finalOurs, 10) || 0,
-        opponent_score: parseInt(finalTheirs, 10) || 0,
+        our_score: ours,
+        opponent_score: theirs,
       });
       setDetailGame(updated);
       setFinalOurs(''); setFinalTheirs('');
@@ -2545,14 +2562,28 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   takes it, so a game with a real result is never stuck without
                   one in the season record. */}
               {detailGame.our_score != null ? (
-                <View style={{ alignItems: 'flex-end' }}>
+                // Tapping a score that is already there opens the same sheet
+                // with the numbers in it. A box score can be read wrong, and a
+                // score the coach could see was wrong but could not touch is
+                // worse than no score at all.
+                <TouchableOpacity
+                  style={{ alignItems: 'flex-end' }}
+                  onPress={() => {
+                    setFinalOurs(String(detailGame.our_score ?? ''));
+                    setFinalTheirs(String(detailGame.opponent_score ?? ''));
+                    setScoreError(''); setShowScoreEdit(true);
+                  }}
+                >
                   <Text style={{ color: t.ink, fontSize: 28, fontFamily: fonts[900] }}>
                     {detailGame.our_score} - {detailGame.opponent_score}
                   </Text>
-                </View>
+                  <Text style={{ color: t.accent, fontSize: 11, fontFamily: fonts[700] }}>
+                    {tr('teamGrade.editScore')}
+                  </Text>
+                </TouchableOpacity>
               ) : (
                 <TouchableOpacity style={{ alignItems: 'flex-end' }}
-                                  onPress={() => { setFinalOurs(''); setFinalTheirs(''); setShowScoreEdit(true); }}>
+                                  onPress={() => { setFinalOurs(''); setFinalTheirs(''); setScoreError(''); setShowScoreEdit(true); }}>
                   <Text style={{ color: t.muted2, fontSize: 28, fontFamily: fonts[900] }}>–</Text>
                   <Text style={{ color: t.accent, fontSize: 11, fontFamily: fonts[700] }}>
                     {tr('teamGrade.setScore')}
@@ -3341,6 +3372,11 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         <View style={s.modalOverlay}>
           <View style={[s.modalBox, { maxWidth: 420 }]}>
             <Text style={s.modalTitle}>{tr('teamGrade.finalScore')}</Text>
+            {!!scoreError && (
+              <Text style={{ color: t.negative, fontSize: 13, fontFamily: fonts[600], marginTop: 6 }}>
+                {scoreError}
+              </Text>
+            )}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 }}>
               {/* minWidth: 0 on every flex child. A text input carries an
                   intrinsic width on web — roughly twenty characters — and

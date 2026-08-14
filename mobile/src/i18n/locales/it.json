@@ -2265,7 +2265,10 @@
     "noInsight": "Ancora nessuna analisi.",
     "isMyTeam": "{{name}} è la mia squadra",
     "insightStale": "Nuovi report da allora — riscrivi",
-    "insightRewriting": "Riscrittura…"
+    "insightRewriting": "Riscrittura…",
+    "editScore": "Modifica punteggio",
+    "scoreNeededTitle": "Servono entrambi i punteggi",
+    "scoreNeededMsg": "Inserisci entrambi i punteggi e salva."
   },
   "whiteboard": {
     "title": "Lavagna",

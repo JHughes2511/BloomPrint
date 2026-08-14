@@ -2265,7 +2265,10 @@
     "noInsight": "아직 코멘트가 없습니다.",
     "isMyTeam": "{{name}}은(는) 내 팀입니다",
     "insightStale": "이후 새 리포트가 있습니다 — 다시 쓰기",
-    "insightRewriting": "다시 쓰는 중…"
+    "insightRewriting": "다시 쓰는 중…",
+    "editScore": "점수 편집",
+    "scoreNeededTitle": "두 점수가 모두 필요합니다",
+    "scoreNeededMsg": "두 점수를 입력한 뒤 저장하세요."
   },
   "whiteboard": {
     "title": "작전판",

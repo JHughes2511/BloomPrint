@@ -2265,7 +2265,10 @@
     "noInsight": "Još nema analize.",
     "isMyTeam": "{{name}} je moja momčad",
     "insightStale": "Novi izvještaji otad — napiši ponovno",
-    "insightRewriting": "Ponovno pisanje…"
+    "insightRewriting": "Ponovno pisanje…",
+    "editScore": "Uredi rezultat",
+    "scoreNeededTitle": "Potrebna su oba rezultata",
+    "scoreNeededMsg": "Upiši oba rezultata i spremi."
   },
   "whiteboard": {
     "title": "Ploča",

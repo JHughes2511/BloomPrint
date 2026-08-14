@@ -2265,7 +2265,10 @@
     "noInsight": "Nog geen analyse.",
     "isMyTeam": "{{name}} is mijn team",
     "insightStale": "Nieuwe rapporten sindsdien — herschrijven",
-    "insightRewriting": "Herschrijven…"
+    "insightRewriting": "Herschrijven…",
+    "editScore": "Score bewerken",
+    "scoreNeededTitle": "Beide scores nodig",
+    "scoreNeededMsg": "Vul beide scores in en sla op."
   },
   "whiteboard": {
     "title": "Tactiekbord",

@@ -2265,7 +2265,10 @@
     "noInsight": "Још нема анализе.",
     "isMyTeam": "{{name}} je moj tim",
     "insightStale": "Novi izveštaji otad — napiši ponovo",
-    "insightRewriting": "Ponovo se piše…"
+    "insightRewriting": "Ponovo se piše…",
+    "editScore": "Измени резултат",
+    "scoreNeededTitle": "Потребна су оба резултата",
+    "scoreNeededMsg": "Упиши оба резултата и сачувај."
   },
   "whiteboard": {
     "title": "Tabla",

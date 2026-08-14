@@ -2265,7 +2265,10 @@
     "noInsight": "Aún no hay análisis.",
     "isMyTeam": "{{name}} es mi equipo",
     "insightStale": "Hay informes nuevos — reescribir",
-    "insightRewriting": "Reescribiendo…"
+    "insightRewriting": "Reescribiendo…",
+    "editScore": "Editar marcador",
+    "scoreNeededTitle": "Faltan los dos marcadores",
+    "scoreNeededMsg": "Escribe los dos marcadores y guarda."
   },
   "whiteboard": {
     "title": "Pizarra",

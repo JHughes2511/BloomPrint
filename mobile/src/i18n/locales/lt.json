@@ -2265,7 +2265,10 @@
     "noInsight": "Analizės kol kas nėra.",
     "isMyTeam": "{{name}} yra mano komanda",
     "insightStale": "Nuo tada yra naujų ataskaitų — perrašyti",
-    "insightRewriting": "Perrašoma…"
+    "insightRewriting": "Perrašoma…",
+    "editScore": "Redaguoti rezultatą",
+    "scoreNeededTitle": "Reikia abiejų rezultatų",
+    "scoreNeededMsg": "Įrašyk abu rezultatus ir išsaugok."
   },
   "whiteboard": {
     "title": "Lenta",

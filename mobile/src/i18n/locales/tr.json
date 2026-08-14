@@ -2265,7 +2265,10 @@
     "noInsight": "Henüz analiz yok.",
     "isMyTeam": "{{name}} benim takımım",
     "insightStale": "O zamandan beri yeni raporlar var — yeniden yaz",
-    "insightRewriting": "Yeniden yazılıyor…"
+    "insightRewriting": "Yeniden yazılıyor…",
+    "editScore": "Skoru düzenle",
+    "scoreNeededTitle": "İki skor da gerekli",
+    "scoreNeededMsg": "İki skoru da yaz, sonra kaydet."
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

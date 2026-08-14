@@ -2265,7 +2265,10 @@
     "noInsight": "Δεν υπάρχει ακόμη ανάλυση.",
     "isMyTeam": "Η {{name}} είναι η ομάδα μου",
     "insightStale": "Νέες αναφορές έκτοτε — ξαναγράψτε το",
-    "insightRewriting": "Επανεγγραφή…"
+    "insightRewriting": "Επανεγγραφή…",
+    "editScore": "Επεξεργασία σκορ",
+    "scoreNeededTitle": "Χρειάζονται και τα δύο σκορ",
+    "scoreNeededMsg": "Γράψε και τα δύο σκορ και αποθήκευσε."
   },
   "whiteboard": {
     "title": "Πίνακας",

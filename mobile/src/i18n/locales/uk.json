@@ -2265,7 +2265,10 @@
     "noInsight": "Поки немає розбору.",
     "isMyTeam": "{{name}} — моя команда",
     "insightStale": "Відтоді є нові звіти — переписати",
-    "insightRewriting": "Переписується…"
+    "insightRewriting": "Переписується…",
+    "editScore": "Змінити рахунок",
+    "scoreNeededTitle": "Потрібні обидва рахунки",
+    "scoreNeededMsg": "Введіть обидва рахунки та збережіть."
   },
   "whiteboard": {
     "title": "Тактична дошка",

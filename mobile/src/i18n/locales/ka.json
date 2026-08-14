@@ -2265,7 +2265,10 @@
     "noInsight": "შეფასება ჯერ არ არის.",
     "isMyTeam": "{{name}} ჩემი გუნდია",
     "insightStale": "მას შემდეგ ახალი ანგარიშებია — თავიდან დაწერე",
-    "insightRewriting": "გადაიწერება…"
+    "insightRewriting": "გადაიწერება…",
+    "editScore": "ანგარიშის რედაქტირება",
+    "scoreNeededTitle": "საჭიროა ორივე ანგარიში",
+    "scoreNeededMsg": "ჩაწერე ორივე ანგარიში და შეინახე."
   },
   "whiteboard": {
     "title": "დაფა",

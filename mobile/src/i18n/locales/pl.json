@@ -2265,7 +2265,10 @@
     "noInsight": "Brak analizy.",
     "isMyTeam": "{{name}} to mój zespół",
     "insightStale": "Od tego czasu są nowe raporty — napisz od nowa",
-    "insightRewriting": "Przepisywanie…"
+    "insightRewriting": "Przepisywanie…",
+    "editScore": "Edytuj wynik",
+    "scoreNeededTitle": "Potrzebne oba wyniki",
+    "scoreNeededMsg": "Wpisz oba wyniki i zapisz."
   },
   "whiteboard": {
     "title": "Tablica",

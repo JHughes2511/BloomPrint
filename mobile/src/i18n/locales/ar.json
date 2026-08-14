@@ -2265,7 +2265,10 @@
     "noInsight": "لا توجد ملاحظة بعد.",
     "isMyTeam": "{{name}} هو فريقي",
     "insightStale": "توجد تقارير جديدة منذ ذلك الحين — أعد كتابته",
-    "insightRewriting": "جارٍ إعادة الكتابة…"
+    "insightRewriting": "جارٍ إعادة الكتابة…",
+    "editScore": "تعديل النتيجة",
+    "scoreNeededTitle": "النتيجتان مطلوبتان",
+    "scoreNeededMsg": "اكتب النتيجتين ثم احفظ."
   },
   "whiteboard": {
     "title": "السبورة",

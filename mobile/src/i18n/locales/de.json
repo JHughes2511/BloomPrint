@@ -2265,7 +2265,10 @@
     "noInsight": "Noch keine Einschätzung.",
     "isMyTeam": "{{name}} ist mein Team",
     "insightStale": "Neue Berichte seitdem — neu schreiben",
-    "insightRewriting": "Wird neu geschrieben…"
+    "insightRewriting": "Wird neu geschrieben…",
+    "editScore": "Ergebnis bearbeiten",
+    "scoreNeededTitle": "Beide Ergebnisse nötig",
+    "scoreNeededMsg": "Trage beide Ergebnisse ein und speichere."
   },
   "whiteboard": {
     "title": "Taktiktafel",

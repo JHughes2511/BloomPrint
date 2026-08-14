@@ -2265,7 +2265,10 @@
     "noInsight": "Pas encore d'analyse.",
     "isMyTeam": "{{name}} est mon équipe",
     "insightStale": "Nouveaux rapports depuis — réécrire",
-    "insightRewriting": "Réécriture…"
+    "insightRewriting": "Réécriture…",
+    "editScore": "Modifier le score",
+    "scoreNeededTitle": "Les deux scores sont requis",
+    "scoreNeededMsg": "Saisis les deux scores, puis enregistre."
   },
   "whiteboard": {
     "title": "Tableau blanc",

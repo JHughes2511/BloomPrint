@@ -2265,7 +2265,10 @@
     "noInsight": "まだ所見はありません。",
     "isMyTeam": "{{name}} は自分のチームです",
     "insightStale": "以降に新しいレポートがあります — 書き直す",
-    "insightRewriting": "書き直しています…"
+    "insightRewriting": "書き直しています…",
+    "editScore": "スコアを編集",
+    "scoreNeededTitle": "両方のスコアが必要です",
+    "scoreNeededMsg": "両方のスコアを入力して保存してください。"
   },
   "whiteboard": {
     "title": "ホワイトボード",

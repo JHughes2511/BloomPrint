@@ -2265,7 +2265,10 @@
     "noInsight": "暂无解读。",
     "isMyTeam": "{{name}} 是我的球队",
     "insightStale": "之后有新报告 — 重新生成",
-    "insightRewriting": "正在重新生成…"
+    "insightRewriting": "正在重新生成…",
+    "editScore": "编辑比分",
+    "scoreNeededTitle": "需要两队比分",
+    "scoreNeededMsg": "填写两队比分后保存。"
   },
   "whiteboard": {
     "title": "战术板",

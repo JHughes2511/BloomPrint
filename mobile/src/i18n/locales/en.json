@@ -2265,7 +2265,10 @@
     "noInsight": "No insight yet.",
     "isMyTeam": "{{name}} is my team",
     "insightStale": "New reports since this — rewrite it",
-    "insightRewriting": "Rewriting…"
+    "insightRewriting": "Rewriting…",
+    "editScore": "Edit score",
+    "scoreNeededTitle": "Both scores needed",
+    "scoreNeededMsg": "Type both scores, then save."
   },
   "whiteboard": {
     "title": "Whiteboard",

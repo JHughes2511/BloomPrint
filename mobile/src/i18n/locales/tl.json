@@ -2265,7 +2265,10 @@
     "noInsight": "Wala pang pagsusuri.",
     "isMyTeam": "Ang {{name}} ay aking koponan",
     "insightStale": "May bagong ulat mula noon — isulat muli",
-    "insightRewriting": "Isinusulat muli…"
+    "insightRewriting": "Isinusulat muli…",
+    "editScore": "I-edit ang iskor",
+    "scoreNeededTitle": "Kailangan ang dalawang iskor",
+    "scoreNeededMsg": "Ilagay ang dalawang iskor, tapos i-save."
   },
   "whiteboard": {
     "title": "Whiteboard",

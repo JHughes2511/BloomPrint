@@ -2265,7 +2265,10 @@
     "noInsight": "अभी कोई विश्लेषण नहीं।",
     "isMyTeam": "{{name}} मेरी टीम है",
     "insightStale": "इसके बाद नई रिपोर्ट आई हैं — दोबारा लिखें",
-    "insightRewriting": "दोबारा लिखा जा रहा है…"
+    "insightRewriting": "दोबारा लिखा जा रहा है…",
+    "editScore": "स्कोर बदलें",
+    "scoreNeededTitle": "दोनों स्कोर चाहिए",
+    "scoreNeededMsg": "दोनों स्कोर लिखें, फिर सेव करें।"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",
