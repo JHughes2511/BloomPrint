@@ -61,7 +61,12 @@ export function mdToHtml(md: string): string {
 
   // page-break helpers
   const noSplit = 'page-break-inside:avoid';
-  const keepWithNext = 'page-break-after:avoid';
+  // A heading has to stay with the section under it. page-break-after:avoid is
+  // the CSS for that and the PDF renderer ignores it — its parser only reads
+  // "always", "right" and "left" — so a heading could sit alone at the foot of
+  // a page with its section overleaf. -pdf-keep-with-next is the rule it does
+  // read; the standard one stays for browsers, which print these too.
+  const keepWithNext = 'page-break-after:avoid;-pdf-keep-with-next:true';
 
   for (let idx = 0; idx < lines.length; idx++) {
     const raw = lines[idx];
