@@ -19,6 +19,7 @@ import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 import PageContainer, { REPORT_MAX_WIDTH } from '../../responsive/PageContainer';
 import { renderReport } from '../../utils/renderReport';
+import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../../components/ReportSearch';
 import { GeneratingOverlay } from '../../components/GeneratingBasketball';
 import CommentThread from '../../components/CommentThread';
 import { parseDrills } from '../../utils/trainingDrills';
@@ -60,6 +61,8 @@ export default function PlayerCoachTrainingDetailScreen() {
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [exporting, setExporting] = useState(false);
   const [showCoachNotes, setShowCoachNotes] = useState(false);
+  // The coach's programme, searchable the same way it is everywhere else.
+  const find = useReportSearch(training?.program_text ?? '');
 
   const loadCorrections = () =>
     playerTrainingAPI.coachSentCorrections(trainingId).then(setTrainingCorrections).catch(() => setTrainingCorrections([]));
@@ -211,7 +214,7 @@ export default function PlayerCoachTrainingDetailScreen() {
   return (
     <ScreenBackground>
     <PageContainer maxWidth={REPORT_MAX_WIDTH}>
-      <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareScrollView ref={find.scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <TouchableOpacity onPress={() => goUp()} style={{ flexShrink: 0 }}>
             <Ionicons name="chevron-back" size={24} color={t.ink} />
@@ -237,9 +240,15 @@ export default function PlayerCoachTrainingDetailScreen() {
               <Text style={styles.coachNotesLabel} numberOfLines={1}>{tr('playerApp.coachTrainingDetail.coachNotes')}</Text>
               <Ionicons name={showCoachNotes ? 'chevron-up' : 'chevron-down'} size={14} color={t.muted2} style={{ marginLeft: 'auto' }} />
             </TouchableOpacity>
+            {/* Searching notes that are folded away is searching nothing, so
+                opening the search opens them. */}
+            <View style={{ flexDirection: 'row', marginTop: 8 }}>
+              <ReportSearchButton ctl={find} onOpen={() => setShowCoachNotes(true)} />
+            </View>
+            <ReportSearchBar ctl={find} />
             {showCoachNotes && (
               <View style={styles.coachNotesBox}>
-                {renderReport(training.program_text, { heading: t.ink, body: t.inkSoft })}
+                {renderReport(training.program_text, { heading: t.ink, body: t.inkSoft }, find.search)}
               </View>
             )}
           </View>

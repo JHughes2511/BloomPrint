@@ -83,6 +83,11 @@ export function useReportSearch(text: string, existingRef?: React.RefObject<any>
     if (Platform.OS !== 'web' || typeof document === 'undefined') return;
     const onKey = (e: any) => {
       if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) {
+        // A screen can hold several reports — the one on the page and the ones
+        // in sheets over it — and each has its own search. Only the ones whose
+        // view is actually on screen answer, so Ctrl+F does not quietly open a
+        // bar inside a sheet that is shut.
+        if (!scrollRef.current) return;
         e.preventDefault();
         setOpen(true);
       } else if (e.key === 'Escape') {

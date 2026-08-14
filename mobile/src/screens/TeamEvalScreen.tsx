@@ -19,6 +19,7 @@ import { gameEvalAPI, teamsAPI, playersAPI, staffSharingAPI, coachesAPI, imports
 import type { ScoutInsightOut } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
+import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { formatForLevel, periodLabel, weightBucket, periodForBucket, formatClock, type GameFormat } from '../utils/gameClock';
@@ -371,6 +372,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // Opponent scout
   const [scoutOpponent, setScoutOpponent] = useState<string | null>(null);
   const [scoutData, setScoutData] = useState<any | null>(null);
+  // The three places this screen draws a report: the scouting report under a
+  // game, the one on an opponent's scout page, and a generated game report.
+  // Three scroll views, so three searches.
+  const findScouting = useReportSearch(detailGame?.ai_scouting_report ?? '');
+  const findScout = useReportSearch(scoutData?.ai_scouting_report ?? '', scoutScrollRef);
+  const findGameReport = useReportSearch(gameReportGame?.ai_game_report ?? '');
   // Written sentences by subject: 'offense' | 'defense' | 'weak' | a player's name.
   const [insights, setInsights] = useState<Record<string, ScoutInsightOut>>({});
   // Keyed, not a single value: the three team sections are written at the
@@ -1199,8 +1206,11 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         // export asks for the same document rather than a second one built
         // here that could drift from what the tab draws.
         const { text } = await gameEvalAPI.insightsText(detailGame.id);
-        // Its first line is the title, which the cover above it already says.
-        const body = text.split('\n').slice(1).join('\n').trim();
+        // Its first line is the title and its second is the date, both of
+        // which the cover above it already says.
+        const lines = text.split('\n').slice(1);
+        if ((lines[0] ?? '').trim() === dateStr) lines.shift();
+        const body = lines.join('\n').trim();
         html = buildReportHtml({
           title: `${programName} vs ${detailGame.opponent_name}`,
           subject: `${result}${phase}${year}`,
@@ -2550,7 +2560,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
       {/* Game Detail */}
       {activeView === 'detail' && detailGame && (
-        <ScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
+        <ScrollView ref={findScouting.scrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
           {/* The way back to the list, said on the page rather than left to a
               swipe. Same link Scout uses above its team, for the same reason:
               a game opened from Games is a page under Games, and nothing else
@@ -3042,9 +3052,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* AI scouting report */}
           {(showScoutingReport || detailGame.ai_scouting_report) && (
             <View style={s.card}>
-              <Text style={s.cardLabel}>{tr('teamGrade.scoutingReport')}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <Text style={[s.cardLabel, { flex: 1 }]}>{tr('teamGrade.scoutingReport')}</Text>
+                <ReportSearchButton ctl={findScouting} />
+              </View>
               <View style={{ marginTop: 8 }}>
-                {renderReport(detailGame.ai_scouting_report ?? '', { heading: t.ink, body: t.inkSoft })}
+                <ReportSearchBar ctl={findScouting} />
+                {renderReport(detailGame.ai_scouting_report ?? '', { heading: t.ink, body: t.inkSoft }, findScouting.search)}
               </View>
             </View>
           )}
@@ -3244,9 +3258,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   {scoutData.ai_scouting_report && (
                     <>
                       <View style={s.card}>
-                        <Text style={s.cardLabel}>{tr('teamGrade.scoutingReport')}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                          <Text style={[s.cardLabel, { flex: 1 }]}>{tr('teamGrade.scoutingReport')}</Text>
+                          <ReportSearchButton ctl={findScout} />
+                        </View>
                         <View style={{ marginTop: 8 }}>
-                          {renderReport(scoutData.ai_scouting_report, { heading: t.ink, body: t.inkSoft })}
+                          <ReportSearchBar ctl={findScout} />
+                          {renderReport(scoutData.ai_scouting_report, { heading: t.ink, body: t.inkSoft }, findScout.search)}
                         </View>
                       </View>
 
@@ -3280,7 +3298,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
       {/* Full Game Report — our team + opponent, with add-context (like Scout) */}
       {activeView === 'gamereport' && (
-        <KeyboardAwareScrollView style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
+        <KeyboardAwareScrollView ref={findGameReport.scrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
           {!gameReportGame ? (
             <>
               <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900], marginBottom: 4 }}>{tr('reportTypes.game_report')}</Text>
@@ -3353,9 +3371,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   {gameReportGame.ai_game_report ? (
                     <>
                       <View style={s.card}>
-                        <Text style={s.cardLabel}>{tr('teamGrade.gameReportLabel')}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                          <Text style={[s.cardLabel, { flex: 1 }]}>{tr('teamGrade.gameReportLabel')}</Text>
+                          <ReportSearchButton ctl={findGameReport} />
+                        </View>
                         <View style={{ marginTop: 8 }}>
-                          {renderReport(gameReportGame.ai_game_report, { heading: t.ink, body: t.inkSoft })}
+                          <ReportSearchBar ctl={findGameReport} />
+                          {renderReport(gameReportGame.ai_game_report, { heading: t.ink, body: t.inkSoft }, findGameReport.search)}
                         </View>
                       </View>
 

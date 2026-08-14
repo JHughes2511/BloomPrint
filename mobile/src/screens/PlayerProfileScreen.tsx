@@ -20,6 +20,7 @@ import { Player, Evaluation, Team } from '../types';
 import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
 import { renderReport } from '../utils/renderReport';
+import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import ShareModal from '../components/ShareModal';
@@ -98,6 +99,9 @@ export default function PlayerProfileScreen() {
   const [latestTraining, setLatestTraining] = useState<any | null>(null);
   const [allTraining, setAllTraining] = useState<any[]>([]);
   const [trainingModalItem, setTrainingModalItem] = useState<any | null>(null);
+  // The training program read in this sheet, searchable like every other
+  // report. It shares the sheet's own scroll view.
+  const find = useReportSearch(trainingModalItem?.program_text ?? '', modalScrollRef);
   // The training whose sections the coach is choosing before it is sent.
   const [sendTraining, setSendTraining] = useState<{ id: number; text: string } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1152,10 +1156,12 @@ export default function PlayerProfileScreen() {
                   </Text>
                 )}
               </View>
-              <TouchableOpacity onPress={() => setTrainingModalItem(null)} style={{ padding: 4 }}>
+              <ReportSearchButton ctl={find} />
+              <TouchableOpacity onPress={() => setTrainingModalItem(null)} style={{ padding: 4, marginLeft: 10 }}>
                 <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
+            <ReportSearchBar ctl={find} />
 
             <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'web' ? undefined : (Platform.OS === 'ios' ? 'padding' : 'height')}>
               <KeyboardAwareScrollView
@@ -1166,7 +1172,7 @@ export default function PlayerProfileScreen() {
                 keyboardShouldPersistTaps="handled"
               >
                 {trainingModalItem?.program_text
-                  ? renderReport(trainingModalItem.program_text, { heading: t.ink, body: t.inkSoft })
+                  ? renderReport(trainingModalItem.program_text, { heading: t.ink, body: t.inkSoft }, find.search)
                   : <Text style={{ color: t.muted }}>{tr('playerProfile.noTrainingContent')}</Text>
                 }
 

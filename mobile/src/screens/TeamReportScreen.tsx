@@ -149,6 +149,8 @@ export default function TeamReportScreen() {
   const [prevReports, setPrevReports] = useState<any[]>([]);
   const [loadingPrevReports, setLoadingPrevReports] = useState(false);
   const [selectedPrevReport, setSelectedPrevReport] = useState<any | null>(null);
+  // An older report opened in its own sheet, with its own scroll view.
+  const findPrev = useReportSearch(selectedPrevReport?.report_text ?? '');
   const [prevReportFilter, setPrevReportFilter] = useState<string>('all');
   const [showPrevSearch, setShowPrevSearch] = useState(false);
   const [prevSearchText, setPrevSearchText] = useState('');
@@ -941,13 +943,15 @@ export default function TeamReportScreen() {
                   {selectedPrevReport ? new Date(selectedPrevReport.created_at).toLocaleDateString() : ''}
                 </Text>
               </View>
-              <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setSelectedPrevReport(null)}>
+              <ReportSearchButton ctl={findPrev} />
+              <TouchableOpacity style={{ flexShrink: 0, marginLeft: 10 }} onPress={() => setSelectedPrevReport(null)}>
                 <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
-            <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
+            <ReportSearchBar ctl={findPrev} />
+            <KeyboardAwareScrollView ref={findPrev.scrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
               {selectedPrevReport?.report_text ? (
-                renderReport(selectedPrevReport.report_text, { heading: t.ink, body: t.inkSoft })
+                renderReport(selectedPrevReport.report_text, { heading: t.ink, body: t.inkSoft }, findPrev.search)
               ) : (
                 <Text style={{ color: t.muted }}>{tr('teamReport.noReportContent')}</Text>
               )}

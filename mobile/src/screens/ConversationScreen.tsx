@@ -23,6 +23,7 @@ import { fonts } from '../theme/typography';
 import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import { renderReport } from '../utils/renderReport';
+import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import { reportSubject } from '../utils/reportSubject';
 import { outputTypeLabel } from '../utils/reportType';
 import { sheetCap, desktopOnly } from '../responsive/modalSizes';
@@ -52,6 +53,9 @@ export default function ConversationScreen() {
   const [reportsLoading, setReportsLoading] = useState(false);
   const [reportSearch, setReportSearch] = useState('');
   const [reportView, setReportView] = useState<{ title: string; text: string } | null>(null);
+  // An answer opened as a report is read like any other report, so it searches
+  // like one.
+  const find = useReportSearch(reportView?.text ?? '');
   const scrollRef = useRef<ScrollView>(null);
   const rec = useRef<Audio.Recording | null>(null);
 
@@ -375,9 +379,13 @@ export default function ConversationScreen() {
           <View style={[styles.sheet, { maxHeight: '85%' }]}>
             <View style={styles.sheetHead}>
               <Text style={styles.sheetTitle} numberOfLines={1}>{reportView?.title}</Text>
-              <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setReportView(null)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
+              <ReportSearchButton ctl={find} />
+              <TouchableOpacity style={{ flexShrink: 0, marginLeft: 10 }} onPress={() => setReportView(null)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
-            <ScrollView>{reportView ? renderReport(reportView.text, { heading: t.ink, body: t.inkSoft }) : null}</ScrollView>
+            <ReportSearchBar ctl={find} />
+            <ScrollView ref={find.scrollRef}>
+              {reportView ? renderReport(reportView.text, { heading: t.ink, body: t.inkSoft }, find.search) : null}
+            </ScrollView>
           </View>
         </View>
       </Sheet>

@@ -290,6 +290,10 @@ export default function GameReportBuilderScreen() {
   const scrollRef = useRef<ScrollView>(null);
   // Finding a name in a generated report, which runs to several pages.
   const find = useReportSearch(report?.report_text ?? '', scrollRef);
+  // The two sheets that also hold a report: an older version of it, and one
+  // film's analysis. Each has its own scroll view, so each gets its own search.
+  const findVersion = useReportSearch(versionView?.report_text ?? '');
+  const findClip = useReportSearch(clipModal?.analysis_text ?? '');
   // Y positions captured via onLayout (direct ScrollView children only)
   const boxScoreY = useRef(0);
   const scoutingY = useRef(0);
@@ -1362,11 +1366,13 @@ export default function GameReportBuilderScreen() {
                   {versionView ? `Updated ${new Date(versionView.updated_at || versionView.created_at).toLocaleDateString()}` : ''}
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => setVersionView(null)}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
+              <ReportSearchButton ctl={findVersion} />
+              <TouchableOpacity onPress={() => setVersionView(null)} style={{ marginLeft: 10 }}><Ionicons name="close" size={22} color={t.muted} /></TouchableOpacity>
             </View>
-            <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }}>
+            <ReportSearchBar ctl={findVersion} />
+            <KeyboardAwareScrollView ref={findVersion.scrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }}>
               {versionView?.report_text
-                ? renderReport(versionView.report_text, { heading: t.ink, body: t.inkSoft })
+                ? renderReport(versionView.report_text, { heading: t.ink, body: t.inkSoft }, findVersion.search)
                 : <Text style={{ color: t.muted }}>{tr('gameBuilder.noContent')}</Text>}
             </KeyboardAwareScrollView>
           </View>
@@ -1481,13 +1487,17 @@ export default function GameReportBuilderScreen() {
                   ? tr('gameBuilder.teamFilm', { team: clipModal.team_name })
                   : (clipModal?.label === 'my_team' ? tr('gameBuilder.myTeamFilm') : tr('gameBuilder.opponentFilm'))}</Text>
               </View>
-              <TouchableOpacity onPress={() => setClipModal(null)} style={{ marginLeft: 'auto' }}>
-                <Ionicons name="close" size={22} color={t.muted} />
-              </TouchableOpacity>
+              <View style={{ marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <ReportSearchButton ctl={findClip} />
+                <TouchableOpacity onPress={() => setClipModal(null)}>
+                  <Ionicons name="close" size={22} color={t.muted} />
+                </TouchableOpacity>
+              </View>
             </View>
-            <KeyboardAwareScrollView style={{ maxHeight: sheetScroll280 }} contentContainerStyle={{ paddingBottom: 8 }}>
+            <ReportSearchBar ctl={findClip} />
+            <KeyboardAwareScrollView ref={findClip.scrollRef} style={{ maxHeight: sheetScroll280 }} contentContainerStyle={{ paddingBottom: 8 }}>
               {clipModal?.analysis_text
-                ? renderReport(clipModal.analysis_text, { heading: t.ink, body: t.inkSoft })
+                ? renderReport(clipModal.analysis_text, { heading: t.ink, body: t.inkSoft }, findClip.search)
                 : (() => {
                     // "No analysis yet" is true of a film being watched right
                     // now and of one whose job died an hour ago, and a coach
