@@ -12,6 +12,7 @@ the sections off, and a server that went and got "the report" would quietly
 hand back the parts they had just excluded.
 """
 import re
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
@@ -35,10 +36,29 @@ class PdfIn(BaseModel):
 
 
 def _filename(title: str) -> str:
-    """A name a phone and a desktop will both accept, and a person can read."""
-    safe = re.sub(r"[^A-Za-z0-9 \-_.]", "", (title or "Report")).strip()
-    safe = re.sub(r"\s+", " ", safe)[:80].strip() or "Report"
+    """A name a phone and a desktop will both accept, and a person can read.
+
+    Only characters a file system refuses are removed. Stripping everything
+    non-ASCII named a Russian coach's report "Report.pdf" and a Chinese one
+    "vs.pdf" — their own title discarded for not being in Latin letters.
+    """
+    safe = re.sub(r'[/\\:*?"<>|]', "", (title or "Report"))
+    safe = re.sub(r"[\x00-\x1f\x7f]", "", safe)
+    safe = re.sub(r"\s+", " ", safe).strip()[:80] or "Report"
     return f"{safe}.pdf"
+
+
+def _disposition(name: str) -> str:
+    """Content-Disposition that carries a non-Latin name intact.
+
+    A header is Latin-1, so the name is given twice: an ASCII fallback for
+    anything old, and the real one RFC 5987-encoded for everything else.
+    """
+    ascii_name = name.encode("ascii", "ignore").decode() or "Report.pdf"
+    if ascii_name.strip(". ") in ("", "pdf"):
+        ascii_name = "Report.pdf"
+    quoted = quote(name, safe="")
+    return f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{quoted}"
 
 
 @router.post("/pdf")
@@ -69,7 +89,7 @@ def export_pdf(
         media_type="application/pdf",
         headers={
             # attachment, so a browser saves it instead of navigating to it.
-            "Content-Disposition": f'attachment; filename="{name}"',
+            "Content-Disposition": _disposition(name),
             "Content-Length": str(len(pdf)),
         },
     )

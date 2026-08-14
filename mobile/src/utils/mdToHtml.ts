@@ -185,7 +185,17 @@ export function wrapPrintDocument(params: {
 
 /** Sanitise a string for use as a file system file name. */
 export function safeFileName(s: string): string {
-  return s.replace(/[^a-zA-Z0-9 \-]/g, '').replace(/\s+/g, ' ').trim();
+  // Only what a file system actually refuses, rather than everything that is
+  // not English. Stripping non-ASCII meant a Russian report downloaded as
+  // "Report.pdf" and a Chinese one as "vs.pdf" — the coach's own title thrown
+  // away because it was not written in Latin letters.
+  return (s ?? '')
+    .replace(/[/\\:*?"<>|]/g, '')       // illegal in a file name on some OS
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001f\u007f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 80);
 }
 
 export type ReportSection = { heading: string; body: string; pinned?: boolean };

@@ -37,6 +37,12 @@ export function buildReportHtml(params: {
 export function buildPdfFileName(reportType: string, subject: string, date?: Date): string {
   const d = date ?? new Date();
   const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  const safe = (s: string) => s.replace(/[^a-zA-Z0-9 \-]/g, '').replace(/\s+/g, ' ').trim();
+  // See safeFileName: a name is sanitised, not transliterated.
+  const safe = (s: string) => (s ?? '')
+    .replace(/[/\\:*?"<>|]/g, '')
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001f\u007f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
   return `${safe(reportType)} - ${safe(subject)} - ${dateStr}`;
 }
