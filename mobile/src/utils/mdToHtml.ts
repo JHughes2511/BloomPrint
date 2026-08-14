@@ -82,16 +82,26 @@ export function mdToHtml(md: string): string {
       // renderer lays tables out on declared widths rather than measuring the
       // text, so a table without them collapses into its first column.
       const cols = Math.max(header.length, ...body.map(r => r.length), 1);
-      const w = (100 / cols).toFixed(2);
-      const cellPad = 'padding:5px 7px;border:0.5px solid #cbd5e1;font-size:11px;line-height:1.45';
+      // A box score is a name and eighteen numbers. Split evenly, the name got
+      // the same 5% as PF and came out as two stacked half-words, so the first
+      // column of a wide table is given room and the rest share what is left.
+      const wide = cols >= 8;
+      const firstW = wide ? Math.min(20, (100 / cols) * 2.8) : 100 / cols;
+      const restW = wide ? (100 - firstW) / (cols - 1) : 100 / cols;
+      const width = (k: number) => (k === 0 ? firstW : restW).toFixed(2);
+      // And the cells themselves tighten, because nineteen columns of 11px on a
+      // portrait page is more text than the width can hold.
+      const cellPad = wide
+        ? 'padding:3px 3px;border:0.5px solid #cbd5e1;font-size:8px;line-height:1.3'
+        : 'padding:5px 7px;border:0.5px solid #cbd5e1;font-size:11px;line-height:1.45';
       html += `<table width="100%" cellspacing="0" cellpadding="0" `
         + `style="margin:10px 0;border:0.5px solid #cbd5e1;${noSplit}">`;
       html += '<tr>' + Array.from({ length: cols }, (_, k) =>
-        `<td width="${w}%" style="${cellPad};background:#eef2f7;font-weight:bold;color:#0f172a">`
+        `<td width="${width(k)}%" style="${cellPad};background:#eef2f7;font-weight:bold;color:#0f172a">`
         + `${inline(header[k] ?? '')}</td>`).join('') + '</tr>';
       for (const row of body) {
         html += '<tr>' + Array.from({ length: cols }, (_, k) =>
-          `<td width="${w}%" style="${cellPad};color:#1f2937">${inline(row[k] ?? '')}</td>`)
+          `<td width="${width(k)}%" style="${cellPad};color:#1f2937">${inline(row[k] ?? '')}</td>`)
           .join('') + '</tr>';
       }
       html += '</table>';

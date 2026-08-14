@@ -1174,7 +1174,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   };
 
   const exportDetailPdf = async () => {
-    if (!summary || !detailGame) return;
+    // Game Insights is composed from the game itself, so it exports even when
+    // the grade summary did not load — the other tabs are the grades, and
+    // without them there is nothing to put in the file.
+    if (!detailGame || (!summary && detailTab !== 'insights')) return;
     setExportingPdf(true);
     try {
       const gameDate = new Date(detailGame.date);
@@ -1188,7 +1191,23 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
       let html: string;
 
-      if (detailTab === 'byquarter') {
+      if (detailTab === 'insights') {
+        // The Game Insights tab is tables — team grade, leaders, shooting, key
+        // stats and both box scores. Exporting it used to hand back a list of
+        // player grades as running text, which was neither the page nor a
+        // table. The server composes that page already, for sharing, so the
+        // export asks for the same document rather than a second one built
+        // here that could drift from what the tab draws.
+        const { text } = await gameEvalAPI.insightsText(detailGame.id);
+        // Its first line is the title, which the cover above it already says.
+        const body = text.split('\n').slice(1).join('\n').trim();
+        html = buildReportHtml({
+          title: `${programName} vs ${detailGame.opponent_name}`,
+          subject: `${result}${phase}${year}`,
+          date: dateStr,
+          body,
+        });
+      } else if (detailTab === 'byquarter') {
         // Build quarter comparison HTML with table + per-player breakdown
         const ourStats = gameStats.filter((st: any) => !st.is_opponent);
         const qSet = new Set<number>();
@@ -1364,7 +1383,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       }
 
       const fileName = buildPdfFileName(
-        detailTab === 'byquarter' ? 'Quarter Report' : 'Game Report',
+        detailTab === 'byquarter' ? 'Quarter Report'
+          : detailTab === 'insights' ? 'Game Insights' : 'Game Report',
         `${programName} vs ${detailGame.opponent_name}${phase}`,
         gameDate,
       );

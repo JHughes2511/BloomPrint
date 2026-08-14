@@ -1274,6 +1274,23 @@ def get_box_score_text(
     return {"text": box_score_text(db, game)}
 
 
+@router.get("/sessions/{game_id}/insights-text")
+def get_insights_text(
+    game_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """The Game Insights page, written out as tables.
+
+    Exporting from Game Insights used to hand back a list of player grades in
+    plain text — neither what the tab was showing nor a table. The page is
+    already composed here for sharing, so the export asks for the same document
+    rather than a second one built on the device that could drift from it.
+    """
+    game = _get_game_readable(db, game_id, coach)
+    return {"text": game_insights_text(db, game)}
+
+
 def _game_team_ids(db: Session, coach, game) -> list[int | None]:
     """The teams a game is about: the one it was created under, and the
     opponent when they are a team on the books.
