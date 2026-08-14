@@ -944,7 +944,18 @@ export default function GameReportBuilderScreen() {
                 } else if (reportId) {
                   // No usable date is not a dead end: the sheet can still be
                   // searched by team, which is the other way in.
-                  void refreshLinkAsk(reportId, { manual: true });
+                  //
+                  // And a team name typed here IS that search. It used to be
+                  // thrown away — the sheet opened with an empty box and the
+                  // coach typed the same name a second time to see any games
+                  // at all. Letters mean a name, not a half-typed date, so it
+                  // is carried through and searched on straight away.
+                  const typed = gameDate.trim();
+                  const isName = /\p{L}/u.test(typed);
+                  if (isName) { setGameQuery(typed); setGameDate(''); }
+                  void refreshLinkAsk(reportId, {
+                    manual: true, q: isName ? typed : undefined,
+                  });
                 }
               }}
               disabled={searchingGames}
@@ -1380,6 +1391,11 @@ export default function GameReportBuilderScreen() {
                 placeholderTextColor={t.muted2}
                 value={gameQuery}
                 onChangeText={setGameQuery}
+                returnKeyType="search"
+                // Enter searches. Typing a name and pressing return is what a
+                // search box does everywhere else, and it was doing nothing.
+                onSubmitEditing={() =>
+                  reportId && refreshLinkAsk(reportId, { manual: true, q: gameQuery })}
               />
               <TouchableOpacity
                 style={styles.dateSearchBtn}
