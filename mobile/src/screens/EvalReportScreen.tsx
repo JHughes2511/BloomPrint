@@ -321,10 +321,17 @@ export default function EvalReportScreen() {
         PILLARS.filter(k => ev.pillar_grades![k] != null).forEach(k => {
           const g = ev.pillar_grades![k];
           const pct = Math.round((g / 10) * 100);
+          // The bar is a two-cell table, not a div inside a div. A PDF
+          // renderer gives an empty div no height, so the graded bars simply
+          // were not in the exported file — the numbers were there and the
+          // picture of them was missing. Cells with a background do render.
           body += `<table width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0">
             <tr><td style="font-size:13px">${pillarLabel(k)}</td><td align="right" style="font-size:13px"><strong>${g.toFixed(1)}</strong></td></tr>
-            <tr><td colspan="2"><div style="background:#eee;border-radius:4px;height:8px;margin-top:3px">
-              <div style="background:#2563eb;border-radius:4px;height:8px;width:${pct}%"></div></div></td></tr>
+            <tr><td colspan="2" style="padding-top:3px">
+              <table width="100%" cellpadding="0" cellspacing="0"><tr>
+                <td width="${pct}%" style="background-color:#2563eb;font-size:7px;line-height:7px">&nbsp;</td>
+                <td width="${100 - pct}%" style="background-color:#e5e7eb;font-size:7px;line-height:7px">&nbsp;</td>
+              </tr></table></td></tr>
           </table>`;
         });
       }

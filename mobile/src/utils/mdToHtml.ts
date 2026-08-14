@@ -8,6 +8,31 @@
  *  - Nothing is cut off across page breaks: paragraphs and list items never split,
  *    and a heading is never stranded alone at the bottom of a page.
  */
+// A markdown pipe table, recognised by exactly the rules renderReport uses on
+// screen — a row of cells followed by a |---|---| separator. Kept in step with
+// utils/renderReport.tsx on purpose: the screen drew real tables and the export
+// did not, so a box score that read as a grid in the app came out of the PDF as
+// a run of paragraphs full of pipe characters.
+const isTableRow = (line: string) =>
+  /\|/.test(line) && /^\s*\|?.*\|.*$/.test(line) && line.trim().includes('|');
+const isTableSeparator = (line: string) =>
+  /\|/.test(line) && /^[\s|:\-—─]+$/.test(line) && line.includes('-');
+
+// What the screen treats as a heading, by the same three rules renderReport
+// uses: a markdown heading, an ALL-CAPS line, or a short line ending in a
+// colon. The export only honoured the first, so a report whose sections were
+// ALL-CAPS — which is most of them — came out as an undifferentiated wall of
+// paragraphs while the app showed headings.
+const isAllCapsHeading = (t: string) => /^[A-Z][A-Z0-9\s/&\-().,':]+$/.test(t);
+const isShortHeader = (t: string) => t.length < 60 && t.endsWith(':');
+
+function tableCells(line: string): string[] {
+  let s = line.trim();
+  if (s.startsWith('|')) s = s.slice(1);
+  if (s.endsWith('|')) s = s.slice(0, -1);
+  return s.split('|').map(c => c.trim());
+}
+
 export function mdToHtml(md: string): string {
   const lines = (md ?? '').split('\n');
   let html = '';
@@ -38,8 +63,41 @@ export function mdToHtml(md: string): string {
   const noSplit = 'page-break-inside:avoid';
   const keepWithNext = 'page-break-after:avoid';
 
-  for (const raw of lines) {
+  for (let idx = 0; idx < lines.length; idx++) {
+    const raw = lines[idx];
     const line = raw.trimEnd();
+
+    // A table, before anything else looks at these lines: a header row of
+    // cells followed by the |---| separator, then every row under it.
+    if (isTableRow(line) && idx + 1 < lines.length && isTableSeparator(lines[idx + 1])) {
+      const header = tableCells(line);
+      const body: string[][] = [];
+      let j = idx + 2;
+      while (j < lines.length && isTableRow(lines[j]) && !isTableSeparator(lines[j])) {
+        body.push(tableCells(lines[j]));
+        j++;
+      }
+      closeList();
+      // Widths are shared out evenly and the whole table is 100%: the PDF
+      // renderer lays tables out on declared widths rather than measuring the
+      // text, so a table without them collapses into its first column.
+      const cols = Math.max(header.length, ...body.map(r => r.length), 1);
+      const w = (100 / cols).toFixed(2);
+      const cellPad = 'padding:5px 7px;border:0.5px solid #cbd5e1;font-size:11px;line-height:1.45';
+      html += `<table width="100%" cellspacing="0" cellpadding="0" `
+        + `style="margin:10px 0;border:0.5px solid #cbd5e1;${noSplit}">`;
+      html += '<tr>' + Array.from({ length: cols }, (_, k) =>
+        `<td width="${w}%" style="${cellPad};background:#eef2f7;font-weight:bold;color:#0f172a">`
+        + `${inline(header[k] ?? '')}</td>`).join('') + '</tr>';
+      for (const row of body) {
+        html += '<tr>' + Array.from({ length: cols }, (_, k) =>
+          `<td width="${w}%" style="${cellPad};color:#1f2937">${inline(row[k] ?? '')}</td>`)
+          .join('') + '</tr>';
+      }
+      html += '</table>';
+      idx = j - 1;
+      continue;
+    }
 
     // Pure divider line — skip entirely
     if (/^\s*([-=_*•]\s*){3,}\s*$/.test(line) || /^\s*[-=—─━═╍╌┄┅]{3,}\s*$/.test(line)) {
@@ -67,10 +125,11 @@ export function mdToHtml(md: string): string {
       html += '<div style="height:8px"></div>';
     } else {
       closeList();
-      // A short line ending with ':' reads as a sub-heading
       const trimmed = line.trim();
-      if (trimmed.length < 60 && /:$/.test(trimmed) && !/[.!?]/.test(trimmed.slice(0, -1))) {
-        html += `<p style="font-size:13px;font-weight:700;color:#111;margin:12px 0 3px;${keepWithNext}">${inline(trimmed)}</p>`;
+      if (isAllCapsHeading(trimmed) || isShortHeader(trimmed)) {
+        // The same treatment a markdown heading gets, because that is what the
+        // screen gives all three.
+        html += `<h3 style="font-size:16px;font-weight:800;color:#111;margin:22px 0 7px;border-bottom:1.5px solid #cbd5e1;padding-bottom:4px;${keepWithNext}">${inline(trimmed.replace(/:$/, ''))}</h3>`;
       } else {
         html += `<p style="font-size:12px;line-height:1.7;color:#1f2937;margin:5px 0;${noSplit}">${inline(line)}</p>`;
       }
@@ -249,13 +308,19 @@ export function splitReportSections(text: string): ReportSection[] {
   // Only if it actually helped. A document with one bare heading and nothing
   // to attach it to keeps its original shape.
   if (grouped.length) result = grouped;
-  // The document header (model banner, report type, opponent/metadata lines) is
-  // NOT toggleable content — it's the title block. Pin every leading section up
-  // to the first one that has a real prose body so it's always included and not
-  // shown as a section toggle.
-  const firstReal = result.findIndex(s => s.body.replace(/\s+/g, ' ').trim().length >= 60);
-  if (firstReal > 0) {
-    for (let i = 0; i < firstReal; i++) result[i].pinned = true;
+  // The document header — model banner, report type, opponent and metadata
+  // lines — is not toggleable content, so it is pinned and always included.
+  //
+  // "Header" means the lines BEFORE the first heading, not "every section up
+  // to the first long one", which is what this used to say. That test pinned
+  // any real section whose body happened to be short: a report opening with a
+  // one-line EXECUTIVE SUMMARY lost its switch the moment a later section — a
+  // box score, say — was long enough to be judged the first real one. The
+  // switches then did not match the report, which is the one thing this list
+  // has to get right.
+  const firstHeaded = result.findIndex(s => s.heading !== 'Overview' && s.heading !== 'Report');
+  for (let i = 0; i < (firstHeaded < 0 ? result.length : firstHeaded); i++) {
+    result[i].pinned = true;
   }
   return result;
 }
