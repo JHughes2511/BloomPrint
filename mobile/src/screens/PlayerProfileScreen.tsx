@@ -11,9 +11,7 @@ import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/nativ
 import { useGoUp } from '../navigation/goUp';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system/legacy';
+import { exportHtmlPdf, printRawHtml } from '../utils/exportDoc';
 import * as Clipboard from 'expo-clipboard';
 import QRCode from 'react-native-qrcode-svg';
 import { Video, ResizeMode } from 'expo-av';
@@ -508,7 +506,7 @@ export default function PlayerProfileScreen() {
       date: new Date(trainingModalItem.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
       body: trainingModalItem.program_text,
     });
-    try { await Print.printAsync({ html }); } catch {}
+    try { await printRawHtml(html); } catch {}
   };
 
   const exportTraining = async () => {
@@ -523,13 +521,8 @@ export default function PlayerProfileScreen() {
         body: trainingModalItem.program_text,
       });
       const fileName = buildPdfFileName(tr('reportTypes.training_program'), player?.name ?? 'Player', reportDate);
-      const { uri } = await Print.printToFileAsync({ html });
-      // Copy to a properly-named file so the export keeps the standard convention.
-      const dest = FileSystem.cacheDirectory + fileName + '.pdf';
-      await FileSystem.copyAsync({ from: uri, to: dest });
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: fileName });
-      }
+      // Named to the standard convention rather than a temp file's name.
+      await exportHtmlPdf(html, fileName);
     } catch {
       Alert.alert(tr('common.error'), tr('playerProfile.couldNotExportTraining'));
     } finally {

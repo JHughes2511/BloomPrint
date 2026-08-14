@@ -13,9 +13,7 @@ import Sheet from '../components/Sheet';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useGoUp } from '../navigation/goUp';
 import { Ionicons } from '@expo/vector-icons';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system/legacy';
+import { exportHtmlPdf, printRawHtml } from '../utils/exportDoc';
 import { evalsAPI, playersAPI, playerAPI, staffSharingAPI, coachesAPI } from '../api/client';
 import ShareModal from '../components/ShareModal';
 import { outputTypeLabel, parseOutputTypes } from '../utils/reportType';
@@ -396,10 +394,7 @@ export default function EvalReportScreen() {
     setExporting(true);
     try {
       const html = buildHtml(exportCats);
-      const { uri } = await Print.printToFileAsync({ html });
-      const dest = FileSystem.cacheDirectory + safeFileName(buildFileName()) + '.pdf';
-      await FileSystem.copyAsync({ from: uri, to: dest });
-      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: tr('evalReport.shareBimReport') });
+      await exportHtmlPdf(html, buildFileName());
     } catch (e: any) {
       Alert.alert(tr('evalReport.exportErrorTitle'), e?.message ?? tr('evalReport.couldNotGenerateReport'));
     } finally {
@@ -416,10 +411,7 @@ export default function EvalReportScreen() {
       const allCats = { grades: true, flags: true, questions: true, report: true, corrections: corrections.length > 0 };
       const allReport = Object.fromEntries(reportSections.map(sec => [sec.heading, true]));
       const html = buildHtml(allCats, allReport);
-      const { uri } = await Print.printToFileAsync({ html });
-      const dest = FileSystem.cacheDirectory + safeFileName(buildFileName()) + '.pdf';
-      await FileSystem.copyAsync({ from: uri, to: dest });
-      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: tr('evalReport.shareBimReport') });
+      await exportHtmlPdf(html, buildFileName());
     } catch (e: any) {
       Alert.alert(tr('evalReport.shareErrorTitle'), e?.message ?? tr('evalReport.couldNotGenerateReport'));
     } finally {
@@ -429,7 +421,7 @@ export default function EvalReportScreen() {
 
   const printPdf = async () => {
     try {
-      await Print.printAsync({ html: buildHtml(exportCats) });
+      await printRawHtml(buildHtml(exportCats));
     } catch (e: any) {
       Alert.alert(tr('evalReport.printErrorTitle'), e?.message ?? tr('evalReport.couldNotPrintReport'));
     } finally {

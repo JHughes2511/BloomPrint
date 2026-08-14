@@ -6,9 +6,7 @@ import { useGoUp } from '../navigation/goUp';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system/legacy';
+import { exportHtmlPdf, printRawHtml } from '../utils/exportDoc';
 import { mdToHtml, safeFileName, wrapPrintDocument } from '../utils/mdToHtml';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -44,10 +42,7 @@ export default function SummaryScreen() {
 
   const exportPdf = async () => {
     try {
-      const { uri } = await Print.printToFileAsync({ html: buildHtml() });
-      const dest = FileSystem.cacheDirectory + buildFileName() + '.pdf';
-      await FileSystem.copyAsync({ from: uri, to: dest });
-      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: tr('summary.shareDialogTitle') });
+      await exportHtmlPdf(buildHtml(), buildFileName());
     } catch (e: any) {
       Alert.alert(tr('summary.exportErrorTitle'), e?.message ?? tr('summary.couldNotExport'));
     }
@@ -55,7 +50,7 @@ export default function SummaryScreen() {
 
   const printDoc = async () => {
     try {
-      await Print.printAsync({ html: buildHtml() });
+      await printRawHtml(buildHtml());
     } catch (e: any) {
       Alert.alert(tr('summary.printErrorTitle'), e?.message ?? tr('summary.couldNotPrint'));
     }

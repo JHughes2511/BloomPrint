@@ -11,9 +11,7 @@ import FilmPlayer from '../components/FilmPlayer';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system/legacy';
+import { exportHtmlPdf, printRawHtml } from '../utils/exportDoc';
 import { Video, ResizeMode } from 'expo-av';
 import { evalsAPI, teamsAPI, playerAPI, gameReportsAPI, staffSharingAPI, coachesAPI, authedVideoSource } from '../api/client';
 import ShareModal from '../components/ShareModal';
@@ -288,10 +286,7 @@ export default function TeamReportScreen() {
         body: reportText,
       });
       const fileName = buildPdfFileName(typeLabel(), coach?.program_name ?? tr('teamReport.teamFallback'), now);
-      const { uri } = await Print.printToFileAsync({ html });
-      const dest = FileSystem.cacheDirectory + fileName + '.pdf';
-      await FileSystem.copyAsync({ from: uri, to: dest });
-      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: fileName });
+      await exportHtmlPdf(html, fileName);
     } catch (e: any) {
       Alert.alert(tr('teamReport.exportErrorTitle'), e?.message ?? tr('teamReport.couldNotExport'));
     } finally {
@@ -309,7 +304,7 @@ export default function TeamReportScreen() {
         date: now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
         body: reportText,
       });
-      await Print.printAsync({ html });
+      await printRawHtml(html);
     } catch (e: any) {
       Alert.alert(tr('teamReport.printErrorTitle'), e?.message ?? tr('teamReport.couldNotPrint'));
     }
@@ -386,7 +381,7 @@ export default function TeamReportScreen() {
       date: new Date(report.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
       body: report.report_text,
     });
-    try { await Print.printAsync({ html }); } catch {}
+    try { await printRawHtml(html); } catch {}
   };
 
   const exportPrevReport = async (report: any) => {
@@ -402,14 +397,8 @@ export default function TeamReportScreen() {
         body: report.report_text,
       });
       const fileName = buildPdfFileName(rType, coach?.program_name ?? tr('teamReport.teamFallback'), rDate);
-      const { uri } = await Print.printToFileAsync({ html });
-      // Copy to a properly-named file so the export keeps the standard convention
-      // (Type - Subject - YYYY-MM-DD) instead of the random Print temp name.
-      const dest = FileSystem.cacheDirectory + fileName + '.pdf';
-      await FileSystem.copyAsync({ from: uri, to: dest });
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: fileName });
-      }
+      // Named to the standard convention (Type - Subject - YYYY-MM-DD).
+      await exportHtmlPdf(html, fileName);
     } catch { Alert.alert(tr('common.error'), tr('teamReport.couldNotExportReport')); }
     setExportingPrevReport(false);
   };

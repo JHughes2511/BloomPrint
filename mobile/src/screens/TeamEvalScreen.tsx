@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import * as Print from 'expo-print';
+import { exportHtmlPdf, printRawHtml } from '../utils/exportDoc';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 
@@ -1342,11 +1342,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         gameDate,
       );
       const dest = (FileSystem.cacheDirectory ?? '') + fileName + '.pdf';
-      const { uri } = await Print.printToFileAsync({ html });
-      await FileSystem.copyAsync({ from: uri, to: dest });
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: fileName });
-      }
+      await exportHtmlPdf(html, fileName);
     } catch (e: any) {
       Alert.alert(tr('teamGrade.exportErrorTitle'), e?.message ?? tr('teamGrade.couldNotExport'));
     }

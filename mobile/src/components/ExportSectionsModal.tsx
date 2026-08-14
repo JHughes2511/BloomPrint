@@ -3,10 +3,8 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Switch, Modal, Ac
 import Sheet from './Sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system/legacy';
-import { splitReportSections, joinReportSections, mdToHtml, wrapPrintDocument, safeFileName } from '../utils/mdToHtml';
+import { splitReportSections } from '../utils/mdToHtml';
+import { exportReportPdf, printReport } from '../utils/exportDoc';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
@@ -30,37 +28,53 @@ export default function ExportSectionsModal({ visible, title, subject, reportTex
   const { t: tr } = useTranslation();
   const s = makeStyles(t);
   const sections = splitReportSections(reportText ?? '');
-  const toggleSections = sections.filter(sec => !sec.pinned);
-  const [toggles, setToggles] = useState<Record<string, boolean>>({});
+  // Kept BY POSITION, not by heading. A report can carry the same heading more
+  // than once — a film breakdown has a "SEGMENT 1 NOTES" per segment — and
+  // keying on the text made those one switch: flipping any of them flipped all
+  // of them, and what came out did not match what was ticked.
+  const [on, setOn] = useState<boolean[]>([]);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (visible) setToggles(Object.fromEntries(splitReportSections(reportText ?? '').map(sec => [sec.heading, true])));
+    if (visible) setOn(splitReportSections(reportText ?? '').map(() => true));
   }, [visible, reportText]);
 
-  const filtered = () => joinReportSections(sections, toggles) || reportText;
-  const html = () => wrapPrintDocument({
-    title,
-    subtitle: subject ?? '',
-    date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-    bodyHtml: mdToHtml(filtered()),
-  });
+  // A heading that appears more than once is numbered on screen, so the coach
+  // can tell which switch belongs to which part of the report.
+  const labelFor = (i: number) => {
+    const h = sections[i].heading;
+    const same = sections.map((s, j) => (s.heading === h ? j : -1)).filter(j => j >= 0);
+    return same.length > 1 ? `${h} (${same.indexOf(i) + 1} of ${same.length})` : h;
+  };
+
+  const filtered = () =>
+    sections
+      .filter((sec, i) => sec.pinned || on[i] !== false)
+      .map(sec => (sec.heading === 'Overview' || sec.heading === 'Report'
+        ? sec.body : `## ${sec.heading}\n${sec.body}`))
+      .join('\n\n')
+      .trim() || reportText;
+
+  const doc = () => ({ title, subtitle: subject, text: filtered() });
 
   const doExport = async () => {
     setBusy(true);
     try {
-      const { uri } = await Print.printToFileAsync({ html: html() });
-      const dest = (FileSystem.cacheDirectory ?? '') + `${safeFileName(title)}.pdf`;
-      await FileSystem.copyAsync({ from: uri, to: dest });
-      if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: title });
+      await exportReportPdf(doc());
       onClose();
-    } catch (e: any) { Alert.alert(tr('components.exportSections.exportErrorTitle'), e?.message ?? tr('components.exportSections.couldNotExport')); }
+    } catch (e: any) {
+      Alert.alert(tr('components.exportSections.exportErrorTitle'),
+                  e?.response?.data?.detail ?? e?.message ?? tr('components.exportSections.couldNotExport'));
+    }
     setBusy(false);
   };
   const doPrint = async () => {
     setBusy(true);
-    try { await Print.printAsync({ html: html() }); onClose(); }
-    catch (e: any) { Alert.alert(tr('components.exportSections.printErrorTitle'), e?.message ?? tr('components.exportSections.couldNotPrint')); }
+    try { await printReport(doc()); onClose(); }
+    catch (e: any) {
+      Alert.alert(tr('components.exportSections.printErrorTitle'),
+                  e?.message ?? tr('components.exportSections.couldNotPrint'));
+    }
     setBusy(false);
   };
 
@@ -77,17 +91,17 @@ export default function ExportSectionsModal({ visible, title, subject, reportTex
           </View>
 
           <ScrollView style={{ maxHeight: 340 }}>
-            {toggleSections.length === 0 && <Text style={{ color: t.muted2, paddingVertical: 12 }}>{tr('components.exportSections.oneSection')}</Text>}
-            {toggleSections.map((sec, i) => (
-              <View key={`${sec.heading}-${i}`} style={s.row}>
-                <Text style={s.rowLabel} numberOfLines={1}>{sec.heading}</Text>
+            {sections.every(sec => sec.pinned) && <Text style={{ color: t.muted2, paddingVertical: 12 }}>{tr('components.exportSections.oneSection')}</Text>}
+            {sections.map((sec, i) => (sec.pinned ? null : (
+              <View key={i} style={s.row}>
+                <Text style={s.rowLabel} numberOfLines={1}>{labelFor(i)}</Text>
                 <Switch
-                  value={toggles[sec.heading] !== false}
-                  onValueChange={v => setToggles(p => ({ ...p, [sec.heading]: v }))}
+                  value={on[i] !== false}
+                  onValueChange={v => setOn(p => { const next = p.slice(); next[i] = v; return next; })}
                   trackColor={{ false: t.line, true: t.accent }} thumbColor="#fff"
                 />
               </View>
-            ))}
+            )))}
           </ScrollView>
 
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>

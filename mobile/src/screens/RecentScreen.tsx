@@ -12,9 +12,7 @@ import {
 import Sheet from '../components/Sheet';
 import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system/legacy';
+import { exportHtmlPdf, printRawHtml } from '../utils/exportDoc';
 import { evalsAPI, playerAPI, gameReportsAPI, trainingAPI, staffSharingAPI, coachesAPI, gameEvalAPI } from '../api/client';
 import { readPage, writePage } from '../storage/pageCache';
 import { GradeBadge } from '../components/GradeBadge';
@@ -690,11 +688,7 @@ export default function RecentScreen() {
         ${activeModal.playerName ? `<p>${activeModal.playerName}</p>` : ''}
         ${mdToHtml(activeModal.text)}
       </body></html>`;
-      const { uri } = await Print.printToFileAsync({ html });
-      const fileName = `${safeFileName(title)}.pdf`;
-      const dest = FileSystem.cacheDirectory + fileName;
-      await FileSystem.copyAsync({ from: uri, to: dest });
-      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: tr('recent.shareReportDialog') });
+      await exportHtmlPdf(html, title);
     } catch (e: any) {
       Alert.alert(tr('recent.exportErrorTitle'), e?.message ?? tr('recent.exportErrorMsg'));
     } finally {
@@ -714,7 +708,7 @@ export default function RecentScreen() {
         <h1>BloomPrint — ${title}</h1>
         ${mdToHtml(activeModal.text)}
       </body></html>`;
-      await Print.printAsync({ html });
+      await printRawHtml(html);
     } catch (e: any) {
       Alert.alert(tr('recent.printErrorTitle'), e?.message ?? tr('recent.printErrorMsg'));
     }
@@ -736,10 +730,7 @@ export default function RecentScreen() {
     if (!text) return;
     setExporting(true);
     try {
-      const { uri } = await Print.printToFileAsync({ html: buildReportHtmlDoc(title, text, subject) });
-      const dest = FileSystem.cacheDirectory + `${safeFileName(title)}.pdf`;
-      await FileSystem.copyAsync({ from: uri, to: dest });
-      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: tr('recent.shareReportDialog') });
+      await exportHtmlPdf(buildReportHtmlDoc(title, text, subject), title);
     } catch (e: any) {
       Alert.alert(tr('recent.exportErrorTitle'), e?.message ?? tr('recent.exportErrorMsg'));
     } finally { setExporting(false); }
@@ -748,7 +739,7 @@ export default function RecentScreen() {
   const printText = async (title: string, text: string, subject?: string) => {
     if (!text) return;
     try {
-      await Print.printAsync({ html: buildReportHtmlDoc(title, text, subject) });
+      await printRawHtml(buildReportHtmlDoc(title, text, subject));
     } catch (e: any) {
       Alert.alert(tr('recent.printErrorTitle'), e?.message ?? tr('recent.printErrorMsg'));
     }

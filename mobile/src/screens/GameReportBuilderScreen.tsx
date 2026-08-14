@@ -15,9 +15,7 @@ import { renderReport } from '../utils/renderReport';
 import { GeneratingOverlay, parseGenProgress, jobProgressLabel, uploadProgressCode } from '../components/GeneratingBasketball';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system/legacy';
+import { exportHtmlPdf, printRawHtml } from '../utils/exportDoc';
 import { gameReportsAPI, teamsAPI, playerAPI, staffSharingAPI, coachesAPI, uploadFileStreamed, evalsAPI, gameEvalAPI } from '../api/client';
 import { directUploadAvailable, uploadFilmDirect } from '../api/directUpload';
 import ShareModal from '../components/ShareModal';
@@ -749,12 +747,9 @@ export default function GameReportBuilderScreen() {
         date: now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
         bodyHtml: mdToHtml(report.report_text),
       });
-      const { uri } = await Print.printToFileAsync({ html });
       const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       const fileName = `${safeFileName(reportTypeLabel())} - ${safeFileName(title_label)} - ${stamp}`;
-      const dest = FileSystem.cacheDirectory + fileName + '.pdf';
-      await FileSystem.copyAsync({ from: uri, to: dest });
-      await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: fileName });
+      await exportHtmlPdf(html, fileName);
     } catch (e: any) {
       Alert.alert(tr('gameBuilder.exportErrorTitle'), e?.message ?? tr('gameBuilder.couldNotExport'));
     }
