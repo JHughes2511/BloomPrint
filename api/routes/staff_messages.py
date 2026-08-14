@@ -113,13 +113,19 @@ def _require_member(db: Session, cid: int, coach_id: int) -> models.Conversation
 
 def _message_out(db: Session, m: models.StaffMessage, names: dict) -> dict:
     atts = db.query(models.StaffMessageAttachment).filter_by(message_id=m.id).all()
+    deleted = m.deleted_at is not None
     return {
         "id": m.id,
         "sender_id": m.sender_id,
         "sender_name": names.get(m.sender_id, "Staff"),
-        "text": m.text,
+        # A deleted message keeps its place in the conversation so replies to
+        # it still read, but not its words.
+        "text": None if deleted else m.text,
         "created_at": m.created_at,
-        "attachments": [{
+        "parent_id": m.parent_id,
+        "edited": m.edited_at is not None,
+        "deleted": deleted,
+        "attachments": [] if deleted else [{
             "id": a.id, "kind": a.kind, "report_type": a.report_type, "report_id": a.report_id,
             "report_title": a.report_title, "report_text": a.report_text, "data": a.data, "name": a.name,
         } for a in atts],
@@ -163,7 +169,15 @@ def send_message(
     attachments = body.get("attachments") or []
     if not text and not attachments:
         raise HTTPException(status_code=400, detail="Nothing to send.")
-    msg = models.StaffMessage(conversation_id=cid, sender_id=coach.id, text=text)
+    # Replying to a particular message, when the sender picked one. It has to
+    # belong to this conversation: a reply quoting a message from somewhere
+    # else would show the room text none of them can otherwise see.
+    parent_id = body.get("parent_id")
+    parent = db.get(models.StaffMessage, parent_id) if parent_id else None
+    if parent is not None and parent.conversation_id != cid:
+        raise HTTPException(status_code=400, detail="That message is not in this conversation.")
+    msg = models.StaffMessage(conversation_id=cid, sender_id=coach.id, text=text,
+                              parent_id=parent.id if parent else None)
     db.add(msg)
     db.flush()
     for a in attachments[:10]:
@@ -210,3 +224,62 @@ def mark_read(
         mine.last_read_message_id = last.id
         db.commit()
     return {"ok": True}
+
+
+@router.patch("/{cid}/messages/{mid}")
+def edit_message(
+    cid: int,
+    mid: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Rewrite something you sent.
+
+    Your own only. A conversation is a record several people are reading, and
+    letting one of them rewrite another's words would make it useless as one.
+    """
+    _require_member(db, cid, coach.id)
+    msg = db.get(models.StaffMessage, mid)
+    if not msg or msg.conversation_id != cid:
+        raise HTTPException(status_code=404, detail="Message not found")
+    if msg.sender_id != coach.id:
+        raise HTTPException(status_code=403, detail="That is not your message.")
+    if msg.deleted_at is not None:
+        raise HTTPException(status_code=400, detail="That message was deleted.")
+    text = (body.get("text") or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="A message cannot be empty.")
+    msg.text = text
+    msg.edited_at = datetime.utcnow()
+    db.commit()
+    names = {c.id: c.name for c in db.query(models.Coach).filter(models.Coach.id.in_(_member_ids(db, cid))).all()}
+    return _message_out(db, msg, names)
+
+
+@router.delete("/{cid}/messages/{mid}")
+def delete_message(
+    cid: int,
+    mid: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Take back something you sent.
+
+    Recorded rather than performed: a message somebody has replied to is the
+    top of a thread, and removing the row takes the replies with it. The words
+    and any attachments go; the place it occupied stays.
+    """
+    _require_member(db, cid, coach.id)
+    msg = db.get(models.StaffMessage, mid)
+    if not msg or msg.conversation_id != cid:
+        raise HTTPException(status_code=404, detail="Message not found")
+    if msg.sender_id != coach.id:
+        raise HTTPException(status_code=403, detail="That is not your message.")
+    msg.deleted_at = datetime.utcnow()
+    msg.text = None
+    for a in db.query(models.StaffMessageAttachment).filter_by(message_id=msg.id).all():
+        db.delete(a)
+    db.commit()
+    names = {c.id: c.name for c in db.query(models.Coach).filter(models.Coach.id.in_(_member_ids(db, cid))).all()}
+    return _message_out(db, msg, names)

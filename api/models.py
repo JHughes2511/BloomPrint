@@ -417,6 +417,13 @@ class PlayerComment(Base):
     parent_id           = Column(Integer, ForeignKey("player_comments.id"), nullable=True)  # threaded reply
     text                = Column(Text, nullable=False)
     created_at          = Column(DateTime, default=datetime.utcnow)
+    # When it was last rewritten, so a reader can tell an edited line from the
+    # one they were replied to about.
+    edited_at           = Column(DateTime, nullable=True)
+    # Removal is recorded rather than performed: a comment somebody has already
+    # replied to is a thread, and deleting the row takes the replies with it.
+    # The text goes; the place it occupied stays.
+    deleted_at          = Column(DateTime, nullable=True)
 
     player_user      = relationship("PlayerUser", back_populates="comments")
     coach            = relationship("Coach")
@@ -600,6 +607,11 @@ class StaffReportComment(Base):
     text             = Column(Text, nullable=False)
     target           = Column(String, default="original")  # "original" | "updated"
     created_at       = Column(DateTime, default=datetime.utcnow)
+    # The comment this one answers, so a reply can be read against what it is
+    # replying to rather than only by where it sits in the list.
+    parent_id        = Column(Integer, ForeignKey("staff_report_comments.id"), nullable=True)
+    edited_at        = Column(DateTime, nullable=True)
+    deleted_at       = Column(DateTime, nullable=True)
 
     shared_report = relationship("StaffSharedReport", back_populates="comments")
     author        = relationship("Coach")
@@ -1205,6 +1217,12 @@ class StaffMessage(Base):
     sender_id       = Column(Integer, ForeignKey("coaches.id"), nullable=False)
     text            = Column(Text, nullable=True)
     created_at      = Column(DateTime, default=datetime.utcnow)
+    # The message this one answers. A group conversation moves faster than any
+    # one thread in it, and "yes" three messages later is an answer to nothing.
+    parent_id       = Column(Integer, ForeignKey("staff_messages.id"), nullable=True)
+    edited_at       = Column(DateTime, nullable=True)
+    # See PlayerComment.deleted_at — the row stays so replies to it still read.
+    deleted_at      = Column(DateTime, nullable=True)
 
     attachments = relationship("StaffMessageAttachment", cascade="all, delete-orphan")
 

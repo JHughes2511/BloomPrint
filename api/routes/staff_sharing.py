@@ -1,5 +1,7 @@
 """Staff-to-staff report sharing routes."""
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -550,6 +552,12 @@ def get_comments(
         out = schemas.StaffReportCommentOut.model_validate(c)
         out.author_name = c.author.name if c.author else ""
         out.target = c.target or "original"
+        out.edited = c.edited_at is not None
+        out.deleted = c.deleted_at is not None
+        # A deleted comment keeps its place so the replies under it still
+        # read, but not its words.
+        if out.deleted:
+            out.text = ""
         result.append(out)
     return result
 
@@ -564,11 +572,18 @@ def add_comment(
     sr = db.get(models.StaffSharedReport, shared_id)
     if not sr or not _in_conversation(sr, coach.id, db):
         raise HTTPException(status_code=404, detail="Shared report not found")
+    # Replying to a particular comment, when one was picked. It has to belong
+    # to this report's conversation, or a reply would quote something the room
+    # cannot see.
+    parent = db.get(models.StaffReportComment, body.parent_id) if body.parent_id else None
+    if parent is not None and parent.shared_report_id not in [r.id for r in _conversation_rows(sr, db)]:
+        raise HTTPException(status_code=400, detail="That comment is not on this report.")
     comment = models.StaffReportComment(
         shared_report_id=shared_id,
         author_id=coach.id,
         text=body.text,
         target=(body.target if body.target in ("original", "updated") else "original"),
+        parent_id=parent.id if parent else None,
     )
     db.add(comment)
     db.flush()
@@ -592,6 +607,69 @@ def add_comment(
     db.refresh(comment)
     out = schemas.StaffReportCommentOut.model_validate(comment)
     out.author_name = coach.name
+    return out
+
+
+def _own_comment(db: Session, comment_id: int, coach) -> models.StaffReportComment:
+    """A comment the caller wrote, or the reason they cannot touch it.
+
+    Their own only. These threads are what a staff decides things in, and one
+    member rewriting another's words would leave nobody able to rely on them.
+    """
+    c = db.get(models.StaffReportComment, comment_id)
+    if not c:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    sr = db.get(models.StaffSharedReport, c.shared_report_id)
+    if not sr or not _in_conversation(sr, coach.id, db):
+        raise HTTPException(status_code=404, detail="Comment not found")
+    if c.author_id != coach.id:
+        raise HTTPException(status_code=403, detail="That is not your comment.")
+    return c
+
+
+@router.patch("/comments/{comment_id}", response_model=schemas.StaffReportCommentOut)
+def edit_comment(
+    comment_id: int,
+    body: schemas.StaffReportCommentEdit,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Rewrite a comment you left."""
+    c = _own_comment(db, comment_id, coach)
+    if c.deleted_at is not None:
+        raise HTTPException(status_code=400, detail="That comment was deleted.")
+    text = (body.text or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="A comment cannot be empty.")
+    c.text = text
+    c.edited_at = datetime.utcnow()
+    db.commit()
+    db.refresh(c)
+    out = schemas.StaffReportCommentOut.model_validate(c)
+    out.author_name = coach.name
+    out.edited = True
+    return out
+
+
+@router.delete("/comments/{comment_id}", response_model=schemas.StaffReportCommentOut)
+def delete_comment(
+    comment_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Take back a comment you left.
+
+    Recorded rather than performed — see StaffMessage.deleted_at: a comment
+    with replies under it is a thread, and deleting the row takes them with it.
+    """
+    c = _own_comment(db, comment_id, coach)
+    c.deleted_at = datetime.utcnow()
+    db.commit()
+    db.refresh(c)
+    out = schemas.StaffReportCommentOut.model_validate(c)
+    out.author_name = coach.name
+    out.deleted = True
+    out.text = ""
     return out
 
 

@@ -428,6 +428,8 @@ class PlayerCommentOut(BaseModel):
     text: str
     created_at: datetime
     author_name: str = ""
+    edited: bool = False
+    deleted: bool = False
     model_config = {"from_attributes": True}
 
 
@@ -641,6 +643,11 @@ class CoachNotificationOut(BaseModel):
 class StaffReportCommentCreate(BaseModel):
     text: str
     target: str = "original"  # "original" | "updated" — which version it's under
+    parent_id: int | None = None   # the comment this one answers
+
+
+class StaffReportCommentEdit(BaseModel):
+    text: str
 
 
 class StaffReportCommentOut(BaseModel):
@@ -651,6 +658,9 @@ class StaffReportCommentOut(BaseModel):
     created_at: datetime
     author_name: str = ""
     target: str = "original"
+    parent_id: int | None = None
+    edited: bool = False
+    deleted: bool = False
 
     model_config = {"from_attributes": True}
 

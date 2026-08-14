@@ -440,6 +440,18 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     ("game_minutes_played", "efficiency", "FLOAT"),
     # Added after the questionnaire had already collected responses.
     ("questionnaire_responses", "email", "VARCHAR"),
+    # Replying to a particular message or comment, editing one, and taking one
+    # back. All three tables predate the columns, and create_all() adds tables
+    # rather than columns — without these, a staff conversation on the live
+    # database fails on the first read.
+    ("staff_messages", "parent_id", "INTEGER"),
+    ("staff_messages", "edited_at", "TIMESTAMP"),
+    ("staff_messages", "deleted_at", "TIMESTAMP"),
+    ("staff_report_comments", "parent_id", "INTEGER"),
+    ("staff_report_comments", "edited_at", "TIMESTAMP"),
+    ("staff_report_comments", "deleted_at", "TIMESTAMP"),
+    ("player_comments", "edited_at", "TIMESTAMP"),
+    ("player_comments", "deleted_at", "TIMESTAMP"),
 ]
 
 

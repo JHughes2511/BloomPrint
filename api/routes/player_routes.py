@@ -1,9 +1,11 @@
 """Player-facing routes: invites, link requests, shared reports, training, comments, notifications."""
 import json
+from datetime import datetime
 
 import os
 import secrets
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
@@ -636,6 +638,22 @@ def update_coach_training_progress(
     return {"ok": True}
 
 
+def _comment_out(c: models.PlayerComment) -> schemas.PlayerCommentOut:
+    """One comment as the app reads it.
+
+    The author's name, whether it has been rewritten since, and whether it has
+    been taken back — a deleted comment keeps its place so the replies under it
+    still read, but not its words.
+    """
+    out = schemas.PlayerCommentOut.model_validate(c)
+    out.author_name = c.player_user.name if c.player_user else (c.coach.name if c.coach else "Unknown")
+    out.edited = c.edited_at is not None
+    out.deleted = c.deleted_at is not None
+    if out.deleted:
+        out.text = ""
+    return out
+
+
 @router.get("/coach-training/{training_id}/comments", response_model=list[schemas.PlayerCommentOut])
 def list_coach_training_comments(
     training_id: int,
@@ -653,9 +671,7 @@ def list_coach_training_comments(
     )
     result = []
     for c in comments:
-        out = schemas.PlayerCommentOut.model_validate(c)
-        out.author_name = c.player_user.name if c.player_user else (c.coach.name if c.coach else "Unknown")
-        result.append(out)
+        result.append(_comment_out(c))
     return result
 
 
@@ -1215,11 +1231,7 @@ def get_report_comments(
     comments = db.query(models.PlayerComment).filter_by(shared_report_id=shared_id).all()
     result = []
     for c in comments:
-        out = schemas.PlayerCommentOut.model_validate(c)
-        out.author_name = (
-            c.player_user.name if c.player_user else (c.coach.name if c.coach else "Unknown")
-        )
-        result.append(out)
+        result.append(_comment_out(c))
     return result
 
 
@@ -1232,11 +1244,7 @@ def get_training_comments(
     comments = db.query(models.PlayerComment).filter_by(player_training_id=training_id).all()
     result = []
     for c in comments:
-        out = schemas.PlayerCommentOut.model_validate(c)
-        out.author_name = (
-            c.player_user.name if c.player_user else (c.coach.name if c.coach else "Unknown")
-        )
-        result.append(out)
+        result.append(_comment_out(c))
     return result
 
 
@@ -1389,11 +1397,7 @@ def coach_view_shared_report(
     comments = db.query(models.PlayerComment).filter_by(shared_report_id=shared_id).all()
     result = []
     for c in comments:
-        out = schemas.PlayerCommentOut.model_validate(c)
-        out.author_name = (
-            c.player_user.name if c.player_user else (c.coach.name if c.coach else "Unknown")
-        )
-        result.append(out)
+        result.append(_comment_out(c))
     return {"shared_report_id": shared_id, "comments": [c.model_dump() for c in result]}
 
 
@@ -1794,3 +1798,89 @@ def _build_shared_report_out(shared: models.SharedReport) -> schemas.SharedRepor
         if shared.share_questions:
             out.key_questions = ev.key_questions
     return out
+
+
+# ── Editing and taking back a comment ────────────────────────────────────────
+#
+# A thread is read by both sides. Each may change or remove their own line and
+# nobody else's — a coach rewriting a player's comment, or the reverse, would
+# leave the record useless to both of them.
+
+
+class CommentEdit(BaseModel):
+    text: str
+
+
+def _edit(c: models.PlayerComment, text: str) -> schemas.PlayerCommentOut:
+    if c.deleted_at is not None:
+        raise HTTPException(status_code=400, detail="That comment was deleted.")
+    clean = (text or "").strip()
+    if not clean:
+        raise HTTPException(status_code=400, detail="A comment cannot be empty.")
+    c.text = clean
+    c.edited_at = datetime.utcnow()
+    return c
+
+
+def _soft_delete(c: models.PlayerComment) -> None:
+    """Recorded rather than performed — a comment with replies under it is a
+    thread, and deleting the row takes them with it."""
+    c.deleted_at = datetime.utcnow()
+
+
+@router.patch("/comments/{comment_id}", response_model=schemas.PlayerCommentOut)
+def player_edit_comment(
+    comment_id: int,
+    body: CommentEdit,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    c = db.get(models.PlayerComment, comment_id)
+    if not c or c.player_user_id != pu.id:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    _edit(c, body.text)
+    db.commit(); db.refresh(c)
+    return _comment_out(c)
+
+
+@router.delete("/comments/{comment_id}", response_model=schemas.PlayerCommentOut)
+def player_delete_comment(
+    comment_id: int,
+    db: Session = Depends(get_db),
+    pu: models.PlayerUser = Depends(get_current_player_user),
+):
+    c = db.get(models.PlayerComment, comment_id)
+    if not c or c.player_user_id != pu.id:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    _soft_delete(c)
+    db.commit(); db.refresh(c)
+    return _comment_out(c)
+
+
+@router.patch("/coach-comments/{comment_id}", response_model=schemas.PlayerCommentOut)
+def coach_edit_comment(
+    comment_id: int,
+    body: CommentEdit,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    c = db.get(models.PlayerComment, comment_id)
+    if not c or c.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    _edit(c, body.text)
+    db.commit(); db.refresh(c)
+    return _comment_out(c)
+
+
+@router.delete("/coach-comments/{comment_id}", response_model=schemas.PlayerCommentOut)
+def coach_delete_comment(
+    comment_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    c = db.get(models.PlayerComment, comment_id)
+    if not c or c.coach_id != coach.id:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    _soft_delete(c)
+    db.commit(); db.refresh(c)
+    return _comment_out(c)
