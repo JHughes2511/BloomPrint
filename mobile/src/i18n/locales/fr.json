@@ -144,7 +144,7 @@
         "team_report": "Rapport d'équipe",
         "team_training": "Rapport d'équipe",
         "training": "Programme d'entraînement",
-        "game_session": "Rapport de détection"
+        "game_session": "Analyse du match"
       },
       "updatedLabels": {
         "eval": "Éval mise à jour",

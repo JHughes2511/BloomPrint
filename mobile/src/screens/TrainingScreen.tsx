@@ -168,8 +168,8 @@ export default function TrainingScreen() {
       {/* Program text */}
       {current?.program_text && (
         <View style={styles.section}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Text style={[styles.label, { flex: 1 }]} numberOfLines={1}>{tr('training.fullProgram')}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+            <Text style={[styles.label, { flex: 1, marginBottom: 0 }]} numberOfLines={1}>{tr('training.fullProgram')}</Text>
             <ReportSearchButton ctl={find} />
           </View>
           <ReportSearchBar ctl={find} />

@@ -1227,8 +1227,10 @@ export default function GameReportBuilderScreen() {
         {/* Report output */}
         {report?.report_text ? (
           <View style={{ marginTop: 28 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <Text style={[styles.label, { flex: 1 }]}>{tr('gameBuilder.generatedReport')}</Text>
+            {/* The row keeps the label's own bottom margin, so the search
+                button does not end up sitting on the report box. */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <Text style={[styles.label, { flex: 1, marginBottom: 0 }]}>{tr('gameBuilder.generatedReport')}</Text>
               <ReportSearchButton ctl={find} />
             </View>
             <ReportSearchBar ctl={find} />

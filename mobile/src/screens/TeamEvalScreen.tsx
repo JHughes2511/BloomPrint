@@ -1190,8 +1190,15 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       const gameDate = new Date(detailGame.date);
       const dateStr = gameDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
       const programName = coach?.program_name ?? 'Team';
+      // The team that played this game, which is not always the account's
+      // program name: a coach whose program is "SEED" running a team called
+      // Angola exported "SEED vs Egypt" over a report about Angola.
+      const ourName = (teams as any[]).find(tm => tm.id === detailGame.team_id)?.name || programName;
+      // The score, without a verdict word. "WIN 83-72" above a report that
+      // already says "FINAL: Angola 83 — Egypt 72 (WIN)" reads as a second,
+      // competing claim about the same game.
       const result = detailGame.our_score != null
-        ? `${detailGame.our_score > detailGame.opponent_score ? 'WIN' : 'LOSS'} ${detailGame.our_score}-${detailGame.opponent_score}`
+        ? `${detailGame.our_score}-${detailGame.opponent_score}`
         : 'Score N/A';
       const phase = detailGame.season_phase ? ` · ${detailGame.season_phase.charAt(0).toUpperCase() + detailGame.season_phase.slice(1)}` : '';
       const year = detailGame.season_year ? ` ${detailGame.season_year}` : '';
@@ -1211,8 +1218,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         const lines = text.split('\n').slice(1);
         if ((lines[0] ?? '').trim() === dateStr) lines.shift();
         const body = lines.join('\n').trim();
+        // Named by the team that played, which is what the page and the box
+        // scores below it say. The program name is the account's — a coach
+        // running "SEED" with a team called Angola exported "SEED vs Egypt"
+        // over a report about Angola.
+        const heading = (text.split('\n')[0] ?? '').trim();
         html = buildReportHtml({
-          title: `${programName} vs ${detailGame.opponent_name}`,
+          title: heading || `${ourName} vs ${detailGame.opponent_name}`,
           subject: `${result}${phase}${year}`,
           date: dateStr,
           body,
@@ -1339,7 +1351,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             .footer { position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:9px;color:#aaa;padding:6px 0;border-top:1px solid #eee; }
           </style></head><body>
           <div class="cover">
-            <h1>Quarter Comparison — ${programName} vs ${detailGame.opponent_name}</h1>
+            <h1>Quarter Comparison — ${ourName} vs ${detailGame.opponent_name}</h1>
             <div class="meta">${result} &nbsp;·&nbsp; ${dateStr}${phase}${year} &nbsp;·&nbsp; Team Grade: ${summary.team_grade.toFixed(2)}</div>
           </div>
           <div style="page-break-inside:avoid;margin-bottom:24px">
@@ -1376,7 +1388,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
         const body = [
           `GAME SUMMARY`,
-          `${programName} vs ${detailGame.opponent_name}`,
+          `${ourName} vs ${detailGame.opponent_name}`,
           `${dateStr}${phase}${year}  ·  ${result}`,
           `Team Grade: ${summary.team_grade.toFixed(2)}`,
           ``,
@@ -1385,7 +1397,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         ].join('\n');
 
         html = buildReportHtml({
-          title: `Game Report — ${programName} vs ${detailGame.opponent_name}`,
+          title: `Game Report — ${ourName} vs ${detailGame.opponent_name}`,
           subject: `${result}${phase}${year}`,
           date: dateStr,
           body,
@@ -1395,7 +1407,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       const fileName = buildPdfFileName(
         detailTab === 'byquarter' ? 'Quarter Report'
           : detailTab === 'insights' ? 'Game Insights' : 'Game Report',
-        `${programName} vs ${detailGame.opponent_name}${phase}`,
+        `${ourName} vs ${detailGame.opponent_name}${phase}`,
         gameDate,
       );
       const dest = (FileSystem.cacheDirectory ?? '') + fileName + '.pdf';
@@ -1413,12 +1425,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       const gameDate = new Date(detailGame.date);
       const dateStr = `${gameDate.getFullYear()}-${String(gameDate.getMonth() + 1).padStart(2, '0')}-${String(gameDate.getDate()).padStart(2, '0')}`;
       const programName = coach?.program_name ?? 'Team';
+      // The team that played, same as the PDF.
+      const ourName = (teams as any[]).find(tm => tm.id === detailGame.team_id)?.name || programName;
       const phase = detailGame.season_phase ?? '';
       const result = detailGame.our_score != null
         ? `${detailGame.our_score > detailGame.opponent_score ? 'WIN' : 'LOSS'} ${detailGame.our_score}-${detailGame.opponent_score}`
         : '';
 
-      const meta = `"Game","${programName} vs ${detailGame.opponent_name}"\n"Date","${dateStr}"\n"Phase","${phase}"\n"Result","${result}"\n"Team Grade","${summary.team_grade.toFixed(2)}"\n\n`;
+      const meta = `"Game","${ourName} vs ${detailGame.opponent_name}"\n"Date","${dateStr}"\n"Phase","${phase}"\n"Result","${result}"\n"Team Grade","${summary.team_grade.toFixed(2)}"\n\n`;
 
       let csv: string;
 
@@ -1483,7 +1497,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       }
 
       const reportLabel = detailTab === 'byquarter' ? 'Quarter Report' : 'Game Report';
-      const fileName = `${reportLabel} - ${programName} vs ${detailGame.opponent_name} - ${dateStr}.csv`.replace(/[^a-zA-Z0-9 \-_.]/g, '');
+      const fileName = `${reportLabel} - ${ourName} vs ${detailGame.opponent_name} - ${dateStr}.csv`.replace(/[^a-zA-Z0-9 \-_.]/g, '');
       const dest = (FileSystem.cacheDirectory ?? '') + fileName;
       await FileSystem.writeAsStringAsync(dest, csv, { encoding: FileSystem.EncodingType.UTF8 });
       if (await Sharing.isAvailableAsync()) {
@@ -3052,8 +3066,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* AI scouting report */}
           {(showScoutingReport || detailGame.ai_scouting_report) && (
             <View style={s.card}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <Text style={[s.cardLabel, { flex: 1 }]}>{tr('teamGrade.scoutingReport')}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <Text style={[s.cardLabel, { flex: 1, marginBottom: 0 }]}>{tr('teamGrade.scoutingReport')}</Text>
                 <ReportSearchButton ctl={findScouting} />
               </View>
               <View style={{ marginTop: 8 }}>
@@ -3258,8 +3272,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   {scoutData.ai_scouting_report && (
                     <>
                       <View style={s.card}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                          <Text style={[s.cardLabel, { flex: 1 }]}>{tr('teamGrade.scoutingReport')}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                          <Text style={[s.cardLabel, { flex: 1, marginBottom: 0 }]}>{tr('teamGrade.scoutingReport')}</Text>
                           <ReportSearchButton ctl={findScout} />
                         </View>
                         <View style={{ marginTop: 8 }}>
@@ -3371,8 +3385,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   {gameReportGame.ai_game_report ? (
                     <>
                       <View style={s.card}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                          <Text style={[s.cardLabel, { flex: 1 }]}>{tr('teamGrade.gameReportLabel')}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                          <Text style={[s.cardLabel, { flex: 1, marginBottom: 0 }]}>{tr('teamGrade.gameReportLabel')}</Text>
                           <ReportSearchButton ctl={findGameReport} />
                         </View>
                         <View style={{ marginTop: 8 }}>

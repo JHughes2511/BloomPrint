@@ -772,8 +772,8 @@ export default function EvalReportScreen() {
           no broken-out section map (those use the dropdown above instead). */}
       {(!isSingle || !fixedSections) && ev.report_text && (
         <View style={styles.section}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Text style={[styles.sectionLabel, { flex: 1 }]}>{tr('evalReport.fullReport')}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+            <Text style={[styles.sectionLabel, { flex: 1, marginBottom: 0 }]}>{tr('evalReport.fullReport')}</Text>
             <ReportSearchButton ctl={find} />
           </View>
           <View style={styles.reportBox}>

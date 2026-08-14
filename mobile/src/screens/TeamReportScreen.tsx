@@ -743,8 +743,8 @@ export default function TeamReportScreen() {
               }
             }}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <Text style={[styles.label, { flex: 1 }]} numberOfLines={1}>{tr('teamReport.teamReportLabel')}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <Text style={[styles.label, { flex: 1, marginBottom: 0 }]} numberOfLines={1}>{tr('teamReport.teamReportLabel')}</Text>
               <ReportSearchButton ctl={find} />
             </View>
             <ReportSearchBar ctl={find} />

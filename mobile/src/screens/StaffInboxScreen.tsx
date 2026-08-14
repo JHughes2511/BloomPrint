@@ -30,7 +30,11 @@ import { sheetCap, desktopOnly, REPORT_MODAL_WIDTH } from '../responsive/modalSi
 const REPORT_TYPE_LABEL_KEYS: Record<string, string> = {
   eval: 'reportTypes.player_eval',
   game: 'reportTypes.game_report',
-  game_session: 'staffHub.liveGame',
+  // A shared game carries the whole Game Insights page — grades, leaders,
+  // shooting, key stats, both box scores — so that is what it is called, on
+  // the card and in the viewer. "Live Game" described the four lines it used
+  // to be.
+  game_session: 'teamGrade.gameInsights',
   team_training: 'reportTypes.team_training',
   team_report: 'staffHub.teamReport',
   training: 'reportTypes.training_program',
