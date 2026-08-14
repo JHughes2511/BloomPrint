@@ -2690,5 +2690,13 @@
     "empty": "Încă nimic — corectează un raport și ce spui va rămâne aici.",
     "forTeam": "Pentru {{name}}",
     "everyTeam": "Toate echipele"
+  },
+  "reportSearch": {
+    "open": "Caută",
+    "placeholder": "Caută în acest raport",
+    "count": "{{index}} din {{total}}",
+    "none": "Niciun rezultat",
+    "next": "Rezultatul următor",
+    "previous": "Rezultatul anterior"
   }
 }

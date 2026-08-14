@@ -2690,5 +2690,13 @@
     "empty": "Noch nichts gelernt — korrigiere einen Bericht, und was du sagst, bleibt hier.",
     "forTeam": "Für {{name}}",
     "everyTeam": "Alle Teams"
+  },
+  "reportSearch": {
+    "open": "Suchen",
+    "placeholder": "In diesem Bericht suchen",
+    "count": "{{index}} von {{total}}",
+    "none": "Keine Treffer",
+    "next": "Nächster Treffer",
+    "previous": "Vorheriger Treffer"
   }
 }

@@ -20,6 +20,7 @@ import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from 
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { useFocusEffect } from '@react-navigation/native';
 import { renderReport } from '../utils/renderReport';
+import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import { outputTypeLabel } from '../utils/reportType';
 import { useTheme } from '../theme/ThemeProvider';
 import { topPad, titleTopPad, bleedRow, bleedContent } from '../responsive/screenPadding';
@@ -75,6 +76,9 @@ export default function TeamReportScreen() {
   const [reportText, setReportText] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const scrollRef = React.useRef<ScrollView>(null);
+  // Finding something in a season summary, which is the longest report the app
+  // writes.
+  const find = useReportSearch(reportText ?? '', scrollRef);
   const reportSectionY = React.useRef(0);
   const pendingScrollToReport = React.useRef(false);
 
@@ -737,9 +741,13 @@ export default function TeamReportScreen() {
               }
             }}
           >
-            <Text style={styles.label} numberOfLines={1}>{tr('teamReport.teamReportLabel')}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Text style={[styles.label, { flex: 1 }]} numberOfLines={1}>{tr('teamReport.teamReportLabel')}</Text>
+              <ReportSearchButton ctl={find} />
+            </View>
+            <ReportSearchBar ctl={find} />
             <View style={styles.reportBox}>
-              {renderReport(reportText, { heading: t.ink, body: t.inkSoft })}
+              {renderReport(reportText, { heading: t.ink, body: t.inkSoft }, find.search)}
             </View>
             <View style={styles.actionGrid}>
               <TouchableOpacity style={styles.actionBtn} onPress={exportPdf} disabled={exporting}>

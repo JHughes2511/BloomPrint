@@ -2690,5 +2690,13 @@
     "empty": "Kol kas nieko — pataisykite ataskaitą ir tai, ką pasakysite, liks čia.",
     "forTeam": "{{name}} komandai",
     "everyTeam": "Visos komandos"
+  },
+  "reportSearch": {
+    "open": "Ieškoti",
+    "placeholder": "Ieškoti šioje ataskaitoje",
+    "count": "{{index}} iš {{total}}",
+    "none": "Nėra atitikmenų",
+    "next": "Kitas atitikmuo",
+    "previous": "Ankstesnis atitikmuo"
   }
 }

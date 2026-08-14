@@ -20,6 +20,7 @@ import { ScreenBackground } from '../theme/components';
 import PageContainer, { REPORT_MAX_WIDTH } from '../responsive/PageContainer';
 import { GeneratingOverlay, parseGenProgress, jobProgressLabel } from '../components/GeneratingBasketball';
 import { renderReport } from '../utils/renderReport';
+import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 
 export default function TrainingScreen() {
   const route = useRoute<any>();
@@ -33,6 +34,9 @@ export default function TrainingScreen() {
 
   const [sessions, setSessions] = useState<TrainingSession[]>([]);
   const [current, setCurrent] = useState<TrainingSession | null>(null);
+  // A training program is a week of days; finding one drill in it by eye is
+  // the sort of scrolling this saves.
+  const find = useReportSearch(current?.program_text ?? '');
   const [focusPrompt, setFocusPrompt] = useState('');
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -90,7 +94,7 @@ export default function TrainingScreen() {
       style={{ flex: 1 }}
       behavior={undefined}
     >
-    <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
+    <KeyboardAwareScrollView ref={find.scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 100 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
       <View style={styles.header}>
         <TouchableOpacity onPress={() => goUp()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={t.ink} />
@@ -164,8 +168,12 @@ export default function TrainingScreen() {
       {/* Program text */}
       {current?.program_text && (
         <View style={styles.section}>
-          <Text style={styles.label} numberOfLines={1}>{tr('training.fullProgram')}</Text>
-          {renderReport(current.program_text, { heading: t.ink, body: t.inkSoft })}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Text style={[styles.label, { flex: 1 }]} numberOfLines={1}>{tr('training.fullProgram')}</Text>
+            <ReportSearchButton ctl={find} />
+          </View>
+          <ReportSearchBar ctl={find} />
+          {renderReport(current.program_text, { heading: t.ink, body: t.inkSoft }, find.search)}
         </View>
       )}
 

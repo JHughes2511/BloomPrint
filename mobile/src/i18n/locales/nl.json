@@ -2690,5 +2690,13 @@
     "empty": "Nog niets geleerd — corrigeer een rapport en wat je zegt blijft hier.",
     "forTeam": "Voor {{name}}",
     "everyTeam": "Alle teams"
+  },
+  "reportSearch": {
+    "open": "Zoeken",
+    "placeholder": "Zoek in dit rapport",
+    "count": "{{index}} van {{total}}",
+    "none": "Geen resultaten",
+    "next": "Volgend resultaat",
+    "previous": "Vorig resultaat"
   }
 }

@@ -2690,5 +2690,13 @@
     "empty": "Aún no hay nada aprendido: corrige un informe y lo que digas se guardará aquí.",
     "forTeam": "Para {{name}}",
     "everyTeam": "Todos los equipos"
+  },
+  "reportSearch": {
+    "open": "Buscar",
+    "placeholder": "Buscar en este informe",
+    "count": "{{index}} de {{total}}",
+    "none": "Sin coincidencias",
+    "next": "Coincidencia siguiente",
+    "previous": "Coincidencia anterior"
   }
 }

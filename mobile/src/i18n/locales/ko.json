@@ -2690,5 +2690,13 @@
     "empty": "아직 없습니다. 리포트를 수정하면 여기에 남습니다.",
     "forTeam": "{{name}} 대상",
     "everyTeam": "모든 팀"
+  },
+  "reportSearch": {
+    "open": "검색",
+    "placeholder": "이 리포트에서 검색",
+    "count": "{{total}}개 중 {{index}}번째",
+    "none": "일치 항목 없음",
+    "next": "다음 일치",
+    "previous": "이전 일치"
   }
 }

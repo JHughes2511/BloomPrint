@@ -13,6 +13,7 @@ import KeyboardAwareScrollView from './KeyboardAwareScrollView';
 import { staffSharingAPI } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
+import { useReportSearch, ReportSearchBar, ReportSearchButton } from './ReportSearch';
 import { GeneratingOverlay } from './GeneratingBasketball';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -81,6 +82,9 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
   // A shared report is the most likely place to hit another language: translate
   // on view, keeping a toggle back to what the sharer actually wrote.
   const rt = useReportTranslation('shared', item?.id, bodyText || undefined);
+  // Searched in whatever language is on screen, translated or not — the coach
+  // is looking for what they can see.
+  const find = useReportSearch(rt.text ?? '');
 
   if (!item) return null;
 
@@ -188,7 +192,8 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
               <Text style={styles.title}>{item.subject_name || typeLabelFor(item.report_type) || tr('components.viewer.reportFallback')}</Text>
               <Text style={styles.sub}>{tr('components.viewer.fromSender', { type: typeLabelFor(item.report_type), sender: item.sender_name })}</Text>
             </View>
-            <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <ReportSearchButton ctl={find} />
+            <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} style={{ marginLeft: 10 }}>
               <Ionicons name="close" size={24} color={t.muted} />
             </TouchableOpacity>
           </View>
@@ -207,14 +212,15 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
 
           {/* Report body — always visible + scrollable */}
           <View style={styles.bodyWrap}>
-            <KeyboardAwareScrollView contentContainerStyle={styles.bodyContent}>
+            <KeyboardAwareScrollView ref={find.scrollRef} contentContainerStyle={styles.bodyContent}>
               {bodyText ? (
                 <>
+                  <ReportSearchBar ctl={find} />
                   <TranslationToggle
                     canToggle={rt.canToggle} isTranslated={rt.isTranslated}
                     showOriginal={rt.showOriginal} loading={rt.loading} onToggle={rt.toggle}
                   />
-                  {renderReport(rt.text, { heading: t.ink, body: t.inkSoft })}
+                  {renderReport(rt.text, { heading: t.ink, body: t.inkSoft }, find.search)}
                 </>
               ) : <Text style={{ color: t.muted2 }}>{tr('components.viewer.noContent')}</Text>}
             </KeyboardAwareScrollView>

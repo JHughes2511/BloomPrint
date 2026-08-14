@@ -2690,5 +2690,13 @@
     "empty": "Još ništa — ispravite izvještaj i ono što kažete ostat će ovdje.",
     "forTeam": "Za {{name}}",
     "everyTeam": "Sve momčadi"
+  },
+  "reportSearch": {
+    "open": "Traži",
+    "placeholder": "Traži u ovom izvješću",
+    "count": "{{index}} od {{total}}",
+    "none": "Nema rezultata",
+    "next": "Sljedeći rezultat",
+    "previous": "Prethodni rezultat"
   }
 }

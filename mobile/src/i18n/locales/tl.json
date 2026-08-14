@@ -2690,5 +2690,13 @@
     "empty": "Wala pa — magwasto ng ulat at itatago rito ang sinabi mo.",
     "forTeam": "Para kay {{name}}",
     "everyTeam": "Lahat ng koponan"
+  },
+  "reportSearch": {
+    "open": "Maghanap",
+    "placeholder": "Maghanap sa ulat na ito",
+    "count": "{{index}} sa {{total}}",
+    "none": "Walang tugma",
+    "next": "Susunod na tugma",
+    "previous": "Nakaraang tugma"
   }
 }

@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { abandonSheetHistory } from '../web/sheetHistory';
 import { staffSharingAPI, teamStaffAPI, staffMessagesAPI, coachesAPI, teamsAPI } from '../api/client';
 import { renderReport } from '../utils/renderReport';
+import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import SharedReportViewer from '../components/SharedReportViewer';
 import { useTheme } from '../theme/ThemeProvider';
 import { topPad } from '../responsive/screenPadding';
@@ -85,6 +86,14 @@ export default function StaffInboxScreen() {
   const [teamGames, setTeamGames] = useState<any[]>([]);
   const [teamGamesLoading, setTeamGamesLoading] = useState(false);
   const [activeGame, setActiveGame] = useState<any | null>(null);
+  // Whichever of the two the open game is showing — a shared report or the
+  // scouting report on a live game.
+  // Counted on exactly the text that is drawn, sign-off trimmed and all, so
+  // the counter and the highlights cannot disagree.
+  const find = useReportSearch(
+    String(activeGame?.report_text ?? activeGame?.ai_scouting_report ?? '')
+      .replace(/\s*END OF REPORT\.?\s*$/i, ''),
+  );
   const [gameCommentText, setGameCommentText] = useState('');
   const [gameComments, setGameComments] = useState<any[]>([]);
   const [submittingGameComment, setSubmittingGameComment] = useState(false);
@@ -789,7 +798,8 @@ export default function StaffInboxScreen() {
                 <Text style={styles.modalTitle} numberOfLines={1}>{activeGame?.title}</Text>
                 <Text style={styles.modalSub} numberOfLines={1}>{activeGame?.kind === 'session' ? 'Live Game Stats' : 'Game Report'} · {activeGame?.date}</Text>
               </View>
-              <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setActiveGame(null)}>
+              <ReportSearchButton ctl={find} />
+              <TouchableOpacity style={{ flexShrink: 0, marginLeft: 10 }} onPress={() => setActiveGame(null)}>
                 <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
@@ -809,15 +819,16 @@ export default function StaffInboxScreen() {
               </TouchableOpacity>
             )}
 
-            <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+            <ReportSearchBar ctl={find} />
+            <KeyboardAwareScrollView ref={find.scrollRef} contentContainerStyle={{ paddingBottom: 16 }}>
               {activeGame?.kind === 'report' && (
                 activeGame.report_text
-                  ? renderReport(String(activeGame.report_text).replace(/\s*END OF REPORT\.?\s*$/i, ''), { heading: t.ink, body: t.inkSoft })
+                  ? renderReport(String(activeGame.report_text).replace(/\s*END OF REPORT\.?\s*$/i, ''), { heading: t.ink, body: t.inkSoft }, find.search)
                   : <Text style={{ color: t.muted2 }}>{tr('staffHub.noReportGenerated')}</Text>
               )}
               {activeGame?.kind === 'session' && (
                 activeGame.ai_scouting_report
-                  ? renderReport(String(activeGame.ai_scouting_report).replace(/\s*END OF REPORT\.?\s*$/i, ''), { heading: t.ink, body: t.inkSoft })
+                  ? renderReport(String(activeGame.ai_scouting_report).replace(/\s*END OF REPORT\.?\s*$/i, ''), { heading: t.ink, body: t.inkSoft }, find.search)
                   : <Text style={{ color: t.muted2 }}>No AI scouting report generated yet for this game.</Text>
               )}
             </KeyboardAwareScrollView>

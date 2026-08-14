@@ -2690,5 +2690,13 @@
     "empty": "Inget lärt ännu — rätta en rapport så sparas det du säger här.",
     "forTeam": "För {{name}}",
     "everyTeam": "Alla lag"
+  },
+  "reportSearch": {
+    "open": "Sök",
+    "placeholder": "Sök i rapporten",
+    "count": "{{index}} av {{total}}",
+    "none": "Inga träffar",
+    "next": "Nästa träff",
+    "previous": "Föregående träff"
   }
 }

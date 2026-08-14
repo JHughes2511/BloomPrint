@@ -12,6 +12,7 @@ import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/nativ
 import { useGoUp } from '../navigation/goUp';
 import { Ionicons } from '@expo/vector-icons';
 import { renderReport } from '../utils/renderReport';
+import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import { GeneratingOverlay, parseGenProgress, jobProgressLabel, uploadProgressCode } from '../components/GeneratingBasketball';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
@@ -287,6 +288,8 @@ export default function GameReportBuilderScreen() {
   const shareDebounce = useRef<any>(null);
 
   const scrollRef = useRef<ScrollView>(null);
+  // Finding a name in a generated report, which runs to several pages.
+  const find = useReportSearch(report?.report_text ?? '', scrollRef);
   // Y positions captured via onLayout (direct ScrollView children only)
   const boxScoreY = useRef(0);
   const scoutingY = useRef(0);
@@ -1220,9 +1223,13 @@ export default function GameReportBuilderScreen() {
         {/* Report output */}
         {report?.report_text ? (
           <View style={{ marginTop: 28 }}>
-            <Text style={styles.label}>{tr('gameBuilder.generatedReport')}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Text style={[styles.label, { flex: 1 }]}>{tr('gameBuilder.generatedReport')}</Text>
+              <ReportSearchButton ctl={find} />
+            </View>
+            <ReportSearchBar ctl={find} />
             <View style={styles.reportBox}>
-              {renderReport(report.report_text, { heading: t.ink, body: t.inkSoft })}
+              {renderReport(report.report_text, { heading: t.ink, body: t.inkSoft }, find.search)}
             </View>
             <View style={styles.actionRow}>
               <TouchableOpacity style={styles.actionBtn} onPress={() => setShowExport(true)}>

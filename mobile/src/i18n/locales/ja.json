@@ -2690,5 +2690,13 @@
     "empty": "まだ何もありません。レポートを修正すると、その内容がここに残ります。",
     "forTeam": "{{name}} 用",
     "everyTeam": "すべてのチーム"
+  },
+  "reportSearch": {
+    "open": "検索",
+    "placeholder": "このレポートを検索",
+    "count": "{{total}} 件中 {{index}} 件目",
+    "none": "一致なし",
+    "next": "次の一致",
+    "previous": "前の一致"
   }
 }

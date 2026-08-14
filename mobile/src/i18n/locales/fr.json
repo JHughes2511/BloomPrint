@@ -2690,5 +2690,13 @@
     "empty": "Rien pour l'instant — corrigez un rapport et ce que vous direz sera conservé ici.",
     "forTeam": "Pour {{name}}",
     "everyTeam": "Toutes les équipes"
+  },
+  "reportSearch": {
+    "open": "Rechercher",
+    "placeholder": "Rechercher dans ce rapport",
+    "count": "{{index}} sur {{total}}",
+    "none": "Aucun résultat",
+    "next": "Résultat suivant",
+    "previous": "Résultat précédent"
   }
 }

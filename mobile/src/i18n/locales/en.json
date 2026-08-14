@@ -2690,5 +2690,13 @@
     "empty": "Nothing learned yet — correct a report and what you say will be kept here.",
     "forTeam": "For {{name}}",
     "everyTeam": "Every team"
+  },
+  "reportSearch": {
+    "open": "Search",
+    "placeholder": "Search this report",
+    "count": "{{index}} of {{total}}",
+    "none": "No matches",
+    "next": "Next match",
+    "previous": "Previous match"
   }
 }

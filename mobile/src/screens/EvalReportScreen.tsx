@@ -30,6 +30,7 @@ import { GradeBadge } from '../components/GradeBadge';
 import { PillarCard } from '../components/PillarCard';
 import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import { renderReport } from '../utils/renderReport';
+import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { useSheetScrollHeight, sheetCap, desktopOnly } from '../responsive/modalSizes';
 
@@ -443,6 +444,8 @@ export default function EvalReportScreen() {
   // differs both the full body AND the broken-out sections are shown
   // translated, with a toggle back to the original.
   const rt = useReportTranslation('eval', ev?.id, ev?.report_text ?? undefined);
+  // The evaluation as it reads on screen, searchable.
+  const find = useReportSearch(rt.text ?? '');
 
   if (loading) return <ScreenBackground><View style={styles.center}><ActivityIndicator color={t.accent} size="large" /></View></ScreenBackground>;
   if (!ev) return null;
@@ -470,7 +473,7 @@ export default function EvalReportScreen() {
   return (
     <ScreenBackground>
     <PageContainer maxWidth={REPORT_MAX_WIDTH}>
-    <KeyboardAwareScrollView style={styles.container} contentContainerStyle={{ paddingBottom: isSingle ? 24 : 100 }}>
+    <KeyboardAwareScrollView ref={find.scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: isSingle ? 24 : 100 }}>
 
       {/* Header */}
       <View style={styles.header}>
@@ -546,17 +549,23 @@ export default function EvalReportScreen() {
             </View>
           ))}
 
-          <TouchableOpacity style={styles.fullToggle} onPress={() => setShowFull(v => !v)}>
-            <Text style={styles.fullToggleText}>{showFull ? tr('evalReport.hideFullReport') : tr('evalReport.seeFullReport')}</Text>
-            <Ionicons name={showFull ? 'chevron-up' : 'chevron-down'} size={16} color={t.accent} />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <TouchableOpacity style={[styles.fullToggle, { flex: 1 }]} onPress={() => setShowFull(v => !v)}>
+              <Text style={styles.fullToggleText}>{showFull ? tr('evalReport.hideFullReport') : tr('evalReport.seeFullReport')}</Text>
+              <Ionicons name={showFull ? 'chevron-up' : 'chevron-down'} size={16} color={t.accent} />
+            </TouchableOpacity>
+            {/* Searching a report that is folded away is searching nothing, so
+                opening the search opens the report with it. */}
+            <ReportSearchButton ctl={find} onOpen={() => setShowFull(true)} />
+          </View>
           {showFull && ev.report_text && (
             <View style={styles.reportBox}>
+              <ReportSearchBar ctl={find} />
               <TranslationToggle
                 canToggle={rt.canToggle} isTranslated={rt.isTranslated}
                 showOriginal={rt.showOriginal} loading={rt.loading} onToggle={rt.toggle}
               />
-              {renderReport(rt.text, { heading: t.ink, body: t.inkSoft })}
+              {renderReport(rt.text, { heading: t.ink, body: t.inkSoft }, find.search)}
             </View>
           )}
         </View>
@@ -763,13 +772,17 @@ export default function EvalReportScreen() {
           no broken-out section map (those use the dropdown above instead). */}
       {(!isSingle || !fixedSections) && ev.report_text && (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{tr('evalReport.fullReport')}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Text style={[styles.sectionLabel, { flex: 1 }]}>{tr('evalReport.fullReport')}</Text>
+            <ReportSearchButton ctl={find} />
+          </View>
           <View style={styles.reportBox}>
+            <ReportSearchBar ctl={find} />
             <TranslationToggle
               canToggle={rt.canToggle} isTranslated={rt.isTranslated}
               showOriginal={rt.showOriginal} loading={rt.loading} onToggle={rt.toggle}
             />
-            {renderReport(rt.text, { heading: t.ink, body: t.inkSoft })}
+            {renderReport(rt.text, { heading: t.ink, body: t.inkSoft }, find.search)}
           </View>
         </View>
       )}

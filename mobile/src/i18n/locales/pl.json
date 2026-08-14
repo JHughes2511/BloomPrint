@@ -2690,5 +2690,13 @@
     "empty": "Jeszcze nic — popraw raport, a to co powiesz zostanie tutaj.",
     "forTeam": "Dla {{name}}",
     "everyTeam": "Wszystkie zespoły"
+  },
+  "reportSearch": {
+    "open": "Szukaj",
+    "placeholder": "Szukaj w tym raporcie",
+    "count": "{{index}} z {{total}}",
+    "none": "Brak wyników",
+    "next": "Następny wynik",
+    "previous": "Poprzedni wynik"
   }
 }

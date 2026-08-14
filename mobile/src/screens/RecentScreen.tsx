@@ -20,6 +20,7 @@ import { mdToHtml, safeFileName, splitReportSections, joinReportSections } from 
 import ShareModal from '../components/ShareModal';
 import { outputTypeLabel, outputTypeNames } from '../utils/reportType';
 import { renderReport } from '../utils/renderReport';
+import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import SharedReportViewer from '../components/SharedReportViewer';
 import ScoutContextPanel from '../components/ScoutContextPanel';
@@ -164,6 +165,11 @@ export default function RecentScreen() {
     : activeModal?.kind === 'team' ? 'team_report'
     : activeModal?.kind === 'training' ? 'training' : undefined;
   const rt = useReportTranslation(modalReportType, activeModal?.id as number | undefined, activeModal?.text);
+  // A saved report and a game report each get their own search: two sheets,
+  // two scroll views, and a query typed into one has nothing to do with the
+  // other.
+  const find = useReportSearch(rt.text ?? '');
+  const findGame = useReportSearch(gameReportModal?.text ?? '');
 
   const supportsCorrections = (m: ModalReport | null) =>
     !!m && (m.kind === 'eval' ? !!m.evalId : (m.kind === 'team' || m.kind === 'training'));
@@ -1174,7 +1180,8 @@ export default function RecentScreen() {
                 <Text style={styles.modalTitle} numberOfLines={1}>{gameReportModal?.title ?? tr('reportTypes.report')}</Text>
                 {!!gameReportModal?.subject && <Text style={styles.modalSub} numberOfLines={1}>{gameReportModal.subject}</Text>}
               </View>
-              <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => { setGameReportModal(null); setScoutCorrectMode(false); }}>
+              <ReportSearchButton ctl={findGame} />
+              <TouchableOpacity style={{ flexShrink: 0, marginLeft: 10 }} onPress={() => { setGameReportModal(null); setScoutCorrectMode(false); }}>
                 <Ionicons name="close" size={24} color={t.muted} />
               </TouchableOpacity>
             </View>
@@ -1191,9 +1198,10 @@ export default function RecentScreen() {
               />
             ) : (
               <>
-                <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+                <KeyboardAwareScrollView ref={findGame.scrollRef} contentContainerStyle={{ paddingBottom: 16 }}>
+                  <ReportSearchBar ctl={findGame} />
                   {gameReportModal?.text
-                    ? renderReport(gameReportModal.text, { heading: t.ink, body: t.inkSoft })
+                    ? renderReport(gameReportModal.text, { heading: t.ink, body: t.inkSoft }, findGame.search)
                     : <Text style={{ color: t.muted2 }}>{tr('recent.noReportContentAvailable')}</Text>
                   }
                 </KeyboardAwareScrollView>
@@ -1401,7 +1409,8 @@ export default function RecentScreen() {
                   <Text style={styles.modalSub} numberOfLines={1}>{activeModal.playerName}</Text>
                 )}
               </View>
-              <TouchableOpacity style={{ flexShrink: 0 }} onPress={() => setActiveModal(null)}>
+              <ReportSearchButton ctl={find} />
+              <TouchableOpacity style={{ flexShrink: 0, marginLeft: 10 }} onPress={() => setActiveModal(null)}>
                 <Ionicons name="close" size={24} color={t.muted} />
               </TouchableOpacity>
             </View>
@@ -1410,15 +1419,16 @@ export default function RecentScreen() {
                 sub-views live in their own sheet on top now, and gating this on
                 modalView collapsed the card to its header bar when one opened. */}
             <>
-                <KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+                <KeyboardAwareScrollView ref={find.scrollRef} contentContainerStyle={{ paddingBottom: 16 }}>
                   {activeModal?.text
                     ? (
                       <>
+                        <ReportSearchBar ctl={find} />
                         <TranslationToggle
                           canToggle={rt.canToggle} isTranslated={rt.isTranslated}
                           showOriginal={rt.showOriginal} loading={rt.loading} onToggle={rt.toggle}
                         />
-                        {renderReport(rt.text, { heading: t.ink, body: t.inkSoft })}
+                        {renderReport(rt.text, { heading: t.ink, body: t.inkSoft }, find.search)}
                       </>
                     )
                     : <Text style={{ color: t.muted2 }}>{tr('recent.noReportContent')}</Text>

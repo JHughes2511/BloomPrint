@@ -2690,5 +2690,13 @@
     "empty": "Henüz bir şey yok — bir raporu düzeltin, söyledikleriniz burada kalsın.",
     "forTeam": "{{name}} için",
     "everyTeam": "Tüm takımlar"
+  },
+  "reportSearch": {
+    "open": "Ara",
+    "placeholder": "Bu raporda ara",
+    "count": "{{total}} sonuçtan {{index}}.",
+    "none": "Sonuç yok",
+    "next": "Sonraki sonuç",
+    "previous": "Önceki sonuç"
   }
 }
