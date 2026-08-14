@@ -142,6 +142,16 @@ function quarterMultiplier(q: number): number {
 
 type ViewKey = 'dashboard' | 'games' | 'live' | 'detail' | 'scout' | 'gamereport';
 
+/**
+ * Minutes as a coach reads them, or a dash.
+ *
+ * Null means the sheet never said. It used to be twenty for everybody, which
+ * is why an exported grade sheet claimed every player on the roster played
+ * exactly twenty minutes.
+ */
+const minsLabel = (m: number | null | undefined): string =>
+  m === null || m === undefined ? '-' : m.toFixed(0);
+
 export default function TeamEvalScreen({ route, navigation }: any) {
   // Tablet and up. Not Platform: a phone browser is web too, and gating the
   // desktop layout on platform put it on every phone that opened the site.
@@ -1315,7 +1325,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       // over the other team's grades under our team's heading.
       const grades = detailTab === 'opponent' ? summary.opponent_grades : summary.player_grades;
         const gradeText = grades.map((g: any) =>
-          `${g.player_name}\nOFF ${g.offensive_grade.toFixed(2)}  ·  DEF ${g.defensive_grade.toFixed(2)}  ·  ${g.minutes_played.toFixed(0)} min  ·  Grade ${g.game_grade.toFixed(2)}`
+          `${g.player_name}\nOFF ${g.offensive_grade.toFixed(2)}  ·  DEF ${g.defensive_grade.toFixed(2)}  ·  ${minsLabel(g.minutes_played)} min  ·  Grade ${g.game_grade.toFixed(2)}`
         ).join('\n\n');
 
         const body = [
@@ -1420,7 +1430,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         const grades = detailTab === 'opponent' ? summary.opponent_grades : summary.player_grades;
         const header = 'Player,Offensive Grade,Defensive Grade,Minutes,Game Grade\n';
         const rows = grades.map((g: any) =>
-          `"${g.player_name}",${g.offensive_grade.toFixed(2)},${g.defensive_grade.toFixed(2)},${g.minutes_played.toFixed(0)},${g.game_grade.toFixed(2)}`
+          `"${g.player_name}",${g.offensive_grade.toFixed(2)},${g.defensive_grade.toFixed(2)},${minsLabel(g.minutes_played)},${g.game_grade.toFixed(2)}`
         ).join('\n');
         csv = meta + header + rows;
       }
@@ -2798,7 +2808,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     </Text>
                     <Text style={{ color: t.muted, fontSize: 11 }}>{tr('teamGrade.offLabel')} {g.offensive_grade.toFixed(1)}</Text>
                     <Text style={{ color: t.muted, fontSize: 11 }}>{tr('teamGrade.defLabel')} {g.defensive_grade.toFixed(1)}</Text>
-                    <Text style={{ color: t.muted, fontSize: 11 }}>{g.minutes_played.toFixed(0)}{tr('teamGrade.mAbbr')}</Text>
+                    <Text style={{ color: t.muted, fontSize: 11 }}>{minsLabel(g.minutes_played)}{tr('teamGrade.mAbbr')}</Text>
                     <View style={s.gradeBadge}>
                       <Text style={s.gradeBadgeText}>{g.game_grade.toFixed(2)}</Text>
                     </View>
@@ -2841,7 +2851,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
                         {/* OFF / DEF / minutes */}
                         <Text style={{ color: t.muted, fontSize: 11, marginBottom: 10 }}>
-                          {tr('teamGrade.offDefMin', { off: g.offensive_grade.toFixed(1), def: g.defensive_grade.toFixed(1), min: g.minutes_played.toFixed(0) })}
+                          {tr('teamGrade.offDefMin', { off: g.offensive_grade.toFixed(1), def: g.defensive_grade.toFixed(1), min: minsLabel(g.minutes_played) })}
                         </Text>
 
                         {/* Grading stats */}
@@ -3884,7 +3894,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     <View style={{ flexDirection: 'row', gap: 12, marginTop: 4 }}>
                       <Text style={{ color: t.muted, fontSize: 12 }}>{tr('teamGrade.offLabel')} <Text style={{ color: t.accent, fontFamily: fonts[700] }}>{pg.offensive_grade.toFixed(2)}</Text></Text>
                       <Text style={{ color: t.muted, fontSize: 12 }}>{tr('teamGrade.defLabel')} <Text style={{ color: t.accent, fontFamily: fonts[700] }}>{pg.defensive_grade.toFixed(2)}</Text></Text>
-                      <Text style={{ color: t.muted, fontSize: 12 }}>{pg.minutes_played.toFixed(0)} {tr('teamGrade.minAbbr')}</Text>
+                      <Text style={{ color: t.muted, fontSize: 12 }}>{minsLabel(pg.minutes_played)} {tr('teamGrade.minAbbr')}</Text>
                     </View>
                   );
                 })()}

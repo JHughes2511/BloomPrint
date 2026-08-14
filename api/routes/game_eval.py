@@ -126,15 +126,30 @@ def _import_raw(stat: str, count: int) -> float:
 BOX_SCORE_FIELDS = ("FGM", "FGA", "2PM", "2PA", "3PM", "3PA", "FTM", "FTA",
                     "OREB", "DREB", "REB", "AST", "STL", "BLK", "TO", "PF")
 
+# Printed on every box score, and none of them a tally of events: minutes are a
+# duration, a plus-minus is a difference and can be negative, efficiency is a
+# formula. They are read off the sheet alongside the counted stats and stored
+# on the player's line rather than as stat rows — see GameMinutesPlayed.
+#
+# Minutes are the one that changes a number the coach acts on: grading weights
+# a player by time on the floor, and with none recorded everybody was treated
+# as having played twenty.
+LINE_FIELDS = ("MIN", "PM", "EFF")
+
 _AI_BOX_SCORE_INSTRUCTION = (
     "This is a basketball box score. Return JSON only:\n"
     '{"teams": [{"team_name": "...", "players": [{"name": "...", '
     '"FGM": 0, "FGA": 0, "2PM": 0, "2PA": 0, "3PM": 0, "3PA": 0, "FTM": 0, "FTA": 0, '
-    '"OREB": 0, "DREB": 0, "REB": 0, "AST": 0, "STL": 0, "BLK": 0, "TO": 0, "PF": 0}]}]}\n'
+    '"OREB": 0, "DREB": 0, "REB": 0, "AST": 0, "STL": 0, "BLK": 0, "TO": 0, "PF": 0, '
+    '"MIN": "0:00", "PM": 0, "EFF": 0}]}]}\n'
     "Include every team and every player listed. Use the numbers exactly as printed — "
     "do NOT compute, estimate or fill in a stat that is not shown; omit the key instead. "
     "FGM/FGA are ALL field goals including threes. If the sheet shows a combined line "
-    "like '9-18', FGM is 9 and FGA is 18. Skip team-total rows."
+    "like '9-18', FGM is 9 and FGA is 18. Skip team-total rows.\n"
+    "MIN is minutes played exactly as printed — \"27:13\" stays \"27:13\", 27 stays 27. "
+    "PM is the plus-minus column and CAN be negative; keep the sign. EFF is the "
+    "efficiency column. Omit any of the three the sheet does not show rather than "
+    "working it out."
 )
 
 
@@ -154,9 +169,22 @@ def _canonical_rows_from_sheet(rows: list[list]) -> list[tuple[str, dict]]:
     for row in rows[1:]:
         if name_idx >= len(row) or not row[name_idx] or not str(row[name_idx]).strip():
             continue
-        vals: dict[str, int] = {}
+        vals: dict[str, float] = {}
         for i, field in cols.items():
             if i >= len(row):
+                continue
+            if field == "MIN":
+                mins = _minutes_value(row[i])
+                if mins is not None:
+                    vals[field] = mins
+                continue
+            if field in ("PM", "EFF"):
+                # Kept even when negative: a minus-twelve is a result, and
+                # dropping it left the column blank for the players it mattered
+                # most for.
+                signed = _signed_value(row[i])
+                if signed is not None:
+                    vals[field] = signed
                 continue
             try:
                 n = int(float(row[i]))
@@ -187,7 +215,77 @@ _SHEET_COL_MAP: list[tuple[str, str]] = [
     (r"^(blk|blocks?)", "BLK"),
     (r"^(to|tov|turnovers?)", "TO"),
     (r"^(pf|fouls?)", "PF"),
+    (r"^(min|mins|minutes|mp|time)", "MIN"),
+    (r"^(\+/-|\+-|pm|plus ?minus|plusminus|\+/−)", "PM"),
+    (r"^(eff|efficiency|effic|pir|index ?rating)", "EFF"),
 ]
+
+
+def _minutes_value(raw) -> float | None:
+    """Minutes, however the sheet writes them.
+
+    "27:13" is twenty-seven minutes and thirteen seconds, not twenty-seven
+    point thirteen — read as a decimal it would quietly under-count every
+    player on the sheet.
+    """
+    if raw is None:
+        return None
+    text = str(raw).strip()
+    if not text or text in ("-", "–", "—"):
+        return None
+    if ":" in text:
+        parts = text.split(":")
+        try:
+            mins = int(parts[0] or 0)
+            secs = int(parts[1] or 0) if len(parts) > 1 else 0
+        except ValueError:
+            return None
+        return round(mins + secs / 60.0, 2)
+    try:
+        return round(float(text), 2)
+    except ValueError:
+        return None
+
+
+def _signed_value(raw) -> float | None:
+    """A number that is allowed to be negative, or None if the cell is blank."""
+    if raw is None:
+        return None
+    text = str(raw).strip().replace("−", "-").replace("+", "")
+    if not text or text in ("-", "–", "—"):
+        return None
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
+def _save_line_values(db: Session, game_id: int, is_opponent: bool,
+                      player_name: str, vals: dict) -> None:
+    """Minutes, plus-minus and efficiency for one player, from one sheet.
+
+    Only what the sheet actually gave: a column it did not print stays None, so
+    the app can say "not recorded" instead of showing a zero the coach would
+    read as a real result.
+    """
+    mins = vals.get("MIN")
+    pm = vals.get("PM")
+    eff = vals.get("EFF")
+    if mins is None and pm is None and eff is None:
+        return
+    row = (db.query(models.GameMinutesPlayed)
+             .filter_by(game_id=game_id, player_name=player_name,
+                        is_opponent=is_opponent).first())
+    if row is None:
+        row = models.GameMinutesPlayed(game_id=game_id, player_name=player_name,
+                                       is_opponent=is_opponent, minutes_played=0.0)
+        db.add(row)
+    if mins is not None:
+        row.minutes_played = float(mins)
+    if pm is not None:
+        row.plus_minus = float(pm)
+    if eff is not None:
+        row.efficiency = float(eff)
 
 
 def _stats_from_canonical(v: dict) -> dict[str, int]:
@@ -363,6 +461,15 @@ async def import_game_stats(
                     if not pname:
                         continue
                     vals = {k: pl[k] for k in BOX_SCORE_FIELDS if isinstance(pl.get(k), (int, float))}
+                    # MIN arrives as "27:13" as often as a number, and PM is
+                    # signed — neither survives the numeric filter above.
+                    mins = _minutes_value(pl.get("MIN"))
+                    if mins is not None:
+                        vals["MIN"] = mins
+                    for key in ("PM", "EFF"):
+                        signed = _signed_value(pl.get(key))
+                        if signed is not None:
+                            vals[key] = signed
                     if vals:
                         # A sheet naming neither team falls back to what the
                         # coach pressed, which is all the old importer ever had.
@@ -389,6 +496,7 @@ async def import_game_stats(
 
     imported = 0
     for side, pname, vals in collected:
+        _save_line_values(db, game.id, side, pname, vals)
         for stat, count in _stats_from_canonical(vals).items():
             raw = _import_raw(stat, count)
             db.add(models.GamePlayerStat(
@@ -648,7 +756,20 @@ _TOTALLED = ("PTS", "FGM", "FGA", "2PM", "2PA", "3PM", "3PA", "FTM", "FTA",
              "OREB", "DREB", "REB", "AST", "STL", "BLK", "TO", "PF")
 
 
-def _side_rows(stats: list, is_opp: bool, roster: dict[str, str] | None = None) -> tuple[list[dict], dict]:
+def _line_extras(db: Session, game_id: int) -> dict[tuple[bool, str], dict]:
+    """Minutes, plus-minus and efficiency per player, as the sheet printed them."""
+    out: dict[tuple[bool, str], dict] = {}
+    for r in db.query(models.GameMinutesPlayed).filter_by(game_id=game_id).all():
+        out[(bool(r.is_opponent), r.player_name)] = {
+            "MIN": r.minutes_played if r.minutes_played else None,
+            "PM": r.plus_minus,
+            "EFF": r.efficiency,
+        }
+    return out
+
+
+def _side_rows(stats: list, is_opp: bool, roster: dict[str, str] | None = None,
+               extras: dict[tuple[bool, str], dict] | None = None) -> tuple[list[dict], dict]:
     by_player: dict[str, dict[str, int]] = {}
     jerseys: dict[str, str] = {}
     for st in stats:
@@ -659,10 +780,26 @@ def _side_rows(stats: list, is_opp: bool, roster: dict[str, str] | None = None) 
         # Any row that carries one will do; they all came off the same sheet.
         if getattr(st, "jersey_number", None) and st.player_name not in jerseys:
             jerseys[st.player_name] = str(st.jersey_number)
-    rows = [{"player": name, "jersey": _jersey_for(name, jerseys, roster), **_player_line(c)}
-            for name, c in sorted(by_player.items())]
+    rows = []
+    for name, c in sorted(by_player.items()):
+        row = {"player": name, "jersey": _jersey_for(name, jerseys, roster), **_player_line(c)}
+        line = (extras or {}).get((is_opp, name), {})
+        row["MIN"] = line.get("MIN")
+        row["PM"] = line.get("PM")
+        # The sheet's own efficiency where it printed one, and the standard
+        # formula where it did not — the two agree, and a coach reading the
+        # column should not have to know which they are looking at.
+        row["EFF"] = line.get("EFF") if line.get("EFF") is not None else _efficiency(row)
+        rows.append(row)
     rows.sort(key=lambda r: r["PTS"], reverse=True)
     totals = {k: sum(r[k] for r in rows) for k in _TOTALLED}
+    # Minutes total to 200 on a five-a-side full game, which is how a coach
+    # checks a sheet was read correctly.
+    recorded_mins = [r["MIN"] for r in rows if r["MIN"] is not None]
+    totals["MIN"] = round(sum(recorded_mins), 1) if recorded_mins else None
+    pms = [r["PM"] for r in rows if r["PM"] is not None]
+    totals["PM"] = round(sum(pms), 1) if pms else None
+    totals["EFF"] = sum(r["EFF"] for r in rows if r["EFF"] is not None)
     return rows, totals
 
 
@@ -908,9 +1045,10 @@ def game_box_score(
     # Both rosters, so a number typed on the Roster page shows up on the sheet.
     rosters = {False: _roster_jerseys(db, game.team_id),
                True: _roster_jerseys(db, _opponent_team_id(db, game))}
+    extras = _line_extras(db, game.id)
     sides = []
     for is_opp, name in ((False, our_name), (True, game.opponent_name or "Opponent")):
-        rows, totals = _side_rows(stats, is_opp, rosters[is_opp])
+        rows, totals = _side_rows(stats, is_opp, rosters[is_opp], extras)
         # The box score is the base, and the printed panel only fills in what the
         # player rows say nothing about.
         #
@@ -1674,7 +1812,8 @@ def log_minutes(
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 
-def _compute_grades(stats: list[models.GamePlayerStat], minutes_map: dict[str, float]) -> list[dict]:
+def _compute_grades(stats: list[models.GamePlayerStat], minutes_map: dict[str, float],
+                    line_extras: dict[str, dict] | None = None) -> list[dict]:
     player_data: dict[str, dict] = {}
     for s in stats:
         if s.player_name not in player_data:
@@ -1694,7 +1833,14 @@ def _compute_grades(stats: list[models.GamePlayerStat], minutes_map: dict[str, f
 
     grades = []
     for name, data in player_data.items():
-        mins = minutes_map.get(name, 20.0)  # default 20 min if not recorded
+        # Real minutes when the sheet gave them. Where it did not, the grade
+        # is still worked out the way it always was — blanking every historical
+        # game would be worse than the fault being fixed — but the minutes
+        # themselves are reported as unknown rather than as twenty, so nothing
+        # downstream prints a number nobody recorded.
+        extras = (line_extras or {}).get(name, {})
+        recorded = minutes_map.get(name)
+        mins = recorded if recorded and recorded > 0 else 20.0
         total = data["offensive_weighted"] + data["defensive_weighted"]
         game_grade = round(total / max(mins, 1.0), 2)
         grades.append({
@@ -1703,9 +1849,11 @@ def _compute_grades(stats: list[models.GamePlayerStat], minutes_map: dict[str, f
             "offensive_grade": round(data["offensive_weighted"], 2),
             "defensive_grade": round(data["defensive_weighted"], 2),
             "total_grade": round(total, 2),
-            "minutes_played": round(mins, 1),
+            "minutes_played": round(recorded, 1) if recorded else None,
+            "minutes_recorded": recorded is not None,
             "game_grade": game_grade,
-            "plus_minus": 0,  # computed separately if lineup timestamps available
+            "plus_minus": extras.get("plus_minus"),
+            "efficiency": extras.get("efficiency"),
             "per_quarter": {str(q): dict(v) for q, v in data["quarters"].items()},
         })
     grades.sort(key=lambda x: x["game_grade"], reverse=True)
@@ -1743,12 +1891,18 @@ def get_summary(
     mp_records = db.query(models.GameMinutesPlayed).filter_by(game_id=game.id).all()
     our_minutes = {r.player_name: r.minutes_played for r in mp_records if not r.is_opponent}
     opp_minutes = {r.player_name: r.minutes_played for r in mp_records if r.is_opponent}
+    # The plus-minus and the efficiency off the same sheet, so a grade row can
+    # show them beside the grade instead of a hardcoded zero.
+    our_extras = {r.player_name: {"plus_minus": r.plus_minus, "efficiency": r.efficiency}
+                  for r in mp_records if not r.is_opponent}
+    opp_extras = {r.player_name: {"plus_minus": r.plus_minus, "efficiency": r.efficiency}
+                  for r in mp_records if r.is_opponent}
 
     our_stats = [s for s in game.player_stats if not s.is_opponent]
     opp_stats = [s for s in game.player_stats if s.is_opponent]
 
-    player_grades = _compute_grades(our_stats, our_minutes)
-    opponent_grades = _compute_grades(opp_stats, opp_minutes)
+    player_grades = _compute_grades(our_stats, our_minutes, our_extras)
+    opponent_grades = _compute_grades(opp_stats, opp_minutes, opp_extras)
     # A squad number belongs to the player, not to the sheet they were read
     # from — so the roster answers first wherever a grade is shown.
     for grades, team_id in ((player_grades, game.team_id),
@@ -1820,7 +1974,8 @@ def player_game_history(
             .filter_by(game_id=game_id, player_name=player_name, is_opponent=False)
             .first()
         )
-        minutes = mp_rec.minutes_played if mp_rec else 20.0
+        recorded_minutes = mp_rec.minutes_played if mp_rec and mp_rec.minutes_played else None
+        minutes = recorded_minutes or 20.0
         game_grade = round(total_w / max(minutes, 1.0), 2)
 
         stat_breakdown: dict = {}

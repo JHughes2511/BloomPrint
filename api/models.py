@@ -980,6 +980,18 @@ class GameTeamAdvanced(Base):
 
 
 class GameMinutesPlayed(Base):
+    """The parts of a player's box-score line that are not countable stats.
+
+    Minutes, plus-minus and efficiency are printed on every real box score and
+    none of them is a tally of events, so they have no place in GamePlayerStat
+    — a plus-minus is not worth grade points and cannot be summed across
+    quarters. They live here, one row per player per game, read straight off
+    the sheet.
+
+    Minutes matter beyond the sheet: grading weights a player's work by how
+    long they were on the floor, and with none recorded every player was
+    treated as having played exactly twenty.
+    """
     __tablename__ = "game_minutes_played"
     id = Column(Integer, primary_key=True, index=True)
     game_id = Column(Integer, ForeignKey("game_sessions.id"), nullable=False)
@@ -987,6 +999,10 @@ class GameMinutesPlayed(Base):
     player_name = Column(String, nullable=False)
     is_opponent = Column(Boolean, default=False)
     minutes_played = Column(Float, default=0.0)
+    # Both nullable and both meaning "the sheet did not say", which is not the
+    # same as zero — a plus-minus of 0 is a real result.
+    plus_minus = Column(Float, nullable=True)
+    efficiency = Column(Float, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 

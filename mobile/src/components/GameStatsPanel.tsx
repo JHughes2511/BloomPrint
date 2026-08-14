@@ -159,9 +159,34 @@ const KEY_STATS: { key: string; label: string }[] = [
 const EDIT_FIELDS = ['2PM', '2PA', '3PM', '3PA', 'FTM', 'FTA',
                      'OREB', 'DREB', 'AST', 'STL', 'BLK', 'TO', 'PF'];
 
-// Column order of the box score, matching how a printed one reads.
-const BOX_COLS = ['PTS', 'FGM', 'FGA', '3PM', '3PA', 'FTM', 'FTA',
-                  'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF'];
+// Column order of the box score, matching how a printed one reads — minutes
+// first, then scoring, then the rest, and the two summary columns last. Taken
+// from the sheet a coach compares this against rather than invented here.
+const BOX_COLS = ['MIN', 'PTS', 'FGM', 'FGA', '3PM', '3PA', 'FTM', 'FTA',
+                  'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF',
+                  'PM', 'EFF'];
+
+// Not counts: a duration, a signed difference, and a formula. Each is shown as
+// the sheet writes it, and a column the sheet never gave reads as "-" rather
+// than as a zero the coach would take for a real result.
+const LINE_COLS = new Set(['MIN', 'PM', 'EFF']);
+const COL_LABEL: Record<string, string> = { PM: '+/-', EFF: 'EFF', MIN: 'MIN' };
+
+function boxCell(col: string, value: unknown): string {
+  if (!LINE_COLS.has(col)) return String(value ?? 0);
+  if (value === null || value === undefined) return '-';
+  if (col === 'MIN') {
+    const total = Number(value);
+    if (!Number.isFinite(total)) return '-';
+    const mins = Math.floor(total);
+    const secs = Math.round((total - mins) * 60);
+    return `${mins}:${String(secs).padStart(2, '0')}`;
+  }
+  const n = Number(value);
+  if (!Number.isFinite(n)) return '-';
+  const rounded = Math.round(n * 10) / 10;
+  return col === 'PM' && rounded > 0 ? `+${rounded}` : String(rounded);
+}
 
 export default function GameStatsPanel({ gameId, refreshKey = 0 }:
   { gameId: number; refreshKey?: number }) {
@@ -575,14 +600,18 @@ function BoxScoreRows({ side, t, s, tr, onEditRow }: any) {
           <Text style={[s.tCell, s.tName, s.tHeadText]} numberOfLines={1}>
             {tr('gameStats.player')}
           </Text>
-          {BOX_COLS.map(c => <Text key={c} style={[s.tCell, s.tHeadText]}>{c}</Text>)}
+          {BOX_COLS.map(c => (
+            <Text key={c} style={[s.tCell, s.tHeadText]}>{COL_LABEL[c] ?? c}</Text>
+          ))}
         </View>
         {side.players.map((p: any) => (
           <TouchableOpacity key={p.player} style={s.tRow} disabled={!onEditRow}
                             onPress={() => onEditRow?.(p)}>
             {anyJersey && <Text style={s.tJersey}>{p.jersey ?? ''}</Text>}
             <Text style={[s.tCell, s.tName]} numberOfLines={1}>{p.player}</Text>
-            {BOX_COLS.map(c => <Text key={c} style={s.tCell}>{p[c] ?? 0}</Text>)}
+            {BOX_COLS.map(c => (
+              <Text key={c} style={s.tCell}>{boxCell(c, p[c])}</Text>
+            ))}
           </TouchableOpacity>
         ))}
         <View style={[s.tRow, s.tTotals]}>
@@ -591,7 +620,7 @@ function BoxScoreRows({ side, t, s, tr, onEditRow }: any) {
             {tr('gameStats.total')}
           </Text>
           {BOX_COLS.map(c => (
-            <Text key={c} style={[s.tCell, s.tHeadText]}>{side.totals[c] ?? 0}</Text>
+            <Text key={c} style={[s.tCell, s.tHeadText]}>{boxCell(c, side.totals[c])}</Text>
           ))}
         </View>
       </View>

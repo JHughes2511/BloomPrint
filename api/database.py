@@ -435,6 +435,9 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     ("players", "updated_at", "TIMESTAMP"),
     # What a film was analysed as, as opposed to what its packet is set to now.
     ("game_report_clips", "output_type", "VARCHAR"),
+    # A box score prints these beside the counted stats; neither is countable.
+    ("game_minutes_played", "plus_minus", "FLOAT"),
+    ("game_minutes_played", "efficiency", "FLOAT"),
     # Added after the questionnaire had already collected responses.
     ("questionnaire_responses", "email", "VARCHAR"),
 ]
