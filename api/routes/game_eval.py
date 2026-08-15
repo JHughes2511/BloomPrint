@@ -1903,6 +1903,12 @@ def list_stats(
         .order_by(models.GamePlayerStat.id)
         .all()
     )
+    # A number can arrive two ways — read off a sheet, or typed on the Roster
+    # page — and the row only knows the first. The box score has preferred the
+    # roster's answer for a while; the quarter view is built from these rows and
+    # was showing a number only for games whose sheet happened to print one.
+    rosters = {False: _roster_jerseys(db, game.team_id),
+               True: _roster_jerseys(db, _opponent_team_id(db, game))}
     return [
         {
             "id": s.id,
@@ -1915,8 +1921,13 @@ def list_stats(
             "weighted_points": s.weighted_points,
             "count": s.count,
             # The squad number, so the quarter view can name a player the way
-            # the box score does.
-            "jersey_number": s.jersey_number,
+            # the box score does — the roster first, then whatever the sheet
+            # said, exactly as _side_rows resolves it.
+            "jersey_number": _jersey_for(
+                s.player_name,
+                {s.player_name: str(s.jersey_number)} if s.jersey_number else {},
+                rosters[bool(s.is_opponent)],
+            ),
             # Live-tracked or read off a sheet. An imported row is whole-game
             # totals filed under one period, and calling that "Q1" tells the
             # coach the game had one quarter.

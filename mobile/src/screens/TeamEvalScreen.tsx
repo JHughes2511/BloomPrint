@@ -296,6 +296,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [summary, setSummary] = useState<any | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [detailTab, setDetailTab] = useState<'insights' | 'our' | 'opponent' | 'byquarter'>('insights');
+  // Tabs the coach has opened on this game. What has been drawn once stays
+  // drawn, so going back to it is not another round trip.
+  const [seenTabs, setSeenTabs] = useState<Set<string>>(new Set(['insights']));
 
   /**
    * Everyone this game could be against: the teams on file, and everyone
@@ -961,9 +964,19 @@ export default function TeamEvalScreen({ route, navigation }: any) {
 
   // ── Game detail ──────────────────────────────────────────────────────────────
 
+  /** Switch tab, and remember it has been drawn. */
+  const openTab = (tab: 'insights' | 'our' | 'opponent' | 'byquarter') => {
+    setDetailTab(tab);
+    setSeenTabs(prev => (prev.has(tab) ? prev : new Set(prev).add(tab)));
+    navigation.setParams?.({ tab });
+  };
+
   const openDetail = async (game: any) => {
     setDetailGame(game);
     setActiveView('detail');
+    // The open game goes in the address, so a refresh comes back to it rather
+    // than to the dashboard — and so the page can be linked to at all.
+    navigation.setParams?.({ game: String(game.id) });
     setExpandedPlayer(null);
     setShowScoutingReport(false);
     setSummary(null);
@@ -1014,6 +1027,30 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     }
   }, [route?.params?.openGameId]));
 
+  // The game the address bar is holding, reopened on a fresh load. A coach who
+  // refreshes inside a game was put back on the dashboard, having lost the page
+  // they were reading — the open game only ever existed in this screen's state.
+  const restoredGame = useRef(false);
+  useEffect(() => {
+    const gid = Number(route?.params?.game);
+    if (!gid || restoredGame.current || detailGame) return;
+    restoredGame.current = true;
+    (async () => {
+      try {
+        const game = await gameEvalAPI.getSession(gid);
+        await openDetail(game);
+        const tab = route?.params?.tab;
+        if (tab && ['insights', 'our', 'opponent', 'byquarter'].includes(tab)) {
+          openTab(tab);
+        }
+      } catch {
+        // The game is gone, or belongs to somebody else. Leave the address
+        // alone and stay where the app landed.
+        navigation?.setParams?.({ game: undefined, tab: undefined });
+      }
+    })();
+  }, [route?.params?.game]);
+
   // Deep link from Ask BloomPrint: land on the exact view/modal it promised —
   // openView ('dashboard'|'games'|'scout'|'gamereport'), openNewGame (Games +
   // the New Game form), openPlaybook (the whiteboard playbook).
@@ -1024,7 +1061,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       setActiveView(p.openView as ViewKey);
     }
     if (p.openNewGame) {
-      setActiveView('games');
+      (navigation.setParams?.({ game: undefined, tab: undefined }), setActiveView('games'));
       setShowNewGame(true);
     }
     if (p.openPlaybook) setWhiteboardPlaybook(true);
@@ -1737,7 +1774,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // Back walks the steps taken inside this screen before it leaves it. Order
   // matters and is inner-first: a player opened inside a scouted team closes
   // before the team does. See useBackStep.
-  useBackStep(activeView === 'detail' || activeView === 'live', () => setActiveView('games'));
+  useBackStep(activeView === 'detail' || activeView === 'live', () => (navigation.setParams?.({ game: undefined, tab: undefined }), setActiveView('games')));
   useBackStep(!!scoutOpponent, () => { setScoutOpponent(null); setScoutData(null); });
   useBackStep(!!scoutPlayer, () => setScoutPlayer(null));
   useBackStep(!!gameReportGame, () => setGameReportGame(null));
@@ -1784,7 +1821,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const BackToGames = () => (
     <TouchableOpacity
       style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}
-      onPress={() => setActiveView('games')}
+      onPress={() => (navigation.setParams?.({ game: undefined, tab: undefined }), setActiveView('games'))}
     >
       <Ionicons name="arrow-back" size={18} color={t.muted} />
       <Text style={{ color: t.muted, fontSize: 14 }}>{tr('teamGrade.allGames')}</Text>
@@ -2707,13 +2744,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           <View style={[s.teamToggle, { borderBottomWidth: 0 }]}>
             <TouchableOpacity
               style={[s.teamToggleBtn, detailTab === 'insights' && s.teamToggleBtnActive]}
-              onPress={() => setDetailTab('insights')}
+              onPress={() => openTab('insights')}
             >
               <Text style={[s.teamToggleText, detailTab === 'insights' && s.teamToggleTextActive]} numberOfLines={1}>{tr('teamGrade.gameInsights')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[s.teamToggleBtn, detailTab === 'our' && s.teamToggleBtnActive]}
-              onPress={() => setDetailTab('our')}
+              onPress={() => openTab('our')}
             >
               <Text style={[s.teamToggleText, detailTab === 'our' && s.teamToggleTextActive]} numberOfLines={1}>
                 {(teams as any[]).find(tm => tm.id === detailGame.team_id)?.name
@@ -2722,7 +2759,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </TouchableOpacity>
             <TouchableOpacity
               style={[s.teamToggleBtn, detailTab === 'opponent' && s.teamToggleBtnActive]}
-              onPress={() => setDetailTab('opponent')}
+              onPress={() => openTab('opponent')}
             >
               <Text style={[s.teamToggleText, detailTab === 'opponent' && s.teamToggleTextActive]} numberOfLines={1}>
                 {detailGame.opponent_name || tr('teamGrade.opponent')}
@@ -2730,7 +2767,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </TouchableOpacity>
             <TouchableOpacity
               style={[s.teamToggleBtn, detailTab === 'byquarter' && s.teamToggleBtnActive]}
-              onPress={() => setDetailTab('byquarter')}
+              onPress={() => openTab('byquarter')}
             >
               <Text style={[s.teamToggleText, detailTab === 'byquarter' && s.teamToggleTextActive]}>{tr('teamGrade.byQuarter')}</Text>
             </TouchableOpacity>
@@ -3036,8 +3073,15 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* The game's numbers, under the grades. Everything here is derived
               from what was actually recorded; the panels that need a file we
               don't have say which one rather than drawing an empty chart. */}
-          {detailTab === 'insights' && (
-            <GameStatsPanel gameId={detailGame.id} refreshKey={statsVersion} />
+          {/* Kept mounted once opened, and hidden rather than thrown away.
+              Switching to By Quarter and back used to unmount this panel, which
+              read the whole game again on the way in — a wait for numbers that
+              were on screen a second earlier. A tab that has never been opened
+              is still not mounted, so opening a game costs one read. */}
+          {seenTabs.has('insights') && (
+            <View style={detailTab === 'insights' ? undefined : { display: 'none' }}>
+              <GameStatsPanel gameId={detailGame.id} refreshKey={statsVersion} />
+            </View>
           )}
 
           {/* This team's box score, under this team's grades. A grade is an
@@ -3046,10 +3090,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* No wrapper padding: the card sits at the same width as the player
               grades above it and the Game Insights panels, rather than inset by
               sixteen pixels from everything else on the page. */}
-          {(detailTab === 'our' || detailTab === 'opponent') && (
-            <TeamBoxScore gameId={detailGame.id} isOpponent={detailTab === 'opponent'}
-                          refreshKey={statsVersion} />
-          )}
+          {(['our', 'opponent'] as const).map(side => (
+            seenTabs.has(side) ? (
+              <View key={side} style={detailTab === side ? undefined : { display: 'none' }}>
+                <TeamBoxScore gameId={detailGame.id} isOpponent={side === 'opponent'}
+                              refreshKey={statsVersion} />
+              </View>
+            ) : null
+          ))}
 
           {/* Action buttons */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, marginBottom: 16 }}>
