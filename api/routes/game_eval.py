@@ -1272,6 +1272,10 @@ def edit_player_line(
             raw_points=raw, quarter_multiplier=IMPORT_MULTIPLIER,
             weighted_points=raw * IMPORT_MULTIPLIER, count=count, source="import",
         ))
+    # A corrected line can add a player who was not on the sheet before. Anyone
+    # this game is shared with should have them too.
+    from ..player_grants import regrant_game_players
+    regrant_game_players(db, game.id)
     db.commit()
     return {"ok": True}
 

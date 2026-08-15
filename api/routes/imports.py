@@ -506,6 +506,13 @@ def game_stats_commit(
         raise HTTPException(status_code=500, detail=f"Could not save the imported stats: {exc}")
 
     roster = _sync_roster(db, game, coach, body.players, body.team_mine)
+    # Anyone this game was shared with gets the names the file just added. The
+    # game is a live link, so the people in it are live too — re-reading a
+    # sheet with five more players on it left the recipient with a team that
+    # was missing half its squad.
+    from ..player_grants import regrant_game_players
+    regrant_game_players(db, game.id)
+    db.commit()
     return {"imported": imported, "events": events_in, "shots": shots_in,
             "team_stats": advanced_in, "roster": roster}
 

@@ -150,6 +150,33 @@ def ensure_teams_for_share(db: Session, report_type: str, report_id: int,
     return out
 
 
+def regrant_game_players(db: Session, game_id: int) -> int:
+    """Hand over anyone a shared game has gained since it was shared.
+
+    A share used to hand over the box score as it stood that minute. Re-import
+    the file with five more names on it and the recipient had the game, the
+    numbers and the teams, but not the people — Mali was on their roster with
+    six of its eleven players. The game is a live link, so who is in it is live
+    too.
+
+    Called after anything that rewrites a box score. Nothing is taken away: a
+    player dropped from a re-read stays with whoever already has them.
+    """
+    shares = (db.query(models.StaffSharedReport)
+              .filter(models.StaffSharedReport.report_id == game_id,
+                      models.StaffSharedReport.report_type.in_(("game_session", "game")))
+              .all())
+    if not shares:
+        return 0
+    given = 0
+    for sr in shares:
+        sender = db.get(models.Coach, sr.sender_id)
+        if sender:
+            given += grant_players_for_share(db, "game_session", game_id,
+                                             sender, sr.recipient_id)
+    return given
+
+
 def grant_players_for_share(db: Session, report_type: str, report_id: int,
                             sender: models.Coach, recipient_id: int) -> int:
     """Give the recipient the people a shared report is about. Returns how many."""
