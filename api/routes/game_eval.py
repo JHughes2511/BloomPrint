@@ -831,7 +831,11 @@ def game_insights_text(db: Session, game: models.GameSession) -> str:
     # Game leaders, over both teams, as the board shows them.
     everyone = [{**r, "team": n} for n, o, rows, _ in sides for r in rows]
     leader_rows = []
-    for label, metric in (("Efficiency", _efficiency), ("Points", lambda r: r["PTS"]),
+    # Same figure the box score below prints — the sheet's own where it gave one.
+    def shown_eff(r: dict) -> float:
+        return r["EFF"] if r.get("EFF") is not None else _efficiency(r)
+
+    for label, metric in (("Efficiency", shown_eff), ("Points", lambda r: r["PTS"]),
                           ("Rebounds", lambda r: r["REB"]), ("Assists", lambda r: r["AST"]),
                           ("Blocks", lambda r: r["BLK"]), ("Steals", lambda r: r["STL"])):
         best = max(everyone, key=metric, default=None)
@@ -946,11 +950,15 @@ def _side_rows(stats: list, is_opp: bool, roster: dict[str, str] | None = None,
         row = {"player": name, "jersey": _jersey_for(name, jerseys, roster), **_player_line(c)}
         line = (extras or {}).get((is_opp, name), {})
         row["MIN"] = line.get("MIN")
-        row["PM"] = line.get("PM")
+        # Stored as floats because minutes are 30.83. A plus-minus and an
+        # efficiency are whole numbers, and printing "29.0" in a column of
+        # integers reads as a different kind of number than the one beside it.
+        row["PM"] = _whole(line.get("PM"))
         # The sheet's own efficiency where it printed one, and the standard
         # formula where it did not — the two agree, and a coach reading the
         # column should not have to know which they are looking at.
-        row["EFF"] = line.get("EFF") if line.get("EFF") is not None else _efficiency(row)
+        row["EFF"] = (_whole(line.get("EFF")) if line.get("EFF") is not None
+                      else _efficiency(row))
         rows.append(row)
     rows.sort(key=lambda r: r["PTS"], reverse=True)
     totals = {k: sum(r[k] for r in rows) for k in _TOTALLED}
@@ -1000,6 +1008,13 @@ def _opponent_team_id(db: Session, game) -> int | None:
                 if _norm_team(tm.name) == _norm_team(game.opponent_name)
                 and tm.id != game.team_id), None)
     return row.id if row else None
+
+
+def _whole(v):
+    """A float that is a whole number, as an integer. None stays None."""
+    if v is None:
+        return None
+    return int(v) if float(v).is_integer() else v
 
 
 def _efficiency(r: dict) -> int:
@@ -1237,8 +1252,14 @@ def game_box_score(
         ranked = sorted(everyone, key=metric, reverse=True)[:5]
         return [{"player": r["player"], "team_name": r["team_name"], "value": metric(r)}
                 for r in ranked if metric(r) > 0]
+    # The EFF the row is showing, not the formula on its own — see _side_rows.
+    # Ranking on the formula while the column prints the sheet's figure had the
+    # board crediting a different player from the table directly under it.
+    def shown_eff(r: dict) -> float:
+        return r["EFF"] if r.get("EFF") is not None else _efficiency(r)
+
     leaders = {
-        "efficiency": top(_efficiency),
+        "efficiency": top(shown_eff),
         "points": top(lambda r: r["PTS"]),
         "rebounds": top(lambda r: r["REB"]),
         "assists": top(lambda r: r["AST"]),
