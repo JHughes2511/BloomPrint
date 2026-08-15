@@ -1475,7 +1475,11 @@
     "claimTitle": "Preuzmi vlasništvo",
     "claimMsg": "Vlasnik momčadi {{team}} više nema račun. Želite li preuzeti momčad?",
     "claimConfirm": "Preuzmi",
-    "sharedWith": "{{type}} · Podijeljeno s {{names}}"
+    "sharedWith": "{{type}} · Podijeljeno s {{names}}",
+    "unshare": "Prekini dijeljenje",
+    "unshareTitle": "Prekini dijeljenje izvještaja",
+    "unshareMessage": "Povući ga od {{names}}? Nestaje iz njihovog Staff Huba, a podijeljena utakmica nestaje i s njihovog rasporeda.",
+    "couldNotUnshare": "Dijeljenje se nije moglo prekinuti."
   },
   "teamDetail": {
     "title": "Momčad",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "Igrač za dodati u sastav",
       "body": "{{coach}} ima {{player}} u svojoj verziji {{team}}. Dodati ga u sastav?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} je prekinuo dijeljenje izvještaja",
+      "body": "{{coach}} je povukao {{type}} koji je podijelio s tobom."
     }
   },
   "teamInvite": {

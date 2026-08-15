@@ -1475,7 +1475,11 @@
     "claimTitle": "Преузми власништво",
     "claimMsg": "Власник тима {{team}} више нема налог. Желите ли да преузмете тим?",
     "claimConfirm": "Преузми",
-    "sharedWith": "{{type}} · Podeljeno sa {{names}}"
+    "sharedWith": "{{type}} · Podeljeno sa {{names}}",
+    "unshare": "Прекини дељење",
+    "unshareTitle": "Прекини дељење извештаја",
+    "unshareMessage": "Повући га од {{names}}? Нестаје из њиховог Staff Hub-а, а подељена утакмица нестаје и са распореда.",
+    "couldNotUnshare": "Дељење није могло да се прекине."
   },
   "teamDetail": {
     "title": "Тим",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "Игрaч зa дoдaвaњe у сaстaв",
       "body": "{{coach}} имa {{player}} у свojoj вeрзиjи {{team}}. Дoдaти гa у сaстaв?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} је прекинуо дељење извештаја",
+      "body": "{{coach}} је повукао {{type}} који је поделио с тобом."
     }
   },
   "teamInvite": {

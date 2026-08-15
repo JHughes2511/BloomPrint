@@ -3125,22 +3125,10 @@ def season_dashboard(
         # my people played, so its side of the scoreboard is my side — without
         # this the game shows on the Games tab and the record beside it still
         # reads 0-0.
-        # ...and the teams behind games that were shared and have since been
-        # frozen. Both are games I was given rather than games I logged, and a
-        # season record that changes the day somebody else deletes their copy
-        # is not a record of anything.
-        subject_games = list(visible_shared) + [
-            g.id for g in db.query(models.GameSession)
-            .filter(models.GameSession.coach_id == coach.id,
-                    models.GameSession.frozen_from.isnot(None)).all()]
-        if subject_games:
-            have = {m.id for m in mine}
-            for g in db.query(models.GameSession).filter(
-                    models.GameSession.id.in_(subject_games)).all():
-                t = db.get(models.Team, g.team_id) if g.team_id else None
-                if t and t.id not in have:
-                    have.add(t.id)
-                    mine.append(t)
+        # A game somebody shared is NOT added here. "All teams" is this coach's
+        # own season, and a game they were handed is a record of another team's
+        # night — it belongs to the season of the team it was played by, which
+        # is what picking that team in the selector asks for.
         subject_ids = {t.id for t in mine}
         subject_names = {(t.name or "").strip().lower() for t in mine}
 
@@ -3170,13 +3158,21 @@ def season_dashboard(
                      .filter(models.GamePlayerStat.game_id.in_([g.id for g in games])).all()):
             stats_by.setdefault(st.game_id, []).append(st)
 
+    # A game's own side, by name as well as by id. On a game another coach
+    # shared, the team row belongs to THEM — picking my own Angola matched
+    # nothing, so the games tab listed the night and the record beside it read
+    # 0-0.
+    team_name_by_id = {t.id: (t.name or "").strip().lower()
+                       for t in db.query(models.Team).all()}
     for game in games:
         # Which side of this game the answer is about. A game whose own team is
         # not the subject, but whose opponent is, is read from the opponent's
         # bench — that is what makes a season for a team the coach only tracks.
-        from_theirs = game.team_id not in subject_ids and \
+        ours_is_subject = (game.team_id in subject_ids
+                           or team_name_by_id.get(game.team_id) in subject_names)
+        from_theirs = not ours_is_subject and \
             (game.opponent_name or "").strip().lower() in subject_names
-        if game.team_id not in subject_ids and not from_theirs:
+        if not ours_is_subject and not from_theirs:
             continue    # neither side is what was asked about
         if game.our_score is not None and game.opponent_score is not None:
             our_pts, opp_pts = game.our_score, game.opponent_score

@@ -1475,7 +1475,11 @@
     "claimTitle": "Ta över ägarskapet",
     "claimMsg": "Ägaren av {{team}} har inget konto längre. Vill du ta över som ägare?",
     "claimConfirm": "Ta över",
-    "sharedWith": "{{type}} · Delad med {{names}}"
+    "sharedWith": "{{type}} · Delad med {{names}}",
+    "unshare": "Sluta dela",
+    "unshareTitle": "Sluta dela rapport",
+    "unshareMessage": "Ta tillbaka den från {{names}}? Den lämnar deras Staff Hub, och en delad match lämnar även deras spelschema.",
+    "couldNotUnshare": "Kunde inte sluta dela rapporten."
   },
   "teamDetail": {
     "title": "Lag",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "En spelare att lägga till i truppen",
       "body": "{{coach}} har {{player}} i sin version av {{team}}. Lägga till i truppen?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} slutade dela en rapport",
+      "body": "{{coach}} tog tillbaka {{type}} som delats med dig."
     }
   },
   "teamInvite": {

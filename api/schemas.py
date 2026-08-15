@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from typing import Any
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -569,9 +569,11 @@ class StaffShareRequest(BaseModel):
     report_id: int
     recipient_id: int
     allow_regenerate: bool = False
-    # Optional frozen, section-filtered snapshot. When provided (and
-    # allow_regenerate is False) the recipient sees this exact text instead of
-    # the live report.
+    # Headings the sender unticked. The recipient's copy stays live and leaves
+    # these out, so hiding a section no longer means freezing the report.
+    hidden_sections: list[str] | None = None
+    # Kept for older clients that still send it; the recipient's text is
+    # resolved live either way now.
     frozen_text: str | None = None
 
 
@@ -586,6 +588,25 @@ class StaffSharedReportOut(BaseModel):
     sender_name: str = ""
     recipient_name: str = ""
     report_text: str | None = None  # resolved from actual report
+    # Headings the sender left out. The text above is live, so the reader
+    # applies these when rendering — using the same splitter that produced
+    # them, rather than a second copy of it on the server.
+    hidden_sections: list[str] = []
+
+    @field_validator("hidden_sections", mode="before")
+    @classmethod
+    def _parse_hidden(cls, v):
+        """Stored as a JSON string on the row; a list out here."""
+        if v is None:
+            return []
+        if isinstance(v, str):
+            import json as _json
+            try:
+                got = _json.loads(v)
+            except ValueError:
+                return []
+            return [str(x) for x in got] if isinstance(got, list) else []
+        return v
     regenerated_text: str | None = None
     subject_name: str | None = None  # player name / matchup / "Team Report"
     output_type: str | None = None
@@ -624,6 +645,7 @@ class StaffGroupShareRequest(BaseModel):
     team_id: int | None = None
     program_name: str | None = None
     allow_regenerate: bool = False
+    hidden_sections: list[str] | None = None
     frozen_text: str | None = None
 
 

@@ -1475,7 +1475,11 @@
     "claimTitle": "オーナー権を引き継ぐ",
     "claimMsg": "{{team}} のオーナーのアカウントはもうありません。オーナーになりますか？",
     "claimConfirm": "引き継ぐ",
-    "sharedWith": "{{type}} · {{names}} に共有"
+    "sharedWith": "{{type}} · {{names}} に共有",
+    "unshare": "共有を解除",
+    "unshareTitle": "レポートの共有を解除",
+    "unshareMessage": "{{names}} から取り消しますか？相手の Staff Hub から消え、共有した試合も相手の日程から外れます。",
+    "couldNotUnshare": "共有を解除できませんでした。"
   },
   "teamDetail": {
     "title": "チーム",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "ロスターに追加する選手",
       "body": "{{coach}} の {{team}} には {{player}} がいます。ロスターに追加しますか？"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} がレポートの共有を解除しました",
+      "body": "{{coach}} が共有していた {{type}} を取り消しました。"
     }
   },
   "teamInvite": {

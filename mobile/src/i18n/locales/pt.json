@@ -1475,7 +1475,11 @@
     "claimTitle": "Assumir a propriedade",
     "claimMsg": "O proprietário de {{team}} já não tem conta. Quer assumir a propriedade?",
     "claimConfirm": "Assumir",
-    "sharedWith": "{{type}} · Partilhado com {{names}}"
+    "sharedWith": "{{type}} · Partilhado com {{names}}",
+    "unshare": "Deixar de compartilhar",
+    "unshareTitle": "Deixar de compartilhar relatório",
+    "unshareMessage": "Retomar de {{names}}? Sai do Staff Hub deles, e um jogo compartilhado sai também da agenda.",
+    "couldNotUnshare": "Não foi possível deixar de compartilhar."
   },
   "teamDetail": {
     "title": "Time",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "Um jogador para adicionar ao teu plantel",
       "body": "{{coach}} tem {{player}} na cópia de {{team}}. Adicionar ao plantel?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} deixou de compartilhar um relatório",
+      "body": "{{coach}} retomou {{type}} que havia compartilhado com você."
     }
   },
   "teamInvite": {

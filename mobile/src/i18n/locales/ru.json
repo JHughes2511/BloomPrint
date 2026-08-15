@@ -1475,7 +1475,11 @@
     "claimTitle": "Стать владельцем",
     "claimMsg": "У владельца команды {{team}} больше нет аккаунта. Стать владельцем?",
     "claimConfirm": "Принять",
-    "sharedWith": "{{type}} · Отправлено: {{names}}"
+    "sharedWith": "{{type}} · Отправлено: {{names}}",
+    "unshare": "Отменить доступ",
+    "unshareTitle": "Отменить доступ к отчёту",
+    "unshareMessage": "Забрать его у {{names}}? Он исчезнет из их Staff Hub, а общий матч — и из их расписания.",
+    "couldNotUnshare": "Не удалось отменить доступ."
   },
   "teamDetail": {
     "title": "Команда",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "Игрок для добавления в состав",
       "body": "У {{coach}} есть {{player}} в своей версии {{team}}. Добавить в состав?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} отменил доступ к отчёту",
+      "body": "{{coach}} забрал {{type}}, которым делился с вами."
     }
   },
   "teamInvite": {

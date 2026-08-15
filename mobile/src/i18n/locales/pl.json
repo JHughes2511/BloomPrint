@@ -1475,7 +1475,11 @@
     "claimTitle": "Przejmij własność",
     "claimMsg": "Właściciel {{team}} nie ma już konta. Chcesz przejąć drużynę?",
     "claimConfirm": "Przejmij",
-    "sharedWith": "{{type}} · Udostępniono: {{names}}"
+    "sharedWith": "{{type}} · Udostępniono: {{names}}",
+    "unshare": "Cofnij udostępnienie",
+    "unshareTitle": "Cofnij udostępnienie raportu",
+    "unshareMessage": "Odebrać go użytkownikowi {{names}}? Zniknie z ich Staff Hub, a udostępniony mecz zniknie też z terminarza.",
+    "couldNotUnshare": "Nie udało się cofnąć udostępnienia."
   },
   "teamDetail": {
     "title": "Zespół",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "Zawodnik do dodania do składu",
       "body": "{{coach}} ma {{player}} w swojej wersji {{team}}. Dodać do składu?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} cofnął udostępnienie raportu",
+      "body": "{{coach}} odebrał {{type}}, który Ci udostępnił."
     }
   },
   "teamInvite": {

@@ -1475,7 +1475,11 @@
     "claimTitle": "Sahipliği al",
     "claimMsg": "{{team}} takımının sahibinin artık hesabı yok. Sahipliği almak ister misin?",
     "claimConfirm": "Sahiplen",
-    "sharedWith": "{{type}} · Paylaşıldı: {{names}}"
+    "sharedWith": "{{type}} · Paylaşıldı: {{names}}",
+    "unshare": "Paylaşımı kaldır",
+    "unshareTitle": "Rapor paylaşımını kaldır",
+    "unshareMessage": "{{names}} kişisinden geri alınsın mı? Staff Hub'larından çıkar, paylaşılan bir maç da fikstürlerinden çıkar.",
+    "couldNotUnshare": "Rapor paylaşımı kaldırılamadı."
   },
   "teamDetail": {
     "title": "Takım",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "Kadroya eklenecek bir oyuncu",
       "body": "{{coach}}, {{team}} listesinde {{player}} oyuncusuna sahip. Kadroya eklensin mi?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} bir rapor paylaşımını kaldırdı",
+      "body": "{{coach}}, seninle paylaştığı {{type}} kaydını geri aldı."
     }
   },
   "teamInvite": {

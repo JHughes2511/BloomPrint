@@ -1475,7 +1475,11 @@
     "claimTitle": "Rivendica la proprietà",
     "claimMsg": "Il proprietario di {{team}} non ha più un account. Vuoi diventarne proprietario?",
     "claimConfirm": "Rivendica",
-    "sharedWith": "{{type}} · Condiviso con {{names}}"
+    "sharedWith": "{{type}} · Condiviso con {{names}}",
+    "unshare": "Annulla condivisione",
+    "unshareTitle": "Annulla condivisione report",
+    "unshareMessage": "Riprenderlo da {{names}}? Esce dal loro Staff Hub e una partita condivisa esce anche dal loro calendario.",
+    "couldNotUnshare": "Impossibile annullare la condivisione."
   },
   "teamDetail": {
     "title": "Squadra",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "Un giocatore da aggiungere alla rosa",
       "body": "{{coach}} ha {{player}} nella sua versione di {{team}}. Aggiungerlo alla rosa?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} ha annullato una condivisione",
+      "body": "{{coach}} ha ripreso {{type}} che aveva condiviso con te."
     }
   },
   "teamInvite": {

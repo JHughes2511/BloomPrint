@@ -11,6 +11,7 @@ import TranslationToggle from './TranslationToggle';
 import VoiceTextInput from './VoiceTextInput';
 import KeyboardAwareScrollView from './KeyboardAwareScrollView';
 import { staffSharingAPI } from '../api/client';
+import { splitReportSections, joinReportSections } from '../utils/mdToHtml';
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { useReportSearch, ReportSearchBar, ReportSearchButton } from './ReportSearch';
@@ -82,9 +83,21 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
   // Computed with optional access so the hook below can run on EVERY render —
   // it must sit above the `if (!item)` return or the hook count changes between
   // renders and React throws "Rendered more hooks than during the previous render".
-  const bodyText = bodyMode === 'updated'
+  // The report is read live, so the sections the sender left out are taken out
+  // here — with the same splitter that listed them when they were unticked,
+  // rather than a second copy of it on the server that could drift from this
+  // one.
+  const withoutHidden = (text: string) => {
+    const hide: string[] = item?.hidden_sections ?? [];
+    if (!text || hide.length === 0) return text;
+    const secs = splitReportSections(text);
+    const keep: Record<string, boolean> = {};
+    for (const sec of secs) keep[sec.heading] = !hide.includes(sec.heading);
+    return joinReportSections(secs, keep) || text;
+  };
+  const bodyText = withoutHidden(bodyMode === 'updated'
     ? (item?.regenerated_text ?? item?.report_text ?? '')
-    : (item?.report_text ?? '');
+    : (item?.report_text ?? ''));
   // A shared report is the most likely place to hit another language: translate
   // on view, keeping a toggle back to what the sharer actually wrote.
   const rt = useReportTranslation('shared', item?.id, bodyText || undefined);

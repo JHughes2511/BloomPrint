@@ -1475,7 +1475,11 @@
     "claimTitle": "Claim ownership",
     "claimMsg": "The owner of {{team}} no longer has an account. Take over as owner?",
     "claimConfirm": "Claim",
-    "sharedWith": "{{type}} · Shared with {{names}}"
+    "sharedWith": "{{type}} · Shared with {{names}}",
+    "unshare": "Un-share",
+    "unshareTitle": "Un-share report",
+    "unshareMessage": "Take this back from {{names}}? It leaves their Staff Hub, and a shared game leaves their schedule too.",
+    "couldNotUnshare": "Could not un-share that report."
   },
   "teamDetail": {
     "title": "Team",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "A player to add to your roster",
       "body": "{{coach}} has {{player}} on their copy of {{team}}. Add them to the roster?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} un-shared a report",
+      "body": "{{coach}} took back {{type}} they had shared with you."
     }
   },
   "teamInvite": {

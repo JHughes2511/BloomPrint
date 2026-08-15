@@ -1475,7 +1475,11 @@
     "claimTitle": "תביעת בעלות",
     "claimMsg": "לבעלים של {{team}} אין יותר חשבון. להפוך לבעלים?",
     "claimConfirm": "תבע בעלות",
-    "sharedWith": "{{type}} · שותף עם {{names}}"
+    "sharedWith": "{{type}} · שותף עם {{names}}",
+    "unshare": "ביטול שיתוף",
+    "unshareTitle": "ביטול שיתוף הדוח",
+    "unshareMessage": "לקחת אותו בחזרה מ-{{names}}? הוא ייעלם מה-Staff Hub שלהם, ומשחק משותף ייעלם גם מהלוח שלהם.",
+    "couldNotUnshare": "לא ניתן לבטל את השיתוף."
   },
   "teamDetail": {
     "title": "קבוצה",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "שחקן להוספה לסגל",
       "body": "ל{{coach}} יש את {{player}} בעותק שלו של {{team}}. להוסיף אותו לסגל?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} ביטל שיתוף של דוח",
+      "body": "{{coach}} לקח בחזרה {{type}} ששיתף איתך."
     }
   },
   "teamInvite": {

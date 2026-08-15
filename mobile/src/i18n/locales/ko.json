@@ -1475,7 +1475,11 @@
     "claimTitle": "소유권 가져오기",
     "claimMsg": "{{team}}의 소유자 계정이 더 이상 없습니다. 소유자가 되시겠습니까?",
     "claimConfirm": "가져오기",
-    "sharedWith": "{{type}} · {{names}}에게 공유함"
+    "sharedWith": "{{type}} · {{names}}에게 공유함",
+    "unshare": "공유 해제",
+    "unshareTitle": "리포트 공유 해제",
+    "unshareMessage": "{{names}} 님에게서 회수할까요? 상대의 Staff Hub에서 사라지고, 공유된 경기도 일정에서 빠집니다.",
+    "couldNotUnshare": "공유를 해제하지 못했습니다."
   },
   "teamDetail": {
     "title": "팀",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "로스터에 추가할 선수",
       "body": "{{coach}} 님의 {{team}} 명단에 {{player}} 선수가 있습니다. 로스터에 추가할까요?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} 님이 리포트 공유를 해제했습니다",
+      "body": "{{coach}} 님이 공유했던 {{type}}을(를) 회수했습니다."
     }
   },
   "teamInvite": {

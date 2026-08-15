@@ -1475,7 +1475,11 @@
     "claimTitle": "स्वामित्व लें",
     "claimMsg": "{{team}} के स्वामी का खाता अब नहीं है। क्या आप स्वामी बनना चाहते हैं?",
     "claimConfirm": "अपनाएँ",
-    "sharedWith": "{{type}} · {{names}} के साथ साझा किया गया"
+    "sharedWith": "{{type}} · {{names}} के साथ साझा किया गया",
+    "unshare": "साझा करना बंद करें",
+    "unshareTitle": "रिपोर्ट साझा करना बंद करें",
+    "unshareMessage": "इसे {{names}} से वापस लें? यह उनके Staff Hub से हट जाएगी, और साझा मैच उनके शेड्यूल से भी हट जाएगा।",
+    "couldNotUnshare": "रिपोर्ट साझा करना बंद नहीं हो सका।"
   },
   "teamDetail": {
     "title": "टीम",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "आपकी टीम सूची में जोड़ने के लिए एक खिलाड़ी",
       "body": "{{coach}} के पास {{team}} की उनकी सूची में {{player}} है। क्या उन्हें सूची में जोड़ें?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} ने रिपोर्ट साझा करना बंद किया",
+      "body": "{{coach}} ने आपके साथ साझा {{type}} वापस ले ली।"
     }
   },
   "teamInvite": {

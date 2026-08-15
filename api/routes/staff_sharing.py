@@ -1,5 +1,7 @@
 """Staff-to-staff report sharing routes."""
 
+import json
+
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -148,6 +150,24 @@ def _in_conversation(sr: models.StaffSharedReport, coach_id: int, db: Session) -
     return any(r.recipient_id == coach_id for r in _conversation_rows(sr, db))
 
 
+def _dump_hidden(headings: list[str] | None) -> str:
+    """The headings a sender left out, as JSON.
+
+    Always written, even when nothing was hidden: an empty list and a null
+    mean different things here. Null is a share made before headings were
+    recorded, where the only thing we have is the filtered snapshot.
+    """
+    return json.dumps([str(h) for h in (headings or []) if str(h).strip()])
+
+
+def _load_hidden(sr: models.StaffSharedReport) -> list[str]:
+    try:
+        got = json.loads(sr.hidden_sections or "[]")
+        return [str(h) for h in got] if isinstance(got, list) else []
+    except (TypeError, ValueError):
+        return []
+
+
 def _share_text(sr: models.StaffSharedReport, db: Session) -> str | None:
     """The text of a share, live where the thing behind it is live.
 
@@ -158,10 +178,12 @@ def _share_text(sr: models.StaffSharedReport, db: Session) -> str | None:
     text about it that still reads last week's score contradicts the game card
     beside it.
     """
-    if (sr.report_type or "") == "game_session":
-        return _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id)
-    return sr.frozen_text if sr.frozen_text else _resolve_report_text(
-        sr.report_type, sr.report_id, db, sr.sender_id)
+    # A share made before headings were recorded has only its filtered
+    # snapshot: going live for those would show sections the sender had taken
+    # out, which is the one thing this must not do.
+    if sr.hidden_sections is None and sr.frozen_text:
+        return sr.frozen_text
+    return _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id) or sr.frozen_text
 
 
 def _build_out(sr: models.StaffSharedReport, db: Session) -> schemas.StaffSharedReportOut:
@@ -169,6 +191,7 @@ def _build_out(sr: models.StaffSharedReport, db: Session) -> schemas.StaffShared
     out.sender_name = sr.sender.name if sr.sender else ""
     out.recipient_name = sr.recipient.name if sr.recipient else ""
     out.report_text = _share_text(sr, db)
+    out.hidden_sections = _load_hidden(sr)
     out.regenerated_text = sr.regenerated_text
     out.subject_name, out.output_type, out.overall_grade = _report_meta(sr.report_type, sr.report_id, db)
     # Counted across the whole conversation, so the number on the card matches
@@ -225,7 +248,8 @@ def _coach_notify(db: Session, coach_id: int, title: str, body: str, ref_id: int
 
 
 def _upsert_share(db: Session, report_type: str, report_id: int, sender_id: int,
-                  recipient_id: int, allow_regenerate: bool, frozen: str | None):
+                  recipient_id: int, allow_regenerate: bool, frozen: str | None,
+                  hidden: list[str] | None = None):
     """Create a share, or update the existing one for the same
     (report, sender, recipient) — never a duplicate row. Returns (share, is_new)."""
     existing = (
@@ -237,11 +261,13 @@ def _upsert_share(db: Session, report_type: str, report_id: int, sender_id: int,
     if existing:
         existing.allow_regenerate = allow_regenerate
         existing.frozen_text = frozen
+        existing.hidden_sections = _dump_hidden(hidden)
         db.flush()
         return existing, False
     sr = models.StaffSharedReport(
         report_type=report_type, report_id=report_id, sender_id=sender_id,
         recipient_id=recipient_id, allow_regenerate=allow_regenerate, frozen_text=frozen,
+        hidden_sections=_dump_hidden(hidden),
     )
     db.add(sr)
     db.flush()
@@ -264,7 +290,8 @@ def share_with_staff(
     frozen = body.frozen_text if (body.frozen_text and not body.allow_regenerate) else None
 
     sr, _ = _upsert_share(db, body.report_type, body.report_id, coach.id,
-                          body.recipient_id, body.allow_regenerate, frozen)
+                          body.recipient_id, body.allow_regenerate, frozen,
+                          body.hidden_sections)
 
     # The report is about people. Hand them over with it, or the recipient
     # reads an evaluation of a player they cannot look up anywhere.
@@ -410,7 +437,8 @@ def share_with_staff_group(
         if not recipient:
             continue
         sr, _ = _upsert_share(db, body.report_type, body.report_id, coach.id,
-                              rid, body.allow_regenerate, frozen)
+                              rid, body.allow_regenerate, frozen,
+                              body.hidden_sections)
         grant_players_for_share(db, body.report_type, body.report_id, coach, rid)
         ensure_teams_for_share(db, body.report_type, body.report_id, coach, rid)
         _coach_notify(
@@ -451,7 +479,7 @@ def share_with_team(
     count = 0
     for rid in ids:
         sr, _ = _upsert_share(db, report_type, report_id, coach.id, rid,
-                              allow_regenerate, frozen)
+                              allow_regenerate, frozen, body.get("hidden_sections"))
         grant_players_for_share(db, report_type, report_id, coach, rid)
         ensure_teams_for_share(db, report_type, report_id, coach, rid)
         _coach_notify(
@@ -1199,5 +1227,48 @@ def mark_all_coach_notifications_read(
     coach: models.Coach = Depends(get_current_coach),
 ):
     db.query(models.CoachNotification).filter_by(coach_id=coach.id, read=False).update({"read": True})
+    db.commit()
+    return {"ok": True}
+
+
+@router.delete("/{shared_id}")
+def unshare(
+    shared_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Take a report back from the person it was sent to.
+
+    Only the sender can, and it removes the whole thing: the report leaves
+    their Staff Hub, and a shared game leaves their schedule and their season
+    record with it. Nothing is kept behind — un-sharing is the sender saying
+    this was not theirs to have, which is a different act from deleting a game
+    of my own and leaving them the night they had already read.
+
+    Their comments go with the share row. The players and teams the share
+    brought stay: a roster the recipient has been working from for a month is
+    not something to pull out from under them, and they can remove either
+    themselves.
+    """
+    sr = db.get(models.StaffSharedReport, shared_id)
+    if not sr or sr.sender_id != coach.id:
+        raise HTTPException(status_code=404, detail="Shared report not found")
+    recipient_id, report_type, report_id = sr.recipient_id, sr.report_type, sr.report_id
+    db.delete(sr)
+    # Anything the recipient hid from their own games list is about a share
+    # that no longer exists.
+    if report_type in ("game_session", "game"):
+        for row in (db.query(models.SharedGameHidden)
+                    .filter_by(coach_id=recipient_id, game_id=report_id).all()):
+            db.delete(row)
+    db.commit()
+    _coach_notify(
+        db, recipient_id,
+        f"{coach.name} un-shared a report",
+        f"{coach.name} took back a {report_type.replace('_', ' ')} they had shared with you.",
+        key="notifs.staffReportUnshared",
+        params={"coach": coach.name, "type": report_type},
+        ntype="staff_report_unshared",
+    )
     db.commit()
     return {"ok": True}

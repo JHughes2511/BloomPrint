@@ -1475,7 +1475,11 @@
     "claimTitle": "Eigentum übernehmen",
     "claimMsg": "Der Eigentümer von {{team}} hat kein Konto mehr. Möchtest du das Team übernehmen?",
     "claimConfirm": "Übernehmen",
-    "sharedWith": "{{type}} · Geteilt mit {{names}}"
+    "sharedWith": "{{type}} · Geteilt mit {{names}}",
+    "unshare": "Freigabe aufheben",
+    "unshareTitle": "Freigabe des Berichts aufheben",
+    "unshareMessage": "Von {{names}} zurücknehmen? Er verlässt deren Staff Hub, und ein geteiltes Spiel verlässt auch deren Spielplan.",
+    "couldNotUnshare": "Freigabe konnte nicht aufgehoben werden."
   },
   "teamDetail": {
     "title": "Team",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "Ein Spieler für deinen Kader",
       "body": "{{coach}} hat {{player}} in seiner Fassung von {{team}}. Zum Kader hinzufügen?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} hat eine Freigabe aufgehoben",
+      "body": "{{coach}} hat {{type}} zurückgenommen."
     }
   },
   "teamInvite": {

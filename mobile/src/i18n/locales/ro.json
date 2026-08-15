@@ -1475,7 +1475,11 @@
     "claimTitle": "Preia proprietatea",
     "claimMsg": "Proprietarul echipei {{team}} nu mai are cont. Vrei să preiei echipa?",
     "claimConfirm": "Preia",
-    "sharedWith": "{{type}} · Partajat cu {{names}}"
+    "sharedWith": "{{type}} · Partajat cu {{names}}",
+    "unshare": "Anulează partajarea",
+    "unshareTitle": "Anulează partajarea raportului",
+    "unshareMessage": "Îl retragi de la {{names}}? Iese din Staff Hub-ul lor, iar un meci partajat iese și din programul lor.",
+    "couldNotUnshare": "Nu s-a putut anula partajarea."
   },
   "teamDetail": {
     "title": "Echipă",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "Un jucător de adăugat în lot",
       "body": "{{coach}} îl are pe {{player}} în versiunea sa a {{team}}. Îl adaugi în lot?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} a anulat partajarea unui raport",
+      "body": "{{coach}} a retras {{type}} pe care ți-l partajase."
     }
   },
   "teamInvite": {

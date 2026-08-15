@@ -1475,7 +1475,11 @@
     "claimTitle": "المطالبة بالملكية",
     "claimMsg": "لم يعد لمالك فريق {{team}} حساب. هل تريد أن تصبح المالك؟",
     "claimConfirm": "المطالبة",
-    "sharedWith": "{{type}} · تمت المشاركة مع {{names}}"
+    "sharedWith": "{{type}} · تمت المشاركة مع {{names}}",
+    "unshare": "إلغاء المشاركة",
+    "unshareTitle": "إلغاء مشاركة التقرير",
+    "unshareMessage": "استرجاعه من {{names}}؟ سيخرج من Staff Hub لديهم، وستخرج المباراة المشتركة من جدولهم أيضًا.",
+    "couldNotUnshare": "تعذّر إلغاء مشاركة التقرير."
   },
   "teamDetail": {
     "title": "الفريق",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "لاعب لإضافته إلى قائمتك",
       "body": "لدى {{coach}} اللاعب {{player}} في نسخته من {{team}}. هل تضيفه إلى القائمة؟"
+    },
+    "staffReportUnshared": {
+      "title": "ألغى {{coach}} مشاركة تقرير",
+      "body": "استرجع {{coach}} {{type}} الذي شاركه معك."
     }
   },
   "teamInvite": {

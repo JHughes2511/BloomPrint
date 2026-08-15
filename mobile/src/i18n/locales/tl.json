@@ -1475,7 +1475,11 @@
     "claimTitle": "Angkinin ang pagmamay-ari",
     "claimMsg": "Wala nang account ang may-ari ng {{team}}. Gusto mo bang maging may-ari?",
     "claimConfirm": "Angkinin",
-    "sharedWith": "{{type}} · Ibinahagi kay {{names}}"
+    "sharedWith": "{{type}} · Ibinahagi kay {{names}}",
+    "unshare": "Bawiin ang pagbabahagi",
+    "unshareTitle": "Bawiin ang ibinahaging ulat",
+    "unshareMessage": "Bawiin ito kay {{names}}? Aalis ito sa Staff Hub nila, at aalis din sa iskedyul nila ang ibinahaging laro.",
+    "couldNotUnshare": "Hindi nabawi ang pagbabahagi."
   },
   "teamDetail": {
     "title": "Team",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "Isang manlalaro para idagdag sa roster",
       "body": "Nasa kopya ni {{coach}} ng {{team}} si {{player}}. Idagdag sa roster?"
+    },
+    "staffReportUnshared": {
+      "title": "Binawi ni {{coach}} ang isang ulat",
+      "body": "Binawi ni {{coach}} ang {{type}} na ibinahagi sa iyo."
     }
   },
   "teamInvite": {

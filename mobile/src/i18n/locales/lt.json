@@ -1475,7 +1475,11 @@
     "claimTitle": "Perimti nuosavybę",
     "claimMsg": "Komandos {{team}} savininkas nebeturi paskyros. Norite perimti komandą?",
     "claimConfirm": "Perimti",
-    "sharedWith": "{{type}} · Bendrinta su {{names}}"
+    "sharedWith": "{{type}} · Bendrinta su {{names}}",
+    "unshare": "Nebebendrinti",
+    "unshareTitle": "Nebebendrinti ataskaitos",
+    "unshareMessage": "Atsiimti ją iš {{names}}? Ji dings iš jų Staff Hub, o bendrintos rungtynės dings ir iš tvarkaraščio.",
+    "couldNotUnshare": "Nepavyko nutraukti bendrinimo."
   },
   "teamDetail": {
     "title": "Komanda",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "Žaidėjas, kurį galima įtraukti į sudėtį",
       "body": "{{coach}} savo {{team}} sąraše turi {{player}}. Įtraukti į sudėtį?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} nustojo bendrinti ataskaitą",
+      "body": "{{coach}} atsiėmė {{type}}, kurią su jumis bendrino."
     }
   },
   "teamInvite": {

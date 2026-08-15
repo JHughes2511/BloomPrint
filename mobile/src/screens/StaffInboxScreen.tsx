@@ -421,6 +421,34 @@ export default function StaffInboxScreen() {
                   ))}
                 </View>
               </View>
+              {/* Take it back. Only on reports this coach sent, and only from
+                  this list — the report leaves the other coach's Staff Hub,
+                  and a shared game leaves their schedule with it. */}
+              {item.is_sender && (
+                <TouchableOpacity
+                  style={{ padding: 6 }}
+                  onPress={() => {
+                    const names = (item.recipient_names ?? []).join(', ') || item.recipient_name;
+                    Alert.alert(
+                      tr('staffHub.unshareTitle'),
+                      tr('staffHub.unshareMessage', { names }),
+                      [
+                        { text: tr('common.cancel'), style: 'cancel' },
+                        {
+                          text: tr('staffHub.unshare'), style: 'destructive',
+                          onPress: async () => {
+                            try {
+                              await staffSharingAPI.unshare(item.id);
+                              setItems(prev => prev.filter((x: any) => x.id !== item.id));
+                            } catch { Alert.alert(tr('common.error'), tr('staffHub.couldNotUnshare')); }
+                          },
+                        },
+                      ]);
+                  }}
+                >
+                  <Ionicons name="close-circle-outline" size={16} color={t.muted2} />
+                </TouchableOpacity>
+              )}
               <Ionicons name="chevron-forward" size={14} color={t.muted2} />
             </TouchableOpacity>
           );

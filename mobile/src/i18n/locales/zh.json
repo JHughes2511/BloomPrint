@@ -1475,7 +1475,11 @@
     "claimTitle": "接管所有权",
     "claimMsg": "{{team}} 的所有者账号已不存在。要接管为所有者吗？",
     "claimConfirm": "接管",
-    "sharedWith": "{{type}} · 已分享给 {{names}}"
+    "sharedWith": "{{type}} · 已分享给 {{names}}",
+    "unshare": "取消共享",
+    "unshareTitle": "取消共享报告",
+    "unshareMessage": "从 {{names}} 收回？它会从对方的 Staff Hub 中消失，共享的比赛也会从对方的赛程中移除。",
+    "couldNotUnshare": "无法取消共享该报告。"
   },
   "teamDetail": {
     "title": "球队",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "有一名球员可加入你的名单",
       "body": "{{coach}} 的 {{team}} 名单里有 {{player}}。要加入你的名单吗？"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} 取消了报告共享",
+      "body": "{{coach}} 收回了与你共享的 {{type}}。"
     }
   },
   "teamInvite": {

@@ -570,6 +570,11 @@ class StaffSharedReport(Base):
     frozen_text      = Column(Text, nullable=True)
     created_at       = Column(DateTime, default=datetime.utcnow)
 
+    # Headings the sender unticked when sharing, as a JSON list. Kept apart
+    # from frozen_text so that hiding a section and freezing the report stop
+    # being the same switch: the report can go on updating with those sections
+    # still left out.
+    hidden_sections  = Column(Text, nullable=True)
     # id of the recipient's OWN "Updated ___" copy once they regenerate/correct
     # it (points to the appropriate table for report_type). Lets the viewer and
     # Recents surface the updated version distinctly from the original.

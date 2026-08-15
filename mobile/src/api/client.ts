@@ -759,16 +759,19 @@ export const playerAPI = {
 
 // ── Staff sharing ──────────────────────────────────────────────────────────────
 export const staffSharingAPI = {
-  share: (data: { report_type: string; report_id: number; recipient_id: number; allow_regenerate?: boolean; frozen_text?: string }) =>
+  share: (data: { report_type: string; report_id: number; recipient_id: number; allow_regenerate?: boolean; frozen_text?: string; hidden_sections?: string[] }) =>
     api.post('/staff-sharing/share', data).then(r => r.data),
   searchTargets: (q: string) =>
     api.get('/staff-sharing/search-targets', { params: { q } }).then(r => r.data),
-  shareGroup: (data: { report_type: string; report_id: number; kind: string; coach_id?: number; team_id?: number; program_name?: string; allow_regenerate?: boolean; frozen_text?: string }) =>
+  shareGroup: (data: { report_type: string; report_id: number; kind: string; coach_id?: number; team_id?: number; program_name?: string; allow_regenerate?: boolean; frozen_text?: string; hidden_sections?: string[] }) =>
     api.post('/staff-sharing/share-group', data).then(r => r.data),
-  shareTeam: (data: { report_type: string; report_id: number; team_id: number; allow_regenerate?: boolean; frozen_text?: string }) =>
+  shareTeam: (data: { report_type: string; report_id: number; team_id: number; allow_regenerate?: boolean; frozen_text?: string; hidden_sections?: string[] }) =>
     api.post('/staff-sharing/share-team', data).then(r => r.data),
   inbox: () => api.get('/staff-sharing/inbox').then(r => r.data),
   sent: () => api.get('/staff-sharing/sent').then(r => r.data),
+  // Take a report back. Sender only; it leaves the recipient's Staff Hub,
+  // and a shared game leaves their schedule with it.
+  unshare: (sharedId: number) => api.delete(`/staff-sharing/${sharedId}`).then(r => r.data),
   getComments: (sharedId: number) => api.get(`/staff-sharing/${sharedId}/comments`).then(r => r.data),
   addComment: (sharedId: number, text: string, target: 'original' | 'updated' = 'original',
                parentId?: number) =>

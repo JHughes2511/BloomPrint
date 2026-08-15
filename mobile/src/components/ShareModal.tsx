@@ -107,6 +107,13 @@ export default function ShareModal({
 
   const filteredText = () => joinReportSections(sections, sectionToggles) || reportText;
 
+  // The headings left out, sent alongside the text. A staff share stays live
+  // whatever the regenerate toggle says, so what was hidden has to travel as a
+  // list rather than only as a filtered copy — otherwise hiding a section and
+  // freezing the report are the same switch.
+  const hiddenSections = () =>
+    toggleSections.filter(sec => sectionToggles[sec.heading] === false).map(sec => sec.heading);
+
   // Section toggles are available on every target; for staff they only apply in
   // frozen mode (regenerate OFF — a regenerable copy is always the full report).
   // The document header (title / model banner / opponent line) is pinned and
@@ -133,7 +140,7 @@ export default function ShareModal({
           // A team / sub-team from My Groups — staff members only.
           const res = await staffSharingAPI.shareTeam({
             report_type: reportType, report_id: reportId, team_id: selected.id,
-            allow_regenerate: allowRegen, frozen_text: frozen,
+            allow_regenerate: allowRegen, frozen_text: frozen, hidden_sections: hiddenSections(),
           });
           Alert.alert(tr('components.shareModal.sharedTitle'), tr('components.shareModal.sharedTeamStaff', { count: res.shared_count ?? 0, team: res.team_name ?? selected.name }));
         } else {
@@ -141,7 +148,7 @@ export default function ShareModal({
             report_type: reportType, report_id: reportId, kind: selected.kind,
             coach_id: selected.coach_id ?? undefined, team_id: selected.team_id ?? undefined,
             program_name: selected.program_name ?? undefined,
-            allow_regenerate: allowRegen, frozen_text: frozen,
+            allow_regenerate: allowRegen, frozen_text: frozen, hidden_sections: hiddenSections(),
           });
           Alert.alert(tr('components.shareModal.sharedTitle'), tr('components.shareModal.sharedStaff', { count: res.shared_count ?? 1 }));
         }
@@ -155,6 +162,7 @@ export default function ShareModal({
           const staffRes = await staffSharingAPI.shareTeam({
             report_type: reportType, report_id: reportId, team_id: selected.id,
             allow_regenerate: false, frozen_text: filteredText(),
+            hidden_sections: hiddenSections(),
           });
           staffCount = staffRes.shared_count ?? 0;
         } catch {}

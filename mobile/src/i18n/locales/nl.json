@@ -1475,7 +1475,11 @@
     "claimTitle": "Eigendom claimen",
     "claimMsg": "De eigenaar van {{team}} heeft geen account meer. Wil je eigenaar worden?",
     "claimConfirm": "Claimen",
-    "sharedWith": "{{type}} · Gedeeld met {{names}}"
+    "sharedWith": "{{type}} · Gedeeld met {{names}}",
+    "unshare": "Delen stoppen",
+    "unshareTitle": "Delen van rapport stoppen",
+    "unshareMessage": "Terugnemen van {{names}}? Het verdwijnt uit hun Staff Hub, en een gedeelde wedstrijd verdwijnt ook uit hun schema.",
+    "couldNotUnshare": "Kon het delen niet stoppen."
   },
   "teamDetail": {
     "title": "Team",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "Een speler voor je selectie",
       "body": "{{coach}} heeft {{player}} in hun versie van {{team}}. Toevoegen aan de selectie?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} heeft het delen gestopt",
+      "body": "{{coach}} heeft {{type}} teruggenomen."
     }
   },
   "teamInvite": {

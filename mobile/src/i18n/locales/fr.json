@@ -1475,7 +1475,11 @@
     "claimTitle": "Reprendre la propriété",
     "claimMsg": "Le propriétaire de {{team}} n'a plus de compte. Voulez-vous en devenir propriétaire ?",
     "claimConfirm": "Reprendre",
-    "sharedWith": "{{type}} · Partagé avec {{names}}"
+    "sharedWith": "{{type}} · Partagé avec {{names}}",
+    "unshare": "Ne plus partager",
+    "unshareTitle": "Ne plus partager le rapport",
+    "unshareMessage": "Le reprendre à {{names}} ? Il quitte leur Staff Hub, et un match partagé quitte aussi leur calendrier.",
+    "couldNotUnshare": "Impossible d'annuler le partage."
   },
   "teamDetail": {
     "title": "Équipe",
@@ -2582,6 +2586,10 @@
     "rosterPlayerProposed": {
       "title": "Un joueur à ajouter à votre effectif",
       "body": "{{coach}} a {{player}} dans sa version de {{team}}. L'ajouter à l'effectif ?"
+    },
+    "staffReportUnshared": {
+      "title": "{{coach}} a annulé un partage",
+      "body": "{{coach}} a repris {{type}} qu'il avait partagé avec vous."
     }
   },
   "teamInvite": {
