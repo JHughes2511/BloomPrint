@@ -138,10 +138,12 @@ LINE_FIELDS = ("MIN", "PM", "EFF")
 
 _AI_BOX_SCORE_INSTRUCTION = (
     "This is a basketball box score. Return JSON only:\n"
-    '{"teams": [{"team_name": "...", "players": [{"name": "...", '
+    '{"teams": [{"team_name": "...", "players": [{"name": "...", "jersey": "...", '
     '"FGM": 0, "FGA": 0, "2PM": 0, "2PA": 0, "3PM": 0, "3PA": 0, "FTM": 0, "FTA": 0, '
     '"OREB": 0, "DREB": 0, "REB": 0, "AST": 0, "STL": 0, "BLK": 0, "TO": 0, "PF": 0, '
     '"MIN": "0:00", "PM": 0, "EFF": 0}]}]}\n'
+    "jersey is the squad number printed beside the name — the \"#\" or \"No\" "
+    "column — as text, so \"07\" stays \"07\". Omit it if the sheet does not show one.\n"
     "Include every team and every player listed. Use the numbers exactly as printed — "
     "do NOT compute, estimate or fill in a stat that is not shown; omit the key instead. "
     "FGM/FGA are ALL field goals including threes. If the sheet shows a combined line "
@@ -157,8 +159,19 @@ def _canonical_rows_from_sheet(rows: list[list]) -> list[tuple[str, dict]]:
     """A spreadsheet's rows as (player, {FIELD: count}) — read exactly, no model."""
     import re as _re
     header = [str(c).strip().lower() if c is not None else "" for c in rows[0]]
+    # "#" is the SQUAD NUMBER column, not the name one. Reading it as the name
+    # imported a FIBA sheet as players called "5" and "24" — every real name on
+    # it thrown away. "players" is what those sheets actually head the name
+    # column with, and it was not in the list either.
     name_idx = next((i for i, h in enumerate(header)
-                     if h in ("name", "player", "player name", "athlete", "#")), 0)
+                     if h in ("name", "player", "players", "player name",
+                              "player_name", "athlete")), 0)
+    # The number beside the name. A box score prints one for every player and
+    # the import is what puts a squad number on a roster, so it travels with
+    # the line rather than being dropped at the door.
+    jersey_idx = next((i for i, h in enumerate(header)
+                       if h in ("#", "no", "no.", "num", "number", "jersey",
+                                "jersey #", "shirt", "squad number")), None)
     cols: dict[int, str] = {}
     for i, h in enumerate(header):
         for pat, field in _SHEET_COL_MAP:
@@ -170,6 +183,14 @@ def _canonical_rows_from_sheet(rows: list[list]) -> list[tuple[str, dict]]:
         if name_idx >= len(row) or not row[name_idx] or not str(row[name_idx]).strip():
             continue
         vals: dict[str, float] = {}
+        if jersey_idx is not None and jersey_idx < len(row):
+            # Kept as text: "07" is a squad number, not the integer seven.
+            worn = str(row[jersey_idx] if row[jersey_idx] is not None else "").strip()
+            # A spreadsheet hands back 5 as 5.0; nobody wears 5.0.
+            if worn.endswith(".0"):
+                worn = worn[:-2]
+            if worn:
+                vals["JERSEY"] = worn
         for i, field in cols.items():
             if i >= len(row):
                 continue
@@ -461,6 +482,9 @@ async def import_game_stats(
                     if not pname:
                         continue
                     vals = {k: pl[k] for k in BOX_SCORE_FIELDS if isinstance(pl.get(k), (int, float))}
+                    worn = str(pl.get("jersey") or pl.get("#") or "").strip()
+                    if worn:
+                        vals["JERSEY"] = worn
                     # MIN arrives as "27:13" as often as a number, and PM is
                     # signed — neither survives the numeric filter above.
                     mins = _minutes_value(pl.get("MIN"))
@@ -497,10 +521,12 @@ async def import_game_stats(
     imported = 0
     for side, pname, vals in collected:
         _save_line_values(db, game.id, side, pname, vals)
+        worn = str(vals.get("JERSEY") or "").strip() or None
         for stat, count in _stats_from_canonical(vals).items():
             raw = _import_raw(stat, count)
             db.add(models.GamePlayerStat(
                 game_id=game.id, player_name=pname, is_opponent=side,
+                jersey_number=worn,
                 quarter=q, stat_name=stat, stat_category=stat_category(stat),
                 raw_points=raw, quarter_multiplier=mult, weighted_points=raw * mult, count=count,
                 source="import",
@@ -841,18 +867,21 @@ def game_insights_text(db: Session, game: models.GameSession) -> str:
             continue
         body = []
         for r in rows:
-            body.append([r["player"]] + [
+            body.append([r.get("jersey") or "-", r["player"]] + [
                 _fmt_min(r.get(c)) if c == "MIN"
                 else _fmt_signed(r.get(c)) if c == "PM"
                 else (r.get(c) if r.get(c) is not None else "-")
                 for c in cols])
-        body.append(["TOTAL"] + [
+        # The totals line has no number beside it — nobody wears the team's.
+        body.append(["", "TOTAL"] + [
             _fmt_min(totals.get(c)) if c == "MIN"
             else _fmt_signed(totals.get(c)) if c == "PM"
             else (totals.get(c) if totals.get(c) is not None else "-")
             for c in cols])
         out.append(f"{name.upper()} — BOX SCORE")
-        out.append(_md_table(["Player", *labels], body))
+        # The squad number leads the line, the way every printed box score has
+        # it — it is how a coach reads a sheet back against the film.
+        out.append(_md_table(["#", "Player", *labels], body))
 
     return "\n".join(out).strip()
 

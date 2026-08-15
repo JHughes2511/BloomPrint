@@ -87,13 +87,25 @@ export function mdToHtml(md: string): string {
       // renderer lays tables out on declared widths rather than measuring the
       // text, so a table without them collapses into its first column.
       const cols = Math.max(header.length, ...body.map(r => r.length), 1);
-      // A box score is a name and eighteen numbers. Split evenly, the name got
-      // the same 5% as PF and came out as two stacked half-words, so the first
-      // column of a wide table is given room and the rest share what is left.
+      // Columns are sized by what is in them. A box score is a squad number, a
+      // name and eighteen numbers: split evenly the name got the same 5% as PF
+      // and came out as two stacked half-words. Giving the FIRST column the
+      // room was no better — as soon as the number column moved in front of the
+      // name, the widening went to a column holding "5".
+      //
+      // The longest cell in each column is the weight, clamped so one long
+      // note cannot take the whole table and a two-character heading still
+      // gets something to sit in.
+      const longest = (k: number) => Math.max(
+        (header[k] ?? '').length,
+        ...body.map(r => (r[k] ?? '').length),
+        1,
+      );
+      const weights = Array.from({ length: cols },
+                                 (_, k) => Math.min(26, Math.max(3, longest(k))));
+      const total = weights.reduce((a, b) => a + b, 0);
+      const width = (k: number) => ((weights[k] / total) * 100).toFixed(2);
       const wide = cols >= 8;
-      const firstW = wide ? Math.min(20, (100 / cols) * 2.8) : 100 / cols;
-      const restW = wide ? (100 - firstW) / (cols - 1) : 100 / cols;
-      const width = (k: number) => (k === 0 ? firstW : restW).toFixed(2);
       // And the cells themselves tighten, because nineteen columns of 11px on a
       // portrait page is more text than the width can hold.
       const cellPad = wide
