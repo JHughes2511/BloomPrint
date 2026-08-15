@@ -81,6 +81,17 @@ export type ReportSearch = {
    * render that made it, and the arrows then had nowhere to jump to.
    */
   registerActive?: (node: any) => void;
+  /**
+   * Keep the matches split out of the text, but paint nothing.
+   *
+   * Highlighting divides a paragraph into several Text nodes, and a browser
+   * breaks lines differently across that boundary than it does through a plain
+   * string — so taking the colouring away re-broke the paragraph and nudged
+   * everything under it by a few pixels, at the exact moment the coach was
+   * dismissing the search and expecting the page to hold still. Closing mutes
+   * the colour and leaves the split alone.
+   */
+  muted?: boolean;
 };
 
 type Counter = { n: number };
@@ -109,7 +120,7 @@ function Hi({ text, style, search, counter }: {
       <Text
         key={`m${k}`}
         ref={isActive ? (n: any) => { search.registerActive?.(n); } : undefined}
-        style={{
+        style={search.muted ? undefined : {
           // The one the arrows are on is the strong colour; the rest are the
           // softer wash a browser uses, so "where am I" is answerable at a
           // glance without losing sight of the others.
@@ -387,6 +398,9 @@ export function renderReport(
 ): React.ReactElement[] {
   if (!text) return [];
   const active = search && (search.query ?? '').trim() ? search : undefined;
+  // A muted search draws nothing, so the match counting below is skipped for
+  // it — there is no highlight to count towards.
+  const counting = active && !active.muted ? active : undefined;
   const elements: React.ReactElement[] = [];
   let seen = 0;
 
@@ -402,8 +416,8 @@ export function renderReport(
   }
 
   for (const b of blocks) {
-    const here = active
-      ? blockStrings(b).reduce((n, s) => n + matchRanges(s, active.query).length, 0)
+    const here = counting
+      ? blockStrings(b).reduce((n, s) => n + matchRanges(s, counting.query).length, 0)
       : 0;
     elements.push(renderBlock(b, colors, active, seen,
                               b.kind === 'table' ? peers.get(shape(b.header)) : undefined));
