@@ -37,7 +37,7 @@ VERSION = 2
 # Separate from VERSION because it is the cache key for translations: reword a
 # button and every language needs retranslating, while the stored answers still
 # mean exactly what they meant before.
-CONTENT_REVISION = 7
+CONTENT_REVISION = 8
 
 # Deliberately ranges rather than a number. A range still cuts the results by
 # age, and asking a fourteen-year-old for their date of birth to answer six
@@ -96,7 +96,7 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Which of these would change your week if they were already done for you?",
+            "text": "Which of these would change your week if they were already finished by the time you sat down?",
             "multi": True,
             "options": [
                 "Film turned into written notes I can hand out",
@@ -118,14 +118,18 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Think about the software you already use for your team. What do you most want from it over time?",
+            # One gap, not a list of everything mildly annoying. Asking for
+            # the biggest is what separates "this is why I would switch" from
+            # "this could be nicer", and a cold audience answers a single pick
+            # far more readily than a ranking.
+            "text": "Think about the tools you use for your team now. What is the biggest thing they don't do that you wish they did?",
             "options": [
-                "Something new every two or three weeks, with a note saying what changed",
-                "A few improvements a season, at a steady pace",
-                "It gets better at the job the more I use it",
-                "Everything I've put into it stays in one place and carries forward",
-                "Nothing new — I'd rather it stayed exactly as it is",
-                "I don't notice either way",
+                "They hold the film and the stats but don't tell me anything about the game",
+                "They show me one game, not whether a player is actually getting better",
+                "Getting a report to my staff or players is on me — I export and send it",
+                "I end up typing the same numbers in twice",
+                "They don't get any better at the job the longer I use them",
+                "Nothing — what I use does what I need",
             ],
         },
         {
@@ -196,14 +200,14 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Think about the software you already use to scout. What do you most want from it over time?",
+            "text": "Think about the tools you use to scout now. What is the biggest thing they don't do that you wish they did?",
             "options": [
-                "Something new every two or three weeks, with a note saying what changed",
-                "A few improvements a season, at a steady pace",
-                "It gets better at the job the more I use it",
-                "Everything I've put into it stays in one place and carries forward",
-                "Nothing new — I'd rather it stayed exactly as it is",
-                "I don't notice either way",
+                "They store my notes but don't turn them into a read on the opponent",
+                "They cover one game, not what a team does over a season",
+                "Getting the report to the staff who need it is on me",
+                "I end up typing the same numbers in twice",
+                "They don't get any better at the job the longer I use them",
+                "Nothing — what I use does what I need",
             ],
         },
         {
@@ -275,14 +279,14 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Think about the software you already use with your athletes. What do you most want from it over time?",
+            "text": "Think about the tools you use with your athletes now. What is the biggest thing they don't do that you wish they did?",
             "options": [
-                "Something new every two or three weeks, with a note saying what changed",
-                "A few improvements a season, at a steady pace",
-                "It gets better at the job the more I use it",
-                "Everything I've put into it stays in one place and carries forward",
-                "Nothing new — I'd rather it stayed exactly as it is",
-                "I don't notice either way",
+                "They log the work but don't show whether an athlete is improving",
+                "They handle one session, not a plan that carries across weeks",
+                "Getting a programme to an athlete in a form they open is on me",
+                "I end up writing the same programme out twice",
+                "They don't get any better at the job the longer I use them",
+                "Nothing — what I use does what I need",
             ],
         },
         {
@@ -348,14 +352,14 @@ QUESTIONS: dict[str, list[dict]] = {
             ],
         },
         {
-            "text": "Think about the software your staff already uses. What do you most want from it over time?",
+            "text": "Think about the tools your staff uses now. What is the biggest thing they don't do that you wish they did?",
             "options": [
-                "Something new every two or three weeks, with a note saying what changed",
-                "A few improvements a season, at a steady pace",
-                "It gets better at the job the more I use it",
-                "Everything I've put into it stays in one place and carries forward",
-                "Nothing new — I'd rather it stayed exactly as it is",
-                "I don't notice either way",
+                "They hold the film and stats but don't tell us anything about the game",
+                "They show one game, not whether a player is actually getting better",
+                "Getting the report to the staff who need it is on me",
+                "I end up entering the same numbers twice",
+                "They don't get any better at the job the longer we use them",
+                "Nothing — what we use does what we need",
             ],
         },
         {
