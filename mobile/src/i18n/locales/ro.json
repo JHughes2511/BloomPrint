@@ -186,7 +186,8 @@
       "updatedTitle": "Actualizat",
       "updatedSavedMsg": "Salvat ca {{label}} propriu. Se află acum în Recente.",
       "couldNotRegenerate": "Nu s-a putut regenera",
-      "buildingUpdated": "Se construiește raportul actualizat…"
+      "buildingUpdated": "Se construiește raportul actualizat…",
+      "sourceGone": "{{name}} a șters asta, deci nu mai e nimic de arătat. Ce aveai rămâne în fila ta Meciuri."
     },
     "exportSections": {
       "exportPrint": "Exportă / Printează",

@@ -186,7 +186,8 @@
       "updatedTitle": "Uppdaterad",
       "updatedSavedMsg": "Sparad som din egen {{label}}. Den finns nu i dina Senaste.",
       "couldNotRegenerate": "Kunde inte generera om",
-      "buildingUpdated": "Bygger din uppdaterade rapport…"
+      "buildingUpdated": "Bygger din uppdaterade rapport…",
+      "sourceGone": "{{name}} raderade detta, så det finns inget kvar att visa. Det du hade av det finns kvar under din Matcher-flik."
     },
     "exportSections": {
       "exportPrint": "Exportera / Skriv ut",

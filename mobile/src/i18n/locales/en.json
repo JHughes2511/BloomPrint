@@ -186,7 +186,8 @@
       "updatedTitle": "Updated",
       "updatedSavedMsg": "Saved as your own {{label}}. It's now in your Recents.",
       "couldNotRegenerate": "Could not regenerate",
-      "buildingUpdated": "Building your updated report…"
+      "buildingUpdated": "Building your updated report…",
+      "sourceGone": "{{name}} deleted this, so there is nothing left to show. Anything you had of it is kept on your own Games tab."
     },
     "exportSections": {
       "exportPrint": "Export / Print",

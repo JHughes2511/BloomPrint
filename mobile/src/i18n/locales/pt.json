@@ -186,7 +186,8 @@
       "updatedTitle": "Atualizado",
       "updatedSavedMsg": "Salvo como seu próprio {{label}}. Já está nos seus Recentes.",
       "couldNotRegenerate": "Não foi possível regenerar",
-      "buildingUpdated": "Criando seu relatório atualizado…"
+      "buildingUpdated": "Criando seu relatório atualizado…",
+      "sourceGone": "{{name}} excluiu isto, então não há mais nada para mostrar. O que você tinha fica na sua aba Jogos."
     },
     "exportSections": {
       "exportPrint": "Exportar / Imprimir",

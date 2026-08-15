@@ -186,7 +186,8 @@
       "updatedTitle": "Bijgewerkt",
       "updatedSavedMsg": "Opgeslagen als je eigen {{label}}. Het staat nu bij je Recent.",
       "couldNotRegenerate": "Kon niet opnieuw genereren",
-      "buildingUpdated": "Je bijgewerkte rapport wordt opgebouwd…"
+      "buildingUpdated": "Je bijgewerkte rapport wordt opgebouwd…",
+      "sourceGone": "{{name}} heeft dit verwijderd, er is niets meer te tonen. Wat je ervan had, blijft op je Wedstrijden-tab staan."
     },
     "exportSections": {
       "exportPrint": "Exporteren / Afdrukken",

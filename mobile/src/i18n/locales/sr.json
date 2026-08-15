@@ -186,7 +186,8 @@
       "updatedTitle": "Ažurirano",
       "updatedSavedMsg": "Sačuvano kao tvoj sopstveni {{label}}. Sada je u tvom odeljku Nedavno.",
       "couldNotRegenerate": "Nije moguće regenerisati",
-      "buildingUpdated": "Pravimo tvoj ažurirani izveštaj…"
+      "buildingUpdated": "Pravimo tvoj ažurirani izveštaj…",
+      "sourceGone": "{{name}} је ово обрисао, па нема више шта да се прикаже. Оно што си имао остаје на твојој картици Утакмице."
     },
     "exportSections": {
       "exportPrint": "Izvoz / Štampa",

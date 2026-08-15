@@ -186,7 +186,8 @@
       "updatedTitle": "Atnaujinta",
       "updatedSavedMsg": "Išsaugota kaip jūsų pačių {{label}}. Dabar tai yra jūsų naujausiuose.",
       "couldNotRegenerate": "Nepavyko pergeneruoti",
-      "buildingUpdated": "Kuriama atnaujinta ataskaita…"
+      "buildingUpdated": "Kuriama atnaujinta ataskaita…",
+      "sourceGone": "{{name}} tai ištrynė, tad nebėra ką rodyti. Tai, ką turėjote, lieka jūsų Rungtynių kortelėje."
     },
     "exportSections": {
       "exportPrint": "Eksportuoti / spausdinti",

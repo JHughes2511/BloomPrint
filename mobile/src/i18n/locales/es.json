@@ -186,7 +186,8 @@
       "updatedTitle": "Actualizado",
       "updatedSavedMsg": "Guardado como tu propio {{label}}. Ya está en tus Recientes.",
       "couldNotRegenerate": "No se pudo regenerar",
-      "buildingUpdated": "Creando tu informe actualizado…"
+      "buildingUpdated": "Creando tu informe actualizado…",
+      "sourceGone": "{{name}} lo eliminó, así que no queda nada que mostrar. Lo que tenías de él se conserva en tu pestaña Partidos."
     },
     "exportSections": {
       "exportPrint": "Exportar / Imprimir",

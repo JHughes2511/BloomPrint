@@ -186,7 +186,8 @@
       "updatedTitle": "更新しました",
       "updatedSavedMsg": "自分の{{label}}として保存しました。最近の項目に追加されました。",
       "couldNotRegenerate": "再生成できませんでした",
-      "buildingUpdated": "更新されたレポートを作成中…"
+      "buildingUpdated": "更新されたレポートを作成中…",
+      "sourceGone": "{{name}} がこれを削除したため、表示できるものが残っていません。あなたが持っていた分は「試合」タブに残ります。"
     },
     "exportSections": {
       "exportPrint": "エクスポート／印刷",

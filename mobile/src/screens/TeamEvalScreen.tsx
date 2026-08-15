@@ -2775,6 +2775,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   {detailGame.location ? ` · ${detailGame.location}` : ''}
                   {' · '}{phaseLabel(detailGame.season_phase)}
                 </Text>
+                {/* Where this game came from, said on the page you read it on
+                    and not only on the card you opened. A frozen game stopped
+                    following its sender, and a coach comparing it against
+                    theirs has no other way to know that. */}
+                {!!(detailGame.frozen_from || detailGame.shared_by) && (
+                  <Text style={{ color: t.accent, fontSize: 12, marginTop: 4 }}>
+                    {detailGame.frozen_from
+                      ? tr('teamGrade.frozenFromCoach', { name: detailGame.frozen_from })
+                      : tr('teamGrade.sharedByCoach', { name: detailGame.shared_by })}
+                  </Text>
+                )}
               </View>
               {/* The result, where a result belongs. It is worked out from the
                   box score, so an imported game already knows it and asking the

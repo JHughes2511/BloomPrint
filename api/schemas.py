@@ -588,6 +588,10 @@ class StaffSharedReportOut(BaseModel):
     sender_name: str = ""
     recipient_name: str = ""
     report_text: str | None = None  # resolved from actual report
+    # The report this share points at is gone — the sender deleted it. Said
+    # out loud, because the alternative is an entry that opens on nothing and
+    # reads as the app having lost it.
+    source_missing: bool = False
     # Headings the sender left out. The text above is live, so the reader
     # applies these when rendering — using the same splitter that produced
     # them, rather than a second copy of it on the server.

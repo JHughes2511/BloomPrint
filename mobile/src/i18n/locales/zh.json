@@ -186,7 +186,8 @@
       "updatedTitle": "已更新",
       "updatedSavedMsg": "已保存为你自己的{{label}}。现在它在你的最近记录中。",
       "couldNotRegenerate": "无法重新生成",
-      "buildingUpdated": "正在生成你更新的报告…"
+      "buildingUpdated": "正在生成你更新的报告…",
+      "sourceGone": "{{name}} 已将其删除，没有内容可显示。你原有的部分仍保留在你的“比赛”标签中。"
     },
     "exportSections": {
       "exportPrint": "导出 / 打印",

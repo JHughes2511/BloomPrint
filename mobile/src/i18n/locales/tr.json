@@ -186,7 +186,8 @@
       "updatedTitle": "Güncellendi",
       "updatedSavedMsg": "Kendi {{label}} olarak kaydedildi. Artık Son öğelerinizde.",
       "couldNotRegenerate": "Yeniden oluşturulamadı",
-      "buildingUpdated": "Güncellenmiş raporunuz oluşturuluyor…"
+      "buildingUpdated": "Güncellenmiş raporunuz oluşturuluyor…",
+      "sourceGone": "{{name}} bunu sildi, gösterilecek bir şey kalmadı. Sende olanlar Maçlar sekmende duruyor."
     },
     "exportSections": {
       "exportPrint": "Dışa Aktar / Yazdır",

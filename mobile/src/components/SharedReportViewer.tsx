@@ -95,6 +95,9 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
     for (const sec of secs) keep[sec.heading] = !hide.includes(sec.heading);
     return joinReportSections(secs, keep) || text;
   };
+  // The report behind this share is gone. Saying so beats an empty page that
+  // reads as the app having lost it.
+  const gone = !!item?.source_missing;
   const bodyText = withoutHidden(bodyMode === 'updated'
     ? (item?.regenerated_text ?? item?.report_text ?? '')
     : (item?.report_text ?? ''));
@@ -263,7 +266,13 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                   />
                   {renderReport(rt.text, { heading: t.ink, body: t.inkSoft }, find.search)}
                 </>
-              ) : <Text style={{ color: t.muted2 }}>{tr('components.viewer.noContent')}</Text>}
+              ) : (
+                <Text style={{ color: t.muted2 }}>
+                  {gone
+                    ? tr('components.viewer.sourceGone', { name: item?.sender_name || '' })
+                    : tr('components.viewer.noContent')}
+                </Text>
+              )}
             </KeyboardAwareScrollView>
           </View>
 

@@ -186,7 +186,8 @@
       "updatedTitle": "Zaktualizowano",
       "updatedSavedMsg": "Zapisano jako Twój własny {{label}}. Jest teraz w Twoich Ostatnich.",
       "couldNotRegenerate": "Nie udało się wygenerować ponownie",
-      "buildingUpdated": "Tworzenie zaktualizowanego raportu…"
+      "buildingUpdated": "Tworzenie zaktualizowanego raportu…",
+      "sourceGone": "{{name}} to usunął, więc nie ma już czego pokazać. To, co miałeś, zostaje na Twojej karcie Mecze."
     },
     "exportSections": {
       "exportPrint": "Eksportuj / drukuj",

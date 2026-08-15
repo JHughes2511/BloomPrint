@@ -186,7 +186,8 @@
       "updatedTitle": "Mis à jour",
       "updatedSavedMsg": "Enregistré comme votre propre {{label}}. Il figure désormais dans vos Récents.",
       "couldNotRegenerate": "Impossible de régénérer",
-      "buildingUpdated": "Création de votre rapport mis à jour…"
+      "buildingUpdated": "Création de votre rapport mis à jour…",
+      "sourceGone": "{{name}} l'a supprimé, il ne reste donc rien à afficher. Ce que vous en aviez est conservé dans votre onglet Matchs."
     },
     "exportSections": {
       "exportPrint": "Exporter / Imprimer",

@@ -186,7 +186,8 @@
       "updatedTitle": "Aktualisiert",
       "updatedSavedMsg": "Als eigene {{label}} gespeichert. Sie ist jetzt in deinen zuletzt verwendeten Berichten.",
       "couldNotRegenerate": "Neu generieren nicht möglich",
-      "buildingUpdated": "Dein aktualisierter Bericht wird erstellt…"
+      "buildingUpdated": "Dein aktualisierter Bericht wird erstellt…",
+      "sourceGone": "{{name}} hat das gelöscht, es ist nichts mehr da. Was du davon hattest, bleibt in deinem Spiele-Tab."
     },
     "exportSections": {
       "exportPrint": "Exportieren / Drucken",

@@ -192,6 +192,10 @@ def _build_out(sr: models.StaffSharedReport, db: Session) -> schemas.StaffShared
     out.recipient_name = sr.recipient.name if sr.recipient else ""
     out.report_text = _share_text(sr, db)
     out.hidden_sections = _load_hidden(sr)
+    # A game the sender has since deleted resolves to nothing at all. Without
+    # this the card opens on an empty page and the coach is left to guess
+    # whether it is broken, still loading, or genuinely empty.
+    out.source_missing = not (out.report_text or "").strip()
     out.regenerated_text = sr.regenerated_text
     out.subject_name, out.output_type, out.overall_grade = _report_meta(sr.report_type, sr.report_id, db)
     # Counted across the whole conversation, so the number on the card matches

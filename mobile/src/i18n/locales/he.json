@@ -186,7 +186,8 @@
       "updatedTitle": "עודכן",
       "updatedSavedMsg": "נשמר כ{{label}} משלך. הוא נמצא כעת ברשימת האחרונים שלך.",
       "couldNotRegenerate": "לא ניתן ליצור מחדש",
-      "buildingUpdated": "בונה את הדוח המעודכן שלך…"
+      "buildingUpdated": "בונה את הדוח המעודכן שלך…",
+      "sourceGone": "{{name}} מחק את זה, אז לא נשאר מה להציג. מה שהיה לך נשמר בלשונית המשחקים שלך."
     },
     "exportSections": {
       "exportPrint": "ייצוא / הדפסה",

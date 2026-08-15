@@ -186,7 +186,8 @@
       "updatedTitle": "تم التحديث",
       "updatedSavedMsg": "حُفظ كـ {{label}} خاص بك. أصبح الآن ضمن عناصرك الأخيرة.",
       "couldNotRegenerate": "تعذّرت إعادة الإنشاء",
-      "buildingUpdated": "جارٍ إعداد تقريرك المحدَّث…"
+      "buildingUpdated": "جارٍ إعداد تقريرك المحدَّث…",
+      "sourceGone": "حذف {{name}} هذا، فلم يعد هناك ما يُعرض. ما كان لديك منه محفوظ في تبويب المباريات."
     },
     "exportSections": {
       "exportPrint": "تصدير / طباعة",
