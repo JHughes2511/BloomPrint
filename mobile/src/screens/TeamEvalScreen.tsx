@@ -1040,8 +1040,39 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       view: activeView === 'live' ? undefined : activeView,
       game: inGame ? String(detailGame.id) : undefined,
       tab: inGame ? detailTab : undefined,
+      // A scouted team and a game's written report are the same shape of
+      // thing as an open game: you got there from a list, and a refresh was
+      // sending you back to that list. Each of those pages is one scroll with
+      // no tabs of its own, so the selection is the whole of what to keep.
+      scout: activeView === 'scout' && scoutOpponent ? scoutOpponent : undefined,
+      report: activeView === 'gamereport' && gameReportGame
+        ? String(gameReportGame.id) : undefined,
     });
-  }, [activeView, detailGame?.id, detailTab]);
+  }, [activeView, detailGame?.id, detailTab, scoutOpponent, gameReportGame?.id]);
+
+  const restoredScout = useRef(false);
+  useEffect(() => {
+    const name = route?.params?.scout;
+    if (!name || restoredScout.current || scoutOpponent) return;
+    restoredScout.current = true;
+    void openScout(String(name));
+  }, [route?.params?.scout]);
+
+  const restoredReport = useRef(false);
+  useEffect(() => {
+    const rid = Number(route?.params?.report);
+    if (!rid || restoredReport.current || gameReportGame) return;
+    restoredReport.current = true;
+    (async () => {
+      try {
+        openGameReport(await gameEvalAPI.getSession(rid));
+      } catch {
+        // Gone, or somebody else's. Stay on the list rather than on a page
+        // that cannot load.
+        navigation?.setParams?.({ report: undefined });
+      }
+    })();
+  }, [route?.params?.report]);
 
   // And the tab it was holding, restored on a fresh load.
   const restoredView = useRef(false);
