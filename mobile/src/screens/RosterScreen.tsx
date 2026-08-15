@@ -490,7 +490,12 @@ export default function RosterScreen() {
                     ]
                   : [
                       { text: tr('common.cancel'), style: 'cancel' },
-                      ...(item.team_id
+                      // On a team means the row actually names one. A player
+                      // whose team was deleted keeps a team_id pointing at
+                      // nothing, and the card shows their level instead — so
+                      // going by the id offered to remove them from a team the
+                      // coach cannot see.
+                      ...(item.team_name
                         ? [{ text: tr('roster.removeFromTeam'), onPress: leaveTeam }]
                         : []),
                       { text: tr('common.delete'), style: 'destructive', onPress: () =>
