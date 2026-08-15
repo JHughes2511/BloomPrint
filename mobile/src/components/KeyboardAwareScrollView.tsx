@@ -71,7 +71,14 @@ const KeyboardAwareScrollView = forwardRef<ScrollView, ScrollViewProps>(
       <ScrollView
         ref={scrollRef}
         keyboardShouldPersistTaps="handled"
-        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        // Not on the web. react-native-web reads "on-drag" as "blur the
+        // focused element on any scroll event at all" — including a scroll the
+        // app made itself. Searching a report scrolls to each match as the
+        // coach types, so every keystroke after the first blurred the box they
+        // were typing into and the next letter went to the page. There is no
+        // on-screen keyboard to dismiss on the web anyway.
+        keyboardDismissMode={Platform.OS === 'web' ? 'none'
+          : Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
         onScroll={handleScroll}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}

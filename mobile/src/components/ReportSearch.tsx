@@ -175,6 +175,10 @@ export function ReportSearchBar({ ctl }: { ctl: ReportSearchControls }) {
       flexDirection: 'row', alignItems: 'center', gap: 8,
       paddingHorizontal: 10, paddingVertical: 8, marginBottom: 10,
       borderRadius: 10, borderWidth: 1, borderColor: t.line,
+      // Short of the report's full width, and sitting under the button that
+      // opened it. A find box does not need the whole column — it needs room
+      // for a word, a count and two arrows.
+      width: '100%', maxWidth: 460, alignSelf: 'flex-end',
       // Opaque. The bar holds the top of the report while the report scrolls
       // beneath it, so whatever is behind it is text — and `card` is a seven
       // per cent white in the dark theme, which let that text read straight
