@@ -3476,6 +3476,9 @@ def opponent_profile(
     scouting_by = {r.game_id: r for r in db.query(models.GameScoutingReport)
                    .filter(models.GameScoutingReport.game_id.in_(ids),
                            models.GameScoutingReport.coach_id == coach.id).all()}
+    # Every team row's name, whoever owns it: a shared game is filed under the
+    # sender's team, and its name is what says who played.
+    team_names = {t.id: t.name for t in db.query(models.Team).all()}
 
     for game in games:
         # The coach's own scouting report for that game (not another coach's).
@@ -3484,10 +3487,24 @@ def opponent_profile(
                      or (game.ai_scouting_report if game.coach_id == coach.id else None))
         if own_scout:
             latest_report = own_scout
-        # Which bench this team was on in THIS game. A team can be the game's
-        # own team in one and the opponent in the next; reading is_opponent
-        # blindly would scout whoever they happened to be playing.
-        theirs = game.team_id not in same if same else True
+        # Which bench this team was on in THIS game — read off the two names
+        # on the scoreboard, not worked out from the team_id.
+        #
+        # A game has a side of its own and an opponent, and each has a name.
+        # The scouted team is whichever of those two it matches; the rows on
+        # that side are its players, and that is the whole rule. Deciding it
+        # from team_id instead meant any game whose id did not land in the set
+        # -- a team row belonging to another coach, a game filed with no team
+        # at all -- silently fell to the other bench and put the opponent's
+        # players under this team's name.
+        team_row = team_names.get(game.team_id)
+        want = _norm_team(opponent_name)
+        if _norm_team(team_row) == want:
+            theirs = False
+        elif _norm_team(game.opponent_name) == want:
+            theirs = True
+        else:
+            continue    # neither side of this game is the team being scouted
         opp_stats = [s for s in stats_by.get(game.id, []) if bool(s.is_opponent) == theirs]
         for s in opp_stats:
             if s.player_name not in player_totals:

@@ -179,16 +179,21 @@ function columnWidths(
   return ideal.map(w => Math.max(COL_MIN, Math.round(w * scale)));
 }
 
-function TableBlock({ header, rows, colors, search, base }: {
+function TableBlock({ header, rows, colors, search, base, sizingRows }: {
   header: string[]; rows: string[][]; colors: { heading: string; body: string };
-  search?: ReportSearch; base?: number;
+  search?: ReportSearch; base?: number; sizingRows?: string[][];
 }): React.ReactElement {
   // The width of the text column this table sits in, which is the most a table
   // is ever allowed to be. Measured rather than assumed: the same report is
   // rendered in a phone screen, a desktop page and an 820px modal.
   const [available, setAvailable] = React.useState(0);
-  const cols = Math.max(header.length, ...rows.map(r => r.length));
-  const widths = columnWidths(header, rows, cols, available);
+  // Sized from every table in this report that has the same headings, not
+  // from this one alone. Two box scores are the same table twice — one per
+  // team — and sizing each to its own longest name printed them at two
+  // different widths, one above the other, on a page a coach reads as a pair.
+  const sizeFrom = sizingRows ?? rows;
+  const cols = Math.max(header.length, ...sizeFrom.map(r => r.length), ...rows.map(r => r.length));
+  const widths = columnWidths(header, sizeFrom, cols, available);
   const total = widths.reduce((a, b) => a + b, 0);
   const scrolls = !!available && total > available + 1;
 
@@ -331,6 +336,7 @@ function renderBlock(
   colors: { heading: string; body: string },
   search: ReportSearch | undefined,
   base: number,
+  sizingRows?: string[][],
 ): React.ReactElement {
   const key = b.kind === 'table' ? `table-${b.index}`
     : b.kind === 'spacer' ? `spacer-${b.index}` : `line-${b.index}`;
@@ -338,7 +344,7 @@ function renderBlock(
   if (b.kind === 'spacer') return <View key={key} style={{ height: 9 }} />;
   if (b.kind === 'table') {
     return <TableBlock key={key} header={b.header} rows={b.rows} colors={colors}
-                       search={search} base={base} />;
+                       search={search} base={base} sizingRows={sizingRows} />;
   }
 
   const counter: Counter = { n: base };
@@ -384,11 +390,23 @@ export function renderReport(
   const elements: React.ReactElement[] = [];
   let seen = 0;
 
-  for (const b of walkReport(text)) {
+  // Tables sharing a set of headings are the same table repeated, so they are
+  // measured together and come out the same width.
+  const blocks = [...walkReport(text)];
+  const shape = (h: string[]) => h.map(x => x.trim().toLowerCase()).join('|');
+  const peers = new Map<string, string[][]>();
+  for (const b of blocks) {
+    if (b.kind !== 'table') continue;
+    const k = shape(b.header);
+    peers.set(k, [...(peers.get(k) ?? []), ...b.rows]);
+  }
+
+  for (const b of blocks) {
     const here = active
       ? blockStrings(b).reduce((n, s) => n + matchRanges(s, active.query).length, 0)
       : 0;
-    elements.push(renderBlock(b, colors, active, seen));
+    elements.push(renderBlock(b, colors, active, seen,
+                              b.kind === 'table' ? peers.get(shape(b.header)) : undefined));
     seen += here;
   }
   return elements;
