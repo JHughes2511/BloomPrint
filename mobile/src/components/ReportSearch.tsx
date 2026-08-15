@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useBreakpoint } from '../responsive/useBreakpoint';
 import { useTheme } from '../theme/ThemeProvider';
 import { fonts } from '../theme/typography';
 import { countReportMatches, type ReportSearch } from '../utils/renderReport';
@@ -113,21 +114,32 @@ export function ReportSearchButton(
 ) {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
+  const { isPhone } = useBreakpoint();
   return (
     <TouchableOpacity
       onPress={() => { if (!ctl.open) onOpen?.(); ctl.setOpen(o => !o); }}
       accessibilityLabel={tr('reportSearch.open')}
+      // A square tap target once the word is gone, rather than a wide box with
+      // an icon adrift in it.
       style={{
-        flexDirection: 'row', alignItems: 'center', gap: 6,
-        paddingHorizontal: 10, paddingVertical: 7, borderRadius: 8,
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+        paddingHorizontal: isPhone ? 8 : 10, paddingVertical: 7, borderRadius: 8,
         borderWidth: 1, borderColor: ctl.open ? t.accent : t.line,
         backgroundColor: ctl.open ? t.accentSoft : 'transparent',
       }}
     >
-      <Ionicons name="search" size={14} color={ctl.open ? t.accent : t.muted} />
-      <Text style={{ color: ctl.open ? t.accent : t.muted, fontSize: 11.5, fontFamily: fonts[600] }}>
-        {tr('reportSearch.open')}
-      </Text>
+      <Ionicons name={isPhone ? 'search-outline' : 'search'} size={isPhone ? 16 : 14}
+                color={ctl.open ? t.accent : t.muted} />
+      {/* On a phone the word costs more than it says. A report's title is the
+          long thing on that row -- "Coaching Report - Scouting Report" -- and
+          the labelled button pushed it into two lines and then clipped it. The
+          icon alone is the same control; the accessibility label still reads
+          it out. */}
+      {!isPhone && (
+        <Text style={{ color: ctl.open ? t.accent : t.muted, fontSize: 11.5, fontFamily: fonts[600] }}>
+          {tr('reportSearch.open')}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 }
