@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "Could not remove that player from your roster.",
     "myTeamLabel": "One of my teams",
     "myTeamOn": "Counts toward my season record.",
-    "myTeamOff": "A team I keep records on. Its games and grades are here, but they stay out of my record."
+    "myTeamOff": "A team I keep records on. Its games and grades are here, but they stay out of my record.",
+    "removeFromTeam": "Remove from team",
+    "couldNotRemoveFromTeam": "Could not remove them from the team.",
+    "deleteNotYours": "Delete (not yours)",
+    "deleteNotYoursTitle": "Not your player",
+    "deleteNotYoursMsg": "This player belongs to the coach who shared them. You can take them off your roster, but only their coach can delete them."
   },
   "importScreen": {
     "titleRoster": "Import Roster",

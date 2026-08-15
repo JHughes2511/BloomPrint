@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "その選手をロースターから外せませんでした。",
     "myTeamLabel": "自分のチーム",
     "myTeamOn": "自分のシーズン成績に含めます。",
-    "myTeamOff": "記録を取っているチームです。試合と評価はここにありますが、自分の成績には含めません。"
+    "myTeamOff": "記録を取っているチームです。試合と評価はここにありますが、自分の成績には含めません。",
+    "removeFromTeam": "チームから外す",
+    "couldNotRemoveFromTeam": "チームから外せませんでした。",
+    "deleteNotYours": "削除（自分の選手ではありません）",
+    "deleteNotYoursTitle": "自分の選手ではありません",
+    "deleteNotYoursMsg": "この選手は共有した指導者のものです。自分のロスターからは外せますが、削除できるのはその指導者だけです。"
   },
   "importScreen": {
     "titleRoster": "名簿をインポート",

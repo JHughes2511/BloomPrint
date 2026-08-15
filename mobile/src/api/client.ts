@@ -327,6 +327,9 @@ export const playersAPI = {
   /** Take a player off MY roster that a shared report put there. */
   dropShared: (playerId: number) =>
     api.delete(`/players/${playerId}/access`).then(r => r.data),
+  /** Take a player off their team, keeping them in the account. */
+  leaveTeam: (playerId: number) =>
+    api.post(`/players/${playerId}/leave-team`).then(r => r.data),
   list: (teamId?: number) =>
     api.get('/players', { params: teamId != null ? { team_id: teamId } : {} }).then(r => r.data),
 

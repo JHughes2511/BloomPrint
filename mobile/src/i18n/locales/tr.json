@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "Oyuncu kadrondan çıkarılamadı.",
     "myTeamLabel": "Kendi takımlarımdan biri",
     "myTeamOn": "Sezon karneme sayılır.",
-    "myTeamOff": "Kayıt tuttuğum bir takım. Maçları ve notları burada, ama karneme girmez."
+    "myTeamOff": "Kayıt tuttuğum bir takım. Maçları ve notları burada, ama karneme girmez.",
+    "removeFromTeam": "Takımdan çıkar",
+    "couldNotRemoveFromTeam": "Oyuncu takımdan çıkarılamadı.",
+    "deleteNotYours": "Sil (senin değil)",
+    "deleteNotYoursTitle": "Senin oyuncun değil",
+    "deleteNotYoursMsg": "Bu oyuncu, onu paylaşan antrenöre ait. Kendi kadrondan çıkarabilirsin, ama yalnızca antrenörü silebilir."
   },
   "importScreen": {
     "titleRoster": "Kadro İçe Aktar",

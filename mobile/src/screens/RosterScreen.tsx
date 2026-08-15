@@ -210,7 +210,7 @@ export default function RosterScreen() {
     if (!newName.trim()) return;
     setSaving(true);
     try {
-      await playersAPI.create({
+      const created = await playersAPI.create({
         name: newName,
         position: newPos || undefined,
         jersey_number: newJersey || undefined,
@@ -231,6 +231,12 @@ export default function RosterScreen() {
       setNewWeight(''); setNewStandingReach('');
       setNewSchool(''); setNewCity(''); setNewState(''); setNewCountry('');
       setParentPermission(false);
+      // On screen straight away, at the top, rather than after a round trip
+      // and a full re-read of the roster — the coach knows who they just
+      // added and should not have to wait to see them.
+      if (created?.id) {
+        setPlayers(prev => [created, ...prev.filter(p => p.id !== created.id)]);
+      }
       load();
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('roster.couldNotAddPlayer'));
@@ -461,18 +467,32 @@ export default function RosterScreen() {
               };
               const removeShared = () =>
                 removeNow(() => playersAPI.dropShared(item.id), tr('roster.couldNotRemoveShared'));
-              // Only one of the two ever applies. Offering both put "Remove
-              // from my roster" in front of a player the coach owns, where it
-              // can only fail — "this player is not on your roster through a
-              // share" is true and useless.
+              // Off the team, still in the account. A player who moves club
+              // keeps their evaluations, their grades and the games they
+              // played — none of that is a squad list.
+              const leaveTeam = () =>
+                removeNow(() => playersAPI.leaveTeam(item.id), tr('roster.couldNotRemoveFromTeam'));
+              // Two different things, and both are offered. Removing takes the
+              // player off this team and leaves them in the account; deleting
+              // takes them out of it altogether. A player who moves club is
+              // the first, not the second.
+              //
+              // On a player who arrived through another coach's share, removing
+              // gives back the share and deleting is not the coach's to do —
+              // it is shown, and says so, rather than failing when pressed.
               Alert.alert(tr('roster.deletePlayerTitle'), tr('roster.deletePlayerMsg', { name: item.name }),
                 item.shared
                   ? [
                       { text: tr('common.cancel'), style: 'cancel' },
                       { text: tr('roster.removeFromMyRoster'), onPress: removeShared },
+                      { text: tr('roster.deleteNotYours'), onPress: () =>
+                        Alert.alert(tr('roster.deleteNotYoursTitle'), tr('roster.deleteNotYoursMsg')) },
                     ]
                   : [
                       { text: tr('common.cancel'), style: 'cancel' },
+                      ...(item.team_id
+                        ? [{ text: tr('roster.removeFromTeam'), onPress: leaveTeam }]
+                        : []),
                       { text: tr('common.delete'), style: 'destructive', onPress: () =>
                         removeNow(() => playersAPI.delete(item.id), tr('roster.couldNotDeletePlayer')) },
                     ]);

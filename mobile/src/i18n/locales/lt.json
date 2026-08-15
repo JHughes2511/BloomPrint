@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "Nepavyko pašalinti žaidėjo iš tavo sudėties.",
     "myTeamLabel": "Viena iš mano komandų",
     "myTeamOn": "Įskaitoma į mano sezono rekordą.",
-    "myTeamOff": "Komanda, kurios duomenis kaupiu. Rungtynės ir vertinimai čia, bet į mano rekordą neįeina."
+    "myTeamOff": "Komanda, kurios duomenis kaupiu. Rungtynės ir vertinimai čia, bet į mano rekordą neįeina.",
+    "removeFromTeam": "Pašalinti iš komandos",
+    "couldNotRemoveFromTeam": "Nepavyko pašalinti žaidėjo iš komandos.",
+    "deleteNotYours": "Ištrinti (ne jūsų)",
+    "deleteNotYoursTitle": "Ne jūsų žaidėjas",
+    "deleteNotYoursMsg": "Šis žaidėjas priklauso treneriui, kuris jį pasidalijo. Galite jį pašalinti iš savo sąrašo, bet ištrinti gali tik jo treneris."
   },
   "importScreen": {
     "titleRoster": "Importuoti sąrašą",

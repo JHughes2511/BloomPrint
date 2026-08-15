@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "Spieler konnte nicht aus deinem Kader entfernt werden.",
     "myTeamLabel": "Eines meiner Teams",
     "myTeamOn": "Zählt für meine Saisonbilanz.",
-    "myTeamOff": "Ein Team, über das ich Aufzeichnungen führe. Spiele und Noten sind hier, bleiben aber außerhalb meiner Bilanz."
+    "myTeamOff": "Ein Team, über das ich Aufzeichnungen führe. Spiele und Noten sind hier, bleiben aber außerhalb meiner Bilanz.",
+    "removeFromTeam": "Aus dem Team entfernen",
+    "couldNotRemoveFromTeam": "Konnte nicht aus dem Team entfernt werden.",
+    "deleteNotYours": "Löschen (nicht deiner)",
+    "deleteNotYoursTitle": "Nicht dein Spieler",
+    "deleteNotYoursMsg": "Dieser Spieler gehört dem Trainer, der ihn geteilt hat. Du kannst ihn von deinem Kader nehmen, löschen kann ihn nur sein Trainer."
   },
   "importScreen": {
     "titleRoster": "Kader importieren",

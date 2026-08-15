@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "Não foi possível remover esse jogador do teu plantel.",
     "myTeamLabel": "Uma das minhas equipas",
     "myTeamOn": "Conta para o meu registo da época.",
-    "myTeamOff": "Uma equipa sobre a qual mantenho registos. Os jogos e notas estão aqui, mas ficam fora do meu registo."
+    "myTeamOff": "Uma equipa sobre a qual mantenho registos. Os jogos e notas estão aqui, mas ficam fora do meu registo.",
+    "removeFromTeam": "Remover da equipa",
+    "couldNotRemoveFromTeam": "Não foi possível removê-lo da equipa.",
+    "deleteNotYours": "Eliminar (não é teu)",
+    "deleteNotYoursTitle": "Não é o teu jogador",
+    "deleteNotYoursMsg": "Este jogador pertence ao treinador que o partilhou. Podes tirá-lo do teu plantel, mas só o treinador dele o pode eliminar."
   },
   "importScreen": {
     "titleRoster": "Importar Elenco",

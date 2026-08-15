@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "Kunde inte ta bort spelaren från din trupp.",
     "myTeamLabel": "Ett av mina lag",
     "myTeamOn": "Räknas i mitt säsongsfacit.",
-    "myTeamOff": "Ett lag jag för anteckningar om. Matcher och betyg finns här, men utanför mitt facit."
+    "myTeamOff": "Ett lag jag för anteckningar om. Matcher och betyg finns här, men utanför mitt facit.",
+    "removeFromTeam": "Ta bort från laget",
+    "couldNotRemoveFromTeam": "Kunde inte ta bort spelaren från laget.",
+    "deleteNotYours": "Radera (inte din)",
+    "deleteNotYoursTitle": "Inte din spelare",
+    "deleteNotYoursMsg": "Spelaren tillhör tränaren som delade den. Du kan ta bort den från din trupp, men bara deras tränare kan radera den."
   },
   "importScreen": {
     "titleRoster": "Importera trupp",

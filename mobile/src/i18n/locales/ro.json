@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "Nu s-a putut scoate jucătorul din lotul tău.",
     "myTeamLabel": "Una dintre echipele mele",
     "myTeamOn": "Contează în bilanțul meu de sezon.",
-    "myTeamOff": "O echipă despre care țin evidență. Meciurile și notele sunt aici, dar rămân în afara bilanțului meu."
+    "myTeamOff": "O echipă despre care țin evidență. Meciurile și notele sunt aici, dar rămân în afara bilanțului meu.",
+    "removeFromTeam": "Scoate din echipă",
+    "couldNotRemoveFromTeam": "Jucătorul nu a putut fi scos din echipă.",
+    "deleteNotYours": "Șterge (nu e al tău)",
+    "deleteNotYoursTitle": "Nu este jucătorul tău",
+    "deleteNotYoursMsg": "Acest jucător aparține antrenorului care l-a distribuit. Îl poți scoate din lotul tău, dar numai antrenorul lui îl poate șterge."
   },
   "importScreen": {
     "titleRoster": "Importă lot",

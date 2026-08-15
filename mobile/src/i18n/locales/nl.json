@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "Kon die speler niet uit je selectie halen.",
     "myTeamLabel": "Een van mijn teams",
     "myTeamOn": "Telt mee voor mijn seizoensbalans.",
-    "myTeamOff": "Een team dat ik bijhoud. De wedstrijden en cijfers staan hier, maar tellen niet mee."
+    "myTeamOff": "Een team dat ik bijhoud. De wedstrijden en cijfers staan hier, maar tellen niet mee.",
+    "removeFromTeam": "Uit team verwijderen",
+    "couldNotRemoveFromTeam": "Kon deze speler niet uit het team halen.",
+    "deleteNotYours": "Verwijderen (niet van jou)",
+    "deleteNotYoursTitle": "Niet jouw speler",
+    "deleteNotYoursMsg": "Deze speler hoort bij de coach die hem deelde. Je kunt hem van je selectie halen, maar alleen zijn coach kan hem verwijderen."
   },
   "importScreen": {
     "titleRoster": "Selectie importeren",

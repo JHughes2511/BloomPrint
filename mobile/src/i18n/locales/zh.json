@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "无法将该球员从你的名单中移除。",
     "myTeamLabel": "我的球队之一",
     "myTeamOn": "计入我的赛季战绩。",
-    "myTeamOff": "我只做记录的球队。比赛和评分都在这里，但不计入我的战绩。"
+    "myTeamOff": "我只做记录的球队。比赛和评分都在这里，但不计入我的战绩。",
+    "removeFromTeam": "移出球队",
+    "couldNotRemoveFromTeam": "无法将其移出球队。",
+    "deleteNotYours": "删除（不是你的）",
+    "deleteNotYoursTitle": "不是你的球员",
+    "deleteNotYoursMsg": "该球员属于分享他的教练。你可以把他移出你的名单，但只有他的教练才能删除。"
   },
   "importScreen": {
     "titleRoster": "导入阵容",

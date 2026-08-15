@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "Impossibile rimuovere quel giocatore dal tuo roster.",
     "myTeamLabel": "Una delle mie squadre",
     "myTeamOn": "Conta nel mio bilancio stagionale.",
-    "myTeamOff": "Una squadra di cui tengo traccia. Partite e voti sono qui, ma restano fuori dal mio bilancio."
+    "myTeamOff": "Una squadra di cui tengo traccia. Partite e voti sono qui, ma restano fuori dal mio bilancio.",
+    "removeFromTeam": "Rimuovi dalla squadra",
+    "couldNotRemoveFromTeam": "Non è stato possibile rimuoverlo dalla squadra.",
+    "deleteNotYours": "Elimina (non è tuo)",
+    "deleteNotYoursTitle": "Non è il tuo giocatore",
+    "deleteNotYoursMsg": "Questo giocatore appartiene all'allenatore che l'ha condiviso. Puoi toglierlo dal tuo roster, ma solo il suo allenatore può eliminarlo."
   },
   "importScreen": {
     "titleRoster": "Importa Rosa",

@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "Nie udało się usunąć zawodnika z Twojego składu.",
     "myTeamLabel": "Jedna z moich drużyn",
     "myTeamOn": "Liczy się do mojego bilansu sezonu.",
-    "myTeamOff": "Drużyna, którą obserwuję. Jej mecze i oceny są tutaj, ale poza moim bilansem."
+    "myTeamOff": "Drużyna, którą obserwuję. Jej mecze i oceny są tutaj, ale poza moim bilansem.",
+    "removeFromTeam": "Usuń z zespołu",
+    "couldNotRemoveFromTeam": "Nie udało się usunąć zawodnika z zespołu.",
+    "deleteNotYours": "Usuń trwale (nie Twój)",
+    "deleteNotYoursTitle": "To nie Twój zawodnik",
+    "deleteNotYoursMsg": "Ten zawodnik należy do trenera, który go udostępnił. Możesz go zdjąć ze swojej kadry, ale usunąć może go tylko jego trener."
   },
   "importScreen": {
     "titleRoster": "Importuj skład",

@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "해당 선수를 로스터에서 제거하지 못했습니다.",
     "myTeamLabel": "내 팀",
     "myTeamOn": "내 시즌 전적에 포함됩니다.",
-    "myTeamOff": "기록만 관리하는 팀입니다. 경기와 평점은 여기 있지만 내 전적에는 들어가지 않습니다."
+    "myTeamOff": "기록만 관리하는 팀입니다. 경기와 평점은 여기 있지만 내 전적에는 들어가지 않습니다.",
+    "removeFromTeam": "팀에서 제외",
+    "couldNotRemoveFromTeam": "팀에서 제외하지 못했습니다.",
+    "deleteNotYours": "삭제 (내 선수 아님)",
+    "deleteNotYoursTitle": "내 선수가 아닙니다",
+    "deleteNotYoursMsg": "이 선수는 공유한 코치의 선수입니다. 내 로스터에서 뺄 수는 있지만 삭제는 해당 코치만 할 수 있습니다."
   },
   "importScreen": {
     "titleRoster": "로스터 가져오기",

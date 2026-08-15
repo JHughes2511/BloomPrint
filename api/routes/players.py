@@ -125,6 +125,11 @@ def list_players(
     q = db.query(models.Player).filter(or_(*conds))
     if team_id is not None:
         q = q.filter(models.Player.team_id == team_id)
+    # Newest first. A coach adding a player was sent to the bottom of a long
+    # list to find them, and the one they just typed in is the one they are
+    # about to open. id, not created_at: the column is nullable on rows that
+    # predate it, and a null sorts unpredictably.
+    q = q.order_by(models.Player.id.desc())
     out = []
     for p in q.all():
         row = _with_grade(p, _bim_evals(db, coach, p))
@@ -133,6 +138,36 @@ def list_players(
         row.shared = p.coach_id != coach.id and p.id in granted
         out.append(row)
     return out
+
+
+@router.post("/{player_id}/leave-team")
+def remove_from_team(
+    player_id: int,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+):
+    """Take a player off the team they are on, and nothing else.
+
+    A player moves clubs, or an import filed them under the wrong side. Neither
+    is a reason to delete them: the evaluations, the grades and the games they
+    played are the record of a person, not of a squad list. So this clears the
+    team and leaves everything else exactly where it is — the player stays in
+    the account, under All, with no team beside their name, and can be put on
+    another team whenever the coach says so.
+
+    Their lines in a game already played are untouched. A box score is what
+    happened that night; it does not change because somebody left.
+    """
+    player = db.get(models.Player, player_id)
+    if not player or player.coach_id != coach.id:
+        # Somebody else's player, reached through a share. Their team is not
+        # this coach's to change — dropping the share is the action that fits.
+        raise HTTPException(status_code=404, detail="Player not found")
+    if player.team_id is None:
+        return {"ok": True, "team_id": None}
+    player.team_id = None
+    db.commit()
+    return {"ok": True, "team_id": None}
 
 
 @router.delete("/{player_id}/access")

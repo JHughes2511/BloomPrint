@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "Impossible de retirer ce joueur de votre effectif.",
     "myTeamLabel": "Une de mes équipes",
     "myTeamOn": "Compte dans mon bilan de la saison.",
-    "myTeamOff": "Une équipe que je suis. Ses matchs et ses notes sont ici, mais hors de mon bilan."
+    "myTeamOff": "Une équipe que je suis. Ses matchs et ses notes sont ici, mais hors de mon bilan.",
+    "removeFromTeam": "Retirer de l'équipe",
+    "couldNotRemoveFromTeam": "Impossible de le retirer de l'équipe.",
+    "deleteNotYours": "Supprimer (pas le vôtre)",
+    "deleteNotYoursTitle": "Pas votre joueur",
+    "deleteNotYoursMsg": "Ce joueur appartient à l'entraîneur qui l'a partagé. Vous pouvez le retirer de votre effectif, mais seul son entraîneur peut le supprimer."
   },
   "importScreen": {
     "titleRoster": "Importer l'effectif",

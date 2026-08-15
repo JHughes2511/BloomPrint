@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "No se pudo quitar a ese jugador de tu plantel.",
     "myTeamLabel": "Uno de mis equipos",
     "myTeamOn": "Cuenta para mi balance de temporada.",
-    "myTeamOff": "Un equipo del que llevo registro. Sus partidos y notas están aquí, pero no entran en mi balance."
+    "myTeamOff": "Un equipo del que llevo registro. Sus partidos y notas están aquí, pero no entran en mi balance.",
+    "removeFromTeam": "Quitar del equipo",
+    "couldNotRemoveFromTeam": "No se pudo quitar del equipo.",
+    "deleteNotYours": "Eliminar (no es tuyo)",
+    "deleteNotYoursTitle": "No es tu jugador",
+    "deleteNotYoursMsg": "Este jugador pertenece al entrenador que lo compartió. Puedes quitarlo de tu plantilla, pero solo su entrenador puede eliminarlo."
   },
   "importScreen": {
     "titleRoster": "Importar Plantilla",

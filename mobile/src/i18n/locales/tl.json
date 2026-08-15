@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "Hindi maalis ang player sa iyong roster.",
     "myTeamLabel": "Isa sa mga koponan ko",
     "myTeamOn": "Kabilang sa season record ko.",
-    "myTeamOff": "Koponang tinatala ko lang. Nandito ang mga laro at grado, pero wala sa record ko."
+    "myTeamOff": "Koponang tinatala ko lang. Nandito ang mga laro at grado, pero wala sa record ko.",
+    "removeFromTeam": "Alisin sa koponan",
+    "couldNotRemoveFromTeam": "Hindi siya naalis sa koponan.",
+    "deleteNotYours": "Burahin (hindi sa iyo)",
+    "deleteNotYoursTitle": "Hindi mo manlalaro",
+    "deleteNotYoursMsg": "Pag-aari siya ng coach na nagbahagi sa kanya. Maaari mo siyang alisin sa iyong roster, pero ang coach lang niya ang makakabura."
   },
   "importScreen": {
     "titleRoster": "Mag-import ng Roster",

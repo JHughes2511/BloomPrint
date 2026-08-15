@@ -1662,7 +1662,12 @@
     "couldNotRemoveShared": "Nije moguće ukloniti igrača s tvog popisa.",
     "myTeamLabel": "Jedna od mojih momčadi",
     "myTeamOn": "Ulazi u moj sezonski učinak.",
-    "myTeamOff": "Momčad koju pratim. Utakmice i ocjene su ovdje, ali izvan mog učinka."
+    "myTeamOff": "Momčad koju pratim. Utakmice i ocjene su ovdje, ali izvan mog učinka.",
+    "removeFromTeam": "Ukloni iz momčadi",
+    "couldNotRemoveFromTeam": "Igrača nije bilo moguće ukloniti iz momčadi.",
+    "deleteNotYours": "Izbriši (nije tvoj)",
+    "deleteNotYoursTitle": "Nije tvoj igrač",
+    "deleteNotYoursMsg": "Ovaj igrač pripada treneru koji ga je podijelio. Možeš ga maknuti sa svog popisa, ali izbrisati ga može samo njegov trener."
   },
   "importScreen": {
     "titleRoster": "Uvezi sastav",
