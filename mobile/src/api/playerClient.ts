@@ -42,6 +42,12 @@ export const playerReportsAPI = {
   get: (id: number) => playerApi.get(`/player/shared-reports/${id}`).then(r => r.data),
   addComment: (id: number, text: string, parentId?: number) =>
     playerApi.post(`/player/shared-reports/${id}/comments`, { text, parent_id: parentId }).then(r => r.data),
+  /** Rewrite a comment you left. */
+  editComment: (commentId: number, text: string) =>
+    playerApi.patch(`/player/comments/${commentId}`, { text }).then(r => r.data),
+  /** Take one of yours back. It keeps its place so replies still read. */
+  deleteComment: (commentId: number) =>
+    playerApi.delete(`/player/comments/${commentId}`).then(r => r.data),
   getComments: (id: number) =>
     playerApi.get(`/player/shared-reports/${id}/comments`).then(r => r.data),
 };

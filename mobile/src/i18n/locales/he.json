@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "הודעה…",
     "attachReport": "צרף דוח",
     "searchReportsPlaceholder": "חפש דוחות...",
-    "noReportsFound": "לא נמצאו דוחות."
+    "noReportsFound": "לא נמצאו דוחות.",
+    "send": "שליחה"
   },
   "coachNotifs": {
     "title": "התראות",
@@ -2699,5 +2700,16 @@
     "none": "אין תוצאות",
     "next": "התוצאה הבאה",
     "previous": "התוצאה הקודמת"
+  },
+  "msgActions": {
+    "reply": "השב",
+    "edit": "עריכה",
+    "deleted": "ההודעה נמחקה",
+    "edited": "נערך",
+    "replyingTo": "תשובה ל{{name}}",
+    "editing": "עריכת ההודעה שלך",
+    "deleteTitle": "למחוק את זה?",
+    "deleteBody": "היא נשארת במקומה כדי שהתשובות עדיין יובנו, אבל הטקסט נעלם. אי אפשר לבטל.",
+    "holdHint": "לחיצה ארוכה על הודעה לתשובה, עריכה ומחיקה."
   }
 }

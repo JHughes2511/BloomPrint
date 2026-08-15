@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "メッセージ…",
     "attachReport": "レポートを添付",
     "searchReportsPlaceholder": "レポートを検索...",
-    "noReportsFound": "レポートが見つかりません。"
+    "noReportsFound": "レポートが見つかりません。",
+    "send": "送信"
   },
   "coachNotifs": {
     "title": "通知",
@@ -2699,5 +2700,16 @@
     "none": "一致なし",
     "next": "次の一致",
     "previous": "前の一致"
+  },
+  "msgActions": {
+    "reply": "返信",
+    "edit": "編集",
+    "deleted": "メッセージは削除されました",
+    "edited": "編集済み",
+    "replyingTo": "{{name}} への返信",
+    "editing": "自分のメッセージを編集中",
+    "deleteTitle": "削除しますか？",
+    "deleteBody": "返信が読めるよう場所は残りますが、本文は消えます。元には戻せません。",
+    "holdHint": "メッセージを長押しすると返信・編集・削除できます。"
   }
 }

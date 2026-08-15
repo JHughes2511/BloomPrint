@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "Mensahe…",
     "attachReport": "Maglakip ng ulat",
     "searchReportsPlaceholder": "Maghanap ng ulat...",
-    "noReportsFound": "Walang nakitang ulat."
+    "noReportsFound": "Walang nakitang ulat.",
+    "send": "Ipadala"
   },
   "coachNotifs": {
     "title": "Mga abiso",
@@ -2699,5 +2700,16 @@
     "none": "Walang tugma",
     "next": "Susunod na tugma",
     "previous": "Nakaraang tugma"
+  },
+  "msgActions": {
+    "reply": "Sagutin",
+    "edit": "I-edit",
+    "deleted": "Binura ang mensahe",
+    "edited": "na-edit",
+    "replyingTo": "Sagot kay {{name}}",
+    "editing": "Ine-edit ang mensahe mo",
+    "deleteTitle": "Burahin ito?",
+    "deleteBody": "Mananatili ang puwesto nito para mabasa pa rin ang mga sagot, pero mawawala ang teksto. Hindi na maibabalik.",
+    "holdHint": "Pindutin nang matagal ang mensahe para sumagot, mag-edit at magbura."
   }
 }

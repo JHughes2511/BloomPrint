@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "메시지…",
     "attachReport": "리포트 첨부",
     "searchReportsPlaceholder": "리포트 검색...",
-    "noReportsFound": "리포트를 찾을 수 없습니다."
+    "noReportsFound": "리포트를 찾을 수 없습니다.",
+    "send": "보내기"
   },
   "coachNotifs": {
     "title": "알림",
@@ -2699,5 +2700,16 @@
     "none": "일치 항목 없음",
     "next": "다음 일치",
     "previous": "이전 일치"
+  },
+  "msgActions": {
+    "reply": "답장",
+    "edit": "수정",
+    "deleted": "메시지가 삭제됨",
+    "edited": "수정됨",
+    "replyingTo": "{{name}}에게 답장",
+    "editing": "내 메시지 수정 중",
+    "deleteTitle": "삭제할까요?",
+    "deleteBody": "답장이 계속 읽히도록 자리는 남고 내용은 사라집니다. 되돌릴 수 없습니다.",
+    "holdHint": "메시지를 길게 누르면 답장, 수정, 삭제할 수 있습니다."
   }
 }

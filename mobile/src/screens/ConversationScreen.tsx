@@ -24,6 +24,7 @@ import { ScreenBackground } from '../theme/components';
 import PageContainer from '../responsive/PageContainer';
 import { renderReport } from '../utils/renderReport';
 import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
+import { MessageActions, ComposingBanner, type MessageActionTarget } from '../components/MessageActions';
 import { reportSubject } from '../utils/reportSubject';
 import { outputTypeLabel } from '../utils/reportType';
 import { sheetCap, desktopOnly } from '../responsive/modalSizes';
@@ -47,6 +48,11 @@ export default function ConversationScreen() {
   const [text, setText] = useState('');
   const [pending, setPending] = useState<any[]>([]);
   const [sending, setSending] = useState(false);
+  // The message a long press opened the menu on, and what the composer is
+  // currently doing with one: answering it, or rewriting it.
+  const [acting, setActing] = useState<any | null>(null);
+  const [replyTo, setReplyTo] = useState<any | null>(null);
+  const [editing, setEditing] = useState<any | null>(null);
   const [recording, setRecording] = useState(false);
   const [showReportPicker, setShowReportPicker] = useState(false);
   const [reportList, setReportList] = useState<any[]>([]);
@@ -81,15 +87,44 @@ export default function ConversationScreen() {
     if (!text.trim() && pending.length === 0) return;
     setSending(true);
     try {
-      const m = await staffMessagesAPI.send(cid, { text: text.trim() || undefined, attachments: pending });
+      // Rewriting one replaces it in place; anything else is a new message,
+      // carrying the one it answers when the coach picked one.
+      if (editing) {
+        const m = await staffMessagesAPI.edit(cid, editing.id, text.trim());
+        setMessages(prev => prev.map(x => (x.id === m.id ? m : x)));
+        setEditing(null);
+        setText('');
+        return;
+      }
+      const m = await staffMessagesAPI.send(cid, {
+        text: text.trim() || undefined,
+        attachments: pending,
+        parent_id: replyTo?.id,
+      });
       setMessages(prev => [...prev, m]);
       setText('');
       setPending([]);
+      setReplyTo(null);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('conversation.sendError'));
     } finally {
       setSending(false);
+    }
+  };
+
+  const removeMessage = async (m: any) => {
+    // On screen first: it is the coach's own message and their own decision,
+    // and waiting for the round trip made the menu feel like it had missed.
+    setMessages(prev => prev.map(x => (x.id === m.id
+      ? { ...x, deleted: true, text: null, attachments: [] } : x)));
+    if (editing?.id === m.id) { setEditing(null); setText(''); }
+    if (replyTo?.id === m.id) setReplyTo(null);
+    try {
+      await staffMessagesAPI.remove(cid, m.id);
+    } catch (e: any) {
+      await load();   // put it back the way the server has it
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('conversation.sendError'));
     }
   };
 
@@ -260,14 +295,51 @@ export default function ConversationScreen() {
             {messages.length === 0 && <Text style={styles.empty}>{tr('conversation.noMessagesYet')}</Text>}
             {messages.map(m => {
               const mine = m.sender_id === coach?.id;
+              // What this message answers, so a reply reads against it rather
+              // than only by where it sits in the list.
+              const parent = m.parent_id
+                ? messages.find((x: any) => x.id === m.parent_id)
+                : null;
               return (
                 <View key={m.id} style={[styles.bubbleRow, mine ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }]}>
-                  <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    // Press and hold, and on the web a right-click, which is
+                    // where a long press does not exist.
+                    onLongPress={() => setActing(m)}
+                    delayLongPress={350}
+                    {...(Platform.OS === 'web'
+                      ? { onContextMenu: (e: any) => { e.preventDefault(); setActing(m); } } as any
+                      : null)}
+                    style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}
+                  >
                     {isGroup && !mine && <Text style={styles.senderName}>{m.sender_name}</Text>}
-                    {(m.attachments ?? []).map((a: any) => renderAttachment(a, mine))}
-                    {!!m.text && <Text style={[styles.bubbleText, mine && { color: '#fff' }]}>{m.text}</Text>}
-                    <Text style={[styles.bubbleTime, mine && { color: '#ffffffaa' }]}>{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                  </View>
+                    {!!parent && (
+                      <View style={[styles.quoted, mine && { borderLeftColor: '#ffffff88' }]}>
+                        <Text numberOfLines={1} style={[styles.quotedName, mine && { color: '#ffffffcc' }]}>
+                          {parent.sender_name}
+                        </Text>
+                        <Text numberOfLines={2} style={[styles.quotedText, mine && { color: '#ffffffaa' }]}>
+                          {parent.deleted ? tr('msgActions.deleted') : (parent.text || '')}
+                        </Text>
+                      </View>
+                    )}
+                    {m.deleted ? (
+                      <Text style={[styles.bubbleText, { fontStyle: 'italic', opacity: 0.7 },
+                                    mine && { color: '#fff' }]}>
+                        {tr('msgActions.deleted')}
+                      </Text>
+                    ) : (
+                      <>
+                        {(m.attachments ?? []).map((a: any) => renderAttachment(a, mine))}
+                        {!!m.text && <Text style={[styles.bubbleText, mine && { color: '#fff' }]}>{m.text}</Text>}
+                      </>
+                    )}
+                    <Text style={[styles.bubbleTime, mine && { color: '#ffffffaa' }]}>
+                      {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {m.edited && !m.deleted ? ` · ${tr('msgActions.edited')}` : ''}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               );
             })}
@@ -289,6 +361,20 @@ export default function ConversationScreen() {
           </ScrollView>
         )}
 
+        {/* What the composer is about to do, when it is not just a new message. */}
+        {(replyTo || editing) && (
+          <ComposingBanner
+            label={editing
+              ? tr('msgActions.editing')
+              : tr('msgActions.replyingTo', { name: replyTo?.sender_name ?? '' })}
+            preview={editing ? null : (replyTo?.text || '')}
+            onCancel={() => {
+              if (editing) { setEditing(null); setText(''); }
+              setReplyTo(null);
+            }}
+          />
+        )}
+
         {/* Composer */}
         <View style={styles.composer}>
           <TouchableOpacity style={styles.attachBtn} onPress={openReportPicker}><Ionicons name="document-attach-outline" size={20} color={t.muted} /></TouchableOpacity>
@@ -305,7 +391,12 @@ export default function ConversationScreen() {
             onChangeText={setText}
             multiline
           />
-          <TouchableOpacity style={styles.sendBtn} onPress={send} disabled={sending || (!text.trim() && pending.length === 0)}>
+          <TouchableOpacity
+            style={styles.sendBtn}
+            accessibilityLabel={tr('conversation.send')}
+            onPress={send}
+            disabled={sending || (!text.trim() && pending.length === 0)}
+          >
             {/* The filled, angled send glyph — Ionicons "send" already points
                 up and to the right, which is the angle asked for. Shape and
                 colours are unchanged: 44 square, radius 10, CTA fill, and the
@@ -322,6 +413,18 @@ export default function ConversationScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+
+      <MessageActions
+        target={acting ? {
+          preview: acting.deleted ? tr('msgActions.deleted') : (acting.text || ''),
+          mine: acting.sender_id === coach?.id,
+          deleted: !!acting.deleted,
+        } as MessageActionTarget : null}
+        onReply={() => { setReplyTo(acting); setEditing(null); }}
+        onEdit={() => { setEditing(acting); setReplyTo(null); setText(acting?.text ?? ''); }}
+        onDelete={() => { if (acting) void removeMessage(acting); }}
+        onClose={() => setActing(null)}
+      />
 
       {/* Report picker */}
       <Sheet visible={showReportPicker} transparent animationType="slide" onRequestClose={() => setShowReportPicker(false)}>
@@ -409,6 +512,11 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   senderName: { color: t.accent, fontSize: 11, fontFamily: fonts[700], marginBottom: 3 },
   bubbleText: { color: t.inkSoft, fontSize: 14.5, lineHeight: 20 },
   bubbleTime: { color: t.muted2, fontSize: 10, marginTop: 4, alignSelf: 'flex-end' },
+  // The message being answered, above the answer. A rule down the left rather
+  // than a box, so it reads as a quotation and not as a second message.
+  quoted: { borderLeftWidth: 3, borderLeftColor: t.accent, paddingLeft: 8, marginBottom: 6, opacity: 0.95 },
+  quotedName: { color: t.accent, fontSize: 11, fontFamily: fonts[700] },
+  quotedText: { color: t.muted, fontSize: 12 },
   attImage: { width: 200, height: 150, borderRadius: 10, marginBottom: 6 },
   attAudio: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.chip, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 6 },
   attAudioText: { color: t.inkSoft, fontSize: 13, fontFamily: fonts[600], flexShrink: 1 },

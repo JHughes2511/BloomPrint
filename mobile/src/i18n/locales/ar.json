@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "رسالة…",
     "attachReport": "إرفاق تقرير",
     "searchReportsPlaceholder": "ابحث في التقارير...",
-    "noReportsFound": "لم يُعثر على تقارير."
+    "noReportsFound": "لم يُعثر على تقارير.",
+    "send": "إرسال"
   },
   "coachNotifs": {
     "title": "الإشعارات",
@@ -2699,5 +2700,16 @@
     "none": "لا توجد نتائج",
     "next": "النتيجة التالية",
     "previous": "النتيجة السابقة"
+  },
+  "msgActions": {
+    "reply": "رد",
+    "edit": "تعديل",
+    "deleted": "تم حذف الرسالة",
+    "edited": "مُعدّلة",
+    "replyingTo": "رد على {{name}}",
+    "editing": "تعديل رسالتك",
+    "deleteTitle": "حذف هذا؟",
+    "deleteBody": "يبقى مكانها لتظل الردود مفهومة، لكن النص يختفي. لا يمكن التراجع.",
+    "holdHint": "اضغط مطولاً على رسالة للرد والتعديل والحذف."
   }
 }

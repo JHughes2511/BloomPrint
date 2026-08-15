@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "Mensagem…",
     "attachReport": "Anexar um relatório",
     "searchReportsPlaceholder": "Pesquisar relatórios...",
-    "noReportsFound": "Nenhum relatório encontrado."
+    "noReportsFound": "Nenhum relatório encontrado.",
+    "send": "Enviar"
   },
   "coachNotifs": {
     "title": "Notificações",
@@ -2699,5 +2700,16 @@
     "none": "Nenhum resultado",
     "next": "Próximo resultado",
     "previous": "Resultado anterior"
+  },
+  "msgActions": {
+    "reply": "Responder",
+    "edit": "Editar",
+    "deleted": "Mensagem eliminada",
+    "edited": "editado",
+    "replyingTo": "A responder a {{name}}",
+    "editing": "A editar a tua mensagem",
+    "deleteTitle": "Eliminar isto?",
+    "deleteBody": "Fica no lugar para as respostas continuarem a fazer sentido, mas o texto desaparece. Não pode ser desfeito.",
+    "holdHint": "Mantém premida uma mensagem para responder, editar e eliminar."
   }
 }

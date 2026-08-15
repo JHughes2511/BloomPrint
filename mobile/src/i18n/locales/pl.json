@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "Wiadomość…",
     "attachReport": "Dołącz raport",
     "searchReportsPlaceholder": "Szukaj raportów...",
-    "noReportsFound": "Nie znaleziono raportów."
+    "noReportsFound": "Nie znaleziono raportów.",
+    "send": "Wyślij"
   },
   "coachNotifs": {
     "title": "Powiadomienia",
@@ -2699,5 +2700,16 @@
     "none": "Brak wyników",
     "next": "Następny wynik",
     "previous": "Poprzedni wynik"
+  },
+  "msgActions": {
+    "reply": "Odpowiedz",
+    "edit": "Edytuj",
+    "deleted": "Wiadomość usunięta",
+    "edited": "edytowano",
+    "replyingTo": "Odpowiedź do {{name}}",
+    "editing": "Edytujesz swoją wiadomość",
+    "deleteTitle": "Usunąć to?",
+    "deleteBody": "Zostaje na miejscu, żeby odpowiedzi wciąż miały sens, ale treść znika. Nie można tego cofnąć.",
+    "holdHint": "Przytrzymaj wiadomość, aby odpowiedzieć, edytować lub usunąć."
   }
 }

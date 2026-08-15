@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "Bericht…",
     "attachReport": "Een rapport bijvoegen",
     "searchReportsPlaceholder": "Rapporten zoeken...",
-    "noReportsFound": "Geen rapporten gevonden."
+    "noReportsFound": "Geen rapporten gevonden.",
+    "send": "Versturen"
   },
   "coachNotifs": {
     "title": "Meldingen",
@@ -2699,5 +2700,16 @@
     "none": "Geen resultaten",
     "next": "Volgend resultaat",
     "previous": "Vorig resultaat"
+  },
+  "msgActions": {
+    "reply": "Antwoorden",
+    "edit": "Bewerken",
+    "deleted": "Bericht verwijderd",
+    "edited": "bewerkt",
+    "replyingTo": "Antwoord aan {{name}}",
+    "editing": "Je bericht bewerken",
+    "deleteTitle": "Dit verwijderen?",
+    "deleteBody": "Het blijft staan zodat reacties leesbaar blijven, maar de tekst verdwijnt. Dit kan niet ongedaan worden gemaakt.",
+    "holdHint": "Houd een bericht ingedrukt voor antwoorden, bewerken en verwijderen."
   }
 }

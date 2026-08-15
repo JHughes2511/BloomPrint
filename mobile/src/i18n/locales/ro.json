@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "Mesaj…",
     "attachReport": "Atașează un raport",
     "searchReportsPlaceholder": "Caută rapoarte...",
-    "noReportsFound": "Niciun raport găsit."
+    "noReportsFound": "Niciun raport găsit.",
+    "send": "Trimite"
   },
   "coachNotifs": {
     "title": "Notificări",
@@ -2699,5 +2700,16 @@
     "none": "Niciun rezultat",
     "next": "Rezultatul următor",
     "previous": "Rezultatul anterior"
+  },
+  "msgActions": {
+    "reply": "Răspunde",
+    "edit": "Editează",
+    "deleted": "Mesaj șters",
+    "edited": "editat",
+    "replyingTo": "Răspuns către {{name}}",
+    "editing": "Editezi mesajul tău",
+    "deleteTitle": "Ștergi asta?",
+    "deleteBody": "Rămâne pe loc ca răspunsurile să se înțeleagă, dar textul dispare. Nu se poate anula.",
+    "holdHint": "Ține apăsat pe un mesaj pentru răspuns, editare și ștergere."
   }
 }

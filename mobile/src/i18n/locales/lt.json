@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "Žinutė…",
     "attachReport": "Pridėti ataskaitą",
     "searchReportsPlaceholder": "Ieškoti ataskaitų...",
-    "noReportsFound": "Ataskaitų nerasta."
+    "noReportsFound": "Ataskaitų nerasta.",
+    "send": "Siųsti"
   },
   "coachNotifs": {
     "title": "Pranešimai",
@@ -2699,5 +2700,16 @@
     "none": "Nėra atitikmenų",
     "next": "Kitas atitikmuo",
     "previous": "Ankstesnis atitikmuo"
+  },
+  "msgActions": {
+    "reply": "Atsakyti",
+    "edit": "Redaguoti",
+    "deleted": "Žinutė ištrinta",
+    "edited": "redaguota",
+    "replyingTo": "Atsakymas {{name}}",
+    "editing": "Redaguojate savo žinutę",
+    "deleteTitle": "Ištrinti tai?",
+    "deleteBody": "Ji lieka vietoje, kad atsakymai vis dar būtų suprantami, bet tekstas dingsta. Atšaukti nepavyks.",
+    "holdHint": "Palaikykite žinutę, kad atsakytumėte, redaguotumėte ar ištrintumėte."
   }
 }

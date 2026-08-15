@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "Poruka…",
     "attachReport": "Priloži izveštaj",
     "searchReportsPlaceholder": "Pretraži izveštaje...",
-    "noReportsFound": "Nema pronađenih izveštaja."
+    "noReportsFound": "Nema pronađenih izveštaja.",
+    "send": "Пошаљи"
   },
   "coachNotifs": {
     "title": "Obaveštenja",
@@ -2699,5 +2700,16 @@
     "none": "Нема резултата",
     "next": "Следећи резултат",
     "previous": "Претходни резултат"
+  },
+  "msgActions": {
+    "reply": "Одговори",
+    "edit": "Измени",
+    "deleted": "Порука обрисана",
+    "edited": "измењено",
+    "replyingTo": "Одговор за {{name}}",
+    "editing": "Мењаш своју поруку",
+    "deleteTitle": "Обрисати ово?",
+    "deleteBody": "Остаје на месту да се одговори и даље читају, али текст нестаје. Не може да се поништи.",
+    "holdHint": "Држите поруку за одговор, измену и брисање."
   }
 }

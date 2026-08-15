@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "消息…",
     "attachReport": "附加报告",
     "searchReportsPlaceholder": "搜索报告...",
-    "noReportsFound": "未找到报告。"
+    "noReportsFound": "未找到报告。",
+    "send": "发送"
   },
   "coachNotifs": {
     "title": "通知",
@@ -2699,5 +2700,16 @@
     "none": "无匹配项",
     "next": "下一个匹配",
     "previous": "上一个匹配"
+  },
+  "msgActions": {
+    "reply": "回复",
+    "edit": "编辑",
+    "deleted": "消息已删除",
+    "edited": "已编辑",
+    "replyingTo": "回复 {{name}}",
+    "editing": "正在编辑你的消息",
+    "deleteTitle": "删除这条？",
+    "deleteBody": "它会留在原位，让回复仍然读得通，但文字会消失。此操作无法撤销。",
+    "holdHint": "长按消息可回复、编辑和删除。"
   }
 }

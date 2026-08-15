@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "Meddelande…",
     "attachReport": "Bifoga en rapport",
     "searchReportsPlaceholder": "Sök rapporter...",
-    "noReportsFound": "Inga rapporter hittades."
+    "noReportsFound": "Inga rapporter hittades.",
+    "send": "Skicka"
   },
   "coachNotifs": {
     "title": "Aviseringar",
@@ -2699,5 +2700,16 @@
     "none": "Inga träffar",
     "next": "Nästa träff",
     "previous": "Föregående träff"
+  },
+  "msgActions": {
+    "reply": "Svara",
+    "edit": "Redigera",
+    "deleted": "Meddelandet borttaget",
+    "edited": "redigerat",
+    "replyingTo": "Svar till {{name}}",
+    "editing": "Redigerar ditt meddelande",
+    "deleteTitle": "Ta bort det här?",
+    "deleteBody": "Det ligger kvar så att svaren fortfarande går att läsa, men texten försvinner. Går inte att ångra.",
+    "holdHint": "Håll in ett meddelande för att svara, redigera och ta bort."
   }
 }

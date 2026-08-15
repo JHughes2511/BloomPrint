@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "Mensaje…",
     "attachReport": "Adjuntar un informe",
     "searchReportsPlaceholder": "Buscar informes...",
-    "noReportsFound": "No se encontraron informes."
+    "noReportsFound": "No se encontraron informes.",
+    "send": "Enviar"
   },
   "coachNotifs": {
     "title": "Notificaciones",
@@ -2699,5 +2700,16 @@
     "none": "Sin coincidencias",
     "next": "Coincidencia siguiente",
     "previous": "Coincidencia anterior"
+  },
+  "msgActions": {
+    "reply": "Responder",
+    "edit": "Editar",
+    "deleted": "Mensaje eliminado",
+    "edited": "editado",
+    "replyingTo": "Respondiendo a {{name}}",
+    "editing": "Editando tu mensaje",
+    "deleteTitle": "¿Eliminar esto?",
+    "deleteBody": "Se queda en su sitio para que las respuestas sigan teniendo sentido, pero el texto desaparece. No se puede deshacer.",
+    "holdHint": "Mantén pulsado un mensaje para responder, editar y eliminar."
   }
 }

@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "Message…",
     "attachReport": "Attach a report",
     "searchReportsPlaceholder": "Search reports...",
-    "noReportsFound": "No reports found."
+    "noReportsFound": "No reports found.",
+    "send": "Send"
   },
   "coachNotifs": {
     "title": "Notifications",
@@ -2699,5 +2700,16 @@
     "none": "No matches",
     "next": "Next match",
     "previous": "Previous match"
+  },
+  "msgActions": {
+    "reply": "Reply",
+    "edit": "Edit",
+    "deleted": "Message deleted",
+    "edited": "edited",
+    "replyingTo": "Replying to {{name}}",
+    "editing": "Editing your message",
+    "deleteTitle": "Delete this?",
+    "deleteBody": "It stays in place so replies still read, but the words go. This cannot be undone.",
+    "holdHint": "Press and hold a message for reply, edit and delete."
   }
 }

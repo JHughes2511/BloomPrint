@@ -736,6 +736,12 @@ export const playerAPI = {
     api.post('/player/coach-notifications/read-all').then(r => r.data),
   coachViewSharedReport: (sharedId: number) =>
     api.get(`/player/shared-reports/${sharedId}/coach-view`).then(r => r.data),
+  /** Rewrite a comment you left on a player's thread. */
+  editComment: (commentId: number, text: string) =>
+    api.patch(`/player/coach-comments/${commentId}`, { text }).then(r => r.data),
+  /** Take one of yours back. It keeps its place so replies still read. */
+  deleteComment: (commentId: number) =>
+    api.delete(`/player/coach-comments/${commentId}`).then(r => r.data),
   coachReplyToReport: (sharedId: number, text: string, parentId?: number) =>
     api.post(`/player/shared-reports/${sharedId}/coach-reply`, { text, parent_id: parentId }).then(r => r.data),
   shareTeamReport: (data: { output_type: string; report_text: string; target_type: string; player_user_id?: number; team_id?: number; message?: string; subject_player_id?: number; require_consent?: boolean; consent_override?: boolean }) =>
@@ -761,8 +767,16 @@ export const staffSharingAPI = {
   inbox: () => api.get('/staff-sharing/inbox').then(r => r.data),
   sent: () => api.get('/staff-sharing/sent').then(r => r.data),
   getComments: (sharedId: number) => api.get(`/staff-sharing/${sharedId}/comments`).then(r => r.data),
-  addComment: (sharedId: number, text: string, target: 'original' | 'updated' = 'original') =>
-    api.post(`/staff-sharing/${sharedId}/comments`, { text, target }).then(r => r.data),
+  addComment: (sharedId: number, text: string, target: 'original' | 'updated' = 'original',
+               parentId?: number) =>
+    api.post(`/staff-sharing/${sharedId}/comments`,
+             { text, target, parent_id: parentId }).then(r => r.data),
+  /** Rewrite one of your own comments. */
+  editComment: (commentId: number, text: string) =>
+    api.patch(`/staff-sharing/comments/${commentId}`, { text }).then(r => r.data),
+  /** Take one of your own back. It keeps its place so replies still read. */
+  deleteComment: (commentId: number) =>
+    api.delete(`/staff-sharing/comments/${commentId}`).then(r => r.data),
   regenerate: (sharedId: number, feedback: string) =>
     api.post(`/staff-sharing/${sharedId}/regenerate`, { feedback }).then(r => r.data),
   adopt: (sharedId: number, text: string) =>
@@ -789,8 +803,14 @@ export const staffMessagesAPI = {
   create: (data: { member_ids: number[]; title?: string; is_group?: boolean }) =>
     api.post('/staff-messages', data).then(r => r.data),
   get: (cid: number) => api.get(`/staff-messages/${cid}`).then(r => r.data),
-  send: (cid: number, data: { text?: string; attachments?: any[] }) =>
+  send: (cid: number, data: { text?: string; attachments?: any[]; parent_id?: number }) =>
     api.post(`/staff-messages/${cid}/messages`, data).then(r => r.data),
+  /** Rewrite one of your own messages. */
+  edit: (cid: number, mid: number, text: string) =>
+    api.patch(`/staff-messages/${cid}/messages/${mid}`, { text }).then(r => r.data),
+  /** Take one of your own back. It keeps its place so replies still read. */
+  remove: (cid: number, mid: number) =>
+    api.delete(`/staff-messages/${cid}/messages/${mid}`).then(r => r.data),
   read: (cid: number) => api.post(`/staff-messages/${cid}/read`).then(r => r.data),
 };
 

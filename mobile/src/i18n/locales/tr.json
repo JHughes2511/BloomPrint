@@ -1533,7 +1533,8 @@
     "messagePlaceholder": "Mesaj…",
     "attachReport": "Bir rapor ekle",
     "searchReportsPlaceholder": "Rapor ara...",
-    "noReportsFound": "Rapor bulunamadı."
+    "noReportsFound": "Rapor bulunamadı.",
+    "send": "Gönder"
   },
   "coachNotifs": {
     "title": "Bildirimler",
@@ -2699,5 +2700,16 @@
     "none": "Sonuç yok",
     "next": "Sonraki sonuç",
     "previous": "Önceki sonuç"
+  },
+  "msgActions": {
+    "reply": "Yanıtla",
+    "edit": "Düzenle",
+    "deleted": "Mesaj silindi",
+    "edited": "düzenlendi",
+    "replyingTo": "{{name}} kişisine yanıt",
+    "editing": "Mesajını düzenliyorsun",
+    "deleteTitle": "Bu silinsin mi?",
+    "deleteBody": "Yanıtlar okunabilsin diye yeri kalır, ama metin gider. Geri alınamaz.",
+    "holdHint": "Yanıtlamak, düzenlemek ve silmek için mesaja basılı tutun."
   }
 }
