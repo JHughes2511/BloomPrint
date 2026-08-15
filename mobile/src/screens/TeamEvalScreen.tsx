@@ -2745,11 +2745,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             );
             // Build player -> quarter -> { weighted, counts, list }
             const qSet = new Set<number>();
-            const players: Record<string, { total: number; quarters: Record<number, { weighted: number; counts: Record<string, number>; list: any[] }> }> = {};
+            const players: Record<string, { total: number; jersey?: string | null; quarters: Record<number, { weighted: number; counts: Record<string, number>; list: any[] }> }> = {};
             for (const st of ourStats) {
               qSet.add(st.quarter);
               if (!players[st.player_name]) players[st.player_name] = { total: 0, quarters: {} };
               const P = players[st.player_name];
+              // Whichever row carries it — they all came off the same sheet.
+              P.jersey = P.jersey ?? st.jersey_number ?? null;
               if (!P.quarters[st.quarter]) P.quarters[st.quarter] = { weighted: 0, counts: {}, list: [] };
               const Q = P.quarters[st.quarter];
               Q.weighted += st.weighted_points;
@@ -2758,6 +2760,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               P.total += st.weighted_points;
             }
             const qNums = Array.from(qSet).sort((a, b) => a - b);
+            // A box score read off a sheet is whole-game totals filed under one
+            // period. Calling that column "Q1" tells the coach the game had a
+            // first quarter and nothing else, which is not what the sheet said.
+            const wholeGame = qNums.length === 1
+              && ourStats.every((st: any) => st.source === 'import');
+            const periodLabel = (q: number) => (wholeGame ? tr('teamGrade.fullGame') : qLabel(q));
             const playerNames = Object.keys(players).sort((a, b) => players[b].total - players[a].total);
             const teamQ: Record<number, number> = {};
             for (const q of qNums) teamQ[q] = playerNames.reduce((sum, n) => sum + (players[n].quarters[q]?.weighted || 0), 0);
@@ -2769,13 +2777,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               <View style={s.card}>
                 <Text style={s.cardLabel}>{tr('teamGrade.quarterComparison')}</Text>
                 <Text style={{ color: t.muted, fontSize: 11, marginTop: 2, marginBottom: 12 }}>
-                  {tr('teamGrade.quarterComparisonHint')}
+                  {wholeGame ? tr('teamGrade.noPeriodBreakdown') : tr('teamGrade.quarterComparisonHint')}
                 </Text>
 
                 {/* Header */}
                 <View style={s.qHeaderRow}>
                   <Text style={s.qPlayerHead}>{tr('teamGrade.playerHead')}</Text>
-                  {qNums.map(q => <Text key={q} style={s.qColHead}>{qLabel(q)}</Text>)}
+                  {qNums.map(q => <Text key={q} style={s.qColHead}>{periodLabel(q)}</Text>)}
                   <Text style={[s.qColHead, { color: t.accent }]}>{tr('teamGrade.tot')}</Text>
                 </View>
 
@@ -2800,7 +2808,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                       >
                         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 4 }}>
                           <Ionicons name={isOpen ? 'chevron-down' : 'chevron-forward'} size={12} color={t.muted2} />
-                          <Text style={s.qPlayerName} numberOfLines={1}>{name}</Text>
+                          <Text style={s.qPlayerName} numberOfLines={1}>
+                            {P.jersey ? `#${P.jersey} ` : ''}{name}
+                          </Text>
                         </View>
                         {qNums.map(q => {
                           const w = P.quarters[q]?.weighted;
@@ -2827,7 +2837,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                             return (
                               <View key={q} style={{ marginBottom: 10 }}>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-                                  <Text style={{ color: t.accent, fontSize: 11, fontFamily: fonts[800], letterSpacing: 0.5 }}>{qLabel(q)}</Text>
+                                  <Text style={{ color: t.accent, fontSize: 11, fontFamily: fonts[800], letterSpacing: 0.5 }}>{periodLabel(q)}</Text>
                                   <Text style={{ color: cellColor(Q.weighted), fontSize: 11, fontFamily: fonts[700] }}>{fmt(Q.weighted)} {tr('teamGrade.ptsAbbr')}</Text>
                                 </View>
                                 <View style={{ flexDirection: 'row', gap: 12, marginBottom: 6 }}>

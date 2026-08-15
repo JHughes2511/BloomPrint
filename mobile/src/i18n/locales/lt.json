@@ -2270,7 +2270,9 @@
     "insightRewriting": "Perrašoma…",
     "editScore": "Redaguoti rezultatą",
     "scoreNeededTitle": "Reikia abiejų rezultatų",
-    "scoreNeededMsg": "Įrašyk abu rezultatus ir išsaugok."
+    "scoreNeededMsg": "Įrašyk abu rezultatus ir išsaugok.",
+    "fullGame": "Visos rungtynės",
+    "noPeriodBreakdown": "Šiame protokole nebuvo skirstymo pagal kėlinius, todėl visos rungtynės telpa į vieną stulpelį."
   },
   "whiteboard": {
     "title": "Lenta",

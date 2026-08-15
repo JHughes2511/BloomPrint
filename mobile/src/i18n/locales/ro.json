@@ -2270,7 +2270,9 @@
     "insightRewriting": "Se rescrie…",
     "editScore": "Editează scorul",
     "scoreNeededTitle": "Sunt necesare ambele scoruri",
-    "scoreNeededMsg": "Scrie ambele scoruri, apoi salvează."
+    "scoreNeededMsg": "Scrie ambele scoruri, apoi salvează.",
+    "fullGame": "Meci complet",
+    "noPeriodBreakdown": "Această foaie nu avea împărțire pe reprize, așa că tot meciul stă într-o coloană."
   },
   "whiteboard": {
     "title": "Tablă tactică",

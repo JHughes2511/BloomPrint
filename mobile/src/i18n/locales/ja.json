@@ -2270,7 +2270,9 @@
     "insightRewriting": "書き直しています…",
     "editScore": "スコアを編集",
     "scoreNeededTitle": "両方のスコアが必要です",
-    "scoreNeededMsg": "両方のスコアを入力して保存してください。"
+    "scoreNeededMsg": "両方のスコアを入力して保存してください。",
+    "fullGame": "全試合",
+    "noPeriodBreakdown": "このシートにはピリオド別の内訳がないため、全試合が1列にまとまっています。"
   },
   "whiteboard": {
     "title": "ホワイトボード",

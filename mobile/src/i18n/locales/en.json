@@ -2270,7 +2270,9 @@
     "insightRewriting": "Rewriting…",
     "editScore": "Edit score",
     "scoreNeededTitle": "Both scores needed",
-    "scoreNeededMsg": "Type both scores, then save."
+    "scoreNeededMsg": "Type both scores, then save.",
+    "fullGame": "Full game",
+    "noPeriodBreakdown": "This sheet had no period breakdown, so the whole game is one column."
   },
   "whiteboard": {
     "title": "Whiteboard",

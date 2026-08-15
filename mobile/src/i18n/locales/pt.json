@@ -2270,7 +2270,9 @@
     "insightRewriting": "A reescrever…",
     "editScore": "Editar resultado",
     "scoreNeededTitle": "Faltam os dois resultados",
-    "scoreNeededMsg": "Escreve os dois resultados e guarda."
+    "scoreNeededMsg": "Escreve os dois resultados e guarda.",
+    "fullGame": "Jogo completo",
+    "noPeriodBreakdown": "Esta folha não tinha divisão por períodos, por isso o jogo todo fica numa coluna."
   },
   "whiteboard": {
     "title": "Quadro Tático",

@@ -2270,7 +2270,9 @@
     "insightRewriting": "جارٍ إعادة الكتابة…",
     "editScore": "تعديل النتيجة",
     "scoreNeededTitle": "النتيجتان مطلوبتان",
-    "scoreNeededMsg": "اكتب النتيجتين ثم احفظ."
+    "scoreNeededMsg": "اكتب النتيجتين ثم احفظ.",
+    "fullGame": "المباراة كاملة",
+    "noPeriodBreakdown": "لم تتضمن هذه الورقة تقسيمًا حسب الفترات، لذا تظهر المباراة كاملة في عمود واحد."
   },
   "whiteboard": {
     "title": "السبورة",

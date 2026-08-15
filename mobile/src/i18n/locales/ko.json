@@ -2270,7 +2270,9 @@
     "insightRewriting": "다시 쓰는 중…",
     "editScore": "점수 편집",
     "scoreNeededTitle": "두 점수가 모두 필요합니다",
-    "scoreNeededMsg": "두 점수를 입력한 뒤 저장하세요."
+    "scoreNeededMsg": "두 점수를 입력한 뒤 저장하세요.",
+    "fullGame": "경기 전체",
+    "noPeriodBreakdown": "이 기록지에는 쿼터별 구분이 없어 경기 전체가 한 열로 표시됩니다."
   },
   "whiteboard": {
     "title": "작전판",

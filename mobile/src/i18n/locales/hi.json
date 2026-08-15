@@ -2270,7 +2270,9 @@
     "insightRewriting": "दोबारा लिखा जा रहा है…",
     "editScore": "स्कोर बदलें",
     "scoreNeededTitle": "दोनों स्कोर चाहिए",
-    "scoreNeededMsg": "दोनों स्कोर लिखें, फिर सेव करें।"
+    "scoreNeededMsg": "दोनों स्कोर लिखें, फिर सेव करें।",
+    "fullGame": "पूरा मैच",
+    "noPeriodBreakdown": "इस शीट में पीरियड का ब्यौरा नहीं था, इसलिए पूरा मैच एक ही कॉलम में है।"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",

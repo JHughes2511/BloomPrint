@@ -338,7 +338,12 @@ export default function GameStatsPanel({ gameId, refreshKey = 0 }:
               <View key={`${l.team_name}-${l.player}`} style={s.leaderRow}>
                 <Text style={s.rank}>{i + 1}</Text>
                 <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={s.leaderName} numberOfLines={1}>{l.player}</Text>
+                  {/* The number beside the name, as a box score has it — two
+                      players on a squad can share a surname, and the number is
+                      what a coach reads off the film. */}
+                  <Text style={s.leaderName} numberOfLines={1}>
+                    {l.jersey ? `#${l.jersey} ` : ''}{l.player}
+                  </Text>
                   <Text style={s.leaderTeam} numberOfLines={1}>{l.team_name}</Text>
                 </View>
                 <Text style={s.leaderValue}>{l.value}</Text>

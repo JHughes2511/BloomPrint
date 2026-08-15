@@ -2270,7 +2270,9 @@
     "insightRewriting": "Skriver om…",
     "editScore": "Redigera resultat",
     "scoreNeededTitle": "Båda resultaten behövs",
-    "scoreNeededMsg": "Skriv in båda resultaten och spara."
+    "scoreNeededMsg": "Skriv in båda resultaten och spara.",
+    "fullGame": "Hela matchen",
+    "noPeriodBreakdown": "Det här protokollet saknade periodindelning, så hela matchen står i en kolumn."
   },
   "whiteboard": {
     "title": "Taktiktavla",

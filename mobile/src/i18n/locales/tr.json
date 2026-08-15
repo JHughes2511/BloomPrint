@@ -2270,7 +2270,9 @@
     "insightRewriting": "Yeniden yazılıyor…",
     "editScore": "Skoru düzenle",
     "scoreNeededTitle": "İki skor da gerekli",
-    "scoreNeededMsg": "İki skoru da yaz, sonra kaydet."
+    "scoreNeededMsg": "İki skoru da yaz, sonra kaydet.",
+    "fullGame": "Tüm maç",
+    "noPeriodBreakdown": "Bu formda periyot dökümü yoktu, bu yüzden maçın tamamı tek sütunda."
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

@@ -2270,7 +2270,9 @@
     "insightRewriting": "Ponovo se piše…",
     "editScore": "Измени резултат",
     "scoreNeededTitle": "Потребна су оба резултата",
-    "scoreNeededMsg": "Упиши оба резултата и сачувај."
+    "scoreNeededMsg": "Упиши оба резултата и сачувај.",
+    "fullGame": "Цела утакмица",
+    "noPeriodBreakdown": "Овај записник није имао поделу по четвртинама, па је цела утакмица у једној колони."
   },
   "whiteboard": {
     "title": "Tabla",

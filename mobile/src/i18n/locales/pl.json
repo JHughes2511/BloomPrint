@@ -2270,7 +2270,9 @@
     "insightRewriting": "Przepisywanie…",
     "editScore": "Edytuj wynik",
     "scoreNeededTitle": "Potrzebne oba wyniki",
-    "scoreNeededMsg": "Wpisz oba wyniki i zapisz."
+    "scoreNeededMsg": "Wpisz oba wyniki i zapisz.",
+    "fullGame": "Cały mecz",
+    "noPeriodBreakdown": "Ten protokół nie miał podziału na kwarty, więc cały mecz jest w jednej kolumnie."
   },
   "whiteboard": {
     "title": "Tablica",

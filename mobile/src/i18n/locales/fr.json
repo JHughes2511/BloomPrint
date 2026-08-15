@@ -2270,7 +2270,9 @@
     "insightRewriting": "Réécriture…",
     "editScore": "Modifier le score",
     "scoreNeededTitle": "Les deux scores sont requis",
-    "scoreNeededMsg": "Saisis les deux scores, puis enregistre."
+    "scoreNeededMsg": "Saisis les deux scores, puis enregistre.",
+    "fullGame": "Match complet",
+    "noPeriodBreakdown": "Cette feuille n'avait pas de découpage par période : tout le match tient dans une colonne."
   },
   "whiteboard": {
     "title": "Tableau blanc",

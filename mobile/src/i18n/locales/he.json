@@ -2270,7 +2270,9 @@
     "insightRewriting": "כותב מחדש…",
     "editScore": "עריכת תוצאה",
     "scoreNeededTitle": "צריך את שתי התוצאות",
-    "scoreNeededMsg": "הזן את שתי התוצאות ושמור."
+    "scoreNeededMsg": "הזן את שתי התוצאות ושמור.",
+    "fullGame": "המשחק כולו",
+    "noPeriodBreakdown": "בגיליון הזה לא היה פירוט לפי רבעים, ולכן כל המשחק מופיע בעמודה אחת."
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

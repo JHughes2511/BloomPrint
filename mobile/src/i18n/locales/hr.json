@@ -2270,7 +2270,9 @@
     "insightRewriting": "Ponovno pisanje…",
     "editScore": "Uredi rezultat",
     "scoreNeededTitle": "Potrebna su oba rezultata",
-    "scoreNeededMsg": "Upiši oba rezultata i spremi."
+    "scoreNeededMsg": "Upiši oba rezultata i spremi.",
+    "fullGame": "Cijela utakmica",
+    "noPeriodBreakdown": "Ovaj zapisnik nije imao podjelu po četvrtinama pa je cijela utakmica u jednom stupcu."
   },
   "whiteboard": {
     "title": "Ploča",

@@ -532,8 +532,21 @@ async def import_game_stats(
                 source="import",
             ))
             imported += 1
+
+    # The squad numbers the sheet printed belong on the roster too. The
+    # reviewed import has done this since it was written; this path — the same
+    # file, read without a preview to confirm — wrote the game and left the
+    # roster alone, so a coach who imported this way saw no numbers anywhere
+    # and typed them in again by hand off the same sheet.
+    from .imports import _sync_roster
+    roster = _sync_roster(db, game, coach, [
+        {"player_name": pname, "is_opponent": side,
+         "jersey_number": (vals.get("JERSEY") or None)}
+        for side, pname, vals in collected
+    ])
     db.commit()
-    return {"imported": imported, "players": len(collected), "errors": read_errors}
+    return {"imported": imported, "players": len(collected), "errors": read_errors,
+            "roster": roster}
 
 
 def _compute_raw_points(stat_name: str, count: int) -> tuple[float, str]:
@@ -1184,15 +1197,39 @@ def edit_player_line(
     if not name:
         raise HTTPException(status_code=400, detail="Which player?")
 
+    raw_line = body.line or {}
+
+    # Minutes, plus-minus and efficiency are not counted stats and do not live
+    # on the stat rows — they are the player's line values. Corrected here too,
+    # because the minutes are what the grade divides by, and until now this
+    # endpoint dropped them.
+    line_values: dict[str, float] = {}
+    mins = _minutes_value(raw_line.get("MIN"))
+    if mins is not None:
+        line_values["MIN"] = mins
+    for key in ("PM", "EFF"):
+        signed = _signed_value(raw_line.get(key))
+        if signed is not None:
+            line_values[key] = signed
+    if line_values:
+        _save_line_values(db, game.id, bool(body.is_opponent), name, line_values)
+
+    line = {k: int(v) for k, v in raw_line.items()
+            if k not in LINE_FIELDS and isinstance(v, (int, float)) and int(v) >= 0}
+
+    # An edit that only corrects the minutes is not an instruction to delete
+    # everything the player did. The rows are replaced only when the correction
+    # actually carries counted stats.
+    if not line:
+        db.commit()
+        return {"ok": True}
+
     (db.query(models.GamePlayerStat)
        .filter(models.GamePlayerStat.game_id == game.id,
                models.GamePlayerStat.player_name == name,
                models.GamePlayerStat.is_opponent == bool(body.is_opponent),
                models.GamePlayerStat.source == "import")
        .delete(synchronize_session=False))
-
-    line = {k: int(v) for k, v in (body.line or {}).items()
-            if isinstance(v, (int, float)) and int(v) >= 0}
     for stat, count in _stats_from_canonical(line).items():
         raw = _import_raw(stat, count)
         db.add(models.GamePlayerStat(
@@ -1250,7 +1287,8 @@ def game_box_score(
                 for side in sides for r in side["players"]]
     def top(metric) -> list[dict]:
         ranked = sorted(everyone, key=metric, reverse=True)[:5]
-        return [{"player": r["player"], "team_name": r["team_name"], "value": metric(r)}
+        return [{"player": r["player"], "jersey": r.get("jersey"),
+                 "team_name": r["team_name"], "value": metric(r)}
                 for r in ranked if metric(r) > 0]
     # The EFF the row is showing, not the formula on its own — see _side_rows.
     # Ranking on the formula while the column prints the sheet's figure had the
@@ -1876,6 +1914,13 @@ def list_stats(
             "raw_points": s.raw_points,
             "weighted_points": s.weighted_points,
             "count": s.count,
+            # The squad number, so the quarter view can name a player the way
+            # the box score does.
+            "jersey_number": s.jersey_number,
+            # Live-tracked or read off a sheet. An imported row is whole-game
+            # totals filed under one period, and calling that "Q1" tells the
+            # coach the game had one quarter.
+            "source": s.source,
         }
         for s in stats
     ]

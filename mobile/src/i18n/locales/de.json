@@ -2270,7 +2270,9 @@
     "insightRewriting": "Wird neu geschrieben…",
     "editScore": "Ergebnis bearbeiten",
     "scoreNeededTitle": "Beide Ergebnisse nötig",
-    "scoreNeededMsg": "Trage beide Ergebnisse ein und speichere."
+    "scoreNeededMsg": "Trage beide Ergebnisse ein und speichere.",
+    "fullGame": "Ganzes Spiel",
+    "noPeriodBreakdown": "Dieser Bogen hatte keine Viertel-Aufteilung, daher steht das ganze Spiel in einer Spalte."
   },
   "whiteboard": {
     "title": "Taktiktafel",
