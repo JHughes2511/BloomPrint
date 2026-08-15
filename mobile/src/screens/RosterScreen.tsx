@@ -470,7 +470,16 @@ export default function RosterScreen() {
             }}
           >
             <View style={styles.cardLeft}>
-              <Text style={styles.playerName}>{item.name}</Text>
+              {/* The squad number, where there is one. A box score is often the
+                  only place it is ever written down, and the import has been
+                  putting it on the player for a while — this card just never
+                  showed it, so it looked as though nothing had been saved. */}
+              <Text style={styles.playerName}>
+                {item.jersey_number ? (
+                  <Text style={styles.playerNumber}>#{item.jersey_number}  </Text>
+                ) : null}
+                {item.name}
+              </Text>
               <Text style={styles.playerMeta}>
                 {[item.position, item.team_name ?? item.competition_level].filter(Boolean).join(' · ')}
               </Text>
@@ -777,6 +786,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   cardInGrid: { marginHorizontal: 0 },
   cardLeft: { flex: 1 },
   playerName: { color: t.ink, fontSize: 16, fontFamily: fonts[700] },
+  playerNumber: { color: t.accent, fontSize: 14, fontFamily: fonts[800] },
   playerMeta: { color: t.muted, fontSize: 12, marginTop: 2 },
   emptyWrap: { alignItems: 'center', marginTop: 60 },
   emptyText: { color: t.muted, textAlign: 'center', paddingHorizontal: 32 },

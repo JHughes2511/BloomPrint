@@ -968,15 +968,11 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const openTab = (tab: 'insights' | 'our' | 'opponent' | 'byquarter') => {
     setDetailTab(tab);
     setSeenTabs(prev => (prev.has(tab) ? prev : new Set(prev).add(tab)));
-    navigation.setParams?.({ tab });
   };
 
   const openDetail = async (game: any) => {
     setDetailGame(game);
     setActiveView('detail');
-    // The open game goes in the address, so a refresh comes back to it rather
-    // than to the dashboard — and so the page can be linked to at all.
-    navigation.setParams?.({ game: String(game.id) });
     setExpandedPlayer(null);
     setShowScoutingReport(false);
     setSummary(null);
@@ -1030,6 +1026,28 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // The game the address bar is holding, reopened on a fresh load. A coach who
   // refreshes inside a game was put back on the dashboard, having lost the page
   // they were reading — the open game only ever existed in this screen's state.
+  // The address bar follows the screen: which of the four tabs is open, the
+  // game inside it, and the tab within that game. Done in one place rather than
+  // in every button that moves — a press that set one param while another
+  // cleared it left the address describing a page nobody was on.
+  useEffect(() => {
+    const inGame = activeView === 'detail' && !!detailGame;
+    navigation.setParams?.({
+      view: activeView === 'live' ? undefined : activeView,
+      game: inGame ? String(detailGame.id) : undefined,
+      tab: inGame ? detailTab : undefined,
+    });
+  }, [activeView, detailGame?.id, detailTab]);
+
+  // And the tab it was holding, restored on a fresh load.
+  const restoredView = useRef(false);
+  useEffect(() => {
+    const v = route?.params?.view;
+    if (!v || restoredView.current) return;
+    restoredView.current = true;
+    if (['dashboard', 'games', 'scout', 'gamereport'].includes(v)) setActiveView(v as ViewKey);
+  }, [route?.params?.view]);
+
   const restoredGame = useRef(false);
   useEffect(() => {
     const gid = Number(route?.params?.game);
@@ -1061,7 +1079,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       setActiveView(p.openView as ViewKey);
     }
     if (p.openNewGame) {
-      (navigation.setParams?.({ game: undefined, tab: undefined }), setActiveView('games'));
+      setActiveView('games');
       setShowNewGame(true);
     }
     if (p.openPlaybook) setWhiteboardPlaybook(true);
@@ -1774,7 +1792,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // Back walks the steps taken inside this screen before it leaves it. Order
   // matters and is inner-first: a player opened inside a scouted team closes
   // before the team does. See useBackStep.
-  useBackStep(activeView === 'detail' || activeView === 'live', () => (navigation.setParams?.({ game: undefined, tab: undefined }), setActiveView('games')));
+  useBackStep(activeView === 'detail' || activeView === 'live', () => setActiveView('games'));
   useBackStep(!!scoutOpponent, () => { setScoutOpponent(null); setScoutData(null); });
   useBackStep(!!scoutPlayer, () => setScoutPlayer(null));
   useBackStep(!!gameReportGame, () => setGameReportGame(null));
@@ -1821,7 +1839,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const BackToGames = () => (
     <TouchableOpacity
       style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}
-      onPress={() => (navigation.setParams?.({ game: undefined, tab: undefined }), setActiveView('games'))}
+      onPress={() => setActiveView('games')}
     >
       <Ionicons name="arrow-back" size={18} color={t.muted} />
       <Text style={{ color: t.muted, fontSize: 14 }}>{tr('teamGrade.allGames')}</Text>

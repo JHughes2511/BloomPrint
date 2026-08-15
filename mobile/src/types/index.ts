@@ -27,6 +27,8 @@ export interface Coach {
 export interface Player {
   id: number;
   name: string;
+  /** Squad number. Typed on the roster, or read off an imported box score. */
+  jersey_number: string | null;
   position: string | null;
   age: number | null;
   height: string | null;
