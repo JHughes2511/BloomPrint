@@ -120,6 +120,58 @@ def init_db():
     _backfill_rosters_from_games()
     _restore_deleted_clip_analyses()
     _clear_stale_team_links()
+    _teams_for_existing_shares()
+    _merge_duplicate_players()
+
+
+def _teams_for_existing_shares():
+    """Teams for games shared before shares created them.
+
+    A shared game puts both its teams in the recipient's account, so they can
+    scout either side and see the players under a team rather than loose. That
+    started with the change that added it, which left every game shared before
+    then with no team on the recipient's side — a Mali chip that never
+    appeared. Matched on name, so nobody gets a second Angola.
+    """
+    from .player_grants import ensure_teams_for_share
+    from . import models
+
+    db = SessionLocal()
+    try:
+        shares = (db.query(models.StaffSharedReport)
+                  .filter(models.StaffSharedReport.report_type.in_(
+                      ("game_session", "game"))).all())
+        made = 0
+        for sr in shares:
+            sender = db.get(models.Coach, sr.sender_id)
+            if not sender:
+                continue
+            made += len(ensure_teams_for_share(db, sr.report_type, sr.report_id,
+                                               sender, sr.recipient_id) or [])
+        db.commit()
+        if made:
+            log.info("Checked %s shared game(s) for their teams", len(shares))
+    except Exception as exc:
+        db.rollback()
+        log.warning("Could not add teams for existing shares: %s", exc)
+    finally:
+        db.close()
+
+
+def _merge_duplicate_players():
+    """The same player written twice on one roster — see dedupe_players."""
+    from .dedupe_players import merge_duplicates
+
+    db = SessionLocal()
+    try:
+        folded = merge_duplicates(db)
+        if folded:
+            log.info("Folded %s duplicate player record(s) into one each", folded)
+    except Exception as exc:
+        db.rollback()
+        log.warning("Could not merge duplicate players: %s", exc)
+    finally:
+        db.close()
 
 
 def _clear_stale_team_links():

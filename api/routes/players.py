@@ -152,7 +152,22 @@ def list_players(
         if team_id is not None and row.team_id != team_id:
             continue
         out.append(row)
-    return out
+
+    # One person, one card. Sharing a game creates a record on the SENDER's
+    # side for every name in the box score, so a coach who already keeps that
+    # player saw them twice — once as their own, once as the shared twin. The
+    # twin is not ours to delete, so it simply is not listed: the row that
+    # stays is the one carrying the jersey, the position and the evaluations.
+    #
+    # Same name AND same number. A name on its own is not a person — two
+    # squads have a Diallo — and the number is what a coach reads them by.
+    def key(r):
+        num = str(r.jersey_number or "").strip().lstrip("#").lower()
+        return (" ".join((r.name or "").split()).lower(), num)
+
+    owned = {key(r) for r in out if not r.shared and str(r.jersey_number or "").strip()}
+    return [r for r in out
+            if not (r.shared and str(r.jersey_number or "").strip() and key(r) in owned)]
 
 
 @router.post("/{player_id}/leave-team")

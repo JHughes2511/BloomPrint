@@ -3431,7 +3431,10 @@ def opponent_profile(
     # could have three games on file and no scouting page, because it happened
     # to be stored as the game's own team every time — which is a detail of how
     # the row is written, not something a coach knows or should have to.
-    same = [tm.id for tm in db.query(models.Team).filter_by(coach_id=coach.id).all()
+    # Any team row with this name, whoever owns it. A game shared with me is
+    # filed under the SENDER's Angola, so looking only at my own team rows left
+    # the night off Angola's scouting page even though it is on my schedule.
+    same = [tm.id for tm in db.query(models.Team).all()
             if _norm_team(tm.name) == _norm_team(opponent_name)]
     side = [func.lower(models.GameSession.opponent_name) == opponent_name.strip().lower()]
     if same:

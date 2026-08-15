@@ -46,6 +46,7 @@ import DraggableWhiteboardButton from '../components/DraggableWhiteboardButton';
 import { useSheetScrollHeight, sheetCap, desktopOnly, CONTENT_MAX_WIDTH, REPORT_MODAL_WIDTH } from '../responsive/modalSizes';
 import { useGridColumns } from '../responsive/useGridColumns';
 import { useBackStep } from '../navigation/useBackStep';
+import { abandonSheetHistory } from '../web/sheetHistory';
 
 // Highest competition level → lowest.
 const COMPETITION_LEVELS = [
@@ -1830,6 +1831,24 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const NAV_PARENT: Record<string, string> = { detail: 'games', live: 'games' };
   const navView = NAV_PARENT[activeView] ?? activeView;
 
+  /**
+   * Leave a step by pressing the link on the page, rather than by going back.
+   *
+   * The step is holding a history entry so that BACK closes it. Closing it any
+   * other way spends that entry with a history.back(), which is right when the
+   * entry sits above the page — and wrong after a refresh, where the page was
+   * loaded AT the step's own address. There the entry underneath is that same
+   * address, so the back landed on it, the screen read the team out of it, and
+   * pressing All teams left the coach exactly where they were.
+   *
+   * Forgetting the entry instead leaves the address the one this screen just
+   * wrote, which is the list.
+   */
+  const leaveStep = (close: () => void) => {
+    abandonSheetHistory();
+    close();
+  };
+
   // Back walks the steps taken inside this screen before it leaves it. Order
   // matters and is inner-first: a player opened inside a scouted team closes
   // before the team does. See useBackStep.
@@ -1881,7 +1900,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const BackToGames = () => (
     <TouchableOpacity
       style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}
-      onPress={() => setActiveView('games')}
+      onPress={() => leaveStep(() => setActiveView('games'))}
     >
       <Ionicons name="arrow-back" size={18} color={t.muted} />
       <Text style={{ color: t.muted, fontSize: 14 }}>{tr('teamGrade.allGames')}</Text>
@@ -2809,7 +2828,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               ) : (
                 <View style={{ marginTop: 16, flexDirection: 'row', alignItems: 'flex-start' }}>
                   {([
-                    [(teams as any[]).find(tm => tm.id === detailGame.team_id)?.name
+                    [detailGame.team_name
+                      ?? (teams as any[]).find(tm => tm.id === detailGame.team_id)?.name
                       ?? coach?.program_name ?? tr('teamGrade.ourTeam'), summary.team_grade, t.accent],
                     [detailGame.opponent_name || tr('teamGrade.opponent'),
                       summary.opponent_team_grade, t.negative],
@@ -2848,7 +2868,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               onPress={() => openTab('our')}
             >
               <Text style={[s.teamToggleText, detailTab === 'our' && s.teamToggleTextActive]} numberOfLines={1}>
-                {(teams as any[]).find(tm => tm.id === detailGame.team_id)?.name
+                {detailGame.team_name
+                  ?? (teams as any[]).find(tm => tm.id === detailGame.team_id)?.name
                   ?? coach?.program_name ?? tr('teamGrade.ourTeam')}
               </Text>
             </TouchableOpacity>
@@ -3289,7 +3310,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             <>
               <TouchableOpacity
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}
-                onPress={() => { setScoutOpponent(null); setScoutData(null); }}
+                onPress={() => leaveStep(() => { setScoutOpponent(null); setScoutData(null); })}
               >
                 <Ionicons name="arrow-back" size={18} color={t.muted} />
                 <Text style={{ color: t.muted, fontSize: 14 }}>{tr('teamGrade.allOpponents')}</Text>
@@ -3527,7 +3548,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             <>
               <TouchableOpacity
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}
-                onPress={() => setGameReportGame(null)}
+                onPress={() => leaveStep(() => setGameReportGame(null))}
               >
                 <Ionicons name="arrow-back" size={18} color={t.muted} />
                 <Text style={{ color: t.muted, fontSize: 14 }}>{tr('teamGrade.allGames')}</Text>
