@@ -157,6 +157,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // Tablet and up. Not Platform: a phone browser is web too, and gating the
   // desktop layout on platform put it on every phone that opened the site.
   const { isWide } = useBreakpoint();
+  // How wide the phase chips actually are, so the team picker can tell whether
+  // it fits beside them.
+  const [chipRowWidth, setChipRowWidth] = useState(0);
   const { coach } = useAuth();
   const { currentTeamId } = useTeam();
   const { t, mode } = useTheme();
@@ -1821,7 +1824,16 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       <View
         ref={outside}
         style={inline
-          ? { width: 260, marginLeft: 'auto', position: 'relative', zIndex: 20 }
+          // 260 fixed was more than a tablet has to spare beside seven view
+          // chips: the row ran out of room and cut the last chip off exactly
+          // where this box started, which reads as the two colliding.
+          //
+          // So it asks for less and grows back into whatever the chips do not
+          // need — 260 on a desktop, narrower on an iPad. If even the smaller
+          // width leaves the chips short, the row wraps and this takes the
+          // line below rather than squeezing them.
+          ? { flexBasis: 200, flexGrow: 1, minWidth: 200, maxWidth: 260,
+              marginLeft: 'auto', position: 'relative', zIndex: 20 }
           : { paddingHorizontal: 16, marginBottom: 12 }}
       >
         <TouchableOpacity
@@ -2093,10 +2105,25 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               Without the label the chips sat tight under the divider while the
               dashboard's started lower, so switching tabs shifted everything. */}
           <View style={{ marginBottom: 16, zIndex: 20 }}>
-          <View style={desktopOnly({ flexDirection: 'row', alignItems: 'flex-end', gap: 12, paddingRight: 16 })}>
-          <View style={desktopOnly({ flex: 1, minWidth: 0 })}>
+          <View style={desktopOnly({ flexDirection: 'row', alignItems: 'flex-end',
+                                     flexWrap: 'wrap', gap: 12, paddingRight: 16 })}>
+          {/* The chips ask for the width they actually need, measured rather
+              than assumed — seven of them are much wider in German than in
+              English, and a number picked here would be wrong in most of the
+              25 languages. */}
+          <View style={desktopOnly({ flexGrow: 1, flexShrink: 0, maxWidth: '100%',
+                                     flexBasis: chipRowWidth || 'auto' })}>
           <Text style={[s.cardLabel, { marginBottom: 8 }]}>{tr('teamGrade.gameView')}</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ ...bleedRow(20) }} contentContainerStyle={bleedContent(20, 0)}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            // The bleed lets the chips run to the glass on a phone, where the
+            // row has the line to itself. Next to the team picker it only
+            // pushes the row under it, so it stops at its own edge there.
+            style={isWide ? { marginLeft: -20 } : { ...bleedRow(20) }}
+            contentContainerStyle={bleedContent(20, 0)}
+            onContentSizeChange={(w) => setChipRowWidth(Math.ceil(w))}
+          >
             {['all', ...orderedPhases].map(p => (
               <TouchableOpacity
                 key={p}
