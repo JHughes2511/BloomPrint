@@ -12,6 +12,7 @@ from ..player_grants import grant_players_for_share, ensure_teams_for_share
 from ..auth import get_current_coach
 from .. import models, notify, schemas
 from ..ai_models import OPUS
+from ..report_sections import strip_sections
 
 router = APIRouter(prefix="/staff-sharing", tags=["staff-sharing"])
 
@@ -185,13 +186,21 @@ def _share_text(sr: models.StaffSharedReport, db: Session) -> str | None:
     # text about it that still reads the numbers from share time contradicts
     # the box score beside it.
     if (sr.report_type or "") == "game_session":
-        return live or sr.frozen_text
+        # Still section-filtered: live and "leave this part out" are two
+        # switches, and being live is no reason to hand over a section the
+        # sender took off the page.
+        return strip_sections(live, _load_hidden(sr)) if live else sr.frozen_text
     # Everything else: a share made before headings were recorded has only its
     # filtered snapshot to go on, and going live for those would show sections
     # the sender had taken out — the one thing this must not do.
     if sr.hidden_sections is None and sr.frozen_text:
         return sr.frozen_text
-    return live or sr.frozen_text
+    if live:
+        # Dropped here rather than in the reader: the Recent list, its search
+        # and every export read this same text, and a section removed in the
+        # viewer alone would still be in all of those.
+        return strip_sections(live, _load_hidden(sr))
+    return sr.frozen_text
 
 
 def _build_out(sr: models.StaffSharedReport, db: Session) -> schemas.StaffSharedReportOut:
@@ -1185,6 +1194,9 @@ def forward_shared(
         recipient_id=body.recipient_id,
         allow_regenerate=body.allow_regenerate,
         frozen_text=fwd_frozen,
+        # The sections the ORIGINAL sender left out stay out. Passing a report
+        # on is not a decision to hand over the part of it they withheld.
+        hidden_sections=sr.hidden_sections,
     )
     db.add(new_sr)
     db.flush()

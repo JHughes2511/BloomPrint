@@ -121,6 +121,7 @@ def init_db():
     _restore_deleted_clip_analyses()
     _clear_stale_team_links()
     _teams_for_existing_shares()
+    _players_for_shared_games()
     _merge_duplicate_players()
 
 
@@ -154,6 +155,42 @@ def _teams_for_existing_shares():
     except Exception as exc:
         db.rollback()
         log.warning("Could not add teams for existing shares: %s", exc)
+    finally:
+        db.close()
+
+
+def _players_for_shared_games():
+    """Every name in a shared or frozen game, on the roster under its team.
+
+    A live share lends the recipient the sender's player records. A frozen
+    game has no sender to lend from, so its names existed only as rows on a
+    box score — the team was on the roster with a fraction of its squad, or
+    with nobody at all. This files them, once, for the games already here.
+
+    Only ever adds. A player already on that team keeps everything they have.
+    """
+    from .shared_games import file_box_score_players
+    from . import models
+
+    db = SessionLocal()
+    try:
+        frozen = (db.query(models.GameSession)
+                  .filter(models.GameSession.frozen_from.isnot(None)).all())
+        added = sum(file_box_score_players(db, g, g.coach_id) for g in frozen)
+        # And the live ones, so a team a share created is not left empty either.
+        shares = (db.query(models.StaffSharedReport)
+                  .filter(models.StaffSharedReport.report_type.in_(
+                      ("game_session", "game"))).all())
+        for sr in shares:
+            game = db.get(models.GameSession, sr.report_id)
+            if game is not None:
+                added += file_box_score_players(db, game, sr.recipient_id)
+        db.commit()
+        if added:
+            log.info("Filed %s player(s) from shared games onto their teams", added)
+    except Exception as exc:
+        db.rollback()
+        log.warning("Could not file players from shared games: %s", exc)
     finally:
         db.close()
 

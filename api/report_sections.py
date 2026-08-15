@@ -152,3 +152,67 @@ def apply_section_correction(original: str, corrected: str, changed: str | None 
         if heading and _norm(heading) not in kept:
             out.insert(min(i, len(out)), (heading, body))
     return join_sections(out)
+
+
+# ── Dropping sections from a live report ──────────────────────────────────────
+#
+# _without_sections above serves the player-facing sends, where the text is
+# fixed at the moment it goes out. A staff share is different now: it records
+# WHICH headings the sender unticked and the report stays live, so the dropping
+# happens on every read rather than once.
+#
+# That needs the heading rules the SENDER saw, which are the client splitter's
+# — splitReportSections in mobile/src/utils/mdToHtml.ts. Those are more
+# generous than the pair above: an em dash ("WEEKLY PLAN — TWO-A-DAYS") and a
+# leading digit ("3-POINT SHOOTING DETAIL") are both headings there and are not
+# here. A heading the sender could tick that this could not find would be a
+# section that quietly failed to be hidden, so this is a port of that function,
+# with a test that runs both over the same reports and compares.
+
+_LIVE_HASH = re.compile(r"^#{1,6}\s+")
+_LIVE_LABELLED_NUMBER = re.compile(r":\s*-?\d")
+_LIVE_ENDS_WITH_COLON = re.compile(r":\s*$")
+_LIVE_CAPS = re.compile(r"^[A-Z0-9][A-Z0-9\s/&()\-—–:'.,%+#]*$")
+_LIVE_TWO_LETTERS = re.compile(r"[A-Z]{2}")
+_LIVE_SENTENCE_END = re.compile(r"[.!?]$")
+
+
+def client_heading_of(line: str) -> str | None:
+    """The heading this line is, or None. Mirrors headingOf in mdToHtml.ts."""
+    t = (line or "").strip()
+    if _LIVE_HASH.match(t):
+        return _LIVE_HASH.sub("", t).replace("**", "").strip()
+    # "GRADE: 6.4 / 10" is a field of the section above, not a section.
+    if _LIVE_LABELLED_NUMBER.search(t) and not _LIVE_ENDS_WITH_COLON.search(t):
+        return None
+    if (_LIVE_CAPS.match(t) and _LIVE_TWO_LETTERS.search(t)
+            and 3 <= len(t) < 70 and not _LIVE_SENTENCE_END.search(t)):
+        return re.sub(r":$", "", t).strip()
+    return None
+
+
+def strip_sections(text: str, hidden: list[str]) -> str:
+    """The report without the headings named, and without their bodies.
+
+    A heading that matches nothing leaves the report alone: a sender who
+    unticked a section of a report that has since been rewritten should get the
+    rewrite, not an empty page.
+    """
+    if not text or not hidden:
+        return text
+    drop = {" ".join(str(h or "").split()).strip().lower().rstrip(":")
+            for h in hidden if str(h).strip()}
+    if not drop:
+        return text
+    out: list[str] = []
+    dropping = False
+    for line in text.split("\n"):
+        h = client_heading_of(line)
+        if h is not None:
+            dropping = " ".join(h.split()).strip().lower().rstrip(":") in drop
+        if not dropping:
+            out.append(line)
+    # Collapse the gap left behind, so removing a section does not leave a hole
+    # three blank lines deep in the middle of the page.
+    joined = re.sub(r"\n{3,}", "\n\n", "\n".join(out))
+    return joined.strip("\n") + ("\n" if text.endswith("\n") else "")
