@@ -2226,7 +2226,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </View>
           ) : (
             <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: gamesGrid.gap, paddingHorizontal: 16 })}
-                  onLayout={gamesGrid.onLayout}>
+                  ref={gamesGrid.ref} onLayout={gamesGrid.onLayout}>
             {filteredSessions.map((game: any) => {
               const hasScore = game.our_score != null;
               return (
@@ -3195,7 +3195,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 </View>
               ) : (
                 <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: scoutGrid.gap, paddingHorizontal: 16 })}
-                      onLayout={scoutGrid.onLayout}>
+                      ref={scoutGrid.ref} onLayout={scoutGrid.onLayout}>
                 {scoutableTeams.map(opp => (
                   <TouchableOpacity key={opp} style={[s.gameCard, scoutGrid.cardWidth ? { width: scoutGrid.cardWidth } : null]} onPress={() => openScout(opp)}>
                     <Text style={s.gameCardOpponent}>{opp}</Text>
@@ -3426,7 +3426,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 <Text style={{ color: t.muted2, fontSize: 13 }}>{tr('teamGrade.noGamesYet')}</Text>
               )}
               <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap, paddingHorizontal: 16 })}
-                    onLayout={reportGrid.onLayout}>
+                    ref={reportGrid.ref} onLayout={reportGrid.onLayout}>
               {/* No W/L badge. The card already carries "Angola vs Egypt" and
                   "83-72"; a bare W beside them says nothing the two numbers do
                   not, and without a team on it there was no way to tell whose

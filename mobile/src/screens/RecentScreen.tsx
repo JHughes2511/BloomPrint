@@ -910,7 +910,7 @@ export default function RecentScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} tintColor={t.accent} />}
         data={listData}
         keyExtractor={(e: any) => e.__dayHeader ? `day-${e.__dayHeader}` : (e.shared ? `shared-${e.shared_id}` : `${e.kind}-${e.id}`)}
-        onLayout={recentGrid.onLayout}
+        ref={recentGrid.ref} onLayout={recentGrid.onLayout}
         CellRendererComponent={isWide ? ({ children, index, style, ...rest }: any) => (
           <View
             {...rest}

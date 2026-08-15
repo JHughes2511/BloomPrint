@@ -252,7 +252,7 @@ export default function PlayerInboxScreen() {
         </View>
       ) : (
         <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap, paddingHorizontal: 16 })}
-              onLayout={reportGrid.onLayout}>
+              ref={reportGrid.ref} onLayout={reportGrid.onLayout}>
         {searched.map(item => {
           const isFilm = (item.output_type || '').includes('film');
           return (

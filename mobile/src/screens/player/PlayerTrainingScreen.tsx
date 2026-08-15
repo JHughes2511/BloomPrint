@@ -163,7 +163,7 @@ export default function PlayerTrainingScreen() {
           ) : null}
 
           <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: trainGrid.gap, paddingHorizontal: 16 })}
-                onLayout={trainGrid.onLayout}>
+                ref={trainGrid.ref} onLayout={trainGrid.onLayout}>
           {filtered.map((pt, idx) => (
             <TouchableOpacity
               key={`${pt.origin}-${pt.id}`}
