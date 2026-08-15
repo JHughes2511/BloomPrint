@@ -193,6 +193,7 @@ GAME_FILE_INSTRUCTION = (
     "contains and omitting the rest:\n"
     '{\n'
     '  "players": [{"player_name": "", "jersey_number": "", "team_name": "", "is_opponent": false, '
+    '"MIN": "0:00", "PM": 0, "EFF": 0, '
     '"stats": {"2 FG Made": 0, "2 FG Missed": 0, "3 FG Made": 0, "3 FG Missed": 0, '
     '"FT Made": 0, "FT Missed": 0, "Off. Reb": 0, "Def. Reb": 0, "Assists": 0, '
     '"Steal": 0, "Blocked Shot": 0, "Turnover": 0, "Foul Against": 0}}],\n'
@@ -205,7 +206,12 @@ GAME_FILE_INSTRUCTION = (
     '"second_chance_points": 0, "points_in_paint": 0, "bench_points": 0}]\n'
     '}\n\n'
     "PLAYERS — the box score. jersey_number is the squad number printed beside the "
-    "name, as text ('00' is not 0); omit it when the sheet does not print one. "
+    "name, as text ('00' is not 0); omit it when the sheet does not print one.\n"
+    "MIN is minutes played exactly as printed — '27:13' stays '27:13', 27 stays 27. "
+    "PM is the plus-minus column and CAN be negative; keep the sign. EFF is the "
+    "efficiency or PIR column. These three are not counted stats and belong beside "
+    "the name, not in 'stats'. Omit any the sheet does not print rather than "
+    "working it out.\n"
     "FG/FGM/FGA cover ALL field goals, threes included, so "
     "'2 FG Made' must have the threes subtracted: a 9-of-18 line containing three "
     "threes is 6 two-point makes and 3 three-point makes. Misses matter as much as "

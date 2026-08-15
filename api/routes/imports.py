@@ -179,9 +179,18 @@ async def game_stats_preview(
                     continue
                 if n > 0:
                     norm[k] = n
-        clean.append({"player_name": name, "team_name": str(p.get("team_name") or "").strip(),
-                      "jersey_number": str(p.get("jersey_number") or "").strip() or None,
-                      "is_opponent": bool(p.get("is_opponent")), "stats": norm})
+        row = {"player_name": name, "team_name": str(p.get("team_name") or "").strip(),
+               "jersey_number": str(p.get("jersey_number") or "").strip() or None,
+               "is_opponent": bool(p.get("is_opponent")), "stats": norm}
+        # Minutes, plus-minus and efficiency are not counted stats — a duration,
+        # a signed difference and a formula — so they travel beside the name.
+        # Dropped here, the box score showed a dash in all three columns for
+        # every player of every game imported this way, and grading fell back to
+        # treating everyone as having played twenty minutes.
+        for key in ("MIN", "PM", "EFF"):
+            if p.get(key) not in (None, ""):
+                row[key] = p[key]
+        clean.append(row)
 
     # The game knows who is playing; the file knows what it called them. Matching
     # the two is far better than the model's guess at which side is "the
@@ -242,6 +251,12 @@ async def game_stats_preview(
         # A number printed on one of the two files is a number for this player.
         if row.get("jersey_number") and not merged[key].get("jersey_number"):
             merged[key]["jersey_number"] = row["jersey_number"]
+        # Same for the line values: the stat sheet prints minutes, the shooting
+        # breakdown beside it does not, and merging must not lose the one that
+        # did.
+        for k in ("MIN", "PM", "EFF"):
+            if row.get(k) not in (None, "") and merged[key].get(k) in (None, ""):
+                merged[key][k] = row[k]
     # Events, shots and team totals are not reviewed row by row — a coach is not
     # going to tick four hundred play-by-play lines — so they travel with the
     # preview and are counted for them instead.
@@ -294,7 +309,8 @@ def game_stats_commit(
 ):
     from .game_eval import (
         _get_game, _import_raw, stat_category, _clear_prior_import,
-        IMPORT_QUARTER, IMPORT_MULTIPLIER,
+        IMPORT_QUARTER, IMPORT_MULTIPLIER, _save_line_values,
+        _minutes_value, _signed_value,
     )
     game = _get_game(db, body.game_id, coach.id)
     # Whole-game totals: neutral quarter, no clutch multiplier. See game_eval.
@@ -320,6 +336,19 @@ def game_stats_commit(
             continue
         is_opp = bool(p.get("is_opponent"))
         jersey = str(p.get("jersey_number") or "").strip() or None
+        # The parts of the line that are not counted stats. Read the same way
+        # the direct upload reads them: "27:13" is twenty-seven minutes and
+        # thirteen seconds, and a minus-twelve keeps its sign.
+        line: dict[str, float] = {}
+        mins = _minutes_value(p.get("MIN"))
+        if mins is not None:
+            line["MIN"] = mins
+        for key in ("PM", "EFF"):
+            signed = _signed_value(p.get(key))
+            if signed is not None:
+                line[key] = signed
+        if line:
+            _save_line_values(db, game.id, is_opp, name, line)
         stats = p.get("stats") if isinstance(p.get("stats"), dict) else {}
         for stat, count in stats.items():
             try:
