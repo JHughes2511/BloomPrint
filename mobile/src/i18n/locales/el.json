@@ -2281,7 +2281,8 @@
     "sharedByCoach": "Κοινοποιήθηκε από {{name}}",
     "removeSharedGameTitle": "Αφαίρεση κοινόχρηστου αγώνα",
     "removeSharedGameMessage": "Να αφαιρεθεί ο αγώνας από τη λίστα σου; Παραμένει στον/στην {{name}} — αλλάζει μόνο η δική σου προβολή.",
-    "removeFromMyGames": "Αφαίρεση από τους αγώνες μου"
+    "removeFromMyGames": "Αφαίρεση από τους αγώνες μου",
+    "frozenFromCoach": "Από {{name}} · δεν ενημερώνεται πλέον"
   },
   "whiteboard": {
     "title": "Πίνακας",

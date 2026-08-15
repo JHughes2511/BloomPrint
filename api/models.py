@@ -783,6 +783,12 @@ class GameSession(SoftDeleteMixin, Base):
     status = Column(String, default="in_progress")
     ai_scouting_report = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    # A game that was shared with this coach and has stopped being live — the
+    # sender deleted it, took the share back, or left. It is a copy of how the
+    # game last stood, and it never changes again. See shared_games.py.
+    frozen_from_game_id = Column(Integer, nullable=True, index=True)
+    frozen_from = Column(String, nullable=True)   # the coach it came from
+    frozen_at = Column(DateTime, nullable=True)
 
     coach = relationship("Coach")
     player_stats = relationship("GamePlayerStat", back_populates="game", cascade="all, delete-orphan")

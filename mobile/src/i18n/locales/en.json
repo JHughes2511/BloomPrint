@@ -2281,7 +2281,8 @@
     "sharedByCoach": "Shared by {{name}}",
     "removeSharedGameTitle": "Remove Shared Game",
     "removeSharedGameMessage": "Take this game off your list? It stays with {{name}} — only your view changes.",
-    "removeFromMyGames": "Remove from my games"
+    "removeFromMyGames": "Remove from my games",
+    "frozenFromCoach": "From {{name}} · no longer updating"
   },
   "whiteboard": {
     "title": "Whiteboard",

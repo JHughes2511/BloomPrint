@@ -2281,7 +2281,8 @@
     "sharedByCoach": "Ibinahagi ni {{name}}",
     "removeSharedGameTitle": "Alisin ang ibinahaging laro",
     "removeSharedGameMessage": "Alisin ang laro sa listahan mo? Nananatili ito kay {{name}} — ang view mo lang ang magbabago.",
-    "removeFromMyGames": "Alisin sa aking mga laro"
+    "removeFromMyGames": "Alisin sa aking mga laro",
+    "frozenFromCoach": "Mula kay {{name}} · hindi na nag-a-update"
   },
   "whiteboard": {
     "title": "Whiteboard",

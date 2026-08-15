@@ -2281,7 +2281,8 @@
     "sharedByCoach": "Compartido por {{name}}",
     "removeSharedGameTitle": "Quitar partido compartido",
     "removeSharedGameMessage": "¿Quitar este partido de tu lista? Sigue con {{name}}: solo cambia tu vista.",
-    "removeFromMyGames": "Quitar de mis partidos"
+    "removeFromMyGames": "Quitar de mis partidos",
+    "frozenFromCoach": "De {{name}} · ya no se actualiza"
   },
   "whiteboard": {
     "title": "Pizarra",

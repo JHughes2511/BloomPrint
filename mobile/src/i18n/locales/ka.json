@@ -2281,7 +2281,8 @@
     "sharedByCoach": "გააზიარა {{name}}-მა",
     "removeSharedGameTitle": "გაზიარებული თამაშის წაშლა",
     "removeSharedGameMessage": "წავშალოთ ეს თამაში თქვენი სიიდან? ის რჩება {{name}}-თან — იცვლება მხოლოდ თქვენი ხედი.",
-    "removeFromMyGames": "წაშლა ჩემი თამაშებიდან"
+    "removeFromMyGames": "წაშლა ჩემი თამაშებიდან",
+    "frozenFromCoach": "{{name}}-გან · აღარ განახლდება"
   },
   "whiteboard": {
     "title": "დაფა",

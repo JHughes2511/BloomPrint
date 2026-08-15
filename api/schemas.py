@@ -753,6 +753,9 @@ class GameSessionOut(BaseModel):
     # Set when another coach shared this game with me: their name, for the
     # card. None on my own games.
     shared_by: str | None = None
+    # Set when the share behind this game ended and it was kept as it last
+    # stood: the coach it came from. Read-only from then on.
+    frozen_from: str | None = None
     model_config = {"from_attributes": True}
 
 

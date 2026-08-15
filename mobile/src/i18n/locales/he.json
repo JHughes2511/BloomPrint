@@ -2281,7 +2281,8 @@
     "sharedByCoach": "שותף על ידי {{name}}",
     "removeSharedGameTitle": "הסרת משחק משותף",
     "removeSharedGameMessage": "להסיר את המשחק מהרשימה שלך? הוא נשאר אצל {{name}} — רק התצוגה שלך משתנה.",
-    "removeFromMyGames": "הסר מהמשחקים שלי"
+    "removeFromMyGames": "הסר מהמשחקים שלי",
+    "frozenFromCoach": "מאת {{name}} · כבר לא מתעדכן"
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

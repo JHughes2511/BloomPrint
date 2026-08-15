@@ -426,6 +426,10 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     ("generation_jobs", "attempts", "INTEGER DEFAULT 0"),
     ("game_report_clips", "team_name", "VARCHAR"),
     ("shared_reports", "hidden_sections", "TEXT"),
+    # A shared game that stopped being live, kept as it last stood.
+    ("game_sessions", "frozen_from_game_id", "INTEGER"),
+    ("game_sessions", "frozen_from", "VARCHAR"),
+    ("game_sessions", "frozen_at", "TIMESTAMP"),
     ("share_approvals", "hidden_sections", "TEXT"),
     # The team-totals panel gained the basic totals after its table had already
     # shipped. create_all() adds missing TABLES and not missing COLUMNS, so

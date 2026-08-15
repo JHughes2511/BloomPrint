@@ -2281,7 +2281,8 @@
     "sharedByCoach": "Pasidalino {{name}}",
     "removeSharedGameTitle": "Pašalinti bendrintas rungtynes",
     "removeSharedGameMessage": "Pašalinti šias rungtynes iš savo sąrašo? Jos lieka pas {{name}} — keičiasi tik jūsų rodinys.",
-    "removeFromMyGames": "Pašalinti iš mano rungtynių"
+    "removeFromMyGames": "Pašalinti iš mano rungtynių",
+    "frozenFromCoach": "Nuo {{name}} · nebeatnaujinama"
   },
   "whiteboard": {
     "title": "Lenta",

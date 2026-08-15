@@ -2281,7 +2281,8 @@
     "sharedByCoach": "Partagé par {{name}}",
     "removeSharedGameTitle": "Retirer le match partagé",
     "removeSharedGameMessage": "Retirer ce match de votre liste ? Il reste chez {{name}} — seule votre vue change.",
-    "removeFromMyGames": "Retirer de mes matchs"
+    "removeFromMyGames": "Retirer de mes matchs",
+    "frozenFromCoach": "De {{name}} · ne se met plus à jour"
   },
   "whiteboard": {
     "title": "Tableau blanc",

@@ -2281,7 +2281,8 @@
     "sharedByCoach": "Compartilhado por {{name}}",
     "removeSharedGameTitle": "Remover jogo compartilhado",
     "removeSharedGameMessage": "Tirar este jogo da sua lista? Ele continua com {{name}} — só a sua visualização muda.",
-    "removeFromMyGames": "Remover dos meus jogos"
+    "removeFromMyGames": "Remover dos meus jogos",
+    "frozenFromCoach": "De {{name}} · não atualiza mais"
   },
   "whiteboard": {
     "title": "Quadro Tático",

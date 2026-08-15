@@ -2281,7 +2281,8 @@
     "sharedByCoach": "Udostępnione przez {{name}}",
     "removeSharedGameTitle": "Usuń udostępniony mecz",
     "removeSharedGameMessage": "Usunąć ten mecz z Twojej listy? Pozostaje u {{name}} — zmienia się tylko Twój widok.",
-    "removeFromMyGames": "Usuń z moich meczów"
+    "removeFromMyGames": "Usuń z moich meczów",
+    "frozenFromCoach": "Od {{name}} · już się nie aktualizuje"
   },
   "whiteboard": {
     "title": "Tablica",

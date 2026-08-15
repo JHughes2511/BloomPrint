@@ -608,10 +608,17 @@ def player_tracked_stats_block(db, coach_id: int, player_name: str, game_ids) ->
     )
 
 
-def _get_game(db: Session, game_id: int, coach_id: int) -> models.GameSession:
+def _get_game(db: Session, game_id: int, coach_id: int,
+              allow_frozen: bool = False) -> models.GameSession:
     game = db.get(models.GameSession, game_id)
     if not game or game.coach_id != coach_id:
         raise HTTPException(status_code=404, detail="Game session not found")
+    # A frozen game is a record of somebody else's night, kept because the
+    # share ended. It can be removed, but not rewritten — editing it would
+    # quietly turn their game into mine.
+    if game.frozen_from and not allow_frozen:
+        raise HTTPException(status_code=403,
+                            detail="This game is a frozen copy of a shared game and can't be edited.")
     return game
 
 
@@ -1937,7 +1944,12 @@ def delete_session(
                 db.add(models.SharedGameHidden(coach_id=coach.id, game_id=game_id))
                 db.commit()
             return {"ok": True, "hidden": True}
-    game = _get_game(db, game_id, coach.id)
+    game = _get_game(db, game_id, coach.id, allow_frozen=True)
+    # Anyone this game was shared with keeps it as it last stood. Deleting my
+    # own game is not a reason to take a night out of their season without
+    # telling them.
+    from ..shared_games import freeze_all
+    freeze_all(db, game)
     # Hidden, not destroyed — a tracked game carries a whole night's stats.
     soft_delete(db, game)
     db.commit()
@@ -3113,11 +3125,21 @@ def season_dashboard(
         # my people played, so its side of the scoreboard is my side — without
         # this the game shows on the Games tab and the record beside it still
         # reads 0-0.
-        if visible_shared:
+        # ...and the teams behind games that were shared and have since been
+        # frozen. Both are games I was given rather than games I logged, and a
+        # season record that changes the day somebody else deletes their copy
+        # is not a record of anything.
+        subject_games = list(visible_shared) + [
+            g.id for g in db.query(models.GameSession)
+            .filter(models.GameSession.coach_id == coach.id,
+                    models.GameSession.frozen_from.isnot(None)).all()]
+        if subject_games:
+            have = {m.id for m in mine}
             for g in db.query(models.GameSession).filter(
-                    models.GameSession.id.in_(visible_shared)).all():
+                    models.GameSession.id.in_(subject_games)).all():
                 t = db.get(models.Team, g.team_id) if g.team_id else None
-                if t and t.is_mine is not False and t.id not in {m.id for m in mine}:
+                if t and t.id not in have:
+                    have.add(t.id)
                     mine.append(t)
         subject_ids = {t.id for t in mine}
         subject_names = {(t.name or "").strip().lower() for t in mine}

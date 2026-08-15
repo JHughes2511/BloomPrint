@@ -2281,7 +2281,8 @@
     "sharedByCoach": "شارَكه {{name}}",
     "removeSharedGameTitle": "إزالة المباراة المشتركة",
     "removeSharedGameMessage": "إزالة هذه المباراة من قائمتك؟ تبقى لدى {{name}} — يتغيّر عرضك أنت فقط.",
-    "removeFromMyGames": "إزالة من مبارياتي"
+    "removeFromMyGames": "إزالة من مبارياتي",
+    "frozenFromCoach": "من {{name}} · لم يعد يُحدَّث"
   },
   "whiteboard": {
     "title": "السبورة",

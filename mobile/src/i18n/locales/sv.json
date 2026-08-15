@@ -2281,7 +2281,8 @@
     "sharedByCoach": "Delad av {{name}}",
     "removeSharedGameTitle": "Ta bort delad match",
     "removeSharedGameMessage": "Ta bort matchen från din lista? Den finns kvar hos {{name}} — bara din vy ändras.",
-    "removeFromMyGames": "Ta bort från mina matcher"
+    "removeFromMyGames": "Ta bort från mina matcher",
+    "frozenFromCoach": "Från {{name}} · uppdateras inte längre"
   },
   "whiteboard": {
     "title": "Taktiktavla",

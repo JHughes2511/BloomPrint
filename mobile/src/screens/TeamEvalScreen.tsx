@@ -1090,7 +1090,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     navigation?.setParams?.({ openView: undefined, openNewGame: undefined, openPlaybook: undefined });
   }, [route?.params?.openView, route?.params?.openNewGame, route?.params?.openPlaybook]));
 
-  const isOwnedGame = (game: any) => !game || game.coach_id === coach?.id;
+  // A frozen game is filed in my account but is a record of somebody else's
+  // night: it is read-only, so every edit affordance is off for it too.
+  const isOwnedGame = (game: any) => !game || (game.coach_id === coach?.id && !game.frozen_from);
 
   const openPlayerStats = (playerName: string) => {
     setStatsModalPlayer(playerName);
@@ -2257,9 +2259,11 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     </Text>
                     {/* Whose game this is. It counts in the season record like
                         any other, so where it came from has to be said. */}
-                    {!!game.shared_by && (
+                    {!!(game.shared_by || game.frozen_from) && (
                       <Text style={{ color: t.accent, fontSize: 11, marginTop: 2 }} numberOfLines={1}>
-                        {tr('teamGrade.sharedByCoach', { name: game.shared_by })}
+                        {game.frozen_from
+                          ? tr('teamGrade.frozenFromCoach', { name: game.frozen_from })
+                          : tr('teamGrade.sharedByCoach', { name: game.shared_by })}
                       </Text>
                     )}
                   </View>
@@ -2270,7 +2274,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                       </Text>
                     </View>
                   </View>
-                  {isOwnedGame(game) ? (
+                  {isOwnedGame(game) && !game.frozen_from ? (
                     <TouchableOpacity
                       style={{ padding: 4 }}
                       onPress={() => {
@@ -2289,7 +2293,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     >
                       <Ionicons name="trash-outline" size={15} color={t.muted2} />
                     </TouchableOpacity>
-                  ) : game.shared_by ? (
+                  ) : (game.shared_by || game.frozen_from) ? (
                     /* A shared game isn't mine to delete — this takes it off
                        my list and out of my season record, and leaves the
                        coach who shared it untouched. */
@@ -2298,7 +2302,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                       onPress={() => {
                         Alert.alert(
                           tr('teamGrade.removeSharedGameTitle'),
-                          tr('teamGrade.removeSharedGameMessage', { name: game.shared_by }),
+                          tr('teamGrade.removeSharedGameMessage', { name: game.shared_by || game.frozen_from }),
                           [
                             { text: tr('common.cancel'), style: 'cancel' },
                             {

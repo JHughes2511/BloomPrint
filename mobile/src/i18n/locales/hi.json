@@ -2281,7 +2281,8 @@
     "sharedByCoach": "{{name}} ने साझा किया",
     "removeSharedGameTitle": "साझा किया गया मैच हटाएँ",
     "removeSharedGameMessage": "इस मैच को अपनी सूची से हटाएँ? यह {{name}} के पास रहेगा — केवल आपका दृश्य बदलेगा।",
-    "removeFromMyGames": "मेरे मैचों से हटाएँ"
+    "removeFromMyGames": "मेरे मैचों से हटाएँ",
+    "frozenFromCoach": "{{name}} से · अब अपडेट नहीं होता"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",

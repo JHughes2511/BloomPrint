@@ -148,13 +148,27 @@ def _in_conversation(sr: models.StaffSharedReport, coach_id: int, db: Session) -
     return any(r.recipient_id == coach_id for r in _conversation_rows(sr, db))
 
 
+def _share_text(sr: models.StaffSharedReport, db: Session) -> str | None:
+    """The text of a share, live where the thing behind it is live.
+
+    A frozen snapshot is a section-filtered copy taken at share time, so the
+    recipient sees exactly what was sent. Game Insights are the exception: the
+    game itself is a live link — it sits on the recipient's schedule and counts
+    in their season record, following the sender's corrections — so a page of
+    text about it that still reads last week's score contradicts the game card
+    beside it.
+    """
+    if (sr.report_type or "") == "game_session":
+        return _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id)
+    return sr.frozen_text if sr.frozen_text else _resolve_report_text(
+        sr.report_type, sr.report_id, db, sr.sender_id)
+
+
 def _build_out(sr: models.StaffSharedReport, db: Session) -> schemas.StaffSharedReportOut:
     out = schemas.StaffSharedReportOut.model_validate(sr)
     out.sender_name = sr.sender.name if sr.sender else ""
     out.recipient_name = sr.recipient.name if sr.recipient else ""
-    # A frozen snapshot (section-filtered, non-regenerable) takes precedence over
-    # the live report text so the recipient sees exactly the controlled copy.
-    out.report_text = sr.frozen_text if sr.frozen_text else _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id)
+    out.report_text = _share_text(sr, db)
     out.regenerated_text = sr.regenerated_text
     out.subject_name, out.output_type, out.overall_grade = _report_meta(sr.report_type, sr.report_id, db)
     # Counted across the whole conversation, so the number on the card matches
@@ -692,7 +706,7 @@ async def regenerate_shared(
     if not feedback:
         raise HTTPException(status_code=400, detail="Feedback required")
 
-    report_text = sr.frozen_text or _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id)
+    report_text = _share_text(sr, db)
     if not report_text:
         raise HTTPException(status_code=400, detail="No report content to regenerate")
 
@@ -968,7 +982,7 @@ async def regenerate_mine(
     # Base off my latest updated copy if I have one, else the shared original.
     # Prefer the frozen (toggle-filtered) copy so regeneration never brings back
     # sections the sharer deselected.
-    base = sr.regenerated_text or sr.frozen_text or _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id)
+    base = sr.regenerated_text or _share_text(sr, db)
     if not base:
         raise HTTPException(status_code=400, detail="No report content to update")
 

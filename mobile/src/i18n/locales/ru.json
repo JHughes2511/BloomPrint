@@ -2281,7 +2281,8 @@
     "sharedByCoach": "Поделился {{name}}",
     "removeSharedGameTitle": "Убрать общий матч",
     "removeSharedGameMessage": "Убрать этот матч из вашего списка? Он останется у {{name}} — изменится только ваш вид.",
-    "removeFromMyGames": "Убрать из моих матчей"
+    "removeFromMyGames": "Убрать из моих матчей",
+    "frozenFromCoach": "От {{name}} · больше не обновляется"
   },
   "whiteboard": {
     "title": "Тактическая доска",
