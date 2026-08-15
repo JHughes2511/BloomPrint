@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { roleLabel } from '../utils/roleLabel';
 import { useTranslation } from 'react-i18next';
 import VoiceTextInput from '../components/VoiceTextInput';
@@ -10,7 +10,7 @@ import {
   Platform, ScrollView, Alert, TextInput, RefreshControl,
 } from 'react-native';
 import Sheet from '../components/Sheet';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 import { useGoUp } from '../navigation/goUp';
 import { Ionicons } from '@expo/vector-icons';
 import { abandonSheetHistory } from '../web/sheetHistory';
@@ -74,6 +74,31 @@ export default function StaffInboxScreen() {
   const [view, setView] = useState<'report' | 'regenerated' | 'comments' | 'regenerate' | 'notes'>('report');
   const [coachNotes, setCoachNotes] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
+
+  const route = useRoute<any>();
+  // Which of the three tabs, and the shared report open over it, go in the
+  // address — so a refresh comes back to the page being read rather than to
+  // the top of the inbox.
+  useEffect(() => {
+    navigation.setParams?.({
+      tab: tab === 'inbox' ? undefined : tab,
+      item: activeItem ? String(activeItem.id) : undefined,
+    });
+  }, [tab, activeItem?.id]);
+
+  const restoredInbox = useRef(false);
+  useEffect(() => {
+    if (restoredInbox.current) return;
+    const t = route?.params?.tab;
+    if (t && ['inbox', 'team_games', 'my_teams'].includes(t)) setTab(t as TabKey);
+    const id = Number(route?.params?.item);
+    if (!id) { if (t) restoredInbox.current = true; return; }
+    if (items.length === 0) return;   // the inbox has not been read yet
+    restoredInbox.current = true;
+    const found = items.find((x: any) => x.id === id);
+    if (found) setActiveItem(found);
+    else navigation.setParams?.({ item: undefined });
+  }, [route?.params?.tab, route?.params?.item, items.length]);
 
   // My Teams state
   const [myTeams, setMyTeams] = useState<any[]>([]);

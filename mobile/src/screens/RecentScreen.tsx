@@ -132,6 +132,10 @@ export default function RecentScreen() {
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeModal, setActiveModal] = useState<ModalReport | null>(null);
+  // Whichever report is open, whichever of the three ways it opened — the plain
+  // modal, the shared viewer, or the game/scout/film sheet. Kept as the list row
+  // itself so a refresh can reopen it the same way it opened the first time.
+  const [openedItem, setOpenedItem] = useState<ReportItem | null>(null);
   // 'report' = main view, 'send' = send flow, 'correct' = correction input
   const [modalView, setModalView] = useState<'report' | 'send' | 'correct'>('report');
   const [teamReportTexts, setTeamReportTexts] = useState<Record<number, string>>({});
@@ -566,6 +570,9 @@ export default function RecentScreen() {
   };
 
   const handlePress = async (item: ReportItem) => {
+    // A game report leaves this screen for the builder; everything else opens
+    // a sheet here, which is what the address should remember.
+    if (item.shared || item.kind !== 'game') setOpenedItem(item);
     // A shared report opens in the unified viewer (correct / regenerate /
     // comment / notes), always scrollable.
     if (item.shared) {
@@ -653,6 +660,37 @@ export default function RecentScreen() {
       allow_regenerate: item.allow_regenerate, sender_name: item.sender_name, subject_name: item.player_name,
     });
   };
+
+  // Closing the last sheet means nothing is open any more.
+  useEffect(() => {
+    if (!activeModal && !gameReportModal && !viewerShared) setOpenedItem(null);
+  }, [activeModal, gameReportModal, viewerShared]);
+
+  // Reopen from the address first, so the sync below cannot wipe the parameter
+  // before the list has arrived.
+  const restoredReport = useRef(false);
+  useEffect(() => {
+    if (restoredReport.current) return;
+    const id = Number(route?.params?.report);
+    if (!id) { restoredReport.current = true; return; }
+    if (items.length === 0) return;         // the list is still loading
+    restoredReport.current = true;
+    const kind = route?.params?.kind;
+    const found = items.find(r => r.id === id && (!kind || r.kind === kind));
+    if (found) void handlePress(found);
+    else navigation.setParams?.({ report: undefined, kind: undefined });
+  }, [route?.params?.report, items.length]);   // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The open report goes in the address, so a refresh comes back to it rather
+  // than to the top of the list. Kind as well as id: an eval, a team report and
+  // a training programme can each be number seven.
+  useEffect(() => {
+    if (!restoredReport.current) return;
+    navigation.setParams?.({
+      report: openedItem ? String(openedItem.id) : undefined,
+      kind: openedItem ? openedItem.kind : undefined,
+    });
+  }, [openedItem?.id, openedItem?.kind]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDelete = (item: ReportItem) => {
     if (item.shared) return; // a report shared with me isn't mine to delete
