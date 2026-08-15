@@ -156,6 +156,7 @@ export function ReportSearchButton(
 export function ReportSearchBar({ ctl }: { ctl: ReportSearchControls }) {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
+  const { isPhone } = useBreakpoint();
   const inputRef = useRef<any>(null);
   useEffect(() => {
     if (!ctl.open || Platform.OS !== 'web') return;
@@ -172,8 +173,14 @@ export function ReportSearchBar({ ctl }: { ctl: ReportSearchControls }) {
   const none = typed && ctl.total === 0;
   return (
     <View style={{
-      flexDirection: 'row', alignItems: 'center', gap: 8,
-      paddingHorizontal: 10, paddingVertical: 8, marginBottom: 10,
+      // Trimmed on a phone, where the row is a good share of the screen. Only
+      // the spacing and the icons: the typed text stays as it is, because a
+      // field under 16px makes iOS zoom the whole page the moment it is
+      // focused, which is a far bigger jolt than a tall bar.
+      flexDirection: 'row', alignItems: 'center', gap: isPhone ? 5 : 8,
+      paddingHorizontal: isPhone ? 8 : 10,
+      paddingVertical: isPhone ? 4 : 8,
+      marginBottom: isPhone ? 8 : 10,
       borderRadius: 10, borderWidth: 1, borderColor: t.line,
       // Short of the report's full width, and sitting under the button that
       // opened it. A find box does not need the whole column — it needs room
@@ -196,7 +203,7 @@ export function ReportSearchBar({ ctl }: { ctl: ReportSearchControls }) {
         ? ({ position: 'sticky', top: 0, zIndex: 20 } as any)
         : null),
     }}>
-      <Ionicons name="search" size={15} color={t.muted} />
+      <Ionicons name="search" size={isPhone ? 13 : 15} color={t.muted} />
       <TextInput
         ref={inputRef}
         // Focused by hand on the web rather than with autoFocus, so it can be
@@ -221,7 +228,8 @@ export function ReportSearchBar({ ctl }: { ctl: ReportSearchControls }) {
           "0 of 0" beside an empty box is not information. */}
       {typed && (
         <Text style={{
-          color: none ? t.negative : t.muted, fontSize: 11.5, fontFamily: fonts[600],
+          color: none ? t.negative : t.muted,
+          fontSize: isPhone ? 10.5 : 11.5, fontFamily: fonts[600],
         }}>
           {none
             ? tr('reportSearch.none')
@@ -232,20 +240,20 @@ export function ReportSearchBar({ ctl }: { ctl: ReportSearchControls }) {
         onPress={() => ctl.step(-1)}
         disabled={ctl.total === 0}
         accessibilityLabel={tr('reportSearch.previous')}
-        style={{ padding: 4, opacity: ctl.total === 0 ? 0.35 : 1 }}
+        style={{ padding: isPhone ? 2 : 4, opacity: ctl.total === 0 ? 0.35 : 1 }}
       >
-        <Ionicons name="chevron-up" size={16} color={t.ink} />
+        <Ionicons name="chevron-up" size={isPhone ? 14 : 16} color={t.ink} />
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => ctl.step(1)}
         disabled={ctl.total === 0}
         accessibilityLabel={tr('reportSearch.next')}
-        style={{ padding: 4, opacity: ctl.total === 0 ? 0.35 : 1 }}
+        style={{ padding: isPhone ? 2 : 4, opacity: ctl.total === 0 ? 0.35 : 1 }}
       >
-        <Ionicons name="chevron-down" size={16} color={t.ink} />
+        <Ionicons name="chevron-down" size={isPhone ? 14 : 16} color={t.ink} />
       </TouchableOpacity>
-      <TouchableOpacity onPress={ctl.close} accessibilityLabel={tr('common.close')} style={{ padding: 4 }}>
-        <Ionicons name="close" size={16} color={t.muted} />
+      <TouchableOpacity onPress={ctl.close} accessibilityLabel={tr('common.close')} style={{ padding: isPhone ? 2 : 4 }}>
+        <Ionicons name="close" size={isPhone ? 14 : 16} color={t.muted} />
       </TouchableOpacity>
     </View>
   );
