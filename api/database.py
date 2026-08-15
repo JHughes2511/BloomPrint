@@ -119,6 +119,36 @@ def init_db():
     _claim_linked_players()
     _backfill_rosters_from_games()
     _restore_deleted_clip_analyses()
+    _clear_stale_team_links()
+
+
+def _clear_stale_team_links():
+    """Players pointing at a team that no longer exists.
+
+    Deleting a team hides the team and leaves every player still holding its
+    id. Nothing shows the team after that — the roster card falls back to the
+    competition level — so the player is team-less in every way except the
+    column, which is the one thing the app reads to decide what can be done
+    with them. A deleted team is never brought back, so the link is dead and
+    clearing it makes the row say what is already true.
+
+    Idempotent, and it only ever clears: nobody is moved, nothing is deleted.
+    """
+    from sqlalchemy import text
+
+    try:
+        with engine.connect() as conn:
+            res = conn.execute(text(
+                "UPDATE players SET team_id = NULL WHERE team_id IS NOT NULL "
+                "AND team_id NOT IN (SELECT id FROM teams WHERE deleted_at IS NULL)"
+            ))
+            conn.commit()
+            if res.rowcount:
+                log.info("Cleared %s player link(s) to a deleted team", res.rowcount)
+    except Exception as exc:
+        # A database that predates the column, or a backend that will not take
+        # the statement. Not a reason to refuse to start.
+        log.warning("Could not clear stale team links: %s", exc)
 
 
 def _restore_deleted_clip_analyses():
