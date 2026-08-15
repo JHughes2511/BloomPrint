@@ -8,6 +8,7 @@ import {
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useGoUp } from '../../navigation/goUp';
 import { useTranslation } from 'react-i18next';
+import { usePlayerAuth } from '../../context/PlayerAuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import { playerReportsAPI, playerTrainingAPI } from '../../api/playerClient';
@@ -26,6 +27,7 @@ const PILLARS = [
 ];
 
 export default function PlayerReportDetailScreen() {
+  const { playerUser } = usePlayerAuth();
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   // Back means up a level — see navigation/goUp.ts.
@@ -219,6 +221,15 @@ export default function PlayerReportDetailScreen() {
             onReply={async (parentId, text) => {
               const c = await playerReportsAPI.addComment(reportId, text, parentId);
               setComments(prev => [...prev, c]);
+            }}
+            mine={(c: any) => !!c.player_user_id && c.player_user_id === playerUser?.id}
+            onEdit={async (id, text) => {
+              const c = await playerReportsAPI.editComment(id, text);
+              setComments(prev => prev.map(x => (x.id === id ? c : x)));
+            }}
+            onDelete={async (id) => {
+              const c = await playerReportsAPI.deleteComment(id);
+              setComments(prev => prev.map(x => (x.id === id ? c : x)));
             }}
           />
           <View style={styles.commentInput}>

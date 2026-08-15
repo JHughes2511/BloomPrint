@@ -8,6 +8,7 @@ import {
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useGoUp } from '../navigation/goUp';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import { playerAPI } from '../api/client';
@@ -33,6 +34,7 @@ function cleanMarkdown(text: string): string {
 }
 
 export default function CoachTrainingDetailScreen() {
+  const { coach } = useAuth();
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   // Back means up a level — see navigation/goUp.ts.
@@ -187,6 +189,17 @@ export default function CoachTrainingDetailScreen() {
               await playerAPI.addCoachComment(trainingId, { text, parent_id: parentId });
               const updated = await playerAPI.getTrainingDetail(trainingId);
               setTraining(updated);
+            }}
+            // A coach may rewrite or take back their own line and nobody
+            // else's — the server enforces the same rule.
+            mine={(c: any) => !!c.coach_id && c.coach_id === coach?.id}
+            onEdit={async (id, text) => {
+              await playerAPI.editComment(id, text);
+              setTraining(await playerAPI.getTrainingDetail(trainingId));
+            }}
+            onDelete={async (id) => {
+              await playerAPI.deleteComment(id);
+              setTraining(await playerAPI.getTrainingDetail(trainingId));
             }}
           />
           <View style={styles.commentInput}>

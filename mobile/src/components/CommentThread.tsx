@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
 import { fonts } from '../theme/typography';
+import { MessageActions } from './MessageActions';
 
 export type ThreadComment = {
   id: number;
@@ -12,6 +13,10 @@ export type ThreadComment = {
   author_name?: string;
   text: string;
   created_at: string;
+  /** Rewritten since it was posted. */
+  edited?: boolean;
+  /** Taken back. It keeps its place so the replies under it still read. */
+  deleted?: boolean;
 };
 
 /**
@@ -22,10 +27,17 @@ export default function CommentThread({
   comments,
   onReply,
   accent,
+  mine,
+  onEdit,
+  onDelete,
 }: {
   comments: ThreadComment[];
   onReply: (parentId: number, text: string) => Promise<void>;
   accent?: string;
+  /** Whether the reader wrote this one — decides what a long press offers. */
+  mine?: (c: ThreadComment) => boolean;
+  onEdit?: (id: number, text: string) => Promise<void>;
+  onDelete?: (id: number) => Promise<void>;
 }) {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
@@ -35,6 +47,10 @@ export default function CommentThread({
   const [replyText, setReplyText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [collapsed, setCollapsed] = useState<Record<number, boolean>>({});
+  // The comment a long press opened the menu on, and the one being rewritten.
+  const [acting, setActing] = useState<ThreadComment | null>(null);
+  const [editing, setEditing] = useState<ThreadComment | null>(null);
+  const [editText, setEditText] = useState('');
 
   const byParent = useMemo(() => {
     const map: Record<string, ThreadComment[]> = {};
@@ -57,6 +73,18 @@ export default function CommentThread({
     }
   };
 
+  const saveEdit = async () => {
+    if (!editing || !editText.trim() || !onEdit) return;
+    setSubmitting(true);
+    try {
+      await onEdit(editing.id, editText.trim());
+      setEditing(null);
+      setEditText('');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const renderLevel = (parentKey: string, depth: number): React.ReactNode[] => {
     const items = byParent[parentKey] ?? [];
     return items.map(c => {
@@ -64,12 +92,42 @@ export default function CommentThread({
       const isCollapsed = !!collapsed[c.id];
       return (
         <View key={c.id} style={[depth > 0 && { marginLeft: 14, borderLeftWidth: 2, borderLeftColor: t.line, paddingLeft: 10 }]}>
-          <View style={s.card}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onLongPress={() => setActing(c)}
+            delayLongPress={350}
+            {...(Platform.OS === 'web'
+              ? { onContextMenu: (e: any) => { e.preventDefault(); setActing(c); } } as any
+              : null)}
+            style={s.card}
+          >
             <View style={s.head}>
-              <Text style={[s.author, { color: acc }]}>{c.author_name || tr('components.commentThread.unknown')}</Text>
+              <Text style={[s.author, { color: acc }]}>
+                {c.author_name || tr('components.commentThread.unknown')}
+                {c.edited && !c.deleted ? ` · ${tr('msgActions.edited')}` : ''}
+              </Text>
               <Text style={s.date}>{new Date(c.created_at).toLocaleDateString()}</Text>
             </View>
-            <Text style={s.text}>{c.text}</Text>
+            {editing?.id === c.id ? (
+              <View style={s.replyRow}>
+                <TextInput
+                  style={s.input}
+                  value={editText}
+                  onChangeText={setEditText}
+                  autoFocus
+                  multiline
+                />
+                <TouchableOpacity style={s.sendBtn} onPress={saveEdit}
+                                  disabled={submitting || !editText.trim()}>
+                  {submitting ? <ActivityIndicator color={t.ctaText} size="small" />
+                              : <Ionicons name="checkmark" size={20} color={t.ctaText} />}
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <Text style={[s.text, c.deleted && { fontStyle: 'italic', opacity: 0.7 }]}>
+                {c.deleted ? tr('msgActions.deleted') : c.text}
+              </Text>
+            )}
             <View style={s.actionsRow}>
               <TouchableOpacity onPress={() => { setReplyTo(replyTo === c.id ? null : c.id); setReplyText(''); }} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
                 <Text style={[s.replyLink, { color: acc }]}>{replyTo === c.id ? tr('common.cancel') : tr('components.commentThread.reply')}</Text>
@@ -82,7 +140,7 @@ export default function CommentThread({
                 </TouchableOpacity>
               )}
             </View>
-          </View>
+          </TouchableOpacity>
           {replyTo === c.id && (
             <View style={s.replyRow}>
               <TextInput
@@ -105,7 +163,22 @@ export default function CommentThread({
     });
   };
 
-  return <View>{renderLevel('root', 0)}</View>;
+  return (
+    <View>
+      {renderLevel('root', 0)}
+      <MessageActions
+        target={acting ? {
+          preview: acting.deleted ? tr('msgActions.deleted') : acting.text,
+          mine: mine ? mine(acting) : false,
+          deleted: !!acting.deleted,
+        } : null}
+        onReply={() => { setReplyTo(acting!.id); setReplyText(''); setEditing(null); }}
+        onEdit={onEdit ? () => { setEditing(acting); setEditText(acting?.text ?? ''); } : undefined}
+        onDelete={onDelete ? () => { if (acting) void onDelete(acting.id); } : undefined}
+        onClose={() => setActing(null)}
+      />
+    </View>
+  );
 }
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({

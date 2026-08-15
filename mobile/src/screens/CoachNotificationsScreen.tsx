@@ -344,6 +344,15 @@ export default function CoachNotificationsScreen() {
                             await playerAPI.coachReplyToReport(n.ref_id!, text, parentId);
                             await loadThread(n.id, n.ref_id!);
                           }}
+                          mine={(c: any) => !!c.coach_id && c.coach_id === coach?.id}
+                          onEdit={async (id, text) => {
+                            await playerAPI.editComment(id, text);
+                            await loadThread(n.id, n.ref_id!);
+                          }}
+                          onDelete={async (id) => {
+                            await playerAPI.deleteComment(id);
+                            await loadThread(n.id, n.ref_id!);
+                          }}
                         />
                       </View>
                     )}

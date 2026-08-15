@@ -277,6 +277,15 @@ export default function PlayerTrainingDetailScreen() {
               const c = await playerTrainingAPI.addComment(trainingId, text, parentId);
               setComments(prev => [...prev, c]);
             }}
+            mine={(c: any) => !!c.player_user_id && c.player_user_id === playerUser?.id}
+            onEdit={async (id, text) => {
+              const c = await playerTrainingAPI.editComment(id, text);
+              setComments(prev => prev.map(x => (x.id === id ? c : x)));
+            }}
+            onDelete={async (id) => {
+              const c = await playerTrainingAPI.deleteComment(id);
+              setComments(prev => prev.map(x => (x.id === id ? c : x)));
+            }}
           />
           <View style={styles.commentInput}>
             <VoiceTextInput

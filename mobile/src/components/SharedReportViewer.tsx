@@ -14,6 +14,7 @@ import { staffSharingAPI } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { useReportSearch, ReportSearchBar, ReportSearchButton } from './ReportSearch';
+import { MessageActions, ComposingBanner, type MessageActionTarget } from './MessageActions';
 import { GeneratingOverlay } from './GeneratingBasketball';
 import { useTheme } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -45,6 +46,11 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
   const [comments, setComments] = useState<any[]>([]);
   const [corrections, setCorrections] = useState<any[]>([]);
   const [commentText, setCommentText] = useState('');
+  // The comment a long press opened the menu on, and what the box below is
+  // about to do with one.
+  const [acting, setActing] = useState<any | null>(null);
+  const [replyTo, setReplyTo] = useState<any | null>(null);
+  const [editing, setEditing] = useState<any | null>(null);
   const [noteText, setNoteText] = useState('');
   const [correctText, setCorrectText] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -97,13 +103,35 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
     if (!commentText.trim()) return;
     setBusy(true);
     try {
-      await staffSharingAPI.addComment(item.id, commentText.trim(), bodyMode);
+      // Rewriting one replaces it in place; anything else is a new comment,
+      // carrying the one it answers when the coach picked one.
+      if (editing) {
+        await staffSharingAPI.editComment(editing.id, commentText.trim());
+        setEditing(null);
+      } else {
+        await staffSharingAPI.addComment(item.id, commentText.trim(), bodyMode, replyTo?.id);
+        setReplyTo(null);
+      }
       setComments(await staffSharingAPI.getComments(item.id));
       setCommentText('');
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.viewer.couldNotAddComment'));
     }
     setBusy(false);
+  };
+
+  const removeComment = async (c: any) => {
+    // On screen first: it is the coach's own comment and their own decision.
+    setComments(prev => prev.map((x: any) =>
+      (x.id === c.id ? { ...x, deleted: true, text: '' } : x)));
+    if (editing?.id === c.id) { setEditing(null); setCommentText(''); }
+    if (replyTo?.id === c.id) setReplyTo(null);
+    try {
+      await staffSharingAPI.deleteComment(c.id);
+    } catch (e: any) {
+      setComments(await staffSharingAPI.getComments(item.id).catch(() => comments));
+      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('components.viewer.couldNotAddComment'));
+    }
   };
 
   const saveNote = async () => {
@@ -323,13 +351,52 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                   {comments.filter(c => !isNote(c) && underCurrent(c)).length === 0 && (
                     <Text style={styles.empty}>{tr('components.viewer.noCommentsYet')}</Text>
                   )}
-                  {comments.filter(c => !isNote(c) && underCurrent(c)).map((c: any) => (
-                    <View key={c.id} style={styles.commentCard}>
-                      <Text style={styles.commentAuthor}>{c.author_name}</Text>
-                      <Text style={styles.commentText}>{c.text}</Text>
-                    </View>
-                  ))}
+                  {comments.filter(c => !isNote(c) && underCurrent(c)).map((c: any) => {
+                    const parent = c.parent_id
+                      ? comments.find((x: any) => x.id === c.parent_id)
+                      : null;
+                    return (
+                      <TouchableOpacity
+                        key={c.id}
+                        activeOpacity={0.85}
+                        onLongPress={() => setActing(c)}
+                        delayLongPress={350}
+                        {...(Platform.OS === 'web'
+                          ? { onContextMenu: (e: any) => { e.preventDefault(); setActing(c); } } as any
+                          : null)}
+                        style={styles.commentCard}
+                      >
+                        <Text style={styles.commentAuthor}>
+                          {c.author_name}
+                          {c.edited && !c.deleted ? ` · ${tr('msgActions.edited')}` : ''}
+                        </Text>
+                        {!!parent && (
+                          <View style={styles.quoted}>
+                            <Text numberOfLines={1} style={styles.quotedName}>{parent.author_name}</Text>
+                            <Text numberOfLines={2} style={styles.quotedText}>
+                              {parent.deleted ? tr('msgActions.deleted') : parent.text}
+                            </Text>
+                          </View>
+                        )}
+                        <Text style={[styles.commentText, c.deleted && { fontStyle: 'italic', opacity: 0.7 }]}>
+                          {c.deleted ? tr('msgActions.deleted') : c.text}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </ScrollView>
+                {(replyTo || editing) && (
+                  <ComposingBanner
+                    label={editing
+                      ? tr('msgActions.editing')
+                      : tr('msgActions.replyingTo', { name: replyTo?.author_name ?? '' })}
+                    preview={editing ? null : (replyTo?.text || '')}
+                    onCancel={() => {
+                      if (editing) { setEditing(null); setCommentText(''); }
+                      setReplyTo(null);
+                    }}
+                  />
+                )}
                 <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
                   <VoiceTextInput
                     style={[styles.input, { flex: 1 }]}
@@ -339,7 +406,12 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                     onChangeText={setCommentText}
                     multiline
                   />
-                  <TouchableOpacity style={styles.sendBtn} onPress={submitComment} disabled={busy || !commentText.trim()}>
+                  <TouchableOpacity
+                    style={styles.sendBtn}
+                    accessibilityLabel={tr('conversation.send')}
+                    onPress={submitComment}
+                    disabled={busy || !commentText.trim()}
+                  >
                     {busy ? <ActivityIndicator color={t.ctaText} size="small" /> : <Ionicons name="arrow-up" size={20} color={t.ctaText} />}
                   </TouchableOpacity>
                 </View>
@@ -379,6 +451,17 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
           <GeneratingOverlay visible={regenerating} label={tr('components.viewer.buildingUpdated')} />
         </View>
       </KeyboardAvoidingView>
+      <MessageActions
+        target={acting ? {
+          preview: acting.deleted ? tr('msgActions.deleted') : (acting.text || ''),
+          mine: acting.author_id === coach?.id,
+          deleted: !!acting.deleted,
+        } as MessageActionTarget : null}
+        onReply={() => { setReplyTo(acting); setEditing(null); }}
+        onEdit={() => { setEditing(acting); setReplyTo(null); setCommentText(acting?.text ?? ''); }}
+        onDelete={() => { if (acting) void removeComment(acting); }}
+        onClose={() => setActing(null)}
+      />
     </Sheet>
   );
 }
@@ -421,4 +504,8 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   commentCard: { backgroundColor: t.chip, borderRadius: 10, padding: 10, marginBottom: 6 },
   commentAuthor: { color: t.accent, fontSize: 11, fontFamily: fonts[700], marginBottom: 2 },
   commentText: { color: t.inkSoft, fontSize: 13 },
+  // The comment being answered, above the answer.
+  quoted: { borderLeftWidth: 3, borderLeftColor: t.accent, paddingLeft: 8, marginVertical: 4 },
+  quotedName: { color: t.accent, fontSize: 11, fontFamily: fonts[700] },
+  quotedText: { color: t.muted, fontSize: 12 },
 });

@@ -53,6 +53,13 @@ export const playerReportsAPI = {
 };
 
 export const playerTrainingAPI = {
+  /** Rewrite a comment you left. Same endpoint as the reports one — a comment
+   *  is a comment, whichever screen it was written on. */
+  editComment: (commentId: number, text: string) =>
+    playerApi.patch(`/player/comments/${commentId}`, { text }).then(r => r.data),
+  /** Take one of yours back. It keeps its place so replies still read. */
+  deleteComment: (commentId: number) =>
+    playerApi.delete(`/player/comments/${commentId}`).then(r => r.data),
   generate: (sharedReportId: number) =>
     playerApi.post(`/player/training/generate/${sharedReportId}`).then(r => r.data),
   list: () => playerApi.get('/player/training').then(r => r.data),
