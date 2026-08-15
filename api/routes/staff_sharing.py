@@ -178,12 +178,20 @@ def _share_text(sr: models.StaffSharedReport, db: Session) -> str | None:
     text about it that still reads last week's score contradicts the game card
     beside it.
     """
-    # A share made before headings were recorded has only its filtered
-    # snapshot: going live for those would show sections the sender had taken
-    # out, which is the one thing this must not do.
+    live = _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id)
+    # Game Insights are the game, always. There is no snapshot to prefer, on a
+    # share sent yesterday or one sent before any of this existed: the game
+    # sits on the recipient's schedule and counts in their season, so a page of
+    # text about it that still reads the numbers from share time contradicts
+    # the box score beside it.
+    if (sr.report_type or "") == "game_session":
+        return live or sr.frozen_text
+    # Everything else: a share made before headings were recorded has only its
+    # filtered snapshot to go on, and going live for those would show sections
+    # the sender had taken out — the one thing this must not do.
     if sr.hidden_sections is None and sr.frozen_text:
         return sr.frozen_text
-    return _resolve_report_text(sr.report_type, sr.report_id, db, sr.sender_id) or sr.frozen_text
+    return live or sr.frozen_text
 
 
 def _build_out(sr: models.StaffSharedReport, db: Session) -> schemas.StaffSharedReportOut:
