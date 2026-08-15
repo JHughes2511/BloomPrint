@@ -170,12 +170,27 @@ export function ReportSearchBar({ ctl }: { ctl: ReportSearchControls }) {
   if (!ctl.open) return null;
   const typed = !!ctl.query.trim();
   const none = typed && ctl.total === 0;
-  const bar = (
+  return (
     <View style={{
       flexDirection: 'row', alignItems: 'center', gap: 8,
-      paddingHorizontal: 10, paddingVertical: 8,
-      marginBottom: Platform.OS === 'web' ? 0 : 10,
-      borderRadius: 10, borderWidth: 1, borderColor: t.line, backgroundColor: t.card,
+      paddingHorizontal: 10, paddingVertical: 8, marginBottom: 10,
+      borderRadius: 10, borderWidth: 1, borderColor: t.line,
+      // Opaque. The bar holds the top of the report while the report scrolls
+      // beneath it, so whatever is behind it is text — and `card` is a seven
+      // per cent white in the dark theme, which let that text read straight
+      // through the box a coach was typing into. `sheet` is the token for a
+      // surface that sits over content.
+      backgroundColor: t.sheet,
+      // Held at the top of the report rather than scrolled away with it: the
+      // arrows are the point of the bar, and they were reachable only from
+      // the top of the page.
+      //
+      // In the flow, not floating over the text. A zero-height wrapper with
+      // the bar drawn absolutely inside it kept the page perfectly still, and
+      // put the bar on top of the sentence being read.
+      ...(Platform.OS === 'web'
+        ? ({ position: 'sticky', top: 0, zIndex: 20 } as any)
+        : null),
     }}>
       <Ionicons name="search" size={15} color={t.muted} />
       <TextInput
@@ -228,30 +243,6 @@ export function ReportSearchBar({ ctl }: { ctl: ReportSearchControls }) {
       <TouchableOpacity onPress={ctl.close} accessibilityLabel={tr('common.close')} style={{ padding: 4 }}>
         <Ionicons name="close" size={16} color={t.muted} />
       </TouchableOpacity>
-    </View>
-  );
-  if (Platform.OS !== 'web') return bar;
-  return (
-    /**
-     * Held at the top of the report, and taking no room while it is there.
-     *
-     * The arrows are the whole point of the bar, and they used to be reachable
-     * only from the top of the page: find a word, let it scroll you down to
-     * the match, and reaching the next one meant scrolling all the way back up
-     * to the bar you had left behind. So it sticks.
-     *
-     * Sticky rather than fixed, so it belongs to the report it searches — it
-     * arrives with that report and leaves with it, and a page holding two of
-     * them never ends up with a bar hovering over the wrong one.
-     *
-     * The wrapper is zero-height and the bar is drawn out of the flow inside
-     * it, so opening and closing the search changes no layout at all. In the
-     * flow it cost the page a line each way: the browser absorbs most of that
-     * itself, and the few pixels it does not are still the passage you were
-     * reading moving under your eyes as you dismiss the thing.
-     */
-    <View style={{ position: 'sticky', top: 0, zIndex: 20, height: 0 } as any}>
-      <View style={{ position: 'absolute', top: 0, left: 0, right: 0 }}>{bar}</View>
     </View>
   );
 }
