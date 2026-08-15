@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "Novo relatório partilhado",
-      "body": "{{coach}} partilhou um {{type}} consigo."
+      "body": "{{coach}} partilhou contigo: {{type}}."
     },
     "teamReportSharedCoach": {
       "title": "Relatório de equipa partilhado",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "Relatório partilhado por {{coach}}",
-      "body": "{{coach}} partilhou um {{type}} consigo."
+      "body": "{{coach}} partilhou contigo: {{type}}."
     },
     "staffReportSharedTeam": {
       "title": "Relatório partilhado por {{coach}}",
-      "body": "{{coach}} partilhou um {{type}} com {{team}}."
+      "body": "{{coach}} partilhou com {{team}}: {{type}}."
     },
     "staffReportComment": {
       "title": "Novo comentário de {{coach}}",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "Relatório reencaminhado por {{coach}}",
-      "body": "{{coach}} reencaminhou-lhe um {{type}}."
+      "body": "{{coach}} reencaminhou-te: {{type}}."
     },
     "teamJoinRequest": {
       "title": "{{coach}} pediu para entrar na sua equipa",

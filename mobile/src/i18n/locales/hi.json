@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "नई रिपोर्ट साझा हुई",
-      "body": "{{coach}} ने आपके साथ एक {{type}} साझा की।"
+      "body": "{{coach}} ने आपके साथ साझा किया: {{type}}।"
     },
     "teamReportSharedCoach": {
       "title": "टीम रिपोर्ट साझा हुई",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "{{coach}} ने रिपोर्ट साझा की",
-      "body": "{{coach}} ने आपके साथ एक {{type}} साझा की।"
+      "body": "{{coach}} ने आपके साथ साझा किया: {{type}}।"
     },
     "staffReportSharedTeam": {
       "title": "{{coach}} ने रिपोर्ट साझा की",
-      "body": "{{coach}} ने {{team}} के साथ एक {{type}} साझा की।"
+      "body": "{{coach}} ने {{team}} के साथ साझा किया: {{type}}।"
     },
     "staffReportComment": {
       "title": "{{coach}} की नई टिप्पणी",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "{{coach}} ने रिपोर्ट अग्रेषित की",
-      "body": "{{coach}} ने आपको एक {{type}} अग्रेषित की।"
+      "body": "{{coach}} ने आपको भेजा: {{type}}।"
     },
     "teamJoinRequest": {
       "title": "{{coach}} ने आपकी टीम में शामिल होने का अनुरोध किया",

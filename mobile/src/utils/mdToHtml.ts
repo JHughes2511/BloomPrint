@@ -99,7 +99,12 @@ export function mdToHtml(md: string): string {
       const cellPad = wide
         ? 'padding:3px 3px;border:0.5px solid #cbd5e1;font-size:8px;line-height:1.3'
         : 'padding:5px 7px;border:0.5px solid #cbd5e1;font-size:11px;line-height:1.45';
-      html += `<table width="100%" cellspacing="0" cellpadding="0" `
+      // repeat="1" draws the header row again at the top of every page the
+      // table continues onto. Without it a box score that crosses a page break
+      // leaves its column headers behind on the previous page and the player
+      // lines arrive overleaf under nothing. It is the renderer's own
+      // attribute — page-break rules do not reach inside a table.
+      html += `<table width="100%" cellspacing="0" cellpadding="0" repeat="1" `
         + `style="margin:10px 0;border:0.5px solid #cbd5e1;${noSplit}">`;
       html += '<tr>' + Array.from({ length: cols }, (_, k) =>
         `<td width="${width(k)}%" style="${cellPad};background:#eef2f7;font-weight:bold;color:#0f172a">`

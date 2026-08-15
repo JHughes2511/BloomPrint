@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "May bagong ulat na ibinahagi",
-      "body": "Ibinahagi ni {{coach}} sa iyo ang isang {{type}}."
+      "body": "Ibinahagi sa iyo ni {{coach}}: {{type}}."
     },
     "teamReportSharedCoach": {
       "title": "Ibinahagi ang ulat ng koponan",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "Ulat na ibinahagi ni {{coach}}",
-      "body": "Ibinahagi ni {{coach}} sa iyo ang isang {{type}}."
+      "body": "Ibinahagi sa iyo ni {{coach}}: {{type}}."
     },
     "staffReportSharedTeam": {
       "title": "Ulat na ibinahagi ni {{coach}}",
-      "body": "Ibinahagi ni {{coach}} ang isang {{type}} sa {{team}}."
+      "body": "Ibinahagi ni {{coach}} sa {{team}}: {{type}}."
     },
     "staffReportComment": {
       "title": "Bagong komento mula kay {{coach}}",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "Ulat na ipinasa ni {{coach}}",
-      "body": "Ipinasa sa iyo ni {{coach}} ang isang {{type}}."
+      "body": "Ipinasa sa iyo ni {{coach}}: {{type}}."
     },
     "teamJoinRequest": {
       "title": "Humiling si {{coach}} na sumali sa koponan mo",

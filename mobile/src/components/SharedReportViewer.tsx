@@ -347,7 +347,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
             {bottomTab === 'comments' && (
               <View>
                 <Text style={styles.scopeHint}>{tr('components.viewer.commentsOn', { version: bodyMode === 'updated' ? updatedLabel : tr('components.viewer.original') })}</Text>
-                <ScrollView style={{ maxHeight: 120 }}>
+                <ScrollView style={{ maxHeight: 260 }}>
                   {comments.filter(c => !isNote(c) && underCurrent(c)).length === 0 && (
                     <Text style={styles.empty}>{tr('components.viewer.noCommentsYet')}</Text>
                   )}

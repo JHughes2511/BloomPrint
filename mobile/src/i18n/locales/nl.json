@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "Nieuw rapport gedeeld",
-      "body": "{{coach}} heeft een {{type}} met je gedeeld."
+      "body": "{{coach}} heeft met jou gedeeld: {{type}}."
     },
     "teamReportSharedCoach": {
       "title": "Teamrapport gedeeld",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "Rapport gedeeld door {{coach}}",
-      "body": "{{coach}} heeft een {{type}} met je gedeeld."
+      "body": "{{coach}} heeft met jou gedeeld: {{type}}."
     },
     "staffReportSharedTeam": {
       "title": "Rapport gedeeld door {{coach}}",
-      "body": "{{coach}} heeft een {{type}} gedeeld met {{team}}."
+      "body": "{{coach}} heeft met {{team}} gedeeld: {{type}}."
     },
     "staffReportComment": {
       "title": "Nieuwe opmerking van {{coach}}",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "Rapport doorgestuurd door {{coach}}",
-      "body": "{{coach}} heeft je een {{type}} doorgestuurd."
+      "body": "{{coach}} heeft naar jou doorgestuurd: {{type}}."
     },
     "teamJoinRequest": {
       "title": "{{coach}} wil bij je team",

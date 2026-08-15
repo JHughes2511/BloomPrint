@@ -771,9 +771,9 @@ def game_insights_text(db: Session, game: models.GameSession) -> str:
     if game.date:
         out.append(game.date.strftime("%B %-d, %Y"))
     if ours_pts is not None and theirs_pts is not None:
-        verdict = ("WIN" if ours_pts > theirs_pts
-                   else "LOSS" if ours_pts < theirs_pts else "TIE")
-        out.append(f"FINAL: {our} {ours_pts} — {theirs} {theirs_pts} ({verdict})")
+        # The scoreline says who won. Adding "(WIN)" after it is the same fact
+        # twice, and it reads as a second claim about the same game.
+        out.append(f"FINAL: {our} {ours_pts} — {theirs} {theirs_pts}")
     out.append("")
 
     stats = list(game.player_stats)

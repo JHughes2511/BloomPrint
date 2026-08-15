@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "Novi izvještaj podijeljen",
-      "body": "{{coach}} je s vama podijelio: {{type}}."
+      "body": "{{coach}} je podijelio s tobom: {{type}}."
     },
     "teamReportSharedCoach": {
       "title": "Momčadski izvještaj podijeljen",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "Izvještaj podijelio {{coach}}",
-      "body": "{{coach}} je s vama podijelio: {{type}}."
+      "body": "{{coach}} je podijelio s tobom: {{type}}."
     },
     "staffReportSharedTeam": {
       "title": "Izvještaj podijelio {{coach}}",
-      "body": "{{coach}} je podijelio izvještaj ({{type}}) s momčadi {{team}}."
+      "body": "{{coach}} je podijelio s {{team}}: {{type}}."
     },
     "staffReportComment": {
       "title": "Novi komentar od {{coach}}",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "Izvještaj proslijedio {{coach}}",
-      "body": "{{coach}} vam je proslijedio izvještaj ({{type}})."
+      "body": "{{coach}} ti je proslijedio: {{type}}."
     },
     "teamJoinRequest": {
       "title": "{{coach}} traži pridruživanje vašoj momčadi",

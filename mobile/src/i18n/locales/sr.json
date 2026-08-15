@@ -2516,7 +2516,7 @@
     },
     "staffReportSharedTeam": {
       "title": "Извештај поделио {{coach}}",
-      "body": "{{coach}} је поделио извештај ({{type}}) са тимом {{team}}."
+      "body": "{{coach}} је поделио са {{team}}: {{type}}."
     },
     "staffReportComment": {
       "title": "Нови коментар од {{coach}}",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "Извештај проследио {{coach}}",
-      "body": "{{coach}} вам је проследио извештај ({{type}})."
+      "body": "{{coach}} вам је проследио: {{type}}."
     },
     "teamJoinRequest": {
       "title": "{{coach}} тражи да се придружи вашем тиму",

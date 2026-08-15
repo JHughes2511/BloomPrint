@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "Udostępniono nowy raport",
-      "body": "{{coach}} udostępnił Ci {{type}}."
+      "body": "{{coach}} udostępnił(a) Ci: {{type}}."
     },
     "teamReportSharedCoach": {
       "title": "Udostępniono raport drużyny",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "Raport udostępniony przez {{coach}}",
-      "body": "{{coach}} udostępnił Ci {{type}}."
+      "body": "{{coach}} udostępnił(a) Ci: {{type}}."
     },
     "staffReportSharedTeam": {
       "title": "Raport udostępniony przez {{coach}}",
-      "body": "{{coach}} udostępnił {{type}} drużynie {{team}}."
+      "body": "{{coach}} udostępnił(a) zespołowi {{team}}: {{type}}."
     },
     "staffReportComment": {
       "title": "Nowy komentarz od {{coach}}",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "Raport przekazany przez {{coach}}",
-      "body": "{{coach}} przekazał Ci {{type}}."
+      "body": "{{coach}} przesłał(a) Ci: {{type}}."
     },
     "teamJoinRequest": {
       "title": "{{coach}} prosi o dołączenie do drużyny",

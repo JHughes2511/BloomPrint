@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "New report shared",
-      "body": "{{coach}} shared a {{type}} with you."
+      "body": "{{coach}} shared {{type}} with you."
     },
     "teamReportSharedCoach": {
       "title": "Team report shared",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "Report shared by {{coach}}",
-      "body": "{{coach}} shared a {{type}} with you."
+      "body": "{{coach}} shared {{type}} with you."
     },
     "staffReportSharedTeam": {
       "title": "Report shared by {{coach}}",
-      "body": "{{coach}} shared a {{type}} with {{team}}."
+      "body": "{{coach}} shared {{type}} with {{team}}."
     },
     "staffReportComment": {
       "title": "New comment from {{coach}}",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "Report forwarded by {{coach}}",
-      "body": "{{coach}} forwarded a {{type}} to you."
+      "body": "{{coach}} forwarded {{type}} to you."
     },
     "teamJoinRequest": {
       "title": "{{coach}} asked to join your team",

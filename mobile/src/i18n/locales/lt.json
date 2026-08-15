@@ -2516,7 +2516,7 @@
     },
     "staffReportSharedTeam": {
       "title": "Ataskaita nuo {{coach}}",
-      "body": "{{coach}} pasidalijo ataskaita ({{type}}) su komanda {{team}}."
+      "body": "{{coach}} pasidalijo su {{team}}: {{type}}."
     },
     "staffReportComment": {
       "title": "Naujas komentaras nuo {{coach}}",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "Ataskaitą persiuntė {{coach}}",
-      "body": "{{coach}} persiuntė jums ataskaitą ({{type}})."
+      "body": "{{coach}} persiuntė jums: {{type}}."
     },
     "teamJoinRequest": {
       "title": "{{coach}} prašo prisijungti prie jūsų komandos",

@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "דוח חדש שותף",
-      "body": "{{coach}} שיתף איתך {{type}}."
+      "body": "{{coach}} שיתף איתך: {{type}}."
     },
     "teamReportSharedCoach": {
       "title": "דוח קבוצה שותף",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "דוח שותף על ידי {{coach}}",
-      "body": "{{coach}} שיתף איתך {{type}}."
+      "body": "{{coach}} שיתף איתך: {{type}}."
     },
     "staffReportSharedTeam": {
       "title": "דוח שותף על ידי {{coach}}",
-      "body": "{{coach}} שיתף {{type}} עם {{team}}."
+      "body": "{{coach}} שיתף עם {{team}}: {{type}}."
     },
     "staffReportComment": {
       "title": "תגובה חדשה מ{{coach}}",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "דוח הועבר על ידי {{coach}}",
-      "body": "{{coach}} העביר אליך {{type}}."
+      "body": "{{coach}} העביר אליך: {{type}}."
     },
     "teamJoinRequest": {
       "title": "{{coach}} ביקש להצטרף לקבוצה שלך",

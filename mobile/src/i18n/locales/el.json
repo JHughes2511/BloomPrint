@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "Νέα αναφορά κοινοποιήθηκε",
-      "body": "Ο/Η {{coach}} μοιράστηκε μαζί σας μια {{type}}."
+      "body": "Ο/Η {{coach}} μοιράστηκε μαζί σου: {{type}}."
     },
     "teamReportSharedCoach": {
       "title": "Κοινοποιήθηκε αναφορά ομάδας",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "Αναφορά από {{coach}}",
-      "body": "Ο/Η {{coach}} μοιράστηκε μαζί σας μια {{type}}."
+      "body": "Ο/Η {{coach}} μοιράστηκε μαζί σου: {{type}}."
     },
     "staffReportSharedTeam": {
       "title": "Αναφορά από {{coach}}",
-      "body": "Ο/Η {{coach}} μοιράστηκε μια {{type}} με την ομάδα {{team}}."
+      "body": "Ο/Η {{coach}} μοιράστηκε με {{team}}: {{type}}."
     },
     "staffReportComment": {
       "title": "Νέο σχόλιο από {{coach}}",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "Αναφορά προωθήθηκε από {{coach}}",
-      "body": "Ο/Η {{coach}} σας προώθησε μια {{type}}."
+      "body": "Ο/Η {{coach}} σου προώθησε: {{type}}."
     },
     "teamJoinRequest": {
       "title": "Ο/Η {{coach}} ζήτησε να μπει στην ομάδα σας",

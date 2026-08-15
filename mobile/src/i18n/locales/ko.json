@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "새 리포트 공유됨",
-      "body": "{{coach}} 님이 회원님과 {{type}}을(를) 공유했습니다."
+      "body": "{{coach}}님이 회원님과 공유했습니다: {{type}}"
     },
     "teamReportSharedCoach": {
       "title": "팀 리포트 공유됨",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "{{coach}} 님이 리포트를 공유했습니다",
-      "body": "{{coach}} 님이 회원님과 {{type}}을(를) 공유했습니다."
+      "body": "{{coach}}님이 회원님과 공유했습니다: {{type}}"
     },
     "staffReportSharedTeam": {
       "title": "{{coach}} 님이 리포트를 공유했습니다",
-      "body": "{{coach}} 님이 {{team}}과(와) {{type}}을(를) 공유했습니다."
+      "body": "{{coach}}님이 {{team}}과(와) 공유했습니다: {{type}}"
     },
     "staffReportComment": {
       "title": "{{coach}} 님의 새 댓글",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "{{coach}} 님이 리포트를 전달했습니다",
-      "body": "{{coach}} 님이 회원님에게 {{type}}을(를) 전달했습니다."
+      "body": "{{coach}}님이 회원님께 전달했습니다: {{type}}"
     },
     "teamJoinRequest": {
       "title": "{{coach}} 님이 팀 합류를 요청했습니다",

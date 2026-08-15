@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "تمت مشاركة تقرير جديد",
-      "body": "شارك {{coach}} معك {{type}}."
+      "body": "شارك معك {{coach}}: {{type}}."
     },
     "teamReportSharedCoach": {
       "title": "تمت مشاركة تقرير الفريق",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "تقرير من {{coach}}",
-      "body": "شارك {{coach}} معك {{type}}."
+      "body": "شارك معك {{coach}}: {{type}}."
     },
     "staffReportSharedTeam": {
       "title": "تقرير من {{coach}}",
-      "body": "شارك {{coach}} {{type}} مع {{team}}."
+      "body": "شارك {{coach}} مع {{team}}: {{type}}."
     },
     "staffReportComment": {
       "title": "تعليق جديد من {{coach}}",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "تقرير أعاد {{coach}} توجيهه",
-      "body": "أعاد {{coach}} توجيه {{type}} إليك."
+      "body": "أعاد {{coach}} توجيه ما يلي إليك: {{type}}."
     },
     "teamJoinRequest": {
       "title": "طلب {{coach}} الانضمام إلى فريقك",

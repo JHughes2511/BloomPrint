@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "Ny rapport delad",
-      "body": "{{coach}} delade en {{type}} med dig."
+      "body": "{{coach}} delade med dig: {{type}}."
     },
     "teamReportSharedCoach": {
       "title": "Lagrapport delad",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "Rapport delad av {{coach}}",
-      "body": "{{coach}} delade en {{type}} med dig."
+      "body": "{{coach}} delade med dig: {{type}}."
     },
     "staffReportSharedTeam": {
       "title": "Rapport delad av {{coach}}",
-      "body": "{{coach}} delade en {{type}} med {{team}}."
+      "body": "{{coach}} delade med {{team}}: {{type}}."
     },
     "staffReportComment": {
       "title": "Ny kommentar från {{coach}}",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "Rapport vidarebefordrad av {{coach}}",
-      "body": "{{coach}} vidarebefordrade en {{type}} till dig."
+      "body": "{{coach}} vidarebefordrade till dig: {{type}}."
     },
     "teamJoinRequest": {
       "title": "{{coach}} vill gå med i ditt lag",

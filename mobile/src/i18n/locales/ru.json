@@ -2516,7 +2516,7 @@
     },
     "staffReportSharedTeam": {
       "title": "Отчёт от {{coach}}",
-      "body": "{{coach}} поделился отчётом ({{type}}) с командой {{team}}."
+      "body": "{{coach}} поделился с командой {{team}}: {{type}}."
     },
     "staffReportComment": {
       "title": "Новый комментарий от {{coach}}",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "Отчёт переслан от {{coach}}",
-      "body": "{{coach}} переслал вам отчёт ({{type}})."
+      "body": "{{coach}} переслал вам: {{type}}."
     },
     "teamJoinRequest": {
       "title": "{{coach}} просит вступить в вашу команду",

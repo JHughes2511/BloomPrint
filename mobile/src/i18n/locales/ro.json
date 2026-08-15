@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "Raport nou partajat",
-      "body": "{{coach}} a partajat cu tine un {{type}}."
+      "body": "{{coach}} a partajat cu tine: {{type}}."
     },
     "teamReportSharedCoach": {
       "title": "Raport de echipă partajat",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "Raport partajat de {{coach}}",
-      "body": "{{coach}} a partajat cu tine un {{type}}."
+      "body": "{{coach}} a partajat cu tine: {{type}}."
     },
     "staffReportSharedTeam": {
       "title": "Raport partajat de {{coach}}",
-      "body": "{{coach}} a partajat un {{type}} cu {{team}}."
+      "body": "{{coach}} a partajat cu {{team}}: {{type}}."
     },
     "staffReportComment": {
       "title": "Comentariu nou de la {{coach}}",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "Raport redirecționat de {{coach}}",
-      "body": "{{coach}} ți-a redirecționat un {{type}}."
+      "body": "{{coach}} ți-a redirecționat: {{type}}."
     },
     "teamJoinRequest": {
       "title": "{{coach}} a cerut să se alăture echipei tale",

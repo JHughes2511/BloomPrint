@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "ახალი ანგარიში გაზიარდა",
-      "body": "{{coach}}-მა გაგიზიარათ {{type}}."
+      "body": "{{coach}}-მა გაგიზიარათ: {{type}}."
     },
     "teamReportSharedCoach": {
       "title": "გუნდის ანგარიში გაზიარდა",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "ანგარიში {{coach}}-სგან",
-      "body": "{{coach}}-მა გაგიზიარათ {{type}}."
+      "body": "{{coach}}-მა გაგიზიარათ: {{type}}."
     },
     "staffReportSharedTeam": {
       "title": "ანგარიში {{coach}}-სგან",
-      "body": "{{coach}}-მა გაუზიარა {{type}} გუნდს {{team}}."
+      "body": "{{coach}}-მა გაუზიარა გუნდს {{team}}: {{type}}."
     },
     "staffReportComment": {
       "title": "ახალი კომენტარი {{coach}}-სგან",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "ანგარიში გადმოაგზავნა {{coach}}-მა",
-      "body": "{{coach}}-მა გადმოგიგზავნათ {{type}}."
+      "body": "{{coach}}-მა გადმოგიგზავნათ: {{type}}."
     },
     "teamJoinRequest": {
       "title": "{{coach}}-მა მოითხოვა თქვენს გუნდში გაწევრიანება",

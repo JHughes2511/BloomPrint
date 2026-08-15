@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "有新报告分享给你",
-      "body": "{{coach}} 与你分享了一份{{type}}。"
+      "body": "{{coach}} 与你分享了：{{type}}"
     },
     "teamReportSharedCoach": {
       "title": "球队报告已分享",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "{{coach}} 分享了报告",
-      "body": "{{coach}} 与你分享了一份{{type}}。"
+      "body": "{{coach}} 与你分享了：{{type}}"
     },
     "staffReportSharedTeam": {
       "title": "{{coach}} 分享了报告",
-      "body": "{{coach}} 与 {{team}} 分享了一份{{type}}。"
+      "body": "{{coach}} 与 {{team}} 分享了：{{type}}"
     },
     "staffReportComment": {
       "title": "{{coach}} 的新评论",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "{{coach}} 转发了报告",
-      "body": "{{coach}} 向你转发了一份{{type}}。"
+      "body": "{{coach}} 向你转发了：{{type}}"
     },
     "teamJoinRequest": {
       "title": "{{coach}} 申请加入你的球队",

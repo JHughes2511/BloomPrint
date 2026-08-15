@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "新しいレポートが共有されました",
-      "body": "{{coach}} があなたと{{type}}を共有しました。"
+      "body": "{{coach}} があなたと共有しました：{{type}}"
     },
     "teamReportSharedCoach": {
       "title": "チームレポートが共有されました",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "{{coach}} がレポートを共有しました",
-      "body": "{{coach}} があなたと{{type}}を共有しました。"
+      "body": "{{coach}} があなたと共有しました：{{type}}"
     },
     "staffReportSharedTeam": {
       "title": "{{coach}} がレポートを共有しました",
-      "body": "{{coach}} が {{team}} と{{type}}を共有しました。"
+      "body": "{{coach}} が {{team}} と共有しました：{{type}}"
     },
     "staffReportComment": {
       "title": "{{coach}} からの新しいコメント",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "{{coach}} がレポートを転送しました",
-      "body": "{{coach}} があなたに{{type}}を転送しました。"
+      "body": "{{coach}} があなたに転送しました：{{type}}"
     },
     "teamJoinRequest": {
       "title": "{{coach}} がチームへの参加を希望しています",

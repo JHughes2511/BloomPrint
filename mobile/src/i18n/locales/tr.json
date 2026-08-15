@@ -2460,7 +2460,7 @@
     },
     "reportShared": {
       "title": "Yeni rapor paylaşıldı",
-      "body": "{{coach}} seninle bir {{type}} paylaştı."
+      "body": "{{coach}} seninle paylaştı: {{type}}."
     },
     "teamReportSharedCoach": {
       "title": "Takım raporu paylaşıldı",
@@ -2512,11 +2512,11 @@
     },
     "staffReportShared": {
       "title": "{{coach}} bir rapor paylaştı",
-      "body": "{{coach}} seninle bir {{type}} paylaştı."
+      "body": "{{coach}} seninle paylaştı: {{type}}."
     },
     "staffReportSharedTeam": {
       "title": "{{coach}} bir rapor paylaştı",
-      "body": "{{coach}}, {{team}} ile bir {{type}} paylaştı."
+      "body": "{{coach}}, {{team}} ile paylaştı: {{type}}."
     },
     "staffReportComment": {
       "title": "{{coach}} kişisinden yeni yorum",
@@ -2540,7 +2540,7 @@
     },
     "staffReportForwarded": {
       "title": "{{coach}} bir rapor iletti",
-      "body": "{{coach}} sana bir {{type}} iletti."
+      "body": "{{coach}} sana iletti: {{type}}."
     },
     "teamJoinRequest": {
       "title": "{{coach}} takımına katılmak istiyor",
