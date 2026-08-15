@@ -117,7 +117,13 @@ export function ReportSearchButton(
   const { isPhone } = useBreakpoint();
   return (
     <TouchableOpacity
-      onPress={() => { if (!ctl.open) onOpen?.(); ctl.setOpen(o => !o); }}
+      onPress={() => {
+        // Closing from here is closing: it clears the search and the colouring
+        // with it, exactly as the X does. Leaving the query behind left a
+        // report full of highlights and no bar to clear them with.
+        if (ctl.open) ctl.close();
+        else { onOpen?.(); ctl.setOpen(true); }
+      }}
       accessibilityLabel={tr('reportSearch.open')}
       // A square tap target once the word is gone, rather than a wide box with
       // an icon adrift in it.
@@ -156,6 +162,17 @@ export function ReportSearchBar({ ctl }: { ctl: ReportSearchControls }) {
       flexDirection: 'row', alignItems: 'center', gap: 8,
       paddingHorizontal: 10, paddingVertical: 8, marginBottom: 10,
       borderRadius: 10, borderWidth: 1, borderColor: t.line, backgroundColor: t.card,
+      // Held at the top of the report rather than scrolled away with it. The
+      // arrows are the whole point of the bar and they were only reachable
+      // from the top of the page: find a word, scroll to it, and getting to
+      // the next one meant scrolling all the way back up.
+      //
+      // Sticky rather than fixed, so it belongs to the report it searches —
+      // it arrives with the report and leaves with it, and a page holding two
+      // reports does not end up with a bar floating over the wrong one.
+      ...(Platform.OS === 'web'
+        ? ({ position: 'sticky', top: 0, zIndex: 20 } as any)
+        : null),
     }}>
       <Ionicons name="search" size={15} color={t.muted} />
       <TextInput
