@@ -461,12 +461,21 @@ export default function RosterScreen() {
               };
               const removeShared = () =>
                 removeNow(() => playersAPI.dropShared(item.id), tr('roster.couldNotRemoveShared'));
-              Alert.alert(tr('roster.deletePlayerTitle'), tr('roster.deletePlayerMsg', { name: item.name }), [
-                { text: tr('common.cancel'), style: 'cancel' },
-                { text: tr('roster.removeFromMyRoster'), onPress: removeShared },
-                { text: tr('common.delete'), style: 'destructive', onPress: () =>
-                  removeNow(() => playersAPI.delete(item.id), tr('roster.couldNotDeletePlayer')) },
-              ]);
+              // Only one of the two ever applies. Offering both put "Remove
+              // from my roster" in front of a player the coach owns, where it
+              // can only fail — "this player is not on your roster through a
+              // share" is true and useless.
+              Alert.alert(tr('roster.deletePlayerTitle'), tr('roster.deletePlayerMsg', { name: item.name }),
+                item.shared
+                  ? [
+                      { text: tr('common.cancel'), style: 'cancel' },
+                      { text: tr('roster.removeFromMyRoster'), onPress: removeShared },
+                    ]
+                  : [
+                      { text: tr('common.cancel'), style: 'cancel' },
+                      { text: tr('common.delete'), style: 'destructive', onPress: () =>
+                        removeNow(() => playersAPI.delete(item.id), tr('roster.couldNotDeletePlayer')) },
+                    ]);
             }}
           >
             <View style={styles.cardLeft}>

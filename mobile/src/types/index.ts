@@ -29,6 +29,8 @@ export interface Player {
   name: string;
   /** Squad number. Typed on the roster, or read off an imported box score. */
   jersey_number: string | null;
+  /** Here because a shared report brought them, rather than because I own them. */
+  shared?: boolean;
   position: string | null;
   age: number | null;
   height: string | null;

@@ -125,7 +125,14 @@ def list_players(
     q = db.query(models.Player).filter(or_(*conds))
     if team_id is not None:
         q = q.filter(models.Player.team_id == team_id)
-    return [_with_grade(p, _bim_evals(db, coach, p)) for p in q.all()]
+    out = []
+    for p in q.all():
+        row = _with_grade(p, _bim_evals(db, coach, p))
+        # Mine if I own the row; otherwise they are here through a share, and
+        # the only thing I can do is take them off my own list.
+        row.shared = p.coach_id != coach.id and p.id in granted
+        out.append(row)
+    return out
 
 
 @router.delete("/{player_id}/access")

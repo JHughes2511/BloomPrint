@@ -135,6 +135,10 @@ class PlayerOut(BaseModel):
     bim_report_count: int = 0                 # how many evals feed the composite
     team_id: int | None = None
     team_name: str | None = None
+    # On my roster because a shared report brought them, rather than because I
+    # own them. The two are removed in different ways and only one of them
+    # applies to any given player.
+    shared: bool = False
 
     model_config = {"from_attributes": True}
 
