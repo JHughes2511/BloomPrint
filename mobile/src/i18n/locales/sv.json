@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "Båda resultaten behövs",
     "scoreNeededMsg": "Skriv in båda resultaten och spara.",
     "fullGame": "Hela matchen",
-    "noPeriodBreakdown": "Det här protokollet saknade periodindelning, så hela matchen står i en kolumn."
+    "noPeriodBreakdown": "Det här protokollet saknade periodindelning, så hela matchen står i en kolumn.",
+    "sharedByCoach": "Delad av {{name}}",
+    "removeSharedGameTitle": "Ta bort delad match",
+    "removeSharedGameMessage": "Ta bort matchen från din lista? Den finns kvar hos {{name}} — bara din vy ändras.",
+    "removeFromMyGames": "Ta bort från mina matcher"
   },
   "whiteboard": {
     "title": "Taktiktavla",

@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "Both scores needed",
     "scoreNeededMsg": "Type both scores, then save.",
     "fullGame": "Full game",
-    "noPeriodBreakdown": "This sheet had no period breakdown, so the whole game is one column."
+    "noPeriodBreakdown": "This sheet had no period breakdown, so the whole game is one column.",
+    "sharedByCoach": "Shared by {{name}}",
+    "removeSharedGameTitle": "Remove Shared Game",
+    "removeSharedGameMessage": "Take this game off your list? It stays with {{name}} — only your view changes.",
+    "removeFromMyGames": "Remove from my games"
   },
   "whiteboard": {
     "title": "Whiteboard",

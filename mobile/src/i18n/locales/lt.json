@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "Reikia abiejų rezultatų",
     "scoreNeededMsg": "Įrašyk abu rezultatus ir išsaugok.",
     "fullGame": "Visos rungtynės",
-    "noPeriodBreakdown": "Šiame protokole nebuvo skirstymo pagal kėlinius, todėl visos rungtynės telpa į vieną stulpelį."
+    "noPeriodBreakdown": "Šiame protokole nebuvo skirstymo pagal kėlinius, todėl visos rungtynės telpa į vieną stulpelį.",
+    "sharedByCoach": "Pasidalino {{name}}",
+    "removeSharedGameTitle": "Pašalinti bendrintas rungtynes",
+    "removeSharedGameMessage": "Pašalinti šias rungtynes iš savo sąrašo? Jos lieka pas {{name}} — keičiasi tik jūsų rodinys.",
+    "removeFromMyGames": "Pašalinti iš mano rungtynių"
   },
   "whiteboard": {
     "title": "Lenta",

@@ -1107,6 +1107,20 @@ class TeamStaff(Base):
     team  = relationship("Team")
 
 
+class SharedGameHidden(Base):
+    """A game shared with me that I took off my own list.
+
+    Only my view: the sender's game is untouched, the same way removing a
+    shared player from a roster leaves the owner's roster alone.
+    """
+    __tablename__ = "shared_game_hidden"
+
+    id       = Column(Integer, primary_key=True, index=True)
+    coach_id = Column(Integer, ForeignKey("coaches.id"), nullable=False, index=True)
+    game_id  = Column(Integer, ForeignKey("game_sessions.id"), nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class QuestionnaireTranslation(Base):
     """The questionnaire in one language, translated once and kept.
 

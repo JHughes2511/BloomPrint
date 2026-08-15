@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "צריך את שתי התוצאות",
     "scoreNeededMsg": "הזן את שתי התוצאות ושמור.",
     "fullGame": "המשחק כולו",
-    "noPeriodBreakdown": "בגיליון הזה לא היה פירוט לפי רבעים, ולכן כל המשחק מופיע בעמודה אחת."
+    "noPeriodBreakdown": "בגיליון הזה לא היה פירוט לפי רבעים, ולכן כל המשחק מופיע בעמודה אחת.",
+    "sharedByCoach": "שותף על ידי {{name}}",
+    "removeSharedGameTitle": "הסרת משחק משותף",
+    "removeSharedGameMessage": "להסיר את המשחק מהרשימה שלך? הוא נשאר אצל {{name}} — רק התצוגה שלך משתנה.",
+    "removeFromMyGames": "הסר מהמשחקים שלי"
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

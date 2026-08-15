@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "需要两队比分",
     "scoreNeededMsg": "填写两队比分后保存。",
     "fullGame": "全场",
-    "noPeriodBreakdown": "这份记录没有分节数据，所以整场比赛显示为一列。"
+    "noPeriodBreakdown": "这份记录没有分节数据，所以整场比赛显示为一列。",
+    "sharedByCoach": "{{name}} 分享",
+    "removeSharedGameTitle": "移除共享比赛",
+    "removeSharedGameMessage": "将这场比赛从你的列表中移除？它仍保留在 {{name}} 那里——只有你的视图会变。",
+    "removeFromMyGames": "从我的比赛中移除"
   },
   "whiteboard": {
     "title": "战术板",

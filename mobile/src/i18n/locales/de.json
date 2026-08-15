@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "Beide Ergebnisse nötig",
     "scoreNeededMsg": "Trage beide Ergebnisse ein und speichere.",
     "fullGame": "Ganzes Spiel",
-    "noPeriodBreakdown": "Dieser Bogen hatte keine Viertel-Aufteilung, daher steht das ganze Spiel in einer Spalte."
+    "noPeriodBreakdown": "Dieser Bogen hatte keine Viertel-Aufteilung, daher steht das ganze Spiel in einer Spalte.",
+    "sharedByCoach": "Geteilt von {{name}}",
+    "removeSharedGameTitle": "Geteiltes Spiel entfernen",
+    "removeSharedGameMessage": "Dieses Spiel von deiner Liste nehmen? Es bleibt bei {{name}} — nur deine Ansicht ändert sich.",
+    "removeFromMyGames": "Aus meinen Spielen entfernen"
   },
   "whiteboard": {
     "title": "Taktiktafel",

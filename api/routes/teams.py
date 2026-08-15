@@ -30,6 +30,8 @@ def list_teams(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
+    # Teams from a shared game are created in this account when the share
+    # lands (see ensure_teams_for_share), so they are ordinary rows here.
     return db.query(models.Team).filter_by(coach_id=coach.id).order_by(models.Team.id).all()
 
 @router.patch("/{team_id}", response_model=schemas.TeamOut)

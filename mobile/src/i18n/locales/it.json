@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "Servono entrambi i punteggi",
     "scoreNeededMsg": "Inserisci entrambi i punteggi e salva.",
     "fullGame": "Partita intera",
-    "noPeriodBreakdown": "Questo referto non aveva la divisione per periodi, quindi tutta la partita sta in una colonna."
+    "noPeriodBreakdown": "Questo referto non aveva la divisione per periodi, quindi tutta la partita sta in una colonna.",
+    "sharedByCoach": "Condiviso da {{name}}",
+    "removeSharedGameTitle": "Rimuovi partita condivisa",
+    "removeSharedGameMessage": "Togliere questa partita dal tuo elenco? Resta a {{name}}: cambia solo la tua vista.",
+    "removeFromMyGames": "Rimuovi dalle mie partite"
   },
   "whiteboard": {
     "title": "Lavagna",

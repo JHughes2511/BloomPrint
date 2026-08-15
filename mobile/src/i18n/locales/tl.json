@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "Kailangan ang dalawang iskor",
     "scoreNeededMsg": "Ilagay ang dalawang iskor, tapos i-save.",
     "fullGame": "Buong laro",
-    "noPeriodBreakdown": "Walang hati kada period ang talaan na ito, kaya nasa isang column ang buong laro."
+    "noPeriodBreakdown": "Walang hati kada period ang talaan na ito, kaya nasa isang column ang buong laro.",
+    "sharedByCoach": "Ibinahagi ni {{name}}",
+    "removeSharedGameTitle": "Alisin ang ibinahaging laro",
+    "removeSharedGameMessage": "Alisin ang laro sa listahan mo? Nananatili ito kay {{name}} — ang view mo lang ang magbabago.",
+    "removeFromMyGames": "Alisin sa aking mga laro"
   },
   "whiteboard": {
     "title": "Whiteboard",

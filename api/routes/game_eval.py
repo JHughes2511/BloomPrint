@@ -623,6 +623,33 @@ def _accessible_team_ids(db: Session, coach: models.Coach) -> set[int]:
     return ids
 
 
+def shared_game_senders(db: Session, coach: models.Coach) -> dict[int, str]:
+    """Games shared with this coach as Game Insights, and who sent each.
+
+    A share is a live link, not a copy: the game is read straight from the
+    sender's record, so their corrections show up here without being sent
+    again. Read-only stays read-only — editing still goes through _get_game,
+    which is owner-only.
+    """
+    rows = (
+        db.query(models.StaffSharedReport)
+        .filter(models.StaffSharedReport.recipient_id == coach.id,
+                models.StaffSharedReport.report_type.in_(("game_session", "game")))
+        .all()
+    )
+    if not rows:
+        return {}
+    senders = {c.id: c.name for c in db.query(models.Coach)
+               .filter(models.Coach.id.in_({r.sender_id for r in rows})).all()}
+    return {r.report_id: senders.get(r.sender_id) or "" for r in rows}
+
+
+def _hidden_shared_game_ids(db: Session, coach: models.Coach) -> set[int]:
+    """Shared games this coach took off their own list."""
+    return {r.game_id for r in db.query(models.SharedGameHidden)
+            .filter_by(coach_id=coach.id).all()}
+
+
 def _coach_scouting(db: Session, coach: models.Coach, game: models.GameSession) -> str | None:
     """The coach's OWN scouting report for a game. Each coach who can access a
     game keeps their own private scouting; the owner's legacy report (stored on
@@ -1736,6 +1763,8 @@ def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession,
     answers every question itself, which is right for a single game.
     """
     out = schemas.GameSessionOut.model_validate(game)
+    team = db.get(models.Team, game.team_id) if game.team_id else None
+    out.team_name = team.name if team else None
     if ctx is not None:
         out.stats_need_reimport = game.id in ctx["imported"] and game.id not in ctx["misses"]
     else:
@@ -1775,6 +1804,8 @@ def _get_game_readable(db: Session, game_id: int, coach: models.Coach) -> models
     if game.coach_id == coach.id:
         return game
     if game.team_id is not None and game.team_id in _accessible_team_ids(db, coach):
+        return game
+    if game.id in shared_game_senders(db, coach):
         return game
     raise HTTPException(status_code=404, detail="Game session not found")
 
@@ -1836,6 +1867,13 @@ def list_sessions(
     conds = [models.GameSession.coach_id == coach.id]
     if accessible_ids:
         conds.append(models.GameSession.team_id.in_(accessible_ids))
+    # A game another coach shared with me belongs on my schedule too: my
+    # players played it, so it counts in Team Grade like any other. Read-only
+    # — editing still goes through _get_game, which is owner-only.
+    shared_by = shared_game_senders(db, coach)
+    visible_shared = set(shared_by) - _hidden_shared_game_ids(db, coach)
+    if visible_shared:
+        conds.append(models.GameSession.id.in_(visible_shared))
     q = db.query(models.GameSession).filter(or_(*conds))
     picked = _team_filter(db, team_ids)
     if picked is not None:
@@ -1848,7 +1886,14 @@ def list_sessions(
     # Gate each game's written scouting report: staff see the game's stats but
     # only see the AI scouting write-up if it was shared to them.
     ctx = _gate_context(db, coach, games)
-    return [_gate_scouting(db, coach, g, ctx) for g in games]
+    out = []
+    for g in games:
+        row = _gate_scouting(db, coach, g, ctx)
+        # Said on the card, so a game that arrived from someone else is never
+        # mistaken for one this coach tracked.
+        row.shared_by = shared_by.get(g.id) if g.coach_id != coach.id else None
+        out.append(row)
+    return out
 
 
 @router.get("/sessions/{game_id}", response_model=schemas.GameSessionOut)
@@ -1881,6 +1926,17 @@ def delete_session(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
+    # A game somebody shared with me is not mine to delete. Taking it off my
+    # list takes it off MY list only, the way a shared player can be removed
+    # from my roster without touching the owner's.
+    if game_id in shared_game_senders(db, coach):
+        owner = db.get(models.GameSession, game_id)
+        if owner and owner.coach_id != coach.id:
+            if not db.query(models.SharedGameHidden).filter_by(
+                    coach_id=coach.id, game_id=game_id).first():
+                db.add(models.SharedGameHidden(coach_id=coach.id, game_id=game_id))
+                db.commit()
+            return {"ok": True, "hidden": True}
     game = _get_game(db, game_id, coach.id)
     # Hidden, not destroyed — a tracked game carries a whole night's stats.
     soft_delete(db, game)
@@ -2952,7 +3008,15 @@ def _team_filter(db: Session, param: str | None):
     if names:
         # Opponents are free text, so matched by name and case-insensitively —
         # "Duke" and "duke" are one opponent, as the New Game picker enforces.
-        conds.append(func.lower(models.GameSession.opponent_name).in_([n.lower() for n in names]))
+        lowered = [n.lower() for n in names]
+        conds.append(func.lower(models.GameSession.opponent_name).in_(lowered))
+        # And the same name on the other side of the scoreboard, where the team
+        # row belongs to another coach — a game shared with me is filed under
+        # THEIR Angola, so picking my Angola has to find it by name as well.
+        same = [t.id for t in db.query(models.Team).all()
+                if t.name and t.name.lower() in lowered and t.id not in picked]
+        if same:
+            conds.append(models.GameSession.team_id.in_(same))
     return _or(*conds)
 
 
@@ -2996,6 +3060,13 @@ def season_dashboard(
     conds = [models.GameSession.coach_id == coach.id]
     if accessible_ids:
         conds.append(models.GameSession.team_id.in_(accessible_ids))
+    # A shared game counts here exactly like one this coach tracked — same
+    # night, same players, and leaving it out would make the season record
+    # disagree with the list of games on the next tab.
+    visible_shared = (set(shared_game_senders(db, coach))
+                      - _hidden_shared_game_ids(db, coach))
+    if visible_shared:
+        conds.append(models.GameSession.id.in_(visible_shared))
     q = db.query(models.GameSession).filter(or_(*conds)).filter(models.GameSession.status == "completed")
     picked = _team_filter(db, team_ids)
     if picked is not None:
@@ -3038,6 +3109,16 @@ def season_dashboard(
         # win-loss record.
         mine = [t for t in db.query(models.Team).filter_by(coach_id=coach.id).all()
                 if t.is_mine is not False]
+        # Plus the teams behind games shared with me. A shared game is a game
+        # my people played, so its side of the scoreboard is my side — without
+        # this the game shows on the Games tab and the record beside it still
+        # reads 0-0.
+        if visible_shared:
+            for g in db.query(models.GameSession).filter(
+                    models.GameSession.id.in_(visible_shared)).all():
+                t = db.get(models.Team, g.team_id) if g.team_id else None
+                if t and t.is_mine is not False and t.id not in {m.id for m in mine}:
+                    mine.append(t)
         subject_ids = {t.id for t in mine}
         subject_names = {(t.name or "").strip().lower() for t in mine}
 
@@ -3322,6 +3403,12 @@ def opponent_profile(
     conds = [models.GameSession.coach_id == coach.id]
     if accessible_ids:
         conds.append(models.GameSession.team_id.in_(accessible_ids))
+    # Games shared with me are material on this team too — they are the reason
+    # the team is on my Scout list in the first place.
+    visible_shared = (set(shared_game_senders(db, coach))
+                      - _hidden_shared_game_ids(db, coach))
+    if visible_shared:
+        conds.append(models.GameSession.id.in_(visible_shared))
     # Either side of the scoreboard. Matching only opponent_name meant a team
     # could have three games on file and no scouting page, because it happened
     # to be stored as the game's own team every time — which is a detail of how

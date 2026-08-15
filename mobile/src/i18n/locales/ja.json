@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "両方のスコアが必要です",
     "scoreNeededMsg": "両方のスコアを入力して保存してください。",
     "fullGame": "全試合",
-    "noPeriodBreakdown": "このシートにはピリオド別の内訳がないため、全試合が1列にまとまっています。"
+    "noPeriodBreakdown": "このシートにはピリオド別の内訳がないため、全試合が1列にまとまっています。",
+    "sharedByCoach": "{{name}} が共有",
+    "removeSharedGameTitle": "共有された試合を削除",
+    "removeSharedGameMessage": "この試合をリストから外しますか？{{name}} 側には残り、あなたの表示だけが変わります。",
+    "removeFromMyGames": "自分の試合から外す"
   },
   "whiteboard": {
     "title": "ホワイトボード",

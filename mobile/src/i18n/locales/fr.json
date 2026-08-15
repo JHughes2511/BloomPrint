@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "Les deux scores sont requis",
     "scoreNeededMsg": "Saisis les deux scores, puis enregistre.",
     "fullGame": "Match complet",
-    "noPeriodBreakdown": "Cette feuille n'avait pas de découpage par période : tout le match tient dans une colonne."
+    "noPeriodBreakdown": "Cette feuille n'avait pas de découpage par période : tout le match tient dans une colonne.",
+    "sharedByCoach": "Partagé par {{name}}",
+    "removeSharedGameTitle": "Retirer le match partagé",
+    "removeSharedGameMessage": "Retirer ce match de votre liste ? Il reste chez {{name}} — seule votre vue change.",
+    "removeFromMyGames": "Retirer de mes matchs"
   },
   "whiteboard": {
     "title": "Tableau blanc",

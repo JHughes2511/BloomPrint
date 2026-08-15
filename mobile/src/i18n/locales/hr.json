@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "Potrebna su oba rezultata",
     "scoreNeededMsg": "Upiši oba rezultata i spremi.",
     "fullGame": "Cijela utakmica",
-    "noPeriodBreakdown": "Ovaj zapisnik nije imao podjelu po četvrtinama pa je cijela utakmica u jednom stupcu."
+    "noPeriodBreakdown": "Ovaj zapisnik nije imao podjelu po četvrtinama pa je cijela utakmica u jednom stupcu.",
+    "sharedByCoach": "Podijelio {{name}}",
+    "removeSharedGameTitle": "Ukloni podijeljenu utakmicu",
+    "removeSharedGameMessage": "Ukloniti ovu utakmicu s tvog popisa? Ostaje kod {{name}} — mijenja se samo tvoj prikaz.",
+    "removeFromMyGames": "Ukloni iz mojih utakmica"
   },
   "whiteboard": {
     "title": "Ploča",

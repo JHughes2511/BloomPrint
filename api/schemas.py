@@ -745,6 +745,14 @@ class GameSessionOut(BaseModel):
     # same file fixes both. Said out loud rather than left as quietly wrong
     # numbers a coach has no way to spot.
     stats_need_reimport: bool = False
+    # The name on the game's own side of the scoreboard. Resolved here because
+    # the team row can belong to another coach — on a shared game the reader
+    # cannot look it up among their own teams, and the card read "SEED vs Mali"
+    # for a game SEED never played.
+    team_name: str | None = None
+    # Set when another coach shared this game with me: their name, for the
+    # card. None on my own games.
+    shared_by: str | None = None
     model_config = {"from_attributes": True}
 
 

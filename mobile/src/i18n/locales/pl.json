@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "Potrzebne oba wyniki",
     "scoreNeededMsg": "Wpisz oba wyniki i zapisz.",
     "fullGame": "Cały mecz",
-    "noPeriodBreakdown": "Ten protokół nie miał podziału na kwarty, więc cały mecz jest w jednej kolumnie."
+    "noPeriodBreakdown": "Ten protokół nie miał podziału na kwarty, więc cały mecz jest w jednej kolumnie.",
+    "sharedByCoach": "Udostępnione przez {{name}}",
+    "removeSharedGameTitle": "Usuń udostępniony mecz",
+    "removeSharedGameMessage": "Usunąć ten mecz z Twojej listy? Pozostaje u {{name}} — zmienia się tylko Twój widok.",
+    "removeFromMyGames": "Usuń z moich meczów"
   },
   "whiteboard": {
     "title": "Tablica",

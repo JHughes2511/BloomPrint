@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "Faltan los dos marcadores",
     "scoreNeededMsg": "Escribe los dos marcadores y guarda.",
     "fullGame": "Partido completo",
-    "noPeriodBreakdown": "Esta hoja no traía desglose por periodos, así que todo el partido va en una columna."
+    "noPeriodBreakdown": "Esta hoja no traía desglose por periodos, así que todo el partido va en una columna.",
+    "sharedByCoach": "Compartido por {{name}}",
+    "removeSharedGameTitle": "Quitar partido compartido",
+    "removeSharedGameMessage": "¿Quitar este partido de tu lista? Sigue con {{name}}: solo cambia tu vista.",
+    "removeFromMyGames": "Quitar de mis partidos"
   },
   "whiteboard": {
     "title": "Pizarra",

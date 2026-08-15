@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "Faltam os dois resultados",
     "scoreNeededMsg": "Escreve os dois resultados e guarda.",
     "fullGame": "Jogo completo",
-    "noPeriodBreakdown": "Esta folha não tinha divisão por períodos, por isso o jogo todo fica numa coluna."
+    "noPeriodBreakdown": "Esta folha não tinha divisão por períodos, por isso o jogo todo fica numa coluna.",
+    "sharedByCoach": "Compartilhado por {{name}}",
+    "removeSharedGameTitle": "Remover jogo compartilhado",
+    "removeSharedGameMessage": "Tirar este jogo da sua lista? Ele continua com {{name}} — só a sua visualização muda.",
+    "removeFromMyGames": "Remover dos meus jogos"
   },
   "whiteboard": {
     "title": "Quadro Tático",

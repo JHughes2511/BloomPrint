@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "Sunt necesare ambele scoruri",
     "scoreNeededMsg": "Scrie ambele scoruri, apoi salvează.",
     "fullGame": "Meci complet",
-    "noPeriodBreakdown": "Această foaie nu avea împărțire pe reprize, așa că tot meciul stă într-o coloană."
+    "noPeriodBreakdown": "Această foaie nu avea împărțire pe reprize, așa că tot meciul stă într-o coloană.",
+    "sharedByCoach": "Partajat de {{name}}",
+    "removeSharedGameTitle": "Elimină meciul partajat",
+    "removeSharedGameMessage": "Scoți acest meci din lista ta? Rămâne la {{name}} — se schimbă doar vizualizarea ta.",
+    "removeFromMyGames": "Elimină din meciurile mele"
   },
   "whiteboard": {
     "title": "Tablă tactică",

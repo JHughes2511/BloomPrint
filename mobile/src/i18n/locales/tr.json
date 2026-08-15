@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "İki skor da gerekli",
     "scoreNeededMsg": "İki skoru da yaz, sonra kaydet.",
     "fullGame": "Tüm maç",
-    "noPeriodBreakdown": "Bu formda periyot dökümü yoktu, bu yüzden maçın tamamı tek sütunda."
+    "noPeriodBreakdown": "Bu formda periyot dökümü yoktu, bu yüzden maçın tamamı tek sütunda.",
+    "sharedByCoach": "{{name}} paylaştı",
+    "removeSharedGameTitle": "Paylaşılan maçı kaldır",
+    "removeSharedGameMessage": "Bu maç listenden kaldırılsın mı? {{name}} tarafında kalır — yalnızca senin görünümün değişir.",
+    "removeFromMyGames": "Maçlarımdan kaldır"
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

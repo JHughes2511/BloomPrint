@@ -105,6 +105,51 @@ def players_in_report(db: Session, report_type: str, report_id: int,
     return []
 
 
+def _norm(x) -> str:
+    return "".join(ch for ch in str(x or "").lower() if ch.isalnum())
+
+
+def ensure_teams_for_share(db: Session, report_type: str, report_id: int,
+                           sender: models.Coach, recipient_id: int) -> list[int]:
+    """Both teams in a shared game, as records in the recipient's account.
+
+    A shared game carries enough to know who played it: the side the sender
+    tracked and the side they played. Neither is the recipient's own squad, so
+    both land as teams they keep records on (is_mine False) rather than as
+    their own — that is the same distinction the app already draws for a team
+    you have only ever faced.
+
+    Matched on name, so a coach who already keeps an Angola gets the games and
+    the players on the Angola they have, not a second one beside it. The
+    sender's own records are never written to.
+    """
+    if recipient_id == sender.id or (report_type or "").lower() not in ("game", "game_session"):
+        return []
+    g = db.get(models.GameSession, report_id)
+    if not g:
+        return []
+    ours = db.get(models.Team, g.team_id) if g.team_id else None
+    wanted = [n for n in ((ours.name if ours else None), g.opponent_name) if (n or "").strip()]
+    if not wanted:
+        return []
+    existing = {_norm(t.name): t for t in
+                db.query(models.Team).filter_by(coach_id=recipient_id).all()
+                if t.deleted_at is None}
+    out = []
+    for name in wanted:
+        team = existing.get(_norm(name))
+        if team is None:
+            team = models.Team(
+                name=name.strip(), coach_id=recipient_id, is_mine=False,
+                competition_level=(ours.competition_level if ours else None)
+                                  or sender.competition_level or "HS Varsity")
+            db.add(team)
+            db.flush()
+            existing[_norm(name)] = team
+        out.append(team.id)
+    return out
+
+
 def grant_players_for_share(db: Session, report_type: str, report_id: int,
                             sender: models.Coach, recipient_id: int) -> int:
     """Give the recipient the people a shared report is about. Returns how many."""

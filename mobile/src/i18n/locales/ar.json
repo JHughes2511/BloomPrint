@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "النتيجتان مطلوبتان",
     "scoreNeededMsg": "اكتب النتيجتين ثم احفظ.",
     "fullGame": "المباراة كاملة",
-    "noPeriodBreakdown": "لم تتضمن هذه الورقة تقسيمًا حسب الفترات، لذا تظهر المباراة كاملة في عمود واحد."
+    "noPeriodBreakdown": "لم تتضمن هذه الورقة تقسيمًا حسب الفترات، لذا تظهر المباراة كاملة في عمود واحد.",
+    "sharedByCoach": "شارَكه {{name}}",
+    "removeSharedGameTitle": "إزالة المباراة المشتركة",
+    "removeSharedGameMessage": "إزالة هذه المباراة من قائمتك؟ تبقى لدى {{name}} — يتغيّر عرضك أنت فقط.",
+    "removeFromMyGames": "إزالة من مبارياتي"
   },
   "whiteboard": {
     "title": "السبورة",

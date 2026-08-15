@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "Beide scores nodig",
     "scoreNeededMsg": "Vul beide scores in en sla op.",
     "fullGame": "Hele wedstrijd",
-    "noPeriodBreakdown": "Dit formulier had geen indeling per periode, dus de hele wedstrijd staat in één kolom."
+    "noPeriodBreakdown": "Dit formulier had geen indeling per periode, dus de hele wedstrijd staat in één kolom.",
+    "sharedByCoach": "Gedeeld door {{name}}",
+    "removeSharedGameTitle": "Gedeelde wedstrijd verwijderen",
+    "removeSharedGameMessage": "Deze wedstrijd van je lijst halen? Hij blijft bij {{name}} — alleen jouw weergave verandert.",
+    "removeFromMyGames": "Uit mijn wedstrijden verwijderen"
   },
   "whiteboard": {
     "title": "Tactiekbord",

@@ -314,7 +314,11 @@ export default function TeamEvalScreen({ route, navigation }: any) {
    * team; only the label was leaving it out.
    */
   const matchupLabel = React.useCallback((game: any) => {
-    const ours = (teams as any[]).find(tm => tm.id === game?.team_id)?.name
+    // The game's own team name first: on a game another coach shared, the
+    // team row is theirs and is not among mine, and falling straight through
+    // to my program printed "SEED vs Mali" for a game SEED never played.
+    const ours = game?.team_name
+      ?? (teams as any[]).find(tm => tm.id === game?.team_id)?.name
       ?? coach?.program_name;
     return ours
       ? tr('teamGrade.matchup', { us: ours, them: game?.opponent_name })
@@ -1202,7 +1206,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
    */
   const sideLabels = React.useMemo(() => {
     const where = String(activeGame?.location ?? '').trim().toLowerCase();
-    const ourName = (teams as any[]).find(tm => tm.id === activeGame?.team_id)?.name
+    const ourName = activeGame?.team_name
+      ?? (teams as any[]).find(tm => tm.id === activeGame?.team_id)?.name
       ?? coach?.program_name ?? tr('teamGrade.ourTeam');
     if (where.startsWith('home')) return { ours: tr('teamGrade.home'), theirs: tr('teamGrade.away') };
     if (where.startsWith('away')) return { ours: tr('teamGrade.away'), theirs: tr('teamGrade.home') };
@@ -1251,7 +1256,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       // The team that played this game, which is not always the account's
       // program name: a coach whose program is "SEED" running a team called
       // Angola exported "SEED vs Egypt" over a report about Angola.
-      const ourName = (teams as any[]).find(tm => tm.id === detailGame.team_id)?.name || programName;
+      const ourName = detailGame.team_name
+        || (teams as any[]).find(tm => tm.id === detailGame.team_id)?.name || programName;
       // The score, without a verdict word. "WIN 83-72" above a report that
       // already says "FINAL: Angola 83 — Egypt 72 (WIN)" reads as a second,
       // competing claim about the same game.
@@ -1484,7 +1490,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       const dateStr = `${gameDate.getFullYear()}-${String(gameDate.getMonth() + 1).padStart(2, '0')}-${String(gameDate.getDate()).padStart(2, '0')}`;
       const programName = coach?.program_name ?? 'Team';
       // The team that played, same as the PDF.
-      const ourName = (teams as any[]).find(tm => tm.id === detailGame.team_id)?.name || programName;
+      const ourName = detailGame.team_name
+        || (teams as any[]).find(tm => tm.id === detailGame.team_id)?.name || programName;
       const phase = detailGame.season_phase ?? '';
       const result = detailGame.our_score != null
         ? `${detailGame.our_score > detailGame.opponent_score ? 'WIN' : 'LOSS'} ${detailGame.our_score}-${detailGame.opponent_score}`
@@ -1772,6 +1779,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     };
     for (const g of sessions as any[]) {
       add(g.opponent_name);
+      add(g.team_name);
       add((teams as any[]).find(tm => tm.id === g.team_id)?.name);
     }
     for (const tm of teams as any[]) add(tm.name);
@@ -1800,6 +1808,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   /** Games this team played, on either side of the scoreboard. */
   const gamesInvolving = (name: string) => (sessions as any[]).filter((g: any) =>
     norm(g.opponent_name) === norm(name)
+    || norm(g.team_name ?? '') === norm(name)
     || norm((teams as any[]).find(tm => tm.id === g.team_id)?.name ?? '') === norm(name));
 
   /**
@@ -2246,6 +2255,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                       {game.location ? ` · ${game.location}` : ''}
                       {hasScore ? ` · ${game.our_score}-${game.opponent_score}` : ''}
                     </Text>
+                    {/* Whose game this is. It counts in the season record like
+                        any other, so where it came from has to be said. */}
+                    {!!game.shared_by && (
+                      <Text style={{ color: t.accent, fontSize: 11, marginTop: 2 }} numberOfLines={1}>
+                        {tr('teamGrade.sharedByCoach', { name: game.shared_by })}
+                      </Text>
+                    )}
                   </View>
                   <View style={{ alignItems: 'flex-end', gap: 4 }}>
                     <View style={[s.statusBadge, game.status === 'in_progress' && { backgroundColor: t.accentSoft }]}>
@@ -2272,6 +2288,32 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                       }}
                     >
                       <Ionicons name="trash-outline" size={15} color={t.muted2} />
+                    </TouchableOpacity>
+                  ) : game.shared_by ? (
+                    /* A shared game isn't mine to delete — this takes it off
+                       my list and out of my season record, and leaves the
+                       coach who shared it untouched. */
+                    <TouchableOpacity
+                      style={{ padding: 4 }}
+                      onPress={() => {
+                        Alert.alert(
+                          tr('teamGrade.removeSharedGameTitle'),
+                          tr('teamGrade.removeSharedGameMessage', { name: game.shared_by }),
+                          [
+                            { text: tr('common.cancel'), style: 'cancel' },
+                            {
+                              text: tr('teamGrade.removeFromMyGames'), style: 'destructive',
+                              onPress: async () => {
+                                try {
+                                  await gameEvalAPI.deleteSession(game.id);
+                                  setSessions(prev => prev.filter(x => x.id !== game.id));
+                                } catch { Alert.alert(tr('common.error'), tr('teamGrade.couldNotDelete')); }
+                              },
+                            },
+                          ]);
+                      }}
+                    >
+                      <Ionicons name="close-circle-outline" size={15} color={t.muted2} />
                     </TouchableOpacity>
                   ) : (
                     <View style={{ padding: 4 }}>
@@ -3477,7 +3519,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                       <GameReportPanel
                         gameId={gameReportGame.id}
                         opponentName={gameReportGame.opponent_name}
-                        ourTeamName={(teams as any[]).find(tm => tm.id === gameReportGame.team_id)?.name
+                        ourTeamName={gameReportGame.team_name
+                          ?? (teams as any[]).find(tm => tm.id === gameReportGame.team_id)?.name
                                      ?? coach?.program_name}
                         hasReport={!!gameReportGame.ai_game_report}
                         onRegenerated={(text) => setGameReportGame((prev: any) => ({ ...prev, ai_game_report: text }))}

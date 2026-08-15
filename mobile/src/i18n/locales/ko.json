@@ -2277,7 +2277,11 @@
     "scoreNeededTitle": "두 점수가 모두 필요합니다",
     "scoreNeededMsg": "두 점수를 입력한 뒤 저장하세요.",
     "fullGame": "경기 전체",
-    "noPeriodBreakdown": "이 기록지에는 쿼터별 구분이 없어 경기 전체가 한 열로 표시됩니다."
+    "noPeriodBreakdown": "이 기록지에는 쿼터별 구분이 없어 경기 전체가 한 열로 표시됩니다.",
+    "sharedByCoach": "{{name}} 님이 공유함",
+    "removeSharedGameTitle": "공유된 경기 제거",
+    "removeSharedGameMessage": "이 경기를 내 목록에서 제거할까요? {{name}} 님에게는 그대로 남고 내 화면만 바뀝니다.",
+    "removeFromMyGames": "내 경기에서 제거"
   },
   "whiteboard": {
     "title": "작전판",

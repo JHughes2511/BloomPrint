@@ -123,19 +123,34 @@ def list_players(
         # Shared with me: the report about them came with the person.
         conds.append(models.Player.id.in_(granted))
     q = db.query(models.Player).filter(or_(*conds))
-    if team_id is not None:
-        q = q.filter(models.Player.team_id == team_id)
+    # team_id is applied after the display team below, not in SQL: a player who
+    # came with a shared game is filed on the sender's team row, and asking the
+    # database for mine would answer with nobody.
     # Newest first. A coach adding a player was sent to the bottom of a long
     # list to find them, and the one they just typed in is the one they are
     # about to open. id, not created_at: the column is nullable on rows that
     # predate it, and a null sorts unpredictably.
     q = q.order_by(models.Player.id.desc())
+    # A player who arrived with a shared game is on a team, but on the SENDER's
+    # side of it: the team row belongs to them and the player row is theirs to
+    # file. The recipient keeps their own record of both teams in that game, so
+    # the player is shown under the one whose name matches — read only, no
+    # write, so nothing on the sender's roster moves.
+    by_name = {" ".join((t.name or "").split()).lower(): t
+               for t in db.query(models.Team).filter_by(coach_id=coach.id).all()
+               if t.deleted_at is None}
     out = []
     for p in q.all():
         row = _with_grade(p, _bim_evals(db, coach, p))
         # Mine if I own the row; otherwise they are here through a share, and
         # the only thing I can do is take them off my own list.
         row.shared = p.coach_id != coach.id and p.id in granted
+        if row.shared and (row.team_id is None or row.team_id not in team_ids):
+            mine = by_name.get(" ".join((p.program_name or "").split()).lower())
+            if mine is not None:
+                row.team_id, row.team_name = mine.id, mine.name
+        if team_id is not None and row.team_id != team_id:
+            continue
         out.append(row)
     return out
 
