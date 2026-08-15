@@ -3220,21 +3220,30 @@ def season_dashboard(
         })
 
         for pg in player_grades:
-            key = (row_team_id, pg["player_name"])
+            # Keyed by the team's NAME, not its id. Two rows can carry the same
+            # name — my Angola and the Angola on a game somebody shared — and
+            # keying on the id split one player into a row per row, each of
+            # them reading 1G, with their three games spread across them.
+            key = (_norm_team(row_team_name), pg["player_name"])
             if key not in player_totals:
-                player_totals[key] = {"games": 0, "total_grade": 0.0, "total_off": 0.0, "total_def": 0.0}
+                player_totals[key] = {"games": 0, "total_grade": 0.0, "total_off": 0.0,
+                                      "total_def": 0.0, "team_id": row_team_id,
+                                      "team_name": row_team_name}
+            if player_totals[key]["team_id"] is None:
+                player_totals[key]["team_id"] = row_team_id
+                player_totals[key]["team_name"] = row_team_name
             player_totals[key]["games"] += 1
             player_totals[key]["total_grade"] += pg["game_grade"]
             player_totals[key]["total_off"] += pg["offensive_grade"]
             player_totals[key]["total_def"] += pg["defensive_grade"]
 
     player_leaderboard = []
-    for (tid, name), data in player_totals.items():
+    for (_team_key, name), data in player_totals.items():
         g = max(data["games"], 1)
         player_leaderboard.append({
             "player_name": name,
-            "team_id": tid,
-            "team_name": team_names.get(tid),
+            "team_id": data["team_id"],
+            "team_name": data["team_name"] or team_names.get(data["team_id"]),
             "avg_game_grade": round(data["total_grade"] / g, 2),
             "games_played": data["games"],
             "avg_offensive": round(data["total_off"] / g, 2),

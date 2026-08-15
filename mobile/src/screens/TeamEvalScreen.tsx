@@ -2176,7 +2176,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               {dashboard.player_leaderboard.length > 0 && (
                 <View style={s.card}>
                   <Text style={s.cardLabel}>{tr('teamGrade.playerLeaderboard')}</Text>
-                  {dashboard.player_leaderboard.slice(0, 8).map((p: any, i: number) => (
+                  {dashboard.player_leaderboard.slice(0, 15).map((p: any, i: number) => (
                     <TouchableOpacity key={`${p.team_id ?? 0}-${p.player_name}`} style={s.leaderRow} onPress={() => openGradeDetail(p.player_name)}>
                       <Text style={s.leaderRank}>{i + 1}</Text>
                       <View style={{ flex: 1 }}>
