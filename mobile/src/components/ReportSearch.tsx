@@ -153,7 +153,17 @@ export function ReportSearchButton(
 }
 
 /** The bar itself. Render it directly above the report. */
-export function ReportSearchBar({ ctl }: { ctl: ReportSearchControls }) {
+export function ReportSearchBar(
+  { ctl, phoneMaxWidth }: {
+    ctl: ReportSearchControls;
+    /**
+     * A tighter cap for a phone, where the 460 below never bites — the column
+     * is narrower than that, so the bar runs the full width of the report.
+     * Passed where a full-width bar reads as a heavy band across the page.
+     */
+    phoneMaxWidth?: number;
+  },
+) {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
   const { isPhone } = useBreakpoint();
@@ -185,7 +195,8 @@ export function ReportSearchBar({ ctl }: { ctl: ReportSearchControls }) {
       // Short of the report's full width, and sitting under the button that
       // opened it. A find box does not need the whole column — it needs room
       // for a word, a count and two arrows.
-      width: '100%', maxWidth: 460, alignSelf: 'flex-end',
+      width: '100%', maxWidth: isPhone ? (phoneMaxWidth ?? 460) : 460,
+      alignSelf: 'flex-end',
       // Opaque. The bar holds the top of the report while the report scrolls
       // beneath it, so whatever is behind it is text — and `card` is a seven
       // per cent white in the dark theme, which let that text read straight
