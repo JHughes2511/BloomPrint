@@ -1233,7 +1233,11 @@ export default function GameReportBuilderScreen() {
               <Text style={[styles.label, { flex: 1, marginBottom: 0 }]}>{tr('gameBuilder.generatedReport')}</Text>
               <ReportSearchButton ctl={find} />
             </View>
-            <ReportSearchBar ctl={find} />
+            {/* Shorter than the bar a report SHEET opens with. That sheet
+                fills the screen, so its full-width bar is the screen's width
+                and reads right; this section sits in the page, so the same
+                width reads as a band across it. */}
+            <ReportSearchBar ctl={find} phoneMaxWidth={320} />
             <View style={styles.reportBox}>
               {renderReport(report.report_text, { heading: t.ink, body: t.inkSoft }, find.search)}
             </View>

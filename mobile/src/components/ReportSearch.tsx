@@ -47,7 +47,7 @@ export function useReportSearch(text: string, existingRef?: React.RefObject<any>
   useEffect(() => { setActive(0); }, [query, text]);
 
   /** Put the active match on screen. */
-  const jump = useCallback(() => {
+  const jump = useCallback((animated: boolean) => {
     const scroller = scrollRef.current;
     const node = activeNode.current;
     const inner = scroller?.getInnerViewNode?.() ?? scroller?.getInnerViewRef?.();
@@ -57,16 +57,28 @@ export function useReportSearch(text: string, existingRef?: React.RefObject<any>
       (_x: number, y: number) => {
         // A little above it, so the match is not against the top edge with no
         // sense of what it is part of.
-        scroller.scrollTo?.({ y: Math.max(0, y - 120), animated: true });
+        scroller.scrollTo?.({ y: Math.max(0, y - 120), animated });
       },
       () => {},
     );
   }, []);
 
-  // After the render that moved the active highlight, not during it.
+  // Typing jumps straight there; the arrows glide.
+  //
+  // Every keystroke starts a fresh jump, and an animated one takes longer to
+  // finish than the next letter takes to arrive — so the page was left
+  // scrolling for a second or more after the coach stopped typing, and the
+  // bar riding the top of the report trailed behind them the whole way. A
+  // find box lands on the word, which is what a browser's own does.
+  //
+  // Stepping with the arrows is one deliberate move at a time, and there the
+  // glide shows the distance travelled, so it keeps it.
+  const lastQuery = useRef(query);
   useEffect(() => {
     if (!open || total <= 0) return;
-    const id = setTimeout(jump, 0);
+    const typed = query !== lastQuery.current;
+    lastQuery.current = query;
+    const id = setTimeout(() => jump(!typed), 0);
     return () => clearTimeout(id);
   }, [open, active, total, query, jump]);
 
@@ -153,7 +165,21 @@ export function ReportSearchButton(
 }
 
 /** The bar itself. Render it directly above the report. */
-export function ReportSearchBar({ ctl }: { ctl: ReportSearchControls }) {
+export function ReportSearchBar(
+  { ctl, phoneMaxWidth }: {
+    ctl: ReportSearchControls;
+    /**
+     * A tighter cap for a phone, where the 460 below never bites — a phone
+     * column is narrower than that, so the bar spans it.
+     *
+     * Passed where the report itself does not fill the screen. A sheet does,
+     * so its bar spanning the sheet reads as full width and is right; a
+     * section sitting in the page does not, and a bar running its whole width
+     * reads as a band rather than a find box.
+     */
+    phoneMaxWidth?: number;
+  },
+) {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
   const { isPhone } = useBreakpoint();
@@ -186,9 +212,10 @@ export function ReportSearchBar({ ctl }: { ctl: ReportSearchControls }) {
       // opened it. A find box does not need the whole column — it needs room
       // for a word, a count and two arrows.
       // Capped on a desktop, where the report column is far wider than a find
-      // box needs to be. A phone column is already narrower than the cap, so
-      // there the bar simply spans it — the same as it does in a report sheet.
-      width: '100%', maxWidth: 460, alignSelf: 'flex-end',
+      // box needs to be. On a phone the column is already narrower than that,
+      // so the bar spans it unless a caller asks for less.
+      width: '100%', maxWidth: isPhone ? (phoneMaxWidth ?? 460) : 460,
+      alignSelf: 'flex-end',
       // Opaque. The bar holds the top of the report while the report scrolls
       // beneath it, so whatever is behind it is text — and `card` is a seven
       // per cent white in the dark theme, which let that text read straight
