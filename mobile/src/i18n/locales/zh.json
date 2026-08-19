@@ -2637,7 +2637,17 @@
     "placeholder": "搜索",
     "seeAll": "查看全部 {{count}} 条",
     "title": "搜索",
-    "typeToSearch": "输入以搜索全部内容"
+    "typeToSearch": "输入以搜索全部内容",
+    "groups": {
+      "packets": "比赛包",
+      "film": "影像分析",
+      "gameReports": "比赛报告",
+      "opponents": "对手球员",
+      "insights": "球探洞察",
+      "messages": "团队消息",
+      "comments": "评论",
+      "goTo": "前往"
+    }
   },
   "gameStats": {
     "gameLeaders": "本场领袖",

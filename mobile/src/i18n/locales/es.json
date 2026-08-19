@@ -2637,7 +2637,17 @@
     "placeholder": "Buscar",
     "seeAll": "Ver los {{count}}",
     "title": "Buscar",
-    "typeToSearch": "Escribe para buscar en todo"
+    "typeToSearch": "Escribe para buscar en todo",
+    "groups": {
+      "packets": "Paquetes de Partido",
+      "film": "Análisis de Vídeo",
+      "gameReports": "Informes de Partido",
+      "opponents": "Jugadores Rivales",
+      "insights": "Hallazgos de Ojeo",
+      "messages": "Mensajes del Staff",
+      "comments": "Comentarios",
+      "goTo": "Ir a"
+    }
   },
   "gameStats": {
     "gameLeaders": "Líderes del partido",

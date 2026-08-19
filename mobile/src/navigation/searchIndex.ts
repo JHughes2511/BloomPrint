@@ -74,6 +74,11 @@ export function matchIndex(term: string, limit = 6): SearchResults | null {
   const games = take(index.games ?? [], (g: any) =>
     hit(q, g.title, g.opponent_name, g.opponent_a_name, g.output_type));
   const scouting = take(index.scouting ?? [], (s: any) => hit(q, s.opponent_name, s.location));
+  const film = take(index.film ?? [], (f: any) => hit(q, f.title, f.output_type));
+  const gameReports = take(index.game_reports ?? [], (r: any) => hit(q, r.opponent_name));
+  const opponents = take(index.opponents ?? [], (o: any) =>
+    hit(q, o.player_name, o.opponent_name, o.position, o.jersey_number));
+  const insights = take(index.insights ?? [], (i: any) => hit(q, i.team_name, i.subject));
 
   return {
     players: players.rows,
@@ -83,10 +88,16 @@ export function matchIndex(term: string, limit = 6): SearchResults | null {
     team_reports: teamReports.rows,
     games: games.rows,
     scouting: scouting.rows,
+    film: film.rows,
+    game_reports: gameReports.rows,
+    opponents: opponents.rows,
+    insights: insights.rows,
     totals: {
       players: players.total, teams: teams.total, reports: reports.total,
       training: training.total, team_reports: teamReports.total,
       games: games.total, scouting: scouting.total,
+      film: film.total, game_reports: gameReports.total,
+      opponents: opponents.total, insights: insights.total,
     },
   };
 }

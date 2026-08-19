@@ -2637,7 +2637,17 @@
     "placeholder": "खोजें",
     "seeAll": "सभी {{count}} देखें",
     "title": "खोज",
-    "typeToSearch": "सब कुछ खोजने के लिए टाइप करें"
+    "typeToSearch": "सब कुछ खोजने के लिए टाइप करें",
+    "groups": {
+      "packets": "मैच पैकेट",
+      "film": "फ़िल्म विश्लेषण",
+      "gameReports": "मैच रिपोर्ट",
+      "opponents": "प्रतिद्वंद्वी खिलाड़ी",
+      "insights": "स्काउट अंतर्दृष्टि",
+      "messages": "स्टाफ़ संदेश",
+      "comments": "टिप्पणियाँ",
+      "goTo": "यहाँ जाएँ"
+    }
   },
   "gameStats": {
     "gameLeaders": "मैच के अग्रणी",

@@ -2637,7 +2637,17 @@
     "placeholder": "Szukaj",
     "seeAll": "Zobacz wszystkie ({{count}})",
     "title": "Szukaj",
-    "typeToSearch": "Wpisz, aby przeszukać wszystko"
+    "typeToSearch": "Wpisz, aby przeszukać wszystko",
+    "groups": {
+      "packets": "Pakiety meczowe",
+      "film": "Analizy wideo",
+      "gameReports": "Raporty meczowe",
+      "opponents": "Zawodnicy rywala",
+      "insights": "Spostrzeżenia skautingowe",
+      "messages": "Wiadomości sztabu",
+      "comments": "Komentarze",
+      "goTo": "Przejdź do"
+    }
   },
   "gameStats": {
     "gameLeaders": "Najlepsi w meczu",

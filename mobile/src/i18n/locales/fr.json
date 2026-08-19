@@ -2637,7 +2637,17 @@
     "placeholder": "Rechercher",
     "seeAll": "Voir les {{count}}",
     "title": "Recherche",
-    "typeToSearch": "Tapez pour tout rechercher"
+    "typeToSearch": "Tapez pour tout rechercher",
+    "groups": {
+      "packets": "Dossiers de match",
+      "film": "Analyses vidéo",
+      "gameReports": "Rapports de match",
+      "opponents": "Joueurs adverses",
+      "insights": "Observations de détection",
+      "messages": "Messages du staff",
+      "comments": "Commentaires",
+      "goTo": "Aller à"
+    }
   },
   "gameStats": {
     "gameLeaders": "Meilleurs joueurs",

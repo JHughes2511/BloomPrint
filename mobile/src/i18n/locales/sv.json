@@ -2637,7 +2637,17 @@
     "placeholder": "Sök",
     "seeAll": "Visa alla {{count}}",
     "title": "Sök",
-    "typeToSearch": "Skriv för att söka i allt"
+    "typeToSearch": "Skriv för att söka i allt",
+    "groups": {
+      "packets": "Matchpaket",
+      "film": "Filmanalyser",
+      "gameReports": "Matchrapporter",
+      "opponents": "Motståndarspelare",
+      "insights": "Scoutinginsikter",
+      "messages": "Personalmeddelanden",
+      "comments": "Kommentarer",
+      "goTo": "Gå till"
+    }
   },
   "gameStats": {
     "gameLeaders": "Matchens bästa",

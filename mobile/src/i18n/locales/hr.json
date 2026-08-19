@@ -2637,7 +2637,17 @@
     "placeholder": "Pretraži",
     "seeAll": "Prikaži sve ({{count}})",
     "title": "Pretraga",
-    "typeToSearch": "Upišite za pretragu svega"
+    "typeToSearch": "Upišite za pretragu svega",
+    "groups": {
+      "packets": "Paketi utakmica",
+      "film": "Analize snimaka",
+      "gameReports": "Izvještaji o utakmicama",
+      "opponents": "Igrači protivnika",
+      "insights": "Skautski uvidi",
+      "messages": "Poruke stožera",
+      "comments": "Komentari",
+      "goTo": "Idi na"
+    }
   },
   "gameStats": {
     "gameLeaders": "Najbolji igrači",

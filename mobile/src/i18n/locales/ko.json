@@ -2637,7 +2637,17 @@
     "placeholder": "검색",
     "seeAll": "전체 보기 ({{count}})",
     "title": "검색",
-    "typeToSearch": "입력하여 전체 검색"
+    "typeToSearch": "입력하여 전체 검색",
+    "groups": {
+      "packets": "경기 패킷",
+      "film": "영상 분석",
+      "gameReports": "경기 리포트",
+      "opponents": "상대 선수",
+      "insights": "스카우팅 인사이트",
+      "messages": "스태프 메시지",
+      "comments": "댓글",
+      "goTo": "이동"
+    }
   },
   "gameStats": {
     "gameLeaders": "경기 리더",

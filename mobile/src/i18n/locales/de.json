@@ -2637,7 +2637,17 @@
     "placeholder": "Suchen",
     "seeAll": "Alle {{count}} anzeigen",
     "title": "Suche",
-    "typeToSearch": "Tippen, um alles zu durchsuchen"
+    "typeToSearch": "Tippen, um alles zu durchsuchen",
+    "groups": {
+      "packets": "Spielpakete",
+      "film": "Filmanalysen",
+      "gameReports": "Spielberichte",
+      "opponents": "Gegnerspieler",
+      "insights": "Scouting-Erkenntnisse",
+      "messages": "Team-Nachrichten",
+      "comments": "Kommentare",
+      "goTo": "Gehe zu"
+    }
   },
   "gameStats": {
     "gameLeaders": "Beste Spieler",

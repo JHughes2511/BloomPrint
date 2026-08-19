@@ -2637,7 +2637,17 @@
     "placeholder": "Ara",
     "seeAll": "Tümünü gör ({{count}})",
     "title": "Arama",
-    "typeToSearch": "Her şeyde aramak için yazın"
+    "typeToSearch": "Her şeyde aramak için yazın",
+    "groups": {
+      "packets": "Maç Paketleri",
+      "film": "Video Analizleri",
+      "gameReports": "Maç Raporları",
+      "opponents": "Rakip Oyuncular",
+      "insights": "Gözlem Notları",
+      "messages": "Ekip Mesajları",
+      "comments": "Yorumlar",
+      "goTo": "Şuraya git"
+    }
   },
   "gameStats": {
     "gameLeaders": "Maçın liderleri",

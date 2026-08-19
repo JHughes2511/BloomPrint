@@ -2637,7 +2637,17 @@
     "placeholder": "Maghanap",
     "seeAll": "Tingnan lahat ({{count}})",
     "title": "Maghanap",
-    "typeToSearch": "Mag-type para maghanap sa lahat"
+    "typeToSearch": "Mag-type para maghanap sa lahat",
+    "groups": {
+      "packets": "Mga Game Packet",
+      "film": "Mga Film Breakdown",
+      "gameReports": "Mga Ulat ng Laro",
+      "opponents": "Mga Manlalaro ng Kalaban",
+      "insights": "Mga Scout Insight",
+      "messages": "Mga Mensahe ng Staff",
+      "comments": "Mga Komento",
+      "goTo": "Pumunta sa"
+    }
   },
   "gameStats": {
     "gameLeaders": "Mga nangunguna",

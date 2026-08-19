@@ -144,7 +144,7 @@ export default function Sidebar({ state, descriptors, navigation }: BottomTabBar
     (navigation as any).navigate(tab, { screen, params });
   };
 
-  const groups = buildSearchGroups(results, tr, go, setCurrentTeamId);
+  const groups = buildSearchGroups(results, tr, go, setCurrentTeamId, query);
 
   return (
     <View style={s.rail}>

@@ -2637,7 +2637,17 @@
     "placeholder": "Search",
     "seeAll": "See all {{count}}",
     "title": "Search",
-    "typeToSearch": "Type to search across everything"
+    "typeToSearch": "Type to search across everything",
+    "groups": {
+      "packets": "Game Packets",
+      "film": "Film Breakdowns",
+      "gameReports": "Game Reports",
+      "opponents": "Opponent Players",
+      "insights": "Scout Insights",
+      "messages": "Staff Messages",
+      "comments": "Comments",
+      "goTo": "Go To"
+    }
   },
   "gameStats": {
     "gameLeaders": "Game Leaders",

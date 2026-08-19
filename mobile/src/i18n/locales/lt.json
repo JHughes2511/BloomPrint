@@ -2637,7 +2637,17 @@
     "placeholder": "Ieškoti",
     "seeAll": "Rodyti visus ({{count}})",
     "title": "Paieška",
-    "typeToSearch": "Rašykite, kad ieškotumėte visur"
+    "typeToSearch": "Rašykite, kad ieškotumėte visur",
+    "groups": {
+      "packets": "Rungtynių paketai",
+      "film": "Vaizdo analizės",
+      "gameReports": "Rungtynių ataskaitos",
+      "opponents": "Varžovų žaidėjai",
+      "insights": "Skautavimo įžvalgos",
+      "messages": "Personalo žinutės",
+      "comments": "Komentarai",
+      "goTo": "Eiti į"
+    }
   },
   "gameStats": {
     "gameLeaders": "Rungtynių lyderiai",

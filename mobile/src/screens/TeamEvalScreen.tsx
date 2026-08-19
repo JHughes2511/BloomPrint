@@ -1038,7 +1038,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // game inside it, and the tab within that game. Done in one place rather than
   // in every button that moves — a press that set one param while another
   // cleared it left the address describing a page nobody was on.
+  //
+  // Not on the first render. On arrival the address already says where the
+  // coach is going, and writing over it describes where they merely landed —
+  // the default view, before anything that was asked for has been carried out.
+  // The restore effects below then read that back as the request, and the
+  // request loses. Measured: opening an opponent's scouting page from search
+  // put the coach on the dashboard, and asking for the playbook opened
+  // nothing. The screen has nothing to say about a page it has not drawn yet.
+  const synced = useRef(false);
   useEffect(() => {
+    if (!synced.current) { synced.current = true; return; }
     const inGame = activeView === 'detail' && !!detailGame;
     navigation.setParams?.({
       view: activeView === 'live' ? undefined : activeView,
@@ -1054,19 +1064,32 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     });
   }, [activeView, detailGame?.id, detailTab, scoutOpponent, gameReportGame?.id]);
 
-  const restoredScout = useRef(false);
+  // These remember WHICH one they opened, not merely that they ran once.
+  //
+  // A single boolean was enough while the only caller was a page reload, where
+  // the param is read once and never changes. Search made it wrong: picking a
+  // scouted team from the sidebar, then picking a different one, asked for the
+  // second with the flag already set, and the screen sat on the first — the
+  // result opening nothing, which reads as search being broken.
+  //
+  // Holding the value keeps the loop these guards exist to prevent shut: the
+  // URL sync writes back the same value that was just handled, which is no
+  // longer new, so nothing re-opens.
+  const restoredScout = useRef<string | null>(null);
   useEffect(() => {
-    const name = route?.params?.scout;
-    if (!name || restoredScout.current || scoutOpponent) return;
-    restoredScout.current = true;
-    void openScout(String(name));
+    const name = route?.params?.scout ? String(route.params.scout) : null;
+    if (!name || restoredScout.current === name) return;
+    restoredScout.current = name;
+    if (scoutOpponent === name) return;
+    void openScout(name);
   }, [route?.params?.scout]);
 
-  const restoredReport = useRef(false);
+  const restoredReport = useRef<number | null>(null);
   useEffect(() => {
     const rid = Number(route?.params?.report);
-    if (!rid || restoredReport.current || gameReportGame) return;
-    restoredReport.current = true;
+    if (!rid || restoredReport.current === rid) return;
+    restoredReport.current = rid;
+    if (gameReportGame?.id === rid) return;
     (async () => {
       try {
         openGameReport(await gameEvalAPI.getSession(rid));
@@ -1079,9 +1102,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   }, [route?.params?.report]);
 
   // And the tab it was holding, restored on a fresh load.
+  // Deliberately once, unlike the two above: `view` is written back by this
+  // screen as the coach moves around, so reading it as an instruction every
+  // time it changes is the screen taking dictation from itself. Measured — the
+  // page died with a maximum-update-depth error. Asking for a view from
+  // elsewhere goes through `openView`, which is cleared once it is carried out.
   const restoredView = useRef(false);
   useEffect(() => {
-    const v = route?.params?.view;
+    const v = route?.params?.view ? String(route.params.view) : null;
     if (!v || restoredView.current) return;
     restoredView.current = true;
     if (['dashboard', 'games', 'scout', 'gamereport'].includes(v)) setActiveView(v as ViewKey);
@@ -1113,7 +1141,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // the New Game form), openPlaybook (the whiteboard playbook).
   useFocusEffect(useCallback(() => {
     const p = route?.params ?? {};
-    if (!p.openView && !p.openNewGame && !p.openPlaybook) return;
+    if (!p.openView && !p.openNewGame && !p.openPlaybook && !p.openScoutTeam) return;
     if (p.openView && ['dashboard', 'games', 'scout', 'gamereport'].includes(p.openView)) {
       setActiveView(p.openView as ViewKey);
     }
@@ -1122,8 +1150,18 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       setShowNewGame(true);
     }
     if (p.openPlaybook) setWhiteboardPlaybook(true);
-    navigation?.setParams?.({ openView: undefined, openNewGame: undefined, openPlaybook: undefined });
-  }, [route?.params?.openView, route?.params?.openNewGame, route?.params?.openPlaybook]));
+    // Which scouted team to open, said as an instruction rather than through
+    // `scout`. `scout` is the address bar's mirror of where the coach already
+    // is, and this screen wipes it on arrival — it is not on the scout view
+    // yet, so it writes "no team scouted" over the request before anything
+    // reads it. Measured: picking an opponent's player out of search landed on
+    // the dashboard. An instruction that clears itself cannot be overwritten
+    // by the mirror, because the mirror is not where it lives.
+    if (p.openScoutTeam) void openScout(String(p.openScoutTeam));
+    navigation?.setParams?.({ openView: undefined, openNewGame: undefined,
+                             openPlaybook: undefined, openScoutTeam: undefined });
+  }, [route?.params?.openView, route?.params?.openNewGame, route?.params?.openPlaybook,
+      route?.params?.openScoutTeam]));
 
   // A frozen game is filed in my account but is a record of somebody else's
   // night: it is read-only, so every edit affordance is off for it too.

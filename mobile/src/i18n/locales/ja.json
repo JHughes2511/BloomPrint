@@ -2637,7 +2637,17 @@
     "placeholder": "検索",
     "seeAll": "すべて表示（{{count}}件）",
     "title": "検索",
-    "typeToSearch": "入力してすべてを検索"
+    "typeToSearch": "入力してすべてを検索",
+    "groups": {
+      "packets": "試合パケット",
+      "film": "映像分析",
+      "gameReports": "試合レポート",
+      "opponents": "相手選手",
+      "insights": "スカウト所見",
+      "messages": "スタッフメッセージ",
+      "comments": "コメント",
+      "goTo": "移動"
+    }
   },
   "gameStats": {
     "gameLeaders": "ゲームリーダー",

@@ -69,7 +69,7 @@ export default function SearchResultsScreen() {
   const go = (tab: string, screen: string, params: Record<string, unknown>) => {
     navigation.navigate(tab, { screen, params });
   };
-  const groups = buildSearchGroups(results, tr, go, setCurrentTeamId);
+  const groups = buildSearchGroups(results, tr, go, setCurrentTeamId, query);
 
   return (
     <ScreenBackground>

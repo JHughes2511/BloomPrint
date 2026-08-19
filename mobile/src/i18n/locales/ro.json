@@ -2637,7 +2637,17 @@
     "placeholder": "Caută",
     "seeAll": "Vezi toate ({{count}})",
     "title": "Căutare",
-    "typeToSearch": "Scrie pentru a căuta în tot"
+    "typeToSearch": "Scrie pentru a căuta în tot",
+    "groups": {
+      "packets": "Pachete de meci",
+      "film": "Analize video",
+      "gameReports": "Rapoarte de meci",
+      "opponents": "Jucătorii adversarului",
+      "insights": "Observații de scouting",
+      "messages": "Mesaje ale staffului",
+      "comments": "Comentarii",
+      "goTo": "Mergi la"
+    }
   },
   "gameStats": {
     "gameLeaders": "Lideri de meci",

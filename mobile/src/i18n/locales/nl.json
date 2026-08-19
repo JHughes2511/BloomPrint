@@ -2637,7 +2637,17 @@
     "placeholder": "Zoeken",
     "seeAll": "Bekijk alle {{count}}",
     "title": "Zoeken",
-    "typeToSearch": "Typ om alles te doorzoeken"
+    "typeToSearch": "Typ om alles te doorzoeken",
+    "groups": {
+      "packets": "Wedstrijdpakketten",
+      "film": "Beeldanalyses",
+      "gameReports": "Wedstrijdrapporten",
+      "opponents": "Tegenstanders",
+      "insights": "Scoutinginzichten",
+      "messages": "Stafberichten",
+      "comments": "Reacties",
+      "goTo": "Ga naar"
+    }
   },
   "gameStats": {
     "gameLeaders": "Toppers",

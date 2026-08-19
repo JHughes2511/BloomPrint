@@ -2637,7 +2637,17 @@
     "placeholder": "חיפוש",
     "seeAll": "הצג את כל {{count}}",
     "title": "חיפוש",
-    "typeToSearch": "הקלד כדי לחפש בכל"
+    "typeToSearch": "הקלד כדי לחפש בכל",
+    "groups": {
+      "packets": "חבילות משחק",
+      "film": "ניתוחי וידאו",
+      "gameReports": "דוחות משחק",
+      "opponents": "שחקני היריב",
+      "insights": "תובנות סקאוטינג",
+      "messages": "הודעות צוות",
+      "comments": "תגובות",
+      "goTo": "מעבר אל"
+    }
   },
   "gameStats": {
     "gameLeaders": "מובילי המשחק",

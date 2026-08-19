@@ -2637,7 +2637,17 @@
     "placeholder": "بحث",
     "seeAll": "عرض الكل ({{count}})",
     "title": "بحث",
-    "typeToSearch": "اكتب للبحث في كل شيء"
+    "typeToSearch": "اكتب للبحث في كل شيء",
+    "groups": {
+      "packets": "حزم المباريات",
+      "film": "تحليلات الفيديو",
+      "gameReports": "تقارير المباريات",
+      "opponents": "لاعبو الخصم",
+      "insights": "رؤى الاستكشاف",
+      "messages": "رسائل الطاقم",
+      "comments": "التعليقات",
+      "goTo": "الانتقال إلى"
+    }
   },
   "gameStats": {
     "gameLeaders": "أبرز اللاعبين",
