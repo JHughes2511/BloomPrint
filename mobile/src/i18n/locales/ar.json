@@ -2287,7 +2287,8 @@
     "removeSharedGameTitle": "إزالة المباراة المشتركة",
     "removeSharedGameMessage": "إزالة هذه المباراة من قائمتك؟ تبقى لدى {{name}} — يتغيّر عرضك أنت فقط.",
     "removeFromMyGames": "إزالة من مبارياتي",
-    "frozenFromCoach": "من {{name}} · لم يعد يُحدَّث"
+    "frozenFromCoach": "من {{name}} · لم يعد يُحدَّث",
+    "searchTeamsPlaceholder": "ابحث عن الفرق..."
   },
   "whiteboard": {
     "title": "السبورة",

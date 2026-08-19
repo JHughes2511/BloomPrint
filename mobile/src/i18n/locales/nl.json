@@ -2287,7 +2287,8 @@
     "removeSharedGameTitle": "Gedeelde wedstrijd verwijderen",
     "removeSharedGameMessage": "Deze wedstrijd van je lijst halen? Hij blijft bij {{name}} — alleen jouw weergave verandert.",
     "removeFromMyGames": "Uit mijn wedstrijden verwijderen",
-    "frozenFromCoach": "Van {{name}} · wordt niet meer bijgewerkt"
+    "frozenFromCoach": "Van {{name}} · wordt niet meer bijgewerkt",
+    "searchTeamsPlaceholder": "Teams zoeken..."
   },
   "whiteboard": {
     "title": "Tactiekbord",

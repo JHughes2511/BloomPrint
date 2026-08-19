@@ -2287,7 +2287,8 @@
     "removeSharedGameTitle": "共有された試合を削除",
     "removeSharedGameMessage": "この試合をリストから外しますか？{{name}} 側には残り、あなたの表示だけが変わります。",
     "removeFromMyGames": "自分の試合から外す",
-    "frozenFromCoach": "{{name}} から · 更新は止まりました"
+    "frozenFromCoach": "{{name}} から · 更新は止まりました",
+    "searchTeamsPlaceholder": "チームを検索..."
   },
   "whiteboard": {
     "title": "ホワイトボード",

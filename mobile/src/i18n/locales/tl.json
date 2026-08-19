@@ -2287,7 +2287,8 @@
     "removeSharedGameTitle": "Alisin ang ibinahaging laro",
     "removeSharedGameMessage": "Alisin ang laro sa listahan mo? Nananatili ito kay {{name}} — ang view mo lang ang magbabago.",
     "removeFromMyGames": "Alisin sa aking mga laro",
-    "frozenFromCoach": "Mula kay {{name}} · hindi na nag-a-update"
+    "frozenFromCoach": "Mula kay {{name}} · hindi na nag-a-update",
+    "searchTeamsPlaceholder": "Maghanap ng koponan..."
   },
   "whiteboard": {
     "title": "Whiteboard",

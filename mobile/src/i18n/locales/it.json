@@ -2287,7 +2287,8 @@
     "removeSharedGameTitle": "Rimuovi partita condivisa",
     "removeSharedGameMessage": "Togliere questa partita dal tuo elenco? Resta a {{name}}: cambia solo la tua vista.",
     "removeFromMyGames": "Rimuovi dalle mie partite",
-    "frozenFromCoach": "Da {{name}} · non si aggiorna più"
+    "frozenFromCoach": "Da {{name}} · non si aggiorna più",
+    "searchTeamsPlaceholder": "Cerca squadre..."
   },
   "whiteboard": {
     "title": "Lavagna",

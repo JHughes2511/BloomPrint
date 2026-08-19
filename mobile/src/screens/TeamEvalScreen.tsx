@@ -20,6 +20,7 @@ import type { ScoutInsightOut } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
+import ListSearchHeader from '../components/ListSearchHeader';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { formatForLevel, periodLabel, weightBucket, periodForBucket, formatClock, type GameFormat } from '../utils/gameClock';
@@ -349,6 +350,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [showScoutingReport, setShowScoutingReport] = useState(false);
   const [gameReportGame, setGameReportGame] = useState<any>(null);
   const [gameReportSearch, setGameReportSearch] = useState('');
+  const [scoutSearch, setScoutSearch] = useState('');
   const [loadingGameReport, setLoadingGameReport] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportingCsv, setExportingCsv] = useState(false);
@@ -1820,6 +1822,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     for (const tm of teams as any[]) add(tm.name);
     return [...names.values()].sort((a, b) => a.localeCompare(b));
   }, [sessions, teams]);
+
+  /** The teams the Scout picker shows, narrowed by what was typed. */
+  const scoutTeamsShown = React.useMemo(() => {
+    const q = norm(scoutSearch);
+    return q ? scoutableTeams.filter(n => norm(n).includes(q)) : scoutableTeams;
+  }, [scoutableTeams, scoutSearch]);
 
   /**
    * Which nav chip is lit.
@@ -3315,15 +3323,22 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           {/* Opponent selector */}
           {!scoutOpponent ? (
             <>
-              <Text style={[s.cardLabel, { marginBottom: 10 }]}>{tr('teamGrade.selectTeam')}</Text>
-              {scoutableTeams.length === 0 ? (
+              <ListSearchHeader
+                title={tr('teamGrade.selectTeam')}
+                titleStyle={s.cardLabel}
+                value={scoutSearch}
+                onChange={setScoutSearch}
+                placeholder={tr('teamGrade.searchTeamsPlaceholder')}
+              />
+              <View style={{ height: 10 }} />
+              {scoutTeamsShown.length === 0 ? (
             <View style={[s.card, { alignItems: 'center' }]}>
                   <Text style={{ color: t.muted, fontSize: 13 }}>{tr('teamGrade.noOpponents')}</Text>
                 </View>
               ) : (
                 <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: scoutGrid.gap, paddingHorizontal: 16 })}
                       ref={scoutGrid.ref} onLayout={scoutGrid.onLayout}>
-                {scoutableTeams.map(opp => (
+                {scoutTeamsShown.map(opp => (
                   <TouchableOpacity key={opp} style={[s.gameCard, scoutGrid.cardWidth ? { width: scoutGrid.cardWidth } : null]} onPress={() => openScout(opp)}>
                     <Text style={s.gameCardOpponent}>{opp}</Text>
                     <Text style={{ color: t.muted, fontSize: 12 }}>
@@ -3545,41 +3560,19 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         <KeyboardAwareScrollView ref={findGameReport.scrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
           {!gameReportGame ? (
             <>
-              {/* The title, and a way to find a game, on one line. A season
-                  runs to dozens of games and the picker is a grid of them. */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-                <Text style={{ flex: 1, color: t.ink, fontSize: 22, fontFamily: fonts[900] }}>
-                  {tr('reportTypes.game_report')}
-                </Text>
-                <View style={{
-                  flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 1,
-                  width: '100%', maxWidth: 260,
-                  paddingHorizontal: 10, paddingVertical: 7, borderRadius: 10,
-                  borderWidth: 1, borderColor: t.line, backgroundColor: t.card,
-                }}>
-                  <Ionicons name="search" size={14} color={t.muted} />
-                  <TextInput
-                    value={gameReportSearch}
-                    onChangeText={setGameReportSearch}
-                    placeholder={tr('staffHub.searchGamesPlaceholder')}
-                    placeholderTextColor={t.muted2}
-                    style={{
-                      flex: 1, minWidth: 0, color: t.ink, fontSize: 13, paddingVertical: 2,
-                      ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null),
-                    }}
-                  />
-                  {!!gameReportSearch && (
-                    <TouchableOpacity onPress={() => setGameReportSearch('')}
-                                      accessibilityLabel={tr('common.close')}
-                                      style={{ padding: 2 }}>
-                      <Ionicons name="close" size={14} color={t.muted} />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </View>
-              <Text style={{ color: t.muted2, fontSize: 13, marginBottom: 12 }}>
-                {tr('teamGrade.gameReportPickHint')}
-              </Text>
+              <ListSearchHeader
+                title={tr('reportTypes.game_report')}
+                titleStyle={{ color: t.ink, fontSize: 22, fontFamily: fonts[900] }}
+                value={gameReportSearch}
+                onChange={setGameReportSearch}
+                placeholder={tr('staffHub.searchGamesPlaceholder')}
+                subtitle={(
+                  <Text style={{ color: t.muted2, fontSize: 13, marginTop: 4 }}>
+                    {tr('teamGrade.gameReportPickHint')}
+                  </Text>
+                )}
+              />
+              <View style={{ height: 12 }} />
               {sessions.length === 0 && (
                 <Text style={{ color: t.muted2, fontSize: 13 }}>{tr('teamGrade.noGamesYet')}</Text>
               )}

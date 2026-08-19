@@ -2287,7 +2287,8 @@
     "removeSharedGameTitle": "Paylaşılan maçı kaldır",
     "removeSharedGameMessage": "Bu maç listenden kaldırılsın mı? {{name}} tarafında kalır — yalnızca senin görünümün değişir.",
     "removeFromMyGames": "Maçlarımdan kaldır",
-    "frozenFromCoach": "{{name}} kaynaklı · artık güncellenmiyor"
+    "frozenFromCoach": "{{name}} kaynaklı · artık güncellenmiyor",
+    "searchTeamsPlaceholder": "Takım ara..."
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

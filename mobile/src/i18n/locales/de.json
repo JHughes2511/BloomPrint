@@ -2287,7 +2287,8 @@
     "removeSharedGameTitle": "Geteiltes Spiel entfernen",
     "removeSharedGameMessage": "Dieses Spiel von deiner Liste nehmen? Es bleibt bei {{name}} — nur deine Ansicht ändert sich.",
     "removeFromMyGames": "Aus meinen Spielen entfernen",
-    "frozenFromCoach": "Von {{name}} · wird nicht mehr aktualisiert"
+    "frozenFromCoach": "Von {{name}} · wird nicht mehr aktualisiert",
+    "searchTeamsPlaceholder": "Teams suchen..."
   },
   "whiteboard": {
     "title": "Taktiktafel",

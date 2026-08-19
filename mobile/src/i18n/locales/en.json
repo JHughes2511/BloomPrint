@@ -2287,7 +2287,8 @@
     "removeSharedGameTitle": "Remove Shared Game",
     "removeSharedGameMessage": "Take this game off your list? It stays with {{name}} — only your view changes.",
     "removeFromMyGames": "Remove from my games",
-    "frozenFromCoach": "From {{name}} · no longer updating"
+    "frozenFromCoach": "From {{name}} · no longer updating",
+    "searchTeamsPlaceholder": "Search teams..."
   },
   "whiteboard": {
     "title": "Whiteboard",
