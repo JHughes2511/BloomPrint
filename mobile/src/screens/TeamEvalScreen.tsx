@@ -348,6 +348,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [generatingReport, setGeneratingReport] = useState(false);
   const [showScoutingReport, setShowScoutingReport] = useState(false);
   const [gameReportGame, setGameReportGame] = useState<any>(null);
+  const [gameReportSearch, setGameReportSearch] = useState('');
   const [loadingGameReport, setLoadingGameReport] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportingCsv, setExportingCsv] = useState(false);
@@ -1856,6 +1857,23 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   useBackStep(!!scoutOpponent, () => { setScoutOpponent(null); setScoutData(null); });
   useBackStep(!!scoutPlayer, () => setScoutPlayer(null));
   useBackStep(!!gameReportGame, () => setGameReportGame(null));
+
+  /**
+   * The games the Game Report picker shows, narrowed by what was typed.
+   *
+   * Either side of the scoreboard: a team is a team whichever bench it was on,
+   * so "Angola" finds Angola vs Mali and Duke vs Angola alike — the same rule
+   * Scout reads by.
+   */
+  const gameReportGames = React.useMemo(() => {
+    const q = norm(gameReportSearch);
+    if (!q) return sessions as any[];
+    const nameOf = (g: any) => g.team_name
+      ?? (teams as any[]).find(tm => tm.id === g.team_id)?.name
+      ?? coach?.program_name ?? '';
+    return (sessions as any[]).filter((g: any) =>
+      norm(nameOf(g)).includes(q) || norm(g.opponent_name ?? '').includes(q));
+  }, [sessions, teams, coach, gameReportSearch]);
 
   /** Games this team played, on either side of the scoreboard. */
   const gamesInvolving = (name: string) => (sessions as any[]).filter((g: any) =>
@@ -3527,12 +3545,46 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         <KeyboardAwareScrollView ref={findGameReport.scrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
           {!gameReportGame ? (
             <>
-              <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900], marginBottom: 4 }}>{tr('reportTypes.game_report')}</Text>
+              {/* The title, and a way to find a game, on one line. A season
+                  runs to dozens of games and the picker is a grid of them. */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 4 }}>
+                <Text style={{ flex: 1, color: t.ink, fontSize: 22, fontFamily: fonts[900] }}>
+                  {tr('reportTypes.game_report')}
+                </Text>
+                <View style={{
+                  flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 1,
+                  width: '100%', maxWidth: 260,
+                  paddingHorizontal: 10, paddingVertical: 7, borderRadius: 10,
+                  borderWidth: 1, borderColor: t.line, backgroundColor: t.card,
+                }}>
+                  <Ionicons name="search" size={14} color={t.muted} />
+                  <TextInput
+                    value={gameReportSearch}
+                    onChangeText={setGameReportSearch}
+                    placeholder={tr('staffHub.searchGamesPlaceholder')}
+                    placeholderTextColor={t.muted2}
+                    style={{
+                      flex: 1, minWidth: 0, color: t.ink, fontSize: 13, paddingVertical: 2,
+                      ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null),
+                    }}
+                  />
+                  {!!gameReportSearch && (
+                    <TouchableOpacity onPress={() => setGameReportSearch('')}
+                                      accessibilityLabel={tr('common.close')}
+                                      style={{ padding: 2 }}>
+                      <Ionicons name="close" size={14} color={t.muted} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
               <Text style={{ color: t.muted2, fontSize: 13, marginBottom: 12 }}>
                 {tr('teamGrade.gameReportPickHint')}
               </Text>
               {sessions.length === 0 && (
                 <Text style={{ color: t.muted2, fontSize: 13 }}>{tr('teamGrade.noGamesYet')}</Text>
+              )}
+              {sessions.length > 0 && gameReportGames.length === 0 && (
+                <Text style={{ color: t.muted2, fontSize: 13 }}>{tr('teamGrade.noOpponents')}</Text>
               )}
               <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap, paddingHorizontal: 16 })}
                     ref={reportGrid.ref} onLayout={reportGrid.onLayout}>
@@ -3540,7 +3592,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   "83-72"; a bare W beside them says nothing the two numbers do
                   not, and without a team on it there was no way to tell whose
                   W it was. */}
-              {sessions.map((g: any) => (
+              {gameReportGames.map((g: any) => (
                 <TouchableOpacity key={g.id} style={[s.gameCard, reportGrid.cardWidth ? { width: reportGrid.cardWidth } : null]} onPress={() => openGameReport(g)}>
                   <View style={{ flex: 1 }}>
                     <Text style={{ color: t.ink, fontSize: 15, fontFamily: fonts[700] }}>{matchupLabel(g)}</Text>
