@@ -866,6 +866,14 @@ export default function StaffInboxScreen() {
                 style={styles.fullDataBtn}
                 onPress={() => {
                   const gid = activeGame.id;
+                  // Give up the history entry this sheet is holding BEFORE
+                  // leaving. Closing it normally schedules a history.back() to
+                  // spend that entry, which is right when the page stays put
+                  // and wrong here: the navigation pushes its own entry first,
+                  // so the queued back lands on the sheet's and puts the coach
+                  // straight back on the Staff Hub they just left. See
+                  // abandonSheetHistory.
+                  abandonSheetHistory();
                   setActiveGame(null);
                   navigation.navigate('TeamEvalTab', { screen: 'TeamEval', params: { openGameId: gid } });
                 }}
