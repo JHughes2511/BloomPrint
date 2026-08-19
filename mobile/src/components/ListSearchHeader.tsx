@@ -86,13 +86,24 @@ export default function ListSearchHeader({
               if (open) onChange('');
               setOpen(o => !o);
             }}
-            style={{
-              padding: 8, borderRadius: 8, borderWidth: 1,
+            // The frame is light beside a heading; the target is not.
+            //
+            // The padding here is the target and the border below is the
+            // frame, so the square a coach sees is small and the area that
+            // answers a thumb is not. hitSlop would have been the obvious way
+            // and does nothing on the web — measured: a press six pixels
+            // outside the box did not open the search. The negative margin
+            // gives the padding back to the layout, so the frame still sits
+            // where it looks like it sits.
+            style={{ padding: 8, margin: -8 }}
+          >
+            <View style={{
+              padding: 5, borderRadius: 7, borderWidth: 1,
               borderColor: open ? t.accent : t.line,
               backgroundColor: open ? t.accentSoft : 'transparent',
-            }}
-          >
-            <Ionicons name="search-outline" size={16} color={open ? t.accent : t.muted} />
+            }}>
+              <Ionicons name="search-outline" size={15} color={open ? t.accent : t.muted} />
+            </View>
           </TouchableOpacity>
         ) : field({ width: '100%', maxWidth: 260, flexShrink: 1 })}
       </View>
