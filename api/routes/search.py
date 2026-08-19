@@ -84,6 +84,27 @@ def _shared_ids(db: Session, coach: models.Coach, *kinds: str) -> set[int]:
     return {r.report_id for r in rows}
 
 
+def _game_scope(coach: models.Coach, team_ids: set[int]):
+    """The condition for a tracked game this coach can open.
+
+    Written as a condition rather than a set of ids so it can be joined onto
+    the things that hang off a game — the written report, the whiteboard — and
+    let the database do the narrowing. Collecting ids first works until a coach
+    has a season of games and every search sends a thousand of them back down
+    as an IN list.
+    """
+    return or_(models.GameSession.coach_id == coach.id,
+               models.GameSession.team_id.in_(team_ids) if team_ids
+               else models.GameSession.id.is_(None))
+
+
+def _packet_scope(coach: models.Coach, shared_packets: set[int]):
+    """The same, for a report packet: their own, or one shared with them."""
+    return or_(models.GameReport.coach_id == coach.id,
+               models.GameReport.id.in_(shared_packets) if shared_packets
+               else models.GameReport.id.is_(None))
+
+
 def _page(query, limit: int):
     """A group's rows plus how many there are in total, for "see all N".
 
@@ -110,6 +131,8 @@ def search(
     if not term:
         return {"query": term, "players": [], "teams": [], "reports": [],
                 "training": [], "team_reports": [], "games": [], "scouting": [],
+                "film": [], "game_reports": [], "opponents": [], "insights": [],
+                "messages": [], "staff_comments": [], "comments": [],
                 "totals": {}}
 
     # One letter answers from names only. It is the first keystroke of a name
@@ -248,11 +271,167 @@ def search(
     )
     scouting, scouting_n = _page(scouting_q, limit)
 
+    # ── The long documents ────────────────────────────────────────────────────
+    # A film breakdown and a game's written report are the two biggest pieces
+    # of writing the app produces, and neither was searchable: a coach who
+    # remembered a phrase from one had no way back to it but to open packets
+    # until they found the right one.
+    film_q = (
+        db.query(models.GameReportClip)
+        .join(models.GameReport,
+              models.GameReportClip.game_report_id == models.GameReport.id)
+        .filter(models.GameReportClip.analysis_text.isnot(None))
+        .filter(_packet_scope(coach, shared_packets))
+        .filter(or_(
+            models.GameReportClip.team_name.ilike(pattern, escape="\\"),
+            models.GameReportClip.output_type.ilike(pattern, escape="\\"),
+            models.GameReportClip.analysis_text.ilike(pattern, escape="\\") if deep else false(),
+        ))
+        .order_by(models.GameReportClip.id.desc())
+    )
+    film, film_n = _page(film_q, limit)
+
+    # The report written off a tracked game. Matched on the opponent's name as
+    # well as the body, because "the Egypt report" is what a coach calls it —
+    # the row itself carries no title at all.
+    full_q = (
+        db.query(models.GameFullReport, models.GameSession)
+        .join(models.GameSession,
+              models.GameFullReport.game_id == models.GameSession.id)
+        .filter(_game_scope(coach, team_ids))
+        .filter(or_(
+            models.GameSession.opponent_name.ilike(pattern, escape="\\"),
+            models.GameFullReport.report_text.ilike(pattern, escape="\\") if deep else false(),
+        ))
+        .order_by(models.GameFullReport.id.desc())
+    )
+    full_reports, full_n = _page(full_q, limit)
+
+    # ── Scouting, the parts of it that are not the game ───────────────────────
+    opponents_q = (
+        db.query(models.OpponentPlayer)
+        .filter(models.OpponentPlayer.coach_id == coach.id)
+        .filter(or_(
+            models.OpponentPlayer.player_name.ilike(pattern, escape="\\"),
+            models.OpponentPlayer.opponent_name.ilike(pattern, escape="\\"),
+            models.OpponentPlayer.position.ilike(pattern, escape="\\"),
+            models.OpponentPlayer.jersey_number.ilike(pattern, escape="\\"),
+            models.OpponentPlayer.notes.ilike(pattern, escape="\\") if deep else false(),
+        ))
+        .order_by(models.OpponentPlayer.player_name)
+    )
+    opponents, opponents_n = _page(opponents_q, limit)
+
+    insights_q = (
+        db.query(models.ScoutInsight)
+        .filter(models.ScoutInsight.coach_id == coach.id)
+        .filter(or_(
+            models.ScoutInsight.team_name.ilike(pattern, escape="\\"),
+            models.ScoutInsight.subject.ilike(pattern, escape="\\"),
+            models.ScoutInsight.insight.ilike(pattern, escape="\\") if deep else false(),
+        ))
+        .order_by(models.ScoutInsight.id.desc())
+    )
+    insights, insights_n = _page(insights_q, limit)
+
+    # ── Staff Hub ─────────────────────────────────────────────────────────────
+    # Only conversations this coach is actually in. A message is the one kind
+    # of row here that belongs to somebody else as much as to them, so the
+    # membership table is the filter rather than authorship: they can see what
+    # was said to them, not only what they said.
+    my_convs = {m.conversation_id for m in db.query(models.ConversationMember)
+                .filter_by(coach_id=coach.id).all()}
+    conv_scope = (models.StaffMessage.conversation_id.in_(my_convs) if my_convs
+                  else models.StaffMessage.id.is_(None))
+    messages_q = (
+        db.query(models.StaffMessage)
+        .filter(conv_scope)
+        .filter(models.StaffMessage.deleted_at.is_(None))
+        .filter(models.StaffMessage.text.ilike(pattern, escape="\\") if deep else false())
+        .order_by(models.StaffMessage.id.desc())
+    )
+    messages, messages_n = _page(messages_q, limit)
+
+    # Comments left on a report that was shared between coaches — visible to
+    # the two ends of that share, which is what the Staff Hub shows.
+    my_shares = {r.id for r in db.query(models.StaffSharedReport)
+                 .filter(or_(models.StaffSharedReport.sender_id == coach.id,
+                             models.StaffSharedReport.recipient_id == coach.id)).all()}
+    staff_comments_q = (
+        db.query(models.StaffReportComment)
+        .filter(models.StaffReportComment.shared_report_id.in_(my_shares) if my_shares
+                else models.StaffReportComment.id.is_(None))
+        .filter(models.StaffReportComment.deleted_at.is_(None))
+        .filter(models.StaffReportComment.text.ilike(pattern, escape="\\") if deep else false())
+        .order_by(models.StaffReportComment.id.desc())
+    )
+    staff_comments, staff_comments_n = _page(staff_comments_q, limit)
+
+    # ── What a player wrote back ──────────────────────────────────────────────
+    # A comment reaches this coach two ways: they wrote it, or a player wrote
+    # it on something this coach shared with them. The second is the one that
+    # matters — it is the half of the conversation they did not author and
+    # cannot otherwise find.
+    my_shared_reports = {r.id for r in db.query(models.SharedReport)
+                         .filter_by(shared_by_id=coach.id).all()}
+    my_training = {r.id for r in db.query(models.TrainingSession)
+                   .filter_by(coach_id=coach.id).all()}
+    comment_scope = [models.PlayerComment.coach_id == coach.id]
+    if my_shared_reports:
+        comment_scope.append(models.PlayerComment.shared_report_id.in_(my_shared_reports))
+    if my_training:
+        comment_scope.append(models.PlayerComment.training_session_id.in_(my_training))
+    comments_q = (
+        db.query(models.PlayerComment)
+        .filter(or_(*comment_scope))
+        .filter(models.PlayerComment.deleted_at.is_(None))
+        .filter(models.PlayerComment.text.ilike(pattern, escape="\\") if deep else false())
+        .order_by(models.PlayerComment.id.desc())
+    )
+    comments, comments_n = _page(comments_q, limit)
+
     def player_name(pid) -> str | None:
         if not pid:
             return None
         p = db.get(models.Player, pid)
         return p.name if p else None
+
+    def sender_name(cid) -> str | None:
+        c = db.get(models.Coach, cid) if cid else None
+        return c.name if c else None
+
+    def conversation_title(conv_id) -> str | None:
+        """What the Staff Hub calls this thread.
+
+        A group has a name of its own. A one-to-one does not — it is named
+        after the other person, so find them rather than showing "Conversation".
+        """
+        conv = db.get(models.Conversation, conv_id) if conv_id else None
+        if not conv:
+            return None
+        if conv.title:
+            return conv.title
+        other = (db.query(models.ConversationMember)
+                 .filter(models.ConversationMember.conversation_id == conv_id,
+                         models.ConversationMember.coach_id != coach.id).first())
+        return sender_name(other.coach_id) if other else None
+
+    def comment_eval_id(pc) -> int | None:
+        """The evaluation a player's comment is attached to, if any.
+
+        Comments hang off the share, not the report, so opening one means
+        walking back through the share to the evaluation it carried.
+        """
+        if pc.shared_report_id:
+            sr = db.get(models.SharedReport, pc.shared_report_id)
+            if sr:
+                return sr.evaluation_id
+        if pc.player_training_id:
+            pt = db.get(models.PlayerTraining, pc.player_training_id)
+            sr = db.get(models.SharedReport, pt.shared_report_id) if pt else None
+            if sr:
+                return sr.evaluation_id
+        return None
 
     def my_scout_text(game_id: int) -> str | None:
         row = (db.query(models.GameScoutingReport)
@@ -306,12 +485,58 @@ def search(
              "created_at": s.created_at}
             for s in scouting
         ],
+        "film": [
+            {"id": c.id, "report_id": c.game_report_id,
+             "title": c.team_name or c.label, "output_type": c.output_type,
+             "snippet": _snippet(c.analysis_text, term), "created_at": c.created_at}
+            for c in film
+        ],
+        "game_reports": [
+            {"id": r.id, "game_id": g.id, "opponent_name": g.opponent_name,
+             "date": g.date, "snippet": _snippet(r.report_text, term),
+             "created_at": r.created_at}
+            for r, g in full_reports
+        ],
+        "opponents": [
+            {"id": o.id, "player_name": o.player_name, "opponent_name": o.opponent_name,
+             "jersey_number": o.jersey_number, "position": o.position,
+             "snippet": _snippet(o.notes, term)}
+            for o in opponents
+        ],
+        "insights": [
+            {"id": i.id, "team_name": i.team_name, "subject": i.subject,
+             "snippet": _snippet(i.insight, term) or (i.insight or "")[:120],
+             "created_at": i.created_at}
+            for i in insights
+        ],
+        "messages": [
+            {"id": m.id, "conversation_id": m.conversation_id,
+             "sender_name": sender_name(m.sender_id),
+             "title": conversation_title(m.conversation_id),
+             "snippet": _snippet(m.text, term), "created_at": m.created_at}
+            for m in messages
+        ],
+        "staff_comments": [
+            {"id": sc.id, "shared_report_id": sc.shared_report_id,
+             "sender_name": sender_name(sc.author_id),
+             "snippet": _snippet(sc.text, term), "created_at": sc.created_at}
+            for sc in staff_comments
+        ],
+        "comments": [
+            {"id": pc.id, "eval_id": comment_eval_id(pc),
+             "training_id": pc.training_session_id,
+             "snippet": _snippet(pc.text, term), "created_at": pc.created_at}
+            for pc in comments
+        ],
         # What the client needs to offer "see all 23" rather than silently
         # showing six of them and looking like that is all there is.
         "totals": {
             "players": players_n, "teams": teams_n, "reports": evals_n,
             "training": training_n, "team_reports": team_reports_n,
             "games": games_n, "scouting": scouting_n,
+            "film": film_n, "game_reports": full_n, "opponents": opponents_n,
+            "insights": insights_n, "messages": messages_n,
+            "staff_comments": staff_comments_n, "comments": comments_n,
         },
     }
 
@@ -397,10 +622,33 @@ def search_index(
              .order_by(models.GameReport.id.desc()).limit(INDEX_CAP).all())
 
     scouting = (db.query(models.GameSession)
-                .filter(or_(models.GameSession.coach_id == coach.id,
-                            models.GameSession.team_id.in_(team_ids) if team_ids
-                            else models.GameSession.id.is_(None)))
+                .filter(_game_scope(coach, team_ids))
                 .order_by(models.GameSession.id.desc()).limit(INDEX_CAP).all())
+
+    # The named things among the long documents and the scouting notes. Their
+    # bodies stay on the server — that is the whole point of this endpoint —
+    # but a coach typing an opponent's name should not wait for a round trip to
+    # be shown the film they shot against them.
+    film = (db.query(models.GameReportClip)
+            .join(models.GameReport,
+                  models.GameReportClip.game_report_id == models.GameReport.id)
+            .filter(models.GameReportClip.analysis_text.isnot(None))
+            .filter(_packet_scope(coach, shared_packets))
+            .order_by(models.GameReportClip.id.desc()).limit(INDEX_CAP).all())
+
+    full_reports = (db.query(models.GameFullReport, models.GameSession)
+                    .join(models.GameSession,
+                          models.GameFullReport.game_id == models.GameSession.id)
+                    .filter(_game_scope(coach, team_ids))
+                    .order_by(models.GameFullReport.id.desc()).limit(INDEX_CAP).all())
+
+    opponents = (db.query(models.OpponentPlayer)
+                 .filter(models.OpponentPlayer.coach_id == coach.id)
+                 .order_by(models.OpponentPlayer.player_name).limit(INDEX_CAP).all())
+
+    insights = (db.query(models.ScoutInsight)
+                .filter(models.ScoutInsight.coach_id == coach.id)
+                .order_by(models.ScoutInsight.id.desc()).limit(INDEX_CAP).all())
 
     return {
         "players": [
@@ -440,5 +688,26 @@ def search_index(
             {"id": s.id, "opponent_name": s.opponent_name, "location": s.location,
              "created_at": s.created_at}
             for s in scouting
+        ],
+        "film": [
+            {"id": c.id, "report_id": c.game_report_id,
+             "title": c.team_name or c.label, "output_type": c.output_type,
+             "created_at": c.created_at}
+            for c in film
+        ],
+        "game_reports": [
+            {"id": r.id, "game_id": g.id, "opponent_name": g.opponent_name,
+             "date": g.date, "created_at": r.created_at}
+            for r, g in full_reports
+        ],
+        "opponents": [
+            {"id": o.id, "player_name": o.player_name, "opponent_name": o.opponent_name,
+             "jersey_number": o.jersey_number, "position": o.position}
+            for o in opponents
+        ],
+        "insights": [
+            {"id": i.id, "team_name": i.team_name, "subject": i.subject,
+             "created_at": i.created_at}
+            for i in insights
         ],
     }
