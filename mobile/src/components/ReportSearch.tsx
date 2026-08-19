@@ -117,10 +117,50 @@ export function useReportSearch(text: string, existingRef?: React.RefObject<any>
     ? { query, active, registerActive, muted: !open }
     : undefined;
 
-  return { scrollRef, search, open, setOpen, query, setQuery, active, total, step, close };
+  return { scrollRef, search, open, setOpen, query, setQuery, active, total, step, close, jump };
 }
 
 export type ReportSearchControls = ReturnType<typeof useReportSearch>;
+
+/**
+ * Open the bar on a word that was chosen somewhere else.
+ *
+ * A hit from the app-wide search knows the phrase the coach was looking for.
+ * Landing them at the top of a six-page report and leaving them to find it
+ * again is asking them to do the search twice.
+ *
+ * `ready` is whether the text is actually here yet: a report arrives after the
+ * screen does, and priming against an empty string finds nothing and then sits
+ * there having already run.
+ */
+export function usePrimedSearch(
+  ctl: ReportSearchControls, term: string | undefined | null, ready: boolean,
+) {
+  const done = useRef<string | null>(null);
+  useEffect(() => {
+    const wanted = (term ?? '').trim();
+    if (!wanted || !ready || done.current === wanted) return;
+    done.current = wanted;
+    ctl.setQuery(wanted);
+    ctl.setOpen(true);
+    // And again once the page has been laid out.
+    //
+    // The bar's own jump fires as soon as there is a match to jump to, which
+    // on arrival is the same beat the report is first drawn — there is nothing
+    // measurable underneath it yet, so it scrolls nowhere and never tries
+    // again, because nothing about the search has changed since. Measured: a
+    // game report opened highlighted at the top of the page while the match
+    // sat four thousand pixels down.
+    //
+    // Twice, at a frame and then at a quarter second, because a report that
+    // arrives with the screen and one that arrives after it settle at
+    // different moments. Landing on the match twice looks the same as landing
+    // on it once.
+    const frame = requestAnimationFrame(() => ctl.jump(false));
+    const late = setTimeout(() => ctl.jump(false), 250);
+    return () => { cancelAnimationFrame(frame); clearTimeout(late); };
+  }, [term, ready]);
+}
 
 /** The button that opens the bar. Sits with the other actions on a report. */
 export function ReportSearchButton(

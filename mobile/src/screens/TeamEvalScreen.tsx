@@ -19,7 +19,7 @@ import { gameEvalAPI, teamsAPI, playersAPI, staffSharingAPI, coachesAPI, imports
 import type { ScoutInsightOut } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
-import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
+import { useReportSearch, usePrimedSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import ListSearchHeader from '../components/ListSearchHeader';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
@@ -392,6 +392,11 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const findScouting = useReportSearch(detailGame?.ai_scouting_report ?? '');
   const findScout = useReportSearch(scoutData?.ai_scouting_report ?? '', scoutScrollRef);
   const findGameReport = useReportSearch(gameReportGame?.ai_game_report ?? '');
+
+  // The phrase that brought the coach here, carried in from the app-wide
+  // search so the report opens already showing it.
+  usePrimedSearch(findGameReport, route?.params?.find,
+                  !!gameReportGame?.ai_game_report);
   // Written sentences by subject: 'offense' | 'defense' | 'weak' | a player's name.
   const [insights, setInsights] = useState<Record<string, ScoutInsightOut>>({});
   // Keyed, not a single value: the three team sections are written at the

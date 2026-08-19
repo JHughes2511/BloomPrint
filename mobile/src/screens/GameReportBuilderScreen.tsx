@@ -12,7 +12,7 @@ import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/nativ
 import { useGoUp } from '../navigation/goUp';
 import { Ionicons } from '@expo/vector-icons';
 import { renderReport } from '../utils/renderReport';
-import { useReportSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
+import { useReportSearch, usePrimedSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import { GeneratingOverlay, parseGenProgress, jobProgressLabel, uploadProgressCode } from '../components/GeneratingBasketball';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
@@ -294,6 +294,25 @@ export default function GameReportBuilderScreen() {
   // film's analysis. Each has its own scroll view, so each gets its own search.
   const findVersion = useReportSearch(versionView?.report_text ?? '');
   const findClip = useReportSearch(clipModal?.analysis_text ?? '');
+
+  // Arriving from the app-wide search: open the film it found, and start both
+  // searches on the phrase that found it. A coach who searched for a sentence
+  // should not have to search for it again once they are looking at the page
+  // it is on.
+  const wanted: string | undefined = route.params?.find;
+  const openClipId: number | undefined = route.params?.openClipId
+    ? Number(route.params.openClipId) : undefined;
+  const openedClip = useRef(false);
+  useEffect(() => {
+    if (!openClipId || openedClip.current) return;
+    const clip = (report?.clips ?? []).find((c: any) => c.id === openClipId);
+    if (!clip) return;
+    openedClip.current = true;
+    setClipModal(clip);
+    setClipCorrectionText('');
+  }, [openClipId, report?.clips]);
+  usePrimedSearch(find, wanted, !!report?.report_text);
+  usePrimedSearch(findClip, wanted, !!clipModal?.analysis_text);
   // Y positions captured via onLayout (direct ScrollView children only)
   const boxScoreY = useRef(0);
   const scoutingY = useRef(0);
