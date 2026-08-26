@@ -181,10 +181,18 @@ def build_player_training_prompt(player_name: str, original_text: str, feedback:
     if feedback:
         prompt += f"PLAYER FEEDBACK TO INCORPORATE:\n{feedback}\n\n"
     prompt += (
-        "Create a detailed, actionable training program with specific drills, focus areas, and a weekly "
-        "structure, preserving the coach's priorities and intent. Include a weekly plan broken out by day of "
-        "the week (e.g. MONDAY, TUESDAY, WEDNESDAY, ...); put each day's title on its own line and list every "
-        "drill/focus item under it as its own bullet starting with '- '."
+        "Create a detailed, actionable training program with specific drills and focus areas, preserving the "
+        "coach's priorities, intent and structure.\n\n"
+        # The player's checklist is built from whatever shape comes back, so
+        # this asks the model to keep the coach's rather than impose a week on
+        # it. Mandating MONDAY..SUNDAY meant a four-week block or a
+        # phase-by-phase program was rewritten into seven days that were not in
+        # the coach's plan.
+        "Organise it the way the coach organised theirs. If they worked in days, use days; if in weeks, "
+        "phases or blocks, use those; if they simply listed drills, keep the list. Put each section title in "
+        "ALL CAPS on its own line ending with a colon, and list every drill or focus item under it as its own "
+        "bullet starting with '- '. A player ticks these off one by one, so each bullet should be a single "
+        "piece of work they can finish, not a paragraph."
         f"{REPORT_FORMAT}"
     )
     return prompt
