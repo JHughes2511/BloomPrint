@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import models
+from .. import emails, models, notify
 
 router = APIRouter(prefix="/staff-messages", tags=["staff-messages"])
 
@@ -195,18 +195,22 @@ def send_message(
     coach.last_active = datetime.utcnow()  # communication counts as activity
     # Notify the other members.
     preview = text or "[attachment]"
-    for mid in _member_ids(db, cid):
-        if mid == coach.id:
-            continue
+    params = {"coach": coach.name, "preview": preview[:120]}
+    recipients = [mid for mid in _member_ids(db, cid) if mid != coach.id]
+    for mid in recipients:
         db.add(models.PlayerNotification(
             coach_id=mid,
             type="staff_message",
             title=f"Message from {coach.name}",
             body=preview[:120],
-            i18n_key="notifs.staffMessage", i18n_params={"coach": coach.name, "preview": preview[:120]},
+            i18n_key="notifs.staffMessage", i18n_params=params,
             ref_id=cid,
         ))
     db.commit()
+    for mid in recipients:
+        notify.coach_notification(db.get(models.Coach, mid), "notifs.staffMessage",
+                                  params,
+                                  link=emails.link_to(f"/home/staff/{cid}"))
     names = {c.id: c.name for c in db.query(models.Coach).filter(models.Coach.id.in_(_member_ids(db, cid))).all()}
     return _message_out(db, msg, names)
 

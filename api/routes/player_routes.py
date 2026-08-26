@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import models, notify, schemas
+from .. import emails, models, notify, schemas
 from ..softdelete import soft_delete
 from ..ownership import get_owned
 from ..report_sections import _without_sections
@@ -417,6 +417,8 @@ def share_report(
             )
             db.add(approval)
             db.flush()
+            params = {"coach": coach.name, "type": ev.output_type,
+                      "recipient": recipient_name}
             db.add(models.PlayerNotification(
                 player_user_id=subject_pu.id,
                 type="share_approval",
@@ -424,10 +426,14 @@ def share_report(
                 body=(f"{coach.name} wants to send your {ev.output_type.replace('_', ' ')} report "
                       f"to {recipient_name}. Approve or reject sharing your report with a player it isn't about."),
                 i18n_key="notifs.shareApproval",
-                i18n_params={"coach": coach.name, "type": ev.output_type, "recipient": recipient_name},
+                i18n_params=params,
                 ref_id=approval.id,
             ))
             db.commit()
+            # Nothing is shared until they answer, so this one waits on a
+            # person rather than merely telling them something happened.
+            notify.player_notification(subject_pu, "notifs.shareApproval", params,
+                                       link=emails.link_to("/my/alerts"))
             return {"ok": True, "status": "pending_approval",
                     "subject_name": subject_name, "recipient_name": recipient_name}
         if not subject_pu and not body.consent_override:
@@ -448,16 +454,20 @@ def share_report(
     )
     db.add(shared)
     db.flush()
+    params = {"coach": coach.name, "type": ev.output_type}
     notif = models.PlayerNotification(
         player_user_id=body.player_user_id,
         type="report_shared",
         title="New Report Shared",
         body=f"{coach.name} shared a {ev.output_type.replace('_', ' ')} report with you.",
-        i18n_key="notifs.reportShared", i18n_params={"coach": coach.name, "type": ev.output_type},
+        i18n_key="notifs.reportShared", i18n_params=params,
         ref_id=shared.id,
     )
     db.add(notif)
     db.commit()
+    notify.player_notification(db.get(models.PlayerUser, body.player_user_id),
+                               "notifs.reportShared", params,
+                               link=emails.link_to(f"/my/reports/{shared.id}"))
     db.refresh(shared)
     return _build_shared_report_out(shared)
 
@@ -549,19 +559,25 @@ async def generate_player_training(
     db.add(pt)
     db.flush()
 
-    coaches = db.query(models.Coach).all()
-    for coach in coaches:
-        notif = models.PlayerNotification(
-            coach_id=coach.id,
+    # The coach who sent the report this came from, not every coach in the app.
+    # This used to be db.query(models.Coach).all(): a player pressing generate
+    # notified every coach on the platform, which was noise in the app and
+    # would be a mass mailing here.
+    params = {"player": pu.name}
+    owner = db.get(models.Coach, shared.shared_by_id) if shared else None
+    if owner:
+        db.add(models.PlayerNotification(
+            coach_id=owner.id,
             type="training_generated",
             title="Player Generated Training",
             body=f"{pu.name} generated a training program from a shared report.",
-            i18n_key="notifs.playerGeneratedTraining", i18n_params={"player": pu.name},
+            i18n_key="notifs.playerGeneratedTraining", i18n_params=params,
             ref_id=pt.id,
-        )
-        db.add(notif)
+        ))
     db.commit()
     db.refresh(pt)
+    notify.coach_notification(owner, "notifs.playerGeneratedTraining", params,
+                              link=emails.link_to("/home/notifications"))
     return pt
 
 
@@ -735,17 +751,21 @@ def refresh_coach_training(
         session.completed_drills = []
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI update failed: {exc}")
+    params = {"player": pu.name, "text": body.feedback[:80]}
     notif = models.CoachNotification(
         coach_id=session.coach_id,
         type="training_feedback",
         title="Training Feedback",
         body=f"{pu.name} requested an update to their training: \"{body.feedback[:80]}\"",
-        i18n_key="notifs.trainingFeedbackRequest", i18n_params={"player": pu.name, "text": body.feedback[:80]},
+        i18n_key="notifs.trainingFeedbackRequest", i18n_params=params,
         ref_id=training_id,
     )
     db.add(notif)
     db.commit()
     db.refresh(session)
+    notify.coach_notification(db.get(models.Coach, session.coach_id),
+                              "notifs.trainingFeedbackRequest", params,
+                              link=emails.link_to(f"/home/training/{training_id}"))
     return _coach_training_out(session)
 
 
@@ -806,6 +826,9 @@ def update_player_training(
     db.add(notif)
     db.commit()
     db.refresh(pt)
+    notify.player_notification(db.get(models.PlayerUser, pt.player_user_id),
+                               "notifs.trainingNotesAdded", {},
+                               link=emails.link_to(f"/my/training/{pt.id}"))
     return pt
 
 
@@ -871,19 +894,23 @@ async def refresh_player_training(
         if not text_blocks:
             raise HTTPException(status_code=500, detail="AI returned no content")
         pt.program_text = text_blocks[0].text
-        coaches = db.query(models.Coach).all()
-        for coach in coaches:
-            notif = models.PlayerNotification(
-                coach_id=coach.id,
+        # One coach, for the same reason as the generate route above.
+        params = {"player": pu.name}
+        owner = (db.get(models.Coach, pt.shared_report.shared_by_id)
+                 if pt.shared_report else None)
+        if owner:
+            db.add(models.PlayerNotification(
+                coach_id=owner.id,
                 type="training_refreshed",
                 title="Player Updated Training",
                 body=f"{pu.name} updated their training program with new feedback.",
-                i18n_key="notifs.playerUpdatedTraining", i18n_params={"player": pu.name},
+                i18n_key="notifs.playerUpdatedTraining", i18n_params=params,
                 ref_id=pt.id,
-            )
-            db.add(notif)
+            ))
         db.commit()
         db.refresh(pt)
+        notify.coach_notification(owner, "notifs.playerUpdatedTraining", params,
+                                  link=emails.link_to("/home/notifications"))
         return pt
     except HTTPException:
         raise
@@ -1051,16 +1078,20 @@ def apply_coach_training_corrections(
         raise HTTPException(status_code=500, detail=f"AI update failed: {exc}")
     for c in pending:
         c.applied = True
+    params = {"player": pu.name}
     db.add(models.CoachNotification(
         coach_id=session.coach_id,
         type="training_feedback",
         title="Training Feedback",
         body=f"{pu.name} applied corrections to their training.",
-        i18n_key="notifs.trainingFeedbackApplied", i18n_params={"player": pu.name},
+        i18n_key="notifs.trainingFeedbackApplied", i18n_params=params,
         ref_id=training_id,
     ))
     db.commit()
     db.refresh(session)
+    notify.coach_notification(db.get(models.Coach, session.coach_id),
+                              "notifs.trainingFeedbackApplied", params,
+                              link=emails.link_to(f"/home/training/{training_id}"))
     return _coach_training_out(session)
 
 
@@ -1099,17 +1130,21 @@ async def coach_refresh_training(
         if not text_blocks:
             raise HTTPException(status_code=500, detail="AI returned no content")
         pt.program_text = text_blocks[0].text
+        params = {"coach": coach.name}
         notif = models.PlayerNotification(
             player_user_id=pt.player_user_id,
             type="training_updated",
             title="Training Updated by Coach",
             body=f"{coach.name} has updated your training program.",
-            i18n_key="notifs.trainingUpdatedByCoach", i18n_params={"coach": coach.name},
+            i18n_key="notifs.trainingUpdatedByCoach", i18n_params=params,
             ref_id=pt.id,
         )
         db.add(notif)
         db.commit()
         db.refresh(pt)
+        notify.player_notification(db.get(models.PlayerUser, pt.player_user_id),
+                                   "notifs.trainingUpdatedByCoach", params,
+                                   link=emails.link_to(f"/my/training/{pt.id}"))
         return pt
     except HTTPException:
         raise
@@ -1527,6 +1562,8 @@ def share_team_report(
                     )
                     db.add(approval)
                     db.flush()
+                    params = {"coach": coach.name, "type": body.output_type,
+                              "recipient": recipient_name}
                     db.add(models.PlayerNotification(
                         player_user_id=subject_pu.id,
                         type="share_approval",
@@ -1535,11 +1572,13 @@ def share_team_report(
                               f"{body.output_type.replace('_', ' ')} report to {recipient_name}. "
                               f"Approve or reject sharing your report with a player it isn't about."),
                         i18n_key="notifs.shareApproval",
-                        i18n_params={"coach": coach.name, "type": body.output_type,
-                                     "recipient": recipient_name},
+                        i18n_params=params,
                         ref_id=approval.id,
                     ))
                     db.commit()
+                    notify.player_notification(subject_pu, "notifs.shareApproval",
+                                               params,
+                                               link=emails.link_to("/my/alerts"))
                     return {"ok": True, "status": "pending_approval",
                             "subject_name": subject_name, "recipient_name": recipient_name}
                 if not subject_pu and not body.consent_override:
@@ -1580,6 +1619,7 @@ def share_team_report(
 
     # Create TeamSharedReport for each target player user
     count = 0
+    mail = []
     for pu_id in targets:
         pu = db.get(models.PlayerUser, pu_id)
         if not pu:
@@ -1593,19 +1633,26 @@ def share_team_report(
         )
         db.add(tsr)
         db.flush()
+        params = {"coach": coach.name, "type": body.output_type}
         notif = models.PlayerNotification(
             player_user_id=pu_id,
             type="team_report_shared",
             title=f"Team Report Shared",
             body=f"{coach.name} shared a {body.output_type.replace('_', ' ')} team report with you.",
             i18n_key="notifs.teamReportSharedPlayer",
-            i18n_params={"coach": coach.name, "type": body.output_type},
+            i18n_params=params,
             ref_id=tsr.id,
         )
         db.add(notif)
+        # Queued per player rather than one mail to everyone: each reads it in
+        # their own language, and no player learns who else it went to.
+        mail.append((pu, params, tsr.id))
         count += 1
 
     db.commit()
+    for target, params, tsr_id in mail:
+        notify.player_notification(target, "notifs.teamReportSharedPlayer", params,
+                                   link=emails.link_to(f"/my/reports/team/{tsr_id}"))
     return {"ok": True, "shared_count": count}
 
 
@@ -1666,15 +1713,18 @@ def approve_share(
         )
         db.add(shared)
         db.flush()
+        shared_params = {"coach": coach.name if coach else None,
+                         "type": a.output_type}
         db.add(models.PlayerNotification(
             player_user_id=a.recipient_player_user_id,
             type="report_shared",
             title="New Report Shared",
             body=f"{coach.name if coach else 'A coach'} shared a {a.output_type.replace('_', ' ')} report with you.",
             i18n_key="notifs.reportShared",
-            i18n_params={"coach": coach.name if coach else None, "type": a.output_type},
+            i18n_params=shared_params,
             ref_id=shared.id,
         ))
+        shared_link = emails.link_to(f"/my/reports/{shared.id}")
     else:
         tsr = models.TeamSharedReport(
             player_user_id=a.recipient_player_user_id,
@@ -1685,24 +1735,34 @@ def approve_share(
         )
         db.add(tsr)
         db.flush()
+        shared_params = {"coach": coach.name if coach else None,
+                         "type": a.output_type}
         db.add(models.PlayerNotification(
             player_user_id=a.recipient_player_user_id,
             type="team_report_shared",
             title="Report Shared",
             body=f"{coach.name if coach else 'A coach'} shared a {a.output_type.replace('_', ' ')} report with you.",
             i18n_key="notifs.reportShared",
-            i18n_params={"coach": coach.name if coach else None, "type": a.output_type},
+            i18n_params=shared_params,
             ref_id=tsr.id,
         ))
+        shared_link = emails.link_to(f"/my/reports/team/{tsr.id}")
+    approved_params = {"player": pu.name, "type": a.output_type}
     db.add(models.PlayerNotification(
         coach_id=a.coach_id,
         type="share_approved",
         title="Share approved",
         body=f"{pu.name} approved sharing their {a.output_type.replace('_', ' ')} report.",
-        i18n_key="notifs.shareApproved", i18n_params={"player": pu.name, "type": a.output_type},
+        i18n_key="notifs.shareApproved", i18n_params=approved_params,
     ))
     a.status = "approved"
     db.commit()
+    # Both sides: the player it was sent to, and the coach who was waiting.
+    notify.player_notification(db.get(models.PlayerUser, a.recipient_player_user_id),
+                               "notifs.reportShared", shared_params, link=shared_link)
+    notify.coach_notification(db.get(models.Coach, a.coach_id),
+                              "notifs.shareApproved", approved_params,
+                              link=emails.link_to("/home/notifications"))
     return {"ok": True, "status": "approved"}
 
 
@@ -1717,14 +1777,18 @@ def reject_share(
         raise HTTPException(status_code=404, detail="Approval not found")
     if a.status == "pending":
         a.status = "rejected"
+        params = {"player": pu.name, "type": a.output_type}
         db.add(models.PlayerNotification(
             coach_id=a.coach_id,
             type="share_rejected",
             title="Share declined",
             body=f"{pu.name} declined sharing their {a.output_type.replace('_', ' ')} report.",
-            i18n_key="notifs.shareRejected", i18n_params={"player": pu.name, "type": a.output_type},
+            i18n_key="notifs.shareRejected", i18n_params=params,
         ))
         db.commit()
+        notify.coach_notification(db.get(models.Coach, a.coach_id),
+                                  "notifs.shareRejected", params,
+                                  link=emails.link_to("/home/notifications"))
     return {"ok": True, "status": a.status}
 
 

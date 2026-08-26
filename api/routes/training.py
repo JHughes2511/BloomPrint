@@ -8,7 +8,7 @@ from ..database import get_db, SessionLocal
 from ..auth import get_current_coach
 from .. import genjob
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
-from .. import models, notify, schemas
+from .. import emails, models, notify, schemas
 from ..ownership import get_owned
 from ..report_sections import _without_sections
 from ..ai_models import OPUS, SONNET, text_of, long_text
@@ -615,18 +615,22 @@ def refresh_player_program(
         session.completed_drills = []
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI update failed: {exc}")
-    if session.player and session.player.player_user:
+    target = session.player.player_user if session.player else None
+    params = {"coach": coach.name}
+    if target:
         notif = models.PlayerNotification(
-            player_user_id=session.player.player_user.id,
+            player_user_id=target.id,
             type="training_shared",
             title="Training Program Updated",
             body=f"{coach.name} updated your training program.",
-            i18n_key="notifs.trainingUpdatedByCoach", i18n_params={"coach": coach.name},
+            i18n_key="notifs.trainingUpdatedByCoach", i18n_params=params,
             ref_id=training_id,
         )
         db.add(notif)
     db.commit()
     db.refresh(session)
+    notify.player_notification(target, "notifs.trainingUpdatedByCoach", params,
+                               link=emails.link_to(f"/my/training/from-coach/{training_id}"))
     return session
 
 

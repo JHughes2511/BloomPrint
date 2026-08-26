@@ -36,7 +36,7 @@ from difflib import SequenceMatcher
 
 from sqlalchemy.orm import Session
 
-from . import models
+from . import emails, models, notify
 from .softdelete import soft_delete
 
 # Who the player is. Shared knowledge, and the only thing that merges.
@@ -233,16 +233,22 @@ def _propose(db: Session, team: models.Team, coach: models.Coach,
     db.add(row)
     db.flush()
     if owner_id and owner_id != coach.id:
+        params = {"coach": coach.name, "player": player.name, "team": team.name}
         db.add(models.CoachNotification(
             coach_id=owner_id,
             title="A player to add to your roster",
             body=f"{coach.name} has {player.name} on their copy of {team.name}. "
                  f"Add them to the roster?",
             i18n_key="notifs.rosterPlayerProposed",
-            i18n_params={"coach": coach.name, "player": player.name, "team": team.name},
+            i18n_params=params,
             type="roster_player_proposed",
             ref_id=row.id,
         ))
+        # This one is a question, not an announcement: the roster stays as it
+        # is until the owner answers it.
+        notify.coach_notification(db.get(models.Coach, owner_id),
+                                  "notifs.rosterPlayerProposed", params,
+                                  link=emails.link_to("/home/staff"))
     return True
 
 

@@ -36,6 +36,15 @@ def app_url() -> str:
     return (os.environ.get("APP_URL") or "https://bloomprint.org").rstrip("/")
 
 
+def link_to(path: str) -> str:
+    """A deep link into the app: app_url() with a path on it.
+
+    Kept here rather than written out at each caller so a change of host, or a
+    trailing slash, is one edit and not thirty.
+    """
+    return f"{app_url()}/{(path or '').lstrip('/')}"
+
+
 def unsubscribe_url(token: str) -> str:
     """The one-click opt-out. Points at the API, which needs no session to honour it."""
     base = (os.environ.get("API_URL") or app_url()).rstrip("/")
@@ -534,7 +543,14 @@ def _fmt_tags(s: str, params: dict) -> str:
     and str.format would also try to read single braces that appear in ordinary
     prose.
     """
-    return _TAG.sub(lambda m: str(params.get(m.group(1), m.group(0))), s or "")
+    def one(m):
+        val = params.get(m.group(1))
+        # None and "" count as not supplied, not as words. A row that carries
+        # {"team": None} would otherwise mail "Marcus joined None." — the tag
+        # is left in place instead, and notification_copy refuses the send.
+        return m.group(0) if val is None or val == "" else str(val)
+
+    return _TAG.sub(one, s or "")
 
 
 def _localize_params(params: dict, lang: str) -> dict:

@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import models
+from .. import emails, models, notify
 from ..ai_models import OPUS
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
@@ -888,14 +888,18 @@ async def confirm(body: ConfirmBody, db: Session = Depends(get_db), coach: model
         msg = models.StaffMessage(conversation_id=conv.id, sender_id=coach.id, text=text)
         db.add(msg)
         conv.last_at = datetime.utcnow()
+        params = {"coach": coach.name, "preview": text[:120]}
         for c in others:
             db.add(models.PlayerNotification(
                 coach_id=c.id, type="staff_message",
                 title=f"Message from {coach.name}", body=text[:120],
                 i18n_key="notifs.staffMessage",
-                i18n_params={"coach": coach.name, "preview": text[:120]},
+                i18n_params=params,
                 ref_id=conv.id))
         db.commit()
+        for c in others:
+            notify.coach_notification(c, "notifs.staffMessage", params,
+                                      link=emails.link_to(f"/home/staff/{conv.id}"))
         names = ", ".join(c.name for c in others)
         return {"done": True,
                 "message": f"Message sent to the group with {names}." if is_group else f"Message sent to {names}.",

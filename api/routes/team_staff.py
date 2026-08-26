@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import models, notify, roster_sync
+from .. import emails, models, notify, roster_sync
 
 router = APIRouter(prefix="/team-staff", tags=["team-staff"])
 
@@ -205,14 +205,19 @@ def join_team(
 
 
 def _notify_owner_joined(db: Session, team, coach) -> None:
+    params = {"coach": coach.name, "role": coach.role or "staff", "team": team.name}
     db.add(models.CoachNotification(
         coach_id=team.coach_id,
         title=f"{coach.name} joined your team",
         body=f"{coach.name} ({coach.role or 'staff'}) has joined {team.name}.",
         i18n_key="notifs.teamStaffJoined",
-        i18n_params={"coach": coach.name, "role": coach.role or "staff", "team": team.name},
+        i18n_params=params,
         type="team_staff_joined",
     ))
+    # Same key, same params, so the email cannot say anything the row does not.
+    notify.coach_notification(db.get(models.Coach, team.coach_id),
+                              "notifs.teamStaffJoined", params,
+                              link=emails.link_to(f"/home/staff/team/{team.id}"))
 
 
 def _get_join_request(db: Session, request_id: int, owner_id: int):
@@ -605,15 +610,19 @@ def add_member(
 
     db.add(models.TeamStaff(team_id=team_id, coach_id=coach_id))
     roster_sync.on_staff_joined(db, team, target)
+    params = {"coach": coach.name, "team": team.name}
     db.add(models.CoachNotification(
         coach_id=coach_id,
         title=f"Added to {team.name}",
         body=f"{coach.name} added you to {team.name}.",
         i18n_key="notifs.teamMemberAdded",
-        i18n_params={"coach": coach.name, "team": team.name},
+        i18n_params=params,
         type="team_member_added",
     ))
     db.commit()
+    notify.coach_notification(db.get(models.Coach, coach_id),
+                              "notifs.teamMemberAdded", params,
+                              link=emails.link_to(f"/home/staff/team/{team_id}"))
     return {"ok": True, "team_id": team_id, "coach_id": coach_id}
 
 
@@ -640,15 +649,21 @@ def remove_member(
     # a private copy of the players they evaluated, it just stops updating.
     roster_sync.on_staff_left(db, team, db.get(models.Coach, coach_id))
     db.delete(link)
+    params = {"team": team.name}
     db.add(models.CoachNotification(
         coach_id=coach_id,
         title=f"Removed from {team.name}",
         body=f"You were removed from {team.name}.",
         i18n_key="notifs.teamMemberRemoved",
-        i18n_params={"team": team.name},
+        i18n_params=params,
         type="team_member_removed",
     ))
     db.commit()
+    # No team link: they cannot open it any more. The staff list is where the
+    # question "what am I still on?" gets answered.
+    notify.coach_notification(db.get(models.Coach, coach_id),
+                              "notifs.teamMemberRemoved", params,
+                              link=emails.link_to("/home/staff"))
     return {"ok": True}
 
 
@@ -751,13 +766,17 @@ def approve_invite(
         inv.status = "approved"
         team = db.get(models.Team, inv.team_id)
         roster_sync.on_staff_joined(db, team, coach)
+        params = {"coach": coach.name, "team": team.name if team else None}
         db.add(models.PlayerNotification(
             coach_id=inv.invited_by, type="team_invite_approved", title="Invite accepted",
             body=f"{coach.name} joined {team.name if team else 'your team'}.",
             i18n_key="notifs.teamInviteAccepted",
-            i18n_params={"coach": coach.name, "team": team.name if team else None},
+            i18n_params=params,
         ))
         db.commit()
+        notify.coach_notification(db.get(models.Coach, inv.invited_by),
+                                  "notifs.teamInviteAccepted", params,
+                                  link=emails.link_to("/home/staff"))
     return {"ok": True, "status": inv.status}
 
 
@@ -775,12 +794,16 @@ def reject_invite(
         raise HTTPException(status_code=404, detail="Invite not found")
     if inv.status == "pending":
         inv.status = "rejected"
+        params = {"coach": coach.name}
         db.add(models.PlayerNotification(
             coach_id=inv.invited_by, type="team_invite_rejected", title="Invite declined",
             body=f"{coach.name} declined the team invite.",
-            i18n_key="notifs.teamInviteRejected", i18n_params={"coach": coach.name},
+            i18n_key="notifs.teamInviteRejected", i18n_params=params,
         ))
         db.commit()
+        notify.coach_notification(db.get(models.Coach, inv.invited_by),
+                                  "notifs.teamInviteRejected", params,
+                                  link=emails.link_to("/home/staff"))
     return {"ok": True, "status": inv.status}
 
 
@@ -873,24 +896,33 @@ def transfer_owner(
         ).first():
             db.add(models.TeamStaff(team_id=t.id, coach_id=previous_owner_id))
 
+    to_new = {"coach": coach.name, "team": team.name}
     db.add(models.CoachNotification(
         coach_id=new_owner_id,
         title=f"You now own {team.name}",
         body=f"{coach.name} made you the owner of {team.name}.",
         i18n_key="notifs.teamOwnerChanged",
-        i18n_params={"coach": coach.name, "team": team.name},
+        i18n_params=to_new,
         type="team_owner_changed",
     ))
+    to_old = None
     if not orphaned and previous_owner_id != coach.id:
+        to_old = {"coach": new_owner.name, "team": team.name}
         db.add(models.CoachNotification(
             coach_id=previous_owner_id,
             title=f"{new_owner.name} now owns {team.name}",
             body=f"{new_owner.name} is now the owner of {team.name}.",
             i18n_key="notifs.teamOwnerChanged",
-            i18n_params={"coach": new_owner.name, "team": team.name},
+            i18n_params=to_old,
             type="team_owner_changed",
         ))
     db.commit()
+    where = emails.link_to(f"/home/staff/team/{team.id}")
+    notify.coach_notification(db.get(models.Coach, new_owner_id),
+                              "notifs.teamOwnerChanged", to_new, link=where)
+    if to_old:
+        notify.coach_notification(db.get(models.Coach, previous_owner_id),
+                                  "notifs.teamOwnerChanged", to_old, link=where)
     return {
         "ok": True,
         "team_id": team.id,

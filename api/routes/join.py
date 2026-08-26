@@ -26,7 +26,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import models, ratelimit, roster_sync
+from .. import emails, models, notify, ratelimit, roster_sync
 from .player_auth import get_current_player_user
 
 router = APIRouter(prefix="/join", tags=["join"])
@@ -85,16 +85,20 @@ def join_as_staff(
                                     display_name=coach.name))
         # The coach who shared the link should know who used it without going
         # looking — auto-join means nobody approved this.
+        params = {"name": coach.name, "team": team.name}
         db.add(models.PlayerNotification(
             coach_id=link.created_by,
             type="team_joined",
             title="Someone joined your team",
             body=f"{coach.name} joined {team.name} through your invite link.",
             i18n_key="notifs.joinedViaLink",
-            i18n_params={"name": coach.name, "team": team.name},
+            i18n_params=params,
             ref_id=team.id,
         ))
         db.commit()
+        notify.coach_notification(db.get(models.Coach, link.created_by),
+                                  "notifs.joinedViaLink", params,
+                                  link=emails.link_to(f"/home/staff/team/{team.id}"))
     return {"ok": True, "team_name": team.name, "already": bool(existing)}
 
 
@@ -171,16 +175,20 @@ def join_as_player(
     _add_player_link(db, pu, player.id, team.coach_id)
     db.add(models.TeamJoinEvent(link_id=link.id, player_user_id=pu.id, player_id=player.id,
                                 kind="player", display_name=player.name))
+    params = {"name": player.name, "team": team.name}
     db.add(models.PlayerNotification(
         coach_id=link.created_by,
         type="team_joined",
         title="A player joined your team",
         body=f"{player.name} joined {team.name} through your invite link.",
         i18n_key="notifs.joinedViaLink",
-        i18n_params={"name": player.name, "team": team.name},
+        i18n_params=params,
         ref_id=team.id,
     ))
     db.commit()
+    notify.coach_notification(db.get(models.Coach, link.created_by),
+                              "notifs.joinedViaLink", params,
+                              link=emails.link_to(f"/home/staff/team/{team.id}"))
     return {"ok": True, "team_name": team.name, "player_id": player.id, "player_name": player.name}
 
 
