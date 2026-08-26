@@ -10,6 +10,19 @@ import { useTheme } from '../theme/ThemeProvider';
 type Props = TextInputProps & {
   value?: string;
   onChangeText?: (text: string) => void;
+  /**
+   * Start one line tall and grow with what is typed, between these heights.
+   *
+   * A multiline field is a <textarea> on the web, and its height comes from
+   * its row count — so a box meant for a one-line comment opened three lines
+   * tall, and the button beside it stretched to match. A minHeight cannot fix
+   * that: the field was already taller than the minimum. Stating the height is
+   * what makes it short, and measuring the content is what lets it grow again.
+   *
+   * These are heights for the TEXT, not the box: whatever padding the style
+   * puts around it is added on top.
+   */
+  autoGrow?: { min: number; max: number };
 };
 
 const CHUNK_MS = 2500; // recording chunk length — shorter = words appear sooner
@@ -21,12 +34,14 @@ export default function VoiceTextInput({
   secureTextEntry,
   editable,
   multiline,
+  autoGrow,
   ...rest
 }: Props) {
   const { t } = useTheme();
   const { t: tr, i18n } = useTranslation();
   const [listening, setListening] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
+  const [grown, setGrown] = useState(autoGrow?.min ?? 0);
 
   const inputRef = useRef<TextInput>(null);
   const recordingRef = useRef<Audio.Recording | null>(null);
@@ -45,6 +60,10 @@ export default function VoiceTextInput({
   useEffect(() => {
     valueRef.current = value;
   }, [value]);
+
+  useEffect(() => {
+    if (autoGrow && !value) setGrown(autoGrow.min);
+  }, [value, autoGrow?.min]);
 
   const keyboardType = (rest as any).keyboardType;
   const showMic =
@@ -223,7 +242,13 @@ export default function VoiceTextInput({
           fontSize,
           fontWeight,
           ...(multiline ? { textAlignVertical: 'top' as const } : null),
+          ...(autoGrow ? { height: grown } : null),
         }}
+        onContentSizeChange={autoGrow ? (e: any) => {
+          const h = e?.nativeEvent?.contentSize?.height;
+          if (!h) return;
+          setGrown(Math.max(autoGrow.min, Math.min(autoGrow.max, Math.ceil(h))));
+        } : (rest as any).onContentSizeChange}
       />
       {showMic && (
         <TouchableOpacity

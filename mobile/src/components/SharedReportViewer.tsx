@@ -423,6 +423,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                   <VoiceTextInput
                     style={[styles.input, { flex: 1 }]}
                     placeholder={tr('components.viewer.addCommentPlaceholder')}
+                    autoGrow={{ min: 18, max: 92 }}
                     placeholderTextColor={t.muted2}
                     value={commentText}
                     onChangeText={setCommentText}
@@ -457,6 +458,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
                   <VoiceTextInput
                     style={[styles.input, { flex: 1 }]}
                     placeholder={tr('components.viewer.addNotePlaceholder')}
+                    autoGrow={{ min: 18, max: 92 }}
                     placeholderTextColor={t.muted2}
                     value={noteText}
                     onChangeText={setNoteText}
@@ -507,7 +509,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   bottomTabActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   bottomTabText: { color: t.muted, fontSize: 12, fontFamily: fonts[600], lineHeight: 16 },
   bottomTabTextActive: { color: t.ctaText, fontFamily: fonts[700] },
-  input: { backgroundColor: t.card, borderRadius: 10, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 44, maxHeight: 120 },
+  input: { backgroundColor: t.card, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 11, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line },
   secondaryBtn: { flex: 1, borderRadius: 10, paddingVertical: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.accent, backgroundColor: t.accentSoft },
   secondaryBtnText: { color: t.accent, fontFamily: fonts[700], fontSize: 13 },
   primaryBtn: { flex: 1, flexDirection: 'row', gap: 6, borderRadius: 10, paddingVertical: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: t.ctaBg },
@@ -515,7 +517,7 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   // Stretches to the box beside it rather than sitting 44 tall at the bottom
   // of a field that has grown past that. Same shape as the send buttons in
   // Staff Hub and Coach Training — what was out of step was the height.
-  sendBtn: { width: 44, minHeight: 44, borderRadius: 10, backgroundColor: t.ctaBg, alignItems: 'center', justifyContent: 'center', alignSelf: 'stretch' },
+  sendBtn: { width: 44, height: 44, borderRadius: 10, backgroundColor: t.ctaBg, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end' },
   hint: { color: t.muted2, fontSize: 11, marginTop: 8 },
   scopeHint: { color: t.accent, fontSize: 10, fontFamily: fonts[700], letterSpacing: 0.5, marginBottom: 6 },
   corrRow: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: t.chip, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, marginBottom: 6 },

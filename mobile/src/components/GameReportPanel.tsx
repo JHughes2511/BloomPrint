@@ -120,6 +120,7 @@ export default function GameReportPanel({ gameId, opponentName, ourTeamName, has
       <VoiceTextInput
         style={s.input}
         placeholder={tr('components.gameReport.contextPlaceholder')}
+        autoGrow={{ min: 38, max: 116 }}
         placeholderTextColor={t.muted2}
         value={text}
         onChangeText={setText}
@@ -203,7 +204,7 @@ export default function GameReportPanel({ gameId, opponentName, ourTeamName, has
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   restoreText: { color: t.accent, fontSize: 11, fontFamily: fonts[600] },
   hint: { color: t.muted2, fontSize: 12, marginBottom: 10, lineHeight: 18 },
-  input: { backgroundColor: t.card, borderRadius: 10, padding: 12, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, minHeight: 60, textAlignVertical: 'top' },
+  input: { backgroundColor: t.card, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 11, color: t.ink, fontSize: 14, borderWidth: 1, borderColor: t.line, textAlignVertical: 'top' },
   rememberRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10, backgroundColor: t.chip, borderRadius: 10, padding: 12 },
   rememberLabel: { color: t.ink, fontSize: 13, fontFamily: fonts[700] },
   rememberSub: { color: t.muted2, fontSize: 11, marginTop: 2 },

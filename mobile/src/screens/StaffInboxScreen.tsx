@@ -902,6 +902,7 @@ export default function StaffInboxScreen() {
               <VoiceTextInput
                 style={[styles.input, { flex: 1, marginBottom: 0 }]}
                 placeholder={tr('staffHub.addCommentPlaceholder')}
+                autoGrow={{ min: 18, max: 92 }}
                 placeholderTextColor={t.muted2}
                 value={gameCommentText}
                 onChangeText={setGameCommentText}
@@ -996,11 +997,12 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   commentText: { color: t.inkSoft, fontSize: 13 },
   commentDate: { color: t.muted2, fontSize: 11, marginTop: 6 },
   input: {
-    backgroundColor: t.card, borderRadius: 10, padding: 12, color: t.ink,
+    backgroundColor: t.card, borderRadius: 10,
+    paddingHorizontal: 12, paddingVertical: 11, color: t.ink,
     fontSize: 14, borderWidth: 1, borderColor: t.line, marginBottom: 8,
   },
   searchBtn: { backgroundColor: t.ctaBg, borderRadius: 10, width: 44, alignItems: 'center', justifyContent: 'center' },
-  sendBtn: { backgroundColor: t.ctaBg, borderRadius: 10, width: 44, alignItems: 'center', justifyContent: 'center' },
+  sendBtn: { backgroundColor: t.ctaBg, borderRadius: 10, width: 44, height: 44, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end' },
   regenBtn: { backgroundColor: t.accent, borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 4 },
   sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20 },
   newMsgBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.ctaBg, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6, marginBottom: 8, flexShrink: 1, maxWidth: 160 },
