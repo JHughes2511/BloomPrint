@@ -45,6 +45,19 @@ def link_to(path: str) -> str:
     return f"{app_url()}/{(path or '').lstrip('/')}"
 
 
+def decide_urls(token: str) -> tuple[str, str]:
+    """(approve, decline) for one decision link.
+
+    Points at the API rather than the app: whoever follows it is not signed in,
+    and the page that asks them to confirm is served by the server that can
+    check the token. Following either URL decides nothing on its own; see
+    api/decisions.py for why.
+    """
+    base = (os.environ.get("API_URL") or app_url()).rstrip("/")
+    return (f"{base}/decide?token={token}&choice=approve",
+            f"{base}/decide?token={token}&choice=reject")
+
+
 def unsubscribe_url(token: str) -> str:
     """The one-click opt-out. Points at the API, which needs no session to honour it."""
     base = (os.environ.get("API_URL") or app_url()).rstrip("/")
@@ -60,6 +73,9 @@ def unsubscribe_url(token: str) -> str:
 #                it on purpose: "3 new comments" needs plural rules that differ
 #                across these twenty-five languages, and the list is right there
 #                underneath anyway
+#   decide_*:    the approve-or-decline page reached from an email button. See
+#                api/decisions.py; the page is served by the API, not the app,
+#                because whoever follows the link is not signed in.
 #   signoff:     how the message ends
 #   unsub:       the footer, with {url} for the opt-out
 #   unsub_note:  reassurance that account mail is unaffected by opting out
@@ -69,6 +85,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Open BloomPrint",
         "reset_cta": "Choose a new password",
         "digest_title": "New comments and replies",
+        "decide_approve": "Approve",
+        "decide_reject": "Decline",
+        "decide_ask": "Confirm your answer",
+        "decide_approved": "Approved.",
+        "decide_rejected": "Declined.",
+        "decide_gone": "This has already been answered.",
+        "decide_expired": "This link has expired. Open BloomPrint to answer it.",
+        "decide_failed": "Something went wrong. Open BloomPrint to answer it.",
         "signoff": "BloomPrint",
         "unsub": "Don't want these? Turn them off: {url}",
         "unsub_note": "You'll still get messages about your own account.",
@@ -81,6 +105,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Abrir BloomPrint",
         "reset_cta": "Elegir una contraseña nueva",
         "digest_title": "Nuevos comentarios y respuestas",
+        "decide_approve": "Aprobar",
+        "decide_reject": "Rechazar",
+        "decide_ask": "Confirma tu respuesta",
+        "decide_approved": "Aprobado.",
+        "decide_rejected": "Rechazado.",
+        "decide_gone": "Esto ya se ha respondido.",
+        "decide_expired": "Este enlace ha caducado. Abre BloomPrint para responder.",
+        "decide_failed": "Algo ha fallado. Abre BloomPrint para responder.",
         "signoff": "BloomPrint",
         "unsub": "¿No quieres recibirlos? Desactívalos: {url}",
         "unsub_note": "Seguirás recibiendo mensajes sobre tu propia cuenta.",
@@ -93,6 +125,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Ouvrir BloomPrint",
         "reset_cta": "Choisir un nouveau mot de passe",
         "digest_title": "Nouveaux commentaires et réponses",
+        "decide_approve": "Approuver",
+        "decide_reject": "Refuser",
+        "decide_ask": "Confirmez votre réponse",
+        "decide_approved": "Approuvé.",
+        "decide_rejected": "Refusé.",
+        "decide_gone": "Cela a déjà été traité.",
+        "decide_expired": "Ce lien a expiré. Ouvrez BloomPrint pour répondre.",
+        "decide_failed": "Une erreur est survenue. Ouvrez BloomPrint pour répondre.",
         "signoff": "BloomPrint",
         "unsub": "Vous ne voulez plus les recevoir ? Désactivez-les : {url}",
         "unsub_note": "Vous continuerez à recevoir les messages concernant votre compte.",
@@ -105,6 +145,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Abrir o BloomPrint",
         "reset_cta": "Escolher uma nova palavra-passe",
         "digest_title": "Novos comentários e respostas",
+        "decide_approve": "Aprovar",
+        "decide_reject": "Recusar",
+        "decide_ask": "Confirme a sua resposta",
+        "decide_approved": "Aprovado.",
+        "decide_rejected": "Recusado.",
+        "decide_gone": "Isto já foi respondido.",
+        "decide_expired": "Esta ligação expirou. Abra o BloomPrint para responder.",
+        "decide_failed": "Algo correu mal. Abra o BloomPrint para responder.",
         "signoff": "BloomPrint",
         "unsub": "Não quer recebê-los? Desative-os: {url}",
         "unsub_note": "Continuará a receber mensagens sobre a sua própria conta.",
@@ -117,6 +165,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Apri BloomPrint",
         "reset_cta": "Scegli una nuova password",
         "digest_title": "Nuovi commenti e risposte",
+        "decide_approve": "Approva",
+        "decide_reject": "Rifiuta",
+        "decide_ask": "Conferma la tua risposta",
+        "decide_approved": "Approvato.",
+        "decide_rejected": "Rifiutato.",
+        "decide_gone": "È già stato deciso.",
+        "decide_expired": "Questo link è scaduto. Apri BloomPrint per rispondere.",
+        "decide_failed": "Qualcosa è andato storto. Apri BloomPrint per rispondere.",
         "signoff": "BloomPrint",
         "unsub": "Non vuoi riceverle? Disattivale: {url}",
         "unsub_note": "Continuerai a ricevere i messaggi relativi al tuo account.",
@@ -129,6 +185,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "BloomPrint öffnen",
         "reset_cta": "Neues Passwort wählen",
         "digest_title": "Neue Kommentare und Antworten",
+        "decide_approve": "Genehmigen",
+        "decide_reject": "Ablehnen",
+        "decide_ask": "Bestätige deine Antwort",
+        "decide_approved": "Genehmigt.",
+        "decide_rejected": "Abgelehnt.",
+        "decide_gone": "Das wurde bereits beantwortet.",
+        "decide_expired": "Dieser Link ist abgelaufen. Öffne BloomPrint, um zu antworten.",
+        "decide_failed": "Etwas ist schiefgelaufen. Öffne BloomPrint, um zu antworten.",
         "signoff": "BloomPrint",
         "unsub": "Nicht erwünscht? Hier abschalten: {url}",
         "unsub_note": "Nachrichten zu deinem eigenen Konto erhältst du weiterhin.",
@@ -141,6 +205,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "BloomPrint openen",
         "reset_cta": "Nieuw wachtwoord kiezen",
         "digest_title": "Nieuwe reacties en antwoorden",
+        "decide_approve": "Goedkeuren",
+        "decide_reject": "Afwijzen",
+        "decide_ask": "Bevestig je antwoord",
+        "decide_approved": "Goedgekeurd.",
+        "decide_rejected": "Afgewezen.",
+        "decide_gone": "Dit is al beantwoord.",
+        "decide_expired": "Deze link is verlopen. Open BloomPrint om te antwoorden.",
+        "decide_failed": "Er ging iets mis. Open BloomPrint om te antwoorden.",
         "signoff": "BloomPrint",
         "unsub": "Liever niet? Zet ze uit: {url}",
         "unsub_note": "Berichten over je eigen account blijf je ontvangen.",
@@ -153,6 +225,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Öppna BloomPrint",
         "reset_cta": "Välj ett nytt lösenord",
         "digest_title": "Nya kommentarer och svar",
+        "decide_approve": "Godkänn",
+        "decide_reject": "Avböj",
+        "decide_ask": "Bekräfta ditt svar",
+        "decide_approved": "Godkänt.",
+        "decide_rejected": "Avböjt.",
+        "decide_gone": "Det här är redan besvarat.",
+        "decide_expired": "Länken har gått ut. Öppna BloomPrint för att svara.",
+        "decide_failed": "Något gick fel. Öppna BloomPrint för att svara.",
         "signoff": "BloomPrint",
         "unsub": "Vill du inte ha dem? Stäng av dem: {url}",
         "unsub_note": "Du får fortfarande meddelanden som rör ditt eget konto.",
@@ -165,6 +245,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Otwórz BloomPrint",
         "reset_cta": "Ustaw nowe hasło",
         "digest_title": "Nowe komentarze i odpowiedzi",
+        "decide_approve": "Zatwierdź",
+        "decide_reject": "Odrzuć",
+        "decide_ask": "Potwierdź swoją odpowiedź",
+        "decide_approved": "Zatwierdzono.",
+        "decide_rejected": "Odrzucono.",
+        "decide_gone": "To już zostało rozstrzygnięte.",
+        "decide_expired": "Ten link wygasł. Otwórz BloomPrint, aby odpowiedzieć.",
+        "decide_failed": "Coś poszło nie tak. Otwórz BloomPrint, aby odpowiedzieć.",
         "signoff": "BloomPrint",
         "unsub": "Nie chcesz ich otrzymywać? Wyłącz je: {url}",
         "unsub_note": "Wiadomości dotyczące Twojego konta będziesz otrzymywać nadal.",
@@ -177,6 +265,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Открыть BloomPrint",
         "reset_cta": "Задать новый пароль",
         "digest_title": "Новые комментарии и ответы",
+        "decide_approve": "Одобрить",
+        "decide_reject": "Отклонить",
+        "decide_ask": "Подтвердите свой ответ",
+        "decide_approved": "Одобрено.",
+        "decide_rejected": "Отклонено.",
+        "decide_gone": "На это уже ответили.",
+        "decide_expired": "Срок действия ссылки истёк. Откройте BloomPrint, чтобы ответить.",
+        "decide_failed": "Что-то пошло не так. Откройте BloomPrint, чтобы ответить.",
         "signoff": "BloomPrint",
         "unsub": "Не хотите их получать? Отключите: {url}",
         "unsub_note": "Сообщения о вашей учётной записи будут приходить по-прежнему.",
@@ -189,6 +285,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Відкрити BloomPrint",
         "reset_cta": "Задати новий пароль",
         "digest_title": "Нові коментарі та відповіді",
+        "decide_approve": "Схвалити",
+        "decide_reject": "Відхилити",
+        "decide_ask": "Підтвердьте свою відповідь",
+        "decide_approved": "Схвалено.",
+        "decide_rejected": "Відхилено.",
+        "decide_gone": "На це вже відповіли.",
+        "decide_expired": "Термін дії посилання минув. Відкрийте BloomPrint, щоб відповісти.",
+        "decide_failed": "Щось пішло не так. Відкрийте BloomPrint, щоб відповісти.",
         "signoff": "BloomPrint",
         "unsub": "Не хочете їх отримувати? Вимкніть: {url}",
         "unsub_note": "Повідомлення про ваш обліковий запис надходитимуть і далі.",
@@ -201,6 +305,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Отвори BloomPrint",
         "reset_cta": "Изаберите нову лозинку",
         "digest_title": "Нови коментари и одговори",
+        "decide_approve": "Одобри",
+        "decide_reject": "Одбиј",
+        "decide_ask": "Потврдите свој одговор",
+        "decide_approved": "Одобрено.",
+        "decide_rejected": "Одбијено.",
+        "decide_gone": "На ово је већ одговорено.",
+        "decide_expired": "Ова веза је истекла. Отворите BloomPrint да одговорите.",
+        "decide_failed": "Нешто није у реду. Отворите BloomPrint да одговорите.",
         "signoff": "BloomPrint",
         "unsub": "Не желите ово? Искључите: {url}",
         "unsub_note": "Поруке о вашем налогу и даље ћете примати.",
@@ -213,6 +325,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Otvori BloomPrint",
         "reset_cta": "Odaberite novu lozinku",
         "digest_title": "Novi komentari i odgovori",
+        "decide_approve": "Odobri",
+        "decide_reject": "Odbij",
+        "decide_ask": "Potvrdite svoj odgovor",
+        "decide_approved": "Odobreno.",
+        "decide_rejected": "Odbijeno.",
+        "decide_gone": "Na ovo je već odgovoreno.",
+        "decide_expired": "Ova poveznica je istekla. Otvorite BloomPrint za odgovor.",
+        "decide_failed": "Nešto je pošlo po zlu. Otvorite BloomPrint za odgovor.",
         "signoff": "BloomPrint",
         "unsub": "Ne želite ovo? Isključite: {url}",
         "unsub_note": "Poruke o vašem računu i dalje ćete primati.",
@@ -225,6 +345,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "BloomPrint'i aç",
         "reset_cta": "Yeni şifre belirle",
         "digest_title": "Yeni yorumlar ve yanıtlar",
+        "decide_approve": "Onayla",
+        "decide_reject": "Reddet",
+        "decide_ask": "Yanıtınızı onaylayın",
+        "decide_approved": "Onaylandı.",
+        "decide_rejected": "Reddedildi.",
+        "decide_gone": "Bu zaten yanıtlandı.",
+        "decide_expired": "Bu bağlantının süresi doldu. Yanıtlamak için BloomPrint'i açın.",
+        "decide_failed": "Bir şeyler ters gitti. Yanıtlamak için BloomPrint'i açın.",
         "signoff": "BloomPrint",
         "unsub": "Bunları istemiyor musunuz? Kapatın: {url}",
         "unsub_note": "Kendi hesabınızla ilgili mesajları almaya devam edeceksiniz.",
@@ -237,6 +365,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Deschide BloomPrint",
         "reset_cta": "Alege o parolă nouă",
         "digest_title": "Comentarii și răspunsuri noi",
+        "decide_approve": "Aprobă",
+        "decide_reject": "Respinge",
+        "decide_ask": "Confirmă răspunsul",
+        "decide_approved": "Aprobat.",
+        "decide_rejected": "Respins.",
+        "decide_gone": "S-a răspuns deja la aceasta.",
+        "decide_expired": "Acest link a expirat. Deschide BloomPrint pentru a răspunde.",
+        "decide_failed": "Ceva nu a mers bine. Deschide BloomPrint pentru a răspunde.",
         "signoff": "BloomPrint",
         "unsub": "Nu le vrei? Dezactivează-le: {url}",
         "unsub_note": "Vei primi în continuare mesajele despre contul tău.",
@@ -249,6 +385,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Άνοιγμα του BloomPrint",
         "reset_cta": "Επιλογή νέου κωδικού",
         "digest_title": "Νέα σχόλια και απαντήσεις",
+        "decide_approve": "Έγκριση",
+        "decide_reject": "Απόρριψη",
+        "decide_ask": "Επιβεβαίωσε την απάντησή σου",
+        "decide_approved": "Εγκρίθηκε.",
+        "decide_rejected": "Απορρίφθηκε.",
+        "decide_gone": "Έχει ήδη απαντηθεί.",
+        "decide_expired": "Ο σύνδεσμος έληξε. Άνοιξε το BloomPrint για να απαντήσεις.",
+        "decide_failed": "Κάτι πήγε στραβά. Άνοιξε το BloomPrint για να απαντήσεις.",
         "signoff": "BloomPrint",
         "unsub": "Δεν τα θέλετε; Απενεργοποιήστε τα: {url}",
         "unsub_note": "Θα συνεχίσετε να λαμβάνετε μηνύματα για τον λογαριασμό σας.",
@@ -261,6 +405,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Atidaryti BloomPrint",
         "reset_cta": "Nustatyti naują slaptažodį",
         "digest_title": "Nauji komentarai ir atsakymai",
+        "decide_approve": "Patvirtinti",
+        "decide_reject": "Atmesti",
+        "decide_ask": "Patvirtinkite savo atsakymą",
+        "decide_approved": "Patvirtinta.",
+        "decide_rejected": "Atmesta.",
+        "decide_gone": "Į tai jau atsakyta.",
+        "decide_expired": "Šios nuorodos galiojimas baigėsi. Atidarykite BloomPrint, kad atsakytumėte.",
+        "decide_failed": "Kažkas nepavyko. Atidarykite BloomPrint, kad atsakytumėte.",
         "signoff": "BloomPrint",
         "unsub": "Nenorite jų gauti? Išjunkite: {url}",
         "unsub_note": "Pranešimus apie savo paskyrą ir toliau gausite.",
@@ -273,6 +425,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "فتح BloomPrint",
         "reset_cta": "اختيار كلمة مرور جديدة",
         "digest_title": "تعليقات وردود جديدة",
+        "decide_approve": "موافقة",
+        "decide_reject": "رفض",
+        "decide_ask": "أكّد إجابتك",
+        "decide_approved": "تمت الموافقة.",
+        "decide_rejected": "تم الرفض.",
+        "decide_gone": "تمت الإجابة على هذا بالفعل.",
+        "decide_expired": "انتهت صلاحية هذا الرابط. افتح BloomPrint للرد.",
+        "decide_failed": "حدث خطأ ما. افتح BloomPrint للرد.",
         "signoff": "BloomPrint",
         "unsub": "لا تريد هذه الرسائل؟ أوقفها: {url}",
         "unsub_note": "ستستمر في تلقّي الرسائل المتعلقة بحسابك.",
@@ -285,6 +445,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "פתיחת BloomPrint",
         "reset_cta": "בחירת סיסמה חדשה",
         "digest_title": "תגובות ותשובות חדשות",
+        "decide_approve": "אישור",
+        "decide_reject": "דחייה",
+        "decide_ask": "אשר את תשובתך",
+        "decide_approved": "אושר.",
+        "decide_rejected": "נדחה.",
+        "decide_gone": "כבר ניתנה תשובה על כך.",
+        "decide_expired": "תוקף הקישור פג. פתח את BloomPrint כדי להשיב.",
+        "decide_failed": "משהו השתבש. פתח את BloomPrint כדי להשיב.",
         "signoff": "BloomPrint",
         "unsub": "לא מעוניין בהודעות האלה? אפשר לכבות: {url}",
         "unsub_note": "הודעות שנוגעות לחשבון שלך ימשיכו להישלח.",
@@ -297,6 +465,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "BloomPrint खोलें",
         "reset_cta": "नया पासवर्ड चुनें",
         "digest_title": "नई टिप्पणियाँ और जवाब",
+        "decide_approve": "स्वीकार करें",
+        "decide_reject": "अस्वीकार करें",
+        "decide_ask": "अपना उत्तर पुष्ट करें",
+        "decide_approved": "स्वीकृत।",
+        "decide_rejected": "अस्वीकृत।",
+        "decide_gone": "इसका उत्तर पहले ही दिया जा चुका है।",
+        "decide_expired": "यह लिंक समाप्त हो गया है। उत्तर देने के लिए BloomPrint खोलें।",
+        "decide_failed": "कुछ गड़बड़ हो गई। उत्तर देने के लिए BloomPrint खोलें।",
         "signoff": "BloomPrint",
         "unsub": "ये नहीं चाहिए? इन्हें बंद करें: {url}",
         "unsub_note": "आपके अपने खाते से जुड़े संदेश आपको मिलते रहेंगे।",
@@ -309,6 +485,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "BloomPrint-ის გახსნა",
         "reset_cta": "ახალი პაროლის არჩევა",
         "digest_title": "ახალი კომენტარები და პასუხები",
+        "decide_approve": "დამტკიცება",
+        "decide_reject": "უარყოფა",
+        "decide_ask": "დაადასტურეთ თქვენი პასუხი",
+        "decide_approved": "დამტკიცდა.",
+        "decide_rejected": "უარყოფილია.",
+        "decide_gone": "ამაზე უკვე გაცემულია პასუხი.",
+        "decide_expired": "ბმულს ვადა გაუვიდა. გახსენით BloomPrint პასუხისთვის.",
+        "decide_failed": "რაღაც ვერ გამოვიდა. გახსენით BloomPrint პასუხისთვის.",
         "signoff": "BloomPrint",
         "unsub": "აღარ გსურთ მათი მიღება? გამორთეთ: {url}",
         "unsub_note": "თქვენს ანგარიშთან დაკავშირებულ შეტყობინებებს კვლავ მიიღებთ.",
@@ -321,6 +505,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "BloomPrint を開く",
         "reset_cta": "新しいパスワードを設定",
         "digest_title": "新しいコメントと返信",
+        "decide_approve": "承認する",
+        "decide_reject": "却下する",
+        "decide_ask": "回答を確認してください",
+        "decide_approved": "承認しました。",
+        "decide_rejected": "却下しました。",
+        "decide_gone": "これはすでに回答済みです。",
+        "decide_expired": "このリンクは期限切れです。BloomPrint を開いて回答してください。",
+        "decide_failed": "うまくいきませんでした。BloomPrint を開いて回答してください。",
         "signoff": "BloomPrint",
         "unsub": "不要な場合はこちらから停止できます: {url}",
         "unsub_note": "アカウントに関するお知らせは引き続きお送りします。",
@@ -333,6 +525,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "BloomPrint 열기",
         "reset_cta": "새 비밀번호 설정",
         "digest_title": "새 댓글과 답글",
+        "decide_approve": "승인",
+        "decide_reject": "거절",
+        "decide_ask": "답변을 확인하세요",
+        "decide_approved": "승인했습니다.",
+        "decide_rejected": "거절했습니다.",
+        "decide_gone": "이미 처리된 요청입니다.",
+        "decide_expired": "링크가 만료되었습니다. BloomPrint에서 답변해 주세요.",
+        "decide_failed": "문제가 발생했습니다. BloomPrint에서 답변해 주세요.",
         "signoff": "BloomPrint",
         "unsub": "받고 싶지 않으신가요? 여기에서 끄세요: {url}",
         "unsub_note": "계정 관련 안내는 계속 발송됩니다.",
@@ -345,6 +545,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "打开 BloomPrint",
         "reset_cta": "设置新密码",
         "digest_title": "新的评论和回复",
+        "decide_approve": "批准",
+        "decide_reject": "拒绝",
+        "decide_ask": "确认你的回答",
+        "decide_approved": "已批准。",
+        "decide_rejected": "已拒绝。",
+        "decide_gone": "这个请求已经处理过了。",
+        "decide_expired": "链接已过期。请打开 BloomPrint 回复。",
+        "decide_failed": "出了点问题。请打开 BloomPrint 回复。",
         "signoff": "BloomPrint",
         "unsub": "不想收到这些邮件？可在此关闭：{url}",
         "unsub_note": "与你账号相关的邮件仍会照常发送。",
@@ -357,6 +565,14 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Buksan ang BloomPrint",
         "reset_cta": "Pumili ng bagong password",
         "digest_title": "Mga bagong komento at sagot",
+        "decide_approve": "Aprubahan",
+        "decide_reject": "Tanggihan",
+        "decide_ask": "Kumpirmahin ang iyong sagot",
+        "decide_approved": "Naaprubahan.",
+        "decide_rejected": "Tinanggihan.",
+        "decide_gone": "Nasagot na ito.",
+        "decide_expired": "Nag-expire na ang link na ito. Buksan ang BloomPrint para sumagot.",
+        "decide_failed": "May nangyaring mali. Buksan ang BloomPrint para sumagot.",
         "signoff": "BloomPrint",
         "unsub": "Ayaw mo ng mga ito? I-off sila: {url}",
         "unsub_note": "Patuloy mo pa ring matatanggap ang mga mensahe tungkol sa sarili mong account.",
@@ -428,7 +644,8 @@ def _cta(shell: dict[str, str], event: str) -> str:
 
 
 def render(event: str, lang: str | None, params: dict | None = None, *,
-           token: str | None = None, link: str | None = None) -> tuple[str, str]:
+           token: str | None = None, link: str | None = None,
+           decide: str | None = None) -> tuple[str, str]:
     """(subject, body) for one event, in the reader's language.
 
     An unknown language falls back to English: sending in the wrong language
@@ -453,6 +670,12 @@ def render(event: str, lang: str | None, params: dict | None = None, *,
     if name:
         parts.append(_fmt(shell["greeting"], {"name": name}))
     parts.append(_plain(_fmt(line, params)))
+    if decide:
+        # A message that asks a question offers both answers, and the way into
+        # the app underneath in case the reader would rather look first.
+        yes, no = decide_urls(decide)
+        parts.append(f"{shell['decide_approve']}: {yes}\n"
+                     f"{shell['decide_reject']}: {no}")
     parts.append(f"{_cta(shell, event)}: {link or app_url()}")
     parts.append(shell["signoff"])
 
@@ -492,7 +715,8 @@ def check_complete() -> list[str]:
 
 
 def render_html(event: str, lang: str | None, params: dict | None = None, *,
-                token: str | None = None, link: str | None = None) -> str:
+                token: str | None = None, link: str | None = None,
+                decide: str | None = None) -> str:
     """The same message, laid out.
 
     Deliberately assembled from the same shell and the same event line as the
@@ -521,6 +745,10 @@ def render_html(event: str, lang: str | None, params: dict | None = None, *,
         "contact": shell.get("contact"),
         "contact_address": contact_email(),
     }
+    if decide:
+        yes, no = decide_urls(decide)
+        kw["cta_label"], kw["cta_url"] = shell["decide_approve"], yes
+        kw["cta2_label"], kw["cta2_url"] = shell["decide_reject"], no
     if event in MILESTONE_EVENTS:
         # The banner carries the news, so the greeting moves onto it as the
         # kicker rather than being said twice.
@@ -626,8 +854,8 @@ def notification_copy(key: str, lang: str | None,
 
 
 def render_notification(key: str, lang: str | None, params: dict | None = None, *,
-                        token: str | None = None,
-                        link: str | None = None) -> tuple[str, str] | None:
+                        token: str | None = None, link: str | None = None,
+                        decide: str | None = None) -> tuple[str, str] | None:
     """(subject, text body) for a notification, framed like any other email."""
     pair = notification_copy(key, lang, params)
     if pair is None:
@@ -636,7 +864,12 @@ def render_notification(key: str, lang: str | None, params: dict | None = None, 
     code = (lang or DEFAULT_LANG).split("-")[0].lower()
     shell = SHELL.get(code, SHELL[DEFAULT_LANG])
 
-    parts = [body, f"{shell['open_cta']}: {link or app_url()}", shell["signoff"]]
+    parts = [body]
+    if decide:
+        yes, no = decide_urls(decide)
+        parts.append(f"{shell['decide_approve']}: {yes}\n"
+                     f"{shell['decide_reject']}: {no}")
+    parts += [f"{shell['open_cta']}: {link or app_url()}", shell["signoff"]]
     if token:
         # Every one of these is an opt-out-able notification by definition:
         # account mail is not written as a notification row.
@@ -647,8 +880,8 @@ def render_notification(key: str, lang: str | None, params: dict | None = None, 
 
 def render_notification_html(key: str, lang: str | None,
                              params: dict | None = None, *,
-                             token: str | None = None,
-                             link: str | None = None) -> str | None:
+                             token: str | None = None, link: str | None = None,
+                             decide: str | None = None) -> str | None:
     """The same notification, laid out. Same words, same shell as render()."""
     from .email_html import build
     from .mailer import contact_email
@@ -671,6 +904,10 @@ def render_notification_html(key: str, lang: str | None,
         "contact": shell.get("contact"),
         "contact_address": contact_email(),
     }
+    if decide:
+        yes, no = decide_urls(decide)
+        kw["cta_label"], kw["cta_url"] = shell["decide_approve"], yes
+        kw["cta2_label"], kw["cta2_url"] = shell["decide_reject"], no
     if token:
         kw["unsub"] = shell["unsub"].replace("{url}", "").strip()
         kw["unsub_url"] = unsubscribe_url(token)

@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import emails, models, notify, schemas
+from .. import decisions, emails, models, notify, schemas
 from ..softdelete import soft_delete
 from ..ownership import get_owned
 from ..report_sections import _without_sections
@@ -165,8 +165,14 @@ def request_link(
         ))
     db.commit()
     for coach_id in recipients:
-        notify.coach_event(db.get(models.Coach, coach_id), "player_link_request",
-                           {"player": pu.name, "profile": player.name})
+        # One token each: they are different people answering, and a link that
+        # worked for whoever it was forwarded to would be a link that lets a
+        # stranger settle another coach's roster.
+        notify.coach_event(
+            db.get(models.Coach, coach_id), "player_link_request",
+            {"player": pu.name, "profile": player.name},
+            decide=decisions.issue(db, "player_link_request", lr.id,
+                                   decisions.COACH, coach_id))
     return {"ok": True}
 
 
@@ -431,9 +437,13 @@ def share_report(
             ))
             db.commit()
             # Nothing is shared until they answer, so this one waits on a
-            # person rather than merely telling them something happened.
-            notify.player_notification(subject_pu, "notifs.shareApproval", params,
-                                       link=emails.link_to("/my/alerts"))
+            # person rather than merely telling them something happened, and
+            # the mail carries both answers.
+            notify.player_notification(
+                subject_pu, "notifs.shareApproval", params,
+                link=emails.link_to("/my/alerts"),
+                decide=decisions.issue(db, "share_approval", approval.id,
+                                       decisions.PLAYER, subject_pu.id))
             return {"ok": True, "status": "pending_approval",
                     "subject_name": subject_name, "recipient_name": recipient_name}
         if not subject_pu and not body.consent_override:
@@ -1606,9 +1616,11 @@ def share_team_report(
                         ref_id=approval.id,
                     ))
                     db.commit()
-                    notify.player_notification(subject_pu, "notifs.shareApproval",
-                                               params,
-                                               link=emails.link_to("/my/alerts"))
+                    notify.player_notification(
+                        subject_pu, "notifs.shareApproval", params,
+                        link=emails.link_to("/my/alerts"),
+                        decide=decisions.issue(db, "share_approval", approval.id,
+                                               decisions.PLAYER, subject_pu.id))
                     return {"ok": True, "status": "pending_approval",
                             "subject_name": subject_name, "recipient_name": recipient_name}
                 if not subject_pu and not body.consent_override:

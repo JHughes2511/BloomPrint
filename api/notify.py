@@ -82,7 +82,8 @@ def _preference(audience: str, user_id: int) -> tuple[str, bool]:
 
 
 def _deliver(audience: str, user_id: int, event: str, to: str,
-             lang: str | None, params: dict, link: str | None) -> None:
+             lang: str | None, params: dict, link: str | None,
+             decide: str | None = None) -> None:
     """Render and send. Runs on the pool; must never raise."""
     try:
         token, opted_out = _preference(audience, user_id)
@@ -90,11 +91,13 @@ def _deliver(audience: str, user_id: int, event: str, to: str,
         # something the recipient just did, and there is nothing to opt out of.
         if opted_out and event not in ACCOUNT_EVENTS:
             return
-        subject, body = render(event, lang, params, token=token, link=link)
+        subject, body = render(event, lang, params, token=token, link=link,
+                               decide=decide)
         # Both halves, always. The text is the message; the HTML is how it
         # looks. A client that cannot show one shows the other.
         try:
-            html = render_html(event, lang, params, token=token, link=link)
+            html = render_html(event, lang, params, token=token, link=link,
+                               decide=decide)
         except Exception:
             # A layout that fails must not cost someone their notification.
             log.warning("Could not lay out %s; sending as text", event, exc_info=True)
@@ -117,16 +120,21 @@ def _deliver(audience: str, user_id: int, event: str, to: str,
 
 def send_event(audience: str, user_id: int, event: str, *, to: str | None,
                lang: str | None, params: dict | None = None,
-               link: str | None = None) -> None:
-    """Queue one event for one person. Returns immediately."""
+               link: str | None = None, decide: str | None = None) -> None:
+    """Queue one event for one person. Returns immediately.
+
+    `decide` is a token from api/decisions.py, for the messages that ask a
+    question: it puts both answers in the mail as buttons.
+    """
     if not to:
         return
     _pool.submit(_deliver, audience, user_id, event, to, lang,
-                 dict(params or {}), link)
+                 dict(params or {}), link, decide)
 
 
 def coach_event(coach: "models.Coach | None", event: str,
-                params: dict | None = None, *, link: str | None = None) -> None:
+                params: dict | None = None, *, link: str | None = None,
+                decide: str | None = None) -> None:
     """send_event for a coach, reading address and language off the row.
 
     Values are copied out here, on the caller's thread, because the row belongs
@@ -137,11 +145,13 @@ def coach_event(coach: "models.Coach | None", event: str,
     p = dict(params or {})
     p.setdefault("name", coach.name)
     send_event(COACH, coach.id, event, to=coach.email,
-               lang=coach.preferred_language, params=p, link=link)
+               lang=coach.preferred_language, params=p, link=link,
+               decide=decide)
 
 
 def player_event(user: "models.PlayerUser | None", event: str,
-                 params: dict | None = None, *, link: str | None = None) -> None:
+                 params: dict | None = None, *, link: str | None = None,
+                 decide: str | None = None) -> None:
     """send_event for a player account, in the player's own language."""
     if user is None:
         return
@@ -149,7 +159,7 @@ def player_event(user: "models.PlayerUser | None", event: str,
     p.setdefault("name", user.name)
     send_event(PLAYER, user.id, event, to=user.email,
                lang=getattr(user, "preferred_language", None),
-               params=p, link=link)
+               params=p, link=link, decide=decide)
 
 
 def is_opted_out(audience: str, user_id: int) -> bool:
@@ -188,8 +198,8 @@ def set_opted_out(audience: str, user_id: int, value: bool) -> bool:
 # cannot come to disagree.
 
 def _deliver_notification(audience: str, user_id: int, key: str, to: str,
-                          lang: str | None, params: dict,
-                          link: str | None) -> None:
+                          lang: str | None, params: dict, link: str | None,
+                          decide: str | None = None) -> None:
     """Render one notification as mail and send it. Never raises."""
     try:
         token, opted_out = _preference(audience, user_id)
@@ -197,7 +207,8 @@ def _deliver_notification(audience: str, user_id: int, key: str, to: str,
         # written as an event, not as a notification row.
         if opted_out:
             return
-        rendered = render_notification(key, lang, params, token=token, link=link)
+        rendered = render_notification(key, lang, params, token=token, link=link,
+                                       decide=decide)
         if rendered is None:
             # No copy for the key, or a param the caller did not pass. Both
             # mean the message would read as a bug; the in-app row still shows.
@@ -205,7 +216,8 @@ def _deliver_notification(audience: str, user_id: int, key: str, to: str,
             return
         subject, body = rendered
         try:
-            html = render_notification_html(key, lang, params, token=token, link=link)
+            html = render_notification_html(key, lang, params, token=token,
+                                            link=link, decide=decide)
         except Exception:
             log.warning("Could not lay out %s; sending as text", key, exc_info=True)
             html = None
@@ -220,7 +232,7 @@ def _deliver_notification(audience: str, user_id: int, key: str, to: str,
 
 def notification(audience: str, user_id: int, key: str, *, to: str | None,
                  lang: str | None, params: dict | None = None,
-                 link: str | None = None) -> None:
+                 link: str | None = None, decide: str | None = None) -> None:
     """Send the email for one in-app notification, or queue it for the digest.
 
     Returns immediately either way. Which of the two happens is decided here
@@ -234,12 +246,12 @@ def notification(audience: str, user_id: int, key: str, *, to: str | None,
         digest.queue(audience, user_id, key, params, link)
         return
     _pool.submit(_deliver_notification, audience, user_id, key, to, lang,
-                 dict(params or {}), link)
+                 dict(params or {}), link, decide)
 
 
 def coach_notification(coach: "models.Coach | None", key: str,
-                       params: dict | None = None, *,
-                       link: str | None = None) -> None:
+                       params: dict | None = None, *, link: str | None = None,
+                       decide: str | None = None) -> None:
     """The coach's copy of a notification, in the coach's language.
 
     Address and language are read here, on the caller's thread, because the row
@@ -248,18 +260,19 @@ def coach_notification(coach: "models.Coach | None", key: str,
     if coach is None:
         return
     notification(COACH, coach.id, key, to=coach.email,
-                 lang=coach.preferred_language, params=params, link=link)
+                 lang=coach.preferred_language, params=params, link=link,
+                 decide=decide)
 
 
 def player_notification(user: "models.PlayerUser | None", key: str,
-                        params: dict | None = None, *,
-                        link: str | None = None) -> None:
+                        params: dict | None = None, *, link: str | None = None,
+                        decide: str | None = None) -> None:
     """The player's copy of a notification, in the player's language."""
     if user is None:
         return
     notification(PLAYER, user.id, key, to=user.email,
                  lang=getattr(user, "preferred_language", None),
-                 params=params, link=link)
+                 params=params, link=link, decide=decide)
 
 
 # Events that go into the hourly digest instead of leaving one at a time. See

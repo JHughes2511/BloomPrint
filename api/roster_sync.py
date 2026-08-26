@@ -36,7 +36,7 @@ from difflib import SequenceMatcher
 
 from sqlalchemy.orm import Session
 
-from . import emails, models, notify
+from . import decisions, emails, models, notify
 from .softdelete import soft_delete
 
 # Who the player is. Shared knowledge, and the only thing that merges.
@@ -246,9 +246,11 @@ def _propose(db: Session, team: models.Team, coach: models.Coach,
         ))
         # This one is a question, not an announcement: the roster stays as it
         # is until the owner answers it.
-        notify.coach_notification(db.get(models.Coach, owner_id),
-                                  "notifs.rosterPlayerProposed", params,
-                                  link=emails.link_to("/home/staff"))
+        notify.coach_notification(
+            db.get(models.Coach, owner_id), "notifs.rosterPlayerProposed", params,
+            link=emails.link_to("/home/staff"),
+            decide=decisions.issue(db, "roster_proposal", row.id,
+                                   decisions.COACH, owner_id))
     return True
 
 

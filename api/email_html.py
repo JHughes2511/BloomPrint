@@ -106,7 +106,8 @@ def _paragraphs(body: str, align: str) -> str:
     return "".join(out)
 
 
-def _button(label: str, url: str, rtl: bool, bg: str = ACCENT) -> str:
+def _button(label: str, url: str, rtl: bool, bg: str = ACCENT,
+            fg: str = "#FFFFFF", gap: str = "6px 0 22px") -> str:
     """Full width and rounded, the way the app's own buttons are.
 
     Wrapped in a table because a padded <a> is the one button shape Outlook
@@ -114,10 +115,10 @@ def _button(label: str, url: str, rtl: bool, bg: str = ACCENT) -> str:
     """
     return f"""
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-           border="0" style="margin:6px 0 22px">
+           border="0" style="margin:{gap}">
       <tr><td align="center" bgcolor="{bg}" style="border-radius:10px">
         <a href="{_esc(url)}" style="display:block;padding:15px 24px;
-           font-family:{FONT};font-size:16px;font-weight:600;color:#FFFFFF;
+           font-family:{FONT};font-size:16px;font-weight:600;color:{fg};
            text-decoration:none;border-radius:10px">{_esc(label)}</a>
       </td></tr>
     </table>"""
@@ -162,6 +163,13 @@ def build(
     # Navy when the banner is already wearing the accent, so the panel and the
     # button are not the same blue arguing with each other.
     cta_bg: str = ACCENT,
+    # A second button, for the messages that ask a question rather than
+    # announce something. Stacked under the first rather than beside it: two
+    # cells side by side is the layout Outlook is worst at, and on a phone a
+    # full-width target is easier to hit correctly — which matters more than
+    # usual when the two answers are opposites.
+    cta2_label: str | None = None,
+    cta2_url: str | None = None,
     contact: str | None = None,
     contact_address: str | None = None,
     unsub: str | None = None,
@@ -187,7 +195,16 @@ def build(
         greet = (f'<p style="margin:0 0 18px;font-size:16px;line-height:26px;'
                  f'color:{INK};font-weight:600;text-align:{align}">{_esc(greeting)}</p>')
 
-    cta = _button(cta_label, cta_url, rtl, cta_bg) if cta_label and cta_url else ""
+    cta = ""
+    if cta_label and cta_url:
+        second = bool(cta2_label and cta2_url)
+        cta = _button(cta_label, cta_url, rtl, cta_bg,
+                      gap="6px 0 10px" if second else "6px 0 22px")
+        if second:
+            # The declining answer is quiet rather than red: it is an ordinary
+            # answer, not a warning, and two loud buttons make the reader stop
+            # and work out which is which.
+            cta += _button(cta2_label, cta2_url, rtl, CHIP, INK, "0 0 22px")
 
     lines = []
     # The contact line is on every message. A reader with a question should

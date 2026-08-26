@@ -1384,6 +1384,40 @@ class PendingNotification(Base):
     sent_at    = Column(DateTime, nullable=True, index=True)
 
 
+class DecisionToken(Base):
+    """One approve-or-decline link, sent in an email.
+
+    The request it answers already exists — a consent request, a join request,
+    an invite, a roster proposal. This is only a way to answer it without
+    opening the app, so it carries no decision of its own: which way it goes is
+    chosen when the link is followed, not when it is minted. One token per
+    request per person, and it answers only that one.
+
+    Stored as a hash, like a password reset, so a leaked database hands over no
+    working links. Anyone holding the link can answer as that person, which is
+    exactly what it is for, and why it expires.
+    """
+    __tablename__ = "decision_tokens"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    token_hash = Column(String, unique=True, index=True, nullable=False)
+    # Which kind of request, which row of it, and who is entitled to answer.
+    kind       = Column(String, nullable=False)
+    target_id  = Column(Integer, nullable=False)
+    audience   = Column(String, nullable=False)
+    user_id    = Column(Integer, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    # Stamped when the link has been followed through to a decision. A request
+    # answered inside the app instead leaves this null, and the link then finds
+    # the request already settled and says so.
+    used_at    = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    @property
+    def is_live(self) -> bool:
+        return self.used_at is None and datetime.utcnow() < self.expires_at
+
+
 class TeamJoinLink(Base):
     """A standing signup link for a team.
 

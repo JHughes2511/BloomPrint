@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import emails, models, notify, roster_sync
+from .. import decisions, emails, models, notify, roster_sync
 
 router = APIRouter(prefix="/team-staff", tags=["team-staff"])
 
@@ -199,8 +199,11 @@ def join_team(
         ref_id=req.id,
     ))
     db.commit()
-    notify.coach_event(db.get(models.Coach, team.coach_id), "team_join_request",
-                       {"coach": coach.name, "team": team.name})
+    notify.coach_event(
+        db.get(models.Coach, team.coach_id), "team_join_request",
+        {"coach": coach.name, "team": team.name},
+        decide=decisions.issue(db, "team_join_request", req.id,
+                               decisions.COACH, team.coach_id))
     return {"ok": True, "status": "pending"}
 
 
@@ -706,8 +709,10 @@ def invite_to_team(
         # An existing account gets the same message a stranger would, minus the
         # signup code they don't need. Without this the only invite anyone was
         # emailed about was one sent to an address with no account.
-        notify.coach_event(target, "staff_invite",
-                           {"inviter": coach.name, "team": team.name})
+        notify.coach_event(
+            target, "staff_invite", {"inviter": coach.name, "team": team.name},
+            decide=decisions.issue(db, "team_invite", inv.id,
+                                   decisions.COACH, target.id))
         return {"status": "invited", "name": target.name}
 
     if not email:
