@@ -289,6 +289,7 @@ export default function PlayerTrainingDetailScreen() {
               value={commentText}
               onChangeText={setCommentText}
               multiline
+              autoGrow={{ min: 18, max: 92 }}
 
             />
             <TouchableOpacity
@@ -298,7 +299,7 @@ export default function PlayerTrainingDetailScreen() {
             >
               {submitting
                 ? <ActivityIndicator color="#fff" size="small" />
-                : <Ionicons name="send" size={18} color="#fff" />}
+                : <Ionicons name="arrow-up" size={20} color="#fff" />}
             </TouchableOpacity>
           </View>
         </View>
@@ -459,14 +460,13 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
     flex: 1,
     backgroundColor: t.chip,
     borderRadius: 10,
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
     color: t.ink,
     fontSize: 14,
     borderWidth: 1,
     borderColor: t.line,
-    maxHeight: 100,
-    minHeight: 80,
-  },
+    },
   // One control in two pieces: the field and Send share a height rather than
   // each arriving at one through its own padding. Padding alone made the button
   // grow with the multiline field beside it — on web that field is a textarea
