@@ -100,7 +100,10 @@
     "conferenceRequired": "Conférence obligatoire",
     "conferenceRequiredMsg": "Veuillez choisir votre conférence pour continuer.",
     "appLanguage": "Langue de l'application",
-    "panelTagline": "Analyse vidéo, évaluations des joueurs et plans d'entraînement — dans un seul système."
+    "panelTagline": "Analyse vidéo, évaluations des joueurs et plans d'entraînement — dans un seul système.",
+    "forgotPassword": "Mot de passe oublié ?",
+    "forgotNeedEmail": "Saisissez votre e-mail ci-dessus, puis touchez à nouveau.",
+    "forgotSent": "Si cette adresse a un compte, un lien est en route."
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "Supprimer ceci ?",
     "deleteBody": "Il garde sa place pour que les réponses restent lisibles, mais le texte disparaît. Action irréversible.",
     "holdHint": "Appuyez longuement sur un message pour répondre, modifier et supprimer."
+  },
+  "resetPassword": {
+    "title": "Choisissez un nouveau mot de passe",
+    "sub": "Ce lien ne fonctionne qu'une fois. Prenez quelque chose que vous n'avez pas déjà utilisé ici.",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Saisissez-le à nouveau",
+    "submit": "Enregistrer et se connecter",
+    "show": "Afficher le mot de passe",
+    "hide": "Masquer le mot de passe",
+    "tooShort": "Au moins {{count}} caractères.",
+    "mismatch": "Ils ne correspondent pas.",
+    "failed": "Cela n'a pas fonctionné. Demandez un nouveau lien et réessayez.",
+    "badLinkTitle": "Ce lien est incomplet",
+    "badLinkBody": "Votre messagerie l'a peut-être coupé. Demandez-en un nouveau depuis l'écran de connexion.",
+    "backToSignIn": "Retour à la connexion",
+    "signsOutOthers": "Enregistrer un nouveau mot de passe vous déconnecte de tous les autres appareils."
   }
 }

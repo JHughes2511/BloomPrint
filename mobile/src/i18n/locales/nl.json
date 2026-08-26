@@ -100,7 +100,10 @@
     "conferenceRequired": "Conference verplicht",
     "conferenceRequiredMsg": "Selecteer je conference om door te gaan.",
     "appLanguage": "App-taal",
-    "panelTagline": "Videoanalyse, spelerevaluaties en trainingsplannen — in één systeem."
+    "panelTagline": "Videoanalyse, spelerevaluaties en trainingsplannen — in één systeem.",
+    "forgotPassword": "Wachtwoord vergeten?",
+    "forgotNeedEmail": "Vul hierboven je e-mail in en tik dit nog eens aan.",
+    "forgotSent": "Als dat adres een account heeft, is er een link onderweg."
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "Dit verwijderen?",
     "deleteBody": "Het blijft staan zodat reacties leesbaar blijven, maar de tekst verdwijnt. Dit kan niet ongedaan worden gemaakt.",
     "holdHint": "Houd een bericht ingedrukt voor antwoorden, bewerken en verwijderen."
+  },
+  "resetPassword": {
+    "title": "Kies een nieuw wachtwoord",
+    "sub": "Deze link werkt één keer. Kies iets dat je hier nog niet hebt gebruikt.",
+    "newPassword": "Nieuw wachtwoord",
+    "confirmPassword": "Typ het nog eens",
+    "submit": "Opslaan en inloggen",
+    "show": "Wachtwoord tonen",
+    "hide": "Wachtwoord verbergen",
+    "tooShort": "Minstens {{count}} tekens.",
+    "mismatch": "Deze komen niet overeen.",
+    "failed": "Dat werkte niet. Vraag een nieuwe link aan en probeer het opnieuw.",
+    "badLinkTitle": "Deze link is onvolledig",
+    "badLinkBody": "Je mailprogramma heeft hem misschien afgekapt. Vraag een nieuwe aan op het inlogscherm.",
+    "backToSignIn": "Terug naar inloggen",
+    "signsOutOthers": "Een nieuw wachtwoord opslaan logt je uit op alle andere apparaten."
   }
 }

@@ -100,7 +100,10 @@
     "conferenceRequired": "Konferencija je obavezna",
     "conferenceRequiredMsg": "Odaberi svoju konferenciju za nastavak.",
     "appLanguage": "Jezik aplikacije",
-    "panelTagline": "Analiza snimaka, ocjene igrača i planovi treninga — u jednom sustavu."
+    "panelTagline": "Analiza snimaka, ocjene igrača i planovi treninga — u jednom sustavu.",
+    "forgotPassword": "Zaboravili ste lozinku?",
+    "forgotNeedEmail": "Unesite e-poštu iznad pa ponovno dodirnite ovo.",
+    "forgotSent": "Ako ta adresa ima račun, poveznica je već na putu."
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "Izbrisati ovo?",
     "deleteBody": "Ostaje na mjestu da se odgovori i dalje mogu čitati, ali tekst nestaje. Ne može se poništiti.",
     "holdHint": "Držite poruku za odgovor, uređivanje i brisanje."
+  },
+  "resetPassword": {
+    "title": "Odaberite novu lozinku",
+    "sub": "Ova poveznica radi jednom. Odaberite nešto što ovdje još niste koristili.",
+    "newPassword": "Nova lozinka",
+    "confirmPassword": "Unesite ponovno",
+    "submit": "Spremi i prijavi me",
+    "show": "Prikaži lozinku",
+    "hide": "Sakrij lozinku",
+    "tooShort": "Najmanje {{count}} znakova.",
+    "mismatch": "Ne podudaraju se.",
+    "failed": "Nije uspjelo. Zatražite novu poveznicu i pokušajte ponovno.",
+    "badLinkTitle": "Ova poveznica je nepotpuna",
+    "badLinkBody": "Možda ju je vaš program za e-poštu skratio. Zatražite novu na zaslonu za prijavu.",
+    "backToSignIn": "Natrag na prijavu",
+    "signsOutOthers": "Spremanje nove lozinke odjavljuje vas sa svih drugih uređaja."
   }
 }

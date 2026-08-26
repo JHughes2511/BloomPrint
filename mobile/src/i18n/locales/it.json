@@ -100,7 +100,10 @@
     "conferenceRequired": "Conference Obbligatoria",
     "conferenceRequiredMsg": "Seleziona la tua conference per continuare.",
     "appLanguage": "Lingua dell'App",
-    "panelTagline": "Analisi video, valutazioni dei giocatori e piani di allenamento — in un unico sistema."
+    "panelTagline": "Analisi video, valutazioni dei giocatori e piani di allenamento — in un unico sistema.",
+    "forgotPassword": "Password dimenticata?",
+    "forgotNeedEmail": "Scrivi la tua email qui sopra, poi tocca di nuovo.",
+    "forgotSent": "Se quell'indirizzo ha un account, il link è già in arrivo."
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "Eliminare?",
     "deleteBody": "Resta al suo posto così le risposte restano leggibili, ma il testo sparisce. Non è reversibile.",
     "holdHint": "Tieni premuto un messaggio per rispondere, modificare ed eliminare."
+  },
+  "resetPassword": {
+    "title": "Scegli una nuova password",
+    "sub": "Questo link funziona una volta sola. Scegli qualcosa che non hai già usato qui.",
+    "newPassword": "Nuova password",
+    "confirmPassword": "Scrivila di nuovo",
+    "submit": "Salva e accedi",
+    "show": "Mostra password",
+    "hide": "Nascondi password",
+    "tooShort": "Almeno {{count}} caratteri.",
+    "mismatch": "Non coincidono.",
+    "failed": "Non ha funzionato. Chiedi un nuovo link e riprova.",
+    "badLinkTitle": "Questo link è incompleto",
+    "badLinkBody": "La tua app di posta potrebbe averlo tagliato. Chiedine uno nuovo dalla schermata di accesso.",
+    "backToSignIn": "Torna all'accesso",
+    "signsOutOthers": "Salvare una nuova password ti disconnette da tutti gli altri dispositivi."
   }
 }

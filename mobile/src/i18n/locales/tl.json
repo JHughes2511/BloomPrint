@@ -100,7 +100,10 @@
     "conferenceRequired": "Kailangan ng Conference",
     "conferenceRequiredMsg": "Pumili ng conference mo para makatuloy.",
     "appLanguage": "Wika ng App",
-    "panelTagline": "Pagsusuri ng film, evaluation ng manlalaro, at training plan — sa iisang sistema."
+    "panelTagline": "Pagsusuri ng film, evaluation ng manlalaro, at training plan — sa iisang sistema.",
+    "forgotPassword": "Nakalimutan ang password?",
+    "forgotNeedEmail": "I-type ang email mo sa itaas, tapos pindutin ulit ito.",
+    "forgotSent": "Kung may account ang address na iyon, papunta na ang link."
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "Burahin ito?",
     "deleteBody": "Mananatili ang puwesto nito para mabasa pa rin ang mga sagot, pero mawawala ang teksto. Hindi na maibabalik.",
     "holdHint": "Pindutin nang matagal ang mensahe para sumagot, mag-edit at magbura."
+  },
+  "resetPassword": {
+    "title": "Pumili ng bagong password",
+    "sub": "Isang beses gumagana ang link na ito. Pumili ng hindi mo pa nagamit dito.",
+    "newPassword": "Bagong password",
+    "confirmPassword": "I-type ulit",
+    "submit": "I-save at mag-sign in",
+    "show": "Ipakita ang password",
+    "hide": "Itago ang password",
+    "tooShort": "Hindi bababa sa {{count}} karakter.",
+    "mismatch": "Hindi magkatugma.",
+    "failed": "Hindi umubra. Humingi ng bagong link at subukan ulit.",
+    "badLinkTitle": "Kulang ang link na ito",
+    "badLinkBody": "Baka pinutol ito ng email app mo. Humingi ng bago sa sign-in screen.",
+    "backToSignIn": "Balik sa sign in",
+    "signsOutOthers": "Ang pag-save ng bagong password ay magsi-sign out sa iyo sa lahat ng ibang device."
   }
 }

@@ -100,7 +100,10 @@
     "conferenceRequired": "Conferência obrigatória",
     "conferenceRequiredMsg": "Selecione sua conferência para continuar.",
     "appLanguage": "Idioma do app",
-    "panelTagline": "Análise de vídeo, avaliações de jogadores e planos de treino — em um só sistema."
+    "panelTagline": "Análise de vídeo, avaliações de jogadores e planos de treino — em um só sistema.",
+    "forgotPassword": "Esqueceu-se da palavra-passe?",
+    "forgotNeedEmail": "Escreva o seu email acima e toque aqui outra vez.",
+    "forgotSent": "Se esse endereço tiver conta, a ligação já vai a caminho."
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "Eliminar isto?",
     "deleteBody": "Fica no lugar para as respostas continuarem a fazer sentido, mas o texto desaparece. Não pode ser desfeito.",
     "holdHint": "Mantém premida uma mensagem para responder, editar e eliminar."
+  },
+  "resetPassword": {
+    "title": "Escolha uma nova palavra-passe",
+    "sub": "Esta ligação funciona uma vez. Escolha algo que ainda não tenha usado aqui.",
+    "newPassword": "Nova palavra-passe",
+    "confirmPassword": "Escreva outra vez",
+    "submit": "Guardar e entrar",
+    "show": "Mostrar palavra-passe",
+    "hide": "Ocultar palavra-passe",
+    "tooShort": "Pelo menos {{count}} caracteres.",
+    "mismatch": "Não coincidem.",
+    "failed": "Não resultou. Peça uma nova ligação e tente de novo.",
+    "badLinkTitle": "Esta ligação está incompleta",
+    "badLinkBody": "A sua aplicação de email pode tê-la cortado. Peça outra no ecrã de início de sessão.",
+    "backToSignIn": "Voltar ao início de sessão",
+    "signsOutOthers": "Guardar uma nova palavra-passe termina a sessão em todos os outros dispositivos."
   }
 }

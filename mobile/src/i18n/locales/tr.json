@@ -100,7 +100,10 @@
     "conferenceRequired": "Konferans Gerekli",
     "conferenceRequiredMsg": "Devam etmek için lütfen konferansınızı seçin.",
     "appLanguage": "Uygulama Dili",
-    "panelTagline": "Video analizi, oyuncu değerlendirmeleri ve antrenman planları — tek bir sistemde."
+    "panelTagline": "Video analizi, oyuncu değerlendirmeleri ve antrenman planları — tek bir sistemde.",
+    "forgotPassword": "Şifrenizi mi unuttunuz?",
+    "forgotNeedEmail": "E-postanızı yukarıya yazın, sonra buraya tekrar dokunun.",
+    "forgotSent": "O adresin hesabı varsa bağlantı yola çıktı."
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "Bu silinsin mi?",
     "deleteBody": "Yanıtlar okunabilsin diye yeri kalır, ama metin gider. Geri alınamaz.",
     "holdHint": "Yanıtlamak, düzenlemek ve silmek için mesaja basılı tutun."
+  },
+  "resetPassword": {
+    "title": "Yeni bir şifre seçin",
+    "sub": "Bu bağlantı bir kez çalışır. Burada daha önce kullanmadığınız bir şey seçin.",
+    "newPassword": "Yeni şifre",
+    "confirmPassword": "Tekrar yazın",
+    "submit": "Kaydet ve giriş yap",
+    "show": "Şifreyi göster",
+    "hide": "Şifreyi gizle",
+    "tooShort": "En az {{count}} karakter.",
+    "mismatch": "Bunlar eşleşmiyor.",
+    "failed": "Olmadı. Yeni bir bağlantı isteyip tekrar deneyin.",
+    "badLinkTitle": "Bu bağlantı eksik",
+    "badLinkBody": "E-posta uygulamanız kısaltmış olabilir. Giriş ekranından yenisini isteyin.",
+    "backToSignIn": "Girişe dön",
+    "signsOutOthers": "Yeni şifre kaydetmek diğer tüm cihazlardaki oturumunuzu kapatır."
   }
 }

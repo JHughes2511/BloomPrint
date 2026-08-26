@@ -100,7 +100,10 @@
     "conferenceRequired": "Konferens krävs",
     "conferenceRequiredMsg": "Välj din konferens för att fortsätta.",
     "appLanguage": "Appspråk",
-    "panelTagline": "Filmanalys, spelarutvärderingar och träningsplaner – i ett system."
+    "panelTagline": "Filmanalys, spelarutvärderingar och träningsplaner – i ett system.",
+    "forgotPassword": "Glömt lösenordet?",
+    "forgotNeedEmail": "Skriv din e-post ovanför och tryck här igen.",
+    "forgotSent": "Om adressen har ett konto är en länk på väg."
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "Ta bort det här?",
     "deleteBody": "Det ligger kvar så att svaren fortfarande går att läsa, men texten försvinner. Går inte att ångra.",
     "holdHint": "Håll in ett meddelande för att svara, redigera och ta bort."
+  },
+  "resetPassword": {
+    "title": "Välj ett nytt lösenord",
+    "sub": "Länken fungerar en gång. Välj något du inte redan använt här.",
+    "newPassword": "Nytt lösenord",
+    "confirmPassword": "Skriv det igen",
+    "submit": "Spara och logga in",
+    "show": "Visa lösenord",
+    "hide": "Dölj lösenord",
+    "tooShort": "Minst {{count}} tecken.",
+    "mismatch": "De stämmer inte överens.",
+    "failed": "Det gick inte. Be om en ny länk och försök igen.",
+    "badLinkTitle": "Länken är ofullständig",
+    "badLinkBody": "Ditt e-postprogram kan ha kapat den. Be om en ny från inloggningssidan.",
+    "backToSignIn": "Tillbaka till inloggning",
+    "signsOutOthers": "Att spara ett nytt lösenord loggar ut dig på alla andra enheter."
   }
 }

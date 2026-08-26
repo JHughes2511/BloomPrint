@@ -100,7 +100,10 @@
     "conferenceRequired": "Conference erforderlich",
     "conferenceRequiredMsg": "Bitte wähle deine Conference aus, um fortzufahren.",
     "appLanguage": "App-Sprache",
-    "panelTagline": "Filmanalyse, Spielerbewertungen und Trainingspläne — in einem System."
+    "panelTagline": "Filmanalyse, Spielerbewertungen und Trainingspläne — in einem System.",
+    "forgotPassword": "Passwort vergessen?",
+    "forgotNeedEmail": "Trag oben deine E-Mail ein und tipp noch einmal hier.",
+    "forgotSent": "Wenn es zu der Adresse ein Konto gibt, ist ein Link unterwegs."
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "Das löschen?",
     "deleteBody": "Sie bleibt an ihrem Platz, damit Antworten weiter lesbar sind, aber der Text verschwindet. Nicht rückgängig zu machen.",
     "holdHint": "Nachricht gedrückt halten für Antworten, Bearbeiten und Löschen."
+  },
+  "resetPassword": {
+    "title": "Neues Passwort wählen",
+    "sub": "Dieser Link funktioniert einmal. Nimm etwas, das du hier noch nicht benutzt hast.",
+    "newPassword": "Neues Passwort",
+    "confirmPassword": "Noch einmal eingeben",
+    "submit": "Speichern und anmelden",
+    "show": "Passwort anzeigen",
+    "hide": "Passwort verbergen",
+    "tooShort": "Mindestens {{count}} Zeichen.",
+    "mismatch": "Die beiden stimmen nicht überein.",
+    "failed": "Das hat nicht geklappt. Fordere einen neuen Link an und versuch es noch einmal.",
+    "badLinkTitle": "Dieser Link ist unvollständig",
+    "badLinkBody": "Vielleicht hat dein Mailprogramm ihn abgeschnitten. Fordere über die Anmeldeseite einen neuen an.",
+    "backToSignIn": "Zurück zur Anmeldung",
+    "signsOutOthers": "Ein neues Passwort meldet dich auf allen anderen Geräten ab."
   }
 }

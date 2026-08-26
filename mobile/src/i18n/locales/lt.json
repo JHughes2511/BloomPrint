@@ -100,7 +100,10 @@
     "conferenceRequired": "Reikalinga konferencija",
     "conferenceRequiredMsg": "Norėdami tęsti, pasirinkite savo konferenciją.",
     "appLanguage": "Programėlės kalba",
-    "panelTagline": "Vaizdo analizė, žaidėjų vertinimai ir treniruočių planai — vienoje sistemoje."
+    "panelTagline": "Vaizdo analizė, žaidėjų vertinimai ir treniruočių planai — vienoje sistemoje.",
+    "forgotPassword": "Pamiršote slaptažodį?",
+    "forgotNeedEmail": "Įveskite el. paštą aukščiau ir palieskite čia dar kartą.",
+    "forgotSent": "Jei tas adresas turi paskyrą, nuoroda jau pakeliui."
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "Ištrinti tai?",
     "deleteBody": "Ji lieka vietoje, kad atsakymai vis dar būtų suprantami, bet tekstas dingsta. Atšaukti nepavyks.",
     "holdHint": "Palaikykite žinutę, kad atsakytumėte, redaguotumėte ar ištrintumėte."
+  },
+  "resetPassword": {
+    "title": "Pasirinkite naują slaptažodį",
+    "sub": "Nuoroda veikia vieną kartą. Pasirinkite tai, ko čia dar nenaudojote.",
+    "newPassword": "Naujas slaptažodis",
+    "confirmPassword": "Įveskite dar kartą",
+    "submit": "Išsaugoti ir prisijungti",
+    "show": "Rodyti slaptažodį",
+    "hide": "Slėpti slaptažodį",
+    "tooShort": "Bent {{count}} simbolių.",
+    "mismatch": "Jie nesutampa.",
+    "failed": "Nepavyko. Paprašykite naujos nuorodos ir bandykite dar kartą.",
+    "badLinkTitle": "Ši nuoroda nepilna",
+    "badLinkBody": "Ją galėjo nukirpti jūsų pašto programa. Paprašykite naujos prisijungimo lange.",
+    "backToSignIn": "Atgal į prisijungimą",
+    "signsOutOthers": "Išsaugojus naują slaptažodį atsijungiama visuose kituose įrenginiuose."
   }
 }

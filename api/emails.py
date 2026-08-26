@@ -45,6 +45,8 @@ def unsubscribe_url(token: str) -> str:
 # The frame around every message.
 #   greeting:    "Hi {name}," — omitted entirely if we have no name
 #   open_cta:    label for the link into the app
+#   reset_cta:   label for that link when it is a password-reset link, because
+#                a button that says "Open BloomPrint" hides what it does
 #   signoff:     how the message ends
 #   unsub:       the footer, with {url} for the opt-out
 #   unsub_note:  reassurance that account mail is unaffected by opting out
@@ -52,6 +54,7 @@ SHELL: dict[str, dict[str, str]] = {
     "en": {
         "greeting": "Hi {name},",
         "open_cta": "Open BloomPrint",
+        "reset_cta": "Choose a new password",
         "signoff": "BloomPrint",
         "unsub": "Don't want these? Turn them off: {url}",
         "unsub_note": "You'll still get messages about your own account.",
@@ -62,6 +65,7 @@ SHELL: dict[str, dict[str, str]] = {
     "es": {
         "greeting": "Hola {name}:",
         "open_cta": "Abrir BloomPrint",
+        "reset_cta": "Elegir una contraseña nueva",
         "signoff": "BloomPrint",
         "unsub": "¿No quieres recibirlos? Desactívalos: {url}",
         "unsub_note": "Seguirás recibiendo mensajes sobre tu propia cuenta.",
@@ -72,6 +76,7 @@ SHELL: dict[str, dict[str, str]] = {
     "fr": {
         "greeting": "Bonjour {name},",
         "open_cta": "Ouvrir BloomPrint",
+        "reset_cta": "Choisir un nouveau mot de passe",
         "signoff": "BloomPrint",
         "unsub": "Vous ne voulez plus les recevoir ? Désactivez-les : {url}",
         "unsub_note": "Vous continuerez à recevoir les messages concernant votre compte.",
@@ -82,6 +87,7 @@ SHELL: dict[str, dict[str, str]] = {
     "pt": {
         "greeting": "Olá {name},",
         "open_cta": "Abrir o BloomPrint",
+        "reset_cta": "Escolher uma nova palavra-passe",
         "signoff": "BloomPrint",
         "unsub": "Não quer recebê-los? Desative-os: {url}",
         "unsub_note": "Continuará a receber mensagens sobre a sua própria conta.",
@@ -92,6 +98,7 @@ SHELL: dict[str, dict[str, str]] = {
     "it": {
         "greeting": "Ciao {name},",
         "open_cta": "Apri BloomPrint",
+        "reset_cta": "Scegli una nuova password",
         "signoff": "BloomPrint",
         "unsub": "Non vuoi riceverle? Disattivale: {url}",
         "unsub_note": "Continuerai a ricevere i messaggi relativi al tuo account.",
@@ -102,6 +109,7 @@ SHELL: dict[str, dict[str, str]] = {
     "de": {
         "greeting": "Hallo {name},",
         "open_cta": "BloomPrint öffnen",
+        "reset_cta": "Neues Passwort wählen",
         "signoff": "BloomPrint",
         "unsub": "Nicht erwünscht? Hier abschalten: {url}",
         "unsub_note": "Nachrichten zu deinem eigenen Konto erhältst du weiterhin.",
@@ -112,6 +120,7 @@ SHELL: dict[str, dict[str, str]] = {
     "nl": {
         "greeting": "Hoi {name},",
         "open_cta": "BloomPrint openen",
+        "reset_cta": "Nieuw wachtwoord kiezen",
         "signoff": "BloomPrint",
         "unsub": "Liever niet? Zet ze uit: {url}",
         "unsub_note": "Berichten over je eigen account blijf je ontvangen.",
@@ -122,6 +131,7 @@ SHELL: dict[str, dict[str, str]] = {
     "sv": {
         "greeting": "Hej {name},",
         "open_cta": "Öppna BloomPrint",
+        "reset_cta": "Välj ett nytt lösenord",
         "signoff": "BloomPrint",
         "unsub": "Vill du inte ha dem? Stäng av dem: {url}",
         "unsub_note": "Du får fortfarande meddelanden som rör ditt eget konto.",
@@ -132,6 +142,7 @@ SHELL: dict[str, dict[str, str]] = {
     "pl": {
         "greeting": "Cześć {name},",
         "open_cta": "Otwórz BloomPrint",
+        "reset_cta": "Ustaw nowe hasło",
         "signoff": "BloomPrint",
         "unsub": "Nie chcesz ich otrzymywać? Wyłącz je: {url}",
         "unsub_note": "Wiadomości dotyczące Twojego konta będziesz otrzymywać nadal.",
@@ -142,6 +153,7 @@ SHELL: dict[str, dict[str, str]] = {
     "ru": {
         "greeting": "Здравствуйте, {name}!",
         "open_cta": "Открыть BloomPrint",
+        "reset_cta": "Задать новый пароль",
         "signoff": "BloomPrint",
         "unsub": "Не хотите их получать? Отключите: {url}",
         "unsub_note": "Сообщения о вашей учётной записи будут приходить по-прежнему.",
@@ -152,6 +164,7 @@ SHELL: dict[str, dict[str, str]] = {
     "uk": {
         "greeting": "Вітаємо, {name}!",
         "open_cta": "Відкрити BloomPrint",
+        "reset_cta": "Задати новий пароль",
         "signoff": "BloomPrint",
         "unsub": "Не хочете їх отримувати? Вимкніть: {url}",
         "unsub_note": "Повідомлення про ваш обліковий запис надходитимуть і далі.",
@@ -162,6 +175,7 @@ SHELL: dict[str, dict[str, str]] = {
     "sr": {
         "greeting": "Здраво {name},",
         "open_cta": "Отвори BloomPrint",
+        "reset_cta": "Изаберите нову лозинку",
         "signoff": "BloomPrint",
         "unsub": "Не желите ово? Искључите: {url}",
         "unsub_note": "Поруке о вашем налогу и даље ћете примати.",
@@ -172,6 +186,7 @@ SHELL: dict[str, dict[str, str]] = {
     "hr": {
         "greeting": "Bok {name},",
         "open_cta": "Otvori BloomPrint",
+        "reset_cta": "Odaberite novu lozinku",
         "signoff": "BloomPrint",
         "unsub": "Ne želite ovo? Isključite: {url}",
         "unsub_note": "Poruke o vašem računu i dalje ćete primati.",
@@ -182,6 +197,7 @@ SHELL: dict[str, dict[str, str]] = {
     "tr": {
         "greeting": "Merhaba {name},",
         "open_cta": "BloomPrint'i aç",
+        "reset_cta": "Yeni şifre belirle",
         "signoff": "BloomPrint",
         "unsub": "Bunları istemiyor musunuz? Kapatın: {url}",
         "unsub_note": "Kendi hesabınızla ilgili mesajları almaya devam edeceksiniz.",
@@ -192,6 +208,7 @@ SHELL: dict[str, dict[str, str]] = {
     "ro": {
         "greeting": "Salut {name},",
         "open_cta": "Deschide BloomPrint",
+        "reset_cta": "Alege o parolă nouă",
         "signoff": "BloomPrint",
         "unsub": "Nu le vrei? Dezactivează-le: {url}",
         "unsub_note": "Vei primi în continuare mesajele despre contul tău.",
@@ -202,6 +219,7 @@ SHELL: dict[str, dict[str, str]] = {
     "el": {
         "greeting": "Γεια σου {name},",
         "open_cta": "Άνοιγμα του BloomPrint",
+        "reset_cta": "Επιλογή νέου κωδικού",
         "signoff": "BloomPrint",
         "unsub": "Δεν τα θέλετε; Απενεργοποιήστε τα: {url}",
         "unsub_note": "Θα συνεχίσετε να λαμβάνετε μηνύματα για τον λογαριασμό σας.",
@@ -212,6 +230,7 @@ SHELL: dict[str, dict[str, str]] = {
     "lt": {
         "greeting": "Sveiki, {name},",
         "open_cta": "Atidaryti BloomPrint",
+        "reset_cta": "Nustatyti naują slaptažodį",
         "signoff": "BloomPrint",
         "unsub": "Nenorite jų gauti? Išjunkite: {url}",
         "unsub_note": "Pranešimus apie savo paskyrą ir toliau gausite.",
@@ -222,6 +241,7 @@ SHELL: dict[str, dict[str, str]] = {
     "ar": {
         "greeting": "مرحبًا {name}،",
         "open_cta": "فتح BloomPrint",
+        "reset_cta": "اختيار كلمة مرور جديدة",
         "signoff": "BloomPrint",
         "unsub": "لا تريد هذه الرسائل؟ أوقفها: {url}",
         "unsub_note": "ستستمر في تلقّي الرسائل المتعلقة بحسابك.",
@@ -232,6 +252,7 @@ SHELL: dict[str, dict[str, str]] = {
     "he": {
         "greeting": "שלום {name},",
         "open_cta": "פתיחת BloomPrint",
+        "reset_cta": "בחירת סיסמה חדשה",
         "signoff": "BloomPrint",
         "unsub": "לא מעוניין בהודעות האלה? אפשר לכבות: {url}",
         "unsub_note": "הודעות שנוגעות לחשבון שלך ימשיכו להישלח.",
@@ -242,6 +263,7 @@ SHELL: dict[str, dict[str, str]] = {
     "hi": {
         "greeting": "नमस्ते {name},",
         "open_cta": "BloomPrint खोलें",
+        "reset_cta": "नया पासवर्ड चुनें",
         "signoff": "BloomPrint",
         "unsub": "ये नहीं चाहिए? इन्हें बंद करें: {url}",
         "unsub_note": "आपके अपने खाते से जुड़े संदेश आपको मिलते रहेंगे।",
@@ -252,6 +274,7 @@ SHELL: dict[str, dict[str, str]] = {
     "ka": {
         "greeting": "გამარჯობა, {name},",
         "open_cta": "BloomPrint-ის გახსნა",
+        "reset_cta": "ახალი პაროლის არჩევა",
         "signoff": "BloomPrint",
         "unsub": "აღარ გსურთ მათი მიღება? გამორთეთ: {url}",
         "unsub_note": "თქვენს ანგარიშთან დაკავშირებულ შეტყობინებებს კვლავ მიიღებთ.",
@@ -262,6 +285,7 @@ SHELL: dict[str, dict[str, str]] = {
     "ja": {
         "greeting": "{name} さん",
         "open_cta": "BloomPrint を開く",
+        "reset_cta": "新しいパスワードを設定",
         "signoff": "BloomPrint",
         "unsub": "不要な場合はこちらから停止できます: {url}",
         "unsub_note": "アカウントに関するお知らせは引き続きお送りします。",
@@ -272,6 +296,7 @@ SHELL: dict[str, dict[str, str]] = {
     "ko": {
         "greeting": "{name}님, 안녕하세요.",
         "open_cta": "BloomPrint 열기",
+        "reset_cta": "새 비밀번호 설정",
         "signoff": "BloomPrint",
         "unsub": "받고 싶지 않으신가요? 여기에서 끄세요: {url}",
         "unsub_note": "계정 관련 안내는 계속 발송됩니다.",
@@ -282,6 +307,7 @@ SHELL: dict[str, dict[str, str]] = {
     "zh": {
         "greeting": "{name} 你好，",
         "open_cta": "打开 BloomPrint",
+        "reset_cta": "设置新密码",
         "signoff": "BloomPrint",
         "unsub": "不想收到这些邮件？可在此关闭：{url}",
         "unsub_note": "与你账号相关的邮件仍会照常发送。",
@@ -292,6 +318,7 @@ SHELL: dict[str, dict[str, str]] = {
     "tl": {
         "greeting": "Kumusta {name},",
         "open_cta": "Buksan ang BloomPrint",
+        "reset_cta": "Pumili ng bagong password",
         "signoff": "BloomPrint",
         "unsub": "Ayaw mo ng mga ito? I-off sila: {url}",
         "unsub_note": "Patuloy mo pa ring matatanggap ang mga mensahe tungkol sa sarili mong account.",
@@ -348,6 +375,20 @@ def _plain(s: str) -> str:
 MILESTONE_EVENTS = {"signup_coach", "signup_player"}
 
 
+def _cta(shell: dict[str, str], event: str) -> str:
+    """What the one link in the message should be called.
+
+    Nearly every message is asking someone to come and look at something, so
+    the default says so. A reset link is the exception: it does one specific
+    thing, and a button labelled "Open BloomPrint" on a mail about a password
+    is the kind of button people do not press because they cannot tell what it
+    will do.
+    """
+    if event == "password_reset":
+        return shell.get("reset_cta") or shell["open_cta"]
+    return shell["open_cta"]
+
+
 def render(event: str, lang: str | None, params: dict | None = None, *,
            token: str | None = None, link: str | None = None) -> tuple[str, str]:
     """(subject, body) for one event, in the reader's language.
@@ -374,7 +415,7 @@ def render(event: str, lang: str | None, params: dict | None = None, *,
     if name:
         parts.append(_fmt(shell["greeting"], {"name": name}))
     parts.append(_plain(_fmt(line, params)))
-    parts.append(f"{shell['open_cta']}: {link or app_url()}")
+    parts.append(f"{_cta(shell, event)}: {link or app_url()}")
     parts.append(shell["signoff"])
 
     # Account mail carries no opt-out: it is the consequence of something the
@@ -437,7 +478,7 @@ def render_html(event: str, lang: str | None, params: dict | None = None, *,
     kw: dict = {
         "body": _fmt(line, params),
         "lang": code,
-        "cta_label": shell["open_cta"],
+        "cta_label": _cta(shell, event),
         "cta_url": link or app_url(),
         "contact": shell.get("contact"),
         "contact_address": contact_email(),

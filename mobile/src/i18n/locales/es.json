@@ -100,7 +100,10 @@
     "conferenceRequired": "Conferencia Obligatoria",
     "conferenceRequiredMsg": "Selecciona tu conferencia para continuar.",
     "appLanguage": "Idioma de la App",
-    "panelTagline": "Análisis de video, evaluaciones de jugadores y planes de entrenamiento: todo en un sistema."
+    "panelTagline": "Análisis de video, evaluaciones de jugadores y planes de entrenamiento: todo en un sistema.",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "forgotNeedEmail": "Escribe tu email arriba y vuelve a tocar aquí.",
+    "forgotSent": "Si esa dirección tiene una cuenta, el enlace ya va en camino."
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "¿Eliminar esto?",
     "deleteBody": "Se queda en su sitio para que las respuestas sigan teniendo sentido, pero el texto desaparece. No se puede deshacer.",
     "holdHint": "Mantén pulsado un mensaje para responder, editar y eliminar."
+  },
+  "resetPassword": {
+    "title": "Elige una nueva contraseña",
+    "sub": "Este enlace funciona una sola vez. Elige algo que no hayas usado aquí antes.",
+    "newPassword": "Nueva contraseña",
+    "confirmPassword": "Escríbela otra vez",
+    "submit": "Guardar e iniciar sesión",
+    "show": "Mostrar contraseña",
+    "hide": "Ocultar contraseña",
+    "tooShort": "Al menos {{count}} caracteres.",
+    "mismatch": "No coinciden.",
+    "failed": "No ha funcionado. Pide un enlace nuevo e inténtalo otra vez.",
+    "badLinkTitle": "Este enlace está incompleto",
+    "badLinkBody": "Puede que tu aplicación de correo lo haya cortado. Pide uno nuevo desde la pantalla de inicio de sesión.",
+    "backToSignIn": "Volver al inicio de sesión",
+    "signsOutOthers": "Guardar una contraseña nueva cierra tu sesión en todos los demás dispositivos."
   }
 }

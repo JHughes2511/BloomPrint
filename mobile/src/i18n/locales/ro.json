@@ -100,7 +100,10 @@
     "conferenceRequired": "Conferință obligatorie",
     "conferenceRequiredMsg": "Te rugăm să alegi conferința pentru a continua.",
     "appLanguage": "Limba aplicației",
-    "panelTagline": "Analiză video, evaluări ale jucătorilor și planuri de antrenament — într-un singur sistem."
+    "panelTagline": "Analiză video, evaluări ale jucătorilor și planuri de antrenament — într-un singur sistem.",
+    "forgotPassword": "Ți-ai uitat parola?",
+    "forgotNeedEmail": "Scrie-ți emailul mai sus, apoi atinge din nou aici.",
+    "forgotSent": "Dacă adresa are cont, linkul este deja pe drum."
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "Ștergi asta?",
     "deleteBody": "Rămâne pe loc ca răspunsurile să se înțeleagă, dar textul dispare. Nu se poate anula.",
     "holdHint": "Ține apăsat pe un mesaj pentru răspuns, editare și ștergere."
+  },
+  "resetPassword": {
+    "title": "Alege o parolă nouă",
+    "sub": "Linkul funcționează o singură dată. Alege ceva ce nu ai mai folosit aici.",
+    "newPassword": "Parolă nouă",
+    "confirmPassword": "Scrie-o din nou",
+    "submit": "Salvează și intră",
+    "show": "Arată parola",
+    "hide": "Ascunde parola",
+    "tooShort": "Cel puțin {{count}} caractere.",
+    "mismatch": "Nu se potrivesc.",
+    "failed": "Nu a mers. Cere un link nou și încearcă din nou.",
+    "badLinkTitle": "Acest link este incomplet",
+    "badLinkBody": "Poate l-a tăiat aplicația ta de email. Cere altul din ecranul de autentificare.",
+    "backToSignIn": "Înapoi la autentificare",
+    "signsOutOthers": "Salvarea unei parole noi te deconectează de pe toate celelalte dispozitive."
   }
 }

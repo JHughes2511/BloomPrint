@@ -100,7 +100,10 @@
     "conferenceRequired": "Wymagana konferencja",
     "conferenceRequiredMsg": "Wybierz konferencję, aby kontynuować.",
     "appLanguage": "Język aplikacji",
-    "panelTagline": "Analiza wideo, oceny zawodników i plany treningowe — w jednym systemie."
+    "panelTagline": "Analiza wideo, oceny zawodników i plany treningowe — w jednym systemie.",
+    "forgotPassword": "Nie pamiętasz hasła?",
+    "forgotNeedEmail": "Wpisz e-mail powyżej i dotknij tego jeszcze raz.",
+    "forgotSent": "Jeśli ten adres ma konto, link już jest w drodze."
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "Usunąć to?",
     "deleteBody": "Zostaje na miejscu, żeby odpowiedzi wciąż miały sens, ale treść znika. Nie można tego cofnąć.",
     "holdHint": "Przytrzymaj wiadomość, aby odpowiedzieć, edytować lub usunąć."
+  },
+  "resetPassword": {
+    "title": "Wybierz nowe hasło",
+    "sub": "Ten link działa raz. Wybierz coś, czego tu jeszcze nie używałeś.",
+    "newPassword": "Nowe hasło",
+    "confirmPassword": "Wpisz je ponownie",
+    "submit": "Zapisz i zaloguj",
+    "show": "Pokaż hasło",
+    "hide": "Ukryj hasło",
+    "tooShort": "Co najmniej {{count}} znaków.",
+    "mismatch": "Nie są takie same.",
+    "failed": "Nie udało się. Poproś o nowy link i spróbuj ponownie.",
+    "badLinkTitle": "Ten link jest niepełny",
+    "badLinkBody": "Program pocztowy mógł go uciąć. Poproś o nowy na ekranie logowania.",
+    "backToSignIn": "Powrót do logowania",
+    "signsOutOthers": "Zapisanie nowego hasła wylogowuje Cię ze wszystkich innych urządzeń."
   }
 }

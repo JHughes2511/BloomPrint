@@ -100,7 +100,10 @@
     "conferenceRequired": "カンファレンスが必要です",
     "conferenceRequiredMsg": "続行するにはカンファレンスを選択してください。",
     "appLanguage": "アプリの言語",
-    "panelTagline": "映像分析、選手評価、トレーニング計画をひとつのシステムで。"
+    "panelTagline": "映像分析、選手評価、トレーニング計画をひとつのシステムで。",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "forgotNeedEmail": "上にメールアドレスを入力してから、もう一度ここをタップしてください。",
+    "forgotSent": "そのアドレスにアカウントがあれば、リンクを送っています。"
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "削除しますか？",
     "deleteBody": "返信が読めるよう場所は残りますが、本文は消えます。元には戻せません。",
     "holdHint": "メッセージを長押しすると返信・編集・削除できます。"
+  },
+  "resetPassword": {
+    "title": "新しいパスワードを設定",
+    "sub": "このリンクは一度だけ使えます。ここで使ったことのないものにしてください。",
+    "newPassword": "新しいパスワード",
+    "confirmPassword": "もう一度入力",
+    "submit": "保存してサインイン",
+    "show": "パスワードを表示",
+    "hide": "パスワードを隠す",
+    "tooShort": "{{count}}文字以上。",
+    "mismatch": "一致しません。",
+    "failed": "うまくいきませんでした。新しいリンクを取り直してお試しください。",
+    "badLinkTitle": "リンクが途中で切れています",
+    "badLinkBody": "メールアプリが切ってしまった可能性があります。サインイン画面から取り直してください。",
+    "backToSignIn": "サインインに戻る",
+    "signsOutOthers": "新しいパスワードを保存すると、他のすべての端末からサインアウトされます。"
   }
 }
