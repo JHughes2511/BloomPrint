@@ -8,17 +8,25 @@ Each of those already emails the person it is waiting on. Making them open the
 app, find the screen and press the button is three steps to say one word, and
 the request sits there in the meantime.
 
-WHY THE LINK DOES NOT DECIDE ANYTHING BY ITSELF
+WHAT A DECISION LINK IS
 
-Mail is scanned. Outlook Safe Links, spam filters and preview generators follow
-the links in a message before a human ever sees it, and a link that acts when
-it is fetched has been acted on by a machine. For a consent request that means
-a report about a player shared without the player having agreed to anything.
+A single-use permission to answer one request as one person. Following it
+carries the decision out; there is no confirmation step, because the point is
+not having to go anywhere. That makes the link itself the credential, and it is
+treated like one:
 
-So the link in the email opens a page instead, in the reader's language, which
-shows what is being asked and one button to confirm. The decision happens on
-the POST that button makes, which a scanner does not make. Two clicks, no app,
-no sign-in.
+  - Only its hash is stored, so a leaked database hands over no working links.
+  - It works once, and the row records that it was spent.
+  - It dies after seven days.
+  - It is minted per person and per request. Several coaches hear about one
+    link request; a link that worked for whoever it was forwarded to would let
+    a stranger settle another coach's roster.
+
+The risk this leaves, worth naming because it is invisible from the outside:
+some mail systems fetch links before a person reads the message, and a fetch is
+a decision. The four properties above bound what one such fetch can reach, and
+the app's own screens stay the authority for anyone who would rather look
+first.
 
 WHY IT REUSES THE ROUTES
 

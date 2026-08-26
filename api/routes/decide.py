@@ -1,14 +1,22 @@
-"""The page an approve-or-decline button in an email opens.
+"""Answering a request by pressing a button in an email.
 
 Unauthenticated, like the unsubscribe page and for the same reason: whoever
 clicks is in a mail client, often on a device that has never signed in. The
 token is the credential and it grants exactly one power — answering the one
 request it was minted for.
 
-GET shows what is being asked and one button. POST is the answer. That split is
-the whole point of this file: mail scanners follow links, so a GET that decided
-something would be decided by a machine before a person saw it. See
-api/decisions.py.
+ONE CLICK. Pressing Approve or Decline in the mail carries the decision out and
+shows the result. There is no confirmation step, by decision: the whole point
+is not having to go anywhere.
+
+The cost of that, stated plainly because it is real and not visible from the
+outside: some mail systems fetch the links in a message before a person opens
+it, and a fetch of one of these links is a decision. Where that happens the
+request will settle without the recipient pressing anything. Three things limit
+it — a token works once, dies after seven days, and answers exactly one request
+for exactly one person — but they limit the blast radius, not the event. The
+app's own screens remain the authority for anyone who would rather look first,
+and every one of these emails still carries the link into them.
 """
 from fastapi import APIRouter, Depends, Form
 from fastapi.responses import HTMLResponse
@@ -137,13 +145,12 @@ def _shell(lang: str) -> dict:
                             emails.SHELL[emails.DEFAULT_LANG])
 
 
-@router.get("/decide", response_class=HTMLResponse)
-def show(token: str = "", choice: str = "approve",
-         db: Session = Depends(get_db)):
-    """Show what is being asked, with one button to confirm it.
+def _answer(db: Session, token: str, choice: str) -> HTMLResponse:
+    """Carry out the decision and say what happened, in the reader's language.
 
-    Nothing is decided here. This handler is what a mail scanner reaches, and
-    all it does is read.
+    One body for both methods so the two can never come to mean different
+    things. GET is what the button in the email is; POST exists because a
+    browser that turns the result page into a form post should not break.
     """
     row = decisions.lookup(db, token)
     if row is None:
@@ -154,46 +161,28 @@ def show(token: str = "", choice: str = "approve",
     lang = getattr(account, "preferred_language", None) or "en"
     shell = _shell(lang)
 
-    if not decisions.still_pending(db, row):
-        return _page(lang, shell["decide_gone"], "", _open_link(lang))
-
-    pick = "approve" if choice != "reject" else "reject"
-    label = shell["decide_approve"] if pick == "approve" else shell["decide_reject"]
-    form = (
-        f"<form method=post action='/decide'>"
-        f"<input type=hidden name=token value='{_esc(token)}'>"
-        f"<input type=hidden name=choice value='{pick}'>"
-        f"<button class='{'yes' if pick == 'approve' else 'no'}' type=submit>"
-        f"{_esc(label)}</button></form>"
-        # The other answer, in case they pressed the wrong button in the mail.
-        f"<form method=get action='/decide'>"
-        f"<input type=hidden name=token value='{_esc(token)}'>"
-        f"<input type=hidden name=choice value="
-        f"'{'reject' if pick == 'approve' else 'approve'}'>"
-        f"<button class='{'no' if pick == 'approve' else 'yes'}' type=submit>"
-        f"{_esc(shell['decide_reject'] if pick == 'approve' else shell['decide_approve'])}"
-        f"</button></form>"
-    )
-    return _page(lang, shell["decide_ask"], _describe(db, row, lang), form)
-
-
-@router.post("/decide", response_class=HTMLResponse)
-def act(token: str = Form(""), choice: str = Form("approve"),
-        db: Session = Depends(get_db)):
-    """The answer. Only reached by pressing the button on the page above."""
-    row = decisions.lookup(db, token)
-    if row is None:
-        shell = _shell("en")
-        return _page("en", shell["decide_expired"], "", _open_link("en"))
-
-    account = decisions.account_for(db, row)
-    lang = getattr(account, "preferred_language", None) or "en"
-    shell = _shell(lang)
-
-    outcome = decisions.decide(db, row, "approve" if choice != "reject" else "reject")
+    outcome = decisions.decide(db, row, "reject" if choice == "reject" else "approve")
     heading = {
         "approved": shell["decide_approved"],
         "rejected": shell["decide_rejected"],
+        # Answered in the app, withdrawn, or this link already used. Said
+        # rather than shown as a failure: nothing is wrong, it is just done.
         "gone": shell["decide_gone"],
     }.get(outcome, shell["decide_failed"])
-    return _page(lang, heading, "", _open_link(lang))
+    # What was being asked, kept on the result page: somebody who pressed a
+    # button in a mail they half-read should be able to see what they answered.
+    body = _describe(db, row, lang) if outcome in ("approved", "rejected") else ""
+    return _page(lang, heading, body, _open_link(lang))
+
+
+@router.get("/decide", response_class=HTMLResponse)
+def act_get(token: str = "", choice: str = "approve",
+            db: Session = Depends(get_db)):
+    """The button in the email. One click, and it is done."""
+    return _answer(db, token, choice)
+
+
+@router.post("/decide", response_class=HTMLResponse)
+def act_post(token: str = Form(""), choice: str = Form("approve"),
+             db: Session = Depends(get_db)):
+    return _answer(db, token, choice)
