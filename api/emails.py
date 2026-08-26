@@ -52,7 +52,7 @@ SHELL: dict[str, dict[str, str]] = {
     "en": {
         "greeting": "Hi {name},",
         "open_cta": "Open BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Don't want these? Turn them off: {url}",
         "unsub_note": "You'll still get messages about your own account.",
         "contact": "Questions? Email us at",
@@ -62,7 +62,7 @@ SHELL: dict[str, dict[str, str]] = {
     "es": {
         "greeting": "Hola {name}:",
         "open_cta": "Abrir BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "¿No quieres recibirlos? Desactívalos: {url}",
         "unsub_note": "Seguirás recibiendo mensajes sobre tu propia cuenta.",
         "contact": "¿Preguntas? Escríbenos a",
@@ -72,7 +72,7 @@ SHELL: dict[str, dict[str, str]] = {
     "fr": {
         "greeting": "Bonjour {name},",
         "open_cta": "Ouvrir BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Vous ne voulez plus les recevoir ? Désactivez-les : {url}",
         "unsub_note": "Vous continuerez à recevoir les messages concernant votre compte.",
         "contact": "Des questions ? Écrivez-nous à",
@@ -82,7 +82,7 @@ SHELL: dict[str, dict[str, str]] = {
     "pt": {
         "greeting": "Olá {name},",
         "open_cta": "Abrir o BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Não quer recebê-los? Desative-os: {url}",
         "unsub_note": "Continuará a receber mensagens sobre a sua própria conta.",
         "contact": "Dúvidas? Escreva para",
@@ -92,7 +92,7 @@ SHELL: dict[str, dict[str, str]] = {
     "it": {
         "greeting": "Ciao {name},",
         "open_cta": "Apri BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Non vuoi riceverle? Disattivale: {url}",
         "unsub_note": "Continuerai a ricevere i messaggi relativi al tuo account.",
         "contact": "Domande? Scrivici a",
@@ -102,7 +102,7 @@ SHELL: dict[str, dict[str, str]] = {
     "de": {
         "greeting": "Hallo {name},",
         "open_cta": "BloomPrint öffnen",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Nicht erwünscht? Hier abschalten: {url}",
         "unsub_note": "Nachrichten zu deinem eigenen Konto erhältst du weiterhin.",
         "contact": "Fragen? Schreib uns an",
@@ -112,7 +112,7 @@ SHELL: dict[str, dict[str, str]] = {
     "nl": {
         "greeting": "Hoi {name},",
         "open_cta": "BloomPrint openen",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Liever niet? Zet ze uit: {url}",
         "unsub_note": "Berichten over je eigen account blijf je ontvangen.",
         "contact": "Vragen? Mail ons op",
@@ -122,7 +122,7 @@ SHELL: dict[str, dict[str, str]] = {
     "sv": {
         "greeting": "Hej {name},",
         "open_cta": "Öppna BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Vill du inte ha dem? Stäng av dem: {url}",
         "unsub_note": "Du får fortfarande meddelanden som rör ditt eget konto.",
         "contact": "Frågor? Mejla oss på",
@@ -132,7 +132,7 @@ SHELL: dict[str, dict[str, str]] = {
     "pl": {
         "greeting": "Cześć {name},",
         "open_cta": "Otwórz BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Nie chcesz ich otrzymywać? Wyłącz je: {url}",
         "unsub_note": "Wiadomości dotyczące Twojego konta będziesz otrzymywać nadal.",
         "contact": "Pytania? Napisz do nas na",
@@ -142,7 +142,7 @@ SHELL: dict[str, dict[str, str]] = {
     "ru": {
         "greeting": "Здравствуйте, {name}!",
         "open_cta": "Открыть BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Не хотите их получать? Отключите: {url}",
         "unsub_note": "Сообщения о вашей учётной записи будут приходить по-прежнему.",
         "contact": "Вопросы? Напишите нам на",
@@ -152,7 +152,7 @@ SHELL: dict[str, dict[str, str]] = {
     "uk": {
         "greeting": "Вітаємо, {name}!",
         "open_cta": "Відкрити BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Не хочете їх отримувати? Вимкніть: {url}",
         "unsub_note": "Повідомлення про ваш обліковий запис надходитимуть і далі.",
         "contact": "Питання? Напишіть нам на",
@@ -162,7 +162,7 @@ SHELL: dict[str, dict[str, str]] = {
     "sr": {
         "greeting": "Здраво {name},",
         "open_cta": "Отвори BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Не желите ово? Искључите: {url}",
         "unsub_note": "Поруке о вашем налогу и даље ћете примати.",
         "contact": "Питања? Пишите нам на",
@@ -172,7 +172,7 @@ SHELL: dict[str, dict[str, str]] = {
     "hr": {
         "greeting": "Bok {name},",
         "open_cta": "Otvori BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Ne želite ovo? Isključite: {url}",
         "unsub_note": "Poruke o vašem računu i dalje ćete primati.",
         "contact": "Pitanja? Pišite nam na",
@@ -182,7 +182,7 @@ SHELL: dict[str, dict[str, str]] = {
     "tr": {
         "greeting": "Merhaba {name},",
         "open_cta": "BloomPrint'i aç",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Bunları istemiyor musunuz? Kapatın: {url}",
         "unsub_note": "Kendi hesabınızla ilgili mesajları almaya devam edeceksiniz.",
         "contact": "Sorunuz mu var? Bize yazın:",
@@ -192,7 +192,7 @@ SHELL: dict[str, dict[str, str]] = {
     "ro": {
         "greeting": "Salut {name},",
         "open_cta": "Deschide BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Nu le vrei? Dezactivează-le: {url}",
         "unsub_note": "Vei primi în continuare mesajele despre contul tău.",
         "contact": "Întrebări? Scrie-ne la",
@@ -202,7 +202,7 @@ SHELL: dict[str, dict[str, str]] = {
     "el": {
         "greeting": "Γεια σου {name},",
         "open_cta": "Άνοιγμα του BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Δεν τα θέλετε; Απενεργοποιήστε τα: {url}",
         "unsub_note": "Θα συνεχίσετε να λαμβάνετε μηνύματα για τον λογαριασμό σας.",
         "contact": "Απορίες; Γράψτε μας στο",
@@ -212,7 +212,7 @@ SHELL: dict[str, dict[str, str]] = {
     "lt": {
         "greeting": "Sveiki, {name},",
         "open_cta": "Atidaryti BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Nenorite jų gauti? Išjunkite: {url}",
         "unsub_note": "Pranešimus apie savo paskyrą ir toliau gausite.",
         "contact": "Klausimai? Rašykite mums adresu",
@@ -222,7 +222,7 @@ SHELL: dict[str, dict[str, str]] = {
     "ar": {
         "greeting": "مرحبًا {name}،",
         "open_cta": "فتح BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "لا تريد هذه الرسائل؟ أوقفها: {url}",
         "unsub_note": "ستستمر في تلقّي الرسائل المتعلقة بحسابك.",
         "contact": "أسئلة؟ راسلنا على",
@@ -232,7 +232,7 @@ SHELL: dict[str, dict[str, str]] = {
     "he": {
         "greeting": "שלום {name},",
         "open_cta": "פתיחת BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "לא מעוניין בהודעות האלה? אפשר לכבות: {url}",
         "unsub_note": "הודעות שנוגעות לחשבון שלך ימשיכו להישלח.",
         "contact": "שאלות? כתבו לנו אל",
@@ -242,7 +242,7 @@ SHELL: dict[str, dict[str, str]] = {
     "hi": {
         "greeting": "नमस्ते {name},",
         "open_cta": "BloomPrint खोलें",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "ये नहीं चाहिए? इन्हें बंद करें: {url}",
         "unsub_note": "आपके अपने खाते से जुड़े संदेश आपको मिलते रहेंगे।",
         "contact": "सवाल? हमें यहाँ लिखें",
@@ -252,7 +252,7 @@ SHELL: dict[str, dict[str, str]] = {
     "ka": {
         "greeting": "გამარჯობა, {name},",
         "open_cta": "BloomPrint-ის გახსნა",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "აღარ გსურთ მათი მიღება? გამორთეთ: {url}",
         "unsub_note": "თქვენს ანგარიშთან დაკავშირებულ შეტყობინებებს კვლავ მიიღებთ.",
         "contact": "შეკითხვები? მოგვწერეთ",
@@ -262,7 +262,7 @@ SHELL: dict[str, dict[str, str]] = {
     "ja": {
         "greeting": "{name} さん",
         "open_cta": "BloomPrint を開く",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "不要な場合はこちらから停止できます: {url}",
         "unsub_note": "アカウントに関するお知らせは引き続きお送りします。",
         "contact": "ご質問は",
@@ -272,7 +272,7 @@ SHELL: dict[str, dict[str, str]] = {
     "ko": {
         "greeting": "{name}님, 안녕하세요.",
         "open_cta": "BloomPrint 열기",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "받고 싶지 않으신가요? 여기에서 끄세요: {url}",
         "unsub_note": "계정 관련 안내는 계속 발송됩니다.",
         "contact": "문의는",
@@ -282,7 +282,7 @@ SHELL: dict[str, dict[str, str]] = {
     "zh": {
         "greeting": "{name} 你好，",
         "open_cta": "打开 BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "不想收到这些邮件？可在此关闭：{url}",
         "unsub_note": "与你账号相关的邮件仍会照常发送。",
         "contact": "有问题？请发邮件至",
@@ -292,7 +292,7 @@ SHELL: dict[str, dict[str, str]] = {
     "tl": {
         "greeting": "Kumusta {name},",
         "open_cta": "Buksan ang BloomPrint",
-        "signoff": "— BloomPrint",
+        "signoff": "BloomPrint",
         "unsub": "Ayaw mo ng mga ito? I-off sila: {url}",
         "unsub_note": "Patuloy mo pa ring matatanggap ang mga mensahe tungkol sa sarili mong account.",
         "contact": "May tanong? Mag-email sa",
