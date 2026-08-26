@@ -1246,7 +1246,9 @@
       "updatedTitle": "已更新！",
       "updatedMsg": "你的训练计划已根据你的更正更新。",
       "failedUpdateTraining": "更新训练失败",
-      "failedAddComment": "添加评论失败"
+      "failedAddComment": "添加评论失败",
+      "showDetail": "显示详情",
+      "hideDetail": "隐藏详情"
     },
     "coachTrainingDetail": {
       "notFound": "未找到训练计划",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "已更新！",
       "updatedMsg": "你的训练计划已根据你的更正更新。",
       "failedUpdateTraining": "更新训练失败",
-      "failedAddComment": "添加评论失败"
+      "failedAddComment": "添加评论失败",
+      "showDetail": "显示详情",
+      "hideDetail": "隐藏详情"
     }
   },
   "recent": {

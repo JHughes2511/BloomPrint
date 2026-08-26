@@ -1246,7 +1246,9 @@
       "updatedTitle": "Updated!",
       "updatedMsg": "Your training program has been updated based on your corrections.",
       "failedUpdateTraining": "Failed to update training",
-      "failedAddComment": "Failed to add comment"
+      "failedAddComment": "Failed to add comment",
+      "showDetail": "Show detail",
+      "hideDetail": "Hide detail"
     },
     "coachTrainingDetail": {
       "notFound": "Training program not found",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "Updated!",
       "updatedMsg": "Your training program has been updated based on your corrections.",
       "failedUpdateTraining": "Failed to update training",
-      "failedAddComment": "Failed to add comment"
+      "failedAddComment": "Failed to add comment",
+      "showDetail": "Show detail",
+      "hideDetail": "Hide detail"
     }
   },
   "recent": {

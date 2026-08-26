@@ -1246,7 +1246,9 @@
       "updatedTitle": "تم التحديث!",
       "updatedMsg": "تم تحديث برنامجك التدريبي بناءً على تصحيحاتك.",
       "failedUpdateTraining": "تعذّر تحديث التدريب",
-      "failedAddComment": "تعذّر إضافة التعليق"
+      "failedAddComment": "تعذّر إضافة التعليق",
+      "showDetail": "عرض التفاصيل",
+      "hideDetail": "إخفاء التفاصيل"
     },
     "coachTrainingDetail": {
       "notFound": "لم يُعثر على البرنامج التدريبي",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "تم التحديث!",
       "updatedMsg": "تم تحديث برنامجك التدريبي بناءً على تصحيحاتك.",
       "failedUpdateTraining": "تعذّر تحديث التدريب",
-      "failedAddComment": "تعذّر إضافة التعليق"
+      "failedAddComment": "تعذّر إضافة التعليق",
+      "showDetail": "عرض التفاصيل",
+      "hideDetail": "إخفاء التفاصيل"
     }
   },
   "recent": {

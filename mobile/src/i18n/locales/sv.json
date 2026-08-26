@@ -1246,7 +1246,9 @@
       "updatedTitle": "Uppdaterad!",
       "updatedMsg": "Ditt träningsprogram har uppdaterats baserat på dina rättelser.",
       "failedUpdateTraining": "Kunde inte uppdatera träning",
-      "failedAddComment": "Kunde inte lägga till kommentar"
+      "failedAddComment": "Kunde inte lägga till kommentar",
+      "showDetail": "Visa detaljer",
+      "hideDetail": "Dölj detaljer"
     },
     "coachTrainingDetail": {
       "notFound": "Träningsprogram hittades inte",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "Uppdaterad!",
       "updatedMsg": "Ditt träningsprogram har uppdaterats baserat på dina rättelser.",
       "failedUpdateTraining": "Kunde inte uppdatera träning",
-      "failedAddComment": "Kunde inte lägga till kommentar"
+      "failedAddComment": "Kunde inte lägga till kommentar",
+      "showDetail": "Visa detaljer",
+      "hideDetail": "Dölj detaljer"
     }
   },
   "recent": {

@@ -1246,7 +1246,9 @@
       "updatedTitle": "Aggiornato!",
       "updatedMsg": "Il tuo programma di allenamento è stato aggiornato in base alle tue correzioni.",
       "failedUpdateTraining": "Aggiornamento dell'allenamento fallito",
-      "failedAddComment": "Aggiunta del commento fallita"
+      "failedAddComment": "Aggiunta del commento fallita",
+      "showDetail": "Mostra dettagli",
+      "hideDetail": "Nascondi dettagli"
     },
     "coachTrainingDetail": {
       "notFound": "Programma di allenamento non trovato",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "Aggiornato!",
       "updatedMsg": "Il tuo programma di allenamento è stato aggiornato in base alle tue correzioni.",
       "failedUpdateTraining": "Aggiornamento dell'allenamento fallito",
-      "failedAddComment": "Aggiunta del commento fallita"
+      "failedAddComment": "Aggiunta del commento fallita",
+      "showDetail": "Mostra dettagli",
+      "hideDetail": "Nascondi dettagli"
     }
   },
   "recent": {

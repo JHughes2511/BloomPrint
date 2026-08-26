@@ -1246,7 +1246,9 @@
       "updatedTitle": "更新しました！",
       "updatedMsg": "あなたの修正に基づいてトレーニングプログラムを更新しました。",
       "failedUpdateTraining": "トレーニングを更新できませんでした",
-      "failedAddComment": "コメントを追加できませんでした"
+      "failedAddComment": "コメントを追加できませんでした",
+      "showDetail": "詳細を表示",
+      "hideDetail": "詳細を隠す"
     },
     "coachTrainingDetail": {
       "notFound": "トレーニングプログラムが見つかりません",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "更新しました！",
       "updatedMsg": "あなたの修正に基づいてトレーニングプログラムを更新しました。",
       "failedUpdateTraining": "トレーニングを更新できませんでした",
-      "failedAddComment": "コメントを追加できませんでした"
+      "failedAddComment": "コメントを追加できませんでした",
+      "showDetail": "詳細を表示",
+      "hideDetail": "詳細を隠す"
     }
   },
   "recent": {

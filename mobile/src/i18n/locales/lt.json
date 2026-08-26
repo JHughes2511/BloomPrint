@@ -1246,7 +1246,9 @@
       "updatedTitle": "Atnaujinta!",
       "updatedMsg": "Jūsų treniruočių programa atnaujinta pagal jūsų pataisymus.",
       "failedUpdateTraining": "Nepavyko atnaujinti treniruotės",
-      "failedAddComment": "Nepavyko pridėti komentaro"
+      "failedAddComment": "Nepavyko pridėti komentaro",
+      "showDetail": "Rodyti detales",
+      "hideDetail": "Slėpti detales"
     },
     "coachTrainingDetail": {
       "notFound": "Treniruočių programa nerasta",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "Atnaujinta!",
       "updatedMsg": "Jūsų treniruočių programa atnaujinta pagal jūsų pataisymus.",
       "failedUpdateTraining": "Nepavyko atnaujinti treniruotės",
-      "failedAddComment": "Nepavyko pridėti komentaro"
+      "failedAddComment": "Nepavyko pridėti komentaro",
+      "showDetail": "Rodyti detales",
+      "hideDetail": "Slėpti detales"
     }
   },
   "recent": {

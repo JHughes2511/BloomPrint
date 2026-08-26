@@ -1246,7 +1246,9 @@
       "updatedTitle": "Mis à jour !",
       "updatedMsg": "Votre programme d'entraînement a été mis à jour à partir de vos corrections.",
       "failedUpdateTraining": "Échec de la mise à jour de l'entraînement",
-      "failedAddComment": "Échec de l'ajout du commentaire"
+      "failedAddComment": "Échec de l'ajout du commentaire",
+      "showDetail": "Voir le détail",
+      "hideDetail": "Masquer le détail"
     },
     "coachTrainingDetail": {
       "notFound": "Programme d'entraînement introuvable",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "Mis à jour !",
       "updatedMsg": "Votre programme d'entraînement a été mis à jour à partir de vos corrections.",
       "failedUpdateTraining": "Échec de la mise à jour de l'entraînement",
-      "failedAddComment": "Échec de l'ajout du commentaire"
+      "failedAddComment": "Échec de l'ajout du commentaire",
+      "showDetail": "Voir le détail",
+      "hideDetail": "Masquer le détail"
     }
   },
   "recent": {

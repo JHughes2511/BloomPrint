@@ -1246,7 +1246,9 @@
       "updatedTitle": "Güncellendi!",
       "updatedMsg": "Antrenman programınız düzeltmelerinize göre güncellendi.",
       "failedUpdateTraining": "Antrenman güncellenemedi",
-      "failedAddComment": "Yorum eklenemedi"
+      "failedAddComment": "Yorum eklenemedi",
+      "showDetail": "Ayrıntıyı göster",
+      "hideDetail": "Ayrıntıyı gizle"
     },
     "coachTrainingDetail": {
       "notFound": "Antrenman programı bulunamadı",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "Güncellendi!",
       "updatedMsg": "Antrenman programınız düzeltmelerinize göre güncellendi.",
       "failedUpdateTraining": "Antrenman güncellenemedi",
-      "failedAddComment": "Yorum eklenemedi"
+      "failedAddComment": "Yorum eklenemedi",
+      "showDetail": "Ayrıntıyı göster",
+      "hideDetail": "Ayrıntıyı gizle"
     }
   },
   "recent": {

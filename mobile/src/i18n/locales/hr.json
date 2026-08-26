@@ -1246,7 +1246,9 @@
       "updatedTitle": "Ažurirano!",
       "updatedMsg": "Tvoj program treninga ažuriran je na temelju tvojih ispravaka.",
       "failedUpdateTraining": "Ažuriranje treninga nije uspjelo",
-      "failedAddComment": "Dodavanje komentara nije uspjelo"
+      "failedAddComment": "Dodavanje komentara nije uspjelo",
+      "showDetail": "Prikaži detalje",
+      "hideDetail": "Sakrij detalje"
     },
     "coachTrainingDetail": {
       "notFound": "Program treninga nije pronađen",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "Ažurirano!",
       "updatedMsg": "Tvoj program treninga ažuriran je na temelju tvojih ispravaka.",
       "failedUpdateTraining": "Ažuriranje treninga nije uspjelo",
-      "failedAddComment": "Dodavanje komentara nije uspjelo"
+      "failedAddComment": "Dodavanje komentara nije uspjelo",
+      "showDetail": "Prikaži detalje",
+      "hideDetail": "Sakrij detalje"
     }
   },
   "recent": {

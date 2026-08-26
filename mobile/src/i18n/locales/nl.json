@@ -1246,7 +1246,9 @@
       "updatedTitle": "Bijgewerkt!",
       "updatedMsg": "Je trainingsprogramma is bijgewerkt op basis van je correcties.",
       "failedUpdateTraining": "Kon training niet bijwerken",
-      "failedAddComment": "Kon opmerking niet toevoegen"
+      "failedAddComment": "Kon opmerking niet toevoegen",
+      "showDetail": "Details tonen",
+      "hideDetail": "Details verbergen"
     },
     "coachTrainingDetail": {
       "notFound": "Trainingsprogramma niet gevonden",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "Bijgewerkt!",
       "updatedMsg": "Je trainingsprogramma is bijgewerkt op basis van je correcties.",
       "failedUpdateTraining": "Kon training niet bijwerken",
-      "failedAddComment": "Kon opmerking niet toevoegen"
+      "failedAddComment": "Kon opmerking niet toevoegen",
+      "showDetail": "Details tonen",
+      "hideDetail": "Details verbergen"
     }
   },
   "recent": {

@@ -1246,7 +1246,9 @@
       "updatedTitle": "업데이트 완료!",
       "updatedMsg": "수정 사항을 반영해 훈련 프로그램이 업데이트되었습니다.",
       "failedUpdateTraining": "훈련을 업데이트하지 못했습니다",
-      "failedAddComment": "댓글을 추가하지 못했습니다"
+      "failedAddComment": "댓글을 추가하지 못했습니다",
+      "showDetail": "자세히 보기",
+      "hideDetail": "자세히 숨기기"
     },
     "coachTrainingDetail": {
       "notFound": "훈련 프로그램을 찾을 수 없습니다",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "업데이트 완료!",
       "updatedMsg": "수정 사항을 반영해 훈련 프로그램이 업데이트되었습니다.",
       "failedUpdateTraining": "훈련을 업데이트하지 못했습니다",
-      "failedAddComment": "댓글을 추가하지 못했습니다"
+      "failedAddComment": "댓글을 추가하지 못했습니다",
+      "showDetail": "자세히 보기",
+      "hideDetail": "자세히 숨기기"
     }
   },
   "recent": {

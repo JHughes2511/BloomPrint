@@ -1246,7 +1246,9 @@
       "updatedTitle": "עודכן!",
       "updatedMsg": "תוכנית האימונים שלך עודכנה על בסיס התיקונים שלך.",
       "failedUpdateTraining": "עדכון האימון נכשל",
-      "failedAddComment": "הוספת התגובה נכשלה"
+      "failedAddComment": "הוספת התגובה נכשלה",
+      "showDetail": "הצגת פרטים",
+      "hideDetail": "הסתרת פרטים"
     },
     "coachTrainingDetail": {
       "notFound": "תוכנית האימונים לא נמצאה",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "עודכן!",
       "updatedMsg": "תוכנית האימונים שלך עודכנה על בסיס התיקונים שלך.",
       "failedUpdateTraining": "עדכון האימון נכשל",
-      "failedAddComment": "הוספת התגובה נכשלה"
+      "failedAddComment": "הוספת התגובה נכשלה",
+      "showDetail": "הצגת פרטים",
+      "hideDetail": "הסתרת פרטים"
     }
   },
   "recent": {

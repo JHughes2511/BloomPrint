@@ -1246,7 +1246,9 @@
       "updatedTitle": "Aktualisiert!",
       "updatedMsg": "Dein Trainingsprogramm wurde anhand deiner Korrekturen aktualisiert.",
       "failedUpdateTraining": "Training konnte nicht aktualisiert werden",
-      "failedAddComment": "Kommentar konnte nicht hinzugefügt werden"
+      "failedAddComment": "Kommentar konnte nicht hinzugefügt werden",
+      "showDetail": "Details anzeigen",
+      "hideDetail": "Details ausblenden"
     },
     "coachTrainingDetail": {
       "notFound": "Trainingsprogramm nicht gefunden",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "Aktualisiert!",
       "updatedMsg": "Dein Trainingsprogramm wurde anhand deiner Korrekturen aktualisiert.",
       "failedUpdateTraining": "Training konnte nicht aktualisiert werden",
-      "failedAddComment": "Kommentar konnte nicht hinzugefügt werden"
+      "failedAddComment": "Kommentar konnte nicht hinzugefügt werden",
+      "showDetail": "Details anzeigen",
+      "hideDetail": "Details ausblenden"
     }
   },
   "recent": {

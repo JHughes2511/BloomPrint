@@ -1246,7 +1246,9 @@
       "updatedTitle": "Na-update!",
       "updatedMsg": "Na-update ang programa ng training mo batay sa mga pagwawasto mo.",
       "failedUpdateTraining": "Nabigong i-update ang training",
-      "failedAddComment": "Nabigong magdagdag ng komento"
+      "failedAddComment": "Nabigong magdagdag ng komento",
+      "showDetail": "Ipakita ang detalye",
+      "hideDetail": "Itago ang detalye"
     },
     "coachTrainingDetail": {
       "notFound": "Hindi nahanap ang programa ng training",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "Na-update!",
       "updatedMsg": "Na-update ang programa ng training mo batay sa mga pagwawasto mo.",
       "failedUpdateTraining": "Nabigong i-update ang training",
-      "failedAddComment": "Nabigong magdagdag ng komento"
+      "failedAddComment": "Nabigong magdagdag ng komento",
+      "showDetail": "Ipakita ang detalye",
+      "hideDetail": "Itago ang detalye"
     }
   },
   "recent": {

@@ -1246,7 +1246,9 @@
       "updatedTitle": "अपडेट हो गया!",
       "updatedMsg": "आपके सुधारों के आधार पर आपका ट्रेनिंग प्रोग्राम अपडेट कर दिया गया है।",
       "failedUpdateTraining": "ट्रेनिंग अपडेट करने में विफल",
-      "failedAddComment": "टिप्पणी जोड़ने में विफल"
+      "failedAddComment": "टिप्पणी जोड़ने में विफल",
+      "showDetail": "विवरण दिखाएँ",
+      "hideDetail": "विवरण छिपाएँ"
     },
     "coachTrainingDetail": {
       "notFound": "ट्रेनिंग प्रोग्राम नहीं मिला",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "अपडेट हो गया!",
       "updatedMsg": "आपके सुधारों के आधार पर आपका ट्रेनिंग प्रोग्राम अपडेट कर दिया गया है।",
       "failedUpdateTraining": "ट्रेनिंग अपडेट करने में विफल",
-      "failedAddComment": "टिप्पणी जोड़ने में विफल"
+      "failedAddComment": "टिप्पणी जोड़ने में विफल",
+      "showDetail": "विवरण दिखाएँ",
+      "hideDetail": "विवरण छिपाएँ"
     }
   },
   "recent": {

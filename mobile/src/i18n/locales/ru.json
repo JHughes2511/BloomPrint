@@ -1246,7 +1246,9 @@
       "updatedTitle": "Обновлено!",
       "updatedMsg": "Ваша программа тренировок обновлена на основе ваших правок.",
       "failedUpdateTraining": "Не удалось обновить тренировку",
-      "failedAddComment": "Не удалось добавить комментарий"
+      "failedAddComment": "Не удалось добавить комментарий",
+      "showDetail": "Показать детали",
+      "hideDetail": "Скрыть детали"
     },
     "coachTrainingDetail": {
       "notFound": "Программа тренировок не найдена",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "Обновлено!",
       "updatedMsg": "Ваша программа тренировок обновлена на основе ваших правок.",
       "failedUpdateTraining": "Не удалось обновить тренировку",
-      "failedAddComment": "Не удалось добавить комментарий"
+      "failedAddComment": "Не удалось добавить комментарий",
+      "showDetail": "Показать детали",
+      "hideDetail": "Скрыть детали"
     }
   },
   "recent": {

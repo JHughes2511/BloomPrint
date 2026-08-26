@@ -20,6 +20,7 @@ import { fonts } from '../../theme/typography';
 import { ScreenBackground } from '../../theme/components';
 import PageContainer, { REPORT_MAX_WIDTH } from '../../responsive/PageContainer';
 import { parseDrills } from '../../utils/trainingDrills';
+import DrillRow from '../../components/DrillRow';
 import { GeneratingOverlay } from '../../components/GeneratingBasketball';
 import CommentThread from '../../components/CommentThread';
 import { buildPdfFileName } from '../../utils/buildReportPdf';
@@ -231,21 +232,14 @@ export default function PlayerTrainingDetailScreen() {
                 {sec.drills.map(d => {
                   const done = completed.has(d.key);
                   return (
-                    <TouchableOpacity
+                    <DrillRow
                       key={d.key}
-                      style={[styles.drillRow, done && styles.drillRowDone]}
-                      onPress={() => toggleDrill(d.key)}
-                      activeOpacity={0.7}
-                    >
-                      <View style={[styles.checkbox, done ? styles.checkboxDone : styles.checkboxIdle]}>
-                        {done && <Ionicons name="checkmark" size={15} color="#16201A" />}
-                      </View>
-                      {/* A long translated drill label clips here; the checkbox never moves. */}
-                      <View style={{ flex: 1, flexShrink: 1, minWidth: 0 }}>
-                        <Text style={[styles.drillLabel, done && styles.drillLabelDone]} numberOfLines={2}>{d.label}</Text>
-                        {d.meta ? <Text style={styles.drillMeta} numberOfLines={1}>{d.meta}</Text> : null}
-                      </View>
-                    </TouchableOpacity>
+                      drill={d}
+                      done={done}
+                      onToggle={() => toggleDrill(d.key)}
+                      expandLabel={tr('playerApp.trainingDetail.showDetail')}
+                      collapseLabel={tr('playerApp.trainingDetail.hideDetail')}
+                    />
                   );
                 })}
               </View>

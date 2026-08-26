@@ -1246,7 +1246,9 @@
       "updatedTitle": "Actualizat!",
       "updatedMsg": "Programul tău de antrenament a fost actualizat pe baza corecturilor tale.",
       "failedUpdateTraining": "Antrenamentul nu a putut fi actualizat",
-      "failedAddComment": "Comentariul nu a putut fi adăugat"
+      "failedAddComment": "Comentariul nu a putut fi adăugat",
+      "showDetail": "Arată detaliile",
+      "hideDetail": "Ascunde detaliile"
     },
     "coachTrainingDetail": {
       "notFound": "Programul de antrenament nu a fost găsit",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "Actualizat!",
       "updatedMsg": "Programul tău de antrenament a fost actualizat pe baza corecturilor tale.",
       "failedUpdateTraining": "Antrenamentul nu a putut fi actualizat",
-      "failedAddComment": "Comentariul nu a putut fi adăugat"
+      "failedAddComment": "Comentariul nu a putut fi adăugat",
+      "showDetail": "Arată detaliile",
+      "hideDetail": "Ascunde detaliile"
     }
   },
   "recent": {

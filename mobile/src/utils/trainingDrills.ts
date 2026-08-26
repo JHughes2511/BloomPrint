@@ -23,7 +23,21 @@
 // than renumbered — the first Monday keeps its old key and only the second one
 // gets a new one.
 
-export interface Drill { key: string; label: string; meta?: string }
+export interface Drill {
+  key: string;
+  label: string;
+  meta?: string;
+  /**
+   * What the program says under this item, verbatim.
+   *
+   * The rows carry a label and at most a line of summary, and everything that
+   * says what the work actually is lived further down the page. A player had to
+   * leave the checklist, find the right part of the program and come back. This
+   * is those lines, so the row can open where it stands. Not a rewrite of them:
+   * a second version of the same words is a second version to keep in step.
+   */
+  detail: string[];
+}
 export interface DrillSection { title: string; drills: Drill[] }
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -58,7 +72,38 @@ const findDuration = (s: string) => {
 
 const isBullet = (raw: string) => /^\s*[-•*]\s+/.test(raw) || /^\s*\d+[.)]\s+/.test(raw);
 
+const indentOf = (raw: string) => (raw.match(/^\s*/) as RegExpMatchArray)[0].length;
+
+/** Trim the detail so one runaway section cannot fill the screen. */
+const MAX_DETAIL = 12;
+
+function trimDetail(lines: string[]): string[] {
+  const out: string[] = [];
+  for (const l of lines) {
+    const t = clean(l);
+    if (!t) continue;
+    const item = stripMarker(t);
+    if (!item) continue;
+    out.push(item);
+    if (out.length >= MAX_DETAIL) break;
+  }
+  return out;
+}
+
+// Deliberately two strippers.
+//
+// stripBullet is what the day path has always used, and the focus text it
+// produces feeds that path's keys. Correcting it would change keys for any
+// program whose day heading carried no focus, which is a player's ticks gone.
+// It stays as it is.
 const stripBullet = (s: string) => s.replace(/^[-•*\d.)\s]+/, '').trim();
+
+// stripMarker is the correct one: a list marker is a dash, a dot, or a number
+// FOLLOWED by a dot or bracket. A bare leading digit is part of what was
+// written, and eating it turned "3 sets of pound dribble" into "sets of pound
+// dribble". Used by the structure path, which is new and has no keys to keep,
+// and by the detail, which feeds no keys at all.
+const stripMarker = (s: string) => s.replace(/^\s*(?:[-•*]|\d+[.)])\s+/, '').trim();
 
 /** A heading in the house style: ALL CAPS ending with a colon, or a markdown one. */
 function headingOf(raw: string): string | null {
@@ -134,6 +179,17 @@ function parseByDay(lines: string[]): Drill[] {
     const dayCap = cap(day);
     if (!focus) focus = describeFrom(lines, i + 1);
 
+    // Everything written under this day, up to the next day or section.
+    const under: string[] = [];
+    if (!raw.includes('|')) {
+      for (let j = i + 1; j < lines.length; j++) {
+        const nxt = clean(lines[j]);
+        if (!nxt) continue;
+        if (DAY_AT_START.test(nxt) || END_SECTION.test(nxt) || WEEKLY_HEADING.test(nxt)) break;
+        under.push(lines[j]);
+      }
+    }
+
     // A program longer than a week says "Monday" again. It used to be dropped,
     // taking the whole of week two off the list. The first keeps the key it has
     // always had so ticks survive; later ones are qualified.
@@ -145,6 +201,7 @@ function parseByDay(lines: string[]): Drill[] {
       key: times === 1 ? base : `${base}-${times}`,
       label: times === 1 ? dayCap : `${dayCap} (${times})`,
       meta: [focus, duration].filter(Boolean).join(' · ') || undefined,
+      detail: trimDetail(under),
     });
     if (drills.length >= MAX_ITEMS) break;
   }
@@ -174,8 +231,9 @@ function parseByStructure(lines: string[]): DrillSection[] {
     sections.push(current);
   };
 
-  for (const raw of lines) {
+  for (let idx = 0; idx < lines.length; idx++) {
     if (count >= MAX_ITEMS) break;
+    const raw = lines[idx];
     const line = clean(raw);
     if (!line) continue;
 
@@ -198,7 +256,7 @@ function parseByStructure(lines: string[]): DrillSection[] {
       if (sawHeading) continue;
       push('');
     }
-    const item = stripBullet(line);
+    const item = stripMarker(line);
     if (!item || item.length > 120) continue;
     const duration = findDuration(item);
     const label = item.replace(/\s*\(?\b\d+\s*(?:min|hr|hour)s?\)?\s*$/i, '').trim() || item;
@@ -208,7 +266,25 @@ function parseByStructure(lines: string[]): DrillSection[] {
     while (used.has(key)) key = `${key}-${++n}`;
     used.add(key);
 
-    current!.drills.push({ key, label, meta: duration || undefined });
+    // What sits under this bullet: anything indented beneath it, and any prose
+    // that follows before the next item. A sibling bullet or a heading ends it.
+    const own = indentOf(raw);
+    const under: string[] = [];
+    let j = idx + 1;
+    for (; j < lines.length; j++) {
+      const nxt = lines[j];
+      if (!clean(nxt)) continue;
+      if (headingOf(nxt)) break;
+      if (isBullet(nxt) && indentOf(nxt) <= own) break;
+      under.push(nxt);
+    }
+    // Past them, not over them. A sub-bullet is what this item involves, and
+    // leaving the cursor behind listed every one of them as its own row to tick
+    // as well as showing it inside the row above.
+    idx = j - 1;
+
+    current!.drills.push({ key, label, meta: duration || undefined,
+                           detail: trimDetail(under) });
     count++;
   }
   return sections.filter(s => s.drills.length);

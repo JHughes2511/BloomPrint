@@ -1246,7 +1246,9 @@
       "updatedTitle": "Оновлено!",
       "updatedMsg": "Вашу тренувальну програму оновлено на основі ваших виправлень.",
       "failedUpdateTraining": "Не вдалося оновити тренування",
-      "failedAddComment": "Не вдалося додати коментар"
+      "failedAddComment": "Не вдалося додати коментар",
+      "showDetail": "Показати деталі",
+      "hideDetail": "Сховати деталі"
     },
     "coachTrainingDetail": {
       "notFound": "Тренувальну програму не знайдено",
@@ -1279,7 +1281,9 @@
       "updatedTitle": "Оновлено!",
       "updatedMsg": "Вашу тренувальну програму оновлено на основі ваших виправлень.",
       "failedUpdateTraining": "Не вдалося оновити тренування",
-      "failedAddComment": "Не вдалося додати коментар"
+      "failedAddComment": "Не вдалося додати коментар",
+      "showDetail": "Показати деталі",
+      "hideDetail": "Сховати деталі"
     }
   },
   "recent": {
