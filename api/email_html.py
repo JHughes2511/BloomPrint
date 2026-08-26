@@ -28,6 +28,7 @@ mistake. The wordmark is letterspaced text for exactly that reason.
 from __future__ import annotations
 
 import html as _html
+import re
 
 # The app's own palette. A coach should recognise the mail as the same product.
 CREAM = "#F7F2EA"      # page behind the card — the light canvas gradient's top
@@ -57,13 +58,23 @@ def _esc(s: str) -> str:
     return _html.escape(s or "", quote=True)
 
 
+def _bold(escaped: str) -> str:
+    """**like this** becomes bold.
+
+    Applied after escaping, so a body containing a literal < is still safe and
+    the only markup that can reach the page is the tag put there on purpose.
+    """
+    return re.sub(r"\*\*(.+?)\*\*",
+                  rf'<strong style="color:{INK}">\1</strong>', escaped)
+
+
 def _paragraphs(body: str, align: str) -> str:
     """The message, one <p> per blank-line-separated block."""
     out = []
     for block in [b.strip() for b in (body or "").split("\n\n") if b.strip()]:
         out.append(
             f'<p style="margin:0 0 18px;font-size:16px;line-height:26px;'
-            f'color:{INK_SOFT};text-align:{align}">{_esc(block)}</p>'
+            f'color:{INK_SOFT};text-align:{align}">{_bold(_esc(block))}</p>'
         )
     return "".join(out)
 
