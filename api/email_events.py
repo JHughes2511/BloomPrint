@@ -607,7 +607,7 @@ EVENTS["signup_coach"] = {
 
 EVENTS["signup_player"] = {
     "en": ("Welcome to BloomPrint",
-           "Your coaching staff shares reports and training programs with you here. Both are written by BloomPrint AI using your coach's own inputs and criteria.\n\nWhere to start.\n\n1. Link your account to your coach or trainer. They approve the request, and after that anything they send reaches you.\n\n2. A report arrives under **Reports** as soon as a coach or trainer sends you one. Open it to read what they wrote about you.\n\n3. Under **Training**, your coach or trainer sends you a program and our AI breaks it into a checklist you can work through. Tick items off as you go.\n\nComment on any report or program to ask a question, and your coach can answer in the same place."),
+           "Your coaching staff can share reports and training programs with you here. Both are written by BloomPrint AI from your coach's own inputs and criteria, so what you read is measured against how they see the game.\n\nWhere to start.\n\n1. Link your account to your coach or trainer. They approve the request, and after that anything they send reaches you.\n\n2. A report arrives under **Reports** as soon as a coach or trainer sends you one. Open it to read what they wrote about you.\n\n3. Under **Training**, a program you have been sent is broken into a checklist by our AI. Tick items off as you go.\n\nComment on any report or program to ask a question, and your coach can answer in the same place."),
     "es": ("Bienvenido a BloomPrint",
            "Tu cuenta de jugador está lista. Vincúlala a tu equipo para ver tus evaluaciones y entrenamientos."),
     "fr": ("Bienvenue sur BloomPrint",
