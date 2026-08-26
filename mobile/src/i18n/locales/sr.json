@@ -2595,7 +2595,10 @@
       "title": "Власник тима промењен",
       "body": "{{coach}} је сада власник тима {{team}}."
     },
-    "joinedViaLink": "{{name}} се придружио екипи {{team}} преко твоје позивнице.",
+    "joinedViaLink": {
+      "title": "Неко се придружио вашем тиму",
+      "body": "{{name}} се придружио екипи {{team}} преко твоје позивнице."
+    },
     "jobDone": {
       "title": "{{kind}} spreman",
       "body": "Vaš {{kind}} je gotov i spreman za čitanje."

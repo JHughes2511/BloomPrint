@@ -89,6 +89,15 @@ def on_startup():
             "sent. Set RESEND_API_KEY (or SMTP_HOST) to turn it on."
         )
 
+    # A gap in the email copy is invisible at runtime: an untranslated event
+    # silently falls back to English and nothing looks broken, which is exactly
+    # why it has to be checked by something that looks on purpose. Logged, not
+    # raised — a missing translation is not a reason to refuse to serve.
+    from .emails import check_complete, check_notif_copy
+
+    for problem in check_complete() + check_notif_copy():
+        log.warning("Email copy: %s", problem)
+
     # Film uploads go from the coach's browser straight to the bucket, which
     # only works if the bucket allows that origin. Stated at boot for the same
     # reason as the mail line above: it is invisible until it is the only thing

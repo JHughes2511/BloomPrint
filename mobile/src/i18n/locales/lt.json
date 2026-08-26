@@ -2595,7 +2595,10 @@
       "title": "Komandos savininkas pakeistas",
       "body": "{{coach}} dabar yra {{team}} savininkas."
     },
-    "joinedViaLink": "{{name}} prisijungė prie {{team}} per tavo pakvietimo nuorodą.",
+    "joinedViaLink": {
+      "title": "Kažkas prisijungė prie jūsų komandos",
+      "body": "{{name}} prisijungė prie {{team}} per tavo pakvietimo nuorodą."
+    },
     "jobDone": {
       "title": "{{kind}} paruoštas",
       "body": "Jūsų {{kind}} baigtas ir paruoštas skaityti."

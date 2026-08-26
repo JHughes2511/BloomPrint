@@ -2595,7 +2595,10 @@
       "title": "Nagbago ang may-ari ng koponan",
       "body": "Si {{coach}} na ang may-ari ng {{team}}."
     },
-    "joinedViaLink": "Sumali si {{name}} sa {{team}} gamit ang iyong link.",
+    "joinedViaLink": {
+      "title": "May sumali sa iyong team",
+      "body": "Sumali si {{name}} sa {{team}} gamit ang iyong link."
+    },
     "jobDone": {
       "title": "Handa na ang {{kind}}",
       "body": "Tapos na ang iyong {{kind}} at handa nang basahin."

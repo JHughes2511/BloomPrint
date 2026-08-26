@@ -2595,7 +2595,10 @@
       "title": "Teameigenaar gewijzigd",
       "body": "{{coach}} is nu de eigenaar van {{team}}."
     },
-    "joinedViaLink": "{{name}} is via jouw uitnodigingslink bij {{team}} gekomen.",
+    "joinedViaLink": {
+      "title": "Iemand heeft zich bij je team gevoegd",
+      "body": "{{name}} is via jouw uitnodigingslink bij {{team}} gekomen."
+    },
     "jobDone": {
       "title": "{{kind}} klaar",
       "body": "Je {{kind}} is klaar om te lezen."

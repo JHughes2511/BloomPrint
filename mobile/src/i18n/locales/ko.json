@@ -2595,7 +2595,10 @@
       "title": "팀 소유자 변경됨",
       "body": "{{coach}} 님이 이제 {{team}}의 소유자입니다."
     },
-    "joinedViaLink": "{{name}} 님이 초대 링크로 {{team}}에 합류했습니다.",
+    "joinedViaLink": {
+      "title": "누군가 팀에 합류했습니다",
+      "body": "{{name}} 님이 초대 링크로 {{team}}에 합류했습니다."
+    },
     "jobDone": {
       "title": "{{kind}} 완료",
       "body": "{{kind}}이(가) 완성되어 확인할 수 있습니다."

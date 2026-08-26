@@ -147,6 +147,11 @@ def build(
     body: str,
     lang: str = "en",
     greeting: str | None = None,
+    # A plain heading above the body, for a message whose first job is to say
+    # what happened. Not `headline`, which is the milestone banner: a comment
+    # on a report does not deserve a coloured panel, and a sender that
+    # celebrates small things teaches people to skim the ones that matter.
+    heading: str | None = None,
     headline: str | None = None,
     kicker: str | None = None,
     banner_bg: str = BANNER_BG,
@@ -170,6 +175,12 @@ def build(
 
     head = (_banner(headline, kicker, rtl, banner_bg, banner_fg, banner_kicker_fg)
             if headline else "")
+
+    head_line = ""
+    if heading:
+        head_line = (f'<p style="margin:0 0 14px;font-size:19px;line-height:27px;'
+                     f'color:{INK};font-weight:700;text-align:{align}">'
+                     f'{_esc(heading)}</p>')
 
     greet = ""
     if greeting:
@@ -237,6 +248,7 @@ def build(
 
         <tr><td style="padding:{'30px 32px 6px' if headline else '4px 32px 6px'}">
           {greet}
+          {head_line}
           {_paragraphs(body, align)}
           {cta}
         </td></tr>

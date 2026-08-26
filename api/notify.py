@@ -26,7 +26,8 @@ from sqlalchemy.exc import IntegrityError
 
 from . import models
 from .database import SessionLocal
-from .emails import ACCOUNT_EVENTS, render, render_html
+from .emails import (ACCOUNT_EVENTS, render, render_html, render_notification,
+                     render_notification_html)
 from .mailer import contact_email, mail_from, try_send
 
 log = logging.getLogger(__name__)
@@ -175,3 +176,78 @@ def set_opted_out(audience: str, user_id: int, value: bool) -> bool:
         return bool(pref.opted_out)
     finally:
         db.close()
+
+
+# ── The other half: notifications ─────────────────────────────────────────────
+#
+# Everything above sends copy written for the inbox. Most of what happens in
+# the app is not that: it is one of forty-odd events that already writes an
+# in-app notification, and the email for it should say the same thing rather
+# than a second version of it. The words come from the app's own packs by way
+# of api/notif_copy.py, so there is one place to edit and the two channels
+# cannot come to disagree.
+
+def _deliver_notification(audience: str, user_id: int, key: str, to: str,
+                          lang: str | None, params: dict,
+                          link: str | None) -> None:
+    """Render one notification as mail and send it. Never raises."""
+    try:
+        token, opted_out = _preference(audience, user_id)
+        # Every notification is opt-out-able by definition: account mail is
+        # written as an event, not as a notification row.
+        if opted_out:
+            return
+        rendered = render_notification(key, lang, params, token=token, link=link)
+        if rendered is None:
+            # No copy for the key, or a param the caller did not pass. Both
+            # mean the message would read as a bug; the in-app row still shows.
+            log.warning("No email copy for notification %s", key)
+            return
+        subject, body = rendered
+        try:
+            html = render_notification_html(key, lang, params, token=token, link=link)
+        except Exception:
+            log.warning("Could not lay out %s; sending as text", key, exc_info=True)
+            html = None
+        ok, reason = try_send(to, subject, body, html, from_addr=mail_from(),
+                              reply_to=contact_email())
+        if not ok:
+            log.warning("Notification email %s to %s not sent: %s", key, to, reason)
+    except Exception:
+        log.warning("Could not email notification %s to %s #%s", key, audience,
+                    user_id, exc_info=True)
+
+
+def notification(audience: str, user_id: int, key: str, *, to: str | None,
+                 lang: str | None, params: dict | None = None,
+                 link: str | None = None) -> None:
+    """Queue the email for one in-app notification. Returns immediately."""
+    if not to:
+        return
+    _pool.submit(_deliver_notification, audience, user_id, key, to, lang,
+                 dict(params or {}), link)
+
+
+def coach_notification(coach: "models.Coach | None", key: str,
+                       params: dict | None = None, *,
+                       link: str | None = None) -> None:
+    """The coach's copy of a notification, in the coach's language.
+
+    Address and language are read here, on the caller's thread, because the row
+    belongs to a session that may be closed by the time the pool reaches it.
+    """
+    if coach is None:
+        return
+    notification(COACH, coach.id, key, to=coach.email,
+                 lang=coach.preferred_language, params=params, link=link)
+
+
+def player_notification(user: "models.PlayerUser | None", key: str,
+                        params: dict | None = None, *,
+                        link: str | None = None) -> None:
+    """The player's copy of a notification, in the player's language."""
+    if user is None:
+        return
+    notification(PLAYER, user.id, key, to=user.email,
+                 lang=getattr(user, "preferred_language", None),
+                 params=params, link=link)

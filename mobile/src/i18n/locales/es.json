@@ -2595,7 +2595,10 @@
       "title": "Cambio de propietario del equipo",
       "body": "{{coach}} es ahora el propietario de {{team}}."
     },
-    "joinedViaLink": "{{name}} se unió a {{team}} con tu enlace de invitación.",
+    "joinedViaLink": {
+      "title": "Alguien se ha unido a tu equipo",
+      "body": "{{name}} se unió a {{team}} con tu enlace de invitación."
+    },
     "jobDone": {
       "title": "{{kind}} listo",
       "body": "Tu {{kind}} ha terminado y está listo para leer."

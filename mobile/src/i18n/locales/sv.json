@@ -2595,7 +2595,10 @@
       "title": "Lagets ägare ändrad",
       "body": "{{coach}} äger nu {{team}}."
     },
-    "joinedViaLink": "{{name}} gick med i {{team}} via din inbjudningslänk.",
+    "joinedViaLink": {
+      "title": "Någon har gått med i ditt lag",
+      "body": "{{name}} gick med i {{team}} via din inbjudningslänk."
+    },
     "jobDone": {
       "title": "{{kind}} klar",
       "body": "Din {{kind}} är klar att läsa."

@@ -13,7 +13,7 @@ English rather than failing to send.
 
 Adding an event: add one entry to EVENTS with a subject and body per language.
 Adding a language: add one SHELL entry and one line per event. Both are checked
-by test_emails_complete() below, which the API imports at startup.
+by check_complete() below, which the API runs at startup and logs.
 """
 from __future__ import annotations
 
@@ -505,3 +505,165 @@ def render_html(event: str, lang: str | None, params: dict | None = None, *,
         kw["unsub_url"] = unsubscribe_url(token)
         kw["unsub_label"] = shell["unsub_link"]
     return build(**kw)
+
+
+# ── Notifications, as email ───────────────────────────────────────────────────
+#
+# Everything above is copy written for the inbox. This half is the other kind:
+# the app already writes a notification for dozens of events, in the reader's
+# language, and mailing the same event should say the same thing rather than a
+# second version of it that drifts.
+#
+# The strings come from the app's own packs, compiled into api/notif_copy.py
+# because the API image has no mobile/ directory. See
+# scripts/i18n/build_notif_copy.py.
+
+_TAG = re.compile(r"\{\{\s*(\w+)\s*\}\}")
+
+# Params a notification carries as an API enum instead of as words, because the
+# writer does not know who will read the row or in what language. The client
+# localizes exactly these two; so does this, from the same packs.
+ENUM_PARAMS = {"type": "REPORT_TYPES", "kind": "JOB_KINDS"}
+
+
+def _fmt_tags(s: str, params: dict) -> str:
+    """Interpolate the app's {{name}} placeholders.
+
+    A separate function from _fmt rather than a conversion into it: these
+    strings are shared with the client, so they must keep the client's syntax,
+    and str.format would also try to read single braces that appear in ordinary
+    prose.
+    """
+    return _TAG.sub(lambda m: str(params.get(m.group(1), m.group(0))), s or "")
+
+
+def _localize_params(params: dict, lang: str) -> dict:
+    from . import notif_copy
+
+    out = dict(params or {})
+    for name, table in ENUM_PARAMS.items():
+        raw = out.get(name)
+        if isinstance(raw, str) and raw:
+            by_lang = getattr(notif_copy, table)
+            words = by_lang.get(lang) or by_lang.get(DEFAULT_LANG) or {}
+            # An enum the packs do not know about reads as words rather than as
+            # "film_breakdown", which is what the client does with it too.
+            out[name] = words.get(raw) or raw.replace("_", " ")
+    return out
+
+
+def notification_copy(key: str, lang: str | None,
+                      params: dict | None = None) -> tuple[str, str] | None:
+    """(title, body) for one in-app notification, in the reader's language.
+
+    `key` is the row's i18n_key, with or without its "notifs." prefix. None
+    when there is no copy for it at all, which is the caller's signal to send
+    nothing: an email whose body is a key name is worse than no email.
+    """
+    from .notif_copy import NOTIF_COPY
+
+    name = (key or "").split(".")[-1]
+    by_lang = NOTIF_COPY.get(name)
+    if not by_lang:
+        return None
+    code = (lang or DEFAULT_LANG).split("-")[0].lower()
+    title, body = by_lang.get(code) or by_lang.get(DEFAULT_LANG)
+    ready = _localize_params(params or {}, code)
+    out = _fmt_tags(title, ready), _fmt_tags(body, ready)
+    # A param the caller did not pass leaves its {{placeholder}} in the text.
+    # In the app that is a cosmetic slip in a list the reader is already
+    # looking at; in an inbox it is a message that reads like a broken machine
+    # sent it. Nothing goes out rather than that, and the in-app notification
+    # is still there to be read.
+    if any(_TAG.search(part) for part in out):
+        return None
+    return out
+
+
+def render_notification(key: str, lang: str | None, params: dict | None = None, *,
+                        token: str | None = None,
+                        link: str | None = None) -> tuple[str, str] | None:
+    """(subject, text body) for a notification, framed like any other email."""
+    pair = notification_copy(key, lang, params)
+    if pair is None:
+        return None
+    title, body = pair
+    code = (lang or DEFAULT_LANG).split("-")[0].lower()
+    shell = SHELL.get(code, SHELL[DEFAULT_LANG])
+
+    parts = [body, f"{shell['open_cta']}: {link or app_url()}", shell["signoff"]]
+    if token:
+        # Every one of these is an opt-out-able notification by definition:
+        # account mail is not written as a notification row.
+        parts.append(_fmt(shell["unsub"], {"url": unsubscribe_url(token)})
+                     + "\n" + shell["unsub_note"])
+    return title, "\n\n".join(parts)
+
+
+def render_notification_html(key: str, lang: str | None,
+                             params: dict | None = None, *,
+                             token: str | None = None,
+                             link: str | None = None) -> str | None:
+    """The same notification, laid out. Same words, same shell as render()."""
+    from .email_html import build
+    from .mailer import contact_email
+
+    pair = notification_copy(key, lang, params)
+    if pair is None:
+        return None
+    title, body = pair
+    code = (lang or DEFAULT_LANG).split("-")[0].lower()
+    shell = SHELL.get(code, SHELL[DEFAULT_LANG])
+
+    kw: dict = {
+        # The title is the subject line and would be said twice if it were also
+        # the greeting, so it heads the message and the body follows it.
+        "heading": title,
+        "body": body,
+        "lang": code,
+        "cta_label": shell["open_cta"],
+        "cta_url": link or app_url(),
+        "contact": shell.get("contact"),
+        "contact_address": contact_email(),
+    }
+    if token:
+        kw["unsub"] = shell["unsub"].replace("{url}", "").strip()
+        kw["unsub_url"] = unsubscribe_url(token)
+        kw["unsub_label"] = shell["unsub_link"]
+    return build(**kw)
+
+
+def check_notif_copy() -> list[str]:
+    """Is api/notif_copy.py still what the packs say?
+
+    Only checkable where the packs exist. The API image excludes mobile/ on
+    purpose, so in production this finds nothing and says so by returning
+    nothing — the check belongs to development, where the packs get edited and
+    the generated file gets forgotten.
+    """
+    import json
+    import hashlib
+
+    from .notif_copy import SOURCE_DIGEST
+
+    here = os.path.dirname(os.path.abspath(__file__))
+    packs = os.path.join(here, "..", "mobile", "src", "i18n", "locales")
+    if not os.path.isdir(packs):
+        return []
+    h = hashlib.sha256()
+    for lang in LANGS:
+        path = os.path.join(packs, f"{lang}.json")
+        if not os.path.exists(path):
+            return [f"locale pack missing: {lang}.json"]
+        with open(path, encoding="utf-8") as f:
+            pack = json.load(f)
+        h.update(json.dumps(pack.get("notifs", {}), sort_keys=True,
+                            ensure_ascii=False).encode())
+        h.update(json.dumps(pack.get("reportTypes", {}), sort_keys=True,
+                            ensure_ascii=False).encode())
+        h.update(json.dumps(pack.get("jobs", {}).get("kinds", {}),
+                            sort_keys=True, ensure_ascii=False).encode())
+    if h.hexdigest() != SOURCE_DIGEST:
+        return ["api/notif_copy.py is out of date with the locale packs. "
+                "Run: python3 scripts/i18n/build_notif_copy.py"]
+    return []

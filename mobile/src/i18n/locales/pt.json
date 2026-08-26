@@ -2595,7 +2595,10 @@
       "title": "Propriedade da equipa alterada",
       "body": "{{coach}} é agora o proprietário de {{team}}."
     },
-    "joinedViaLink": "{{name}} entrou em {{team}} através do teu link de convite.",
+    "joinedViaLink": {
+      "title": "Alguém juntou-se à sua equipa",
+      "body": "{{name}} entrou em {{team}} através do teu link de convite."
+    },
     "jobDone": {
       "title": "{{kind}} pronto",
       "body": "O teu {{kind}} terminou e está pronto para ler."

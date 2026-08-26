@@ -2595,7 +2595,10 @@
       "title": "Proprietarul echipei s-a schimbat",
       "body": "{{coach}} este acum proprietarul echipei {{team}}."
     },
-    "joinedViaLink": "{{name}} a intrat în {{team}} prin linkul tău de invitație.",
+    "joinedViaLink": {
+      "title": "Cineva s-a alăturat echipei tale",
+      "body": "{{name}} a intrat în {{team}} prin linkul tău de invitație."
+    },
     "jobDone": {
       "title": "{{kind}} gata",
       "body": "{{kind}} s-a terminat și poate fi citit."

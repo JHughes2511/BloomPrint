@@ -2595,7 +2595,10 @@
       "title": "Takım sahibi değişti",
       "body": "{{coach}} artık {{team}} takımının sahibi."
     },
-    "joinedViaLink": "{{name}}, davet bağlantınla {{team}} takımına katıldı.",
+    "joinedViaLink": {
+      "title": "Birisi takımınıza katıldı",
+      "body": "{{name}}, davet bağlantınla {{team}} takımına katıldı."
+    },
     "jobDone": {
       "title": "{{kind}} hazır",
       "body": "{{kind}} tamamlandı ve okunmaya hazır."

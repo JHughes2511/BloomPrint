@@ -2595,7 +2595,10 @@
       "title": "チームのオーナーが変わりました",
       "body": "{{coach}} が {{team}} のオーナーになりました。"
     },
-    "joinedViaLink": "{{name}} さんが招待リンクから {{team}} に参加しました。",
+    "joinedViaLink": {
+      "title": "チームに参加した人がいます",
+      "body": "{{name}} さんが招待リンクから {{team}} に参加しました。"
+    },
     "jobDone": {
       "title": "{{kind}}が完了しました",
       "body": "{{kind}}が仕上がり、閲覧できます。"
