@@ -18,6 +18,7 @@ by test_emails_complete() below, which the API imports at startup.
 from __future__ import annotations
 
 import os
+import re
 
 DEFAULT_LANG = "en"
 
@@ -326,6 +327,17 @@ def _fmt(s: str, params: dict) -> str:
         return s
 
 
+def _plain(s: str) -> str:
+    """The body as text, with the emphasis markers taken out.
+
+    A name is marked **like this** in the copy so the laid-out version can bold
+    it. The text version has no way to draw bold, and leaving the markers in
+    means a reader on a text-only client sees the asterisks — which is worse
+    than no emphasis at all, because it reads as a formatting bug.
+    """
+    return re.sub(r"\*\*(.+?)\*\*", r"\1", s or "")
+
+
 # Events that earn the banner. Everything else is the plain layout: a
 # notification wearing a celebration reads as marketing, and a sender that
 # celebrates a comment teaches people to skim the message that mattered.
@@ -357,7 +369,7 @@ def render(event: str, lang: str | None, params: dict | None = None, *,
     name = (params.get("name") or "").strip()
     if name:
         parts.append(_fmt(shell["greeting"], {"name": name}))
-    parts.append(_fmt(line, params))
+    parts.append(_plain(_fmt(line, params)))
     parts.append(f"{shell['open_cta']}: {link or app_url()}")
     parts.append(shell["signoff"])
 
