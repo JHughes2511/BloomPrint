@@ -31,6 +31,10 @@ export const playerAuthAPI = {
     playerApi.post('/player-auth/login', { email, password }).then(r => r.data),
   google: (data: { id_token: string; mode: 'login' | 'register'; name?: string; country?: string; city?: string }) =>
     playerApi.post('/player-auth/google', data).then(r => r.data),
+  requestPasswordReset: (email: string) =>
+    playerApi.post('/player-auth/password-reset/request', { email }).then(r => r.data),
+  confirmPasswordReset: (token: string, password: string) =>
+    playerApi.post('/player-auth/password-reset/confirm', { token, password }).then(r => r.data),
   me: () => playerApi.get('/player-auth/me').then(r => r.data),
   updateMe: (data: { name?: string; avatar?: string | null; country?: string; city?: string }) =>
     playerApi.patch('/player-auth/me', data).then(r => r.data),

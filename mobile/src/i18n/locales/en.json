@@ -100,7 +100,10 @@
     "conferenceRequired": "Conference Required",
     "conferenceRequiredMsg": "Please select your conference to continue.",
     "appLanguage": "App Language",
-    "panelTagline": "Film breakdown, player evaluations, and training plans — in one system."
+    "panelTagline": "Film breakdown, player evaluations, and training plans — in one system.",
+    "forgotPassword": "Forgot your password?",
+    "forgotNeedEmail": "Enter your email above, then tap this again.",
+    "forgotSent": "If that address has an account, a reset link is on its way."
   },
   "components": {
     "shareModal": {
@@ -2751,5 +2754,21 @@
     "deleteTitle": "Delete this?",
     "deleteBody": "It stays in place so replies still read, but the words go. This cannot be undone.",
     "holdHint": "Press and hold a message for reply, edit and delete."
+  },
+  "resetPassword": {
+    "title": "Choose a new password",
+    "sub": "This link works once. Pick something you have not used here before.",
+    "newPassword": "New password",
+    "confirmPassword": "Type it again",
+    "submit": "Save and sign in",
+    "show": "Show password",
+    "hide": "Hide password",
+    "tooShort": "At least {{count}} characters.",
+    "mismatch": "These do not match.",
+    "failed": "That did not work. Ask for a new link and try again.",
+    "badLinkTitle": "This link is incomplete",
+    "badLinkBody": "It may have been cut short by your email app. Ask for a new one from the sign-in screen.",
+    "backToSignIn": "Back to sign in",
+    "signsOutOthers": "Saving a new password signs you out on every other device."
   }
 }

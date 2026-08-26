@@ -55,6 +55,10 @@ export const linking: LinkingOptions<any> = {
       // who is signed in.
       Questionnaire: 'questionnaire',
       QuestionnaireResults: 'questionnaire/results',
+      // Opened from an email by someone who cannot sign in, so it lives with
+      // the signed-out routes. Registered in all three navigators for the same
+      // reason as Join: whoever clicks it may already have a session.
+      ResetPassword: 'reset-password',
       CoachLogin: 'login',
       PlayerLogin: 'player/login',
       PlayerRegister: 'player/register',

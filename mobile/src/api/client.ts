@@ -288,6 +288,13 @@ export const authAPI = {
   login: (email: string, password: string) =>
     api.post('/auth/login', { email, password }).then(r => r.data),
 
+  // Both halves of getting back in. The request never says whether the address
+  // has an account, so there is nothing here to branch on.
+  requestPasswordReset: (email: string) =>
+    api.post('/auth/password-reset/request', { email }).then(r => r.data),
+  confirmPasswordReset: (token: string, password: string) =>
+    api.post('/auth/password-reset/confirm', { token, password }).then(r => r.data),
+
   google: (data: {
     id_token: string; mode: 'login' | 'register';
     // Editable on the signup form, so it has to be sendable. The type is what

@@ -296,7 +296,7 @@ def request_player_password_reset(request: Request, body: PlayerPasswordResetReq
     if pu:
         token = password_reset.issue(db, password_reset.PLAYER, pu.id)
         notify.player_event(pu, "password_reset",
-                            link=f"{emails.app_url()}/reset-password?token={token}")
+                            link=f"{emails.app_url()}/reset-password?token={token}&as=player")
     return {"ok": True}
 
 

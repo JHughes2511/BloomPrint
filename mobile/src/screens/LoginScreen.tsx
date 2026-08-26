@@ -250,6 +250,28 @@ export default function LoginScreen() {
     }
   };
 
+
+  const [forgotBusy, setForgotBusy] = useState(false);
+  const [forgotNote, setForgotNote] = useState('');
+
+  const forgotPassword = async () => {
+    const address = (email || '').trim();
+    if (!address) {
+      setForgotNote(tr('auth.forgotNeedEmail'));
+      return;
+    }
+    setForgotBusy(true);
+    try {
+      await authAPI.requestPasswordReset(address);
+    } catch {
+      // Deliberately silent. The endpoint answers the same either way, so a
+      // failure here must not be the one thing that tells someone whether the
+      // address is registered.
+    }
+    setForgotNote(tr('auth.forgotSent'));
+    setForgotBusy(false);
+  };
+
   const submit = async () => {
     if (mode === 'register') {
       if (competitionLevel === 'College' && !conference) {
@@ -431,6 +453,16 @@ export default function LoginScreen() {
             : <Text style={styles.btnText}>{mode === 'login' ? tr('auth.signIn') : tr('auth.createAccount')}</Text>}
         </TouchableOpacity>
 
+        {/* Only when signing in. There is nothing to have forgotten on a form
+            that is creating the account. */}
+        {mode === 'login' && (
+          <TouchableOpacity onPress={forgotPassword} disabled={forgotBusy}>
+            <Text style={styles.forgot} numberOfLines={2}>
+              {forgotNote || tr('auth.forgotPassword')}
+            </Text>
+          </TouchableOpacity>
+        )}
+
         {!googleIdToken && (
           <>
             <View style={styles.orRow}>
@@ -530,6 +562,8 @@ const makePickerStyles = (t: ThemeTokens) => StyleSheet.create({
 });
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  forgot: { color: t.muted, fontSize: 13, textAlign: 'center', marginTop: 14, lineHeight: 19 },
+
   container: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: 24, paddingTop: 60 },
   backBtn: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', marginBottom: 24, gap: 4 },
   backText: { color: t.muted, fontSize: 14 },

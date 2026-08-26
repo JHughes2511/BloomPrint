@@ -371,7 +371,7 @@ def request_password_reset(request: Request, body: PasswordResetRequest,
     if coach:
         token = password_reset.issue(db, password_reset.COACH, coach.id)
         notify.coach_event(coach, "password_reset",
-                           link=f"{emails.app_url()}/reset-password?token={token}")
+                           link=f"{emails.app_url()}/reset-password?token={token}&as=coach")
     return {"ok": True}
 
 

@@ -56,6 +56,28 @@ export default function PlayerLoginScreen() {
     }
   };
 
+
+  const [forgotBusy, setForgotBusy] = useState(false);
+  const [forgotNote, setForgotNote] = useState('');
+
+  const forgotPassword = async () => {
+    const address = (email || '').trim();
+    if (!address) {
+      setForgotNote(tr('auth.forgotNeedEmail'));
+      return;
+    }
+    setForgotBusy(true);
+    try {
+      await playerAuthAPI.requestPasswordReset(address);
+    } catch {
+      // Deliberately silent. The endpoint answers the same either way, so a
+      // failure here must not be the one thing that tells someone whether the
+      // address is registered.
+    }
+    setForgotNote(tr('auth.forgotSent'));
+    setForgotBusy(false);
+  };
+
   const submit = async () => {
     if (!email.trim() || !password.trim()) {
       Alert.alert(tr('common.error'), tr('playerApp.login.enterEmailPassword'));
@@ -121,6 +143,17 @@ export default function PlayerLoginScreen() {
               : <Text style={styles.btnText} numberOfLines={1}>{tr('auth.signIn')}</Text>}
           </TouchableOpacity>
 
+
+          {/* Sends to whatever address is already typed above rather than
+              opening a second screen to ask for it again. The reply never says
+              whether the address has an account, so there is nothing to branch
+              on and nothing to reveal. */}
+          <TouchableOpacity onPress={forgotPassword} disabled={forgotBusy}>
+            <Text style={styles.forgot} numberOfLines={2}>
+              {forgotNote || tr('auth.forgotPassword')}
+            </Text>
+          </TouchableOpacity>
+
           <View style={styles.orRow}>
             <View style={styles.orLine} />
             <Text style={styles.orText} numberOfLines={1}>{tr('auth.or')}</Text>
@@ -150,6 +183,8 @@ export default function PlayerLoginScreen() {
 }
 
 const makeStyles = (t: ThemeTokens) => StyleSheet.create({
+  forgot: { color: t.muted, fontSize: 13, textAlign: 'center', marginTop: 14, lineHeight: 19 },
+
   container: {
     flexGrow: 1,
     alignItems: 'center',
