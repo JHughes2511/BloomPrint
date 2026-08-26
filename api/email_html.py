@@ -30,13 +30,18 @@ from __future__ import annotations
 import html as _html
 
 # The app's own palette. A coach should recognise the mail as the same product.
-CREAM = "#F5F0E8"      # page behind the card
+CREAM = "#F7F2EA"      # page behind the card — the light canvas gradient's top
 CARD = "#FFFFFF"
 INK = "#16242E"
 INK_SOFT = "#34424B"
 MUTED = "#8A8174"
 ACCENT = "#1F6F9B"     # links and the button
-ACCENT_LIGHT = "#41B8E8"   # headline on the dark banner
+# NOT the dark theme's #41B8E8. That is the accent the app uses on a dark
+# canvas, and dropping it into a light-mode design gave a harsh cyan on navy
+# that appears nowhere in the app.
+BANNER_BG = "#16242E"
+BANNER_FG = "#FFFFFF"
+BANNER_KICKER = "#A9BCC7"
 CHIP = "#EFE8DC"       # the quiet footer card
 LINE = "#E1D9CA"
 
@@ -80,7 +85,9 @@ def _button(label: str, url: str, rtl: bool) -> str:
     </table>"""
 
 
-def _banner(headline: str, kicker: str | None, rtl: bool) -> str:
+def _banner(headline: str, kicker: str | None, rtl: bool,
+            bg: str = BANNER_BG, fg: str = BANNER_FG,
+            kicker_fg: str = BANNER_KICKER) -> str:
     """The dark panel, for the handful of messages that earn one.
 
     A flat colour rather than a gradient: Outlook drops CSS gradients entirely
@@ -88,12 +95,12 @@ def _banner(headline: str, kicker: str | None, rtl: bool) -> str:
     """
     align = "right" if rtl else "left"
     kick = (f'<p style="margin:0 0 10px;font-size:15px;line-height:22px;'
-            f'color:#C7D6DE;text-align:{align}">{_esc(kicker)}</p>') if kicker else ""
+            f'color:{kicker_fg};text-align:{align}">{_esc(kicker)}</p>') if kicker else ""
     return f"""
-    <tr><td bgcolor="{INK}" style="padding:34px 32px 38px;background-color:{INK}">
+    <tr><td bgcolor="{bg}" style="padding:34px 32px 38px;background-color:{bg}">
       {kick}
       <h1 style="margin:0;font-size:30px;line-height:38px;font-weight:700;
-          color:{ACCENT_LIGHT};text-align:{align}">{_esc(headline)}</h1>
+          letter-spacing:-0.5px;color:{fg};text-align:{align}">{_esc(headline)}</h1>
     </td></tr>"""
 
 
@@ -104,6 +111,9 @@ def build(
     greeting: str | None = None,
     headline: str | None = None,
     kicker: str | None = None,
+    banner_bg: str = BANNER_BG,
+    banner_fg: str = BANNER_FG,
+    banner_kicker_fg: str = BANNER_KICKER,
     cta_label: str | None = None,
     cta_url: str | None = None,
     contact: str | None = None,
@@ -117,7 +127,8 @@ def build(
     align = "right" if rtl else "left"
     dir_attr = "rtl" if rtl else "ltr"
 
-    head = _banner(headline, kicker, rtl) if headline else ""
+    head = (_banner(headline, kicker, rtl, banner_bg, banner_fg, banner_kicker_fg)
+            if headline else "")
 
     greet = ""
     if greeting:
