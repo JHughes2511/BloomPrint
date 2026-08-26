@@ -2288,7 +2288,8 @@
     "removeSharedGameMessage": "¿Quitar este partido de tu lista? Sigue con {{name}}: solo cambia tu vista.",
     "removeFromMyGames": "Quitar de mis partidos",
     "frozenFromCoach": "De {{name}} · ya no se actualiza",
-    "searchTeamsPlaceholder": "Buscar equipos..."
+    "searchTeamsPlaceholder": "Buscar equipos...",
+    "viewFullGameData": "Ver todos los datos del partido"
   },
   "whiteboard": {
     "title": "Pizarra",

@@ -2288,7 +2288,8 @@
     "removeSharedGameMessage": "इस मैच को अपनी सूची से हटाएँ? यह {{name}} के पास रहेगा — केवल आपका दृश्य बदलेगा।",
     "removeFromMyGames": "मेरे मैचों से हटाएँ",
     "frozenFromCoach": "{{name}} से · अब अपडेट नहीं होता",
-    "searchTeamsPlaceholder": "टीमें खोजें..."
+    "searchTeamsPlaceholder": "टीमें खोजें...",
+    "viewFullGameData": "पूरा मैच डेटा देखें"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",

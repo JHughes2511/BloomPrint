@@ -2288,7 +2288,8 @@
     "removeSharedGameMessage": "Tirar este jogo da sua lista? Ele continua com {{name}} — só a sua visualização muda.",
     "removeFromMyGames": "Remover dos meus jogos",
     "frozenFromCoach": "De {{name}} · não atualiza mais",
-    "searchTeamsPlaceholder": "Buscar times..."
+    "searchTeamsPlaceholder": "Buscar times...",
+    "viewFullGameData": "Ver todos os dados do jogo"
   },
   "whiteboard": {
     "title": "Quadro Tático",

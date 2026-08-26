@@ -2288,7 +2288,8 @@
     "removeSharedGameMessage": "წავშალოთ ეს თამაში თქვენი სიიდან? ის რჩება {{name}}-თან — იცვლება მხოლოდ თქვენი ხედი.",
     "removeFromMyGames": "წაშლა ჩემი თამაშებიდან",
     "frozenFromCoach": "{{name}}-გან · აღარ განახლდება",
-    "searchTeamsPlaceholder": "გუნდების ძებნა..."
+    "searchTeamsPlaceholder": "გუნდების ძებნა...",
+    "viewFullGameData": "მატჩის სრული მონაცემების ნახვა"
   },
   "whiteboard": {
     "title": "დაფა",

@@ -2288,7 +2288,8 @@
     "removeSharedGameMessage": "Scoți acest meci din lista ta? Rămâne la {{name}} — se schimbă doar vizualizarea ta.",
     "removeFromMyGames": "Elimină din meciurile mele",
     "frozenFromCoach": "De la {{name}} · nu se mai actualizează",
-    "searchTeamsPlaceholder": "Caută echipe..."
+    "searchTeamsPlaceholder": "Caută echipe...",
+    "viewFullGameData": "Vezi toate datele meciului"
   },
   "whiteboard": {
     "title": "Tablă tactică",

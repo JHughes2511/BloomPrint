@@ -2288,7 +2288,8 @@
     "removeSharedGameMessage": "이 경기를 내 목록에서 제거할까요? {{name}} 님에게는 그대로 남고 내 화면만 바뀝니다.",
     "removeFromMyGames": "내 경기에서 제거",
     "frozenFromCoach": "{{name}} 님에게서 · 더 이상 갱신되지 않음",
-    "searchTeamsPlaceholder": "팀 검색..."
+    "searchTeamsPlaceholder": "팀 검색...",
+    "viewFullGameData": "전체 경기 데이터 보기"
   },
   "whiteboard": {
     "title": "작전판",

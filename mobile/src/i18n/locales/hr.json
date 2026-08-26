@@ -2288,7 +2288,8 @@
     "removeSharedGameMessage": "Ukloniti ovu utakmicu s tvog popisa? Ostaje kod {{name}} — mijenja se samo tvoj prikaz.",
     "removeFromMyGames": "Ukloni iz mojih utakmica",
     "frozenFromCoach": "Od {{name}} · više se ne ažurira",
-    "searchTeamsPlaceholder": "Traži momčadi..."
+    "searchTeamsPlaceholder": "Traži momčadi...",
+    "viewFullGameData": "Prikaži sve podatke utakmice"
   },
   "whiteboard": {
     "title": "Ploča",

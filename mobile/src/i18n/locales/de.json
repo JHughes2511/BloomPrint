@@ -2288,7 +2288,8 @@
     "removeSharedGameMessage": "Dieses Spiel von deiner Liste nehmen? Es bleibt bei {{name}} — nur deine Ansicht ändert sich.",
     "removeFromMyGames": "Aus meinen Spielen entfernen",
     "frozenFromCoach": "Von {{name}} · wird nicht mehr aktualisiert",
-    "searchTeamsPlaceholder": "Teams suchen..."
+    "searchTeamsPlaceholder": "Teams suchen...",
+    "viewFullGameData": "Alle Spieldaten ansehen"
   },
   "whiteboard": {
     "title": "Taktiktafel",

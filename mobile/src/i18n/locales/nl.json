@@ -2288,7 +2288,8 @@
     "removeSharedGameMessage": "Deze wedstrijd van je lijst halen? Hij blijft bij {{name}} — alleen jouw weergave verandert.",
     "removeFromMyGames": "Uit mijn wedstrijden verwijderen",
     "frozenFromCoach": "Van {{name}} · wordt niet meer bijgewerkt",
-    "searchTeamsPlaceholder": "Teams zoeken..."
+    "searchTeamsPlaceholder": "Teams zoeken...",
+    "viewFullGameData": "Alle wedstrijdgegevens bekijken"
   },
   "whiteboard": {
     "title": "Tactiekbord",

@@ -2288,7 +2288,8 @@
     "removeSharedGameMessage": "Убрать этот матч из вашего списка? Он останется у {{name}} — изменится только ваш вид.",
     "removeFromMyGames": "Убрать из моих матчей",
     "frozenFromCoach": "От {{name}} · больше не обновляется",
-    "searchTeamsPlaceholder": "Поиск команд..."
+    "searchTeamsPlaceholder": "Поиск команд...",
+    "viewFullGameData": "Все данные о матче"
   },
   "whiteboard": {
     "title": "Тактическая доска",

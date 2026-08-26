@@ -2288,7 +2288,8 @@
     "removeSharedGameMessage": "Να αφαιρεθεί ο αγώνας από τη λίστα σου; Παραμένει στον/στην {{name}} — αλλάζει μόνο η δική σου προβολή.",
     "removeFromMyGames": "Αφαίρεση από τους αγώνες μου",
     "frozenFromCoach": "Από {{name}} · δεν ενημερώνεται πλέον",
-    "searchTeamsPlaceholder": "Αναζήτηση ομάδων..."
+    "searchTeamsPlaceholder": "Αναζήτηση ομάδων...",
+    "viewFullGameData": "Προβολή όλων των δεδομένων αγώνα"
   },
   "whiteboard": {
     "title": "Πίνακας",

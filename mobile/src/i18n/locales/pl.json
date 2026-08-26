@@ -2288,7 +2288,8 @@
     "removeSharedGameMessage": "Usunąć ten mecz z Twojej listy? Pozostaje u {{name}} — zmienia się tylko Twój widok.",
     "removeFromMyGames": "Usuń z moich meczów",
     "frozenFromCoach": "Od {{name}} · już się nie aktualizuje",
-    "searchTeamsPlaceholder": "Szukaj drużyn..."
+    "searchTeamsPlaceholder": "Szukaj drużyn...",
+    "viewFullGameData": "Zobacz pełne dane meczu"
   },
   "whiteboard": {
     "title": "Tablica",

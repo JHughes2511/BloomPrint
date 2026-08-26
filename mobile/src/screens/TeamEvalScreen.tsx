@@ -155,6 +155,68 @@ type ViewKey = 'dashboard' | 'games' | 'live' | 'detail' | 'scout' | 'gamereport
 const minsLabel = (m: number | null | undefined): string =>
   m === null || m === undefined ? '-' : m.toFixed(0);
 
+/**
+ * The game's stats and grades — as the page under Games, or as a sheet over
+ * the game report.
+ *
+ * One body either way rather than a second copy of it. A coach reading the
+ * written report wants the numbers behind a sentence without losing their
+ * place, and a popup that drifts from the page it mirrors is worse than no
+ * popup: two versions of the same four tabs is two things to keep in step.
+ *
+ * Declared out here, not inside the screen, so it is the same component across
+ * renders — one defined in the render body is a new type every time, which
+ * throws away the tabs, the scroll position and everything loaded under them.
+ */
+function GameDataShell({
+  inSheet, onClose, title, scrollRef, pageStyle, t, closeLabel, children,
+}: {
+  inSheet: boolean;
+  onClose: () => void;
+  title: string;
+  scrollRef: React.RefObject<any>;
+  pageStyle: any;
+  t: ThemeTokens;
+  closeLabel: string;
+  children: React.ReactNode;
+}) {
+  if (!inSheet) {
+    return (
+      <ScrollView ref={scrollRef} style={pageStyle} contentContainerStyle={{ paddingBottom: 100 }}>
+        {children}
+      </ScrollView>
+    );
+  }
+  return (
+    <Sheet visible animationType="slide" transparent onRequestClose={onClose}>
+      <View style={{ flex: 1, backgroundColor: t.scrim, justifyContent: 'flex-end' }}>
+        <View style={{
+          backgroundColor: t.sheet, borderTopLeftRadius: 20, borderTopRightRadius: 20,
+          height: '92%', ...sheetCap(REPORT_MODAL_WIDTH),
+        }}>
+          <View style={{
+            flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16,
+            borderBottomWidth: 1, borderBottomColor: t.chip,
+          }}>
+            <Text style={{ flex: 1, color: t.ink, fontSize: 17, fontFamily: fonts[800] }}
+                  numberOfLines={1}>{title}</Text>
+            <TouchableOpacity onPress={onClose} accessibilityLabel={closeLabel}>
+              <Ionicons name="close" size={24} color={t.muted} />
+            </TouchableOpacity>
+          </View>
+          {/* The same ref, because only one of the two shells is ever on
+              screen: the sheet opens from the game report, where the page
+              version is not rendered. Without it the find bar inside the
+              scouting report highlights matches it cannot scroll to. */}
+          <ScrollView ref={scrollRef} contentContainerStyle={{ padding: 16, paddingBottom: 60 }}>
+            {children}
+          </ScrollView>
+        </View>
+      </View>
+    </Sheet>
+  );
+}
+
 export default function TeamEvalScreen({ route, navigation }: any) {
   // Tablet and up. Not Platform: a phone browser is web too, and gating the
   // desktop layout on platform put it on every phone that opened the site.
@@ -178,6 +240,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const noteInputY = useRef(0);
   const [whiteboardGameId, setWhiteboardGameId] = useState<number | null>(null);
   const [whiteboardPlaybook, setWhiteboardPlaybook] = useState(false);
+  // The stats-and-grades sheet over the game report. Separate from activeView
+  // because it sits ON the game report rather than replacing it — the coach
+  // closes it and is still where they were reading.
+  const [gameDataSheet, setGameDataSheet] = useState(false);
   const [activeView, setActiveView] = useState<ViewKey>('dashboard');
   const [sessions, setSessions] = useState<any[]>([]);
 
@@ -983,9 +1049,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setSeenTabs(prev => (prev.has(tab) ? prev : new Set(prev).add(tab)));
   };
 
-  const openDetail = async (game: any) => {
+  const openDetail = async (game: any, asSheet = false) => {
     setDetailGame(game);
-    setActiveView('detail');
+    if (asSheet) setGameDataSheet(true);
+    else setActiveView('detail');
     setExpandedPlayer(null);
     setShowScoutingReport(false);
     setSummary(null);
@@ -2820,13 +2887,21 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       )}
 
       {/* Game Detail */}
-      {activeView === 'detail' && detailGame && (
-        <ScrollView ref={findScouting.scrollRef} style={s.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
+      {(activeView === 'detail' || gameDataSheet) && detailGame && (
+        <GameDataShell
+          inSheet={gameDataSheet}
+          onClose={() => setGameDataSheet(false)}
+          title={matchupLabel(detailGame)}
+          scrollRef={findScouting.scrollRef}
+          pageStyle={s.scroll}
+          t={t}
+          closeLabel={tr('common.close')}
+        >
           {/* The way back to the list, said on the page rather than left to a
               swipe. Same link Scout uses above its team, for the same reason:
               a game opened from Games is a page under Games, and nothing else
               on the screen says how to get back up. */}
-          <BackToGames />
+          {!gameDataSheet && <BackToGames />}
           {/* Header */}
           <View style={s.card}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -3357,7 +3432,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               </View>
             </View>
           )}
-        </ScrollView>
+        </GameDataShell>
       )}
 
       {/* Opponent Scout */}
@@ -3688,6 +3763,22 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                       <View style={s.card}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                           <Text style={[s.cardLabel, { flex: 1, marginBottom: 0 }]}>{tr('teamGrade.gameReportLabel')}</Text>
+                          {/* The numbers behind the writing, without leaving
+                              the writing. Sits beside the search rather than
+                              as a row of its own: both are things you do TO
+                              this report, and the report is what the page is
+                              for. */}
+                          <TouchableOpacity
+                            accessibilityLabel={tr('teamGrade.viewFullGameData')}
+                            onPress={() => void openDetail(gameReportGame, true)}
+                            style={{ padding: 8, margin: -8 }}
+                          >
+                            <View style={{
+                              padding: 5, borderRadius: 7, borderWidth: 1, borderColor: t.line,
+                            }}>
+                              <Ionicons name="stats-chart-outline" size={15} color={t.muted} />
+                            </View>
+                          </TouchableOpacity>
                           <ReportSearchButton ctl={findGameReport} />
                         </View>
                         <View style={{ marginTop: 8 }}>

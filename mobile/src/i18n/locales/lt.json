@@ -2288,7 +2288,8 @@
     "removeSharedGameMessage": "Pašalinti šias rungtynes iš savo sąrašo? Jos lieka pas {{name}} — keičiasi tik jūsų rodinys.",
     "removeFromMyGames": "Pašalinti iš mano rungtynių",
     "frozenFromCoach": "Nuo {{name}} · nebeatnaujinama",
-    "searchTeamsPlaceholder": "Ieškoti komandų..."
+    "searchTeamsPlaceholder": "Ieškoti komandų...",
+    "viewFullGameData": "Peržiūrėti visus rungtynių duomenis"
   },
   "whiteboard": {
     "title": "Lenta",

@@ -2288,7 +2288,8 @@
     "removeSharedGameMessage": "Уклонити ову утакмицу са твог списка? Остаје код {{name}} — мења се само твој приказ.",
     "removeFromMyGames": "Уклони из мојих утакмица",
     "frozenFromCoach": "Од {{name}} · више се не ажурира",
-    "searchTeamsPlaceholder": "Претражи тимове..."
+    "searchTeamsPlaceholder": "Претражи тимове...",
+    "viewFullGameData": "Прикажи све податке утакмице"
   },
   "whiteboard": {
     "title": "Tabla",
