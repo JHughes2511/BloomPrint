@@ -68,7 +68,7 @@ def _paragraphs(body: str, align: str) -> str:
     return "".join(out)
 
 
-def _button(label: str, url: str, rtl: bool) -> str:
+def _button(label: str, url: str, rtl: bool, bg: str = ACCENT) -> str:
     """Full width and rounded, the way the app's own buttons are.
 
     Wrapped in a table because a padded <a> is the one button shape Outlook
@@ -77,7 +77,7 @@ def _button(label: str, url: str, rtl: bool) -> str:
     return f"""
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
            border="0" style="margin:6px 0 22px">
-      <tr><td align="center" bgcolor="{ACCENT}" style="border-radius:10px">
+      <tr><td align="center" bgcolor="{bg}" style="border-radius:10px">
         <a href="{_esc(url)}" style="display:block;padding:15px 24px;
            font-family:{FONT};font-size:16px;font-weight:600;color:#FFFFFF;
            text-decoration:none;border-radius:10px">{_esc(label)}</a>
@@ -116,6 +116,9 @@ def build(
     banner_kicker_fg: str = BANNER_KICKER,
     cta_label: str | None = None,
     cta_url: str | None = None,
+    # Navy when the banner is already wearing the accent, so the panel and the
+    # button are not the same blue arguing with each other.
+    cta_bg: str = ACCENT,
     contact: str | None = None,
     contact_address: str | None = None,
     unsub: str | None = None,
@@ -135,7 +138,7 @@ def build(
         greet = (f'<p style="margin:0 0 18px;font-size:16px;line-height:26px;'
                  f'color:{INK};font-weight:600;text-align:{align}">{_esc(greeting)}</p>')
 
-    cta = _button(cta_label, cta_url, rtl) if cta_label and cta_url else ""
+    cta = _button(cta_label, cta_url, rtl, cta_bg) if cta_label and cta_url else ""
 
     lines = []
     # The contact line is on every message. A reader with a question should
