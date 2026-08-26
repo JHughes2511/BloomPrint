@@ -709,17 +709,22 @@ def add_coach_training_comment_player(
     )
     db.add(comment)
     db.flush()
+    params = {"player": pu.name, "text": body.text[:80]}
     notif = models.CoachNotification(
         coach_id=session.coach_id,
         type="player_commented_coach_training",
         title="Player Responded",
         body=f"{pu.name} commented on their training: \"{body.text[:80]}\"",
-        i18n_key="notifs.playerCommentedTraining", i18n_params={"player": pu.name, "text": body.text[:80]},
+        i18n_key="notifs.playerCommentedTraining", i18n_params=params,
         ref_id=training_id,
     )
     db.add(notif)
     db.commit()
     db.refresh(comment)
+    # Goes into the hourly digest rather than out on its own; notify decides.
+    notify.coach_notification(db.get(models.Coach, session.coach_id),
+                              "notifs.playerCommentedTraining", params,
+                              link=emails.link_to(f"/home/training/{training_id}"))
     out = schemas.PlayerCommentOut.model_validate(comment)
     out.author_name = pu.name
     return out
@@ -1172,17 +1177,21 @@ def add_player_comment(
     )
     db.add(comment)
     db.flush()
+    params = {"player": pu.name, "text": body.text[:80]}
     notif = models.PlayerNotification(
         coach_id=shared.shared_by_id,
         type="player_commented",
         title="Player Responded",
         body=f"{pu.name} commented on a shared report: \"{body.text[:80]}\"",
-        i18n_key="notifs.playerCommentedReport", i18n_params={"player": pu.name, "text": body.text[:80]},
+        i18n_key="notifs.playerCommentedReport", i18n_params=params,
         ref_id=shared_id,
     )
     db.add(notif)
     db.commit()
     db.refresh(comment)
+    notify.coach_notification(db.get(models.Coach, shared.shared_by_id),
+                              "notifs.playerCommentedReport", params,
+                              link=emails.link_to("/home/notifications"))
     out = schemas.PlayerCommentOut.model_validate(comment)
     out.author_name = pu.name
     return out
@@ -1207,17 +1216,21 @@ def add_training_comment_player(
     db.add(comment)
     db.flush()
     shared = pt.shared_report
+    params = {"player": pu.name, "text": body.text[:80]}
     notif = models.PlayerNotification(
         coach_id=shared.shared_by_id,
         type="player_commented_training",
         title="Player Responded",
         body=f"{pu.name} commented on their training: \"{body.text[:80]}\"",
-        i18n_key="notifs.playerCommentedTraining", i18n_params={"player": pu.name, "text": body.text[:80]},
+        i18n_key="notifs.playerCommentedTraining", i18n_params=params,
         ref_id=training_id,
     )
     db.add(notif)
     db.commit()
     db.refresh(comment)
+    notify.coach_notification(db.get(models.Coach, shared.shared_by_id),
+                              "notifs.playerCommentedTraining", params,
+                              link=emails.link_to(f"/home/training/{training_id}"))
     out = schemas.PlayerCommentOut.model_validate(comment)
     out.author_name = pu.name
     return out
@@ -1241,17 +1254,21 @@ def add_training_comment_coach(
     )
     db.add(comment)
     db.flush()
+    params = {"text": body.text[:80]}
     notif = models.PlayerNotification(
         player_user_id=pt.player_user_id,
         type="training_updated",
         title="Coach Added Notes",
         body=f"A coach commented on your training: \"{body.text[:80]}\"",
-        i18n_key="notifs.coachCommentedTraining", i18n_params={"text": body.text[:80]},
+        i18n_key="notifs.coachCommentedTraining", i18n_params=params,
         ref_id=training_id,
     )
     db.add(notif)
     db.commit()
     db.refresh(comment)
+    notify.player_notification(db.get(models.PlayerUser, pt.player_user_id),
+                               "notifs.coachCommentedTraining", params,
+                               link=emails.link_to(f"/my/training/{training_id}"))
     out = schemas.PlayerCommentOut.model_validate(comment)
     out.author_name = coach.name
     return out
@@ -1453,16 +1470,20 @@ def coach_reply_to_shared_report(
             comment = models.PlayerComment(coach_id=coach.id, player_training_id=shared_id, text=body.text, parent_id=body.parent_id)
             db.add(comment)
             db.flush()
+            params = {"text": body.text[:80]}
             db.add(models.PlayerNotification(
                 player_user_id=pt.player_user_id,
                 type="training_updated",
                 title="Coach Added Notes",
                 body=f"A coach commented on your training: \"{body.text[:80]}\"",
-                i18n_key="notifs.coachCommentedTraining", i18n_params={"text": body.text[:80]},
+                i18n_key="notifs.coachCommentedTraining", i18n_params=params,
                 ref_id=shared_id,
             ))
             db.commit()
             db.refresh(comment)
+            notify.player_notification(db.get(models.PlayerUser, pt.player_user_id),
+                                       "notifs.coachCommentedTraining", params,
+                                       link=emails.link_to(f"/my/training/{shared_id}"))
             out = schemas.PlayerCommentOut.model_validate(comment)
             out.author_name = coach.name
             return out
@@ -1471,18 +1492,23 @@ def coach_reply_to_shared_report(
             comment = models.PlayerComment(coach_id=coach.id, training_session_id=shared_id, text=body.text, parent_id=body.parent_id)
             db.add(comment)
             db.flush()
-            if ts.player and ts.player.player_user:
+            target = ts.player.player_user if ts.player else None
+            params = {"coach": coach.name, "text": body.text[:80]}
+            if target:
                 db.add(models.PlayerNotification(
-                    player_user_id=ts.player.player_user.id,
+                    player_user_id=target.id,
                     type="training_shared",
                     title="Coach Replied",
                     body=f"{coach.name} commented on your training: \"{body.text[:80]}\"",
                     i18n_key="notifs.coachRepliedTraining",
-                    i18n_params={"coach": coach.name, "text": body.text[:80]},
+                    i18n_params=params,
                     ref_id=shared_id,
                 ))
             db.commit()
             db.refresh(comment)
+            notify.player_notification(
+                target, "notifs.coachRepliedTraining", params,
+                link=emails.link_to(f"/my/training/from-coach/{shared_id}"))
             out = schemas.PlayerCommentOut.model_validate(comment)
             out.author_name = coach.name
             return out
@@ -1495,17 +1521,21 @@ def coach_reply_to_shared_report(
     )
     db.add(comment)
     db.flush()
+    params = {"coach": coach.name, "text": body.text[:80]}
     notif = models.PlayerNotification(
         player_user_id=shared.player_user_id,
         type="coach_replied",
         title="Coach Replied",
         body=f"{coach.name} replied to your report comment: \"{body.text[:80]}\"",
-        i18n_key="notifs.coachRepliedComment", i18n_params={"coach": coach.name, "text": body.text[:80]},
+        i18n_key="notifs.coachRepliedComment", i18n_params=params,
         ref_id=shared_id,
     )
     db.add(notif)
     db.commit()
     db.refresh(comment)
+    notify.player_notification(db.get(models.PlayerUser, shared.player_user_id),
+                               "notifs.coachRepliedComment", params,
+                               link=emails.link_to(f"/my/reports/{shared_id}"))
     out = schemas.PlayerCommentOut.model_validate(comment)
     out.author_name = coach.name
     return out

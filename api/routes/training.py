@@ -571,18 +571,24 @@ def add_coach_training_comment(
     )
     db.add(comment)
     db.flush()
-    if session.player and session.player.player_user:
+    target = session.player.player_user if session.player else None
+    params = {"coach": coach.name, "text": body.text[:80]}
+    if target:
         notif = models.PlayerNotification(
-            player_user_id=session.player.player_user.id,
+            player_user_id=target.id,
             type="training_shared",
             title="Coach Replied",
             body=f"{coach.name} commented on your training: \"{body.text[:80]}\"",
             i18n_key="notifs.coachRepliedTraining",
-            i18n_params={"coach": coach.name, "text": body.text[:80]},
+            i18n_params=params,
             ref_id=training_id,
         )
         db.add(notif)
     db.commit()
+    # Into the hourly digest; see api/digest.py.
+    notify.player_notification(
+        target, "notifs.coachRepliedTraining", params,
+        link=emails.link_to(f"/my/training/from-coach/{training_id}"))
     db.refresh(comment)
     out = schemas.PlayerCommentOut.model_validate(comment)
     out.author_name = coach.name

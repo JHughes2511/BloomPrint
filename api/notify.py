@@ -221,8 +221,17 @@ def _deliver_notification(audience: str, user_id: int, key: str, to: str,
 def notification(audience: str, user_id: int, key: str, *, to: str | None,
                  lang: str | None, params: dict | None = None,
                  link: str | None = None) -> None:
-    """Queue the email for one in-app notification. Returns immediately."""
+    """Send the email for one in-app notification, or queue it for the digest.
+
+    Returns immediately either way. Which of the two happens is decided here
+    rather than at the call sites, so a caller writes the same line whether the
+    event is chatty or not, and the policy is one list to read.
+    """
     if not to:
+        return
+    if _digested(key):
+        from . import digest
+        digest.queue(audience, user_id, key, params, link)
         return
     _pool.submit(_deliver_notification, audience, user_id, key, to, lang,
                  dict(params or {}), link)
@@ -251,3 +260,18 @@ def player_notification(user: "models.PlayerUser | None", key: str,
     notification(PLAYER, user.id, key, to=user.email,
                  lang=getattr(user, "preferred_language", None),
                  params=params, link=link)
+
+
+# Events that go into the hourly digest instead of leaving one at a time. See
+# api/digest.py for why these and not others.
+DIGEST_KEYS = {
+    "playerCommentedReport",
+    "playerCommentedTraining",
+    "coachCommentedTraining",
+    "coachRepliedComment",
+    "coachRepliedTraining",
+}
+
+
+def _digested(key: str) -> bool:
+    return (key or "").split(".")[-1] in DIGEST_KEYS

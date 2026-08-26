@@ -1351,6 +1351,39 @@ class EmailPreference(Base):
         UniqueConstraint("audience", "user_id", name="uq_email_pref_audience_user"),
     )
 
+
+class PendingNotification(Base):
+    """A notification waiting to go out in a digest rather than on its own.
+
+    Comments and replies are the events people generate in bursts: a coach and
+    a player go back and forth on one training program and that is six emails
+    in four minutes about a conversation they are both already having. So those
+    events queue here and leave as one message per hour instead.
+
+    Everything else still sends immediately. The distinction is not importance
+    but frequency: a report being shared happens once and is worth an
+    interruption; the eighth reply in a thread is not.
+
+    A row is claimed by stamping sent_at before the message is built, so two
+    processes flushing at the same time cannot both send it. A new table rather
+    than columns anywhere, for the reason written on EmailPreference above.
+    """
+    __tablename__ = "pending_notifications"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    audience   = Column(String, nullable=False, index=True)
+    user_id    = Column(Integer, nullable=False, index=True)
+    # The same i18n key and params the in-app row carries, so the digest says
+    # what the app says.
+    i18n_key   = Column(String, nullable=False)
+    params     = Column(JSON, nullable=True)
+    link       = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    # Set when the row has been folded into a message that went out, or when it
+    # was claimed by a flush that then failed. Either way it is not sent twice.
+    sent_at    = Column(DateTime, nullable=True, index=True)
+
+
 class TeamJoinLink(Base):
     """A standing signup link for a team.
 
