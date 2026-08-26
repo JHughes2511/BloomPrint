@@ -307,7 +307,11 @@ SHELL: dict[str, dict[str, str]] = {
 # changing their address, and suppressing it would leave them unable to use
 # what they asked for. Activity mail is about other people's actions, and that
 # is what the opt-out is for.
-ACCOUNT_EVENTS = {"signup_coach", "signup_player", "email_changed"}
+ACCOUNT_EVENTS = {"signup_coach", "signup_player", "email_changed",
+                  # A reset link and the notice that a password changed are
+                  # the two messages someone locked out of an account needs
+                  # most. An opt-out must never be able to hold them back.
+                  "password_reset", "password_changed"}
 
 
 class _Missing(dict):

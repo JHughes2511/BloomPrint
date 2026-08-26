@@ -27,9 +27,16 @@ def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
 
-def create_token(coach_id: int) -> str:
+def create_token(coach_id: int, epoch: int = 0) -> str:
+    """A session for this coach, stamped with the account's current epoch.
+
+    The epoch is what makes a password reset able to end sessions on devices
+    nobody has in front of them: bump it on the account and every token issued
+    before now stops matching.
+    """
     expire = datetime.utcnow() + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
-    return jwt.encode({"sub": str(coach_id), "exp": expire}, coach_key(), algorithm=ALGORITHM)
+    return jwt.encode({"sub": str(coach_id), "ep": int(epoch or 0), "exp": expire},
+                      coach_key(), algorithm=ALGORITHM)
 
 
 def get_current_coach(
@@ -49,6 +56,13 @@ def get_current_coach(
 
     coach = db.get(models.Coach, coach_id)
     if coach is None:
+        raise credentials_error
+    # A token minted before the last password reset is no longer a session.
+    #
+    # Absent claim reads as 0, which is the epoch every account starts at, so
+    # tokens issued before this existed keep working. Without that, shipping
+    # this would have signed out every coach in the app at once.
+    if int(payload.get("ep", 0)) != int(coach.session_epoch or 0):
         raise credentials_error
     return coach
 

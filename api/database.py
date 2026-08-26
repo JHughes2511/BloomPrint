@@ -507,6 +507,10 @@ def _reparse_eval_sections():
 ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     # (table, column, SQL type + default)
     ("player_users", "preferred_language", "VARCHAR DEFAULT 'en'"),
+    # create_all() adds missing TABLES, never missing columns, so a new column
+    # on a live Postgres has to come through here or it simply is not there.
+    ("coaches", "session_epoch", "INTEGER DEFAULT 0"),
+    ("player_users", "session_epoch", "INTEGER DEFAULT 0"),
     ("staff_shared_reports", "request_status", "VARCHAR"),
     ("feedback", "images", "TEXT"),
     ("coaches", "job_title", "VARCHAR"),

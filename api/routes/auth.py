@@ -3,9 +3,11 @@ import os
 import re
 
 from fastapi import Request, APIRouter, Depends, HTTPException, status, UploadFile, File
+from pydantic import BaseModel
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from ..database import get_db
-from .. import models, notify, schemas
+from .. import emails, models, notify, password_reset, schemas
 from ..auth import hash_password, verify_password, create_token, get_current_coach
 from ..coach_context import SYSTEM_PROFILE_FIELDS
 from ..ai_models import SONNET
@@ -69,7 +71,7 @@ def register(request: Request, body: schemas.CoachCreate, db: Session = Depends(
     db.commit()
     db.refresh(coach)
     notify.coach_event(coach, "signup_coach")
-    return {"access_token": create_token(coach.id), "coach": coach}
+    return {"access_token": create_token(coach.id, coach.session_epoch), "coach": coach}
 
 
 @router.post("/login", response_model=schemas.Token)
@@ -84,7 +86,7 @@ def login(request: Request, body: schemas.CoachLogin, db: Session = Depends(get_
         db.commit()
     except Exception:
         db.rollback()
-    return {"access_token": create_token(coach.id), "coach": coach}
+    return {"access_token": create_token(coach.id, coach.session_epoch), "coach": coach}
 
 
 @router.post("/google")
@@ -108,7 +110,7 @@ def google_auth(request: Request, body: schemas.CoachGoogleAuth, db: Session = D
             db.refresh(coach)
         return {
             "status": "ok",
-            "access_token": create_token(coach.id),
+            "access_token": create_token(coach.id, coach.session_epoch),
             "coach": schemas.CoachOut.model_validate(coach),
         }
 
@@ -140,7 +142,7 @@ def google_auth(request: Request, body: schemas.CoachGoogleAuth, db: Session = D
     notify.coach_event(coach, "signup_coach")
     return {
         "status": "ok",
-        "access_token": create_token(coach.id),
+        "access_token": create_token(coach.id, coach.session_epoch),
         "coach": schemas.CoachOut.model_validate(coach),
     }
 
@@ -336,3 +338,71 @@ def search_coaches(
          "program_name": c.program_name}
         for c in results
     ]
+
+
+# ── Getting back in ───────────────────────────────────────────────────────────
+
+class PasswordResetRequest(BaseModel):
+    email: str
+
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    password: str
+
+
+@router.post("/password-reset/request")
+def request_password_reset(request: Request, body: PasswordResetRequest,
+                           db: Session = Depends(get_db)):
+    """Send a reset link, if that address has an account.
+
+    The response never says whether it did. A form that answers "is this
+    address registered?" is a way to build a list of who uses the app, one
+    guess at a time, and the answer is worth more to someone enumerating than
+    the reassurance is worth to the person who mistyped their own address.
+
+    Rate limited for the same reason it is silent: the cost of asking has to be
+    higher than the value of asking repeatedly.
+    """
+    ratelimit.check(request, "password-reset")
+    email = (body.email or "").strip().lower()
+    coach = db.query(models.Coach).filter(
+        func.lower(models.Coach.email) == email).first() if email else None
+    if coach:
+        token = password_reset.issue(db, password_reset.COACH, coach.id)
+        notify.coach_event(coach, "password_reset",
+                           link=f"{emails.app_url()}/reset-password?token={token}")
+    return {"ok": True}
+
+
+@router.post("/password-reset/confirm", response_model=schemas.Token)
+def confirm_password_reset(request: Request, body: PasswordResetConfirm,
+                           db: Session = Depends(get_db)):
+    """Set the new password, end every other session, and say so.
+
+    Signing the other devices out is the half that matters when the reset was
+    prompted by somebody else being in the account: a new password on its own
+    leaves the session they are already holding untouched.
+    """
+    ratelimit.check(request, "password-reset-confirm")
+    if len(body.password or "") < 8:
+        raise HTTPException(status_code=400,
+                            detail="Password must be at least 8 characters.")
+    row = password_reset.redeem(db, body.token, password_reset.COACH)
+    if row is None:
+        raise HTTPException(status_code=400,
+                            detail="That reset link has expired or has already been used.")
+    coach = password_reset.account_for(db, row)
+    if coach is None:
+        raise HTTPException(status_code=400, detail="That account no longer exists.")
+
+    coach.password_hash = hash_password(body.password)
+    password_reset.end_all_sessions(coach)
+    db.commit()
+    db.refresh(coach)
+
+    notify.coach_event(coach, "password_changed")
+    # Signed straight in, with a token carrying the new epoch. Someone who has
+    # just proved they hold the address should not be asked to type the
+    # password they set ten seconds ago.
+    return {"access_token": create_token(coach.id, coach.session_epoch), "coach": coach}

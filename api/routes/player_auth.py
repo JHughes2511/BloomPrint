@@ -4,11 +4,12 @@ from datetime import datetime, timedelta
 from fastapi import Request, APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 import bcrypt
 from jose import jwt
 from ..database import get_db
-from .. import models, notify, schemas
+from .. import emails, models, notify, password_reset, schemas
 
 from ..appsecrets import player_key
 from .. import ratelimit
@@ -27,9 +28,11 @@ def _verify_pw(password: str, hashed: str) -> bool:
 router = APIRouter(prefix="/player-auth", tags=["player-auth"])
 
 
-def _make_token(player_user_id: int) -> str:
+def _make_token(player_user_id: int, epoch: int = 0) -> str:
+    """See create_token in api/auth.py: the epoch is what a reset can revoke."""
     return jwt.encode(
-        {"sub": f"player:{player_user_id}", "exp": datetime.utcnow() + timedelta(days=30)},
+        {"sub": f"player:{player_user_id}", "ep": int(epoch or 0),
+         "exp": datetime.utcnow() + timedelta(days=30)},
         player_key(),
         algorithm=ALGORITHM,
     )
@@ -50,6 +53,10 @@ def get_current_player_user(
     pu = db.get(models.PlayerUser, player_user_id)
     if not pu:
         raise HTTPException(status_code=401, detail="Player user not found")
+    # See create_token in api/auth.py. A missing claim reads as 0 so tokens
+    # issued before this existed keep working.
+    if int(payload.get("ep", 0)) != int(pu.session_epoch or 0):
+        raise HTTPException(status_code=401, detail="Invalid player token")
     return pu
 
 
@@ -71,7 +78,7 @@ def register(request: Request, body: schemas.PlayerUserCreate, db: Session = Dep
     db.refresh(pu)
     notify.player_event(pu, "signup_player")
     return schemas.PlayerToken(
-        access_token=_make_token(pu.id),
+        access_token=_make_token(pu.id, pu.session_epoch),
         player_user=schemas.PlayerUserOut.model_validate(pu),
     )
 
@@ -83,7 +90,7 @@ def login(request: Request, body: schemas.CoachLogin, db: Session = Depends(get_
     if not pu or not _verify_pw(body.password, pu.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     return schemas.PlayerToken(
-        access_token=_make_token(pu.id),
+        access_token=_make_token(pu.id, pu.session_epoch),
         player_user=schemas.PlayerUserOut.model_validate(pu),
     )
 
@@ -108,7 +115,7 @@ def google_auth(request: Request, body: schemas.PlayerGoogleAuth, db: Session = 
             db.refresh(pu)
         return {
             "status": "ok",
-            "access_token": _make_token(pu.id),
+            "access_token": _make_token(pu.id, pu.session_epoch),
             "player_user": schemas.PlayerUserOut.model_validate(pu),
         }
 
@@ -131,7 +138,7 @@ def google_auth(request: Request, body: schemas.PlayerGoogleAuth, db: Session = 
     notify.player_event(pu, "signup_player")
     return {
         "status": "ok",
-        "access_token": _make_token(pu.id),
+        "access_token": _make_token(pu.id, pu.session_epoch),
         "player_user": schemas.PlayerUserOut.model_validate(pu),
     }
 
@@ -257,3 +264,62 @@ def update_linked_player(
     db.commit()
     db.refresh(player)
     return schemas.PlayerOut.model_validate(player)
+
+
+# ── Getting back in ───────────────────────────────────────────────────────────
+#
+# The coach's equivalents live in routes/auth.py and the reasoning is written
+# out there. The shared half is api/password_reset.py, deliberately, so the
+# security properties cannot come to differ between the two audiences.
+
+
+class PlayerPasswordResetRequest(BaseModel):
+    email: str
+
+
+class PlayerPasswordResetConfirm(BaseModel):
+    token: str
+    password: str
+
+
+@router.post("/password-reset/request")
+def request_player_password_reset(request: Request, body: PlayerPasswordResetRequest,
+                                  db: Session = Depends(get_db)):
+    """Send a reset link, if that address has a player account.
+
+    Answers the same whether it did or not: see routes/auth.py.
+    """
+    ratelimit.check(request, "player-password-reset")
+    email = (body.email or "").strip().lower()
+    pu = db.query(models.PlayerUser).filter(
+        func.lower(models.PlayerUser.email) == email).first() if email else None
+    if pu:
+        token = password_reset.issue(db, password_reset.PLAYER, pu.id)
+        notify.player_event(pu, "password_reset",
+                            link=f"{emails.app_url()}/reset-password?token={token}")
+    return {"ok": True}
+
+
+@router.post("/password-reset/confirm", response_model=schemas.PlayerToken)
+def confirm_player_password_reset(request: Request, body: PlayerPasswordResetConfirm,
+                                  db: Session = Depends(get_db)):
+    ratelimit.check(request, "player-password-reset-confirm")
+    if len(body.password or "") < 8:
+        raise HTTPException(status_code=400,
+                            detail="Password must be at least 8 characters.")
+    row = password_reset.redeem(db, body.token, password_reset.PLAYER)
+    if row is None:
+        raise HTTPException(status_code=400,
+                            detail="That reset link has expired or has already been used.")
+    pu = password_reset.account_for(db, row)
+    if pu is None:
+        raise HTTPException(status_code=400, detail="That account no longer exists.")
+
+    pu.password_hash = _hash_pw(body.password)
+    password_reset.end_all_sessions(pu)
+    db.commit()
+    db.refresh(pu)
+
+    notify.player_event(pu, "password_changed")
+    return schemas.PlayerToken(access_token=_make_token(pu.id, pu.session_epoch),
+                               player_user=pu)

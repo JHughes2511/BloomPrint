@@ -34,6 +34,11 @@ class Coach(Base):
     # UI + AI output language (BCP-47 primary tag, e.g. "es", "ru"). Reports,
     # Ask BloomPrint, and the app interface all follow this choice.
     preferred_language = Column(String, default="en")
+    # Bumped when the password is reset, which invalidates every token issued
+    # before it. Stateless JWTs carry no server-side record to revoke, so this
+    # counter travelling inside the token is the only thing that can end a
+    # session someone else is holding.
+    session_epoch      = Column(Integer, default=0, nullable=False)
     # Program system & philosophy — free-text per category. Injected into every
     # report so evaluations are framed as fit-for-this-program.
     system_profile    = Column(JSON, nullable=True)
@@ -281,6 +286,11 @@ class PlayerUser(Base):
     # before this column, so the choice was device-local and forgotten on the
     # next sign-in.
     preferred_language = Column(String, default="en")
+    # Bumped when the password is reset, which invalidates every token issued
+    # before it. Stateless JWTs carry no server-side record to revoke, so this
+    # counter travelling inside the token is the only thing that can end a
+    # session someone else is holding.
+    session_epoch      = Column(Integer, default=0, nullable=False)
     created_at    = Column(DateTime, default=datetime.utcnow)
 
     player        = relationship("Player", back_populates="player_user")
@@ -1284,6 +1294,32 @@ class TeamInvite(Base):
     kind             = Column(String, default="invite")
     status           = Column(String, default="pending")  # pending / approved / rejected
     created_at       = Column(DateTime, default=datetime.utcnow)
+
+
+class PasswordReset(Base):
+    """One request to set a new password, for a coach or a player.
+
+    The token is stored as a hash, never as itself. A reset token is a
+    temporary password: anyone holding one can take the account, so a leaked
+    database should not hand over a working set of them. The link carries the
+    real token, this row can only recognise it.
+
+    Rows are kept after use rather than deleted, so a token cannot be replayed
+    and so a support question about an account has something to read.
+    """
+    __tablename__ = "password_resets"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    audience   = Column(String, nullable=False, index=True)   # "coach" | "player"
+    user_id    = Column(Integer, nullable=False, index=True)
+    token_hash = Column(String, nullable=False, unique=True, index=True)
+    expires_at = Column(DateTime, nullable=False)
+    used_at    = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    @property
+    def is_live(self) -> bool:
+        return self.used_at is None and self.expires_at > datetime.utcnow()
 
 
 class EmailPreference(Base):
