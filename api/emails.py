@@ -55,6 +55,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Don't want these? Turn them off: {url}",
         "unsub_note": "You'll still get messages about your own account.",
         "contact": "Questions? Email us at",
+        "account_ready": "Your account is ready.",
+        "unsub_link": "unsubscribe",
     },
     "es": {
         "greeting": "Hola {name}:",
@@ -63,6 +65,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "¿No quieres recibirlos? Desactívalos: {url}",
         "unsub_note": "Seguirás recibiendo mensajes sobre tu propia cuenta.",
         "contact": "¿Preguntas? Escríbenos a",
+        "account_ready": "Tu cuenta está lista.",
+        "unsub_link": "darse de baja",
     },
     "fr": {
         "greeting": "Bonjour {name},",
@@ -71,6 +75,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Vous ne voulez plus les recevoir ? Désactivez-les : {url}",
         "unsub_note": "Vous continuerez à recevoir les messages concernant votre compte.",
         "contact": "Des questions ? Écrivez-nous à",
+        "account_ready": "Votre compte est prêt.",
+        "unsub_link": "se désabonner",
     },
     "pt": {
         "greeting": "Olá {name},",
@@ -79,6 +85,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Não quer recebê-los? Desative-os: {url}",
         "unsub_note": "Continuará a receber mensagens sobre a sua própria conta.",
         "contact": "Dúvidas? Escreva para",
+        "account_ready": "A sua conta está pronta.",
+        "unsub_link": "cancelar subscrição",
     },
     "it": {
         "greeting": "Ciao {name},",
@@ -87,6 +95,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Non vuoi riceverle? Disattivale: {url}",
         "unsub_note": "Continuerai a ricevere i messaggi relativi al tuo account.",
         "contact": "Domande? Scrivici a",
+        "account_ready": "Il tuo account è pronto.",
+        "unsub_link": "annulla iscrizione",
     },
     "de": {
         "greeting": "Hallo {name},",
@@ -95,6 +105,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Nicht erwünscht? Hier abschalten: {url}",
         "unsub_note": "Nachrichten zu deinem eigenen Konto erhältst du weiterhin.",
         "contact": "Fragen? Schreib uns an",
+        "account_ready": "Dein Konto ist bereit.",
+        "unsub_link": "abbestellen",
     },
     "nl": {
         "greeting": "Hoi {name},",
@@ -103,6 +115,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Liever niet? Zet ze uit: {url}",
         "unsub_note": "Berichten over je eigen account blijf je ontvangen.",
         "contact": "Vragen? Mail ons op",
+        "account_ready": "Je account is klaar.",
+        "unsub_link": "afmelden",
     },
     "sv": {
         "greeting": "Hej {name},",
@@ -111,6 +125,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Vill du inte ha dem? Stäng av dem: {url}",
         "unsub_note": "Du får fortfarande meddelanden som rör ditt eget konto.",
         "contact": "Frågor? Mejla oss på",
+        "account_ready": "Ditt konto är klart.",
+        "unsub_link": "avsluta prenumeration",
     },
     "pl": {
         "greeting": "Cześć {name},",
@@ -119,6 +135,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Nie chcesz ich otrzymywać? Wyłącz je: {url}",
         "unsub_note": "Wiadomości dotyczące Twojego konta będziesz otrzymywać nadal.",
         "contact": "Pytania? Napisz do nas na",
+        "account_ready": "Twoje konto jest gotowe.",
+        "unsub_link": "zrezygnuj",
     },
     "ru": {
         "greeting": "Здравствуйте, {name}!",
@@ -127,6 +145,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Не хотите их получать? Отключите: {url}",
         "unsub_note": "Сообщения о вашей учётной записи будут приходить по-прежнему.",
         "contact": "Вопросы? Напишите нам на",
+        "account_ready": "Ваш аккаунт готов.",
+        "unsub_link": "отписаться",
     },
     "uk": {
         "greeting": "Вітаємо, {name}!",
@@ -135,6 +155,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Не хочете їх отримувати? Вимкніть: {url}",
         "unsub_note": "Повідомлення про ваш обліковий запис надходитимуть і далі.",
         "contact": "Питання? Напишіть нам на",
+        "account_ready": "Ваш обліковий запис готовий.",
+        "unsub_link": "відписатися",
     },
     "sr": {
         "greeting": "Здраво {name},",
@@ -143,6 +165,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Не желите ово? Искључите: {url}",
         "unsub_note": "Поруке о вашем налогу и даље ћете примати.",
         "contact": "Питања? Пишите нам на",
+        "account_ready": "Ваш налог је спреман.",
+        "unsub_link": "одјави се",
     },
     "hr": {
         "greeting": "Bok {name},",
@@ -151,6 +175,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Ne želite ovo? Isključite: {url}",
         "unsub_note": "Poruke o vašem računu i dalje ćete primati.",
         "contact": "Pitanja? Pišite nam na",
+        "account_ready": "Vaš račun je spreman.",
+        "unsub_link": "odjavi se",
     },
     "tr": {
         "greeting": "Merhaba {name},",
@@ -159,6 +185,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Bunları istemiyor musunuz? Kapatın: {url}",
         "unsub_note": "Kendi hesabınızla ilgili mesajları almaya devam edeceksiniz.",
         "contact": "Sorunuz mu var? Bize yazın:",
+        "account_ready": "Hesabınız hazır.",
+        "unsub_link": "aboneliği bırak",
     },
     "ro": {
         "greeting": "Salut {name},",
@@ -167,6 +195,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Nu le vrei? Dezactivează-le: {url}",
         "unsub_note": "Vei primi în continuare mesajele despre contul tău.",
         "contact": "Întrebări? Scrie-ne la",
+        "account_ready": "Contul tău este gata.",
+        "unsub_link": "dezabonare",
     },
     "el": {
         "greeting": "Γεια σου {name},",
@@ -175,6 +205,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Δεν τα θέλετε; Απενεργοποιήστε τα: {url}",
         "unsub_note": "Θα συνεχίσετε να λαμβάνετε μηνύματα για τον λογαριασμό σας.",
         "contact": "Απορίες; Γράψτε μας στο",
+        "account_ready": "Ο λογαριασμός σας είναι έτοιμος.",
+        "unsub_link": "κατάργηση εγγραφής",
     },
     "lt": {
         "greeting": "Sveiki, {name},",
@@ -183,6 +215,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Nenorite jų gauti? Išjunkite: {url}",
         "unsub_note": "Pranešimus apie savo paskyrą ir toliau gausite.",
         "contact": "Klausimai? Rašykite mums adresu",
+        "account_ready": "Jūsų paskyra paruošta.",
+        "unsub_link": "atsisakyti",
     },
     "ar": {
         "greeting": "مرحبًا {name}،",
@@ -191,6 +225,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "لا تريد هذه الرسائل؟ أوقفها: {url}",
         "unsub_note": "ستستمر في تلقّي الرسائل المتعلقة بحسابك.",
         "contact": "أسئلة؟ راسلنا على",
+        "account_ready": "حسابك جاهز.",
+        "unsub_link": "إلغاء الاشتراك",
     },
     "he": {
         "greeting": "שלום {name},",
@@ -199,6 +235,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "לא מעוניין בהודעות האלה? אפשר לכבות: {url}",
         "unsub_note": "הודעות שנוגעות לחשבון שלך ימשיכו להישלח.",
         "contact": "שאלות? כתבו לנו אל",
+        "account_ready": "החשבון שלך מוכן.",
+        "unsub_link": "ביטול הרשמה",
     },
     "hi": {
         "greeting": "नमस्ते {name},",
@@ -207,6 +245,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "ये नहीं चाहिए? इन्हें बंद करें: {url}",
         "unsub_note": "आपके अपने खाते से जुड़े संदेश आपको मिलते रहेंगे।",
         "contact": "सवाल? हमें यहाँ लिखें",
+        "account_ready": "आपका खाता तैयार है।",
+        "unsub_link": "सदस्यता समाप्त करें",
     },
     "ka": {
         "greeting": "გამარჯობა, {name},",
@@ -215,6 +255,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "აღარ გსურთ მათი მიღება? გამორთეთ: {url}",
         "unsub_note": "თქვენს ანგარიშთან დაკავშირებულ შეტყობინებებს კვლავ მიიღებთ.",
         "contact": "შეკითხვები? მოგვწერეთ",
+        "account_ready": "თქვენი ანგარიში მზადაა.",
+        "unsub_link": "გამოწერის გაუქმება",
     },
     "ja": {
         "greeting": "{name} さん",
@@ -223,6 +265,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "不要な場合はこちらから停止できます: {url}",
         "unsub_note": "アカウントに関するお知らせは引き続きお送りします。",
         "contact": "ご質問は",
+        "account_ready": "アカウントの準備ができました。",
+        "unsub_link": "配信停止",
     },
     "ko": {
         "greeting": "{name}님, 안녕하세요.",
@@ -231,6 +275,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "받고 싶지 않으신가요? 여기에서 끄세요: {url}",
         "unsub_note": "계정 관련 안내는 계속 발송됩니다.",
         "contact": "문의는",
+        "account_ready": "계정이 준비되었습니다.",
+        "unsub_link": "수신 거부",
     },
     "zh": {
         "greeting": "{name} 你好，",
@@ -239,6 +285,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "不想收到这些邮件？可在此关闭：{url}",
         "unsub_note": "与你账号相关的邮件仍会照常发送。",
         "contact": "有问题？请发邮件至",
+        "account_ready": "你的账户已就绪。",
+        "unsub_link": "退订",
     },
     "tl": {
         "greeting": "Kumusta {name},",
@@ -247,6 +295,8 @@ SHELL: dict[str, dict[str, str]] = {
         "unsub": "Ayaw mo ng mga ito? I-off sila: {url}",
         "unsub_note": "Patuloy mo pa ring matatanggap ang mga mensahe tungkol sa sarili mong account.",
         "contact": "May tanong? Mag-email sa",
+        "account_ready": "Handa na ang iyong account.",
+        "unsub_link": "mag-unsubscribe",
     },
 }
 
@@ -274,6 +324,12 @@ def _fmt(s: str, params: dict) -> str:
         return s.format_map(_Missing(params))
     except Exception:
         return s
+
+
+# Events that earn the banner. Everything else is the plain layout: a
+# notification wearing a celebration reads as marketing, and a sender that
+# celebrates a comment teaches people to skim the message that mattered.
+MILESTONE_EVENTS = {"signup_coach", "signup_player"}
 
 
 def render(event: str, lang: str | None, params: dict | None = None, *,
@@ -338,3 +394,57 @@ def check_complete() -> list[str]:
             if lang not in by_lang:
                 problems.append(f"EVENTS[{event!r}] missing language {lang!r}")
     return problems
+
+
+def render_html(event: str, lang: str | None, params: dict | None = None, *,
+                token: str | None = None, link: str | None = None) -> str:
+    """The same message, laid out.
+
+    Deliberately assembled from the same shell and the same event line as the
+    text version rather than from a second copy of the words. Two renderings of
+    one message are a pair that drifts; one set of words rendered twice is not.
+    """
+    from .email_events import EVENTS
+    from .email_html import ACCENT, INK, build
+    from .mailer import contact_email
+
+    code = (lang or DEFAULT_LANG).split("-")[0].lower()
+    if event not in EVENTS or code not in EVENTS[event]:
+        code = DEFAULT_LANG
+    shell = SHELL.get(code, SHELL[DEFAULT_LANG])
+    params = dict(params or {})
+    _, line = EVENTS[event][code]
+
+    name = (params.get("name") or "").strip()
+    greeting = _fmt(shell["greeting"], {"name": name}) if name else None
+
+    kw: dict = {
+        "body": _fmt(line, params),
+        "lang": code,
+        "cta_label": shell["open_cta"],
+        "cta_url": link or app_url(),
+        "contact": shell.get("contact"),
+        "contact_address": contact_email(),
+    }
+    if event in MILESTONE_EVENTS:
+        # The banner carries the news, so the greeting moves onto it as the
+        # kicker rather than being said twice.
+        kw["headline"] = shell.get("account_ready", "Your account is ready.")
+        kw["kicker"] = greeting
+        kw["banner_bg"] = ACCENT
+        kw["banner_fg"] = "#FFFFFF"
+        kw["banner_kicker_fg"] = "#CFE3EE"
+        kw["cta_bg"] = INK
+    else:
+        kw["greeting"] = greeting
+
+    # Account mail carries no opt-out: it is the consequence of something the
+    # recipient did themselves.
+    if token and event not in ACCOUNT_EVENTS:
+        # The text shell writes one sentence with the URL inside it. HTML needs
+        # the words and the address apart, so the sentence is kept without its
+        # placeholder and the link carries its own short label.
+        kw["unsub"] = shell["unsub"].replace("{url}", "").strip()
+        kw["unsub_url"] = unsubscribe_url(token)
+        kw["unsub_label"] = shell["unsub_link"]
+    return build(**kw)

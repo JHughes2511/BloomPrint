@@ -22,9 +22,11 @@ import logging
 import secrets
 from concurrent.futures import ThreadPoolExecutor
 
+from sqlalchemy.exc import IntegrityError
+
 from . import models
 from .database import SessionLocal
-from .emails import ACCOUNT_EVENTS, render
+from .emails import ACCOUNT_EVENTS, render, render_html
 from .mailer import contact_email, mail_from, try_send
 
 log = logging.getLogger(__name__)
@@ -57,8 +59,22 @@ def _preference(audience: str, user_id: int) -> tuple[str, bool]:
                 token=secrets.token_urlsafe(32),
             )
             db.add(pref)
-            db.commit()
-            db.refresh(pref)
+            try:
+                db.commit()
+                db.refresh(pref)
+            except IntegrityError:
+                # Two sends to an account that has never been emailed race to
+                # create this row, and the loser used to raise into _deliver's
+                # catch-all, which dropped the message. Not hypothetical: a
+                # changed address emails the old and the new one at once, and
+                # the pool runs four at a time. The row the winner wrote is the
+                # row we wanted, so read it back.
+                db.rollback()
+                pref = (
+                    db.query(models.EmailPreference)
+                    .filter_by(audience=audience, user_id=user_id)
+                    .one()
+                )
         return pref.token, bool(pref.opted_out)
     finally:
         db.close()
@@ -74,10 +90,18 @@ def _deliver(audience: str, user_id: int, event: str, to: str,
         if opted_out and event not in ACCOUNT_EVENTS:
             return
         subject, body = render(event, lang, params, token=token, link=link)
+        # Both halves, always. The text is the message; the HTML is how it
+        # looks. A client that cannot show one shows the other.
+        try:
+            html = render_html(event, lang, params, token=token, link=link)
+        except Exception:
+            # A layout that fails must not cost someone their notification.
+            log.warning("Could not lay out %s; sending as text", event, exc_info=True)
+            html = None
         # Sent FROM the noreply mailbox, but a reply goes somewhere a person
         # reads. Pressing Reply is what people do instead of reading a footer,
         # and without this it was the one gesture guaranteed to fail.
-        ok, reason = try_send(to, subject, body, from_addr=mail_from(),
+        ok, reason = try_send(to, subject, body, html, from_addr=mail_from(),
                               reply_to=contact_email())
         if not ok:
             # Said out loud rather than swallowed. Mail failing must not break
