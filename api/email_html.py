@@ -106,9 +106,11 @@ def build(
     kicker: str | None = None,
     cta_label: str | None = None,
     cta_url: str | None = None,
-    footer: str | None = None,
-    footer_link: str | None = None,
-    footer_link_label: str | None = None,
+    contact: str | None = None,
+    contact_address: str | None = None,
+    unsub: str | None = None,
+    unsub_url: str | None = None,
+    unsub_label: str | None = None,
 ) -> str:
     """One message, laid out. `headline` present means the banner layout."""
     rtl = (lang or "en").split("-")[0].lower() in RTL_LANGS
@@ -124,20 +126,33 @@ def build(
 
     cta = _button(cta_label, cta_url, rtl) if cta_label and cta_url else ""
 
+    lines = []
+    # The contact line is on every message. A reader with a question should
+    # never have to work out where to send it, and the address this came FROM
+    # is a bin.
+    if contact and contact_address:
+        lines.append(
+            f'<p style="margin:0;font-size:13px;line-height:20px;color:{MUTED};'
+            f'text-align:{align}">{_esc(contact)} '
+            f'<a href="mailto:{_esc(contact_address)}" style="color:{ACCENT}">'
+            f'{_esc(contact_address)}</a></p>'
+        )
+    # The opt-out only where there is something to opt out of. Account mail is
+    # the consequence of something the reader just did.
+    if unsub and unsub_url and unsub_label:
+        lines.append(
+            f'<p style="margin:10px 0 0;font-size:13px;line-height:20px;'
+            f'color:{MUTED};text-align:{align}">{_esc(unsub)} '
+            f'<a href="{_esc(unsub_url)}" style="color:{ACCENT}">'
+            f'{_esc(unsub_label)}</a></p>'
+        )
     foot = ""
-    if footer:
-        link = ""
-        if footer_link and footer_link_label:
-            link = (f' <a href="{_esc(footer_link)}" style="color:{ACCENT}">'
-                    f'{_esc(footer_link_label)}</a>')
+    if lines:
         foot = f"""
         <tr><td style="padding:0 32px 32px">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
                  border="0" style="background-color:{CHIP};border-radius:12px">
-            <tr><td style="padding:18px 20px">
-              <p style="margin:0;font-size:13px;line-height:20px;color:{MUTED};
-                 text-align:{align}">{_esc(footer)}{link}</p>
-            </td></tr>
+            <tr><td style="padding:18px 20px">{"".join(lines)}</td></tr>
           </table>
         </td></tr>"""
 

@@ -16,7 +16,7 @@ Env:
 import os
 
 from .emails import DEFAULT_LANG, app_url, render
-from .mailer import mail_enabled, mail_from, send_email
+from .mailer import contact_email, mail_enabled, mail_from, send_email
 
 
 def email_enabled() -> bool:
@@ -52,4 +52,5 @@ def send_team_invite_email(to_email: str, inviter_name: str, team_name: str,
     # The code is what keeps the invite usable if the link is mangled in
     # transit or read on a device that cannot open it.
     body = body.rstrip("\n") + f"\n\nInvite code: {code}\n"
-    return send_email(to_email, subject, body, from_addr=mail_from())
+    return send_email(to_email, subject, body, from_addr=mail_from(),
+                      reply_to=contact_email())

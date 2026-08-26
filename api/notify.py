@@ -25,7 +25,7 @@ from concurrent.futures import ThreadPoolExecutor
 from . import models
 from .database import SessionLocal
 from .emails import ACCOUNT_EVENTS, render
-from .mailer import mail_from, try_send
+from .mailer import contact_email, mail_from, try_send
 
 log = logging.getLogger(__name__)
 
@@ -74,7 +74,11 @@ def _deliver(audience: str, user_id: int, event: str, to: str,
         if opted_out and event not in ACCOUNT_EVENTS:
             return
         subject, body = render(event, lang, params, token=token, link=link)
-        ok, reason = try_send(to, subject, body, from_addr=mail_from())
+        # Sent FROM the noreply mailbox, but a reply goes somewhere a person
+        # reads. Pressing Reply is what people do instead of reading a footer,
+        # and without this it was the one gesture guaranteed to fail.
+        ok, reason = try_send(to, subject, body, from_addr=mail_from(),
+                              reply_to=contact_email())
         if not ok:
             # Said out loud rather than swallowed. Mail failing must not break
             # the event, but a silent return means "no mail arrived" and "no

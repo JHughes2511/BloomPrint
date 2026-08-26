@@ -54,6 +54,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Don't want these? Turn them off: {url}",
         "unsub_note": "You'll still get messages about your own account.",
+        "contact": "Questions? Email us at",
     },
     "es": {
         "greeting": "Hola {name}:",
@@ -61,6 +62,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "¿No quieres recibirlos? Desactívalos: {url}",
         "unsub_note": "Seguirás recibiendo mensajes sobre tu propia cuenta.",
+        "contact": "¿Preguntas? Escríbenos a",
     },
     "fr": {
         "greeting": "Bonjour {name},",
@@ -68,6 +70,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Vous ne voulez plus les recevoir ? Désactivez-les : {url}",
         "unsub_note": "Vous continuerez à recevoir les messages concernant votre compte.",
+        "contact": "Des questions ? Écrivez-nous à",
     },
     "pt": {
         "greeting": "Olá {name},",
@@ -75,6 +78,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Não quer recebê-los? Desative-os: {url}",
         "unsub_note": "Continuará a receber mensagens sobre a sua própria conta.",
+        "contact": "Dúvidas? Escreva para",
     },
     "it": {
         "greeting": "Ciao {name},",
@@ -82,6 +86,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Non vuoi riceverle? Disattivale: {url}",
         "unsub_note": "Continuerai a ricevere i messaggi relativi al tuo account.",
+        "contact": "Domande? Scrivici a",
     },
     "de": {
         "greeting": "Hallo {name},",
@@ -89,6 +94,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Nicht erwünscht? Hier abschalten: {url}",
         "unsub_note": "Nachrichten zu deinem eigenen Konto erhältst du weiterhin.",
+        "contact": "Fragen? Schreib uns an",
     },
     "nl": {
         "greeting": "Hoi {name},",
@@ -96,6 +102,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Liever niet? Zet ze uit: {url}",
         "unsub_note": "Berichten over je eigen account blijf je ontvangen.",
+        "contact": "Vragen? Mail ons op",
     },
     "sv": {
         "greeting": "Hej {name},",
@@ -103,6 +110,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Vill du inte ha dem? Stäng av dem: {url}",
         "unsub_note": "Du får fortfarande meddelanden som rör ditt eget konto.",
+        "contact": "Frågor? Mejla oss på",
     },
     "pl": {
         "greeting": "Cześć {name},",
@@ -110,6 +118,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Nie chcesz ich otrzymywać? Wyłącz je: {url}",
         "unsub_note": "Wiadomości dotyczące Twojego konta będziesz otrzymywać nadal.",
+        "contact": "Pytania? Napisz do nas na",
     },
     "ru": {
         "greeting": "Здравствуйте, {name}!",
@@ -117,6 +126,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Не хотите их получать? Отключите: {url}",
         "unsub_note": "Сообщения о вашей учётной записи будут приходить по-прежнему.",
+        "contact": "Вопросы? Напишите нам на",
     },
     "uk": {
         "greeting": "Вітаємо, {name}!",
@@ -124,6 +134,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Не хочете їх отримувати? Вимкніть: {url}",
         "unsub_note": "Повідомлення про ваш обліковий запис надходитимуть і далі.",
+        "contact": "Питання? Напишіть нам на",
     },
     "sr": {
         "greeting": "Здраво {name},",
@@ -131,6 +142,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Не желите ово? Искључите: {url}",
         "unsub_note": "Поруке о вашем налогу и даље ћете примати.",
+        "contact": "Питања? Пишите нам на",
     },
     "hr": {
         "greeting": "Bok {name},",
@@ -138,6 +150,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Ne želite ovo? Isključite: {url}",
         "unsub_note": "Poruke o vašem računu i dalje ćete primati.",
+        "contact": "Pitanja? Pišite nam na",
     },
     "tr": {
         "greeting": "Merhaba {name},",
@@ -145,6 +158,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Bunları istemiyor musunuz? Kapatın: {url}",
         "unsub_note": "Kendi hesabınızla ilgili mesajları almaya devam edeceksiniz.",
+        "contact": "Sorunuz mu var? Bize yazın:",
     },
     "ro": {
         "greeting": "Salut {name},",
@@ -152,6 +166,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Nu le vrei? Dezactivează-le: {url}",
         "unsub_note": "Vei primi în continuare mesajele despre contul tău.",
+        "contact": "Întrebări? Scrie-ne la",
     },
     "el": {
         "greeting": "Γεια σου {name},",
@@ -159,6 +174,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Δεν τα θέλετε; Απενεργοποιήστε τα: {url}",
         "unsub_note": "Θα συνεχίσετε να λαμβάνετε μηνύματα για τον λογαριασμό σας.",
+        "contact": "Απορίες; Γράψτε μας στο",
     },
     "lt": {
         "greeting": "Sveiki, {name},",
@@ -166,6 +182,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Nenorite jų gauti? Išjunkite: {url}",
         "unsub_note": "Pranešimus apie savo paskyrą ir toliau gausite.",
+        "contact": "Klausimai? Rašykite mums adresu",
     },
     "ar": {
         "greeting": "مرحبًا {name}،",
@@ -173,6 +190,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "لا تريد هذه الرسائل؟ أوقفها: {url}",
         "unsub_note": "ستستمر في تلقّي الرسائل المتعلقة بحسابك.",
+        "contact": "أسئلة؟ راسلنا على",
     },
     "he": {
         "greeting": "שלום {name},",
@@ -180,6 +198,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "לא מעוניין בהודעות האלה? אפשר לכבות: {url}",
         "unsub_note": "הודעות שנוגעות לחשבון שלך ימשיכו להישלח.",
+        "contact": "שאלות? כתבו לנו אל",
     },
     "hi": {
         "greeting": "नमस्ते {name},",
@@ -187,6 +206,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "ये नहीं चाहिए? इन्हें बंद करें: {url}",
         "unsub_note": "आपके अपने खाते से जुड़े संदेश आपको मिलते रहेंगे।",
+        "contact": "सवाल? हमें यहाँ लिखें",
     },
     "ka": {
         "greeting": "გამარჯობა, {name},",
@@ -194,6 +214,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "აღარ გსურთ მათი მიღება? გამორთეთ: {url}",
         "unsub_note": "თქვენს ანგარიშთან დაკავშირებულ შეტყობინებებს კვლავ მიიღებთ.",
+        "contact": "შეკითხვები? მოგვწერეთ",
     },
     "ja": {
         "greeting": "{name} さん",
@@ -201,6 +222,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "不要な場合はこちらから停止できます: {url}",
         "unsub_note": "アカウントに関するお知らせは引き続きお送りします。",
+        "contact": "ご質問は",
     },
     "ko": {
         "greeting": "{name}님, 안녕하세요.",
@@ -208,6 +230,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "받고 싶지 않으신가요? 여기에서 끄세요: {url}",
         "unsub_note": "계정 관련 안내는 계속 발송됩니다.",
+        "contact": "문의는",
     },
     "zh": {
         "greeting": "{name} 你好，",
@@ -215,6 +238,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "不想收到这些邮件？可在此关闭：{url}",
         "unsub_note": "与你账号相关的邮件仍会照常发送。",
+        "contact": "有问题？请发邮件至",
     },
     "tl": {
         "greeting": "Kumusta {name},",
@@ -222,6 +246,7 @@ SHELL: dict[str, dict[str, str]] = {
         "signoff": "— BloomPrint",
         "unsub": "Ayaw mo ng mga ito? I-off sila: {url}",
         "unsub_note": "Patuloy mo pa ring matatanggap ang mga mensahe tungkol sa sarili mong account.",
+        "contact": "May tanong? Mag-email sa",
     },
 }
 

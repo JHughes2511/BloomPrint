@@ -30,6 +30,17 @@ def mail_from() -> str:
     return os.environ.get("MAIL_FROM") or os.environ.get("SMTP_FROM") or DEFAULT_FROM
 
 
+def contact_email() -> str:
+    """Where a reader should write when they have a question.
+
+    Its own default rather than one derived from the feedback plumbing:
+    feedback_to() falls back to MAIL_FROM, which is the noreply mailbox, and a
+    "questions?" line pointing at noreply is worse than no line at all — it
+    invites a reply into a bin.
+    """
+    return os.environ.get("CONTACT_EMAIL") or "feedback@bloomprint.org"
+
+
 def feedback_to() -> str:
     return os.environ.get("FEEDBACK_TO") or mail_from()
 
