@@ -68,10 +68,37 @@ def _bold(escaped: str) -> str:
                   rf'<strong style="color:{INK}">\1</strong>', escaped)
 
 
+def _bullets(lines: list[str], align: str) -> str:
+    """A block whose every line starts with "- " becomes a list.
+
+    Built from table rows rather than <ul>, because Outlook indents and bullets
+    a list to its own taste and ignores most of what CSS asks for. A row with a
+    dot in the first cell renders the same everywhere.
+    """
+    rows = ""
+    pad = "padding-left" if align == "left" else "padding-right"
+    for line in lines:
+        rows += (
+            f'<tr>'
+            f'<td valign="top" style="width:14px;font-size:16px;line-height:26px;'
+            f'color:{ACCENT}">&bull;</td>'
+            f'<td style="font-size:16px;line-height:26px;color:{INK_SOFT};'
+            f'{pad}:8px;padding-bottom:6px;text-align:{align}">'
+            f'{_bold(_esc(line))}</td></tr>'
+        )
+    return (f'<table role="presentation" cellpadding="0" cellspacing="0" border="0"'
+            f' style="margin:0 0 18px" dir="{"rtl" if align == "right" else "ltr"}">'
+            f'{rows}</table>')
+
+
 def _paragraphs(body: str, align: str) -> str:
-    """The message, one <p> per blank-line-separated block."""
+    """The message, one <p> per blank-line-separated block, or a list."""
     out = []
     for block in [b.strip() for b in (body or "").split("\n\n") if b.strip()]:
+        lines = [l.strip() for l in block.splitlines() if l.strip()]
+        if lines and all(l.startswith("- ") for l in lines):
+            out.append(_bullets([l[2:].strip() for l in lines], align))
+            continue
         out.append(
             f'<p style="margin:0 0 18px;font-size:16px;line-height:26px;'
             f'color:{INK_SOFT};text-align:{align}">{_bold(_esc(block))}</p>'
