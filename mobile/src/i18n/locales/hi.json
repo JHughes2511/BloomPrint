@@ -187,7 +187,9 @@
       "updatedSavedMsg": "आपके अपने {{label}} के रूप में सहेजा गया। यह अब आपके हाल के में है।",
       "couldNotRegenerate": "दोबारा नहीं बनाया जा सका",
       "buildingUpdated": "आपकी अपडेटेड रिपोर्ट बन रही है…",
-      "sourceGone": "{{name}} ने इसे हटा दिया, इसलिए दिखाने को कुछ नहीं बचा। आपके पास जो था वह आपके मैच टैब में रहेगा।"
+      "sourceGone": "{{name}} ने इसे हटा दिया, इसलिए दिखाने को कुछ नहीं बचा। आपके पास जो था वह आपके मैच टैब में रहेगा।",
+      "collapse": "संक्षिप्त करें",
+      "expand": "विस्तृत करें"
     },
     "exportSections": {
       "exportPrint": "एक्सपोर्ट / प्रिंट",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "मेरे मैचों से हटाएँ",
     "frozenFromCoach": "{{name}} से · अब अपडेट नहीं होता",
     "searchTeamsPlaceholder": "टीमें खोजें...",
-    "viewFullGameData": "पूरा मैच डेटा देखें"
+    "viewFullGameData": "पूरा मैच डेटा देखें",
+    "gameData": "मैच डेटा"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",

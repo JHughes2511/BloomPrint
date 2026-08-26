@@ -187,7 +187,9 @@
       "updatedSavedMsg": "حُفظ كـ {{label}} خاص بك. أصبح الآن ضمن عناصرك الأخيرة.",
       "couldNotRegenerate": "تعذّرت إعادة الإنشاء",
       "buildingUpdated": "جارٍ إعداد تقريرك المحدَّث…",
-      "sourceGone": "حذف {{name}} هذا، فلم يعد هناك ما يُعرض. ما كان لديك منه محفوظ في تبويب المباريات."
+      "sourceGone": "حذف {{name}} هذا، فلم يعد هناك ما يُعرض. ما كان لديك منه محفوظ في تبويب المباريات.",
+      "collapse": "طيّ",
+      "expand": "توسيع"
     },
     "exportSections": {
       "exportPrint": "تصدير / طباعة",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "إزالة من مبارياتي",
     "frozenFromCoach": "من {{name}} · لم يعد يُحدَّث",
     "searchTeamsPlaceholder": "ابحث عن الفرق...",
-    "viewFullGameData": "عرض بيانات المباراة كاملة"
+    "viewFullGameData": "عرض بيانات المباراة كاملة",
+    "gameData": "بيانات المباراة"
   },
   "whiteboard": {
     "title": "السبورة",

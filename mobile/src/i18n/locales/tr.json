@@ -187,7 +187,9 @@
       "updatedSavedMsg": "Kendi {{label}} olarak kaydedildi. Artık Son öğelerinizde.",
       "couldNotRegenerate": "Yeniden oluşturulamadı",
       "buildingUpdated": "Güncellenmiş raporunuz oluşturuluyor…",
-      "sourceGone": "{{name}} bunu sildi, gösterilecek bir şey kalmadı. Sende olanlar Maçlar sekmende duruyor."
+      "sourceGone": "{{name}} bunu sildi, gösterilecek bir şey kalmadı. Sende olanlar Maçlar sekmende duruyor.",
+      "collapse": "Daralt",
+      "expand": "Genişlet"
     },
     "exportSections": {
       "exportPrint": "Dışa Aktar / Yazdır",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "Maçlarımdan kaldır",
     "frozenFromCoach": "{{name}} kaynaklı · artık güncellenmiyor",
     "searchTeamsPlaceholder": "Takım ara...",
-    "viewFullGameData": "Tüm maç verilerini gör"
+    "viewFullGameData": "Tüm maç verilerini gör",
+    "gameData": "Maç Verileri"
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

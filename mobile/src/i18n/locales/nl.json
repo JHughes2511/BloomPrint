@@ -187,7 +187,9 @@
       "updatedSavedMsg": "Opgeslagen als je eigen {{label}}. Het staat nu bij je Recent.",
       "couldNotRegenerate": "Kon niet opnieuw genereren",
       "buildingUpdated": "Je bijgewerkte rapport wordt opgebouwd…",
-      "sourceGone": "{{name}} heeft dit verwijderd, er is niets meer te tonen. Wat je ervan had, blijft op je Wedstrijden-tab staan."
+      "sourceGone": "{{name}} heeft dit verwijderd, er is niets meer te tonen. Wat je ervan had, blijft op je Wedstrijden-tab staan.",
+      "collapse": "Inklappen",
+      "expand": "Uitklappen"
     },
     "exportSections": {
       "exportPrint": "Exporteren / Afdrukken",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "Uit mijn wedstrijden verwijderen",
     "frozenFromCoach": "Van {{name}} · wordt niet meer bijgewerkt",
     "searchTeamsPlaceholder": "Teams zoeken...",
-    "viewFullGameData": "Alle wedstrijdgegevens bekijken"
+    "viewFullGameData": "Alle wedstrijdgegevens bekijken",
+    "gameData": "Wedstrijdgegevens"
   },
   "whiteboard": {
     "title": "Tactiekbord",

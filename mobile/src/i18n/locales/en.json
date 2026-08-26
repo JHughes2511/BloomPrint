@@ -187,7 +187,9 @@
       "updatedSavedMsg": "Saved as your own {{label}}. It's now in your Recents.",
       "couldNotRegenerate": "Could not regenerate",
       "buildingUpdated": "Building your updated report…",
-      "sourceGone": "{{name}} deleted this, so there is nothing left to show. Anything you had of it is kept on your own Games tab."
+      "sourceGone": "{{name}} deleted this, so there is nothing left to show. Anything you had of it is kept on your own Games tab.",
+      "collapse": "Collapse",
+      "expand": "Expand"
     },
     "exportSections": {
       "exportPrint": "Export / Print",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "Remove from my games",
     "frozenFromCoach": "From {{name}} · no longer updating",
     "searchTeamsPlaceholder": "Search teams...",
-    "viewFullGameData": "View full game data"
+    "viewFullGameData": "View full game data",
+    "gameData": "Game Data"
   },
   "whiteboard": {
     "title": "Whiteboard",

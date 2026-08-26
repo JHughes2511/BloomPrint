@@ -187,7 +187,9 @@
       "updatedSavedMsg": "Salvato come tuo {{label}}. Ora si trova nei tuoi Recenti.",
       "couldNotRegenerate": "Impossibile rigenerare",
       "buildingUpdated": "Creazione del report aggiornato in corso…",
-      "sourceGone": "{{name}} l'ha eliminato, quindi non resta nulla da mostrare. Quello che ne avevi resta nella tua scheda Partite."
+      "sourceGone": "{{name}} l'ha eliminato, quindi non resta nulla da mostrare. Quello che ne avevi resta nella tua scheda Partite.",
+      "collapse": "Comprimi",
+      "expand": "Espandi"
     },
     "exportSections": {
       "exportPrint": "Esporta / Stampa",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "Rimuovi dalle mie partite",
     "frozenFromCoach": "Da {{name}} · non si aggiorna più",
     "searchTeamsPlaceholder": "Cerca squadre...",
-    "viewFullGameData": "Vedi tutti i dati della partita"
+    "viewFullGameData": "Vedi tutti i dati della partita",
+    "gameData": "Dati partita"
   },
   "whiteboard": {
     "title": "Lavagna",

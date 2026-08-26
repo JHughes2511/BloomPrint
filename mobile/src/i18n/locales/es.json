@@ -187,7 +187,9 @@
       "updatedSavedMsg": "Guardado como tu propio {{label}}. Ya está en tus Recientes.",
       "couldNotRegenerate": "No se pudo regenerar",
       "buildingUpdated": "Creando tu informe actualizado…",
-      "sourceGone": "{{name}} lo eliminó, así que no queda nada que mostrar. Lo que tenías de él se conserva en tu pestaña Partidos."
+      "sourceGone": "{{name}} lo eliminó, así que no queda nada que mostrar. Lo que tenías de él se conserva en tu pestaña Partidos.",
+      "collapse": "Contraer",
+      "expand": "Expandir"
     },
     "exportSections": {
       "exportPrint": "Exportar / Imprimir",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "Quitar de mis partidos",
     "frozenFromCoach": "De {{name}} · ya no se actualiza",
     "searchTeamsPlaceholder": "Buscar equipos...",
-    "viewFullGameData": "Ver todos los datos del partido"
+    "viewFullGameData": "Ver todos los datos del partido",
+    "gameData": "Datos del partido"
   },
   "whiteboard": {
     "title": "Pizarra",

@@ -44,6 +44,10 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
   const [item, setItem] = useState<any | null>(shared);
   const [bodyMode, setBodyMode] = useState<'original' | 'updated'>('original');
   const [bottomTab, setBottomTab] = useState<BottomTab>('comments');
+  // Shut, the report gets the room. The pills stay either way: the counts on
+  // them are half of why a coach looks down here at all, and a strip that
+  // vanishes entirely leaves nothing saying there is anything to come back to.
+  const [bottomOpen, setBottomOpen] = useState(true);
   const [comments, setComments] = useState<any[]>([]);
   const [corrections, setCorrections] = useState<any[]>([]);
   const [commentText, setCommentText] = useState('');
@@ -278,23 +282,34 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
 
           {/* Bottom action panel — report stays visible above */}
           <View style={styles.bottomPanel}>
-            <View style={styles.bottomTabs}>
+            <View style={styles.bottomBar}>
+              <View style={styles.bottomTabs}>
               {canRegen && (
-                <TouchableOpacity style={[styles.bottomTab, bottomTab === 'correct' && styles.bottomTabActive]} onPress={() => setBottomTab('correct')}>
+                <TouchableOpacity style={[styles.bottomTab, bottomTab === 'correct' && styles.bottomTabActive]} onPress={() => { setBottomTab('correct'); setBottomOpen(true); }}>
                   <Text style={[styles.bottomTabText, bottomTab === 'correct' && styles.bottomTabTextActive]}>
                     {tr('components.viewer.correctionsTab', { count: corrections.length })}
                   </Text>
                 </TouchableOpacity>
               )}
-              <TouchableOpacity style={[styles.bottomTab, bottomTab === 'comments' && styles.bottomTabActive]} onPress={() => setBottomTab('comments')}>
+              <TouchableOpacity style={[styles.bottomTab, bottomTab === 'comments' && styles.bottomTabActive]} onPress={() => { setBottomTab('comments'); setBottomOpen(true); }}>
                 <Text style={[styles.bottomTabText, bottomTab === 'comments' && styles.bottomTabTextActive]}>{tr('components.viewer.commentsTab', { count: comments.filter(c => !isNote(c) && underCurrent(c)).length })}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.bottomTab, bottomTab === 'notes' && styles.bottomTabActive]} onPress={() => setBottomTab('notes')}>
+              <TouchableOpacity style={[styles.bottomTab, bottomTab === 'notes' && styles.bottomTabActive]} onPress={() => { setBottomTab('notes'); setBottomOpen(true); }}>
                 <Text style={[styles.bottomTabText, bottomTab === 'notes' && styles.bottomTabTextActive]}>{tr('components.viewer.notesTab', { count: comments.filter(c => isNote(c) && underCurrent(c)).length })}</Text>
+              </TouchableOpacity>
+              </View>
+              <TouchableOpacity
+                accessibilityLabel={bottomOpen ? tr('components.viewer.collapse')
+                                               : tr('components.viewer.expand')}
+                onPress={() => setBottomOpen(o => !o)}
+                style={styles.collapseBtn}
+              >
+                <Ionicons name={bottomOpen ? 'chevron-down' : 'chevron-up'}
+                          size={16} color={t.muted} />
               </TouchableOpacity>
             </View>
 
-            {bottomTab === 'correct' && canRegen && (
+            {bottomOpen && bottomTab === 'correct' && canRegen && (
               <View>
                 {/* Saved corrections — edit / delete the un-applied ones */}
                 {corrections.length > 0 && (
@@ -366,7 +381,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
               </View>
             )}
 
-            {bottomTab === 'comments' && (
+            {bottomOpen && bottomTab === 'comments' && (
               <View>
                 <Text style={styles.scopeHint}>{tr('components.viewer.commentsOn', { version: bodyMode === 'updated' ? updatedLabel : tr('components.viewer.original') })}</Text>
                 <ScrollView style={{ maxHeight: 260 }}>
@@ -441,7 +456,7 @@ export default function SharedReportViewer({ shared, visible, onClose, onChanged
               </View>
             )}
 
-            {bottomTab === 'notes' && (
+            {bottomOpen && bottomTab === 'notes' && (
               <View>
                 <Text style={styles.scopeHint}>{tr('components.viewer.notesOn', { version: bodyMode === 'updated' ? updatedLabel : tr('components.viewer.original') })}</Text>
                 <ScrollView style={{ maxHeight: 100 }}>
@@ -504,7 +519,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   bodyWrap: { flex: 1, marginTop: 10 },
   bodyContent: { paddingHorizontal: 16, paddingBottom: 16 },
   bottomPanel: { borderTopWidth: 1, borderTopColor: t.line, paddingTop: 10, marginTop: 6 },
-  bottomTabs: { flexDirection: 'row', gap: 6, marginBottom: 10, flexWrap: 'wrap' },
+  bottomBar: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
+  bottomTabs: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', flex: 1 },
+  collapseBtn: { paddingHorizontal: 8, paddingVertical: 7, borderRadius: 999,
+                 borderWidth: 1, borderColor: t.line, backgroundColor: t.chip },
   bottomTab: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999, borderWidth: 1, borderColor: t.line, backgroundColor: t.chip },
   bottomTabActive: { backgroundColor: t.ctaBg, borderColor: t.ctaBg },
   bottomTabText: { color: t.muted, fontSize: 12, fontFamily: fonts[600], lineHeight: 16 },

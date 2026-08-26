@@ -187,7 +187,9 @@
       "updatedSavedMsg": "Enregistré comme votre propre {{label}}. Il figure désormais dans vos Récents.",
       "couldNotRegenerate": "Impossible de régénérer",
       "buildingUpdated": "Création de votre rapport mis à jour…",
-      "sourceGone": "{{name}} l'a supprimé, il ne reste donc rien à afficher. Ce que vous en aviez est conservé dans votre onglet Matchs."
+      "sourceGone": "{{name}} l'a supprimé, il ne reste donc rien à afficher. Ce que vous en aviez est conservé dans votre onglet Matchs.",
+      "collapse": "Réduire",
+      "expand": "Développer"
     },
     "exportSections": {
       "exportPrint": "Exporter / Imprimer",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "Retirer de mes matchs",
     "frozenFromCoach": "De {{name}} · ne se met plus à jour",
     "searchTeamsPlaceholder": "Rechercher des équipes...",
-    "viewFullGameData": "Voir toutes les données du match"
+    "viewFullGameData": "Voir toutes les données du match",
+    "gameData": "Données du match"
   },
   "whiteboard": {
     "title": "Tableau blanc",

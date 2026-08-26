@@ -187,7 +187,9 @@
       "updatedSavedMsg": "Spremljeno kao tvoj vlastiti {{label}}. Sada je u tvojim Nedavnima.",
       "couldNotRegenerate": "Nije moguće ponovno generirati",
       "buildingUpdated": "Izrađujem tvoj ažurirani izvještaj…",
-      "sourceGone": "{{name}} je ovo obrisao, pa nema više što prikazati. Ono što si imao ostaje na tvojoj kartici Utakmice."
+      "sourceGone": "{{name}} je ovo obrisao, pa nema više što prikazati. Ono što si imao ostaje na tvojoj kartici Utakmice.",
+      "collapse": "Sažmi",
+      "expand": "Proširi"
     },
     "exportSections": {
       "exportPrint": "Izvezi / ispiši",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "Ukloni iz mojih utakmica",
     "frozenFromCoach": "Od {{name}} · više se ne ažurira",
     "searchTeamsPlaceholder": "Traži momčadi...",
-    "viewFullGameData": "Prikaži sve podatke utakmice"
+    "viewFullGameData": "Prikaži sve podatke utakmice",
+    "gameData": "Podaci utakmice"
   },
   "whiteboard": {
     "title": "Ploča",

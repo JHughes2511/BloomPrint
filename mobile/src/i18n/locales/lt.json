@@ -187,7 +187,9 @@
       "updatedSavedMsg": "Išsaugota kaip jūsų pačių {{label}}. Dabar tai yra jūsų naujausiuose.",
       "couldNotRegenerate": "Nepavyko pergeneruoti",
       "buildingUpdated": "Kuriama atnaujinta ataskaita…",
-      "sourceGone": "{{name}} tai ištrynė, tad nebėra ką rodyti. Tai, ką turėjote, lieka jūsų Rungtynių kortelėje."
+      "sourceGone": "{{name}} tai ištrynė, tad nebėra ką rodyti. Tai, ką turėjote, lieka jūsų Rungtynių kortelėje.",
+      "collapse": "Sutraukti",
+      "expand": "Išskleisti"
     },
     "exportSections": {
       "exportPrint": "Eksportuoti / spausdinti",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "Pašalinti iš mano rungtynių",
     "frozenFromCoach": "Nuo {{name}} · nebeatnaujinama",
     "searchTeamsPlaceholder": "Ieškoti komandų...",
-    "viewFullGameData": "Peržiūrėti visus rungtynių duomenis"
+    "viewFullGameData": "Peržiūrėti visus rungtynių duomenis",
+    "gameData": "Rungtynių duomenys"
   },
   "whiteboard": {
     "title": "Lenta",

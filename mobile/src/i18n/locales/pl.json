@@ -187,7 +187,9 @@
       "updatedSavedMsg": "Zapisano jako Twój własny {{label}}. Jest teraz w Twoich Ostatnich.",
       "couldNotRegenerate": "Nie udało się wygenerować ponownie",
       "buildingUpdated": "Tworzenie zaktualizowanego raportu…",
-      "sourceGone": "{{name}} to usunął, więc nie ma już czego pokazać. To, co miałeś, zostaje na Twojej karcie Mecze."
+      "sourceGone": "{{name}} to usunął, więc nie ma już czego pokazać. To, co miałeś, zostaje na Twojej karcie Mecze.",
+      "collapse": "Zwiń",
+      "expand": "Rozwiń"
     },
     "exportSections": {
       "exportPrint": "Eksportuj / drukuj",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "Usuń z moich meczów",
     "frozenFromCoach": "Od {{name}} · już się nie aktualizuje",
     "searchTeamsPlaceholder": "Szukaj drużyn...",
-    "viewFullGameData": "Zobacz pełne dane meczu"
+    "viewFullGameData": "Zobacz pełne dane meczu",
+    "gameData": "Dane meczu"
   },
   "whiteboard": {
     "title": "Tablica",

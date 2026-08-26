@@ -187,7 +187,9 @@
       "updatedSavedMsg": "Na-save bilang sarili mong {{label}}. Nasa Recents mo na ito ngayon.",
       "couldNotRegenerate": "Hindi ma-regenerate",
       "buildingUpdated": "Binubuo ang na-update mong ulat…",
-      "sourceGone": "Binura ito ni {{name}}, kaya wala nang maipapakita. Ang nasa iyo ay nananatili sa Games tab mo."
+      "sourceGone": "Binura ito ni {{name}}, kaya wala nang maipapakita. Ang nasa iyo ay nananatili sa Games tab mo.",
+      "collapse": "I-collapse",
+      "expand": "I-expand"
     },
     "exportSections": {
       "exportPrint": "I-export / I-print",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "Alisin sa aking mga laro",
     "frozenFromCoach": "Mula kay {{name}} · hindi na nag-a-update",
     "searchTeamsPlaceholder": "Maghanap ng koponan...",
-    "viewFullGameData": "Tingnan ang buong datos ng laro"
+    "viewFullGameData": "Tingnan ang buong datos ng laro",
+    "gameData": "Datos ng Laro"
   },
   "whiteboard": {
     "title": "Whiteboard",

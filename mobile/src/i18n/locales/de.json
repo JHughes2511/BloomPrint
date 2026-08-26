@@ -187,7 +187,9 @@
       "updatedSavedMsg": "Als eigene {{label}} gespeichert. Sie ist jetzt in deinen zuletzt verwendeten Berichten.",
       "couldNotRegenerate": "Neu generieren nicht möglich",
       "buildingUpdated": "Dein aktualisierter Bericht wird erstellt…",
-      "sourceGone": "{{name}} hat das gelöscht, es ist nichts mehr da. Was du davon hattest, bleibt in deinem Spiele-Tab."
+      "sourceGone": "{{name}} hat das gelöscht, es ist nichts mehr da. Was du davon hattest, bleibt in deinem Spiele-Tab.",
+      "collapse": "Einklappen",
+      "expand": "Ausklappen"
     },
     "exportSections": {
       "exportPrint": "Exportieren / Drucken",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "Aus meinen Spielen entfernen",
     "frozenFromCoach": "Von {{name}} · wird nicht mehr aktualisiert",
     "searchTeamsPlaceholder": "Teams suchen...",
-    "viewFullGameData": "Alle Spieldaten ansehen"
+    "viewFullGameData": "Alle Spieldaten ansehen",
+    "gameData": "Spieldaten"
   },
   "whiteboard": {
     "title": "Taktiktafel",

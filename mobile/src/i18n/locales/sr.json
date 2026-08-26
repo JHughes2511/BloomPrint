@@ -187,7 +187,9 @@
       "updatedSavedMsg": "Sačuvano kao tvoj sopstveni {{label}}. Sada je u tvom odeljku Nedavno.",
       "couldNotRegenerate": "Nije moguće regenerisati",
       "buildingUpdated": "Pravimo tvoj ažurirani izveštaj…",
-      "sourceGone": "{{name}} је ово обрисао, па нема више шта да се прикаже. Оно што си имао остаје на твојој картици Утакмице."
+      "sourceGone": "{{name}} је ово обрисао, па нема више шта да се прикаже. Оно што си имао остаје на твојој картици Утакмице.",
+      "collapse": "Сажми",
+      "expand": "Прошири"
     },
     "exportSections": {
       "exportPrint": "Izvoz / Štampa",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "Уклони из мојих утакмица",
     "frozenFromCoach": "Од {{name}} · више се не ажурира",
     "searchTeamsPlaceholder": "Претражи тимове...",
-    "viewFullGameData": "Прикажи све податке утакмице"
+    "viewFullGameData": "Прикажи све податке утакмице",
+    "gameData": "Подаци утакмице"
   },
   "whiteboard": {
     "title": "Tabla",

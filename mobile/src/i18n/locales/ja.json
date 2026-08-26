@@ -187,7 +187,9 @@
       "updatedSavedMsg": "自分の{{label}}として保存しました。最近の項目に追加されました。",
       "couldNotRegenerate": "再生成できませんでした",
       "buildingUpdated": "更新されたレポートを作成中…",
-      "sourceGone": "{{name}} がこれを削除したため、表示できるものが残っていません。あなたが持っていた分は「試合」タブに残ります。"
+      "sourceGone": "{{name}} がこれを削除したため、表示できるものが残っていません。あなたが持っていた分は「試合」タブに残ります。",
+      "collapse": "折りたたむ",
+      "expand": "展開"
     },
     "exportSections": {
       "exportPrint": "エクスポート／印刷",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "自分の試合から外す",
     "frozenFromCoach": "{{name}} から · 更新は止まりました",
     "searchTeamsPlaceholder": "チームを検索...",
-    "viewFullGameData": "試合データをすべて表示"
+    "viewFullGameData": "試合データをすべて表示",
+    "gameData": "試合データ"
   },
   "whiteboard": {
     "title": "ホワイトボード",

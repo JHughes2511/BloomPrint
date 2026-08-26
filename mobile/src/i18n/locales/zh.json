@@ -187,7 +187,9 @@
       "updatedSavedMsg": "已保存为你自己的{{label}}。现在它在你的最近记录中。",
       "couldNotRegenerate": "无法重新生成",
       "buildingUpdated": "正在生成你更新的报告…",
-      "sourceGone": "{{name}} 已将其删除，没有内容可显示。你原有的部分仍保留在你的“比赛”标签中。"
+      "sourceGone": "{{name}} 已将其删除，没有内容可显示。你原有的部分仍保留在你的“比赛”标签中。",
+      "collapse": "折叠",
+      "expand": "展开"
     },
     "exportSections": {
       "exportPrint": "导出 / 打印",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "从我的比赛中移除",
     "frozenFromCoach": "来自 {{name}} · 不再更新",
     "searchTeamsPlaceholder": "搜索球队...",
-    "viewFullGameData": "查看完整比赛数据"
+    "viewFullGameData": "查看完整比赛数据",
+    "gameData": "比赛数据"
   },
   "whiteboard": {
     "title": "战术板",

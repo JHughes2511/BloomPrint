@@ -187,7 +187,9 @@
       "updatedSavedMsg": "Salvo como seu próprio {{label}}. Já está nos seus Recentes.",
       "couldNotRegenerate": "Não foi possível regenerar",
       "buildingUpdated": "Criando seu relatório atualizado…",
-      "sourceGone": "{{name}} excluiu isto, então não há mais nada para mostrar. O que você tinha fica na sua aba Jogos."
+      "sourceGone": "{{name}} excluiu isto, então não há mais nada para mostrar. O que você tinha fica na sua aba Jogos.",
+      "collapse": "Recolher",
+      "expand": "Expandir"
     },
     "exportSections": {
       "exportPrint": "Exportar / Imprimir",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "Remover dos meus jogos",
     "frozenFromCoach": "De {{name}} · não atualiza mais",
     "searchTeamsPlaceholder": "Buscar times...",
-    "viewFullGameData": "Ver todos os dados do jogo"
+    "viewFullGameData": "Ver todos os dados do jogo",
+    "gameData": "Dados do jogo"
   },
   "whiteboard": {
     "title": "Quadro Tático",

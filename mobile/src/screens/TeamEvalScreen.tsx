@@ -3733,10 +3733,31 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900], marginBottom: 2 }}>
                 {matchupLabel(gameReportGame)}
               </Text>
-              <Text style={{ color: t.muted2, fontSize: 13, marginBottom: 12 }}>
-                {gameReportGame.date ? new Date(gameReportGame.date).toLocaleDateString() : ''}
-                {gameReportGame.our_score != null ? `  ·  ${gameReportGame.our_score}-${gameReportGame.opponent_score}` : ''}
-              </Text>
+              {/* The numbers behind the game, on the line that already carries
+                  its numbers — and outside the report card, because that card
+                  only exists once a report has been generated. Put inside it,
+                  the way into the stats was missing from exactly the screen a
+                  coach lands on first. */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <Text style={{ color: t.muted2, fontSize: 13, flex: 1 }}>
+                  {gameReportGame.date ? new Date(gameReportGame.date).toLocaleDateString() : ''}
+                  {gameReportGame.our_score != null ? `  ·  ${gameReportGame.our_score}-${gameReportGame.opponent_score}` : ''}
+                </Text>
+                <TouchableOpacity
+                  accessibilityLabel={tr('teamGrade.viewFullGameData')}
+                  onPress={() => void openDetail(gameReportGame, true)}
+                  style={{
+                    flexDirection: 'row', alignItems: 'center', gap: 6,
+                    paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999,
+                    borderWidth: 1, borderColor: t.line, backgroundColor: t.chip,
+                  }}
+                >
+                  <Ionicons name="stats-chart-outline" size={14} color={t.muted} />
+                  <Text style={{ color: t.muted, fontSize: 12, fontFamily: fonts[700] }}>
+                    {tr('teamGrade.gameData')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
               {loadingGameReport ? (
                 <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />

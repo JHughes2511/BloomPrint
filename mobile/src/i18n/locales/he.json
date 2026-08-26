@@ -187,7 +187,9 @@
       "updatedSavedMsg": "נשמר כ{{label}} משלך. הוא נמצא כעת ברשימת האחרונים שלך.",
       "couldNotRegenerate": "לא ניתן ליצור מחדש",
       "buildingUpdated": "בונה את הדוח המעודכן שלך…",
-      "sourceGone": "{{name}} מחק את זה, אז לא נשאר מה להציג. מה שהיה לך נשמר בלשונית המשחקים שלך."
+      "sourceGone": "{{name}} מחק את זה, אז לא נשאר מה להציג. מה שהיה לך נשמר בלשונית המשחקים שלך.",
+      "collapse": "כיווץ",
+      "expand": "הרחבה"
     },
     "exportSections": {
       "exportPrint": "ייצוא / הדפסה",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "הסר מהמשחקים שלי",
     "frozenFromCoach": "מאת {{name}} · כבר לא מתעדכן",
     "searchTeamsPlaceholder": "חיפוש קבוצות...",
-    "viewFullGameData": "הצגת כל נתוני המשחק"
+    "viewFullGameData": "הצגת כל נתוני המשחק",
+    "gameData": "נתוני המשחק"
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

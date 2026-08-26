@@ -187,7 +187,9 @@
       "updatedSavedMsg": "Salvat ca {{label}} propriu. Se află acum în Recente.",
       "couldNotRegenerate": "Nu s-a putut regenera",
       "buildingUpdated": "Se construiește raportul actualizat…",
-      "sourceGone": "{{name}} a șters asta, deci nu mai e nimic de arătat. Ce aveai rămâne în fila ta Meciuri."
+      "sourceGone": "{{name}} a șters asta, deci nu mai e nimic de arătat. Ce aveai rămâne în fila ta Meciuri.",
+      "collapse": "Restrânge",
+      "expand": "Extinde"
     },
     "exportSections": {
       "exportPrint": "Exportă / Printează",
@@ -2289,7 +2291,8 @@
     "removeFromMyGames": "Elimină din meciurile mele",
     "frozenFromCoach": "De la {{name}} · nu se mai actualizează",
     "searchTeamsPlaceholder": "Caută echipe...",
-    "viewFullGameData": "Vezi toate datele meciului"
+    "viewFullGameData": "Vezi toate datele meciului",
+    "gameData": "Date meci"
   },
   "whiteboard": {
     "title": "Tablă tactică",
