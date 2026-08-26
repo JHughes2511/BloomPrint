@@ -2527,6 +2527,14 @@
       "title": "{{coach}} prisijungė prie jūsų komandos",
       "body": "{{coach}} ({{role}}) prisijungė prie {{team}}."
     },
+    "teamMemberAdded": {
+      "title": "Pridėta prie {{team}}",
+      "body": "{{coach}} pridėjo jus prie {{team}}."
+    },
+    "teamMemberRemoved": {
+      "title": "Pašalinta iš {{team}}",
+      "body": "Jūs pašalintas iš {{team}}."
+    },
     "teamInvite": {
       "title": "Kvietimas į komandą",
       "body": "{{coach}} pakvietė jus prisijungti prie {{team}}."

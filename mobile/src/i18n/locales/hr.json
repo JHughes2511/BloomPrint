@@ -2527,6 +2527,14 @@
       "title": "{{coach}} se pridružio vašoj momčadi",
       "body": "{{coach}} ({{role}}) se pridružio momčadi {{team}}."
     },
+    "teamMemberAdded": {
+      "title": "Dodani u {{team}}",
+      "body": "{{coach}} vas je dodao u {{team}}."
+    },
+    "teamMemberRemoved": {
+      "title": "Uklonjeni iz {{team}}",
+      "body": "Uklonjeni ste iz {{team}}."
+    },
     "teamInvite": {
       "title": "Pozivnica za momčad",
       "body": "{{coach}} vas je pozvao da se pridružite momčadi {{team}}."

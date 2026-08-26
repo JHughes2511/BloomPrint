@@ -2527,6 +2527,14 @@
       "title": "انضم {{coach}} إلى فريقك",
       "body": "انضم {{coach}} ({{role}}) إلى {{team}}."
     },
+    "teamMemberAdded": {
+      "title": "أُضِفت إلى {{team}}",
+      "body": "أضافك {{coach}} إلى {{team}}."
+    },
+    "teamMemberRemoved": {
+      "title": "أُزلت من {{team}}",
+      "body": "تمت إزالتك من {{team}}."
+    },
     "teamInvite": {
       "title": "دعوة إلى فريق",
       "body": "دعاك {{coach}} للانضمام إلى {{team}}."

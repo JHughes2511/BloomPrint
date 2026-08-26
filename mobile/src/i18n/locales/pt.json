@@ -2527,6 +2527,14 @@
       "title": "{{coach}} juntou-se à sua equipa",
       "body": "{{coach}} ({{role}}) juntou-se a {{team}}."
     },
+    "teamMemberAdded": {
+      "title": "Adicionado a {{team}}",
+      "body": "{{coach}} adicionou-o a {{team}}."
+    },
+    "teamMemberRemoved": {
+      "title": "Removido de {{team}}",
+      "body": "Foi removido de {{team}}."
+    },
     "teamInvite": {
       "title": "Convite de equipa",
       "body": "{{coach}} convidou-o para se juntar a {{team}}."

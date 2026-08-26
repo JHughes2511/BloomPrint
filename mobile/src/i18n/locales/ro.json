@@ -2527,6 +2527,14 @@
       "title": "{{coach}} s-a alăturat echipei tale",
       "body": "{{coach}} ({{role}}) s-a alăturat echipei {{team}}."
     },
+    "teamMemberAdded": {
+      "title": "Adăugat la {{team}}",
+      "body": "{{coach}} te-a adăugat la {{team}}."
+    },
+    "teamMemberRemoved": {
+      "title": "Scos din {{team}}",
+      "body": "Ai fost scos din {{team}}."
+    },
     "teamInvite": {
       "title": "Invitație în echipă",
       "body": "{{coach}} te-a invitat să te alături echipei {{team}}."

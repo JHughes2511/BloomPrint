@@ -2527,6 +2527,14 @@
       "title": "{{coach}} がチームに加わりました",
       "body": "{{coach}}（{{role}}）が {{team}} に加わりました。"
     },
+    "teamMemberAdded": {
+      "title": "{{team}} に追加されました",
+      "body": "{{coach}} があなたを {{team}} に追加しました。"
+    },
+    "teamMemberRemoved": {
+      "title": "{{team}} から外れました",
+      "body": "{{team}} から外されました。"
+    },
     "teamInvite": {
       "title": "チームへの招待",
       "body": "{{coach}} があなたを {{team}} に招待しました。"

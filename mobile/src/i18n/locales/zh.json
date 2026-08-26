@@ -2527,6 +2527,14 @@
       "title": "{{coach}} 加入了你的球队",
       "body": "{{coach}}（{{role}}）已加入 {{team}}。"
     },
+    "teamMemberAdded": {
+      "title": "已加入 {{team}}",
+      "body": "{{coach}} 把你加入了 {{team}}。"
+    },
+    "teamMemberRemoved": {
+      "title": "已被移出 {{team}}",
+      "body": "你已被移出 {{team}}。"
+    },
     "teamInvite": {
       "title": "球队邀请",
       "body": "{{coach}} 邀请你加入 {{team}}。"

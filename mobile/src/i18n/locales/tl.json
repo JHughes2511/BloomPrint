@@ -2527,6 +2527,14 @@
       "title": "Sumali si {{coach}} sa iyong koponan",
       "body": "Sumali si {{coach}} ({{role}}) sa {{team}}."
     },
+    "teamMemberAdded": {
+      "title": "Idinagdag sa {{team}}",
+      "body": "Idinagdag ka ni {{coach}} sa {{team}}."
+    },
+    "teamMemberRemoved": {
+      "title": "Inalis sa {{team}}",
+      "body": "Inalis ka sa {{team}}."
+    },
     "teamInvite": {
       "title": "Imbitasyon sa koponan",
       "body": "Inimbitahan ka ni {{coach}} na sumali sa {{team}}."

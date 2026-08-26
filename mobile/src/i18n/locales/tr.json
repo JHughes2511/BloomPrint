@@ -2527,6 +2527,14 @@
       "title": "{{coach}} takımına katıldı",
       "body": "{{coach}} ({{role}}), {{team}} takımına katıldı."
     },
+    "teamMemberAdded": {
+      "title": "{{team}} takımına eklendiniz",
+      "body": "{{coach}} sizi {{team}} takımına ekledi."
+    },
+    "teamMemberRemoved": {
+      "title": "{{team}} takımından çıkarıldınız",
+      "body": "{{team}} takımından çıkarıldınız."
+    },
     "teamInvite": {
       "title": "Takım daveti",
       "body": "{{coach}} seni {{team}} takımına davet etti."

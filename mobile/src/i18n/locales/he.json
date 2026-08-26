@@ -2527,6 +2527,14 @@
       "title": "{{coach}} הצטרף לקבוצה שלך",
       "body": "{{coach}} ({{role}}) הצטרף ל{{team}}."
     },
+    "teamMemberAdded": {
+      "title": "נוספת ל{{team}}",
+      "body": "{{coach}} הוסיף אותך ל{{team}}."
+    },
+    "teamMemberRemoved": {
+      "title": "הוסרת מ{{team}}",
+      "body": "הוסרת מ{{team}}."
+    },
     "teamInvite": {
       "title": "הזמנה לקבוצה",
       "body": "{{coach}} הזמין אותך להצטרף ל{{team}}."

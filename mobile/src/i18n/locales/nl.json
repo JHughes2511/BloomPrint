@@ -2527,6 +2527,14 @@
       "title": "{{coach}} is bij je team gekomen",
       "body": "{{coach}} ({{role}}) heeft zich aangesloten bij {{team}}."
     },
+    "teamMemberAdded": {
+      "title": "Toegevoegd aan {{team}}",
+      "body": "{{coach}} heeft je toegevoegd aan {{team}}."
+    },
+    "teamMemberRemoved": {
+      "title": "Verwijderd uit {{team}}",
+      "body": "Je bent verwijderd uit {{team}}."
+    },
     "teamInvite": {
       "title": "Teamuitnodiging",
       "body": "{{coach}} heeft je uitgenodigd voor {{team}}."

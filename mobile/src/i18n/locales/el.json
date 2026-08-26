@@ -2527,6 +2527,14 @@
       "title": "Ο/Η {{coach}} μπήκε στην ομάδα σας",
       "body": "Ο/Η {{coach}} ({{role}}) μπήκε στην ομάδα {{team}}."
     },
+    "teamMemberAdded": {
+      "title": "Προστέθηκες στην {{team}}",
+      "body": "Ο/Η {{coach}} σε πρόσθεσε στην {{team}}."
+    },
+    "teamMemberRemoved": {
+      "title": "Αφαιρέθηκες από την {{team}}",
+      "body": "Αφαιρέθηκες από την {{team}}."
+    },
     "teamInvite": {
       "title": "Πρόσκληση ομάδας",
       "body": "Ο/Η {{coach}} σας προσκάλεσε στην ομάδα {{team}}."

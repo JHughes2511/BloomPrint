@@ -2527,6 +2527,14 @@
       "title": "{{coach}} gick med i ditt lag",
       "body": "{{coach}} ({{role}}) har gått med i {{team}}."
     },
+    "teamMemberAdded": {
+      "title": "Tillagd i {{team}}",
+      "body": "{{coach}} lade till dig i {{team}}."
+    },
+    "teamMemberRemoved": {
+      "title": "Borttagen från {{team}}",
+      "body": "Du har tagits bort från {{team}}."
+    },
     "teamInvite": {
       "title": "Laginbjudan",
       "body": "{{coach}} bjöd in dig till {{team}}."
