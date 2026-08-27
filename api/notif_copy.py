@@ -6,7 +6,7 @@ this file: it is overwritten, and the point of it is that the email and
 the in-app notification cannot come to say different things.
 """
 
-SOURCE_DIGEST = "02a0cbd4e31bf3dfaeeb321b92120063a97213f66263eb1b24bf981b81a6caae"
+SOURCE_DIGEST = "1466222929b5c416376cfc212669c74381fd42ba01c04f9ae334c774e82b66c3"
 
 # key -> language -> (title, body). Placeholders are the app's own
 # {{name}} form, interpolated by api/emails.py.
@@ -1117,6 +1117,33 @@ NOTIF_COPY: dict[str, dict[str, tuple[str, str]]] = {
         'ko': ('팀 소유자 변경됨', '{{coach}} 님이 이제 {{team}}의 소유자입니다.'),
         'zh': ('球队所有者已变更', '{{coach}} 现在是 {{team}} 的所有者。'),
         'tl': ('Nagbago ang may-ari ng koponan', 'Si {{coach}} na ang may-ari ng {{team}}.'),
+    },
+    'teamReleased': {
+        'en': ('A team has no owner', '{{coach}} let go of {{team}}. Any staff member can claim it.'),
+        'es': ('Un equipo se ha quedado sin responsable', '{{coach}} ha dejado {{team}}. Cualquier miembro del cuerpo técnico puede quedárselo.'),
+        'fr': ("Une équipe n'a plus de responsable", "{{coach}} a laissé {{team}}. N'importe quel membre du staff peut la reprendre."),
+        'pt': ('Uma equipa ficou sem responsável', '{{coach}} deixou {{team}}. Qualquer membro da equipa técnica pode assumi-la.'),
+        'it': ('Una squadra è rimasta senza responsabile', '{{coach}} ha lasciato {{team}}. Qualsiasi membro dello staff può prenderla.'),
+        'de': ('Ein Team hat keinen Besitzer mehr', '{{coach}} hat {{team}} abgegeben. Jedes Staff-Mitglied kann es übernehmen.'),
+        'nl': ('Een team heeft geen eigenaar meer', '{{coach}} heeft {{team}} losgelaten. Elk stafflid kan het overnemen.'),
+        'sv': ('Ett lag saknar ägare', '{{coach}} lämnade {{team}}. Vem som helst i staben kan ta över.'),
+        'pl': ('Zespół został bez właściciela', '{{coach}} zrezygnował z {{team}}. Każdy członek sztabu może przejąć zespół.'),
+        'ru': ('У команды не осталось владельца', '{{coach}} отказался от {{team}}. Любой из штаба может взять команду себе.'),
+        'uk': ('У команди не залишилося власника', '{{coach}} відмовився від {{team}}. Будь-хто зі штабу може взяти команду собі.'),
+        'sr': ('Тим је остао без власника', '{{coach}} је напустио {{team}}. Било ко из штаба може преузети тим.'),
+        'hr': ('Momčad je ostala bez vlasnika', '{{coach}} je napustio {{team}}. Bilo tko iz stožera može preuzeti momčad.'),
+        'tr': ('Bir takımın sahibi kalmadı', '{{coach}}, {{team}} takımını bıraktı. Teknik ekipten herkes devralabilir.'),
+        'ro': ('O echipă a rămas fără proprietar', '{{coach}} a renunțat la {{team}}. Orice membru din staff o poate prelua.'),
+        'el': ('Μια ομάδα έμεινε χωρίς υπεύθυνο', 'Ο/Η {{coach}} άφησε την {{team}}. Οποιοδήποτε μέλος του επιτελείου μπορεί να την αναλάβει.'),
+        'lt': ('Komanda liko be savininko', '{{coach}} paliko {{team}}. Bet kuris štabo narys gali ją perimti.'),
+        'ar': ('فريق بلا مالك', 'ترك {{coach}} فريق {{team}}. يمكن لأي عضو في الطاقم أن يتولاه.'),
+        'he': ('קבוצה נותרה ללא בעלים', '{{coach}} עזב את {{team}}. כל אחד מהצוות יכול לקחת אותה.'),
+        'hi': ('एक टीम बिना मालिक के रह गई', '{{coach}} ने {{team}} छोड़ दी। स्टाफ का कोई भी सदस्य इसे ले सकता है।'),
+        'ka': ('გუნდი დარჩა მფლობელის გარეშე', '{{coach}}-მა დატოვა {{team}}. შტაბის ნებისმიერ წევრს შეუძლია მისი აღება.'),
+        'ja': ('チームのオーナーがいなくなりました', '{{coach}} が {{team}} を手放しました。スタッフの誰でも引き継げます。'),
+        'ko': ('팀에 소유자가 없습니다', '{{coach}} 님이 {{team}}을 놓았습니다. 스태프 누구나 맡을 수 있습니다.'),
+        'zh': ('球队没有负责人了', '{{coach}} 放开了 {{team}}。教练组任何人都可以接手。'),
+        'tl': ('Walang may-ari ang isang team', 'Binitawan ni {{coach}} ang {{team}}. Kahit sino sa staff ay pwedeng kumuha nito.'),
     },
     'teamReportSharedCoach': {
         'en': ('Team report shared', '{{coach}} shared a team report with you.\n\n{{preview}}...'),

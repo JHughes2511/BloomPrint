@@ -2599,6 +2599,10 @@
       "title": "Lagets ägare ändrad",
       "body": "{{coach}} äger nu {{team}}."
     },
+    "teamReleased": {
+      "title": "Ett lag saknar ägare",
+      "body": "{{coach}} lämnade {{team}}. Vem som helst i staben kan ta över."
+    },
     "joinedViaLink": {
       "title": "Någon har gått med i ditt lag",
       "body": "{{name}} gick med i {{team}} via din inbjudningslänk."

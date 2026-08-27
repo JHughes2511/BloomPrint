@@ -2599,6 +2599,10 @@
       "title": "Nagbago ang may-ari ng koponan",
       "body": "Si {{coach}} na ang may-ari ng {{team}}."
     },
+    "teamReleased": {
+      "title": "Walang may-ari ang isang team",
+      "body": "Binitawan ni {{coach}} ang {{team}}. Kahit sino sa staff ay pwedeng kumuha nito."
+    },
     "joinedViaLink": {
       "title": "May sumali sa iyong team",
       "body": "Sumali si {{name}} sa {{team}} gamit ang iyong link."

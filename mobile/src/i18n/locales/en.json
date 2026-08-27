@@ -2599,6 +2599,10 @@
       "title": "Team ownership changed",
       "body": "{{coach}} is now the owner of {{team}}."
     },
+    "teamReleased": {
+      "title": "A team has no owner",
+      "body": "{{coach}} let go of {{team}}. Any staff member can claim it."
+    },
     "joinedViaLink": {
       "title": "Someone joined your team",
       "body": "{{name}} joined {{team}} through your invite link."

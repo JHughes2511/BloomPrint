@@ -2599,6 +2599,10 @@
       "title": "Komandos savininkas pakeistas",
       "body": "{{coach}} dabar yra {{team}} savininkas."
     },
+    "teamReleased": {
+      "title": "Komanda liko be savininko",
+      "body": "{{coach}} paliko {{team}}. Bet kuris štabo narys gali ją perimti."
+    },
     "joinedViaLink": {
       "title": "Kažkas prisijungė prie jūsų komandos",
       "body": "{{name}} prisijungė prie {{team}} per tavo pakvietimo nuorodą."

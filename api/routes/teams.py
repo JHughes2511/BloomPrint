@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import models, schemas
+from .. import emails, models, notify, schemas
 from ..softdelete import soft_delete
 
 router = APIRouter(prefix="/teams", tags=["teams"])
@@ -124,14 +124,43 @@ def delete_team(
             frontier = [c.id for c in children]
         for t in released:
             t.coach_id = None
+        released_ids = [t.id for t in released]
         # Any membership row of the owner's own goes too, or the team would
         # come straight back on their list as a team they are staff on.
         (db.query(models.TeamStaff)
-         .filter(models.TeamStaff.team_id.in_([t.id for t in released]),
+         .filter(models.TeamStaff.team_id.in_(released_ids),
                  models.TeamStaff.coach_id == coach.id)
          .delete(synchronize_session=False))
+
+        # Everyone left on it needs telling, because nothing about their app
+        # changes: the team is still there, still working, and now waiting for
+        # one of them to take it on. Nobody would find that out by looking.
+        # Named once per person about the team they were told of, not once per
+        # sub-team, so letting go of a program is one message and not four.
+        told: dict[int, str] = {}
+        for link in (db.query(models.TeamStaff)
+                     .filter(models.TeamStaff.team_id.in_(released_ids))
+                     .order_by(models.TeamStaff.team_id)
+                     .all()):
+            told.setdefault(link.coach_id, team.name)
+        params = {"coach": coach.name, "team": team.name}
+        for coach_id in told:
+            db.add(models.CoachNotification(
+                coach_id=coach_id,
+                title="A team has no owner",
+                body=f"{coach.name} let go of {team.name}. "
+                     f"Any staff member can claim it.",
+                i18n_key="notifs.teamReleased",
+                i18n_params=params,
+                type="team_released",
+                ref_id=team.id,
+            ))
         db.commit()
-        return {"ok": True, "released": len(released)}
+        where = emails.link_to(f"/home/staff/team/{team.id}")
+        for coach_id in told:
+            notify.coach_notification(db.get(models.Coach, coach_id),
+                                      "notifs.teamReleased", params, link=where)
+        return {"ok": True, "released": len(released), "told": len(told)}
 
     soft_delete(db, team)
     db.commit()

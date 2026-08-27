@@ -2599,6 +2599,10 @@
       "title": "Proprietà della squadra cambiata",
       "body": "{{coach}} è ora il proprietario di {{team}}."
     },
+    "teamReleased": {
+      "title": "Una squadra è rimasta senza responsabile",
+      "body": "{{coach}} ha lasciato {{team}}. Qualsiasi membro dello staff può prenderla."
+    },
     "joinedViaLink": {
       "title": "Qualcuno si è unito alla tua squadra",
       "body": "{{name}} è entrato in {{team}} con il tuo link d'invito."

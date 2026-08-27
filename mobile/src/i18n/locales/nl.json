@@ -2599,6 +2599,10 @@
       "title": "Teameigenaar gewijzigd",
       "body": "{{coach}} is nu de eigenaar van {{team}}."
     },
+    "teamReleased": {
+      "title": "Een team heeft geen eigenaar meer",
+      "body": "{{coach}} heeft {{team}} losgelaten. Elk stafflid kan het overnemen."
+    },
     "joinedViaLink": {
       "title": "Iemand heeft zich bij je team gevoegd",
       "body": "{{name}} is via jouw uitnodigingslink bij {{team}} gekomen."

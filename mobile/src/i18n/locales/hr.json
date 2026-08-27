@@ -2599,6 +2599,10 @@
       "title": "Vlasnik momčadi promijenjen",
       "body": "{{coach}} je sada vlasnik momčadi {{team}}."
     },
+    "teamReleased": {
+      "title": "Momčad je ostala bez vlasnika",
+      "body": "{{coach}} je napustio {{team}}. Bilo tko iz stožera može preuzeti momčad."
+    },
     "joinedViaLink": {
       "title": "Netko se pridružio vašoj momčadi",
       "body": "{{name}} se pridružio ekipi {{team}} preko tvoje pozivnice."

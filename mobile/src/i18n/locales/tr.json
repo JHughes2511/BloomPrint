@@ -2599,6 +2599,10 @@
       "title": "Takım sahibi değişti",
       "body": "{{coach}} artık {{team}} takımının sahibi."
     },
+    "teamReleased": {
+      "title": "Bir takımın sahibi kalmadı",
+      "body": "{{coach}}, {{team}} takımını bıraktı. Teknik ekipten herkes devralabilir."
+    },
     "joinedViaLink": {
       "title": "Birisi takımınıza katıldı",
       "body": "{{name}}, davet bağlantınla {{team}} takımına katıldı."

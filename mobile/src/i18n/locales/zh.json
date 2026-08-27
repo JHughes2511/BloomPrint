@@ -2599,6 +2599,10 @@
       "title": "球队所有者已变更",
       "body": "{{coach}} 现在是 {{team}} 的所有者。"
     },
+    "teamReleased": {
+      "title": "球队没有负责人了",
+      "body": "{{coach}} 放开了 {{team}}。教练组任何人都可以接手。"
+    },
     "joinedViaLink": {
       "title": "有人加入了你的球队",
       "body": "{{name}} 通过你的邀请链接加入了 {{team}}。"
