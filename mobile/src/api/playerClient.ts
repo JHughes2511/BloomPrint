@@ -38,6 +38,15 @@ export const playerAuthAPI = {
   me: () => playerApi.get('/player-auth/me').then(r => r.data),
   updateMe: (data: { name?: string; avatar?: string | null; country?: string; city?: string }) =>
     playerApi.patch('/player-auth/me', data).then(r => r.data),
+
+  // Activity email on/off. Separate from the profile record because the same
+  // setting is writable from the unsubscribe link in any message. The server
+  // has had these two since email prefs existed; the player app had no way to
+  // call them, so a player's only way to stop email was a footer link.
+  getEmailPrefs: (): Promise<{ email_enabled: boolean }> =>
+    playerApi.get('/player-auth/email-prefs').then(r => r.data),
+  setEmailPrefs: (email_enabled: boolean) =>
+    playerApi.patch('/player-auth/email-prefs', { email_enabled }).then(r => r.data),
 };
 
 export const playerReportsAPI = {

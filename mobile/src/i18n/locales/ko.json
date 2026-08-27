@@ -591,7 +591,7 @@
     },
     "askBloomprint": "BloomPrint에 질문",
     "emailNotifications": "이메일 알림",
-    "emailNotificationsHint": "누군가 리포트를 공유하거나, 초대하거나, 요청에 답하면 이메일을 받습니다.",
+    "emailNotificationsHint": "공유, 댓글, 훈련, 팀 변경 사항. 계정 관련 메시지는 항상 전달됩니다.",
     "emailNotificationsLabel": "활동을 이메일로 알림",
     "feedbackAttach": "첨부",
     "feedbackTakePhoto": "사진 촬영",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "코치의 QR 코드를 비춰주세요",
       "age": "나이",
       "phAge": "예: 17",
-      "onRosterAs": "로스터에는 {{name}}(으)로"
+      "onRosterAs": "로스터에는 {{name}}(으)로",
+      "emailNotifications": "이메일 알림",
+      "emailNotificationsLabel": "활동을 이메일로 알림",
+      "emailNotificationsHint": "리포트, 훈련, 코치의 답글. 계정 관련 메시지는 항상 전달됩니다."
     },
     "reportDetail": {
       "sharedBy": "{{name}} 보냄 · {{date}}",

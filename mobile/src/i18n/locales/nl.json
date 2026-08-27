@@ -591,7 +591,7 @@
     },
     "askBloomprint": "Vraag BloomPrint",
     "emailNotifications": "E-mailmeldingen",
-    "emailNotificationsHint": "Ontvang een e-mail wanneer iemand een rapport deelt, je uitnodigt of op een verzoek reageert.",
+    "emailNotificationsHint": "Gedeelde rapporten, reacties, training en teamwijzigingen. Berichten over je account komen altijd aan.",
     "emailNotificationsLabel": "Mail me over activiteit",
     "feedbackAttach": "Bijvoegen",
     "feedbackTakePhoto": "Foto maken",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "Richt op de QR-code van je coach",
       "age": "Leeftijd",
       "phAge": "bijv. 17",
-      "onRosterAs": "In de selectie als {{name}}"
+      "onRosterAs": "In de selectie als {{name}}",
+      "emailNotifications": "E-mailmeldingen",
+      "emailNotificationsLabel": "Mail me over activiteit",
+      "emailNotificationsHint": "Rapporten, training en reacties van je coach. Berichten over je account komen altijd aan."
     },
     "reportDetail": {
       "sharedBy": "Van {{name}} · {{date}}",

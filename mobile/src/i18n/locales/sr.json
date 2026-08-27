@@ -591,7 +591,7 @@
     },
     "askBloomprint": "Pitaj BloomPrint",
     "emailNotifications": "Обавештења имејлом",
-    "emailNotificationsHint": "Примајте имејл када неко подели извештај, позове вас или одговори на захтев.",
+    "emailNotificationsHint": "Дељења, коментари, тренинзи и промене у тиму. Поруке о вашем налогу увек стижу.",
     "emailNotificationsLabel": "Шаљи ми имејл о активности",
     "feedbackAttach": "Приложи",
     "feedbackTakePhoto": "Сликај",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "Usmeri ka QR kodu svog trenera",
       "age": "Године",
       "phAge": "нпр. 17",
-      "onRosterAs": "У тиму као {{name}}"
+      "onRosterAs": "У тиму као {{name}}",
+      "emailNotifications": "Обавештења имејлом",
+      "emailNotificationsLabel": "Шаљи ми имејл о активности",
+      "emailNotificationsHint": "Извештаји, тренинзи и одговори тренера. Поруке о вашем налогу увек стижу."
     },
     "reportDetail": {
       "sharedBy": "Od {{name}} · {{date}}",

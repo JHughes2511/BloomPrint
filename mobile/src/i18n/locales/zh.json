@@ -591,7 +591,7 @@
     },
     "askBloomprint": "询问 BloomPrint",
     "emailNotifications": "邮件通知",
-    "emailNotificationsHint": "当有人分享报告、邀请你或回复请求时收到邮件。",
+    "emailNotificationsHint": "共享、评论、训练和球队变动。与账户有关的邮件始终会发送。",
     "emailNotificationsLabel": "通过邮件通知我",
     "feedbackAttach": "添加附件",
     "feedbackTakePhoto": "拍照",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "对准你教练的二维码",
       "age": "年龄",
       "phAge": "例如 17",
-      "onRosterAs": "名单上显示为 {{name}}"
+      "onRosterAs": "名单上显示为 {{name}}",
+      "emailNotifications": "邮件通知",
+      "emailNotificationsLabel": "通过邮件通知我",
+      "emailNotificationsHint": "报告、训练和教练的回复。与账户有关的邮件始终会发送。"
     },
     "reportDetail": {
       "sharedBy": "来自 {{name}} · {{date}}",

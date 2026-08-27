@@ -591,7 +591,7 @@
     },
     "askBloomprint": "Chiedi a BloomPrint",
     "emailNotifications": "Notifiche email",
-    "emailNotificationsHint": "Ricevi un'email quando qualcuno condivide un report, ti invita o risponde a una richiesta.",
+    "emailNotificationsHint": "Condivisioni, commenti, allenamenti e modifiche alla squadra. I messaggi sul tuo account arrivano sempre.",
     "emailNotificationsLabel": "Avvisami via email",
     "feedbackAttach": "Allega",
     "feedbackTakePhoto": "Scatta foto",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "Punta il codice QR del tuo allenatore",
       "age": "Età",
       "phAge": "es. 17",
-      "onRosterAs": "In rosa come {{name}}"
+      "onRosterAs": "In rosa come {{name}}",
+      "emailNotifications": "Notifiche email",
+      "emailNotificationsLabel": "Avvisami via email",
+      "emailNotificationsHint": "Report, allenamenti e risposte del tuo allenatore. I messaggi sul tuo account arrivano sempre."
     },
     "reportDetail": {
       "sharedBy": "Da {{name}} · {{date}}",

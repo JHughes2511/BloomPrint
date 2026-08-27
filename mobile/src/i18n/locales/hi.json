@@ -591,7 +591,7 @@
     },
     "askBloomprint": "BloomPrint से पूछें",
     "emailNotifications": "ईमेल सूचनाएँ",
-    "emailNotificationsHint": "जब कोई रिपोर्ट साझा करे, आपको आमंत्रित करे या अनुरोध का उत्तर दे तो ईमेल पाएँ।",
+    "emailNotificationsHint": "साझा रिपोर्ट, टिप्पणियाँ, प्रशिक्षण और टीम में बदलाव। आपके खाते से जुड़े संदेश हमेशा आते हैं।",
     "emailNotificationsLabel": "गतिविधि के बारे में ईमेल भेजें",
     "feedbackAttach": "संलग्न करें",
     "feedbackTakePhoto": "फ़ोटो लें",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "अपने कोच के QR कोड पर कैमरा रखें",
       "age": "आयु",
       "phAge": "जैसे 17",
-      "onRosterAs": "रोस्टर में {{name}} के रूप में"
+      "onRosterAs": "रोस्टर में {{name}} के रूप में",
+      "emailNotifications": "ईमेल सूचनाएँ",
+      "emailNotificationsLabel": "गतिविधि के बारे में ईमेल भेजें",
+      "emailNotificationsHint": "रिपोर्ट, प्रशिक्षण और कोच के जवाब। आपके खाते से जुड़े संदेश हमेशा आते हैं।"
     },
     "reportDetail": {
       "sharedBy": "{{name}} की ओर से · {{date}}",

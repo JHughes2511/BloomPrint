@@ -591,7 +591,7 @@
     },
     "askBloomprint": "שאל את BloomPrint",
     "emailNotifications": "התראות במייל",
-    "emailNotificationsHint": "קבל מייל כשמישהו משתף דוח, מזמין אותך או עונה לבקשה.",
+    "emailNotificationsHint": "שיתופים, תגובות, אימונים ושינויים בקבוצה. הודעות על החשבון שלך תמיד מגיעות.",
     "emailNotificationsLabel": "שלחו לי מייל על פעילות",
     "feedbackAttach": "צירוף",
     "feedbackTakePhoto": "צילום תמונה",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "כוון אל קוד ה-QR של המאמן שלך",
       "age": "גיל",
       "phAge": "לדוגמה 17",
-      "onRosterAs": "בסגל בשם {{name}}"
+      "onRosterAs": "בסגל בשם {{name}}",
+      "emailNotifications": "התראות במייל",
+      "emailNotificationsLabel": "שלחו לי מייל על פעילות",
+      "emailNotificationsHint": "דוחות, אימונים ותשובות מהמאמן. הודעות על החשבון שלך תמיד מגיעות."
     },
     "reportDetail": {
       "sharedBy": "מאת {{name}} · {{date}}",

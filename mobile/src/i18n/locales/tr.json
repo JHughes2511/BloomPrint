@@ -591,7 +591,7 @@
     },
     "askBloomprint": "BloomPrint'e sor",
     "emailNotifications": "E-posta bildirimleri",
-    "emailNotificationsHint": "Biri rapor paylaştığında, sizi davet ettiğinde veya bir isteği yanıtladığında e-posta alın.",
+    "emailNotificationsHint": "Paylaşımlar, yorumlar, antrenmanlar ve takım değişiklikleri. Hesabınızla ilgili mesajlar her zaman ulaşır.",
     "emailNotificationsLabel": "Etkinlik için e-posta gönder",
     "feedbackAttach": "Ekle",
     "feedbackTakePhoto": "Fotoğraf çek",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "Antrenörünüzün QR koduna doğrultun",
       "age": "Yaş",
       "phAge": "örn. 17",
-      "onRosterAs": "Kadroda {{name}} olarak"
+      "onRosterAs": "Kadroda {{name}} olarak",
+      "emailNotifications": "E-posta bildirimleri",
+      "emailNotificationsLabel": "Etkinlik için e-posta gönder",
+      "emailNotificationsHint": "Raporlar, antrenmanlar ve antrenörünüzün yanıtları. Hesabınızla ilgili mesajlar her zaman ulaşır."
     },
     "reportDetail": {
       "sharedBy": "{{name}} tarafından · {{date}}",

@@ -93,6 +93,10 @@ def unsubscribe_url(token: str) -> str:
 #   signoff:     how the message ends
 #   unsub:       the footer, with {url} for the opt-out
 #   unsub_note:  reassurance that account mail is unaffected by opting out
+#   unsub_done_*: the page the opt-out link lands on. A link that answers in a
+#                language the reader does not have is a page that looks like it
+#                failed, and this one is reached FROM a message we already sent
+#                them in their own.
 SHELL: dict[str, dict[str, str]] = {
     "en": {
         "greeting": "Hi {name},",
@@ -116,6 +120,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Questions? Email us at",
         "account_ready": "Your account is ready.",
         "unsub_link": "unsubscribe",
+        "unsub_done_title": "Unsubscribed",
+        "unsub_done_body": "You won't get email about other people's activity any more. Messages about your own account will still be sent.",
     },
     "es": {
         "greeting": "Hola {name}:",
@@ -139,6 +145,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "¿Preguntas? Escríbenos a",
         "account_ready": "Tu cuenta está lista.",
         "unsub_link": "darse de baja",
+        "unsub_done_title": "Baja confirmada",
+        "unsub_done_body": "Ya no recibirás correos sobre la actividad de otras personas. Los mensajes sobre tu propia cuenta se seguirán enviando.",
     },
     "fr": {
         "greeting": "Bonjour {name},",
@@ -162,6 +170,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Des questions ? Écrivez-nous à",
         "account_ready": "Votre compte est prêt.",
         "unsub_link": "se désabonner",
+        "unsub_done_title": "Désabonné",
+        "unsub_done_body": "Vous ne recevrez plus d'e-mails sur l'activité des autres. Les messages concernant votre compte continueront d'arriver.",
     },
     "pt": {
         "greeting": "Olá {name},",
@@ -185,6 +195,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Dúvidas? Escreva para",
         "account_ready": "A sua conta está pronta.",
         "unsub_link": "cancelar subscrição",
+        "unsub_done_title": "Subscrição cancelada",
+        "unsub_done_body": "Deixará de receber emails sobre a atividade de outras pessoas. As mensagens sobre a sua própria conta continuarão a ser enviadas.",
     },
     "it": {
         "greeting": "Ciao {name},",
@@ -208,6 +220,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Domande? Scrivici a",
         "account_ready": "Il tuo account è pronto.",
         "unsub_link": "annulla iscrizione",
+        "unsub_done_title": "Disiscritto",
+        "unsub_done_body": "Non riceverai più email sull'attività degli altri. I messaggi sul tuo account continueranno ad arrivare.",
     },
     "de": {
         "greeting": "Hallo {name},",
@@ -231,6 +245,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Fragen? Schreib uns an",
         "account_ready": "Dein Konto ist bereit.",
         "unsub_link": "abbestellen",
+        "unsub_done_title": "Abgemeldet",
+        "unsub_done_body": "Du bekommst keine E-Mails mehr über die Aktivität anderer. Nachrichten zu deinem eigenen Konto werden weiter gesendet.",
     },
     "nl": {
         "greeting": "Hoi {name},",
@@ -254,6 +270,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Vragen? Mail ons op",
         "account_ready": "Je account is klaar.",
         "unsub_link": "afmelden",
+        "unsub_done_title": "Afgemeld",
+        "unsub_done_body": "Je krijgt geen e-mails meer over de activiteit van anderen. Berichten over je eigen account blijven komen.",
     },
     "sv": {
         "greeting": "Hej {name},",
@@ -277,6 +295,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Frågor? Mejla oss på",
         "account_ready": "Ditt konto är klart.",
         "unsub_link": "avsluta prenumeration",
+        "unsub_done_title": "Avregistrerad",
+        "unsub_done_body": "Du får inte längre e-post om andras aktivitet. Meddelanden om ditt eget konto skickas fortfarande.",
     },
     "pl": {
         "greeting": "Cześć {name},",
@@ -300,6 +320,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Pytania? Napisz do nas na",
         "account_ready": "Twoje konto jest gotowe.",
         "unsub_link": "zrezygnuj",
+        "unsub_done_title": "Zrezygnowano",
+        "unsub_done_body": "Nie będziesz już dostawać e-maili o aktywności innych osób. Wiadomości o Twoim koncie nadal będą wysyłane.",
     },
     "ru": {
         "greeting": "Здравствуйте, {name}!",
@@ -323,6 +345,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Вопросы? Напишите нам на",
         "account_ready": "Ваш аккаунт готов.",
         "unsub_link": "отписаться",
+        "unsub_done_title": "Вы отписаны",
+        "unsub_done_body": "Вы больше не будете получать письма об активности других. Сообщения о вашей учётной записи будут приходить по-прежнему.",
     },
     "uk": {
         "greeting": "Вітаємо, {name}!",
@@ -346,6 +370,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Питання? Напишіть нам на",
         "account_ready": "Ваш обліковий запис готовий.",
         "unsub_link": "відписатися",
+        "unsub_done_title": "Ви відписані",
+        "unsub_done_body": "Ви більше не отримуватимете листи про активність інших. Повідомлення про ваш обліковий запис надходитимуть і далі.",
     },
     "sr": {
         "greeting": "Здраво {name},",
@@ -369,6 +395,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Питања? Пишите нам на",
         "account_ready": "Ваш налог је спреман.",
         "unsub_link": "одјави се",
+        "unsub_done_title": "Одјављени сте",
+        "unsub_done_body": "Више нећете добијати имејлове о активности других. Поруке о вашем налогу и даље ће се слати.",
     },
     "hr": {
         "greeting": "Bok {name},",
@@ -392,6 +420,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Pitanja? Pišite nam na",
         "account_ready": "Vaš račun je spreman.",
         "unsub_link": "odjavi se",
+        "unsub_done_title": "Odjavljeni ste",
+        "unsub_done_body": "Više nećete dobivati e-poštu o aktivnosti drugih. Poruke o vašem računu i dalje će se slati.",
     },
     "tr": {
         "greeting": "Merhaba {name},",
@@ -415,6 +445,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Sorunuz mu var? Bize yazın:",
         "account_ready": "Hesabınız hazır.",
         "unsub_link": "aboneliği bırak",
+        "unsub_done_title": "Abonelikten çıkıldı",
+        "unsub_done_body": "Artık başkalarının etkinliğiyle ilgili e-posta almayacaksınız. Kendi hesabınızla ilgili mesajlar gönderilmeye devam eder.",
     },
     "ro": {
         "greeting": "Salut {name},",
@@ -438,6 +470,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Întrebări? Scrie-ne la",
         "account_ready": "Contul tău este gata.",
         "unsub_link": "dezabonare",
+        "unsub_done_title": "Dezabonat",
+        "unsub_done_body": "Nu vei mai primi e-mailuri despre activitatea altora. Mesajele despre contul tău vor fi trimise în continuare.",
     },
     "el": {
         "greeting": "Γεια σου {name},",
@@ -461,6 +495,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Απορίες; Γράψτε μας στο",
         "account_ready": "Ο λογαριασμός σας είναι έτοιμος.",
         "unsub_link": "κατάργηση εγγραφής",
+        "unsub_done_title": "Διαγραφή ολοκληρώθηκε",
+        "unsub_done_body": "Δεν θα λαμβάνετε πλέον email για τη δραστηριότητα άλλων. Τα μηνύματα για τον δικό σας λογαριασμό θα συνεχίσουν να στέλνονται.",
     },
     "lt": {
         "greeting": "Sveiki, {name},",
@@ -484,6 +520,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "Klausimai? Rašykite mums adresu",
         "account_ready": "Jūsų paskyra paruošta.",
         "unsub_link": "atsisakyti",
+        "unsub_done_title": "Atsisakyta prenumeratos",
+        "unsub_done_body": "Nebegausite el. laiškų apie kitų veiklą. Žinutės apie jūsų paskyrą ir toliau bus siunčiamos.",
     },
     "ar": {
         "greeting": "مرحبًا {name}،",
@@ -507,6 +545,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "أسئلة؟ راسلنا على",
         "account_ready": "حسابك جاهز.",
         "unsub_link": "إلغاء الاشتراك",
+        "unsub_done_title": "تم إلغاء الاشتراك",
+        "unsub_done_body": "لن تصلك بعد الآن رسائل عن نشاط الآخرين. أما الرسائل الخاصة بحسابك فستستمر.",
     },
     "he": {
         "greeting": "שלום {name},",
@@ -530,6 +570,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "שאלות? כתבו לנו אל",
         "account_ready": "החשבון שלך מוכן.",
         "unsub_link": "ביטול הרשמה",
+        "unsub_done_title": "ההרשמה בוטלה",
+        "unsub_done_body": "לא תקבלו יותר מיילים על פעילות של אחרים. הודעות על החשבון שלכם ימשיכו להישלח.",
     },
     "hi": {
         "greeting": "नमस्ते {name},",
@@ -553,6 +595,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "सवाल? हमें यहाँ लिखें",
         "account_ready": "आपका खाता तैयार है।",
         "unsub_link": "सदस्यता समाप्त करें",
+        "unsub_done_title": "सदस्यता समाप्त",
+        "unsub_done_body": "अब आपको दूसरों की गतिविधि के ईमेल नहीं मिलेंगे। आपके अपने खाते से जुड़े संदेश आते रहेंगे।",
     },
     "ka": {
         "greeting": "გამარჯობა, {name},",
@@ -576,6 +620,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "შეკითხვები? მოგვწერეთ",
         "account_ready": "თქვენი ანგარიში მზადაა.",
         "unsub_link": "გამოწერის გაუქმება",
+        "unsub_done_title": "გამოწერა გაუქმებულია",
+        "unsub_done_body": "აღარ მიიღებთ წერილებს სხვების აქტივობის შესახებ. თქვენს ანგარიშთან დაკავშირებული შეტყობინებები კვლავ გამოგეგზავნებათ.",
     },
     "ja": {
         "greeting": "{name} さん",
@@ -599,6 +645,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "ご質問は",
         "account_ready": "アカウントの準備ができました。",
         "unsub_link": "配信停止",
+        "unsub_done_title": "配信を停止しました",
+        "unsub_done_body": "他の人の活動に関するメールは届かなくなります。ご自身のアカウントに関するお知らせは引き続き送信されます。",
     },
     "ko": {
         "greeting": "{name}님, 안녕하세요.",
@@ -622,6 +670,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "문의는",
         "account_ready": "계정이 준비되었습니다.",
         "unsub_link": "수신 거부",
+        "unsub_done_title": "수신을 해지했습니다",
+        "unsub_done_body": "다른 사람의 활동에 관한 이메일은 더 이상 오지 않습니다. 계정 관련 메시지는 계속 발송됩니다.",
     },
     "zh": {
         "greeting": "{name} 你好，",
@@ -645,6 +695,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "有问题？请发邮件至",
         "account_ready": "你的账户已就绪。",
         "unsub_link": "退订",
+        "unsub_done_title": "已退订",
+        "unsub_done_body": "你将不再收到关于他人动态的邮件。与你自己账户有关的邮件仍会发送。",
     },
     "tl": {
         "greeting": "Kumusta {name},",
@@ -668,6 +720,8 @@ SHELL: dict[str, dict[str, str]] = {
         "contact": "May tanong? Mag-email sa",
         "account_ready": "Handa na ang iyong account.",
         "unsub_link": "mag-unsubscribe",
+        "unsub_done_title": "Na-unsubscribe na",
+        "unsub_done_body": "Hindi ka na makakatanggap ng email tungkol sa aktibidad ng iba. Padadalhan ka pa rin ng mga mensahe tungkol sa sarili mong account.",
     },
 }
 

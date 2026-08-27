@@ -591,7 +591,7 @@
     },
     "askBloomprint": "BloomPrint に質問",
     "emailNotifications": "メール通知",
-    "emailNotificationsHint": "レポートの共有、招待、リクエストへの返答があったときにメールを受け取ります。",
+    "emailNotificationsHint": "共有、コメント、トレーニング、チームの変更について。アカウントに関するお知らせは常に届きます。",
     "emailNotificationsLabel": "アクティビティをメールで知らせる",
     "feedbackAttach": "添付",
     "feedbackTakePhoto": "写真を撮る",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "コーチのQRコードに向けてください",
       "age": "年齢",
       "phAge": "例: 17",
-      "onRosterAs": "ロスターでは {{name}}"
+      "onRosterAs": "ロスターでは {{name}}",
+      "emailNotifications": "メール通知",
+      "emailNotificationsLabel": "アクティビティをメールで知らせる",
+      "emailNotificationsHint": "レポート、トレーニング、コーチからの返信について。アカウントに関するお知らせは常に届きます。"
     },
     "reportDetail": {
       "sharedBy": "{{name}}より · {{date}}",

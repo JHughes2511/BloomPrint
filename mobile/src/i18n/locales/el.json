@@ -591,7 +591,7 @@
     },
     "askBloomprint": "Ρωτήστε το BloomPrint",
     "emailNotifications": "Ειδοποιήσεις email",
-    "emailNotificationsHint": "Λάβε email όταν κάποιος μοιράζεται μια αναφορά, σε προσκαλεί ή απαντά σε αίτημα.",
+    "emailNotificationsHint": "Κοινοποιήσεις, σχόλια, προπονήσεις και αλλαγές στην ομάδα. Τα μηνύματα για τον λογαριασμό σας φτάνουν πάντα.",
     "emailNotificationsLabel": "Στείλε μου email για δραστηριότητα",
     "feedbackAttach": "Επισύναψη",
     "feedbackTakePhoto": "Λήψη φωτογραφίας",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "Στόχευσε στον κωδικό QR του προπονητή σου",
       "age": "Ηλικία",
       "phAge": "π.χ. 17",
-      "onRosterAs": "Στο ρόστερ ως {{name}}"
+      "onRosterAs": "Στο ρόστερ ως {{name}}",
+      "emailNotifications": "Ειδοποιήσεις email",
+      "emailNotificationsLabel": "Στείλε μου email για δραστηριότητα",
+      "emailNotificationsHint": "Αναφορές, προπονήσεις και απαντήσεις του προπονητή σας. Τα μηνύματα για τον λογαριασμό σας φτάνουν πάντα."
     },
     "reportDetail": {
       "sharedBy": "Από {{name}} · {{date}}",

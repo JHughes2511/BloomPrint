@@ -591,7 +591,7 @@
     },
     "askBloomprint": "اسأل BloomPrint",
     "emailNotifications": "إشعارات البريد",
-    "emailNotificationsHint": "استلم بريدًا عندما يشارك أحدهم تقريرًا أو يدعوك أو يرد على طلب.",
+    "emailNotificationsHint": "المشاركات والتعليقات والتدريبات وتغييرات الفريق. أما رسائل حسابك فتصلك دائمًا.",
     "emailNotificationsLabel": "أرسل لي بريدًا عن النشاط",
     "feedbackAttach": "إرفاق",
     "feedbackTakePhoto": "التقاط صورة",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "وجّه الكاميرا إلى رمز QR الخاص بمدربك",
       "age": "العمر",
       "phAge": "مثال: 17",
-      "onRosterAs": "في القائمة باسم {{name}}"
+      "onRosterAs": "في القائمة باسم {{name}}",
+      "emailNotifications": "إشعارات البريد",
+      "emailNotificationsLabel": "أرسل لي بريدًا عن النشاط",
+      "emailNotificationsHint": "التقارير والتدريبات وردود مدربك. أما رسائل حسابك فتصلك دائمًا."
     },
     "reportDetail": {
       "sharedBy": "من {{name}} · {{date}}",

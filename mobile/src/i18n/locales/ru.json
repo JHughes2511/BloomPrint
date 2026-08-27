@@ -591,7 +591,7 @@
     },
     "askBloomprint": "Спросить BloomPrint",
     "emailNotifications": "Уведомления по почте",
-    "emailNotificationsHint": "Получать письмо, когда кто-то делится отчётом, приглашает вас или отвечает на запрос.",
+    "emailNotificationsHint": "Доступы, комментарии, тренировки и изменения в команде. Сообщения о вашем аккаунте приходят всегда.",
     "emailNotificationsLabel": "Присылать письма об активности",
     "feedbackAttach": "Прикрепить",
     "feedbackTakePhoto": "Сделать фото",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "Наведите на QR-код вашего тренера",
       "age": "Возраст",
       "phAge": "например, 17",
-      "onRosterAs": "В составе как {{name}}"
+      "onRosterAs": "В составе как {{name}}",
+      "emailNotifications": "Уведомления по почте",
+      "emailNotificationsLabel": "Присылать письма об активности",
+      "emailNotificationsHint": "Отчёты, тренировки и ответы тренера. Сообщения о вашем аккаунте приходят всегда."
     },
     "reportDetail": {
       "sharedBy": "От {{name}} · {{date}}",

@@ -591,7 +591,7 @@
     },
     "askBloomprint": "Magtanong sa BloomPrint",
     "emailNotifications": "Mga abiso sa email",
-    "emailNotificationsHint": "Makatanggap ng email kapag may nagbahagi ng report, nag-imbita sa iyo, o sumagot sa hiling.",
+    "emailNotificationsHint": "Mga share, komento, training at pagbabago sa team. Palaging dumarating ang mga mensahe tungkol sa iyong account.",
     "emailNotificationsLabel": "I-email ako tungkol sa aktibidad",
     "feedbackAttach": "Maglakip",
     "feedbackTakePhoto": "Kumuha ng larawan",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "Itutok sa QR code ng coach mo",
       "age": "Edad",
       "phAge": "hal. 17",
-      "onRosterAs": "Nasa roster bilang {{name}}"
+      "onRosterAs": "Nasa roster bilang {{name}}",
+      "emailNotifications": "Mga abiso sa email",
+      "emailNotificationsLabel": "I-email ako tungkol sa aktibidad",
+      "emailNotificationsHint": "Mga report, training at sagot ng iyong coach. Palaging dumarating ang mga mensahe tungkol sa iyong account."
     },
     "reportDetail": {
       "sharedBy": "Mula kay {{name}} · {{date}}",

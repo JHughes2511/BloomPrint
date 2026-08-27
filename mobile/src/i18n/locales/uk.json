@@ -591,7 +591,7 @@
     },
     "askBloomprint": "Запитати BloomPrint",
     "emailNotifications": "Сповіщення поштою",
-    "emailNotificationsHint": "Отримувати лист, коли хтось ділиться звітом, запрошує вас або відповідає на запит.",
+    "emailNotificationsHint": "Доступи, коментарі, тренування та зміни в команді. Повідомлення про ваш обліковий запис надходять завжди.",
     "emailNotificationsLabel": "Надсилати листи про активність",
     "feedbackAttach": "Прикріпити",
     "feedbackTakePhoto": "Зробити фото",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "Наведіть на QR-код вашого тренера",
       "age": "Вік",
       "phAge": "наприклад, 17",
-      "onRosterAs": "У складі як {{name}}"
+      "onRosterAs": "У складі як {{name}}",
+      "emailNotifications": "Сповіщення поштою",
+      "emailNotificationsLabel": "Надсилати листи про активність",
+      "emailNotificationsHint": "Звіти, тренування та відповіді тренера. Повідомлення про ваш обліковий запис надходять завжди."
     },
     "reportDetail": {
       "sharedBy": "Від {{name}} · {{date}}",

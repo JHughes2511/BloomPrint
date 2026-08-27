@@ -591,7 +591,7 @@
     },
     "askBloomprint": "BloomPrint fragen",
     "emailNotifications": "E-Mail-Benachrichtigungen",
-    "emailNotificationsHint": "E-Mail erhalten, wenn jemand einen Bericht teilt, dich einlädt oder auf eine Anfrage antwortet.",
+    "emailNotificationsHint": "Freigaben, Kommentare, Training und Team-Änderungen. Nachrichten zu deinem Konto kommen immer an.",
     "emailNotificationsLabel": "Per E-Mail benachrichtigen",
     "feedbackAttach": "Anhängen",
     "feedbackTakePhoto": "Foto aufnehmen",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "Richte die Kamera auf den QR-Code deines Trainers",
       "age": "Alter",
       "phAge": "z. B. 17",
-      "onRosterAs": "Im Kader als {{name}}"
+      "onRosterAs": "Im Kader als {{name}}",
+      "emailNotifications": "E-Mail-Benachrichtigungen",
+      "emailNotificationsLabel": "Per E-Mail benachrichtigen",
+      "emailNotificationsHint": "Berichte, Training und Antworten deines Trainers. Nachrichten zu deinem Konto kommen immer an."
     },
     "reportDetail": {
       "sharedBy": "Von {{name}} · {{date}}",

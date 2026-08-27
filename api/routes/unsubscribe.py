@@ -14,22 +14,34 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
 from .player_auth import get_current_player_user
-from .. import models, notify
+from .. import emails, models, notify
 
 router = APIRouter(tags=["unsubscribe"])
 
 
-def _page(title: str, message: str) -> HTMLResponse:
+def _page(title: str, message: str, lang: str = "en") -> HTMLResponse:
+    """The same card the emails and the decision pages use.
+
+    It used to be a dark panel of its own, which made the one page reached from
+    a message look like it belonged to a different product.
+    """
+    d = "rtl" if (lang or "en").split("-")[0].lower() in {"ar", "he"} else "ltr"
+    esc = __import__("html").escape
     return HTMLResponse(
-        "<!doctype html><meta charset=utf-8>"
+        f"<!doctype html><html lang='{esc(lang)}' dir='{d}'><meta charset=utf-8>"
         "<meta name=viewport content='width=device-width,initial-scale=1'>"
-        f"<title>{title}</title>"
-        "<style>body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;"
-        "background:#0f1c22;color:#e8eef1;display:grid;place-items:center;"
+        f"<title>{esc(title)}</title><style>"
+        "body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;"
+        "background:#F7F2EA;color:#16242E;display:grid;place-items:center;"
         "min-height:100vh;margin:0;padding:24px}"
-        "div{max-width:28rem;text-align:center}h1{font-size:1.25rem;margin:0 0 .5rem}"
-        "p{margin:0;color:#9fb3bd;line-height:1.5}</style>"
-        f"<div><h1>{title}</h1><p>{message}</p></div>"
+        ".card{background:#FFFFFF;border-radius:16px;padding:32px;max-width:32rem;"
+        "width:100%;box-sizing:border-box}"
+        ".mark{font-weight:800;letter-spacing:5px;font-size:15px;color:#16242E;"
+        "text-align:center;margin:0 0 26px}"
+        "h1{font-size:1.3rem;line-height:1.4;margin:0 0 10px}"
+        "p{margin:0;color:#34424B;line-height:1.6}</style>"
+        "<div class=card><p class=mark>BLOOMPRINT</p>"
+        f"<h1>{esc(title)}</h1><p>{esc(message)}</p></div></html>"
     )
 
 
@@ -43,6 +55,8 @@ def unsubscribe(token: str = "", db: Session = Depends(get_db)):
     """
     pref = db.query(models.EmailPreference).filter_by(token=token).one_or_none() if token else None
     if pref is None:
+        # No row means no account, so there is no language to answer in.
+        # English is not a choice here, it is the only thing left.
         return _page(
             "Link not recognised",
             "This unsubscribe link is not one we issued, or it has been replaced. "
@@ -51,11 +65,16 @@ def unsubscribe(token: str = "", db: Session = Depends(get_db)):
     if not pref.opted_out:
         pref.opted_out = True
         db.commit()
-    return _page(
-        "Unsubscribed",
-        "You won't get email about other people's activity any more. "
-        "Messages about your own account will still be sent.",
-    )
+
+    # Answered in the reader's own language. They reached this page from a
+    # message we had already written to them in it, so an English page here
+    # reads like something went wrong.
+    model = models.Coach if pref.audience == notify.COACH else models.PlayerUser
+    account = db.get(model, pref.user_id)
+    lang = (getattr(account, "preferred_language", None) or emails.DEFAULT_LANG)
+    shell = emails.SHELL.get(lang.split("-")[0].lower(),
+                             emails.SHELL[emails.DEFAULT_LANG])
+    return _page(shell["unsub_done_title"], shell["unsub_done_body"], lang)
 
 
 # ── In-app setting ────────────────────────────────────────────────────────────

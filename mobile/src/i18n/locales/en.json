@@ -591,7 +591,7 @@
     },
     "askBloomprint": "Ask BloomPrint",
     "emailNotifications": "Email notifications",
-    "emailNotificationsHint": "Get an email when someone shares a report, invites you, or answers a request.",
+    "emailNotificationsHint": "Shares, comments, training and team changes. Messages about your own account always arrive.",
     "emailNotificationsLabel": "Email me about activity",
     "feedbackAttach": "Attach",
     "feedbackTakePhoto": "Take photo",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "Point at your coach's QR code",
       "age": "Age",
       "phAge": "e.g. 17",
-      "onRosterAs": "On the roster as {{name}}"
+      "onRosterAs": "On the roster as {{name}}",
+      "emailNotifications": "Email notifications",
+      "emailNotificationsLabel": "Email me about activity",
+      "emailNotificationsHint": "Reports, training and replies from your coach. Messages about your own account always arrive."
     },
     "reportDetail": {
       "sharedBy": "From {{name}} · {{date}}",

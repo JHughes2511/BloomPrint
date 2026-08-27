@@ -591,7 +591,7 @@
     },
     "askBloomprint": "Klauskite BloomPrint",
     "emailNotifications": "El. pašto pranešimai",
-    "emailNotificationsHint": "Gaukite el. laišką, kai kas nors pasidalija ataskaita, pakviečia jus ar atsako į prašymą.",
+    "emailNotificationsHint": "Bendrinimai, komentarai, treniruotės ir komandos pakeitimai. Žinutės apie jūsų paskyrą pasiekia visada.",
     "emailNotificationsLabel": "Siųsti el. laiškus apie veiklą",
     "feedbackAttach": "Pridėti",
     "feedbackTakePhoto": "Fotografuoti",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "Nukreipkite į trenerio QR kodą",
       "age": "Amžius",
       "phAge": "pvz., 17",
-      "onRosterAs": "Sudėtyje kaip {{name}}"
+      "onRosterAs": "Sudėtyje kaip {{name}}",
+      "emailNotifications": "El. pašto pranešimai",
+      "emailNotificationsLabel": "Siųsti el. laiškus apie veiklą",
+      "emailNotificationsHint": "Ataskaitos, treniruotės ir trenerio atsakymai. Žinutės apie jūsų paskyrą pasiekia visada."
     },
     "reportDetail": {
       "sharedBy": "Nuo {{name}} · {{date}}",

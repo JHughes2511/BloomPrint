@@ -591,7 +591,7 @@
     },
     "askBloomprint": "Întreabă BloomPrint",
     "emailNotifications": "Notificări prin email",
-    "emailNotificationsHint": "Primește un email când cineva partajează un raport, te invită sau răspunde unei cereri.",
+    "emailNotificationsHint": "Partajări, comentarii, antrenamente și schimbări în echipă. Mesajele despre contul tău ajung mereu.",
     "emailNotificationsLabel": "Trimite-mi email despre activitate",
     "feedbackAttach": "Atașează",
     "feedbackTakePhoto": "Fă o poză",
@@ -1168,7 +1168,10 @@
       "pointAtQr": "Îndreaptă camera spre codul QR al antrenorului tău",
       "age": "Vârstă",
       "phAge": "ex. 17",
-      "onRosterAs": "În lot ca {{name}}"
+      "onRosterAs": "În lot ca {{name}}",
+      "emailNotifications": "Notificări prin email",
+      "emailNotificationsLabel": "Trimite-mi email despre activitate",
+      "emailNotificationsHint": "Rapoarte, antrenamente și răspunsuri de la antrenor. Mesajele despre contul tău ajung mereu."
     },
     "reportDetail": {
       "sharedBy": "De la {{name}} · {{date}}",

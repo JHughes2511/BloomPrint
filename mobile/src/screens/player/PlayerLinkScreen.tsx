@@ -6,7 +6,7 @@ import { COMPETITION_LEVELS as CANON_LEVELS } from '../../constants/levels';
 import KeyboardAwareScrollView from '../../components/KeyboardAwareScrollView';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  Alert, ActivityIndicator, Modal, Image,
+  Alert, ActivityIndicator, Modal, Image, Switch,
 } from 'react-native';
 import Sheet from '../../components/Sheet';
 import { useFocusEffect } from '@react-navigation/native';
@@ -35,6 +35,9 @@ export default function PlayerLinkScreen() {
   const styles = makeStyles(t);
 
   const [profile, setProfile] = useState<any | null>(null);
+  // Activity email. Lives outside the profile record, so it is read and written
+  // on its own rather than with the Save button below.
+  const [emailOptIn, setEmailOptIn] = useState(true);
   const [links, setLinks] = useState<Link[]>([]);
 
   // Link modal
@@ -68,6 +71,9 @@ export default function PlayerLinkScreen() {
 
   const load = useCallback(() => {
     playerLinkAPI.listLinks().then((l: Link[]) => setLinks(Array.isArray(l) ? l : [])).catch(() => {});
+    playerAuthAPI.getEmailPrefs()
+      .then(r => setEmailOptIn(!!r.email_enabled))
+      .catch(() => {});
     if (playerUser?.player_id) {
       playerProfileAPI.get().then((p: any) => setProfile(p)).catch(() => {});
     } else {
@@ -386,6 +392,34 @@ export default function PlayerLinkScreen() {
             )}
             <View style={{ marginTop: 20 }}>
               <LanguagePicker />
+            </View>
+
+            {/* Saved on toggle rather than with the Save button below: this one
+                is not part of the profile record, and somebody switching email
+                off should not have to find a button to be left alone. */}
+            <Text style={{ color: t.label, fontSize: 12, fontFamily: fonts[700],
+                           letterSpacing: 0.6, textTransform: 'uppercase',
+                           marginTop: 22, marginBottom: 8 }}>
+              {tr('playerApp.link.emailNotifications')}
+            </Text>
+            <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 8 }}>
+              {tr('playerApp.link.emailNotificationsHint')}
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center',
+                           justifyContent: 'space-between', backgroundColor: t.card,
+                           borderRadius: 12, padding: 14, borderWidth: 1,
+                           borderColor: t.line }}>
+              <Text style={{ color: t.ink, fontSize: 15, flexShrink: 1, marginRight: 12 }}>
+                {tr('playerApp.link.emailNotificationsLabel')}
+              </Text>
+              <Switch
+                value={emailOptIn}
+                onValueChange={(v) => {
+                  setEmailOptIn(v);   // optimistic: the switch must not lag the finger
+                  playerAuthAPI.setEmailPrefs(v).catch(() => setEmailOptIn(!v));
+                }}
+                trackColor={{ false: t.line, true: t.accent }}
+              />
             </View>
             <TouchableOpacity style={[styles.btn, saving && { opacity: 0.6 }]} onPress={saveProfile} disabled={saving}>
               {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText} numberOfLines={1}>{tr('playerApp.link.saveChanges')}</Text>}
