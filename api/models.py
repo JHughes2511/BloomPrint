@@ -39,6 +39,11 @@ class Coach(Base):
     # counter travelling inside the token is the only thing that can end a
     # session someone else is holding.
     session_epoch      = Column(Integer, default=0, nullable=False)
+    # Set the moment deletion is asked for. The row stays: fifty foreign
+    # keys point at coaches and ten at player_users, most of them NOT NULL
+    # and many owned by other people, so a real DELETE would take a
+    # colleague's shared report down with it. See api/account_deletion.py.
+    deleted_at        = Column(DateTime, nullable=True, index=True)
     # Program system & philosophy — free-text per category. Injected into every
     # report so evaluations are framed as fit-for-this-program.
     system_profile    = Column(JSON, nullable=True)
@@ -291,6 +296,11 @@ class PlayerUser(Base):
     # counter travelling inside the token is the only thing that can end a
     # session someone else is holding.
     session_epoch      = Column(Integer, default=0, nullable=False)
+    # Set the moment deletion is asked for. The row stays: fifty foreign
+    # keys point at coaches and ten at player_users, most of them NOT NULL
+    # and many owned by other people, so a real DELETE would take a
+    # colleague's shared report down with it. See api/account_deletion.py.
+    deleted_at        = Column(DateTime, nullable=True, index=True)
     created_at    = Column(DateTime, default=datetime.utcnow)
 
     player        = relationship("Player", back_populates="player_user")
@@ -1416,6 +1426,39 @@ class DecisionToken(Base):
     @property
     def is_live(self) -> bool:
         return self.used_at is None and datetime.utcnow() < self.expires_at
+
+
+class AccountDeletion(Base):
+    """A record that somebody asked for their account to be closed.
+
+    A row rather than only a flag, because three different questions need
+    answering later and a boolean answers none of them: when was it asked for,
+    has it been undone, and has the personal data actually been cleared yet.
+
+    TWO PHASES, ON PURPOSE
+
+    Asking closes the account at once — signed out everywhere, cannot sign in,
+    invisible to everyone else. Nothing personal is destroyed yet, so the whole
+    of it can be undone from a link in the confirmation email for as long as the
+    window lasts. Only when the window passes is the name, address and the rest
+    overwritten, and that part cannot be undone by anyone.
+
+    The alternative, scrubbing immediately, makes "undo" a word that means
+    nothing: the account would come back with no name and no way to sign in.
+    """
+    __tablename__ = "account_deletions"
+
+    id           = Column(Integer, primary_key=True, index=True)
+    audience     = Column(String, nullable=False, index=True)
+    user_id      = Column(Integer, nullable=False, index=True)
+    # Hashed, like every other emailed token here: a leaked table hands over no
+    # working links.
+    token_hash   = Column(String, unique=True, index=True, nullable=False)
+    requested_at = Column(DateTime, default=datetime.utcnow, index=True)
+    undone_at    = Column(DateTime, nullable=True)
+    # When the personal data was actually overwritten. Past this there is
+    # nothing left to restore and the row is only a record that it happened.
+    purged_at    = Column(DateTime, nullable=True, index=True)
 
 
 class TeamJoinLink(Base):

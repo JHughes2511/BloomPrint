@@ -58,6 +58,13 @@ def decide_urls(token: str) -> tuple[str, str]:
             f"{base}/decide?token={token}&choice=reject")
 
 
+def undo_deletion_url(token: str) -> str:
+    """The link that calls off a deletion. Served by the API, not the app: the
+    account is closed, so there is no session to open the app with."""
+    base = (os.environ.get("API_URL") or app_url()).rstrip("/")
+    return f"{base}/undo-deletion?token={token}"
+
+
 def unsubscribe_url(token: str) -> str:
     """The one-click opt-out. Points at the API, which needs no session to honour it."""
     base = (os.environ.get("API_URL") or app_url()).rstrip("/")
@@ -69,6 +76,9 @@ def unsubscribe_url(token: str) -> str:
 #   open_cta:    label for the link into the app
 #   reset_cta:   label for that link when it is a password-reset link, because
 #                a button that says "Open BloomPrint" hides what it does
+#   undo_cta:    label for the link that calls off a deletion. Says what it
+#                does rather than "Open BloomPrint", which on that message
+#                would be the one button nobody dares press.
 #   digest_title: subject and heading of the hourly digest. No count in
 #                it on purpose: "3 new comments" needs plural rules that differ
 #                across these twenty-five languages, and the list is right there
@@ -84,6 +94,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Hi {name},",
         "open_cta": "Open BloomPrint",
         "reset_cta": "Choose a new password",
+        "undo_cta": "Keep my account",
         "digest_title": "New comments and messages",
         "decide_approve": "Approve",
         "decide_reject": "Decline",
@@ -104,6 +115,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Hola {name}:",
         "open_cta": "Abrir BloomPrint",
         "reset_cta": "Elegir una contraseña nueva",
+        "undo_cta": "Conservar mi cuenta",
         "digest_title": "Nuevos comentarios y mensajes",
         "decide_approve": "Aprobar",
         "decide_reject": "Rechazar",
@@ -124,6 +136,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Bonjour {name},",
         "open_cta": "Ouvrir BloomPrint",
         "reset_cta": "Choisir un nouveau mot de passe",
+        "undo_cta": "Conserver mon compte",
         "digest_title": "Nouveaux commentaires et messages",
         "decide_approve": "Approuver",
         "decide_reject": "Refuser",
@@ -144,6 +157,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Olá {name},",
         "open_cta": "Abrir o BloomPrint",
         "reset_cta": "Escolher uma nova palavra-passe",
+        "undo_cta": "Manter a minha conta",
         "digest_title": "Novos comentários e mensagens",
         "decide_approve": "Aprovar",
         "decide_reject": "Recusar",
@@ -164,6 +178,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Ciao {name},",
         "open_cta": "Apri BloomPrint",
         "reset_cta": "Scegli una nuova password",
+        "undo_cta": "Mantieni il mio account",
         "digest_title": "Nuovi commenti e messaggi",
         "decide_approve": "Approva",
         "decide_reject": "Rifiuta",
@@ -184,6 +199,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Hallo {name},",
         "open_cta": "BloomPrint öffnen",
         "reset_cta": "Neues Passwort wählen",
+        "undo_cta": "Konto behalten",
         "digest_title": "Neue Kommentare und Nachrichten",
         "decide_approve": "Genehmigen",
         "decide_reject": "Ablehnen",
@@ -204,6 +220,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Hoi {name},",
         "open_cta": "BloomPrint openen",
         "reset_cta": "Nieuw wachtwoord kiezen",
+        "undo_cta": "Mijn account behouden",
         "digest_title": "Nieuwe reacties en berichten",
         "decide_approve": "Goedkeuren",
         "decide_reject": "Afwijzen",
@@ -224,6 +241,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Hej {name},",
         "open_cta": "Öppna BloomPrint",
         "reset_cta": "Välj ett nytt lösenord",
+        "undo_cta": "Behåll mitt konto",
         "digest_title": "Nya kommentarer och meddelanden",
         "decide_approve": "Godkänn",
         "decide_reject": "Avböj",
@@ -244,6 +262,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Cześć {name},",
         "open_cta": "Otwórz BloomPrint",
         "reset_cta": "Ustaw nowe hasło",
+        "undo_cta": "Zachowaj moje konto",
         "digest_title": "Nowe komentarze i wiadomości",
         "decide_approve": "Zatwierdź",
         "decide_reject": "Odrzuć",
@@ -264,6 +283,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Здравствуйте, {name}!",
         "open_cta": "Открыть BloomPrint",
         "reset_cta": "Задать новый пароль",
+        "undo_cta": "Оставить аккаунт",
         "digest_title": "Новые комментарии и сообщения",
         "decide_approve": "Одобрить",
         "decide_reject": "Отклонить",
@@ -284,6 +304,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Вітаємо, {name}!",
         "open_cta": "Відкрити BloomPrint",
         "reset_cta": "Задати новий пароль",
+        "undo_cta": "Залишити обліковий запис",
         "digest_title": "Нові коментарі та повідомлення",
         "decide_approve": "Схвалити",
         "decide_reject": "Відхилити",
@@ -304,6 +325,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Здраво {name},",
         "open_cta": "Отвори BloomPrint",
         "reset_cta": "Изаберите нову лозинку",
+        "undo_cta": "Задржи мој налог",
         "digest_title": "Нови коментари и поруке",
         "decide_approve": "Одобри",
         "decide_reject": "Одбиј",
@@ -324,6 +346,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Bok {name},",
         "open_cta": "Otvori BloomPrint",
         "reset_cta": "Odaberite novu lozinku",
+        "undo_cta": "Zadrži moj račun",
         "digest_title": "Novi komentari i poruke",
         "decide_approve": "Odobri",
         "decide_reject": "Odbij",
@@ -344,6 +367,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Merhaba {name},",
         "open_cta": "BloomPrint'i aç",
         "reset_cta": "Yeni şifre belirle",
+        "undo_cta": "Hesabımı koru",
         "digest_title": "Yeni yorumlar ve mesajlar",
         "decide_approve": "Onayla",
         "decide_reject": "Reddet",
@@ -364,6 +388,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Salut {name},",
         "open_cta": "Deschide BloomPrint",
         "reset_cta": "Alege o parolă nouă",
+        "undo_cta": "Păstrează contul",
         "digest_title": "Comentarii și mesaje noi",
         "decide_approve": "Aprobă",
         "decide_reject": "Respinge",
@@ -384,6 +409,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Γεια σου {name},",
         "open_cta": "Άνοιγμα του BloomPrint",
         "reset_cta": "Επιλογή νέου κωδικού",
+        "undo_cta": "Διατήρηση του λογαριασμού μου",
         "digest_title": "Νέα σχόλια και μηνύματα",
         "decide_approve": "Έγκριση",
         "decide_reject": "Απόρριψη",
@@ -404,6 +430,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Sveiki, {name},",
         "open_cta": "Atidaryti BloomPrint",
         "reset_cta": "Nustatyti naują slaptažodį",
+        "undo_cta": "Palikti mano paskyrą",
         "digest_title": "Nauji komentarai ir žinutės",
         "decide_approve": "Patvirtinti",
         "decide_reject": "Atmesti",
@@ -424,6 +451,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "مرحبًا {name}،",
         "open_cta": "فتح BloomPrint",
         "reset_cta": "اختيار كلمة مرور جديدة",
+        "undo_cta": "الاحتفاظ بحسابي",
         "digest_title": "تعليقات ورسائل جديدة",
         "decide_approve": "موافقة",
         "decide_reject": "رفض",
@@ -444,6 +472,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "שלום {name},",
         "open_cta": "פתיחת BloomPrint",
         "reset_cta": "בחירת סיסמה חדשה",
+        "undo_cta": "להשאיר את החשבון שלי",
         "digest_title": "תגובות והודעות חדשות",
         "decide_approve": "אישור",
         "decide_reject": "דחייה",
@@ -464,6 +493,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "नमस्ते {name},",
         "open_cta": "BloomPrint खोलें",
         "reset_cta": "नया पासवर्ड चुनें",
+        "undo_cta": "मेरा खाता रखें",
         "digest_title": "नई टिप्पणियाँ और संदेश",
         "decide_approve": "स्वीकार करें",
         "decide_reject": "अस्वीकार करें",
@@ -484,6 +514,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "გამარჯობა, {name},",
         "open_cta": "BloomPrint-ის გახსნა",
         "reset_cta": "ახალი პაროლის არჩევა",
+        "undo_cta": "ჩემი ანგარიშის შენარჩუნება",
         "digest_title": "ახალი კომენტარები და შეტყობინებები",
         "decide_approve": "დამტკიცება",
         "decide_reject": "უარყოფა",
@@ -504,6 +535,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "{name} さん",
         "open_cta": "BloomPrint を開く",
         "reset_cta": "新しいパスワードを設定",
+        "undo_cta": "アカウントを残す",
         "digest_title": "新しいコメントとメッセージ",
         "decide_approve": "承認する",
         "decide_reject": "却下する",
@@ -524,6 +556,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "{name}님, 안녕하세요.",
         "open_cta": "BloomPrint 열기",
         "reset_cta": "새 비밀번호 설정",
+        "undo_cta": "계정 유지하기",
         "digest_title": "새 댓글과 메시지",
         "decide_approve": "승인",
         "decide_reject": "거절",
@@ -544,6 +577,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "{name} 你好，",
         "open_cta": "打开 BloomPrint",
         "reset_cta": "设置新密码",
+        "undo_cta": "保留我的账户",
         "digest_title": "新的评论和消息",
         "decide_approve": "批准",
         "decide_reject": "拒绝",
@@ -564,6 +598,7 @@ SHELL: dict[str, dict[str, str]] = {
         "greeting": "Kumusta {name},",
         "open_cta": "Buksan ang BloomPrint",
         "reset_cta": "Pumili ng bagong password",
+        "undo_cta": "Panatilihin ang aking account",
         "digest_title": "Mga bagong komento at mensahe",
         "decide_approve": "Aprubahan",
         "decide_reject": "Tanggihan",
@@ -592,7 +627,10 @@ ACCOUNT_EVENTS = {"signup_coach", "signup_player", "email_changed",
                   # A reset link and the notice that a password changed are
                   # the two messages someone locked out of an account needs
                   # most. An opt-out must never be able to hold them back.
-                  "password_reset", "password_changed"}
+                  "password_reset", "password_changed",
+                  # Closing an account, and the notice that its data is gone.
+                  # An opt-out must never be able to hold back either.
+                  "account_closed", "account_purged"}
 
 
 class _Missing(dict):
@@ -640,6 +678,8 @@ def _cta(shell: dict[str, str], event: str) -> str:
     """
     if event == "password_reset":
         return shell.get("reset_cta") or shell["open_cta"]
+    if event == "account_closed":
+        return shell.get("undo_cta") or shell["open_cta"]
     return shell["open_cta"]
 
 

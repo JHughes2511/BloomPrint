@@ -64,6 +64,10 @@ def get_current_coach(
     # this would have signed out every coach in the app at once.
     if int(payload.get("ep", 0)) != int(coach.session_epoch or 0):
         raise credentials_error
+    # A closed account is not a session, even while its data is still there
+    # waiting out the undo window.
+    if coach.deleted_at is not None:
+        raise credentials_error
     return coach
 
 

@@ -80,6 +80,12 @@ def login(request: Request, body: schemas.CoachLogin, db: Session = Depends(get_
     coach = db.query(models.Coach).filter_by(email=body.email).first()
     if not coach or not verify_password(body.password, coach.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    # Only said to somebody who has already proved the password, so it reveals
+    # nothing: a wrong password answers 401 above, exactly as it always did.
+    # 403 rather than 401 so the app can tell "wrong password" from "your
+    # account is closed" and offer to reopen it instead of just refusing.
+    if coach.deleted_at is not None:
+        raise HTTPException(status_code=403, detail="account_closed")
     from ..season import touch_and_maybe_remind
     try:
         touch_and_maybe_remind(db, coach)
@@ -102,6 +108,12 @@ def google_auth(request: Request, body: schemas.CoachGoogleAuth, db: Session = D
 
     identity = verify_google_token(body.id_token)
     coach = db.query(models.Coach).filter_by(email=identity.email).first()
+    # A closed account is not signed into, and not resurrected by arriving
+    # through a different door. Treated as no account at all: after the undo
+    # window its address and google_sub are gone anyway, and a genuine return
+    # is a new signup.
+    if coach is not None and coach.deleted_at is not None:
+        coach = None
 
     if coach:
         if not coach.google_sub and identity.sub:

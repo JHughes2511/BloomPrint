@@ -511,6 +511,10 @@ ADDITIVE_COLUMNS: list[tuple[str, str, str]] = [
     # on a live Postgres has to come through here or it simply is not there.
     ("coaches", "session_epoch", "INTEGER DEFAULT 0"),
     ("player_users", "session_epoch", "INTEGER DEFAULT 0"),
+    # Closing an account marks it rather than deleting the row; see
+    # api/account_deletion.py for why a DELETE is not available here.
+    ("coaches", "deleted_at", "TIMESTAMP"),
+    ("player_users", "deleted_at", "TIMESTAMP"),
     ("staff_shared_reports", "request_status", "VARCHAR"),
     ("feedback", "images", "TEXT"),
     ("coaches", "job_title", "VARCHAR"),

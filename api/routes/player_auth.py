@@ -57,6 +57,8 @@ def get_current_player_user(
     # issued before this existed keep working.
     if int(payload.get("ep", 0)) != int(pu.session_epoch or 0):
         raise HTTPException(status_code=401, detail="Invalid player token")
+    if pu.deleted_at is not None:
+        raise HTTPException(status_code=401, detail="Invalid player token")
     return pu
 
 
@@ -89,6 +91,9 @@ def login(request: Request, body: schemas.CoachLogin, db: Session = Depends(get_
     pu = db.query(models.PlayerUser).filter_by(email=body.email).first()
     if not pu or not _verify_pw(body.password, pu.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
+    # See routes/auth.py.
+    if pu.deleted_at is not None:
+        raise HTTPException(status_code=403, detail="account_closed")
     return schemas.PlayerToken(
         access_token=_make_token(pu.id, pu.session_epoch),
         player_user=schemas.PlayerUserOut.model_validate(pu),
@@ -107,6 +112,9 @@ def google_auth(request: Request, body: schemas.PlayerGoogleAuth, db: Session = 
 
     identity = verify_google_token(body.id_token)
     pu = db.query(models.PlayerUser).filter_by(email=identity.email).first()
+    # See routes/auth.py: closed means no account here.
+    if pu is not None and pu.deleted_at is not None:
+        pu = None
 
     if pu:
         if not pu.google_sub and identity.sub:

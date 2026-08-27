@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import decisions, emails, models, notify, roster_sync
+from .. import account_deletion, decisions, emails, models, notify, roster_sync
 
 router = APIRouter(prefix="/team-staff", tags=["team-staff"])
 
@@ -858,7 +858,10 @@ def transfer_owner(
         raise HTTPException(status_code=404, detail="Team not found")
 
     owner = db.get(models.Coach, team.coach_id)
-    orphaned = owner is None
+    # Closed counts as gone. The row survives a deletion (see
+    # api/account_deletion.py), so asking only whether it exists would leave
+    # every team whose owner left frozen with nobody able to claim it.
+    orphaned = owner is None or account_deletion.is_closed(owner)
     is_owner = team.coach_id == coach.id
     is_staff = db.query(models.TeamStaff).filter_by(team_id=team_id, coach_id=coach.id).first() is not None
 
