@@ -36,7 +36,7 @@ export default function PlayerHomeScreen() {
   const { t: tr } = useTranslation();
   const { t, mode, toggle } = useTheme();
   const styles = makeStyles(t);
-  const { playerUser, logout, refreshUser } = usePlayerAuth();
+  const { playerUser, refreshUser } = usePlayerAuth();
   const navigation = useNavigation<any>();
 
   // Finish a join that started before this account existed — signing up swaps
@@ -209,13 +209,6 @@ export default function PlayerHomeScreen() {
     }
   };
 
-  const handleSignOut = () => {
-    Alert.alert(tr('playerApp.home.signOut'), tr('playerApp.home.signOutConfirm'), [
-      { text: tr('common.cancel'), style: 'cancel' },
-      { text: tr('playerApp.home.signOut'), style: 'destructive', onPress: logout },
-    ]);
-  };
-
   return (
     <ScreenBackground>
     <PageContainer>
@@ -241,6 +234,17 @@ export default function PlayerHomeScreen() {
             <TouchableOpacity style={styles.circleBtn} onPress={toggle} accessibilityLabel={tr('playerApp.home.toggleTheme')}>
               <Ionicons name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'} size={18} color={t.inkSoft} />
             </TouchableOpacity>
+            {/* Settings sits where sign-out used to. Signing out is a rare,
+                deliberate act and it is still on the profile screen; settings
+                is the one people go looking for. */}
+            <TouchableOpacity
+              style={styles.circleBtn}
+              onPress={() => navigation.navigate('ProfileTab' as any,
+                                                 { openSettings: true })}
+              accessibilityLabel={tr('playerApp.link.settings')}
+            >
+              <Ionicons name="settings-outline" size={18} color={t.inkSoft} />
+            </TouchableOpacity>
             <TouchableOpacity style={styles.circleBtn} onPress={() => navigation.navigate('PlayerNotifsTab' as any)} accessibilityLabel={tr('playerApp.home.notifications')}>
               <Ionicons name="notifications-outline" size={18} color={t.inkSoft} />
               {unreadCount > 0 && (
@@ -248,9 +252,6 @@ export default function PlayerHomeScreen() {
                   <Text style={styles.badgeText}>{unreadCount}</Text>
                 </View>
               )}
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.circleBtn} onPress={handleSignOut} accessibilityLabel={tr('playerApp.home.signOut')}>
-              <Ionicons name="log-out-outline" size={18} color={t.muted2} />
             </TouchableOpacity>
           </View>
         </View>

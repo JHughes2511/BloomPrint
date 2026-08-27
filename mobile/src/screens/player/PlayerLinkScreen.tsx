@@ -9,7 +9,7 @@ import {
   Alert, ActivityIndicator, Modal, Image, Switch,
 } from 'react-native';
 import Sheet from '../../components/Sheet';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import QrScanner from '../../components/QrScanner';
@@ -68,6 +68,22 @@ export default function PlayerLinkScreen() {
   // QR scanner — permission and camera both live inside the component, so all
   // this screen has to decide is whether it is open.
   const [showScanner, setShowScanner] = useState(false);
+
+  // The settings button on the home screen navigates here and asks for the
+  // sheet. Cleared the moment it is acted on: a param a screen both reads and
+  // writes is a param that reads its own output, and the sheet would reopen
+  // every time this tab regained focus.
+  const route = useRoute<any>();
+  const navigation = useNavigation<any>();
+  useFocusEffect(useCallback(() => {
+    if (route.params?.openSettings) {
+      navigation.setParams({ openSettings: undefined });
+      openEdit();
+    }
+    // openEdit reads current profile state, so it is deliberately not a
+    // dependency: this should fire on the request, not on every profile edit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params?.openSettings]));
 
   const load = useCallback(() => {
     playerLinkAPI.listLinks().then((l: Link[]) => setLinks(Array.isArray(l) ? l : [])).catch(() => {});
@@ -234,15 +250,6 @@ export default function PlayerLinkScreen() {
           </Text>
         </View>
         <View style={styles.headerActions}>
-          {/* The way in that the coach's header already has. Without it the
-              only route to the language and email settings was tapping the
-              avatar, which wears a camera badge and reads as "change my
-              photo" — and for a player with no coach yet, the pencil beside
-              the athletic profile is not on screen at all. */}
-          <TouchableOpacity style={styles.circleBtn} onPress={openEdit}
-                            accessibilityLabel={tr('playerApp.link.settings')}>
-            <Ionicons name="settings-outline" size={18} color={t.inkSoft} />
-          </TouchableOpacity>
           <TouchableOpacity style={styles.circleBtn} onPress={toggle} accessibilityLabel={tr('playerApp.link.toggleTheme')}>
             <Ionicons name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'} size={18} color={t.inkSoft} />
           </TouchableOpacity>

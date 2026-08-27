@@ -28,6 +28,7 @@ from . import models
 from .database import SessionLocal
 from .emails import (ACCOUNT_EVENTS, render, render_html, render_notification,
                      render_notification_html)
+from . import outbox
 from .mailer import contact_email, mail_from, try_send
 
 log = logging.getLogger(__name__)
@@ -105,14 +106,12 @@ def _deliver(audience: str, user_id: int, event: str, to: str,
         # Sent FROM the noreply mailbox, but a reply goes somewhere a person
         # reads. Pressing Reply is what people do instead of reading a footer,
         # and without this it was the one gesture guaranteed to fail.
-        ok, reason = try_send(to, subject, body, html, from_addr=mail_from(),
-                              reply_to=contact_email())
-        if not ok:
-            # Said out loud rather than swallowed. Mail failing must not break
-            # the event, but a silent return means "no mail arrived" and "no
-            # mail was configured" look identical from the outside, and that is
-            # exactly the question to answer when someone reports missing mail.
-            log.warning("Email %s to %s not sent: %s", event, to, reason)
+        # Recorded before it is attempted, and retried if it does not go. See
+        # api/outbox.py: a send has always been fire-and-forget, which is right,
+        # and used to mean a provider having a bad minute lost the message.
+        outbox.send(to, subject, body, html, kind=f"event:{event}",
+                    audience=audience, user_id=user_id,
+                    reply_to=contact_email())
     except Exception:
         log.warning("Could not email %s to %s #%s", event, audience, user_id,
                     exc_info=True)
@@ -223,10 +222,10 @@ def _deliver_notification(audience: str, user_id: int, key: str, to: str,
         except Exception:
             log.warning("Could not lay out %s; sending as text", key, exc_info=True)
             html = None
-        ok, reason = try_send(to, subject, body, html, from_addr=mail_from(),
-                              reply_to=contact_email())
-        if not ok:
-            log.warning("Notification email %s to %s not sent: %s", key, to, reason)
+        outbox.send(to, subject, body, html,
+                    kind=f"notif:{(key or '').split('.')[-1]}",
+                    audience=audience, user_id=user_id,
+                    reply_to=contact_email())
     except Exception:
         log.warning("Could not email notification %s to %s #%s", key, audience,
                     user_id, exc_info=True)

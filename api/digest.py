@@ -32,7 +32,7 @@ import threading
 import time
 from datetime import datetime, timedelta
 
-from . import emails, models
+from . import emails, models, outbox
 from .database import SessionLocal
 from .mailer import contact_email, mail_from, try_send
 
@@ -160,13 +160,10 @@ def flush_once() -> int:
                     log.warning("Could not lay out a digest; sending as text",
                                 exc_info=True)
                     html = None
-                ok, reason = try_send(account.email, subject, body, html,
-                                      from_addr=mail_from(),
-                                      reply_to=contact_email())
-                if ok:
+                if outbox.send(account.email, subject, body, html,
+                               kind="digest", audience=audience,
+                               user_id=user_id, reply_to=contact_email()):
                     sent += 1
-                else:
-                    log.warning("Digest to %s not sent: %s", account.email, reason)
             except Exception:
                 log.warning("Could not send a digest to %s #%s", audience,
                             user_id, exc_info=True)
@@ -183,6 +180,17 @@ def _loop() -> None:
             # Nothing in here may kill the thread: a digest that fails once
             # should not stop every later one.
             log.warning("Digest flush failed", exc_info=True)
+        try:
+            # Messages that did not go out the first time. This thread already
+            # wakes on a timer, and a second timer for retries would be a
+            # second thing to get wrong.
+            outbox.retry_due()
+        except Exception:
+            log.warning("Email retry sweep failed", exc_info=True)
+        try:
+            outbox.prune()
+        except Exception:
+            log.warning("Email log prune failed", exc_info=True)
         time.sleep(TICK_SECONDS)
 
 

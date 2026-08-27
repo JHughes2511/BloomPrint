@@ -1467,6 +1467,48 @@ class AccountDeletion(Base):
     purged_at    = Column(DateTime, nullable=True, index=True)
 
 
+class EmailSend(Base):
+    """One attempt to put a message in somebody's inbox, and how it went.
+
+    Two questions this exists to answer, neither of which the logs could:
+    "did that email actually go out?", and "it did not, so send it again."
+
+    Every send was fire-and-forget by design — mail must never be able to break
+    the event that caused it — which is right, and which also meant a provider
+    having a bad thirty seconds lost a message permanently and silently.
+
+    The rendered message is stored rather than the ingredients. A retry then
+    sends the very bytes that failed, instead of re-rendering from a world that
+    has moved on: a comment edited, a name changed, a report un-shared. It also
+    means a retry cannot fail for a new reason.
+    """
+    __tablename__ = "email_sends"
+
+    id              = Column(Integer, primary_key=True, index=True)
+    to_address      = Column(String, nullable=False, index=True)
+    subject         = Column(String, nullable=False)
+    body            = Column(Text, nullable=False)
+    html            = Column(Text, nullable=True)
+    reply_to        = Column(String, nullable=True)
+    # Who it was for, where there is a who. A digest and a notification have
+    # one; nothing stops a future sender from having none.
+    audience        = Column(String, nullable=True, index=True)
+    user_id         = Column(Integer, nullable=True, index=True)
+    # What produced it: "event:signup_coach", "notif:reportShared", "digest".
+    # Enough to answer "are the welcome emails going out?" without reading
+    # anybody's mail.
+    kind            = Column(String, nullable=True, index=True)
+    # sent | failed | abandoned
+    status          = Column(String, nullable=False, default="failed", index=True)
+    attempts        = Column(Integer, nullable=False, default=0)
+    last_error      = Column(Text, nullable=True)
+    created_at      = Column(DateTime, default=datetime.utcnow, index=True)
+    sent_at         = Column(DateTime, nullable=True)
+    # When to try again. Stamped forward before each attempt so two processes
+    # cannot both be retrying the same message.
+    next_attempt_at = Column(DateTime, nullable=True, index=True)
+
+
 class TeamJoinLink(Base):
     """A standing signup link for a team.
 
