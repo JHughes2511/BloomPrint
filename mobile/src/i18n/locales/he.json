@@ -2432,8 +2432,8 @@
       "body": "ברוכים השבים — זמן טוב לעבור ולעדכן את השיטה והפילוסופיה שלכם לעונת {{season}}."
     },
     "staffMessage": {
-      "title": "הודעה מ{{coach}}",
-      "body": "{{preview}}"
+      "title": "הודעה חדשה",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "תוכנית אימונים נשלחה",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "המאמן הגיב",
-      "body": "{{coach}} הגיב על האימון שלך: \"{{text}}\""
+      "body": "{{coach}} הגיב על {{item}}: \"{{text}}\""
     },
     "trainingUpdatedByCoach": {
       "title": "תוכנית האימונים עודכנה",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "האימון עודכן",
-      "body": "מאמן הוסיף הערות לתוכנית האימונים שלך."
+      "body": "{{coach}} הוסיף הערות ל{{item}}."
     },
     "coachCommentedTraining": {
       "title": "המאמן הוסיף הערות",
-      "body": "מאמן הגיב על האימון שלך: \"{{text}}\""
+      "body": "{{coach}} הגיב על {{item}}: \"{{text}}\""
     },
     "coachRepliedComment": {
       "title": "המאמן הגיב",
-      "body": "{{coach}} השיב להערה שלך על הדוח: \"{{text}}\""
+      "body": "{{coach}} השיב ב{{item}}: \"{{text}}\""
     },
     "linkRequest": {
       "title": "בקשת קישור",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "השחקן הגיב",
-      "body": "{{player}} הגיב על האימון שלו: \"{{text}}\""
+      "body": "{{player}} הגיב על {{item}}: \"{{text}}\""
     },
     "playerCommentedReport": {
       "title": "השחקן הגיב",
-      "body": "{{player}} הגיב על דוח משותף: \"{{text}}\""
+      "body": "{{player}} הגיב על {{item}}: \"{{text}}\""
     },
     "trainingFeedbackRequest": {
       "title": "משוב על האימון",

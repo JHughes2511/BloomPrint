@@ -2432,8 +2432,8 @@
       "body": "欢迎回来——正是回顾并更新你 {{season}} 赛季体系与理念的好时机。"
     },
     "staffMessage": {
-      "title": "{{coach}} 的消息",
-      "body": "{{preview}}"
+      "title": "新消息",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "训练计划已发送",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "教练已回复",
-      "body": "{{coach}} 评论了你的训练：“{{text}}”"
+      "body": "{{coach}} 评论了 {{item}}：“{{text}}”"
     },
     "trainingUpdatedByCoach": {
       "title": "训练计划已更新",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "训练已更新",
-      "body": "有教练在你的训练计划中添加了备注。"
+      "body": "{{coach}} 在 {{item}} 中添加了备注。"
     },
     "coachCommentedTraining": {
       "title": "教练添加了备注",
-      "body": "有教练评论了你的训练：“{{text}}”"
+      "body": "{{coach}} 评论了 {{item}}：“{{text}}”"
     },
     "coachRepliedComment": {
       "title": "教练已回复",
-      "body": "{{coach}} 回复了你对报告的评论：“{{text}}”"
+      "body": "{{coach}} 在 {{item}} 中回复：“{{text}}”"
     },
     "linkRequest": {
       "title": "关联请求",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "球员已回复",
-      "body": "{{player}} 评论了自己的训练：“{{text}}”"
+      "body": "{{player}} 评论了 {{item}}：“{{text}}”"
     },
     "playerCommentedReport": {
       "title": "球员已回复",
-      "body": "{{player}} 评论了一份分享的报告：“{{text}}”"
+      "body": "{{player}} 评论了 {{item}}：“{{text}}”"
     },
     "trainingFeedbackRequest": {
       "title": "训练反馈",

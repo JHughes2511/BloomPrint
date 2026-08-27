@@ -2432,8 +2432,8 @@
       "body": "أهلًا بعودتك — وقت مناسب لمراجعة نظامك وفلسفتك وتحديثهما لموسم {{season}}."
     },
     "staffMessage": {
-      "title": "رسالة من {{coach}}",
-      "body": "{{preview}}"
+      "title": "رسالة جديدة",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "تم إرسال برنامج التدريب",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "رد المدرب",
-      "body": "علّق {{coach}} على تدريبك: «{{text}}»"
+      "body": "علّق {{coach}} على {{item}}: «{{text}}»"
     },
     "trainingUpdatedByCoach": {
       "title": "تم تحديث برنامج التدريب",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "تم تحديث التدريب",
-      "body": "أضاف مدرب ملاحظات إلى برنامج تدريبك."
+      "body": "أضاف {{coach}} ملاحظات إلى {{item}}."
     },
     "coachCommentedTraining": {
       "title": "أضاف المدرب ملاحظات",
-      "body": "علّق مدرب على تدريبك: «{{text}}»"
+      "body": "علّق {{coach}} على {{item}}: «{{text}}»"
     },
     "coachRepliedComment": {
       "title": "رد المدرب",
-      "body": "رد {{coach}} على تعليقك بشأن التقرير: «{{text}}»"
+      "body": "رد {{coach}} في {{item}}: «{{text}}»"
     },
     "linkRequest": {
       "title": "طلب ربط لاعب",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "رد اللاعب",
-      "body": "علّق {{player}} على تدريبه: «{{text}}»"
+      "body": "علّق {{player}} على {{item}}: «{{text}}»"
     },
     "playerCommentedReport": {
       "title": "رد اللاعب",
-      "body": "علّق {{player}} على تقرير تمت مشاركته: «{{text}}»"
+      "body": "علّق {{player}} على {{item}}: «{{text}}»"
     },
     "trainingFeedbackRequest": {
       "title": "ملاحظات التدريب",

@@ -2432,8 +2432,8 @@
       "body": "वापसी पर स्वागत है — {{season}} के लिए अपने सिस्टम और दर्शन की समीक्षा और अपडेट करने का अच्छा समय।"
     },
     "staffMessage": {
-      "title": "{{coach}} का संदेश",
-      "body": "{{preview}}"
+      "title": "नया संदेश",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "प्रशिक्षण कार्यक्रम भेजा गया",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "कोच ने जवाब दिया",
-      "body": "{{coach}} ने आपके प्रशिक्षण पर टिप्पणी की: \"{{text}}\""
+      "body": "{{coach}} ने {{item}} पर टिप्पणी की: \"{{text}}\""
     },
     "trainingUpdatedByCoach": {
       "title": "प्रशिक्षण कार्यक्रम अपडेट हुआ",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "प्रशिक्षण अपडेट हुआ",
-      "body": "एक कोच ने आपके प्रशिक्षण कार्यक्रम में नोट्स जोड़े हैं।"
+      "body": "{{coach}} ने {{item}} में नोट्स जोड़े।"
     },
     "coachCommentedTraining": {
       "title": "कोच ने नोट्स जोड़े",
-      "body": "एक कोच ने आपके प्रशिक्षण पर टिप्पणी की: \"{{text}}\""
+      "body": "{{coach}} ने {{item}} पर टिप्पणी की: \"{{text}}\""
     },
     "coachRepliedComment": {
       "title": "कोच ने जवाब दिया",
-      "body": "{{coach}} ने रिपोर्ट पर आपकी टिप्पणी का उत्तर दिया: \"{{text}}\""
+      "body": "{{coach}} ने {{item}} पर उत्तर दिया: \"{{text}}\""
     },
     "linkRequest": {
       "title": "लिंक अनुरोध",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "खिलाड़ी ने जवाब दिया",
-      "body": "{{player}} ने अपने प्रशिक्षण पर टिप्पणी की: \"{{text}}\""
+      "body": "{{player}} ने {{item}} पर टिप्पणी की: \"{{text}}\""
     },
     "playerCommentedReport": {
       "title": "खिलाड़ी ने जवाब दिया",
-      "body": "{{player}} ने एक साझा रिपोर्ट पर टिप्पणी की: \"{{text}}\""
+      "body": "{{player}} ने {{item}} पर टिप्पणी की: \"{{text}}\""
     },
     "trainingFeedbackRequest": {
       "title": "प्रशिक्षण प्रतिक्रिया",

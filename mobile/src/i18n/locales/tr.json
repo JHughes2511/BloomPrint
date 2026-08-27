@@ -2432,8 +2432,8 @@
       "body": "Tekrar hoş geldin — {{season}} için sistemini ve felsefeni gözden geçirip güncellemek için iyi bir zaman."
     },
     "staffMessage": {
-      "title": "{{coach}} kişisinden mesaj",
-      "body": "{{preview}}"
+      "title": "Yeni mesaj",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "Antrenman programı gönderildi",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "Antrenör yanıtladı",
-      "body": "{{coach}} antrenmanın hakkında yorum yaptı: \"{{text}}\""
+      "body": "{{coach}}, {{item}} için yorum yaptı: \"{{text}}\""
     },
     "trainingUpdatedByCoach": {
       "title": "Antrenman programı güncellendi",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "Antrenman güncellendi",
-      "body": "Bir antrenör antrenman programına notlar ekledi."
+      "body": "{{coach}}, {{item}} için notlar ekledi."
     },
     "coachCommentedTraining": {
       "title": "Antrenör not ekledi",
-      "body": "Bir antrenör antrenmanın hakkında yorum yaptı: \"{{text}}\""
+      "body": "{{coach}}, {{item}} için yorum yaptı: \"{{text}}\""
     },
     "coachRepliedComment": {
       "title": "Antrenör yanıtladı",
-      "body": "{{coach}} rapor yorumuna yanıt verdi: \"{{text}}\""
+      "body": "{{coach}}, {{item}} içinde yanıtladı: \"{{text}}\""
     },
     "linkRequest": {
       "title": "Bağlantı isteği",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "Oyuncu yanıtladı",
-      "body": "{{player}} kendi antrenmanı hakkında yorum yaptı: \"{{text}}\""
+      "body": "{{player}}, {{item}} için yorum yaptı: \"{{text}}\""
     },
     "playerCommentedReport": {
       "title": "Oyuncu yanıtladı",
-      "body": "{{player}} paylaşılan bir rapor hakkında yorum yaptı: \"{{text}}\""
+      "body": "{{player}}, {{item}} için yorum yaptı: \"{{text}}\""
     },
     "trainingFeedbackRequest": {
       "title": "Antrenman geri bildirimi",

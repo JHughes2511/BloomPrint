@@ -18,6 +18,22 @@ from ..ai_models import OPUS, text_of
 
 router = APIRouter(prefix="/player", tags=["player"])
 
+def _names_the_document(evaluation=None, training_title=None) -> str:
+    """Which report or programme a comment is on, for a notification param.
+
+    A title when the document has one, and its type otherwise. Both travel in
+    the same `item` param: the type is an enum the reader's client turns into
+    words in their own language, and a title is not a key in that table so it
+    falls through and shows as it was typed. Without this a digest reads "Andre
+    commented" five times with no way to tell which five things he commented on.
+    """
+    if training_title:
+        return training_title
+    if evaluation is not None:
+        return (evaluation.title or "").strip() or evaluation.output_type
+    return "training_program"
+
+
 
 # ── Invite codes (coach generates) ───────────────────────────────────────────
 
@@ -719,7 +735,8 @@ def add_coach_training_comment_player(
     )
     db.add(comment)
     db.flush()
-    params = {"player": pu.name, "text": body.text[:80]}
+    params = {"player": pu.name, "text": body.text[:80],
+              "item": _names_the_document(training_title=session.title)}
     notif = models.CoachNotification(
         coach_id=session.coach_id,
         type="player_commented_coach_training",
@@ -830,19 +847,21 @@ def update_player_training(
     if not pt:
         raise HTTPException(status_code=404, detail="Training not found")
     pt.coach_notes = body.coach_notes
+    params = {"coach": coach.name, "item": _names_the_document()}
     notif = models.PlayerNotification(
         player_user_id=pt.player_user_id,
         type="training_updated",
         title="Training Updated",
-        body="A coach has added notes to your training program.",
+        body=f"{coach.name} added notes to your training program.",
         i18n_key="notifs.trainingNotesAdded",
+        i18n_params=params,
         ref_id=pt.id,
     )
     db.add(notif)
     db.commit()
     db.refresh(pt)
     notify.player_notification(db.get(models.PlayerUser, pt.player_user_id),
-                               "notifs.trainingNotesAdded", {},
+                               "notifs.trainingNotesAdded", params,
                                link=emails.link_to(f"/my/training/{pt.id}"))
     return pt
 
@@ -1187,7 +1206,8 @@ def add_player_comment(
     )
     db.add(comment)
     db.flush()
-    params = {"player": pu.name, "text": body.text[:80]}
+    params = {"player": pu.name, "text": body.text[:80],
+              "item": _names_the_document(evaluation=shared.evaluation)}
     notif = models.PlayerNotification(
         coach_id=shared.shared_by_id,
         type="player_commented",
@@ -1226,7 +1246,9 @@ def add_training_comment_player(
     db.add(comment)
     db.flush()
     shared = pt.shared_report
-    params = {"player": pu.name, "text": body.text[:80]}
+    params = {"player": pu.name, "text": body.text[:80],
+              "item": _names_the_document(
+                  evaluation=shared.evaluation if shared else None)}
     notif = models.PlayerNotification(
         coach_id=shared.shared_by_id,
         type="player_commented_training",
@@ -1264,7 +1286,8 @@ def add_training_comment_coach(
     )
     db.add(comment)
     db.flush()
-    params = {"text": body.text[:80]}
+    params = {"coach": coach.name, "text": body.text[:80],
+              "item": _names_the_document()}
     notif = models.PlayerNotification(
         player_user_id=pt.player_user_id,
         type="training_updated",
@@ -1480,7 +1503,8 @@ def coach_reply_to_shared_report(
             comment = models.PlayerComment(coach_id=coach.id, player_training_id=shared_id, text=body.text, parent_id=body.parent_id)
             db.add(comment)
             db.flush()
-            params = {"text": body.text[:80]}
+            params = {"coach": coach.name, "text": body.text[:80],
+                      "item": _names_the_document()}
             db.add(models.PlayerNotification(
                 player_user_id=pt.player_user_id,
                 type="training_updated",
@@ -1503,7 +1527,8 @@ def coach_reply_to_shared_report(
             db.add(comment)
             db.flush()
             target = ts.player.player_user if ts.player else None
-            params = {"coach": coach.name, "text": body.text[:80]}
+            params = {"coach": coach.name, "text": body.text[:80],
+                      "item": _names_the_document(training_title=ts.title)}
             if target:
                 db.add(models.PlayerNotification(
                     player_user_id=target.id,
@@ -1531,7 +1556,8 @@ def coach_reply_to_shared_report(
     )
     db.add(comment)
     db.flush()
-    params = {"coach": coach.name, "text": body.text[:80]}
+    params = {"coach": coach.name, "text": body.text[:80],
+              "item": _names_the_document(evaluation=shared.evaluation)}
     notif = models.PlayerNotification(
         player_user_id=shared.player_user_id,
         type="coach_replied",

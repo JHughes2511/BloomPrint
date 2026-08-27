@@ -283,6 +283,9 @@ DIGEST_KEYS = {
     "coachCommentedTraining",
     "coachRepliedComment",
     "coachRepliedTraining",
+    # A back-and-forth between two coaches is as fast as a comment thread, and
+    # one email per message is one email per sentence.
+    "staffMessage",
 }
 
 

@@ -572,7 +572,9 @@ def add_coach_training_comment(
     db.add(comment)
     db.flush()
     target = session.player.player_user if session.player else None
-    params = {"coach": coach.name, "text": body.text[:80]}
+    params = {"coach": coach.name, "text": body.text[:80],
+              # Which programme, so one digest line can be told from the next.
+              "item": (session.title or "").strip() or "training_program"}
     if target:
         notif = models.PlayerNotification(
             player_user_id=target.id,

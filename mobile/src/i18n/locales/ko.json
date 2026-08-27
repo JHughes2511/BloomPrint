@@ -2432,8 +2432,8 @@
       "body": "다시 오신 것을 환영합니다 — {{season}} 시즌을 위해 시스템과 철학을 점검하고 업데이트하기 좋은 시기입니다."
     },
     "staffMessage": {
-      "title": "{{coach}} 님의 메시지",
-      "body": "{{preview}}"
+      "title": "새 메시지",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "훈련 프로그램 전송됨",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "코치가 답변했습니다",
-      "body": "{{coach}} 님이 회원님의 훈련에 댓글을 남겼습니다: \"{{text}}\""
+      "body": "{{coach}} 님이 {{item}}에 댓글을 남겼습니다: \"{{text}}\""
     },
     "trainingUpdatedByCoach": {
       "title": "훈련 프로그램 업데이트됨",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "훈련 업데이트됨",
-      "body": "코치가 회원님의 훈련 프로그램에 메모를 추가했습니다."
+      "body": "{{coach}} 님이 {{item}}에 메모를 추가했습니다."
     },
     "coachCommentedTraining": {
       "title": "코치가 메모를 추가했습니다",
-      "body": "코치가 회원님의 훈련에 댓글을 남겼습니다: \"{{text}}\""
+      "body": "{{coach}} 님이 {{item}}에 댓글을 남겼습니다: \"{{text}}\""
     },
     "coachRepliedComment": {
       "title": "코치가 답변했습니다",
-      "body": "{{coach}} 님이 리포트에 남긴 회원님의 댓글에 답했습니다: \"{{text}}\""
+      "body": "{{coach}} 님이 {{item}}에 답했습니다: \"{{text}}\""
     },
     "linkRequest": {
       "title": "연결 요청",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "선수가 답변했습니다",
-      "body": "{{player}} 님이 자신의 훈련에 댓글을 남겼습니다: \"{{text}}\""
+      "body": "{{player}} 님이 {{item}}에 댓글을 남겼습니다: \"{{text}}\""
     },
     "playerCommentedReport": {
       "title": "선수가 답변했습니다",
-      "body": "{{player}} 님이 공유된 리포트에 댓글을 남겼습니다: \"{{text}}\""
+      "body": "{{player}} 님이 {{item}}에 댓글을 남겼습니다: \"{{text}}\""
     },
     "trainingFeedbackRequest": {
       "title": "훈련 피드백",

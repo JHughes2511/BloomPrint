@@ -2432,8 +2432,8 @@
       "body": "Maligayang pagbabalik — magandang panahon para suriin at i-update ang iyong sistema at pilosopiya para sa {{season}}."
     },
     "staffMessage": {
-      "title": "Mensahe mula kay {{coach}}",
-      "body": "{{preview}}"
+      "title": "Bagong mensahe",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "Naipadala ang programa ng pagsasanay",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "Sumagot ang coach",
-      "body": "Nag-komento si {{coach}} sa iyong pagsasanay: \"{{text}}\""
+      "body": "Nag-komento si {{coach}} sa {{item}}: \"{{text}}\""
     },
     "trainingUpdatedByCoach": {
       "title": "Na-update ang programa ng pagsasanay",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "Na-update ang pagsasanay",
-      "body": "May coach na nagdagdag ng mga tala sa iyong programa ng pagsasanay."
+      "body": "Nagdagdag si {{coach}} ng mga tala sa {{item}}."
     },
     "coachCommentedTraining": {
       "title": "Nagdagdag ng tala ang coach",
-      "body": "May coach na nag-komento sa iyong pagsasanay: \"{{text}}\""
+      "body": "Nag-komento si {{coach}} sa {{item}}: \"{{text}}\""
     },
     "coachRepliedComment": {
       "title": "Sumagot ang coach",
-      "body": "Sumagot si {{coach}} sa iyong komento sa ulat: \"{{text}}\""
+      "body": "Sumagot si {{coach}} sa {{item}}: \"{{text}}\""
     },
     "linkRequest": {
       "title": "Hiling na mag-link",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "Sumagot ang manlalaro",
-      "body": "Nag-komento si {{player}} sa kanyang pagsasanay: \"{{text}}\""
+      "body": "Nag-komento si {{player}} sa {{item}}: \"{{text}}\""
     },
     "playerCommentedReport": {
       "title": "Sumagot ang manlalaro",
-      "body": "Nag-komento si {{player}} sa isang ibinahaging ulat: \"{{text}}\""
+      "body": "Nag-komento si {{player}} sa {{item}}: \"{{text}}\""
     },
     "trainingFeedbackRequest": {
       "title": "Feedback sa pagsasanay",

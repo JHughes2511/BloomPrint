@@ -2432,8 +2432,8 @@
       "body": "Bon retour — un bon moment pour revoir et mettre à jour votre système et votre philosophie pour {{season}}."
     },
     "staffMessage": {
-      "title": "Message de {{coach}}",
-      "body": "{{preview}}"
+      "title": "Nouveau message",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "Programme d'entraînement envoyé",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "L'entraîneur a répondu",
-      "body": "{{coach}} a commenté votre entraînement : \"{{text}}\""
+      "body": "{{coach}} a commenté {{item}} : \"{{text}}\""
     },
     "trainingUpdatedByCoach": {
       "title": "Programme d'entraînement mis à jour",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "Entraînement mis à jour",
-      "body": "Un entraîneur a ajouté des notes à votre programme d'entraînement."
+      "body": "{{coach}} a ajouté des notes à {{item}}."
     },
     "coachCommentedTraining": {
       "title": "L'entraîneur a ajouté des notes",
-      "body": "Un entraîneur a commenté votre entraînement : \"{{text}}\""
+      "body": "{{coach}} a commenté {{item}} : \"{{text}}\""
     },
     "coachRepliedComment": {
       "title": "L'entraîneur a répondu",
-      "body": "{{coach}} a répondu à votre commentaire sur le rapport : \"{{text}}\""
+      "body": "{{coach}} a répondu sur {{item}} : \"{{text}}\""
     },
     "linkRequest": {
       "title": "Demande de liaison",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "Le joueur a répondu",
-      "body": "{{player}} a commenté son entraînement : \"{{text}}\""
+      "body": "{{player}} a commenté {{item}} : \"{{text}}\""
     },
     "playerCommentedReport": {
       "title": "Le joueur a répondu",
-      "body": "{{player}} a commenté un rapport partagé : \"{{text}}\""
+      "body": "{{player}} a commenté {{item}} : \"{{text}}\""
     },
     "trainingFeedbackRequest": {
       "title": "Retour sur l'entraînement",

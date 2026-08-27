@@ -2432,8 +2432,8 @@
       "body": "Καλώς ορίσατε ξανά — καλή στιγμή να δείτε ξανά και να ενημερώσετε το σύστημα και τη φιλοσοφία σας για {{season}}."
     },
     "staffMessage": {
-      "title": "Μήνυμα από {{coach}}",
-      "body": "{{preview}}"
+      "title": "Νέο μήνυμα",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "Το πρόγραμμα προπόνησης στάλθηκε",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "Ο προπονητής απάντησε",
-      "body": "Ο/Η {{coach}} σχολίασε την προπόνησή σας: «{{text}}»"
+      "body": "Ο/Η {{coach}} σχολίασε {{item}}: «{{text}}»"
     },
     "trainingUpdatedByCoach": {
       "title": "Το πρόγραμμα προπόνησης ενημερώθηκε",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "Η προπόνηση ενημερώθηκε",
-      "body": "Ένας προπονητής πρόσθεσε σημειώσεις στο πρόγραμμα προπόνησής σας."
+      "body": "Ο/Η {{coach}} πρόσθεσε σημειώσεις σε {{item}}."
     },
     "coachCommentedTraining": {
       "title": "Ο προπονητής πρόσθεσε σημειώσεις",
-      "body": "Ένας προπονητής σχολίασε την προπόνησή σας: «{{text}}»"
+      "body": "Ο/Η {{coach}} σχολίασε {{item}}: «{{text}}»"
     },
     "coachRepliedComment": {
       "title": "Ο προπονητής απάντησε",
-      "body": "Ο/Η {{coach}} απάντησε στο σχόλιό σας για την αναφορά: «{{text}}»"
+      "body": "Ο/Η {{coach}} απάντησε σε {{item}}: «{{text}}»"
     },
     "linkRequest": {
       "title": "Αίτημα σύνδεσης",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "Ο παίκτης απάντησε",
-      "body": "Ο/Η {{player}} σχολίασε την προπόνησή του/της: «{{text}}»"
+      "body": "Ο/Η {{player}} σχολίασε {{item}}: «{{text}}»"
     },
     "playerCommentedReport": {
       "title": "Ο παίκτης απάντησε",
-      "body": "Ο/Η {{player}} σχολίασε μια κοινοποιημένη αναφορά: «{{text}}»"
+      "body": "Ο/Η {{player}} σχολίασε {{item}}: «{{text}}»"
     },
     "trainingFeedbackRequest": {
       "title": "Σχόλια προπόνησης",

@@ -2432,8 +2432,8 @@
       "body": "Sveiki sugrįžę — geras metas peržiūrėti ir atnaujinti savo sistemą bei filosofiją {{season}} sezonui."
     },
     "staffMessage": {
-      "title": "Žinutė nuo {{coach}}",
-      "body": "{{preview}}"
+      "title": "Nauja žinutė",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "Treniruočių programa išsiųsta",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "Treneris atsakė",
-      "body": "{{coach}} pakomentavo jūsų treniruotę: „{{text}}“"
+      "body": "{{coach}} pakomentavo {{item}}: „{{text}}“"
     },
     "trainingUpdatedByCoach": {
       "title": "Treniruočių programa atnaujinta",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "Treniruotė atnaujinta",
-      "body": "Treneris pridėjo pastabų prie jūsų treniruočių programos."
+      "body": "{{coach}} pridėjo pastabų prie {{item}}."
     },
     "coachCommentedTraining": {
       "title": "Treneris pridėjo pastabų",
-      "body": "Treneris pakomentavo jūsų treniruotę: „{{text}}“"
+      "body": "{{coach}} pakomentavo {{item}}: „{{text}}“"
     },
     "coachRepliedComment": {
       "title": "Treneris atsakė",
-      "body": "{{coach}} atsakė į jūsų komentarą apie ataskaitą: „{{text}}“"
+      "body": "{{coach}} atsakė {{item}}: „{{text}}“"
     },
     "linkRequest": {
       "title": "Susiejimo prašymas",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "Žaidėjas atsakė",
-      "body": "{{player}} pakomentavo savo treniruotę: „{{text}}“"
+      "body": "{{player}} pakomentavo {{item}}: „{{text}}“"
     },
     "playerCommentedReport": {
       "title": "Žaidėjas atsakė",
-      "body": "{{player}} pakomentavo bendrintą ataskaitą: „{{text}}“"
+      "body": "{{player}} pakomentavo {{item}}: „{{text}}“"
     },
     "trainingFeedbackRequest": {
       "title": "Treniruotės atsiliepimas",

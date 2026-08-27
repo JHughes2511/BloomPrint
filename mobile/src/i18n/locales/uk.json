@@ -2432,8 +2432,8 @@
       "body": "З поверненням — гарний час переглянути й оновити свою систему та філософію на {{season}}."
     },
     "staffMessage": {
-      "title": "Повідомлення від {{coach}}",
-      "body": "{{preview}}"
+      "title": "Нове повідомлення",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "Програму тренувань надіслано",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "Тренер відповів",
-      "body": "{{coach}} прокоментував ваше тренування: «{{text}}»"
+      "body": "{{coach}} прокоментував {{item}}: «{{text}}»"
     },
     "trainingUpdatedByCoach": {
       "title": "Програму тренувань оновлено",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "Тренування оновлено",
-      "body": "Тренер додав нотатки до вашої програми тренувань."
+      "body": "{{coach}} додав нотатки до {{item}}."
     },
     "coachCommentedTraining": {
       "title": "Тренер додав нотатки",
-      "body": "Тренер прокоментував ваше тренування: «{{text}}»"
+      "body": "{{coach}} прокоментував {{item}}: «{{text}}»"
     },
     "coachRepliedComment": {
       "title": "Тренер відповів",
-      "body": "{{coach}} відповів на ваш коментар до звіту: «{{text}}»"
+      "body": "{{coach}} відповів у {{item}}: «{{text}}»"
     },
     "linkRequest": {
       "title": "Запит на прив'язку",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "Гравець відповів",
-      "body": "{{player}} прокоментував своє тренування: «{{text}}»"
+      "body": "{{player}} прокоментував {{item}}: «{{text}}»"
     },
     "playerCommentedReport": {
       "title": "Гравець відповів",
-      "body": "{{player}} прокоментував надісланий звіт: «{{text}}»"
+      "body": "{{player}} прокоментував {{item}}: «{{text}}»"
     },
     "trainingFeedbackRequest": {
       "title": "Відгук про тренування",

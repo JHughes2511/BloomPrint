@@ -2432,8 +2432,8 @@
       "body": "Welkom terug — een goed moment om je systeem en filosofie voor {{season}} te bekijken en bij te werken."
     },
     "staffMessage": {
-      "title": "Bericht van {{coach}}",
-      "body": "{{preview}}"
+      "title": "Nieuw bericht",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "Trainingsprogramma verstuurd",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "Coach heeft gereageerd",
-      "body": "{{coach}} gaf commentaar op je training: \"{{text}}\""
+      "body": "{{coach}} heeft {{item}} becommentarieerd: \"{{text}}\""
     },
     "trainingUpdatedByCoach": {
       "title": "Trainingsprogramma bijgewerkt",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "Training bijgewerkt",
-      "body": "Een coach heeft notities aan je trainingsprogramma toegevoegd."
+      "body": "{{coach}} heeft notities toegevoegd aan {{item}}."
     },
     "coachCommentedTraining": {
       "title": "Coach heeft notities toegevoegd",
-      "body": "Een coach gaf commentaar op je training: \"{{text}}\""
+      "body": "{{coach}} heeft {{item}} becommentarieerd: \"{{text}}\""
     },
     "coachRepliedComment": {
       "title": "Coach heeft gereageerd",
-      "body": "{{coach}} reageerde op je opmerking bij het rapport: \"{{text}}\""
+      "body": "{{coach}} heeft gereageerd op {{item}}: \"{{text}}\""
     },
     "linkRequest": {
       "title": "Koppelverzoek",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "Speler heeft gereageerd",
-      "body": "{{player}} gaf commentaar op zijn training: \"{{text}}\""
+      "body": "{{player}} heeft {{item}} becommentarieerd: \"{{text}}\""
     },
     "playerCommentedReport": {
       "title": "Speler heeft gereageerd",
-      "body": "{{player}} gaf commentaar op een gedeeld rapport: \"{{text}}\""
+      "body": "{{player}} heeft {{item}} becommentarieerd: \"{{text}}\""
     },
     "trainingFeedbackRequest": {
       "title": "Trainingsfeedback",

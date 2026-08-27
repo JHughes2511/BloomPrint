@@ -2432,8 +2432,8 @@
       "body": "おかえりなさい。{{season}} に向けてシステムと哲学を見直し、更新する良い機会です。"
     },
     "staffMessage": {
-      "title": "{{coach}} からのメッセージ",
-      "body": "{{preview}}"
+      "title": "新しいメッセージ",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "トレーニングプログラムを送信しました",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "コーチが返信しました",
-      "body": "{{coach}} があなたのトレーニングにコメントしました:「{{text}}」"
+      "body": "{{coach}} が {{item}} にコメントしました:「{{text}}」"
     },
     "trainingUpdatedByCoach": {
       "title": "トレーニングプログラムを更新しました",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "トレーニングを更新しました",
-      "body": "コーチがあなたのトレーニングプログラムにメモを追加しました。"
+      "body": "{{coach}} が {{item}} にメモを追加しました。"
     },
     "coachCommentedTraining": {
       "title": "コーチがメモを追加しました",
-      "body": "コーチがあなたのトレーニングにコメントしました:「{{text}}」"
+      "body": "{{coach}} が {{item}} にコメントしました:「{{text}}」"
     },
     "coachRepliedComment": {
       "title": "コーチが返信しました",
-      "body": "{{coach}} がレポートへのあなたのコメントに返信しました:「{{text}}」"
+      "body": "{{coach}} が {{item}} で返信しました:「{{text}}」"
     },
     "linkRequest": {
       "title": "連携リクエスト",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "選手が返信しました",
-      "body": "{{player}} が自分のトレーニングにコメントしました:「{{text}}」"
+      "body": "{{player}} が {{item}} にコメントしました:「{{text}}」"
     },
     "playerCommentedReport": {
       "title": "選手が返信しました",
-      "body": "{{player}} が共有レポートにコメントしました:「{{text}}」"
+      "body": "{{player}} が {{item}} にコメントしました:「{{text}}」"
     },
     "trainingFeedbackRequest": {
       "title": "トレーニングへのフィードバック",

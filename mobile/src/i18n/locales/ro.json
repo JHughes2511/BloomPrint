@@ -2432,8 +2432,8 @@
       "body": "Bine ai revenit — un moment bun să îți revizuiești și actualizezi sistemul și filozofia pentru {{season}}."
     },
     "staffMessage": {
-      "title": "Mesaj de la {{coach}}",
-      "body": "{{preview}}"
+      "title": "Mesaj nou",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "Program de antrenament trimis",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "Antrenorul a răspuns",
-      "body": "{{coach}} a comentat antrenamentul tău: „{{text}}”"
+      "body": "{{coach}} a comentat la {{item}}: \"{{text}}\""
     },
     "trainingUpdatedByCoach": {
       "title": "Program de antrenament actualizat",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "Antrenament actualizat",
-      "body": "Un antrenor a adăugat notițe în programul tău de antrenament."
+      "body": "{{coach}} a adăugat notițe la {{item}}."
     },
     "coachCommentedTraining": {
       "title": "Antrenorul a adăugat notițe",
-      "body": "Un antrenor a comentat antrenamentul tău: „{{text}}”"
+      "body": "{{coach}} a comentat la {{item}}: \"{{text}}\""
     },
     "coachRepliedComment": {
       "title": "Antrenorul a răspuns",
-      "body": "{{coach}} a răspuns la comentariul tău despre raport: „{{text}}”"
+      "body": "{{coach}} a răspuns la {{item}}: \"{{text}}\""
     },
     "linkRequest": {
       "title": "Cerere de asociere",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "Jucătorul a răspuns",
-      "body": "{{player}} a comentat antrenamentul său: „{{text}}”"
+      "body": "{{player}} a comentat la {{item}}: \"{{text}}\""
     },
     "playerCommentedReport": {
       "title": "Jucătorul a răspuns",
-      "body": "{{player}} a comentat un raport partajat: „{{text}}”"
+      "body": "{{player}} a comentat la {{item}}: \"{{text}}\""
     },
     "trainingFeedbackRequest": {
       "title": "Feedback de antrenament",

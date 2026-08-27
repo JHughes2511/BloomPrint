@@ -2432,8 +2432,8 @@
       "body": "Dobro došli natrag — dobar trenutak da pregledate i ažurirate svoj sustav i filozofiju za {{season}}."
     },
     "staffMessage": {
-      "title": "Poruka od {{coach}}",
-      "body": "{{preview}}"
+      "title": "Nova poruka",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "Program treninga poslan",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "Trener je odgovorio",
-      "body": "{{coach}} je komentirao vaš trening: „{{text}}”"
+      "body": "{{coach}} je komentirao {{item}}: „{{text}}”"
     },
     "trainingUpdatedByCoach": {
       "title": "Program treninga ažuriran",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "Trening ažuriran",
-      "body": "Trener je dodao bilješke u vaš program treninga."
+      "body": "{{coach}} je dodao bilješke u {{item}}."
     },
     "coachCommentedTraining": {
       "title": "Trener je dodao bilješke",
-      "body": "Trener je komentirao vaš trening: „{{text}}”"
+      "body": "{{coach}} je komentirao {{item}}: „{{text}}”"
     },
     "coachRepliedComment": {
       "title": "Trener je odgovorio",
-      "body": "{{coach}} je odgovorio na vaš komentar o izvještaju: „{{text}}”"
+      "body": "{{coach}} je odgovorio u {{item}}: „{{text}}”"
     },
     "linkRequest": {
       "title": "Zahtjev za povezivanje",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "Igrač je odgovorio",
-      "body": "{{player}} je komentirao svoj trening: „{{text}}”"
+      "body": "{{player}} je komentirao {{item}}: „{{text}}”"
     },
     "playerCommentedReport": {
       "title": "Igrač je odgovorio",
-      "body": "{{player}} je komentirao podijeljeni izvještaj: „{{text}}”"
+      "body": "{{player}} je komentirao {{item}}: „{{text}}”"
     },
     "trainingFeedbackRequest": {
       "title": "Povratna informacija o treningu",

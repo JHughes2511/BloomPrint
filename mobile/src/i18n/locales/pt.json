@@ -2432,8 +2432,8 @@
       "body": "Bem-vindo de volta — boa altura para rever e atualizar o seu sistema e filosofia para {{season}}."
     },
     "staffMessage": {
-      "title": "Mensagem de {{coach}}",
-      "body": "{{preview}}"
+      "title": "Nova mensagem",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "Programa de treino enviado",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "O treinador respondeu",
-      "body": "{{coach}} comentou o seu treino: \"{{text}}\""
+      "body": "{{coach}} comentou em {{item}}: \"{{text}}\""
     },
     "trainingUpdatedByCoach": {
       "title": "Programa de treino atualizado",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "Treino atualizado",
-      "body": "Um treinador adicionou notas ao seu programa de treino."
+      "body": "{{coach}} adicionou notas a {{item}}."
     },
     "coachCommentedTraining": {
       "title": "O treinador adicionou notas",
-      "body": "Um treinador comentou o seu treino: \"{{text}}\""
+      "body": "{{coach}} comentou em {{item}}: \"{{text}}\""
     },
     "coachRepliedComment": {
       "title": "O treinador respondeu",
-      "body": "{{coach}} respondeu ao seu comentário sobre o relatório: \"{{text}}\""
+      "body": "{{coach}} respondeu em {{item}}: \"{{text}}\""
     },
     "linkRequest": {
       "title": "Pedido de ligação",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "O jogador respondeu",
-      "body": "{{player}} comentou o seu treino: \"{{text}}\""
+      "body": "{{player}} comentou em {{item}}: \"{{text}}\""
     },
     "playerCommentedReport": {
       "title": "O jogador respondeu",
-      "body": "{{player}} comentou um relatório partilhado: \"{{text}}\""
+      "body": "{{player}} comentou em {{item}}: \"{{text}}\""
     },
     "trainingFeedbackRequest": {
       "title": "Feedback de treino",

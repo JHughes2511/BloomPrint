@@ -2432,8 +2432,8 @@
       "body": "Welcome back — a good time to review and update your system & philosophy for {{season}}."
     },
     "staffMessage": {
-      "title": "Message from {{coach}}",
-      "body": "{{preview}}"
+      "title": "New message",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "Training program sent",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "Coach replied",
-      "body": "{{coach}} commented on your training: \"{{text}}\""
+      "body": "{{coach}} commented on {{item}}: \"{{text}}\""
     },
     "trainingUpdatedByCoach": {
       "title": "Training program updated",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "Training updated",
-      "body": "A coach has added notes to your training program."
+      "body": "{{coach}} added notes to {{item}}."
     },
     "coachCommentedTraining": {
       "title": "Coach added notes",
-      "body": "A coach commented on your training: \"{{text}}\""
+      "body": "{{coach}} commented on {{item}}: \"{{text}}\""
     },
     "coachRepliedComment": {
       "title": "Coach replied",
-      "body": "{{coach}} replied to your report comment: \"{{text}}\""
+      "body": "{{coach}} replied on {{item}}: \"{{text}}\""
     },
     "linkRequest": {
       "title": "Player link request",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "Player responded",
-      "body": "{{player}} commented on their training: \"{{text}}\""
+      "body": "{{player}} commented on {{item}}: \"{{text}}\""
     },
     "playerCommentedReport": {
       "title": "Player responded",
-      "body": "{{player}} commented on a shared report: \"{{text}}\""
+      "body": "{{player}} commented on {{item}}: \"{{text}}\""
     },
     "trainingFeedbackRequest": {
       "title": "Training feedback",

@@ -22,6 +22,11 @@ const ENUM_PARAMS: Record<string, string> = {
   // the kind rather than prose for the same reason as everything else here:
   // it does not know who will read the row or in what language.
   kind: 'jobs.kinds',
+  // WHICH report or program a comment is on. Two shapes travel in this one
+  // param: a report type when the document has no title of its own, and the
+  // title itself when it has one. Both work here — a title is not a key in
+  // reportTypes, so it falls through the defaultValue and shows as written.
+  item: 'reportTypes',
 };
 
 function localizeParams(params: Record<string, any> | null | undefined, tr: TFunction) {

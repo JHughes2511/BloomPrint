@@ -2432,8 +2432,8 @@
       "body": "Willkommen zurück — ein guter Zeitpunkt, dein System und deine Philosophie für {{season}} zu überprüfen und zu aktualisieren."
     },
     "staffMessage": {
-      "title": "Nachricht von {{coach}}",
-      "body": "{{preview}}"
+      "title": "Neue Nachricht",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "Trainingsprogramm gesendet",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "Trainer hat geantwortet",
-      "body": "{{coach}} hat dein Training kommentiert: \"{{text}}\""
+      "body": "{{coach}} hat {{item}} kommentiert: \"{{text}}\""
     },
     "trainingUpdatedByCoach": {
       "title": "Trainingsprogramm aktualisiert",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "Training aktualisiert",
-      "body": "Ein Trainer hat Notizen zu deinem Trainingsprogramm hinzugefügt."
+      "body": "{{coach}} hat Notizen zu {{item}} hinzugefügt."
     },
     "coachCommentedTraining": {
       "title": "Trainer hat Notizen hinzugefügt",
-      "body": "Ein Trainer hat dein Training kommentiert: \"{{text}}\""
+      "body": "{{coach}} hat {{item}} kommentiert: \"{{text}}\""
     },
     "coachRepliedComment": {
       "title": "Trainer hat geantwortet",
-      "body": "{{coach}} hat auf deinen Kommentar zum Bericht geantwortet: \"{{text}}\""
+      "body": "{{coach}} hat auf {{item}} geantwortet: \"{{text}}\""
     },
     "linkRequest": {
       "title": "Verknüpfungsanfrage",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "Spieler hat geantwortet",
-      "body": "{{player}} hat sein Training kommentiert: \"{{text}}\""
+      "body": "{{player}} hat {{item}} kommentiert: \"{{text}}\""
     },
     "playerCommentedReport": {
       "title": "Spieler hat geantwortet",
-      "body": "{{player}} hat einen geteilten Bericht kommentiert: \"{{text}}\""
+      "body": "{{player}} hat {{item}} kommentiert: \"{{text}}\""
     },
     "trainingFeedbackRequest": {
       "title": "Trainings-Feedback",

@@ -2432,8 +2432,8 @@
       "body": "Välkommen tillbaka — ett bra tillfälle att se över och uppdatera ditt system och din filosofi för {{season}}."
     },
     "staffMessage": {
-      "title": "Meddelande från {{coach}}",
-      "body": "{{preview}}"
+      "title": "Nytt meddelande",
+      "body": "{{coach}}: {{preview}}"
     },
     "trainingSent": {
       "title": "Träningsprogram skickat",
@@ -2441,7 +2441,7 @@
     },
     "coachRepliedTraining": {
       "title": "Tränaren svarade",
-      "body": "{{coach}} kommenterade din träning: \"{{text}}\""
+      "body": "{{coach}} kommenterade {{item}}: \"{{text}}\""
     },
     "trainingUpdatedByCoach": {
       "title": "Träningsprogram uppdaterat",
@@ -2449,15 +2449,15 @@
     },
     "trainingNotesAdded": {
       "title": "Träning uppdaterad",
-      "body": "En tränare har lagt till anteckningar i ditt träningsprogram."
+      "body": "{{coach}} lade till anteckningar i {{item}}."
     },
     "coachCommentedTraining": {
       "title": "Tränaren lade till anteckningar",
-      "body": "En tränare kommenterade din träning: \"{{text}}\""
+      "body": "{{coach}} kommenterade {{item}}: \"{{text}}\""
     },
     "coachRepliedComment": {
       "title": "Tränaren svarade",
-      "body": "{{coach}} svarade på din kommentar om rapporten: \"{{text}}\""
+      "body": "{{coach}} svarade på {{item}}: \"{{text}}\""
     },
     "linkRequest": {
       "title": "Begäran om koppling",
@@ -2509,11 +2509,11 @@
     },
     "playerCommentedTraining": {
       "title": "Spelaren svarade",
-      "body": "{{player}} kommenterade sin träning: \"{{text}}\""
+      "body": "{{player}} kommenterade {{item}}: \"{{text}}\""
     },
     "playerCommentedReport": {
       "title": "Spelaren svarade",
-      "body": "{{player}} kommenterade en delad rapport: \"{{text}}\""
+      "body": "{{player}} kommenterade {{item}}: \"{{text}}\""
     },
     "trainingFeedbackRequest": {
       "title": "Träningsåterkoppling",
