@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import emails, models, notify, schemas
+from .. import decisions, emails, models, notify, schemas
 from ..softdelete import soft_delete
 
 router = APIRouter(prefix="/teams", tags=["teams"])
@@ -158,8 +158,16 @@ def delete_team(
         db.commit()
         where = emails.link_to(f"/home/staff/team/{team.id}")
         for coach_id in told:
-            notify.coach_notification(db.get(models.Coach, coach_id),
-                                      "notifs.teamReleased", params, link=where)
+            # A token each, so the mail carries a button that takes the team
+            # rather than a link into the app. They are all live at once on
+            # purpose: this is a race, and the first press wins. The rest then
+            # find an owner and are told who by name.
+            notify.coach_notification(
+                db.get(models.Coach, coach_id), "notifs.teamReleased", params,
+                link=where,
+                decide=decisions.issue(db, "team_claim", team.id,
+                                       decisions.COACH, coach_id),
+                decide_label="claim_cta")
         return {"ok": True, "released": len(released), "told": len(told)}
 
     soft_delete(db, team)

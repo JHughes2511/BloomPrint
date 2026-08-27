@@ -1,10 +1,11 @@
 """Answering a request from the email, without opening the app.
 
-Five things in BloomPrint wait on somebody saying yes or no: a player consenting
+Six things in BloomPrint wait on somebody acting. Five are a yes or no: a player consenting
 to a report about them going to another player, an owner answering a join
 request, a coach answering an invite, an owner answering a proposed roster
 addition, and a coach answering a player asking to be linked to a roster spot.
-Each of those already emails the person it is waiting on. Making them open the
+The sixth is a single action rather than a choice: claiming a team whose owner
+let go of it. Each of those already emails the person it is waiting on. Making them open the
 app, find the screen and press the button is three steps to say one word, and
 the request sits there in the meantime.
 
@@ -111,6 +112,20 @@ def _link_pending(db: Session, row_id: int, user_id: int) -> bool:
     return False
 
 
+def _claim_pending(db: Session, row_id: int, user_id: int) -> bool:
+    """A team is claimable while it has no owner and you are staff on it.
+
+    Not "you were sent the link": the whole point is that several people are
+    sent one and the first to press it gets the team. Everyone else's link then
+    finds an owner here and is turned away by name.
+    """
+    team = db.get(models.Team, row_id)
+    if team is None or team.coach_id is not None:
+        return False
+    return bool(db.query(models.TeamStaff)
+                .filter_by(team_id=row_id, coach_id=user_id).first())
+
+
 def _proposal_pending(db: Session, row_id: int, user_id: int) -> bool:
     row = db.get(models.RosterProposal, row_id)
     if not row or row.status != "pending":
@@ -156,6 +171,18 @@ def _kinds() -> dict:
             "reject": lambda db, user, rid: player_routes.reject_link(
                 request_id=rid, db=db, coach=user),
         },
+        "team_claim": {
+            "audience": COACH,
+            "pending": _claim_pending,
+            # transfer_owner with no coach_id named is "claim it myself", the
+            # same call the button in the app makes.
+            "approve": lambda db, user, rid: team_staff.transfer_owner(
+                team_id=rid, body=team_staff.TransferOwnerBody(), db=db,
+                coach=user),
+            # Nothing to decline. Leaving a team unclaimed is what happens if
+            # you ignore the mail, so a decline would only spend the link.
+            "reject": lambda db, user, rid: None,
+        },
         "roster_proposal": {
             "audience": COACH,
             "pending": _proposal_pending,
@@ -168,7 +195,7 @@ def _kinds() -> dict:
 
 
 KINDS = ("share_approval", "team_join_request", "team_invite",
-         "roster_proposal", "player_link_request")
+         "roster_proposal", "player_link_request", "team_claim")
 
 
 def issue(db: Session, kind: str, target_id: int, audience: str,

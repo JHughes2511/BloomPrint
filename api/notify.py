@@ -199,7 +199,8 @@ def set_opted_out(audience: str, user_id: int, value: bool) -> bool:
 
 def _deliver_notification(audience: str, user_id: int, key: str, to: str,
                           lang: str | None, params: dict, link: str | None,
-                          decide: str | None = None) -> None:
+                          decide: str | None = None,
+                          decide_label: str | None = None) -> None:
     """Render one notification as mail and send it. Never raises."""
     try:
         token, opted_out = _preference(audience, user_id)
@@ -208,7 +209,7 @@ def _deliver_notification(audience: str, user_id: int, key: str, to: str,
         if opted_out:
             return
         rendered = render_notification(key, lang, params, token=token, link=link,
-                                       decide=decide)
+                                       decide=decide, decide_label=decide_label)
         if rendered is None:
             # No copy for the key, or a param the caller did not pass. Both
             # mean the message would read as a bug; the in-app row still shows.
@@ -217,7 +218,8 @@ def _deliver_notification(audience: str, user_id: int, key: str, to: str,
         subject, body = rendered
         try:
             html = render_notification_html(key, lang, params, token=token,
-                                            link=link, decide=decide)
+                                            link=link, decide=decide,
+                                            decide_label=decide_label)
         except Exception:
             log.warning("Could not lay out %s; sending as text", key, exc_info=True)
             html = None
@@ -232,7 +234,8 @@ def _deliver_notification(audience: str, user_id: int, key: str, to: str,
 
 def notification(audience: str, user_id: int, key: str, *, to: str | None,
                  lang: str | None, params: dict | None = None,
-                 link: str | None = None, decide: str | None = None) -> None:
+                 link: str | None = None, decide: str | None = None,
+                 decide_label: str | None = None) -> None:
     """Send the email for one in-app notification, or queue it for the digest.
 
     Returns immediately either way. Which of the two happens is decided here
@@ -246,12 +249,13 @@ def notification(audience: str, user_id: int, key: str, *, to: str | None,
         digest.queue(audience, user_id, key, params, link)
         return
     _pool.submit(_deliver_notification, audience, user_id, key, to, lang,
-                 dict(params or {}), link, decide)
+                 dict(params or {}), link, decide, decide_label)
 
 
 def coach_notification(coach: "models.Coach | None", key: str,
                        params: dict | None = None, *, link: str | None = None,
-                       decide: str | None = None) -> None:
+                       decide: str | None = None,
+                       decide_label: str | None = None) -> None:
     """The coach's copy of a notification, in the coach's language.
 
     Address and language are read here, on the caller's thread, because the row
@@ -261,7 +265,7 @@ def coach_notification(coach: "models.Coach | None", key: str,
         return
     notification(COACH, coach.id, key, to=coach.email,
                  lang=coach.preferred_language, params=params, link=link,
-                 decide=decide)
+                 decide=decide, decide_label=decide_label)
 
 
 def player_notification(user: "models.PlayerUser | None", key: str,

@@ -79,6 +79,10 @@ def unsubscribe_url(token: str) -> str:
 #   undo_cta:    label for the link that calls off a deletion. Says what it
 #                does rather than "Open BloomPrint", which on that message
 #                would be the one button nobody dares press.
+#   claim_cta:   the one button on a "this team has no owner" message. A single
+#                action, not an approve-or-decline, so it says what it does.
+#   claim_taken: what the page says when somebody got there first. Names them,
+#                because "already answered" leaves you wondering who has it.
 #   digest_title: subject and heading of the hourly digest. No count in
 #                it on purpose: "3 new comments" needs plural rules that differ
 #                across these twenty-five languages, and the list is right there
@@ -95,6 +99,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Open BloomPrint",
         "reset_cta": "Choose a new password",
         "undo_cta": "Keep my account",
+        "claim_cta": "Claim this team",
+        "claim_taken": "{name} has already claimed {team}.",
         "digest_title": "New comments and messages",
         "decide_approve": "Approve",
         "decide_reject": "Decline",
@@ -116,6 +122,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Abrir BloomPrint",
         "reset_cta": "Elegir una contraseña nueva",
         "undo_cta": "Conservar mi cuenta",
+        "claim_cta": "Quedarme con este equipo",
+        "claim_taken": "{name} ya se ha quedado con {team}.",
         "digest_title": "Nuevos comentarios y mensajes",
         "decide_approve": "Aprobar",
         "decide_reject": "Rechazar",
@@ -137,6 +145,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Ouvrir BloomPrint",
         "reset_cta": "Choisir un nouveau mot de passe",
         "undo_cta": "Conserver mon compte",
+        "claim_cta": "Reprendre cette équipe",
+        "claim_taken": "{name} a déjà repris {team}.",
         "digest_title": "Nouveaux commentaires et messages",
         "decide_approve": "Approuver",
         "decide_reject": "Refuser",
@@ -158,6 +168,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Abrir o BloomPrint",
         "reset_cta": "Escolher uma nova palavra-passe",
         "undo_cta": "Manter a minha conta",
+        "claim_cta": "Assumir esta equipa",
+        "claim_taken": "{name} já assumiu {team}.",
         "digest_title": "Novos comentários e mensagens",
         "decide_approve": "Aprovar",
         "decide_reject": "Recusar",
@@ -179,6 +191,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Apri BloomPrint",
         "reset_cta": "Scegli una nuova password",
         "undo_cta": "Mantieni il mio account",
+        "claim_cta": "Prendi questa squadra",
+        "claim_taken": "{name} ha già preso {team}.",
         "digest_title": "Nuovi commenti e messaggi",
         "decide_approve": "Approva",
         "decide_reject": "Rifiuta",
@@ -200,6 +214,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "BloomPrint öffnen",
         "reset_cta": "Neues Passwort wählen",
         "undo_cta": "Konto behalten",
+        "claim_cta": "Team übernehmen",
+        "claim_taken": "{name} hat {team} bereits übernommen.",
         "digest_title": "Neue Kommentare und Nachrichten",
         "decide_approve": "Genehmigen",
         "decide_reject": "Ablehnen",
@@ -221,6 +237,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "BloomPrint openen",
         "reset_cta": "Nieuw wachtwoord kiezen",
         "undo_cta": "Mijn account behouden",
+        "claim_cta": "Dit team overnemen",
+        "claim_taken": "{name} heeft {team} al overgenomen.",
         "digest_title": "Nieuwe reacties en berichten",
         "decide_approve": "Goedkeuren",
         "decide_reject": "Afwijzen",
@@ -242,6 +260,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Öppna BloomPrint",
         "reset_cta": "Välj ett nytt lösenord",
         "undo_cta": "Behåll mitt konto",
+        "claim_cta": "Ta över laget",
+        "claim_taken": "{name} har redan tagit över {team}.",
         "digest_title": "Nya kommentarer och meddelanden",
         "decide_approve": "Godkänn",
         "decide_reject": "Avböj",
@@ -263,6 +283,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Otwórz BloomPrint",
         "reset_cta": "Ustaw nowe hasło",
         "undo_cta": "Zachowaj moje konto",
+        "claim_cta": "Przejmij zespół",
+        "claim_taken": "{name} już przejął {team}.",
         "digest_title": "Nowe komentarze i wiadomości",
         "decide_approve": "Zatwierdź",
         "decide_reject": "Odrzuć",
@@ -284,6 +306,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Открыть BloomPrint",
         "reset_cta": "Задать новый пароль",
         "undo_cta": "Оставить аккаунт",
+        "claim_cta": "Взять команду себе",
+        "claim_taken": "{name} уже взял команду {team}.",
         "digest_title": "Новые комментарии и сообщения",
         "decide_approve": "Одобрить",
         "decide_reject": "Отклонить",
@@ -305,6 +329,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Відкрити BloomPrint",
         "reset_cta": "Задати новий пароль",
         "undo_cta": "Залишити обліковий запис",
+        "claim_cta": "Взяти команду собі",
+        "claim_taken": "{name} уже взяв команду {team}.",
         "digest_title": "Нові коментарі та повідомлення",
         "decide_approve": "Схвалити",
         "decide_reject": "Відхилити",
@@ -326,6 +352,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Отвори BloomPrint",
         "reset_cta": "Изаберите нову лозинку",
         "undo_cta": "Задржи мој налог",
+        "claim_cta": "Преузми овај тим",
+        "claim_taken": "{name} је већ преузео {team}.",
         "digest_title": "Нови коментари и поруке",
         "decide_approve": "Одобри",
         "decide_reject": "Одбиј",
@@ -347,6 +375,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Otvori BloomPrint",
         "reset_cta": "Odaberite novu lozinku",
         "undo_cta": "Zadrži moj račun",
+        "claim_cta": "Preuzmi ovu momčad",
+        "claim_taken": "{name} je već preuzeo {team}.",
         "digest_title": "Novi komentari i poruke",
         "decide_approve": "Odobri",
         "decide_reject": "Odbij",
@@ -368,6 +398,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "BloomPrint'i aç",
         "reset_cta": "Yeni şifre belirle",
         "undo_cta": "Hesabımı koru",
+        "claim_cta": "Bu takımı devral",
+        "claim_taken": "{name}, {team} takımını çoktan devraldı.",
         "digest_title": "Yeni yorumlar ve mesajlar",
         "decide_approve": "Onayla",
         "decide_reject": "Reddet",
@@ -389,6 +421,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Deschide BloomPrint",
         "reset_cta": "Alege o parolă nouă",
         "undo_cta": "Păstrează contul",
+        "claim_cta": "Preia această echipă",
+        "claim_taken": "{name} a preluat deja {team}.",
         "digest_title": "Comentarii și mesaje noi",
         "decide_approve": "Aprobă",
         "decide_reject": "Respinge",
@@ -410,6 +444,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Άνοιγμα του BloomPrint",
         "reset_cta": "Επιλογή νέου κωδικού",
         "undo_cta": "Διατήρηση του λογαριασμού μου",
+        "claim_cta": "Ανάληψη της ομάδας",
+        "claim_taken": "Ο/Η {name} έχει ήδη αναλάβει την {team}.",
         "digest_title": "Νέα σχόλια και μηνύματα",
         "decide_approve": "Έγκριση",
         "decide_reject": "Απόρριψη",
@@ -431,6 +467,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Atidaryti BloomPrint",
         "reset_cta": "Nustatyti naują slaptažodį",
         "undo_cta": "Palikti mano paskyrą",
+        "claim_cta": "Perimti šią komandą",
+        "claim_taken": "{name} jau perėmė {team}.",
         "digest_title": "Nauji komentarai ir žinutės",
         "decide_approve": "Patvirtinti",
         "decide_reject": "Atmesti",
@@ -452,6 +490,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "فتح BloomPrint",
         "reset_cta": "اختيار كلمة مرور جديدة",
         "undo_cta": "الاحتفاظ بحسابي",
+        "claim_cta": "تولّي هذا الفريق",
+        "claim_taken": "تولّى {name} فريق {team} بالفعل.",
         "digest_title": "تعليقات ورسائل جديدة",
         "decide_approve": "موافقة",
         "decide_reject": "رفض",
@@ -473,6 +513,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "פתיחת BloomPrint",
         "reset_cta": "בחירת סיסמה חדשה",
         "undo_cta": "להשאיר את החשבון שלי",
+        "claim_cta": "לקחת את הקבוצה",
+        "claim_taken": "{name} כבר לקח את {team}.",
         "digest_title": "תגובות והודעות חדשות",
         "decide_approve": "אישור",
         "decide_reject": "דחייה",
@@ -494,6 +536,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "BloomPrint खोलें",
         "reset_cta": "नया पासवर्ड चुनें",
         "undo_cta": "मेरा खाता रखें",
+        "claim_cta": "यह टीम लें",
+        "claim_taken": "{name} पहले ही {team} ले चुके हैं।",
         "digest_title": "नई टिप्पणियाँ और संदेश",
         "decide_approve": "स्वीकार करें",
         "decide_reject": "अस्वीकार करें",
@@ -515,6 +559,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "BloomPrint-ის გახსნა",
         "reset_cta": "ახალი პაროლის არჩევა",
         "undo_cta": "ჩემი ანგარიშის შენარჩუნება",
+        "claim_cta": "ამ გუნდის აღება",
+        "claim_taken": "{name}-მა უკვე აიღო {team}.",
         "digest_title": "ახალი კომენტარები და შეტყობინებები",
         "decide_approve": "დამტკიცება",
         "decide_reject": "უარყოფა",
@@ -536,6 +582,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "BloomPrint を開く",
         "reset_cta": "新しいパスワードを設定",
         "undo_cta": "アカウントを残す",
+        "claim_cta": "このチームを引き継ぐ",
+        "claim_taken": "{name} がすでに {team} を引き継ぎました。",
         "digest_title": "新しいコメントとメッセージ",
         "decide_approve": "承認する",
         "decide_reject": "却下する",
@@ -557,6 +605,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "BloomPrint 열기",
         "reset_cta": "새 비밀번호 설정",
         "undo_cta": "계정 유지하기",
+        "claim_cta": "이 팀 맡기",
+        "claim_taken": "{name} 님이 이미 {team}을 맡았습니다.",
         "digest_title": "새 댓글과 메시지",
         "decide_approve": "승인",
         "decide_reject": "거절",
@@ -578,6 +628,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "打开 BloomPrint",
         "reset_cta": "设置新密码",
         "undo_cta": "保留我的账户",
+        "claim_cta": "接手这支球队",
+        "claim_taken": "{name} 已经接手了 {team}。",
         "digest_title": "新的评论和消息",
         "decide_approve": "批准",
         "decide_reject": "拒绝",
@@ -599,6 +651,8 @@ SHELL: dict[str, dict[str, str]] = {
         "open_cta": "Buksan ang BloomPrint",
         "reset_cta": "Pumili ng bagong password",
         "undo_cta": "Panatilihin ang aking account",
+        "claim_cta": "Kunin ang team na ito",
+        "claim_taken": "Kinuha na ni {name} ang {team}.",
         "digest_title": "Mga bagong komento at mensahe",
         "decide_approve": "Aprubahan",
         "decide_reject": "Tanggihan",
@@ -929,7 +983,8 @@ def notification_copy(key: str, lang: str | None,
 
 def render_notification(key: str, lang: str | None, params: dict | None = None, *,
                         token: str | None = None, link: str | None = None,
-                        decide: str | None = None) -> tuple[str, str] | None:
+                        decide: str | None = None,
+                        decide_label: str | None = None) -> tuple[str, str] | None:
     """(subject, text body) for a notification, framed like any other email."""
     pair = notification_copy(key, lang, params)
     if pair is None:
@@ -941,8 +996,13 @@ def render_notification(key: str, lang: str | None, params: dict | None = None, 
     parts = [body]
     if decide:
         yes, no = decide_urls(decide)
-        parts.append(f"{shell['decide_approve']}: {yes}\n"
-                     f"{shell['decide_reject']}: {no}")
+        if decide_label:
+            # One action, so one line. An offer to decline something nobody
+            # asked you to accept is just a second thing to read.
+            parts.append(f"{shell.get(decide_label, shell['decide_approve'])}: {yes}")
+        else:
+            parts.append(f"{shell['decide_approve']}: {yes}\n"
+                         f"{shell['decide_reject']}: {no}")
     parts += [f"{shell['open_cta']}: {link or app_url()}", shell["signoff"]]
     if token:
         # Every one of these is an opt-out-able notification by definition:
@@ -955,7 +1015,8 @@ def render_notification(key: str, lang: str | None, params: dict | None = None, 
 def render_notification_html(key: str, lang: str | None,
                              params: dict | None = None, *,
                              token: str | None = None, link: str | None = None,
-                             decide: str | None = None) -> str | None:
+                             decide: str | None = None,
+                             decide_label: str | None = None) -> str | None:
     """The same notification, laid out. Same words, same shell as render()."""
     from .email_html import build
     from .mailer import contact_email
@@ -980,8 +1041,12 @@ def render_notification_html(key: str, lang: str | None,
     }
     if decide:
         yes, no = decide_urls(decide)
-        kw["cta_label"], kw["cta_url"] = shell["decide_approve"], yes
-        kw["cta2_label"], kw["cta2_url"] = shell["decide_reject"], no
+        if decide_label:
+            kw["cta_label"] = shell.get(decide_label, shell["decide_approve"])
+            kw["cta_url"] = yes
+        else:
+            kw["cta_label"], kw["cta_url"] = shell["decide_approve"], yes
+            kw["cta2_label"], kw["cta2_url"] = shell["decide_reject"], no
     if token:
         kw["unsub"] = shell["unsub"].replace("{url}", "").strip()
         kw["unsub_url"] = unsubscribe_url(token)

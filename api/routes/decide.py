@@ -125,6 +125,16 @@ def _describe(db: Session, row: models.DecisionToken, lang: str) -> str:
                 "player": player.name if player else "",
                 "team": team.name if team else "",
             }
+    elif row.kind == "team_claim":
+        t = db.get(models.Team, row.target_id)
+        if t:
+            key, params = "teamReleased", {
+                "coach": "", "team": t.name,
+            }
+            # The name of whoever let it go is not carried on the token, and
+            # the row it came from may be long gone, so the sentence would be
+            # missing a param and refuse to render. The heading says enough.
+            return ""
     elif row.kind == "player_link_request":
         lr = db.get(models.LinkRequest, row.target_id)
         if lr:
@@ -145,6 +155,26 @@ def _shell(lang: str) -> dict:
                             emails.SHELL[emails.DEFAULT_LANG])
 
 
+def _already_claimed(db: Session, row: models.DecisionToken, lang: str) -> str | None:
+    """"Marcus has already claimed Varsity", when somebody got there first.
+
+    A team claim is a race between several people who were all sent a link, so
+    "this has already been answered" is the one message that leaves the reader
+    with the wrong question. Naming the new owner answers it.
+    """
+    if row.kind != "team_claim":
+        return None
+    team = db.get(models.Team, row.target_id)
+    if team is None or team.coach_id is None:
+        return None
+    owner = db.get(models.Coach, team.coach_id)
+    if owner is None:
+        return None
+    shell = _shell(lang)
+    return emails._fmt(shell["claim_taken"],
+                       {"name": owner.name, "team": team.name})
+
+
 def _answer(db: Session, token: str, choice: str) -> HTMLResponse:
     """Carry out the decision and say what happened, in the reader's language.
 
@@ -161,7 +191,12 @@ def _answer(db: Session, token: str, choice: str) -> HTMLResponse:
     lang = getattr(account, "preferred_language", None) or "en"
     shell = _shell(lang)
 
+    # Read before the decision, because deciding spends the link and a claim
+    # that lost the race has to be able to say who won it.
+    taken = _already_claimed(db, row, lang)
     outcome = decisions.decide(db, row, "reject" if choice == "reject" else "approve")
+    if outcome == "gone" and taken:
+        return _page(lang, taken, "", _open_link(lang))
     heading = {
         "approved": shell["decide_approved"],
         "rejected": shell["decide_rejected"],
