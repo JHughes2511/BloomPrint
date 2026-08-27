@@ -853,18 +853,35 @@ def _fmt_tags(s: str, params: dict) -> str:
     return _TAG.sub(one, s or "")
 
 
+# A qualified enum: the API value, then what tells one of them from another.
+# "scouting_report|Andre" renders as "Scouting Report · Andre" in every
+# language, because only the half before the bar is looked up.
+#
+# It exists because the type alone does not identify anything. A coach with a
+# dozen players gets "Andre commented on Scouting Report" and has to go and
+# look; the same line naming the report is the difference between a
+# notification and a nudge. The alternative — composing the whole name on the
+# server — would freeze it in whichever language the writer happened to use,
+# and these rows are read by people who chose a different one.
+QUALIFIER = "|"
+JOIN = " · "
+
+
 def _localize_params(params: dict, lang: str) -> dict:
     from . import notif_copy
 
     out = dict(params or {})
     for name, table in ENUM_PARAMS.items():
         raw = out.get(name)
-        if isinstance(raw, str) and raw:
-            by_lang = getattr(notif_copy, table)
-            words = by_lang.get(lang) or by_lang.get(DEFAULT_LANG) or {}
-            # An enum the packs do not know about reads as words rather than as
-            # "film_breakdown", which is what the client does with it too.
-            out[name] = words.get(raw) or raw.replace("_", " ")
+        if not (isinstance(raw, str) and raw):
+            continue
+        by_lang = getattr(notif_copy, table)
+        words = by_lang.get(lang) or by_lang.get(DEFAULT_LANG) or {}
+        head, sep, tail = raw.partition(QUALIFIER)
+        # An enum the packs do not know about reads as words rather than as
+        # "film_breakdown", which is what the client does with it too.
+        said = words.get(head) or head.replace("_", " ")
+        out[name] = f"{said}{JOIN}{tail}" if sep and tail.strip() else said
     return out
 
 

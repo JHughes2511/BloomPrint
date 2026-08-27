@@ -2435,6 +2435,10 @@
       "title": "Νέο μήνυμα",
       "body": "{{coach}}: {{preview}}"
     },
+    "staffMessageGroup": {
+      "title": "Νέο μήνυμα",
+      "body": "{{coach}} στο {{item}}: {{preview}}"
+    },
     "trainingSent": {
       "title": "Το πρόγραμμα προπόνησης στάλθηκε",
       "body": "Ο/Η {{coach}} σας έστειλε πρόγραμμα προπόνησης. Δείτε την καρτέλα προπόνησης."

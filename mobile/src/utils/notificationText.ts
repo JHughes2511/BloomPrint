@@ -29,16 +29,27 @@ const ENUM_PARAMS: Record<string, string> = {
   item: 'reportTypes',
 };
 
+// A qualified enum: the API value, then what tells one of them from another.
+// "scouting_report|Andre" renders as "Scouting Report · Andre" in whatever
+// language the reader chose, because only the half before the bar is looked up.
+// Kept identical to _localize_params in api/emails.py — the same row is read
+// here and mailed there, and the two must say the same thing.
+const QUALIFIER = '|';
+const JOIN = ' · ';
+
 function localizeParams(params: Record<string, any> | null | undefined, tr: TFunction) {
   if (!params) return {};
   const out: Record<string, any> = { ...params };
   for (const [name, ns] of Object.entries(ENUM_PARAMS)) {
     const raw = out[name];
-    if (typeof raw === 'string' && raw) {
-      // Fall back to the de-underscored enum value so an output_type the packs
-      // don't know about still reads as words rather than "film_breakdown".
-      out[name] = tr(`${ns}.${raw}`, { defaultValue: raw.replace(/_/g, ' ') });
-    }
+    if (typeof raw !== 'string' || !raw) continue;
+    const bar = raw.indexOf(QUALIFIER);
+    const head = bar === -1 ? raw : raw.slice(0, bar);
+    const tail = bar === -1 ? '' : raw.slice(bar + 1);
+    // Fall back to the de-underscored enum value so an output_type the packs
+    // don't know about still reads as words rather than "film_breakdown".
+    const said = tr(`${ns}.${head}`, { defaultValue: head.replace(/_/g, ' ') });
+    out[name] = tail.trim() ? `${said}${JOIN}${tail}` : said;
   }
   return out;
 }

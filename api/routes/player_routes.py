@@ -18,19 +18,47 @@ from ..ai_models import OPUS, text_of
 
 router = APIRouter(prefix="/player", tags=["player"])
 
-def _names_the_document(evaluation=None, training_title=None) -> str:
+def _names_the_document(evaluation=None, training=None,
+                        from_report=None) -> str:
     """Which report or programme a comment is on, for a notification param.
 
-    A title when the document has one, and its type otherwise. Both travel in
-    the same `item` param: the type is an enum the reader's client turns into
-    words in their own language, and a title is not a key in that table so it
-    falls through and shows as it was typed. Without this a digest reads "Andre
-    commented" five times with no way to tell which five things he commented on.
+    Returns what the app itself would show. A document with a title of its own
+    gets that; everything else gets its type qualified by the player it is
+    about, in the "type|qualifier" form emails.py and notificationText.ts both
+    understand — the type stays translated per reader, the qualifier does not
+    need to be.
+
+    Why the player's name qualifies a report: an evaluation carries no title
+    except for a match-up, and PlayerInboxScreen already labels one by the
+    subject it pulls out of the body, which for a player report is the player's
+    name. So this says the same thing that screen says, from data the server
+    has without parsing anything.
+
+    Without a qualifier a coach with a dozen players reads "Andre commented on
+    Scouting Report" five times over and has to go and look at all five.
     """
-    if training_title:
-        return training_title
+    if from_report is not None:
+        # A programme the player generated for themselves out of a shared
+        # report. It is a training programme, not the report — saying
+        # "commented on Scouting Report" about a comment on a training plan is
+        # simply wrong — so it is named as one and qualified by where it came
+        # from.
+        mark = (from_report.title or "").strip() or getattr(
+            from_report.player, "name", None)
+        return f"training_program|{mark}" if mark else "training_program"
+    if training is not None:
+        titled = (getattr(training, "title", "") or "").strip()
+        if titled:
+            return titled
+        who = getattr(getattr(training, "player", None), "name", None)
+        return f"training_program|{who}" if who else "training_program"
     if evaluation is not None:
-        return (evaluation.title or "").strip() or evaluation.output_type
+        titled = (evaluation.title or "").strip()
+        if titled:
+            return titled
+        who = getattr(evaluation.player, "name", None)
+        return (f"{evaluation.output_type}|{who}" if who
+                else evaluation.output_type)
     return "training_program"
 
 
@@ -439,7 +467,8 @@ def share_report(
             )
             db.add(approval)
             db.flush()
-            params = {"coach": coach.name, "type": ev.output_type,
+            params = {"coach": coach.name,
+                      "type": _names_the_document(evaluation=ev),
                       "recipient": recipient_name}
             db.add(models.PlayerNotification(
                 player_user_id=subject_pu.id,
@@ -480,7 +509,8 @@ def share_report(
     )
     db.add(shared)
     db.flush()
-    params = {"coach": coach.name, "type": ev.output_type}
+    params = {"coach": coach.name,
+              "type": _names_the_document(evaluation=ev)}
     notif = models.PlayerNotification(
         player_user_id=body.player_user_id,
         type="report_shared",
@@ -736,7 +766,7 @@ def add_coach_training_comment_player(
     db.add(comment)
     db.flush()
     params = {"player": pu.name, "text": body.text[:80],
-              "item": _names_the_document(training_title=session.title)}
+              "item": _names_the_document(training=session)}
     notif = models.CoachNotification(
         coach_id=session.coach_id,
         type="player_commented_coach_training",
@@ -847,7 +877,9 @@ def update_player_training(
     if not pt:
         raise HTTPException(status_code=404, detail="Training not found")
     pt.coach_notes = body.coach_notes
-    params = {"coach": coach.name, "item": _names_the_document()}
+    params = {"coach": coach.name,
+              "item": _names_the_document(
+                  from_report=pt.shared_report.evaluation if pt.shared_report else None)}
     notif = models.PlayerNotification(
         player_user_id=pt.player_user_id,
         type="training_updated",
@@ -1248,7 +1280,7 @@ def add_training_comment_player(
     shared = pt.shared_report
     params = {"player": pu.name, "text": body.text[:80],
               "item": _names_the_document(
-                  evaluation=shared.evaluation if shared else None)}
+                  from_report=shared.evaluation if shared else None)}
     notif = models.PlayerNotification(
         coach_id=shared.shared_by_id,
         type="player_commented_training",
@@ -1287,7 +1319,8 @@ def add_training_comment_coach(
     db.add(comment)
     db.flush()
     params = {"coach": coach.name, "text": body.text[:80],
-              "item": _names_the_document()}
+              "item": _names_the_document(
+                  from_report=pt.shared_report.evaluation if pt.shared_report else None)}
     notif = models.PlayerNotification(
         player_user_id=pt.player_user_id,
         type="training_updated",
@@ -1504,7 +1537,9 @@ def coach_reply_to_shared_report(
             db.add(comment)
             db.flush()
             params = {"coach": coach.name, "text": body.text[:80],
-                      "item": _names_the_document()}
+                      "item": _names_the_document(
+                          from_report=pt.shared_report.evaluation
+                          if pt.shared_report else None)}
             db.add(models.PlayerNotification(
                 player_user_id=pt.player_user_id,
                 type="training_updated",
@@ -1528,7 +1563,7 @@ def coach_reply_to_shared_report(
             db.flush()
             target = ts.player.player_user if ts.player else None
             params = {"coach": coach.name, "text": body.text[:80],
-                      "item": _names_the_document(training_title=ts.title)}
+                      "item": _names_the_document(training=ts)}
             if target:
                 db.add(models.PlayerNotification(
                     player_user_id=target.id,
@@ -1628,7 +1663,8 @@ def share_team_report(
                     )
                     db.add(approval)
                     db.flush()
-                    params = {"coach": coach.name, "type": body.output_type,
+                    params = {"coach": coach.name,
+                              "type": f"{body.output_type}|{subject_name}",
                               "recipient": recipient_name}
                     db.add(models.PlayerNotification(
                         player_user_id=subject_pu.id,
@@ -1688,6 +1724,10 @@ def share_team_report(
     # Create TeamSharedReport for each target player user
     count = 0
     mail = []
+    # Which team the report is about, so one team report can be told from the
+    # next in a list of them.
+    _team = db.get(models.Team, body.team_id) if body.team_id else None
+    team_name = _team.name if _team else None
     for pu_id in targets:
         pu = db.get(models.PlayerUser, pu_id)
         if not pu:
@@ -1701,7 +1741,9 @@ def share_team_report(
         )
         db.add(tsr)
         db.flush()
-        params = {"coach": coach.name, "type": body.output_type}
+        params = {"coach": coach.name,
+                  "type": f"{body.output_type}|{team_name}" if team_name
+                          else body.output_type}
         notif = models.PlayerNotification(
             player_user_id=pu_id,
             type="team_report_shared",
@@ -1781,8 +1823,10 @@ def approve_share(
         )
         db.add(shared)
         db.flush()
+        _ev = db.get(models.Evaluation, a.evaluation_id)
         shared_params = {"coach": coach.name if coach else None,
-                         "type": a.output_type}
+                         "type": (_names_the_document(evaluation=_ev)
+                                  if _ev is not None else a.output_type)}
         db.add(models.PlayerNotification(
             player_user_id=a.recipient_player_user_id,
             type="report_shared",
@@ -1803,8 +1847,10 @@ def approve_share(
         )
         db.add(tsr)
         db.flush()
+        _subject = db.get(models.Player, a.subject_player_id)
         shared_params = {"coach": coach.name if coach else None,
-                         "type": a.output_type}
+                         "type": (f"{a.output_type}|{_subject.name}"
+                                  if _subject else a.output_type)}
         db.add(models.PlayerNotification(
             player_user_id=a.recipient_player_user_id,
             type="team_report_shared",

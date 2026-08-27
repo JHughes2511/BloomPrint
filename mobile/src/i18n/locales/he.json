@@ -2435,6 +2435,10 @@
       "title": "הודעה חדשה",
       "body": "{{coach}}: {{preview}}"
     },
+    "staffMessageGroup": {
+      "title": "הודעה חדשה",
+      "body": "{{coach}} ב{{item}}: {{preview}}"
+    },
     "trainingSent": {
       "title": "תוכנית אימונים נשלחה",
       "body": "{{coach}} שלח לך תוכנית אימונים. בדוק בלשונית האימונים."

@@ -2435,6 +2435,10 @@
       "title": "Нова порука",
       "body": "{{coach}}: {{preview}}"
     },
+    "staffMessageGroup": {
+      "title": "Нова порука",
+      "body": "{{coach}} у „{{item}}”: {{preview}}"
+    },
     "trainingSent": {
       "title": "Програм тренинга послат",
       "body": "{{coach}} вам је послао програм тренинга. Погледајте картицу тренинга."

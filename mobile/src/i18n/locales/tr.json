@@ -2435,6 +2435,10 @@
       "title": "Yeni mesaj",
       "body": "{{coach}}: {{preview}}"
     },
+    "staffMessageGroup": {
+      "title": "Yeni mesaj",
+      "body": "{{coach}}, {{item}} içinde: {{preview}}"
+    },
     "trainingSent": {
       "title": "Antrenman programı gönderildi",
       "body": "{{coach}} sana bir antrenman programı gönderdi. Antrenman sekmene bak."

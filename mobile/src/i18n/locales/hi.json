@@ -2435,6 +2435,10 @@
       "title": "नया संदेश",
       "body": "{{coach}}: {{preview}}"
     },
+    "staffMessageGroup": {
+      "title": "नया संदेश",
+      "body": "{{item}} में {{coach}}: {{preview}}"
+    },
     "trainingSent": {
       "title": "प्रशिक्षण कार्यक्रम भेजा गया",
       "body": "{{coach}} ने आपको एक प्रशिक्षण कार्यक्रम भेजा है। अपना प्रशिक्षण टैब देखें।"

@@ -196,6 +196,13 @@ def send_message(
     # Notify the other members.
     preview = text or "[attachment]"
     params = {"coach": coach.name, "preview": preview[:120]}
+    # A named group says which thread; a one-to-one is already identified by
+    # who sent it, and "Marcus in Marcus" would be worse than saying nothing.
+    thread = (conv.title or "").strip() if conv.is_group else ""
+    key = "notifs.staffMessage"
+    if thread:
+        key = "notifs.staffMessageGroup"
+        params["item"] = thread
     recipients = [mid for mid in _member_ids(db, cid) if mid != coach.id]
     for mid in recipients:
         db.add(models.PlayerNotification(
@@ -203,13 +210,12 @@ def send_message(
             type="staff_message",
             title=f"Message from {coach.name}",
             body=preview[:120],
-            i18n_key="notifs.staffMessage", i18n_params=params,
+            i18n_key=key, i18n_params=params,
             ref_id=cid,
         ))
     db.commit()
     for mid in recipients:
-        notify.coach_notification(db.get(models.Coach, mid), "notifs.staffMessage",
-                                  params,
+        notify.coach_notification(db.get(models.Coach, mid), key, params,
                                   link=emails.link_to(f"/home/staff/{cid}"))
     names = {c.id: c.name for c in db.query(models.Coach).filter(models.Coach.id.in_(_member_ids(db, cid))).all()}
     return _message_out(db, msg, names)

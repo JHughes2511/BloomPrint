@@ -6,7 +6,7 @@ this file: it is overwritten, and the point of it is that the email and
 the in-app notification cannot come to say different things.
 """
 
-SOURCE_DIGEST = "ea392f2e03812d56dfc44cd9ff0b19f141e7831bcc64b8b9b1b2e441e5f8cb5d"
+SOURCE_DIGEST = "02a0cbd4e31bf3dfaeeb321b92120063a97213f66263eb1b24bf981b81a6caae"
 
 # key -> language -> (title, body). Placeholders are the app's own
 # {{name}} form, interpolated by api/emails.py.
@@ -604,6 +604,33 @@ NOTIF_COPY: dict[str, dict[str, tuple[str, str]]] = {
         'ko': ('새 메시지', '{{coach}}: {{preview}}'),
         'zh': ('新消息', '{{coach}}: {{preview}}'),
         'tl': ('Bagong mensahe', '{{coach}}: {{preview}}'),
+    },
+    'staffMessageGroup': {
+        'en': ('New message', '{{coach}} in {{item}}: {{preview}}'),
+        'es': ('Nuevo mensaje', '{{coach}} en {{item}}: {{preview}}'),
+        'fr': ('Nouveau message', '{{coach}} dans {{item}} : {{preview}}'),
+        'pt': ('Nova mensagem', '{{coach}} em {{item}}: {{preview}}'),
+        'it': ('Nuovo messaggio', '{{coach}} in {{item}}: {{preview}}'),
+        'de': ('Neue Nachricht', '{{coach}} in {{item}}: {{preview}}'),
+        'nl': ('Nieuw bericht', '{{coach}} in {{item}}: {{preview}}'),
+        'sv': ('Nytt meddelande', '{{coach}} i {{item}}: {{preview}}'),
+        'pl': ('Nowa wiadomość', '{{coach}} w {{item}}: {{preview}}'),
+        'ru': ('Новое сообщение', '{{coach}} в «{{item}}»: {{preview}}'),
+        'uk': ('Нове повідомлення', '{{coach}} у «{{item}}»: {{preview}}'),
+        'sr': ('Нова порука', '{{coach}} у „{{item}}”: {{preview}}'),
+        'hr': ('Nova poruka', '{{coach}} u „{{item}}”: {{preview}}'),
+        'tr': ('Yeni mesaj', '{{coach}}, {{item}} içinde: {{preview}}'),
+        'ro': ('Mesaj nou', '{{coach}} în {{item}}: {{preview}}'),
+        'el': ('Νέο μήνυμα', '{{coach}} στο {{item}}: {{preview}}'),
+        'lt': ('Nauja žinutė', '{{coach}} grupėje {{item}}: {{preview}}'),
+        'ar': ('رسالة جديدة', '{{coach}} في {{item}}: {{preview}}'),
+        'he': ('הודעה חדשה', '{{coach}} ב{{item}}: {{preview}}'),
+        'hi': ('नया संदेश', '{{item}} में {{coach}}: {{preview}}'),
+        'ka': ('ახალი შეტყობინება', '{{coach}} ჯგუფში {{item}}: {{preview}}'),
+        'ja': ('新しいメッセージ', '{{item}} の {{coach}}：{{preview}}'),
+        'ko': ('새 메시지', '{{item}}의 {{coach}}: {{preview}}'),
+        'zh': ('新消息', '{{item}} 中 {{coach}}：{{preview}}'),
+        'tl': ('Bagong mensahe', 'Si {{coach}} sa {{item}}: {{preview}}'),
     },
     'staffReportComment': {
         'en': ('New comment from {{coach}}', '{{text}}'),

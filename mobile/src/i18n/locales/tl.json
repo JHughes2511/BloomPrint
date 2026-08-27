@@ -2435,6 +2435,10 @@
       "title": "Bagong mensahe",
       "body": "{{coach}}: {{preview}}"
     },
+    "staffMessageGroup": {
+      "title": "Bagong mensahe",
+      "body": "Si {{coach}} sa {{item}}: {{preview}}"
+    },
     "trainingSent": {
       "title": "Naipadala ang programa ng pagsasanay",
       "body": "Nagpadala si {{coach}} ng programa ng pagsasanay. Tingnan ang iyong tab ng pagsasanay."

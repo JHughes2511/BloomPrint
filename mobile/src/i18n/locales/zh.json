@@ -2435,6 +2435,10 @@
       "title": "新消息",
       "body": "{{coach}}: {{preview}}"
     },
+    "staffMessageGroup": {
+      "title": "新消息",
+      "body": "{{item}} 中 {{coach}}：{{preview}}"
+    },
     "trainingSent": {
       "title": "训练计划已发送",
       "body": "{{coach}} 给你发送了一份训练计划。请查看训练标签页。"

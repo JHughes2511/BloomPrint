@@ -2435,6 +2435,10 @@
       "title": "Nowa wiadomość",
       "body": "{{coach}}: {{preview}}"
     },
+    "staffMessageGroup": {
+      "title": "Nowa wiadomość",
+      "body": "{{coach}} w {{item}}: {{preview}}"
+    },
     "trainingSent": {
       "title": "Wysłano program treningowy",
       "body": "{{coach}} wysłał Ci program treningowy. Sprawdź zakładkę treningu."

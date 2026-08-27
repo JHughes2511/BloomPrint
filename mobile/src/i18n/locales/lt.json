@@ -2435,6 +2435,10 @@
       "title": "Nauja žinutė",
       "body": "{{coach}}: {{preview}}"
     },
+    "staffMessageGroup": {
+      "title": "Nauja žinutė",
+      "body": "{{coach}} grupėje {{item}}: {{preview}}"
+    },
     "trainingSent": {
       "title": "Treniruočių programa išsiųsta",
       "body": "{{coach}} atsiuntė jums treniruočių programą. Patikrinkite treniruočių skirtuką."

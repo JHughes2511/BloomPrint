@@ -2435,6 +2435,10 @@
       "title": "Nytt meddelande",
       "body": "{{coach}}: {{preview}}"
     },
+    "staffMessageGroup": {
+      "title": "Nytt meddelande",
+      "body": "{{coach}} i {{item}}: {{preview}}"
+    },
     "trainingSent": {
       "title": "Träningsprogram skickat",
       "body": "{{coach}} har skickat ett träningsprogram till dig. Titta i din träningsflik."

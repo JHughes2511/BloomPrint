@@ -2435,6 +2435,10 @@
       "title": "새 메시지",
       "body": "{{coach}}: {{preview}}"
     },
+    "staffMessageGroup": {
+      "title": "새 메시지",
+      "body": "{{item}}의 {{coach}}: {{preview}}"
+    },
     "trainingSent": {
       "title": "훈련 프로그램 전송됨",
       "body": "{{coach}} 님이 훈련 프로그램을 보냈습니다. 훈련 탭을 확인하세요."

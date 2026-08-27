@@ -2435,6 +2435,10 @@
       "title": "Mesaj nou",
       "body": "{{coach}}: {{preview}}"
     },
+    "staffMessageGroup": {
+      "title": "Mesaj nou",
+      "body": "{{coach}} în {{item}}: {{preview}}"
+    },
     "trainingSent": {
       "title": "Program de antrenament trimis",
       "body": "{{coach}} ți-a trimis un program de antrenament. Verifică fila de antrenament."
