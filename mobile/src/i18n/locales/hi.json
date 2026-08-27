@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "गतिविधि के बारे में ईमेल भेजें",
       "emailNotificationsHint": "रिपोर्ट, प्रशिक्षण और कोच के जवाब। आपके खाते से जुड़े संदेश हमेशा आते हैं।",
       "settings": "सेटिंग्स",
-      "settingsSub": "प्रोफ़ाइल, भाषा और ईमेल"
+      "settingsSub": "प्रोफ़ाइल, भाषा और ईमेल",
+      "appLanguage": "ऐप की भाषा"
     },
     "reportDetail": {
       "sharedBy": "{{name}} की ओर से · {{date}}",

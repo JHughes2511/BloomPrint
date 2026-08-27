@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "アクティビティをメールで知らせる",
       "emailNotificationsHint": "レポート、トレーニング、コーチからの返信について。アカウントに関するお知らせは常に届きます。",
       "settings": "設定",
-      "settingsSub": "プロフィール、言語、メール"
+      "settingsSub": "プロフィール、言語、メール",
+      "appLanguage": "アプリの言語"
     },
     "reportDetail": {
       "sharedBy": "{{name}}より · {{date}}",

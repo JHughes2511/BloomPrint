@@ -333,23 +333,45 @@ export default function PlayerLinkScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Settings, spelled out. The header gear is for someone who already
-          knows where it lives; this is for someone reading the screen. */}
+      {/* The one setting worth having on the screen rather than behind a
+          sheet: somebody who wants less email should not have to go looking
+          for a way to ask. The athletic profile has its own Edit button and
+          the rest lives behind the gear in the home header. */}
       <View style={styles.section}>
-        <TouchableOpacity style={styles.settingsRow} onPress={openEdit}>
-          <View style={styles.linkIcon}>
-            <Ionicons name="settings-outline" size={20} color={t.accent} />
-          </View>
-          <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
-            <Text style={styles.linkName} numberOfLines={1}>
-              {tr('playerApp.link.settings')}
-            </Text>
-            <Text style={styles.settingsSub} numberOfLines={1}>
-              {tr('playerApp.link.settingsSub')}
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={t.muted2} />
-        </TouchableOpacity>
+        <Text style={styles.sectionLabel} numberOfLines={1}>
+          {tr('playerApp.link.appLanguage')}
+        </Text>
+        {/* LanguagePicker centres itself, the same way it does on the coach's
+            settings and on the sign-in screen. Asking for flex-start here
+            would be a line that looks like it does something. */}
+        <View style={{ marginTop: 10 }}>
+          <LanguagePicker />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel} numberOfLines={1}>
+          {tr('playerApp.link.emailNotifications')}
+        </Text>
+        <Text style={styles.settingsSub}>
+          {tr('playerApp.link.emailNotificationsHint')}
+        </Text>
+        <View style={styles.emailRow}>
+          <Text style={styles.linkName} numberOfLines={2}>
+            {tr('playerApp.link.emailNotificationsLabel')}
+          </Text>
+          <Switch
+            value={emailOptIn}
+            onValueChange={(v) => {
+              // Written on press, with no Save button: this is not part of the
+              // profile record, and a switch that has already saved sitting
+              // next to a Save button is a button that does nothing.
+              setEmailOptIn(v);   // optimistic, so it does not lag the finger
+              playerAuthAPI.setEmailPrefs(v).catch(() => setEmailOptIn(!v));
+            }}
+            trackColor={{ false: t.line, true: t.accent }}
+          />
+        </View>
       </View>
     </ScrollView>
 
@@ -425,37 +447,7 @@ export default function PlayerLinkScreen() {
                 </ScrollView>
               </View>
             )}
-            <View style={{ marginTop: 20 }}>
-              <LanguagePicker />
-            </View>
 
-            {/* Saved on toggle rather than with the Save button below: this one
-                is not part of the profile record, and somebody switching email
-                off should not have to find a button to be left alone. */}
-            <Text style={{ color: t.label, fontSize: 12, fontFamily: fonts[700],
-                           letterSpacing: 0.6, textTransform: 'uppercase',
-                           marginTop: 22, marginBottom: 8 }}>
-              {tr('playerApp.link.emailNotifications')}
-            </Text>
-            <Text style={{ color: t.muted2, fontSize: 12, marginBottom: 8 }}>
-              {tr('playerApp.link.emailNotificationsHint')}
-            </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center',
-                           justifyContent: 'space-between', backgroundColor: t.card,
-                           borderRadius: 12, padding: 14, borderWidth: 1,
-                           borderColor: t.line }}>
-              <Text style={{ color: t.ink, fontSize: 15, flexShrink: 1, marginRight: 12 }}>
-                {tr('playerApp.link.emailNotificationsLabel')}
-              </Text>
-              <Switch
-                value={emailOptIn}
-                onValueChange={(v) => {
-                  setEmailOptIn(v);   // optimistic: the switch must not lag the finger
-                  playerAuthAPI.setEmailPrefs(v).catch(() => setEmailOptIn(!v));
-                }}
-                trackColor={{ false: t.line, true: t.accent }}
-              />
-            </View>
             <TouchableOpacity style={[styles.btn, saving && { opacity: 0.6 }]} onPress={saveProfile} disabled={saving}>
               {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText} numberOfLines={1}>{tr('playerApp.link.saveChanges')}</Text>}
             </TouchableOpacity>
@@ -564,10 +556,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   linkName: { color: t.ink, fontSize: 16, fontFamily: fonts[800], flexShrink: 1 },
   linkSub: { color: t.positive, fontSize: 12.5, fontFamily: fonts[700], marginTop: 1, flexShrink: 1 },
   unlinkText: { color: t.negative, fontSize: 13, fontFamily: fonts[700], flexShrink: 0 },
-  settingsRow: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: t.card, borderRadius: 15, padding: 15, borderWidth: 1, borderColor: t.cardBorder },
+  emailRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, backgroundColor: t.card, borderRadius: 15, padding: 15, borderWidth: 1, borderColor: t.cardBorder, marginTop: 10 },
   // linkSub is green, which reads as a status on a linked coach and as nothing
-  // on a settings row, so this one is muted.
-  settingsSub: { color: t.muted2, fontSize: 12.5, marginTop: 2, flexShrink: 1 },
+  // on a line of explanation, so this one is muted.
+  settingsSub: { color: t.muted2, fontSize: 12.5, marginTop: 6, flexShrink: 1 },
   linkCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.ctaBg, borderRadius: 14, paddingVertical: 15, marginTop: 6 },
   linkCtaText: { color: t.ctaText, fontSize: 15.5, fontFamily: fonts[800], flexShrink: 1 },
 

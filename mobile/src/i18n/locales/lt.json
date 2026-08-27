@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "Siųsti el. laiškus apie veiklą",
       "emailNotificationsHint": "Ataskaitos, treniruotės ir trenerio atsakymai. Žinutės apie jūsų paskyrą pasiekia visada.",
       "settings": "Nustatymai",
-      "settingsSub": "Profilis, kalba ir el. paštas"
+      "settingsSub": "Profilis, kalba ir el. paštas",
+      "appLanguage": "Programėlės kalba"
     },
     "reportDetail": {
       "sharedBy": "Nuo {{name}} · {{date}}",

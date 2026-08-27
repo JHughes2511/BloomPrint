@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "שלחו לי מייל על פעילות",
       "emailNotificationsHint": "דוחות, אימונים ותשובות מהמאמן. הודעות על החשבון שלך תמיד מגיעות.",
       "settings": "הגדרות",
-      "settingsSub": "פרופיל, שפה ואימייל"
+      "settingsSub": "פרופיל, שפה ואימייל",
+      "appLanguage": "שפת האפליקציה"
     },
     "reportDetail": {
       "sharedBy": "מאת {{name}} · {{date}}",

@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "Trimite-mi email despre activitate",
       "emailNotificationsHint": "Rapoarte, antrenamente și răspunsuri de la antrenor. Mesajele despre contul tău ajung mereu.",
       "settings": "Setări",
-      "settingsSub": "Profil, limbă și e-mail"
+      "settingsSub": "Profil, limbă și e-mail",
+      "appLanguage": "Limba aplicației"
     },
     "reportDetail": {
       "sharedBy": "De la {{name}} · {{date}}",

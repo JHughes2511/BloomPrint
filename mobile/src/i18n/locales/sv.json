@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "Mejla mig om aktivitet",
       "emailNotificationsHint": "Rapporter, träning och svar från din tränare. Meddelanden om ditt konto kommer alltid fram.",
       "settings": "Inställningar",
-      "settingsSub": "Profil, språk och e-post"
+      "settingsSub": "Profil, språk och e-post",
+      "appLanguage": "Appspråk"
     },
     "reportDetail": {
       "sharedBy": "Från {{name}} · {{date}}",

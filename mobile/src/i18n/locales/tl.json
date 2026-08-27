@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "I-email ako tungkol sa aktibidad",
       "emailNotificationsHint": "Mga report, training at sagot ng iyong coach. Palaging dumarating ang mga mensahe tungkol sa iyong account.",
       "settings": "Mga setting",
-      "settingsSub": "Profile, wika at email"
+      "settingsSub": "Profile, wika at email",
+      "appLanguage": "Wika ng App"
     },
     "reportDetail": {
       "sharedBy": "Mula kay {{name}} · {{date}}",

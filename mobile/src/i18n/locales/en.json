@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "Email me about activity",
       "emailNotificationsHint": "Reports, training and replies from your coach. Messages about your own account always arrive.",
       "settings": "Settings",
-      "settingsSub": "Profile, language and email"
+      "settingsSub": "Profile, language and email",
+      "appLanguage": "App Language"
     },
     "reportDetail": {
       "sharedBy": "From {{name}} · {{date}}",

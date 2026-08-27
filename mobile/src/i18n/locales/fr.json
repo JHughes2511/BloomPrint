@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "M'avertir par e-mail",
       "emailNotificationsHint": "Rapports, entraînements et réponses de votre entraîneur. Les messages concernant votre compte arrivent toujours.",
       "settings": "Paramètres",
-      "settingsSub": "Profil, langue et e-mails"
+      "settingsSub": "Profil, langue et e-mails",
+      "appLanguage": "Langue de l'application"
     },
     "reportDetail": {
       "sharedBy": "De {{name}} · {{date}}",

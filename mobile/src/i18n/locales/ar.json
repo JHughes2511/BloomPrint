@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "أرسل لي بريدًا عن النشاط",
       "emailNotificationsHint": "التقارير والتدريبات وردود مدربك. أما رسائل حسابك فتصلك دائمًا.",
       "settings": "الإعدادات",
-      "settingsSub": "الملف الشخصي واللغة والبريد"
+      "settingsSub": "الملف الشخصي واللغة والبريد",
+      "appLanguage": "لغة التطبيق"
     },
     "reportDetail": {
       "sharedBy": "من {{name}} · {{date}}",

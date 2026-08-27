@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "Присылать письма об активности",
       "emailNotificationsHint": "Отчёты, тренировки и ответы тренера. Сообщения о вашем аккаунте приходят всегда.",
       "settings": "Настройки",
-      "settingsSub": "Профиль, язык и почта"
+      "settingsSub": "Профиль, язык и почта",
+      "appLanguage": "Язык приложения"
     },
     "reportDetail": {
       "sharedBy": "От {{name}} · {{date}}",

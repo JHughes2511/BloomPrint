@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "Στείλε μου email για δραστηριότητα",
       "emailNotificationsHint": "Αναφορές, προπονήσεις και απαντήσεις του προπονητή σας. Τα μηνύματα για τον λογαριασμό σας φτάνουν πάντα.",
       "settings": "Ρυθμίσεις",
-      "settingsSub": "Προφίλ, γλώσσα και email"
+      "settingsSub": "Προφίλ, γλώσσα και email",
+      "appLanguage": "Γλώσσα Εφαρμογής"
     },
     "reportDetail": {
       "sharedBy": "Από {{name}} · {{date}}",

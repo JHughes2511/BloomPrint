@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "Надсилати листи про активність",
       "emailNotificationsHint": "Звіти, тренування та відповіді тренера. Повідомлення про ваш обліковий запис надходять завжди.",
       "settings": "Налаштування",
-      "settingsSub": "Профіль, мова та пошта"
+      "settingsSub": "Профіль, мова та пошта",
+      "appLanguage": "Мова застосунку"
     },
     "reportDetail": {
       "sharedBy": "Від {{name}} · {{date}}",

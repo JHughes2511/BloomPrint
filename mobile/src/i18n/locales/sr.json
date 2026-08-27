@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "Шаљи ми имејл о активности",
       "emailNotificationsHint": "Извештаји, тренинзи и одговори тренера. Поруке о вашем налогу увек стижу.",
       "settings": "Подешавања",
-      "settingsSub": "Профил, језик и имејл"
+      "settingsSub": "Профил, језик и имејл",
+      "appLanguage": "Jezik aplikacije"
     },
     "reportDetail": {
       "sharedBy": "Od {{name}} · {{date}}",

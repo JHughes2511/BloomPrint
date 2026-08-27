@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "通过邮件通知我",
       "emailNotificationsHint": "报告、训练和教练的回复。与账户有关的邮件始终会发送。",
       "settings": "设置",
-      "settingsSub": "个人资料、语言和邮件"
+      "settingsSub": "个人资料、语言和邮件",
+      "appLanguage": "应用语言"
     },
     "reportDetail": {
       "sharedBy": "来自 {{name}} · {{date}}",

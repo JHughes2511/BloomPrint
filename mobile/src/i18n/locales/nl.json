@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "Mail me over activiteit",
       "emailNotificationsHint": "Rapporten, training en reacties van je coach. Berichten over je account komen altijd aan.",
       "settings": "Instellingen",
-      "settingsSub": "Profiel, taal en e-mail"
+      "settingsSub": "Profiel, taal en e-mail",
+      "appLanguage": "App-taal"
     },
     "reportDetail": {
       "sharedBy": "Van {{name}} · {{date}}",

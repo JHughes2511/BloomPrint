@@ -1173,7 +1173,8 @@
       "emailNotificationsLabel": "Etkinlik için e-posta gönder",
       "emailNotificationsHint": "Raporlar, antrenmanlar ve antrenörünüzün yanıtları. Hesabınızla ilgili mesajlar her zaman ulaşır.",
       "settings": "Ayarlar",
-      "settingsSub": "Profil, dil ve e-posta"
+      "settingsSub": "Profil, dil ve e-posta",
+      "appLanguage": "Uygulama Dili"
     },
     "reportDetail": {
       "sharedBy": "{{name}} tarafından · {{date}}",
