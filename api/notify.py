@@ -291,6 +291,9 @@ DIGEST_KEYS = {
     # one email per message is one email per sentence.
     "staffMessage",
     "staffMessageGroup",
+    # Comments on a report one coach shared with another: same shape, same
+    # pace, same answer.
+    "staffReportComment",
 }
 
 

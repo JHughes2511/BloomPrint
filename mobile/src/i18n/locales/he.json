@@ -2560,8 +2560,8 @@
       "body": "{{coach}} שיתף עם {{team}}: {{type}}."
     },
     "staffReportComment": {
-      "title": "תגובה חדשה מ{{coach}}",
-      "body": "{{text}}"
+      "title": "תגובה חדשה",
+      "body": "{{coach}} הגיב על {{item}}: \"{{text}}\""
     },
     "staffReportRegenerated": {
       "title": "{{coach}} יצר מחדש את הדוח",

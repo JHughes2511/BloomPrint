@@ -2560,8 +2560,8 @@
       "body": "{{coach}} 与 {{team}} 分享了：{{type}}"
     },
     "staffReportComment": {
-      "title": "{{coach}} 的新评论",
-      "body": "{{text}}"
+      "title": "新评论",
+      "body": "{{coach}} 评论了 {{item}}：“{{text}}”"
     },
     "staffReportRegenerated": {
       "title": "{{coach}} 重新生成了报告",

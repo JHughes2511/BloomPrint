@@ -2560,8 +2560,8 @@
       "body": "{{coach}} partilhou com {{team}}: {{type}}."
     },
     "staffReportComment": {
-      "title": "Novo comentário de {{coach}}",
-      "body": "{{text}}"
+      "title": "Novo comentário",
+      "body": "{{coach}} comentou em {{item}}: \"{{text}}\""
     },
     "staffReportRegenerated": {
       "title": "Relatório regenerado por {{coach}}",

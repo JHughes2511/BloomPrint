@@ -2560,8 +2560,8 @@
       "body": "{{coach}}, {{team}} ile paylaştı: {{type}}."
     },
     "staffReportComment": {
-      "title": "{{coach}} kişisinden yeni yorum",
-      "body": "{{text}}"
+      "title": "Yeni yorum",
+      "body": "{{coach}}, {{item}} için yorum yaptı: \"{{text}}\""
     },
     "staffReportRegenerated": {
       "title": "{{coach}} raporu yeniden oluşturdu",

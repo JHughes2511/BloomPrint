@@ -2560,8 +2560,8 @@
       "body": "{{coach}} a partajat cu {{team}}: {{type}}."
     },
     "staffReportComment": {
-      "title": "Comentariu nou de la {{coach}}",
-      "body": "{{text}}"
+      "title": "Comentariu nou",
+      "body": "{{coach}} a comentat la {{item}}: \"{{text}}\""
     },
     "staffReportRegenerated": {
       "title": "{{coach}} a regenerat raportul",

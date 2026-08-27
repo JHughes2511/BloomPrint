@@ -2560,8 +2560,8 @@
       "body": "Ο/Η {{coach}} μοιράστηκε με {{team}}: {{type}}."
     },
     "staffReportComment": {
-      "title": "Νέο σχόλιο από {{coach}}",
-      "body": "{{text}}"
+      "title": "Νέο σχόλιο",
+      "body": "Ο/Η {{coach}} σχολίασε {{item}}: «{{text}}»"
     },
     "staffReportRegenerated": {
       "title": "Ο/Η {{coach}} αναδημιούργησε την αναφορά",

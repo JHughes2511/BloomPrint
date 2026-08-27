@@ -2560,8 +2560,8 @@
       "body": "{{coach}} が {{team}} と共有しました：{{type}}"
     },
     "staffReportComment": {
-      "title": "{{coach}} からの新しいコメント",
-      "body": "{{text}}"
+      "title": "新しいコメント",
+      "body": "{{coach}} が {{item}} にコメントしました:「{{text}}」"
     },
     "staffReportRegenerated": {
       "title": "{{coach}} がレポートを再生成しました",

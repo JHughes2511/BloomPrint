@@ -2560,8 +2560,8 @@
       "body": "{{coach}}-მა გაუზიარა გუნდს {{team}}: {{type}}."
     },
     "staffReportComment": {
-      "title": "ახალი კომენტარი {{coach}}-სგან",
-      "body": "{{text}}"
+      "title": "ახალი კომენტარი",
+      "body": "{{coach}}-მა დააკომენტარა {{item}}: „{{text}}“"
     },
     "staffReportRegenerated": {
       "title": "{{coach}}-მა ხელახლა შექმნა ანგარიში",

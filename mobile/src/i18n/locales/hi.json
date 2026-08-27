@@ -2560,8 +2560,8 @@
       "body": "{{coach}} ने {{team}} के साथ साझा किया: {{type}}।"
     },
     "staffReportComment": {
-      "title": "{{coach}} की नई टिप्पणी",
-      "body": "{{text}}"
+      "title": "नई टिप्पणी",
+      "body": "{{coach}} ने {{item}} पर टिप्पणी की: \"{{text}}\""
     },
     "staffReportRegenerated": {
       "title": "{{coach}} ने रिपोर्ट फिर से बनाई",

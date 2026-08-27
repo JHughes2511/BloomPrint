@@ -2560,8 +2560,8 @@
       "body": "{{coach}} pasidalijo su {{team}}: {{type}}."
     },
     "staffReportComment": {
-      "title": "Naujas komentaras nuo {{coach}}",
-      "body": "{{text}}"
+      "title": "Naujas komentaras",
+      "body": "{{coach}} pakomentavo {{item}}: „{{text}}“"
     },
     "staffReportRegenerated": {
       "title": "{{coach}} pergeneravo ataskaitą",

@@ -5,16 +5,21 @@ import json
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
+import logging
+
+from sqlalchemy import event
 from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..player_grants import grant_players_for_share, ensure_teams_for_share
 from ..auth import get_current_coach
-from .. import models, notify, schemas
+from .. import emails, models, notify, schemas
 from ..ai_models import OPUS
 from ..report_sections import strip_sections
 
 router = APIRouter(prefix="/staff-sharing", tags=["staff-sharing"])
+
+log = logging.getLogger(__name__)
 
 
 def _resolve_report_text(report_type: str, report_id: int, db: Session, sender_id: int | None = None) -> str | None:
@@ -236,6 +241,40 @@ _EMAIL_EVENTS = {
 }
 
 
+def _after_commit(db: Session, send) -> None:
+    """Run `send` once the caller's transaction actually lands.
+
+    Notifications here are written by a helper but committed by the route, so
+    "the event happened" is a moment this function cannot see. Sending before it
+    means mailing something a later failure rolls back, and it means writing to
+    the database from a second connection while this one still holds the write.
+
+    Rolled-back work never sends: the queue is dropped with the transaction.
+    """
+    pending = db.info.setdefault("_staff_share_sends", [])
+    pending.append(send)
+    if db.info.get("_staff_share_hooked"):
+        return
+    db.info["_staff_share_hooked"] = True
+
+    @event.listens_for(db, "after_commit")
+    def _fire(session):
+        for fn in session.info.pop("_staff_share_sends", []):
+            try:
+                fn()
+            except Exception:
+                # One notification that will not send must not undo a commit
+                # that already happened.
+                log.warning("Could not send a staff-share notification",
+                            exc_info=True)
+        session.info["_staff_share_hooked"] = False
+
+    @event.listens_for(db, "after_rollback")
+    def _drop(session):
+        session.info.pop("_staff_share_sends", None)
+        session.info["_staff_share_hooked"] = False
+
+
 def _coach_notify(db: Session, coach_id: int, title: str, body: str, ref_id: int | None = None,
                   ntype: str = "staff_share", key: str | None = None, params: dict | None = None):
     """Queue a notification for a coach.
@@ -256,16 +295,32 @@ def _coach_notify(db: Session, coach_id: int, title: str, body: str, ref_id: int
     db.add(notif)
 
     # Email is a channel on this same event, decided in one place rather than at
-    # each of the ten call sites. Comments and regenerations are deliberately
-    # absent: they are frequent, in-app is enough, and mailing them is how
-    # people learn to filter the domain.
+    # each of the ten call sites.
+    #
+    # Three of these have hand-written email copy of their own and use it. The
+    # rest ride the notification path, which mails the very words the in-app row
+    # carries. Comments used to be left out of both on the grounds that they are
+    # frequent; they now go to the hourly digest instead, which answers the
+    # frequency without answering it by saying nothing.
+    #
+    # Sent after the caller commits, not here. Every one of these callers adds
+    # more to the transaction and commits it themselves, so sending at this
+    # point mails an event that has not happened yet and may still be rolled
+    # back — and the digest queue, which writes on its own connection, was
+    # deadlocking against the caller's open write.
+    recipient = db.get(models.Coach, coach_id)
     event = _EMAIL_EVENTS.get(ntype)
     if event:
         p = params or {}
-        notify.coach_event(db.get(models.Coach, coach_id), event, {
+        _after_commit(db, lambda: notify.coach_event(recipient, event, {
             "sender": p.get("coach") or "A coach",
             "report": (p.get("type") or "report").replace("_", " "),
-        })
+        }))
+    elif key:
+        # There is no per-share screen to deep link to, so this points at the
+        # Staff Hub, which is where every one of these lives.
+        _after_commit(db, lambda: notify.coach_notification(
+            recipient, key, params, link=emails.link_to("/home/staff")))
 
 
 def _upsert_share(db: Session, report_type: str, report_id: int, sender_id: int,
@@ -668,7 +723,11 @@ def add_comment(
             body.text[:120],
             ref_id=shared_id,
             ntype="staff_report_comment",
-            key="notifs.staffReportComment", params={"coach": coach.name, "text": body.text[:120]},
+            key="notifs.staffReportComment",
+            params={"coach": coach.name, "text": body.text[:120],
+                    # Which shared report, so a digest line can be told from
+                    # the next one.
+                    "item": sr.report_type},
         )
     db.commit()
     db.refresh(comment)

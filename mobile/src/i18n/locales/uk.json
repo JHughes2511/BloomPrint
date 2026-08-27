@@ -2560,8 +2560,8 @@
       "body": "{{coach}} поділився з командою {{team}}: {{type}}."
     },
     "staffReportComment": {
-      "title": "Новий коментар від {{coach}}",
-      "body": "{{text}}"
+      "title": "Новий коментар",
+      "body": "{{coach}} прокоментував {{item}}: «{{text}}»"
     },
     "staffReportRegenerated": {
       "title": "{{coach}} перестворив звіт",

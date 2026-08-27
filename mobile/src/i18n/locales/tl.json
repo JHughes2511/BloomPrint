@@ -2560,8 +2560,8 @@
       "body": "Ibinahagi ni {{coach}} sa {{team}}: {{type}}."
     },
     "staffReportComment": {
-      "title": "Bagong komento mula kay {{coach}}",
-      "body": "{{text}}"
+      "title": "Bagong komento",
+      "body": "Nag-komento si {{coach}} sa {{item}}: \"{{text}}\""
     },
     "staffReportRegenerated": {
       "title": "Muling binuo ni {{coach}} ang ulat",

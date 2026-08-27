@@ -2560,8 +2560,8 @@
       "body": "{{coach}}님이 {{team}}과(와) 공유했습니다: {{type}}"
     },
     "staffReportComment": {
-      "title": "{{coach}} 님의 새 댓글",
-      "body": "{{text}}"
+      "title": "새 댓글",
+      "body": "{{coach}} 님이 {{item}}에 댓글을 남겼습니다: \"{{text}}\""
     },
     "staffReportRegenerated": {
       "title": "{{coach}} 님이 리포트를 다시 생성했습니다",
