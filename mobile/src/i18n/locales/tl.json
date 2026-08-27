@@ -2431,11 +2431,11 @@
   "notifs": {
     "seasonNew": {
       "title": "Suriin ang iyong sistema at pilosopiya",
-      "body": "Nagsimula na ang bagong season — magandang panahon para suriin at i-update ang iyong sistema at pilosopiya para sa {{season}}."
+      "body": "Nagsimula na ang bagong season. Magandang panahon para suriin at i-update ang iyong sistema at pilosopiya para sa {{season}}."
     },
     "seasonWelcome": {
       "title": "Suriin ang iyong sistema at pilosopiya",
-      "body": "Maligayang pagbabalik — magandang panahon para suriin at i-update ang iyong sistema at pilosopiya para sa {{season}}."
+      "body": "Maligayang pagbabalik. Magandang panahon para suriin at i-update ang iyong sistema at pilosopiya para sa {{season}}."
     },
     "staffMessage": {
       "title": "Bagong mensahe",

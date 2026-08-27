@@ -2431,11 +2431,11 @@
   "notifs": {
     "seasonNew": {
       "title": "Sistem ve felsefeni gözden geçir",
-      "body": "Yeni bir sezon başladı — {{season}} için sistemini ve felsefeni gözden geçirip güncellemek için iyi bir zaman."
+      "body": "Yeni bir sezon başladı. {{season}} için sistemini ve felsefeni gözden geçirip güncellemek için iyi bir zaman."
     },
     "seasonWelcome": {
       "title": "Sistem ve felsefeni gözden geçir",
-      "body": "Tekrar hoş geldin — {{season}} için sistemini ve felsefeni gözden geçirip güncellemek için iyi bir zaman."
+      "body": "Tekrar hoş geldin. {{season}} için sistemini ve felsefeni gözden geçirip güncellemek için iyi bir zaman."
     },
     "staffMessage": {
       "title": "Yeni mesaj",

@@ -2431,11 +2431,11 @@
   "notifs": {
     "seasonNew": {
       "title": "Revoyez votre système et votre philosophie",
-      "body": "Une nouvelle saison commence — un bon moment pour revoir et mettre à jour votre système et votre philosophie pour {{season}}."
+      "body": "Une nouvelle saison commence. Un bon moment pour revoir et mettre à jour votre système et votre philosophie pour {{season}}."
     },
     "seasonWelcome": {
       "title": "Revoyez votre système et votre philosophie",
-      "body": "Bon retour — un bon moment pour revoir et mettre à jour votre système et votre philosophie pour {{season}}."
+      "body": "Bon retour. Un bon moment pour revoir et mettre à jour votre système et votre philosophie pour {{season}}."
     },
     "staffMessage": {
       "title": "Nouveau message",
