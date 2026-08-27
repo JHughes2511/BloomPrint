@@ -1171,7 +1171,9 @@
       "onRosterAs": "În lot ca {{name}}",
       "emailNotifications": "Notificări prin email",
       "emailNotificationsLabel": "Trimite-mi email despre activitate",
-      "emailNotificationsHint": "Rapoarte, antrenamente și răspunsuri de la antrenor. Mesajele despre contul tău ajung mereu."
+      "emailNotificationsHint": "Rapoarte, antrenamente și răspunsuri de la antrenor. Mesajele despre contul tău ajung mereu.",
+      "settings": "Setări",
+      "settingsSub": "Profil, limbă și e-mail"
     },
     "reportDetail": {
       "sharedBy": "De la {{name}} · {{date}}",

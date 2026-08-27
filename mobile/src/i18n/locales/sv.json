@@ -1171,7 +1171,9 @@
       "onRosterAs": "I truppen som {{name}}",
       "emailNotifications": "E-postaviseringar",
       "emailNotificationsLabel": "Mejla mig om aktivitet",
-      "emailNotificationsHint": "Rapporter, träning och svar från din tränare. Meddelanden om ditt konto kommer alltid fram."
+      "emailNotificationsHint": "Rapporter, träning och svar från din tränare. Meddelanden om ditt konto kommer alltid fram.",
+      "settings": "Inställningar",
+      "settingsSub": "Profil, språk och e-post"
     },
     "reportDetail": {
       "sharedBy": "Från {{name}} · {{date}}",

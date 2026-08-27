@@ -1171,7 +1171,9 @@
       "onRosterAs": "В составе как {{name}}",
       "emailNotifications": "Уведомления по почте",
       "emailNotificationsLabel": "Присылать письма об активности",
-      "emailNotificationsHint": "Отчёты, тренировки и ответы тренера. Сообщения о вашем аккаунте приходят всегда."
+      "emailNotificationsHint": "Отчёты, тренировки и ответы тренера. Сообщения о вашем аккаунте приходят всегда.",
+      "settings": "Настройки",
+      "settingsSub": "Профиль, язык и почта"
     },
     "reportDetail": {
       "sharedBy": "От {{name}} · {{date}}",

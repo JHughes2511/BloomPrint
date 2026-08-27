@@ -1171,7 +1171,9 @@
       "onRosterAs": "No plantel como {{name}}",
       "emailNotifications": "Notificações por email",
       "emailNotificationsLabel": "Avisar-me por email",
-      "emailNotificationsHint": "Relatórios, treinos e respostas do seu treinador. As mensagens sobre a sua conta chegam sempre."
+      "emailNotificationsHint": "Relatórios, treinos e respostas do seu treinador. As mensagens sobre a sua conta chegam sempre.",
+      "settings": "Definições",
+      "settingsSub": "Perfil, idioma e email"
     },
     "reportDetail": {
       "sharedBy": "De {{name}} · {{date}}",

@@ -1171,7 +1171,9 @@
       "onRosterAs": "У складі як {{name}}",
       "emailNotifications": "Сповіщення поштою",
       "emailNotificationsLabel": "Надсилати листи про активність",
-      "emailNotificationsHint": "Звіти, тренування та відповіді тренера. Повідомлення про ваш обліковий запис надходять завжди."
+      "emailNotificationsHint": "Звіти, тренування та відповіді тренера. Повідомлення про ваш обліковий запис надходять завжди.",
+      "settings": "Налаштування",
+      "settingsSub": "Профіль, мова та пошта"
     },
     "reportDetail": {
       "sharedBy": "Від {{name}} · {{date}}",

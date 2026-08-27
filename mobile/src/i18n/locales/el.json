@@ -1171,7 +1171,9 @@
       "onRosterAs": "Στο ρόστερ ως {{name}}",
       "emailNotifications": "Ειδοποιήσεις email",
       "emailNotificationsLabel": "Στείλε μου email για δραστηριότητα",
-      "emailNotificationsHint": "Αναφορές, προπονήσεις και απαντήσεις του προπονητή σας. Τα μηνύματα για τον λογαριασμό σας φτάνουν πάντα."
+      "emailNotificationsHint": "Αναφορές, προπονήσεις και απαντήσεις του προπονητή σας. Τα μηνύματα για τον λογαριασμό σας φτάνουν πάντα.",
+      "settings": "Ρυθμίσεις",
+      "settingsSub": "Προφίλ, γλώσσα και email"
     },
     "reportDetail": {
       "sharedBy": "Από {{name}} · {{date}}",

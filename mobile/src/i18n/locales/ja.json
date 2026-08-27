@@ -1171,7 +1171,9 @@
       "onRosterAs": "ロスターでは {{name}}",
       "emailNotifications": "メール通知",
       "emailNotificationsLabel": "アクティビティをメールで知らせる",
-      "emailNotificationsHint": "レポート、トレーニング、コーチからの返信について。アカウントに関するお知らせは常に届きます。"
+      "emailNotificationsHint": "レポート、トレーニング、コーチからの返信について。アカウントに関するお知らせは常に届きます。",
+      "settings": "設定",
+      "settingsSub": "プロフィール、言語、メール"
     },
     "reportDetail": {
       "sharedBy": "{{name}}より · {{date}}",

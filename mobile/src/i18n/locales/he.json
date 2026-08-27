@@ -1171,7 +1171,9 @@
       "onRosterAs": "בסגל בשם {{name}}",
       "emailNotifications": "התראות במייל",
       "emailNotificationsLabel": "שלחו לי מייל על פעילות",
-      "emailNotificationsHint": "דוחות, אימונים ותשובות מהמאמן. הודעות על החשבון שלך תמיד מגיעות."
+      "emailNotificationsHint": "דוחות, אימונים ותשובות מהמאמן. הודעות על החשבון שלך תמיד מגיעות.",
+      "settings": "הגדרות",
+      "settingsSub": "פרופיל, שפה ואימייל"
     },
     "reportDetail": {
       "sharedBy": "מאת {{name}} · {{date}}",

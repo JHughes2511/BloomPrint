@@ -1171,7 +1171,9 @@
       "onRosterAs": "W składzie jako {{name}}",
       "emailNotifications": "Powiadomienia e-mail",
       "emailNotificationsLabel": "Powiadamiaj mnie e-mailem",
-      "emailNotificationsHint": "Raporty, treningi i odpowiedzi trenera. Wiadomości o Twoim koncie zawsze dotrą."
+      "emailNotificationsHint": "Raporty, treningi i odpowiedzi trenera. Wiadomości o Twoim koncie zawsze dotrą.",
+      "settings": "Ustawienia",
+      "settingsSub": "Profil, język i e-mail"
     },
     "reportDetail": {
       "sharedBy": "Od {{name}} · {{date}}",

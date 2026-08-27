@@ -234,6 +234,15 @@ export default function PlayerLinkScreen() {
           </Text>
         </View>
         <View style={styles.headerActions}>
+          {/* The way in that the coach's header already has. Without it the
+              only route to the language and email settings was tapping the
+              avatar, which wears a camera badge and reads as "change my
+              photo" — and for a player with no coach yet, the pencil beside
+              the athletic profile is not on screen at all. */}
+          <TouchableOpacity style={styles.circleBtn} onPress={openEdit}
+                            accessibilityLabel={tr('playerApp.link.settings')}>
+            <Ionicons name="settings-outline" size={18} color={t.inkSoft} />
+          </TouchableOpacity>
           <TouchableOpacity style={styles.circleBtn} onPress={toggle} accessibilityLabel={tr('playerApp.link.toggleTheme')}>
             <Ionicons name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'} size={18} color={t.inkSoft} />
           </TouchableOpacity>
@@ -314,6 +323,25 @@ export default function PlayerLinkScreen() {
         <TouchableOpacity style={styles.linkCta} onPress={() => setShowLink(true)}>
           <Ionicons name="link" size={18} color={t.ctaText} />
           <Text style={styles.linkCtaText} numberOfLines={1}>{tr('playerApp.link.linkToCoach')}</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Settings, spelled out. The header gear is for someone who already
+          knows where it lives; this is for someone reading the screen. */}
+      <View style={styles.section}>
+        <TouchableOpacity style={styles.settingsRow} onPress={openEdit}>
+          <View style={styles.linkIcon}>
+            <Ionicons name="settings-outline" size={20} color={t.accent} />
+          </View>
+          <View style={{ flex: 1, flexShrink: 1, minWidth: 0, marginRight: 8 }}>
+            <Text style={styles.linkName} numberOfLines={1}>
+              {tr('playerApp.link.settings')}
+            </Text>
+            <Text style={styles.settingsSub} numberOfLines={1}>
+              {tr('playerApp.link.settingsSub')}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={t.muted2} />
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -529,6 +557,10 @@ const makeStyles = (t: ThemeTokens) => StyleSheet.create({
   linkName: { color: t.ink, fontSize: 16, fontFamily: fonts[800], flexShrink: 1 },
   linkSub: { color: t.positive, fontSize: 12.5, fontFamily: fonts[700], marginTop: 1, flexShrink: 1 },
   unlinkText: { color: t.negative, fontSize: 13, fontFamily: fonts[700], flexShrink: 0 },
+  settingsRow: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: t.card, borderRadius: 15, padding: 15, borderWidth: 1, borderColor: t.cardBorder },
+  // linkSub is green, which reads as a status on a linked coach and as nothing
+  // on a settings row, so this one is muted.
+  settingsSub: { color: t.muted2, fontSize: 12.5, marginTop: 2, flexShrink: 1 },
   linkCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.ctaBg, borderRadius: 14, paddingVertical: 15, marginTop: 6 },
   linkCtaText: { color: t.ctaText, fontSize: 15.5, fontFamily: fonts[800], flexShrink: 1 },
 

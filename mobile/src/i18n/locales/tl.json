@@ -1171,7 +1171,9 @@
       "onRosterAs": "Nasa roster bilang {{name}}",
       "emailNotifications": "Mga abiso sa email",
       "emailNotificationsLabel": "I-email ako tungkol sa aktibidad",
-      "emailNotificationsHint": "Mga report, training at sagot ng iyong coach. Palaging dumarating ang mga mensahe tungkol sa iyong account."
+      "emailNotificationsHint": "Mga report, training at sagot ng iyong coach. Palaging dumarating ang mga mensahe tungkol sa iyong account.",
+      "settings": "Mga setting",
+      "settingsSub": "Profile, wika at email"
     },
     "reportDetail": {
       "sharedBy": "Mula kay {{name}} · {{date}}",

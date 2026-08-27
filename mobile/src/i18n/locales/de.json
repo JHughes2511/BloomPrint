@@ -1171,7 +1171,9 @@
       "onRosterAs": "Im Kader als {{name}}",
       "emailNotifications": "E-Mail-Benachrichtigungen",
       "emailNotificationsLabel": "Per E-Mail benachrichtigen",
-      "emailNotificationsHint": "Berichte, Training und Antworten deines Trainers. Nachrichten zu deinem Konto kommen immer an."
+      "emailNotificationsHint": "Berichte, Training und Antworten deines Trainers. Nachrichten zu deinem Konto kommen immer an.",
+      "settings": "Einstellungen",
+      "settingsSub": "Profil, Sprache und E-Mail"
     },
     "reportDetail": {
       "sharedBy": "Von {{name}} · {{date}}",

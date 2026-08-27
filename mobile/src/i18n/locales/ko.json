@@ -1171,7 +1171,9 @@
       "onRosterAs": "로스터에는 {{name}}(으)로",
       "emailNotifications": "이메일 알림",
       "emailNotificationsLabel": "활동을 이메일로 알림",
-      "emailNotificationsHint": "리포트, 훈련, 코치의 답글. 계정 관련 메시지는 항상 전달됩니다."
+      "emailNotificationsHint": "리포트, 훈련, 코치의 답글. 계정 관련 메시지는 항상 전달됩니다.",
+      "settings": "설정",
+      "settingsSub": "프로필, 언어, 이메일"
     },
     "reportDetail": {
       "sharedBy": "{{name}} 보냄 · {{date}}",

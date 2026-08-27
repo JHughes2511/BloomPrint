@@ -1171,7 +1171,9 @@
       "onRosterAs": "Sur l'effectif sous {{name}}",
       "emailNotifications": "Notifications par e-mail",
       "emailNotificationsLabel": "M'avertir par e-mail",
-      "emailNotificationsHint": "Rapports, entraînements et réponses de votre entraîneur. Les messages concernant votre compte arrivent toujours."
+      "emailNotificationsHint": "Rapports, entraînements et réponses de votre entraîneur. Les messages concernant votre compte arrivent toujours.",
+      "settings": "Paramètres",
+      "settingsSub": "Profil, langue et e-mails"
     },
     "reportDetail": {
       "sharedBy": "De {{name}} · {{date}}",

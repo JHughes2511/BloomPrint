@@ -1171,7 +1171,9 @@
       "onRosterAs": "Kadroda {{name}} olarak",
       "emailNotifications": "E-posta bildirimleri",
       "emailNotificationsLabel": "Etkinlik için e-posta gönder",
-      "emailNotificationsHint": "Raporlar, antrenmanlar ve antrenörünüzün yanıtları. Hesabınızla ilgili mesajlar her zaman ulaşır."
+      "emailNotificationsHint": "Raporlar, antrenmanlar ve antrenörünüzün yanıtları. Hesabınızla ilgili mesajlar her zaman ulaşır.",
+      "settings": "Ayarlar",
+      "settingsSub": "Profil, dil ve e-posta"
     },
     "reportDetail": {
       "sharedBy": "{{name}} tarafından · {{date}}",

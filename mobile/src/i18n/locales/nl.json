@@ -1171,7 +1171,9 @@
       "onRosterAs": "In de selectie als {{name}}",
       "emailNotifications": "E-mailmeldingen",
       "emailNotificationsLabel": "Mail me over activiteit",
-      "emailNotificationsHint": "Rapporten, training en reacties van je coach. Berichten over je account komen altijd aan."
+      "emailNotificationsHint": "Rapporten, training en reacties van je coach. Berichten over je account komen altijd aan.",
+      "settings": "Instellingen",
+      "settingsSub": "Profiel, taal en e-mail"
     },
     "reportDetail": {
       "sharedBy": "Van {{name}} · {{date}}",

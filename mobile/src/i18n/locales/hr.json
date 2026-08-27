@@ -1171,7 +1171,9 @@
       "onRosterAs": "U sastavu kao {{name}}",
       "emailNotifications": "Obavijesti e-poštom",
       "emailNotificationsLabel": "Šalji mi e-poštu o aktivnosti",
-      "emailNotificationsHint": "Izvještaji, treninzi i odgovori trenera. Poruke o vašem računu uvijek stižu."
+      "emailNotificationsHint": "Izvještaji, treninzi i odgovori trenera. Poruke o vašem računu uvijek stižu.",
+      "settings": "Postavke",
+      "settingsSub": "Profil, jezik i e-pošta"
     },
     "reportDetail": {
       "sharedBy": "Od {{name}} · {{date}}",

@@ -1171,7 +1171,9 @@
       "onRosterAs": "في القائمة باسم {{name}}",
       "emailNotifications": "إشعارات البريد",
       "emailNotificationsLabel": "أرسل لي بريدًا عن النشاط",
-      "emailNotificationsHint": "التقارير والتدريبات وردود مدربك. أما رسائل حسابك فتصلك دائمًا."
+      "emailNotificationsHint": "التقارير والتدريبات وردود مدربك. أما رسائل حسابك فتصلك دائمًا.",
+      "settings": "الإعدادات",
+      "settingsSub": "الملف الشخصي واللغة والبريد"
     },
     "reportDetail": {
       "sharedBy": "من {{name}} · {{date}}",
