@@ -866,11 +866,23 @@ def _fmt_tags(s: str, params: dict) -> str:
 QUALIFIER = "|"
 JOIN = " · "
 
+# The params that hold somebody's name. A qualifier equal to one of these is
+# dropped, because the sentence has already said it: "Andre commented on
+# Scouting Report · Andre" tells you his name twice and which report once.
+# Deliberately not every param — a comment whose text happens to be a name must
+# not silently strip the qualifier off the document.
+NAME_PARAMS = ("player", "coach", "name", "recipient", "profile")
+
 
 def _localize_params(params: dict, lang: str) -> dict:
     from . import notif_copy
 
     out = dict(params or {})
+    said_already = {
+        str(out[k]).strip().casefold()
+        for k in NAME_PARAMS
+        if isinstance(out.get(k), str) and out[k].strip()
+    }
     for name, table in ENUM_PARAMS.items():
         raw = out.get(name)
         if not (isinstance(raw, str) and raw):
@@ -881,7 +893,9 @@ def _localize_params(params: dict, lang: str) -> dict:
         # An enum the packs do not know about reads as words rather than as
         # "film_breakdown", which is what the client does with it too.
         said = words.get(head) or head.replace("_", " ")
-        out[name] = f"{said}{JOIN}{tail}" if sep and tail.strip() else said
+        keep = bool(sep and tail.strip()
+                    and tail.strip().casefold() not in said_already)
+        out[name] = f"{said}{JOIN}{tail}" if keep else said
     return out
 
 

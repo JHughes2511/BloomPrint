@@ -37,19 +37,32 @@ const ENUM_PARAMS: Record<string, string> = {
 const QUALIFIER = '|';
 const JOIN = ' · ';
 
+// The params that hold somebody's name. A qualifier equal to one of these is
+// dropped, because the sentence has already said it: "Andre commented on
+// Scouting Report · Andre" gives you his name twice and the report once.
+// Deliberately not every param — a comment whose text happens to be a name must
+// not silently strip the qualifier off the document.
+const NAME_PARAMS = ['player', 'coach', 'name', 'recipient', 'profile'];
+
 function localizeParams(params: Record<string, any> | null | undefined, tr: TFunction) {
   if (!params) return {};
   const out: Record<string, any> = { ...params };
+  const saidAlready = new Set(
+    NAME_PARAMS
+      .map(k => (typeof out[k] === 'string' ? out[k].trim().toLowerCase() : ''))
+      .filter(Boolean),
+  );
   for (const [name, ns] of Object.entries(ENUM_PARAMS)) {
     const raw = out[name];
     if (typeof raw !== 'string' || !raw) continue;
     const bar = raw.indexOf(QUALIFIER);
     const head = bar === -1 ? raw : raw.slice(0, bar);
-    const tail = bar === -1 ? '' : raw.slice(bar + 1);
+    const tail = bar === -1 ? '' : raw.slice(bar + 1).trim();
     // Fall back to the de-underscored enum value so an output_type the packs
     // don't know about still reads as words rather than "film_breakdown".
     const said = tr(`${ns}.${head}`, { defaultValue: head.replace(/_/g, ' ') });
-    out[name] = tail.trim() ? `${said}${JOIN}${tail}` : said;
+    const keep = !!tail && !saidAlready.has(tail.toLowerCase());
+    out[name] = keep ? `${said}${JOIN}${tail}` : said;
   }
   return out;
 }
