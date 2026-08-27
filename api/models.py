@@ -79,7 +79,13 @@ class Team(SoftDeleteMixin, Base):
 
     id               = Column(Integer, primary_key=True, index=True)
     name             = Column(String, nullable=False)
-    coach_id         = Column(Integer, ForeignKey("coaches.id"), nullable=False)
+    # Nullable because a team outlives its owner leaving it. Deleting a team
+    # you own removes it from YOUR account; the staff on it keep theirs, and
+    # the team is left with no owner until one of them claims it. That claim
+    # path already existed for a team whose owner's account was gone — this
+    # makes "the owner deleted it" reach the same state instead of taking the
+    # team away from everybody.
+    coach_id          = Column(Integer, ForeignKey("coaches.id"), nullable=True)
     # Whether this is one of the coach's OWN sides, or a team they only keep
     # records on. Both live here and are used the same way — a game is between
     # two named teams, not between "us" and "them" — but a season record has to

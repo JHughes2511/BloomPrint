@@ -160,6 +160,17 @@ def join_team(
     if db.query(models.TeamStaff).filter_by(coach_id=coach.id, team_id=team_id).first():
         return {"ok": True, "already_member": True, "status": "approved"}
 
+    # A team whose owner let go of it has nobody to approve anything. Refused
+    # rather than left pending: a request sitting in a queue no one reads is a
+    # worse answer than being told to wait for somebody to take the team on.
+    # Its own staff are unaffected — they are already members and returned
+    # above, and claiming is how one of them becomes the owner.
+    if team.coach_id is None:
+        raise HTTPException(
+            status_code=409,
+            detail="This team has no owner right now. A staff member has to "
+                   "claim it before anyone else can join.")
+
     pending = (
         db.query(models.TeamInvite)
         .filter_by(team_id=team_id, invited_coach_id=coach.id, kind="request", status="pending")
@@ -857,8 +868,11 @@ def transfer_owner(
     if not team:
         raise HTTPException(status_code=404, detail="Team not found")
 
-    owner = db.get(models.Coach, team.coach_id)
-    # Closed counts as gone. The row survives a deletion (see
+    # No owner id at all is the state a team is left in when its owner deletes
+    # it from their own account; asking the session for a NULL primary key
+    # warns today and is documented to raise later, so it is answered here.
+    owner = db.get(models.Coach, team.coach_id) if team.coach_id else None
+    # Closed counts as gone too. The row survives a deletion (see
     # api/account_deletion.py), so asking only whether it exists would leave
     # every team whose owner left frozen with nobody able to claim it.
     orphaned = owner is None or account_deletion.is_closed(owner)

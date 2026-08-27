@@ -597,6 +597,10 @@ RELAXED_COLUMNS: list[tuple[str, str]] = [
     # game_sessions, and the old code wrote a sentinel 0 that matches no row —
     # rejected by Postgres on every write.
     ("game_whiteboards", "game_id"),
+    # A team whose owner deleted it from their own account keeps running for
+    # its staff, with nobody owning it until one of them claims it. See
+    # routes/teams.py delete_team.
+    ("teams", "coach_id"),
 ]
 
 

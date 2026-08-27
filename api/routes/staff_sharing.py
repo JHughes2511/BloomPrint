@@ -349,7 +349,8 @@ def _resolve_group_recipients(
     elif kind == "team" and team_id:
         team = db.get(models.Team, team_id)
         if team:
-            ids.add(team.coach_id)  # team owner
+            if team.coach_id:      # team owner, if the team still has one
+                ids.add(team.coach_id)
             for link in db.query(models.TeamStaff).filter_by(team_id=team_id).all():
                 ids.add(link.coach_id)
     elif kind == "program" and program_name:
@@ -488,7 +489,7 @@ def share_with_team(
     team = db.get(models.Team, int(team_id)) if team_id else None
     if not team:
         raise HTTPException(status_code=404, detail="Team not found")
-    ids = {team.coach_id}
+    ids = {team.coach_id} if team.coach_id else set()
     ids.update(l.coach_id for l in db.query(models.TeamStaff).filter_by(team_id=team.id).all())
     ids.discard(coach.id)
     if not ids:
