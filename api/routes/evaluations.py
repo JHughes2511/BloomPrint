@@ -25,6 +25,16 @@ router = APIRouter(prefix="/evaluations", tags=["evaluations"])
 def _finalize_eval(db, *, player_id, coach, output_type, competition_level,
                    coach_notes, video_path, report_text, title=None):
     """Parse a report and persist the Evaluation row."""
+    # Named once, here, and never derived again. The app used to work out what
+    # to call a report by scanning the first eighteen lines of its body for
+    # something that looked like a heading, which meant the inbox, the email
+    # about it and the digest line on its comments could all disagree about the
+    # same document — or find nothing and call it "a report". A matchup passes
+    # its own title; everything else is about a player, and the player's name is
+    # the fact that tells one report from the next.
+    if not title:
+        player = db.get(models.Player, player_id) if player_id else None
+        title = player.name if player else None
     eval_record = models.Evaluation(
         player_id=player_id,
         coach_id=coach.id,

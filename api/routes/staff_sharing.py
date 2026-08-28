@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..player_grants import grant_players_for_share, ensure_teams_for_share
 from ..auth import get_current_coach
-from .. import emails, models, notify, schemas
+from .. import emails, models, notify, report_titles, schemas
 from ..ai_models import OPUS
 from ..report_sections import strip_sections
 
@@ -89,49 +89,15 @@ def _resolve_report_text(report_type: str, report_id: int, db: Session, sender_i
 
 
 def _report_meta(report_type: str, report_id: int, db: Session) -> tuple[str | None, str | None, float | None]:
-    """(subject_name, output_type, overall_grade) for a shared report so the
-    recipient's Recent list can render it like a normal report."""
-    if report_type == "eval":
-        ev = db.get(models.Evaluation, report_id)
-        if not ev:
-            return None, None, None
-        player = db.get(models.Player, ev.player_id)
-        return (player.name if player else "Player"), ev.output_type, ev.overall_grade
-    if report_type == "game":
-        gr = db.get(models.GameReport, report_id)
-        if not gr:
-            return None, None, None
-        subject = gr.title or (f"vs {gr.opponent_name}" if gr.opponent_name else "Game Report")
-        return subject, gr.output_type, None
-    if report_type in ("team_training", "team_report"):
-        tr = db.get(models.TeamReport, report_id)
-        return ("Team Report" if tr else None), (tr.output_type if tr else None), None
-    if report_type == "training":
-        ts = db.get(models.TrainingSession, report_id)
-        subject = (ts.player.name if ts and ts.player else "Training") if ts else None
-        return subject, "training_program", None
-    if report_type == "game_session":
-        gs = db.get(models.GameSession, report_id)
-        if not gs:
-            return None, None, None
-        # Both teams. "vs Mali" named one side of a game between two, so the
-        # receiver could not tell whose game they had been sent.
-        team = db.get(models.Team, gs.team_id) if gs.team_id else None
-        owner = db.get(models.Coach, gs.coach_id)
-        ours = (team.name if team else None) or (owner.program_name if owner else None)
-        theirs = gs.opponent_name or "Opponent"
-        return (f"{ours} vs {theirs}" if ours else f"vs {theirs}"), "game_report", None
-    if report_type == "film":
-        clip = db.get(models.GameReportClip, report_id)
-        if not clip:
-            return None, None, None
-        gr = db.get(models.GameReport, clip.game_report_id)
-        subject = clip.team_name or (gr.title if gr else None) or "Film"
-        return subject, "film_breakdown", None
-    if report_type == "game_report":
-        gs = db.get(models.GameSession, report_id)
-        return ((f"vs {gs.opponent_name}" if gs else None), "game_report", None)
-    return None, None, None
+    """(title, output_type, overall_grade) for a shared report.
+
+    Moved to api/report_titles.py, because the recipient's list was not the only
+    thing that needs to name a document. The notification and the digest line
+    about a comment on it have to call it the same thing, and while this lived
+    here they could not: the list said "Varsity vs Northgate" and the email that
+    announced it said "a report".
+    """
+    return report_titles.report_meta(report_type, report_id, db)
 
 
 def _conversation_rows(sr: models.StaffSharedReport, db: Session):
