@@ -2431,11 +2431,11 @@
   "notifs": {
     "seasonNew": {
       "title": "Rivedi il tuo sistema e la tua filosofia",
-      "body": "È iniziata una nuova stagione. Un buon momento per rivedere e aggiornare il tuo sistema e la tua filosofia per {{season}}."
+      "body": "È iniziata una nuova stagione. Questo è un buon momento per rivedere il tuo Sistema e Filosofia per {{season}}. Ogni report e ogni programma di allenamento scritto dall'IA parte da quello che c'è lì dentro, quindi qualche minuto adesso dà forma a tutta la stagione."
     },
     "seasonWelcome": {
       "title": "Rivedi il tuo sistema e la tua filosofia",
-      "body": "Bentornato. Un buon momento per rivedere e aggiornare il tuo sistema e la tua filosofia per {{season}}."
+      "body": "Bentornato. Questo è un buon momento per rivedere il tuo Sistema e Filosofia per {{season}}. Ogni report e ogni programma di allenamento scritto dall'IA parte da quello che c'è lì dentro, quindi qualche minuto adesso dà forma a tutta la stagione."
     },
     "staffMessage": {
       "title": "Nuovo messaggio",

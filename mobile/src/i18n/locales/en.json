@@ -2431,11 +2431,11 @@
   "notifs": {
     "seasonNew": {
       "title": "Review your system & philosophy",
-      "body": "A new season has started. A good time to review and update your system & philosophy for {{season}}."
+      "body": "A new season has started. This is a good time to go back over your System & Philosophy for {{season}}. Every report and every training program the AI writes is framed by what is in there, so a few minutes now shapes the whole season."
     },
     "seasonWelcome": {
       "title": "Review your system & philosophy",
-      "body": "Welcome back. A good time to review and update your system & philosophy for {{season}}."
+      "body": "Welcome back. This is a good time to go back over your System & Philosophy for {{season}}. Every report and every training program the AI writes is framed by what is in there, so a few minutes now shapes the whole season."
     },
     "staffMessage": {
       "title": "New message",

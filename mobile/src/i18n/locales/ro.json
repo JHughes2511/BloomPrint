@@ -2431,11 +2431,11 @@
   "notifs": {
     "seasonNew": {
       "title": "Revizuiește-ți sistemul și filozofia",
-      "body": "A început un nou sezon. Un moment bun să îți revizuiești și actualizezi sistemul și filozofia pentru {{season}}."
+      "body": "A început un nou sezon. Este un moment bun să treci din nou prin Sistem și filozofie pentru {{season}}. Fiecare raport și fiecare program de antrenament scris de IA pornește de la ce se află acolo, așa că câteva minute acum modelează tot sezonul."
     },
     "seasonWelcome": {
       "title": "Revizuiește-ți sistemul și filozofia",
-      "body": "Bine ai revenit. Un moment bun să îți revizuiești și actualizezi sistemul și filozofia pentru {{season}}."
+      "body": "Bine ai revenit. Este un moment bun să treci din nou prin Sistem și filozofie pentru {{season}}. Fiecare raport și fiecare program de antrenament scris de IA pornește de la ce se află acolo, așa că câteva minute acum modelează tot sezonul."
     },
     "staffMessage": {
       "title": "Mesaj nou",

@@ -2431,11 +2431,11 @@
   "notifs": {
     "seasonNew": {
       "title": "Sistem ve felsefeni gözden geçir",
-      "body": "Yeni bir sezon başladı. {{season}} için sistemini ve felsefeni gözden geçirip güncellemek için iyi bir zaman."
+      "body": "Yeni bir sezon başladı. {{season}} için Sistem ve Felsefe bölümünüzü yeniden gözden geçirmek için iyi bir zaman. Yapay zekânın yazdığı her rapor ve her antrenman programı oradakilere dayanır; şimdi ayıracağınız birkaç dakika bütün sezonu şekillendirir."
     },
     "seasonWelcome": {
       "title": "Sistem ve felsefeni gözden geçir",
-      "body": "Tekrar hoş geldin. {{season}} için sistemini ve felsefeni gözden geçirip güncellemek için iyi bir zaman."
+      "body": "Tekrar hoş geldiniz. {{season}} için Sistem ve Felsefe bölümünüzü yeniden gözden geçirmek için iyi bir zaman. Yapay zekânın yazdığı her rapor ve her antrenman programı oradakilere dayanır; şimdi ayıracağınız birkaç dakika bütün sezonu şekillendirir."
     },
     "staffMessage": {
       "title": "Yeni mesaj",

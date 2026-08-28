@@ -2431,11 +2431,11 @@
   "notifs": {
     "seasonNew": {
       "title": "Peržiūrėkite savo sistemą ir filosofiją",
-      "body": "Prasidėjo naujas sezonas. Geras metas peržiūrėti ir atnaujinti savo sistemą bei filosofiją {{season}} sezonui."
+      "body": "Prasidėjo naujas sezonas. Dabar geras metas peržiūrėti savo Sistema ir filosofija {{season}} sezonui. Kiekviena ataskaita ir kiekviena treniruočių programa, kurią rašo DI, remiasi tuo, kas ten surašyta, tad kelios minutės dabar formuoja visą sezoną."
     },
     "seasonWelcome": {
       "title": "Peržiūrėkite savo sistemą ir filosofiją",
-      "body": "Sveiki sugrįžę. Geras metas peržiūrėti ir atnaujinti savo sistemą bei filosofiją {{season}} sezonui."
+      "body": "Sveiki sugrįžę. Dabar geras metas peržiūrėti savo Sistema ir filosofija {{season}} sezonui. Kiekviena ataskaita ir kiekviena treniruočių programa, kurią rašo DI, remiasi tuo, kas ten surašyta, tad kelios minutės dabar formuoja visą sezoną."
     },
     "staffMessage": {
       "title": "Nauja žinutė",

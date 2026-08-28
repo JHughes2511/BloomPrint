@@ -2431,11 +2431,11 @@
   "notifs": {
     "seasonNew": {
       "title": "System & Philosophie überprüfen",
-      "body": "Eine neue Saison hat begonnen. Ein guter Zeitpunkt, dein System und deine Philosophie für {{season}} zu überprüfen und zu aktualisieren."
+      "body": "Eine neue Saison hat begonnen. Das ist ein guter Moment, dein System & Philosophie für {{season}} noch einmal durchzugehen. Jeder Bericht und jedes Trainingsprogramm der KI baut darauf auf, also prägen ein paar Minuten jetzt die ganze Saison."
     },
     "seasonWelcome": {
       "title": "System & Philosophie überprüfen",
-      "body": "Willkommen zurück. Ein guter Zeitpunkt, dein System und deine Philosophie für {{season}} zu überprüfen und zu aktualisieren."
+      "body": "Willkommen zurück. Das ist ein guter Moment, dein System & Philosophie für {{season}} noch einmal durchzugehen. Jeder Bericht und jedes Trainingsprogramm der KI baut darauf auf, also prägen ein paar Minuten jetzt die ganze Saison."
     },
     "staffMessage": {
       "title": "Neue Nachricht",

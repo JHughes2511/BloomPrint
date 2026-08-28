@@ -2431,11 +2431,11 @@
   "notifs": {
     "seasonNew": {
       "title": "Pregledajte svoj sustav i filozofiju",
-      "body": "Počela je nova sezona. Dobar trenutak da pregledate i ažurirate svoj sustav i filozofiju za {{season}}."
+      "body": "Počela je nova sezona. Ovo je dobar trenutak da ponovno prođete kroz Sustav i filozofija za {{season}}. Svaki izvještaj i svaki program treninga koje piše UI polaze od onoga što ondje stoji, pa nekoliko minuta sada oblikuje cijelu sezonu."
     },
     "seasonWelcome": {
       "title": "Pregledajte svoj sustav i filozofiju",
-      "body": "Dobro došli natrag. Dobar trenutak da pregledate i ažurirate svoj sustav i filozofiju za {{season}}."
+      "body": "Dobro došli natrag. Ovo je dobar trenutak da ponovno prođete kroz Sustav i filozofija za {{season}}. Svaki izvještaj i svaki program treninga koje piše UI polaze od onoga što ondje stoji, pa nekoliko minuta sada oblikuje cijelu sezonu."
     },
     "staffMessage": {
       "title": "Nova poruka",
