@@ -201,10 +201,17 @@ def update_me(
         # Both addresses are told. The new one confirms the change took; the old
         # one is the only warning someone gets if they did not make it, and it
         # is the address an attacker has just locked them out of.
-        notify.coach_event(coach, "email_changed", {"email": coach.email})
+        # With a live way back in. The old address is the one an attacker has
+        # just locked the owner out of, and telling that person to contact us
+        # is not a way back into anything. Choosing a new password is: it ends
+        # every session, including whoever made this change.
+        reset = f"{emails.app_url()}/reset-password?token={password_reset.issue(db, password_reset.COACH, coach.id)}&as=coach"
+        notify.coach_event(coach, "email_changed", {"email": coach.email},
+                           link=reset)
         notify.send_event("coach", coach.id, "email_changed",
                           to=email_changed_from, lang=coach.preferred_language,
-                          params={"name": coach.name, "email": coach.email})
+                          params={"name": coach.name, "email": coach.email},
+                          link=reset)
     return coach
 
 
@@ -413,7 +420,10 @@ def confirm_password_reset(request: Request, body: PasswordResetConfirm,
     db.commit()
     db.refresh(coach)
 
-    notify.coach_event(coach, "password_changed")
+    notify.coach_event(
+        coach, "password_changed",
+        link=f"{emails.app_url()}/reset-password"
+             f"?token={password_reset.issue(db, password_reset.COACH, coach.id)}&as=coach")
     # Signed straight in, with a token carrying the new epoch. Someone who has
     # just proved they hold the address should not be asked to type the
     # password they set ten seconds ago.

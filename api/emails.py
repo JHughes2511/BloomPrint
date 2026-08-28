@@ -784,7 +784,13 @@ def _cta(shell: dict[str, str], event: str) -> str:
     is the kind of button people do not press because they cannot tell what it
     will do.
     """
-    if event == "password_reset":
+    # The two "something changed on your account" messages belong here as well.
+    # They told the reader to contact us straight away and then offered them a
+    # button that opened the app, which is no use to someone who has just been
+    # locked out of it. Choosing a new password is the action that takes the
+    # account back in both cases: on a changed email, it is what shuts out
+    # whoever changed it.
+    if event in ("password_reset", "password_changed", "email_changed"):
         return shell.get("reset_cta") or shell["open_cta"]
     if event == "account_closed":
         return shell.get("undo_cta") or shell["open_cta"]

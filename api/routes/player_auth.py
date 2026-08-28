@@ -328,6 +328,9 @@ def confirm_player_password_reset(request: Request, body: PlayerPasswordResetCon
     db.commit()
     db.refresh(pu)
 
-    notify.player_event(pu, "password_changed")
+    notify.player_event(
+        pu, "password_changed",
+        link=f"{emails.app_url()}/reset-password"
+             f"?token={password_reset.issue(db, password_reset.PLAYER, pu.id)}&as=player")
     return schemas.PlayerToken(access_token=_make_token(pu.id, pu.session_epoch),
                                player_user=pu)
