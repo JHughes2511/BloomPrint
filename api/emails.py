@@ -804,10 +804,14 @@ def render(event: str, lang: str | None, params: dict | None = None, *,
     if event not in EVENTS:
         raise KeyError(f"No email copy for event {event!r}")
 
-    params = dict(params or {})
     code = (lang or DEFAULT_LANG).split("-")[0].lower()
     if code not in EVENTS[event]:
         code = DEFAULT_LANG
+    # The same treatment the notifications get. Without it these three messages
+    # printed whatever the caller handed over: an English report type whatever
+    # the reader's language, and, once a title was attached to it, the raw
+    # "scouting_report|Andre Wilkins" with the join character showing.
+    params = _localize_params(params or {}, code)
     shell = SHELL.get(code, SHELL[DEFAULT_LANG])
 
     subject, line = EVENTS[event][code]
@@ -879,7 +883,10 @@ def render_html(event: str, lang: str | None, params: dict | None = None, *,
     if event not in EVENTS or code not in EVENTS[event]:
         code = DEFAULT_LANG
     shell = SHELL.get(code, SHELL[DEFAULT_LANG])
-    params = dict(params or {})
+    # Laid out from the same words as the text version, so localized the same
+    # way too. Two renderings of one message that disagree are a pair that
+    # drifts.
+    params = _localize_params(params or {}, code)
     _, line = EVENTS[event][code]
 
     name = (params.get("name") or "").strip()
@@ -940,7 +947,12 @@ _TAG = re.compile(r"\{\{\s*(\w+)\s*\}\}")
 # `item` is which report or programme a comment is on. It carries a report
 # type when the document has no title of its own and the title itself when it
 # has one; an unknown value falls through to itself, so both work.
-ENUM_PARAMS = {"type": "REPORT_TYPES", "kind": "JOB_KINDS", "item": "REPORT_TYPES"}
+# `report` is the same thing again, under the name the standalone events use.
+# It was left out, so those three messages took a humanized string instead and
+# printed the raw value: "Jaire shared a scouting report|Andre Wilkins with
+# you." A reader saw the plumbing.
+ENUM_PARAMS = {"type": "REPORT_TYPES", "kind": "JOB_KINDS", "item": "REPORT_TYPES",
+               "report": "REPORT_TYPES"}
 
 
 def _fmt_tags(s: str, params: dict) -> str:

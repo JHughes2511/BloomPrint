@@ -151,6 +151,12 @@ def report_meta(report_type: str, report_id: int, db: Session
 
 
 def qualified_type(report_type: str, report_id: int, db: Session) -> str | None:
-    """The one value a notification needs: the kind and the document, together."""
+    """The one value a notification needs: the kind and the document, together.
+
+    The report's own output_type is preferred over the sharing kind, because
+    "Scouting Report" says more than "Player Eval" about the same document. The
+    sharing kind is the fallback, and both are keys the type vocabulary knows,
+    so either way the reader gets it in their own language.
+    """
     title, output_type, _ = report_meta(report_type, report_id, db)
-    return qualify(output_type, title)
+    return qualify(output_type or report_type, title)

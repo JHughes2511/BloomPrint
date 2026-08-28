@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_coach
-from .. import decisions, emails, models, notify, schemas
+from .. import decisions, emails, models, notify, report_titles, schemas
 from ..softdelete import soft_delete
 from ..ownership import get_owned
 from ..report_sections import _without_sections
@@ -22,43 +22,41 @@ def _names_the_document(evaluation=None, training=None,
                         from_report=None) -> str:
     """Which report or programme a comment is on, for a notification param.
 
-    Returns what the app itself would show. A document with a title of its own
-    gets that; everything else gets its type qualified by the player it is
-    about, in the "type|qualifier" form emails.py and notificationText.ts both
-    understand — the type stays translated per reader, the qualifier does not
-    need to be.
+    Always the type AND the document, in the "type|title" form emails.py and
+    notificationText.ts both understand: the type stays translated per reader,
+    the title does not need to be. "Scouting Report · Andre Wilkins", never one
+    half of that.
 
-    Why the player's name qualifies a report: an evaluation carries no title
-    except for a match-up, and PlayerInboxScreen already labels one by the
-    subject it pulls out of the body, which for a player report is the player's
-    name. So this says the same thing that screen says, from data the server
-    has without parsing anything.
+    It used to return the bare title whenever a document had one, on the
+    reasoning that a title says enough by itself. It does not: "Marcus
+    commented on Andre Wilkins" has lost the fact that the thing commented on
+    was a scouting report. That only showed up once evaluations started
+    carrying a title of their own, which turned the rare branch into the
+    normal one and quietly dropped the type from every comment notification.
 
-    Without a qualifier a coach with a dozen players reads "Andre commented on
-    Scouting Report" five times over and has to go and look at all five.
+    Without a title a coach with a dozen players reads "Andre commented on
+    Scouting Report" five times over and has to go and open all five. Without a
+    type they cannot tell a report from a training programme. Both halves earn
+    their place.
     """
     if from_report is not None:
         # A programme the player generated for themselves out of a shared
         # report. It is a training programme, not the report — saying
         # "commented on Scouting Report" about a comment on a training plan is
-        # simply wrong — so it is named as one and qualified by where it came
-        # from.
+        # simply wrong — so it is named as one, after where it came from.
         mark = (from_report.title or "").strip() or getattr(
             from_report.player, "name", None)
-        return f"training_program|{mark}" if mark else "training_program"
+        return report_titles.qualify("training_program", mark)
     if training is not None:
-        titled = (getattr(training, "title", "") or "").strip()
-        if titled:
-            return titled
-        who = getattr(getattr(training, "player", None), "name", None)
-        return f"training_program|{who}" if who else "training_program"
+        return report_titles.qualify(
+            "training_program",
+            (getattr(training, "title", "") or "").strip()
+            or getattr(getattr(training, "player", None), "name", None))
     if evaluation is not None:
-        titled = (evaluation.title or "").strip()
-        if titled:
-            return titled
-        who = getattr(evaluation.player, "name", None)
-        return (f"{evaluation.output_type}|{who}" if who
-                else evaluation.output_type)
+        return report_titles.qualify(
+            evaluation.output_type,
+            (evaluation.title or "").strip()
+            or getattr(evaluation.player, "name", None))
     return "training_program"
 
 
