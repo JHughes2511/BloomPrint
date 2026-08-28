@@ -262,6 +262,11 @@ def approve_link(
             ref_id=player.id,
         ))
         db.commit()
+        # The same mail the branch below sends. Being approved from an older
+        # notification is still being approved, and this path returned before
+        # ever reaching it.
+        notify.player_event(pu, "player_link_approved",
+                            {"team": coach.program_name or "your team"})
         return {"ok": True}
     lr.status = "approved"
     _add_player_link(db, lr.player_user, lr.player_id, coach.id)
@@ -1700,25 +1705,41 @@ def share_team_report(
                 targets.append(p.player_user.id)
 
     elif body.target_type == "all_staff":
-        if body.staff_coach_id:
-            # Send to specific staff member
-            target_coaches = [db.get(models.Coach, body.staff_coach_id)]
-            target_coaches = [c for c in target_coaches if c and c.id != coach.id]
-        else:
-            target_coaches = db.query(models.Coach).filter(models.Coach.id != coach.id).all()
+        # With no recipient named, this used to fall back to every coach on the
+        # platform — a coach's team report delivered to strangers. Both callers
+        # that reach here name somebody, and the Share button is now disabled
+        # until they do, so the fallback was never a feature. Refused rather
+        # than quietly narrowed, because a silent no-op looks like a share that
+        # worked.
+        if not body.staff_coach_id:
+            raise HTTPException(status_code=400,
+                                detail="Choose a staff member to share with.")
+        target = db.get(models.Coach, body.staff_coach_id)
+        target_coaches = [target] if target and target.id != coach.id else []
 
         preview = body.report_text[:300] if body.report_text else ""
+        mail_staff = []
         for c in target_coaches:
-            notif = models.PlayerNotification(
+            params = {"coach": coach.name, "type": body.output_type,
+                      "preview": preview}
+            db.add(models.PlayerNotification(
                 coach_id=c.id,
                 type="team_report_shared",
                 title=f"Team Report: {body.output_type.replace('_', ' ').title()}",
                 body=f"{coach.name} shared a team report with you.\n\n{preview}...",
                 i18n_key="notifs.teamReportSharedCoach",
-                i18n_params={"coach": coach.name, "type": body.output_type, "preview": preview},
-            )
-            db.add(notif)
+                i18n_params=params,
+            ))
+            mail_staff.append((c, params))
         db.commit()
+        # The rows were written here and the mail was sent forty lines below,
+        # past a `return` this branch always takes — so this was the one
+        # notification in the app that reached the bell and never an inbox.
+        # Sent after the commit, like every other one: a share that failed to
+        # save must not arrive in somebody's mail.
+        for c, params in mail_staff:
+            notify.coach_notification(c, "notifs.teamReportSharedCoach", params,
+                                      link=emails.link_to("/home/staff"))
         return {"ok": True, "shared_count": len(target_coaches)}
 
     # Create TeamSharedReport for each target player user

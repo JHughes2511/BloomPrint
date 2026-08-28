@@ -1301,9 +1301,12 @@ export default function TeamReportScreen() {
                 <Text style={shareStyles.cancelText} numberOfLines={1}>{tr('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[shareStyles.shareBtn, { opacity: (shareTarget === 'all_staff' || selectedShareTarget) ? 1 : 0.4 }]}
+                // Every tab needs a recipient, staff included. Leaving the
+                // staff tab live with nobody picked sent the report to every
+                // coach on the platform.
+                style={[shareStyles.shareBtn, { opacity: selectedShareTarget ? 1 : 0.4 }]}
                 onPress={submitShare}
-                disabled={sharing || (shareTarget !== 'all_staff' && !selectedShareTarget)}
+                disabled={sharing || !selectedShareTarget}
               >
                 {sharing ? <ActivityIndicator color={t.ctaText} /> : <Text style={shareStyles.shareBtnText} numberOfLines={1}>{tr('common.send')}</Text>}
               </TouchableOpacity>
