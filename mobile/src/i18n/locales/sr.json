@@ -36,8 +36,8 @@
     "rename": "Preimenuj",
     "gotIt": "Razumem",
     "noResults": "Nema rezultata",
-    "continue": "Настави",
-    "checking": "Провера новости…"
+    "continue": "Nastavi",
+    "checking": "Provera novosti…"
   },
   "reportTypes": {
     "report": "Izveštaj",
@@ -101,9 +101,9 @@
     "conferenceRequiredMsg": "Izaberite konferenciju da biste nastavili.",
     "appLanguage": "Jezik aplikacije",
     "panelTagline": "Analiza snimaka, ocene igrača i planovi treninga — u jednom sistemu.",
-    "forgotPassword": "Заборавили сте лозинку?",
-    "forgotNeedEmail": "Унесите имејл изнад па додирните ово поново.",
-    "forgotSent": "Ако та адреса има налог, веза је већ на путу."
+    "forgotPassword": "Zaboravili ste lozinku?",
+    "forgotNeedEmail": "Unesite imejl iznad pa dodirnite ovo ponovo.",
+    "forgotSent": "Ako ta adresa ima nalog, veza je već na putu."
   },
   "components": {
     "shareModal": {
@@ -161,7 +161,7 @@
       "reportFallback": "Izveštaj",
       "updatedReportFallback": "Ažuriran izveštaj",
       "fromSender": "{{type}} · od {{sender}}",
-      "original": "Оригинал",
+      "original": "Original",
       "noContent": "Nema dostupnog sadržaja izveštaja.",
       "correctionsTab": "Ispravke ({{count}})",
       "commentsTab": "Komentari ({{count}})",
@@ -190,9 +190,9 @@
       "updatedSavedMsg": "Sačuvano kao tvoj sopstveni {{label}}. Sada je u tvom odeljku Nedavno.",
       "couldNotRegenerate": "Nije moguće regenerisati",
       "buildingUpdated": "Pravimo tvoj ažurirani izveštaj…",
-      "sourceGone": "{{name}} је ово обрисао, па нема више шта да се прикаже. Оно што си имао остаје на твојој картици Утакмице.",
-      "collapse": "Сажми",
-      "expand": "Прошири"
+      "sourceGone": "{{name}} je ovo obrisao, pa nema više šta da se prikaže. Ono što si imao ostaje na tvojoj kartici Utakmice.",
+      "collapse": "Sažmi",
+      "expand": "Proširi"
     },
     "exportSections": {
       "exportPrint": "Izvoz / Štampa",
@@ -276,20 +276,20 @@
       "permissionTitle": "Potrebna dozvola",
       "permissionMsg": "Za glasovni unos potreban je pristup mikrofonu.",
       "recordFailed": "Snimanje nije moglo da počne.",
-      "transcribeFailedTitle": "Гласовни унос није успео",
-      "transcribeFailed": "Ништа није могло да се транскрибује. Сервер је пријавио:"
+      "transcribeFailedTitle": "Glasovni unos nije uspeo",
+      "transcribeFailed": "Ništa nije moglo da se transkribuje. Server je prijavio:"
     },
     "country": {
       "selectCountry": "Izaberi državu",
       "searchCountries": "Pretraži države..."
     },
     "sendTraining": {
-      "title": "Пошаљи играчу",
-      "subWithName": "Одабери шта ће {{name}} видети.",
-      "sub": "Одабери шта ће играч видети.",
-      "oneSection": "Програм има један одељак — шаље се у целости.",
-      "send": "Пошаљи",
-      "couldNotSend": "Програм није послат."
+      "title": "Pošalji igraču",
+      "subWithName": "Odaberi šta će {{name}} videti.",
+      "sub": "Odaberi šta će igrač videti.",
+      "oneSection": "Program ima jedan odeljak — šalje se u celosti.",
+      "send": "Pošalji",
+      "couldNotSend": "Program nije poslat."
     }
   },
   "newEval": {
@@ -431,20 +431,20 @@
     "noPendingCorrectionsTitle": "Nema ispravki na čekanju",
     "noPendingCorrectionsMsg": "Dodaj bar jednu ispravku pre regenerisanja.",
     "fixed": {
-      "offensiveSkills": "Нападачке вештине",
-      "defense": "Одбрана",
-      "projection": "Пројекција",
-      "systemFit": "Уклапање у систем",
-      "development": "Развој",
-      "outlook": "Изгледи",
-      "offense": "Напад",
-      "adjustments": "Прилагођавања",
-      "analysis": "Анализа",
-      "whatsWorking": "Шта функционише",
-      "players": "Играчи",
-      "lineupsDepth": "Поставе и дубина",
-      "clips": "Клипови",
-      "summary": "Резиме"
+      "offensiveSkills": "Napadačke veštine",
+      "defense": "Odbrana",
+      "projection": "Projekcija",
+      "systemFit": "Uklapanje u sistem",
+      "development": "Razvoj",
+      "outlook": "Izgledi",
+      "offense": "Napad",
+      "adjustments": "Prilagođavanja",
+      "analysis": "Analiza",
+      "whatsWorking": "Šta funkcioniše",
+      "players": "Igrači",
+      "lineupsDepth": "Postave i dubina",
+      "clips": "Klipovi",
+      "summary": "Rezime"
     }
   },
   "home": {
@@ -533,8 +533,8 @@
     "emailPlaceholder": "vi@imejl.com",
     "emailHint": "Ovo je imejl sa kojim se prijavljujete.",
     "role": "Uloga",
-    "jobTitle": "Функција",
-    "jobTitlePlaceholder": "нпр. директор развоја играча",
+    "jobTitle": "Funkcija",
+    "jobTitlePlaceholder": "npr. direktor razvoja igrača",
     "appLanguage": "Jezik aplikacije",
     "appLanguageHint": "Aplikacija, vaši izveštaji i Pitaj BloomPrint koriste ovaj jezik.",
     "programOrganization": "Program / Organizacija",
@@ -590,14 +590,14 @@
       }
     },
     "askBloomprint": "Pitaj BloomPrint",
-    "emailNotifications": "Обавештења имејлом",
-    "emailNotificationsHint": "Дељења, коментари, тренинзи и промене у тиму. Поруке о вашем налогу увек стижу.",
-    "emailNotificationsLabel": "Шаљи ми имејл о активности",
-    "feedbackAttach": "Приложи",
-    "feedbackTakePhoto": "Сликај",
-    "feedbackPhotoPermTitle": "Потребан приступ камери",
-    "feedbackPhotoPermMsg": "Дозволите приступ камери да приложите фотографију.",
-    "feedbackPhotoError": "Није могуће приложити ту фотографију."
+    "emailNotifications": "Obaveštenja imejlom",
+    "emailNotificationsHint": "Deljenja, komentari, treninzi i promene u timu. Poruke o vašem nalogu uvek stižu.",
+    "emailNotificationsLabel": "Šalji mi imejl o aktivnosti",
+    "feedbackAttach": "Priloži",
+    "feedbackTakePhoto": "Slikaj",
+    "feedbackPhotoPermTitle": "Potreban pristup kameri",
+    "feedbackPhotoPermMsg": "Dozvolite pristup kameri da priložite fotografiju.",
+    "feedbackPhotoError": "Nije moguće priložiti tu fotografiju."
   },
   "onboarding": {
     "step": "Korak {{current}} od {{total}}",
@@ -744,7 +744,7 @@
     "couldNotComplete": "Nije moguće završiti to.",
     "couldNotOpenTitle": "Nije moguće otvoriti",
     "couldNotOpenMsg": "Nisam mogao automatski da otvorim taj ekran.",
-    "noPlayerResolved": "Нисам препознао на ког играча мислиш. Покушај са именом како стоји на списку."
+    "noPlayerResolved": "Nisam prepoznao na kog igrača misliš. Pokušaj sa imenom kako stoji na spisku."
   },
   "playerProfile": {
     "couldNotSaveChanges": "Nije moguće sačuvati izmene",
@@ -841,7 +841,7 @@
     "weight": "Težina",
     "standingReach": "Domet u stojećem stavu",
     "school": "Škola",
-    "program": "Програм",
+    "program": "Program",
     "team": "Tim",
     "level": "Nivo",
     "city": "Grad",
@@ -853,7 +853,7 @@
     "evaluations": "Procene",
     "trainingPlans": "Planovi treninga",
     "memberSince": "Član od {{date}}",
-    "noTrainingContent": "Нема тренажног садржаја.",
+    "noTrainingContent": "Nema trenažnog sadržaja.",
     "corrections": "ISPRAVKE",
     "correctionsPlaceholder": "Unesi ispravke ili povratne informacije za novi program treninga...",
     "saveForLater": "Sačuvaj za kasnije",
@@ -862,8 +862,8 @@
     "generatingTrainingOverlay": "Generisanje treninga…",
     "applied": "PRIMENJENO",
     "pending": "NA ČEKANJU",
-    "playersVersion": "ИГРАЧЕВА ВЕРЗИЈА",
-    "sentBadge": "ПОСЛАТО",
+    "playersVersion": "IGRAČEVA VERZIJA",
+    "sentBadge": "POSLATO",
     "preparingChecklist": "AI priprema igračevu verziju kontrolne liste...",
     "commentsCount": "Komentari ({{count}})",
     "unknown": "Nepoznato",
@@ -918,9 +918,9 @@
     "allowRegenerate": "Dozvoli primaocu da ponovo generiše",
     "searchCoachPlaceholder": "Pretraži ime trenera/programa...",
     "summarizeHistoryTitle": "Sažmi istoriju",
-    "noEvalsYet": "Још нема евалуација.",
-    "updatePlayerProgram": "Ажурирај играчев програм",
-    "createAssign": "Направи и додели",
+    "noEvalsYet": "Još nema evaluacija.",
+    "updatePlayerProgram": "Ažuriraj igračev program",
+    "createAssign": "Napravi i dodeli",
     "summarizeFrom": "Sažmi iz",
     "summarizeAs": "Napiši kao",
     "sourceGameStats": "Statistika utakmica",
@@ -1139,9 +1139,9 @@
       "failedToSendRequest": "Slanje zahteva nije uspelo",
       "cameraNeeded": "Potrebna kamera",
       "cameraMsg": "Omogućite pristup kameri da skenirate QR kod.",
-      "cameraInsecure": "Камера захтева безбедну (https) везу.",
-      "cameraUnsupported": "Овај прегледач не може да отвори камеру. Унесите код изнад.",
-      "cameraUnavailable": "Није могуће покренути камеру. Унесите код изнад.",
+      "cameraInsecure": "Kamera zahteva bezbednu (https) vezu.",
+      "cameraUnsupported": "Ovaj pregledač ne može da otvori kameru. Unesite kod iznad.",
+      "cameraUnavailable": "Nije moguće pokrenuti kameru. Unesite kod iznad.",
       "failedToSaveProfile": "Čuvanje profila nije uspelo.",
       "yourName": "Vaše ime",
       "country": "Država",
@@ -1166,14 +1166,14 @@
       "request": "Zatraži",
       "noStaffFound": "Nije pronađen štab. Probaj drugu pretragu.",
       "pointAtQr": "Usmeri ka QR kodu svog trenera",
-      "age": "Године",
-      "phAge": "нпр. 17",
-      "onRosterAs": "У тиму као {{name}}",
-      "emailNotifications": "Обавештења имејлом",
-      "emailNotificationsLabel": "Шаљи ми имејл о активности",
-      "emailNotificationsHint": "Извештаји, тренинзи и одговори тренера. Поруке о вашем налогу увек стижу.",
-      "settings": "Подешавања",
-      "settingsSub": "Профил, језик и имејл",
+      "age": "Godine",
+      "phAge": "npr. 17",
+      "onRosterAs": "U timu kao {{name}}",
+      "emailNotifications": "Obaveštenja imejlom",
+      "emailNotificationsLabel": "Šalji mi imejl o aktivnosti",
+      "emailNotificationsHint": "Izveštaji, treninzi i odgovori trenera. Poruke o vašem nalogu uvek stižu.",
+      "settings": "Podešavanja",
+      "settingsSub": "Profil, jezik i imejl",
       "appLanguage": "Jezik aplikacije"
     },
     "reportDetail": {
@@ -1256,8 +1256,8 @@
       "updatedMsg": "Vaš program treninga je ažuriran na osnovu vaših ispravki.",
       "failedUpdateTraining": "Ažuriranje treninga nije uspelo",
       "failedAddComment": "Dodavanje komentara nije uspelo",
-      "showDetail": "Прикажи детаље",
-      "hideDetail": "Сакриј детаље"
+      "showDetail": "Prikaži detalje",
+      "hideDetail": "Sakrij detalje"
     },
     "coachTrainingDetail": {
       "notFound": "Program treninga nije pronađen",
@@ -1291,8 +1291,8 @@
       "updatedMsg": "Vaš program treninga je ažuriran na osnovu vaših ispravki.",
       "failedUpdateTraining": "Ažuriranje treninga nije uspelo",
       "failedAddComment": "Dodavanje komentara nije uspelo",
-      "showDetail": "Прикажи детаље",
-      "hideDetail": "Сакриј детаље"
+      "showDetail": "Prikaži detalje",
+      "hideDetail": "Sakrij detalje"
     }
   },
   "recent": {
@@ -1383,9 +1383,9 @@
     "correctionsCount": "Ispravke ({{count}})",
     "applied": "PRIMENJENO",
     "pending": "NA ČEKANJU",
-    "sectionsLabel": "Одељци",
-    "filmFromPacket": "{{team}} · из {{packet}}",
-    "fromFilm": "{{types}} · Снимак"
+    "sectionsLabel": "Odeljci",
+    "filmFromPacket": "{{team}} · iz {{packet}}",
+    "fromFilm": "{{types}} · Snimak"
   },
   "staffHub": {
     "title": "Centar štaba",
@@ -1418,9 +1418,9 @@
     "join": "Pridruži se",
     "memberCountOne": "{{count}} član",
     "memberCountOther": "{{count}} članova",
-    "ownerRole": "Власник",
-    "staffRole": "Особље",
-    "onlyYouHint": "Засад сте овде сами — користите „Позови“ да додате особље.",
+    "ownerRole": "Vlasnik",
+    "staffRole": "Osoblje",
+    "onlyYouHint": "Zasad ste ovde sami — koristite „Pozovi“ da dodate osoblje.",
     "ownedByYou": "Vi ste vlasnik",
     "message": "Poruka",
     "subTeam": "Pod-tim",
@@ -1442,7 +1442,7 @@
     "inviteTo": "Pozovi u {{name}}",
     "inviteHint": "Pretraži trenera po imenu ili unesi imejl da pozoveš nekog novog. Samo trenerski nalozi.",
     "invitePlaceholder": "Ime ili imejl trenera...",
-    "emailInviteRow": "Позивница мејлом: {{email}}",
+    "emailInviteRow": "Pozivnica mejlom: {{email}}",
     "inviteSentTitle": "Poziv poslat",
     "inviteSentMsg": "{{name}} je pozvan i odobriće ili odbiti poziv.",
     "emailInviteTitle": "Poziv imejlom",
@@ -1465,59 +1465,59 @@
     "leaveTeamTitle": "Napusti tim",
     "leaveTeamMsg": "Više nećete videti utakmice ovog tima niti primati njihova obaveštenja.",
     "leaveTeamError": "Nije moguće napustiti tim",
-    "viewFullGameData": "Прикажи све податке утакмице (статистика и оцене)",
+    "viewFullGameData": "Prikaži sve podatke utakmice (statistika i ocene)",
     "noReportYet": "Još nije generisan izveštaj.",
     "noScoutingReportYet": "Još nije generisan AI skaut izveštaj za ovu utakmicu.",
     "addCommentPlaceholder": "Dodaj komentar...",
     "you": "Ti",
     "subTeamPlaceholder": "Naziv podgrupe (npr. Napad, Bekovi)...",
     "coachNameOrEmail": "Ime ili imejl trenera...",
-    "inviteSheetHint": "Претрага по имену, програму или мејлу. Само тренерски налози.",
-    "noAccountYet": "Није пронађен налог за ову адресу",
-    "noReportGenerated": "Извештај још није генерисан.",
-    "requestJoin": "Затражи",
-    "requestPending": "Затражено",
-    "requestSentTitle": "Захтев послат",
-    "requestSentMsg": "Власник тима ће одобрити или одбити ваш захтев.",
-    "joinRequestsLabel": "ЗАХТЕВИ ({{count}})",
-    "wantsToJoin": "{{role}} · жели да се придружи тиму {{team}}",
-    "transferOwner": "Пренеси",
-    "transferHint": "Изаберите ко преузима тим {{team}}. Подтимови иду уз њега, а ви остајете у штабу.",
-    "transferNoStaff": "Прво позовите тренера — тим можете предати само некоме ко је већ у штабу.",
-    "transferDoneTitle": "Тим пренет",
-    "transferDoneMsg": "Тим сада припада њима. Ви сте и даље у штабу.",
-    "transferError": "Није могуће пренети тим",
-    "claimOwnership": "Преузми",
-    "claimTitle": "Преузми власништво",
-    "claimMsg": "Власник тима {{team}} више нема налог. Желите ли да преузмете тим?",
-    "claimConfirm": "Преузми",
+    "inviteSheetHint": "Pretraga po imenu, programu ili mejlu. Samo trenerski nalozi.",
+    "noAccountYet": "Nije pronađen nalog za ovu adresu",
+    "noReportGenerated": "Izveštaj još nije generisan.",
+    "requestJoin": "Zatraži",
+    "requestPending": "Zatraženo",
+    "requestSentTitle": "Zahtev poslat",
+    "requestSentMsg": "Vlasnik tima će odobriti ili odbiti vaš zahtev.",
+    "joinRequestsLabel": "ZAHTEVI ({{count}})",
+    "wantsToJoin": "{{role}} · želi da se pridruži timu {{team}}",
+    "transferOwner": "Prenesi",
+    "transferHint": "Izaberite ko preuzima tim {{team}}. Podtimovi idu uz njega, a vi ostajete u štabu.",
+    "transferNoStaff": "Prvo pozovite trenera — tim možete predati samo nekome ko je već u štabu.",
+    "transferDoneTitle": "Tim prenet",
+    "transferDoneMsg": "Tim sada pripada njima. Vi ste i dalje u štabu.",
+    "transferError": "Nije moguće preneti tim",
+    "claimOwnership": "Preuzmi",
+    "claimTitle": "Preuzmi vlasništvo",
+    "claimMsg": "Vlasnik tima {{team}} više nema nalog. Želite li da preuzmete tim?",
+    "claimConfirm": "Preuzmi",
     "sharedWith": "{{type}} · Podeljeno sa {{names}}",
-    "unshare": "Прекини дељење",
-    "unshareTitle": "Прекини дељење извештаја",
-    "unshareMessage": "Повући га од {{names}}? Нестаје из њиховог Staff Hub-а, а подељена утакмица нестаје и са распореда.",
-    "couldNotUnshare": "Дељење није могло да се прекине."
+    "unshare": "Prekini deljenje",
+    "unshareTitle": "Prekini deljenje izveštaja",
+    "unshareMessage": "Povući ga od {{names}}? Nestaje iz njihovog Staff Hub-a, a podeljena utakmica nestaje i sa rasporeda.",
+    "couldNotUnshare": "Deljenje nije moglo da se prekine."
   },
   "teamDetail": {
-    "title": "Тим",
-    "staffLabel": "Особље",
-    "subteamsLabel": "Подтимови",
-    "viewProfile": "Погледај профил",
-    "messageMember": "Порука",
-    "addToSubteam": "Додај у подтим",
-    "addToWhich": "Додај {{name}} у",
-    "addedTitle": "Додато",
-    "addedMsg": "{{name}} је сада у {{team}}.",
-    "addError": "Није могуће додати у тај тим.",
-    "remove": "Уклони",
-    "removeTitle": "Уклони из тима",
-    "removeMsg": "Уклонити {{name}} из {{team}}?",
-    "removeError": "Није могуће уклонити.",
-    "roleLabel": "Улога",
-    "programLabel": "Програм",
-    "conferenceLabel": "Конференција",
-    "levelLabel": "Ниво",
-    "locationLabel": "Локација",
-    "sharedTeamsLabel": "Заједнички тимови"
+    "title": "Tim",
+    "staffLabel": "Osoblje",
+    "subteamsLabel": "Podtimovi",
+    "viewProfile": "Pogledaj profil",
+    "messageMember": "Poruka",
+    "addToSubteam": "Dodaj u podtim",
+    "addToWhich": "Dodaj {{name}} u",
+    "addedTitle": "Dodato",
+    "addedMsg": "{{name}} je sada u {{team}}.",
+    "addError": "Nije moguće dodati u taj tim.",
+    "remove": "Ukloni",
+    "removeTitle": "Ukloni iz tima",
+    "removeMsg": "Ukloniti {{name}} iz {{team}}?",
+    "removeError": "Nije moguće ukloniti.",
+    "roleLabel": "Uloga",
+    "programLabel": "Program",
+    "conferenceLabel": "Konferencija",
+    "levelLabel": "Nivo",
+    "locationLabel": "Lokacija",
+    "sharedTeamsLabel": "Zajednički timovi"
   },
   "conversation": {
     "title": "Razgovor",
@@ -1554,7 +1554,7 @@
     "attachReport": "Priloži izveštaj",
     "searchReportsPlaceholder": "Pretraži izveštaje...",
     "noReportsFound": "Nema pronađenih izveštaja.",
-    "send": "Пошаљи"
+    "send": "Pošalji"
   },
   "coachNotifs": {
     "title": "Obaveštenja",
@@ -1605,9 +1605,9 @@
     "viewType": "Vidi {{type}}",
     "markAsRead": "Označi kao pročitano",
     "viewReport": "Prikaži izveštaj",
-    "addToRoster": "Дoдaj",
-    "rosterAddedTitle": "Дoдaтo",
-    "rosterAddedMsg": "Сaдa je у сaстaву."
+    "addToRoster": "Dodaj",
+    "rosterAddedTitle": "Dodato",
+    "rosterAddedMsg": "Sada je u sastavu."
   },
   "coachTraining": {
     "notFound": "Trening nije pronađen",
@@ -1678,16 +1678,16 @@
     "importOneByOneHint": "ili dodirni + da dodaš igrače jednog po jednog",
     "emptyNoPlayers": "Još nema igrača. Kreiraj tim i dodaj igrače.",
     "teams": "Timovi",
-    "removeFromMyRoster": "Уклони са мог списка",
-    "couldNotRemoveShared": "Није могуће уклонити играча са твог списка.",
-    "myTeamLabel": "Један од мојих тимова",
-    "myTeamOn": "Улази у мој сезонски учинак.",
-    "myTeamOff": "Тим који пратим. Утакмице и оцене су овде, али ван мог учинка.",
-    "removeFromTeam": "Уклони из тима",
-    "couldNotRemoveFromTeam": "Играч није могао да буде уклоњен из тима.",
-    "deleteNotYours": "Обриши (није твој)",
-    "deleteNotYoursTitle": "Није твој играч",
-    "deleteNotYoursMsg": "Овај играч припада тренеру који га је поделио. Можеш га скинути са свог списка, али обрисати га може само његов тренер."
+    "removeFromMyRoster": "Ukloni sa mog spiska",
+    "couldNotRemoveShared": "Nije moguće ukloniti igrača sa tvog spiska.",
+    "myTeamLabel": "Jedan od mojih timova",
+    "myTeamOn": "Ulazi u moj sezonski učinak.",
+    "myTeamOff": "Tim koji pratim. Utakmice i ocene su ovde, ali van mog učinka.",
+    "removeFromTeam": "Ukloni iz tima",
+    "couldNotRemoveFromTeam": "Igrač nije mogao da bude uklonjen iz tima.",
+    "deleteNotYours": "Obriši (nije tvoj)",
+    "deleteNotYoursTitle": "Nije tvoj igrač",
+    "deleteNotYoursMsg": "Ovaj igrač pripada treneru koji ga je podelio. Možeš ga skinuti sa svog spiska, ali obrisati ga može samo njegov trener."
   },
   "importScreen": {
     "titleRoster": "Uvezi sastav",
@@ -2004,14 +2004,14 @@
     "applyRegenerate": "Primeni i regeneriši",
     "regeneratingLabel": "Regenerisanje izveštaja…",
     "noContent": "Nema sadržaja.",
-    "noAnalysisYet": "Још нема анализе.",
-    "applyCorrection": "Примени исправку",
-    "noPlayersFound": "Нема пронађених играча.",
-    "myTeamFilm": "Снимак мог тима",
-    "opponentFilm": "Снимак противника",
-    "teamFilm": "Снимак: {{team}}",
-    "bothTeams": "Обе",
-    "analysisStopped": "Анализа је прекинута. Обриши снимак и додај га поново.",
+    "noAnalysisYet": "Još nema analize.",
+    "applyCorrection": "Primeni ispravku",
+    "noPlayersFound": "Nema pronađenih igrača.",
+    "myTeamFilm": "Snimak mog tima",
+    "opponentFilm": "Snimak protivnika",
+    "teamFilm": "Snimak: {{team}}",
+    "bothTeams": "Obe",
+    "analysisStopped": "Analiza je prekinuta. Obriši snimak i dodaj ga ponovo.",
     "importBoxScoreTitle": "Uvezi statistiku",
     "importBoxScoreMessage": "Odakle da se preuzme statistika?",
     "importFromGame": "Iz zabeležene utakmice",
@@ -2170,10 +2170,10 @@
     "continueLiveEntry": "Nastavi unos uživo",
     "scoutingReport": "SKAUT IZVEŠTAJ",
     "selectOpponent": "IZABERI PROTIVNIKA",
-    "noOpponents": "Још нема тимова. Прво забележите утакмицу.",
+    "noOpponents": "Još nema timova. Prvo zabeležite utakmicu.",
     "gamesCount": "{{count}} utakmica",
     "gamesCount_plural": "{{count}} utakmica",
-    "allOpponents": "Сви тимови",
+    "allOpponents": "Svi timovi",
     "gamesAgainst": "UTAKMICE PROTIV",
     "na": "N/D",
     "noScore": "Nema rezultata",
@@ -2201,7 +2201,7 @@
     "importStats": "Uvezi statistiku",
     "teamOptional": "TIM",
     "noneNoTeam": "Nijedan (bez tima)",
-    "selectTeam": "Изабери тим",
+    "selectTeam": "Izaberi tim",
     "none": "Nijedan",
     "createNewTeam": "+ Kreiraj novi tim",
     "teamNamePlaceholder": "Naziv tima",
@@ -2284,28 +2284,28 @@
     "home": "Domaći",
     "away": "Gosti",
     "finalLabel": "Kraj",
-    "ourPlayerNamePlaceholder": "Име играча...",
-    "couldNotAddPlayer": "Тај играч није могао бити додат.",
-    "setScore": "Унеси резултат",
-    "perGameLine": "{{pts}} поена · {{reb}} ск · {{ast}} ас · {{stl}} укр · {{blk}} бл · {{to}} изг",
-    "perGameStat": "{{stat}} — {{n}} по утакмици",
-    "noInsight": "Још нема анализе.",
+    "ourPlayerNamePlaceholder": "Ime igrača...",
+    "couldNotAddPlayer": "Taj igrač nije mogao biti dodat.",
+    "setScore": "Unesi rezultat",
+    "perGameLine": "{{pts}} poena · {{reb}} sk · {{ast}} as · {{stl}} ukr · {{blk}} bl · {{to}} izg",
+    "perGameStat": "{{stat}} — {{n}} po utakmici",
+    "noInsight": "Još nema analize.",
     "isMyTeam": "{{name}} je moj tim",
     "insightStale": "Novi izveštaji otad — napiši ponovo",
     "insightRewriting": "Ponovo se piše…",
-    "editScore": "Измени резултат",
-    "scoreNeededTitle": "Потребна су оба резултата",
-    "scoreNeededMsg": "Упиши оба резултата и сачувај.",
-    "fullGame": "Цела утакмица",
-    "noPeriodBreakdown": "Овај записник није имао поделу по четвртинама, па је цела утакмица у једној колони.",
-    "sharedByCoach": "Поделио {{name}}",
-    "removeSharedGameTitle": "Уклони подељену утакмицу",
-    "removeSharedGameMessage": "Уклонити ову утакмицу са твог списка? Остаје код {{name}} — мења се само твој приказ.",
-    "removeFromMyGames": "Уклони из мојих утакмица",
-    "frozenFromCoach": "Од {{name}} · више се не ажурира",
-    "searchTeamsPlaceholder": "Претражи тимове...",
-    "viewFullGameData": "Прикажи све податке утакмице",
-    "gameData": "Подаци утакмице"
+    "editScore": "Izmeni rezultat",
+    "scoreNeededTitle": "Potrebna su oba rezultata",
+    "scoreNeededMsg": "Upiši oba rezultata i sačuvaj.",
+    "fullGame": "Cela utakmica",
+    "noPeriodBreakdown": "Ovaj zapisnik nije imao podelu po četvrtinama, pa je cela utakmica u jednoj koloni.",
+    "sharedByCoach": "Podelio {{name}}",
+    "removeSharedGameTitle": "Ukloni podeljenu utakmicu",
+    "removeSharedGameMessage": "Ukloniti ovu utakmicu sa tvog spiska? Ostaje kod {{name}} — menja se samo tvoj prikaz.",
+    "removeFromMyGames": "Ukloni iz mojih utakmica",
+    "frozenFromCoach": "Od {{name}} · više se ne ažurira",
+    "searchTeamsPlaceholder": "Pretraži timove...",
+    "viewFullGameData": "Prikaži sve podatke utakmice",
+    "gameData": "Podaci utakmice"
   },
   "whiteboard": {
     "title": "Tabla",
@@ -2421,197 +2421,197 @@
     "showTranslation": "Prikaži prevod"
   },
   "jobProgress": {
-    "scanning": "Скенирање снимка у потрази за кључним акцијама…",
-    "segment": "Анализа сегмента {{i}} од {{n}}",
-    "synthesizing": "Састављање извештаја",
-    "uploading": "Отпремање снимка — {{pct}}% ({{sent}} од {{total}})",
-    "uploadingOf": "Отпремање снимка {{i}} од {{n}} — {{pct}}% ({{sent}} од {{total}})",
-    "working": "У току…"
+    "scanning": "Skeniranje snimka u potrazi za ključnim akcijama…",
+    "segment": "Analiza segmenta {{i}} od {{n}}",
+    "synthesizing": "Sastavljanje izveštaja",
+    "uploading": "Otpremanje snimka — {{pct}}% ({{sent}} od {{total}})",
+    "uploadingOf": "Otpremanje snimka {{i}} od {{n}} — {{pct}}% ({{sent}} od {{total}})",
+    "working": "U toku…"
   },
   "notifs": {
     "seasonNew": {
-      "title": "Прегледајте свој систем и филозофију",
-      "body": "Почела је нова сезона. Ово је добар тренутак да поново прођете кроз одељак „Sistem i filozofija” за {{season}}. Сваки извештај и сваки програм тренинга које пише ВИ полазе од онога што тамо стоји, па неколико минута сада обликује целу сезону."
+      "title": "Pregledajte svoj sistem i filozofiju",
+      "body": "Počela je nova sezona. Ovo je dobar trenutak da ponovo prođete kroz odeljak „Sistem i filozofija” za {{season}}. Svaki izveštaj i svaki program treninga koje piše VI polaze od onoga što tamo stoji, pa nekoliko minuta sada oblikuje celu sezonu."
     },
     "seasonWelcome": {
-      "title": "Прегледајте свој систем и филозофију",
-      "body": "Добро дошли назад. Ово је добар тренутак да поново прођете кроз одељак „Sistem i filozofija” за {{season}}. Сваки извештај и сваки програм тренинга које пише ВИ полазе од онога што тамо стоји, па неколико минута сада обликује целу сезону."
+      "title": "Pregledajte svoj sistem i filozofiju",
+      "body": "Dobro došli nazad. Ovo je dobar trenutak da ponovo prođete kroz odeljak „Sistem i filozofija” za {{season}}. Svaki izveštaj i svaki program treninga koje piše VI polaze od onoga što tamo stoji, pa nekoliko minuta sada oblikuje celu sezonu."
     },
     "staffMessage": {
-      "title": "Нова порука",
+      "title": "Nova poruka",
       "body": "{{coach}}: {{preview}}"
     },
     "staffMessageGroup": {
-      "title": "Нова порука",
-      "body": "{{coach}} у „{{item}}”: {{preview}}"
+      "title": "Nova poruka",
+      "body": "{{coach}} u „{{item}}”: {{preview}}"
     },
     "trainingSent": {
-      "title": "Програм тренинга послат",
-      "body": "{{coach}} вам је послао програм тренинга. Погледајте картицу тренинга."
+      "title": "Program treninga poslat",
+      "body": "{{coach}} vam je poslao program treninga. Pogledajte karticu treninga."
     },
     "coachRepliedTraining": {
-      "title": "Тренер је одговорио",
-      "body": "{{coach}} је коментарисао {{item}}: „{{text}}”"
+      "title": "Trener je odgovorio",
+      "body": "{{coach}} je komentarisao {{item}}: „{{text}}”"
     },
     "trainingUpdatedByCoach": {
-      "title": "Програм тренинга ажуриран",
-      "body": "{{coach}} је ажурирао ваш програм тренинга."
+      "title": "Program treninga ažuriran",
+      "body": "{{coach}} je ažurirao vaš program treninga."
     },
     "trainingNotesAdded": {
-      "title": "Тренинг ажуриран",
-      "body": "{{coach}} је додао белешке у {{item}}."
+      "title": "Trening ažuriran",
+      "body": "{{coach}} je dodao beleške u {{item}}."
     },
     "coachCommentedTraining": {
-      "title": "Тренер је додао белешке",
-      "body": "{{coach}} је коментарисао {{item}}: „{{text}}”"
+      "title": "Trener je dodao beleške",
+      "body": "{{coach}} je komentarisao {{item}}: „{{text}}”"
     },
     "coachRepliedComment": {
-      "title": "Тренер је одговорио",
-      "body": "{{coach}} је одговорио у {{item}}: „{{text}}”"
+      "title": "Trener je odgovorio",
+      "body": "{{coach}} je odgovorio u {{item}}: „{{text}}”"
     },
     "linkRequest": {
-      "title": "Захтев за повезивање",
-      "body": "{{player}} тражи повезивање са профилом играча {{profile}}."
+      "title": "Zahtev za povezivanje",
+      "body": "{{player}} traži povezivanje sa profilom igrača {{profile}}."
     },
     "linkRequestSelf": {
-      "title": "Захтев за повезивање",
-      "body": "{{player}} тражи повезивање са вашим налогом."
+      "title": "Zahtev za povezivanje",
+      "body": "{{player}} traži povezivanje sa vašim nalogom."
     },
     "linkApprovedProgram": {
-      "title": "Профил повезан",
-      "body": "Ваш налог је повезан са {{program}}."
+      "title": "Profil povezan",
+      "body": "Vaš nalog je povezan sa {{program}}."
     },
     "linkApprovedProfile": {
-      "title": "Профил повезан",
-      "body": "Ваш налог је повезан са профилом играча {{player}}."
+      "title": "Profil povezan",
+      "body": "Vaš nalog je povezan sa profilom igrača {{player}}."
     },
     "shareApproval": {
-      "title": "Потребно одобрење",
-      "body": "{{coach}} жели да пошаље ваш {{type}} играчу {{recipient}}. Одобрите или одбијте дељење вашег извештаја са играчем на кога се не односи."
+      "title": "Potrebno odobrenje",
+      "body": "{{coach}} želi da pošalje vaš {{type}} igraču {{recipient}}. Odobrite ili odbijte deljenje vašeg izveštaja sa igračem na koga se ne odnosi."
     },
     "shareApproved": {
-      "title": "Дељење одобрено",
-      "body": "{{player}} је одобрио дељење свог извештаја ({{type}})."
+      "title": "Deljenje odobreno",
+      "body": "{{player}} je odobrio deljenje svog izveštaja ({{type}})."
     },
     "shareRejected": {
-      "title": "Дељење одбијено",
-      "body": "{{player}} је одбио дељење свог извештаја ({{type}})."
+      "title": "Deljenje odbijeno",
+      "body": "{{player}} je odbio deljenje svog izveštaja ({{type}})."
     },
     "reportShared": {
-      "title": "Нови извештај подељен",
-      "body": "{{coach}} је поделио са вама: {{type}}."
+      "title": "Novi izveštaj podeljen",
+      "body": "{{coach}} je podelio sa vama: {{type}}."
     },
     "teamReportSharedCoach": {
-      "title": "Тимски извештај подељен",
-      "body": "{{coach}} је поделио тимски извештај са вама.\n\n{{preview}}..."
+      "title": "Timski izveštaj podeljen",
+      "body": "{{coach}} je podelio timski izveštaj sa vama.\n\n{{preview}}..."
     },
     "teamReportSharedPlayer": {
-      "title": "Тимски извештај подељен",
-      "body": "{{coach}} је поделио са вама тимски извештај ({{type}})."
+      "title": "Timski izveštaj podeljen",
+      "body": "{{coach}} je podelio sa vama timski izveštaj ({{type}})."
     },
     "playerGeneratedTraining": {
-      "title": "Играч је направио тренинг",
-      "body": "{{player}} је направио програм тренинга на основу извештаја: {{item}}."
+      "title": "Igrač je napravio trening",
+      "body": "{{player}} je napravio program treninga na osnovu izveštaja: {{item}}."
     },
     "playerUpdatedTraining": {
-      "title": "Играч је ажурирао тренинг",
-      "body": "{{player}} је ажурирао {{item}} новим примедбама."
+      "title": "Igrač je ažurirao trening",
+      "body": "{{player}} je ažurirao {{item}} novim primedbama."
     },
     "playerCommentedTraining": {
-      "title": "Играч је одговорио",
-      "body": "{{player}} је коментарисао {{item}}: „{{text}}”"
+      "title": "Igrač je odgovorio",
+      "body": "{{player}} je komentarisao {{item}}: „{{text}}”"
     },
     "playerCommentedReport": {
-      "title": "Играч је одговорио",
-      "body": "{{player}} је коментарисао {{item}}: „{{text}}”"
+      "title": "Igrač je odgovorio",
+      "body": "{{player}} je komentarisao {{item}}: „{{text}}”"
     },
     "trainingFeedbackRequest": {
-      "title": "Повратна информација о тренингу",
-      "body": "{{player}} је затражио ажурирање: {{item}}, „{{text}}”"
+      "title": "Povratna informacija o treningu",
+      "body": "{{player}} je zatražio ažuriranje: {{item}}, „{{text}}”"
     },
     "trainingFeedbackApplied": {
-      "title": "Повратна информација о тренингу",
-      "body": "{{player}} је применио исправке: {{item}}, „{{text}}”"
+      "title": "Povratna informacija o treningu",
+      "body": "{{player}} je primenio ispravke: {{item}}, „{{text}}”"
     },
     "teamStaffJoined": {
-      "title": "{{coach}} се придружио вашем тиму",
-      "body": "{{coach}} ({{role}}) се придружио тиму {{team}}."
+      "title": "{{coach}} se pridružio vašem timu",
+      "body": "{{coach}} ({{role}}) se pridružio timu {{team}}."
     },
     "teamMemberAdded": {
-      "title": "Додати у {{team}}",
-      "body": "{{coach}} вас је додао у {{team}}."
+      "title": "Dodati u {{team}}",
+      "body": "{{coach}} vas je dodao u {{team}}."
     },
     "teamMemberRemoved": {
-      "title": "Уклоњени из {{team}}",
-      "body": "Уклоњени сте из {{team}}."
+      "title": "Uklonjeni iz {{team}}",
+      "body": "Uklonjeni ste iz {{team}}."
     },
     "teamInvite": {
-      "title": "Позивница за тим",
-      "body": "{{coach}} вас је позвао да се придружите тиму {{team}}."
+      "title": "Pozivnica za tim",
+      "body": "{{coach}} vas je pozvao da se pridružite timu {{team}}."
     },
     "teamInviteAccepted": {
-      "title": "Позивница прихваћена",
-      "body": "{{coach}} се придружио тиму {{team}}."
+      "title": "Pozivnica prihvaćena",
+      "body": "{{coach}} se pridružio timu {{team}}."
     },
     "teamInviteRejected": {
-      "title": "Позивница одбијена",
-      "body": "{{coach}} је одбио позивницу за тим."
+      "title": "Pozivnica odbijena",
+      "body": "{{coach}} je odbio pozivnicu za tim."
     },
     "staffReportShared": {
-      "title": "Извештај поделио {{coach}}",
-      "body": "{{coach}} је поделио са вама: {{type}}."
+      "title": "Izveštaj podelio {{coach}}",
+      "body": "{{coach}} je podelio sa vama: {{type}}."
     },
     "staffReportSharedTeam": {
-      "title": "Извештај поделио {{coach}}",
-      "body": "{{coach}} је поделио са {{team}}: {{type}}."
+      "title": "Izveštaj podelio {{coach}}",
+      "body": "{{coach}} je podelio sa {{team}}: {{type}}."
     },
     "staffReportComment": {
-      "title": "Нови коментар",
-      "body": "{{coach}} је коментарисао {{item}}: „{{text}}”"
+      "title": "Novi komentar",
+      "body": "{{coach}} je komentarisao {{item}}: „{{text}}”"
     },
     "staffReportRegenerated": {
-      "title": "{{coach}} је поново генерисао извештај",
-      "body": "{{coach}} је поново генерисао извештај ({{type}}) који сте поделили."
+      "title": "{{coach}} je ponovo generisao izveštaj",
+      "body": "{{coach}} je ponovo generisao izveštaj ({{type}}) koji ste podelili."
     },
     "staffReportRequest": {
-      "title": "{{coach}} је затражио ваш ажурирани извештај",
-      "body": "{{coach}} жели да види вашу ажурирану верзију извештаја ({{type}})."
+      "title": "{{coach}} je zatražio vaš ažurirani izveštaj",
+      "body": "{{coach}} želi da vidi vašu ažuriranu verziju izveštaja ({{type}})."
     },
     "staffReportDeclined": {
-      "title": "{{coach}} је одбио ваш захтев",
-      "body": "{{coach}} је одбио да подели свој ажурирани извештај ({{type}})."
+      "title": "{{coach}} je odbio vaš zahtev",
+      "body": "{{coach}} je odbio da podeli svoj ažurirani izveštaj ({{type}})."
     },
     "staffReportUpdatedShared": {
-      "title": "{{coach}} је поделио ажурирани извештај",
-      "body": "{{coach}} је поделио са вама свој ажурирани извештај ({{type}})."
+      "title": "{{coach}} je podelio ažurirani izveštaj",
+      "body": "{{coach}} je podelio sa vama svoj ažurirani izveštaj ({{type}})."
     },
     "staffReportForwarded": {
-      "title": "Извештај проследио {{coach}}",
-      "body": "{{coach}} вам је проследио: {{type}}."
+      "title": "Izveštaj prosledio {{coach}}",
+      "body": "{{coach}} vam je prosledio: {{type}}."
     },
     "teamJoinRequest": {
-      "title": "{{coach}} тражи да се придружи вашем тиму",
-      "body": "{{coach}} ({{role}}) је затражио да се придружи тиму {{team}}."
+      "title": "{{coach}} traži da se pridruži vašem timu",
+      "body": "{{coach}} ({{role}}) je zatražio da se pridruži timu {{team}}."
     },
     "teamJoinApproved": {
-      "title": "Захтев одобрен",
-      "body": "Сада сте у стручном штабу тима {{team}}."
+      "title": "Zahtev odobren",
+      "body": "Sada ste u stručnom štabu tima {{team}}."
     },
     "teamJoinRejected": {
-      "title": "Захтев одбијен",
-      "body": "Ваш захтев да се придружите тиму {{team}} је одбијен."
+      "title": "Zahtev odbijen",
+      "body": "Vaš zahtev da se pridružite timu {{team}} je odbijen."
     },
     "teamOwnerChanged": {
-      "title": "Власник тима промењен",
-      "body": "{{coach}} је сада власник тима {{team}}."
+      "title": "Vlasnik tima promenjen",
+      "body": "{{coach}} je sada vlasnik tima {{team}}."
     },
     "teamReleased": {
-      "title": "Тим је остао без власника",
-      "body": "{{coach}} је напустио {{team}}. Било ко из штаба може преузети тим."
+      "title": "Tim je ostao bez vlasnika",
+      "body": "{{coach}} je napustio {{team}}. Bilo ko iz štaba može preuzeti tim."
     },
     "joinedViaLink": {
-      "title": "Неко се придружио вашем тиму",
-      "body": "{{name}} се придружио екипи {{team}} преко твоје позивнице."
+      "title": "Neko se pridružio vašem timu",
+      "body": "{{name}} se pridružio ekipi {{team}} preko tvoje pozivnice."
     },
     "jobDone": {
       "title": "{{kind}} spreman",
@@ -2619,70 +2619,70 @@
     },
     "jobFailed": {
       "title": "{{kind}} nije uspeo",
-      "body": "Није било могуће завршити: {{item}}. {{reason}}"
+      "body": "Nije bilo moguće završiti: {{item}}. {{reason}}"
     },
     "rosterPlayerProposed": {
-      "title": "Игрaч зa дoдaвaњe у сaстaв",
-      "body": "{{coach}} имa {{player}} у свojoj вeрзиjи {{team}}. Дoдaти гa у сaстaв?"
+      "title": "Igrač za dodavanje u sastav",
+      "body": "{{coach}} ima {{player}} u svojoj verziji {{team}}. Dodati ga u sastav?"
     },
     "staffReportUnshared": {
-      "title": "{{coach}} је прекинуо дељење извештаја",
-      "body": "{{coach}} је повукао {{type}} који је поделио с тобом."
+      "title": "{{coach}} je prekinuo deljenje izveštaja",
+      "body": "{{coach}} je povukao {{type}} koji je podelio s tobom."
     }
   },
   "teamInvite": {
-    "button": "Позивница",
-    "title": "Позови у екипу",
-    "sub": "Ко ово отвори придружује се екипи {{team}} — играчи на списак, стручни штаб у екипу.",
-    "share": "Подели",
-    "download": "Сачувај QR",
-    "copied": "Линк копиран",
-    "hint": "Покажи код за скенирање или пошаљи линк. Важи док га не опозовеш.",
-    "joinedLabel": "Придружили се преко овог линка ({{count}})",
-    "asPlayer": "Играч",
-    "asStaff": "Штаб",
-    "revokeAndNew": "Опозови и направи нови",
-    "revokeTitle": "Опозвати овај линк?",
-    "revokeMessage": "Стари линк одмах престаје да ради. Ко се већ придружио остаје у екипи.",
-    "revoke": "Опозови",
-    "couldNotCreate": "Није могуће направити позивницу.",
-    "couldNotRevoke": "Није могуће опозвати тај линк.",
-    "shareMessage": "Придружи се екипи {{team}} на BloomPrint-у: {{url}}"
+    "button": "Pozivnica",
+    "title": "Pozovi u ekipu",
+    "sub": "Ko ovo otvori pridružuje se ekipi {{team}} — igrači na spisak, stručni štab u ekipu.",
+    "share": "Podeli",
+    "download": "Sačuvaj QR",
+    "copied": "Link kopiran",
+    "hint": "Pokaži kod za skeniranje ili pošalji link. Važi dok ga ne opozoveš.",
+    "joinedLabel": "Pridružili se preko ovog linka ({{count}})",
+    "asPlayer": "Igrač",
+    "asStaff": "Štab",
+    "revokeAndNew": "Opozovi i napravi novi",
+    "revokeTitle": "Opozvati ovaj link?",
+    "revokeMessage": "Stari link odmah prestaje da radi. Ko se već pridružio ostaje u ekipi.",
+    "revoke": "Opozovi",
+    "couldNotCreate": "Nije moguće napraviti pozivnicu.",
+    "couldNotRevoke": "Nije moguće opozvati taj link.",
+    "shareMessage": "Pridruži se ekipi {{team}} na BloomPrint-u: {{url}}"
   },
   "join": {
-    "invitedBy": "{{name}} те позвао у",
-    "whoAreYou": "Ко си ти?",
-    "iAmPlayer": "Ја сам играч",
-    "iAmPlayerSub": "Примај извештаје и тренинге од свог тренера.",
-    "iAmStaff": "Ја сам тренер, скаут или кондициони тренер",
-    "iAmStaffSub": "Придружи се стручном штабу.",
-    "whichOne": "Ко си од њих?",
-    "notListed": "Ниси на списку?",
-    "yourName": "Твоје име",
-    "addMe": "Додај ме на списак",
-    "joinAsStaffNow": "Придружи се екипи {{team}}",
-    "welcomeTitle": "Унутра си",
-    "joinedTeam": "Придружио си се екипи {{team}}.",
-    "couldNotJoin": "Придруживање овим линком није успело.",
-    "badLink": "Ова позивница није важећа или је опозвана.",
-    "goToApp": "Иди на BloomPrint",
-    "joiningBanner": "Придружујеш се екипи {{team}}",
+    "invitedBy": "{{name}} te pozvao u",
+    "whoAreYou": "Ko si ti?",
+    "iAmPlayer": "Ja sam igrač",
+    "iAmPlayerSub": "Primaj izveštaje i treninge od svog trenera.",
+    "iAmStaff": "Ja sam trener, skaut ili kondicioni trener",
+    "iAmStaffSub": "Pridruži se stručnom štabu.",
+    "whichOne": "Ko si od njih?",
+    "notListed": "Nisi na spisku?",
+    "yourName": "Tvoje ime",
+    "addMe": "Dodaj me na spisak",
+    "joinAsStaffNow": "Pridruži se ekipi {{team}}",
+    "welcomeTitle": "Unutra si",
+    "joinedTeam": "Pridružio si se ekipi {{team}}.",
+    "couldNotJoin": "Pridruživanje ovim linkom nije uspelo.",
+    "badLink": "Ova pozivnica nije važeća ili je opozvana.",
+    "goToApp": "Idi na BloomPrint",
+    "joiningBanner": "Pridružuješ se ekipi {{team}}",
     "noLink": "Prijavite se da nastavite."
   },
   "search": {
-    "placeholder": "Претражи",
-    "seeAll": "Прикажи све ({{count}})",
-    "title": "Претрага",
-    "typeToSearch": "Унесите за претрагу свега",
+    "placeholder": "Pretraži",
+    "seeAll": "Prikaži sve ({{count}})",
+    "title": "Pretraga",
+    "typeToSearch": "Unesite za pretragu svega",
     "groups": {
-      "packets": "Пакети утакмица",
-      "film": "Анализе снимака",
-      "gameReports": "Извештаји о утакмицама",
-      "opponents": "Играчи противника",
-      "insights": "Скаут увиди",
-      "messages": "Поруке штаба",
-      "comments": "Коментари",
-      "goTo": "Иди на"
+      "packets": "Paketi utakmica",
+      "film": "Analize snimaka",
+      "gameReports": "Izveštaji o utakmicama",
+      "opponents": "Igrači protivnika",
+      "insights": "Skaut uvidi",
+      "messages": "Poruke štaba",
+      "comments": "Komentari",
+      "goTo": "Idi na"
     }
   },
   "gameStats": {
@@ -2708,7 +2708,7 @@
       "attempts": "Shooting percentages need shot attempts, and this game has makes only. Import a box score that includes attempts (FGA / 3PA / FTA) to see them.",
       "play_by_play": "This needs a play-by-play file — every event with a game clock and a running score. Import one and this will appear.",
       "shot_coordinates": "This needs shot locations. Import a file that includes a court coordinate for each shot and this will appear.",
-      "team_stats": "За ово треба пет бројки: поени из изгубљених лопти, поени из контри, поени из друге шансе, поени из рекета и поени са клупе."
+      "team_stats": "Za ovo treba pet brojki: poeni iz izgubljenih lopti, poeni iz kontri, poeni iz druge šanse, poeni iz reketa i poeni sa klupe."
     },
     "biggestLead": "Najveće vođstvo",
     "biggestRun": "Najveća serija",
@@ -2727,13 +2727,13 @@
     "fixHint": "Attach the file again and say what was wrong. Only this section is re-read; everything else in the game stays as it is.",
     "fixPlaceholder": "e.g. Egypt had 7 blocks, not 8 — the panel on the right of the sheet.",
     "attachAndRedo": "Priloži i ponovi",
-    "whichTeamTitle": "Који је ово тим?",
-    "whichTeamHint": "Овај фајл не именује тимове, а стране се не погађају. Реците који је који и бројеви ће отићи на право место.",
+    "whichTeamTitle": "Koji je ovo tim?",
+    "whichTeamHint": "Ovaj fajl ne imenuje timove, a strane se ne pogađaju. Recite koji je koji i brojevi će otići na pravo mesto.",
     "section": {
-      "players": "{{count}} играча",
-      "events": "{{count}} акција",
-      "shots": "{{count}} шутева",
-      "team_stats": "укупно за тим"
+      "players": "{{count}} igrača",
+      "events": "{{count}} akcija",
+      "shots": "{{count}} šuteva",
+      "team_stats": "ukupno za tim"
     }
   },
   "jobs": {
@@ -2762,38 +2762,38 @@
     "everyTeam": "Svi timovi"
   },
   "reportSearch": {
-    "open": "Претрага",
-    "placeholder": "Претражи овај извештај",
-    "count": "{{index}} од {{total}}",
-    "none": "Нема резултата",
-    "next": "Следећи резултат",
-    "previous": "Претходни резултат"
+    "open": "Pretraga",
+    "placeholder": "Pretraži ovaj izveštaj",
+    "count": "{{index}} od {{total}}",
+    "none": "Nema rezultata",
+    "next": "Sledeći rezultat",
+    "previous": "Prethodni rezultat"
   },
   "msgActions": {
-    "reply": "Одговори",
-    "edit": "Измени",
-    "deleted": "Порука обрисана",
-    "edited": "измењено",
-    "replyingTo": "Одговор за {{name}}",
-    "editing": "Мењаш своју поруку",
-    "deleteTitle": "Обрисати ово?",
-    "deleteBody": "Остаје на месту да се одговори и даље читају, али текст нестаје. Не може да се поништи.",
-    "holdHint": "Држите поруку за одговор, измену и брисање."
+    "reply": "Odgovori",
+    "edit": "Izmeni",
+    "deleted": "Poruka obrisana",
+    "edited": "izmenjeno",
+    "replyingTo": "Odgovor za {{name}}",
+    "editing": "Menjaš svoju poruku",
+    "deleteTitle": "Obrisati ovo?",
+    "deleteBody": "Ostaje na mestu da se odgovori i dalje čitaju, ali tekst nestaje. Ne može da se poništi.",
+    "holdHint": "Držite poruku za odgovor, izmenu i brisanje."
   },
   "resetPassword": {
-    "title": "Изаберите нову лозинку",
-    "sub": "Ова веза ради једном. Изаберите нешто што овде још нисте користили.",
-    "newPassword": "Нова лозинка",
-    "confirmPassword": "Унесите поново",
-    "submit": "Сачувај и пријави ме",
-    "show": "Прикажи лозинку",
-    "hide": "Сакриј лозинку",
-    "tooShort": "Најмање {{count}} знакова.",
-    "mismatch": "Не поклапају се.",
-    "failed": "Није успело. Затражите нову везу и покушајте поново.",
-    "badLinkTitle": "Ова веза је непотпуна",
-    "badLinkBody": "Можда ју је ваш имејл програм скратио. Затражите нову са екрана за пријаву.",
-    "backToSignIn": "Назад на пријаву",
-    "signsOutOthers": "Чување нове лозинке вас одјављује са свих других уређаја."
+    "title": "Izaberite novu lozinku",
+    "sub": "Ova veza radi jednom. Izaberite nešto što ovde još niste koristili.",
+    "newPassword": "Nova lozinka",
+    "confirmPassword": "Unesite ponovo",
+    "submit": "Sačuvaj i prijavi me",
+    "show": "Prikaži lozinku",
+    "hide": "Sakrij lozinku",
+    "tooShort": "Najmanje {{count}} znakova.",
+    "mismatch": "Ne poklapaju se.",
+    "failed": "Nije uspelo. Zatražite novu vezu i pokušajte ponovo.",
+    "badLinkTitle": "Ova veza je nepotpuna",
+    "badLinkBody": "Možda ju je vaš imejl program skratio. Zatražite novu sa ekrana za prijavu.",
+    "backToSignIn": "Nazad na prijavu",
+    "signsOutOthers": "Čuvanje nove lozinke vas odjavljuje sa svih drugih uređaja."
   }
 }
