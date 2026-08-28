@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "選手がトレーニングを作成しました",
-      "body": "{{player}} が共有レポートからトレーニングプログラムを作成しました。"
+      "body": "{{player}} が {{item}} からトレーニングプログラムを作成しました。"
     },
     "playerUpdatedTraining": {
       "title": "選手がトレーニングを更新しました",
-      "body": "{{player}} が新しいフィードバックでトレーニングプログラムを更新しました。"
+      "body": "{{player}} が新しいフィードバックで {{item}} を更新しました。"
     },
     "playerCommentedTraining": {
       "title": "選手が返信しました",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "トレーニングへのフィードバック",
-      "body": "{{player}} がトレーニングの更新を依頼しました:「{{text}}」"
+      "body": "{{player}} が {{item}} の更新を依頼しました:「{{text}}」"
     },
     "trainingFeedbackApplied": {
       "title": "トレーニングへのフィードバック",
-      "body": "{{player}} が自分のトレーニングに修正を適用しました。"
+      "body": "{{player}} が {{item}} に修正を適用しました:「{{text}}」"
     },
     "teamStaffJoined": {
       "title": "{{coach}} がチームに加わりました",

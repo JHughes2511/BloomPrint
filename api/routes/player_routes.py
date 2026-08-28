@@ -622,7 +622,12 @@ async def generate_player_training(
     # This used to be db.query(models.Coach).all(): a player pressing generate
     # notified every coach on the platform, which was noise in the app and
     # would be a mass mailing here.
-    params = {"player": pu.name}
+    # Which report it came from. Falls back to the bare type rather than being
+    # left out: copy with an unfilled placeholder is never sent, so an
+    # unnameable source would turn a vague email into no email.
+    params = {"player": pu.name,
+              "item": (report_titles.qualified_type("eval", shared.evaluation_id, db)
+                       if shared else None) or "eval"}
     owner = db.get(models.Coach, shared.shared_by_id) if shared else None
     if owner:
         db.add(models.PlayerNotification(
@@ -816,7 +821,8 @@ def refresh_coach_training(
         session.completed_drills = []
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"AI update failed: {exc}")
-    params = {"player": pu.name, "text": body.feedback[:80]}
+    params = {"player": pu.name, "text": body.feedback[:80],
+              "item": _names_the_document(training=session)}
     notif = models.CoachNotification(
         coach_id=session.coach_id,
         type="training_feedback",
@@ -964,7 +970,10 @@ async def refresh_player_training(
             raise HTTPException(status_code=500, detail="AI returned no content")
         pt.program_text = text_blocks[0].text
         # One coach, for the same reason as the generate route above.
-        params = {"player": pu.name}
+        params = {"player": pu.name,
+                  "item": _names_the_document(
+                      from_report=(pt.shared_report.evaluation
+                                   if pt.shared_report else None))}
         owner = (db.get(models.Coach, pt.shared_report.shared_by_id)
                  if pt.shared_report else None)
         if owner:
@@ -1147,7 +1156,12 @@ def apply_coach_training_corrections(
         raise HTTPException(status_code=500, detail=f"AI update failed: {exc}")
     for c in pending:
         c.applied = True
-    params = {"player": pu.name}
+    # What the corrections said, not just that some were made. A coach who is
+    # told only that corrections happened has to open the app to find out what
+    # they were, which is the trip this message exists to save them.
+    said = "; ".join(c.correction.strip() for c in pending if c.correction)[:120]
+    params = {"player": pu.name, "text": said or "-",
+              "item": _names_the_document(training=session)}
     db.add(models.CoachNotification(
         coach_id=session.coach_id,
         type="training_feedback",

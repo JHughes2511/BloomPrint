@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "선수가 훈련을 생성했습니다",
-      "body": "{{player}} 님이 공유된 리포트로 훈련 프로그램을 만들었습니다."
+      "body": "{{player}} 님이 {{item}}(으)로 훈련 프로그램을 만들었습니다."
     },
     "playerUpdatedTraining": {
       "title": "선수가 훈련을 업데이트했습니다",
-      "body": "{{player}} 님이 새 피드백으로 훈련 프로그램을 업데이트했습니다."
+      "body": "{{player}} 님이 새 피드백으로 {{item}}을(를) 업데이트했습니다."
     },
     "playerCommentedTraining": {
       "title": "선수가 답변했습니다",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "훈련 피드백",
-      "body": "{{player}} 님이 훈련 업데이트를 요청했습니다: \"{{text}}\""
+      "body": "{{player}} 님이 {{item}} 업데이트를 요청했습니다: \"{{text}}\""
     },
     "trainingFeedbackApplied": {
       "title": "훈련 피드백",
-      "body": "{{player}} 님이 자신의 훈련에 수정 사항을 적용했습니다."
+      "body": "{{player}} 님이 {{item}}에 수정 사항을 적용했습니다: \"{{text}}\""
     },
     "teamStaffJoined": {
       "title": "{{coach}} 님이 팀에 합류했습니다",

@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "Jucătorul a generat un antrenament",
-      "body": "{{player}} a generat un program de antrenament dintr-un raport partajat."
+      "body": "{{player}} a generat un program de antrenament din raportul: {{item}}."
     },
     "playerUpdatedTraining": {
       "title": "Jucătorul și-a actualizat antrenamentul",
-      "body": "{{player}} și-a actualizat programul de antrenament cu observații noi."
+      "body": "{{player}} a actualizat {{item}} cu observații noi."
     },
     "playerCommentedTraining": {
       "title": "Jucătorul a răspuns",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "Feedback de antrenament",
-      "body": "{{player}} a cerut o actualizare a antrenamentului său: „{{text}}”"
+      "body": "{{player}} a cerut o actualizare pentru {{item}}: „{{text}}”"
     },
     "trainingFeedbackApplied": {
       "title": "Feedback de antrenament",
-      "body": "{{player}} a aplicat corecții antrenamentului său."
+      "body": "{{player}} a aplicat corecții la {{item}}: „{{text}}”"
     },
     "teamStaffJoined": {
       "title": "{{coach}} s-a alăturat echipei tale",

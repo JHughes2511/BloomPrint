@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "Spelaren skapade träning",
-      "body": "{{player}} skapade ett träningsprogram från en delad rapport."
+      "body": "{{player}} skapade ett träningsprogram från {{item}}."
     },
     "playerUpdatedTraining": {
       "title": "Spelaren uppdaterade träningen",
-      "body": "{{player}} uppdaterade sitt träningsprogram med ny återkoppling."
+      "body": "{{player}} uppdaterade {{item}} med ny återkoppling."
     },
     "playerCommentedTraining": {
       "title": "Spelaren svarade",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "Träningsåterkoppling",
-      "body": "{{player}} bad om en uppdatering av sin träning: \"{{text}}\""
+      "body": "{{player}} bad om en uppdatering av {{item}}: \"{{text}}\""
     },
     "trainingFeedbackApplied": {
       "title": "Träningsåterkoppling",
-      "body": "{{player}} tillämpade korrigeringar på sin träning."
+      "body": "{{player}} tillämpade korrigeringar på {{item}}: \"{{text}}\""
     },
     "teamStaffJoined": {
       "title": "{{coach}} gick med i ditt lag",

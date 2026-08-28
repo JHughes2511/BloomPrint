@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "أنشأ اللاعب تدريبًا",
-      "body": "أنشأ {{player}} برنامج تدريب من تقرير تمت مشاركته."
+      "body": "أنشأ {{player}} برنامج تدريب من: {{item}}."
     },
     "playerUpdatedTraining": {
       "title": "حدّث اللاعب تدريبه",
-      "body": "حدّث {{player}} برنامج تدريبه بملاحظات جديدة."
+      "body": "حدّث {{player}} {{item}} بملاحظات جديدة."
     },
     "playerCommentedTraining": {
       "title": "رد اللاعب",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "ملاحظات التدريب",
-      "body": "طلب {{player}} تحديث تدريبه: «{{text}}»"
+      "body": "طلب {{player}} تحديث {{item}}: «{{text}}»"
     },
     "trainingFeedbackApplied": {
       "title": "ملاحظات التدريب",
-      "body": "طبّق {{player}} تصحيحات على تدريبه."
+      "body": "طبّق {{player}} تصحيحات على {{item}}: «{{text}}»"
     },
     "teamStaffJoined": {
       "title": "انضم {{coach}} إلى فريقك",

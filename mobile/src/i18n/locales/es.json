@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "El jugador generó un entrenamiento",
-      "body": "{{player}} generó un programa de entrenamiento a partir de un informe compartido."
+      "body": "{{player}} generó un programa de entrenamiento a partir de {{item}}."
     },
     "playerUpdatedTraining": {
       "title": "El jugador actualizó su entrenamiento",
-      "body": "{{player}} actualizó su programa de entrenamiento con nuevos comentarios."
+      "body": "{{player}} actualizó {{item}} con nuevos comentarios."
     },
     "playerCommentedTraining": {
       "title": "El jugador respondió",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "Comentarios de entrenamiento",
-      "body": "{{player}} solicitó una actualización de su entrenamiento: \"{{text}}\""
+      "body": "{{player}} solicitó una actualización de {{item}}: \"{{text}}\""
     },
     "trainingFeedbackApplied": {
       "title": "Comentarios de entrenamiento",
-      "body": "{{player}} aplicó correcciones a su entrenamiento."
+      "body": "{{player}} aplicó correcciones a {{item}}: \"{{text}}\""
     },
     "teamStaffJoined": {
       "title": "{{coach}} se unió a tu equipo",

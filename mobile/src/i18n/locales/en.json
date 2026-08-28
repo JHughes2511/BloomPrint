@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "Player generated training",
-      "body": "{{player}} generated a training program from a shared report."
+      "body": "{{player}} generated a training program from {{item}}."
     },
     "playerUpdatedTraining": {
       "title": "Player updated training",
-      "body": "{{player}} updated their training program with new feedback."
+      "body": "{{player}} updated {{item}} with new feedback."
     },
     "playerCommentedTraining": {
       "title": "Player responded",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "Training feedback",
-      "body": "{{player}} requested an update to their training: \"{{text}}\""
+      "body": "{{player}} requested an update to {{item}}: \"{{text}}\""
     },
     "trainingFeedbackApplied": {
       "title": "Training feedback",
-      "body": "{{player}} applied corrections to their training."
+      "body": "{{player}} applied corrections to {{item}}: \"{{text}}\""
     },
     "teamStaffJoined": {
       "title": "{{coach}} joined your team",

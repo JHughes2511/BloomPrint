@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "Speler heeft training gemaakt",
-      "body": "{{player}} heeft een trainingsprogramma gemaakt op basis van een gedeeld rapport."
+      "body": "{{player}} heeft een trainingsprogramma gemaakt op basis van {{item}}."
     },
     "playerUpdatedTraining": {
       "title": "Speler heeft training bijgewerkt",
-      "body": "{{player}} heeft zijn trainingsprogramma bijgewerkt met nieuwe feedback."
+      "body": "{{player}} heeft {{item}} bijgewerkt met nieuwe feedback."
     },
     "playerCommentedTraining": {
       "title": "Speler heeft gereageerd",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "Trainingsfeedback",
-      "body": "{{player}} vroeg om een update van zijn training: \"{{text}}\""
+      "body": "{{player}} vroeg om een update van {{item}}: \"{{text}}\""
     },
     "trainingFeedbackApplied": {
       "title": "Trainingsfeedback",
-      "body": "{{player}} heeft correcties op zijn training toegepast."
+      "body": "{{player}} heeft correcties op {{item}} toegepast: \"{{text}}\""
     },
     "teamStaffJoined": {
       "title": "{{coach}} is bij je team gekomen",

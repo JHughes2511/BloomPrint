@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "Гравець створив тренування",
-      "body": "{{player}} створив програму тренувань на основі надісланого звіту."
+      "body": "{{player}} створив програму тренувань на основі звіту: {{item}}."
     },
     "playerUpdatedTraining": {
       "title": "Гравець оновив тренування",
-      "body": "{{player}} оновив свою програму тренувань новими зауваженнями."
+      "body": "{{player}} оновив {{item}} новими зауваженнями."
     },
     "playerCommentedTraining": {
       "title": "Гравець відповів",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "Відгук про тренування",
-      "body": "{{player}} попросив оновити своє тренування: «{{text}}»"
+      "body": "{{player}} попросив оновити {{item}}: «{{text}}»"
     },
     "trainingFeedbackApplied": {
       "title": "Відгук про тренування",
-      "body": "{{player}} застосував правки до свого тренування."
+      "body": "{{player}} застосував правки до {{item}}: «{{text}}»"
     },
     "teamStaffJoined": {
       "title": "{{coach}} приєднався до вашої команди",

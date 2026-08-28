@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "השחקן יצר אימון",
-      "body": "{{player}} יצר תוכנית אימונים מתוך דוח משותף."
+      "body": "{{player}} יצר תוכנית אימונים מתוך {{item}}."
     },
     "playerUpdatedTraining": {
       "title": "השחקן עדכן את האימון",
-      "body": "{{player}} עדכן את תוכנית האימונים שלו עם משוב חדש."
+      "body": "{{player}} עדכן את {{item}} עם משוב חדש."
     },
     "playerCommentedTraining": {
       "title": "השחקן הגיב",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "משוב על האימון",
-      "body": "{{player}} ביקש עדכון לאימון שלו: \"{{text}}\""
+      "body": "{{player}} ביקש עדכון ל־{{item}}: \"{{text}}\""
     },
     "trainingFeedbackApplied": {
       "title": "משוב על האימון",
-      "body": "{{player}} החיל תיקונים על האימון שלו."
+      "body": "{{player}} החיל תיקונים על {{item}}: \"{{text}}\""
     },
     "teamStaffJoined": {
       "title": "{{coach}} הצטרף לקבוצה שלך",

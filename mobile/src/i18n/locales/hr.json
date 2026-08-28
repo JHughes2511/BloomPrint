@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "Igrač je izradio trening",
-      "body": "{{player}} je izradio program treninga na temelju podijeljenog izvještaja."
+      "body": "{{player}} je izradio program treninga na temelju izvještaja: {{item}}."
     },
     "playerUpdatedTraining": {
       "title": "Igrač je ažurirao trening",
-      "body": "{{player}} je ažurirao svoj program treninga novim primjedbama."
+      "body": "{{player}} je ažurirao {{item}} novim primjedbama."
     },
     "playerCommentedTraining": {
       "title": "Igrač je odgovorio",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "Povratna informacija o treningu",
-      "body": "{{player}} je zatražio ažuriranje svog treninga: „{{text}}”"
+      "body": "{{player}} je zatražio ažuriranje: {{item}}, „{{text}}”"
     },
     "trainingFeedbackApplied": {
       "title": "Povratna informacija o treningu",
-      "body": "{{player}} je primijenio ispravke na svoj trening."
+      "body": "{{player}} je primijenio ispravke: {{item}}, „{{text}}”"
     },
     "teamStaffJoined": {
       "title": "{{coach}} se pridružio vašoj momčadi",

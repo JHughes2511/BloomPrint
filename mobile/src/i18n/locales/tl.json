@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "Gumawa ng pagsasanay ang manlalaro",
-      "body": "Gumawa si {{player}} ng programa ng pagsasanay mula sa ibinahaging ulat."
+      "body": "Gumawa si {{player}} ng programa ng pagsasanay mula sa {{item}}."
     },
     "playerUpdatedTraining": {
       "title": "In-update ng manlalaro ang pagsasanay",
-      "body": "In-update ni {{player}} ang kanyang programa ng pagsasanay gamit ang bagong feedback."
+      "body": "In-update ni {{player}} ang {{item}} gamit ang bagong feedback."
     },
     "playerCommentedTraining": {
       "title": "Sumagot ang manlalaro",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "Feedback sa pagsasanay",
-      "body": "Humiling si {{player}} ng update sa kanyang pagsasanay: \"{{text}}\""
+      "body": "Humiling si {{player}} ng update sa {{item}}: \"{{text}}\""
     },
     "trainingFeedbackApplied": {
       "title": "Feedback sa pagsasanay",
-      "body": "Naglapat si {{player}} ng mga pagwawasto sa kanyang pagsasanay."
+      "body": "Naglapat si {{player}} ng mga pagwawasto sa {{item}}: \"{{text}}\""
     },
     "teamStaffJoined": {
       "title": "Sumali si {{coach}} sa iyong koponan",

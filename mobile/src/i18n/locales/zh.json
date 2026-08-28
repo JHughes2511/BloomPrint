@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "球员生成了训练",
-      "body": "{{player}} 根据一份分享的报告生成了训练计划。"
+      "body": "{{player}} 根据{{item}}生成了训练计划。"
     },
     "playerUpdatedTraining": {
       "title": "球员更新了训练",
-      "body": "{{player}} 用新的反馈更新了自己的训练计划。"
+      "body": "{{player}} 用新的反馈更新了{{item}}。"
     },
     "playerCommentedTraining": {
       "title": "球员已回复",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "训练反馈",
-      "body": "{{player}} 请求更新自己的训练：“{{text}}”"
+      "body": "{{player}} 请求更新{{item}}：“{{text}}”"
     },
     "trainingFeedbackApplied": {
       "title": "训练反馈",
-      "body": "{{player}} 对自己的训练应用了修改。"
+      "body": "{{player}} 对{{item}}应用了修改：“{{text}}”"
     },
     "teamStaffJoined": {
       "title": "{{coach}} 加入了你的球队",

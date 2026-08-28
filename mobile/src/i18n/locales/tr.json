@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "Oyuncu antrenman oluşturdu",
-      "body": "{{player}} paylaşılan bir rapordan antrenman programı oluşturdu."
+      "body": "{{player}} şu rapordan antrenman programı oluşturdu: {{item}}."
     },
     "playerUpdatedTraining": {
       "title": "Oyuncu antrenmanı güncelledi",
-      "body": "{{player}} antrenman programını yeni geri bildirimle güncelledi."
+      "body": "{{player}} şunu yeni geri bildirimle güncelledi: {{item}}."
     },
     "playerCommentedTraining": {
       "title": "Oyuncu yanıtladı",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "Antrenman geri bildirimi",
-      "body": "{{player}} antrenmanının güncellenmesini istedi: \"{{text}}\""
+      "body": "{{player}} şunun güncellenmesini istedi: {{item}}, \"{{text}}\""
     },
     "trainingFeedbackApplied": {
       "title": "Antrenman geri bildirimi",
-      "body": "{{player}} antrenmanına düzeltmeler uyguladı."
+      "body": "{{player}} şuna düzeltmeler uyguladı: {{item}}, \"{{text}}\""
     },
     "teamStaffJoined": {
       "title": "{{coach}} takımına katıldı",

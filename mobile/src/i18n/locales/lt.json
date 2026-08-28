@@ -2511,11 +2511,11 @@
     },
     "playerGeneratedTraining": {
       "title": "Žaidėjas sukūrė treniruotę",
-      "body": "{{player}} sukūrė treniruočių programą iš bendrintos ataskaitos."
+      "body": "{{player}} sukūrė treniruočių programą iš ataskaitos: {{item}}."
     },
     "playerUpdatedTraining": {
       "title": "Žaidėjas atnaujino treniruotę",
-      "body": "{{player}} atnaujino savo treniruočių programą naujomis pastabomis."
+      "body": "{{player}} atnaujino {{item}} naujomis pastabomis."
     },
     "playerCommentedTraining": {
       "title": "Žaidėjas atsakė",
@@ -2527,11 +2527,11 @@
     },
     "trainingFeedbackRequest": {
       "title": "Treniruotės atsiliepimas",
-      "body": "{{player}} paprašė atnaujinti savo treniruotę: „{{text}}“"
+      "body": "{{player}} paprašė atnaujinti {{item}}: „{{text}}“"
     },
     "trainingFeedbackApplied": {
       "title": "Treniruotės atsiliepimas",
-      "body": "{{player}} pritaikė pataisymus savo treniruotei."
+      "body": "{{player}} pritaikė pataisymus: {{item}}, „{{text}}“"
     },
     "teamStaffJoined": {
       "title": "{{coach}} prisijungė prie jūsų komandos",
