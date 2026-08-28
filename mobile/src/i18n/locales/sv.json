@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}} klar",
-      "body": "Din {{kind}} är klar att läsa."
+      "body": "Din {{item}} är klar att läsa."
     },
     "jobFailed": {
       "title": "{{kind}} misslyckades",
-      "body": "Den kunde inte slutföras. {{reason}}"
+      "body": "{{item}} kunde inte slutföras. {{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "En spelare att lägga till i truppen",

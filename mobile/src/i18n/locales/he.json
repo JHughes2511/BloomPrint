@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}} מוכן",
-      "body": "ה{{kind}} שלך הסתיים ומוכן לקריאה."
+      "body": "ה{{item}} שלך הסתיים ומוכן לקריאה."
     },
     "jobFailed": {
       "title": "{{kind}} נכשל",
-      "body": "לא ניתן היה לסיים. {{reason}}"
+      "body": "לא ניתן היה להשלים: {{item}}. {{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "שחקן להוספה לסגל",

@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}} ready",
-      "body": "Your {{kind}} has finished and is ready to read."
+      "body": "Your {{item}} has finished and is ready to read."
     },
     "jobFailed": {
       "title": "{{kind}} failed",
-      "body": "It could not be finished. {{reason}}"
+      "body": "{{item}} could not be finished. {{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "A player to add to your roster",
@@ -2739,7 +2739,7 @@
   "jobs": {
     "kinds": {
       "eval": "Player evaluation",
-      "team_report": "Team report",
+      "team_report": "Team Eval",
       "packet": "Game report packet",
       "training": "Training program",
       "scouting": "Scouting report",

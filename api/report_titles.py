@@ -150,6 +150,34 @@ def report_meta(report_type: str, report_id: int, db: Session
     return None, None, None
 
 
+# What a finished background job produced. Read off the branch in
+# evaluations.py that loads a job's result, so the mail names the same document
+# the screen opens rather than a second guess at it.
+JOB_KIND_REPORTS = {
+    "eval": "eval",
+    "eval_text": "eval",
+    "team_report": "team_report",
+    "packet": "game",
+    "training": "training",
+    "scouting": "game_session",
+    "game_report_full": "game_report",
+    "clip": "film",
+}
+
+
+def qualified_for_job(db: Session, kind: str, result_id: int | None) -> str | None:
+    """Which document a finished job produced, named.
+
+    "Your team report is ready" is true of every team report a coach has ever
+    run. It does not say which one, and a coach who queued three does not know
+    which of the three to open.
+    """
+    report_type = JOB_KIND_REPORTS.get(kind or "")
+    if not report_type or not result_id:
+        return None
+    return qualified_type(report_type, result_id, db)
+
+
 def qualified_type(report_type: str, report_id: int, db: Session) -> str | None:
     """The one value a notification needs: the kind and the document, together.
 

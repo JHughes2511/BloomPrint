@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}} fertig",
-      "body": "Dein {{kind}} ist fertig und kann gelesen werden."
+      "body": "Dein {{item}} ist fertig und kann gelesen werden."
     },
     "jobFailed": {
       "title": "{{kind}} fehlgeschlagen",
-      "body": "Konnte nicht abgeschlossen werden. {{reason}}"
+      "body": "{{item}} konnte nicht fertiggestellt werden. {{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "Ein Spieler für deinen Kader",

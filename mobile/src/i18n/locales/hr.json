@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}} spreman",
-      "body": "Vaš {{kind}} je gotov i spreman za čitanje."
+      "body": "Vaš {{item}} je gotov i spreman za čitanje."
     },
     "jobFailed": {
       "title": "{{kind}} nije uspio",
-      "body": "Nije se moglo dovršiti. {{reason}}"
+      "body": "Nije bilo moguće završiti: {{item}}. {{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "Igrač za dodati u sastav",

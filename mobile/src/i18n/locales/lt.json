@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}} paruoštas",
-      "body": "Jūsų {{kind}} baigtas ir paruoštas skaityti."
+      "body": "Jūsų {{item}} baigtas ir paruoštas skaityti."
     },
     "jobFailed": {
       "title": "{{kind}} nepavyko",
-      "body": "Nepavyko užbaigti. {{reason}}"
+      "body": "Nepavyko užbaigti: {{item}}. {{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "Žaidėjas, kurį galima įtraukti į sudėtį",

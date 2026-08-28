@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}} gotowy",
-      "body": "Twój {{kind}} jest gotowy do przeczytania."
+      "body": "Twój {{item}} jest gotowy do przeczytania."
     },
     "jobFailed": {
       "title": "{{kind}} nie powiódł się",
-      "body": "Nie udało się ukończyć. {{reason}}"
+      "body": "Nie udało się dokończyć: {{item}}. {{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "Zawodnik do dodania do składu",

@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}}已完成",
-      "body": "你的{{kind}}已生成，可以查看了。"
+      "body": "你的{{item}}已生成，可以查看了。"
     },
     "jobFailed": {
       "title": "{{kind}}失败",
-      "body": "无法完成。{{reason}}"
+      "body": "无法完成{{item}}。{{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "有一名球员可加入你的名单",

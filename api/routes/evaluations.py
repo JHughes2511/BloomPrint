@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db, revive_if_stalled, SessionLocal
 from ..auth import get_current_coach
 from .. import genjob
-from .. import models, schemas
+from .. import models, report_titles, schemas
 from ..softdelete import soft_delete
 from ..ownership import get_owned
 from ..ai_models import OPUS, text_of, long_text
@@ -491,7 +491,13 @@ def active_generation_jobs(
                 ref_id=job.result_id,
                 ntype="job_done" if job.status == "done" else "job_error",
                 key="notifs.jobDone" if job.status == "done" else "notifs.jobFailed",
+                # `item` names the document the job produced. It falls back to
+                # the kind rather than being left out: copy with an unfilled
+                # placeholder in it is not sent at all, so a job whose result
+                # cannot be named would go from a vague email to no email.
                 params={"kind": job.kind, "label": label,
+                        "item": report_titles.qualified_for_job(
+                            db, job.kind, job.result_id) or job.kind,
                         "reason": (job.error or "")[:200]},
             )
             job.announced = True

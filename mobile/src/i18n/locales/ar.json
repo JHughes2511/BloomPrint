@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}} جاهز",
-      "body": "انتهى {{kind}} وأصبح جاهزًا للقراءة."
+      "body": "انتهى {{item}} وأصبح جاهزًا للقراءة."
     },
     "jobFailed": {
       "title": "فشل {{kind}}",
-      "body": "تعذّر إكماله. {{reason}}"
+      "body": "تعذّر إكمال: {{item}}. {{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "لاعب لإضافته إلى قائمتك",

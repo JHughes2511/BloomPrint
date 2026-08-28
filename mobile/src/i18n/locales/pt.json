@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}} pronto",
-      "body": "O teu {{kind}} terminou e está pronto para ler."
+      "body": "O teu {{item}} terminou e está pronto para ler."
     },
     "jobFailed": {
       "title": "{{kind}} falhou",
-      "body": "Não foi possível terminar. {{reason}}"
+      "body": "Não foi possível terminar {{item}}. {{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "Um jogador para adicionar ao teu plantel",

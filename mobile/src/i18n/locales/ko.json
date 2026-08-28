@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}} 완료",
-      "body": "{{kind}}이(가) 완성되어 확인할 수 있습니다."
+      "body": "{{item}}이(가) 완성되어 확인할 수 있습니다."
     },
     "jobFailed": {
       "title": "{{kind}} 실패",
-      "body": "완료하지 못했습니다. {{reason}}"
+      "body": "{{item}}을(를) 완료하지 못했습니다. {{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "로스터에 추가할 선수",

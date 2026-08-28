@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}} hazır",
-      "body": "{{kind}} tamamlandı ve okunmaya hazır."
+      "body": "{{item}} tamamlandı ve okunmaya hazır."
     },
     "jobFailed": {
       "title": "{{kind}} başarısız",
-      "body": "Tamamlanamadı. {{reason}}"
+      "body": "{{item}} tamamlanamadı. {{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "Kadroya eklenecek bir oyuncu",

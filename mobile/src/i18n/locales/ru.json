@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}} готов",
-      "body": "Ваш {{kind}} готов к прочтению."
+      "body": "Ваш {{item}} готов к прочтению."
     },
     "jobFailed": {
       "title": "{{kind}}: ошибка",
-      "body": "Не удалось завершить. {{reason}}"
+      "body": "Не удалось завершить: {{item}}. {{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "Игрок для добавления в состав",

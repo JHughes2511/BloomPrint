@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}} gata",
-      "body": "{{kind}} s-a terminat și poate fi citit."
+      "body": "{{item}} s-a terminat și poate fi citit."
     },
     "jobFailed": {
       "title": "{{kind}} a eșuat",
-      "body": "Nu a putut fi finalizat. {{reason}}"
+      "body": "Nu s-a putut finaliza: {{item}}. {{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "Un jucător de adăugat în lot",

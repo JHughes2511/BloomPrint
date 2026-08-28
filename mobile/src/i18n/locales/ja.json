@@ -2615,11 +2615,11 @@
     },
     "jobDone": {
       "title": "{{kind}}が完了しました",
-      "body": "{{kind}}が仕上がり、閲覧できます。"
+      "body": "{{item}}が仕上がり、閲覧できます。"
     },
     "jobFailed": {
       "title": "{{kind}}に失敗しました",
-      "body": "完了できませんでした。{{reason}}"
+      "body": "{{item}} を完了できませんでした。{{reason}}"
     },
     "rosterPlayerProposed": {
       "title": "ロスターに追加する選手",
