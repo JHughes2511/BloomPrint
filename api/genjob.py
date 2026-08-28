@@ -26,7 +26,7 @@ import json
 from typing import Callable
 
 from .database import SessionLocal
-from . import models
+from . import job_notify, models
 
 
 def start(db, coach_id: int, kind: str, payload: dict | None) -> models.GenerationJob:
@@ -93,6 +93,11 @@ def run(job_id: int, work: Callable[[], int | None]) -> None:
                 job.status = "done"
                 if result_id is not None:
                     job.result_id = result_id
+                # Told now, not when the coach next opens the app. Announcing
+                # on the poll meant the email arrived at the one moment it
+                # could tell them nothing they were not about to see, and a
+                # report that finished overnight was never announced at all.
+                job_notify.announce(db, job)
             db.commit()
         finally:
             db.close()
@@ -106,6 +111,7 @@ def run(job_id: int, work: Callable[[], int | None]) -> None:
                 # coach is shown, and "your credit balance is too low" is
                 # actionable in a way that a generic failure is not.
                 job.error = _reason(exc)[:500]
+                job_notify.announce(db, job)
             db.commit()
         finally:
             db.close()

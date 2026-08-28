@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db, revive_if_stalled, SessionLocal
 from ..auth import get_current_coach
 from .. import genjob
-from .. import models, report_titles, schemas
+from .. import job_notify, models, report_titles, schemas
 from ..softdelete import soft_delete
 from ..ownership import get_owned
 from ..ai_models import OPUS, text_of, long_text
@@ -120,6 +120,7 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
             if job:
                 job.status = "done"
                 job.result_id = eval_record.id
+                job_notify.announce(db, job)
             db.commit()
         finally:
             db.close()
@@ -131,6 +132,7 @@ def _run_eval_video_job(job_id: int, *, player_id: int, coach_id: int, output_ty
             if job:
                 job.status = "error"
                 job.error = str(exc)[:500]
+                job_notify.announce(edb, job)
             edb.commit()
         except Exception:
             edb.rollback()
@@ -432,19 +434,9 @@ def _run_eval_text_job(job_id: int, player_id: int, coach_id: int, output_type: 
     genjob.run(job_id, work)
 
 
-# What a finished job is called, for the banner and the notification. The key
-# is the job's kind; the client renders `jobs.kinds.<name>` in the coach's own
-# language, and the English here is the fallback for the notification row.
-JOB_KIND_LABELS = {
-    "eval": "Player evaluation",
-    "eval_text": "Player evaluation",
-    "team_report": "Team report",
-    "packet": "Game report packet",
-    "training": "Training program",
-    "scouting": "Scouting report",
-    "game_report_full": "Game report",
-    "clip": "Film analysis",
-}
+# What a finished job is called lives in api/job_notify.py, beside the code that
+# announces one. Two copies had already drifted: this one still said "Team
+# report" after the tab's name reached the other.
 
 # How far back the banner looks. Long enough that a film analysis started
 # before lunch is still announced, short enough that opening the app after a
@@ -464,9 +456,13 @@ def active_generation_jobs(
     the coach is still sitting there or has moved on to the roster, and until
     now nothing outside that one screen knew it had happened.
 
-    Finishing is also announced here rather than at each of the six places that
-    mark a job done — a notification written in one place cannot be forgotten
-    in five.
+    Announcing has moved to where a job actually finishes. Doing it here made
+    the message depend on the coach already looking: a report that finished
+    while they were away was announced when they next opened the app, and one
+    that finished more than JOB_LOOKBACK_HOURS earlier was never announced at
+    all. The call is still made here, as a backstop for anything that finished
+    without getting through, and announce() is idempotent so nothing is said
+    twice.
     """
     from datetime import datetime, timedelta
     since = datetime.utcnow() - timedelta(hours=JOB_LOOKBACK_HOURS)
@@ -476,32 +472,11 @@ def active_generation_jobs(
               .order_by(models.GenerationJob.updated_at.desc())
               .limit(50).all())
 
-    from .staff_sharing import _coach_notify
     out = []
     announced_now = False
     for job in jobs:
-        label = JOB_KIND_LABELS.get(job.kind, "Report")
-        if job.status in ("done", "error") and not job.announced:
-            _coach_notify(
-                db, coach.id,
-                title=f"{label} {'ready' if job.status == 'done' else 'failed'}",
-                body=(f"Your {label.lower()} is ready to read."
-                      if job.status == "done"
-                      else (job.error or f"Your {label.lower()} could not be finished.")),
-                ref_id=job.result_id,
-                ntype="job_done" if job.status == "done" else "job_error",
-                key="notifs.jobDone" if job.status == "done" else "notifs.jobFailed",
-                # `item` names the document the job produced. It falls back to
-                # the kind rather than being left out: copy with an unfilled
-                # placeholder in it is not sent at all, so a job whose result
-                # cannot be named would go from a vague email to no email.
-                params={"kind": job.kind, "label": label,
-                        "item": report_titles.qualified_for_job(
-                            db, job.kind, job.result_id) or job.kind,
-                        "reason": (job.error or "")[:200]},
-            )
-            job.announced = True
-            announced_now = True
+        label = job_notify.label_for(job.kind)
+        announced_now |= job_notify.announce(db, job)
         out.append({
             "id": job.id, "kind": job.kind, "status": job.status,
             "progress": job.progress, "result_id": job.result_id,
@@ -701,6 +676,7 @@ def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_
             if job:
                 job.status = "done"
                 job.result_id = rec.id
+                job_notify.announce(db, job)
             db.commit()
         finally:
             db.close()
@@ -711,6 +687,7 @@ def _run_team_report_job(job_id: int, *, coach_id: int, output_type: str, focus_
             if job:
                 job.status = "error"
                 job.error = str(exc)[:500]
+                job_notify.announce(edb, job)
             edb.commit()
         except Exception:
             edb.rollback()

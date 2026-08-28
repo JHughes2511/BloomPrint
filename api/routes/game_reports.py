@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db, SessionLocal, revive_if_stalled
 from ..auth import get_current_coach
 from ..report_format import REPORT_FORMAT, REPORT_FORMAT_WITH_TABLES
-from .. import models, schemas
+from .. import job_notify, models, schemas
 from ..softdelete import soft_delete
 from ..ownership import owns
 from ..ai_models import long_text
@@ -183,6 +183,7 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             if job:
                 job.status = "done"
                 job.result_id = clip_id
+                job_notify.announce(wdb, job)
             wdb.commit()
         finally:
             wdb.close()
@@ -199,6 +200,7 @@ def _run_clip_analysis(clip_id: int, job_id: int, video_path: str, output_type: 
             if job:
                 job.status = "error"
                 job.error = str(exc)[:500]
+                job_notify.announce(edb, job)
             edb.commit()
         except Exception:
             edb.rollback()
@@ -338,6 +340,7 @@ def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_ty
             if job:
                 job.status = "done"
                 job.result_id = clip_id
+                job_notify.announce(wdb, job)
             wdb.commit()
         finally:
             wdb.close()
@@ -348,6 +351,7 @@ def _run_clip_recorrection(clip_id: int, job_id: int, video_path: str, output_ty
             if job:
                 job.status = "error"
                 job.error = str(exc)[:500]
+                job_notify.announce(edb, job)
             edb.commit()
         except Exception:
             edb.rollback()
@@ -1492,6 +1496,7 @@ def _run_packet_generation(report_id: int, job_id: int, coach_id: int):
             if job:
                 job.status = "done"
                 job.result_id = report_id
+                job_notify.announce(wdb, job)
             wdb.commit()
         finally:
             wdb.close()
@@ -1502,6 +1507,7 @@ def _run_packet_generation(report_id: int, job_id: int, coach_id: int):
             if job:
                 job.status = "error"
                 job.error = str(exc)[:500]
+                job_notify.announce(edb, job)
             edb.commit()
         finally:
             edb.close()

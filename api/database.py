@@ -1539,6 +1539,7 @@ def revive_if_stalled(sess, job) -> bool:
         log.info("Stalled job %s picked back up (attempt %s)", job.id, attempts)
         return True
 
+    from . import job_notify
     job.status = "error"
     job.error = (
         "This stopped part-way and could not be picked back up — nothing was "
@@ -1548,6 +1549,10 @@ def revive_if_stalled(sess, job) -> bool:
         "Try running it again."
     )
     _mark_subject_failed(sess, job)
+    # A job a restart killed is the case where the coach is most certainly not
+    # watching, so it is the last one that should be announced only when they
+    # next happen to look.
+    job_notify.announce(sess, job)
     sess.commit()
     log.info("Stalled job %s closed as errored", job.id)
     return True
@@ -1593,6 +1598,7 @@ def _fail_orphaned_jobs():
                     job.partial = _remember_segment_count(job, done_now)
                     resumable.append((job.id, job.kind, job.payload))
                     continue
+                from . import job_notify
                 job.status = "error"
                 job.error = (
                     "The server restarted while this was running, so the analysis "
@@ -1602,6 +1608,9 @@ def _fail_orphaned_jobs():
                     "Try running it again."
                 )
                 _mark_subject_failed(sess, job)
+                # Same reason as above: a job the restart killed is one nobody
+                # is sitting and watching.
+                job_notify.announce(sess, job)
             if stale:
                 sess.commit()
 
