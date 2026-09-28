@@ -21,7 +21,7 @@ import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { useReportSearch, usePrimedSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import ListSearchHeader from '../components/ListSearchHeader';
-import DateRangeFilter, { ALL_TIME, DateRange, inDateRange, isFiltering, rangeParams } from '../components/DateRangeFilter';
+import DateRangeFilter, { ALL_TIME, DateField, DateRange, dayKey, inDateRange, isFiltering, rangeParams } from '../components/DateRangeFilter';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { formatForLevel, periodLabel, weightBucket, periodForBucket, formatClock, type GameFormat } from '../utils/gameClock';
@@ -4298,6 +4298,37 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               />
 
               <Text style={s.fieldLabel}>{tr('teamGrade.date')}</Text>
+              {Platform.OS === 'web' ? (
+                // In a browser the platform picker draws nothing at all, so this
+                // box used to be pressable and do nothing: every game created on
+                // the website was dated the day it was typed in. The browser's
+                // own date field here instead, styled as the box it replaces.
+                <View style={{ marginBottom: 16 }}>
+                  <DateField
+                    hideLabel
+                    label={tr('teamGrade.date')}
+                    value={dayKey(newGameDate)}
+                    inputStyle={{ background: t.chip, borderRadius: 14,
+                                  padding: '11px 12px', fontSize: 15 }}
+                    onChange={v => {
+                      // A browser date field can be cleared; a game cannot be
+                      // undated, so that keeps the date it had.
+                      if (!v) return;
+                      const [y, m, d] = v.split('-').map(Number);
+                      // The day changes and the time of day is kept, as the
+                      // phone picker does.
+                      const next = new Date(newGameDate);
+                      next.setFullYear(y, m - 1, d);
+                      // Keep the season year in sync unless the coach typed their own.
+                      if (!newGameYear.trim() || newGameYear === seasonForDate(newGameDate)) {
+                        setNewGameYear(seasonForDate(next));
+                      }
+                      setNewGameDate(next);
+                    }}
+                  />
+                </View>
+              ) : (
+              <>
               <TouchableOpacity
                 style={[s.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }]}
                 onPress={() => setShowDatePicker(v => !v)}
@@ -4325,6 +4356,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                     }
                   }}
                 />
+              )}
+              </>
               )}
 
               <Text style={s.fieldLabel}>{tr('teamGrade.competitionLevel')}</Text>

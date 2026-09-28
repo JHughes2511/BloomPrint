@@ -125,9 +125,19 @@ export const isFiltering = (r: DateRange) => r.preset !== 'all';
  * The native date picker renders nothing at all in a browser, and BloomPrint is
  * mostly used in one. So the web gets the browser's own date field, and iOS and
  * Android get the platform picker.
+ *
+ * Exported for New Game, whose date could not be changed in a browser at all
+ * for exactly that reason: pressing it drew nothing, so every game created on
+ * the website was dated the day it was entered.
  */
-function DateField({ value, onChange, label }: {
-  value?: string; onChange: (v: string) => void; label: string;
+export function DateField({ value, onChange, label, hideLabel, inputStyle }: {
+  value?: string; onChange: (v: string) => void;
+  /** Always the field's accessible name; shown above it unless hideLabel. */
+  label: string;
+  /** For a form that already prints its own label over the field. */
+  hideLabel?: boolean;
+  /** Extra CSS for the browser's field, to match the form it sits in. */
+  inputStyle?: Record<string, any>;
 }) {
   const { t, mode } = useTheme();
   const [open, setOpen] = useState(false);
@@ -135,9 +145,11 @@ function DateField({ value, onChange, label }: {
   if (Platform.OS === 'web') {
     return (
       <View style={{ gap: 4 }}>
-        <Text style={{ color: t.muted, fontSize: 11, fontWeight: '600', letterSpacing: 0.4 }}>
-          {label}
-        </Text>
+        {!hideLabel && (
+          <Text style={{ color: t.muted, fontSize: 11, fontWeight: '600', letterSpacing: 0.4 }}>
+            {label}
+          </Text>
+        )}
         {React.createElement('input', {
           type: 'date',
           value: value ?? '',
@@ -151,6 +163,7 @@ function DateField({ value, onChange, label }: {
             border: `1px solid ${t.line}`, borderRadius: 8,
             padding: '7px 8px', fontSize: 14, fontFamily: 'inherit',
             width: '100%', boxSizing: 'border-box',
+            ...(inputStyle ?? {}),
           },
         })}
       </View>
