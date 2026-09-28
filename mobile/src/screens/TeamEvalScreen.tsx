@@ -21,7 +21,7 @@ import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { useReportSearch, usePrimedSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import ListSearchHeader from '../components/ListSearchHeader';
-import DateRangeFilter, { ALL_TIME, DateRange, inDateRange, isFiltering } from '../components/DateRangeFilter';
+import DateRangeFilter, { ALL_TIME, DateRange, inDateRange, isFiltering, rangeParams } from '../components/DateRangeFilter';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { formatForLevel, periodLabel, weightBucket, periodForBucket, formatClock, type GameFormat } from '../utils/gameClock';
@@ -421,6 +421,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // each list, because a coach who narrows to this season in one of them
   // expects the other two to be looking at the same season when they switch.
   const [dateRange, setDateRange] = useState<DateRange>(ALL_TIME);
+  // The range as the server takes it, for the scouting page, which is built on
+  // the server from the games in it. Recomputed when the range changes, so a
+  // preset left on keeps the same instants for as long as the page is open.
+  const scoutRange = React.useMemo(() => rangeParams(dateRange), [dateRange]);
+  const scoutRangeKey = JSON.stringify(scoutRange);
+  // The scouted team had no games in the range: said on the page, not in an
+  // alert, because it is an answer rather than a failure.
+  const [scoutRangeEmpty, setScoutRangeEmpty] = useState(false);
   const [scoutSearch, setScoutSearch] = useState('');
   const [loadingGameReport, setLoadingGameReport] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
@@ -1746,7 +1754,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const loadInsight = async (team: string, subject: string, refresh = false) => {
     setInsightBusy(prev => ({ ...prev, [subject]: true }));
     try {
-      const res = await gameEvalAPI.scoutInsight(team, subject, refresh);
+      const res = await gameEvalAPI.scoutInsight(team, subject, refresh, scoutRange);
       setInsights(prev => ({ ...prev, [subject]: res }));
     } catch {
       // A sentence that could not be written must not take the numbers with it.
@@ -1766,20 +1774,46 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const refreshScout = useCallback(async (name: string) => {
     try {
       const [data, notes, kept] = await Promise.all([
-        gameEvalAPI.getOpponentProfile(name),
+        gameEvalAPI.getOpponentProfile(name, scoutRange),
         gameEvalAPI.getOpponentNotes(name).catch(() => []),
-        gameEvalAPI.scoutInsights(name).catch(() => ({})),
+        gameEvalAPI.scoutInsights(name, scoutRange).catch(() => ({})),
       ]);
       setScoutData(data);
       setScoutNotes(notes ?? []);
       // Merged, not replaced: a sentence written seconds ago in this session
       // is not in the stored set yet and must not vanish.
       setInsights(prev => ({ ...prev, ...(kept as any) }));
-      void writePage(`scout.${coach?.id ?? 0}.${name}`, { data, insights: kept });
+      void writePage(`scout.${coach?.id ?? 0}.${name}.${scoutRangeKey}`, { data, insights: kept });
     } catch {
       // Offline, or the team was renamed. What is on screen is still true.
     }
-  }, [coach?.id]);
+  }, [coach?.id, scoutRange, scoutRangeKey]);
+
+  // A different range is a different page: read it again. Not on the first
+  // render, which openScout has already loaded.
+  //
+  // Only while Scout is showing. The team stays remembered when the coach goes
+  // to Games, and opening it switches the view to Scout, so reloading it from
+  // Games would pull the coach out of the list they were narrowing. Instead
+  // it is marked, and read again the moment they come back to it.
+  const lastScoutRange = useRef(scoutRangeKey);
+  const scoutRangeStale = useRef(false);
+  useEffect(() => {
+    if (lastScoutRange.current === scoutRangeKey) return;
+    lastScoutRange.current = scoutRangeKey;
+    if (!scoutOpponent) return;
+    if (activeView === 'scout') void openScout(scoutOpponent);
+    else scoutRangeStale.current = true;
+  // openScout is recreated every render; the range is the thing that matters.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scoutRangeKey]);
+  useEffect(() => {
+    if (activeView === 'scout' && scoutOpponent && scoutRangeStale.current) {
+      scoutRangeStale.current = false;
+      void openScout(scoutOpponent);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeView]);
 
   // Every time this screen comes back into view with a team open.
   useFocusEffect(
@@ -1842,10 +1876,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setInsightBusy({});
     setLoadingScout(true);
     setLoadingNotes(true);
+    setScoutRangeEmpty(false);
     // Last time's page for this team, so the wait is spent looking at their
     // numbers rather than at a spinner. Overwritten the moment the live
-    // profile lands a few lines below.
-    const scoutKey = `scout.${coach?.id ?? 0}.${opponentName}`;
+    // profile lands a few lines below. Kept per range: showing the all-time
+    // page while a narrower one loads would flash the wrong numbers.
+    const scoutKey = `scout.${coach?.id ?? 0}.${opponentName}.${scoutRangeKey}`;
     readPage<any>(scoutKey).then(kept => {
       if (!kept) return;
       setScoutData((prev: any) => prev ?? kept.data ?? null);
@@ -1854,9 +1890,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     });
     try {
       const [data, notes, kept] = await Promise.all([
-        gameEvalAPI.getOpponentProfile(opponentName),
+        gameEvalAPI.getOpponentProfile(opponentName, scoutRange),
         gameEvalAPI.getOpponentNotes(opponentName),
-        gameEvalAPI.scoutInsights(opponentName).catch(() => ({})),
+        gameEvalAPI.scoutInsights(opponentName, scoutRange).catch(() => ({})),
       ]);
       setScoutData(data);
       setScoutNotes(notes);
@@ -1875,7 +1911,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         if (!at || at.games !== n) void loadInsight(opponentName, key, true);
       }
     } catch (e: any) {
-      Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamGrade.couldNotLoadScout'));
+      if (e?.response?.status === 404 && isFiltering(dateRange)) {
+        // No games against them in the range. The page says so and offers the
+        // way back; an alert would read as something having gone wrong.
+        setScoutData(null);
+        setScoutRangeEmpty(true);
+      } else {
+        Alert.alert(tr('common.error'), e?.response?.data?.detail ?? tr('teamGrade.couldNotLoadScout'));
+      }
     }
     setLoadingScout(false);
     setLoadingNotes(false);
@@ -1906,12 +1949,15 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const regenerateScoutingReport = async () => {
     if (!scoutOpponent) return;
     // Find the most recent game against this opponent
-    const game = sessions.find(s => s.opponent_name === scoutOpponent);
+    // In the range the page is showing: regenerating the report for a game
+    // the page has been told to leave out would change nothing on it.
+    const game = sessions.find(s => s.opponent_name === scoutOpponent
+                                    && inDateRange(s.date, dateRange));
     if (!game) return;
     setRegeneratingScout(true);
     try {
       await gameEvalAPI.getScoutingReport(game.id);
-      const data = await gameEvalAPI.getOpponentProfile(scoutOpponent);
+      const data = await gameEvalAPI.getOpponentProfile(scoutOpponent, scoutRange);
       setScoutData(data);
     } catch (e: any) {
       Alert.alert(tr('common.error'), e?.response?.data?.detail ?? e?.message ?? tr('teamGrade.couldNotRegenerate'));
@@ -1945,11 +1991,27 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     return [...names.values()].sort((a, b) => a.localeCompare(b));
   }, [sessions, teams]);
 
-  /** The teams the Scout picker shows, narrowed by what was typed. */
+  // Defined above the list that uses it: a const read during render before
+  // its line runs is a crash, not undefined.
+  /** Games this team played, on either side of the scoreboard. */
+  const gamesInvolving = (name: string) => (sessions as any[]).filter((g: any) =>
+    norm(g.opponent_name) === norm(name)
+    || norm(g.team_name ?? '') === norm(name)
+    || norm((teams as any[]).find(tm => tm.id === g.team_id)?.name ?? '') === norm(name));
+
+  /**
+   * The teams the Scout picker shows, narrowed by what was typed and by the
+   * date range: a team is listed when there is at least one game against them
+   * in it, since a scouting page with nothing in it is not somewhere to go.
+   */
   const scoutTeamsShown = React.useMemo(() => {
     const q = norm(scoutSearch);
-    return q ? scoutableTeams.filter(n => norm(n).includes(q)) : scoutableTeams;
-  }, [scoutableTeams, scoutSearch]);
+    const typed = q ? scoutableTeams.filter(n => norm(n).includes(q)) : scoutableTeams;
+    if (!isFiltering(dateRange)) return typed;
+    return typed.filter(n => gamesInvolving(n).some((g: any) => inDateRange(g.date, dateRange)));
+  // gamesInvolving reads sessions and teams, which are listed so this follows them.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scoutableTeams, scoutSearch, dateRange, sessions, teams]);
 
   /**
    * Which nav chip is lit.
@@ -2005,12 +2067,6 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     return dated.filter((g: any) =>
       norm(nameOf(g)).includes(q) || norm(g.opponent_name ?? '').includes(q));
   }, [sessions, teams, coach, gameReportSearch, dateRange]);
-
-  /** Games this team played, on either side of the scoreboard. */
-  const gamesInvolving = (name: string) => (sessions as any[]).filter((g: any) =>
-    norm(g.opponent_name) === norm(name)
-    || norm(g.team_name ?? '') === norm(name)
-    || norm((teams as any[]).find(tm => tm.id === g.team_id)?.name ?? '') === norm(name));
 
   /**
    * The imported players, grouped by the team heading their file used.
@@ -3487,11 +3543,21 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 value={scoutSearch}
                 onChange={setScoutSearch}
                 placeholder={tr('teamGrade.searchTeamsPlaceholder')}
+                trailing={<DateRangeFilter value={dateRange} onChange={setDateRange} />}
               />
               <View style={{ height: 10 }} />
               {scoutTeamsShown.length === 0 ? (
             <View style={[s.card, { alignItems: 'center' }]}>
-                  <Text style={{ color: t.muted, fontSize: 13 }}>{tr('teamGrade.noOpponents')}</Text>
+                  {isFiltering(dateRange) && scoutableTeams.length > 0 ? (
+                    <>
+                      <Text style={{ color: t.muted, fontSize: 13 }}>{tr('dateFilter.noneInRange')}</Text>
+                      <TouchableOpacity onPress={() => setDateRange(ALL_TIME)} style={{ marginTop: 10 }}>
+                        <Text style={{ color: t.accent, fontSize: 13, fontWeight: '700' }}>{tr('dateFilter.showAll')}</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <Text style={{ color: t.muted, fontSize: 13 }}>{tr('teamGrade.noOpponents')}</Text>
+                  )}
                 </View>
               ) : (
                 <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: scoutGrid.gap, paddingHorizontal: 16 })}
@@ -3500,7 +3566,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   <TouchableOpacity key={opp} style={[s.gameCard, scoutGrid.cardWidth ? { width: scoutGrid.cardWidth } : null]} onPress={() => openScout(opp)}>
                     <Text style={s.gameCardOpponent}>{opp}</Text>
                     <Text style={{ color: t.muted, fontSize: 12 }}>
-                      {tr('teamGrade.gamesCount', { count: gamesInvolving(opp).length })}
+                      {tr('teamGrade.gamesCount', {
+                        count: gamesInvolving(opp).filter((g: any) => inDateRange(g.date, dateRange)).length,
+                      })}
                     </Text>
                     <Ionicons name="chevron-forward" size={16} color={t.line} />
                   </TouchableOpacity>
@@ -3521,10 +3589,26 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               {/* Sits closer to the back link and further from the first card,
                   so the name reads as this page's title rather than as a label
                   attached to the box under it. */}
-              <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900], marginBottom: 14 }}>{scoutOpponent}</Text>
+              {/* The range on the title line too: the whole page is narrowed by
+                  it, and a page of numbers that quietly describes last month
+                  and says nothing about it reads as the team's season. */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12,
+                             marginBottom: 14, zIndex: 40 }}>
+                <Text style={{ color: t.ink, fontSize: 22, fontFamily: fonts[900], flex: 1 }}
+                      numberOfLines={2}>{scoutOpponent}</Text>
+                <DateRangeFilter value={dateRange} onChange={setDateRange} />
+              </View>
 
               {loadingScout ? (
                 <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />
+              ) : scoutRangeEmpty ? (
+                <View style={[s.card, { alignItems: 'center' }]}>
+                  <Ionicons name="calendar-outline" size={36} color={t.line} />
+                  <Text style={{ color: t.muted, fontSize: 13, marginTop: 10 }}>{tr('dateFilter.noneInRange')}</Text>
+                  <TouchableOpacity onPress={() => setDateRange(ALL_TIME)} style={{ marginTop: 10 }}>
+                    <Text style={{ color: t.accent, fontSize: 13, fontWeight: '700' }}>{tr('dateFilter.showAll')}</Text>
+                  </TouchableOpacity>
+                </View>
               ) : scoutData ? (
                 <>
                   {/* Record vs this opponent */}

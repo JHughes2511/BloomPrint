@@ -1450,7 +1450,9 @@ def _opponent_team_id_of(db: Session, coach, game) -> int | None:
     return None
 
 
-def team_written_material(db: Session, coach, team_name: str) -> list[tuple[str, str]]:
+def team_written_material(db: Session, coach, team_name: str,
+                          date_from: datetime | None = None,
+                          date_to: datetime | None = None) -> list[tuple[str, str]]:
     """Everything WRITTEN about a team that Scout should be reading.
 
     The scouting page was built from games, box scores and per-game scouting
@@ -1459,6 +1461,11 @@ def team_written_material(db: Session, coach, team_name: str) -> list[tuple[str,
     exists to tell them about that team knew nothing about any of it.
 
     Returns [(what it is, the text)], newest first.
+
+    With a date range, only packets about games in it. A scouting sentence for
+    this season must not quietly lean on a report about last season's game,
+    which would put back exactly what narrowing the page took out. A packet is
+    placed by the date of its game, or by when it was made if it has none.
     """
     needle = "".join(ch for ch in (team_name or "").lower() if ch.isalnum())
     if not needle:
@@ -1475,7 +1482,13 @@ def team_written_material(db: Session, coach, team_name: str) -> list[tuple[str,
     packets = (db.query(models.GameReport)
                  .filter_by(coach_id=coach.id)
                  .order_by(models.GameReport.id.desc()).limit(40).all())
+    lo, hi = _utc_naive(date_from), _utc_naive(date_to)
+    if lo and hi and lo > hi:
+        lo, hi = hi, lo
     for gr in packets:
+        when = getattr(gr, "game_date", None) or gr.created_at
+        if (lo and when and when < lo) or (hi and when and when > hi):
+            continue
         my_name = gr.my_team.name if gr.my_team else None
         opp_name = gr.opponent_team.name if gr.opponent_team else None
         if not about(my_name, opp_name, gr.opponent_name,
@@ -1515,7 +1528,9 @@ def team_material_block(db: Session, coach, team_name: str,
             + "".join(parts))
 
 
-def team_material_count(db: Session, coach, team_name: str) -> int:
+def team_material_count(db: Session, coach, team_name: str,
+                        date_from: datetime | None = None,
+                        date_to: datetime | None = None) -> int:
     """How many written pieces exist about a team, for spotting staleness.
 
     A one-sentence insight used to be rewritten only when the GAME count
@@ -1523,7 +1538,7 @@ def team_material_count(db: Session, coach, team_name: str) -> int:
     page kept showing a line written before the material it should have been
     written from.
     """
-    return len(team_written_material(db, coach, team_name))
+    return len(team_written_material(db, coach, team_name, date_from, date_to))
 
 
 def learned_for_game(db: Session, coach, game) -> str:
@@ -3283,6 +3298,10 @@ class ScoutInsightIn(BaseModel):
     # A player's name, or one of offense / defense / weak.
     subject: str
     refresh: bool = False
+    # The scouting page's date range, when it has one. The sentence is written
+    # from the games in it and kept against exactly those games.
+    date_from: datetime | None = None
+    date_to: datetime | None = None
 
 
 @router.post("/opponents/{opponent_name}/insight")
@@ -3309,15 +3328,31 @@ async def scout_insight(
     if not subject:
         raise HTTPException(status_code=400, detail="Which player or section?")
 
-    profile = opponent_profile(opponent_name, db, coach)
+    profile = opponent_profile(opponent_name, db, coach,
+                               date_from=body.date_from, date_to=body.date_to)
     games_n = profile.get("games_count") or 0
-    written = team_written_material(db, coach, opponent_name)
+    games_key = profile.get("games_key")
+    written = team_written_material(db, coach, opponent_name,
+                                    body.date_from, body.date_to)
     material_n = len(written)
+    ranged = bool(body.date_from or body.date_to)
 
-    row = (db.query(models.ScoutInsight)
-             .filter_by(coach_id=coach.id, team_name=opponent_name, subject=subject)
-             .order_by(models.ScoutInsight.id.desc()).first())
-    if row and not body.refresh and row.games == games_n:
+    # The sentence written from exactly these games, if there is one.
+    base = (db.query(models.ScoutInsight)
+              .filter_by(coach_id=coach.id, team_name=opponent_name, subject=subject))
+    row = (base.filter(models.ScoutInsight.games_key == games_key)
+               .order_by(models.ScoutInsight.id.desc()).first())
+    if row is None and not ranged:
+        # Written before sentences were keyed by their games. It can only be an
+        # all-time one, and it is judged the way it always was, by its game
+        # count: kept if that still matches, rewritten in place if not. So the
+        # sentences a coach already has cost nothing more after this change.
+        row = (base.filter(models.ScoutInsight.games_key.is_(None))
+                   .order_by(models.ScoutInsight.id.desc()).first())
+        if row is not None and row.games == games_n:
+            row.games_key = games_key
+            db.commit()
+    if row and not body.refresh and row.games_key == games_key:
         return {"insight": row.insight, "games": row.games, "cached": True,
                 # Kept, but flagged: there is written material about this team
                 # that this sentence predates.
@@ -3387,11 +3422,13 @@ async def scout_insight(
 
     if row:
         row.insight, row.games, row.created_at = text, games_n, datetime.utcnow()
-        row.material = material_n
+        row.material, row.games_key = material_n, games_key
     else:
+        # A new row rather than overwriting another range's: a coach switching
+        # between this season and all time should find both still there.
         db.add(models.ScoutInsight(coach_id=coach.id, team_name=opponent_name,
                                    subject=subject, insight=text, games=games_n,
-                                   material=material_n))
+                                   material=material_n, games_key=games_key))
     db.commit()
     return {"insight": text, "games": games_n, "cached": False,
             "stale": False, "material": material_n, "material_now": material_n}
@@ -3402,27 +3439,76 @@ def scout_insights(
     opponent_name: str,
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
+    date_from: datetime | None = None,
+    date_to: datetime | None = None,
 ):
     """Everything already written about this team, so the page can show what it
-    has without paying for anything it does not need."""
+    has without paying for anything it does not need.
+
+    Only sentences written from the games the page is showing. With the page
+    narrowed to a date range, a sentence written from all of a team's games is
+    a description of a different page.
+    """
+    games = _scout_games(db, coach, opponent_name, date_from, date_to)
+    games_key, games_n = _games_key(games), len(games)
+    ranged = bool(date_from or date_to)
     rows = (db.query(models.ScoutInsight)
               .filter_by(coach_id=coach.id, team_name=opponent_name)
               .order_by(models.ScoutInsight.id).all())
     # Counted once for the whole page rather than per row: it is the same
     # question for every sentence on it.
-    material_n = team_material_count(db, coach, opponent_name)
+    material_n = team_material_count(db, coach, opponent_name, date_from, date_to)
+    # Oldest first, so where a subject has more than one match the newest wins.
     return {r.subject: {"insight": r.insight, "games": r.games,
                         "stale": (r.material or 0) != material_n,
                         "material": r.material or 0, "material_now": material_n}
-            for r in rows}
+            for r in rows
+            if r.games_key == games_key
+            # Written before sentences were keyed: all-time, by game count.
+            or (not ranged and r.games_key is None and r.games == games_n)}
 
 
-@router.get("/opponents/{opponent_name}")
-def opponent_profile(
-    opponent_name: str,
-    db: Session = Depends(get_db),
-    coach: models.Coach = Depends(get_current_coach),
-):
+def _utc_naive(d: datetime | None) -> datetime | None:
+    """A date from the app as the database stores one: UTC, without a zone.
+
+    The app sends ISO instants with an offset; the columns hold naive UTC.
+    Compared as they arrive, SQLite compares strings and Postgres converts one
+    side to the other, and neither is a comparison anyone meant to make.
+    """
+    if d is None:
+        return None
+    if d.tzinfo is not None:
+        d = d.astimezone(timezone.utc).replace(tzinfo=None)
+    return d
+
+
+def _games_key(games) -> str:
+    """A fingerprint of exactly which games something was built from."""
+    import hashlib
+    ids = ",".join(str(i) for i in sorted(g.id for g in games))
+    return hashlib.sha1(ids.encode()).hexdigest()[:20]
+
+
+def _same_team_ids(db: Session, opponent_name: str) -> list[int]:
+    """Every team row with this name, whoever owns it.
+
+    A game shared with me is filed under the SENDER's Angola, so looking only
+    at my own team rows left the night off Angola's scouting page even though
+    it is on my schedule.
+    """
+    return [tm.id for tm in db.query(models.Team).all()
+            if _norm_team(tm.name) == _norm_team(opponent_name)]
+
+
+def _scout_games(db: Session, coach, opponent_name: str,
+                 date_from: datetime | None = None,
+                 date_to: datetime | None = None) -> list:
+    """Every game against this team the coach can see, newest first, in a range.
+
+    The one place that decides which games a scouting page is about, so the
+    page, the sentences written about it and the check for whether those
+    sentences are still current cannot disagree about it.
+    """
     # Opponent intel is built from every game against them that the coach can
     # see — their own games plus games on teams they're staff on.
     from sqlalchemy import or_
@@ -3447,19 +3533,46 @@ def opponent_profile(
     # Any team row with this name, whoever owns it. A game shared with me is
     # filed under the SENDER's Angola, so looking only at my own team rows left
     # the night off Angola's scouting page even though it is on my schedule.
-    same = [tm.id for tm in db.query(models.Team).all()
-            if _norm_team(tm.name) == _norm_team(opponent_name)]
+    same = _same_team_ids(db, opponent_name)
     side = [func.lower(models.GameSession.opponent_name) == opponent_name.strip().lower()]
     if same:
         side.append(models.GameSession.team_id.in_(same))
-    games = (
-        db.query(models.GameSession)
-        .filter(or_(*conds), or_(*side))
-        .order_by(models.GameSession.date.desc())
-        .all()
-    )
+    q = db.query(models.GameSession).filter(or_(*conds), or_(*side))
+    # A game's date is when it was played. A range given the wrong way round
+    # is taken the right way round rather than matching nothing, the same as
+    # the app does with it.
+    lo, hi = _utc_naive(date_from), _utc_naive(date_to)
+    if lo and hi and lo > hi:
+        lo, hi = hi, lo
+    if lo:
+        q = q.filter(models.GameSession.date >= lo)
+    if hi:
+        q = q.filter(models.GameSession.date <= hi)
+    return q.order_by(models.GameSession.date.desc()).all()
+
+
+@router.get("/opponents/{opponent_name}")
+def opponent_profile(
+    opponent_name: str,
+    db: Session = Depends(get_db),
+    coach: models.Coach = Depends(get_current_coach),
+    date_from: datetime | None = None,
+    date_to: datetime | None = None,
+):
+    """A team's scouting page: their players, tendencies and games.
+
+    Narrowed to a date range when one is given, so the averages, the tendencies
+    and everything written from them describe those games and not a season the
+    coach has asked to look past.
+    """
+    games = _scout_games(db, coach, opponent_name, date_from, date_to)
+    # Which bench is theirs, for reading every game from their side below.
+    same = _same_team_ids(db, opponent_name)
     if not games:
-        raise HTTPException(status_code=404, detail="No games found for this team")
+        raise HTTPException(
+            status_code=404,
+            detail=("No games against this team in that date range"
+                    if (date_from or date_to) else "No games found for this team"))
 
     player_totals: dict[str, dict] = {}
     offense_tendencies: dict[str, int] = defaultdict(int)
@@ -3608,6 +3721,7 @@ def opponent_profile(
         "games_played_against": games_list,
         "best_players": best_players,
         "games_count": len(games),
+        "games_key": _games_key(games),
         "offensive_tendencies": _rate(top_offense),
         "defensive_tendencies": _rate(top_defense),
         "weak_spots": [{"stat": st, "score": round(sc, 2),

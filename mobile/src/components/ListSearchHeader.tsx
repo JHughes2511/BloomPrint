@@ -80,7 +80,10 @@ export default function ListSearchHeader({
   );
 
   return (
-    <View>
+    // Raised above the grid under it when it carries a control with a menu.
+    // Without this the cards that follow in the page painted over the date
+    // range's menu: it could be seen and not pressed.
+    <View style={trailing ? { position: 'relative', zIndex: 40 } : undefined}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Text style={[{ flex: 1 }, titleStyle]} numberOfLines={2}>{title}</Text>
         {isPhone ? (

@@ -33,6 +33,12 @@ export type RosterProposal = {
   proposed_by_name: string;
 };
 
+/**
+ * The date range a scouting page is narrowed to, as the server takes it.
+ * Empty for all time. Made by rangeParams in components/DateRangeFilter.
+ */
+export type ScoutRange = { date_from?: string; date_to?: string };
+
 /** One written sentence on the scouting page, and whether it is out of date. */
 export type ScoutInsightOut = {
   insight: string;
@@ -902,13 +908,13 @@ export const gameEvalAPI = {
     return evalsAPI.awaitJob(job_id, onTick);
   },
   /** One written sentence about a team or one of its players. */
-  scoutInsight: (team: string, subject: string, refresh = false) =>
+  scoutInsight: (team: string, subject: string, refresh = false, range: ScoutRange = {}) =>
     api.post(`/game-eval/opponents/${encodeURIComponent(team)}/insight`,
-             { subject, refresh }, { timeout: 120000 })
+             { subject, refresh, ...range }, { timeout: 120000 })
        .then(r => r.data as ScoutInsightOut),
   /** Everything already written about a team, so nothing is paid for twice. */
-  scoutInsights: (team: string) =>
-    api.get(`/game-eval/opponents/${encodeURIComponent(team)}/insights`)
+  scoutInsights: (team: string, range: ScoutRange = {}) =>
+    api.get(`/game-eval/opponents/${encodeURIComponent(team)}/insights`, { params: range })
        .then(r => r.data as Record<string, ScoutInsightOut>),
   scoutingCorrections: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/scouting-corrections`).then(r => r.data),
   addScoutingCorrection: (gameId: number, text: string) => api.post(`/game-eval/sessions/${gameId}/scouting-corrections`, { text }).then(r => r.data),
@@ -930,7 +936,8 @@ export const gameEvalAPI = {
   restoreReportVersion: (gameId: number, versionId: number) =>
     api.post(`/game-eval/sessions/${gameId}/report-versions/${versionId}/restore`).then(r => r.data),
   getSeasonDashboard: (params?: any) => api.get('/game-eval/season-dashboard', { params }).then(r => r.data),
-  getOpponentProfile: (name: string) => api.get(`/game-eval/opponents/${encodeURIComponent(name)}`).then(r => r.data),
+  getOpponentProfile: (name: string, range: ScoutRange = {}) =>
+    api.get(`/game-eval/opponents/${encodeURIComponent(name)}`, { params: range }).then(r => r.data),
   compareGames: (game1Id: number, game2Id: number) => api.get('/game-eval/compare', { params: { game1_id: game1Id, game2_id: game2Id } }).then(r => r.data),
   logMinutes: (gameId: number, data: any) => api.post(`/game-eval/sessions/${gameId}/minutes`, data).then(r => r.data),
   getOpponentNotes: (name: string) => api.get(`/game-eval/opponents/${encodeURIComponent(name)}/notes`).then(r => r.data),

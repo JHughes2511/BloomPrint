@@ -1094,6 +1094,18 @@ class ScoutInsight(Base):
     subject     = Column(String, nullable=False, index=True)
     insight     = Column(Text, nullable=False)
     games       = Column(Integer, default=0)
+    # Which games the sentence was written from, as a fingerprint of their ids.
+    # A scouting page can be narrowed to a date range, and a sentence written
+    # from all of a team's games must not be shown for last month's, or the
+    # other way round. Keyed by the games rather than by the range, so two
+    # ranges that hold the same games share one sentence, and a range that
+    # rolls forward a day without taking in a new game costs nothing. Null on
+    # rows written before this existed, which are all-time sentences and are
+    # recognised by their game count until they are next used.
+    # No index: lookups are already narrowed by coach, team and subject, and an
+    # index here would exist on a fresh database but never on production, where
+    # the column arrives through ADDITIVE_COLUMNS and nothing adds one.
+    games_key   = Column(String, nullable=True)
     created_at  = Column(DateTime, default=datetime.utcnow)
 
     coach = relationship("Coach")
