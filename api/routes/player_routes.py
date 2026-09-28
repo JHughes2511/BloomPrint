@@ -60,6 +60,53 @@ def _names_the_document(evaluation=None, training=None,
     return "training_program"
 
 
+# ── Who a record belongs to ──────────────────────────────────────────────────
+#
+# Every table's ids start at 1 and count up, so "they would have to guess the
+# id" is no protection: counting from 1 is the whole attack. A route that
+# fetches a record by the id in its URL and only checks that it exists hands
+# that record to every coach on the platform. Several did, and between them a
+# coach with no connection to a player could comment on, rewrite and annotate
+# that player's training, and see, reject or approve onto their own roster the
+# link requests addressed to other coaches.
+#
+# The two rules live here so that every route asks the same question.
+
+def _owns_player_training(pt, coach) -> bool:
+    """A programme a player generated for themselves belongs to the coach who
+    shared the report it was generated from. That is who is told when it is
+    generated and when it changes, so it is who may act on it."""
+    return bool(pt is not None and pt.shared_report is not None
+                and pt.shared_report.shared_by_id == coach.id)
+
+
+def _link_request_coaches(db: Session, lr) -> set[int]:
+    """The coaches a link request is addressed to.
+
+    The same set request_link notifies when the request is made: the coach it
+    was sent to directly, the coach who owns the roster row, and the owner and
+    staff of that player's team. Seeing, approving and rejecting a request is
+    for exactly the people who were asked, which is how the notification was
+    scoped already and how these routes were not.
+    """
+    ids: set[int] = set()
+    if lr is None:
+        return ids
+    if lr.coach_id:
+        ids.add(lr.coach_id)
+    player = lr.player
+    if player is not None:
+        if player.coach_id:
+            ids.add(player.coach_id)
+        if player.team_id:
+            team = db.get(models.Team, player.team_id)
+            if team is not None and team.coach_id:
+                ids.add(team.coach_id)
+            ids |= {ts.coach_id for ts in
+                    db.query(models.TeamStaff).filter_by(team_id=player.team_id)}
+    return ids
+
+
 
 # ── Invite codes (coach generates) ───────────────────────────────────────────
 
@@ -223,7 +270,11 @@ def list_link_requests(
     db: Session = Depends(get_db),
     coach: models.Coach = Depends(get_current_coach),
 ):
-    requests = db.query(models.LinkRequest).filter_by(status="pending").all()
+    # Every pending request on the platform was returned here, to every
+    # coach, with the player's name on it.
+    requests = [lr for lr in
+                db.query(models.LinkRequest).filter_by(status="pending").all()
+                if coach.id in _link_request_coaches(db, lr)]
     result = []
     for lr in requests:
         out = schemas.LinkRequestOut.model_validate(lr)
@@ -240,9 +291,18 @@ def approve_link(
     coach: models.Coach = Depends(get_current_coach),
 ):
     lr = db.get(models.LinkRequest, request_id)
+    if lr is not None and coach.id not in _link_request_coaches(db, lr):
+        # Not addressed to this coach. Treated as not there rather than
+        # refused, so the answer does not tell a stranger that it exists.
+        lr = None
     if not lr:
         # Legacy notifications carried ref_id = player_user id (no LinkRequest).
-        pu = db.get(models.PlayerUser, request_id)
+        # Honoured only for a coach who was actually sent one: that row is the
+        # record of who was asked. Without it this path put any player on the
+        # roster of whichever coach happened to call it with their account id.
+        asked = db.query(models.PlayerNotification).filter_by(
+            coach_id=coach.id, type="link_requested", ref_id=request_id).first()
+        pu = db.get(models.PlayerUser, request_id) if asked else None
         if not pu:
             raise HTTPException(status_code=404, detail="Request not found")
         # coach_id is what puts a player on a roster: the list is filtered by
@@ -298,8 +358,11 @@ def reject_link(
     coach: models.Coach = Depends(get_current_coach),
 ):
     lr = db.get(models.LinkRequest, request_id)
-    if not lr:
-        # Legacy notification (no LinkRequest) — nothing to reject; just succeed.
+    if not lr or coach.id not in _link_request_coaches(db, lr):
+        # Legacy notification (no LinkRequest), or a request addressed to
+        # somebody else: nothing to reject, and the answer is the same either
+        # way so it does not reveal which. Any coach could reject any request
+        # here, and reject deletes the player's placeholder profile with it.
         return {"ok": True}
     lr.status = "rejected"
     # Clean up the auto-created placeholder roster profile if it was never used.
@@ -883,7 +946,7 @@ def update_player_training(
     coach: models.Coach = Depends(get_current_coach),
 ):
     pt = db.get(models.PlayerTraining, training_id)
-    if not pt:
+    if not _owns_player_training(pt, coach):
         raise HTTPException(status_code=404, detail="Training not found")
     pt.coach_notes = body.coach_notes
     params = {"coach": coach.name,
@@ -1188,7 +1251,7 @@ async def coach_refresh_training(
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
     pt = db.get(models.PlayerTraining, training_id)
-    if not pt:
+    if not _owns_player_training(pt, coach):
         raise HTTPException(status_code=404, detail="Training not found")
     feedback = (body.get("feedback") or "").strip()
     if not feedback:
@@ -1325,7 +1388,7 @@ def add_training_comment_coach(
     coach: models.Coach = Depends(get_current_coach),
 ):
     pt = db.get(models.PlayerTraining, training_id)
-    if not pt:
+    if not _owns_player_training(pt, coach):
         raise HTTPException(status_code=404, detail="Training not found")
     comment = models.PlayerComment(
         coach_id=coach.id,
@@ -1548,7 +1611,18 @@ def coach_reply_to_shared_report(
         # Fallback: older/ambiguous "player_commented" notifications carried a
         # training id here, not a shared-report id. Route those to the matching
         # training comment thread so the reply still lands instead of 404-ing.
+        #
+        # Only if it is THIS coach's player. The other two branches check that
+        # and this one only checked the programme existed, so any coach could
+        # post into any player's training thread by counting up from 1 (every
+        # table's ids start there, so collisions are the normal case, not the
+        # odd one), and the player got an in-app notification and a digest
+        # email carrying a stranger's name and message. A programme a player
+        # generated for themselves belongs to the coach who shared the report
+        # it was generated from.
         pt = db.get(models.PlayerTraining, shared_id)
+        if not _owns_player_training(pt, coach):
+            pt = None
         if pt:
             comment = models.PlayerComment(coach_id=coach.id, player_training_id=shared_id, text=body.text, parent_id=body.parent_id)
             db.add(comment)
