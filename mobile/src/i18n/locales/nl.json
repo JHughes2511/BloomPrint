@@ -2795,5 +2795,21 @@
     "badLinkBody": "Je mailprogramma heeft hem misschien afgekapt. Vraag een nieuwe aan op het inlogscherm.",
     "backToSignIn": "Terug naar inloggen",
     "signsOutOthers": "Een nieuw wachtwoord opslaan logt je uit op alle andere apparaten."
+  },
+  "dateFilter": {
+    "all": "Alles",
+    "7d": "Afgelopen 7 dagen",
+    "30d": "Afgelopen 30 dagen",
+    "season": "Dit seizoen",
+    "custom": "Eigen periode",
+    "from": "Van",
+    "to": "Tot",
+    "apply": "Toepassen",
+    "open": "Filteren op datum",
+    "between": "{{from}} tot {{to}}",
+    "since": "Sinds {{from}}",
+    "until": "Tot {{to}}",
+    "noneInRange": "Geen wedstrijden in deze periode.",
+    "showAll": "Alles tonen"
   }
 }

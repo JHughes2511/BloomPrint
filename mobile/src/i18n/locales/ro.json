@@ -2795,5 +2795,21 @@
     "badLinkBody": "Poate l-a tăiat aplicația ta de email. Cere altul din ecranul de autentificare.",
     "backToSignIn": "Înapoi la autentificare",
     "signsOutOthers": "Salvarea unei parole noi te deconectează de pe toate celelalte dispozitive."
+  },
+  "dateFilter": {
+    "all": "Tot timpul",
+    "7d": "Ultimele 7 zile",
+    "30d": "Ultimele 30 de zile",
+    "season": "Acest sezon",
+    "custom": "Interval personalizat",
+    "from": "De la",
+    "to": "Până la",
+    "apply": "Aplică",
+    "open": "Filtrează după dată",
+    "between": "{{from}} până la {{to}}",
+    "since": "Din {{from}}",
+    "until": "Până la {{to}}",
+    "noneInRange": "Niciun meci în acest interval de date.",
+    "showAll": "Arată tot timpul"
   }
 }

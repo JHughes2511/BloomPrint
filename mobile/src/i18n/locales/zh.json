@@ -2795,5 +2795,21 @@
     "badLinkBody": "可能被你的邮件应用截断了。请在登录页重新获取一个。",
     "backToSignIn": "返回登录",
     "signsOutOthers": "保存新密码会让你在其他所有设备上退出登录。"
+  },
+  "dateFilter": {
+    "all": "全部时间",
+    "7d": "最近 7 天",
+    "30d": "最近 30 天",
+    "season": "本赛季",
+    "custom": "自定义范围",
+    "from": "开始",
+    "to": "结束",
+    "apply": "应用",
+    "open": "按日期筛选",
+    "between": "{{from}} 至 {{to}}",
+    "since": "{{from}} 起",
+    "until": "截至 {{to}}",
+    "noneInRange": "此日期范围内没有比赛。",
+    "showAll": "显示全部时间"
   }
 }

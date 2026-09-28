@@ -2795,5 +2795,21 @@
     "badLinkBody": "La tua app di posta potrebbe averlo tagliato. Chiedine uno nuovo dalla schermata di accesso.",
     "backToSignIn": "Torna all'accesso",
     "signsOutOthers": "Salvare una nuova password ti disconnette da tutti gli altri dispositivi."
+  },
+  "dateFilter": {
+    "all": "Tutto",
+    "7d": "Ultimi 7 giorni",
+    "30d": "Ultimi 30 giorni",
+    "season": "Questa stagione",
+    "custom": "Intervallo personalizzato",
+    "from": "Dal",
+    "to": "Al",
+    "apply": "Applica",
+    "open": "Filtra per data",
+    "between": "Dal {{from}} al {{to}}",
+    "since": "Dal {{from}}",
+    "until": "Fino al {{to}}",
+    "noneInRange": "Nessuna partita in questo intervallo di date.",
+    "showAll": "Mostra tutto"
   }
 }

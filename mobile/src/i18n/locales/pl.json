@@ -2795,5 +2795,21 @@
     "badLinkBody": "Program pocztowy mógł go uciąć. Poproś o nowy na ekranie logowania.",
     "backToSignIn": "Powrót do logowania",
     "signsOutOthers": "Zapisanie nowego hasła wylogowuje Cię ze wszystkich innych urządzeń."
+  },
+  "dateFilter": {
+    "all": "Cały okres",
+    "7d": "Ostatnie 7 dni",
+    "30d": "Ostatnie 30 dni",
+    "season": "Ten sezon",
+    "custom": "Własny zakres",
+    "from": "Od",
+    "to": "Do",
+    "apply": "Zastosuj",
+    "open": "Filtruj według daty",
+    "between": "Od {{from}} do {{to}}",
+    "since": "Od {{from}}",
+    "until": "Do {{to}}",
+    "noneInRange": "Brak meczów w tym zakresie dat.",
+    "showAll": "Pokaż cały okres"
   }
 }

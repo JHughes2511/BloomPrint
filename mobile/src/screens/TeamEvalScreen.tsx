@@ -21,6 +21,7 @@ import { useAuth } from '../context/AuthContext';
 import { renderReport } from '../utils/renderReport';
 import { useReportSearch, usePrimedSearch, ReportSearchBar, ReportSearchButton } from '../components/ReportSearch';
 import ListSearchHeader from '../components/ListSearchHeader';
+import DateRangeFilter, { ALL_TIME, DateRange, inDateRange, isFiltering } from '../components/DateRangeFilter';
 import { GeneratingOverlay } from '../components/GeneratingBasketball';
 import { buildReportHtml, buildPdfFileName } from '../utils/buildReportPdf';
 import { formatForLevel, periodLabel, weightBucket, periodForBucket, formatClock, type GameFormat } from '../utils/gameClock';
@@ -416,6 +417,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [showScoutingReport, setShowScoutingReport] = useState(false);
   const [gameReportGame, setGameReportGame] = useState<any>(null);
   const [gameReportSearch, setGameReportSearch] = useState('');
+  // One date range for Games, Scout and Game Report. Owned here rather than by
+  // each list, because a coach who narrows to this season in one of them
+  // expects the other two to be looking at the same season when they switch.
+  const [dateRange, setDateRange] = useState<DateRange>(ALL_TIME);
   const [scoutSearch, setScoutSearch] = useState('');
   const [loadingGameReport, setLoadingGameReport] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
@@ -547,8 +552,15 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   useFocusEffect(useCallback(() => { loadData(); }, [loadData]));
 
   const filteredSessions = sessions.filter(
-    s => phaseFilter === 'all' || s.season_phase === phaseFilter,
+    s => (phaseFilter === 'all' || s.season_phase === phaseFilter)
+      && inDateRange(s.date, dateRange),
   );
+  // Whether the date range, and not the phase chips or an empty season, is what
+  // left a list with nothing in it. The empty state has to say which: "no
+  // games, create your first" is alarming to someone who has fifty and has
+  // simply narrowed to a week they did not play.
+  const hiddenByDate = (list: any[], shown: any[]) =>
+    isFiltering(dateRange) && shown.length === 0 && list.length > 0;
 
   // ── Create team ──────────────────────────────────────────────────────────────
 
@@ -1985,13 +1997,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
    */
   const gameReportGames = React.useMemo(() => {
     const q = norm(gameReportSearch);
-    if (!q) return sessions as any[];
+    const dated = (sessions as any[]).filter((g: any) => inDateRange(g.date, dateRange));
+    if (!q) return dated;
     const nameOf = (g: any) => g.team_name
       ?? (teams as any[]).find(tm => tm.id === g.team_id)?.name
       ?? coach?.program_name ?? '';
-    return (sessions as any[]).filter((g: any) =>
+    return dated.filter((g: any) =>
       norm(nameOf(g)).includes(q) || norm(g.opponent_name ?? '').includes(q));
-  }, [sessions, teams, coach, gameReportSearch]);
+  }, [sessions, teams, coach, gameReportSearch, dateRange]);
 
   /** Games this team played, on either side of the scoreboard. */
   const gamesInvolving = (name: string) => (sessions as any[]).filter((g: any) =>
@@ -2365,7 +2378,19 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               25 languages. */}
           <View style={desktopOnly({ flexGrow: 1, flexShrink: 0, maxWidth: '100%',
                                      flexBasis: chipRowWidth || 'auto' })}>
-          <Text style={[s.cardLabel, { marginBottom: 8 }]}>{tr('teamGrade.gameView')}</Text>
+          {isWide ? (
+            <Text style={[s.cardLabel, { marginBottom: 8 }]}>{tr('teamGrade.gameView')}</Text>
+          ) : (
+            // A phone has no row to spare beside the chips, so the date filter
+            // goes on the label's line, where the other two lists put search.
+            <View style={{ flexDirection: 'row', alignItems: 'center',
+                           marginBottom: 8, zIndex: 40 }}>
+              <Text style={[s.cardLabel, { marginBottom: 0, flex: 1 }]}>
+                {tr('teamGrade.gameView')}
+              </Text>
+              <DateRangeFilter value={dateRange} onChange={setDateRange} />
+            </View>
+          )}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -2390,6 +2415,13 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           </ScrollView>
           </View>
           {isWide && <TeamFilterBar inline />}
+          {/* Level with the team picker's box rather than the chips' label, so
+              the two filters read as one row of controls. */}
+          {isWide && (
+            <View style={{ alignSelf: 'flex-end', marginLeft: 12 }}>
+              <DateRangeFilter value={dateRange} onChange={setDateRange} size="field" />
+            </View>
+          )}
           </View>
           </View>
 
@@ -2416,6 +2448,14 @@ export default function TeamEvalScreen({ route, navigation }: any) {
               page would hydrate from disk and still sit behind a spinner. */}
           {firstLoad && sessions.length === 0 ? (
             <ActivityIndicator color={t.accent} style={{ marginTop: 24 }} />
+          ) : hiddenByDate(sessions as any[], filteredSessions) ? (
+            <View style={[s.card, { alignItems: 'center' }]}>
+              <Ionicons name="calendar-outline" size={36} color={t.line} />
+              <Text style={{ color: t.muted, fontSize: 13, marginTop: 10 }}>{tr('dateFilter.noneInRange')}</Text>
+              <TouchableOpacity onPress={() => setDateRange(ALL_TIME)} style={{ marginTop: 10 }}>
+                <Text style={{ color: t.accent, fontSize: 13, fontWeight: '700' }}>{tr('dateFilter.showAll')}</Text>
+              </TouchableOpacity>
+            </View>
           ) : filteredSessions.length === 0 ? (
             <View style={[s.card, { alignItems: 'center' }]}>
               <Ionicons name="basketball-outline" size={36} color={t.line} />
@@ -3684,6 +3724,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 value={gameReportSearch}
                 onChange={setGameReportSearch}
                 placeholder={tr('staffHub.searchGamesPlaceholder')}
+                trailing={<DateRangeFilter value={dateRange} onChange={setDateRange} />}
                 subtitle={(
                   <Text style={{ color: t.muted2, fontSize: 13, marginTop: 4 }}>
                     {tr('teamGrade.gameReportPickHint')}
@@ -3695,7 +3736,17 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 <Text style={{ color: t.muted2, fontSize: 13 }}>{tr('teamGrade.noGamesYet')}</Text>
               )}
               {sessions.length > 0 && gameReportGames.length === 0 && (
-                <Text style={{ color: t.muted2, fontSize: 13 }}>{tr('teamGrade.noOpponents')}</Text>
+                isFiltering(dateRange)
+                  && (sessions as any[]).every((g: any) => !inDateRange(g.date, dateRange)) ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    <Text style={{ color: t.muted2, fontSize: 13 }}>{tr('dateFilter.noneInRange')}</Text>
+                    <TouchableOpacity onPress={() => setDateRange(ALL_TIME)}>
+                      <Text style={{ color: t.accent, fontSize: 13, fontWeight: '700' }}>{tr('dateFilter.showAll')}</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <Text style={{ color: t.muted2, fontSize: 13 }}>{tr('teamGrade.noOpponents')}</Text>
+                )
               )}
               <View style={desktopOnly({ flexDirection: 'row', flexWrap: 'wrap', gap: reportGrid.gap, paddingHorizontal: 16 })}
                     ref={reportGrid.ref} onLayout={reportGrid.onLayout}>

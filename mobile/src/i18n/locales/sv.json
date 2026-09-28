@@ -2795,5 +2795,21 @@
     "badLinkBody": "Ditt e-postprogram kan ha kapat den. Be om en ny från inloggningssidan.",
     "backToSignIn": "Tillbaka till inloggning",
     "signsOutOthers": "Att spara ett nytt lösenord loggar ut dig på alla andra enheter."
+  },
+  "dateFilter": {
+    "all": "All tid",
+    "7d": "Senaste 7 dagarna",
+    "30d": "Senaste 30 dagarna",
+    "season": "Den här säsongen",
+    "custom": "Anpassat intervall",
+    "from": "Från",
+    "to": "Till",
+    "apply": "Använd",
+    "open": "Filtrera på datum",
+    "between": "{{from}} till {{to}}",
+    "since": "Sedan {{from}}",
+    "until": "Till {{to}}",
+    "noneInRange": "Inga matcher i det här datumintervallet.",
+    "showAll": "Visa all tid"
   }
 }

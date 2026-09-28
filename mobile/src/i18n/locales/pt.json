@@ -2795,5 +2795,21 @@
     "badLinkBody": "A sua aplicação de email pode tê-la cortado. Peça outra no ecrã de início de sessão.",
     "backToSignIn": "Voltar ao início de sessão",
     "signsOutOthers": "Guardar uma nova palavra-passe termina a sessão em todos os outros dispositivos."
+  },
+  "dateFilter": {
+    "all": "Tudo",
+    "7d": "Últimos 7 dias",
+    "30d": "Últimos 30 dias",
+    "season": "Esta época",
+    "custom": "Intervalo personalizado",
+    "from": "De",
+    "to": "Até",
+    "apply": "Aplicar",
+    "open": "Filtrar por data",
+    "between": "{{from}} a {{to}}",
+    "since": "Desde {{from}}",
+    "until": "Até {{to}}",
+    "noneInRange": "Não há jogos neste intervalo de datas.",
+    "showAll": "Ver tudo"
   }
 }

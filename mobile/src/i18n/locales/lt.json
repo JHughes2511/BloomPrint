@@ -2795,5 +2795,21 @@
     "badLinkBody": "Ją galėjo nukirpti jūsų pašto programa. Paprašykite naujos prisijungimo lange.",
     "backToSignIn": "Atgal į prisijungimą",
     "signsOutOthers": "Išsaugojus naują slaptažodį atsijungiama visuose kituose įrenginiuose."
+  },
+  "dateFilter": {
+    "all": "Visas laikotarpis",
+    "7d": "Paskutinės 7 dienos",
+    "30d": "Paskutinės 30 dienų",
+    "season": "Šis sezonas",
+    "custom": "Pasirinktas laikotarpis",
+    "from": "Nuo",
+    "to": "Iki",
+    "apply": "Taikyti",
+    "open": "Filtruoti pagal datą",
+    "between": "Nuo {{from}} iki {{to}}",
+    "since": "Nuo {{from}}",
+    "until": "Iki {{to}}",
+    "noneInRange": "Šiuo laikotarpiu rungtynių nėra.",
+    "showAll": "Rodyti visą laikotarpį"
   }
 }

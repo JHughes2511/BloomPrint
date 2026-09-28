@@ -2795,5 +2795,21 @@
     "badLinkBody": "Votre messagerie l'a peut-être coupé. Demandez-en un nouveau depuis l'écran de connexion.",
     "backToSignIn": "Retour à la connexion",
     "signsOutOthers": "Enregistrer un nouveau mot de passe vous déconnecte de tous les autres appareils."
+  },
+  "dateFilter": {
+    "all": "Tout",
+    "7d": "7 derniers jours",
+    "30d": "30 derniers jours",
+    "season": "Cette saison",
+    "custom": "Période personnalisée",
+    "from": "Du",
+    "to": "Au",
+    "apply": "Appliquer",
+    "open": "Filtrer par date",
+    "between": "Du {{from}} au {{to}}",
+    "since": "Depuis le {{from}}",
+    "until": "Jusqu'au {{to}}",
+    "noneInRange": "Aucun match sur cette période.",
+    "showAll": "Tout afficher"
   }
 }

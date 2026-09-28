@@ -2795,5 +2795,21 @@
     "badLinkBody": "메일 앱이 링크를 자른 것일 수 있습니다. 로그인 화면에서 새로 요청하세요.",
     "backToSignIn": "로그인으로 돌아가기",
     "signsOutOthers": "새 비밀번호를 저장하면 다른 모든 기기에서 로그아웃됩니다."
+  },
+  "dateFilter": {
+    "all": "전체 기간",
+    "7d": "최근 7일",
+    "30d": "최근 30일",
+    "season": "이번 시즌",
+    "custom": "기간 지정",
+    "from": "시작일",
+    "to": "종료일",
+    "apply": "적용",
+    "open": "날짜로 필터",
+    "between": "{{from}}~{{to}}",
+    "since": "{{from}}부터",
+    "until": "{{to}}까지",
+    "noneInRange": "이 기간에 경기가 없습니다.",
+    "showAll": "전체 기간 보기"
   }
 }

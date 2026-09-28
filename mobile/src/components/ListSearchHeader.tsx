@@ -18,7 +18,7 @@ import { useBreakpoint } from '../responsive/useBreakpoint';
 import { useTheme } from '../theme/ThemeProvider';
 
 export default function ListSearchHeader({
-  title, titleStyle, value, onChange, placeholder, subtitle,
+  title, titleStyle, value, onChange, placeholder, subtitle, trailing,
 }: {
   title: string;
   titleStyle?: any;
@@ -27,6 +27,12 @@ export default function ListSearchHeader({
   placeholder: string;
   /** Rendered under the title line, above the box on a phone. */
   subtitle?: React.ReactNode;
+  /**
+   * A control that belongs to the same list, on the title line to the right
+   * of the search: the date range, on the lists that have one. On a phone it
+   * sits beside the search icon; on a desktop beside the box.
+   */
+  trailing?: React.ReactNode;
 }) {
   const { t } = useTheme();
   const { t: tr } = useTranslation();
@@ -106,6 +112,7 @@ export default function ListSearchHeader({
             </View>
           </TouchableOpacity>
         ) : field({ width: '100%', maxWidth: 260, flexShrink: 1 })}
+        {trailing}
       </View>
       {subtitle}
       {isPhone && open && field({ marginTop: 8 })}

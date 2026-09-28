@@ -2795,5 +2795,21 @@
     "badLinkBody": "E-posta uygulamanız kısaltmış olabilir. Giriş ekranından yenisini isteyin.",
     "backToSignIn": "Girişe dön",
     "signsOutOthers": "Yeni şifre kaydetmek diğer tüm cihazlardaki oturumunuzu kapatır."
+  },
+  "dateFilter": {
+    "all": "Tüm zamanlar",
+    "7d": "Son 7 gün",
+    "30d": "Son 30 gün",
+    "season": "Bu sezon",
+    "custom": "Özel aralık",
+    "from": "Başlangıç",
+    "to": "Bitiş",
+    "apply": "Uygula",
+    "open": "Tarihe göre filtrele",
+    "between": "{{from}} ile {{to}} arası",
+    "since": "{{from}} tarihinden beri",
+    "until": "{{to}} tarihine kadar",
+    "noneInRange": "Bu tarih aralığında maç yok.",
+    "showAll": "Tüm zamanları göster"
   }
 }

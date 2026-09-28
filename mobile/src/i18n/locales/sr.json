@@ -2795,5 +2795,21 @@
     "badLinkBody": "Možda ju je vaš imejl program skratio. Zatražite novu sa ekrana za prijavu.",
     "backToSignIn": "Nazad na prijavu",
     "signsOutOthers": "Čuvanje nove lozinke vas odjavljuje sa svih drugih uređaja."
+  },
+  "dateFilter": {
+    "all": "Sve vreme",
+    "7d": "Poslednjih 7 dana",
+    "30d": "Poslednjih 30 dana",
+    "season": "Ova sezona",
+    "custom": "Prilagođeni period",
+    "from": "Od",
+    "to": "Do",
+    "apply": "Primeni",
+    "open": "Filtriraj po datumu",
+    "between": "Od {{from}} do {{to}}",
+    "since": "Od {{from}}",
+    "until": "Do {{to}}",
+    "noneInRange": "Nema utakmica u ovom periodu.",
+    "showAll": "Prikaži sve vreme"
   }
 }

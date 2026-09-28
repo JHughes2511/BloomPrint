@@ -2795,5 +2795,21 @@
     "badLinkBody": "It may have been cut short by your email app. Ask for a new one from the sign-in screen.",
     "backToSignIn": "Back to sign in",
     "signsOutOthers": "Saving a new password signs you out on every other device."
+  },
+  "dateFilter": {
+    "all": "All time",
+    "7d": "Last 7 days",
+    "30d": "Last 30 days",
+    "season": "This season",
+    "custom": "Custom range",
+    "from": "From",
+    "to": "To",
+    "apply": "Apply",
+    "open": "Filter by date",
+    "between": "{{from}} to {{to}}",
+    "since": "Since {{from}}",
+    "until": "Until {{to}}",
+    "noneInRange": "No games in this date range.",
+    "showAll": "Show all time"
   }
 }

@@ -2795,5 +2795,21 @@
     "badLinkBody": "Baka pinutol ito ng email app mo. Humingi ng bago sa sign-in screen.",
     "backToSignIn": "Balik sa sign in",
     "signsOutOthers": "Ang pag-save ng bagong password ay magsi-sign out sa iyo sa lahat ng ibang device."
+  },
+  "dateFilter": {
+    "all": "Lahat ng panahon",
+    "7d": "Huling 7 araw",
+    "30d": "Huling 30 araw",
+    "season": "Ngayong season",
+    "custom": "Pasadyang saklaw",
+    "from": "Mula",
+    "to": "Hanggang",
+    "apply": "Ilapat",
+    "open": "I-filter ayon sa petsa",
+    "between": "{{from}} hanggang {{to}}",
+    "since": "Mula {{from}}",
+    "until": "Hanggang {{to}}",
+    "noneInRange": "Walang laro sa saklaw na petsang ito.",
+    "showAll": "Ipakita ang lahat ng panahon"
   }
 }

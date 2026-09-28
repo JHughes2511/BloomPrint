@@ -2795,5 +2795,21 @@
     "badLinkBody": "Puede que tu aplicación de correo lo haya cortado. Pide uno nuevo desde la pantalla de inicio de sesión.",
     "backToSignIn": "Volver al inicio de sesión",
     "signsOutOthers": "Guardar una contraseña nueva cierra tu sesión en todos los demás dispositivos."
+  },
+  "dateFilter": {
+    "all": "Todo",
+    "7d": "Últimos 7 días",
+    "30d": "Últimos 30 días",
+    "season": "Esta temporada",
+    "custom": "Rango personalizado",
+    "from": "Desde",
+    "to": "Hasta",
+    "apply": "Aplicar",
+    "open": "Filtrar por fecha",
+    "between": "{{from}} al {{to}}",
+    "since": "Desde {{from}}",
+    "until": "Hasta {{to}}",
+    "noneInRange": "No hay partidos en este rango de fechas.",
+    "showAll": "Ver todo"
   }
 }

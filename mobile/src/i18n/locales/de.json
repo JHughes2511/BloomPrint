@@ -2795,5 +2795,21 @@
     "badLinkBody": "Vielleicht hat dein Mailprogramm ihn abgeschnitten. Fordere über die Anmeldeseite einen neuen an.",
     "backToSignIn": "Zurück zur Anmeldung",
     "signsOutOthers": "Ein neues Passwort meldet dich auf allen anderen Geräten ab."
+  },
+  "dateFilter": {
+    "all": "Gesamter Zeitraum",
+    "7d": "Letzte 7 Tage",
+    "30d": "Letzte 30 Tage",
+    "season": "Diese Saison",
+    "custom": "Eigener Zeitraum",
+    "from": "Von",
+    "to": "Bis",
+    "apply": "Anwenden",
+    "open": "Nach Datum filtern",
+    "between": "{{from}} bis {{to}}",
+    "since": "Seit {{from}}",
+    "until": "Bis {{to}}",
+    "noneInRange": "Keine Spiele in diesem Zeitraum.",
+    "showAll": "Gesamten Zeitraum zeigen"
   }
 }
