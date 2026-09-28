@@ -9,9 +9,9 @@ if somebody had kept them. And what to do about one that did not, which was
 nothing at all — a blip lost a message permanently, and silently.
 
 Now each send writes a row first and updates it with what happened. A failure
-is retried on a widening delay; the digest thread already wakes on a timer and
-does the retrying, because a second timer for this would be a second thing to
-get wrong.
+is retried on a widening delay. The failure tells api/scheduler.py when the
+retry is due, and its thread does the retrying then, the same thread that
+sends the digests, because two of them would be two things to get wrong.
 
 WHAT IS STORED
 
@@ -28,7 +28,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timedelta
 
-from . import models
+from . import models, scheduler
 from .database import SessionLocal
 from .mailer import mail_from, try_send
 
@@ -76,7 +76,12 @@ def _attempt(db, row: models.EmailSend) -> bool:
         else:
             row.status = "failed"
             row.next_attempt_at = now + BACKOFF[row.attempts - 1]
+    retry_at = row.next_attempt_at
     db.commit()
+    # After the commit, for the same reason the digest queue does it then: the
+    # scheduler reads the retry back from the database when it wakes.
+    if retry_at is not None:
+        scheduler.wake_at(retry_at)
     return ok
 
 

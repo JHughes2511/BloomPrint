@@ -14,10 +14,11 @@ the same words the single email would have carried.
 
 HOW IT RUNS
 
-There is no scheduler in this app. A thread started at boot wakes every few
-minutes and flushes whatever has come due, which is a person whose oldest
-queued item is an hour old. That bounds the wait at an hour without holding a
-lone comment for the rest of one.
+A digest comes due when the oldest item in someone's queue is an hour old.
+Queueing an item tells api/scheduler.py that moment, and the scheduler's
+thread sleeps until then. It used to wake every five minutes to look instead,
+which kept the database from ever going to sleep and ran through its plan's
+allowance; see the scheduler for that story.
 
 A row is claimed by stamping sent_at BEFORE the message is built, in an update
 that only touches rows still unclaimed. Two processes flushing at the same
@@ -28,11 +29,9 @@ send, which loses a digest rather than sending it twice.
 from __future__ import annotations
 
 import logging
-import threading
-import time
 from datetime import datetime, timedelta
 
-from . import emails, models, outbox
+from . import emails, models, outbox, scheduler
 from .database import SessionLocal
 from .mailer import contact_email, mail_from, try_send
 
@@ -41,16 +40,11 @@ log = logging.getLogger(__name__)
 # How long a queued comment waits for company before its digest goes out.
 WINDOW = timedelta(hours=1)
 
-# How often the thread looks. Well under the window, so an hour-old item is
-# never much more than an hour old when it leaves.
-TICK_SECONDS = 300
 
 # One person's digest is not a mailing list. A thread that ran away would
 # otherwise produce a message with hundreds of lines in it; the rest stay
 # queued and go out in the next one.
 MAX_LINES = 40
-
-_started = False
 
 
 def queue(audience: str, user_id: int, key: str, params: dict | None = None,
@@ -61,13 +55,19 @@ def queue(audience: str, user_id: int, key: str, params: dict | None = None,
     the caller is mid-transaction and committing theirs here would commit
     whatever else they had half-written.
     """
+    # Stamped here rather than left to the column default, so the moment it
+    # comes due is known without reading the row back.
+    now = datetime.utcnow()
     db = SessionLocal()
     try:
         db.add(models.PendingNotification(
             audience=audience, user_id=user_id, i18n_key=key,
-            params=dict(params or {}), link=link,
+            params=dict(params or {}), link=link, created_at=now,
         ))
         db.commit()
+        # After the commit, so that when the scheduler wakes and reads the
+        # queue, this row is in it.
+        scheduler.wake_at(now + WINDOW)
     except Exception:
         db.rollback()
         # A digest that fails to queue must not break the event that caused it.
@@ -172,37 +172,6 @@ def flush_once() -> int:
     return sent
 
 
-def _loop() -> None:
-    while True:
-        try:
-            flush_once()
-        except Exception:
-            # Nothing in here may kill the thread: a digest that fails once
-            # should not stop every later one.
-            log.warning("Digest flush failed", exc_info=True)
-        try:
-            # Messages that did not go out the first time. This thread already
-            # wakes on a timer, and a second timer for retries would be a
-            # second thing to get wrong.
-            outbox.retry_due()
-        except Exception:
-            log.warning("Email retry sweep failed", exc_info=True)
-        try:
-            outbox.prune()
-        except Exception:
-            log.warning("Email log prune failed", exc_info=True)
-        time.sleep(TICK_SECONDS)
-
-
 def start() -> None:
-    """Begin flushing, once per process.
-
-    A daemon thread so it can never hold the server open on shutdown. Guarded
-    because a reloader can import and start the app more than once, and two
-    loops in one process is two chances to race for the same rows.
-    """
-    global _started
-    if _started:
-        return
-    _started = True
-    threading.Thread(target=_loop, name="digest", daemon=True).start()
+    """Begin flushing. Kept so existing callers still work; see scheduler."""
+    scheduler.start()

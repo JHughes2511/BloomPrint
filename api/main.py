@@ -100,12 +100,12 @@ def on_startup():
     for problem in check_complete() + check_notif_copy():
         log.warning("Email copy: %s", problem)
 
-    # Comments and replies queue instead of mailing one at a time, and there is
-    # no scheduler in this app to send the batches, so the flusher is a thread
-    # this process owns. See api/digest.py.
-    from . import digest
+    # Comments and replies queue instead of mailing one at a time, and failed
+    # sends are retried later. One thread sends both, waking only when one of
+    # them is due rather than on a timer. See api/scheduler.py.
+    from . import scheduler
 
-    digest.start()
+    scheduler.start()
 
     # Film uploads go from the coach's browser straight to the bucket, which
     # only works if the bucket allows that origin. Stated at boot for the same
