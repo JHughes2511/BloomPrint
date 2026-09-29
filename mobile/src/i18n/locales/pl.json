@@ -2402,7 +2402,8 @@
       "rebound": "zbiórce w obronie",
       "miss": "niecelnym rzucie",
       "made": "celnym rzucie"
-    }
+    },
+    "boxScore": "Protokół"
   },
   "whiteboard": {
     "title": "Tablica",
@@ -2925,7 +2926,7 @@
     "defense": "Obrona",
     "play": "Zagrywka",
     "newPlay": "Nowa zagrywka…",
-    "call": "Wywołaj",
+    "call": "Dodaj zagrywkę",
     "orb": "Zb. w ataku",
     "viewing": "Podgląd",
     "all": "Wszystko",
@@ -3028,6 +3029,6 @@
     },
     "result": "Rzut / wynik",
     "pickPlayFirst": "Wybierz obronę, potem zagrywkę, by rozpocząć posiadanie.",
-    "deleteNote": "Jego statystyki zostają w protokole."
+    "deleteNote": "Jego statystyki też znikną z protokołu, a punkty zostaną odjęte od wyniku."
   }
 }

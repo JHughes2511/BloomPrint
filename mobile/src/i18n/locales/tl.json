@@ -2402,7 +2402,8 @@
       "rebound": "defensive rebound",
       "miss": "mintis na tira",
       "made": "pumasok na basket"
-    }
+    },
+    "boxScore": "Box score"
   },
   "whiteboard": {
     "title": "Whiteboard",
@@ -2925,7 +2926,7 @@
     "defense": "Depensa",
     "play": "Play",
     "newPlay": "Bagong play…",
-    "call": "Tawagin",
+    "call": "Magdagdag ng play",
     "orb": "Off. rebound",
     "viewing": "Tinitingnan",
     "all": "Lahat",
@@ -3028,6 +3029,6 @@
     },
     "result": "Tira / resulta",
     "pickPlayFirst": "Piliin ang depensa, tapos ang play, para magsimula ng possession.",
-    "deleteNote": "Mananatili ang stats nito sa box score."
+    "deleteNote": "Aalisin din ang stats nito sa box score at ibabawas ang puntos sa iskor."
   }
 }

@@ -2402,7 +2402,8 @@
       "rebound": "savunma ribaundundan",
       "miss": "kaçan şuttan",
       "made": "atılan basketten"
-    }
+    },
+    "boxScore": "Kutu skor"
   },
   "whiteboard": {
     "title": "Taktik Tahtası",
@@ -2925,7 +2926,7 @@
     "defense": "Savunma",
     "play": "Set",
     "newPlay": "Yeni set…",
-    "call": "Çağır",
+    "call": "Set ekle",
     "orb": "Hücum rib.",
     "viewing": "Görünüm",
     "all": "Tümü",
@@ -3028,6 +3029,6 @@
     },
     "result": "Şut / sonuç",
     "pickPlayFirst": "Hücumu başlatmak için önce savunmayı, sonra seti seç.",
-    "deleteNote": "İstatistikleri kutu skorda kalır."
+    "deleteNote": "İstatistikleri de kutu skordan çıkar ve sayıları skordan düşülür."
   }
 }

@@ -2402,7 +2402,8 @@
       "rebound": "a defensive rebound",
       "miss": "a missed shot",
       "made": "a made basket"
-    }
+    },
+    "boxScore": "Box Score"
   },
   "whiteboard": {
     "title": "Whiteboard",
@@ -2925,7 +2926,7 @@
     "defense": "Defense",
     "play": "Play",
     "newPlay": "New play…",
-    "call": "Call it",
+    "call": "Add play",
     "orb": "Off. rebounds",
     "viewing": "Viewing",
     "all": "All",
@@ -3028,6 +3029,6 @@
     },
     "result": "Shot / result",
     "pickPlayFirst": "Pick the defense, then the play, to start a possession.",
-    "deleteNote": "Its stats stay in the box score."
+    "deleteNote": "Its stats come out of the box score too, and any points come off the score."
   }
 }

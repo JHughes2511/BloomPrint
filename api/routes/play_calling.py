@@ -151,12 +151,22 @@ def edit_possession(call_id: int, body: PossessionIn, db: Session = Depends(get_
 @router.delete("/possessions/{call_id}")
 def delete_possession(call_id: int, db: Session = Depends(get_db),
                       coach: models.Coach = Depends(get_current_coach)):
-    call, _ = _owned_call(db, call_id, coach)
-    # Stats that happened in it stay; they just belong to no possession now.
-    db.query(models.GamePlayerStat).filter_by(possession_id=call.id).update({"possession_id": None})
+    call, game = _owned_call(db, call_id, coach)
+    # A wrong call goes with everything tapped in it: its stats come out of the
+    # box score, and while the game is live its baskets come off the score.
+    # (A finished game's score is the final one; it is not second-guessed.)
+    stats = db.query(models.GamePlayerStat).filter_by(possession_id=call.id).all()
+    for st in stats:
+        if game.status == "in_progress" and st.stat_name in pc.POINTS:
+            pc._add_score(db, game, bool(st.is_opponent), -pc.POINTS[st.stat_name] * (st.count or 1))
+        db.query(models.StatDuplicate).filter_by(original_id=st.id).update({"original_id": None})
+        db.delete(st)
     db.delete(call)
     db.commit()
-    return {"ok": True}
+    db.refresh(game)
+    from .game_eval import _shown_scores
+    ours, theirs = _shown_scores(game)
+    return {"ok": True, "stats_removed": len(stats), "our_score": ours, "opponent_score": theirs}
 
 
 class FinishIn(BaseModel):

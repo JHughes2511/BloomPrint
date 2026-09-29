@@ -2402,7 +2402,8 @@
       "rebound": "um rebote defensivo",
       "miss": "um arremesso errado",
       "made": "uma cesta convertida"
-    }
+    },
+    "boxScore": "Box score"
   },
   "whiteboard": {
     "title": "Quadro Tático",
@@ -2925,7 +2926,7 @@
     "defense": "Defesa",
     "play": "Jogada",
     "newPlay": "Nova jogada…",
-    "call": "Chamar",
+    "call": "Adicionar jogada",
     "orb": "Reb. ofensivos",
     "viewing": "Vendo",
     "all": "Tudo",
@@ -3028,6 +3029,6 @@
     },
     "result": "Arremesso / resultado",
     "pickPlayFirst": "Escolha a defesa e depois a jogada para começar uma posse.",
-    "deleteNote": "As estatísticas dela continuam no box score."
+    "deleteNote": "As estatísticas também saem do box score e os pontos saem do placar."
   }
 }

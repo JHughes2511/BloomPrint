@@ -1510,6 +1510,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // Whoever may track it live: the owner, or anyone on the game's team.
   const canTrack = (game: any) => !!game && !game.frozen_from
     && ((game.coach_id === coach?.id) || !!game.can_track);
+  // Who may correct a game's stats: the owner, and while it is live anyone
+  // tracking it (they are the ones who logged them).
+  const canEditStats = (game: any) => isOwnedGame(game) || (game?.status === 'in_progress' && canTrack(game));
 
   const openPlayerStats = (playerName: string) => {
     setStatsModalPlayer(playerName);
@@ -1519,8 +1522,12 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const deleteStatEntry = async (statId: number) => {
     if (!detailGame) return;
     try {
-      await gameEvalAPI.deleteStat(statId);
+      // A live game's score moved when the basket was tapped, so taking the
+      // basket out takes it off the score too. A finished game's score is final.
+      const live = detailGame.status === 'in_progress';
+      await gameEvalAPI.deleteStat(statId, live);
       setGameStats(prev => prev.filter(s => s.id !== statId));
+      if (live) gameEvalAPI.getSession(detailGame.id).then(setDetailGame).catch(() => {});
       // Refresh summary grades
       const s = await gameEvalAPI.getGameSummary(detailGame.id);
       setSummary(s);
@@ -2478,7 +2485,15 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 <TouchableOpacity
                   key={v}
                   style={[s.navBtn, navView === v && s.navBtnActive]}
-                  onPress={() => { if (v === 'gamereport') setGameReportGame(null); if (v === 'playcalling') setPcGame(null); setActiveView(v); }}
+                  // A tab is a move to somewhere else, not a step back: leaving
+                  // a game (or a scouted team) through the steps' own close
+                  // would spend its history entry with a back(), and that back
+                  // landed on Games instead of the tab tapped.
+                  onPress={() => leaveStep(() => {
+                    if (v === 'gamereport') setGameReportGame(null);
+                    if (v === 'playcalling') setPcGame(null);
+                    setActiveView(v);
+                  })}
                 >
                   <Text style={[s.navBtnText, navView === v && s.navBtnTextActive]}>
                     {v === 'dashboard' ? tr('teamGrade.views.dashboard') : v === 'games' ? tr('teamGrade.views.games')
@@ -3126,36 +3141,38 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </View>
           </Sheet>
 
-          {/* Team toggle — for tapping stats in live. A game tracked after the
-              fact has nothing to tap, and a selected team sitting above the
-              Import button read as though it scoped the import, which it has
-              not done since importing stopped being per-side. */}
-          {activeGame.tracking_mode !== 'post' && (
-          <View style={s.teamToggle}>
-            <TouchableOpacity
-              style={[s.teamToggleBtn, entryMode === 'our' && s.teamToggleBtnActive]}
-              onPress={() => { setEntryMode('our'); setSelectedPlayer(null); }}
-            >
-              {/* The team's name, not "Our Team". The coach knows which side is
-                  theirs; what they need on a stat pad is which of their teams
-                  this is and who it is against. */}
-              <Text style={[s.teamToggleText, entryMode === 'our' && s.teamToggleTextActive]} numberOfLines={1}>
-                {activeGame.team_name ?? (teams as any[]).find(tm => tm.id === activeGame.team_id)?.name
-                  ?? coach?.program_name ?? tr('teamGrade.ourTeam')}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[s.teamToggleBtn, entryMode === 'opponent' && s.teamToggleBtnActive]}
-              onPress={() => { setEntryMode('opponent'); setSelectedPlayer(null); }}
-            >
-              <Text style={[s.teamToggleText, entryMode === 'opponent' && s.teamToggleTextActive]} numberOfLines={1}>
-                {activeGame.opponent_name || tr('teamGrade.opponent')}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          )}
-
           <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
+            {/* Team toggle — for tapping stats in live. It scrolls with the stat
+                pad it belongs to: pinned above the page, it sat over Play
+                Calling, which has its own team buttons. A game tracked after the
+                fact has nothing to tap, and a selected team sitting above the
+                Import button read as though it scoped the import, which it has
+                not done since importing stopped being per-side. */}
+            {activeGame.tracking_mode !== 'post' && (
+            <View style={[s.teamToggle, { marginHorizontal: -16, marginTop: -16, marginBottom: 12 }]}>
+              <TouchableOpacity
+                style={[s.teamToggleBtn, entryMode === 'our' && s.teamToggleBtnActive]}
+                onPress={() => { setEntryMode('our'); setSelectedPlayer(null); }}
+              >
+                {/* The team's name, not "Our Team". The coach knows which side is
+                    theirs; what they need on a stat pad is which of their teams
+                    this is and who it is against. */}
+                <Text style={[s.teamToggleText, entryMode === 'our' && s.teamToggleTextActive]} numberOfLines={1}>
+                  {activeGame.team_name ?? (teams as any[]).find(tm => tm.id === activeGame.team_id)?.name
+                    ?? coach?.program_name ?? tr('teamGrade.ourTeam')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[s.teamToggleBtn, entryMode === 'opponent' && s.teamToggleBtnActive]}
+                onPress={() => { setEntryMode('opponent'); setSelectedPlayer(null); }}
+              >
+                <Text style={[s.teamToggleText, entryMode === 'opponent' && s.teamToggleTextActive]} numberOfLines={1}>
+                  {activeGame.opponent_name || tr('teamGrade.opponent')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            )}
+
             {/* An import from before attempts were read: makes only, so no
                 shooting percentage, and points inflated by every three. Said
                 out loud — the numbers look fine and are quietly wrong. */}
@@ -3335,6 +3352,15 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                   <Text style={{ color: t.muted, fontFamily: fonts[600], fontSize: 13 }}>{tr('teamGrade.lineup')}</Text>
                 </TouchableOpacity>
               )}
+              {/* The box score, to correct: the same page and Edit stats as
+                  after the game. "Continue live entry" there comes back. */}
+              <TouchableOpacity
+                style={[s.actionBtnLive, { flex: 1, borderColor: t.line }]}
+                onPress={() => { openTab('our'); openDetail(activeGame); }}
+              >
+                <Ionicons name="stats-chart-outline" size={16} color={t.muted} />
+                <Text style={{ color: t.muted, fontFamily: fonts[600], fontSize: 13 }}>{tr('teamGrade.boxScore')}</Text>
+              </TouchableOpacity>
               <TouchableOpacity
                 style={[s.actionBtnLive, { flex: 1, borderColor: t.negative }]}
                 onPress={endGame}
@@ -5225,10 +5251,10 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       <Sheet visible={showStatsModal} transparent animationType="slide" onRequestClose={() => setShowStatsModal(false)}>
         <View style={s.modalOverlay}>
           <View style={[s.modalBox, { maxHeight: '90%' }]}>
-            <Text style={s.modalTitle}>{isOwnedGame(detailGame) ? tr('teamGrade.editStats') : tr('teamGrade.statsTitle')} — {statsModalPlayer}</Text>
+            <Text style={s.modalTitle}>{canEditStats(detailGame) ? tr('teamGrade.editStats') : tr('teamGrade.statsTitle')} — {statsModalPlayer}</Text>
 
             {/* ADD STAT SECTION — owner only */}
-            {isOwnedGame(detailGame) && (
+            {canEditStats(detailGame) && (
             <View style={{ backgroundColor: t.chip, borderRadius: 10, padding: 12, marginBottom: 14, borderWidth: 1, borderColor: t.chip }}>
               <Text style={{ color: t.accent, fontSize: 11, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 10 }}>{tr('teamGrade.addMissingStat')}</Text>
 
@@ -5300,7 +5326,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             )}
 
             {/* EXISTING STATS */}
-            <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 8 }}>{isOwnedGame(detailGame) ? tr('teamGrade.loggedStatsRemovable') : tr('teamGrade.loggedStats')}</Text>
+            <Text style={{ color: t.muted, fontSize: 10, fontFamily: fonts[700], letterSpacing: 1, marginBottom: 8 }}>{canEditStats(detailGame) ? tr('teamGrade.loggedStatsRemovable') : tr('teamGrade.loggedStats')}</Text>
             <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 260 }}>
               {gameStats
                 .filter(st => st.player_name === statsModalPlayer && st.is_opponent === (detailTab === 'opponent'))
@@ -5320,7 +5346,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                           {qLabel(st.quarter)}  ·  {st.weighted_points >= 0 ? '+' : ''}{st.weighted_points.toFixed(1)} {tr('teamGrade.ptsAbbr')}
                         </Text>
                       </View>
-                      {isOwnedGame(detailGame) && (
+                      {canEditStats(detailGame) && (
                         <TouchableOpacity
                           style={{ padding: 8 }}
                           onPress={() =>

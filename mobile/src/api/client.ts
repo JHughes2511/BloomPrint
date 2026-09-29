@@ -927,7 +927,8 @@ export const gameEvalAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     }).then(r => r.data);
   },
-  deleteStat: (statId: number) => api.delete(`/game-eval/stats/${statId}`).then(r => r.data),
+  deleteStat: (statId: number, adjustScore = false) =>
+    api.delete(`/game-eval/stats/${statId}`, { params: adjustScore ? { adjust_score: true } : undefined }).then(r => r.data),
   logLineup: (gameId: number, data: any) => api.post(`/game-eval/sessions/${gameId}/lineup`, data).then(r => r.data),
   getLineup: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/lineup`).then(r => r.data),
   getGameSummary: (gameId: number) => api.get(`/game-eval/sessions/${gameId}/summary`).then(r => r.data),

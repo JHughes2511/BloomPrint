@@ -172,12 +172,19 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
     send(() => playCallingAPI.orb(game.id, sd, liveQuarter, delta));
   };
 
-  // A wrong call comes off; whatever was tapped in it stays in the box score.
+  // A wrong call comes off with everything tapped in it: its stats leave the
+  // box score and its baskets come off the scoreboard.
   const removeCall = (call: any) => Alert.alert(tr('playCalling.deleteTitle'), tr('playCalling.deleteNote'), [
     { text: tr('common.cancel'), style: 'cancel' },
     { text: tr('common.delete'), style: 'destructive', onPress: () => {
       setData((prev: any) => prev && ({ ...prev, possessions: prev.possessions.filter((p: any) => p.id !== call.id) }));
-      send(async () => playCallingAPI.remove(await idOf(call)));
+      for (const e of call.events ?? []) {
+        if (e.points) onScoreBump(e.is_opponent ? 'opponent' : 'our', -e.points);
+      }
+      send(async () => {
+        const r = await playCallingAPI.remove(await idOf(call));
+        onScores(r.our_score ?? null, r.opponent_score ?? null);
+      });
     } },
   ]);
 

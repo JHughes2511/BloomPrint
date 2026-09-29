@@ -2402,7 +2402,8 @@
       "rebound": "un rimbalzo difensivo",
       "miss": "un tiro sbagliato",
       "made": "un canestro segnato"
-    }
+    },
+    "boxScore": "Tabellino"
   },
   "whiteboard": {
     "title": "Lavagna",
@@ -2925,7 +2926,7 @@
     "defense": "Difesa",
     "play": "Gioco",
     "newPlay": "Nuovo gioco…",
-    "call": "Chiama",
+    "call": "Aggiungi gioco",
     "orb": "Rimb. offensivi",
     "viewing": "Visualizza",
     "all": "Tutto",
@@ -3028,6 +3029,6 @@
     },
     "result": "Tiro / esito",
     "pickPlayFirst": "Scegli la difesa, poi il gioco, per iniziare un possesso.",
-    "deleteNote": "Le sue statistiche restano nel tabellino."
+    "deleteNote": "Anche le sue statistiche escono dal tabellino e i punti vengono tolti dal punteggio."
   }
 }

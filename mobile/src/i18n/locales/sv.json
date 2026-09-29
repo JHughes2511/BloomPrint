@@ -2402,7 +2402,8 @@
       "rebound": "en defensiv retur",
       "miss": "ett missat skott",
       "made": "en gjord korg"
-    }
+    },
+    "boxScore": "Boxscore"
   },
   "whiteboard": {
     "title": "Taktiktavla",
@@ -2925,7 +2926,7 @@
     "defense": "Försvar",
     "play": "Spel",
     "newPlay": "Nytt spel…",
-    "call": "Kalla",
+    "call": "Lägg till spel",
     "orb": "Off. returer",
     "viewing": "Visar",
     "all": "Alla",
@@ -3028,6 +3029,6 @@
     },
     "result": "Skott / resultat",
     "pickPlayFirst": "Välj försvaret och sedan spelet för att starta ett anfall.",
-    "deleteNote": "Statistiken ligger kvar i boxscoren."
+    "deleteNote": "Statistiken tas också bort ur boxscoren och poängen dras av från ställningen."
   }
 }

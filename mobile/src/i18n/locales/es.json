@@ -2402,7 +2402,8 @@
       "rebound": "un rebote defensivo",
       "miss": "un tiro fallado",
       "made": "una canasta anotada"
-    }
+    },
+    "boxScore": "Box score"
   },
   "whiteboard": {
     "title": "Pizarra",
@@ -2925,7 +2926,7 @@
     "defense": "Defensa",
     "play": "Jugada",
     "newPlay": "Nueva jugada…",
-    "call": "Llamar",
+    "call": "Añadir jugada",
     "orb": "Reb. ofensivos",
     "viewing": "Viendo",
     "all": "Todo",
@@ -3028,6 +3029,6 @@
     },
     "result": "Tiro / resultado",
     "pickPlayFirst": "Elige la defensa y luego la jugada para empezar una posesión.",
-    "deleteNote": "Sus estadísticas se quedan en el box score."
+    "deleteNote": "Sus estadísticas también salen del box score y sus puntos se restan del marcador."
   }
 }

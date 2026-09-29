@@ -2402,7 +2402,8 @@
       "rebound": "einem Defensivrebound",
       "miss": "einem Fehlwurf",
       "made": "einem Treffer"
-    }
+    },
+    "boxScore": "Boxscore"
   },
   "whiteboard": {
     "title": "Taktiktafel",
@@ -2925,7 +2926,7 @@
     "defense": "Verteidigung",
     "play": "Spielzug",
     "newPlay": "Neuer Spielzug…",
-    "call": "Ansagen",
+    "call": "Spielzug hinzufügen",
     "orb": "Off. Rebounds",
     "viewing": "Ansicht",
     "all": "Alle",
@@ -3028,6 +3029,6 @@
     },
     "result": "Wurf / Ergebnis",
     "pickPlayFirst": "Wähle die Verteidigung, dann den Spielzug, um einen Angriff zu starten.",
-    "deleteNote": "Seine Statistiken bleiben im Boxscore."
+    "deleteNote": "Seine Statistiken werden auch aus dem Boxscore entfernt und Punkte vom Spielstand abgezogen."
   }
 }

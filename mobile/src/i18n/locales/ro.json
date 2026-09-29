@@ -2402,7 +2402,8 @@
       "rebound": "o recuperare în apărare",
       "miss": "o aruncare ratată",
       "made": "un coș marcat"
-    }
+    },
+    "boxScore": "Foaia de statistici"
   },
   "whiteboard": {
     "title": "Tablă tactică",
@@ -2925,7 +2926,7 @@
     "defense": "Apărare",
     "play": "Sistem",
     "newPlay": "Sistem nou…",
-    "call": "Cheamă",
+    "call": "Adaugă sistem",
     "orb": "Recup. ofensive",
     "viewing": "Vizualizare",
     "all": "Tot",
@@ -3028,6 +3029,6 @@
     },
     "result": "Aruncare / rezultat",
     "pickPlayFirst": "Alege apărarea, apoi sistemul, pentru a începe o posesie.",
-    "deleteNote": "Statisticile ei rămân în foaia de statistici."
+    "deleteNote": "Statisticile ei ies și din foaia de statistici, iar punctele se scad din scor."
   }
 }

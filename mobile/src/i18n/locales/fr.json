@@ -2402,7 +2402,8 @@
       "rebound": "un rebond défensif",
       "miss": "un tir manqué",
       "made": "un panier marqué"
-    }
+    },
+    "boxScore": "Feuille de match"
   },
   "whiteboard": {
     "title": "Tableau blanc",
@@ -2925,7 +2926,7 @@
     "defense": "Défense",
     "play": "Système",
     "newPlay": "Nouveau système…",
-    "call": "Appeler",
+    "call": "Ajouter un système",
     "orb": "Rebonds off.",
     "viewing": "Affichage",
     "all": "Tout",
@@ -3028,6 +3029,6 @@
     },
     "result": "Tir / résultat",
     "pickPlayFirst": "Choisissez la défense, puis le système, pour lancer une possession.",
-    "deleteNote": "Ses stats restent dans la feuille de match."
+    "deleteNote": "Ses stats sortent aussi de la feuille de match et ses points sont retirés du score."
   }
 }

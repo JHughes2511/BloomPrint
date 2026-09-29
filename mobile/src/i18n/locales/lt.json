@@ -2402,7 +2402,8 @@
       "rebound": "atkovoto kamuolio gynyboje",
       "miss": "nepataikyto metimo",
       "made": "pelnyto taško"
-    }
+    },
+    "boxScore": "Protokolas"
   },
   "whiteboard": {
     "title": "Lenta",
@@ -2925,7 +2926,7 @@
     "defense": "Gynyba",
     "play": "Derinys",
     "newPlay": "Naujas derinys…",
-    "call": "Iškviesti",
+    "call": "Pridėti derinį",
     "orb": "Puol. atk. kamuoliai",
     "viewing": "Rodoma",
     "all": "Visi",
@@ -3028,6 +3029,6 @@
     },
     "result": "Metimas / rezultatas",
     "pickPlayFirst": "Pasirinkite gynybą, tada derinį, kad pradėtumėte ataką.",
-    "deleteNote": "Jos statistika lieka protokole."
+    "deleteNote": "Jos statistika taip pat pašalinama iš protokolo, o taškai atimami iš rezultato."
   }
 }

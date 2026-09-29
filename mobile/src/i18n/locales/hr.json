@@ -2402,7 +2402,8 @@
       "rebound": "skoka u obrani",
       "miss": "promašenog šuta",
       "made": "postignutog koša"
-    }
+    },
+    "boxScore": "Zapisnik"
   },
   "whiteboard": {
     "title": "Ploča",
@@ -2925,7 +2926,7 @@
     "defense": "Obrana",
     "play": "Akcija",
     "newPlay": "Nova akcija…",
-    "call": "Pozovi",
+    "call": "Dodaj akciju",
     "orb": "Skokovi u napadu",
     "viewing": "Prikaz",
     "all": "Sve",
@@ -3028,6 +3029,6 @@
     },
     "result": "Šut / ishod",
     "pickPlayFirst": "Odaberi obranu, pa akciju, za početak napada.",
-    "deleteNote": "Njegova statistika ostaje u zapisniku."
+    "deleteNote": "Njegova statistika briše se i iz zapisnika, a koševi se oduzimaju od rezultata."
   }
 }

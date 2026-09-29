@@ -2402,7 +2402,8 @@
       "rebound": "een verdedigende rebound",
       "miss": "een gemist schot",
       "made": "een gescoorde bal"
-    }
+    },
+    "boxScore": "Boxscore"
   },
   "whiteboard": {
     "title": "Tactiekbord",
@@ -2925,7 +2926,7 @@
     "defense": "Verdediging",
     "play": "Spel",
     "newPlay": "Nieuw spel…",
-    "call": "Afroepen",
+    "call": "Spel toevoegen",
     "orb": "Aanv. rebounds",
     "viewing": "Bekijken",
     "all": "Alles",
@@ -3028,6 +3029,6 @@
     },
     "result": "Schot / resultaat",
     "pickPlayFirst": "Kies de verdediging en dan het spel om een balbezit te starten.",
-    "deleteNote": "De statistieken blijven in de boxscore."
+    "deleteNote": "De statistieken gaan ook uit de boxscore en punten gaan van de stand af."
   }
 }
