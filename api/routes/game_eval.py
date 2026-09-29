@@ -1760,7 +1760,8 @@ def _gate_context(db: Session, coach: models.Coach, games: list) -> dict:
     """
     ids = [g.id for g in games]
     if not ids:
-        return {"scouting": {}, "full": {}, "misses": set(), "imported": set(), "scores": {}}
+        return {"scouting": {}, "full": {}, "misses": set(), "imported": set(), "scores": {},
+                "track_teams": set()}
 
     scouting = {r.game_id: r for r in db.query(models.GameScoutingReport)
                 .filter(models.GameScoutingReport.game_id.in_(ids),
@@ -1800,7 +1801,8 @@ def _gate_context(db: Session, coach: models.Coach, games: list) -> dict:
         # answer is "unknown", not a shutout. Same rule as derived_scores().
         scores[gid] = (ours, theirs) if ours is not None and theirs is not None else (None, None)
     return {"scouting": scouting, "full": full, "misses": misses,
-            "imported": imported, "scores": scores}
+            "imported": imported, "scores": scores,
+            "track_teams": _accessible_team_ids(db, coach)}
 
 
 def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession,
@@ -1815,6 +1817,9 @@ def _gate_scouting(db: Session, coach: models.Coach, game: models.GameSession,
     out = schemas.GameSessionOut.model_validate(game)
     team = db.get(models.Team, game.team_id) if game.team_id else None
     out.team_name = team.name if team else None
+    track_teams = ctx["track_teams"] if ctx is not None else _accessible_team_ids(db, coach)
+    out.can_track = not game.frozen_from and (
+        game.coach_id == coach.id or (game.team_id is not None and game.team_id in track_teams))
     if ctx is not None:
         out.stats_need_reimport = game.id in ctx["imported"] and game.id not in ctx["misses"]
     else:
@@ -2147,7 +2152,18 @@ def change_score(
                .values({col.key: case((new < 0, 0), else_=new)}))
     db.commit()
     db.refresh(game)
-    return {"our_score": game.our_score, "opponent_score": game.opponent_score}
+    ours, theirs = _shown_scores(game)
+    return {"our_score": ours, "opponent_score": theirs}
+
+
+def _shown_scores(game: models.GameSession) -> tuple[int | None, int | None]:
+    """The score the app shows: what was entered, else what the box score says."""
+    ours, theirs = game.our_score, game.opponent_score
+    if ours is None or theirs is None:
+        e_ours, e_theirs = effective_scores(game)
+        ours = e_ours if ours is None else ours
+        theirs = e_theirs if theirs is None else theirs
+    return ours, theirs
 
 
 class ClockSet(BaseModel):
@@ -2239,11 +2255,7 @@ def live_beat(
                               func.max(models.GamePlayerStat.id)).filter(
         models.GamePlayerStat.game_id == game.id).one()
     db.refresh(game)
-    ours, theirs = (game.our_score, game.opponent_score)
-    if ours is None or theirs is None:
-        e_ours, e_theirs = effective_scores(game)
-        ours = e_ours if ours is None else ours
-        theirs = e_theirs if theirs is None else theirs
+    ours, theirs = _shown_scores(game)
     return {
         "status": game.status,
         "our_score": ours, "opponent_score": theirs,

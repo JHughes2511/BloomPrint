@@ -947,9 +947,21 @@ export const gameEvalAPI = {
   getOpponentNotes: (name: string) => api.get(`/game-eval/opponents/${encodeURIComponent(name)}/notes`).then(r => r.data),
   addOpponentNote: (name: string, noteText: string) => api.post(`/game-eval/opponents/${encodeURIComponent(name)}/notes`, { note_text: noteText }).then(r => r.data),
   deleteOpponentNote: (noteId: number) => api.delete(`/game-eval/opponent-notes/${noteId}`).then(r => r.data),
-  listOpponentPlayers: (name: string) => api.get(`/game-eval/opponents/${encodeURIComponent(name)}/players`).then(r => r.data),
-  addOpponentPlayer: (name: string, data: { player_name: string; jersey_number?: string; position?: string }) =>
-    api.post(`/game-eval/opponents/${encodeURIComponent(name)}/players`, data).then(r => r.data),
+  // With a game id, the list is the game owner's, shared by everyone tracking it.
+  listOpponentPlayers: (name: string, gameId?: number) =>
+    api.get(`/game-eval/opponents/${encodeURIComponent(name)}/players`,
+            { params: gameId ? { game_id: gameId } : undefined }).then(r => r.data),
+  addOpponentPlayer: (name: string, data: { player_name: string; jersey_number?: string; position?: string }, gameId?: number) =>
+    api.post(`/game-eval/opponents/${encodeURIComponent(name)}/players`, data,
+             { params: gameId ? { game_id: gameId } : undefined }).then(r => r.data),
+  // Tracking a live game together.
+  changeScore: (gameId: number, side: 'our' | 'opponent', delta: number) =>
+    api.post(`/game-eval/sessions/${gameId}/score`, { side, delta }).then(r => r.data),
+  setClock: (gameId: number, clock: { period: number; remaining: number; running: boolean }) =>
+    api.post(`/game-eval/sessions/${gameId}/clock`, clock).then(r => r.data),
+  liveBeat: (gameId: number, side: 'our' | 'opponent') =>
+    api.post(`/game-eval/sessions/${gameId}/live`, { side }).then(r => r.data),
+  liveLeave: (gameId: number) => api.delete(`/game-eval/sessions/${gameId}/live`).then(r => r.data),
   deleteOpponentPlayer: (playerId: number) => api.delete(`/game-eval/opponent-players/${playerId}`).then(r => r.data),
   playerGameHistory: (playerName: string) =>
     api.get('/game-eval/player-game-history', { params: { player_name: playerName } }).then(r => r.data),

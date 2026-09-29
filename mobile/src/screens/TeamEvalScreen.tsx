@@ -366,6 +366,15 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   const [statToast, setStatToast] = useState<string | null>(null);
   const [subOutPlayer, setSubOutPlayer] = useState<string | null>(null);
   const [ourScore, setOurScore] = useState(0);
+  // Everyone tracking the live game right now, from the heartbeat.
+  const [trackers, setTrackers] = useState<{ coach_id: number; name: string; side: 'our' | 'opponent'; you: boolean }[]>([]);
+  // Bumped by every local score / clock change, so a heartbeat that left before
+  // the change cannot put the old value back when it returns.
+  const scoreSeq = useRef(0);
+  const scoreInFlight = useRef(0);
+  const clockSeq = useRef(0);
+  const liveStatsCount = useRef<number | null>(null);
+  const liveBeats = useRef(0);
   const [oppScore, setOppScore] = useState(0);
 
   // Game detail
@@ -834,7 +843,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       merged.push(p);
     };
     try {
-      (await gameEvalAPI.listOpponentPlayers(game.opponent_name)).forEach(push);
+      (await gameEvalAPI.listOpponentPlayers(game.opponent_name, game.id)).forEach(push);
     } catch { /* an opponent with nothing saved is not an error */ }
     const theirTeam = await findOpponentTeam(game);
     if (theirTeam) {
@@ -859,7 +868,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
           setClockRunning(false);
           setPeriodIndex(pi => pi + 1);
           // The next period's length: an overtime is shorter than a quarter.
-          return periodLength(gameFmt, periodIndex + 1);
+          const next = periodLength(gameFmt, periodIndex + 1);
+          setTimeout(() => pushClock(periodIndex + 1, next, false), 0);
+          return next;
         }
         return prev - 1;
       });
@@ -891,19 +902,107 @@ export default function TeamEvalScreen({ route, navigation }: any) {
     setClockRemaining(remaining);
     setClockRunning(false);
     setActiveQuarter(bucket);
+    pushClock(pi, remaining, false);
+  };
+
+  /**
+   * The clock is the game's, not this device's: every start, stop, edit and
+   * period change goes to the server, and every tracker's heartbeat brings it
+   * back. Bumping clockSeq first means a heartbeat already on its way cannot
+   * undo the change when it lands.
+   */
+  const pushClock = (period: number, remaining: number, running: boolean) => {
+    if (!activeGame) return;
+    clockSeq.current += 1;
+    gameEvalAPI.setClock(activeGame.id, { period, remaining: Math.max(0, Math.round(remaining)), running })
+      .catch(() => {});
+  };
+
+  const toggleClock = () => {
+    const running = !clockRunning;
+    setClockRunning(running);
+    pushClock(periodIndex, clockRemaining, running);
   };
 
   const advancePeriod = () => {
+    const next = periodLength(gameFmt, periodIndex + 1);
     setPeriodIndex(pi => pi + 1);
-    setClockRemaining(periodLength(gameFmt, periodIndex + 1));
+    setClockRemaining(next);
     setClockRunning(false);
+    pushClock(periodIndex + 1, next, false);
   };
   const applyClockEdit = () => {
     const m = Math.max(0, parseInt(editMin, 10) || 0);
     const sc = Math.min(59, Math.max(0, parseInt(editSec, 10) || 0));
     setClockRemaining(m * 60 + sc);
     setShowClockEdit(false);
+    pushClock(periodIndex, m * 60 + sc, clockRunning);
   };
+
+  // What the clock reads right now, for the heartbeat to compare against.
+  const clockNow = useRef({ periodIndex, clockRemaining, clockRunning });
+  clockNow.current = { periodIndex, clockRemaining, clockRunning };
+  const entryModeRef = useRef(entryMode);
+  entryModeRef.current = entryMode;
+
+  /** Our roster and theirs again: a teammate may have added a player. */
+  const refreshLiveRosters = (game: any) => {
+    if (game.team_id) playersAPI.list(game.team_id).then(setRoster).catch(() => {});
+    loadOpponentRoster(game).catch(() => {});
+  };
+
+  /**
+   * Tracking together. Every three seconds: I am here, on this side; and back
+   * comes the game as it stands — the score, the clock, who else is in, and
+   * how many stats there are. Leaving the tracker takes me off the list.
+   */
+  const liveBeat = async (game: any) => {
+    const sSeq = scoreSeq.current;
+    const cSeq = clockSeq.current;
+    try {
+      const r = await gameEvalAPI.liveBeat(game.id, entryModeRef.current);
+      setTrackers(r.trackers || []);
+      if (sSeq === scoreSeq.current && scoreInFlight.current === 0) {
+        setOurScore(r.our_score ?? 0);
+        setOppScore(r.opponent_score ?? 0);
+      }
+      const c = r.clock;
+      if (c && cSeq === clockSeq.current) {
+        const cur = clockNow.current;
+        if (c.period !== cur.periodIndex || c.running !== cur.clockRunning
+            || Math.abs(c.remaining - cur.clockRemaining) > 1) {
+          setPeriodIndex(c.period);
+          setClockRemaining(c.remaining);
+          setClockRunning(c.running);
+        }
+      }
+      // A teammate's new stat can carry a player this device has not seen; a
+      // player they added without a stat yet turns up within fifteen seconds.
+      const count = r.stats?.count ?? 0;
+      liveBeats.current += 1;
+      if ((liveStatsCount.current !== null && count !== liveStatsCount.current)
+          || liveBeats.current % 5 === 0) refreshLiveRosters(game);
+      liveStatsCount.current = count;
+    } catch { /* the next beat will try again */ }
+  };
+
+  useEffect(() => {
+    if (activeView !== 'live' || !activeGame) return;
+    const game = activeGame;
+    liveStatsCount.current = null;
+    liveBeat(game);
+    const iv = setInterval(() => liveBeat(game), 3000);
+    return () => {
+      clearInterval(iv);
+      setTrackers([]);
+      gameEvalAPI.liveLeave(game.id).catch(() => {});
+    };
+  }, [activeView, activeGame?.id]);
+
+  // Switching sides shows on everyone else's bar straight away.
+  useEffect(() => {
+    if (activeView === 'live' && activeGame) liveBeat(activeGame);
+  }, [entryMode]);
 
   const addOpponentPlayer = async () => {
     const name = newOppPlayer.trim();
@@ -913,7 +1012,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
         player_name: name,
         jersey_number: newOppJersey.trim() || undefined,
         position: newOppPosition.trim() || undefined,
-      });
+      }, activeGame.id);
       setOpponentRoster(prev => prev.some(p => p.player_name === saved.player_name)
         ? prev.map(p => (p.player_name === saved.player_name ? saved : p))
         : [...prev, saved]);
@@ -1045,16 +1144,22 @@ export default function TeamEvalScreen({ route, navigation }: any) {
       setOppScore(prev => (nextOpp = Math.max(0, prev + delta)));
     }
     if (activeGame) {
-      // ONLY the side that was tapped. Sending both wrote an explicit 0 for the
-      // team nobody had touched — and an explicit score always beats the one
-      // worked out from the box score, so a single tap on a live game replaced
-      // a real result with 0-0 permanently. The untouched side stays as it was,
-      // which for an unscored game means "still unknown".
-      setTimeout(() => {
-        gameEvalAPI.updateSession(activeGame.id,
-          team === 'our' ? { our_score: nextOur } : { opponent_score: nextOpp },
-        ).catch(() => {});
-      }, 0);
+      // A change, not a total: "+2 to us", added on the server. Sending the
+      // total this device had meant two people tracking one game overwrote
+      // each other's points. Only the side that was tapped is touched, so an
+      // unscored side stays "still unknown" rather than becoming 0.
+      scoreSeq.current += 1;
+      scoreInFlight.current += 1;
+      gameEvalAPI.changeScore(activeGame.id, team === 'our' ? 'our' : 'opponent', delta)
+        .then(r => {
+          scoreInFlight.current -= 1;
+          // The server's answer counts everyone's taps; show it once mine are in.
+          if (scoreInFlight.current === 0) {
+            setOurScore(r.our_score ?? 0);
+            setOppScore(r.opponent_score ?? 0);
+          }
+        })
+        .catch(() => { scoreInFlight.current -= 1; });
     }
   };
 
@@ -1275,6 +1380,9 @@ export default function TeamEvalScreen({ route, navigation }: any) {
   // A frozen game is filed in my account but is a record of somebody else's
   // night: it is read-only, so every edit affordance is off for it too.
   const isOwnedGame = (game: any) => !game || (game.coach_id === coach?.id && !game.frozen_from);
+  // Whoever may track it live: the owner, or anyone on the game's team.
+  const canTrack = (game: any) => !!game && !game.frozen_from
+    && ((game.coach_id === coach?.id) || !!game.can_track);
 
   const openPlayerStats = (playerName: string) => {
     setStatsModalPlayer(playerName);
@@ -2543,7 +2651,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
                 <TouchableOpacity
                   key={game.id}
                   style={[s.gameCard, gamesGrid.cardWidth ? { width: gamesGrid.cardWidth } : null]}
-                  onPress={() => (game.status === 'in_progress' && isOwnedGame(game)) ? openLiveEntry(game) : openDetail(game)}
+                  onPress={() => (game.status === 'in_progress' && canTrack(game)) ? openLiveEntry(game) : openDetail(game)}
                 >
                   <View style={{ flex: 1 }}>
                     <Text style={s.gameCardOpponent} numberOfLines={1}>{matchupLabel(game)}</Text>
@@ -2702,6 +2810,33 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </View>
           </View>
 
+          {/* Who is tracking this game right now, like the faces at the top of
+              a shared spreadsheet: each in their side's colour. */}
+          {trackers.length > 0 && (
+            <View style={s.trackerBar} accessibilityLabel={tr('teamGrade.trackingNow', { defaultValue: 'Tracking now' })}>
+              <Text style={s.trackerBarLabel}>{tr('teamGrade.trackingNow', { defaultValue: 'Tracking now' })}</Text>
+              {trackers.map(tk => {
+                const color = tk.side === 'opponent' ? t.negative : t.accent;
+                const initials = (tk.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]!.toUpperCase()).join('');
+                return (
+                  <View key={tk.coach_id} style={s.trackerChip}>
+                    <View style={[s.trackerAvatar, { borderColor: color, backgroundColor: tk.side === 'opponent' ? t.negativeSoft : t.accentSoft }]}>
+                      <Text style={[s.trackerInitials, { color }]}>{initials}</Text>
+                    </View>
+                    <View>
+                      <Text style={s.trackerName} numberOfLines={1}>
+                        {tk.you ? tr('teamGrade.you', { defaultValue: 'You' }) : tk.name}
+                      </Text>
+                      <Text style={[s.trackerSide, { color }]} numberOfLines={1}>
+                        {tk.side === 'opponent' ? sideLabels.theirs : sideLabels.ours}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+
           {/* Stat recorded toast */}
           {statToast && (
             <View style={{ backgroundColor: t.positive, paddingVertical: 6, paddingHorizontal: 16 }}>
@@ -2723,7 +2858,7 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </TouchableOpacity>
             <TouchableOpacity
               style={[s.clockRunBtn, { backgroundColor: clockRunning ? t.negativeSoft : t.positiveSoft }]}
-              onPress={() => setClockRunning(r => !r)}
+              onPress={toggleClock}
             >
               <Ionicons name={clockRunning ? 'pause' : 'play'} size={16} color={clockRunning ? t.negative : t.positive} />
               <Text style={{ color: clockRunning ? t.negative : t.positive, fontFamily: fonts[700], fontSize: 12 }}>
@@ -3568,8 +3703,8 @@ export default function TeamEvalScreen({ route, navigation }: any) {
             </TouchableOpacity>
           </View>
 
-          {/* Live entry shortcut if in_progress — owner only */}
-          {detailGame.status === 'in_progress' && isOwnedGame(detailGame) && (
+          {/* Live entry shortcut if in_progress — anyone who can track it */}
+          {detailGame.status === 'in_progress' && canTrack(detailGame) && (
             <TouchableOpacity
               style={[s.newGameBtn, { marginHorizontal: 16, marginBottom: 16 }]}
               onPress={() => openLiveEntry(detailGame)}
@@ -5123,6 +5258,14 @@ const makeS = (t: ThemeTokens) => StyleSheet.create({
   qRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 4 },
   qPlayerName: { flex: 1, color: t.ink, fontSize: 13, fontFamily: fonts[600] },
   qCell: { width: 42, textAlign: 'center', fontSize: 12, fontFamily: fonts[700] },
+  trackerBar: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12,
+                paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: t.divider },
+  trackerBarLabel: { color: t.muted, fontSize: 10, fontFamily: fonts[800], letterSpacing: 1, textTransform: 'uppercase' },
+  trackerChip: { flexDirection: 'row', alignItems: 'center', gap: 6, maxWidth: 180 },
+  trackerAvatar: { width: 26, height: 26, borderRadius: 13, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  trackerInitials: { fontSize: 10, fontFamily: fonts[800] },
+  trackerName: { color: t.ink, fontSize: 12, fontFamily: fonts[700] },
+  trackerSide: { fontSize: 10, fontFamily: fonts[600] },
   qExpand: { backgroundColor: t.chip, borderRadius: 10, padding: 12, marginTop: 4, marginBottom: 10 },
   chip: {
     borderWidth: 1, borderColor: t.line, borderRadius: 999,

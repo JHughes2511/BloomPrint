@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "Van {{name}} · wordt niet meer bijgewerkt",
     "searchTeamsPlaceholder": "Teams zoeken...",
     "viewFullGameData": "Alle wedstrijdgegevens bekijken",
-    "gameData": "Wedstrijdgegevens"
+    "gameData": "Wedstrijdgegevens",
+    "trackingNow": "Nu aan het bijhouden",
+    "you": "Jij"
   },
   "whiteboard": {
     "title": "Tactiekbord",

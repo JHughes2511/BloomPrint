@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "Od {{name}} · już się nie aktualizuje",
     "searchTeamsPlaceholder": "Szukaj drużyn...",
     "viewFullGameData": "Zobacz pełne dane meczu",
-    "gameData": "Dane meczu"
+    "gameData": "Dane meczu",
+    "trackingNow": "Teraz rejestrują",
+    "you": "Ty"
   },
   "whiteboard": {
     "title": "Tablica",

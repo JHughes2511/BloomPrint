@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "מאת {{name}} · כבר לא מתעדכן",
     "searchTeamsPlaceholder": "חיפוש קבוצות...",
     "viewFullGameData": "הצגת כל נתוני המשחק",
-    "gameData": "נתוני המשחק"
+    "gameData": "נתוני המשחק",
+    "trackingNow": "עוקבים עכשיו",
+    "you": "את/ה"
   },
   "whiteboard": {
     "title": "לוח טקטיקה",

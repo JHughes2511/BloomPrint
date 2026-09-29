@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "{{name}} kaynaklı · artık güncellenmiyor",
     "searchTeamsPlaceholder": "Takım ara...",
     "viewFullGameData": "Tüm maç verilerini gör",
-    "gameData": "Maç Verileri"
+    "gameData": "Maç Verileri",
+    "trackingNow": "Şu an kaydedenler",
+    "you": "Sen"
   },
   "whiteboard": {
     "title": "Taktik Tahtası",

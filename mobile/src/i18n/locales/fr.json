@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "De {{name}} · ne se met plus à jour",
     "searchTeamsPlaceholder": "Rechercher des équipes...",
     "viewFullGameData": "Voir toutes les données du match",
-    "gameData": "Données du match"
+    "gameData": "Données du match",
+    "trackingNow": "Suivent en direct",
+    "you": "Vous"
   },
   "whiteboard": {
     "title": "Tableau blanc",

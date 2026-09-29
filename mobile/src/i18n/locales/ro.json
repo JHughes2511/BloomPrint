@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "De la {{name}} · nu se mai actualizează",
     "searchTeamsPlaceholder": "Caută echipe...",
     "viewFullGameData": "Vezi toate datele meciului",
-    "gameData": "Date meci"
+    "gameData": "Date meci",
+    "trackingNow": "Înregistrează acum",
+    "you": "Tu"
   },
   "whiteboard": {
     "title": "Tablă tactică",

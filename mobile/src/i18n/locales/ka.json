@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "{{name}}-გან · აღარ განახლდება",
     "searchTeamsPlaceholder": "გუნდების ძებნა...",
     "viewFullGameData": "მატჩის სრული მონაცემების ნახვა",
-    "gameData": "მატჩის მონაცემები"
+    "gameData": "მატჩის მონაცემები",
+    "trackingNow": "ახლა აღრიცხავენ",
+    "you": "თქვენ"
   },
   "whiteboard": {
     "title": "დაფა",

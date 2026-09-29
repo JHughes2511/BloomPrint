@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "Von {{name}} · wird nicht mehr aktualisiert",
     "searchTeamsPlaceholder": "Teams suchen...",
     "viewFullGameData": "Alle Spieldaten ansehen",
-    "gameData": "Spieldaten"
+    "gameData": "Spieldaten",
+    "trackingNow": "Erfasst gerade",
+    "you": "Du"
   },
   "whiteboard": {
     "title": "Taktiktafel",

@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "Från {{name}} · uppdateras inte längre",
     "searchTeamsPlaceholder": "Sök lag...",
     "viewFullGameData": "Visa all matchdata",
-    "gameData": "Matchdata"
+    "gameData": "Matchdata",
+    "trackingNow": "Registrerar nu",
+    "you": "Du"
   },
   "whiteboard": {
     "title": "Taktiktavla",

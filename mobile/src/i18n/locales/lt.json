@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "Nuo {{name}} · nebeatnaujinama",
     "searchTeamsPlaceholder": "Ieškoti komandų...",
     "viewFullGameData": "Peržiūrėti visus rungtynių duomenis",
-    "gameData": "Rungtynių duomenys"
+    "gameData": "Rungtynių duomenys",
+    "trackingNow": "Dabar fiksuoja",
+    "you": "Jūs"
   },
   "whiteboard": {
     "title": "Lenta",

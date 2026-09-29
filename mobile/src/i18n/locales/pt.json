@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "De {{name}} · não atualiza mais",
     "searchTeamsPlaceholder": "Buscar times...",
     "viewFullGameData": "Ver todos os dados do jogo",
-    "gameData": "Dados do jogo"
+    "gameData": "Dados do jogo",
+    "trackingNow": "Registrando agora",
+    "you": "Você"
   },
   "whiteboard": {
     "title": "Quadro Tático",

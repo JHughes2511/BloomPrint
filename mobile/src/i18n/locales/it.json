@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "Da {{name}} · non si aggiorna più",
     "searchTeamsPlaceholder": "Cerca squadre...",
     "viewFullGameData": "Vedi tutti i dati della partita",
-    "gameData": "Dati partita"
+    "gameData": "Dati partita",
+    "trackingNow": "Stanno registrando",
+    "you": "Tu"
   },
   "whiteboard": {
     "title": "Lavagna",

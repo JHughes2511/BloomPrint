@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "Από {{name}} · δεν ενημερώνεται πλέον",
     "searchTeamsPlaceholder": "Αναζήτηση ομάδων...",
     "viewFullGameData": "Προβολή όλων των δεδομένων αγώνα",
-    "gameData": "Δεδομένα αγώνα"
+    "gameData": "Δεδομένα αγώνα",
+    "trackingNow": "Καταγράφουν τώρα",
+    "you": "Εσύ"
   },
   "whiteboard": {
     "title": "Πίνακας",

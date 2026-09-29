@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "From {{name}} · no longer updating",
     "searchTeamsPlaceholder": "Search teams...",
     "viewFullGameData": "View full game data",
-    "gameData": "Game Data"
+    "gameData": "Game Data",
+    "trackingNow": "Tracking now",
+    "you": "You"
   },
   "whiteboard": {
     "title": "Whiteboard",

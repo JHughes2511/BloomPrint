@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "Od {{name}} · više se ne ažurira",
     "searchTeamsPlaceholder": "Traži momčadi...",
     "viewFullGameData": "Prikaži sve podatke utakmice",
-    "gameData": "Podaci utakmice"
+    "gameData": "Podaci utakmice",
+    "trackingNow": "Trenutno bilježe",
+    "you": "Ti"
   },
   "whiteboard": {
     "title": "Ploča",

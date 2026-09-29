@@ -771,6 +771,8 @@ class GameSessionOut(BaseModel):
     # same file fixes both. Said out loud rather than left as quietly wrong
     # numbers a coach has no way to spot.
     stats_need_reimport: bool = False
+    # This coach may track the game live: its owner, or staff on its team.
+    can_track: bool = False
     # The name on the game's own side of the scoreboard. Resolved here because
     # the team row can belong to another coach — on a shared game the reader
     # cannot look it up among their own teams, and the card read "SEED vs Mali"

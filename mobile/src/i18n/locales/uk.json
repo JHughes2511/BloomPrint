@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "Від {{name}} · більше не оновлюється",
     "searchTeamsPlaceholder": "Пошук команд...",
     "viewFullGameData": "Переглянути всі дані матчу",
-    "gameData": "Дані матчу"
+    "gameData": "Дані матчу",
+    "trackingNow": "Зараз ведуть",
+    "you": "Ви"
   },
   "whiteboard": {
     "title": "Тактична дошка",

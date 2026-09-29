@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "من {{name}} · لم يعد يُحدَّث",
     "searchTeamsPlaceholder": "ابحث عن الفرق...",
     "viewFullGameData": "عرض بيانات المباراة كاملة",
-    "gameData": "بيانات المباراة"
+    "gameData": "بيانات المباراة",
+    "trackingNow": "يسجّلون الآن",
+    "you": "أنت"
   },
   "whiteboard": {
     "title": "السبورة",

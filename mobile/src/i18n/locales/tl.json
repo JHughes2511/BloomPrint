@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "Mula kay {{name}} · hindi na nag-a-update",
     "searchTeamsPlaceholder": "Maghanap ng koponan...",
     "viewFullGameData": "Tingnan ang buong datos ng laro",
-    "gameData": "Datos ng Laro"
+    "gameData": "Datos ng Laro",
+    "trackingNow": "Nagta-track ngayon",
+    "you": "Ikaw"
   },
   "whiteboard": {
     "title": "Whiteboard",

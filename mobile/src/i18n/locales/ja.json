@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "{{name}} から · 更新は止まりました",
     "searchTeamsPlaceholder": "チームを検索...",
     "viewFullGameData": "試合データをすべて表示",
-    "gameData": "試合データ"
+    "gameData": "試合データ",
+    "trackingNow": "記録中",
+    "you": "あなた"
   },
   "whiteboard": {
     "title": "ホワイトボード",

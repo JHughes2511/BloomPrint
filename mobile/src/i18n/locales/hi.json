@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "{{name}} से · अब अपडेट नहीं होता",
     "searchTeamsPlaceholder": "टीमें खोजें...",
     "viewFullGameData": "पूरा मैच डेटा देखें",
-    "gameData": "मैच डेटा"
+    "gameData": "मैच डेटा",
+    "trackingNow": "अभी ट्रैक कर रहे हैं",
+    "you": "आप"
   },
   "whiteboard": {
     "title": "व्हाइटबोर्ड",

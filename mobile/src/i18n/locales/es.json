@@ -2305,7 +2305,9 @@
     "frozenFromCoach": "De {{name}} · ya no se actualiza",
     "searchTeamsPlaceholder": "Buscar equipos...",
     "viewFullGameData": "Ver todos los datos del partido",
-    "gameData": "Datos del partido"
+    "gameData": "Datos del partido",
+    "trackingNow": "Registrando ahora",
+    "you": "Tú"
   },
   "whiteboard": {
     "title": "Pizarra",
