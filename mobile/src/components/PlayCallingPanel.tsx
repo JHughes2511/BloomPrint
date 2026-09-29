@@ -164,7 +164,12 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
     return `− ${tr('playCalling.noScore')}`;
   };
 
-  const roster = pick ? players[pick.call.side as Side] : [];
+  // The team with the ball, sorted by jersey number, for a tidy grid.
+  const jerseyNum = (j?: string | null) => { const n = parseInt(String(j ?? ''), 10); return Number.isFinite(n) ? n : 999; };
+  const roster = pick ? [...players[pick.call.side as Side]].sort((a, b) =>
+    jerseyNum(a.jersey) - jerseyNum(b.jersey) || a.name.localeCompare(b.name)) : [];
+  const pickColor = pick?.call.side === 'opponent' ? t.negative : t.accent;
+  const pickSoft = pick?.call.side === 'opponent' ? t.negativeSoft : t.accentSoft;
 
   return (
     <View style={s.panel}>
@@ -328,16 +333,26 @@ export default function PlayCallingPanel({ game, liveQuarter, qLabel, sideNames,
       <Sheet visible={!!pick} transparent animationType="slide" onRequestClose={() => setPick(null)}>
         <View style={s.overlay}>
           <View style={s.sheet}>
-            <View style={[s.row, { alignItems: 'center', marginBottom: 10 }]}>
-              <Text style={s.sheetTitle}>{pick ? tr('playCalling.whoFor', { stat: statLabel(pick.stat) }) : ''}</Text>
-              <TouchableOpacity onPress={() => setPick(null)} style={{ marginLeft: 'auto' }}>
+            <View style={[s.row, { alignItems: 'flex-start', marginBottom: 12 }]}>
+              <View style={{ flex: 1 }}>
+                <Text style={s.sheetTitle}>{pick ? tr('playCalling.whoFor', { stat: statLabel(pick.stat) }) : ''}</Text>
+                {/* Whose players these are, in that team's colour. */}
+                {pick && (
+                  <View style={[s.teamTag, { backgroundColor: pickSoft, borderColor: pickColor }]}>
+                    <View style={[s.teamDot, { backgroundColor: pickColor }]} />
+                    <Text style={[s.teamTagText, { color: pickColor }]}>{sideNames[pick.call.side as Side]}</Text>
+                  </View>
+                )}
+              </View>
+              <TouchableOpacity onPress={() => setPick(null)}>
                 <Ionicons name="close" size={22} color={t.muted} />
               </TouchableOpacity>
             </View>
-            <ScrollView style={{ maxHeight: 320 }} contentContainerStyle={s.chips}>
+            <ScrollView style={{ maxHeight: 360 }} contentContainerStyle={s.playerGrid}>
               {roster.map(p => (
-                <TouchableOpacity key={p.name} style={s.howBtn} onPress={() => logOutcome(p.name)}>
-                  <Text style={s.howText}>{p.jersey ? `#${p.jersey} ` : ''}{p.name}</Text>
+                <TouchableOpacity key={p.name} style={s.playerCell} onPress={() => logOutcome(p.name)}>
+                  <Text style={[s.playerNo, { color: pickColor }]}>{p.jersey ? `#${p.jersey}` : '—'}</Text>
+                  <Text style={s.playerName} numberOfLines={2}>{p.name}</Text>
                 </TouchableOpacity>
               ))}
               {!roster.length && <Text style={s.empty}>{tr('playCalling.noPlayers')}</Text>}
@@ -388,8 +403,18 @@ const makeStyles = (t: ThemeTokens) => ({
   itemPlay: { color: t.ink, fontSize: 13, fontFamily: fonts[700] },
   itemResult: { fontSize: 12, marginTop: 1 },
   overlay: { flex: 1, backgroundColor: t.scrim, justifyContent: 'center' as const, padding: 20 },
-  sheet: { backgroundColor: t.sheet, borderRadius: 18, padding: 20, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(560) },
+  sheet: { backgroundColor: t.sheet, borderRadius: 18, padding: 20, borderWidth: 1, borderColor: t.cardBorder, ...sheetCap(760) },
   sheetTitle: { color: t.ink, fontSize: 17, fontFamily: fonts[800] },
+  teamTag: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 6, alignSelf: 'flex-start' as const,
+             marginTop: 6, borderWidth: 1, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
+  teamDot: { width: 7, height: 7, borderRadius: 4 },
+  teamTagText: { fontSize: 12, fontFamily: fonts[800] },
+  playerGrid: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, rowGap: 8, columnGap: 8 },
+  playerCell: { width: '31.8%' as const, minWidth: 140, flexGrow: 0, flexDirection: 'row' as const, alignItems: 'center' as const,
+                gap: 8, borderWidth: 1, borderColor: t.line, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 10,
+                backgroundColor: t.card },
+  playerNo: { width: 34, fontSize: 13, fontFamily: fonts[800] },
+  playerName: { flex: 1, color: t.ink, fontSize: 13, fontFamily: fonts[700] },
   howBtn: { borderWidth: 1, borderColor: t.line, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, backgroundColor: t.card },
   howText: { color: t.ink, fontSize: 13, fontFamily: fonts[700] },
 });
